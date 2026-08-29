@@ -103,7 +103,13 @@ main() {
   check_ai_provider_docs
   check_utility_docs
   check_function_group_docs
-  report_coverage
+  # Capture the coverage threshold verdict — without this the final
+  # `printf PASS...` overwrites report_coverage's exit code and CI
+  # never sees a coverage regression.
+  if ! report_coverage; then
+    printf 'FAIL: docs coverage below MIN_DOCS_COVERAGE=%s%%\n' "$MIN_DOCS_COVERAGE" >&2
+    return 1
+  fi
 
   printf 'PASS: public dot commands, utility entrypoints, AI providers, and function groups are documented at or above the required threshold\n'
 }

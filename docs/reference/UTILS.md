@@ -40,21 +40,30 @@ The `dot` command is the main interface for managing dotfiles. Run `dot version`
 |---------|-------------|
 | `dot doctor` | Run system health checks (`--score/-s`,`--heal/-H`) |
 | `dot health` | Run the health dashboard (`--verbose/-v`,`--json/-j`,`--fix/-f`,`--force/-F`) |
+| `dot health-check` | Alias of `dot health` |
 | `dot heal` | Auto-repair missing tools, chezmoi drift, broken symlinks, and critical files (`--dry-run/-n`,`--force/-f`) |
 | `dot smoke-test` | Verify toolchains (Rust, Go, AI CLIs) |
 | `dot verify` | Run security and integrity verification (`--security/-s`) |
 | `dot chaos` | Simulate config corruption to test self-healing |
 | `dot rollback` | Roll back dotfiles to the previous known-good state |
+| `dot restore` | Restore from a backup or git ref |
 | `dot drift` | Detailed configuration drift dashboard |
 | `dot benchmark` | Measure shell startup time (`--detailed/-d`,`--profile/-p`,`--compare/-c`,`--waterfall/-w`) |
 | `dot perf` | Show performance mode + quick timing (`--json/-j`,`--profile/-p`,`--runs/-r`,`--target/-t`) |
 | `dot score` | Show the high-level system health and security scorecard |
+| `dot scorecard` | Unified health / security / performance scorecard with drill-in |
+| `dot security-score` | Score workstation security (`--verbose/-v`,`--quiet/-q`,`--json/-j`) |
 | `dot metrics` | Show recent observability metrics |
+| `dot intelligence` | Show the Dotfiles Intelligence Surface (patterns, agents, policies) |
+| `dot conflicts` | Report alias / command / binary conflicts across shells |
+| `dot locks` | Show version locks for key tools (mise / asdf pins) |
 | `dot load-bench` | Measure heavy-layer readiness |
+| `dot load-bench-pty` | Measure background prewarm via a PTY |
+| `dot load-benchmark-pty` | Long-form alias of `dot load-bench-pty` |
 | `dot mcp` | Validate MCP policy and registry (`--strict/-s`,`--json/-j`) |
 | `dot attest` | Export workstation evidence (`--json/-j`,`--write/-w`,`--fleet-store/-F`) |
+| `dot attestation` | Full attestation flow (alias of `dot attest`) |
 | `dot history` | Analyse shell history |
-| `dot security-score` | Score workstation security (`--verbose/-v`,`--quiet/-q`,`--json/-j`) |
 | `dot snapshot` | Capture workstation state (`--baseline/-b`,`--force/-f`) |
 | `dot ai` | Show categorized AI CLI status and launch an installed provider |
 | `dot ai-setup` | Bootstrap supported AI CLIs interactively |
@@ -79,6 +88,16 @@ The `dot` command is the main interface for managing dotfiles. Run `dot version`
 | `dot docs` | Show the main repository documentation |
 | `dot log-rotate` | Rotate `~/.local/share/dotfiles.log` |
 | `dot lint` | Lint shell scripts (`--check/-c`,`--fix/-f`) |
+| `dot setup` | Interactive first-run setup (profile, features, secrets) |
+| `dot manual` | Open or download the multi-format manual (PDF / EPUB / HTML) |
+| `dot aliases` | List / search / explain aliases and tiers |
+| `dot alias-check` | Static-check alias definitions for conflicts |
+| `dot agents` | Multi-harness agent context (AGENTS.md sync, Cursor/Codex stubs) |
+| `dot init <github-user>` | Bootstrap a foreign dotfiles repo through chezmoi + dot |
+| `dot registry` | Browse reusable dotfile modules from the dot registry |
+| `dot bootstrap` | Bootstrap a fresh machine (install.sh entrypoint) |
+| `dot theme-sync` | Cross-DE theme sync helper (direct invocation of `dot-theme-sync`) |
+| `dot patterns` | Manage AI steering patterns (add / list / edit / delete) |
 
 ## Universal Scripts
 
@@ -115,13 +134,20 @@ Themes are auto-generated from wallpapers — `themes.toml` is not hand-edited. 
 | Command | Description |
 |---------|-------------|
 | `dot cl` | Invoke Claude Code with dotfiles context injection |
+| `dot claude` | Direct passthrough to the `claude` CLI |
+| `dot codex` | Direct passthrough to the `codex` CLI |
 | `dot copilot` | Invoke GitHub Copilot CLI with dotfiles context injection |
 | `dot gemini` | Invoke Gemini CLI with dotfiles context injection |
+| `dot goose` | Direct passthrough to the `goose` CLI |
 | `dot kiro` | Invoke Kiro CLI with dotfiles context injection |
 | `dot sgpt` | Invoke Shell-GPT with dotfiles context injection |
 | `dot ollama` | Invoke Ollama with dotfiles context injection |
 | `dot opencode` | Invoke OpenCode with dotfiles context injection |
 | `dot aider` | Invoke Aider with dotfiles context injection |
+| `dot autohand` | Autohand AI orchestrator passthrough |
+| `dot qwen` | Direct passthrough to the `qwen` CLI |
+| `dot vibe` | Direct passthrough to the Mistral `vibe` CLI |
+| `dot zai` | Direct passthrough to the Z.ai CLI |
 
 ## Secrets
 

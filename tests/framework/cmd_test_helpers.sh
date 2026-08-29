@@ -45,6 +45,31 @@ _skip() {
 }
 
 # ---------------------------------------------------------------------------
+# _pass / _fail_named — linear-check idiom used by simple QA scripts
+# that don't wrap each assertion in test_start. These auto-bump
+# TESTS_RUN so consumers can write:
+#
+#   _pass "name"                         # ✓ + counters
+#   _fail_named "name" "reason"          # ✗ + counters
+#
+# Unlike _ok / _fail (paired with an explicit test_start), these
+# stand alone. Use them in tests/unit/{dot-cli,qa}/*.sh and other
+# linear scripts where the assertion is inline (`if X; then _pass A;
+# else _fail_named A B; fi`).
+# ---------------------------------------------------------------------------
+_pass() {
+  ((TESTS_RUN++)) || true
+  ((TESTS_PASSED++)) || true
+  printf '  \033[0;32m✓\033[0m %s\n' "$1"
+}
+
+_fail_named() {
+  ((TESTS_RUN++)) || true
+  ((TESTS_FAILED++)) || true
+  printf '  \033[0;31m✗\033[0m %s: %s\n' "$1" "${2:-}"
+}
+
+# ---------------------------------------------------------------------------
 # _contains — substring match on a captured string. Sidesteps
 # assertions.sh's assert_output_contains which uses eval on its second
 # arg and choked on ANSI escape sequences + unicode markers our UI
