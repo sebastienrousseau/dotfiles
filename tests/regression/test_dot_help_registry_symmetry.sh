@@ -81,7 +81,7 @@ _in_list() {
   shift
   local item
   for item in "$@"; do
-    [ "$item" = "$needle" ] && return 0
+    [[ "$item" = "$needle" ]] && return 0
   done
   return 1
 }
@@ -90,7 +90,7 @@ _in_list() {
 # 0. Sanity: parsers found entries.
 # ---------------------------------------------------------------------------
 test_start "route_table_nonempty"
-if [ ${#routes[@]} -ge 30 ]; then
+if [[ ${#routes[@]} -ge 30 ]]; then
   TESTS_PASSED=$((TESTS_PASSED + 1))
   printf '  \033[0;32m✓\033[0m %s: %d routes\n' "$CURRENT_TEST" "${#routes[@]}"
 else
@@ -99,7 +99,7 @@ else
 fi
 
 test_start "help_tables_nonempty"
-if [ ${#specs[@]} -ge 30 ] && [ ${#details[@]} -ge 30 ]; then
+if [[ ${#specs[@]} -ge 30 && ${#details[@]} -ge 30 ]]; then
   TESTS_PASSED=$((TESTS_PASSED + 1))
   printf '  \033[0;32m✓\033[0m %s: %d specs + %d details\n' "$CURRENT_TEST" "${#specs[@]}" "${#details[@]}"
 else
@@ -117,7 +117,7 @@ for c in "${specs[@]}"; do
     phantom_specs[${#phantom_specs[@]}]="$c"
   fi
 done
-if [ ${#phantom_specs[@]} -eq 0 ]; then
+if [[ ${#phantom_specs[@]} -eq 0 ]]; then
   TESTS_PASSED=$((TESTS_PASSED + 1))
   printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
 else
@@ -132,7 +132,7 @@ for c in "${details[@]}"; do
     phantom_details[${#phantom_details[@]}]="$c"
   fi
 done
-if [ ${#phantom_details[@]} -eq 0 ]; then
+if [[ ${#phantom_details[@]} -eq 0 ]]; then
   TESTS_PASSED=$((TESTS_PASSED + 1))
   printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
 else
@@ -174,7 +174,7 @@ for cmd in "${routes[@]}"; do
     *"Unknown help topic"*) broken[${#broken[@]}]="$cmd" ;;
   esac
 done
-if [ ${#broken[@]} -eq 0 ]; then
+if [[ ${#broken[@]} -eq 0 ]]; then
   TESTS_PASSED=$((TESTS_PASSED + 1))
   visible_count=$((${#routes[@]} - skipped - 6))
   printf '  \033[0;32m✓\033[0m %s: %d visible commands answered, %d hidden skipped\n' \
