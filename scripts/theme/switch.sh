@@ -123,7 +123,7 @@ theme_exists() {
 }
 
 all_theme_names() {
-  sed -n 's/^\[themes\.\([a-z0-9-]*\)\]$/\1/p' "$THEMES_FILE" | sort -u
+  sed -n 's/^\[themes\.\([a-zA-Z0-9-]*\)\]$/\1/p' "$THEMES_FILE" | sort -u
 }
 
 # List wallpaper families that have BOTH dark and light variants in themes.toml.
