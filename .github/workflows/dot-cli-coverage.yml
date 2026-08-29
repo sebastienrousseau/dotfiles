@@ -88,6 +88,22 @@ jobs:
           # and the gate is strict.
           bash tests/unit/commands/test_cli_help_coverage.sh
 
+      - name: Ratchet — docs coverage across reference tables
+        run: |
+          # docs/reference/UTILS.md + docs/AI.md + docs/reference/SCRIPTS.md
+          # + docs/architecture/ARCHITECTURE.md must cover every public dot
+          # command, AI provider, utility entrypoint, and function group.
+          # 100% required; enforced by scripts/qa/docs-coverage.sh.
+          MIN_DOCS_COVERAGE=100 bash scripts/qa/docs-coverage.sh
+
+      - name: Ratchet — wall-clock budget for all gates
+        run: |
+          # Sum of all 6 gate scripts must run in under RATCHET_WALL_CLOCK_MS
+          # (default 15000ms). Baseline on a workstation: ~3600ms; 4x
+          # headroom for CI variance. If any gate creeps above 5s or the
+          # total above the ceiling, this fails and points at the culprit.
+          bash tests/performance/test_ratchets_wall_clock.sh
+
       - name: Upload coverage.json
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
