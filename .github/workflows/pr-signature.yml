@@ -11,6 +11,15 @@ permissions:
 jobs:
   check-signature:
     name: Verify PR description signature
+    # The signature is a human attestation of authorship. A bot cannot
+    # make it, so requiring it of bot-authored PRs makes them
+    # permanently unmergeable rather than unsigned — Dependabot updates
+    # are otherwise stuck on exactly this. Skipping is the honest
+    # outcome: an absent signature on a Dependabot PR is accurate.
+    if: >-
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot-preview[bot]' &&
+      github.event.pull_request.user.login != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Harden runner (block mode)
