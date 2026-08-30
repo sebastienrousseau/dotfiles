@@ -71,7 +71,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.519)
+  version       The version (tag or branch) to install (default: v0.2.520)
 
 Options:
   --help        Show this help message
@@ -87,7 +87,7 @@ EOF
 }
 
 main() {
-  local version="v0.2.519"
+  local version="v0.2.520"
   local version_set=0
   local minimal=0
   local provision="${DOTFILES_PROVISION:-0}"
@@ -117,7 +117,7 @@ main() {
         # like `foobar` doesn't trigger a 30s+ network download attempt.
         # Caught by the install.sh fuzz harness (#881).
         if [[ ! "$arg" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-+][a-zA-Z0-9.-]+)?$ ]]; then
-          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.519)."
+          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.520)."
         fi
         version="$arg"
         version_set=1
