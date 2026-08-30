@@ -1,0 +1,220 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/usr/bin/env bash
+# Copyright (c) 2015-2026 Sebastien Rousseau
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+#
+# run_once_before_macos-icloud-symlinks.sh.tmpl
+#
+# =============================================================================
+# WHAT THIS SCRIPT DOES (and, critically, WHAT IT REFUSES TO DO)
+# =============================================================================
+#
+# Re-establishes the iCloud Drive symlinks that the deleted
+# defaults/symlink_*.tmpl files used to manage — SAFELY.
+#
+# The previous mechanism used chezmoi's symlink_ templates, which have a
+# fatal flaw: chezmoi's "replace target with symlink" logic is essentially
+# `rm -rf $target; ln -s $source $target`. If the target directory has
+# ANY content when chezmoi first applies, that content is destroyed. This
+# is the bug that deleted a user's real ~/Documents (see #1018).
+#
+# This script replaces that mechanism with a paranoid, additive approach:
+#
+#   1. It runs ONCE, before chezmoi apply, on macOS only. `run_once_before_`
+#      means chezmoi only runs it if the file's contents change from the
+#      previously-applied version — and only before any other apply steps.
+#
+#   2. It NEVER removes non-empty directories. Ever. The only removal it
+#      performs is `rmdir` on an empty dir — a call that fails safely if
+#      the dir contains anything, including hidden files.
+#
+#   3. It NEVER moves user data into iCloud. Users move their own data.
+#      The script's contract: "if you tell me the target is safe to link,
+#      I'll link it. Otherwise I'll skip and log why."
+#
+#   4. It requires iCloud Drive to be set up (checks that the CloudDocs
+#      container exists on disk). If iCloud isn't set up on the machine,
+#      the script silently skips — no error, no partial state.
+#
+#   5. It writes a persistent log to $XDG_STATE_HOME/dotfiles/icloud-
+#      symlinks.log with a decision per candidate. Every run appends;
+#      nothing is ever silently overwritten.
+#
+#   6. It has an override: touch $HOME/.dotfiles.icloud-skip to short-
+#      circuit the whole script permanently. Useful for CI, VMs, or
+#      Macs where iCloud symlinks are actively unwanted.
+#
+#   7. It reports what it did to stdout so `chezmoi apply` shows a
+#      summary of "linked / already linked / skipped-because-non-empty /
+#      skipped-because-iCloud-source-missing / skipped-because-override".
+#
+# --- REFUSAL MATRIX ---
+#
+# For each candidate directory (~/Desktop, ~/Documents, ~/Downloads,
+# ~/Movies, ~/Music, ~/Pictures, ~/Public), the script decides:
+#
+#   State of $HOME/$name           | Action taken
+#   -------------------------------|----------------------------------------
+#   Symlink to iCloud source       | NO-OP (already correct)
+#   Symlink to somewhere else      | SKIP + log (never overwrite user's link)
+#   Regular dir, non-empty         | SKIP + log (data protection - never touch)
+#   Regular dir, empty             | rmdir + create symlink
+#   Regular file                   | SKIP + log (unexpected — never touch)
+#   Does not exist                 | Create symlink directly
+#
+#   State of iCloud source dir     | Action taken
+#   -------------------------------|----------------------------------------
+#   Does not exist                 | SKIP + log (iCloud may still be syncing)
+#   Is a directory                 | Proceed with link
+#   Is a symlink                   | SKIP + log (unexpected iCloud state)
+#
+# --- ENV OVERRIDES ---
+#
+#   DOTFILES_ICLOUD_SYMLINKS=0     Skip entirely (documented alt to touch-file)
+#   DOTFILES_ICLOUD_DRY_RUN=1      Log decisions, take no action
+#
+# =============================================================================
+
+set -euo pipefail
+
+# --- 0. Log destination -------------------------------------------------------
+XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOG_DIR="$XDG_STATE_HOME/dotfiles"
+LOG_FILE="$LOG_DIR/icloud-symlinks.log"
+mkdir -p "$LOG_DIR"
+
+_log() {
+  # Always both stdout (visible in chezmoi apply output) and the log file.
+  local msg="$1"
+  printf '[icloud-symlinks] %s\n' "$msg"
+  printf '%s [icloud-symlinks] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$msg" \
+    >> "$LOG_FILE"
+}
+
+# --- 1. Kill-switches ---------------------------------------------------------
+if [[ -f "$HOME/.dotfiles.icloud-skip" ]]; then
+  _log "SKIP-ALL: found kill-switch file ~/.dotfiles.icloud-skip"
+  exit 0
+fi
+
+if [[ "${DOTFILES_ICLOUD_SYMLINKS:-1}" == "0" ]]; then
+  _log "SKIP-ALL: DOTFILES_ICLOUD_SYMLINKS=0"
+  exit 0
+fi
+
+DRY_RUN=0
+if [[ "${DOTFILES_ICLOUD_DRY_RUN:-0}" == "1" ]]; then
+  DRY_RUN=1
+  _log "DRY-RUN: no changes will be applied"
+fi
+
+# --- 2. iCloud availability ---------------------------------------------------
+ICLOUD_ROOT="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
+if [[ ! -d "$ICLOUD_ROOT" ]]; then
+  _log "SKIP-ALL: iCloud Drive not initialised on this Mac ($ICLOUD_ROOT missing)"
+  exit 0
+fi
+
+# --- 3. Candidate directories -------------------------------------------------
+# Kept as a single-column list for clarity. Any name added here MUST also
+# be listed in defaults/.chezmoiignore.tmpl's Darwin block — that's the
+# belt-and-braces guarantee that chezmoi never manages these paths.
+CANDIDATES=(
+  Desktop
+  Documents
+  Downloads
+  Movies
+  Music
+  Pictures
+  Public
+)
+
+# --- 4. Per-candidate decision --------------------------------------------
+# Each candidate is handled independently. Failure of one MUST NOT abort
+# the others — so we wrap the per-candidate logic in a subshell + `|| true`.
+# This is a deliberate tradeoff: partial success is better than no
+# progress. Every decision is logged.
+
+_link_if_safe() {
+  local name="$1"
+  local target="$HOME/$name"
+  local source="$ICLOUD_ROOT/$name"
+
+  # --- iCloud source checks (READ-ONLY) ---
+  if [[ ! -e "$source" ]]; then
+    _log "SKIP '$name': iCloud source does not exist yet ('$source')"
+    return 0
+  fi
+  if [[ -L "$source" ]]; then
+    _log "SKIP '$name': iCloud source is itself a symlink (unexpected)"
+    return 0
+  fi
+  if [[ ! -d "$source" ]]; then
+    _log "SKIP '$name': iCloud source exists but is not a directory"
+    return 0
+  fi
+
+  # --- Target checks (destructive-adjacent — MAXIMUM CAUTION) ---
+  if [[ -L "$target" ]]; then
+    # Already a symlink. Compare where it points to.
+    local current
+    current="$(readlink "$target" 2>/dev/null || echo '')"
+    if [[ "$current" == "$source" ]]; then
+      _log "OK   '$name': already symlinked to iCloud"
+      return 0
+    fi
+    # Symlink pointing elsewhere — user's own setup, do not touch.
+    _log "SKIP '$name': is a symlink to '$current' (not iCloud) — leaving alone"
+    return 0
+  fi
+
+  if [[ -f "$target" ]]; then
+    # Unexpected: a regular file where we'd expect a dir/symlink. Refuse.
+    _log "SKIP '$name': target is a regular file, refusing to touch"
+    return 0
+  fi
+
+  if [[ -d "$target" ]]; then
+    # It's a directory. Is it EMPTY? Use `ls -A` (shows hidden) + wc.
+    # NOT `find -empty` because we want to be paranoid about a file
+    # named `.DS_Store` — that still counts as "user has data here."
+    local count
+    count="$(ls -A "$target" 2>/dev/null | wc -l | tr -d ' ')"
+    if [[ "$count" != "0" ]]; then
+      _log "SKIP '$name': target dir has $count entries, refusing (user data protection)"
+      _log "     to link this dir manually: move your files into '$source' then run:"
+      _log "       rm -rf '$target' && ln -s '$source' '$target'"
+      return 0
+    fi
+    # Empty dir. Safe to rmdir + symlink.
+    if [[ "$DRY_RUN" == "1" ]]; then
+      _log "DRY  '$name': would rmdir empty target + create symlink to iCloud"
+      return 0
+    fi
+    # rmdir fails safely on non-empty (double-check in case of TOCTOU
+    # race — a file could appear between our check and the rmdir).
+    if ! rmdir "$target" 2>/dev/null; then
+      _log "SKIP '$name': rmdir of empty dir failed (race? permissions?) — no action"
+      return 0
+    fi
+    ln -s "$source" "$target"
+    _log "LINK '$name': created symlink -> iCloud"
+    return 0
+  fi
+
+  # Target does not exist at all — simplest case, just create the link.
+  if [[ "$DRY_RUN" == "1" ]]; then
+    _log "DRY  '$name': would create symlink to iCloud (target missing)"
+    return 0
+  fi
+  ln -s "$source" "$target"
+  _log "LINK '$name': created symlink -> iCloud (target didn't exist)"
+  return 0
+}
+
+_log "== BEGIN run — user=$(whoami) host=$(hostname) =="
+for name in "${CANDIDATES[@]}"; do
+  ( _link_if_safe "$name" ) || _log "ERR  '$name': subshell failed (see above)"
+done
+_log "== END run =="
+{{- end -}}
