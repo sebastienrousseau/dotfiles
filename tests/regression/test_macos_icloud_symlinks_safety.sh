@@ -120,22 +120,65 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# INVARIANT 3: a symlink pointing to somewhere the user chose is never
-# overwritten.
+# INVARIANT 3 + 7: how the script treats a symlink that ALREADY exists.
+#
+# Both invariants interrogate the same code path (the `-L "$target"`
+# branch), so they share one sandbox and one script run — the script
+# walks every candidate per invocation, and a second invocation would
+# push this file past its "instant" perf budget for no added coverage.
+#
+#   INVARIANT 3  a link the USER chose is never overwritten.
+#   INVARIANT 7  a link that is ALREADY correct is recognised as correct,
+#                whatever form it takes. Recognition was a literal string
+#                compare of `readlink` against "$ICLOUD_ROOT/$name", which
+#                misses three forms macOS and users produce routinely:
+#                  * trailing slash  ln -s ".../Downloads/" ~/Downloads
+#                  * relative        ln -s "Library/Mobile Documents/..." ~/Music
+#                  * multi-hop       ~/Desktop -> ~/hop -> .../Desktop
+#                All name the right directory but fail a string compare, so
+#                the script fell through to the "symlink to somewhere else"
+#                branch and reported a correct link as "(not iCloud)". Not
+#                data loss — the fallthrough still skips — but it defeats
+#                the idempotency contract and makes the audit log lie about
+#                the state of user data.
 # ---------------------------------------------------------------------------
-test_start "icloud_never_overrides_user_managed_symlink"
 _new_sandbox >/dev/null
-mkdir -p "$ICLOUD/Movies"
+mkdir -p "$ICLOUD/Movies" "$ICLOUD/Downloads" "$ICLOUD/Music" "$ICLOUD/Desktop"
+# Invariant 3 fixture: a link the user pointed at their own disk.
 mkdir -p "$HOME/external-drive"
 ln -s "$HOME/external-drive" "$HOME/Movies"
-bash "$RENDERED" >/dev/null 2>&1 || true
+# Invariant 7 fixtures: three spellings of an already-correct iCloud link.
+ln -s "$ICLOUD/Downloads/" "$HOME/Downloads"
+ln -s "Library/Mobile Documents/com~apple~CloudDocs/Music" "$HOME/Music"
+ln -s "$ICLOUD/Desktop" "$HOME/.desktop-hop"
+ln -s "$HOME/.desktop-hop" "$HOME/Desktop"
+symlink_run_out="$(bash "$RENDERED" 2>&1 || true)"
+
+test_start "icloud_never_overrides_user_managed_symlink"
 resolved="$(readlink "$HOME/Movies" 2>/dev/null || echo '')"
 if [[ "$resolved" == "$HOME/external-drive" ]]; then
   TESTS_PASSED=$((TESTS_PASSED + 1))
-  printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
+  printf '  \033[0;32m\xe2\x9c\x93\033[0m %s\n' "$CURRENT_TEST"
 else
   TESTS_FAILED=$((TESTS_FAILED + 1))
-  printf '  \033[0;31m✗\033[0m %s: symlink now points to %s\n' "$CURRENT_TEST" "$resolved"
+  printf '  \033[0;31m\xe2\x9c\x97\033[0m %s: symlink now points to %s\n' "$CURRENT_TEST" "$resolved"
+fi
+
+test_start "icloud_recognises_existing_correct_link_regardless_of_link_form"
+mismatched_forms=()
+echo "$symlink_run_out" | grep -q "OK   'Downloads'" ||
+  mismatched_forms=("${mismatched_forms[@]}" "trailing-slash")
+echo "$symlink_run_out" | grep -q "OK   'Music'" ||
+  mismatched_forms=("${mismatched_forms[@]}" "relative")
+echo "$symlink_run_out" | grep -q "OK   'Desktop'" ||
+  mismatched_forms=("${mismatched_forms[@]}" "multi-hop")
+if [[ ${#mismatched_forms[@]} -eq 0 ]]; then
+  TESTS_PASSED=$((TESTS_PASSED + 1))
+  printf '  \033[0;32m\xe2\x9c\x93\033[0m %s\n' "$CURRENT_TEST"
+else
+  TESTS_FAILED=$((TESTS_FAILED + 1))
+  printf '  \033[0;31m\xe2\x9c\x97\033[0m %s: correct links misreported as non-iCloud: %s\n' \
+    "$CURRENT_TEST" "${mismatched_forms[*]}"
 fi
 
 # ---------------------------------------------------------------------------
@@ -210,6 +253,24 @@ else
     "$CURRENT_TEST" "${missing_from_ignore[*]}"
 fi
 
+# ---------------------------------------------------------------------------
+# INVARIANT 7: an existing correct link to iCloud is RECOGNISED as correct.
+#
+# The script's idempotency contract is "already symlinked to iCloud -> no-op,
+# logged OK". That recognition was a literal string compare of `readlink`
+# output against "$ICLOUD_ROOT/$name", which breaks for three link forms
+# macOS and users produce routinely:
+#
+#   * trailing slash   ln -s ".../CloudDocs/Downloads/" ~/Downloads
+#   * relative link    ln -s "Library/Mobile Documents/..." ~/Downloads
+#   * multi-hop link   ~/Downloads -> ~/link -> .../CloudDocs/Downloads
+#
+# All three point at exactly the right place, but a literal compare misses
+# and the script falls through to the "symlink to somewhere else" branch —
+# reporting a correctly-linked dir as "(not iCloud)". Not data loss (the
+# fallthrough still skips), but it defeats the idempotency contract and
+# makes the audit log actively misleading about the state of user data.
+# ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
