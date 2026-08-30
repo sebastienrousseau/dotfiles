@@ -492,14 +492,16 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-    env:
-      # Budgets are calibrated at 2x the median measured on a developer
-      # machine (see docs/operations/PERFORMANCE_BUDGETS.md). GitHub-hosted
-      # runners are slower again, so scale the budgets rather than inflate
-      # the recorded baselines — local runs stay strict at the default 100%.
-      # Tighten this once real runner medians are known; the gate prints
-      # every median, so the first green run tells you what to set.
-      PERF_BUDGET_PERCENT: "200"
+    # No PERF_BUDGET_PERCENT override: the gate runs at its strict 100%.
+    #
+    # The first CI run assumed hosted runners were ~2x slower and scaled
+    # budgets accordingly. The measured medians said otherwise — the macOS
+    # runner is comparable to or FASTER than the reference machine on every
+    # gate (docs-coverage 679ms vs 969, traceability 1775 vs 2389,
+    # help-registry 3318 vs 4449, dot doctor 1746 vs 4423). The worst
+    # runner/local ratio observed was 1.25x (dot search), so budgets set at
+    # 2x the local median keep >= 1.6x headroom here. Scaling them further
+    # would only have blunted the gate.
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0

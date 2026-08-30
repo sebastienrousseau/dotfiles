@@ -122,11 +122,13 @@ When you add a new script that runs at a shell prompt:
 - **Per-op budget test**: `tests/performance/test_perf_budgets.sh`
 - **Suite-level wall-clock ratchet**: `tests/performance/test_help_gates_wall_clock.sh`
 - **CI wiring**: `.github/workflows/ci.yml`, job `quality-performance` — runs on
-  ubuntu-latest and macos-latest for every PR, with no `|| true`. Hosted runners
-  are slower than a developer machine, so the job sets `PERF_BUDGET_PERCENT=200`
-  to scale budgets rather than inflate the recorded baselines; local runs stay
-  strict at the default 100%. Tighten that number once real runner medians are
-  known — the gate prints every median, so the first green run tells you.
+  ubuntu-latest and macos-latest for every PR, with no `|| true` and no budget
+  scaling. Measured on the hosted macOS runner (2026-08-30), it is comparable to
+  or faster than the reference machine on every gate — docs-coverage 679ms vs
+  969, traceability 1775 vs 2389, help-registry 3318 vs 4449, `dot doctor` 1746
+  vs 4423 — with a worst runner/local ratio of 1.25× (`dot search`). Budgets set
+  at 2× the local median therefore keep ≥1.6× headroom in CI, so the gate runs
+  strict.
 
 ## Environment knobs
 

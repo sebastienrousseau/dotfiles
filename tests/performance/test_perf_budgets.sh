@@ -131,6 +131,15 @@ _gate_max_rc() {
     ((TESTS_FAILED++)) || true
     printf '  \033[0;31m✗\033[0m %s: exited %s (max allowed %s) — timing is meaningless\n' \
       "$label" "$failed" "$max_rc"
+    # Re-run once with output captured. An exit code with no context is
+    # undebuggable in CI, where you cannot reproduce the environment by hand.
+    local diag
+    diag="$("$@" 2>&1 | tail -25)"
+    if [[ -n "$diag" ]]; then
+      printf '%s\n' "$diag" | sed 's/^/        | /'
+    else
+      printf '        | (command produced no output)\n'
+    fi
   elif [[ "$median" -le "$budget_ms" ]]; then
     ((TESTS_PASSED++)) || true
     printf '  \033[0;32m✓\033[0m %s: median=%sms budget=%sms\n' \
