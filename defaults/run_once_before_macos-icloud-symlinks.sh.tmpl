@@ -66,7 +66,8 @@
 #   -------------------------------|----------------------------------------
 #   Does not exist                 | SKIP + log (iCloud may still be syncing)
 #   Is a directory                 | Proceed with link
-#   Is a symlink                   | SKIP + log (unexpected iCloud state)
+#   Is a symlink                   | SKIP + log (macOS native Desktop &
+#                                 |   Documents sync: already synced)
 #
 # --- ENV OVERRIDES ---
 #
@@ -146,7 +147,16 @@ _link_if_safe() {
     return 0
   fi
   if [[ -L "$source" ]]; then
-    _log "SKIP '$name': iCloud source is itself a symlink (unexpected)"
+    # Not an error, and usually not exotic: when macOS's native "Desktop &
+    # Documents Folders" sync is enabled, macOS itself places
+    # CloudDocs/Desktop -> ~/Desktop and CloudDocs/Documents -> ~/Documents.
+    # Those folders are then ALREADY fully iCloud-synced by macOS, and
+    # hand-symlinking them would fight the native feature. Skipping is
+    # correct; say so plainly rather than calling it "unexpected", which
+    # would invite the user to "fix" a working setup and lose data.
+    _log "SKIP '$name': iCloud source is itself a symlink — normal when macOS"
+    _log "     'Desktop & Documents Folders' sync owns this folder, in which case"
+    _log "     it is already synced by macOS and needs no symlink. Leaving alone."
     return 0
   fi
   if [[ ! -d "$source" ]]; then
@@ -156,10 +166,18 @@ _link_if_safe() {
 
   # --- Target checks (destructive-adjacent — MAXIMUM CAUTION) ---
   if [[ -L "$target" ]]; then
-    # Already a symlink. Compare where it points to.
-    local current
+    # Already a symlink. Compare where it RESOLVES to, not the literal
+    # link text. A trailing slash, a relative target, or a chain of links
+    # all name the correct directory but fail a string compare — which
+    # would misreport an already-correct link as "not iCloud" and defeat
+    # the idempotency contract. Resolution failing (dangling link) leaves
+    # `resolved` empty, so we fall through to the skip branch: an
+    # unresolvable link is still never overwritten.
+    local current resolved source_phys
     current="$(readlink "$target" 2>/dev/null || echo '')"
-    if [[ "$current" == "$source" ]]; then
+    resolved="$(cd -P "$target" 2>/dev/null && pwd -P || echo '')"
+    source_phys="$(cd -P "$source" 2>/dev/null && pwd -P || echo '')"
+    if [[ -n "$resolved" ]] && [[ "$resolved" == "$source_phys" ]]; then
       _log "OK   '$name': already symlinked to iCloud"
       return 0
     fi

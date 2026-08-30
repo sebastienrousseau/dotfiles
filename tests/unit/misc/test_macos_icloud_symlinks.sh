@@ -240,15 +240,26 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# ICLOUD SOURCE EDGE CASE: source is a symlink (unexpected iCloud state).
+# ICLOUD SOURCE EDGE CASE: source is a symlink.
 # LOG BRANCH: SKIP '$name': iCloud source is itself a symlink
+#
+# This is NOT an exotic state: when macOS's native "Desktop & Documents
+# Folders" sync is on (System Settings > iCloud > iCloud Drive), macOS
+# itself puts CloudDocs/Desktop -> ~/Desktop and CloudDocs/Documents ->
+# ~/Documents. Those folders are already fully iCloud-synced by macOS,
+# and symlinking them by hand would fight the native feature.
+#
+# So the log line must not describe this as "unexpected" — on a data-
+# safety tool, calling a correct configuration unexpected invites the
+# user to "fix" it and lose data. Assert the message explains itself.
 # ---------------------------------------------------------------------------
 test_start "skips_when_icloud_source_is_a_symlink"
 _new_sandbox >/dev/null
 mkdir -p "$HOME/some-other-place"
 ln -s "$HOME/some-other-place" "$ICLOUD/Documents"
 out="$(_run_script)"
-if [[ ! -L "$HOME/Documents" ]] && [[ "$out" == *"source is itself a symlink"* ]]; then
+if [[ ! -L "$HOME/Documents" ]] && [[ "$out" == *"source is itself a symlink"* ]] &&
+  [[ "$out" != *"unexpected"* ]] && [[ "$out" == *"Desktop & Documents"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
 else

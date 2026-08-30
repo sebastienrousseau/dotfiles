@@ -14,7 +14,7 @@
 #     * The iCloud script itself (one full pass)
 #     * Version-consistency gate
 #     * docs-coverage gate
-#     * iCloud regression safety test (9 assertions)
+#     * iCloud regression safety test (10 assertions, budget 600ms)
 #
 #   FAST    (≤ 2000ms) — heavier gates + sandboxed CLI reads
 #     * dot status
@@ -150,7 +150,14 @@ test_start "instant_docs_coverage"
 _gate "$CURRENT_TEST" 500 5 bash "$REPO_ROOT/scripts/qa/docs-coverage.sh"
 
 test_start "instant_icloud_regression_test"
-_gate "$CURRENT_TEST" 500 5 bash "$REPO_ROOT/tests/regression/test_macos_icloud_symlinks_safety.sh"
+# 600ms, not the tier's nominal 500ms: this budget is calibrated per
+# assertion count (see tier notes above). At 9 assertions it measured
+# ~435ms against a 500ms gate; the 10th assertion (link-form recognition,
+# which shares a sandbox with invariant 3 to stay cheap) moves the median
+# to ~495ms — inside 500ms on a good run, over it on a noisy one. 600ms
+# restores the ~20% headroom the 9-assertion calibration had, so the gate
+# still catches real regressions instead of flaking on scheduler noise.
+_gate "$CURRENT_TEST" 600 5 bash "$REPO_ROOT/tests/regression/test_macos_icloud_symlinks_safety.sh"
 
 # =============================================================================
 # TIER 2: FAST (≤2000ms)
