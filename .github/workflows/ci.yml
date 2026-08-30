@@ -483,6 +483,43 @@ jobs:
   # ============================================================================
   # STAGE 4: QUALITY (Depends on lint + test passing)
   # ============================================================================
+  quality-performance:
+    name: Quality / Performance budgets (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    needs: [lint-shell, test-unit]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    # No PERF_BUDGET_PERCENT override: the gate runs at its strict 100%.
+    #
+    # The first CI run assumed hosted runners were ~2x slower and scaled
+    # budgets accordingly. The measured medians said otherwise — the macOS
+    # runner is comparable to or FASTER than the reference machine on every
+    # gate (docs-coverage 679ms vs 969, traceability 1775 vs 2389,
+    # help-registry 3318 vs 4449, dot doctor 1746 vs 4423). The worst
+    # runner/local ratio observed was 1.25x (dot search), so budgets set at
+    # 2x the local median keep >= 1.6x headroom here. Scaling them further
+    # would only have blunted the gate.
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Chezmoi
+        uses: ./.github/actions/setup-chezmoi
+
+      # No `|| true`. This gate exists to fail the build when a budget is
+      # breached or a measured command exits non-zero; swallowing its status
+      # would make it exactly the silently-passing gate it is meant to be.
+      - name: Performance budgets
+        run: bash tests/performance/test_perf_budgets.sh
+
+
   quality-idempotency:
     name: Quality / Idempotency
     runs-on: ubuntu-latest
