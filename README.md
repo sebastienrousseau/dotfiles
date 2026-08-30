@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/sebastienrousseau/dotfiles/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=githubactions&logoColor=white" alt="Build" /></a>
-  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.519-blue?style=for-the-badge&logo=semanticrelease&logoColor=white" alt="Version" /></a>
+  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.520-blue?style=for-the-badge&logo=semanticrelease&logoColor=white" alt="Version" /></a>
   <a href="https://www.npmjs.com/package/@sebastienrousseau/dotfiles"><img src="https://img.shields.io/npm/v/@sebastienrousseau/dotfiles?style=for-the-badge&logo=npm&logoColor=white&label=npm" alt="npm" /></a>
   <a href="https://doc.dotfiles.io/"><img src="https://img.shields.io/badge/Manual-doc.dotfiles.io-66c2a5?style=for-the-badge&labelColor=555555&logo=materialformkdocs&logoColor=white" alt="Manual" /></a>
   <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge&logo=github&logoColor=white" alt="Downloads" /></a>
@@ -95,7 +95,7 @@ per-release hash and how it is generated are documented in
 
 ```bash
 curl -fsSL -o /tmp/dotfiles-install.sh \
-  https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.519/install.sh
+  https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.520/install.sh
 echo "3b5d1332fb07a1261da117e53f69acc0097c3d9bd676fc9f53a000257b72978e  /tmp/dotfiles-install.sh" \
   | shasum -a 256 -c
 bash /tmp/dotfiles-install.sh
