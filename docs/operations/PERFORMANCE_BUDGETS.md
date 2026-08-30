@@ -29,20 +29,25 @@ All medians in milliseconds. Budget = 2× median (or the tier ceiling, whichever
 | `dot help <cmd>` | 15 | 500 | 33× |
 | `dot search <keyword>` | 15 | 500 | 33× |
 | iCloud script single-run | 15 | 500 | 33× |
-| `check-version-consistency.sh` | 14 | 500 | 36× |
-| `docs-coverage.sh` | 148 | 500 | 3.4× |
-| iCloud regression test | 94 | 500 | 5.3× |
+
 
 ### FAST tier
 
 | Operation | Baseline | Budget | Headroom |
 |---|---:|---:|---:|
-| `dot status` (sandbox) | 28 | 2000 | 71× |
-| `dot diff` (sandbox) | 32 | 2000 | 62× |
-| `traceability-coverage.sh` | 623 | 2000 | 3.2× |
-| iCloud unit test (29 assertions) | 498 | 2000 | 4× |
-| `test_dot_subcommand_smoke.sh` | 1308 | 2000 | 1.5× |
-| `test_dot_help_registry_symmetry.sh` | 1381 | 2000 | 1.4× |
+| `dot status` (sandbox) | 1510 | 2000 | 1.3× |
+| `dot diff` (sandbox) | 1420 | 2000 | 1.4× |
+
+> The previous `dot status` / `dot diff` baselines of 28 ms and 32 ms were not
+> real. The perf sandbox never created chezmoi's source directory, so both
+> commands aborted immediately with *"no such file or directory"* — and
+> `_measure` discarded exit codes, so the gate timed the failure path and
+> called it excellent. The sandbox now links the repo into `XDG_DATA_HOME`,
+> and the figures above are the commands actually running.
+
+The QA gates and test suites that used to sit in this tier moved to GATES
+below: they are not interactive operations, so a ceiling defined by
+human-perceived latency never described them.
 
 ### MEDIUM tier
 
@@ -50,6 +55,36 @@ All medians in milliseconds. Budget = 2× median (or the tier ceiling, whichever
 |---|---:|---:|---:|
 | `dot doctor` | 3892 | 5000 | 1.3× |
 | `bench.sh --quick` | 826 | 5000 | 6× |
+
+Both MEDIUM entries are diagnostics that report findings through their exit
+status — `dot doctor` exits 1 whenever it finds issues, and `bench.sh` exits 1
+when a shell breaches its own startup threshold. They are gated with
+`_gate_diag`, which permits exit 1 but still fails on 2+ (not-found,
+permission, signal, syntax error). That is far narrower than the blanket
+`|| true` it replaced.
+
+### GATES tier (CI quality gates and test suites)
+
+Budgets are 2× the median measured on the **slowest supported platform**,
+not the fastest. Medians below: `rousseau-mbp-m1`, macOS 26 (Darwin 25.6),
+2026-08-30.
+
+| Operation | macOS median | Linux median | Budget | Headroom |
+|---|---:|---:|---:|---:|
+| `check-version-consistency.sh` | 68 | 14 | 500 | 7.4× |
+| `docs-coverage.sh` | 969 | 148 | 2000 | 2.1× |
+| iCloud regression test (12 assertions) | 494 | 94 | 1000 | 2.0× |
+| iCloud unit test (29 assertions) | 1743 | 498 | 3500 | 2.0× |
+| `traceability-coverage.sh` | 2389 | 623 | 5000 | 2.1× |
+| `test_dot_subcommand_smoke.sh` | 3785 | 1308 | 7500 | 2.0× |
+| `test_dot_help_registry_symmetry.sh` | 4449 | 1381 | 9000 | 2.0× |
+
+These gates run **3–6× slower on macOS than on Linux** — fork/exec is markedly
+more expensive there and every one of them is fork-heavy shell. CI covers both
+platforms, so the original Linux-only calibration could not hold, and five of
+these sat red as a result. Re-capture the Linux column when convenient; it is
+carried over from the 2026-08-30 Ryzen baseline and is not the binding
+constraint.
 
 ### ACCEPTED-SLOW (documented, not gated per-run)
 
@@ -86,7 +121,20 @@ When you add a new script that runs at a shell prompt:
 
 - **Per-op budget test**: `tests/performance/test_perf_budgets.sh`
 - **Suite-level wall-clock ratchet**: `tests/performance/test_help_gates_wall_clock.sh`
-- **CI wiring**: `.github/workflows/dot-cli-coverage.yml` (add here to run on every PR)
+- **CI wiring**: `.github/workflows/ci.yml`, job `quality-performance` — runs on
+  ubuntu-latest and macos-latest for every PR, with no `|| true`. Hosted runners
+  are slower than a developer machine, so the job sets `PERF_BUDGET_PERCENT=200`
+  to scale budgets rather than inflate the recorded baselines; local runs stay
+  strict at the default 100%. Tighten that number once real runner medians are
+  known — the gate prints every median, so the first green run tells you.
+
+## Environment knobs
+
+| Variable | Default | Effect |
+|---|---|---|
+| `PERF_BUDGET_PERCENT` | `100` | Scales every budget. `0` makes them all impossible — that is how `test_gate_integrity.sh` proves the gate actually fires. |
+| `PERF_GATE_FILTER` | *(unset)* | Runs only gates whose label contains this substring. Skipped gates never call `test_start`, so `TESTS_RUN == PASSED + FAILED` still holds. |
+| `DOT_CLI` | `bin/dot` | Points the `dot` gates at another binary, so breakage detection can be exercised against a deliberately corrupted CLI. |
 
 ## When a budget fires
 

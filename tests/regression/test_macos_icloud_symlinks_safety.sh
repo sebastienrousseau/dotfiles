@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 #
 # Regression: the 5 most critical safety invariants of
-# defaults/run_once_before_macos-icloud-symlinks.sh.tmpl.
+# defaults/run_before_macos-icloud-symlinks.sh.tmpl.
 #
 # This is a REGRESSION test — it runs on every commit as part of
 # the standard regression suite. Its job is not to be exhaustive
@@ -35,7 +35,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 source "$SCRIPT_DIR/../framework/assertions.sh"
 
-TEMPLATE="$REPO_ROOT/defaults/run_once_before_macos-icloud-symlinks.sh.tmpl"
+# Overridable so the one-shot guard below can be proven to fail.
+TEMPLATE="${TEMPLATE:-$REPO_ROOT/defaults/run_before_macos-icloud-symlinks.sh.tmpl}"
 
 # ---------------------------------------------------------------------------
 # Render the template into a runnable bash script (strip darwin guard).
@@ -271,6 +272,52 @@ fi
 # fallthrough still skips), but it defeats the idempotency contract and
 # makes the audit log actively misleading about the state of user data.
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# INVARIANT 8: the script must CONVERGE, not fire once.
+#
+# On a fresh Mac, `chezmoi apply` runs while iCloud Drive is still syncing
+# the folder tree down. Every candidate then hits "iCloud source does not
+# exist yet" and skips. Under the old `run_once_before_` prefix that was
+# the single attempt chezmoi would ever make, so the links were never
+# created at all — the exact opposite of the script's purpose.
+#
+# Two assertions:
+#   a) the source file is not run_once_/run_onchange_ (a structural guard:
+#      renaming it back reintroduces the one-shot failure mode)
+#   b) a second run, after iCloud appears, does create the link
+# ---------------------------------------------------------------------------
+test_start "icloud_script_is_not_run_once"
+tmpl_name="$(basename "$TEMPLATE")"
+case "$tmpl_name" in
+  run_once_* | run_onchange_*)
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+    printf '  \033[0;31m✗\033[0m %s: named %s — one attempt only; a fresh Mac whose iCloud has not synced yet never gets its links\n' \
+      "$CURRENT_TEST" "$tmpl_name"
+    ;;
+  *)
+    TESTS_PASSED=$((TESTS_PASSED + 1))
+    printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
+    ;;
+esac
+
+test_start "icloud_converges_once_icloud_appears"
+_new_sandbox >/dev/null
+# Pass 1: iCloud container exists but the folder has not synced down.
+bash "$RENDERED" >/dev/null 2>&1 || true
+first_state="absent"
+[[ -L "$HOME/Downloads" ]] && first_state="linked"
+# iCloud finishes syncing, then the next apply runs the script again.
+mkdir -p "$ICLOUD/Downloads"
+bash "$RENDERED" >/dev/null 2>&1 || true
+if [[ "$first_state" == "absent" ]] && [[ -L "$HOME/Downloads" ]]; then
+  TESTS_PASSED=$((TESTS_PASSED + 1))
+  printf '  \033[0;32m✓\033[0m %s: skipped while syncing, linked on the next run\n' "$CURRENT_TEST"
+else
+  TESTS_FAILED=$((TESTS_FAILED + 1))
+  printf '  \033[0;31m✗\033[0m %s: first=%s second=%s\n' "$CURRENT_TEST" \
+    "$first_state" "$([[ -L "$HOME/Downloads" ]] && echo linked || echo absent)"
+fi
+
 # ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------

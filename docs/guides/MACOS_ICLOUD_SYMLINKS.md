@@ -6,7 +6,7 @@ render_with_liquid: false
 
 On macOS, this dotfiles setup can (safely) symlink personal directories into iCloud Drive so `~/Desktop`, `~/Documents`, `~/Downloads`, `~/Movies`, `~/Music`, `~/Pictures`, and `~/Public` all live in iCloud and back up automatically.
 
-The mechanism is `defaults/run_once_before_macos-icloud-symlinks.sh.tmpl`, which chezmoi runs once (before `apply`) whenever its contents change.
+The mechanism is `defaults/run_before_macos-icloud-symlinks.sh.tmpl`, which chezmoi runs once (before `apply`) whenever its contents change.
 
 ## `~/Desktop` and `~/Documents` are a special case
 

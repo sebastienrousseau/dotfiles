@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 #
 # Exhaustive behavioural + safety tests for
-# defaults/run_once_before_macos-icloud-symlinks.sh.tmpl.
+# defaults/run_before_macos-icloud-symlinks.sh.tmpl.
 #
 # This is the most destructive-adjacent script in the repo — its
 # predecessor (chezmoi's symlink_*.tmpl mechanism) destroyed real
@@ -42,7 +42,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$REPO_ROOT/tests/framework/assertions.sh"
 
-TEMPLATE="$REPO_ROOT/defaults/run_once_before_macos-icloud-symlinks.sh.tmpl"
+TEMPLATE="$REPO_ROOT/defaults/run_before_macos-icloud-symlinks.sh.tmpl"
 
 # ---------------------------------------------------------------------------
 # Render the template into a runnable bash script. Strip only the

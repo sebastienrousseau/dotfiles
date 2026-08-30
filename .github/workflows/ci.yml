@@ -483,6 +483,41 @@ jobs:
   # ============================================================================
   # STAGE 4: QUALITY (Depends on lint + test passing)
   # ============================================================================
+  quality-performance:
+    name: Quality / Performance budgets (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    needs: [lint-shell, test-unit]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    env:
+      # Budgets are calibrated at 2x the median measured on a developer
+      # machine (see docs/operations/PERFORMANCE_BUDGETS.md). GitHub-hosted
+      # runners are slower again, so scale the budgets rather than inflate
+      # the recorded baselines — local runs stay strict at the default 100%.
+      # Tighten this once real runner medians are known; the gate prints
+      # every median, so the first green run tells you what to set.
+      PERF_BUDGET_PERCENT: "200"
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Chezmoi
+        uses: ./.github/actions/setup-chezmoi
+
+      # No `|| true`. This gate exists to fail the build when a budget is
+      # breached or a measured command exits non-zero; swallowing its status
+      # would make it exactly the silently-passing gate it is meant to be.
+      - name: Performance budgets
+        run: bash tests/performance/test_perf_budgets.sh
+
+
   quality-idempotency:
     name: Quality / Idempotency
     runs-on: ubuntu-latest

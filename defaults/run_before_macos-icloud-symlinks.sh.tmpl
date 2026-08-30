@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 #
-# run_once_before_macos-icloud-symlinks.sh.tmpl
+# run_before_macos-icloud-symlinks.sh.tmpl
 #
 # =============================================================================
 # WHAT THIS SCRIPT DOES (and, critically, WHAT IT REFUSES TO DO)
@@ -20,9 +20,20 @@
 #
 # This script replaces that mechanism with a paranoid, additive approach:
 #
-#   1. It runs ONCE, before chezmoi apply, on macOS only. `run_once_before_`
-#      means chezmoi only runs it if the file's contents change from the
-#      previously-applied version — and only before any other apply steps.
+#   1. It runs before every `chezmoi apply`, on macOS only, and CONVERGES:
+#      each run re-evaluates the refusal matrix and links whatever has
+#      become safe to link since the last one.
+#
+#      This deliberately is NOT `run_once_before_`. A run-once script gets
+#      exactly one attempt, and on a fresh Mac that attempt lands while
+#      iCloud Drive is still syncing the folder tree down — so every
+#      candidate hits "iCloud source does not exist yet", skips, and the
+#      one chance is spent. The links would then never be created, which
+#      is precisely the opposite of what this script is for.
+#
+#      Re-running is safe by construction: every branch of the refusal
+#      matrix below is idempotent, and an already-correct link is a
+#      logged no-op. Steady-state cost is a few milliseconds.
 #
 #   2. It NEVER removes non-empty directories. Ever. The only removal it
 #      performs is `rmdir` on an empty dir — a call that fails safely if
@@ -84,11 +95,18 @@ LOG_DIR="$XDG_STATE_HOME/dotfiles"
 LOG_FILE="$LOG_DIR/icloud-symlinks.log"
 mkdir -p "$LOG_DIR"
 
+# One timestamp per run, not one per line. Every line in a run shares the
+# same second anyway, so per-line `date` calls bought nothing but ~13
+# subprocess spawns — a third of this script's runtime. Measured 92ms ->
+# 61ms median (interleaved A/B, 25 samples). bash 3.2 is the target here
+# (stock macOS), so printf '%(%s)T' is not available.
+_RUN_TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
 _log() {
   # Always both stdout (visible in chezmoi apply output) and the log file.
   local msg="$1"
   printf '[icloud-symlinks] %s\n' "$msg"
-  printf '%s [icloud-symlinks] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$msg" \
+  printf '%s [icloud-symlinks] %s\n' "$_RUN_TS" "$msg" \
     >> "$LOG_FILE"
 }
 
