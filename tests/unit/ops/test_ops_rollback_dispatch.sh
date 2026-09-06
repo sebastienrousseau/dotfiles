@@ -21,6 +21,13 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
+# The assertions below capture each child's stdout and stderr, which
+# would also swallow the xtrace records the repo's coverage runner reads
+# from stderr. Hand every child a copy of this test's real stderr on
+# fd 9 and point BASH_XTRACEFD at it, so its line records still reach
+# the runner while the captured text stays clean.
+exec 9>&2
+
 ROLLBACK_FILE="$REPO_ROOT/scripts/ops/rollback.sh"
 
 trap cov_teardown_sandbox EXIT
@@ -80,7 +87,7 @@ _run_rb() {
   RB_RC=0
   RB_OUT="$(
     cd "$R_HOME" &&
-      env PATH="$R_BIN:$SYSBIN$RB_PATH_EXTRA" \
+      env BASH_XTRACEFD=9 PATH="$R_BIN:$SYSBIN$RB_PATH_EXTRA" \
         HOME="$R_HOME" \
         XDG_DATA_HOME="$R_HOME/.local/share" \
         XDG_STATE_HOME="$R_HOME/.local/state" \

@@ -15,6 +15,13 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
+# The assertions below capture each child's stdout and stderr, which
+# would also swallow the xtrace records the repo's coverage runner reads
+# from stderr. Hand every child a copy of this test's real stderr on
+# fd 9 and point BASH_XTRACEFD at it, so its line records still reach
+# the runner while the captured text stays clean.
+exec 9>&2
+
 HASH_FILE="$REPO_ROOT/defaults/dot_local/bin/executable_hash"
 
 trap cov_teardown_sandbox EXIT
@@ -136,7 +143,7 @@ _run_hash() {
   H_RC=0
   H_OUT="$(
     printf '%s' "$stdin_text" |
-      env PATH="$bindir" HOME="$TMP/hash-home" \
+      env BASH_XTRACEFD=9 PATH="$bindir" HOME="$TMP/hash-home" \
         "$BASH" "$HASH_FILE" "$@" 2>&1
   )" || H_RC=$?
 }

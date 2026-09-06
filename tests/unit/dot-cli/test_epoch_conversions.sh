@@ -15,6 +15,13 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
+# The assertions below capture each child's stdout and stderr, which
+# would also swallow the xtrace records the repo's coverage runner reads
+# from stderr. Hand every child a copy of this test's real stderr on
+# fd 9 and point BASH_XTRACEFD at it, so its line records still reach
+# the runner while the captured text stays clean.
+exec 9>&2
+
 EPOCH_FILE="$REPO_ROOT/defaults/dot_local/bin/executable_epoch"
 
 trap cov_teardown_sandbox EXIT
@@ -45,7 +52,7 @@ E_RC=0
 _run_epoch() {
   E_RC=0
   E_OUT="$(
-    env PATH="$E_BIN" HOME="$TMP/ep-home" "$BASH" "$EPOCH_FILE" "$@" </dev/null 2>&1
+    env BASH_XTRACEFD=9 PATH="$E_BIN" HOME="$TMP/ep-home" "$BASH" "$EPOCH_FILE" "$@" </dev/null 2>&1
   )" || E_RC=$?
 }
 

@@ -13,6 +13,13 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
+# The assertions below capture each child's stdout and stderr, which
+# would also swallow the xtrace records the repo's coverage runner reads
+# from stderr. Hand every child a copy of this test's real stderr on
+# fd 9 and point BASH_XTRACEFD at it, so its line records still reach
+# the runner while the captured text stays clean.
+exec 9>&2
+
 BM_FILE="$REPO_ROOT/defaults/dot_local/bin/executable_bm"
 
 trap cov_teardown_sandbox EXIT
@@ -32,7 +39,7 @@ _run_bm() {
   BM_RC=0
   BM_OUT="$(
     cd "$cwd" &&
-      env HOME="$BM_HOME" "$BASH" "$BM_FILE" "$@" </dev/null 2>&1
+      env BASH_XTRACEFD=9 HOME="$BM_HOME" "$BASH" "$BM_FILE" "$@" </dev/null 2>&1
   )" || BM_RC=$?
 }
 
@@ -185,7 +192,7 @@ printf 'gnu %s\n' "$TMP/bm-work/alpha" >>"$BOOKMARKS"
 BM_RC=0
 BM_OUT="$(
   cd "$TMP" &&
-    env PATH="$GNU_SED_BIN" HOME="$BM_HOME" "$BASH" "$BM_FILE" remove gnu </dev/null 2>&1
+    env BASH_XTRACEFD=9 PATH="$GNU_SED_BIN" HOME="$BM_HOME" "$BASH" "$BM_FILE" remove gnu </dev/null 2>&1
 )" || BM_RC=$?
 _bm_expect "gnu_sed_branch_removes_entry" 0 "Bookmark 'gnu' removed"
 

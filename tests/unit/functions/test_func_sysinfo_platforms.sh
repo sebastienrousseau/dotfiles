@@ -16,6 +16,13 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
+# The assertions below capture each child's stdout and stderr, which
+# would also swallow the xtrace records the repo's coverage runner reads
+# from stderr. Hand every child a copy of this test's real stderr on
+# fd 9 and point BASH_XTRACEFD at it, so its line records still reach
+# the runner while the captured text stays clean.
+exec 9>&2
+
 SYSINFO_FILE="$REPO_ROOT/defaults/.chezmoitemplates/functions/system/sysinfo.sh"
 
 trap cov_teardown_sandbox EXIT
@@ -60,7 +67,7 @@ SI_RC=0
 _run_sysinfo() {
   SI_RC=0
   SI_OUT="$(
-    env PATH="$SI_BIN:$SYSBIN" \
+    env BASH_XTRACEFD=9 PATH="$SI_BIN:$SYSBIN" \
       HOME="$TMP/si-home" \
       SHELL="/bin/zsh" \
       NO_COLOR=1 \
@@ -233,7 +240,7 @@ _si_expect "cygwin_platform_arm" "fixture-cyg"
 # =======================================================================
 test_start "color_branch_sets_green_escape"
 _color_out="$(
-  env PATH="$SI_BIN:$SYSBIN" HOME="$TMP/si-home" SHELL="/bin/zsh" TERM= \
+  env BASH_XTRACEFD=9 PATH="$SI_BIN:$SYSBIN" HOME="$TMP/si-home" SHELL="/bin/zsh" TERM= \
     "$BASH" -c '
       # Fake an interactive stdout for the `[[ -t 1 ]]` probe by running
       # the source with stdout attached to the caller and capturing the
