@@ -42,6 +42,11 @@ WANT="Apache-2.0 OR MIT"
 OLD_VALUES=(
   "MIT"
   "Apache-2.0"
+  # Same grant, reversed. Semantically equivalent, but tooling that
+  # compares the expression as a string (including this repo's own
+  # copyright checker) wants one canonical spelling. Other branches
+  # landing alongside this one may well write it this way.
+  "MIT OR Apache-2.0"
 )
 
 # Paths excluded from the sweep. Vendored trees keep upstream headers;
@@ -68,11 +73,15 @@ for arg in "$@"; do
 done
 
 # Build one alternation of the old values for grep, e.g. "MIT|Apache-2.0".
+# Longest first, so "MIT OR Apache-2.0" is tried before bare "MIT" —
+# alternation is leftmost-first, and the short branch would otherwise
+# match the prefix and leave " OR Apache-2.0" dangling.
 old_alt=""
-for v in "${OLD_VALUES[@]}"; do
+while IFS= read -r v; do
+  [[ -n "$v" ]] || continue
   [[ -n "$old_alt" ]] && old_alt+="|"
   old_alt+="$(printf '%s' "$v" | sed 's/[][\.*^$/]/\\&/g')"
-done
+done < <(printf '%s\n' "${OLD_VALUES[@]}" | awk '{ print length, $0 }' | sort -rn | cut -d' ' -f2-)
 
 # Candidate files: tracked, and carrying an SPDX line whose value is
 # exactly one of the old values (anchored, so "MIT OR X" is not a hit).

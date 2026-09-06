@@ -124,7 +124,11 @@ for file in "${all_files[@]}"; do
       # Trim surrounding whitespace without a subshell.
       declared="${declared#"${declared%%[![:space:]]*}"}"
       declared="${declared%"${declared##*[![:space:]]}"}"
-      if [[ -n "$declared" && "$declared" != "$EXPECTED_SPDX" ]]; then
+      # `A OR B` and `B OR A` are the same grant. Compare the operands
+      # as a set so a file is not failed over word order alone.
+      declared_sorted="$(printf '%s' "$declared" | tr ' ' '\n' | grep -v '^OR$' | LC_ALL=C sort | tr '\n' ' ')"
+      expected_sorted="$(printf '%s' "$EXPECTED_SPDX" | tr ' ' '\n' | grep -v '^OR$' | LC_ALL=C sort | tr '\n' ' ')"
+      if [[ -n "$declared" && "$declared_sorted" != "$expected_sorted" ]]; then
         wrong_spdx+=("$file: declares '$declared'")
       fi
     fi
