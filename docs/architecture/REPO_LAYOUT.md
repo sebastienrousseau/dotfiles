@@ -131,7 +131,7 @@ find this workstation's agent capabilities:
 | `mise.toml`, `mise-versions.lock.json`  | Mise toolchain versions (locked)                                               |
 | `flake.nix`, `flake.lock` (root)        | Root Nix flake for `direnv` + repo dev shell                                   |
 | `nix/flake.nix`, `nix/home.nix`         | Separate flake for Home Manager activation (used by `dot upgrade` and `ci-enforced.yml → lint-nix`) |
-| `lib/wasm-tools/`                       | Vendored WebAssembly tooling (build output gitignored)                          |
+| `lib/wasm-tools/`                       | `dot-sys` Rust crate (lib + bin): emits/parses the health-probe JSON record; gated by `rust.yml` |
 | `.envrc`                                | `direnv` hook into the root flake                                              |
 
 ---
@@ -218,7 +218,7 @@ version control. If one of them ever shows up in `git status`, check the
 | `.claude/`               | Claude Code per-machine state (`settings.local.json` permission allowlists)  |
 | `node_modules/`          | Node dependency trees from repo-local scripts                                |
 | `.version-sync-backup/`  | Timestamped backups from `version-sync.sh`                                   |
-| `lib/wasm-tools/target/` | Rust build artefacts for the vendored wasm tooling                           |
+| `lib/wasm-tools/target/` | Rust build artefacts for the `dot-sys` crate (and `fuzz/target/`)            |
 | `dot_etc/machines/`      | Host-specific installer overrides                                            |
 
 ---
