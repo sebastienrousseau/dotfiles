@@ -4,9 +4,12 @@ render_with_liquid: false
 
 # Command Index
 
-Generated from `dot help all`. To refresh after adding or renaming
-a subcommand, run `tools/docs/generate-command-index.sh`. The CI
-job `lint/command-index` fails when this file is stale.
+Generated from `dot help all` plus the `dot help <command>` detail
+registry, so a command that is routable and has help text is listed
+even when it is absent from the compact overview. To refresh after
+adding or renaming a subcommand, run
+`tools/docs/generate-command-index.sh`. The CI job
+`lint/command-index` fails when this file is stale.
 
 | Command | Summary |
 |---------|---------|
@@ -42,7 +45,9 @@ job `lint/command-index` fails when this file is stale.
 | `dot aliases` | stats Show alias usage counts from shell history |
 | `dot aliases` | tiers Show which alias tiers/ecosystems are enabled |
 | `dot aliases` | why Show details and deprecation status for a single alias |
+| `dot apply` | Apply the current dotfiles to this machine. |
 | `dot attest` | Export workstation attestation evidence (--json |
+| `dot autohand` | Run the Autohand CLI with dotfiles context patterns. |
 | `dot backup` | Create a compressed backup of your home |
 | `dot benchmark` | Benchmark shell startup with per-component profiling |
 | `dot bundle` | Create offline archive of dotfiles environment |
@@ -50,6 +55,8 @@ job `lint/command-index` fails when this file is stale.
 | `dot cd` | Print source directory path (use: cd $(dot cd)) |
 | `dot chaos` | Simulate config corruption to test self-healing |
 | `dot cl` | Claude CLI with context patterns |
+| `dot claude` | Run the Claude CLI bridge (alias for cl). |
+| `dot codex` | Run the OpenAI Codex CLI with dotfiles context patterns. |
 | `dot commit` | AI-powered conventional commit |
 | `dot completion` | Generate shell completions (bash/zsh/fish/nu) from the command registry |
 | `dot copilot` | GitHub Copilot CLI with context patterns |
@@ -74,8 +81,12 @@ job `lint/command-index` fails when this file is stale.
 | `dot fleet` | namespace Show or set the active namespace for multi-tenant isolation |
 | `dot fleet` | status Show this node's fleet status: id, namespace, version, OS, drift, last apply |
 | `dot fonts` | Install (default) or patch Nerd Fonts (JetBrainsMono by default) |
+| `dot goose` | Run the Goose CLI with dotfiles context patterns. |
+| `dot heal` | Auto-repair common dotfiles problems (missing files, broken links). |
+| `dot health` | Run the health dashboard with optional fixes. |
 | `dot help` | Show this help message |
 | `dot history` | Shell history analysis |
+| `dot init` | Bootstrap a foreign dotfiles repo through chezmoi + dot. |
 | `dot keys` | Keybindings (sign-check: verify git signing) |
 | `dot keys` | sign-check Verify git commit-signing configuration and key availability |
 | `dot kimi` | Kimi CLI with context patterns |
@@ -84,6 +95,7 @@ job `lint/command-index` fails when this file is stale.
 | `dot lint` | Lint shell scripts (--fix |
 | `dot load-bench` | Measure time to heavy-layer readiness |
 | `dot lock-screen` | Enforce lock screen idle settings [Linux] |
+| `dot manual` | Open or download the dotfiles manual in HTML, PDF, EPUB, or text. |
 | `dot mcp` | Inspect MCP policy, supply chain, and registry |
 | `dot mcp` | doctor Run the MCP policy/supply-chain/config audit |
 | `dot mcp` | registry Show the configured MCP server registry |
@@ -104,15 +116,18 @@ job `lint/command-index` fails when this file is stale.
 | `dot patterns` | view View an AI steering pattern |
 | `dot perf` | Show performance mode and quick timing |
 | `dot policy` | Check and enforce security policies across the environment |
+| `dot prewarm` | Alias of cache-refresh — regenerate shell init caches. |
 | `dot profile` | Show/switch configuration profile |
 | `dot profile` | set Set the active configuration profile (run dot sync to apply) |
 | `dot profile` | show Show the active configuration profile and feature flags |
+| `dot qwen` | Run the Qwen Coder CLI with dotfiles context patterns. |
 | `dot registry` | info Print full metadata for a registry module |
 | `dot registry` | install Install a registry module (scaffold) |
 | `dot registry` | list List modules in the configured module registry |
 | `dot registry` | search Filter registry modules by keyword |
 | `dot registry` | set-url Override the registry URL (https only; persists) |
 | `dot registry` | url Show the active registry URL |
+| `dot restore` | Restore from a backup or git ref. |
 | `dot rollback` | Rollback dotfiles to a previous state |
 | `dot sandbox` | Launch a safe sandbox preview (Docker/Podman) |
 | `dot score` | System health and security scorecard |
@@ -127,6 +142,7 @@ job `lint/command-index` fails when this file is stale.
 | `dot secrets` | set Store a secret value under a key |
 | `dot secrets-create` | Create an encrypted secrets file |
 | `dot secrets-init` | Initialize age key for secrets |
+| `dot security-score` | Assess workstation security posture. |
 | `dot sgpt` | Shell-GPT with context patterns |
 | `dot snapshot` | Capture baseline system snapshot |
 | `dot ssh-cert` | Manage short-lived SSH certificates |
@@ -151,6 +167,8 @@ job `lint/command-index` fails when this file is stale.
 | `dot upgrade` | Update system toolchains, plugins, and dotfiles |
 | `dot usb-safety` | Disable automount for removable media [Linux] |
 | `dot version` | Show version information. |
+| `dot vibe` | Run the Vibe AI CLI with dotfiles context patterns. |
 | `dot wallpaper` | Apply a wallpaper from your library [macOS,Linux] |
 | `dot wallpaper` | rotate Rotate to the next wallpaper in your library |
 | `dot wallpaper` | sync Sync wallpaper from your library |
+| `dot zai` | Run the ZAI CLI with dotfiles context patterns. |

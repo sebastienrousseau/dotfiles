@@ -361,6 +361,8 @@ upgrade|Run the managed update path for tools and dotfiles.|dot upgrade
 doctor|Inspect shell tools, paths, portability, and health.|dot doctor\ndot doctor --score\ndot doctor -H
 attest|Export workstation attestation evidence.|dot attest\ndot attest --json\ndot attest -F /srv/dotfiles-fleet
 health|Run the health dashboard with optional fixes.|dot health -v\ndot health -j\ndot health -f
+heal|Auto-repair common dotfiles problems (missing files, broken links).|dot heal\ndot heal --dry-run
+manual|Open or download the dotfiles manual in HTML, PDF, EPUB, or text.|dot manual\ndot manual text --offline\ndot manual download pdf
 perf|Measure shell performance and emit structured timing.|dot perf -j -r 1\ndot perf -p\ndot perf -t 200
 security-score|Assess workstation security posture.|dot security-score -j\ndot security-score -q
 snapshot|Capture the current workstation snapshot.|dot snapshot -b\ndot snapshot -b -f
