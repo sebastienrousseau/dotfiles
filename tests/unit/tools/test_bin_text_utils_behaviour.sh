@@ -113,6 +113,43 @@ STDIN_FILE="$WORK/in.txt" util hex
 assert_equals 0 "$RC" "rc"
 out_has "6869" "stdin viewed"
 
+test_start "hex_falls_back_to_hexdump_then_od_then_errors"
+# The viewer prefers xxd, then hexdump, then od; hide them one at a time.
+HEXPATH="$DOTFILES_COV_TMPDIR/hexpath"
+mkdir -p "$HEXPATH"
+ln -sf "$(command -v bash)" "$HEXPATH/bash"
+for c in printf echo cat tr sed grep; do
+  p="$(command -v "$c" 2>/dev/null)" && ln -sf "$p" "$HEXPATH/$c"
+done
+for c in hexdump od; do
+  p="$(command -v "$c" 2>/dev/null)" && ln -sf "$p" "$HEXPATH/$c"
+done
+PATH="$HEXPATH" util hex "$WORK/bin.dat"
+assert_equals 0 "$RC" "rc"
+out_has "41 42" "hexdump rendered the bytes"
+rm -f "$HEXPATH/hexdump"
+PATH="$HEXPATH" util hex "$WORK/bin.dat"
+# The od arm passes `-t x1z`, whose `z` format character BSD od rejects, so
+# on macOS the fallback runs and surfaces od's own failure.
+assert_true "[[ $RC -ne 0 ]]" "the od fallback ran"
+assert_true "! grep -q 'required' '$OUTF'" "and it is not the no-tool error"
+rm -f "$HEXPATH/od"
+PATH="$HEXPATH" util hex "$WORK/bin.dat"
+assert_equals 1 "$RC" "rc"
+out_has "xxd, hexdump, or od required" "error names every option"
+
+test_start "hex_colour_mode_pipes_through_bat"
+cat >"$DOTFILES_COV_TMPDIR/bin/bat" <<STUB
+#!$(command -v bash)
+printf 'bat %s\n' "\$*"
+cat
+STUB
+chmod +x "$DOTFILES_COV_TMPDIR/bin/bat"
+util hex -c "$WORK/bin.dat"
+assert_equals 0 "$RC" "rc"
+out_has "bat --language=xxd --style=plain" "colouriser invoked"
+out_has "4142" "bytes still rendered"
+
 # ── hashsum ─────────────────────────────────────────────────────────────
 KNOWN_SHA256="2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824" # "hello"
 KNOWN_MD5="5d41402abc4b2a76b9719d911017c592"
