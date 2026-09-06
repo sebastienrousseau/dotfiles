@@ -53,23 +53,23 @@ func FuzzValidateName(f *testing.F) {
 		"mathiasbynens",
 		"holman.dotfiles",
 		"paulirish_42",
-		"x",                              // 1 char
-		strings.Repeat("a", 64),          // long but valid
+		"x",                     // 1 char
+		strings.Repeat("a", 64), // long but valid
 		"with-dash",
 		"with.dot",
 		"with_underscore",
-		"123",                            // leading digit (allowed)
-		"",                               // empty (must reject)
-		"contains space",                 // space (must reject)
-		"contains/slash",                 // slash (must reject)
-		"injection;ls",                   // shell metacharacter
-		"$(whoami)",                      // command substitution
-		"`whoami`",                       // backtick
-		"name\nnewline",                  // newline
-		"\x00nullbyte",                 // null byte
-		"\u202eRLO",                      // right-to-left override
-		"emoji\U0001F600",                        // multi-byte UTF-8
-		"--flag-injection",               // looks like a CLI flag
+		"123",              // leading digit (allowed)
+		"",                 // empty (must reject)
+		"contains space",   // space (must reject)
+		"contains/slash",   // slash (must reject)
+		"injection;ls",     // shell metacharacter
+		"$(whoami)",        // command substitution
+		"`whoami`",         // backtick
+		"name\nnewline",    // newline
+		"\x00nullbyte",     // null byte
+		"\u202eRLO",        // right-to-left override
+		"emoji\U0001F600",  // multi-byte UTF-8
+		"--flag-injection", // looks like a CLI flag
 	}
 	for _, s := range seeds {
 		f.Add(s)

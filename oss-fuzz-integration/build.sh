@@ -24,6 +24,15 @@ cd "$SRC/dotfiles/oss-fuzz-integration/fuzz"
 # (1) creating fuzz/<name>_test.go with `func Fuzz<Cap>(f *testing.F)`,
 # (2) appending a `compile_native_go_fuzzer` call here.
 
+# Harness inventory (keep in sync with docs/security/FUZZING.md):
+#   FuzzValidateName / FuzzInitURLResolver - ports of the shell helpers
+#   FuzzUI*  - ports of the dot-ui parsers   (defaults/dot_local/share/dot-ui)
+#   FuzzAI*  - ports of the dot-ai-tui parsers (defaults/dot_local/share/dot-ai-tui)
+# The dot-ui / dot-ai-tui binaries are `package main` in their own modules,
+# which compile_native_go_fuzzer cannot import, so their parsers are ported
+# into this package and are fuzzed in-module as well (each module's
+# fuzz_test.go), where they run against the real implementation.
+
 go get github.com/AdamKorcz/go-118-fuzz-build/testing
 
 compile_native_go_fuzzer \
@@ -35,6 +44,51 @@ compile_native_go_fuzzer \
   github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
   FuzzInitURLResolver \
   fuzz_init_url_resolver
+
+compile_native_go_fuzzer \
+  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  FuzzUIEventLine \
+  fuzz_ui_event_line
+
+compile_native_go_fuzzer \
+  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  FuzzUIHexColor \
+  fuzz_ui_hex_color
+
+compile_native_go_fuzzer \
+  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  FuzzUIPickFilter \
+  fuzz_ui_pick_filter
+
+compile_native_go_fuzzer \
+  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  FuzzUIPickArgs \
+  fuzz_ui_pick_args
+
+compile_native_go_fuzzer \
+  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  FuzzUITableRows \
+  fuzz_ui_table_rows
+
+compile_native_go_fuzzer \
+  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  FuzzAISessionFile \
+  fuzz_ai_session_file
+
+compile_native_go_fuzzer \
+  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  FuzzAISqliteOutput \
+  fuzz_ai_sqlite_output
+
+compile_native_go_fuzzer \
+  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  FuzzAIFenceTag \
+  fuzz_ai_fence_tag
+
+compile_native_go_fuzzer \
+  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  FuzzAIGatewayURL \
+  fuzz_ai_gateway_url
 
 # Seed corpora: copy any *_seed_corpus/ subdirectories alongside
 # the binary. OSS-Fuzz picks them up automatically.
