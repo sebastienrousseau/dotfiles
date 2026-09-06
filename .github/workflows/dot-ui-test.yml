@@ -1,7 +1,13 @@
 name: dot-ui / Go Tests
 
-# Unit tests + coverage gate for the shared `dot` UI renderer (dot-ui).
-# Runs only when the Go source changes.
+# Quality gates for the shared `dot` UI renderer (dot-ui):
+#   * gofmt + go vet + staticcheck + golangci-lint
+#   * unit / regression / example tests with a 98% statement-coverage floor
+#     (computed from `go tool cover -func`, no third-party action)
+#   * every benchmark once (-benchtime=1x) as a smoke job
+#   * fuzz-corpus replay (seed + testdata crashers, no fuzzing)
+# Runs only when the Go source changes. The matrix tests the MSRV from
+# go.mod and the current stable toolchain.
 
 on:
   push:
@@ -17,15 +23,23 @@ on:
 permissions:
   contents: read
 
+env:
+  MODULE_DIR: defaults/dot_local/share/dot-ui
+  # Hard floor per the coverage policy; local is ~99% (only the three
+  # documented process-boundary seams can vary by platform).
+  MIN_COVERAGE: "98.0"
+
 jobs:
-  dot-ui:
-    name: dot-ui / Test + Coverage
+  test:
+    name: dot-ui / Test + Coverage (go ${{ matrix.go }})
     runs-on: ubuntu-latest
-    timeout-minutes: 8
-    env:
-      # Floor below the local ~82% — the remaining statements are the
-      # interactive Bubble Tea / /dev/tty paths that need a real PTY.
-      MIN_COVERAGE: "80.0"
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        # "msrv" resolves to the `go` directive in go.mod (1.26 today);
+        # "stable" is the newest release, so toolchain drift is caught early.
+        go: [msrv, stable]
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
@@ -34,21 +48,76 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Setup Go
+      - name: Setup Go (MSRV from go.mod)
+        if: matrix.go == 'msrv'
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: "1.26"
+          go-version-file: defaults/dot_local/share/dot-ui/go.mod
+          cache-dependency-path: defaults/dot_local/share/dot-ui/go.sum
 
-      - name: Test + coverage gate
-        working-directory: defaults/dot_local/share/dot-ui
+      - name: Setup Go (stable)
+        if: matrix.go == 'stable'
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+          cache-dependency-path: defaults/dot_local/share/dot-ui/go.sum
+
+      - name: Format + vet
+        working-directory: ${{ env.MODULE_DIR }}
         run: |
           set -euo pipefail
-          gofmt -l . | (! grep .) || { echo "::error::gofmt"; exit 1; }
+          gofmt -l . | (! grep .) || { echo "::error::gofmt: files need formatting"; exit 1; }
           go vet ./...
-          go test -coverprofile=cov.out ./...
+
+      - name: Test + coverage gate
+        working-directory: ${{ env.MODULE_DIR }}
+        run: |
+          set -euo pipefail
+          go test -race -coverprofile=cov.out ./...
           pct="$(go tool cover -func=cov.out | awk '/^total:/{gsub(/%/,"",$3); print $3}')"
           echo "::notice::dot-ui coverage ${pct}% (floor ${MIN_COVERAGE}%)"
           awk -v p="$pct" -v m="$MIN_COVERAGE" 'BEGIN{exit !(p+0 >= m+0)}' || {
             echo "::error::dot-ui coverage ${pct}% is below the ${MIN_COVERAGE}% floor"
+            go tool cover -func=cov.out | awk '$3 != "100.0%"'
             exit 1
           }
+
+      - name: Fuzz corpus replay (seed + testdata, no fuzzing)
+        working-directory: ${{ env.MODULE_DIR }}
+        run: go test -run '^Fuzz' -v ./...
+
+      - name: Benchmark smoke (every benchmark once)
+        working-directory: ${{ env.MODULE_DIR }}
+        run: go test -bench . -benchtime=1x -run '^$' ./...
+
+  lint:
+    name: dot-ui / staticcheck + golangci-lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Go (MSRV from go.mod)
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: defaults/dot_local/share/dot-ui/go.mod
+          cache-dependency-path: defaults/dot_local/share/dot-ui/go.sum
+
+      - name: staticcheck
+        working-directory: ${{ env.MODULE_DIR }}
+        run: |
+          set -euo pipefail
+          go install honnef.co/go/tools/cmd/staticcheck@v0.8.1
+          "$(go env GOPATH)/bin/staticcheck" ./...
+
+      - name: golangci-lint
+        working-directory: ${{ env.MODULE_DIR }}
+        run: |
+          set -euo pipefail
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.2
+          "$(go env GOPATH)/bin/golangci-lint" run ./...

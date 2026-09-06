@@ -1,0 +1,38 @@
+# golangci-lint configuration for dot-ai-tui.
+#
+# Pins the linter set explicitly so a newer CLI release cannot change what
+# the CI gate enforces. `standard` is errcheck + govet + ineffassign +
+# staticcheck + unused; the extras below are the ones worth failing on for
+# a small, single-package binary.
+version: "2"
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - misspell
+    - nolintlint
+    - revive
+    - unconvert
+  settings:
+    revive:
+      rules:
+        - name: exported # every exported identifier needs a doc comment
+        - name: package-comments
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+  exclusions:
+    presets:
+      - comments
+      - std-error-handling
+    rules:
+      # Test helpers close pipes and sockets on cleanup paths where a
+      # failure cannot affect the assertion under test.
+      - path: _test\.go
+        linters:
+          - errcheck
+
+formatters:
+  enable:
+    - gofmt
