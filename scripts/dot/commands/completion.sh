@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 ## `dot completion <bash|zsh|fish|nu>` — emit shell completion for `dot`,
 ## generated from the canonical _dot_help_specs registry in bin/dot. Using one

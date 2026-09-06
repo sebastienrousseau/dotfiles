@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Copyright header validator (zero-tolerance policy).
 #
@@ -7,12 +7,19 @@
 # are deliberately narrow to avoid false positives on C-style `(c)` comments
 # or the word "token" appearing in running text.
 #
+# Also validates the SPDX identifier itself, not merely its presence:
+# a file declaring a licence narrower than the project's grant is a
+# REUSE compliance failure and is the statement a downstream reader
+# would rely on. The expected grant is read from package.json so this
+# check cannot drift from the manifest.
+#
 # Usage:
 #   check-copyright-headers.sh [--extensions=sh,lua,nix,...] [--excludes=REGEX]
+#                              [--no-spdx-value]
 #
 # Exit codes:
-#   0  all files have a valid header
-#   1  one or more files are missing a header
+#   0  all files have a valid header with the expected SPDX grant
+#   1  one or more files are missing a header, or declare a wrong grant
 #   2  invalid invocation
 
 set -euo pipefail
@@ -22,11 +29,18 @@ EXCLUDES_DEFAULT='(^|/)(node_modules|\.git|vendor|target|build)/|\.tmpl$|(^|/)(d
 
 EXTENSIONS="$EXTENSIONS_DEFAULT"
 EXCLUDES="$EXCLUDES_DEFAULT"
+CHECK_SPDX_VALUE=1
+
+# The grant every first-party file must declare, read from the manifest
+# rather than hardcoded, so relicensing is a one-line change there.
+EXPECTED_SPDX="$(sed -n 's/.*"license"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' package.json 2>/dev/null | head -1)"
+[[ -n "$EXPECTED_SPDX" ]] || EXPECTED_SPDX="Apache-2.0 OR MIT"
 
 for arg in "$@"; do
   case "$arg" in
     --extensions=*) EXTENSIONS="${arg#*=}" ;;
     --excludes=*) EXCLUDES="${arg#*=}" ;;
+    --no-spdx-value) CHECK_SPDX_VALUE=0 ;;
     -h | --help)
       sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'
       exit 0
@@ -74,6 +88,7 @@ if [[ "${#all_files[@]}" -eq 0 ]]; then
 fi
 
 missing=()
+wrong_spdx=()
 for file in "${all_files[@]}"; do
   if [[ "$file" =~ $EXCLUDES ]]; then
     continue
@@ -90,6 +105,25 @@ for file in "${all_files[@]}"; do
   done
 
   $found || missing+=("$file")
+
+  # Second gate: if the file declares an SPDX identifier at all, it
+  # must be the project's grant. A missing SPDX line is covered by the
+  # header check above; a *wrong* one is what this catches.
+  if [[ "$CHECK_SPDX_VALUE" -eq 1 ]]; then
+    spdx_line="$(grep -m1 -F 'SPDX-License-Identifier:' <<<"$head_buf" || true)"
+    if [[ -n "$spdx_line" ]]; then
+      # Strip everything up to the tag, and any trailing comment
+      # close (`-->`) or whitespace, leaving the bare expression.
+      declared="${spdx_line#*SPDX-License-Identifier:}"
+      declared="${declared%%-->*}"
+      # Trim surrounding whitespace without a subshell.
+      declared="${declared#"${declared%%[![:space:]]*}"}"
+      declared="${declared%"${declared##*[![:space:]]}"}"
+      if [[ -n "$declared" && "$declared" != "$EXPECTED_SPDX" ]]; then
+        wrong_spdx+=("$file: declares '$declared'")
+      fi
+    fi
+  fi
 done
 
 if [[ "${#missing[@]}" -gt 0 ]]; then
@@ -102,4 +136,14 @@ if [[ "${#missing[@]}" -gt 0 ]]; then
   exit 1
 fi
 
-echo "::notice::All ${#all_files[@]} file(s) have a valid copyright header"
+if [[ "${#wrong_spdx[@]}" -gt 0 ]]; then
+  echo "::error::SPDX grant mismatch — ${#wrong_spdx[@]} file(s) declare a licence other than '$EXPECTED_SPDX'"
+  printf '  - %s\n' "${wrong_spdx[@]}"
+  echo
+  echo "The project ships LICENSE-APACHE and LICENSE-MIT and package.json declares"
+  echo "'$EXPECTED_SPDX'. A file claiming less is the statement downstream relies on."
+  echo "Fix with: tools/ci/normalize-spdx-headers.sh"
+  exit 1
+fi
+
+echo "::notice::All ${#all_files[@]} file(s) have a valid copyright header and declare '$EXPECTED_SPDX'"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Sourced by scripts/dot/commands/ai.sh — the `dot ai` subcommand bodies.
 # Split out of ai.sh to keep that dispatcher under the 600-line limit.

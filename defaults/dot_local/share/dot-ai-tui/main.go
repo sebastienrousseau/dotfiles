@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 // Copyright (c) 2015-2026 Sebastien Rousseau
 //
 // dot-ai — the `dot ai` cockpit. A glamorous, chat-centric Bubble Tea TUI for

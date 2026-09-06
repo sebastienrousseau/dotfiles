@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Install Nerd Fonts (JetBrainsMono & Symbols)
 # This script runs when the checksum of this file changes (user triggered or manual update)

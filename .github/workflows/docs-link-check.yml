@@ -119,3 +119,11 @@ jobs:
 
       - name: REUSE compliance
         uses: fsfe/reuse-action@bb774aa972c2a89ff34781233d275075cbddf542 # v5.0.0
+
+      # reuse-action proves every file HAS licensing information.
+      # This proves the information is the *right* grant: the project
+      # ships LICENSE-APACHE + LICENSE-MIT, so a file declaring bare
+      # MIT understates what downstream may rely on. Catches the drift
+      # that followed the relicensing commit.
+      - name: SPDX grant matches the manifest
+        run: bash tools/ci/normalize-spdx-headers.sh --check

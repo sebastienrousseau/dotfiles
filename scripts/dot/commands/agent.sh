@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Dotfiles CLI - Agent Mode Commands (extracted from meta.sh)
 # mode list|current|show|set|run|doctor|card|log|checkpoint|conformance

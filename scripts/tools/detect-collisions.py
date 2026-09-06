@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # MIT License
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # See LICENSE file for details.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Compat shim: the canonical script moved to tools/ci/ during the repo reorg.
 # Pinned reusable workflows on main still reference the old path;
