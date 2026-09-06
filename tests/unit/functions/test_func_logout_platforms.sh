@@ -18,9 +18,9 @@ source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 # The assertions below capture each child's stdout and stderr, which
 # would also swallow the xtrace records the repo's coverage runner reads
 # from stderr. Hand every child a copy of this test's real stderr on
-# fd 9 and point BASH_XTRACEFD at it, so its line records still reach
+# fd 21 and point BASH_XTRACEFD at it, so its line records still reach
 # the runner while the captured text stays clean.
-exec 9>&2
+exec 21>&2
 
 LOGOUT_FILE="$REPO_ROOT/defaults/.chezmoitemplates/functions/misc/logout.sh"
 
@@ -62,7 +62,7 @@ _run_logout() {
   LO_RC=0
   LO_OUT="$(
     printf '%s' "$stdin_text" |
-      env BASH_XTRACEFD=9 PATH="$LO_BIN:$SYSBIN" HOME="$TMP/lo-home" USER=fixtureuser \
+      env BASH_XTRACEFD=21 PATH="$LO_BIN:$SYSBIN" HOME="$TMP/lo-home" USER=fixtureuser \
         "$BASH" -c 'source "$1"; shift; logout "$@"' _ "$LOGOUT_SOURCE" "$@" 2>&1
   )" || LO_RC=$?
 }
@@ -241,7 +241,7 @@ _lo_expect "fallback_logging_used_without_shared_library" 1 \
 # definition directly.
 test_start "fallback_log_warning_writes_to_stderr"
 _warn_out="$(
-  env BASH_XTRACEFD=9 PATH="$LO_BIN:$SYSBIN" HOME="$TMP/lo-home" \
+  env BASH_XTRACEFD=21 PATH="$LO_BIN:$SYSBIN" HOME="$TMP/lo-home" \
     "$BASH" -c 'source "$1"; log_warning "disk almost full"' _ \
     "$ORPHAN_DIR/logout.sh" 2>&1 >/dev/null
 )" || true

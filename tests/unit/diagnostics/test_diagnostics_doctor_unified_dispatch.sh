@@ -18,9 +18,9 @@ source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 # The assertions below capture each child's stdout and stderr, which
 # would also swallow the xtrace records the repo's coverage runner reads
 # from stderr. Hand every child a copy of this test's real stderr on
-# fd 9 and point BASH_XTRACEFD at it, so its line records still reach
+# fd 21 and point BASH_XTRACEFD at it, so its line records still reach
 # the runner while the captured text stays clean.
-exec 9>&2
+exec 21>&2
 
 DU_FILE="$REPO_ROOT/scripts/diagnostics/doctor-unified.sh"
 
@@ -36,7 +36,7 @@ _run_du() {
   DU_RC=0
   DU_OUT="$(
     cd "$TMP/du-home" &&
-      env BASH_XTRACEFD=9 HOME="$TMP/du-home" DOTFILES_ACCESSIBILITY=1 \
+      env BASH_XTRACEFD=21 HOME="$TMP/du-home" DOTFILES_ACCESSIBILITY=1 \
         "$BASH" "$DU_FILE" "$@" </dev/null 2>&1
   )" || DU_RC=$?
 }

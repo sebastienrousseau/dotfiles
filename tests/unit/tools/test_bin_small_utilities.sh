@@ -19,9 +19,9 @@ source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 # The assertions below capture each child's stdout and stderr, which
 # would also swallow the xtrace records the repo's coverage runner reads
 # from stderr. Hand every child a copy of this test's real stderr on
-# fd 9 and point BASH_XTRACEFD at it, so its line records still reach
+# fd 21 and point BASH_XTRACEFD at it, so its line records still reach
 # the runner while the captured text stays clean.
-exec 9>&2
+exec 21>&2
 
 BIN_DIR="$REPO_ROOT/defaults/dot_local/bin"
 
@@ -35,7 +35,7 @@ mkdir -p "$TMP/util-home"
 # `env -i` gives each run a hermetic environment, but it would also drop
 # BASH_ENV, which is how the repo's coverage runner turns on xtrace in
 # child shells. Carry it through explicitly when it is set.
-COV_ENV=(BASH_XTRACEFD=9)
+COV_ENV=(BASH_XTRACEFD=21)
 [[ -n "${BASH_ENV:-}" ]] && COV_ENV+=("BASH_ENV=$BASH_ENV")
 
 U_BIN=""

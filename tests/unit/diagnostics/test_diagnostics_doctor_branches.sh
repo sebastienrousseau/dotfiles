@@ -20,9 +20,9 @@ source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 # The assertions below capture each child's stdout and stderr, which
 # would also swallow the xtrace records the repo's coverage runner reads
 # from stderr. Hand every child a copy of this test's real stderr on
-# fd 9 and point BASH_XTRACEFD at it, so its line records still reach
+# fd 21 and point BASH_XTRACEFD at it, so its line records still reach
 # the runner while the captured text stays clean.
-exec 9>&2
+exec 21>&2
 
 DOCTOR_FILE="$REPO_ROOT/scripts/diagnostics/doctor.sh"
 
@@ -123,7 +123,7 @@ _run_doctor() {
   DOC_RC=0
   DOC_OUT="$(
     cd "$S_HOME" &&
-      env BASH_XTRACEFD=9 PATH="$S_BIN:$SYSBIN" \
+      env BASH_XTRACEFD=21 PATH="$S_BIN:$SYSBIN" \
         HOME="$S_HOME" \
         XDG_CONFIG_HOME="$S_HOME/.config" \
         XDG_DATA_HOME="$S_HOME/.local/share" \
