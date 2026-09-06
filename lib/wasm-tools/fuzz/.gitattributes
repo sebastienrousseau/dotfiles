@@ -1,0 +1,5 @@
+# Corpus inputs are opaque byte strings: never let git normalise line
+# endings or try to diff/merge them, or a seed stops reproducing the case
+# it was added for.
+corpus/** -text -diff -merge
+regressions/** -text -diff -merge
