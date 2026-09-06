@@ -33,7 +33,10 @@ CHECK_SPDX_VALUE=1
 
 # The grant every first-party file must declare, read from the manifest
 # rather than hardcoded, so relicensing is a one-line change there.
-EXPECTED_SPDX="$(sed -n 's/.*"license"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' package.json 2>/dev/null | head -1)"
+# `|| true`: the checker is also run from a scratch directory by its
+# own tests, where package.json does not exist. Under `set -e` a
+# failing command substitution would abort before the fallback.
+EXPECTED_SPDX="$(sed -n 's/.*"license"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' package.json 2>/dev/null | head -1 || true)"
 [[ -n "$EXPECTED_SPDX" ]] || EXPECTED_SPDX="Apache-2.0 OR MIT"
 
 for arg in "$@"; do
@@ -110,11 +113,13 @@ for file in "${all_files[@]}"; do
   # must be the project's grant. A missing SPDX line is covered by the
   # header check above; a *wrong* one is what this catches.
   if [[ "$CHECK_SPDX_VALUE" -eq 1 ]]; then
+    # REUSE-IgnoreStart -- search string, not a declaration
     spdx_line="$(grep -m1 -F 'SPDX-License-Identifier:' <<<"$head_buf" || true)"
     if [[ -n "$spdx_line" ]]; then
       # Strip everything up to the tag, and any trailing comment
       # close (`-->`) or whitespace, leaving the bare expression.
       declared="${spdx_line#*SPDX-License-Identifier:}"
+      # REUSE-IgnoreEnd
       declared="${declared%%-->*}"
       # Trim surrounding whitespace without a subshell.
       declared="${declared#"${declared%%[![:space:]]*}"}"

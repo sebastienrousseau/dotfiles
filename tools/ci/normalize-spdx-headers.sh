@@ -83,7 +83,9 @@ while IFS= read -r file; do
   [[ -f "$file" ]] || continue
   stale[${#stale[@]}]="$file"
 done < <(
+  # REUSE-IgnoreStart -- match pattern, not a declaration
   git grep -lE "SPDX-License-Identifier:[[:space:]]+(${old_alt})[[:space:]]*(-->)?[[:space:]]*$" -- . 2>/dev/null || true
+  # REUSE-IgnoreEnd
 )
 
 if [[ ${#stale[@]} -eq 0 ]]; then
@@ -108,7 +110,9 @@ fi
 # line already uses (`# `, `// `, `<!-- ... -->`, `.\" `), replacing
 # only the identifier itself.
 for file in "${stale[@]}"; do
+  # REUSE-IgnoreStart -- substitution pattern, not a declaration
   perl -0pi -e "s{(SPDX-License-Identifier:[ \t]+)(?:${old_alt})([ \t]*(?:-->)?[ \t]*)\$}{\${1}${WANT}\${2}}gm" "$file"
+  # REUSE-IgnoreEnd
 done
 
 echo "SPDX headers: rewrote ${#stale[@]} file(s) to '${WANT}'"
