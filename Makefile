@@ -15,7 +15,8 @@ FUZZTIME ?=
 .DEFAULT_GOAL := help
 
 .PHONY: help test test-unit test-integration test-quick examples \
-        lint lint-shell lint-docs lint-pins lint-copyright lint-workflows \
+        lint lint-shell lint-shell-all lint-docs lint-pins lint-copyright \
+        lint-workflows lint-links lint-reuse lint-spdx \
         docs docs-serve man completions generate check-drift verify-versions \
         sbom bench fuzz coverage clean check
 
@@ -42,11 +43,28 @@ coverage: ## kcov/xtrace coverage report (MIN_COVERAGE_PCT gate, see coverage.ym
 	bash ./tools/ci/run-coverage.sh
 
 # ── Lint ───────────────────────────────────────────────────────────────
-lint: lint-shell lint-docs lint-pins lint-copyright lint-workflows ## All linters
+lint: lint-shell lint-docs lint-pins lint-copyright lint-workflows \
+      lint-links lint-reuse lint-spdx ## All linters
 
-lint-shell: ## shellcheck + shfmt on every tracked shell file (CI flags)
-	git ls-files '*.sh' 'bin/dot' 'bin/dot-*' 'scripts/verify-release-versions' \
-	  | xargs shellcheck --severity=error -e SC1091 -e SC2030 -e SC2031
+# shellcheck covers every tracked shell file, matching ci.yml.
+# shfmt is scoped to the same targets as reusable-shell-lint.yml
+# (`shfmt_targets`), so `make lint-shell` reproduces CI exactly rather
+# than being stricter than it. Use `make lint-shell-all` for the
+# repo-wide formatting check — 21 files predate that scope and are
+# left alone here deliberately: reformatting them belongs in its own
+# change, not bundled into unrelated work.
+SHFMT_TARGETS ?= scripts install.sh defaults/.chezmoitemplates
+
+# `*.sh` only, matching reusable-shell-lint.yml's `rg --files -g "*.sh"`.
+# Extensionless scripts (bin/dot, bin/dot-*) are covered by the
+# preamble and copyright gates; some of them are Python, which
+# shellcheck refuses outright.
+lint-shell: ## shellcheck + shfmt, exactly as CI runs them
+	git ls-files '*.sh' \
+	  | xargs shellcheck -x --severity=error -e SC1091 -e SC2030 -e SC2031
+	shfmt -d -i 2 -ci $(SHFMT_TARGETS)
+
+lint-shell-all: ## shfmt over every tracked shell file (superset of CI)
 	git ls-files '*.sh' | xargs shfmt -d -i 2 -ci
 
 lint-docs: ## markdownlint-cli2 + codespell over docs and *.md
@@ -61,6 +79,15 @@ lint-copyright: ## Copyright/SPDX header present in every source file
 
 lint-workflows: ## actionlint over .github/workflows
 	actionlint
+
+lint-links: ## lychee offline link check (what docs-link-check.yml gates on)
+	lychee --config config/lychee.toml --offline --no-progress '**/*.md'
+
+lint-reuse: ## REUSE compliance over the whole tree
+	reuse lint
+
+lint-spdx: ## Every SPDX header declares the project's licence grant
+	bash ./tools/ci/normalize-spdx-headers.sh --check
 
 # ── Generated artefacts ────────────────────────────────────────────────
 man: ## Generate share/man/man1/dot.1 from the command registry

@@ -35,7 +35,11 @@ _completion_commands() {
     in_func && /cat <<'\''EOF'\''/ { in_block = 1; next }
     in_block && /^EOF$/ { exit }
     in_block && NF >= 3 && $2 !~ / / {
-      name = $2; desc = $3
+      name = $2
+      # Description = fields 3..NF-1 rejoined: registry descriptions can
+      # contain "|" (e.g. "--ai|-A") and the last field is the hint.
+      desc = $3
+      for (i = 4; i < NF; i++) desc = desc "|" $i
       gsub(/^[ \t]+|[ \t]+$/, "", name)
       gsub(/^[ \t]+|[ \t]+$/, "", desc)
       gsub(/[":\047]/, "", desc)
@@ -54,7 +58,9 @@ _completion_subcommands() {
     in_func && /cat <<'\''EOF'\''/ { in_block = 1; next }
     in_block && /^EOF$/ { exit }
     in_block && NF >= 3 && $2 ~ / / {
-      full = $2; desc = $3
+      full = $2
+      desc = $3
+      for (i = 4; i < NF; i++) desc = desc "|" $i
       gsub(/^[ \t]+|[ \t]+$/, "", full)
       gsub(/^[ \t]+|[ \t]+$/, "", desc)
       gsub(/[":\047]/, "", desc)

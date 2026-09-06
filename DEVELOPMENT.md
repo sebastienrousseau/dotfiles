@@ -140,8 +140,8 @@ subset (lint + drift + test + examples) in one go.
 
 | Workflow | Job | Locally |
 |---|---|---|
-| `ci.yml` | Lint / Shell | `git ls-files '*.sh' \| xargs shellcheck --severity=error -e SC1091 -e SC2030 -e SC2031` |
-| `ci.yml` | Lint / Shell (format) | `git ls-files '*.sh' \| xargs shfmt -d -i 2 -ci` |
+| `ci.yml` | Lint / Shell | `make lint-shell` (`shellcheck -x --severity=error -e SC1091 -e SC2030 -e SC2031` over `*.sh`) |
+| `ci.yml` | Lint / Shell (format) | `shfmt -d -i 2 -ci scripts install.sh defaults/.chezmoitemplates` (CI's `shfmt_targets`; `make lint-shell-all` is the repo-wide superset) |
 | `ci.yml` | Lint / Lua | `luacheck .` and `stylua --check .` |
 | `ci.yml` | Lint / Fish | `fish --no-execute <file>` per fish file |
 | `ci.yml` | Lint / Nushell | `nu --commands 'source <file>'` per nu file |

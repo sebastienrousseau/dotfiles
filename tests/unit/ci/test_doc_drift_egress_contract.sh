@@ -44,7 +44,12 @@ assert_equals "$harden_steps" "$block_policies" \
   "every doc-drift harden-runner step must use egress-policy: block"
 
 test_start "doc_drift_expected_job_count"
-assert_equals "2" "$harden_steps" "doc-drift currently has two isolated generator jobs"
+# One isolated generator job per artefact derived from the command
+# registry in bin/dot: command-index, version-consistency, man page,
+# completions. The count is asserted rather than left open so that
+# adding a generator without its own hardened, block-mode job is a
+# test failure rather than a silent gap.
+assert_equals "4" "$harden_steps" "doc-drift has one isolated job per generated artefact"
 
 test_start "doc_drift_no_wildcard_egress"
 if grep -Eq '(^|[[:space:]])(\*|0\.0\.0\.0/0|::/0)([[:space:]]|$)' "$WORKFLOW"; then
