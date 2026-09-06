@@ -58,7 +58,9 @@ test_start "matches_copyright_paren_c"
 assert_file_contains "$SCRIPT_FILE" "Copyright (c)" "must match Copyright (c) pattern"
 
 test_start "matches_spdx"
+# REUSE-IgnoreStart -- assertion string, not a declaration
 assert_file_contains "$SCRIPT_FILE" "SPDX-License-Identifier:" "must match SPDX header"
+# REUSE-IgnoreEnd
 
 # ---------------------------------------------------------------------------
 # End-to-end: run the script in a temp dir with a known-good and known-bad file

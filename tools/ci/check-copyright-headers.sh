@@ -45,7 +45,9 @@ done
 PATTERNS=(
   "Copyright (c)"
   "Copyright ©"
+  # REUSE-IgnoreStart -- this is a search pattern, not a declaration
   "SPDX-License-Identifier:"
+  # REUSE-IgnoreEnd
   "© "
 )
 

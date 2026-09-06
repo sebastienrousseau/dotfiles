@@ -1,0 +1,61 @@
+# SPDX-FileCopyrightText: 2015-2026 Sebastien Rousseau
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+#
+# REUSE 3.3 configuration — machine-readable licensing for the whole
+# tree (https://reuse.software/). A file's own SPDX header wins; the
+# annotations below cover everything that cannot carry a comment
+# (JSON, images, lockfiles, fuzz corpora) or that would be noise to
+# annotate one file at a time.
+#
+# Lint with:  reuse lint     (or `make lint-reuse`)
+version = 1
+SPDX-PackageName = "dotfiles"
+SPDX-PackageSupplier = "Sebastien Rousseau <sebastian.rousseau@gmail.com>"
+SPDX-PackageDownloadLocation = "https://github.com/sebastienrousseau/dotfiles"
+
+# Default for the whole tree: the project's own work, dual-licensed.
+# `precedence = "aggregate"` means a file's own header takes priority
+# where one exists, and this applies everywhere else.
+[[annotations]]
+path = ["**", "**/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2015-2026 Sebastien Rousseau"
+SPDX-License-Identifier = "Apache-2.0 OR MIT"
+
+# Vendored third-party Rust source. Recorded explicitly so a reader
+# can see the boundary between our code and imported code, even though
+# the licence expression matches.
+[[annotations]]
+path = ["lib/wasm-tools/**", "lib/wasm-tools/**/**"]
+precedence = "override"
+SPDX-FileCopyrightText = "2015-2026 Sebastien Rousseau"
+SPDX-License-Identifier = "Apache-2.0 OR MIT"
+
+# Fuzzing corpus: opaque byte sequences emitted by the fuzzer, not
+# authored content, and they must stay byte-exact — a header would
+# change the input under test.
+[[annotations]]
+path = ["fuzz/testdata/**", "fuzz/testdata/**/**"]
+precedence = "override"
+SPDX-FileCopyrightText = "2015-2026 Sebastien Rousseau"
+SPDX-License-Identifier = "Apache-2.0 OR MIT"
+
+# Generated or machine-managed files. Listed by name so it is visible
+# that they are outputs rather than source; regenerate, do not edit.
+[[annotations]]
+path = [
+  "mise.lock",
+  "mise-versions.lock.json",
+  "flake.lock",
+  "nix/flake.lock",
+  "requirements-docs.txt",
+  "fuzz/go.sum",
+  ".secrets.baseline",
+  "docs/manual/command-index.md",
+  "share/man/man1/dot.1",
+  "share/completions/zsh/_dot",
+  "defaults/dot_local/share/bash-completion/completions/dot",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2015-2026 Sebastien Rousseau"
+SPDX-License-Identifier = "Apache-2.0 OR MIT"

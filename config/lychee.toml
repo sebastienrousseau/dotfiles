@@ -1,0 +1,55 @@
+# lychee configuration — link checking for docs and Markdown.
+# Run: lychee --config config/lychee.toml --offline '**/*.md'  (make lint-links)
+#
+# CI runs the offline pass as a hard gate (broken *internal* links fail
+# the build, which is the rule the repository standard sets) and a
+# full online pass on a schedule, where third-party outages must not
+# block a merge.
+
+# Directories that are not ours to fix, or are deliberately frozen.
+exclude_path = [
+  "node_modules",
+  "site",
+  "_build",
+  "build",
+  "coverage",
+  "docs/archive",
+  "docs/.vitepress/reports",
+  "CHANGELOG.md",
+  "defaults/dot_config",
+  "defaults/dot_claude",
+  "lib/wasm-tools/target",
+]
+
+# Loopback, reserved and documentation domains: unreachable by design.
+exclude = [
+  '^https?://localhost',
+  '^https?://127\.0\.0\.1',
+  '^https?://0\.0\.0\.0',
+  '^https?://\[::1\]',
+  '^https?://.*\.local(:\d+)?(/|$)',
+  '^https?://(www\.)?example\.(com|org|net)',
+  '^https?://example',
+  '^https?://your-',
+  '^https?://.*\.invalid',
+  # Placeholders inside templates and tutorials.
+  '\{\{.*\}\}',
+  '<.*>',
+  # MkDocs Material directory-URLs inside raw HTML on docs/index.md.
+  # MkDocs does not rewrite `.md` links inside a raw <a href>, so the
+  # button row must use site-relative pretty URLs; they resolve on the
+  # built site but have no matching file on disk.
+  'docs/(guides|reference)/[A-Z_]+$',
+  # Requires authentication; a 404 here means "not logged in", not "broken".
+  '^https://github\.com/.*/settings',
+  '^https://github\.com/.*/security/advisories',
+]
+
+# Rate limits and transient 403s from bot-hostile hosts are not
+# broken links.
+accept = [200, 204, 206, 301, 302, 303, 307, 308, 403, 429]
+max_retries = 3
+retry_wait_time = 2
+timeout = 30
+max_concurrency = 8
+no_progress = true
