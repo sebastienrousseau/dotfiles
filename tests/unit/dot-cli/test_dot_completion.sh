@@ -19,7 +19,7 @@ assert_file_exists "$REPO_ROOT/scripts/dot/commands/completion.sh" "completion m
 
 test_start "completion_bash_emits_complete"
 out="$(bash "$DOT" completion bash 2>/dev/null || true)"
-assert_contains "complete -W" "$out" "bash completion emits a complete -W directive"
+assert_contains "complete -F _dot_completions" "$out" "bash completion registers the _dot_completions function"
 
 test_start "completion_zsh_emits_compdef"
 out="$(bash "$DOT" completion zsh 2>/dev/null || true)"

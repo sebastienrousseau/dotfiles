@@ -1,0 +1,6 @@
+# codespell configuration — `codespell --config config/codespellrc`
+# Scope: prose and source. Generated, vendored, and lock files are skipped.
+[codespell]
+skip = .git,node_modules,*.lock,*.sum,mise.lock,requirements-docs.txt,.secrets.baseline,CHANGELOG.md,docs/archive,docs/.vitepress,site,_build,build,dist,coverage,*.png,*.jpg,*.svg,*.gif,*.heic,*.woff,*.woff2,*.ttf,*.otf,LICENSES
+ignore-words-list = ans,crate,hist,ser,te,ue,nd,als,oll,sur,hashi,noice,fpr,iff,inh,ro,ot
+quiet-level = 2

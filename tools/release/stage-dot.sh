@@ -16,8 +16,12 @@ usage() {
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 dest="$1"
 dest_name="$(basename "$dest")"
+# Refuse anything that does not look like a staging/libexec directory:
+# this script rm -rf's its destination. Accepted basenames are the
+# release layout (dot, dot-<version>), the bundle name, and the
+# `make install` libexec name (dotfiles, i.e. $(PREFIX)/lib/dotfiles).
 [[ "$dest" != / && "$dest" != . && -n "$dest" &&
-  ("$dest_name" == "dot" || "$dest_name" == dot-* || "$dest_name" == "bundle") ]] || {
+  ("$dest_name" == "dot" || "$dest_name" == dot-* || "$dest_name" == "bundle" || "$dest_name" == "dotfiles") ]] || {
   printf 'Refusing unsafe destination: %s\n' "$dest" >&2
   exit 2
 }
@@ -42,10 +46,21 @@ cp -R "$repo_root/defaults/.chezmoitemplates" "$dest/defaults/"
 cp -R "$repo_root/defaults/dot_config/dotfiles" "$dest/defaults/dot_config/"
 cp -R "$repo_root/defaults/dot_claude" "$dest/defaults/"
 
-cp "$repo_root/share/man/man1/dot.1" "$dest/share/man/man1/"
-cp "$repo_root/share/completions/zsh/_dot" "$dest/share/zsh/site-functions/_dot"
-cp "$repo_root/defaults/dot_local/share/bash-completion/completions/dot" "$dest/share/bash-completion/completions/dot"
-cp "$repo_root/defaults/dot_config/fish/functions/dot.fish" "$dest/share/fish/vendor_completions.d/dot.fish"
+# Man page and completions are BUILD PRODUCTS of the command registry
+# in bin/dot — generated here rather than copied, so a staged tree can
+# never ship a page or completion that drifted from the CLI it wraps.
+# (The committed copies under share/ exist for chezmoi-deployed users
+# and are drift-checked against these same generators in CI.)
+bash "$repo_root/tools/docs/generate-manpage.sh" --output "$dest/share/man/man1/dot.1" >/dev/null
+for shell in zsh bash fish; do
+  case "$shell" in
+    zsh) target="$dest/share/zsh/site-functions/_dot" ;;
+    bash) target="$dest/share/bash-completion/completions/dot" ;;
+    fish) target="$dest/share/fish/vendor_completions.d/dot.fish" ;;
+  esac
+  CHEZMOI_SOURCE_DIR="$repo_root" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 \
+    bash "$repo_root/bin/dot" completion "$shell" >"$target"
+done
 
 chmod 0755 "$dest/bin/dot" "$dest"/bin/dot-* "$dest/scripts/uninstall.sh"
 

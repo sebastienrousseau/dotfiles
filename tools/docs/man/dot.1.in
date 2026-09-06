@@ -1,0 +1,114 @@
+.\" SPDX-License-Identifier: MIT
+.\" Copyright (c) 2015-2026 Sebastien Rousseau
+.\"
+.\" Prose template for share/man/man1/dot.1. The COMMANDS and ALIASES
+.\" sections are generated from the command registry in bin/dot by
+.\" tools/docs/generate-manpage.sh — edit THIS file for prose, edit
+.\" bin/dot (_dot_help_specs / _dot_help_details) for command text,
+.\" then run `make man`. CI fails when share/man/man1/dot.1 is stale.
+.TH DOT 1 "@DATE@" "dotfiles v@VERSION@" "User Commands"
+.SH NAME
+dot \- dotfiles management CLI
+.SH SYNOPSIS
+.B dot
+.RI [ command ]
+.RI [ subcommand ]
+.RI [ options ]
+.br
+.B dot help
+.RI [ command ]
+.br
+.B dot help all
+.SH DESCRIPTION
+.B dot
+is the control plane for a chezmoi-managed dotfiles system. It provides
+commands for applying configuration, diagnostics, repair, security, and
+AI-assisted development workflows.
+.PP
+Every command accepts
+.B \-\-help
+and
+.BR \-h .
+Run
+.B dot help all
+for the complete reference,
+.B dot search
+.I keyword
+to find a command, and
+.B dot completion
+.I shell
+to generate shell completions from the same registry that produced this
+page.
+.SH COMMANDS
+@COMMANDS@
+.SH ALIASES AND HIDDEN COMMANDS
+The dispatcher also routes the following names. They are aliases,
+deprecated bridges, or advanced entry points that are kept out of
+.B dot help
+to reduce noise; each still works and documents itself with
+.BR \-\-help .
+@ALIASES@
+.SH ENVIRONMENT
+.TP
+.B DOTFILES_FAST=1
+Skip heavy layers (zinit, completions) for fast startup.
+.TP
+.B DOTFILES_ULTRA_FAST=1
+Bare minimum shell (aliases + prompt only).
+.TP
+.B DOTFILES_AI=1
+Enable AI helper scripts.
+.TP
+.B DOTFILES_NONINTERACTIVE=1
+Force non-interactive mode (for CI/scripts).
+.TP
+.B DOTFILES_PREWARM_ON_APPLY=1
+Auto-prewarm caches after dot apply (default: enabled).
+.TP
+.B CHEZMOI_SOURCE_DIR
+Override the resolved source tree. Used by packaged installs that keep
+the framework outside
+.IR ~/.dotfiles .
+.TP
+.B NO_COLOR=1
+Disable ANSI colour in every command.
+.SH FILES
+.TP
+.I ~/.dotfiles/
+Repository root (chezmoi source).
+.TP
+.I ~/.config/chezmoi/chezmoi.toml
+Per-machine overrides.
+.TP
+.I ~/.config/dotfiles/commands/
+User-provided custom dot commands.
+.TP
+.I ~/.config/dotfiles/modules.d/
+User-provided aliases and functions.
+.TP
+.I ~/.config/zsh/rc.d.local/
+User-provided zsh initialization scripts.
+.TP
+.I ~/.local/share/dotfiles.log
+Local action log. No telemetry leaves the machine.
+.SH EXIT STATUS
+.B 0
+on success,
+.B 1
+on a command failure,
+.B 2
+on usage errors (unknown command, bad flags).
+.SH SEE ALSO
+.BR chezmoi (1),
+.BR mise (1),
+.BR zsh (1)
+.PP
+Manual: https://doc.dotfiles.io/ \(em source in
+.I docs/manual/
+of the repository.
+.SH AUTHORS
+Sebastien Rousseau <sebastian.rousseau@gmail.com>
+.SH BUGS
+Report issues at https://github.com/sebastienrousseau/dotfiles/issues
+.br
+Security reports: see SECURITY.md in the repository (private channel).

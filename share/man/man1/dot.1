@@ -1,128 +1,588 @@
-.TH DOT 1 "May 2026" "dotfiles v0.2.519" "User Commands"
+.\" SPDX-License-Identifier: MIT
+.\" Copyright (c) 2015-2026 Sebastien Rousseau
+.\"
+.\" Prose template for share/man/man1/dot.1. The COMMANDS and ALIASES
+.\" sections are generated from the command registry in bin/dot by
+.\" tools/docs/generate-manpage.sh — edit THIS file for prose, edit
+.\" bin/dot (_dot_help_specs / _dot_help_details) for command text,
+.\" then run `make man`. CI fails when share/man/man1/dot.1 is stale.
+.TH DOT 1 "2026-08-13" "dotfiles v0.2.519" "User Commands"
 .SH NAME
 dot \- dotfiles management CLI
 .SH SYNOPSIS
 .B dot
 .RI [ command ]
+.RI [ subcommand ]
 .RI [ options ]
+.br
+.B dot help
+.RI [ command ]
+.br
+.B dot help all
 .SH DESCRIPTION
 .B dot
 is the control plane for a chezmoi-managed dotfiles system. It provides
 commands for applying configuration, diagnostics, repair, security, and
 AI-assisted development workflows.
+.PP
+Every command accepts
+.B \-\-help
+and
+.BR \-h .
+Run
+.B dot help all
+for the complete reference,
+.B dot search
+.I keyword
+to find a command, and
+.B dot completion
+.I shell
+to generate shell completions from the same registry that produced this
+page.
 .SH COMMANDS
 .SS Core
 .TP
-.B apply
-Converge the machine onto the tracked configuration.
-.TP
-.B update
-Pull the latest state and pre-warm slow paths.
-.TP
 .B sync
-Alias for apply.
+Apply dotfiles (alias for apply; \-\-pull to fetch, \-\-check to preview)
+.TP
+.B add
+Add a file to chezmoi source
 .TP
 .B diff
-Show chezmoi diff with exclusions.
+Show chezmoi diff with exclusions
 .TP
 .B status
-Show configuration drift.
-.TP
-.B add \fIfile\fR
-Add a file to chezmoi source.
-.TP
-.B remove \fIfile\fR
-Safely remove a managed file.
+Show configuration drift (chezmoi status)
 .TP
 .B edit
-Open chezmoi source in $EDITOR.
+Open chezmoi source in $EDITOR
+.TP
+.B uninstall
+Remove the managed dotfiles environment (prompts unless \-\-force)
 .TP
 .B cd
-Print source directory path.
+Print source directory path (use: cd $(dot cd))
+.TP
+.B commit
+AI\-powered conventional commit
 .SS Diagnostics
 .TP
 .B doctor
-Audit tools, paths, portability, and security posture.
-.TP
-.B health
-Run health dashboard.
-.TP
-.B heal
-Auto-repair tools, chezmoi drift, broken symlinks, and missing files.
-.TP
-.B smoke\-test
-Exercise critical toolchains and integrations.
-.TP
-.B benchmark
-Run shell startup performance benchmarks.
-.TP
-.B score
-Compute overall system health score.
-.SS Recovery
-.TP
-.B rollback
-Manage backups and rollback to previous states.
-.TP
-.B bundle
-Produce a portable support or recovery archive.
-.TP
-.B snapshot
-Create a baseline snapshot.
-.SS Security
+Deep audit: tools, paths, portability, AI analysis (\-\-ai|\-A)
 .TP
 .B attest
-Export machine-readable workstation evidence.
+Export workstation attestation evidence (\-\-json|\-j, \-\-write|\-w, \-\-fleet\-store|\-F)
 .TP
-.B secrets \fIsubcommand\fR
-Manage encrypted secrets (load, edit, provider).
+.B secret\-audit
+Audit secret hygiene and leakage surface
 .TP
-.B mcp
-MCP policy validation and server management.
+.B score
+System health and security scorecard
+.TP
+.B snapshot
+Capture baseline system snapshot
+.TP
+.B chaos
+Simulate config corruption to test self\-healing
+.TP
+.B bundle
+Create offline archive of dotfiles environment
+.TP
+.B rollback
+Rollback dotfiles to a previous state
+.TP
+.B history
+Shell history analysis
+.TP
+.B perf
+Show performance mode and quick timing
+.TP
+.B benchmark
+Benchmark shell startup with per\-component profiling
+.TP
+.B metrics
+Show recent observability metrics (JSONL)
+.TP
+.B load\-bench
+Measure time to heavy\-layer readiness
 .SS AI
 .TP
 .B ai
-Open the AI fleet cockpit (TUI). With a prompt, run a one-shot on Claude
-(\fBdot ai "fix the bug"\fR); with a tool name, run it on that tool
-(\fBdot ai codex "..."\fR).
+AI fleet cockpit, gateway, and cost
+.TP
+.B ai\-setup
+Interactive setup for all AI CLI tools
+.TP
+.B ai\-query
+Context\-aware RAG query over your dotfiles
+.TP
+.B mcp
+Inspect MCP policy, supply chain, and registry
+.TP
+.B mode
+Set or inspect agent operating profiles (ask/plan/apply/audit)
+.TP
+.B agent
+Profile\-aware execution, agent card, a2a\-card, session log, checkpoints, and conformance
+.TP
+.B cl
+Claude CLI with context patterns
+.TP
+.B copilot
+GitHub Copilot CLI with context patterns
+.TP
+.B kimi
+Kimi CLI with context patterns
+.TP
+.B agy
+Antigravity CLI with context patterns
+.TP
+.B kiro
+Kiro CLI with context patterns
+.TP
+.B sgpt
+Shell\-GPT with context patterns
+.TP
+.B ollama
+Ollama with context patterns
+.TP
+.B opencode
+OpenCode with context patterns
+.TP
+.B aider
+Aider with context patterns
 .TP
 .B ai chat
-Open an interactive session with a fleet tool.
+Start an interactive AI session with a chosen tool
 .TP
-.B ai tools, ai install
-Show, install, and manage the AI CLI fleet.
+.B ai tools
+Show installed AI CLI tools and their versions
+.TP
+.B ai install
+Install AI CLI tools via mise/native installers
 .TP
 .B ai serve
-Run a local Claude gateway and route the non-Claude fleet through it,
-serving your Claude subscription over the Anthropic and OpenAI protocols.
+Run the local AI gateway/proxy that routes non\-Claude providers
 .TP
-.B ai cost, ai doctor, ai login
-Spend report, fleet/gateway health check, and tool authentication.
+.B ai cost
+Report AI spend across every provider from the unified run log
 .TP
-.B \-\-style <name>
-Steer any prompt with a context pattern (architect, hardener, refactor).
+.B ai login
+Interactive setup/authentication for installed AI CLI tools
 .TP
-.B cl, codex, copilot, goose, crush, amp, cursor-agent, grok, kimi, agy, kiro, sgpt, ollama, opencode, aider, autohand, vibe, qwen, zai
-Deprecated bridge aliases for \fBdot ai <tool>\fR; each still works and
-prints a hint.
+.B ai doctor
+Diagnose AI tooling configuration and connectivity
 .TP
-.B ai\-setup, ai\-query
-Deprecated aliases for \fBdot ai login\fR and \fBdot ai ask\fR.
+.B ai ask
+Context\-aware RAG query over your dotfiles
+.TP
+.B ai run
+Run a one\-shot prompt with an AI tool
+.TP
+.B ai delegate
+Delegate a coding task to a cheaper AI model under agent policy
+.TP
+.B mode list
+List available agent operating profiles (ask/plan/apply/audit)
+.TP
+.B mode current
+Show the active agent profile and its policy
+.TP
+.B mode show
+Show details of a specific agent profile
+.TP
+.B mode set
+Switch the active agent profile
+.TP
+.B mode run
+Run a command under a given agent profile with a checkpoint
+.TP
+.B mode doctor
+Validate the agent\-profiles.json config and default profile
+.TP
+.B agent card
+Show the local agent card metadata
+.TP
+.B agent log
+Tail the agent session audit log
+.TP
+.B agent checkpoint
+Manage agent run checkpoints (save/list/show/replay)
+.TP
+.B agent delegate
+Delegate execution to an allowed sub\-agent
+.TP
+.B agent a2a\-card
+Show or validate the A2A v0.3 agent card
+.TP
+.B agent conformance
+Run the A2A conformance test suite
+.TP
+.B mcp doctor
+Run the MCP policy/supply\-chain/config audit
+.TP
+.B mcp registry
+Show the configured MCP server registry
+.TP
+.B agents list
+Show recognised AI agent harnesses and their config paths
+.TP
+.B agents check
+Verify AGENTS.md tracks CLAUDE.md (exit 1 if drifted)
+.TP
+.B agents render
+Regenerate AGENTS.md and per\-harness config from CLAUDE.md
+.TP
+.B patterns list
+List AI steering patterns
+.TP
+.B patterns view
+View an AI steering pattern
+.TP
+.B patterns edit
+Edit an AI steering pattern in $EDITOR
 .SS Tools
 .TP
 .B env
-Inspect or modify environment variables.
+Tool versions (mise)
 .TP
 .B profile
-Show or switch active profile.
+Show/switch configuration profile
 .TP
-.B prewarm
-Regenerate shell caches for fast startup.
+.B keys
+Keybindings (sign\-check: verify git signing)
 .TP
-.B clean\-cache
-Clear shell initialization caches.
+.B tools
+Show or install nix packages
+.TP
+.B new
+Create a new project from a template
+.TP
+.B sandbox
+Launch a safe sandbox preview (Docker/Podman)
+.TP
+.B lint
+Lint shell scripts (\-\-fix|\-f to auto\-format, \-\-check|\-c for CI)
 .TP
 .B learn
-Interactive tour of dotfiles features.
+Start the interactive tour of your new tools
+.TP
+.B docs
+Show repo README
+.TP
+.B env list
+List managed tool versions via mise
+.TP
+.B env emit
+Emit a portable workstation environment manifest (SBOM; \-\-format json)
+.TP
+.B env prune
+Show or remove orphan tool installs (\-\-yes to commit)
+.TP
+.B env install
+Install requested tool versions via mise
+.TP
+.B env use
+Pin a tool version globally/locally via mise
+.TP
+.B registry list
+List modules in the configured module registry
+.TP
+.B registry search
+Filter registry modules by keyword
+.TP
+.B registry info
+Print full metadata for a registry module
+.TP
+.B registry install
+Install a registry module (scaffold)
+.TP
+.B registry url
+Show the active registry URL
+.TP
+.B registry set\-url
+Override the registry URL (https only; persists)
+.TP
+.B tools install
+Enter the Nix development shell with all managed tools
+.TP
+.B tools docs
+Show the full tools markdown documentation
+.TP
+.B profile show
+Show the active configuration profile and feature flags
+.TP
+.B profile set
+Set the active configuration profile (run dot sync to apply)
+.TP
+.B aliases list
+List all shell aliases shipped by the dotfiles
+.TP
+.B aliases search
+Search aliases by term
+.TP
+.B aliases why
+Show details and deprecation status for a single alias
+.TP
+.B aliases stats
+Show alias usage counts from shell history
+.TP
+.B aliases cheatsheet
+Generate the alias cheatsheet markdown
+.TP
+.B aliases tiers
+Show which alias tiers/ecosystems are enabled
+.TP
+.B keys sign\-check
+Verify git commit\-signing configuration and key availability
+.SS Appearance
+.TP
+.B theme
+Switch terminal theme (dark/light)
+.TP
+.B wallpaper
+Apply a wallpaper from your library [macOS,Linux]
+.TP
+.B fonts
+Install (default) or patch Nerd Fonts (JetBrainsMono by default)
+.TP
+.B tune
+Apply OS tuning (opt\-in) [macOS,Linux]
+.TP
+.B theme list
+Show all available terminal/wallpaper themes
+.TP
+.B theme set
+Set a theme by name (interactive picker if omitted)
+.TP
+.B theme toggle
+Toggle light/dark within the current theme family
+.TP
+.B theme sync
+Sync the dotfiles theme with system dark/light mode
+.TP
+.B theme family
+Cycle between theme families
+.TP
+.B theme current
+Show the current theme info
+.TP
+.B theme rebuild
+Regenerate themes from system and custom wallpapers
+.TP
+.B wallpaper sync
+Sync wallpaper from your library
+.TP
+.B wallpaper rotate
+Rotate to the next wallpaper in your library
+.SS Secrets
+.TP
+.B secrets\-init
+Initialize age key for secrets
+.TP
+.B secrets
+Edit encrypted secrets (age)
+.TP
+.B secrets\-create
+Create an encrypted secrets file
+.TP
+.B ssh\-key
+Encrypt an SSH key locally with age
+.TP
+.B ssh\-cert
+Manage short\-lived SSH certificates
+.TP
+.B secrets edit
+Edit the encrypted secrets file (age)
+.TP
+.B secrets set
+Store a secret value under a key
+.TP
+.B secrets get
+Retrieve a secret value (\-\-raw for plaintext)
+.TP
+.B secrets list
+List indexed secret keys
+.TP
+.B secrets load
+Emit export lines for a secrets bucket (use with eval)
+.TP
+.B secrets provider
+Show the active secrets provider
+.SS Security (opt\-in)
+.TP
+.B backup
+Create a compressed backup of your home
+.TP
+.B policy
+Check and enforce security policies across the environment
+.TP
+.B encrypt\-check
+Check disk encryption status
+.TP
+.B firewall
+Apply firewall hardening [macOS,Linux]
+.TP
+.B telemetry
+Disable OS telemetry [macOS,Linux]
+.TP
+.B dns\-doh
+Enable DNS\-over\-HTTPS [macOS,Linux]
+.TP
+.B lock\-screen
+Enforce lock screen idle settings [Linux]
+.TP
+.B usb\-safety
+Disable automount for removable media [Linux]
+.SS Fleet
+.TP
+.B fleet
+Show fleet node status, drift, and namespace (\-\-json for machine output)
+.TP
+.B fleet drift
+Check for configuration drift across managed files
+.TP
+.B fleet namespace
+Show or set the active namespace for multi\-tenant isolation
+.TP
+.B fleet events
+Show recent fleet events from local event log
+.TP
+.B teleport
+Deploy the dotfiles environment to a remote host over SSH
+.TP
+.B fleet status
+Show this node's fleet status: id, namespace, version, OS, drift, last apply
+.TP
+.B fleet enforce
+Show or set RBAC enforcement mode (advisory/strict) for agent profiles
+.TP
+.B fleet apply
+SSH to every host in fleet.toml and run dot sync (or a custom \-\-cmd)
+.SS Meta
+.TP
+.B upgrade
+Update system toolchains, plugins, and dotfiles
+.TP
+.B packages
+List installed packages and package managers
+.TP
+.B cache\-refresh
+Regenerate shell caches for ultra\-fast startup
+.TP
+.B completion
+Generate shell completions (bash/zsh/fish/nu) from the command registry
+.TP
+.B search
+Find commands by keyword
+.TP
+.B version
+Show version information.
+.TP
+.B help
+Show this help message
+.SH ALIASES AND HIDDEN COMMANDS
+The dispatcher also routes the following names. They are aliases,
+deprecated bridges, or advanced entry points that are kept out of
+.B dot help
+to reduce noise; each still works and documents itself with
+.BR \-\-help .
+.TP
+.B agents
+Synchronize and render instructions for supported AI coding harnesses.
+.TP
+.B alias\-check
+Routed to the tools module; run dot alias\-check \-\-help.
+.TP
+.B aliases
+Inspect or audit shell aliases shipped by the dotfiles.
+.TP
+.B apply
+Apply the current dotfiles to this machine.
+.TP
+.B attestation
+Routed to the diagnostics module; run dot attestation \-\-help.
+.TP
+.B autohand
+Run the Autohand CLI with dotfiles context patterns.
+.TP
+.B claude
+Run the Claude CLI bridge (alias for cl).
+.TP
+.B codex
+Run the OpenAI Codex CLI with dotfiles context patterns.
+.TP
+.B conflicts
+Routed to the diagnostics module; run dot conflicts \-\-help.
+.TP
+.B drift
+Routed to the diagnostics module; run dot drift \-\-help.
+.TP
+.B goose
+Run the Goose CLI with dotfiles context patterns.
+.TP
+.B health\-check
+Routed to the diagnostics module; run dot health\-check \-\-help.
+.TP
+.B health
+Run the health dashboard with optional fixes.
+.TP
+.B heal
+Routed to the diagnostics module; run dot heal \-\-help.
+.TP
+.B init
+Bootstrap a dotfiles repository through chezmoi.
+.TP
+.B intelligence
+Routed to the diagnostics module; run dot intelligence \-\-help.
+.TP
+.B load\-bench\-pty
+Routed to the diagnostics module; run dot load\-bench\-pty \-\-help.
+.TP
+.B locks
+Routed to the diagnostics module; run dot locks \-\-help.
+.TP
+.B log\-rotate
+Routed to the tools module; run dot log\-rotate \-\-help.
+.TP
+.B manual
+Routed to the manual module; run dot manual \-\-help.
+.TP
+.B patterns
+Routed to the patterns module; run dot patterns \-\-help.
+.TP
+.B prewarm
+Alias of cache\-refresh — regenerate shell init caches.
+.TP
+.B qwen
+Run the Qwen Coder CLI with dotfiles context patterns.
+.TP
+.B registry
+Browse and manage reusable dotfile modules.
+.TP
+.B restore
+Restore from a backup or git ref.
+.TP
+.B scorecard
+Routed to the diagnostics module; run dot scorecard \-\-help.
+.TP
+.B security\-score
+Assess workstation security posture.
+.TP
+.B setup
+Routed to the tools module; run dot setup \-\-help.
+.TP
+.B smoke\-test
+Routed to the diagnostics module; run dot smoke\-test \-\-help.
+.TP
+.B update
+Routed to the core module; run dot update \-\-help.
+.TP
+.B vibe
+Run the Vibe AI CLI with dotfiles context patterns.
+.TP
+.B zai
+Run the ZAI CLI with dotfiles context patterns.
 .SH ENVIRONMENT
 .TP
 .B DOTFILES_FAST=1
@@ -139,6 +599,14 @@ Force non-interactive mode (for CI/scripts).
 .TP
 .B DOTFILES_PREWARM_ON_APPLY=1
 Auto-prewarm caches after dot apply (default: enabled).
+.TP
+.B CHEZMOI_SOURCE_DIR
+Override the resolved source tree. Used by packaged installs that keep
+the framework outside
+.IR ~/.dotfiles .
+.TP
+.B NO_COLOR=1
+Disable ANSI colour in every command.
 .SH FILES
 .TP
 .I ~/.dotfiles/
@@ -155,11 +623,27 @@ User-provided aliases and functions.
 .TP
 .I ~/.config/zsh/rc.d.local/
 User-provided zsh initialization scripts.
+.TP
+.I ~/.local/share/dotfiles.log
+Local action log. No telemetry leaves the machine.
+.SH EXIT STATUS
+.B 0
+on success,
+.B 1
+on a command failure,
+.B 2
+on usage errors (unknown command, bad flags).
 .SH SEE ALSO
 .BR chezmoi (1),
 .BR mise (1),
 .BR zsh (1)
+.PP
+Manual: https://doc.dotfiles.io/ \(em source in
+.I docs/manual/
+of the repository.
 .SH AUTHORS
 Sebastien Rousseau <sebastian.rousseau@gmail.com>
 .SH BUGS
 Report issues at https://github.com/sebastienrousseau/dotfiles/issues
+.br
+Security reports: see SECURITY.md in the repository (private channel).
