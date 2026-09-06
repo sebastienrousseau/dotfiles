@@ -3,6 +3,7 @@
 package main
 
 import (
+	"errors"
 	"io"
 	"os"
 	"strings"
@@ -12,19 +13,28 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// errWriter fails every write — used to drive the render-error exit paths.
+type errWriter struct{}
+
+func (errWriter) Write([]byte) (int, error) { return 0, errors.New("write failed") }
+
+// TestDispatchVersion covers `dot-ui --version`, `-v` and `version`.
 func TestDispatchVersion(t *testing.T) {
-	var out, errb strings.Builder
-	if code := dispatch([]string{"--version"}, &out, &errb); code != 0 {
-		t.Fatalf("version exit=%d", code)
-	}
-	if !strings.Contains(out.String(), version) {
-		t.Errorf("version output=%q", out.String())
+	for _, flag := range []string{"--version", "-v", "version"} {
+		var out, errb strings.Builder
+		if code := dispatch([]string{flag}, strings.NewReader(""), &out, &errb); code != 0 {
+			t.Fatalf("%s exit=%d", flag, code)
+		}
+		if !strings.Contains(out.String(), version) {
+			t.Errorf("%s output=%q", flag, out.String())
+		}
 	}
 }
 
+// TestDispatchNoArgs covers the missing-subcommand usage error (exit 2).
 func TestDispatchNoArgs(t *testing.T) {
 	var out, errb strings.Builder
-	if code := dispatch(nil, &out, &errb); code != 2 {
+	if code := dispatch(nil, strings.NewReader(""), &out, &errb); code != 2 {
 		t.Fatalf("no-args exit=%d want 2", code)
 	}
 	if !strings.Contains(errb.String(), "missing subcommand") {
@@ -32,46 +42,139 @@ func TestDispatchNoArgs(t *testing.T) {
 	}
 }
 
+// TestDispatchUnknown covers reserved/unknown subcommands (exit 2 so the bash
+// façade falls back to plain output).
 func TestDispatchUnknown(t *testing.T) {
-	var out, errb strings.Builder
-	if code := dispatch([]string{"bogus"}, &out, &errb); code != 2 {
-		t.Fatalf("unknown exit=%d want 2", code)
+	for _, sub := range []string{"bogus", "dashboard", "spin"} {
+		var out, errb strings.Builder
+		if code := dispatch([]string{sub}, strings.NewReader(""), &out, &errb); code != 2 {
+			t.Fatalf("%s exit=%d want 2", sub, code)
+		}
+		if !strings.Contains(errb.String(), "unsupported subcommand") {
+			t.Errorf("stderr=%q", errb.String())
+		}
 	}
-	if !strings.Contains(errb.String(), "unsupported subcommand") {
+}
+
+// TestDispatchRunSnapshot covers `dot-ui run` under DOT_UI_SNAPSHOT=1.
+func TestDispatchRunSnapshot(t *testing.T) {
+	t.Setenv("DOT_UI_SNAPSHOT", "1")
+	in := `{"t":"header","title":"t","subtitle":"s"}` + "\n" + `{"t":"done","summary":"ok"}` + "\n"
+	var out, errb strings.Builder
+	if code := dispatch([]string{"run"}, strings.NewReader(in), &out, &errb); code != 0 {
+		t.Fatalf("run snapshot exit=%d stderr=%q", code, errb.String())
+	}
+	if !strings.Contains(out.String(), "Done") {
+		t.Errorf("run snapshot output=%q", out.String())
+	}
+}
+
+// TestDispatchRunRenderError covers the exit-1 path when the frame cannot be
+// written to stdout.
+func TestDispatchRunRenderError(t *testing.T) {
+	t.Setenv("DOT_UI_SNAPSHOT", "1")
+	var errb strings.Builder
+	if code := dispatch([]string{"run"}, strings.NewReader(`{"t":"done"}`), errWriter{}, &errb); code != 1 {
+		t.Fatalf("run render error exit=%d want 1", code)
+	}
+	if !strings.Contains(errb.String(), "dot-ui run:") {
 		t.Errorf("stderr=%q", errb.String())
 	}
 }
 
-func TestDispatchRunSnapshot(t *testing.T) {
-	t.Setenv("DOT_UI_SNAPSHOT", "1")
-	// Redirect os.Stdin/os.Stdout for the run path.
-	inR, inW, _ := os.Pipe()
-	outR, outW, _ := os.Pipe()
-	oldIn, oldOut := os.Stdin, os.Stdout
-	os.Stdin, os.Stdout = inR, outW
-	defer func() { os.Stdin, os.Stdout = oldIn, oldOut }()
-
-	go func() {
-		io.WriteString(inW, `{"t":"header","title":"t","subtitle":"s"}`+"\n")
-		io.WriteString(inW, `{"t":"done","summary":"ok"}`+"\n")
-		inW.Close()
-	}()
-
-	var out strings.Builder
-	done := make(chan int, 1)
-	go func() {
-		var errb strings.Builder
-		done <- dispatch([]string{"run"}, io.Discard, &errb)
-	}()
-	code := <-done
-	outW.Close()
-	b, _ := io.ReadAll(outR)
-	out.Write(b)
-	if code != 0 {
-		t.Fatalf("run snapshot exit=%d", code)
+// TestDispatchTableRenderError covers the exit-1 path for `dot-ui table`.
+func TestDispatchTableRenderError(t *testing.T) {
+	var errb strings.Builder
+	if code := dispatch([]string{"table"}, strings.NewReader("H\nv\n"), errWriter{}, &errb); code != 1 {
+		t.Fatalf("table render error exit=%d want 1", code)
 	}
-	if !strings.Contains(out.String(), "Done") {
-		t.Errorf("run snapshot output=%q", out.String())
+	if !strings.Contains(errb.String(), "dot-ui table:") {
+		t.Errorf("stderr=%q", errb.String())
+	}
+}
+
+// TestDispatchPickSnapshot covers `dot-ui pick` routed through dispatch under
+// DOT_UI_SNAPSHOT=1 (no terminal → exit 2 so the caller falls back).
+func TestDispatchPickSnapshot(t *testing.T) {
+	t.Setenv("DOT_UI_SNAPSHOT", "1")
+	var out, errb strings.Builder
+	if code := dispatch([]string{"pick", "--header", "H"}, strings.NewReader("a\nb\n"), &out, &errb); code != 2 {
+		t.Fatalf("pick snapshot exit=%d want 2", code)
+	}
+	if out.String() != "" {
+		t.Errorf("pick snapshot must print nothing, got %q", out.String())
+	}
+}
+
+// TestMain_ExitsWithDispatchCode covers main via the exit seam: the process
+// exit code is exactly what dispatch returned.
+func TestMain_ExitsWithDispatchCode(t *testing.T) {
+	oldExit, oldArgs, oldOut := exit, os.Args, os.Stdout
+	defer func() { exit, os.Args, os.Stdout = oldExit, oldArgs, oldOut }()
+	got := -1
+	exit = func(code int) { got = code }
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Stdout = w
+	os.Args = []string{"dot-ui", "--version"}
+	main()
+	w.Close()
+	b, _ := io.ReadAll(r)
+	if got != 0 {
+		t.Fatalf("main exit=%d want 0", got)
+	}
+	if !strings.Contains(string(b), version) {
+		t.Errorf("main stdout=%q", string(b))
+	}
+	// A usage error propagates as exit 2.
+	os.Args = []string{"dot-ui"}
+	main()
+	if got != 2 {
+		t.Fatalf("main usage exit=%d want 2", got)
+	}
+}
+
+// TestParsePickArgs covers the --header/--prompt flag parser, including
+// dangling flags and unknown arguments.
+func TestParsePickArgs(t *testing.T) {
+	cases := []struct {
+		name           string
+		args           []string
+		header, prompt string
+	}{
+		{"none", nil, "", ""},
+		{"both", []string{"--header", "H", "--prompt", "P"}, "H", "P"},
+		{"reversed", []string{"--prompt", "P", "--header", "H"}, "H", "P"},
+		{"dangling header", []string{"--header"}, "", ""},
+		{"dangling prompt", []string{"--prompt"}, "", ""},
+		{"unknown ignored", []string{"--bogus", "x", "--header", "H"}, "H", ""},
+		{"value looks like flag", []string{"--header", "--prompt"}, "--prompt", ""},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			h, p := parsePickArgs(c.args)
+			if h != c.header || p != c.prompt {
+				t.Fatalf("parsePickArgs(%q)=(%q,%q) want (%q,%q)", c.args, h, p, c.header, c.prompt)
+			}
+		})
+	}
+}
+
+// TestSnapshotMode covers the DOT_UI_SNAPSHOT env switch.
+func TestSnapshotMode(t *testing.T) {
+	t.Setenv("DOT_UI_SNAPSHOT", "")
+	if snapshotMode() {
+		t.Error("unset → interactive")
+	}
+	t.Setenv("DOT_UI_SNAPSHOT", "0")
+	if snapshotMode() {
+		t.Error("0 → interactive")
+	}
+	t.Setenv("DOT_UI_SNAPSHOT", "1")
+	if !snapshotMode() {
+		t.Error("1 → snapshot")
 	}
 }
 
@@ -137,5 +240,17 @@ func TestUpdateSpinnerTick(t *testing.T) {
 func TestInit(t *testing.T) {
 	if newTestModel().Init() == nil {
 		t.Error("Init should return the spinner tick cmd")
+	}
+}
+
+// TestSeamDefaults exercises the production bodies of the process-boundary
+// seams. Under `go test` stdout/stderr are pipes (not terminals) and
+// /dev/tty may or may not exist, so only the contract is asserted: the
+// predicates return without panicking and an opened tty is closed again.
+func TestSeamDefaults(t *testing.T) {
+	_ = stdoutIsTTY()
+	_ = stderrIsTTY()
+	if f, err := openTTY(); err == nil {
+		f.Close()
 	}
 }

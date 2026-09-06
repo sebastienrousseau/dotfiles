@@ -4,6 +4,7 @@ package main
 
 import (
 	"io"
+	"os"
 	"strings"
 	"testing"
 
@@ -157,10 +158,154 @@ func TestRunPickNonInteractive(t *testing.T) {
 	}
 }
 
+// TestCmdPickSnapshotFallsBack covers DOT_UI_SNAPSHOT=1 → exit 2 (fallback).
 func TestCmdPickSnapshotFallsBack(t *testing.T) {
 	t.Setenv("DOT_UI_SNAPSHOT", "1")
-	code := cmdPick(NewStyles(LoadPalette()), []string{"--header", "H", "--prompt", "P"}, io.Discard)
+	code := cmdPick(NewStyles(LoadPalette()), []string{"--header", "H", "--prompt", "P"}, strings.NewReader("a\n"), io.Discard)
 	if code != 2 {
 		t.Errorf("snapshot pick should exit 2 (no-tty → fallback), got %d", code)
+	}
+}
+
+// TestCmdPickNoTerminal covers the piped/non-interactive case (stderr is not
+// a terminal) → exit 2 without touching /dev/tty.
+func TestCmdPickNoTerminal(t *testing.T) {
+	t.Setenv("DOT_UI_SNAPSHOT", "")
+	old := stderrIsTTY
+	defer func() { stderrIsTTY = old }()
+	stderrIsTTY = func() bool { return false }
+	var out strings.Builder
+	code := cmdPick(NewStyles(LoadPalette()), nil, strings.NewReader("a\nb\n"), &out)
+	if code != 2 || out.String() != "" {
+		t.Errorf("no-terminal pick: code=%d out=%q", code, out.String())
+	}
+}
+
+// TestCmdPickTTYOpenFails covers a terminal session where /dev/tty cannot be
+// opened: the picker degrades to the fallback code (2).
+func TestCmdPickTTYOpenFails(t *testing.T) {
+	t.Setenv("DOT_UI_SNAPSHOT", "")
+	oldTTY, oldOpen := stderrIsTTY, openTTY
+	defer func() { stderrIsTTY, openTTY = oldTTY, oldOpen }()
+	stderrIsTTY = func() bool { return true }
+	openTTY = func() (*os.File, error) { return nil, os.ErrNotExist }
+	if code := cmdPick(NewStyles(LoadPalette()), nil, strings.NewReader("a\n"), io.Discard); code != 2 {
+		t.Errorf("tty open failure should exit 2, got %d", code)
+	}
+}
+
+// TestPickInit covers the (no-op) Init command.
+func TestPickInit(t *testing.T) {
+	if newTestPick().Init() != nil {
+		t.Error("pick Init should return nil")
+	}
+}
+
+// TestPickUpAndCtrlKeys covers up/ctrl+p/ctrl+n navigation and bounds.
+func TestPickUpAndCtrlKeys(t *testing.T) {
+	var mm tea.Model = newTestPick()
+	mm, _ = mm.Update(tea.KeyMsg{Type: tea.KeyCtrlN})
+	mm, _ = mm.Update(tea.KeyMsg{Type: tea.KeyCtrlN})
+	if c := mm.(pickModel).cursor; c != 2 {
+		t.Fatalf("ctrl+n twice → cursor=%d want 2", c)
+	}
+	mm, _ = mm.Update(key("up"))
+	if c := mm.(pickModel).cursor; c != 1 {
+		t.Fatalf("up → cursor=%d want 1", c)
+	}
+	mm, _ = mm.Update(tea.KeyMsg{Type: tea.KeyCtrlP})
+	mm, _ = mm.Update(tea.KeyMsg{Type: tea.KeyCtrlP}) // clamps at 0
+	if c := mm.(pickModel).cursor; c != 0 {
+		t.Fatalf("ctrl+p → cursor=%d want 0", c)
+	}
+	// Multi-rune keys (e.g. paste) are ignored by the query.
+	mm, _ = mm.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("ab")})
+	if q := mm.(pickModel).query; q != "" {
+		t.Fatalf("multi-rune key should be ignored, query=%q", q)
+	}
+	// Backspace on an empty query is a no-op.
+	mm, _ = mm.Update(key("backspace"))
+	if len(mm.(pickModel).filtered) != 4 {
+		t.Fatal("backspace on empty query must keep all items")
+	}
+}
+
+// TestPickVisibleRows covers the row-window clamps (3..20).
+func TestPickVisibleRows(t *testing.T) {
+	cases := []struct{ height, want int }{
+		{0, 3}, {5, 3}, {7, 3}, {8, 4}, {15, 11}, {24, 20}, {100, 20},
+	}
+	for _, c := range cases {
+		m := newTestPick()
+		m.height = c.height
+		if got := m.visibleRows(); got != c.want {
+			t.Errorf("height=%d visibleRows=%d want %d", c.height, got, c.want)
+		}
+	}
+}
+
+// TestPickScrollWindow covers clampScroll in both directions: the offset
+// follows the cursor down past the window, then back up.
+func TestPickScrollWindow(t *testing.T) {
+	items := []string{"a", "b", "c", "d", "e", "f"}
+	var mm tea.Model = newPickModel(NewStyles(LoadPalette()), "", "", items)
+	mm, _ = mm.Update(tea.WindowSizeMsg{Width: 80, Height: 7}) // 3 rows
+	for i := 0; i < 4; i++ {
+		mm, _ = mm.Update(key("down"))
+	}
+	pm := mm.(pickModel)
+	if pm.cursor != 4 || pm.offset != 2 {
+		t.Fatalf("after 4×down cursor=%d offset=%d want 4/2", pm.cursor, pm.offset)
+	}
+	view := pm.View()
+	if !strings.Contains(view, "e") || strings.Contains(view, "  a\n") {
+		t.Errorf("window should show the cursor row and hide the top:\n%s", view)
+	}
+	for i := 0; i < 3; i++ {
+		mm, _ = mm.Update(key("up"))
+	}
+	pm = mm.(pickModel)
+	if pm.cursor != 1 || pm.offset != 1 {
+		t.Fatalf("after 3×up cursor=%d offset=%d want 1/1", pm.cursor, pm.offset)
+	}
+}
+
+// TestPickViewDefaults covers the default prompt glyph, the no-header layout
+// and the "no matches" line.
+func TestPickViewDefaults(t *testing.T) {
+	m := newPickModel(NewStyles(LoadPalette()), "", "", []string{"one", "two"})
+	out := m.View()
+	if !strings.Contains(out, "›") {
+		t.Errorf("default prompt glyph missing:\n%s", out)
+	}
+	if strings.HasPrefix(out, "  \n") {
+		t.Errorf("empty header should not emit a blank line:\n%s", out)
+	}
+	m.query = "zzz"
+	m.refilter()
+	if out := m.View(); !strings.Contains(out, "no matches") || !strings.Contains(out, "0/2") {
+		t.Errorf("no-match view wrong:\n%s", out)
+	}
+}
+
+// TestFuzzyMatchNonASCII is the regression test for the byte-vs-rune
+// comparison that made any non-ASCII query unmatchable (found by
+// FuzzFuzzyMatch's "a string matches itself" invariant).
+func TestFuzzyMatchNonASCII(t *testing.T) {
+	cases := []struct {
+		s, q string
+		want bool
+	}{
+		{"é", "é", true},
+		{"Épinal", "é", true},
+		{"日本語", "本", true},
+		{"日本語", "語本", false},
+		{"Straße", "straße", true},
+		{"naïve-dark", "nïd", true},
+	}
+	for _, c := range cases {
+		if got := fuzzyMatch(c.s, c.q); got != c.want {
+			t.Errorf("fuzzyMatch(%q,%q)=%v want %v", c.s, c.q, got, c.want)
+		}
 	}
 }

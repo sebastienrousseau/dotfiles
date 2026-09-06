@@ -24,13 +24,31 @@ import (
 	"os"
 )
 
+// version is the dot-ui release string printed by `dot-ui --version`; it
+// tracks the framework version in defaults/.chezmoidata.toml.
 const version = "0.2.512"
 
-func main() { os.Exit(dispatch(os.Args[1:], os.Stdout, os.Stderr)) }
+// Process-boundary seams. Each wraps exactly one call that cannot be
+// exercised in-process by `go test`: os.Exit terminates the test binary, and
+// the controlling terminal (/dev/tty, stdout/stderr device checks) does not
+// exist under CI. Tests substitute these; production never does.
+var (
+	// exit terminates the process with a status code.
+	exit = os.Exit
+	// stdoutIsTTY reports whether stdout is attached to a terminal.
+	stdoutIsTTY = func() bool { return isTTY(os.Stdout) }
+	// stderrIsTTY reports whether stderr is attached to a terminal.
+	stderrIsTTY = func() bool { return isTTY(os.Stderr) }
+	// openTTY opens the controlling terminal read/write.
+	openTTY = func() (*os.File, error) { return os.OpenFile("/dev/tty", os.O_RDWR, 0) }
+)
+
+func main() { exit(dispatch(os.Args[1:], os.Stdin, os.Stdout, os.Stderr)) }
 
 // dispatch routes a subcommand and returns a process exit code. Split from
-// main so it is unit-testable without spawning a process.
-func dispatch(args []string, stdout, stderr io.Writer) int {
+// main so it is unit-testable without spawning a process. stdin carries the
+// event/row stream, stdout the rendered output, stderr diagnostics.
+func dispatch(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	if len(args) == 0 {
 		fmt.Fprintln(stderr, "dot-ui: missing subcommand (run|pick|table|dashboard|spin)")
 		return 2
@@ -40,19 +58,19 @@ func dispatch(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stdout, "dot-ui", version)
 		return 0
 	case "run":
-		if err := cmdRun(NewStyles(LoadPalette())); err != nil {
+		if err := cmdRun(NewStyles(LoadPalette()), stdin, stdout); err != nil {
 			fmt.Fprintln(stderr, "dot-ui run:", err)
 			return 1
 		}
 		return 0
 	case "table":
-		if err := runTable(LoadPalette(), os.Stdin, os.Stdout); err != nil {
+		if err := runTable(LoadPalette(), stdin, stdout); err != nil {
 			fmt.Fprintln(stderr, "dot-ui table:", err)
 			return 1
 		}
 		return 0
 	case "pick":
-		return cmdPick(NewStyles(LoadPalette()), args[1:], stdout)
+		return cmdPick(NewStyles(LoadPalette()), args[1:], stdin, stdout)
 	default:
 		// Reserved / unknown subcommand — non-zero so the bash façade uses
 		// its plain fallback instead of assuming rich output happened.
@@ -61,31 +79,33 @@ func dispatch(args []string, stdout, stderr io.Writer) int {
 	}
 }
 
+// snapshotMode reports whether DOT_UI_SNAPSHOT=1 requests a static one-shot
+// frame instead of an interactive Bubble Tea session.
+func snapshotMode() bool { return os.Getenv("DOT_UI_SNAPSHOT") == "1" }
+
 // cmdRun wires stdin (events) + /dev/tty (keys) + stdout (render) for the run
 // view, honoring DOT_UI_SNAPSHOT for a static one-shot frame.
-func cmdRun(st Styles) error {
-	if os.Getenv("DOT_UI_SNAPSHOT") == "1" {
-		return snapshotStep(st, os.Stdin, os.Stdout)
+func cmdRun(st Styles, stdin io.Reader, stdout io.Writer) error {
+	if snapshotMode() {
+		return snapshotStep(st, stdin, stdout)
 	}
 
-	interactive := isTTY(os.Stdout)
+	interactive := stdoutIsTTY()
 	var ttyReader io.Reader
 	if interactive {
 		// Keyboard from the controlling terminal so stdin stays the event
 		// stream. If /dev/tty can't be opened, keep rendering without keys.
-		if tty, err := os.Open("/dev/tty"); err == nil {
+		if tty, err := openTTY(); err == nil {
 			ttyReader = tty
-			defer tty.Close()
+			defer func() { _ = tty.Close() }()
 		}
 	}
-	return runStep(st, os.Stdin, ttyReader, os.Stdout, interactive)
+	return runStep(st, stdin, ttyReader, stdout, interactive)
 }
 
-// cmdPick parses --header/--prompt, drives the picker on /dev/tty, and prints
-// the selection to stdout (exit 0) or nothing (exit 1 on cancel/no-TTY) so the
-// bash caller can fall back.
-func cmdPick(st Styles, args []string, stdout io.Writer) int {
-	var header, prompt string
+// parsePickArgs extracts --header and --prompt from the pick argument list.
+// Unknown flags are ignored; a trailing flag with no value is ignored too.
+func parsePickArgs(args []string) (header, prompt string) {
 	for i := 0; i < len(args); i++ {
 		switch args[i] {
 		case "--header":
@@ -100,19 +120,27 @@ func cmdPick(st Styles, args []string, stdout io.Writer) int {
 			}
 		}
 	}
-	snapshot := os.Getenv("DOT_UI_SNAPSHOT") == "1"
+	return header, prompt
+}
+
+// cmdPick parses --header/--prompt, drives the picker on /dev/tty, and prints
+// the selection to stdout (exit 0) or nothing (exit 1 on cancel, 2 when no
+// terminal is available) so the bash caller can fall back.
+func cmdPick(st Styles, args []string, stdin io.Reader, stdout io.Writer) int {
+	header, prompt := parsePickArgs(args)
+	snapshot := snapshotMode()
 	var tty *os.File
 	// Only engage the interactive picker in a real session. stderr stays a
 	// terminal even when stdout is captured (sel=$(… | dot-ui pick)); if it
 	// isn't a tty we're piped/non-interactive, so bail to the fallback rather
 	// than block on a /dev/tty that never delivers input.
-	if !snapshot && isTTY(os.Stderr) {
-		if f, err := os.OpenFile("/dev/tty", os.O_RDWR, 0); err == nil {
+	if !snapshot && stderrIsTTY() {
+		if f, err := openTTY(); err == nil {
 			tty = f
-			defer f.Close()
+			defer func() { _ = f.Close() }()
 		}
 	}
-	sel, outcome := runPick(st, header, prompt, os.Stdin, tty, snapshot)
+	sel, outcome := runPick(st, header, prompt, stdin, tty, snapshot)
 	switch outcome {
 	case pickSelected:
 		fmt.Fprintln(stdout, sel)

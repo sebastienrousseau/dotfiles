@@ -48,13 +48,18 @@ var fallback = Palette{
 	Bg:      "",
 }
 
-// envColor returns a validated hex color from env, or the fallback.
-func envColor(key string, fb lipgloss.Color) lipgloss.Color {
-	v := os.Getenv(key)
+// parseColor validates v as a #rgb / #rrggbb hex color and returns it, or
+// the fallback when v is empty or malformed.
+func parseColor(v string, fb lipgloss.Color) lipgloss.Color {
 	if v != "" && hexRe.MatchString(v) {
 		return lipgloss.Color(v)
 	}
 	return fb
+}
+
+// envColor returns a validated hex color from env, or the fallback.
+func envColor(key string, fb lipgloss.Color) lipgloss.Color {
+	return parseColor(os.Getenv(key), fb)
 }
 
 // LoadPalette resolves the palette from DOT_UI_* env vars with per-field

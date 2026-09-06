@@ -3,8 +3,6 @@
 package main
 
 import (
-	"io"
-	"os"
 	"strings"
 	"testing"
 )
@@ -47,30 +45,35 @@ func TestRunTableHeaderOnly(t *testing.T) {
 	}
 }
 
+// TestDispatchTable covers `dot-ui table` end-to-end through dispatch.
 func TestDispatchTable(t *testing.T) {
-	inR, inW, _ := os.Pipe()
-	outR, outW, _ := os.Pipe()
-	oldIn, oldOut := os.Stdin, os.Stdout
-	os.Stdin, os.Stdout = inR, outW
-	defer func() { os.Stdin, os.Stdout = oldIn, oldOut }()
-
-	go func() {
-		io.WriteString(inW, "H1\x1fH2\nv1\x1fv2\n")
-		inW.Close()
-	}()
-
-	done := make(chan int, 1)
-	go func() {
-		var errb strings.Builder
-		done <- dispatch([]string{"table"}, io.Discard, &errb)
-	}()
-	code := <-done
-	outW.Close()
-	b, _ := io.ReadAll(outR)
+	var out, errb strings.Builder
+	code := dispatch([]string{"table"}, strings.NewReader("H1\x1fH2\nv1\x1fv2\n"), &out, &errb)
 	if code != 0 {
-		t.Fatalf("table dispatch exit=%d", code)
+		t.Fatalf("table dispatch exit=%d stderr=%q", code, errb.String())
 	}
-	if !strings.Contains(string(b), "H1") || !strings.Contains(string(b), "v2") {
-		t.Errorf("table dispatch output=%q", string(b))
+	if !strings.Contains(out.String(), "H1") || !strings.Contains(out.String(), "v2") {
+		t.Errorf("table dispatch output=%q", out.String())
+	}
+}
+
+// TestRunTableRaggedRows covers rows with fewer/more cells than the header.
+func TestRunTableRaggedRows(t *testing.T) {
+	var b strings.Builder
+	in := "A\x1fB\x1fC\nonly-one\nx\x1fy\x1fz\x1fextra\n"
+	if err := runTable(LoadPalette(), strings.NewReader(in), &b); err != nil {
+		t.Fatal(err)
+	}
+	for _, w := range []string{"A", "only-one", "z"} {
+		if !strings.Contains(b.String(), w) {
+			t.Errorf("ragged table missing %q\n%s", w, b.String())
+		}
+	}
+}
+
+// TestRunTableWriteError covers the propagated write error.
+func TestRunTableWriteError(t *testing.T) {
+	if err := runTable(LoadPalette(), strings.NewReader("H\nv\n"), errWriter{}); err == nil {
+		t.Fatal("write error must propagate")
 	}
 }
