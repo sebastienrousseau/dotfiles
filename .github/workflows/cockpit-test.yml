@@ -25,8 +25,9 @@ permissions:
 
 env:
   MODULE_DIR: defaults/dot_local/share/dot-ai-tui
-  # Hard floor per the coverage policy; local is ~99.8% (the one uncovered
-  # statement is an unreachable json.Marshal error guard).
+  # Hard floor per the coverage policy. Local is 100.0% of statements
+  # under -race; the margin absorbs platform variance (sqlite3 presence,
+  # the notification backend).
   MIN_COVERAGE: "98.0"
 
 jobs:

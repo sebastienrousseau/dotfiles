@@ -25,8 +25,9 @@ permissions:
 
 env:
   MODULE_DIR: defaults/dot_local/share/dot-ui
-  # Hard floor per the coverage policy; local is ~99% (only the three
-  # documented process-boundary seams can vary by platform).
+  # Hard floor per the coverage policy. Local is 100.0% of statements
+  # under -race; the margin absorbs platform variance in the documented
+  # process-boundary seams (terminal detection, /dev/tty).
   MIN_COVERAGE: "98.0"
 
 jobs:
