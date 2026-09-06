@@ -52,9 +52,8 @@ brew "shellcheck"
 brew "shfmt"
 
 # -----------------------------------------------------------------------------
-# Languages & Runtimes (managed by mise)
+# Languages & Runtimes (mise itself is the standalone build, see mise.run)
 # -----------------------------------------------------------------------------
-brew "mise"
 brew "uv"                    # Fast Python package manager
 brew "rustup"
 brew "go"
