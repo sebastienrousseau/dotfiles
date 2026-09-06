@@ -17,7 +17,7 @@
 //
 // Run locally:
 //
-//	cd oss-fuzz-integration/fuzz
+//	cd fuzz
 //	go test -run '^$' -fuzz=FuzzUIEventLine -fuzztime=30s ./...
 
 package fuzz

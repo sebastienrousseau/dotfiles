@@ -162,7 +162,7 @@ jobs:
           quiet: true
           soft_fail: true
           # OSS-Fuzz scaffolding can't satisfy CKV_DOCKER_2/3/7 — see ci-enforced.yml.
-          skip_path: oss-fuzz-integration/
+          skip_path: fuzz/oss-fuzz/
 
       - name: Upload Checkov results to GitHub Security
         if: always()

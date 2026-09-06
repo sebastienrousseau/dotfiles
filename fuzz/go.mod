@@ -4,7 +4,7 @@
 // scripts into Go so OSS-Fuzz's libFuzzer engine can exercise it.
 // Re-port any newly-added user-input-handling shell logic here.
 
-module github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz
+module github.com/sebastienrousseau/dotfiles/fuzz
 
 go 1.23
 

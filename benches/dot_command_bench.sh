@@ -8,7 +8,7 @@
 #
 #   tools/ci/dot-cli-startup-bench.sh   one command (`dot version`), asserted
 #                                       against a per-OS budget.
-#   tests/performance/bench.sh          interactive shell startup, asserted
+#   benches/bench.sh          interactive shell startup, asserted
 #                                       against calibrated thresholds.
 #
 # This script is the breadth half: it times EVERY routed subcommand rather
@@ -27,11 +27,11 @@
 # wants an explicit ceiling, and is off by default.
 #
 # Usage:
-#   tests/performance/dot_command_bench.sh                 # help sweep
-#   tests/performance/dot_command_bench.sh --full          # + read-only runs
-#   tests/performance/dot_command_bench.sh --list-ids      # ids, one per line
-#   tests/performance/dot_command_bench.sh --output b.json
-#   tests/performance/dot_command_bench.sh --runs 5 --budget-ms 2000
+#   benches/dot_command_bench.sh                 # help sweep
+#   benches/dot_command_bench.sh --full          # + read-only runs
+#   benches/dot_command_bench.sh --list-ids      # ids, one per line
+#   benches/dot_command_bench.sh --output b.json
+#   benches/dot_command_bench.sh --runs 5 --budget-ms 2000
 #
 # Every id printed by --list-ids is referenceable from the Benchmark column of
 # docs/reference/FEATURE-MATRIX.md, and scripts/qa/check-feature-matrix.sh

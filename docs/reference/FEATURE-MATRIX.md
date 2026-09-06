@@ -17,7 +17,7 @@ parses it on every push and fails when:
 - a row names a regression test function that no
   `tests/regression/test_feature_matrix_*.sh` file defines;
 - a row names a benchmark id that
-  `tests/performance/dot_command_bench.sh --list-ids` does not produce;
+  `benches/dot_command_bench.sh --list-ids` does not produce;
 - a row names an example file that does not exist.
 
 So a new subcommand cannot merge without coverage, and coverage cannot be
@@ -53,7 +53,7 @@ bash tests/regression/test_feature_matrix_fleet_registry.sh
 
 # The benchmarks (help cold-start for every command; --full adds the
 # read-only invocations):
-bash tests/performance/dot_command_bench.sh --full --output bench.json
+bash benches/dot_command_bench.sh --full --output bench.json
 
 # The examples:
 bash scripts/qa/validate-examples.sh
@@ -69,7 +69,7 @@ bash scripts/qa/check-feature-matrix.sh
 | Command | The `dot` subcommand. |
 | Variant | The specific flag, subcommand, environment variable or config key this row pins. |
 | Regression test | A shell function in `tests/regression/test_feature_matrix_*.sh`. |
-| Benchmark | An id from `tests/performance/dot_command_bench.sh`. `help:<cmd>` is that command's cold-start; `run:<id>` is a real read-only invocation. |
+| Benchmark | An id from `benches/dot_command_bench.sh`. `help:<cmd>` is that command's cold-start; `run:<id>` is a real read-only invocation. |
 | Example | A runnable script under `examples/`, executed by `scripts/qa/validate-examples.sh`. |
 | Manual | Where the feature is documented. |
 | Coverage | `regression`, or `smoke` plus the reason the feature is unmeasurable in CI. |
@@ -128,7 +128,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot doctor` | --heal / -H | `test_fm_doctor_heal` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot doctor` | --audit / -a | `test_fm_doctor_audit` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot doctor` | --json / -j, --ai / -A passthrough | `test_fm_doctor_json` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot doctor` | --benchmark / -b | `test_fm_smoke_doctor_benchmark` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — runs tests/benchmark.sh (hyperfine over every shell, minutes) — covered by tests/performance/bench.sh |
+| `dot doctor` | --benchmark / -b | `test_fm_smoke_doctor_benchmark` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — runs tests/benchmark.sh (hyperfine over every shell, minutes) — covered by benches/bench.sh |
 | `dot heal` | (default) | `test_fm_heal` | `run:heal` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot heal` | --dry-run / -n | `test_fm_heal_dry_run` | `run:heal-dry-run` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot health` | (default) | `test_fm_health` | `run:health` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
@@ -546,7 +546,7 @@ hunted through the table.
 |---------|---------|----------------------------------|
 | `dot uninstall` | (prompts unless --force) | destructive — removes the managed environment from $HOME; only --help is exercised |
 | `dot uninstall` | --force | destructive — --force skips the confirmation and purges real files |
-| `dot doctor` | --benchmark / -b | runs tests/benchmark.sh (hyperfine over every shell, minutes) — covered by tests/performance/bench.sh |
+| `dot doctor` | --benchmark / -b | runs tests/benchmark.sh (hyperfine over every shell, minutes) — covered by benches/bench.sh |
 | `dot health` | --fix / -f, --force / -F | --fix re-applies chezmoi and rewrites shell configs in $HOME |
 | `dot rollback` | rollback / rollback-to N / git-reset / restore FILE (--force, --dry-run, --verbose) | rewrites $HOME dotfiles from a backup and resets the git checkout |
 | `dot load-bench-pty` | (default) | needs the chezmoi-rendered dot-load-benchmark-pty template and a pseudo-terminal |

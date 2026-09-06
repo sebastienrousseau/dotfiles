@@ -33,14 +33,14 @@ harnesses live in three modules:
 
 | Module | Harnesses | Runs against |
 |--------|-----------|--------------|
-| `oss-fuzz-integration/fuzz` | 11 | ports of the shell helpers **and** of the two binaries' parsers — this is the package OSS-Fuzz and ClusterFuzzLite compile |
+| `fuzz` | 11 | ports of the shell helpers **and** of the two binaries' parsers — this is the package OSS-Fuzz and ClusterFuzzLite compile |
 | `defaults/dot_local/share/dot-ui` | 8 | the real dot-ui implementation, in-module |
 | `defaults/dot_local/share/dot-ai-tui` | 11 | the real dot-ai-tui implementation, in-module |
 
 `dot-ui` and `dot-ai-tui` are `package main` in their own modules,
 which OSS-Fuzz's `compile_native_go_fuzzer` cannot import — it needs a
 library package. Their parsers are therefore **ported** into
-`oss-fuzz-integration/fuzz` alongside the shell ports, and fuzzed
+`fuzz` alongside the shell ports, and fuzzed
 in-module as well. The in-module targets are the ones that catch real
 bugs on every push; the ports are what runs continuously at scale.
 The same lockstep rule applies: drift between a port and its original
@@ -111,13 +111,13 @@ Add a harness when:
 - a new "construct a URL / path / shell-eval string" code path lands,
 - a new function in `dot-ui` or `dot-ai-tui` parses or transforms
   stdin, an environment variable, a key stream or model output —
-  add it in-module *and* port it to `oss-fuzz-integration/fuzz`.
+  add it in-module *and* port it to `fuzz`.
 
 ## Running locally
 
 ```sh
 # Ports (also what OSS-Fuzz builds)
-cd oss-fuzz-integration/fuzz
+cd fuzz
 go test -run '^$' -fuzz=FuzzValidateName -fuzztime=30s ./...
 go test -run '^$' -fuzz=FuzzUIEventLine  -fuzztime=30s ./...
 
@@ -142,11 +142,11 @@ guards, replayed by `go test ./...` and by the `replay` job in
 
 ## OSS-Fuzz integration (pending)
 
-The `oss-fuzz-integration/` directory contains everything OSS-Fuzz
+The `fuzz/oss-fuzz/` directory contains everything OSS-Fuzz
 needs to onboard this project:
 
 ```
-oss-fuzz-integration/
+fuzz/oss-fuzz/
 ├── project.yaml      # OSS-Fuzz project metadata
 ├── Dockerfile        # build environment
 ├── build.sh          # compiles every harness in fuzz/
@@ -161,7 +161,7 @@ oss-fuzz-integration/
 To onboard:
 
 1. Fork `github.com/google/oss-fuzz`.
-2. Copy `oss-fuzz-integration/` contents to `projects/dotfiles/` in the fork.
+2. Copy `fuzz/oss-fuzz/` contents to `projects/dotfiles/` in the fork.
 3. Verify locally per <https://google.github.io/oss-fuzz/getting-started/new-project-guide/#testing-locally>:
 
    ```sh
@@ -190,7 +190,7 @@ which runs OSS-Fuzz-style fuzzing on every PR in this repo
 - **fuzz** — a 60-second window per harness (configurable via
   `workflow_dispatch`) on PRs touching an input-parsing surface:
   `scripts/dot/lib/utils.sh`, `scripts/dot/commands/init.sh`,
-  `oss-fuzz-integration/**`, `.clusterfuzzlite/**` or either Go
+  `fuzz/**`, `.clusterfuzzlite/**` or either Go
   module.
 
 This is the local equivalent of CIFuzz and catches the

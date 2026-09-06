@@ -100,7 +100,7 @@ exit 0
 EOF
 }
 
-# hyperfine + jq shims drive tests/performance/bench.sh deterministically:
+# hyperfine + jq shims drive benches/bench.sh deterministically:
 # jq prints the "min ms" bench.sh compares against its thresholds.
 _bench() {
   local min_ms="$1"

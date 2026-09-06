@@ -8,7 +8,7 @@ name: ClusterFuzzLite / PR
 on:
   pull_request:
     paths:
-      - "oss-fuzz-integration/**"
+      - "fuzz/**"
       - ".clusterfuzzlite/**"
       - ".github/workflows/cflite_pr.yml"
 

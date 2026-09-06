@@ -181,7 +181,7 @@ the repo itself.
 | `tests/unit/`                             | Unit tests organised by domain: `aliases/`, `ci/`, `docs/`, `dot-cli/`, `fish/`, `functions/`, `install/`, `nvim/`, `ops/`, `secrets/`, `security/`, `shell/`, `theme/`, `tools/`, `diagnostics/`, `misc/`, `nushell/` |
 | `tests/integration/`                      | End-to-end install and apply flows                                                         |
 | `tests/regression/`                       | Guardrail tests for previously-broken behaviours                                           |
-| `tests/performance/`                      | `benchmark_runner.sh` and friends                                                          |
+| `benches/`                      | `benchmark_runner.sh` and friends                                                          |
 | `tests/benchmark.sh`, `tests/test-aliases.sh`, `tests/test-docker.sh` | Top-level entrypoints                                              |
 | `tests/Dockerfile.sandbox`                | Fresh-Ubuntu sandbox image for integration tests                                           |
 

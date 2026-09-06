@@ -59,7 +59,7 @@ This file is curated for LLM agents indexing the repository. The links below are
 
 - [Test framework](tests/framework/): hand-rolled bash runner with assertions + mocks
 - [Test domains](tests/unit/): 19 subdirectories (aliases, ci, diagnostics, dot-cli, fish, install, nvim, ops, secrets, security, shell, themes, …)
-- [Performance tests](tests/performance/)
+- [Performance tests](benches/)
 - [Regression tests](tests/regression/)
 
 ## Operations

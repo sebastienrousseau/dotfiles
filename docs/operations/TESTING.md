@@ -21,7 +21,7 @@ The repo uses a multi-layer testing approach: unit tests for individual function
 RUN_INTEGRATION=1 ./tests/framework/test_runner.sh
 
 # Run performance benchmarks
-./tests/performance/benchmark_runner.sh
+./benches/benchmark_runner.sh
 
 # Run unit tests in parallel (parsed per-file output, deterministic order)
 ./tests/framework/test_runner.sh --jobs auto
@@ -120,7 +120,7 @@ Test individual functions in isolation. Each file follows the `test_*.sh` naming
 
 Test complete workflows like the installation script and end-to-end apply behavior.
 
-### Performance tests (`tests/performance/`)
+### Performance tests (`benches/`)
 
 Measure resource efficiency with shell startup benchmarks and load tests.
 
@@ -171,7 +171,7 @@ Tests run automatically on every push to main, every pull request, and weekly sc
 
 - name: Run Performance Benchmarks
   run: |
-    ./tests/performance/benchmark_runner.sh
+    ./benches/benchmark_runner.sh
 ```
 
 ## Environment variables

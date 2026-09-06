@@ -695,7 +695,7 @@ if command -v zsh >/dev/null 2>&1 && command -v timeout >/dev/null 2>&1; then
 fi
 
 if command -v hyperfine >/dev/null 2>&1; then
-  if bash "$SCRIPT_DIR/../../tests/performance/bench.sh" 2>/dev/null; then
+  if bash "$SCRIPT_DIR/../../benches/bench.sh" 2>/dev/null; then
     _ok "startup latency" "within target thresholds"
   else
     # Only suggest prewarm when it could actually help. The caches were

@@ -362,7 +362,7 @@ The gaps, so nobody has to find them:
 - Scorecard's `Code-Review` check scores **0**: one maintainer,
   merges gated by CI rather than by a second reviewer.
 - OSS-Fuzz onboarding is prepared under
-  [`oss-fuzz-integration/`](oss-fuzz-integration/project.yaml) but
+  [`fuzz/oss-fuzz/`](fuzz/oss-fuzz/project.yaml) but
   **not yet submitted**; ClusterFuzzLite runs in the meantime.
 - Repology tracks one packaging (AUR `dot-cli-git`); Homebrew and
   Scoop go through this project's own tap and bucket.
@@ -599,7 +599,7 @@ documented in
 [`docs/operations/PERFORMANCE.md`](docs/operations/PERFORMANCE.md);
 the harnesses are
 [`tools/ci/dot-cli-startup-bench.sh`](tools/ci/dot-cli-startup-bench.sh)
-and [`tests/performance/`](tests/performance/).
+and [`benches/`](benches/).
 
 ---
 
@@ -1018,7 +1018,7 @@ make uninstall
 
 ./tests/framework/test_runner.sh --jobs auto   # unit suite, parallel
 bash tests/snapshots/test_snapshots.sh         # golden CLI output
-bash tests/fuzz/fuzz_install.sh                # install.sh under adversarial input
+bash fuzz/install/fuzz_install.sh                # install.sh under adversarial input
 bash tools/docs/generate-command-index.sh --check
 bash scripts/qa/check-version-consistency.sh
 ```
@@ -1034,12 +1034,12 @@ are in [`CONTRIBUTING.md`](CONTRIBUTING.md). A
 ### Fuzzing
 
 Two native Go fuzz harnesses ship under
-[`oss-fuzz-integration/fuzz/`](oss-fuzz-integration/fuzz/) for the
+[`fuzz/`](fuzz/) for the
 user-input surfaces that were ported out of the shell so they could
 be fuzzed at all: `FuzzValidateName` (the name validator behind
 `lib/dot/utils.sh`) and `FuzzInitURLResolver` (the URL resolver
 behind `dot init`). A third harness,
-[`tests/fuzz/fuzz_install.sh`](tests/fuzz/fuzz_install.sh), drives
+[`fuzz/install/fuzz_install.sh`](fuzz/install/fuzz_install.sh), drives
 `install.sh` itself with unknown flags, garbage positionals, symlink
 loops in `$HOME`, an empty `PATH`, 4 KB arguments, and NUL bytes in
 the environment, and asserts every case exits cleanly or fails fast
@@ -1059,12 +1059,12 @@ alias; unknown positionals triggering a 30 s network fetch).
   `install.sh` harness weekly on Ubuntu and macOS, and on every PR
   touching `install.sh`; a scheduled failure opens a tracking issue.
 - **OSS-Fuzz:** the project definition is ready in
-  [`oss-fuzz-integration/`](oss-fuzz-integration/project.yaml)
+  [`fuzz/oss-fuzz/`](fuzz/oss-fuzz/project.yaml)
   (libFuzzer, ASan + UBSan, x86_64); the upstream submission to
   `google/oss-fuzz` has not been filed yet.
 
 ```bash
-cd oss-fuzz-integration/fuzz
+cd fuzz
 go test -run TestNothing -fuzz='^FuzzValidateName$' -fuzztime=60s ./...
 go test -run TestNothing -fuzz='^FuzzInitURLResolver$' -fuzztime=60s ./...
 ```
@@ -1072,7 +1072,7 @@ go test -run TestNothing -fuzz='^FuzzInitURLResolver$' -fuzztime=60s ./...
 The harness layout and the OSS-Fuzz submission steps are in
 [`docs/security/FUZZING.md`](docs/security/FUZZING.md); the shared
 corpus lives beside the harnesses under
-[`oss-fuzz-integration/fuzz/testdata/`](oss-fuzz-integration/fuzz/testdata/).
+[`fuzz/testdata/`](fuzz/testdata/).
 
 ### Hardening gates in place of Miri
 

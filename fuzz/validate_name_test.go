@@ -21,7 +21,7 @@
 //      (catches homoglyph attacks).
 //
 // Run locally:
-//   cd oss-fuzz-integration/fuzz
+//   cd fuzz
 //   go test -fuzz=FuzzValidateName -fuzztime=30s
 
 package fuzz

@@ -18,7 +18,7 @@ on:
       - 'bin/dot'
       - 'scripts/dot/**'
       - 'tools/ci/dot-cli-startup-bench.sh'
-      - 'tests/performance/dot_command_bench.sh'
+      - 'benches/dot_command_bench.sh'
       - 'docs/reference/FEATURE-MATRIX.md'
       - '.github/workflows/dot-cli-bench.yml'
   pull_request:
@@ -26,7 +26,7 @@ on:
       - 'bin/dot'
       - 'scripts/dot/**'
       - 'tools/ci/dot-cli-startup-bench.sh'
-      - 'tests/performance/dot_command_bench.sh'
+      - 'benches/dot_command_bench.sh'
       - 'docs/reference/FEATURE-MATRIX.md'
       - '.github/workflows/dot-cli-bench.yml'
 
@@ -107,7 +107,7 @@ jobs:
 
       - name: Benchmark every command
         run: |
-          bash tests/performance/dot_command_bench.sh \
+          bash benches/dot_command_bench.sh \
             --full --runs 3 --output dot-command-bench.json
 
       - name: Verify every command was covered

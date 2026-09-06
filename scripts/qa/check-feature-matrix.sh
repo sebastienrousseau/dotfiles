@@ -18,7 +18,7 @@
 #   2. Test coverage — every regression test function named in a row is
 #      defined by one of tests/regression/test_feature_matrix_*.sh.
 #   3. Benchmark coverage — every benchmark id named in a row is produced by
-#      `tests/performance/dot_command_bench.sh --list-ids`.
+#      `benches/dot_command_bench.sh --list-ids`.
 #   4. Example coverage — every example file named in a row exists and is
 #      executable by scripts/qa/validate-examples.sh.
 #
@@ -39,7 +39,7 @@ cd "$REPO_ROOT"
 MATRIX="docs/reference/FEATURE-MATRIX.md"
 DOT_BIN="bin/dot"
 COMMAND_INDEX="docs/manual/command-index.md"
-BENCH="tests/performance/dot_command_bench.sh"
+BENCH="benches/dot_command_bench.sh"
 TEST_GLOB="tests/regression/test_feature_matrix_*.sh"
 
 QUIET=0

@@ -19,9 +19,9 @@ RUN git clone --depth 1 \
 # external imports beyond the stdlib + the project's own packages),
 # so this Dockerfile is minimal.
 
-WORKDIR ${SRC}/dotfiles/oss-fuzz-integration/fuzz
+WORKDIR ${SRC}/dotfiles/fuzz
 
-# The build script in $SRC/dotfiles/oss-fuzz-integration/build.sh is
+# The build script in $SRC/dotfiles/fuzz/oss-fuzz/build.sh is
 # invoked by OSS-Fuzz's $SRC/build.sh wrapper; we just need to make
 # it executable.
 COPY build.sh "$SRC/"

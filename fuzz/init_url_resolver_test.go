@@ -18,7 +18,7 @@
 //   * Empty input MUST refuse.
 //
 // Run locally:
-//   cd oss-fuzz-integration/fuzz
+//   cd fuzz
 //   go test -fuzz=FuzzInitURLResolver -fuzztime=30s
 
 package fuzz

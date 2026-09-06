@@ -4,7 +4,7 @@
 # against libFuzzer with $SANITIZER applied.
 #
 # OSS-Fuzz invokes this with:
-#   /src/dotfiles/oss-fuzz-integration/build.sh
+#   /src/dotfiles/fuzz/oss-fuzz/build.sh
 # from a working directory inside the docker container.
 #
 # Each *_test.go file under fuzz/ that contains `func Fuzz<Name>(`
@@ -12,7 +12,7 @@
 
 set -euo pipefail
 
-cd "$SRC/dotfiles/oss-fuzz-integration/fuzz"
+cd "$SRC/dotfiles/fuzz"
 
 # OSS-Fuzz exports: $OUT (artefact dir), $SANITIZER, $CFLAGS,
 # $LIB_FUZZING_ENGINE. These are native Go fuzzers
@@ -44,57 +44,57 @@ cd "$SRC/dotfiles/oss-fuzz-integration/fuzz"
 go get github.com/AdamKorcz/go-118-fuzz-build/testing
 
 compile_native_go_fuzzer \
-  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  github.com/sebastienrousseau/dotfiles/fuzz \
   FuzzValidateName \
   fuzz_validate_name
 
 compile_native_go_fuzzer \
-  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  github.com/sebastienrousseau/dotfiles/fuzz \
   FuzzInitURLResolver \
   fuzz_init_url_resolver
 
 compile_native_go_fuzzer \
-  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  github.com/sebastienrousseau/dotfiles/fuzz \
   FuzzUIEventLine \
   fuzz_ui_event_line
 
 compile_native_go_fuzzer \
-  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  github.com/sebastienrousseau/dotfiles/fuzz \
   FuzzUIHexColor \
   fuzz_ui_hex_color
 
 compile_native_go_fuzzer \
-  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  github.com/sebastienrousseau/dotfiles/fuzz \
   FuzzUIPickFilter \
   fuzz_ui_pick_filter
 
 compile_native_go_fuzzer \
-  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  github.com/sebastienrousseau/dotfiles/fuzz \
   FuzzUIPickArgs \
   fuzz_ui_pick_args
 
 compile_native_go_fuzzer \
-  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  github.com/sebastienrousseau/dotfiles/fuzz \
   FuzzUITableRows \
   fuzz_ui_table_rows
 
 compile_native_go_fuzzer \
-  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  github.com/sebastienrousseau/dotfiles/fuzz \
   FuzzAISessionFile \
   fuzz_ai_session_file
 
 compile_native_go_fuzzer \
-  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  github.com/sebastienrousseau/dotfiles/fuzz \
   FuzzAISqliteOutput \
   fuzz_ai_sqlite_output
 
 compile_native_go_fuzzer \
-  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  github.com/sebastienrousseau/dotfiles/fuzz \
   FuzzAIFenceTag \
   fuzz_ai_fence_tag
 
 compile_native_go_fuzzer \
-  github.com/sebastienrousseau/dotfiles/oss-fuzz-integration/fuzz \
+  github.com/sebastienrousseau/dotfiles/fuzz \
   FuzzAIGatewayURL \
   fuzz_ai_gateway_url
 
