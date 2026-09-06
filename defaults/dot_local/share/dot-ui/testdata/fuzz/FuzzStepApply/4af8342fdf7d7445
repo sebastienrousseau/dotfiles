@@ -1,0 +1,2 @@
+go test fuzz v1
+string("{\"t\":\"progress\",\"Cur\":-1,\"totAl\":1}")
