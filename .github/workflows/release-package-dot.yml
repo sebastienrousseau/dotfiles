@@ -16,7 +16,7 @@ name: Release / Package dot CLI
 #   share/bash-completion/completions/dot
 #   share/fish/vendor_completions.d/dot.fish
 #
-# The Homebrew formula in install/homebrew/dot.rb installs from this
+# The Homebrew formula in pkg/brew/dot.rb installs from this
 # exact layout — keep them in lockstep.
 
 on:

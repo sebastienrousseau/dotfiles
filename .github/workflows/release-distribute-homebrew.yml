@@ -123,7 +123,7 @@ jobs:
           TAG="${{ steps.resolve-tag.outputs.tag }}"
 
           # Read the template formula
-          TEMPLATE_PATH="install/homebrew/dot.rb"
+          TEMPLATE_PATH="pkg/brew/dot.rb"
           if [[ ! -f "$TEMPLATE_PATH" ]]; then
             echo "::error::Template formula not found at ${TEMPLATE_PATH}"
             exit 1

@@ -55,13 +55,13 @@ re-test a specific channel out-of-band.
 
    ```sh
    # macOS
-   brew install --build-from-source install/homebrew/dot.rb && dot version
+   brew install --build-from-source pkg/brew/dot.rb && dot version
 
    # Windows
-   scoop install install/scoop/dot.json; dot version
+   scoop install pkg/scoop/dot.json; dot version
 
    # Arch
-   cd install/aur && makepkg -si; dot version
+   cd pkg/aur && makepkg -si; dot version
    ```
 
 ## See also

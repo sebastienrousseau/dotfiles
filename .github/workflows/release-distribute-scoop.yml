@@ -123,7 +123,7 @@ jobs:
           TAG="${{ steps.resolve-tag.outputs.tag }}"
 
           # Read the template manifest
-          TEMPLATE_PATH="install/scoop/dot.json"
+          TEMPLATE_PATH="pkg/scoop/dot.json"
           if [[ ! -f "$TEMPLATE_PATH" ]]; then
             echo "::error::Template manifest not found at ${TEMPLATE_PATH}"
             exit 1

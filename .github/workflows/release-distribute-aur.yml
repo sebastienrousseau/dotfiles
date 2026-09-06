@@ -139,7 +139,7 @@ jobs:
           set -euo pipefail
           VERSION="${{ steps.resolve-tag.outputs.version }}"
           SHA256="${{ steps.compute-sha256.outputs.sha256 }}"
-          cp install/aur/PKGBUILD aur-pkg/PKGBUILD
+          cp pkg/aur/PKGBUILD aur-pkg/PKGBUILD
           sed -i "s/^pkgver=.*/pkgver=${VERSION}/" aur-pkg/PKGBUILD
           sed -i "s/^sha256sums=(.*)$/sha256sums=('${SHA256}')/" aur-pkg/PKGBUILD
           echo "Updated PKGBUILD:"
