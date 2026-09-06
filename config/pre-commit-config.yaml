@@ -201,8 +201,26 @@ repos:
 
       - id: version-consistency
         name: Version-bearing files match defaults/.chezmoidata.toml
-        entry: scripts/qa/check-version-consistency.sh
+        entry: scripts/verify-release-versions
         language: script
         pass_filenames: false
         stages: [pre-commit]
-        files: '^(defaults/\.chezmoidata\.toml|README\.md|CLAUDE\.md|AGENTS\.md|package\.json|share/man/man1/dot\.1|lib/dot/bento\.sh|scripts/qa/check-version-consistency\.sh)$'
+        files: '^(defaults/\.chezmoidata\.toml|README\.md|CLAUDE\.md|AGENTS\.md|package\.json|share/man/man1/dot\.1|lib/dot/bento\.sh|llms\.txt|CHANGELOG\.md|install\.sh|\.well-known/.*\.json|scripts/verify-release-versions)$'
+
+      - id: manpage-drift
+        name: share/man/man1/dot.1 matches the command registry
+        entry: tools/docs/generate-manpage.sh
+        args: ['--check']
+        language: script
+        pass_filenames: false
+        stages: [pre-commit]
+        files: '^(bin/dot|tools/docs/man/dot\.1\.in|tools/docs/generate-manpage\.sh|share/man/man1/dot\.1)$'
+
+      - id: completions-drift
+        name: Committed completions match the command registry
+        entry: tools/docs/generate-completions.sh
+        args: ['--check']
+        language: script
+        pass_filenames: false
+        stages: [pre-commit]
+        files: '^(bin/dot|scripts/dot/commands/completion\.sh|tools/docs/generate-completions\.sh|share/completions/zsh/_dot|defaults/dot_local/share/bash-completion/completions/dot)$'
