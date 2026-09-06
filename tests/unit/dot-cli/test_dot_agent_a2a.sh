@@ -71,7 +71,14 @@ assert_contains "specVersion" "$OUT" "validation rows"
 # resolve_source_dir() derives the repo root from lib/dot's own location, so
 # a fake root that symlinks lib/ + scripts/dot/ back to the repo lets us
 # swap in a deliberately broken .well-known/agent-card.json.
-FAKE="$DOTFILES_COV_TMPDIR/fake-root"
+#
+# The fake root deliberately lives OUTSIDE the sandbox tmpdir: the coverage
+# aggregator resolves each traced BASH_SOURCE path after the test exits, and
+# a fake root torn down with the sandbox would leave those records pointing
+# at a dangling path, so the lines executed through it would not be counted.
+# The fixed name is wiped on entry, so at most one such tree ever exists.
+FAKE="${TMPDIR:-/tmp}/dotfiles-cov-agent-fakeroot"
+rm -rf "$FAKE"
 mkdir -p "$FAKE/scripts/diagnostics" "$FAKE/.well-known"
 ln -s "$REPO_ROOT/lib" "$FAKE/lib"
 ln -s "$REPO_ROOT/scripts/dot" "$FAKE/scripts/dot"
