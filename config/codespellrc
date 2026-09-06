@@ -2,5 +2,12 @@
 # Scope: prose and source. Generated, vendored, and lock files are skipped.
 [codespell]
 skip = .git,node_modules,*.lock,*.sum,mise.lock,requirements-docs.txt,.secrets.baseline,CHANGELOG.md,docs/archive,docs/.vitepress,site,_build,build,dist,coverage,*.png,*.jpg,*.svg,*.gif,*.heic,*.woff,*.woff2,*.ttf,*.otf,LICENSES
-ignore-words-list = ans,crate,hist,ser,te,ue,nd,als,oll,sur,hashi,noice,fpr,iff,inh,ro,ot
+# Words codespell flags that are correct here. Each is a real term:
+#   als/ALS  alias-listing helper       oll     Ollama alias prefix
+#   ans      Ansible/answers fixtures   nd      Neovim leader-key binding
+#   fpr/FPR  GPG fingerprint field      Hashi   HashiCorp
+#   noice    noice.nvim plugin          intoto  in-toto attestation format
+#   trough   GTK scrollbar widget part  crasher fuzzing term for a crash input
+#   wth      appears inside config/typos.toml's own rules
+ignore-words-list = als,ans,crasher,fpr,hashi,intoto,nd,noice,oll,trough,wth
 quiet-level = 2

@@ -143,7 +143,7 @@ curl -s https://api.github.com/users/sebastienrousseau/ssh_signing_keys
 
 Do **not** install. Open an issue at
 <https://github.com/sebastienrousseau/dotfiles/issues>, or — if you
-believe the artefact was tampered with rather than merely mis-built —
+believe the artefact was tampered with rather than merely built wrong —
 report it privately per [`../SECURITY.md`](../SECURITY.md).
 
 ## Coverage by release

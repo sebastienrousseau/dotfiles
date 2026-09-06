@@ -55,6 +55,9 @@ extend-exclude = [
   # Binary-armored cryptographic material — random base64 bytes
   # routinely trip typos rules ("BA" → BY/BE, etc.). Verify keys
   # via fingerprint, not lexical content.
+  # codespell's own ignore-words list is a list of words that look
+  # like typos by construction; typos must not lint it.
+  "config/codespellrc",
   "**/*.asc",
   "**/*.pgp",
   "**/*.gpg",
