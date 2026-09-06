@@ -187,13 +187,13 @@ verify-dot-release v0.2.502    # verify specific tag
    `security@sebastienrousseau.com` (encrypted to the WKD-published
    GPG key — fingerprint
    `55AFAD364FD9DB3819E61F0C8D688FAFA9144693`). Acknowledgement
-   SLA: 72 hours per `.github/SECURITY.md`.
+   SLA: 72 hours per `SECURITY.md`.
 
 ---
 
 ## See also
 
-- `.github/SECURITY.md` — coordinated disclosure policy.
+- `SECURITY.md` — coordinated disclosure policy.
 - `docs/security/KEY_ROTATION.md` — disclosure-key rotation procedure.
 - `docs/security/SCORECARD.md` — OpenSSF Scorecard posture.
 - `docs/operations/HARD_AUDIT_2026.md` Part 7 — the GPG key generation + WKD publication record.

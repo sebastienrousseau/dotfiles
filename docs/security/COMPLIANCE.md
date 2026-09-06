@@ -370,7 +370,7 @@ bash tests/unit/test_dot_commands_apply.sh
 
 | File | Purpose | Location |
 |------|---------|----------|
-| SECURITY.md | Vulnerability reporting | `.github/SECURITY.md` |
+| SECURITY.md | Vulnerability reporting | `SECURITY.md` |
 | CONTRIBUTING.md | Contribution guidelines | `.github/CONTRIBUTING.md` |
 | CODEOWNERS | Code ownership | `.github/CODEOWNERS` |
 | INCIDENT_RESPONSE.md | Incident response plan | `docs/security/` |

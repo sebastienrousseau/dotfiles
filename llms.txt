@@ -28,7 +28,7 @@ This file is curated for LLM agents indexing the repository. The links below are
 
 ## Security & trust
 
-- [Security policy](.github/SECURITY.md): disclosure SLA (Critical: 24h, High: 72h, Medium: 5d, Low: 10d) and reporting contact
+- [Security policy](SECURITY.md): disclosure SLA (Critical: 24h, High: 72h, Medium: 5d, Low: 10d) and reporting contact
 - [Threat model](docs/security/THREAT_MODEL.md)
 - [Encryption with age + SOPS](docs/security/ENCRYPTION.md)
 - [MCP governance policy](docs/security/MCP_POLICY.md)

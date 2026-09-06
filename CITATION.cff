@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Citation metadata (Citation File Format 1.2.0). Validate with:
+#   cffconvert --validate
+# GitHub renders this as the repository's "Cite this repository" panel.
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+title: ".dotfiles"
+abstract: >-
+  Cross-platform, signed, local-first dotfiles for macOS, Linux, and WSL.
+  Multi-shell parity across bash, zsh, fish, nushell and PowerShell, a
+  chezmoi-managed configuration tree, the `dot` CLI control plane,
+  wallpaper-driven terminal theming, and a release pipeline carrying SLSA
+  provenance, sigstore signatures and an SBOM.
+type: software
+authors:
+  - family-names: Rousseau
+    given-names: Sebastien
+    email: sebastian.rousseau@gmail.com
+repository-code: "https://github.com/sebastienrousseau/dotfiles"
+url: "https://doc.dotfiles.io/"
+license:
+  - Apache-2.0
+  - MIT
+version: 0.2.519
+date-released: "2026-08-13"
+keywords:
+  - dotfiles
+  - chezmoi
+  - shell
+  - zsh
+  - fish
+  - nushell
+  - developer-environment
+  - supply-chain-security
+  - slsa
+  - reproducible-configuration

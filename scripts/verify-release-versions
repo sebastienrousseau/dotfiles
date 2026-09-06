@@ -100,6 +100,8 @@ specs=(
   ".well-known/mcp/server-card.json|\"version\"|\"version\": \"${canonical}\""
   # LLM-facing repo index.
   "llms.txt|Current version:|Current version: v${canonical}."
+  # Citation metadata: a stale version here is cited in papers.
+  "CITATION.cff|^version:|version: ${canonical}"
   # Keep-a-Changelog: the top heading must be the version being shipped.
   "CHANGELOG.md|^## v|## v${canonical}"
 )

@@ -20,7 +20,7 @@ names will land here with role and contact.
 
 ## Security contact
 
-For coordinated vulnerability disclosure, follow `.github/SECURITY.md`.
+For coordinated vulnerability disclosure, follow `SECURITY.md`.
 TL;DR: encrypt your report to the WKD-published GPG key above and
 email `security@sebastienrousseau.com`. Acknowledgement SLA: 72 hours.
 

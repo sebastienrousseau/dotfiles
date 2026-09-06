@@ -6,7 +6,7 @@ render_with_liquid: false
 
 This page tracks two distinct key lifecycles:
 
-1. **Disclosure key** — the GPG key reporters use to encrypt vulnerability reports to the maintainer. Single key, public, rotated annually or on compromise. Source of truth for the active fingerprint is `.github/SECURITY.md`.
+1. **Disclosure key** — the GPG key reporters use to encrypt vulnerability reports to the maintainer. Single key, public, rotated annually or on compromise. Source of truth for the active fingerprint is `SECURITY.md`.
 2. **Secrets encryption keys** — the Age and SOPS keys that protect encrypted dotfiles in this repo. Multiple keys, per-machine, rotated annually or on personnel / device change.
 
 Both sections live here so a single audit can confirm the project's

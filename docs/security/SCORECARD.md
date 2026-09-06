@@ -75,7 +75,7 @@ marks reflect this repo's posture at the time of writing — the
 | Pinned-Dependencies | ⚠ | Closed 8 of 14 findings this cycle (every Dockerfile base + every workflow action + 2 `curl \| sh` installers + the `npm install -g npm` upgrade step). 5 residual findings stay open by design — see `Open findings`. |
 | SAST | ✓ | CodeQL (`.github/workflows/codeql.yml`) + Checkov + Grype. |
 | SBOM | ✓ | Generated per PR by `sbom-diff.yml` and per release by `security-release.yml`. |
-| Security-Policy | ✓ | `.github/SECURITY.md` + this page + `docs/security/THREAT_MODEL.md`. |
+| Security-Policy | ✓ | `SECURITY.md` + this page + `docs/security/THREAT_MODEL.md`. |
 | Token-Permissions | ✓ | Top-level `permissions:` blocks restricted to `contents: read`. `write` scopes scoped to the jobs that need them (#886). |
 | Vulnerabilities | ✓ | Grype gate hard-fails on `high` / `critical` on `main` (#852). |
 | Webhooks | n/a | No external webhooks configured. |

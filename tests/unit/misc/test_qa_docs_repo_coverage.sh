@@ -11,7 +11,7 @@ source "$REPO_ROOT/tests/framework/assertions.sh"
 
 DOCS_SCRIPT="$REPO_ROOT/scripts/qa/docs-coverage.sh"
 SCRIPTS_DOC="$REPO_ROOT/docs/reference/SCRIPTS.md"
-ARCH_DOC="$REPO_ROOT/docs/architecture/ARCHITECTURE.md"
+ARCH_DOC="$REPO_ROOT/docs/ARCHITECTURE.md"
 
 test_start "docs_repo_coverage_scripts_catalog_exists"
 assert_file_exists "$SCRIPTS_DOC" "script catalog should exist"
