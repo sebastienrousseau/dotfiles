@@ -154,6 +154,23 @@ fm_repo_copy() {
   printf '%s\n' "$dest"
 }
 
+# fm_repo_copy_aliases — a second, heavier copy that also carries
+# scripts/diagnostics (the alias manifest and cheatsheet generators) and the
+# chezmoi-tracked alias templates they read. Kept separate from fm_repo_copy
+# because `dot lint` walks whatever is in the tree it is pointed at, and
+# dragging .chezmoitemplates into the lint copy tripled that row's runtime.
+fm_repo_copy_aliases() {
+  local dest="$FM_SANDBOX/repo-aliases"
+  [[ -d "$dest" ]] && {
+    printf '%s\n' "$dest"
+    return 0
+  }
+  fm_repo_copy "$dest" >/dev/null
+  cp -R "$REPO_ROOT/scripts/diagnostics" "$dest/scripts/diagnostics" 2>/dev/null || true
+  cp -R "$REPO_ROOT/defaults/.chezmoitemplates" "$dest/defaults/.chezmoitemplates" 2>/dev/null || true
+  printf '%s\n' "$dest"
+}
+
 # ---------------------------------------------------------------------------
 # Invocation
 # ---------------------------------------------------------------------------
