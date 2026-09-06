@@ -45,6 +45,10 @@ random_word() {
 generate_sentence() {
   local word_count=$((RANDOM % 10 + 5))
   local sentence=""
+  # `i` and `word` must be local: the callers loop on `i` too, and leaking it
+  # here ended their loop after a single iteration (`lorem s 5` printed one
+  # sentence, `lorem p 3` one paragraph).
+  local i word
   for ((i = 0; i < word_count; i++)); do
     if [[ $i -eq 0 ]]; then
       word=$(random_word)
@@ -59,6 +63,7 @@ generate_sentence() {
 generate_paragraph() {
   local sentence_count=$((RANDOM % 4 + 3))
   local paragraph=""
+  local i
   for ((i = 0; i < sentence_count; i++)); do
     if [[ $i -eq 0 ]]; then
       paragraph=$(generate_sentence)
@@ -93,7 +98,9 @@ case "$TYPE" in
   p | paragraph | paragraphs)
     for ((i = 0; i < COUNT; i++)); do
       generate_paragraph
-      [[ $i -lt $((COUNT - 1)) ]] && echo
+      # `|| true`: on the last iteration the test is false, and as the final
+      # command of the script that made `lorem` (and `lorem p N`) exit 1.
+      [[ $i -lt $((COUNT - 1)) ]] && echo || true
     done
     ;;
   -h | --help)
