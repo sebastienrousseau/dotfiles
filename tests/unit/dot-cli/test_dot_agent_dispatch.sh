@@ -200,11 +200,23 @@ _link_dirs() {
   done
   return 0
 }
+# Building the farm expands to `ln -s` calls with ~900 arguments each. Under
+# the coverage runner every one of those is an xtrace record tens of KB long,
+# and records that big come back truncated — corrupting the trace around
+# them. Turn tracing off for the farm only, then back on.
+_xtrace_was_on=0
+case "$-" in *x*) _xtrace_was_on=1 ;; esac
+set +x
 _link_dirs /usr/bin /bin /usr/sbin /sbin
 _link_dirs "${_dirs[@]}"
 for _l in "$NOJQ"/*; do [[ -f "$_l" ]] || rm -f "$_l"; done
 _link_dirs /usr/bin /bin /usr/sbin /sbin
 rm -f "$NOJQ/jq"
+# Keep the *current* bash: on macOS the farm would otherwise resolve `bash`
+# to /bin/bash 3.2, whose xtrace truncates the PS4 expansion at 100 chars —
+# every coverage record from the child would be malformed and dropped.
+ln -sf "$(command -v bash)" "$NOJQ/bash"
+[[ "$_xtrace_was_on" == "1" ]] && set -x
 PATH="$NOJQ" meta mode list
 assert_equals 1 "$RC" "rc"
 assert_contains "jq is required" "$ERR" "error"

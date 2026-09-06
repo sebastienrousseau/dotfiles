@@ -398,7 +398,7 @@ if command -v jq >/dev/null 2>&1; then
       {
         jq -r '.mcpServers | to_entries[]? | (.value.env // {}) | to_entries[]?.value' "$MCP_CONFIG"
         jq -r '.mcpServers | to_entries[]? | (.value.args // [])[]?' "$MCP_CONFIG"
-      } | sed -n 's/^\${\([A-Z0-9_]\+\)}$/\1/p' | sort -u
+      } | sed -n 's/^\${\([A-Z0-9_][A-Z0-9_]*\)}$/\1/p' | sort -u
     )"
     if [[ -z "$env_vars" ]]; then
       log_success "Server env placeholders" "none declared"
