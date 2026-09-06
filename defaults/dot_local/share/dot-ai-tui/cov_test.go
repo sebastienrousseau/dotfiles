@@ -381,7 +381,6 @@ func TestUpdateInput(t *testing.T) {
 	// enter a normal prompt → streams (cmd) while not running
 	orig := execCommand
 	execCommand = func(name string, args ...string) *exec.Cmd { return exec.Command("printf", "ok") }
-	defer func() { execCommand = orig }()
 	m = base()
 	m.input.SetValue("hello there")
 	mm2, c := m.Update(key("enter"))
@@ -394,6 +393,10 @@ func TestUpdateInput(t *testing.T) {
 	if _, c := mr.Update(key("enter")); c != nil {
 		t.Fatal("send while running ignored")
 	}
+	// The streaming goroutine reads execCommand, so it has to finish
+	// before the stub is restored — otherwise the restore races it.
+	drain(mr.streamCh)
+	execCommand = orig
 }
 
 func TestHandleSlashAll(t *testing.T) {

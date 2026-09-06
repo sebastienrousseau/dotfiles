@@ -276,3 +276,43 @@ func TestErrorLineStyled(t *testing.T) {
 		t.Errorf("a normal reply must still be syntax-highlighted:\n%q", out)
 	}
 }
+
+// TestSaveSessionMarshalFailure covers the encode-failure branch: a
+// failure must leave any previously saved session untouched rather than
+// writing a truncated file.
+func TestSaveSessionMarshalFailure(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	good := []line{{who: "you", text: "keep me"}}
+	saveSession(good)
+
+	orig := marshalSession
+	defer func() { marshalSession = orig }()
+	marshalSession = func([]sessLine) ([]byte, error) { return nil, errors.New("encode failed") }
+	saveSession([]line{{who: "you", text: "must not land"}})
+
+	got := loadSession()
+	if len(got) != 1 || got[0].text != "keep me" {
+		t.Fatalf("a failed encode must not overwrite the session: %+v", got)
+	}
+}
+
+// TestSplashClampsNegativeHeight covers the height clamp directly: the
+// splash is asked for fewer rows than it has content for, and for a
+// negative count.
+func TestSplashClampsNegativeHeight(t *testing.T) {
+	m := sized()
+	for _, h := range []int{-10, -1, 0, 1, 3, 30} {
+		out := m.splash(40, h)
+		want := max(h, 0)
+		got := strings.Count(out, "\n") + 1
+		if want == 0 {
+			if out != "" {
+				t.Errorf("h=%d should render nothing, got %q", h, out)
+			}
+			continue
+		}
+		if got != want {
+			t.Errorf("splash(40,%d) rendered %d lines, want %d", h, got, want)
+		}
+	}
+}

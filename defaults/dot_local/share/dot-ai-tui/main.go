@@ -416,14 +416,22 @@ func sessionPath() string {
 	return filepath.Join(base, "dot-ai-tui", "session.json")
 }
 
+// marshalSession encodes the persisted session. Indirected so the
+// otherwise-unreachable encode-failure branch in saveSession is testable.
+var marshalSession = func(s []sessLine) ([]byte, error) { return json.Marshal(s) }
+
 func saveSession(lines []line) {
 	s := make([]sessLine, 0, len(lines))
 	for _, l := range lines {
 		s = append(s, sessLine{l.who, l.text})
 	}
-	b, err := json.Marshal(s)
+	b, err := marshalSession(s)
 	if err != nil {
-		return // unreachable for a slice of plain strings; kept for safety
+		// Unreachable for a slice of plain strings, so it is behind a seam
+		// rather than excluded: TestSaveSessionMarshalFailure substitutes a
+		// failing marshaller to prove a failure is a silent no-op and never
+		// truncates the file on disk.
+		return
 	}
 	p := sessionPath()
 	if os.MkdirAll(filepath.Dir(p), 0o700) != nil {
