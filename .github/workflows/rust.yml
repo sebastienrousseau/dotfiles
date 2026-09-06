@@ -1,0 +1,395 @@
+name: Rust / dot-sys
+
+# Quality gates for the `dot-sys` crate in lib/wasm-tools. Every job is
+# path-filtered to the crate and this file; every action is SHA-pinned per
+# docs/security/CI_PINNING.md.
+#
+#   test      — stable / MSRV / beta on ubuntu + macos
+#   fmt       — rustfmt, crate + fuzz crate
+#   clippy    — -D warnings -W clippy::pedantic across all targets
+#   doc       — rustdoc with -D warnings, doctests run in `test`
+#   coverage  — cargo-llvm-cov, fails under 98% lines / regions / functions
+#   miri      — cargo miri test on nightly (UB / aliasing checks)
+#   fuzz      — replay seed + regression corpora (-runs=0), then 60s smoke
+#   bench     — criterion compile + `--quick` smoke
+#   examples  — every example runs
+#   deny      — cargo-deny: advisories, licences, bans, sources
+#   audit     — cargo-audit against the RustSec advisory database
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'lib/wasm-tools/**'
+      - '.github/workflows/rust.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'lib/wasm-tools/**'
+      - '.github/workflows/rust.yml'
+  workflow_dispatch:
+    inputs:
+      fuzztime:
+        description: 'Per-target fuzz smoke duration in seconds'
+        required: false
+        default: '60'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUSTFLAGS: -D warnings
+  # Keep in sync with `rust-version` in lib/wasm-tools/Cargo.toml.
+  MSRV: '1.86.0'
+
+defaults:
+  run:
+    working-directory: lib/wasm-tools
+
+jobs:
+  test:
+    name: Test / ${{ matrix.toolchain }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        toolchain: [stable, '1.86.0', beta]
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Guard MSRV drift
+        if: matrix.toolchain != 'stable' && matrix.toolchain != 'beta'
+        run: |
+          test "${{ matrix.toolchain }}" = "$MSRV"
+          grep -q "^rust-version = \"${MSRV%.0}\"" Cargo.toml
+
+      - uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: lib/wasm-tools
+
+      - name: Test (unit, integration, doc)
+        run: cargo test --locked --all-features
+
+      - name: Build release binary and smoke it
+        run: |
+          cargo build --locked --release
+          out="$(./target/release/dot-sys)"
+          echo "$out"
+          printf '%s' "$out" | grep -Eq '^\{"status": "ok", "timestamp": [1-9][0-9]*, "engine": "wasm"\}$'
+
+  fmt:
+    name: Lint / rustfmt
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        with:
+          toolchain: stable
+          components: rustfmt
+
+      - name: cargo fmt --check (crate)
+        run: cargo fmt --all --check
+
+      - name: cargo fmt --check (fuzz crate)
+        run: cargo fmt --all --check --manifest-path fuzz/Cargo.toml
+
+  clippy:
+    name: Lint / clippy (pedantic)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        with:
+          toolchain: stable
+          components: clippy
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: lib/wasm-tools
+
+      - name: cargo clippy
+        run: cargo clippy --locked --all-targets --all-features -- -D warnings -W clippy::pedantic
+
+  doc:
+    name: Docs / rustdoc -D warnings
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        with:
+          toolchain: stable
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: lib/wasm-tools
+
+      - name: cargo doc
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc --locked --no-deps --all-features
+
+      - name: Doctests
+        run: cargo test --locked --all-features --doc
+
+  coverage:
+    name: Coverage / llvm-cov >= 98%
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        with:
+          toolchain: stable
+          components: llvm-tools-preview
+
+      - uses: taiki-e/install-action@84f5ac3124727fb3d284d4d22ee9ab3654fd09a6 # v2.87.7
+        with:
+          tool: cargo-llvm-cov
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: lib/wasm-tools
+
+      - name: cargo llvm-cov (gate)
+        run: |
+          cargo llvm-cov --locked --all-features \
+            --fail-under-lines 98 \
+            --fail-under-regions 98 \
+            --fail-under-functions 98 \
+            --lcov --output-path lcov.info
+          cargo llvm-cov report --summary-only
+
+      - name: Upload lcov
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dot-sys-lcov
+          path: lib/wasm-tools/lcov.info
+          retention-days: 14
+
+  miri:
+    name: Miri / nightly
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        with:
+          toolchain: nightly
+          components: miri
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: lib/wasm-tools
+
+      - name: cargo miri test
+        env:
+          # Mirrors lib/wasm-tools/.cargo/config.toml; `Status::now()` reads
+          # the wall clock, which Miri's default isolation forbids.
+          MIRIFLAGS: -Zmiri-disable-isolation
+        run: |
+          cargo miri setup
+          cargo miri test --locked --all-features
+
+  fuzz:
+    name: Fuzz / ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [fuzz_parse, fuzz_roundtrip, fuzz_at, fuzz_cli]
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        with:
+          toolchain: nightly
+          components: rust-src
+
+      - uses: taiki-e/install-action@84f5ac3124727fb3d284d4d22ee9ab3654fd09a6 # v2.87.7
+        with:
+          tool: cargo-fuzz
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: lib/wasm-tools/fuzz
+
+      - name: Build ${{ matrix.target }}
+        run: cargo fuzz build ${{ matrix.target }}
+
+      - name: Replay seed corpus + fixed-bug regressions (-runs=0)
+        run: |
+          cargo fuzz run ${{ matrix.target }} \
+            fuzz/corpus/${{ matrix.target }} \
+            fuzz/regressions/${{ matrix.target }} \
+            -- -runs=0
+
+      - name: Smoke fuzz ${{ matrix.target }}
+        env:
+          FUZZTIME: ${{ inputs.fuzztime || '60' }}
+        run: |
+          cargo fuzz run ${{ matrix.target }} \
+            fuzz/corpus/${{ matrix.target }} \
+            fuzz/regressions/${{ matrix.target }} \
+            -- -max_total_time="$FUZZTIME"
+
+      - name: Upload reproducer if failed
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fuzz-reproducer-${{ matrix.target }}
+          path: lib/wasm-tools/fuzz/artifacts/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  bench:
+    name: Bench / criterion smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        with:
+          toolchain: stable
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: lib/wasm-tools
+
+      - name: cargo bench --no-run
+        run: cargo bench --locked --no-run
+
+      - name: cargo bench -- --quick
+        run: cargo bench --locked -- --quick
+
+  examples:
+    name: Examples / run all
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        with:
+          toolchain: stable
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: lib/wasm-tools
+
+      - name: Run every example
+        run: |
+          for src in examples/*.rs; do
+            name="$(basename "$src" .rs)"
+            echo "::group::cargo run --example $name"
+            cargo run --locked --example "$name"
+            echo "::endgroup::"
+          done
+
+  deny:
+    name: Supply chain / cargo-deny
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
+        with:
+          manifest-path: lib/wasm-tools/Cargo.toml
+          command: check
+          arguments: --all-features
+
+  audit:
+    name: Supply chain / cargo-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        with:
+          toolchain: stable
+
+      - uses: taiki-e/install-action@84f5ac3124727fb3d284d4d22ee9ab3654fd09a6 # v2.87.7
+        with:
+          tool: cargo-audit
+
+      - name: cargo audit
+        run: cargo audit --deny warnings
