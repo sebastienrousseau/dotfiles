@@ -36,11 +36,11 @@ if [[ $remove_source -eq 0 ]]; then
   args+=("--keep-source")
 fi
 
-printf "About to run: chezmoi remove %s %s\n" "${args[*]}" "${paths[*]}"
+printf "About to run: chezmoi remove %s %s\n" "${args[*]:-}" "${paths[*]}"
 read -r -p "Proceed? [y/N] " confirm
 if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
   echo "Aborted."
   exit 1
 fi
 
-chezmoi remove "${args[@]}" "${paths[@]}"
+chezmoi remove ${args[@]+"${args[@]}"} "${paths[@]}"
