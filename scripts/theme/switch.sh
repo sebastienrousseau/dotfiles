@@ -128,25 +128,29 @@ all_theme_names() {
 
 # List wallpaper families that have BOTH dark and light variants in themes.toml.
 # Only these are presented to users — unpaired wallpapers are hidden.
+#
+# This was two associative arrays. Those are bash 4 only, and macOS still
+# ships 3.2 as /bin/bash, where `local -A` fails outright ("local: -A:
+# invalid option"). Both arrays then stayed empty, so this function printed
+# nothing and `dot theme list`, `dot theme family` and the interactive picker
+# silently offered no themes at all on a stock macOS shell.
+#
+# Two newline-separated lists plus `comm` behave identically on 3.2 and 4+.
 paired_families() {
-  local -A has_dark has_light
-  local name family
+  local darks="" lights="" name family
   while IFS= read -r name; do
-    if [[ "$name" == *-dark ]]; then
-      family="${name%-dark}"
-      has_dark["$family"]=1
-    elif [[ "$name" == *-light ]]; then
-      family="${name%-light}"
-      has_light["$family"]=1
-    fi
+    case "$name" in
+      *-dark) darks="${darks}${name%-dark}"$'\n' ;;
+      *-light) lights="${lights}${name%-light}"$'\n' ;;
+    esac
   done < <(all_theme_names)
 
-  for family in $(printf '%s\n' "${!has_dark[@]}" | sort); do
-    # `fallback` is a synthetic safety theme (see themes.toml) that templates
-    # degrade to when .theme is unset/invalid — never a user-selectable one.
-    [[ "$family" == "fallback" ]] && continue
-    [[ -n "${has_light[$family]+x}" ]] && echo "$family"
-  done
+  # `fallback` is a synthetic safety theme (see themes.toml) that templates
+  # degrade to when .theme is unset/invalid — never a user-selectable one.
+  comm -12 \
+    <(printf '%s' "$darks" | sort -u) \
+    <(printf '%s' "$lights" | sort -u) |
+    grep -vxF 'fallback' || true
 }
 
 # Determine source type (system/custom) for a wallpaper family.

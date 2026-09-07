@@ -124,7 +124,7 @@ check() {
         if [[ "$use_ui" = "1" ]]; then
           ui_warn "$name" "$message"
         else
-          printf "${YELLOW}⚠${NC} %-35s ${YELLOW}WARNING${NC}"
+          printf "${YELLOW}⚠${NC} %-35s ${YELLOW}WARNING${NC}" "$name"
           [[ -n "$message" ]] && printf " ${GRAY}%s${NC}" "$message"
           printf "\n"
         fi
@@ -137,7 +137,7 @@ check() {
         if [[ "$use_ui" = "1" ]]; then
           ui_err "$name" "$message"
         else
-          printf "${RED}✗${NC} %-35s ${RED}FAILED${NC}"
+          printf "${RED}✗${NC} %-35s ${RED}FAILED${NC}" "$name"
           [[ -n "$message" ]] && printf " ${GRAY}%s${NC}" "$message"
           printf "\n"
         fi

@@ -116,7 +116,10 @@ ex() {
   shift
   test_start "registry_ex_${label}"
   set +e
-  cmd_registry "$@" </dev/null >/dev/null 2>&1
+  # stdout is discarded but stderr must stay attached: the coverage
+  # runner reads bash xtrace records from it, and `2>&1` here used to
+  # send every one of them to /dev/null with the output.
+  cmd_registry "$@" </dev/null >/dev/null
   local rc=$?
   set -e
   ((TESTS_PASSED++)) || true

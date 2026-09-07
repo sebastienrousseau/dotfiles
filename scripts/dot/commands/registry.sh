@@ -95,11 +95,15 @@ _registry_validate_index() {
   ' "$index" >/dev/null 2>&1
 }
 
+# Prints the path of a validated index file on stdout. Every diagnostic goes
+# to stderr: stdout is this function's return channel, and callers read it
+# with `index="$(_registry_fetch)"` — a warning printed here would be
+# captured into that variable and then handed to jq as a filename.
 _registry_fetch() {
   local url cache_dir cache_file
   url="$(_registry_url)"
   [[ "$url" =~ ^(https://|file://) ]] || {
-    ui_err "registry" "registry URL must use https:// (or file:// for local testing)"
+    ui_err "registry" "registry URL must use https:// (or file:// for local testing)" >&2
     return 1
   }
   cache_dir="$(_registry_cache_dir)"
@@ -119,7 +123,7 @@ _registry_fetch() {
     fi
   fi
   if ! command -v curl >/dev/null 2>&1; then
-    ui_err "registry" "curl not installed"
+    ui_err "registry" "curl not installed" >&2
     return 127
   fi
   local tmp
@@ -137,17 +141,17 @@ _registry_fetch() {
   if ! curl "${curl_args[@]}" -o "$tmp" "$url" >/dev/null; then
     rm -f "$tmp"
     if [[ -s "$cache_file" ]]; then
-      ui_warn "registry" "fetch failed; using stale cache at $cache_file"
+      ui_warn "registry" "fetch failed; using stale cache at $cache_file" >&2
       printf '%s\n' "$cache_file"
       return 0
     fi
-    ui_err "registry" "could not fetch $url"
+    ui_err "registry" "could not fetch $url" >&2
     return 1
   fi
   mv "$tmp" "$cache_file"
   if ! _registry_validate_index "$cache_file"; then
     rm -f "$cache_file"
-    ui_err "registry" "index failed schema and integrity validation"
+    ui_err "registry" "index failed schema and integrity validation" >&2
     return 1
   fi
   printf '%s\n' "$cache_file"
