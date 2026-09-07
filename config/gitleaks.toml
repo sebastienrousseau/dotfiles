@@ -12,8 +12,12 @@ title = "Dotfiles Gitleaks Configuration"
 # Use the default gitleaks config as a base
 useDefault = true
 
-# Allowlist patterns that are known false positives
-[allowlist]
+# Allowlist patterns that are known false positives.
+#
+# NOTE: this is the `[[allowlists]]` array form. The singular `[allowlist]`
+# table is deprecated upstream, and gitleaks >= 8.30 refuses to load a
+# config that mixes the two — so every allowlist here must use this form.
+[[allowlists]]
 description = "Allowlisted patterns for documentation examples"
 
 # Example secrets used in documentation
@@ -31,6 +35,7 @@ regexes = [
 
     # GPG public key fingerprints used for signature verification (not secrets)
     '''CHEZMOI_GPG_KEY=''',
+
 ]
 
 # Paths to ignore (documentation files with examples)
@@ -60,6 +65,34 @@ stopwords = [
     "placeholder",
     "dummy",
     "fake",
+]
+
+# ─────────────────────────────────────────────────────────────────────────
+# SSH public-key fingerprints in documentation.
+#
+# `git tag -v`, `git log --show-signature` and `ssh-keygen -lf` all print
+# a key fingerprint as `SHA256:` + 43 base64 characters. KEYS.asc and
+# pkg/VERIFY.md quote that output so a reader can compare what they get
+# against what they should get.
+#
+# A fingerprint is a hash of a PUBLIC key, published deliberately so that
+# anyone can verify our signatures — GitHub serves the same keys from
+# /users/<user>/ssh_signing_keys. It authenticates nobody. gitleaks'
+# generic-api-key rule matches it only because the base64 entropy is high
+# (4.8) and the word "key" sits next to it.
+#
+# This is a separate allowlist because it needs `regexTarget = "line"`:
+# the rule's captured secret is the bare base64 run, without the
+# `SHA256:` prefix, so matching the secret alone would mean allowlisting
+# *any* 43-character base64 string — which is the shape of plenty of real
+# credentials. Requiring the `SHA256:` prefix on the line keeps this
+# narrow, and leaves KEYS.asc otherwise fully scanned: a private key
+# pasted into it would still be caught.
+[[allowlists]]
+description = "SSH public-key fingerprints (SHA256:...) quoted in verification docs"
+regexTarget = "line"
+regexes = [
+    '''SHA256:[A-Za-z0-9+/]{43}''',
 ]
 
 # Additional patterns to detect

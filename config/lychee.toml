@@ -38,8 +38,17 @@ exclude = [
   # MkDocs Material directory-URLs inside raw HTML on docs/index.md.
   # MkDocs does not rewrite `.md` links inside a raw <a href>, so the
   # button row must use site-relative pretty URLs; they resolve on the
-  # built site but have no matching file on disk.
+  # built site but have no matching file on disk. The row links
+  # guides/INSTALL/, reference/UTILS/ and ARCHITECTURE/ — the last one
+  # sits directly under docs/, hence the second alternative.
+  #
+  # Do not "verify" these on macOS alone: its filesystem is
+  # case-insensitive, so `docs/ARCHITECTURE` silently resolves to the
+  # `docs/architecture/` directory there and the check passes locally
+  # while failing on Linux CI. That is exactly how this exclusion came
+  # to be missing.
   'docs/(guides|reference)/[A-Z_]+$',
+  'docs/ARCHITECTURE$',
   # Requires authentication; a 404 here means "not logged in", not "broken".
   '^https://github\.com/.*/settings',
   '^https://github\.com/.*/security/advisories',
