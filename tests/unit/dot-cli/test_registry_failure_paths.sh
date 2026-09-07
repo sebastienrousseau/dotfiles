@@ -95,8 +95,12 @@ TRAVERSAL_DIR="$WORK/traversal"
 mkdir -p "$TRAVERSAL_DIR/sub"
 printf 'pwned\n' >"$TRAVERSAL_DIR/sub/file"
 TRAVERSAL_ARCHIVE="$WORK/traversal-1.0.0.tar.gz"
-# `-C "$TRAVERSAL_DIR/sub" ../sub/file` records the member as "../sub/file".
-tar -czf "$TRAVERSAL_ARCHIVE" -C "$TRAVERSAL_DIR/sub" ../sub/file 2>/dev/null
+# The member has to be recorded as "../sub/file". GNU tar strips a leading
+# "../" ("Removing leading `../' from member names") unless -P is given, so
+# without it this fixture is a perfectly safe archive on Linux and the guard
+# under test is never reached. -P keeps the path verbatim on GNU tar and
+# bsdtar alike.
+tar -Pczf "$TRAVERSAL_ARCHIVE" -C "$TRAVERSAL_DIR/sub" ../sub/file 2>/dev/null
 TRAVERSAL_SHA="$(sha256_of "$TRAVERSAL_ARCHIVE")"
 
 EMPTY_DIR="$WORK/empty-module"
@@ -174,12 +178,16 @@ assert_equals "1" "$rc" "set-url with no URL fails"
 assert_file_contains "$OUT" "missing URL" "the error names the missing argument"
 
 test_start "set_url_reports_a_config_it_cannot_write"
+# Permission bits are not enough: root ignores them, and CI containers
+# routinely run as root. Put a regular file where the config directory has to
+# be, so `mkdir -p` fails for every user.
 cfg_dir="$(dirname "$(_registry_config_file)")"
-mkdir -p "$cfg_dir"
-chmod 500 "$cfg_dir"
+rm -rf "$cfg_dir"
+mkdir -p "$(dirname "$cfg_dir")"
+: >"$cfg_dir"
 rc="$(run set-url "file://$GOOD_INDEX")"
-chmod 700 "$cfg_dir"
-assert_equals "1" "$rc" "an unwritable config directory is an error, not a silent no-op"
+rm -f "$cfg_dir"
+assert_equals "1" "$rc" "a config path that cannot be created is an error, not a silent no-op"
 assert_file_contains "$OUT" "set-url" "the failure is attributed to set-url"
 
 # ===========================================================================
@@ -247,6 +255,11 @@ clear_cache
 rc="$(run install good-module)"
 assert_equals "1" "$rc" "a mismatched SHA-256 stops the install"
 assert_file_contains "$OUT" "SHA-256 mismatch" "the error names the mismatch"
+
+test_start "the_traversal_fixture_really_contains_a_traversal_path"
+# Guards the guard: if tar ever normalises the member away, the refusal test
+# below would pass against a harmless archive.
+assert_output_matches "\\.\\./sub/file" "tar -tzf '$TRAVERSAL_ARCHIVE'"
 
 test_start "install_refuses_an_archive_with_traversal_paths"
 export DOTFILES_REGISTRY_URL="file://$TRAVERSAL_INDEX"

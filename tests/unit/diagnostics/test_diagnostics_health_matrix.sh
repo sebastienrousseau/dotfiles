@@ -421,49 +421,22 @@ assert_file_contains "$OUT" '"check":"Nerd Font available","status":"pass"' "the
 
 test_start "unmeasurable_shell_startup_warns"
 # TIMEFORMAT is inherited by the `time` keyword health.sh uses, so a format
-# without a "real" row makes the timing unparseable — the branch a broken
+# without a "real" row makes the timing unparsable — the branch a broken
 # interactive zsh config would take.
 new_home slowshell
 TIMEFORMAT='elapsed %3R' run_health "$FULL_BIN" --json
-assert_file_contains "$OUT" '"check":"Shell startup time","status":"warn"' "unparseable timing warns instead of aborting"
+assert_file_contains "$OUT" '"check":"Shell startup time","status":"warn"' "unparsable timing warns instead of aborting"
 
 # ===========================================================================
 # 12. Terminal rendering: colours plus the gum-backed renderer.
 # ===========================================================================
-test_start "tty_run_uses_colour_and_gum"
-new_home tty
-if command -v script >/dev/null 2>&1; then
-  inner="$WORK/tty_inner.sh"
-  cat >"$inner" <<EOF
-export PATH='$FULL_BIN'
-export HOME='$SANDBOX_HOME'
-export TERM=xterm
-exec {__xfd}>>'$WORK/tty.trace'
-export BASH_XTRACEFD=\$__xfd
-'$REAL_BASH' '$SCRIPT_FILE'
-echo "health-rc=\$?" >'$WORK/tty.rc'
-EOF
-  rm -f "$WORK/tty.rc"
-  {
-    _i=0
-    while [[ ! -f "$WORK/tty.rc" && $_i -lt 400 ]]; do
-      sleep 0.05
-      _i=$((_i + 1))
-    done
-  } | if [[ "$(uname -s)" == Darwin ]]; then
-    script -q "$WORK/tty.raw" "$REAL_BASH" "$inner" >/dev/null 2>&1
-  else
-    script -qec "$REAL_BASH '$inner'" "$WORK/tty.raw" >/dev/null 2>&1
-  fi
-  cat "$WORK/tty.trace" >&2 2>/dev/null || true
-  tr -d '\r' <"$WORK/tty.raw" >"$OUT" 2>/dev/null || true
-  assert_file_contains "$WORK/tty.rc" "health-rc=0" "health exits 0 on a terminal"
-  assert_file_contains "$OUT" "Health Score" "the score bar renders on a terminal"
-else
-  _fail "script(1) not found — the TTY renderer cannot be exercised"
-fi
-
-# tty_health <bin-dir> — run health.sh on a pty with the given PATH.
+# tty_health <bin-dir> — run health.sh with stdout and stderr on a
+# pseudo-terminal, so its colour and gum branches fire. No `exec {fd}>` or
+# BASH_XTRACEFD: both are bash 4.1+ and macOS ships 3.2 as /bin/bash, which
+# is what the macOS CI runner resolves. Under the coverage runner the inner
+# shell's xtrace therefore lands on the pty with the report, so the records
+# are split back out — replayed on fd 2 for the aggregator, and kept out of
+# the text the assertions read.
 tty_health() {
   local bin="$1" inner
   inner="$WORK/tty_inner.sh"
@@ -474,13 +447,10 @@ export XDG_CONFIG_HOME='$SANDBOX_HOME/.config'
 export XDG_DATA_HOME='$SANDBOX_HOME/.local/share'
 export XDG_STATE_HOME='$SANDBOX_HOME/.local/state'
 export TERM=xterm
-exec {__xfd}>>'$WORK/tty.trace'
-export BASH_XTRACEFD=\$__xfd
 '$REAL_BASH' '$SCRIPT_FILE'
 echo "health-rc=\$?" >'$WORK/tty.rc'
 EOF
   rm -f "$WORK/tty.rc"
-  : >"$WORK/tty.trace"
   {
     local _i=0
     while [[ ! -f "$WORK/tty.rc" && $_i -lt 400 ]]; do
@@ -492,9 +462,20 @@ EOF
   else
     script -qec "$REAL_BASH '$inner'" "$WORK/tty.raw" >/dev/null 2>&1
   fi
-  cat "$WORK/tty.trace" >&2 2>/dev/null || true
-  tr -d '\r' <"$WORK/tty.raw" >"$OUT" 2>/dev/null || true
+  tr -d '\r' <"$WORK/tty.raw" >"$WORK/tty.all" 2>/dev/null || true
+  grep -E '^\++@COV@:' "$WORK/tty.all" >&2
+  grep -vE '^\++@COV@:' "$WORK/tty.all" >"$OUT"
 }
+
+test_start "tty_run_uses_colour_and_gum"
+new_home tty
+if command -v script >/dev/null 2>&1; then
+  tty_health "$FULL_BIN"
+  assert_file_contains "$WORK/tty.rc" "health-rc=0" "health exits 0 on a terminal"
+  assert_file_contains "$OUT" "Health Score" "the score bar renders on a terminal"
+else
+  _fail "script(1) not found — the TTY renderer cannot be exercised"
+fi
 
 test_start "tty_score_bar_is_green_when_the_environment_is_healthy"
 if command -v script >/dev/null 2>&1; then

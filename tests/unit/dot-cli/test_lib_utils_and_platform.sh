@@ -72,7 +72,12 @@ printf 'Linux version 5.15.0-microsoft-standard-WSL2\n' >"$WSL_MARKER"
 # its CHEZMOI_SOURCE_DIR / ~/.dotfiles / ~/.local/share/chezmoi fallbacks
 # run. Left in place on exit — see the file header.
 # ---------------------------------------------------------------------------
-FIXTURE_ROOT="${TMPDIR:-/tmp}/dotfiles-cov-fixtures/lib-utils"
+# TMPDIR is not guaranteed to name an existing directory (it is unset in a
+# fresh container and can be stale in a reused one), so fall back to /tmp;
+# the uid keeps the path from colliding on a shared machine.
+_fixture_base="${TMPDIR:-/tmp}"
+[[ -d "$_fixture_base" ]] || _fixture_base=/tmp
+FIXTURE_ROOT="${_fixture_base%/}/dotfiles-cov-fixtures-$(id -u)/lib-utils"
 rm -rf "$FIXTURE_ROOT"
 mkdir -p "$FIXTURE_ROOT/detached"
 for lib in ui.sh utils.sh platform.sh ai-install.sh log.sh verified-download.sh; do

@@ -355,6 +355,27 @@ rc="$(switch rebuild --force)"
 assert_equals "0" "$rc" "rebuild exits 0"
 assert_file_contains "$OUT" "rebuild-invoked --force" "arguments are forwarded to rebuild-themes.sh"
 
+test_start "the_family_listing_works_on_the_system_bash"
+# Regression: paired_families used two associative arrays. `local -A` is a
+# hard error on bash 3.2 — still /bin/bash on macOS and what the macOS CI
+# runner resolves — so both stayed empty and `dot theme list`, `dot theme
+# family` and the picker silently offered nothing. Re-run the listing under
+# /bin/bash explicitly so the regression cannot come back unnoticed.
+if [[ -x /bin/bash ]]; then
+  set_theme_to bloom-dark
+  rc=0
+  CHEZMOI_SOURCE_DIR="$SRC" DOTFILES_WALLPAPER_DIR="$WALLPAPERS" \
+    PATH="$BIN:/usr/bin:/bin" \
+    /bin/bash "$SCRIPT_FILE" list </dev/null >"$OUT" 2>"$ERR" || rc=$?
+  cat "$ERR" >&2
+  assert_equals "0" "$rc" "the listing exits 0 under $(/bin/bash -c 'echo bash ${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}')"
+  assert_file_contains "$OUT" "bloom" "paired families are listed under the system bash"
+  assert_file_contains "$OUT" "maui" "every paired family is listed under the system bash"
+  assert_output_not_contains "invalid option" "cat '$ERR'"
+else
+  _fail "/bin/bash not found"
+fi
+
 # ===========================================================================
 # Guards
 # ===========================================================================

@@ -151,29 +151,51 @@ in_ui() {
   bash -c "set +e; source '$SCRIPT_FILE'; $1"
 }
 
+# The pseudo-terminal runs below need an interpreter for the inner shell.
+# Prefer one that supports `exec {fd}>` (bash 4.1+) because lib/dot/ui.sh
+# uses it for the rich step-runner's FIFO; fall back to the interpreter
+# running this file. macOS CI runners only have bash 3.2, so the handful
+# of assertions that need the newer syntax are gated on PTY_BASH_HAS_VARFD.
+_pick_pty_bash() {
+  local candidate
+  for candidate in "${BASH:-}" "$(command -v bash 2>/dev/null || true)" \
+    /opt/homebrew/bin/bash /usr/local/bin/bash /bin/bash; do
+    [[ -n "$candidate" && -x "$candidate" ]] || continue
+    if "$candidate" -c 'exec {fd}>/dev/null' 2>/dev/null; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  printf '%s\n' "$REAL_BASH"
+}
+PTY_BASH="$(_pick_pty_bash)"
+PTY_BASH_HAS_VARFD=0
+"$PTY_BASH" -c 'exec {fd}>/dev/null' 2>/dev/null && PTY_BASH_HAS_VARFD=1
+
 # tty_run <bash snippet> [stdin-text] — run the snippet with stdout AND
 # stderr attached to a pseudo-terminal, so `[[ -t 1 ]]` / `[[ -t 2 ]]`
 # branches fire. The typescript (what the terminal showed) is written to
 # $TTY_OUT with CRs stripped; the snippet's exit status is returned.
 #
-# Two details keep this deterministic:
-#   * xtrace goes to BASH_XTRACEFD (a file replayed on our stderr) so the
-#     coverage aggregator still sees every traced line while fd 2 stays a
-#     terminal for the `[[ -t 2 ]]` branches.
+# Three details keep this portable and deterministic:
+#   * No `exec {fd}>` / BASH_XTRACEFD — both are bash 4.1+, and macOS
+#     ships 3.2 as /bin/bash, which is what the macOS CI runner resolves.
+#     Under the coverage runner the inner shell's xtrace therefore lands
+#     on the pty together with the program's output, so the records are
+#     split back out below: replayed on fd 2 for the aggregator, and kept
+#     out of the text the assertions read.
 #   * script(1) stops relaying pty output once its own stdin reaches EOF,
 #     so stdin is held open (after feeding any text) until the inner
 #     script has written its exit status.
+#   * That exit status travels through a file rather than script(1),
+#     whose own status differs between the BSD and util-linux builds.
 TTY_OUT="$WORK/tty.out"
 tty_run() {
-  local snippet="$1" stdin_text="${2:-}" inner trace rcfile rc
+  local snippet="$1" stdin_text="${2:-}" inner rcfile rc
   inner="$WORK/tty_inner.sh"
-  trace="$WORK/tty.trace"
   rcfile="$WORK/tty.rc"
-  : >"$trace"
   rm -f "$rcfile"
   cat >"$inner" <<EOF
-exec {__xfd}>>'$trace'
-export BASH_XTRACEFD=\$__xfd
 set +e
 source '$SCRIPT_FILE'
 $snippet
@@ -187,12 +209,13 @@ EOF
       _i=$((_i + 1))
     done
   } | if [[ "$("$REAL_UNAME" -s)" == Darwin ]]; then
-    script -q "$TTY_OUT.raw" bash "$inner" >/dev/null 2>&1
+    script -q "$TTY_OUT.raw" "$PTY_BASH" "$inner" >/dev/null 2>&1
   else
-    script -qec "bash '$inner'" "$TTY_OUT.raw" >/dev/null 2>&1
+    script -qec "$PTY_BASH '$inner'" "$TTY_OUT.raw" >/dev/null 2>&1
   fi
-  tr -d '\r' <"$TTY_OUT.raw" >"$TTY_OUT"
-  cat "$trace" >&2
+  tr -d '\r' <"$TTY_OUT.raw" >"$TTY_OUT.all"
+  grep -E '^\++@COV@:' "$TTY_OUT.all" >&2
+  grep -vE '^\++@COV@:' "$TTY_OUT.all" >"$TTY_OUT"
   rc="$(cat "$rcfile" 2>/dev/null || echo 255)"
   return "$rc"
 }
@@ -211,7 +234,14 @@ fi
 
 test_start "tty_steps_rich_mode_streams_ndjson_to_dot_ui"
 rm -f "$WORK/dot-ui.events"
-if FAKE_UNAME=Linux FAKE_COLOR_SCHEME=prefer-dark tty_run 'ui_steps_begin "dot theme" "bloom"; echo "rich=$_UI_STEPS_RICH"; ui_step a "Alpha" run; ui_step_progress 1 2; ui_step_wait "hold"; ui_step a "Alpha" ok "fine"; ui_steps_end "all good"; echo "active=$_UI_STEPS_ACTIVE"'; then
+if [[ "$PTY_BASH_HAS_VARFD" != "1" ]]; then
+  # ui_steps_begin opens its renderer FIFO with `exec {fd}>`, which is
+  # bash 4.1+. On a host whose only bash is 3.2 (stock macOS, and the
+  # macOS CI runner) the rich path cannot be entered at all, so there is
+  # nothing to assert here — the plain-mode fallback is covered below.
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped — $PTY_BASH lacks {fd} redirection (bash 4.1+)"
+elif FAKE_UNAME=Linux FAKE_COLOR_SCHEME=prefer-dark tty_run 'ui_steps_begin "dot theme" "bloom"; echo "rich=$_UI_STEPS_RICH"; ui_step a "Alpha" run; ui_step_progress 1 2; ui_step_wait "hold"; ui_step a "Alpha" ok "fine"; ui_steps_end "all good"; echo "active=$_UI_STEPS_ACTIVE"'; then
   assert_file_contains "$TTY_OUT" "rich=1" "rich mode engaged"
   assert_file_contains "$TTY_OUT" "active=0" "steps deactivated after end"
   assert_file_contains "$WORK/dot-ui.events" '{"t":"header","title":"dot theme","subtitle":"bloom"}' "header event emitted"

@@ -65,6 +65,13 @@ EOF
   chmod +x "$LOCKTOOLS/$tool"
 done
 
+# Running as root (CI containers routinely do) turns `--apply` from a refusal
+# into a real installation: install-grub-theme.sh would copy into /boot and
+# rewrite /etc/default/grub. The refusal is only observable as an ordinary
+# user, so as root the flag is not passed at all.
+IS_ROOT=0
+[[ "$(id -u)" -eq 0 ]] && IS_ROOT=1
+
 OUT="$WORK/out.txt"
 ERR="$WORK/err.txt"
 # run <script> <args…> — stdout captured, stderr replayed so the coverage
@@ -101,9 +108,14 @@ assert_equals "0" "$rc" "the dry run exits 0"
 assert_file_contains "$ERR" "Dry run. Use --apply" "the dry run says how to proceed"
 
 test_start "grub_theme_apply_requires_root"
-rc="$(FAKE_UNAME=Linux DOTFILES_GRUB_THEME_DIR="$GRUB_SRC" run "$GRUB" --apply)"
-assert_equals "1" "$rc" "--apply without root fails"
-assert_file_contains "$ERR" "run with sudo" "the error asks for sudo"
+if [[ "$IS_ROOT" == "1" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped as root — --apply would install into /boot"
+else
+  rc="$(FAKE_UNAME=Linux DOTFILES_GRUB_THEME_DIR="$GRUB_SRC" run "$GRUB" --apply)"
+  assert_equals "1" "$rc" "--apply without root fails"
+  assert_file_contains "$ERR" "run with sudo" "the error asks for sudo"
+fi
 
 # ===========================================================================
 # install-boot-logo.sh
@@ -127,9 +139,14 @@ assert_equals "0" "$rc" "the dry run exits 0"
 assert_file_contains "$ERR" "Dry run. Use --apply" "the dry run says how to proceed"
 
 test_start "boot_logo_apply_requires_root"
-rc="$(FAKE_UNAME=Linux DOTFILES_BOOT_LOGO="$LOGO" run "$BOOT_LOGO" --apply)"
-assert_equals "1" "$rc" "--apply without root fails"
-assert_file_contains "$ERR" "run with sudo" "the error asks for sudo"
+if [[ "$IS_ROOT" == "1" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped as root — --apply would install a Plymouth theme"
+else
+  rc="$(FAKE_UNAME=Linux DOTFILES_BOOT_LOGO="$LOGO" run "$BOOT_LOGO" --apply)"
+  assert_equals "1" "$rc" "--apply without root fails"
+  assert_file_contains "$ERR" "run with sudo" "the error asks for sudo"
+fi
 
 # ===========================================================================
 # install-lock-icon.sh
