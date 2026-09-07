@@ -122,6 +122,12 @@ minimised reproducers of previously-fixed findings
 (`fuzz/regressions/<target>/`) with `-runs=0`, then fuzzes each target
 for 60 seconds. A fixed crash therefore cannot silently return.
 
+If `cargo-fuzz` came from a prebuilt release binary rather than
+`cargo install` (for example via `taiki-e/install-action`), pass
+`--target "$(rustc -vV | awk '/^host:/ { print $2 }')"` to every
+invocation. It otherwise defaults to the triple it was itself built for,
+which on Linux is a static musl build that AddressSanitizer cannot use.
+
 ```bash
 cargo +nightly fuzz build
 cargo +nightly fuzz run fuzz_parse     fuzz/corpus/fuzz_parse     fuzz/regressions/fuzz_parse

@@ -270,12 +270,21 @@ jobs:
         with:
           workspaces: lib/wasm-tools/fuzz
 
+      # cargo-fuzz defaults `--target` to the triple it was *itself* built
+      # for, and install-action ships the official prebuilt Linux binary,
+      # which is a static musl build. That default makes the build fail with
+      # "sanitizer is incompatible with statically linked libc" plus a
+      # missing musl std, so pin every invocation to the real host triple.
+      - name: Resolve host target triple
+        run: |
+          echo "HOST_TRIPLE=$(rustc -vV | awk '/^host:/ { print $2 }')" >> "$GITHUB_ENV"
+
       - name: Build ${{ matrix.target }}
-        run: cargo fuzz build ${{ matrix.target }}
+        run: cargo fuzz build --target "$HOST_TRIPLE" ${{ matrix.target }}
 
       - name: Replay seed corpus + fixed-bug regressions (-runs=0)
         run: |
-          cargo fuzz run ${{ matrix.target }} \
+          cargo fuzz run --target "$HOST_TRIPLE" ${{ matrix.target }} \
             fuzz/corpus/${{ matrix.target }} \
             fuzz/regressions/${{ matrix.target }} \
             -- -runs=0
@@ -284,7 +293,7 @@ jobs:
         env:
           FUZZTIME: ${{ inputs.fuzztime || '60' }}
         run: |
-          cargo fuzz run ${{ matrix.target }} \
+          cargo fuzz run --target "$HOST_TRIPLE" ${{ matrix.target }} \
             fuzz/corpus/${{ matrix.target }} \
             fuzz/regressions/${{ matrix.target }} \
             -- -max_total_time="$FUZZTIME"
