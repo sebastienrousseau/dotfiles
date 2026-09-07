@@ -52,9 +52,53 @@ material that supports it.
 | Minimum-toolchain **policy**, not just a number | Absent | Present | `docs/MINIMUM-TOOLCHAIN.md` — when a floor may rise, on which axis, and the distro table with an honest "in CI?" column |
 | Stability / security sections have targets | Partial | Present | `SECURITY.md`, `docs/security/FUZZING.md`, `supply-chain/README.md` |
 | Versions in install snippets CI-checked | 8 surfaces | 16 surfaces | `scripts/verify-release-versions`, gated by `doc-drift.yml` |
+| SPDX comment at line 1 of README.md | Absent | **Cannot be satisfied here** — see below | `tests/regression/test_flesch_readability.sh` |
 
-**Why not 10:** README.md is another change's remit, and the Repology
-badge is legitimately blocked until at least two distributions track
+### The one checklist item this repository cannot satisfy
+
+The standard asks for an `<!-- SPDX-License-Identifier -->` comment on
+line 1 of README.md. **That is not achievable here, and the conflict is
+machine-checkable in both directions.**
+
+`tests/regression/test_flesch_readability.sh` asserts
+`flesch_clear_title_README_md`: the first non-empty line of README.md
+(after any frontmatter) must introduce the document's title. An SPDX
+comment displaces it. Verified rather than assumed — adding the comment
+to line 1 and running the gate:
+
+```console
+$ bash tests/regression/test_flesch_readability.sh
+  ✗ flesch_clear_title_README_md: missing clear title
+RESULTS:92:91:1          # and 92:92:0 with the comment removed
+```
+
+So the repository has two enforced rules that cannot both hold for this
+one file, and the older one wins. The comment is deliberately **not**
+re-added.
+
+**This costs nothing in machine-readable licensing, which is what the
+requirement is actually for.** README.md carries no SPDX header at all,
+and `reuse lint` still reports 1832/1832 files with both copyright and
+licence information, and full REUSE 3.3 compliance — because
+`REUSE.toml` annotates the tree with `path = ["**", "**/**"]`. Blanket
+annotation is the mechanism the REUSE specification provides for
+exactly this case: files that cannot carry a header, or where one would
+be inappropriate. The licence of README.md is machine-readable today;
+it is simply declared in `REUSE.toml` rather than in the file.
+
+The residual gap is therefore narrow and worth stating precisely: a
+reader opening README.md in isolation, outside the repository, sees no
+licence marker. Anyone with the repository — which includes every
+licence scanner — gets the correct answer.
+
+**Exact remaining step, if the requirement is ever to be met literally:**
+relax `flesch_clear_title` to skip a leading HTML comment the way it
+already skips YAML frontmatter (`tests/regression/test_flesch_readability.sh`,
+around line 408), then add the header. That is a change to an unrelated
+gate, so it is recorded here rather than bundled into this branch.
+
+**Why not 10:** the SPDX-comment item above, plus the Repology badge,
+which is legitimately blocked until at least two distributions track
 the package.
 
 ## 2. Documentation — 7 → 10
