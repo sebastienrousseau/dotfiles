@@ -193,7 +193,7 @@ func (m stepModel) View() string {
 	}
 	// Transient wait line
 	if m.wait != "" {
-		b.WriteString(fmt.Sprintf("  %s  %s\n", m.sp.View(), m.st.Detail.Render(m.wait)))
+		fmt.Fprintf(&b, "  %s  %s\n", m.sp.View(), m.st.Detail.Render(m.wait))
 	}
 	// Progress bar
 	if m.total > 0 && !m.done {
@@ -240,15 +240,17 @@ func (m stepModel) renderStep(s step) string {
 	return strings.TrimRight(line, " ")
 }
 
+// renderBar draws the 24-cell progress bar. The filled width is clamped to
+// [0, w] because an emitter can send cur < 0 or cur > total; a negative
+// width used to panic strings.Repeat (regression corpus:
+// testdata/fuzz/FuzzStepApply).
 func (m stepModel) renderBar() string {
 	const w = 24
 	filled := 0
 	if m.total > 0 {
 		filled = m.cur * w / m.total
 	}
-	if filled > w {
-		filled = w
-	}
+	filled = max(0, min(filled, w))
 	bar := m.st.BarFull.Render(strings.Repeat("━", filled)) +
 		m.st.BarRest.Render(strings.Repeat("━", w-filled))
 	return fmt.Sprintf("%s  %s", bar, m.st.Detail.Render(fmt.Sprintf("%d/%d", m.cur, m.total)))

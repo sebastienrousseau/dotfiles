@@ -16,10 +16,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"time"
 
+	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/alecthomas/chroma/v2/quick"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -81,12 +85,17 @@ var (
 	selSt    = lipgloss.NewStyle().Foreground(pink).Bold(true)
 	youSt    = lipgloss.NewStyle().Foreground(mauve).Bold(true)
 	botSt    = lipgloss.NewStyle().Foreground(green).Bold(true)
+	errSt    = lipgloss.NewStyle().Foreground(red).Bold(true)
 	bodySt   = lipgloss.NewStyle().Foreground(text)
 	panel    = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(border).Padding(0, 1)
 	panelHot = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(violet).Padding(0, 1)
 	keySt    = lipgloss.NewStyle().Foreground(mauve).Bold(true)
 	keyDesc  = lipgloss.NewStyle().Foreground(faint)
 )
+
+// errPrefix marks a transcript line that carries a failed turn; the
+// renderer styles those lines with the error colour.
+const errPrefix = "error: "
 
 type line struct {
 	who  string // "you" | tool name | "sys"
@@ -224,8 +233,15 @@ func (m model) renderPalette(pal []paletteItem, w int) string {
 	return strings.TrimRight(b.String(), "\n")
 }
 
+// gatewayURL builds the gateway base URL from a host and port.
+func gatewayURL(host, port string) string {
+	return fmt.Sprintf("http://%s:%s", host, port)
+}
+
+// gatewayBase resolves the gateway base URL from DOT_AI_HOST / DOT_AI_PORT
+// (defaults 127.0.0.1:3456).
 func gatewayBase() string {
-	return fmt.Sprintf("http://%s:%s", envOr("DOT_AI_HOST", "127.0.0.1"), envOr("DOT_AI_PORT", "3456"))
+	return gatewayURL(envOr("DOT_AI_HOST", "127.0.0.1"), envOr("DOT_AI_PORT", "3456"))
 }
 
 func envOr(k, def string) string {
@@ -253,7 +269,7 @@ func refresh() tea.Msg {
 	}
 	client := http.Client{Timeout: 1500 * time.Millisecond}
 	if resp, err := client.Get(gatewayBase() + "/health"); err == nil {
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 		body, _ := io.ReadAll(resp.Body)
 		out.gatewayUp = resp.StatusCode == 200 && strings.Contains(string(body), "healthy")
 		out.gatewayMsg = map[bool]string{true: gatewayBase(), false: "unhealthy"}[out.gatewayUp]
@@ -283,7 +299,12 @@ func sqlite(db, query string) string {
 	if err != nil {
 		return ""
 	}
-	// Defensive: drop any stray "Run Time:"/dot-prefixed meta lines.
+	return filterSqliteOutput(b)
+}
+
+// filterSqliteOutput trims sqlite3 CLI output and drops any stray
+// "Run Time:" / dot-prefixed meta lines a user's ~/.sqliterc could inject.
+func filterSqliteOutput(b []byte) string {
 	var keep []string
 	for _, ln := range strings.Split(strings.TrimSpace(string(b)), "\n") {
 		if strings.HasPrefix(ln, "Run Time:") || strings.HasPrefix(strings.TrimSpace(ln), ".") {
@@ -395,13 +416,21 @@ func sessionPath() string {
 	return filepath.Join(base, "dot-ai-tui", "session.json")
 }
 
+// marshalSession encodes the persisted session. Indirected so the
+// otherwise-unreachable encode-failure branch in saveSession is testable.
+var marshalSession = func(s []sessLine) ([]byte, error) { return json.Marshal(s) }
+
 func saveSession(lines []line) {
 	s := make([]sessLine, 0, len(lines))
 	for _, l := range lines {
 		s = append(s, sessLine{l.who, l.text})
 	}
-	b, err := json.Marshal(s)
+	b, err := marshalSession(s)
 	if err != nil {
+		// Unreachable for a slice of plain strings, so it is behind a seam
+		// rather than excluded: TestSaveSessionMarshalFailure substitutes a
+		// failing marshaller to prove a failure is a silent no-op and never
+		// truncates the file on disk.
 		return
 	}
 	p := sessionPath()
@@ -416,6 +445,11 @@ func loadSession() []line {
 	if err != nil {
 		return nil
 	}
+	return parseSession(b)
+}
+
+// parseSession decodes a saved session file; malformed JSON yields nil.
+func parseSession(b []byte) []line {
 	var s []sessLine
 	if json.Unmarshal(b, &s) != nil {
 		return nil
@@ -430,15 +464,59 @@ func loadSession() []line {
 // notify fires a best-effort desktop notification (macOS osascript / Linux
 // notify-send); failures are silent.
 func notify(title, body string) {
-	var c *exec.Cmd
-	switch runtime.GOOS {
+	_ = notifyCmd(runtime.GOOS, title, body).Start()
+}
+
+// notifyCmd builds the platform notification command for goos.
+func notifyCmd(goos, title, body string) *exec.Cmd {
+	switch goos {
 	case "darwin":
-		c = execCommand("osascript", "-e",
+		return execCommand("osascript", "-e",
 			fmt.Sprintf("display notification %q with title %q", body, title))
 	default:
-		c = execCommand("notify-send", title, body)
+		return execCommand("notify-send", title, body)
 	}
-	_ = c.Start()
+}
+
+// highlightCode is the chroma entry point, indirected so the (otherwise
+// unreachable) formatter-failure fallback in highlight can be tested.
+var highlightCode = quick.Highlight
+
+// langRe bounds a fence info string to a short identifier. chroma resolves
+// an unknown name by glob-matching it against every lexer's filename
+// patterns, which is linear in the name's length with a ~2.5ms/char
+// constant: a 5 000-character "language" stalled View for 13s (regression
+// corpus: testdata/fuzz/FuzzHighlight).
+var langRe = regexp.MustCompile(`^[A-Za-z0-9_+#.-]{1,32}$`)
+
+// langCache memoises fence-info → lexer-name lookups so a transcript that
+// is re-rendered on every tick does not pay the registry scan each frame.
+// It is capped so hostile output cannot grow it without bound.
+var (
+	langCache    sync.Map
+	langCacheN   atomic.Int32
+	langCacheMax = int32(64)
+)
+
+// resolveLang maps a fence info string to a chroma lexer name, or "" when
+// the tag is malformed/unknown (chroma then uses its plaintext fallback).
+func resolveLang(lang string) string {
+	if !langRe.MatchString(lang) {
+		return ""
+	}
+	if v, ok := langCache.Load(lang); ok {
+		return v.(string)
+	}
+	name := ""
+	if l := lexers.Get(lang); l != nil {
+		name = l.Config().Name
+	}
+	if langCacheN.Load() < langCacheMax {
+		if _, loaded := langCache.LoadOrStore(lang, name); !loaded {
+			langCacheN.Add(1)
+		}
+	}
+	return name
 }
 
 // highlight syntax-colours fenced ``` code blocks (and inline diffs) with
@@ -459,7 +537,7 @@ func highlight(text string) string {
 			lang, code = strings.TrimSpace(p[:nl]), p[nl+1:]
 		}
 		var hb strings.Builder
-		if err := quick.Highlight(&hb, code, lang, "terminal256", "github-dark"); err == nil {
+		if err := highlightCode(&hb, code, resolveLang(lang), "terminal256", "github-dark"); err == nil {
 			b.WriteString(hb.String())
 		} else {
 			b.WriteString(code)
@@ -524,7 +602,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		last := len(m.transcript) - 1
 		if msg.err != nil {
-			m.transcript[last].text = "error: " + msg.err.Error()
+			m.transcript[last].text = errPrefix + msg.err.Error()
 			m.running, m.streamCh = false, nil
 			return m, nil
 		}
@@ -693,12 +771,13 @@ func (m model) handleSlash(cmd string) (tea.Model, tea.Cmd) {
 	case "/clear":
 		m.transcript = nil
 	case "/model":
-		if arg == "" {
+		switch arg {
+		case "":
 			sys("models: " + strings.TrimSpace(strings.Join(models, " ")+" (blank = default)") + " — current: " + modelLabel(m.aiModel))
-		} else if arg == "default" || arg == "off" {
+		case "default", "off":
 			m.aiModel = ""
 			sys("model → default")
-		} else {
+		default:
 			m.aiModel = arg
 			sys("model → " + arg)
 		}
@@ -716,10 +795,11 @@ func (m model) handleSlash(cmd string) (tea.Model, tea.Cmd) {
 	case "/quit", "/q", "/exit":
 		return m, tea.Quit
 	case "/style":
-		if arg == "" || arg == "off" {
-			m.style, _ = "", arg
+		switch arg {
+		case "", "off":
+			m.style = ""
 			sys("style cleared")
-		} else {
+		default:
 			m.style = arg
 			sys("style → " + arg)
 		}
@@ -900,6 +980,9 @@ var logoArt = []string{
 // splash renders the gorgeous empty-state: the wordmark, a one-line pitch,
 // and the quick-start keys, centred in a w×h box.
 func (m model) splash(w, h int) string {
+	if h < 0 {
+		h = 0
+	}
 	c := func(s string) string { return lipgloss.PlaceHorizontal(w, lipgloss.Center, s) }
 	grad := []lipgloss.Color{violet, mauve, pink}
 	var b []string
@@ -947,6 +1030,13 @@ func (m model) renderTranscript(w, h int) string {
 				rec = append(rec, dimSt.Render("  "+r))
 			}
 		}
+		// The recent block only fits when at least one splash row remains;
+		// a very short panel (tiny terminal + open palette) drops it rather
+		// than asking splash for a negative height (regression corpus:
+		// testdata/fuzz/FuzzRenderTranscript).
+		if len(rec) >= h {
+			rec = nil
+		}
 		sp := m.splash(w, h-len(rec))
 		if len(rec) > 0 {
 			return sp + "\n" + strings.Join(rec, "\n")
@@ -964,6 +1054,10 @@ func (m model) renderTranscript(w, h int) string {
 				tag, content = dimSt.Render("· "), dimSt.Render(l.text)
 			default:
 				tag, content = botSt.Render(l.who+" ▸ "), highlight(l.text)
+				if strings.HasPrefix(l.text, errPrefix) {
+					// A failed turn reads as an error, not as a reply.
+					tag, content = errSt.Render(l.who+" ▸ "), errSt.Render(l.text)
+				}
 				hasCode = strings.Contains(l.text, "```")
 			}
 			if hasCode {
@@ -1024,9 +1118,18 @@ func run() error {
 	return err
 }
 
+// Process-boundary seams: os.Exit terminates the test binary and run()
+// takes over the terminal, so main is exercised through these two hooks.
+var (
+	// exit terminates the process with a status code.
+	exit = os.Exit
+	// runProgram starts the cockpit (or the snapshot renderer).
+	runProgram = run
+)
+
 func main() {
-	if err := run(); err != nil {
+	if err := runProgram(); err != nil {
 		fmt.Fprintln(os.Stderr, "dot-ai-tui:", err)
-		os.Exit(1)
+		exit(1)
 	}
 }

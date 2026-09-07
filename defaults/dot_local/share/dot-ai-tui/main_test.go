@@ -141,3 +141,28 @@ func TestCursorBounds(t *testing.T) {
 		t.Fatalf("cursor escaped bounds: got %d, want %d", c, len(fleet)-1)
 	}
 }
+
+// TestRenderTranscriptTinyHeightWithRecent is the regression test for the
+// slice-bounds panic when the empty-state splash was asked for a negative
+// height: a 12-row terminal with the palette open leaves a 1-line panel, and
+// the "recent runs" block (up to 4 lines) used to be subtracted from it
+// (found by FuzzRenderTranscript / FuzzModelKeys).
+func TestRenderTranscriptTinyHeightWithRecent(t *testing.T) {
+	m := sized()
+	m.recent = []string{"a", "b", "c"}
+	for _, h := range []int{1, 2, 3, 4, 5} {
+		out := m.renderTranscript(40, h)
+		if got := strings.Count(out, "\n") + 1; got != h {
+			t.Errorf("h=%d rendered %d lines", h, got)
+		}
+	}
+	// End-to-end: tiny terminal, palette open, empty transcript, recent set.
+	m = newModel()
+	m = upd(m, tea.WindowSizeMsg{Width: 41, Height: 12})
+	m = upd(m, refreshMsg{tools: fleet, recent: []string{"a", "b", "c"}})
+	m = upd(m, key("tab"))
+	m.input.SetValue("/")
+	if v := m.View(); v == "" {
+		t.Fatal("empty view")
+	}
+}

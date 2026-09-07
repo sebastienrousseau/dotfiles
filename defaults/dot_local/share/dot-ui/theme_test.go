@@ -73,3 +73,65 @@ func TestNewStyles(t *testing.T) {
 		t.Fatal("Logo style rendered empty")
 	}
 }
+
+// TestParseColor covers the pure hex validator behind envColor.
+func TestParseColor(t *testing.T) {
+	fb := lipgloss.Color("#000000")
+	cases := []struct {
+		in   string
+		want lipgloss.Color
+	}{
+		{"#abc", "#abc"}, {"#ABCDEF", "#ABCDEF"}, {"#1a2b3c", "#1a2b3c"},
+		{"", fb}, {"abc", fb}, {"#ab", fb}, {"#abcd", fb}, {"#abcdefg", fb},
+		{"#ggg", fb}, {" #abc", fb}, {"#abc\n", fb},
+	}
+	for _, c := range cases {
+		if got := parseColor(c.in, fb); got != c.want {
+			t.Errorf("parseColor(%q)=%q want %q", c.in, got, c.want)
+		}
+	}
+}
+
+// TestLoadPaletteAllFields covers every DOT_UI_* variable, including Bg.
+func TestLoadPaletteAllFields(t *testing.T) {
+	vars := map[string]string{
+		"DOT_UI_ACCENT": "#111111", "DOT_UI_SUCCESS": "#222222", "DOT_UI_WARNING": "#333333",
+		"DOT_UI_ERROR": "#444444", "DOT_UI_INFO": "#555555", "DOT_UI_PANEL": "#666666",
+		"DOT_UI_BORDER": "#777777", "DOT_UI_FG": "#888888", "DOT_UI_BG": "#999999",
+	}
+	for k, v := range vars {
+		t.Setenv(k, v)
+	}
+	p := LoadPalette()
+	got := []lipgloss.Color{p.Accent, p.Success, p.Warning, p.Error, p.Info, p.Panel, p.Border, p.Fg, p.Bg}
+	want := []lipgloss.Color{"#111111", "#222222", "#333333", "#444444", "#555555", "#666666", "#777777", "#888888", "#999999"}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("field %d = %q want %q", i, got[i], want[i])
+		}
+	}
+	// Invalid Bg falls back to the terminal default (empty).
+	t.Setenv("DOT_UI_BG", "nope")
+	if p := LoadPalette(); p.Bg != "" {
+		t.Errorf("invalid Bg should fall back to empty, got %q", p.Bg)
+	}
+}
+
+// TestNewStylesUsesPalette covers that each style is derived from its
+// palette field (render output differs when the palette changes).
+func TestNewStylesUsesPalette(t *testing.T) {
+	a := NewStyles(fallback)
+	p := fallback
+	p.Accent, p.Success, p.Error, p.Info, p.Fg, p.Border, p.Warning = "#010101", "#020202", "#030303", "#040404", "#050505", "#060606", "#070707"
+	b := NewStyles(p)
+	pairs := [][2]lipgloss.Style{
+		{a.Logo, b.Logo}, {a.Title, b.Title}, {a.Sub, b.Sub}, {a.Ok, b.Ok}, {a.Skip, b.Skip}, {a.Fail, b.Fail},
+		{a.Warn, b.Warn}, {a.Spin, b.Spin}, {a.Label, b.Label}, {a.Detail, b.Detail}, {a.Summary, b.Summary},
+		{a.BarFull, b.BarFull}, {a.BarRest, b.BarRest},
+	}
+	for i, pr := range pairs {
+		if pr[0].GetForeground() == pr[1].GetForeground() && pr[0].GetBackground() == pr[1].GetBackground() {
+			t.Errorf("style %d does not derive from the palette", i)
+		}
+	}
+}

@@ -48,15 +48,18 @@ func newPickModel(st Styles, header, prompt string, items []string) pickModel {
 
 // fuzzyMatch reports whether all runes of query appear in s in order
 // (case-insensitive subsequence) — the same feel as fzf.
+//
+// Both sides are compared rune-by-rune: an earlier byte-vs-rune comparison
+// meant any non-ASCII query (e.g. "é") could never match, not even itself
+// (regression corpus: testdata/fuzz/FuzzFuzzyMatch).
 func fuzzyMatch(s, query string) bool {
 	if query == "" {
 		return true
 	}
-	s = strings.ToLower(s)
-	q := strings.ToLower(query)
+	q := []rune(strings.ToLower(query))
 	i := 0
-	for _, r := range s {
-		if i < len(q) && rune(q[i]) == r {
+	for _, r := range strings.ToLower(s) {
+		if i < len(q) && q[i] == r {
 			i++
 		}
 	}

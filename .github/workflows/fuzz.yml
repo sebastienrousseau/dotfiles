@@ -1,13 +1,23 @@
 name: Fuzz / Native Go harnesses
 
-# Runs each Go fuzz harness for a short window on every PR that
-# touches user-input parsing surfaces or the harnesses themselves.
-# Catches regressions before they merge.
+# Two gates:
 #
-# Pairs with the (pending) OSS-Fuzz integration in
-# oss-fuzz-integration/ which runs the same harnesses
-# continuously at scale on Google infra. See
-# docs/security/FUZZING.md.
+#   replay  — on every push and PR, every committed corpus (seed entries
+#             plus the minimized crashers of previously-fixed findings) is
+#             replayed with `go test -run '^Fuzz'`. No fuzzing, no flakes:
+#             a fixed crash cannot silently come back.
+#   fuzz    — a short fuzzing window per harness on PRs that touch an input
+#             parsing surface, to catch regressions before they merge.
+#
+# Harnesses live in three places:
+#   oss-fuzz-integration/fuzz            ports of the shell helpers and of
+#                                        the two Go binaries' parsers
+#   defaults/dot_local/share/dot-ui      in-module, against the real code
+#   defaults/dot_local/share/dot-ai-tui  in-module, against the real code
+#
+# Pairs with the OSS-Fuzz / ClusterFuzzLite integration in
+# oss-fuzz-integration/, which runs the ported harnesses continuously at
+# scale on Google infra. See docs/security/FUZZING.md.
 
 on:
   push:
@@ -17,6 +27,9 @@ on:
       - 'lib/dot/utils.sh'
       - 'scripts/dot/commands/init.sh'
       - 'oss-fuzz-integration/**'
+      - 'defaults/dot_local/share/dot-ui/**'
+      - 'defaults/dot_local/share/dot-ai-tui/**'
+      - '.clusterfuzzlite/**'
       - '.github/workflows/fuzz.yml'
   workflow_dispatch:
     inputs:
@@ -34,16 +47,48 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  fuzz:
-    name: Fuzz / ${{ matrix.harness }}
+  # Fast, deterministic gate: replay every committed corpus in every module.
+  replay:
+    name: Fuzz / Replay corpus (${{ matrix.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        harness:
-          - FuzzValidateName
-          - FuzzInitURLResolver
+        include:
+          - name: oss-fuzz ports
+            dir: oss-fuzz-integration/fuzz
+          - name: dot-ui
+            dir: defaults/dot_local/share/dot-ui
+          - name: dot-ai-tui
+            dir: defaults/dot_local/share/dot-ai-tui
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: ${{ matrix.dir }}/go.mod
+          cache-dependency-path: ${{ matrix.dir }}/go.sum
+
+      - name: Replay seed + regression corpus
+        working-directory: ${{ matrix.dir }}
+        run: go test -run '^Fuzz' -v ./...
+
+  # The OSS-Fuzz builder compiles each harness from ONE rewritten _test.go
+  # file, without the package's other test files. `go test` cannot see that
+  # constraint, so a harness referencing a sibling test file passes every
+  # local gate and fails only inside the ClusterFuzzLite container. This
+  # job reproduces the constraint in seconds.
+  harness-layout:
+    name: Fuzz / Harness self-containment
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
@@ -56,14 +101,104 @@ jobs:
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: oss-fuzz-integration/fuzz/go.mod
+          cache-dependency-path: oss-fuzz-integration/fuzz/go.sum
+
+      - name: Each harness must build without its sibling test files
+        run: bash tools/ci/check-fuzz-harness-self-contained.sh
+
+  # Short fuzzing window per harness.
+  fuzz:
+    name: Fuzz / ${{ matrix.harness }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Ports of the shell input handling.
+          - harness: FuzzValidateName
+            dir: oss-fuzz-integration/fuzz
+          - harness: FuzzInitURLResolver
+            dir: oss-fuzz-integration/fuzz
+          # dot-ui, in-module against the real implementation.
+          - harness: FuzzParseEvent
+            dir: defaults/dot_local/share/dot-ui
+          - harness: FuzzStepApply
+            dir: defaults/dot_local/share/dot-ui
+          - harness: FuzzParseColor
+            dir: defaults/dot_local/share/dot-ui
+          - harness: FuzzFuzzyMatch
+            dir: defaults/dot_local/share/dot-ui
+          - harness: FuzzPickKeys
+            dir: defaults/dot_local/share/dot-ui
+          - harness: FuzzRunTable
+            dir: defaults/dot_local/share/dot-ui
+          - harness: FuzzReadItems
+            dir: defaults/dot_local/share/dot-ui
+          - harness: FuzzParsePickArgs
+            dir: defaults/dot_local/share/dot-ui
+          # dot-ai-tui, in-module against the real implementation.
+          - harness: FuzzHighlight
+            dir: defaults/dot_local/share/dot-ai-tui
+          - harness: FuzzBuildPrompt
+            dir: defaults/dot_local/share/dot-ai-tui
+          - harness: FuzzHandleSlash
+            dir: defaults/dot_local/share/dot-ai-tui
+          - harness: FuzzPalette
+            dir: defaults/dot_local/share/dot-ai-tui
+          - harness: FuzzWindowRows
+            dir: defaults/dot_local/share/dot-ai-tui
+          - harness: FuzzRenderTranscript
+            dir: defaults/dot_local/share/dot-ai-tui
+          - harness: FuzzParseSession
+            dir: defaults/dot_local/share/dot-ai-tui
+          - harness: FuzzFilterSqliteOutput
+            dir: defaults/dot_local/share/dot-ai-tui
+          - harness: FuzzGatewayURL
+            dir: defaults/dot_local/share/dot-ai-tui
+          - harness: FuzzModelKeys
+            dir: defaults/dot_local/share/dot-ai-tui
+          - harness: FuzzModelCycle
+            dir: defaults/dot_local/share/dot-ai-tui
+          # Ports of the two binaries' parsers — what OSS-Fuzz builds.
+          - harness: FuzzUIEventLine
+            dir: oss-fuzz-integration/fuzz
+          - harness: FuzzUIHexColor
+            dir: oss-fuzz-integration/fuzz
+          - harness: FuzzUIPickFilter
+            dir: oss-fuzz-integration/fuzz
+          - harness: FuzzUIPickArgs
+            dir: oss-fuzz-integration/fuzz
+          - harness: FuzzUITableRows
+            dir: oss-fuzz-integration/fuzz
+          - harness: FuzzAISessionFile
+            dir: oss-fuzz-integration/fuzz
+          - harness: FuzzAISqliteOutput
+            dir: oss-fuzz-integration/fuzz
+          - harness: FuzzAIFenceTag
+            dir: oss-fuzz-integration/fuzz
+          - harness: FuzzAIGatewayURL
+            dir: oss-fuzz-integration/fuzz
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: ${{ matrix.dir }}/go.mod
           cache: false
 
       - name: Run ${{ matrix.harness }}
-        working-directory: oss-fuzz-integration/fuzz
+        working-directory: ${{ matrix.dir }}
         env:
           FUZZTIME: ${{ inputs.fuzztime || '60s' }}
         run: |
-          go test -run TestNothing -fuzz='^${{ matrix.harness }}$' \
+          go test -run '^$' -fuzz='^${{ matrix.harness }}$' \
             -fuzztime="$FUZZTIME" ./...
 
       - name: Upload reproducer corpus if failed
@@ -71,5 +206,5 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: fuzz-reproducer-${{ matrix.harness }}
-          path: oss-fuzz-integration/fuzz/testdata/fuzz/
+          path: ${{ matrix.dir }}/testdata/fuzz/
           retention-days: 14
