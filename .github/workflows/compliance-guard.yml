@@ -260,7 +260,7 @@ jobs:
   # ============================================================================
   portability-shell-lint:
     name: Portability Shell Lint
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@76bd7d860d27843b5901e4e67df66b08ecca4ef3 # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@02f75433c88d7494b2d5198170ab965dca261a15 # main
     with:
       include_tests: false
       # Severity widened to `warning` and the gate flipped to hard-fail
