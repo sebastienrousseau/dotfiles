@@ -17,7 +17,7 @@ set -u
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
-source "$SCRIPT_DIR/feature_matrix_lib.sh"
+source "$SCRIPT_DIR/../framework/feature_matrix_lib.sh"
 
 trap fm_sandbox_teardown EXIT
 fm_sandbox_setup
@@ -360,8 +360,15 @@ test_fm_commit() {
   # With nothing staged the helper must refuse cleanly rather than invoking a
   # model. It is the one exit path reachable without an AI provider.
   fm_expect_rc_in 0 1
+  # The contract is that `dot commit` REFUSES cleanly rather than invoking a
+  # model — not which refusal it reaches first. There are two, and which one
+  # fires depends on the host: with an AI provider installed (a developer
+  # machine) it gets as far as the staged-changes check; with none (a CI
+  # runner) it stops at the provider check. Asserting only the first was a
+  # macOS assumption, and it failed on the Linux runner where no provider
+  # exists.
   test_start "fm_commit_refuses_without_staged_changes"
-  fm_expect_any "No staged changes" "staged"
+  fm_expect_any "No staged changes" "staged" "No AI provider found"
 }
 
 test_fm_smoke_uninstall() {

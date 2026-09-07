@@ -19,7 +19,7 @@ set -u
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
-source "$SCRIPT_DIR/feature_matrix_lib.sh"
+source "$SCRIPT_DIR/../framework/feature_matrix_lib.sh"
 
 trap fm_sandbox_teardown EXIT
 fm_sandbox_setup
@@ -220,7 +220,17 @@ test_fm_load_bench() {
     "exec bash '$REPO_ROOT/defaults/dot_local/bin/executable_dot-load-benchmark' \"\$@\""
   test_start "fm_load_bench"
   fm_run load-bench
-  fm_expect_rc_in 0 1
+  # The helper times zsh's heavy-layer readiness with `zsh -i -c`, so without
+  # zsh on the host it prints its header and then exits 127. That is the
+  # runner's toolbox, not a regression — the same environment-gap skip
+  # test_dot_commands_execution.sh applies to a bare 127. zsh is the login
+  # shell on the developer machines this was written on and is absent from
+  # the Linux CI runner, which is exactly how this row first went red.
+  if [[ "$FM_RC" -eq 127 ]] && ! command -v zsh >/dev/null 2>&1; then
+    fm_pass "skipped — zsh not installed (load-bench times an interactive zsh)"
+  else
+    fm_expect_rc_in 0 1
+  fi
   test_start "fm_load_bench_reports_timings"
   fm_expect_any "load benchmark" "avg" "ms"
 }

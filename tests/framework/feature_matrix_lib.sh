@@ -2,13 +2,15 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck shell=bash disable=SC1090,SC1091,SC2034
-# Regression for: GH-881
 #
 # feature_matrix_lib.sh — shared harness for the FEATURE-MATRIX regression
 # suite (tests/regression/test_feature_matrix_*.sh).
 #
-# NOT a test file: the runner discovers `test_*.sh` only, so this name is
-# deliberately outside that glob.
+# Lives in tests/framework/ rather than tests/regression/ for two reasons:
+# it is shared test infrastructure like assertions.sh and mocks.sh, and
+# docs/NAMING_CONVENTIONS.md requires every .sh under tests/{unit,integration,
+# regression} to be named test_*.sh — which this is not, and must not be,
+# since the runner would then execute a library as a suite.
 #
 # Every row of docs/reference/FEATURE-MATRIX.md names a test function that
 # lives in one of the test_feature_matrix_*.sh files and is verified to exist
@@ -44,7 +46,7 @@ _DOT_LIB_FEATURE_MATRIX_LOADED=1
 
 FM_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$FM_LIB_DIR/../.." && pwd)}"
-source "$FM_LIB_DIR/../framework/assertions.sh"
+source "$FM_LIB_DIR/assertions.sh"
 
 FM_DOT="$REPO_ROOT/bin/dot"
 

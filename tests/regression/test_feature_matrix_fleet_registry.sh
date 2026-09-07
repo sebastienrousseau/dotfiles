@@ -22,7 +22,7 @@ set -u
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
-source "$SCRIPT_DIR/feature_matrix_lib.sh"
+source "$SCRIPT_DIR/../framework/feature_matrix_lib.sh"
 
 trap fm_sandbox_teardown EXIT
 fm_sandbox_setup
