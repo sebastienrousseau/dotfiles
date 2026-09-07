@@ -120,9 +120,22 @@ out_has "No process found on port 3000" "message"
 # `kill` is a shell builtin, so a PATH stub would never be consulted: the
 # signal has to be real. Each case therefore targets a throwaway `sleep`
 # started by this suite, and never a PID we did not create.
+#
+# spawn_victim — start that sleep so it can be signalled safely. `sleep 30 &`
+# alone is not safe: until the child execs it is still *this* bash, carrying
+# this suite's `trap cov_teardown_sandbox EXIT`, so a SIGTERM that arrives in
+# the fork/exec window makes the child delete the shared sandbox out from
+# under the rest of the suite (reproduced on Linux; the window is wider
+# there). Clearing the trap and exec-ing in the child closes it.
+spawn_victim() {
+  (
+    trap - EXIT
+    exec sleep 30
+  ) &
+  VICTIM=$!
+}
 test_start "kill_port_sends_sigterm_by_default"
-sleep 30 &
-VICTIM=$!
+spawn_victim
 printf '%s\n' "$VICTIM" >"$LSOF_PIDS"
 util kill-port 3000
 assert_equals 0 "$RC" "rc"
@@ -132,26 +145,24 @@ wait "$VICTIM" 2>/dev/null
 assert_false "kill -0 $VICTIM 2>/dev/null" "the process is gone"
 
 test_start "kill_port_force_sends_sigkill"
-sleep 30 &
-VICTIM=$!
+spawn_victim
 printf '%s\n' "$VICTIM" >"$LSOF_PIDS"
 util kill-port 8080 --force
 assert_equals 0 "$RC" "rc"
 out_has "Force killing" "announced"
 out_has "Killed PID $VICTIM" "result"
 wait "$VICTIM" 2>/dev/null
-sleep 30 &
-VICTIM=$!
+spawn_victim
 printf '%s\n' "$VICTIM" >"$LSOF_PIDS"
 util kill-port 8080 -f
 out_has "Killed PID $VICTIM" "short flag behaves the same"
 wait "$VICTIM" 2>/dev/null
 
 test_start "kill_port_kills_every_listed_process"
-sleep 30 &
-FIRST=$!
-sleep 30 &
-SECOND=$!
+spawn_victim
+FIRST="$VICTIM"
+spawn_victim
+SECOND="$VICTIM"
 printf '%s\n%s\n' "$FIRST" "$SECOND" >"$LSOF_PIDS"
 util kill-port 3000
 assert_equals 0 "$RC" "rc"
@@ -160,14 +171,14 @@ out_has "Killed PID $SECOND" "second process"
 wait "$FIRST" "$SECOND" 2>/dev/null
 
 test_start "kill_port_reports_a_process_it_cannot_signal"
-sleep 5 &
-GONE=$!
-kill "$GONE" 2>/dev/null
-wait "$GONE" 2>/dev/null
-printf '%s\n' "$GONE" >"$LSOF_PIDS"
+# A PID above every platform's pid_max (Linux 4194304, macOS 99998) can never
+# name a live process, so this drives the failure branch without signalling
+# anything — including without racing a background job's fork/exec window.
+IMPOSSIBLE_PID=2147483646
+printf '%s\n' "$IMPOSSIBLE_PID" >"$LSOF_PIDS"
 util kill-port 3000
 assert_equals 0 "$RC" "rc"
-out_has "Failed to kill PID $GONE" "failure reported"
+out_has "Failed to kill PID $IMPOSSIBLE_PID" "failure reported"
 
 NOTOOL="$DOTFILES_COV_TMPDIR/notool"
 mkdir -p "$NOTOOL"
@@ -188,16 +199,36 @@ assert_true "! grep -q 'Killed PID' '$OUTF'" "nothing is signalled"
 record_stub osascript
 record_stub notify-send
 
-test_start "notify_uses_osascript_on_macos"
+test_start "notify_uses_the_notifier_for_this_platform"
 util notify "Build" "finished"
 assert_equals 0 "$RC" "rc"
-called "display notification"
-assert_file_contains "$CALLS" "with title \"Build\"" "title passed through"
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  called "display notification"
+  assert_file_contains "$CALLS" "with title \"Build\"" "title passed through"
+else
+  called "notify-send Build finished"
+fi
 
 test_start "notify_defaults_the_title"
 util notify
 assert_equals 0 "$RC" "rc"
 assert_file_contains "$CALLS" "Notification" "default title"
+
+test_start "notify_falls_back_to_stdout_without_a_desktop_notifier"
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  # The macOS arm has no fallback: osascript is part of the OS.
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: not applicable on macOS"
+else
+  BARE="$DOTFILES_COV_TMPDIR/bare"
+  mkdir -p "$BARE"
+  for c in sh bash printf echo grep uname; do
+    p="$(command -v "$c" 2>/dev/null)" && ln -sf "$p" "$BARE/$c"
+  done
+  PATH="$BARE" util notify "Build" "finished"
+  assert_equals 0 "$RC" "rc"
+  out_has "Build: finished" "message printed to stdout"
+fi
 
 # ── antigravity ─────────────────────────────────────────────────────────
 test_start "antigravity_reports_a_missing_upstream_binary"

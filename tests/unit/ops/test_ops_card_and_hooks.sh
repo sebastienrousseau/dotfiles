@@ -71,7 +71,15 @@ out_has "Security" "security row"
 out_has "Hydrated" "footer"
 
 test_start "bento_names_the_running_platform"
-out_has "macOS" "macOS detected on this host"
+# The card detects the OS itself: macOS on Darwin, WSL when
+# /proc/sys/kernel/osrelease says so, Linux otherwise.
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  out_has "macOS" "macOS detected"
+elif grep -qiE '(microsoft|wsl)' /proc/sys/kernel/osrelease 2>/dev/null; then
+  out_has "WSL" "WSL detected"
+else
+  out_has "Linux" "Linux detected"
+fi
 
 # ── prepare-commit-msg ──────────────────────────────────────────────────
 MSG="$DOTFILES_COV_TMPDIR/COMMIT_EDITMSG"

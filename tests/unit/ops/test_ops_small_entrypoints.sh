@@ -155,6 +155,12 @@ assert_equals 0 "$RC" "rc"
 out_has "not available; skipping sysctl tuning" "explanation"
 
 # ── prewarm ─────────────────────────────────────────────────────────────
+# prewarm.sh locks on $XDG_RUNTIME_DIR (falling back to /tmp), a path shared
+# by every process on the machine. Point it inside the sandbox so a suite
+# running in parallel can neither take our lock nor see us holding it.
+export XDG_RUNTIME_DIR="$DOTFILES_COV_TMPDIR/run"
+mkdir -p "$XDG_RUNTIME_DIR"
+
 test_start "prewarm_caches_every_tool_it_finds"
 record_stub starship
 record_stub zoxide
@@ -201,7 +207,7 @@ called "gh completion -s zsh"
 assert_file_contains "$XDG_DATA_HOME/zsh/completions/_gh" "#compdef gh" "completion written"
 
 test_start "prewarm_refuses_to_run_twice_at_once"
-LOCK="${XDG_RUNTIME_DIR:-/tmp}/dotfiles-prewarm.lock"
+LOCK="$XDG_RUNTIME_DIR/dotfiles-prewarm.lock"
 NOFLOCK="$DOTFILES_COV_TMPDIR/noflock"
 mkdir -p "$NOFLOCK" "${LOCK}.d"
 ln -sf "$REAL_BASH" "$NOFLOCK/bash"
@@ -226,7 +232,17 @@ out_has "Invalid SSH target" "error"
 out_has "Expected format: user@hostname" "hint"
 
 test_start "teleport_pipes_the_chezmoi_archive_over_ssh"
-record_stub ssh
+# The ssh stub must *drain* the archive: teleport pipes `chezmoi archive`
+# into it under `set -o pipefail`, so a stub that exits without reading
+# gives the writer SIGPIPE and the script exits 141 (seen on Linux, where
+# the timing differs from macOS).
+cat >"$BIN/ssh" <<STUB
+#!$REAL_BASH
+printf 'ssh %s\n' "\$*" >>"\$CALLS"
+cat >/dev/null
+exit 0
+STUB
+chmod +x "$BIN/ssh"
 cat >"$BIN/chezmoi" <<STUB
 #!$REAL_BASH
 printf 'chezmoi %s\\n' "\$*" >>"\$CALLS"

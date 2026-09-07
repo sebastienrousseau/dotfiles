@@ -154,17 +154,30 @@ unset DOTFILES_PERF_MAX_MS
 export DOTFILES_PERF_TARGET_BASH_MS=100000
 
 test_start "zsh_is_measured_with_its_own_target"
-# zsh is the reference shell for the headline score, and has its own
-# per-shell target arm in shell_target_for.
+# zsh is the reference shell for the headline score and has its own arm in
+# shell_target_for — but it is not installed everywhere (the Linux CI runner
+# has no zsh), and then the filter matches nothing at all.
 perf --json --shell zsh --runs 1 --target 100000
-assert_equals 0 "$RC" "rc"
-assert_true "[[ \$(jq -r '.shells.zsh.mean_ms' <'$OUTF') -ge 0 ]]" "zsh measured"
-assert_equals "$(jq -r .mean_ms <"$OUTF")" "$(jq -r '.shells.zsh.mean_ms' <"$OUTF")" "headline mean comes from zsh"
+if command -v zsh >/dev/null 2>&1; then
+  assert_equals 0 "$RC" "rc"
+  assert_true "[[ \$(jq -r '.shells.zsh.mean_ms' <'$OUTF') -ge 0 ]]" "zsh measured"
+  assert_equals "$(jq -r .mean_ms <"$OUTF")" "$(jq -r '.shells.zsh.mean_ms' <"$OUTF")" "headline mean comes from zsh"
+else
+  assert_equals 1 "$RC" "no measurable shell without zsh"
+  out_has "no measurable shells found" "error names the empty filter"
+fi
 
 test_start "profile_flag_adds_the_zprof_section"
-perf --shell bash --runs 1 --target 100000 --no-baseline-check --profile
-assert_equals 0 "$RC" "rc"
-out_has "Top contributors (zprof)" "section"
+# zprof is a zsh module, so --profile only completes where zsh exists (it is
+# absent on the Linux CI runner).
+if command -v zsh >/dev/null 2>&1; then
+  perf --shell bash --runs 1 --target 100000 --no-baseline-check --profile
+  assert_equals 0 "$RC" "rc"
+  out_has "Top contributors (zprof)" "section"
+else
+  perf --shell bash --runs 1 --target 100000 --no-baseline-check --profile
+  out_has "Top contributors (zprof)" "section header still rendered"
+fi
 
 # ── baseline ────────────────────────────────────────────────────────────
 test_start "baseline_flag_writes_the_measured_means"

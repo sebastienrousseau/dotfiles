@@ -231,7 +231,7 @@ assert_equals "healthy" "$(out_json .status)" "status"
 assert_equals "1" "$(out_json .server_count)" "server_count"
 assert_equals "true" "$(out_json .checks.config_present)" "config_present"
 assert_equals "false" "$(out_json .strict)" "strict flag"
-assert_output_not_contains "MCP Doctor" "printf '%s' \"\$OUT\""
+out_lacks "MCP Doctor" "no human-readable chrome in --json mode"
 
 test_start "json_mode_reports_warning_status"
 doctor "MCP_CONFIG=$MINIMAL_CFG" "MCP_POLICY_CONFIG=$FIX/absent.json" \

@@ -182,28 +182,42 @@ assert_equals 0 "$RC" "rc"
 out_has "[INFO] hello from the fallback" "fallback logger"
 
 # ── hiddenfiles ─────────────────────────────────────────────────────────
-test_start "hiddenfiles_help_lists_both_actions"
-fn files/hiddenfiles.sh hiddenfiles --help
-assert_equals 0 "$RC" "rc"
-out_has "Hidden Files Visibility Toggle" "banner"
-out_has "hiddenfiles [show|hide]" "usage"
+# The function refuses to run anywhere but macOS, so each platform gets the
+# arm it actually reaches.
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  test_start "hiddenfiles_refuses_to_run_off_macos"
+  fn files/hiddenfiles.sh hiddenfiles
+  assert_equals 1 "$RC" "rc"
+  out_has "hiddenfiles: macOS only" "refusal"
 
-test_start "hiddenfiles_rejects_an_unknown_action"
-fn files/hiddenfiles.sh hiddenfiles sideways
-assert_equals 1 "$RC" "rc"
-out_has "Invalid argument: 'sideways'" "error"
+  test_start "hiddenfiles_refuses_before_reading_its_arguments"
+  fn files/hiddenfiles.sh hiddenfiles --help
+  assert_equals 1 "$RC" "rc"
+  out_has "hiddenfiles: macOS only" "the guard runs before the help arm"
+else
+  test_start "hiddenfiles_help_lists_both_actions"
+  fn files/hiddenfiles.sh hiddenfiles --help
+  assert_equals 0 "$RC" "rc"
+  out_has "Hidden Files Visibility Toggle" "banner"
+  out_has "hiddenfiles [show|hide]" "usage"
 
-test_start "hiddenfiles_defaults_to_hiding"
-# `defaults` and `osascript` are sandbox no-op shims.
-fn files/hiddenfiles.sh hiddenfiles
-assert_equals 0 "$RC" "rc"
-out_has "Hiding hidden files" "action"
-out_has "Finder settings updated successfully" "completion"
+  test_start "hiddenfiles_rejects_an_unknown_action"
+  fn files/hiddenfiles.sh hiddenfiles sideways
+  assert_equals 1 "$RC" "rc"
+  out_has "Invalid argument: 'sideways'" "error"
 
-test_start "hiddenfiles_can_show_them_too"
-fn files/hiddenfiles.sh hiddenfiles show
-assert_equals 0 "$RC" "rc"
-out_has "Showing hidden files" "action"
+  test_start "hiddenfiles_defaults_to_hiding"
+  # `defaults` and `osascript` are sandbox no-op shims.
+  fn files/hiddenfiles.sh hiddenfiles
+  assert_equals 0 "$RC" "rc"
+  out_has "Hiding hidden files" "action"
+  out_has "Finder settings updated successfully" "completion"
+
+  test_start "hiddenfiles_can_show_them_too"
+  fn files/hiddenfiles.sh hiddenfiles show
+  assert_equals 0 "$RC" "rc"
+  out_has "Showing hidden files" "action"
+fi
 
 # ── emoji ───────────────────────────────────────────────────────────────
 test_start "emoji_reports_a_missing_picker"

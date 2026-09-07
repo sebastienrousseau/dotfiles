@@ -129,9 +129,17 @@ assert_equals 0 "$RC" "rc"
 out_has "41 42" "hexdump rendered the bytes"
 rm -f "$HEXPATH/hexdump"
 PATH="$HEXPATH" util hex "$WORK/bin.dat"
-# The od arm passes `-t x1z`, whose `z` format character BSD od rejects, so
-# on macOS the fallback runs and surfaces od's own failure.
-assert_true "[[ $RC -ne 0 ]]" "the od fallback ran"
+# The od arm passes `-t x1z`. GNU od accepts the `z` format character and
+# renders the dump; BSD od (macOS) rejects it, so the arm surfaces od's own
+# failure. Assert whichever this platform's od actually does — and in both
+# cases that it is the od arm, not the no-tool error.
+if od -A x -t x1z -v /dev/null >/dev/null 2>&1; then
+  assert_equals 0 "$RC" "the od fallback rendered the dump"
+  # GNU od spaces the byte columns: "41 42".
+  out_has "41 42" "od rendered the bytes"
+else
+  assert_true "[[ $RC -ne 0 ]]" "the od fallback ran and surfaced od's failure"
+fi
 assert_true "! grep -q 'required' '$OUTF'" "and it is not the no-tool error"
 rm -f "$HEXPATH/od"
 PATH="$HEXPATH" util hex "$WORK/bin.dat"
