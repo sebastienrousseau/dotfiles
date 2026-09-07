@@ -178,6 +178,16 @@ _expect_absent() {
   fi
 }
 
+# doctor.sh abbreviates the home prefix with `${value/#$HOME/\~}`. Bash
+# 4.4+ strips the backslash and prints `~`; bash 3.2 — the `bash` on
+# PATH on a stock Mac and on the macos-14 runner — keeps it and prints
+# `\~`. Assert whichever this interpreter actually produces rather than
+# hard-coding one of them.
+_HOME_TILDE='~'
+if [[ "$(v=/x/y HOME=/x eval 'printf %s "${v/#$HOME/\~}"')" == '\~'* ]]; then
+  _HOME_TILDE='\~'
+fi
+
 _linux_os_release() {
   cat >"$S_HOME/os-release" <<'EOF'
 ID=fixturelinux
@@ -403,7 +413,8 @@ _expect "s2_environment_and_state" \
   "[WARN] audit bypass" "1 push(es) bypassed" "[WARN] history_filter" "1 patterns" \
   "[WARN] antigravity wrapper" "expected ~/.local/bin/antigravity" \
   "[WARN] fish_plugins" "missing jorgebucaran/fisher" "[WARN] cargo-install-update" \
-  "[WARN] symlinks" "1 broken: ~/.config/dangling" "[WARN] portability" "scan skipped"
+  "[WARN] symlinks" "1 broken: $_HOME_TILDE/.config/dangling" \
+  "[WARN] portability" "scan skipped"
 _expect "s2_performance_warnings" \
   "[WARN] shell caches" "stale (mise, zoxide, atuin, fzf, direnv)" \
   "[WARN] uncached slow-init tools" "pyenv" "[WARN] .zcompdump" "refresh:" \

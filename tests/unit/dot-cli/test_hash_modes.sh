@@ -246,7 +246,11 @@ _h_expect "file_mode_missing_file_exits_1" 1 "Error: File not found:"
 _run_hash "$GNU_BIN" "" --check "$SHA256_HELLO" hello
 _h_expect "check_mode_match_exits_0" 0 "Hash matches"
 
-_run_hash "$GNU_BIN" "" -c "${SHA256_HELLO^^}" hello
+# Uppercased with tr, not ${VAR^^}: that expansion is bash 4+, and on
+# bash 3.2 it fails as a bad substitution, leaving the assertion below to
+# re-inspect the previous run instead of this one.
+SHA256_HELLO_UPPER="$(printf '%s' "$SHA256_HELLO" | tr '[:lower:]' '[:upper:]')"
+_run_hash "$GNU_BIN" "" -c "$SHA256_HELLO_UPPER" hello
 _h_expect "check_mode_is_case_insensitive" 0 "Hash matches"
 
 _run_hash "$GNU_BIN" "" -c deadbeef hello
