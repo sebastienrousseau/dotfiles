@@ -6,6 +6,11 @@
 # Lazy load nvm only when nvm, node, npm, or yarn is called
 if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
   lazy_nvm() {
+    # The trigger names are ALIASES, not functions: `unset -f` alone
+    # leaves them in place, so every later `node`/`npm` call routes
+    # back through this loader and re-sources nvm.sh. Drop the aliases
+    # first so the shell resolves the real functions nvm.sh defines.
+    unalias nvm node npm yarn npx 2>/dev/null || true
     unset -f nvm node npm yarn npx
     export NVM_DIR="$HOME/.nvm"
     [[ -s "$NVM_DIR/nvm.sh" ]] && \. "$NVM_DIR/nvm.sh"
@@ -26,6 +31,11 @@ fi
 # RBENV (Ruby Version Manager)
 if command -v rbenv >/dev/null; then
   lazy_rbenv() {
+    # `unalias` before anything else: `rbenv` here is an alias, and the
+    # command substitution below is parsed at runtime with alias
+    # expansion on (every interactive shell), so `$(rbenv init -)`
+    # re-entered this function and forked without bound.
+    unalias rbenv ruby gem bundle 2>/dev/null || true
     unset -f rbenv ruby gem bundle
     eval "$(rbenv init -)"
     "$@"
@@ -40,6 +50,8 @@ fi
 # SDKMAN (Java/Groovy/Scala Version Manager)
 if [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]]; then
   lazy_sdk() {
+    # Same alias-vs-function trap as lazy_nvm above.
+    unalias sdk java gradle mvn kotlin 2>/dev/null || true
     unset -f sdk java gradle mvn kotlin
     source "$HOME/.sdkman/bin/sdkman-init.sh"
     "$@"
