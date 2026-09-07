@@ -1,5 +1,3 @@
-<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
-
 <p align="center">
   <img src="https://cloudcdn.pro/dotfiles/v2/images/logos/dotfiles.svg" alt="Dotfiles logo" width="128" />
 </p>
@@ -22,8 +20,8 @@
   <a href="https://codespaces.new/sebastienrousseau/dotfiles"><img src="https://img.shields.io/badge/Open%20in-Codespaces-blue?style=for-the-badge&logo=github&logoColor=white" alt="Open in GitHub Codespaces" /></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/dotfiles"><img src="https://img.shields.io/ossf-scorecard/github.com/sebastienrousseau/dotfiles?style=for-the-badge&logo=linuxfoundation&logoColor=white&label=OpenSSF%20Scorecard" alt="OpenSSF Scorecard" /></a>
   <a href="https://www.bestpractices.dev/projects/12840"><img src="https://img.shields.io/cii/level/12840?style=for-the-badge&logo=linuxfoundation&logoColor=white&label=OpenSSF%20Best%20Practices" alt="OpenSSF Best Practices" /></a>
-  <a href="LICENSE-APACHE"><img src="https://img.shields.io/badge/License-Apache--2.0%20OR%20MIT-green?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="License: Apache-2.0 OR MIT" /></a>
-  <a href="docs/MINIMUM-TOOLCHAIN.md"><img src="https://img.shields.io/badge/toolchain-bash%205.0%20%C2%B7%20chezmoi%202.40-93450a?style=for-the-badge&logo=gnubash&logoColor=white" alt="Minimum toolchain: bash 5.0, chezmoi 2.40" /></a>
+  <a href="#license"><img src="https://img.shields.io/badge/License-Apache--2.0%20OR%20MIT-green?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="License: Apache-2.0 OR MIT" /></a>
+  <a href="#requirements"><img src="https://img.shields.io/badge/toolchain-bash%205.0%20%C2%B7%20chezmoi%202.40-93450a?style=for-the-badge&logo=gnubash&logoColor=white" alt="Minimum toolchain: bash 5.0, chezmoi 2.40" /></a>
   <a href="https://repology.org/project/dot-cli/versions"><img src="https://img.shields.io/repology/repositories/dot-cli?style=for-the-badge&label=Repology" alt="Repology" /></a>
 </p>
 
@@ -37,9 +35,9 @@
 - [Requirements](#requirements) — toolchain floor, platforms, shells
 - [Quick Start](#quick-start) — install, verify, switch a theme, apply in six commands
 
-**The dotfiles ecosystem** (framework + four in-repo satellites)
+**The dotfiles family** (framework + four in-repo satellites)
 
-- [The dotfiles ecosystem](#the-dotfiles-ecosystem) — `dot`, `dot-ui`, `dot-ai-tui`, `dot mcp`, `dot-sys`, the module registry at a glance
+- [The dotfiles family](#the-dotfiles-family) — `dot`, `dot-ui`, `dot-ai-tui`, `dot mcp`, `dot-sys`, the module registry at a glance
 
 **Framework reference**
 
@@ -50,6 +48,9 @@
 - [Comparison](#comparison) — short matrix against chezmoi, holman, nikitabobko
 - [Benchmarks](#benchmarks) — startup budgets and the measurement method
 - [Features](#features) — what is included, by area
+
+**What it does**
+
 - [Wallpaper-driven themes](#wallpaper-driven-themes) — K-Means in CIELAB, WCAG AAA, 228 generated themes
 - [Agent governance (ask / plan / apply / audit)](#agent-governance-ask--plan--apply--audit) — bounded profiles, MCP policy, attestation
 - [Self-healing and rollback](#self-healing-and-rollback) — `dot doctor`, `dot heal`, `dot chaos`, `dot rollback`
@@ -106,7 +107,8 @@ form above skips this check; use it for sandboxes and ephemeral CI.
 
 Every tag publishes `dot-<version>.tar.gz` and `.zip` with the
 dispatcher, `lib/dot`, the man page, zsh / bash / fish completions,
-and a `Makefile` honouring `PREFIX` and `DESTDIR`. The archive
+and a `Makefile` honouring the usual install prefix and staging
+directory. The archive
 carries SLSA build provenance (keyless, via Fulcio + Rekor):
 
 ```bash
@@ -119,7 +121,7 @@ make -C dot-0.2.519 install PREFIX=/usr/local
 [`release-install-smoke.yml`](.github/workflows/release-install-smoke.yml)
 repeats exactly this sequence on a clean Ubuntu and macOS runner
 after every release: verify provenance, `make install` into an
-empty `DESTDIR`, run `dot version`, `make uninstall`, assert
+empty staging directory, run `dot version`, `make uninstall`, assert
 nothing is left behind.
 
 ### Package managers
@@ -139,8 +141,9 @@ and
 from the templates under [`install/`](install/README.md); the AUR
 package is pushed by
 [`release-distribute-aur.yml`](.github/workflows/release-distribute-aur.yml).
-See [`docs/packaging.md`](docs/packaging.md) for the packager-facing
-notes and [`pkg/`](pkg/) for the per-format sources.
+The per-channel templates and the maintainer runbook are in
+[`install/README.md`](install/README.md); the end-to-end pipeline is
+[`docs/operations/RELEASE_PIPELINE.md`](docs/operations/RELEASE_PIPELINE.md).
 
 ### With chezmoi directly
 
@@ -222,14 +225,17 @@ profile per machine and flip session flags when you need less.
   and `lib/dot` avoid bash-4-only constructs where macOS's stock
   `/bin/bash` 3.2 has to run them (the notes are in `lib/dot/ui.sh`),
   but 3.2 is not a supported interactive shell.
+
 - **chezmoi 2.40 or newer, git 2.35 or newer, curl.** CI pins
   chezmoi `2.47.1` and installs it through a checksum-verified
   fetch; `install.sh` does the same on your machine.
+
 - **A supported platform.** macOS 14+ (Apple Silicon and Intel),
   Ubuntu 22.04+, Debian 12+, WSL2, NixOS 23.11+ are CI-tested or
   supported; Fedora and Arch are community-supported. The full
   table, with per-tool floors, is
   [`docs/reference/SUPPORT_MATRIX.md`](docs/reference/SUPPORT_MATRIX.md).
+
 - **Windows.** PowerShell 7.4 LTS / 7.5+ runs the native
   `dot.ps1` for the daily workflow (apply, status, doctor, mise
   inventory, agent checks, fleet status); the `Test / Windows` job
@@ -239,10 +245,10 @@ profile per machine and flip session flags when you need less.
 exercises, not the oldest version that happens to work. It is
 raised only in a release whose `CHANGELOG.md` entry names the new
 floor and the reason, never silently. The version axis on which it
-may move, the history, and the table mapping current distro
-toolchains to the floor live in
-[`docs/MINIMUM-TOOLCHAIN.md`](docs/MINIMUM-TOOLCHAIN.md); this
-README makes no distro-compatibility claim that table does not
+may move, and the table mapping every supported platform and tool
+to its floor live in
+[`docs/reference/SUPPORT_MATRIX.md`](docs/reference/SUPPORT_MATRIX.md);
+this README makes no distro-compatibility claim that table does not
 back.
 
 ---
@@ -258,22 +264,32 @@ dot theme toggle      # swap dark and light within the current family
 dot sync              # apply the source tree; the next shell hydrates its caches
 ```
 
-Then edit `~/.config/chezmoi/chezmoi.toml` for per-machine settings
-([Profiles](docs/reference/PROFILES.md)), flip flags in
-`.chezmoidata.toml` ([Feature Flags](docs/reference/FEATURES.md)),
-and run `dot sync` again. Upgrades are covered in
+### First 5 Minutes
+
+1. **Check** — `dot doctor` validates tools, paths, and security.
+2. **Explore** — `dot learn` walks through shells, secrets, themes,
+   and performance.
+3. **Customize** — edit `~/.config/chezmoi/chezmoi.toml` for
+   per-machine settings
+   ([Profiles](docs/reference/PROFILES.md)).
+4. **Toggle features** — flip flags in `.chezmoidata.toml`
+   ([Feature Flags](docs/reference/FEATURES.md)).
+5. **Apply** — `dot sync` applies the config, and the next
+   interactive shell hydrates its caches through `_cached_eval`.
+
+Upgrades between versions are covered in
 [`docs/operations/MIGRATION.md`](docs/operations/MIGRATION.md).
 
 ---
 
-## The dotfiles ecosystem
+## The dotfiles family
 
 One repository, one release train: the `dot` framework plus four
 satellites that ship inside it and version with it. The version
 number in `.chezmoidata.toml` is the compatibility contract — CI's
 `Generators / version-consistency` job checks it against eight
 human-visible surfaces (`package.json`, `bin/dot`, the man page, the
-`bento` banner, this README's badge, `CLAUDE.md`, `AGENTS.md`) on
+`bento` banner, this README's badge, `CLAUDE.md`, [`AGENTS.md`](AGENTS.md)) on
 every push.
 
 | Component | What it is | Use case |
@@ -353,9 +369,14 @@ The gaps, so nobody has to find them:
 - Nushell sits at Tier 3 with under 5% feature parity
   ([ADR-011](docs/adr/ADR-011-nushell-tier3-keep.md)).
 
-The full methodology, the lockstep model, and the measured gaps are
-in [`docs/ECOSYSTEM.md`](docs/ECOSYSTEM.md). The rest of this README
-covers the **framework** surface.
+Each number above names the command or the file that produced it.
+The Scorecard breakdown is
+[`docs/security/SCORECARD.md`](docs/security/SCORECARD.md), the
+coverage history is in
+[`coverage.yml`](.github/workflows/coverage.yml), and
+[`docs/STRUCTURE.md`](docs/STRUCTURE.md) maps every top-level path
+to the component that owns it. The rest of this README covers the
+**framework** surface.
 
 ---
 
@@ -372,9 +393,9 @@ dot init alice               # clone + apply through the dot harness
 dot init https://... --no-apply
 ```
 
-Coming from a specific tool? The headline mapping is below; the
-per-tool guides under [`docs/migration/`](docs/migration/) carry the
-TL;DR, the full concept table, behavioural notes, and a checklist.
+Coming from a specific tool? The headline mapping is below, and
+`dot init --dry-run` shows what the move would produce on this
+machine before anything is written.
 
 | Coming from | What changes |
 |---|---|
@@ -576,7 +597,9 @@ dot load-bench            # time to heavy-layer readiness
 Budgets, baseline lifecycle, and the regression-issue pipeline are
 documented in
 [`docs/operations/PERFORMANCE.md`](docs/operations/PERFORMANCE.md);
-[`benches/`](benches/) holds the harness sources.
+the harnesses are
+[`tools/ci/dot-cli-startup-bench.sh`](tools/ci/dot-cli-startup-bench.sh)
+and [`tests/performance/`](tests/performance/).
 
 ---
 
@@ -814,13 +837,15 @@ graph TD
     G --> P[Signed Attestation Logs]
 ```
 
-Root layout (since v0.2.503): `bin/` (dispatcher), `lib/dot/`
+Root layout: `bin/` (dispatcher), `lib/dot/`
 (shared bash library), `defaults/` (the chezmoi source tree, via
 `.chezmoiroot`), `scripts/` (runtime subcommands), `tools/`
 (repo-only ops), `install/` (bootstrap and channel templates). The
-map of every top-level path is
-[`docs/STRUCTURE.md`](docs/STRUCTURE.md); the contributor-facing
-design is [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+map of every top-level path, with the history of the reorganisation
+that produced it, is [`docs/STRUCTURE.md`](docs/STRUCTURE.md); the
+contributor-facing
+design is
+[`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md).
 
 </details>
 
@@ -948,24 +973,29 @@ disagreement on priorities.
   toolchain for the TUI satellites. `profile = "minimal"` and
   `DOTFILES_ULTRA_FAST=1` cut that down, but the framework assumes
   it may install things. A single `.zshrc` is lighter.
+
 - **You need full parity on nushell.** Nushell is Tier 3: simple
   aliases plus bash-delegated functions, under 5% of the zsh feature
   set, kept deliberately as a reference target
   ([ADR-011](docs/adr/ADR-011-nushell-tier3-keep.md)).
+
 - **You need Windows without WSL to be first-class.** The native
   `dot.ps1` covers the daily workflow (apply, status, doctor, mise,
   agents, fleet status); themes, `heal`, and most diagnostics still
   need bash. Windows CI verifies the PowerShell surface, not the
   whole CLI.
+
 - **You are on Fedora or Arch and need CI-backed support.** Both
   are community-supported: the code is expected to work, but the
   matrix runs Ubuntu, macOS (Intel and Apple Silicon), and Windows
   ([`docs/reference/SUPPORT_MATRIX.md`](docs/reference/SUPPORT_MATRIX.md)).
+
 - **You do not want `apply` to run scripts.** Provisioning hooks
   under `install/provision/` (`run_onchange_*`) install packages,
   fonts, and tmux plugins when their source changes. They are
   idempotent and previewable with `dot sync --check`, but they are
   scripts running as you.
+
 - **You need a second reviewer on every merge.** This is a
   single-maintainer project gated by CI, DCO, and signed commits,
   not by code review; the Scorecard `Code-Review` check says so.
@@ -994,7 +1024,8 @@ bash scripts/qa/check-version-consistency.sh
 ```
 
 Toolchain setup, the task map, and how to reproduce every CI gate
-locally are in [`DEVELOPMENT.md`](DEVELOPMENT.md). Commit signing,
+locally are in [`CONTRIBUTING.md`](CONTRIBUTING.md) and
+[`docs/operations/TESTING.md`](docs/operations/TESTING.md). Commit signing,
 the DCO trailer, branch names, and the regression-test convention
 are in [`CONTRIBUTING.md`](CONTRIBUTING.md). A
 [devcontainer](.devcontainer/devcontainer.json) boots to a working
@@ -1040,9 +1071,10 @@ go test -run TestNothing -fuzz='^FuzzInitURLResolver$' -fuzztime=60s ./...
 
 The harness layout and the OSS-Fuzz submission steps are in
 [`docs/security/FUZZING.md`](docs/security/FUZZING.md); the shared
-fuzz assets live under [`fuzz/`](fuzz/).
+corpus lives beside the harnesses under
+[`oss-fuzz-integration/fuzz/testdata/`](oss-fuzz-integration/fuzz/testdata/).
 
-### Hardening gates (shell code has no Miri, so these stand in)
+### Hardening gates in place of Miri
 
 - **ShellCheck at severity `error` is a hard gate** on every push
   (`reusable-shell-lint.yml`, `fail_on_shellcheck: true`), with
@@ -1065,7 +1097,7 @@ fuzz assets live under [`fuzz/`](fuzz/).
 - **Generators cannot drift:** the command index is regenerated
   from `dot help all` and diffed; eight version surfaces
   (`package.json`, `bin/dot` twice, the man page, `lib/dot/bento.sh`,
-  this README's badge, `CLAUDE.md`, `AGENTS.md`) are checked against
+  this README's badge, `CLAUDE.md`, [`AGENTS.md`](AGENTS.md)) are checked against
   `.chezmoidata.toml`; `.chezmoidata.toml` itself is validated
   against its JSON Schema. `dot agents check` does the same for the
   AI-harness stubs locally.
@@ -1103,12 +1135,12 @@ documented in
 **Reporting:** never open a public issue for a vulnerability — use
 [GitHub Security Advisories](https://github.com/sebastienrousseau/dotfiles/security/advisories)
 or <security@sebastienrousseau.com>; see
-[`SECURITY.md`](SECURITY.md) for the response SLA (Critical: 24 h
+[`.github/SECURITY.md`](.github/SECURITY.md) for the response SLA (Critical: 24 h
 initial response, 48 h target; High: 72 h / 7 days; Medium: 5 / 30
 business days; Low: 10 / 90), the supported-version table, and the
 GPG key for encrypted reports
 ([`docs/security/DISCLOSURE.md`](docs/security/DISCLOSURE.md),
-[`KEYS.asc`](KEYS.asc)).
+[`docs/security/KEYS.md`](docs/security/KEYS.md)).
 
 A dotfiles framework is code that runs as you, on every login, on
 every machine you own. The posture below closes the vectors that
@@ -1219,10 +1251,10 @@ The four entry points, identical across every repo in the family:
 - **[Command reference](docs/manual/command-index.md)** — every
   `dot` subcommand, generated from `dot help all`; `man dot` after
   install
-- **[Developer docs](DEVELOPMENT.md)** — toolchain, task map,
+- **[Developer docs](CONTRIBUTING.md)** — toolchain, task map,
   reproducing every CI gate locally
-- **[Ecosystem map](docs/ECOSYSTEM.md)** — the framework and its
-  satellites, the lockstep model, the scorecard
+- **[Family map](docs/STRUCTURE.md)** — every top-level path, the
+  component that owns it, and where to make which change
 
 The manual is published in nine formats (single- and multi-page
 HTML, PDF, EPUB, ASCII text, compressed variants, Markdown source)
@@ -1231,17 +1263,16 @@ and rebuilds on every change from [`docs/manual/`](docs/manual/).
 | Document | Covers |
 |---|---|
 | [`docs/STRUCTURE.md`](docs/STRUCTURE.md) | Every top-level path, the chezmoi naming contract, where to make which change. |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) / [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) | Startup strategies, `_cached_eval`, lazy hydration, artifact and ultra-fast modes. |
+| [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) | Startup strategies, `_cached_eval`, lazy hydration, artifact and ultra-fast modes. |
 | [`docs/adr/`](docs/adr/README.md) | Twelve decision records: CI/CD, shell performance, security-first, CLI architecture, chezmoi, shell selection, multi-shell parity, aliases, wallpaper theming, transient prompt, nushell tier, AI local proxy. |
 | [`docs/reference/`](docs/reference/) | Aliases, feature flags, fonts, PowerShell parity, profiles, scripts, support matrix, themes, tools, `dot` utilities. |
 | [`docs/security/`](docs/security/README.md) | Threat model, install verification, fuzzing, secrets, encryption, MCP policy, commit signing, CI pinning, egress allowlist, key rotation, release verification, Scorecard, compliance, incident response. |
 | [`docs/operations/`](docs/operations/OPERATIONS.md) | Release pipeline, version sync, performance, reliability, coverage, drift, registry, attestation, CI cadence, migration between versions. |
 | [`docs/guides/`](docs/guides/INSTALL.md) | Install, theming, Neovim IDE, troubleshooting, WSL2 + Nix. |
-| [`docs/packaging.md`](docs/packaging.md) | For distro maintainers: license grant, toolchain policy, pin model, offline tests, signature verification. |
-| [`SECURITY.md`](SECURITY.md) · [`SUPPORT.md`](SUPPORT.md) · [`GOVERNANCE.md`](GOVERNANCE.md) · [`CONTRIBUTING.md`](CONTRIBUTING.md) · [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | Reporting, support channels, decision model, contribution workflow, community expectations. |
+| [`install/README.md`](install/README.md) | For distro maintainers: the bootstrap path, the per-channel templates, and the publication checklist. |
+| [`.github/SECURITY.md`](.github/SECURITY.md) · [`GOVERNANCE.md`](GOVERNANCE.md) · [`CONTRIBUTING.md`](CONTRIBUTING.md) · [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | Reporting, decision model, contribution workflow, community expectations. |
 | [`CHANGELOG.md`](CHANGELOG.md) | Per-release notes. **The complete record** — every release appears here. |
 | [`AGENTS.md`](AGENTS.md) / [`CLAUDE.md`](CLAUDE.md) | Invariants for AI-assisted contributors; `CLAUDE.md` is canonical, `AGENTS.md` is rendered from it. |
-| [`CITATION.cff`](CITATION.cff) | How to cite the project. |
 
 ---
 
@@ -1275,6 +1306,7 @@ every one of them stays fixed.
   [`docs/operations/MIGRATION.md`](docs/operations/MIGRATION.md)
   with a migration or rollback script under `install/migrate/`
   ([`GOVERNANCE.md`](GOVERNANCE.md)).
+
 - **Output stability.** For a tool that generates files, output *is*
   API. Machine-readable outputs carry a schema version —
   `dot env emit` conforms to
@@ -1283,7 +1315,7 @@ every one of them stays fixed.
   [`docs/schema/dot-registry-v1.json`](docs/schema/dot-registry-v1.json) —
   and a change to their shape is a new schema version, not an edit
   to `v1`. Generated artefacts that other tools consume
-  (`themes.toml`, shell completions, `AGENTS.md` and the harness
+  (`themes.toml`, shell completions, [`AGENTS.md`](AGENTS.md) and the harness
   stubs, the command index) are produced by generators whose output
   is diffed in CI; a behavioural change to what a generator emits is
   treated as breaking and recorded in the changelog even when no
@@ -1291,9 +1323,12 @@ every one of them stays fixed.
   `version`, `doctor`, `perf`, and `health` is pinned by golden
   snapshots and changes only with a deliberate snapshot update in
   the same commit.
+
 - **Minimum toolchain.** Raised only with the reason recorded in the
   `CHANGELOG.md` entry, never silently — policy, version axis, and
-  history in [`docs/MINIMUM-TOOLCHAIN.md`](docs/MINIMUM-TOOLCHAIN.md).
+  history in
+  [`docs/reference/SUPPORT_MATRIX.md`](docs/reference/SUPPORT_MATRIX.md).
+
 - **Deprecations** are announced before removal with the removal
   release named up front:
   [`docs/reference/ALIASES_DEPRECATIONS.md`](docs/reference/ALIASES_DEPRECATIONS.md)
