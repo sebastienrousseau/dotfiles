@@ -206,9 +206,12 @@ cmd_fleet_drift() {
       tail -n "$count" "$_DRIFT_HISTORY_FILE" | while IFS= read -r line; do
         local time status file_count
         # One jq per line (was three: .time, .status, .files|length).
+        # `|| true`: on an unparseable line jq prints nothing, `read`
+        # hits EOF and returns 1, and `set -e` would otherwise abort the
+        # whole listing instead of rendering the `?` placeholders below.
         IFS=$'\t' read -r time status file_count < <(
           printf '%s' "$line" | jq -r '[.time, .status, (.files | length)] | @tsv' 2>/dev/null
-        )
+        ) || true
         [[ -n "$time" ]] || time="?"
         [[ -n "$status" ]] || status="?"
         [[ -n "$file_count" ]] || file_count=0
