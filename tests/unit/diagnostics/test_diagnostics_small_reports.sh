@@ -258,9 +258,16 @@ test_start "smoke_test_accepts_a_tool_managed_by_mise"
 MISEONLY="$WORK/mise-bin"
 mkdir -p "$MISEONLY"
 for f in "$BARE"/*; do ln -sf "$f" "$MISEONLY/$(basename "$f")"; done
+# check_cmd pipes this into `grep -qE`, which exits at the first match and
+# closes the pipe. Without `trap '' PIPE` the stub is killed by SIGPIPE, and
+# because smoke-test.sh runs under `set -o pipefail` the whole pipeline then
+# reports 141 — so an installed tool intermittently reads as "not found".
+# Whether the signal lands at all depends on scheduling, which made this fail
+# only under parallel load.
 cat >"$MISEONLY/mise" <<EOF
 #!$REAL_BASH
-[[ "\${1:-}" == ls ]] && printf 'git 2.42.0\nzsh 5.9\nchezmoi 2.47.1\nrg 14.1.0\nbat 0.24\neza 0.18\nzoxide 0.9\nzellij 0.40\nshfmt 3.8\npueue 3.4\nsgpt 1.4\ncopilot 1.0\nkiro-cli 0.2\n'
+trap '' PIPE
+[[ "\${1:-}" == ls ]] && printf 'git 2.42.0\nzsh 5.9\nchezmoi 2.47.1\nrg 14.1.0\nbat 0.24\neza 0.18\nzoxide 0.9\nzellij 0.40\nshfmt 3.8\npueue 3.4\nsgpt 1.4\ncopilot 1.0\nkiro-cli 0.2\n' 2>/dev/null
 exit 0
 EOF
 chmod +x "$MISEONLY/mise"
