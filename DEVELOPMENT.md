@@ -151,6 +151,7 @@ subset (lint + drift + test + examples) in one go.
 | `ci.yml` | Security / Link Check | `lychee --offline '**/*.md'` (see below) |
 | `ci-enforced.yml` | Lint / * (zero warnings) | `make lint` |
 | `pre-commit.yml` | Pre-Commit | `pre-commit run --all-files --config config/pre-commit-config.yaml` |
+| `pre-commit.yml` | actionlint hook | `make lint-workflows` (`actionlint -shellcheck=`, matching the hook) |
 | `reusable-shell-lint.yml` | Shell Lint | `make lint-shell` |
 | `reusable-lua-lint.yml` | Lua Lint | `luacheck . && stylua --check .` |
 | `reusable-nix-lint.yml` | Nix Lint | `nix flake check` (root and `nix/`) |

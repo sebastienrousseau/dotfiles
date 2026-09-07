@@ -77,8 +77,13 @@ lint-pins: ## Reusable workflows must be pinned by 40-hex SHA
 lint-copyright: ## Copyright/SPDX header present in every source file
 	bash ./tools/ci/check-copyright-headers.sh
 
-lint-workflows: ## actionlint over .github/workflows
-	actionlint
+# `-shellcheck=` matches the actionlint pre-commit hook, which mutes
+# shellcheck-in-script findings: 29 pre-existing style hits are tracked
+# separately, and this gate is for workflow syntax, runner labels and
+# event mismatches. Without the flag this target is stricter than CI
+# and fails on a clean checkout.
+lint-workflows: ## actionlint over .github/workflows, as CI runs it
+	actionlint -shellcheck=
 
 lint-links: ## lychee offline link check (what docs-link-check.yml gates on)
 	lychee --config config/lychee.toml --offline --no-progress '**/*.md'
