@@ -24,7 +24,10 @@
 
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# Honour a caller-supplied REPO_ROOT, matching scorecard-snapshot.sh,
+# a2a-conformance.sh and the other repo-scoped QA scripts. Lets the
+# checker run against a fixture tree without being copied into it.
+REPO_ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$REPO_ROOT"
 
 # ── Parse flags ─────────────────────────────────────────────────────────

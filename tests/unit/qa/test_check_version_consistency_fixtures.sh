@@ -28,11 +28,13 @@ trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
 # Build a fixture tree where every live surface carries <version>.
-# Prints the path of the symlinked script inside the fixture.
+# Prints the fixture root; the checker runs against it through
+# REPO_ROOT rather than being copied or symlinked into the tree —
+# a symlinked copy also hides the run from the coverage aggregator,
+# which resolves trace paths after the sandbox is gone.
 _fixture() { # <name> <version>
   local root="$DOTFILES_COV_TMPDIR/fx-$1" v="$2"
   mkdir -p "$root/scripts/qa" "$root/defaults" "$root/bin" "$root/share/man/man1" "$root/lib/dot"
-  ln -s "$SCRIPT_FILE" "$root/scripts/qa/check-version-consistency.sh"
   printf 'dotfiles_version = "%s"\n' "$v" >"$root/defaults/.chezmoidata.toml"
   printf '{\n  "name": "dotfiles",\n  "version": "%s"\n}\n' "$v" >"$root/package.json"
   printf '#!/usr/bin/env bash\n# Dotfiles CLI Entry Point - v%s\nVERSION="%s"\n' "$v" "$v" >"$root/bin/dot"
@@ -47,7 +49,7 @@ _fixture() { # <name> <version>
 _check() { # <fixture-root> [args]
   local root="$1"
   shift
-  "$BASH_BIN" "$root/scripts/qa/check-version-consistency.sh" "$@" 2>&1
+  REPO_ROOT="$root" "$BASH_BIN" "$SCRIPT_FILE" "$@" 2>&1
 }
 
 test_start "help_and_unknown_flag"
