@@ -76,7 +76,11 @@ if [ "$MODE" = "encode" ]; then
 else
   # Add padding if needed for URL-safe decode
   if [ "$URL_SAFE" -eq 1 ]; then
-    INPUT=$(printf "%s" "$INPUT" | tr '-_' '+/')
+    # `--` before the set: a leading `-` in `-_` is parsed as an option
+    # by BSD tr ("tr: illegal option -- _"), so `b64 -d -u …` failed on
+    # every macOS host. The encode direction ('+/' → '-_') is unaffected
+    # because its first set starts with `+`.
+    INPUT=$(printf "%s" "$INPUT" | tr -- '-_' '+/')
     while [ $((${#INPUT} % 4)) -ne 0 ]; do INPUT="${INPUT}="; done
   fi
   # macOS/BSD base64 uses -D for decode; GNU coreutils uses -d.
