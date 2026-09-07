@@ -129,11 +129,17 @@ mapfile -t collected < <(
 )
 echo "${collected[0]}" >/dev/null
 FIXTURE
-EXPECT_subst="2 6 7 11 12 15 16 19 20 23 24 25 26 29 32"
+EXPECT_subst="2 6 7 11 12 15 16 19 20 23 24 25 29 32"
 
 # Continuations: plain backslash-joined words (untraceable) versus a
 # continuation that starts a new command (traced at its own line), plus a
 # multi-line double-quoted string.
+#
+# Lines 6 and 8 — the heads of `true \` / `&& …` and `false \` / `|| …` —
+# are deliberately absent from the expectation. bash 5.3 traces them at
+# their own line; bash 5.2 (every current Linux runner) traces them at the
+# operator line instead, leaving them permanently unhittable there. The
+# classifier drops them so the denominator is the same on both.
 cat >"$SANDBOX/src/contin.sh" <<'FIXTURE'
 #!/usr/bin/env bash
 printf '%s %s %s\n' \
@@ -153,7 +159,7 @@ echo "$message" >/dev/null
 true && \
   echo "tail-operator" >/dev/null
 FIXTURE
-EXPECT_contin="2 6 7 8 9 10 11 12 15 16 17"
+EXPECT_contin="2 7 9 10 11 12 15 16 17"
 
 # Compound terminators carrying a redirection are not traced; a
 # terminator that starts a pipeline element is.
@@ -258,6 +264,15 @@ else
   sed -n '1,40p' "$runner_log" >&2
 fi
 
+# Which bash will actually drive the traced children decides whether the
+# dedicated xtrace descriptor is available at all (BASH_XTRACEFD is 4.1+).
+DRIVER_BASH_VERSION="$(bash -c 'echo "${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"' 2>/dev/null || echo "0.0")"
+DRIVER_BASH_HAS_XTRACEFD=0
+case "$DRIVER_BASH_VERSION" in
+  0.* | 1.* | 2.* | 3.* | 4.0) : ;;
+  *) DRIVER_BASH_HAS_XTRACEFD=1 ;;
+esac
+
 # Extract "<lineno> <hits>" for one SF: block.
 lcov_block() {
   awk -v want="$1" '
@@ -287,6 +302,19 @@ for name in $FIXTURES; do
   test_start "fully_covered_${name}"
   # Every fixture executes all of its own statements, so anything left at
   # zero hits is a line the classifier kept that bash cannot report.
+  #
+  # captured.sh is the exception: it is driven with `>/dev/null 2>&1`, and
+  # only BASH_XTRACEFD keeps its records out of that redirection. On a
+  # bash older than 4.1 — /bin/bash on macOS, which is what `bash`
+  # resolves to on a stock macOS runner — there is no such descriptor and
+  # the records genuinely are lost. That is a documented limitation of the
+  # mechanism on bash 3.x, not a classifier defect, so record a skip
+  # rather than a failure the fixture cannot control.
+  if [[ "$name" == "captured" ]] && [[ "$DRIVER_BASH_HAS_XTRACEFD" != "1" ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (bash ${DRIVER_BASH_VERSION} has no BASH_XTRACEFD)"
+    continue
+  fi
   uncovered="$(lcov_block "$sf" | awk '$2 == 0 {print $1}' | tr '\n' ' ')"
   uncovered="${uncovered% }"
   assert_equals "" "$uncovered" \
@@ -355,7 +383,7 @@ fi
 test_start "trace_records_survive_a_long_path_under_bash32"
 # macOS /bin/bash is 3.2 and truncates the expanded PS4 at 100 characters.
 # The runner's record format must stay short enough that a deep checkout
-# cannot cut the `:@` terminator off and make the record unparseable.
+# cannot cut the `:@` terminator off and make the record unparsable.
 if [[ -x /bin/bash ]] && /bin/bash --version 2>/dev/null | head -1 | grep -q 'version 3\.'; then
   deep="$SANDBOX/aaaaaaaaaa/bbbbbbbbbb/cccccccccc/dddddddddd/eeeeeeeeee/ffffffffff"
   mkdir -p "$deep"
@@ -426,39 +454,56 @@ test_start "incomplete_sweep_is_a_hard_error"
 # A worker that dies before recording a status leaves the sweep short, and
 # `xargs … || true` hides it. The runner must refuse to report a
 # percentage computed from a fraction of the suite.
-mkdir -p "$SANDBOX/tests-partial/unit" "$SANDBOX/tests-partial/regression"
-printf '#!/usr/bin/env bash\necho "RESULTS:1:1:0"\n' \
-  >"$SANDBOX/tests-partial/unit/test_ok.sh"
-cat >"$SANDBOX/tests-partial/unit/test_kills_its_worker.sh" <<'EOF'
+#
+# The fixture has to find its grandparent to kill it; without /proc or
+# `ps` there is no portable way, so record a skip rather than a false
+# failure (a slim container is the case that hits this).
+if [[ ! -r /proc/self/stat ]] && ! command -v ps >/dev/null 2>&1; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (no /proc and no ps to find the worker)"
+else
+  mkdir -p "$SANDBOX/tests-partial/unit" "$SANDBOX/tests-partial/regression"
+  printf '#!/usr/bin/env bash\necho "RESULTS:1:1:0"\n' \
+    >"$SANDBOX/tests-partial/unit/test_ok.sh"
+  cat >"$SANDBOX/tests-partial/unit/test_kills_its_worker.sh" <<'EOF'
 #!/usr/bin/env bash
 # Kill the xargs worker two levels up (this shell <- timeout <- worker),
 # reproducing "xargs: bash: terminated with signal 15": the worker dies
 # before it can record a status, so this test leaves no result behind.
-worker="$(ps -o ppid= -p "$PPID" 2>/dev/null | tr -d ' ')"
-[[ -n "$worker" ]] && kill -TERM "$worker" 2>/dev/null
+# /proc first (Linux, and present even in images without procps), `ps`
+# second (macOS and anything else).
+worker=""
+if [[ -r "/proc/$PPID/stat" ]]; then
+  worker="$(awk '{print $4}' "/proc/$PPID/stat" 2>/dev/null)"
+fi
+if [[ -z "$worker" ]] && command -v ps >/dev/null 2>&1; then
+  worker="$(ps -o ppid= -p "$PPID" 2>/dev/null | tr -d ' ')"
+fi
+[[ -n "$worker" && "$worker" != "0" ]] && kill -TERM "$worker" 2>/dev/null
 sleep 5
 EOF
-set +e
-env REPO_ROOT="$SANDBOX" \
-  TESTS_DIR="$SANDBOX/tests-partial" \
-  COVERAGE_DIR="$SANDBOX/coverage5" \
-  COVERAGE_OUT="$SANDBOX/coverage5/lcov.info" \
-  COV_INCLUDE_DIRS="$SANDBOX/src" \
-  MIN_COVERAGE_PCT=0 \
-  COV_TEST_TIMEOUT=30 \
-  JOBS=1 \
-  bash "$RUNNER" >"$SANDBOX/runner-partial.log" 2>&1
-partial_ec=$?
-rm -rf "$SANDBOX/tests-partial"
-if [[ "$partial_ec" -ne 0 ]] &&
-  grep -qE "tests-completed: [01]/2" "$SANDBOX/runner-partial.log" &&
-  grep -q "no result recorded for: unit/test_kills_its_worker.sh" "$SANDBOX/runner-partial.log"; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected a non-zero exit naming the test with no result (got $partial_ec)"
-  grep -E 'tests-completed|no result' "$SANDBOX/runner-partial.log" >&2 || true
+  set +e
+  env REPO_ROOT="$SANDBOX" \
+    TESTS_DIR="$SANDBOX/tests-partial" \
+    COVERAGE_DIR="$SANDBOX/coverage5" \
+    COVERAGE_OUT="$SANDBOX/coverage5/lcov.info" \
+    COV_INCLUDE_DIRS="$SANDBOX/src" \
+    MIN_COVERAGE_PCT=0 \
+    COV_TEST_TIMEOUT=30 \
+    JOBS=1 \
+    bash "$RUNNER" >"$SANDBOX/runner-partial.log" 2>&1
+  partial_ec=$?
+  rm -rf "$SANDBOX/tests-partial"
+  if [[ "$partial_ec" -ne 0 ]] &&
+    grep -qE "tests-completed: [01]/2" "$SANDBOX/runner-partial.log" &&
+    grep -q "no result recorded for: unit/test_kills_its_worker.sh" "$SANDBOX/runner-partial.log"; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected a non-zero exit naming the test with no result (got $partial_ec)"
+    grep -E 'tests-completed|no result' "$SANDBOX/runner-partial.log" >&2 || true
+  fi
 fi
 
 test_start "xtrace_uses_a_dedicated_descriptor"

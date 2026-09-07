@@ -730,6 +730,10 @@ terminator_redir_re = re.compile(
     r"^\s*(done|fi|esac|\}|\))\s+(?P<rest>[0-9]*[<>].*)$"
 )
 cont_op_head_re = re.compile(r"^\s*(\|\||&&|\||;;?|&)")
+# A backslash-continued command whose continuation begins with `&&` or
+# `||` is attributed to the OPERATOR line, not its own, on bash 5.2 —
+# and to its own line on 5.3. See the note in classify().
+cont_andor_re = re.compile(r"^\s*(&&|\|\|)")
 cont_op_tail_re = re.compile(
     r"(\|\||&&|\||;|&|\(|\{|!|\bthen\b|\bdo\b|\belse\b)\s*$"
 )
@@ -1028,6 +1032,51 @@ def analyze(path):
         verdict = classify(line, is_start, cont_reason, prev_code,
                            logical_has_subst, case_depth, excluding,
                            xtrace_disabled)
+
+        # Which bash you run decides where the head of a backslash-joined
+        # `&&`/`||` list is reported, so neither answer can be trusted:
+        #
+        #     true \\
+        #       && echo hi
+        #
+        # bash 5.3 traces `true` at its own line; bash 5.2 — every current
+        # Linux runner — traces it at the `&&` line, which then carries two
+        # records and leaves the head permanently unhittable. Dropping the
+        # head makes the denominator identical on both, at the cost of one
+        # covered line on 5.3. The operator line keeps its own entry, so a
+        # short-circuited right-hand side is still reported as missed.
+        #
+        # Narrow on purpose: only the STATEMENT-START head, and only for
+        # `&&`/`||`. An intermediate `&& cmd \\` in a longer chain is traced
+        # on both (observed), as are `|`, `;` and a trailing-operator join
+        # (`true && \\`), so all of those keep their line.
+        if (
+            verdict == "exec"
+            and is_start
+            and info["ends_with_backslash"]
+            and not st["quote"]
+            and not any(k in WORDISH for k, _ in st["stack"])
+            and lineno < len(text)
+            and cont_andor_re.match(text[lineno])
+        ):
+            verdict = "skip"
+
+        # `done < <(` whose process substitution spans lines is another
+        # version-dependent attribution. bash 5.x runs the substitution's
+        # body at the closing paren, which folds onto this line; bash 3.2
+        # attributes it to the `while`/`for` header instead, leaving the
+        # whole `done < <( … )` region with no record at all. Excluded, so
+        # the denominator agrees across versions.
+        #
+        # The single-line `done < <(cmd)` IS traced on both (observed), so
+        # the classify() rule keeps it — only the spanning form is dropped.
+        if (
+            verdict == "exec"
+            and is_start
+            and (st["quote"] or any(k in WORDISH for k, _ in st["stack"]))
+            and terminator_redir_re.match(strip_comment(line))
+        ):
+            verdict = "skip"
 
         if excl_start_re.search(line):
             excluding = True
