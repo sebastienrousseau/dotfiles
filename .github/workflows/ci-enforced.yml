@@ -33,7 +33,7 @@ jobs:
   # ============================================================================
   lint-shell:
     name: Lint / Shell (Zero Warnings)
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@b2d31a02f18ef89137edff7501c05eb59ff28b8f # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@76bd7d860d27843b5901e4e67df66b08ecca4ef3 # main
     with:
       include_tests: false
       shellcheck_severity: error
