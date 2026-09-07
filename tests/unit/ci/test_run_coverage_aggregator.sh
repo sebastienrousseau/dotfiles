@@ -203,7 +203,20 @@ echo "count=$count" >/dev/null
 FIXTURE
 EXPECT_plain="4 5 6 7 8 10 13 17 20"
 
-FIXTURES="funcs cases subst contin terminators plain"
+# Driven with its stderr captured AND discarded — the pattern that used to
+# throw a child's whole contribution away, because xtrace writes to fd 2.
+cat >"$SANDBOX/src/captured.sh" <<'FIXTURE'
+#!/usr/bin/env bash
+emit() {
+  echo "captured-stdout"
+  echo "captured-stderr" >&2
+}
+emit
+echo "captured-done"
+FIXTURE
+EXPECT_captured="3 4 6 7"
+
+FIXTURES="funcs cases subst contin terminators plain captured"
 
 # Driver: runs every fixture so that all of their statements execute.
 {
@@ -211,7 +224,11 @@ FIXTURES="funcs cases subst contin terminators plain"
   echo '# SPDX-License-Identifier: MIT'
   echo 'SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../src" && pwd)"'
   for name in $FIXTURES; do
-    echo "bash \"\$SRC/${name}.sh\" >/dev/null || true"
+    if [[ "$name" == "captured" ]]; then
+      echo "bash \"\$SRC/${name}.sh\" >/dev/null 2>&1 || true"
+    else
+      echo "bash \"\$SRC/${name}.sh\" >/dev/null || true"
+    fi
   done
   echo 'echo "RESULTS:1:1:0"'
 } >"$SANDBOX/tests/unit/test_drive_fixtures.sh"
@@ -334,6 +351,76 @@ else
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected a clean run naming the skipped test (got $skip_ec)"
 fi
+
+test_start "trace_records_survive_a_long_path_under_bash32"
+# macOS /bin/bash is 3.2 and truncates the expanded PS4 at 100 characters.
+# The runner's record format must stay short enough that a deep checkout
+# cannot cut the `:@` terminator off and make the record unparseable.
+if [[ -x /bin/bash ]] && /bin/bash --version 2>/dev/null | head -1 | grep -q 'version 3\.'; then
+  deep="$SANDBOX/aaaaaaaaaa/bbbbbbbbbb/cccccccccc/dddddddddd/eeeeeeeeee/ffffffffff"
+  mkdir -p "$deep"
+  printf '#!/usr/bin/env bash\necho deep\n' >"$deep/deep.sh"
+  cov_ps4="$(grep -m1 '^COV_PS4=' "$RUNNER" | cut -d= -f2- | sed "s/^'//; s/'$//")"
+  deep_trace="$SANDBOX/deep.trace"
+  COV_ROOT="$SANDBOX" PS4="$cov_ps4" /bin/bash -xu "$deep/deep.sh" \
+    2>"$deep_trace" >/dev/null || true
+  intact="$(grep -cE '^\+@COV@:[0-9]+:[^:]*:@' "$deep_trace" 2>/dev/null)" || intact=0
+  allrec="$(grep -cE '^\++@COV@:[0-9]+:' "$deep_trace" 2>/dev/null)" || allrec=0
+  if [[ "$intact" -gt 0 && "$intact" -eq "$allrec" ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: ${intact}/${allrec} records intact from a ${#deep} char path"
+  fi
+else
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (no bash 3.x at /bin/bash)"
+fi
+
+test_start "silent_trace_is_reported"
+# A test whose stderr goes nowhere yields an empty trace while exiting 0.
+# That must be named, not absorbed.
+mkdir -p "$SANDBOX/tests-silent/unit" "$SANDBOX/tests-silent/regression"
+cat >"$SANDBOX/tests-silent/unit/test_silent.sh" <<'EOF'
+#!/usr/bin/env bash
+# Synthetic stand-in for the real shape of this failure: a suite whose
+# stderr is redirected away on a shell too old for BASH_XTRACEFD, so the
+# runner is handed an empty trace and a clean exit status. Pointing
+# BASH_XTRACEFD at the discarded descriptor and clearing what was written
+# before that reproduces the same end state on a modern bash.
+exec 2>/dev/null
+BASH_XTRACEFD=2
+: >"${COV_TRACE_FILE:-/dev/null}"
+echo "RESULTS:1:1:0"
+EOF
+set +e
+env REPO_ROOT="$SANDBOX" \
+  TESTS_DIR="$SANDBOX/tests-silent" \
+  COVERAGE_DIR="$SANDBOX/coverage4" \
+  COVERAGE_OUT="$SANDBOX/coverage4/lcov.info" \
+  COV_INCLUDE_DIRS="$SANDBOX/src" \
+  MIN_COVERAGE_PCT=0 \
+  JOBS=2 \
+  bash "$RUNNER" >"$SANDBOX/runner-silent.log" 2>&1
+silent_ec=$?
+rm -rf "$SANDBOX/tests-silent"
+if grep -q "no coverage captured from: unit/test_silent.sh" "$SANDBOX/runner-silent.log" &&
+  grep -q "silent-traces: 1 test(s)" "$SANDBOX/runner-silent.log"; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: runner did not name the silent test (exit $silent_ec)"
+fi
+
+test_start "xtrace_uses_a_dedicated_descriptor"
+assert_file_contains "$RUNNER" "BASH_XTRACEFD=" \
+  "xtrace must not be written to fd 2, where a test's redirection can eat it"
+
+test_start "truncated_records_are_audited"
+assert_file_contains "$RUNNER" "truncated-trace-records:" \
+  "a record that lost its terminator must be counted and reported"
 
 test_start "timeout_default_is_documented"
 assert_file_contains "$RUNNER" 'COV_TEST_TIMEOUT:-300' \

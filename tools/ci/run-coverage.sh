@@ -21,9 +21,11 @@
 #   Then we parse all traces with regex and write lcov.info. This is
 #   the same mechanism bashcov uses, minus the Ruby runtime.
 #
-# Linux + macOS both work (macOS bash 3.2 supports BASH_XTRACEFD as
-# well — verified locally on bash 5.3 via Homebrew). The pre-commit
-# hook in this repo can invoke this on any platform.
+# Linux + macOS both work. macOS is the awkward one: /bin/bash is 3.2,
+# which truncates the expanded PS4 at 100 characters, so the record
+# format below stays short on purpose and the startup probe refuses to
+# run if a reachable bash mangles records anyway. The pre-commit hook in
+# this repo can invoke this on any platform.
 #
 # Closes the runner half of #856 / Slice 1 of #883.
 # =============================================================================
@@ -135,20 +137,69 @@ rm -rf "$status_dir"
 mkdir -p "$status_dir"
 
 # -----------------------------------------------------------------------------
+# The trace record format.
+#
+# Two properties matter and neither is negotiable:
+#
+#   1. `${BASH_SOURCE[0]:+…}` (not `${BASH_SOURCE}`) keeps PS4 evaluation
+#      from failing under `set -u`: at the top level of a `bash -c`
+#      script BASH_SOURCE[0] is unbound, and an unguarded expansion
+#      aborts the shell, taking out any test that sources a
+#      `set -euo pipefail` library file. The `:+` form neither errors on
+#      an unset variable nor expands its body when unset, so it survives
+#      `set -u` while still allowing the prefix strip below.
+#
+#   2. The path is emitted RELATIVE to the repo root. bash 3.2 — still
+#      /bin/bash on macOS, and reachable from any test whose PATH farm
+#      resolves `bash` there — truncates the expanded PS4 at 100
+#      characters. A checkout path long enough to push the `:@`
+#      terminator past that limit mangles every record from such a
+#      child, and the aggregator drops them: measured coverage would
+#      depend on how deep the checkout happens to sit. A repo-relative
+#      path keeps the prefix around 45 characters whatever the checkout
+#      path. `COV_ROOT` is exported for the strip; if a sandbox scrubs
+#      it the pattern cannot match and the record falls back to the
+#      absolute path (still correct, just long), which the truncation
+#      audit after aggregation then catches.
+# -----------------------------------------------------------------------------
+export COV_ROOT="$REPO_ROOT"
+COV_PS4='+@COV@:${LINENO}:${BASH_SOURCE[0]:+${BASH_SOURCE[0]#${COV_ROOT:-__cov_unset__}/}}:@ '
+
 # BASH_ENV setup file: enables xtrace in every non-interactive bash that
 # inherits it. Child processes spawned via `bash $SCRIPT` get their own
 # tracing turned on automatically.
-# -----------------------------------------------------------------------------
 bash_env="$COVERAGE_DIR/_cov_bashenv.sh"
-cat >"$bash_env" <<'SETUP'
-# coverage runtime — enable xtrace, define PS4 with file+line markers.
-# `${BASH_SOURCE:-}` (not `${BASH_SOURCE}`) prevents PS4 evaluation
-# from failing under `set -u`: at the top level of a `bash -c`
-# script, BASH_SOURCE[0] is unbound; an unguarded expansion under
-# `set -u` aborts the shell, taking out any test that sources a
-# `set -euo pipefail` library file.
+: >"$bash_env"
+printf "PS4='%s'\n" "$COV_PS4" >>"$bash_env"
+cat >>"$bash_env" <<'SETUP'
+# Route xtrace to a descriptor of our own instead of stderr.
+#
+# This is the difference between measuring a child and losing it. A test
+# that captures or discards a child's stderr — `out=$(cmd 2>&1)`,
+# `cmd 2>/dev/null`, `cmd &>/dev/null`, `cmd |& …` — takes that child's
+# xtrace records with it, because they are written to fd 2. The child
+# runs, does its work, and contributes nothing: one such line in one test
+# file was measuring scripts/dot/commands/registry.sh at 58% when it was
+# really at 75%. The runner cannot police what a test redirects, but it
+# can put the records somewhere a redirection cannot reach.
+#
+# BASH_XTRACEFD is bash 4.1+. Older shells (macOS /bin/bash 3.2) fall
+# through and keep writing to stderr, which the worker redirects to the
+# same file — the pre-existing behaviour, no worse. The `exec` sits
+# inside `eval` because bash 3.2 cannot even *parse* `{var}>`, and
+# BASH_ENV files are parsed whole before anything runs.
+if [ -n "${COV_TRACE_FILE:-}" ] && [ -z "${BASH_XTRACEFD:-}" ]; then
+  case "${BASH_VERSION:-}" in
+    1.* | 2.* | 3.* | 4.0*) : ;;
+    *)
+      if eval 'exec {__cov_xfd}>>"$COV_TRACE_FILE"' 2>/dev/null; then
+        BASH_XTRACEFD=$__cov_xfd
+      fi
+      ;;
+  esac
+fi
+# Enabled last so the plumbing above does not trace itself.
 set -x
-PS4='+@COV@:${LINENO}:${BASH_SOURCE:-}:@ '
 SETUP
 
 # Sanity-probe: run one trivial script through the pipeline so a
@@ -163,15 +214,37 @@ echo "probe-sum=$((x + y))"
 PROBE
 chmod +x "$probe_target"
 
-PS4='+@COV@:${LINENO}:${BASH_SOURCE}:@ ' \
-  BASH_ENV="$bash_env" \
-  bash "$probe_target" 2>"$trace_dir/_probe.trace" >/dev/null || true
-probe_lines=$(grep -cE "^\+@COV@:[0-9]+:.*${probe_target}:@" "$trace_dir/_probe.trace" 2>/dev/null || echo 0)
-echo "probe: ${probe_lines} traced lines from ${probe_target}" >&2
-if [[ "$probe_lines" -eq 0 ]]; then
-  echo "::error::xtrace probe captured no lines — coverage mechanism broken" >&2
-  exit 2
+# Probe every bash a test could plausibly reach: the one on PATH, and
+# /bin/bash when it is a different binary (macOS ships 3.2 there). A
+# record is only usable if it survives *intact*, terminator included —
+# hence the `:@` in the pattern.
+probe_bashes=("bash")
+if [[ -x /bin/bash ]] && [[ "$(command -v bash)" != "/bin/bash" ]]; then
+  probe_bashes+=("/bin/bash")
 fi
+for probe_bash in "${probe_bashes[@]}"; do
+  probe_trace="$trace_dir/_probe.trace"
+  : >"$probe_trace"
+  PS4="$COV_PS4" \
+    BASH_ENV="$bash_env" \
+    COV_TRACE_FILE="$probe_trace" \
+    "$probe_bash" "$probe_target" 2>"$probe_trace" >/dev/null </dev/null || true
+  probe_lines=$(grep -cE '^\+@COV@:[0-9]+:[^:]*:@' "$probe_trace" 2>/dev/null) || probe_lines=0
+  probe_all=$(grep -cE '^\++@COV@:[0-9]+:' "$probe_trace" 2>/dev/null) || probe_all=0
+  probe_bad=$((probe_all - probe_lines))
+  probe_version=$("$probe_bash" -c 'echo "${BASH_VERSION%%(*}"' 2>/dev/null || echo "?")
+  echo "probe: ${probe_bash} (bash ${probe_version}) — ${probe_lines} intact record(s), ${probe_bad} mangled" >&2
+  if [[ "$probe_lines" -eq 0 ]]; then
+    echo "::error::xtrace probe captured no usable records via ${probe_bash} — coverage mechanism broken" >&2
+    exit 2
+  fi
+  if [[ "$probe_bad" -gt 0 ]]; then
+    echo "::error::${probe_bash} (bash ${probe_version}) truncates the PS4 expansion, mangling trace records." >&2
+    echo "::error::REPO_ROOT is ${#REPO_ROOT} characters; records emitted through that bash lose their terminator and are dropped." >&2
+    echo "::error::Use a shorter checkout path, or put a bash >= 4.1 ahead of ${probe_bash} on PATH." >&2
+    exit 2
+  fi
+done
 
 # -----------------------------------------------------------------------------
 # Collect test files (mirror tests/framework/test_runner.sh discovery).
@@ -213,18 +286,31 @@ run_one() {
   relative="${f#"$COV_TESTS_DIR"/}"
   slug="${relative//\//__}"
   trace="$COV_TRACE_DIR/${slug}.trace"
+  : >"$trace"
   started=$(date +%s)
+  # `</dev/null` and `>/dev/null` on purpose: a test that backgrounds a
+  # grandchild leaves it holding whatever descriptors it inherited, and
+  # if those are the runner's own stdin/stdout pipes (they are, whenever
+  # a caller wraps this script in a command substitution) the sweep
+  # appears to hang long after every test has finished. Handing each test
+  # /dev/null for both ends makes an orphan unable to hold the pipeline
+  # open. The timeout wrapper — GNU `timeout`, `gtimeout`, or the perl
+  # fallback — signals the whole process group, so orphans are killed
+  # rather than merely detached; `--kill-after=5` finishes off anything
+  # that ignores SIGTERM.
   if [[ -n "${COV_TIMEOUT_CMD:-}" ]]; then
-    PS4='+@COV@:${LINENO}:${BASH_SOURCE}:@ ' \
+    PS4="$COV_PS4" \
       BASH_ENV="$COV_BASH_ENV" \
+      COV_TRACE_FILE="$trace" \
       "$COV_TIMEOUT_CMD" --kill-after=5 "$COV_TEST_TIMEOUT" \
-      bash "$f" 2>"$trace" >/dev/null
+      bash "$f" 2>"$trace" >/dev/null </dev/null
     status=$?
   else
     # No timeout available (stock macOS): run without the hang-guard.
-    PS4='+@COV@:${LINENO}:${BASH_SOURCE}:@ ' \
+    PS4="$COV_PS4" \
       BASH_ENV="$COV_BASH_ENV" \
-      bash "$f" 2>"$trace" >/dev/null
+      COV_TRACE_FILE="$trace" \
+      bash "$f" 2>"$trace" >/dev/null </dev/null
     status=$?
   fi
   ended=$(date +%s)
@@ -237,6 +323,7 @@ run_one() {
 
 export COV_TRACE_DIR="$trace_dir"
 export COV_STATUS_DIR="$status_dir"
+export COV_PS4
 export COV_BASH_ENV="$bash_env"
 export COV_TESTS_DIR="$TESTS_DIR"
 export COV_TEST_TIMEOUT
@@ -302,6 +389,39 @@ else
 fi
 
 # -----------------------------------------------------------------------------
+# Silent-trace audit — the other way a test contributes nothing without
+# saying so. A test that redirects its whole stderr away (`exec 2>…`, or a
+# wrapper that captures the suite itself) hands us an empty trace while
+# exiting cleanly: the tests ran, the coverage vanished. BASH_XTRACEFD
+# above stops that happening for *children* a test captures, but it cannot
+# help a shell too old for BASH_XTRACEFD or a test that redirects the
+# runner's own descriptor, so the result is checked rather than assumed.
+#
+# Warning, not error: a trace can legitimately be thin, and this is a
+# signal to go and look, not a verdict.
+# -----------------------------------------------------------------------------
+silent_tests=()
+for status_file in "$status_dir"/*.status; do
+  [[ -e "$status_file" ]] || continue
+  slug="$(basename "$status_file" .status)"
+  trace_file="$trace_dir/${slug}.trace"
+  rel="$(cut -f3 "$status_file")"
+  if [[ ! -s "$trace_file" ]] ||
+    ! grep -qE '^\++@COV@:[0-9]+:' "$trace_file" 2>/dev/null; then
+    silent_tests+=("${rel:-$slug}")
+  fi
+done
+if [[ "${#silent_tests[@]}" -gt 0 ]]; then
+  echo "::warning::${#silent_tests[@]} test(s) produced no xtrace records at all — their stderr is being redirected away and their coverage is lost" >&2
+  for s in "${silent_tests[@]}"; do
+    echo "::warning::no coverage captured from: $s" >&2
+  done
+  echo "silent-traces: ${#silent_tests[@]} test(s): ${silent_tests[*]}" >&2
+else
+  echo "silent-traces: 0 test(s)" >&2
+fi
+
+# -----------------------------------------------------------------------------
 # Aggregate trace files → lcov.info.
 # -----------------------------------------------------------------------------
 python3 - "$COVERAGE_OUT" "$trace_dir" "$REPO_ROOT" "$COV_INCLUDE_DIRS" <<'PY'
@@ -309,7 +429,7 @@ python3 - "$COVERAGE_OUT" "$trace_dir" "$REPO_ROOT" "$COV_INCLUDE_DIRS" <<'PY'
 import os
 import re
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 out_path, trace_dir, repo_root, include_dirs_spec = sys.argv[1:5]
@@ -405,6 +525,14 @@ def is_skipped(abs_path: Path) -> bool:
 # functions inside command substitutions and subshells.
 hit_re = re.compile(r"^\++@COV@:(\d+):([^:]+):@")
 
+# A record that starts like ours but has lost its `:@ ` terminator was
+# truncated in flight — bash 3.2 cuts the expanded PS4 at 100 characters.
+# Such a record is silently unusable, which is exactly the failure mode
+# this runner must never have, so they are counted and reported.
+record_head_re = re.compile(r"^\++@COV@:(\d+):(.*)$")
+truncated_records = Counter()
+truncated_by_trace = Counter()
+
 # raw_hits[abs_path][line] = total trace records seen for that physical line
 raw_hits = defaultdict(lambda: defaultdict(int))
 source_cache = {}
@@ -444,6 +572,10 @@ for trace_path in sorted(trace_dir.glob("*.trace")):
             for line in f:
                 m = hit_re.match(line)
                 if not m:
+                    head = record_head_re.match(line)
+                    if head:
+                        truncated_records[head.group(2)[:80]] += 1
+                        truncated_by_trace[trace_path.name] += 1
                     continue
                 lineno = int(m.group(1))
                 src = m.group(2).strip()
@@ -951,7 +1083,33 @@ covered = sum(1 for lines in files.values() for h in lines.values() if h > 0)
 pct = (covered * 100.0 / total_lines) if total_lines else 0.0
 print(f"Aggregated: {total_files} files, {covered}/{total_lines} lines = {pct:.2f}%",
       file=sys.stderr)
+
+# Truncation audit. A mangled record is a lost record, so say so. It is a
+# hard error only when the lost record could have been for a measured
+# file — i.e. its surviving prefix overlaps the repo root. Records for
+# paths outside the repo (a $TMPDIR sandbox script, say) never entered
+# the denominator, so they are reported without failing the run.
+if truncated_records:
+    n = sum(truncated_records.values())
+    root = str(repo_root)
+    fatal = any(root.startswith(p) or p.startswith(root)
+                for p in truncated_records)
+    level = "error" if fatal else "warning"
+    print(f"::{level}::{n} trace record(s) were truncated and could not be "
+          f"parsed — bash 3.2 cuts the expanded PS4 at 100 characters",
+          file=sys.stderr)
+    for name, count in truncated_by_trace.most_common(10):
+        print(f"::{level}::truncated records in {name}: {count}", file=sys.stderr)
+    for prefix, count in truncated_records.most_common(5):
+        print(f"  {count} record(s) truncated at: {prefix!r}", file=sys.stderr)
+    print(f"truncated-trace-records: {n} record(s) in "
+          f"{len(truncated_by_trace)} trace file(s)", file=sys.stderr)
+    if fatal:
+        sys.exit(4)
+else:
+    print("truncated-trace-records: 0", file=sys.stderr)
 PY
+aggregate_ec=$?
 
 if [[ ! -s "$COVERAGE_OUT" ]]; then
   echo "::error::failed to produce lcov.info — aggregator wrote empty file." >&2
@@ -987,11 +1145,16 @@ if [[ "$below" == "1" ]]; then
 fi
 
 # Reported last so the coverage number is still visible above it: a killed
-# test invalidates the measurement even when the surviving tests clear the
-# floor.
+# test or a mangled record invalidates the measurement even when the
+# surviving tests clear the floor.
 if [[ "$cov_timeout_failure" -eq 1 ]]; then
   echo "::error::coverage measurement is invalid — ${#killed_tests[@]} test(s) killed by COV_TEST_TIMEOUT" >&2
   exit 3
+fi
+
+if [[ "$aggregate_ec" -ne 0 ]]; then
+  echo "::error::coverage measurement is invalid — trace records for measured files were truncated (aggregator exit ${aggregate_ec})" >&2
+  exit "$aggregate_ec"
 fi
 
 exit 0
