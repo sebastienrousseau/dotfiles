@@ -167,6 +167,54 @@ _rc=$?
 assert_equals 0 "$_rc" "gated override exits 0"
 assert_contains "OK: risky overrides are gated" "$_out" "override check passes"
 
+test_start "governance_flags_an_expired_deprecated_alias"
+# scripts/dot/data/alias-deprecations.tsv lists dlogsf as removable
+# since v0.2.487; the repo is past that, so a tree that still defines
+# the alias must fail the deprecation window.
+_root="$(_tree g-deprecated)"
+printf "alias dlogsf='docker logs -f'\n" \
+  >"$_root/.chezmoitemplates/aliases/deprecated.aliases.sh"
+_out="$(_govern "$_root")"
+_rc=$?
+assert_equals 1 "$_rc" "an expired deprecated alias exits 1"
+assert_contains "ERROR: expired deprecated aliases still present" "$_out" "the expired window is reported"
+assert_contains "dlogsf (remove_in=v0.2.487, replacement=dklf)" "$_out" "the replacement is suggested"
+
+test_start "governance_reports_a_clean_deprecation_window"
+_root="$(_tree g-notdeprecated)"
+printf "alias dkl='docker logs'\n" >"$_root/.chezmoitemplates/aliases/ok.aliases.sh"
+_out="$(_govern "$_root")"
+assert_equals 0 "$?" "no expired aliases exits 0"
+assert_contains "OK: no expired deprecated aliases" "$_out" "the window check is reported as passing"
+
+test_start "manifest_falls_back_to_grep_without_ripgrep"
+_root="$(_tree m-nogrep)"
+printf "alias gg='git grep'\n" >"$_root/.chezmoitemplates/aliases/g.aliases.sh"
+_nogrep="$DOTFILES_COV_TMPDIR/nogrep"
+mkdir -p "$_nogrep"
+for _t in bash grep sed head tr cat printf echo dirname basename; do
+  _p="$(command -v "$_t" 2>/dev/null || true)"
+  [[ -n "$_p" ]] && ln -sf "$_p" "$_nogrep/$_t"
+done
+_out="$(CHEZMOI_SOURCE_DIR="$_root" PATH="$_nogrep" "$BASH_BIN" "$MANIFEST" 2>&1)"
+_rc=$?
+assert_equals 0 "$_rc" "the grep fallback exits 0"
+assert_contains "gg" "$_out" "aliases are still inventoried without ripgrep"
+
+test_start "manifest_resolves_the_default_chezmoi_checkout"
+# No CHEZMOI_SOURCE_DIR and no ~/.dotfiles: the manifest falls back to
+# ~/.local/share/chezmoi.
+_home="$DOTFILES_COV_TMPDIR/xdg-home"
+mkdir -p "$_home/.local/share/chezmoi/.chezmoitemplates/aliases" \
+  "$_home/.local/share/chezmoi/.chezmoitemplates/functions"
+printf "alias xdg='echo xdg'\n" \
+  >"$_home/.local/share/chezmoi/.chezmoitemplates/aliases/x.aliases.sh"
+_out="$(env -u CHEZMOI_SOURCE_DIR HOME="$_home" "$BASH_BIN" "$MANIFEST" 2>&1)"
+_rc=$?
+assert_equals 0 "$_rc" "the default checkout is used"
+assert_contains "xdg" "$_out" "its aliases are inventoried"
+assert_contains "$_home/.local/share/chezmoi" "$_out" "rows point into that checkout"
+
 test_start "governance_rejects_hardcoded_user_paths"
 _root="$(_tree g-paths)"
 printf "alias proj='cd /Users/someone/code'\n" \
