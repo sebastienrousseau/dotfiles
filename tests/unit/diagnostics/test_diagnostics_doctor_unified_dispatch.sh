@@ -30,13 +30,28 @@ cov_setup_sandbox
 TMP="$DOTFILES_COV_TMPDIR"
 mkdir -p "$TMP/du-home"
 
+# A restricted PATH for the runs below. `--benchmark` hands control to
+# tests/benchmark.sh, whose fallback loop starts ten interactive shells
+# and whose fast path runs hyperfine; neither belongs in a unit test, and
+# on a busy runner they are unbounded. Leaving every shell and hyperfine
+# out of PATH makes that target fail fast and identically everywhere,
+# while still proving doctor-unified reached its exec.
+DU_BIN="$TMP/du-bin"
+mkdir -p "$DU_BIN"
+for _t in cat env printf sed grep tr head dirname basename mktemp rm uname \
+  locale tput wc awk; do
+  _p="$(command -v "$_t" 2>/dev/null || true)"
+  [[ -n "$_p" ]] && ln -sf "$_p" "$DU_BIN/$_t"
+done
+ln -sf "$BASH" "$DU_BIN/bash"
+
 DU_OUT=""
 DU_RC=0
 _run_du() {
   DU_RC=0
   DU_OUT="$(
     cd "$TMP/du-home" &&
-      env BASH_XTRACEFD=21 HOME="$TMP/du-home" DOTFILES_ACCESSIBILITY=1 \
+      env BASH_XTRACEFD=21 PATH="$DU_BIN" HOME="$TMP/du-home" DOTFILES_ACCESSIBILITY=1 \
         "$BASH" "$DU_FILE" "$@" </dev/null 2>&1
   )" || DU_RC=$?
 }
