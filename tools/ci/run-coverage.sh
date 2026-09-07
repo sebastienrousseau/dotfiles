@@ -295,8 +295,8 @@ def is_skipped(abs_path: Path) -> bool:
 # functions inside command substitutions and subshells.
 hit_re = re.compile(r"^\++@COV@:(\d+):([^:]+):@")
 
-# files[abs_path][line] = total hits
-files = defaultdict(lambda: defaultdict(int))
+# raw_hits[abs_path][line] = total trace records seen for that physical line
+raw_hits = defaultdict(lambda: defaultdict(int))
 source_cache = {}
 
 def in_includes(path: Path) -> bool:
@@ -346,137 +346,485 @@ for trace_path in sorted(trace_dir.glob("*.trace")):
                 source_path = normalized_source(src)
                 if source_path is None:
                     continue
-                files[source_path][lineno] += 1
+                raw_hits[source_path][lineno] += 1
     except OSError as e:
         print(f"warn: read error {trace_path}: {e}", file=sys.stderr)
 
-# Sweep through include-dirs and add executable lines for files we never
-# touched, so lcov coverage % reflects total source surface, not just
-# touched files.
-ws_re = re.compile(r"^\s*$")
-comment_re = re.compile(r"^\s*#")
-shebang_re = re.compile(r"^\s*#!")
+# -----------------------------------------------------------------------------
+# Source analysis — which physical lines can bash xtrace ever report, and
+# which physical line does it report a multi-line statement on?
+#
+# `set -x` does NOT emit a record for every line that runs. Several
+# constructs execute perfectly well and never produce a `+@COV@:` record at
+# their own line number, so counting them as "executable" put permanently
+# unhittable lines in the denominator and capped per-file coverage well
+# below 100%. Every exclusion below was established by running a fixture
+# under this runner's own PS4 + `set -x` and observing that no record
+# appears for the line; the fixtures live in
+# tests/unit/ci/test_run_coverage_aggregator.sh and are asserted on every
+# run so this classifier cannot silently drift.
+#
+# Observed (bash 5.3, and the same on 5.2):
+#
+#   1. Function-definition headers. `greet() {`, `greet()` + `{` on the
+#      next line, and `function greet {` all emit nothing; only the body
+#      is traced. A one-line definition (`f() { echo hi; }`) IS traced,
+#      because the body is on that line — so it stays in the denominator.
+#
+#   2. `case` pattern labels. `a | x)`, `"hello world")`, `'')` and `*)`
+#      emit nothing even when the arm matches; the arm's body is what
+#      gets traced. The old `case_pattern` regex only recognised bare
+#      `foo)`, so every label with alternation, quoting or a space was
+#      still counted. A label with its body on the same line
+#      (`x) echo x ;;`) IS traced and stays.
+#
+#   3. Interior lines of a multi-line *word*: an unterminated `$( )`,
+#      `<( )`, `>( )`, backtick, `name=( )` array assignment, `$(( ))`,
+#      or an unterminated quoted string. Nothing inside is ever reported
+#      at its own line; bash attributes the whole statement to ONE
+#      physical line of the construct — sometimes the first, sometimes
+#      the last:
+#
+#        a=$(          -> record lands on the closing `)` line
+#          echo A
+#        )
+#        echo "$(      -> record lands on the `echo` line
+#          echo B
+#        )"
+#
+#      Guessing which end would risk dropping a genuinely covered line,
+#      so instead the statement is *folded*: the first physical line is
+#      the single denominator entry, and a record on any later physical
+#      line of the same statement counts as a hit on it (`alias` below).
+#      That is exact — one logical statement, one denominator slot, hit
+#      iff bash traced it anywhere — and needs no guess.
+#
+#   4. Backslash-continuation lines that carry only more words of the
+#      same command (`printf '%s' \` / `"one" \` / `"two"`): only the
+#      first line is traced. But a continuation that STARTS a new
+#      command is traced at its own line (`true && \` / `  echo x`, or
+#      `cmd \` / `  || echo fallback`), so those are kept. The
+#      discriminator is an operator at the head of the continuation or
+#      at the tail of the line before it.
+#
+#   5. Compound terminators carrying only a redirection: `done <"$f"`,
+#      `fi >/dev/null`, `} >/dev/null` emit nothing — the redirection is
+#      set up by the compound command, which was already traced at its
+#      head. `done | cat` IS traced (the pipeline's next element runs
+#      there) and `done < <(cmd)` IS traced (the process substitution's
+#      body runs there), so both stay.
+#
+# Deliberately NOT excluded — see the report in #883 for the evidence:
+#   * `(` / `)` of a bare subshell group and `{` / `}` of a brace group:
+#     already dropped by the structural rule, and the statements INSIDE
+#     such a group are traced at their own lines, so they stay.
+#   * Lines that are merely untested (an `if` branch never taken, a
+#     function never called). Those are the thing coverage is for.
+#   * `x) ;;` — a case label with an empty body on the same line emits
+#     nothing, but the shape is indistinguishable from `x) cmd ;;`
+#     without a real parser. Left in the denominator; it understates.
+# -----------------------------------------------------------------------------
+heredoc_re = re.compile(
+    r"""<<(-?)\s*(?:"([^"]*)"|'([^']*)'|\\?([A-Za-z_][A-Za-z0-9_.\-]*))"""
+)
+excl_line_re = re.compile(r"#\s*LCOV_EXCL_LINE")
+excl_start_re = re.compile(r"#\s*LCOV_EXCL_START")
+excl_stop_re = re.compile(r"#\s*LCOV_EXCL_STOP")
+# Scripts that explicitly turn off xtrace can't be measured by this
+# mechanism — the bash runtime simply stops emitting trace records.
+# Treat everything after `set +x` / `set +o xtrace` as excluded so it
+# doesn't sink the denominator.
+xtrace_off_re = re.compile(r"^\s*set\s+(\+x|\+o\s+xtrace)\b")
+structural_re = re.compile(
+    r"^\s*("
+    r"fi|done|else|elif|esac|then|do|in|"
+    r"\}|\{|\(|"
+    r"\)\s*;?;?\s*$|"  # bare `)` (subshell / case-pattern close)
+    r";;&?\s*$|"       # `;;` / `;;&` case-clause terminators
+    r";&\s*$"          # `;&` fallthrough terminator
+    r")\s*(#.*)?$"
+)
+func_hdr_re = re.compile(
+    r"^\s*(function\s+)?[A-Za-z_][A-Za-z0-9_:.+\-]*\s*\(\s*\)\s*(\{\s*)?(#.*)?$"
+)
+func_hdr_kw_re = re.compile(
+    r"^\s*function\s+[A-Za-z_][A-Za-z0-9_:.+\-]*\s*(\{\s*)?(#.*)?$"
+)
+case_open_re = re.compile(r"^\s*case\b")
+esac_re = re.compile(r"^\s*esac\b")
+terminator_redir_re = re.compile(
+    r"^\s*(done|fi|esac|\}|\))\s+(?P<rest>[0-9]*[<>].*)$"
+)
+cont_op_head_re = re.compile(r"^\s*(\|\||&&|\||;;?|&)")
+cont_op_tail_re = re.compile(
+    r"(\|\||&&|\||;|&|\(|\{|!|\bthen\b|\bdo\b|\belse\b)\s*$"
+)
+WORDISH = ("word", "arith", "btick")
 
-def executable_lines(path: Path):
-    """Lines that bash xtrace can plausibly emit.
+def scan_line(line, st):
+    """Advance the shell lexer state across one physical line.
 
-    Excludes:
-      - blanks / shebangs / comments (already)
-      - structural-only keywords (`fi`, `done`, `else`, `esac`, `then`,
-        `do`, `in`, bare `{`/`}` braces) — these are syntax, not
-        commands; xtrace never traces them
-      - heredoc body lines (between `<<EOF` and `EOF`) — content, not
-        executed
-      - `case` pattern labels (`foo)`) — the matched body executes,
-        not the pattern itself
-
-    This matches what `bash -x` actually produces a `+`-prefixed
-    line for, so the denominator reflects measurable lines.
-
-    Honor LCOV_EXCL_LINE / LCOV_EXCL_START / LCOV_EXCL_STOP markers
-    so authors can exempt genuinely unreachable lines (platform-
-    gated branches, root-only paths, dead-code stubs).
+    `st` carries `quote` (None / `'` / `"`) and `stack` (open word-level
+    or command-level groupings) across lines, which is what tells us
+    whether the next physical line continues this statement.
     """
-    import re as _re
-    structural = _re.compile(
-        r"^\s*("
-        r"fi|done|else|elif|esac|then|do|in|"
-        r"\}|\{|"
-        r"\)\s*;?;?\s*$|"        # bare `)` (case pattern close)
-        r";;\s*$"                # `;;` case-clause terminator
-        r")\s*(#.*)?$"
-    )
-    case_pattern = _re.compile(r"^\s*[a-zA-Z0-9_\*\?\[\|/\-\.+]+\)\s*(#.*)?$")
-    heredoc_open = _re.compile(r"<<-?\s*[\"\']?([A-Za-z_][A-Za-z0-9_]*)[\"\']?")
-    excl_line = _re.compile(r"#\s*LCOV_EXCL_LINE")
-    excl_start = _re.compile(r"#\s*LCOV_EXCL_START")
-    excl_stop = _re.compile(r"#\s*LCOV_EXCL_STOP")
-    # Scripts that explicitly turn off xtrace can't be measured by
-    # this mechanism — the bash runtime simply stops emitting trace
-    # records. Treat everything after `set +x` / `set +o xtrace`
-    # as excluded so it doesn't sink the denominator.
-    xtrace_off = _re.compile(r"^\s*set\s+(\+x|\+o\s+xtrace)\b")
+    quote = st["quote"]
+    stack = st["stack"]
+    heredocs = []
+    has_subst = False
+    unmatched_close = 0
+    ends_with_backslash = False
 
+    i = 0
+    n = len(line)
+    while i < n:
+        c = line[i]
+
+        if quote == "'":
+            if c == "'":
+                quote = None
+            i += 1
+            continue
+
+        if c == "\\":
+            # A trailing backslash continues the line everywhere except
+            # inside single quotes (handled above).
+            if i + 1 >= n:
+                ends_with_backslash = True
+                i += 1
+            else:
+                i += 2
+            continue
+
+        if quote == '"':
+            # `$(`, `$((` and backticks re-open command context inside a
+            # double-quoted word; remember the quote so it is restored
+            # when the substitution closes.
+            if c == '"':
+                quote = None
+                i += 1
+                continue
+            if c == "$" and i + 1 < n and line[i + 1] == "(":
+                if i + 2 < n and line[i + 2] == "(":
+                    stack.append(("arith", quote))
+                    i += 3
+                else:
+                    stack.append(("word", quote))
+                    has_subst = True
+                    i += 2
+                quote = None
+                continue
+            if c == "`":
+                stack.append(("btick", quote))
+                has_subst = True
+                quote = None
+                i += 1
+                continue
+            i += 1
+            continue
+
+        # Unquoted.
+        if c == "#" and (i == 0 or line[i - 1] in " \t;&|("):
+            break  # comment runs to end of line
+
+        if c == "'":
+            quote = "'"
+            i += 1
+            continue
+        if c == '"':
+            quote = '"'
+            i += 1
+            continue
+        if c == "`":
+            if stack and stack[-1][0] == "btick":
+                quote = stack.pop()[1]
+            else:
+                stack.append(("btick", None))
+                has_subst = True
+            i += 1
+            continue
+
+        if c == "$" and i + 1 < n and line[i + 1] == "(":
+            if i + 2 < n and line[i + 2] == "(":
+                stack.append(("arith", None))
+                i += 3
+            else:
+                stack.append(("word", None))
+                has_subst = True
+                i += 2
+            continue
+
+        if c in "<>" and i + 1 < n and line[i + 1] == "(":
+            stack.append(("word", None))  # process substitution
+            has_subst = True
+            i += 2
+            continue
+
+        if c == "=" and i + 1 < n and line[i + 1] == "(":
+            stack.append(("word", None))  # `name=(` / `name+=(` array
+            i += 2
+            continue
+
+        if c == "(":
+            if i + 1 < n and line[i + 1] == "(":
+                stack.append(("arith", None))
+                i += 2
+            else:
+                stack.append(("cmd", None))  # subshell group
+                i += 1
+            continue
+
+        if c == ")":
+            if stack:
+                kind, saved = stack.pop()
+                if kind == "arith" and i + 1 < n and line[i + 1] == ")":
+                    i += 1
+                quote = saved
+            else:
+                unmatched_close += 1
+            i += 1
+            continue
+
+        # `<<<` is a here-string, not a here-document: consume it whole so
+        # its word is never mistaken for a here-doc terminator.
+        if c == "<" and line[i + 1:i + 3] == "<<":
+            i += 3
+            continue
+
+        # `<<` opens a here-document, but `1 << 2` inside `$(( ))` is a
+        # left shift — the arith guard keeps the two apart.
+        if (
+            c == "<"
+            and i + 1 < n
+            and line[i + 1] == "<"
+            and not any(k == "arith" for k, _ in stack)
+        ):
+            m = heredoc_re.match(line, i)
+            if m:
+                heredocs.append((m.group(2) or m.group(3) or m.group(4),
+                                 m.group(1) == "-"))
+                i = m.end()
+                continue
+            i += 2
+            continue
+
+        i += 1
+
+    st["quote"] = quote
+    return {
+        "heredocs": heredocs,
+        "has_subst": has_subst,
+        "unmatched_close": unmatched_close,
+        "ends_with_backslash": ends_with_backslash and quote != "'",
+    }
+
+def strip_comment(line):
+    """Drop a trailing unquoted `#` comment."""
+    quote = None
+    for i, c in enumerate(line):
+        if quote:
+            if c == quote:
+                quote = None
+            continue
+        if c in "\"'":
+            quote = c
+        elif c == "#" and (i == 0 or line[i - 1] in " \t;&|("):
+            return line[:i]
+    return line
+
+def is_case_label(line):
+    """True for a `case` pattern label with no command on the line.
+
+    Quote-aware: the line must close exactly one paren it never opened
+    and end there, which covers `*)`, `a | x)`, `"hello world")`, `'')`
+    and the `(a|b)` form, while rejecting `x) echo x ;;` (traced) and
+    ordinary code containing balanced parens.
+    """
+    body = strip_comment(line).rstrip()
+    if not body.endswith(")"):
+        return False
+    probe = body.strip()
+    if probe.startswith("("):
+        probe = probe[1:]
+    st = {"quote": None, "stack": []}
+    info = scan_line(probe, st)
+    if st["quote"] or st["stack"]:
+        return False
+    return info["unmatched_close"] == 1
+
+def classify(line, is_start, cont_reason, prev_code, logical_has_subst,
+             case_depth, excluding, xtrace_disabled):
+    """Return "exec" (denominator entry), "alias" (fold onto the
+    statement's first line) or "skip" (not measurable at all)."""
+    if excluding or excl_start_re.search(line) or excl_stop_re.search(line):
+        return "skip"
+    if excl_line_re.search(line):
+        return "skip"
+    if xtrace_disabled:
+        return "skip"
+
+    if not is_start:
+        if cont_reason == "quote":
+            return "alias"
+        # Backslash continuation: traced only when it begins a new
+        # command, which an operator at either join point signals.
+        if cont_op_head_re.match(line):
+            return "exec"
+        tail = strip_comment(prev_code).rstrip()
+        if tail.endswith("\\"):
+            tail = tail[:-1].rstrip()
+        if cont_op_tail_re.search(tail):
+            return "exec"
+        return "alias"
+
+    if not line or not line.strip():
+        return "skip"
+    if line.lstrip().startswith("#"):
+        return "skip"
+    if xtrace_off_re.match(line):
+        return "skip"
+    if structural_re.match(line):
+        return "skip"
+    if func_hdr_re.match(line) or func_hdr_kw_re.match(line):
+        return "skip"
+    if case_depth > 0 and is_case_label(line):
+        return "skip"
+    m = terminator_redir_re.match(strip_comment(line))
+    if m and not logical_has_subst and not re.search(r"(\|\||&&|\||;)",
+                                                     m.group("rest")):
+        return "skip"
+    return "exec"
+
+analysis_cache = {}
+
+def analyze(path):
+    """Return (executable_lines, alias) for one shell file.
+
+    `executable_lines` is the set of physical lines that belong in the
+    lcov denominator. `alias` maps every other physical line of a
+    multi-line statement (and here-doc bodies) onto that statement's
+    denominator line, so a trace record landing on a later physical line
+    still counts as a hit for the statement.
+    """
+    key = str(path)
+    if key in analysis_cache:
+        return analysis_cache[key]
     try:
-        with open(path, "r", errors="replace") as f:
+        with open(key, "r", errors="replace") as f:
             text = f.read().splitlines()
     except OSError:
-        return []
+        analysis_cache[key] = (set(), {})
+        return analysis_cache[key]
 
-    out = []
-    in_heredoc = None  # the terminator we're waiting for
+    exec_lines = set()
+    alias = {}
+    st = {"quote": None, "stack": []}
+    heredoc_queue = []
+    in_heredoc = None
+    stmt_start = 1
+    cont_reason = None
+    prev_code = ""
+    logical_has_subst = False
+    case_depth = 0
     excluding = False
     xtrace_disabled = False
-    for i, line in enumerate(text, 1):
-        # LCOV_EXCL handling
-        if excl_start.search(line):
-            excluding = True
-            continue
-        if excl_stop.search(line):
-            excluding = False
-            continue
-        if excluding:
-            continue
-        if excl_line.search(line):
-            continue
 
-        # Once a script disables xtrace, no further lines can be
-        # measured by this mechanism — drop them from the denominator.
-        if xtrace_disabled:
-            continue
-        if xtrace_off.match(line):
-            xtrace_disabled = True
-            continue
+    for i, line in enumerate(text):
+        lineno = i + 1
 
-        # Heredoc body — track and skip
         if in_heredoc is not None:
-            if line.strip() == in_heredoc:
-                in_heredoc = None
+            # Here-doc bodies are data, not commands. Fold them onto the
+            # statement that opened them so a stray record can't invent
+            # a denominator entry.
+            alias[lineno] = stmt_start
+            term, strip_tabs = in_heredoc
+            probe = line.lstrip("\t") if strip_tabs else line
+            if probe.strip() == term:
+                in_heredoc = heredoc_queue.pop(0) if heredoc_queue else None
             continue
-        hd = heredoc_open.search(line)
-        if hd and not comment_re.match(line):
-            in_heredoc = hd.group(1)
 
-        if not line or ws_re.match(line):
-            continue
-        if shebang_re.match(line):
-            continue
-        if comment_re.match(line):
-            continue
-        if structural.match(line):
-            continue
-        if case_pattern.match(line):
-            continue
-        out.append(i)
-    return out
+        is_start = cont_reason is None
+        if is_start:
+            stmt_start = lineno
+            logical_has_subst = False
 
+        info = scan_line(line, st)
+        logical_has_subst = logical_has_subst or info["has_subst"]
+
+        verdict = classify(line, is_start, cont_reason, prev_code,
+                           logical_has_subst, case_depth, excluding,
+                           xtrace_disabled)
+
+        if excl_start_re.search(line):
+            excluding = True
+        elif excl_stop_re.search(line):
+            excluding = False
+        if is_start and xtrace_off_re.match(line):
+            xtrace_disabled = True
+
+        if is_start and not excluding:
+            if case_open_re.match(line):
+                case_depth += 1
+            elif esac_re.match(line):
+                case_depth = max(0, case_depth - 1)
+
+        if verdict == "exec":
+            exec_lines.add(lineno)
+            stmt_start = lineno
+        elif verdict == "alias":
+            alias[lineno] = stmt_start
+
+        if info["heredocs"]:
+            heredoc_queue.extend(info["heredocs"])
+
+        if st["quote"] or any(k in WORDISH for k, _ in st["stack"]):
+            cont_reason = "quote"
+        elif info["ends_with_backslash"]:
+            cont_reason = "backslash"
+        else:
+            cont_reason = None
+
+        if heredoc_queue:
+            in_heredoc = heredoc_queue.pop(0)
+
+        prev_code = line
+
+    analysis_cache[key] = (exec_lines, alias)
+    return analysis_cache[key]
+
+# Sweep through include-dirs so the lcov percentage reflects the total
+# source surface, not just the files a test happened to touch.
+candidates = set(raw_hits)
 for inc in include_dirs:
     if not inc.exists():
         continue
     for path in inc.rglob("*.sh"):
+        if not is_skipped(path):
+            candidates.add(str(path.resolve()))
+    for path in inc.rglob("*"):
+        # also include shebanged shell scripts without an extension
+        if not path.is_file() or path.suffix or path.stat().st_size == 0:
+            continue
         if is_skipped(path):
             continue
-        ap = str(path.resolve())
-        existing = files[ap]  # creates the entry on touch
-        for ln in executable_lines(path):
-            if ln not in existing:
-                existing[ln] = 0
-    for path in inc.rglob("*"):
-        # also include shebanged shell scripts without .sh
-        if path.is_file() and not path.suffix and path.stat().st_size > 0:
-            if is_skipped(path):
-                continue
-            try:
-                with open(path, "r", errors="replace") as f:
-                    first = f.readline()
-            except OSError:
-                continue
-            if first.startswith("#!") and ("bash" in first or "sh" in first):
-                ap = str(path.resolve())
-                existing = files[ap]
-                for ln in executable_lines(path):
-                    if ln not in existing:
-                        existing[ln] = 0
+        try:
+            with open(path, "r", errors="replace") as f:
+                first = f.readline()
+        except OSError:
+            continue
+        if first.startswith("#!") and ("bash" in first or "sh" in first):
+            candidates.add(str(path.resolve()))
+
+# files[abs_path][line] = hits, restricted to the measurable denominator.
+files = {}
+for ap in candidates:
+    exec_lines, alias = analyze(ap)
+    counts = dict.fromkeys(exec_lines, 0)
+    for lineno, n_hits in raw_hits.get(ap, {}).items():
+        target = alias.get(lineno, lineno)
+        if target in counts:
+            counts[target] += n_hits
+    files[ap] = counts
 
 # Emit lcov.info
 with open(out_path, "w") as out:
