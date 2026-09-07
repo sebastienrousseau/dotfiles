@@ -75,6 +75,7 @@ fm_sandbox_setup() {
     "$FM_SANDBOX/.local/share" \
     "$FM_SANDBOX/.local/state" \
     "$FM_SANDBOX/.cache" \
+    "$FM_SANDBOX/run" \
     "$FM_SANDBOX/bin" \
     "$FM_SANDBOX/work"
 
@@ -85,6 +86,17 @@ fm_sandbox_setup() {
   export XDG_DATA_HOME="$FM_SANDBOX/.local/share"
   export XDG_STATE_HOME="$FM_SANDBOX/.local/state"
   export XDG_CACHE_HOME="$FM_SANDBOX/.cache"
+  # XDG_RUNTIME_DIR matters as much as the other four, and is easy to miss
+  # because most commands never touch it. scripts/ops/rollback.sh locks
+  # "${XDG_RUNTIME_DIR:-/tmp}/dotfiles-rollback.lock", so leaving it unset
+  # sends that lock to a machine-global /tmp path shared by every test
+  # process the runner has in flight. When another one holds it, `flock -n`
+  # fails and rollback warns "Already running" and exits 0 — a rc the test
+  # accepts and output it does not, which is exactly how
+  # fm_rollback_clean_reports failed on CI while passing everywhere else.
+  # It never reproduced on macOS because stock macOS has no `flock`, so the
+  # whole locking block is skipped there.
+  export XDG_RUNTIME_DIR="$FM_SANDBOX/run"
   export CHEZMOI_SOURCE_DIR="$REPO_ROOT"
 
   # Deterministic, non-interactive, machine-readable output.
