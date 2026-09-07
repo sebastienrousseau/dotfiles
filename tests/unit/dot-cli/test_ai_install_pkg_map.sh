@@ -37,13 +37,13 @@ _out="$("$BASH_BIN" -c '
   source "$1"
   first="$_DOT_LIB_AI_INSTALL_LOADED"
   source "$1"
-  echo "loaded=$first reguard=$_DOT_LIB_AI_INSTALL_LOADED"
+  echo "loaded=$first after=$_DOT_LIB_AI_INSTALL_LOADED"
   declare -F _ai_mise_pkg >/dev/null && echo "map-defined"
   declare -F install_claude_native >/dev/null && echo "installers-defined"
 ' _ "$AI_INSTALL" 2>&1)"
 _rc=$?
 assert_equals 0 "$_rc" "sourcing twice exits 0"
-assert_contains "loaded=1 reguard=1" "$_out" "the re-source guard holds"
+assert_contains "loaded=1 after=1" "$_out" "the re-source guard holds"
 assert_contains "map-defined" "$_out" "the package map is available to callers"
 assert_contains "installers-defined" "$_out" "the native installers are available to callers"
 

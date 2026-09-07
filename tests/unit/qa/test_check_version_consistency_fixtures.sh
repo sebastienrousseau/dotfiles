@@ -27,6 +27,22 @@ BASH_BIN="$(command -v bash)"
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
+# Substring refutation on an already-captured string. The framework's
+# assert_output_not_contains re-runs its arguments through `eval`, so
+# feeding captured output back in breaks on any shell metacharacter the
+# program happened to print.
+_refute_contains() { # <needle> <haystack> <msg>
+  if [[ "$2" != *"$1"* ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $3"
+    return 0
+  fi
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $3"
+  printf '%b\n' "    Should not contain: '$1'"
+  return 1
+}
+
 # Build a fixture tree where every live surface carries <version>.
 # Prints the fixture root; the checker runs against it through
 # REPO_ROOT rather than being copied or symlinked into the tree —
@@ -129,7 +145,7 @@ _out="$(_check "$_root" --fix)"
 _rc=$?
 assert_equals 1 "$_rc" "unfixable drift exits 1"
 assert_contains "DRIFT in bin/dot" "$_out" "drift reported"
-assert_output_not_contains "fixed:" printf '%s' "$_out"
+_refute_contains "fixed:" "$_out" "nothing is rewritten when the tree is in sync"
 assert_file_contains "$_root/bin/dot" 'VERSION="9.9.9"' "unsafe line left untouched"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

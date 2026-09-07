@@ -54,6 +54,31 @@ if [[ -f "$SCRIPT_DIR/../../package.json" ]]; then
 fi
 repo_version="${repo_version:-0.0.0}"
 
+# ripgrep is preferred but is NOT guaranteed to be installed (the CI
+# runners and minimal setups often lack it, which is why
+# aliases-manifest.sh already carries a grep fallback). Without one
+# here, `rg` exiting 127 reads as "no match": every gated override was
+# reported as ungated, and this gate failed with false errors on any
+# machine without ripgrep.
+_gov_grep_file() { # <ere-pattern> <file>
+  if command -v rg >/dev/null 2>&1; then
+    rg -q "$1" "$2"
+  else
+    grep -qE "$1" "$2"
+  fi
+}
+
+_gov_grep_tree() { # <ere-pattern> <dir>...
+  local pattern="$1"
+  shift
+  if command -v rg >/dev/null 2>&1; then
+    rg -q --glob '*.sh' --glob '*.aliases.sh' --glob '*.tmpl' "$pattern" "$@" 2>/dev/null
+  else
+    grep -rqE --include='*.sh' --include='*.aliases.sh' --include='*.tmpl' \
+      "$pattern" "$@" 2>/dev/null
+  fi
+}
+
 # 1) Duplicate alias names
 dupes="$(awk -F'\t' '{count[$1]++} END {for (k in count) if (count[k] > 1) print k}' "$tmp_manifest" | sort)"
 if [[ -n "$dupes" ]]; then
@@ -77,7 +102,7 @@ while IFS=$'\t' read -r name _value file _line; do
       if [[ "$file" == *"/aliases/gnu/"* ]]; then
         continue
       fi
-      if ! rg -q 'DOTFILES_(ENABLE|SAFE|ALIAS)' "$file"; then
+      if ! _gov_grep_file 'DOTFILES_(ENABLE|SAFE|ALIAS)' "$file"; then
         echo "ERROR: risky override '$name' in $file is not gated by a DOTFILES_* flag"
         errors=$((errors + 1))
       fi
@@ -111,7 +136,9 @@ if [[ -f "$deprecations_file" ]]; then
         alias_found=1
       fi
       function_found=0
-      if rg -q --glob '*.sh' --glob '*.aliases.sh' --glob '*.tmpl' "^[[:space:]]*(function[[:space:]]+)?${alias_name}[[:space:]]*\\(\\)" "$SCRIPT_DIR/../../defaults/.chezmoitemplates/aliases" "$SCRIPT_DIR/../../scripts/dot"; then
+      if _gov_grep_tree "^[[:space:]]*(function[[:space:]]+)?${alias_name}[[:space:]]*\\(\\)" \
+        "$SCRIPT_DIR/../../defaults/.chezmoitemplates/aliases" \
+        "$SCRIPT_DIR/../../scripts/dot"; then
         function_found=1
       fi
       if [[ $alias_found -eq 1 || $function_found -eq 1 ]]; then

@@ -48,7 +48,8 @@ case "$*" in
     exit 0
     ;;
   *--with-colons*)
-    printf 'tru::1:1700000000:0:3:1:5\n'
+    # A non-`pub:` record first, so the awk `/^pub:/` filter is exercised.
+    printf 'cfg:version:2.4.4\n'
     printf 'pub:u:255:22:0123456789ABCDEF:1700000000:%s::u:::scESC::::::23::0:\n' \
       "${GPG_SHIM_EXPIRES:-0}"
     exit 0

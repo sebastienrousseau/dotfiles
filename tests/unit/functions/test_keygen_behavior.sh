@@ -29,6 +29,25 @@ BASH_BIN="$(command -v bash)"
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
+# Permission bits, portably. GNU `stat -f` is "filesystem status" and
+# SUCCEEDS, so a `-f`-first probe never falls through to `-c` on Linux
+# and returns a block of filesystem info instead of a mode. BSD stat
+# rejects `-c` outright, so probing `-c` first is the safe order.
+_mode() { # <path>
+  stat -c '%a' "$1" 2>/dev/null || stat -f '%Lp' "$1" 2>/dev/null
+}
+
+# The Linux arm must NOT suggest the macOS-only keychain flag.
+_refute_keychain() { # <output>
+  if [[ "$1" != *"--apple-use-keychain"* ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no macOS keychain flag on Linux"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: keychain flag leaked into the Linux hint"
+  fi
+}
+
 # ── Controlled PATH ───────────────────────────────────────────────────
 # Only what keygen itself needs. The clipboard probes in
 # copy_to_clipboard must NOT see the host's pbcopy/xclip, so the
@@ -77,11 +96,17 @@ _clip_dir() { # <tool> → dir holding only that clipboard shim
 }
 export CLIP_OUT="$DOTFILES_COV_TMPDIR/clip.txt"
 
-# Linux arm: `uname -s` must say Linux.
+# Platform arms: keygen branches on `uname -s`, so each case pins it
+# rather than inheriting the host's (the agent-hint assertions below
+# differ between macOS and Linux).
 _linux="$DOTFILES_COV_TMPDIR/linux"
 mkdir -p "$_linux"
 printf '#!/usr/bin/env bash\necho Linux\n' >"$_linux/uname"
 chmod +x "$_linux/uname"
+_darwin="$DOTFILES_COV_TMPDIR/darwin"
+mkdir -p "$_darwin"
+printf '#!/usr/bin/env bash\necho Darwin\n' >"$_darwin/uname"
+chmod +x "$_darwin/uname"
 
 # Run keygen from a fresh bash with the function file sourced. PATH is
 # set INSIDE the child so the sourced prelude and keygen both see it.
@@ -153,8 +178,8 @@ assert_contains "SSH key successfully generated" "$_out" "success message printe
 assert_contains "SHA256:shim-fingerprint" "$_out" "fingerprint printed"
 assert_contains "copied to clipboard (macOS)" "$_out" "pbcopy branch reported"
 assert_contains "ssh-shim AAAA" "$(cat "$CLIP_OUT")" "public key reached the clipboard shim"
-assert_equals "700" "$(stat -f '%Lp' "$HOME/.ssh" 2>/dev/null || stat -c '%a' "$HOME/.ssh")" "the .ssh directory is mode 0700"
-assert_equals "600" "$(stat -f '%Lp' "$HOME/.ssh/id_ed25519_mykey" 2>/dev/null || stat -c '%a' "$HOME/.ssh/id_ed25519_mykey")" "private key is 0600"
+assert_equals "700" "$(_mode "$HOME/.ssh")" "the .ssh directory is mode 0700"
+assert_equals "600" "$(_mode "$HOME/.ssh/id_ed25519_mykey")" "private key is 0600"
 
 test_start "existing_key_is_not_regenerated"
 : >"$KEYGEN_SHIM_LOG"
@@ -186,11 +211,19 @@ assert_contains "Public key copied to clipboard." "$_out" "cb branch reported"
 
 test_start "macos_agent_down_warns_with_keychain_hint"
 _fresh_home agentmac
-_out="$(SSH_ADD_RC=1 _keygen "$(_clip_dir wl-copy)" mackey me@example.com)"
+_out="$(SSH_ADD_RC=1 _keygen "$_darwin:$(_clip_dir wl-copy)" mackey me@example.com)"
 _rc=$?
 assert_equals 0 "$_rc" "generation still exits 0"
 assert_contains "ssh-add --apple-use-keychain" "$_out" "keychain hint printed"
 assert_contains "copied to clipboard (Wayland)" "$_out" "wl-copy branch reported"
+
+test_start "linux_agent_down_warns_without_the_keychain_flag"
+_fresh_home agentlinux
+_out="$(SSH_ADD_RC=1 _keygen "$_linux:$(_clip_dir wl-copy)" linuxkey me@example.com)"
+_rc=$?
+assert_equals 0 "$_rc" "generation still exits 0"
+assert_contains "SSH agent not running" "$_out" "agent warning printed"
+_refute_keychain "$_out"
 
 test_start "clip_exe_and_no_clipboard_branches"
 _fresh_home clipexe

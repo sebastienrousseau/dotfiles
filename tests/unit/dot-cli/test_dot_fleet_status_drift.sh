@@ -265,7 +265,7 @@ rc=$?
 assert_equals 0 "$rc" "history exits 0"
 assert_contains "2026-01-01T00:00:00Z" "$out" "clean entry time shown"
 assert_contains "drifted (2 files)" "$out" "drifted entry shows file count"
-assert_contains "?" "$out" "unparseable line falls back to ? instead of aborting"
+assert_contains "?" "$out" "unparsable line falls back to ? instead of aborting"
 
 test_start "fleet_drift_history_honours_count"
 out="$(fleet drift history 1 2>&1)"

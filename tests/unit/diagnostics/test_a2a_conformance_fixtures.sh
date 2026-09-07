@@ -29,6 +29,22 @@ BASH_BIN="$(command -v bash)"
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
+# Substring refutation on an already-captured string. The framework's
+# assert_output_not_contains re-runs its arguments through `eval`, so
+# feeding captured output back in breaks on any shell metacharacter the
+# program happened to print.
+_refute_contains() { # <needle> <haystack> <msg>
+  if [[ "$2" != *"$1"* ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $3"
+    return 0
+  fi
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $3"
+  printf '%b\n' "    Should not contain: '$1'"
+  return 1
+}
+
 if ! command -v jq >/dev/null 2>&1; then
   echo "SKIP: jq is required for these fixtures"
   echo "RESULTS:0:0:0"
@@ -155,7 +171,7 @@ _card="$_root/.well-known/agent-card.json"
 jq '.skills = []' "$_card" >"$_card.tmp" && mv "$_card.tmp" "$_card"
 _list="$(_issues "$_root")"
 assert_contains "skills:empty array" "$_list" "an empty array is still an issue"
-assert_output_not_contains "skills:missing or not array" printf '%s' "$_list"
+_refute_contains "skills:missing or not array" "$_list" "a present-but-empty array is not a type error"
 
 test_start "a2a_cross_checks_the_internal_card"
 _root="$(_fixture internal)"

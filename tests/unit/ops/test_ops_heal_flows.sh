@@ -30,6 +30,22 @@ BASH_BIN="$(command -v bash)"
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
+# Substring refutation on an already-captured string. The framework's
+# assert_output_not_contains re-runs its arguments through `eval`, so
+# feeding captured output back in breaks on any shell metacharacter the
+# program happened to print.
+_refute_contains() { # <needle> <haystack> <msg>
+  if [[ "$2" != *"$1"* ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $3"
+    return 0
+  fi
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $3"
+  printf '%b\n' "    Should not contain: '$1'"
+  return 1
+}
+
 # Shim every tool heal_missing_dependencies probes so the dependency
 # pass is deterministic (zero missing) regardless of the host.
 _deps="$DOTFILES_COV_TMPDIR/deps"
@@ -150,7 +166,7 @@ _out="$(PATH="$_flockno:$PATH" _heal -n)"
 _rc=$?
 assert_equals 0 "$_rc" "contended lock exits 0"
 assert_contains "Already running" "$_out" "already-running warning printed"
-assert_output_not_contains "Dotfiles Heal" printf '%s' "$_out"
+_refute_contains "Dotfiles Heal" "$_out" "the banner is suppressed"
 rmdir "$_lock_dir"
 
 test_start "without_flock_held_lock_dir_reports_already_running"

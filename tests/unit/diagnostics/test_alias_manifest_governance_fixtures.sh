@@ -37,6 +37,22 @@ BASH_BIN="$(command -v bash)"
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
+# Substring refutation on an already-captured string. The framework's
+# assert_output_not_contains re-runs its arguments through `eval`, so
+# feeding captured output back in breaks on any shell metacharacter the
+# program happened to print.
+_refute_contains() { # <needle> <haystack> <msg>
+  if [[ "$2" != *"$1"* ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $3"
+    return 0
+  fi
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $3"
+  printf '%b\n' "    Should not contain: '$1'"
+  return 1
+}
+
 # _tree <name> — an empty source tree with both directories the
 # manifest searches (a missing one makes ripgrep exit 2).
 _tree() {
@@ -214,6 +230,47 @@ _rc=$?
 assert_equals 0 "$_rc" "the default checkout is used"
 assert_contains "xdg" "$_out" "its aliases are inventoried"
 assert_contains "$_home/.local/share/chezmoi" "$_out" "rows point into that checkout"
+
+test_start "governance_reaches_the_same_verdict_without_ripgrep"
+# The CI runners have no ripgrep. Before alias-governance.sh grew a grep
+# fallback, `rg` exiting 127 read as "no match" and every gated override
+# was reported as ungated — the repo's own governance run failed with
+# eight phantom errors on Linux.
+_norg="$DOTFILES_COV_TMPDIR/norg"
+mkdir -p "$_norg"
+for _t in bash grep sed awk sort uniq head tail cut wc tr cat printf echo \
+  mktemp rm dirname basename jq; do
+  _p="$("$BASH_BIN" -c "command -v $_t" 2>/dev/null || true)"
+  [[ -n "$_p" ]] && ln -sf "$_p" "$_norg/$_t"
+done
+
+_root="$(_tree g-gated-norg)"
+{
+  echo "# Enable with DOTFILES_ENABLE_CD=1"
+  echo '[ -n ${DOTFILES_ENABLE_CD:-} ] && alias cd=pushd'
+} >"$_root/.chezmoitemplates/aliases/gated.aliases.sh"
+_out="$(env CHEZMOI_SOURCE_DIR="$_root" CI="" PATH="$_norg" "$BASH_BIN" "$GOVERNANCE" 2>&1)"
+_rc=$?
+assert_equals 0 "$_rc" "a gated override still passes without ripgrep"
+assert_contains "OK: risky overrides are gated" "$_out" "the gate is evaluated, not skipped"
+_refute_contains "command not found" "$_out" "no tool is missing from the fallback path"
+
+_root="$(_tree g-risky-norg)"
+printf "alias cd='pushd'\n" >"$_root/.chezmoitemplates/aliases/risky.aliases.sh"
+_out="$(env CHEZMOI_SOURCE_DIR="$_root" CI="" PATH="$_norg" "$BASH_BIN" "$GOVERNANCE" 2>&1)"
+_rc=$?
+assert_equals 1 "$_rc" "an ungated override still fails without ripgrep"
+assert_contains "ERROR: risky override 'cd'" "$_out" "the same error is produced"
+
+# The deprecation window also searches the tree with ripgrep; exercise
+# its grep fallback (recursive + --include globs) too.
+_root="$(_tree g-deprecated-norg)"
+printf "alias dlogsf='docker logs -f'\n" \
+  >"$_root/.chezmoitemplates/aliases/deprecated.aliases.sh"
+_out="$(env CHEZMOI_SOURCE_DIR="$_root" CI="" PATH="$_norg" "$BASH_BIN" "$GOVERNANCE" 2>&1)"
+_rc=$?
+assert_equals 1 "$_rc" "an expired deprecation still fails without ripgrep"
+assert_contains "expired deprecated aliases still present" "$_out" "the same verdict is reached"
 
 test_start "governance_rejects_hardcoded_user_paths"
 _root="$(_tree g-paths)"

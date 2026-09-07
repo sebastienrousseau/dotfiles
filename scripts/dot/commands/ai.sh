@@ -23,20 +23,15 @@ AI_STATUS_TTL="${DOTFILES_AI_STATUS_TTL:-300}"
 AI_STATUS_CACHE_FILE="${AI_CACHE_DIR}/status.tsv"
 
 # Fallback to source tree if patterns don't exist in config (common in CI).
-# `.chezmoiroot` moves the chezmoi source tree one level down (it holds
-# `defaults` here), so the patterns ship at
-# <repo>/<chezmoiroot>/dot_config/ai/patterns — probing only
-# <repo>/dot_config/ai/patterns made this fallback a no-op and
-# `dot ai <tool> --style <name>` died with "Pattern not found" on exactly
-# the un-deployed machines the fallback exists for.
+# `.chezmoiroot` moves the source tree one level down (it holds
+# `defaults` here), so probing <repo>/dot_config/… alone made this a
+# no-op and `--style` died with "Pattern not found" off-deployment.
 if [[ ! -d "$PATTERN_DIR" ]]; then
   _AI_SRC="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-  _AI_ROOT_SUB=""
-  if [[ -f "$_AI_SRC/.chezmoiroot" ]]; then
-    _AI_ROOT_SUB="$(head -1 "$_AI_SRC/.chezmoiroot" | tr -d '[:space:]')"
-  fi
-  for _AI_CAND in "$_AI_SRC/dot_config/ai/patterns" \
-    ${_AI_ROOT_SUB:+"$_AI_SRC/$_AI_ROOT_SUB/dot_config/ai/patterns"}; do
+  _AI_SUB=""
+  [[ -f "$_AI_SRC/.chezmoiroot" ]] &&
+    _AI_SUB="/$(head -1 "$_AI_SRC/.chezmoiroot" | tr -d '[:space:]')"
+  for _AI_CAND in "$_AI_SRC/dot_config/ai/patterns" "$_AI_SRC$_AI_SUB/dot_config/ai/patterns"; do
     if [[ -d "$_AI_CAND" ]]; then
       PATTERN_DIR="$_AI_CAND"
       break
@@ -418,10 +413,8 @@ ${prompt}"
         do_install=$(gum confirm "Install $tool via mise ($mise_pkg)?" && echo "yes" || echo "no")
       else
         printf "Install %s via mise (%s)? [y/N] " "$tool" "$mise_pkg"
-        # `|| true`: with stdin at EOF (piped, cron, CI) `read` returns 1
-        # and `set -e` killed the script mid-prompt — no answer, no
-        # install hint, bare rc 1. EOF means "no", which the case below
-        # already handles.
+        # `|| true`: at EOF (piped, cron, CI) `read` returns 1 and
+        # `set -e` killed the script mid-prompt. EOF means "no".
         read -r do_install || true
         case "$do_install" in y | Y | yes) do_install="yes" ;; *) do_install="no" ;; esac
       fi

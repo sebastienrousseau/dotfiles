@@ -206,7 +206,7 @@ cmd_fleet_drift() {
       tail -n "$count" "$_DRIFT_HISTORY_FILE" | while IFS= read -r line; do
         local time status file_count
         # One jq per line (was three: .time, .status, .files|length).
-        # `|| true`: on an unparseable line jq prints nothing, `read`
+        # `|| true`: on an unparsable line jq prints nothing, `read`
         # hits EOF and returns 1, and `set -e` would otherwise abort the
         # whole listing instead of rendering the `?` placeholders below.
         IFS=$'\t' read -r time status file_count < <(

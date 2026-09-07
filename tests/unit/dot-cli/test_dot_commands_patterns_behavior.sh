@@ -27,6 +27,22 @@ BASH_BIN="$(command -v bash)"
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
+# Substring refutation on an already-captured string. The framework's
+# assert_output_not_contains re-runs its arguments through `eval`, so
+# feeding captured output back in breaks on any shell metacharacter the
+# program happened to print.
+_refute_contains() { # <needle> <haystack> <msg>
+  if [[ "$2" != *"$1"* ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $3"
+    return 0
+  fi
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $3"
+  printf '%b\n' "    Should not contain: '$1'"
+  return 1
+}
+
 PATTERN_DIR="$XDG_CONFIG_HOME/ai/patterns"
 LOG="$DOTFILES_COV_TMPDIR/patterns.log"
 : >"$LOG"
@@ -59,7 +75,7 @@ printf '# Hardener\n' >"$PATTERN_DIR/hardener.md"
 _out="$(_run list)"
 assert_contains "architect" "$_out" "first pattern listed"
 assert_contains "hardener" "$_out" "second pattern listed"
-assert_output_not_contains ".md" printf '%s' "$_out"
+_refute_contains ".md" "$_out" "the .md suffix is stripped from listed names"
 
 test_start "patterns_defaults_to_list"
 _out="$(_run)"
@@ -91,7 +107,7 @@ assert_file_contains "$LOG" "$PATTERN_DIR/architect.md" "glow received the patte
 test_start "patterns_view_reports_an_unknown_pattern"
 _out="$(_run view nope)"
 assert_contains "Pattern not found" "$_out" "missing pattern reported"
-assert_output_not_contains "Pattern: nope" printf '%s' "$_out"
+_refute_contains "Pattern: nope" "$_out" "no pattern body is rendered"
 
 test_start "patterns_view_without_a_name_fails_with_usage"
 _out="$(_run view)"

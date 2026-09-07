@@ -28,6 +28,22 @@ BASH_BIN="$(command -v bash)"
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
+# Substring refutation on an already-captured string. The framework's
+# assert_output_not_contains re-runs its arguments through `eval`, so
+# feeding captured output back in breaks on any shell metacharacter the
+# program happened to print.
+_refute_contains() { # <needle> <haystack> <msg>
+  if [[ "$2" != *"$1"* ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $3"
+    return 0
+  fi
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $3"
+  printf '%b\n' "    Should not contain: '$1'"
+  return 1
+}
+
 _driver="$DOTFILES_COV_TMPDIR/driver.sh"
 cat >"$_driver" <<'DRIVER'
 #!/usr/bin/env bash
@@ -83,7 +99,7 @@ ln -s /nonexistent/lock "$HOME/google-chrome-backup/SingletonLock"
 ln -s /nonexistent/cookie "$HOME/SingletonCookie"
 _out="$(_run heal_broken_symlinks DRY_RUN=1)"
 assert_contains "DRY: remove broken symlink: $HOME/dead-a -> /nonexistent/target-a" "$_out" "broken link previewed"
-assert_output_not_contains "SingletonCookie" printf '%s' "$_out"
+_refute_contains "SingletonCookie" "$_out" "known lock files are skipped"
 assert_contains "ISSUES=1 FIXES=0" "$_out" "only the real broken link counted"
 # `-e`/`-f` are false for a dangling symlink, so assert on `-L`.
 assert_true "[[ -L '$HOME/dead-a' ]]" "dry-run leaves the broken link in place"
@@ -106,7 +122,7 @@ test_start "symlinks_lock_pattern_removed_without_prompt"
 _fresh_home lockpat
 ln -s /nonexistent/x "$HOME/app.SingletonLock.stale"
 _out="$(_run heal_broken_symlinks </dev/null)"
-assert_output_not_contains "Remove broken symlink" printf '%s' "$_out"
+_refute_contains "Remove broken symlink" "$_out" "lock-pattern links are removed without prompting"
 assert_contains "removed $HOME/app.SingletonLock.stale" "$_out" "lock-pattern link removed"
 assert_contains "ISSUES=1 FIXES=1" "$_out" "fix counted"
 
