@@ -153,6 +153,19 @@ _rc=$?
 assert_equals 0 "$_rc" "a freshly rendered tree is in sync"
 assert_contains "in sync with CLAUDE.md" "$_out" "sync is reported"
 
+test_start "agents_check_is_insensitive_to_blank_line_differences"
+# `render` writes one more blank line after its header block than
+# CLAUDE.md carries, so the two extracted bodies ALWAYS differ by a
+# blank line — the whole verdict rests on that being ignored. Adding
+# more blank lines must not manufacture drift either. (macOS 14's diff
+# drops --ignore-blank-lines under -q, which made every freshly
+# rendered tree look drifted there.)
+printf '\n\n' >>"$_root/AGENTS.md"
+_out="$(_agents "$_bin" check)"
+_rc=$?
+assert_equals 0 "$_rc" "extra blank lines are not drift"
+assert_contains "in sync with CLAUDE.md" "$_out" "still reported as in sync"
+
 test_start "agents_check_detects_drift"
 printf '\n- A rule added only to CLAUDE.md.\n' >>"$_root/CLAUDE.md"
 _out="$(_agents "$_bin" check)"
