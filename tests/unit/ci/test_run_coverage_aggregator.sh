@@ -414,6 +414,53 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: runner did not name the silent test (exit $silent_ec)"
 fi
 
+test_start "empty_bash_source_is_not_mistaken_for_truncation"
+# `bash -c` has no BASH_SOURCE[0], so records legitimately carry an empty
+# file field. Those must parse (and then be skipped for having no file),
+# not be counted as mangled — otherwise the truncation audit cries wolf on
+# every run and the real signal is lost in the noise.
+assert_file_contains "$RUNNER" 'hit_re = re.compile(r"^\++@COV@:(\d+):([^:]*):@")' \
+  "the record pattern must accept an empty BASH_SOURCE field"
+
+test_start "incomplete_sweep_is_a_hard_error"
+# A worker that dies before recording a status leaves the sweep short, and
+# `xargs … || true` hides it. The runner must refuse to report a
+# percentage computed from a fraction of the suite.
+mkdir -p "$SANDBOX/tests-partial/unit" "$SANDBOX/tests-partial/regression"
+printf '#!/usr/bin/env bash\necho "RESULTS:1:1:0"\n' \
+  >"$SANDBOX/tests-partial/unit/test_ok.sh"
+cat >"$SANDBOX/tests-partial/unit/test_kills_its_worker.sh" <<'EOF'
+#!/usr/bin/env bash
+# Kill the xargs worker two levels up (this shell <- timeout <- worker),
+# reproducing "xargs: bash: terminated with signal 15": the worker dies
+# before it can record a status, so this test leaves no result behind.
+worker="$(ps -o ppid= -p "$PPID" 2>/dev/null | tr -d ' ')"
+[[ -n "$worker" ]] && kill -TERM "$worker" 2>/dev/null
+sleep 5
+EOF
+set +e
+env REPO_ROOT="$SANDBOX" \
+  TESTS_DIR="$SANDBOX/tests-partial" \
+  COVERAGE_DIR="$SANDBOX/coverage5" \
+  COVERAGE_OUT="$SANDBOX/coverage5/lcov.info" \
+  COV_INCLUDE_DIRS="$SANDBOX/src" \
+  MIN_COVERAGE_PCT=0 \
+  COV_TEST_TIMEOUT=30 \
+  JOBS=1 \
+  bash "$RUNNER" >"$SANDBOX/runner-partial.log" 2>&1
+partial_ec=$?
+rm -rf "$SANDBOX/tests-partial"
+if [[ "$partial_ec" -ne 0 ]] &&
+  grep -qE "tests-completed: [01]/2" "$SANDBOX/runner-partial.log" &&
+  grep -q "no result recorded for: unit/test_kills_its_worker.sh" "$SANDBOX/runner-partial.log"; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected a non-zero exit naming the test with no result (got $partial_ec)"
+  grep -E 'tests-completed|no result' "$SANDBOX/runner-partial.log" >&2 || true
+fi
+
 test_start "xtrace_uses_a_dedicated_descriptor"
 assert_file_contains "$RUNNER" "BASH_XTRACEFD=" \
   "xtrace must not be written to fd 2, where a test's redirection can eat it"

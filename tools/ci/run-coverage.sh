@@ -343,6 +343,34 @@ elapsed=$(($(date +%s) - start_ts))
 echo "trace phase done in ${elapsed}s" >&2
 
 # -----------------------------------------------------------------------------
+# Completeness audit — did every discovered test actually run?
+#
+# `xargs … || true` swallows a worker that died before it could record a
+# status: `xargs: bash: terminated with signal 15` scrolls past, the sweep
+# stops early, and the aggregator happily prints a percentage computed
+# from a fraction of the suite. That is the same silent-wrong-number
+# failure as the timeout kill, arriving by a different door — a sweep
+# interrupted at 230 of 670 tests reported 47.28% and exited 0 — so the
+# count of status records is checked against the count of tests dispatched.
+# -----------------------------------------------------------------------------
+ran_count=$(find "$status_dir" -name '*.status' -type f | wc -l | tr -d ' ')
+echo "tests-completed: ${ran_count}/${#test_files[@]}" >&2
+cov_incomplete=0
+if [[ "$ran_count" -ne "${#test_files[@]}" ]]; then
+  cov_incomplete=1
+  echo "::error::only ${ran_count} of ${#test_files[@]} tests recorded a result — the sweep did not finish, so any percentage below is computed from a fraction of the suite" >&2
+  missing=0
+  for f in "${test_files[@]}"; do
+    rel="${f#"$TESTS_DIR"/}"
+    if [[ ! -e "$status_dir/${rel//\//__}.status" ]]; then
+      missing=$((missing + 1))
+      [[ "$missing" -le 10 ]] && echo "::error::no result recorded for: $rel" >&2
+    fi
+  done
+  [[ "$missing" -gt 10 ]] && echo "::error::… and $((missing - 10)) more" >&2
+fi
+
+# -----------------------------------------------------------------------------
 # Timeout audit — a killed test contributes no trace records, so it silently
 # removes its share of the numerator while leaving the denominator intact.
 # That made the reported percentage a function of machine load: two runs over
@@ -523,7 +551,11 @@ def is_skipped(abs_path: Path) -> bool:
 # Bash adds one xtrace prefix for each nested execution context. Count both
 # top-level `+@COV@` records and `++@COV@`/`+++@COV@` records emitted from
 # functions inside command substitutions and subshells.
-hit_re = re.compile(r"^\++@COV@:(\d+):([^:]+):@")
+# `[^:]*` (not `[^:]+`): a `bash -c` top level has no BASH_SOURCE[0], so
+# the field is legitimately empty. Those records name no file and are
+# skipped below — but they must still MATCH here, or the truncation audit
+# would mistake every one of them for a mangled record.
+hit_re = re.compile(r"^\++@COV@:(\d+):([^:]*):@")
 
 # A record that starts like ours but has lost its `:@ ` terminator was
 # truncated in flight — bash 3.2 cuts the expanded PS4 at 100 characters.
@@ -1147,6 +1179,11 @@ fi
 # Reported last so the coverage number is still visible above it: a killed
 # test or a mangled record invalidates the measurement even when the
 # surviving tests clear the floor.
+if [[ "$cov_incomplete" -eq 1 ]]; then
+  echo "::error::coverage measurement is invalid — the sweep ran ${ran_count} of ${#test_files[@]} tests" >&2
+  exit 5
+fi
+
 if [[ "$cov_timeout_failure" -eq 1 ]]; then
   echo "::error::coverage measurement is invalid — ${#killed_tests[@]} test(s) killed by COV_TEST_TIMEOUT" >&2
   exit 3
