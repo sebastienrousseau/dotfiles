@@ -79,23 +79,30 @@ STRIP_TIMESTAMP="cut -d ' ' -f 2-"
 # shellcheck disable=SC2124
 GIT_LOG_DEFAULT="git log --pretty='${FORMAT_MESSAGE}' ${GIT_ARGS[*]} | ${STRIP_TIMESTAMP}"
 
-fzf \
-  --border --border-label " [ Enter: Show | Ctrl+O: Browser | Ctrl+Y: Copy hash ] " \
-  --disabled --no-sort --query "" \
-  --bind "start:reload(${GIT_LOG_DEFAULT})" \
-  --bind "change:reload:sleep 0.15
-      query={q};
-      if [ -z \"\${query}\" ]; then
-        ${GIT_LOG_DEFAULT}
-      else
-        [[ \"\${query}\" =~ [A-Z] ]] && case= || case=\"--regexp-ignore-case\"
-        (git log \${case} --pretty='${FORMAT_CODE}' ${GIT_ARGS[*]} -G \"\${query}\"
-         git log \${case} --pretty='${FORMAT_MESSAGE}' ${GIT_ARGS[*]} --grep \"\${query}\") |
-         sort --numeric-sort --reverse --unique --key 1,1 |
-         ${STRIP_TIMESTAMP}
-      fi" \
-  --bind "enter:execute(git show {1} -- | delta --paging always)" \
-  --bind "ctrl-o:execute-silent(bash -c 'source ${0}; open_commit_url {1}')" \
-  --bind "ctrl-y:execute-silent(printf '%s' {1} | cb)" \
-  --preview "git show {1} -- | delta --width=\${FZF_PREVIEW_COLUMNS}" \
-  --preview-window="right:70%" || true
+# Only launch the picker when gl is EXECUTED. The Ctrl+O binding below
+# re-enters this file with `bash -c 'source <gl>; open_commit_url …'`
+# to reuse the URL normaliser; without this guard that re-ran the whole
+# script and spawned a second, hidden fzf before the function it wanted
+# could run.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  fzf \
+    --border --border-label " [ Enter: Show | Ctrl+O: Browser | Ctrl+Y: Copy hash ] " \
+    --disabled --no-sort --query "" \
+    --bind "start:reload(${GIT_LOG_DEFAULT})" \
+    --bind "change:reload:sleep 0.15
+        query={q};
+        if [ -z \"\${query}\" ]; then
+          ${GIT_LOG_DEFAULT}
+        else
+          [[ \"\${query}\" =~ [A-Z] ]] && case= || case=\"--regexp-ignore-case\"
+          (git log \${case} --pretty='${FORMAT_CODE}' ${GIT_ARGS[*]} -G \"\${query}\"
+           git log \${case} --pretty='${FORMAT_MESSAGE}' ${GIT_ARGS[*]} --grep \"\${query}\") |
+           sort --numeric-sort --reverse --unique --key 1,1 |
+           ${STRIP_TIMESTAMP}
+        fi" \
+    --bind "enter:execute(git show {1} -- | delta --paging always)" \
+    --bind "ctrl-o:execute-silent(bash -c 'source ${0}; open_commit_url {1}')" \
+    --bind "ctrl-y:execute-silent(printf '%s' {1} | cb)" \
+    --preview "git show {1} -- | delta --width=\${FZF_PREVIEW_COLUMNS}" \
+    --preview-window="right:70%" || true
+fi

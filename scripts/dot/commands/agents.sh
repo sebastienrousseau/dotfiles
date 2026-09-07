@@ -148,10 +148,18 @@ cmd_agents() {
         ui_warn "AGENTS.md" "missing — run 'dot agents render'"
         return 1
       fi
-      # Diff the bodies (header comments differ by design).
-      # `--ignore-blank-lines` so the trailing newline from the footer
-      # block doesn't false-positive as drift.
-      if diff -q --ignore-blank-lines <(_agents_body "$claude_md") <(_agents_body "$agents_md") >/dev/null 2>&1; then
+      # Compare the bodies (header comments differ by design), ignoring
+      # blank lines: the rendered file carries an extra one after its
+      # header block. This deliberately does NOT lean on
+      # `diff -q --ignore-blank-lines` — some BSD diff builds (macOS 14's,
+      # for one) short-circuit `-q` to a byte comparison and drop the
+      # ignore flags, which made `check` report drift on a tree it had
+      # just rendered. Stripping the blank lines here is implementation-
+      # independent.
+      local _claude_body _agents_body_text
+      _claude_body="$(_agents_body "$claude_md" | grep -v '^[[:space:]]*$')"
+      _agents_body_text="$(_agents_body "$agents_md" | grep -v '^[[:space:]]*$')"
+      if [[ "$_claude_body" == "$_agents_body_text" ]]; then
         ui_ok "AGENTS.md" "in sync with CLAUDE.md"
         return 0
       fi
