@@ -103,8 +103,44 @@ jobs:
           #   Release hardening: 59.32% (7523/12682) after including the
           #             mandatory regression suite and replaying function-probe
           #             xtrace into the aggregator. floor=58.
+          #   Measurement fix: 70.15% (7700/10977). NOT new tests — the two
+          #             defects below made every previous figure an
+          #             understatement, so this entry corrects the metric
+          #             rather than improving the code.
+          #             (a) Denominator: bash `set -x` emits no trace record
+          #             for function-definition headers, `case` labels, the
+          #             interior of a multi-line `$( )` / `<( )` / array /
+          #             quoted string, plain backslash continuations, or a
+          #             compound terminator carrying only a redirection
+          #             (`done <file`). Those lines were permanently
+          #             unhittable yet sat in the denominator, capping real
+          #             files at 86-97%. They are now excluded, and a
+          #             multi-line statement folds onto ONE denominator entry
+          #             (bash reports it at the first physical line for some
+          #             constructs and the last for others). Denominator
+          #             12679 -> 10977; +8.99 pt.
+          #             (b) Per-test timeout: at 60s the heavier suites were
+          #             SIGTERMed mid-run and contributed nothing, so the
+          #             number tracked machine load. Budget raised to 300s
+          #             and a kill is now a hard error (exit 3, named files).
+          #             +1.80 pt (measured by re-aggregating the corrected
+          #             trace set with the OLD aggregator: 61.16%).
+          #             (c) Landed after that measurement, so NOT in the
+          #             70.15%: xtrace now goes to a dedicated descriptor
+          #             instead of fd 2, so a test that captures or discards
+          #             a child's stderr no longer throws that child's
+          #             coverage away (540 of 706 test files have such a
+          #             redirection on an invocation line); and the record
+          #             carries a repo-relative path, so bash 3.2's 100-char
+          #             PS4 truncation can no longer mangle records from a
+          #             deep checkout. Both only ever recover records, so
+          #             70.15% is a lower bound on what CI will measure.
+          #             floor=68 — ~2 pt of cushion for local<->CI drift and
+          #             run-to-run xtrace variance, matching the margin the
+          #             previous entries carried. Ratchet again once CI has
+          #             reported a figure that includes (c).
           # Bump in lockstep with the slice that lands the bump.
-          MIN_COVERAGE_PCT: '58'
+          MIN_COVERAGE_PCT: '68'
         run: bash tools/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact
