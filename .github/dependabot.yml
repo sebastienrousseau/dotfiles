@@ -13,6 +13,21 @@ updates:
     labels:
       - "dependencies"
       - "security"
+    ignore:
+      # This repo's own reusable workflows are pinned by SHA, so Dependabot
+      # sees each call site as a github-actions dependency and opens a PR
+      # whenever main moves. But .github/workflows/bump-reusable-pins.yml
+      # already owns that job: it runs on every push to main touching a
+      # reusable-*.yml and opens a single PR bumping every stale caller.
+      #
+      # With both active, each merge to main regenerated up to seven
+      # near-identical PRs, which in turn moved main again. Nothing required
+      # them: tools/ci/lint-reusable-pins.sh only enforces that a pin is an
+      # immutable 40-hex SHA, never that it matches main, so a pin that
+      # trails main by a few commits is valid and safe.
+      #
+      # Third-party actions are unaffected and still bumped normally.
+      - dependency-name: "sebastienrousseau/dotfiles/.github/workflows/*"
     groups:
       github-actions-minor-patch:
         patterns:
