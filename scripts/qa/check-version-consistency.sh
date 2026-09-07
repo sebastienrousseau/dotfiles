@@ -49,8 +49,12 @@ _log() { ((quiet)) || printf '%s\n' "$*"; }
 _err() { printf 'check-version-consistency: %s\n' "$*" >&2; }
 
 # ── Canonical version ──────────────────────────────────────────────────
-canonical="$(grep -E '^dotfiles_version[[:space:]]*=' defaults/.chezmoidata.toml |
-  head -1 | sed -E 's/.*"([^"]+)".*/\1/')"
+# `|| true`: when the key is absent grep exits 1, and under
+# `set -euo pipefail` that aborted the script right here — rc 1 with no
+# message, indistinguishable from "drift detected", and the documented
+# rc 2 below was unreachable. Let the emptiness check do the reporting.
+canonical="$(grep -E '^dotfiles_version[[:space:]]*=' defaults/.chezmoidata.toml 2>/dev/null |
+  head -1 | sed -E 's/.*"([^"]+)".*/\1/' || true)"
 
 if [[ -z "$canonical" ]]; then
   _err 'failed to read dotfiles_version from defaults/.chezmoidata.toml'
