@@ -196,7 +196,15 @@ show_language_package_managers() {
     # mid-output. Capture the pipeline separately so we can fall back
     # cleanly without stray "N/A" lines from pipe-with-|| tricks.
     if pipx_list_out="$(pipx list --short 2>/dev/null)"; then
-      pipx_installed="$(printf '%s' "$pipx_list_out" | wc -l | tr -d ' ')"
+      # Command substitution strips the trailing newline, so counting
+      # with `printf '%s' … | wc -l` reported one package fewer than
+      # installed (and 0 when exactly one was installed). Re-add the
+      # terminator, and treat "no output" as zero rather than one.
+      if [[ -n "$pipx_list_out" ]]; then
+        pipx_installed="$(printf '%s\n' "$pipx_list_out" | wc -l | tr -d ' ')"
+      else
+        pipx_installed=0
+      fi
     else
       pipx_installed="N/A"
     fi
