@@ -86,8 +86,23 @@ _du_expect "short_flag_arms_are_visited" 1 "scripts/ops/health-check.sh"
 # =======================================================================
 # 3. A resolvable target is exec'd. `--benchmark` picks tests/benchmark.sh,
 #    which is the cheapest of the six and needs no fixture.
+#
+#    The assertion is on the banner the target prints, not on the exit
+#    status: after `exec` the status belongs to benchmark.sh, which is
+#    not this script's contract. It exits 0 where zsh and hyperfine are
+#    installed and 127 on a runner without them, and doctor-unified has
+#    done its job identically in both cases.
 # =======================================================================
 _run_du --benchmark
-_du_expect "benchmark_flag_execs_its_target" 0 "Total Startup Benchmark"
+test_start "benchmark_flag_execs_its_target"
+if [[ "$DU_OUT" == *"Total Startup Benchmark"* ]] &&
+  [[ "$DU_OUT" != *"Script not found"* ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (target rc=$DU_RC)"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: the benchmark target did not run"
+  printf '%s\n' "$DU_OUT" | tail -20 | sed 's/^/      /'
+fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

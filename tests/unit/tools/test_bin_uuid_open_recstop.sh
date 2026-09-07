@@ -161,22 +161,34 @@ _b_expect "uuid_zero_count_prints_nothing" 0
 test_start "uuid_zero_count_output_is_empty"
 assert_empty "$B_OUT" "a count of zero must print no UUIDs"
 
-# The od + /dev/urandom fallback, with no uuidgen and no kernel file.
-# It is reached but cannot succeed: `od -x /dev/urandom | head -1` leaves
-# od writing to a closed pipe, and under `set -o pipefail` that SIGPIPE
-# (rc 141) propagates out of the assignment and, under `set -e`, ends the
-# script before it prints anything. Pinned here as observed behaviour
-# rather than fixed, so a later change to that pipeline is deliberate.
-_b_scenario uuid_fallback
+# With no uuidgen on PATH, which generator runs next is decided by the
+# host, and the two outcomes are genuinely different:
+#
+#   Linux — /proc/sys/kernel/random/uuid exists, so the kernel branch
+#           runs and prints a real UUID.
+#   macOS — that file does not exist, so the od + /dev/urandom fallback
+#           runs. It cannot succeed: `od -x /dev/urandom | head -1`
+#           leaves od writing to a closed pipe, and under `set -o
+#           pipefail` that SIGPIPE propagates out of the assignment and,
+#           under `set -e`, ends the script before it prints anything.
+#
+# Both are asserted, chosen by probing the same path the script probes,
+# so the suite pins real behaviour on either platform instead of baking
+# in the host it was written on.
+_b_scenario uuid_no_uuidgen
 _run_bin executable_uuid
-test_start "uuid_urandom_fallback_fails_on_sigpipe"
-if [[ "$B_RC" -ne 0 ]] && [[ -z "$B_OUT" ]]; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$B_RC)"
+if [[ -f /proc/sys/kernel/random/uuid ]]; then
+  _b_expect "uuid_falls_back_to_the_kernel_random_file" 0 "MATCH:$UUID_RE"
 else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected a non-zero exit and no output"
-  printf '%s\n' "$B_OUT" | sed 's/^/      /'
+  test_start "uuid_urandom_fallback_fails_on_sigpipe"
+  if [[ "$B_RC" -ne 0 ]] && [[ -z "$B_OUT" ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=$B_RC)"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected a non-zero exit and no output"
+    printf '%s\n' "$B_OUT" | sed 's/^/      /'
+  fi
 fi
 
 # =======================================================================
