@@ -18,12 +18,16 @@ on:
       - 'bin/dot'
       - 'scripts/dot/**'
       - 'tools/ci/dot-cli-startup-bench.sh'
+      - 'tests/performance/dot_command_bench.sh'
+      - 'docs/reference/FEATURE-MATRIX.md'
       - '.github/workflows/dot-cli-bench.yml'
   pull_request:
     paths:
       - 'bin/dot'
       - 'scripts/dot/**'
       - 'tools/ci/dot-cli-startup-bench.sh'
+      - 'tests/performance/dot_command_bench.sh'
+      - 'docs/reference/FEATURE-MATRIX.md'
       - '.github/workflows/dot-cli-bench.yml'
 
 permissions:
@@ -60,3 +64,57 @@ jobs:
           DOT_BENCH_RUNS: 11
           DOT_BENCH_CMD: version
         run: bash tools/ci/dot-cli-startup-bench.sh
+
+  # Breadth sweep: every routed command, not just `dot version`. The gate
+  # above is the asserted one; this job RECORDS timings so a regression in a
+  # single command's cold start cannot hide behind one representative
+  # command, and uploads the JSON as an artifact for trend comparison.
+  #
+  # Deliberately not asserted. Per fix(bench) 73b788f0, a single command's
+  # wall clock on these runners is not measurable to better than roughly
+  # ±25% between sessions, and a threshold that fails on when it happens to
+  # run teaches people to ignore the check. The calibrated thresholds stay
+  # in the scripts that own them.
+  sweep:
+    name: dot CLI sweep / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    timeout-minutes: 20
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install hyperfine
+        # The sweep falls back to a portable median-of-N loop without it, but
+        # hyperfine does the warmup and the statistics properly.
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          case "$(uname -s)" in
+            Linux) bash tools/ci/install-tools.sh hyperfine ;;
+            Darwin) brew install hyperfine ;;
+          esac
+
+      - name: Benchmark every command
+        run: |
+          bash tests/performance/dot_command_bench.sh \
+            --full --runs 3 --output dot-command-bench.json
+
+      - name: Verify every command was covered
+        # The sweep is only meaningful if it actually reached every command;
+        # this is the assertion the job does make.
+        run: bash ./scripts/qa/check-feature-matrix.sh --quiet
+
+      - name: Upload benchmark JSON
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dot-command-bench-${{ matrix.os }}
+          path: dot-command-bench.json
+          retention-days: 30

@@ -82,6 +82,28 @@ jobs:
       - name: Validate executable examples
         run: bash ./scripts/qa/validate-examples.sh
 
+  # Coverage contract for the `dot` CLI: every routable command, flag,
+  # environment variable and config key has a row in
+  # docs/reference/FEATURE-MATRIX.md naming the regression test, benchmark,
+  # example and manual section that cover it. The gate fails when a command
+  # gains no row, or a row names a test / benchmark id / example that does
+  # not exist — so coverage cannot be added to the table without being
+  # written, or deleted without the table going red.
+  feature-matrix:
+    name: Feature Matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Verify the feature matrix is in sync
+        run: bash ./scripts/qa/check-feature-matrix.sh
+
   wsl-contract:
     name: WSL Contract
     runs-on: ubuntu-latest
@@ -125,7 +147,7 @@ jobs:
   reliability-summary:
     name: Reliability Summary
     runs-on: ubuntu-latest
-    needs: [reliability, examples-contract, wsl-contract, powershell-contract]
+    needs: [reliability, examples-contract, feature-matrix, wsl-contract, powershell-contract]
     if: always()
     steps:
       - name: Harden runner (audit mode)
@@ -141,6 +163,10 @@ jobs:
           fi
           if [[ "${{ needs.examples-contract.result }}" != "success" ]]; then
             echo "::error::Examples contract failed"
+            exit 1
+          fi
+          if [[ "${{ needs.feature-matrix.result }}" != "success" ]]; then
+            echo "::error::Feature matrix drift gate failed"
             exit 1
           fi
           if [[ "${{ needs.wsl-contract.result }}" != "success" ]]; then
