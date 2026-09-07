@@ -44,7 +44,7 @@ jobs:
 
   lint-lua:
     name: Lint / Lua (Zero Warnings)
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@3108a81f22deea174bd4e7c59f83e2a7e0fb0f61 # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-lua-lint.yml@02f75433c88d7494b2d5198170ab965dca261a15 # main
     with:
       target: defaults/dot_config/nvim
       strict: true
