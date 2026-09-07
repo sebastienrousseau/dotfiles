@@ -83,6 +83,27 @@ covers, and a matrix test fails if a harness is missing from it.
 | `FuzzHighlight` | A 5 000-character fenced-block language tag stalled every render for 13s (chroma's unknown-lexer lookup is linear in the tag length). | Validate fence tags against a short-identifier pattern and memoise the lookup. |
 | `FuzzRenderTranscript` | An empty transcript on a 12-row terminal with the palette open asked the splash for a negative height and panicked on a slice bound. | Drop the "recent runs" block when it does not fit; clamp the splash height. |
 
+### Harness files must be self-contained
+
+`compile_native_go_fuzzer` rewrites **one** `*_test.go` file into a
+regular `.go` file and builds it **without** the package's other test
+files. A harness that references a symbol declared in a sibling
+`_test.go` therefore passes `go test` everywhere and fails only inside
+the OSS-Fuzz / ClusterFuzzLite container:
+
+```
+./dot_ui_parsers_test.go_fuzz.go:117:21: undefined: dangerousChars
+2026/09/07 01:14:42 failed to build packages:exit status 1
+```
+
+So a shared constant is deliberately **duplicated** per harness file
+rather than factored out. If sharing is genuinely warranted, put the
+symbol in a non-test `.go` file in the package — those the builder keeps.
+
+`tools/ci/check-fuzz-harness-self-contained.sh` enforces this by
+type-checking each harness alone in a scratch module; it runs in the
+`Fuzz / Harness self-containment` job on every relevant PR.
+
 Add a harness when:
 
 - a new `dot <subcommand>` accepts user input via `$1` / `--flag`,

@@ -31,6 +31,15 @@ import (
 
 // ── port of defaults/dot_local/share/dot-ui/run.go ──────────────────────────
 
+// uiDangerousChars is the shell-metacharacter set an accepted value must never
+// contain. It is deliberately duplicated per harness file rather than
+// shared: compile_native_go_fuzzer rewrites ONE *_test.go file into a
+// regular .go file and builds it without the package's other test files,
+// so a harness that references a symbol declared in a sibling _test.go
+// builds under `go test` but fails in the OSS-Fuzz builder with
+// "undefined: <symbol>". Every harness file must be self-contained.
+const uiDangerousChars = ";&|`$\\<>\"' \t\n\r"
+
 // UIEvent mirrors dot-ui's Event: the union of all NDJSON event fields.
 type UIEvent struct {
 	T         string `json:"t"`
@@ -154,7 +163,7 @@ func FuzzUIHexColor(f *testing.F) {
 				t.Fatalf("accepted non-hex byte %q at %d in %q", v[i], i, v)
 			}
 		}
-		for _, c := range dangerousChars {
+		for _, c := range uiDangerousChars {
 			if strings.ContainsRune(v, c) {
 				t.Fatalf("accepted colour contains %q: %q", c, v)
 			}

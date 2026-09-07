@@ -24,6 +24,14 @@ cd "$SRC/dotfiles/oss-fuzz-integration/fuzz"
 # (1) creating fuzz/<name>_test.go with `func Fuzz<Cap>(f *testing.F)`,
 # (2) appending a `compile_native_go_fuzzer` call here.
 
+# IMPORTANT: each harness file must be SELF-CONTAINED.
+# compile_native_go_fuzzer rewrites ONE *_test.go file into a regular .go
+# file and builds it WITHOUT the package's other test files, so a harness
+# that uses a symbol declared in a sibling _test.go builds under `go test`
+# and then fails here with "undefined: <symbol>". Duplicate the symbol into
+# the harness file, or put it in a non-test .go file in the package.
+# tools/ci/check-fuzz-harness-self-contained.sh enforces this in CI.
+
 # Harness inventory (keep in sync with docs/security/FUZZING.md):
 #   FuzzValidateName / FuzzInitURLResolver - ports of the shell helpers
 #   FuzzUI*  - ports of the dot-ui parsers   (defaults/dot_local/share/dot-ui)

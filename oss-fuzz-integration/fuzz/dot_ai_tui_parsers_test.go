@@ -31,6 +31,15 @@ import (
 
 // ── port of defaults/dot_local/share/dot-ai-tui/main.go ─────────────────────
 
+// aiDangerousChars is the shell-metacharacter set an accepted value must never
+// contain. It is deliberately duplicated per harness file rather than
+// shared: compile_native_go_fuzzer rewrites ONE *_test.go file into a
+// regular .go file and builds it without the package's other test files,
+// so a harness that references a symbol declared in a sibling _test.go
+// builds under `go test` but fails in the OSS-Fuzz builder with
+// "undefined: <symbol>". Every harness file must be self-contained.
+const aiDangerousChars = ";&|`$\\<>\"' \t\n\r"
+
 // AISessLine mirrors the cockpit's sessLine — one persisted chat turn.
 type AISessLine struct{ Who, Text string }
 
@@ -177,7 +186,7 @@ func FuzzAIFenceTag(f *testing.F) {
 					t.Fatalf("accepted fence tag with %q: %q", r, lang)
 				}
 			}
-			for _, c := range dangerousChars {
+			for _, c := range aiDangerousChars {
 				if strings.ContainsRune(lang, c) {
 					t.Fatalf("accepted fence tag contains %q: %q", c, lang)
 				}
