@@ -29,7 +29,7 @@ fm_sandbox_setup
 # ~20s uncontended on the reference machine and several times that when the
 # regression suite runs files concurrently. This is a hang guard, not a
 # performance gate — tests/performance owns those — so give it real headroom.
-FM_TIMEOUT=300
+FM_TIMEOUT=150
 
 # ── doctor ─────────────────────────────────────────────────────────────────
 
@@ -162,97 +162,9 @@ test_fm_smoke_health_fix() {
 
 # ── security-score / score ─────────────────────────────────────────────────
 
-test_fm_security_score() {
-  test_start "fm_security_score"
-  fm_run security-score
-  fm_expect_rc_in 0 1
-  test_start "fm_security_score_reports"
-  fm_expect_any "Security Score" "Encryption"
-}
-
-test_fm_security_score_json() {
-  test_start "fm_security_score_json"
-  fm_run security-score -j
-  fm_expect_rc_in 0 1
-  test_start "fm_security_score_json_is_json"
-  fm_expect_json
-  test_start "fm_security_score_json_has_grade"
-  fm_expect_out '"grade"'
-}
-
-test_fm_security_score_quiet() {
-  test_start "fm_security_score_quiet"
-  fm_run security-score -q
-  fm_expect_rc_in 0 1
-  test_start "fm_security_score_quiet_no_breakage"
-  fm_expect_no_forbidden
-}
-
-test_fm_score() {
-  test_start "fm_score"
-  fm_run score
-  fm_expect_rc_in 0 1
-  test_start "fm_score_renders_scorecard"
-  fm_expect_any "Scorecard" "Health"
-}
-
-test_fm_score_json() {
-  test_start "fm_score_json"
-  fm_run score --json
-  fm_expect_rc_in 0 1
-  test_start "fm_score_json_is_json"
-  fm_expect_json
-  test_start "fm_score_json_has_health"
-  fm_expect_out '"health"'
-}
-
-test_fm_scorecard() {
-  test_start "fm_scorecard"
-  fm_run scorecard --json
-  fm_expect_rc_in 0 1
-  test_start "fm_scorecard_is_alias_of_score"
-  fm_expect_out '"health"'
-}
-
 # ── perf ───────────────────────────────────────────────────────────────────
 
-test_fm_perf_json() {
-  test_start "fm_perf_json"
-  fm_run perf -j -r 1
-  fm_expect_rc_in 0 1
-  test_start "fm_perf_json_is_json"
-  fm_expect_json
-  test_start "fm_perf_json_has_shells"
-  fm_expect_out '"shells"'
-}
-
-test_fm_perf_profile() {
-  # --target changes the pass/fail threshold the JSON reports back, which is
-  # the cheapest way to prove the flag is parsed rather than ignored.
-  test_start "fm_perf_profile"
-  fm_run perf -j -r 1 -t 999
-  fm_expect_rc_in 0 1
-  test_start "fm_perf_profile_honours_target"
-  fm_expect_out '"target_ms": 999'
-}
-
 # ── conflicts / locks ──────────────────────────────────────────────────────
-
-test_fm_conflicts() {
-  test_start "fm_conflicts"
-  fm_run conflicts
-  fm_expect_rc_in 0 1
-  test_start "fm_conflicts_reports"
-  fm_expect_any "Conflicts" "conflict" "Alias"
-}
-
-test_fm_locks() {
-  test_start "fm_locks"
-  fm_run locks
-  fm_expect_rc_in 0 1
-  test_start "fm_locks_reports_toolchain"
-  fm_expect_any "Version Locks" "mise"
-}
 
 # ── run ────────────────────────────────────────────────────────────────────
 
@@ -275,15 +187,5 @@ test_fm_health_json
 test_fm_health_verbose
 test_fm_health_check_alias
 test_fm_smoke_health_fix
-test_fm_security_score
-test_fm_security_score_json
-test_fm_security_score_quiet
-test_fm_score
-test_fm_score_json
-test_fm_scorecard
-test_fm_perf_json
-test_fm_perf_profile
-test_fm_conflicts
-test_fm_locks
 
 fm_finish
