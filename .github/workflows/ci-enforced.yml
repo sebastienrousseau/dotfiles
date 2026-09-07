@@ -193,7 +193,7 @@ jobs:
 
   test-unit:
     name: Test / Unit Tests
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@3fed6ae2d2f61ffba2aecc2270978ef685687c01 # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-test-suite.yml@02f75433c88d7494b2d5198170ab965dca261a15 # main
     with:
       min_coverage: "100"
       run_integration: true
