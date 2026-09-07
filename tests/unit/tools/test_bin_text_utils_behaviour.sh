@@ -22,19 +22,36 @@ OUTF="$DOTFILES_COV_TMPDIR/out.txt"
 WORK="$DOTFILES_COV_TMPDIR/work"
 mkdir -p "$WORK"
 STDIN_FILE=/dev/null
+LOREM_ERR="$DOTFILES_COV_TMPDIR/lorem-err.txt"
 
 # util <name> <args…> — run one utility, stdout to $OUTF, status in RC.
+# $UTIL_BASH selects the interpreter: `bash` on PATH by default.
+UTIL_BASH="bash"
 util() {
   local name="$1"
   shift
   # stderr stays attached so the child's xtrace reaches the coverage trace.
-  bash "$BIN_DIR/executable_$name" "$@" >"$OUTF" <"$STDIN_FILE"
+  "$UTIL_BASH" "$BIN_DIR/executable_$name" "$@" >"$OUTF" <"$STDIN_FILE"
   RC=$?
   return 0
 }
 out_has() { assert_file_contains "$OUTF" "$1" "${2:-output contains $1}"; }
 
 # ── lorem ───────────────────────────────────────────────────────────────
+# `lorem` documents a bash 4+ requirement: it capitalises with `${word^}`,
+# which bash 3.2 — the system bash on macOS, and what `bash` resolves to on
+# the macos-14 runner — rejects as a bad substitution. Find an interpreter
+# that meets that requirement; when there is none, the generation paths get
+# their documented limitation asserted instead of generated text.
+LOREM_BASH=""
+for _cand in "$(command -v bash)" /opt/homebrew/bin/bash /usr/local/bin/bash; do
+  [[ -n "$_cand" && -x "$_cand" ]] || continue
+  if "$_cand" -c 'v=a; : "${v^}"' 2>/dev/null; then
+    LOREM_BASH="$_cand"
+    break
+  fi
+done
+
 test_start "lorem_help_lists_the_types"
 util lorem --help
 assert_equals 0 "$RC" "rc"
@@ -46,28 +63,41 @@ util lorem sonnets
 assert_equals 1 "$RC" "rc"
 out_has "Unknown type: sonnets" "error"
 
-test_start "lorem_generates_the_requested_number_of_words"
-util lorem words 5
-assert_equals 0 "$RC" "rc"
-assert_equals "5" "$(wc -w <"$OUTF" | tr -d ' ')" "word count"
-assert_true "grep -qE '^[A-Z]' '$OUTF'" "first word is capitalised"
+if [[ -z "$LOREM_BASH" ]]; then
+  test_start "lorem_generation_needs_the_bash_4_it_documents"
+  # Only the generation paths need it: --help and the unknown-type arm above
+  # ran fine on this same interpreter.
+  bash "$BIN_DIR/executable_lorem" words 3 >"$OUTF" 2>"$LOREM_ERR"
+  RC=$?
+  [[ "${DOTFILES_COV_ECHO_STDERR:-0}" == "1" ]] && cat "$LOREM_ERR" >&2
+  assert_true "[[ $RC -ne 0 ]]" "generation fails under bash 3.2"
+  assert_file_contains "$LOREM_ERR" "bad substitution" "the bash 4+ expansion is what fails"
+else
+  UTIL_BASH="$LOREM_BASH"
+  test_start "lorem_generates_the_requested_number_of_words"
+  util lorem words 5
+  assert_equals 0 "$RC" "rc"
+  assert_equals "5" "$(wc -w <"$OUTF" | tr -d ' ')" "word count"
+  assert_true "grep -qE '^[A-Z]' '$OUTF'" "first word is capitalised"
 
-test_start "lorem_generates_sentences"
-util lorem s 3
-assert_equals 0 "$RC" "rc"
-assert_equals "3" "$(wc -l <"$OUTF" | tr -d ' ')" "one sentence per line"
-assert_true "grep -qE '\\.$' '$OUTF'" "sentences end with a full stop"
+  test_start "lorem_generates_sentences"
+  util lorem s 3
+  assert_equals 0 "$RC" "rc"
+  assert_equals "3" "$(wc -l <"$OUTF" | tr -d ' ')" "one sentence per line"
+  assert_true "grep -qE '\\.$' '$OUTF'" "sentences end with a full stop"
 
-test_start "lorem_defaults_to_one_paragraph"
-util lorem
-assert_equals 0 "$RC" "rc"
-assert_equals "1" "$(grep -c . "$OUTF")" "a single non-empty paragraph"
+  test_start "lorem_defaults_to_one_paragraph"
+  util lorem
+  assert_equals 0 "$RC" "rc"
+  assert_equals "1" "$(grep -c . "$OUTF")" "a single non-empty paragraph"
 
-test_start "lorem_separates_multiple_paragraphs_with_a_blank_line"
-util lorem p 3
-assert_equals 0 "$RC" "rc"
-assert_equals "3" "$(grep -c . "$OUTF")" "three paragraphs"
-assert_equals "2" "$(grep -c '^$' "$OUTF")" "two separators"
+  test_start "lorem_separates_multiple_paragraphs_with_a_blank_line"
+  util lorem p 3
+  assert_equals 0 "$RC" "rc"
+  assert_equals "3" "$(grep -c . "$OUTF")" "three paragraphs"
+  assert_equals "2" "$(grep -c '^$' "$OUTF")" "two separators"
+  UTIL_BASH="bash"
+fi
 
 # ── hex ─────────────────────────────────────────────────────────────────
 test_start "hex_help_lists_the_modes"
