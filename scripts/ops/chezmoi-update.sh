@@ -45,7 +45,11 @@ NOTICE_FILE="$STATE_DIR/notice"
 
 run_update() {
   echo "Updating dotfiles..."
-  chezmoi update "${args[@]}"
+  # `${args[@]+...}`: with DOTFILES_INTERACTIVE_APPLY=1 no flags are added,
+  # and bash 3.2 (the system bash on macOS) treats an unguarded empty array
+  # expansion under `set -u` as an unbound variable — `dot update` then died
+  # instead of running chezmoi.
+  chezmoi update ${args[@]+"${args[@]}"}
 }
 
 if $ASYNC; then
