@@ -120,19 +120,36 @@ out_has "Needs attention" "verdict for a zero score"
 unset DOTFILES_PERF_MAX_MS
 export DOTFILES_PERF_TARGET_BASH_MS=100000
 
-test_start "a_mid_range_score_lands_between_the_two_floors"
-# target < mean < max is the interpolated band: score is neither 100 nor 0.
-export DOTFILES_PERF_MAX_MS=5000 DOTFILES_PERF_TARGET_BASH_MS=100000
+test_start "a_score_between_the_floors_follows_the_documented_formula"
+# Between the two floors the score is interpolated. The measured mean is
+# whatever the machine gives us, so the oracle recomputes the documented
+# formula from the report's own numbers instead of guessing a band.
+export DOTFILES_PERF_MAX_MS=100000 DOTFILES_PERF_TARGET_BASH_MS=100000
 perf --json --shell bash --runs 1 --target 1
 assert_equals 0 "$RC" "rc"
-assert_true "[[ \$(jq -r .score <'$OUTF') -gt 0 && \$(jq -r .score <'$OUTF') -lt 100 ]]" "interpolated score"
+mean="$(jq -r .mean_ms <"$OUTF")"
+target="$(jq -r .target_ms <"$OUTF")"
+max="$(jq -r .max_ms_target <"$OUTF")"
+score="$(jq -r .score <"$OUTF")"
+if [[ "$mean" -le "$target" ]]; then
+  expected=100
+elif [[ "$mean" -ge "$max" ]]; then
+  expected=0
+else
+  expected=$((100 - (mean - target) * 100 / (max - target)))
+fi
+assert_equals "$expected" "$score" "score interpolates between target and max"
+assert_true "[[ $mean -gt $target && $mean -lt $max ]]" "the measurement sits in the interpolated band"
 
-test_start "a_good_but_not_perfect_score_is_reported_as_good"
+test_start "a_score_below_100_is_reported_as_good_or_needs_attention"
+# A 200ms ceiling puts any real shell startup below a perfect score.
+export DOTFILES_PERF_MAX_MS=200
 perf --shell bash --runs 1 --target 1 --no-baseline-check
 assert_equals 0 "$RC" "rc"
-# A score below 100 is either "Good" (>=80) or "Needs attention"; which one
-# depends on how loaded the machine is, so accept the non-perfect pair.
+# Which of the two non-perfect verdicts applies depends on how loaded the
+# machine is, so accept the pair and reject the perfect one.
 assert_true "grep -qE 'Good \(tune to reach 100\)|Needs attention' '$OUTF'" "non-perfect verdict"
+assert_true "! grep -q 'Excellent' '$OUTF'" "not reported as excellent"
 unset DOTFILES_PERF_MAX_MS
 export DOTFILES_PERF_TARGET_BASH_MS=100000
 
