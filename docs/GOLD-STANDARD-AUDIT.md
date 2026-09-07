@@ -282,10 +282,27 @@ Recorded so the scores above are not read as more than they are:
 - The reproducibility statement covers **deterministic archiving**
   only.
 - Coverage is gated at 58%, a measured floor rather than a target.
-- The first full-suite run reported 11 failures. Eight were a genuine
-  regression in this branch (the zsh completion, fixed above and
-  re-verified); one was a stale contract assertion updated with the
-  workflow it describes; the remaining two — `test_auto_doctor.sh` and
-  `test_auto_traceability_coverage.sh` — were load-induced timeouts
-  that pass 6/6 and 6/6 when run alone, both with and without this
-  branch's changes.
+- Full-suite results: the first run reported 11 failures, the final run
+  5, of 5597 tests. Eight of the original 11 were a genuine regression
+  in this branch (the zsh completion — fixed above and re-verified);
+  one was a stale contract assertion, updated alongside the workflow it
+  describes. Of the 5 remaining, four
+  (`test_auto_docs_coverage`, `test_auto_doctor`, `test_auto_tools`,
+  `test_test_framework_invariants`) pass in isolation — 6/6, 6/6, 17/17
+  and 17/17 — and fail only under the suite's parallelism.
+- One test is genuinely flaky and worth recording rather than
+  dismissing: `tests/unit/auto/test_auto_traceability_coverage.sh`
+  passed 3/3 at the branch base and 1/3 on this branch. The cause is
+  not a broken behaviour — `scripts/qa/traceability-coverage.sh`
+  reports 169/169 (100%) and `docs/operations/TRACEABILITY.md` is
+  untouched by this branch, so no traced path was broken by the
+  directory moves. It is the auto-generated coverage harness: it calls
+  every function in the script under a 60 s cap, including `trim()`,
+  whose body is a bare `sed` reading standard input. Called with no
+  stdin, it blocks until EOF, so whether the run fits inside the cap
+  depends on what stdin happens to be. **Exact remaining step:** give
+  `trim()` a `"${1:-}"`-style argument form, or add it to the
+  functions-mode skip-list in `tests/framework/coverage_helpers.sh`.
+  Left alone here because it is a pre-existing latent defect in an
+  unrelated harness, and fixing it does not belong in a structure
+  cleanup.
