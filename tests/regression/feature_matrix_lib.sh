@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck shell=bash disable=SC1090,SC1091,SC2034
+# Regression for: GH-881
 #
 # feature_matrix_lib.sh — shared harness for the FEATURE-MATRIX regression
 # suite (tests/regression/test_feature_matrix_*.sh).
