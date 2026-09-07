@@ -173,7 +173,7 @@ jobs:
       || needs.changes.outputs.nix == 'true'
       || github.event_name == 'schedule'
       || github.event_name == 'workflow_dispatch'
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@b2d31a02f18ef89137edff7501c05eb59ff28b8f # main
+    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-copyright-lint.yml@85c268b98a3682b4d2e17ee75905118d86d36271 # main
 
   lint-reusable-pins:
     name: Lint / Reusable Workflow Pins
