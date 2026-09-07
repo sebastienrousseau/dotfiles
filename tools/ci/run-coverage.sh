@@ -37,7 +37,44 @@ COVERAGE_OUT="${COVERAGE_OUT:-$COVERAGE_DIR/lcov.info}"
 MIN_COVERAGE_PCT="${MIN_COVERAGE_PCT:-0}" # initial floor; tighten per slice
 COV_INCLUDE_DIRS="${COV_INCLUDE_DIRS:-$REPO_ROOT/scripts:$REPO_ROOT/lib:$REPO_ROOT/defaults/dot_local/bin:$REPO_ROOT/defaults/.chezmoitemplates/functions}"
 JOBS="${JOBS:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}"
-COV_TEST_TIMEOUT="${COV_TEST_TIMEOUT:-60}"
+# Per-test wall-clock budget.
+#
+# This used to be 60s, which was *below* the real cost of the heavier
+# suites once they run under xtrace with the sweep's own parallelism
+# competing for CPU (test_auto_doctor.sh, test_auto_verify.sh,
+# test_version_sync_exec.sh and ~25 others). Those tests were SIGTERMed
+# mid-run and contributed nothing to the denominator's numerator, so the
+# reported percentage silently tracked machine load: the same tree
+# measured twice could differ by whole points and individual files could
+# appear to lose coverage between runs that never touched them.
+#
+# 300s is ~2x the slowest test measured over a full sweep at `JOBS=3` on
+# a contended 10-core laptop: regression/test_dot_help_flag_universal.sh
+# at 157s, unit/auto/test_auto_dot_driver.sh at 112s. The one test that
+# came closer, unit/theme/test_themes_toml.sh at 273s, is slow only on a
+# developer machine — it runs `magick identify` over the user's real
+# ~/Pictures/Wallpapers library, which does not exist on a CI runner.
+# It is still a real hang-guard — a genuinely blocked test dies in five
+# minutes rather than stalling the sweep — but it no longer truncates
+# tests that are merely slow.
+#
+# Regardless of the value, a kill is now a HARD ERROR (see the
+# post-sweep audit below): a silent kill that moves the number is the
+# one outcome this runner must never produce again.
+COV_TEST_TIMEOUT="${COV_TEST_TIMEOUT:-300}"
+
+# Tests deliberately not traced, as paths relative to $TESTS_DIR,
+# colon-separated. This is an EXPLICIT list, printed on every run — the
+# opposite of the silent timeout kill it replaces.
+#
+#   regression/test_test_framework_invariants.sh is a meta-suite: it runs
+#   every OTHER regression suite serially, each with its own 180s inner
+#   budget, so its wall-clock cost is the sum of the entire regression
+#   tier and no per-test budget can accommodate it. Every suite it invokes
+#   is already traced directly by this sweep: re-aggregating a full sweep
+#   with and without its trace gives the identical 7700/10977 lines, so
+#   excluding it removes a duplicate, not coverage.
+COV_SKIP_TESTS="${COV_SKIP_TESTS:-regression/test_test_framework_invariants.sh}"
 
 # GNU `timeout` guards against a hung test stalling the sweep, but it does
 # not exist on stock macOS (it's coreutils). Prefer `timeout`, then
@@ -93,6 +130,9 @@ mkdir -p "$COVERAGE_DIR"
 trace_dir="$COVERAGE_DIR/traces"
 rm -rf "$trace_dir"
 mkdir -p "$trace_dir"
+status_dir="$COVERAGE_DIR/status"
+rm -rf "$status_dir"
+mkdir -p "$status_dir"
 
 # -----------------------------------------------------------------------------
 # BASH_ENV setup file: enables xtrace in every non-interactive bash that
@@ -139,13 +179,26 @@ fi
 # Portable read — `mapfile` is bash 4 only and this runner documents
 # macOS support, where /bin/bash is 3.2.
 test_files=()
+skipped_tests=()
 while IFS= read -r _line; do
-  [[ -n "$_line" ]] && test_files+=("$_line")
+  [[ -n "$_line" ]] || continue
+  _rel="${_line#"$TESTS_DIR"/}"
+  case ":$COV_SKIP_TESTS:" in
+    *":$_rel:"*)
+      skipped_tests+=("$_rel")
+      continue
+      ;;
+  esac
+  test_files+=("$_line")
 done < <(find "$TESTS_DIR/unit" "$TESTS_DIR/regression" -name 'test_*.sh' -type f | sort)
 
 if [[ "${#test_files[@]}" -eq 0 ]]; then
   echo "::error::no unit or regression test files discovered under $TESTS_DIR" >&2
   exit 1
+fi
+
+if [[ "${#skipped_tests[@]}" -gt 0 ]]; then
+  echo "skipped-by-policy: ${#skipped_tests[@]} test(s): ${skipped_tests[*]}" >&2
 fi
 
 echo "Tracing ${#test_files[@]} test files (parallel × $JOBS, timeout ${COV_TEST_TIMEOUT}s/test)..." >&2
@@ -156,23 +209,34 @@ echo "Tracing ${#test_files[@]} test files (parallel × $JOBS, timeout ${COV_TES
 # shellcheck disable=SC2317,SC2329  # called indirectly via xargs subshell
 run_one() {
   local f="$1"
-  local relative trace
+  local relative trace slug status started ended
   relative="${f#"$COV_TESTS_DIR"/}"
-  trace="$COV_TRACE_DIR/${relative//\//__}.trace"
+  slug="${relative//\//__}"
+  trace="$COV_TRACE_DIR/${slug}.trace"
+  started=$(date +%s)
   if [[ -n "${COV_TIMEOUT_CMD:-}" ]]; then
     PS4='+@COV@:${LINENO}:${BASH_SOURCE}:@ ' \
       BASH_ENV="$COV_BASH_ENV" \
       "$COV_TIMEOUT_CMD" --kill-after=5 "$COV_TEST_TIMEOUT" \
-      bash "$f" 2>"$trace" >/dev/null || true
+      bash "$f" 2>"$trace" >/dev/null
+    status=$?
   else
     # No timeout available (stock macOS): run without the hang-guard.
     PS4='+@COV@:${LINENO}:${BASH_SOURCE}:@ ' \
       BASH_ENV="$COV_BASH_ENV" \
-      bash "$f" 2>"$trace" >/dev/null || true
+      bash "$f" 2>"$trace" >/dev/null
+    status=$?
   fi
+  ended=$(date +%s)
+  # One record per test: exit status, wall-clock seconds, relative path.
+  # The post-sweep audit turns timeout kills into a hard error and
+  # reports the slowest tests so the budget stays defensible.
+  printf '%s\t%s\t%s\n' "$status" "$((ended - started))" "$relative" \
+    >"$COV_STATUS_DIR/${slug}.status"
 }
 
 export COV_TRACE_DIR="$trace_dir"
+export COV_STATUS_DIR="$status_dir"
 export COV_BASH_ENV="$bash_env"
 export COV_TESTS_DIR="$TESTS_DIR"
 export COV_TEST_TIMEOUT
@@ -190,6 +254,52 @@ printf '%s\n' "${test_files[@]}" |
   true
 elapsed=$(($(date +%s) - start_ts))
 echo "trace phase done in ${elapsed}s" >&2
+
+# -----------------------------------------------------------------------------
+# Timeout audit — a killed test contributes no trace records, so it silently
+# removes its share of the numerator while leaving the denominator intact.
+# That made the reported percentage a function of machine load: two runs over
+# an identical tree could disagree by whole points, and individual files could
+# appear to lose coverage between runs that never touched them.
+#
+# Kills are therefore a HARD ERROR. lcov.info is still written (the artifact
+# and the per-file detail stay useful for debugging) but the runner exits
+# non-zero and names every killed file, so the number is never quietly wrong.
+#
+# `timeout` reports 124 when it had to signal the child, and 137 when the
+# child had to be SIGKILLed after --kill-after; the perl fallback reports
+# 124. Requiring the observed duration to have reached the budget as well
+# keeps a test that genuinely exits 124 from being misreported as a kill.
+# -----------------------------------------------------------------------------
+killed_tests=()
+slowest_report=""
+if [[ -d "$status_dir" ]]; then
+  while IFS=$'\t' read -r st dur rel; do
+    [[ -n "${rel:-}" ]] || continue
+    if [[ "$st" == "124" || "$st" == "137" ]] && [[ "$dur" -ge "$COV_TEST_TIMEOUT" ]]; then
+      killed_tests+=("$rel (${dur}s, exit $st)")
+    fi
+  done < <(cat "$status_dir"/*.status 2>/dev/null)
+  slowest_report=$(sort -t$'\t' -k2,2nr "$status_dir"/*.status 2>/dev/null |
+    head -5 | awk -F'\t' '{printf "  %5ss  %s\n", $2, $3}')
+fi
+
+if [[ -n "$slowest_report" ]]; then
+  echo "slowest tests (budget ${COV_TEST_TIMEOUT}s):" >&2
+  printf '%s\n' "$slowest_report" >&2
+fi
+
+cov_timeout_failure=0
+if [[ "${#killed_tests[@]}" -gt 0 ]]; then
+  cov_timeout_failure=1
+  echo "::error::${#killed_tests[@]} test(s) exceeded COV_TEST_TIMEOUT=${COV_TEST_TIMEOUT}s and were killed; coverage is understated and non-deterministic" >&2
+  for k in "${killed_tests[@]}"; do
+    echo "::error::killed by coverage timeout: $k" >&2
+  done
+  echo "killed-by-timeout: ${#killed_tests[@]} test(s): ${killed_tests[*]}" >&2
+else
+  echo "killed-by-timeout: 0 test(s)" >&2
+fi
 
 # -----------------------------------------------------------------------------
 # Aggregate trace files → lcov.info.
@@ -874,6 +984,14 @@ below=$(awk -v p="$pct" -v t="$MIN_COVERAGE_PCT" 'BEGIN{print (p+0 < t+0) ? "1" 
 if [[ "$below" == "1" ]]; then
   echo "::error::coverage ${pct}% is below the floor ${MIN_COVERAGE_PCT}%" >&2
   exit 1
+fi
+
+# Reported last so the coverage number is still visible above it: a killed
+# test invalidates the measurement even when the surviving tests clear the
+# floor.
+if [[ "$cov_timeout_failure" -eq 1 ]]; then
+  echo "::error::coverage measurement is invalid — ${#killed_tests[@]} test(s) killed by COV_TEST_TIMEOUT" >&2
+  exit 3
 fi
 
 exit 0

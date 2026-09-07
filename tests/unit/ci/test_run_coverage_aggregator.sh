@@ -276,6 +276,73 @@ for name in $FIXTURES; do
     "${name}.sh must reach 100% — uncovered lines are unhittable, not untested"
 done
 
+# -----------------------------------------------------------------------------
+# The runner must refuse to report a number when a test was killed.
+# -----------------------------------------------------------------------------
+test_start "timeout_kill_is_a_hard_error"
+mkdir -p "$SANDBOX/tests-hang/unit" "$SANDBOX/tests-hang/regression"
+cat >"$SANDBOX/tests-hang/unit/test_hangs.sh" <<'EOF'
+#!/usr/bin/env bash
+sleep 60
+EOF
+cat >"$SANDBOX/tests-hang/unit/test_quick.sh" <<'EOF'
+#!/usr/bin/env bash
+echo "RESULTS:1:1:0"
+EOF
+set +e
+env REPO_ROOT="$SANDBOX" \
+  TESTS_DIR="$SANDBOX/tests-hang" \
+  COVERAGE_DIR="$SANDBOX/coverage2" \
+  COVERAGE_OUT="$SANDBOX/coverage2/lcov.info" \
+  COV_INCLUDE_DIRS="$SANDBOX/src" \
+  MIN_COVERAGE_PCT=0 \
+  COV_TEST_TIMEOUT=2 \
+  JOBS=2 \
+  bash "$RUNNER" >"$SANDBOX/runner-timeout.log" 2>&1
+timeout_ec=$?
+if [[ "$timeout_ec" -ne 0 ]] &&
+  grep -q "killed by coverage timeout: unit/test_hangs.sh" "$SANDBOX/runner-timeout.log"; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected non-zero exit naming the killed test (got $timeout_ec)"
+fi
+
+test_start "policy_skip_is_explicit_and_announced"
+# The escape hatch for a test that no budget can fit is an explicit,
+# printed list — never a silent kill.
+set +e
+env REPO_ROOT="$SANDBOX" \
+  TESTS_DIR="$SANDBOX/tests-hang" \
+  COVERAGE_DIR="$SANDBOX/coverage3" \
+  COVERAGE_OUT="$SANDBOX/coverage3/lcov.info" \
+  COV_INCLUDE_DIRS="$SANDBOX/src" \
+  MIN_COVERAGE_PCT=0 \
+  COV_TEST_TIMEOUT=2 \
+  COV_SKIP_TESTS="unit/test_hangs.sh:unit/test_other.sh" \
+  JOBS=2 \
+  bash "$RUNNER" >"$SANDBOX/runner-skip.log" 2>&1
+skip_ec=$?
+rm -rf "$SANDBOX/tests-hang"
+if [[ "$skip_ec" -eq 0 ]] &&
+  grep -q "skipped-by-policy: 1 test(s): unit/test_hangs.sh" "$SANDBOX/runner-skip.log" &&
+  grep -q "killed-by-timeout: 0 test(s)" "$SANDBOX/runner-skip.log"; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected a clean run naming the skipped test (got $skip_ec)"
+fi
+
+test_start "timeout_default_is_documented"
+assert_file_contains "$RUNNER" 'COV_TEST_TIMEOUT:-300' \
+  "the per-test budget must stay above the slowest real suite"
+
+test_start "killed_tests_are_summarised"
+assert_file_contains "$RUNNER" "killed-by-timeout:" \
+  "the runner must print a summary line naming any killed file"
+
 # Note: do NOT add cov_exercise_script here. This test asserts properties of
 # the coverage runner itself; running the runner during a coverage run would
 # spawn nested traces and pollute the parent's aggregation.
