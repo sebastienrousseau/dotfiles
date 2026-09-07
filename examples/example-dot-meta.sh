@@ -39,7 +39,8 @@ printf '=== Meta commands and the MCP surface ===\n\n'
 
 # The commands this group provides. Each is shown with the one-line summary
 # the CLI itself carries, so this example cannot drift from the registry.
-for cmd in upgrade cache-refresh docs learn keys sandbox mcp search version help; do
+group_commands=(upgrade cache-refresh docs learn keys sandbox mcp search version help)
+for cmd in "${group_commands[@]}"; do
   summary="$( (bash "$dot" help "$cmd" 2>/dev/null || true) |
     sed -n 's/.*Summary *//p' | head -1 || true)"
   printf '  dot %-22s %s\n' "$cmd" "${summary:-(see dot help all)}"

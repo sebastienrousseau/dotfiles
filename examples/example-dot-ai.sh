@@ -39,7 +39,8 @@ printf '=== AI providers and the ai cockpit ===\n\n'
 
 # The commands this group provides. Each is shown with the one-line summary
 # the CLI itself carries, so this example cannot drift from the registry.
-for cmd in ai ai-setup ai-query cl copilot kimi agy kiro sgpt ollama opencode aider; do
+group_commands=(ai ai-setup ai-query cl copilot kimi agy kiro sgpt ollama opencode aider)
+for cmd in "${group_commands[@]}"; do
   summary="$( (bash "$dot" help "$cmd" 2>/dev/null || true) |
     sed -n 's/.*Summary *//p' | head -1 || true)"
   printf '  dot %-22s %s\n' "$cmd" "${summary:-(see dot help all)}"
