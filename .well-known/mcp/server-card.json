@@ -17,7 +17,7 @@
   },
   "security": {
     "authentication": "none",
-    "policyRef": "dot_config/dotfiles/mcp-policy.json"
+    "policyRef": "defaults/dot_config/dotfiles/mcp-policy.json"
   },
   "tools": [
     {

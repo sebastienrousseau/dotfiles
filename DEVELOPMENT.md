@@ -290,7 +290,8 @@ the short version is that the `dot` CLI's *output* is part of the
 contract, not just its flags.
 
 ```bash
-# 1. Bump the manifest, then propagate.
+# 1. Bump the manifest, then propagate. NEW is the version you are
+#    releasing, e.g. NEW=0.2.520
 $EDITOR defaults/.chezmoidata.toml
 ./scripts/version-sync.sh
 bash scripts/verify-release-versions
@@ -301,13 +302,13 @@ bash scripts/verify-release-versions
 make check
 
 # 4. Tag — signed, annotated. Unsigned tags are rejected by CI.
-git tag -s v0.2.520 -m "dotfiles v0.2.520"
+git tag -s "v$NEW" -m "dotfiles v$NEW"
 
 # 5. Dry-run the pipeline BEFORE pushing the tag.
-gh workflow run release-package-dot.yml -f release_tag=v0.2.520 -f dry_run=true
+gh workflow run release-package-dot.yml -f release_tag="v$NEW" -f dry_run=true
 
 # 6. Push.
-git push origin v0.2.520
+git push origin "v$NEW"
 ```
 
 What happens then, in order: `release-package-dot.yml` builds the
