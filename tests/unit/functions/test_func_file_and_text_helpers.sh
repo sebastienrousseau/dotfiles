@@ -56,6 +56,12 @@ exit ${3:-0}
 EOF
   chmod +x "$BIN/$1"
 }
+# When the host has ripgrep, link it into the stub PATH so dothelp takes its
+# ripgrep branch (with --color=always) rather than the grep fallback; the CI
+# runners differ on whether ripgrep is installed, and both paths must pass.
+_rg="$(command -v rg 2>/dev/null || true)"
+[[ -n "$_rg" ]] && ln -sf "$_rg" "$BIN/rg"
+
 mkstub diskutil
 mkstub osascript
 mkstub defaults
@@ -69,6 +75,13 @@ chmod +x "$BIN/uname"
 
 OUT="$WORK/out.txt"
 ERR="$WORK/err.txt"
+# dothelp asks ripgrep for `--color=always`, so on a host that has ripgrep
+# the matched term arrives wrapped in SGR escapes and a literal substring
+# spanning it never matches. Compare against an escape-stripped copy.
+plain_out() {
+  sed $'s/\033\[[0-9;]*m//g' "$OUT" >"$OUT.plain"
+  printf '%s' "$OUT.plain"
+}
 # call <function-file> <snippet> — source the template and run the snippet in
 # a child shell. Stdout is captured in $OUT, stderr in $ERR and replayed so
 # the coverage runner keeps its xtrace records. Echoes the exit status.
@@ -244,7 +257,7 @@ mkdir -p "$HOME/.config/shell"
 printf "alias gs='git status'\n" >"$HOME/.config/shell/aliases.sh"
 rc="$(call misc/dothelp.sh 'dothelp git')"
 assert_equals "0" "$rc" "a matching search exits 0"
-assert_file_contains "$OUT" "git status" "the matching line is shown"
+assert_file_contains "$(plain_out)" "git status" "the matching line is shown"
 
 test_start "dothelp_falls_back_to_grep_without_ripgrep"
 # A PATH without rg must still search, via grep.
@@ -262,7 +275,7 @@ PATH="$NORG" HOME="$HOME" "$REAL_BASH" -c "
 " >"$OUT" 2>"$ERR" || rc=$?
 cat "$ERR" >&2
 assert_equals "0" "$rc" "the grep fallback exits 0"
-assert_file_contains "$OUT" "git status" "grep finds the same line"
+assert_file_contains "$(plain_out)" "git status" "grep finds the same line"
 
 # ===========================================================================
 # curl/curlheader.sh
