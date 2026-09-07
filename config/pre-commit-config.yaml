@@ -51,8 +51,13 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
+      # Fuzz corpus entries are opaque byte strings, not text: a seed
+      # exists to reproduce one exact input, so appending a newline or
+      # trimming its trailing CRLF silently stops it testing that case.
       - id: trailing-whitespace
+        exclude: '^lib/wasm-tools/fuzz/(corpus|regressions)/'
       - id: end-of-file-fixer
+        exclude: '^lib/wasm-tools/fuzz/(corpus|regressions)/'
       - id: check-yaml
       - id: check-json
       - id: check-toml

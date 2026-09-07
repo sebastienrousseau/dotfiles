@@ -1,11 +1,19 @@
-// Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+// Copyright (c) 2015-2026 Sebastien Rousseau
+
+//! `dot-sys` binary: prints one health-probe record to stdout.
+//!
+//! All logic lives in [`dot_sys::cli::run`] so it can be unit tested with
+//! an injected clock and writers; this file only wires the real ones in.
+
+use std::io;
+use std::process::ExitCode;
 use std::time::SystemTime;
 
-fn main() {
-    let now = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .expect("Time went backwards")
-        .as_secs();
-
-    println!(r#"{{"status": "ok", "timestamp": {}, "engine": "wasm"}}"#, now);
+fn main() -> ExitCode {
+    ExitCode::from(dot_sys::cli::run(
+        &mut io::stdout().lock(),
+        &mut io::stderr().lock(),
+        SystemTime::now(),
+    ))
 }

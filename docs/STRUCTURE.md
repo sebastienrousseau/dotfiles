@@ -25,7 +25,7 @@ See `docs/operations/ROADMAP_V0_2_503.md` for the full history.
 | `scripts/` | framework | Runtime-invoked scripts (`dot` CLI dispatch + specialised subtrees). See `scripts/README.md`. |
 | `tools/` | repo-ops | Repo-only ops: CI helpers, release, maintenance, docs-generation. Not distributable. See `tools/README.md`. |
 | `lib/dot/` | framework | Shared bash library sourced by every `dot` subcommand and the dispatcher. Reorganised here from `scripts/dot/lib/` per RFC Phase 1. See `lib/dot/README.md`. |
-| `lib/` | framework | Library tree (`lib/dot/` + third-party `lib/wasm-tools/`). |
+| `lib/` | framework | Library tree (`lib/dot/` + the `dot-sys` Rust crate in `lib/wasm-tools/`). |
 | `install/` | framework | Bootstrap logic + distribution-channel manifests (`homebrew/`, `scoop/`, `aur/`). See `install/README.md`. `install/provision/` runs on `chezmoi apply` via `run_onchange_*` triggers. |
 | `install.sh` | framework | Top-level installer. SHA256-verified chezmoi fetch + initial apply. |
 | `.chezmoitemplates/` | framework | Reusable Go-template partials (aliases, functions, paths). Sourced by `dot_*.tmpl` files. |

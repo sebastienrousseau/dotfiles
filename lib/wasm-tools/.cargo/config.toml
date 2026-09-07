@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# `Status::now()` reads the wall clock, which Miri forbids in its default
+# isolation mode. Lifting isolation lets a plain `cargo +nightly miri test`
+# pass from a clean checkout while still checking every other test for UB.
+[env]
+MIRIFLAGS = "-Zmiri-disable-isolation"

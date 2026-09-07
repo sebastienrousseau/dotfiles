@@ -60,6 +60,7 @@
     "tests/regression/fixtures/**",
     "tests/unit/**/fixtures/**",
     "**/*.lock",
+    "**/target/**",
     "docs/.vitepress/reports/**",
     "docs/COPYRIGHT"
   ]

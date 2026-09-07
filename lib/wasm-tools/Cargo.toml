@@ -1,7 +1,56 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+
 [package]
 name = "dot-sys"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
+rust-version = "1.86"
+resolver = "3"
+license = "Apache-2.0 OR MIT"
+description = "Health-probe record emitted by the dotfiles framework's Rust helper"
+repository = "https://github.com/sebastienrousseau/dotfiles"
+readme = "README.md"
+publish = false
+
+[lib]
+name = "dot_sys"
+path = "src/lib.rs"
+# The default libtest harness does not understand criterion's flags, so keep
+# it out of `cargo bench`; benchmarking lives entirely in benches/status.rs.
+bench = false
+
+[[bin]]
+name = "dot-sys"
+path = "src/main.rs"
+bench = false
 
 [dependencies]
-# Use small, fast dependencies or none
+# Deliberately empty: the crate is std-only. JSON is one fixed record, so a
+# hand-written emitter + strict parser is smaller, faster to compile, and
+# has no supply chain than pulling serde/serde_json for three fields.
+
+[dev-dependencies]
+assert_cmd = "2.2"
+criterion = { version = "0.8", default-features = false }
+
+[[bench]]
+name = "status"
+harness = false
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
+strip = true
+
+[lints.rust]
+missing_docs = "deny"
+unsafe_code = "forbid"
+unused_must_use = "deny"
+
+[lints.rustdoc]
+all = "deny"
+
+[lints.clippy]
+all = "deny"
+pedantic = "deny"
