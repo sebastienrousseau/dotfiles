@@ -24,7 +24,7 @@ for arg in "$@"; do
     --score | -s) target="scripts/diagnostics/scorecard.sh" ;;
     --smoke | -m) target="scripts/diagnostics/smoke-test.sh" ;;
     --drift | -d) target="scripts/diagnostics/drift-dashboard.sh" ;;
-    --benchmark | -b) target="benches/bench.sh" ;;
+    --benchmark | -b) target="tests/benchmark.sh" ;;
     --json | -j | --ai | -A) passthrough+=("$arg") ;;
     *) passthrough+=("$arg") ;;
   esac

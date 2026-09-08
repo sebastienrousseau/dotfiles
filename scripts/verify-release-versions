@@ -44,7 +44,7 @@ for arg in "$@"; do
     --fix) fix=1 ;;
     --quiet | -q) quiet=1 ;;
     -h | --help)
-      sed -n '2,21p' "$0"
+      sed -n '5,29p' "$0" | sed 's/^# \{0,1\}//'
       exit 0
       ;;
     *)
