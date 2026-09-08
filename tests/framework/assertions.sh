@@ -23,15 +23,59 @@ CURRENT_TEST=""
 # ship GNU timeout, so use gtimeout when available and Perl's alarm otherwise.
 run_with_timeout() {
   local seconds="$1"
-  local timeout_bin
   shift
+
+  # Bound the command AND everything it spawns.
+  #
+  # Killing only the direct child is not enough. A grandchild inherits the
+  # caller's stdout, so when the caller captured output with `$( )` — as
+  # test_test_framework_invariants.sh does around whole suites — the capture
+  # blocks until that grandchild exits, however long the timeout was. Measured:
+  # a 3-second timeout against a script that backgrounds `sleep 60` returned
+  # on time but the capture took the full 60s; against a longer sleep it simply
+  # never returned. Neither GNU `timeout` nor the old `perl alarm; exec` form
+  # prevents this, because both signal one process.
+  #
+  # perl gives us fork + setsid + kill-the-group portably. macOS ships no
+  # setsid(1), so a shell-only version of this is not available on both
+  # platforms. The group is killed on timeout AND after a normal exit, since
+  # the stranded-writer problem happens either way.
+  #
+  # Exit codes match GNU timeout: 124 on expiry, 128+N when signalled,
+  # otherwise the command's own status. scripts and helpers in this repo
+  # (tests/framework/coverage_helpers.sh) already treat 124 as "timed out".
+  if command -v perl >/dev/null 2>&1; then
+    perl -e '
+      use POSIX qw(setsid);
+      my $secs = shift @ARGV;
+      my $pid  = fork();
+      die "run_with_timeout: fork failed: $!\n" unless defined $pid;
+      if ($pid == 0) {
+        setsid();
+        exec { $ARGV[0] } @ARGV;
+        exit 127;
+      }
+      my $timed_out = 0;
+      $SIG{ALRM} = sub { $timed_out = 1; kill("KILL", -$pid); };
+      alarm($secs);
+      my $reaped;
+      do { $reaped = waitpid($pid, 0); } while ($reaped == -1 && $!{EINTR});
+      my $status = $?;
+      alarm(0);
+      kill("KILL", -$pid);
+      exit(124) if $timed_out;
+      exit($status & 127 ? 128 + ($status & 127) : $status >> 8);
+    ' "$seconds" "$@"
+    return $?
+  fi
+
+  local timeout_bin
   timeout_bin="$(type -P timeout || true)"
+  if [[ -z "$timeout_bin" ]]; then
+    timeout_bin="$(type -P gtimeout || true)"
+  fi
   if [[ -n "$timeout_bin" ]]; then
     "$timeout_bin" "$seconds" "$@"
-  elif timeout_bin="$(type -P gtimeout || true)" && [[ -n "$timeout_bin" ]]; then
-    "$timeout_bin" "$seconds" "$@"
-  elif command -v perl >/dev/null 2>&1; then
-    perl -e 'alarm shift; exec @ARGV or exit 127' "$seconds" "$@"
   else
     "$@"
   fi

@@ -304,8 +304,18 @@ fm_expect_out_matches() {
 }
 
 # fm_expect_nonempty — assert the command printed something on stdout.
+# NOTE on the test below: it looks like a job for "${FM_OUT// /}", and that is
+# what it used to be. Do not go back. bash 3.2 — which is /bin/bash on the
+# macOS runners — implements pattern substitution over a large string
+# quadratically: on the 176 KB `dot aliases list` output it had not finished
+# after two minutes, where bash 5.3 takes 11s. That ran inside the test shell,
+# not inside a `dot` invocation, so FM_TIMEOUT never applied to it, and the
+# whole macOS regression tier sat silent until the job's six-hour ceiling
+# cancelled it. A single anchored glob asks the same question — "is there a
+# non-whitespace character in here?" — in one pass, and measures 0s on both
+# 3.2 and 5.3.
 fm_expect_nonempty() {
-  if [[ -n "${FM_OUT// /}" ]]; then
+  if [[ "$FM_OUT" == *[![:space:]]* ]]; then
     fm_pass "$(printf '%s' "$FM_OUT" | wc -l | tr -d ' ') line(s)"
   else
     fm_fail "stdout was empty"
@@ -384,7 +394,9 @@ fm_smoke() {
     fm_fail "dot $* --help exited $FM_RC"
     return 0
   fi
-  if [[ -z "${FM_OUT// /}" ]]; then
+  # Same reasoning as fm_expect_nonempty: no pattern substitution over
+  # captured output, because bash 3.2 makes that quadratic.
+  if [[ "$FM_OUT" != *[![:space:]]* ]]; then
     fm_fail "dot $* --help printed nothing"
     return 0
   fi
