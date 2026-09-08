@@ -198,7 +198,7 @@ jobs:
       min_coverage: "100"
       run_integration: true
       run_strict_checks: true
-      timeout_minutes: 10
+      timeout_minutes: 15
 
   # ============================================================================
   # STAGE 4: MERGE GATE (All checks must pass)

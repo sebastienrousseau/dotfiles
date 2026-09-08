@@ -41,3 +41,4 @@ It is enforced by `bash ./scripts/qa/traceability-coverage.sh`.
 | BT-29 | OpenSSF Scorecard nightly snapshot artefact | `scripts/qa/scorecard-snapshot.sh` | `tests/unit/qa/test_scorecard_snapshot.sh` | `docs/security/SCORECARD.md` |
 | BT-30 | Shell completion generator (`dot completion <shell>`) | `scripts/dot/commands/completion.sh` | `tests/unit/dot-cli/test_dot_completion.sh` | `docs/reference/UTILS.md` |
 | BT-31 | Examples coverage contract (feature/command → example) | `scripts/qa/examples-coverage.sh` | `tests/unit/misc/test_qa_examples_coverage.sh` | `docs/reference/UTILS.md` |
+| BT-32 | Feature matrix drift gate (command → test, benchmark, example) | `scripts/qa/check-feature-matrix.sh` | `tests/unit/misc/test_qa_check_feature_matrix.sh` | `docs/reference/FEATURE-MATRIX.md`, `docs/operations/TESTING.md` |

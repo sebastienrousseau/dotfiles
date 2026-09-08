@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
+# Regression for: d0052cd6
 # Symmetry ratchet between bin/dot's three static registries:
 #   * _dot_command_routes()  — every command the dispatcher can route
 #   * _dot_help_specs()      — every command shown in the compact overview
