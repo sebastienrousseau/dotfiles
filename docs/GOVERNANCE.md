@@ -15,7 +15,7 @@ exist.
 | Bug fix | Open PR, maintainer reviews + merges. Tests required. | Maintainer |
 | Feature addition | Open issue first to scope. Then PR. Larger changes need an RFC in `docs/operations/`. | Maintainer |
 | Breaking change | RFC in `docs/operations/RFC_<topic>.md` + 2-week comment window + migration script + at least one minor-version deprecation. | Maintainer (with public reasoning) |
-| Security policy | `.github/SECURITY.md` is the canonical reference. Disclosure-key rotation follows `docs/security/KEY_ROTATION.md`. | Maintainer + 30-day public notice |
+| Security policy | `SECURITY.md` is the canonical reference. Disclosure-key rotation follows `docs/security/KEY_ROTATION.md`. | Maintainer + 30-day public notice |
 | Dependency change | Pre-commit + CI must stay green. New runtime deps require RFC. | Maintainer |
 | Release | Maintainer cuts tags. Convention: signed annotated tag, Cosign-signed SBOM, SLSA L3 provenance. | Maintainer |
 

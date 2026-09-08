@@ -69,13 +69,13 @@ marks reflect this repo's posture at the time of writing — the
 | Code-Review | ⚠ | Single-maintainer repo; PRs are self-merged after CI. Scorecard scores 0/30 here by design — see `Open findings` below. |
 | Signed-Commits | ✓ | Enforced by pre-push hook (`scripts/git-hooks/pre-push`) and at-push by branch protection (#853 + #857). |
 | Dependency-Update-Tool | ✓ | Dependabot configured for github-actions / npm / docker / devcontainers / uv. |
-| Fuzzing | ⚠ | `install.sh` fuzz harness lives under `tests/fuzz/` (closes #881), but it's shell-based and Scorecard's heuristic only recognizes OSS-Fuzz / ClusterFuzzLite / native Go fuzz / libFuzzer / Atheris. None support shell. Property tests under `tests/unit/functions/test_property_*.sh` cover the closest equivalent surface. |
+| Fuzzing | ⚠ | `install.sh` fuzz harness lives under `fuzz/install/` (closes #881), but it's shell-based and Scorecard's heuristic only recognizes OSS-Fuzz / ClusterFuzzLite / native Go fuzz / libFuzzer / Atheris. None support shell. Property tests under `tests/unit/functions/test_property_*.sh` cover the closest equivalent surface. |
 | License | ✓ | MIT at repo root (`LICENSE`). |
 | Maintained | ✓ | Active commit cadence; the [README](https://github.com/sebastienrousseau/dotfiles/blob/main/README.md) lists the current `dotfiles_version`. |
 | Pinned-Dependencies | ⚠ | Closed 8 of 14 findings this cycle (every Dockerfile base + every workflow action + 2 `curl \| sh` installers + the `npm install -g npm` upgrade step). 5 residual findings stay open by design — see `Open findings`. |
 | SAST | ✓ | CodeQL (`.github/workflows/codeql.yml`) + Checkov + Grype. |
 | SBOM | ✓ | Generated per PR by `sbom-diff.yml` and per release by `security-release.yml`. |
-| Security-Policy | ✓ | `.github/SECURITY.md` + this page + `docs/security/THREAT_MODEL.md`. |
+| Security-Policy | ✓ | `SECURITY.md` + this page + `docs/security/THREAT_MODEL.md`. |
 | Token-Permissions | ✓ | Top-level `permissions:` blocks restricted to `contents: read`. `write` scopes scoped to the jobs that need them (#886). |
 | Vulnerabilities | ✓ | Grype gate hard-fails on `high` / `critical` on `main` (#852). |
 | Webhooks | n/a | No external webhooks configured. |
@@ -117,7 +117,7 @@ false positives in Scorecard's regex.
 
 | Alert | Action |
 |---|---|
-| `FuzzingID` (medium) | Dismiss as **Won't fix** with comment: "Repo is bash + Go-template + Lua. ClusterFuzzLite / OSS-Fuzz / native Go fuzz / libFuzzer / Atheris (the frameworks Scorecard recognises) all target compiled languages, none support shell. The `tests/fuzz/fuzz_install.sh` harness + property tests under `tests/unit/functions/test_property_*.sh` cover the equivalent surface." |
+| `FuzzingID` (medium) | Dismiss as **Won't fix** with comment: "Repo is bash + Go-template + Lua. ClusterFuzzLite / OSS-Fuzz / native Go fuzz / libFuzzer / Atheris (the frameworks Scorecard recognises) all target compiled languages, none support shell. The `fuzz/install/fuzz_install.sh` harness + property tests under `tests/unit/functions/test_property_*.sh` cover the equivalent surface." |
 | `CIIBestPracticesID` (low) | Apply at <https://www.bestpractices.dev/projects/new>. ~67 self-attested questions, free, 1-2 hours. After silver-tier approval, paste the badge into `README.md` next to the existing Scorecard badge. Most criteria already met (signed commits, CI, security policy, license). |
 
 ## Closed this cycle

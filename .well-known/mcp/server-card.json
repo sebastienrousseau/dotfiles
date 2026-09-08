@@ -1,7 +1,7 @@
 {
   "cardVersion": "2026.03",
   "name": "dotfiles-mcp",
-  "version": "0.2.501",
+  "version": "0.2.519",
   "description": "MCP server surface for dotfiles workstation automation.",
   "transport": {
     "stdio": {
@@ -17,7 +17,7 @@
   },
   "security": {
     "authentication": "none",
-    "policyRef": "dot_config/dotfiles/mcp-policy.json"
+    "policyRef": "defaults/dot_config/dotfiles/mcp-policy.json"
   },
   "tools": [
     {

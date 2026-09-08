@@ -17,7 +17,7 @@ render_with_liquid: false
   <a class="primary" href="guides/INSTALL/">Install →</a>
   <a href="https://github.com/sebastienrousseau/dotfiles">GitHub</a>
   <a href="reference/UTILS/">Utilities</a>
-  <a href="architecture/ARCHITECTURE/">Architecture</a>
+  <a href="ARCHITECTURE/">Architecture</a>
 </div>
 
 </section>
@@ -88,7 +88,7 @@ render_with_liquid: false
 
     Deterministic templates, feature flags, profiles, `run_onchange_` hooks. Everything lives in `defaults/` and applies to `$HOME` on-demand.
 
-    [→ Architecture](architecture/ARCHITECTURE.md)
+    [→ Architecture](ARCHITECTURE.md)
 
 </div>
 
@@ -120,7 +120,7 @@ Once installed:
 
 - [**Install guide**](guides/INSTALL.md) — full bootstrap walkthrough, per-platform.
 - [**Utilities & `dot` CLI**](reference/UTILS.md) — every subcommand with examples.
-- [**Architecture**](architecture/ARCHITECTURE.md) — how the layers fit together.
+- [**Architecture**](ARCHITECTURE.md) — how the layers fit together.
 - [**Trusted agent workstation**](operations/TRUSTED_AGENT_WORKSTATION.md) — hardening + attestation runbook.
 - [**Troubleshooting**](guides/TROUBLESHOOTING.md) — the common gotchas.
 - [**Support matrix**](reference/SUPPORT_MATRIX.md) — OS × shell × package-manager grid.

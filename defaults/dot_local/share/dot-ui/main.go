@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 // Copyright (c) 2015-2026 Sebastien Rousseau
 //
 // dot-ui — the shared Bubble Tea rendering binary for the `dot` CLI.

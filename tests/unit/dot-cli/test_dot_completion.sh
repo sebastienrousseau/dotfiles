@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 ## Verify `dot completion <shell>` generates completion for each supported
 ## shell from the command registry, and prints usage with no/unknown args.
@@ -19,7 +19,7 @@ assert_file_exists "$REPO_ROOT/scripts/dot/commands/completion.sh" "completion m
 
 test_start "completion_bash_emits_complete"
 out="$(bash "$DOT" completion bash 2>/dev/null || true)"
-assert_contains "complete -W" "$out" "bash completion emits a complete -W directive"
+assert_contains "complete -F _dot_completions" "$out" "bash completion registers the _dot_completions function"
 
 test_start "completion_zsh_emits_compdef"
 out="$(bash "$DOT" completion zsh 2>/dev/null || true)"

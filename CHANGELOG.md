@@ -297,9 +297,11 @@ headers across the source tree.
   to `batcat`/`fdfind`; a missing apt/dnf/pacman warns loudly instead of silently
   installing nothing; WSL gets a best-effort `wslu` install for `wslview`. fish
   and nushell now export `EDITOR`/`VISUAL`/`PAGER` to match the zsh/bash profile.
+<!-- REUSE-IgnoreStart -->
 - **Licensing:** added `SPDX-License-Identifier: MIT` headers (SPDX-first / REUSE
   form) and normalized the copyright line to `Sebastien Rousseau` across 831
   repo-only source files; dropped the contradictory `All rights reserved.`.
+<!-- REUSE-IgnoreEnd -->
 - **README** — fixed the OpenSSF Best Practices badge (was linking to the
   new-project form with a static label; now the live `cii/percentage/12840`
   endpoint linked to the real project).

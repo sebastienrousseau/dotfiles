@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 # Branch-driving tests for scripts/diagnostics/doctor.sh.
@@ -100,7 +100,7 @@ exit 0
 EOF
 }
 
-# hyperfine + jq shims drive tests/performance/bench.sh deterministically:
+# hyperfine + jq shims drive benches/bench.sh deterministically:
 # jq prints the "min ms" bench.sh compares against its thresholds.
 _bench() {
   local min_ms="$1"

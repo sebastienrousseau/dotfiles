@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 #
 # Fixture-driven tests for scripts/qa/check-version-consistency.sh.
 # The script derives REPO_ROOT from its own location, so each case
-# symlinks it into a throwaway tree holding the eight version surfaces
+# symlinks it into a throwaway tree holding the sixteen version surfaces
 # and then drifts one of them: missing file, missing pattern, wrong
 # version (with and without --fix), unreadable canonical version.
 #
@@ -59,6 +59,20 @@ _fixture() { # <name> <version>
   printf '# Dotfiles\n\n![Version](https://img.shields.io/badge/Version-v%s-blue)\n' "$v" >"$root/README.md"
   printf 'Chezmoi-managed dotfiles. Version `%s`.\n' "$v" >"$root/CLAUDE.md"
   printf 'Chezmoi-managed dotfiles. Version `%s`.\n' "$v" >"$root/AGENTS.md"
+  # Surfaces added when the checker became scripts/verify-release-versions:
+  # the tag-pinned install snippet, install.sh's default version, the two
+  # machine-readable discovery cards, llms.txt, the CHANGELOG heading and
+  # the citation metadata.
+  printf 'curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v%s/install.sh\n' \
+    "$v" >>"$root/README.md"
+  printf '#!/usr/bin/env bash\n  local version="v%s"\n#   version  (default: v%s)\n' \
+    "$v" "$v" >"$root/install.sh"
+  mkdir -p "$root/.well-known/mcp"
+  printf '{\n  "version": "%s"\n}\n' "$v" >"$root/.well-known/agent-card.json"
+  printf '{\n  "version": "%s"\n}\n' "$v" >"$root/.well-known/mcp/server-card.json"
+  printf 'Current version: v%s.\n' "$v" >"$root/llms.txt"
+  printf '# Changelog\n\n## v%s — 2026-01-01\n' "$v" >"$root/CHANGELOG.md"
+  printf 'cff-version: 1.2.0\nversion: %s\n' "$v" >"$root/CITATION.cff"
   printf '%s\n' "$root"
 }
 
@@ -72,7 +86,7 @@ test_start "help_and_unknown_flag"
 _root="$(_fixture help 1.2.3)"
 _out="$(_check "$_root" --help)"
 assert_equals 0 $? "--help exits 0"
-assert_contains "Verify that every" "$_out" "help text printed"
+assert_contains "Usage:" "$_out" "help text printed"
 _out="$(_check "$_root" --bogus)"
 assert_equals 2 $? "unknown flag exits 2"
 assert_contains "unknown flag: --bogus" "$_out" "unknown flag named"
@@ -83,7 +97,7 @@ _out="$(_check "$_root")"
 _rc=$?
 assert_equals 0 "$_rc" "matching tree exits 0"
 assert_contains "canonical: 1.2.3" "$_out" "canonical version logged"
-assert_contains "all 8 live version surfaces match 1.2.3" "$_out" "success summary printed"
+assert_contains "all 16 live version surfaces match 1.2.3" "$_out" "success summary printed"
 
 test_start "quiet_suppresses_output_but_keeps_rc"
 _root="$(_fixture quiet 1.2.3)"

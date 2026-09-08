@@ -6,9 +6,16 @@ name: Doc Drift / Generators
 #   - tools/docs/generate-command-index.sh --check
 #       Verifies docs/manual/command-index.md matches `dot help all`.
 #
-#   - scripts/qa/check-version-consistency.sh --quiet
-#       Verifies 8 human-visible version surfaces match
-#       defaults/.chezmoidata.toml.
+#   - scripts/verify-release-versions
+#       Verifies every human-visible version surface (install
+#       snippets, badges, man page, agent/MCP cards, llms.txt,
+#       CHANGELOG heading) matches defaults/.chezmoidata.toml.
+#
+#   - tools/docs/generate-manpage.sh --check
+#       Verifies share/man/man1/dot.1 matches the command registry.
+#
+#   - tools/docs/generate-completions.sh --check
+#       Verifies the committed zsh/bash completions match it too.
 #
 # Adding a third generator is just adding a new step below — keep
 # this workflow flat and easy to extend.
@@ -22,7 +29,17 @@ on:
       - 'bin/dot'
       - 'scripts/dot/commands/**'
       - 'tools/docs/generate-command-index.sh'
-      - 'scripts/qa/check-version-consistency.sh'
+      - 'scripts/verify-release-versions'
+      - 'tools/docs/generate-manpage.sh'
+      - 'tools/docs/man/dot.1.in'
+      - 'tools/docs/generate-completions.sh'
+      - 'scripts/dot/commands/completion.sh'
+      - 'share/completions/zsh/_dot'
+      - 'defaults/dot_local/share/bash-completion/completions/dot'
+      - 'llms.txt'
+      - 'CHANGELOG.md'
+      - '.well-known/**'
+      - 'install.sh'
       - 'scripts/qa/scorecard-snapshot.sh'
       - 'defaults/.chezmoidata.toml'
       - 'README.md'
@@ -85,4 +102,50 @@ jobs:
             release-assets.githubusercontent.com:443
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Verify version-bearing files match defaults/.chezmoidata.toml
-        run: bash scripts/qa/check-version-consistency.sh
+        run: bash scripts/verify-release-versions
+
+  manpage:
+    name: Generators / man page
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Harden runner (block mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: block
+          # Isolated jobs: checkout + a local script only, no external
+          # fetches. Endpoints are the GitHub set the runner needs to pull
+          # actions and the repo. If a future step here needs more egress,
+          # add it or revert this job to `audit`.
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            codeload.github.com:443
+            objects.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Verify share/man/man1/dot.1 matches the command registry
+        run: bash tools/docs/generate-manpage.sh --check
+
+  completions:
+    name: Generators / completions
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Harden runner (block mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: block
+          # Isolated jobs: checkout + a local script only, no external
+          # fetches. Endpoints are the GitHub set the runner needs to pull
+          # actions and the repo. If a future step here needs more egress,
+          # add it or revert this job to `audit`.
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            codeload.github.com:443
+            objects.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Verify committed shell completions match the command registry
+        run: bash tools/docs/generate-completions.sh --check

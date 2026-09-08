@@ -101,6 +101,23 @@ _dot() {
     'version:Show version information'
     '--version:Show version information'
     'help:Show help message'
+
+    # Added to close registry drift — see tools/docs/generate-completions.sh --check
+    'agent:Profile-aware execution, agent card, a2a-card, session log, checkpoints, and conformance'
+    'attest:Export workstation attestation evidence (--json|-j, --write|-w, --fleet-store|-F)'
+    'cache-refresh:Regenerate shell caches for ultra-fast startup'
+    'completion:Generate shell completions (bash/zsh/fish/nu) from the command registry'
+    'fleet:Show fleet node status, drift, and namespace (--json for machine output)'
+    'lint:Lint shell scripts (--fix|-f to auto-format, --check|-c for CI)'
+    'mcp:Inspect MCP policy, supply chain, and registry'
+    'metrics:Show recent observability metrics (JSONL)'
+    'mode:Set or inspect agent operating profiles (ask/plan/apply/audit)'
+    'policy:Check and enforce security policies across the environment'
+    'profile:Show/switch configuration profile'
+    'score:System health and security scorecard'
+    'secret-audit:Audit secret hygiene and leakage surface'
+    'teleport:Deploy the dotfiles environment to a remote host over SSH'
+    'uninstall:Remove the managed dotfiles environment (prompts unless --force)'
   )
 
   _arguments -C \
@@ -251,7 +268,7 @@ _dot() {
         ssh-cert)
           local -a cert_cmds=(
             'issue:Request a short-lived SSH certificate'
-            'status:Show current certificate status'
+            'status:Show configuration drift (chezmoi status)'
             'revoke:Revoke an active certificate'
           )
           _describe -t subcommands 'ssh-cert subcommand' cert_cmds
@@ -260,12 +277,12 @@ _dot() {
           local -a ai_cmds=(
             'run:One-shot prompt on a tool (default Claude)'
             'chat:Open an interactive session with a tool'
-            'tools:Install and manage the AI fleet'
+            'tools:Show or install nix packages'
             'install:Install fleet tools (all or one)'
             'serve:Run the local Claude gateway and route the fleet'
             'cost:Show the spend report'
             'login:Authenticate a tool'
-            'doctor:Health-check the fleet and gateway'
+            'doctor:Deep audit tools, paths, portability, AI analysis (--ai|-A)'
             'ask:Context-aware RAG query over the repo'
             'delegate:Run a background AI delegate'
             'dashboard:Deprecated — opens the cockpit (use: dot ai)'
@@ -274,7 +291,7 @@ _dot() {
           ;;
         secrets)
           local -a secrets_cmds=(
-            'edit:Edit encrypted secrets'
+            'edit:Open chezmoi source in $EDITOR'
             'set:Set a secret value'
             'get:Get a secret value'
             'list:List secret keys'

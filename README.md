@@ -138,11 +138,11 @@ The Homebrew formula and Scoop manifest are regenerated per tag by
 [`release-distribute-homebrew.yml`](.github/workflows/release-distribute-homebrew.yml)
 and
 [`release-distribute-scoop.yml`](.github/workflows/release-distribute-scoop.yml)
-from the templates under [`install/`](install/README.md); the AUR
+from the templates under [`pkg/`](pkg/README.md); the AUR
 package is pushed by
 [`release-distribute-aur.yml`](.github/workflows/release-distribute-aur.yml).
 The per-channel templates and the maintainer runbook are in
-[`install/README.md`](install/README.md); the end-to-end pipeline is
+[`pkg/README.md`](pkg/README.md); the end-to-end pipeline is
 [`docs/operations/RELEASE_PIPELINE.md`](docs/operations/RELEASE_PIPELINE.md).
 
 ### With chezmoi directly
@@ -208,10 +208,10 @@ profile per machine and flip session flags when you need less.
 | `profile = "server"` | same | Shell, git, monitoring tools, no desktop | same |
 | `[features]` flags | `.chezmoidata.toml` | `alias_wrapper`, `dms`, `zellij`, `linux_desktop`, `niri`, `waybar`, `fuzzel`, `mako`, `foot`, `kanshi`, `touch`, `t2`, `surface` — schema-checked in CI | [`docs/reference/FEATURES.md`](docs/reference/FEATURES.md) |
 | `DOTFILES_FAST=1` | environment | Skip heavy layers (zinit, completions, lazy runtime managers) | [Configuration](#configuration) |
-| `DOTFILES_ULTRA_FAST=1` | environment | Bare minimum shell: paths, aliases, prompt | [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) |
+| `DOTFILES_ULTRA_FAST=1` | environment | Bare minimum shell: paths, aliases, prompt | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 | `DOTFILES_DEFER_TOOLS=1` *(default)* | environment | Resolve heavy binaries asynchronously after the first prompt | `defaults/dot_config/zsh/dot_zshrc.tmpl` |
 | `DOTFILES_AI=1` | environment | Enable AI helper scripts | [`docs/reference/PROFILES.md`](docs/reference/PROFILES.md) |
-| `DOTFILES_ARTIFACT_MODE=1` | environment | Minimal prompt plus the async Bento dashboard | [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) |
+| `DOTFILES_ARTIFACT_MODE=1` | environment | Minimal prompt plus the async Bento dashboard | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 | `DOTFILES_DEBUG=1` / `DOTFILES_TRACE=1` | environment | Per-stage startup timing / full trace to stderr | [`docs/manual/03-reference/03-environment.md`](docs/manual/03-reference/03-environment.md) |
 | `EVALCACHE_DISABLE=true` | environment | Bypass `_cached_eval` for debugging | [Features](#features) |
 
@@ -234,7 +234,7 @@ profile per machine and flip session flags when you need less.
   Ubuntu 22.04+, Debian 12+, WSL2, NixOS 23.11+ are CI-tested or
   supported; Fedora and Arch are community-supported. The full
   table, with per-tool floors, is
-  [`docs/reference/SUPPORT_MATRIX.md`](docs/reference/SUPPORT_MATRIX.md).
+  [`docs/MINIMUM-TOOLCHAIN.md`](docs/MINIMUM-TOOLCHAIN.md).
 
 - **Windows.** PowerShell 7.4 LTS / 7.5+ runs the native
   `dot.ps1` for the daily workflow (apply, status, doctor, mise
@@ -247,7 +247,7 @@ raised only in a release whose `CHANGELOG.md` entry names the new
 floor and the reason, never silently. The version axis on which it
 may move, and the table mapping every supported platform and tool
 to its floor live in
-[`docs/reference/SUPPORT_MATRIX.md`](docs/reference/SUPPORT_MATRIX.md);
+[`docs/MINIMUM-TOOLCHAIN.md`](docs/MINIMUM-TOOLCHAIN.md);
 this README makes no distro-compatibility claim that table does not
 back.
 
@@ -362,7 +362,7 @@ The gaps, so nobody has to find them:
 - Scorecard's `Code-Review` check scores **0**: one maintainer,
   merges gated by CI rather than by a second reviewer.
 - OSS-Fuzz onboarding is prepared under
-  [`oss-fuzz-integration/`](oss-fuzz-integration/project.yaml) but
+  [`fuzz/oss-fuzz/`](fuzz/oss-fuzz/project.yaml) but
   **not yet submitted**; ClusterFuzzLite runs in the meantime.
 - Repology tracks one packaging (AUR `dot-cli-git`); Homebrew and
   Scoop go through this project's own tap and bucket.
@@ -580,7 +580,7 @@ fish startup **217 ms → 119 ms** by emitting the alias bridge as
 `abbr` instead of `alias` (#963); ~140 ms saved per fish start by
 shadowing Homebrew's eager `direnv` / `mise` `vendor_conf.d` hooks;
 20–50 ms saved per tool by `_cached_eval`
-([`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)).
+([`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)).
 The original threshold and the `hyperfine --warmup 3 --runs 10
 "zsh -i -c exit"` recipe are in
 [ADR-002](docs/adr/ADR-002-shell-performance.md).
@@ -599,7 +599,7 @@ documented in
 [`docs/operations/PERFORMANCE.md`](docs/operations/PERFORMANCE.md);
 the harnesses are
 [`tools/ci/dot-cli-startup-bench.sh`](tools/ci/dot-cli-startup-bench.sh)
-and [`tests/performance/`](tests/performance/).
+and [`benches/`](benches/).
 
 ---
 
@@ -845,7 +845,7 @@ map of every top-level path, with the history of the reorganisation
 that produced it, is [`docs/STRUCTURE.md`](docs/STRUCTURE.md); the
 contributor-facing
 design is
-[`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md).
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 </details>
 
@@ -1018,13 +1018,13 @@ make uninstall
 
 ./tests/framework/test_runner.sh --jobs auto   # unit suite, parallel
 bash tests/snapshots/test_snapshots.sh         # golden CLI output
-bash tests/fuzz/fuzz_install.sh                # install.sh under adversarial input
+bash fuzz/install/fuzz_install.sh                # install.sh under adversarial input
 bash tools/docs/generate-command-index.sh --check
-bash scripts/qa/check-version-consistency.sh
+bash scripts/verify-release-versions
 ```
 
 Toolchain setup, the task map, and how to reproduce every CI gate
-locally are in [`CONTRIBUTING.md`](CONTRIBUTING.md) and
+locally are in [`DEVELOPMENT.md`](DEVELOPMENT.md) and
 [`docs/operations/TESTING.md`](docs/operations/TESTING.md). Commit signing,
 the DCO trailer, branch names, and the regression-test convention
 are in [`CONTRIBUTING.md`](CONTRIBUTING.md). A
@@ -1034,12 +1034,12 @@ are in [`CONTRIBUTING.md`](CONTRIBUTING.md). A
 ### Fuzzing
 
 Two native Go fuzz harnesses ship under
-[`oss-fuzz-integration/fuzz/`](oss-fuzz-integration/fuzz/) for the
+[`fuzz/`](fuzz/) for the
 user-input surfaces that were ported out of the shell so they could
 be fuzzed at all: `FuzzValidateName` (the name validator behind
 `lib/dot/utils.sh`) and `FuzzInitURLResolver` (the URL resolver
 behind `dot init`). A third harness,
-[`tests/fuzz/fuzz_install.sh`](tests/fuzz/fuzz_install.sh), drives
+[`fuzz/install/fuzz_install.sh`](fuzz/install/fuzz_install.sh), drives
 `install.sh` itself with unknown flags, garbage positionals, symlink
 loops in `$HOME`, an empty `PATH`, 4 KB arguments, and NUL bytes in
 the environment, and asserts every case exits cleanly or fails fast
@@ -1059,12 +1059,12 @@ alias; unknown positionals triggering a 30 s network fetch).
   `install.sh` harness weekly on Ubuntu and macOS, and on every PR
   touching `install.sh`; a scheduled failure opens a tracking issue.
 - **OSS-Fuzz:** the project definition is ready in
-  [`oss-fuzz-integration/`](oss-fuzz-integration/project.yaml)
+  [`fuzz/oss-fuzz/`](fuzz/oss-fuzz/project.yaml)
   (libFuzzer, ASan + UBSan, x86_64); the upstream submission to
   `google/oss-fuzz` has not been filed yet.
 
 ```bash
-cd oss-fuzz-integration/fuzz
+cd fuzz
 go test -run TestNothing -fuzz='^FuzzValidateName$' -fuzztime=60s ./...
 go test -run TestNothing -fuzz='^FuzzInitURLResolver$' -fuzztime=60s ./...
 ```
@@ -1072,7 +1072,7 @@ go test -run TestNothing -fuzz='^FuzzInitURLResolver$' -fuzztime=60s ./...
 The harness layout and the OSS-Fuzz submission steps are in
 [`docs/security/FUZZING.md`](docs/security/FUZZING.md); the shared
 corpus lives beside the harnesses under
-[`oss-fuzz-integration/fuzz/testdata/`](oss-fuzz-integration/fuzz/testdata/).
+[`fuzz/testdata/`](fuzz/testdata/).
 
 ### Hardening gates in place of Miri
 
@@ -1135,7 +1135,7 @@ documented in
 **Reporting:** never open a public issue for a vulnerability — use
 [GitHub Security Advisories](https://github.com/sebastienrousseau/dotfiles/security/advisories)
 or <security@sebastienrousseau.com>; see
-[`.github/SECURITY.md`](.github/SECURITY.md) for the response SLA (Critical: 24 h
+[`SECURITY.md`](SECURITY.md) for the response SLA (Critical: 24 h
 initial response, 48 h target; High: 72 h / 7 days; Medium: 5 / 30
 business days; Low: 10 / 90), the supported-version table, and the
 GPG key for encrypted reports
@@ -1251,9 +1251,9 @@ The four entry points, identical across every repo in the family:
 - **[Command reference](docs/manual/command-index.md)** — every
   `dot` subcommand, generated from `dot help all`; `man dot` after
   install
-- **[Developer docs](CONTRIBUTING.md)** — toolchain, task map,
+- **[Developer docs](DEVELOPMENT.md)** — toolchain, task map,
   reproducing every CI gate locally
-- **[Family map](docs/STRUCTURE.md)** — every top-level path, the
+- **[Family map](docs/ECOSYSTEM.md)** — what lives in-repo, the
   component that owns it, and where to make which change
 
 The manual is published in nine formats (single- and multi-page
@@ -1263,14 +1263,14 @@ and rebuilds on every change from [`docs/manual/`](docs/manual/).
 | Document | Covers |
 |---|---|
 | [`docs/STRUCTURE.md`](docs/STRUCTURE.md) | Every top-level path, the chezmoi naming contract, where to make which change. |
-| [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) | Startup strategies, `_cached_eval`, lazy hydration, artifact and ultra-fast modes. |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Startup strategies, `_cached_eval`, lazy hydration, artifact and ultra-fast modes. |
 | [`docs/adr/`](docs/adr/README.md) | Twelve decision records: CI/CD, shell performance, security-first, CLI architecture, chezmoi, shell selection, multi-shell parity, aliases, wallpaper theming, transient prompt, nushell tier, AI local proxy. |
 | [`docs/reference/`](docs/reference/) | Aliases, feature flags, fonts, PowerShell parity, profiles, scripts, support matrix, themes, tools, `dot` utilities. |
 | [`docs/security/`](docs/security/README.md) | Threat model, install verification, fuzzing, secrets, encryption, MCP policy, commit signing, CI pinning, egress allowlist, key rotation, release verification, Scorecard, compliance, incident response. |
 | [`docs/operations/`](docs/operations/OPERATIONS.md) | Release pipeline, version sync, performance, reliability, coverage, drift, registry, attestation, CI cadence, migration between versions. |
 | [`docs/guides/`](docs/guides/INSTALL.md) | Install, theming, Neovim IDE, troubleshooting, WSL2 + Nix. |
-| [`install/README.md`](install/README.md) | For distro maintainers: the bootstrap path, the per-channel templates, and the publication checklist. |
-| [`.github/SECURITY.md`](.github/SECURITY.md) · [`GOVERNANCE.md`](GOVERNANCE.md) · [`CONTRIBUTING.md`](CONTRIBUTING.md) · [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | Reporting, decision model, contribution workflow, community expectations. |
+| [`docs/packaging.md`](docs/packaging.md) | For distro maintainers: licence grant, toolchain floors, dependency pin model, offline build/test, signature verification. |
+| [`SECURITY.md`](SECURITY.md) · [`GOVERNANCE.md`](GOVERNANCE.md) · [`CONTRIBUTING.md`](CONTRIBUTING.md) · [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | Reporting, decision model, contribution workflow, community expectations. |
 | [`CHANGELOG.md`](CHANGELOG.md) | Per-release notes. **The complete record** — every release appears here. |
 | [`AGENTS.md`](AGENTS.md) / [`CLAUDE.md`](CLAUDE.md) | Invariants for AI-assisted contributors; `CLAUDE.md` is canonical, `AGENTS.md` is rendered from it. |
 
@@ -1327,7 +1327,7 @@ every one of them stays fixed.
 - **Minimum toolchain.** Raised only with the reason recorded in the
   `CHANGELOG.md` entry, never silently — policy, version axis, and
   history in
-  [`docs/reference/SUPPORT_MATRIX.md`](docs/reference/SUPPORT_MATRIX.md).
+  [`docs/MINIMUM-TOOLCHAIN.md`](docs/MINIMUM-TOOLCHAIN.md).
 
 - **Deprecations** are announced before removal with the removal
   release named up front:

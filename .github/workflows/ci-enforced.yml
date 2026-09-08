@@ -147,10 +147,10 @@ jobs:
           soft_fail: false  # FAIL on security issues
           output_format: sarif
           output_file_path: reports/checkov.sarif
-          # oss-fuzz-integration/ is OSS-Fuzz scaffolding — it MUST use
+          # fuzz/oss-fuzz/ is OSS-Fuzz scaffolding — it MUST use
           # the upstream base image as-is (no USER, HEALTHCHECK, or
           # tagged FROM); OSS-Fuzz runs the harnesses, not us.
-          skip_path: oss-fuzz-integration/
+          skip_path: fuzz/oss-fuzz/
       - name: Upload Checkov results to GitHub Security
         if: always() && hashFiles('reports/checkov.sarif') != ''
         uses: github/codeql-action/upload-sarif@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4

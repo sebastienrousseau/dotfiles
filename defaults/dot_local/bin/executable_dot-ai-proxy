@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # dot-ai-proxy — manage the native local Claude proxy (dot-ai-serve) and
 # route the AI fleet through it, so any Anthropic/OpenAI-protocol CLI

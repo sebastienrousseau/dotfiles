@@ -32,7 +32,7 @@
 set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
-FUZZ_DIR="${1:-$REPO_ROOT/oss-fuzz-integration/fuzz}"
+FUZZ_DIR="${1:-$REPO_ROOT/fuzz}"
 
 if [[ ! -d "$FUZZ_DIR" ]]; then
   echo "::error::fuzz module directory not found: $FUZZ_DIR"
@@ -81,7 +81,7 @@ for harness in "${harnesses[@]}"; do
   if out=$(cd "$dir" && go vet ./... 2>&1); then
     echo "  ok   $harness"
   else
-    echo "::error file=oss-fuzz-integration/fuzz/$harness::harness is not self-contained — compile_native_go_fuzzer builds it without the package's other _test.go files"
+    echo "::error file=fuzz/$harness::harness is not self-contained — compile_native_go_fuzzer builds it without the package's other _test.go files"
     printf '      %s\n' "$out"
     fail_count=$((fail_count + 1))
   fi

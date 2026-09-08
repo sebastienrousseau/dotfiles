@@ -52,7 +52,7 @@ Quick jumps into the Manual:
 - [Testing](operations/TESTING.md)
 - [Reliability](operations/RELIABILITY.md)
 - [Naming conventions](NAMING_CONVENTIONS.md)
-- [Architecture](architecture/ARCHITECTURE.md)
+- [Architecture](ARCHITECTURE.md)
 - [Repository layout](architecture/REPO_LAYOUT.md)
 - [AI cost optimization](architecture/AI_COST_OPTIMIZATION.md)
 - [Release pipeline](operations/RELEASE_PIPELINE.md)

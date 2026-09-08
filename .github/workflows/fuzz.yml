@@ -10,13 +10,13 @@ name: Fuzz / Native Go harnesses
 #             parsing surface, to catch regressions before they merge.
 #
 # Harnesses live in three places:
-#   oss-fuzz-integration/fuzz            ports of the shell helpers and of
+#   fuzz            ports of the shell helpers and of
 #                                        the two Go binaries' parsers
 #   defaults/dot_local/share/dot-ui      in-module, against the real code
 #   defaults/dot_local/share/dot-ai-tui  in-module, against the real code
 #
 # Pairs with the OSS-Fuzz / ClusterFuzzLite integration in
-# oss-fuzz-integration/, which runs the ported harnesses continuously at
+# fuzz/oss-fuzz/, which runs the ported harnesses continuously at
 # scale on Google infra. See docs/security/FUZZING.md.
 
 on:
@@ -26,7 +26,7 @@ on:
     paths:
       - 'lib/dot/utils.sh'
       - 'scripts/dot/commands/init.sh'
-      - 'oss-fuzz-integration/**'
+      - 'fuzz/**'
       - 'defaults/dot_local/share/dot-ui/**'
       - 'defaults/dot_local/share/dot-ai-tui/**'
       - '.clusterfuzzlite/**'
@@ -57,7 +57,7 @@ jobs:
       matrix:
         include:
           - name: oss-fuzz ports
-            dir: oss-fuzz-integration/fuzz
+            dir: fuzz
           - name: dot-ui
             dir: defaults/dot_local/share/dot-ui
           - name: dot-ai-tui
@@ -100,8 +100,8 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version-file: oss-fuzz-integration/fuzz/go.mod
-          cache-dependency-path: oss-fuzz-integration/fuzz/go.sum
+          go-version-file: fuzz/go.mod
+          cache-dependency-path: fuzz/go.sum
 
       - name: Each harness must build without its sibling test files
         run: bash tools/ci/check-fuzz-harness-self-contained.sh
@@ -117,9 +117,9 @@ jobs:
         include:
           # Ports of the shell input handling.
           - harness: FuzzValidateName
-            dir: oss-fuzz-integration/fuzz
+            dir: fuzz
           - harness: FuzzInitURLResolver
-            dir: oss-fuzz-integration/fuzz
+            dir: fuzz
           # dot-ui, in-module against the real implementation.
           - harness: FuzzParseEvent
             dir: defaults/dot_local/share/dot-ui
@@ -162,23 +162,23 @@ jobs:
             dir: defaults/dot_local/share/dot-ai-tui
           # Ports of the two binaries' parsers — what OSS-Fuzz builds.
           - harness: FuzzUIEventLine
-            dir: oss-fuzz-integration/fuzz
+            dir: fuzz
           - harness: FuzzUIHexColor
-            dir: oss-fuzz-integration/fuzz
+            dir: fuzz
           - harness: FuzzUIPickFilter
-            dir: oss-fuzz-integration/fuzz
+            dir: fuzz
           - harness: FuzzUIPickArgs
-            dir: oss-fuzz-integration/fuzz
+            dir: fuzz
           - harness: FuzzUITableRows
-            dir: oss-fuzz-integration/fuzz
+            dir: fuzz
           - harness: FuzzAISessionFile
-            dir: oss-fuzz-integration/fuzz
+            dir: fuzz
           - harness: FuzzAISqliteOutput
-            dir: oss-fuzz-integration/fuzz
+            dir: fuzz
           - harness: FuzzAIFenceTag
-            dir: oss-fuzz-integration/fuzz
+            dir: fuzz
           - harness: FuzzAIGatewayURL
-            dir: oss-fuzz-integration/fuzz
+            dir: fuzz
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1

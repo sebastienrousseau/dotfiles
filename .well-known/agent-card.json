@@ -1,9 +1,9 @@
 {
   "specVersion": "0.3",
   "name": "dotfiles-agent",
-  "version": "0.2.501",
+  "version": "0.2.519",
   "description": "Trusted workstation agent surface for local shell automation, configuration governance, and fleet management.",
-  "url": "https://github.com/sebastienvermeille/dotfiles",
+  "url": "https://github.com/sebastienrousseau/dotfiles",
   "skills": [
     {
       "id": "workstation-attestation",

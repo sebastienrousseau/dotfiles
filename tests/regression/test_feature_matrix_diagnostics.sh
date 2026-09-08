@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 # Regression for: GH-881
@@ -28,7 +28,7 @@ fm_sandbox_setup
 # The scoring commands re-probe the whole toolchain: a full `dot doctor` is
 # ~20s uncontended on the reference machine and several times that when the
 # regression suite runs files concurrently. This is a hang guard, not a
-# performance gate — tests/performance owns those — so give it real headroom.
+# performance gate — benches owns those — so give it real headroom.
 FM_TIMEOUT=150
 
 # ── doctor ─────────────────────────────────────────────────────────────────
@@ -99,7 +99,7 @@ test_fm_doctor_json() {
 
 test_fm_smoke_doctor_benchmark() {
   # --benchmark shells out to the full hyperfine sweep over every installed
-  # shell: minutes of wall clock. tests/performance/bench.sh owns that gate.
+  # shell: minutes of wall clock. benches/bench.sh owns that gate.
   fm_smoke doctor
 }
 

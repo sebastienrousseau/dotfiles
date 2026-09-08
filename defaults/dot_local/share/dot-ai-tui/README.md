@@ -48,7 +48,7 @@ JSON, sqlite3 output scrubbing, gateway configuration, the whole key
 handler at arbitrary terminal sizes, and the model cycle. Every `go test`
 run replays the seed corpus plus the committed crashers under
 `testdata/fuzz/<Target>/`. The ClusterFuzzLite / OSS-Fuzz build in
-`oss-fuzz-integration/` compiles the same targets with libFuzzer.
+`fuzz/oss-fuzz/` compiles the same targets with libFuzzer.
 
 ```bash
 go test -run '^$' -fuzz=FuzzHighlight          -fuzztime=30s ./...   # fenced-code highlighter

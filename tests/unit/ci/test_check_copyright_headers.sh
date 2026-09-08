@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -58,7 +58,9 @@ test_start "matches_copyright_paren_c"
 assert_file_contains "$SCRIPT_FILE" "Copyright (c)" "must match Copyright (c) pattern"
 
 test_start "matches_spdx"
+# REUSE-IgnoreStart -- assertion string, not a declaration
 assert_file_contains "$SCRIPT_FILE" "SPDX-License-Identifier:" "must match SPDX header"
+# REUSE-IgnoreEnd
 
 # ---------------------------------------------------------------------------
 # End-to-end: run the script in a temp dir with a known-good and known-bad file

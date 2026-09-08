@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 set -euo pipefail
 
@@ -10,7 +10,7 @@ DOT_CLI="$REPO_ROOT/bin/dot"
 UTILS_DOC="$REPO_ROOT/docs/reference/UTILS.md"
 AI_DOC="$REPO_ROOT/docs/AI.md"
 SCRIPTS_DOC="$REPO_ROOT/docs/reference/SCRIPTS.md"
-ARCH_DOC="$REPO_ROOT/docs/architecture/ARCHITECTURE.md"
+ARCH_DOC="$REPO_ROOT/docs/ARCHITECTURE.md"
 FUNCTION_GROUPS_JSON="$REPO_ROOT/defaults/.chezmoitemplates/functions/groups.json"
 MIN_DOCS_COVERAGE="${MIN_DOCS_COVERAGE:-100}"
 

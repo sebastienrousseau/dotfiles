@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 ## Coverage-exercise test: drives high-value, side-effect-free code paths so
 ## the xtrace coverage runner records them. Targets lib/dot/ui.sh (all ui_*

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck shell=bash disable=SC1090,SC1091,SC2034
 #
@@ -57,7 +57,7 @@ FM_ERR=""
 
 # Default wall-clock budget for one `dot` invocation. Generous: the reliability
 # suite runs files in parallel on contended CI runners, and this is a hang
-# guard, not a performance gate (tests/performance owns those).
+# guard, not a performance gate (benches owns those).
 FM_TIMEOUT="${FM_TIMEOUT:-120}"
 
 # ---------------------------------------------------------------------------

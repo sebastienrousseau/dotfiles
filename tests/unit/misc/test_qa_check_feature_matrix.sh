@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 #
 # Unit coverage for scripts/qa/check-feature-matrix.sh, the drift gate over
@@ -46,13 +46,13 @@ fm_gate_scratch() {
   local dest
   dest="$(mktemp -d -t fmgate.XXXXXX)"
   mkdir -p "$dest/docs/reference" "$dest/docs/manual" "$dest/scripts/qa" \
-    "$dest/tests/regression" "$dest/tests/performance" "$dest/bin" \
+    "$dest/tests/regression" "$dest/benches" "$dest/bin" \
     "$dest/scripts/dot/commands" "$dest/examples"
   cp "$GATE" "$dest/scripts/qa/"
   cp "$MATRIX" "$dest/docs/reference/"
   cp "$REPO_ROOT/docs/manual/command-index.md" "$dest/docs/manual/"
   cp "$REPO_ROOT/bin/dot" "$dest/bin/"
-  cp "$REPO_ROOT/tests/performance/dot_command_bench.sh" "$dest/tests/performance/"
+  cp "$REPO_ROOT/benches/dot_command_bench.sh" "$dest/benches/"
   cp "$REPO_ROOT"/tests/regression/test_feature_matrix_*.sh "$dest/tests/regression/" 2>/dev/null
   cp "$REPO_ROOT"/scripts/dot/commands/*.sh "$dest/scripts/dot/commands/" 2>/dev/null
   cp "$REPO_ROOT"/examples/*.sh "$dest/examples/" 2>/dev/null

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Version Synchronization Script
 # Synchronizes version numbers across all markdown files with package.json
@@ -39,12 +39,18 @@ EXCLUDE_FILES=(
   # carry per-release hash tables / closed-cycle logs. The "current"
   # version inside these is tracked by hand, not by version-sync.
   "docs/security/CI_PINNING.md"
+  # Same reason: supply-chain/README.md pins the SLSA generator at its
+  # required tag (v2.1.0). That is a third-party version, not ours.
+  "supply-chain/README.md"
   "docs/security/INSTALL_VERIFICATION.md"
   "docs/security/SCORECARD.md"
 
   # Release-verification recipes use an example pinned tag
   # that intentionally stays at a known-published release.
   "docs/security/VERIFY_RELEASE.md"
+  # Same category: pkg/VERIFY.md's "coverage by release" table names
+  # the release each attestation first appeared in, which is history.
+  "pkg/VERIFY.md"
 
   # Example bundles — version refs in README'd examples are illustrative.
   "examples/mise-plugin-dot/README.md"
@@ -611,6 +617,39 @@ main() {
         rm -f "$temp_file"
       fi
     fi
+  done
+
+  # Machine-readable discovery cards. These are JSON with a bare
+  # `"version"` key, so the `v$VERSION` substitution above does not
+  # reach them — which is exactly why the MCP card sat at 0.2.501
+  # while the project shipped 0.2.519. Agents fetch these over the
+  # network, so a stale version here misroutes tooling rather than
+  # merely reading wrong. Gated by scripts/verify-release-versions.
+  local card_files=(
+    ".well-known/mcp/server-card.json"
+    ".well-known/agent-card.json"
+  )
+  for card_file in "${card_files[@]}"; do
+    local card_path="$PROJECT_ROOT/$card_file"
+    [[ -f "$card_path" ]] || continue
+    # Deliberately sed, not jq: jq re-serialises the whole document and
+    # would reflow the hand-formatted arrays in these cards, producing a
+    # large diff for a one-token change. Only the top-level "version"
+    # key is rewritten (it is the first such key in both files).
+    local card_tmp
+    card_tmp=$(umask 077 && mktemp)
+    cp "$card_path" "$card_tmp"
+    sed_in_place "$card_tmp" \
+      "1,6s|\"version\": \"$SED_VERSION_PATTERN\"|\"version\": \"$target_version\"|"
+    if ! cmp -s "$card_path" "$card_tmp"; then
+      if [[ "$dry_run" == "true" ]]; then
+        log_info "Would update: $card_file"
+      else
+        cat "$card_tmp" >"$card_path"
+        log_success "Updated: $card_file"
+      fi
+    fi
+    rm -f "$card_tmp"
   done
 
   # Update version references

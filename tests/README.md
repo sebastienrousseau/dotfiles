@@ -132,7 +132,7 @@ When a snapshot test fails, decide:
 
 ### install.sh fuzz harness
 
-`tests/fuzz/fuzz_install.sh` runs `install.sh` against a battery of
+`fuzz/install/fuzz_install.sh` runs `install.sh` against a battery of
 adversarial inputs (unknown flags, garbage positionals, symlink
 loops in `$HOME`, empty `$PATH`, doubled flags, 4 KB-long arg
 strings, NUL bytes in env vars) and asserts each one either
@@ -140,7 +140,7 @@ succeeds cleanly or fails fast with a clear non-zero exit — but
 never hangs. Closes part of [#881](https://github.com/sebastienrousseau/dotfiles/issues/881).
 
 ```bash
-bash tests/fuzz/fuzz_install.sh
+bash fuzz/install/fuzz_install.sh
 ```
 
 Requires `timeout` (Linux) or `gtimeout` (macOS, install via
@@ -152,7 +152,7 @@ both fixed in the same commit that introduced the harness.
 
 CI: `.github/workflows/install-fuzz.yml` runs the harness weekly on
 both Linux and macOS, on every PR touching `install.sh` or
-`tests/fuzz/`, and on manual dispatch.
+`fuzz/install/`, and on manual dispatch.
 
 ### Run Individual Test File
 

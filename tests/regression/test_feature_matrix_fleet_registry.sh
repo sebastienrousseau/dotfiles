@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 # Regression for: GH-881
@@ -893,7 +893,7 @@ fm_assert_completion() {
   fm_pass "generated"
 }
 
-test_fm_completion_bash() { fm_assert_completion bash "complete -W" "dot"; }
+test_fm_completion_bash() { fm_assert_completion bash "complete -F _dot_completions" "dot"; }
 test_fm_completion_zsh() { fm_assert_completion zsh "#compdef dot" "_describe"; }
 test_fm_completion_fish() { fm_assert_completion fish "complete -c dot"; }
 

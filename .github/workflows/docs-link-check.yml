@@ -1,0 +1,129 @@
+name: Docs / Links + REUSE
+
+# Two cheap documentation gates the repository standard requires:
+#
+#   1. Link check (lychee). The OFFLINE pass is a hard gate on every
+#      push and PR: a broken intra-repo link is our bug and must fail
+#      the build. The ONLINE pass runs on a schedule only, because a
+#      third-party outage is not a reason to block a merge — it opens
+#      an issue instead.
+#
+#   2. REUSE lint. Every file's licensing must be machine-readable
+#      (REUSE.toml + per-file SPDX headers). Hard gate.
+#
+# ci.yml also runs lychee, but only on schedule/dispatch and with
+# `fail: false`; this workflow is the gating half.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    # Mondays 06:00 UTC — the online pass.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-link-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  links-offline:
+    name: Docs / Link Check (offline, gating)
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden runner (block mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: block
+          # Offline pass resolves local files only; the endpoints below
+          # are just what the runner needs to fetch actions and the repo.
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            codeload.github.com:443
+            objects.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check intra-repo links
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: --config config/lychee.toml --offline --no-progress '**/*.md'
+          fail: true
+
+  links-online:
+    name: Docs / Link Check (online, advisory)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check every link
+        id: lychee
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: --config config/lychee.toml --no-progress '**/*.md'
+          output: lychee-report.md
+          fail: false
+
+      - name: Open or update a tracking issue
+        if: steps.lychee.outputs.exit_code != 0
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          title="Broken external links detected"
+          existing="$(gh issue list --repo "$REPOSITORY" --state open \
+            --search "$title in:title" --json number --jq '.[0].number // empty')"
+          body="$(printf 'Scheduled link check found unreachable external links.\n\nRun: %s\n\n%s\n' \
+            "$RUN_URL" "$(head -c 60000 lychee-report.md 2>/dev/null || echo 'see run log')")"
+          if [[ -n "$existing" ]]; then
+            gh issue comment "$existing" --repo "$REPOSITORY" --body "$body"
+          else
+            gh issue create --repo "$REPOSITORY" --title "$title" --body "$body" \
+              --label documentation 2>/dev/null \
+              || gh issue create --repo "$REPOSITORY" --title "$title" --body "$body"
+          fi
+
+  reuse:
+    name: Docs / REUSE lint
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: REUSE compliance
+        uses: fsfe/reuse-action@bb774aa972c2a89ff34781233d275075cbddf542 # v5.0.0
+
+      # reuse-action proves every file HAS licensing information.
+      # This proves the information is the *right* grant: the project
+      # ships LICENSE-APACHE + LICENSE-MIT, so a file declaring bare
+      # MIT understates what downstream may rely on. Catches the drift
+      # that followed the relicensing commit.
+      - name: SPDX grant matches the manifest
+        run: bash tools/ci/normalize-spdx-headers.sh --check

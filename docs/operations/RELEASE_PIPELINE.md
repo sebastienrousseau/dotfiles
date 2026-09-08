@@ -52,9 +52,9 @@ dependencies allow.
 | `security-release.yml` (sbom job) | `release.published`, dispatch | Generate SPDX SBOM via anchore/sbom-action. Cosign keyless sign the SBOM. | `dotfiles-sbom.spdx.json` + `.sig` + `.pem`. |
 | `security-release.yml` (provenance job) | needs sbom | SLSA L3 provenance via slsa-framework/slsa-github-generator. | `dotfiles-sbom.spdx.json.intoto.jsonl`. |
 | `security-release.yml` (manifest job) | needs provenance + complete asset set | Build `ALL_SHA256SUMS` over every release asset, Cosign-sign it, and verify its signature and digests. | `ALL_SHA256SUMS` + `.sig` + `.pem`. |
-| `release-distribute-homebrew.yml` | `release.published`, dispatch | Hash `dot-VERSION.tar.gz`, regenerate `install/homebrew/dot.rb`, push branch + PR to `sebastienrousseau/homebrew-tap`. | One PR on the tap repo. |
-| `release-distribute-scoop.yml` | `release.published`, dispatch | Hash `dot-VERSION.zip`, rewrite `install/scoop/dot.json` via jq (both 64bit + arm64 point at same zip), PR to `sebastienrousseau/scoop-bucket`. | One PR on the bucket repo. |
-| `release-distribute-aur.yml` | `release.published`, dispatch | Hash `dot-VERSION.tar.gz`, rewrite `pkgver` + `sha256sums` in `install/aur/PKGBUILD`, regenerate `.SRCINFO` via dockerised `makepkg`, push to `ssh://aur@aur.archlinux.org/dot-cli-git.git`. | One commit on AUR. |
+| `release-distribute-homebrew.yml` | `release.published`, dispatch | Hash `dot-VERSION.tar.gz`, regenerate `pkg/brew/dot.rb`, push branch + PR to `sebastienrousseau/homebrew-tap`. | One PR on the tap repo. |
+| `release-distribute-scoop.yml` | `release.published`, dispatch | Hash `dot-VERSION.zip`, rewrite `pkg/scoop/dot.json` via jq (both 64bit + arm64 point at same zip), PR to `sebastienrousseau/scoop-bucket`. | One PR on the bucket repo. |
+| `release-distribute-aur.yml` | `release.published`, dispatch | Hash `dot-VERSION.tar.gz`, rewrite `pkgver` + `sha256sums` in `pkg/aur/PKGBUILD`, regenerate `.SRCINFO` via dockerised `makepkg`, push to `ssh://aur@aur.archlinux.org/dot-cli-git.git`. | One commit on AUR. |
 | `release-attestation-check.yml` | weekly cron + dispatch | Verify the latest release carries the full attestation bundle (SBOM + sig + cert + intoto + manifest + sig + cert). | Opens or comments on a tracking issue. |
 
 ## Event ownership and readiness
@@ -106,7 +106,7 @@ independently.
 - **AUR `pkgname=dot-cli-git`**: AUR's `-git` convention means
   "tracks git HEAD", but the workflow publishes tagged stable
   releases. Either rename to plain `dotfiles` in
-  `install/aur/PKGBUILD` and register that package, or accept the
+  `pkg/aur/PKGBUILD` and register that package, or accept the
   misnomer. Documented in the v0.2.503 PR (#895).
 - **Signed-Releases retroactive**: the unified manifest landed in
   v0.2.503. Releases v0.2.500-502 carry the SBOM bundle only.

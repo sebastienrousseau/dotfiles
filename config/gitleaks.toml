@@ -12,7 +12,14 @@ title = "Dotfiles Gitleaks Configuration"
 # Use the default gitleaks config as a base
 useDefault = true
 
-# Allowlist patterns that are known false positives
+# Allowlist patterns that are known false positives.
+#
+# NOTE: keep this as the SINGULAR `[allowlist]` table. The `[[allowlists]]`
+# array form is newer: gitleaks 8.24.3 (pinned by gitleaks-action in CI)
+# silently IGNORES it — the allowlist has no effect and the scan fails —
+# while gitleaks >= 8.30 refuses to load a config that mixes both forms.
+# The singular table is the only spelling both versions honour, so every
+# entry belongs in this one table until the CI pin moves.
 [allowlist]
 description = "Allowlisted patterns for documentation examples"
 
@@ -31,6 +38,26 @@ regexes = [
 
     # GPG public key fingerprints used for signature verification (not secrets)
     '''CHEZMOI_GPG_KEY=''',
+
+    # The SSH signing key's PUBLIC fingerprint, quoted in KEYS.asc and
+    # pkg/VERIFY.md where the docs show the expected `git tag -v` output
+    # so a reader can compare what they get against what they should get.
+    #
+    # A fingerprint is a hash of a public key, published on purpose —
+    # GitHub serves the same key from
+    # /users/sebastienrousseau/ssh_signing_keys. It authenticates nobody.
+    # gitleaks' generic-api-key rule matches it only because the base64
+    # entropy is 4.8 and the word "key" sits next to it.
+    #
+    # Deliberately the exact value, not a `SHA256:[A-Za-z0-9+/]{43}` shape:
+    # entries here are matched against the captured secret, which is the
+    # bare base64 run WITHOUT the `SHA256:` prefix, so a shape-based
+    # pattern would permit any 43-character base64 string — the shape of
+    # plenty of real credentials. Pinning the value keeps the exception to
+    # this one published artefact, and means rotating the signing key
+    # correctly re-triggers review here.
+    '''f6FG\+guRNtT3R36oQFS4oWCx1d10nm\+BoaIL3Tkh1r4''',
+
 ]
 
 # Paths to ignore (documentation files with examples)

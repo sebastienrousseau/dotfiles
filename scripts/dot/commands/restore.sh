@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # dot restore - Restore dotfiles from backup or previous state
 # Usage: dot restore [--list|-l|--latest|-L|<backup-id>]

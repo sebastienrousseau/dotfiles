@@ -574,8 +574,8 @@ jobs:
 
       - name: Performance benchmark
         run: |
-          chmod +x tests/performance/*.sh 2>/dev/null || true
-          ./tests/performance/benchmark_runner.sh 2>/dev/null || true
+          chmod +x benches/*.sh 2>/dev/null || true
+          ./benches/benchmark_runner.sh 2>/dev/null || true
 
       - name: Shell startup benchmark with regression tracking
         id: benchmark

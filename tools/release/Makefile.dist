@@ -1,17 +1,56 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Makefile shipped inside the dot-<version>.tar.gz release archive.
+# Same install contract as the repository GNUmakefile, but the man page
+# and completions are already generated into share/ by the release
+# build, so there is nothing to build here — only place files.
+#
+#   make install [PREFIX=/usr] [DESTDIR=/tmp/stage]
+#   make uninstall
+#   make smoke        # run the staged CLI in place, no install
+
 PREFIX ?= /usr/local
 DESTDIR ?=
+BINDIR ?= $(PREFIX)/bin
+DATADIR ?= $(PREFIX)/share
+MANDIR ?= $(DATADIR)/man
+DOCDIR ?= $(DATADIR)/doc/dotfiles
 LIBEXECDIR ?= $(PREFIX)/lib/dotfiles
+BASHCOMPDIR ?= $(DATADIR)/bash-completion/completions
+ZSHCOMPDIR ?= $(DATADIR)/zsh/site-functions
+FISHCOMPDIR ?= $(DATADIR)/fish/vendor_completions.d
+INSTALL ?= install
+INSTALL_DATA ?= $(INSTALL) -m 0644
+# Relative symlink target from $(BINDIR) to $(LIBEXECDIR)/bin/dot. Relative
+# so a DESTDIR-staged tree is executable in place (packagers and the
+# release smoke test rely on that). Override when BINDIR/LIBEXECDIR are
+# not siblings under $(PREFIX); install fails loudly if it does not resolve.
+DOT_LINK ?= ../lib/dotfiles/bin/dot
 
-.PHONY: install uninstall smoke
+.PHONY: all install uninstall smoke
+
+all: smoke
 
 install:
-	install -d "$(DESTDIR)$(LIBEXECDIR)" "$(DESTDIR)$(PREFIX)/bin"
+	$(INSTALL) -d "$(DESTDIR)$(LIBEXECDIR)" "$(DESTDIR)$(BINDIR)" "$(DESTDIR)$(MANDIR)/man1" \
+	  "$(DESTDIR)$(DOCDIR)" "$(DESTDIR)$(BASHCOMPDIR)" "$(DESTDIR)$(ZSHCOMPDIR)" "$(DESTDIR)$(FISHCOMPDIR)"
 	cp -R bin lib scripts security docs defaults share "$(DESTDIR)$(LIBEXECDIR)/"
-	ln -sfn "../lib/dotfiles/bin/dot" "$(DESTDIR)$(PREFIX)/bin/dot"
+	ln -sfn "$(DOT_LINK)" "$(DESTDIR)$(BINDIR)/dot"
+	@test -x "$(DESTDIR)$(BINDIR)/dot" || { echo "error: $(DESTDIR)$(BINDIR)/dot -> $(DOT_LINK) does not resolve; set DOT_LINK" >&2; exit 1; }
+	$(INSTALL_DATA) share/man/man1/dot.1 "$(DESTDIR)$(MANDIR)/man1/dot.1"
+	$(INSTALL_DATA) share/bash-completion/completions/dot "$(DESTDIR)$(BASHCOMPDIR)/dot"
+	$(INSTALL_DATA) share/zsh/site-functions/_dot "$(DESTDIR)$(ZSHCOMPDIR)/_dot"
+	$(INSTALL_DATA) share/fish/vendor_completions.d/dot.fish "$(DESTDIR)$(FISHCOMPDIR)/dot.fish"
+	@for f in LICENSE-APACHE LICENSE-MIT README.md CHANGELOG.md; do \
+	  [ -f "$$f" ] && $(INSTALL_DATA) "$$f" "$(DESTDIR)$(DOCDIR)/$$f" || true; \
+	done
 
 uninstall:
-	rm -f "$(DESTDIR)$(PREFIX)/bin/dot"
-	rm -rf "$(DESTDIR)$(LIBEXECDIR)"
+	rm -f "$(DESTDIR)$(BINDIR)/dot"
+	rm -f "$(DESTDIR)$(MANDIR)/man1/dot.1"
+	rm -f "$(DESTDIR)$(BASHCOMPDIR)/dot" "$(DESTDIR)$(ZSHCOMPDIR)/_dot" "$(DESTDIR)$(FISHCOMPDIR)/dot.fish"
+	rm -rf "$(DESTDIR)$(DOCDIR)" "$(DESTDIR)$(LIBEXECDIR)"
 
 smoke:
 	CHEZMOI_SOURCE_DIR="$(CURDIR)" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 ./bin/dot version

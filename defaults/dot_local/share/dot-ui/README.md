@@ -55,7 +55,7 @@ matcher and key handling, the table row splitter, the stdin item reader
 and the `pick` flag parser. Every `go test` run replays the seed corpus
 plus the committed crashers under `testdata/fuzz/<Target>/`, so a fixed
 bug cannot silently return. The ClusterFuzzLite / OSS-Fuzz build in
-`oss-fuzz-integration/` compiles the same targets with libFuzzer.
+`fuzz/oss-fuzz/` compiles the same targets with libFuzzer.
 
 ```bash
 go test -run '^$' -fuzz=FuzzParseEvent    -fuzztime=30s ./...   # NDJSON line decoder

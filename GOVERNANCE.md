@@ -49,5 +49,7 @@ prerequisite for review.
 
 Should the primary maintainer become unavailable, the project can be continued
 by any contributor with: the documented ADRs, the enforced CI gates, and the
-declarative configuration. Forking and continuing under the MIT
-[`LICENSE`](LICENSE) is explicitly permitted and supported.
+declarative configuration. Forking and continuing under either
+[`LICENSE-APACHE`](LICENSE-APACHE) or [`LICENSE-MIT`](LICENSE-MIT) —
+the project is dual-licensed `Apache-2.0 OR MIT` — is explicitly
+permitted and supported.
