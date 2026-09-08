@@ -289,7 +289,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot theme` | (default) | `test_fm_theme` | `run:theme` | `examples/example-dot-appearance.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot theme` | list | `test_fm_theme_list` | `run:theme-list` | `examples/example-dot-appearance.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot theme` | current | `test_fm_theme_current` | `run:theme-current` | `examples/example-dot-appearance.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot theme` | set (no name, exit 1) | `test_fm_theme_set_missing` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot theme` | set with no name: reports a diagnostic and leaves the theme unchanged | `test_fm_theme_set_missing` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot theme` | set <name> / light / dark | `test_fm_smoke_theme_set` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — switches the OS appearance and rewrites terminal configs (osascript / gsettings) |
 | `dot theme` | toggle | `test_fm_smoke_theme_toggle` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — switches the OS appearance (system mutation) |
 | `dot theme` | sync | `test_fm_smoke_theme_sync` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — rewrites terminal configs to follow the OS appearance (system mutation) |
