@@ -967,8 +967,6 @@ func windowRows(rows []string, cursor, h int) []string {
 	return rows[start : start+h]
 }
 
-// renderTranscript returns exactly h lines (padded at the top) so the input
-// box pins to the bottom of the chat panel — a proper chat feel.
 // logoArt is the "dot ai" wordmark (half-block font), rendered with a
 // violet→mauve→pink gradient in the splash.
 var logoArt = []string{
@@ -1013,6 +1011,18 @@ func (m model) splash(w, h int) string {
 	return strings.Join(b, "\n")
 }
 
+// renderTranscript renders the chat panel body at exactly max(h, 1) physical
+// rows, padded at the top so the input box pins to the bottom — a proper chat
+// feel. View sizes the surrounding panel from the same h, so returning any
+// other number of rows overflows the panel and pushes the input box and
+// footer off the frame.
+//
+// That row count is a hard contract on every path and for every transcript,
+// including content the cockpit did not author: /resume replays session.json
+// from disk, whose Who and Text fields are arbitrary. A non-positive h is a
+// nonsensical request rather than an error, and is answered with one row.
+//
+// FuzzRenderTranscript asserts the contract directly.
 func (m model) renderTranscript(w, h int) string {
 	if h < 1 {
 		h = 1
@@ -1075,6 +1085,22 @@ func (m model) renderTranscript(w, h int) string {
 			}
 		}
 	}
+	// One slice element must be one physical row before the height clamp
+	// below can mean anything. The fenced-code branch appends `tag + <body
+	// line>` and only ever splits the body, but `tag` embeds the line's
+	// author — and the author is not always ours: /resume replays
+	// session.json from disk, whose Who field is arbitrary. A newline in
+	// there used to smuggle extra rows past the clamp and push the input
+	// box out of the fixed-height chat panel. Flatten first, so the "exactly
+	// h rows" contract holds no matter which branch produced the row.
+	// Regression corpus: testdata/fuzz/FuzzRenderTranscript.
+	if anyMultiline(lines) {
+		flat := make([]string, 0, len(lines)+1)
+		for _, ln := range lines {
+			flat = append(flat, strings.Split(ln, "\n")...)
+		}
+		lines = flat
+	}
 	// Keep the tail; pad the top so content sits at the bottom.
 	if len(lines) > h {
 		lines = lines[len(lines)-h:]
@@ -1083,6 +1109,18 @@ func (m model) renderTranscript(w, h int) string {
 		lines = append([]string{""}, lines...)
 	}
 	return strings.Join(lines, "\n")
+}
+
+// anyMultiline reports whether any element spans more than one row. It keeps
+// the common case allocation-free: only a transcript that actually carries an
+// embedded newline pays for the re-split.
+func anyMultiline(lines []string) bool {
+	for _, ln := range lines {
+		if strings.Contains(ln, "\n") {
+			return true
+		}
+	}
+	return false
 }
 
 // renderSnapshot prints one frame at a fixed size — for previews and
