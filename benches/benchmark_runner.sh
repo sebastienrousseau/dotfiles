@@ -8,7 +8,7 @@ set -euo pipefail
 # Measures execution time and memory usage per shell with baseline tracking
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Results storage for regression tracking
 RESULTS_DIR="${RESULTS_DIR:-$HOME/.local/share/dotfiles/benchmarks}"

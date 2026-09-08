@@ -7,7 +7,8 @@ skip = .git,node_modules,*.lock,*.sum,mise.lock,requirements-docs.txt,.secrets.b
 #   ans      Ansible/answers fixtures   nd      Neovim leader-key binding
 #   fpr/FPR  GPG fingerprint field      Hashi   HashiCorp
 #   noice    noice.nvim plugin          intoto  in-toto attestation format
-#   trough   GTK scrollbar widget part  crasher fuzzing term for a crash input
+#   trough   GTK scrollbar widget part  crasher/crashers  fuzzing term for a
+#                                              crash-triggering input
 #   wth      appears inside config/typos.toml's own rules
-ignore-words-list = als,ans,crasher,fpr,hashi,intoto,nd,noice,oll,trough,wth
+ignore-words-list = als,ans,crasher,crashers,fpr,hashi,intoto,nd,noice,oll,trough,wth
 quiet-level = 2

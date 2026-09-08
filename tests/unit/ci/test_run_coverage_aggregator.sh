@@ -227,7 +227,10 @@ FIXTURES="funcs cases subst contin terminators plain captured"
 # Driver: runs every fixture so that all of their statements execute.
 {
   echo '#!/usr/bin/env bash'
+  # REUSE-IgnoreStart -- fixture content written to a generated file,
+  # not a licence declaration for this test script.
   echo '# SPDX-License-Identifier: MIT'
+  # REUSE-IgnoreEnd
   echo 'SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../src" && pwd)"'
   for name in $FIXTURES; do
     if [[ "$name" == "captured" ]]; then
