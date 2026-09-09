@@ -234,16 +234,14 @@ test_fm_tools() {
 }
 
 test_fm_tools_docs() {
-  # KNOWN BUG (reported, not fixed here — scripts/dot/commands is shared):
-  # cmd_tools looks for <src>/docs/TOOLS.md and <src>/docs/UTILS.md, but both
-  # live under docs/reference/, so `dot tools docs` reports "TOOLS.md not
-  # found" on a complete checkout. The assertion pins that the subcommand is
-  # routed and names the document either way.
+  # cmd_tools used to look only in <src>/docs/; both documents live under
+  # docs/reference/, so `dot tools docs` reported "TOOLS.md not found" on a
+  # complete checkout. The reference location is probed first now.
   test_start "fm_tools_docs"
   fm_run tools docs
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_tools_docs_names_the_document"
-  fm_expect_any "TOOLS.md" "Tools"
+  fm_expect_out "Integrated tools organized by role"
 }
 
 test_fm_smoke_tools_install() { fm_smoke tools; }

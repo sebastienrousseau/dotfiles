@@ -607,7 +607,6 @@ accommodated. None is fixed here — `bin/dot`'s command modules and
 
 | Severity | Where | What |
 |----------|-------|------|
-| Medium | `scripts/dot/commands/tools.sh` | `dot tools docs` looks for `docs/TOOLS.md` / `docs/UTILS.md`; both live under `docs/reference/`, so the subcommand reports "TOOLS.md not found" on a complete checkout. |
 | Low | `scripts/dot/commands/meta.sh` | A bare `dot keys` falls back to `scripts/diagnostics/keys.sh`, which does not exist, when `docs/KEYS.md` is absent — and `docs/KEYS.md` is not in the tree. |
 | Low | `scripts/lib/secrets_provider.sh` | The `plain-enc` store aborts with `tmp_rec: unbound variable` under `set -u` *after* writing the encrypted file, so `dot secrets set` exits non-zero on a write that in fact succeeded. |
 | Note | `scripts/dot/commands/env-emit.sh` | The `-h\|--help` arm of `dot_env_emit` is unreachable through the CLI: the dispatcher's universal `--help` intercept fires first and renders `dot help env`. Working as designed, but the sub-handler's usage text can only be read in the source. |
