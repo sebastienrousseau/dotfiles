@@ -17,7 +17,8 @@
 // Subcommands:
 //
 //	serve      run the stdio MCP server (the card's transport)
-//	tools      print the tool manifest as JSON (for `dot mcp doctor` and CI)
+//	tools      print the tool/resource manifest as JSON, without speaking
+//	           the protocol (inspection, scripts, and CI)
 //	--version  print the version and exit
 package main
 

@@ -70,8 +70,9 @@ no traversal surface. `MCP_POLICY_CONFIG`, `MCP_REGISTRY_CONFIG` and
 `AGENT_PROFILE_CONFIG` are honoured, as they are by the bash commands.
 
 `dot-mcp tools` prints the tool and resource manifest as JSON without
-speaking the protocol — that is how the published card is checked against
-the running registry (`TestServerCardMatchesRegistry`).
+speaking the protocol, for inspecting or diffing what is served.
+`TestServerCardMatchesRegistry` asserts the same registry against the
+published card, in both directions.
 
 See [FEATURES.md](FEATURES.md) for the full feature → test matrix.
 

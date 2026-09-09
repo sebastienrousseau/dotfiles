@@ -391,10 +391,9 @@ func decodeParams(raw json.RawMessage, dst any) *rpcError {
 	return nil
 }
 
-// WriteToolManifest prints the tool and resource manifest as a JSON document.
-// It is what `dot mcp doctor` and the card-drift test read, so the published
-// card can be checked against the running server without speaking the
-// protocol.
+// WriteToolManifest prints the tool and resource manifest as a JSON document,
+// so what the server serves can be inspected — or diffed against the published
+// card — without speaking the protocol.
 func (s *Server) WriteToolManifest(w io.Writer) error {
 	tools := make([]toolDescriptor, 0, len(s.tools))
 	for _, t := range s.tools {
