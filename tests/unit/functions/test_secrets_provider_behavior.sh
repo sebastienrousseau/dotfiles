@@ -167,6 +167,77 @@ dot_secrets_get "some-key" 2>/dev/null
 # rc=3 (provider returned empty). "No provider configured" is rc=2.
 assert_equals "2" "$?" "dot_secrets_get with no provider should return exit code 2 (rc=1 was the pre-N6 behavior)"
 
+# ──────────────────────────────────────────────────────────────────────────────
+# 12. plain-enc: a successful write must report success
+#
+# Regression: dot_secrets_store_plain_enc set `trap 'rm -f "$tmp_rec"' RETURN`
+# on a variable local to itself. A RETURN trap set inside a function fires
+# again when its CALLER returns — dot_secrets_set — by which point tmp_rec is
+# out of scope, so under `set -u` the whole call aborted with
+# "tmp_rec: unbound variable" AFTER the encrypted file had been written.
+# `dot secrets set` exited non-zero on a write that had in fact succeeded, and
+# the key never reached the index because index_add came after the store.
+#
+# Run in a child shell with `set -euo pipefail` — this file runs with `set +e`,
+# which is exactly the condition that hides the bug.
+# ──────────────────────────────────────────────────────────────────────────────
+test_start "secrets_set_plain_enc_reports_a_successful_write"
+_PLAIN_TMP="$(portable_mktemp_dir)"
+mkdir -p "$_PLAIN_TMP/bin"
+cat >"$_PLAIN_TMP/bin/age-keygen" <<'SHIM'
+#!/usr/bin/env bash
+[[ "${1:-}" == "-y" ]] && printf 'age1testrecipient\n'
+exit 0
+SHIM
+cat >"$_PLAIN_TMP/bin/age" <<'SHIM'
+#!/usr/bin/env bash
+out=""
+while (($#)); do
+  case "$1" in
+    -o)
+      out="$2"
+      shift 2
+      ;;
+    *) shift ;;
+  esac
+done
+if [[ -n "$out" ]]; then
+  cat >"$out"
+else
+  cat >/dev/null
+fi
+exit 0
+SHIM
+chmod +x "$_PLAIN_TMP/bin/age-keygen" "$_PLAIN_TMP/bin/age"
+printf 'AGE-SECRET-KEY-TEST\n' >"$_PLAIN_TMP/key.txt"
+
+mkdir -p "$_PLAIN_TMP/tmp"
+_plain_out="$(
+  PATH="$_PLAIN_TMP/bin:$PATH" \
+    TMPDIR="$_PLAIN_TMP/tmp" \
+    DOTFILES_SECRETS_PROVIDER=plain-enc \
+    DOT_SECRETS_HOME="$_PLAIN_TMP/secrets" \
+    DOT_SECRETS_STORE_DIR="$_PLAIN_TMP/secrets/store" \
+    DOT_SECRETS_INDEX_FILE="$_PLAIN_TMP/secrets/index.txt" \
+    DOT_SECRETS_AGE_KEY="$_PLAIN_TMP/key.txt" \
+    bash -c 'set -euo pipefail; source "$1"; dot_secrets_set PLAIN_KEY plain-value' \
+    _ "$SECRETS_FILE" 2>&1
+)"
+_plain_rc=$?
+assert_equals "0" "$_plain_rc" "a successful plain-enc write must exit 0"
+assert_output_not_contains "unbound variable" "printf '%s' \"\$_plain_out\""
+assert_file_exists "$_PLAIN_TMP/secrets/store/PLAIN_KEY.age" "the encrypted file is written"
+assert_file_contains "$_PLAIN_TMP/secrets/index.txt" "PLAIN_KEY" \
+  "the key reaches the index, which only happens if the store call returned"
+
+test_start "secrets_set_plain_enc_leaves_no_recipient_file_behind"
+# The recipient file the store writes is a temporary; dropping the RETURN
+# trap must not mean dropping the cleanup. TMPDIR was private to the child,
+# so anything left there is ours.
+_leftover="$(find "$_PLAIN_TMP/tmp" -type f 2>/dev/null | wc -l | tr -d ' ')"
+assert_equals "0" "$_leftover" "the temporary recipient file is removed"
+rm -rf "$_PLAIN_TMP"
+
 # Cleanup
 rm -rf "$_TMP_SECRETS"
 mock_cleanup
