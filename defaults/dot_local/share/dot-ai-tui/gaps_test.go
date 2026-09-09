@@ -12,6 +12,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 // TestMainErrorExit covers main's failure path through the exit seam: a run
@@ -314,5 +316,73 @@ func TestSplashClampsNegativeHeight(t *testing.T) {
 		if got != want {
 			t.Errorf("splash(40,%d) rendered %d lines, want %d", h, got, want)
 		}
+	}
+}
+
+// TestRenderTranscriptRowContract pins renderTranscript's core contract: it
+// returns exactly max(h,1) physical rows, whatever the transcript holds.
+//
+// The fenced-code branch appends `tag + <body line>` without re-splitting,
+// and `tag` embeds the line's author. An author containing a newline
+// therefore smuggled an extra row past the height clamp, overflowing the
+// fixed-height chat panel and pushing the input box out of its box. The
+// author is not always ours to trust: /resume replays session.json from
+// disk, whose Who field is arbitrary (see TestResumedSessionCannotOverflow).
+//
+// Found by FuzzRenderTranscript; corpus:
+// testdata/fuzz/FuzzRenderTranscript/82dca60e6d4f443a.
+func TestRenderTranscriptRowContract(t *testing.T) {
+	rows := func(s string) int { return strings.Count(s, "\n") + 1 }
+	cases := []struct {
+		name      string
+		who, text string
+		w, h      int
+	}{
+		{"newline author, fenced body", "\n", "```", 30, -5},
+		{"newline author, fenced body, tall", "\n", "```", 30, 6},
+		{"multi-newline author", "\n\n\n", "```go\nx\n```", 30, 3},
+		{"newline author, plain body", "\n", "hello", 30, 2},
+		{"carriage-return author", "a\nb", "```\ncode\n```", 40, 4},
+		{"newline in body only", "claude", "```\na\nb\nc\n```", 40, 2},
+		{"author is a lone fence", "```", "```", 20, 1},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			m := sized()
+			m.transcript = []line{{who: c.who, text: c.text}}
+			out := m.renderTranscript(c.w, c.h)
+			if got, want := rows(out), max(c.h, 1); got != want {
+				t.Fatalf("renderTranscript(w=%d,h=%d) → %d rows, want %d\n%q",
+					c.w, c.h, got, want, out)
+			}
+		})
+	}
+}
+
+// TestResumedSessionCannotOverflow is the end-to-end reachability proof: a
+// session file on disk carries an arbitrary Who, /resume replays it, and the
+// rendered frame must still fit the terminal it was sized for.
+func TestResumedSessionCannotOverflow(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("XDG_STATE_HOME", dir)
+	p := filepath.Join(dir, "dot-ai-tui", "session.json")
+	if err := os.MkdirAll(filepath.Dir(p), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	body := `[{"Who":"\n\n\n\n\n\n\n\n","Text":"` + "```" + `"}]`
+	if err := os.WriteFile(p, []byte(body), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	m := newModel()
+	m = upd(m, tea.WindowSizeMsg{Width: 100, Height: 30})
+	m = upd(m, refreshMsg{tools: fleet, costToday: "$0.00"})
+	mm, _ := m.handleSlash("/resume")
+	m = mm.(model)
+	if len(m.transcript) == 0 {
+		t.Fatal("session did not load")
+	}
+	if got := strings.Count(m.View(), "\n") + 1; got > 30 {
+		t.Fatalf("resumed session overflowed the 30-row terminal: %d rows", got)
 	}
 }

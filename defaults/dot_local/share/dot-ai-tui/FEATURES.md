@@ -100,6 +100,8 @@ Keep the last column a list of backticked function names.
 | view | Splash (wordmark, pitch, quick keys) with up to 3 recent runs when the chat is empty | View | `TestSplash` `BenchmarkSplash` `BenchmarkRenderTranscriptSplash` |
 | view | Splash survives a panel too short for the recent block | tiny terminal + palette | `TestRenderTranscriptTinyHeightWithRecent` `FuzzRenderTranscript` |
 | view | Splash clamps a zero or negative height | tiny terminal | `TestSplashClampsNegativeHeight` |
+| view | Transcript returns exactly `max(h,1)` physical rows whatever the author or body contains | any transcript | `TestRenderTranscriptRowContract` `FuzzRenderTranscript` |
+| view | A resumed session cannot overflow the terminal it was sized for | `/resume` of an arbitrary session.json | `TestResumedSessionCannotOverflow` |
 | view | Transcript pinned to the bottom, exactly `h` lines, wrapped prose | View | `TestCoverageGaps2` `TestCoverageGaps4` `TestCoverageGaps5` `TestCoverageGaps6` `BenchmarkRenderTranscript` |
 | view | Fenced code syntax-highlighted with chroma; prose untouched | View | `TestHighlightCode` `TestHighlightFallback` `FuzzHighlight` `BenchmarkHighlight` `BenchmarkHighlightProse` |
 | view | Fence language tags validated and memoised (no render stall on hostile tags) | View | `TestResolveLang` `TestHighlightHugeLangTag` `BenchmarkResolveLang` |

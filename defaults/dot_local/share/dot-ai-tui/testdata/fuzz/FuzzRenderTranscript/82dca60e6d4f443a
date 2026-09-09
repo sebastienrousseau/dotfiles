@@ -1,0 +1,6 @@
+go test fuzz v1
+string("\n")
+string("```")
+int(30)
+int(-37)
+int(-96)
