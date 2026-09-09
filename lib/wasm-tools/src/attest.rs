@@ -564,7 +564,7 @@ mod tests {
     }
 
     #[test]
-    fn freshness_rejects_unparseable_and_ill_typed_stamps() {
+    fn freshness_rejects_unparsable_and_ill_typed_stamps() {
         let bad = with(GOOD, GENERATED_AT, "yesterday");
         assert_eq!(
             detail_of(&verify(&bad), GENERATED_AT),
