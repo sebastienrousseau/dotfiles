@@ -193,9 +193,17 @@ cmd_agents() {
 -->
 
 HEADER
-        # Replace the title line so the rendered file declares its
-        # purpose, but pass everything else through unchanged.
-        _agents_body "$claude_md" | sed '1s/^# CLAUDE\.md.*/# AGENTS.md — AI Assistant Guidelines/'
+        # The title is emitted, not substituted. This used to be
+        #
+        #     _agents_body … | sed '1s/^# CLAUDE\.md.*/# AGENTS.md — …/'
+        #
+        # but _agents_body drops the H1 by design (the two files differ
+        # there), so line 1 of its output was never the CLAUDE.md title and
+        # the substitution could not fire: the rendered file carried no title
+        # at all. `check` is unaffected either way — it compares bodies with
+        # the H1 stripped from both sides.
+        printf '# AGENTS.md — AI Assistant Guidelines\n'
+        _agents_body "$claude_md"
         cat <<'FOOTER'
 
 ---

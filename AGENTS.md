@@ -11,6 +11,7 @@
   first; do not hand-edit AGENTS.md.
 -->
 
+# AGENTS.md — AI Assistant Guidelines
 
 ## Project Overview
 
