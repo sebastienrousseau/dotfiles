@@ -40,17 +40,31 @@ uk_run() {
 }
 
 # ── 1. uuid without uuidgen ────────────────────────────────────────────────
-# The fallback is `od -x /dev/urandom | head -1 | awk …`. head closes the
-# pipe after one line, od dies of SIGPIPE, and `set -o pipefail` turns that
-# into the script's status — so on a host with neither uuidgen nor
-# /proc/sys/kernel/random/uuid this path fails instead of producing an id.
-# Asserted as it behaves: a loud failure is the safe outcome here, and a
-# half-formed identifier would be the dangerous one.
-test_start "uuid_fallback_fails_loudly_rather_than_emitting_a_partial_id"
-uk_run executable_uuid
-assert_not_equals "0" "$UK_RC" \
-  "the urandom fallback must not report success it did not achieve"
-assert_empty "$UK_OUT" "and must not print a half-formed identifier"
+# With uuidgen stubbed away, `uuid` tries the kernel source first and only
+# then the `od -x /dev/urandom | head -1 | awk …` fallback. Which branch runs
+# is decided by the host, so assert the behaviour of the branch this host
+# actually takes rather than assuming one of them:
+#
+#   Linux    /proc/sys/kernel/random/uuid exists, so a real id is produced.
+#   macOS    neither source exists, so the fallback runs — and there `head`
+#            closes the pipe, `od` dies of SIGPIPE, and `set -o pipefail`
+#            turns that into the script's status.
+#
+# The invariant that holds on both is the one that matters: `uuid` never
+# reports success while printing a half-formed identifier.
+if [[ -r /proc/sys/kernel/random/uuid ]]; then
+  test_start "uuid_uses_the_kernel_source_when_uuidgen_is_absent"
+  uk_run executable_uuid
+  assert_equals "0" "$UK_RC" "the kernel source should produce an id"
+  assert_true "[[ \"\$UK_OUT\" =~ ^[0-9a-fA-F-]{36}$ ]]" \
+    "and it should be a well-formed uuid"
+else
+  test_start "uuid_fallback_fails_loudly_rather_than_emitting_a_partial_id"
+  uk_run executable_uuid
+  assert_not_equals "0" "$UK_RC" \
+    "the urandom fallback must not report success it did not achieve"
+  assert_empty "$UK_OUT" "and must not print a half-formed identifier"
+fi
 
 # ── 2. kill-port walks its lookup tools ────────────────────────────────────
 #
