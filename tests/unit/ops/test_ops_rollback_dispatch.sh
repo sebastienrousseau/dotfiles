@@ -345,7 +345,11 @@ _rb_shim flock <<'EOF'
 exit 1
 EOF
 _run_rb status
-_rb_expect "flock_held_by_another_instance_exits_0" 0 "Already running" "NOT:Dotfiles Rollback Status"
+# Regression: this arm used to `exit 0`, which made "another instance holds
+# the lock, so I did nothing" indistinguishable from "the rollback ran and
+# succeeded" to any caller or CI step. 75 is EX_TEMPFAIL — nothing is wrong,
+# try again — and is distinct from 1, which means the rollback ran and failed.
+_rb_expect "flock_held_by_another_instance_reports_busy" 75 "Already running" "NOT:Dotfiles Rollback Status"
 
 # =======================================================================
 # 9. ~/.dotfiles resolution fallbacks: readlink-only, then neither tool.

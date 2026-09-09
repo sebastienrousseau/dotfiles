@@ -35,6 +35,11 @@ BACKUP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/backups"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
 ROLLBACK_LOG="$STATE_DIR/rollback.log"
 MAX_BACKUPS=10
+# sysexits.h EX_TEMPFAIL: the command did nothing because another instance
+# holds the lock. Distinct from 1 (the rollback ran and failed) and from 0
+# (the rollback ran and succeeded) — a caller has to be able to tell those
+# three apart.
+EXIT_BUSY=75
 
 # Logging — delegates to shared ui.sh primitives
 ui_init
@@ -525,8 +530,12 @@ main() {
   if command -v flock >/dev/null 2>&1; then
     exec 9>"$LOCK_FILE"
     if ! flock -n 9; then
+      # Losing the lock means this invocation did nothing. Exiting 0 made
+      # "did nothing" indistinguishable from "rolled back" to any caller or
+      # CI step, which is the one thing a recovery tool must never be
+      # ambiguous about. 75 is EX_TEMPFAIL: nothing is wrong, try again.
       ui_warn "Already running" "Another rollback instance is active"
-      exit 0
+      exit "$EXIT_BUSY"
     fi
   fi
 
