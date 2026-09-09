@@ -71,42 +71,28 @@ test_fm_theme_current() {
 test_fm_theme_set_missing() {
   # `dot theme set` with no name must not quietly apply a theme.
   #
-  # This row deliberately does NOT assert an exit code, because the exit code
-  # is not a property of the command here — it is a property of the bash
-  # running it. scripts/theme/switch.sh installs `trap cleanup EXIT`, and when
-  # the script aborts under `set -u` the trap's own (successful) last command
-  # replaces the failure status on bash 3.2 but not on bash 5.x:
+  # History: this row used to avoid asserting an exit code, because the code
+  # was a property of the bash running the command rather than of the command.
+  # `set_theme "$1"` aborted on the unset positional under `set -u`, and a
+  # script that dies that way with an EXIT trap installed — switch.sh installs
+  # `trap cleanup EXIT` — exits 0 on bash 3.2 (macOS /bin/bash) and 1 on 5.x.
+  # No handler can recover it: `$?` is already 0 when the handler runs.
   #
-  #     bash 3.2  (macOS runners, /bin/bash)   rc=0
-  #     bash 5.x  (Linux runners)              rc=1
-  #
-  # Measured directly, and with the trap removed both return 1. An earlier
-  # version of this row asserted "must not exit 0" and so passed on Linux and
-  # failed on macOS while the command behaved identically on both — a test of
-  # the runner, not of the CLI.
-  #
-  # Two product findings reported separately, neither fixed here:
-  #   * `dot help theme` documents "interactive picker if omitted", but
-  #     `set_theme "$1"` dies on the unset positional before pick_theme is
-  #     ever reached. `"${1:-}"` would restore the documented behaviour.
-  #   * More seriously, that EXIT trap masks the exit status of ANY failure in
-  #     switch.sh on bash 3.2, so on macOS the script reports success however
-  #     it fails.
-  #
-  # What is contractual on both platforms, and what this row pins: the command
-  # says something rather than failing mute, and it does not change the
-  # configured theme.
+  # Both halves are fixed. `set_theme "${1:-}"` reaches the picker `dot help
+  # theme` documents, so the abort — the only status-losing path on 3.2 — is
+  # gone, and under DOTFILES_NONINTERACTIVE (which the sandbox exports, and
+  # where no picker can run) the command refuses with a usage message and
+  # rc=1 on every shell. tests/unit/theme/test_theme_switch_dispatch.sh pins
+  # the picker path and the bash-3.2 status directly.
   local data="$REPO_ROOT/defaults/.chezmoidata.toml"
   local before
   before="$(sed -n 's/^theme = "\(.*\)"/\1/p' "$data" | head -1)"
 
   test_start "fm_theme_set_missing"
   fm_run theme set
-  if [[ -n "$FM_OUT$FM_ERR" ]]; then
-    fm_pass "reported a diagnostic (rc=$FM_RC)"
-  else
-    fm_fail "theme set with no name produced no output at all"
-  fi
+  fm_expect_rc 1
+  test_start "fm_theme_set_missing_reports_usage"
+  fm_expect_any "dot theme set <name>" "Missing theme name"
 
   test_start "fm_theme_set_missing_does_not_apply_a_theme"
   local after
