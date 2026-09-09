@@ -301,23 +301,42 @@ cmd_fleet_namespace() {
       validate_name "$new_ns" "namespace"
       local data_file
       data_file="$(resolve_chezmoi_source_dir)/.chezmoidata.toml"
-      if grep -q "^namespace = " "$data_file" 2>/dev/null; then
-        # Atomic write: render into a tempfile + mv so concurrent
-        # `dot fleet namespace set` callers can't corrupt the TOML.
-        # Avoids `sed -i` portability dance (GNU `-i` vs BSD `-i ''`).
-        local _tmp
-        _tmp="$(mktemp "${data_file}.XXXXXX")" || die "Cannot create tempfile"
-        # Explicit if/else instead of A && B || C — the latter (SC2015)
-        # silently runs C when B itself fails, masking real mv errors.
+      [[ -f "$data_file" ]] || die ".chezmoidata.toml not found: $data_file"
+      # Atomic write: render into a tempfile + mv so concurrent
+      # `dot fleet namespace set` callers can't corrupt the TOML.
+      # Avoids `sed -i` portability dance (GNU `-i` vs BSD `-i ''`).
+      local _tmp _rendered=0
+      _tmp="$(mktemp "${data_file}.XXXXXX")" || die "Cannot create tempfile"
+      # Explicit if/else instead of A && B || C — the latter (SC2015)
+      # silently runs C when B itself fails, masking real mv errors.
+      if grep -q "^namespace = " "$data_file"; then
         if sed "s/^namespace = \".*\"/namespace = \"$new_ns\"/" "$data_file" >"$_tmp"; then
-          if ! mv "$_tmp" "$data_file"; then
-            rm -f "$_tmp"
-            die "Failed to commit namespace update"
-          fi
-        else
-          rm -f "$_tmp"
-          die "Failed to render namespace update"
+          _rendered=1
         fi
+      else
+        # No key yet — the shipped .chezmoidata.toml has none, and rewriting
+        # only when one already existed made `set` a silent no-op on a fresh
+        # checkout while still reporting success. Insert it after the first
+        # line: appending at the end would land the key inside whatever
+        # [table] the file happens to end with, which TOML reads as a
+        # different key entirely. `dot profile set` does the same for
+        # `profile`.
+        if awk -v ns="$new_ns" '
+          NR == 1 { print; printf "namespace = \"%s\"\n", ns; inserted = 1; next }
+          { print }
+          END { if (!inserted) printf "namespace = \"%s\"\n", ns }
+        ' "$data_file" >"$_tmp"; then
+          _rendered=1
+        fi
+      fi
+      if [[ "$_rendered" -eq 1 ]]; then
+        if ! mv "$_tmp" "$data_file"; then
+          rm -f "$_tmp"
+          die "Failed to commit namespace update"
+        fi
+      else
+        rm -f "$_tmp"
+        die "Failed to render namespace update"
       fi
       ui_ok "Namespace" "Set to '$new_ns'. Run 'dot sync' to apply."
       _fleet_emit_event "namespace_set" "ok" "namespace=$new_ns"

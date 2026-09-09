@@ -608,7 +608,6 @@ accommodated. None is fixed here — `bin/dot`'s command modules and
 | Severity | Where | What |
 |----------|-------|------|
 | High | `scripts/dot/commands/agent.sh` | `dot mode run`, `dot agent checkpoint replay` and `dot agent delegate` all discard the wrapped command's exit code. All three use `if ! "$@"; then exit_code=$?`, where `$?` is the status of the *negated* pipeline and so always `0`. `dot mode run plan false` exits 0; delegate reports `failed (exit 0)`. Fix: `"$@" \|\| exit_code=$?`. |
-| High | `scripts/dot/commands/fleet.sh` | `dot fleet namespace set` rewrites `.chezmoidata.toml` only when a `namespace` key already exists, but reports success either way. The shipped file has no such key, so on a fresh checkout the command is a silent no-op. `dot profile set` handles the same case correctly by appending the key. |
 | Medium | `scripts/dot/commands/registry.sh` | The registry index cache lives at one fixed path and is treated as fresh for six hours regardless of which URL produced it, so changing `DOTFILES_REGISTRY_URL` keeps serving the previous registry's index. |
 | Medium | `scripts/diagnostics/doctor-unified.sh` | `dot doctor --audit` routes to `scripts/ops/health-check.sh`, which is not in the tree; the flag dies with "Script not found". |
 | Medium | `scripts/dot/commands/tools.sh` | `dot tools docs` looks for `docs/TOOLS.md` / `docs/UTILS.md`; both live under `docs/reference/`, so the subcommand reports "TOOLS.md not found" on a complete checkout. |
