@@ -51,6 +51,15 @@
 	forceSignAnnotated = true
 {{- end }}
 
+# Add a `Signed-off-by` trailer to every commit (DCO). Deliberately outside
+# the signing-key block above: a sign-off is a statement about provenance,
+# not a cryptographic signature, so it applies whether or not a signing key
+# is configured. Repositories that gate on the DCO — this one included —
+# reject commits without it, and adding it after the fact means an amend
+# and a force-push.
+[format]
+	signOff = true
+
 [alias]
 	st = status -sb
 	d = diff
