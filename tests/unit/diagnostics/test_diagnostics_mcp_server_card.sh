@@ -62,6 +62,35 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: missing transport"
 fi
 
+# The card is a promise a client acts on: the transport it names must be the
+# command that actually starts the MCP server, and the module it names must
+# exist. The full tool/resource/capability equivalence is asserted by the Go
+# side (TestServerCardMatchesRegistry) which can enumerate the live registry.
+test_start "mcp_server_card_transport_starts_the_server"
+if [[ "$(jq -r '.transport.stdio.command + " " + (.transport.stdio.args | join(" "))' "$SERVER_CARD")" == "dot mcp serve" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}\u2713${NC} $CURRENT_TEST: transport is 'dot mcp serve'"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}\u2717${NC} $CURRENT_TEST: transport does not start the MCP server"
+fi
+
+test_start "mcp_server_card_names_its_implementation"
+CARD_MODULE="$(jq -r '.implementation.module // empty' "$SERVER_CARD")"
+assert_file_exists "$REPO_ROOT/$CARD_MODULE/go.mod" "card implementation.module should be a Go module"
+
+test_start "mcp_serve_subcommand_exists"
+assert_file_contains "$REPO_ROOT/scripts/dot/commands/meta.sh" "cmd_mcp_serve" "dot mcp serve should be implemented"
+
+test_start "mcp_server_card_declares_no_prompts"
+if [[ "$(jq -r '.capabilities.prompts' "$SERVER_CARD")" == "false" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}\u2713${NC} $CURRENT_TEST: prompts capability is false"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}\u2717${NC} $CURRENT_TEST: prompts is declared but no prompts/* handler exists"
+fi
+
 test_start "mcp_doctor_validates_server_card"
 assert_file_contains "$MCP_DOCTOR" "Server Card (SEP-1649)" "mcp-doctor should validate server card"
 

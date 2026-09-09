@@ -198,6 +198,7 @@ Every `dot` command's individually-enforced subcommands (see `dot help`).
 | `dot agent conformance` | Run the A2A conformance test suite |
 | `dot mcp doctor` | Run the MCP policy/supply-chain/config audit |
 | `dot mcp registry` | Show the configured MCP server registry |
+| `dot mcp serve` | Run the stdio MCP server (JSON-RPC 2.0 on stdin/stdout) |
 | `dot secrets edit` | Edit the encrypted secrets file (age) |
 | `dot secrets set` | Store a secret value under a key |
 | `dot secrets get` | Retrieve a secret value (--raw for plaintext) |

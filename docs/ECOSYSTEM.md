@@ -18,7 +18,7 @@ table — and the argument for why the family currently has one member.
 |---|---|---|
 | `dot` CLI | `bin/dot` + `scripts/dot/commands/` + `lib/dot/` | It is the product. Splitting it from the configuration it manages would create a version-skew problem between the CLI and the config schema it reads (`defaults/.chezmoidata.toml`). |
 | Configuration tree | `defaults/` (chezmoi source, rebased via `.chezmoiroot`) | Same reason, inverted: the config depends on the CLI's template data. |
-| **MCP governance surface** (not a server — see below) | `scripts/dot/commands/meta.sh` → `dot mcp`, discovery card at `.well-known/mcp/server-card.json` | See below. |
+| **MCP governance surface and server** | `scripts/dot/commands/meta.sh` → `dot mcp`, server in `defaults/dot_local/share/dot-mcp/` (Go), discovery card at `.well-known/mcp/server-card.json` | See below. |
 | **A2A agent card** | `.well-known/agent-card.json`, validated by `dot agent a2a-card --validate`, conformance suite via `dot agent conformance` | A static discovery document plus a subcommand. Nothing to host separately. |
 | AI fleet TUI | `defaults/dot_local/share/dot-ai-tui/` (Go) | Tested by `cockpit-test.yml`. Ships as part of the config tree; useless without it. |
 | `dot-ui` widgets | `defaults/dot_local/share/dot-ui/` (Go) | Tested by `dot-ui-test.yml`. Same reasoning. |
@@ -42,42 +42,56 @@ and is never edited by hand.
 
 ## The three satellites the checklist asks about
 
-### MCP — in-repo, and **not currently a server**
+### MCP — in-repo, and now a real server
 
-`dot mcp` exists today as `dot mcp doctor` and `dot mcp registry`. It
-is a **governance surface**: it validates MCP policy, audits the
-supply chain of the MCP servers *you* have configured, and prints the
-registry. It exposes no network listener, runs no daemon, and has no
-deployment target.
+`dot mcp` has two faces, both in-repo.
 
-It is **not an MCP server**, and the discovery card overstates this.
-`.well-known/mcp/server-card.json` declares a stdio transport of
-`dot mcp --strict --json` together with `capabilities.tools`,
+The **governance surface** is the older one: `dot mcp doctor` validates
+MCP policy and audits the supply chain of the MCP servers *you* have
+configured, and `dot mcp registry` prints the tracked registry.
+
+The **protocol surface** is `dot mcp serve`: a stdio MCP server speaking
+JSON-RPC 2.0 over newline-delimited frames on stdin/stdout. It
+implements `initialize`, `notifications/initialized`, `ping`,
+`tools/list`, `tools/call`, `resources/list`, `resources/read`,
+`resources/templates/list` and `logging/setLevel`, and shuts down
+cleanly on EOF. It is a third Go module,
+[`defaults/dot_local/share/dot-mcp`](../defaults/dot_local/share/dot-mcp/README.md),
+deployed to `~/.local/bin/dot-mcp` alongside `dot-ui` and `dot-ai-tui`.
+
+Four tools are served, all read-only, each a fixed `dot` argument vector
+run without a shell: `mcp-doctor`, `agent-mode`, `workstation-attestation`
+and `fleet-status`. Mutating paths (`dot mode set`, `dot attest --write`)
+are deliberately not exposed, so a client cannot change this workstation
+through the server. Five resources expose the MCP policy, the MCP
+registry, the agent profiles and both discovery cards.
+
+`.well-known/mcp/server-card.json` now describes exactly that. It
+previously advertised a transport of `dot mcp --strict --json` — a
+one-shot audit report — together with `capabilities.tools`,
 `capabilities.resources`, `capabilities.logging` and a four-entry
-`tools[]` array. Running that exact command emits a one-shot JSON
-audit report and exits:
+`tools[]` array, none of which existed. A client that followed the card
+would have connected, sent `initialize`, and received a report it could
+not parse. Rather than narrow the card, the protocol was implemented and
+the card was corrected to match:
 
-```console
-$ dot mcp --strict --json
-{"status": "failed", "strict": true, "server_count": 0, ...}
-```
+- `transport.stdio` is `dot mcp serve`, not `dot mcp --strict --json`
+  — the flags kept their original meaning (strict audit, JSON output)
+  instead of being overloaded into a mode switch;
+- the four declared tools are the four served tools, and the check runs
+  in both directions (`TestServerCardMatchesRegistry`);
+- `capabilities.resources` and `capabilities.logging` stayed true
+  because both are implemented; `prompts` stays false because no
+  `prompts/*` handler exists, and a test fails if it is ever flipped
+  without one.
 
-There is no JSON-RPC framing, no `initialize` handshake, and no
-`tools/list` or `tools/call` handler anywhere in the tree — `rg` for
-those finds nothing. An MCP client that followed the card would
-connect, send `initialize`, and get a report it cannot parse.
+The A2A card's `entrypoints.mcp` was updated from `dot mcp --strict
+--json` to `dot mcp serve` for the same reason.
 
-This is recorded here rather than papered over: the honest options are
-to implement the protocol or to narrow the card to what the CLI
-actually does, and that is a decision for the maintainer, not
-something to settle by flipping booleans in a published manifest. Two
-unambiguous factual errors in the cards **were** corrected while
-auditing them — see "Corrections made" below.
-
-Even so, the *repository* conclusion is unchanged: whatever this
-surface becomes, it belongs in-repo. It reads the workstation's own
-state, its declared transport is the CLI binary this repo ships, and a
-satellite would need to depend on this repo for every datum it serves.
+Even so, the *repository* conclusion is unchanged: this surface belongs
+in-repo. It reads the workstation's own state, its declared transport is
+the CLI binary this repo ships, and a satellite would need to depend on
+this repo for every datum it serves.
 
 **When that would change:** if it grew a real network transport, or
 served data about a machine other than the one it runs on, it would
@@ -162,10 +176,11 @@ shipped `0.2.519`. They are now checked by
 `scripts/verify-release-versions` on every push and rewritten by
 `scripts/version-sync.sh` at release time, so neither can drift again.
 
-The larger discrepancy — the MCP card advertising a server that does
-not exist — is **left as-is and reported**, because narrowing the card
-and implementing the protocol are both legitimate resolutions and the
-choice is the maintainer's.
+The larger discrepancy — the MCP card advertising a server that did
+not exist — was resolved by implementing the protocol rather than
+narrowing the card. `dot mcp serve` now serves every tool, resource and
+capability the card declares, and the card and the registry are pinned
+to each other by tests that fail in both directions.
 
 ## Keeping this page honest
 
@@ -174,8 +189,9 @@ The claims above are checkable rather than aspirational:
 | Claim | Verify with |
 |---|---|
 | `dot mcp` exists and is routed | `dot mcp --help`; route table in `bin/dot` |
-| `dot mcp` is **not** an MCP server | `dot mcp --strict --json` returns a report, not a handshake; `rg 'jsonrpc\|tools/list\|tools/call'` finds nothing |
-| The MCP card points at the CLI | `jq .transport .well-known/mcp/server-card.json` |
+| `dot mcp serve` **is** an MCP server | `printf '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}\n' \| dot mcp serve` returns an `initialize` result |
+| The card and the server agree | `cd defaults/dot_local/share/dot-mcp && go test -run TestServerCard ./...` |
+| The MCP card points at the server | `jq .transport .well-known/mcp/server-card.json` → `dot mcp serve` |
 | `lib/wasm-tools` builds natively, not to wasm | `grep -c wasm32 lib/wasm-tools/Cargo.toml` → 0 |
 | The A2A card is valid | `dot agent a2a-card --validate` |
 | Card versions match the manifest | `bash scripts/verify-release-versions` (both cards are checked surfaces) |

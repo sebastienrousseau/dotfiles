@@ -73,6 +73,9 @@ _fixture() { # <name> <version>
   printf 'Current version: v%s.\n' "$v" >"$root/llms.txt"
   printf '# Changelog\n\n## v%s — 2026-01-01\n' "$v" >"$root/CHANGELOG.md"
   printf 'cff-version: 1.2.0\nversion: %s\n' "$v" >"$root/CITATION.cff"
+  # The MCP server's serverInfo.version, which must equal the card's.
+  mkdir -p "$root/defaults/dot_local/share/dot-mcp"
+  printf '// dot-mcp\nconst version = "%s"\n' "$v" >"$root/defaults/dot_local/share/dot-mcp/main.go"
   printf '%s\n' "$root"
 }
 
@@ -97,7 +100,7 @@ _out="$(_check "$_root")"
 _rc=$?
 assert_equals 0 "$_rc" "matching tree exits 0"
 assert_contains "canonical: 1.2.3" "$_out" "canonical version logged"
-assert_contains "all 16 live version surfaces match 1.2.3" "$_out" "success summary printed"
+assert_contains "all 17 live version surfaces match 1.2.3" "$_out" "success summary printed"
 
 test_start "quiet_suppresses_output_but_keeps_rc"
 _root="$(_fixture quiet 1.2.3)"

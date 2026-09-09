@@ -174,6 +174,7 @@ subset (lint + drift + test + examples) in one go.
 | `coverage.yml` | Coverage / kcov | `MIN_COVERAGE_PCT=58 bash tools/ci/run-coverage.sh` |
 | `cockpit-test.yml` | Cockpit / Go Tests | `cd defaults/dot_local/share/dot-ai-tui && go test ./...` |
 | `dot-ui-test.yml` | dot-ui / Go Tests | `cd defaults/dot_local/share/dot-ui && go test ./...` |
+| `mcp-server-test.yml` | MCP Server / Go Tests | `cd defaults/dot_local/share/dot-mcp && go test ./...` |
 | `nightly.yml` | Weekly extended | `make test` plus `make bench` |
 
 ### Fuzzing

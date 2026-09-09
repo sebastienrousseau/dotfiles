@@ -96,9 +96,10 @@ adding or renaming a subcommand, run
 | `dot load-bench` | Measure time to heavy-layer readiness |
 | `dot lock-screen` | Enforce lock screen idle settings [Linux] |
 | `dot manual` | Open or download the dotfiles manual in HTML, PDF, EPUB, or text. |
-| `dot mcp` | Inspect MCP policy, supply chain, and registry |
+| `dot mcp` | Inspect MCP policy, supply chain, and registry; serve MCP over stdio |
 | `dot mcp` | doctor Run the MCP policy/supply-chain/config audit |
 | `dot mcp` | registry Show the configured MCP server registry |
+| `dot mcp` | serve Run the stdio MCP server (JSON-RPC 2.0 on stdin/stdout) |
 | `dot metrics` | Show recent observability metrics (JSONL) |
 | `dot mode` | Set or inspect agent operating profiles (ask/plan/apply/audit) |
 | `dot mode` | current Show the active agent profile and its policy |

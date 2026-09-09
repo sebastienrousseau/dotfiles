@@ -228,6 +228,23 @@ test_fm_config_mcp_registry_json() {
   fi
 }
 
+test_fm_mcp_serve() {
+  # `dot mcp serve` is the transport .well-known/mcp/server-card.json
+  # advertises. With stdin already at EOF the server completes its whole
+  # lifecycle immediately: it must exit cleanly (or report that the binary is
+  # not built, rc 1) and put nothing on stdout that is not a protocol frame —
+  # no banner, no log line. One stray byte there desynchronises a client.
+  test_start "fm_mcp_serve"
+  fm_run mcp serve
+  fm_expect_rc_in 0 1
+  test_start "fm_mcp_serve_stdout_carries_frames_only"
+  if [[ -z "$FM_OUT" ]] || printf '%s\n' "$FM_OUT" | grep -qE '^\{"jsonrpc":"2\.0"'; then
+    fm_pass "stdout carried no non-protocol output"
+  else
+    fm_fail "stdout carried non-protocol output: $FM_OUT"
+  fi
+}
+
 test_fm_mcp_unknown() {
   test_start "fm_mcp_unknown"
   fm_run mcp zzz-not-a-subcommand
@@ -901,6 +918,7 @@ test_fm_mcp_registry
 test_fm_mcp_registry_json
 test_fm_env_mcp_registry_config
 test_fm_config_mcp_registry_json
+test_fm_mcp_serve
 test_fm_mcp_unknown
 test_fm_mode
 test_fm_mode_list

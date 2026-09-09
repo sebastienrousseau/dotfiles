@@ -154,6 +154,14 @@ touch "$meta_tmp/cache/zsh/tool-init.zsh" \
   MCP_REGISTRY_CONFIG="$meta_tmp/repo/dot_config/dotfiles/mcp-registry.json" cmd_mcp registry --json
   (cmd_mcp doctor --strict)
   (cmd_mcp nope)
+  # `mcp serve` execs the MCP server, so each call runs in a subshell. First
+  # with a stub `dot-mcp` on PATH (the deployed path), then with none and no
+  # Go toolchain (the "not built" diagnostic, exit 1).
+  printf '#!/usr/bin/env bash\nexit 0\n' >"$meta_tmp/bin/dot-mcp"
+  chmod +x "$meta_tmp/bin/dot-mcp"
+  (PATH="$meta_tmp/bin:/usr/bin:/bin" cmd_mcp serve </dev/null)
+  rm -f "$meta_tmp/bin/dot-mcp"
+  (PATH="/usr/bin:/bin" cmd_mcp serve </dev/null)
 ) >/dev/null || true
 assert_file_not_exists "$meta_tmp/cache/zsh/tool-init.zsh" \
   "meta deep branches cleared sandbox zsh cache"

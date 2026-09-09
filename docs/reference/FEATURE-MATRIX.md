@@ -369,6 +369,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot mcp registry` | --json / -j | `test_fm_mcp_registry_json` | `run:mcp-registry-json` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot mcp registry` | MCP_REGISTRY_CONFIG overrides the registry file | `test_fm_env_mcp_registry_config` | `help:mcp` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 | `dot mcp registry` | dot_config/dotfiles/mcp-registry.json `servers` map | `test_fm_config_mcp_registry_json` | `help:mcp` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/02-config-files.md` | regression |
+| `dot mcp serve` | stdio MCP server: JSON-RPC 2.0 on stdin/stdout, EOF shuts down | `test_fm_mcp_serve` | `help:mcp` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot mcp` | <unknown> (usage, exit 1) | `test_fm_mcp_unknown` | `help:mcp` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot mode` | (default = current) | `test_fm_mode` | `run:mode` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot mode list` | (default) | `test_fm_mode_list` | `run:mode-list` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
