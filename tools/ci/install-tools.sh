@@ -63,8 +63,19 @@ printf 'Installing missing tools: %s\n' "${missing[*]}"
 # ceiling the job timeout can cut short would report "cancelled" — the very
 # symptom this replaces — instead of a readable error.
 apt_install_missing() {
-  sudo timeout 60 apt-get update -qq &&
-    sudo timeout 120 apt-get install -y -qq --no-install-recommends "${missing[@]}"
+  # `apt-get update` exits non-zero when ANY configured repository fails to
+  # fetch — including third-party ones the runner image ships that have
+  # nothing to do with what we install. On 2026-09-09 the Google Chrome repo
+  # was unreachable and took down ten jobs across a PR: apt itself reported
+  # "Some index files failed to download. They have been ignored, or old ones
+  # used instead", so it had a usable index and the packages we want come from
+  # Ubuntu's own repos, but the `&&` vetoed the install anyway.
+  #
+  # So refresh on a best-effort basis and let the *install* decide success.
+  # A genuinely missing package still fails here, loudly, which is the signal
+  # worth acting on.
+  sudo timeout 60 apt-get update -qq || true
+  sudo timeout 120 apt-get install -y -qq --no-install-recommends "${missing[@]}"
 }
 
 for attempt in 1 2 3; do
