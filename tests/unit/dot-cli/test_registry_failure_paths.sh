@@ -201,24 +201,37 @@ assert_not_equals "0" "$rc" "an unreachable index with no cache fails"
 assert_file_contains "$ERR" "could not fetch" "the error names the fetch"
 
 test_start "stale_cache_is_used_when_the_fetch_fails"
-# Prime the cache from a good index, age it past the 6h TTL, then point the
-# registry at a URL that cannot be fetched.
-export DOTFILES_REGISTRY_URL="file://$GOOD_INDEX"
+# Prime the cache from a good index, age it past the 6h TTL, then make THAT
+# URL unfetchable. Same URL throughout: the cache is keyed by URL, so the
+# fallback is "the registry you asked for is unreachable, here is the copy we
+# have of it" — never another registry's index.
+export DOTFILES_REGISTRY_URL="file://$WORK/vanishing.json"
+cp "$GOOD_INDEX" "$WORK/vanishing.json"
 clear_cache
 run list >/dev/null
-cache_file="$(_registry_cache_dir)/index.json"
+cache_file="$(_registry_cache_file)"
 assert_file_exists "$cache_file" "the index was cached"
 touch -t 202001010000 "$cache_file"
-export DOTFILES_REGISTRY_URL="file://$WORK/does-not-exist.json"
+rm -f "$WORK/vanishing.json"
 rc="$(run list)"
 assert_equals "0" "$rc" "a stale cache still serves the listing"
 assert_file_contains "$ERR" "using stale cache" "the fallback is announced on stderr"
 assert_file_contains "$OUT" "good-module" "the stale index contents are shown"
 
+test_start "a_different_url_does_not_borrow_that_stale_cache"
+# The cache above is still on disk and still stale. A different registry URL
+# that cannot be fetched must fail rather than serve it — the whole point of
+# keying the cache by URL.
+export DOTFILES_REGISTRY_URL="file://$WORK/does-not-exist.json"
+rc="$(run list)"
+assert_not_equals "0" "$rc" "another registry's stale cache is not served"
+assert_file_contains "$ERR" "could not fetch" "the unreachable URL is reported"
+
 test_start "corrupt_cache_is_discarded_and_refetched"
 export DOTFILES_REGISTRY_URL="file://$GOOD_INDEX"
 clear_cache
 run list >/dev/null
+cache_file="$(_registry_cache_file)"
 printf 'not json at all\n' >"$cache_file"
 rc="$(run list)"
 assert_equals "0" "$rc" "a cache that fails validation is replaced, not served"
