@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
 <p align="center">
   <img src="https://cloudcdn.pro/dotfiles/v2/images/logos/dotfiles.svg" alt="Dotfiles logo" width="128" />
 </p>

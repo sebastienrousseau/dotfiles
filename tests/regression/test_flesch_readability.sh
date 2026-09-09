@@ -30,13 +30,13 @@ USER_DOCS=(
 # Extract prose from markdown (strip code blocks, tables, HTML, links)
 _extract_prose() {
   awk '/^```/{skip=!skip; next} !skip{print}' "$1" | # Remove fenced code blocks
-    sed '/^|/d' |                   # Remove tables
-    sed '/^<[^>]*>$/d' |           # Remove HTML-only lines
-    sed 's/\[[^]]*\]([^)]*)//g' |  # Strip link syntax
-    sed '/^##* /d' |                # Remove headings
-    sed '/^$/d' |                   # Remove blank lines
-    sed '/^---$/d' |                # Remove horizontal rules
-    sed '/^- \[/d'                  # Remove checkbox lines
+    sed '/^|/d' |                                    # Remove tables
+    sed '/^<[^>]*>$/d' |                             # Remove HTML-only lines
+    sed 's/\[[^]]*\]([^)]*)//g' |                    # Strip link syntax
+    sed '/^##* /d' |                                 # Remove headings
+    sed '/^$/d' |                                    # Remove blank lines
+    sed '/^---$/d' |                                 # Remove horizontal rules
+    sed '/^- \[/d'                                   # Remove checkbox lines
 }
 
 # Count words in text
@@ -197,7 +197,7 @@ failures=0
 for doc in "${USER_DOCS[@]}"; do
   filepath="$REPO_ROOT/$doc"
   [[ -f "$filepath" ]] || continue
-  lines=$(wc -l < "$filepath" | tr -d ' ')
+  lines=$(wc -l <"$filepath" | tr -d ' ')
   if [[ "$lines" -lt 20 ]]; then
     printf '    %s: too short (%s lines, min 20)\n' "$doc" "$lines"
     failures=$((failures + 1))
@@ -318,7 +318,7 @@ for doc in "${USER_DOCS[@]}"; do
       fi
     fi
     prev_line="$line"
-  done < "$filepath"
+  done <"$filepath"
 done
 assert_equals "0" "$failures" "code blocks should have context text before them"
 
@@ -384,7 +384,7 @@ for doc in "${USER_DOCS[@]}"; do
       fi
       bullet_count=0
     fi
-  done < "$filepath"
+  done <"$filepath"
   # Check trailing list
   if [[ "$bullet_count" -gt 10 ]]; then
     printf '    %s: bullet list with %d items at end of file\n' "$doc" "$bullet_count"
@@ -409,6 +409,13 @@ for doc in "${USER_DOCS[@]}"; do
     NR == 1 && $0 == "---" { in_frontmatter = 1; next }
     in_frontmatter && $0 == "---" { in_frontmatter = 0; next }
     in_frontmatter { next }
+    # Skip a leading HTML comment block the same way. REPO-STANDARD wants an
+    # SPDX identifier on line 1 of the README, which is an HTML comment in
+    # Markdown; without this the standard and this test are mutually
+    # exclusive. A comment is invisible when rendered, so it does not affect
+    # whether a reader sees a clear title — which is what this asserts.
+    !in_frontmatter && /^[[:space:]]*<!--/ { in_comment = 1 }
+    in_comment { if (/-->/) { in_comment = 0 }; next }
     NF { print; exit }
   ' "$filepath")
   if [[ "$first_content" =~ ^#[[:space:]] || "$first_content" =~ ^\<[phH] ]]; then
@@ -464,7 +471,7 @@ for doc in "${USER_DOCS[@]}"; do
   [[ -f "$filepath" ]] || continue
   doc_slug="${doc//[\/.]/_}"
   test_start "flesch_doc_length_${doc_slug}"
-  lines=$(wc -l < "$filepath" | tr -d ' ')
+  lines=$(wc -l <"$filepath" | tr -d ' ')
   if [[ "$lines" -ge 20 ]]; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $lines lines"
