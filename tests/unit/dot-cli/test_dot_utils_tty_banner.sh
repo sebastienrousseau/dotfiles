@@ -43,12 +43,12 @@ TTY_FORM=""
 printf '#!/bin/sh\n[ -t 1 ] && echo TTY_PROBE_OK\n' >"$FX/tty-probe.sh"
 chmod +x "$FX/tty-probe.sh"
 for _attempt in 1 2 3; do
-  if script -qec "$FX/tty-probe.sh" /dev/null 2>/dev/null | tr -d '\r' |
+  if script -qec "$FX/tty-probe.sh" /dev/null </dev/null 2>/dev/null | tr -d '\r' |
     grep -q TTY_PROBE_OK; then
     TTY_FORM="util-linux"
     break
   fi
-  if script -q /dev/null "$FX/tty-probe.sh" 2>/dev/null | tr -d '\r' |
+  if script -q /dev/null "$FX/tty-probe.sh" </dev/null 2>/dev/null | tr -d '\r' |
     grep -q TTY_PROBE_OK; then
     TTY_FORM="bsd"
     break
@@ -86,9 +86,9 @@ tty_run() {
   local attempt
   for attempt in 1 2 3; do
     if [[ "$TTY_FORM" == "util-linux" ]]; then
-      TTY_OUT="$(script -qec "$runner" /dev/null 2>&1 | tr -d '\r')"
+      TTY_OUT="$(script -qec "$runner" /dev/null </dev/null 2>&1 | tr -d '\r')"
     else
-      TTY_OUT="$(script -q /dev/null "$runner" 2>&1 | tr -d '\r')"
+      TTY_OUT="$(script -q /dev/null "$runner" </dev/null 2>&1 | tr -d '\r')"
     fi
     [[ -n "$TTY_OUT" ]] && break
   done
