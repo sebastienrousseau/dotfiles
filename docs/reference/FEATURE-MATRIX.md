@@ -600,10 +600,11 @@ hunted through the table.
 
 ## Findings this matrix produced
 
-Building the coverage turned up defects in the CLI. Each is exercised by the
+Building the coverage turned up defects in the CLI. Each was exercised by the
 row that found it, commented at that row, and reported rather than silently
-accommodated. None is fixed here — `bin/dot`'s command modules and
-`scripts/diagnostics/` belong to other work.
+accommodated. Every one of them has since been fixed and pinned by a
+regression test; what remains below is the one entry that is working as
+designed.
 
 | Severity | Where | What |
 |----------|-------|------|
@@ -611,16 +612,28 @@ accommodated. None is fixed here — `bin/dot`'s command modules and
 
 ### Commands that write into the checkout
 
-Three commands resolve their write target from the location of the sourced
-library rather than from `$HOME`, so a sandboxed `HOME` does not protect a
-working tree from them. The regression rows for these drive a throwaway copy
-of the repo instead, and then assert the checkout is still clean:
+These commands resolve their write target through `lib/dot/utils.sh`'s
+`resolve_source_dir`, which probes the location of the sourced library BEFORE
+`$CHEZMOI_SOURCE_DIR` and `$HOME`. Running `./bin/dot` from a checkout
+therefore writes into that checkout whatever `HOME` says, so a sandboxed
+`HOME` does not protect a working tree from them. The regression rows for
+these drive a throwaway copy of the repo instead, and then assert the checkout
+is still clean:
 
 - `dot profile set` → `defaults/.chezmoidata.toml`
 - `dot fleet namespace set` → `defaults/.chezmoidata.toml`
 - `dot fleet enforce set` → `defaults/dot_config/dotfiles/agent-profiles.json`
 - `dot aliases cheatsheet` (no `--output`) → `docs/ALIASES_CHEATSHEET.md`
-- `dot theme set` → `defaults/.chezmoidata.toml`, **and** the OS appearance
+
+`dot theme set` is NOT one of them, contrary to an earlier note here.
+scripts/theme/switch.sh and bin/dot-theme-sync resolve the data file from
+`$CHEZMOI_SOURCE_DIR`, then `$HOME/.dotfiles`, then
+`$HOME/.local/share/chezmoi`, and refuse with "Dotfiles source not found"
+when none exists — measured by pointing `$HOME/.dotfiles` at a synthetic tree
+while running the checkout's `bin/dot`: the synthetic tree was written and the
+checkout was untouched. It writes the checkout under this harness only because
+the harness points both `CHEZMOI_SOURCE_DIR` and `$HOME/.dotfiles` at it. It
+also drives the real OS appearance, which is why it stays a smoke row.
 
 ## See also
 

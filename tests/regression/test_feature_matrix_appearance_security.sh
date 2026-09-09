@@ -14,10 +14,10 @@
 # `defaults write`. Those rows carry a --help smoke test and a recorded
 # reason in the matrix rather than a fake pass.
 #
-# `dot theme set` is worth calling out: it resolves the theme file from the
-# location of the sourced library, not from $HOME, so it rewrites
-# defaults/.chezmoidata.toml in the CHECKOUT even under a sandboxed HOME —
-# and then drives the OS appearance. It is never invoked here.
+# `dot theme set` is worth calling out: it resolves the theme file from
+# CHEZMOI_SOURCE_DIR / $HOME/.dotfiles, which this harness aims at the
+# checkout, and it then drives the real OS appearance. It is never invoked
+# here with a theme name for that second reason.
 
 set -u
 
