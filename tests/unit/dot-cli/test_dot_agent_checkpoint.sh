@@ -174,4 +174,63 @@ AGENT_PROFILE_CONFIG="$STRICT_PROFILES" meta agent delegate lint-checker bash -c
 assert_equals 4 "$RC" "rc"
 assert_contains "failed (exit 4)" "$OUT" "failure line"
 
+# ── delegate without GNU timeout ────────────────────────────────────────
+# Regression: the arm was `if timeout "$delegate_timeout" "$@"`. `timeout` is
+# GNU coreutils; stock macOS ships neither it nor `gtimeout` (that arrives
+# only with `brew install coreutils`), so on a clean Mac the delegated command
+# never ran at all — `dot agent delegate` is unusable on the platform this
+# repo primarily targets. $NOTIME is a curated bin dir with everything the
+# command needs and no timeout binary of either name.
+NOTIME="$DOTFILES_COV_TMPDIR/no-timeout-bin"
+mkdir -p "$NOTIME"
+for _t in bash sh env jq sed awk grep cat date mkdir rm mv cp mktemp dirname \
+  basename head tail tr cut sort uniq wc uname tput stty ls find chmod touch \
+  comm realpath readlink id hostname sleep perl; do
+  _p="$(command -v "$_t" 2>/dev/null || true)"
+  [[ -n "$_p" ]] && ln -sf "$_p" "$NOTIME/$_t"
+done
+test_start "delegate_bin_dir_has_no_timeout"
+assert_file_not_exists "$NOTIME/timeout" "the curated PATH must not contain timeout"
+assert_file_not_exists "$NOTIME/gtimeout" "the curated PATH must not contain gtimeout"
+
+test_start "delegate_runs_the_command_without_a_timeout_binary"
+PATH="$NOTIME" AGENT_PROFILE_CONFIG="$STRICT_PROFILES" \
+  meta agent delegate lint-checker bash -c 'printf "delegated-ran\n"'
+assert_equals 0 "$RC" "rc"
+assert_contains "delegated-ran" "$OUT" "the delegated command ran"
+assert_contains "completed" "$OUT" "success line"
+
+test_start "delegate_propagates_failure_without_a_timeout_binary"
+PATH="$NOTIME" AGENT_PROFILE_CONFIG="$STRICT_PROFILES" \
+  meta agent delegate lint-checker bash -c 'exit 4'
+assert_equals 4 "$RC" "rc"
+assert_contains "failed (exit 4)" "$OUT" "the command's own status survives the fallback"
+
+test_start "delegate_enforces_the_limit_without_a_timeout_binary"
+# The fallback must still bound the command, not merely run it. 124 is GNU
+# timeout's expiry status, which the perl fallback reproduces.
+FAST="$DOTFILES_COV_TMPDIR/fast-profiles.json"
+jq '.rbac.enforcement = "strict" | .delegation.enabled = true
+    | .profiles.ask.canDelegate = true
+    | .delegation.allowedDelegates["lint-checker"].timeout = 1' \
+  "$REAL_PROFILES" >"$FAST"
+PATH="$NOTIME" AGENT_PROFILE_CONFIG="$FAST" \
+  meta agent delegate lint-checker bash -c 'sleep 20'
+assert_equals 124 "$RC" "an over-running delegate is killed and reported as 124"
+
+test_start "delegate_runs_unbounded_only_as_a_last_resort"
+# No timeout binary AND no perl: the command must still run, and the lost
+# guarantee must be announced rather than assumed.
+NOPERL="$DOTFILES_COV_TMPDIR/no-perl-bin"
+mkdir -p "$NOPERL"
+for _f in "$NOTIME"/*; do
+  [[ "$(basename "$_f")" == "perl" ]] && continue
+  ln -sf "$(readlink "$_f")" "$NOPERL/$(basename "$_f")"
+done
+PATH="$NOPERL" AGENT_PROFILE_CONFIG="$STRICT_PROFILES" \
+  meta agent delegate lint-checker bash -c 'printf "unbounded-ran\n"'
+assert_equals 0 "$RC" "rc"
+assert_contains "unbounded-ran" "$OUT" "the delegated command still ran"
+assert_contains "without a time limit" "$OUT$ERR" "the missing bound is announced"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -21,6 +21,55 @@ _agent_repo_root() {
   require_source_dir
 }
 
+## _agent_run_bounded <seconds> <command…> — run a command under a wall-clock
+## limit on every platform we ship to.
+##
+## `timeout` is GNU coreutils. Stock macOS has neither it nor `gtimeout`
+## (that one arrives with `brew install coreutils`), so the delegate arm's
+## former `timeout "$t" "$@"` meant the delegated command never ran at all on
+## a clean Mac — it died 127, "command not found". perl is present on both
+## macOS and the CI runners and gives us fork + alarm, which is what timeout(1)
+## does. tests/framework/assertions.sh solves the same problem the same way.
+##
+## Exit codes follow GNU timeout: 124 on expiry, 128+N when signalled,
+## otherwise the command's own status.
+_agent_run_bounded() {
+  local seconds="$1"
+  shift
+  local bin
+  bin="$(type -P timeout || true)"
+  [[ -n "$bin" ]] || bin="$(type -P gtimeout || true)"
+  if [[ -n "$bin" ]]; then
+    "$bin" "$seconds" "$@"
+    return
+  fi
+  if command -v perl >/dev/null 2>&1; then
+    perl -e '
+      my $secs = shift @ARGV;
+      my $pid  = fork();
+      die "dot: fork failed: $!\n" unless defined $pid;
+      if ($pid == 0) {
+        exec { $ARGV[0] } @ARGV;
+        exit 127;
+      }
+      my $timed_out = 0;
+      $SIG{ALRM} = sub { $timed_out = 1; kill("TERM", $pid); kill("KILL", $pid); };
+      alarm($secs);
+      my $reaped;
+      do { $reaped = waitpid($pid, 0); } while ($reaped == -1 && $!{EINTR});
+      my $status = $?;
+      alarm(0);
+      exit(124) if $timed_out;
+      exit($status & 127 ? 128 + ($status & 127) : $status >> 8);
+    ' "$seconds" "$@"
+    return
+  fi
+  # Neither available: running the command is still better than refusing to,
+  # but the lost guarantee is said out loud rather than assumed.
+  ui_warn "Delegate" "no timeout(1) or perl on PATH — running without a time limit"
+  "$@"
+}
+
 _agent_profiles_file() {
   local repo_root
   repo_root="$(_agent_repo_root)"
@@ -393,7 +442,7 @@ EOF
       dot_agent_session_log "delegate_start" "$delegate_profile" "running" "delegate=$delegate_name" "parent=$current_profile" "timeout=$delegate_timeout"
       ui_info "Delegating" "$delegate_name (profile: $delegate_profile, timeout: ${delegate_timeout}s)"
       local exit_code=0
-      if timeout "$delegate_timeout" "$@"; then
+      if _agent_run_bounded "$delegate_timeout" "$@"; then
         dot_agent_session_log "delegate_finish" "$delegate_profile" "ok" "delegate=$delegate_name" "exit_code=$exit_code"
         ui_ok "Delegate" "$delegate_name completed"
       else
