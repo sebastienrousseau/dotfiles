@@ -199,11 +199,33 @@ cmd_keys() {
     return 0
   fi
 
-  if [ -n "$src_dir" ] && [ -f "$src_dir/docs/KEYS.md" ]; then
+  # The keybindings document lives at docs/security/KEYS.md. Probing only
+  # docs/KEYS.md meant every `dot keys` fell through to
+  # scripts/diagnostics/keys.sh, which is not in the tree either, so the
+  # command could only ever report "Keys script not found". The legacy path
+  # stays in the list for trees that predate the move.
+  local keys_doc=""
+  if [ -n "$src_dir" ]; then
+    local candidate
+    for candidate in docs/security/KEYS.md docs/KEYS.md; do
+      if [ -f "$src_dir/$candidate" ]; then
+        keys_doc="$src_dir/$candidate"
+        break
+      fi
+    done
+  fi
+
+  if [ -n "$keys_doc" ]; then
     if [ -n "${1:-}" ]; then
-      rg -i --fixed-strings --context 1 "${1:-}" "$src_dir/docs/KEYS.md" || true
+      # ripgrep is not installed everywhere (the CI runners have none), and
+      # a bare `rg` there printed nothing at all while exiting 0.
+      if has_command rg; then
+        rg -i --fixed-strings --context 1 "${1:-}" "$keys_doc" || true
+      else
+        grep -i -F -C 1 -- "${1:-}" "$keys_doc" || true
+      fi
     else
-      exec cat "$src_dir/docs/KEYS.md"
+      exec cat "$keys_doc"
     fi
   else
     run_script "scripts/diagnostics/keys.sh" "Keys script" "$@"

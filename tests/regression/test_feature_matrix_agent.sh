@@ -102,14 +102,14 @@ test_fm_smoke_sandbox() { fm_smoke sandbox; }
 # ── meta: keys ─────────────────────────────────────────────────────────────
 
 test_fm_keys() {
-  # KNOWN GAP (reported): cmd_keys falls back to scripts/diagnostics/keys.sh,
-  # which does not exist, when docs/KEYS.md is absent — and docs/KEYS.md is
-  # not in the tree, so a bare `dot keys` reports "Keys script not found".
+  # cmd_keys used to probe only docs/KEYS.md and then fall back to
+  # scripts/diagnostics/keys.sh; neither is in the tree, so a bare `dot keys`
+  # could only report "Keys script not found". It reads docs/security/KEYS.md.
   test_start "fm_keys"
   fm_run keys
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_keys_is_routed"
-  fm_expect_any "Keys" "KEYS.md" "keybinding" "not found"
+  fm_expect_out "Keybindings"
 }
 
 test_fm_keys_sign_check() {
