@@ -40,7 +40,7 @@ _dot_completions() {
       return 0
       ;;
     mcp)
-      COMPREPLY=($(compgen -W "doctor registry" -- "$cur"))
+      COMPREPLY=($(compgen -W "doctor registry serve" -- "$cur"))
       return 0
       ;;
     mode)
