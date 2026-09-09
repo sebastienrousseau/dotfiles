@@ -360,7 +360,7 @@ dot registry url                  # show the active registry URL
 dot registry set-url <url>        # override the registry URL (HTTPS-only)
 ```
 
-Default registry: `https://sebastienrousseau.github.io/dotfiles/registry.json`. Cache lives at `${XDG_CACHE_HOME:-~/.cache}/dotfiles/registry/index.json` with a 6h TTL. One-off override: `DOTFILES_REGISTRY_URL=<url> dot registry list`.
+Default registry: `https://sebastienrousseau.github.io/dotfiles/registry.json`. Cache lives under `${XDG_CACHE_HOME:-~/.cache}/dotfiles/registry/`, one `index-<digest>.json` per registry URL, with a 6h TTL. One-off override: `DOTFILES_REGISTRY_URL=<url> dot registry list`.
 
 The JSON contract + module-contribution flow live in [`docs/operations/REGISTRY.md`](../../operations/REGISTRY.md).
 

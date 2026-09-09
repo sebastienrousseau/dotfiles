@@ -483,24 +483,13 @@ JSON
   printf '%s\n' "$dir/index.json"
 }
 
-# The registry cache lives at one fixed path and is considered fresh for six
-# hours REGARDLESS of which URL it came from, so a row that points
-# DOTFILES_REGISTRY_URL at a different index still reads the previous one
-# unless the cache is dropped first. (Worth knowing outside the tests too: a
-# user who changes their registry URL keeps serving the old index for up to
-# six hours.)
+# The index cache is keyed by URL and kept for six hours, so a row that wants
+# a fresh fetch from the same URL has to drop it first. (Pointing
+# DOTFILES_REGISTRY_URL somewhere else no longer serves the previous
+# registry's index — that was a reported bug, now fixed and pinned by
+# tests/unit/dot-cli/test_dot_registry_cache_per_url.sh.)
 fm_registry_clear_cache() {
-  rm -f "$XDG_CACHE_HOME/dotfiles/registry/index.json"
-}
-
-# The registry cache lives at one fixed path and is considered fresh for six
-# hours REGARDLESS of which URL it came from, so a row that points
-# DOTFILES_REGISTRY_URL at a different index still reads the previous one
-# unless the cache is dropped first. (Worth knowing outside the tests too: a
-# user who changes their registry URL keeps serving the old index for up to
-# six hours.)
-fm_registry_clear_cache() {
-  rm -f "$XDG_CACHE_HOME/dotfiles/registry/index.json"
+  rm -f "$XDG_CACHE_HOME"/dotfiles/registry/index-*.json
 }
 
 fm_registry_url() {

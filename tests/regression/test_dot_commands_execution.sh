@@ -55,7 +55,15 @@ mkdir -p "$sandbox/.config" "$sandbox/.local/share" "$sandbox/.cache" \
 ln -s "$REPO_ROOT" "$sandbox/.dotfiles"
 printf '#!/usr/bin/env bash\nexit 0\n' >"$sandbox/bin/chezmoi"
 chmod +x "$sandbox/bin/chezmoi"
-printf '{"version":1,"modules":[]}\n' >"$sandbox/.cache/dotfiles/registry/index.json"
+# Seed the registry index cache so `dot registry …` stays offline. The cache
+# is keyed by the URL it came from, so ask registry.sh where the active URL's
+# index belongs instead of hard-coding a file name.
+registry_cache_file="$(
+  HOME="$sandbox" XDG_CACHE_HOME="$sandbox/.cache" XDG_CONFIG_HOME="$sandbox/.config" \
+    bash -c 'source "$1"; _registry_cache_file' _ \
+    "$REPO_ROOT/scripts/dot/commands/registry.sh"
+)"
+printf '{"version":1,"modules":[]}\n' >"$registry_cache_file"
 export HOME="$sandbox" \
   XDG_CONFIG_HOME="$sandbox/.config" \
   XDG_DATA_HOME="$sandbox/.local/share" \

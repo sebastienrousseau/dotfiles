@@ -34,10 +34,15 @@ fi
 # Point the fetcher at the in-repo sample registry and seed the cache
 # so list/search/info stay offline. The smoke also exercises
 # _registry_url's DOTFILES_REGISTRY_URL branch.
+#
+# The cache is keyed by URL (a fixed index.json would be served for whichever
+# registry was fetched first), so ask the module itself where this URL's
+# index belongs rather than hard-coding the file name.
 LOCAL_REGISTRY="file://$REPO_ROOT/docs/registry.json"
 export DOTFILES_REGISTRY_URL="$LOCAL_REGISTRY"
-mkdir -p "$XDG_CACHE_HOME/dotfiles/registry"
-cp "$REPO_ROOT/docs/registry.json" "$XDG_CACHE_HOME/dotfiles/registry/index.json"
+REGISTRY_CACHE_FILE="$(bash -c 'source "$1"; _registry_cache_file' _ "$SCRIPT_FILE")"
+mkdir -p "$(dirname "$REGISTRY_CACHE_FILE")"
+cp "$REPO_ROOT/docs/registry.json" "$REGISTRY_CACHE_FILE"
 
 for sub in "--help" "url" "list"; do
   test_start "dot_registry_$(echo "$sub" | tr -d -- '-')"
@@ -116,7 +121,15 @@ registry_tmp="$DOTFILES_COV_TMPDIR/registry-deep"
 mkdir -p "$registry_tmp/config/dotfiles" \
   "$registry_tmp/cache/dotfiles/registry" \
   "$registry_tmp/bin"
-cat >"$registry_tmp/cache/dotfiles/registry/index.json" <<'JSON'
+# Seeded at the cache path this URL maps to — the cache is keyed by URL.
+REGISTRY_DEEP_CACHE="$(
+  HOME="$registry_tmp/home" \
+    XDG_CONFIG_HOME="$registry_tmp/config" \
+    XDG_CACHE_HOME="$registry_tmp/cache" \
+    DOTFILES_REGISTRY_URL="" \
+    bash -c 'source "$1"; _registry_cache_file' _ "$SCRIPT_FILE"
+)"
+cat >"$REGISTRY_DEEP_CACHE" <<'JSON'
 {
   "version": 1,
   "updated": "2026-07-22T12:00:00Z",
@@ -215,7 +228,7 @@ chmod +x "$registry_tmp/bin/curl"
   cmd_registry --help
   cmd_registry not-a-real-subcommand
 
-  rm -f "$registry_tmp/cache/dotfiles/registry/index.json"
+  rm -f "$registry_tmp"/cache/dotfiles/registry/index-*.json
   DOTFILES_REGISTRY_URL="https://registry.example/index.json" _registry_fetch
 ) >/dev/null || true
 assert_file_contains "$registry_tmp/config/dotfiles/registry.toml" \
