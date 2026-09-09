@@ -607,7 +607,6 @@ accommodated. None is fixed here — `bin/dot`'s command modules and
 
 | Severity | Where | What |
 |----------|-------|------|
-| Medium | `scripts/diagnostics/doctor-unified.sh` | `dot doctor --audit` routes to `scripts/ops/health-check.sh`, which is not in the tree; the flag dies with "Script not found". |
 | Medium | `scripts/dot/commands/tools.sh` | `dot tools docs` looks for `docs/TOOLS.md` / `docs/UTILS.md`; both live under `docs/reference/`, so the subcommand reports "TOOLS.md not found" on a complete checkout. |
 | Low | `scripts/dot/commands/meta.sh` | A bare `dot keys` falls back to `scripts/diagnostics/keys.sh`, which does not exist, when `docs/KEYS.md` is absent — and `docs/KEYS.md` is not in the tree. |
 | Low | `scripts/lib/secrets_provider.sh` | The `plain-enc` store aborts with `tmp_rec: unbound variable` under `set -u` *after* writing the encrypted file, so `dot secrets set` exits non-zero on a write that in fact succeeded. |
