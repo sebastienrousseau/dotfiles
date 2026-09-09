@@ -88,3 +88,37 @@ not quotas**.
   equivalence (prove it, don't assert it).
 - Verification is a step, not a vibe: state what you did to verify and what
   you observed; if you skipped a step, say so.
+
+## Destructive git operations
+
+Rewriting or discarding history is **never** a routine tool call. This applies
+to every repository, not just the one where it was learned.
+
+Covered: `rebase` (incl. `--signoff`, `--autosquash`), `push --force` /
+`--force-with-lease`, `reset --hard`, `stash pop`/`drop`, `checkout --`,
+`clean -fd`, `commit --amend` on anything already pushed, branch deletion.
+
+- **Check the precondition, then the postcondition.** Before: does the path
+  exist exactly as spelled, and did the previous command actually succeed?
+  After: verify the invariant that matters — `%G?` for signatures, file
+  contents for edits, `git stash list` for stashes — **before pushing**, not
+  after being asked.
+- **A rebase does not preserve signatures.** It rewrites every commit and
+  re-signs only if `commit.gpgsign` is set. Never assume it survived; check
+  `git log --format='%G?'` on the rewritten range.
+- **One branch at a time.** Never batch a force-push across several branches.
+- **Never chain a destructive command after an unverified one.** `set -e`
+  semantics do not carry across separate tool calls; a failed `stash push`
+  still lets the following `stash pop` run, and it will pop something else.
+- **Prefer the non-destructive form**: `revert` over `reset --hard`; a fresh
+  branch over rewriting a pushed one; `git stash list` before any `pop`.
+- **Idempotence is not free.** A replacement script run twice can corrupt data.
+  Revert to a known-clean state, confirm the revert actually happened, then
+  apply once.
+- **Recovery**: `git reflog` and the hash printed by a dropped stash
+  (`git stash store <sha>`) can undo most of this — but only if the mistake is
+  noticed, which is why the postcondition check is the rule that matters.
+
+The failure mode to watch for: treating one of these as ordinary, and letting
+the next step proceed as though the previous had succeeded. The damage usually
+looks fine at the time and surfaces much later.
