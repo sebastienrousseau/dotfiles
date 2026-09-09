@@ -5,6 +5,7 @@ name: Rust / dot-sys
 # docs/security/CI_PINNING.md.
 #
 #   test      — stable / MSRV / beta on ubuntu + macos
+#   wasm      — build wasm32-wasip1 and execute it under wasmtime
 #   fmt       — rustfmt, crate + fuzz crate
 #   clippy    — -D warnings -W clippy::pedantic across all targets
 #   doc       — rustdoc with -D warnings, doctests run in `test`
@@ -93,7 +94,102 @@ jobs:
           cargo build --locked --release
           out="$(./target/release/dot-sys)"
           echo "$out"
+          # The engine field states where the code ran. This is the host
+          # build, so it must say "native"; the wasm job asserts "wasm".
+          printf '%s' "$out" | grep -Eq '^\{"status": "ok", "timestamp": [1-9][0-9]*, "engine": "native"\}$'
+
+      - name: Verify a fixture with the host build
+        run: |
+          ./target/release/dot-sys verify --now 1788955200 --max-age any \
+            < tests/data/compliant.json
+          if ./target/release/dot-sys verify --now 1788955200 --max-age any \
+               < tests/data/non-compliant.json; then
+            echo "non-compliant evidence must not pass" >&2
+            exit 1
+          fi
+
+  wasm:
+    name: WebAssembly / wasm32-wasip1 under wasmtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
+        with:
+          toolchain: stable
+          targets: wasm32-wasip1
+          components: clippy
+
+      # Keep the runtime on the version mise.toml pins for the workstation,
+      # so CI and `dot attest --verify` run the module the same way.
+      - uses: taiki-e/install-action@84f5ac3124727fb3d284d4d22ee9ab3654fd09a6 # v2.87.7
+        with:
+          tool: wasmtime@47.0.3
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: lib/wasm-tools
+
+      - name: Guard the pinned runtime against mise.toml
+        working-directory: ${{ github.workspace }}
+        run: |
+          pinned="$(sed -n 's/^wasmtime = "\(.*\)"$/\1/p' mise.toml | head -n 1)"
+          echo "mise.toml pins wasmtime $pinned"
+          wasmtime --version | grep -q "$pinned"
+
+      - name: Clippy for the wasm target
+        run: |
+          cargo clippy --locked --target wasm32-wasip1 --bins --lib \
+            -- -D warnings -W clippy::pedantic
+
+      - name: Build the module
+        run: cargo build --locked --release --target wasm32-wasip1 --bin dot-sys
+
+      - name: Execute the module and assert it ran as WebAssembly
+        run: |
+          module=target/wasm32-wasip1/release/dot-sys.wasm
+          test -f "$module"
+          out="$(wasmtime run "$module")"
+          echo "$out"
           printf '%s' "$out" | grep -Eq '^\{"status": "ok", "timestamp": [1-9][0-9]*, "engine": "wasm"\}$'
+
+          # A compliant record passes, a non-compliant one does not, and the
+          # verdict says the verification itself happened inside the sandbox.
+          verdict="$(wasmtime run "$module" verify --json --now 1788955200 \
+            --max-age any < tests/data/compliant.json)"
+          echo "$verdict"
+          printf '%s' "$verdict" | grep -q '"status": "ok", "timestamp": 1788955200, "engine": "wasm"'
+          if wasmtime run "$module" verify --now 1788955200 --max-age any \
+               < tests/data/non-compliant.json; then
+            echo "non-compliant evidence must not pass" >&2
+            exit 1
+          fi
+
+      - name: Run the WebAssembly integration tests
+        env:
+          DOT_SYS_WASM: target/wasm32-wasip1/release/dot-sys.wasm
+          DOT_SYS_WASM_REQUIRED: '1'
+        run: cargo test --locked --all-features --test wasm
+
+      - name: Exercise the shell caller
+        working-directory: ${{ github.workspace }}
+        env:
+          DOT_SYS_WASM: >-
+            ${{ github.workspace }}/lib/wasm-tools/target/wasm32-wasip1/release/dot-sys.wasm
+        run: bash tests/unit/diagnostics/test_diagnostics_attest_verify.sh
+
+      - name: Upload the module
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dot-sys-wasm32-wasip1
+          path: lib/wasm-tools/target/wasm32-wasip1/release/dot-sys.wasm
+          retention-days: 14
 
   fmt:
     name: Lint / rustfmt
@@ -248,7 +344,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [fuzz_parse, fuzz_roundtrip, fuzz_at, fuzz_cli]
+        target:
+          - fuzz_parse
+          - fuzz_roundtrip
+          - fuzz_at
+          - fuzz_cli
+          - fuzz_json
+          - fuzz_verify
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1

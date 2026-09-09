@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-09-09T12:00:00Z",
+  "repo_root": "/home/u/.dotfiles",
+  "dotfiles_version": "0.2.519",
+  "platform": {
+    "runtime": "linux-x64",
+    "host_os": "linux",
+    "architecture": "x86_64",
+    "hostname": "kestrel"
+  },
+  "git_signing": {
+    "format": "ssh",
+    "signing_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExampleKeyOnly",
+    "allowed_signers_file": "/home/u/.config/git/allowed_signers",
+    "merge_verify_signatures": true
+  },
+  "agent": {
+    "current_profile": "ask",
+    "profiles": {"defaultProfile": "ask", "profiles": ["ask", "plan", "apply", "audit"]},
+    "card": {"name": "dot", "version": "0.2.519"}
+  },
+  "governance": {
+    "policy_bundles": {"bundles": []},
+    "model_registry": {"models": []},
+    "prompt_registry": {"prompts": []}
+  },
+  "mcp": {
+    "doctor": {"status": "healthy", "servers": [], "warnings": 0},
+    "policy": {"defaultDecision": "deny"},
+    "registry": {"servers": []}
+  }
+}

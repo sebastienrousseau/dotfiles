@@ -38,6 +38,10 @@ criterion = { version = "0.8", default-features = false }
 name = "status"
 harness = false
 
+[[bench]]
+name = "attest"
+harness = false
+
 [profile.release]
 codegen-units = 1
 lto = "fat"

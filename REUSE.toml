@@ -22,9 +22,10 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = "2015-2026 Sebastien Rousseau"
 SPDX-License-Identifier = "Apache-2.0 OR MIT"
 
-# Vendored third-party Rust source. Recorded explicitly so a reader
-# can see the boundary between our code and imported code, even though
-# the licence expression matches.
+# First-party Rust source for the `dot-sys` crate: the health probe and
+# the WebAssembly verifier behind `dot attest --verify`. Listed
+# explicitly because the tree also holds fuzz corpora and build output,
+# which carry no header of their own.
 [[annotations]]
 path = ["lib/wasm-tools/**", "lib/wasm-tools/**/**"]
 precedence = "override"

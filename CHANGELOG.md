@@ -2,6 +2,43 @@
 
 This file documents all notable changes to this project.
 
+## Unreleased
+
+### Added
+
+- `dot attest --verify` (`--json|-j`, `--max-age|-a`): checks a workstation
+  evidence record against the attestation policy by running `lib/wasm-tools`
+  as WebAssembly under `wasmtime`. The module gets stdin, stdout and a clock
+  and nothing else — no filesystem, no network, no environment — so the
+  verdict does not depend on the tools installed on the machine under review.
+  Eleven checks cover evidence freshness, the required identity fields, the
+  git signing configuration, the agent profile and MCP health.
+- `scripts/diagnostics/attest-verify.sh`, the caller behind that flag: it
+  resolves the module and the runtime, builds the module on demand when a
+  Rust toolchain is present, and forwards an evidence file, a pipe, or a
+  fresh `dot attest --json`.
+- `dot-sys` gained a real `wasm32-wasip1` target, a general JSON reader
+  (`dot_sys::json`), an RFC 3339 UTC parser (`dot_sys::time`), the policy
+  itself (`dot_sys::attest`), a `verify` subcommand, `--help` and
+  `--version`, two more fuzz targets (`fuzz_json`, `fuzz_verify`), a fourth
+  example, a second benchmark suite, and `tests/wasm.rs`, which executes the
+  built module in a runtime rather than merely inspecting the artefact.
+- `rust.yml` gained a `wasm` job: clippy for the target, a build, an
+  execution assertion, the WebAssembly integration tests, the shell caller's
+  test, and the `.wasm` uploaded as an artefact.
+
+### Fixed
+
+- The health-probe record no longer claims `"engine": "wasm"` when it was
+  produced by a host binary. `ENGINE` is now `cfg`-selected, so the field
+  states where the bytes were actually computed: `wasm` from the module,
+  `native` from the host build. This is what makes the field evidence rather
+  than a label, and both halves are asserted in CI.
+- Corrected the documentation that described `lib/wasm-tools` as vendored
+  third-party tooling or as "not actually WebAssembly": `docs/ECOSYSTEM.md`,
+  `docs/architecture/REPO_LAYOUT.md`, `docs/STRUCTURE.md`,
+  `docs/ARCHITECTURE.md`, `docs/reference/TOOLS.md` and `REUSE.toml`.
+
 ## v0.2.519 — 2026-08-13
 
 ### Added

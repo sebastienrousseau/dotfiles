@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-09-09T12:00:00Z",
+  "repo_root": "/home/u/.dotfiles",
+  "dotfiles_version": "0.2.519",
+  "platform": {
+    "runtime": "linux-x64",
+    "host_os": "linux",
+    "architecture": "x86_64",
+    "hostname": ""
+  },
+  "git_signing": {
+    "format": "none",
+    "signing_key": "",
+    "allowed_signers_file": "/home/u/.config/git/allowed_signers",
+    "merge_verify_signatures": false
+  },
+  "agent": {"current_profile": "yolo"},
+  "mcp": {"doctor": {"status": "degraded"}}
+}
