@@ -230,6 +230,30 @@ assert_file_exists "$_PLAIN_TMP/secrets/store/PLAIN_KEY.age" "the encrypted file
 assert_file_contains "$_PLAIN_TMP/secrets/index.txt" "PLAIN_KEY" \
   "the key reaches the index, which only happens if the store call returned"
 
+test_start "secrets_set_plain_enc_reports_a_failing_encryption"
+# The trap that used to clean up also swallowed nothing useful: with it gone,
+# a failing age-keygen or age must be reported rather than assumed to work,
+# or a failed encryption would look exactly like a stored secret.
+cat >"$_PLAIN_TMP/bin/age" <<'SHIM'
+#!/usr/bin/env bash
+exit 3
+SHIM
+chmod +x "$_PLAIN_TMP/bin/age"
+_fail_out="$(
+  PATH="$_PLAIN_TMP/bin:$PATH" \
+    TMPDIR="$_PLAIN_TMP/tmp" \
+    DOTFILES_SECRETS_PROVIDER=plain-enc \
+    DOT_SECRETS_HOME="$_PLAIN_TMP/secrets" \
+    DOT_SECRETS_STORE_DIR="$_PLAIN_TMP/secrets/store" \
+    DOT_SECRETS_INDEX_FILE="$_PLAIN_TMP/secrets/index.txt" \
+    DOT_SECRETS_AGE_KEY="$_PLAIN_TMP/key.txt" \
+    bash -c 'set -euo pipefail; source "$1"; dot_secrets_set FAIL_KEY v' \
+    _ "$SECRETS_FILE" 2>&1
+)"
+_fail_rc=$?
+assert_not_equals "0" "$_fail_rc" "a failing age must not report success"
+assert_output_not_contains "FAIL_KEY" "cat '$_PLAIN_TMP/secrets/index.txt'"
+
 test_start "secrets_set_plain_enc_leaves_no_recipient_file_behind"
 # The recipient file the store writes is a temporary; dropping the RETURN
 # trap must not mean dropping the cleanup. TMPDIR was private to the child,

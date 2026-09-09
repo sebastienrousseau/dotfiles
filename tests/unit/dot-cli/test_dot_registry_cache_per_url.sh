@@ -143,4 +143,27 @@ assert_equals "2" "$(printf '%s\n' "$paths" | sort -u | wc -l | tr -d ' ')" \
   "two URLs must map to two cache files"
 assert_output_not_contains "/index.json" "printf '%s' '$paths'"
 
+test_start "the_cache_key_falls_back_to_cksum_without_a_sha256_tool"
+# Not every host has shasum or sha256sum (busybox images, trimmed containers).
+# The key must still be stable and per-URL there — it is a cache key, not a
+# security boundary.
+NOSHA="$DOTFILES_COV_TMPDIR/no-sha-bin"
+mkdir -p "$NOSHA"
+for _t in bash sh cat env printf sed grep awk tr head tail cut sort wc \
+  mktemp rm mkdir dirname basename date uname cksum stat curl jq tput stty; do
+  _p="$(command -v "$_t" 2>/dev/null || true)"
+  [[ -n "$_p" ]] && ln -sf "$_p" "$NOSHA/$_t"
+done
+assert_file_not_exists "$NOSHA/shasum" "the curated PATH must not contain shasum"
+assert_file_not_exists "$NOSHA/sha256sum" "the curated PATH must not contain sha256sum"
+keys="$(PATH="$NOSHA" bash -c '
+  source "$1"
+  _registry_cache_key "$2"
+  _registry_cache_key "$3"
+  _registry_cache_key "$2"
+' _ "$REGISTRY_SH" "$URL_A" "$URL_B")"
+assert_equals "3" "$(printf '%s\n' "$keys" | grep -c .)" "three keys printed"
+assert_equals "2" "$(printf '%s\n' "$keys" | sort -u | wc -l | tr -d ' ')" \
+  "two URLs, two keys, and the same URL keys the same way twice"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
