@@ -99,7 +99,7 @@ list of backticked function names.
 
 | Area | Feature | Trigger | Tests |
 | :--- | :--- | :--- | :--- |
-| errors | Unparseable frame answered with `-32700` and a null id | `{` | `TestMalformedFrameIsAnsweredWithANullID` |
+| errors | Unparsable frame answered with `-32700` and a null id | `{` | `TestMalformedFrameIsAnsweredWithANullID` |
 | errors | Invalid envelope answered with `-32600` | wrong `jsonrpc` | `TestDecodeRequest` |
 | errors | Unknown method answered with `-32601` | `prompts/list` | `TestUnknownMethod` `TestEndToEndProtocolExchange` |
 | errors | Bad arguments answered with `-32602` | `tools/call` | `TestToolsCallRejections` |
