@@ -3,7 +3,26 @@
        ACCENT tracks the mode-following active theme, so it matches the wallpaper
        frame actually on screen — the HEIC's light and dark frames are different
        images with different dominant colours, so the dark accent would not match
-       the light-mode wallpaper the user sees. */ -}}
+       the light-mode wallpaper the user sees.
+
+       That split is by ROLE, not by colour:
+
+         background role  ($accent)      — the active variant. A block of
+           accent with white on it: `accent` is AAA-darkened against white in
+           both variants, so this holds at 7:1 either way, and it is the part
+           the eye reads as "matching the wallpaper".
+         foreground role  ($accent_fg, $secondary, $tertiary, $muted) — the
+           DARK variant's *_on_surface colours. Two problems stack here. A
+           light variant's chromatic colours are solved against a LIGHT
+           background so they come out dark (1.02:1 as text on this bar), and
+           `accent`/`secondary`/`tertiary` are darkened in BOTH variants until
+           white sits on them at 7:1 — they are block backgrounds by
+           construction, and reusing them as text reached 1.67:1. The
+           *_on_surface slots keep the hue and raise lightness until the text
+           clears 4.5:1 on panel, border and bg.
+         separator glyphs — the active accent, deliberately. A powerline glyph
+           must match the colour of the block it abuts or the join shows a
+           seam; it is a shape, not text, so contrast does not apply. */ -}}
 {{- $themeName := includeTemplate "theme-name" . -}}
 {{- $family := trimSuffix "-dark" (trimSuffix "-light" $themeName) -}}
 {{- $t := index .themes (printf "%s-dark" $family) -}}
@@ -17,10 +36,25 @@
 {{- $bg := $t.term.bg -}}
 {{- $fg := $t.term.fg -}}
 {{- $accent := $active.ui.accent -}}
+{{- $accent_fg := (index $t.ui "accent_on_surface") | default $t.ui.accent -}}
 {{- $accent_text := $active.ui.accent_text -}}
 {{- $panel := $t.ui.panel -}}
 {{- $border := $t.ui.border -}}
 {{- $dim := $t.term.c8 -}}
+{{- /* muted: de-emphasised but still TEXT. term.c8 is ANSI bright-black,
+       floored at 2.5:1 against bg, and using it here put the clock at
+       2.12:1 and the inactive window names at 2.45:1. ui.text_muted is
+       floored at 4.5:1 against BOTH panel and border, which are the two
+       surfaces this bar paints on. */ -}}
+{{- $muted := (index $t.ui "text_muted") | default $t.term.c8 -}}
+{{- /* The wallpaper's 2nd and 3rd chromatic colours, so the bar carries
+       more of the image than a single accent. Both take white at 7:1.
+       `index` rather than `.secondary`: a missing map key is an ERROR
+       with field syntax and nil with index, and only nil reaches
+       `default`. This template must survive a themes.toml generated
+       before these keys existed. */ -}}
+{{- $secondary := (index $t.ui "secondary_on_surface") | default $t.ui.accent -}}
+{{- $tertiary := (index $t.ui "tertiary_on_surface") | default $t.ui.accent -}}
 {{- $error := $t.ui.error -}}
 {{- $success := $t.ui.success -}}
 {{- $warning := $t.ui.warning -}}
@@ -178,21 +212,21 @@ set -g status-left "\
 # Right: [git?] [host] ❱ [date] ❱ [time]
 set -g status-right "\
 #[fg={{ $border }},bg={{ $panel }},nobold,noitalics,nounderscore]\
-#[fg={{ $fg }},bg={{ $border }}] #H \
+#[fg={{ $secondary }},bg={{ $border }},bold] #H \
 #[fg={{ $border }},bg={{ $border }},nobold,noitalics,nounderscore]\
-#[fg={{ $dim }},bg={{ $border }}] %d %b \
+#[fg={{ $muted }},bg={{ $border }}] %d %b \
 #[fg={{ $accent }},bg={{ $border }},nobold,noitalics,nounderscore]\
 #[fg={{ $accent_text }},bg={{ $accent }},bold]  %H:%M "
 
 # --- Window Tabs ---
 set -g window-status-format "\
 #[fg={{ $panel }},bg={{ $panel }},nobold,noitalics,nounderscore]\
-#[fg={{ $dim }},bg={{ $panel }}] #I  #W #F \
+#[fg={{ $muted }},bg={{ $panel }}] #I  #W #F \
 #[fg={{ $panel }},bg={{ $panel }},nobold,noitalics,nounderscore]"
 
 set -g window-status-current-format "\
 #[fg={{ $panel }},bg={{ $border }},nobold,noitalics,nounderscore]\
-#[fg={{ $accent }},bg={{ $border }},bold] #I  #W #F \
+#[fg={{ $accent_fg }},bg={{ $border }},bold] #I  #W #F \
 #[fg={{ $border }},bg={{ $panel }},nobold,noitalics,nounderscore]"
 
 set -g window-status-separator ""
@@ -200,7 +234,7 @@ set -g window-status-separator ""
 # --- Pane Borders ---
 set -g pane-border-style "fg={{ $border }}"
 set -g pane-active-border-style "fg={{ $accent }}"
-set -g display-panes-colour "{{ $border }}"
+set -g display-panes-colour "{{ $tertiary }}"
 set -g display-panes-active-colour "{{ $accent }}"
 
 # --- Messages & Menus ---
