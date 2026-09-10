@@ -5,6 +5,9 @@ Catppuccin.catppuccin-vsc-icons
 
 # Additional recommended extensions for theme support
 enkia.tokyo-night
+# 44 of the 228 generated themes map to the everforest family; without
+# this the label resolves to nothing and VS Code keeps the old theme.
+sainnhe.everforest
 
 # Development Extensions (examples)
 # ms-python.python

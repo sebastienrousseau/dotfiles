@@ -329,6 +329,28 @@ def ensure_contrast(
     return lab_to_rgb(fl, fa, fb)
 
 
+# VS Code theme labels, as the extensions actually register them.
+#
+# These were previously derived by taking the Neovim theme name and appending
+# Catppuccin's flavour words: f"{nvim.title()} {'Mocha' if is_dark else 'Latte'}".
+# That is correct for Catppuccin and fabricated for everything else — it
+# produced "Tokyonight Mocha" and "Everforest Latte", which no extension
+# registers. VS Code cannot resolve an unknown label, so it silently keeps
+# whatever theme was already active and logs an error the user never sees.
+#
+# Mocha/Latte are Catppuccin FLAVOUR names, not a general dark/light suffix.
+# The label must match `contributes.themes[].label` in the extension's
+# package.json exactly, so it is written out rather than computed.
+VSCODE_THEMES = {
+    # catppuccin.catppuccin-vsc
+    "catppuccin": {"dark": "Catppuccin Mocha", "light": "Catppuccin Latte"},
+    # enkia.tokyo-night
+    "tokyonight": {"dark": "Tokyo Night", "light": "Tokyo Night Light"},
+    # sainnhe.everforest
+    "everforest": {"dark": "Everforest Dark", "light": "Everforest Light"},
+}
+
+
 def _nvim_from_hue(hue: float, is_dark: bool) -> Tuple[str, str]:
     """Map accent hue angle to nearest Neovim colorscheme."""
     if 60 <= hue < 150:
@@ -596,9 +618,9 @@ def generate_theme(
             "gtk_icon": "Papirus-Dark" if is_dark else "Papirus-Light",
             "gnome_shell": "",
             "gnome_gtk": "Adwaita-dark" if is_dark else "Adwaita",
-            "vscode": f"{nvim_theme[0].replace('-', ' ').title()} {'Mocha' if is_dark else 'Latte'}",
-            "vscode_dark": f"{nvim_theme[0].replace('-', ' ').title()} Mocha",
-            "vscode_light": f"{nvim_theme[0].replace('-', ' ').title()} Latte",
+            "vscode": VSCODE_THEMES[nvim_theme[0]]["dark" if is_dark else "light"],
+            "vscode_dark": VSCODE_THEMES[nvim_theme[0]]["dark"],
+            "vscode_light": VSCODE_THEMES[nvim_theme[0]]["light"],
             "cat_wallpaper": "",
             "starship_palette": f"catppuccin_{'mocha' if is_dark else 'latte'}",
         },

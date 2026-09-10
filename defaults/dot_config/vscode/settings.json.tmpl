@@ -1,7 +1,10 @@
 {
-  // Theme Configuration - Dynamically set based on chezmoi theme variable
-{{- $themeName := includeTemplate "theme-name" . -}}
-{{- $t := index .themes $themeName -}}
+{{- $themeName := includeTemplate "theme-name" . }}
+{{- $t := index .themes $themeName }}
+  // Theme Configuration - set from the chezmoi theme variable.
+  // The two assignments above must NOT use a right-hand `-}}`: that chomps
+  // the following newline and welds this comment onto the colorTheme line
+  // below, commenting the setting out. It shipped that way.
   "workbench.colorTheme": "{{ $t.app.vscode }}",
   "workbench.preferredDarkColorTheme": "{{ $t.app.vscode_dark }}",
   "workbench.preferredLightColorTheme": "{{ $t.app.vscode_light }}",
