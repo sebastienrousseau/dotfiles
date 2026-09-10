@@ -105,7 +105,7 @@ if command -v apt-get >/dev/null; then
     $sudo_cmd apt-get install -y gh || log_info "Skipping GitHub CLI install (apt)."
   fi
 
-  optional_packages=(terraform terraform-docs tflint trivy packer vagrant ansible)
+  optional_packages=(terraform terraform-docs tflint trivy packer vagrant ansible sccache)
   install_optional=()
   for pkg in "${optional_packages[@]}"; do
     if apt-cache show "$pkg" >/dev/null 2>&1; then
@@ -128,7 +128,7 @@ elif command -v dnf >/dev/null; then
   )
   $sudo_cmd dnf install -y "${packages[@]}"
 
-  optional_packages=(terraform terraform-docs tflint trivy packer vagrant ansible)
+  optional_packages=(terraform terraform-docs tflint trivy packer vagrant ansible sccache)
   install_optional=()
   for pkg in "${optional_packages[@]}"; do
     if dnf list --available "$pkg" >/dev/null 2>&1; then
@@ -152,7 +152,7 @@ elif command -v pacman >/dev/null; then
   )
   $sudo_cmd pacman -S --needed --noconfirm "${packages[@]}"
 
-  optional_packages=(terraform terraform-docs tflint trivy packer vagrant ansible)
+  optional_packages=(terraform terraform-docs tflint trivy packer vagrant ansible sccache)
   install_optional=()
   for pkg in "${optional_packages[@]}"; do
     if pacman -Si "$pkg" >/dev/null 2>&1; then
