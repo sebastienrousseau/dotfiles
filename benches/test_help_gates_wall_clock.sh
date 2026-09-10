@@ -23,7 +23,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
-source "$SCRIPT_DIR/../framework/assertions.sh"
+# The assertions framework lives under tests/, not beside this file. benches/
+# is a sibling of tests/, so `$SCRIPT_DIR/../framework` resolves to
+# `<repo>/framework`, which does not exist — this script has been dying on
+# its own second line, and nothing in CI ran it, so nothing said so. Address
+# it from the repository root instead.
+source "$REPO_ROOT/tests/framework/assertions.sh"
 
 GATES=(
   tests/regression/test_dot_subcommand_smoke.sh
