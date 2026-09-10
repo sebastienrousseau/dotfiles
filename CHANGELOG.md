@@ -4,6 +4,29 @@ This file documents all notable changes to this project.
 
 ## v0.2.519 — 2026-08-13
 
+### Added
+
+- Implemented the Model Context Protocol server the discovery card has always
+  advertised. `dot mcp serve` now speaks JSON-RPC 2.0 over newline-delimited
+  frames on stdin/stdout: `initialize`, `initialized`, `ping`, `tools/list`,
+  `tools/call`, `resources/list`, `resources/read`,
+  `resources/templates/list`, `logging/setLevel`, and a clean shutdown on EOF.
+  It is a third Go module, `defaults/dot_local/share/dot-mcp`, deployed to
+  `~/.local/bin/dot-mcp`.
+- Served four read-only tools — `mcp-doctor`, `agent-mode`,
+  `workstation-attestation` and `fleet-status` — each a fixed `dot` argument
+  vector run without a shell, and five read-only resources covering the MCP
+  policy, the MCP registry, the agent profiles and both discovery cards.
+  Mutating paths are deliberately not exposed.
+
+### Changed
+
+- Corrected `.well-known/mcp/server-card.json` to describe the server that now
+  exists: the stdio transport is `dot mcp serve` rather than the one-shot
+  `dot mcp --strict --json` audit, and the declared tools, resources and
+  capabilities are pinned to the running registry by tests that fail in both
+  directions. `entrypoints.mcp` in the A2A card was updated to match.
+
 ### Fixed
 
 - Rendered the Nerd Font check as a chezmoi template so its verified-download

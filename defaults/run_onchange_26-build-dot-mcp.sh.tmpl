@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# run_onchange_26-build-dot-mcp.sh.tmpl
+# Builds the stdio MCP server (`dot mcp serve`) to ~/.local/bin/dot-mcp when
+# its Go source changes. Unlike the cockpit this is not opt-in: the published
+# card at .well-known/mcp/server-card.json advertises `dot mcp serve` as a
+# transport, so any workstation with a Go toolchain should have the server
+# ready. Skips cleanly when no Go toolchain is available (`dot mcp serve` then
+# builds it on demand into the user cache).
+{{- if ne .chezmoi.os "windows" }}
+
+set -euo pipefail
+
+# Source hashes baked in at render time so this script's content changes when
+# the server source changes, retriggering chezmoi onchange.
+# main.go:      {{ include "dot_local/share/dot-mcp/main.go" | sha256sum }}
+# server.go:    {{ include "dot_local/share/dot-mcp/server.go" | sha256sum }}
+# jsonrpc.go:   {{ include "dot_local/share/dot-mcp/jsonrpc.go" | sha256sum }}
+# tools.go:     {{ include "dot_local/share/dot-mcp/tools.go" | sha256sum }}
+# resources.go: {{ include "dot_local/share/dot-mcp/resources.go" | sha256sum }}
+# paths.go:     {{ include "dot_local/share/dot-mcp/paths.go" | sha256sum }}
+# go.mod:       {{ include "dot_local/share/dot-mcp/go.mod" | sha256sum }}
+
+SRC="$HOME/.local/share/dot-mcp"
+OUT="$HOME/.local/bin/dot-mcp"
+
+[[ -f "$SRC/main.go" ]] || {
+  echo "dot-mcp: source not deployed yet — skipping."
+  exit 0
+}
+
+# Resolve a Go toolchain (mise shims put `go` on PATH when activated).
+if ! command -v go >/dev/null 2>&1; then
+  echo "dot-mcp: no Go toolchain — install via mise to enable. Skipping."
+  exit 0
+fi
+
+mkdir -p "$HOME/.local/bin"
+echo "Building dot-mcp (MCP server)…"
+if (cd "$SRC" && go build -o "$OUT" .); then
+  echo "dot-mcp installed: $OUT"
+else
+  echo "dot-mcp: build failed (continuing)."
+fi
+{{- end }}

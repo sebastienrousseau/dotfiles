@@ -98,6 +98,9 @@ specs=(
   # version here misroutes tooling rather than merely reading wrong.
   ".well-known/agent-card.json|\"version\"|\"version\": \"${canonical}\""
   ".well-known/mcp/server-card.json|\"version\"|\"version\": \"${canonical}\""
+  # serverInfo.version returned by the MCP `initialize` handshake. A client
+  # reads the card and the handshake; they must agree.
+  "defaults/dot_local/share/dot-mcp/main.go|^const version =|const version = \"${canonical}\""
   # LLM-facing repo index.
   "llms.txt|Current version:|Current version: v${canonical}."
   # Citation metadata: a stale version here is cited in papers.

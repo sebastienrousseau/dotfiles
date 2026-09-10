@@ -117,7 +117,7 @@ Interactive setup for all AI CLI tools
 Context\-aware RAG query over your dotfiles
 .TP
 .B mcp
-Inspect MCP policy, supply chain, and registry
+Inspect MCP policy, supply chain, and registry; serve MCP over stdio
 .TP
 .B mode
 Set or inspect agent operating profiles (ask/plan/apply/audit)
@@ -223,6 +223,9 @@ Run the MCP policy/supply\-chain/config audit
 .TP
 .B mcp registry
 Show the configured MCP server registry
+.TP
+.B mcp serve
+Run the stdio MCP server (JSON\-RPC 2.0 on stdin/stdout)
 .TP
 .B agents list
 Show recognised AI agent harnesses and their config paths

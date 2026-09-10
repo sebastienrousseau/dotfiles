@@ -101,7 +101,7 @@ assert_file_contains "$MCP_POLICY_FILE" "\"requireOauthForHttpTransports\": true
 
 test_start "mcp_meta_registry_subcommand"
 assert_file_contains "$META_COMMANDS_SCRIPT" "registry)" "dot mcp supports registry subcommand"
-assert_file_contains "$META_COMMANDS_SCRIPT" "Usage: dot mcp [doctor|registry]" "dot mcp usage includes registry"
+assert_file_contains "$META_COMMANDS_SCRIPT" "Usage: dot mcp [doctor|registry|serve]" "dot mcp usage includes registry and serve"
 
 test_start "mcp_doctor_strict_local_passes"
 if REPO_ROOT="$REPO_ROOT" MCP_CONFIG="$MCP_CONFIG_FILE" bash "$TEST_SCRIPT" --strict >/dev/null 2>&1; then

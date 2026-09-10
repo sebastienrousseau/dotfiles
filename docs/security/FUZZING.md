@@ -28,14 +28,15 @@ the shell rejects (or vice-versa), one of them has a hole.
 
 ## Where the harnesses live
 
-The framework ships two Go binaries as well as the shell, so
-harnesses live in three modules:
+The framework ships three Go binaries as well as the shell, so
+harnesses live in four modules:
 
 | Module | Harnesses | Runs against |
 |--------|-----------|--------------|
 | `fuzz` | 11 | ports of the shell helpers **and** of the two binaries' parsers — this is the package OSS-Fuzz and ClusterFuzzLite compile |
 | `defaults/dot_local/share/dot-ui` | 8 | the real dot-ui implementation, in-module |
 | `defaults/dot_local/share/dot-ai-tui` | 11 | the real dot-ai-tui implementation, in-module |
+| `defaults/dot_local/share/dot-mcp` | 5 | the real MCP server, in-module — everything a peer can put on the wire |
 
 `dot-ui` and `dot-ai-tui` are `package main` in their own modules,
 which OSS-Fuzz's `compile_native_go_fuzzer` cannot import — it needs a
@@ -70,6 +71,7 @@ is a bug in one of them.
 |--------|-----------|
 | dot-ui | `FuzzParseEvent`, `FuzzStepApply`, `FuzzParseColor`, `FuzzFuzzyMatch`, `FuzzPickKeys`, `FuzzRunTable`, `FuzzReadItems`, `FuzzParsePickArgs` |
 | dot-ai-tui | `FuzzHighlight`, `FuzzBuildPrompt`, `FuzzHandleSlash`, `FuzzPalette`, `FuzzWindowRows`, `FuzzRenderTranscript`, `FuzzParseSession`, `FuzzFilterSqliteOutput`, `FuzzGatewayURL`, `FuzzModelKeys`, `FuzzModelCycle` |
+| dot-mcp | `FuzzReadFrames`, `FuzzDecodeRequest`, `FuzzValidateArgs`, `FuzzServeSession`, `FuzzBuildCallResult` |
 
 Each module's `FEATURES.md` maps every harness to the feature it
 covers, and a matrix test fails if a harness is missing from it.
@@ -109,7 +111,7 @@ Add a harness when:
 - a new `dot <subcommand>` accepts user input via `$1` / `--flag`,
 - a new regex appears in `scripts/dot/lib/utils.sh`,
 - a new "construct a URL / path / shell-eval string" code path lands,
-- a new function in `dot-ui` or `dot-ai-tui` parses or transforms
+- a new function in `dot-ui`, `dot-ai-tui` or `dot-mcp` parses or transforms
   stdin, an environment variable, a key stream or model output —
   add it in-module *and* port it to `fuzz`.
 

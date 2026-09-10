@@ -14,6 +14,7 @@ name: Fuzz / Native Go harnesses
 #                                        the two Go binaries' parsers
 #   defaults/dot_local/share/dot-ui      in-module, against the real code
 #   defaults/dot_local/share/dot-ai-tui  in-module, against the real code
+#   defaults/dot_local/share/dot-mcp     in-module, the MCP wire protocol
 #
 # Pairs with the OSS-Fuzz / ClusterFuzzLite integration in
 # fuzz/oss-fuzz/, which runs the ported harnesses continuously at
@@ -29,6 +30,7 @@ on:
       - 'fuzz/**'
       - 'defaults/dot_local/share/dot-ui/**'
       - 'defaults/dot_local/share/dot-ai-tui/**'
+      - 'defaults/dot_local/share/dot-mcp/**'
       - '.clusterfuzzlite/**'
       - '.github/workflows/fuzz.yml'
   workflow_dispatch:
@@ -62,6 +64,8 @@ jobs:
             dir: defaults/dot_local/share/dot-ui
           - name: dot-ai-tui
             dir: defaults/dot_local/share/dot-ai-tui
+          - name: dot-mcp
+            dir: defaults/dot_local/share/dot-mcp
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
@@ -160,6 +164,17 @@ jobs:
             dir: defaults/dot_local/share/dot-ai-tui
           - harness: FuzzModelCycle
             dir: defaults/dot_local/share/dot-ai-tui
+          # dot-mcp, in-module: everything a peer can put on the wire.
+          - harness: FuzzReadFrames
+            dir: defaults/dot_local/share/dot-mcp
+          - harness: FuzzDecodeRequest
+            dir: defaults/dot_local/share/dot-mcp
+          - harness: FuzzValidateArgs
+            dir: defaults/dot_local/share/dot-mcp
+          - harness: FuzzServeSession
+            dir: defaults/dot_local/share/dot-mcp
+          - harness: FuzzBuildCallResult
+            dir: defaults/dot_local/share/dot-mcp
           # Ports of the two binaries' parsers — what OSS-Fuzz builds.
           - harness: FuzzUIEventLine
             dir: fuzz

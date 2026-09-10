@@ -53,6 +53,9 @@ node_modules
 # `test.go` and tries to EXECUTE it (exec format error) — so ignore that too.
 .local/share/dot-ui/*_test.go
 .local/share/dot-ui/test.go
+# Same for the MCP server: `go build .` ignores its tests, and the card-truth
+# tests reference .well-known/, which is not deployed either.
+.local/share/dot-mcp/*_test.go
 
 # ── Standalone files that aren't user-deployable ──────────────────────
 install.sh

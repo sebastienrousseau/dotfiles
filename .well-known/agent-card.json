@@ -50,7 +50,7 @@
     "cli": "dot",
     "mode": "dot mode",
     "attestation": "dot attest --json",
-    "mcp": "dot mcp --strict --json",
+    "mcp": "dot mcp serve",
     "conformance": "dot agent conformance --strict --json",
     "a2aCard": "dot agent a2a-card --json"
   }

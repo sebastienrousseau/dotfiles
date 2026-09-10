@@ -239,7 +239,7 @@ Diagnostics|load-bench|Measure time to heavy-layer readiness|Performance benchma
 AI|ai|AI fleet cockpit, gateway, and cost|Subcommands: dot ai (cockpit), dot ai "<prompt>", dot ai serve, dot ai install, dot ai cost, dot ai doctor.
 AI|ai-setup|Interactive setup for all AI CLI tools|Initial AI tool bootstrap.
 AI|ai-query|Context-aware RAG query over your dotfiles|Ask questions over the repo state.
-AI|mcp|Inspect MCP policy, supply chain, and registry|Governance and validation surface.
+AI|mcp|Inspect MCP policy, supply chain, and registry; serve MCP over stdio|Governance surface plus the `dot mcp serve` MCP server.
 AI|mode|Set or inspect agent operating profiles (ask/plan/apply/audit)|Bounded-autonomy controls.
 AI|agent|Profile-aware execution, agent card, a2a-card, session log, checkpoints, and conformance|Agent metadata and local audit trail.
 AI|cl|Claude CLI with context patterns|Context-aware Anthropic bridge.
@@ -316,6 +316,7 @@ AI|agent a2a-card|Show or validate the A2A v0.3 agent card|Subcommand — e.g. d
 AI|agent conformance|Run the A2A conformance test suite|Subcommand — e.g. dot agent conformance --strict
 AI|mcp doctor|Run the MCP policy/supply-chain/config audit|Subcommand — e.g. dot mcp doctor
 AI|mcp registry|Show the configured MCP server registry|Subcommand — e.g. dot mcp registry
+AI|mcp serve|Run the stdio MCP server (JSON-RPC 2.0 on stdin/stdout)|Subcommand — e.g. dot mcp serve
 Secrets|secrets edit|Edit the encrypted secrets file (age)|Subcommand — e.g. dot secrets edit
 Secrets|secrets set|Store a secret value under a key|Subcommand — e.g. dot secrets set OPENAI_API_KEY
 Secrets|secrets get|Retrieve a secret value (--raw for plaintext)|Subcommand — e.g. dot secrets get OPENAI_API_KEY --raw
@@ -384,7 +385,7 @@ restore|Restore from a backup or git ref.|dot restore -l\ndot restore -L\ndot re
 rollback|Restore a previous configuration snapshot.|dot rollback
 lint|Run shell quality checks for the repo.|dot lint\ndot lint -c\ndot lint -f
 ai|Show installed AI tools, delegate a task to a cheap model, or report spend.|dot ai\ndot ai delegate "rename UserService.get* to fetch*"\ndot ai cost --since 7
-mcp|Inspect MCP configuration, policy, and registry.|dot mcp\ndot mcp -s -j\ndot mcp registry
+mcp|Inspect MCP configuration, policy, and registry, or run the MCP server.|dot mcp\ndot mcp -s -j\ndot mcp registry\ndot mcp serve
 mode|Inspect or switch the active agent mode.|dot mode list\ndot mode show ask\ndot mode set audit
 agent|Inspect agent metadata or run profile-aware actions.|dot agent card\ndot agent a2a-card --validate\ndot agent checkpoint list\ndot agent conformance --strict --json
 agents|Synchronize and render instructions for supported AI coding harnesses.|dot agents list\ndot agents check\ndot agents render

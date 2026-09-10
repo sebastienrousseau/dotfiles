@@ -212,13 +212,38 @@ still work as deprecated aliases. See [AI.md](../../AI.md) for the full guide.
 
 ### `dot mcp`
 
-Inspect MCP policy and registry.
+Inspect MCP policy and registry, or run the MCP server.
 
 ```
-dot mcp [--strict|-s] [--json|-j]
+dot mcp [--strict|-s] [--json|-j]   # audit (default: doctor)
+dot mcp registry [--json|-j]        # show the tracked MCP server registry
+dot mcp serve                       # run the stdio MCP server
 ```
 
 With `--strict`, validates the active MCP registry matches the policy hash. Exit code 1 on mismatch.
+
+#### `dot mcp serve`
+
+Runs the Model Context Protocol server described by
+`.well-known/mcp/server-card.json`: JSON-RPC 2.0 over newline-delimited
+frames on stdin/stdout, with stderr reserved for logs. It is meant to be
+launched by an MCP client, not typed at a prompt:
+
+```json
+{ "mcpServers": { "dotfiles": { "command": "dot", "args": ["mcp", "serve"] } } }
+```
+
+It serves four read-only tools — `mcp-doctor`, `agent-mode`,
+`workstation-attestation` and `fleet-status`, each a fixed `dot` argument
+vector run without a shell — and five resources (the MCP policy, the MCP
+registry, the agent profiles and both discovery cards). Mutating paths
+(`dot mode set`, `dot attest --write`) are deliberately not exposed: a
+client cannot change this workstation through the server.
+
+The binary is `~/.local/bin/dot-mcp`, built by chezmoi from
+[`defaults/dot_local/share/dot-mcp`](../../../defaults/dot_local/share/dot-mcp/README.md);
+when it is missing and a Go toolchain is present, `dot mcp serve` builds
+it on demand into the user cache.
 
 ### `dot mode [<profile>]`
 

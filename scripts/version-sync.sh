@@ -596,6 +596,11 @@ main() {
     "install.sh"
     "lib/dot/bento.sh"
     "share/man/man1/dot.1"
+    # The MCP server reports this string as serverInfo.version in the
+    # `initialize` handshake, and it must equal the version in
+    # .well-known/mcp/server-card.json — a client compares them.
+    # TestVersionMatchesServerCard fails the build if this drifts.
+    "defaults/dot_local/share/dot-mcp/main.go"
   )
   for script_file in "${script_files[@]}"; do
     local full_path="$PROJECT_ROOT/$script_file"
