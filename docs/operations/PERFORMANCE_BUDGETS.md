@@ -4,7 +4,7 @@ render_with_liquid: false
 
 # Performance Budgets
 
-Every operation this repo owns falls into one of four performance tiers. Each tier has a **hard budget** enforced by `tests/performance/test_perf_budgets.sh`. If a change pushes an operation past its budget's headroom, CI fails.
+Every operation this repo owns falls into one of four performance tiers. Each tier has a **hard budget** enforced by `benches/test_perf_budgets.sh`. If a change pushes an operation past its budget's headroom, CI fails.
 
 ## The tiers
 
@@ -90,7 +90,7 @@ constraint.
 
 | Operation | Baseline | Reason |
 |---|---:|---|
-| `test_dot_help_flag_universal.sh` | ~11s | Invokes `dot help --help` on ~100 commands via subshell each. The coverage it provides justifies the cost; regression is caught by `tests/performance/test_help_gates_wall_clock.sh` at the suite level. |
+| `test_dot_help_flag_universal.sh` | ~11s | Invokes `dot help --help` on ~100 commands via subshell each. The coverage it provides justifies the cost; regression is caught by `benches/test_help_gates_wall_clock.sh` at the suite level. |
 
 ### OUT-OF-SCOPE (not gated per-run)
 
@@ -105,7 +105,7 @@ constraint.
 
 The budgets above are **regression gates**, not aspirations. If a real optimisation lowers a baseline, edit the doc + the perf test to lower the budget too. If a change pushes something over the budget, the test fails and CI blocks the merge.
 
-The aspirational shell-startup target (`<30ms`) is tracked separately in `tests/performance/bench.sh` — that's a bench, not a budget.
+The aspirational shell-startup target (`<30ms`) is tracked separately in `benches/bench.sh` — that's a bench, not a budget.
 
 ## Adding a new operation
 
@@ -114,13 +114,13 @@ When you add a new script that runs at a shell prompt:
 1. Time it 5 runs on a warm system: `for _ in {1..5}; do time bash your-script; done`
 2. Take the median.
 3. Place it in the tier where `budget ≥ 2 × median`. If a median is 400ms it goes in FAST (500ms is uncomfortably tight); if it's 300ms, INSTANT is fine.
-4. Add it to `tests/performance/test_perf_budgets.sh` in the correct tier section.
+4. Add it to `benches/test_perf_budgets.sh` in the correct tier section.
 5. Add its baseline to this doc.
 
 ## Where the enforcement lives
 
-- **Per-op budget test**: `tests/performance/test_perf_budgets.sh`
-- **Suite-level wall-clock ratchet**: `tests/performance/test_help_gates_wall_clock.sh`
+- **Per-op budget test**: `benches/test_perf_budgets.sh`
+- **Suite-level wall-clock ratchet**: `benches/test_help_gates_wall_clock.sh`
 - **CI wiring**: `.github/workflows/ci.yml`, job `quality-performance` — runs on
   ubuntu-latest and macos-latest for every PR, with no `|| true` and no budget
   scaling. Measured on the hosted macOS runner (2026-08-30), it is comparable to

@@ -22,7 +22,7 @@
 #   - scripts/qa/traceability-coverage.sh (same class of bug —
 #     both were silently passing before #1032 + #1035)
 #   - scripts/qa/check-version-consistency.sh (must detect drift)
-#   - tests/performance/test_perf_budgets.sh (must fail when a
+#   - benches/test_perf_budgets.sh (must fail when a
 #     budget is exceeded)
 
 set -u
@@ -112,7 +112,7 @@ fi
 #   b) normal budget              -> must exit zero (not always-failing)
 #   c) deliberately broken command -> must exit non-zero (breakage detection)
 # ---------------------------------------------------------------------------
-GATE="$REPO_ROOT/tests/performance/test_perf_budgets.sh"
+GATE="$REPO_ROOT/benches/test_perf_budgets.sh"
 PERF_PROBE="instant_dot_version"
 
 test_start "perf_gate_fails_on_budget_violation"

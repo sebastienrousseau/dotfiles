@@ -402,7 +402,7 @@ out="$(_run_script 2>&1)" || true
 chmod 755 "$HOME"   # always restore, even if test fails
 # Post-condition: no symlink created, dir still exists
 if [[ -d "$HOME/Movies" ]] && [[ ! -L "$HOME/Movies" ]] \
-   && ([[ "$out" == *"rmdir of empty dir failed"* ]] || [[ "$out" == *"race"* ]]); then
+   && { [[ "$out" == *"rmdir of empty dir failed"* ]] || [[ "$out" == *"race"* ]]; }; then
   ((TESTS_PASSED++)) || true
   printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
 else

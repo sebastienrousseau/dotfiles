@@ -2,6 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
+# preamble:skip
+#
+# This is a test-framework script, not a program: it uses the same assertion
+# helpers as tests/, reports every budget it breaches rather than dying on the
+# first, and measures commands whose non-zero exit is the thing being asserted.
+# `set -e` would abort at the first violation and turn a full report into a
+# single line. It lived under tests/ — which the preamble check skips for
+# exactly this reason — until benches/ became the home for timing work.
 #
 # Performance budgets — one place, tiered targets, measured baselines.
 #
@@ -26,13 +34,13 @@
 #
 #   MEDIUM  (≤ 5000ms) — full diagnostics runs
 #     * dot doctor
-#     * tests/performance/bench.sh (quick mode)
+#     * benches/bench.sh (quick mode)
 #
 #   ACCEPTED-SLOW (documented, best-effort)
 #     * test_dot_help_flag_universal — invokes dot help --help on ~100
 #       commands via a subshell each; ~11s is legitimate for the
 #       coverage it provides. Not gated here; tracked in wall-clock
-#       ratchet (tests/performance/test_help_gates_wall_clock.sh).
+#       ratchet (benches/test_help_gates_wall_clock.sh).
 #
 #   OUT-OF-SCOPE — multi-minute operations we do not gate per-run
 #     * chezmoi apply (fresh macOS: minutes)
@@ -50,8 +58,11 @@
 set -u
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
-source "$SCRIPT_DIR/../framework/assertions.sh"
+REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+# The assertions framework lives under tests/, not beside this file: benches/
+# is a sibling of tests/, so it is addressed from the repository root rather
+# than relative to SCRIPT_DIR.
+source "$REPO_ROOT/tests/framework/assertions.sh"
 
 # Overridable so the breakage-detection path can be exercised against a
 # deliberately corrupted CLI without touching the real one.
@@ -79,10 +90,12 @@ _measure() {
     rc=0
     times+=("$(( (end_ns - start_ns) / 1000000 ))")
   done
-  # median
-  local sorted
-  IFS=$'\n' sorted=($(printf '%s\n' "${times[@]}" | sort -n))
-  unset IFS
+  # median. Read the sorted list line by line rather than word-splitting a
+  # command substitution: mapfile is bash 4, and macOS ships bash 3.2.
+  local sorted=() _t
+  while IFS= read -r _t; do
+    sorted+=("$_t")
+  done < <(printf '%s\n' "${times[@]}" | sort -n)
   local mid=$((runs / 2))
   printf '%s %s' "$worst_rc" "${sorted[$mid]}"
 }
@@ -243,9 +256,9 @@ _gate "fast_dot_diff" 2000 3 bash "$DOT_CLI" diff
 
 _gate_diag "medium_dot_doctor" 5000 3 bash "$DOT_CLI" doctor
 
-# tests/performance/bench.sh has been observed at ~2s; give it 5s headroom
-if [[ -f "$REPO_ROOT/tests/performance/bench.sh" ]]; then
-  _gate_diag "medium_bench_quick_mode" 5000 3 bash "$REPO_ROOT/tests/performance/bench.sh" --quick
+# benches/bench.sh has been observed at ~2s; give it 5s headroom
+if [[ -f "$REPO_ROOT/benches/bench.sh" ]]; then
+  _gate_diag "medium_bench_quick_mode" 5000 3 bash "$REPO_ROOT/benches/bench.sh" --quick
 else
   # Absent bench.sh is not a pass — skip silently rather than bump a counter
   # without a matching test_start, which would break the framework invariant

@@ -38,6 +38,26 @@ This file documents all notable changes to this project.
   third-party tooling or as "not actually WebAssembly": `docs/ECOSYSTEM.md`,
   `docs/architecture/REPO_LAYOUT.md`, `docs/STRUCTURE.md`,
   `docs/ARCHITECTURE.md`, `docs/reference/TOOLS.md` and `REUSE.toml`.
+## v0.2.520 — 2026-08-13
+
+### Fixed
+
+- Replaced the destructive mechanism behind the macOS iCloud symlink hook. The
+  previous implementation could remove real content from `~/Documents` and
+  `~/Desktop`; the replacement only ever removes an empty directory, refuses to
+  act on a non-empty one, and leaves an existing correct symlink untouched.
+- Reported what it declined to do, and why, instead of failing silently.
+
+### Added
+
+- `docs/guides/MACOS_ICLOUD_SYMLINKS.md`, documenting what the hook does, the
+  cases it refuses, and how to resolve each one by hand.
+- A safety regression suite and a unit suite for the hook, covering the refusal
+  paths that the destructive version never had.
+- Performance budgets for the shell startup path, with the budget table and its
+  rationale in `docs/operations/PERFORMANCE_BUDGETS.md`.
+- A gate-integrity regression test asserting that the safety checks cannot be
+  disabled without a test failing.
 
 ## v0.2.519 — 2026-08-13
 
