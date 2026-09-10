@@ -68,7 +68,12 @@ codex = "latest"
 # binary and `corralctl` is never on PATH. The github: backend unpacks the
 # release tarball as-is and yields the real `corralctl`. Verified against
 # v0.0.18 assets (corralctl_Darwin_arm64.tar.gz et al).
-"github:sebastienrousseau/corral" = "latest"
+# The repository is now sebastienrousseau/corralctl, and `corralctl sync`
+# (which replaces corral-sync) is not in a tagged release yet. Until v0.0.37
+# ships, ~/.config/mise/config.toml pins a go: build of the branch; switch
+# this back on afterwards as:
+#   "github:sebastienrousseau/corralctl" = "latest"
+# "github:sebastienrousseau/corral" = "latest"
 eza = "latest"
 gping = "latest"
 # pandoc builds the HTML/PDF/EPUB manual. Without it tools/docs/build-manual.sh
