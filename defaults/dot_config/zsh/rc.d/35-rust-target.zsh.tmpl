@@ -1,0 +1,53 @@
+# Rust: per-project target dirs, all visible under /tmp/builds
+#
+# A single shared `target-dir` makes every repo serialise, because cargo
+# takes an exclusive lock on it — a build in one project blocks a test
+# run in another, which looks like a hang rather than contention. So
+# ~/.cargo/config.toml no longer sets one.
+#
+# To keep build output out of the repos *and* browsable in one place,
+# each project's ./target is a symlink into /tmp/builds/<name>.
+#
+# A symlink rather than CARGO_TARGET_DIR on purpose: an environment
+# variable only applies to this shell, so rust-analyzer, cargo-fuzz and
+# build scripts would still use ./target and rebuild everything a second
+# time. Every tool follows a symlink.
+
+# Point the current project's ./target at /tmp/builds/<name>.
+# Usage: rust-target-tmp [name]   (defaults to the repo/directory name)
+rust-target-tmp() {
+  local root name dest
+  root=$(command git rev-parse --show-toplevel 2>/dev/null) || root=$PWD
+  if [[ ! -f "$root/Cargo.toml" ]]; then
+    print -u2 "rust-target-tmp: no Cargo.toml in $root"
+    return 1
+  fi
+  name=${1:-${root:t}}
+  dest="/tmp/builds/$name"
+
+  if [[ -e "$root/target" && ! -L "$root/target" ]]; then
+    print -u2 "rust-target-tmp: $root/target exists and is a real directory."
+    print -u2 "  Remove it first:  rm -rf ${root:q}/target"
+    return 1
+  fi
+
+  mkdir -p "$dest"
+  ln -sfn "$dest" "$root/target"
+  print "target -> $dest"
+}
+
+# Recreate the symlink if /tmp was cleared on reboot but the link
+# survives in the repo. Cheap: one stat per cd into a cargo project.
+_rust_target_relink() {
+  [[ -L target && ! -e target ]] || return 0
+  local dest
+  dest=$(readlink target)
+  [[ $dest == /tmp/builds/* ]] && mkdir -p "$dest"
+}
+autoload -Uz add-zsh-hook 2>/dev/null && add-zsh-hook chpwd _rust_target_relink
+
+# List what is currently occupying /tmp/builds, largest first.
+rust-target-usage() {
+  [[ -d /tmp/builds ]] || { print "no /tmp/builds yet"; return 0 }
+  du -sh /tmp/builds/*(/N) 2>/dev/null | sort -rh
+}

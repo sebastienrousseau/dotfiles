@@ -56,6 +56,7 @@ brew "shfmt"
 # -----------------------------------------------------------------------------
 brew "uv"                    # Fast Python package manager
 brew "rustup"
+brew "sccache"                # Shared compilation cache; see ~/.cargo/config.toml
 brew "go"
 
 # -----------------------------------------------------------------------------

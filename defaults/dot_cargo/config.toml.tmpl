@@ -26,8 +26,31 @@ bloat = "bloat --release --crates"
 jobs = -1
 # Incremental compilation for faster rebuilds
 incremental = true
-# Build artifacts in /tmp (cleared on reboot)
-target-dir = "/tmp/builds/cargo"
+# NOTE: `target-dir` is deliberately NOT set globally.
+#
+# Cargo takes an exclusive lock on the target directory, so pointing
+# every repo at one shared path makes concurrent builds serialise —
+# a build in one project blocks `cargo test` in another, which looks
+# like a hang rather than contention. Each project now uses its own
+# ./target instead.
+#
+# The shared-target benefit (compiling common dependencies once) is
+# recovered by sccache below, which is content-addressed and so is
+# shared across projects *without* a lock.
+#
+# To override for one build:  CARGO_TARGET_DIR=/tmp/builds/foo cargo build
+# Use sccache as a compilation cache. Content-addressed, so concurrent
+# builds of different projects sharing dependency versions all hit the
+# same cache without blocking each other.
+#
+# Templated on presence rather than set unconditionally: cargo treats a
+# missing rustc-wrapper as a hard error ("could not execute process
+# sccache"), so an unguarded line here would break every build on a
+# machine that has not installed it yet. Re-run `chezmoi apply` after
+# installing sccache to pick it up.
+{{- if lookPath "sccache" }}
+rustc-wrapper = "sccache"
+{{- end }}
 
 {{- if eq .chezmoi.os "darwin" }}
 # macOS: Use Apple's linker for faster linking
@@ -61,6 +84,7 @@ progress.width = 80
 [registries.crates-io]
 protocol = "sparse"
 
-# Uncomment to use sccache for distributed caching
-# [build]
-# rustc-wrapper = "sccache"
+# sccache is configured in the [build] section above. Note it must live
+# there and not in a second [build] table — two tables with the same
+# name is a TOML duplicate-key error, which is why the previous
+# commented-out block here could never have been uncommented as written.

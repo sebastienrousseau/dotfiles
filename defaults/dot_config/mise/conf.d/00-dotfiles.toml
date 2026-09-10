@@ -30,8 +30,17 @@ python = ["3.12", "3.11", "3.14"]
 # Go
 go = "latest"
 
-# Rust
-rust = "latest"
+# Rust -- deliberately NOT managed by mise.
+#
+# mise's rust plugin exports RUSTUP_TOOLCHAIN, and that environment
+# variable overrides `rust-toolchain.toml` in every project, silently.
+# A repository pinned to 1.98.0 was being built with 1.97.1: clippy
+# reported an unknown lint for one that only exists in 1.98, and a
+# local "all green" did not mean CI would be green.
+#
+# rustup is installed and ~/.cargo/bin is on PATH, so rustup governs
+# instead and each project's own pin is honoured. Re-adding
+# `rust = "latest"` here brings the override back.
 
 # Ruby
 ruby = "3.3"
@@ -59,7 +68,12 @@ codex = "latest"
 # binary and `corralctl` is never on PATH. The github: backend unpacks the
 # release tarball as-is and yields the real `corralctl`. Verified against
 # v0.0.18 assets (corralctl_Darwin_arm64.tar.gz et al).
-"github:sebastienrousseau/corral" = "latest"
+# The repository is now sebastienrousseau/corralctl, and `corralctl sync`
+# (which replaces corral-sync) is not in a tagged release yet. Until v0.0.37
+# ships, ~/.config/mise/config.toml pins a go: build of the branch; switch
+# this back on afterwards as:
+#   "github:sebastienrousseau/corralctl" = "latest"
+# "github:sebastienrousseau/corral" = "latest"
 eza = "latest"
 gping = "latest"
 # pandoc builds the HTML/PDF/EPUB manual. Without it tools/docs/build-manual.sh
