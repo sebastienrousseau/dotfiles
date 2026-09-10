@@ -9,11 +9,14 @@
   "workbench.preferredDarkColorTheme": "{{ $t.app.vscode_dark }}",
   "workbench.preferredLightColorTheme": "{{ $t.app.vscode_light }}",
 
-  // Icon Theme - Use Catppuccin icons when available
-  "workbench.iconTheme": "catppuccin-perfect",
+  // Icon Theme. The id must match contributes.iconThemes[].id in
+  // catppuccin.catppuccin-vsc-icons — "catppuccin-perfect" is not one of
+  // them and never resolved. Follows the theme's own mode.
+  "workbench.iconTheme": "{{ $t.app.vscode_icons }}",
 
-  // Product Icon Theme
-  "workbench.productIconTheme": "catppuccin-perfect",
+  // No productIconTheme: catppuccin-vsc-icons registers no product icon
+  // themes at all, so the previous "catppuccin-perfect" silently did
+  // nothing. VS Code's default is correct here.
 
   // Terminal Integration - Match system theme
   "terminal.integrated.minimumContrastRatio": 4.5,

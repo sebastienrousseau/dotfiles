@@ -329,26 +329,26 @@ def ensure_contrast(
     return lab_to_rgb(fl, fa, fb)
 
 
-# VS Code theme labels, as the extensions actually register them.
+# VS Code theming — Catppuccin only.
 #
-# These were previously derived by taking the Neovim theme name and appending
-# Catppuccin's flavour words: f"{nvim.title()} {'Mocha' if is_dark else 'Latte'}".
-# That is correct for Catppuccin and fabricated for everything else — it
-# produced "Tokyonight Mocha" and "Everforest Latte", which no extension
-# registers. VS Code cannot resolve an unknown label, so it silently keeps
-# whatever theme was already active and logs an error the user never sees.
-#
-# Mocha/Latte are Catppuccin FLAVOUR names, not a general dark/light suffix.
 # The label must match `contributes.themes[].label` in the extension's
-# package.json exactly, so it is written out rather than computed.
-VSCODE_THEMES = {
-    # catppuccin.catppuccin-vsc
-    "catppuccin": {"dark": "Catppuccin Mocha", "light": "Catppuccin Latte"},
-    # enkia.tokyo-night
-    "tokyonight": {"dark": "Tokyo Night", "light": "Tokyo Night Light"},
-    # sainnhe.everforest
-    "everforest": {"dark": "Everforest Dark", "light": "Everforest Light"},
-}
+# package.json exactly, and the icon id must match `contributes.iconThemes[].id`.
+# VS Code cannot resolve an unknown name: it keeps whatever is active and logs
+# an error the user never sees, which is how three wrong values here survived.
+#
+# Verified against catppuccin.catppuccin-vsc 3.19.0 and
+# catppuccin.catppuccin-vsc-icons 1.26.0:
+#   themes      Catppuccin Mocha | Macchiato | Frappe | Latte
+#   iconThemes  catppuccin-mocha | -macchiato | -frappe | -latte
+#   productIconThemes  (none — the extension registers none at all)
+#
+# Neovim still picks per-family (tokyonight/everforest/catppuccin) from the
+# wallpaper hue; only the VS Code surface is pinned, because a single editor
+# theme that is always installed beats three that mostly are not.
+VSCODE_DARK = "Catppuccin Mocha"
+VSCODE_LIGHT = "Catppuccin Latte"
+VSCODE_ICONS_DARK = "catppuccin-mocha"
+VSCODE_ICONS_LIGHT = "catppuccin-latte"
 
 
 def _nvim_from_hue(hue: float, is_dark: bool) -> Tuple[str, str]:
@@ -618,9 +618,10 @@ def generate_theme(
             "gtk_icon": "Papirus-Dark" if is_dark else "Papirus-Light",
             "gnome_shell": "",
             "gnome_gtk": "Adwaita-dark" if is_dark else "Adwaita",
-            "vscode": VSCODE_THEMES[nvim_theme[0]]["dark" if is_dark else "light"],
-            "vscode_dark": VSCODE_THEMES[nvim_theme[0]]["dark"],
-            "vscode_light": VSCODE_THEMES[nvim_theme[0]]["light"],
+            "vscode": VSCODE_DARK if is_dark else VSCODE_LIGHT,
+            "vscode_dark": VSCODE_DARK,
+            "vscode_light": VSCODE_LIGHT,
+            "vscode_icons": VSCODE_ICONS_DARK if is_dark else VSCODE_ICONS_LIGHT,
             "cat_wallpaper": "",
             "starship_palette": f"catppuccin_{'mocha' if is_dark else 'latte'}",
         },
