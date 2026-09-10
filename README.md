@@ -300,7 +300,7 @@ every push.
 | **`dot-ai-tui`** ([`defaults/dot_local/share/dot-ai-tui`](defaults/dot_local/share/dot-ai-tui)) | Go Bubble Tea cockpit behind `dot ai` | Install, run, chat with, and meter Claude, Codex, Copilot, Aider, OpenCode and friends from one screen. |
 | **`dot mcp`** ([`docs/security/MCP_POLICY.md`](docs/security/MCP_POLICY.md)) | MCP policy, supply-chain, and registry audit over `mcp-policy.json` / `mcp-registry.json` | Keep Model Context Protocol servers inside an allowlist before an agent touches them. |
 | **`dot-mcp`** ([`defaults/dot_local/share/dot-mcp`](defaults/dot_local/share/dot-mcp)) | Go stdio MCP server behind `dot mcp serve` — JSON-RPC 2.0, four read-only tools, five resources | Let an MCP client audit this workstation's policy, agent mode, attestation and drift without being able to change it. |
-| **`dot-sys`** ([`lib/wasm-tools`](lib/wasm-tools)) | Rust source compiled to WebAssembly and run under `wasmtime` | Portable, sandboxed helper binaries for the shell. |
+| **`dot-sys`** ([`lib/wasm-tools`](lib/wasm-tools/README.md)) | Rust crate built for `wasm32-wasip1` and run under `wasmtime` | `dot attest --verify`: check a workstation evidence record in a sandbox with no filesystem, network or environment, so the verdict does not depend on the machine being reviewed. |
 | **Module registry** ([`docs/operations/REGISTRY.md`](docs/operations/REGISTRY.md)) | JSON index of reusable dotfile modules, schema at [`docs/schema/dot-registry-v1.json`](docs/schema/dot-registry-v1.json) | `dot registry list / search / install` with SHA-256-verified archives and a chezmoi preview before apply. |
 
 ### Install the pieces

@@ -30,7 +30,7 @@ Core architectural decisions and system design of the dotfiles shell distributio
 ├── .chezmoitemplates/   # Unified source for aliases, functions, and paths
 ├── scripts/             # Internal libraries and diagnostics
 ├── nix/                 # Nix Flake for deterministic toolchains
-├── lib/wasm-tools/      # Rust source for Wasm utilities
+├── lib/wasm-tools/      # `dot-sys` crate: health probe + WebAssembly attestation verifier
 └── install.sh           # Universal bootstrap script (zero dependencies)
 ```
 

@@ -25,7 +25,7 @@ Dot • Reference
 
 == Inspect and Repair ==
   •  doctor           Run the main health check.
-  •  attest           Export workstation evidence.
+  •  attest           Export workstation evidence, or verify it in WebAssembly.
   •  rollback         Return to a previous state.
   •  lint             Check shell script quality.
 

@@ -35,7 +35,7 @@ Integrated tools organized by role in the workflow.
 | Tool | Purpose | Description |
 | :--- | :--- | :--- |
 | **Pueue** | Task queue | Offload long-running tasks to a background daemon |
-| **Wasmtime** | Wasm runtime | Run pre-compiled Rust/Zig tools as WebAssembly modules |
+| **Wasmtime** | Wasm runtime | Runs `lib/wasm-tools` (`dot-sys.wasm`) for `dot attest --verify` |
 | **SOPS** | Secrets operations | Encrypted secrets with automatic en/decryption |
 
 ---

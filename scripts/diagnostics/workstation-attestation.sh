@@ -25,11 +25,22 @@ JSON_MODE=0
 WRITE_PATH=""
 FLEET_STORE=""
 FLEET_ID=""
+VERIFY=0
+VERIFY_MAX_AGE=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --json | -j)
       JSON_MODE=1
       shift
+      ;;
+    --verify | -V)
+      VERIFY=1
+      shift
+      ;;
+    --max-age | -a)
+      VERIFY_MAX_AGE="${2:-}"
+      VERIFY=1
+      shift 2
       ;;
     --write | -w)
       WRITE_PATH="${2:-}"
@@ -169,6 +180,20 @@ if [[ -n "$FLEET_STORE" ]]; then
   mkdir -p "$fleet_dir"
   printf '%s\n' "$attestation_json" >"$fleet_file"
   printf '%s\n' "$attestation_json" >"$fleet_timestamp_file"
+fi
+
+# Hand the evidence to the WebAssembly verifier rather than printing it.
+# The module has no access to this machine beyond the bytes on its stdin, so
+# the verdict does not depend on the tools the machine under review happens
+# to have installed.
+if [[ "$VERIFY" -eq 1 ]]; then
+  verify_args=(--verify)
+  [[ "$JSON_MODE" -eq 1 ]] && verify_args+=(--json)
+  [[ -n "$VERIFY_MAX_AGE" ]] && verify_args+=(--max-age "$VERIFY_MAX_AGE")
+  verify_status=0
+  printf '%s\n' "$attestation_json" |
+    bash "$SCRIPT_DIR/attest-verify.sh" "${verify_args[@]}" || verify_status=$?
+  exit "$verify_status"
 fi
 
 if [[ "$JSON_MODE" -eq 1 ]]; then

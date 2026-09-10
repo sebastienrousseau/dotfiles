@@ -22,7 +22,7 @@ table — and the argument for why the family currently has one member.
 | **A2A agent card** | `.well-known/agent-card.json`, validated by `dot agent a2a-card --validate`, conformance suite via `dot agent conformance` | A static discovery document plus a subcommand. Nothing to host separately. |
 | AI fleet TUI | `defaults/dot_local/share/dot-ai-tui/` (Go) | Tested by `cockpit-test.yml`. Ships as part of the config tree; useless without it. |
 | `dot-ui` widgets | `defaults/dot_local/share/dot-ui/` (Go) | Tested by `dot-ui-test.yml`. Same reasoning. |
-| **WASM tooling** | `lib/wasm-tools/` (Rust, crate `dot-sys`) — *native binary despite the name* | See below. |
+| **WASM verifier** | `lib/wasm-tools/` (Rust, crate `dot-sys`), built for `wasm32-wasip1` and run under `wasmtime` by `dot attest --verify` | See below. |
 | Module registry | `docs/registry.json` + schema in `docs/schema/`, served over Pages, validated by `tools/ci/check-registry.sh` | A JSON document, not a service. |
 | Packaging recipes | `pkg/` (brew, scoop, aur, nix, docker) | The *published* taps are separate repos and have to be — see the next table. |
 | Documentation site | `docs/` → MkDocs → `doc.dotfiles.io` via `pages.yml` | Built from the same tree it documents; a docs repo would drift by construction. |
@@ -121,29 +121,44 @@ real value, an LSP over that schema would be defensible. Today the
 schema is 40 lines and `docs/schema/chezmoidata.schema.json` plus
 `taplo` covers it.
 
-### WASM — in-repo, marginal, and **not actually WebAssembly**
+### WASM — in-repo, and now actually WebAssembly
 
-`lib/wasm-tools/` is a Rust crate (`dot-sys`) with an 11-line
-`main.rs` whose build output is gitignored. Three things about it are
-worth stating plainly, because the directory name implies otherwise:
+An earlier revision of this page said `lib/wasm-tools/` was "not
+actually WebAssembly", and it was right: the crate had no `wasm32`
+target, built an ordinary host binary, printed a hardcoded
+`"engine": "wasm"` field, and nothing in the repository invoked it.
+`wasmtime` was pinned in `mise.toml` for a runtime nothing used.
 
-- `Cargo.toml` declares **no `wasm32` target and no `crate-type`**, so
-  `cargo build` produces an ordinary native binary for the host.
-- The program's entire behaviour is to print a timestamp — and a
-  hardcoded `"engine": "wasm"` field, which is the only WebAssembly in
-  it.
-- `wasmtime` is pinned in `mise.toml` in anticipation of a runtime
-  that nothing currently uses.
+That is fixed. The crate now:
 
-So it is an experiment with an aspirational name, not a shipped
-surface. It is not a satellite because it is not yet a product;
-promoting an experiment to its own repository is how you acquire a
-repository nobody maintains.
+- builds for **`wasm32-wasip1`** (`cargo build --release --target
+  wasm32-wasip1`), producing `dot-sys.wasm`;
+- has a consumer — `dot attest --verify`
+  (`scripts/diagnostics/attest-verify.sh`) runs the module under
+  `wasmtime` and hands it the evidence record on stdin;
+- reports `"engine": "wasm"` **only when it really ran as
+  WebAssembly**. The constant is `cfg`-selected: the host build of the
+  same source says `"engine": "native"`. `lib/wasm-tools/tests/wasm.rs`
+  asserts both halves, and `rust.yml`'s `wasm` job executes the module
+  rather than merely building it.
 
-**When that would change:** if it gained real functionality, an actual
-`wasm32-*` target, and a consumer outside this repo, it would belong
-on crates.io as its own crate — and a satellite repo would then be the
-right home, because Rust crates version independently.
+Why the sandbox is the point rather than decoration: the evidence
+record is produced by the machine under review. A reviewer who checks
+it with `jq` on that machine is trusting tools the machine controls.
+The module has no filesystem, no network and no environment — it reads
+bytes on stdin, applies a fixed policy, and writes a verdict, with the
+same bytes producing the same verdict on any platform that has a
+WebAssembly runtime. This is the first slice of the "TrustMee-Wasm"
+direction recorded in
+[`operations/HARD_AUDIT_2026.md` §8.7](operations/HARD_AUDIT_2026.md);
+the remaining slice is bundling the module *with* the evidence so a
+reviewer needs no checkout at all.
+
+**When a satellite repo would be right:** if the verifier gained a
+consumer outside this repo, it would belong on crates.io as its own
+crate, and a satellite would then be the right home because Rust
+crates version independently. Today its only consumer is `dot attest`,
+which releases with it.
 
 ## The rule
 
@@ -154,7 +169,8 @@ either.
 - `homebrew-tap` — both (Homebrew's cadence, Homebrew's users).
 - `dot mcp` — neither: it releases with the CLI and its only consumer
   is an agent already on this machine.
-- `lib/wasm-tools` — neither yet.
+- `lib/wasm-tools` — has a consumer (`dot attest --verify`), but not an
+  independent one: it ships and versions with the CLI.
 
 Splitting a component that fails this test moves complexity from a
 directory boundary (free, enforced by review) to a repository boundary
@@ -192,7 +208,9 @@ The claims above are checkable rather than aspirational:
 | `dot mcp serve` **is** an MCP server | `printf '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}\n' \| dot mcp serve` returns an `initialize` result |
 | The card and the server agree | `cd defaults/dot_local/share/dot-mcp && go test -run TestServerCard ./...` |
 | The MCP card points at the server | `jq .transport .well-known/mcp/server-card.json` → `dot mcp serve` |
-| `lib/wasm-tools` builds natively, not to wasm | `grep -c wasm32 lib/wasm-tools/Cargo.toml` → 0 |
+| `lib/wasm-tools` really builds and runs as wasm | `cargo build --release --target wasm32-wasip1 --manifest-path lib/wasm-tools/Cargo.toml && wasmtime run lib/wasm-tools/target/wasm32-wasip1/release/dot-sys.wasm` → a record whose `engine` is `wasm` |
+| The host build of the same source says so | `cargo run --manifest-path lib/wasm-tools/Cargo.toml` → `"engine": "native"` |
+| The verifier has a caller | `dot attest --verify`; `rg -l attest-verify scripts/` |
 | The A2A card is valid | `dot agent a2a-card --validate` |
 | Card versions match the manifest | `bash scripts/verify-release-versions` (both cards are checked surfaces) |
 | The three taps are generated, not authored | `pkg/README.md` and the `release-distribute-*.yml` workflows |

@@ -9,13 +9,13 @@
 
 use std::time::{Duration, UNIX_EPOCH};
 
-use dot_sys::{Status, ENGINE_WASM, STATUS_OK};
+use dot_sys::{Status, ENGINE, STATUS_OK};
 use libfuzzer_sys::fuzz_target;
 
 fuzz_target!(|secs: u64| {
     let status = Status::at(secs);
     assert_eq!(status.status, STATUS_OK);
-    assert_eq!(status.engine, ENGINE_WASM);
+    assert_eq!(status.engine, ENGINE);
     assert_eq!(status.timestamp, secs);
 
     let json = status.to_json();

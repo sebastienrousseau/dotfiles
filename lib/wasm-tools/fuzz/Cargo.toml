@@ -47,5 +47,19 @@ test = false
 doc = false
 bench = false
 
+[[bin]]
+name = "fuzz_json"
+path = "fuzz_targets/fuzz_json.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_verify"
+path = "fuzz_targets/fuzz_verify.rs"
+test = false
+doc = false
+bench = false
+
 [workspace]
 members = ["."]

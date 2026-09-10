@@ -22,11 +22,14 @@
 //! # Example
 //!
 //! ```
-//! use dot_sys::Status;
+//! use dot_sys::{Status, ENGINE};
 //!
 //! let probe = Status::at(1_700_000_000);
 //! let json = probe.to_json();
-//! assert_eq!(json, r#"{"status": "ok", "timestamp": 1700000000, "engine": "wasm"}"#);
+//! assert_eq!(
+//!     json,
+//!     format!(r#"{{"status": "ok", "timestamp": 1700000000, "engine": "{ENGINE}"}}"#),
+//! );
 //!
 //! let parsed = Status::parse(&json)?;
 //! assert_eq!(parsed, probe);
@@ -45,13 +48,50 @@ use std::fmt::{self, Write as _};
 use std::str::FromStr;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+pub mod attest;
 pub mod cli;
+pub mod json;
+pub mod time;
 
-/// The `status` value reported by a healthy probe.
+/// The `status` value reported by a healthy probe, or by a verdict in
+/// which every check passed.
 pub const STATUS_OK: &str = "ok";
 
-/// The `engine` value reported by this helper.
+/// The `status` value reported by a verdict with at least one failed check.
+pub const STATUS_FAILED: &str = "failed";
+
+/// The `engine` value reported when the code is running as WebAssembly.
 pub const ENGINE_WASM: &str = "wasm";
+
+/// The `engine` value reported when the code is running as a host binary.
+pub const ENGINE_NATIVE: &str = "native";
+
+/// The engine this build is actually running on.
+///
+/// This is [`ENGINE_WASM`] on any `wasm32` target and [`ENGINE_NATIVE`]
+/// everywhere else. Records emitted by the crate carry it verbatim, so the
+/// `engine` field is a statement of fact about where the bytes were
+/// computed rather than a label chosen by the author: run the module under
+/// `wasmtime` and it reads `wasm`; run the host binary and it reads
+/// `native`.
+///
+/// # Example
+///
+/// ```
+/// use dot_sys::{Status, ENGINE};
+///
+/// assert_eq!(Status::at(1).engine, ENGINE);
+/// # #[cfg(not(target_family = "wasm"))]
+/// assert_eq!(ENGINE, "native");
+/// ```
+#[cfg(target_family = "wasm")]
+pub const ENGINE: &str = ENGINE_WASM;
+
+/// The engine this build is actually running on.
+///
+/// See the `wasm32` definition of this constant for the full contract.
+#[cfg(not(target_family = "wasm"))]
+pub const ENGINE: &str = ENGINE_NATIVE;
 
 /// One health-probe record.
 ///
@@ -64,12 +104,12 @@ pub const ENGINE_WASM: &str = "wasm";
 /// # Example
 ///
 /// ```
-/// use dot_sys::{Status, ENGINE_WASM, STATUS_OK};
+/// use dot_sys::{Status, ENGINE, STATUS_OK};
 ///
 /// let s = Status::at(42);
 /// assert_eq!(s.status, STATUS_OK);
 /// assert_eq!(s.timestamp, 42);
-/// assert_eq!(s.engine, ENGINE_WASM);
+/// assert_eq!(s.engine, ENGINE);
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Status {
@@ -101,18 +141,22 @@ impl Status {
         }
     }
 
-    /// Builds a healthy (`"ok"` / `"wasm"`) record for the given Unix time.
+    /// Builds a healthy record for the given Unix time, tagged with the
+    /// [`ENGINE`] this build is running on.
     ///
     /// # Example
     ///
     /// ```
-    /// use dot_sys::Status;
+    /// use dot_sys::{Status, ENGINE};
     ///
-    /// assert_eq!(Status::at(0).to_json(), r#"{"status": "ok", "timestamp": 0, "engine": "wasm"}"#);
+    /// assert_eq!(
+    ///     Status::at(0).to_json(),
+    ///     format!(r#"{{"status": "ok", "timestamp": 0, "engine": "{ENGINE}"}}"#),
+    /// );
     /// ```
     #[must_use]
     pub fn at(timestamp: u64) -> Self {
-        Self::new(STATUS_OK, timestamp, ENGINE_WASM)
+        Self::new(STATUS_OK, timestamp, ENGINE)
     }
 
     /// Builds a healthy record for an arbitrary [`SystemTime`].
@@ -221,7 +265,7 @@ impl Status {
     /// use dot_sys::{Error, Status};
     ///
     /// let s = Status::parse(" { \"status\": \"ok\", \"timestamp\": 5, \"engine\": \"wasm\" } ")?;
-    /// assert_eq!(s, Status::at(5));
+    /// assert_eq!(s, Status::new("ok", 5, "wasm"));
     ///
     /// assert_eq!(
     ///     Status::parse(r#"{"status": "ok", "timestamp": 05, "engine": "wasm"}"#),
@@ -230,7 +274,7 @@ impl Status {
     /// # Ok::<(), Error>(())
     /// ```
     pub fn parse(input: &str) -> Result<Self, Error> {
-        let mut p = Parser { input, pos: 0 };
+        let mut p = json::Scanner::at(input, 0);
         p.skip_ws();
         p.expect(b'{', "'{'")?;
         p.skip_ws();
@@ -293,7 +337,7 @@ impl fmt::Display for Status {
 /// use dot_sys::Status;
 ///
 /// let s: Status = r#"{"status": "ok", "timestamp": 9, "engine": "wasm"}"#.parse()?;
-/// assert_eq!(s, Status::at(9));
+/// assert_eq!(s, Status::new("ok", 9, "wasm"));
 /// # Ok::<(), dot_sys::Error>(())
 /// ```
 impl FromStr for Status {
@@ -353,6 +397,22 @@ pub enum Error {
         /// Byte offset of the first trailing character.
         offset: usize,
     },
+    /// A [`json::get`] path named a member the document does not have.
+    MissingMember {
+        /// The whole dotted path that was looked up.
+        path: &'static str,
+    },
+    /// Objects or arrays nest deeper than [`json::MAX_DEPTH`] at `offset`.
+    TooDeep {
+        /// Byte offset of the bracket that would have gone too deep.
+        offset: usize,
+    },
+    /// The text at `offset` is not the `YYYY-MM-DDTHH:MM:SSZ` instant that
+    /// [`time::parse_rfc3339_utc`] accepts.
+    InvalidDateTime {
+        /// Byte offset, within the timestamp, of the first bad character.
+        offset: usize,
+    },
 }
 
 impl fmt::Display for Error {
@@ -373,6 +433,15 @@ impl fmt::Display for Error {
             Self::TrailingInput { offset } => {
                 write!(f, "unexpected trailing input at byte {offset}")
             }
+            Self::MissingMember { path } => write!(f, "no member \"{path}\" in the document"),
+            Self::TooDeep { offset } => write!(
+                f,
+                "nesting deeper than {} at byte {offset}",
+                json::MAX_DEPTH
+            ),
+            Self::InvalidDateTime { offset } => {
+                write!(f, "invalid RFC 3339 UTC timestamp at byte {offset}")
+            }
         }
     }
 }
@@ -380,7 +449,7 @@ impl fmt::Display for Error {
 impl std::error::Error for Error {}
 
 /// Appends `s` to `out` as a JSON string literal, quotes included.
-fn write_json_string(out: &mut String, s: &str) {
+pub(crate) fn write_json_string(out: &mut String, s: &str) {
     out.push('"');
     for c in s.chars() {
         match c {
@@ -401,198 +470,23 @@ fn write_json_string(out: &mut String, s: &str) {
     out.push('"');
 }
 
-/// Minimal recursive-descent cursor over the input bytes.
-struct Parser<'a> {
-    input: &'a str,
-    pos: usize,
-}
-
-impl Parser<'_> {
-    fn peek(&self) -> Option<u8> {
-        self.input.as_bytes().get(self.pos).copied()
-    }
-
-    fn skip_ws(&mut self) {
-        while matches!(self.peek(), Some(b' ' | b'\t' | b'\n' | b'\r')) {
-            self.pos += 1;
-        }
-    }
-
-    /// Consumes exactly `byte`, or fails describing `expected`.
-    fn expect(&mut self, byte: u8, expected: &'static str) -> Result<(), Error> {
-        match self.peek() {
-            None => Err(Error::UnexpectedEnd),
-            Some(b) if b == byte => {
-                self.pos += 1;
-                Ok(())
-            }
-            Some(_) => Err(Error::Unexpected {
-                offset: self.pos,
-                expected,
-            }),
-        }
-    }
-
-    /// Consumes `literal` byte for byte; the error points at the first
-    /// mismatching byte and names the whole literal.
-    fn expect_literal(&mut self, literal: &'static str) -> Result<(), Error> {
-        for &b in literal.as_bytes() {
-            self.expect(b, literal)?;
-        }
-        Ok(())
-    }
-
-    /// Parses a strict JSON non-negative integer into a `u64`.
-    fn parse_u64(&mut self) -> Result<u64, Error> {
-        let start = self.pos;
-        let first = match self.peek() {
-            None => return Err(Error::UnexpectedEnd),
-            Some(b @ b'0'..=b'9') => b,
-            Some(_) => {
-                return Err(Error::Unexpected {
-                    offset: start,
-                    expected: "a digit",
-                })
-            }
-        };
-        self.pos += 1;
-        if first == b'0' {
-            return match self.peek() {
-                Some(b'0'..=b'9') => Err(Error::Unexpected {
-                    offset: self.pos,
-                    expected: "no digit after a leading zero",
-                }),
-                _ => Ok(0),
-            };
-        }
-        let mut value = u64::from(first - b'0');
-        while let Some(b @ b'0'..=b'9') = self.peek() {
-            value = value
-                .checked_mul(10)
-                .and_then(|v| v.checked_add(u64::from(b - b'0')))
-                .ok_or(Error::NumberOverflow { offset: start })?;
-            self.pos += 1;
-        }
-        Ok(value)
-    }
-
-    /// Parses a JSON string literal, decoding escapes.
-    fn parse_string(&mut self) -> Result<String, Error> {
-        self.expect(b'"', "'\"'")?;
-        let mut out = String::new();
-        loop {
-            let Some(c) = self.input[self.pos..].chars().next() else {
-                return Err(Error::UnexpectedEnd);
-            };
-            match c {
-                '"' => {
-                    self.pos += 1;
-                    return Ok(out);
-                }
-                '\\' => {
-                    let decoded = self.parse_escape()?;
-                    out.push(decoded);
-                }
-                c if c < ' ' => {
-                    return Err(Error::Unexpected {
-                        offset: self.pos,
-                        expected: "an escaped control character",
-                    })
-                }
-                c => {
-                    self.pos += c.len_utf8();
-                    out.push(c);
-                }
-            }
-        }
-    }
-
-    /// Parses one escape sequence; `self.pos` is on the backslash.
-    fn parse_escape(&mut self) -> Result<char, Error> {
-        let start = self.pos;
-        self.pos += 1;
-        let Some(tag) = self.peek() else {
-            return Err(Error::UnexpectedEnd);
-        };
-        self.pos += 1;
-        let decoded = match tag {
-            b'"' => '"',
-            b'\\' => '\\',
-            b'/' => '/',
-            b'b' => '\u{08}',
-            b'f' => '\u{0C}',
-            b'n' => '\n',
-            b'r' => '\r',
-            b't' => '\t',
-            b'u' => return self.parse_unicode_escape(start),
-            _ => return Err(Error::InvalidEscape { offset: start }),
-        };
-        Ok(decoded)
-    }
-
-    /// Parses the `XXXX` (and, for a high surrogate, the following
-    /// `\uYYYY`) of a `\u` escape; `self.pos` is just past the `u`.
-    fn parse_unicode_escape(&mut self, start: usize) -> Result<char, Error> {
-        let mut units = [self.parse_hex4()?, 0];
-        let mut len = 1;
-        if (0xD800..=0xDBFF).contains(&units[0]) {
-            // A high surrogate is only meaningful as the first half of a
-            // `\uXXXX\uYYYY` pair, so the next two bytes must be `\u`.
-            let Some(next) = self.input.as_bytes().get(self.pos..self.pos + 2) else {
-                return Err(Error::UnexpectedEnd);
-            };
-            if next != b"\\u" {
-                return Err(Error::InvalidUnicodeEscape { offset: start });
-            }
-            self.pos += 2;
-            units[1] = self.parse_hex4()?;
-            len = 2;
-        }
-        // `decode_utf16` rejects lone or mismatched surrogates for us.
-        char::decode_utf16(units[..len].iter().copied())
-            .next()
-            .and_then(Result::ok)
-            .ok_or(Error::InvalidUnicodeEscape { offset: start })
-    }
-
-    /// Reads exactly four hex digits at `self.pos`; the error offset points
-    /// at the first byte that is not a hex digit.
-    fn parse_hex4(&mut self) -> Result<u16, Error> {
-        let Some(digits) = self.input.as_bytes().get(self.pos..self.pos + 4) else {
-            return Err(Error::UnexpectedEnd);
-        };
-        let mut value = 0u16;
-        for (i, &d) in digits.iter().enumerate() {
-            let nibble = match d {
-                b'0'..=b'9' => d - b'0',
-                b'a'..=b'f' => d - b'a' + 10,
-                b'A'..=b'F' => d - b'A' + 10,
-                _ => {
-                    return Err(Error::InvalidUnicodeEscape {
-                        offset: self.pos + i,
-                    })
-                }
-            };
-            value = (value << 4) | u16::from(nibble);
-        }
-        self.pos += 4;
-        Ok(value)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::collections::HashSet;
     use std::time::Duration;
 
-    const CANONICAL: &str = r#"{"status": "ok", "timestamp": 1700000000, "engine": "wasm"}"#;
+    /// The record `Status::at` emits on this build, for `timestamp`.
+    fn record(timestamp: &str) -> String {
+        format!(r#"{{"status": "ok", "timestamp": {timestamp}, "engine": "{ENGINE}"}}"#)
+    }
 
     #[test]
     fn at_uses_constants() {
         let s = Status::at(1_700_000_000);
         assert_eq!(s.status, STATUS_OK);
-        assert_eq!(s.engine, ENGINE_WASM);
+        assert_eq!(s.engine, ENGINE);
+        assert!(ENGINE == ENGINE_WASM || ENGINE == ENGINE_NATIVE);
         assert_eq!(s.timestamp, 1_700_000_000);
     }
 
@@ -605,14 +499,17 @@ mod tests {
 
     #[test]
     fn to_json_matches_historic_binary_format() {
-        assert_eq!(Status::at(1_700_000_000).to_json(), CANONICAL);
-        assert_eq!(
-            Status::at(0).to_json(),
-            r#"{"status": "ok", "timestamp": 0, "engine": "wasm"}"#
-        );
+        // The layout is byte-for-byte what the pre-0.2 binary printed; only
+        // the `engine` value now states the truth about this build.
+        assert_eq!(Status::at(1_700_000_000).to_json(), record("1700000000"));
+        assert_eq!(Status::at(0).to_json(), record("0"));
         assert_eq!(
             Status::at(u64::MAX).to_json(),
-            r#"{"status": "ok", "timestamp": 18446744073709551615, "engine": "wasm"}"#
+            record("18446744073709551615")
+        );
+        assert_eq!(
+            Status::new(STATUS_OK, 1_700_000_000, ENGINE_WASM).to_json(),
+            r#"{"status": "ok", "timestamp": 1700000000, "engine": "wasm"}"#
         );
     }
 
@@ -654,35 +551,39 @@ mod tests {
 
     #[test]
     fn parse_canonical() {
-        assert_eq!(Status::parse(CANONICAL), Ok(Status::at(1_700_000_000)));
+        assert_eq!(
+            Status::parse(&record("1700000000")),
+            Ok(Status::at(1_700_000_000))
+        );
+        // Any engine name round-trips; only `at` picks this build's.
+        assert_eq!(
+            Status::parse(r#"{"status": "ok", "timestamp": 1, "engine": "wasm"}"#),
+            Ok(Status::new(STATUS_OK, 1, ENGINE_WASM))
+        );
     }
 
     #[test]
     fn parse_via_from_str() {
-        let s: Status = CANONICAL.parse().expect("valid");
+        let s: Status = record("1700000000").parse().expect("valid");
         assert_eq!(s, Status::at(1_700_000_000));
         assert_eq!("".parse::<Status>(), Err(Error::UnexpectedEnd));
     }
 
     #[test]
     fn parse_tolerates_json_whitespace() {
-        let spaced =
-            " \t\r\n{ \"status\"\t:\n\"ok\" , \"timestamp\" : 7 , \"engine\" : \"wasm\" }\n";
-        assert_eq!(Status::parse(spaced), Ok(Status::at(7)));
-        let tight = r#"{"status":"ok","timestamp":7,"engine":"wasm"}"#;
-        assert_eq!(Status::parse(tight), Ok(Status::at(7)));
+        let spaced = format!(
+            " \t\r\n{{ \"status\"\t:\n\"ok\" , \"timestamp\" : 7 , \"engine\" : \"{ENGINE}\" }}\n"
+        );
+        assert_eq!(Status::parse(&spaced), Ok(Status::at(7)));
+        let tight = format!(r#"{{"status":"ok","timestamp":7,"engine":"{ENGINE}"}}"#);
+        assert_eq!(Status::parse(&tight), Ok(Status::at(7)));
     }
 
     #[test]
     fn parse_zero_and_max() {
+        assert_eq!(Status::parse(&record("0")), Ok(Status::at(0)));
         assert_eq!(
-            Status::parse(r#"{"status": "ok", "timestamp": 0, "engine": "wasm"}"#),
-            Ok(Status::at(0))
-        );
-        assert_eq!(
-            Status::parse(
-                r#"{"status": "ok", "timestamp": 18446744073709551615, "engine": "wasm"}"#
-            ),
+            Status::parse(&record("18446744073709551615")),
             Ok(Status::at(u64::MAX))
         );
     }
@@ -935,7 +836,7 @@ mod tests {
 
     #[test]
     fn error_display_messages() {
-        let cases: [(Error, &str); 7] = [
+        let cases: [(Error, &str); 10] = [
             (
                 Error::ClockBeforeEpoch,
                 "system clock is before the Unix epoch",
@@ -963,6 +864,18 @@ mod tests {
             (
                 Error::TrailingInput { offset: 7 },
                 "unexpected trailing input at byte 7",
+            ),
+            (
+                Error::MissingMember { path: "a.b" },
+                "no member \"a.b\" in the document",
+            ),
+            (
+                Error::TooDeep { offset: 8 },
+                "nesting deeper than 64 at byte 8",
+            ),
+            (
+                Error::InvalidDateTime { offset: 9 },
+                "invalid RFC 3339 UTC timestamp at byte 9",
             ),
         ];
         for (err, msg) in cases {

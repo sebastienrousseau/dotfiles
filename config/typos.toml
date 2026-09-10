@@ -17,6 +17,12 @@ extend-ignore-re = [
 ]
 
 [default.extend-words]
+# Truncated JSON literals used as parser fixtures in lib/wasm-tools: the
+# tests assert that "tru", "fals" and "nul" are rejected as incomplete
+# keywords. They are the input under test, not misspellings — correcting
+# them would delete the cases they exist to cover.
+tru = "tru"
+fals = "fals"
 # Project-specific words that typos flags but should not — applies inside
 # identifiers, strings, and prose (broader than extend-identifiers).
 oll = "oll"            # `oll` alias prefix for Ollama (oll-pull, oll-list)
