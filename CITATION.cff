@@ -24,7 +24,7 @@ license:
   - Apache-2.0
   - MIT
 version: 0.2.520
-date-released: "2026-08-13"
+date-released: "2026-09-10"
 keywords:
   - dotfiles
   - chezmoi
