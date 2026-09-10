@@ -407,13 +407,41 @@ def _compute_bg_fg(clusters, is_dark):
     Override per mode via DOTFILES_TERM_BG_DARK / _FG_DARK / _BG_LIGHT /
     _FG_LIGHT.
     """
-    _ = clusters  # bg/fg no longer wallpaper-derived
     if is_dark:
         bg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_BG_DARK", "#1e1e2e"))
         fg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_FG_DARK", "#d4d4d4"))
     else:
         bg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_BG_LIGHT", "#fbf1c7"))
         fg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_FG_LIGHT", "#3c3836"))
+
+    # Tint the engineered neutral toward the wallpaper's dominant hue.
+    #
+    # The lightness stays exactly where it was — that is what the docstring
+    # above is protecting, and it is what keeps contrast and eye strain
+    # predictable. Only a*/b* move, and only to TINT_CHROMA, which is small
+    # enough to read as "this terminal belongs to that wallpaper" rather than
+    # as a coloured background.
+    #
+    # Without this, term.bg had exactly two values across 228 themes and every
+    # theme looked identical apart from one accent. Set DOTFILES_TERM_TINT=0
+    # for the previous flat neutrals.
+    if _env_hex("DOTFILES_TERM_TINT", "1") != "0":
+        ranked = sorted(clusters, key=lambda c: c[1] * lab_chroma(*c[0]), reverse=True)
+        src = ranked[0][0] if ranked and lab_chroma(*ranked[0][0]) >= 5.0 else None
+        if src is not None:
+            hue_c = lab_chroma(*src)
+            if hue_c > 0:
+                # Unit vector along the wallpaper's hue, scaled to a fixed,
+                # deliberately low chroma. Dark surfaces take a touch more:
+                # the same chroma reads weaker against a low-lightness ground.
+                bg_chroma = 4.5 if is_dark else 3.0
+                fg_chroma = 2.5 if is_dark else 2.0
+                ua, ub = src[1] / hue_c, src[2] / hue_c
+                bl = rgb_to_lab(*bg_rgb)[0]
+                fl = rgb_to_lab(*fg_rgb)[0]
+                bg_rgb = lab_to_rgb(bl, ua * bg_chroma, ub * bg_chroma)
+                fg_rgb = lab_to_rgb(fl, ua * fg_chroma, ub * fg_chroma)
+
     bg_lab = rgb_to_lab(*bg_rgb)
     return bg_lab, bg_rgb, fg_rgb
 
@@ -443,6 +471,104 @@ def _compute_accent(clusters, is_dark):
             break
         al = max(0.0, al - 2.0)
     return (al, aa, ab), lab_to_rgb(al, aa, ab)
+
+
+def _compute_support_colours(clusters, accent_lab, is_dark):
+    """The wallpaper's SECOND and THIRD chromatic colours, as UI accents.
+
+    `_compute_accent` takes the top of the population x chroma ranking and
+    throws the rest away, so a wallpaper contributed exactly one colour to
+    the UI and everything else — status bars, separators, inactive states —
+    fell back to fixed neutrals. These are the next two ranked clusters,
+    put through the same AAA-darkening as the accent so white text sits on
+    them at 7:1.
+
+    Clusters within 12 degrees of a colour already chosen are skipped: two
+    near-identical blues give no more information than one, and the point of
+    a secondary is that it reads as different.
+    """
+    ranked = [c for c in sorted(clusters, key=lambda c: c[1] * lab_chroma(*c[0]), reverse=True)
+              if lab_chroma(*c[0]) >= 5.0]
+    picked, hues = [], [lab_hue(*accent_lab)]
+    for lab, _pop in ranked:
+        h = lab_hue(*lab)
+        if all(min(abs(h - o), 360 - abs(h - o)) >= 12.0 for o in hues):
+            picked.append(lab)
+            hues.append(h)
+        if len(picked) == 2:
+            break
+    # A wallpaper with only one usable hue still needs two support colours:
+    # rotate the accent rather than emit a duplicate.
+    while len(picked) < 2:
+        base = picked[-1] if picked else accent_lab
+        c = lab_chroma(*base)
+        h = (lab_hue(*base) + 40.0 * (len(picked) + 1)) % 360.0
+        rad = math.radians(h)
+        picked.append((base[0], math.cos(rad) * c, math.sin(rad) * c))
+
+    out = []
+    for lab in picked:
+        L = max(lab[0], 35.0) if is_dark else min(lab[0], 45.0)
+        a, b = lab[1], lab[2]
+        for _ in range(80):
+            if contrast_ratio((255, 255, 255), lab_to_rgb(L, a, b)) >= 7.0:
+                break
+            L = max(0.0, L - 2.0)
+        out.append(lab_to_rgb(L, a, b))
+    return out[0], out[1]
+
+
+def _on_dark(lab, surfaces, min_ratio=4.5):
+    """The same hue, light enough to be TEXT on a dark surface.
+
+    `accent`, `secondary` and `tertiary` are darkened until white sits on
+    them at 7:1 — they are background colours by construction, and painting
+    them as text on the dark status bar measured as low as 1.67:1.
+
+    This keeps the hue and chroma and walks lightness up instead, until the
+    ratio holds against every surface the text can land on. Without it there
+    is no way to show a wallpaper colour AS text: the choice would be
+    between wallpaper colour and legibility.
+    """
+    L, a, b = lab
+    for _ in range(120):
+        rgb = lab_to_rgb(L, a, b)
+        if all(contrast_ratio(rgb, s) >= min_ratio for s in surfaces):
+            return rgb
+        if L >= 100.0:
+            break
+        L = min(100.0, L + 1.5)
+    return lab_to_rgb(L, a, b)
+
+
+def _muted_text(panel_rgb, border_rgb, bg_lab, is_dark):
+    """Readable de-emphasised text — 4.5:1 against every surface it lands on.
+
+    Not `term.c8`. c8 is ANSI bright-black and is supposed to be dim; its
+    floor is 2.5:1 against bg, and tmux was painting the clock and the
+    inactive window names with it at 2.12:1 and 2.45:1. Raising c8 would
+    have made every terminal's dim colour less dim in order to fix a status
+    bar, so this is a separate slot.
+
+    Floored against BOTH panel and border, not just panel: the two differ in
+    lightness, tmux draws muted text on each of them, and flooring against
+    only the friendlier one left the other at 4.40:1 — a near miss is still
+    a miss.
+    """
+    start = 62.0 if is_dark else 42.0
+    seed = lab_to_rgb(start, bg_lab[1] * 0.5, bg_lab[2] * 0.5)
+    out = seed
+    for surface in (panel_rgb, border_rgb):
+        out = ensure_contrast(out, surface, 4.5, is_dark)
+    # ensure_contrast against the second surface can walk back toward the
+    # first, so confirm rather than assume, and step until both hold.
+    for _ in range(80):
+        if all(contrast_ratio(out, s) >= 4.5 for s in (panel_rgb, border_rgb)):
+            break
+        l, a, b = rgb_to_lab(*out)
+        l = min(100.0, l + 2.0) if is_dark else max(0.0, l - 2.0)
+        out = lab_to_rgb(l, a, b)
+    return out
 
 
 def _compute_panel_border(bg_lab, bg_rgb, is_dark):
@@ -560,6 +686,14 @@ def generate_theme(
     sel_rgb = lab_to_rgb(*sel_lab)
 
     panel_rgb, border_rgb = _compute_panel_border(bg_lab, bg_rgb, is_dark)
+    secondary_rgb, tertiary_rgb = _compute_support_colours(clusters, accent_lab, is_dark)
+    muted_rgb = _muted_text(panel_rgb, border_rgb, bg_lab, is_dark)
+    # Text-safe versions of the three chromatic colours, for consumers that
+    # paint them as foreground on panel/border rather than as a block.
+    _surfaces = (panel_rgb, border_rgb, bg_rgb)
+    accent_on_rgb = _on_dark(rgb_to_lab(*accent_rgb), _surfaces)
+    secondary_on_rgb = _on_dark(rgb_to_lab(*secondary_rgb), _surfaces)
+    tertiary_on_rgb = _on_dark(rgb_to_lab(*tertiary_rgb), _surfaces)
     ansi = _ansi_palette(clusters, accent_lab, bg_rgb, is_dark)
     c0_rgb, c7_rgb, c8_rgb, c15_rgb = _structural_colors(bg_lab, bg_rgb, is_dark)
 
@@ -609,6 +743,17 @@ def generate_theme(
             "info": rgb_to_hex(*ansi["blue"][0]),
             "panel": rgb_to_hex(*panel_rgb),
             "border": rgb_to_hex(*border_rgb),
+            # The wallpaper's 2nd and 3rd chromatic colours. White sits on
+            # either at 7:1, same as accent.
+            "secondary": rgb_to_hex(*secondary_rgb),
+            "tertiary": rgb_to_hex(*tertiary_rgb),
+            # De-emphasised text that is still text: 4.5:1 against `panel`.
+            "text_muted": rgb_to_hex(*muted_rgb),
+            # Same hues, lightened until they are legible AS TEXT on panel,
+            # border and bg (>= 4.5:1 on all three).
+            "accent_on_surface": rgb_to_hex(*accent_on_rgb),
+            "secondary_on_surface": rgb_to_hex(*secondary_on_rgb),
+            "tertiary_on_surface": rgb_to_hex(*tertiary_on_rgb),
         },
         "app": {
             "nvim": nvim_theme[0],
@@ -654,7 +799,9 @@ def theme_to_toml(theme: Dict) -> str:
     lines.append("")
 
     lines.append(f"[themes.{name}.ui]")
-    for key in ["accent", "accent_text", "error", "warning", "success", "info", "panel", "border"]:
+    for key in ["accent", "accent_text", "secondary", "tertiary", "text_muted",
+                "accent_on_surface", "secondary_on_surface", "tertiary_on_surface",
+                "error", "warning", "success", "info", "panel", "border"]:
         lines.append(f'{key} = "{theme["ui"][key]}"')
     lines.append("")
 
