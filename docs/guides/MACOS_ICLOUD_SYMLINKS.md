@@ -6,7 +6,7 @@ render_with_liquid: false
 
 On macOS, this dotfiles setup can (safely) symlink personal directories into iCloud Drive so `~/Desktop`, `~/Documents`, `~/Downloads`, `~/Movies`, `~/Music`, `~/Pictures`, and `~/Public` all live in iCloud and back up automatically.
 
-The mechanism is `defaults/run_before_macos-icloud-symlinks.sh.tmpl`, which chezmoi runs once (before `apply`) whenever its contents change.
+The mechanism is `defaults/run_before_macos-icloud-symlinks.sh.tmpl`, which chezmoi runs before **every** `apply` — not once, and not only when the script changes. That is deliberate: a run-once script gets a single attempt, and on a fresh Mac that attempt lands while iCloud Drive is still syncing the folder tree down, so every candidate would skip and the one chance would be spent. Running each time lets it link whatever has become safe to link since the last apply. Repeat runs are no-ops that cost a few milliseconds.
 
 ## `~/Desktop` and `~/Documents` are a special case
 
@@ -73,6 +73,25 @@ rmdir ~/Documents          # sanity check: this succeeds only if truly empty
 chezmoi apply
 ```
 
+## After the links exist: what changes
+
+Linking a folder into iCloud does exactly what it says, and that has consequences worth understanding *before* you migrate rather than after.
+
+**Storage.** Everything saved to a linked folder counts against your iCloud quota, not just local disk. `~/Downloads` is the one that catches people out.
+
+**Deletion.** Deleting a file from a linked folder deletes it from iCloud, and therefore from every device signed into that account. There is no local-only copy any more. This is inherent to symlinking and is not something the hook can guard.
+
+**Eviction.** macOS may evict a synced file's contents to reclaim disk space, leaving a placeholder behind. Reading it downloads it again — so a script that walks one of these folders can block on the network where it used to return instantly.
+
+**Two things in this repository write into these folders.** Neither runs during `chezmoi apply`; both are commands you invoke deliberately:
+
+| What | Where | Why it matters after linking |
+|---|---|---|
+| `scripts/theme/merge-wallpaper.sh` | `~/Pictures/Wallpapers` (override with `DOTFILES_WALLPAPER_DIR`) | Merges a light/dark pair into one `.heic` and then **deletes both source files**. After linking, that pair is consumed from iCloud. Point `DOTFILES_WALLPAPER_DIR` at a local directory to keep the library off iCloud. |
+| `defaults/dot_config/mpv/mpv.conf` | `~/Pictures/Screenshots` | `screenshot-directory` is set here, so mpv screenshots land in iCloud. |
+
+Nothing else in this repository writes into the seven folders, and chezmoi itself never touches them: they are listed in the Darwin block of `.chezmoiignore.tmpl`, and `chezmoi managed` reports none of them among the paths it controls.
+
 ## Log
 
 Every run appends to `$XDG_STATE_HOME/dotfiles/icloud-symlinks.log` (default: `~/.local/state/dotfiles/icloud-symlinks.log`). Grep for `SKIP` to see why a candidate wasn't linked, or `LINK` to see what was created.
@@ -83,7 +102,13 @@ The same directory names are listed in `defaults/.chezmoiignore.tmpl`'s Darwin b
 
 ## Tests
 
-`tests/unit/misc/test_macos_icloud_symlinks.sh` runs 29 assertions covering every branch of the refusal matrix, and `tests/regression/test_macos_icloud_symlinks_safety.sh` runs 10 more covering the data-loss invariants. If any of them regress, CI blocks the merge.
+Three suites, 52 assertions, all of them run under `/bin/bash` 3.2 as well as bash 5:
+
+- `tests/unit/misc/test_macos_icloud_symlinks.sh` — 29 assertions covering every branch of the refusal matrix.
+- `tests/regression/test_macos_icloud_symlinks_safety.sh` — 12 assertions on the data-loss invariants, checking that named canary files survive.
+- `tests/regression/test_macos_icloud_symlinks_manifest.sh` — 11 assertions that hash the *whole* sandbox tree before and after, so a file lost in a path nobody named still shows up. Verified to drop from 11/11 to 4/11 against a deliberately reintroduced #1018.
+
+`tests/regression/test_gate_integrity.sh` adds 10 more asserting those gates fail when they should. If any of them regress, CI blocks the merge.
 
 ## Manual override: disable entirely
 
