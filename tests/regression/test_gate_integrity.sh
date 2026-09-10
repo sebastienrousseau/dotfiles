@@ -156,6 +156,53 @@ fi
 rm -f "$_broken"
 
 # ---------------------------------------------------------------------------
+# GATE 4b: the gate must reach the same verdicts without a GNU clock.
+#
+# %N is a GNU extension. BSD date — macOS 14 and earlier — passes the literal
+# "N" through, which used to make every measurement fail to parse and every
+# budget compare as met, including for a CLI that could not parse. The gate
+# reported a clean pass on those machines and nothing said otherwise; only
+# macos-14 in the CI matrix was old enough to show it.
+#
+# Rather than assert which clock the gate uses, put a date without %N first on
+# PATH and require the same two verdicts as above. Any future timing rewrite
+# that reintroduces the dependency fails here.
+# ---------------------------------------------------------------------------
+_bsd_path="$(mktemp -d)"
+cat >"$_bsd_path/date" <<'BSDDATE'
+#!/bin/sh
+# BSD date: %N is not a conversion specifier, it is a literal N.
+case "$1" in
+  +%s%N) printf '%sN\n' "$(/bin/date +%s)" ;;
+  *) exec /bin/date "$@" ;;
+esac
+BSDDATE
+chmod +x "$_bsd_path/date"
+
+test_start "perf_gate_fires_without_a_gnu_clock"
+if PATH="$_bsd_path:$PATH" PERF_GATE_FILTER="$PERF_PROBE" PERF_BUDGET_PERCENT=0 \
+  bash "$GATE" >/dev/null 2>&1; then
+  ((TESTS_FAILED++)) || true
+  printf '  \033[0;31m✗\033[0m %s: impossible budget passed without a GNU date — the gate is blind here\n' \
+    "$CURRENT_TEST"
+else
+  ((TESTS_PASSED++)) || true
+  printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
+fi
+
+test_start "perf_gate_measures_without_a_gnu_clock"
+if PATH="$_bsd_path:$PATH" PERF_GATE_FILTER="$PERF_PROBE" \
+  bash "$GATE" >/dev/null 2>&1; then
+  ((TESTS_PASSED++)) || true
+  printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '  \033[0;31m✗\033[0m %s: gate fails within budget without a GNU date — always-red there\n' \
+    "$CURRENT_TEST"
+fi
+rm -rf "$_bsd_path"
+
+# ---------------------------------------------------------------------------
 # GATE 5: iCloud regression safety test — must fail if a canary
 # file gets deleted. Verify the test's own "canary preservation"
 # assertion still exists and would fire.

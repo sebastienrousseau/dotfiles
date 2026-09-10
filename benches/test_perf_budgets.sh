@@ -70,26 +70,52 @@ DOT_CLI="${DOT_CLI:-$REPO_ROOT/bin/dot}"
 ICLOUD_TMPL="$REPO_ROOT/defaults/run_before_macos-icloud-symlinks.sh.tmpl"
 
 # ---------------------------------------------------------------------------
-# _measure — run a command N times, return median wall-clock ms.
-# Uses date +%s%N for high-resolution timing (bash builtin timings
-# aren't consistent across shells / macOS bash).
+# _measure — run a command N times, return "<worst exit status> <median ms>".
+#
+# Timing comes from the `time` keyword with TIMEFORMAT, not from
+# `date +%s%N`. %N is a GNU extension: BSD date, which is what macOS 14 and
+# earlier ship, copies the literal "N" through. Every arithmetic below then
+# died on "value too great for base", _measure returned nothing, and an empty
+# median compares as 0 against any budget — so on those machines this gate
+# reported every budget met, including for a CLI that could not parse. It was
+# the silently-passing gate this file exists to argue against, and it went
+# unnoticed because the runner that exposed it, macos-14, is the only one in
+# the matrix old enough to have a date without %N.
+#
+# The `time` keyword is a shell builtin, present and millisecond-accurate in
+# bash 3.2, and needs no external clock at all. LC_ALL is pinned because
+# TIMEFORMAT renders the decimal separator per locale.
 # ---------------------------------------------------------------------------
 _measure() {
   local runs="$1"; shift
   local times=() worst_rc=0 rc=0
-  local i start_ns end_ns
+  local i elapsed secs ms rc_file
+  local TIMEFORMAT='%3R'
+  rc_file="$(mktemp)"
   for ((i=0; i<runs; i++)); do
-    start_ns=$(date +%s%N)
     # F2: capture the exit status instead of discarding it. A command that
     # crashes instantly is FAST, and the old `|| true` let it sail through
-    # its budget — a broken `dot` reported excellent performance.
-    "$@" >/dev/null 2>&1 || rc=$?
-    end_ns=$(date +%s%N)
-    # Bookkeeping AFTER the clock stops, so it is not counted in the median.
+    # its budget — a broken `dot` reported excellent performance. The status
+    # is written to a file because `time` needs the command inside its own
+    # group, whose exit status the substitution below does not carry out.
+    elapsed="$(
+      LC_ALL=C
+      { time { "$@" >/dev/null 2>&1; printf '%s' "$?" >"$rc_file"; }; } 2>&1
+    )"
+    rc="$(cat "$rc_file")"
     [[ "$rc" -gt "$worst_rc" ]] && worst_rc="$rc"
-    rc=0
-    times+=("$(( (end_ns - start_ns) / 1000000 ))")
+    # "1.234" -> 1234. Split on the decimal point rather than using floating
+    # point, which the shell has none of.
+    secs="${elapsed%%.*}"
+    ms="${elapsed##*.}"
+    if [[ ! "$secs" =~ ^[0-9]+$ ]] || [[ ! "$ms" =~ ^[0-9]{3}$ ]]; then
+      rm -f "$rc_file"
+      printf 'CLOCK_UNUSABLE %s' "$elapsed"
+      return 0
+    fi
+    times+=("$((10#$secs * 1000 + 10#$ms))")
   done
+  rm -f "$rc_file"
   # median. Read the sorted list line by line rather than word-splitting a
   # command substitution: mapfile is bash 4, and macOS ships bash 3.2.
   local sorted=() _t
@@ -140,6 +166,16 @@ _gate_max_rc() {
   out="$(_measure "$runs" "$@")"
   failed="${out%% *}"
   median="${out##* }"
+  # A gate that could not measure must fail, not pass. Both fields go through
+  # `-gt` / `-le`, and bash reads a non-numeric operand there as 0 — so
+  # without this an unusable clock would have silently satisfied every budget,
+  # which is exactly how the BSD-date breakage stayed invisible.
+  if [[ ! "$failed" =~ ^[0-9]+$ ]] || [[ ! "$median" =~ ^[0-9]+$ ]]; then
+    ((TESTS_FAILED++)) || true
+    printf '  \033[0;31m✗\033[0m %s: could not measure (got %s) — refusing to report a pass\n' \
+      "$label" "$out"
+    return 0
+  fi
   if [[ "$failed" -gt "$max_rc" ]]; then
     ((TESTS_FAILED++)) || true
     printf '  \033[0;31m✗\033[0m %s: exited %s (max allowed %s) — timing is meaningless\n' \

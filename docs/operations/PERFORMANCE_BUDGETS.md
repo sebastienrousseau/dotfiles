@@ -134,12 +134,33 @@ When you add a new script that runs at a shell prompt:
 - **Suite-level wall-clock ratchet**: `benches/test_help_gates_wall_clock.sh`
 - **CI wiring**: `.github/workflows/ci.yml`, job `quality-performance` — runs on
   ubuntu-latest and macos-latest for every PR, with no `|| true` and no budget
-  scaling. Measured on the hosted macOS runner (2026-08-30), it is comparable to
-  or faster than the reference machine on every gate — docs-coverage 679ms vs
-  969, traceability 1775 vs 2389, help-registry 3318 vs 4449, `dot doctor` 1746
-  vs 4423 — with a worst runner/local ratio of 1.25× (`dot search`). Budgets set
-  at 2× the local median therefore keep ≥1.6× headroom in CI, so the gate runs
-  strict.
+  scaling. On the gates the hosted macOS runner is comparable to or faster than
+  the reference machine — docs-coverage 679 ms vs 969, traceability 1775 vs
+  2389, help-registry 3318 vs 4449, `dot doctor` 1746 vs 4423. The exception is
+  anything that drives chezmoi over the whole source tree: `dot status` and
+  `dot diff` measured ~2× the local median on **both** hosted platforms, which
+  is why they sit in MEDIUM rather than FAST. Budget a new operation against the
+  slowest platform it will run on, not against this machine.
+
+### How the time is measured
+
+`_measure` uses the `time` keyword with `TIMEFORMAT='%3R'`, not `date +%s%N`.
+
+`%N` is a GNU extension. BSD `date` — macOS 14 and earlier — copies the literal
+`N` through, so every arithmetic conversion failed, `_measure` returned nothing,
+and an empty median compares as `0` against any budget. The gate reported every
+budget met on those machines, for any command, including one that could not
+parse. `time` is a shell builtin, is millisecond-accurate in bash 3.2, and needs
+no external clock at all.
+
+Two consequences worth keeping:
+
+- `_gate_max_rc` rejects a non-numeric median outright rather than comparing it.
+  Both fields go through `-gt` / `-le`, where bash reads a non-numeric operand
+  as `0` — so a gate that cannot measure would otherwise report success.
+- `tests/regression/test_gate_integrity.sh` puts a `date` without `%N` first on
+  `PATH` and requires the same verdicts. A future timing rewrite that
+  reintroduces the dependency fails there rather than going quiet.
 
 ## Environment knobs
 
