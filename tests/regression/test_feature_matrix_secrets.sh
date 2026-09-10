@@ -127,12 +127,11 @@ test_fm_secrets_set() {
   fi
   test_start "fm_secrets_set"
   fm_run secrets set FM_DEMO_KEY fm-demo-value
-  # KNOWN BUG (reported): the plain-enc store aborts with
-  # "tmp_rec: unbound variable" under `set -u` after it has already written
-  # the encrypted file, so `set` exits non-zero even though the secret is
-  # stored. The round trip below is the real assertion; this row only pins
-  # that the command does not silently claim success while storing nothing.
-  fm_expect_rc_in 0 1
+  # The plain-enc store used to abort with "tmp_rec: unbound variable" under
+  # `set -u` after it had already written the encrypted file, so `set` exited
+  # non-zero on a write that had in fact succeeded. A successful store now
+  # reports success.
+  fm_expect_rc 0
   test_start "fm_secrets_set_indexes_the_key"
   fm_run secrets list
   fm_expect_out "FM_DEMO_KEY"

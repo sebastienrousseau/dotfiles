@@ -174,6 +174,11 @@ assert_contains "Invalid namespace" "$out" "validation message"
 assert_file_contains "$DATA" 'namespace = "lab"' "data file untouched"
 
 test_start "fleet_namespace_set_without_existing_key"
+# Regression: the `set` arm only rewrote the file when a `namespace = ` key
+# was already there, yet reported success either way — and the shipped
+# defaults/.chezmoidata.toml has no such key, so on a fresh checkout the
+# command was a silent no-op. It must append the key, as `dot profile set`
+# does for `profile`.
 write_data <<'TOML'
 node_id = "node-a"
 TOML
@@ -181,7 +186,20 @@ out="$(fleet namespace set fresh 2>&1)"
 rc=$?
 assert_equals 0 "$rc" "set without a namespace line still succeeds"
 assert_contains "Set to 'fresh'" "$out" "confirmation message"
-assert_equals "" "$(grep '^namespace' "$DATA")" "no namespace line is invented"
+assert_file_contains "$DATA" 'namespace = "fresh"' "the missing key is appended, not skipped"
+assert_equals "1" "$(grep -c '^namespace = ' "$DATA")" "exactly one namespace key is written"
+assert_file_contains "$DATA" 'node_id = "node-a"' "the rest of the file survives"
+
+test_start "fleet_namespace_set_without_existing_key_is_visible_to_show"
+out="$(fleet namespace show 2>&1)"
+assert_contains "fresh" "$out" "the appended namespace is the active one"
+
+test_start "fleet_namespace_set_appends_idempotently"
+out="$(fleet namespace set fresher 2>&1)"
+rc=$?
+assert_equals 0 "$rc" "a second set exits 0"
+assert_file_contains "$DATA" 'namespace = "fresher"' "the appended key is rewritten in place"
+assert_equals "1" "$(grep -c '^namespace = ' "$DATA")" "no duplicate key is appended"
 
 write_data <<'TOML'
 namespace = "team"

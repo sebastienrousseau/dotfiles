@@ -253,11 +253,17 @@ cmd_tools() {
       exit 1
     fi
   elif [ "$subcommand" = "docs" ]; then
-    if [ -n "$src_dir" ] && [ -f "$src_dir/docs/TOOLS.md" ]; then
-      exec cat "$src_dir/docs/TOOLS.md"
-    elif [ -n "$src_dir" ] && [ -f "$src_dir/docs/UTILS.md" ]; then
-      exec cat "$src_dir/docs/UTILS.md"
-    fi
+    # docs/reference/ first: both documents were moved there, and looking
+    # only in docs/ meant `dot tools docs` answered "TOOLS.md not found" on a
+    # complete checkout. The legacy paths stay in the list so a pre-reorg
+    # tree still resolves.
+    local doc
+    for doc in docs/reference/TOOLS.md docs/reference/UTILS.md \
+      docs/TOOLS.md docs/UTILS.md; do
+      if [ -n "$src_dir" ] && [ -f "$src_dir/$doc" ]; then
+        exec cat "$src_dir/$doc"
+      fi
+    done
     ui_err "Docs" "TOOLS.md not found"
     exit 1
   else

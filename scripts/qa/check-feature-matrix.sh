@@ -175,9 +175,13 @@ fi
 # 2. Test coverage
 # ---------------------------------------------------------------------------
 
+# `|| true`: this runs at top level under `set -euo pipefail`, so without it an
+# unmatched glob (or a grep that simply finds nothing) aborts the whole script
+# with grep's status before the emptiness check below can run — exit 2 and not
+# a word about why, instead of the diagnostic that check exists to print.
 # shellcheck disable=SC2086
 grep -ho '^test_fm_[a-z0-9_]*()' $TEST_GLOB 2>/dev/null |
-  sed 's/()//' | sort -u >"$work/defined-tests.txt"
+  sed 's/()//' | sort -u >"$work/defined-tests.txt" || true
 
 if [[ ! -s "$work/defined-tests.txt" ]]; then
   fail "no test functions found in $TEST_GLOB"

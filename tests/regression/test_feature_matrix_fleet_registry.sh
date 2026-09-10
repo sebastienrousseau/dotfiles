@@ -165,31 +165,32 @@ test_fm_fleet_namespace_set() {
   repo="$(fm_repo_copy)"
   local data="$repo/defaults/.chezmoidata.toml"
 
-  # KNOWN BUG (found by this row, reported; scripts/dot/commands/fleet.sh is
-  # not this agent's file to change). cmd_fleet_namespace's `set` arm is
-  #
-  #     if grep -q "^namespace = " "$data_file"; then …rewrite… fi
-  #     ui_ok "Namespace" "Set to '$new_ns'…"
-  #
-  # so when the key is absent it writes NOTHING and still reports success.
-  # The shipped defaults/.chezmoidata.toml has no top-level `namespace` key,
-  # so on a fresh checkout `dot fleet namespace set X` is a silent no-op.
-  # `dot profile set` handles the same case correctly, by appending the key.
+  # The case a fresh checkout is actually in: no top-level `namespace` key.
+  # cmd_fleet_namespace used to rewrite only when the key was already there
+  # while reporting success either way, so `dot fleet namespace set X` was a
+  # silent no-op on the shipped file. It now inserts the key, as `dot profile
+  # set` does for `profile`.
   test_start "fm_fleet_namespace_set_reports_success_without_the_key"
   grep -q '^namespace = ' "$data" && sed -i.bak '/^namespace = /d' "$data"
   fm_run_bin "$repo/bin/dot" fleet namespace set fm-engineering
   fm_expect_rc 0
+  test_start "fm_fleet_namespace_set_writes_the_missing_key"
+  if grep -q '^namespace = "fm-engineering"' "$data"; then
+    fm_pass "key inserted at the top level"
+  else
+    fm_fail "namespace set reported success without writing the key"
+  fi
 
-  # The working path: with the key present, the value must be rewritten.
-  printf 'namespace = "default"\n' >>"$data"
+  # The rewrite path: with the key present (the row above just inserted it),
+  # the value must be replaced in place rather than duplicated.
   test_start "fm_fleet_namespace_set"
   fm_run_bin "$repo/bin/dot" fleet namespace set fm-engineering
   fm_expect_rc 0
   test_start "fm_fleet_namespace_set_persists"
-  if grep -q 'namespace = "fm-engineering"' "$data"; then
-    fm_pass "written to the copy"
+  if [[ "$(grep -c '^namespace = "fm-engineering"' "$data")" == "1" ]]; then
+    fm_pass "written to the copy, exactly once"
   else
-    fm_fail "namespace not persisted even with the key present"
+    fm_fail "namespace not persisted exactly once: $(grep -c '^namespace = ' "$data") key(s)"
   fi
   test_start "fm_fleet_namespace_set_is_visible_to_show"
   fm_run_bin "$repo/bin/dot" fleet namespace
@@ -482,24 +483,13 @@ JSON
   printf '%s\n' "$dir/index.json"
 }
 
-# The registry cache lives at one fixed path and is considered fresh for six
-# hours REGARDLESS of which URL it came from, so a row that points
-# DOTFILES_REGISTRY_URL at a different index still reads the previous one
-# unless the cache is dropped first. (Worth knowing outside the tests too: a
-# user who changes their registry URL keeps serving the old index for up to
-# six hours.)
+# The index cache is keyed by URL and kept for six hours, so a row that wants
+# a fresh fetch from the same URL has to drop it first. (Pointing
+# DOTFILES_REGISTRY_URL somewhere else no longer serves the previous
+# registry's index — that was a reported bug, now fixed and pinned by
+# tests/unit/dot-cli/test_dot_registry_cache_per_url.sh.)
 fm_registry_clear_cache() {
-  rm -f "$XDG_CACHE_HOME/dotfiles/registry/index.json"
-}
-
-# The registry cache lives at one fixed path and is considered fresh for six
-# hours REGARDLESS of which URL it came from, so a row that points
-# DOTFILES_REGISTRY_URL at a different index still reads the previous one
-# unless the cache is dropped first. (Worth knowing outside the tests too: a
-# user who changes their registry URL keeps serving the old index for up to
-# six hours.)
-fm_registry_clear_cache() {
-  rm -f "$XDG_CACHE_HOME/dotfiles/registry/index.json"
+  rm -f "$XDG_CACHE_HOME"/dotfiles/registry/index-*.json
 }
 
 fm_registry_url() {

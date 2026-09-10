@@ -191,18 +191,25 @@ assert_contains "phantom" "$(fm_run "$fx" --quiet 2>&1)" \
 
 # ── 6. No regression suite defines any matrix test function ────────────────
 #
-# The gate carries a `fail "no test functions found"` arm for this, but it
-# cannot be reached: the `grep … $TEST_GLOB | sed | sort` pipeline that fills
-# defined-tests.txt runs at the top level under `set -euo pipefail`, so an
-# unmatched glob aborts the script with grep's own status (2) before the
-# emptiness check runs. The gate still refuses to pass, which is the property
-# that matters, so this asserts what actually happens rather than pretending
-# the arm is live.
+# The gate's `fail "no test functions found"` arm used to be unreachable: the
+# `grep … $TEST_GLOB | sed | sort` pipeline that fills defined-tests.txt runs
+# at the top level under `set -euo pipefail`, so an unmatched glob aborted the
+# script with grep's own status (2) before the emptiness check could run. It
+# refused to pass, which was the property that mattered, but it said nothing —
+# a bare exit 2 where a diagnostic was written and waiting.
+#
+# The pipeline now tolerates finding nothing, so the arm is live. Both halves
+# are asserted: the status, and the sentence, because the point of the fix is
+# that someone reading CI can tell what happened.
 fx="$(fm_fresh)"
 rm -f "$fx"/tests/regression/test_feature_matrix_*.sh
 test_start "feature_matrix_refuses_an_empty_regression_tier"
-assert_equals "2" "$(fm_rc "$fx" --quiet)" \
-  "an empty regression tier should abort the gate, not pass it"
+assert_equals "1" "$(fm_rc "$fx" --quiet)" \
+  "an empty regression tier should fail the gate through its own check"
+
+test_start "feature_matrix_empty_regression_tier_is_diagnosed"
+assert_contains "no test functions found" "$(fm_run "$fx" --quiet 2>&1)" \
+  "the refusal should name what it could not find"
 
 # ── 7. A named function that is defined but never invoked ──────────────────
 fx="$(fm_fresh)"

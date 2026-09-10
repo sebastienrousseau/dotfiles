@@ -168,6 +168,42 @@ else
 fi
 rm -rf "$_up_sb"
 
+# ── dot keys ─────────────────────────────────────────────────────────
+# Regression: cmd_keys probed <src>/docs/KEYS.md and, when that was absent,
+# fell back to scripts/diagnostics/keys.sh. The keybindings document lives at
+# docs/security/KEYS.md and the fallback script is not in the tree at all, so
+# a bare `dot keys` could only ever answer "Keys script not found".
+_keys_out="$DOTFILES_COV_TMPDIR/keys.out"
+
+test_start "keys_prints_the_keybindings_document"
+_keys_rc=0
+bash "$META_FILE" keys >"$_keys_out" 2>&1 || _keys_rc=$?
+assert_equals "0" "$_keys_rc" "a bare 'dot keys' exits 0 on a complete checkout"
+assert_file_contains "$_keys_out" "# Keybindings" "the document is printed"
+assert_output_not_contains "Keys script not found" "cat '$_keys_out'"
+
+test_start "keys_with_a_query_searches_the_document"
+_keys_rc=0
+bash "$META_FILE" keys "Reload config" >"$_keys_out" 2>&1 || _keys_rc=$?
+assert_equals "0" "$_keys_rc" "a query exits 0"
+assert_file_contains "$_keys_out" "Reload config" "the matching line is shown"
+
+test_start "keys_search_works_without_ripgrep"
+# The CI runners have no ripgrep, and a bare `rg` there printed nothing while
+# exiting 0. $KEYS_BIN is a curated PATH with grep but no rg.
+KEYS_BIN="$DOTFILES_COV_TMPDIR/keys-bin"
+mkdir -p "$KEYS_BIN"
+for _t in bash sh cat env printf sed grep tr head tail dirname basename \
+  mktemp rm uname locale tput wc awk date cut sort realpath readlink; do
+  _p="$(command -v "$_t" 2>/dev/null || true)"
+  [[ -n "$_p" ]] && ln -sf "$_p" "$KEYS_BIN/$_t"
+done
+assert_file_not_exists "$KEYS_BIN/rg" "the curated PATH must not contain ripgrep"
+_keys_rc=0
+PATH="$KEYS_BIN" bash "$META_FILE" keys "Reload config" >"$_keys_out" 2>&1 || _keys_rc=$?
+assert_equals "0" "$_keys_rc" "the search exits 0 without ripgrep"
+assert_file_contains "$_keys_out" "Reload config" "grep answers when rg is absent"
+
 echo ""
 echo "Meta commands tests completed."
 # Slice 3 (#883): exercise the script under sandbox for line coverage

@@ -303,10 +303,26 @@ assert_file_contains "$OUT" "already on bloom-dark" "re-picking the active famil
 assert_empty "$(last_sync)" "no theme is applied"
 
 test_start "cancelling_the_picker_applies_nothing"
+set_theme_to bloom-dark
 : >"$SYNC_CALLS"
 rc="$(FAKE_PICK="" FAKE_PICK_RC=1 switch)"
 assert_equals "0" "$rc" "a cancelled pick still exits 0"
 assert_empty "$(last_sync)" "cancelling applies nothing"
+assert_file_contains "$OUT" "no selection" "a cancelled pick says the theme is unchanged"
+
+test_start "set_with_no_name_refuses_in_a_non_interactive_session"
+# ui_pick reports "no selector could run" exactly as it reports a cancel, so
+# without this guard a forgotten argument would exit 0 having done nothing —
+# the same "did nothing looks like success" failure the picker fix is about.
+: >"$SYNC_CALLS"
+rc=0
+CHEZMOI_SOURCE_DIR="$SRC" DOTFILES_WALLPAPER_DIR="$WALLPAPERS" \
+  DOTFILES_NONINTERACTIVE=1 PATH="$BIN:/usr/bin:/bin" \
+  "$REAL_BASH" "$SCRIPT_FILE" set </dev/null >"$OUT" 2>"$ERR" || rc=$?
+cat "$ERR" >&2
+assert_equals "1" "$rc" "a non-interactive 'set' with no name fails"
+assert_file_contains "$OUT" "dot theme set <name>" "the usage is printed"
+assert_empty "$(last_sync)" "nothing is applied"
 
 test_start "set_with_an_empty_name_opens_the_picker"
 set_theme_to bloom-dark
@@ -314,6 +330,57 @@ set_theme_to bloom-dark
 rc="$(FAKE_PICK="○  maui                                 Custom" switch set "")"
 assert_equals "0" "$rc" "set with an empty name exits 0"
 assert_equals "maui-dark" "$(last_sync)" "an empty name falls through to the interactive picker"
+
+test_start "set_with_no_name_at_all_opens_the_picker"
+# Regression: the dispatcher's `set` arm called `set_theme "$1"` after the
+# shift, so with no theme name the script died on the unset positional under
+# `set -u` — before set_theme's own empty-string check could open the picker
+# that `dot help theme` documents ("Set theme (interactive if no name)").
+set_theme_to bloom-dark
+: >"$SYNC_CALLS"
+rc="$(FAKE_PICK="○  maui                                 Custom" switch set)"
+assert_equals "0" "$rc" "set with no name exits 0"
+assert_equals "maui-dark" "$(last_sync)" "no name falls through to the interactive picker"
+assert_output_not_contains "unbound variable" "cat '$ERR'"
+
+test_start "set_with_no_name_keeps_its_status_honest_on_the_system_bash"
+# The same abort was also a reporting bug, and a macOS-only one. On bash 3.2
+# — still /bin/bash on macOS — a script that aborts under `set -u` while an
+# EXIT trap is installed exits 0, not 1: the status is already gone by the
+# time the handler runs, so no handler can restore it. switch.sh installs
+# `trap cleanup EXIT`, so `dot theme set` announced "$1: unbound variable"
+# and then reported success to its caller. Measured on this repo:
+#
+#     /bin/bash (3.2)   rc=0 + "unbound variable" on stderr
+#     bash 5.x          rc=1 + "unbound variable" on stderr
+#
+# There is no unguarded expansion left in switch.sh, so the abort — and with
+# it the only status-losing path on 3.2 — cannot happen. What this pins on
+# both shells: rc=0 must mean the command actually did its work.
+if [[ -x /bin/bash ]]; then
+  set_theme_to bloom-dark
+  : >"$SYNC_CALLS"
+  rc=0
+  CHEZMOI_SOURCE_DIR="$SRC" \
+    DOTFILES_WALLPAPER_DIR="$WALLPAPERS" \
+    FAKE_PICK="○  maui                                 Custom" \
+    PATH="$BIN:/usr/bin:/bin" \
+    /bin/bash "$SCRIPT_FILE" set </dev/null >"$OUT" 2>"$ERR" || rc=$?
+  cat "$ERR" >&2
+  assert_equals "0" "$rc" "set with no name exits 0 under the system bash"
+  assert_equals "maui-dark" "$(last_sync)" "the exit status matches what was applied"
+  assert_output_not_contains "unbound variable" "cat '$ERR'"
+
+  # The EXIT trap must not mask an ordinary failure either.
+  rc=0
+  CHEZMOI_SOURCE_DIR="$SRC" DOTFILES_WALLPAPER_DIR="$WALLPAPERS" \
+    PATH="$BIN:/usr/bin:/bin" \
+    /bin/bash "$SCRIPT_FILE" definitely-not-a-theme </dev/null >"$OUT" 2>"$ERR" || rc=$?
+  cat "$ERR" >&2
+  assert_equals "1" "$rc" "an unknown argument still fails under the system bash"
+else
+  _fail "/bin/bash not found"
+fi
 
 test_start "a_theme_absent_from_themes_toml_falls_back_to_suffix_stripping"
 # get_theme_family cannot read a family for an unlisted theme, so it strips

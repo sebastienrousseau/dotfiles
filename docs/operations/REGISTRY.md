@@ -27,7 +27,7 @@ dot registry url                    # show active registry URL
 dot registry set-url <url>          # point at a different registry
 ```
 
-The registry index is cached locally at `${XDG_CACHE_HOME:-~/.cache}/dotfiles/registry/index.json` with a 6 hour TTL. Override the URL one-off via `DOTFILES_REGISTRY_URL=<url> dot registry list`.
+The registry index is cached locally under `${XDG_CACHE_HOME:-~/.cache}/dotfiles/registry/` with a 6 hour TTL, in a file named for the URL it was fetched from (`index-<digest>.json`) so changing the registry URL never serves the previous registry's index. Override the URL one-off via `DOTFILES_REGISTRY_URL=<url> dot registry list`.
 
 ## JSON contract
 

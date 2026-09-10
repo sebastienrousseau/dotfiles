@@ -210,7 +210,14 @@ declare -a PROBES=(
   "fleet_drift_h   fleet drift history"
   "fleet_drift_p   fleet drift predict"
   "fleet_drift_c   fleet drift check"
-  "fleet_ns_set    fleet namespace set engineering"
+  # NOT `fleet namespace set`: that arm writes .chezmoidata.toml, and its
+  # target is resolved from the location of the sourced library rather than
+  # from $HOME, so a sandboxed HOME does not keep it out of the checkout. It
+  # was harmless here only for as long as the arm was a silent no-op when the
+  # file had no `namespace` key — the bug fixed in
+  # scripts/dot/commands/fleet.sh. The set arm is covered against a fake
+  # source tree by tests/unit/dot-cli/test_dot_fleet_namespace_enforce_apply.sh.
+  "fleet_ns_show   fleet namespace show"
   # ── manual subcommand probes ──
   "manual_help     manual --help"
   "manual_open     manual open"

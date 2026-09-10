@@ -260,6 +260,56 @@ assert_dir_exists "$tools_tmp/work/demo_project" "tools deep branches created sa
   bash "$TOOLS_FILE" tools install node >/dev/null
 ) || true
 
+# ── tools docs ───────────────────────────────────────────────────────
+# Regression: cmd_tools looked for <src>/docs/TOOLS.md and <src>/docs/UTILS.md.
+# Both documents live under docs/reference/, so `dot tools docs` answered
+# "TOOLS.md not found" on a complete checkout — the subcommand could not work
+# for anyone. The reference location is probed first, the legacy one after,
+# so a pre-reorg checkout still resolves.
+test_start "tools_docs_prints_the_tools_document"
+_docs_out="$DOTFILES_COV_TMPDIR/tools-docs.out"
+_docs_rc=0
+bash "$TOOLS_FILE" tools docs >"$_docs_out" 2>&1 || _docs_rc=$?
+assert_equals "0" "$_docs_rc" "tools docs exits 0 on a complete checkout"
+assert_file_contains "$_docs_out" "Integrated tools organized by role" \
+  "the body of docs/reference/TOOLS.md is printed"
+assert_output_not_contains "TOOLS.md not found" "cat '$_docs_out'"
+
+test_start "tools_docs_falls_back_to_the_legacy_location"
+# A tree that only has the pre-reorg docs/TOOLS.md must still resolve.
+_legacy="$DOTFILES_COV_TMPDIR/legacy-repo"
+mkdir -p "$_legacy/docs" "$_legacy/lib/dot"
+printf 'legacy-tools-doc\n' >"$_legacy/docs/TOOLS.md"
+_docs_rc=0
+(
+  set +e
+  # shellcheck disable=SC1090
+  source "$REPO_ROOT/lib/dot/utils.sh"
+  # shellcheck disable=SC1090
+  set -- tools
+  source "$TOOLS_FILE" >/dev/null 2>&1
+  _DOT_SOURCE_DIR_CACHE="$_legacy"
+  cmd_tools docs
+) >"$_docs_out" 2>&1 || _docs_rc=$?
+assert_file_contains "$_docs_out" "legacy-tools-doc" "the legacy docs/TOOLS.md is still found"
+
+test_start "tools_docs_reports_a_tree_with_neither_document"
+_bare="$DOTFILES_COV_TMPDIR/bare-repo"
+mkdir -p "$_bare/docs"
+_docs_rc=0
+(
+  set +e
+  # shellcheck disable=SC1090
+  source "$REPO_ROOT/lib/dot/utils.sh"
+  set -- tools
+  # shellcheck disable=SC1090
+  source "$TOOLS_FILE" >/dev/null 2>&1
+  _DOT_SOURCE_DIR_CACHE="$_bare"
+  cmd_tools docs
+) >"$_docs_out" 2>&1 || _docs_rc=$?
+assert_equals "1" "$_docs_rc" "a tree with no tools document fails"
+assert_file_contains "$_docs_out" "TOOLS.md not found" "the missing document is named"
+
 # Slice 3 (#883): exercise the script under sandbox for line coverage
 cov_exercise_script "$TOOLS_FILE"
 

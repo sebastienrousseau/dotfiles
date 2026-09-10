@@ -200,8 +200,17 @@ is_dark_theme() {
 }
 
 set_theme() {
-  local new_theme="$1"
+  local new_theme="${1:-}"
   if [ -z "$new_theme" ]; then
+    # A picker needs someone to pick. Under DOTFILES_NONINTERACTIVE the
+    # selector cannot run, and ui_pick reports "nothing selected" the same
+    # way it reports a cancel — so answering with a silent success would
+    # make a forgotten argument indistinguishable from a theme change.
+    if [ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]; then
+      ui_err "Missing theme name" "no interactive picker in a non-interactive session"
+      ui_info "Usage" "dot theme set <name>  (or 'dot theme list' to see them)"
+      return 1
+    fi
     pick_theme
     return
   fi
@@ -252,6 +261,11 @@ pick_theme() {
     else
       ui_info "Theme" "already on $current"
     fi
+  else
+    # Cancelled, or no selector could run. Either way nothing changed, and
+    # saying so beats exiting mute on a command the user asked to be
+    # interactive.
+    ui_info "Theme" "no selection — still on $current"
   fi
 }
 
@@ -403,7 +417,16 @@ case "${1:-}" in
     ;;
   set)
     shift
-    set_theme "$1"
+    # `"${1:-}"`, not `"$1"`: with no theme name the bare positional aborts
+    # the script under `set -u` before set_theme's own empty-string check can
+    # open the picker `dot help theme` promises. Worse, the abort is silent
+    # about its status on bash 3.2 (macOS /bin/bash): when a script dies on an
+    # unbound variable with an EXIT trap installed — switch.sh installs
+    # `trap cleanup EXIT` — 3.2 exits 0, and no handler can recover the status
+    # because `$?` is already 0 when the handler runs. So on a stock Mac this
+    # one missing default turned every `dot theme set` typo into a reported
+    # success. Keep every expansion in this script guarded.
+    set_theme "${1:-}"
     ;;
   toggle)
     toggle_theme

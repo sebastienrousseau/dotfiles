@@ -96,9 +96,24 @@ dot_secrets_store_plain_enc() {
   dot_secrets_ensure_layout
   tmp_rec="$(umask 077 && mktemp)"
   file="$DOT_SECRETS_STORE_DIR/${key}.age"
-  trap 'rm -f "$tmp_rec"' RETURN
-  age-keygen -y "$DOT_SECRETS_AGE_KEY" >"$tmp_rec"
-  printf "%s" "$value" | age -R "$tmp_rec" -o "$file"
+
+  # No RETURN trap here. A RETURN trap set inside a function also fires when
+  # its CALLER returns, and by then `tmp_rec` — local to this function — is
+  # out of scope: under `set -u` the trap aborted dot_secrets_set with
+  # "tmp_rec: unbound variable" AFTER the encrypted file had been written, so
+  # `dot secrets set` reported failure on a write that had succeeded. Clean up
+  # explicitly on both paths instead.
+  if ! age-keygen -y "$DOT_SECRETS_AGE_KEY" >"$tmp_rec"; then
+    rm -f "$tmp_rec"
+    echo "failed to derive the age recipient from $DOT_SECRETS_AGE_KEY" >&2
+    return 1
+  fi
+  if ! printf "%s" "$value" | age -R "$tmp_rec" -o "$file"; then
+    rm -f "$tmp_rec"
+    echo "failed to encrypt secret: $key" >&2
+    return 1
+  fi
+  rm -f "$tmp_rec"
   chmod 600 "$file" 2>/dev/null || true
 }
 

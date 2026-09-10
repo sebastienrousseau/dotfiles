@@ -89,6 +89,26 @@ assert_exit_code 1 "cd '$scratch' && REPO_ROOT='$scratch' bash '$scratch/scripts
 
 rm -rf "$scratch"
 
+# 5. No test functions at all: the gate's own diagnostic must be the one that
+#    fires. Regression: the `grep … | sed | sort` that fills defined-tests.txt
+#    runs at top level under `set -euo pipefail`, so an unmatched glob aborted
+#    the script with grep's status (2) before the emptiness check below it
+#    could run. The gate still refused to pass, so the property held — but the
+#    message a maintainer needs was dead code, and the exit status was 2 where
+#    every other drift class exits 1.
+test_start "check_feature_matrix_reports_a_tree_with_no_test_functions"
+scratch_no_tests="$(fm_gate_scratch)"
+rm -f "$scratch_no_tests"/tests/regression/test_feature_matrix_*.sh
+gate_out="$(mktemp -t fmgate-out.XXXXXX)"
+gate_rc=0
+(cd "$scratch_no_tests" && REPO_ROOT="$scratch_no_tests" \
+  bash "$scratch_no_tests/scripts/qa/check-feature-matrix.sh" --quiet) \
+  >"$gate_out" 2>&1 || gate_rc=$?
+assert_equals "1" "$gate_rc" "a tree with no matrix test files fails the gate with the drift status"
+assert_file_contains "$gate_out" "no test functions found" \
+  "the gate says WHY it failed instead of dying on the glob"
+rm -rf "$scratch_no_tests" "$gate_out"
+
 test_start "check_feature_matrix_left_the_checkout_clean"
 assert_exit_code 0 "bash '$GATE' --quiet"
 

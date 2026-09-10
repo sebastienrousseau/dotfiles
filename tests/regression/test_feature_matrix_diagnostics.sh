@@ -76,17 +76,20 @@ test_fm_doctor_heal() {
 }
 
 test_fm_doctor_audit() {
-  # KNOWN BUG (reported, not fixed here — scripts/diagnostics is another
-  # agent's file): doctor-unified.sh maps --audit to scripts/ops/health-check.sh,
-  # which does not exist in the tree, so the flag currently dies with
-  # "Script not found". The assertion below passes both before and after that
-  # is fixed: what is pinned is that --audit is RECOGNISED as a flag and
-  # routed somewhere, not that the target happens to be missing today.
+  # --audit used to map to scripts/ops/health-check.sh, which has never been
+  # in the tree, so the flag died with "Script not found". It now routes to
+  # the health dashboard — the audit-shaped diagnostic the name meant.
   test_start "fm_doctor_audit"
   fm_run doctor --audit
   fm_expect_rc_in 0 1
   test_start "fm_doctor_audit_is_routed"
-  fm_expect_any "Script not found" "Health" "health" "audit"
+  fm_expect_any "Health" "health"
+  test_start "fm_doctor_audit_target_exists"
+  if [[ "$FM_OUT$FM_ERR" == *"Script not found"* ]]; then
+    fm_fail "--audit routes to a script that is not in the tree"
+  else
+    fm_pass "the target resolved"
+  fi
 }
 
 test_fm_doctor_json() {

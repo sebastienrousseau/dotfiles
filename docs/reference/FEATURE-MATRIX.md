@@ -600,35 +600,40 @@ hunted through the table.
 
 ## Findings this matrix produced
 
-Building the coverage turned up defects in the CLI. Each is exercised by the
+Building the coverage turned up defects in the CLI. Each was exercised by the
 row that found it, commented at that row, and reported rather than silently
-accommodated. None is fixed here — `bin/dot`'s command modules and
-`scripts/diagnostics/` belong to other work.
+accommodated. Every one of them has since been fixed and pinned by a
+regression test; what remains below is the one entry that is working as
+designed.
 
 | Severity | Where | What |
 |----------|-------|------|
-| High | `scripts/dot/commands/agent.sh` | `dot mode run`, `dot agent checkpoint replay` and `dot agent delegate` all discard the wrapped command's exit code. All three use `if ! "$@"; then exit_code=$?`, where `$?` is the status of the *negated* pipeline and so always `0`. `dot mode run plan false` exits 0; delegate reports `failed (exit 0)`. Fix: `"$@" \|\| exit_code=$?`. |
-| High | `scripts/dot/commands/fleet.sh` | `dot fleet namespace set` rewrites `.chezmoidata.toml` only when a `namespace` key already exists, but reports success either way. The shipped file has no such key, so on a fresh checkout the command is a silent no-op. `dot profile set` handles the same case correctly by appending the key. |
-| Medium | `scripts/dot/commands/registry.sh` | The registry index cache lives at one fixed path and is treated as fresh for six hours regardless of which URL produced it, so changing `DOTFILES_REGISTRY_URL` keeps serving the previous registry's index. |
-| Medium | `scripts/diagnostics/doctor-unified.sh` | `dot doctor --audit` routes to `scripts/ops/health-check.sh`, which is not in the tree; the flag dies with "Script not found". |
-| Medium | `scripts/dot/commands/tools.sh` | `dot tools docs` looks for `docs/TOOLS.md` / `docs/UTILS.md`; both live under `docs/reference/`, so the subcommand reports "TOOLS.md not found" on a complete checkout. |
-| Low | `scripts/dot/commands/meta.sh` | A bare `dot keys` falls back to `scripts/diagnostics/keys.sh`, which does not exist, when `docs/KEYS.md` is absent — and `docs/KEYS.md` is not in the tree. |
-| Low | `scripts/theme/switch.sh` | `dot theme set` with no name aborts with `$1: unbound variable` instead of printing usage. The refusal is correct; its presentation is not. |
-| Low | `scripts/lib/secrets_provider.sh` | The `plain-enc` store aborts with `tmp_rec: unbound variable` under `set -u` *after* writing the encrypted file, so `dot secrets set` exits non-zero on a write that in fact succeeded. |
 | Note | `scripts/dot/commands/env-emit.sh` | The `-h\|--help` arm of `dot_env_emit` is unreachable through the CLI: the dispatcher's universal `--help` intercept fires first and renders `dot help env`. Working as designed, but the sub-handler's usage text can only be read in the source. |
 
 ### Commands that write into the checkout
 
-Three commands resolve their write target from the location of the sourced
-library rather than from `$HOME`, so a sandboxed `HOME` does not protect a
-working tree from them. The regression rows for these drive a throwaway copy
-of the repo instead, and then assert the checkout is still clean:
+These commands resolve their write target through `lib/dot/utils.sh`'s
+`resolve_source_dir`, which probes the location of the sourced library BEFORE
+`$CHEZMOI_SOURCE_DIR` and `$HOME`. Running `./bin/dot` from a checkout
+therefore writes into that checkout whatever `HOME` says, so a sandboxed
+`HOME` does not protect a working tree from them. The regression rows for
+these drive a throwaway copy of the repo instead, and then assert the checkout
+is still clean:
 
 - `dot profile set` → `defaults/.chezmoidata.toml`
 - `dot fleet namespace set` → `defaults/.chezmoidata.toml`
 - `dot fleet enforce set` → `defaults/dot_config/dotfiles/agent-profiles.json`
 - `dot aliases cheatsheet` (no `--output`) → `docs/ALIASES_CHEATSHEET.md`
-- `dot theme set` → `defaults/.chezmoidata.toml`, **and** the OS appearance
+
+`dot theme set` is NOT one of them, contrary to an earlier note here.
+scripts/theme/switch.sh and bin/dot-theme-sync resolve the data file from
+`$CHEZMOI_SOURCE_DIR`, then `$HOME/.dotfiles`, then
+`$HOME/.local/share/chezmoi`, and refuse with "Dotfiles source not found"
+when none exists — measured by pointing `$HOME/.dotfiles` at a synthetic tree
+while running the checkout's `bin/dot`: the synthetic tree was written and the
+checkout was untouched. It writes the checkout under this harness only because
+the harness points both `CHEZMOI_SOURCE_DIR` and `$HOME/.dotfiles` at it. It
+also drives the real OS appearance, which is why it stays a smoke row.
 
 ## See also
 

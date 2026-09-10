@@ -102,14 +102,14 @@ test_fm_smoke_sandbox() { fm_smoke sandbox; }
 # ── meta: keys ─────────────────────────────────────────────────────────────
 
 test_fm_keys() {
-  # KNOWN GAP (reported): cmd_keys falls back to scripts/diagnostics/keys.sh,
-  # which does not exist, when docs/KEYS.md is absent — and docs/KEYS.md is
-  # not in the tree, so a bare `dot keys` reports "Keys script not found".
+  # cmd_keys used to probe only docs/KEYS.md and then fall back to
+  # scripts/diagnostics/keys.sh; neither is in the tree, so a bare `dot keys`
+  # could only report "Keys script not found". It reads docs/security/KEYS.md.
   test_start "fm_keys"
   fm_run keys
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_keys_is_routed"
-  fm_expect_any "Keys" "KEYS.md" "keybinding" "not found"
+  fm_expect_out "Keybindings"
 }
 
 test_fm_keys_sign_check() {
@@ -381,24 +381,16 @@ test_fm_mode_run_exit_code() {
   # The wrapped command's exit code SHOULD reach the caller, or `dot mode run`
   # cannot be used as a CI wrapper at all.
   #
-  # KNOWN BUG (found by this row, reported; scripts/dot/commands/agent.sh is
-  # not this agent's file to change). All three wrappers use
+  # This row was written while all three wrappers used
   #
   #     if ! "$@"; then exit_code=$?
   #
-  # and inside that branch `$?` is the status of the NEGATED pipeline, which
-  # is always 0 — so the failure code is lost. `dot mode run plan false`
-  # exits 0, and `dot agent delegate` prints "failed (exit 0)". The fix is to
-  # capture before negating:
-  #
-  #     "$@" || exit_code=$?
-  #
-  # The assertion accepts both values so it passes before and after the fix
-  # rather than pinning the bug in place; the row below is what proves the
-  # command actually ran.
+  # where `$?` is the status of the NEGATED pipeline and so always 0 — the
+  # failure code was lost. They now run the command as the `if` condition and
+  # read `$?` in the else branch, so the real status reaches the caller.
   test_start "fm_mode_run_exit_code"
   fm_run mode run plan sh -c "exit 42"
-  fm_expect_rc_in 0 42
+  fm_expect_rc 42
   test_start "fm_mode_run_exit_code_command_was_executed"
   fm_run mode run plan sh -c "printf fm-exit-marker; exit 42"
   fm_expect_out "fm-exit-marker"
@@ -679,32 +671,15 @@ test_fm_agent_delegate() {
   AGENT_PROFILE_CONFIG="$profiles" fm_run agent delegate fm-reviewer echo fm-delegated
   fm_expect_rc 0
 
-  # KNOWN BUG (found by this row, reported; scripts/dot/commands/agent.sh is
-  # not this agent's file to change): the delegate path wraps the command as
-  #
-  #     if ! timeout "$delegate_timeout" "$@"; then
-  #
-  # and `timeout` is GNU coreutils, which stock macOS does not ship — only
-  # `gtimeout`, and only after `brew install coreutils`. So on a clean Mac the
-  # delegated command never runs at all, and (because of the negated-status
-  # bug in the same function) it is announced as "failed (exit 0)". The rest
-  # of the repo handles this properly: tests/framework/assertions.sh defines a
-  # `timeout` shim that falls back to gtimeout, and bench.sh probes for both.
-  #
-  # The row therefore only asserts the command actually ran where a timeout
-  # binary exists; elsewhere it records the environment gap rather than
-  # reporting a red test for a machine the CLI cannot serve.
-  #
-  # `type -P`, not `command -v`: assertions.sh defines a `timeout` shell
-  # FUNCTION as its own fallback, and `command -v` reports that function as
-  # available — but a function is not exported to the `dot` subprocess, which
-  # is where the lookup that matters happens. Only a real executable counts.
+  # This row used to be conditional on a GNU `timeout` existing: the delegate
+  # path wrapped the command as `timeout "$delegate_timeout" "$@"`, and stock
+  # macOS ships neither `timeout` nor `gtimeout`, so the delegated command
+  # never ran there at all. _agent_run_bounded now falls back to perl's
+  # fork+alarm (the same answer tests/framework/assertions.sh gives), so the
+  # command runs — and stays bounded — on every host we support. The unit
+  # file pins the fallbacks with a PATH that has no timeout binary.
   test_start "fm_agent_delegate_runs_under_the_delegate_profile"
-  if [[ -n "$(type -P timeout)" ]]; then
-    fm_expect_out "fm-delegated"
-  else
-    fm_pass "skipped — no GNU timeout; dot agent delegate cannot run its command here"
-  fi
+  fm_expect_out "fm-delegated"
   test_start "fm_agent_delegate_rejects_an_unknown_delegate"
   AGENT_PROFILE_CONFIG="$profiles" fm_run agent delegate zzz-nobody echo x
   fm_expect_rc 1

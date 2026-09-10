@@ -132,13 +132,24 @@ done
 assert_contains "rendered → $_root/AGENTS.md" "$_out" "AGENTS.md render reported"
 
 test_start "agents_render_propagates_the_claude_body"
-# NOTE: render pipes the body through
-# `sed '1s/^# CLAUDE\.md.*/# AGENTS.md — AI Assistant Guidelines/'`,
-# but `_agents_body` has already dropped that H1, so the substitution
-# never fires and the rendered file carries no title of its own — the
-# committed AGENTS.md shows the same shape. Pinned as current
-# behaviour; changing it would re-render every harness file.
-assert_output_not_contains "# AGENTS.md — AI Assistant Guidelines" cat "$_root/AGENTS.md"
+# Regression: render used to pipe the body through
+# `sed '1s/^# CLAUDE\.md.*/# AGENTS.md — AI Assistant Guidelines/'`, but
+# `_agents_body` drops the H1 by design, so line 1 was never the CLAUDE.md
+# title, the substitution never fired, and the rendered file carried no title
+# at all. The title is printed directly now.
+assert_file_contains "$_root/AGENTS.md" "# AGENTS.md — AI Assistant Guidelines" \
+  "the rendered file declares its own title"
+test_start "agents_render_puts_the_title_before_the_body"
+_title_line="$(grep -n '^# AGENTS\.md' "$_root/AGENTS.md" | head -1 | cut -d: -f1)"
+_body_line="$(grep -n '^## Conventions' "$_root/AGENTS.md" | head -1 | cut -d: -f1)"
+if [[ -n "$_title_line" && -n "$_body_line" && "$_title_line" -lt "$_body_line" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (title on line $_title_line)"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: title=$_title_line body=$_body_line"
+fi
+test_start "agents_render_propagates_the_claude_body"
 assert_file_contains "$_root/AGENTS.md" "## Conventions" "the first body heading survives"
 assert_file_contains "$_root/AGENTS.md" "Conventional commits." "the CLAUDE.md body is carried over"
 assert_file_contains "$_root/AGENTS.md" "Canonical source: CLAUDE.md" "the do-not-edit header is present"

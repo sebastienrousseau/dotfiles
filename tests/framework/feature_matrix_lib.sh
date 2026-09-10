@@ -27,19 +27,27 @@
 #   * No network: commands that would egress are recorded "unmeasurable" in
 #     the matrix and covered by a --help smoke test instead.
 #
-# Three commands resolve their WRITE target from the location of the sourced
-# library rather than from $HOME, so a sandboxed HOME does not protect the
-# checkout from them:
+# Some commands resolve their WRITE target through lib/dot/utils.sh's
+# resolve_source_dir, which probes the location of the sourced library BEFORE
+# $CHEZMOI_SOURCE_DIR and $HOME. A sandboxed HOME does not protect the
+# checkout from those:
 #
 #     dot profile set              -> <repo>/defaults/.chezmoidata.toml
 #     dot fleet namespace set      -> <repo>/defaults/.chezmoidata.toml
 #     dot fleet enforce set        -> <repo>/defaults/dot_config/.../agent-profiles.json
-#     dot theme set / toggle / …   -> <repo>/defaults/.chezmoidata.toml (+ the OS appearance)
 #     dot aliases cheatsheet       -> <repo>/docs/ALIASES_CHEATSHEET.md
 #
-# `fm_repo_copy` exists for the first three: it materialises a ~1 MB subset of
-# the repo in the sandbox so the write lands there. `theme set` additionally
-# drives the real OS appearance, so it stays a smoke row.
+# `fm_repo_copy` exists for those: it materialises a ~1 MB subset of the repo
+# in the sandbox so the write lands there.
+#
+# `dot theme set` is NOT in that list, despite an earlier note here saying so.
+# scripts/theme/switch.sh and bin/dot-theme-sync resolve the data file from
+# CHEZMOI_SOURCE_DIR, then $HOME/.dotfiles, then $HOME/.local/share/chezmoi,
+# and refuse when none exists — verified by pointing $HOME/.dotfiles at a
+# synthetic tree while running the checkout's bin/dot: the synthetic tree was
+# written, the checkout was not. It reaches the checkout HERE only because
+# this harness points both CHEZMOI_SOURCE_DIR and $HOME/.dotfiles at it. It
+# also drives the real OS appearance, which is why it stays a smoke row.
 
 [[ "${_DOT_LIB_FEATURE_MATRIX_LOADED:-0}" == "1" ]] && return 0
 _DOT_LIB_FEATURE_MATRIX_LOADED=1

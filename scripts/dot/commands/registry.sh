@@ -76,6 +76,38 @@ _registry_cache_dir() {
   printf '%s/dotfiles/registry\n' "${XDG_CACHE_HOME:-$HOME/.cache}"
 }
 
+## The index cache is keyed by URL, not by one fixed path.
+##
+## It used to live at <cache>/index.json for every registry, and be treated as
+## fresh for six hours: a freshness window says nothing about WHICH registry
+## produced the file, so changing DOTFILES_REGISTRY_URL — or running
+## `dot registry set-url` — kept serving the previous registry's index for up
+## to six hours. Keying by URL also means switching back and forth does not
+## re-download.
+##
+## SHA-256 where a hasher exists, POSIX `cksum` otherwise: this is a cache
+## key, not a security boundary, and every index is schema-validated on read.
+_registry_cache_key() {
+  local url="$1" digest=""
+  if command -v shasum >/dev/null 2>&1; then
+    digest="$(printf '%s' "$url" | shasum -a 256 2>/dev/null | awk '{print $1}')"
+  elif command -v sha256sum >/dev/null 2>&1; then
+    digest="$(printf '%s' "$url" | sha256sum 2>/dev/null | awk '{print $1}')"
+  fi
+  if [[ -z "$digest" ]]; then
+    digest="$(printf '%s' "$url" | cksum | awk '{print $1 "-" $2}')"
+  fi
+  printf '%s\n' "${digest:0:32}"
+}
+
+## _registry_cache_file [url] — absolute path of the cached index for a URL
+## (the active one by default). Tests seed the cache through this.
+_registry_cache_file() {
+  local url="${1:-}"
+  [[ -n "$url" ]] || url="$(_registry_url)"
+  printf '%s/index-%s.json\n' "$(_registry_cache_dir)" "$(_registry_cache_key "$url")"
+}
+
 _registry_data_dir() {
   printf '%s/dotfiles/modules\n' "${XDG_DATA_HOME:-$HOME/.local/share}"
 }
@@ -107,7 +139,7 @@ _registry_fetch() {
     return 1
   }
   cache_dir="$(_registry_cache_dir)"
-  cache_file="$cache_dir/index.json"
+  cache_file="$(_registry_cache_file "$url")"
   mkdir -p "$cache_dir"
   # Refresh if older than 6h or missing.
   local now mtime

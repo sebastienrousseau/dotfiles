@@ -20,7 +20,11 @@ target="scripts/diagnostics/doctor.sh"
 for arg in "$@"; do
   case "$arg" in
     --heal | -H) target="scripts/ops/heal.sh" ;;
-    --audit | -a) target="scripts/ops/health-check.sh" ;;
+    # scripts/ops/health-check.sh has never existed in this tree, so
+    # `dot doctor --audit` died with "Script not found" for every user who
+    # tried it. The health dashboard is what that name meant: it is the
+    # audit-shaped diagnostic, and `dot health-check` already aliases it.
+    --audit | -a) target="scripts/diagnostics/health.sh" ;;
     --score | -s) target="scripts/diagnostics/scorecard.sh" ;;
     --smoke | -m) target="scripts/diagnostics/smoke-test.sh" ;;
     --drift | -d) target="scripts/diagnostics/drift-dashboard.sh" ;;
