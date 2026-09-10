@@ -65,6 +65,21 @@ fuzz_target!(|data: &[u8]| {
     assert_eq!(read_back.text().parse::<Status>(), Ok(summary));
 
     let text = report.to_string();
-    assert_eq!(text.lines().count(), report.checks.len() + 1);
     assert!(text.ends_with('\n'));
+
+    // One line per check plus the summary. A detail quotes a value the
+    // document chose, so a newline in it would split a row in two; a
+    // carriage return or an ESC would let the attested machine repaint the
+    // reviewer's screen. Neither may survive rendering.
+    assert_eq!(
+        text.lines().count(),
+        report.checks.len() + 1,
+        "a check rendered across more than one line: {text:?}"
+    );
+    for line in text.lines() {
+        assert!(
+            !line.chars().any(char::is_control),
+            "control character reached the rendered line {line:?}"
+        );
+    }
 });

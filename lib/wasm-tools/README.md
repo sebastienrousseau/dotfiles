@@ -233,13 +233,24 @@ an invariant rather than only surviving:
 | `fuzz_at`        | `Status::at`, `Status::from_system_time`, `to_json`, `parse` | `at(n)` and `from_system_time(EPOCH + n)` agree and round-trip for every `u64` |
 | `fuzz_cli`       | `cli::run` (and through it `from_system_time`, `Display`) | exit code, which stream got output, and that stdout parses back to `Status::at(secs)` |
 | `fuzz_json`      | `json::validate`, `json::get`, every `Value` accessor | a value `get` returns is valid JSON on its own and really is a slice of the input; every error offset is inside the input on a char boundary |
-| `fuzz_verify`    | `attest::Report::verify`, `to_json`, `Display`, `summary` | a verdict is only refused for non-JSON input; the summary agrees with the checks; both renderings round-trip |
+| `fuzz_verify`    | `attest::Report::verify`, `to_json`, `Display`, `summary` | a verdict is only refused for non-JSON input; the summary agrees with the checks; both renderings round-trip; the table is exactly one line per check and carries no control character |
 
 `fuzz_json` and `fuzz_verify` matter most: they cover the code that reads
 documents the module did not produce, which is the crate's whole attack
 surface once it is handed evidence from another machine. `fuzz_verify`
 lays its input out by hand — eight little-endian bytes of `now`, eight of
 `max_age`, then the document — so a seed is readable.
+
+`fuzz_verify` has already earned its place: it found that a JSON `\n`
+escape inside a member the policy reads (`platform.runtime`) decoded to a
+real newline, reached `Check::detail` unescaped, and split one check
+across two lines of the table. The reproducer is
+`fuzz/regressions/fuzz_verify/newline-in-a-detail` and the fix is
+`attest::flatten`, which escapes the whole `Cc` category at the single
+render site — a carriage return or `ESC` in the same position would have
+let the machine under review repaint the reviewer's screen and forge the
+verdict being read. `Report::to_json` deliberately keeps the raw value,
+because a parser is not at risk from bytes a terminal acts on.
 
 Every push replays the seed corpus (`fuzz/corpus/<target>/`) plus the
 minimised reproducers of previously-fixed findings

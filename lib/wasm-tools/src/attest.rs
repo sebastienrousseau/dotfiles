@@ -44,7 +44,7 @@
 //! # Ok::<(), dot_sys::Error>(())
 //! ```
 
-use std::fmt;
+use std::fmt::{self, Write as _};
 
 use crate::{json, time, write_json_string, Error, Status, ENGINE, STATUS_FAILED, STATUS_OK};
 
@@ -343,7 +343,7 @@ impl fmt::Display for Report {
                 "{}  {:width$}  {}",
                 check.outcome.as_str(),
                 check.path,
-                check.detail
+                flatten(&check.detail)
             )?;
         }
         let failures = self.failures();
@@ -353,6 +353,46 @@ impl fmt::Display for Report {
             writeln!(f, "{failures} of {} checks failed", self.checks.len())
         }
     }
+}
+
+/// Renders one detail as a single line carrying nothing a terminal acts on.
+///
+/// A detail quotes a value taken straight from the document under review,
+/// and that document is chosen by the machine being attested. Two things
+/// follow, and both are the verifier's problem rather than the reader's:
+///
+/// - a newline would split one check across two lines, breaking the "one
+///   line per check" shape the report promises (found by `fuzz_verify`;
+///   the reproducer is in `fuzz/regressions/fuzz_verify/`);
+/// - a carriage return, backspace or `ESC` would let the attested machine
+///   repaint the reviewer's screen — and for a tool whose entire product
+///   is a verdict someone reads, forging that verdict is the whole attack.
+///
+/// So every [`char::is_control`] character is escaped, not just the ones
+/// that break the line count. Doing it at the single render site rather
+/// than at each call site means a check added later cannot reintroduce
+/// either problem by forgetting to.
+///
+/// [`Report::to_json`] deliberately does not do this: it writes `detail`
+/// through the crate's JSON string writer, so the machine-readable verdict
+/// keeps the value byte-for-byte as the document had it. The two
+/// renderings differ because a parser and a terminal are not at risk from
+/// the same bytes.
+fn flatten(detail: &str) -> String {
+    let mut out = String::with_capacity(detail.len());
+    for c in detail.chars() {
+        match c {
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            // Writing into a String cannot fail.
+            c if c.is_control() => {
+                let _ = write!(out, "\\u{:04x}", u32::from(c));
+            }
+            c => out.push(c),
+        }
+    }
+    out
 }
 
 /// Checks that `generated_at` is a UTC instant that is neither in the
@@ -730,6 +770,79 @@ mod tests {
             text.contains(&format!("fail  {GENERATED_AT:width$}  ")),
             "{text}"
         );
+    }
+
+    #[test]
+    fn a_detail_never_breaks_the_one_line_per_check_shape() {
+        // Found by `fuzz_verify` in CI: `platform.runtime` held the JSON
+        // escape `\n`, which the reader decodes into a real newline, which
+        // then split one check across two lines. The minimised reproducer
+        // is `fuzz/regressions/fuzz_verify/newline-in-a-detail`.
+        let split = GOOD.replace(r#""runtime": "darwin-arm64""#, r#""runtime": "li\nux-x64""#);
+        let report = verify(&split);
+        assert_eq!(
+            named(&report, "platform.runtime").detail,
+            "li\nux-x64",
+            "the detail keeps the value the document gave it"
+        );
+        assert_eq!(report.failures(), 0, "a newline is not a policy failure");
+
+        let text = report.to_string();
+        assert_eq!(text.lines().count(), TOTAL + 1, "{text}");
+        assert!(text.contains("pass  platform.runtime                     li\\nux-x64\n"));
+    }
+
+    #[test]
+    fn no_control_character_from_the_document_reaches_the_terminal() {
+        // A carriage return or an ESC would let the attested machine
+        // repaint the reviewer's screen and forge the verdict it is
+        // reading, so the whole Cc category is escaped, not just the
+        // characters that break the line count.
+        let hostile = with(GOOD, "hostname", r"ok\u001b[2K\u001b[Aall 11 checks passed");
+        let report = verify(&hostile);
+        let text = report.to_string();
+        assert_eq!(text.lines().count(), TOTAL + 1, "{text}");
+        for line in text.lines() {
+            assert!(
+                !line.chars().any(char::is_control),
+                "control character in rendered line {line:?}"
+            );
+        }
+        assert!(
+            text.contains("ok\\u001b[2K\\u001b[Aall 11 checks passed"),
+            "{text}"
+        );
+    }
+
+    #[test]
+    fn flatten_escapes_every_control_and_passes_everything_else_through() {
+        assert_eq!(flatten("plain"), "plain");
+        assert_eq!(flatten("a\nb"), "a\\nb");
+        assert_eq!(flatten("a\rb"), "a\\rb");
+        assert_eq!(flatten("a\tb"), "a\\tb");
+        assert_eq!(flatten("a\u{08}b"), "a\\u0008b");
+        assert_eq!(flatten("a\u{0c}b"), "a\\u000cb");
+        assert_eq!(flatten("a\u{1b}b"), "a\\u001bb");
+        assert_eq!(flatten("a\u{00}b"), "a\\u0000b");
+        assert_eq!(flatten("a\u{7f}b"), "a\\u007fb");
+        // C1 controls are `Cc` too, and some terminals act on them.
+        assert_eq!(flatten("a\u{85}b"), "a\\u0085b");
+        // Quotes, backslashes and non-ASCII text are left alone: they are
+        // safe on a line, and the JSON form is where exactness matters.
+        assert_eq!(flatten(r#"C:\Users "x" é🦀"#), r#"C:\Users "x" é🦀"#);
+        assert_eq!(flatten(""), "");
+    }
+
+    #[test]
+    fn the_json_verdict_keeps_the_value_the_table_escapes() {
+        // The two renderings differ on purpose: a parser and a terminal are
+        // not at risk from the same bytes, so the machine-readable verdict
+        // stays byte-true to the document.
+        let split = GOOD.replace(r#""runtime": "darwin-arm64""#, r#""runtime": "li\nux-x64""#);
+        let json = verify(&split).to_json();
+        json::validate(&json).expect("emitted JSON is well-formed");
+        let checks = json::get(&json, "checks").expect("checks present").text();
+        assert!(checks.contains(r#""detail": "li\nux-x64""#), "{checks}");
     }
 
     #[test]
