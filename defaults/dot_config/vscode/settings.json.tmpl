@@ -1,16 +1,22 @@
 {
-  // Theme Configuration - Dynamically set based on chezmoi theme variable
-{{- $themeName := includeTemplate "theme-name" . -}}
-{{- $t := index .themes $themeName -}}
+{{- $themeName := includeTemplate "theme-name" . }}
+{{- $t := index .themes $themeName }}
+  // Theme Configuration - set from the chezmoi theme variable.
+  // The two assignments above must NOT use a right-hand `-}}`: that chomps
+  // the following newline and welds this comment onto the colorTheme line
+  // below, commenting the setting out. It shipped that way.
   "workbench.colorTheme": "{{ $t.app.vscode }}",
   "workbench.preferredDarkColorTheme": "{{ $t.app.vscode_dark }}",
   "workbench.preferredLightColorTheme": "{{ $t.app.vscode_light }}",
 
-  // Icon Theme - Use Catppuccin icons when available
-  "workbench.iconTheme": "catppuccin-perfect",
+  // Icon Theme. The id must match contributes.iconThemes[].id in
+  // catppuccin.catppuccin-vsc-icons — "catppuccin-perfect" is not one of
+  // them and never resolved. Follows the theme's own mode.
+  "workbench.iconTheme": "{{ $t.app.vscode_icons }}",
 
-  // Product Icon Theme
-  "workbench.productIconTheme": "catppuccin-perfect",
+  // No productIconTheme: catppuccin-vsc-icons registers no product icon
+  // themes at all, so the previous "catppuccin-perfect" silently did
+  // nothing. VS Code's default is correct here.
 
   // Terminal Integration - Match system theme
   "terminal.integrated.minimumContrastRatio": 4.5,

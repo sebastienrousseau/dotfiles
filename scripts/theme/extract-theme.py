@@ -329,6 +329,28 @@ def ensure_contrast(
     return lab_to_rgb(fl, fa, fb)
 
 
+# VS Code theming — Catppuccin only.
+#
+# The label must match `contributes.themes[].label` in the extension's
+# package.json exactly, and the icon id must match `contributes.iconThemes[].id`.
+# VS Code cannot resolve an unknown name: it keeps whatever is active and logs
+# an error the user never sees, which is how three wrong values here survived.
+#
+# Verified against catppuccin.catppuccin-vsc 3.19.0 and
+# catppuccin.catppuccin-vsc-icons 1.26.0:
+#   themes      Catppuccin Mocha | Macchiato | Frappe | Latte
+#   iconThemes  catppuccin-mocha | -macchiato | -frappe | -latte
+#   productIconThemes  (none — the extension registers none at all)
+#
+# Neovim still picks per-family (tokyonight/everforest/catppuccin) from the
+# wallpaper hue; only the VS Code surface is pinned, because a single editor
+# theme that is always installed beats three that mostly are not.
+VSCODE_DARK = "Catppuccin Mocha"
+VSCODE_LIGHT = "Catppuccin Latte"
+VSCODE_ICONS_DARK = "catppuccin-mocha"
+VSCODE_ICONS_LIGHT = "catppuccin-latte"
+
+
 def _nvim_from_hue(hue: float, is_dark: bool) -> Tuple[str, str]:
     """Map accent hue angle to nearest Neovim colorscheme."""
     if 60 <= hue < 150:
@@ -596,9 +618,10 @@ def generate_theme(
             "gtk_icon": "Papirus-Dark" if is_dark else "Papirus-Light",
             "gnome_shell": "",
             "gnome_gtk": "Adwaita-dark" if is_dark else "Adwaita",
-            "vscode": f"{nvim_theme[0].replace('-', ' ').title()} {'Mocha' if is_dark else 'Latte'}",
-            "vscode_dark": f"{nvim_theme[0].replace('-', ' ').title()} Mocha",
-            "vscode_light": f"{nvim_theme[0].replace('-', ' ').title()} Latte",
+            "vscode": VSCODE_DARK if is_dark else VSCODE_LIGHT,
+            "vscode_dark": VSCODE_DARK,
+            "vscode_light": VSCODE_LIGHT,
+            "vscode_icons": VSCODE_ICONS_DARK if is_dark else VSCODE_ICONS_LIGHT,
             "cat_wallpaper": "",
             "starship_palette": f"catppuccin_{'mocha' if is_dark else 'latte'}",
         },

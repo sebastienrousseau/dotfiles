@@ -1,10 +1,8 @@
 # VS Code extensions (one per line).
-# Theme Extensions - Required for Catppuccin theme switching
+# Theme Extensions. Catppuccin is the only VS Code theme the manifest
+# emits, so this is the whole set — no tokyonight, no everforest.
 Catppuccin.catppuccin-vsc
 Catppuccin.catppuccin-vsc-icons
-
-# Additional recommended extensions for theme support
-enkia.tokyo-night
 
 # Development Extensions (examples)
 # ms-python.python
