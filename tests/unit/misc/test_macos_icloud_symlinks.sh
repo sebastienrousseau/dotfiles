@@ -654,14 +654,22 @@ DEFENSIVE_BRANCHES=(
 
 _is_defensive() {
   local branch="$1"
-  for defensive in "${DEFENSIVE_BRANCHES[@]}"; do
+  for defensive in ${DEFENSIVE_BRANCHES[@]+"${DEFENSIVE_BRANCHES[@]}"}; do
     [[ "$branch" == "$defensive" ]] && return 0
   done
   return 1
 }
 
 test_start "every_log_branch_exercised_by_suite"
-mapfile -t branches < <(
+# Read the branch list line by line rather than with mapfile: macOS ships
+# bash 3.2, where mapfile does not exist. There it failed as "command not
+# found", left `branches` unset, and the `for` below then aborted the whole
+# file on an unbound variable — which is why the CI runner saw this suite
+# exit 1 while every assertion above it had passed.
+branches=()
+while IFS= read -r _branch_line; do
+  branches+=("$_branch_line")
+done < <(
   grep -oE '_log "[^"]*"' "$TEMPLATE" \
     | sed 's/_log "//; s/"$//' \
     | grep -v "^     to link this dir manually" \
@@ -672,7 +680,7 @@ mapfile -t branches < <(
 )
 missing_branches=()
 allowlisted_count=0
-for branch in "${branches[@]}"; do
+for branch in ${branches[@]+"${branches[@]}"}; do
   static_prefix="${branch%%\$*}"
   static_prefix="${static_prefix% \'}"
   static_prefix="${static_prefix%% }"

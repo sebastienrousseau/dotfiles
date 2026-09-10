@@ -113,10 +113,10 @@ directory. The archive
 carries SLSA build provenance (keyless, via Fulcio + Rekor):
 
 ```bash
-gh release download v0.2.519 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
-gh attestation verify dot-0.2.519.tar.gz --repo sebastienrousseau/dotfiles
-tar -xzf dot-0.2.519.tar.gz
-make -C dot-0.2.519 install PREFIX=/usr/local
+gh release download v0.2.520 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
+gh attestation verify dot-0.2.520.tar.gz --repo sebastienrousseau/dotfiles
+tar -xzf dot-0.2.520.tar.gz
+make -C dot-0.2.520 install PREFIX=/usr/local
 ```
 
 [`release-install-smoke.yml`](.github/workflows/release-install-smoke.yml)
@@ -310,7 +310,7 @@ every push.
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
 
 # Only the dot CLI, from the attested release archive
-gh release download v0.2.519 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
+gh release download v0.2.520 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
 
 # The Go satellites are (re)built on apply by
 #   defaults/run_onchange_24-build-dot-ui.sh.tmpl
@@ -861,7 +861,7 @@ design is
 
 ```toml
 # defaults/.chezmoidata.toml — repo-wide defaults, schema-checked in CI
-dotfiles_version = "0.2.519"
+dotfiles_version = "0.2.520"
 
 [features]
 alias_wrapper = false   # confirm destructive aliases

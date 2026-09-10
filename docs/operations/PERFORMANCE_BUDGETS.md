@@ -33,17 +33,18 @@ All medians in milliseconds. Budget = 2× median (or the tier ceiling, whichever
 
 ### FAST tier
 
-| Operation | Baseline | Budget | Headroom |
-|---|---:|---:|---:|
-| `dot status` (sandbox) | 1510 | 2000 | 1.3× |
-| `dot diff` (sandbox) | 1420 | 2000 | 1.4× |
+Currently empty.
 
-> The previous `dot status` / `dot diff` baselines of 28 ms and 32 ms were not
-> real. The perf sandbox never created chezmoi's source directory, so both
-> commands aborted immediately with *"no such file or directory"* — and
-> `_measure` discarded exit codes, so the gate timed the failure path and
-> called it excellent. The sandbox now links the repo into `XDG_DATA_HOME`,
-> and the figures above are the commands actually running.
+`dot status` and `dot diff` were placed here at 2000ms against reference
+medians of 1510 ms and 1420 ms — 1.3× and 1.4× headroom, short of the ≥ 2×
+this document requires of every budget. They have since moved to MEDIUM; see
+that section for the measurements that prompted it.
+
+> The baselines of 28 ms and 32 ms recorded before those were not real. The
+> perf sandbox never created chezmoi's source directory, so both commands
+> aborted immediately with *"no such file or directory"* — and `_measure`
+> discarded exit codes, so the gate timed the failure path and called it
+> excellent. The sandbox now links the repo into `XDG_DATA_HOME`.
 
 The QA gates and test suites that used to sit in this tier moved to GATES
 below: they are not interactive operations, so a ceiling defined by
@@ -53,11 +54,21 @@ human-perceived latency never described them.
 
 | Operation | Baseline | Budget | Headroom |
 |---|---:|---:|---:|
+| `dot status` (sandbox) | 2329 | 5000 | 2.1× |
+| `dot diff` (sandbox) | 2157 | 5000 | 2.3× |
 | `dot doctor` | 3892 | 5000 | 1.3× |
 | `bench.sh --quick` | 826 | 5000 | 6× |
 
-Both MEDIUM entries are diagnostics that report findings through their exit
-status — `dot doctor` exits 1 whenever it finds issues, and `bench.sh` exits 1
+The `dot status` and `dot diff` baselines are the **worst** of the two hosted
+runners, not the reference machine: macOS measured 2290 ms / 2157 ms and Ubuntu
+2329 ms / 2136 ms, against 1139 ms / 1174 ms locally. Two unrelated platforms
+agreeing within 8% is a property of the commands rather than of one slow
+runner — both shell out to chezmoi, which walks the whole source tree, and that
+is disk-bound. A budget taken from the faster machine would have been a gate
+that only ever fired on other people's hardware.
+
+`dot doctor` and `bench.sh --quick` are diagnostics that report findings through
+their exit status — `dot doctor` exits 1 whenever it finds issues, and `bench.sh` exits 1
 when a shell breaches its own startup threshold. They are gated with
 `_gate_diag`, which permits exit 1 but still fails on 2+ (not-found,
 permission, signal, syntax error). That is far narrower than the blanket
