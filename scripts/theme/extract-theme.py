@@ -473,6 +473,43 @@ def _compute_accent(clusters, is_dark):
     return (al, aa, ab), lab_to_rgb(al, aa, ab)
 
 
+# A support colour that has to fall below this lightness to satisfy the 7:1
+# white-on-block requirement is not carrying colour any more. See the
+# rejection note in _compute_support_colours.
+SUPPORT_MIN_L = 25.0
+
+
+def _aaa_darkened(lab, is_dark):
+    """Clamp lightness per mode, then darken until white sits on it at 7:1.
+
+    Shared by the selection filter and the final emission so a candidate is
+    judged on exactly the colour it will become, not on the one it started
+    as — checking the input and emitting the output was how a colour that
+    passed the chroma filter still arrived at L*=14.8.
+
+    A candidate that is ALREADY darker than SUPPORT_MIN_L is then lifted back
+    toward it, one step at a time, stopping the moment another step would
+    cost the 7:1 guarantee. Two different things can leave a support colour
+    too dark: the darkening loop travelling a long way (a low-chroma
+    candidate), and the cluster simply starting dark (dune-light's whole
+    palette sits near L*17 and holds 14.3:1, so the loop never ran). The
+    first is handled by rejecting the candidate; only the second can be
+    lifted, and only where there is contrast headroom to pay for it.
+    """
+    L = max(lab[0], 35.0) if is_dark else min(lab[0], 45.0)
+    a, b = lab[1], lab[2]
+    for _ in range(80):
+        if contrast_ratio((255, 255, 255), lab_to_rgb(L, a, b)) >= 7.0:
+            break
+        L = max(0.0, L - 2.0)
+    while L < SUPPORT_MIN_L:
+        nxt = min(SUPPORT_MIN_L, L + 1.0)
+        if contrast_ratio((255, 255, 255), lab_to_rgb(nxt, a, b)) < 7.0:
+            break
+        L = nxt
+    return (L, a, b)
+
+
 def _compute_support_colours(clusters, accent_lab, is_dark):
     """The wallpaper's SECOND and THIRD chromatic colours, as UI accents.
 
@@ -492,9 +529,25 @@ def _compute_support_colours(clusters, accent_lab, is_dark):
     picked, hues = [], [lab_hue(*accent_lab)]
     for lab, _pop in ranked:
         h = lab_hue(*lab)
-        if all(min(abs(h - o), 360 - abs(h - o)) >= 12.0 for o in hues):
-            picked.append(lab)
-            hues.append(h)
+        if any(min(abs(h - o), 360 - abs(h - o)) < 12.0 for o in hues):
+            continue
+        # Reject a candidate that only reaches 7:1 by going almost black.
+        #
+        # The AAA-darkening below drives lightness down until white sits on
+        # the colour at 7:1. A low-chroma candidate has to travel a long way
+        # to get there: bauhaus-light's second cluster landed at L*=14.8,
+        # which reads as another shade of dark rather than as a colour, even
+        # though its chroma of 8.0 passed the filter above.
+        #
+        # Measured across the library this affected 7 themes, all light
+        # variants, where the surface is pale and the colours must darken to
+        # sit on it. Raising the chroma floor instead would have cost 34
+        # themes their support colours and fixed only one of these seven, so
+        # the constraint belongs on the OUTCOME, not on the input.
+        if _aaa_darkened(lab, is_dark)[0] < SUPPORT_MIN_L:
+            continue
+        picked.append(lab)
+        hues.append(h)
         if len(picked) == 2:
             break
     # A wallpaper with only one usable hue still needs two support colours:
@@ -506,16 +559,8 @@ def _compute_support_colours(clusters, accent_lab, is_dark):
         rad = math.radians(h)
         picked.append((base[0], math.cos(rad) * c, math.sin(rad) * c))
 
-    out = []
-    for lab in picked:
-        L = max(lab[0], 35.0) if is_dark else min(lab[0], 45.0)
-        a, b = lab[1], lab[2]
-        for _ in range(80):
-            if contrast_ratio((255, 255, 255), lab_to_rgb(L, a, b)) >= 7.0:
-                break
-            L = max(0.0, L - 2.0)
-        out.append(lab_to_rgb(L, a, b))
-    return out[0], out[1]
+    return (lab_to_rgb(*_aaa_darkened(picked[0], is_dark)),
+            lab_to_rgb(*_aaa_darkened(picked[1], is_dark)))
 
 
 def _on_dark(lab, surfaces, min_ratio=4.5):
