@@ -86,9 +86,18 @@ not the fastest. Medians below: `rousseau-mbp-m1`, macOS 26 (Darwin 25.6),
 | `docs-coverage.sh` | 969 | 148 | 2000 | 2.1× |
 | iCloud regression test (12 assertions) | 494 | 94 | 1000 | 2.0× |
 | iCloud unit test (29 assertions) | 1743 | 498 | 3500 | 2.0× |
+| iCloud manifest test (11 assertions) | 1575 | — † | 5000 | 3.2× |
 | `traceability-coverage.sh` | 2389 | 623 | 5000 | 2.1× |
 | `test_dot_subcommand_smoke.sh` | 3785 | 1308 | 7500 | 2.0× |
 | `test_dot_help_registry_symmetry.sh` | 4449 | 1381 | 9000 | 2.0× |
+
+† The manifest test hashes an entire sandbox tree before and after every
+scenario, so it is disk-bound in a way the other gates are not. Its budget is
+set at 3.2× the macOS median rather than the 2.0× used above, deliberately:
+`dot status` and `dot diff` were first budgeted at 1.3× and 1.4×, and both
+breached on the first CI run that measured them. The Linux median is left
+unfilled until CI reports one — guessing it would defeat the point of a table
+of measurements.
 
 These gates run **3–6× slower on macOS than on Linux** — fork/exec is markedly
 more expensive there and every one of them is fork-heavy shell. CI covers both

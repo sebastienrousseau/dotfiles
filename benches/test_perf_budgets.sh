@@ -346,6 +346,12 @@ _gate "gate_docs_coverage" 2000 3 bash "$REPO_ROOT/scripts/qa/docs-coverage.sh"
 
 _gate "gate_icloud_regression_test" 1000 5 bash "$REPO_ROOT/tests/regression/test_macos_icloud_symlinks_safety.sh"
 
+# Hashes the whole sandbox tree before and after each scenario, so it costs
+# more than the canary-file suite above and is measured separately. Local
+# median 1575ms; 5000ms keeps >3x headroom, which the disk-bound work here
+# needs on a hosted runner.
+_gate "gate_icloud_manifest_test" 5000 3 bash "$REPO_ROOT/tests/regression/test_macos_icloud_symlinks_manifest.sh"
+
 _gate "gate_icloud_unit_test" 3500 3 bash "$REPO_ROOT/tests/unit/misc/test_macos_icloud_symlinks.sh"
 
 _gate "gate_traceability_coverage" 5000 3 bash "$REPO_ROOT/scripts/qa/traceability-coverage.sh"
