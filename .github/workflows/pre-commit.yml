@@ -67,5 +67,18 @@ jobs:
       - name: Run pre-commit (typos hook)
         run: pre-commit run typos --all-files --config config/pre-commit-config.yaml --show-diff-on-failure
 
+      # Local-only until now. The hook is registered in
+      # config/pre-commit-config.yaml but the job ran four hooks by name and
+      # this was not one of them, so it bound only on machines with the hooks
+      # installed — a contributor without them, or a merge made through the
+      # web UI, went straight past it.
+      #
+      # It asserts every file under tests/regression/ carries a
+      # `# Regression for:` header naming what it pins. Verified before
+      # wiring in: all 29 existing files pass, and a file added without a
+      # header exits 1.
+      - name: Run pre-commit (regression-traceability hook)
+        run: pre-commit run regression-traceability --all-files --config config/pre-commit-config.yaml --show-diff-on-failure
+
       - name: Run pre-commit (actionlint hook)
         run: pre-commit run actionlint --all-files --config config/pre-commit-config.yaml --show-diff-on-failure
