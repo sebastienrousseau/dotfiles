@@ -478,6 +478,21 @@ def _compute_accent(clusters, is_dark):
 # rejection note in _compute_support_colours.
 SUPPORT_MIN_L = 25.0
 
+# Minimum perceptual distance between the three support colours, as dE*ab.
+#
+# This replaced a 12-degree hue-angle check, which let near-identical colours
+# through: hue angle is meaningless at low chroma, so three slate blues at
+# chroma ~13 could sit 12 degrees apart and still be the same colour to look
+# at. forest-dark's accent/secondary/tertiary measured dE 3.6 — against ~2.3
+# for "just noticeable" — while passing the hue rule comfortably.
+#
+# 10 is roughly where two colours read as clearly different rather than as
+# shades of one. Measured over the library, 68 of 228 themes had at least one
+# pair below it; those now reach further down the cluster ranking for a
+# candidate that is actually distinct, and only fall back to a synthetic
+# rotation when the wallpaper genuinely has nothing else to offer.
+SUPPORT_MIN_DE = 10.0
+
 
 def _aaa_darkened(lab, is_dark):
     """Clamp lightness per mode, then darken until white sits on it at 7:1.
@@ -510,6 +525,19 @@ def _aaa_darkened(lab, is_dark):
     return (L, a, b)
 
 
+def _displayed(lab, is_dark):
+    """The LAB of the colour that will actually be SHOWN.
+
+    Cluster centroids routinely land outside sRGB — Tang's top three sit at
+    chroma 197, 119 and 98, where sRGB tops out near 130 — and `lab_to_rgb`
+    clamps them. Comparing the raw LAB values said those three were dE 79 and
+    49 apart; after clamping they were #a80000 and #b00000, dE 3.3. The
+    distance test has to run on the clamped colour or it is measuring
+    something the user never sees.
+    """
+    return rgb_to_lab(*lab_to_rgb(*_aaa_darkened(lab, is_dark)))
+
+
 def _compute_support_colours(clusters, accent_lab, is_dark):
     """The wallpaper's SECOND and THIRD chromatic colours, as UI accents.
 
@@ -526,10 +554,12 @@ def _compute_support_colours(clusters, accent_lab, is_dark):
     """
     ranked = [c for c in sorted(clusters, key=lambda c: c[1] * lab_chroma(*c[0]), reverse=True)
               if lab_chroma(*c[0]) >= 5.0]
-    picked, hues = [], [lab_hue(*accent_lab)]
+    # Compare the colours as they will be SHOWN, not as the clusters arrived:
+    # the AAA-darkening moves lightness, which moves perceptual distance too.
+    picked, chosen = [], [rgb_to_lab(*lab_to_rgb(*accent_lab))]
     for lab, _pop in ranked:
-        h = lab_hue(*lab)
-        if any(min(abs(h - o), 360 - abs(h - o)) < 12.0 for o in hues):
+        final = _displayed(lab, is_dark)
+        if any(lab_distance(final, o) < SUPPORT_MIN_DE for o in chosen):
             continue
         # Reject a candidate that only reaches 7:1 by going almost black.
         #
@@ -544,20 +574,53 @@ def _compute_support_colours(clusters, accent_lab, is_dark):
         # sit on it. Raising the chroma floor instead would have cost 34
         # themes their support colours and fixed only one of these seven, so
         # the constraint belongs on the OUTCOME, not on the input.
-        if _aaa_darkened(lab, is_dark)[0] < SUPPORT_MIN_L:
+        if final[0] < SUPPORT_MIN_L:
             continue
         picked.append(lab)
-        hues.append(h)
+        chosen.append(final)
         if len(picked) == 2:
             break
-    # A wallpaper with only one usable hue still needs two support colours:
-    # rotate the accent rather than emit a duplicate.
+    # A wallpaper with only one usable hue still needs two support colours, so
+    # the accent's hue is rotated to invent them. Rotating blindly does not
+    # work: a rotated hue at high chroma often falls outside sRGB, and
+    # lab_to_rgb clamps it. Two different angles then clamp to nearly the same
+    # colour — tang-light produced #695600 and #685600, dE 0.5 apart, both at
+    # chroma 45. The fallback was the one path not checking its own output.
+    #
+    # So search: walk angles away from the accent, and drop chroma until the
+    # result survives a round trip through sRGB (proof it is in gamut) and is
+    # far enough from everything already chosen.
     while len(picked) < 2:
         base = picked[-1] if picked else accent_lab
-        c = lab_chroma(*base)
-        h = (lab_hue(*base) + 40.0 * (len(picked) + 1)) % 360.0
-        rad = math.radians(h)
-        picked.append((base[0], math.cos(rad) * c, math.sin(rad) * c))
+        best = None
+        for deg in (120, 90, 150, 60, 180, 40, 210, 30, 240, 270, 300):
+            for scale in (1.0, 0.85, 0.7, 0.55, 0.4):
+                c = lab_chroma(*base) * scale
+                rad = math.radians((lab_hue(*base) + deg) % 360.0)
+                cand_lab = (base[0], math.cos(rad) * c, math.sin(rad) * c)
+                final = _displayed(cand_lab, is_dark)
+                rgb = lab_to_rgb(*_aaa_darkened(cand_lab, is_dark))
+                # Round trip: if the colour was out of gamut it was clamped,
+                # and the clamped value will not convert back to what we asked
+                # for. That is exactly how the duplicates were produced.
+                if lab_distance(rgb_to_lab(*rgb), final) > 3.0:
+                    continue
+                if final[0] < SUPPORT_MIN_L:
+                    continue
+                d = min(lab_distance(final, o) for o in chosen)
+                if d >= SUPPORT_MIN_DE:
+                    best = cand_lab
+                    break
+                if best is None or d > min(lab_distance(_displayed(best, is_dark), o) for o in chosen):
+                    best = cand_lab
+            if best is not None and min(
+                lab_distance(_displayed(best, is_dark), o) for o in chosen
+            ) >= SUPPORT_MIN_DE:
+                break
+        if best is None:
+            best = (base[0], -base[1], -base[2])  # last resort: opposite hue
+        picked.append(best)
+        chosen.append(_displayed(best, is_dark))
 
     return (lab_to_rgb(*_aaa_darkened(picked[0], is_dark)),
             lab_to_rgb(*_aaa_darkened(picked[1], is_dark)))
