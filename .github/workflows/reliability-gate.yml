@@ -82,6 +82,21 @@ jobs:
       - name: Validate executable examples
         run: bash ./scripts/qa/validate-examples.sh
 
+      # validate-examples.sh checks the examples that EXIST still run.
+      # examples-coverage.sh checks every command HAS one — a different
+      # question, and until now nobody was asking it in CI.
+      #
+      # `git log -S examples-coverage -- .github/` was empty: no workflow has
+      # ever invoked it. Its unit test points REPO_ROOT at synthetic fixture
+      # trees, so it exercises the script's logic and never the repository's
+      # actual coverage. A new `dot` command with no example would have gone
+      # in green.
+      #
+      # It reports 162/162 against a 100% threshold today, so this starts
+      # enforcing rather than starting red.
+      - name: Every command has an example
+        run: bash ./scripts/qa/examples-coverage.sh
+
   # Coverage contract for the `dot` CLI: every routable command, flag,
   # environment variable and config key has a row in
   # docs/reference/FEATURE-MATRIX.md naming the regression test, benchmark,
