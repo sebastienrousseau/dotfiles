@@ -23,13 +23,35 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
-source "$SCRIPT_DIR/../framework/assertions.sh"
+# The assertions framework lives under tests/, not beside this file. benches/
+# is a sibling of tests/, so `$SCRIPT_DIR/../framework` resolves to
+# `<repo>/framework`, which does not exist — this script has been dying on
+# its own second line, and nothing in CI ran it, so nothing said so. Address
+# it from the repository root instead.
+source "$REPO_ROOT/tests/framework/assertions.sh"
 
 GATES=(
   tests/regression/test_dot_subcommand_smoke.sh
   tests/regression/test_dot_help_flag_universal.sh
 )
 
+# THESE TWO NUMBERS HAVE NEVER BEEN MEASURED AGAINST.
+#
+# They were written in #1034 alongside this file, and `git log -S
+# test_help_gates_wall_clock -- .github/` returns nothing: no workflow has
+# ever invoked this script, on any runner, ever. It then moved to benches/
+# in #1058, which broke its framework path, so from that point it could not
+# even start.
+#
+# CI now runs it in the Benchmark job as ADVISORY (continue-on-error), so
+# real figures get logged without gating on a guess. Once a few runs have
+# reported, set these from the observed medians with headroom and make it
+# enforcing.
+#
+# For reference, a local run on a machine at load average ~11 measured
+# 120624ms total with test_dot_help_flag_universal.sh at 63646ms — which
+# says more about the load than about the gate, and is exactly why the
+# number needs to come from CI rather than from here.
 THRESHOLD_MS="${HELP_GATES_WALL_CLOCK_MS:-20000}"
 PER_GATE_MAX_MS="${HELP_GATES_PER_MAX_MS:-15000}"
 

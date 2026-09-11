@@ -213,8 +213,52 @@ jobs:
         env:
           FUZZTIME: ${{ inputs.fuzztime || '60s' }}
         run: |
-          go test -run '^$' -fuzz='^${{ matrix.harness }}$' \
-            -fuzztime="$FUZZTIME" ./...
+          set -uo pipefail
+          log="$(mktemp)"
+
+          run_once() {
+            go test -run '^$' -fuzz='^${{ matrix.harness }}$' \
+              -fuzztime="$FUZZTIME" ./... 2>&1 | tee "$log"
+            return "${PIPESTATUS[0]}"
+          }
+
+          # A crasher is recorded as a file under testdata/fuzz/. Its presence
+          # is what separates "the fuzzer found something" from "the fuzzer
+          # finished and then failed to shut down", and only the second is
+          # worth retrying.
+          found_crasher() {
+            [ -d testdata/fuzz ] && [ -n "$(find testdata/fuzz -type f -print -quit 2>/dev/null)" ]
+          }
+
+          if run_once; then
+            exit 0
+          fi
+
+          # `--- FAIL: Fuzz... (60.10s)  context deadline exceeded` against a
+          # 60s budget is the coordinator missing its own shutdown window by
+          # milliseconds after a complete run. Go reports it as a test failure
+          # even though nothing failed. Retry ONCE, and only when there is no
+          # reproducer on disk — a real finding always writes one, so this
+          # cannot hide one.
+          if found_crasher; then
+            echo "::error::${{ matrix.harness }} found a crasher (reproducer written)"
+            exit 1
+          fi
+          if ! grep -q 'context deadline exceeded' "$log"; then
+            echo "::error::${{ matrix.harness }} failed without a reproducer and without a shutdown timeout"
+            exit 1
+          fi
+
+          echo "::warning::${{ matrix.harness }} hit Go's fuzzing shutdown deadline with no reproducer; retrying once"
+          if run_once; then
+            exit 0
+          fi
+          if found_crasher; then
+            echo "::error::${{ matrix.harness }} found a crasher on the retry"
+          else
+            echo "::error::${{ matrix.harness }} failed twice; not a one-off shutdown race"
+          fi
+          exit 1
 
       - name: Upload reproducer corpus if failed
         if: failure()

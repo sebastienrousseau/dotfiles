@@ -577,6 +577,22 @@ jobs:
           chmod +x benches/*.sh 2>/dev/null || true
           ./benches/benchmark_runner.sh 2>/dev/null || true
 
+      # ADVISORY, deliberately. The ratchet's thresholds
+      # (HELP_GATES_WALL_CLOCK_MS=20000, HELP_GATES_PER_MAX_MS=15000) were
+      # chosen in #1034 when the file was written, and `git log -S` over
+      # .github/ shows no workflow has ever referenced it — so no runner has
+      # ever measured against them. It then moved to benches/ in #1058, which
+      # broke its framework path, and it could not start at all.
+      #
+      # Reporting first is the point: a threshold nothing has measured is not
+      # a threshold, and picking a number now would just be a guess with a
+      # gate attached. Once a few runs have logged real figures here, set the
+      # two variables from them and drop continue-on-error.
+      - name: Help-gate wall-clock ratchet (advisory)
+        continue-on-error: true
+        run: |
+          bash benches/test_help_gates_wall_clock.sh || true
+
       - name: Shell startup benchmark with regression tracking
         id: benchmark
         run: |
