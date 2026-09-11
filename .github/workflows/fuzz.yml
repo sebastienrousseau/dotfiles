@@ -222,12 +222,24 @@ jobs:
             return "${PIPESTATUS[0]}"
           }
 
-          # A crasher is recorded as a file under testdata/fuzz/. Its presence
-          # is what separates "the fuzzer found something" from "the fuzzer
-          # finished and then failed to shut down", and only the second is
-          # worth retrying.
+          # A crasher is a file Go WRITES under testdata/fuzz/ during the run.
+          #
+          # The first version of this checked whether testdata/fuzz contained
+          # any file at all, which is wrong: dot-ui ships a committed seed
+          # corpus at testdata/fuzz/FuzzStepApply/, and dot-ai-tui three more
+          # under FuzzHighlight/. For any harness in those modules the check
+          # was true before the fuzzer had run a single execution, so a
+          # shutdown race was reported as "found a crasher" and the retry it
+          # was meant to gate never fired. dot-mcp has no committed corpus,
+          # which is why this passed testing and only showed up on dot-ui.
+          #
+          # Compare a snapshot instead. A crasher is a NEW path, not any path.
+          corpus_before="$(find testdata/fuzz -type f 2>/dev/null | sort || true)"
+
           found_crasher() {
-            [ -d testdata/fuzz ] && [ -n "$(find testdata/fuzz -type f -print -quit 2>/dev/null)" ]
+            local after
+            after="$(find testdata/fuzz -type f 2>/dev/null | sort || true)"
+            [ -n "$(comm -13 <(printf '%s\n' "$corpus_before") <(printf '%s\n' "$after"))" ]
           }
 
           if run_once; then
