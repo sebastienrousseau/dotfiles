@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
+# Regression for: GH-1018
 # shellcheck disable=SC1090,SC1091,SC2034
 #
 # Regression: defaults/run_before_macos-icloud-symlinks.sh.tmpl must leave a
