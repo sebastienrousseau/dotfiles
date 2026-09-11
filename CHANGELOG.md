@@ -14,6 +14,18 @@ This file documents all notable changes to this project.
   rationale in `docs/operations/PERFORMANCE_BUDGETS.md`.
 - A gate-integrity regression test asserting that the safety checks cannot be
   disabled without a test failing.
+- `dot mcp serve` — a real stdio Model Context Protocol server, where the
+  published card had previously described one that did not exist. Full
+  lifecycle with version negotiation across three protocol revisions,
+  `tools/list`, `tools/call`, resources and logging, with proper JSON-RPC
+  error objects. All four tools are read-only and run from closed argument
+  vectors without a shell; the mutating operations are deliberately
+  unreachable. Go, standard library only.
+- A feature matrix covering every routable command, flag, environment
+  variable and config key, each row naming the regression test, benchmark,
+  example and manual section that covers it. The gate fails when a command
+  gains no row, or when a row names a test or example that does not exist,
+  so coverage cannot be claimed in the table without being written.
 - `dot attest --verify` (`--json|-j`, `--max-age|-a`): checks a workstation
   evidence record against the attestation policy by running `lib/wasm-tools`
   as WebAssembly under `wasmtime`. The module gets stdin, stdout and a clock
@@ -35,6 +47,34 @@ This file documents all notable changes to this project.
   execution assertion, the WebAssembly integration tests, the shell caller's
   test, and the `.wasm` uploaded as an artefact.
 
+### Changed
+
+- Bash line coverage went from 59% to **98.14%**. Roughly half of that came
+  from fixing the measurement rather than adding tests: untraceable lines sat
+  in the denominator, 540 of 706 test files discarded their traces through
+  `2>&1`, silent timeout kills were counted as passes, and the sweep's `PS4`
+  truncated at 100 characters so the figure depended on how long your checkout
+  path was. Correcting those alone moved it 59.36% to 72.29% with no new test
+  written. Both Go modules are at 100%, where fuzzing found four defects.
+- The terminal palette now takes more than one colour from the wallpaper.
+  `term.bg` had two distinct values across all 228 themes; it now has 36, and
+  the status bar carries a secondary and tertiary alongside the accent. The
+  background is *tinted* rather than replaced — lightness is unchanged, so the
+  low-eye-strain surface the engine was built around is preserved, and
+  `DOTFILES_TERM_TINT=0` restores the flat neutrals.
+- Rust is no longer managed by mise. Its plugin exports `RUSTUP_TOOLCHAIN`,
+  which silently overrides `rust-toolchain.toml` in every project — a
+  repository pinned to 1.98.0 was being built with 1.97.1, and a local "all
+  green" said nothing about CI. rustup governs instead, so each project's own
+  pin is honoured.
+- `~/.cargo/config.toml` no longer sets a global `target-dir`. Cargo takes an
+  exclusive lock on it, so every repository sharing one path serialised: a
+  build in one project blocked `cargo test` in another, and cargo prints
+  nothing while it waits, so it read as a hang. sccache recovers the shared
+  dependency cache without the lock.
+- mise's tool directories are promoted above Homebrew and the shims on `PATH`,
+  fused into the existing dedup pass rather than added as a second walk.
+
 ### Fixed
 
 - Replaced the destructive mechanism behind the macOS iCloud symlink hook. The
@@ -51,6 +91,29 @@ This file documents all notable changes to this project.
   third-party tooling or as "not actually WebAssembly": `docs/ECOSYSTEM.md`,
   `docs/architecture/REPO_LAYOUT.md`, `docs/STRUCTURE.md`,
   `docs/ARCHITECTURE.md`, `docs/reference/TOOLS.md` and `REUSE.toml`.
+- `workbench.colorTheme` had been commented out on every machine this was
+  ever applied to. A template newline was chomped, welding the setting onto
+  the comment above it. Two thirds of the theme labels also named themes no
+  extension registers — "Tokyonight Mocha" and "Everforest Latte", where
+  Mocha and Latte are Catppuccin flavours rather than a general dark/light
+  suffix. The editor is now pinned to Catppuccin, and the icon theme ids are
+  the ones the extension actually declares.
+- Twelve documented defects, each with a regression test proven to fail
+  against the unfixed code first: `dot theme set` aborting before its picker,
+  `dot fleet namespace set` reporting success while writing nothing,
+  `dot agent delegate` requiring a GNU `timeout` absent from stock macOS, a
+  registry cache keyed by path so changing the URL served a stale index for
+  six hours, and `dot doctor --audit` routing to a script not in the tree.
+  Two of the reported findings turned out to be wrong, and correcting them
+  was more useful than fixing them.
+- `chezmoi apply` no longer silently discards edits made directly in `$HOME`.
+  Local drift is captured into the source instead of overwritten.
+- macOS home folders (`~/Desktop`, `~/Documents`, `~/Public` and the rest) are
+  excluded from chezmoi management entirely, as a second layer beneath the
+  iCloud hook's own refusals.
+- `docs-coverage.sh` and `traceability-coverage.sh` stopped masking their own
+  exit codes, so a failing gate now fails.
+- `dot benchmark` is routed. Every layer but the router already had it.
 
 ## v0.2.519 — 2026-08-13
 
