@@ -20,7 +20,7 @@ func ExampleServer_Serve() {
 		fmt.Println("serve:", err)
 	}
 	// Output:
-	// {"jsonrpc":"2.0","id":1,"result":{"capabilities":{"logging":{},"resources":{"listChanged":false,"subscribe":false},"tools":{"listChanged":false}},"instructions":"Read-only governance surface for a chezmoi-managed dotfiles workstation. Tools run the `dot` CLI's own audit commands and never change configuration. Resources expose the MCP policy, the MCP registry, the agent profiles and the discovery cards.","protocolVersion":"2025-06-18","serverInfo":{"name":"dotfiles-mcp","title":"dotfiles workstation governance","version":"0.2.519"}}}
+	// {"jsonrpc":"2.0","id":1,"result":{"capabilities":{"logging":{},"resources":{"listChanged":false,"subscribe":false},"tools":{"listChanged":false}},"instructions":"Read-only governance surface for a chezmoi-managed dotfiles workstation. Tools run the `dot` CLI's own audit commands and never change configuration. Resources expose the MCP policy, the MCP registry, the agent profiles and the discovery cards.","protocolVersion":"2025-06-18","serverInfo":{"name":"dotfiles-mcp","title":"dotfiles workstation governance","version":"0.2.520"}}}
 }
 
 // ExampleServer_Serve_toolsCall shows a tool call being answered with both a

@@ -95,8 +95,8 @@ Full provenance policy: [`supply-chain/README.md`](https://github.com/sebastienr
 From a release tarball (recommended — it is the attested artefact):
 
 ```sh
-tar -xzf dot-0.2.519.tar.gz
-cd dot-0.2.519
+tar -xzf dot-0.2.520.tar.gz
+cd dot-0.2.520
 make install PREFIX=/usr DESTDIR="$pkgdir"
 ```
 
@@ -166,7 +166,7 @@ and [`security/VERIFY_RELEASE.md`](security/VERIFY_RELEASE.md).
 Minimum a packager should do:
 
 ```sh
-TAG=v0.2.519
+TAG=v0.2.520
 REPO=sebastienrousseau/dotfiles
 
 # SLSA build provenance on the tarball itself
@@ -188,7 +188,7 @@ Tags are signed with an SSH ed25519 key published in
 which is itself a `git allowed_signers` file:
 
 ```sh
-git -c gpg.ssh.allowedSignersFile=KEYS.asc tag -v v0.2.519
+git -c gpg.ssh.allowedSignersFile=KEYS.asc tag -v v0.2.520
 ```
 
 An SBOM ships with every release in both CycloneDX and SPDX JSON.

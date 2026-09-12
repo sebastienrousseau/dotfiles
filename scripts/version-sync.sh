@@ -293,7 +293,7 @@ update_version_references() {
     files_processed=$((files_processed + 1))
 
     # Skip milestone and other historical files
-    if [[ "$(basename "$file")" == MILESTONE_* ]]; then
+    if _is_historical_record "$file"; then
       log_info "Skipping historical file: $file"
       continue
     fi
@@ -372,6 +372,22 @@ update_version_references() {
   echo "$changes_made"
 }
 
+# A version reference is only drift if it is meant to track the release. In a
+# historical record it is evidence: GOLD-STANDARD-AUDIT.md records which tag
+# `git tag -v` was run against and what it printed, and MILESTONE_* files
+# describe releases that already happened. Rewriting either to the version
+# being prepared would claim a verification nobody performed against a tag
+# that does not exist yet, which is a worse outcome than a stale-looking
+# string. Both the updater and the verifier consult this, so they cannot
+# disagree about which files are in scope.
+_is_historical_record() {
+  case "$(basename "$1")" in
+    MILESTONE_*) return 0 ;;
+    GOLD-STANDARD-AUDIT.md) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 verify_version_consistency() {
   local expected_version="$1"
   local files=("${@:2}")
@@ -386,7 +402,7 @@ verify_version_consistency() {
       continue
     fi
 
-    if [[ "$(basename "$file")" == MILESTONE_* ]]; then
+    if _is_historical_record "$file"; then
       log_info "Skipping historical file: $file"
       continue
     fi
