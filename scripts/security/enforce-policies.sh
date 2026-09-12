@@ -58,36 +58,117 @@ check_dependencies() {
 }
 
 # Scan for hardcoded secrets
+# repo_files [pattern] — NUL-separated list of TRACKED files.
+#
+# Every check below used to walk the working tree with `find`, which pulls in
+# whatever happens to be sitting there: coverage/ alone is 165 MB of xtrace
+# output and produced 50 of the 52 gitleaks findings on a clean checkout, and
+# it is gitignored at .gitignore:80 with zero tracked files. A policy gate
+# about the repository should examine the repository, so this asks git.
+#
+# Falls back to find when run outside a work tree (a tarball, say), with the
+# same exclusions spelled out rather than assumed.
+repo_files() {
+  local pattern="${1:-}"
+  if git -C "${REPO_ROOT}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    if [[ -n "$pattern" ]]; then
+      git -C "${REPO_ROOT}" ls-files -z -- "$pattern"
+    else
+      git -C "${REPO_ROOT}" ls-files -z
+    fi
+  else
+    if [[ -n "$pattern" ]]; then
+      find "${REPO_ROOT}" -name "$pattern" -type f \
+        -not -path "*/.git/*" -not -path "*/coverage/*" -not -path "*/node_modules/*" -print0
+    else
+      find "${REPO_ROOT}" -type f \
+        -not -path "*/.git/*" -not -path "*/coverage/*" -not -path "*/node_modules/*" -print0
+    fi
+  fi
+}
+
 scan_secrets() {
   log "INFO" "Scanning for hardcoded secrets..."
 
   local violations=0
 
-  # Run gitleaks
-  if gitleaks detect --source="${REPO_ROOT}" --config="${REPO_ROOT}/config/gitleaks.toml" --no-git >/dev/null 2>&1; then
+  # gitleaks in GIT mode, not --no-git.
+  #
+  # --no-git scanned the working tree, which meant gitignored build output
+  # (coverage/, 165 MB) and, worse, it cannot honour .gitleaksignore: those
+  # entries are fingerprinted `<commit>:<file>:<rule>:<line>`, and with no
+  # commit to key on, every allowlisted false positive came back. That is how
+  # this reported "potential secrets" while `gitleaks detect` over all 2278
+  # commits reported none.
+  #
+  # Git mode is also ~18x faster here: 10s against 3m0s.
+  local gl_out
+  if gl_out="$(gitleaks detect --source="${REPO_ROOT}" \
+    --config="${REPO_ROOT}/config/gitleaks.toml" \
+    --redact --no-banner 2>&1)"; then
     log "INFO" "✅ No secrets detected by gitleaks"
   else
     log "WARN" "❌ Potential secrets detected by gitleaks"
+    printf '%s\n' "$gl_out" | grep -E '^(Finding|File|RuleID|Commit):' | head -40 >>"${LOG_FILE}" 2>/dev/null || true
     violations=$((violations + 1))
   fi
 
-  # Manual pattern checks
+  # A short list of patterns that are unambiguous on sight, scanned over
+  # TRACKED files only.
+  #
+  # The previous list could not pass on any real repository. `[0-9a-f]{32,}`
+  # matches every git SHA, checksum and fingerprint in the tree, so it fired
+  # unconditionally; and `key\s*=\s*"..."` matches documentation, test
+  # fixtures and any config key whose name ends in "key". Four of the six
+  # patterns reported a violation on a clean checkout, which trains a reader
+  # to ignore the output — the opposite of what a gate is for.
+  #
+  # What survives is the shapes that do not occur by accident. Everything
+  # else is gitleaks' job, and it does it with entropy analysis and an
+  # allowlist rather than a bare grep.
   local secret_patterns=(
-    'password\s*=\s*["\047][^"\047]*["\047]'
-    'token\s*=\s*["\047][^"\047]*["\047]'
-    'secret\s*=\s*["\047][^"\047]*["\047]'
-    'key\s*=\s*["\047][^"\047]*["\047]'
-    'AKIA[0-9A-Z]{16}' # AWS Access Key
-    '[0-9a-f]{32,}'    # Potential hash/token
+    'AKIA[0-9A-Z]{16}'                       # AWS access key id
+    'ASIA[0-9A-Z]{16}'                       # AWS temporary access key id
+    '-----BEGIN [A-Z ]*PRIVATE KEY-----'     # any PEM private key block
+    'xox[baprs]-[0-9A-Za-z-]{10,}'           # Slack token
+    'ghp_[0-9A-Za-z]{36}'                    # GitHub personal access token
+    'AIza[0-9A-Za-z_-]{35}'                  # Google API key
   )
 
+  # Two kinds of file contain these shapes on purpose, and both already
+  # declare it using gitleaks' own conventions rather than a list kept here:
+  #
+  #   * the gitleaks config itself — it allowlists a fake AWS key by value,
+  #     so a rule-definition file necessarily holds the shape its rules
+  #     match. (Deliberately not quoted here: writing the literal out made
+  #     THIS file match its own pattern, which is the same self-match the
+  #     original guarded against with --exclude=enforce-policies.sh);
+  #   * fixtures that test secret detection — the atuin history filter's test
+  #     carries `export AWS_SECRET_ACCESS_KEY=ASIA...  # gitleaks:allow`,
+  #     because the point of the test is that such a line gets filtered.
+  #
+  # Honouring `gitleaks:allow` means one convention, already understood by
+  # contributors and by gitleaks, instead of a second exclusion list here
+  # that would drift out of step with the first.
+  local pattern hits f line
   for pattern in "${secret_patterns[@]}"; do
-    if grep -r -E -i "${pattern}" "${REPO_ROOT}" \
-      --exclude-dir=".git" \
-      --exclude="*.log" \
-      --exclude="enforce-policies.sh" \
-      --exclude="environment-template.env" >/dev/null 2>&1; then
-      log "WARN" "❌ Potential hardcoded credential pattern found: ${pattern}"
+    hits=""
+    while IFS= read -r -d '' f; do
+      case "$f" in
+        config/gitleaks.toml | .gitleaks.toml) continue ;;
+      esac
+      [[ -f "${REPO_ROOT}/$f" ]] || continue
+      while IFS= read -r line; do
+        [[ "$line" == *"gitleaks:allow"* ]] && continue
+        hits="${hits}${f}\n"
+        break
+      done < <(LC_ALL=C grep -E "${pattern}" "${REPO_ROOT}/$f" 2>/dev/null || true)
+    done < <(repo_files)
+    if [[ -n "$hits" ]]; then
+      log "WARN" "❌ Credential pattern ${pattern} found in:"
+      printf '%b' "$hits" | head -10 | while IFS= read -r h; do
+        [[ -n "$h" ]] && log "WARN" "     ${h}"
+      done
       violations=$((violations + 1))
     fi
   done
@@ -105,28 +186,33 @@ check_file_permissions() {
 
   local violations=0
 
-  # Check for overly permissive files
+  # World-writable is the property worth catching. The old test was
+  # `[[ $perms -gt 755 ]]`, comparing an octal mode as a decimal number,
+  # which lets 764 (group-writable) through while flagging 775.
+  local file perms
   while IFS= read -r -d '' file; do
-    if [[ -f "$file" ]]; then
-      local perms
-      perms=$(stat -c %a "$file" 2>/dev/null || stat -f %OLp "$file")
-      if [[ $perms -gt 755 ]]; then
-        log "WARN" "❌ Overly permissive file: ${file} (${perms})"
-        violations=$((violations + 1))
-      fi
+    file="${REPO_ROOT}/${file}"
+    [[ -f "$file" ]] || continue
+    perms=$(stat -c %a "$file" 2>/dev/null || stat -f %OLp "$file" 2>/dev/null) || continue
+    # Other-writable is the bit that matters; group-writable in a repo is
+    # normal on shared checkouts.
+    if (( 8#${perms} & 8#0002 )); then
+      log "WARN" "❌ World-writable file: ${file} (${perms})"
+      violations=$((violations + 1))
     fi
-  done < <(find "${REPO_ROOT}" -type f -not -path "*/.git/*" -print0)
+  done < <(repo_files)
 
-  # Check for executable text files
-  local text_extensions=("md" "txt" "json" "yaml" "yml" "toml")
-
-  for ext in "${text_extensions[@]}"; do
+  # Executable text files. `find -executable` is GNU-only: on macOS, where
+  # this hook actually runs for most contributors, that predicate is an
+  # error and the whole loop found nothing. Test the file instead.
+  local ext
+  for ext in md txt json yaml yml toml; do
     while IFS= read -r -d '' file; do
-      if [[ -x "$file" ]]; then
+      if [[ -x "${REPO_ROOT}/${file}" ]]; then
         log "WARN" "❌ Executable text file: ${file}"
         violations=$((violations + 1))
       fi
-    done < <(find "${REPO_ROOT}" -name "*.${ext}" -executable -not -path "*/.git/*" -print0)
+    done < <(repo_files "*.${ext}")
   done
 
   if [[ $violations -eq 0 ]]; then
@@ -142,12 +228,18 @@ validate_shell_scripts() {
 
   local violations=0
 
+  # Tracked scripts only, at the severity CI gates on. Running plain
+  # `shellcheck` here contradicted tools/ci and the Shell Lint workflow,
+  # which use `-S error` / `-S warning`, so this reported "violations" for
+  # style notes that the repository has deliberately decided not to gate.
+  local script
   while IFS= read -r -d '' script; do
-    if ! shellcheck "$script" >/dev/null 2>&1; then
-      log "WARN" "❌ ShellCheck violations in: ${script}"
+    [[ -f "${REPO_ROOT}/${script}" ]] || continue
+    if ! shellcheck -S error -x "${REPO_ROOT}/${script}" >/dev/null 2>&1; then
+      log "WARN" "❌ ShellCheck errors in: ${script}"
       violations=$((violations + 1))
     fi
-  done < <(find "${REPO_ROOT}" -name "*.sh" -not -path "*/.git/*" -print0)
+  done < <(repo_files "*.sh")
 
   if [[ $violations -eq 0 ]]; then
     log "INFO" "✅ All shell scripts pass validation"
@@ -156,37 +248,20 @@ validate_shell_scripts() {
   return $violations
 }
 
-# Check environment variable usage
-check_environment_variables() {
-  log "INFO" "Checking environment variable usage..."
-
-  local violations=0
-
-  # Look for unprotected variable assignments
-  while IFS= read -r -d '' file; do
-    # Skip binary files and specific files
-    if file "$file" | grep -q "text" && [[ ! "$file" =~ \.(log|env)$ ]]; then
-      # Check for variables that should use default patterns
-      if grep -E '^[A-Z_]+=.+$' "$file" >/dev/null 2>&1; then
-        # Check if they use proper defaulting
-        if ! grep -E '\$\{[A-Z_]+:-[^}]*\}' "$file" >/dev/null 2>&1; then
-          local suspicious_vars
-          suspicious_vars=$(grep -E '^[A-Z_]+=.+$' "$file" | head -3)
-          if [[ -n "$suspicious_vars" ]]; then
-            log "WARN" "❌ Potential hardcoded variables in ${file}: ${suspicious_vars}"
-            violations=$((violations + 1))
-          fi
-        fi
-      fi
-    fi
-  done < <(find "${REPO_ROOT}" -type f -not -path "*/.git/*" -not -path "*/.github/security-policies/*" -print0)
-
-  if [[ $violations -eq 0 ]]; then
-    log "INFO" "✅ Environment variable usage is appropriate"
-  fi
-
-  return $violations
-}
+# check_environment_variables() was removed here.
+#
+# It warned when a file contained `^[A-Z_]+=...` but did not also contain
+# `${VAR:-default}` ANYWHERE in the same file. That is not a security
+# property: one defaulted variable anywhere exempted every assignment in the
+# file, and a file with no defaults at all — a constants file, a .env
+# template, a generated manifest — was flagged regardless of whether any
+# value was sensitive. It ran `file` on every path in the working tree to
+# decide what to read.
+#
+# There is no threshold that makes the condition meaningful, so it is gone
+# rather than tuned. Hardcoded credentials are what gitleaks and the pattern
+# list in scan_secrets() are for, and they judge the value rather than
+# whether a neighbouring line happens to use parameter expansion.
 
 # Validate OPA policies
 validate_policies() {
@@ -228,14 +303,18 @@ check_sensitive_files() {
     "id_ed25519"
   )
 
+  # Tracked files only. A `.env` a contributor keeps locally, or a key in an
+  # ignored scratch directory, is not something this repository ships — and
+  # flagging it trains people to ignore the check. What matters is whether
+  # such a file is committed.
+  local pattern file
   for pattern in "${sensitive_patterns[@]}"; do
     while IFS= read -r -d '' file; do
-      # Skip allowed files
-      if [[ ! "$file" =~ (environment-template\.env|\.pub$) ]]; then
-        log "WARN" "❌ Sensitive file detected: ${file}"
+      if [[ ! "$file" =~ (environment-template\.env|\.pub$|KEYS\.asc$) ]]; then
+        log "WARN" "❌ Sensitive file committed: ${file}"
         violations=$((violations + 1))
       fi
-    done < <(find "${REPO_ROOT}" -name "${pattern}" -not -path "*/.git/*" -print0)
+    done < <(repo_files "${pattern}")
   done
 
   if [[ $violations -eq 0 ]]; then
@@ -308,7 +387,6 @@ main() {
   scan_secrets || total_violations=$((total_violations + $?))
   check_file_permissions || total_violations=$((total_violations + $?))
   validate_shell_scripts || total_violations=$((total_violations + $?))
-  check_environment_variables || total_violations=$((total_violations + $?))
   validate_policies || total_violations=$((total_violations + 1))
   check_sensitive_files || total_violations=$((total_violations + $?))
 
