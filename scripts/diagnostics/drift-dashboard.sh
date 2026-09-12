@@ -71,7 +71,8 @@ fi
 # Class 1: chezmoi-managed drift
 # -----------------------------------------------------------------------------
 
-cm_status="$(chezmoi status 2>/dev/null || true)"
+# --exclude=always: always-run scripts are pending by design, not drift.
+cm_status="$(chezmoi status --exclude=always 2>/dev/null || true)"
 cm_count=0
 if [[ -n "$cm_status" ]]; then
   cm_count=$(printf '%s\n' "$cm_status" | wc -l | tr -d ' ')

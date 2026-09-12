@@ -2,6 +2,18 @@
 
 This file documents all notable changes to this project.
 
+## Unreleased
+
+### Fixed
+
+- `dot doctor`, `dot health`, `dot fleet`, the scorecard and the drift dashboard
+  no longer report permanent drift on macOS. The iCloud symlink hook is a
+  `run_before_` script that chezmoi lists as pending on every apply by design,
+  which made plain `chezmoi verify` exit 1 and every `chezmoi status` line
+  count read 1 on a fully synchronised machine. Those callers now pass
+  `--exclude=always`; files, directories, symlinks and `run_once`/`run_onchange`
+  scripts still count as drift.
+
 ## v0.2.520 — 2026-09-10
 
 ### Added

@@ -372,7 +372,11 @@ fi
 
 # --- State ---
 _section "State"
-if chezmoi verify &>/dev/null; then
+# --exclude=always: a run_before_/run_after_ script (the macOS iCloud hook)
+# is "pending" on every apply by design, so plain `verify` exits 1 forever
+# on a fully synchronised machine. Files, dirs, symlinks and run_once/
+# run_onchange scripts still count.
+if chezmoi verify --exclude=always &>/dev/null; then
   _ok "chezmoi" "synchronized"
 else
   _fail "chezmoi" "drifted (run dot drift)"

@@ -210,7 +210,9 @@ _bench 10
 _shim chezmoi <<EOF
 #!/usr/bin/env bash
 case "\${1:-}" in
-  verify) exit 0 ;;
+  # Plain verify exits 1 on any machine with an always-run script; doctor
+  # must exclude that entry type or it reports permanent drift.
+  verify) case " \$* " in *" --exclude=always "*) exit 0 ;; *) exit 1 ;; esac ;;
   managed) printf '%s\n' "$S_HOME/.config/zsh/clean.zsh" "$S_HOME/.config/absent.conf" "$S_HOME/other.txt" ;;
 esac
 exit 0
@@ -467,7 +469,9 @@ EOF
 _shim chezmoi <<EOF
 #!/usr/bin/env bash
 case "\${1:-}" in
-  verify) exit 0 ;;
+  # Plain verify exits 1 on any machine with an always-run script; doctor
+  # must exclude that entry type or it reports permanent drift.
+  verify) case " \$* " in *" --exclude=always "*) exit 0 ;; *) exit 1 ;; esac ;;
   managed) printf '%s\n' "$S_HOME/.config/zsh/ghost.zsh" ;;
 esac
 exit 0
