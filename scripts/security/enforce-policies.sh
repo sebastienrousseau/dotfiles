@@ -163,12 +163,12 @@ scan_secrets() {
   # else is gitleaks' job, and it does it with entropy analysis and an
   # allowlist rather than a bare grep.
   local secret_patterns=(
-    'AKIA[0-9A-Z]{16}'                       # AWS access key id
-    'ASIA[0-9A-Z]{16}'                       # AWS temporary access key id
-    '-----BEGIN [A-Z ]*PRIVATE KEY-----'     # any PEM private key block
-    'xox[baprs]-[0-9A-Za-z-]{10,}'           # Slack token
-    'ghp_[0-9A-Za-z]{36}'                    # GitHub personal access token
-    'AIza[0-9A-Za-z_-]{35}'                  # Google API key
+    'AKIA[0-9A-Z]{16}'                   # AWS access key id
+    'ASIA[0-9A-Z]{16}'                   # AWS temporary access key id
+    '-----BEGIN [A-Z ]*PRIVATE KEY-----' # any PEM private key block
+    'xox[baprs]-[0-9A-Za-z-]{10,}'       # Slack token
+    'ghp_[0-9A-Za-z]{36}'                # GitHub personal access token
+    'AIza[0-9A-Za-z_-]{35}'              # Google API key
   )
 
   # Two kinds of file contain these shapes on purpose, and both already
@@ -234,7 +234,7 @@ check_file_permissions() {
     perms=$(stat -c %a "$abs" 2>/dev/null || stat -f %OLp "$abs" 2>/dev/null) || continue
     # Other-writable is the bit that matters; group-writable in a repo is
     # normal on shared checkouts.
-    if (( 8#${perms} & 8#0002 )); then
+    if ((8#${perms} & 8#0002)); then
       log "WARN" "❌ World-writable file: ${file} (${perms})"
       violations=$((violations + 1))
     fi
@@ -368,7 +368,10 @@ check_sensitive_files() {
         log "WARN" "❌ Sensitive file committed: ${file}"
         violations=$((violations + 1))
       fi
-    done < <(repo_files "${pattern}"; repo_files "*/${pattern}")
+    done < <(
+      repo_files "${pattern}"
+      repo_files "*/${pattern}"
+    )
   done
 
   if [[ $violations -eq 0 ]]; then
@@ -455,20 +458,23 @@ main() {
 
   local label
 
-  rc=0; scan_secrets || rc=$?
+  rc=0
+  scan_secrets || rc=$?
   label="Secrets scanning (gitleaks + high-signal patterns)"
   have_tool gitleaks || label="Secrets scanning (pattern scan only, gitleaks absent)"
   record_check "$label" "$rc"
   total_violations=$((total_violations + rc))
 
-  rc=0; check_file_permissions || rc=$?
+  rc=0
+  check_file_permissions || rc=$?
   record_check "File permissions validation" "$rc"
   total_violations=$((total_violations + rc))
 
   # rc 2 is the skip sentinel: the tool that backs this check is absent. A skip
   # adds nothing to the violation count and is rendered as SKIPPED, never as a
   # tick — use DOTFILES_POLICY_STRICT=1 to make it an error instead.
-  rc=0; validate_shell_scripts || rc=$?
+  rc=0
+  validate_shell_scripts || rc=$?
   if have_tool shellcheck; then
     record_check "Shell script analysis (shellcheck)" "$rc"
     total_violations=$((total_violations + rc))
@@ -476,7 +482,8 @@ main() {
     record_check "Shell script analysis (shellcheck)" "SKIPPED"
   fi
 
-  rc=0; validate_policies || rc=$?
+  rc=0
+  validate_policies || rc=$?
   if have_tool opa; then
     [[ $rc -ne 0 ]] && rc=1
     record_check "OPA policy validation" "$rc"
@@ -485,7 +492,8 @@ main() {
     record_check "OPA policy validation" "SKIPPED"
   fi
 
-  rc=0; check_sensitive_files || rc=$?
+  rc=0
+  check_sensitive_files || rc=$?
   record_check "Sensitive files detection" "$rc"
   total_violations=$((total_violations + rc))
 
