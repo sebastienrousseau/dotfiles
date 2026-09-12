@@ -93,7 +93,8 @@ cmd_fleet_status() {
   local drift_status="clean"
   if has_command chezmoi; then
     local drift_output
-    drift_output="$(chezmoi status 2>/dev/null || true)"
+    # --exclude=always: always-run scripts are pending by design, not drift.
+    drift_output="$(chezmoi status --exclude=always 2>/dev/null || true)"
     if [[ -n "$drift_output" ]]; then
       drift_status="drifted"
     fi
@@ -168,7 +169,7 @@ cmd_fleet_drift() {
       fi
 
       local drift_output
-      drift_output="$(chezmoi status 2>/dev/null || true)"
+      drift_output="$(chezmoi status --exclude=always 2>/dev/null || true)"
 
       _fleet_drift_append_history "$drift_output"
 

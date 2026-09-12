@@ -52,7 +52,8 @@ perf_target=$(python3 -c 'import json,sys; j=json.loads(sys.stdin.read()); print
 
 # Drift count
 if command -v chezmoi >/dev/null 2>&1; then
-  drift_count=$(chezmoi status 2>/dev/null | wc -l | tr -d ' ')
+  # --exclude=always: always-run scripts are pending by design, not drift.
+  drift_count=$(chezmoi status --exclude=always 2>/dev/null | wc -l | tr -d ' ')
 else
   drift_count=0
 fi

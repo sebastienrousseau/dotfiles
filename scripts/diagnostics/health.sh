@@ -454,7 +454,8 @@ check_sync_status() {
   # needs warned about via the health dashboard.
   if has_command chezmoi; then
     local status_output
-    status_output=$(chezmoi status 2>/dev/null || echo "")
+    # --exclude=always: always-run scripts are pending by design, not drift.
+    status_output=$(chezmoi status --exclude=always 2>/dev/null || echo "")
     if [[ -z "$status_output" ]]; then
       check "Chezmoi sync" "pass"
     else
