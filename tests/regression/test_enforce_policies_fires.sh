@@ -156,6 +156,23 @@ assert_contains "World-writable file" "$RUN_OUT" \
 assert_contains "Executable text file" "$RUN_OUT" \
   "and the executable-text check must fire on the same file"
 
+# A tracked symlink must NOT be reported. A symlink carries its own mode bits
+# but the kernel ignores them — access is governed by the target — and they are
+# not portable: Linux creates symlinks 777, macOS 755. This repository tracks
+# eight of them (.gitleaks.toml, .pre-commit-config.yaml and friends, all
+# pointing into config/), which passed on a Mac and failed on an Ubuntu runner
+# for that reason alone.
+#
+# `chmod -h` sets the link's own bits on macOS and is unsupported on Linux,
+# where the link is already 777 — so after this line the scenario is a
+# world-writable symlink on both platforms, and the test means the same thing
+# in both places rather than passing trivially on one.
+test_start "tracked_symlink_is_not_flagged_for_permissions"
+run_scenario 'echo hi > real.txt && ln -s real.txt link.toml && chmod -h 777 link.toml 2>/dev/null || true'
+assert_equals "0" "$RUN_RC" "a tracked symlink must not fail the gate"
+assert_false '[[ "$RUN_OUT" == *"link.toml"* ]]' \
+  "and must not be named by either permission check"
+
 # -----------------------------------------------------------------------------
 # 5. A shellcheck error in a tracked script.
 # -----------------------------------------------------------------------------

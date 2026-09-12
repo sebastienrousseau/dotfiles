@@ -227,9 +227,19 @@ check_file_permissions() {
   # which lets 764 (group-writable) through while flagging 775.
   # Paths are reported repository-relative, the way every other check reports
   # them, so the output is diffable between machines.
+  #
+  # Symlinks are skipped. A symlink carries its own mode bits, but the kernel
+  # ignores them: access is governed entirely by the target, which is checked
+  # on its own if it is tracked. Those bits are also not portable — Linux
+  # creates symlinks 777 and macOS 755 — so including them made this pass on a
+  # Mac and fail on a runner for the same eight tracked symlinks
+  # (.gitleaks.toml, .pre-commit-config.yaml and friends, all pointing into
+  # config/). `[[ -f ]]` follows the link, so it cannot filter them; -L must be
+  # tested first.
   local file perms abs
   while IFS= read -r -d '' file; do
     abs="${REPO_ROOT}/${file}"
+    [[ -L "$abs" ]] && continue
     [[ -f "$abs" ]] || continue
     perms=$(stat -c %a "$abs" 2>/dev/null || stat -f %OLp "$abs" 2>/dev/null) || continue
     # Other-writable is the bit that matters; group-writable in a repo is
@@ -243,9 +253,13 @@ check_file_permissions() {
   # Executable text files. `find -executable` is GNU-only: on macOS, where
   # this hook actually runs for most contributors, that predicate is an
   # error and the whole loop found nothing. Test the file instead.
+  # Symlinks skipped here for the same reason: `-x` follows the link, so a
+  # tracked symlink pointing at any executable would be reported as an
+  # executable text file.
   local ext
   for ext in md txt json yaml yml toml; do
     while IFS= read -r -d '' file; do
+      [[ -L "${REPO_ROOT}/${file}" ]] && continue
       if [[ -x "${REPO_ROOT}/${file}" ]]; then
         log "WARN" "❌ Executable text file: ${file}"
         violations=$((violations + 1))
