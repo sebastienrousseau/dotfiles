@@ -315,7 +315,7 @@ _new_scenario s2
 _uname Linux
 _zsh "9 9"
 _tool pueue pueued batcat wasmtime age hyperfine \
-  mise zoxide atuin fzf direnv pyenv pwsh \
+  mise zoxide atuin fzf direnv pyenv pwsh cargo \
   lscpu lspci free wlr-randr dpkg wslpath
 _bench 9999
 _linux_os_release
@@ -572,8 +572,8 @@ _expect "s5_unknown_os_fallback" \
   "DE: n/a" "[FAIL] zsh" "[WARN] fish" "[FAIL] starship" "[WARN] nu" \
   "[FAIL] rg" "[OK] nix" "optional (not installed)" "[FAIL] age" "[WARN] claude" \
   "[FAIL] chezmoi" "[FAIL] .zshrc" "[FAIL] dot" "[WARN] antigravity" \
-  "[FAIL] fish_plugins" "[WARN] cargo-install-update" "[OK] symlinks" \
-  "[WARN] portability" "[OK] shell caches" "[OK] PATH length" \
+  "[FAIL] fish_plugins" "[OK] cargo-install-update" "not needed (cargo not installed)" \
+  "[OK] symlinks" "[WARN] portability" "[OK] shell caches" "[OK] PATH length" \
   "[WARN] hyperfine" "Run 'dot heal' to repair."
 
 # =======================================================================
