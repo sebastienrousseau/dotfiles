@@ -29,32 +29,66 @@ log() {
   echo "[${timestamp}] [${level}] ${message}" | tee -a "${LOG_FILE}"
 }
 
+# Per-check outcomes, recorded by main() and rendered by generate_report().
+# Parallel arrays rather than an associative array: this runs under bash 3.2 on
+# stock macOS, where `declare -A` does not exist.
+CHECK_NAMES=()
+CHECK_RESULTS=()
+
+record_check() {
+  CHECK_NAMES+=("$1")
+  CHECK_RESULTS+=("$2")
+}
+
 # Error handling
 error_exit() {
   log "ERROR" "$1"
   exit 1
 }
 
-# Check if required tools are installed
+# Check if required tools are installed.
+#
+# Only the tools every check needs are fatal. gitleaks, shellcheck and opa each
+# back exactly one check, and treating them as fatal meant a machine without
+# opa ran NO checks at all — as a pre-commit hook, that is a gate that silently
+# does nothing on most contributors' machines. A missing optional tool now skips
+# its own check and nothing else.
+#
+# A skip is never counted as a pass: it is reported as SKIPPED in the output and
+# in the report, and DOTFILES_POLICY_STRICT=1 turns any skip into a hard error
+# so CI can demand the full set.
+MISSING_OPTIONAL=()
+
+have_tool() {
+  command -v "$1" >/dev/null 2>&1
+}
+
 check_dependencies() {
   log "INFO" "Checking dependencies..."
 
-  local missing_tools=()
+  local missing_required=()
+  local tool
 
-  # Required tools
-  local tools=("opa" "gitleaks" "shellcheck" "grep" "find")
-
-  for tool in "${tools[@]}"; do
-    if ! command -v "$tool" &>/dev/null; then
-      missing_tools+=("$tool")
-    fi
+  for tool in grep find git; do
+    have_tool "$tool" || missing_required+=("$tool")
   done
 
-  if [[ ${#missing_tools[@]} -gt 0 ]]; then
-    error_exit "Missing required tools: ${missing_tools[*]}"
+  if [[ ${#missing_required[@]} -gt 0 ]]; then
+    error_exit "Missing required tools: ${missing_required[*]}"
   fi
 
-  log "INFO" "All dependencies satisfied"
+  for tool in gitleaks shellcheck opa; do
+    have_tool "$tool" || MISSING_OPTIONAL+=("$tool")
+  done
+
+  if [[ ${#MISSING_OPTIONAL[@]} -gt 0 ]]; then
+    if [[ "${DOTFILES_POLICY_STRICT:-0}" == "1" ]]; then
+      error_exit "Missing tools (strict mode): ${MISSING_OPTIONAL[*]}"
+    fi
+    log "WARN" "Not installed, related checks will be SKIPPED: ${MISSING_OPTIONAL[*]}"
+  fi
+
+  log "INFO" "Dependency check complete"
 }
 
 # Scan for hardcoded secrets
@@ -103,7 +137,9 @@ scan_secrets() {
   #
   # Git mode is also ~18x faster here: 10s against 3m0s.
   local gl_out
-  if gl_out="$(gitleaks detect --source="${REPO_ROOT}" \
+  if ! have_tool gitleaks; then
+    log "WARN" "⏭  gitleaks SKIPPED (not installed) — pattern scan still runs"
+  elif gl_out="$(gitleaks detect --source="${REPO_ROOT}" \
     --config="${REPO_ROOT}/config/gitleaks.toml" \
     --redact --no-banner 2>&1)"; then
     log "INFO" "✅ No secrets detected by gitleaks"
@@ -189,11 +225,13 @@ check_file_permissions() {
   # World-writable is the property worth catching. The old test was
   # `[[ $perms -gt 755 ]]`, comparing an octal mode as a decimal number,
   # which lets 764 (group-writable) through while flagging 775.
-  local file perms
+  # Paths are reported repository-relative, the way every other check reports
+  # them, so the output is diffable between machines.
+  local file perms abs
   while IFS= read -r -d '' file; do
-    file="${REPO_ROOT}/${file}"
-    [[ -f "$file" ]] || continue
-    perms=$(stat -c %a "$file" 2>/dev/null || stat -f %OLp "$file" 2>/dev/null) || continue
+    abs="${REPO_ROOT}/${file}"
+    [[ -f "$abs" ]] || continue
+    perms=$(stat -c %a "$abs" 2>/dev/null || stat -f %OLp "$abs" 2>/dev/null) || continue
     # Other-writable is the bit that matters; group-writable in a repo is
     # normal on shared checkouts.
     if (( 8#${perms} & 8#0002 )); then
@@ -225,6 +263,11 @@ check_file_permissions() {
 # Validate shell scripts
 validate_shell_scripts() {
   log "INFO" "Validating shell scripts..."
+
+  if ! have_tool shellcheck; then
+    log "WARN" "⏭  Shell script validation SKIPPED (shellcheck not installed)"
+    return 2
+  fi
 
   local violations=0
 
@@ -272,6 +315,11 @@ validate_policies() {
     return 1
   fi
 
+  if ! have_tool opa; then
+    log "WARN" "⏭  OPA policy validation SKIPPED (opa not installed)"
+    return 2
+  fi
+
   if opa test "${POLICIES_DIR}" >/dev/null 2>&1; then
     log "INFO" "✅ OPA policies are valid"
     return 0
@@ -307,6 +355,12 @@ check_sensitive_files() {
   # ignored scratch directory, is not something this repository ships — and
   # flagging it trains people to ignore the check. What matters is whether
   # such a file is committed.
+  #
+  # Each name is queried at the root AND at any depth. A git pathspec with a
+  # wildcard (`*.key`) already matches at any depth, because `*` spans `/` in
+  # pathspecs; a bare name (`id_rsa`, `.env`) matches ONLY at the repository
+  # root. Without the `*/` form, a committed `.ssh/id_rsa` — the likeliest
+  # place for a private key to appear — would not have been reported at all.
   local pattern file
   for pattern in "${sensitive_patterns[@]}"; do
     while IFS= read -r -d '' file; do
@@ -314,7 +368,7 @@ check_sensitive_files() {
         log "WARN" "❌ Sensitive file committed: ${file}"
         violations=$((violations + 1))
       fi
-    done < <(repo_files "${pattern}")
+    done < <(repo_files "${pattern}"; repo_files "*/${pattern}")
   done
 
   if [[ $violations -eq 0 ]]; then
@@ -322,6 +376,25 @@ check_sensitive_files() {
   fi
 
   return $violations
+}
+
+# Render the checklist from what actually ran, so a failing check cannot show
+# a tick. The previous version printed six fixed ✅ lines regardless of outcome,
+# including one for a check that no longer exists.
+_report_checklist() {
+  local i
+  # An empty array expansion is an unbound-variable error under `set -u` on
+  # bash 3.2, so the guard is load-bearing, not defensive noise.
+  [[ ${#CHECK_NAMES[@]} -eq 0 ]] && return 0
+  for i in "${!CHECK_NAMES[@]}"; do
+    if [[ "${CHECK_RESULTS[$i]}" == "SKIPPED" ]]; then
+      echo "- ⏭ ${CHECK_NAMES[$i]} — SKIPPED (required tool not installed)"
+    elif [[ "${CHECK_RESULTS[$i]}" == "0" ]]; then
+      echo "- ✅ ${CHECK_NAMES[$i]}"
+    else
+      echo "- ❌ ${CHECK_NAMES[$i]} (${CHECK_RESULTS[$i]} violation(s))"
+    fi
+  done
 }
 
 # Generate security report
@@ -340,12 +413,7 @@ generate_report() {
 
 ## Security Checks Performed
 
-- ✅ Secrets scanning (gitleaks + manual patterns)
-- ✅ File permissions validation
-- ✅ Shell script analysis (shellcheck)
-- ✅ Environment variable usage check
-- ✅ OPA policy validation
-- ✅ Sensitive files detection
+$(_report_checklist)
 
 ## Security Score
 
@@ -354,10 +422,9 @@ $(if [[ $total_violations -eq 0 ]]; then echo "🟢 **PASSED** - No security vio
 ## Recommendations
 
 1. Review any flagged violations in the audit log
-2. Update hardcoded values to use environment variables
-3. Ensure proper file permissions (644 for files, 755 for executables)
-4. Use the provided environment template for configuration
-5. Run this script regularly as part of your development workflow
+2. Ensure proper file permissions (644 for files, 755 for executables)
+3. Keep secrets out of tracked files; use the environment template for configuration
+4. Run this script regularly as part of your development workflow
 
 ## Next Steps
 
@@ -383,12 +450,44 @@ main() {
 
   local total_violations=0
 
-  # Run all checks
-  scan_secrets || total_violations=$((total_violations + $?))
-  check_file_permissions || total_violations=$((total_violations + $?))
-  validate_shell_scripts || total_violations=$((total_violations + $?))
-  validate_policies || total_violations=$((total_violations + 1))
-  check_sensitive_files || total_violations=$((total_violations + $?))
+  # Run all checks, recording each outcome for the report.
+  local rc
+
+  local label
+
+  rc=0; scan_secrets || rc=$?
+  label="Secrets scanning (gitleaks + high-signal patterns)"
+  have_tool gitleaks || label="Secrets scanning (pattern scan only, gitleaks absent)"
+  record_check "$label" "$rc"
+  total_violations=$((total_violations + rc))
+
+  rc=0; check_file_permissions || rc=$?
+  record_check "File permissions validation" "$rc"
+  total_violations=$((total_violations + rc))
+
+  # rc 2 is the skip sentinel: the tool that backs this check is absent. A skip
+  # adds nothing to the violation count and is rendered as SKIPPED, never as a
+  # tick — use DOTFILES_POLICY_STRICT=1 to make it an error instead.
+  rc=0; validate_shell_scripts || rc=$?
+  if have_tool shellcheck; then
+    record_check "Shell script analysis (shellcheck)" "$rc"
+    total_violations=$((total_violations + rc))
+  else
+    record_check "Shell script analysis (shellcheck)" "SKIPPED"
+  fi
+
+  rc=0; validate_policies || rc=$?
+  if have_tool opa; then
+    [[ $rc -ne 0 ]] && rc=1
+    record_check "OPA policy validation" "$rc"
+    total_violations=$((total_violations + rc))
+  else
+    record_check "OPA policy validation" "SKIPPED"
+  fi
+
+  rc=0; check_sensitive_files || rc=$?
+  record_check "Sensitive files detection" "$rc"
+  total_violations=$((total_violations + rc))
 
   # Generate report
   generate_report "$total_violations"
