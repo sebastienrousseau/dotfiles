@@ -51,6 +51,9 @@ This file documents all notable changes to this project.
   passes `-u` with the user's `init.lua` (honouring `XDG_CONFIG_HOME` and
   `NVIM_APPNAME`) ahead of `-l`, and reports a visible skip when there is no
   config to load.
+- `dot doctor` no longer warns about a missing `cargo-install-update` on a
+  machine that has no `cargo` for it to run through; the check now reports
+  "not needed" there and keeps warning where a Rust toolchain is present.
 
 ## v0.2.519 — 2026-08-13
 

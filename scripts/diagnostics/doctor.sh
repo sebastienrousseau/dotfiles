@@ -462,10 +462,15 @@ else
   _fail "fish_plugins" "missing (~/.config/fish/fish_plugins)"
 fi
 
+# Only meaningful when there is a cargo for topgrade to run it through; a
+# machine without a Rust toolchain has nothing to update, so warning about
+# the missing helper there is noise that never goes away.
 if command -v cargo-install-update >/dev/null 2>&1; then
   _ok "cargo-install-update" "$(pretty_path "$(command -v cargo-install-update)")"
-else
+elif command -v cargo >/dev/null 2>&1; then
   _warn "cargo-install-update" "missing (install: cargo install cargo-update)"
+else
+  _ok "cargo-install-update" "not needed (cargo not installed)"
 fi
 
 # --- Symlinks ---
