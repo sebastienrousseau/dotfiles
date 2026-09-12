@@ -229,6 +229,87 @@ jobs:
       run_supply_chain_checks: false
       run_permission_audit: true
 
+  # ----------------------------------------------------------------------------
+  # The job above is named "Policy Enforcement" but never ran
+  # scripts/security/enforce-policies.sh — it calls a reusable baseline whose
+  # permission audit sets `issues=1`, echoes a warning and then exits 0, so it
+  # cannot fail. The script itself ran nowhere: it is declared in
+  # config/pre-commit-config.yaml at `stages: [pre-push]`, but this repository
+  # installs hand-written .git/hooks (not pre-commit-managed ones, and they
+  # never call pre-commit), and the Pre-Commit workflow runs five hooks by name
+  # and not this one. This job is where it actually executes.
+  # ----------------------------------------------------------------------------
+
+  policy-script:
+    name: Security / Policy Script
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [secrets-scan]
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group' || github.event_name == 'schedule'
+    permissions:
+      contents: read
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Full history: the script runs gitleaks in git mode, and
+          # .gitleaksignore entries are fingerprinted
+          # `<commit>:<file>:<rule>:<line>`. On a shallow checkout those commits
+          # are absent, so every allowlisted false positive would come back.
+          fetch-depth: 0
+
+      - name: Install shellcheck
+        run: bash tools/ci/install-tools.sh shellcheck
+
+      - name: Install gitleaks and opa
+        env:
+          GITLEAKS_VERSION: 8.30.1
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+          OPA_VERSION: 1.20.2
+          OPA_SHA256: 69da5179ee403d10fa11bab6cfb4ffb0d23dba5f9b682fa977db772a1da5670f
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.local/bin"
+
+          # Pinned by version AND checksum. install-tools.sh is apt-based and
+          # neither tool is an apt package, so these come from their releases.
+          curl -fsSL --retry 3 --max-time 120 -o /tmp/gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  /tmp/gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/gitleaks.tar.gz -C "$HOME/.local/bin" gitleaks
+
+          curl -fsSL --retry 3 --max-time 120 -o "$HOME/.local/bin/opa" \
+            "https://github.com/open-policy-agent/opa/releases/download/v${OPA_VERSION}/opa_linux_amd64_static"
+          echo "${OPA_SHA256}  $HOME/.local/bin/opa" | sha256sum -c -
+          chmod +x "$HOME/.local/bin/opa"
+
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Enforce security policies
+        run: |
+          set -euo pipefail
+          # STRICT: a missing tool becomes an error rather than a skip. The
+          # script tolerates absent tools so a contributor without opa still
+          # gets the other checks; CI provisions all three, so here a skip
+          # means provisioning broke and must fail loudly.
+          DOTFILES_POLICY_STRICT=1 ./scripts/security/enforce-policies.sh
+
+      - name: Upload security report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4.6.2
+        with:
+          name: security-policy-report
+          path: |
+            security-report.md
+            .security-audit.log
+          if-no-files-found: warn
+          retention-days: 14
+
   # ============================================================================
   # STAGE 6: SECURITY ATTESTATION (main branch only, schedule)
   # ============================================================================
@@ -289,6 +370,7 @@ jobs:
       - dependency-scan
       - infrastructure-scan
       - policy-enforcement
+      - policy-script
     if: always()
     steps:
       - name: Harden runner (audit mode)
@@ -302,7 +384,8 @@ jobs:
             "${{ needs.secrets-scan.result }}" \
             "${{ needs.dependency-scan.result }}" \
             "${{ needs.infrastructure-scan.result }}" \
-            "${{ needs.policy-enforcement.result }}"; do
+            "${{ needs.policy-enforcement.result }}" \
+            "${{ needs.policy-script.result }}"; do
             if [[ "$result" != "success" && "$result" != "skipped" ]]; then
               echo "::error::Security workflow contains a failing mandatory job"
               exit 1
