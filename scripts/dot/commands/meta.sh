@@ -70,7 +70,13 @@ cmd_upgrade() {
     [[ "${1:-}" == "--" ]] && shift
     local log="$log_dir/$id.log" rc=0
     ui_step "$id" "$label" run "$running"
-    "$@" >"$log" 2>&1 || rc=$?
+    # stdin is closed on purpose. Output is captured to a log, so a phase
+    # that prompts (chezmoi's "X has changed since chezmoi last wrote it?",
+    # a git credential helper, nvim waiting on a keypress) would otherwise
+    # block on the terminal with its question invisible — the 2026-09-12
+    # "chezmoi update seems very slow" report. With no stdin the prompt
+    # fails fast, the step is marked failed, and the tail below says why.
+    "$@" >"$log" 2>&1 </dev/null || rc=$?
     if [[ "$rc" -eq 0 ]]; then
       ui_step "$id" "" ok "$(_upgrade_last_line "$log")"
     else
@@ -89,14 +95,27 @@ cmd_upgrade() {
     _upgrade_step nix-gc "Nix GC" "collecting…" -- nix-collect-garbage -d
   fi
 
-  _upgrade_step dotfiles "Dotfiles" "chezmoi update…" -- chezmoi update
+  # --no-tty: chezmoi otherwise opens /dev/tty directly for its
+  # overwrite prompt, bypassing the closed stdin above and hanging.
+  _upgrade_step dotfiles "Dotfiles" "chezmoi update…" -- chezmoi update --no-tty
 
   if has_command nvim; then
     # scripts/nvim/headless-upgrade.lua runs Lazy sync AND waits for
     # Mason's async install queue to drain, so ensure_installed installs
     # (codelldb, debugpy, delve, etc.) aren't aborted by an early quitall.
-    _upgrade_step nvim "Neovim plugins" "Lazy sync + Mason drain…" -- \
-      nvim --headless -l "$src_dir/scripts/nvim/headless-upgrade.lua"
+    #
+    # `nvim -l` does NOT load the user's init.lua, so without an explicit
+    # -u the script found no lazy.nvim and logged "skipping plugin update"
+    # on every run — the upgrade step was a silent no-op. Point -u at the
+    # config nvim would load itself (honouring XDG_CONFIG_HOME and
+    # NVIM_APPNAME) and skip visibly when there is none to load.
+    local nvim_init="${XDG_CONFIG_HOME:-$HOME/.config}/${NVIM_APPNAME:-nvim}/init.lua"
+    if [ -f "$nvim_init" ]; then
+      _upgrade_step nvim "Neovim plugins" "Lazy sync + Mason drain…" -- \
+        nvim --headless -u "$nvim_init" -l "$src_dir/scripts/nvim/headless-upgrade.lua"
+    else
+      ui_step nvim "Neovim plugins" skip "no init.lua at $nvim_init"
+    fi
   fi
 
   if [ "${DOTFILES_FONTS:-}" = "1" ] &&
@@ -117,6 +136,9 @@ cmd_upgrade() {
     while ((i < n)); do
       ui_err "${fail_labels[$i]}" "log tail:"
       tail -n 15 "${fail_logs[$i]}" | sed 's/^/    /'
+      if grep -q 'has changed since chezmoi last wrote it' "${fail_logs[$i]}"; then
+        ui_info "Hint" "a managed file was edited locally — run 'chezmoi apply' to choose per file, or 'chezmoi update --force' to overwrite"
+      fi
       ((i++)) || true
     done
     ui_info "Logs" "$log_dir"
