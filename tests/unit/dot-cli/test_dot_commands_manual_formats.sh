@@ -148,7 +148,17 @@ assert_equals 1 "$_rc" "a missing offline copy exits 1"
 assert_contains "offline copy not found at $OFFLINE/dotfiles.epub" "$_out" "the expected path is named"
 
 test_start "manual_local_build_is_reported_when_absent"
-_out="$(_manual pdf --local)"
+# --local resolves the source dir from lib/'s own location, so on a machine
+# that has run tools/docs/build-manual.sh the build under this repo exists and
+# the "absent" case never happens (utils.sh resets its source-dir cache on
+# load, so it cannot be pinned from the environment). Run the command through
+# a stand-in tree that borrows lib/ and scripts/ but has no _build/, so the
+# assertion is about the code path and not about the developer's checkout.
+_no_build="$DOTFILES_COV_TMPDIR/no-build-repo"
+mkdir -p "$_no_build"
+ln -s "$REPO_ROOT/lib" "$_no_build/lib"
+ln -s "$REPO_ROOT/scripts" "$_no_build/scripts"
+_out="$(MANUAL="$_no_build/scripts/dot/commands/manual.sh" _manual pdf --local)"
 _rc=$?
 assert_equals 1 "$_rc" "a missing local build exits 1"
 assert_contains "local build not found" "$_out" "the missing build is reported"

@@ -166,6 +166,100 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: failure handling wrong"
   printf '%s\n' "$_up_out2" | sed 's/^/      /'
 fi
+
+# ── cmd_upgrade must never block on a prompt it has hidden ───────────
+# Regression for the 2026-09-12 "chezmoi update seems very slow" report.
+# Each phase's output is captured to a log, so a phase that asks a
+# question (chezmoi's "X has changed since chezmoi last wrote it?") sat
+# waiting on the terminal with the question invisible. The step runner
+# now closes stdin and chezmoi gets --no-tty, so the prompt fails fast
+# and the tail explains what to do instead. Same harness as above, plus
+# a fake XDG_CONFIG_HOME so the nvim phase is driven by the fixture and
+# not by whatever the host has under ~/.config.
+_up_run() {
+  XDG_CONFIG_HOME="$1" PATH="$_up_sb/bin:$PATH" bash -c '
+    set -uo pipefail
+    require_source_dir() { printf "%s\n" "'"$_up_sb"'/src"; }
+    has_command() { command -v "$1" >/dev/null 2>&1; }
+    source "'"$REPO_ROOT"'/lib/dot/ui.sh"
+    eval "$(sed -n "/^_upgrade_last_line()/,/^}/p;/^cmd_upgrade()/,/^}\$/p" "'"$REPO_ROOT"'/scripts/dot/commands/meta.sh")"
+    cmd_upgrade
+  ' 2>&1
+}
+mkdir -p "$_up_sb/xdg/nvim" "$_up_sb/xdg-empty"
+: >"$_up_sb/xdg/nvim/init.lua"
+cat >"$_up_sb/bin/chezmoi" <<STUB
+#!/usr/bin/env bash
+printf '%s\n' "\$*" >"$_up_sb/chezmoi.args"
+# /dev/fd/0 -ef /dev/null is true only when stdin really is /dev/null,
+# not for a pipe, a file or a tty.
+if [ /dev/fd/0 -ef /dev/null ]; then echo CLOSED; else echo OPEN; fi >"$_up_sb/chezmoi.stdin"
+STUB
+cat >"$_up_sb/bin/nvim" <<STUB
+#!/usr/bin/env bash
+printf '%s\n' "\$*" >"$_up_sb/nvim.args"
+STUB
+chmod +x "$_up_sb/bin"/*
+
+test_start "upgrade_runs_steps_with_stdin_closed_and_chezmoi_no_tty"
+_up_out3="$(_up_run "$_up_sb/xdg")"
+if grep -q -- '--no-tty' "$_up_sb/chezmoi.args" 2>/dev/null &&
+  grep -qx 'CLOSED' "$_up_sb/chezmoi.stdin" 2>/dev/null; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: chezmoi gets --no-tty and no stdin"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: args=[$(cat "$_up_sb/chezmoi.args" 2>/dev/null)] stdin=[$(cat "$_up_sb/chezmoi.stdin" 2>/dev/null)]"
+  printf '%s\n' "$_up_out3" | sed 's/^/      /'
+fi
+
+# `nvim -l` skips init.lua, so the headless upgrade script found no
+# lazy.nvim and logged "skipping plugin update" on every run — the phase
+# was a silent no-op. -u must point at the user's init.lua and come
+# BEFORE -l, because -l ends nvim's option processing.
+test_start "upgrade_nvim_loads_user_init_before_script"
+_nv_args="$(cat "$_up_sb/nvim.args" 2>/dev/null || true)"
+case "$_nv_args" in
+  *"--headless -u $_up_sb/xdg/nvim/init.lua -l "*headless-upgrade.lua)
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: -u init.lua precedes -l"
+    ;;
+  *)
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: nvim args=[$_nv_args]"
+    ;;
+esac
+
+test_start "upgrade_nvim_skips_visibly_when_no_init"
+rm -f "$_up_sb/nvim.args"
+_up_out4="$(_up_run "$_up_sb/xdg-empty")"
+if [[ ! -e "$_up_sb/nvim.args" ]] &&
+  printf '%s\n' "$_up_out4" | grep -q 'Neovim plugins' &&
+  printf '%s\n' "$_up_out4" | grep -q 'no init.lua'; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: step reported as skipped, nvim not run"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected a visible skip without invoking nvim"
+  printf '%s\n' "$_up_out4" | sed 's/^/      /'
+fi
+
+test_start "upgrade_chezmoi_overwrite_prompt_surfaces_hint"
+cat >"$_up_sb/bin/chezmoi" <<'STUB'
+#!/usr/bin/env bash
+echo ".npmrc has changed since chezmoi last wrote it (diff/overwrite/all-overwrite/skip/quit)? chezmoi: .npmrc: EOF" >&2
+exit 1
+STUB
+_up_out5="$(_up_run "$_up_sb/xdg")"
+if printf '%s\n' "$_up_out5" | grep -q 'has changed since chezmoi last wrote it' &&
+  printf '%s\n' "$_up_out5" | grep -q "chezmoi update --force"; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: prompt failure explained with a fix"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: hint missing"
+  printf '%s\n' "$_up_out5" | sed 's/^/      /'
+fi
 rm -rf "$_up_sb"
 
 # ── dot keys ─────────────────────────────────────────────────────────
