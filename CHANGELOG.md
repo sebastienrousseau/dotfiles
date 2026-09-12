@@ -38,6 +38,22 @@ This file documents all notable changes to this project.
   third-party tooling or as "not actually WebAssembly": `docs/ECOSYSTEM.md`,
   `docs/architecture/REPO_LAYOUT.md`, `docs/STRUCTURE.md`,
   `docs/ARCHITECTURE.md`, `docs/reference/TOOLS.md` and `REUSE.toml`.
+- `dot upgrade` no longer hangs on a question nobody can see. Each phase's
+  output is captured to a log, so when `chezmoi update` met a locally edited
+  managed file it asked "has changed since chezmoi last wrote it?" on the
+  terminal's tty while the run looked merely slow. The step runner now closes
+  stdin and passes `--no-tty`, so the prompt fails fast, the step is marked
+  failed, and the surfaced tail names the fix (`chezmoi apply` to choose per
+  file, or `chezmoi update --force`).
+- `dot upgrade`'s Neovim phase actually syncs plugins. `nvim -l` does not
+  load `init.lua`, so `scripts/nvim/headless-upgrade.lua` never found
+  lazy.nvim and logged "skipping plugin update" on every run. The phase now
+  passes `-u` with the user's `init.lua` (honouring `XDG_CONFIG_HOME` and
+  `NVIM_APPNAME`) ahead of `-l`, and reports a visible skip when there is no
+  config to load.
+- `dot doctor` no longer warns about a missing `cargo-install-update` on a
+  machine that has no `cargo` for it to run through; the check now reports
+  "not needed" there and keeps warning where a Rust toolchain is present.
 
 ## v0.2.519 — 2026-08-13
 

@@ -1043,7 +1043,13 @@ test_fm_manual_offline_missing() {
   test_start "fm_manual_offline_missing_names_the_path"
   fm_expect_any "offline copy not found" "dotfiles.pdf"
   test_start "fm_manual_local_missing"
-  fm_run manual text --local
+  # --local resolves the build under the dispatcher's own source tree, so
+  # against the real checkout this depends on whether the developer has run
+  # tools/docs/build-manual.sh. Drive it through the sandbox repo copy, which
+  # carries no _build/, so the "missing" case is the one under test.
+  local repo
+  repo="$(fm_repo_copy)"
+  fm_run_bin "$repo/bin/dot" manual text --local
   fm_expect_rc 1
   test_start "fm_manual_local_missing_points_at_the_builder"
   fm_expect_any "local build not found" "build-manual.sh"
