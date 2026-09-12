@@ -13,6 +13,11 @@ This file documents all notable changes to this project.
   count read 1 on a fully synchronised machine. Those callers now pass
   `--exclude=always`; files, directories, symlinks and `run_once`/`run_onchange`
   scripts still count as drift.
+- markdown-preview.nvim no longer blocks `dot upgrade`'s plugin sync. Its build
+  step ran `cd app && npm install`, which rewrote the upstream `app/yarn.lock`
+  on every build and left the checkout dirty, so Lazy refused to update it.
+  The spec now uses upstream's `mkdp#util#install`, which downloads the
+  prebuilt preview server and leaves the checkout untouched.
 
 ## v0.2.520 — 2026-09-10
 
