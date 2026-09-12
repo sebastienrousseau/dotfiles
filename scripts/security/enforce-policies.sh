@@ -465,6 +465,24 @@ main() {
 
   check_dependencies
 
+  # Report what is installed and stop, without scanning.
+  #
+  # A full pass walks every tracked file and runs shellcheck over each tracked
+  # script — ~85s here. That is the right cost for a gate and the wrong cost
+  # for a caller that only wants to know whether the tooling is present, or a
+  # smoke test checking the command is wired up.
+  #
+  # The feature-matrix test got this for free from a bug: gitleaks and opa were
+  # fatal dependencies, so on a machine without them the script exited before
+  # doing any work. Fixing that turned a sub-second test into a full scan
+  # inside a 120s budget, and it began failing on the macOS runners. This is
+  # the same fast path, made deliberate and documented rather than accidental.
+  if [[ "${DOTFILES_POLICY_DEPS_ONLY:-0}" == "1" ]]; then
+    log "INFO" "Dependency check only (DOTFILES_POLICY_DEPS_ONLY=1); no scan performed"
+    ui_ok "Dependencies checked"
+    exit 0
+  fi
+
   local total_violations=0
 
   # Run all checks, recording each outcome for the report.
