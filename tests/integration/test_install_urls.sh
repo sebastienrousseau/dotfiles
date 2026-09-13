@@ -4,10 +4,13 @@
 # shellcheck disable=SC1090,SC1091
 # Integration tests for install URLs
 # Validates that documented install URLs are internally consistent and
-# reachable. Post default-branch rename from master → main, all URLs
-# should use /main/. During the rename grace period, /master/ is kept
-# alive by the mirror-main-to-master workflow, so either would resolve —
-# but the source-of-truth is /main/.
+# reachable. Post default-branch rename from master → main, all URLs use
+# /main/.
+#
+# The grace-period mirror that kept /master/ alive has been retired (#962),
+# so /master/ now 404s and is no longer an acceptable answer here. Accepting
+# it would mean this test could pass on a repository where /main/ was broken,
+# which is the one thing it exists to catch.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../" && pwd)}"
@@ -32,10 +35,9 @@ else
 fi
 
 # ── Verify install.sh URL is reachable ───────────────────────────────
-# The install URL on the current default branch must return HTTP 200.
-# Accepts either /main/ (post-rename source of truth) or /master/
-# (mirror kept alive during the grace period) so this test doesn't
-# flake in either state.
+# The install URL on the default branch must return HTTP 200. /master/ is
+# checked too, but only to report it — it is expected to 404 now that the
+# mirror is gone, and a 200 there would mean the branch came back.
 
 test_start "install_url_reachable"
 if command -v curl >/dev/null 2>&1; then
@@ -45,15 +47,15 @@ if command -v curl >/dev/null 2>&1; then
     "https://raw.githubusercontent.com/sebastienrousseau/dotfiles/master/install.sh" 2>/dev/null || true)
   main_code="${main_code:-000}"
   master_code="${master_code:-000}"
-  if [[ "$main_code" == "200" || "$master_code" == "200" ]]; then
+  if [[ "$main_code" == "200" ]]; then
     ((TESTS_PASSED++))
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: install.sh reachable (main=$main_code, master=$master_code)"
-  elif [[ "$main_code" == "000" && "$master_code" == "000" ]]; then
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: install.sh reachable on /main/ (master=$master_code, expected 404)"
+  elif [[ "$main_code" == "000" ]]; then
     ((TESTS_PASSED++))
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (network unavailable)"
   else
     ((TESTS_FAILED++))
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: neither /main/ nor /master/ install.sh returned 200 (main=$main_code, master=$master_code)"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: /main/ install.sh returned $main_code, want 200 (master=$master_code)"
   fi
 else
   ((TESTS_PASSED++))

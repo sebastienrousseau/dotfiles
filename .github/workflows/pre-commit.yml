@@ -7,9 +7,9 @@ name: Pre-Commit Hooks
 
 on:
   pull_request:
-    branches: [main, master]
+    branches: [main]
   push:
-    branches: [main, master]
+    branches: [main]
   merge_group:
 
 concurrency:

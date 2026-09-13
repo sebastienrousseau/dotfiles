@@ -19,12 +19,12 @@ name: Rust / dot-sys
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
     paths:
       - 'lib/wasm-tools/**'
       - '.github/workflows/rust.yml'
   pull_request:
-    branches: [main, master]
+    branches: [main]
     paths:
       - 'lib/wasm-tools/**'
       - '.github/workflows/rust.yml'
