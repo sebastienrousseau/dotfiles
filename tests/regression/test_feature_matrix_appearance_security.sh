@@ -169,7 +169,15 @@ test_fm_telemetry() {
 
 test_fm_policy() {
   test_start "fm_policy"
-  fm_run policy
+  # Deps-only: this row checks the command is wired up and reports, not that
+  # the workspace is clean. A full pass walks every tracked file and shellchecks
+  # every tracked script (~85s), which does not fit a smoke test with a 120s
+  # budget — it began failing on the macOS runners once the script stopped
+  # treating a missing opa as fatal and started actually scanning.
+  #
+  # The scan itself is covered by test_enforce_policies_fires.sh, which plants
+  # violations and asserts the specific check that catches each one.
+  DOTFILES_POLICY_DEPS_ONLY=1 fm_run policy
   # Exits non-zero when opa/gitleaks are absent, which is the environment
   # rather than a regression; what matters is the dependency check runs.
   fm_expect_rc_in 0 1

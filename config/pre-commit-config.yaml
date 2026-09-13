@@ -142,6 +142,21 @@ repos:
         args: ['--check']  # report drift; do not auto-format on commit
 
   # Custom security policy enforcement
+  #
+  # CI is the enforcement point, not this entry. The authoritative run is the
+  # `Security / Policy Script` job in .github/workflows/security-enhanced.yml,
+  # which provisions gitleaks/opa/shellcheck and runs the script with
+  # DOTFILES_POLICY_STRICT=1.
+  #
+  # This hook is opt-in and, as configured, does not fire: the repository
+  # installs hand-written .git/hooks via scripts/git-hooks/install.sh rather
+  # than pre-commit-managed ones, and those do not call pre-commit. To run it
+  # locally on push you must install pre-commit's own pre-push hook
+  # (`pre-commit install --hook-type pre-push`) — note that this REPLACES
+  # .git/hooks/pre-push, which currently enforces commit signatures and runs
+  # the quick reliability audit, so do it deliberately.
+  #
+  # Kept at pre-push rather than pre-commit because a full run is ~85s.
   - repo: local
     hooks:
       - id: security-policy-enforcement
