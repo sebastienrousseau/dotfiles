@@ -16,9 +16,9 @@ name: Docs / Links + REUSE
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
   schedule:
     # Mondays 06:00 UTC — the online pass.
     - cron: '0 6 * * 1'

@@ -11,7 +11,7 @@ name: dot-ui / Go Tests
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
     paths:
       - "defaults/dot_local/share/dot-ui/**"
       - ".github/workflows/dot-ui-test.yml"

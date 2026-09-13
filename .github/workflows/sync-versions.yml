@@ -9,7 +9,7 @@ on:
       - 'scripts/version-sync.sh'
       - 'docs/operations/VERSION_SYNC.md'
   pull_request:
-    branches: [main, master]
+    branches: [main]
     paths:
       - '**/*.md'
       - 'package.json'

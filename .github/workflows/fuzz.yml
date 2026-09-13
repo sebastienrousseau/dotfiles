@@ -22,7 +22,7 @@ name: Fuzz / Native Go harnesses
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
     paths:
       - 'lib/dot/utils.sh'

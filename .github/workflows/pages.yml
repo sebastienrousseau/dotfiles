@@ -13,7 +13,7 @@ name: Pages
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
     paths:
       - 'docs/**'
       - 'mkdocs.yml'

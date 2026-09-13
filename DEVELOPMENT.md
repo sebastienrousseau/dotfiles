@@ -252,8 +252,8 @@ make DESTDIR=/tmp/stage uninstall
 ### Maintenance-only
 
 `bump-reusable-pins.yml`, `update-deps.yml`, `drift-detection.yml`,
-`mirror-main-to-master.yml`, `devcontainer-prebuild.yml` — scheduled
-housekeeping with no local equivalent worth running by hand.
+`devcontainer-prebuild.yml` — scheduled housekeeping with no local
+equivalent worth running by hand.
 
 ---
 

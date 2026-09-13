@@ -11,7 +11,7 @@ name: Cockpit / Go Tests
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
     paths:
       - "defaults/dot_local/share/dot-ai-tui/**"
       - ".github/workflows/cockpit-test.yml"

@@ -15,7 +15,7 @@ name: MCP Server / Go Tests
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
     paths:
       - "defaults/dot_local/share/dot-mcp/**"
       - ".well-known/mcp/server-card.json"
