@@ -18,6 +18,7 @@ source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 SCRIPT_FILE="$REPO_ROOT/scripts/diagnostics/health.sh"
 REAL_BASH="${BASH:-$(command -v bash)}"
+REAL_JQ="$(command -v jq)"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
@@ -63,12 +64,13 @@ for t in fnm rustc go fzf rg fd bat eza zoxide atuin delta jq yq sops just \
   zellij hyperfine ghostty starship age fc-list gpg; do
   stub "$FULL_BIN" "$t"
 done
+ln -sf "$REAL_JQ" "$FULL_BIN/jq"
 stub "$FULL_BIN" node 'echo v24.15.0'
 stub "$FULL_BIN" python3 'echo "Python 3.13.2"'
 stub "$FULL_BIN" mise 'echo "2026.5.7"'
 stub "$FULL_BIN" nvim 'echo "NVIM v0.11.0"'
 stub "$FULL_BIN" zsh
-stub "$FULL_BIN" chezmoi 'case "${1:-}" in status) [[ -n "${FAKE_CHEZMOI_STATUS:-}" ]] && printf "%s\n" "$FAKE_CHEZMOI_STATUS" ;; esac'
+stub "$FULL_BIN" chezmoi 'case "${1:-}" in dump-config) printf "{\"age\":{\"identity\":\"%s\"}}\n" "${FAKE_AGE_IDENTITY:-}" ;; status) [[ -n "${FAKE_CHEZMOI_STATUS:-}" ]] && printf "%s\n" "$FAKE_CHEZMOI_STATUS" ;; esac'
 stub "$FULL_BIN" git '
 case "${1:-}" in
   config) [[ "${FAKE_GIT_CONFIG_FAIL:-0}" == "1" ]] && exit 1
@@ -178,6 +180,21 @@ assert_file_contains "$OUT" "Config directories" "config dir roll-up reported"
 
 test_start "fully_provisioned_environment_scores_high"
 if grep -qE "Excellent|Good!" "$OUT"; then _pass; else _fail "expected a high score band"; fi
+
+test_start "named_keys_are_detected_and_permissions_checked"
+new_home namedkeys
+mkdir -p "$SANDBOX_HOME/.ssh" "$SANDBOX_HOME/.config/chezmoi"
+touch "$SANDBOX_HOME/.ssh/rousseau-mba-m1" "$SANDBOX_HOME/.ssh/rousseau-mba-m1.pub" \
+  "$SANDBOX_HOME/.config/chezmoi/rousseau-mba-m1.agekey"
+chmod 600 "$SANDBOX_HOME/.ssh/rousseau-mba-m1"
+FAKE_AGE_IDENTITY="~/.config/chezmoi/rousseau-mba-m1.agekey" run_health "$FULL_BIN" --json
+assert_file_contains "$OUT" '"check":"Age key configured","status":"pass"' "configured age filename is recognized"
+assert_file_contains "$OUT" '"check":"SSH keys present","status":"pass"' "named SSH key is recognized"
+assert_file_contains "$OUT" '"check":"SSH key perms (rousseau-mba-m1)","status":"pass"' "named key permissions are checked"
+chmod 644 "$SANDBOX_HOME/.ssh/rousseau-mba-m1"
+FAKE_AGE_IDENTITY="~/.config/chezmoi/missing.agekey" run_health "$FULL_BIN" --json
+assert_file_contains "$OUT" '"check":"Age key configured","status":"warn"' "missing configured identity still warns"
+assert_file_contains "$OUT" '"check":"SSH key perms (rousseau-mba-m1)","status":"warn"' "insecure named key still warns"
 
 # ===========================================================================
 # 3. Config-directory partial state (found > 0 but < total).

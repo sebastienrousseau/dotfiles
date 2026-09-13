@@ -344,7 +344,12 @@ check_security() {
 
   if has_command age; then
     check "Age encryption" "pass"
-    if [[ -f "${HOME}/.config/chezmoi/key.txt" ]]; then
+    local age_identity="${HOME}/.config/chezmoi/key.txt" configured_identity=""
+    if has_command chezmoi && has_command jq; then
+      configured_identity=$(chezmoi dump-config --format=json 2>/dev/null | jq -r '.age.identity // empty' 2>/dev/null || true)
+      [[ -z "$configured_identity" ]] || age_identity="${configured_identity/#\~/$HOME}"
+    fi
+    if [[ -f "$age_identity" ]]; then
       check "Age key configured" "pass"
     else
       check "Age key configured" "warn" "Key not found"
@@ -353,14 +358,27 @@ check_security() {
     check "Age encryption" "warn" "Not installed"
   fi
 
-  if [[ -f "${HOME}/.ssh/id_ed25519" ]] || [[ -f "${HOME}/.ssh/id_rsa" ]]; then
+  local -a ssh_keys=("$HOME/.ssh/id_ed25519" "$HOME/.ssh/id_rsa" "$HOME/.ssh/id_ed25519_sk")
+  local public_key key existing_key keys_found=false
+  for public_key in "$HOME/.ssh/"*.pub; do
+    [[ -f "$public_key" && -f "${public_key%.pub}" ]] || continue
+    key="${public_key%.pub}"
+    for existing_key in "${ssh_keys[@]}"; do
+      [[ "$existing_key" != "$key" ]] || continue 2
+    done
+    ssh_keys+=("$key")
+  done
+  for key in "${ssh_keys[@]}"; do
+    [[ ! -f "$key" ]] || keys_found=true
+  done
+  if $keys_found; then
     check "SSH keys present" "pass"
   else
     check "SSH keys present" "warn" "No keys found"
   fi
 
   # Check SSH key permissions
-  for key in "$HOME/.ssh/id_ed25519" "$HOME/.ssh/id_rsa" "$HOME/.ssh/id_ed25519_sk"; do
+  for key in "${ssh_keys[@]}"; do
     if [[ -f "$key" ]]; then
       local perms
       # Same hazard as node_version above: if BOTH stat spellings fail (a

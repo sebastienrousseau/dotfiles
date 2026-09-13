@@ -197,7 +197,7 @@ cmd_ai_status() {
   done
 
   # Offer to install missing providers via mise
-  if [[ ${#missing[@]} -gt 0 ]] && has_command mise; then
+  if [[ ${#missing[@]} -gt 0 ]] && has_command mise && [[ -t 0 && -t 1 ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]]; then
     echo ""
     local _ai_install_action=""
     if has_command gum; then
@@ -297,6 +297,8 @@ cmd_ai_status() {
   echo ""
   if [ ${#installed[@]} -eq 0 ]; then
     ui_warn "No AI CLIs installed"
+  elif [[ ! -t 0 || ! -t 1 || "${DOTFILES_NONINTERACTIVE:-0}" == "1" ]]; then
+    return 0
   elif has_command gum; then
     ui_info "Launch" "Select an AI CLI to start"
     local -a choices=()

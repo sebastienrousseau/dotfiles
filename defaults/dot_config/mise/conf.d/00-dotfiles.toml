@@ -159,7 +159,7 @@ MISE_EXPERIMENTAL = "1"
 GITHUB_TOKEN = "{{exec(command='gh auth token 2>/dev/null || true')}}"
 # Build caches → /tmp (cleared on reboot)
 GOCACHE = "/tmp/builds/go-cache"
-GOTMPDIR = "/tmp/builds/go-tmp"
+# Go uses the system temporary directory; custom GOTMPDIR must already exist.
 PIP_CACHE_DIR = "/tmp/builds/pip-cache"
 UV_CACHE_DIR = "/tmp/builds/uv-cache"
 ZIG_LOCAL_CACHE_DIR = "/tmp/builds/zig-cache"

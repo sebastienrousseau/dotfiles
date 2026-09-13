@@ -31,7 +31,7 @@ _ai_mise_pkg() {
     cursor-agent) echo "" ;;
     grok) echo "" ;;
     aider) echo "pipx:aider-chat" ;;
-    opencode) echo "npm:opencode-ai" ;;
+    opencode) echo "opencode" ;;
     sgpt) echo "pipx:shell-gpt" ;;
     agy) echo "" ;;
     kimi) echo "" ;;

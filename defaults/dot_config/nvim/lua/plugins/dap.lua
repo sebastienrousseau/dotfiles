@@ -143,8 +143,7 @@ return {
         else
           cb({
             type = "executable",
-            command = vim.fn.exepath("python3"),
-            args = { "-m", "debugpy.adapter" },
+            command = vim.fn.stdpath("data") .. "/mason/bin/debugpy-adapter",
           })
         end
       end
@@ -346,9 +345,10 @@ return {
     "jay-babu/mason-nvim-dap.nvim",
     dependencies = { "williamboman/mason.nvim", "mfussenegger/nvim-dap" },
     opts = {
-      ensure_installed = { "js-debug-adapter", "debugpy", "delve", "codelldb", "bash-debug-adapter" },
-      automatic_installation = true,
-      handlers = {},
+      ensure_installed = { "js", "python", "delve", "codelldb", "bash" },
+      automatic_installation = false,
+      -- Adapters and launch configurations are defined above.
+      handlers = nil,
     },
   },
 

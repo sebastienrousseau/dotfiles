@@ -25,6 +25,8 @@ REAL_UNAME="$(command -v uname)"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
+# Colour and picker scenarios control NO_COLOR explicitly.
+unset NO_COLOR
 BIN="$DOTFILES_COV_TMPDIR/bin"
 WORK="$DOTFILES_COV_TMPDIR/work"
 mkdir -p "$WORK"
