@@ -22,8 +22,8 @@ _ai_deprecated() {
 _ai_invoke_provider() {
   local tool="$1" full_prompt="$2" rc=0
   case "$tool" in
-    cl | claude) printf "%s" "$full_prompt" | claude || rc=$? ;;
-    codex) printf "%s" "$full_prompt" | codex || rc=$? ;;
+    cl | claude) printf "%s" "$full_prompt" | claude --print || rc=$? ;;
+    codex) printf "%s" "$full_prompt" | codex exec - || rc=$? ;;
     copilot) copilot -sp "$full_prompt" || rc=$? ;;
     agy) printf "%s" "$full_prompt" | agy chat || rc=$? ;;
     goose) goose run -t "$full_prompt" || rc=$? ;;
@@ -34,13 +34,13 @@ _ai_invoke_provider() {
     kimi) kimi -p "$full_prompt" --quiet || rc=$? ;;
     kiro | kiro-cli) printf "%s" "$full_prompt" | kiro-cli chat || rc=$? ;;
     sgpt) printf "%s" "$full_prompt" | sgpt --chat shell-gpt || rc=$? ;;
-    ollama) printf "%s" "$full_prompt" | ollama run llama3.2 || rc=$? ;;
-    opencode) printf "%s" "$full_prompt" | opencode query || rc=$? ;;
-    aider) printf "%s" "$full_prompt" | aider --msg "-" || rc=$? ;;
-    autohand) printf "%s" "$full_prompt" | autohand chat || rc=$? ;;
-    vibe) printf "%s" "$full_prompt" | vibe chat || rc=$? ;;
-    qwen) printf "%s" "$full_prompt" | qwen chat || rc=$? ;;
-    zai) printf "%s" "$full_prompt" | zai chat || rc=$? ;;
+    ollama) printf "%s" "$full_prompt" | ollama run "${DOTFILES_OLLAMA_MODEL:-qwen3.5:4b}" || rc=$? ;;
+    opencode) opencode run "$full_prompt" || rc=$? ;;
+    aider) aider --message "$full_prompt" || rc=$? ;;
+    autohand) autohand --prompt "$full_prompt" || rc=$? ;;
+    vibe) vibe --prompt "$full_prompt" || rc=$? ;;
+    qwen) qwen --prompt "$full_prompt" || rc=$? ;;
+    zai) zai --prompt "$full_prompt" || rc=$? ;;
     *)
       ui_err "Unsupported tool" "$tool"
       return 2
@@ -121,6 +121,9 @@ cmd_ai_chat() {
   if ! has_command "$bin"; then
     ui_err "$tool" "not installed — run 'dot ai tools' to install"
     return 1
+  fi
+  if [[ "$bin" == "ollama" ]]; then
+    exec ollama run "${DOTFILES_OLLAMA_MODEL:-qwen3.5:4b}"
   fi
   exec "$bin"
 }

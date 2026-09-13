@@ -408,7 +408,7 @@ _expect "s2_linux_wsl_platform" \
 _expect "s2_tool_resolution" \
   "[OK] starship" "/usr/bin/starship/starship (system)" "[WARN] fish" "[OK] zsh" \
   "[WARN] nu" "[OK] bat" "(batcat)" "[FAIL] chezmoi" "[OK] nix optional (not installed)" "[FAIL] sops" \
-  "[OK] pueue daemon" "started" "[WARN] claude"
+  "[OK] pueue daemon" "started" "[INFO] claude optional (not installed)"
 _expect "s2_environment_and_state" \
   "[WARN] XDG_CONFIG_HOME" "[WARN] XDG_DATA_HOME" "not absolute: relative/data" \
   "[WARN] PIPX_HOME" "[FAIL] chezmoi" "drifted" "[FAIL] .zshrc" "[OK] dot" \
@@ -574,7 +574,7 @@ assert_equals 1 "$DOC_RC" "missing core tools exit 1"
 _expect "s5_unknown_os_fallback" \
   "FreeBSD 6.1.0" "Host: unknown" "CPU: x86_64 (?)" "Packages: n/a" \
   "DE: n/a" "[FAIL] zsh" "[WARN] fish" "[FAIL] starship" "[WARN] nu" \
-  "[FAIL] rg" "[OK] nix" "optional (not installed)" "[FAIL] age" "[WARN] claude" \
+  "[FAIL] rg" "[OK] nix" "optional (not installed)" "[FAIL] age" "[INFO] claude optional (not installed)" \
   "[FAIL] chezmoi" "[FAIL] .zshrc" "[FAIL] dot" "[WARN] antigravity" \
   "[FAIL] fish_plugins" "[OK] cargo-install-update" "not needed (cargo not installed)" \
   "[OK] symlinks" "[WARN] portability" "[OK] shell caches" "[OK] PATH length" \

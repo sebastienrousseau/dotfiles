@@ -26,6 +26,7 @@ exec 21>&2
 export BASH_XTRACEFD=21
 
 AI_SCRIPT="$REPO_ROOT/scripts/dot/commands/ai.sh"
+REAL_PYTHON="$(command -v python3)"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
@@ -124,10 +125,40 @@ run_ai() {
   rm -f "$CACHE"
   : >"$CALLS"
   set +e
-  OUT="$(PATH="$p" bash "$AI_SCRIPT" "$@" 2>&1 </dev/null)"
+  if [[ "${AI_TEST_TTY:-0}" == "1" ]]; then
+    OUT="$(
+      PATH="$p" "$REAL_PYTHON" - "$REAL_BASH" "$AI_SCRIPT" "$@" <<'PYTTY'
+import errno
+import os
+import pty
+import sys
+
+pid, fd = pty.fork()
+if pid == 0:
+    os.execv(sys.argv[1], sys.argv[1:])
+while True:
+    try:
+        data = os.read(fd, 65536)
+    except OSError as exc:
+        if exc.errno == errno.EIO:
+            break
+        raise
+    if not data:
+        break
+    sys.stdout.buffer.write(data.replace(b"\r\n", b"\n"))
+os.close(fd)
+_, status = os.waitpid(pid, 0)
+sys.exit(os.waitstatus_to_exitcode(status))
+PYTTY
+    )"
+  else
+    OUT="$(PATH="$p" bash "$AI_SCRIPT" "$@" 2>&1 </dev/null)"
+  fi
   RC=$?
   set -e
 }
+
+AI_TEST_TTY=1
 
 # ── `dot ai tools`: missing providers, gum "Install all" ────────────
 test_start "ai_tools_install_all_via_gum"
@@ -148,7 +179,7 @@ GUM_MISSING="Choose which to install" GUM_PICK='Codex CLI\nOpenCode' \
   run_ai "$GUM:$MISE:$BASE_PATH" ai tools
 assert_equals 0 "$RC" "choose-which flow exits 0"
 assert_file_contains "$CALLS" "npm:@openai/codex@latest" "picked codex installed"
-assert_file_contains "$CALLS" "npm:opencode-ai@latest" "picked opencode installed"
+assert_file_contains "$CALLS" "opencode@latest" "picked opencode installed"
 if grep -q 'aider' "$CALLS"; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: unpicked provider must not be installed"
@@ -185,6 +216,17 @@ assert_equals 0 "$RC" "launcher tip exits 0"
 assert_contains "Install gum for interactive launcher" "$OUT" "gum launcher tip"
 assert_file_exists "$CACHE" "status cache written"
 assert_file_contains "$CACHE" "claude" "cache lists the probed tool"
+
+AI_TEST_TTY=0
+
+test_start "ai_status_without_tty_never_installs_or_launches"
+GUM_MISSING="Install all" GUM_LAUNCH="Claude Code" \
+  run_ai "$TOOLS:$GUM:$MISE:$BASE_PATH" ai tools
+assert_equals 0 "$RC" "non-interactive status exits successfully"
+assert_contains "Claude Code" "$OUT" "status is still reported"
+assert_false "grep -q 'mise use' '$CALLS'" "non-interactive status cannot install tools"
+assert_false "[[ \"\$OUT\" == *'Select an AI CLI'* ]]" "no terminal picker is offered"
+assert_false "[[ \"\$OUT\" == *'claude-ran'* ]]" "no agent is launched"
 
 # ── `dot ai tools install <tool>` verb ─────────────────────────────
 test_start "ai_tools_install_verb"

@@ -4,22 +4,7 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
-### Fixed
-
-- `dot doctor`, `dot health`, `dot fleet`, the scorecard and the drift dashboard
-  no longer report permanent drift on macOS. The iCloud symlink hook is a
-  `run_before_` script that chezmoi lists as pending on every apply by design,
-  which made plain `chezmoi verify` exit 1 and every `chezmoi status` line
-  count read 1 on a fully synchronised machine. Those callers now pass
-  `--exclude=always`; files, directories, symlinks and `run_once`/`run_onchange`
-  scripts still count as drift.
-- markdown-preview.nvim no longer blocks `dot upgrade`'s plugin sync. Its build
-  step ran `cd app && npm install`, which rewrote the upstream `app/yarn.lock`
-  on every build and left the checkout dirty, so Lazy refused to update it.
-  The spec now uses upstream's `mkdp#util#install`, which downloads the
-  prebuilt preview server and leaves the checkout untouched.
-
-## v0.2.520 — 2026-09-10
+## v0.2.520 — 2026-09-13
 
 ### Added
 
@@ -93,6 +78,32 @@ This file documents all notable changes to this project.
   fused into the existing dedup pass rather than added as a second walk.
 
 ### Fixed
+
+- AI provider dispatch now uses the installed CLIs' prompt modes; OpenCode
+  installs through its native mise backend. Noninteractive status checks no
+  longer open terminal pickers. Reviewed upstream installer checksums are refreshed.
+- Ollama prompts and interactive chat default to `qwen3.5:4b`; set
+  `DOTFILES_OLLAMA_MODEL` to select another downloaded model.
+- Neovim configures the current Treesitter and mason-lspconfig APIs, preserves
+  custom debugger configurations, and uses Mason's Python debug adapter.
+- Health checks recognize named SSH key pairs and the configured age identity;
+  doctor includes Codex and reports absent optional AI providers as information.
+- Homebrew's rustup is available in the shared shell and Fish paths. Go uses
+  its system temporary directory instead of a potentially missing custom directory.
+- Terminal test fixtures explicitly control `NO_COLOR`.
+
+- `dot doctor`, `dot health`, `dot fleet`, the scorecard and the drift dashboard
+  no longer report permanent drift on macOS. The iCloud symlink hook is a
+  `run_before_` script that chezmoi lists as pending on every apply by design,
+  which made plain `chezmoi verify` exit 1 and every `chezmoi status` line
+  count read 1 on a fully synchronised machine. Those callers now pass
+  `--exclude=always`; files, directories, symlinks and `run_once`/`run_onchange`
+  scripts still count as drift.
+- markdown-preview.nvim no longer blocks `dot upgrade`'s plugin sync. Its build
+  step ran `cd app && npm install`, which rewrote the upstream `app/yarn.lock`
+  on every build and left the checkout dirty, so Lazy refused to update it.
+  The spec now uses upstream's `mkdp#util#install`, which downloads the
+  prebuilt preview server and leaves the checkout untouched.
 
 - Replaced the destructive mechanism behind the macOS iCloud symlink hook. The
   previous implementation could remove real content from `~/Documents` and

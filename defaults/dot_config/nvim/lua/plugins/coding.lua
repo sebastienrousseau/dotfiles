@@ -9,32 +9,52 @@ return {
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
-    event = { "BufReadPost", "BufNewFile" },
+    lazy = false,
     config = function()
-      -- Use correct module path (configs)
-      local ok, ts_config = pcall(require, "nvim-treesitter.configs")
-      if not ok then
-        -- Treesitter not installed yet, skip configuration
+      local languages = {
+        "python",
+        "go",
+        "markdown",
+        "markdown_inline",
+        "json",
+        "toml",
+        "yaml",
+        "bash",
+        "vim",
+        "vimdoc",
+        "regex",
+        "lua",
+        "rust",
+        "dockerfile",
+        "javascript",
+        "typescript",
+        "tsx",
+        "html",
+        "css",
+      }
+      local ok, legacy = pcall(require, "nvim-treesitter.configs")
+      if ok then
+        legacy.setup({
+          ensure_installed = languages,
+          highlight = { enable = true },
+          indent = { enable = true },
+        })
         return
       end
 
-      ts_config.setup({
-        ensure_installed = {
-          "python",
-          "go",
-          "markdown",
-          "json",
-          "toml",
-          "yaml",
-          "bash",
-          "vim",
-          "regex",
-          "lua",
-          "rust",
-          "dockerfile",
-        },
-        highlight = { enable = true },
-        indent = { enable = true },
+      local treesitter = require("nvim-treesitter")
+      treesitter.setup({})
+      treesitter.install(languages)
+      vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("DotfilesTreesitter", { clear = true }),
+        callback = function(event)
+          local lang = vim.treesitter.language.get_lang(vim.bo[event.buf].filetype)
+          local loaded, available = pcall(vim.treesitter.language.add, lang or "")
+          if lang and loaded and available then
+            vim.treesitter.start(event.buf, lang)
+            vim.bo[event.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          end
+        end,
       })
     end,
   },

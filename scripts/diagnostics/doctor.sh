@@ -169,11 +169,11 @@ fi
 
 # --- AI CLIs ---
 _section "AI CLIs"
-for cmd in claude copilot kimi agy sgpt ollama opencode aider kiro-cli; do
+for cmd in codex claude copilot kimi agy sgpt ollama opencode aider kiro-cli; do
   if check_cmd "$cmd"; then
     _ok "$cmd" "$(pretty_path "$(get_cmd_path "$cmd")")"
   else
-    _warn "$cmd" "optional"
+    ui_info "$cmd" "optional (not installed)"
   fi
 done
 
