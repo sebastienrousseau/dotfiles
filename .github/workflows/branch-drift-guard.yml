@@ -1,0 +1,105 @@
+# SPDX-FileCopyrightText: 2026 Sebastien Rousseau <sebastian.rousseau@gmail.com>
+# SPDX-License-Identifier: GPL-3.0-only
+
+name: Branch Drift Guard
+
+# Long-lived branches must not silently drift away from `main`.
+#
+# On 2026-09-17, `feat/v0.2.503` was found 140 commits behind `main` and 225
+# ahead, diverged since 2026-05-17. Merging `main` into it produced **322
+# conflict hunks across 180 files**, 63 of them whole-file add/add decisions.
+# Neither line was abandoned — both were averaging ~90 commits a month — so the
+# cost was not a stalled branch, it was two live branches quietly growing a
+# reconciliation nobody had budgeted for.
+#
+# PR #1031 had already written the plan down in August ("land only after rebase
+# absorbs the 84 downstream main fixes"). By September the 84 was 140. Writing
+# the plan down is not the same as it happening, which is what this job is for.
+#
+# It does not merge anything. It measures the gap and fails once the gap is
+# large enough that reconciliation stops being routine — early enough that it
+# is still a small job.
+
+on:
+  schedule:
+    # Mondays, 07:00 UTC. Weekly is the right cadence: daily would be noise,
+    # monthly is how 84 became 140.
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to check against main'
+        required: false
+        default: 'feat/v0.2.503'
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    name: Long-lived branches are not drifting
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          show-progress: false
+
+      - name: Measure the gap
+        id: measure
+        env:
+          BRANCH: ${{ github.event.inputs.branch || 'feat/v0.2.503' }}
+          # Behind-count at which this starts failing. 40 is about a fortnight
+          # at this repository's rate; 140 was four months and 322 hunks.
+          MAX_BEHIND: '40'
+        run: |
+          set -euo pipefail
+
+          if ! git show-ref --verify --quiet "refs/remotes/origin/${BRANCH}"; then
+            echo "Branch ${BRANCH} no longer exists — nothing to guard."
+            echo "gone=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          behind=$(git rev-list --count "origin/${BRANCH}..origin/main")
+          ahead=$(git rev-list --count "origin/main..origin/${BRANCH}")
+          base=$(git merge-base "origin/main" "origin/${BRANCH}")
+          since=$(git log -1 --format=%cs "$base")
+
+          {
+            echo "### Branch drift: \`${BRANCH}\`"
+            echo ""
+            echo "| | |"
+            echo "| --- | --- |"
+            echo "| behind \`main\` | ${behind} |"
+            echo "| ahead of \`main\` | ${ahead} |"
+            echo "| diverged since | ${since} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # A dry-run merge in a scratch worktree gives the number that actually
+          # matters: what reconciling costs today. It is never committed.
+          git worktree add -q --detach /tmp/drift "origin/${BRANCH}"
+          conflicts=0
+          if ! git -C /tmp/drift -c merge.verifySignatures=false \
+                 merge --no-commit --no-ff origin/main >/dev/null 2>&1; then
+            conflicts=$(git -C /tmp/drift diff --name-only --diff-filter=U | wc -l | tr -d ' ')
+            git -C /tmp/drift merge --abort || true
+          fi
+          git worktree remove --force /tmp/drift || true
+
+          echo "| conflicting files if merged today | ${conflicts} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "behind=${behind}" >> "$GITHUB_OUTPUT"
+          echo "conflicts=${conflicts}" >> "$GITHUB_OUTPUT"
+
+          if [ "${behind}" -gt "${MAX_BEHIND}" ]; then
+            echo "::error::${BRANCH} is ${behind} commits behind main (limit ${MAX_BEHIND}), and merging main into it today would conflict in ${conflicts} file(s). Sync it now — the cost only goes up. See CONTRIBUTING.md, 'Long-lived branches'."
+            exit 1
+          fi
+
+          echo "${BRANCH} is ${behind} commits behind main — within the ${MAX_BEHIND} limit."
