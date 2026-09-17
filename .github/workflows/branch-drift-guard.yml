@@ -81,14 +81,32 @@ jobs:
 
           # A dry-run merge in a scratch worktree gives the number that actually
           # matters: what reconciling costs today. It is never committed.
-          git worktree add -q --detach /tmp/drift "origin/${BRANCH}"
-          conflicts=0
-          if ! git -C /tmp/drift -c merge.verifySignatures=false \
-                 merge --no-commit --no-ff origin/main >/dev/null 2>&1; then
-            conflicts=$(git -C /tmp/drift diff --name-only --diff-filter=U | wc -l | tr -d ' ')
-            git -C /tmp/drift merge --abort || true
+          #
+          # The output is captured rather than discarded. The first version of
+          # this job sent it to /dev/null, and when the merge failed *without*
+          # producing conflicts it reported "0 conflicting files" — a confident
+          # wrong number, which is worse than no number. A dry run that cannot
+          # run now says so.
+          conflicts="unknown"
+          if git worktree add -q --detach /tmp/drift "origin/${BRANCH}" 2>/tmp/wt.err; then
+            if git -C /tmp/drift -c merge.verifySignatures=false \
+                 merge --no-commit --no-ff origin/main >/tmp/merge.out 2>&1; then
+              conflicts=0
+            else
+              unmerged=$(git -C /tmp/drift diff --name-only --diff-filter=U | wc -l | tr -d ' ')
+              if [ "$unmerged" -gt 0 ]; then
+                conflicts="$unmerged"
+              else
+                echo "::warning::Dry-run merge could not be completed; conflict count unavailable."
+                sed 's/^/    /' /tmp/merge.out | head -20
+              fi
+              git -C /tmp/drift merge --abort 2>/dev/null || true
+            fi
+            git worktree remove --force /tmp/drift || true
+          else
+            echo "::warning::Could not create the scratch worktree; conflict count unavailable."
+            sed 's/^/    /' /tmp/wt.err | head -10
           fi
-          git worktree remove --force /tmp/drift || true
 
           echo "| conflicting files if merged today | ${conflicts} |" >> "$GITHUB_STEP_SUMMARY"
           echo "behind=${behind}" >> "$GITHUB_OUTPUT"
@@ -96,7 +114,11 @@ jobs:
 
           if [ "${behind}" -gt "${MAX_BEHIND}" ]; then
             msg="${BRANCH} is ${behind} commits behind main (limit ${MAX_BEHIND})."
-            msg="${msg} Merging main into it today would conflict in ${conflicts} file(s)."
+            if [ "${conflicts}" = "unknown" ]; then
+              msg="${msg} (The dry-run merge could not be measured — see the warning above.)"
+            else
+              msg="${msg} Merging main into it today would conflict in ${conflicts} file(s)."
+            fi
             msg="${msg} Sync it now — the cost only goes up."
             msg="${msg} See CONTRIBUTING.md, 'Long-lived branches'."
             echo "::error::${msg}"
