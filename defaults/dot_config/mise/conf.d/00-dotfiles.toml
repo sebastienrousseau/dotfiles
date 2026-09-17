@@ -19,6 +19,8 @@ activate_aggressive = true
 verbose = false
 # Use precompiled ruby binaries (silences 2026.8.0 warning)
 ruby.compile = false
+# Tolerate slow crates.io/index responses (default 20s is too tight)
+fetch_remote_versions_timeout = "60s"
 
 [tools]
 # Node.js
