@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Sebastien Rousseau <sebastian.rousseau@gmail.com>
-# SPDX-License-Identifier: GPL-3.0-only
-
 name: Branch Drift Guard
 
 # Long-lived branches must not silently drift away from `main`.
@@ -98,7 +95,11 @@ jobs:
           echo "conflicts=${conflicts}" >> "$GITHUB_OUTPUT"
 
           if [ "${behind}" -gt "${MAX_BEHIND}" ]; then
-            echo "::error::${BRANCH} is ${behind} commits behind main (limit ${MAX_BEHIND}), and merging main into it today would conflict in ${conflicts} file(s). Sync it now — the cost only goes up. See CONTRIBUTING.md, 'Long-lived branches'."
+            msg="${BRANCH} is ${behind} commits behind main (limit ${MAX_BEHIND})."
+            msg="${msg} Merging main into it today would conflict in ${conflicts} file(s)."
+            msg="${msg} Sync it now — the cost only goes up."
+            msg="${msg} See CONTRIBUTING.md, 'Long-lived branches'."
+            echo "::error::${msg}"
             exit 1
           fi
 

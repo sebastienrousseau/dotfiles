@@ -84,7 +84,7 @@ A branch that outlives a single pull request has to be merged from `main` on a
 cadence, not "before it lands". The cost of reconciling is not linear in time —
 it compounds, because both lines keep editing the same files.
 
-`feat/v0.2.503` is the worked example. PR #1031 wrote the plan down in August:
+The long-lived `feat/v0.2.5xx` release line is the worked example. PR #1031 wrote the plan down in August:
 land it *after* a rebase absorbs the 84 `main` fixes it was behind. That rebase
 did not happen. By September it was **140 behind and 225 ahead**, and merging
 `main` into it produced **322 conflict hunks across 180 files**, 63 of them
@@ -95,7 +95,7 @@ The `Branch Drift Guard` workflow now fails once a tracked branch is more than
 40 commits behind `main` — roughly a fortnight here. If it fails:
 
 ```sh
-git checkout feat/v0.2.503
+git checkout <the long-lived branch>
 git merge origin/main      # resolve, then push
 ```
 
