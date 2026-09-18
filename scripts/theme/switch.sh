@@ -1215,7 +1215,12 @@ EOF
     fi
     current_family="${current%-dark}"
     [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
-    mapfile -t families < <(paired_families)
+    # Not `mapfile -t`: that is bash 4 only, and macOS ships bash 3.2 as
+    # /bin/bash. tests/unit/shell/test_bash32_portability.sh gates on it.
+    families=()
+    while IFS= read -r _fam; do
+      [[ -n "$_fam" ]] && families+=("$_fam")
+    done < <(paired_families)
     if [[ ${#families[@]} -eq 0 ]]; then
       ui_err "No themes" "run 'dot theme rebuild' first"
       exit 1
