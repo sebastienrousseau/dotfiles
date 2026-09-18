@@ -221,7 +221,7 @@ All of the following criteria must be satisfied for this V&V report to remain va
 
 - [ISO 13485:2016](https://www.iso.org/standard/59752.html) — Medical devices, Quality management systems
 - [ISO 27001:2022](https://www.iso.org/standard/27001) — Information security management
-- [SOC 2 Type II](https://www.aicpa.org/soc2) — Trust Services Criteria
+- [SOC 2 Type II](https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc-2) — Trust Services Criteria
 - [SLSA Framework](https://slsa.dev/) — Supply chain Levels for Software Artifacts
 - [ShellCheck](https://www.shellcheck.net/) — Static analysis for shell scripts
 - [Gitleaks](https://gitleaks.io/) — Secrets detection

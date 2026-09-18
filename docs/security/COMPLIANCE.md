@@ -450,7 +450,7 @@ grep "text=auto" .gitattributes && echo "OK"
 
 ## References
 
-- [SOC 2 Type II](https://www.aicpa.org/soc2)
+- [SOC 2 Type II](https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc-2)
 - [ISO 27001:2022](https://www.iso.org/standard/27001)
 - [OWASP Top 10](https://owasp.org/Top10/)
 - [Google Shell Style Guide](https://google.github.io/styleguide/shellguide.html)

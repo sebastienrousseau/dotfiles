@@ -16,7 +16,7 @@ Under the hood the plugin invokes `dot init <owner/repo>` so every install runs 
 
 ## Status
 
-**Scaffold.** This is a vendored copy of the upcoming `jdx/mise-plugin-dot` external repo. Once the maintainer extracts it to its own GitHub repo and submits a PR to [`mise-en-place/registry`](https://github.com/mise-en-place/registry), `mise install dot@<spec>` becomes a one-line install for any user on any platform mise supports.
+**Scaffold.** This is a vendored copy of the upcoming `jdx/mise-plugin-dot` external repo. Once the maintainer extracts it to its own GitHub repo and submits a PR to [`mise-en-place/registry`](https://mise.jdx.dev/registry.html), `mise install dot@<spec>` becomes a one-line install for any user on any platform mise supports.
 
 This vendored copy exists so:
 
@@ -40,7 +40,7 @@ This vendored copy exists so:
 ## Adoption path (the section worth reading)
 
 1. Maintainer extracts this directory to `github.com/sebastienrousseau/mise-plugin-dot`.
-2. Maintainer opens a PR to [`mise-en-place/registry`](https://github.com/mise-en-place/registry) adding the plugin entry.
+2. Maintainer opens a PR to [`mise-en-place/registry`](https://mise.jdx.dev/registry.html) adding the plugin entry.
 3. Once merged, `mise install dot@latest` works for every mise user globally.
 4. devtools.fm episode pitch sent to Jeff Dickey (per [ROADMAP_2026 §E1](https://github.com/sebastienrousseau/dotfiles/blob/main/docs/operations/ROADMAP_2026.md)).
 
