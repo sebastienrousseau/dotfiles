@@ -12,19 +12,21 @@
 # reference machine (2026-08-29): ~4300ms. 3.5x headroom is
 # intentional — CI runners are slower and network calls in the man-
 # page lint step add variance.
+set -euo pipefail
+
 # shellcheck disable=SC1090,SC1091,SC2034
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
-source "$SCRIPT_DIR/../framework/assertions.sh"
-source "$SCRIPT_DIR/../framework/cmd_test_helpers.sh"
+REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+source "$REPO_ROOT/tests/framework/assertions.sh"
+source "$REPO_ROOT/tests/framework/cmd_test_helpers.sh"
 
 GATES=(
   tests/unit/commands/test_cli_docs_sync.sh
   tests/unit/commands/test_cli_route_integrity.sh
   tests/unit/commands/test_cli_help_coverage.sh
   tests/unit/theme/test_theme_docs_sync.sh
-  tests/performance/coverage_dot_cli.sh
-  tests/performance/coverage_dot_theme.sh
+  benches/coverage_dot_cli.sh
+  benches/coverage_dot_theme.sh
 )
 
 THRESHOLD_MS="${RATCHET_WALL_CLOCK_MS:-15000}"
@@ -45,7 +47,7 @@ fi
 test_start "individual_gate_pass_rates"
 fail_summary=()
 for g in "${GATES[@]}"; do
-  out="$(bash "$REPO_ROOT/$g" 2>&1)"
+  out="$(bash "$REPO_ROOT/$g" 2>&1 || true)"
   # Coverage tools don't emit RESULTS: — probe them via exit code
   # (they set MIN_COVERAGE gate) and skip the pass-rate check.
   if [[ "$g" == *"coverage_dot_"* ]]; then
@@ -70,7 +72,7 @@ fi
 test_start "total_wall_clock_under_threshold_${THRESHOLD_MS}ms"
 start_ns=$(date +%s%N)
 for g in "${GATES[@]}"; do
-  MIN_COVERAGE=100 bash "$REPO_ROOT/$g" >/dev/null 2>&1
+  MIN_COVERAGE=100 bash "$REPO_ROOT/$g" >/dev/null 2>&1 || true
 done
 end_ns=$(date +%s%N)
 elapsed_ms=$(( (end_ns - start_ns) / 1000000 ))
@@ -85,7 +87,7 @@ test_start "per_gate_under_5s_each"
 slow=()
 for g in "${GATES[@]}"; do
   start_ns=$(date +%s%N)
-  MIN_COVERAGE=100 bash "$REPO_ROOT/$g" >/dev/null 2>&1
+  MIN_COVERAGE=100 bash "$REPO_ROOT/$g" >/dev/null 2>&1 || true
   end_ns=$(date +%s%N)
   ms=$(( (end_ns - start_ns) / 1000000 ))
   if (( ms > 5000 )); then

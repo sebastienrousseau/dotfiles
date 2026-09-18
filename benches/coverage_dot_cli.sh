@@ -10,14 +10,14 @@
 #   * Fails when below MIN_COVERAGE (env, default 80).
 #
 # Usage:
-#   bash tests/performance/coverage_dot_cli.sh
-#   bash tests/performance/coverage_dot_cli.sh --json
-#   MIN_COVERAGE=90 bash tests/performance/coverage_dot_cli.sh
+#   bash benches/coverage_dot_cli.sh
+#   bash benches/coverage_dot_cli.sh --json
+#   MIN_COVERAGE=90 bash benches/coverage_dot_cli.sh
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 TESTS_ROOT="$REPO_ROOT/tests"
 DOT_BIN="$REPO_ROOT/bin/dot"
 
