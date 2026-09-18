@@ -95,9 +95,9 @@ dot theme toggle
 
 Toggles between the dark and light variant of the current theme family. A theme named `macos-tahoe-dark` toggles to `macos-tahoe-light`, and vice versa.
 
-## Command Reference (v0.2.503+)
+## Command Reference (v0.2.520+)
 
-The full `dot theme` command surface as of v0.2.503:
+The full `dot theme` command surface as of v0.2.520:
 
 | Command | Purpose |
 |---|---|
