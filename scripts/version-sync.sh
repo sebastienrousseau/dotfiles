@@ -384,6 +384,10 @@ _is_historical_record() {
   case "$(basename "$1")" in
     MILESTONE_*) return 0 ;;
     GOLD-STANDARD-AUDIT.md) return 0 ;;
+    # Forward-looking, not stale: this document defines the criteria for
+    # cutting v1.0.0, so v0.3.0/v0.4.0/v0.9.0/v1.0.0 are deliberate
+    # milestones. Rewriting them to the current version destroys its point.
+    RELEASE_1_0.md) return 0 ;;
     *) return 1 ;;
   esac
 }

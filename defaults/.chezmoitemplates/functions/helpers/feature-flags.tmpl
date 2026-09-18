@@ -1,0 +1,47 @@
+{{- /*
+  Feature Flags Helper
+
+  Provides consistent feature flag resolution with sensible defaults.
+  All flags default to false/disabled for safety.
+
+  Usage:
+    {{ template "feature-flags" . }}
+    Then use: $feature_nix, $feature_docker, etc.
+*/ -}}
+
+{{- /* Core features */ -}}
+{{- $feature_nix := false -}}
+{{- $feature_docker := false -}}
+{{- $feature_kubernetes := false -}}
+{{- $feature_cloud := false -}}
+
+{{- /* Development features */ -}}
+{{- $feature_rust := false -}}
+{{- $feature_go := false -}}
+{{- $feature_node := false -}}
+{{- $feature_python := false -}}
+
+{{- /* AI features */ -}}
+{{- $feature_ai := false -}}
+{{- $feature_copilot := false -}}
+
+{{- /* Security features */ -}}
+{{- $feature_security := false -}}
+{{- $feature_gpg := false -}}
+
+{{- /* Resolve from chezmoi data */ -}}
+{{- if hasKey . "features" -}}
+  {{- $f := .features -}}
+  {{- if hasKey $f "nix" }}{{ $feature_nix = $f.nix }}{{ end -}}
+  {{- if hasKey $f "docker" }}{{ $feature_docker = $f.docker }}{{ end -}}
+  {{- if hasKey $f "kubernetes" }}{{ $feature_kubernetes = $f.kubernetes }}{{ end -}}
+  {{- if hasKey $f "cloud" }}{{ $feature_cloud = $f.cloud }}{{ end -}}
+  {{- if hasKey $f "rust" }}{{ $feature_rust = $f.rust }}{{ end -}}
+  {{- if hasKey $f "go" }}{{ $feature_go = $f.go }}{{ end -}}
+  {{- if hasKey $f "node" }}{{ $feature_node = $f.node }}{{ end -}}
+  {{- if hasKey $f "python" }}{{ $feature_python = $f.python }}{{ end -}}
+  {{- if hasKey $f "ai" }}{{ $feature_ai = $f.ai }}{{ end -}}
+  {{- if hasKey $f "copilot" }}{{ $feature_copilot = $f.copilot }}{{ end -}}
+  {{- if hasKey $f "security" }}{{ $feature_security = $f.security }}{{ end -}}
+  {{- if hasKey $f "gpg" }}{{ $feature_gpg = $f.gpg }}{{ end -}}
+{{- end -}}

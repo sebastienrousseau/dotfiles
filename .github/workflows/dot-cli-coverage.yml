@@ -1,0 +1,112 @@
+name: dot CLI Coverage
+
+# Enforces the pan-CLI coverage ratchet: every top-level `dot <cmd>`
+# in bin/dot must be referenced by at least one file under tests/.
+# Runs on every push touching command modules or the coverage tool.
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'feat/**'
+    paths:
+      - 'bin/dot'
+      - 'bin/dot-*'
+      - 'scripts/dot/commands/**'
+      - 'tests/**'
+      - 'tests/performance/coverage_dot_cli.sh'
+      - '.github/workflows/dot-cli-coverage.yml'
+  pull_request:
+    paths:
+      - 'bin/dot'
+      - 'bin/dot-*'
+      - 'scripts/dot/commands/**'
+      - 'tests/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    name: pan-CLI command coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Symlink dotfiles source at ~/.dotfiles
+        run: ln -sf "$GITHUB_WORKSPACE" "$HOME/.dotfiles"
+
+      - name: Human-readable coverage table
+        run: bash tests/performance/coverage_dot_cli.sh
+
+      - name: JSON report
+        run: bash tests/performance/coverage_dot_cli.sh --json | tee coverage.json
+
+      - name: Ratchet — every command must have at least one test mention
+        run: |
+          # 100 % required. Any command in bin/dot without a test-file
+          # reference fails the run.
+          MIN_COVERAGE=100 bash tests/performance/coverage_dot_cli.sh > /dev/null
+
+      - name: Ratchet — docs-sync across all 4 loci
+        run: |
+          # Every top-level dot command must appear in bash + zsh +
+          # fish completions AND the dot(1) man page. As of the
+          # 2026-08-28 push the ratchet holds at 100% (103/103) with a
+          # cli_no_partial_or_bare_commands_ratchet_full gate; any new
+          # top-level command lands in Partial or Bare and fails the
+          # run until documented in every locus. Also includes a
+          # groff/mandoc man-page parse-cleanliness gate.
+          bash tests/unit/commands/test_cli_docs_sync.sh
+
+      - name: Ratchet — route integrity of _dot_command_routes()
+        run: |
+          # Every `cmd|namespace` row in bin/dot's routes heredoc must
+          # resolve to a real binding (case label, cmd_ function, inline
+          # bin/dot case, or bin/dot-<cmd> executable). Catches drift
+          # where a handler exists but the route entry was forgotten
+          # (or vice versa: a route with no handler on the other side).
+          bash tests/unit/commands/test_cli_route_integrity.sh
+
+      - name: Ratchet — help topic parity with routes
+        run: |
+          # Every routed command must have a _dot_help_specs() entry so
+          # `dot help <cmd>` returns a useful description instead of
+          # "Unknown help topic". As of 2026-08-28 parity is 100/100
+          # and the gate is strict.
+          bash tests/unit/commands/test_cli_help_coverage.sh
+
+      - name: Ratchet — docs coverage across reference tables
+        run: |
+          # docs/reference/UTILS.md + docs/AI.md + docs/reference/SCRIPTS.md
+          # + docs/architecture/ARCHITECTURE.md must cover every public dot
+          # command, AI provider, utility entrypoint, and function group.
+          # 100% required; enforced by scripts/qa/docs-coverage.sh.
+          MIN_DOCS_COVERAGE=100 bash scripts/qa/docs-coverage.sh
+
+      - name: Ratchet — wall-clock budget for all gates
+        run: |
+          # Sum of all 6 gate scripts must run in under RATCHET_WALL_CLOCK_MS
+          # (default 15000ms). Baseline on a workstation: ~3600ms; 4x
+          # headroom for CI variance. If any gate creeps above 5s or the
+          # total above the ceiling, this fails and points at the culprit.
+          bash tests/performance/test_ratchets_wall_clock.sh
+
+      - name: Upload coverage.json
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dot-cli-coverage
+          path: coverage.json
+          retention-days: 30

@@ -1,0 +1,95 @@
+# Bash completion for the `dot` CLI — focused on the theme subcommand.
+# Source or drop into ~/.local/share/bash-completion/completions/dot
+#
+# Provides completions for:
+#   dot theme <TAB>              -> subcommands + theme names
+#   dot theme set <TAB>          -> theme names
+#   dot theme preview <TAB>      -> theme names
+#   dot theme set NAME --<TAB>   -> flags (--force, --full)
+
+_dot_theme_names() {
+  local f="$HOME/.dotfiles/defaults/.chezmoidata/themes.toml"
+  [[ -f "$f" ]] || f="$HOME/.local/share/chezmoi/.chezmoidata/themes.toml"
+  [[ -f "$f" ]] || return
+  sed -n 's/^\[themes\.\([a-zA-Z0-9-]*\)\]$/\1/p' "$f" | sort -u
+}
+
+_dot_completions() {
+  local cur prev words cword
+  _init_completion 2>/dev/null || COMPREPLY=()
+
+  # Top-level subcommand list — kept in sync with dot(1) man page and
+  # the zsh/fish completions by tests/unit/commands/test_cli_docs_sync.sh.
+  if [[ ${COMP_CWORD} -eq 1 ]]; then
+    local top="add agent agents ai ai-query ai-setup aider alias-check \
+      aliases apply attest attestation autohand backup benchmark \
+      bootstrap bundle cache-refresh cd chaos cl claude clean-cache \
+      codex commit conflicts copilot diff dns-doh docs doctor drift \
+      edit encrypt-check env firewall fleet fonts gemini goose heal \
+      health health-check help history init intelligence keys kiro \
+      learn lint load-bench load-bench-pty load-benchmark-pty locks \
+      lock-screen log-rotate manual mcp metrics mode new ollama \
+      opencode packages patterns perf prewarm profile qwen registry \
+      remove restore rollback sandbox score scorecard search secrets \
+      secrets-create secrets-init security-score setup sgpt \
+      smoke-test snapshot ssh-cert ssh-key status sync telemetry \
+      theme theme-sync tools tune update upgrade usb-safety verify \
+      version vibe wallpaper zai"
+    COMPREPLY=( $(compgen -W "$top" -- "$cur") )
+    return
+  fi
+
+  # `dot theme ...`
+  if [[ "${COMP_WORDS[1]}" == "theme" ]]; then
+    local subs="list set toggle mode family random preview undo history current status diff accent wallpaper fit export import sync ambient rotate reset rebuild help"
+    if [[ ${COMP_CWORD} -eq 2 ]]; then
+      # subcommand OR theme name (quick-switch)
+      COMPREPLY=( $(compgen -W "$subs $(_dot_theme_names)" -- "$cur") )
+      return
+    fi
+    local sub="${COMP_WORDS[2]}"
+    case "$sub" in
+      set | preview | diff)
+        # After name, allow --force / --full for set/preview; diff takes
+        # two theme names positionally.
+        if [[ "$cur" == -* ]]; then
+          COMPREPLY=( $(compgen -W "--force --full" -- "$cur") )
+        else
+          COMPREPLY=( $(compgen -W "$(_dot_theme_names)" -- "$cur") )
+        fi
+        return
+        ;;
+      ambient)
+        COMPREPLY=( $(compgen -W "run enable disable status" -- "$cur") )
+        return
+        ;;
+      mode)
+        COMPREPLY=( $(compgen -W "dark light auto" -- "$cur") )
+        return
+        ;;
+      rotate)
+        COMPREPLY=( $(compgen -W "enable disable status" -- "$cur") )
+        return
+        ;;
+      export | import)
+        _filedir 'json' 2>/dev/null || COMPREPLY=( $(compgen -f -- "$cur") )
+        return
+        ;;
+      accent)
+        COMPREPLY=( $(compgen -W "blue teal green yellow orange red pink purple slate" -- "$cur") )
+        return
+        ;;
+      wallpaper)
+        # File paths — let bash's file completion do the work.
+        _filedir 'png|jpg|jpeg|webp|heic' 2>/dev/null || COMPREPLY=( $(compgen -f -- "$cur") )
+        return
+        ;;
+      fit)
+        COMPREPLY=( $(compgen -W "zoom spanned centered scaled stretched wallpaper none" -- "$cur") )
+        return
+        ;;
+    esac
+  fi
+}
+
+complete -F _dot_completions dot

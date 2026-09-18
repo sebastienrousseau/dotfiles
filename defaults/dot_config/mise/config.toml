@@ -1,0 +1,104 @@
+# mise (runtime manager) configuration
+# https://mise.jdx.dev/
+
+[settings]
+# Install missing tools automatically
+auto_install = true
+# Ensure mise tool paths/shims are placed ahead of system PATH
+activate_aggressive = true
+# Use verbose output
+verbose = false
+# Use precompiled ruby binaries (silences 2026.8.0 warning)
+ruby.compile = false
+
+[tools]
+# Node.js
+node = ["lts", "24", "25"]
+
+# Python
+python = ["3.12", "3.11", "3.14"]
+
+# Go
+go = "latest"
+
+# Rust
+rust = "latest"
+
+# Ruby
+ruby = "3.3"
+
+# Java
+java = "21"
+
+# Deno
+deno = "latest"
+
+# Bun
+bun = "latest"
+
+# Zig
+zig = "latest"
+
+# CLI Tools
+atuin = "latest"
+bat = "latest"
+codex = "latest"
+eza = "latest"
+gping = "latest"
+ripgrep = "latest"
+ruff = "latest"
+yazi = "latest"
+zellij = "latest"
+zoxide = "latest"
+"aqua:twpayne/chezmoi" = "latest"
+"aqua:junegunn/fzf" = "latest"
+"aqua:FiloSottile/age" = "latest"
+"aqua:sharkdp/hyperfine" = "latest"
+"aqua:ollama/ollama" = "latest"
+"aqua:Nukesor/pueue/pueue" = "4.0.4"
+"aqua:Nukesor/pueue/pueued" = "4.0.4"
+"aqua:dandavison/delta" = "latest"
+fd = "latest"
+"aqua:ClementTsang/bottom" = "latest"
+"npm:tldr" = "latest"
+"aqua:jesseduffield/lazygit" = "latest"
+"aqua:jesseduffield/lazydocker" = "latest"
+
+# Python tools
+"pipx:poetry" = "latest"
+uv = "latest"
+"pipx:aider-chat" = "latest"
+"pipx:shell-gpt" = "latest"
+
+# AI tools
+"npm:@anthropic-ai/claude-code" = "latest"
+"npm:@github/copilot" = "latest"
+"npm:@google/gemini-cli" = "latest"
+"npm:codex-cli" = "latest"
+"npm:opencode-ai" = "latest"
+kiro-cli = "latest"
+"npm:autohand-cli" = "latest"
+"npm:@qwen-code/qwen-code" = "latest"
+"npm:@guizmo-ai/zai-cli" = "latest"
+# "pipx:mistral-vibe" = "latest"  # disabled 2026-05-12: dep `mistralai` quarantined on PyPI; re-enable when restored
+
+# Task runners
+task = "latest"
+just = "latest"
+
+# Nushell (structured-data shell). The bare `nushell` name isn't in
+# mise's tool registry; the aqua: backend resolves it from the official
+# release tarballs.
+"aqua:nushell/nushell" = "latest"
+
+[env]
+# Environment variables to set
+MISE_EXPERIMENTAL = "1"
+GITHUB_TOKEN = "{{exec(command='gh auth token')}}"
+# Build caches → /tmp (cleared on reboot)
+GOCACHE = "/tmp/builds/go-cache"
+GOTMPDIR = "/tmp/builds/go-tmp"
+PIP_CACHE_DIR = "/tmp/builds/pip-cache"
+UV_CACHE_DIR = "/tmp/builds/uv-cache"
+ZIG_LOCAL_CACHE_DIR = "/tmp/builds/zig-cache"
+ZIG_GLOBAL_CACHE_DIR = "/tmp/builds/zig-global-cache"

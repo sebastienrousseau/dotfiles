@@ -1,0 +1,6 @@
+   family          Solar                     Solar                   
+   mode            dark                      dark                    
+   macos_accent    3                         3                       
+   ui.accent       #2ecc71                   #2ecc71                 
+   term.bg         #101010                   #101010                 
+   term.fg         #eeeeee                   #eeeeee                 

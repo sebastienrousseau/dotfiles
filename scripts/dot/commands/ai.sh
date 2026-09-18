@@ -101,6 +101,8 @@ _ai_refresh_status_cache() {
   command -v timeout >/dev/null 2>&1 && _TO="timeout 8 "
   # Variables expand inside the child Bash probe.
   # shellcheck disable=SC2016
+  local _TO=""
+  command -v timeout >/dev/null 2>&1 && _TO="timeout 3 "
   local probe_script='
     payload="$1"; out_dir="$2"; to="$3"
     i="${payload%%|*}"; entry="${payload#*|}"
@@ -335,6 +337,94 @@ _ai_log_run() {
   log_bin="${HOME}/.local/bin/dot-ai-log"
   [[ -x "$log_bin" ]] || return 0
   "$log_bin" "$provider" "$project" "$exit_code" "$duration_secs" "$prompt_words" "$ts" || true
+}
+
+# Locate the vibe-delegate / delegate-report tools deployed by the
+# /vibe Claude Code skill. Path stays in sync with
+# defaults/dot_claude/skills/vibe/tools/.
+_ai_delegate_tool() {
+  local tool="$1" # vibe-delegate | delegate-report
+  local path="${HOME}/.claude/skills/vibe/tools/${tool}"
+  if [[ ! -x "$path" ]]; then
+    # Errors to stderr so callers capturing stdout via $() get just the path.
+    ui_err "$tool" "not found at $path" >&2
+    ui_info "Hint" "Run 'chezmoi apply' to deploy the /vibe skill" >&2
+    return 1
+  fi
+  printf '%s\n' "$path"
+}
+
+cmd_ai_delegate() {
+  # Front-door to the same delegator the /vibe slash command uses.
+  # Usage: dot ai delegate "<prompt>" [max-turns] [agent] [timeout]
+  if [[ $# -lt 1 ]]; then
+    ui_err "Usage" "dot ai delegate \"<prompt>\" [max-turns] [agent] [timeout-secs]"
+    ui_info "Example" "dot ai delegate \"add a CHANGELOG entry for v0.2.504\""
+    return 1
+  fi
+  local prompt="$1"
+  shift
+  local max_turns="${1:-10}"
+  local agent="${2:-}"
+  local timeout="${3:-180}"
+  local tool
+  tool="$(_ai_delegate_tool vibe-delegate)" || return 1
+  if ! has_command vibe; then
+    ui_warn "vibe" "not installed"
+    ui_info "Install" "mise use -g pipx:mistral-vibe"
+    return 1
+  fi
+  "$tool" "$(pwd)" "$prompt" "$max_turns" "$agent" "$timeout"
+}
+
+cmd_ai_cost() {
+  # Unified AI spend report. Wraps delegate-report (vibe runs) and is
+  # the documented interface for users: path may move later.
+  local tool
+  tool="$(_ai_delegate_tool delegate-report)" || return 1
+  "$tool" "$@"
+}
+
+# Append a best-effort run entry to the unified AI log read by
+# delegate-report. Token/cost fields are left blank when the provider
+# CLI does not surface them — the report tolerates missing fields and
+# groups by `model`. This gives users one place to see invocations
+# across Claude, Gemini, Aider, Vibe, etc., not just Vibe.
+_ai_log_run() {
+  local provider="$1" exit_code="$2" duration_secs="$3" prompt_words="$4"
+  local log_file="${HOME}/.local/share/delegate-runs.jsonl"
+  mkdir -p "$(dirname "$log_file")"
+  local project ts
+  project="$(basename "$PWD")"
+  ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  # python3 keeps the encoding boring; jq would also work but isn't
+  # guaranteed present everywhere this script runs.
+  python3 - "$log_file" "$provider" "$project" "$exit_code" "$duration_secs" "$prompt_words" "$ts" <<'PY'
+import json, sys
+log, provider, project, ec, dur, pw, ts = sys.argv[1:8]
+entry = {
+    "ts": ts,
+    "delegate": provider,
+    "model": provider,
+    "project": project,
+    "exit_code": int(ec),
+    "duration_secs": float(dur),
+    "prompt_words": int(pw),
+    "tool_calls": 0,
+    "files_changed": 0,
+    "wrote_nothing": False,
+    "warn_count": 0,
+    "search_replace_fails": 0,
+    "syntax_errors": 0,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "tokens_total": 0,
+    "cost_usd": 0,
+    "cost_claude_eq": 0,
+}
+with open(log, "a") as fh:
+    fh.write(json.dumps(entry) + "\n")
+PY
 }
 
 run_ai_with_context() {

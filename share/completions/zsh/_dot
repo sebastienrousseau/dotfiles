@@ -22,6 +22,12 @@ _dot() {
     'ollama:Ollama with context patterns'
     'opencode:OpenCode with context patterns'
     'aider:Aider with context patterns'
+    'claude:Claude Code CLI passthrough'
+    'codex:Codex CLI passthrough'
+    'goose:Goose AI assistant passthrough'
+    'qwen:Qwen coder CLI passthrough'
+    'vibe:Vibe CLI passthrough'
+    'zai:Z.ai CLI passthrough'
     'add:Add a file to chezmoi source'
     'diff:Show chezmoi diff with exclusions'
     'status:Show configuration drift'
@@ -41,10 +47,13 @@ _dot() {
     'health:Run comprehensive health check'
     'smoke-test:Run automated toolchain verification'
     'chaos:Simulate config corruption to test self-healing'
+    'score:Compute overall system health score'
     'scorecard:Unified health/security/performance scorecard'
     'security-score:Analyze infrastructure security score'
     'intelligence:Show Dotfiles Intelligence Surface'
     'rollback:Rollback dotfiles to a previous state'
+    'restore:Restore from backup or git ref'
+    'autohand:Autohand AI orchestrator passthrough'
     'drift:Drift dashboard (detailed chezmoi status)'
     'history:Shell history analysis'
     'benchmark:Run shell startup benchmark'
@@ -52,6 +61,10 @@ _dot() {
     'load:Preload heavy shell layers'
     'load-bench:Measure time to heavy-layer readiness'
     'load-bench-pty:Measure background prewarm via PTY'
+    'load-benchmark-pty:Measure background prewarm via PTY (long form)'
+    'health-check:Alias for health'
+    'metrics:Emit machine-readable diagnostic metrics'
+    'attestation:Full attestation flow (alias of attest)'
     'ai:Show AI helper status'
     'ai-setup:Interactive setup for all AI CLI tools'
     'ai-query:Context-aware RAG query over your dotfiles'
@@ -70,9 +83,12 @@ _dot() {
     'docs:Show repo README'
     'log-rotate:Rotate dotfiles log'
     'setup:Interactive setup (profile, features, secrets)'
+    'alias-check:Static-check alias definitions for conflicts'
+    'bootstrap:Bootstrap a fresh machine (calls install.sh)'
 
     # Appearance
     'theme:Switch terminal theme'
+    'theme-sync:Cross-DE theme sync helper (direct invocation)'
     'wallpaper:Apply a wallpaper'
     'fonts:Install Nerd Fonts'
     'tune:Apply OS tuning'
@@ -97,7 +113,16 @@ _dot() {
 
     # Meta
     'upgrade:Update flake, plugins, and dotfiles'
+    'cache-refresh:Clear and regenerate shell caches (alias of prewarm)'
     'packages:List installed packages'
+    'attest:Export workstation attestation evidence'
+    'mcp:Inspect MCP policy and registry'
+    'profile:Show or set the agent profile'
+    'lint:Lint shell scripts'
+    'agents:Multi-harness agent context (AGENTS.md sync)'
+    'agent:Show agent metadata and logs'
+    'fleet:Fleet management commands'
+    'init:Bootstrap a foreign dotfiles repo'
     'version:Show version information'
     '--version:Show version information'
     'help:Show help message'
@@ -262,8 +287,51 @@ _dot() {
           _describe -t subcommands 'tools subcommand' tool_cmds
           ;;
         theme)
-          local -a themes=(dark light)
-          _describe -t themes 'theme mode' themes
+          # Subcommands + theme names (for quick-switch `dot theme NAME`).
+          local -a theme_cmds theme_names
+          theme_cmds=(
+            'list:Show all available themes'
+            'set:Set theme (interactive if no name)'
+            'toggle:Toggle between light/dark within family'
+            'mode:Idempotently force dark or light mode'
+            'family:Cycle to the next family'
+            'random:Pick a random family, keep current mode'
+            'preview:Try a theme, ENTER to keep or Ctrl-C to revert'
+            'undo:Step back to the previous theme'
+            'history:Show recently-applied themes'
+            'current:Show current theme info'
+            'status:Dashboard: recorded vs applied theme state'
+            'diff:Side-by-side comparison of two themes'
+            'accent:Tweak accent live without wallpaper/theme change'
+            'wallpaper:Set an arbitrary wallpaper without theme swap'
+            'fit:Wallpaper fit (zoom, spanned, centered, scaled, ...)'
+            'export:Snapshot theme+fit to JSON'
+            'import:Restore theme+fit from JSON'
+            'rotate:Wallpaper rotation timer (enable/disable/status)'
+            'sync:Sync dotfiles with system dark/light mode'
+            'ambient:Time-based mode switch (run|enable|disable|status)'
+            'reset:Restore GNOME defaults'
+            'rebuild:Regenerate themes from wallpapers'
+            'help:Show subcommand help'
+          )
+          # Pull theme names from themes.toml if available (readable via user).
+          local themes_file="$HOME/.dotfiles/defaults/.chezmoidata/themes.toml"
+          [[ -f "$themes_file" ]] || themes_file="$HOME/.local/share/chezmoi/.chezmoidata/themes.toml"
+          if [[ -f "$themes_file" ]]; then
+            theme_names=( "${(@f)$(sed -n 's/^\[themes\.\([a-zA-Z0-9-]*\)\]$/\1/p' "$themes_file" | sort -u)}" )
+          fi
+          _describe -t subcommands 'theme subcommand' theme_cmds
+          _describe -t themes 'theme name' theme_names
+          ;;
+        theme:set|theme:preview)
+          # Second-arg completion: only theme names.
+          local themes_file="$HOME/.dotfiles/defaults/.chezmoidata/themes.toml"
+          [[ -f "$themes_file" ]] || themes_file="$HOME/.local/share/chezmoi/.chezmoidata/themes.toml"
+          if [[ -f "$themes_file" ]]; then
+            local -a theme_names
+            theme_names=( "${(@f)$(sed -n 's/^\[themes\.\([a-zA-Z0-9-]*\)\]$/\1/p' "$themes_file" | sort -u)}" )
+            _describe -t themes 'theme name' theme_names
+          fi
           ;;
         ssh-cert)
           local -a cert_cmds=(

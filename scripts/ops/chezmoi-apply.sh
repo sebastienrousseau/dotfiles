@@ -176,18 +176,7 @@ if [[ "${DOTFILES_SNAPSHOT_ON_APPLY:-1}" = "1" ]]; then
   fi
 fi
 
-check_cmd() {
-  local cmd="$1"
-  if command -v "$cmd" &>/dev/null; then
-    return 0
-  fi
-  if command -v mise &>/dev/null; then
-    if mise ls --installed 2>/dev/null | grep -qE "($cmd|aqua:.*$cmd)"; then
-      return 0
-    fi
-  fi
-  return 1
-}
+# check_cmd() is provided by lib/dot/utils.sh — sourced above.
 
 echo ""
 ui_header "AI provider CLI checks (optional)"

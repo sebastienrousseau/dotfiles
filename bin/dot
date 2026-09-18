@@ -216,13 +216,17 @@ EOF
 _dot_help_specs() {
   cat <<'EOF'
 Core|sync|Apply dotfiles (alias for apply; --pull to fetch, --check to preview)|Use after clone or after changes.
+Core|apply|Apply dotfiles via chezmoi (canonical form of sync)|The underlying operation `sync` wraps.
+Core|update|Pull latest changes and apply them|Combines git pull + dot apply.
 Core|add|Add a file to chezmoi source|Start managing a file in the source tree.
+Core|remove|Safely remove a managed file (chezmoi remove --keep-source)|Un-manage without deleting the target.
 Core|diff|Show chezmoi diff with exclusions|Preview pending changes before apply.
 Core|status|Show configuration drift (chezmoi status)|Inspect the current managed state.
 Core|edit|Open chezmoi source in $EDITOR|Jump into the source tree quickly.
 Core|uninstall|Remove the managed dotfiles environment (prompts unless --force)|Guided teardown, counterpart to init.
 Core|cd|Print source directory path (use: cd $(dot cd))|Useful in shell scripts and jump helpers.
 Core|commit|AI-powered conventional commit|Wraps the commit helper flow.
+Core|clean-cache|Clear shell initialization caches|Use when startup gets slow or a cached value is stale.
 Diagnostics|doctor|Deep audit: tools, paths, portability, AI analysis (--ai|-A)|Main health and repair entrypoint.
 Diagnostics|attest|Export workstation attestation evidence (--json|-j, --write|-w, --fleet-store|-F) or check it against policy (--verify|-V, --max-age|-a)|Produce machine-readable evidence, and verify it with the sandboxed WebAssembly verifier.
 Diagnostics|secret-audit|Audit secret hygiene and leakage surface|Secret governance report.
@@ -251,6 +255,14 @@ AI|sgpt|Shell-GPT with context patterns|Context-aware Shell-GPT bridge.
 AI|ollama|Ollama with context patterns|Context-aware local-model bridge.
 AI|opencode|OpenCode with context patterns|Context-aware OpenCode bridge.
 AI|aider|Aider with context patterns|Context-aware Aider bridge.
+AI|claude|Claude Code CLI passthrough|Direct invocation of the claude CLI.
+AI|codex|Codex CLI passthrough|Direct invocation of the codex CLI.
+AI|goose|Goose AI assistant passthrough|Direct invocation of the goose CLI.
+AI|qwen|Qwen coder CLI passthrough|Direct invocation of the qwen CLI.
+AI|vibe|Mistral Vibe CLI passthrough|Direct invocation of the vibe CLI.
+AI|zai|Z.ai CLI passthrough|Direct invocation of the zai CLI.
+AI|autohand|Autohand AI orchestrator passthrough|Direct invocation of the autohand CLI.
+AI|patterns|Manage AI steering patterns (add / list / edit / delete)|Curate the pattern library.
 Tools|env|Tool versions (mise)|Managed runtime versions.
 Tools|profile|Show/switch configuration profile|Profile-specific behavior.
 Tools|keys|Keybindings (sign-check: verify git signing)|Keyboard and signing references.
@@ -260,6 +272,11 @@ Tools|sandbox|Launch a safe sandbox preview (Docker/Podman)|Disposable environme
 Tools|lint|Lint shell scripts (--fix|-f to auto-format, --check|-c for CI)|Shell quality gate.
 Tools|learn|Start the interactive tour of your new tools|Guided onboarding.
 Tools|docs|Show repo README|Open the main documentation.
+Tools|setup|Interactive setup (profile, features, secrets)|First-run configuration wizard.
+Tools|manual|Open or download the multi-format manual (PDF / EPUB / HTML)|Reference documentation.
+Tools|aliases|List / search / explain aliases and tiers|Alias catalog.
+Tools|alias-check|Static-check alias definitions for conflicts|Alias QA gate.
+Tools|log-rotate|Rotate the dotfiles log; enforces size cap and retention|Housekeeping helper.
 Appearance|theme|Switch terminal theme (dark/light)|Terminal appearance control.
 Appearance|wallpaper|Apply a wallpaper from your library [macOS,Linux]|Desktop customization helper.
 Appearance|fonts|Install (default) or patch Nerd Fonts (JetBrainsMono by default)|Font bootstrap and patcher helper.
@@ -480,6 +497,7 @@ apply|core
 init|init
 update|core
 add|core
+remove|core
 diff|core
 status|core
 cd|core
@@ -487,6 +505,8 @@ edit|core
 commit|core
 uninstall|core
 doctor|diagnostics
+benchmark|diagnostics
+verify|diagnostics
 scorecard|diagnostics
 score|diagnostics
 snapshot|diagnostics
@@ -850,7 +870,10 @@ case "$route" in
     show_version
     ;;
 
-  # User-provided custom commands
+  # User-provided custom commands, then bin/dot-<name> auto-shim
+  # (git-style: `dot foo` -> `dot-foo` if a matching executable exists
+  # anywhere on PATH). Users can drop new commands next to `dot` and
+  # tab-completion will see them via the routes table extraction.
   *)
     _user_cmd="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/commands/${COMMAND}.sh"
     if [[ -f "$_user_cmd" ]]; then
@@ -859,10 +882,17 @@ case "$route" in
       # shellcheck disable=SC1090
       (source "$_user_cmd" "$@")
       exit $?
-    else
-      echo "Unknown command: ${COMMAND:-}" >&2
-      echo "Run 'dot help' for available commands." >&2
-      exit 1
     fi
+    # Try bin/dot-<name> in the same dir as this script, then $PATH.
+    _self_dir="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || echo "$0")")" && pwd)"
+    if [[ -x "$_self_dir/dot-${COMMAND}" ]]; then
+      exec "$_self_dir/dot-${COMMAND}" "$@"
+    fi
+    if command -v "dot-${COMMAND}" >/dev/null 2>&1; then
+      exec "dot-${COMMAND}" "$@"
+    fi
+    echo "Unknown command: ${COMMAND:-}" >&2
+    echo "Run 'dot help' for available commands." >&2
+    exit 1
     ;;
 esac

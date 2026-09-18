@@ -1,0 +1,6 @@
+!=  family          Solar                     Firewatch               
+   mode            dark                      dark                    
+!=  macos_accent    3                         5                       
+!=  ui.accent       #2ecc71                   #9b59b6                 
+!=  term.bg         #101010                   #282828                 
+!=  term.fg         #eeeeee                   #dcdcdc                 

@@ -1,0 +1,35 @@
+# OSS-Fuzz project metadata for github.com/sebastienrousseau/dotfiles
+#
+# This file is intended for upstream submission to
+# github.com/google/oss-fuzz under projects/dotfiles/project.yaml.
+# Pinning it here lets us iterate on the harnesses without an
+# upstream round-trip; once the harnesses stabilise, copy this
+# directory's contents into a PR against google/oss-fuzz.
+#
+# See https://google.github.io/oss-fuzz/getting-started/new-project-guide/
+# for the full submission flow.
+
+homepage: "https://github.com/sebastienrousseau/dotfiles"
+language: go
+primary_contact: "sebastian.rousseau@gmail.com"
+auto_ccs:
+  - "sebastian.rousseau@gmail.com"
+
+# Fuzzing engines and sanitizers. Go fuzzers built with the native
+# `go test -fuzz` runner; libFuzzer is OSS-Fuzz's preferred engine.
+fuzzing_engines:
+  - libfuzzer
+
+sanitizers:
+  - address
+  - undefined
+
+# Architectures to build for. OSS-Fuzz default is x86_64; arm64
+# coverage is opt-in and slower (queue is longer).
+architectures:
+  - x86_64
+
+# How the maintainer is notified of new findings. OSS-Fuzz creates
+# private issues by default; we mirror them to our security
+# disclosure channel for transparency.
+view_restrictions: none

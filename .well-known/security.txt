@@ -1,0 +1,14 @@
+# RFC 9116 security contact metadata.
+# https://securitytxt.org/
+# Regenerate the timestamps + signature via `scripts/security/*` when
+# rotating disclosure keys.
+
+Contact: mailto:security@sebastienrousseau.com
+Contact: https://github.com/sebastienrousseau/dotfiles/security/advisories/new
+Expires: 2027-07-01T00:00:00.000Z
+Encryption: https://sebastienrousseau.com/.well-known/openpgpkey/hu/pub
+Preferred-Languages: en, fr
+Canonical: https://sebastienrousseau.com/.well-known/security.txt
+Canonical: https://github.com/sebastienrousseau/dotfiles/.well-known/security.txt
+Policy: https://github.com/sebastienrousseau/dotfiles/blob/master/SECURITY.md
+Acknowledgments: https://github.com/sebastienrousseau/dotfiles/blob/master/docs/security/COMPLIANCE.md

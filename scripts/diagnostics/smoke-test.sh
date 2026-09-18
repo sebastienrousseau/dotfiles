@@ -15,19 +15,7 @@ ui_header "Dotfiles Smoke Tests"
 
 declare -i passed=0
 declare -i failed=0
-
-check_cmd() {
-  local cmd="$1"
-  if command -v "$cmd" >/dev/null 2>&1; then
-    return 0
-  fi
-  if command -v mise >/dev/null 2>&1; then
-    if mise ls --installed 2>/dev/null | grep -qE "($cmd|aqua:.*$cmd)"; then
-      return 0
-    fi
-  fi
-  return 1
-}
+# check_cmd() is provided by lib/dot/utils.sh
 
 verify_cmd() {
   local cmd="$1"

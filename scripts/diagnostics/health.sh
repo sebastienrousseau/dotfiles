@@ -14,8 +14,7 @@ source "$SCRIPT_DIR/../../lib/dot/ui.sh"
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../../lib/dot/log.sh"
 
-# Portable has_command (self-contained; no dependency on utils.sh)
-has_command() { command -v "$1" >/dev/null 2>&1; }
+# has_command() is provided by lib/dot/utils.sh — sourced above.
 
 # Colors (fallback when gum is unavailable; respect NO_COLOR)
 if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then

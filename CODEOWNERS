@@ -1,0 +1,40 @@
+# CODEOWNERS — automatic PR review assignment.
+#
+# Syntax: <glob>  @owner1 @owner2 …
+# Order matters — later entries override earlier ones for the same paths.
+# See https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# ---------------------------------------------------------------------------
+# Default owner — everything routes to the primary maintainer.
+# ---------------------------------------------------------------------------
+*                                       @sebastienrousseau
+
+# ---------------------------------------------------------------------------
+# Security-critical paths — require the maintainer's review explicitly.
+# ---------------------------------------------------------------------------
+/SECURITY.md                            @sebastienrousseau
+/docs/security/                         @sebastienrousseau
+/scripts/security/                      @sebastienrousseau
+/scripts/git-hooks/                     @sebastienrousseau
+/defaults/private_dot_ssh/              @sebastienrousseau
+/.github/workflows/                     @sebastienrousseau
+/.github/security-policies/             @sebastienrousseau
+
+# ---------------------------------------------------------------------------
+# Governance / community docs — explicit ownership so drive-by edits still
+# route to the maintainer even after ownership rotation.
+# ---------------------------------------------------------------------------
+/GOVERNANCE.md                          @sebastienrousseau
+/MAINTAINERS.md                         @sebastienrousseau
+/CODE_OF_CONDUCT.md                     @sebastienrousseau
+/CODEOWNERS                             @sebastienrousseau
+/docs/GOVERNANCE.md                     @sebastienrousseau
+/docs/MAINTAINERS.md                    @sebastienrousseau
+
+# ---------------------------------------------------------------------------
+# Release + packaging — a mistake here can break every downstream user.
+# ---------------------------------------------------------------------------
+/install/                               @sebastienrousseau
+/install.sh                             @sebastienrousseau
+/scripts/ops/release.sh                 @sebastienrousseau
+/scripts/version-sync.sh                @sebastienrousseau
