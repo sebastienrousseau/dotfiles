@@ -683,7 +683,7 @@ ui_steps_end() {
 # from an inability to run (2, fall back).
 # ═══════════════════════════════════════════════════════════════════════
 ui_pick() {
-  local header="" prompt=""
+  local header="" prompt="" preview=""
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --header)
@@ -692,6 +692,13 @@ ui_pick() {
         ;;
       --prompt)
         prompt="${2:-}"
+        shift 2
+        ;;
+      # Optional fzf preview command. Only the fzf backend can honour it;
+      # dot-ui and gum have no equivalent, so they simply ignore it and the
+      # caller still gets a working picker.
+      --preview)
+        preview="${2:-}"
         shift 2
         ;;
       *) shift ;;
@@ -720,7 +727,12 @@ ui_pick() {
   fi
 
   if command -v fzf >/dev/null 2>&1 && [[ -t 2 ]]; then
-    local -a fzf_args=(--height 30 --reverse --no-sort --no-preview --ansi)
+    local -a fzf_args=(--height 30 --reverse --no-sort --ansi)
+    if [[ -n "$preview" ]]; then
+      fzf_args+=(--preview "$preview" --preview-window 'right:50%:wrap')
+    else
+      fzf_args+=(--no-preview)
+    fi
     [[ -n "$header" ]] && fzf_args+=(--header "$header")
     [[ -n "$prompt" ]] && fzf_args+=(--prompt "$prompt ")
     printf '%s\n' "$input" | fzf "${fzf_args[@]}" || true
