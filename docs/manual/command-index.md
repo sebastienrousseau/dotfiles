@@ -39,15 +39,17 @@ adding or renaming a subcommand, run
 | `dot ai-query` | Context-aware RAG query over your dotfiles |
 | `dot ai-setup` | Interactive setup for all AI CLI tools |
 | `dot aider` | Aider with context patterns |
+| `dot alias-check` | Static-check alias definitions for conflicts |
+| `dot aliases` | List / search / explain aliases and tiers |
 | `dot aliases` | cheatsheet Generate the alias cheatsheet markdown |
 | `dot aliases` | list List all shell aliases shipped by the dotfiles |
 | `dot aliases` | search Search aliases by term |
 | `dot aliases` | stats Show alias usage counts from shell history |
 | `dot aliases` | tiers Show which alias tiers/ecosystems are enabled |
 | `dot aliases` | why Show details and deprecation status for a single alias |
-| `dot apply` | Apply the current dotfiles to this machine. |
+| `dot apply` | Apply dotfiles via chezmoi (canonical form of sync) |
 | `dot attest` | Export workstation attestation evidence (--json |
-| `dot autohand` | Run the Autohand CLI with dotfiles context patterns. |
+| `dot autohand` | Autohand AI orchestrator passthrough |
 | `dot backup` | Create a compressed backup of your home |
 | `dot benchmark` | Benchmark shell startup with per-component profiling |
 | `dot bundle` | Create offline archive of dotfiles environment |
@@ -55,8 +57,9 @@ adding or renaming a subcommand, run
 | `dot cd` | Print source directory path (use: cd $(dot cd)) |
 | `dot chaos` | Simulate config corruption to test self-healing |
 | `dot cl` | Claude CLI with context patterns |
-| `dot claude` | Run the Claude CLI bridge (alias for cl). |
-| `dot codex` | Run the OpenAI Codex CLI with dotfiles context patterns. |
+| `dot claude` | Claude Code CLI passthrough |
+| `dot clean-cache` | Clear shell initialization caches |
+| `dot codex` | Codex CLI passthrough |
 | `dot commit` | AI-powered conventional commit |
 | `dot completion` | Generate shell completions (bash/zsh/fish/nu) from the command registry |
 | `dot copilot` | GitHub Copilot CLI with context patterns |
@@ -81,7 +84,7 @@ adding or renaming a subcommand, run
 | `dot fleet` | namespace Show or set the active namespace for multi-tenant isolation |
 | `dot fleet` | status Show this node's fleet status: id, namespace, version, OS, drift, last apply |
 | `dot fonts` | Install (default) or patch Nerd Fonts (JetBrainsMono by default) |
-| `dot goose` | Run the Goose CLI with dotfiles context patterns. |
+| `dot goose` | Goose AI assistant passthrough |
 | `dot heal` | Auto-repair common dotfiles problems (missing files, broken links). |
 | `dot health` | Run the health dashboard with optional fixes. |
 | `dot help` | Show this help message |
@@ -95,7 +98,8 @@ adding or renaming a subcommand, run
 | `dot lint` | Lint shell scripts (--fix |
 | `dot load-bench` | Measure time to heavy-layer readiness |
 | `dot lock-screen` | Enforce lock screen idle settings [Linux] |
-| `dot manual` | Open or download the dotfiles manual in HTML, PDF, EPUB, or text. |
+| `dot log-rotate` | Rotate the dotfiles log; enforces size cap and retention |
+| `dot manual` | Open or download the multi-format manual (PDF / EPUB / HTML) |
 | `dot mcp` | Inspect MCP policy, supply chain, and registry; serve MCP over stdio |
 | `dot mcp` | doctor Run the MCP policy/supply-chain/config audit |
 | `dot mcp` | registry Show the configured MCP server registry |
@@ -112,6 +116,7 @@ adding or renaming a subcommand, run
 | `dot ollama` | Ollama with context patterns |
 | `dot opencode` | OpenCode with context patterns |
 | `dot packages` | List installed packages and package managers |
+| `dot patterns` | Manage AI steering patterns (add / list / edit / delete) |
 | `dot patterns` | edit Edit an AI steering pattern in $EDITOR |
 | `dot patterns` | list List AI steering patterns |
 | `dot patterns` | view View an AI steering pattern |
@@ -121,13 +126,14 @@ adding or renaming a subcommand, run
 | `dot profile` | Show/switch configuration profile |
 | `dot profile` | set Set the active configuration profile (run dot sync to apply) |
 | `dot profile` | show Show the active configuration profile and feature flags |
-| `dot qwen` | Run the Qwen Coder CLI with dotfiles context patterns. |
+| `dot qwen` | Qwen coder CLI passthrough |
 | `dot registry` | info Print full metadata for a registry module |
 | `dot registry` | install Install a registry module (scaffold) |
 | `dot registry` | list List modules in the configured module registry |
 | `dot registry` | search Filter registry modules by keyword |
 | `dot registry` | set-url Override the registry URL (https only; persists) |
 | `dot registry` | url Show the active registry URL |
+| `dot remove` | Safely remove a managed file (chezmoi remove --keep-source) |
 | `dot restore` | Restore from a backup or git ref. |
 | `dot rollback` | Rollback dotfiles to a previous state |
 | `dot sandbox` | Launch a safe sandbox preview (Docker/Podman) |
@@ -144,6 +150,7 @@ adding or renaming a subcommand, run
 | `dot secrets-create` | Create an encrypted secrets file |
 | `dot secrets-init` | Initialize age key for secrets |
 | `dot security-score` | Assess workstation security posture. |
+| `dot setup` | Interactive setup (profile, features, secrets) |
 | `dot sgpt` | Shell-GPT with context patterns |
 | `dot snapshot` | Capture baseline system snapshot |
 | `dot ssh-cert` | Manage short-lived SSH certificates |
@@ -165,11 +172,12 @@ adding or renaming a subcommand, run
 | `dot tools` | install Enter the Nix development shell with all managed tools |
 | `dot tune` | Apply OS tuning (opt-in) [macOS,Linux] |
 | `dot uninstall` | Remove the managed dotfiles environment (prompts unless --force) |
+| `dot update` | Pull latest changes and apply them |
 | `dot upgrade` | Update system toolchains, plugins, and dotfiles |
 | `dot usb-safety` | Disable automount for removable media [Linux] |
 | `dot version` | Show version information. |
-| `dot vibe` | Run the Vibe AI CLI with dotfiles context patterns. |
+| `dot vibe` | Mistral Vibe CLI passthrough |
 | `dot wallpaper` | Apply a wallpaper from your library [macOS,Linux] |
 | `dot wallpaper` | rotate Rotate to the next wallpaper in your library |
 | `dot wallpaper` | sync Sync wallpaper from your library |
-| `dot zai` | Run the ZAI CLI with dotfiles context patterns. |
+| `dot zai` | Z.ai CLI passthrough |

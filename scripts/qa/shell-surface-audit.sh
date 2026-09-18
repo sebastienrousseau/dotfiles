@@ -53,12 +53,27 @@ EOF
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --json)      JSON=1; shift ;;
-    --max-total) MAX_TOTAL=$2; shift 2 ;;
-    --root)      ROOT=$2; shift 2 ;;
-    --allowlist) ALLOWLIST=$2; shift 2 ;;
-    -h|--help)   usage 0 ;;
-    *)           echo "unknown flag: $1" >&2; usage 1 ;;
+    --json)
+      JSON=1
+      shift
+      ;;
+    --max-total)
+      MAX_TOTAL=$2
+      shift 2
+      ;;
+    --root)
+      ROOT=$2
+      shift 2
+      ;;
+    --allowlist)
+      ALLOWLIST=$2
+      shift 2
+      ;;
+    -h | --help) usage 0 ;;
+    *)
+      echo "unknown flag: $1" >&2
+      usage 1
+      ;;
   esac
 done
 
@@ -94,7 +109,7 @@ if [[ -r $ALLOWLIST ]]; then
     name=${name%"${name##*[![:space:]]}"}
     [[ -z $name ]] && continue
     ALLOWED[$name]=1
-  done < "$ALLOWLIST"
+  done <"$ALLOWLIST"
 fi
 
 # ---------------------------------------------------------------------------
@@ -117,7 +132,10 @@ declare -A BUCKETS=(
 
 count_in() {
   local dir=$1
-  [[ -d $dir ]] || { echo 0; return; }
+  [[ -d $dir ]] || {
+    echo 0
+    return
+  }
   find "$dir" -type f -name '*.sh' 2>/dev/null | wc -l
 }
 
@@ -165,8 +183,8 @@ filter_allowlist() {
 #     basenames are excluded.
 DUP_BASENAMES=$(
   for role in lib dot_command install scripts_ci scripts_ops scripts_qa \
-              scripts_security scripts_diagnostics scripts_tools scripts_lib \
-              entrypoint; do
+    scripts_security scripts_diagnostics scripts_tools scripts_lib \
+    entrypoint; do
     dir=${BUCKETS[$role]:-}
     [[ -d $dir ]] || continue
     find "$dir" -type f -name '*.sh' -printf '%f\n' 2>/dev/null
@@ -177,20 +195,20 @@ DUP_BASENAMES=$(
 #     an identifier followed by `()` counts. Skips test files.
 #     Allowlisted names are excluded.
 DUP_FUNCS=$(
-  find lib scripts bin install -type f -name '*.sh' 2>/dev/null \
-    | xargs -r grep -HnE '^[[:space:]]*[a-zA-Z_][a-zA-Z0-9_]*[[:space:]]*\(\)[[:space:]]*\{' 2>/dev/null \
-    | awk -F: '{
+  find lib scripts bin install -type f -name '*.sh' 2>/dev/null |
+    xargs -r grep -HnE '^[[:space:]]*[a-zA-Z_][a-zA-Z0-9_]*[[:space:]]*\(\)[[:space:]]*\{' 2>/dev/null |
+    awk -F: '{
         # Split "path:line:code" and pull the function name.
         code=$3
         for (i=4; i<=NF; i++) code=code ":" $i
         gsub(/^[[:space:]]*/, "", code)
         gsub(/[[:space:]]*\(\).*$/, "", code)
         print code "\t" $1
-      }' \
-    | sort -u \
-    | awk -F'\t' '{print $1}' \
-    | sort | uniq -c | awk '$1 > 1 {print $1" "$2}' \
-    | filter_allowlist
+      }' |
+    sort -u |
+    awk -F'\t' '{print $1}' |
+    sort | uniq -c | awk '$1 > 1 {print $1" "$2}' |
+    filter_allowlist
 )
 
 # ---------------------------------------------------------------------------
@@ -217,9 +235,9 @@ else
   printf 'total *.sh files: %d\n\n' "$TOTAL"
   printf 'by role:\n'
   for role in lib dot_command entrypoint install \
-              scripts_ci scripts_ops scripts_qa scripts_security \
-              scripts_diagnostics scripts_tools scripts_lib \
-              test one_off; do
+    scripts_ci scripts_ops scripts_qa scripts_security \
+    scripts_diagnostics scripts_tools scripts_lib \
+    test one_off; do
     printf '  %-22s %5d\n' "$role" "${COUNTS[$role]:-0}"
   done
 
@@ -236,14 +254,14 @@ else
   else
     printf '%s\n' "$DUP_FUNCS" | head -20 | awk '{printf "  %-4s %s\n", $1, $2}'
     over=$(echo "$DUP_FUNCS" | wc -l)
-    (( over > 20 )) && printf '  … (%d more)\n' "$((over - 20))"
+    ((over > 20)) && printf '  … (%d more)\n' "$((over - 20))"
   fi
 fi
 
 # ---------------------------------------------------------------------------
 # 4. Enforcement gate.
 # ---------------------------------------------------------------------------
-if (( MAX_TOTAL > 0 )) && (( TOTAL > MAX_TOTAL )); then
+if ((MAX_TOTAL > 0)) && ((TOTAL > MAX_TOTAL)); then
   echo "" >&2
   echo "ERROR: shell surface ($TOTAL) exceeds ceiling ($MAX_TOTAL)." >&2
   echo "Ratchet down first, or amend the ceiling with an RFC." >&2

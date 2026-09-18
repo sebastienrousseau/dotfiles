@@ -5,7 +5,7 @@ _dot_completions() {
   COMPREPLY=()
   cur="${COMP_WORDS[COMP_CWORD]}"
   prev="${COMP_WORDS[COMP_CWORD - 1]}"
-  commands='sync add diff status edit uninstall cd commit doctor attest secret-audit score snapshot chaos bundle rollback history perf benchmark metrics load-bench ai ai-setup ai-query mcp mode agent cl copilot kimi agy kiro sgpt ollama opencode aider env profile keys tools new sandbox lint learn docs theme wallpaper fonts tune secrets-init secrets secrets-create ssh-key ssh-cert backup policy encrypt-check firewall telemetry dns-doh lock-screen usb-safety fleet teleport upgrade packages cache-refresh completion search version help'
+  commands='sync apply update add remove diff status edit uninstall cd commit clean-cache doctor attest secret-audit score snapshot chaos bundle rollback history perf benchmark metrics load-bench ai ai-setup ai-query mcp mode agent cl copilot kimi agy kiro sgpt ollama opencode aider claude codex goose qwen vibe zai autohand patterns env profile keys tools new sandbox lint learn docs setup manual aliases alias-check log-rotate theme wallpaper fonts tune secrets-init secrets secrets-create ssh-key ssh-cert backup policy encrypt-check firewall telemetry dns-doh lock-screen usb-safety fleet teleport upgrade packages cache-refresh completion search version help'
   case "$prev" in
     dot)
       COMPREPLY=($(compgen -W "$commands" -- "$cur"))

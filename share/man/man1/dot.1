@@ -45,8 +45,17 @@ page.
 .B sync
 Apply dotfiles (alias for apply; \-\-pull to fetch, \-\-check to preview)
 .TP
+.B apply
+Apply dotfiles via chezmoi (canonical form of sync)
+.TP
+.B update
+Pull latest changes and apply them
+.TP
 .B add
 Add a file to chezmoi source
+.TP
+.B remove
+Safely remove a managed file (chezmoi remove \-\-keep\-source)
 .TP
 .B diff
 Show chezmoi diff with exclusions
@@ -65,6 +74,9 @@ Print source directory path (use: cd $(dot cd))
 .TP
 .B commit
 AI\-powered conventional commit
+.TP
+.B clean\-cache
+Clear shell initialization caches
 .SS Diagnostics
 .TP
 .B doctor
@@ -151,6 +163,30 @@ OpenCode with context patterns
 .TP
 .B aider
 Aider with context patterns
+.TP
+.B claude
+Claude Code CLI passthrough
+.TP
+.B codex
+Codex CLI passthrough
+.TP
+.B goose
+Goose AI assistant passthrough
+.TP
+.B qwen
+Qwen coder CLI passthrough
+.TP
+.B vibe
+Mistral Vibe CLI passthrough
+.TP
+.B zai
+Z.ai CLI passthrough
+.TP
+.B autohand
+Autohand AI orchestrator passthrough
+.TP
+.B patterns
+Manage AI steering patterns (add / list / edit / delete)
 .TP
 .B ai chat
 Start an interactive AI session with a chosen tool
@@ -272,6 +308,21 @@ Start the interactive tour of your new tools
 .TP
 .B docs
 Show repo README
+.TP
+.B setup
+Interactive setup (profile, features, secrets)
+.TP
+.B manual
+Open or download the multi\-format manual (PDF / EPUB / HTML)
+.TP
+.B aliases
+List / search / explain aliases and tiers
+.TP
+.B alias\-check
+Static\-check alias definitions for conflicts
+.TP
+.B log\-rotate
+Rotate the dotfiles log; enforces size cap and retention
 .TP
 .B env list
 List managed tool versions via mise
@@ -494,35 +545,14 @@ to reduce noise; each still works and documents itself with
 .B agents
 Synchronize and render instructions for supported AI coding harnesses.
 .TP
-.B alias\-check
-Routed to the tools module; run dot alias\-check \-\-help.
-.TP
-.B aliases
-Inspect or audit shell aliases shipped by the dotfiles.
-.TP
-.B apply
-Apply the current dotfiles to this machine.
-.TP
 .B attestation
 Routed to the diagnostics module; run dot attestation \-\-help.
-.TP
-.B autohand
-Run the Autohand CLI with dotfiles context patterns.
-.TP
-.B claude
-Run the Claude CLI bridge (alias for cl).
-.TP
-.B codex
-Run the OpenAI Codex CLI with dotfiles context patterns.
 .TP
 .B conflicts
 Routed to the diagnostics module; run dot conflicts \-\-help.
 .TP
 .B drift
 Routed to the diagnostics module; run dot drift \-\-help.
-.TP
-.B goose
-Run the Goose CLI with dotfiles context patterns.
 .TP
 .B health\-check
 Routed to the diagnostics module; run dot health\-check \-\-help.
@@ -545,20 +575,8 @@ Routed to the diagnostics module; run dot load\-bench\-pty \-\-help.
 .B locks
 Routed to the diagnostics module; run dot locks \-\-help.
 .TP
-.B log\-rotate
-Routed to the tools module; run dot log\-rotate \-\-help.
-.TP
-.B manual
-Open or download the dotfiles manual in HTML, PDF, EPUB, or text.
-.TP
-.B patterns
-Routed to the patterns module; run dot patterns \-\-help.
-.TP
 .B prewarm
 Alias of cache\-refresh — regenerate shell init caches.
-.TP
-.B qwen
-Run the Qwen Coder CLI with dotfiles context patterns.
 .TP
 .B registry
 Browse and manage reusable dotfile modules.
@@ -572,20 +590,11 @@ Routed to the diagnostics module; run dot scorecard \-\-help.
 .B security\-score
 Assess workstation security posture.
 .TP
-.B setup
-Routed to the tools module; run dot setup \-\-help.
-.TP
 .B smoke\-test
 Routed to the diagnostics module; run dot smoke\-test \-\-help.
 .TP
-.B update
-Routed to the core module; run dot update \-\-help.
-.TP
-.B vibe
-Run the Vibe AI CLI with dotfiles context patterns.
-.TP
-.B zai
-Run the ZAI CLI with dotfiles context patterns.
+.B verify
+Routed to the diagnostics module; run dot verify \-\-help.
 .SH ENVIRONMENT
 .TP
 .B DOTFILES_FAST=1

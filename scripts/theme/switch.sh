@@ -311,7 +311,8 @@ END {
   local selected_family
   selected_family="$(printf '%s' "$theme_list" | ui_pick \
     --header "Select wallpaper theme (current: $current_family [$current_mode])" \
-    --prompt "Theme >" |
+    --prompt "Theme >" \
+    --preview "$preview_cmd" |
     awk '$1 !~ /^#/ && NF >= 2 {print $2}')" || return 0
 
   if [[ -n "$selected_family" ]]; then
@@ -455,8 +456,8 @@ sync_theme() {
         local kde_scheme
         kde_scheme="$(kreadconfig6 --file kdeglobals --group General --key ColorScheme 2>/dev/null)"
         case "$kde_scheme" in
-          *Light*|*light*) os_mode="light" ;;
-          *Dark*|*dark*) os_mode="dark" ;;
+          *Light* | *light*) os_mode="light" ;;
+          *Dark* | *dark*) os_mode="dark" ;;
         esac
       fi
       ;;
@@ -526,15 +527,15 @@ ambient_theme() {
   sunset="${sunset:-19:00}"
 
   # Convert HH:MM strings to minutes since midnight for cheap comparison.
-  IFS=':' read -r hour minute <<< "$sunrise"
+  IFS=':' read -r hour minute <<<"$sunrise"
   sunrise_min=$((10#$hour * 60 + 10#$minute))
-  IFS=':' read -r hour minute <<< "$sunset"
+  IFS=':' read -r hour minute <<<"$sunset"
   sunset_min=$((10#$hour * 60 + 10#$minute))
   now="$(date +%H:%M)"
-  IFS=':' read -r hour minute <<< "$now"
+  IFS=':' read -r hour minute <<<"$now"
   now_min=$((10#$hour * 60 + 10#$minute))
 
-  if (( now_min >= sunrise_min && now_min < sunset_min )); then
+  if ((now_min >= sunrise_min && now_min < sunset_min)); then
     desired="light"
   else
     desired="dark"
@@ -561,7 +562,7 @@ ambient_enable() {
   local dot_path
   dot_path="$(command -v dot 2>/dev/null || echo "$HOME/.local/bin/dot")"
 
-  cat > "$unit_dir/dot-theme-ambient.service" <<EOF
+  cat >"$unit_dir/dot-theme-ambient.service" <<EOF
 [Unit]
 Description=Ambient theme switch (dot theme ambient)
 After=graphical-session.target
@@ -571,7 +572,7 @@ Type=oneshot
 ExecStart=${dot_path} theme ambient
 EOF
 
-  cat > "$unit_dir/dot-theme-ambient.timer" <<EOF
+  cat >"$unit_dir/dot-theme-ambient.timer" <<EOF
 [Unit]
 Description=Run 'dot theme ambient' hourly and on session start
 
@@ -626,14 +627,17 @@ case "${1:-}" in
     shift
     want="${1:-}"
     case "$want" in
-      dark|light) : ;;
+      dark | light) : ;;
       auto)
         # Alias for `dot theme sync` — more discoverable next to
         # `mode dark` / `mode light`.
         sync_theme
         exit 0
         ;;
-      *) ui_err "Usage" "dot theme mode <dark|light|auto>"; exit 1 ;;
+      *)
+        ui_err "Usage" "dot theme mode <dark|light|auto>"
+        exit 1
+        ;;
     esac
     current="$(current_theme)"
     family="${current%-dark}"
@@ -652,14 +656,14 @@ case "${1:-}" in
     # the ambient timer independently drives light/dark.
     shift
     case "${1:-}" in
-      enable|"")
+      enable | "")
         interval="${2:-30m}"
         # Accept 5m / 1h / 30s / 3600 (raw seconds also fine — systemd
         # OnUnitActiveSec is quite forgiving).
         unit_dir="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
         mkdir -p "$unit_dir"
         dot_path="$(command -v dot 2>/dev/null || echo "$HOME/.local/bin/dot")"
-        cat > "$unit_dir/dot-theme-rotate.service" <<EOF
+        cat >"$unit_dir/dot-theme-rotate.service" <<EOF
 [Unit]
 Description=Rotate wallpaper family (dot theme random)
 After=graphical-session.target
@@ -668,7 +672,7 @@ After=graphical-session.target
 Type=oneshot
 ExecStart=${dot_path} theme random
 EOF
-        cat > "$unit_dir/dot-theme-rotate.timer" <<EOF
+        cat >"$unit_dir/dot-theme-rotate.timer" <<EOF
 [Unit]
 Description=Rotate wallpaper family on interval
 
@@ -712,7 +716,7 @@ EOF
   ambient)
     shift
     case "${1:-run}" in
-      run|"") ambient_theme ;;
+      run | "") ambient_theme ;;
       enable) ambient_enable ;;
       disable) ambient_disable ;;
       status)
@@ -753,7 +757,7 @@ EOF
     {
       printf '%s\n' "$current"
       [[ -n "$rest" ]] && printf '%s\n' "$rest"
-    } > "$tmp"
+    } >"$tmp"
     mv "$tmp" "$hist"
     set_theme "$prev"
     ;;
@@ -768,7 +772,7 @@ EOF
     while IFS= read -r line; do
       printf '  %2d  %s\n' "$n" "$line"
       n=$((n + 1))
-    done < "$hist"
+    done <"$hist"
     ui_info "Current" "$(current_theme)"
     ;;
   reset)
@@ -792,12 +796,15 @@ EOF
       ui_err "Usage" "dot theme diff <theme-a> <theme-b>"
       exit 1
     fi
-    a="$1"; b="$2"
+    a="$1"
+    b="$2"
     if ! grep -q "^\[themes\.${a}\]$" "$THEMES_FILE"; then
-      ui_err "Unknown" "theme '$a'"; exit 1
+      ui_err "Unknown" "theme '$a'"
+      exit 1
     fi
     if ! grep -q "^\[themes\.${b}\]$" "$THEMES_FILE"; then
-      ui_err "Unknown" "theme '$b'"; exit 1
+      ui_err "Unknown" "theme '$b'"
+      exit 1
     fi
     ui_header "Theme diff: $a  vs  $b"
     awk -v A="$a" -v B="$b" '
@@ -880,7 +887,7 @@ EOF
     if [[ -z "$out" || "$out" == "-" ]]; then
       printf '%s\n' "$payload"
     else
-      printf '%s\n' "$payload" > "$out"
+      printf '%s\n' "$payload" >"$out"
       ui_ok "Export" "$out"
     fi
     ;;
@@ -907,7 +914,7 @@ EOF
     ui_info "Import" "$in_file"
     set_theme "$imp_theme"
     if [[ -n "$imp_fit" && "$imp_fit" != "" ]] && command -v gsettings >/dev/null 2>&1; then
-      gsettings set org.gnome.desktop.background picture-options "$imp_fit" 2>/dev/null && \
+      gsettings set org.gnome.desktop.background picture-options "$imp_fit" 2>/dev/null &&
         ui_ok "Fit" "$imp_fit"
     fi
     ;;
@@ -922,8 +929,11 @@ EOF
       exit 0
     fi
     case "$want" in
-      zoom|spanned|centered|scaled|stretched|wallpaper|none) : ;;
-      *) ui_err "Usage" "dot theme fit <zoom|spanned|centered|scaled|stretched|wallpaper|none>"; exit 1 ;;
+      zoom | spanned | centered | scaled | stretched | wallpaper | none) : ;;
+      *)
+        ui_err "Usage" "dot theme fit <zoom|spanned|centered|scaled|stretched|wallpaper|none>"
+        exit 1
+        ;;
     esac
     if command -v gsettings >/dev/null 2>&1; then
       gsettings set org.gnome.desktop.background picture-options "$want" 2>/dev/null
@@ -950,12 +960,13 @@ EOF
       wp="$(realpath -- "$wp" 2>/dev/null || readlink -f -- "$wp")"
     fi
     if [[ ! -f "$wp" ]]; then
-      ui_err "Wallpaper" "file not found: $wp"; exit 1
+      ui_err "Wallpaper" "file not found: $wp"
+      exit 1
     fi
     # Detect DE (inlined mini-detector matching dot-theme-sync).
     raw="$(printf '%s' "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}" | tr '[:upper:]' '[:lower:]')"
     case "$raw" in
-      *kde*|*plasma*) de=kde ;;
+      *kde* | *plasma*) de=kde ;;
       *xfce*) de=xfce ;;
       *) de=gnome ;;
     esac
@@ -1008,10 +1019,10 @@ EOF
     want="${1:-}"
     if [[ -z "$want" ]]; then
       ui_info "Current" "accent"
-      command -v gsettings >/dev/null 2>&1 \
-        && ui_info "GNOME" "$(gsettings get org.gnome.desktop.interface accent-color 2>/dev/null | tr -d "'")"
-      command -v kreadconfig6 >/dev/null 2>&1 \
-        && ui_info "KDE" "$(kreadconfig6 --file kdeglobals --group General --key AccentColor 2>/dev/null)"
+      command -v gsettings >/dev/null 2>&1 &&
+        ui_info "GNOME" "$(gsettings get org.gnome.desktop.interface accent-color 2>/dev/null | tr -d "'")"
+      command -v kreadconfig6 >/dev/null 2>&1 &&
+        ui_info "KDE" "$(kreadconfig6 --file kdeglobals --group General --key AccentColor 2>/dev/null)"
       exit 0
     fi
     # Map int → GNOME enum name if numeric.
@@ -1024,8 +1035,11 @@ EOF
       4) want="blue" ;;
       5) want="purple" ;;
       6) want="pink" ;;
-      blue|teal|green|yellow|orange|red|pink|purple|slate) : ;;
-      *) ui_err "Usage" "dot theme accent <int -1..6 | blue|teal|green|yellow|orange|red|pink|purple|slate>"; exit 1 ;;
+      blue | teal | green | yellow | orange | red | pink | purple | slate) : ;;
+      *)
+        ui_err "Usage" "dot theme accent <int -1..6 | blue|teal|green|yellow|orange|red|pink|purple|slate>"
+        exit 1
+        ;;
     esac
     changed=0
     if command -v gsettings >/dev/null 2>&1; then
@@ -1066,8 +1080,13 @@ EOF
     current_family="${current%-dark}"
     [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
 
-    live_dark=""; live_light=""; live_accent=""; live_scheme=""; live_cursor=""
-    kde_scheme=""; kde_accent=""
+    live_dark=""
+    live_light=""
+    live_accent=""
+    live_scheme=""
+    live_cursor=""
+    kde_scheme=""
+    kde_accent=""
     if command -v gsettings >/dev/null 2>&1; then
       live_dark="$(gsettings get org.gnome.desktop.background picture-uri-dark 2>/dev/null | tr -d "'")"
       live_light="$(gsettings get org.gnome.desktop.background picture-uri 2>/dev/null | tr -d "'")"
@@ -1090,7 +1109,7 @@ EOF
         *mate*) de=mate ;;
         *unity*) de=unity ;;
         *lxqt*) de=lxqt ;;
-        *kde*|*plasma*) de=kde ;;
+        *kde* | *plasma*) de=kde ;;
         *xfce*) de=xfce ;;
         *sway*) de=sway ;;
         *hyprland*) de=hyprland ;;
@@ -1171,13 +1190,22 @@ EOF
         --mode)
           shift
           case "${1:-}" in
-            dark|light) _rand_mode="$1" ;;
-            *) ui_err "Usage" "--mode dark|light"; exit 1 ;;
+            dark | light) _rand_mode="$1" ;;
+            *)
+              ui_err "Usage" "--mode dark|light"
+              exit 1
+              ;;
           esac
           shift
           ;;
-        --mode=*) _rand_mode="${1#--mode=}"; shift ;;
-        *) ui_err "Usage" "dot theme random [--mode dark|light]"; exit 1 ;;
+        --mode=*)
+          _rand_mode="${1#--mode=}"
+          shift
+          ;;
+        *)
+          ui_err "Usage" "dot theme random [--mode dark|light]"
+          exit 1
+          ;;
       esac
     done
     current="$(current_theme)"
