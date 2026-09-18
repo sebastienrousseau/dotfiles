@@ -153,7 +153,7 @@ Methodology: IEC 60812:2018 — Analysis techniques for system reliability.
 ## References
 
 - [IEC 60812:2018](https://www.iso.org/standard/64076.html) — Analysis techniques for system reliability
-- [AIAG FMEA Handbook](https://www.aiag.org/quality/automotive-core-tools/fmea) — Automotive Industry Action Group FMEA methodology
+- [AIAG FMEA Handbook](https://www.aiag.org/store/publications/details?ProductCode=FMEAAIAGVDA-1) — Automotive Industry Action Group FMEA methodology
 - [COMPLIANCE.md](COMPLIANCE.md) — Regulatory mapping and security controls
 - [THREAT_MODEL.md](THREAT_MODEL.md) — Trust boundaries and attack surface analysis
 - [SECURITY.md](SECURITY.md) — Vulnerability reporting and response SLAs

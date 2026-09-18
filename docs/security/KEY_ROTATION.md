@@ -25,7 +25,8 @@ Closes the rotation half of [#870](https://github.com/sebastienrousseau/dotfiles
 | Algorithm | ED25519 signing primary + CV25519 encryption subkey |
 | Created | 2026-05-16 |
 | Expires | 2029-05-15 (3 years from creation) |
-| WKD URL | <https://sebastienrousseau.com/.well-known/openpgpkey/hu/qpzqfwauiwxnu1xrf5h47bunsho44p6f> |
+| Keyserver | <https://keys.openpgp.org/search?q=sebastian.rousseau%40gmail.com> |
+| WKD URL | `https://sebastienrousseau.com/.well-known/openpgpkey/hu/qpzqfwauiwxnu1xrf5h47bunsho44p6f` — **not yet published**; the path returns 404, so fetch the key from the keyserver above until WKD is served. |
 | Cross-reference | matches the SSH signing key in `dot_config/git/allowed_signers.tmpl` |
 
 ### Rotation triggers

@@ -52,6 +52,7 @@ exclude = [
   # Requires authentication; a 404 here means "not logged in", not "broken".
   '^https://github\.com/.*/settings',
   '^https://github\.com/.*/security/advisories',
+  '^https://github\.com/.*/security/code-scanning',
 ]
 
 # Rate limits and transient 403s from bot-hostile hosts are not

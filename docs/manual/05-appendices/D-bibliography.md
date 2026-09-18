@@ -44,7 +44,7 @@ Cited works and recommended reading.
 
 ## Shell Performance
 
-- **Yoo, D.** *How to benchmark shell startup time.* <https://web.archive.org/web/2023/https://hermann.blog/benchmark-shell-startup-time>
+- **Yoo, D.** *How to benchmark shell startup time.* (Original site offline; no Wayback snapshot exists as of 2026-09-18.)
 - **Zsh manual.** *Startup files: zshenv, zprofile, zshrc.* <https://zsh.sourceforge.io/Doc/Release/Files.html>
 
 ## Documentation Systems
