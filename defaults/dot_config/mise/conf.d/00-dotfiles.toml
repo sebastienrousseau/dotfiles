@@ -134,6 +134,7 @@ uv = "latest"
 # `npm:opencode-ai` is a redundant duplicate using the broken npm optional-dep
 # wrapper pattern — do not reintroduce it.
 opencode = "latest"
+kiro-cli = "latest"
 "npm:autohand-cli" = "latest"
 "npm:@qwen-code/qwen-code" = "latest"
 "npm:@guizmo-ai/zai-cli" = "latest"
