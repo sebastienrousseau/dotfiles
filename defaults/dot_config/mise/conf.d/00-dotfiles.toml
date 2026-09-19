@@ -11,6 +11,7 @@
 # config.toml or the drift returns.
 
 [settings]
+minimum_release_age = "0s"
 # Install missing tools automatically
 auto_install = true
 # Ensure mise tool paths/shims are placed ahead of system PATH
@@ -102,7 +103,7 @@ zoxide = "latest"
 "aqua:ollama/ollama" = "latest"
 "aqua:Nukesor/pueue/pueue" = "4.0.4"
 "aqua:Nukesor/pueue/pueued" = "4.0.4"
-wasmtime = "47.0.3"
+wasmtime = "48.0.2"
 sops = "3.13.3"
 "aqua:dandavison/delta" = "latest"
 fd = "latest"
@@ -113,7 +114,7 @@ fd = "latest"
 "aqua:charmbracelet/gum" = "latest"
 "aqua:charmbracelet/glow" = "latest"
 "aqua:charmbracelet/mods" = "latest"
-"aqua:topgrade-rs/topgrade" = "latest"
+"aqua:topgrade-rs/topgrade" = "17.11.0"
 starship = "latest"
 
 # Python tools
@@ -133,7 +134,6 @@ uv = "latest"
 # `npm:opencode-ai` is a redundant duplicate using the broken npm optional-dep
 # wrapper pattern — do not reintroduce it.
 opencode = "latest"
-kiro-cli = "latest"
 "npm:autohand-cli" = "latest"
 "npm:@qwen-code/qwen-code" = "latest"
 "npm:@guizmo-ai/zai-cli" = "latest"
@@ -147,7 +147,7 @@ just = "latest"
 # mise's tool registry; the aqua: backend resolves it from the official
 # release tarballs.
 "aqua:nushell/nushell" = "0.114.1"
-"aqua:PowerShell/PowerShell" = "7.5.2"
+"aqua:PowerShell/PowerShell" = "7.6.6"
 
 [env]
 # Environment variables to set
