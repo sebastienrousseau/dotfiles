@@ -56,7 +56,8 @@ LOG="$RUNDIR/$STAMP-$MODE.log"
 MANIFEST="$RUNDIR/$STAMP-$MODE.manifest.tsv"
 RESTORE="$RUNDIR/$STAMP-restore.sh"
 RAW="$(mktemp)"
-trap 'rm -f "$RAW"' EXIT
+PRFILE="$(mktemp)"
+trap 'rm -f "$RAW" "$PRFILE"' EXIT
 : >"$LOG"
 
 #   status  repo  scope   branch  sha  reason
@@ -151,19 +152,18 @@ while IFS= read -r g; do
 
   say "=== $repo (default=$def)"
 
-  # --- merged-PR map, one API call per repo ---------------------------
-  declare -A PR_OID=() PR_NUM=()
+  # --- merged-PR table, one API call per repo --------------------------
+  # A flat "ref<TAB>oid<TAB>num" file rather than an associative array:
+  # this repo targets bash 3.2 (what macOS ships), where `declare -A` does
+  # not exist. tests/unit/shell/test_bash32_portability.sh enforces that.
+  : >"$PRFILE"
   if [[ "$HAVE_GH" == "1" ]]; then
-    # gh returns newest first; keep the newest PR per head ref.
-    while IFS=$'\t' read -r ref oid num; do
-      [[ -z "$ref" ]] && continue
-      [[ -n "${PR_OID[$ref]:-}" ]] && continue
-      PR_OID[$ref]="$oid"
-      PR_NUM[$ref]="$num"
-    done < <(gh pr list --state merged --limit 1000 \
+    # gh returns newest first; keep only the first row per head ref.
+    gh pr list --state merged --limit 1000 \
       --json headRefName,headRefOid,number \
-      --jq '.[] | [.headRefName, .headRefOid, .number] | @tsv' 2>/dev/null || true)
-    say "    (merged PRs with head refs: ${#PR_OID[@]})"
+      --jq '.[] | [.headRefName, .headRefOid, .number] | @tsv' 2>/dev/null |
+      awk -F'\t' '!seen[$1]++' >"$PRFILE" || true
+    say "    (merged PRs with head refs: $(wc -l <"$PRFILE" | tr -d ' '))"
   fi
 
   # decide <scope> <branch> <sha> -> "DELETE <reason>" | "LEAVE <reason>"
@@ -174,14 +174,17 @@ while IFS= read -r g; do
       echo "DELETE ancestor-of-$def"
       return
     fi
-    local oid="${PR_OID[$b]:-}"
-    if [[ -n "$oid" ]]; then
+    local hit oid num
+    hit="$(awk -F'\t' -v k="$b" '$1 == k { print $2 "\t" $3; exit }' "$PRFILE")"
+    if [[ -n "$hit" ]]; then
+      oid="${hit%%$'\t'*}"
+      num="${hit##*$'\t'}"
       if [[ "$sha" == "$oid" ]]; then
-        echo "DELETE pr#${PR_NUM[$b]}-merged"
+        echo "DELETE pr#${num}-merged"
       else
         # Branch moved after its PR merged: later commits are NOT in the
         # default branch, so deleting here would discard them.
-        echo "LEAVE moved-since-pr#${PR_NUM[$b]}"
+        echo "LEAVE moved-since-pr#${num}"
       fi
       return
     fi
@@ -263,7 +266,6 @@ while IFS= read -r g; do
   done < <(git branch -r --format='%(refname:short)' 2>/dev/null |
     grep '^origin/' | sed 's|^origin/||' | grep -v '^HEAD$')
 
-  unset PR_OID PR_NUM
   cd "$ROOT"
 done < <(find "$ROOT" -maxdepth 3 -name .git -type d 2>/dev/null |
   sed "s|^$ROOT/||;s|/.git$||")
