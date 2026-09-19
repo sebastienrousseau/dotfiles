@@ -627,8 +627,12 @@ _load_theme_fields() {
   if [[ -n "$kv" ]]; then
     while IFS= read -r line; do
       [[ -z "$line" ]] && continue
-      # shellcheck disable=SC2086
-      declare -g "$line"
+      # Not `declare -g`: that flag is bash 4+, and macOS ships bash 3.2 as
+      # /bin/bash, where it fails with "declare: -g: invalid option" and takes
+      # the whole script down. eval assigns at global scope here because none
+      # of the TH_* names are declared local in this function, and the value
+      # is safe for the reason given above.
+      eval "$line"
     done <<<"$kv"
   fi
   return 0
@@ -1590,7 +1594,7 @@ main() {
     fi
     _info "Would" "run chezmoi apply on 12 targeted templates"
     _info "Would" "reload: ghostty tmux niri desktop dms wallpaper browsers nvim"
-    _info "Would" "detected DE: $(bash -c 'raw="${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}"; raw="${raw,,}"; case "$raw" in *budgie*) echo budgie;; *cinnamon*) echo cinnamon;; *kde*|*plasma*) echo kde;; *xfce*) echo xfce;; *gnome*) echo gnome;; *) echo unknown;; esac' 2>/dev/null)"
+    _info "Would" "detected DE: $(bash -c 'raw="${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}"; raw="$(printf %s "$raw" | tr "[:upper:]" "[:lower:]")"; case "$raw" in *budgie*) echo budgie;; *cinnamon*) echo cinnamon;; *kde*|*plasma*) echo kde;; *xfce*) echo xfce;; *gnome*) echo gnome;; *) echo unknown;; esac' 2>/dev/null)"
     _ok "Dry-run" "complete — no changes made"
     exit 0
   fi
