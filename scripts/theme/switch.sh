@@ -291,7 +291,14 @@ in_root && /^macos_accent/ { sub(/.*= */,"");   accent_int=$0 }
 in_ui && /^accent /        { sub(/.*= *"?/,""); sub(/"$/,""); accent=$0 }
 in_term && /^bg /          { sub(/.*= *"?/,""); sub(/"$/,""); bg=$0 }
 in_term && /^fg /          { sub(/.*= *"?/,""); sub(/"$/,""); fg=$0 }
-in_term && match($0, /^c([0-9]+) *= *"([^"]+)"/, m) { term_c[m[1]+0] = m[2] }
+in_term && /^c[0-9]+ *= *"/ {
+    # Not match($0, re, m): the three-argument form is a gawk extension,
+    # and macOS ships the one-true-awk, which rejects it outright — the
+    # whole preview then dies with a syntax error.
+    _k = $0; sub(/ *=.*$/, "", _k); sub(/^c/, "", _k)
+    _v = $0; sub(/^[^"]*"/, "", _v); sub(/".*$/, "", _v)
+    term_c[_k+0] = _v
+  }
 END {
   print "family:    " F " (" M ")"
   print "wallpaper: " wallpaper
