@@ -56,8 +56,8 @@ LOG="$RUNDIR/$STAMP-$MODE.log"
 MANIFEST="$RUNDIR/$STAMP-$MODE.manifest.tsv"
 RESTORE="$RUNDIR/$STAMP-restore.sh"
 RAW="$(mktemp)"
-PRFILE="$(mktemp)"
-trap 'rm -f "$RAW" "$PRFILE"' EXIT
+PR_TABLE="$(mktemp)"
+trap 'rm -f "$RAW" "$PR_TABLE"' EXIT
 : >"$LOG"
 
 #   status  repo  scope   branch  sha  reason
@@ -156,14 +156,14 @@ while IFS= read -r g; do
   # A flat "ref<TAB>oid<TAB>num" file rather than an associative array:
   # this repo targets bash 3.2 (what macOS ships), where `declare -A` does
   # not exist. tests/unit/shell/test_bash32_portability.sh enforces that.
-  : >"$PRFILE"
+  : >"$PR_TABLE"
   if [[ "$HAVE_GH" == "1" ]]; then
     # gh returns newest first; keep only the first row per head ref.
     gh pr list --state merged --limit 1000 \
       --json headRefName,headRefOid,number \
       --jq '.[] | [.headRefName, .headRefOid, .number] | @tsv' 2>/dev/null |
-      awk -F'\t' '!seen[$1]++' >"$PRFILE" || true
-    say "    (merged PRs with head refs: $(wc -l <"$PRFILE" | tr -d ' '))"
+      awk -F'\t' '!seen[$1]++' >"$PR_TABLE" || true
+    say "    (merged PRs with head refs: $(wc -l <"$PR_TABLE" | tr -d ' '))"
   fi
 
   # decide <scope> <branch> <sha> -> "DELETE <reason>" | "LEAVE <reason>"
@@ -175,7 +175,7 @@ while IFS= read -r g; do
       return
     fi
     local hit oid num
-    hit="$(awk -F'\t' -v k="$b" '$1 == k { print $2 "\t" $3; exit }' "$PRFILE")"
+    hit="$(awk -F'\t' -v k="$b" '$1 == k { print $2 "\t" $3; exit }' "$PR_TABLE")"
     if [[ -n "$hit" ]]; then
       oid="${hit%%$'\t'*}"
       num="${hit##*$'\t'}"
