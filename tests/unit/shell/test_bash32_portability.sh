@@ -37,10 +37,21 @@ PORTABLE_DIRS=(lib scripts tools install bin)
 
 _scan() {
   local pattern="$1"
-  local dir hits=""
+  local dir f hits=""
   for dir in "${PORTABLE_DIRS[@]}"; do
     [[ -d "$dir" ]] || continue
     hits+="$(grep -rnE "$pattern" "$dir" --include='*.sh' 2>/dev/null || true)"$'\n'
+    # `bin` is in PORTABLE_DIRS but its executables carry no .sh suffix, so
+    # --include skipped every one of them — bin/dot, bin/dot-theme-sync and
+    # the rest were never scanned by any check in this file. That is how a
+    # `declare -g` reached macOS users: bash 3.2 rejects the flag outright
+    # and the script dies. Extensionless files with a bash shebang count.
+    while IFS= read -r f; do
+      [[ -n "$f" ]] || continue
+      case "$f" in *.sh) continue ;; esac
+      head -1 "$f" 2>/dev/null | grep -qE '^#!.*\bbash\b' || continue
+      hits+="$(grep -nE "$pattern" "$f" 2>/dev/null | sed "s|^|$f:|" || true)"$'\n'
+    done < <(find "$dir" -type f -perm -u+x 2>/dev/null)
   done
   printf '%s' "$hits" | grep -vE '^\s*$' || true
 }
@@ -54,6 +65,23 @@ if [[ -z "$hits" ]]; then
 else
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: mapfile/readarray are bash 4 only"
+  printf '%s\n' "$hits" | sed 's/^/      /'
+fi
+
+# ── declare -g ───────────────────────────────────────────────────────
+# bin/dot-theme-sync shipped `declare -g` and broke on every macOS box
+# whose first bash is /bin/bash 3.2: "declare: -g: invalid option", and
+# the script dies. The gate below checked mapfile, readarray and
+# declare -A but not -g, so nothing caught it until a theme test crashed
+# on a macos-14 runner.
+test_start "no_declare_g"
+hits="$(_scan '^[^#]*\bdeclare\s+-[A-Za-z]*g')"
+if [[ -z "$hits" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no declare -g"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: declare -g is bash 4 only"
   printf '%s\n' "$hits" | sed 's/^/      /'
 fi
 
