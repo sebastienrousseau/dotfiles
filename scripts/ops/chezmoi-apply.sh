@@ -13,6 +13,9 @@ source "$SCRIPT_DIR/../../lib/dot/log.sh"
 # shellcheck source=../../lib/dot/ai-install.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../../lib/dot/ai-install.sh"
+# shellcheck source=../../lib/dot/utils.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../../lib/dot/utils.sh" # check_cmd
 export DOT_COMMAND="apply"
 
 # Temp file cleanup. `set +u` guards the array expansion: on bash 3.2
@@ -176,18 +179,7 @@ if [[ "${DOTFILES_SNAPSHOT_ON_APPLY:-1}" = "1" ]]; then
   fi
 fi
 
-check_cmd() {
-  local cmd="$1"
-  if command -v "$cmd" &>/dev/null; then
-    return 0
-  fi
-  if command -v mise &>/dev/null; then
-    if mise ls --installed 2>/dev/null | grep -qE "($cmd|aqua:.*$cmd)"; then
-      return 0
-    fi
-  fi
-  return 1
-}
+# check_cmd() is provided by lib/dot/utils.sh — sourced above.
 
 echo ""
 ui_header "AI provider CLI checks (optional)"
