@@ -40,7 +40,7 @@ sed_in_place() {
   fi
 }
 
-## check_cmd — Test whether a command is invokable.
+## check_cmd — Test whether a command is invocable.
 ## Checks the process PATH first, then falls back to `mise ls --installed`
 ## so mise-managed tools (aqua:foo, npm:bar, plain foo) are recognised
 ## even when their shim hasn't been added to the current shell's PATH.
