@@ -198,7 +198,9 @@ jobs:
       min_coverage: "100"
       run_integration: true
       run_strict_checks: true
-      timeout_minutes: 15
+      # Mirrors ci.yml: the 10,526-test full suite exceeded the former 15m
+      # budget while integration was still making progress.
+      timeout_minutes: 25
 
   # ----------------------------------------------------------------------------
   # scripts/security/enforce-policies.sh. This job lives here, not in
