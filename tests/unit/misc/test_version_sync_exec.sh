@@ -6,7 +6,7 @@
 #
 # Unlike test_version_sync.sh (which only greps the source), this file
 # actually RUNS version-sync.sh against a throwaway sandbox project tree,
-# exercising arg parsing, get_package_version, validate_version,
+# exercising arg parsing, get_canonical_version, validate_version,
 # find_version_files, verify_version_consistency (both branches), and the
 # chezmoidata sync write path — the paths issue #954 flags as the biggest
 # measurable coverage gap.
@@ -157,7 +157,7 @@ test_start "version_sync_exec_invalid_version"
 run_vs "1.2"
 assert_equals "1" "$VS_RC" "malformed semver is rejected"
 
-# 4. --verify detects a markdown mismatch (README v0.0.1 vs package 9.9.9)
+# 4. --verify detects a markdown mismatch (README v0.0.1 vs canonical 9.9.9)
 build_sandbox "9.9.9" "0.0.1" "9.9.9"
 test_start "version_sync_exec_verify_mismatch"
 run_vs --verify
@@ -169,12 +169,15 @@ test_start "version_sync_exec_verify_consistent"
 run_vs --verify
 assert_equals "0" "$VS_RC" "--verify passes when versions are consistent"
 
-# 6. --force with sandbox writes enabled rewrites .chezmoidata.toml
-build_sandbox "9.9.9" "9.9.9" "0.0.1"
+# 6. --force with sandbox writes enabled regenerates package/docs from the
+# canonical manifest.
+build_sandbox "0.0.1" "0.0.1" "9.9.9"
 test_start "version_sync_exec_force_rewrites"
 ALLOW_W=1 run_vs --force --no-backup
-assert_file_contains "$CHEZMOIDATA" 'dotfiles_version = "9.9.9"' \
-  "--force syncs dotfiles_version to the package.json version"
+assert_file_contains "$SANDBOX/package.json" '"version": "9.9.9"' \
+  "--force generates package.json from the canonical dotfiles_version"
+assert_file_contains "$SANDBOX/README.md" "Version-v9.9.9" \
+  "--force generates documentation from the canonical dotfiles_version"
 
 # 7. --dry-run makes no changes
 build_sandbox "9.9.9" "9.9.9" "0.0.1"
@@ -187,7 +190,7 @@ assert_file_contains "$CHEZMOIDATA" 'dotfiles_version = "0.0.1"' \
 # script-file sync, no-backup path, and post-write verification. Keep stderr
 # visible so the xtrace coverage runner can attribute sourced and child-script
 # lines; stdout is enough to discard normal command output.
-build_sandbox "8.8.8" "0.0.1" "0.0.1"
+build_sandbox "0.0.1" "0.0.1" "8.8.8"
 test_start "version_sync_exec_branch_visible_write"
 live_bento_before="$(shasum -a 256 "$REPO_ROOT/lib/dot/bento.sh" | awk '{print $1}')"
 (
@@ -205,7 +208,7 @@ assert_file_contains "$SANDBOX/scripts/git-hooks/pre-commit-audit.sh" "v8.8.8 st
   "write path updates pre-commit audit banner"
 
 # 9. Coverage-visible fallback discovery: remove rg/jq from PATH so
-# find_version_files and get_package_version take the portable sed/grep path.
+# find_version_files takes the portable find/grep path.
 build_sandbox "7.7.7" "0.0.1" "0.0.1"
 test_start "version_sync_exec_branch_visible_portable_fallbacks"
 (
@@ -247,7 +250,7 @@ assert_file_contains "$CHEZMOIDATA" 'dotfiles_version = "5.5.4"' \
 # shaped stamp in the same file is therefore left behind by the sync and then
 # found by the verification pass — which is exactly the failure mode that pass
 # exists for.
-build_sandbox "4.4.4" "0.0.1" "0.0.1"
+build_sandbox "0.0.1" "0.0.1" "4.4.4"
 printf 'echo "(v0.0.2)"\n' >>"$SANDBOX/scripts/git-hooks/pre-commit-audit.sh"
 test_start "version_sync_exec_post_write_verification_failure"
 ALLOW_W=1 run_vs --force --no-backup
@@ -266,6 +269,8 @@ ln -s "$VERSION_FILE" "$EMPTY/scripts/version-sync.sh"
 # make this "empty" project not empty.
 cp -R "$REPO_ROOT/lib/dot" "$EMPTY/lib/dot"
 printf '{\n  "version": "3.3.3"\n}\n' >"$EMPTY/package.json"
+mkdir -p "$EMPTY/defaults"
+printf 'dotfiles_version = "3.3.3"\n' >"$EMPTY/defaults/.chezmoidata.toml"
 VS_RC=0
 VS_OUT="$(
   cd "$EMPTY" &&
@@ -275,36 +280,34 @@ assert_equals "0" "$VS_RC" "an empty project should exit 0"
 assert_contains "No files with version references" "$VS_OUT" \
   "the empty-project path should say why it did nothing"
 
-# 14. The version is read from package.json by sed when jq is unavailable.
-# Every other case either supplies a version explicitly or has jq on PATH, so
-# get_package_version's portable arm had never run.
-build_sandbox "2.2.2" "0.0.1" "0.0.1"
-test_start "version_sync_exec_reads_package_version_without_jq"
+# 14. The canonical manifest is read without jq or another TOML dependency.
+build_sandbox "0.0.1" "0.0.1" "2.2.2"
+test_start "version_sync_exec_reads_canonical_version_without_jq"
 VS_RC=0
 VS_OUT="$(
   cd "$SANDBOX" &&
     PATH="$PORTABLE_PATH" DOTFILES_ALLOW_COVERAGE_WRITES=0 \
       bash scripts/version-sync.sh --dry-run 2>&1
 )" || VS_RC=$?
-assert_equals "0" "$VS_RC" "the sed fallback should read package.json cleanly"
-assert_contains "package.json version: 2.2.2" "$VS_OUT" \
-  "the version should be recovered without jq"
+assert_equals "0" "$VS_RC" "the canonical version should be read cleanly"
+assert_contains "canonical dotfiles_version: 2.2.2" "$VS_OUT" \
+  "the canonical version should be recovered without a TOML dependency"
 
-# 15. package.json missing entirely.
-test_start "version_sync_exec_requires_package_json"
+# 15. Canonical manifest missing entirely.
+test_start "version_sync_exec_requires_canonical_manifest"
 build_sandbox "1.1.1" "0.0.1" "0.0.1"
-rm -f "$SANDBOX/package.json"
+rm -f "$CHEZMOIDATA"
 run_vs
-assert_equals "1" "$VS_RC" "a missing package.json should exit 1"
-assert_contains "package.json not found" "$VS_OUT" "the failure should say so"
+assert_equals "1" "$VS_RC" "a missing canonical manifest should exit 1"
+assert_contains "Canonical version manifest not found" "$VS_OUT" "the failure should say so"
 
-# 16. package.json present but carrying no usable version.
-test_start "version_sync_exec_rejects_an_unreadable_package_version"
+# 16. Canonical manifest present but carrying no usable version.
+test_start "version_sync_exec_rejects_an_unreadable_canonical_version"
 build_sandbox "1.1.1" "0.0.1" "0.0.1"
-printf '{\n  "name": "demo"\n}\n' >"$SANDBOX/package.json"
+printf 'profile = "demo"\n' >"$CHEZMOIDATA"
 run_vs
-assert_equals "1" "$VS_RC" "a package.json with no version should exit 1"
-assert_contains "Could not extract version" "$VS_OUT" "the failure should say so"
+assert_equals "1" "$VS_RC" "a canonical manifest with no version should exit 1"
+assert_contains "Could not extract dotfiles_version" "$VS_OUT" "the failure should say so"
 
 # 17. --backup is also spelled -b, and asking for it explicitly is a
 # different arm of the option parser from letting it default.
@@ -314,5 +317,14 @@ ALLOW_W=1 run_vs -b --force
 assert_equals "0" "$VS_RC" "-b should be accepted"
 assert_dir_exists "$SANDBOX/.version-sync-backup" \
   "-b should create the backup directory"
+
+# 18. Generated package metadata is required once synchronization reaches the
+# write phase; silently omitting it would produce an incomplete release.
+build_sandbox "1.1.1" "0.0.1" "1.1.1"
+rm -f "$SANDBOX/package.json"
+test_start "version_sync_exec_requires_generated_package_surface"
+ALLOW_W=1 run_vs --force --no-backup
+assert_equals "1" "$VS_RC" "a missing package.json should exit 1"
+assert_contains "package.json not found" "$VS_OUT" "the failure should say so"
 
 printf 'RESULTS:%s:%s:%s\n' "$TESTS_RUN" "$TESTS_PASSED" "$TESTS_FAILED"

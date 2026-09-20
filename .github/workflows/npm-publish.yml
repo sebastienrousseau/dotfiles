@@ -50,6 +50,9 @@ jobs:
           fi
           cat package.json
 
+      - name: Verify packed artifact allowlist
+        run: node scripts/qa/verify-npm-package.mjs
+
       # Trusted Publishing (OIDC). The GitHub Actions OIDC token is
       # exchanged with npmjs.com for a short-lived publish credential;
       # provenance is attached automatically and cryptographically tied
@@ -86,6 +89,9 @@ jobs:
           node-version: '24'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@sebastienrousseau'
+
+      - name: Verify packed artifact allowlist
+        run: node scripts/qa/verify-npm-package.mjs
 
       # Skip cleanly if this version is already on GPR (avoids 409 on
       # workflow re-dispatches against an already-published release).

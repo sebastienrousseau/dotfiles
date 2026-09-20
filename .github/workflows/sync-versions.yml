@@ -6,19 +6,27 @@ on:
     paths:
       - '**/*.md'
       - 'package.json'
+      - 'defaults/.chezmoidata.toml'
+      - 'install.sh'
       - 'scripts/version-sync.sh'
+      - 'scripts/verify-release-versions'
+      - 'scripts/release-preflight'
       - 'docs/operations/VERSION_SYNC.md'
   pull_request:
     branches: [main]
     paths:
       - '**/*.md'
       - 'package.json'
+      - 'defaults/.chezmoidata.toml'
+      - 'install.sh'
       - 'scripts/version-sync.sh'
+      - 'scripts/verify-release-versions'
+      - 'scripts/release-preflight'
       - 'docs/operations/VERSION_SYNC.md'
   workflow_dispatch:
     inputs:
       target_version:
-        description: 'Target version to sync (defaults to package.json)'
+        description: 'Target version to sync (defaults to canonical .chezmoidata.toml)'
         required: false
         type: string
 
@@ -100,7 +108,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ github.event.inputs.target_version }}" ]]; then
             TARGET_VERSION="${{ github.event.inputs.target_version }}"
           else
-            TARGET_VERSION="$(jq -r '.version' package.json)"
+            TARGET_VERSION="$(sed -nE 's/^[[:space:]]*dotfiles_version[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' defaults/.chezmoidata.toml)"
           fi
           echo "target_version=$TARGET_VERSION" >> "$GITHUB_OUTPUT"
           echo "Target version: $TARGET_VERSION"

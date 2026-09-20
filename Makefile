@@ -109,9 +109,11 @@ check-drift: ## Fail if any generated artefact is stale (what doc-drift.yml runs
 	bash ./tools/docs/generate-manpage.sh --check
 	bash ./tools/docs/generate-completions.sh --check
 	bash ./scripts/verify-release-versions
+	bash ./scripts/release-preflight
 
 verify-versions: ## Assert every version surface matches the manifest
 	bash ./scripts/verify-release-versions
+	bash ./scripts/release-preflight
 
 # ── Docs ───────────────────────────────────────────────────────────────
 docs: ## Build the MkDocs manual with warnings denied

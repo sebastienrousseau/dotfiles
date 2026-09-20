@@ -4,126 +4,84 @@ render_with_liquid: false
 
 # CI Dependency Pinning Policy
 
-Every external dependency the CI pipeline consumes must be pinned by
-40-hex commit SHA. The policy applies to:
+CI references use two different trust models. They must not be conflated.
 
-1. **Third-party actions** — `uses: owner/action@<sha>` (already enforced via Scorecard's `Pinned-Dependencies` check at score ≥ 9).
-2. **Reusable workflows in this repo** — `uses: sebastienrousseau/dotfiles/.github/workflows/reusable-X.yml@<sha>` (added with [#855](https://github.com/sebastienrousseau/dotfiles/issues/855); enforced by `tools/ci/lint-reusable-pins.sh`).
-3. **Container base images** — `FROM image:tag@sha256:<digest>` (closed by [#886](https://github.com/sebastienrousseau/dotfiles/pull/886)).
-4. **Release binaries downloaded at build time** — `curl … && echo "<sha256> ..." | sha256sum -c` (closed by [#888](https://github.com/sebastienrousseau/dotfiles/pull/888)).
+1. **Third-party actions** use `owner/action@<40-hex-commit-sha>`.
+2. **Third-party reusable workflows** use
+   `owner/repository/.github/workflows/file.yml@<40-hex-commit-sha>`.
+3. **Reusable workflows in this repository** use
+   `./.github/workflows/file.yml`.
+4. **Container images and downloaded release binaries** use immutable digests
+   or verified SHA256 manifests.
 
-The sole exception is the SLSA generic reusable workflow. Its bootstrap
-validates that the caller reference has the form `refs/tags/vX.Y.Z` and
-fails when invoked through a bare commit SHA. Therefore
-`generator_generic_slsa3.yml` is pinned to the exact release tag
-`v2.1.0`; the corresponding commit SHA is recorded beside the call site
-and must be verified before any tag bump. OpenSSF Scorecard explicitly
-exempts the SLSA generator from its SHA-pinning check for this constraint.
+The SLSA generic generator remains the documented exception: its bootstrap
+requires a release-tag reference. The corresponding commit is recorded beside
+the call site and reviewed whenever the tag changes.
 
-## Why SHA-pin reusable workflows
+## Why local references are required in this repository
 
-When `ci.yml` calls a reusable via `./.github/workflows/reusable-X.yml`,
-GitHub resolves the reusable from the **same ref as the calling
-workflow at run time**. For an in-repo PR that's the PR's branch —
-fine. The risk is the inverse: a malicious push to `main` (or any
-ref the calling workflow might resolve from) can swap reusable
-content under a CI run, with no audit trail in the PR diff.
-
-Pinning to a 40-hex SHA freezes the reusable's content at the
-pinned commit. To swap the reusable, you have to bump every call
-site — visible in the PR diff, reviewable, revertible.
-
-## Acceptable forms
+A local reusable-workflow reference is resolved from the same commit as its
+caller. Consequently, a pull request that changes
+`reusable-shell-lint.yml` executes that changed workflow during the pull
+request. An owner/repository reference pinned to an older SHA is immutable,
+but it executes stale code and can let a broken or weakened reusable workflow
+merge without ever being tested.
 
 ```yaml
-# Acceptable — full SHA pin.
-uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e # main
+# Required for a workflow in this repository.
+uses: ./.github/workflows/reusable-shell-lint.yml
+
+# Required for a workflow owned by another repository.
+uses: example/security-workflows/.github/workflows/audit.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e
 ```
 
-The trailing comment is a human-readable hint at what the SHA
-represented when it was pinned (typically `main`, sometimes a tag
-like `v0.2.501`). The hint is documentation only — the SHA is what
-GitHub uses.
+The security boundary is therefore:
+
+- same repository: same reviewed commit;
+- external repository: immutable reviewed commit.
 
 ## Rejected forms
 
 ```yaml
-# Rejected — relative path is a mutable ref.
-uses: ./.github/workflows/reusable-shell-lint.yml
+# Rejected: bypasses changes to the reusable workflow in the current PR.
+uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@b0615f8fb5c0f3826f58904a5567eff11b6c500e
 
-# Rejected — branch ref is mutable.
-uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@main
+# Rejected: mutable external branch or tag.
+uses: example/security-workflows/.github/workflows/audit.yml@main
+uses: example/security-workflows/.github/workflows/audit.yml@v1
 
-# Rejected — tag ref is mutable (tags can be moved).
-uses: sebastienrousseau/dotfiles/.github/workflows/reusable-shell-lint.yml@v0.2.501
+# Rejected: abbreviated external commit identifier.
+uses: example/security-workflows/.github/workflows/audit.yml@b0615f8f
 ```
 
-The `lint-reusable-pins` job in `ci.yml` runs `tools/ci/lint-reusable-pins.sh`
-on every workflow change. The lint fails the build on any of the
-rejected forms above.
+## Enforcement
 
-## Refreshing pinned SHAs
+`tools/ci/lint-reusable-pins.sh` validates both parts of the policy. Its name
+is retained for compatibility with existing hooks and coverage accounting.
+The fixture tests in `tests/unit/ci/test_reusable_pin_lint.sh` prove that:
 
-`bump-reusable-pins.yml` handles this automatically. On every push to
-`main` that touches `.github/workflows/reusable-*.yml`, the bot scans
-caller workflows for stale pins and opens a PR bumping them to the new
-SHA. Signed with `ACTIONS_BOT_SIGNING_KEY` so the resulting commit
-passes `Verify Commit Signatures`.
+- local same-repository references pass;
+- remote references back to this repository fail, even at a full SHA;
+- external full-SHA references pass; and
+- mutable or abbreviated external references fail.
 
-The manual recipe below stays here as a fallback — for example, if you
-need to bump pins before a merge to main, or if the bot's run failed
-and you want to short-circuit waiting for the next push trigger.
+Run the policy locally with:
 
 ```sh
-# 1. Land the change to the reusable on main via a PR.
-# 2. After merge, capture the new main SHA:
-git fetch origin main
-PIN=$(git rev-parse origin/main)
-echo "$PIN"
-
-# 3. Bump every call site:
-find .github/workflows -name '*.yml' -exec sed -i.bak -E \
-  "s|(/reusable-[a-z0-9-]+\.yml@)[0-9a-f]{40}|\\1${PIN}|g" {} +
-rm -f .github/workflows/*.bak
-
-# 4. Verify the lint still passes:
 bash tools/ci/lint-reusable-pins.sh
-
-# 5. Land the bump on a follow-up PR with a single-purpose commit:
-git commit -am "chore(ci): bump reusable-workflow pins to ${PIN:0:10}"
+bash tests/unit/ci/test_reusable_pin_lint.sh
 ```
-
-Whether bumped by the bot or by hand, the resulting PR runs the full
-CI suite — a reviewer still confirms the new reusable content is
-intentional before merge.
 
 ## Dependabot
 
-Dependabot's `github-actions` ecosystem now updates full-SHA references to
-same-repository reusable workflows. PR
-[#992](https://github.com/sebastienrousseau/dotfiles/pull/992) verified this
-behavior by moving the reusable workflow baseline from v0.2.511 to the
-immutable v0.2.516 commit alongside the external minor/patch action group.
+Dependabot continues to update third-party GitHub Actions. Local reusable
+workflows are repository source, not dependencies, so they need no pin-bump
+automation. Removing that automation also removes its write-capable token and
+the former two-PR “change then refresh pins” release cycle.
 
-Keep `bump-reusable-pins.yml` enabled as the immediate post-merge path. It
-updates callers as soon as a reusable workflow changes on `main`, while
-Dependabot provides the scheduled dependency review and grouped update path.
-Both mechanisms must preserve full 40-hex SHA references and pass
-`lint-reusable-pins` plus the egress-policy contract tests.
+## References
 
-## Negative test
-
-`tests/unit/ci/test_reusable_pin_lint.sh` deliberately drops an
-unpinned reusable reference into a sandboxed workflow tree and
-asserts that `lint-reusable-pins.sh` exits non-zero with the
-expected error message. The test runs as part of the standard
-test suite — a regression in the lint catches at PR time, not at
-merge time.
-
-## See also
-
-- [#855](https://github.com/sebastienrousseau/dotfiles/issues/855) — original tracking issue.
-- `tools/ci/lint-reusable-pins.sh` — the enforcement script.
-- `tests/unit/ci/test_reusable_pin_lint.sh` — the negative test.
-- `.github/workflows/bump-reusable-pins.yml` — the auto-bump bot.
-- [GitHub: pinning actions to a full-length commit SHA](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions).
+- [GitHub workflow syntax: reusable workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_iduses)
+- [GitHub secure use reference](https://docs.github.com/en/actions/reference/security/secure-use)
+- `tools/ci/lint-reusable-pins.sh`
+- `tests/unit/ci/test_reusable_pin_lint.sh`

@@ -54,7 +54,8 @@ into `defaults/`.
 **B. Adopt this repo's defaults** and layer your changes on top:
 
 ```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+# Download and verify the release installer per docs/guides/INSTALL.md first.
+bash /tmp/dotfiles-install.sh
 ```
 
 Path A continues below.
@@ -64,7 +65,8 @@ Path A continues below.
 ```sh
 old_source="$(chezmoi source-path)"
 
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+# Download and verify the release installer per docs/guides/INSTALL.md first.
+bash /tmp/dotfiles-install.sh
 
 # Copy your source files under defaults/, preserving chezmoi's naming.
 rsync -av --exclude '.git' "$old_source/" ~/.dotfiles/defaults/

@@ -41,7 +41,8 @@ The installer does not touch yadm's repo (`~/.local/share/yadm/repo.git`)
 or its config, so both can coexist while you migrate.
 
 ```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+# Download and verify the release installer per docs/guides/INSTALL.md first.
+bash /tmp/dotfiles-install.sh
 dot version
 ```
 

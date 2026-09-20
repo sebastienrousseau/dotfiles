@@ -219,6 +219,7 @@ Every `dot` command's individually-enforced subcommands (see `dot help`).
 | `dot theme set` | Set a family to auto mode or an explicit light/dark variant (interactive picker if omitted) |
 | `dot theme toggle` | Toggle light/dark within the current theme family |
 | `dot theme mode` | Select `dark`, `light`, or OS-following `auto` mode |
+| `dot theme plan` | Produce a pure human or JSON transaction plan without writes or reloads |
 | `dot theme sync` | Enable auto mode and sync immediately with system appearance |
 | `dot theme family` | Cycle between theme families |
 | `dot theme current` | Show the current theme info |

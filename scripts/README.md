@@ -32,7 +32,8 @@ few specialised subtrees.
 | `scripts/git-hooks/` | Git hooks not managed by chezmoi (kept here for portable install). | `install/provision/*` |
 | `scripts/qa/` | Quality-assurance helpers (PowerShell contract tests, version-consistency checks, scorecard snapshot, etc). | `.github/workflows/pr-signature.yml`, `powershell-contract.yml`, doc-drift |
 | `scripts/demo/` | Demonstration helpers (recordings, screenshots). | Manual |
-| `scripts/version-sync.sh` | Bulk version-string propagator (`scripts/qa/check-version-consistency.sh` is the verifier). | Release flow |
+| `scripts/version-sync.sh` | Propagates canonical `defaults/.chezmoidata.toml` version metadata to generated surfaces. | Release flow |
+| `scripts/release-preflight` | Rejects version drift, reused immutable tags, and installer checksum drift before release. | Release flow / CI |
 | `scripts/uninstall.sh` | Reverse-of-`install.sh` — user-invoked. | Manual |
 
 ### `tools/` (repo-only ops, not distributable)

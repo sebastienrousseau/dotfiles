@@ -49,4 +49,86 @@ assert_file_contains "$SANDBOX/.config/opencode/cli.json" '"name": "system"' \
 assert_file_contains "$SANDBOX/.config/opencode/cli.json" '"mode": "light"' \
   "OpenCode receives the active mode"
 
+printf '%s\n' '{not-json' >"$SANDBOX/.gemini/settings.json"
+invalid_before="$(shasum -a 256 "$SANDBOX/.gemini/settings.json" | awk '{print $1}')"
+result_json="$(python3 "$ADAPTER" --theme maui-dark --themes-file "$THEMES" \
+  --home "$SANDBOX" --json)"
+
+test_start "ai_theme_adapter_emits_typed_results"
+assert_output_contains '1.0|dark|invalid_config' \
+  "printf '%s' '$result_json' | python3 -c 'import json,sys; d=json.load(sys.stdin); g=next(p for p in d[\"providers\"] if p[\"provider\"] == \"gemini\"); print(d[\"schema_version\"], d[\"mode\"], g[\"status\"], sep=\"|\")'"
+
+test_start "ai_theme_adapter_preserves_malformed_json"
+assert_equals "$invalid_before" \
+  "$(shasum -a 256 "$SANDBOX/.gemini/settings.json" | awk '{print $1}')" \
+  "malformed provider config must remain byte-identical"
+
+printf '%s\n' 'not = [valid' >"$SANDBOX/.codex/config.toml"
+codex_before="$(shasum -a 256 "$SANDBOX/.codex/config.toml" | awk '{print $1}')"
+result_json="$(python3 "$ADAPTER" --theme maui-dark --themes-file "$THEMES" \
+  --home "$SANDBOX" --json)"
+
+test_start "ai_theme_adapter_preserves_malformed_toml"
+assert_equals "$codex_before" \
+  "$(shasum -a 256 "$SANDBOX/.codex/config.toml" | awk '{print $1}')" \
+  "malformed Codex config must remain byte-identical"
+
+policy="$SANDBOX/features.toml"
+cat >"$policy" <<'TOML'
+[features]
+ai_theme_sync = false
+TOML
+claude_before="$(shasum -a 256 "$SANDBOX/.claude/settings.json" | awk '{print $1}')"
+result_json="$(python3 "$ADAPTER" --theme maui-dark --themes-file "$THEMES" \
+  --home "$SANDBOX" --defaults-config "$policy" --json)"
+
+test_start "ai_theme_adapter_honours_global_opt_out"
+assert_output_contains 'disabled' \
+  "printf '%s' '$result_json' | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(p[\"status\"] for p in d[\"providers\"] if p[\"provider\"] == \"claude\"))'"
+
+test_start "ai_theme_adapter_opt_out_performs_no_write"
+assert_equals "$claude_before" \
+  "$(shasum -a 256 "$SANDBOX/.claude/settings.json" | awk '{print $1}')"
+
+cat >"$policy" <<'TOML'
+[features]
+ai_theme_sync = true
+
+[features.ai_theme_providers]
+gemini = false
+TOML
+result_json="$(python3 "$ADAPTER" --theme maui-dark --themes-file "$THEMES" \
+  --home "$SANDBOX" --defaults-config "$policy" --json)"
+
+test_start "ai_theme_adapter_honours_provider_opt_out"
+assert_output_contains 'disabled' \
+  "printf '%s' '$result_json' | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(p[\"status\"] for p in d[\"providers\"] if p[\"provider\"] == \"gemini\"))'"
+
+cas_file="$SANDBOX/cas-provider.json"
+printf '%s\n' '{"owner":"original"}' >"$cas_file"
+cat >"$SANDBOX/test-cas.py" <<'PY'
+import pathlib
+import runpy
+import sys
+
+module = runpy.run_path(sys.argv[1])
+target = pathlib.Path(sys.argv[2])
+expected = module["content_hash"](target)
+target.write_text('{"owner":"concurrent"}\n', encoding="utf-8")
+try:
+    module["atomic_text"](target, '{"owner":"dot"}\n', expected_hash=expected)
+except module["ConcurrentModificationError"]:
+    pass
+else:
+    raise SystemExit("compare-before-commit accepted stale input")
+if target.read_text(encoding="utf-8") != '{"owner":"concurrent"}\n':
+    raise SystemExit("concurrent content was overwritten")
+PY
+
+test_start "ai_theme_adapter_rejects_concurrent_modification"
+assert_exit_code 0 "python3 '$SANDBOX/test-cas.py' '$ADAPTER' '$cas_file'"
+
+test_start "ai_theme_result_schema_is_committed"
+assert_file_exists "$REPO_ROOT/schemas/ai-theme-result.schema.json"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

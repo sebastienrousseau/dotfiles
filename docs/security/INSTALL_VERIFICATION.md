@@ -18,8 +18,8 @@ anything destructive:
 
 ### 1. The installer itself (verified path)
 
-The README's **Verified install** snippet pins to a release tag
-(e.g. `v0.2.501`), downloads the installer, and asks `shasum -a 256
+The README's **Verified release installer** snippet pins to a release asset,
+downloads the installer, and asks `shasum -a 256
 -c` (or `sha256sum -c`) to check the contents against an expected
 hash. If the hash doesn't match, the verify step exits non-zero and
 the install never starts.
@@ -27,7 +27,9 @@ the install never starts.
 ### 2. The `chezmoi` binary (always verified when possible)
 
 `install.sh` prefers the bundled checksum-verified installer at
-`tools/ci/install-chezmoi-verified.sh`, which:
+`tools/ci/install-chezmoi-verified.sh`. A release-pinned standalone copy uses
+the same verification algorithm embedded in `install.sh`, so the secure path
+does not depend on another unverified download. Both implementations:
 
 - Resolves the platform (`uname -s` + `uname -m`).
 - Downloads `chezmoi_<version>_<os>_<arch>.tar.gz` AND the matching
@@ -39,17 +41,9 @@ the install never starts.
 - Aborts with a clear error if the asset isn't in the checksum file
   or the verification fails.
 
-When the verified installer isn't available (e.g. the curl one-liner
-mode where `install.sh` is fetched in isolation), the code falls back
-to `get.chezmoi.io` with two defense-in-depth checks:
-
-- The downloaded installer must be smaller than 100 KiB (sanity
-  guard against a CDN serving an arbitrary binary).
-- The first line must start with `#!/` (must look like a shell
-  script).
-
-These are weaker than a SHA256 check, but they catch the obvious
-"installer got replaced with a 50 MB malicious binary" failure mode.
+No path pipes `get.chezmoi.io` or another moving remote script into a shell.
+If the upstream checksum manifest is absent, the requested archive is absent,
+or the digest differs, installation fails closed.
 
 ### 3. The chezmoi source tree
 
@@ -60,26 +54,22 @@ branch protection on `main` requires signed commits (see #853).
 
 ## How to obtain per-release hashes
 
-The verified-install snippet uses the SHA256 of the `install.sh`
-file *as it exists at the release tag*. To regenerate after a release:
+The release workflow copies `install.sh` to
+`dotfiles-install-<version>.sh`, publishes a `.sha256` sibling, generates a
+keyless Sigstore bundle, and includes the installer in the build-provenance
+attestation and release-wide signed manifest. To update the README before a
+release:
 
 ```bash
 git switch main
 git pull
-NEW_TAG="v0.2.502"   # adjust
-git tag -s "$NEW_TAG" -m "..."
-git push origin "$NEW_TAG"
+NEW_TAG="v0.2.521"   # adjust
 
 # Compute the hash:
 shasum -a 256 install.sh
 
-# Update README.md's verified-install snippet with the new hash + tag.
+# Update README.md's verified-install snippet with the new hash + version.
 ```
-
-A follow-up automation (tracked at the bottom of this page) will
-publish a `.sha256` sibling next to the install.sh asset in GitHub
-Releases so the README snippet can reference a stable URL instead
-of a hardcoded value.
 
 ## What to do if the hash doesn't match
 
@@ -92,14 +82,11 @@ If you run the verified install and `shasum -a 256 -c` reports
    for the matching tag. The per-release `install.sh` SHA is
    embedded in the README at the time of that release; you can also
    recover it from the git history of `README.md`.
-3. If the README hash is stale (release was retagged for legitimate
-   reasons), `git log` on `install.sh` will show the change. Inspect
-   the diff before trusting a new hash.
+3. Release tags are immutable. If the README hash is stale, do not retag;
+   correct the release process and publish a new patch version.
 
 ## What is NOT verified (yet)
 
-- **Cosign keyless signature** on `install.sh` — tracked separately
-  under #876.
 - **deps.dev attestation lookup** for npm/Python deps used during
   install — tracked under #877.
 - **Reproducible-build guarantee** for the chezmoi binary itself —

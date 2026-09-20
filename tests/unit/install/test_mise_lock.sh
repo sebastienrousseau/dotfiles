@@ -10,6 +10,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 config="$REPO_ROOT/mise.toml"
 lock="$REPO_ROOT/mise.lock"
+global_config="$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml"
 
 test_start "mise_lock_exists"
 assert_file_exists "$lock" "cross-platform mise lockfile exists"
@@ -25,6 +26,21 @@ else
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
+
+test_start "mise_global_config_has_release_quarantine"
+assert_file_contains "$global_config" 'minimum_release_age = "7d"' "new tool releases age for seven days before auto-install"
+
+test_start "mise_global_config_does_not_export_github_token"
+if grep -Eq '^[[:space:]]*GITHUB_TOKEN[[:space:]]*=' "$global_config"; then
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: global child processes would inherit GitHub credentials"
+else
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: GitHub credentials remain task-scoped"
+fi
+
+test_start "mise_global_config_does_not_materialize_gh_token"
+assert_output_not_contains "gh auth token" "cat '$global_config'"
 
 for tool in node rust go bun starship wasmtime sops yazi zellij; do
   test_start "mise_lock_contains_${tool}"

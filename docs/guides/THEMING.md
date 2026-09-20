@@ -48,6 +48,19 @@ dot theme tahoe-dark
 
 Sets the theme immediately. Regenerates configs and reloads running applications.
 
+### Preview the Transaction
+
+```bash
+dot theme plan maui --mode auto
+dot theme plan maui --mode auto --json
+```
+
+Planning is pure: it does not acquire the apply lock, create state, render a
+template, reload an application, or use the network. JSON plans conform to
+`schemas/theme-plan.schema.json` and include the operation identity, previous
+and desired theme identities, installed targets, required/optional status, and
+pre-change hashes.
+
 ### Rebuild Themes
 
 ```bash
@@ -60,17 +73,42 @@ Discovers wallpapers from system + custom paths, runs K-Means extraction in para
 
 ### Under the Hood: dot-theme-sync
 
-`dot-theme-sync` handles the full switching pipeline:
+`dot-theme-sync` handles the switching pipeline as a per-user transaction:
 
-1. Writes the new theme name into `.chezmoidata.toml` (and `chezmoi.toml` if present).
-   If those files drift, `dot-theme-sync` now resynchronizes them before rendering because `chezmoi.toml` `[data]` overrides the source data file.
-2. Runs a targeted `chezmoi apply` on theme-dependent config files only -- much faster than a full apply.
-3. Signals running applications to reload and coordinates browser-facing theme state:
+1. Acquires an exclusive, portable user lock and records its PID and operation ID.
+2. Snapshots installed file targets, including symlink identity, into a private operation directory.
+3. Writes machine-local runtime state to `~/.config/chezmoi/chezmoi.toml`; the tracked `.chezmoidata.toml` remains the fresh-install default.
+4. Runs a targeted `chezmoi apply` and treats renderer failures as required transaction failures.
+5. Updates optional AI-provider fragments and reloads installed applications.
+6. Reads back the active theme identity, writes a versioned JSON journal, and releases the lock.
+7. On a required failure or signal, restores files in reverse order and records `rolled_back` or `rollback_failed`.
 
 ```bash
 dot-theme-sync                    # Reload current theme
 dot-theme-sync macos-wave-light   # Switch to a new theme
+dot-theme-sync maui-dark --plan --json
 dot-theme-sync --full             # Full chezmoi apply instead of targeted
+```
+
+Journals and snapshots are retained under
+`$XDG_STATE_HOME/dot/theme-transactions/` (default
+`~/.local/state/dot/theme-transactions/`) for the latest 20 operations. File
+mutations are reversible in this milestone; desktop IPC and system appearance
+reloads remain best-effort adapters and are explicitly reported as optional
+results.
+
+AI CLI provider files remain user-owned. The adapter validates JSON or TOML,
+checks that the file hash has not changed immediately before its atomic rename,
+and reports `invalid_config`, `conflict`, or `write_failed` without replacing
+the file. Disable all provider updates, or one provider, in the machine-local
+chezmoi configuration:
+
+```toml
+[data.features]
+ai_theme_sync = false
+
+[data.features.ai_theme_providers]
+gemini = false
 ```
 
 ## What Changes

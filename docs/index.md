@@ -99,7 +99,8 @@ Install onto a fresh machine:
 === "macOS / Linux / WSL"
 
     ```bash
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+    # Download and SHA256-verify the release asset as shown in Install.
+    bash /tmp/dotfiles-install.sh
     ```
 
 === "Windows (PowerShell 7+)"

@@ -68,7 +68,8 @@ it, but move it first to avoid the confusion entirely:
 mv "$HOME/.dotfiles" "$HOME/.dotfiles.bare.bak"
 alias config='git --git-dir=$HOME/.dotfiles.bare.bak --work-tree=$HOME'
 
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+# Download and verify the release installer per docs/guides/INSTALL.md first.
+bash /tmp/dotfiles-install.sh
 ```
 
 Your files in `$HOME` are untouched by the move — only the git

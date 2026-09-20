@@ -12,10 +12,11 @@ Set up on macOS, Linux, or WSL in 3 to 5 minutes.
 
 ## Install
 
+Download and SHA256-verify the release-pinned installer using the canonical
+command in the root [README](../../README.md#verified-release-installer), then:
+
 ```bash
-bash -c "$(
-  curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh
-)"
+bash /tmp/dotfiles-install.sh
 ```
 
 Then restart your terminal or run `exec $SHELL`.
@@ -97,10 +98,9 @@ Install only shells and core tools. This skips editor and terminal extras:
 Use this mode for CI or scripts that run without user input:
 
 ```bash
+# After the verified download above:
 DOTFILES_SILENT=1 DOTFILES_NONINTERACTIVE=1 \
-  bash -c "$(
-    curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh
-  )"
+  bash /tmp/dotfiles-install.sh --force
 ```
 
 ### Nix

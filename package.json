@@ -1,12 +1,13 @@
 {
   "name": "@sebastienrousseau/dotfiles",
-  "version": "0.2.520",
+  "version": "0.2.521",
   "description": "The Trusted Shell Platform — Universal dotfiles managed by Chezmoi. Features Bash & Zsh for macOS, Linux & WSL. Rust modern tooling & enterprise-grade security.",
   "main": "install.sh",
   "bin": {
     "dotfiles-install": "./install.sh"
   },
   "scripts": {
+    "prepack": "node scripts/qa/verify-npm-package.mjs",
     "test": "bash ./scripts/qa/reliability-audit.sh",
     "test:quick": "bash ./scripts/qa/reliability-audit.sh --quick",
     "test:unit": "bash ./scripts/qa/reliability-audit.sh --unit-only",
@@ -66,13 +67,12 @@
   },
   "files": [
     "install.sh",
+    "tools/ci/install-chezmoi-verified.sh",
+    "tools/README.md",
     "README.md",
-    "LICENSE",
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
     "CHANGELOG.md",
-    "docs/",
-    "dot_config/",
-    "dot_local/",
-    "scripts/",
-    "templates/"
+    "package.json"
   ]
 }

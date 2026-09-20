@@ -63,10 +63,17 @@ _fixture() { # <name> <version>
   # the tag-pinned install snippet, install.sh's default version, the two
   # machine-readable discovery cards, llms.txt, the CHANGELOG heading and
   # the citation metadata.
-  printf 'curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v%s/install.sh\n' \
-    "$v" >>"$root/README.md"
+  printf 'curl -fsSL https://github.com/sebastienrousseau/dotfiles/releases/download/v%s/dotfiles-install-%s.sh\n' \
+    "$v" "$v" >>"$root/README.md"
   printf '#!/usr/bin/env bash\n  local version="v%s"\n#   version  (default: v%s)\n' \
     "$v" "$v" >"$root/install.sh"
+  if command -v sha256sum >/dev/null 2>&1; then
+    fixture_hash="$(sha256sum "$root/install.sh" | awk '{print $1}')"
+  else
+    fixture_hash="$(shasum -a 256 "$root/install.sh" | awk '{print $1}')"
+  fi
+  printf 'echo "%s  /tmp/dotfiles-install.sh" | shasum -a 256 -c -\n' \
+    "$fixture_hash" >>"$root/README.md"
   mkdir -p "$root/.well-known/mcp"
   printf '{\n  "version": "%s"\n}\n' "$v" >"$root/.well-known/agent-card.json"
   printf '{\n  "version": "%s"\n}\n' "$v" >"$root/.well-known/mcp/server-card.json"
@@ -164,5 +171,13 @@ assert_equals 1 "$_rc" "unfixable drift exits 1"
 assert_contains "DRIFT in bin/dot" "$_out" "drift reported"
 _refute_contains "fixed:" "$_out" "nothing is rewritten when the tree is in sync"
 assert_file_contains "$_root/bin/dot" 'VERSION="9.9.9"' "unsafe line left untouched"
+
+test_start "installer_digest_drift_is_rejected"
+_root="$(_fixture digest 1.2.3)"
+printf '# changed after README digest was recorded\n' >>"$_root/install.sh"
+_out="$(_check "$_root")"
+_rc=$?
+assert_equals 1 "$_rc" "stale installer digest exits 1"
+assert_contains "DRIFT in README.md installer SHA256" "$_out" "digest drift is named"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

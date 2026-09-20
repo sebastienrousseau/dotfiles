@@ -1,5 +1,5 @@
 # Active profile - change this to switch configurations
-dotfiles_version = "0.2.520"
+dotfiles_version = "0.2.521"
 profile = "laptop"
 
 # Machine preset — set per-host in ~/.config/chezmoi/chezmoi.toml:
@@ -42,6 +42,10 @@ dms = true
 # Terminal multiplexers
 zellij = false
 
+# Wallpaper-aware AI CLI appearance adapters. Provider configs remain
+# user-owned: malformed or concurrently changed files are never overwritten.
+ai_theme_sync = true
+
 # Linux desktop / Wayland — override per-host in ~/.config/chezmoi/chezmoi.toml
 linux_desktop = false
 niri = false
@@ -53,6 +57,14 @@ kanshi = false
 touch = false
 t2 = false
 surface = false
+
+[features.ai_theme_providers]
+codex = true
+claude = true
+gemini = true
+agy = true
+qwen = true
+opencode = true
 
 # ============================================================================
 # Tool-specific configuration

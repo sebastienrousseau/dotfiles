@@ -4,7 +4,11 @@ render_with_liquid: false
 
 # Version Synchronization System
 
-The version synchronization system ensures that all version references across the repository remain consistent with the version specified in `package.json`.
+The version synchronization system ensures that all live version references
+remain consistent with `dotfiles_version` in
+`defaults/.chezmoidata.toml`. That manifest is the only hand-edited source;
+`package.json`, CLI metadata, discovery cards, and current documentation are
+generated release surfaces.
 
 ## Overview
 
@@ -35,13 +39,13 @@ This system provides automated version synchronization through:
 
 **Triggers**:
 
-- Push to `main` branch when `package.json` changes
-- Pull requests affecting `package.json`
+- Push to `main` or a release branch when the canonical manifest changes
+- Pull requests affecting the canonical manifest or a generated surface
 - Manual dispatch with optional target version
 
 **Process**:
 
-1. **Detect Changes** - Compares current vs previous `package.json` version
+1. **Read Canonical Version** - Reads `dotfiles_version` from `.chezmoidata.toml`
 2. **Sync Versions** - Updates all markdown files with version references
 3. **Verify Consistency** - Ensures all references match target version
 4. **Commit & Push** - Automatically commits changes (except on PRs)
@@ -60,7 +64,7 @@ This system provides automated version synchronization through:
 **Usage**:
 
 ```bash
-# Sync to current package.json version
+# Sync to the canonical dotfiles_version
 ./scripts/version-sync.sh
 
 # Sync to specific version
@@ -123,19 +127,14 @@ For local development, add to `.git/hooks/pre-commit`:
 }
 ```
 
-### Package.json Integration
+### Canonical Manifest Integration
 
-Version changes in `package.json` automatically trigger synchronization:
+Change the version explicitly through the synchronizer; it updates the
+canonical manifest and regenerates `package.json` in the same operation:
 
-```json
-{
-  "name": "@sebastienrousseau/dotfiles",
-  "version": "0.2.485",  // Changes here trigger sync
-  "scripts": {
-    "version-sync": "./scripts/version-sync.sh",
-    "version-verify": "./scripts/version-sync.sh --verify"
-  }
-}
+```bash
+./scripts/version-sync.sh 0.2.522
+./scripts/release-preflight --require-untagged
 ```
 
 ## Workflow Examples
@@ -143,8 +142,8 @@ Version changes in `package.json` automatically trigger synchronization:
 ### Scenario 1: Version Bump
 
 ```bash
-# Developer updates package.json version
-npm version patch
+# Developer updates the canonical manifest and all generated surfaces
+./scripts/version-sync.sh 0.2.522
 
 # Push to main
 git push origin main
@@ -159,7 +158,7 @@ git push origin main
 ### Scenario 2: PR Review
 
 ```bash
-# PR with package.json changes
+# PR with version-surface changes
 # GitHub Actions automatically:
 # 1. Checks version consistency
 # 2. Reports any mismatches
@@ -199,7 +198,7 @@ These files are always included even if they don't currently contain versions:
 Files that are intentionally excluded:
 
 - `CHANGELOG.md` - May contain historical versions
-- `package.json` - Source of truth
+- `package.json` - Generated package-registry metadata
 - `docs/security/COMPLIANCE.md` - Includes external compliance spec versions
 - `docs/reference/FONTS.md` - Includes upstream font release versions
 - `docs/archive/LEGACY_ROADMAP.md` - Keeps historical release markers
@@ -355,7 +354,7 @@ DEBUG=1 ./scripts/version-sync.sh --dry-run
 | Script not executable | `chmod +x scripts/version-sync.sh` |
 | Missing tools | `apt install jq ripgrep` (Ubuntu) |
 | Permission denied | Check Git status and file permissions |
-| Workflow not triggering | Verify `package.json` changes are in push |
+| Workflow not triggering | Verify the canonical manifest change is in the push |
 | Changes not committed | Check branch protection rules |
 
 ### Log Analysis

@@ -63,11 +63,10 @@ Options:
 
 Steps performed:
   1. Verify clean working tree and up-to-date branch
-  2. Bump version in package.json
-  3. Run version-sync to update docs
-  4. Update CHANGELOG.md with new version header
-  5. Create signed commit and tag
-  6. Push commit and tag to origin
+  2. Update the canonical dotfiles_version and regenerate version surfaces
+  3. Update CHANGELOG.md with new version header
+  4. Create signed commit and tag
+  5. Push commit and tag to origin
 
 Examples:
   $(basename "$0")              # Patch release
@@ -77,9 +76,10 @@ Examples:
 EOF
 }
 
-# Get current version from package.json
+# Get the current version from the canonical chezmoi data manifest.
 get_version() {
-  grep -o '"version": "[^"]*"' "$PROJECT_ROOT/package.json" | grep -o '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*'
+  sed -nE 's/^[[:space:]]*dotfiles_version[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' \
+    "$PROJECT_ROOT/defaults/.chezmoidata.toml" | head -n 1
 }
 
 # Bump version string
@@ -150,6 +150,10 @@ main() {
 
   local current_version new_version
   current_version=$(get_version)
+  if [[ ! "$current_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    log_error "Invalid or missing canonical dotfiles_version: ${current_version:-<empty>}"
+    exit 1
+  fi
   new_version=$(bump_version "$current_version" "$bump_type")
 
   printf '%b\n' "${BOLD}Dotfiles Release${NC}"
@@ -189,10 +193,18 @@ main() {
   fi
   log_success "Branch is up to date with origin"
 
+  if git show-ref --verify --quiet "refs/tags/v${new_version}"; then
+    local existing_release_commit
+    existing_release_commit="$(git rev-list -n 1 "v${new_version}")"
+    log_error "Tag v${new_version} already exists at ${existing_release_commit}; release tags are immutable."
+    exit 1
+  fi
+  log_success "Tag v${new_version} is available"
+
   if [[ "$dry_run" == "1" ]]; then
     log_step "Would perform the following"
-    log_info "1. Bump package.json: $current_version → $new_version"
-    log_info "2. Run version-sync.sh"
+    log_info "1. Set canonical dotfiles_version: $current_version → $new_version"
+    log_info "2. Regenerate version surfaces with version-sync.sh"
     log_info "3. Add v${new_version} header to CHANGELOG.md"
     log_info "4. Commit: 'chore(release): v${new_version}'"
     log_info "5. Tag: v${new_version} (signed)"
@@ -202,21 +214,17 @@ main() {
     exit 0
   fi
 
-  # ── Step 2: Bump version ──────────────────────────────────────
-  log_step "Bump version in package.json"
-  sed_in_place "s/\"version\": \"${current_version}\"/\"version\": \"${new_version}\"/" "$PROJECT_ROOT/package.json"
-  log_success "package.json: $current_version → $new_version"
-
-  # ── Step 3: Sync versions across docs ─────────────────────────
-  log_step "Sync version across docs"
+  # ── Step 2: Update the canonical version and generated surfaces ─
+  log_step "Update canonical version and regenerate release metadata"
   if [[ -x "$SCRIPT_DIR/../version-sync.sh" ]]; then
-    bash "$SCRIPT_DIR/../version-sync.sh" --force 2>&1 | tail -3
-    log_success "Version sync complete"
+    bash "$SCRIPT_DIR/../version-sync.sh" --force "$new_version" 2>&1 | tail -3
+    log_success "Canonical version and generated surfaces: $current_version → $new_version"
   else
-    log_warn "version-sync.sh not found, skipping"
+    log_error "version-sync.sh not found"
+    exit 1
   fi
 
-  # ── Step 4: Update CHANGELOG ──────────────────────────────────
+  # ── Step 3: Update CHANGELOG ──────────────────────────────────
   log_step "Update CHANGELOG.md"
   local today
   today=$(date +%Y-%m-%d)
@@ -235,6 +243,13 @@ main() {
   else
     log_warn "CHANGELOG.md not found, skipping"
   fi
+
+  # The version and changelog now describe the candidate release. Validate
+  # every live surface and fail before committing if this immutable tag has
+  # ever been used, even if it currently resolves to HEAD.
+  log_step "Validate release identity"
+  bash "$SCRIPT_DIR/../release-preflight" --require-untagged
+  log_success "Release identity is unique and consistent"
 
   # ── Step 5: Commit and tag ────────────────────────────────────
   log_step "Create signed commit and tag"

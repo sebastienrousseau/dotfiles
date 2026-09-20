@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.io/schemas/theme-plan.schema.json",
+  "title": "DOT theme operation plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "operation_id",
+    "operation",
+    "desired",
+    "previous",
+    "changes",
+    "warnings"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "operation_id": { "type": "string", "minLength": 1 },
+    "operation": { "const": "theme.apply" },
+    "desired": { "$ref": "#/$defs/themeIdentity" },
+    "previous": { "$ref": "#/$defs/themeIdentity" },
+    "changes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/change" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    }
+  },
+  "$defs": {
+    "themeIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "family", "mode", "preference"],
+      "properties": {
+        "name": { "type": "string" },
+        "family": { "type": "string" },
+        "mode": { "enum": ["dark", "light"] },
+        "preference": { "enum": ["auto", "dark", "light"] }
+      }
+    },
+    "change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adapter", "target", "kind", "required"],
+      "properties": {
+        "adapter": { "type": "string", "minLength": 1 },
+        "target": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["file", "command", "ipc", "desktop"] },
+        "required": { "type": "boolean" },
+        "before_hash": { "type": "string" },
+        "after_hash": { "type": "string" },
+        "reload": { "type": "string" }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

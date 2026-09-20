@@ -82,7 +82,7 @@ manifest sig + cert.
 | Secret | Used by | Setup |
 |---|---|---|
 | `GITHUB_TOKEN` | every workflow (auto) | n/a |
-| `ACTIONS_BOT_SIGNING_KEY` | distribute-* (signed commits on tap repos), `bump-reusable-pins.yml`, `update-deps.yml` | See `docs/security/AUTOMATION_SECRETS.md`. |
+| `ACTIONS_BOT_SIGNING_KEY` | distribute-* (signed commits on tap repos), `update-deps.yml` | See `docs/security/AUTOMATION_SECRETS.md`. |
 | `AUR_SSH_KEY` | `release-distribute-aur.yml` only | SSH ED25519 keypair; public key on the `srousseau` AUR profile, private key in this secret. See `memory/reference_aur_account.md` for the AUR Edit-Account form quirk that bit us during setup. |
 
 ## Distribution targets
@@ -121,7 +121,7 @@ independently.
 
 - `docs/security/VERIFY_RELEASE.md` — consumer-facing verification.
 - `docs/security/CI_PINNING.md` — reusable workflow pin policy + the
-  `bump-reusable-pins.yml` auto-bump bot.
+  same-commit local reusable-workflow references.
 - `docs/security/AUTOMATION_SECRETS.md` — how each automation secret
   is generated, scoped, and rotated.
 - `docs/operations/ROADMAP_V0_2_503.md` — the 7-workstream plan this

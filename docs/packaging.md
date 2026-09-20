@@ -80,7 +80,7 @@ and every pin is committed:
 | Documentation build (Python) | `requirements-docs.txt` | Hash-pinned (`--require-hashes`-compatible), compiled from `requirements-docs.in` |
 | Node tooling | `package.json` | Dev-only |
 | Nix | `flake.lock`, `nix/flake.lock` | Root flake provides the dev shell; `nix/flake.nix` provides `packages.default` |
-| GitHub Actions | 40-hex commit SHA on every `uses:` | Enforced by `tools/ci/lint-reusable-pins.sh` and OpenSSF Scorecard |
+| GitHub Actions | Same-commit paths for local reusable workflows; 40-hex SHA for external `uses:` | Enforced by `tools/ci/lint-reusable-pins.sh` and OpenSSF Scorecard |
 | Container bases | `FROM image:tag@sha256:<digest>` | Policy in [`security/CI_PINNING.md`](security/CI_PINNING.md) |
 | Binaries fetched during CI | `sha256sum -c` against a committed manifest | `security/remote-installers.sha256` |
 
@@ -95,8 +95,8 @@ Full provenance policy: [`supply-chain/README.md`](https://github.com/sebastienr
 From a release tarball (recommended — it is the attested artefact):
 
 ```sh
-tar -xzf dot-0.2.520.tar.gz
-cd dot-0.2.520
+tar -xzf dot-0.2.521.tar.gz
+cd dot-0.2.521
 make install PREFIX=/usr DESTDIR="$pkgdir"
 ```
 
@@ -166,7 +166,7 @@ and [`security/VERIFY_RELEASE.md`](security/VERIFY_RELEASE.md).
 Minimum a packager should do:
 
 ```sh
-TAG=v0.2.520
+TAG=v0.2.521
 REPO=sebastienrousseau/dotfiles
 
 # SLSA build provenance on the tarball itself
@@ -188,7 +188,7 @@ Tags are signed with an SSH ed25519 key published in
 which is itself a `git allowed_signers` file:
 
 ```sh
-git -c gpg.ssh.allowedSignersFile=KEYS.asc tag -v v0.2.520
+git -c gpg.ssh.allowedSignersFile=KEYS.asc tag -v v0.2.521
 ```
 
 An SBOM ships with every release in both CycloneDX and SPDX JSON.

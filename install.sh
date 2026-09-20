@@ -71,7 +71,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.520)
+  version       The version (tag or branch) to install (default: v0.2.521)
 
 Options:
   --help        Show this help message
@@ -87,7 +87,7 @@ EOF
 }
 
 main() {
-  local version="v0.2.520"
+  local version="v0.2.521"
   local version_set=0
   local minimal=0
   local provision="${DOTFILES_PROVISION:-0}"
@@ -117,7 +117,7 @@ main() {
         # like `foobar` doesn't trigger a 30s+ network download attempt.
         # Caught by the install.sh fuzz harness (#881).
         if [[ ! "$arg" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-+][a-zA-Z0-9.-]+)?$ ]]; then
-          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.520)."
+          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.521)."
         fi
         version="$arg"
         version_set=1
@@ -196,6 +196,68 @@ main() {
     fi
   }
 
+  # Standalone checksum-verified chezmoi bootstrap. Keep this implementation
+  # in the entry point so a release-pinned install.sh remains self-contained;
+  # repository and npm installs may use the identical helper script below.
+  install_chezmoi_verified_embedded() {
+    local chezmoi_version="$1"
+    local destination="$2"
+    local os arch asset checksums_asset base_url temp_dir checksum_line
+
+    os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+    arch="$(uname -m)"
+    case "$os" in
+      linux | darwin) ;;
+      *)
+        echo "Unsupported OS for chezmoi bootstrap: $os" >&2
+        return 1
+        ;;
+    esac
+    case "$arch" in
+      x86_64 | amd64) arch="amd64" ;;
+      arm64 | aarch64) arch="arm64" ;;
+      *)
+        echo "Unsupported architecture for chezmoi bootstrap: $arch" >&2
+        return 1
+        ;;
+    esac
+
+    asset="chezmoi_${chezmoi_version}_${os}_${arch}.tar.gz"
+    checksums_asset="chezmoi_${chezmoi_version}_checksums.txt"
+    base_url="https://github.com/twpayne/chezmoi/releases/download/v${chezmoi_version}"
+    temp_dir="$(umask 077 && mktemp -d)"
+
+    if ! (
+      set -e
+      if ! curl --proto '=https' --tlsv1.2 -fsSL \
+        -o "$temp_dir/checksums.txt" "$base_url/$checksums_asset"; then
+        curl --proto '=https' --tlsv1.2 -fsSL \
+          -o "$temp_dir/checksums.txt" "$base_url/checksums.txt"
+      fi
+      curl --proto '=https' --tlsv1.2 -fsSL \
+        -o "$temp_dir/$asset" "$base_url/$asset"
+      checksum_line="$(grep -E "[[:space:]]${asset}$" "$temp_dir/checksums.txt" | head -n 1 || true)"
+      [[ -n "$checksum_line" ]] || {
+        echo "Checksum entry not found for $asset" >&2
+        exit 1
+      }
+      cd "$temp_dir"
+      if command -v sha256sum >/dev/null 2>&1; then
+        printf '%s\n' "$checksum_line" | sha256sum -c -
+      else
+        printf '%s\n' "$checksum_line" | shasum -a 256 -c -
+      fi
+      tar -xzf "$asset" chezmoi
+      mkdir -p "$destination"
+      install -m 755 chezmoi "$destination/chezmoi"
+    ); then
+      rm -rf "$temp_dir"
+      return 1
+    fi
+
+    rm -rf "$temp_dir"
+  }
+
   # 3. Install Chezmoi (in parallel with other checks where possible)
   install_chezmoi() {
     if command -v chezmoi >/dev/null; then
@@ -231,11 +293,15 @@ main() {
         fi
         return 0
       fi
-      echo "" >&2
-      echo "   tools/ci/install-chezmoi-verified.sh is missing; cannot verify chezmoi bootstrap." >&2
-      echo "   Install chezmoi manually (brew install chezmoi / official binary)" >&2
-      echo "   and re-run install.sh." >&2
-      return 1
+      echo "   Using embedded checksum verifier..."
+      if ! install_chezmoi_verified_embedded "${CHEZMOI_VERSION:-2.47.1}" "$bin_dir"; then
+        echo "" >&2
+        echo "   The embedded checksum-verified chezmoi bootstrap failed." >&2
+        echo "   Refusing to fall back to an unverified remote script." >&2
+        echo "   Install chezmoi manually from https://www.chezmoi.io/install/" >&2
+        return 1
+      fi
+      return 0
     fi
   }
 
@@ -369,7 +435,7 @@ main() {
   # 6. Initialize & Apply
   step "Applying Configuration..."
 
-  # ── Auto-migration for v0.2.520 reorg ─────────────────────────────────
+  # ── Auto-migration for v0.2.521 reorg ─────────────────────────────────
   # If the user is upgrading from a pre-0.2.503 install, run the
   # migration script BEFORE `chezmoi apply` so the reorg's source-
   # path moves don't cause chezmoi to delete deployed files.
@@ -378,7 +444,7 @@ main() {
   for migrate_src in "$SOURCE_DIR" "$LEGACY_SOURCE_DIR"; do
     migrate_script="$migrate_src/install/migrate/migrate-v0_2-to-v0_2_503.sh"
     if [[ -x "$migrate_script" ]]; then
-      echo "   Running v0.2.520 migration (idempotent; safe on fresh installs)..."
+      echo "   Running v0.2.521 migration (idempotent; safe on fresh installs)..."
       "$migrate_script" || echo "   migration exited non-zero — continuing apply"
       break
     fi

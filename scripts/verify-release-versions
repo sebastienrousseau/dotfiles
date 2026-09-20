@@ -91,7 +91,7 @@ specs=(
   # Install snippet pinned to a tag — the "no stale install one-liner"
   # rule from the repo standard. `main` snippets are deliberately
   # unpinned and are not checked.
-  "README.md|raw.githubusercontent.com/sebastienrousseau/dotfiles/v|/dotfiles/v${canonical}/install.sh"
+  "README.md|github.com/sebastienrousseau/dotfiles/releases/download/v|/releases/download/v${canonical}/dotfiles-install-${canonical}.sh"
   "install.sh|local version=\"v|local version=\"v${canonical}\""
   "install.sh|\\(default: v|(default: v${canonical})"
   # Machine-readable discovery surfaces: agents fetch these, so a stale
@@ -139,6 +139,27 @@ for spec in "${specs[@]}"; do
     fi
   fi
 done
+
+# Bind the human-facing verified-install command to the exact installer bytes.
+# A version-correct URL with a stale digest is still an unusable release path.
+installer_hash="$(
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum install.sh | awk '{print $1}'
+  else
+    shasum -a 256 install.sh | awk '{print $1}'
+  fi
+)"
+documented_hashes="$(
+  grep '/tmp/dotfiles-install\.sh' README.md |
+    grep -oE '[0-9a-f]{64}' |
+    sort -u || true
+)"
+if [[ "$documented_hashes" != "$installer_hash" ]]; then
+  _err "DRIFT in README.md installer SHA256"
+  _err "  found:    ${documented_hashes:-<missing>}"
+  _err "  expected: $installer_hash"
+  drift=$((drift + 1))
+fi
 
 if ((drift > 0)); then
   if ((fix)); then

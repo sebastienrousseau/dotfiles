@@ -11,7 +11,8 @@ Thirty short recipes for common tasks.
 ### 1. Install on a fresh machine
 
 ```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+# After the verified release download in the installation guide:
+bash /tmp/dotfiles-install.sh
 ```
 
 ### 2. Update everything

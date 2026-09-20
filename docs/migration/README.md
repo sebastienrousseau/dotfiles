@@ -49,8 +49,9 @@ rollback for that specific migration.
 tar -czf ~/dotfiles-backup-$(date +%F).tar.gz -C "$HOME" \
   .bashrc .zshrc .config .gitconfig 2>/dev/null || true
 
-# 2. Install the framework (does not touch your files yet).
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+# 2. After the verified release download in docs/guides/INSTALL.md,
+#    install the framework (does not touch your files yet).
+bash /tmp/dotfiles-install.sh
 
 # 3. Bring your own files under management, one at a time.
 dot add ~/.gitconfig

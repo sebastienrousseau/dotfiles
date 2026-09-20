@@ -29,14 +29,14 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
-# Test: reads from package.json
-test_start "version_sync_reads_package"
-if grep -qE 'package\.json|jq.*version' "$VERSION_FILE" 2>/dev/null; then
+# Test: reads from the canonical chezmoi data manifest
+test_start "version_sync_reads_canonical_manifest"
+if grep -qE 'get_canonical_version|dotfiles_version' "$VERSION_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: reads package.json"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: reads canonical manifest"
 else
   ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should read package.json"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should read canonical manifest"
 fi
 
 # Test: supports verify mode

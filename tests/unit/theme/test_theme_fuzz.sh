@@ -28,10 +28,10 @@ mkdir -p "$XDG_STATE_HOME/dot" "$XDG_CONFIG_HOME" "$XDG_DATA_HOME"
 mkdir -p "$TMPHOME/dotfiles/.chezmoidata"
 export CHEZMOI_SOURCE_DIR="$TMPHOME/dotfiles"
 
-cat > "$TMPHOME/dotfiles/.chezmoidata.toml" <<'EOF'
+cat >"$TMPHOME/dotfiles/.chezmoidata.toml" <<'EOF'
 theme = "Baseline-dark"
 EOF
-cat > "$TMPHOME/dotfiles/.chezmoidata/themes.toml" <<'EOF'
+cat >"$TMPHOME/dotfiles/.chezmoidata/themes.toml" <<'EOF'
 [themes.Baseline-dark]
 mode = "dark"
 family = "Baseline"
@@ -45,14 +45,13 @@ MOCK_BIN="$TMPHOME/mocks"
 mkdir -p "$MOCK_BIN"
 export PATH="$MOCK_BIN:$PATH"
 for cmd in gsettings kwriteconfig6 kreadconfig6 systemctl qdbus \
-           chezmoi tmux pgrep busctl killall swww hyprctl niri; do
-  cat > "$MOCK_BIN/$cmd" <<EOF
+  chezmoi tmux pgrep busctl killall swww hyprctl niri; do
+  cat >"$MOCK_BIN/$cmd" <<EOF
 #!/usr/bin/env bash
 exit 0
 EOF
   chmod +x "$MOCK_BIN/$cmd"
 done
-
 
 _datafile_theme() {
   grep -oE '^theme = "[^"]+"' "$TMPHOME/dotfiles/.chezmoidata.toml" | head -1 | cut -d'"' -f2
@@ -73,42 +72,42 @@ touch "$CANARY"
 INVALID_NAMES=(
   # Note: empty string is NOT invalid — dot-theme-sync with no args
   # is a valid "reload current" mode used by cron / systemd timers.
-  " "                                   # whitespace
-  "space in middle"                     # space
-  "dot.in.name"                         # dot
-  "slash/in/name"                       # path separator
-  "back\\slash"                         # backslash
-  "with;semicolon"                      # command chain
-  "with|pipe"                           # pipe
-  "with\$var"                           # var expansion
-  "with\`backtick\`"                    # command sub
-  "with\$(sub)"                         # command sub v2
-  "with>redirect"                       # redirect
-  "with<redirect"                       # input redirect
-  "with&background"                     # background
-  "with!bang"                           # history expansion
-  "with*glob"                           # glob
-  "with?glob"                           # glob
-  "with[bracket"                        # glob class
-  "with(paren"                          # subshell hint
-  "with{brace"                          # brace expansion
-  "with#hash"                           # comment
-  "with@at"                             # invalid char
-  "with+plus"                           # invalid char
-  "with=equals"                         # invalid char
-  "with:colon"                          # invalid char
-  "with\"quote"                         # embedded quote
-  "with'apostrophe"                     # embedded apostrophe
-  "-startsWithDash"                     # ambiguous with flag
-  $'with\ttab'                          # tab
-  $'with\nnewline'                      # newline (fs-visible)
-  "🚀emoji"                             # unicode
-  "$(printf 'a%.0s' {1..1000})"         # 1000-char over-length
-  "; rm -rf $CANARY"                   # shell injection attempt
-  "\$(rm -rf $CANARY)"                 # cmd sub injection
-  "\`rm -rf $CANARY\`"                 # backtick injection
-  "&& rm -rf $CANARY"                  # boolean chain
-  "'; rm '$CANARY'"                    # quote-break injection
+  " "                           # whitespace
+  "space in middle"             # space
+  "dot.in.name"                 # dot
+  "slash/in/name"               # path separator
+  "back\\slash"                 # backslash
+  "with;semicolon"              # command chain
+  "with|pipe"                   # pipe
+  "with\$var"                   # var expansion
+  "with\`backtick\`"            # command sub
+  "with\$(sub)"                 # command sub v2
+  "with>redirect"               # redirect
+  "with<redirect"               # input redirect
+  "with&background"             # background
+  "with!bang"                   # history expansion
+  "with*glob"                   # glob
+  "with?glob"                   # glob
+  "with[bracket"                # glob class
+  "with(paren"                  # subshell hint
+  "with{brace"                  # brace expansion
+  "with#hash"                   # comment
+  "with@at"                     # invalid char
+  "with+plus"                   # invalid char
+  "with=equals"                 # invalid char
+  "with:colon"                  # invalid char
+  "with\"quote"                 # embedded quote
+  "with'apostrophe"             # embedded apostrophe
+  "-startsWithDash"             # ambiguous with flag
+  $'with\ttab'                  # tab
+  $'with\nnewline'              # newline (fs-visible)
+  "🚀emoji"                      # unicode
+  "$(printf 'a%.0s' {1..1000})" # 1000-char over-length
+  "; rm -rf $CANARY"            # shell injection attempt
+  "\$(rm -rf $CANARY)"          # cmd sub injection
+  "\`rm -rf $CANARY\`"          # backtick injection
+  "&& rm -rf $CANARY"           # boolean chain
+  "'; rm '$CANARY'"             # quote-break injection
 )
 
 test_start "fuzz_invalid_names_all_rejected"
@@ -124,9 +123,9 @@ for name in "${INVALID_NAMES[@]}"; do
     ((n_rejected++)) || true
   fi
   # Reset datafile in case a bug slipped through
-  printf 'theme = "Baseline-dark"\n' > "$TMPHOME/dotfiles/.chezmoidata.toml"
+  printf 'theme = "Baseline-dark"\n' >"$TMPHOME/dotfiles/.chezmoidata.toml"
 done
-if (( n_rejected == n_total )); then
+if ((n_rejected == n_total)); then
   _ok
   printf '     (%d/%d invalid names rejected)\n' "$n_rejected" "$n_total"
 else
@@ -160,7 +159,7 @@ for name in "${VALID_NAMES[@]}"; do
     ((n_ok++)) || true
   fi
 done
-if (( n_ok == ${#VALID_NAMES[@]} )); then
+if ((n_ok == ${#VALID_NAMES[@]})); then
   _ok
 else
   _fail "some valid names were rejected"
@@ -173,7 +172,7 @@ test_start "fuzz_datafile_still_toml_parseable"
 # TOML basic check: exactly one `theme = "..."` line, no other top-level
 # keys clobbered.
 theme_line_count=$(grep -cE '^theme = "[^"]+"' "$TMPHOME/dotfiles/.chezmoidata.toml")
-if (( theme_line_count == 1 )); then
+if ((theme_line_count == 1)); then
   _ok
 else
   _fail "expected 1 theme line, found $theme_line_count"
@@ -184,7 +183,7 @@ fi
 # ---------------------------------------------------------------------------
 test_start "fuzz_no_orphan_tempfiles_after_rejection_storm"
 orphans=$(find "$TMPHOME/dotfiles" -maxdepth 2 -name 'tmp.*' 2>/dev/null | wc -l)
-if (( orphans == 0 )); then
+if ((orphans == 0)); then
   _ok
 else
   _fail "$orphans orphan tempfile(s)"
@@ -196,10 +195,10 @@ fi
 # ---------------------------------------------------------------------------
 test_start "fuzz_10kb_name_handled_under_500ms"
 huge_name="$(printf 'a%.0s' {1..10000})"
-start_ms=$(date +%s%3N)
+start_ms="$(python3 -c 'import time; print(time.monotonic_ns() // 1_000_000)')"
 "$DOT_THEME_SYNC" "$huge_name" >/dev/null 2>&1
-end_ms=$(date +%s%3N)
-if (( end_ms - start_ms < 500 )); then
+end_ms="$(python3 -c 'import time; print(time.monotonic_ns() // 1_000_000)')"
+if ((end_ms - start_ms < 500)); then
   _ok
   printf '     (elapsed=%dms)\n' $((end_ms - start_ms))
 else
@@ -218,13 +217,13 @@ for _ in $(seq 25); do
   # 1-50 random printable chars, includes shell metacharacters
   len=$((RANDOM % 50 + 1))
   # bash4 lacks $RANDOM in a range easily; use tr from /dev/urandom
-  fuzz="$(head -c 100 /dev/urandom | tr -dc 'A-Za-z0-9!@#$%^&*()_+-=[]{}|;:,.<>?/~' | head -c "$len")"
+  fuzz="$(head -c 100 /dev/urandom | LC_ALL=C tr -dc 'A-Za-z0-9!@#$%^&*()_+-=[]{}|;:,.<>?/~' | head -c "$len")"
   "$DOT_THEME_SYNC" "$fuzz" >/dev/null 2>&1
   # After any fuzz input, datafile must still have exactly 1 theme line
   count=$(grep -cE '^theme = "[^"]+"' "$TMPHOME/dotfiles/.chezmoidata.toml")
-  (( count == 1 )) || corrupt=$((corrupt + 1))
+  ((count == 1)) || corrupt=$((corrupt + 1))
 done
-if (( corrupt == 0 )); then
+if ((corrupt == 0)); then
   _ok
   printf '     (seed=%d, 25 random inputs, all safely rejected or applied)\n' "$seed"
 else
