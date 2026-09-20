@@ -1,3 +1,4 @@
+encryption = "age"
 # Source directory for dotfiles - uses chezmoi's built-in homeDir variable
 # Template syntax: .chezmoi.homeDir accesses chezmoi's internal data
 sourceDir = "{{ .chezmoi.homeDir }}/.dotfiles"
@@ -24,7 +25,6 @@ sourceDir = "{{ .chezmoi.homeDir }}/.dotfiles"
 # Template control flow: "if ne $age_identity" checks if variable is not empty
 # This entire [age] section is only rendered if user provided an identity
 {{ if ne $age_identity "" }}
-encryption = "age"
 
 [age]
     # Variable interpolation: $age_identity expands to the stored/prompted value
