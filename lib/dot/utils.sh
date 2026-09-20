@@ -22,6 +22,43 @@ source "$_DOT_LIB_DIR/ai-install.sh"
 
 _DOT_SOURCE_DIR_CACHE=""
 
+## sed_in_place — Portable in-place `sed` that works on GNU + BSD sed.
+## GNU sed accepts `-i` with no argument; BSD (macOS) sed requires an
+## empty extension argument (`-i ''`). Callers pass sed args exactly
+## as they would to `sed`; the wrapper picks the right `-i` form
+## based on `sed --version`.
+## Args:  arguments passed verbatim to sed.
+## Usage: sed_in_place -e 's/foo/bar/' path/to/file
+## Note:  scripts/version-sync.sh keeps a specialised file-first
+##        variant (`sed_in_place FILE ARGS...` with `-E`) for the
+##        template-syncing pipeline; that one is intentionally distinct.
+sed_in_place() {
+  if sed --version >/dev/null 2>&1; then
+    sed -i "$@" # GNU
+  else
+    sed -i '' "$@" # BSD (macOS)
+  fi
+}
+
+## check_cmd — Test whether a command is invocable.
+## Checks the process PATH first, then falls back to `mise ls --installed`
+## so mise-managed tools (aqua:foo, npm:bar, plain foo) are recognised
+## even when their shim hasn't been added to the current shell's PATH.
+## Args:  $1 — command name to look up.
+## Exit:  0 if available, 1 otherwise. Silent on stdout/stderr.
+check_cmd() {
+  local cmd="$1"
+  if command -v "$cmd" >/dev/null 2>&1; then
+    return 0
+  fi
+  if command -v mise >/dev/null 2>&1; then
+    if mise ls --installed 2>/dev/null | grep -qE "($cmd|aqua:.*$cmd)"; then
+      return 0
+    fi
+  fi
+  return 1
+}
+
 ## resolve_source_dir — Locate the dotfiles source tree.
 ## Checks (in order): relative to this script, $CHEZMOI_SOURCE_DIR,
 ## ~/.dotfiles, ~/.local/share/chezmoi. Caches the result for the process.
@@ -436,7 +473,7 @@ is_help_flag() {
   local arg
   for arg in "$@"; do
     case "$arg" in
-      --help|-h) return 0 ;;
+      --help | -h) return 0 ;;
       # `--` marks end of options; anything after is positional data.
       # Stop scanning so a literal `--help` value doesn't trigger.
       --) return 1 ;;
