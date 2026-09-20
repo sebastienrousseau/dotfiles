@@ -32,7 +32,7 @@ import (
 // defaults/.chezmoidata.toml and is kept in step with
 // .well-known/mcp/server-card.json by scripts/version-sync.sh; the pairing is
 // asserted by TestVersionMatchesServerCard.
-const version = "0.2.519"
+const version = "0.2.520"
 
 // Process-boundary seams. Each wraps exactly one call that cannot be exercised
 // in-process by `go test`: os.Exit terminates the test binary. Tests substitute

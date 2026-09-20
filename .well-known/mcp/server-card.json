@@ -1,7 +1,7 @@
 {
   "cardVersion": "2026.03",
   "name": "dotfiles-mcp",
-  "version": "0.2.519",
+  "version": "0.2.520",
   "description": "Read-only MCP server over the dotfiles workstation governance surface: MCP policy audit, agent operating profiles, workstation attestation and fleet status.",
   "protocolVersions": ["2025-06-18", "2025-03-26", "2024-11-05"],
   "transport": {
