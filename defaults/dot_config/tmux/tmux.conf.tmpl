@@ -6,11 +6,9 @@
 {{- $bg := $t.term.bg -}}
 {{- $fg := $t.term.fg -}}
 {{- $accent := $t.ui.accent -}}
-{{- $accent_fg := (index $t.ui "accent_on_surface") | default $t.ui.accent -}}
 {{- $accent_text := $t.ui.accent_text -}}
 {{- $panel := $t.ui.panel -}}
 {{- $border := $t.ui.border -}}
-{{- $dim := $t.term.c8 -}}
 {{- /* muted: de-emphasised but still TEXT. term.c8 is ANSI bright-black,
        floored at 2.5:1 against bg, and using it here put the clock at
        2.12:1 and the inactive window names at 2.45:1. ui.text_muted is
@@ -18,7 +16,8 @@
        surfaces this bar paints on. */ -}}
 {{- $muted := (index $t.ui "text_muted") | default $t.term.c8 -}}
 {{- /* The wallpaper's 2nd and 3rd chromatic colours, so the bar carries
-       more of the image than a single accent. Both take white at 7:1.
+       more of the image than a single accent. Their mode-aware text colour
+       reaches at least 7:1: black on dark-mode blocks, white in light mode.
        `index` rather than `.secondary`: a missing map key is an ERROR
        with field syntax and nil with index, and only nil reaches
        `default`. This template must survive a themes.toml generated
@@ -26,11 +25,7 @@
 {{- $secondary := (index $t.ui "secondary_on_surface") | default $t.ui.accent -}}
 {{- $tertiary := (index $t.ui "tertiary_on_surface") | default $t.ui.accent -}}
 {{- $error := $t.ui.error -}}
-{{- $success := $t.ui.success -}}
 {{- $warning := $t.ui.warning -}}
-{{- $info := $t.ui.info -}}
-{{- $c4 := $t.term.c4 -}}
-{{- $c6 := $t.term.c6 -}}
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  TMUX CONFIGURATION (Universal)                                          ║
@@ -51,6 +46,17 @@ set -g set-clipboard on
 set -g escape-time 10
 set -g focus-events on
 set -g repeat-time 600
+# New panes inherit an explicit appearance signal even when OSC 11 cannot pass
+# through tmux. Gemini, Qwen, Claude, OpenCode, and other adaptive TUIs use it.
+set-environment -g COLORTERM "truecolor"
+set-environment -g COLORFGBG "{{ if eq $t.mode "light" }}0;15{{ else }}15;0{{ end }}"
+set-environment -g AIDER_DARK_MODE "{{ if eq $t.mode "dark" }}true{{ else }}false{{ end }}"
+set-environment -g AIDER_LIGHT_MODE "{{ if eq $t.mode "light" }}true{{ else }}false{{ end }}"
+set-environment -g AIDER_CODE_THEME "solarized-{{ $t.mode }}"
+set-environment -g AIDER_USER_INPUT_COLOR "{{ $t.term.c2 }}"
+set-environment -g AIDER_TOOL_ERROR_COLOR "{{ $t.term.c1 }}"
+set-environment -g AIDER_TOOL_WARNING_COLOR "{{ $t.term.c3 }}"
+set-environment -g AIDER_ASSISTANT_OUTPUT_COLOR "{{ $t.term.c4 }}"
 setw -g xterm-keys on
 set -g base-index 1
 setw -g pane-base-index 1
@@ -182,39 +188,55 @@ set -g status-interval 2
 set -g status-position bottom
 set -g status-justify absolute-centre
 set -g status-style "bg={{ $panel }},fg={{ $fg }}"
-set -g status-left-length 100
-set -g status-right-length 140
+set -g status-left-length 40
+set -g status-right-length 88
+
+# Give every session a stable colour from the active wallpaper palette. The
+# helper refreshes all sessions after a theme change and colours new/renamed
+# sessions without requiring hand-maintained per-project rules.
+set -g @dot_session_colour "{{ $accent }}"
+set -g @dot_client_focused 1
+run-shell -b "test ! -x ~/.local/bin/tmux-status || ~/.local/bin/tmux-status apply-colours '{{ $accent }}' '{{ $secondary }}' '{{ $tertiary }}'"
+set-hook -g session-created "run-shell -b \"~/.local/bin/tmux-status apply-colours '{{ $accent }}' '{{ $secondary }}' '{{ $tertiary }}'\""
+set-hook -g session-renamed "run-shell -b \"~/.local/bin/tmux-status apply-colours '{{ $accent }}' '{{ $secondary }}' '{{ $tertiary }}'\""
+
+# Terminals which report focus events keep the active session vivid and dim
+# every coloured status block in unfocused clients. Unsupported terminals keep
+# the safe, bright default rather than looking permanently inactive.
+set-hook -g client-focus-in 'set-option @dot_client_focused 1 ; refresh-client -S'
+set-hook -g client-focus-out 'set-option @dot_client_focused 0 ; refresh-client -S'
 
 # --- Dotbar-inspired session pill — session identity is always priority one ---
 set -g status-left "\
-#[fg=#{?client_prefix,{{ $warning }},{{ $accent }}},bg={{ $panel }}]\
-#[fg=#{?client_prefix,{{ $bg }},{{ $accent_text }}},bg=#{?client_prefix,{{ $warning }},{{ $accent }}},bold] #{?client_prefix,PREFIX,SESSION} · #S \
-#[fg=#{?client_prefix,{{ $warning }},{{ $accent }}},bg={{ $panel }}]\
-#[fg={{ $muted }},bg={{ $panel }},nobold]  #{session_windows}w "
+#[fg=#{?client_prefix,{{ $error }},#{?@dot_client_focused,#{@dot_session_colour},{{ $border }}}},bg={{ $panel }}]\
+#[fg=#{?@dot_client_focused,#{?client_prefix,{{ $bg }},{{ $accent_text }}},{{ $muted }}},bg=#{?client_prefix,{{ $error }},#{?@dot_client_focused,#{@dot_session_colour},{{ $border }}}},bold] #{?client_prefix,  ,}#S \
+#[fg=#{?client_prefix,{{ $error }},#{?@dot_client_focused,#{@dot_session_colour},{{ $border }}}},bg={{ $panel }}]"
 
-# --- Active pane intelligence + machine/time ---
+# --- Responsive context + active workload + compact clock ---
+# CWD appears above 130 columns and other sessions above 160. Narrow AI panes
+# retain only the high-value process and clock blocks.
 set -g status-right "\
 #[fg={{ $warning }},bg={{ $panel }},bold]#{?pane_in_mode, COPY ,}#{?pane_synchronized, SYNC ,}\
 #[fg={{ $secondary }},bg={{ $panel }},bold]#{?#{==:#{pane_current_command},ssh}, 󰌘 SSH ,}\
-#[fg={{ $border }},bg={{ $panel }}]\
-#[fg={{ $accent_fg }},bg={{ $border }},bold] #(~/.local/bin/tmux-ai status #{q:pane_current_command} #{pane_pid}) \
-#[fg={{ $muted }},bg={{ $border }},nobold] #H · %d %b \
-#[fg={{ $accent }},bg={{ $border }}]\
-#[fg={{ $accent_text }},bg={{ $accent }},bold] %H:%M #[fg={{ $accent }},bg={{ $panel }}]"
+#[fg={{ $muted }},bg={{ $panel }}]#{?#{e|>=:#{client_width},160},#(~/.local/bin/tmux-status other-sessions #{q:session_name})  ,}\
+#[fg={{ $muted }},bg={{ $panel }}]#{?#{e|>=:#{client_width},130},  #(~/.local/bin/tmux-status short-path #{q:pane_current_path})  ,}\
+#[fg=#{?@dot_client_focused,{{ $tertiary }},{{ $border }}},bg={{ $panel }}]\
+#[fg=#{?@dot_client_focused,{{ $accent_text }},{{ $muted }}},bg=#{?@dot_client_focused,{{ $tertiary }},{{ $border }}},bold] #{pane_current_command} \
+#[fg=#{?@dot_client_focused,{{ $tertiary }},{{ $border }}},bg={{ $panel }}] \
+#[fg=#{?@dot_client_focused,{{ $accent }},{{ $border }}},bg={{ $panel }}]\
+#[fg=#{?@dot_client_focused,{{ $accent_text }},{{ $muted }}},bg=#{?@dot_client_focused,{{ $accent }},{{ $border }}},bold] %H:%M #[fg=#{?@dot_client_focused,{{ $accent }},{{ $border }}},bg={{ $panel }}]"
 
 # --- Window Tabs ---
 set -g window-status-format "\
-#[fg={{ $muted }},bg={{ $panel }},nobold] #I:#W \
-#[fg={{ $secondary }},bg={{ $panel }}]#{?window_activity_flag,●,}#{?window_bell_flag,!,} "
+#[fg={{ $muted }},bg={{ $panel }},nobold] #I:#W\
+#[fg={{ $warning }},bg={{ $panel }}]#{?window_activity_flag, ●,}#{?window_bell_flag, !,}#{?window_last_flag, ,} "
 
 set -g window-status-current-format "\
-#[fg={{ $border }},bg={{ $panel }}]\
-#[fg={{ $accent_fg }},bg={{ $border }},bold] #I:#W \
-#[fg={{ $secondary }},bg={{ $border }},nobold]#{pane_current_command} \
-#[fg={{ $tertiary }},bg={{ $border }}]#{?window_zoomed_flag,󰊓 ,}\
-#[fg={{ $border }},bg={{ $panel }}]"
+#[fg=#{?@dot_client_focused,{{ $secondary }},{{ $border }}},bg={{ $panel }}]\
+#[fg=#{?@dot_client_focused,{{ $accent_text }},{{ $muted }}},bg=#{?@dot_client_focused,{{ $secondary }},{{ $border }}},bold] #I:#W #{?window_zoomed_flag, ,} \
+#[fg=#{?@dot_client_focused,{{ $secondary }},{{ $border }}},bg={{ $panel }}]"
 
-set -g window-status-separator ""
+set -g window-status-separator "#[fg={{ $border }},bg={{ $panel }}] · "
 set -g window-status-bell-style "bg={{ $error }},fg={{ $bg }},bold"
 set -g window-status-activity-style "bg={{ $panel }},fg={{ $warning }},bold"
 

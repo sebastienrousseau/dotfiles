@@ -25,7 +25,8 @@
 ###############
 # Appearance  #
 ###############
-background-opacity = {{ if eq .chezmoi.os "darwin" }}0.92{{ else }}0.96{{ end }}
+# Large reading surfaces stay opaque so semantic colours keep their contrast.
+background-opacity = 1.0
 background-blur = {{ if eq .chezmoi.os "darwin" }}14{{ else }}0{{ end }}
 window-padding-x = 16
 window-padding-y = 12

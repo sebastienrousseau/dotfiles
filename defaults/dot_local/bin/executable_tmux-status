@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+# Small, cache-free helpers for the wallpaper-aware tmux status bar.
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: tmux-status apply-colours <primary> <secondary> <tertiary>
+       tmux-status other-sessions <current-session>
+       tmux-status short-path <path>
+EOF
+}
+
+apply_colours() {
+  local primary="${1:-}"
+  local secondary="${2:-}"
+  local tertiary="${3:-}"
+  local session_id session_name checksum colour candidate offset
+  local used="|"
+  local -a colours
+
+  [[ "$primary" =~ ^#[0-9A-Fa-f]{6}$ ]] || return 2
+  [[ "$secondary" =~ ^#[0-9A-Fa-f]{6}$ ]] || return 2
+  [[ "$tertiary" =~ ^#[0-9A-Fa-f]{6}$ ]] || return 2
+
+  # Build twelve wallpaper-derived slots. Linear probing makes colours unique
+  # across the active session set while the checksum keeps the assignment
+  # deterministic for a given set of session names.
+  colours=(
+    "$primary" "$secondary" "$tertiary"
+    "$(blend_colour "$primary" "$secondary" 3)"
+    "$(blend_colour "$primary" "$tertiary" 3)"
+    "$(blend_colour "$secondary" "$primary" 3)"
+    "$(blend_colour "$secondary" "$tertiary" 3)"
+    "$(blend_colour "$tertiary" "$primary" 3)"
+    "$(blend_colour "$tertiary" "$secondary" 3)"
+    "$(blend_colour "$primary" "$secondary" 1)"
+    "$(blend_colour "$primary" "$tertiary" 1)"
+    "$(blend_colour "$secondary" "$tertiary" 1)"
+  )
+
+  while IFS='|' read -r session_id session_name; do
+    [[ -n "$session_id" ]] || continue
+    checksum="$(printf '%s' "$session_name" | cksum | awk '{print $1}')"
+    candidate=$((checksum % ${#colours[@]}))
+    colour="${colours[$candidate]}"
+    for ((offset = 0; offset < ${#colours[@]}; offset++)); do
+      colour="${colours[$(((candidate + offset) % ${#colours[@]}))]}"
+      [[ "$used" == *"|$colour|"* ]] || break
+    done
+    used+="$colour|"
+    tmux set-option -q -t "$session_id" @dot_session_colour "$colour"
+  done < <(tmux list-sessions -F '#{session_id}|#{session_name}' 2>/dev/null | sort -t '|' -k2 || true)
+}
+
+blend_colour() {
+  local left="${1#\#}" right="${2#\#}" left_weight="${3:-1}"
+  local divisor=$((left_weight + 1)) red green blue
+
+  red=$(((left_weight * 16#${left:0:2} + 16#${right:0:2}) / divisor))
+  green=$(((left_weight * 16#${left:2:2} + 16#${right:2:2}) / divisor))
+  blue=$(((left_weight * 16#${left:4:2} + 16#${right:4:2}) / divisor))
+  printf '#%02x%02x%02x' "$red" "$green" "$blue"
+}
+
+other_sessions() {
+  local current="${1:-}"
+  local session first="" count=0 remaining
+
+  while IFS= read -r session; do
+    [[ -n "$session" && "$session" != "$current" ]] || continue
+    ((count += 1))
+    [[ -n "$first" ]] || first="$session"
+  done < <(tmux list-sessions -F '#{session_name}' 2>/dev/null || true)
+
+  ((count > 0)) || return 0
+  if ((${#first} > 16)); then
+    first="${first:0:15}…"
+  fi
+  remaining=$((count - 1))
+  printf '↔ %s' "$first"
+  ((remaining == 0)) || printf ' +%d' "$remaining"
+}
+
+short_path() {
+  local path="${1:-}" parent leaf
+  [[ -n "$path" ]] || return 0
+  path="${path%/}"
+  leaf="${path##*/}"
+  parent="${path%/*}"
+  parent="${parent##*/}"
+  if [[ -n "$parent" && "$parent" != "$leaf" ]]; then
+    printf '%s/%s' "$parent" "$leaf"
+  else
+    printf '%s' "$leaf"
+  fi
+}
+
+case "${1:-}" in
+  apply-colours)
+    shift
+    apply_colours "$@"
+    ;;
+  other-sessions)
+    shift
+    other_sessions "$@"
+    ;;
+  short-path)
+    shift
+    short_path "$@"
+    ;;
+  -h | --help)
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac

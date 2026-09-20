@@ -37,7 +37,8 @@ config.window_padding = {
   top = 12,
   bottom = 12,
 }
-config.window_background_opacity = {{ if eq .chezmoi.os "darwin" }}0.92{{ else }}0.96{{ end }}
+-- Preserve the generated sRGB palette and its tested contrast ratios.
+config.window_background_opacity = 1.0
 
 config.enable_tab_bar = true
 config.use_fancy_tab_bar = false

@@ -6,7 +6,8 @@ pad=10x10
 term=xterm-256color
 
 [colors]
-alpha=0.95
+# Preserve the generated sRGB palette and its tested contrast ratios.
+alpha=1.0
 background={{ trimPrefix "#" $t.term.bg }}
 foreground={{ trimPrefix "#" $t.term.fg }}
 regular0={{ trimPrefix "#" $t.term.c0 }}

@@ -290,6 +290,25 @@ ANSI_HUES = {
     "cyan": 210.0,
 }
 
+# Apple HIG increased-contrast system colours (June 2025 specification).
+#
+# A terminal cannot call NSColor's dynamic semantic APIs, so these are used as
+# perceptual calibration anchors, not copied as the final palette. Wallpaper
+# hue is preserved while chroma is brought into the same legibility range as
+# Apple's independently tuned light and dark appearances.
+HIG_INCREASED_CONTRAST = {
+    "light": [
+        (233, 21, 45), (197, 83, 0), (161, 106, 0), (0, 137, 50),
+        (0, 133, 117), (0, 129, 152), (0, 126, 174), (30, 110, 244),
+        (86, 74, 222), (176, 47, 194), (231, 18, 77), (149, 109, 81),
+    ],
+    "dark": [
+        (255, 97, 101), (255, 160, 86), (254, 223, 67), (74, 217, 104),
+        (84, 223, 203), (59, 221, 236), (109, 217, 255), (92, 184, 255),
+        (167, 170, 255), (234, 141, 255), (255, 138, 196), (219, 166, 121),
+    ],
+}
+
 
 def find_nearest_hue(hue: float) -> str:
     """Map a CIELAB hue angle to the nearest ANSI color name."""
@@ -301,6 +320,58 @@ def find_nearest_hue(hue: float) -> str:
             best_dist = dist
             best_name = name
     return best_name
+
+
+def _hue_distance(left: float, right: float) -> float:
+    """Smallest distance between two hue angles."""
+    return min(abs(left - right), 360.0 - abs(left - right))
+
+
+def _fit_lab_to_srgb(lab: Tuple[float, float, float]) -> Tuple[float, float, float]:
+    """Reduce chroma until a Lab colour survives the sRGB round trip.
+
+    Wallpaper clusters can sit well outside the terminal's sRGB gamut. Raw
+    channel clamping makes supposedly different hues collapse to the same
+    muddy colour, so fit chroma before emitting the value.
+    """
+    lightness, _a, _b = lab
+    hue = lab_hue(*lab)
+    chroma = lab_chroma(*lab)
+    for _ in range(48):
+        candidate = (
+            lightness,
+            math.cos(math.radians(hue)) * chroma,
+            math.sin(math.radians(hue)) * chroma,
+        )
+        rendered = rgb_to_lab(*lab_to_rgb(*candidate))
+        if lab_distance(candidate, rendered) <= 2.0:
+            return rendered
+        chroma *= 0.94
+    return rgb_to_lab(*lab_to_rgb(lightness, 0.0, 0.0))
+
+
+def _hig_reference_lab(lab, is_dark):
+    """Nearest Apple increased-contrast system colour by perceptual hue."""
+    hue = lab_hue(*lab)
+    references = [
+        rgb_to_lab(*rgb)
+        for rgb in HIG_INCREASED_CONTRAST["dark" if is_dark else "light"]
+    ]
+    return min(references, key=lambda ref: _hue_distance(hue, lab_hue(*ref)))
+
+
+def _hig_semantic_lab(lab, is_dark):
+    """Preserve wallpaper hue with Apple-like mode-specific chroma."""
+    hue = lab_hue(*lab)
+    reference = _hig_reference_lab(lab, is_dark)
+    reference_chroma = lab_chroma(*reference)
+    source_chroma = lab_chroma(*lab)
+    # Increased-contrast system colours remain visibly chromatic in both
+    # appearances. Keep source variation but prevent washed-out or neon ends.
+    chroma = max(reference_chroma * 0.86, source_chroma * 1.10)
+    chroma = min(chroma, reference_chroma * 1.12)
+    radians = math.radians(hue)
+    return (lab[0], math.cos(radians) * chroma, math.sin(radians) * chroma)
 
 
 def adjust_lightness(lab: Tuple[float, float, float], target_L: float) -> Tuple[float, float, float]:
@@ -397,45 +468,44 @@ def _env_hex(key: str, fallback: str) -> str:
 
 
 def _compute_bg_fg(clusters, is_dark):
-    """Terminal background/foreground — fixed, engineered neutrals per mode.
+    """Terminal background/foreground tinted from the active wallpaper.
 
-    Deliberately NOT derived from the wallpaper: a terminal wants a
-    high-contrast, low-eye-strain surface that stays stable across themes.
-    Dark mode uses a deep neutral grey with off-white text; light mode a warm
-    paper cream with charcoal text. The wallpaper still drives the accent and
-    the 16 ANSI colours (which are computed against this bg for contrast).
-    Override per mode via DOTFILES_TERM_BG_DARK / _FG_DARK / _BG_LIGHT /
-    _FG_LIGHT.
+    Start from Apple's semantic system-gray hierarchy, then carry enough of the
+    wallpaper's dominant hue into them that switching families is immediately
+    visible. Lightness remains fixed, preserving predictable contrast; only
+    a*/b* move. Override the bases per mode via DOTFILES_TERM_BG_DARK /
+    _FG_DARK / _BG_LIGHT / _FG_LIGHT, or set DOTFILES_TERM_TINT=0 to retain
+    the untinted bases.
     """
     if is_dark:
-        bg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_BG_DARK", "#1e1e2e"))
-        fg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_FG_DARK", "#d4d4d4"))
+        bg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_BG_DARK", "#1c1c1e"))
+        fg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_FG_DARK", "#f5f5f7"))
     else:
-        bg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_BG_LIGHT", "#fbf1c7"))
-        fg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_FG_LIGHT", "#3c3836"))
+        bg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_BG_LIGHT", "#f2f2f7"))
+        fg_rgb = hex_to_rgb(_env_hex("DOTFILES_TERM_FG_LIGHT", "#1d1d1f"))
 
-    # Tint the engineered neutral toward the wallpaper's dominant hue.
-    #
-    # The lightness stays exactly where it was — that is what the docstring
-    # above is protecting, and it is what keeps contrast and eye strain
-    # predictable. Only a*/b* move, and only to TINT_CHROMA, which is small
-    # enough to read as "this terminal belongs to that wallpaper" rather than
-    # as a coloured background.
-    #
-    # Without this, term.bg had exactly two values across 228 themes and every
-    # theme looked identical apart from one accent. Set DOTFILES_TERM_TINT=0
-    # for the previous flat neutrals.
-    if _env_hex("DOTFILES_TERM_TINT", "1") != "0":
+    # Tint the engineered neutral toward the wallpaper's dominant hue. A
+    # fixed chroma of 4.5 was technically different but perceptually too close
+    # to grey: Berlin, Maui and Rose all looked like the same terminal. Scale
+    # with the source image instead, bounded so vivid wallpapers remain calm.
+    tint_enabled = os.environ.get("DOTFILES_TERM_TINT", "1").lower() not in {
+        "0", "false", "no", "off"
+    }
+    if tint_enabled:
         ranked = sorted(clusters, key=lambda c: c[1] * lab_chroma(*c[0]), reverse=True)
         src = ranked[0][0] if ranked and lab_chroma(*ranked[0][0]) >= 5.0 else None
         if src is not None:
             hue_c = lab_chroma(*src)
             if hue_c > 0:
-                # Unit vector along the wallpaper's hue, scaled to a fixed,
-                # deliberately low chroma. Dark surfaces take a touch more:
-                # the same chroma reads weaker against a low-lightness ground.
-                bg_chroma = 4.5 if is_dark else 3.0
-                fg_chroma = 2.5 if is_dark else 2.0
+                # Dark surfaces need more chroma for the tint to remain
+                # visible. Foreground tint stays restrained so text remains
+                # neutral-looking while belonging to the same palette.
+                if is_dark:
+                    bg_chroma = max(7.0, min(12.0, hue_c * 0.24))
+                    fg_chroma = max(1.5, min(3.0, bg_chroma * 0.24))
+                else:
+                    bg_chroma = max(3.5, min(7.0, hue_c * 0.16))
+                    fg_chroma = max(1.0, min(2.5, bg_chroma * 0.24))
                 ua, ub = src[1] / hue_c, src[2] / hue_c
                 bl = rgb_to_lab(*bg_rgb)[0]
                 fl = rgb_to_lab(*fg_rgb)[0]
@@ -455,28 +525,17 @@ def _compute_accent(clusters, is_dark):
     that doesn't represent the image. Near-neutral clusters score ~0 and
     are skipped; if the whole image is neutral we fall back to the most
     saturated cluster so the accent still carries a hue. The selected
-    colour is then AAA-darkened below (ADR-009 contrast requirement)."""
+    colour is then moved toward the opposite end of the terminal surface:
+    bright on dark themes and deep on light themes. This is the same design
+    principle as tmux-colorful's automatic black/white foreground selection,
+    with an explicit AAA contrast guarantee rather than a YIQ threshold."""
     ranked = sorted(clusters, key=lambda c: c[1] * lab_chroma(*c[0]), reverse=True)
     accent_lab = ranked[0][0]
     if lab_chroma(*accent_lab) < 5.0:
         accent_lab = max(clusters, key=lambda c: lab_chroma(*c[0]))[0]
-    if is_dark:
-        accent_lab = (max(accent_lab[0], 35.0), accent_lab[1], accent_lab[2])
-    else:
-        accent_lab = (min(accent_lab[0], 45.0), accent_lab[1], accent_lab[2])
-    # Darken until white text has 7:1 contrast (AAA)
-    al, aa, ab = accent_lab
-    for _ in range(80):
-        if contrast_ratio((255, 255, 255), lab_to_rgb(al, aa, ab)) >= 7.0:
-            break
-        al = max(0.0, al - 2.0)
-    return (al, aa, ab), lab_to_rgb(al, aa, ab)
+    accent_lab = _aaa_block(accent_lab, is_dark)
+    return accent_lab, lab_to_rgb(*accent_lab)
 
-
-# A support colour that has to fall below this lightness to satisfy the 7:1
-# white-on-block requirement is not carrying colour any more. See the
-# rejection note in _compute_support_colours.
-SUPPORT_MIN_L = 25.0
 
 # Minimum perceptual distance between the three support colours, as dE*ab.
 #
@@ -491,38 +550,33 @@ SUPPORT_MIN_L = 25.0
 # pair below it; those now reach further down the cluster ranking for a
 # candidate that is actually distinct, and only fall back to a synthetic
 # rotation when the wallpaper genuinely has nothing else to offer.
-SUPPORT_MIN_DE = 10.0
+SUPPORT_MIN_DE = 18.0
 
 
-def _aaa_darkened(lab, is_dark):
-    """Clamp lightness per mode, then darken until white sits on it at 7:1.
+def _aaa_block(lab, is_dark):
+    """Return a vivid block colour with AAA-readable foreground text.
 
-    Shared by the selection filter and the final emission so a candidate is
-    judged on exactly the colour it will become, not on the one it started
-    as — checking the input and emitting the output was how a colour that
-    passed the chroma filter still arrived at L*=14.8.
-
-    A candidate that is ALREADY darker than SUPPORT_MIN_L is then lifted back
-    toward it, one step at a time, stopping the moment another step would
-    cost the 7:1 guarantee. Two different things can leave a support colour
-    too dark: the darkening loop travelling a long way (a low-chroma
-    candidate), and the cluster simply starting dark (dune-light's whole
-    palette sits near L*17 and holds 14.3:1, so the loop never ran). The
-    first is handled by rejecting the candidate; only the second can be
-    lifted, and only where there is contrast headroom to pay for it.
+    Dark terminal surfaces get luminous blocks with black text; light
+    surfaces get deep blocks with white text. Hue and chroma are unchanged
+    while lightness moves only as far as needed for a 7:1 contrast ratio.
+    This avoids the old behaviour where every mode darkened accents for white
+    text and consequently made dark terminals look uniformly muddy.
     """
-    L = max(lab[0], 35.0) if is_dark else min(lab[0], 45.0)
-    a, b = lab[1], lab[2]
-    for _ in range(80):
-        if contrast_ratio((255, 255, 255), lab_to_rgb(L, a, b)) >= 7.0:
+    semantic = _hig_semantic_lab(lab, is_dark)
+    reference = _hig_reference_lab(lab, is_dark)
+    L = (
+        max(semantic[0], reference[0], 62.0)
+        if is_dark
+        else min(semantic[0], reference[0], 38.0)
+    )
+    a, b = semantic[1], semantic[2]
+    text = (0, 0, 0) if is_dark else (255, 255, 255)
+    step = 1.5 if is_dark else -1.5
+    for _ in range(120):
+        if contrast_ratio(text, lab_to_rgb(L, a, b)) >= 7.0:
             break
-        L = max(0.0, L - 2.0)
-    while L < SUPPORT_MIN_L:
-        nxt = min(SUPPORT_MIN_L, L + 1.0)
-        if contrast_ratio((255, 255, 255), lab_to_rgb(nxt, a, b)) < 7.0:
-            break
-        L = nxt
-    return (L, a, b)
+        L = max(0.0, min(100.0, L + step))
+    return _fit_lab_to_srgb((L, a, b))
 
 
 def _displayed(lab, is_dark):
@@ -535,7 +589,7 @@ def _displayed(lab, is_dark):
     distance test has to run on the clamped colour or it is measuring
     something the user never sees.
     """
-    return rgb_to_lab(*lab_to_rgb(*_aaa_darkened(lab, is_dark)))
+    return rgb_to_lab(*lab_to_rgb(*_aaa_block(lab, is_dark)))
 
 
 def _compute_support_colours(clusters, accent_lab, is_dark):
@@ -545,8 +599,7 @@ def _compute_support_colours(clusters, accent_lab, is_dark):
     throws the rest away, so a wallpaper contributed exactly one colour to
     the UI and everything else — status bars, separators, inactive states —
     fell back to fixed neutrals. These are the next two ranked clusters,
-    put through the same AAA-darkening as the accent so white text sits on
-    them at 7:1.
+    put through the same mode-aware AAA mapping as the accent.
 
     Clusters within 12 degrees of a colour already chosen are skipped: two
     near-identical blues give no more information than one, and the point of
@@ -555,26 +608,11 @@ def _compute_support_colours(clusters, accent_lab, is_dark):
     ranked = [c for c in sorted(clusters, key=lambda c: c[1] * lab_chroma(*c[0]), reverse=True)
               if lab_chroma(*c[0]) >= 5.0]
     # Compare the colours as they will be SHOWN, not as the clusters arrived:
-    # the AAA-darkening moves lightness, which moves perceptual distance too.
+    # the AAA block mapping moves lightness, which moves perceptual distance.
     picked, chosen = [], [rgb_to_lab(*lab_to_rgb(*accent_lab))]
     for lab, _pop in ranked:
         final = _displayed(lab, is_dark)
         if any(lab_distance(final, o) < SUPPORT_MIN_DE for o in chosen):
-            continue
-        # Reject a candidate that only reaches 7:1 by going almost black.
-        #
-        # The AAA-darkening below drives lightness down until white sits on
-        # the colour at 7:1. A low-chroma candidate has to travel a long way
-        # to get there: bauhaus-light's second cluster landed at L*=14.8,
-        # which reads as another shade of dark rather than as a colour, even
-        # though its chroma of 8.0 passed the filter above.
-        #
-        # Measured across the library this affected 7 themes, all light
-        # variants, where the surface is pale and the colours must darken to
-        # sit on it. Raising the chroma floor instead would have cost 34
-        # themes their support colours and fixed only one of these seven, so
-        # the constraint belongs on the OUTCOME, not on the input.
-        if final[0] < SUPPORT_MIN_L:
             continue
         picked.append(lab)
         chosen.append(final)
@@ -599,13 +637,11 @@ def _compute_support_colours(clusters, accent_lab, is_dark):
                 rad = math.radians((lab_hue(*base) + deg) % 360.0)
                 cand_lab = (base[0], math.cos(rad) * c, math.sin(rad) * c)
                 final = _displayed(cand_lab, is_dark)
-                rgb = lab_to_rgb(*_aaa_darkened(cand_lab, is_dark))
+                rgb = lab_to_rgb(*_aaa_block(cand_lab, is_dark))
                 # Round trip: if the colour was out of gamut it was clamped,
                 # and the clamped value will not convert back to what we asked
                 # for. That is exactly how the duplicates were produced.
                 if lab_distance(rgb_to_lab(*rgb), final) > 3.0:
-                    continue
-                if final[0] < SUPPORT_MIN_L:
                     continue
                 d = min(lab_distance(final, o) for o in chosen)
                 if d >= SUPPORT_MIN_DE:
@@ -622,30 +658,26 @@ def _compute_support_colours(clusters, accent_lab, is_dark):
         picked.append(best)
         chosen.append(_displayed(best, is_dark))
 
-    return (lab_to_rgb(*_aaa_darkened(picked[0], is_dark)),
-            lab_to_rgb(*_aaa_darkened(picked[1], is_dark)))
+    return (lab_to_rgb(*_aaa_block(picked[0], is_dark)),
+            lab_to_rgb(*_aaa_block(picked[1], is_dark)))
 
 
-def _on_dark(lab, surfaces, min_ratio=4.5):
-    """The same hue, light enough to be TEXT on a dark surface.
+def _on_surface(lab, surfaces, is_dark, min_ratio=4.5):
+    """The same hue, readable as text on every terminal surface.
 
-    `accent`, `secondary` and `tertiary` are darkened until white sits on
-    them at 7:1 — they are background colours by construction, and painting
-    them as text on the dark status bar measured as low as 1.67:1.
-
-    This keeps the hue and chroma and walks lightness up instead, until the
-    ratio holds against every surface the text can land on. Without it there
-    is no way to show a wallpaper colour AS text: the choice would be
-    between wallpaper colour and legibility.
+    Walk lightness away from the surface: upward for a dark terminal and
+    downward for a light one. This retains the wallpaper hue and keeps text
+    accents legible independently of their block-background counterparts.
     """
     L, a, b = lab
+    step = 1.5 if is_dark else -1.5
     for _ in range(120):
         rgb = lab_to_rgb(L, a, b)
         if all(contrast_ratio(rgb, s) >= min_ratio for s in surfaces):
             return rgb
-        if L >= 100.0:
+        if (is_dark and L >= 100.0) or (not is_dark and L <= 0.0):
             break
-        L = min(100.0, L + 1.5)
+        L = max(0.0, min(100.0, L + step))
     return lab_to_rgb(L, a, b)
 
 
@@ -680,19 +712,24 @@ def _muted_text(panel_rgb, border_rgb, bg_lab, is_dark):
 
 
 def _compute_panel_border(bg_lab, bg_rgb, is_dark):
-    """Compute panel and border with enforced contrast ranges against bg."""
+    """Compute Apple's primary/secondary/tertiary surface hierarchy.
+
+    The offsets mirror system gray 6 -> gray 5 -> gray 4: elevation gets
+    lighter in dark mode and darker in light mode. Chroma recedes with each
+    layer so large surfaces remain calm while accents carry the wallpaper.
+    """
     if is_dark:
-        panel_lab = (min(bg_lab[0] + 3, 100), bg_lab[1], bg_lab[2])
-        border_lab = (bg_lab[0] + 8, bg_lab[1] * 0.5, bg_lab[2] * 0.5)
+        panel_lab = (min(bg_lab[0] + 8, 100), bg_lab[1] * 0.85, bg_lab[2] * 0.85)
+        border_lab = (min(bg_lab[0] + 14, 100), bg_lab[1] * 0.65, bg_lab[2] * 0.65)
     else:
-        panel_lab = (max(bg_lab[0] - 3, 0), bg_lab[1], bg_lab[2])
-        border_lab = (bg_lab[0] - 6, bg_lab[1] * 0.3, bg_lab[2] * 0.3)
+        panel_lab = (max(bg_lab[0] - 5, 0), bg_lab[1] * 0.85, bg_lab[2] * 0.85)
+        border_lab = (max(bg_lab[0] - 12, 0), bg_lab[1] * 0.65, bg_lab[2] * 0.65)
     panel_rgb = lab_to_rgb(*panel_lab)
     for _ in range(20):
         pr = contrast_ratio(panel_rgb, bg_rgb)
-        if 1.03 <= pr <= 2.0:
+        if 1.08 <= pr <= 2.0:
             break
-        if pr < 1.03:
+        if pr < 1.08:
             panel_lab = (panel_lab[0] + (2 if is_dark else -2), panel_lab[1], panel_lab[2])
         else:
             panel_lab = (panel_lab[0] + (-1 if is_dark else 1), panel_lab[1], panel_lab[2])
@@ -703,28 +740,30 @@ def _compute_panel_border(bg_lab, bg_rgb, is_dark):
 
 def _build_ansi_color(base_lab, accent_lab, bg_rgb, is_dark):
     """Build normal + bright ANSI variant from a base Lab color."""
+    reference = _hig_reference_lab(base_lab, is_dark)
+    base_lab = _hig_semantic_lab(base_lab, is_dark)
     normal_L = (
-        max(55.0, min(75.0, base_lab[0])) if is_dark
+        max(65.0, min(82.0, reference[0])) if is_dark
         else max(30.0, min(50.0, base_lab[0]))
     )
-    normal = adjust_lightness(base_lab, normal_L)
+    normal = _fit_lab_to_srgb((normal_L, base_lab[1], base_lab[2]))
     if is_dark:
         # Dark bg: the bright variant pops by getting lighter.
-        bright = adjust_lightness(base_lab, normal_L + 12)
+        bright = _fit_lab_to_srgb((min(92.0, normal_L + 10), base_lab[1], base_lab[2]))
         bright_min = 4.5
     else:
         # Light bg: a lighter bright would wash out against near-white, so
         # brighten by vividness at equal lightness instead — the bright is
         # never darker than the normal (matches Apple's light ANSI ramp,
         # where brights read as more saturated, not muddier).
-        bright = (normal[0], normal[1] * 1.25, normal[2] * 1.25)
+        bright = _fit_lab_to_srgb((normal[0], normal[1] * 1.15, normal[2] * 1.15))
         bright_min = 7.0
     # WCAG AAA (7:1) for the chromatic slots on a light bg so coloured text
     # (paths, syntax) is unambiguously legible — AA (4.5:1) still read as washed
     # out on cream. Brights stay AAA too and differ from normals by saturation
     # (Apple's light ramp), not lightness. Dark mode keeps its lower floor
     # (light text on dark reads comfortably at a lower ratio).
-    normal_min = 3.0 if is_dark else 7.0
+    normal_min = 4.5 if is_dark else 7.0
     normal_rgb = ensure_contrast(lab_to_rgb(*normal), bg_rgb, normal_min, is_dark)
     bright_rgb = ensure_contrast(lab_to_rgb(*bright), bg_rgb, bright_min, is_dark)
     return normal_rgb, bright_rgb
@@ -783,7 +822,7 @@ def generate_theme(
     """Generate a full theme definition from clustered dominant colors."""
     bg_lab, bg_rgb, fg_rgb = _compute_bg_fg(clusters, is_dark)
     accent_lab, accent_rgb = _compute_accent(clusters, is_dark)
-    accent_text = (255, 255, 255)
+    accent_text = (0, 0, 0) if is_dark else (255, 255, 255)
     cursor_rgb = accent_rgb
 
     # Selection background
@@ -799,11 +838,15 @@ def generate_theme(
     # Text-safe versions of the three chromatic colours, for consumers that
     # paint them as foreground on panel/border rather than as a block.
     _surfaces = (panel_rgb, border_rgb, bg_rgb)
-    accent_on_rgb = _on_dark(rgb_to_lab(*accent_rgb), _surfaces)
-    secondary_on_rgb = _on_dark(rgb_to_lab(*secondary_rgb), _surfaces)
-    tertiary_on_rgb = _on_dark(rgb_to_lab(*tertiary_rgb), _surfaces)
+    accent_on_rgb = _on_surface(rgb_to_lab(*accent_rgb), _surfaces, is_dark)
+    secondary_on_rgb = _on_surface(rgb_to_lab(*secondary_rgb), _surfaces, is_dark)
+    tertiary_on_rgb = _on_surface(rgb_to_lab(*tertiary_rgb), _surfaces, is_dark)
     ansi = _ansi_palette(clusters, accent_lab, bg_rgb, is_dark)
     c0_rgb, c7_rgb, c8_rgb, c15_rgb = _structural_colors(bg_lab, bg_rgb, is_dark)
+    status_rgb = {
+        colour: lab_to_rgb(*_aaa_block(rgb_to_lab(*ansi[colour][0]), is_dark))
+        for colour in ("red", "yellow", "green", "blue")
+    }
 
     accent_hue = lab_hue(*accent_lab)
     nvim_theme = _nvim_from_hue(accent_hue, is_dark)
@@ -845,14 +888,14 @@ def generate_theme(
         "ui": {
             "accent": rgb_to_hex(*accent_rgb),
             "accent_text": rgb_to_hex(*accent_text),
-            "error": rgb_to_hex(*ansi["red"][0]),
-            "warning": rgb_to_hex(*ansi["yellow"][0]),
-            "success": rgb_to_hex(*ansi["green"][0]),
-            "info": rgb_to_hex(*ansi["blue"][0]),
+            "error": rgb_to_hex(*status_rgb["red"]),
+            "warning": rgb_to_hex(*status_rgb["yellow"]),
+            "success": rgb_to_hex(*status_rgb["green"]),
+            "info": rgb_to_hex(*status_rgb["blue"]),
             "panel": rgb_to_hex(*panel_rgb),
             "border": rgb_to_hex(*border_rgb),
-            # The wallpaper's 2nd and 3rd chromatic colours. White sits on
-            # either at 7:1, same as accent.
+            # The wallpaper's 2nd and 3rd chromatic colours. Black text sits
+            # on dark-mode blocks and white text on light-mode blocks at 7:1.
             "secondary": rgb_to_hex(*secondary_rgb),
             "tertiary": rgb_to_hex(*tertiary_rgb),
             # De-emphasised text that is still text: 4.5:1 against `panel`.

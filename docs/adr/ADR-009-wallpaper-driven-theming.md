@@ -68,10 +68,34 @@ implemented in `scripts/theme/` with the following pipeline:
    to preserve aesthetic intent. If AAA cannot be reached, fall back to
    AA with a logged warning (never silently regress).
 
+   Large accent blocks use mode-aware polarity: dark themes lift the
+   wallpaper hue until black text reaches AAA, while light themes deepen
+   it until white text reaches AAA. This prevents dark themes from becoming
+   muddy and light themes from becoming washed out.
+
+   Apple Human Interface Guidelines provide the semantic model for the two
+   appearances. Wallpaper hues are calibrated against Apple's independently
+   tuned increased-contrast light/dark system colors; primary, secondary, and
+   tertiary surfaces follow the system-gray elevation hierarchy. Large
+   terminal reading surfaces remain opaque so wallpaper translucency cannot
+   alter the tested sRGB values or their contrast.
+
 4. **Format generation** — emit one canonical TOML palette to
    `.chezmoidata/themes.toml`, then run `chezmoi apply` so every
    theme-aware template (terminals, editors, status bars, browsers)
    regenerates from a single declarative source.
+
+   Tmux hashes each session name across twelve shades derived from the
+   palette's three block colors, with collision probing across active sessions,
+   making concurrent projects visually distinct without per-project config.
+   Focus-aware dimming and width-gated context keep that identity dominant
+   instead of filling narrow panes with secondary telemetry.
+
+   AI CLI integration is provider-neutral first: terminal ANSI colours and an
+   explicit `COLORFGBG` mode reach every child process, including panes behind
+   tmux. Small adapters then select native theme facilities where available
+   (Codex, Claude, Gemini, Antigravity, Qwen, OpenCode, and Aider) while
+   preserving unrelated provider settings.
 
 5. **Companion pipelines** — `dot-theme-sync` feeds the same accent
    colors to **matugen** for Material You-style GTK/Qt theming on
@@ -125,6 +149,7 @@ changed), repeatable, and tested under `tests/unit/theme/`.
 ## References
 
 - WCAG 2.2 contrast: <https://www.w3.org/TR/WCAG22/#contrast-minimum>
+- Apple Human Interface Guidelines — Color: <https://developer.apple.com/design/human-interface-guidelines/color>
 - CIELAB color space: <https://en.wikipedia.org/wiki/CIELAB_color_space>
 - `scripts/theme/` — engine source
 - `.chezmoidata/themes.toml` — output palette schema

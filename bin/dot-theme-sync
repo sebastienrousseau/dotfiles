@@ -15,6 +15,7 @@
 ## # Supported Applications
 ##   Ghostty   — chezmoi apply + runtime config reload
 ##   Tmux      — chezmoi apply + source-file reload
+##   AI CLIs   — provider adapters + terminal appearance inheritance
 ##   Niri      — screen transition
 ##   Neovim    — --remote-expr colorscheme switch (direct IPC, no file needed)
 ##   Browsers  — desktop color-scheme sync + Firefox content preference
@@ -307,6 +308,10 @@ apply_theme_configs() {
     "$HOME/.config/alacritty/alacritty.toml"
     "$HOME/.config/kitty/kitty.conf"
     "$HOME/.config/starship.toml"
+    "$HOME/.config/zsh/rc.d/10-env.zsh"
+    "$HOME/.config/fish/conf.d/env.fish"
+    "$HOME/.config/nushell/env.nu"
+    "$HOME/.codex/themes/dotfiles.tmTheme"
     "$HOME/.config/wezterm/wezterm.lua"
     "$HOME/.config/foot/foot.ini"
     "$HOME/.config/fuzzel/fuzzel.ini"
@@ -337,6 +342,16 @@ apply_theme_configs() {
     fi
   fi
 
+  # iTerm2's dynamic profile is produced by a run_onchange script rather than
+  # a normal target file, so a targeted apply must address its source path
+  # explicitly. Otherwise only a full chezmoi apply ever refreshes iTerm2.
+  local iterm_source="$CHEZMOI_SRC/run_onchange_22-iterm2-profile.sh.tmpl"
+  if [[ "$PLATFORM" == "Darwin" && -f "$iterm_source" ]]; then
+    if chezmoi apply --force --source-path "$iterm_source" &>/dev/null; then
+      applied_count=$((applied_count + 1))
+    fi
+  fi
+
   # Niri: some setups keep config.kdl outside chezmoi management; fall back
   # to rendering the template directly.
   local niri_target="$HOME/.config/niri/config.kdl"
@@ -361,6 +376,26 @@ apply_theme_configs() {
     _ok "Chezmoi" "regenerated $applied_count configs"
   else
     _skip "Chezmoi" "no managed configs found"
+  fi
+}
+
+sync_ai_cli_themes() {
+  local theme="$1"
+  local helper="$SRC_DIR/scripts/theme/sync-ai-cli-themes.py"
+  local updated
+
+  if ! command -v python3 &>/dev/null || [[ ! -f "$helper" ]]; then
+    _skip "AI CLIs" "theme adapter unavailable"
+    return 0
+  fi
+  if updated="$(python3 "$helper" --theme "$theme" --themes-file "$THEMES_FILE" 2>/dev/null)"; then
+    if [[ -n "$updated" ]]; then
+      _ok "AI CLIs" "updated ${updated//,/, } (restart active TUIs)"
+    else
+      _skip "AI CLIs" "no provider configs found"
+    fi
+  else
+    _skip "AI CLIs" "provider configs could not be updated"
   fi
 }
 
@@ -1490,6 +1525,7 @@ usage() {
   printf '%s\n' "${BOLD}APPLICATIONS${RESET}"
   printf '  %s\n' "Ghostty    chezmoi apply + runtime reload"
   printf '  %s\n' "Tmux       chezmoi apply + source-file reload"
+  printf '  %s\n' "AI CLIs    adaptive themes for Codex, Claude, Gemini, agy, Qwen, OpenCode, Aider"
   printf '  %s\n' "Niri       screen transition"
   printf '  %s\n' "Browsers   desktop sync + Firefox content preference"
   printf '  %s\n' "Neovim     remote-expr colorscheme switch (direct IPC)"
@@ -1694,6 +1730,7 @@ main() {
   else
     apply_theme_configs
   fi
+  sync_ai_cli_themes "$theme"
   sync_ghostty_macos_config
   echo ""
 

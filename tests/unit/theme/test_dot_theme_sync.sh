@@ -12,7 +12,14 @@ SCRIPT_FILE="$REPO_ROOT/bin/dot-theme-sync"
 AUTO_AGENT="$REPO_ROOT/defaults/private_Library/LaunchAgents/com.sebastienrousseau.dot-theme-auto.plist.tmpl"
 AUTO_INSTALLER="$REPO_ROOT/defaults/run_onchange_after_31-theme-auto-launchagent.sh.tmpl"
 TMUX_AI="$REPO_ROOT/defaults/dot_local/bin/executable_tmux-ai"
+TMUX_STATUS="$REPO_ROOT/defaults/dot_local/bin/executable_tmux-status"
 TMUX_TEMPLATE="$REPO_ROOT/defaults/dot_config/tmux/tmux.conf.tmpl"
+CODEX_THEME="$REPO_ROOT/defaults/dot_codex/themes/dotfiles.tmTheme.tmpl"
+KITTY_TEMPLATE="$REPO_ROOT/defaults/dot_config/kitty/kitty.conf.tmpl"
+GHOSTTY_TEMPLATE="$REPO_ROOT/defaults/dot_config/ghostty/config.tmpl"
+ALACRITTY_TEMPLATE="$REPO_ROOT/defaults/dot_config/alacritty/alacritty.toml.tmpl"
+WEZTERM_TEMPLATE="$REPO_ROOT/defaults/dot_config/wezterm/wezterm.lua.tmpl"
+FOOT_TEMPLATE="$REPO_ROOT/defaults/dot_config/foot/foot.ini.tmpl"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
@@ -46,6 +53,16 @@ test_start "regenerates_prompt_and_terminal_palettes"
 assert_file_contains "$SCRIPT_FILE" '.config/starship.toml' "theme sync must regenerate Starship"
 assert_file_contains "$SCRIPT_FILE" '.config/kitty/kitty.conf' "theme sync must regenerate Kitty"
 assert_file_contains "$SCRIPT_FILE" '.config/tmux/tmux.conf' "theme sync must regenerate tmux"
+assert_file_contains "$SCRIPT_FILE" '.codex/themes/dotfiles.tmTheme' "theme sync must regenerate Codex"
+assert_file_contains "$SCRIPT_FILE" 'run_onchange_22-iterm2-profile.sh.tmpl' \
+  "targeted theme sync must regenerate the iTerm2 dynamic profile"
+
+test_start "terminal_palettes_render_opaque"
+assert_file_contains "$KITTY_TEMPLATE" 'background_opacity 1.0' "Kitty must preserve tested sRGB colors"
+assert_file_contains "$GHOSTTY_TEMPLATE" 'background-opacity = 1.0' "Ghostty must preserve tested sRGB colors"
+assert_file_contains "$ALACRITTY_TEMPLATE" 'opacity = 1.0' "Alacritty must preserve tested sRGB colors"
+assert_file_contains "$WEZTERM_TEMPLATE" 'window_background_opacity = 1.0' "WezTerm must preserve tested sRGB colors"
+assert_file_contains "$FOOT_TEMPLATE" 'alpha=1.0' "Foot must preserve tested sRGB colors"
 
 test_start "stores_runtime_theme_in_machine_config"
 assert_file_contains "$SCRIPT_FILE" "set_machine_data_value()" "must atomically manage machine-local theme data"
@@ -77,17 +94,40 @@ assert_file_contains "$STARSHIP_TEMPLATE" '$t.term.c4' \
 
 test_start "tmux_has_ai_aware_dotbar"
 assert_file_exists "$TMUX_AI" "AI-aware tmux helper must exist"
+assert_file_exists "$TMUX_STATUS" "multi-session tmux helper must exist"
+assert_file_contains "$TMUX_STATUS" 'blend_colour' \
+  "session names must select stable, distinct wallpaper-derived colours"
+assert_file_contains "$TMUX_STATUS" 'used+="$colour|"' \
+  "active sessions must avoid colour collisions"
 assert_file_contains "$TMUX_TEMPLATE" 'AI CLI cockpit' "prefix+A must expose the AI launcher"
+assert_file_contains "$TMUX_TEMPLATE" 'set -g focus-events on' "tmux must receive terminal focus events"
+assert_file_contains "$TMUX_TEMPLATE" 'client-focus-out' "inactive clients must dim their status blocks"
+assert_file_contains "$TMUX_TEMPLATE" '@dot_session_colour' "session pills must use their own colour"
+assert_file_contains "$TMUX_TEMPLATE" 'other-sessions' "status bar must expose other active sessions"
 assert_file_contains "$TMUX_TEMPLATE" 'client_prefix' "session pill must react to prefix state"
-assert_file_contains "$TMUX_TEMPLATE" '#{?client_prefix,PREFIX,SESSION} · #S' \
+assert_file_contains "$TMUX_TEMPLATE" '#{?client_prefix,  ,}#S' \
   "session name must be the primary left-side identity"
+assert_file_contains "$TMUX_TEMPLATE" '@dot_client_focused,{{ $secondary }},{{ $border }}' \
+  "active window must visibly carry a distinct wallpaper colour"
 assert_file_contains "$TMUX_TEMPLATE" 'window_zoomed_flag' "window list must show zoom state"
 assert_file_contains "$TMUX_TEMPLATE" 'window_activity_flag' "window list must show activity"
-assert_file_contains "$TMUX_TEMPLATE" 'tmux-ai status' "status bar must identify the active AI CLI"
+assert_file_contains "$TMUX_TEMPLATE" '#I:#W ' "active window must use a distinct current-window flag"
+assert_file_contains "$TMUX_TEMPLATE" 'short-path' "wide clients must show a compact working directory"
+assert_file_contains "$TMUX_TEMPLATE" 'e|>=:#{client_width},130' \
+  "responsive context must compare client width numerically"
+assert_file_contains "$TMUX_TEMPLATE" 'set-environment -g COLORFGBG' \
+  "tmux panes must inherit a reliable light/dark appearance signal"
+assert_file_contains "$TMUX_TEMPLATE" '@dot_client_focused,{{ $tertiary }},{{ $border }}' \
+  "status bar must identify the active workload in a distinct colour segment"
+assert_equals "Code/project" "$(bash "$TMUX_STATUS" short-path /Users/seb/Code/project)" \
+  "working directory context must stay compact"
 assert_equals "AI:CODEX" "$(bash "$TMUX_AI" status codex 0)" \
   "Codex sessions receive an explicit provider badge"
 assert_equals "AI:CLAUDE" "$(bash "$TMUX_AI" status claude 0)" \
   "Claude sessions receive an explicit provider badge"
+assert_file_exists "$CODEX_THEME" "Codex must receive a wallpaper-derived syntax theme"
+assert_file_contains "$SCRIPT_FILE" 'sync_ai_cli_themes' \
+  "theme sync must coordinate installed AI provider CLIs"
 
 test_start "has_reload_niri"
 assert_file_contains "$SCRIPT_FILE" "reload_niri()" "must have reload_niri"

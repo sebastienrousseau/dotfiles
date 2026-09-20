@@ -104,13 +104,18 @@ The Neovim configuration includes:
 
 The tmux status bar displays:
 
-- A prominent rounded session-name pill that remains visible in prefix mode
-- Wallpaper-derived colors shared with the active terminal theme
-- Current workspace, windows, active command, zoom, bell, and activity state
-- Active AI provider badges for Claude, Codex, Copilot, OpenCode, Aider, and the wider `dot ai` fleet
-- Copy, synchronized-pane, SSH, host, date, and time indicators
+- A prominent rounded session-name pill with a stable per-session palette color
+- A red keyboard state while the tmux prefix is active and dimmed blocks when the client loses focus
+- Distinct wallpaper-derived primary, secondary, and tertiary color segments
+- Compact window tabs with current, zoom, last, bell, and activity icons
+- The active workload (including AI CLIs such as Claude and Codex) and time
+- Responsive CWD and other-session context on wider terminals
+- Copy, synchronized-pane, and SSH indicators only when relevant
 
 Press `prefix + A` to open the AI CLI launcher in the current workspace.
+AI provider sessions started after a theme switch inherit the same light/dark
+mode and wallpaper palette; restart existing TUIs because providers cache their
+appearance independently from tmux.
 
 ## Adding Screenshots
 

@@ -13,7 +13,9 @@ symbol_map U+E000-U+F8FF Symbols Nerd Font
 font_size {{ $fontSize }}
 
 window_padding_width 16
-background_opacity {{ if eq .chezmoi.os "darwin" }}0.92{{ else }}0.96{{ end }}
+# A terminal is a large reading surface: keep it opaque so generated sRGB
+# colours retain their tested contrast instead of blending with the wallpaper.
+background_opacity 1.0
 dim_opacity 0.75
 confirm_os_window_close 0
 enable_audio_bell no

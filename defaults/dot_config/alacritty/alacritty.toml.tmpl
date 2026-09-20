@@ -4,7 +4,8 @@
 {{- $t := index .themes $themeName -}}
 [window]
 padding = { x = 16, y = 12 }
-opacity = {{ if eq .chezmoi.os "darwin" }}0.92{{ else }}0.96{{ end }}
+# Preserve the generated sRGB palette and its tested contrast ratios.
+opacity = 1.0
 option_as_alt = {{ if eq .chezmoi.os "darwin" }}"Both"{{ else }}"None"{{ end }}
 
 [font]
