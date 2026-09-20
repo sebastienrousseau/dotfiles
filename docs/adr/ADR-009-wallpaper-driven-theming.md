@@ -88,8 +88,10 @@ implemented in `scripts/theme/` with the following pipeline:
    Tmux hashes each session name across twelve shades derived from the
    palette's three block colors, with collision probing across active sessions,
    making concurrent projects visually distinct without per-project config.
-   Focus-aware dimming and width-gated context keep that identity dominant
-   instead of filling narrow panes with secondary telemetry.
+   The session name is the only persistent chromatic element; window, path,
+   system, and time modules use neutral semantic text. Width gates hide
+   secondary telemetry in narrow panes, and a single platform-aware sample
+   collects CPU, memory, and battery data every ten seconds.
 
    AI CLI integration is provider-neutral first: terminal ANSI colours and an
    explicit `COLORFGBG` mode reach every child process, including panes behind

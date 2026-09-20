@@ -9,6 +9,7 @@ usage() {
 Usage: tmux-status apply-colours <primary> <secondary> <tertiary>
        tmux-status other-sessions <current-session>
        tmux-status short-path <path>
+       tmux-status system
 EOF
 }
 
@@ -97,6 +98,114 @@ short_path() {
   fi
 }
 
+format_system() {
+  local cpu="${1:-}" memory="${2:-}" battery="${3:-}"
+  local separator="" metric
+
+  for metric in \
+    "${cpu:+ ${cpu}%}" \
+    "${memory:+ ${memory}%}" \
+    "${battery:+ ${battery}%}"; do
+    [[ -n "$metric" ]] || continue
+    printf '%s%s' "$separator" "$metric"
+    separator=' · '
+  done
+}
+
+system_darwin() {
+  local cores cpu memory battery
+
+  cores="$(sysctl -n hw.logicalcpu 2>/dev/null || true)"
+  [[ "$cores" =~ ^[1-9][0-9]*$ ]] || cores=1
+  cpu="$(
+    ps -A -o %cpu= 2>/dev/null |
+      awk -v cores="$cores" '{ total += $1 } END { if (NR) { value = total / cores; if (value > 100) value = 100; printf "%.0f", value } }' ||
+      true
+  )"
+  memory="$(
+    memory_pressure -Q 2>/dev/null |
+      awk -F ': ' '/System-wide memory free percentage/ { gsub(/%/, "", $2); printf "%.0f", 100 - $2; exit }' ||
+      true
+  )"
+  battery="$(
+    pmset -g batt 2>/dev/null |
+      awk 'match($0, /[0-9]+%/) { print substr($0, RSTART, RLENGTH - 1); exit }' ||
+      true
+  )"
+  format_system "$cpu" "$memory" "$battery"
+}
+
+system_linux() {
+  local proc_root="${TMUX_STATUS_PROC_ROOT:-/proc}"
+  local power_root="${TMUX_STATUS_SYS_ROOT:-/sys}"
+  local runtime_dir state_file
+  local label user nice kernel idle iowait irq softirq steal rest
+  local total idle_total previous_total=0 previous_idle=0 delta_total delta_idle
+  local cpu="" memory="" battery="" capacity_file
+
+  if [[ -r "$proc_root/stat" ]]; then
+    read -r label user nice kernel idle iowait irq softirq steal rest <"$proc_root/stat" || true
+    total=$((user + nice + kernel + idle + iowait + irq + softirq + steal))
+    idle_total=$((idle + iowait))
+    runtime_dir="${XDG_RUNTIME_DIR:-${TMPDIR:-${XDG_CACHE_HOME:-$HOME/.cache}}}"
+    state_file="$runtime_dir/dotfiles-tmux-cpu-${UID:-0}.state"
+    mkdir -p "$runtime_dir" 2>/dev/null || true
+    if [[ -r "$state_file" ]] && read -r previous_total previous_idle <"$state_file"; then
+      delta_total=$((total - previous_total))
+      delta_idle=$((idle_total - previous_idle))
+      if ((delta_total > 0)); then
+        cpu=$(((100 * (delta_total - delta_idle) + delta_total / 2) / delta_total))
+      fi
+    else
+      cpu=$(((100 * (total - idle_total) + total / 2) / total))
+    fi
+    printf '%s %s\n' "$total" "$idle_total" >"$state_file" 2>/dev/null || true
+  fi
+
+  if [[ -r "$proc_root/meminfo" ]]; then
+    memory="$(
+      awk '
+        /^MemTotal:/ { total = $2 }
+        /^MemAvailable:/ { available = $2 }
+        END { if (total > 0) printf "%.0f", 100 * (total - available) / total }
+      ' "$proc_root/meminfo" 2>/dev/null || true
+    )"
+  fi
+
+  for capacity_file in "$power_root"/class/power_supply/BAT*/capacity; do
+    [[ -r "$capacity_file" ]] || continue
+    read -r battery <"$capacity_file" || true
+    break
+  done
+  format_system "$cpu" "$memory" "$battery"
+}
+
+system_windows() {
+  local payload cpu memory battery
+
+  command -v powershell.exe &>/dev/null || return 0
+  payload="$(
+    powershell.exe -NoLogo -NoProfile -NonInteractive -Command \
+      '$cpu = (Get-CimInstance Win32_Processor | Measure-Object LoadPercentage -Average).Average; $os = Get-CimInstance Win32_OperatingSystem; $mem = [math]::Round(100 * (1 - $os.FreePhysicalMemory / $os.TotalVisibleMemorySize)); $bat = (Get-CimInstance Win32_Battery | Select-Object -First 1 -ExpandProperty EstimatedChargeRemaining); Write-Output ("{0}|{1}|{2}" -f $cpu, $mem, $bat)' \
+      2>/dev/null |
+      tr -d '\r' |
+      tail -1 ||
+      true
+  )"
+  IFS='|' read -r cpu memory battery <<<"$payload"
+  format_system "$cpu" "$memory" "$battery"
+}
+
+system_status() {
+  local platform="${TMUX_STATUS_PLATFORM:-}"
+  [[ -n "$platform" ]] || platform="$(uname -s 2>/dev/null || true)"
+  case "$platform" in
+    Darwin) system_darwin ;;
+    Linux) system_linux ;;
+    CYGWIN* | MINGW* | MSYS*) system_windows ;;
+  esac
+}
+
 case "${1:-}" in
   apply-colours)
     shift
@@ -109,6 +218,10 @@ case "${1:-}" in
   short-path)
     shift
     short_path "$@"
+    ;;
+  system)
+    shift
+    system_status "$@"
     ;;
   -h | --help)
     usage

@@ -92,7 +92,7 @@ assert_file_contains "$STARSHIP_TEMPLATE" 'palette = "wallpaper"' \
 assert_file_contains "$STARSHIP_TEMPLATE" '$t.term.c4' \
   "Starship blue must come from the active theme"
 
-test_start "tmux_has_ai_aware_dotbar"
+test_start "tmux_has_minimal_ai_aware_status"
 assert_file_exists "$TMUX_AI" "AI-aware tmux helper must exist"
 assert_file_exists "$TMUX_STATUS" "multi-session tmux helper must exist"
 assert_file_contains "$TMUX_STATUS" 'blend_colour' \
@@ -101,24 +101,26 @@ assert_file_contains "$TMUX_STATUS" 'used+="$colour|"' \
   "active sessions must avoid colour collisions"
 assert_file_contains "$TMUX_TEMPLATE" 'AI CLI cockpit' "prefix+A must expose the AI launcher"
 assert_file_contains "$TMUX_TEMPLATE" 'set -g focus-events on' "tmux must receive terminal focus events"
-assert_file_contains "$TMUX_TEMPLATE" 'client-focus-out' "inactive clients must dim their status blocks"
-assert_file_contains "$TMUX_TEMPLATE" '@dot_session_colour' "session pills must use their own colour"
-assert_file_contains "$TMUX_TEMPLATE" 'other-sessions' "status bar must expose other active sessions"
-assert_file_contains "$TMUX_TEMPLATE" 'client_prefix' "session pill must react to prefix state"
-assert_file_contains "$TMUX_TEMPLATE" '#{?client_prefix,  ,}#S' \
+assert_file_contains "$TMUX_TEMPLATE" '@dot_session_colour' "session names must use their own colour"
+assert_file_contains "$TMUX_TEMPLATE" 'client_prefix' "session name must react to prefix state"
+assert_file_contains "$TMUX_TEMPLATE" '#{?client_prefix, , }#S' \
   "session name must be the primary left-side identity"
-assert_file_contains "$TMUX_TEMPLATE" '@dot_client_focused,{{ $secondary }},{{ $border }}' \
-  "active window must visibly carry a distinct wallpaper colour"
+assert_file_contains "$TMUX_TEMPLATE" 'status-justify left' \
+  "minimal status must place session and windows in one compact group"
 assert_file_contains "$TMUX_TEMPLATE" 'window_zoomed_flag' "window list must show zoom state"
-assert_file_contains "$TMUX_TEMPLATE" 'window_activity_flag' "window list must show activity"
-assert_file_contains "$TMUX_TEMPLATE" '#I:#W ' "active window must use a distinct current-window flag"
-assert_file_contains "$TMUX_TEMPLATE" 'short-path' "wide clients must show a compact working directory"
-assert_file_contains "$TMUX_TEMPLATE" 'e|>=:#{client_width},130' \
-  "responsive context must compare client width numerically"
+assert_file_contains "$TMUX_TEMPLATE" '#I:#W#F' "window list must retain native state flags"
+assert_file_contains "$TMUX_TEMPLATE" 'tmux-status system' \
+  "wide clients must show one lightweight cross-platform system sample"
+assert_file_contains "$TMUX_TEMPLATE" '@dot_status_show_system' \
+  "system monitoring must remain user-configurable"
+assert_file_contains "$TMUX_TEMPLATE" '@dot_status_padded' \
+  "status height must remain user-configurable"
+assert_file_contains "$TMUX_TEMPLATE" 'status-format[1]' \
+  "padded status must add a neutral breathing row"
+assert_file_contains "$TMUX_TEMPLATE" 'e|>=:#{client_width},120' \
+  "system monitoring must disappear on narrow clients"
 assert_file_contains "$TMUX_TEMPLATE" 'set-environment -g COLORFGBG' \
   "tmux panes must inherit a reliable light/dark appearance signal"
-assert_file_contains "$TMUX_TEMPLATE" '@dot_client_focused,{{ $tertiary }},{{ $border }}' \
-  "status bar must identify the active workload in a distinct colour segment"
 assert_equals "Code/project" "$(bash "$TMUX_STATUS" short-path /Users/seb/Code/project)" \
   "working directory context must stay compact"
 assert_equals "AI:CODEX" "$(bash "$TMUX_AI" status codex 0)" \

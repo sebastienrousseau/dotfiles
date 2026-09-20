@@ -178,66 +178,59 @@ bind C-f command-prompt -p find-session 'switch-client -t %%'
 bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
-# ║  THEME — Powerline Status Bar                                           ║
+# ║  THEME — Minimal Status Bar                                             ║
 # ║  Colors from .chezmoidata/themes.toml ({{ $themeName }})  ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 
 # --- Status Bar ---
 set -g status on
-set -g status-interval 2
+set -g status-interval 10
 set -g status-position bottom
-set -g status-justify absolute-centre
+set -g status-justify left
 set -g status-style "bg={{ $panel }},fg={{ $fg }}"
-set -g status-left-length 40
-set -g status-right-length 88
+set -g status-left-length 32
+set -g status-right-length 120
+
+# User-overridable modules. `set -o` keeps values from a local tmux.conf or
+# command line, making the generated theme customizable without forking it.
+set -ogq @dot_status_padded on
+set -ogq @dot_status_show_path on
+set -ogq @dot_status_show_system on
+set -ogq @dot_status_show_date on
+if -F '#{==:#{@dot_status_padded},on}' 'set -g status 2' 'set -g status 1'
+# Tmux has no fractional vertical padding. A neutral second row gives uppercase
+# session names breathing room without adding more modules or visual noise.
+set -g 'status-format[1]' "#[bg={{ $panel }}] "
 
 # Give every session a stable colour from the active wallpaper palette. The
 # helper refreshes all sessions after a theme change and colours new/renamed
 # sessions without requiring hand-maintained per-project rules.
 set -g @dot_session_colour "{{ $accent }}"
-set -g @dot_client_focused 1
 run-shell -b "test ! -x ~/.local/bin/tmux-status || ~/.local/bin/tmux-status apply-colours '{{ $accent }}' '{{ $secondary }}' '{{ $tertiary }}'"
 set-hook -g session-created "run-shell -b \"~/.local/bin/tmux-status apply-colours '{{ $accent }}' '{{ $secondary }}' '{{ $tertiary }}'\""
 set-hook -g session-renamed "run-shell -b \"~/.local/bin/tmux-status apply-colours '{{ $accent }}' '{{ $secondary }}' '{{ $tertiary }}'\""
 
-# Terminals which report focus events keep the active session vivid and dim
-# every coloured status block in unfocused clients. Unsupported terminals keep
-# the safe, bright default rather than looking permanently inactive.
-set-hook -g client-focus-in 'set-option @dot_client_focused 1 ; refresh-client -S'
-set-hook -g client-focus-out 'set-option @dot_client_focused 0 ; refresh-client -S'
-
-# --- Dotbar-inspired session pill — session identity is always priority one ---
+# --- Minimal session identity — the bar's only persistent chromatic element ---
 set -g status-left "\
-#[fg=#{?client_prefix,{{ $error }},#{?@dot_client_focused,#{@dot_session_colour},{{ $border }}}},bg={{ $panel }}]\
-#[fg=#{?@dot_client_focused,#{?client_prefix,{{ $bg }},{{ $accent_text }}},{{ $muted }}},bg=#{?client_prefix,{{ $error }},#{?@dot_client_focused,#{@dot_session_colour},{{ $border }}}},bold] #{?client_prefix,  ,}#S \
-#[fg=#{?client_prefix,{{ $error }},#{?@dot_client_focused,#{@dot_session_colour},{{ $border }}}},bg={{ $panel }}]"
+#[fg=#{?client_prefix,{{ $error }},#{@dot_session_colour}},bg={{ $panel }},bold]#{?client_prefix, , }#S \
+#[fg={{ $border }},bg={{ $panel }},nobold]│ "
 
-# --- Responsive context + active workload + compact clock ---
-# CWD appears above 130 columns and other sessions above 160. Narrow AI panes
-# retain only the high-value process and clock blocks.
+# --- One lightweight system sample, responsive context, and time ---
+# `tmux-status system` performs one platform-aware sample per interval. Path,
+# monitoring, and date modules can be disabled independently with the options
+# above; narrower clients progressively retain only the clock.
 set -g status-right "\
-#[fg={{ $warning }},bg={{ $panel }},bold]#{?pane_in_mode, COPY ,}#{?pane_synchronized, SYNC ,}\
-#[fg={{ $secondary }},bg={{ $panel }},bold]#{?#{==:#{pane_current_command},ssh}, 󰌘 SSH ,}\
-#[fg={{ $muted }},bg={{ $panel }}]#{?#{e|>=:#{client_width},160},#(~/.local/bin/tmux-status other-sessions #{q:session_name})  ,}\
-#[fg={{ $muted }},bg={{ $panel }}]#{?#{e|>=:#{client_width},130},  #(~/.local/bin/tmux-status short-path #{q:pane_current_path})  ,}\
-#[fg=#{?@dot_client_focused,{{ $tertiary }},{{ $border }}},bg={{ $panel }}]\
-#[fg=#{?@dot_client_focused,{{ $accent_text }},{{ $muted }}},bg=#{?@dot_client_focused,{{ $tertiary }},{{ $border }}},bold] #{pane_current_command} \
-#[fg=#{?@dot_client_focused,{{ $tertiary }},{{ $border }}},bg={{ $panel }}] \
-#[fg=#{?@dot_client_focused,{{ $accent }},{{ $border }}},bg={{ $panel }}]\
-#[fg=#{?@dot_client_focused,{{ $accent_text }},{{ $muted }}},bg=#{?@dot_client_focused,{{ $accent }},{{ $border }}},bold] %H:%M #[fg=#{?@dot_client_focused,{{ $accent }},{{ $border }}},bg={{ $panel }}]"
+#[fg={{ $fg }},bg={{ $panel }},bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
+#[fg={{ $muted }},bg={{ $panel }},nobold]#{?#{==:#{@dot_status_show_path},on}, #[fg={{ $fg }}]#{b:pane_current_path} #[fg={{ $border }}]│ #[fg={{ $muted }}],}\
+#{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#(~/.local/bin/tmux-status system) #[fg={{ $border }}]│ #[fg={{ $muted }}],}\
+#{?#{&&:#{==:#{@dot_status_show_date},on},#{e|>=:#{client_width},155}},%d %b · ,}%H:%M "
 
 # --- Window Tabs ---
-set -g window-status-format "\
-#[fg={{ $muted }},bg={{ $panel }},nobold] #I:#W\
-#[fg={{ $warning }},bg={{ $panel }}]#{?window_activity_flag, ●,}#{?window_bell_flag, !,}#{?window_last_flag, ,} "
+set -g window-status-format "#[fg={{ $muted }},bg={{ $panel }},nobold] #I:#W#F "
+set -g window-status-current-format "#[fg={{ $fg }},bg={{ $panel }},bold] #I:#W#F#{?window_zoomed_flag, ,} "
 
-set -g window-status-current-format "\
-#[fg=#{?@dot_client_focused,{{ $secondary }},{{ $border }}},bg={{ $panel }}]\
-#[fg=#{?@dot_client_focused,{{ $accent_text }},{{ $muted }}},bg=#{?@dot_client_focused,{{ $secondary }},{{ $border }}},bold] #I:#W #{?window_zoomed_flag, ,} \
-#[fg=#{?@dot_client_focused,{{ $secondary }},{{ $border }}},bg={{ $panel }}]"
-
-set -g window-status-separator "#[fg={{ $border }},bg={{ $panel }}] · "
-set -g window-status-bell-style "bg={{ $error }},fg={{ $bg }},bold"
+set -g window-status-separator "#[fg={{ $border }},bg={{ $panel }},nobold]·"
+set -g window-status-bell-style "bg={{ $panel }},fg={{ $error }},bold"
 set -g window-status-activity-style "bg={{ $panel }},fg={{ $warning }},bold"
 
 # --- Pane Borders ---
