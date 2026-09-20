@@ -109,7 +109,6 @@ The tmux status bar displays:
 - Neutral, text-only window tabs with native current, zoom, last, bell, and activity flags
 - A single lightweight CPU, memory, and battery sample on macOS, Linux/Arch, WSL, and Windows
 - An always-visible directory, a responsive date, and an always-visible clock
-- A neutral padding row so uppercase session names retain comfortable height
 - Copy, synchronized-pane, and SSH indicators only when relevant
 
 Press `prefix + A` to open the AI CLI launcher in the current workspace.

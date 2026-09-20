@@ -193,14 +193,9 @@ set -g status-right-length 120
 
 # User-overridable modules. `set -o` keeps values from a local tmux.conf or
 # command line, making the generated theme customizable without forking it.
-set -ogq @dot_status_padded on
 set -ogq @dot_status_show_path on
 set -ogq @dot_status_show_system on
 set -ogq @dot_status_show_date on
-if -F '#{==:#{@dot_status_padded},on}' 'set -g status 2' 'set -g status 1'
-# Tmux has no fractional vertical padding. A neutral second row gives uppercase
-# session names breathing room without adding more modules or visual noise.
-set -g 'status-format[1]' "#[bg={{ $panel }}] "
 
 # Give every session a stable colour from the active wallpaper palette. The
 # helper refreshes all sessions after a theme change and colours new/renamed
@@ -212,7 +207,7 @@ set-hook -g session-renamed "run-shell -b \"~/.local/bin/tmux-status apply-colou
 
 # --- Minimal session identity — the bar's only persistent chromatic element ---
 set -g status-left "\
-#[fg=#{?client_prefix,{{ $error }},#{@dot_session_colour}},bg={{ $panel }},bold]#{?client_prefix, , }#S \
+#[fg=#{?client_prefix,{{ $error }},#{@dot_session_colour}},bg={{ $panel }},bold] #{?client_prefix, , }#S \
 #[fg={{ $border }},bg={{ $panel }},nobold]│ "
 
 # --- One lightweight system sample, responsive context, and time ---

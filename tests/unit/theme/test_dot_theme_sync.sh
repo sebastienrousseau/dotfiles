@@ -113,10 +113,6 @@ assert_file_contains "$TMUX_TEMPLATE" 'tmux-status system' \
   "wide clients must show one lightweight cross-platform system sample"
 assert_file_contains "$TMUX_TEMPLATE" '@dot_status_show_system' \
   "system monitoring must remain user-configurable"
-assert_file_contains "$TMUX_TEMPLATE" '@dot_status_padded' \
-  "status height must remain user-configurable"
-assert_file_contains "$TMUX_TEMPLATE" 'status-format[1]' \
-  "padded status must add a neutral breathing row"
 assert_file_contains "$TMUX_TEMPLATE" 'e|>=:#{client_width},120' \
   "system monitoring must disappear on narrow clients"
 assert_file_contains "$TMUX_TEMPLATE" 'set-environment -g COLORFGBG' \
