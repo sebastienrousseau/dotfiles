@@ -79,6 +79,22 @@ USAGE
   esac
 done
 
+# Collect the evidence before resolving the runtime or module. Explicit input
+# errors must be reported as input errors without requiring a working Wasm
+# toolchain (or attempting an unnecessary build) first.
+evidence=""
+if [[ -n "$EVIDENCE_FILE" ]]; then
+  if [[ ! -f "$EVIDENCE_FILE" ]]; then
+    echo "attest-verify: no such evidence file: $EVIDENCE_FILE" >&2
+    exit 2
+  fi
+  evidence="$(cat "$EVIDENCE_FILE")"
+elif [[ ! -t 0 ]]; then
+  evidence="$(cat)"
+else
+  evidence="$(bash "$SCRIPT_DIR/workstation-attestation.sh" --json)"
+fi
+
 # Resolve the WebAssembly runtime. `wasmtime` is pinned in mise.toml, shipped
 # by flake.nix and the Brewfile, and checked by `dot doctor`.
 WASMTIME_BIN="${WASMTIME:-wasmtime}"
@@ -104,20 +120,6 @@ if [[ ! -f "$MODULE" ]]; then
   echo "attest-verify: building the verifier for $WASM_TARGET ..." >&2
   cargo build --quiet --release --target "$WASM_TARGET" \
     --manifest-path "$CRATE_DIR/Cargo.toml" --bin dot-sys >&2
-fi
-
-# Collect the evidence: an explicit file, a pipe, or a fresh attestation.
-evidence=""
-if [[ -n "$EVIDENCE_FILE" ]]; then
-  if [[ ! -f "$EVIDENCE_FILE" ]]; then
-    echo "attest-verify: no such evidence file: $EVIDENCE_FILE" >&2
-    exit 2
-  fi
-  evidence="$(cat "$EVIDENCE_FILE")"
-elif [[ ! -t 0 ]]; then
-  evidence="$(cat)"
-else
-  evidence="$(bash "$SCRIPT_DIR/workstation-attestation.sh" --json)"
 fi
 
 module_args=(verify)
