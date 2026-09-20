@@ -185,10 +185,10 @@ set -g status-style "bg={{ $panel }},fg={{ $fg }}"
 set -g status-left-length 100
 set -g status-right-length 140
 
-# --- Dotbar-inspired session pill + workspace context ---
+# --- Dotbar-inspired session pill — session identity is always priority one ---
 set -g status-left "\
-#{?client_prefix,#[fg={{ $warning }},bg={{ $panel }}]#[fg={{ $bg }},bg={{ $warning }},bold] PREFIX #[fg={{ $warning }},bg={{ $panel }}],#[fg={{ $accent }},bg={{ $panel }}]#[fg={{ $accent_text }},bg={{ $accent }},bold] #S #[fg={{ $accent }},bg={{ $panel }}]}\
-#[fg={{ $muted }},bg={{ $panel }},nobold] 󰉋 #{b:pane_current_path} "
+#{?client_prefix,#[fg={{ $warning }},bg={{ $panel }}]#[fg={{ $bg }},bg={{ $warning }},bold] PREFIX · #S #[fg={{ $warning }},bg={{ $panel }}],#[fg={{ $accent }},bg={{ $panel }}]#[fg={{ $accent_text }},bg={{ $accent }},bold] SESSION · #S #[fg={{ $accent }},bg={{ $panel }}]}\
+#[fg={{ $muted }},bg={{ $panel }},nobold]  #{session_windows}w "
 
 # --- Active pane intelligence + machine/time ---
 set -g status-right "\
