@@ -104,10 +104,13 @@ The Neovim configuration includes:
 
 The tmux status bar displays:
 
-- Session name
-- Current window
-- Host name
-- Date and time
+- A rounded session pill that changes while the prefix key is active
+- Wallpaper-derived colors shared with the active terminal theme
+- Current workspace, windows, active command, zoom, bell, and activity state
+- Active AI provider badges for Claude, Codex, Copilot, OpenCode, Aider, and the wider `dot ai` fleet
+- Copy, synchronized-pane, SSH, host, date, and time indicators
+
+Press `prefix + A` to open the AI CLI launcher in the current workspace.
 
 ## Adding Screenshots
 

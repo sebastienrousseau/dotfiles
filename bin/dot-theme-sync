@@ -306,7 +306,12 @@ apply_theme_configs() {
     "$HOME/.config/tmux/tmux.conf"
     "$HOME/.config/alacritty/alacritty.toml"
     "$HOME/.config/kitty/kitty.conf"
+    "$HOME/.config/starship.toml"
     "$HOME/.config/wezterm/wezterm.lua"
+    "$HOME/.config/foot/foot.ini"
+    "$HOME/.config/fuzzel/fuzzel.ini"
+    "$HOME/.config/vscode/settings.json"
+    "$HOME/.warp/themes/dotfiles.yaml"
     "$HOME/.config/firefox/user.js"
     "$HOME/.config/gtk-3.0/gtk.css"
     "$HOME/.config/gtk-3.0/settings.ini"
@@ -453,7 +458,10 @@ reload_kitty() {
   # kitty reloads its config (colours included) live on SIGUSR1 — applied to
   # every OS window, no remote-control socket required.
   local pids
-  pids="$(pgrep -x kitty 2>/dev/null || true)"
+  pids="$({
+    pgrep -x kitty 2>/dev/null || true
+    pgrep -f '^/Applications/kitty\.app/Contents/MacOS/kitty$' 2>/dev/null || true
+  } | awk '!seen[$0]++')"
   if [[ -z "$pids" ]]; then
     SKIPPED+=("kitty")
     _skip "Kitty" "not running"
@@ -497,6 +505,12 @@ reload_tmux() {
   # but the theme/colors still reload successfully — treat as success.
   local out
   out="$(tmux source-file "$conf" 2>&1)" || true
+  # Sourcing updates server options, but detached/external invocations do not
+  # always repaint attached clients immediately. Redraw each one explicitly.
+  local client
+  while IFS= read -r client; do
+    [[ -n "$client" ]] && tmux refresh-client -t "$client" -S 2>/dev/null || true
+  done < <(tmux list-clients -F '#{client_name}' 2>/dev/null || true)
   RELOADED+=("tmux")
   if [[ -n "$out" ]]; then
     _ok "Tmux" "source-file (warnings: ${out##*: })"
@@ -1641,7 +1655,7 @@ main() {
       _info "Would" "write theme=\"$new_theme\" to $CHEZMOI_CFG"
       _info "Would" "set theme mode to $requested_preference"
     fi
-    _info "Would" "run chezmoi apply on 12 targeted templates"
+    _info "Would" "regenerate all installed theme-dependent configs"
     _info "Would" "reload: ghostty tmux niri desktop dms wallpaper browsers nvim"
     _info "Would" "detected DE: $(bash -c 'raw="${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}"; raw="$(printf %s "$raw" | tr "[:upper:]" "[:lower:]")"; case "$raw" in *budgie*) echo budgie;; *cinnamon*) echo cinnamon;; *kde*|*plasma*) echo kde;; *xfce*) echo xfce;; *gnome*) echo gnome;; *) echo unknown;; esac' 2>/dev/null)"
     _ok "Dry-run" "complete — no changes made"
@@ -1689,6 +1703,7 @@ main() {
   # DOT_THEME_SEQUENTIAL=1 forces the old sequential order for debugging.
   if [[ "${DOT_THEME_SEQUENTIAL:-0}" == "1" ]]; then
     reload_ghostty
+    reload_kitty
     reload_tmux
     reload_niri
     reload_desktop "$theme"

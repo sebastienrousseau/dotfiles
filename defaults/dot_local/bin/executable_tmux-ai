@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+## AI-aware tmux status and launcher helper.
+
+set -euo pipefail
+
+provider_label() {
+  local text
+  text="$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]')"
+  case "$text" in
+    *claude*) printf 'AI:CLAUDE' ;;
+    *codex*) printf 'AI:CODEX' ;;
+    *copilot*) printf 'AI:COPILOT' ;;
+    *goose*) printf 'AI:GOOSE' ;;
+    *crush*) printf 'AI:CRUSH' ;;
+    *cursor-agent* | *cursor\ agent*) printf 'AI:CURSOR' ;;
+    *opencode*) printf 'AI:OPENCODE' ;;
+    *autohand*) printf 'AI:AUTOHAND' ;;
+    *aider*) printf 'AI:AIDER' ;;
+    *gemini*) printf 'AI:GEMINI' ;;
+    *kimi*) printf 'AI:KIMI' ;;
+    *kiro-cli* | *kiro*) printf 'AI:KIRO' ;;
+    *ollama*) printf 'AI:OLLAMA' ;;
+    *sgpt* | *shell-gpt*) printf 'AI:SHELL-GPT' ;;
+    *qwen*) printf 'AI:QWEN' ;;
+    *antigravity* | *agy*) printf 'AI:ANTIGRAVITY' ;;
+    *mistral*vibe* | *vibe*) printf 'AI:VIBE' ;;
+    *grok*) printf 'AI:GROK' ;;
+    *zai*) printf 'AI:ZAI' ;;
+    *amp*) printf 'AI:AMP' ;;
+    *) return 1 ;;
+  esac
+}
+
+descendant_provider() {
+  local root="${1:-}" frontier child children details label depth
+  [[ "$root" =~ ^[0-9]+$ ]] || return 1
+  command -v pgrep >/dev/null 2>&1 || return 1
+  frontier="$root"
+  for depth in 1 2 3 4 5 6; do
+    children=""
+    for child in $frontier; do
+      children="$children $(pgrep -P "$child" 2>/dev/null || true)"
+    done
+    [[ -n "${children//[[:space:]]/}" ]] || break
+    for child in $children; do
+      details="$(ps -p "$child" -o comm= -o args= 2>/dev/null || true)"
+      if label="$(provider_label "$details" 2>/dev/null)"; then
+        printf '%s' "$label"
+        return 0
+      fi
+    done
+    frontier="$children"
+  done
+  return 1
+}
+
+status_label() {
+  local command_name="${1:-shell}" pane_pid="${2:-}" label clean upper
+  if label="$(provider_label "$command_name" 2>/dev/null)"; then
+    printf '%s\n' "$label"
+    return
+  fi
+  if label="$(descendant_provider "$pane_pid" 2>/dev/null)"; then
+    printf '%s\n' "$label"
+    return
+  fi
+
+  clean="${command_name##*/}"
+  clean="$(printf '%s' "$clean" | tr -cd '[:alnum:]_.+-' | cut -c1-14)"
+  upper="$(printf '%s' "$clean" | tr '[:lower:]' '[:upper:]')"
+  case "$clean" in
+    zsh | bash | fish | nu | sh) printf 'SHELL\n' ;;
+    nvim | vim) printf 'EDITOR:%s\n' "$upper" ;;
+    ssh) printf 'SSH\n' ;;
+    '') printf 'SHELL\n' ;;
+    *) printf 'CLI:%s\n' "$upper" ;;
+  esac
+}
+
+launch_provider() {
+  local provider="${1:-}" cwd="${2:-$PWD}" title launch_command
+  case "$provider" in
+    cockpit)
+      title="ai-cockpit"
+      launch_command="exec dot ai"
+      ;;
+    claude | codex | copilot | goose | crush | amp | cursor-agent | grok | kimi | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
+      title="ai-$provider"
+      launch_command="exec dot ai chat $provider"
+      ;;
+    *)
+      printf 'tmux-ai: unsupported provider: %s\n' "$provider" >&2
+      return 2
+      ;;
+  esac
+  [[ -d "$cwd" ]] || cwd="$PWD"
+  command -v tmux >/dev/null 2>&1 || return 127
+  tmux new-window -n "$title" -c "$cwd" "$launch_command"
+}
+
+case "${1:-status}" in
+  status)
+    shift
+    status_label "${1:-}" "${2:-}"
+    ;;
+  launch)
+    shift
+    launch_provider "${1:-}" "${2:-$PWD}"
+    ;;
+  --help | -h)
+    printf 'Usage: tmux-ai status <command> <pane-pid>\n'
+    printf '       tmux-ai launch <provider|cockpit> [working-directory]\n'
+    ;;
+  *)
+    printf 'tmux-ai: unknown command: %s\n' "$1" >&2
+    exit 2
+    ;;
+esac

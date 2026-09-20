@@ -11,6 +11,8 @@ source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 SCRIPT_FILE="$REPO_ROOT/bin/dot-theme-sync"
 AUTO_AGENT="$REPO_ROOT/defaults/private_Library/LaunchAgents/com.sebastienrousseau.dot-theme-auto.plist.tmpl"
 AUTO_INSTALLER="$REPO_ROOT/defaults/run_onchange_after_31-theme-auto-launchagent.sh.tmpl"
+TMUX_AI="$REPO_ROOT/defaults/dot_local/bin/executable_tmux-ai"
+TMUX_TEMPLATE="$REPO_ROOT/defaults/dot_config/tmux/tmux.conf.tmpl"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
@@ -40,6 +42,11 @@ assert_file_contains "$SCRIPT_FILE" "CHEZMOI_CFG" "current theme should account 
 test_start "has_apply_theme_configs"
 assert_file_contains "$SCRIPT_FILE" "apply_theme_configs()" "must have apply_theme_configs"
 
+test_start "regenerates_prompt_and_terminal_palettes"
+assert_file_contains "$SCRIPT_FILE" '.config/starship.toml' "theme sync must regenerate Starship"
+assert_file_contains "$SCRIPT_FILE" '.config/kitty/kitty.conf' "theme sync must regenerate Kitty"
+assert_file_contains "$SCRIPT_FILE" '.config/tmux/tmux.conf' "theme sync must regenerate tmux"
+
 test_start "stores_runtime_theme_in_machine_config"
 assert_file_contains "$SCRIPT_FILE" "set_machine_data_value()" "must atomically manage machine-local theme data"
 assert_file_contains "$SCRIPT_FILE" "set_machine_data_value theme_family" "must persist the selected family"
@@ -54,6 +61,31 @@ assert_file_contains "$SCRIPT_FILE" "reload_ghostty()" "must have reload_ghostty
 
 test_start "has_reload_tmux"
 assert_file_contains "$SCRIPT_FILE" "reload_tmux()" "must have reload_tmux"
+assert_file_contains "$SCRIPT_FILE" "refresh-client" "tmux reload must redraw attached clients"
+
+test_start "has_reload_kitty"
+assert_file_contains "$SCRIPT_FILE" "reload_kitty()" "must have reload_kitty"
+assert_file_contains "$SCRIPT_FILE" "/Applications/kitty\\.app/Contents/MacOS/kitty" \
+  "Kitty reload should support macOS app bundle matching"
+
+test_start "starship_uses_wallpaper_palette"
+STARSHIP_TEMPLATE="$REPO_ROOT/defaults/dot_config/starship.toml.tmpl"
+assert_file_contains "$STARSHIP_TEMPLATE" 'palette = "wallpaper"' \
+  "Starship must use the wallpaper-derived palette"
+assert_file_contains "$STARSHIP_TEMPLATE" '$t.term.c4' \
+  "Starship blue must come from the active theme"
+
+test_start "tmux_has_ai_aware_dotbar"
+assert_file_exists "$TMUX_AI" "AI-aware tmux helper must exist"
+assert_file_contains "$TMUX_TEMPLATE" 'AI CLI cockpit' "prefix+A must expose the AI launcher"
+assert_file_contains "$TMUX_TEMPLATE" 'client_prefix' "session pill must react to prefix state"
+assert_file_contains "$TMUX_TEMPLATE" 'window_zoomed_flag' "window list must show zoom state"
+assert_file_contains "$TMUX_TEMPLATE" 'window_activity_flag' "window list must show activity"
+assert_file_contains "$TMUX_TEMPLATE" 'tmux-ai status' "status bar must identify the active AI CLI"
+assert_equals "AI:CODEX" "$(bash "$TMUX_AI" status codex 0)" \
+  "Codex sessions receive an explicit provider badge"
+assert_equals "AI:CLAUDE" "$(bash "$TMUX_AI" status claude 0)" \
+  "Claude sessions receive an explicit provider badge"
 
 test_start "has_reload_niri"
 assert_file_contains "$SCRIPT_FILE" "reload_niri()" "must have reload_niri"

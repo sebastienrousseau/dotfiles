@@ -5,10 +5,10 @@
 # Raise timeout to avoid spurious prompt warnings.
 command_timeout = 5000
 add_newline = true
-{{- $themeName := includeTemplate "theme-name" . -}}
+{{ $themeName := includeTemplate "theme-name" . -}}
 {{- $t := index .themes $themeName -}}
-# Palette driven by starship_palette in .chezmoidata/themes.toml
-palette = "{{ $t.app.starship_palette }}"
+# Palette driven directly by the active wallpaper-derived terminal colours.
+palette = "wallpaper"
 
 [character]
 success_symbol = "[➜](bold green)"
@@ -144,6 +144,16 @@ variable = "DOTFILES_LAYERS_LOAD_STATUS"
 symbol = ""
 style = "bold dimmed yellow"
 format = '[•]($style) '
+
+[palettes.wallpaper]
+black = "{{ $t.term.c0 }}"
+red = "{{ $t.term.c1 }}"
+green = "{{ $t.term.c2 }}"
+yellow = "{{ $t.term.c3 }}"
+blue = "{{ $t.term.c4 }}"
+purple = "{{ $t.term.c5 }}"
+cyan = "{{ $t.term.c6 }}"
+white = "{{ $t.term.c7 }}"
 
 [palettes.catppuccin_mocha]
 rosewater = "#f5e0dc"
