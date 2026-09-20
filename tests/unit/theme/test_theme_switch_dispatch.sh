@@ -34,6 +34,10 @@ mkdir -p "$WORK"
 test_start "script_exists"
 assert_file_exists "$SCRIPT_FILE" "scripts/theme/switch.sh must exist"
 
+test_start "launchd_can_resolve_theme_sync"
+assert_file_contains "$SCRIPT_FILE" '$HOME/.local/bin/dot-theme-sync' \
+  "switcher must fall back to the deployed helper under launchd's sparse PATH"
+
 _pass() {
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
@@ -53,7 +57,11 @@ mkdir -p "$SRC/defaults/.chezmoidata"
 echo "defaults" >"$SRC/.chezmoiroot"
 DATA_FILE="$SRC/defaults/.chezmoidata.toml"
 THEMES_FILE="$SRC/defaults/.chezmoidata/themes.toml"
-printf 'theme = "bloom-dark"\n' >"$DATA_FILE"
+cat >"$DATA_FILE" <<'TOML'
+theme = "bloom-dark"
+theme_family = "bloom"
+theme_mode = "auto"
+TOML
 cat >"$THEMES_FILE" <<'TOML'
 [themes.bloom-dark]
 family = "bloom"
@@ -150,12 +158,19 @@ switch() {
   local rc=0
   CHEZMOI_SOURCE_DIR="$SRC" \
     DOTFILES_WALLPAPER_DIR="$WALLPAPERS" \
+    FAKE_APPLE_DARK="${FAKE_APPLE_DARK:-1}" \
     PATH="$BIN:/usr/bin:/bin" \
     "$REAL_BASH" "$SCRIPT_FILE" "$@" </dev/null >"$OUT" 2>"$ERR" || rc=$?
   cat "$ERR" >&2
   printf '%s' "$rc"
 }
-set_theme_to() { printf 'theme = "%s"\n' "$1" >"$DATA_FILE"; }
+set_theme_to() {
+  local theme="$1" mode="${2:-auto}" family
+  family="${theme%-dark}"
+  [[ "$family" != "$theme" ]] || family="${theme%-light}"
+  printf 'theme = "%s"\ntheme_family = "%s"\ntheme_mode = "%s"\n' \
+    "$theme" "$family" "$mode" >"$DATA_FILE"
+}
 last_sync() { tail -n 1 "$SYNC_CALLS" 2>/dev/null; }
 
 # ===========================================================================
@@ -181,16 +196,16 @@ assert_file_contains "$OUT" "◀" "the active family is flagged"
 test_start "current_reports_theme_family_and_mode"
 rc="$(switch current)"
 assert_equals "0" "$rc" "current exits 0"
-assert_file_contains "$OUT" "bloom-dark (bloom, dark)" "current names the theme, family and mode"
+assert_file_contains "$OUT" "bloom-dark (bloom, dark; auto)" "current names the resolved theme, family and auto preference"
 
 test_start "current_reports_light_mode"
 set_theme_to bloom-light
 switch current >/dev/null
-assert_file_contains "$OUT" "bloom-light (bloom, light)" "a light theme is reported as light"
+assert_file_contains "$OUT" "bloom-light (bloom, light; auto)" "a light theme is reported as light"
 
 test_start "current_prefers_the_machine_local_chezmoi_override"
 mkdir -p "$XDG_CONFIG_HOME/chezmoi"
-printf 'theme = "maui-dark"\n' >"$XDG_CONFIG_HOME/chezmoi/chezmoi.toml"
+printf '[data]\ntheme = "maui-dark"\n' >"$XDG_CONFIG_HOME/chezmoi/chezmoi.toml"
 switch current >/dev/null
 assert_file_contains "$OUT" "maui-dark" "the chezmoi.toml override wins over .chezmoidata.toml"
 rm -f "$XDG_CONFIG_HOME/chezmoi/chezmoi.toml"
@@ -204,6 +219,12 @@ set_theme_to bloom-dark
 rc="$(switch set maui-light)"
 assert_equals "0" "$rc" "set exits 0"
 assert_equals "maui-light" "$(last_sync)" "the requested theme is handed to dot-theme-sync"
+
+test_start "set_family_enables_auto_mode"
+: >"$SYNC_CALLS"
+rc="$(switch set maui)"
+assert_equals "0" "$rc" "setting a paired family exits 0"
+assert_equals "maui-dark --auto" "$(last_sync)" "a family resolves to system appearance in auto mode"
 
 test_start "a_bare_theme_name_is_treated_as_a_quick_switch"
 : >"$SYNC_CALLS"
@@ -237,25 +258,25 @@ test_start "toggle_from_an_unsuffixed_theme_uses_the_default_pair"
 set_theme_to plain
 : >"$SYNC_CALLS"
 switch toggle >/dev/null
-assert_equals "bloom-dark" "$(last_sync)" "an unsuffixed theme falls back to the default dark theme"
+assert_equals "maui-dark" "$(last_sync)" "an unsuffixed theme falls back to the default dark theme"
 
 test_start "family_cycles_to_the_next_paired_family"
 set_theme_to bloom-dark
 : >"$SYNC_CALLS"
 switch family >/dev/null
-assert_equals "maui-dark" "$(last_sync)" "bloom cycles to maui, preserving the mode"
+assert_equals "maui-dark --auto" "$(last_sync)" "bloom cycles to Maui while retaining auto mode"
 
 test_start "family_wraps_around_and_preserves_light_mode"
 set_theme_to maui-light
 : >"$SYNC_CALLS"
 switch family >/dev/null
-assert_equals "bloom-light" "$(last_sync)" "the last family wraps to the first, staying light"
+assert_equals "bloom-light --auto" "$(last_sync)" "the last family wraps while retaining auto mode"
 
 test_start "family_from_an_unknown_family_starts_at_the_first"
 set_theme_to solo-dark
 : >"$SYNC_CALLS"
 switch family >/dev/null
-assert_equals "bloom-dark" "$(last_sync)" "a family with no pair starts the cycle over"
+assert_equals "bloom-dark --auto" "$(last_sync)" "an unknown family starts the auto-mode cycle over"
 
 # ===========================================================================
 # System-appearance sync
@@ -265,20 +286,20 @@ set_theme_to bloom-dark
 : >"$SYNC_CALLS"
 FAKE_UNAME=Darwin FAKE_APPLE_DARK=0 switch sync >/dev/null
 assert_file_contains "$OUT" "System is light" "the light system appearance is announced"
-assert_equals "bloom-light" "$(last_sync)" "dotfiles follow macOS into light mode"
+assert_equals "bloom-light --auto" "$(last_sync)" "dotfiles follow macOS into light mode and retain auto"
 
 test_start "sync_follows_a_dark_macos_appearance"
 set_theme_to bloom-light
 : >"$SYNC_CALLS"
 FAKE_UNAME=Darwin FAKE_APPLE_DARK=1 switch sync >/dev/null
 assert_file_contains "$OUT" "System is dark" "the dark system appearance is announced"
-assert_equals "bloom-dark" "$(last_sync)" "dotfiles follow macOS into dark mode"
+assert_equals "bloom-dark --auto" "$(last_sync)" "dotfiles follow macOS into dark mode and retain auto"
 
 test_start "sync_follows_a_light_gnome_colour_scheme"
 set_theme_to bloom-dark
 : >"$SYNC_CALLS"
 FAKE_UNAME=Linux FAKE_COLOR_SCHEME=prefer-light switch sync >/dev/null
-assert_equals "bloom-light" "$(last_sync)" "GNOME's prefer-light is honoured"
+assert_equals "bloom-light --auto" "$(last_sync)" "GNOME's prefer-light is honoured"
 
 test_start "sync_is_a_no_op_when_already_matching"
 set_theme_to bloom-dark
@@ -286,6 +307,25 @@ set_theme_to bloom-dark
 FAKE_UNAME=Linux FAKE_COLOR_SCHEME=prefer-dark switch sync >/dev/null
 assert_file_contains "$OUT" "already match" "a matching system needs no change"
 assert_empty "$(last_sync)" "nothing is applied when the modes already agree"
+
+test_start "manual_mode_disables_auto_even_when_variant_matches"
+set_theme_to bloom-dark auto
+: >"$SYNC_CALLS"
+switch mode dark >/dev/null
+assert_equals "bloom-dark" "$(last_sync)" "explicit dark mode is persisted as manual"
+
+test_start "background_sync_respects_manual_mode"
+set_theme_to bloom-light light
+: >"$SYNC_CALLS"
+FAKE_UNAME=Darwin FAKE_APPLE_DARK=1 switch sync --if-auto >/dev/null
+assert_file_contains "$OUT" "manual mode active" "background sync explains why it skipped"
+assert_empty "$(last_sync)" "background watcher does not override manual mode"
+
+test_start "mode_auto_reenables_system_following"
+set_theme_to bloom-light light
+: >"$SYNC_CALLS"
+FAKE_UNAME=Darwin FAKE_APPLE_DARK=1 switch mode auto >/dev/null
+assert_equals "bloom-dark --auto" "$(last_sync)" "auto mode resolves and records the system variant"
 
 # ===========================================================================
 # Interactive picker
@@ -295,7 +335,7 @@ set_theme_to bloom-dark
 : >"$SYNC_CALLS"
 rc="$(FAKE_PICK="○  maui                                 Custom" switch)"
 assert_equals "0" "$rc" "the picker exits 0"
-assert_equals "maui-dark" "$(last_sync)" "the picked family is applied in the current mode"
+assert_equals "maui-dark --auto" "$(last_sync)" "the picked family follows the system appearance"
 
 test_start "picking_the_active_family_changes_nothing"
 set_theme_to bloom-dark
@@ -331,7 +371,7 @@ set_theme_to bloom-dark
 : >"$SYNC_CALLS"
 rc="$(FAKE_PICK="○  maui                                 Custom" switch set "")"
 assert_equals "0" "$rc" "set with an empty name exits 0"
-assert_equals "maui-dark" "$(last_sync)" "an empty name falls through to the interactive picker"
+assert_equals "maui-dark --auto" "$(last_sync)" "an empty name falls through to the auto-mode picker"
 
 test_start "set_with_no_name_at_all_opens_the_picker"
 # Regression: the dispatcher's `set` arm called `set_theme "$1"` after the
@@ -342,7 +382,7 @@ set_theme_to bloom-dark
 : >"$SYNC_CALLS"
 rc="$(FAKE_PICK="○  maui                                 Custom" switch set)"
 assert_equals "0" "$rc" "set with no name exits 0"
-assert_equals "maui-dark" "$(last_sync)" "no name falls through to the interactive picker"
+assert_equals "maui-dark --auto" "$(last_sync)" "no name falls through to the auto-mode picker"
 assert_output_not_contains "unbound variable" "cat '$ERR'"
 
 test_start "set_with_no_name_keeps_its_status_honest_on_the_system_bash"
@@ -365,12 +405,13 @@ if [[ -x /bin/bash ]]; then
   rc=0
   CHEZMOI_SOURCE_DIR="$SRC" \
     DOTFILES_WALLPAPER_DIR="$WALLPAPERS" \
+    FAKE_APPLE_DARK=1 \
     FAKE_PICK="○  maui                                 Custom" \
     PATH="$BIN:/usr/bin:/bin" \
     /bin/bash "$SCRIPT_FILE" set </dev/null >"$OUT" 2>"$ERR" || rc=$?
   cat "$ERR" >&2
   assert_equals "0" "$rc" "set with no name exits 0 under the system bash"
-  assert_equals "maui-dark" "$(last_sync)" "the exit status matches what was applied"
+  assert_equals "maui-dark --auto" "$(last_sync)" "the exit status matches what was applied"
   assert_output_not_contains "unbound variable" "cat '$ERR'"
 
   # The EXIT trap must not mask an ordinary failure either.
@@ -390,7 +431,7 @@ test_start "a_theme_absent_from_themes_toml_falls_back_to_suffix_stripping"
 set_theme_to ghost-light
 rc="$(switch current)"
 assert_equals "0" "$rc" "an unlisted theme still reports"
-assert_file_contains "$OUT" "ghost-light (ghost, light)" "the family is derived from the name"
+assert_file_contains "$OUT" "ghost-light (ghost, light; auto)" "the family is derived from the name"
 
 test_start "family_falls_back_to_the_default_when_nothing_is_paired"
 UNPAIRED_SRC="$WORK/unpaired-src"
@@ -405,7 +446,7 @@ CHEZMOI_SOURCE_DIR="$UNPAIRED_SRC" DOTFILES_WALLPAPER_DIR="$WALLPAPERS" \
   "$REAL_BASH" "$SCRIPT_FILE" family >"$OUT" 2>"$ERR" || rc=$?
 cat "$ERR" >&2
 assert_equals "0" "$rc" "family exits 0 with no paired families"
-assert_equals "bloom-dark" "$(last_sync)" "with nothing to cycle, the default dark theme is applied"
+assert_equals "maui-dark" "$(last_sync)" "with nothing to cycle, the Maui default dark theme is applied"
 
 # ===========================================================================
 # Help and rebuild

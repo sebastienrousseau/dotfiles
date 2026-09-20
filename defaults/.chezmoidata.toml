@@ -8,14 +8,14 @@ profile = "laptop"
 # See .chezmoidata/hardware.toml for available presets.
 machine = ""
 
-# Visual theme — must be a key in .chezmoidata/themes.toml. Templates
-# that consult `.theme` (dot_gitconfig.tmpl, dot_config/alacritty/
-# alacritty.toml.tmpl, etc.) crash with `no entry for key` when this
-# names a theme that isn't defined. Those templates fall back to the
-# synthetic `fallback-dark` theme (always present — re-emitted by
-# rebuild-themes.sh, never wallpaper-derived) if `.theme` is unset or
-# unknown, so an invalid value degrades gracefully rather than aborting.
-theme = "pyramid-dark"
+# Visual theme. `theme_family` is the wallpaper/palette family and
+# `theme_mode = "auto"` follows the operating-system appearance. `theme` is
+# the concrete resolved palette retained for templates and as a safe startup
+# fallback before the appearance watcher runs. Runtime selections are written
+# to ~/.config/chezmoi/chezmoi.toml so switching themes does not dirty the repo.
+theme = "maui-dark"
+theme_family = "maui"
+theme_mode = "auto" # auto, dark, or light
 
 # Terminal settings
 terminal_font_family = "JetBrainsMono Nerd Font"

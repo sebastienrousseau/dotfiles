@@ -78,34 +78,52 @@ fi
 # Theme Database
 # =============================================================================
 
-# Default preferences (must be present keys in themes.toml — the theme
-# regeneration removed the old macos-monterey-* names; bloom is the current
-# default family and always ships a dark+light pair).
-DEFAULT_DARK="bloom-dark"
-DEFAULT_LIGHT="bloom-light"
+# Default family (must ship a dark+light pair in themes.toml). Maui uses one
+# dynamic HEIC wallpaper while exposing separate palettes to applications.
+DEFAULT_DARK="maui-dark"
+DEFAULT_LIGHT="maui-light"
 
-# Machine-local chezmoi override (chezmoi.toml [data] theme) takes precedence
-# over .chezmoidata.toml when rendering, so it is the authoritative "current"
-# value. Kept in sync by dot-theme-sync's write_theme().
+# Machine-local chezmoi overrides take precedence over repository defaults.
+# Theme switching writes only these overrides so selecting a wallpaper never
+# dirties the tracked default configuration.
 CHEZMOI_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
+THEME_SYNC_BIN="$(command -v dot-theme-sync 2>/dev/null || true)"
+THEME_SYNC_BIN="${THEME_SYNC_BIN:-$HOME/.local/bin/dot-theme-sync}"
 
 # =============================================================================
 # Theme Functions
 # =============================================================================
 
-current_theme() {
-  # Prefer the machine-local override (what chezmoi actually renders), so
-  # `dot theme current` never disagrees with the deployed configs. Fall back
-  # to the repo default in .chezmoidata.toml when no override is set.
+theme_setting() {
+  local key="${1:-}"
   if [[ -f "$CHEZMOI_CFG" ]]; then
     local override
-    override="$(awk -F'"' '/^theme =/ {print $2}' "$CHEZMOI_CFG" | head -n 1)"
+    override="$(awk -F'"' -v key="$key" '
+      /^\[data\]$/ { in_data=1; next }
+      /^\[/ { in_data=0 }
+      in_data && $0 ~ "^" key "[[:space:]]*=" { print $2; exit }
+    ' "$CHEZMOI_CFG")"
     if [[ -n "$override" ]]; then
       echo "$override"
       return 0
     fi
   fi
-  awk -F'"' '/^theme =/ {print $2}' "$DATA_FILE" | head -n 1
+  awk -F'"' -v key="$key" '$0 ~ "^" key "[[:space:]]*=" {print $2; exit}' "$DATA_FILE"
+}
+
+current_theme() { theme_setting theme; }
+
+theme_mode_preference() {
+  local mode
+  mode="$(theme_setting theme_mode)"
+  case "$mode" in
+    auto | dark | light) printf '%s\n' "$mode" ;;
+    *)
+      local current
+      current="$(current_theme)"
+      is_dark_theme "$current" && printf 'dark\n' || printf 'light\n'
+      ;;
+  esac
 }
 
 theme_mode() {
@@ -120,6 +138,10 @@ theme_mode() {
 theme_exists() {
   local name="${1:-}"
   grep -q "^\[themes\.${name}\]$" "$THEMES_FILE" 2>/dev/null
+}
+
+run_theme_sync() {
+  "$THEME_SYNC_BIN" "$@"
 }
 
 all_theme_names() {
@@ -214,10 +236,21 @@ set_theme() {
     pick_theme
     return
   fi
+
+  # A family name means "follow the system"; an explicit suffixed variant
+  # remains a manual light/dark selection for scripts and power users.
+  if ! theme_exists "$new_theme" && theme_exists "${new_theme}-dark" && theme_exists "${new_theme}-light"; then
+    local family="$new_theme"
+    new_theme="${family}-$(system_appearance_mode)"
+    shift
+    run_theme_sync "$new_theme" --auto "$@"
+    return
+  fi
+
   # Pass remaining args (e.g. --force, --full) straight through so the
   # sync backend can honour them.
   shift
-  dot-theme-sync "$new_theme" "$@"
+  run_theme_sync "$new_theme" "$@"
 }
 
 # Interactive theme picker — prefers fzf, falls back to a numbered menu
@@ -323,12 +356,15 @@ END {
     awk '$1 !~ /^#/ && NF >= 2 {print $2}')" || return 0
 
   if [[ -n "$selected_family" ]]; then
-    # Apply with current appearance mode (dark/light)
-    local new_theme="${selected_family}-${current_mode}"
-    if [[ "$new_theme" != "$current" ]]; then
-      dot-theme-sync "$new_theme"
+    # Families selected from the picker follow the system appearance. The
+    # concrete variant remains available to templates as a resolved cache.
+    local selected_mode
+    selected_mode="$(system_appearance_mode)"
+    local new_theme="${selected_family}-${selected_mode}"
+    if [[ "$new_theme" != "$current" || "$(theme_mode_preference)" != "auto" ]]; then
+      run_theme_sync "$new_theme" --auto
     else
-      ui_info "Theme" "already on $current"
+      ui_info "Theme" "already on $current (auto)"
     fi
   else
     # Cancelled, or no selector could run. Either way nothing changed, and
@@ -419,7 +455,11 @@ switch_family() {
     next_family="${families[0]}"
   fi
 
-  set_theme "${next_family}-${mode}"
+  if [[ "$(theme_mode_preference)" == "auto" ]]; then
+    set_theme "${next_family}-${mode}" --auto
+  else
+    set_theme "${next_family}-${mode}"
+  fi
 }
 
 # Show current theme info
@@ -431,13 +471,12 @@ show_current() {
   if ! is_dark_theme "$current" 2>/dev/null; then
     mode="light"
   fi
-  ui_info "Current" "$current ($family, $mode)"
+  ui_info "Current" "$current ($family, $mode; $(theme_mode_preference))"
 }
 
-# Detect system appearance (Dark/Light) and sync dotfiles. Also picks up
-# KDE Plasma's color scheme (BreezeLight vs BreezeDark), so KDE users get
-# the same auto-sync as GNOME users.
-sync_theme() {
+# Detect system appearance. KDE Plasma's color scheme is included so KDE
+# users get the same auto-sync as GNOME and macOS users.
+system_appearance_mode() {
   local os_mode="dark" # Default fallback
   case "$(uname -s)" in
     Darwin)
@@ -470,20 +509,38 @@ sync_theme() {
       ;;
   esac
 
+  printf '%s\n' "$os_mode"
+}
+
+# Resolve the selected family to the system appearance and retain auto mode.
+# `--if-auto` is used by the macOS LaunchAgent so a manual dark/light choice
+# is never overridden in the background.
+sync_theme() {
+  local condition="${1:-}"
+  if [[ "$condition" == "--if-auto" && "$(theme_mode_preference)" != "auto" ]]; then
+    ui_info "Sync" "manual mode active — automatic sync skipped"
+    return 0
+  fi
+
+  local os_mode
+  os_mode="$(system_appearance_mode)"
+
   local current
   current="$(current_theme)"
   local current_mode="dark"
   is_dark_theme "$current" 2>/dev/null || current_mode="light"
 
   if [[ "$current_mode" == "$os_mode" ]]; then
-    ui_ok "Sync" "Dotfiles already match system ($os_mode mode)"
-    return 0
+    if [[ "$(theme_mode_preference)" == "auto" ]]; then
+      ui_ok "Sync" "Dotfiles already match system ($os_mode mode, auto)"
+      return 0
+    fi
   fi
   ui_info "Sync" "System is $os_mode — switching from $current_mode..."
   local family
   family="${current%-dark}"
   [[ "$family" != "$current" ]] || family="${current%-light}"
-  set_theme "${family}-${os_mode}"
+  set_theme "${family}-${os_mode}" --auto
 }
 
 # Ambient auto-switch: pick light|dark based on time of day.
@@ -636,8 +693,6 @@ case "${1:-}" in
     case "$want" in
       dark | light) : ;;
       auto)
-        # Alias for `dot theme sync` — more discoverable next to
-        # `mode dark` / `mode light`.
         sync_theme
         exit 0
         ;;
@@ -650,7 +705,7 @@ case "${1:-}" in
     family="${current%-dark}"
     [[ "$family" != "$current" ]] || family="${current%-light}"
     target="${family}-${want}"
-    if [[ "$current" == "$target" ]]; then
+    if [[ "$current" == "$target" && "$(theme_mode_preference)" == "$want" ]]; then
       ui_ok "Mode" "$current — already in $want mode"
     else
       set_theme "$target"
@@ -718,7 +773,7 @@ EOF
     esac
     ;;
   sync)
-    sync_theme
+    sync_theme "${2:-}"
     ;;
   ambient)
     shift
@@ -1176,10 +1231,10 @@ EOF
     ui_info "Preview" "$preview (was $prev)"
     # Revert on Ctrl-C. Trap fires before exit so the shell prompt
     # returns with the original theme active.
-    trap 'echo; dot-theme-sync --force "'"$prev"'" >/dev/null 2>&1; ui_info "Reverted" "'"$prev"'"; exit 130' INT
-    if ! dot-theme-sync --force "$preview"; then
+    trap 'echo; run_theme_sync --force "'"$prev"'" >/dev/null 2>&1; ui_info "Reverted" "'"$prev"'"; exit 130' INT
+    if ! run_theme_sync --force "$preview"; then
       ui_err "Preview" "apply failed — reverting"
-      dot-theme-sync --force "$prev" >/dev/null 2>&1
+      run_theme_sync --force "$prev" >/dev/null 2>&1
       exit 1
     fi
     echo ""
@@ -1192,12 +1247,16 @@ EOF
     # mode; override with `--mode dark|light`.
     shift
     _rand_mode=""
+    _rand_explicit=false
     while [[ $# -gt 0 ]]; do
       case "$1" in
         --mode)
           shift
           case "${1:-}" in
-            dark | light) _rand_mode="$1" ;;
+            dark | light)
+              _rand_mode="$1"
+              _rand_explicit=true
+              ;;
             *)
               ui_err "Usage" "--mode dark|light"
               exit 1
@@ -1207,6 +1266,7 @@ EOF
           ;;
         --mode=*)
           _rand_mode="${1#--mode=}"
+          _rand_explicit=true
           shift
           ;;
         *)
@@ -1239,7 +1299,11 @@ EOF
     done
     [[ ${#picks[@]} -eq 0 ]] && picks=("${families[@]}")
     pick="${picks[RANDOM % ${#picks[@]}]}"
-    set_theme "${pick}-${_rand_mode}"
+    if [[ "$(theme_mode_preference)" == "auto" && "$_rand_explicit" == false ]]; then
+      set_theme "${pick}-${_rand_mode}" --auto
+    else
+      set_theme "${pick}-${_rand_mode}"
+    fi
     ;;
   help | --help | -h)
     ui_header "Usage"
@@ -1248,9 +1312,9 @@ EOF
     ui_header "Commands"
     ui_ok "(no args)" "Interactive theme picker (fzf)"
     ui_ok "list" "Show all available themes"
-    ui_ok "set [NAME]" "Set theme (interactive if no name)"
+    ui_ok "set [NAME]" "Set a family to auto, or an explicit light/dark variant"
     ui_ok "toggle" "Toggle between light/dark within current family"
-    ui_ok "mode <dark|light|auto>" "Force a mode (auto = sync with system)"
+    ui_ok "mode <dark|light|auto>" "Choose manual mode or follow the system"
     ui_ok "rotate [enable [N]|disable|status]" "Wallpaper rotation timer"
     ui_ok "family" "Cycle to the next family"
     ui_ok "random" "Pick a random family, keep current mode"
@@ -1266,7 +1330,7 @@ EOF
     ui_ok "fit <mode>" "Wallpaper fit: zoom|spanned|centered|scaled|stretched"
     ui_ok "export [file]" "Snapshot current theme+fit to JSON"
     ui_ok "import <file>" "Restore theme+fit from a snapshot"
-    ui_ok "sync" "Sync dotfiles with system dark/light mode"
+    ui_ok "sync" "Enable auto mode and sync with system appearance"
     ui_ok "ambient" "Time-based mode switch (run|enable|disable|status)"
     ui_ok "rebuild" "Regenerate themes from system + custom wallpapers"
     echo ""
@@ -1276,9 +1340,11 @@ EOF
     pick_theme
     ;;
   *)
-    # Treat unknown args as theme names for quick switching: dot theme macos-sequoia-dark
+    # Treat known variants or paired family names as quick switches.
     if grep -q "^\[themes\.${1}\]" "$THEMES_FILE" 2>/dev/null; then
-      dot-theme-sync "$1"
+      run_theme_sync "$1"
+    elif theme_exists "${1}-dark" && theme_exists "${1}-light"; then
+      set_theme "$1"
     else
       ui_err "Unknown command or theme" "$1"
       ui_info "Usage" "dot theme [list|set <name>|toggle|family|current|help]"

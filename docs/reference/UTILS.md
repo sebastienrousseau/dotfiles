@@ -216,9 +216,10 @@ Every `dot` command's individually-enforced subcommands (see `dot help`).
 | `dot registry url` | Show the active registry URL |
 | `dot registry set-url` | Override the registry URL (https only; persists) |
 | `dot theme list` | Show all available terminal/wallpaper themes |
-| `dot theme set` | Set a theme by name (interactive picker if omitted) |
+| `dot theme set` | Set a family to auto mode or an explicit light/dark variant (interactive picker if omitted) |
 | `dot theme toggle` | Toggle light/dark within the current theme family |
-| `dot theme sync` | Sync the dotfiles theme with system dark/light mode |
+| `dot theme mode` | Select `dark`, `light`, or OS-following `auto` mode |
+| `dot theme sync` | Enable auto mode and sync immediately with system appearance |
 | `dot theme family` | Cycle between theme families |
 | `dot theme current` | Show the current theme info |
 | `dot theme rebuild` | Regenerate themes from system and custom wallpapers |

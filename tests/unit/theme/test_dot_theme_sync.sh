@@ -9,6 +9,8 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 SCRIPT_FILE="$REPO_ROOT/bin/dot-theme-sync"
+AUTO_AGENT="$REPO_ROOT/defaults/private_Library/LaunchAgents/com.sebastienrousseau.dot-theme-auto.plist.tmpl"
+AUTO_INSTALLER="$REPO_ROOT/defaults/run_onchange_after_31-theme-auto-launchagent.sh.tmpl"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
@@ -38,9 +40,10 @@ assert_file_contains "$SCRIPT_FILE" "CHEZMOI_CFG" "current theme should account 
 test_start "has_apply_theme_configs"
 assert_file_contains "$SCRIPT_FILE" "apply_theme_configs()" "must have apply_theme_configs"
 
-test_start "has_sync_theme_state"
-assert_file_contains "$SCRIPT_FILE" "sync_theme_state()" "must have sync_theme_state"
-assert_file_contains "$SCRIPT_FILE" "synced data files to chezmoi override" "must report when theme state is resynchronized"
+test_start "stores_runtime_theme_in_machine_config"
+assert_file_contains "$SCRIPT_FILE" "set_machine_data_value()" "must atomically manage machine-local theme data"
+assert_file_contains "$SCRIPT_FILE" "set_machine_data_value theme_family" "must persist the selected family"
+assert_file_contains "$SCRIPT_FILE" "set_machine_data_value theme_mode" "must persist auto/manual mode"
 
 test_start "has_sync_ghostty_macos_config"
 assert_file_contains "$SCRIPT_FILE" "sync_ghostty_macos_config()" "must mirror Ghostty config for macOS"
@@ -79,6 +82,14 @@ assert_file_contains "$SCRIPT_FILE" "reload_nvim()" "must have reload_nvim"
 # --- Updates chezmoi.toml ---
 test_start "updates_chezmoi_toml"
 assert_file_contains "$SCRIPT_FILE" "chezmoi.toml" "must update chezmoi.toml"
+
+test_start "macos_auto_theme_agent"
+assert_file_exists "$AUTO_AGENT" "macOS auto-theme LaunchAgent must exist"
+assert_file_contains "$AUTO_AGENT" "WatchPaths" "agent must react to macOS preference changes"
+assert_file_contains "$AUTO_AGENT" "--if-auto" "agent must respect manual mode"
+assert_file_contains "$AUTO_AGENT" "/opt/homebrew/bin" "agent must expose Homebrew tools under launchd"
+assert_file_exists "$AUTO_INSTALLER" "chezmoi must reload the agent when it changes"
+assert_file_contains "$AUTO_INSTALLER" "launchctl bootstrap" "installer must bootstrap the LaunchAgent"
 
 # --- Uses DBus for Ghostty ---
 test_start "ghostty_uses_dbus"

@@ -644,12 +644,22 @@ regenerated.
 
 ```bash
 dot theme              # interactive picker (paired themes only)
+dot theme set maui     # select a family and follow OS appearance
 dot theme tahoe-dark   # switch directly
 dot theme toggle       # swap dark and light within the current family
+dot theme mode light   # pin a manual appearance
+dot theme mode auto    # resume following the OS appearance
 dot theme family       # cycle between theme families
-dot theme sync         # follow the OS dark/light setting
+dot theme sync         # enable auto mode and sync immediately
 dot theme rebuild      # regenerate from current wallpapers
 ```
+
+Maui is the default family. Its dynamic HEIC supplies both wallpaper
+appearances, while the resolved `maui-light` or `maui-dark` palette keeps
+terminals and applications aligned. On macOS, a LaunchAgent watches the
+system appearance preference and reruns the sync automatically. Runtime
+selection is machine-local in `~/.config/chezmoi/chezmoi.toml`, so using the
+picker does not modify the dotfiles checkout.
 
 On theme switch, every managed surface updates. Terminals: Ghostty,
 Alacritty, Kitty, WezTerm, Warp, iTerm2, tmux. Editors: Neovim and
