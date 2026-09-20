@@ -18,6 +18,9 @@ This file documents all notable changes to this project.
   failures.
 - Hardened AI CLI theme adapters with typed outcomes, malformed-config
   preservation, compare-before-commit writes, and global/per-provider opt-outs.
+- Added an independently versioned palette audit covering truecolor, xterm-256,
+  focus/selection contrast, perceptual separation, and color-vision simulation
+  across all 228 themes; stabilized semantic status colors in both modes.
 
 ## v0.2.520 — 2026-09-13
 

@@ -309,6 +309,58 @@ HIG_INCREASED_CONTRAST = {
     ],
 }
 
+# Semantic status colours are intentionally stable instead of being sampled
+# from arbitrary wallpaper clusters. Their lightness and hue spacing preserve
+# the meaning of error/warning/success/info under protan, deutan, and tritan
+# simulations while retaining AAA text contrast in both appearances.
+SEMANTIC_STATUS = {
+    "dark": {
+        "error": (255, 107, 107),
+        "warning": (255, 209, 102),
+        "success": (94, 225, 122),
+        "info": (101, 184, 255),
+    },
+    "light": {
+        "error": (159, 18, 57),
+        "warning": (107, 63, 0),
+        "success": (20, 83, 45),
+        "info": (30, 58, 138),
+    },
+}
+
+_XTERM_LEVELS = (0, 95, 135, 175, 215, 255)
+XTERM_256 = (
+    (
+        (0, 0, 0), (128, 0, 0), (0, 128, 0), (128, 128, 0),
+        (0, 0, 128), (128, 0, 128), (0, 128, 128), (192, 192, 192),
+        (128, 128, 128), (255, 0, 0), (0, 255, 0), (255, 255, 0),
+        (0, 0, 255), (255, 0, 255), (0, 255, 255), (255, 255, 255),
+    )
+    + tuple((r, g, b) for r in _XTERM_LEVELS for g in _XTERM_LEVELS for b in _XTERM_LEVELS)
+    + tuple((8 + 10 * i,) * 3 for i in range(24))
+)
+
+
+def nearest_xterm_colour(rgb):
+    """Return the xterm-256 colour a conventional RGB quantizer selects."""
+    return min(XTERM_256, key=lambda candidate: sum(
+        (candidate[channel] - rgb[channel]) ** 2 for channel in range(3)
+    ))
+
+
+def ensure_xterm_contrast(fg_rgb, bg_rgb, min_ratio, is_dark):
+    """Keep the 256-colour fallback above its independent contrast floor."""
+    fg_lab = rgb_to_lab(*fg_rgb)
+    mapped_bg = nearest_xterm_colour(bg_rgb)
+    for _ in range(80):
+        candidate = lab_to_rgb(*fg_lab)
+        if contrast_ratio(nearest_xterm_colour(candidate), mapped_bg) >= min_ratio:
+            return candidate
+        lightness, a, b = fg_lab
+        lightness += 1.5 if is_dark else -1.5
+        fg_lab = (max(0.0, min(100.0, lightness)), a, b)
+    return lab_to_rgb(*fg_lab)
+
 
 def find_nearest_hue(hue: float) -> str:
     """Map a CIELAB hue angle to the nearest ANSI color name."""
@@ -766,6 +818,8 @@ def _build_ansi_color(base_lab, accent_lab, bg_rgb, is_dark):
     normal_min = 4.5 if is_dark else 7.0
     normal_rgb = ensure_contrast(lab_to_rgb(*normal), bg_rgb, normal_min, is_dark)
     bright_rgb = ensure_contrast(lab_to_rgb(*bright), bg_rgb, bright_min, is_dark)
+    normal_rgb = ensure_xterm_contrast(normal_rgb, bg_rgb, 4.5, is_dark)
+    bright_rgb = ensure_xterm_contrast(bright_rgb, bg_rgb, 4.5, is_dark)
     return normal_rgb, bright_rgb
 
 
@@ -843,10 +897,7 @@ def generate_theme(
     tertiary_on_rgb = _on_surface(rgb_to_lab(*tertiary_rgb), _surfaces, is_dark)
     ansi = _ansi_palette(clusters, accent_lab, bg_rgb, is_dark)
     c0_rgb, c7_rgb, c8_rgb, c15_rgb = _structural_colors(bg_lab, bg_rgb, is_dark)
-    status_rgb = {
-        colour: lab_to_rgb(*_aaa_block(rgb_to_lab(*ansi[colour][0]), is_dark))
-        for colour in ("red", "yellow", "green", "blue")
-    }
+    status_rgb = SEMANTIC_STATUS["dark" if is_dark else "light"]
 
     accent_hue = lab_hue(*accent_lab)
     nvim_theme = _nvim_from_hue(accent_hue, is_dark)
@@ -888,10 +939,10 @@ def generate_theme(
         "ui": {
             "accent": rgb_to_hex(*accent_rgb),
             "accent_text": rgb_to_hex(*accent_text),
-            "error": rgb_to_hex(*status_rgb["red"]),
-            "warning": rgb_to_hex(*status_rgb["yellow"]),
-            "success": rgb_to_hex(*status_rgb["green"]),
-            "info": rgb_to_hex(*status_rgb["blue"]),
+            "error": rgb_to_hex(*status_rgb["error"]),
+            "warning": rgb_to_hex(*status_rgb["warning"]),
+            "success": rgb_to_hex(*status_rgb["success"]),
+            "info": rgb_to_hex(*status_rgb["info"]),
             "panel": rgb_to_hex(*panel_rgb),
             "border": rgb_to_hex(*border_rgb),
             # The wallpaper's 2nd and 3rd chromatic colours. Black text sits

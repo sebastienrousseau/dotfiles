@@ -18,7 +18,7 @@ FUZZTIME ?=
         lint lint-shell lint-shell-all lint-docs lint-pins lint-copyright \
         lint-workflows lint-links lint-reuse lint-spdx \
         docs docs-serve man completions generate check-drift verify-versions \
-        sbom bench fuzz coverage clean check
+        audit-palettes sbom bench fuzz coverage clean check
 
 help: ## Show this help
 	@awk 'BEGIN{FS=":.*## "} /^[a-zA-Z_-]+:.*## /{printf "  %-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -38,6 +38,9 @@ test-quick: ## Fast subset for pre-commit loops
 
 examples: ## Execute every example under examples/ (docs that run)
 	bash ./scripts/qa/validate-examples.sh
+
+audit-palettes: ## Audit truecolor, xterm-256, contrast, and color-vision contracts
+	python3 ./scripts/theme/audit-palettes.py
 
 coverage: ## kcov/xtrace coverage report (MIN_COVERAGE_PCT gate, see coverage.yml)
 	bash ./tools/ci/run-coverage.sh
@@ -142,4 +145,4 @@ fuzz: ## Replay seed + regression corpus; set FUZZTIME=30s to also mutate
 clean: ## Remove build products
 	rm -rf $(BUILDDIR) site _build coverage dist nightly-reports
 
-check: lint check-drift test examples ## Everything CI gates on, locally
+check: lint check-drift audit-palettes test examples ## Everything CI gates on, locally

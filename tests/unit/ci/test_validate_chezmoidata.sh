@@ -70,6 +70,12 @@ assert_file_exists "$TAPLO_CONFIG" ".taplo.toml must exist"
 test_start "taplo_config_points_at_schema"
 assert_file_contains "$TAPLO_CONFIG" "config/chezmoidata.schema.json" ".taplo.toml must reference schema path"
 
+test_start "schema_allows_typed_ai_provider_overrides"
+assert_file_contains "$SCHEMA_FILE" '"ai_theme_providers"' \
+  "nested AI provider flags must have an explicit schema"
+assert_file_contains "$SCHEMA_FILE" '"opencode": { "type": "boolean" }' \
+  "each supported provider override must remain boolean"
+
 # Exercise the missing-dependency path by stripping cargo/local bin
 # entries from PATH while keeping the standard system bins (so bash
 # itself remains findable).

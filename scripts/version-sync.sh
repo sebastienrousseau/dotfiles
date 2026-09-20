@@ -551,9 +551,9 @@ main() {
 
   if [[ ${#version_files[@]} -eq 0 ]]; then
     log_warning "No files with version references found"
-  else
-    log_info "Found ${#version_files[@]} files with version references"
+    return 0
   fi
+  log_info "Found ${#version_files[@]} files with version references"
 
   # Verify mode - just check consistency
   if [[ "$verify_only" == "true" ]]; then

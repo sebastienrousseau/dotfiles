@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Portable transaction primitives for dot-theme-sync.
+# Sourced by dot-theme-sync; inherits set -euo pipefail
 
 # This file is sourced by bin/dot-theme-sync. Keep it compatible with the
 # Bash 3.2 shipped by macOS: no associative arrays, mapfile, or declare -g.
@@ -241,7 +242,8 @@ _theme_txn_write_journal() {
 }
 
 _theme_txn_prune() {
-  local root="$(_theme_txn_state_root)" keep="${DOT_THEME_TRANSACTION_RETENTION:-20}"
+  local root keep="${DOT_THEME_TRANSACTION_RETENTION:-20}"
+  root="$(_theme_txn_state_root)"
   case "$keep" in '' | *[!0-9]*) keep=20 ;; esac
   [[ "$keep" -gt 0 ]] || keep=1
   [[ -d "$root" ]] || return 0

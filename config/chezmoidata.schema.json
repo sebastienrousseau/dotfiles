@@ -52,7 +52,22 @@
     },
     "features": {
       "type": "object",
-      "description": "Feature flags. All values must be boolean.",
+      "description": "Feature flags. Scalar flags are boolean; explicitly declared nested policy tables have their own schemas.",
+      "properties": {
+        "ai_theme_providers": {
+          "type": "object",
+          "description": "Per-provider overrides for wallpaper-aware AI CLI appearance updates.",
+          "additionalProperties": false,
+          "properties": {
+            "codex": { "type": "boolean" },
+            "claude": { "type": "boolean" },
+            "gemini": { "type": "boolean" },
+            "agy": { "type": "boolean" },
+            "qwen": { "type": "boolean" },
+            "opencode": { "type": "boolean" }
+          }
+        }
+      },
       "additionalProperties": {
         "type": "boolean"
       }
