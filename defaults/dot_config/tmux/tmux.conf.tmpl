@@ -187,14 +187,15 @@ set -g status-right-length 140
 
 # --- Dotbar-inspired session pill — session identity is always priority one ---
 set -g status-left "\
-#{?client_prefix,#[fg={{ $warning }},bg={{ $panel }}]#[fg={{ $bg }},bg={{ $warning }},bold] PREFIX · #S #[fg={{ $warning }},bg={{ $panel }}],#[fg={{ $accent }},bg={{ $panel }}]#[fg={{ $accent_text }},bg={{ $accent }},bold] SESSION · #S #[fg={{ $accent }},bg={{ $panel }}]}\
+#[fg=#{?client_prefix,{{ $warning }},{{ $accent }}},bg={{ $panel }}]\
+#[fg=#{?client_prefix,{{ $bg }},{{ $accent_text }}},bg=#{?client_prefix,{{ $warning }},{{ $accent }}},bold] #{?client_prefix,PREFIX,SESSION} · #S \
+#[fg=#{?client_prefix,{{ $warning }},{{ $accent }}},bg={{ $panel }}]\
 #[fg={{ $muted }},bg={{ $panel }},nobold]  #{session_windows}w "
 
 # --- Active pane intelligence + machine/time ---
 set -g status-right "\
-#{?pane_in_mode,#[fg={{ $warning }},bg={{ $panel }},bold] COPY ,}\
-#{?pane_synchronized,#[fg={{ $warning }},bg={{ $panel }},bold] SYNC ,}\
-#{?#{==:#{pane_current_command},ssh},#[fg={{ $secondary }},bg={{ $panel }},bold] 󰌘 SSH ,}\
+#[fg={{ $warning }},bg={{ $panel }},bold]#{?pane_in_mode, COPY ,}#{?pane_synchronized, SYNC ,}\
+#[fg={{ $secondary }},bg={{ $panel }},bold]#{?#{==:#{pane_current_command},ssh}, 󰌘 SSH ,}\
 #[fg={{ $border }},bg={{ $panel }}]\
 #[fg={{ $accent_fg }},bg={{ $border }},bold] #(~/.local/bin/tmux-ai status #{q:pane_current_command} #{pane_pid}) \
 #[fg={{ $muted }},bg={{ $border }},nobold] #H · %d %b \
