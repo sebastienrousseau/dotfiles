@@ -4,8 +4,6 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
-## v0.2.520 — 2026-09-13
-
 ### Added
 
 - `docs/guides/MACOS_ICLOUD_SYMLINKS.md`, documenting what the hook does, the
