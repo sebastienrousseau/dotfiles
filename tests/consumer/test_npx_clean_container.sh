@@ -3,6 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 set -euo pipefail
 
+# Explicit container lane only: native integration runners need not have Docker.
 # No home/repository/token/socket bind mounts enter this clean consumer container.
 # This is a real package fetch + installer execution, not `npx --help` or a mock.
 image="${DOT_NPX_TEST_IMAGE:-node@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6}"

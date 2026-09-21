@@ -9,7 +9,8 @@ on:
       - 'tests/unit/core/**'
       - 'tests/unit/install/test_archive_adversarial.py'
       - 'tests/visual/**'
-      - 'tests/integration/test_npx_clean_container.sh'
+      - 'tests/consumer/**'
+      - 'tests/unit/ci/test_npx_consumer_lane.sh'
       - '.github/workflows/core-contracts.yml'
   push:
     branches: [main]
@@ -98,4 +99,4 @@ jobs:
         with:
           egress-policy: audit
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - run: bash tests/integration/test_npx_clean_container.sh 0.2.522
+      - run: bash tests/consumer/test_npx_clean_container.sh 0.2.522
