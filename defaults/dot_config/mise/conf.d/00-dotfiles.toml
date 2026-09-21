@@ -161,10 +161,12 @@ MISE_EXPERIMENTAL = "1"
 # inherit it, including untrusted build and test commands. GitHub-aware tools
 # should invoke `gh` directly so its credential helper retains ownership of
 # the token and only supplies it to the requested operation.
-# Build caches → /tmp (cleared on reboot)
-GOCACHE = "/tmp/builds/go-cache"
+# Build caches live below a per-user XDG root. Environment values are ordered:
+# later entries safely reference DOT_BUILD_ROOT through mise's template context.
+DOT_BUILD_ROOT = "{{ xdg_cache_home }}/dot/builds"
+GOCACHE = "{{ env.DOT_BUILD_ROOT }}/go-cache"
 # Go uses the system temporary directory; custom GOTMPDIR must already exist.
-PIP_CACHE_DIR = "/tmp/builds/pip-cache"
-UV_CACHE_DIR = "/tmp/builds/uv-cache"
-ZIG_LOCAL_CACHE_DIR = "/tmp/builds/zig-cache"
-ZIG_GLOBAL_CACHE_DIR = "/tmp/builds/zig-global-cache"
+PIP_CACHE_DIR = "{{ env.DOT_BUILD_ROOT }}/pip-cache"
+UV_CACHE_DIR = "{{ env.DOT_BUILD_ROOT }}/uv-cache"
+ZIG_LOCAL_CACHE_DIR = "{{ env.DOT_BUILD_ROOT }}/zig-cache"
+ZIG_GLOBAL_CACHE_DIR = "{{ env.DOT_BUILD_ROOT }}/zig-global-cache"

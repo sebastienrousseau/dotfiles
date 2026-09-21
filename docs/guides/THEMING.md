@@ -209,7 +209,7 @@ If you don't provide custom wallpapers, your OS keeps its current desktop wallpa
 
 ## Build Artifacts
 
-All build caches (Cargo, Go, pip, uv, Zig) are redirected to `/tmp/builds/` via environment variables in `mise.toml` and `cargo/config.toml`. The directory is created on shell init via `fish/conf.d/env.fish`. Build artifacts are cleared on reboot.
+Build caches (Cargo, Go, pip, uv, Zig) are redirected below the private per-user `$DOT_BUILD_ROOT`, which defaults to `$XDG_CACHE_HOME/dot/builds`. mise exports the root for managed commands, while Fish and Zsh create it with owner-only permissions during shell initialization. The cache is disposable and can be removed when no build is running.
 
 ## Troubleshooting
 
