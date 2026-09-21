@@ -104,10 +104,17 @@ The Neovim configuration includes:
 
 The tmux status bar displays:
 
-- Session name
-- Current window
-- Host name
-- Date and time
+- A compact session name with a stable, wallpaper-derived per-session color
+- A keyboard icon while the tmux prefix is active
+- Neutral, text-only window tabs with native current, zoom, last, bell, and activity flags
+- A single lightweight CPU, memory, and battery sample on macOS, Linux/Arch, WSL, and Windows
+- An always-visible directory, a responsive date, and an always-visible clock
+- Copy, synchronized-pane, and SSH indicators only when relevant
+
+Press `prefix + A` to open the AI CLI launcher in the current workspace.
+AI provider sessions started after a theme switch inherit the same light/dark
+mode and wallpaper palette; restart existing TUIs because providers cache their
+appearance independently from tmux.
 
 ## Adding Screenshots
 

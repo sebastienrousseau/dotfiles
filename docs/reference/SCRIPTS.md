@@ -66,6 +66,7 @@ Exhaustive catalog of user-facing executables installed from `dot_local/bin/`.
 | `rec-start` | Start shell session recording |
 | `rec-stop` | Stop shell session recording |
 | `start-niri` | Launch a Niri compositor session |
+| `tmux-ai` | Show active AI providers in tmux and launch provider sessions |
 | `tmux-sessionizer` | Fuzzy tmux session and project switcher |
 | `up` | Jump up directory levels quickly |
 | `win` | WSL bridge for launching Windows programs |

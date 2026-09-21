@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+{{- $themeName := includeTemplate "theme-name" . -}}
+{{- $t := index .themes $themeName -}}
+<plist version="1.0">
+<dict>
+  <key>name</key><string>Dotfiles Wallpaper</string>
+  <key>settings</key>
+  <array>
+    <dict>
+      <key>settings</key>
+      <dict>
+        <key>background</key><string>{{ $t.term.bg }}</string>
+        <key>caret</key><string>{{ $t.term.cursor }}</string>
+        <key>foreground</key><string>{{ $t.term.fg }}</string>
+        <key>invisibles</key><string>{{ $t.ui.text_muted }}</string>
+        <key>lineHighlight</key><string>{{ $t.ui.panel }}</string>
+        <key>selection</key><string>{{ $t.term.sel_bg }}</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key><string>Comments</string>
+      <key>scope</key><string>comment, punctuation.definition.comment</string>
+      <key>settings</key><dict><key>foreground</key><string>{{ $t.ui.text_muted }}</string></dict>
+    </dict>
+    <dict>
+      <key>name</key><string>Strings and inserted text</string>
+      <key>scope</key><string>string, markup.inserted, markup.inserted.diff</string>
+      <key>settings</key><dict><key>foreground</key><string>{{ $t.term.c2 }}</string></dict>
+    </dict>
+    <dict>
+      <key>name</key><string>Numbers and constants</string>
+      <key>scope</key><string>constant, constant.numeric, constant.language</string>
+      <key>settings</key><dict><key>foreground</key><string>{{ $t.term.c3 }}</string></dict>
+    </dict>
+    <dict>
+      <key>name</key><string>Keywords and changed text</string>
+      <key>scope</key><string>keyword, storage, markup.changed, markup.changed.diff</string>
+      <key>settings</key><dict><key>foreground</key><string>{{ $t.term.c5 }}</string></dict>
+    </dict>
+    <dict>
+      <key>name</key><string>Functions, types, and headings</string>
+      <key>scope</key><string>entity.name, entity.name.function, entity.name.type, markup.heading</string>
+      <key>settings</key><dict><key>foreground</key><string>{{ $t.term.c4 }}</string></dict>
+    </dict>
+    <dict>
+      <key>name</key><string>Variables and links</string>
+      <key>scope</key><string>variable, support, markup.underline.link</string>
+      <key>settings</key><dict><key>foreground</key><string>{{ $t.term.c6 }}</string></dict>
+    </dict>
+    <dict>
+      <key>name</key><string>Errors and deleted text</string>
+      <key>scope</key><string>invalid, markup.deleted, markup.deleted.diff</string>
+      <key>settings</key><dict><key>foreground</key><string>{{ $t.term.c1 }}</string></dict>
+    </dict>
+  </array>
+  <key>uuid</key><string>4D415549-444F-5446-494C-45535448454D</string>
+</dict>
+</plist>

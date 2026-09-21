@@ -13,8 +13,13 @@ source "$SCRIPT_DIR/../../lib/dot/ui.sh"
 # shellcheck source=../../lib/dot/log.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../../lib/dot/log.sh"
-
-# Portable has_command (self-contained; no dependency on utils.sh)
+# Deliberately NOT lib/dot/utils.sh's has_command, though it is identical.
+# health.sh has to run against a minimal tree: the matrix test in
+# tests/unit/diagnostics/test_diagnostics_health_matrix.sh builds one that
+# symlinks ui.sh and log.sh and nothing else, because a health check whose
+# own dependencies are missing is worth very little. Sourcing utils.sh here
+# would pull in platform.sh, ai-install.sh and verified-download.sh and
+# break in exactly the degraded tree this script exists to diagnose.
 has_command() { command -v "$1" >/dev/null 2>&1; }
 
 # Colors (fallback when gum is unavailable; respect NO_COLOR)

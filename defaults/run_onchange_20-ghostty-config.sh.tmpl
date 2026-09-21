@@ -2,7 +2,7 @@
 
 # run_onchange_20-ghostty-config.sh.tmpl
 # Ghostty config hash: {{ include "dot_config/ghostty/config.tmpl" | sha256sum }}
-{{- if eq .chezmoi.os "darwin" -}}
+{{ if eq .chezmoi.os "darwin" -}}
 
 set -euo pipefail
 

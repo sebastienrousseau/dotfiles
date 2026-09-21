@@ -20,15 +20,8 @@
          {{`{{- $themeName := includeTemplate "theme-name" . -}}`}}
          {{`{{- $t := index .themes $themeName -}}`}}
 
-       Callers that also need a `-light` -> `-dark` fallback (terminal
-       colour templates that keep a dark surface under a light system
-       theme) can add the standard remap after resolving `$t`:
-
-         {{`{{- $tt := $t -}}`}}
-         {{`{{- if hasSuffix "-light" $themeName -}}`}}
-         {{`  {{- $dv := index .themes (printf "%s-dark" (trimSuffix "-light" $themeName)) -}}`}}
-         {{`  {{- if and $dv (hasKey $dv "term") -}}{{- $tt = $dv -}}{{- end -}}`}}
-         {{`{{- end -}}`}}
+       Callers use the returned variant directly so terminal and application
+       colours stay aligned with the active light or dark wallpaper frame.
     */ -}}
 {{- $requested := default "fallback-dark" .theme -}}
 {{- $t := index .themes $requested -}}

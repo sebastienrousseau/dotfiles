@@ -2,14 +2,10 @@
 {{- $fontSize := default 20 .terminal_font_size -}}
 {{- $themeName := includeTemplate "theme-name" . -}}
 {{- $t := index .themes $themeName -}}
-{{- $tt := $t -}}
-{{- if hasSuffix "-light" $themeName -}}
-  {{- $darkTheme := index .themes (printf "%s-dark" (trimSuffix "-light" $themeName)) -}}
-  {{- if and $darkTheme (hasKey $darkTheme "term") -}}{{- $tt = $darkTheme -}}{{- end -}}
-{{- end }}
 [window]
 padding = { x = 16, y = 12 }
-opacity = {{ if eq .chezmoi.os "darwin" }}0.92{{ else }}0.96{{ end }}
+# Preserve the generated sRGB palette and its tested contrast ratios.
+opacity = 1.0
 option_as_alt = {{ if eq .chezmoi.os "darwin" }}"Both"{{ else }}"None"{{ end }}
 
 [font]
@@ -22,33 +18,33 @@ offset = { x = 0, y = 0 }
 {{- end }}
 
 [colors.primary]
-background = "{{ $tt.term.bg }}"
-foreground = "{{ $tt.term.fg }}"
+background = "{{ $t.term.bg }}"
+foreground = "{{ $t.term.fg }}"
 
 [colors.cursor]
-cursor = "{{ $tt.term.cursor }}"
-text = "{{ $tt.term.cursor_text }}"
+cursor = "{{ $t.term.cursor }}"
+text = "{{ $t.term.cursor_text }}"
 
 [colors.selection]
-background = "{{ $tt.term.sel_bg }}"
-text = "{{ $tt.term.sel_fg }}"
+background = "{{ $t.term.sel_bg }}"
+text = "{{ $t.term.sel_fg }}"
 
 [colors.normal]
-black = "{{ $tt.term.c0 }}"
-red = "{{ $tt.term.c1 }}"
-green = "{{ $tt.term.c2 }}"
-yellow = "{{ $tt.term.c3 }}"
-blue = "{{ $tt.term.c4 }}"
-magenta = "{{ $tt.term.c5 }}"
-cyan = "{{ $tt.term.c6 }}"
-white = "{{ $tt.term.c7 }}"
+black = "{{ $t.term.c0 }}"
+red = "{{ $t.term.c1 }}"
+green = "{{ $t.term.c2 }}"
+yellow = "{{ $t.term.c3 }}"
+blue = "{{ $t.term.c4 }}"
+magenta = "{{ $t.term.c5 }}"
+cyan = "{{ $t.term.c6 }}"
+white = "{{ $t.term.c7 }}"
 
 [colors.bright]
-black = "{{ $tt.term.c8 }}"
-red = "{{ $tt.term.c9 }}"
-green = "{{ $tt.term.c10 }}"
-yellow = "{{ $tt.term.c11 }}"
-blue = "{{ $tt.term.c12 }}"
-magenta = "{{ $tt.term.c13 }}"
-cyan = "{{ $tt.term.c14 }}"
-white = "{{ $tt.term.c15 }}"
+black = "{{ $t.term.c8 }}"
+red = "{{ $t.term.c9 }}"
+green = "{{ $t.term.c10 }}"
+yellow = "{{ $t.term.c11 }}"
+blue = "{{ $t.term.c12 }}"
+magenta = "{{ $t.term.c13 }}"
+cyan = "{{ $t.term.c14 }}"
+white = "{{ $t.term.c15 }}"

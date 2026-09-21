@@ -1,46 +1,14 @@
-{{- /* Structural colours come from the theme's DARK variant so the status bar
-       stays dark (a light bar clashes inside the always-dark terminal). But the
-       ACCENT tracks the mode-following active theme, so it matches the wallpaper
-       frame actually on screen — the HEIC's light and dark frames are different
-       images with different dominant colours, so the dark accent would not match
-       the light-mode wallpaper the user sees.
-
-       That split is by ROLE, not by colour:
-
-         background role  ($accent)      — the active variant. A block of
-           accent with white on it: `accent` is AAA-darkened against white in
-           both variants, so this holds at 7:1 either way, and it is the part
-           the eye reads as "matching the wallpaper".
-         foreground role  ($accent_fg, $secondary, $tertiary, $muted) — the
-           DARK variant's *_on_surface colours. Two problems stack here. A
-           light variant's chromatic colours are solved against a LIGHT
-           background so they come out dark (1.02:1 as text on this bar), and
-           `accent`/`secondary`/`tertiary` are darkened in BOTH variants until
-           white sits on them at 7:1 — they are block backgrounds by
-           construction, and reusing them as text reached 1.67:1. The
-           *_on_surface slots keep the hue and raise lightness until the text
-           clears 4.5:1 on panel, border and bg.
-         separator glyphs — the active accent, deliberately. A powerline glyph
-           must match the colour of the block it abuts or the join shows a
-           seam; it is a shape, not text, so contrast does not apply. */ -}}
+{{- /* Every tmux surface follows the active wallpaper variant. The generated
+       ui.*_on_surface slots already enforce readable text contrast against
+       that variant's panel and border colours. */ -}}
 {{- $themeName := includeTemplate "theme-name" . -}}
-{{- $family := trimSuffix "-dark" (trimSuffix "-light" $themeName) -}}
-{{- $t := index .themes (printf "%s-dark" $family) -}}
-{{- if or (not $t) (not (hasKey $t "term")) -}}
-  {{- /* `family-dark` variant is missing/malformed — fall back to the
-         validated theme-name partial's return (guaranteed well-formed). */ -}}
-  {{- $t = index .themes $themeName -}}
-{{- end -}}
-{{- $active := index .themes $themeName -}}
-{{- if not $active -}}{{- $active = $t -}}{{- end -}}
+{{- $t := index .themes $themeName -}}
 {{- $bg := $t.term.bg -}}
 {{- $fg := $t.term.fg -}}
-{{- $accent := $active.ui.accent -}}
-{{- $accent_fg := (index $t.ui "accent_on_surface") | default $t.ui.accent -}}
-{{- $accent_text := $active.ui.accent_text -}}
+{{- $accent := $t.ui.accent -}}
+{{- $accent_text := $t.ui.accent_text -}}
 {{- $panel := $t.ui.panel -}}
 {{- $border := $t.ui.border -}}
-{{- $dim := $t.term.c8 -}}
 {{- /* muted: de-emphasised but still TEXT. term.c8 is ANSI bright-black,
        floored at 2.5:1 against bg, and using it here put the clock at
        2.12:1 and the inactive window names at 2.45:1. ui.text_muted is
@@ -48,7 +16,8 @@
        surfaces this bar paints on. */ -}}
 {{- $muted := (index $t.ui "text_muted") | default $t.term.c8 -}}
 {{- /* The wallpaper's 2nd and 3rd chromatic colours, so the bar carries
-       more of the image than a single accent. Both take white at 7:1.
+       more of the image than a single accent. Their mode-aware text colour
+       reaches at least 7:1: black on dark-mode blocks, white in light mode.
        `index` rather than `.secondary`: a missing map key is an ERROR
        with field syntax and nil with index, and only nil reaches
        `default`. This template must survive a themes.toml generated
@@ -56,11 +25,7 @@
 {{- $secondary := (index $t.ui "secondary_on_surface") | default $t.ui.accent -}}
 {{- $tertiary := (index $t.ui "tertiary_on_surface") | default $t.ui.accent -}}
 {{- $error := $t.ui.error -}}
-{{- $success := $t.ui.success -}}
 {{- $warning := $t.ui.warning -}}
-{{- $info := $t.ui.info -}}
-{{- $c4 := $t.term.c4 -}}
-{{- $c6 := $t.term.c6 -}}
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  TMUX CONFIGURATION (Universal)                                          ║
@@ -81,6 +46,17 @@ set -g set-clipboard on
 set -g escape-time 10
 set -g focus-events on
 set -g repeat-time 600
+# New panes inherit an explicit appearance signal even when OSC 11 cannot pass
+# through tmux. Gemini, Qwen, Claude, OpenCode, and other adaptive TUIs use it.
+set-environment -g COLORTERM "truecolor"
+set-environment -g COLORFGBG "{{ if eq $t.mode "light" }}0;15{{ else }}15;0{{ end }}"
+set-environment -g AIDER_DARK_MODE "{{ if eq $t.mode "dark" }}true{{ else }}false{{ end }}"
+set-environment -g AIDER_LIGHT_MODE "{{ if eq $t.mode "light" }}true{{ else }}false{{ end }}"
+set-environment -g AIDER_CODE_THEME "solarized-{{ $t.mode }}"
+set-environment -g AIDER_USER_INPUT_COLOR "{{ $t.term.c2 }}"
+set-environment -g AIDER_TOOL_ERROR_COLOR "{{ $t.term.c1 }}"
+set-environment -g AIDER_TOOL_WARNING_COLOR "{{ $t.term.c3 }}"
+set-environment -g AIDER_ASSISTANT_OUTPUT_COLOR "{{ $t.term.c4 }}"
 setw -g xterm-keys on
 set -g base-index 1
 setw -g pane-base-index 1
@@ -182,54 +158,75 @@ bind q kill-pane
 # Toggle synchronize-panes (type in all panes simultaneously)
 bind S setw synchronize-panes \; display "Sync panes: #{?synchronize-panes,ON,OFF}"
 
+# AI cockpit — launch a provider in a named window rooted at the active pane.
+# The status bar detects these sessions and labels the active provider.
+bind A display-menu -T "#[align=centre] AI CLI cockpit " -x C -y C \
+  "Cockpit" a "run-shell '~/.local/bin/tmux-ai launch cockpit #{q:pane_current_path}'" \
+  "" \
+  "Claude Code" c "run-shell '~/.local/bin/tmux-ai launch claude #{q:pane_current_path}'" \
+  "Codex" x "run-shell '~/.local/bin/tmux-ai launch codex #{q:pane_current_path}'" \
+  "Copilot" p "run-shell '~/.local/bin/tmux-ai launch copilot #{q:pane_current_path}'" \
+  "OpenCode" o "run-shell '~/.local/bin/tmux-ai launch opencode #{q:pane_current_path}'" \
+  "Aider" i "run-shell '~/.local/bin/tmux-ai launch aider #{q:pane_current_path}'" \
+  "Goose" g "run-shell '~/.local/bin/tmux-ai launch goose #{q:pane_current_path}'" \
+  "Kimi" k "run-shell '~/.local/bin/tmux-ai launch kimi #{q:pane_current_path}'" \
+  "Qwen" q "run-shell '~/.local/bin/tmux-ai launch qwen #{q:pane_current_path}'"
+
 # Session Management
 bind C-c new-session
 bind C-f command-prompt -p find-session 'switch-client -t %%'
 bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
-# ║  THEME — Powerline Status Bar                                           ║
+# ║  THEME — Minimal Status Bar                                             ║
 # ║  Colors from .chezmoidata/themes.toml ({{ $themeName }})  ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 
 # --- Status Bar ---
 set -g status on
-set -g status-interval 5
+set -g status-interval 10
 set -g status-position bottom
 set -g status-justify left
 set -g status-style "bg={{ $panel }},fg={{ $fg }}"
-set -g status-left-length 80
-set -g status-right-length 80
+set -g status-left-length 32
+set -g status-right-length 120
 
-# --- Powerline Segments ---
-# Left: [session] ❱ [window]
+# User-overridable modules. `set -o` keeps values from a local tmux.conf or
+# command line, making the generated theme customizable without forking it.
+set -ogq @dot_status_show_path on
+set -ogq @dot_status_show_system on
+set -ogq @dot_status_show_date on
+
+# Give every session a stable colour from the active wallpaper palette. The
+# helper refreshes all sessions after a theme change and colours new/renamed
+# sessions without requiring hand-maintained per-project rules.
+set -g @dot_session_colour "{{ $accent }}"
+run-shell -b "test ! -x ~/.local/bin/tmux-status || ~/.local/bin/tmux-status apply-colours '{{ $accent }}' '{{ $secondary }}' '{{ $tertiary }}'"
+set-hook -g session-created "run-shell -b \"~/.local/bin/tmux-status apply-colours '{{ $accent }}' '{{ $secondary }}' '{{ $tertiary }}'\""
+set-hook -g session-renamed "run-shell -b \"~/.local/bin/tmux-status apply-colours '{{ $accent }}' '{{ $secondary }}' '{{ $tertiary }}'\""
+
+# --- Minimal session identity — the bar's only persistent chromatic element ---
 set -g status-left "\
-#[bg={{ $accent }},fg={{ $accent_text }},bold]  #S \
-#[fg={{ $accent }},bg={{ $border }},nobold,noitalics,nounderscore]\
-#[fg={{ $fg }},bg={{ $border }}] #W \
-#[fg={{ $border }},bg={{ $panel }},nobold,noitalics,nounderscore]"
+#[fg=#{?client_prefix,{{ $error }},#{@dot_session_colour}},bg={{ $panel }},bold] #{?client_prefix, , }#S \
+#[fg={{ $border }},bg={{ $panel }},nobold]│ "
 
-# Right: [git?] [host] ❱ [date] ❱ [time]
+# --- One lightweight system sample, responsive context, and time ---
+# `tmux-status system` performs one platform-aware sample per interval. Path,
+# monitoring, and date modules can be disabled independently with the options
+# above; narrower clients progressively retain only the clock.
 set -g status-right "\
-#[fg={{ $border }},bg={{ $panel }},nobold,noitalics,nounderscore]\
-#[fg={{ $secondary }},bg={{ $border }},bold] #H \
-#[fg={{ $border }},bg={{ $border }},nobold,noitalics,nounderscore]\
-#[fg={{ $muted }},bg={{ $border }}] %d %b \
-#[fg={{ $accent }},bg={{ $border }},nobold,noitalics,nounderscore]\
-#[fg={{ $accent_text }},bg={{ $accent }},bold]  %H:%M "
+#[fg={{ $fg }},bg={{ $panel }},bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
+#[fg={{ $muted }},bg={{ $panel }},nobold]#{?#{==:#{@dot_status_show_path},on}, #[fg={{ $fg }}]#{b:pane_current_path} #[fg={{ $border }}]│ #[fg={{ $muted }}],}\
+#{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#(~/.local/bin/tmux-status system) #[fg={{ $border }}]│ #[fg={{ $muted }}],}\
+#{?#{&&:#{==:#{@dot_status_show_date},on},#{e|>=:#{client_width},155}},%d %b · ,}%H:%M "
 
 # --- Window Tabs ---
-set -g window-status-format "\
-#[fg={{ $panel }},bg={{ $panel }},nobold,noitalics,nounderscore]\
-#[fg={{ $muted }},bg={{ $panel }}] #I  #W #F \
-#[fg={{ $panel }},bg={{ $panel }},nobold,noitalics,nounderscore]"
+set -g window-status-format "#[fg={{ $muted }},bg={{ $panel }},nobold] #I:#W#F "
+set -g window-status-current-format "#[fg={{ $fg }},bg={{ $panel }},bold] #I:#W#F#{?window_zoomed_flag, ,} "
 
-set -g window-status-current-format "\
-#[fg={{ $panel }},bg={{ $border }},nobold,noitalics,nounderscore]\
-#[fg={{ $accent_fg }},bg={{ $border }},bold] #I  #W #F \
-#[fg={{ $border }},bg={{ $panel }},nobold,noitalics,nounderscore]"
-
-set -g window-status-separator ""
+set -g window-status-separator "#[fg={{ $border }},bg={{ $panel }},nobold]·"
+set -g window-status-bell-style "bg={{ $panel }},fg={{ $error }},bold"
+set -g window-status-activity-style "bg={{ $panel }},fg={{ $warning }},bold"
 
 # --- Pane Borders ---
 set -g pane-border-style "fg={{ $border }}"

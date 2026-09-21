@@ -1,3 +1,5 @@
+{{- $themeName := includeTemplate "theme-name" . -}}
+{{- $t := index .themes $themeName -}}
 # Environment and core variables
 export HOSTNAME="${HOST}"
 export INPUTRC="${HOME}/.inputrc"
@@ -13,6 +15,18 @@ export LANGUAGE="${USER_LANGUAGE}"
 export LC_ALL="${USER_LANGUAGE}"
 export LC_CTYPE="${USER_LANGUAGE}"
 export TERM="xterm-256color"
+export COLORTERM="truecolor"
+export COLORFGBG="{{ if eq $t.mode "light" }}0;15{{ else }}15;0{{ end }}"
+
+# Provider-neutral AI CLI appearance. Most TUIs inspect COLORFGBG or ANSI;
+# Aider additionally exposes explicit mode and semantic colour variables.
+export AIDER_DARK_MODE="{{ if eq $t.mode "dark" }}true{{ else }}false{{ end }}"
+export AIDER_LIGHT_MODE="{{ if eq $t.mode "light" }}true{{ else }}false{{ end }}"
+export AIDER_CODE_THEME="solarized-{{ $t.mode }}"
+export AIDER_USER_INPUT_COLOR="{{ $t.term.c2 }}"
+export AIDER_TOOL_ERROR_COLOR="{{ $t.term.c1 }}"
+export AIDER_TOOL_WARNING_COLOR="{{ $t.term.c3 }}"
+export AIDER_ASSISTANT_OUTPUT_COLOR="{{ $t.term.c4 }}"
 
 # fnm multishell path for environments without /run/user/... access
 if [[ -z "${XDG_RUNTIME_DIR:-}" ]]; then

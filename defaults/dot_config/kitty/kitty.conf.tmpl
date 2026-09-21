@@ -13,7 +13,9 @@ symbol_map U+E000-U+F8FF Symbols Nerd Font
 font_size {{ $fontSize }}
 
 window_padding_width 16
-background_opacity {{ if eq .chezmoi.os "darwin" }}0.92{{ else }}0.96{{ end }}
+# A terminal is a large reading surface: keep it opaque so generated sRGB
+# colours retain their tested contrast instead of blending with the wallpaper.
+background_opacity 1.0
 dim_opacity 0.75
 confirm_os_window_close 0
 enable_audio_bell no
@@ -22,18 +24,8 @@ cursor_trail 0
 linux_display_server wayland
 {{- end }}
 
-{{- /* The terminal always uses the DARK palette, in both OS light and dark
-       modes: the engineered dark scheme is high-contrast and low-fatigue,
-       whereas a very light (cream) terminal bg washes out faint/secondary text.
-       The wallpaper and the rest of the desktop still follow the OS mode. */ -}}
-{{- $themeName := includeTemplate "theme-name" . -}}
-{{- $family := trimSuffix "-dark" (trimSuffix "-light" $themeName) -}}
-{{- $t := index .themes (printf "%s-dark" $family) -}}
-{{- if or (not $t) (not (hasKey $t "term")) -}}
-  {{- /* `family-dark` variant is missing/malformed — fall back to the
-         validated theme-name partial's return (guaranteed well-formed). */ -}}
-  {{- $t = index .themes $themeName -}}
-{{- end }}
+{{ $themeName := includeTemplate "theme-name" . -}}
+{{- $t := index .themes $themeName -}}
 background {{ $t.term.bg }}
 foreground {{ $t.term.fg }}
 selection_background {{ $t.term.sel_bg }}

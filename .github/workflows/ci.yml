@@ -478,16 +478,13 @@ jobs:
       min_coverage: "95"
       run_integration: true
       run_strict_checks: true
-      # 10 -> 15. This job runs unit + regression + module coverage + the
+      # This job runs unit + regression + module coverage + the
       # integration suite in one budget. The FEATURE-MATRIX regression suites
       # add ~800 assertions that each invoke the real `dot` CLI in a sandboxed
-      # HOME, which is the point of them — they catch what static checks
-      # cannot — but it moved the unit phase from ~2.5 to ~4.5 minutes and
-      # squeezed integration out of the remaining time. Measured on the run
-      # that hit the wall: unit finished at +5m00s, coverage +5m11s,
-      # integration was still going when the job was cancelled at +10m00s.
-      # 15 restores roughly the same headroom the job had before.
-      timeout_minutes: 15
+      # HOME. With 10,526 assertions, both full-suite callers were still making
+      # progress in integration when GitHub cancelled them at +15m. Keep a
+      # finite budget, but leave enough headroom for hosted-runner variance.
+      timeout_minutes: 25
 
   # ============================================================================
   # STAGE 4: QUALITY (Depends on lint + test passing)

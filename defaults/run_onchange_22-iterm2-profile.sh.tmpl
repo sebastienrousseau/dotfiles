@@ -9,11 +9,6 @@ set -euo pipefail
 
 {{ $themeName := includeTemplate "theme-name" . -}}
 {{- $t := index .themes $themeName -}}
-{{- $tt := $t -}}
-{{- if hasSuffix "-light" $themeName -}}
-  {{- $darkTheme := index .themes (printf "%s-dark" (trimSuffix "-light" $themeName)) -}}
-  {{- if and $darkTheme (hasKey $darkTheme "term") -}}{{- $tt = $darkTheme -}}{{- end -}}
-{{- end }}
 
 THEME_NAME={{ $themeName | quote }}
 
@@ -24,31 +19,31 @@ THEME_NAME={{ $themeName | quote }}
 # macOS-only (see the `eq .chezmoi.os "darwin"` guard above) and macOS ships
 # bash 3.2, which has no associative arrays — `declare -A` there aborts with
 # "unbound variable" under `set -u`. Indexed arrays work back to bash 3.x.
-C_bg={{ $tt.term.bg | quote }}
-C_fg={{ $tt.term.fg | quote }}
-C_cursor={{ $tt.term.cursor | quote }}
-C_cursor_text={{ $tt.term.cursor_text | quote }}
-C_sel_bg={{ $tt.term.sel_bg | quote }}
-C_sel_fg={{ $tt.term.sel_fg | quote }}
+C_bg={{ $t.term.bg | quote }}
+C_fg={{ $t.term.fg | quote }}
+C_cursor={{ $t.term.cursor | quote }}
+C_cursor_text={{ $t.term.cursor_text | quote }}
+C_sel_bg={{ $t.term.sel_bg | quote }}
+C_sel_fg={{ $t.term.sel_fg | quote }}
 
 # ANSI colours 0..15, indexed so the emit loop below can address them by number.
 ANSI=(
-  {{ $tt.term.c0 | quote }}
-  {{ $tt.term.c1 | quote }}
-  {{ $tt.term.c2 | quote }}
-  {{ $tt.term.c3 | quote }}
-  {{ $tt.term.c4 | quote }}
-  {{ $tt.term.c5 | quote }}
-  {{ $tt.term.c6 | quote }}
-  {{ $tt.term.c7 | quote }}
-  {{ $tt.term.c8 | quote }}
-  {{ $tt.term.c9 | quote }}
-  {{ $tt.term.c10 | quote }}
-  {{ $tt.term.c11 | quote }}
-  {{ $tt.term.c12 | quote }}
-  {{ $tt.term.c13 | quote }}
-  {{ $tt.term.c14 | quote }}
-  {{ $tt.term.c15 | quote }}
+  {{ $t.term.c0 | quote }}
+  {{ $t.term.c1 | quote }}
+  {{ $t.term.c2 | quote }}
+  {{ $t.term.c3 | quote }}
+  {{ $t.term.c4 | quote }}
+  {{ $t.term.c5 | quote }}
+  {{ $t.term.c6 | quote }}
+  {{ $t.term.c7 | quote }}
+  {{ $t.term.c8 | quote }}
+  {{ $t.term.c9 | quote }}
+  {{ $t.term.c10 | quote }}
+  {{ $t.term.c11 | quote }}
+  {{ $t.term.c12 | quote }}
+  {{ $t.term.c13 | quote }}
+  {{ $t.term.c14 | quote }}
+  {{ $t.term.c15 | quote }}
 )
 
 # Convert "#RRGGBB" to three sRGB float components in 0.0..1.0.

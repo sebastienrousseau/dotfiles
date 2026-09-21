@@ -8,12 +8,14 @@
 ## # Usage
 ##   dot-theme-sync                    # Regenerate configs + reload running apps
 ##   dot-theme-sync macos-monterey-light   # Set theme + regenerate + reload
+##   dot-theme-sync maui-dark --auto   # Resolve Maui while retaining auto mode
 ##   dot-theme-sync --full             # Full chezmoi apply + reload
 ##   dot-theme-sync --help             # Show this help
 ##
 ## # Supported Applications
 ##   Ghostty   — chezmoi apply + runtime config reload
 ##   Tmux      — chezmoi apply + source-file reload
+##   AI CLIs   — provider adapters + terminal appearance inheritance
 ##   Niri      — screen transition
 ##   Neovim    — --remote-expr colorscheme switch (direct IPC, no file needed)
 ##   Browsers  — desktop color-scheme sync + Firefox content preference
@@ -119,21 +121,87 @@ join_lines() {
 # Theme Parsing
 # =============================================================================
 
-# Read the current theme from .chezmoidata.toml
-current_theme() {
+# Read a key from chezmoi.toml's [data] section, then fall back to the
+# repository defaults. Runtime theme state belongs in the machine-local file;
+# the tracked data file only defines defaults for a fresh installation.
+theme_data_value() {
+  local key="${1:-}"
+  local value=""
   if [[ -f "$CHEZMOI_CFG" ]]; then
-    local chezmoi_theme
-    chezmoi_theme="$(awk -F'"' '/^theme =/ {print $2}' "$CHEZMOI_CFG" | head -n 1)"
-    if [[ -n "$chezmoi_theme" ]]; then
-      echo "$chezmoi_theme"
-      return 0
-    fi
+    value="$(awk -F'"' -v key="$key" '
+      /^\[data\]$/ { in_data=1; next }
+      /^\[/ { in_data=0 }
+      in_data && $0 ~ "^" key "[[:space:]]*=" { print $2; exit }
+    ' "$CHEZMOI_CFG")"
   fi
-  awk -F'"' '/^theme =/ {print $2}' "$DATA_FILE" | head -n 1
+  if [[ -z "$value" && -f "$DATA_FILE" ]]; then
+    value="$(awk -F'"' -v key="$key" '$0 ~ "^" key "[[:space:]]*=" { print $2; exit }' "$DATA_FILE")"
+  fi
+  printf '%s\n' "$value"
 }
 
-# Write a new theme into .chezmoidata.toml AND chezmoi.toml [data] section.
-# Both must be updated: chezmoi.toml [data] takes precedence over .chezmoidata.toml.
+current_theme() { theme_data_value theme; }
+current_theme_family() {
+  local family
+  family="$(theme_data_value theme_family)"
+  if [[ -z "$family" ]]; then
+    local theme
+    theme="$(current_theme)"
+    family="${theme%-dark}"
+    [[ "$family" != "$theme" ]] || family="${theme%-light}"
+  fi
+  printf '%s\n' "$family"
+}
+current_theme_mode() {
+  local mode
+  mode="$(theme_data_value theme_mode)"
+  case "$mode" in
+    auto | dark | light) printf '%s\n' "$mode" ;;
+    *)
+      local theme
+      theme="$(current_theme)"
+      [[ "$theme" == *-light ]] && printf 'light\n' || printf 'dark\n'
+      ;;
+  esac
+}
+
+# Atomically set a quoted key in chezmoi.toml's [data] table, creating the
+# table when needed. Keeping mutable state here prevents `dot theme` from
+# editing the tracked repository default.
+set_machine_data_value() {
+  local key="${1:-}" value="${2:-}"
+  mkdir -p "$(dirname "$CHEZMOI_CFG")"
+  local tmp_file
+  tmp_file="$(umask 077 && mktemp)"
+  awk -v key="$key" -v value="$value" '
+    BEGIN { in_data=0; saw_data=0; wrote=0 }
+    /^\[data\]$/ { in_data=1; saw_data=1; print; next }
+    /^\[/ {
+      if (in_data && !wrote) { printf "%s = \"%s\"\n", key, value; wrote=1 }
+      in_data=0
+      print
+      next
+    }
+    in_data && $0 ~ "^" key "[[:space:]]*=" {
+      if (!wrote) { printf "%s = \"%s\"\n", key, value; wrote=1 }
+      next
+    }
+    { print }
+    END {
+      if (in_data && !wrote) printf "%s = \"%s\"\n", key, value
+      else if (!saw_data) printf "\n[data]\n%s = \"%s\"\n", key, value
+    }
+  ' "$CHEZMOI_CFG" 2>/dev/null >"$tmp_file" || {
+    printf '[data]\n%s = "%s"\n' "$key" "$value" >"$tmp_file"
+  }
+  if ! mv "$tmp_file" "$CHEZMOI_CFG"; then
+    _err "Write" "failed to update $CHEZMOI_CFG"
+    rm -f "$tmp_file"
+    return 1
+  fi
+}
+
+# Write resolved runtime state to chezmoi.toml's machine-local [data] table.
 _theme_history_file() {
   printf '%s' "${XDG_STATE_HOME:-$HOME/.local/state}/dot/theme-history"
 }
@@ -157,6 +225,7 @@ _record_theme_history() {
 
 write_theme() {
   local new_theme="${1:-}"
+  local preference="${2:-manual}"
   # R5: validate input
   if [[ -z "$new_theme" ]]; then
     _err "Invalid" "theme name required"
@@ -174,45 +243,17 @@ write_theme() {
     exit 1
   fi
 
-  # Update .chezmoidata.toml (source of truth for templates)
-  local tmp_file
-  tmp_file="$(umask 077 && mktemp)"
-  if grep -q '^theme = ' "$DATA_FILE"; then
-    sed "s/^theme = .*/theme = \"$new_theme\"/" "$DATA_FILE" >"$tmp_file"
+  local family mode
+  family="${new_theme%-dark}"
+  [[ "$family" != "$new_theme" ]] || family="${new_theme%-light}"
+  [[ "$new_theme" == *-light ]] && mode="light" || mode="dark"
+
+  set_machine_data_value theme "$new_theme"
+  set_machine_data_value theme_family "$family"
+  if [[ "$preference" == "auto" ]]; then
+    set_machine_data_value theme_mode auto
   else
-    cat "$DATA_FILE" >"$tmp_file"
-    printf 'theme = "%s"\n' "$new_theme" >>"$tmp_file"
-  fi
-  # R7: check mv return, restore on failure
-  if ! mv "$tmp_file" "$DATA_FILE"; then
-    _err "Write" "failed to update $DATA_FILE"
-    rm -f "$tmp_file"
-    return 1
-  fi
-
-  # Update chezmoi.toml [data] section (overrides .chezmoidata.toml)
-  if [[ -f "$CHEZMOI_CFG" ]] && grep -q '^theme = ' "$CHEZMOI_CFG"; then
-    tmp_file="$(umask 077 && mktemp)"
-    sed "s/^theme = .*/theme = \"$new_theme\"/" "$CHEZMOI_CFG" >"$tmp_file"
-    if ! mv "$tmp_file" "$CHEZMOI_CFG"; then
-      _err "Write" "failed to update $CHEZMOI_CFG"
-      rm -f "$tmp_file"
-    fi
-  fi
-}
-
-sync_theme_state() {
-  [[ -f "$DATA_FILE" ]] || return 0
-  [[ -f "$CHEZMOI_CFG" ]] || return 0
-  grep -q '^theme = ' "$CHEZMOI_CFG" || return 0
-
-  local data_theme chezmoi_theme
-  data_theme="$(awk -F'"' '/^theme =/ {print $2}' "$DATA_FILE" | head -n 1)"
-  chezmoi_theme="$(awk -F'"' '/^theme =/ {print $2}' "$CHEZMOI_CFG" | head -n 1)"
-
-  if [[ -n "$chezmoi_theme" && -n "$data_theme" && "$data_theme" != "$chezmoi_theme" ]]; then
-    write_theme "$chezmoi_theme"
-    _info "Theme" "synced data files to chezmoi override ($chezmoi_theme)"
+    set_machine_data_value theme_mode "$mode"
   fi
 }
 
@@ -266,7 +307,16 @@ apply_theme_configs() {
     "$HOME/.config/tmux/tmux.conf"
     "$HOME/.config/alacritty/alacritty.toml"
     "$HOME/.config/kitty/kitty.conf"
+    "$HOME/.config/starship.toml"
+    "$HOME/.config/zsh/rc.d/10-env.zsh"
+    "$HOME/.config/fish/conf.d/env.fish"
+    "$HOME/.config/nushell/env.nu"
+    "$HOME/.codex/themes/dotfiles.tmTheme"
     "$HOME/.config/wezterm/wezterm.lua"
+    "$HOME/.config/foot/foot.ini"
+    "$HOME/.config/fuzzel/fuzzel.ini"
+    "$HOME/.config/vscode/settings.json"
+    "$HOME/.warp/themes/dotfiles.yaml"
     "$HOME/.config/firefox/user.js"
     "$HOME/.config/gtk-3.0/gtk.css"
     "$HOME/.config/gtk-3.0/settings.ini"
@@ -289,6 +339,16 @@ apply_theme_configs() {
   if [[ ${#valid_targets[@]} -gt 0 ]]; then
     if chezmoi apply --force "${valid_targets[@]}" &>/dev/null; then
       applied_count=${#valid_targets[@]}
+    fi
+  fi
+
+  # iTerm2's dynamic profile is produced by a run_onchange script rather than
+  # a normal target file, so a targeted apply must address its source path
+  # explicitly. Otherwise only a full chezmoi apply ever refreshes iTerm2.
+  local iterm_source="$CHEZMOI_SRC/run_onchange_22-iterm2-profile.sh.tmpl"
+  if [[ "$PLATFORM" == "Darwin" && -f "$iterm_source" ]]; then
+    if chezmoi apply --force --source-path "$iterm_source" &>/dev/null; then
+      applied_count=$((applied_count + 1))
     fi
   fi
 
@@ -316,6 +376,26 @@ apply_theme_configs() {
     _ok "Chezmoi" "regenerated $applied_count configs"
   else
     _skip "Chezmoi" "no managed configs found"
+  fi
+}
+
+sync_ai_cli_themes() {
+  local theme="$1"
+  local helper="$SRC_DIR/scripts/theme/sync-ai-cli-themes.py"
+  local updated
+
+  if ! command -v python3 &>/dev/null || [[ ! -f "$helper" ]]; then
+    _skip "AI CLIs" "theme adapter unavailable"
+    return 0
+  fi
+  if updated="$(python3 "$helper" --theme "$theme" --themes-file "$THEMES_FILE" 2>/dev/null)"; then
+    if [[ -n "$updated" ]]; then
+      _ok "AI CLIs" "updated ${updated//,/, } (restart active TUIs)"
+    else
+      _skip "AI CLIs" "no provider configs found"
+    fi
+  else
+    _skip "AI CLIs" "provider configs could not be updated"
   fi
 }
 
@@ -413,7 +493,10 @@ reload_kitty() {
   # kitty reloads its config (colours included) live on SIGUSR1 — applied to
   # every OS window, no remote-control socket required.
   local pids
-  pids="$(pgrep -x kitty 2>/dev/null || true)"
+  pids="$({
+    pgrep -x kitty 2>/dev/null || true
+    pgrep -f '^/Applications/kitty\.app/Contents/MacOS/kitty$' 2>/dev/null || true
+  } | awk '!seen[$0]++')"
   if [[ -z "$pids" ]]; then
     SKIPPED+=("kitty")
     _skip "Kitty" "not running"
@@ -457,6 +540,12 @@ reload_tmux() {
   # but the theme/colors still reload successfully — treat as success.
   local out
   out="$(tmux source-file "$conf" 2>&1)" || true
+  # Sourcing updates server options, but detached/external invocations do not
+  # always repaint attached clients immediately. Redraw each one explicitly.
+  local client
+  while IFS= read -r client; do
+    [[ -n "$client" ]] && tmux refresh-client -t "$client" -S 2>/dev/null || true
+  done < <(tmux list-clients -F '#{client_name}' 2>/dev/null || true)
   RELOADED+=("tmux")
   if [[ -n "$out" ]]; then
     _ok "Tmux" "source-file (warnings: ${out##*: })"
@@ -1429,12 +1518,14 @@ usage() {
   printf '%s\n' "${BOLD}USAGE${RESET}"
   printf '  %s\n' "dot-theme-sync                    Regenerate configs + reload running apps"
   printf '  %s\n' "dot-theme-sync <theme-name>       Set theme + regenerate + reload"
+  printf '  %s\n' "dot-theme-sync <theme-name> --auto Set resolved theme and follow OS mode"
   printf '  %s\n' "dot-theme-sync --full             Full chezmoi apply + reload"
   printf '  %s\n' "dot-theme-sync --help             Show this help"
   echo ""
   printf '%s\n' "${BOLD}APPLICATIONS${RESET}"
   printf '  %s\n' "Ghostty    chezmoi apply + runtime reload"
   printf '  %s\n' "Tmux       chezmoi apply + source-file reload"
+  printf '  %s\n' "AI CLIs    adaptive themes for Codex, Claude, Gemini, agy, Qwen, OpenCode, Aider"
   printf '  %s\n' "Niri       screen transition"
   printf '  %s\n' "Browsers   desktop sync + Firefox content preference"
   printf '  %s\n' "Neovim     remote-expr colorscheme switch (direct IPC)"
@@ -1526,6 +1617,7 @@ main() {
   local do_full=false
   local do_force=false
   local do_dry_run=false
+  local do_auto=false
   local new_theme=""
 
   # Parse arguments — accept a flag before OR after the theme name.
@@ -1545,6 +1637,10 @@ main() {
         ;;
       --dry-run | -n)
         do_dry_run=true
+        shift
+        ;;
+      --auto)
+        do_auto=true
         shift
         ;;
       "")
@@ -1569,12 +1665,17 @@ main() {
   # Save previous theme for rollback on failure
   local prev_theme
   prev_theme="$(current_theme)"
+  local prev_preference
+  prev_preference="$(current_theme_mode)"
 
   # Idempotency: if the requested theme is already active and there's no
   # explicit --force / --full, skip the whole apply chain. Users who want
   # to re-render after editing configs pass --force; scripts that fire
   # `dot theme set X` repeatedly no longer pay the ~700 ms tax per call.
+  local requested_preference="manual"
+  [[ "$do_auto" == true ]] && requested_preference="auto"
   if [[ -n "$new_theme" && "$new_theme" == "$prev_theme" &&
+    "$requested_preference" == "$prev_preference" &&
     "$do_full" == false && "$do_force" == false ]]; then
     _info "Theme" "$new_theme"
     _ok "Idempotent" "already active — pass --force to re-apply"
@@ -1587,23 +1688,19 @@ main() {
     _info "Theme" "$target"
     _info "Dry-run" "no writes will be performed"
     if [[ -n "$new_theme" ]]; then
-      _info "Would" "write theme=\"$new_theme\" to $DATA_FILE"
-      if [[ -f "$CHEZMOI_CFG" ]] && grep -q '^theme = ' "$CHEZMOI_CFG" 2>/dev/null; then
-        _info "Would" "sync theme to $CHEZMOI_CFG"
-      fi
+      _info "Would" "write theme=\"$new_theme\" to $CHEZMOI_CFG"
+      _info "Would" "set theme mode to $requested_preference"
     fi
-    _info "Would" "run chezmoi apply on 12 targeted templates"
+    _info "Would" "regenerate all installed theme-dependent configs"
     _info "Would" "reload: ghostty tmux niri desktop dms wallpaper browsers nvim"
     _info "Would" "detected DE: $(bash -c 'raw="${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}"; raw="$(printf %s "$raw" | tr "[:upper:]" "[:lower:]")"; case "$raw" in *budgie*) echo budgie;; *cinnamon*) echo cinnamon;; *kde*|*plasma*) echo kde;; *xfce*) echo xfce;; *gnome*) echo gnome;; *) echo unknown;; esac' 2>/dev/null)"
     _ok "Dry-run" "complete — no changes made"
     exit 0
   fi
 
-  # If a new theme was specified, write it to the data file
+  # If a new theme was specified, persist it as machine-local state.
   if [[ -n "$new_theme" ]]; then
-    write_theme "$new_theme"
-  else
-    sync_theme_state
+    write_theme "$new_theme" "$requested_preference"
   fi
 
   # Read the active theme and print exactly once. When `new_theme` was
@@ -1626,13 +1723,14 @@ main() {
       _ok "Chezmoi" "full apply completed"
     else
       _err "Chezmoi" "apply failed — rolling back to $prev_theme"
-      write_theme "$prev_theme"
+      write_theme "$prev_theme" "$prev_preference"
       apply_theme_configs
       return 1
     fi
   else
     apply_theme_configs
   fi
+  sync_ai_cli_themes "$theme"
   sync_ghostty_macos_config
   echo ""
 
@@ -1642,6 +1740,7 @@ main() {
   # DOT_THEME_SEQUENTIAL=1 forces the old sequential order for debugging.
   if [[ "${DOT_THEME_SEQUENTIAL:-0}" == "1" ]]; then
     reload_ghostty
+    reload_kitty
     reload_tmux
     reload_niri
     reload_desktop "$theme"

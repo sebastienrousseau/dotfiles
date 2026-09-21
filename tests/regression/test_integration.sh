@@ -339,7 +339,22 @@ test_start "integration_smoke_test_exists"
 assert_file_exists "$REPO_ROOT/scripts/diagnostics/smoke-test.sh" "smoke-test.sh must exist"
 
 test_start "integration_smoke_test_checks_mise"
-assert_file_contains "$REPO_ROOT/scripts/diagnostics/smoke-test.sh" "mise" "smoke test must check for mise"
+# The smoke test never verified `mise` as one of its tools — the only
+# occurrence of the word was inside its private copy of check_cmd, whose
+# fallback consults `mise ls --installed` when a command is not on PATH.
+# So this assertion was passing on the text of a helper, not on behaviour,
+# and it went red the moment that helper moved to lib/dot/utils.sh.
+# The intent — the smoke test's command lookup is mise-aware — is now
+# asserted where that is actually decided, plus the link that carries it.
+# One assert per test_start: tests/regression/test_framework_invariants.sh
+# requires RUN == PASSED + FAILED, so a second assert under this name would
+# make the counts disagree.
+assert_file_contains "$REPO_ROOT/lib/dot/utils.sh" "mise ls --installed" \
+  "check_cmd falls back to mise"
+
+test_start "integration_smoke_test_sources_check_cmd"
+assert_file_contains "$REPO_ROOT/scripts/diagnostics/smoke-test.sh" \
+  "lib/dot/utils.sh" "smoke test sources the mise-aware check_cmd"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

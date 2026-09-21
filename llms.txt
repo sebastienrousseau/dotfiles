@@ -1,6 +1,6 @@
 # .dotfiles
 
-> Workstation-infrastructure dotfiles for macOS, Linux, and WSL. Multi-shell by default (zsh, fish, bash, nushell, PowerShell), with wallpaper-driven terminal themes (K-Means CIELAB + WCAG AAA), first-class agent / MCP governance, signed releases, and a self-healing CLI. Chezmoi-managed. Current version: v0.2.519.
+> Workstation-infrastructure dotfiles for macOS, Linux, and WSL. Multi-shell by default (zsh, fish, bash, nushell, PowerShell), with wallpaper-driven terminal themes (K-Means CIELAB + WCAG AAA), first-class agent / MCP governance, signed releases, and a self-healing CLI. Chezmoi-managed. Current version: v0.2.520.
 
 This file is curated for LLM agents indexing the repository. The links below are the *load-bearing* documents — start here, not with `find`.
 

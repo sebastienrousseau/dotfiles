@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+# macOS auto-theme agent: {{ include "private_Library/LaunchAgents/com.sebastienrousseau.dot-theme-auto.plist.tmpl" | sha256sum }}
+{{- if eq .chezmoi.os "darwin" }}
+
+set -euo pipefail
+
+label="com.sebastienrousseau.dot-theme-auto"
+domain="gui/$(id -u)"
+plist="$HOME/Library/LaunchAgents/${label}.plist"
+
+mkdir -p "$HOME/Library/Logs"
+launchctl bootout "$domain" "$plist" >/dev/null 2>&1 || true
+if launchctl bootstrap "$domain" "$plist"; then
+  launchctl enable "$domain/$label" || true
+else
+  printf 'warning: could not bootstrap %s (no active GUI domain?)\n' "$label" >&2
+fi
+{{- end }}

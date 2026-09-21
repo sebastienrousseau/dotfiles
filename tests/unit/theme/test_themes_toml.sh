@@ -151,7 +151,8 @@ fi
 
 # --- WCAG AAA contrast validation ---
 test_start "all_themes_wcag_aaa"
-wcag_result="$(python3 - "$THEMES_FILE" <<'PYEOF' 2>/dev/null || true
+wcag_result="$(
+  python3 - "$THEMES_FILE" <<'PYEOF' 2>/dev/null || true
 import sys
 path = sys.argv[1]
 try:
@@ -192,6 +193,9 @@ for name in sorted(themes):
     checks = [
         cr(fg, bg) >= 7.0,
         cr(ui["accent_text"], ui["accent"]) >= 7.0,
+        all(cr(ui["accent_text"], ui[role]) >= 7.0
+            for role in ("error", "warning", "success", "info")),
+        ui["accent_text"] == ("#000000" if t["mode"] == "dark" else "#ffffff"),
         cr(term["c0"], bg) >= 1.5,
         cr(term["c8"], bg) >= 2.5,
         # Bright white (c15) is the lightest structural tone in either mode —
@@ -199,8 +203,13 @@ for name in sorted(themes):
         # is gated by fg (above), not c15.
         rl(hex_to_rgb(term["c15"])) >= rl(hex_to_rgb(term["c7"])),
         cr(fg, term["sel_bg"]) >= 4.5,
-        1.03 <= cr(ui["panel"], bg) <= 2.0,
-        1.08 <= cr(ui["border"], bg) <= 3.5,
+        1.08 <= cr(ui["panel"], bg) <= 2.0,
+        1.20 <= cr(ui["border"], bg) <= 3.5,
+        # Apple semantic surface hierarchy: elevation gets lighter in dark
+        # mode and darker in light mode (primary -> secondary -> tertiary).
+        (rl(hex_to_rgb(bg)) < rl(hex_to_rgb(ui["panel"])) < rl(hex_to_rgb(ui["border"])))
+        if t["mode"] == "dark" else
+        (rl(hex_to_rgb(bg)) > rl(hex_to_rgb(ui["panel"])) > rl(hex_to_rgb(ui["border"]))),
     ]
     if not all(checks):
         fails += 1
@@ -242,7 +251,7 @@ while IFS= read -r line; do
       bad=$((bad + 1))
     fi
   fi
-done < "$THEMES_FILE"
+done <"$THEMES_FILE"
 assert_equals "$bad" "0" "all color values must be valid 6-digit hex"
 
 # --- Wallpaper paths must not carry one machine's home directory ---

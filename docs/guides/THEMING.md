@@ -16,7 +16,15 @@ Wallpapers are the source of truth. The system discovers wallpapers from two loc
 1. **System wallpapers** — platform-native (macOS `/System/Library/Desktop Pictures/`, Linux `/usr/share/backgrounds/`)
 2. **Custom wallpapers** — user-provided in `~/Pictures/Wallpapers/` (custom overrides system)
 
-`extract-theme.py` extracts dominant colors from each wallpaper using K-Means clustering in CIELAB color space, then generates a full terminal palette (16 ANSI colors, accent, bg/fg, panel, border) with WCAG contrast enforcement.
+`extract-theme.py` extracts dominant colors from each wallpaper using K-Means clustering in CIELAB color space, then generates a full terminal palette (16 ANSI colors, accent, bg/fg, panel, border) with WCAG contrast enforcement. Dark variants map wallpaper hues to luminous color blocks with black text; light variants map them to deep blocks with white text, so both modes remain vivid and readable.
+
+The mode-specific tuning follows Apple's semantic-color model: light and dark
+are generated independently, backgrounds use a primary/secondary/tertiary
+surface hierarchy, and chromatic roles are calibrated against Apple's
+increased-contrast system colors while retaining the wallpaper hue. Terminal
+windows are opaque so translucency cannot invalidate the generated sRGB
+contrast. This applies consistently to Ghostty, Kitty, Alacritty, WezTerm,
+Foot, iTerm2, Warp, tmux, and provider TUIs.
 
 `rebuild-themes.sh` orchestrates discovery → extraction → assembly into `.chezmoidata/themes.toml`. Themes are cached in `~/.cache/dotfiles/themes/` and only regenerated when wallpapers change.
 
@@ -72,7 +80,8 @@ Each theme switch touches these applications:
 | Application | Mechanism | What Changes |
 | :--- | :--- | :--- |
 | **Ghostty** | `chezmoi apply` + macOS app-support sync + DBus `reload-config` or runtime signal fallback | Background, foreground, all 16 ANSI colors, cursor |
-| **Tmux** | `chezmoi apply` + `source-file` | Status bar colors, pane borders, mode indicators |
+| **Tmux** | `chezmoi apply` + `source-file` | Wallpaper colors, deterministic session identity, focus/prefix state, pane borders, mode indicators |
+| **AI CLIs** | terminal ANSI + `COLORFGBG` + provider adapters | Codex custom syntax theme; Claude auto; Gemini/Qwen ANSI light/dark; agy terminal; OpenCode system; Aider mode and semantic colors |
 | **Niri** | `chezmoi apply` + `load-config-file` IPC | Window borders, focus ring, inactive tint |
 | **Desktop (macOS)** | `osascript` + `defaults write` + `killall` | System appearance (Light/Dark), accent color, highlight color; forces SystemUIServer/Dock/cfprefsd refresh |
 | **Wallpaper (macOS)** | `osascript` System Events | Desktop wallpaper set across all displays |
@@ -219,6 +228,10 @@ Tmux reloads via `source-file`. If TPM plugins override colors, run:
 ```bash
 tmux source-file ~/.config/tmux/tmux.conf
 ```
+
+Each session hashes its name into twelve shades derived from the active theme's primary, secondary, and tertiary colors. Collision probing keeps the active session set visually distinct; renaming a session updates that identity automatically. The session name is the bar's only persistent colored element. Windows, directory, system health, date, and time use neutral semantic text; the directory remains visible in split terminal windows while width gates remove monitoring and date from narrower AI panes. CPU, memory, and battery are gathered by one lightweight status helper on macOS, Linux/Arch, WSL, and Windows environments. Set `@dot_status_show_path`, `@dot_status_show_system`, or `@dot_status_show_date` to `off` before reloading tmux to hide an individual module.
+
+AI provider TUIs receive the same mode and palette through the most native interface each exposes. `COLORFGBG` is injected into new shells and tmux panes for provider-neutral detection. `dot-theme-sync` also preserves and updates installed provider configs for Codex, Claude, Gemini, Antigravity (`agy`), Qwen, and OpenCode; Aider reads generated mode and color environment variables. Restart an already-running provider TUI after a theme change because most cache their appearance at startup.
 
 ### Checking the active theme
 

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
+<!-- Copyright (c) 2015-2026 Sebastien Rousseau -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.sebastienrousseau.dot-theme-auto</string>
+
+	<key>ProgramArguments</key>
+	<array>
+		<string>{{ .chezmoi.homeDir }}/.local/bin/dot</string>
+		<string>theme</string>
+		<string>sync</string>
+		<string>--if-auto</string>
+	</array>
+
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>{{ .chezmoi.homeDir }}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
+
+	<key>RunAtLoad</key>
+	<true/>
+
+	<!-- macOS updates this preference file when system appearance changes. -->
+	<key>WatchPaths</key>
+	<array>
+		<string>{{ .chezmoi.homeDir }}/Library/Preferences/.GlobalPreferences.plist</string>
+	</array>
+
+	<key>ThrottleInterval</key>
+	<integer>2</integer>
+	<key>ProcessType</key>
+	<string>Background</string>
+
+	<key>StandardOutPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/dot-theme-auto.log</string>
+	<key>StandardErrorPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/dot-theme-auto.log</string>
+</dict>
+</plist>
