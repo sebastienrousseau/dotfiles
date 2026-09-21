@@ -7,12 +7,14 @@ on:
       - 'docs/manual/**'
       - 'tools/docs/**'
       - '.github/workflows/manual-publish.yml'
+      - 'tests/unit/docs/test_manual_release_assets.sh'
   pull_request:
     branches: [main]
     paths:
       - 'docs/manual/**'
       - 'tools/docs/**'
       - '.github/workflows/manual-publish.yml'
+      - 'tests/unit/docs/test_manual_release_assets.sh'
   release:
     types: [published]
   workflow_dispatch:
@@ -50,8 +52,11 @@ jobs:
       - name: Run manual quality gates
         run: bash tools/docs/check-manual.sh
 
+      - name: Test release asset contract
+        run: bash tests/unit/docs/test_manual_release_assets.sh
+
       - name: Fast build (no PDF)
-        run: bash tools/docs/build-manual.sh --fast
+        run: bash tools/docs/build-manual.sh --fast --clean
 
   # ==========================================================================
   # BUILD — full (pandoc + TeX Live). Only when we actually publish the site
@@ -107,7 +112,7 @@ jobs:
             codespell
 
       - name: Build manual (all formats)
-        run: bash tools/docs/build-manual.sh
+        run: bash tools/docs/build-manual.sh --clean
 
       - name: Record file sizes
         id: sizes
@@ -146,15 +151,22 @@ jobs:
           name: manual
           path: _build/manual/
 
+      - name: Verify downloaded manual assets
+        working-directory: _build/manual
+        run: sha256sum --check --strict SHA256SUMS
+
       - name: Upload to release
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           files: |
             _build/manual/dotfiles.pdf
             _build/manual/dotfiles.epub
+            _build/manual/dotfiles.html
             _build/manual/dotfiles.html.gz
             _build/manual/html.tar.gz
             _build/manual/dotfiles.txt.gz
+            _build/manual/dotfiles.txt
             _build/manual/dotfiles-md.tar.gz
+            _build/manual/search-index.json
             _build/manual/SHA256SUMS
-          fail_on_unmatched_files: false
+          fail_on_unmatched_files: true
