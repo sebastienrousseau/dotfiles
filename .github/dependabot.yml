@@ -53,7 +53,13 @@ updates:
           - "major"
 
   - package-ecosystem: "docker"
-    directory: "/"
+    # Docker manifests live below the repository root. Dependabot does not
+    # recurse from `directory: "/"`; that stale scope fails with
+    # dependency_file_not_found instead of checking any image dependency.
+    directories:
+      - "/.devcontainer"
+      - "/fuzz/oss-fuzz"
+      - "/tests"
     schedule:
       interval: "weekly"
       day: "monday"
