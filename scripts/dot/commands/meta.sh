@@ -131,7 +131,7 @@ cmd_upgrade() {
     # NVIM_APPNAME) and skip visibly when there is none to load.
     local nvim_init="${XDG_CONFIG_HOME:-$HOME/.config}/${NVIM_APPNAME:-nvim}/init.lua"
     if [ -f "$nvim_init" ]; then
-      _upgrade_step nvim "Neovim plugins" "Lazy sync + Mason drain…" -- \
+      DOTFILES_NVIM_UPGRADE=1 _upgrade_step nvim "Neovim plugins" "Lazy, parsers + Mason…" -- \
         nvim --headless -u "$nvim_init" -l "$src_dir/scripts/nvim/headless-upgrade.lua"
     else
       ui_step nvim "Neovim plugins" skip "no init.lua at $nvim_init"
@@ -146,7 +146,7 @@ cmd_upgrade() {
 
   local n=${#fail_labels[@]}
   if [[ "$n" -eq 0 ]]; then
-    ui_steps_end "toolchains, plugins, and dotfiles up to date"
+    ui_steps_end "requested upgrade phases completed"
     rm -rf "$log_dir"
   else
     ui_steps_end "$n step(s) failed"

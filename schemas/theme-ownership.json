@@ -33,7 +33,7 @@
     {"path": "$HOME/.qwen/settings.json", "platform": "all", "adapter": "ai-provider", "format": "json", "ownership": "keys", "keys": ["ui.theme"]},
     {"path": "$HOME/.config/opencode/cli.json", "platform": "all", "adapter": "ai-provider", "format": "json", "ownership": "keys", "keys": ["$schema", "theme.name", "theme.mode"]},
     {"path": "${XDG_STATE_HOME:-$HOME/.local/state}/DankMaterialShell/session.json", "platform": "all", "adapter": "desktop-shell", "format": "json", "ownership": "adapter-defined", "keys": []},
-    {"path": "$HOME/Library/Application Support/com.mitchellh.ghostty/config", "platform": "darwin", "adapter": "chezmoi", "format": "ghostty", "ownership": "file", "keys": []},
+    {"path": "$HOME/Library/Application Support/com.mitchellh.ghostty/config", "platform": "darwin", "adapter": "ghostty-native", "format": "ghostty", "ownership": "file", "keys": []},
     {"path": "${XDG_CONFIG_HOME:-$HOME/.config}/DankMaterialShell/settings.json", "platform": "non-darwin", "adapter": "desktop-shell", "format": "json", "ownership": "adapter-defined", "keys": []}
   ]
 }

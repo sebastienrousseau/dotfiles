@@ -17,7 +17,7 @@
         "properties": {
           "path": {"type": "string", "minLength": 1},
           "platform": {"enum": ["all", "darwin", "non-darwin"]},
-          "adapter": {"enum": ["theme-state", "chezmoi", "ai-provider", "desktop-shell"]},
+          "adapter": {"enum": ["theme-state", "chezmoi", "ghostty-native", "ai-provider", "desktop-shell"]},
           "format": {"enum": ["toml", "json", "jsonc", "ghostty", "tmux", "kitty", "shell", "fish", "nushell", "plist", "lua", "ini", "yaml", "javascript", "css", "kdl"]},
           "ownership": {"enum": ["file", "keys", "adapter-defined"]},
           "keys": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}

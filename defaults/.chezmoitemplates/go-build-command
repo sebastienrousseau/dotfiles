@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+# Build privately beside the destination so successful replacement is atomic.
+# An old shell or `go env -w` can retain a GOTMPDIR that no longer exists.
+# Override it for this build only; never rewrite the user's Go environment.
+dot_build_go_binary() (
+  set -euo pipefail
+  umask 077
+  dot_build_dir="$(mktemp -d "${OUT}.build.XXXXXX")" || exit 1
+  trap 'rm -rf -- "$dot_build_dir"' EXIT
+  cd "$SRC" || exit 1
+  GOTMPDIR="$dot_build_dir" go build -o "$dot_build_dir/binary" . || exit 1
+  chmod 755 "$dot_build_dir/binary" || exit 1
+  mv -f "$dot_build_dir/binary" "$OUT" || exit 1
+)

@@ -8,7 +8,14 @@ return {
   -- Treesitter (Syntax Highlighting)
   {
     "nvim-treesitter/nvim-treesitter",
-    build = ":TSUpdate",
+    build = function()
+      local treesitter = require("nvim-treesitter")
+      if vim.env.DOTFILES_NVIM_UPGRADE == "1" and treesitter.update then
+        require("config.upgrade").track(treesitter.update(nil, { summary = true }))
+      else
+        vim.cmd("TSUpdate")
+      end
+    end,
     lazy = false,
     config = function()
       local languages = {
@@ -36,6 +43,7 @@ return {
       if ok then
         legacy.setup({
           ensure_installed = languages,
+          sync_install = vim.env.DOTFILES_NVIM_UPGRADE == "1",
           highlight = { enable = true },
           indent = { enable = true },
         })
@@ -44,7 +52,7 @@ return {
 
       local treesitter = require("nvim-treesitter")
       treesitter.setup({})
-      treesitter.install(languages)
+      require("config.upgrade").track(treesitter.install(languages))
       vim.api.nvim_create_autocmd("FileType", {
         group = vim.api.nvim_create_augroup("DotfilesTreesitter", { clear = true }),
         callback = function(event)

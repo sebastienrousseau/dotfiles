@@ -1,81 +1,94 @@
 -- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
--- headless-upgrade.lua — plugin/tool refresh for `dot upgrade`.
---
--- Runs Lazy sync and then waits for Mason's async install queue to drain
--- before exiting.  The naive invocation
---     nvim --headless "+Lazy! sync" +qa
--- races on two fronts:
---   1. Lazy's own async ops (git fetch/checkout, `build` hooks) can outlive
---      the `Lazy! sync` command return.
---   2. `mason-nvim-dap` and `mason-lspconfig` fire `ensure_installed` on
---      plugin load; those installs are enqueued to mason.nvim and run
---      async, so `+qa` aborts them mid-download (leaving codelldb / debugpy
---      / delve half-installed, per repeated user reports on `dot upgrade`).
---
--- We explicitly wait for both queues before quitting.
+-- Complete observable plugin/parser/tool work before reporting success.
+local TIMEOUT_MS = 300000
 
-local LAZY_TIMEOUT_MS  = 300000  -- 5 min per phase
-local MASON_TIMEOUT_MS = 300000
-
-local function log(msg)
-  io.stderr:write(("[headless-upgrade] %s\n"):format(msg))
+local function log(message)
+  io.stderr:write(("[headless-upgrade] %s\n"):format(message))
 end
 
--- ---------------------------------------------------------------------------
--- Phase 1: Lazy sync (blocking)
--- ---------------------------------------------------------------------------
-local ok_lazy, lazy = pcall(require, "lazy")
-if not ok_lazy then
-  log("lazy.nvim not available; skipping plugin update")
-  vim.cmd("quitall!")
-  return
-end
-
-lazy.sync({ wait = true, show = false })
-
--- Belt-and-braces: give any residual runner tasks a chance to drain even if
--- `wait = true` returned early on the last task in a batch.
-pcall(function()
-  local ok_runner, runner = pcall(require, "lazy.manage.runner")
-  if not ok_runner then return end
-  vim.wait(LAZY_TIMEOUT_MS, function()
-    return not (runner.running and runner.running())
-  end, 200)
-end)
-
--- ---------------------------------------------------------------------------
--- Phase 2: drain Mason's async install queue
--- ---------------------------------------------------------------------------
-pcall(function()
-  local ok_reg, registry = pcall(require, "mason-registry")
-  if not ok_reg then return end
-
-  -- Refresh the remote registry so ensure_installed picks up latest versions.
-  local refreshed = false
-  registry.refresh(function() refreshed = true end)
-  vim.wait(30000, function() return refreshed end, 200)
-
-  local function any_installing()
-    for _, pkg in ipairs(registry.get_all_packages() or {}) do
-      if pkg.is_installing and pkg:is_installing() then
-        return true
+local function run()
+  local lazy = require("lazy") -- Missing configuration is a failure, not a no-op.
+  local has_mason, registry = pcall(require, "mason-registry")
+  local mason_failures, installing = {}, {}
+  local function observe_mason()
+    local active = false
+    for _, package in ipairs(registry.get_all_packages()) do
+      if package:is_installing() then
+        installing[package.name] = package
+        active = true
       end
     end
-    return false
+    return active
+  end
+  if has_mason then
+    registry:on("package:install:failed", function(package)
+      table.insert(mason_failures, package.name)
+    end)
+    observe_mason()
   end
 
-  -- Small settle time so installs triggered by ensure_installed hooks have
-  -- a chance to enter the installing state before we start polling.
-  vim.wait(2000, function() return false end, 200)
-
-  local done = vim.wait(MASON_TIMEOUT_MS, function()
-    return not any_installing()
-  end, 500)
-
-  if not done then
-    log(("Mason install queue still active after %ds; exiting anyway"):format(
-      MASON_TIMEOUT_MS / 1000))
+  local synced = false
+  vim.api.nvim_create_autocmd("User", {
+    pattern = "LazySync",
+    once = true,
+    callback = function()
+      synced = true
+    end,
+  })
+  lazy.sync({ wait = false, show = false })
+  assert(
+    vim.wait(TIMEOUT_MS, function()
+      return synced
+    end, 100),
+    "Lazy sync timed out"
+  )
+  for name, plugin in pairs(require("lazy.core.config").plugins) do
+    for _, task in ipairs(plugin._.tasks or {}) do
+      assert(not task:running(), "Lazy task still running: " .. name)
+      assert(not task:has_errors(), "Lazy task failed: " .. name)
+    end
   end
-end)
 
+  local has_tracker, tracker = pcall(require, "config.upgrade")
+  if has_tracker then
+    tracker.wait(TIMEOUT_MS)
+  end
+
+  if has_mason then
+    local refreshed, refresh_ok = false, false
+    registry.refresh(function(success)
+      refreshed, refresh_ok = true, success
+    end)
+    assert(
+      vim.wait(30000, function()
+        return refreshed
+      end, 100),
+      "Mason registry refresh timed out"
+    )
+    assert(refresh_ok, "Mason registry refresh failed")
+    -- Let ensure_installed callbacks enqueue before testing for an empty queue.
+    vim.wait(2000, function()
+      observe_mason()
+      return false
+    end, 100)
+    assert(
+      vim.wait(TIMEOUT_MS, function()
+        return not observe_mason()
+      end, 200),
+      "Mason install queue timed out"
+    )
+    assert(#mason_failures == 0, "Mason install failed: " .. table.concat(mason_failures, ", "))
+    for name, package in pairs(installing) do
+      assert(package:is_installed(), "Mason install incomplete: " .. name)
+    end
+  end
+end
+
+local ok, error_message = pcall(run)
+if not ok then
+  log(tostring(error_message))
+  vim.cmd("cquit 1")
+  return
+end
+log("plugin sync and tracked installations completed")
 vim.cmd("quitall!")

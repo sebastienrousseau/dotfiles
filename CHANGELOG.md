@@ -8,6 +8,13 @@ This file documents all notable changes to this project.
 
 ### Fixed
 
+- Classify Ghostty's macOS-native mirror separately from chezmoi-managed files
+  so targeted theme changes do not fail on an unmanaged mirror. Preserve
+  renderer diagnostics with the transaction instead of discarding errors.
+- Build Go helpers with private temporary directories despite stale shell/Go
+  settings; preserve existing binaries and report attempted build failures.
+- Wait for tracked Treesitter parser work and fail headless Neovim upgrades on
+  plugin errors, registry failures, or install timeouts instead of quitting early.
 - Reuse valid cached chezmoi binaries in CI by parsing the actual version
   output; reject mismatched, malformed, prerelease, and failing binaries.
 - Preserve upgrade summaries when the progress renderer exits: contain SIGPIPE,

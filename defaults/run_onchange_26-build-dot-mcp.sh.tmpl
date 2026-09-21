@@ -35,10 +35,12 @@ if ! command -v go >/dev/null 2>&1; then
 fi
 
 mkdir -p "$HOME/.local/bin"
+{{ template "go-build-command" . }}
 echo "Building dot-mcp (MCP server)…"
-if (cd "$SRC" && go build -o "$OUT" .); then
+if dot_build_go_binary; then
   echo "dot-mcp installed: $OUT"
 else
-  echo "dot-mcp: build failed (continuing)."
+  echo "dot-mcp: build failed; existing binary preserved. See compiler diagnostics above." >&2
+  exit 1
 fi
 {{- end }}

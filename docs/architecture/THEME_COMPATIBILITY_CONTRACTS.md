@@ -34,6 +34,8 @@ file returned by the legacy `theme_transaction_targets` function, including
 its macOS/non-macOS branches. Its
 [`schema`](../../schemas/theme-ownership.schema.json) defines closed records
 with an adapter, format, ownership granularity and snapshot rollback policy.
+Ghostty's macOS Application Support mirror belongs to `ghostty-native`, not
+chezmoi: it is snapshotted but must never enter the managed-file apply batch.
 The unit contract compares resolved paths and adapters with the actual pure
 enumeration functions for Darwin, Linux and the Windows compatibility selector.
 
