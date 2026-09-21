@@ -1,0 +1,45 @@
+local wezterm = require 'wezterm'
+
+local config = {}
+if wezterm.config_builder then
+  config = wezterm.config_builder()
+end
+
+config.font = wezterm.font_with_fallback({
+  "JetBrainsMono Nerd Font",
+  "JetBrains Mono",
+  "Noto Sans Mono",
+  "Roboto Mono",
+})
+config.font_size = 20
+config.line_height = 1.08
+config.freetype_load_target = "Light"
+config.front_end = "WebGpu"
+config.animation_fps = 1
+
+config.window_padding = {
+  left = 16,
+  right = 16,
+  top = 12,
+  bottom = 12,
+}
+-- Preserve the generated sRGB palette and its tested contrast ratios.
+config.window_background_opacity = 1.0
+
+config.enable_tab_bar = true
+config.use_fancy_tab_bar = false
+config.hide_tab_bar_if_only_one_tab = true
+config.window_decorations = "RESIZE"
+
+config.colors = {
+  foreground = "#f5f5f8",
+  background = "#1c1b25",
+  cursor_bg = "#acaaf3",
+  cursor_fg = "#1c1b25",
+  selection_bg = "#3b3a52",
+  selection_fg = "#f5f5f8",
+  ansi = { "#3e3d49", "#fb7373", "#61d677", "#d5a880", "#acaaf3", "#f28de7", "#00def1", "#b9b8ba" },
+  brights = { "#5d5c68", "#ff9e9a", "#7ef391", "#f2c39b", "#cac7ff", "#ffb2f8", "#91f5ff", "#e2e2e3" },
+}
+
+return config

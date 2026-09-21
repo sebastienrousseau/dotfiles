@@ -243,8 +243,9 @@ if [[ "$PTY_BASH_HAS_VARFD" != "1" ]]; then
   # nothing to assert here — the plain-mode fallback is covered below.
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped — $PTY_BASH lacks {fd} redirection (bash 4.1+)"
-elif FAKE_UNAME=Linux FAKE_COLOR_SCHEME=prefer-dark tty_run 'ui_steps_begin "dot theme" "bloom"; echo "rich=$_UI_STEPS_RICH"; ui_step a "Alpha" run; ui_step_progress 1 2; ui_step_wait "hold"; ui_step a "Alpha" ok "fine"; ui_steps_end "all good"; echo "active=$_UI_STEPS_ACTIVE"'; then
+elif FAKE_UNAME=Linux FAKE_COLOR_SCHEME=prefer-dark tty_run 'ui_steps_begin "dot theme" "bloom"; echo stderr-after-renderer-start >&2; echo "rich=$_UI_STEPS_RICH"; ui_step a "Alpha" run; ui_step_progress 1 2; ui_step_wait "hold"; ui_step a "Alpha" ok "fine"; ui_steps_end "all good"; echo "active=$_UI_STEPS_ACTIVE"'; then
   assert_file_contains "$TTY_OUT" "rich=1" "rich mode engaged"
+  assert_file_contains "$TTY_OUT" "stderr-after-renderer-start" "opening the renderer must not permanently redirect caller stderr"
   assert_file_contains "$TTY_OUT" "active=0" "steps deactivated after end"
   assert_file_contains "$WORK/dot-ui.events" '{"t":"header","title":"dot theme","subtitle":"bloom"}' "header event emitted"
   assert_file_contains "$WORK/dot-ui.events" '"t":"progress","cur":1,"total":2' "progress event emitted"

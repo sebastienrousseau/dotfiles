@@ -59,11 +59,31 @@ cmd_upgrade() {
   log_dir="$(mktemp -d "${TMPDIR:-/tmp}/dot-upgrade.XXXXXX")"
   local fail_labels=() fail_logs=()
 
+  _upgrade_dotfiles() {
+    local update_source branch
+    update_source="$(chezmoi source-path 2>/dev/null)" || update_source=""
+    if [[ -d "$update_source" ]] && git -C "$update_source" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      branch="$(git -C "$update_source" symbolic-ref --quiet --short HEAD)" || {
+        printf 'Dotfiles checkout is detached; switch to a tracked branch before upgrading.\n' >&2
+        return 1
+      }
+      if ! git -C "$update_source" rev-parse --verify '@{upstream}' >/dev/null 2>&1; then
+        printf 'Dotfiles branch %s has no upstream. Push it with -u or explicitly select a tracked branch; no files were changed.\n' "$branch" >&2
+        return 1
+      fi
+      if [[ -n "$(git -C "$update_source" status --porcelain)" ]]; then
+        printf 'Dotfiles checkout has uncommitted changes. Commit or stash them before upgrading; no files were changed.\n' >&2
+        return 1
+      fi
+    fi
+    chezmoi update --no-tty
+  }
+
   # _upgrade_step <id> <label> <running-detail> -- cmd [args...]
   # Renders one tracked step: spinner while it runs, then ok (with the
   # log's last line) or fail. Never aborts the run — a failed phase is
-  # recorded and surfaced at the end, matching the previous `|| true`
-  # behaviour but without the raw flood.
+  # recorded and surfaced at the end. The overall command fails if any
+  # phase failed, even though independent phases can still finish.
   _upgrade_step() {
     local id="$1" label="$2" running="$3"
     shift 3
@@ -97,7 +117,7 @@ cmd_upgrade() {
 
   # --no-tty: chezmoi otherwise opens /dev/tty directly for its
   # overwrite prompt, bypassing the closed stdin above and hanging.
-  _upgrade_step dotfiles "Dotfiles" "chezmoi update…" -- chezmoi update --no-tty
+  _upgrade_step dotfiles "Dotfiles" "chezmoi update…" -- _upgrade_dotfiles
 
   if has_command nvim; then
     # scripts/nvim/headless-upgrade.lua runs Lazy sync AND waits for
@@ -111,7 +131,7 @@ cmd_upgrade() {
     # NVIM_APPNAME) and skip visibly when there is none to load.
     local nvim_init="${XDG_CONFIG_HOME:-$HOME/.config}/${NVIM_APPNAME:-nvim}/init.lua"
     if [ -f "$nvim_init" ]; then
-      _upgrade_step nvim "Neovim plugins" "Lazy sync + Mason drain…" -- \
+      DOTFILES_NVIM_UPGRADE=1 _upgrade_step nvim "Neovim plugins" "Lazy, parsers + Mason…" -- \
         nvim --headless -u "$nvim_init" -l "$src_dir/scripts/nvim/headless-upgrade.lua"
     else
       ui_step nvim "Neovim plugins" skip "no init.lua at $nvim_init"
@@ -126,7 +146,7 @@ cmd_upgrade() {
 
   local n=${#fail_labels[@]}
   if [[ "$n" -eq 0 ]]; then
-    ui_steps_end "toolchains, plugins, and dotfiles up to date"
+    ui_steps_end "requested upgrade phases completed"
     rm -rf "$log_dir"
   else
     ui_steps_end "$n step(s) failed"
@@ -142,6 +162,7 @@ cmd_upgrade() {
       ((i++)) || true
     done
     ui_info "Logs" "$log_dir"
+    return 1
   fi
 }
 

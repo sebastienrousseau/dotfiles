@@ -1,0 +1,36 @@
+font_family JetBrainsMono Nerd Font
+symbol_map U+E000-U+F8FF Symbols Nerd Font
+font_size 20
+
+window_padding_width 16
+# A terminal is a large reading surface: keep it opaque so generated sRGB
+# colours retain their tested contrast instead of blending with the wallpaper.
+background_opacity 1.0
+dim_opacity 0.75
+confirm_os_window_close 0
+enable_audio_bell no
+cursor_trail 0
+linux_display_server wayland
+
+background #f3f1fa
+foreground #1d1d1e
+selection_background #d3cceb
+selection_foreground #1d1d1e
+cursor #001867
+
+color0  #2c2c2d
+color1  #a6001b
+color2  #006011
+color3  #6c4827
+color4  #1a38b1
+color5  #91038b
+color6  #005763
+color7  #6d6d6e
+color8  #525254
+color9  #a5000c
+color10 #00600f
+color11 #6f4721
+color12 #0036c2
+color13 #95008f
+color14 #005763
+color15 #969697

@@ -158,9 +158,9 @@ _up_out2="$(
 )"
 if printf '%s\n' "$_up_out2" | grep -q 'network down' &&
   printf '%s\n' "$_up_out2" | grep -q 'Neovim plugins' &&
-  printf '%s\n' "$_up_out2" | grep -q 'RC=0'; then
+  printf '%s\n' "$_up_out2" | grep -q 'RC=1'; then
   ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: run continued, tail surfaced, rc=0"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: run continued, tail surfaced, rc=1"
 else
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: failure handling wrong"

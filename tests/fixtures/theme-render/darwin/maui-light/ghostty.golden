@@ -1,0 +1,109 @@
+###############################################
+# ██████╗  ██████╗ ████████╗███████╗██╗██╗     ███████╗███████╗
+# ██╔══██╗██╔═══██╗╚══██╔══╝██╔════╝██║██║     ██╔════╝██╔════╝
+# ██║  ██║██║   ██║   ██║   █████╗  ██║██║     █████╗  ███████╗
+# ██║  ██║██║   ██║   ██║   ██╔══╝  ██║██║     ██╔══╝  ╚════██║
+# ██████╔╝╚██████╔╝   ██║   ██║     ██║███████╗███████╗███████║
+# ╚═════╝  ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝
+#
+# Simply design to fit your shell life
+# Ghostty Configuration (v0.0.0)
+# Cross-Platform: macOS, Linux, WSL
+###############################################
+
+##########
+# Theme  #
+##########
+# Managed by chezmoi from DOTFILES_THEME
+
+###############
+# Appearance  #
+###############
+# Large reading surfaces stay opaque so semantic colours keep their contrast.
+background-opacity = 1.0
+background-blur = 14
+window-padding-x = 16
+window-padding-y = 12
+window-padding-balance = true
+window-padding-color = background
+unfocused-split-opacity = 0.95
+
+############
+# macOS UI #
+############
+macos-titlebar-style = tabs
+macos-option-as-alt = true
+window-colorspace = display-p3
+window-save-state = always
+window-vsync = true
+
+################
+#  Linux / WSL #
+################
+# Enterprise tweaks for Linux consistency
+gtk-titlebar = true
+# gtk-single-instance = true
+# linux-cme-preedit-ime = true
+
+################
+# Typography   #
+################
+# Primary: User preference (Apple Native)
+# Fallback logic is handled by Ghostty attempting the first found.
+font-family = "JetBrainsMono Nerd Font"
+font-family = "SF Mono"
+font-family = "JetBrains Mono"
+font-family = "Noto Sans Mono"
+font-family = "Roboto Mono"
+
+font-size = 20
+adjust-cell-width = -1
+font-thicken = false
+font-thicken-strength = 0
+adjust-cell-height = 1
+adjust-font-baseline = -1
+
+#####################
+# Behaviour / UX    #
+#####################
+scrollback-limit = 10000
+working-directory = home
+window-inherit-working-directory = true
+shell-integration = bash
+command = /bin/bash
+quit-after-last-window-closed = true
+
+################
+# Keybindings  #
+################
+keybind = cmd+shift+,=reload_config
+keybind = opt+super+left=previous_tab
+keybind = opt+super+right=next_tab
+# Linux/Windows friendly alternatives (using Alt/Ctrl)
+keybind = ctrl+shift+,=reload_config
+
+################
+# Colors       #
+################
+background = #e9f4fa
+foreground = #1c1d1e
+cursor-color = #005a75
+cursor-text = #e9f4fa
+selection-background = #c2d3dc
+selection-foreground = #1c1d1e
+palette = 0=#2b2c2d
+palette = 1=#a50015
+palette = 2=#005f19
+palette = 3=#5c5000
+palette = 4=#005477
+palette = 5=#91038b
+palette = 6=#005769
+palette = 7=#6c6d6e
+palette = 8=#515354
+palette = 9=#a20002
+palette = 10=#00600e
+palette = 11=#5c5000
+palette = 12=#005478
+palette = 13=#95008f
+palette = 14=#00576a
+palette = 15=#959697

@@ -377,6 +377,7 @@ _theme_target_adapter() {
       THEME_TARGET_ADAPTER="ai-provider"
       ;;
     *DankMaterialShell*) THEME_TARGET_ADAPTER="desktop-shell" ;;
+    "$HOME/Library/Application Support/com.mitchellh.ghostty/config") THEME_TARGET_ADAPTER="ghostty-native" ;;
     *) THEME_TARGET_ADAPTER="chezmoi" ;;
   esac
 }
@@ -465,6 +466,18 @@ emit_theme_plan_human() {
 # Targeted Config Regeneration
 # =============================================================================
 
+# Retain renderer diagnostics in the private transaction directory. Dry-run
+# stdout can contain whole configurations, so never print or retain that stream.
+_theme_chezmoi_apply() {
+  local log="${THEME_TXN_OPERATION_DIR:?}/chezmoi.log" rc=0
+  chezmoi apply "$@" >/dev/null 2>>"$log" || rc=$?
+  if [[ "$rc" -ne 0 ]]; then
+    _err "Chezmoi" "apply exited $rc; diagnostics: $log"
+    tail -n 8 "$log" >&2
+  fi
+  return "$rc"
+}
+
 # Regenerate only theme-dependent config files via chezmoi.
 # Much faster than a full apply — just renders the templates that use $t.
 apply_theme_configs() {
@@ -490,9 +503,9 @@ apply_theme_configs() {
   local applied_count=0
   local required_failed=0
   if [[ ${#valid_targets[@]} -gt 0 ]]; then
-    if ! chezmoi apply --dry-run --force "${valid_targets[@]}" &>/dev/null; then
+    if ! _theme_chezmoi_apply --dry-run --force "${valid_targets[@]}"; then
       required_failed=1
-    elif chezmoi apply --force "${valid_targets[@]}" &>/dev/null; then
+    elif _theme_chezmoi_apply --force "${valid_targets[@]}"; then
       applied_count=${#valid_targets[@]}
     else
       required_failed=1
@@ -504,9 +517,9 @@ apply_theme_configs() {
   # explicitly. Otherwise only a full chezmoi apply ever refreshes iTerm2.
   local iterm_source="$CHEZMOI_SRC/run_onchange_22-iterm2-profile.sh.tmpl"
   if [[ "$PLATFORM" == "Darwin" && -f "$iterm_source" ]]; then
-    if ! chezmoi apply --dry-run --force --source-path "$iterm_source" &>/dev/null; then
+    if ! _theme_chezmoi_apply --dry-run --force --source-path "$iterm_source"; then
       required_failed=1
-    elif chezmoi apply --force --source-path "$iterm_source" &>/dev/null; then
+    elif _theme_chezmoi_apply --force --source-path "$iterm_source"; then
       applied_count=$((applied_count + 1))
     else
       required_failed=1
@@ -518,9 +531,9 @@ apply_theme_configs() {
   local niri_target="$HOME/.config/niri/config.kdl"
   local tmp_file
   if [[ -f "$niri_target" ]]; then
-    if ! chezmoi apply --dry-run --force "$niri_target" &>/dev/null; then
+    if ! _theme_chezmoi_apply --dry-run --force "$niri_target"; then
       required_failed=1
-    elif chezmoi apply --force "$niri_target" &>/dev/null; then
+    elif _theme_chezmoi_apply --force "$niri_target"; then
       applied_count=$((applied_count + 1))
     else
       local niri_template="$SRC_DIR/dot_config/niri/config.kdl.tmpl"
@@ -538,14 +551,14 @@ apply_theme_configs() {
     fi
   fi
 
+  if [[ $required_failed -ne 0 ]]; then
+    _err "Chezmoi" "required theme configuration failed to render"
+    return 1
+  fi
   if [[ $applied_count -gt 0 ]]; then
     _ok "Chezmoi" "regenerated $applied_count configs"
   else
     _skip "Chezmoi" "no managed configs found"
-  fi
-  if [[ $required_failed -ne 0 ]]; then
-    _err "Chezmoi" "required theme configuration failed to render"
-    return 1
   fi
 }
 
@@ -610,7 +623,8 @@ sync_ghostty_macos_config() {
   if cp "$xdg_config" "$macos_config" 2>/dev/null; then
     _ok "Ghostty" "mirrored config to macOS app support"
   else
-    _skip "Ghostty" "macOS app support config could not be updated"
+    _err "Ghostty" "macOS app support config could not be updated"
+    return 1
   fi
 }
 
@@ -1991,10 +2005,10 @@ main() {
   # Regenerate config files with new theme data
   if [[ "$do_full" == true ]]; then
     _info "Chezmoi" "full apply..."
-    if ! chezmoi apply --dry-run --force &>/dev/null; then
+    if ! _theme_chezmoi_apply --dry-run --force; then
       _err "Chezmoi" "required full apply failed validation — transaction will roll back"
       return 1
-    elif chezmoi apply --force 2>/dev/null; then
+    elif _theme_chezmoi_apply --force; then
       _ok "Chezmoi" "full apply completed"
     else
       _err "Chezmoi" "required full apply failed — transaction will roll back"

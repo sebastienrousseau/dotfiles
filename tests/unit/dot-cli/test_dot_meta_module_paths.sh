@@ -29,7 +29,7 @@ meta_run() {
   DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" dot_fixture_run "$FX" meta "$@"
 }
 
-# ── 1. upgrade: a failing phase is recorded, not fatal ─────────────────────
+# ── 1. upgrade: continue after a failed phase, then report failure ─────────
 #
 # The fonts phase is opt-in and needs the installer to exist in the source
 # tree, so the fixture gets a stub one; the chezmoi phase is made to fail so
@@ -42,7 +42,7 @@ dot_fixture_stub "$FX/stubs" nvim 0
 test_start "meta_upgrade_survives_a_failing_phase"
 DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" \
   DOTFILES_FONTS=1 dot_fixture_run "$FX" meta upgrade
-assert_equals "0" "$DOT_FIXTURE_RC" "a failed phase must not abort the upgrade"
+assert_equals "1" "$DOT_FIXTURE_RC" "a failed phase must produce a nonzero final result"
 assert_contains "step(s) failed" "$DOT_FIXTURE_OUT" \
   "the run should end with a failure tally"
 

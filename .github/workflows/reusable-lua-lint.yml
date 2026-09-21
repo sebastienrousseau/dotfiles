@@ -81,6 +81,9 @@ jobs:
           echo "::notice::Checking stylua formatting on ${{ inputs.target }}"
           "$HOME/.cargo/bin/stylua" --check --color Never "${{ inputs.target }}"
 
+      - name: Headless upgrade completion contracts
+        run: lua tests/unit/nvim/test_headless_upgrade.lua "$GITHUB_WORKSPACE"
+
       # Functional gate: boot a real headless Neovim and require every config
       # module + plugin spec, catching runtime faults static linting misses.
       - name: Setup Neovim

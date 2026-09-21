@@ -1,0 +1,239 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║  TMUX CONFIGURATION (Universal)                                          ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+
+# --- GENERAL SETTINGS ---
+set -g default-terminal "xterm-256color"
+if-shell 'uname | grep -q Linux' 'set -g default-terminal "tmux-256color"'
+set-option -sa terminal-overrides ",*256col*:Tc"
+
+unbind C-b
+set -g prefix C-a
+bind C-a send-prefix
+
+set -g mouse on
+set -g history-limit 102400
+set -g set-clipboard on
+set -g escape-time 10
+set -g focus-events on
+set -g repeat-time 600
+# New panes inherit an explicit appearance signal even when OSC 11 cannot pass
+# through tmux. Gemini, Qwen, Claude, OpenCode, and other adaptive TUIs use it.
+set-environment -g COLORTERM "truecolor"
+set-environment -g COLORFGBG "0;15"
+set-environment -g AIDER_DARK_MODE "false"
+set-environment -g AIDER_LIGHT_MODE "true"
+set-environment -g AIDER_CODE_THEME "solarized-light"
+set-environment -g AIDER_USER_INPUT_COLOR "#005f19"
+set-environment -g AIDER_TOOL_ERROR_COLOR "#a50015"
+set-environment -g AIDER_TOOL_WARNING_COLOR "#5c5000"
+set-environment -g AIDER_ASSISTANT_OUTPUT_COLOR "#005477"
+setw -g xterm-keys on
+set -g base-index 1
+setw -g pane-base-index 1
+set -g renumber-windows on
+set -g aggressive-resize on
+set -g monitor-activity on
+set -g visual-activity off
+set -g visual-bell off
+set -g visual-silence off
+setw -g allow-rename off
+setw -g automatic-rename off
+setw -g mode-keys vi
+
+# --- COPY MODE (Vim-style) ---
+
+# Enter copy mode with prefix + [
+bind [ copy-mode
+
+# Vim-style selection and yanking
+bind -T copy-mode-vi v send-keys -X begin-selection
+bind -T copy-mode-vi C-v send-keys -X rectangle-toggle
+bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+bind -T copy-mode-vi Escape send-keys -X cancel
+
+# Additional copy mode bindings
+bind -T copy-mode-vi H send-keys -X start-of-line
+bind -T copy-mode-vi L send-keys -X end-of-line
+
+# macOS clipboard integration
+if-shell 'uname | grep -q Darwin' {
+  bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"
+  bind -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "pbcopy"
+  bind ] run "pbpaste | tmux load-buffer - && tmux paste-buffer"
+}
+
+# --- SMART NAVIGATION (Neovim + Tmux) ---
+# Seamless C-h/j/k/l navigation between Neovim splits and Tmux panes.
+# When the active pane runs Neovim, keys are forwarded to it; otherwise
+# Tmux handles pane selection directly.
+is_vim="ps -o state= -o comm= -t '#{pane_tty}' \
+  | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|l?n?vim?x?|fzf)(diff)?$'"
+
+bind -n C-h if-shell "$is_vim" "send-keys C-h" "select-pane -L"
+bind -n C-j if-shell "$is_vim" "send-keys C-j" "select-pane -D"
+bind -n C-k if-shell "$is_vim" "send-keys C-k" "select-pane -U"
+bind -n C-l if-shell "$is_vim" "send-keys C-l" "select-pane -R"
+
+# Restore C-h/j/k/l in copy-mode-vi so scrolling / cursor movement
+# is not intercepted by the smart-navigation bindings above.
+bind -T copy-mode-vi C-h select-pane -L
+bind -T copy-mode-vi C-j select-pane -D
+bind -T copy-mode-vi C-k select-pane -U
+bind -T copy-mode-vi C-l select-pane -R
+
+# --- KEY BINDINGS & NAVIGATION ---
+
+# Reload Config
+bind r source-file ~/.config/tmux/tmux.conf \; display "tmux.conf reloaded"
+
+# Sessionizer (fuzzy session switcher)
+bind f run-shell "~/.local/bin/tmux-sessionizer"
+
+# Window Management
+bind -r C-h previous-window
+bind -r C-l next-window
+bind a last-window
+bind Tab last-window
+bind N new-window
+bind n command-prompt -p "New window name:" "new-window -n '%%'"
+bind R command-prompt -p "Rename window:" "rename-window '%%'"
+bind X confirm-before -p "kill-window #W? (y/n)" kill-window
+
+# Splits (Current Path)
+bind % split-window -h -c "#{pane_current_path}"
+bind '"' split-window -v -c "#{pane_current_path}"
+bind '\' split-window -v -c "#{pane_current_path}"
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v
+bind _ split-window -h
+
+# Pane Navigation (Vim-style)
+bind -r h select-pane -L
+bind -r j select-pane -D
+bind -r k select-pane -U
+bind -r l select-pane -R
+bind -r z resize-pane -Z
+
+# Pane Resizing
+bind -r H resize-pane -L 5
+bind -r J resize-pane -D 5
+bind -r K resize-pane -U 5
+bind -r L resize-pane -R 5
+
+# Pane Movement
+bind < swap-pane -U
+bind > swap-pane -D
+bind q kill-pane
+
+# Toggle synchronize-panes (type in all panes simultaneously)
+bind S setw synchronize-panes \; display "Sync panes: #{?synchronize-panes,ON,OFF}"
+
+# AI cockpit — launch a provider in a named window rooted at the active pane.
+# The status bar detects these sessions and labels the active provider.
+bind A display-menu -T "#[align=centre] AI CLI cockpit " -x C -y C \
+  "Cockpit" a "run-shell '~/.local/bin/tmux-ai launch cockpit #{q:pane_current_path}'" \
+  "" \
+  "Claude Code" c "run-shell '~/.local/bin/tmux-ai launch claude #{q:pane_current_path}'" \
+  "Codex" x "run-shell '~/.local/bin/tmux-ai launch codex #{q:pane_current_path}'" \
+  "Copilot" p "run-shell '~/.local/bin/tmux-ai launch copilot #{q:pane_current_path}'" \
+  "OpenCode" o "run-shell '~/.local/bin/tmux-ai launch opencode #{q:pane_current_path}'" \
+  "Aider" i "run-shell '~/.local/bin/tmux-ai launch aider #{q:pane_current_path}'" \
+  "Goose" g "run-shell '~/.local/bin/tmux-ai launch goose #{q:pane_current_path}'" \
+  "Kimi" k "run-shell '~/.local/bin/tmux-ai launch kimi #{q:pane_current_path}'" \
+  "Qwen" q "run-shell '~/.local/bin/tmux-ai launch qwen #{q:pane_current_path}'"
+
+# Session Management
+bind C-c new-session
+bind C-f command-prompt -p find-session 'switch-client -t %%'
+bind K confirm-before -p "kill all sessions? (y/n)" kill-server
+
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║  THEME — Minimal Status Bar                                             ║
+# ║  Colors from .chezmoidata/themes.toml (maui-light)  ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+
+# --- Status Bar ---
+set -g status on
+set -g status-interval 10
+set -g status-position bottom
+set -g status-justify left
+set -g status-style "bg=#dce5ea,fg=#1c1d1e"
+set -g status-left-length 32
+set -g status-right-length 120
+
+# User-overridable modules. `set -o` keeps values from a local tmux.conf or
+# command line, making the generated theme customizable without forking it.
+set -ogq @dot_status_show_path on
+set -ogq @dot_status_show_system on
+set -ogq @dot_status_show_date on
+
+# Give every session a stable colour from the active wallpaper palette. The
+# helper refreshes all sessions after a theme change and colours new/renamed
+# sessions without requiring hand-maintained per-project rules.
+set -g @dot_session_colour "#005a75"
+run-shell -b "test ! -x ~/.local/bin/tmux-status || ~/.local/bin/tmux-status apply-colours '#005a75' '#7f2ea7' '#754e00'"
+set-hook -g session-created "run-shell -b \"~/.local/bin/tmux-status apply-colours '#005a75' '#7f2ea7' '#754e00'\""
+set-hook -g session-renamed "run-shell -b \"~/.local/bin/tmux-status apply-colours '#005a75' '#7f2ea7' '#754e00'\""
+
+# --- Minimal session identity — the bar's only persistent chromatic element ---
+set -g status-left "\
+#[fg=#{?client_prefix,#9f1239,#{@dot_session_colour}},bg=#dce5ea,bold] #{?client_prefix, , }#S \
+#[fg=#cad1d5,bg=#dce5ea,nobold]│ "
+
+# --- One lightweight system sample, responsive context, and time ---
+# `tmux-status system` performs one platform-aware sample per interval. Path,
+# monitoring, and date modules can be disabled independently with the options
+# above; narrower clients progressively retain only the clock.
+set -g status-right "\
+#[fg=#1c1d1e,bg=#dce5ea,bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
+#[fg=#555a5c,bg=#dce5ea,nobold]#{?#{==:#{@dot_status_show_path},on}, #[fg=#1c1d1e]#{b:pane_current_path} #[fg=#cad1d5]│ #[fg=#555a5c],}\
+#{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#(~/.local/bin/tmux-status system) #[fg=#cad1d5]│ #[fg=#555a5c],}\
+#{?#{&&:#{==:#{@dot_status_show_date},on},#{e|>=:#{client_width},155}},%d %b · ,}%H:%M "
+
+# --- Window Tabs ---
+set -g window-status-format "#[fg=#555a5c,bg=#dce5ea,nobold] #I:#W#F "
+set -g window-status-current-format "#[fg=#1c1d1e,bg=#dce5ea,bold] #I:#W#F#{?window_zoomed_flag, ,} "
+
+set -g window-status-separator "#[fg=#cad1d5,bg=#dce5ea,nobold]·"
+set -g window-status-bell-style "bg=#dce5ea,fg=#9f1239,bold"
+set -g window-status-activity-style "bg=#dce5ea,fg=#6b3f00,bold"
+
+# --- Pane Borders ---
+set -g pane-border-style "fg=#cad1d5"
+set -g pane-active-border-style "fg=#005a75"
+set -g display-panes-colour "#754e00"
+set -g display-panes-active-colour "#005a75"
+
+# --- Messages & Menus ---
+set -g message-style "bg=#cad1d5,fg=#005a75"
+set -g message-command-style "bg=#cad1d5,fg=#005a75"
+set -g mode-style "bg=#cad1d5,fg=#005a75,bold"
+
+# --- Clock ---
+setw -g clock-mode-colour "#005a75"
+setw -g clock-mode-style 24
+
+# --- Copy Mode Highlight ---
+set -g copy-mode-match-style "bg=#6b3f00,fg=#e9f4fa"
+set -g copy-mode-current-match-style "bg=#005a75,fg=#ffffff,bold"
+
+# --- LINUX SPECIFIC ---
+if-shell 'uname | grep -q Linux' {
+  bind -n WheelDownPane select-pane -t= \; send-keys -M
+  bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'select-pane -t=; copy-mode -e; send-keys -M'"
+  # Use cb utility for cross-platform clipboard (Wayland, X11, WSL)
+  bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "cb"
+  bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "cb"
+}
+
+# --- PLUGINS (TPM) ---
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+
+set -g @continuum-restore 'on'
+set -g @continuum-save-interval '15'
+
+# Initialize TMUX plugin manager
+run '~/.tmux/plugins/tpm/tpm'

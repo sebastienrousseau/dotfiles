@@ -1,0 +1,42 @@
+[window]
+padding = { x = 16, y = 12 }
+# Preserve the generated sRGB palette and its tested contrast ratios.
+opacity = 1.0
+option_as_alt = "None"
+
+[font]
+size = 20
+normal = { family = "JetBrainsMono Nerd Font" }
+offset = { x = 0, y = 0 }
+
+[colors.primary]
+background = "#f3f1fa"
+foreground = "#1d1d1e"
+
+[colors.cursor]
+cursor = "#001867"
+text = "#f3f1fa"
+
+[colors.selection]
+background = "#d3cceb"
+text = "#1d1d1e"
+
+[colors.normal]
+black = "#2c2c2d"
+red = "#a6001b"
+green = "#006011"
+yellow = "#6c4827"
+blue = "#1a38b1"
+magenta = "#91038b"
+cyan = "#005763"
+white = "#6d6d6e"
+
+[colors.bright]
+black = "#525254"
+red = "#a5000c"
+green = "#00600f"
+yellow = "#6f4721"
+blue = "#0036c2"
+magenta = "#95008f"
+cyan = "#005763"
+white = "#969697"

@@ -1,0 +1,40 @@
+name: Theme Contracts
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    name: Theme renders / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-chezmoi
+        with:
+          version: '2.47.1'
+      - name: Validate comparison contract
+        run: |
+          bash tests/unit/theme/test_render_goldens.sh
+          bash tests/unit/theme/test_theme_ownership.sh
+      - name: Compare real renders with reviewed baselines
+        run: python3 scripts/theme/check-render-goldens.py
