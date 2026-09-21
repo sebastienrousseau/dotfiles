@@ -32,7 +32,7 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           SIGNATURE_LINE_1="THE ARCHITECT ᛫ Sebastien Rousseau ᛫ https://sebastienrousseau.com"
-          SIGNATURE_LINE_2="THE ENGINE ᛞ EUXIS ᛫ Enterprise Unified Execution Intelligence System ᛫ https://euxis.co"
+          SIGNATURE_LINE_2="THE ENGINE ᛞ EUXIS ᛫ Enterprise Unified Execution Intelligence System ᛫ https://github.com/sebastienrousseau/euxis"
           NORMALIZED_PR_BODY="$(printf '%s' "$PR_BODY" | tr '\r\n' ' ' | sed 's/[[:space:]][[:space:]]*/ /g')"
 
           if printf '%s' "$NORMALIZED_PR_BODY" | grep -qF "$SIGNATURE_LINE_1" && \
