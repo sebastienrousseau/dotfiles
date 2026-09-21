@@ -4,7 +4,7 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
-## v0.2.522 — Unreleased
+## v0.2.522 — 2026-09-21 (Unreleased)
 
 ### Fixed
 
