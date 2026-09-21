@@ -28,6 +28,7 @@ func FuzzHighlight(f *testing.F) {
 	for _, s := range []string{
 		"just prose", "```go\nvar x = 1\n```", "```\nno lang\n```", "```inline```", "```sh\necho hi",
 		"a```b```c```d", "```\n```\n```", "``` unknown-lang \n x \n```", "```ts\n" + strings.Repeat("x", 5000) + "\n```",
+		"\x80\x00st" + strings.Repeat("```", 417) + " prorr",
 	} {
 		f.Add(s)
 	}

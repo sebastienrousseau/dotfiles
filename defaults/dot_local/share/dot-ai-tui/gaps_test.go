@@ -248,6 +248,21 @@ func TestHighlightHugeLangTag(t *testing.T) {
 	}
 }
 
+// TestHighlightManyFences is the regression for FuzzHighlight corpus
+// fe1daad564f5c3bd. Hundreds of empty blocks previously caused hundreds of
+// Chroma initializations and exceeded the three-second render budget.
+func TestHighlightManyFences(t *testing.T) {
+	in := "\x80\x00st" + strings.Repeat("```", 417) + " prorr"
+	start := time.Now()
+	out := highlight(in)
+	if out != in {
+		t.Fatal("over-limit fenced input must fall back byte-for-byte")
+	}
+	if d := time.Since(start); d > 100*time.Millisecond {
+		t.Fatalf("bounded fence fallback took %v", d)
+	}
+}
+
 // TestErrorLineStyled covers the transcript styling of a failed turn: the
 // line is rendered with the error colour, not the assistant colour.
 func TestErrorLineStyled(t *testing.T) {
