@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.io/schemas/theme-ownership.schema.json",
+  "title": "Legacy theme transaction ownership inventory (not mutation authority)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "scope", "rollback", "targets"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "scope": {"const": "legacy-theme-transaction-files"},
+    "rollback": {"const": "snapshot"},
+    "targets": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["path", "platform", "adapter", "format", "ownership", "keys"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "platform": {"enum": ["all", "darwin", "non-darwin"]},
+          "adapter": {"enum": ["theme-state", "chezmoi", "ai-provider", "desktop-shell"]},
+          "format": {"enum": ["toml", "json", "jsonc", "ghostty", "tmux", "kitty", "shell", "fish", "nushell", "plist", "lua", "ini", "yaml", "javascript", "css", "kdl"]},
+          "ownership": {"enum": ["file", "keys", "adapter-defined"]},
+          "keys": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    }
+  }
+}

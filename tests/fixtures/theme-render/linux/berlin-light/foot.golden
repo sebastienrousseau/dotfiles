@@ -1,0 +1,26 @@
+[main]
+font=JetBrainsMono Nerd Font:size=20
+pad=10x10
+term=xterm-256color
+
+[colors]
+# Preserve the generated sRGB palette and its tested contrast ratios.
+alpha=1.0
+background=f3f1fa
+foreground=1d1d1e
+regular0=2c2c2d
+regular1=a6001b
+regular2=006011
+regular3=6c4827
+regular4=1a38b1
+regular5=91038b
+regular6=005763
+regular7=6d6d6e
+bright0=525254
+bright1=a5000c
+bright2=00600f
+bright3=6f4721
+bright4=0036c2
+bright5=95008f
+bright6=005763
+bright7=969697

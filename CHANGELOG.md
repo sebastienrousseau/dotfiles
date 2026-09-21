@@ -8,12 +8,26 @@ This file documents all notable changes to this project.
 
 ### Fixed
 
+- Preserve upgrade summaries when the progress renderer exits: contain SIGPIPE,
+  keep stderr open, and fall back to plain step output. Failed upgrades now
+  return nonzero and explain detached, untracked, or dirty source checkouts.
+- Declare the tree-sitter CLI required by current Neovim parser builds in the
+  managed mise defaults.
 - Keep manual release uploads and checksum manifests in agreement, including
   raw HTML, plain text, the search index, and the Markdown source archive.
 - Fail manual publication on missing outputs or checksum mismatches; reject
   empty and symlinked assets and exclude build intermediates from checksums.
 - Add consumer-download, tamper, missing-output, and fast-build regressions
   for the next sequential patch, v0.2.522.
+
+### Added
+
+- Seventy-two deterministic rendered-config baselines covering six terminal/tmux
+  consumers, two wallpaper families, both appearance modes and three platform
+  inputs, checked on Linux and macOS CI hosts.
+- A schema-defined inventory of 32 legacy theme transaction targets with
+  adapter, format, ownership and snapshot-rollback contracts. This is audit
+  evidence, not the future core's mutation authority.
 
 ## v0.2.521 — 2026-09-20
 
