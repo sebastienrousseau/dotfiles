@@ -24,10 +24,11 @@ Welcome to your universally compatible, high-performance dotfiles configuration,
 
 ### Install
 
-To install these dotfiles on a new machine, run:
+Download and SHA256-verify the release-pinned installer using the root README,
+then run:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.520/install.sh)"
+bash /tmp/dotfiles-install.sh
 ```
 
 This command will:

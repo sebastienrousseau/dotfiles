@@ -30,6 +30,7 @@ on:
       - 'scripts/dot/commands/**'
       - 'tools/docs/generate-command-index.sh'
       - 'scripts/verify-release-versions'
+      - 'scripts/release-preflight'
       - 'tools/docs/generate-manpage.sh'
       - 'tools/docs/man/dot.1.in'
       - 'tools/docs/generate-completions.sh'
@@ -101,8 +102,12 @@ jobs:
             objects.githubusercontent.com:443
             release-assets.githubusercontent.com:443
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
       - name: Verify version-bearing files match defaults/.chezmoidata.toml
-        run: bash scripts/verify-release-versions
+        run: |
+          bash scripts/verify-release-versions
+          bash scripts/release-preflight
 
   manpage:
     name: Generators / man page

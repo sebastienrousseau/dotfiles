@@ -152,6 +152,9 @@ jobs:
           required=(
             "dot-${version}.tar.gz"
             "dot-${version}.zip"
+            "dotfiles-install-${version}.sh"
+            "dotfiles-install-${version}.sh.sha256"
+            "dotfiles-install-${version}.sh.sigstore.json"
             "SHA256SUMS"
             "dotfiles-md.tar.gz"
             "dotfiles.html.gz"

@@ -251,9 +251,13 @@ make DESTDIR=/tmp/stage uninstall
 
 ### Maintenance-only
 
-`bump-reusable-pins.yml`, `update-deps.yml`, `drift-detection.yml`,
+`update-deps.yml`, `drift-detection.yml`,
 `devcontainer-prebuild.yml` — scheduled housekeeping with no local
 equivalent worth running by hand.
+
+Same-repository reusable workflows use `./.github/workflows/...`, so a pull
+request executes the reusable definition from its own commit and no pin-bump
+workflow is needed. External actions and reusable workflows remain SHA-pinned.
 
 ---
 

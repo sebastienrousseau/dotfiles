@@ -1,4 +1,4 @@
-# Rust: per-project target dirs, all visible under /tmp/builds
+# Rust: per-project target dirs, all visible under a private XDG cache root
 #
 # A single shared `target-dir` makes every repo serialise, because cargo
 # takes an exclusive lock on it — a build in one project blocks a test
@@ -6,14 +6,21 @@
 # ~/.cargo/config.toml no longer sets one.
 #
 # To keep build output out of the repos *and* browsable in one place,
-# each project's ./target is a symlink into /tmp/builds/<name>.
+# each project's ./target is a symlink into $DOT_BUILD_ROOT/<name>.
 #
 # A symlink rather than CARGO_TARGET_DIR on purpose: an environment
 # variable only applies to this shell, so rust-analyzer, cargo-fuzz and
 # build scripts would still use ./target and rebuild everything a second
 # time. Every tool follows a symlink.
 
-# Point the current project's ./target at /tmp/builds/<name>.
+# Keep the root private. It is also exported by mise for commands that do not
+# originate in zsh, while this fallback covers shells before mise activation.
+export DOT_BUILD_ROOT="${DOT_BUILD_ROOT:-${XDG_CACHE_HOME:-$HOME/.cache}/dot/builds}"
+if [[ ! -d "$DOT_BUILD_ROOT" ]]; then
+  (umask 077 && command mkdir -p "$DOT_BUILD_ROOT")
+fi
+
+# Point the current project's ./target at $DOT_BUILD_ROOT/<name>.
 # Usage: rust-target-tmp [name]   (defaults to the repo/directory name)
 rust-target-tmp() {
   local root name dest
@@ -23,7 +30,11 @@ rust-target-tmp() {
     return 1
   fi
   name=${1:-${root:t}}
-  dest="/tmp/builds/$name"
+  if [[ -z "$name" || "$name" == "." || "$name" == ".." || "$name" == *[!A-Za-z0-9._-]* ]]; then
+    print -u2 "rust-target-tmp: name must contain only letters, digits, dot, underscore, or hyphen"
+    return 1
+  fi
+  dest="$DOT_BUILD_ROOT/$name"
 
   if [[ -e "$root/target" && ! -L "$root/target" ]]; then
     print -u2 "rust-target-tmp: $root/target exists and is a real directory."
@@ -42,12 +53,12 @@ _rust_target_relink() {
   [[ -L target && ! -e target ]] || return 0
   local dest
   dest=$(readlink target)
-  [[ $dest == /tmp/builds/* ]] && mkdir -p "$dest"
+  [[ $dest == "$DOT_BUILD_ROOT"/* ]] && mkdir -p "$dest"
 }
 autoload -Uz add-zsh-hook 2>/dev/null && add-zsh-hook chpwd _rust_target_relink
 
-# List what is currently occupying /tmp/builds, largest first.
+# List what is currently occupying the private build root, largest first.
 rust-target-usage() {
-  [[ -d /tmp/builds ]] || { print "no /tmp/builds yet"; return 0 }
-  du -sh /tmp/builds/*(/N) 2>/dev/null | sort -rh
+  [[ -d "$DOT_BUILD_ROOT" ]] || { print "no build cache yet"; return 0 }
+  du -sh "$DOT_BUILD_ROOT"/*(/N) 2>/dev/null | sort -rh
 }

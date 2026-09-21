@@ -4,6 +4,24 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+## v0.2.521 — 2026-09-20
+
+### Changed
+
+- Began the production-hardening roadmap with an immutable release-identity
+  preflight, same-commit reusable workflows, and task-scoped GitHub
+  authentication instead of a globally inherited token.
+- Promoted the verified, release-pinned installation path and tightened the
+  npm bootstrap artifact contract.
+- Added pure theme plans plus serialized, journaled theme transactions with
+  pre-apply validation and automatic file/symlink rollback on required
+  failures.
+- Hardened AI CLI theme adapters with typed outcomes, malformed-config
+  preservation, compare-before-commit writes, and global/per-provider opt-outs.
+- Added an independently versioned palette audit covering truecolor, xterm-256,
+  focus/selection contrast, perceptual separation, and color-vision simulation
+  across all 228 themes; stabilized semantic status colors in both modes.
+
 ## v0.2.520 — 2026-09-13
 
 ### Added

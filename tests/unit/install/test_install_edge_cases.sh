@@ -43,15 +43,19 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should install chezmoi via Homebrew"
 fi
 
-# Test: install.sh falls back to get.chezmoi.io for binary install
-test_start "install_chezmoi_fallback"
-if grep -q 'get.chezmoi.io' "$INSTALL_SCRIPT"; then
+# Test: standalone install.sh retains a checksum-verified binary path
+test_start "install_chezmoi_verified_fallback"
+if grep -q 'install_chezmoi_verified_embedded' "$INSTALL_SCRIPT" &&
+  grep -q 'sha256sum -c' "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: falls back to get.chezmoi.io"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: standalone path verifies the upstream checksum"
 else
   ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should fall back to get.chezmoi.io"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should embed a verified fallback"
 fi
+
+test_start "install_refuses_unverified_remote_bootstrap"
+assert_file_contains "$INSTALL_SCRIPT" "Refusing to fall back to an unverified remote script" "unverified fallback fails closed"
 
 # Test: install.sh adds BIN_DIR to PATH for fallback install
 test_start "install_path_update"

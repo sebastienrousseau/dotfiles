@@ -804,6 +804,67 @@ EOF
   current)
     show_current
     ;;
+  plan)
+    shift
+    plan_name="${1:-}"
+    if [[ -z "$plan_name" ]]; then
+      ui_err "Usage" "dot theme plan <family|variant> [--mode auto|dark|light] [--json]"
+      exit 1
+    fi
+    shift
+    plan_mode=""
+    plan_json=false
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --mode)
+          shift
+          plan_mode="${1:-}"
+          [[ -n "$plan_mode" ]] || {
+            ui_err "Usage" "--mode requires auto, dark, or light"
+            exit 1
+          }
+          shift
+          ;;
+        --mode=*)
+          plan_mode="${1#--mode=}"
+          shift
+          ;;
+        --json)
+          plan_json=true
+          shift
+          ;;
+        *)
+          ui_err "Unknown option" "$1"
+          exit 1
+          ;;
+      esac
+    done
+    case "$plan_mode" in
+      "" | auto | dark | light) ;;
+      *)
+        ui_err "Usage" "--mode requires auto, dark, or light"
+        exit 1
+        ;;
+    esac
+
+    plan_family="${plan_name%-dark}"
+    [[ "$plan_family" != "$plan_name" ]] || plan_family="${plan_name%-light}"
+    plan_args=(--plan)
+    [[ "$plan_json" == true ]] && plan_args+=(--json)
+
+    if [[ -z "$plan_mode" && "$plan_family" != "$plan_name" ]]; then
+      plan_target="$plan_name"
+    else
+      [[ -n "$plan_mode" ]] || plan_mode="auto"
+      if [[ "$plan_mode" == "auto" ]]; then
+        plan_target="${plan_family}-$(system_appearance_mode)"
+        plan_args+=(--auto)
+      else
+        plan_target="${plan_family}-${plan_mode}"
+      fi
+    fi
+    run_theme_sync "$plan_target" "${plan_args[@]}"
+    ;;
   undo)
     # Step back one entry in the theme-history stack. Applied theme goes
     # to the top so a second `undo` returns to it (toggle behaviour).
@@ -1319,6 +1380,7 @@ EOF
     ui_ok "family" "Cycle to the next family"
     ui_ok "random" "Pick a random family, keep current mode"
     ui_ok "preview [NAME]" "Try a theme, ENTER to keep or Ctrl-C to revert"
+    ui_ok "plan <NAME> [--mode M] [--json]" "Pure, versioned operation plan"
     ui_ok "undo" "Step back to the previous theme (re-run to toggle)"
     ui_ok "history" "Show recently-applied themes"
     ui_ok "reset" "Restore GNOME defaults (accent/cursor/fonts/shell theme)"

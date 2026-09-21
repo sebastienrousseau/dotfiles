@@ -590,13 +590,19 @@ ui_steps_begin() {
     _ui_export_theme_colors
     # FIFO: dot-ui reads events on stdin while its stdout stays the terminal,
     # and we keep a real PID to wait on when finalising.
-    local fifo
-    fifo="$(mktemp -u 2>/dev/null || echo "/tmp/dot-ui.$$.$RANDOM")"
-    if mkfifo "$fifo" 2>/dev/null; then
+    local fifo_dir fifo runtime_base
+    runtime_base="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}"
+    if ! fifo_dir="$(umask 077 && mktemp -d "$runtime_base/dot-ui.XXXXXX" 2>/dev/null)"; then
+      runtime_base="${TMPDIR:-/tmp}"
+      fifo_dir="$(umask 077 && mktemp -d "$runtime_base/dot-ui.XXXXXX" 2>/dev/null)" || fifo_dir=""
+    fi
+    fifo="${fifo_dir:+$fifo_dir/events.fifo}"
+    if [[ -n "$fifo" ]] && mkfifo -m 600 "$fifo" 2>/dev/null; then
       dot-ui run <"$fifo" &
       _UI_STEPS_PID=$!
       if exec {_UI_STEPS_FD}>"$fifo" 2>/dev/null; then
         rm -f "$fifo"
+        rmdir "$fifo_dir" 2>/dev/null || true
         _UI_STEPS_RICH=1
         _ui_steps_emit "{\"t\":\"header\",\"title\":\"$(_ui_json_esc "$title")\",\"subtitle\":\"$(_ui_json_esc "$subtitle")\"}"
         return 0
@@ -606,6 +612,7 @@ ui_steps_begin() {
       _UI_STEPS_PID=""
       rm -f "$fifo"
     fi
+    [[ -n "$fifo_dir" ]] && rmdir "$fifo_dir" 2>/dev/null || true
   fi
 
   _UI_STEPS_RICH=0

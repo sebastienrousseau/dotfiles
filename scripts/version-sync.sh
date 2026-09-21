@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Version Synchronization Script
-# Synchronizes version numbers across all markdown files with package.json
+# Synchronizes generated version surfaces with defaults/.chezmoidata.toml
 # Used by CI/CD and available for local testing
 
 set -euo pipefail
@@ -62,8 +62,8 @@ EXCLUDE_FILES=(
 
   # ADR + architecture + manual + operations narratives — every
   # version reference inside is dated context, not a "current version"
-  # claim. The single source-of-truth is .chezmoidata.toml (plus
-  # README, package.json — which version-sync DOES rewrite).
+  # claim. The single source of truth is .chezmoidata.toml; README and
+  # package.json are generated surfaces that version-sync rewrites.
   "docs/adr/ADR-007-multi-shell-parity.md"
   "docs/architecture/REPO_LAYOUT.md"
   "docs/manual/01-concepts/04-fleet.md"
@@ -128,18 +128,20 @@ OPTIONS:
   -f, --force       Force sync even if no changes detected
 
 ARGUMENTS:
-  VERSION          Target version to sync to (defaults to package.json version)
+  VERSION          Target version to sync to (defaults to dotfiles_version in
+                   defaults/.chezmoidata.toml)
 
 EXAMPLES:
-  $0                    # Sync to current package.json version
+  $0                    # Sync to the canonical dotfiles_version
   $0 1.2.3             # Sync all files to version 1.2.3
   $0 --dry-run         # Preview changes without applying
   $0 --verify          # Check current version consistency
 
 DESCRIPTION:
   This script synchronizes version numbers across all markdown files in the
-  repository with the version specified in package.json. It updates various
-  version reference patterns including badges, documentation headers, and
+  repository with the canonical dotfiles_version in
+  defaults/.chezmoidata.toml. A supplied VERSION updates that manifest first,
+  then regenerates package metadata, badges, documentation headers, and
   feature version stamps.
 
 EOF
@@ -156,21 +158,18 @@ is_excluded_file() {
   return 1
 }
 
-get_package_version() {
-  local package_file="$PROJECT_ROOT/package.json"
-  if [[ ! -f "$package_file" ]]; then
-    log_error "package.json not found at $package_file"
+get_canonical_version() {
+  local data_file="$PROJECT_ROOT/defaults/.chezmoidata.toml"
+  [[ -f "$data_file" ]] || data_file="$PROJECT_ROOT/.chezmoidata.toml"
+  if [[ ! -f "$data_file" ]]; then
+    log_error "Canonical version manifest not found at defaults/.chezmoidata.toml"
     exit 1
   fi
 
   local version
-  if command -v jq &>/dev/null; then
-    version=$(jq -r '.version' "$package_file" 2>/dev/null)
-  else
-    version=$(sed -nE 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p' "$package_file" | head -n 1)
-  fi
-  if [[ "$version" == "null" || -z "$version" ]]; then
-    log_error "Could not extract version from package.json"
+  version=$(sed -nE 's/^[[:space:]]*dotfiles_version[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' "$data_file" | head -n 1)
+  if [[ -z "$version" ]]; then
+    log_error "Could not extract dotfiles_version from ${data_file#"$PROJECT_ROOT/"}"
     exit 1
   fi
 
@@ -535,8 +534,9 @@ main() {
 
   # Determine target version
   if [[ -z "$target_version" ]]; then
-    target_version=$(get_package_version)
-    log_info "Using package.json version: $target_version"
+    target_version=$(get_canonical_version)
+    validate_version "$target_version"
+    log_info "Using canonical dotfiles_version: $target_version"
   else
     validate_version "$target_version"
     log_info "Using specified version: $target_version"
@@ -551,9 +551,8 @@ main() {
 
   if [[ ${#version_files[@]} -eq 0 ]]; then
     log_warning "No files with version references found"
-    exit 0
+    return 0
   fi
-
   log_info "Found ${#version_files[@]} files with version references"
 
   # Verify mode - just check consistency
@@ -570,7 +569,7 @@ main() {
     create_backup "${version_files[@]}"
   fi
 
-  # Sync chezmoidata.toml (single source of truth for template files).
+  # Sync chezmoidata.toml (single source of truth for the release identity).
   # Post-Phase-4b lives under defaults/ — kept old root location as a
   # fallback so this script is forward- and backward-compatible.
   local chezmoidata="$PROJECT_ROOT/defaults/.chezmoidata.toml"
@@ -585,10 +584,13 @@ main() {
     fi
   fi
 
-  # package.json is the release-tooling source used when VERSION is omitted.
-  # A caller-supplied target must update it atomically before downstream
-  # verification, otherwise the repository immediately contains two versions.
+  # package.json is generated release metadata. Keep it synchronized from the
+  # canonical chezmoi data manifest before downstream verification.
   local package_json="$PROJECT_ROOT/package.json"
+  if [[ ! -f "$package_json" ]]; then
+    log_error "package.json not found at $package_json"
+    exit 1
+  fi
   if [[ "$dry_run" == "true" ]]; then
     log_info "Would update package.json: version = \"$target_version\""
   else

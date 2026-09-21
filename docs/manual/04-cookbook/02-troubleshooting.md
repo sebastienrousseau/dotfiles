@@ -17,7 +17,8 @@ Symptom → cause → fix.
 
 ```sh
 export PATH="$HOME/.local/bin:$PATH"
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+# Re-run only the installer that was release-pinned and SHA256-verified.
+bash /tmp/dotfiles-install.sh
 ```
 
 ### Symptom: "could not create directory ~/.local/share/chezmoi"

@@ -55,5 +55,7 @@ assert_file_contains "$PKG" "actions/attest-build-provenance" "attests build pro
 assert_file_contains "$PKG" "attestations: write" "has attestations:write permission"
 assert_file_contains "$PKG" "id-token: write" "has OIDC token for keyless attestation"
 assert_file_contains "$PKG" "subject-path:" "attests the built artefacts"
+assert_file_contains "$PKG" 'dotfiles-install-${{ steps.ver.outputs.version }}.sh' "standalone installer is attested"
+assert_file_contains "$PKG" 'dotfiles-install-${VERSION}.sh.sigstore.json' "standalone installer has a Sigstore bundle"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

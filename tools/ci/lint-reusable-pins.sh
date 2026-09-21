@@ -1,32 +1,24 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# shellcheck disable=SC2155
 #
-# lint-reusable-pins.sh — fail if any workflow references a reusable
-# workflow via a mutable ref (relative path, branch name, tag).
+# Validate reusable-workflow references.
 #
-# Closes the lint-rule half of #855. Acceptable form for a reusable
-# workflow reference:
+# Same-repository reusable workflows MUST use the local form so GitHub loads
+# the workflow from the exact commit/ref under test:
 #
-#     uses: sebastienrousseau/dotfiles/.github/workflows/reusable-X.yml@<40-hex-sha>
+#   uses: ./.github/workflows/reusable-shell-lint.yml
 #
-# Rejected forms:
-#
-#     uses: ./.github/workflows/reusable-X.yml                  # relative path → mutable
-#     uses: org/repo/.github/workflows/reusable-X.yml@master    # branch ref → mutable
-#     uses: org/repo/.github/workflows/reusable-X.yml@v1        # tag ref → mutable
-#
-# The full-SHA constraint is what prevents a TOCTOU swap where a
-# malicious push to the reusable's branch redirects the calling
-# workflow at run time.
+# Referring to this repository through owner/repo@SHA is immutable, but it is
+# the wrong isolation boundary for pull requests: a PR that changes a reusable
+# workflow would continue executing the older pinned implementation. External
+# reusable workflows retain the normal full-commit-SHA requirement.
 
 set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
-cd "$REPO_ROOT"
-
-WORKFLOWS_DIR=".github/workflows"
+REPOSITORY="${GITHUB_REPOSITORY:-sebastienrousseau/dotfiles}"
+WORKFLOWS_DIR="$REPO_ROOT/.github/workflows"
 fail_count=0
 checked_count=0
 
@@ -35,45 +27,40 @@ if [[ ! -d "$WORKFLOWS_DIR" ]]; then
   exit 1
 fi
 
-# Walk every .yml under .github/workflows/ and inspect each `uses:`
-# line whose target ends with `reusable-*.yml`.
 while IFS= read -r workflow; do
-  while IFS=: read -r line_no _; do
-    line=$(sed -n "${line_no}p" "$workflow")
-    # Extract the ref expression after `uses:`.
-    # Acceptable: <owner>/<repo>/.github/workflows/reusable-X.yml@<40-hex>
-    if echo "$line" | grep -qE '^\s*uses:\s*\./'; then
-      echo "::error file=$workflow,line=$line_no::reusable workflow referenced by relative path (mutable). Pin to <owner>/<repo>/.github/workflows/<file>@<40-hex-sha>."
-      echo "    $line"
-      fail_count=$((fail_count + 1))
-      continue
-    fi
-    if echo "$line" | grep -qE 'reusable-[a-z0-9-]+\.yml@[0-9a-f]{40}\b'; then
-      checked_count=$((checked_count + 1))
-      continue
-    fi
-    if echo "$line" | grep -qE 'reusable-[a-z0-9-]+\.yml@'; then
-      ref=$(echo "$line" | sed -E 's|.*reusable-[a-z0-9-]+\.yml@([^ #]+).*|\1|')
-      echo "::error file=$workflow,line=$line_no::reusable workflow pinned to mutable ref '$ref'. Pin to a 40-hex commit SHA instead."
-      echo "    $line"
-      fail_count=$((fail_count + 1))
-      continue
-    fi
-  done < <(grep -nE 'reusable-[a-z0-9-]+\.yml' "$workflow" || true)
-done < <(find "$WORKFLOWS_DIR" -maxdepth 1 -type f -name '*.yml')
+  while IFS=: read -r line_no line; do
+    target="${line#*uses:}"
+    target="${target%%#*}"
+    target="$(printf '%s' "$target" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')"
 
-echo "reusable-pin lint: checked $checked_count call site(s), $fail_count failure(s)"
+    case "$target" in
+      ./.github/workflows/*.yml | ./.github/workflows/*.yaml)
+        checked_count=$((checked_count + 1))
+        ;;
+      slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0)
+        # The upstream SLSA bootstrap requires a semver tag and rejects a
+        # commit-SHA caller. Keep this exception exact and pair it with the
+        # release-signing contract test that records the reviewed version.
+        checked_count=$((checked_count + 1))
+        ;;
+      "$REPOSITORY"/.github/workflows/*)
+        echo "::error file=$workflow,line=$line_no::same-repository reusable workflow must use ./.github/workflows/<file> so the caller executes the workflow from the commit under test."
+        echo "    $line"
+        fail_count=$((fail_count + 1))
+        ;;
+      */.github/workflows/*)
+        ref="${target##*@}"
+        if [[ "$target" == *@* ]] && [[ "$ref" =~ ^[0-9a-f]{40}$ ]]; then
+          checked_count=$((checked_count + 1))
+        else
+          echo "::error file=$workflow,line=$line_no::external reusable workflow must be pinned to a full 40-hex commit SHA."
+          echo "    $line"
+          fail_count=$((fail_count + 1))
+        fi
+        ;;
+    esac
+  done < <(grep -nE '^[[:space:]]*uses:[[:space:]]*[^#]+/\.github/workflows/' "$workflow" || true)
+done < <(find "$WORKFLOWS_DIR" -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) -print)
 
-if [[ "$fail_count" -gt 0 ]]; then
-  echo ""
-  echo "Refresh pinned SHAs with:"
-  echo "  git fetch origin master"
-  echo "  PIN=\$(git rev-parse origin/master)"
-  echo "  # Apply per call site, then verify:"
-  echo "  bash tools/ci/lint-reusable-pins.sh"
-  echo ""
-  echo "Policy: docs/security/CI_PINNING.md"
-  exit 1
-fi
-
-exit 0
+echo "reusable-reference lint: checked $checked_count call site(s), $fail_count failure(s)"
+exit "$fail_count"

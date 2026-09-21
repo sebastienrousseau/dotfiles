@@ -394,7 +394,8 @@ rm -rf ~/.config/chezmoi/
 
 # 4. Reinstall from scratch
 cd /tmp
-curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh | bash
+# Download and SHA256-verify the release installer per docs/guides/INSTALL.md.
+bash /tmp/dotfiles-install.sh
 ```
 
 #### Scenario: WSL2 completely broken
@@ -412,7 +413,8 @@ wsl --unregister Ubuntu
 wsl --import Ubuntu C:\WSL\Ubuntu Ubuntu-backup.tar
 
 # 4. Reinstall dotfiles
-wsl -d Ubuntu -u root -- curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh | bash
+# First copy the release-pinned, SHA256-verified installer into the distro.
+wsl -d Ubuntu -u root -- bash /tmp/dotfiles-install.sh
 ```
 
 ### Partial Recovery

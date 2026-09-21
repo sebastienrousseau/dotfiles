@@ -22,6 +22,10 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../lib/dot/theme-transaction.sh
+source "$SCRIPT_DIR/../lib/dot/theme-transaction.sh"
+
 # =============================================================================
 # Constants & Colors
 # =============================================================================
@@ -290,6 +294,173 @@ theme_value() {
   ' "$THEMES_FILE"
 }
 
+_theme_mode_for_name() {
+  local theme="${1:-}"
+  local mode
+  mode="$(theme_value "$theme" mode 2>/dev/null || true)"
+  case "$mode" in
+    dark | light) printf '%s\n' "$mode" ;;
+    *) [[ "$theme" == *-light ]] && printf 'light\n' || printf 'dark\n' ;;
+  esac
+}
+
+_theme_family_for_name() {
+  local theme="${1:-}" family
+  family="$(theme_value "$theme" family 2>/dev/null || true)"
+  if [[ -z "$family" ]]; then
+    family="${theme%-dark}"
+    [[ "$family" != "$theme" ]] || family="${theme%-light}"
+  fi
+  printf '%s\n' "$family"
+}
+
+_validate_theme_name() {
+  local theme="${1:-}"
+  if [[ -z "$theme" || "$theme" =~ [^a-zA-Z0-9_-] ]]; then
+    _err "Invalid" "theme name: ${theme:-<empty>}"
+    return 1
+  fi
+  if [[ -f "$THEMES_FILE" ]] && ! grep -q "^\[themes\.${theme}\]$" "$THEMES_FILE"; then
+    _err "Unknown" "theme '$theme' — run 'dot theme list' to see available"
+    return 1
+  fi
+}
+
+# All files directly or indirectly owned by one theme operation. Existing
+# files are copied into the private operation directory before the first
+# mutation; absent files are recorded so rollback can remove newly-created
+# provider fragments.
+theme_transaction_targets() {
+  printf '%s\n' \
+    "$CHEZMOI_CFG" \
+    "$HOME/.config/ghostty/config" \
+    "$HOME/.config/tmux/tmux.conf" \
+    "$HOME/.config/alacritty/alacritty.toml" \
+    "$HOME/.config/kitty/kitty.conf" \
+    "$HOME/.config/starship.toml" \
+    "$HOME/.config/zsh/rc.d/10-env.zsh" \
+    "$HOME/.config/fish/conf.d/env.fish" \
+    "$HOME/.config/nushell/env.nu" \
+    "$HOME/.codex/themes/dotfiles.tmTheme" \
+    "$HOME/.config/wezterm/wezterm.lua" \
+    "$HOME/.config/foot/foot.ini" \
+    "$HOME/.config/fuzzel/fuzzel.ini" \
+    "$HOME/.config/vscode/settings.json" \
+    "$HOME/.warp/themes/dotfiles.yaml" \
+    "$HOME/.config/firefox/user.js" \
+    "$HOME/.config/gtk-3.0/gtk.css" \
+    "$HOME/.config/gtk-3.0/settings.ini" \
+    "$HOME/.config/gtk-4.0/gtk.css" \
+    "$HOME/.config/gtk-4.0/settings.ini" \
+    "$HOME/.config/waybar/config.jsonc" \
+    "$HOME/.config/waybar/style.css" \
+    "$HOME/.config/niri/config.kdl" \
+    "$HOME/.codex/config.toml" \
+    "$HOME/.claude/settings.json" \
+    "$HOME/.gemini/settings.json" \
+    "$HOME/.gemini/antigravity-cli/settings.json" \
+    "$HOME/.qwen/settings.json" \
+    "$HOME/.config/opencode/cli.json" \
+    "${XDG_STATE_HOME:-$HOME/.local/state}/DankMaterialShell/session.json"
+  if [[ "$PLATFORM" == "Darwin" ]]; then
+    printf '%s\n' "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+  else
+    printf '%s\n' "${XDG_CONFIG_HOME:-$HOME/.config}/DankMaterialShell/settings.json"
+  fi
+}
+
+_theme_target_adapter() {
+  local target="$1"
+  case "$target" in
+    "$CHEZMOI_CFG") THEME_TARGET_ADAPTER="theme-state" ;;
+    "$HOME/.codex/config.toml" | "$HOME/.claude/settings.json" | "$HOME/.gemini/"* | "$HOME/.qwen/settings.json" | "$HOME/.config/opencode/cli.json")
+      THEME_TARGET_ADAPTER="ai-provider"
+      ;;
+    *DankMaterialShell*) THEME_TARGET_ADAPTER="desktop-shell" ;;
+    *) THEME_TARGET_ADAPTER="chezmoi" ;;
+  esac
+}
+
+_theme_plan_adapter() {
+  _theme_target_adapter "$1"
+  printf '%s\n' "$THEME_TARGET_ADAPTER"
+}
+
+_emit_theme_plan_change() {
+  local adapter="$1" target="$2" kind="$3" required="$4" reload="${5:-}"
+  local before_hash=""
+  [[ "$kind" == "file" && -f "$target" ]] && before_hash="$(_theme_txn_hash "$target")"
+  if [[ "$plan_first" == "0" ]]; then
+    printf ',\n'
+  fi
+  plan_first=0
+  printf '    {"adapter":"%s","target":"%s","kind":"%s","required":%s' \
+    "$(_theme_txn_json_escape "$adapter")" \
+    "$(_theme_txn_json_escape "$target")" \
+    "$kind" "$required"
+  [[ -n "$before_hash" ]] && printf ',"before_hash":"%s"' "$before_hash"
+  [[ -n "$reload" ]] && printf ',"reload":"%s"' "$(_theme_txn_json_escape "$reload")"
+  printf '}'
+}
+
+emit_theme_plan_json() {
+  local target="$1" preference="$2" operation_id="$3"
+  local desired_family desired_mode previous previous_family previous_mode previous_preference
+  desired_family="$(_theme_family_for_name "$target")"
+  desired_mode="$(_theme_mode_for_name "$target")"
+  previous="$(current_theme)"
+  previous_family="$(current_theme_family)"
+  previous_mode="$(_theme_mode_for_name "$previous")"
+  previous_preference="$(current_theme_mode)"
+
+  printf '{\n'
+  printf '  "schema_version": "1.0",\n'
+  printf '  "operation_id": "%s",\n' "$(_theme_txn_json_escape "$operation_id")"
+  printf '  "operation": "theme.apply",\n'
+  printf '  "desired": {"name":"%s","family":"%s","mode":"%s","preference":"%s"},\n' \
+    "$(_theme_txn_json_escape "$target")" "$(_theme_txn_json_escape "$desired_family")" \
+    "$desired_mode" "$preference"
+  printf '  "previous": {"name":"%s","family":"%s","mode":"%s","preference":"%s"},\n' \
+    "$(_theme_txn_json_escape "$previous")" "$(_theme_txn_json_escape "$previous_family")" \
+    "$previous_mode" "$previous_preference"
+  printf '  "changes": [\n'
+  local plan_first=1 path adapter required
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    [[ "$path" == "$CHEZMOI_CFG" || -f "$path" ]] || continue
+    adapter="$(_theme_plan_adapter "$path")"
+    required=true
+    [[ "$adapter" == "ai-provider" || "$adapter" == "desktop-shell" ]] && required=false
+    _emit_theme_plan_change "$adapter" "$path" file "$required" ""
+  done < <(theme_transaction_targets | awk '!seen[$0]++')
+  _emit_theme_plan_change "ghostty" "running Ghostty instances" ipc false "reload-config/SIGUSR2"
+  _emit_theme_plan_change "kitty" "running Kitty instances" ipc false "SIGUSR1"
+  _emit_theme_plan_change "tmux" "running tmux server" ipc false "source-file"
+  _emit_theme_plan_change "desktop" "$PLATFORM appearance" desktop false "platform adapter"
+  _emit_theme_plan_change "wallpaper" "$desired_family" desktop false "wallpaper adapter"
+  _emit_theme_plan_change "browsers" "installed browsers" ipc false "appearance inheritance"
+  _emit_theme_plan_change "nvim" "running Neovim servers" ipc false "remote-expr"
+  printf '\n  ],\n'
+  printf '  "warnings": ['
+  if ! command -v chezmoi >/dev/null 2>&1; then
+    printf '{"code":"CHEZMOI_NOT_FOUND","message":"required chezmoi renderer is not installed"}'
+  fi
+  printf ']\n'
+  printf '}\n'
+}
+
+emit_theme_plan_human() {
+  local target="$1" preference="$2" operation_id="$3" count=0 path
+  _info "Operation" "$operation_id"
+  _info "Theme" "$target ($preference)"
+  while IFS= read -r path; do
+    [[ "$path" == "$CHEZMOI_CFG" || -f "$path" ]] && count=$((count + 1))
+  done < <(theme_transaction_targets | awk '!seen[$0]++')
+  _info "Files" "$count installed target(s) would be staged and atomically restored on failure"
+  _info "Reload" "ghostty kitty tmux desktop wallpaper browsers nvim"
+  _ok "Plan" "pure preview complete — no writes, reloads, or network access"
+}
+
 # =============================================================================
 # Targeted Config Regeneration
 # =============================================================================
@@ -302,43 +473,29 @@ apply_theme_configs() {
     return 1
   fi
 
-  local targets=(
-    "$HOME/.config/ghostty/config"
-    "$HOME/.config/tmux/tmux.conf"
-    "$HOME/.config/alacritty/alacritty.toml"
-    "$HOME/.config/kitty/kitty.conf"
-    "$HOME/.config/starship.toml"
-    "$HOME/.config/zsh/rc.d/10-env.zsh"
-    "$HOME/.config/fish/conf.d/env.fish"
-    "$HOME/.config/nushell/env.nu"
-    "$HOME/.codex/themes/dotfiles.tmTheme"
-    "$HOME/.config/wezterm/wezterm.lua"
-    "$HOME/.config/foot/foot.ini"
-    "$HOME/.config/fuzzel/fuzzel.ini"
-    "$HOME/.config/vscode/settings.json"
-    "$HOME/.warp/themes/dotfiles.yaml"
-    "$HOME/.config/firefox/user.js"
-    "$HOME/.config/gtk-3.0/gtk.css"
-    "$HOME/.config/gtk-3.0/settings.ini"
-    "$HOME/.config/gtk-4.0/gtk.css"
-    "$HOME/.config/gtk-4.0/settings.ini"
-    "$HOME/.config/waybar/config.jsonc"
-    "$HOME/.config/waybar/style.css"
-  )
-
   # Collect existing targets and apply in one chezmoi call.
   # --force skips interactive "file has changed" prompts; &>/dev/null
   # suppresses the prompt text that leaks onto stdout.
   local valid_targets=()
   local target
-  for target in "${targets[@]}"; do
-    [[ -f "$target" ]] && valid_targets+=("$target")
-  done
+  while IFS= read -r target; do
+    _theme_target_adapter "$target"
+    case "$THEME_TARGET_ADAPTER" in
+      chezmoi)
+        [[ "$target" != "$HOME/.config/niri/config.kdl" && -f "$target" ]] && valid_targets+=("$target")
+        ;;
+    esac
+  done < <(theme_transaction_targets | awk '!seen[$0]++')
 
   local applied_count=0
+  local required_failed=0
   if [[ ${#valid_targets[@]} -gt 0 ]]; then
-    if chezmoi apply --force "${valid_targets[@]}" &>/dev/null; then
+    if ! chezmoi apply --dry-run --force "${valid_targets[@]}" &>/dev/null; then
+      required_failed=1
+    elif chezmoi apply --force "${valid_targets[@]}" &>/dev/null; then
       applied_count=${#valid_targets[@]}
+    else
+      required_failed=1
     fi
   fi
 
@@ -347,8 +504,12 @@ apply_theme_configs() {
   # explicitly. Otherwise only a full chezmoi apply ever refreshes iTerm2.
   local iterm_source="$CHEZMOI_SRC/run_onchange_22-iterm2-profile.sh.tmpl"
   if [[ "$PLATFORM" == "Darwin" && -f "$iterm_source" ]]; then
-    if chezmoi apply --force --source-path "$iterm_source" &>/dev/null; then
+    if ! chezmoi apply --dry-run --force --source-path "$iterm_source" &>/dev/null; then
+      required_failed=1
+    elif chezmoi apply --force --source-path "$iterm_source" &>/dev/null; then
       applied_count=$((applied_count + 1))
+    else
+      required_failed=1
     fi
   fi
 
@@ -357,7 +518,9 @@ apply_theme_configs() {
   local niri_target="$HOME/.config/niri/config.kdl"
   local tmp_file
   if [[ -f "$niri_target" ]]; then
-    if chezmoi apply --force "$niri_target" &>/dev/null; then
+    if ! chezmoi apply --dry-run --force "$niri_target" &>/dev/null; then
+      required_failed=1
+    elif chezmoi apply --force "$niri_target" &>/dev/null; then
       applied_count=$((applied_count + 1))
     else
       local niri_template="$SRC_DIR/dot_config/niri/config.kdl.tmpl"
@@ -367,7 +530,10 @@ apply_theme_configs() {
           applied_count=$((applied_count + 1))
         else
           rm -f "$tmp_file"
+          required_failed=1
         fi
+      else
+        required_failed=1
       fi
     fi
   fi
@@ -377,22 +543,49 @@ apply_theme_configs() {
   else
     _skip "Chezmoi" "no managed configs found"
   fi
+  if [[ $required_failed -ne 0 ]]; then
+    _err "Chezmoi" "required theme configuration failed to render"
+    return 1
+  fi
 }
 
 sync_ai_cli_themes() {
   local theme="$1"
   local helper="$SRC_DIR/scripts/theme/sync-ai-cli-themes.py"
-  local updated
+  local result summary applied issues disabled
 
   if ! command -v python3 &>/dev/null || [[ ! -f "$helper" ]]; then
     _skip "AI CLIs" "theme adapter unavailable"
     return 0
   fi
-  if updated="$(python3 "$helper" --theme "$theme" --themes-file "$THEMES_FILE" 2>/dev/null)"; then
-    if [[ -n "$updated" ]]; then
-      _ok "AI CLIs" "updated ${updated//,/, } (restart active TUIs)"
+  if result="$(python3 "$helper" --theme "$theme" --themes-file "$THEMES_FILE" \
+    --defaults-config "$DATA_FILE" --machine-config "$CHEZMOI_CFG" --json 2>/dev/null)"; then
+    summary="$(printf '%s' "$result" | python3 -c '
+import json, sys
+data = json.load(sys.stdin)
+providers = data.get("providers", [])
+applied = [p["provider"] for p in providers if p.get("status") in {"updated", "unchanged"}]
+issues = ["{}={}".format(p.get("provider", "unknown"), p.get("status", "failed")) for p in providers if p.get("status") in {"invalid_config", "conflict", "write_failed"}]
+disabled = [p["provider"] for p in providers if p.get("status") == "disabled"]
+print(",".join(applied))
+print(",".join(issues))
+print(",".join(disabled))
+' 2>/dev/null)" || {
+      _skip "AI CLIs" "provider result could not be parsed"
+      return 0
+    }
+    applied="$(printf '%s\n' "$summary" | sed -n '1p')"
+    issues="$(printf '%s\n' "$summary" | sed -n '2p')"
+    disabled="$(printf '%s\n' "$summary" | sed -n '3p')"
+    if [[ -n "$applied" ]]; then
+      _ok "AI CLIs" "checked ${applied//,/, } (restart active TUIs)"
+    elif [[ -n "$disabled" ]]; then
+      _skip "AI CLIs" "theme sync disabled for ${disabled//,/, }"
     else
       _skip "AI CLIs" "no provider configs found"
+    fi
+    if [[ -n "$issues" ]]; then
+      _skip "AI CLIs" "optional adapter warnings: ${issues//,/, }"
     fi
   else
     _skip "AI CLIs" "provider configs could not be updated"
@@ -1273,37 +1466,43 @@ reload_browsers() {
   fi
 
   local coordinated=()
+  local coordinated_count=0
   local managed_firefox="${XDG_CONFIG_HOME:-$HOME/.config}/firefox/user.js"
   local firefox_roots=()
   local firefox_profiles=()
   local root profile
 
   if [[ "$PLATFORM" == "Darwin" ]]; then
-    [[ -d "/Applications/Safari.app" ]] && coordinated+=("Safari")
-    [[ -d "/Applications/Google Chrome.app" ]] && coordinated+=("Chrome")
-    [[ -d "/Applications/Microsoft Edge.app" ]] && coordinated+=("Edge")
+    [[ -d "/Applications/Safari.app" ]] && coordinated+=("Safari") && coordinated_count=$((coordinated_count + 1))
+    [[ -d "/Applications/Google Chrome.app" ]] && coordinated+=("Chrome") && coordinated_count=$((coordinated_count + 1))
+    [[ -d "/Applications/Microsoft Edge.app" ]] && coordinated+=("Edge") && coordinated_count=$((coordinated_count + 1))
   else
-    command -v google-chrome &>/dev/null && coordinated+=("Chrome")
-    command -v google-chrome-stable &>/dev/null && coordinated+=("Chrome")
-    command -v chromium &>/dev/null && coordinated+=("Chromium")
-    command -v chromium-browser &>/dev/null && coordinated+=("Chromium")
-    command -v microsoft-edge &>/dev/null && coordinated+=("Edge")
-    command -v microsoft-edge-stable &>/dev/null && coordinated+=("Edge")
+    command -v google-chrome &>/dev/null && coordinated+=("Chrome") && coordinated_count=$((coordinated_count + 1))
+    command -v google-chrome-stable &>/dev/null && coordinated+=("Chrome") && coordinated_count=$((coordinated_count + 1))
+    command -v chromium &>/dev/null && coordinated+=("Chromium") && coordinated_count=$((coordinated_count + 1))
+    command -v chromium-browser &>/dev/null && coordinated+=("Chromium") && coordinated_count=$((coordinated_count + 1))
+    command -v microsoft-edge &>/dev/null && coordinated+=("Edge") && coordinated_count=$((coordinated_count + 1))
+    command -v microsoft-edge-stable &>/dev/null && coordinated+=("Edge") && coordinated_count=$((coordinated_count + 1))
   fi
 
+  local firefox_root_count=0
   while IFS= read -r root; do
-    [[ -d "$root" ]] && firefox_roots+=("$root")
+    [[ -d "$root" ]] && firefox_roots+=("$root") && firefox_root_count=$((firefox_root_count + 1))
   done < <(firefox_profile_roots)
 
-  for root in "${firefox_roots[@]}"; do
-    for profile in "$root"/*; do
-      [[ -d "$profile" ]] || continue
-      firefox_profiles+=("$profile")
+  local firefox_profile_count=0
+  if [[ $firefox_root_count -gt 0 ]]; then
+    for root in "${firefox_roots[@]}"; do
+      for profile in "$root"/*; do
+        [[ -d "$profile" ]] || continue
+        firefox_profiles+=("$profile")
+        firefox_profile_count=$((firefox_profile_count + 1))
+      done
     done
-  done
+  fi
 
   local synced_firefox_profiles=0
-  if [[ -f "$managed_firefox" ]]; then
+  if [[ -f "$managed_firefox" && $firefox_profile_count -gt 0 ]]; then
     for profile in "${firefox_profiles[@]}"; do
       if [[ -f "$profile/user.js" ]] && cmp -s "$managed_firefox" "$profile/user.js"; then
         synced_firefox_profiles=$((synced_firefox_profiles + 1))
@@ -1312,7 +1511,7 @@ reload_browsers() {
   fi
 
   local summary_parts=()
-  if [[ ${#coordinated[@]} -gt 0 ]]; then
+  if [[ $coordinated_count -gt 0 ]]; then
     local native
     native="$(
       printf '%s\n' "${coordinated[@]}" | awk '!seen[$0]++' | join_lines ", "
@@ -1323,7 +1522,7 @@ reload_browsers() {
   if [[ -f "$managed_firefox" ]]; then
     if [[ $synced_firefox_profiles -gt 0 ]]; then
       summary_parts+=("Firefox content mode synced for ${synced_firefox_profiles} profile(s)")
-    elif [[ ${#firefox_profiles[@]} -gt 0 ]]; then
+    elif [[ $firefox_profile_count -gt 0 ]]; then
       summary_parts+=("Firefox content mode ready; link ~/.config/firefox/user.js into a profile to enforce it")
     else
       summary_parts+=("Firefox content mode regenerated")
@@ -1519,6 +1718,8 @@ usage() {
   printf '  %s\n' "dot-theme-sync                    Regenerate configs + reload running apps"
   printf '  %s\n' "dot-theme-sync <theme-name>       Set theme + regenerate + reload"
   printf '  %s\n' "dot-theme-sync <theme-name> --auto Set resolved theme and follow OS mode"
+  printf '  %s\n' "dot-theme-sync <theme-name> --plan Preview a pure operation plan"
+  printf '  %s\n' "dot-theme-sync <theme-name> --plan --json Emit the versioned JSON plan"
   printf '  %s\n' "dot-theme-sync --full             Full chezmoi apply + reload"
   printf '  %s\n' "dot-theme-sync --help             Show this help"
   echo ""
@@ -1618,6 +1819,9 @@ main() {
   local do_force=false
   local do_dry_run=false
   local do_auto=false
+  local do_plan=false
+  local do_json=false
+  local lock_timeout="${DOT_THEME_LOCK_TIMEOUT:-10}"
   local new_theme=""
 
   # Parse arguments — accept a flag before OR after the theme name.
@@ -1643,6 +1847,27 @@ main() {
         do_auto=true
         shift
         ;;
+      --plan)
+        do_plan=true
+        shift
+        ;;
+      --json)
+        do_json=true
+        shift
+        ;;
+      --lock-timeout)
+        shift
+        [[ $# -gt 0 ]] || {
+          printf '%s\n' "${RED}error${RESET}: --lock-timeout requires seconds"
+          exit 1
+        }
+        lock_timeout="$1"
+        shift
+        ;;
+      --lock-timeout=*)
+        lock_timeout="${1#--lock-timeout=}"
+        shift
+        ;;
       "")
         shift
         ;;
@@ -1658,22 +1883,42 @@ main() {
     esac
   done
 
+  if [[ "$do_json" == true && "$do_plan" != true ]]; then
+    printf '%s\n' "${RED}error${RESET}: --json requires --plan" >&2
+    exit 1
+  fi
+
+  local prev_theme prev_preference target_theme desired_mode requested_preference operation_id
+  prev_theme="$(current_theme)"
+  prev_preference="$(current_theme_mode)"
+  target_theme="${new_theme:-$prev_theme}"
+  _validate_theme_name "$target_theme" || exit 1
+  desired_mode="$(_theme_mode_for_name "$target_theme")"
+  requested_preference="$desired_mode"
+  [[ "$do_auto" == true ]] && requested_preference="auto"
+  operation_id="$(_theme_txn_new_id)"
+
+  # Planning is intentionally pure: no lock, state directory, temporary file,
+  # renderer, reload command, or network access is touched.
+  if [[ "$do_plan" == true ]]; then
+    if [[ "$do_json" == true ]]; then
+      emit_theme_plan_json "$target_theme" "$requested_preference" "$operation_id"
+    else
+      printf '%s\n' "${BOLD}${CYAN}dot-theme-sync plan${RESET}"
+      echo ""
+      emit_theme_plan_human "$target_theme" "$requested_preference" "$operation_id"
+    fi
+    exit 0
+  fi
+
   # Header
   printf '%s\n' "${BOLD}${CYAN}dot-theme-sync${RESET}"
   echo ""
-
-  # Save previous theme for rollback on failure
-  local prev_theme
-  prev_theme="$(current_theme)"
-  local prev_preference
-  prev_preference="$(current_theme_mode)"
 
   # Idempotency: if the requested theme is already active and there's no
   # explicit --force / --full, skip the whole apply chain. Users who want
   # to re-render after editing configs pass --force; scripts that fire
   # `dot theme set X` repeatedly no longer pay the ~700 ms tax per call.
-  local requested_preference="manual"
-  [[ "$do_auto" == true ]] && requested_preference="auto"
   if [[ -n "$new_theme" && "$new_theme" == "$prev_theme" &&
     "$requested_preference" == "$prev_preference" &&
     "$do_full" == false && "$do_force" == false ]]; then
@@ -1684,8 +1929,7 @@ main() {
 
   # Dry-run: print what would change and exit before mutating anything.
   if [[ "$do_dry_run" == true ]]; then
-    local target="${new_theme:-$prev_theme}"
-    _info "Theme" "$target"
+    _info "Theme" "$target_theme"
     _info "Dry-run" "no writes will be performed"
     if [[ -n "$new_theme" ]]; then
       _info "Would" "write theme=\"$new_theme\" to $CHEZMOI_CFG"
@@ -1697,6 +1941,34 @@ main() {
     _ok "Dry-run" "complete — no changes made"
     exit 0
   fi
+
+  # Acquire the process-wide theme lock and snapshot every installed target
+  # before the first write. The EXIT guard restores snapshots on any required
+  # failure or signal, then records the outcome in a bounded local journal.
+  local transaction_targets=()
+  local transaction_target
+  while IFS= read -r transaction_target; do
+    [[ -n "$transaction_target" ]] && transaction_targets+=("$transaction_target")
+  done < <(theme_transaction_targets | awk '!seen[$0]++')
+  if [[ "$do_full" == true ]] && command -v chezmoi >/dev/null 2>&1; then
+    while IFS= read -r -d '' transaction_target; do
+      [[ -n "$transaction_target" ]] && transaction_targets+=("$transaction_target")
+    done < <(chezmoi managed --include files --path-style absolute --nul-path-separator 2>/dev/null || true)
+  fi
+  local unique_transaction_targets=()
+  while IFS= read -r transaction_target; do
+    [[ -n "$transaction_target" ]] && unique_transaction_targets+=("$transaction_target")
+  done < <(printf '%s\n' "${transaction_targets[@]}" | awk '!seen[$0]++')
+  transaction_targets=("${unique_transaction_targets[@]}")
+  if ! _theme_txn_begin "$prev_theme" "$target_theme" "$requested_preference" \
+    "$lock_timeout" "${transaction_targets[@]}"; then
+    _err "Transaction" "could not acquire lock or snapshot targets"
+    return 1
+  fi
+  trap '_theme_txn_exit_guard "$?"' EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+  _info "Operation" "$THEME_TXN_OPERATION_ID"
 
   # If a new theme was specified, persist it as machine-local state.
   if [[ -n "$new_theme" ]]; then
@@ -1719,16 +1991,20 @@ main() {
   # Regenerate config files with new theme data
   if [[ "$do_full" == true ]]; then
     _info "Chezmoi" "full apply..."
-    if chezmoi apply --force 2>/dev/null || chezmoi apply; then
+    if ! chezmoi apply --dry-run --force &>/dev/null; then
+      _err "Chezmoi" "required full apply failed validation — transaction will roll back"
+      return 1
+    elif chezmoi apply --force 2>/dev/null; then
       _ok "Chezmoi" "full apply completed"
     else
-      _err "Chezmoi" "apply failed — rolling back to $prev_theme"
-      write_theme "$prev_theme" "$prev_preference"
-      apply_theme_configs
+      _err "Chezmoi" "required full apply failed — transaction will roll back"
       return 1
     fi
   else
-    apply_theme_configs
+    if ! apply_theme_configs; then
+      _err "Transaction" "required configuration apply failed — rolling back"
+      return 1
+    fi
   fi
   sync_ai_cli_themes "$theme"
   sync_ghostty_macos_config
@@ -1751,6 +2027,15 @@ main() {
   else
     _run_reloads_parallel "$theme"
   fi
+
+  # Required read-back verification. Optional application reload failures are
+  # already represented as typed skips and do not invalidate the core commit.
+  if [[ "$(current_theme)" != "$theme" || "$(current_theme_mode)" != "$requested_preference" ]]; then
+    _err "Verify" "active theme state does not match the plan — rolling back"
+    return 1
+  fi
+
+  _theme_txn_finalize "succeeded" "verified active theme state"
 
   # Record theme change in the history stack so `dot theme undo` can
   # step back through recent choices. Skipped when apply was a no-op.

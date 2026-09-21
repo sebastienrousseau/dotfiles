@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.io/schemas/theme-journal.schema.json",
+  "title": "DOT theme transaction journal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "operation_id",
+    "kind",
+    "status",
+    "started_at",
+    "completed_at",
+    "previous_theme",
+    "desired_theme",
+    "preference",
+    "manifest",
+    "reason"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "operation_id": { "type": "string", "minLength": 1 },
+    "kind": { "const": "theme.apply" },
+    "status": {
+      "enum": ["succeeded", "rolled_back", "rollback_failed"]
+    },
+    "started_at": { "type": "string", "format": "date-time" },
+    "completed_at": { "type": "string", "format": "date-time" },
+    "previous_theme": { "type": "string" },
+    "desired_theme": { "type": "string" },
+    "preference": { "enum": ["auto", "dark", "light", "manual"] },
+    "manifest": { "const": "manifest.tsv" },
+    "reason": { "type": "string" }
+  }
+}

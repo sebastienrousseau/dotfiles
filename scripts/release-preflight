@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Fail closed when a release version is inconsistent or would reuse a tag.
+
+set -euo pipefail
+
+REPO_ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+require_untagged=0
+quiet=0
+
+for arg in "$@"; do
+  case "$arg" in
+    --require-untagged) require_untagged=1 ;;
+    --quiet | -q) quiet=1 ;;
+    -h | --help)
+      cat <<'EOF'
+Usage: scripts/release-preflight [--require-untagged] [--quiet]
+
+Validates all live version surfaces, then checks whether the canonical release
+tag is unused or already resolves to HEAD. Use --require-untagged immediately
+before creating a new release tag.
+EOF
+      exit 0
+      ;;
+    *)
+      echo "release-preflight: unknown option: $arg" >&2
+      exit 2
+      ;;
+  esac
+done
+
+log() { ((quiet)) || printf '%s\n' "$*"; }
+fail() {
+  printf 'release-preflight: %s\n' "$*" >&2
+  exit 1
+}
+
+cd "$REPO_ROOT"
+
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
+  fail "$REPO_ROOT is not a Git worktree"
+
+version="$(sed -nE 's/^dotfiles_version[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' defaults/.chezmoidata.toml | head -1)"
+[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+  printf 'release-preflight: invalid or missing dotfiles_version: %s\n' "${version:-<empty>}" >&2
+  exit 2
+}
+
+previous_version="$(sed -nE 's/^previous_dotfiles_version[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' defaults/.chezmoidata.toml | head -1)"
+[[ "$previous_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+  printf 'release-preflight: invalid or missing previous_dotfiles_version: %s\n' \
+    "${previous_version:-<empty>}" >&2
+  exit 2
+}
+
+IFS=. read -r version_major version_minor version_patch <<<"$version"
+IFS=. read -r previous_major previous_minor previous_patch <<<"$previous_version"
+expected_patch=$((10#$previous_patch + 1))
+if [[ "$version_major" != "$previous_major" || "$version_minor" != "$previous_minor" ]] ||
+  ((10#$version_patch != expected_patch)); then
+  fail "candidate v$version must be exactly one patch after v$previous_version"
+fi
+
+if ! bash scripts/verify-release-versions --quiet; then
+  fail "version-bearing files do not match defaults/.chezmoidata.toml"
+fi
+
+head_commit="$(git rev-parse HEAD)"
+previous_tag="v${previous_version}"
+if ! git show-ref --verify --quiet "refs/tags/$previous_tag"; then
+  fail "predecessor tag $previous_tag does not exist; patch releases cannot be skipped"
+fi
+if ! git merge-base --is-ancestor "$previous_tag" "$head_commit"; then
+  fail "predecessor tag $previous_tag is not an ancestor of HEAD $head_commit"
+fi
+log "release-preflight: $previous_tag is the immediate ancestor release"
+
+tag="v${version}"
+
+if git show-ref --verify --quiet "refs/tags/$tag"; then
+  tagged_commit="$(git rev-list -n 1 "$tag")"
+  if ((require_untagged)); then
+    fail "$tag already exists at $tagged_commit; release tags are immutable"
+  fi
+  if [[ "$tagged_commit" != "$head_commit" ]]; then
+    fail "$tag already identifies $tagged_commit, not HEAD $head_commit; bump the version"
+  fi
+  log "release-preflight: $tag already identifies HEAD $head_commit"
+else
+  log "release-preflight: $tag is available for HEAD $head_commit"
+fi
+
+log "release-preflight: version identity is valid"

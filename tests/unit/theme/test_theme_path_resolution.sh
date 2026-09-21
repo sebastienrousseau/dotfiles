@@ -125,6 +125,8 @@ out="$(PATH="$mockbin:$PATH" CHEZMOI_SOURCE_DIR="$sandbox" \
   XDG_CONFIG_HOME="$sandbox/fake-home/.config" \
   XDG_STATE_HOME="$sandbox/fake-home/.local/state" \
   XDG_CACHE_HOME="$sandbox/fake-home/.cache" \
+  DOT_THEME_LOCK_ROOT="$sandbox/runtime" \
+  DOT_THEME_STATE_DIR="$sandbox/fake-home/.local/state/dot/theme-transactions" \
   "$BASH" "$THEME_SYNC" 2>&1)" || out="${out} [exit=$?]"
 if [[ "$out" == *"$SENTINEL_THEME"* ]]; then
   ((TESTS_PASSED++)) || true

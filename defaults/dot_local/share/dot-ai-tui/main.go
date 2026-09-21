@@ -482,6 +482,11 @@ func notifyCmd(goos, title, body string) *exec.Cmd {
 // unreachable) formatter-failure fallback in highlight can be tested.
 var highlightCode = quick.Highlight
 
+// maxHighlightFences bounds Chroma invocations per render. A run of backticks
+// can encode hundreds of empty fenced blocks in a tiny payload; highlighting
+// each one independently lets untrusted provider output stall the TUI.
+const maxHighlightFences = 64
+
 // langRe bounds a fence info string to a short identifier. chroma resolves
 // an unknown name by glob-matching it against every lexer's filename
 // patterns, which is linear in the name's length with a ~2.5ms/char
@@ -523,6 +528,9 @@ func resolveLang(lang string) string {
 // chroma, leaving prose untouched.
 func highlight(text string) string {
 	if !strings.Contains(text, "```") {
+		return text
+	}
+	if strings.Count(text, "```") > maxHighlightFences {
 		return text
 	}
 	parts := strings.Split(text, "```")

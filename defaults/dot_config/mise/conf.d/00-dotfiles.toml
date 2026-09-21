@@ -11,7 +11,10 @@
 # config.toml or the drift returns.
 
 [settings]
-minimum_release_age = "0s"
+# Stable workstation channel: do not auto-install a release until it has had
+# seven days of ecosystem exposure. Project-local pins and the committed lock
+# file remain authoritative when a repository needs a newer version.
+minimum_release_age = "7d"
 # Install missing tools automatically
 auto_install = true
 # Ensure mise tool paths/shims are placed ahead of system PATH
@@ -153,17 +156,17 @@ just = "latest"
 [env]
 # Environment variables to set
 MISE_EXPERIMENTAL = "1"
-# Use the gh token when authenticated (lifts GitHub API rate limits for
-# aqua/ubi backends), but degrade gracefully when gh is absent or logged
-# out. Without the `|| true` the failing command makes mise abort *every*
-# operation with "failed to parse template" — breaking `dot env`,
-# `mise install`, and shell startup on any machine where `gh auth` hasn't
-# run yet.
-GITHUB_TOKEN = "{{exec(command='gh auth token 2>/dev/null || true')}}"
-# Build caches → /tmp (cleared on reboot)
-GOCACHE = "/tmp/builds/go-cache"
+# Authentication is deliberately task-scoped. Do not export a GitHub token
+# from this global workstation config: every process launched under mise would
+# inherit it, including untrusted build and test commands. GitHub-aware tools
+# should invoke `gh` directly so its credential helper retains ownership of
+# the token and only supplies it to the requested operation.
+# Build caches live below a per-user XDG root. Environment values are ordered:
+# later entries safely reference DOT_BUILD_ROOT through mise's template context.
+DOT_BUILD_ROOT = "{{ xdg_cache_home }}/dot/builds"
+GOCACHE = "{{ env.DOT_BUILD_ROOT }}/go-cache"
 # Go uses the system temporary directory; custom GOTMPDIR must already exist.
-PIP_CACHE_DIR = "/tmp/builds/pip-cache"
-UV_CACHE_DIR = "/tmp/builds/uv-cache"
-ZIG_LOCAL_CACHE_DIR = "/tmp/builds/zig-cache"
-ZIG_GLOBAL_CACHE_DIR = "/tmp/builds/zig-global-cache"
+PIP_CACHE_DIR = "{{ env.DOT_BUILD_ROOT }}/pip-cache"
+UV_CACHE_DIR = "{{ env.DOT_BUILD_ROOT }}/uv-cache"
+ZIG_LOCAL_CACHE_DIR = "{{ env.DOT_BUILD_ROOT }}/zig-cache"
+ZIG_GLOBAL_CACHE_DIR = "{{ env.DOT_BUILD_ROOT }}/zig-global-cache"

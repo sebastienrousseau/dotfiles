@@ -67,6 +67,15 @@ jobs:
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
+      - name: Stage standalone installer
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          set -euo pipefail
+          install -m 755 install.sh "dotfiles-install-${VERSION}.sh"
+          sha256sum "dotfiles-install-${VERSION}.sh" \
+            > "dotfiles-install-${VERSION}.sh.sha256"
+
       - name: Stage layout for distribution
         env:
           VERSION: ${{ steps.ver.outputs.version }}
@@ -156,12 +165,15 @@ jobs:
 
       # Keyless sigstore bundle per archive, so a consumer can verify
       # with cosign alone — no gh CLI, no GitHub API.
-      - name: Sign archives (sigstore keyless)
+      - name: Sign installable assets (sigstore keyless)
         env:
           VERSION: ${{ steps.ver.outputs.version }}
         run: |
           set -euo pipefail
-          for asset in "dot-${VERSION}.tar.gz" "dot-${VERSION}.zip"; do
+          for asset in \
+            "dot-${VERSION}.tar.gz" \
+            "dot-${VERSION}.zip" \
+            "dotfiles-install-${VERSION}.sh"; do
             cosign sign-blob --yes \
               --bundle "${asset}.sigstore.json" \
               "$asset"
@@ -176,7 +188,10 @@ jobs:
           set -euo pipefail
           # A signature that is never verified is a signature nobody has
           # tested. Fail the build here rather than on a consumer's machine.
-          for asset in "dot-${VERSION}.tar.gz" "dot-${VERSION}.zip"; do
+          for asset in \
+            "dot-${VERSION}.tar.gz" \
+            "dot-${VERSION}.zip" \
+            "dotfiles-install-${VERSION}.sh"; do
             cosign verify-blob \
               --bundle "${asset}.sigstore.json" \
               --certificate-identity-regexp "^https://github.com/${REPOSITORY}/" \
@@ -195,6 +210,7 @@ jobs:
           subject-path: |
             dot-${{ steps.ver.outputs.version }}.tar.gz
             dot-${{ steps.ver.outputs.version }}.zip
+            dotfiles-install-${{ steps.ver.outputs.version }}.sh
 
       - name: Upload to release
         if: ${{ inputs.dry_run != true }}
@@ -211,6 +227,9 @@ jobs:
             "dot-${VERSION}.zip.sigstore.json" \
             "dot-${VERSION}.cyclonedx.json" \
             "dot-${VERSION}.SHA256SUMS" \
+            "dotfiles-install-${VERSION}.sh" \
+            "dotfiles-install-${VERSION}.sh.sha256" \
+            "dotfiles-install-${VERSION}.sh.sigstore.json" \
             --clobber
 
       # Dry runs still publish the artefacts somewhere inspectable —
@@ -227,4 +246,7 @@ jobs:
             dot-${{ steps.ver.outputs.version }}.zip.sigstore.json
             dot-${{ steps.ver.outputs.version }}.cyclonedx.json
             dot-${{ steps.ver.outputs.version }}.SHA256SUMS
+            dotfiles-install-${{ steps.ver.outputs.version }}.sh
+            dotfiles-install-${{ steps.ver.outputs.version }}.sh.sha256
+            dotfiles-install-${{ steps.ver.outputs.version }}.sh.sigstore.json
           retention-days: 7

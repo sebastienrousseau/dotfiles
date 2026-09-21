@@ -15,8 +15,10 @@ End-to-end installation and verification, from zero to a fully-working environme
 
 ## Step 1: Run the Installer
 
+First complete the [verified release download](../../../README.md#verified-release-installer), then:
+
 ```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+bash /tmp/dotfiles-install.sh
 ```
 
 The installer:

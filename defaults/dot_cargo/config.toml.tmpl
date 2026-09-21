@@ -38,7 +38,7 @@ incremental = true
 # recovered by sccache below, which is content-addressed and so is
 # shared across projects *without* a lock.
 #
-# To override for one build:  CARGO_TARGET_DIR=/tmp/builds/foo cargo build
+# To override for one build: CARGO_TARGET_DIR="$DOT_BUILD_ROOT/foo" cargo build
 # Use sccache as a compilation cache. Content-addressed, so concurrent
 # builds of different projects sharing dependency versions all hit the
 # same cache without blocking each other.

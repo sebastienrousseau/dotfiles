@@ -18,8 +18,14 @@ source "$SCRIPT_DIR/../framework/assertions.sh"
 # ═══════════════════════════════════════════════════════════════
 
 test_start "readme_install_url_valid"
-# Install URL must point to install.sh on main
-assert_file_contains "$REPO_ROOT/README.md" "raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh" "README install URL must reference main/install.sh"
+# The public install path must be release-pinned and checksum verified.
+assert_file_contains "$REPO_ROOT/README.md" "releases/download/v" "README install URL must reference a release asset"
+
+test_start "readme_install_sha256_verified"
+assert_file_contains "$REPO_ROOT/README.md" "sha256sum -c" "README install path must verify SHA256"
+
+test_start "readme_install_does_not_execute_main"
+assert_output_not_contains "dotfiles/main/install.sh" "cat '$REPO_ROOT/README.md'"
 
 test_start "readme_dot_doctor_exists"
 assert_file_contains "$REPO_ROOT/README.md" "dot doctor" "README must reference dot doctor"

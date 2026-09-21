@@ -215,12 +215,12 @@ repos:
         files: '^(bin/dot|scripts/dot/commands/.*\.sh|tools/docs/generate-command-index\.sh|docs/manual/command-index\.md)$'
 
       - id: version-consistency
-        name: Version-bearing files match defaults/.chezmoidata.toml
-        entry: scripts/verify-release-versions
+        name: Version surfaces and release identity are valid
+        entry: scripts/release-preflight
         language: script
         pass_filenames: false
         stages: [pre-commit]
-        files: '^(defaults/\.chezmoidata\.toml|README\.md|CLAUDE\.md|AGENTS\.md|package\.json|share/man/man1/dot\.1|lib/dot/bento\.sh|llms\.txt|CHANGELOG\.md|install\.sh|\.well-known/.*\.json|scripts/verify-release-versions)$'
+        files: '^(defaults/\.chezmoidata\.toml|README\.md|CLAUDE\.md|AGENTS\.md|package\.json|share/man/man1/dot\.1|lib/dot/bento\.sh|llms\.txt|CHANGELOG\.md|install\.sh|\.well-known/.*\.json|scripts/(verify-release-versions|release-preflight))$'
 
       - id: spdx-grant
         name: SPDX headers declare the project's licence grant

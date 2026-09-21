@@ -15,7 +15,7 @@ Wallpapers — not `themes.toml` — are the source of truth. The system discove
 1. **System wallpapers** — platform-native (macOS `/System/Library/Desktop Pictures/`, Linux `/usr/share/backgrounds/`)
 2. **Custom wallpapers** — `~/Pictures/Wallpapers/` (custom overrides system on name collision)
 
-`extract-theme.py` runs K-Means++ in CIELAB on each wallpaper, generates a 16-color terminal palette plus UI/app mappings, and enforces WCAG AAA contrast. `rebuild-themes.sh` orchestrates discovery → parallel extraction → assembly into `.chezmoidata/themes.toml` (cached in `~/.cache/dotfiles/themes/`, regenerated only when wallpapers change).
+`extract-theme.py` runs K-Means++ in CIELAB on each wallpaper, generates a 16-color terminal palette plus UI/app mappings, and enforces WCAG AAA contrast. Semantic status colors are tuned independently for light and dark appearances so error, warning, success, and info remain distinct under protan, deutan, and tritan simulation. `rebuild-themes.sh` orchestrates discovery → parallel extraction → assembly into `.chezmoidata/themes.toml` (cached in `~/.cache/dotfiles/themes/`, regenerated only when wallpapers change).
 
 `.chezmoidata/themes.toml` is a **generated artifact**. Do not edit it directly.
 
@@ -31,7 +31,7 @@ dot theme list         # Show paired themes with System/Custom source
 
 ## Runtime Apply Behavior
 
-`dot theme` writes the selected theme to `.chezmoidata.toml`, regenerates target configs through chezmoi, then attempts live reloads for running applications.
+`dot theme` writes the selected theme to machine-local chezmoi data, validates and regenerates target configs inside a serialized transaction, then attempts live reloads for running applications. The tracked `.chezmoidata.toml` remains the fresh-install default. A required failure restores file and symlink snapshots; optional applications report typed skip/failure outcomes.
 
 - **macOS**:
   - Applies system Light/Dark appearance via `osascript` (`System Events`)
@@ -87,7 +87,7 @@ bg, fg, cursor, cursor_text, sel_bg, sel_fg
 c0  .. c15                  # 16 ANSI colors
 
 [themes.example-dark.ui]
-accent, accent_text         # white text always 7:1 against accent
+accent, accent_text         # black/white text always >= 7:1 against accent
 error, warning, success, info
 panel, border               # contrast-bound (1.03-2.0 for panel, 1.08-3.5 for border)
 
@@ -108,6 +108,23 @@ To add a new theme, add a wallpaper — there are no manual TOML edits.
 3. Run `dot theme rebuild` to regenerate `themes.toml` (parallel K-Means extraction, ~1-4s per wallpaper)
 4. Run `dot theme <name>` to test
 5. Verify with `chezmoi diff` before applying
+
+## Palette Quality Audit
+
+Every generated catalog is checked independently of the generator:
+
+```bash
+make audit-palettes
+python3 scripts/theme/audit-palettes.py --json
+python3 scripts/theme/audit-palettes.py --theme maui-dark
+```
+
+The versioned report checks body and semantic text contrast, focus and
+selection contrast, truecolor ANSI readability, separately quantized
+xterm-256 readability, wallpaper-support color distance, and semantic-role
+distance under protan/deutan/tritan simulation. The committed 228-theme catalog
+has no exceptions; a failure exits non-zero and identifies the theme, metric,
+observed value, and required floor.
 
 For best results, wallpapers should be 6016×6016 dynamic HEIC with ~1.6× brightness ratio between dark and light variants (golden ratio). Lower-resolution images are auto-resized; non-paired wallpapers are skipped from the picker.
 

@@ -24,7 +24,7 @@ few specialised subtrees.
 | `scripts/diagnostics/` | `doctor.sh` and its helpers — long-form environment health check. | `dot doctor` |
 | `scripts/security/` | Security-domain ops: `check-disclosure-key-expiry.sh`, `lock-configs.sh`, etc. | `dot security`, CI |
 | `scripts/secrets/` | Secret-bucket utilities (rotation, audit). | `dot secrets` subcommands |
-| `scripts/theme/` | Wallpaper-to-palette extraction logic. | `dot theme rebuild` |
+| `scripts/theme/` | Wallpaper-to-palette extraction plus deterministic contrast, xterm-256, and color-vision auditing. | `dot theme rebuild`, `make audit-palettes` |
 | `scripts/tools/` | Tool-helpers shipped via `dot tools` (e.g. `cmatrix.sh`, `emoji-picker.sh`, `figlet-banner.sh`, `log-rotate.sh`). Runtime-invoked. | `dot tools`, `dot env` |
 | `scripts/tuning/` | Opt-in OS tuning scripts (`macos.sh`, `linux.sh`). | `dot tune`, manual invocation |
 | `scripts/ops/` | Repo-wide ops: `rollback.sh`, etc. | `dot rollback`, maintenance |
@@ -32,7 +32,8 @@ few specialised subtrees.
 | `scripts/git-hooks/` | Git hooks not managed by chezmoi (kept here for portable install). | `install/provision/*` |
 | `scripts/qa/` | Quality-assurance helpers (PowerShell contract tests, version-consistency checks, scorecard snapshot, etc). | `.github/workflows/pr-signature.yml`, `powershell-contract.yml`, doc-drift |
 | `scripts/demo/` | Demonstration helpers (recordings, screenshots). | Manual |
-| `scripts/version-sync.sh` | Bulk version-string propagator (`scripts/qa/check-version-consistency.sh` is the verifier). | Release flow |
+| `scripts/version-sync.sh` | Propagates canonical `defaults/.chezmoidata.toml` version metadata to generated surfaces. | Release flow |
+| `scripts/release-preflight` | Rejects version drift, reused immutable tags, and installer checksum drift before release. | Release flow / CI |
 | `scripts/uninstall.sh` | Reverse-of-`install.sh` — user-invoked. | Manual |
 
 ### `tools/` (repo-only ops, not distributable)

@@ -157,6 +157,13 @@ Full parallel rebuild of ~150 wallpapers takes ~3-5 minutes on modern hardware (
 
 `dot-theme-sync` orchestrates the switch across every managed surface:
 
+Before mutation it acquires a per-user lock and snapshots installed targets.
+Required rendering failures restore files in reverse order, while successful
+operations are read-back verified and journaled under
+`${XDG_STATE_HOME:-~/.local/state}/dot/theme-transactions/`. Use
+`dot theme plan <family> --mode auto --json` to inspect the versioned operation
+contract without writing files or reloading applications.
+
 | Surface | Mechanism |
 |:---|:---|
 | Ghostty | `chezmoi apply config.tmpl` + DBus reload or SIGUSR2 |

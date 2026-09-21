@@ -59,7 +59,7 @@ jobs:
 
   secrets-scan:
     name: Security / Secrets Detection
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-secrets-scan.yml@07dcd2aca29d8abb0710292318e820a031cb62db # main
+    uses: ./.github/workflows/reusable-secrets-scan.yml
     with:
       run_guard: true
       run_additional_patterns: false
@@ -83,7 +83,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: TruffleHog OSS
-        uses: trufflesecurity/trufflehog@363923b901c911a9164f50b6c423f47c15372b1c # v3.97.4
+        uses: trufflesecurity/trufflehog@f714bf454f350590f4a24c3ddb1aef02c35bf5b6 # v3.97.5
         with:
           path: ./
           base: ${{ github.event.pull_request.base.sha }}
@@ -128,7 +128,7 @@ jobs:
 
       - name: Upload Grype results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4
+        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
         with:
           sarif_file: grype-results.sarif
           category: grype-analysis
@@ -154,7 +154,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Run Checkov
-        uses: bridgecrewio/checkov-action@a8664e3a0549367977f0cda990a34311835c87c0 # v12.3123.0
+        uses: bridgecrewio/checkov-action@444c9db6fa75e2d9c19ebf1fde7322089be9009e # v12.3125.0
         with:
           output_format: sarif
           output_file_path: checkov-results.sarif
@@ -166,7 +166,7 @@ jobs:
 
       - name: Upload Checkov results to GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4
+        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
         with:
           sarif_file: checkov-results.sarif
           category: checkov-analysis
@@ -209,7 +209,7 @@ jobs:
 
       - name: Upload container scan results
         if: always() && hashFiles('**/Dockerfile*') != ''
-        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4
+        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
         with:
           sarif_file: container-scan.sarif
           category: container-analysis
@@ -220,7 +220,7 @@ jobs:
 
   policy-enforcement:
     name: Security / Policy Enforcement
-    uses: sebastienrousseau/dotfiles/.github/workflows/reusable-security-baseline.yml@4a5da70c897f41c7a7fc24f4cd74ab30c03d37b5 # main
+    uses: ./.github/workflows/reusable-security-baseline.yml
     needs: [secrets-scan]
     # Only run on PRs to catch issues before merge
     if: github.event_name == 'pull_request'

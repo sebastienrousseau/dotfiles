@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.github.io/schemas/palette-audit.schema.json",
+  "title": "DOT palette quality audit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "catalog", "catalog_sha256", "summary", "results"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "catalog": { "type": "string", "minLength": 1 },
+    "catalog_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["themes", "passed", "failed", "failures"],
+      "properties": {
+        "themes": { "type": "integer", "minimum": 0 },
+        "passed": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "failures": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["theme", "mode", "passed", "metrics", "failures"],
+        "properties": {
+          "theme": { "type": "string", "minLength": 1 },
+          "mode": { "type": "string" },
+          "passed": { "type": "boolean" },
+          "metrics": { "type": "object" },
+          "failures": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["check", "actual", "minimum"]
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.github.io/schemas/ai-theme-result.schema.json",
+  "title": "DOT AI theme adapter result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "theme", "mode", "providers"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "theme": { "type": "string", "minLength": 1 },
+    "mode": { "enum": ["dark", "light"] },
+    "providers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["provider", "target", "status", "detail"],
+        "properties": {
+          "provider": {
+            "enum": ["codex", "claude", "gemini", "agy", "qwen", "opencode"]
+          },
+          "target": { "type": "string", "minLength": 1 },
+          "status": {
+            "enum": [
+              "updated",
+              "unchanged",
+              "not_installed",
+              "disabled",
+              "invalid_config",
+              "conflict",
+              "write_failed"
+            ]
+          },
+          "detail": { "type": "string" }
+        }
+      }
+    }
+  }
+}

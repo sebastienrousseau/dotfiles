@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/sebastienrousseau/dotfiles/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=githubactions&logoColor=white" alt="Build" /></a>
-  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.520-blue?style=for-the-badge&logo=semanticrelease&logoColor=white" alt="Version" /></a>
+  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.521-blue?style=for-the-badge&logo=semanticrelease&logoColor=white" alt="Version" /></a>
   <a href="https://www.npmjs.com/package/@sebastienrousseau/dotfiles"><img src="https://img.shields.io/npm/v/@sebastienrousseau/dotfiles?style=for-the-badge&logo=npm&logoColor=white&label=npm" alt="npm" /></a>
   <a href="https://doc.dotfiles.io/"><img src="https://img.shields.io/badge/Manual-doc.dotfiles.io-66c2a5?style=for-the-badge&labelColor=555555&logo=materialformkdocs&logoColor=white" alt="Manual" /></a>
   <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge&logo=github&logoColor=white" alt="Downloads" /></a>
@@ -23,7 +23,6 @@
   <a href="https://www.bestpractices.dev/projects/12840"><img src="https://img.shields.io/cii/level/12840?style=for-the-badge&logo=linuxfoundation&logoColor=white&label=OpenSSF%20Best%20Practices" alt="OpenSSF Best Practices" /></a>
   <a href="#license"><img src="https://img.shields.io/badge/License-Apache--2.0%20OR%20MIT-green?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="License: Apache-2.0 OR MIT" /></a>
   <a href="#requirements"><img src="https://img.shields.io/badge/toolchain-bash%205.0%20%C2%B7%20chezmoi%202.40-93450a?style=for-the-badge&logo=gnubash&logoColor=white" alt="Minimum toolchain: bash 5.0, chezmoi 2.40" /></a>
-  <a href="https://repology.org/project/dot-cli/versions"><img src="https://img.shields.io/repology/repositories/dot-cli?style=for-the-badge&label=Repology" alt="Repology" /></a>
 </p>
 
 ---
@@ -74,35 +73,29 @@
 
 ## Install
 
-### One-line installer
+### Verified release installer
 
-```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
-```
-
-The script needs `git` and `curl`. It fetches a SHA256-verified
-`chezmoi` binary, clones this repository to `~/.dotfiles`, runs
-`chezmoi init --apply`, and puts `dot` on your `PATH`. It runs on
-macOS, Ubuntu, Debian, Arch, WSL2, and GitHub Codespaces, and it is
-idempotent: run it once or a hundred times, same machine state.
-
-### Verified installer (recommended for primary workstations)
-
-Pin to a release tag, download the installer, check its SHA256
-against the value published with the release, then run it. The
-per-release hash and how it is generated are documented in
+The default installation path is pinned to a release and fails before
+execution if the installer bytes do not match the reviewed SHA256. Never pipe
+the moving `main` branch directly into a shell. The per-release hash and its
+release process are documented in
 [`docs/security/INSTALL_VERIFICATION.md`](docs/security/INSTALL_VERIFICATION.md).
 
 ```bash
 curl -fsSL -o /tmp/dotfiles-install.sh \
-  https://raw.githubusercontent.com/sebastienrousseau/dotfiles/v0.2.520/install.sh
-echo "3b5d1332fb07a1261da117e53f69acc0097c3d9bd676fc9f53a000257b72978e  /tmp/dotfiles-install.sh" \
-  | shasum -a 256 -c
+  https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.521/dotfiles-install-0.2.521.sh
+if command -v sha256sum >/dev/null 2>&1; then
+  echo "704e278f970d4aa53362204a89d044caefd64823b7d1cdf3a815c08cac971a89  /tmp/dotfiles-install.sh" | sha256sum -c -
+else
+  echo "704e278f970d4aa53362204a89d044caefd64823b7d1cdf3a815c08cac971a89  /tmp/dotfiles-install.sh" | shasum -a 256 -c -
+fi
 bash /tmp/dotfiles-install.sh
 ```
 
-The verified path also needs `shasum` or `sha256sum`. The one-line
-form above skips this check; use it for sandboxes and ephemeral CI.
+The script needs `git`, `curl`, and `sha256sum` or `shasum`. It downloads a
+checksum-verified `chezmoi` binary, clones the pinned release to
+`~/.dotfiles`, applies it, and puts `dot` on `PATH`. The installer is
+idempotent across macOS, Ubuntu, Debian, Arch, WSL2, and GitHub Codespaces.
 
 ### Pre-built release archive (`dot` CLI only)
 
@@ -113,10 +106,10 @@ directory. The archive
 carries SLSA build provenance (keyless, via Fulcio + Rekor):
 
 ```bash
-gh release download v0.2.520 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
-gh attestation verify dot-0.2.520.tar.gz --repo sebastienrousseau/dotfiles
-tar -xzf dot-0.2.520.tar.gz
-make -C dot-0.2.520 install PREFIX=/usr/local
+gh release download v0.2.521 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
+gh attestation verify dot-0.2.521.tar.gz --repo sebastienrousseau/dotfiles
+tar -xzf dot-0.2.521.tar.gz
+make -C dot-0.2.521 install PREFIX=/usr/local
 ```
 
 [`release-install-smoke.yml`](.github/workflows/release-install-smoke.yml)
@@ -177,8 +170,9 @@ air-gapped host; unpack it and run `./install.sh --force`.
 Silent install (no prompts):
 
 ```bash
+# After downloading and verifying /tmp/dotfiles-install.sh as shown above:
 DOTFILES_SILENT=1 DOTFILES_NONINTERACTIVE=1 \
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+  bash /tmp/dotfiles-install.sh --force
 ```
 
 Docker sandbox:
@@ -257,7 +251,8 @@ back.
 ## Quick Start
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+# First download and verify /tmp/dotfiles-install.sh as shown in Install.
+bash /tmp/dotfiles-install.sh
 dot doctor            # audit tools, paths, portability, security
 dot learn             # interactive tour of shells, secrets, themes, performance
 dot theme rebuild     # generate themes from the wallpapers on this machine
@@ -307,10 +302,10 @@ every push.
 
 ```bash
 # The framework (everything, chezmoi-managed)
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+bash /tmp/dotfiles-install.sh  # after the verified download above
 
 # Only the dot CLI, from the attested release archive
-gh release download v0.2.520 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
+gh release download v0.2.521 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
 
 # The Go satellites are (re)built on apply by
 #   defaults/run_onchange_24-build-dot-ui.sh.tmpl
@@ -357,7 +352,7 @@ What the repository can show today:
 - **Bash line coverage floor 58%** measured by pure `xtrace`, no
   kcov, ratcheted up slice by slice with the history recorded in
   [`coverage.yml`](.github/workflows/coverage.yml).
-- **51 workflows**, every third-party action SHA-pinned, Harden
+- **53 workflows**, every third-party action SHA-pinned, Harden
   Runner in every one of them.
 
 The gaps, so nobody has to find them:
@@ -645,6 +640,7 @@ regenerated.
 ```bash
 dot theme              # interactive picker (paired themes only)
 dot theme set maui     # select a family and follow OS appearance
+dot theme plan maui --mode auto --json # inspect the pure transaction plan
 dot theme tahoe-dark   # switch directly
 dot theme toggle       # swap dark and light within the current family
 dot theme mode light   # pin a manual appearance
@@ -871,7 +867,7 @@ design is
 
 ```toml
 # defaults/.chezmoidata.toml — repo-wide defaults, schema-checked in CI
-dotfiles_version = "0.2.520"
+dotfiles_version = "0.2.521"
 
 [features]
 alias_wrapper = false   # confirm destructive aliases
@@ -1136,7 +1132,7 @@ corpus lives beside the harnesses under
 | `release-install-smoke.yml` / `release-distribute-*.yml` | release | Clean-install smoke on Ubuntu + macOS; Homebrew, Scoop, AUR fan-out |
 | `npm-publish.yml` / `manual-publish.yml` / `pages.yml` | release, push | npm via OIDC trusted publishing; the manual in nine formats; the site |
 
-51 workflows in total; the cadence and the composite actions are
+53 workflows in total; the cadence and the composite actions are
 documented in
 [`docs/operations/CI_CADENCE.md`](docs/operations/CI_CADENCE.md) and
 [`docs/operations/CI_COMPOSITES.md`](docs/operations/CI_COMPOSITES.md).
@@ -1220,7 +1216,7 @@ architectural level, not behind opt-in flags. The full analysis is
   tag reference is the SLSA generator reusable workflow, which its
   maintainers require to be referenced by release tag
   ([`docs/security/CI_PINNING.md`](docs/security/CI_PINNING.md)).
-- **Harden Runner in all 51 workflows**, six jobs in egress-block
+- **Harden Runner in all 53 workflows**, six jobs in egress-block
   mode with an explicit endpoint list
   ([`docs/security/CI_EGRESS_ALLOWLIST.md`](docs/security/CI_EGRESS_ALLOWLIST.md)).
 - **Releases carry provenance:** SLSA L3 build attestation on the
@@ -1359,6 +1355,6 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 ---
 
 **THE ARCHITECT** ᛫ [Sebastien Rousseau](https://sebastienrousseau.com)
-**THE ENGINE** ᛞ [EUXIS](https://euxis.co) ᛫ Enterprise Unified Execution Intelligence System
+**THE ENGINE** ᛞ [EUXIS](https://github.com/sebastienrousseau/euxis) ᛫ Enterprise Unified Execution Intelligence System
 
 <p align="right"><a href="#contents">Back to Top</a></p>

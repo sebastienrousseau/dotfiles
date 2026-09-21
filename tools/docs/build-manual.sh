@@ -1161,7 +1161,7 @@ build_landing() {
       {
         "@type": "Question",
         "name": "How do I install .dotfiles?",
-        "acceptedAnswer": {"@type": "Answer", "text": "Run: bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)\" — then verify with 'dot doctor'."}
+        "acceptedAnswer": {"@type": "Answer", "text": "Download the release-pinned installer, verify its published SHA256 as documented in the install guide, run it, then verify the workstation with 'dot doctor'."}
       },
       {
         "@type": "Question",
@@ -1259,12 +1259,13 @@ HTML
     <p>Integrity: <a href="SHA256SUMS">SHA256SUMS</a> · Version history: <a href="$REPO_URL/releases">GitHub Releases</a></p>
 
     <h2>Quick start</h2>
-    <pre><code>bash -c "\$(curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.sh)"
+    <pre><code># Download and SHA256-verify the release installer per the install guide.
+bash /tmp/dotfiles-install.sh
 dot doctor
 dot learn</code></pre>
 
     <h2>Source</h2>
-    <p>Repository: <a href="$REPO_URL">sebastienrousseau/dotfiles</a> · License: <a href="$REPO_URL/blob/main/LICENSE">MIT</a></p>
+    <p>Repository: <a href="$REPO_URL">sebastienrousseau/dotfiles</a> · License: <a href="$REPO_URL/blob/main/LICENSE-MIT">MIT</a> OR <a href="$REPO_URL/blob/main/LICENSE-APACHE">Apache-2.0</a></p>
   </main>
 
   <footer class="site-footer">

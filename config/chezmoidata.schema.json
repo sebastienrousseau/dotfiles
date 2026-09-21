@@ -5,12 +5,17 @@
   "description": "Schema for the dotfiles project's root .chezmoidata.toml file. Catches typos in feature flags, profile names, and tool selections at PR time.",
   "type": "object",
   "additionalProperties": true,
-  "required": ["dotfiles_version", "profile"],
+  "required": ["dotfiles_version", "previous_dotfiles_version", "profile"],
   "properties": {
     "dotfiles_version": {
       "type": "string",
       "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?(\\+[A-Za-z0-9.-]+)?$",
       "description": "Semver-style version string. Single source of truth synchronised by version-sync.sh."
+    },
+    "previous_dotfiles_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Immediate published predecessor. Release preflight requires dotfiles_version to be exactly one patch greater."
     },
     "profile": {
       "type": "string",
@@ -52,7 +57,22 @@
     },
     "features": {
       "type": "object",
-      "description": "Feature flags. All values must be boolean.",
+      "description": "Feature flags. Scalar flags are boolean; explicitly declared nested policy tables have their own schemas.",
+      "properties": {
+        "ai_theme_providers": {
+          "type": "object",
+          "description": "Per-provider overrides for wallpaper-aware AI CLI appearance updates.",
+          "additionalProperties": false,
+          "properties": {
+            "codex": { "type": "boolean" },
+            "claude": { "type": "boolean" },
+            "gemini": { "type": "boolean" },
+            "agy": { "type": "boolean" },
+            "qwen": { "type": "boolean" },
+            "opencode": { "type": "boolean" }
+          }
+        }
+      },
       "additionalProperties": {
         "type": "boolean"
       }
