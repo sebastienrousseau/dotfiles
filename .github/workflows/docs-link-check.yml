@@ -104,6 +104,22 @@ jobs:
               || gh issue create --repo "$REPOSITORY" --title "$title" --body "$body"
           fi
 
+      - name: Close the resolved tracking issue
+        if: steps.lychee.outputs.exit_code == 0
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          title="Broken external links detected"
+          existing="$(gh issue list --repo "$REPOSITORY" --state open \
+            --search "$title in:title" --json number --jq '.[0].number // empty')"
+          if [[ -n "$existing" ]]; then
+            gh issue close "$existing" --repo "$REPOSITORY" \
+              --comment "Resolved by a clean external-link run: $RUN_URL"
+          fi
+
   reuse:
     name: Docs / REUSE lint
     if: github.event_name != 'schedule'

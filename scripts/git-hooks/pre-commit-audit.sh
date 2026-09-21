@@ -103,7 +103,7 @@ fi
 if echo "$STAGED_FILES" | grep -q "^README.md$"; then
   echo -n "   🏛️  Checking README signature... "
   EXPECTED_ARCHITECT='**THE ARCHITECT** ᛫ [Sebastien Rousseau](https://sebastienrousseau.com)'
-  EXPECTED_ENGINE='**THE ENGINE** ᛞ [EUXIS](https://euxis.co) ᛫ Enterprise Unified Execution Intelligence System'
+  EXPECTED_ENGINE='**THE ENGINE** ᛞ [EUXIS](https://github.com/sebastienrousseau/euxis) ᛫ Enterprise Unified Execution Intelligence System'
   README_CONTENT=$(git show :README.md 2>/dev/null || cat README.md)
   if echo "$README_CONTENT" | grep -qF "$EXPECTED_ARCHITECT" && echo "$README_CONTENT" | grep -qF "$EXPECTED_ENGINE"; then
     printf '%b\\n' "${GREEN}PASSED${NC}"
