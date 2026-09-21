@@ -270,6 +270,13 @@ else
   _fail "pty run failed"
 fi
 
+test_start "tty_steps_never_reserves_fifo_with_mktemp_u"
+if grep -q 'mktemp -u' "$REPO_ROOT/lib/dot/ui.sh"; then
+  _fail "ui steps must create a private runtime directory before its FIFO"
+else
+  _pass "ui steps avoid the racy mktemp -u pattern"
+fi
+
 test_start "tty_table_end_prefers_dot_ui_then_gum_then_printf"
 rm -f "$WORK/dot-ui.table" "$WORK/gum.calls"
 if tty_run 'ui_table_begin "Tool" "Ver"; ui_table_add "rg" "14"; ui_table_end; echo "hdrs=${#_UI_TABLE_HEADERS[@]}"'; then
