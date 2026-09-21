@@ -27,7 +27,7 @@ func read(root *os.Root, name string) ([]byte, Snapshot, error) {
 		return nil, s, err
 	}
 	st, ok := i.Sys().(*syscall.Stat_t)
-	if !ok || !i.Mode().IsRegular() || st.Nlink != 1 || i.Size() > MaxFile || i.Mode()&0077 != 0 || st.Uid != uint32(os.Getuid()) {
+	if !ok || !i.Mode().IsRegular() || st.Nlink != 1 || i.Size() > MaxFile || i.Mode()&0077 != 0 || i.Mode()&0400 == 0 || i.Mode()&(os.ModeSetuid|os.ModeSetgid|os.ModeSticky) != 0 || st.Uid != uint32(os.Getuid()) {
 		return nil, s, fmt.Errorf("DOT_E_POLICY: not a private owned regular file")
 	}
 	b, err := io.ReadAll(io.LimitReader(f, MaxFile+1))

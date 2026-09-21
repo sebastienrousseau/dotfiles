@@ -89,6 +89,34 @@ func TestCrossRootPlanRejected(t *testing.T) {
 	restored(t, e)
 }
 
+func TestModePolicy(t *testing.T) {
+	for _, mode := range []os.FileMode{0500, os.ModeSetuid | 0600, os.ModeSetgid | 0600, os.ModeSticky | 0600, 0300} {
+		t.Run(mode.String(), func(t *testing.T) {
+			e, p, data := setup(t)
+			if err := e.Root.Chmod("hello.txt", mode); err != nil {
+				if errors.Is(err, os.ErrPermission) && mode&(os.ModeSetuid|os.ModeSetgid) != 0 {
+					t.Skip("filesystem already refuses privilege bits")
+				}
+				t.Fatal(err)
+			}
+			s, err := e.Observe("hello.txt")
+			if mode != 0500 {
+				if err == nil {
+					t.Fatal("unsafe file mode accepted")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			p.Operations[0].Before = s
+			if _, err = e.Prepare(p, data); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
 func TestCrashBoundaries(t *testing.T) {
 	for _, point := range []string{"prepared", "committing", "flushed-0", "renamed-0", "flushed-1", "renamed-1", "committed"} {
 		t.Run(point, func(t *testing.T) {

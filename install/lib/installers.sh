@@ -68,7 +68,7 @@ archive_paths_are_safe() {
   while IFS= read -r entry; do
     [[ -n "$entry" ]] || continue
     case "$entry" in
-      /* | ../* | */../* | */.. | *\\* | *:*) die "Archive contains unsafe path: $entry" ;;
+      /* | .. | ../* | */../* | */.. | *//* | */./* | */. | *\\* | *:*) die "Archive contains unsafe path: $entry" ;;
     esac
     if printf '%s' "$entry" | LC_ALL=C grep -q '[^ -~]'; then
       die "Archive contains control characters."

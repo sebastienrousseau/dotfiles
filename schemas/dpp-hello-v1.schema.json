@@ -15,7 +15,7 @@
         "uid": {"type": "integer", "minimum": 0, "maximum": 4294967295},
         "gid": {"type": "integer", "minimum": 0, "maximum": 4294967295}
       },
-      "allOf": [{"if": {"properties": {"exists": {"const": false}}}, "then": {"properties": {"sha256": {"const": ""}, "mode": {"const": 0}, "uid": {"const": 0}, "gid": {"const": 0}}}, "else": {"properties": {"sha256": {"$ref": "#/$defs/hash"}, "mode": {"enum": [256, 384, 448]}}}}]
+      "allOf": [{"if": {"properties": {"exists": {"const": false}}}, "then": {"properties": {"sha256": {"const": ""}, "mode": {"const": 0}, "uid": {"const": 0}, "gid": {"const": 0}}}, "else": {"properties": {"sha256": {"$ref": "#/$defs/hash"}, "mode": {"enum": [256, 320, 384, 448]}}}}]
     },
     "manifest": {
       "type": "object", "additionalProperties": false,

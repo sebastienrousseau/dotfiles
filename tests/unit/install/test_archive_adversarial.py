@@ -23,13 +23,15 @@ class Archives(unittest.TestCase):
 
     def test_tar_matrix(self):
         cases = ["valid", "absolute", "traversal", "symlink", "hardlink",
-                 "fifo", "device", "duplicate", "backslash", "drive", "corrupt"]
+                 "fifo", "device", "duplicate", "backslash", "drive", "corrupt",
+                 "parent", "alias", "double-slash"]
         with tempfile.TemporaryDirectory() as directory:
             for case in cases:
                 with self.subTest(case=case):
                     path = Path(directory) / f"{case}.tar"
                     name = {"absolute": "/escape", "traversal": "../escape",
-                            "backslash": "..\\escape", "drive": "C:/escape"}.get(case, "bin/tool")
+                            "backslash": "..\\escape", "drive": "C:/escape",
+                            "parent": "..", "alias": "bin/./tool", "double-slash": "bin//tool"}.get(case, "bin/tool")
                     with tarfile.open(path, "w") as archive:
                         entry = tarfile.TarInfo(name)
                         entry.mode = 0o755
@@ -49,11 +51,13 @@ class Archives(unittest.TestCase):
 
     def test_zip_matrix(self):
         with tempfile.TemporaryDirectory() as directory:
-            for case in ("valid", "traversal", "absolute", "symlink", "backslash", "drive", "corrupt"):
+            for case in ("valid", "traversal", "absolute", "symlink", "backslash", "drive", "corrupt",
+                         "parent", "alias", "double-slash"):
                 with self.subTest(case=case):
                     path = Path(directory) / f"{case}.zip"
                     name = {"absolute": "/escape", "traversal": "../escape",
-                            "backslash": "..\\escape", "drive": "C:/escape"}.get(case, "bin/tool")
+                            "backslash": "..\\escape", "drive": "C:/escape",
+                            "parent": "..", "alias": "bin/./tool", "double-slash": "bin//tool"}.get(case, "bin/tool")
                     with zipfile.ZipFile(path, "w") as archive:
                         entry = zipfile.ZipInfo(name)
                         entry.create_system = 3

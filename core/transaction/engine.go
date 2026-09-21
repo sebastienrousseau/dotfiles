@@ -189,7 +189,7 @@ func validate(p Plan) error {
 		if !o.After.Exists || o.After.Mode != 0600 || !hashPattern.MatchString(o.After.Digest) {
 			return fmt.Errorf("DOT_E_VALIDATION: artifact policy")
 		}
-		if o.Before.Exists && (!hashPattern.MatchString(o.Before.Digest) || o.Before.Mode&0077 != 0) {
+		if o.Before.Exists && (!hashPattern.MatchString(o.Before.Digest) || o.Before.Mode > 0700 || o.Before.Mode&0077 != 0 || o.Before.Mode&0400 == 0) {
 			return fmt.Errorf("DOT_E_VALIDATION: precondition")
 		}
 		if !o.Before.Exists && o.Before != (Snapshot{}) {
