@@ -13,6 +13,7 @@ bash tests/visual/fetch-fonts.sh "$tests_root/fonts"
 mkdir "$tests_root/screenshots"
 docker build -f tests/visual/Dockerfile -t dot-visual-contracts:local .
 docker run --rm --init --security-opt no-new-privileges \
+  --user "$(id -u):$(id -g)" --env HOME=/tmp \
   --mount "type=bind,src=$PWD,dst=/repo,readonly" \
   --mount "type=bind,src=$tests_root/fonts,dst=/usr/local/share/fonts/dot,readonly" \
   --mount "type=bind,src=$tests_root/screenshots,dst=/output" \

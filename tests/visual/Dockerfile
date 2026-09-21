@@ -7,4 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 ENV LIBGL_ALWAYS_SOFTWARE=1
 WORKDIR /repo
+USER node
+# This batch image has no network service; health means renderer prerequisites exist.
+HEALTHCHECK --interval=30s --timeout=5s CMD test -x /usr/bin/kitty && test -x /usr/bin/tmux
 ENTRYPOINT ["xvfb-run", "-a", "-s", "-screen 0 3000x1400x24", "python3", "tests/visual/capture_tmux.py"]

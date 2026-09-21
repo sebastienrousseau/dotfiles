@@ -79,6 +79,7 @@ jobs:
           bash tests/visual/fetch-fonts.sh "$RUNNER_TEMP/visual-fonts"
           docker build -f tests/visual/Dockerfile -t dot-visual-contracts:ci .
           docker run --rm --init --security-opt no-new-privileges \
+            --user "$(id -u):$(id -g)" --env HOME=/tmp \
             --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/repo,readonly" \
             --mount "type=bind,src=$RUNNER_TEMP/visual-fonts,dst=/usr/local/share/fonts/dot,readonly" \
             --mount "type=bind,src=$RUNNER_TEMP/visual-output,dst=/output" \
