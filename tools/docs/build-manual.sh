@@ -1080,8 +1080,16 @@ build_archives() {
 
 build_checksums() {
   log "computing SHA256SUMS"
-  (cd "$BUILD_DIR" && (sha256sum dotfiles.* html.tar.gz search-index.json 2>/dev/null ||
-    shasum -a 256 dotfiles.* html.tar.gz search-index.json 2>/dev/null) >SHA256SUMS)
+  set -- "$BUILD_DIR"
+  if $FAST || ! $PDF_SUPPORT; then
+    set -- "$@" --fast
+  fi
+  if bash "$REPO_ROOT/tools/docs/checksum-manual.sh" "$@" >"$BUILD_DIR/SHA256SUMS.tmp"; then
+    mv "$BUILD_DIR/SHA256SUMS.tmp" "$BUILD_DIR/SHA256SUMS"
+  else
+    rm -f "$BUILD_DIR/SHA256SUMS.tmp"
+    die "manual asset checksum generation failed"
+  fi
   log "  → SHA256SUMS"
 }
 

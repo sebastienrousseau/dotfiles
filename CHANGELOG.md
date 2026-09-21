@@ -4,6 +4,17 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+## v0.2.522 — 2026-09-21 (Unreleased)
+
+### Fixed
+
+- Keep manual release uploads and checksum manifests in agreement, including
+  raw HTML, plain text, the search index, and the Markdown source archive.
+- Fail manual publication on missing outputs or checksum mismatches; reject
+  empty and symlinked assets and exclude build intermediates from checksums.
+- Add consumer-download, tamper, missing-output, and fast-build regressions
+  for the next sequential patch, v0.2.522.
+
 ## v0.2.521 — 2026-09-20
 
 ### Changed
