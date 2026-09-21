@@ -54,27 +54,40 @@ download_and_verify_sha256() {
 }
 
 archive_paths_are_safe() {
-  local kind="$1" archive="$2" entry
+  local kind="$1" archive="$2" entry listing metadata
   local list_cmd=()
   case "$kind" in
     tar) list_cmd=(tar -tf "$archive") ;;
     zip) list_cmd=(unzip -Z -1 "$archive") ;;
     *) die "Unsupported archive type: $kind" ;;
   esac
+  # Capture status explicitly: process substitution does not propagate a corrupt
+  # archive's listing failure to the loop. Reject ambiguous/control-character names.
+  listing="$("${list_cmd[@]}")" || die "Cannot list archive; refusing extraction."
+  [[ -n "$listing" ]] || die "Empty archive; refusing extraction."
   while IFS= read -r entry; do
     [[ -n "$entry" ]] || continue
     case "$entry" in
-      /* | ../* | */../* | */..) die "Archive contains unsafe path: $entry" ;;
+      /* | ../* | */../* | */.. | *\\* | *:*) die "Archive contains unsafe path: $entry" ;;
     esac
-  done < <("${list_cmd[@]}")
-  if [[ "$kind" == "tar" ]] &&
-    tar -tvf "$archive" | awk 'substr($1,1,1) == "l" || substr($1,1,1) == "h" { found=1 } END { exit !found }'; then
-    die "Archive contains links; refusing extraction."
+    if printf '%s' "$entry" | LC_ALL=C grep -q '[^ -~]'; then
+      die "Archive contains control characters."
+    fi
+  done <<<"$listing"
+  if [[ -n "$(printf '%s\n' "$listing" | sed 's|^\./||;s|/$||' | LC_ALL=C sort | uniq -d)" ]]; then
+    die "Archive contains duplicate paths; refusing extraction."
+  fi
+  if [[ "$kind" == "tar" ]]; then
+    metadata="$(tar -tvf "$archive")" || die "Cannot inspect archive metadata."
+    if printf '%s\n' "$metadata" | awk 'substr($1,1,1) != "-" && substr($1,1,1) != "d" { found=1 } END { exit !found }'; then
+      die "Archive contains links or special files; refusing extraction."
+    fi
   fi
   if [[ "$kind" == "zip" ]]; then
     command -v zipinfo >/dev/null 2>&1 || die "zipinfo is required for safe ZIP extraction."
-    if zipinfo -l "$archive" | awk 'substr($1,1,1) == "l" { found=1 } END { exit !found }'; then
-      die "ZIP archive contains symbolic links; refusing extraction."
+    metadata="$(zipinfo -l "$archive")" || die "Cannot inspect ZIP metadata."
+    if printf '%s\n' "$metadata" | awk '$1 ~ /^[lbcps?][-rwxstST?]{9}$/ { found=1 } END { exit !found }'; then
+      die "ZIP archive contains links or special files; refusing extraction."
     fi
   fi
 }
