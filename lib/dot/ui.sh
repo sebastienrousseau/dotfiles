@@ -565,11 +565,32 @@ _ui_json_esc() {
 # Write one event to the renderer, never failing the caller.
 _ui_steps_emit() {
   [[ -n "$_UI_STEPS_FD" ]] || return 0
-  { printf '%s\n' "$1" >&"$_UI_STEPS_FD"; } 2>/dev/null || true
+  # A renderer can exit before its producer (Ctrl-C, crash, closed terminal).
+  # `|| true` alone cannot catch SIGPIPE delivered to the parent shell's
+  # builtin printf. Ignore PIPE only in the writer subshell, then fall back
+  # to plain output without changing the caller's signal handlers.
+  if ! (
+    trap '' PIPE
+    printf '%s\n' "$1" >&"$_UI_STEPS_FD"
+  ) 2>/dev/null; then
+    if [[ "$_UI_STEPS_FD" =~ ^[0-9]+$ ]]; then
+      eval "exec ${_UI_STEPS_FD}>&-" 2>/dev/null || true
+    fi
+    _UI_STEPS_FD=""
+    _UI_STEPS_RICH=0
+    if [[ -n "$_UI_STEPS_PID" ]] && ! kill -0 "$_UI_STEPS_PID" 2>/dev/null; then
+      wait "$_UI_STEPS_PID" 2>/dev/null || true
+      _UI_STEPS_PID=""
+    fi
+  fi
+  return 0
 }
 
 # Rich-mode gate: interactive TTY + dot-ui, honouring every opt-out.
 _ui_steps_rich_ok() {
+  # Dynamic file descriptors require Bash 4.1. Stock macOS Bash must select
+  # plain output before `exec {fd}>` can terminate it as an invalid command.
+  ((BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 1))) || return 1
   [[ -t 1 ]] || return 1
   [[ "${DOTFILES_ACCESSIBILITY:-0}" != "1" ]] || return 1
   [[ -z "${NO_COLOR:-}" ]] || return 1
@@ -600,7 +621,7 @@ ui_steps_begin() {
     if [[ -n "$fifo" ]] && mkfifo -m 600 "$fifo" 2>/dev/null; then
       dot-ui run <"$fifo" &
       _UI_STEPS_PID=$!
-      if exec {_UI_STEPS_FD}>"$fifo" 2>/dev/null; then
+      if { exec {_UI_STEPS_FD}>"$fifo"; } 2>/dev/null; then
         rm -f "$fifo"
         rmdir "$fifo_dir" 2>/dev/null || true
         _UI_STEPS_RICH=1
@@ -626,15 +647,15 @@ ui_steps_begin() {
 ui_step() {
   local id="$1" label="${2:-}" state="${3:-run}" detail="${4:-}"
   [[ "$_UI_STEPS_ACTIVE" == "1" ]] || return 0
+  [[ -n "$label" ]] && _ui_step_label_set "$id" "$label"
 
   if [[ "$_UI_STEPS_RICH" == "1" ]]; then
     _ui_steps_emit "{\"t\":\"step\",\"id\":\"$(_ui_json_esc "$id")\",\"label\":\"$(_ui_json_esc "$label")\",\"state\":\"$(_ui_json_esc "$state")\",\"detail\":\"$(_ui_json_esc "$detail")\"}"
-    return 0
+    [[ "$_UI_STEPS_RICH" == "1" ]] && return 0
   fi
 
   # Plain mode: remember the label (set on the `run` event), print only on a
   # terminal state so each step is exactly one line.
-  [[ -n "$label" ]] && _ui_step_label_set "$id" "$label"
   local lbl
   lbl="$(_ui_step_label_get "$id")"
   case "$state" in

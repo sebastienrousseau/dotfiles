@@ -91,6 +91,8 @@ gping = "latest"
 pandoc = "latest"
 ripgrep = "latest"
 ruff = "latest"
+# Required by current nvim-treesitter to build its managed parsers.
+"aqua:tree-sitter/tree-sitter" = "latest"
 yazi = "26.5.6"
 zellij = "0.44.3"
 zoxide = "latest"
