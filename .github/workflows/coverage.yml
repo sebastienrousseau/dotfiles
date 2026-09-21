@@ -154,7 +154,7 @@ jobs:
       - name: Upload to Codecov
         # Tokenless OSS upload — no secret needed for public repos.
         # When the repo is private or rate-limited, set CODECOV_TOKEN.
-        uses: codecov/codecov-action@0b35c9ecc4f0529d0eb674914510c22f85b196b4 # v7.1.0
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         if: always()
         continue-on-error: true   # don't block PRs on Codecov flakiness
         with:
