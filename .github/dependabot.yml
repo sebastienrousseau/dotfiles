@@ -71,6 +71,15 @@ updates:
     labels:
       - "dependencies"
       - "security"
+    # Ubuntu tags here are intentional platform contracts (24.04 LTS and
+    # 26.04 LTS), not application versions. Preserve those release lines;
+    # digest-only refreshes remain eligible because they are not SemVer tag
+    # updates.
+    ignore:
+      - dependency-name: "ubuntu"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
 
   - package-ecosystem: "devcontainers"
     directory: "/"
