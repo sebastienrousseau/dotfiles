@@ -8,6 +8,8 @@ This file documents all notable changes to this project.
 
 ### Fixed
 
+- Reuse valid cached chezmoi binaries in CI by parsing the actual version
+  output; reject mismatched, malformed, prerelease, and failing binaries.
 - Preserve upgrade summaries when the progress renderer exits: contain SIGPIPE,
   keep stderr open, and fall back to plain step output. Failed upgrades now
   return nonzero and explain detached, untracked, or dirty source checkouts.
