@@ -5,12 +5,17 @@
   "description": "Schema for the dotfiles project's root .chezmoidata.toml file. Catches typos in feature flags, profile names, and tool selections at PR time.",
   "type": "object",
   "additionalProperties": true,
-  "required": ["dotfiles_version", "profile"],
+  "required": ["dotfiles_version", "previous_dotfiles_version", "profile"],
   "properties": {
     "dotfiles_version": {
       "type": "string",
       "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?(\\+[A-Za-z0-9.-]+)?$",
       "description": "Semver-style version string. Single source of truth synchronised by version-sync.sh."
+    },
+    "previous_dotfiles_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Immediate published predecessor. Release preflight requires dotfiles_version to be exactly one patch greater."
     },
     "profile": {
       "type": "string",

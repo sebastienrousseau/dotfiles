@@ -82,7 +82,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "Running integration tests..."
-          RUN_INTEGRATION=1 ./tests/framework/test_runner.sh --jobs auto 2>&1 | tee integration_output.log
+          RUN_INTEGRATION=1 ./tests/framework/test_runner.sh --jobs auto --integration-only 2>&1 | tee integration_output.log
 
           INTEGRATION_FAILED="$(
             grep -a "Total failed:" integration_output.log \

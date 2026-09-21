@@ -48,12 +48,36 @@ version="$(sed -nE 's/^dotfiles_version[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p
   exit 2
 }
 
+previous_version="$(sed -nE 's/^previous_dotfiles_version[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' defaults/.chezmoidata.toml | head -1)"
+[[ "$previous_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+  printf 'release-preflight: invalid or missing previous_dotfiles_version: %s\n' \
+    "${previous_version:-<empty>}" >&2
+  exit 2
+}
+
+IFS=. read -r version_major version_minor version_patch <<<"$version"
+IFS=. read -r previous_major previous_minor previous_patch <<<"$previous_version"
+expected_patch=$((10#$previous_patch + 1))
+if [[ "$version_major" != "$previous_major" || "$version_minor" != "$previous_minor" ]] ||
+  ((10#$version_patch != expected_patch)); then
+  fail "candidate v$version must be exactly one patch after v$previous_version"
+fi
+
 if ! bash scripts/verify-release-versions --quiet; then
   fail "version-bearing files do not match defaults/.chezmoidata.toml"
 fi
 
-tag="v${version}"
 head_commit="$(git rev-parse HEAD)"
+previous_tag="v${previous_version}"
+if ! git show-ref --verify --quiet "refs/tags/$previous_tag"; then
+  fail "predecessor tag $previous_tag does not exist; patch releases cannot be skipped"
+fi
+if ! git merge-base --is-ancestor "$previous_tag" "$head_commit"; then
+  fail "predecessor tag $previous_tag is not an ancestor of HEAD $head_commit"
+fi
+log "release-preflight: $previous_tag is the immediate ancestor release"
+
+tag="v${version}"
 
 if git show-ref --verify --quiet "refs/tags/$tag"; then
   tagged_commit="$(git rev-list -n 1 "$tag")"
