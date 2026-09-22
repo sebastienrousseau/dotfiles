@@ -32,10 +32,10 @@ func run() error {
 			if err = protocol.Strict(m.Params, &p); err != nil {
 				return err
 			}
-			if p.Protocol != 1 || len(p.Nonce) != 64 {
-				return fmt.Errorf("DOT_E_PROTOCOL: negotiation")
+			result, err = negotiate(p)
+			if err != nil {
+				return err
 			}
-			result = protocol.Identity{Protocol: 1, Nonce: p.Nonce, ID: "org.dot.hello"}
 		case "dot.plan":
 			result = protocol.Proposal{Names: []string{"hello.txt", "welcome.txt"}}
 		case "dot.materialize":
@@ -95,6 +95,30 @@ func run() error {
 		}
 	}
 	return nil
+}
+
+func negotiate(p protocol.Initialize) (protocol.Identity, error) {
+	nonce, err := hex.DecodeString(p.Nonce)
+	if err != nil || len(nonce) != 32 || p.Protocol != 1 || p.Profile != protocol.HelloProfile ||
+		p.RequiredAssurance != protocol.AssuranceAudit || !equal(p.Capabilities, protocol.HelloCapabilities) {
+		return protocol.Identity{}, fmt.Errorf("DOT_E_PROTOCOL: negotiation")
+	}
+	return protocol.Identity{
+		Protocol: 1, Profile: protocol.HelloProfile, Assurance: protocol.AssuranceAudit,
+		Capabilities: append([]string(nil), protocol.HelloCapabilities...), Nonce: p.Nonce, ID: "org.dot.hello",
+	}, nil
+}
+
+func equal(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 func main() {
 	if err := run(); err != nil {

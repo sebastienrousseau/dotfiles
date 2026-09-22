@@ -12,7 +12,10 @@ import (
 
 func TestRoundTrip(t *testing.T) {
 	var b bytes.Buffer
-	m := Message{JSONRPC: "2.0", ID: 1, Method: "dot.initialize", Params: Value(Initialize{1, strings.Repeat("a", 64)})}
+	m := Message{JSONRPC: "2.0", ID: 1, Method: "dot.initialize", Params: Value(Initialize{
+		Protocol: 1, Profile: HelloProfile, RequiredAssurance: AssuranceAudit,
+		Capabilities: HelloCapabilities, Nonce: strings.Repeat("a", 64),
+	})}
 	if err := Write(&b, m); err != nil {
 		t.Fatal(err)
 	}

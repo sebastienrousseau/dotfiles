@@ -6,7 +6,6 @@
 package host
 
 import (
-	"errors"
 	"os/exec"
 	"syscall"
 )
@@ -19,14 +18,7 @@ func configureProcess(cmd *exec.Cmd) (func() error, error) {
 		if cmd.Process == nil {
 			return nil
 		}
-		err := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
-		if errors.Is(err, syscall.ESRCH) {
-			return nil
-		}
-		if errors.Is(err, syscall.EPERM) && exitedGroup(cmd.Process.Pid) {
-			return nil
-		}
-		return err
+		return stopProcessGroup(cmd.Process.Pid)
 	}
 	cmd.Cancel = stop
 	return stop, nil
