@@ -61,7 +61,7 @@ func main() {
 		panic(fmt.Sprintf("unapproved executable result: %v", err))
 	}
 	for resource, want := range map[int]uint64{
-		syscall.RLIMIT_AS: 1 << 30, syscall.RLIMIT_CORE: 0, syscall.RLIMIT_CPU: 2,
+		syscall.RLIMIT_AS: 2 << 30, syscall.RLIMIT_CORE: 0, syscall.RLIMIT_CPU: 2,
 		syscall.RLIMIT_FSIZE: 65536, syscall.RLIMIT_NOFILE: 32,
 	} {
 		var limit syscall.Rlimit

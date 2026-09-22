@@ -8,14 +8,15 @@ package host
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 
 	"dotfiles.local/core/protocol"
 )
 
-func pluginCommand(ctx context.Context, plugin, _, assurance string) (*exec.Cmd, error) {
+func pluginCommand(ctx context.Context, plugin *os.File, _ string, assurance string) (*exec.Cmd, func(), error) {
 	if assurance != protocol.AssuranceAudit {
-		return nil, fmt.Errorf("DOT_E_SANDBOX_UNAVAILABLE: macOS process containment requires a signed App Sandbox helper")
+		return nil, nil, fmt.Errorf("DOT_E_SANDBOX_UNAVAILABLE: macOS process containment requires a signed App Sandbox helper")
 	}
-	return exec.CommandContext(ctx, plugin), nil
+	return exec.CommandContext(ctx, plugin.Name()), func() {}, nil
 }

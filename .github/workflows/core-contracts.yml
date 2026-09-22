@@ -74,6 +74,10 @@ jobs:
         if: runner.os == 'Linux'
         working-directory: core
         run: go test ./sandbox ./cmd/dot-core -run '^(TestLinuxContainment|TestContainedCommandLifecycle)$' -count=5
+      - name: Repeat Linux executable replacement boundary
+        if: runner.os == 'Linux'
+        working-directory: core
+        run: go test ./host -run '^TestPinned' -count=100
   contracts:
     runs-on: ubuntu-latest
     timeout-minutes: 5

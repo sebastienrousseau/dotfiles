@@ -20,8 +20,9 @@ import (
 )
 
 const (
-	maxArtifact = 65536
-	minimumABI  = 3 // includes REFER and TRUNCATE mediation
+	maxArtifact     = 65536
+	maxAddressSpace = 2 << 30 // leaves headroom for the Go runtime's reserved arenas
+	minimumABI      = 3       // includes REFER and TRUNCATE mediation
 )
 
 func Run(plugin, stage string) error {
@@ -60,7 +61,16 @@ func validate(plugin, stage string) error {
 	if !filepath.IsAbs(plugin) || !filepath.IsAbs(stage) || os.Getenv("DOT_STAGE_ROOT") != stage {
 		return fmt.Errorf("DOT_E_POLICY: exact absolute sandbox paths required")
 	}
-	pi, err := os.Lstat(plugin)
+	var pi os.FileInfo
+	var err error
+	if plugin == "/proc/self/fd/4" {
+		// Core passes the already-verified plugin as inherited descriptor 4.
+		// Following this single internal descriptor binds validation, Landlock
+		// and exec to that open inode rather than a replaceable pathname.
+		pi, err = os.Stat(plugin)
+	} else {
+		pi, err = os.Lstat(plugin)
+	}
 	if err != nil || !pi.Mode().IsRegular() || pi.Mode().Perm()&0022 != 0 || pi.Size() > 16<<20 {
 		return fmt.Errorf("DOT_E_PLUGIN_IDENTITY: sandbox executable policy")
 	}
@@ -98,7 +108,7 @@ func validateStaticELF(plugin string) error {
 
 func limits() error {
 	for resource, limit := range map[int]uint64{
-		unix.RLIMIT_AS:     1 << 30,
+		unix.RLIMIT_AS:     maxAddressSpace,
 		unix.RLIMIT_CORE:   0,
 		unix.RLIMIT_CPU:    2,
 		unix.RLIMIT_FSIZE:  maxArtifact,

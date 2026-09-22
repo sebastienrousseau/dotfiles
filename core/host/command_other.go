@@ -8,9 +8,10 @@ package host
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 )
 
-func pluginCommand(context.Context, string, string, string) (*exec.Cmd, error) {
-	return nil, fmt.Errorf("DOT_E_SANDBOX_UNAVAILABLE: platform plugin driver unavailable")
+func pluginCommand(context.Context, *os.File, string, string) (*exec.Cmd, func(), error) {
+	return nil, nil, fmt.Errorf("DOT_E_SANDBOX_UNAVAILABLE: platform plugin driver unavailable")
 }

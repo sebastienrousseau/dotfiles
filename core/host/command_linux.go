@@ -15,20 +15,25 @@ import (
 	"dotfiles.local/core/protocol"
 )
 
-func pluginCommand(ctx context.Context, plugin, stage, assurance string) (*exec.Cmd, error) {
+func pluginCommand(ctx context.Context, plugin *os.File, stage, assurance string) (*exec.Cmd, func(), error) {
 	if assurance == protocol.AssuranceAudit {
-		return exec.CommandContext(ctx, plugin), nil
+		return descriptorCommand(ctx, plugin, nil), func() {}, nil
 	}
 	if assurance != protocol.AssuranceProcess {
-		return nil, fmt.Errorf("DOT_E_POLICY: unsupported assurance")
+		return nil, nil, fmt.Errorf("DOT_E_POLICY: unsupported assurance")
 	}
 	core, err := os.Executable()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	runner := filepath.Join(filepath.Dir(core), "dot-sandbox")
-	if _, err = binary(runner); err != nil {
-		return nil, fmt.Errorf("DOT_E_SANDBOX_UNAVAILABLE: trusted runner: %w", err)
+	return containedCommand(ctx, filepath.Join(filepath.Dir(core), "dot-sandbox"), plugin, stage)
+}
+
+func containedCommand(ctx context.Context, runnerPath string, plugin *os.File, stage string) (*exec.Cmd, func(), error) {
+	runner, _, err := openBinary(runnerPath)
+	if err != nil {
+		return nil, nil, fmt.Errorf("DOT_E_SANDBOX_UNAVAILABLE: trusted runner: %w", err)
 	}
-	return exec.CommandContext(ctx, runner, plugin, stage), nil
+	closeRunner := func() { runner.Close() }
+	return descriptorCommand(ctx, runner, []*os.File{plugin}, descriptorPath(4), stage), closeRunner, nil
 }
