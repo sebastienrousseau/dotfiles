@@ -22,12 +22,14 @@ recover pre-capability hello transactions; a newly negotiated hello proposal mus
 contain the exact required effect.
 
 The restricted profile negotiates all security-relevant dimensions explicitly:
-profile `org.dot.hello/v1`, assurance `audit`, and the exact ordered capability set
-`materialize`, `plan`, `post-commit-effects`, `validate`. The manifest binds profile
-and assurance before launch. Core sends its required values and nonce in `dot.initialize`; the plugin
-must echo an exact identity, profile, assurance, capability set, protocol and nonce.
+profile `org.dot.hello/v1`, assurance `audit` or Linux `process`, and the exact
+ordered capability set `materialize`, `plan`, `post-commit-effects`, `validate`.
+The manifest binds profile and assurance before launch. Core sends its required
+values and nonce in `dot.initialize`; the plugin must echo an exact identity,
+profile, assurance, capability set, protocol and nonce.
 Missing, reordered, added or downgraded values fail before planning. Audit consent
-does not satisfy or impersonate a future OS-enforced assurance level.
+does not satisfy process assurance, and protocol claims never impersonate platform
+enforcement.
 
 Proposal identity binds observed preconditions, ordered slots, typed effects, nonce
 and executable digest. Core seals the final plan only after verifying materialized bytes and

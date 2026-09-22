@@ -83,13 +83,15 @@ COV_SKIP_TESTS="${COV_SKIP_TESTS:-regression/test_test_framework_invariants.sh}"
 # `gtimeout` (brew coreutils), then a Perl alarm fallback available on
 # stock macOS. Without a wrapper, a single blocking traced test can stall
 # the entire sweep.
-COV_TIMEOUT_CMD=""
-if command -v timeout >/dev/null 2>&1; then
-  COV_TIMEOUT_CMD="timeout"
-elif command -v gtimeout >/dev/null 2>&1; then
-  COV_TIMEOUT_CMD="gtimeout"
-elif command -v perl >/dev/null 2>&1; then
-  COV_TIMEOUT_CMD="_cov_perl_timeout"
+if [[ "${COV_TIMEOUT_CMD+x}" != "x" ]]; then
+  COV_TIMEOUT_CMD=""
+  if command -v timeout >/dev/null 2>&1; then
+    COV_TIMEOUT_CMD="timeout"
+  elif command -v gtimeout >/dev/null 2>&1; then
+    COV_TIMEOUT_CMD="gtimeout"
+  elif command -v perl >/dev/null 2>&1; then
+    COV_TIMEOUT_CMD="_cov_perl_timeout"
+  fi
 fi
 
 # shellcheck disable=SC2317  # exported for indirect worker invocation

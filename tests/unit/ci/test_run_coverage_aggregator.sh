@@ -458,55 +458,42 @@ test_start "incomplete_sweep_is_a_hard_error"
 # `xargs … || true` hides it. The runner must refuse to report a
 # percentage computed from a fraction of the suite.
 #
-# The fixture has to find its grandparent to kill it; without /proc or
-# `ps` there is no portable way, so record a skip rather than a false
-# failure (a slim container is the case that hits this).
-if [[ ! -r /proc/self/stat ]] && ! command -v ps >/dev/null 2>&1; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (no /proc and no ps to find the worker)"
-else
-  mkdir -p "$SANDBOX/tests-partial/unit" "$SANDBOX/tests-partial/regression"
-  printf '#!/usr/bin/env bash\necho "RESULTS:1:1:0"\n' \
-    >"$SANDBOX/tests-partial/unit/test_ok.sh"
-  cat >"$SANDBOX/tests-partial/unit/test_kills_its_worker.sh" <<'EOF'
+# Disable the optional timeout wrapper in this isolated fixture so the test's
+# direct parent is always the xargs worker. This makes the failure portable
+# across GNU timeout, gtimeout, and the Perl fallback process trees.
+mkdir -p "$SANDBOX/tests-partial/unit" "$SANDBOX/tests-partial/regression"
+printf '#!/usr/bin/env bash\necho "RESULTS:1:1:0"\n' \
+  >"$SANDBOX/tests-partial/unit/test_ok.sh"
+cat >"$SANDBOX/tests-partial/unit/test_kills_its_worker.sh" <<'EOF'
 #!/usr/bin/env bash
-# Kill the xargs worker two levels up (this shell <- timeout <- worker),
-# reproducing "xargs: bash: terminated with signal 15": the worker dies
+# Kill the direct xargs worker (this shell <- worker), reproducing
+# "xargs: bash: terminated with signal 15": the worker dies
 # before it can record a status, so this test leaves no result behind.
-# /proc first (Linux, and present even in images without procps), `ps`
-# second (macOS and anything else).
-worker=""
-if [[ -r "/proc/$PPID/stat" ]]; then
-  worker="$(awk '{print $4}' "/proc/$PPID/stat" 2>/dev/null)"
-fi
-if [[ -z "$worker" ]] && command -v ps >/dev/null 2>&1; then
-  worker="$(ps -o ppid= -p "$PPID" 2>/dev/null | tr -d ' ')"
-fi
-[[ -n "$worker" && "$worker" != "0" ]] && kill -TERM "$worker" 2>/dev/null
+kill -TERM "$PPID" 2>/dev/null
 sleep 5
 EOF
-  set +e
-  env REPO_ROOT="$SANDBOX" \
-    TESTS_DIR="$SANDBOX/tests-partial" \
-    COVERAGE_DIR="$SANDBOX/coverage5" \
-    COVERAGE_OUT="$SANDBOX/coverage5/lcov.info" \
-    COV_INCLUDE_DIRS="$SANDBOX/src" \
-    MIN_COVERAGE_PCT=0 \
-    COV_TEST_TIMEOUT=30 \
-    JOBS=1 \
-    bash "$RUNNER" >"$SANDBOX/runner-partial.log" 2>&1
-  partial_ec=$?
-  rm -rf "$SANDBOX/tests-partial"
-  if [[ "$partial_ec" -ne 0 ]] &&
-    grep -qE "tests-completed: [01]/2" "$SANDBOX/runner-partial.log" &&
-    grep -q "no result recorded for: unit/test_kills_its_worker.sh" "$SANDBOX/runner-partial.log"; then
-    ((TESTS_PASSED++)) || true
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
-  else
-    ((TESTS_FAILED++)) || true
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected a non-zero exit naming the test with no result (got $partial_ec)"
-    grep -E 'tests-completed|no result' "$SANDBOX/runner-partial.log" >&2 || true
-  fi
+set +e
+env REPO_ROOT="$SANDBOX" \
+  TESTS_DIR="$SANDBOX/tests-partial" \
+  COVERAGE_DIR="$SANDBOX/coverage5" \
+  COVERAGE_OUT="$SANDBOX/coverage5/lcov.info" \
+  COV_INCLUDE_DIRS="$SANDBOX/src" \
+  MIN_COVERAGE_PCT=0 \
+  COV_TEST_TIMEOUT=30 \
+  COV_TIMEOUT_CMD= \
+  JOBS=1 \
+  bash "$RUNNER" >"$SANDBOX/runner-partial.log" 2>&1
+partial_ec=$?
+rm -rf "$SANDBOX/tests-partial"
+if [[ "$partial_ec" -ne 0 ]] &&
+  grep -qE "tests-completed: [01]/2" "$SANDBOX/runner-partial.log" &&
+  grep -q "no result recorded for: unit/test_kills_its_worker.sh" "$SANDBOX/runner-partial.log"; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected a non-zero exit naming the test with no result (got $partial_ec)"
+  grep -E 'tests-completed|no result' "$SANDBOX/runner-partial.log" >&2 || true
 fi
 
 test_start "xtrace_uses_a_dedicated_descriptor"

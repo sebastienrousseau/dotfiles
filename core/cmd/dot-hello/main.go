@@ -103,11 +103,12 @@ func run() error {
 func negotiate(p protocol.Initialize) (protocol.Identity, error) {
 	nonce, err := hex.DecodeString(p.Nonce)
 	if err != nil || len(nonce) != 32 || p.Protocol != 1 || p.Profile != protocol.HelloProfile ||
-		p.RequiredAssurance != protocol.AssuranceAudit || !equal(p.Capabilities, protocol.HelloCapabilities) {
+		(p.RequiredAssurance != protocol.AssuranceAudit && p.RequiredAssurance != protocol.AssuranceProcess) ||
+		!equal(p.Capabilities, protocol.HelloCapabilities) {
 		return protocol.Identity{}, fmt.Errorf("DOT_E_PROTOCOL: negotiation")
 	}
 	return protocol.Identity{
-		Protocol: 1, Profile: protocol.HelloProfile, Assurance: protocol.AssuranceAudit,
+		Protocol: 1, Profile: protocol.HelloProfile, Assurance: p.RequiredAssurance,
 		Capabilities: append([]string(nil), protocol.HelloCapabilities...), Nonce: p.Nonce, ID: "org.dot.hello",
 	}, nil
 }

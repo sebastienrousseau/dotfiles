@@ -6,6 +6,7 @@ package main
 import (
 	"context"
 	"dotfiles.local/core/host"
+	"dotfiles.local/core/protocol"
 	"dotfiles.local/core/transaction"
 	"flag"
 	"fmt"
@@ -15,7 +16,7 @@ import (
 
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: dot-core init|register|apply|status|plan-id|recover|retry-effects|rollback|archive --root NEW_DEMO_DIRECTORY [--plugin ABSOLUTE_BINARY] [--allow-audit-plugin] [--plan-id SHA256]")
+		return fmt.Errorf("usage: dot-core init|register|apply|status|plan-id|recover|retry-effects|rollback|archive --root NEW_DEMO_DIRECTORY [--plugin ABSOLUTE_BINARY] [--assurance audit|process] [--allow-audit-plugin|--require-process-sandbox] [--plan-id SHA256]")
 	}
 	switch args[0] {
 	case "init", "register", "apply", "status", "plan-id", "recover", "retry-effects", "rollback", "archive":
@@ -24,13 +25,15 @@ func run(args []string) error {
 	}
 	f := flag.NewFlagSet(args[0], flag.ContinueOnError)
 	root := f.String("root", "", "isolated hello demo directory (not your home/config)")
-	var plugin, planID string
-	var audit bool
+	var plugin, planID, assurance string
+	var audit, process bool
 	switch args[0] {
 	case "register":
 		f.StringVar(&plugin, "plugin", "", "absolute hello executable")
+		f.StringVar(&assurance, "assurance", protocol.AssuranceAudit, "required plugin assurance: audit or process")
 	case "apply":
 		f.BoolVar(&audit, "allow-audit-plugin", false, "explicitly accept trusted unsandboxed demo plugin")
+		f.BoolVar(&process, "require-process-sandbox", false, "require the Linux Landlock/seccomp process sandbox")
 	case "archive":
 		f.StringVar(&planID, "plan-id", "", "exact sealed transaction ID to archive")
 	}
@@ -43,8 +46,11 @@ func run(args []string) error {
 	if (args[0] == "register" && plugin == "") || (args[0] == "archive" && planID == "") {
 		return fmt.Errorf("DOT_E_POLICY: command requires an explicit plugin or plan ID")
 	}
-	if args[0] == "apply" && !audit {
-		return fmt.Errorf("DOT_E_POLICY: explicit --allow-audit-plugin required; no OS sandbox")
+	if args[0] == "register" && assurance != protocol.AssuranceAudit && assurance != protocol.AssuranceProcess {
+		return fmt.Errorf("DOT_E_POLICY: unsupported assurance")
+	}
+	if args[0] == "apply" && audit == process {
+		return fmt.Errorf("DOT_E_POLICY: select exactly one assurance flag")
 	}
 	if args[0] == "init" {
 		return transaction.Init(*root)
@@ -56,10 +62,13 @@ func run(args []string) error {
 	defer e.Close()
 	switch args[0] {
 	case "register":
-		return host.Register(e, plugin)
+		return host.RegisterWithAssurance(e, plugin, assurance)
 	case "apply":
 		ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 		defer cancel()
+		if process {
+			return host.ApplyContained(ctx, e)
+		}
 		return host.Apply(ctx, e, audit)
 	case "recover":
 		return e.Recover(false)

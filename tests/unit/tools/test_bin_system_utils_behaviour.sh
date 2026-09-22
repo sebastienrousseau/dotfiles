@@ -370,9 +370,11 @@ assert_true "! grep -q osascript '$CALLS'" "no notification for a clean run"
 
 test_start "corralctl_sync_writes_its_whole_run_to_the_log_stream"
 # The run block redirects *everything* into the log file, so point the log at
-# our own stderr to assert what the script actually emits there.
+# the test's stderr capture to assert what the script actually emits there.
+# A named target is portable; /dev/stderr symlinks cannot be reopened reliably
+# on macOS when the process's descriptor already refers to a regular file.
 rm -f "$LOG"
-ln -sf /dev/stderr "$LOG"
+ln -sf "$ERRF" "$LOG"
 printf '✓ [SYNC] repo-one\n' >"$CORRAL_OUTPUT"
 corral
 assert_equals 0 "$RC" "rc"

@@ -31,6 +31,8 @@ if command -v chezmoi >/dev/null 2>&1; then
   APPLY_DESTINATION="$(mktemp -d)"
   apply_status=0
   chezmoi --source "$REPO_ROOT/defaults" --destination "$APPLY_DESTINATION" \
+    --persistent-state "$APPLY_DESTINATION/chezmoistate.boltdb" \
+    --cache "$APPLY_DESTINATION/cache" \
     apply --force "$APPLY_DESTINATION/fonts.sh" >/dev/null 2>&1 || apply_status=$?
   assert_equals "0" "$apply_status" \
     "font checker should resolve the verifier while chezmoi is applying"

@@ -10,8 +10,9 @@ import (
 	"syscall"
 )
 
-// configureProcess isolates signals, not filesystem/network authority. Descendants
-// that deliberately create another session can escape this audit-only cleanup.
+// configureProcess provides lifecycle cleanup, not filesystem/network authority.
+// Audit-mode descendants can deliberately create another session to escape it;
+// process assurance separately blocks those syscalls before plugin execution.
 func configureProcess(cmd *exec.Cmd) (func() error, error) {
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	stop := func() error {

@@ -26,7 +26,7 @@ significant architectural decisions made in this project.
 | [ADR-013](ADR-013-single-mutation-authority.md) | Single mutation authority | Accepted; migration pending |
 | [ADR-014](ADR-014-dpp-v1.md) | DPP framing, profiles and sealing | Accepted; restricted hello profile |
 | [ADR-015](ADR-015-transaction-recovery.md) | Transaction and recovery semantics | Accepted; Unix demonstration |
-| [ADR-016](ADR-016-plugin-trust-sandbox.md) | Plugin trust and sandbox levels | Accepted; audit-only demonstration |
+| [ADR-016](ADR-016-plugin-trust-sandbox.md) | Plugin trust and sandbox levels | Accepted; audit plus experimental Linux process proof |
 | [ADR-017](ADR-017-sensitive-data-boundary.md) | Sensitive data boundary | Accepted; secret broker pending |
 | [ADR-018](ADR-018-read-only-mcp-isolation.md) | Read-only MCP isolation | Accepted; separate service pending |
 

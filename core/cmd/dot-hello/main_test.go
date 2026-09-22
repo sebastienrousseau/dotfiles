@@ -19,6 +19,12 @@ func TestNegotiation(t *testing.T) {
 	if err != nil || identity.Nonce != request.Nonce || identity.Assurance != protocol.AssuranceAudit {
 		t.Fatal(identity, err)
 	}
+	request.RequiredAssurance = protocol.AssuranceProcess
+	identity, err = negotiate(request)
+	if err != nil || identity.Assurance != protocol.AssuranceProcess {
+		t.Fatal(identity, err)
+	}
+	request.RequiredAssurance = protocol.AssuranceAudit
 	for _, kind := range []string{"protocol", "profile", "assurance", "missing-capability", "capability-order", "nonce-length", "nonce-encoding"} {
 		t.Run(kind, func(t *testing.T) {
 			bad := request
@@ -29,7 +35,7 @@ func TestNegotiation(t *testing.T) {
 			case "profile":
 				bad.Profile = "org.dot.general/v1"
 			case "assurance":
-				bad.RequiredAssurance = "os-enforced"
+				bad.RequiredAssurance = "none"
 			case "missing-capability":
 				bad.Capabilities = bad.Capabilities[:2]
 			case "capability-order":

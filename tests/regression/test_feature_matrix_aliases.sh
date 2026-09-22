@@ -111,13 +111,15 @@ test_fm_aliases_cheatsheet() {
 test_fm_aliases_cheatsheet_default() {
   # With no --output the cheatsheet is written into the source tree's docs/.
   # Drive the sandbox copy so the checkout is left alone.
-  local repo
+  local repo before after
+  before="$(git -C "$REPO_ROOT" status --porcelain -- docs 2>/dev/null)"
   repo="$(fm_repo_copy_aliases)"
   test_start "fm_aliases_cheatsheet_default"
   fm_run_bin "$repo/bin/dot" aliases cheatsheet
   fm_expect_rc_in 0 1
   test_start "fm_aliases_cheatsheet_default_did_not_touch_the_checkout"
-  if [[ -n "$(git -C "$REPO_ROOT" status --porcelain -- docs 2>/dev/null)" ]]; then
+  after="$(git -C "$REPO_ROOT" status --porcelain -- docs 2>/dev/null)"
+  if [[ "$after" != "$before" ]]; then
     fm_fail "the checkout's docs/ was modified"
   else
     fm_pass "checkout untouched"

@@ -1,6 +1,6 @@
 # ADR-016: Explicit plugin trust and honest containment levels
 
-Status: Accepted; audit-only development profile implemented.
+Status: Accepted; audit and experimental Linux process profiles implemented.
 
 ## Decision
 
@@ -16,10 +16,26 @@ Invocation requires `--allow-audit-plugin`. The reported level is `audit`:
 environment filtering, deadlines and byte limits do not prevent filesystem or
 network syscalls by a same-UID process. Run only the reviewed hello executable.
 
+Linux can instead register assurance `process` and invoke with
+`--require-process-sandbox`. Core resolves a fixed sibling `dot-sandbox` runner,
+which requires Landlock ABI 3, `no_new_privs`, a seccomp architecture check and
+deny policy, a parent-death signal, and hard address-space, CPU, output-file and
+descriptor limits. Landlock permits the plugin to read and execute only its exact
+binary and to operate only inside its private stage; execute permission is absent
+from the stage. The runner therefore requires a statically linked ELF executable
+and rejects interpreter-backed or malformed binaries before installing Landlock;
+this keeps dynamic loaders and shared libraries outside the granted boundary.
+Seccomp denies network creation and I/O, namespace and process-group
+escape, new processes, tracing, external signalling, mount and selected kernel
+attack surfaces while preserving Go runtime threads. It also denies external
+metadata mutation, anonymous executable creation and changing the parent-death
+contract. Unsupported kernels,
+architectures, macOS and Windows fail closed rather than reporting process assurance.
+
 No ambient credentials, HOME, PATH or provider configuration are inherited. Shell
 evaluation is absent. Stderr is bounded and discarded rather than persisted as
-potentially sensitive text. Platform containment, memory/CPU/process/descriptor
-limits and descendant containment are required before accepting untrusted plugins.
+potentially sensitive text. The audit profile still lacks platform containment,
+resource limits and descendant containment and cannot accept untrusted plugins.
 
 On Unix, the hello host creates a dedicated process group and terminates remaining
 same-group descendants before commit, on protocol failure and on timeout. The
@@ -45,7 +61,13 @@ OS-enforced process tree, filesystem or network boundary.
 ## Consequences and acceptance
 
 Hash mismatch, symlink executable, invalid manifest, non-explicit registration and
-missing audit consent must fail before spawning. Tests include stdout noise and
-nonzero exits. Production trust-root rotation, signature verification, read-only
-system registry precedence and OS-enforced profiles are separate follow-ups.
+missing exact assurance consent must fail before spawning. Tests include stdout
+noise, nonzero exits and Linux probes for denied filesystem, network, namespace,
+process-group and executable access. The process profile remains an experimental
+hello proof, not permission to run arbitrary untrusted code: the seccomp policy is
+deny-targeted rather than a syscall allowlist; Landlock has documented mediation
+limits; same-UID replacement races and tamper-resistant runner installation remain;
+and macOS/Windows need their native implementations. Production trust-root
+rotation, signature verification and read-only system registry precedence are
+separate follow-ups.
 This reconciles ADR-003 without falsely promoting declarations to enforcement.

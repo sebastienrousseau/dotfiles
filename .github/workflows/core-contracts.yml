@@ -66,6 +66,10 @@ jobs:
         if: runner.os != 'Windows'
         working-directory: core
         run: go test ./transaction -run '^TestEffect' -count=20
+      - name: Repeat Linux process-containment boundary (10 trials)
+        if: runner.os == 'Linux'
+        working-directory: core
+        run: go test ./sandbox ./cmd/dot-core -run '^(TestLinuxContainment|TestContainedCommandLifecycle)$' -count=5
   contracts:
     runs-on: ubuntu-latest
     timeout-minutes: 5

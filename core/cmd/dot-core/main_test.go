@@ -14,10 +14,12 @@ func TestInvalidCommandPolicy(t *testing.T) {
 	for _, args := range [][]string{
 		{}, {"unknown"}, {"init", "--allow-audit-plugin"},
 		{"apply", "--plugin", "/unreviewed"}, {"apply", "--plan-id", "ignored"},
+		{"apply", "--allow-audit-plugin", "--require-process-sandbox"},
 		{"status", "--allow-audit-plugin"}, {"recover", "--plugin", "/unreviewed"},
 		{"retry-effects", "--plugin", "/unreviewed"},
 		{"rollback", "--plan-id", "ignored"}, {"archive", "--allow-audit-plugin"},
-		{"register"}, {"archive"}, {"apply"}, {"apply", "--allow-audit-plugin=false"},
+		{"register"}, {"register", "--plugin", "/tmp/plugin", "--assurance", "none"},
+		{"archive"}, {"apply"}, {"apply", "--allow-audit-plugin=false"},
 		{"init", "extra-positional"}, {"init", "--unknown"},
 	} {
 		t.Run(strings.Join(args, " "), func(t *testing.T) {

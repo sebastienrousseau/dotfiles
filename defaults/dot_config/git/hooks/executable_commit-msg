@@ -9,6 +9,15 @@ set -euo pipefail
 # Format:    Assisted-by: AGENT_NAME:MODEL_VERSION [TOOL1] [TOOL2]
 
 detect_ai_agent() {
+  # Codex exports stable session/thread identifiers but not always the model.
+  # Prefer an explicit model override; otherwise identify the CLI honestly.
+  if [[ -n "${CODEX_SESSION_ID:-}" ||
+    -n "${CODEX_THREAD_ID:-}" ||
+    -n "${CODEX_CI:-}" ]]; then
+    echo "Codex:${CODEX_MODEL:-codex-cli}"
+    return
+  fi
+
   # Default model when running under Claude Code.
   #
   # This has to be hardcoded: Claude Code exports CLAUDECODE,
@@ -26,11 +35,11 @@ detect_ai_agent() {
   # Claude Code (Anthropic). The CLI actually sets CLAUDECODE=1 (no
   # underscore); the other vars are kept as historical aliases and for
   # API-key-only sessions.
-  if [[ -n "${CLAUDECODE:-}" \
-     || -n "${CLAUDE_CODE:-}" \
-     || -n "${CLAUDE_SESSION_ID:-}" \
-     || -n "${CLAUDE_CODE_ENTRYPOINT:-}" \
-     || -n "${ANTHROPIC_API_KEY:-}" ]]; then
+  if [[ -n "${CLAUDECODE:-}" ||
+    -n "${CLAUDE_CODE:-}" ||
+    -n "${CLAUDE_SESSION_ID:-}" ||
+    -n "${CLAUDE_CODE_ENTRYPOINT:-}" ||
+    -n "${ANTHROPIC_API_KEY:-}" ]]; then
     echo "Claude:${claude_default}"
     return
   fi
@@ -56,6 +65,12 @@ detect_ai_agent() {
   # Antigravity CLI (Google)
   if [[ -n "${AGY_API_KEY:-}" && -n "${AGY_SESSION:-}" ]]; then
     echo "Antigravity:antigravity-cli"
+    return
+  fi
+
+  # Gemini CLI (Google)
+  if [[ -n "${GEMINI_CLI:-}" || -n "${GEMINI_SESSION_ID:-}" ]]; then
+    echo "Gemini:${GEMINI_MODEL:-gemini-cli}"
     return
   fi
 
@@ -132,7 +147,7 @@ fi
 if ! grep -Eq "^Assisted-by:" "$msg_file"; then
   ai_agent="$(detect_ai_agent)"
   if [[ -n "$ai_agent" ]]; then
-    printf '\nAssisted-by: %s\n' "$ai_agent" >> "$msg_file"
+    printf '\nAssisted-by: %s\n' "$ai_agent" >>"$msg_file"
   fi
 fi
 
@@ -147,8 +162,8 @@ if grep -Fqx -- "$first_sig_line" "$msg_file"; then
 fi
 
 if [[ -s "$msg_file" ]]; then
-  printf '\n' >> "$msg_file"
+  printf '\n' >>"$msg_file"
 fi
 
-cat "$sig_file" >> "$msg_file"
-printf '\n' >> "$msg_file"
+cat "$sig_file" >>"$msg_file"
+printf '\n' >>"$msg_file"
