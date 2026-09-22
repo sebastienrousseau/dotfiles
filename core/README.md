@@ -112,8 +112,12 @@ Garbage collection, production registry signatures, macOS/Windows process
 containment, a default-deny syscall allowlist, full JCS, production effect drivers,
 Windows ACL/replace semantics, secret brokering and read-only MCP isolation remain
 separate gates. The Linux runner is an experimental hello-profile proof: Landlock
-has documented mediation limits, the runner and registered executable still need
-tamper-resistant installation, and same-UID replacement races are not yet excluded.
+has documented mediation limits and signed, tamper-resistant publisher installation
+is still absent. On Linux, core now opens and validates the plugin and fixed sibling
+runner once, then executes those exact inodes through inherited `/proc/self/fd`
+descriptors. Replacing either pathname after validation cannot select different
+bytes. macOS audit mode retains the documented pathname race; process assurance
+continues to fail closed there and on Windows.
 The tests simulate process crashes and I/O errors; they do not certify physical
 power-loss durability or resistance to a malicious same-UID plugin. No release
 version is bumped by this experimental module.

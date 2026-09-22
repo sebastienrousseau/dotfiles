@@ -32,6 +32,15 @@ metadata mutation, anonymous executable creation and changing the parent-death
 contract. Unsupported kernels,
 architectures, macOS and Windows fail closed rather than reporting process assurance.
 
+On Linux, core opens the registered plugin and fixed sibling runner once, validates
+their file identity/mode/size and the plugin digest, and passes the open inodes as
+descriptors 3 and 4. Both launches resolve through exact `/proc/self/fd` entries.
+Replacing either pathname after validation therefore cannot change the runner or
+plugin bytes selected for execution. The sandbox accepts only the exact descriptor-4
+path as its internal descriptor form; normal direct tests retain strict no-link path
+validation. This closes the Linux launch-time pathname replacement window, not the
+larger publisher/install trust problem.
+
 No ambient credentials, HOME, PATH or provider configuration are inherited. Shell
 evaluation is absent. Stderr is bounded and discarded rather than persisted as
 potentially sensitive text. The audit profile still lacks platform containment,
@@ -74,8 +83,9 @@ noise, nonzero exits and Linux probes for denied filesystem, network, namespace,
 process-group and executable access. The process profile remains an experimental
 hello proof, not permission to run arbitrary untrusted code: the seccomp policy is
 deny-targeted rather than a syscall allowlist; Landlock has documented mediation
-limits; same-UID replacement races and tamper-resistant runner installation remain;
-and macOS/Windows need their native implementations. Production trust-root
+limits; signed publisher verification and tamper-resistant installation remain;
+macOS audit execution still has a same-UID pathname window; and macOS/Windows need
+their native containment implementations. Production trust-root
 rotation, signature verification and read-only system registry precedence are
 separate follow-ups.
 This reconciles ADR-003 without falsely promoting declarations to enforcement.

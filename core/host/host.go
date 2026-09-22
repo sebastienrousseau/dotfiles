@@ -31,27 +31,41 @@ type Manifest struct {
 }
 
 func binary(path string) ([]byte, error) {
+	f, b, err := openBinary(path)
+	if f != nil {
+		f.Close()
+	}
+	return b, err
+}
+
+func openBinary(path string) (*os.File, []byte, error) {
 	i, err := os.Lstat(path)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if !i.Mode().IsRegular() || i.Size() > 16<<20 || i.Mode().Perm()&0022 != 0 {
-		return nil, fmt.Errorf("DOT_E_PLUGIN_IDENTITY: binary type/mode/size")
+		return nil, nil, fmt.Errorf("DOT_E_PLUGIN_IDENTITY: binary type/mode/size")
 	}
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	defer f.Close()
 	opened, err := f.Stat()
-	if err != nil || !os.SameFile(i, opened) {
-		return nil, fmt.Errorf("DOT_E_PLUGIN_IDENTITY: executable changed")
+	if err != nil || !os.SameFile(i, opened) || !opened.Mode().IsRegular() ||
+		opened.Size() > 16<<20 || opened.Mode().Perm()&0022 != 0 {
+		f.Close()
+		return nil, nil, fmt.Errorf("DOT_E_PLUGIN_IDENTITY: executable changed")
 	}
 	b, err := io.ReadAll(io.LimitReader(f, (16<<20)+1))
-	if len(b) > 16<<20 {
-		return nil, fmt.Errorf("DOT_E_PLUGIN_IDENTITY: binary limit")
+	if err != nil {
+		f.Close()
+		return nil, nil, err
 	}
-	return b, err
+	if len(b) > 16<<20 {
+		f.Close()
+		return nil, nil, fmt.Errorf("DOT_E_PLUGIN_IDENTITY: binary limit")
+	}
+	return f, b, nil
 }
 
 func Register(e *transaction.Engine, source string) error {
@@ -159,10 +173,11 @@ func apply(ctx context.Context, e *transaction.Engine, requiredAssurance string)
 		return fmt.Errorf("DOT_E_PLUGIN_IDENTITY: manifest policy")
 	}
 	path := filepath.Join(e.Root.Name(), ".dot-plugin")
-	b, err := binary(path)
+	plugin, b, err := openBinary(path)
 	if err != nil {
 		return err
 	}
+	defer plugin.Close()
 	if transaction.Digest(b) != m.SHA256 {
 		return fmt.Errorf("DOT_E_PLUGIN_IDENTITY: digest")
 	}
@@ -172,10 +187,11 @@ func apply(ctx context.Context, e *transaction.Engine, requiredAssurance string)
 	stage := filepath.Join(e.Root.Name(), ".dot-stage")
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
-	cmd, err := pluginCommand(ctx, path, stage, requiredAssurance)
+	cmd, closeCommand, err := pluginCommand(ctx, plugin, stage, requiredAssurance)
 	if err != nil {
 		return err
 	}
+	defer closeCommand()
 	stopGroup, err := configureProcess(cmd)
 	if err != nil {
 		return err
