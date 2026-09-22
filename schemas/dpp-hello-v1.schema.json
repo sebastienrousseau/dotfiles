@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dotfiles.io/schemas/dpp-hello/v1",
   "title": "DPP/1 restricted hello development profile",
-  "description": "Not the production plugin contract. All reference schemas are closed; secret values and arbitrary effects are forbidden.",
+  "description": "Not the production plugin contract. All reference schemas are closed; secret values and arbitrary effects are forbidden. The only effect is core-executed managed-root sync; the effects property remains optional for recovery of earlier sealed hello plans.",
   "$defs": {
     "hash": {"type": "string", "pattern": "^[a-f0-9]{64}$(?![\\s\\S])"},
     "name": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,30}\\.txt$(?![\\s\\S])"},
@@ -30,12 +30,18 @@
         "after": {"allOf": [{"$ref": "#/$defs/snapshot"}, {"properties": {"exists": {"const": true}, "mode": {"const": 384}}}]}
       }
     },
+    "effect": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "target", "failure_policy"],
+      "properties": {"kind": {"const": "sync"}, "target": {"const": "managed-root"}, "failure_policy": {"const": "required"}}
+    },
     "plan": {
       "type": "object", "additionalProperties": false,
       "required": ["version", "root_id", "nonce", "plugin_digest", "proposal_id", "operations"],
       "properties": {
         "version": {"const": 1}, "root_id": {"$ref": "#/$defs/hash"}, "nonce": {"$ref": "#/$defs/hash"}, "plugin_digest": {"$ref": "#/$defs/hash"}, "proposal_id": {"$ref": "#/$defs/hash"},
-        "operations": {"type": "array", "minItems": 1, "maxItems": 16, "items": {"$ref": "#/$defs/operation"}}
+        "operations": {"type": "array", "minItems": 1, "maxItems": 16, "items": {"$ref": "#/$defs/operation"}},
+        "effects": {"type": "array", "maxItems": 4, "items": {"$ref": "#/$defs/effect"}}
       }
     },
     "sealed_plan": {
@@ -50,7 +56,7 @@
         "params": {"type": "object"}
       },
       "allOf": [
-        {"if": {"properties": {"method": {"const": "dot.initialize"}}}, "then": {"properties": {"params": {"additionalProperties": false, "required": ["protocol", "profile", "required_assurance", "capabilities", "nonce"], "properties": {"protocol": {"const": 1}, "profile": {"const": "org.dot.hello/v1"}, "required_assurance": {"const": "audit"}, "capabilities": {"type": "array", "const": ["materialize", "plan", "validate"]}, "nonce": {"$ref": "#/$defs/hash"}}}}}},
+        {"if": {"properties": {"method": {"const": "dot.initialize"}}}, "then": {"properties": {"params": {"additionalProperties": false, "required": ["protocol", "profile", "required_assurance", "capabilities", "nonce"], "properties": {"protocol": {"const": 1}, "profile": {"const": "org.dot.hello/v1"}, "required_assurance": {"const": "audit"}, "capabilities": {"type": "array", "const": ["materialize", "plan", "post-commit-effects", "validate"]}, "nonce": {"$ref": "#/$defs/hash"}}}}}},
         {"if": {"properties": {"method": {"const": "dot.materialize"}}}, "then": {"properties": {"params": {"additionalProperties": false, "required": ["stage"], "properties": {"stage": {"type": "string", "pattern": "^/[^\\u0000-\\u001f]+$", "maxLength": 4096}}}}}},
         {"if": {"properties": {"method": {"enum": ["dot.plan", "dot.validate", "dot.shutdown"]}}}, "then": {"properties": {"params": {"maxProperties": 0}}}}
       ]
@@ -60,7 +66,7 @@
       "required": ["protocol", "profile", "assurance", "capabilities", "nonce", "id"],
       "properties": {
         "protocol": {"const": 1}, "profile": {"const": "org.dot.hello/v1"},
-        "assurance": {"const": "audit"}, "capabilities": {"type": "array", "const": ["materialize", "plan", "validate"]},
+        "assurance": {"const": "audit"}, "capabilities": {"type": "array", "const": ["materialize", "plan", "post-commit-effects", "validate"]},
         "nonce": {"$ref": "#/$defs/hash"}, "id": {"const": "org.dot.hello"}
       }
     },
@@ -69,7 +75,7 @@
       "properties": {
         "schema_version": {"const": 1}, "operation_id": {"$ref": "#/$defs/hash"},
         "kind": {"enum": ["transaction", "diagnostic"]},
-        "state": {"enum": ["PREPARING", "PREPARED", "COMMITTING", "COMMITTED", "ROLLING_BACK", "ROLLED_BACK", "RECOVERY_REQUIRED", "POST_COMMIT_FAILED"]},
+        "state": {"enum": ["PREPARING", "PREPARED", "COMMITTING", "COMMITTED", "POST_COMMIT_PENDING", "POST_COMMIT_FAILED", "ROLLING_BACK", "ROLLED_BACK", "RECOVERY_REQUIRED"]},
         "code": {"enum": ["DOT_E_PROTOCOL", "DOT_E_PLUGIN_IDENTITY", "DOT_E_POLICY", "DOT_E_PATH_ESCAPE", "DOT_E_CONFLICT", "DOT_E_ARTIFACT_MISMATCH", "DOT_E_VALIDATION", "DOT_E_COMMIT", "DOT_E_RECOVERY_REQUIRED", "DOT_E_POST_COMMIT"]}
       }
     },

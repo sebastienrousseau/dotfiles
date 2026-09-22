@@ -37,7 +37,10 @@ func run() error {
 				return err
 			}
 		case "dot.plan":
-			result = protocol.Proposal{Names: []string{"hello.txt", "welcome.txt"}}
+			result = protocol.Proposal{
+				Names:   []string{"hello.txt", "welcome.txt"},
+				Effects: []protocol.Effect{{Kind: "sync", Target: "managed-root", FailurePolicy: "required"}},
+			}
 		case "dot.materialize":
 			var p protocol.Materialize
 			if err = protocol.Strict(m.Params, &p); err != nil {

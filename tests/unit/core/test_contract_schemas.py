@@ -45,6 +45,12 @@ class Contracts(unittest.TestCase):
             bad["operations"][0]["name"] = name
             self.assertFalse(v.is_valid(bad), name)
         self.assertFalse(v.is_valid(dict(plan, effects=[{"shell": "touch /tmp/bad"}])))
+        good_effect = {"kind": "sync", "target": "managed-root", "failure_policy": "required"}
+        self.assertTrue(v.is_valid(dict(plan, effects=[good_effect])))
+        for effect in [dict(good_effect, kind="shell"), dict(good_effect, target="/tmp"),
+                       dict(good_effect, failure_policy="ignore"), dict(good_effect, command="touch")]:
+            self.assertFalse(v.is_valid(dict(plan, effects=[effect])))
+        self.assertFalse(v.is_valid(dict(plan, effects=[good_effect] * 5)))
         self.assertFalse(v.is_valid(dict(plan, operations=[])))
 
     def test_no_secret_payloads(self):
@@ -63,7 +69,7 @@ class Contracts(unittest.TestCase):
         request = {"jsonrpc": "2.0", "id": 1, "method": "dot.initialize",
                    "params": {"protocol": 1, "profile": "org.dot.hello/v1",
                               "required_assurance": "audit",
-                              "capabilities": ["materialize", "plan", "validate"],
+                              "capabilities": ["materialize", "plan", "post-commit-effects", "validate"],
                               "nonce": "a" * 64}}
         self.assertTrue(validator("request").is_valid(request))
         request["params"]["token"] = "CANARY_DO_NOT_LOG"
@@ -71,7 +77,7 @@ class Contracts(unittest.TestCase):
 
     def test_identity_is_closed_and_exact(self):
         identity = {"protocol": 1, "profile": "org.dot.hello/v1", "assurance": "audit",
-                    "capabilities": ["materialize", "plan", "validate"],
+                    "capabilities": ["materialize", "plan", "post-commit-effects", "validate"],
                     "nonce": "a" * 64, "id": "org.dot.hello"}
         v = validator("identity")
         self.assertTrue(v.is_valid(identity))

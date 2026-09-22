@@ -229,6 +229,9 @@ func Apply(ctx context.Context, e *transaction.Engine, allowAudit bool) error {
 	if len(proposal.Names) != 2 || proposal.Names[0] != "hello.txt" || proposal.Names[1] != "welcome.txt" {
 		return fmt.Errorf("DOT_E_POLICY: hello allowlist")
 	}
+	if len(proposal.Effects) != 1 || proposal.Effects[0] != (protocol.Effect{Kind: "sync", Target: "managed-root", FailurePolicy: "required"}) {
+		return fmt.Errorf("DOT_E_POLICY: hello effect allowlist")
+	}
 	p := transaction.Plan{Version: 1, RootID: e.ID, Nonce: nonceText, PluginDigest: m.SHA256}
 	for _, name := range proposal.Names {
 		before, err := e.Observe(name)
@@ -236,6 +239,11 @@ func Apply(ctx context.Context, e *transaction.Engine, allowAudit bool) error {
 			return err
 		}
 		p.Operations = append(p.Operations, transaction.Operation{Name: name, Before: before})
+	}
+	for _, effect := range proposal.Effects {
+		p.Effects = append(p.Effects, transaction.Effect{
+			Kind: effect.Kind, Target: effect.Target, FailurePolicy: effect.FailurePolicy,
+		})
 	}
 	proposalBytes, err := transaction.Canonical(p)
 	if err != nil {
@@ -314,7 +322,10 @@ func Apply(ctx context.Context, e *transaction.Engine, allowAudit bool) error {
 	if err = ctx.Err(); err != nil {
 		return fmt.Errorf("DOT_E_TIMEOUT: before transaction commit; recover retained prepared evidence: %w", err)
 	}
-	return e.Commit()
+	if err = e.Commit(); err != nil {
+		return err
+	}
+	return e.ApplyEffects()
 }
 
 func validateIdentity(m Manifest, request protocol.Initialize, identity protocol.Identity) error {

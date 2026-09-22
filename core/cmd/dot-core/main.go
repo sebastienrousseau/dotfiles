@@ -15,10 +15,10 @@ import (
 
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: dot-core init|register|apply|status|plan-id|recover|rollback|archive --root NEW_DEMO_DIRECTORY [--plugin ABSOLUTE_BINARY] [--allow-audit-plugin] [--plan-id SHA256]")
+		return fmt.Errorf("usage: dot-core init|register|apply|status|plan-id|recover|retry-effects|rollback|archive --root NEW_DEMO_DIRECTORY [--plugin ABSOLUTE_BINARY] [--allow-audit-plugin] [--plan-id SHA256]")
 	}
 	switch args[0] {
-	case "init", "register", "apply", "status", "plan-id", "recover", "rollback", "archive":
+	case "init", "register", "apply", "status", "plan-id", "recover", "retry-effects", "rollback", "archive":
 	default:
 		return fmt.Errorf("DOT_E_PROTOCOL: unknown command %q", args[0])
 	}
@@ -63,6 +63,8 @@ func run(args []string) error {
 		return host.Apply(ctx, e, audit)
 	case "recover":
 		return e.Recover(false)
+	case "retry-effects":
+		return e.ApplyEffects()
 	case "archive":
 		return e.Archive(planID)
 	case "plan-id":
