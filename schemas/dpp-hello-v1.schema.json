@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.io/schemas/dpp-hello/v1",
+  "title": "DPP/1 restricted hello development profile",
+  "description": "Not the production plugin contract. All reference schemas are closed; secret values and arbitrary effects are forbidden.",
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[a-f0-9]{64}$(?![\\s\\S])"},
+    "name": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,30}\\.txt$(?![\\s\\S])"},
+    "snapshot": {
+      "type": "object", "additionalProperties": false,
+      "required": ["exists", "sha256", "mode", "uid", "gid"],
+      "properties": {
+        "exists": {"type": "boolean"}, "sha256": {"type": "string", "pattern": "^([a-f0-9]{64})?$"},
+        "mode": {"type": "integer", "minimum": 0, "maximum": 448},
+        "uid": {"type": "integer", "minimum": 0, "maximum": 4294967295},
+        "gid": {"type": "integer", "minimum": 0, "maximum": 4294967295}
+      },
+      "allOf": [{"if": {"properties": {"exists": {"const": false}}}, "then": {"properties": {"sha256": {"const": ""}, "mode": {"const": 0}, "uid": {"const": 0}, "gid": {"const": 0}}}, "else": {"properties": {"sha256": {"$ref": "#/$defs/hash"}, "mode": {"enum": [256, 320, 384, 448]}}}}]
+    },
+    "manifest": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "sha256", "protocol", "assurance"],
+      "properties": {"id": {"const": "org.dot.hello"}, "sha256": {"$ref": "#/$defs/hash"}, "protocol": {"const": 1}, "assurance": {"const": "audit"}}
+    },
+    "operation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "before", "after"],
+      "properties": {
+        "name": {"$ref": "#/$defs/name"}, "before": {"$ref": "#/$defs/snapshot"},
+        "after": {"allOf": [{"$ref": "#/$defs/snapshot"}, {"properties": {"exists": {"const": true}, "mode": {"const": 384}}}]}
+      }
+    },
+    "plan": {
+      "type": "object", "additionalProperties": false,
+      "required": ["version", "root_id", "nonce", "plugin_digest", "proposal_id", "operations"],
+      "properties": {
+        "version": {"const": 1}, "root_id": {"$ref": "#/$defs/hash"}, "nonce": {"$ref": "#/$defs/hash"}, "plugin_digest": {"$ref": "#/$defs/hash"}, "proposal_id": {"$ref": "#/$defs/hash"},
+        "operations": {"type": "array", "minItems": 1, "maxItems": 16, "items": {"$ref": "#/$defs/operation"}}
+      }
+    },
+    "sealed_plan": {
+      "type": "object", "additionalProperties": false, "required": ["plan", "plan_id"],
+      "properties": {"plan": {"$ref": "#/$defs/plan"}, "plan_id": {"$ref": "#/$defs/hash"}}
+    },
+    "request": {
+      "type": "object", "additionalProperties": false, "required": ["jsonrpc", "id", "method", "params"],
+      "properties": {
+        "jsonrpc": {"const": "2.0"}, "id": {"type": "integer", "minimum": 1, "maximum": 5},
+        "method": {"enum": ["dot.initialize", "dot.plan", "dot.materialize", "dot.validate", "dot.shutdown"]},
+        "params": {"type": "object"}
+      },
+      "allOf": [
+        {"if": {"properties": {"method": {"const": "dot.initialize"}}}, "then": {"properties": {"params": {"additionalProperties": false, "required": ["protocol", "nonce"], "properties": {"protocol": {"const": 1}, "nonce": {"$ref": "#/$defs/hash"}}}}}},
+        {"if": {"properties": {"method": {"const": "dot.materialize"}}}, "then": {"properties": {"params": {"additionalProperties": false, "required": ["stage"], "properties": {"stage": {"type": "string", "pattern": "^/[^\\u0000-\\u001f]+$", "maxLength": 4096}}}}}},
+        {"if": {"properties": {"method": {"enum": ["dot.plan", "dot.validate", "dot.shutdown"]}}}, "then": {"properties": {"params": {"maxProperties": 0}}}}
+      ]
+    },
+    "event": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "operation_id", "kind", "state"],
+      "properties": {
+        "schema_version": {"const": 1}, "operation_id": {"$ref": "#/$defs/hash"},
+        "kind": {"enum": ["transaction", "diagnostic"]},
+        "state": {"enum": ["PREPARING", "PREPARED", "COMMITTING", "COMMITTED", "ROLLING_BACK", "ROLLED_BACK", "RECOVERY_REQUIRED", "POST_COMMIT_FAILED"]},
+        "code": {"enum": ["DOT_E_PROTOCOL", "DOT_E_PLUGIN_IDENTITY", "DOT_E_POLICY", "DOT_E_PATH_ESCAPE", "DOT_E_CONFLICT", "DOT_E_ARTIFACT_MISMATCH", "DOT_E_VALIDATION", "DOT_E_COMMIT", "DOT_E_RECOVERY_REQUIRED", "DOT_E_POST_COMMIT"]}
+      }
+    },
+    "secret_reference": {
+      "type": "object", "additionalProperties": false,
+      "required": ["reference", "audience", "sensitivity"],
+      "properties": {"reference": {"type": "string", "pattern": "^secret:[a-z0-9-]{1,64}$"}, "audience": {"type": "string", "pattern": "^org\\.dot\\.[a-z]+$"}, "sensitivity": {"const": "secret-reference"}}
+    }
+  },
+  "$ref": "#/$defs/sealed_plan"
+}
