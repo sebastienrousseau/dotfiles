@@ -29,7 +29,10 @@ must confirm no live members before that case is accepted; query failures and li
 members fail closed. Since EOF may precede the final kernel exit-state transition,
 core signals and samples at most 50 times, separated by 2 ms, until every observed
 member is a zombie or the group is absent; a timeout is never interpreted as
-success. Deterministic tests cover transitional, live, unknown and failed queries;
+success. For Darwin's zombie-filter `EPERM` race, core stops signalling and permits
+up to two seconds for the unreaped leader to become observably terminal; persistent
+live state returns the original permission error. Deterministic tests cover
+transitional, live, unknown, permission-race and failed-query states;
 CI repeats 30 delayed descendants and 1,000 short-lived exits per Unix host. The
 descendant fixture is released only after `Apply` returns, so slow test execution
 cannot be mistaken for a surviving process. This uses pinned

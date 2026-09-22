@@ -33,6 +33,13 @@ func settleGroup(query func() ([]unix.KinfoProc, error), signal func() error, pa
 		if signalErr != nil && !errors.Is(signalErr, syscall.EPERM) {
 			return signalErr
 		}
+		if errors.Is(signalErr, syscall.EPERM) {
+			// XNU may filter an exiting member from killpg before sysctl has
+			// published SZOMB. Do not re-signal an EPERM group; observe the
+			// transition for up to two seconds, then preserve the permission
+			// failure. The unreaped leader prevents process-group ID reuse.
+			return awaitTerminal(query, pause, 1000, signalErr)
+		}
 		group, err := query()
 		if err != nil {
 			return err
@@ -40,14 +47,27 @@ func settleGroup(query func() ([]unix.KinfoProc, error), signal func() error, pa
 		if onlyZombies(group) {
 			return nil
 		}
-		if errors.Is(signalErr, syscall.EPERM) {
-			return signalErr
-		}
 		if attempt < 49 {
 			pause()
 		}
 	}
 	return fmt.Errorf("DOT_E_POLICY: plugin process group remained live")
+}
+
+func awaitTerminal(query func() ([]unix.KinfoProc, error), pause func(), attempts int, timeout error) error {
+	for attempt := 0; attempt < attempts; attempt++ {
+		group, err := query()
+		if err != nil {
+			return err
+		}
+		if onlyZombies(group) {
+			return nil
+		}
+		if attempt < attempts-1 {
+			pause()
+		}
+	}
+	return timeout
 }
 
 func onlyZombies(group []unix.KinfoProc) bool {

@@ -26,7 +26,7 @@ func TestOnlyZombies(t *testing.T) {
 }
 
 func TestGroupExitTransition(t *testing.T) {
-	for _, kind := range []string{"exiting", "gone", "live", "unknown", "query-error", "permission"} {
+	for _, kind := range []string{"exiting", "gone", "live", "unknown", "query-error", "permission-settles", "permission-live"} {
 		t.Run(kind, func(t *testing.T) {
 			calls, signals, pauses := 0, 0, 0
 			err := settleGroup(func() ([]unix.KinfoProc, error) {
@@ -43,23 +43,26 @@ func TestGroupExitTransition(t *testing.T) {
 				if kind == "unknown" {
 					group[1].Proc.P_stat = 0
 				}
-				if kind == "exiting" && calls == 3 {
+				if (kind == "exiting" || kind == "permission-settles") && calls == 3 {
 					group[1].Proc.P_stat = 5
 				}
 				return group, nil
 			}, func() error {
 				signals++
-				if kind == "permission" {
+				if kind == "permission-settles" || kind == "permission-live" {
 					return syscall.EPERM
 				}
 				return nil
 			}, func() { pauses++ })
-			wantSuccess := kind == "exiting" || kind == "gone"
+			wantSuccess := kind == "exiting" || kind == "gone" || kind == "permission-settles"
 			if (err == nil) != wantSuccess {
 				t.Fatalf("unexpected result: %v", err)
 			}
-			if (wantSuccess && calls != 3) || (kind == "query-error" && calls != 1) || (kind == "permission" && calls != 1) ||
-				(!wantSuccess && kind != "query-error" && kind != "permission" && calls != 50) || pauses != calls-1 || signals != calls {
+			if (wantSuccess && calls != 3) || (kind == "query-error" && calls != 1) ||
+				(kind == "permission-live" && calls != 1000) ||
+				(!wantSuccess && kind != "query-error" && kind != "permission-live" && calls != 50) ||
+				pauses != calls-1 || ((kind == "permission-settles" || kind == "permission-live") && signals != 1) ||
+				(kind != "permission-settles" && kind != "permission-live" && signals != calls) {
 				t.Fatalf("unexpected bound: %d queries, %d signals, %d pauses", calls, signals, pauses)
 			}
 		})
