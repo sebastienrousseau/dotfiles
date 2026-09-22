@@ -44,9 +44,12 @@ CGO_ENABLED=0 go build -o "$demo_parent/dot-hello" ./cmd/dot-hello
 exact executable and private staging directory with Landlock, applies
 `no_new_privs`, bounded address-space/CPU/file-size/descriptor limits and a
 seccomp deny policy for network, namespace, process escape, mount, tracing and
-other high-risk syscalls. It also denies external metadata mutation, anonymous
-executable creation and changing the parent-death contract. Unsupported kernels
-and architectures fail closed.
+other high-risk syscalls, including queued signals to other processes. It also
+denies external metadata mutation, anonymous executable creation and changing
+the parent-death contract. On amd64 any x32-ABI syscall kills the plugin, since
+those numbers would otherwise bypass the exact-number deny rules. Descriptors
+inherited from core are closed on exec, so the plugin cannot read the runner or
+its own image through them. Unsupported kernels and architectures fail closed.
 
 Keep the demonstration directory to inspect `.dot-txn/plan.json`, its WAL and
 backups. Do not point this tool at HOME, a repository, or an existing config tree.

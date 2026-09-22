@@ -26,17 +26,20 @@ func TestLinuxContainment(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(stage, "outside-path"), []byte(outside+"\n"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	probe := filepath.Join(parent, "probe")
-	runner := filepath.Join(parent, "dot-sandbox")
-	for output, source := range map[string]string{probe: "./testdata/probe", runner: "../cmd/dot-sandbox"} {
-		build := exec.Command("go", "build", "-o", output, source)
-		build.Env = append(os.Environ(), "CGO_ENABLED=0")
-		if b, err := build.CombinedOutput(); err != nil {
-			t.Fatalf("build %s: %s %v", source, b, err)
+	probe, runner := buildProbe(t, parent)
+	// Stand-ins for the runner and plugin images core passes as fds 3 and 4.
+	var inherited []*os.File
+	for range 2 {
+		f, err := os.Open(outside)
+		if err != nil {
+			t.Fatal(err)
 		}
+		defer f.Close()
+		inherited = append(inherited, f)
 	}
 	cmd := exec.Command(runner, probe, stage)
 	cmd.Env = []string{"LANG=C", "DOT_STAGE_ROOT=" + stage}
+	cmd.ExtraFiles = inherited
 	if b, err := cmd.CombinedOutput(); err != nil || strings.TrimSpace(string(b)) != "contained" {
 		t.Fatalf("sandbox: %s %v", b, err)
 	}
@@ -46,6 +49,20 @@ func TestLinuxContainment(t *testing.T) {
 	if b, err := os.ReadFile(filepath.Join(stage, "contained")); err != nil || string(b) != "ok\n" {
 		t.Fatal("stage write missing", string(b), err)
 	}
+}
+
+func buildProbe(t *testing.T, dir string) (probe, runner string) {
+	t.Helper()
+	probe = filepath.Join(dir, "probe")
+	runner = filepath.Join(dir, "dot-sandbox")
+	for output, source := range map[string]string{probe: "./testdata/probe", runner: "../cmd/dot-sandbox"} {
+		build := exec.Command("go", "build", "-o", output, source)
+		build.Env = append(os.Environ(), "CGO_ENABLED=0")
+		if b, err := build.CombinedOutput(); err != nil {
+			t.Fatalf("build %s: %s %v", source, b, err)
+		}
+	}
+	return probe, runner
 }
 
 func TestValidationFailsClosed(t *testing.T) {

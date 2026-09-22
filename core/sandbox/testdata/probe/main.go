@@ -19,7 +19,21 @@ import (
 )
 
 func main() {
+	// Before anything opens a descriptor: the runner must not leak its own
+	// inherited descriptors (the runner and plugin images) into the plugin.
+	for _, fd := range []int{3, 4} {
+		if _, err := unix.FcntlInt(uintptr(fd), unix.F_GETFD, 0); err != unix.EBADF {
+			panic(fmt.Sprintf("inherited descriptor %d result: %v", fd, err))
+		}
+	}
 	stage := os.Getenv("DOT_STAGE_ROOT")
+	if _, err := os.Stat(filepath.Join(stage, "x32")); err == nil {
+		// x32 ABI numbers carry bit 30 under AUDIT_ARCH_X86_64. The filter
+		// must kill the process here instead of falling through to allow.
+		unix.RawSyscall(unix.SYS_SOCKET|0x40000000, unix.AF_INET, unix.SOCK_STREAM, 0)
+		fmt.Println("x32-survived")
+		return
+	}
 	outside, err := os.ReadFile(filepath.Join(stage, "outside-path"))
 	if err != nil {
 		panic(err)
@@ -50,6 +64,13 @@ func main() {
 	}
 	if _, _, errno := syscall.RawSyscall(syscall.SYS_PRCTL, uintptr(syscall.PR_SET_PDEATHSIG), 0, 0); errno != syscall.EPERM {
 		panic(fmt.Sprintf("parent-death reset result: %v", errno))
+	}
+	pid := uintptr(os.Getpid())
+	if _, _, errno := unix.RawSyscall(unix.SYS_RT_SIGQUEUEINFO, pid, 0, 0); errno != unix.EPERM {
+		panic(fmt.Sprintf("queued signal result: %v", errno))
+	}
+	if _, _, errno := unix.RawSyscall6(unix.SYS_RT_TGSIGQUEUEINFO, pid, pid, 0, 0, 0, 0); errno != unix.EPERM {
+		panic(fmt.Sprintf("queued thread signal result: %v", errno))
 	}
 	if _, _, errno := unix.RawSyscall(unix.SYS_MEMFD_CREATE, 0, 0, 0); errno != unix.EPERM {
 		panic(fmt.Sprintf("anonymous executable result: %v", errno))
