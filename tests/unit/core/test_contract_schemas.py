@@ -24,10 +24,11 @@ class Contracts(unittest.TestCase):
 
     def test_manifest_and_downgrade(self):
         good = {"id": "org.dot.hello", "sha256": "a" * 64,
-                "protocol": 1, "assurance": "audit"}
+                "protocol": 1, "profile": "org.dot.hello/v1", "assurance": "audit"}
         v = validator("manifest")
         self.assertTrue(v.is_valid(good))
         for key, value in [("sha256", "bad"), ("protocol", 2),
+                           ("profile", "org.dot.general/v1"),
                            ("assurance", "os-enforced"), ("executable", "from-PATH")]:
             self.assertFalse(v.is_valid(dict(good, **{key: value})))
 
@@ -60,10 +61,24 @@ class Contracts(unittest.TestCase):
 
     def test_rpc_params_are_closed(self):
         request = {"jsonrpc": "2.0", "id": 1, "method": "dot.initialize",
-                   "params": {"protocol": 1, "nonce": "a" * 64}}
+                   "params": {"protocol": 1, "profile": "org.dot.hello/v1",
+                              "required_assurance": "audit",
+                              "capabilities": ["materialize", "plan", "validate"],
+                              "nonce": "a" * 64}}
         self.assertTrue(validator("request").is_valid(request))
         request["params"]["token"] = "CANARY_DO_NOT_LOG"
         self.assertFalse(validator("request").is_valid(request))
+
+    def test_identity_is_closed_and_exact(self):
+        identity = {"protocol": 1, "profile": "org.dot.hello/v1", "assurance": "audit",
+                    "capabilities": ["materialize", "plan", "validate"],
+                    "nonce": "a" * 64, "id": "org.dot.hello"}
+        v = validator("identity")
+        self.assertTrue(v.is_valid(identity))
+        for key, value in [("protocol", 0), ("profile", "org.dot.general/v1"),
+                           ("assurance", "none"), ("capabilities", ["plan"]),
+                           ("id", "org.dot.other"), ("token", "secret")]:
+            self.assertFalse(v.is_valid(dict(identity, **{key: value})))
 
 
 if __name__ == "__main__":

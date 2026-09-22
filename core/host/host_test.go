@@ -11,9 +11,53 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
+
+	"dotfiles.local/core/protocol"
 )
+
+func TestIdentityNegotiation(t *testing.T) {
+	nonce := strings.Repeat("a", 64)
+	manifest := Manifest{ID: "org.dot.hello", Protocol: 1, Profile: protocol.HelloProfile, Assurance: protocol.AssuranceAudit}
+	request := protocol.Initialize{
+		Protocol: 1, Profile: protocol.HelloProfile, RequiredAssurance: protocol.AssuranceAudit,
+		Capabilities: append([]string(nil), protocol.HelloCapabilities...), Nonce: nonce,
+	}
+	identity := protocol.Identity{
+		Protocol: 1, Profile: protocol.HelloProfile, Assurance: protocol.AssuranceAudit,
+		Capabilities: append([]string(nil), protocol.HelloCapabilities...), Nonce: nonce, ID: manifest.ID,
+	}
+	if err := validateIdentity(manifest, request, identity); err != nil {
+		t.Fatal(err)
+	}
+	for _, kind := range []string{"protocol", "profile", "assurance", "capability", "capability-order", "nonce", "id"} {
+		t.Run(kind, func(t *testing.T) {
+			bad := identity
+			bad.Capabilities = append([]string(nil), identity.Capabilities...)
+			switch kind {
+			case "protocol":
+				bad.Protocol = 0
+			case "profile":
+				bad.Profile = "org.dot.general/v1"
+			case "assurance":
+				bad.Assurance = "none"
+			case "capability":
+				bad.Capabilities = bad.Capabilities[:2]
+			case "capability-order":
+				bad.Capabilities[0], bad.Capabilities[1] = bad.Capabilities[1], bad.Capabilities[0]
+			case "nonce":
+				bad.Nonce = strings.Repeat("b", 64)
+			case "id":
+				bad.ID = "org.dot.other"
+			}
+			if err := validateIdentity(manifest, request, bad); err == nil {
+				t.Fatal("downgrade or mismatch accepted")
+			}
+		})
+	}
+}
 
 func TestLifecycle(t *testing.T) {
 	bin := filepath.Join(t.TempDir(), "hello")
@@ -21,7 +65,7 @@ func TestLifecycle(t *testing.T) {
 	if b, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("build: %s %v", b, err)
 	}
-	for _, kind := range []string{"success", "no-consent", "changed-executable", "stdout-noise", "nonzero", "environment", "timeout"} {
+	for _, kind := range []string{"success", "no-consent", "changed-executable", "manifest-downgrade", "stdout-noise", "nonzero", "environment", "timeout"} {
 		t.Run(kind, func(t *testing.T) {
 			root := filepath.Join(t.TempDir(), "demo")
 			if err := transaction.Init(root); err != nil {
@@ -58,6 +102,15 @@ func TestLifecycle(t *testing.T) {
 				os.Chmod(filepath.Join(root, ".dot-plugin"), 0700)
 				os.WriteFile(filepath.Join(root, ".dot-plugin"), []byte("changed"), 0700)
 			}
+			if kind == "manifest-downgrade" {
+				manifest := Manifest{
+					ID: "org.dot.hello", SHA256: transaction.Digest(mustRead(t, filepath.Join(root, ".dot-plugin"))),
+					Protocol: 1, Profile: protocol.HelloProfile, Assurance: "none",
+				}
+				if err = os.WriteFile(filepath.Join(root, ".dot-plugin.json"), protocol.Value(manifest), 0600); err != nil {
+					t.Fatal(err)
+				}
+			}
 			err = Apply(context.Background(), e, kind != "no-consent")
 			if kind != "success" && kind != "environment" {
 				if err == nil {
@@ -92,6 +145,15 @@ func TestLifecycle(t *testing.T) {
 	}
 }
 
+func mustRead(t *testing.T, path string) []byte {
+	t.Helper()
+	b, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return b
+}
+
 func TestChildGroupCleanup(t *testing.T) {
 	bin := filepath.Join(t.TempDir(), "hello")
 	if b, err := exec.Command("go", "build", "-o", bin, "../cmd/dot-hello").CombinedOutput(); err != nil {
@@ -109,9 +171,10 @@ func TestChildGroupCleanup(t *testing.T) {
 			}
 			defer e.Close()
 			fixture := filepath.Join(t.TempDir(), "fixture")
-			// The child writes only inside this test's private stage. If cleanup
-			// fails, the marker proves it outlived Apply; no host data is touched.
-			body := "#!/bin/sh\n(/bin/sleep 1; printf survived > survivor.txt) >/dev/null 2>&1 &\n"
+			// The child writes only after the test releases it following Apply.
+			// This avoids mistaking a slow race-enabled Apply for failed cleanup.
+			// If the child survives, the marker proves it outlived Apply.
+			body := "#!/bin/sh\n(while [ ! -e release ]; do /bin/sleep 0.02; done; printf survived > survivor.txt) >/dev/null 2>&1 &\n"
 			switch kind {
 			case "noise":
 				body += "echo invalid\nwait\n"
@@ -136,7 +199,10 @@ func TestChildGroupCleanup(t *testing.T) {
 			if (err == nil) != (kind == "success") {
 				t.Fatalf("unexpected result: %v", err)
 			}
-			time.Sleep(1200 * time.Millisecond)
+			if err = os.WriteFile(filepath.Join(root, ".dot-stage/release"), []byte("release"), 0600); err != nil {
+				t.Fatal(err)
+			}
+			time.Sleep(300 * time.Millisecond)
 			if _, err = os.Stat(filepath.Join(root, ".dot-stage/survivor.txt")); !os.IsNotExist(err) {
 				t.Fatal("plugin descendant survived cleanup", err)
 			}

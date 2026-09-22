@@ -53,6 +53,11 @@ commands, irrelevant flags, missing registration/archive arguments and absent
 audit consent are rejected before opening the root. Direct CLI tests cover these
 negative paths and two complete apply/archive generations.
 
+Registration and initialization also bind the exact restricted profile, audit
+assurance and capability set. A plugin cannot silently downgrade containment or
+drop/reorder capabilities after the user grants audit consent. This negotiation
+does not upgrade the audit-only process boundary into a sandbox.
+
 Garbage collection, production registry signatures, OS containment, full JCS,
 effect drivers, Windows ACL/replace semantics, secret brokering and read-only MCP
 isolation remain separate gates. The tests simulate process crashes and I/O errors;

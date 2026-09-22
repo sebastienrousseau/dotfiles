@@ -5,6 +5,7 @@ package host
 
 import (
 	"errors"
+	"syscall"
 	"testing"
 
 	"golang.org/x/sys/unix"
@@ -25,10 +26,10 @@ func TestOnlyZombies(t *testing.T) {
 }
 
 func TestGroupExitTransition(t *testing.T) {
-	for _, kind := range []string{"exiting", "gone", "live", "unknown", "query-error"} {
+	for _, kind := range []string{"exiting", "gone", "live", "unknown", "query-error", "permission"} {
 		t.Run(kind, func(t *testing.T) {
-			calls, pauses := 0, 0
-			got := settledGroup(func() ([]unix.KinfoProc, error) {
+			calls, signals, pauses := 0, 0, 0
+			err := settleGroup(func() ([]unix.KinfoProc, error) {
 				calls++
 				if kind == "query-error" {
 					return nil, errors.New("permission denied")
@@ -46,13 +47,20 @@ func TestGroupExitTransition(t *testing.T) {
 					group[1].Proc.P_stat = 5
 				}
 				return group, nil
+			}, func() error {
+				signals++
+				if kind == "permission" {
+					return syscall.EPERM
+				}
+				return nil
 			}, func() { pauses++ })
-			want := kind == "exiting" || kind == "gone"
-			if got != want {
-				t.Fatalf("got %v, want %v", got, want)
+			wantSuccess := kind == "exiting" || kind == "gone"
+			if (err == nil) != wantSuccess {
+				t.Fatalf("unexpected result: %v", err)
 			}
-			if (want && calls != 3) || (!want && kind != "query-error" && calls != 50) || (kind == "query-error" && calls != 1) || pauses != calls-1 {
-				t.Fatalf("unexpected sampling bound: %d calls, %d pauses", calls, pauses)
+			if (wantSuccess && calls != 3) || (kind == "query-error" && calls != 1) || (kind == "permission" && calls != 1) ||
+				(!wantSuccess && kind != "query-error" && kind != "permission" && calls != 50) || pauses != calls-1 || signals != calls {
+				t.Fatalf("unexpected bound: %d queries, %d signals, %d pauses", calls, signals, pauses)
 			}
 		})
 	}

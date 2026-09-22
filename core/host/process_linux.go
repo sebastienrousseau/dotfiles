@@ -3,5 +3,15 @@
 
 package host
 
-// Linux does not need Darwin's zombie-only EPERM exception.
-func exitedGroup(int) bool { return false }
+import (
+	"errors"
+	"syscall"
+)
+
+func stopProcessGroup(pid int) error {
+	err := syscall.Kill(-pid, syscall.SIGKILL)
+	if errors.Is(err, syscall.ESRCH) {
+		return nil
+	}
+	return err
+}

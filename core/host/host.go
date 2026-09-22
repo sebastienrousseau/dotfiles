@@ -26,6 +26,7 @@ type Manifest struct {
 	ID        string `json:"id"`
 	SHA256    string `json:"sha256"`
 	Protocol  int    `json:"protocol"`
+	Profile   string `json:"profile"`
 	Assurance string `json:"assurance"`
 }
 
@@ -72,7 +73,10 @@ func Register(e *transaction.Engine, source string) error {
 	if err != nil {
 		return err
 	}
-	m := Manifest{"org.dot.hello", transaction.Digest(b), 1, "audit"}
+	m := Manifest{
+		ID: "org.dot.hello", SHA256: transaction.Digest(b), Protocol: 1,
+		Profile: protocol.HelloProfile, Assurance: protocol.AssuranceAudit,
+	}
 	f, err = e.Root.OpenFile(".dot-plugin.json", os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
 	if err != nil {
 		return err
@@ -136,7 +140,7 @@ func Apply(ctx context.Context, e *transaction.Engine, allowAudit bool) error {
 	if err = protocol.Strict(metadata, &m); err != nil {
 		return err
 	}
-	if m.ID != "org.dot.hello" || m.Protocol != 1 || m.Assurance != "audit" {
+	if m.ID != "org.dot.hello" || m.Protocol != 1 || m.Profile != protocol.HelloProfile || m.Assurance != protocol.AssuranceAudit {
 		return fmt.Errorf("DOT_E_PLUGIN_IDENTITY: manifest policy")
 	}
 	path := filepath.Join(e.Root.Name(), ".dot-plugin")
@@ -206,12 +210,17 @@ func Apply(ctx context.Context, e *transaction.Engine, allowAudit bool) error {
 		return err
 	}
 	nonceText := hex.EncodeToString(nonce[:])
+	initialize := protocol.Initialize{
+		Protocol: 1, Profile: protocol.HelloProfile,
+		RequiredAssurance: protocol.AssuranceAudit,
+		Capabilities:      append([]string(nil), protocol.HelloCapabilities...), Nonce: nonceText,
+	}
 	var identity protocol.Identity
-	if err = call("dot.initialize", protocol.Initialize{Protocol: 1, Nonce: nonceText}, &identity); err != nil {
+	if err = call("dot.initialize", initialize, &identity); err != nil {
 		return err
 	}
-	if identity.ID != m.ID || identity.Protocol != 1 || identity.Nonce != nonceText {
-		return fmt.Errorf("DOT_E_PLUGIN_IDENTITY: handshake")
+	if err = validateIdentity(m, initialize, identity); err != nil {
+		return err
 	}
 	var proposal protocol.Proposal
 	if err = call("dot.plan", struct{}{}, &proposal); err != nil {
@@ -306,4 +315,18 @@ func Apply(ctx context.Context, e *transaction.Engine, allowAudit bool) error {
 		return fmt.Errorf("DOT_E_TIMEOUT: before transaction commit; recover retained prepared evidence: %w", err)
 	}
 	return e.Commit()
+}
+
+func validateIdentity(m Manifest, request protocol.Initialize, identity protocol.Identity) error {
+	if identity.ID != m.ID || identity.Protocol != request.Protocol || identity.Profile != request.Profile ||
+		identity.Assurance != request.RequiredAssurance || identity.Nonce != request.Nonce ||
+		len(identity.Capabilities) != len(request.Capabilities) {
+		return fmt.Errorf("DOT_E_PLUGIN_IDENTITY: handshake downgrade or mismatch")
+	}
+	for i := range request.Capabilities {
+		if identity.Capabilities[i] != request.Capabilities[i] {
+			return fmt.Errorf("DOT_E_PLUGIN_IDENTITY: capability mismatch")
+		}
+	}
+	return nil
 }

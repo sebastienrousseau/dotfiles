@@ -17,6 +17,13 @@ import (
 
 const MaxFrame = 65536
 
+const (
+	HelloProfile   = "org.dot.hello/v1"
+	AssuranceAudit = "audit"
+)
+
+var HelloCapabilities = []string{"materialize", "plan", "validate"}
+
 type Message struct {
 	JSONRPC string          `json:"jsonrpc"`
 	ID      int             `json:"id"`
@@ -135,13 +142,19 @@ func Value(v any) json.RawMessage {
 }
 
 type Initialize struct {
-	Protocol int    `json:"protocol"`
-	Nonce    string `json:"nonce"`
+	Protocol          int      `json:"protocol"`
+	Profile           string   `json:"profile"`
+	RequiredAssurance string   `json:"required_assurance"`
+	Capabilities      []string `json:"capabilities"`
+	Nonce             string   `json:"nonce"`
 }
 type Identity struct {
-	Protocol int    `json:"protocol"`
-	Nonce    string `json:"nonce"`
-	ID       string `json:"id"`
+	Protocol     int      `json:"protocol"`
+	Profile      string   `json:"profile"`
+	Assurance    string   `json:"assurance"`
+	Capabilities []string `json:"capabilities"`
+	Nonce        string   `json:"nonce"`
+	ID           string   `json:"id"`
 }
 type Proposal struct {
 	Names []string `json:"names"`

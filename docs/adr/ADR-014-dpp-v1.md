@@ -16,6 +16,14 @@ Initialize binds version, plugin identity and a random 256-bit nonce. Plan prece
 materialize, validate and shutdown. No post-commit hook is advertised by hello;
 future hooks may return only core-authorized effect requests.
 
+The restricted profile negotiates all security-relevant dimensions explicitly:
+profile `org.dot.hello/v1`, assurance `audit`, and the exact ordered capability set
+`materialize`, `plan`, `validate`. The manifest binds profile and assurance before
+launch. Core sends its required values and nonce in `dot.initialize`; the plugin
+must echo an exact identity, profile, assurance, capability set, protocol and nonce.
+Missing, reordered, added or downgraded values fail before planning. Audit consent
+does not satisfy or impersonate a future OS-enforced assurance level.
+
 Proposal identity binds observed preconditions, ordered slots, nonce and executable
 digest. Core seals the final plan only after verifying materialized bytes and
 terminating the plugin. SHA-256 hashes canonical bytes, excluding `plan_id` itself.
