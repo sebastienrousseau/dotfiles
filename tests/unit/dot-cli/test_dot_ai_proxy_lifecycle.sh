@@ -106,7 +106,7 @@ tok="$(cat "$STATE/gateway.token" 2>/dev/null)"
 assert_equals "43" "${#tok}" "a 43-char random token is generated"
 
 test_start "ai_proxy_token_file_mode"
-perms="$(stat -f '%Lp' "$STATE/gateway.token" 2>/dev/null || stat -c '%a' "$STATE/gateway.token" 2>/dev/null)"
+perms="$(stat -c '%a' "$STATE/gateway.token" 2>/dev/null || stat -f '%Lp' "$STATE/gateway.token" 2>/dev/null)"
 assert_equals "600" "$perms" "token file is 0600"
 
 test_start "ai_proxy_routing_env_uses_token"

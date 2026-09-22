@@ -78,7 +78,7 @@ else
 fi
 
 test_start "chezmoi_source_config_stays_private"
-perms=$(stat -f '%Lp' "$CHEZMOI_CONFIG_FILE" 2>/dev/null || stat -c '%a' "$CHEZMOI_CONFIG_FILE")
+perms=$(stat -c '%a' "$CHEZMOI_CONFIG_FILE" 2>/dev/null || stat -f '%Lp' "$CHEZMOI_CONFIG_FILE")
 assert_equals "600" "$perms" "rewritten config is 0600"
 
 # ── apply_minimal_profile_overrides ─────────────────────────────────

@@ -15,7 +15,7 @@ server only translates wire formats. Managed via `dot ai serve`.
 Features: real token-by-token streaming (SSE), model routing/aliases, cost
 metering (/metrics, /v1/usage), an optional daily budget cap, and a
 mandatory API-key gate: DOT_AI_API_KEY, or a random token generated on first
-start (0600, print it with `dot-ai-serve --print-token`). Requests whose Host
+start (0600; `dot-ai-serve --token-path` prints where it is stored). Requests whose Host
 header is not this server's loopback address are refused, which blocks DNS
 rebinding from browsers. Multimodal image blocks are acknowledged but not forwarded
 (the CLI engine is text-only); function/tool-calling is likewise unavailable
@@ -729,11 +729,14 @@ def allowed_hosts():
 
 def main():
     global API_KEY
-    if sys.argv[1:] == ["--print-token"]:
-        print(API_KEY or load_or_create_token())
+    if sys.argv[1:] == ["--token-path"]:
+        # Where clients read the token from; the secret itself is never printed.
+        if not API_KEY:
+            load_or_create_token()
+        print(TOKEN_FILE)
         return
     if sys.argv[1:]:
-        log(f"unknown arguments: {' '.join(sys.argv[1:])} (supported: --print-token)")
+        log(f"unknown arguments: {' '.join(sys.argv[1:])} (supported: --token-path)")
         sys.exit(64)
     if not shutil.which(CLAUDE_BIN):
         log(f"WARNING: '{CLAUDE_BIN}' not on PATH — requests will fail until it is installed and authenticated.")
@@ -742,7 +745,7 @@ def main():
         sys.exit(2)
     if not API_KEY:
         API_KEY = load_or_create_token()
-        log(f"auth: token from {TOKEN_FILE} (print with: dot-ai-serve --print-token)")
+        log(f"auth: token from {TOKEN_FILE}")
     server = ThreadingHTTPServer((HOST, PORT), Handler)
     extra = f", budget: ${DAILY_BUDGET:.2f}/day" if DAILY_BUDGET > 0 else ""
     log(f"listening on http://{HOST}:{PORT}  (engine: {CLAUDE_BIN}, model: {DEFAULT_MODEL}{extra})")

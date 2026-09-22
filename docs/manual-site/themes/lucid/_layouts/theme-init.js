@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+// Copyright (c) 2026 Sebastien Rousseau
+// Vendored from ssg-themes.github.io themes/lucid (see ../LICENSE-APACHE, ../LICENSE-MIT).
 /* Applied before first paint so a stored preference never flashes the wrong
  * ground. Absence of a stored value is meaningful: it means "follow the
  * system", so nothing is written to the element and the prefers-color-scheme

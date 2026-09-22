@@ -190,7 +190,7 @@ code="$(code_of -X POST -H 'Content-Type: application/json' "http://127.0.0.1:$D
 assert_equals "401" "$code" "no DOT_AI_API_KEY still requires a key"
 
 test_start "default_token_file_private"
-perms="$(stat -f '%Lp' "$TOKEN_FILE" 2>/dev/null || stat -c '%a' "$TOKEN_FILE" 2>/dev/null)"
+perms="$(stat -c '%a' "$TOKEN_FILE" 2>/dev/null || stat -f '%Lp' "$TOKEN_FILE" 2>/dev/null)"
 assert_equals "600" "$perms" "generated token file is 0600"
 
 test_start "default_token_accepted"
@@ -199,9 +199,11 @@ code="$(code_of -X POST -H 'Content-Type: application/json' -H "authorization: B
   "http://127.0.0.1:$DPORT/v1/messages" -d "$body")"
 assert_equals "200" "$code" "generated token is accepted as a bearer token"
 
-test_start "print_token_matches_file"
-printed="$(perl -e 'alarm 10; exec @ARGV' python3 "$GATEWAY" --print-token 2>/dev/null)"
-assert_equals "$tok" "$printed" "--print-token prints the same token"
+test_start "token_path_names_the_file"
+printed="$(perl -e 'alarm 10; exec @ARGV' python3 "$GATEWAY" --token-path 2>/dev/null)"
+assert_equals "$TOKEN_FILE" "$printed" "--token-path prints where the token lives"
+test_start "token_path_never_prints_the_secret"
+assert_not_equals "$tok" "$printed" "the token itself is not written to stdout"
 
 test_start "wrong_token_rejected"
 code="$(code_of -X POST -H 'Content-Type: application/json' -H 'x-api-key: nope' \

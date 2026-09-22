@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+// Copyright (c) 2026 Sebastien Rousseau
+// Vendored from ssg-themes.github.io themes/lucid (see ../LICENSE-APACHE, ../LICENSE-MIT).
 /* Progressive enhancement only. Without JavaScript the navigation is a
  * plain list and the colour scheme follows the system: nothing here is
  * required to read the documentation. */

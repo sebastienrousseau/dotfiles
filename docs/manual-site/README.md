@@ -16,8 +16,8 @@ make manual-site-serve    # build, then serve at http://127.0.0.1:8000/manual/
 
 - `themes/lucid/` is vendored from
   [ssg-themes.github.io](https://github.com/sebastienrousseau/ssg-themes.github.io)
-  at commit `b5cba1f1ead2f11023de62d80be0cb470cd894ab` (MIT, see
-  `themes/lucid/LICENSE-MIT`). Local changes:
+  at commit `b5cba1f1ead2f11023de62d80be0cb470cd894ab` (Apache-2.0 OR MIT,
+  see `themes/lucid/LICENSE-APACHE` and `LICENSE-MIT`). Local changes:
   - `header.html`: the .dotfiles terminal mark, Docs / Manual / GitHub links,
     no language switcher (the manual is English only);
   - `doc.html`: side navigation, contents, breadcrumbs and pager come from
