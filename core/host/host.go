@@ -113,8 +113,8 @@ func Apply(ctx context.Context, e *transaction.Engine, allowAudit bool) error {
 	if !allowAudit {
 		return fmt.Errorf("DOT_E_POLICY: explicit --allow-audit-plugin required; no OS sandbox")
 	}
-	if _, err := e.Root.Lstat(".dot-txn"); !os.IsNotExist(err) {
-		return fmt.Errorf("DOT_E_RECOVERY_REQUIRED: retain/recover existing transaction")
+	if err := e.Ready(); err != nil {
+		return err
 	}
 	info, err := e.Root.Lstat(".dot-plugin.json")
 	if err != nil {
@@ -154,6 +154,10 @@ func Apply(ctx context.Context, e *transaction.Engine, allowAudit bool) error {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, path)
+	stopGroup, err := configureProcess(cmd)
+	if err != nil {
+		return err
+	}
 	cmd.Dir = stage
 	cmd.Env = []string{"LANG=C", "DOT_STAGE_ROOT=" + stage}
 	cmd.WaitDelay = time.Second
@@ -177,7 +181,7 @@ func Apply(ctx context.Context, e *transaction.Engine, allowAudit bool) error {
 		in.Close()
 		if !stopped {
 			cancel()
-			cmd.Process.Kill()
+			stopGroup()
 			cmd.Wait()
 		}
 	}()
@@ -248,6 +252,12 @@ func Apply(ctx context.Context, e *transaction.Engine, allowAudit bool) error {
 	if err != io.EOF {
 		return fmt.Errorf("DOT_E_PROTOCOL: trailing stdout")
 	}
+	// Kill the group before reaping its leader, so its PID cannot be reused
+	// between Wait and a later group signal. This also cleans up background
+	// children that closed their protocol descriptors before the leader exited.
+	if err = stopGroup(); err != nil {
+		return fmt.Errorf("DOT_E_POLICY: plugin group cleanup failed: %w", err)
+	}
 	err = cmd.Wait()
 	stopped = true
 	if err != nil {
@@ -287,13 +297,13 @@ func Apply(ctx context.Context, e *transaction.Engine, allowAudit bool) error {
 		artifacts = append(artifacts, data)
 	}
 	if err = ctx.Err(); err != nil {
-		return err
+		return fmt.Errorf("DOT_E_TIMEOUT: before transaction prepare: %w", err)
 	}
 	if _, err = e.Prepare(p, artifacts); err != nil {
 		return err
 	}
 	if err = ctx.Err(); err != nil {
-		return err
+		return fmt.Errorf("DOT_E_TIMEOUT: before transaction commit; recover retained prepared evidence: %w", err)
 	}
 	return e.Commit()
 }

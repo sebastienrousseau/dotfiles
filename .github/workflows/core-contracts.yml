@@ -44,6 +44,10 @@ jobs:
       - name: Vet
         working-directory: core
         run: go vet ./...
+      - name: Repeated short-lived plugin cleanup (1000 exits per Unix host)
+        if: runner.os != 'Windows'
+        working-directory: core
+        run: go test ./host -run '^TestProcessExitCleanup$' -count=10
       - name: Repeat crash boundaries (140 trials per Unix host)
         if: runner.os != 'Windows'
         working-directory: core
@@ -52,6 +56,10 @@ jobs:
         if: runner.os == 'Linux'
         working-directory: core
         run: go test ./protocol -fuzz FuzzFrames -fuzztime 15s -parallel 2
+      - name: Repeat archive recovery boundaries (200 trials per Unix host)
+        if: runner.os != 'Windows'
+        working-directory: core
+        run: go test ./transaction -run '^TestArchiveCrashBoundaries$' -count=10
   contracts:
     runs-on: ubuntu-latest
     timeout-minutes: 5

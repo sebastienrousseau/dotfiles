@@ -33,10 +33,26 @@ Windows mutation fails closed pending a handle-based replace/ACL implementation.
 Process-crash tests are not hardware power-loss certification; macOS full hardware
 flush guarantees require further work. Pre-PREPARED failures retain the incomplete
 transaction as evidence and block reuse; automatic abandoned-stage cleanup is pending.
-Transactions are retained, not silently pruned or reused for the next generation.
+Terminal transactions are retained until explicit `archive --plan-id`. Core checks
+the exact sealed ID, terminal state, current target snapshots, backups, artifacts
+and stage before archiving. A durable `.dot-archive` intent covers moving stage
+into the transaction and moving the transaction to `.dot-history/<plan-id>`.
+Both parent directories are synced before removing the intent. `recover` resumes
+interrupted archives without invoking plugins; ambiguous or edited state blocks.
+While archiving, status is `ARCHIVING`; after successful retirement it is `IDLE`.
+The kernel lock remains held across all lifecycle operations.
+
+History is limited to 32 generations; overflow fails without deleting evidence.
+Explicit retirement permits another apply with a fresh nonce and preconditions.
+Rollback remains limited to the active generation. There is no history pruning,
+archived-generation rollback, or byte quota on arbitrary corrupted history entries.
 
 ## Acceptance
 
 Inject failures after prepare, commit intent, flush, rename, commit and rollback;
 include a child process exiting without cleanup. Verify hashes/modes and absence
 restoration, preservation of concurrent edits, seal tampering and lock exclusion.
+Additionally exercise five archive fault boundaries across staged/unstaged and
+committed/rolled-back transactions, repeat recovery, and exit a real child process
+after the history rename. Test evidence retention, full history, mismatched IDs,
+changed stages/targets, symlinks, and refusal to archive incomplete transactions.
