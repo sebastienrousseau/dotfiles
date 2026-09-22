@@ -8,19 +8,24 @@ set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 require_untagged=0
+development=0
 quiet=0
 
 for arg in "$@"; do
   case "$arg" in
     --require-untagged) require_untagged=1 ;;
+    --development) development=1 ;;
     --quiet | -q) quiet=1 ;;
     -h | --help)
       cat <<'EOF'
-Usage: scripts/release-preflight [--require-untagged] [--quiet]
+Usage: scripts/release-preflight [--require-untagged | --development] [--quiet]
 
 Validates all live version surfaces, then checks whether the canonical release
 tag is unused or already resolves to HEAD. Use --require-untagged immediately
 before creating a new release tag.
+
+--development permits an unchanged published version only when its existing tag
+is an ancestor of HEAD. It is for branch validation, never release authorization.
 EOF
       exit 0
       ;;
@@ -30,6 +35,11 @@ EOF
       ;;
   esac
 done
+
+if ((development && require_untagged)); then
+  echo "release-preflight: --development and --require-untagged are mutually exclusive" >&2
+  exit 2
+fi
 
 log() { ((quiet)) || printf '%s\n' "$*"; }
 fail() {
@@ -85,9 +95,14 @@ if git show-ref --verify --quiet "refs/tags/$tag"; then
     fail "$tag already exists at $tagged_commit; release tags are immutable"
   fi
   if [[ "$tagged_commit" != "$head_commit" ]]; then
-    fail "$tag already identifies $tagged_commit, not HEAD $head_commit; bump the version"
+    if ((development)) && git merge-base --is-ancestor "$tagged_commit" "$head_commit"; then
+      log "release-preflight: development after published $tag; not eligible to reuse this tag"
+    else
+      fail "$tag already identifies $tagged_commit, not HEAD $head_commit; bump the version"
+    fi
+  else
+    log "release-preflight: $tag already identifies HEAD $head_commit"
   fi
-  log "release-preflight: $tag already identifies HEAD $head_commit"
 else
   log "release-preflight: $tag is available for HEAD $head_commit"
 fi

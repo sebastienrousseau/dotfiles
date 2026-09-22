@@ -31,6 +31,8 @@ on:
       - 'tools/docs/generate-command-index.sh'
       - 'scripts/verify-release-versions'
       - 'scripts/release-preflight'
+      - 'tests/unit/qa/test_release_preflight.sh'
+      - '.github/workflows/doc-drift.yml'
       - 'tools/docs/generate-manpage.sh'
       - 'tools/docs/man/dot.1.in'
       - 'tools/docs/generate-completions.sh'
@@ -107,7 +109,9 @@ jobs:
       - name: Verify version-bearing files match defaults/.chezmoidata.toml
         run: |
           bash scripts/verify-release-versions
-          bash scripts/release-preflight
+          # Branch validation permits development after an immutable release.
+          # Actual release creation retains strict --require-untagged preflight.
+          bash scripts/release-preflight --development
 
   manpage:
     name: Generators / man page
