@@ -28,9 +28,12 @@ if ! python3 -c 'import socket;s=socket.socket();s.bind(("127.0.0.1",0));s.close
 fi
 
 WORK="$(mktemp -d)"
-PIDS=()
+# Keep the auto-generated gateway token out of the real state dir.
+export XDG_STATE_HOME="$WORK/state"
 cleanup() {
-  for p in "${PIDS[@]:-}"; do kill "$p" 2>/dev/null || true; done
+  # start_server runs inside $(...), so its PIDs are recorded in a file.
+  local p
+  while read -r p; do kill "$p" 2>/dev/null || true; done <"$WORK/pids" 2>/dev/null
   rm -rf "$WORK"
 }
 trap cleanup EXIT
@@ -55,6 +58,16 @@ printf '%s\n' '{"type":"result","is_error":true,"result":"boom from engine","usa
 MK
 chmod +x "$MOCKERR"
 
+# mock that records its argv and working directory
+MOCKREC="$WORK/claude-rec"
+cat >"$MOCKREC" <<MK
+#!/usr/bin/env bash
+cat >/dev/null
+{ printf 'cwd=%s\n' "\$PWD"; printf 'arg=[%s]\n' "\$@"; } >"$WORK/rec.log"
+printf '%s\n' '{"type":"result","is_error":false,"result":"ok","usage":{}}'
+MK
+chmod +x "$MOCKREC"
+
 free_port() { python3 -c 'import socket;s=socket.socket();s.bind(("127.0.0.1",0));print(s.getsockname()[1]);s.close()'; }
 
 # start_server <var-prefix> [ENV=val ...] — sets ${prefix}_PORT, appends PID.
@@ -64,7 +77,7 @@ start_server() {
   # Default bin first (so "$@" can override it); host/port last (fixed).
   env DOT_AI_CLAUDE_BIN="$MOCK" "$@" DOT_AI_HOST=127.0.0.1 DOT_AI_PORT="$port" \
     python3 "$GATEWAY" >"$WORK/srv-$port.log" 2>&1 &
-  PIDS+=("$!")
+  echo "$!" >>"$WORK/pids"
   local i
   for i in $(seq 1 50); do
     curl -fsS "http://127.0.0.1:$port/health" >/dev/null 2>&1 && {
@@ -77,11 +90,13 @@ start_server() {
   return 1
 }
 
-GET() { curl -fsS "$@" 2>/dev/null; }
-POST() { curl -fsS -X POST -H 'Content-Type: application/json' "$@" 2>/dev/null; }
+KEY="main-test-key"
+GET() { curl -fsS -H "x-api-key: $KEY" "$@" 2>/dev/null; }
+POST() { curl -fsS -X POST -H 'Content-Type: application/json' -H "x-api-key: $KEY" "$@" 2>/dev/null; }
+code_of() { curl -s -o /dev/null -w '%{http_code}' "$@"; }
 
 # ───────────────────────── main server ─────────────────────────
-PORT="$(start_server)"
+PORT="$(start_server DOT_AI_API_KEY="$KEY")"
 BASE="http://127.0.0.1:$PORT"
 
 test_start "gateway_starts_and_is_healthy"
@@ -139,9 +154,9 @@ usage="$(GET "$BASE/v1/usage")"
 assert_contains "sonnet" "$usage" "by_model attributes to the resolved (sonnet) model"
 
 test_start "engine_error_surfaces_502"
-ERRPORT="$(start_server DOT_AI_CLAUDE_BIN="$MOCKERR")"
+ERRPORT="$(start_server DOT_AI_CLAUDE_BIN="$MOCKERR" DOT_AI_API_KEY="$KEY")"
 # override the per-call bin by pointing the whole server at the error mock
-code="$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' \
+code="$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -H "x-api-key: $KEY" \
   "http://127.0.0.1:$ERRPORT/v1/messages" -d '{"model":"sonnet","messages":[{"role":"user","content":"hi"}]}')"
 assert_equals "502" "$code" "engine error returns 502"
 
@@ -158,11 +173,77 @@ assert_equals "200" "$okcode" "valid key is accepted"
 
 # ──────────────────────── budget server ────────────────────────
 test_start "daily_budget_cap"
-BPORT="$(start_server DOT_AI_DAILY_BUDGET=0.0000001)"
+BPORT="$(start_server DOT_AI_DAILY_BUDGET=0.0000001 DOT_AI_API_KEY="$KEY")"
 # First request runs (spent starts at 0), pushing spend over the tiny cap.
 POST "http://127.0.0.1:$BPORT/v1/messages" -d '{"model":"sonnet","messages":[{"role":"user","content":"hi"}]}' >/dev/null
-overcode="$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' \
+overcode="$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -H "x-api-key: $KEY" \
   "http://127.0.0.1:$BPORT/v1/messages" -d '{"model":"sonnet","messages":[{"role":"user","content":"hi"}]}')"
 assert_equals "429" "$overcode" "second request over budget returns 429"
+
+# ─────────────── default auth: generated token ───────────────
+body='{"model":"sonnet","messages":[{"role":"user","content":"hi"}]}'
+TOKEN_FILE="$XDG_STATE_HOME/dotfiles/ai-serve/gateway.token"
+DPORT="$(start_server)"
+
+test_start "default_requires_token"
+code="$(code_of -X POST -H 'Content-Type: application/json' "http://127.0.0.1:$DPORT/v1/messages" -d "$body")"
+assert_equals "401" "$code" "no DOT_AI_API_KEY still requires a key"
+
+test_start "default_token_file_private"
+perms="$(stat -f '%Lp' "$TOKEN_FILE" 2>/dev/null || stat -c '%a' "$TOKEN_FILE" 2>/dev/null)"
+assert_equals "600" "$perms" "generated token file is 0600"
+
+test_start "default_token_accepted"
+tok="$(cat "$TOKEN_FILE" 2>/dev/null)"
+code="$(code_of -X POST -H 'Content-Type: application/json' -H "authorization: Bearer $tok" \
+  "http://127.0.0.1:$DPORT/v1/messages" -d "$body")"
+assert_equals "200" "$code" "generated token is accepted as a bearer token"
+
+test_start "print_token_matches_file"
+printed="$(perl -e 'alarm 10; exec @ARGV' python3 "$GATEWAY" --print-token 2>/dev/null)"
+assert_equals "$tok" "$printed" "--print-token prints the same token"
+
+test_start "wrong_token_rejected"
+code="$(code_of -X POST -H 'Content-Type: application/json' -H 'x-api-key: nope' \
+  "http://127.0.0.1:$DPORT/v1/messages" -d "$body")"
+assert_equals "401" "$code" "wrong key is rejected"
+
+test_start "metrics_require_token"
+code="$(code_of "http://127.0.0.1:$DPORT/metrics")"
+assert_equals "401" "$code" "/metrics needs the key"
+
+# ─────────────── DNS rebinding: Host allowlist ───────────────
+test_start "foreign_host_rejected"
+code="$(code_of -H 'Host: attacker.example:'"$DPORT" "http://127.0.0.1:$DPORT/health")"
+assert_equals "403" "$code" "foreign Host header is refused"
+
+test_start "foreign_host_rejected_with_key"
+code="$(code_of -X POST -H 'Host: attacker.example' -H 'Content-Type: application/json' \
+  -H "x-api-key: $tok" "http://127.0.0.1:$DPORT/v1/messages" -d "$body")"
+assert_equals "403" "$code" "foreign Host is refused even with a valid key"
+
+test_start "localhost_host_allowed"
+code="$(code_of -H "Host: localhost:$DPORT" "http://127.0.0.1:$DPORT/health")"
+assert_equals "200" "$code" "localhost:PORT Host is allowed"
+
+# ─────────────── hermetic engine invocation ───────────────
+RPORT="$(start_server DOT_AI_CLAUDE_BIN="$MOCKREC" DOT_AI_API_KEY="$KEY")"
+POST "http://127.0.0.1:$RPORT/v1/messages" -d "$body" >/dev/null
+
+test_start "engine_tools_disabled"
+assert_contains "arg=[--tools]" "$(cat "$WORK/rec.log" 2>/dev/null)" "claude gets --tools"
+test_start "engine_tools_empty"
+tools_val="$(grep -A1 -F 'arg=[--tools]' "$WORK/rec.log" 2>/dev/null | tail -n 1)"
+assert_equals "arg=[]" "$tools_val" "--tools is empty (all tools disabled)"
+
+test_start "engine_runs_in_empty_dir"
+engine_cwd="$(sed -n 's/^cwd=//p' "$WORK/rec.log" 2>/dev/null)"
+assert_not_equals "$(pwd -P)" "$engine_cwd" "engine does not run in the server cwd"
+test_start "engine_cwd_cleaned_up"
+if [[ -n "$engine_cwd" && ! -e "$engine_cwd" ]]; then
+  assert_exit_code 0 "true"
+else
+  assert_exit_code 0 "false  # engine cwd left behind: $engine_cwd"
+fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

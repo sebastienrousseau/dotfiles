@@ -24,6 +24,7 @@ SERVE_BIN="${DOT_AI_SERVE_BIN:-dot-ai-serve}"
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/ai-serve"
 PID_FILE="$STATE_DIR/serve.pid"
+TOKEN_FILE="$STATE_DIR/gateway.token" # shared with dot-ai-serve
 LOG_FILE="$STATE_DIR/serve.log"
 
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
@@ -193,9 +194,37 @@ proxy_setup() {
 # NON-Claude tools. It is deliberately NOT auto-sourced into your shell:
 # the primary `claude` always uses its native session, and setting
 # ANTHROPIC_API_KEY where Claude Code sees it would disable claude.ai
-# connectors. The placeholder key is a dummy the gateway ignores.
+# connectors. The key is the gateway's own token: DOT_AI_API_KEY, or the
+# 0600 token file dot-ai-serve also reads. The gateway rejects anything else.
+_gateway_token() {
+  if [[ -n "${DOT_AI_API_KEY:-}" ]]; then
+    printf '%s\n' "$DOT_AI_API_KEY"
+    return 0
+  fi
+  if [[ ! -s "$TOKEN_FILE" ]]; then
+    (
+      umask 077
+      mkdir -p "$STATE_DIR"
+      local tmp
+      tmp="$(mktemp "$TOKEN_FILE.XXXXXX")" || exit 1
+      LC_ALL=C tr -dc 'A-Za-z0-9_-' </dev/urandom | head -c 43 >"$tmp" && echo >>"$tmp"
+      # Keep a token another process created first.
+      ln "$tmp" "$TOKEN_FILE" 2>/dev/null || true
+      rm -f "$tmp"
+    ) || return 1
+  fi
+  local tok
+  IFS= read -r tok <"$TOKEN_FILE" || true
+  [[ -n "$tok" ]] || return 1
+  printf '%s\n' "$tok"
+}
+
 local_on() {
-  local key="${DOT_AI_API_KEY:-x}"
+  local key
+  if ! key="$(_gateway_token)"; then
+    err "Could not read or create the gateway token at $TOKEN_FILE"
+    return 1
+  fi
   local model="${DOT_AI_DEFAULT_MODEL:-sonnet}"
   mkdir -p "$CONFIG_DIR"
   (
