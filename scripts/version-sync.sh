@@ -326,6 +326,16 @@ update_version_references() {
         sed_in_place "$temp_file" \
           -e "s|\.dotfiles\` v$SED_VERSION_PATTERN|.dotfiles\` v$target_version|g"
         ;;
+      "docs/manual/03-reference/02-config-files.md" | \
+        "docs/manual/03-reference/04-templates.md" | \
+        "docs/manual/01-concepts/02-trust-model.md")
+        # Sample config, attestation and template-variable values that show
+        # the current dotfiles_version without a leading "v".
+        sed_in_place "$temp_file" \
+          -e "s|dotfiles_version = \"$SED_VERSION_PATTERN\"|dotfiles_version = \"$target_version\"|g" \
+          -e "s|\"version\": \"$SED_VERSION_PATTERN\"|\"version\": \"$target_version\"|g" \
+          -e "s|(\.dotfiles_version\` \| string \| \`\")$SED_VERSION_PATTERN|\\1$target_version|g"
+        ;;
       *)
         # Update explicit markdown version labels, backticks, and parentheses.
         # Skip lines containing MILESTONE.

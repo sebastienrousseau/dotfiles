@@ -98,12 +98,12 @@ function script:Invoke-DotNativeCommand {
 
 .EXAMPLE
     Get-DotVersion
-    0.2.503
+    <dotfiles_version from .chezmoidata.toml>
 
 .EXAMPLE
     Get-DotVersion -AsObject | ConvertTo-Json
     {
-      "Version": "0.2.503",
+      "Version": "<dotfiles_version>",
       "Source": "...\\.chezmoidata.toml",
       "Native": true
     }
