@@ -70,7 +70,7 @@ Commands:
   backup          Create a manual backup of current dotfiles
   rollback        Rollback to the previous backup
   rollback-to N   Rollback to specific backup number (from status list)
-  git-reset       Reset to last known good git commit
+  git-reset       Reset to last tag (stashes changes, keeps old HEAD on rollback-backup/*)
   restore FILE    Restore a specific file from backup
   clean           Remove old backups (keeps last $MAX_BACKUPS)
 
@@ -314,19 +314,29 @@ git_reset() {
   git log --oneline -5
   echo ""
 
-  # Check for uncommitted changes
+  # Uncommitted changes (tracked or untracked) are never discarded: either
+  # they are stashed and the stash is confirmed to exist, or we abort.
   if [[ -n "$(git status --porcelain)" ]]; then
     log_warn "Uncommitted changes detected"
+    local response="N"
     if [[ "$FORCE" == "1" ]]; then
-      git stash push -m "Auto-stash before rollback $(date +%Y%m%d_%H%M%S)"
-      log_success "Changes auto-stashed (use 'git stash pop' to recover)"
+      response="Y"
     else
       read -t 30 -rp "Stash changes? [y/N] " response || response="N"
-      if [[ "$response" =~ ^[Yy]$ ]]; then
-        git stash push -m "Auto-stash before rollback $(date +%Y%m%d_%H%M%S)"
-        log_success "Changes stashed"
-      fi
     fi
+    if [[ ! "$response" =~ ^[Yy]$ ]]; then
+      log_error "Aborting: uncommitted changes would be lost. Commit or stash them first."
+      return 1
+    fi
+    local stash_msg
+    stash_msg="dot-rollback $(date +%Y%m%d_%H%M%S)"
+    if ! git stash push --include-untracked -m "$stash_msg" ||
+      ! git stash list -n 1 | grep -qF "$stash_msg" ||
+      [[ -n "$(git status --porcelain)" ]]; then
+      log_error "Aborting: could not stash all changes"
+      return 1
+    fi
+    log_success "Changes stashed as '$stash_msg' (use 'git stash pop' to recover)"
   fi
 
   # Find last good commit (last tag or HEAD~1)
@@ -341,6 +351,15 @@ git_reset() {
   else
     # Create backup first
     create_backup "pre_git_reset"
+
+    # Keep commits made since the target reachable on a named branch.
+    local backup_branch
+    backup_branch="rollback-backup/$(date +%Y%m%d_%H%M%S)"
+    if ! git branch "$backup_branch" HEAD; then
+      log_error "Aborting: could not create backup branch $backup_branch"
+      return 1
+    fi
+    log_info "Previous HEAD saved as branch: $backup_branch"
 
     git reset --hard "$target_commit"
     log_success "Git reset to: $target_commit"
