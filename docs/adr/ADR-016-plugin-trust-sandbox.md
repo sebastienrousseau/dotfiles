@@ -26,7 +26,11 @@ same-group descendants before commit, on protocol failure and on timeout. The
 leader is not reaped until the final group signal, avoiding group-ID reuse. Darwin
 may return `EPERM` for a zombie-only group: a kernel query confined to that group
 must confirm no live members before that case is accepted; query failures and live
-members fail closed. This uses pinned `golang.org/x/sys` rather than parsing `ps`.
+members fail closed. Since EOF may precede the final kernel exit-state transition,
+core samples at most 50 times, separated by 2 ms; a timeout is never interpreted as
+success. Deterministic tests cover transitional, live, unknown and failed queries,
+and CI repeats 1,000 short-lived real process exits per Unix host. This uses pinned
+`golang.org/x/sys` rather than parsing `ps`.
 Tests spawn background children that outlive protocol descriptors and verify they
 cannot write a delayed marker after success, malformed output or timeout. Children
 can deliberately create another session/group; these tests do NOT establish an

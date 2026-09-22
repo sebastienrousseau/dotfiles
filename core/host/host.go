@@ -297,13 +297,13 @@ func Apply(ctx context.Context, e *transaction.Engine, allowAudit bool) error {
 		artifacts = append(artifacts, data)
 	}
 	if err = ctx.Err(); err != nil {
-		return err
+		return fmt.Errorf("DOT_E_TIMEOUT: before transaction prepare: %w", err)
 	}
 	if _, err = e.Prepare(p, artifacts); err != nil {
 		return err
 	}
 	if err = ctx.Err(); err != nil {
-		return err
+		return fmt.Errorf("DOT_E_TIMEOUT: before transaction commit; recover retained prepared evidence: %w", err)
 	}
 	return e.Commit()
 }

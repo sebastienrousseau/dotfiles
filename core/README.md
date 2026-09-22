@@ -47,6 +47,12 @@ children before committing, on protocol failure and on timeout. A child can
 deliberately escape that group. This is process cleanup, **not OS containment**.
 The Darwin kernel inspection dependency is pinned in `go.mod`/`go.sum`.
 
+Flags are command-specific: only `register` accepts `--plugin`, only `apply`
+accepts `--allow-audit-plugin`, and only `archive` accepts `--plan-id`. Unknown
+commands, irrelevant flags, missing registration/archive arguments and absent
+audit consent are rejected before opening the root. Direct CLI tests cover these
+negative paths and two complete apply/archive generations.
+
 Garbage collection, production registry signatures, OS containment, full JCS,
 effect drivers, Windows ACL/replace semantics, secret brokering and read-only MCP
 isolation remain separate gates. The tests simulate process crashes and I/O errors;
