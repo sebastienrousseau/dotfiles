@@ -139,10 +139,18 @@ create_backup() {
   local backup_name="backup_${timestamp}_${reason}"
   local backup_path="$BACKUP_DIR/$backup_name"
 
-  log_step "Creating Backup: $backup_name"
   ensure_dirs
+  # Names have one-second resolution. Two backups in the same second (a
+  # rollback's own pre_rollback safety copy, say) must not share a directory:
+  # the second would overwrite the backup being restored.
+  local n=2
+  while ! mkdir "$backup_path" 2>/dev/null; do
+    backup_name="backup_${timestamp}_${reason}_${n}"
+    backup_path="$BACKUP_DIR/$backup_name"
+    n=$((n + 1))
+  done
 
-  mkdir -p "$backup_path"
+  log_step "Creating Backup: $backup_name"
 
   # List of files/directories to backup
   local targets=(
@@ -519,28 +527,25 @@ main() {
     exit 0
   fi
 
-  # Parse global options
+  # Options may come before or after the command's own argument
+  # (`rollback-to 3 --force`). Stopping at the first positional used to
+  # drop a trailing --force, so the command prompted, read EOF and exited 0
+  # without doing anything.
+  local args=()
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      -f | --force)
-        FORCE=1
-        shift
-        ;;
-      -n | --dry-run)
-        DRY_RUN=1
-        shift
-        ;;
-      -v | --verbose)
-        VERBOSE=1
-        shift
-        ;;
+      -f | --force) FORCE=1 ;;
+      -n | --dry-run) DRY_RUN=1 ;;
+      -v | --verbose) VERBOSE=1 ;;
       -h | --help)
         usage
         exit 0
         ;;
-      *) break ;;
+      *) args+=("$1") ;;
     esac
+    shift
   done
+  set -- ${args[@]+"${args[@]}"}
 
   ensure_dirs
 

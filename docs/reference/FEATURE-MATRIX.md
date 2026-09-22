@@ -27,11 +27,11 @@ deleted without the matrix going red.
 
 | Measure | Count |
 |---------|-------|
-| Feature rows | 371 |
-| Covered by a regression test | 318 (85%) |
-| Unmeasurable, with a recorded reason + `--help` smoke test | 53 (14%) |
-| Benchmarked | 371 (100%) |
-| With a runnable example | 371 (100%) |
+| Feature rows | 376 |
+| Covered by a regression test | 326 (87%) |
+| Unmeasurable, with a recorded reason + `--help` smoke test | 50 (13%) |
+| Benchmarked | 376 (100%) |
+| With a runnable example | 376 (100%) |
 | Distinct commands covered | 103 |
 
 Every row is covered: a row is either exercised end to end against the real
@@ -158,7 +158,8 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot rollback` | backup | `test_fm_rollback_backup` | `help:rollback` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot rollback` | clean | `test_fm_rollback_clean` | `help:rollback` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot rollback` | <unknown> (usage, exit 1) | `test_fm_rollback_unknown` | `help:rollback` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot rollback` | rollback / rollback-to N / git-reset / restore FILE (--force, --dry-run, --verbose) | `test_fm_smoke_rollback_restore` | `help:rollback` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — rewrites $HOME dotfiles from a backup and resets the git checkout |
+| `dot rollback` | rollback / rollback-to N / restore FILE (--force, flags before or after the argument) | `test_fm_rollback_restore_paths` | `help:rollback` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot rollback` | git-reset --force stashes all changes (untracked too) and keeps the old HEAD on rollback-backup/* | `test_fm_rollback_git_reset_keeps_work` | `help:rollback` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot drift` | (default) | `test_fm_drift` | `run:drift` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot drift` | --json / -j, --diff / -d | `test_fm_drift_json` | `run:drift-json` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot history` | (default, reads $HISTFILE) | `test_fm_history` | `run:history` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
@@ -204,7 +205,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot ai ask` | "<question>" RAG query | `test_fm_smoke_ai_ask_query` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — embeds the repo and calls an LLM (network) |
 | `dot ai chat` | [tool] | `test_fm_smoke_ai_chat` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — starts an interactive AI session (TTY) |
 | `dot ai install` | [tool] | `test_fm_smoke_ai_install` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — installs AI CLIs (network, mutates $HOME) |
-| `dot ai serve` | (default) | `test_fm_smoke_ai_serve` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — starts a long-running local gateway process bound to a port |
+| `dot ai serve` | (default) start + fleet routing with the generated token; gateway refuses a missing token and a foreign Host; stop | `test_fm_ai_serve_gateway` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot ai login` | (default) | `test_fm_smoke_ai_login` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — interactive OAuth / API-key prompts (TTY, network) |
 | `dot ai` | dashboard / dash (deprecated cockpit alias) | `test_fm_smoke_ai_dashboard` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — launches the cockpit TUI (interactive TTY) |
 | `dot ai` | proxy / local (deprecated alias of ai serve) | `test_fm_ai_proxy_deprecated` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
@@ -312,6 +313,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot secrets` | edit without an age key (exit 1) | `test_fm_secrets_edit_no_key` | `run:secrets-edit-nokey` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot secrets` | set <KEY> <VALUE> | `test_fm_secrets_set` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot secrets` | set (no key, exit 1) | `test_fm_secrets_set_usage` | `run:secrets-set-usage` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot secrets` | set with an invalid key name (path separator, leading `-` or `.`) is refused (exit 1) | `test_fm_secrets_set_invalid_key` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot secrets` | set <KEY> (prompts for the value) | `test_fm_smoke_secrets_set_prompt` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — reads the secret value from an interactive silent prompt (TTY) |
 | `dot secrets` | get <KEY> (masked) | `test_fm_secrets_get` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot secrets` | get <KEY> --raw | `test_fm_secrets_get_raw` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
@@ -449,7 +451,9 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot fleet apply` | --verify-hosts | `test_fm_fleet_apply_verify_hosts` | `help:fleet` | `examples/example-dot-fleet.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot fleet apply` | (no fleet.toml, exit 1) | `test_fm_fleet_apply_no_hosts` | `run:fleet-apply-nohosts` | `examples/example-dot-fleet.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot fleet apply` | --help / -h | `test_fm_fleet_apply_help` | `help:fleet` | `examples/example-dot-fleet.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot fleet apply` | (real SSH fan-out) | `test_fm_smoke_fleet_apply_ssh` | `help:fleet` | `examples/example-dot-fleet.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — opens SSH connections to every registered host (network) |
+| `dot fleet apply` | (SSH fan-out: one ssh per host, `--` before the target, keep-alives) | `test_fm_fleet_apply_ssh_fanout` | `help:fleet` | `examples/example-dot-fleet.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot fleet apply` | --jobs 0 / non-numeric (usage error, exit 2) | `test_fm_fleet_apply_jobs_invalid` | `help:fleet` | `examples/example-dot-fleet.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot fleet apply` | an ssh target starting with `-` or a host name containing `/` aborts the fan-out | `test_fm_fleet_apply_rejects_option_target` | `help:fleet` | `examples/example-dot-fleet.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot fleet push` | alias of fleet apply | `test_fm_fleet_push_alias` | `help:fleet` | `examples/example-dot-fleet.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot fleet apply` | DOTFILES_FLEET_HOSTS overrides the hosts file | `test_fm_env_dotfiles_fleet_hosts` | `help:fleet` | `examples/example-dot-fleet.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 | `dot fleet apply` | ~/.config/dotfiles/fleet.toml `[hosts.<name>]` ssh / profile | `test_fm_config_fleet_toml` | `help:fleet` | `examples/example-dot-fleet.sh` | `docs/manual/03-reference/02-config-files.md` | regression |
@@ -549,7 +553,6 @@ hunted through the table.
 | `dot uninstall` | --force | destructive — --force skips the confirmation and purges real files |
 | `dot doctor` | --benchmark / -b | runs tests/benchmark.sh (hyperfine over every shell, minutes) — covered by benches/bench.sh |
 | `dot health` | --fix / -f, --force / -F | --fix re-applies chezmoi and rewrites shell configs in $HOME |
-| `dot rollback` | rollback / rollback-to N / git-reset / restore FILE (--force, --dry-run, --verbose) | rewrites $HOME dotfiles from a backup and resets the git checkout |
 | `dot load-bench-pty` | (default) | needs the chezmoi-rendered dot-load-benchmark-pty template and a pseudo-terminal |
 | `dot chaos` | --force | deliberately deletes ~/.zshrc and terminal configs |
 | `dot teleport` | user@host | opens an SSH session to a remote host (network) |
@@ -562,7 +565,6 @@ hunted through the table.
 | `dot ai ask` | "<question>" RAG query | embeds the repo and calls an LLM (network) |
 | `dot ai chat` | [tool] | starts an interactive AI session (TTY) |
 | `dot ai install` | [tool] | installs AI CLIs (network, mutates $HOME) |
-| `dot ai serve` | (default) | starts a long-running local gateway process bound to a port |
 | `dot ai login` | (default) | interactive OAuth / API-key prompts (TTY, network) |
 | `dot ai` | dashboard / dash (deprecated cockpit alias) | launches the cockpit TUI (interactive TTY) |
 | `dot ai-setup` | deprecated alias of ai login | interactive tool authentication (TTY, network) |
@@ -593,7 +595,6 @@ hunted through the table.
 | `dot upgrade` | (default) | runs nix flake update, chezmoi update, and a headless Neovim plugin sync (network, mutates $HOME) |
 | `dot upgrade` | DOTFILES_FONTS=1 adds the Nerd Font step to upgrade | only observable inside the real upgrade run (network) |
 | `dot sandbox` | (default) | builds and runs a Docker/Podman image interactively (network, TTY) |
-| `dot fleet apply` | (real SSH fan-out) | opens SSH connections to every registered host (network) |
 | `dot init` | <user> (clone + apply), --force / -f | clones a remote repository and applies it over $HOME (network) |
 | `dot init` | DOTFILES_NONINTERACTIVE=1 skips the trust confirmation | the prompt only fires on a TTY before a real clone (network) |
 | `dot manual` | html / html-multi / pdf / epub / markdown (default open) | downloads the manual and opens it in the desktop browser / viewer (network, GUI) |

@@ -435,7 +435,71 @@ test_fm_config_fleet_toml() {
   fi
 }
 
-test_fm_smoke_fleet_apply_ssh() { fm_smoke fleet; }
+test_fm_fleet_apply_ssh_fanout() {
+  # The real fan-out, against a recording ssh stub: one invocation per host,
+  # keep-alive options, and `--` before the target.
+  local hosts="$FM_SANDBOX/work/fleet-fanout.toml" log="$FM_SANDBOX/work/ssh-fanout.log"
+  cat >"$hosts" <<'TOML'
+[hosts.alpha]
+ssh = "user@alpha.test"
+[hosts.beta]
+ssh = "user@beta.test"
+TOML
+  rm -f "$log"
+  fm_stub ssh "printf '%s\\n' \"\$*\" >>'$log'; echo ok"
+  test_start "fm_fleet_apply_ssh_fanout"
+  DOTFILES_FLEET_HOSTS="$hosts" fm_run fleet apply --cmd true --jobs 2
+  fm_expect_rc 0
+  test_start "fm_fleet_apply_ssh_fanout_reaches_every_host"
+  fm_expect_any "2 ok"
+  test_start "fm_fleet_apply_ssh_fanout_terminates_options"
+  if grep -q -- '-- user@alpha.test true' "$log" 2>/dev/null &&
+    grep -q -- '-- user@beta.test true' "$log" 2>/dev/null &&
+    grep -q 'ServerAliveInterval=' "$log" 2>/dev/null; then
+    fm_pass "ssh got --, the target and keep-alives"
+  else
+    fm_fail "unexpected ssh argv: $(cat "$log" 2>/dev/null)"
+  fi
+  rm -f "$FM_SANDBOX/bin/ssh"
+}
+
+test_fm_fleet_apply_jobs_invalid() {
+  # --jobs 0 used to spin the throttle loop forever.
+  local hosts="$FM_SANDBOX/work/fleet-jobs.toml"
+  printf '[hosts.alpha]\nssh = "user@alpha.test"\n' >"$hosts"
+  for jobs in 0 many -1; do
+    test_start "fm_fleet_apply_jobs_invalid_${jobs//-/neg}"
+    DOTFILES_FLEET_HOSTS="$hosts" fm_run fleet apply --cmd true --jobs "$jobs"
+    fm_expect_rc 2
+  done
+  test_start "fm_fleet_apply_jobs_invalid_message"
+  fm_expect_any "positive integer"
+}
+
+test_fm_fleet_apply_rejects_option_target() {
+  # A target ssh would parse as an option, and a host name that would
+  # escape the temp dir, are refused before any connection.
+  local hosts="$FM_SANDBOX/work/fleet-opt.toml" log="$FM_SANDBOX/work/ssh-opt.log"
+  rm -f "$log"
+  fm_stub ssh "echo called >>'$log'"
+  printf '[hosts.evil]\nssh = "-F/nonexistent"\n' >"$hosts"
+  test_start "fm_fleet_apply_rejects_option_target"
+  DOTFILES_FLEET_HOSTS="$hosts" fm_run fleet apply --cmd true
+  fm_expect_rc 1
+  test_start "fm_fleet_apply_option_target_message"
+  fm_expect_any "no leading '-'"
+  printf '[hosts.../victim]\nssh = "user@alpha.test"\n' >"$hosts"
+  test_start "fm_fleet_apply_rejects_path_host_name"
+  DOTFILES_FLEET_HOSTS="$hosts" fm_run fleet apply --cmd true
+  fm_expect_rc 1
+  test_start "fm_fleet_apply_refused_targets_never_ssh"
+  if [[ -e "$log" ]]; then
+    fm_fail "ssh was invoked for a refused target"
+  else
+    fm_pass "no ssh invocation"
+  fi
+  rm -f "$FM_SANDBOX/bin/ssh"
+}
 
 test_fm_fleet_unknown() {
   test_start "fm_fleet_unknown"
@@ -1123,7 +1187,9 @@ test_fm_fleet_apply_help
 test_fm_fleet_push_alias
 test_fm_env_dotfiles_fleet_hosts
 test_fm_config_fleet_toml
-test_fm_smoke_fleet_apply_ssh
+test_fm_fleet_apply_ssh_fanout
+test_fm_fleet_apply_jobs_invalid
+test_fm_fleet_apply_rejects_option_target
 test_fm_fleet_unknown
 test_fm_registry_url
 test_fm_registry_list
