@@ -11,6 +11,18 @@ DOT_SECRETS_INDEX_FILE="${DOT_SECRETS_INDEX_FILE:-$DOT_SECRETS_HOME/index.txt}"
 DOT_SECRETS_AGE_KEY="${DOT_SECRETS_AGE_KEY:-$HOME/.config/chezmoi/key.txt}"
 DOT_SECRETS_SERVICE_PREFIX="${DOT_SECRETS_SERVICE_PREFIX:-dotfiles.secret}"
 
+# Keys become file names (<store>/<key>.age) and keychain service names:
+# no path separators, no leading '-' or '.'.
+dot_secrets_valid_key() {
+  [[ "${1:-}" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]*$ ]]
+}
+
+# Bucket keys are also emitted as `export KEY=...` lines that shells
+# source, so they must be shell identifiers.
+dot_secrets_valid_env_key() {
+  [[ "${1:-}" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]
+}
+
 dot_secrets_ensure_layout() {
   mkdir -p "$DOT_SECRETS_STORE_DIR"
   touch "$DOT_SECRETS_INDEX_FILE"
@@ -127,7 +139,10 @@ dot_secrets_get_plain_enc() {
 
 dot_secrets_set() {
   local key="${1:-}" value="${2:-}" provider
-  [[ -n "$key" ]] || return 1
+  if ! dot_secrets_valid_key "$key"; then
+    printf 'dot_secrets_set: invalid key %q (use [A-Za-z0-9_.-], no leading - or .)\n' "$key" >&2
+    return 1
+  fi
   provider="$(dot_secrets_provider)"
   case "$provider" in
     macos-keychain) dot_secrets_store_macos "$key" "$value" ;;
@@ -143,8 +158,8 @@ dot_secrets_set() {
 
 dot_secrets_get() {
   local key="${1:-}" provider value rc=0
-  [[ -n "$key" ]] || {
-    printf 'dot_secrets_get: empty key\n' >&2
+  dot_secrets_valid_key "$key" || {
+    printf 'dot_secrets_get: invalid key %q\n' "$key" >&2
     return 1
   }
   provider="$(dot_secrets_provider)"
@@ -196,5 +211,11 @@ dot_secrets_bucket_keys() {
       }
       exit
     }
-  ' "$data_file"
+  ' "$data_file" | while IFS= read -r key; do
+    if dot_secrets_valid_env_key "$key"; then
+      printf '%s\n' "$key"
+    else
+      printf 'dot secrets: skipping invalid key %q in bucket %s\n' "$key" "$bucket" >&2
+    fi
+  done
 }
