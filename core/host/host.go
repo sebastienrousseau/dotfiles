@@ -123,13 +123,16 @@ type boundedLog struct {
 	overflow bool
 }
 
+// Write keeps draining past the budget and only records the overflow.
+// Returning an error would stop exec's copy goroutine, leaving the plugin
+// blocked on (or killed by) a full stderr pipe instead of being rejected
+// for the overflow once it exits.
 func (l *boundedLog) Write(b []byte) (int, error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.n += len(b)
 	if l.n > 8192 {
 		l.overflow = true
-		return 0, fmt.Errorf("DOT_E_PROTOCOL: stderr limit")
 	}
 	return len(b), nil
 }
@@ -311,11 +314,11 @@ func apply(ctx context.Context, e *transaction.Engine, requiredAssurance string)
 	}
 	err = cmd.Wait()
 	stopped = true
-	if err != nil {
-		return fmt.Errorf("DOT_E_PROTOCOL: plugin failed")
-	}
 	if log.overflow {
 		return fmt.Errorf("DOT_E_PROTOCOL: stderr budget")
+	}
+	if err != nil {
+		return fmt.Errorf("DOT_E_PROTOCOL: plugin failed")
 	}
 	if len(materialized.Artifacts) != len(p.Operations) {
 		return fmt.Errorf("DOT_E_ARTIFACT_MISMATCH: count")
