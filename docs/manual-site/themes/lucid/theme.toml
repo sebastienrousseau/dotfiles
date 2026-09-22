@@ -1,0 +1,13 @@
+name = "Lucid"
+license = "MIT"
+licenselink = "https://github.com/sebastienrousseau/ssg-themes.github.io/blob/main/LICENSE"
+description = "A documentation theme for SSG in the U.S. Web Design System documentation-page pattern: side navigation, in-page contents, and prev/next pagination. Every colour pair is verified at WCAG AAA in CI."
+homepage = "https://themes.static-site-generator.com/lucid/"
+demosite = "https://themes.static-site-generator.com/lucid/"
+tags = ["documentation", "docs", "handbook", "accessible", "multilingual"]
+features = ["documentation", "multilingual", "dark-mode", "accessible", "no-js-required"]
+min_version = "0.0.56"
+
+[author]
+  name = "SSG Theme Suite"
+  homepage = "https://themes.static-site-generator.com/"

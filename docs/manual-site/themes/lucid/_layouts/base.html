@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="{{language}}" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{{title}}</title>
+    <meta name="description" content="{{description}}" />
+
+    <!-- Strict same-origin policy; see README "Security". `form_origin`
+         must name your form endpoint or the browser blocks the POST. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+               base-uri 'none';
+               object-src 'none';
+               script-src 'self';
+               style-src 'self';
+               img-src 'self' data:;
+               font-src 'self';
+               connect-src 'self';
+               manifest-src 'self';
+               form-action 'self' {{form_origin}}"
+    />
+
+    <meta property="og:title" content="{{title}}" />
+    <meta property="og:description" content="{{description}}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{permalink}}" />
+    <meta property="og:locale" content="{{language}}" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="{{title}}" />
+    <meta name="twitter:description" content="{{description}}" />
+
+    <link rel="canonical" href="{{permalink}}" />
+    <link rel="icon" href="{{base_path}}assets/logo.svg" type="image/svg+xml" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0e14" media="(prefers-color-scheme: dark)" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "TechArticle",
+          "@id": "{{permalink}}#article",
+          "headline": "{{headline}}",
+          "description": "{{description}}",
+          "inLanguage": "{{language}}",
+          "url": "{{permalink}}",
+          "author": { "@type": "Organization", "name": "{{author}}" }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "{{site_url}}#website",
+          "url": "{{site_url}}",
+          "name": "{{name}}",
+          "description": "{{description}}",
+          "inLanguage": "{{language}}"
+        }
+      ]
+    }
+    </script>
+
+    <!-- Skeletonic Stylus core, loaded before the theme's own
+         stylesheet so its @layer skeletonic.* blocks are declared
+         first and the theme wins every overlap. -->
+    <link rel="stylesheet" href="{{base_path}}skeletonic.min.css" />
+    <link rel="stylesheet" href="{{base_path}}styles.css" />
+    <script src="{{base_path}}theme-init.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{{label_skip}}</a>
+    {{> header}}
+    <main id="main">
+      {{#block "main"}}{{/block}}
+    </main>
+    {{> footer}}
+    <script src="{{base_path}}main.js" defer></script>
+  </body>
+</html>

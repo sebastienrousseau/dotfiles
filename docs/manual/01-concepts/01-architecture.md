@@ -107,7 +107,7 @@ Shell startup is optimized via a three-tier caching strategy:
 2. **`_cached_eval` pattern** — slow initializers (mise, zoxide, atuin, starship) write their output to `~/.cache/shell/<tool>-init.sh`. Subsequent shells `source` the cache. Cache is invalidated when the binary's mtime changes.
 3. **Lazy loading** — heavy layers (nvm, rbenv, direnv) are loaded on first invocation via shell function stubs.
 
-Target: ≤500ms cold shell startup, ≤100ms per component. Enforced by CI benchmark (see [Performance Reference](../03-reference/01-dot-cli.md#benchmark)).
+Target: ≤500ms cold shell startup, ≤100ms per component. Enforced by CI benchmark (see [Performance Reference](../03-reference/01-dot-cli.md#performance)).
 
 ## Per-Machine Profiles
 

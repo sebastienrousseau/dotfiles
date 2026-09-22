@@ -177,7 +177,7 @@ contract without writing files or reloading applications.
 | macOS accent | `defaults write -g AppleAccentColor` + `killall cfprefsd SystemUIServer Dock` |
 | Desktop wallpaper | `osascript` (macOS) or `gsettings picture-uri` (Linux) |
 
-See [Theming Reference](../03-reference/01-dot-cli.md#theme) for the exact command surface.
+See [Theming Reference](../03-reference/01-dot-cli.md#dot-theme) for the exact command surface.
 
 ## Bibliography
 

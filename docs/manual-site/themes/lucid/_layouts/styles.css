@@ -1,0 +1,852 @@
+/* Lucid — documentation theme for SSG.
+ *
+ * Colour is expressed only through the tokens below. Every pair the theme
+ * actually renders is asserted at WCAG AAA (7:1 text, 3:1 non-text) by
+ * scripts/contrast.py, so a colour change that breaks contrast fails the
+ * build rather than reaching a reader. Nothing here hard-codes a hex value
+ * outside these two blocks.
+ */
+
+/* .dotfiles palette: the terminal-green-on-ink scheme of doc.dotfiles.io,
+ * with a light counterpart. Every pair below is asserted at WCAG AAA (7:1
+ * text, 4.5:1 non-text) by tests/unit/docs/test_manual_site.sh, as the
+ * upstream Lucid gate does. */
+:root,
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #f3f6f4;
+  --surface-soft: #e6ece8;
+  --ink: #0b0e14;
+  --ink-soft: #1f2733;
+  --ink-muted: #3b4452;
+  --accent: #11501f;
+  --accent-hover: #0b3a16;
+  --accent-ink: #ffffff;
+  --accent-soft: #dcf2e0;
+  --on-accent-soft: #0f4a1c;
+  --focus: #11501f;
+  --line: #5f6976;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0b0e14;
+  --surface: #111621;
+  --surface-soft: #161b26;
+  --ink: #e4e7ec;
+  --ink-soft: #cbd2dc;
+  --ink-muted: #a3b1c4;
+  --accent: #7ee787;
+  --accent-hover: #b0f5b7;
+  --accent-ink: #0b0e14;
+  --accent-soft: #12301a;
+  --on-accent-soft: #b0f5b7;
+  --focus: #7ee787;
+  --line: #7d8b9f;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b0e14;
+    --surface: #111621;
+    --surface-soft: #161b26;
+    --ink: #e4e7ec;
+    --ink-soft: #cbd2dc;
+    --ink-muted: #a3b1c4;
+    --accent: #7ee787;
+    --accent-hover: #b0f5b7;
+    --accent-ink: #0b0e14;
+    --accent-soft: #12301a;
+    --on-accent-soft: #b0f5b7;
+    --focus: #7ee787;
+    --line: #7d8b9f;
+    color-scheme: dark;
+  }
+}
+
+:root {
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --r: 8px;
+  --gap: 1.5rem;
+  --shell: 76rem;
+  --read: 42rem;
+  /* Both are fallbacks. main.js measures the real masthead and the
+   * generator's injected search button and overwrites them, so the offsets
+   * stay correct when a translation makes a label longer or the generator
+   * changes its button. Nothing here depends on JavaScript for correctness:
+   * these defaults are sized for the widest case. */
+  --search-gutter: 10rem;
+  --masthead-h: 4rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body, h1, h2, h3, h4, p, ul, ol, dl, dd, figure, pre { margin: 0; }
+ul[class], ol[class] { list-style: none; padding: 0; }
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  /* 1.5 line-height and 0.12em paragraph spacing are WCAG 1.4.12; the
+   * body size is 17px so the reading column lands near 66 characters
+   * without the reader needing to zoom. */
+  font-size: 106.25%;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+  /* 2.4.11/2.4.12: anything scrolled to - an anchor, a TOC click, or a
+   * focus ring - must clear the sticky masthead. Setting it on the scroll
+   * container covers every such scroll at once. */
+  scroll-padding-top: calc(var(--masthead-h) + 1rem);
+}
+
+body { min-height: 100vh; display: flex; flex-direction: column; }
+main { flex: 1; }
+
+/* Focus is never removed, only restyled, and the ring clears 3:1 against
+ * both grounds — checked as --focus in the contrast gate. */
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+a { color: var(--accent); text-underline-offset: 0.18em; }
+a:hover { color: var(--accent-hover); }
+
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -4rem;
+  z-index: 20;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--r);
+  font-weight: 700;
+  text-decoration: none;
+}
+.skip-link:focus { top: 0.5rem; }
+
+.lu-shell { width: 100%; max-width: var(--shell); margin: 0 auto; padding: 0 1.25rem; }
+.lu-shell-narrow { max-width: var(--read); }
+
+/* ---------- masthead ---------- */
+.masthead {
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+  /* main.js drops this to static when the masthead wraps tall enough that
+   * sticking it would cost more viewport than it saves. */
+  position: var(--masthead-pos, sticky);
+  top: 0;
+  z-index: 10;
+}
+/* The masthead is full-bleed rather than held to the content shell. The
+ * generator injects its search control as position:fixed at the viewport's
+ * top-right, so a header stopping at the shell edge left an unbalanced gap
+ * beside it and read as left-aligned. --search-gutter reserves that strip so
+ * the two never collide. */
+.masthead-in {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  flex-wrap: wrap;
+  min-height: 4rem;
+  max-width: none;
+  padding-inline: clamp(1rem, 2.5vw, 2rem);
+  padding-inline-end: calc(clamp(1rem, 2.5vw, 2rem) + var(--search-gutter));
+}
+/* The generator injects its search control as position:fixed at the top-right
+ * of the viewport, where it floats above whatever happens to be scrolled
+ * under it. Measured at 320 and 390 wide, that covered the focused "Next"
+ * pager link and the criteria table - a 2.4.12 failure a keyboard user meets
+ * on the second tab. A viewport-fixed control can always cover something, so
+ * the fix is to move it into the masthead's tool row, which is where a
+ * search control belongs. Once it is in normal flow it cannot cover anything,
+ * and the reserved --search-gutter strip is no longer needed either - main.js
+ * zeroes it after the move, which also stops the header wrapping to a second
+ * row at around 900px wide.
+ *
+ * !important is needed and is scoped to these three declarations: the
+ * generator's stylesheet is injected at the end of <body>, so it wins on
+ * source order against an equally specific id selector. */
+#ssg-search-btn,
+#ssg-search-btn * {
+  position: static !important;
+  inset: auto !important;
+  margin: 0 !important;
+  /* Now that it sits among the header controls it must be one of them, in
+   * both palettes. The generator's own label colour measures 6.95:1 against
+   * its ground - below the 7:1 that 1.4.6 requires, and invisible until the
+   * button moved into the header where the suite could see it. */
+  color: var(--ink-soft) !important;
+}
+#ssg-search-btn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 0.9rem !important;
+  border: 1px solid var(--line) !important;
+  border-radius: var(--r) !important;
+  background: var(--surface) !important;
+  font: inherit !important;
+  font-size: 0.875rem !important;
+  font-weight: 600;
+  cursor: pointer;
+}
+#ssg-search-btn svg { color: var(--ink-soft) !important; }
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.0625rem;
+  padding: 0.6rem 0;
+  min-height: 44px;
+}
+.brand-mark { display: block; color: var(--accent); flex: none; }
+.site-nav { margin-inline-end: auto; }.nav-list { display: flex; gap: 0.35rem; flex-wrap: wrap; }.nav-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.7rem;
+  border-radius: var(--r);
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9375rem;
+}.nav-list a:hover { background: var(--surface); color: var(--accent-hover); text-decoration: underline; }.nav-list a[aria-current] {
+  background: var(--accent-soft);
+  color: var(--on-accent-soft);
+  font-weight: 700;
+}
+.masthead-tools { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.nav-btn, .mode-btn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.nav-btn:hover, .mode-btn:hover { background: var(--surface-soft); color: var(--accent-hover); }
+.nav-btn { display: none; }
+.mode-btn-state { color: var(--ink-muted); font-weight: 400; }
+.mode-btn-state::before { content: " — "; }
+
+/* ---------- hero ---------- */
+.hero { padding: clamp(3rem, 8vw, 6rem) 0 clamp(2rem, 5vw, 3.5rem); }
+/* The hero keeps the shell's width and centring so its left edge lines up
+ * with every band below; the measure is narrowed on the children instead.
+ * Overriding the container's max-width pinned it to the viewport edge and
+ * put the hero on a different left edge from the rest of the page. */
+.hero-in > * { max-width: 54rem; }
+.eyebrow {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.eyebrow-tag {
+  background: var(--accent-soft);
+  color: var(--on-accent-soft);
+  border-radius: 2rem;
+  padding: 0.2rem 0.7rem;
+  font-weight: 700;
+  font-size: 0.8125rem;
+}
+.hero-h {
+  font-size: clamp(2.1rem, 5.5vw, 3.4rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+  text-wrap: balance;
+}
+.hero-lead {
+  font-size: clamp(1.0625rem, 2vw, 1.25rem);
+  color: var(--ink-soft);
+  margin-top: 1.1rem;
+  max-width: 40rem;
+}
+.hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
+.hero-in > .hero-photo {
+  max-width: 72rem;
+  margin-top: 3rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+}
+.hero-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1200 / 742;
+  object-fit: cover;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 1.4rem;
+  border-radius: var(--r);
+  border: 1px solid transparent;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.9375rem;
+}
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover { background: var(--accent-hover); color: var(--accent-ink); }
+.btn-quiet { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.btn-quiet:hover { background: var(--surface-soft); color: var(--ink); }
+
+/* ---------- bands ---------- */
+.band { padding: clamp(2.5rem, 6vw, 4rem) 0; border-top: 1px solid var(--line); }
+.band-soft { background: var(--surface); }
+.band-h { font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -0.015em; text-wrap: balance; }
+.band-lead { color: var(--ink-soft); margin-top: 0.75rem; max-width: var(--read); }
+.band-cta { margin-top: 2rem; }
+
+.snippet { margin-top: 1.75rem; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.snippet-h {
+  background: var(--surface-soft);
+  color: var(--ink-soft);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.snippet-body { margin: 0; padding: 1.1rem; overflow-x: auto; background: var(--surface); }
+.snippet-body code { font-family: var(--mono); font-size: 0.875rem; color: var(--ink); white-space: pre; }
+
+.cards { display: grid; gap: var(--gap); margin-top: 2rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+.card { background: var(--bg); border: 1px solid var(--line); border-radius: var(--r); padding: 1.4rem; }
+.card-h { font-size: 1.0625rem; margin-bottom: 0.5rem; }
+.card p { color: var(--ink-soft); font-size: 0.9375rem; }
+
+.facts { display: grid; gap: var(--gap); margin-top: 2rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+.fact { border-inline-start: 3px solid var(--accent); padding-inline-start: 1rem; }
+.fact-t { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
+.fact-d { color: var(--ink-soft); font-size: 0.9375rem; margin-top: 0.25rem; }
+
+/* ---------- documentation layout (USWDS documentation page) ---------- */
+.doc-shell {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  padding-top: 2.5rem;
+  padding-bottom: 4rem;
+  grid-template-columns: 14rem minmax(0, 1fr) 13rem;
+}
+.doc-side, .doc-toc { align-self: start; position: sticky; top: 5rem; }
+/* Also applied to a <p> now (see doc.html): the sidebar label is not a
+   heading, so its weight and margins are stated rather than inherited from
+   an element default. */
+.side-h {
+  font-weight: 700;
+  margin-top: 0;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  margin-bottom: 0.75rem;
+}
+.side-list, .toc-list { display: flex; flex-direction: column; }
+.side-list a, .toc-list a {
+  display: block;
+  padding: 0.6rem 0.75rem;
+  min-height: 44px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-inline-start: 2px solid var(--line);
+  font-size: 0.9375rem;
+}
+.side-list a:hover, .toc-list a:hover { background: var(--surface); color: var(--accent-hover); text-decoration: underline; }
+.side-list a[aria-current] {
+  background: var(--accent-soft);
+  color: var(--on-accent-soft);
+  border-inline-start-color: var(--accent);
+  font-weight: 700;
+}
+
+.crumbs { font-size: 0.875rem; margin-bottom: 1.25rem; }
+.crumbs ol { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; }
+.crumbs li + li::before { content: "/"; color: var(--ink-muted); margin-inline-end: 0.5rem; }
+/* Navigation, not a sentence, so WCAG 2.5.5's inline exception does not
+ * apply: these need the full 44px target like every other control. */
+.crumbs a, .crumbs [aria-current], .crumbs li > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 0.15rem;
+}
+.crumbs a { color: var(--accent); }
+.crumbs [aria-current] { color: var(--ink-muted); }
+.crumbs li + li::before { align-self: center; }
+
+.doc-h { font-size: clamp(1.85rem, 4vw, 2.5rem); letter-spacing: -0.02em; line-height: 1.2; text-wrap: balance; }
+.doc-lead { font-size: 1.125rem; color: var(--ink-soft); margin-top: 0.85rem; }
+
+.prose { margin-top: 2rem; max-width: var(--read); }
+/* 1.4.8 Visual Presentation (AAA): paragraph spacing at least 1.5x the line
+ * spacing. Line-height is 1.6, so the gap must clear 2.4em; 2.5em leaves a
+ * margin for rounding.
+ *
+ * Matched on descendants rather than direct children: the generator wraps
+ * rendered Markdown in its own element, so `.prose > * + *` matched the
+ * wrapper and left every paragraph inside it at 0. The rule looked right in
+ * the stylesheet and did nothing on the page. :where() keeps specificity at
+ * zero so the heading rules below still win. */
+.prose :where(p, ul, ol, pre, blockquote, table, dl, figure)
+  + :where(p, ul, ol, pre, blockquote, table, dl, figure) {
+  margin-top: 2.5em;
+}
+.prose li + li { margin-top: 0.4rem; }
+.prose h2 { font-size: 1.4rem; margin-top: 2.5rem; letter-spacing: -0.01em; scroll-margin-top: calc(var(--masthead-h) + 1rem); }
+.prose h3 { font-size: 1.125rem; margin-top: 1.75rem; scroll-margin-top: calc(var(--masthead-h) + 1rem); }
+/* A heading introduces the block beneath it, so the gap below is smaller than
+ * the gap between paragraphs — but it is not zero, which is what the
+ * sibling rule above left it at. */
+.prose :where(h2, h3, h4) + * { margin-top: 0.9em; }
+.prose p, .prose li { color: var(--ink-soft); }
+.prose ul, .prose ol { padding-inline-start: 1.4rem; }
+.prose li + li { margin-top: 0.4rem; }
+.prose code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  background: var(--surface-soft);
+  color: var(--ink);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+.prose pre {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 1.1rem;
+  /* A scrolling code block is a scrollable region, and a scrollable region
+   * that is not focusable cannot be reached from a keyboard at all - axe
+   * reports it as serious, and it is 2.1.1. The French accessibility page
+   * tripped it, because its comments are longer than the English ones, which
+   * is exactly the kind of difference a theme claiming to work in any
+   * language must not be sensitive to.
+   *
+   * Adding tabindex from script would satisfy the checker while leaving a
+   * reader without JavaScript unable to reach the same content. Wrapping
+   * removes the scrollable region instead, so there is nothing to reach: it
+   * holds with scripting off, and it means no sample can ever scroll
+   * sideways, which is 1.4.10 as well.
+   *
+   * overflow-x stays as a backstop for content that cannot wrap at all. */
+  overflow-x: auto;
+}
+.prose pre code,
+.prose pre code span,
+.snippet-body code {
+  /* break-spaces rather than pre-wrap: both preserve indentation, but
+   * pre-wrap lets a run of trailing spaces hang outside the content box, and
+   * the aligned comments in these samples have plenty. That measured 385px
+   * inside a 414px viewport, reaching x=426, while the pre itself reported
+   * scrollWidth equal to clientWidth - so nothing was clipped, and a check
+   * comparing width against the viewport saw nothing wrong. */
+  white-space: break-spaces;
+  overflow-wrap: anywhere;
+}
+.prose pre code { background: none; padding: 0; font-size: 0.875rem; }
+/* The syntax highlighter labels tokens with scope names — "shell", "source",
+ * "meta", "variable" — and any of them may collide with a layout class. One
+ * did: `.shell` gave every token in a bash block 21px of horizontal padding,
+ * so `ssg --version` rendered as `ssg  --  version`. Token spans carry colour
+ * and weight, never geometry, so neutralising box properties here makes the
+ * whole class of collision impossible rather than fixing the instance. */
+.prose pre code span {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  display: inline;
+  max-width: none;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+}
+.prose blockquote {
+  border-inline-start: 3px solid var(--accent);
+  padding-inline-start: 1rem;
+  color: var(--ink-soft);
+}
+/* 1.4.10 Reflow: a table's min-content width is the longest unbreakable run
+ * in its cells, which pushed the French criteria table past a 320px
+ * viewport. Allowing breaks anywhere lets the columns shrink to the
+ * container instead of forcing the page to scroll sideways. */
+.ssg-table-scroll, .table-wrap, .snippet-body, [tabindex]:not([tabindex="-1"]) {
+  scroll-margin-top: calc(var(--masthead-h) + 1rem);
+}
+.prose table { width: 100%; border-collapse: collapse; }
+.prose th, .prose td { overflow-wrap: anywhere; min-width: 0; }
+.prose th, .prose td { text-align: start; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--line); font-size: 0.9375rem; }
+.prose th { color: var(--ink); font-weight: 700; background: var(--surface); }
+.prose td { color: var(--ink-soft); }
+
+.pager { display: grid; gap: 1rem; margin-top: 3.5rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+.pager-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-height: 44px;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  text-decoration: none;
+  background: var(--bg);
+}
+.pager-link:hover { background: var(--surface); }
+.pager-next { text-align: end; }
+.pager-dir { font-size: 0.8125rem; color: var(--ink-muted); }
+.pager-name { color: var(--accent); font-weight: 700; }
+
+/* ---------- footer ---------- */
+.footer { border-top: 1px solid var(--line); background: var(--surface); padding: 3rem 0 1.5rem; }
+.footer-in { display: flex; flex-wrap: wrap; gap: 2.5rem; justify-content: space-between; }
+.footer-name { display: block; font-weight: 800; }
+.footer-note { color: var(--ink-soft); font-size: 0.9375rem; margin-top: 0.4rem; max-width: 32rem; }
+.footer-h { font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-muted); margin-bottom: 0.6rem; }
+.footer-nav ul { list-style: none; padding: 0; }
+.footer-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+}
+.footer-nav a:hover { color: var(--accent-hover); }
+.footer-legal { margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
+.footer-legal p { color: var(--ink-muted); font-size: 0.875rem; }
+/* Attribution link. Same treatment as the footer navigation so the touch
+   target stays at the 44px AAA minimum and the colour pair is one already
+   verified by the contrast gate. */
+.footer-credit { margin-top: 0.25rem; }
+.footer-credit a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+.footer-credit a:hover { color: var(--accent-hover); }
+
+/* ---------- narrow viewports ---------- *
+ * The sidebar and contents collapse into the reading order rather than
+ * disappearing: at 320px and at 200% zoom the page reflows to one column
+ * with no horizontal scrolling (WCAG 1.4.10). */
+@media (max-width: 64rem) {
+  .doc-shell { grid-template-columns: minmax(0, 1fr); }
+  .doc-side, .doc-toc { position: static; }
+  .doc-toc { order: -1; border: 1px solid var(--line); border-radius: var(--r); padding: 1rem; }
+}
+
+/* Below the reading width a code block wraps rather than scrolls. Sideways
+ * scrolling inside a paragraph of shell commands is exactly the interaction
+ * 1.4.10 exists to remove, and these samples are short enough to wrap
+ * without losing their shape. */
+@media (max-width: 30rem) {
+  .prose pre { overflow-x: visible; }
+}
+
+@media (max-width: 48rem) {
+  .masthead-in { padding-inline-end: clamp(1rem, 2.5vw, 2rem); }
+  .masthead-tools { padding-inline-end: var(--search-gutter); }
+  .nav-btn { display: inline-flex; align-items: center; justify-content: center; }
+  .site-nav { display: none; width: 100%; }
+  .site-nav.is-open { display: block; }
+  .nav-list { flex-direction: column; }
+  .masthead-in { padding-bottom: 0.5rem; }
+  /* Fallback for the no-JavaScript case, where --masthead-pos is never set:
+   * below this width the masthead wraps to several rows and is not worth
+   * sticking. */
+  .masthead { position: relative; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  .masthead, .footer, .pager, .doc-side, .doc-toc, .skip-link { display: none; }
+  .doc-shell { display: block; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; }
+}
+
+/* ---------------------------------------------------------------------
+   Increase Contrast (macOS / iOS "Increase Contrast", and the same user
+   preference on other platforms).
+
+   Tokens only, so every rule that already consumes them follows. Muted
+   and soft inks collapse onto the full-strength ink, and the hairline
+   rules become the border colour, which is the part that disappears
+   first for anyone who asked for more contrast.
+   --------------------------------------------------------------------- */
+@media (prefers-contrast: more) {
+  :root,
+  :root[data-theme="light"],
+  :root[data-theme="dark"] {
+    --ink-soft: var(--ink);
+    --ink-muted: var(--ink);
+    --rule: var(--line);
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Forced colours (Invert Colors, Windows High Contrast, and similar).
+
+   The OS replaces the palette wholesale here, so the job is not to
+   restyle but to make sure nothing that was carried by colour alone
+   disappears with it. Focus rings and borders get explicit system
+   colours; links get LinkText so they stay identifiable as links.
+   --------------------------------------------------------------------- */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+  a {
+    color: LinkText;
+  }
+  a:visited {
+    color: VisitedText;
+  }
+  /* A button distinguished only by its background becomes invisible
+     when the background is forced; give it an edge that is not. */
+  .btn,
+  .btn-primary {
+    border: 1px solid ButtonText;
+    forced-color-adjust: none;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+  .skip-link {
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+  }
+}
+
+/* Upstream restates its blue accents for Display P3 here. The .dotfiles
+   greens are plain sRGB, so that block is removed rather than left to
+   repaint the accent on wide-gamut screens. */
+
+/* Bilingual safety net.
+   A heading that cannot break pushes its grid past the viewport as soon as
+   the translation is longer than the English — which is how Kairo and
+   Steward failed 1.4.4 and 1.4.10 once French pages existed. `break-word`
+   only acts when a word genuinely does not fit, so it changes nothing for
+   copy that already fits. */
+h1, h2, h3, h4, p, li, dd, dt, figcaption { overflow-wrap: break-word; }
+
+/* A sticky masthead can cover whatever the keyboard scrolls to, which is
+   what WCAG 2.4.11 and 2.4.12 forbid. Reserving its height as scroll
+   padding means a focused element always comes to rest below it. */
+html { scroll-padding-block-start: 5.5rem; }
+
+@media (max-width: 48rem) {
+  html { scroll-padding-block-start: 4.5rem; }
+}
+
+/* Language switcher.
+   One control on all twenty-two themes: a globe, the current locale code,
+   and a panel anchored under the button. It was a bare inline list before,
+   positioned differently in every header.
+
+   A <details> disclosure, not a scripted menu. The themes enforce
+   `script-src 'self'` and the semantics gate renders every page with
+   JavaScript blocked, so anything script-driven would be a dead control in
+   the one rendering that has to keep working.
+
+   Colours come from `currentColor` and the two tokens every theme defines,
+   so a theme needs no palette of its own for this and dark mode follows the
+   header it sits in. The panel is opaque on purpose: the reference design
+   blurs the backdrop, but translucent text surfaces are exactly what the
+   AAA contrast gate cannot measure. */
+.ap-lang { position: relative; }
+.ap-lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-height: 44px;
+  padding: .5rem 1rem;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: .875rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  list-style: none;
+}
+/* Both spellings: Safari still ships the WebKit pseudo-element. */
+.ap-lang-toggle::-webkit-details-marker { display: none; }
+.ap-lang-toggle::marker { content: ""; }
+.ap-lang-toggle:hover { border-color: currentColor; }
+.ap-lang-globe { font-size: 1rem; line-height: 1; }
+.ap-lang-current { line-height: 1; font-variant-numeric: tabular-nums; }
+/* A closed <details> hides its children through a UA rule that an
+   absolutely positioned box escapes: the panel was still laid out, and the
+   layout gate caught it overlapping the theme toggle and the nav links on
+   every theme. Hiding it explicitly is what actually takes it out of flow. */
+.ap-lang:not([open]) .ap-lang-menu { display: none; }
+.ap-lang-menu {
+  position: absolute;
+  top: calc(100% + .375rem);
+  /* Anchored to the button's left edge, not its right. The reference puts
+     this control last in its header, where opening leftwards is the only
+     way it fits; here the search and theme buttons always follow it, so
+     there is room to its right and opening left ran off the viewport. */
+  left: 0;
+  z-index: 60;
+  width: max-content;
+  min-width: 100%;
+  padding: .375rem;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-radius: .6rem;
+  background: var(--surface, var(--bg, #fff));
+  box-shadow: 0 8px 28px rgb(0 0 0 / .18);
+  /* The toggle inherits the header's colour, which on a theme with a dark
+     stage is not the page's. The panel sits on the page surface, so it has
+     to reset rather than inherit it. */
+  color: var(--ink, CanvasText);
+}
+.ap-lang-menu-grid { display: grid; gap: .125rem; }
+.ap-lang-item {
+  display: block;
+  min-height: 44px;
+  padding: .6rem .75rem;
+  border-radius: .35rem;
+  color: inherit;
+  font-size: .85rem;
+  line-height: 1.4;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.ap-lang-item:hover { background: color-mix(in srgb, currentColor 10%, transparent); }
+.ap-lang-item[aria-current] {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: .3em;
+  text-decoration-thickness: 2px;
+}
+
+/* Far enough along a narrow header that opening rightwards would overflow;
+   below this width the panel hangs from the button's right edge instead. */
+@media (max-width: 30rem) {
+  .ap-lang-menu { left: auto; right: 0; }
+}
+
+/* Skeletonic Stylus compatibility.
+ *
+ * The library's reset paints a canvas and a face on <body>, and a colour on
+ * <h1>. This theme paints those on <html> and lets the rest inherit, so with
+ * the library loaded underneath it the library's values would apply unopposed
+ * — the theme declares nothing on <body> for them to lose to. Measured: the
+ * canvas went white in both colour schemes and the heading ink stopped
+ * changing with the mode.
+ *
+ * Inheriting rather than restating avoids naming this theme's tokens twice.
+ */
+body {
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+h1 {
+  color: inherit;
+}
+
+/* A consistent proportional rhythm below every heading level. */
+:where(h1, h2, h3, h4, h5, h6) { padding-block-end: 0.35em; }
+.site-footer .footer-credit a { display: inline; min-width: 0; min-height: 0; padding: 0; margin: 0; white-space: nowrap; }
+
+/* Voxt is the canonical three-state mode control for every theme. */
+#mode-toggle.theme-toggle {
+  appearance: none;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid #5d6375;
+  border-radius: 50%;
+  background: #151928;
+  color: #ffffff;
+  box-shadow: none;
+  cursor: pointer;
+  display: flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+#mode-toggle .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+#mode-toggle .theme-icon { line-height: 1; }
+#mode-toggle .theme-icon::before { content: "🖥️"; font-size: 1.2rem; }
+:root[data-theme="light"] #mode-toggle.theme-toggle {
+  border-color: #878d9b;
+  background: #f3f4f6;
+  color: #090a0f;
+}
+:root[data-theme="light"] #mode-toggle .theme-icon::before { content: "☀️"; }
+:root[data-theme="dark"] #mode-toggle .theme-icon::before { content: "🌙"; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) #mode-toggle.theme-toggle {
+    border-color: #878d9b;
+    background: #f3f4f6;
+    color: #090a0f;
+  }
+}
+
+/* .dotfiles manual: the side navigation lists ~30 chapters in groups, so it
+ * scrolls on its own instead of running past the viewport while sticky. */
+@media (min-width: 64.01rem) {
+  .doc-side {
+    max-height: calc(100vh - var(--masthead-h) - 2rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+.doc-side .side-h + .side-list { margin-bottom: 1rem; }
+.pager-link[hidden] { display: none; }
+.pager-next:only-child { margin-left: auto; }
+/* Group crumbs are plain text (a group has no page of its own); give them
+ * the same box as the current-page crumb so the trail shares a baseline. */
+.crumbs li > span:not([aria-current]) { color: var(--ink-muted); }
