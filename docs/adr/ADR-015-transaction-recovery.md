@@ -45,8 +45,11 @@ filesystem or proof against malicious same-UID writers.
 
 Windows mutation fails closed pending a handle-based replace/ACL implementation.
 Process-crash tests are not hardware power-loss certification; macOS full hardware
-flush guarantees require further work. Pre-PREPARED failures retain the incomplete
-transaction as evidence and block reuse; automatic abandoned-stage cleanup is pending.
+flush guarantees require further work. Pre-`PREPARED` failures report `ABANDONED`
+and block reuse until an operator invokes `discard-abandoned`. That operation removes
+only validated, private, bounded stage/transaction entries when no complete first
+`PREPARED` journal record exists. It is deletion-boundary resumable and idempotent;
+durable recovery, archive and unknown evidence fail closed and remain untouched.
 Terminal transactions are retained until explicit `archive --plan-id`. Core checks
 the exact sealed ID, terminal state, current target snapshots, backups, artifacts
 and stage before archiving. A durable `.dot-archive` intent covers moving stage
@@ -63,7 +66,7 @@ archived-generation rollback, or byte quota on arbitrary corrupted history entri
 
 ## Acceptance
 
-Inject failures after prepare, commit intent, flush, rename, commit and rollback;
+Inject failures before and after prepare, commit intent, flush, rename, commit and rollback;
 include a child process exiting without cleanup. Inject effect failure, interruption
 after execution, and interruption after a durable success record. Verify hashes/modes and absence
 restoration, preservation of concurrent edits, seal tampering and lock exclusion.
@@ -71,3 +74,7 @@ Additionally exercise five archive fault boundaries across staged/unstaged and
 committed/rolled-back transactions, repeat recovery, and exit a real child process
 after the history rename. Test evidence retention, full history, mismatched IDs,
 changed stages/targets, symlinks, and refusal to archive incomplete transactions.
+For abandonment, cover every pre-prepare materialization boundary and every discard
+boundary with both injected errors and real process exits, stage-only and truncated
+journals, repeated discard, preservation of managed-file edits, and refusal of
+complete unknown journals or unexpected entries.

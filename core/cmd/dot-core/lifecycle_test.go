@@ -6,6 +6,7 @@
 package main
 
 import (
+	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
@@ -49,4 +50,14 @@ func TestCommandLifecycle(t *testing.T) {
 		command("status")
 		command("recover")
 	}
+	if err := os.Mkdir(filepath.Join(root, ".dot-stage"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, ".dot-stage", "hello.txt"), []byte("abandoned\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	command("status")
+	command("discard-abandoned")
+	command("discard-abandoned")
+	command("status")
 }

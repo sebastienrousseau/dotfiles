@@ -76,9 +76,18 @@ core verifies terminal state, target preconditions and retained evidence. A
 changed target blocks recovery rather than overwriting the user's edit.
 
 History is capped at 32 generations (not a whole-directory byte quota); reaching
-the cap fails without deleting evidence. There is no automatic pruning, archived
-generation rollback, or pre-PREPARED abandoned-stage cleanup. Rollback applies
-only to the active generation; archive it only when this is the intended choice.
+the cap fails without deleting evidence. There is no automatic pruning or archived
+generation rollback. Rollback applies only to the active generation; archive it
+only when this is the intended choice.
+
+Plugin or host failure before the transaction journal reaches a complete,
+newline-terminated, fsynced `PREPARED` record can leave bounded `.dot-stage` or
+`.dot-txn` artifacts. `status` reports `ABANDONED` for this state. An operator may
+run `discard-abandoned`. The command validates private directory ownership, a
+closed entry allowlist, file identity and journal state before deleting anything.
+It is idempotent and resumable at each deletion boundary, never changes managed
+targets, and refuses durable `PREPARED`, archive or unknown evidence; those states
+require recovery or investigation.
 
 Audit-mode Unix plugins run in a separate process group; core kills remaining same-group
 children before committing, on protocol failure and on timeout. A child can
@@ -87,7 +96,8 @@ The Darwin kernel inspection dependency is pinned in `go.mod`/`go.sum`.
 
 Flags are command-specific: only `register` accepts `--plugin` and `--assurance`,
 only `apply` accepts exactly one of `--allow-audit-plugin` or
-`--require-process-sandbox`, and only `archive` accepts `--plan-id`. Unknown
+`--require-process-sandbox`, and only `archive` accepts `--plan-id`.
+`discard-abandoned` accepts no destructive scope beyond the explicit demo root. Unknown
 commands, irrelevant flags, missing registration/archive arguments and absent
 assurance consent are rejected before opening the root. Direct CLI tests cover these
 negative paths and two complete apply/archive generations.

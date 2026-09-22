@@ -4,15 +4,24 @@
 package transaction
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
+	"strconv"
+	"strings"
 
 	"dotfiles.local/core/protocol"
 )
 
 // MaxHistory bounds retained generations. This prototype never deletes evidence.
 const MaxHistory = 32
+
+type discardDirectory struct {
+	name    string
+	root    *os.Root
+	entries []string
+}
 
 type archiveIntent struct {
 	PlanID string `json:"plan_id"`
@@ -80,10 +89,144 @@ func (e *Engine) Ready() error {
 	}
 	for _, name := range []string{".dot-txn", ".dot-stage"} {
 		if _, err := e.Root.Lstat(name); !os.IsNotExist(err) {
-			return fmt.Errorf("DOT_E_RECOVERY_REQUIRED: retain/recover/archive prior operation")
+			return fmt.Errorf("DOT_E_RECOVERY_REQUIRED: retain/recover/archive prior operation; use discard-abandoned only before durable PREPARED")
 		}
 	}
 	return nil
+}
+
+func durablePrepare(r *os.Root) (bool, error) {
+	b, state, err := read(r, "wal")
+	if err != nil || !state.Exists {
+		return false, err
+	}
+	end := bytes.IndexByte(b, '\n')
+	if end < 0 {
+		// record writes are durable only after the complete newline-terminated
+		// entry is fsynced. A partial first entry cannot authorize target writes.
+		return false, nil
+	}
+	var entry struct {
+		State string `json:"state"`
+	}
+	if err = protocol.Strict(b[:end], &entry); err != nil || entry.State != "PREPARED" {
+		return false, fmt.Errorf("DOT_E_RECOVERY_REQUIRED: preserve unrecognized transaction journal")
+	}
+	return true, nil
+}
+
+func discardEntry(kind, name string) bool {
+	if kind == "stage" {
+		return namePattern.MatchString(name)
+	}
+	if name == "plan.json" || name == "wal" {
+		return true
+	}
+	for _, prefix := range []string{"artifact-", "backup-"} {
+		if strings.HasPrefix(name, prefix) {
+			n, err := strconv.Atoi(strings.TrimPrefix(name, prefix))
+			return err == nil && n >= 0 && n < 16
+		}
+	}
+	return false
+}
+
+func inspectDiscardDirectory(parent *os.Root, name, kind string, limit int) (*discardDirectory, error) {
+	r, err := privateRoot(parent, name)
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	names, err := entries(r, limit)
+	if err != nil {
+		r.Close()
+		return nil, err
+	}
+	d := &discardDirectory{name: name, root: r}
+	for _, entry := range names {
+		if entry.IsDir() || !discardEntry(kind, entry.Name()) {
+			r.Close()
+			return nil, fmt.Errorf("DOT_E_RECOVERY_REQUIRED: preserve unexpected abandoned %s entry", kind)
+		}
+		_, state, err := read(r, entry.Name())
+		if err != nil || !state.Exists {
+			r.Close()
+			return nil, fmt.Errorf("DOT_E_RECOVERY_REQUIRED: preserve unsafe abandoned %s entry", kind)
+		}
+		d.entries = append(d.entries, entry.Name())
+	}
+	return d, nil
+}
+
+func (e *Engine) discardDirectory(d *discardDirectory, point string) error {
+	if d == nil {
+		return nil
+	}
+	for _, name := range d.entries {
+		if err := d.root.Remove(name); err != nil {
+			d.root.Close()
+			return err
+		}
+	}
+	if err := syncDir(d.root); err != nil {
+		d.root.Close()
+		return err
+	}
+	if err := d.root.Close(); err != nil {
+		return err
+	}
+	if err := e.hit(point + "-entries"); err != nil {
+		return err
+	}
+	if err := e.Root.Remove(d.name); err != nil {
+		return err
+	}
+	if err := syncDir(e.Root); err != nil {
+		return err
+	}
+	return e.hit(point)
+}
+
+// DiscardAbandoned removes only bounded, core-owned staging and transaction
+// artifacts that cannot have reached durable PREPARED. It never changes a
+// managed target and refuses recognized recovery evidence or unknown entries.
+func (e *Engine) DiscardAbandoned() error {
+	if _, pending, err := e.archiveIntent(); err != nil {
+		return err
+	} else if pending {
+		return fmt.Errorf("DOT_E_RECOVERY_REQUIRED: finish interrupted archive first")
+	}
+	txn, err := inspectDiscardDirectory(e.Root, ".dot-txn", "transaction", 34)
+	if err != nil {
+		return err
+	}
+	if txn != nil {
+		prepared, err := durablePrepare(txn.root)
+		if err != nil {
+			txn.root.Close()
+			return err
+		}
+		if prepared {
+			txn.root.Close()
+			return fmt.Errorf("DOT_E_RECOVERY_REQUIRED: transaction reached durable PREPARED; use recover")
+		}
+	}
+	stage, err := inspectDiscardDirectory(e.Root, ".dot-stage", "stage", 16)
+	if err != nil {
+		if txn != nil {
+			txn.root.Close()
+		}
+		return err
+	}
+	if err = e.discardDirectory(stage, "discard-stage"); err != nil {
+		if txn != nil {
+			txn.root.Close()
+		}
+		return err
+	}
+	return e.discardDirectory(txn, "discard-transaction")
 }
 
 func (e *Engine) terminal(r *os.Root, id string, targets bool) (Sealed, error) {

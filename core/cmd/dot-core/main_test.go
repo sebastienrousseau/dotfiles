@@ -18,6 +18,7 @@ func TestInvalidCommandPolicy(t *testing.T) {
 		{"status", "--allow-audit-plugin"}, {"recover", "--plugin", "/unreviewed"},
 		{"retry-effects", "--plugin", "/unreviewed"},
 		{"rollback", "--plan-id", "ignored"}, {"archive", "--allow-audit-plugin"},
+		{"discard-abandoned", "--plan-id", "ignored"},
 		{"register"}, {"register", "--plugin", "/tmp/plugin", "--assurance", "none"},
 		{"archive"}, {"apply"}, {"apply", "--allow-audit-plugin=false"},
 		{"init", "extra-positional"}, {"init", "--unknown"},

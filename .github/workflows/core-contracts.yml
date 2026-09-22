@@ -62,6 +62,10 @@ jobs:
         if: runner.os != 'Windows'
         working-directory: core
         run: go test ./transaction -run '^TestArchiveCrashBoundaries$' -count=10
+      - name: Repeat abandoned pre-prepare cleanup boundaries
+        if: runner.os != 'Windows'
+        working-directory: core
+        run: go test ./transaction -run '^TestDiscardAbandoned' -count=10
       - name: Repeat post-commit effect recovery (60 trials per Unix host)
         if: runner.os != 'Windows'
         working-directory: core

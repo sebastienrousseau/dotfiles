@@ -37,6 +37,14 @@ evaluation is absent. Stderr is bounded and discarded rather than persisted as
 potentially sensitive text. The audit profile still lacks platform containment,
 resource limits and descendant containment and cannot accept untrusted plugins.
 
+Failures before a durable `PREPARED` record are not transaction recovery: no
+target mutation was authorized. Core reports these bounded artifacts as
+`ABANDONED` and exposes an explicit, idempotent `discard-abandoned` operation.
+It validates private ownership, closed filename/type/count rules and the first
+journal record before deletion. Any complete but unrecognized record, durable
+`PREPARED` state, archive intent, link or unexpected entry is retained and fails
+closed for operator investigation.
+
 On Unix, the hello host creates a dedicated process group and terminates remaining
 same-group descendants before commit, on protocol failure and on timeout. The
 leader is not reaped until the final group signal, avoiding group-ID reuse. Darwin

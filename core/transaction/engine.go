@@ -234,6 +234,9 @@ func (e *Engine) Prepare(p Plan, artifacts [][]byte) (string, error) {
 	if err := syncDir(e.Root); err != nil {
 		return "", err
 	}
+	if err := e.hit("prepare-created"); err != nil {
+		return "", err
+	}
 	r, err := e.txn()
 	if err != nil {
 		return "", err
@@ -263,6 +266,9 @@ func (e *Engine) Prepare(p Plan, artifacts [][]byte) (string, error) {
 		if actual != o.After {
 			return "", fmt.Errorf("DOT_E_ARTIFACT_MISMATCH: metadata")
 		}
+		if err = e.hit(fmt.Sprintf("prepare-artifact-%d", i)); err != nil {
+			return "", err
+		}
 	}
 	sealed, err := Seal(p)
 	if err != nil {
@@ -276,6 +282,9 @@ func (e *Engine) Prepare(p Plan, artifacts [][]byte) (string, error) {
 		return "", err
 	}
 	if err = syncDir(r); err != nil {
+		return "", err
+	}
+	if err = e.hit("prepare-sealed"); err != nil {
 		return "", err
 	}
 	if err = e.record(r, "PREPARED"); err != nil {
@@ -535,6 +544,14 @@ func (e *Engine) Status() (string, error) {
 	}
 	r, err := e.txn()
 	if os.IsNotExist(err) {
+		stage, stageErr := inspectDiscardDirectory(e.Root, ".dot-stage", "stage", 16)
+		if stageErr != nil {
+			return "", stageErr
+		}
+		if stage != nil {
+			stage.root.Close()
+			return "ABANDONED", nil
+		}
 		if err = e.Ready(); err != nil {
 			return "", err
 		}
@@ -544,6 +561,13 @@ func (e *Engine) Status() (string, error) {
 		return "", err
 	}
 	defer r.Close()
+	prepared, err := durablePrepare(r)
+	if err != nil {
+		return "", err
+	}
+	if !prepared {
+		return "ABANDONED", nil
+	}
 	s, state, err := load(r)
 	if err == nil && s.Plan.RootID != e.ID {
 		return "", fmt.Errorf("DOT_E_RECOVERY_REQUIRED: root identity mismatch")
