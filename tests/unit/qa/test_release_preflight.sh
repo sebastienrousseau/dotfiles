@@ -71,6 +71,25 @@ output="$(run_preflight "$root")" || rc=$?
 assert_equals 1 "$rc" "tag at another commit fails"
 assert_contains "bump the version" "$output" "remediation is explicit"
 
+test_start "release_preflight_development_accepts_published_ancestor"
+output="$(run_preflight "$root" --development)"
+assert_contains "not eligible to reuse this tag" "$output" "development does not authorize retagging"
+
+test_start "release_preflight_development_cannot_weaken_creation"
+rc=0
+output="$(run_preflight "$root" --development --require-untagged)" || rc=$?
+assert_equals 2 "$rc" "release creation cannot use development mode"
+
+test_start "release_preflight_development_rejects_nonancestor_tag"
+git -C "$root" checkout -q --detach v1.2.2
+git -C "$root" -c user.name=Test -c user.email=test@example.invalid \
+  -c commit.gpgsign=false commit --allow-empty -q -m unrelated
+git -C "$root" -c tag.gpgSign=false tag --no-sign -f v1.2.3 >/dev/null
+git -C "$root" checkout -q -
+rc=0
+output="$(run_preflight "$root" --development)" || rc=$?
+assert_equals 1 "$rc" "same-version tag on another lineage fails"
+
 test_start "release_preflight_require_untagged_rejects_existing_head_tag"
 fixture_repo 1.2.3
 root="$FIXTURE_ROOT"
@@ -87,6 +106,11 @@ rc=0
 output="$(VERIFY_RC=1 run_preflight "$root")" || rc=$?
 assert_equals 1 "$rc" "version verifier failure propagates"
 assert_contains "version-bearing files do not match" "$output" "drift is diagnosed"
+
+test_start "release_preflight_development_rejects_version_drift"
+rc=0
+output="$(VERIFY_RC=1 run_preflight "$root" --development)" || rc=$?
+assert_equals 1 "$rc" "development still enforces all version surfaces"
 
 test_start "release_preflight_rejects_invalid_manifest_version"
 fixture_repo not-semver
@@ -121,6 +145,11 @@ assert_equals 1 "$rc" "candidate cannot skip a patch release"
 assert_contains "must be exactly one patch after" "$output" \
   "patch-only remediation is explicit"
 
+test_start "release_preflight_development_rejects_skipped_patch"
+rc=0
+output="$(run_preflight "$root" --development)" || rc=$?
+assert_equals 1 "$rc" "development cannot skip a patch"
+
 test_start "release_preflight_rejects_missing_predecessor_tag"
 fixture_repo 1.2.3
 root="$FIXTURE_ROOT"
@@ -132,3 +161,4 @@ assert_contains "patch releases cannot be skipped" "$output" \
   "missing predecessor explains the release invariant"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
+[[ "$TESTS_FAILED" == 0 ]]
