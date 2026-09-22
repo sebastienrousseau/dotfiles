@@ -499,6 +499,13 @@ EOF
     esac
   done
 
+  # The throttle loop below waits while the running-job count is >= jobs,
+  # so 0 or a non-number would spin forever.
+  if [[ ! "$jobs" =~ ^[1-9][0-9]*$ ]]; then
+    ui_err "--jobs" "expected a positive integer, got '$jobs'"
+    return 2
+  fi
+
   local hosts_file
   hosts_file="$(_fleet_hosts_file)"
   if [[ ! -f "$hosts_file" ]]; then
@@ -563,10 +570,16 @@ EOF
   # `user@host:port` characters only — refuses single quotes, backticks,
   # `$()`, semicolons, spaces, any shell metacharacter. Closes the
   # round-2 audit's hostname-injection finding.
+  # A leading '-' would be parsed by ssh as an option (e.g. -F/-o), and
+  # the host name becomes a temp-file name, so it may not contain '/'.
   while IFS=$'\t' read -r name ssh profile; do
     [[ -n "$name" ]] || continue
-    if [[ ! "$ssh" =~ ^[a-zA-Z0-9._@:+/-]+$ ]]; then
-      ui_err "$name" "invalid ssh target ($ssh) — only [a-zA-Z0-9._@:+/-] allowed"
+    if [[ ! "$name" =~ ^[a-zA-Z0-9._-]+$ || "$name" == .* ]]; then
+      ui_err "$name" "invalid host name — only [a-zA-Z0-9._-] allowed, no leading '.'"
+      return 1
+    fi
+    if [[ ! "$ssh" =~ ^[a-zA-Z0-9._@:+/-]+$ || "$ssh" == -* ]]; then
+      ui_err "$name" "invalid ssh target ($ssh) — only [a-zA-Z0-9._@:+/-] allowed, no leading '-'"
       return 1
     fi
   done <<<"$entries"
@@ -605,8 +618,9 @@ EOF
   _fleet_apply_one() {
     local _name="$1" _ssh="$2" _cmd="$3" _tmp="$4"
     if ssh -o BatchMode=yes -o ConnectTimeout=10 \
+      -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
       -o StrictHostKeyChecking=accept-new \
-      "$_ssh" "$_cmd" </dev/null \
+      -- "$_ssh" "$_cmd" </dev/null \
       >"$_tmp/$_name.out" 2>"$_tmp/$_name.err"; then
       printf 'ok\n' >"$_tmp/$_name.status"
     else
