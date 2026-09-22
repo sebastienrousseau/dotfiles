@@ -21,6 +21,17 @@ evaluation is absent. Stderr is bounded and discarded rather than persisted as
 potentially sensitive text. Platform containment, memory/CPU/process/descriptor
 limits and descendant containment are required before accepting untrusted plugins.
 
+On Unix, the hello host creates a dedicated process group and terminates remaining
+same-group descendants before commit, on protocol failure and on timeout. The
+leader is not reaped until the final group signal, avoiding group-ID reuse. Darwin
+may return `EPERM` for a zombie-only group: a kernel query confined to that group
+must confirm no live members before that case is accepted; query failures and live
+members fail closed. This uses pinned `golang.org/x/sys` rather than parsing `ps`.
+Tests spawn background children that outlive protocol descriptors and verify they
+cannot write a delayed marker after success, malformed output or timeout. Children
+can deliberately create another session/group; these tests do NOT establish an
+OS-enforced process tree, filesystem or network boundary.
+
 ## Consequences and acceptance
 
 Hash mismatch, symlink executable, invalid manifest, non-explicit registration and

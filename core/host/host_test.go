@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestLifecycle(t *testing.T) {
@@ -76,6 +77,68 @@ func TestLifecycle(t *testing.T) {
 			}
 			if err = e.Recover(true); err != nil {
 				t.Fatal(err)
+			}
+			id, err := e.PlanID()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err = e.Archive(id); err != nil {
+				t.Fatal(err)
+			}
+			if err = Apply(context.Background(), e, true); err != nil {
+				t.Fatal("second application failed", err)
+			}
+		})
+	}
+}
+
+func TestChildGroupCleanup(t *testing.T) {
+	bin := filepath.Join(t.TempDir(), "hello")
+	if b, err := exec.Command("go", "build", "-o", bin, "../cmd/dot-hello").CombinedOutput(); err != nil {
+		t.Fatalf("build: %s %v", b, err)
+	}
+	for _, kind := range []string{"noise", "timeout", "success"} {
+		t.Run(kind, func(t *testing.T) {
+			root := filepath.Join(t.TempDir(), "demo")
+			if err := transaction.Init(root); err != nil {
+				t.Fatal(err)
+			}
+			e, err := transaction.Open(root)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer e.Close()
+			fixture := filepath.Join(t.TempDir(), "fixture")
+			// The child writes only inside this test's private stage. If cleanup
+			// fails, the marker proves it outlived Apply; no host data is touched.
+			body := "#!/bin/sh\n(/bin/sleep 1; printf survived > survivor.txt) >/dev/null 2>&1 &\n"
+			switch kind {
+			case "noise":
+				body += "echo invalid\nwait\n"
+			case "timeout":
+				body += "wait\n"
+			case "success":
+				body += "exec '" + bin + "'\n"
+			}
+			if err = os.WriteFile(fixture, []byte(body), 0700); err != nil {
+				t.Fatal(err)
+			}
+			if err = Register(e, fixture); err != nil {
+				t.Fatal(err)
+			}
+			ctx := context.Background()
+			if kind == "timeout" {
+				var cancel context.CancelFunc
+				ctx, cancel = context.WithTimeout(ctx, 150*time.Millisecond)
+				defer cancel()
+			}
+			err = Apply(ctx, e, true)
+			if (err == nil) != (kind == "success") {
+				t.Fatalf("unexpected result: %v", err)
+			}
+			time.Sleep(1200 * time.Millisecond)
+			if _, err = os.Stat(filepath.Join(root, ".dot-stage/survivor.txt")); !os.IsNotExist(err) {
+				t.Fatal("plugin descendant survived cleanup", err)
 			}
 		})
 	}

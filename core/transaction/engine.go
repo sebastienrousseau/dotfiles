@@ -201,6 +201,11 @@ func validate(p Plan) error {
 
 // Prepare persists sealed bytes and backups before a PREPARED record. No target changes.
 func (e *Engine) Prepare(p Plan, artifacts [][]byte) (string, error) {
+	if _, pending, err := e.archiveIntent(); err != nil {
+		return "", err
+	} else if pending {
+		return "", fmt.Errorf("DOT_E_RECOVERY_REQUIRED: archive in progress")
+	}
 	if p.RootID != e.ID {
 		return "", fmt.Errorf("DOT_E_POLICY: plan belongs to a different root")
 	}
@@ -442,7 +447,18 @@ func (e *Engine) replace(name string, b []byte, before Snapshot, mode uint32, in
 // Recover always rolls an incomplete commit back; it never depends on a plugin.
 // A third-party edit blocks recovery instead of being overwritten.
 func (e *Engine) Recover(explicitRollback bool) error {
+	if intent, pending, err := e.archiveIntent(); err != nil {
+		return err
+	} else if pending {
+		if explicitRollback {
+			return fmt.Errorf("DOT_E_RECOVERY_REQUIRED: finish archive before rollback")
+		}
+		return e.Archive(intent.PlanID)
+	}
 	r, err := e.txn()
+	if os.IsNotExist(err) {
+		return e.Ready()
+	}
 	if err != nil {
 		return err
 	}
@@ -504,7 +520,18 @@ func (e *Engine) Recover(explicitRollback bool) error {
 }
 
 func (e *Engine) Status() (string, error) {
+	if _, pending, err := e.archiveIntent(); err != nil {
+		return "", err
+	} else if pending {
+		return "ARCHIVING", nil
+	}
 	r, err := e.txn()
+	if os.IsNotExist(err) {
+		if err = e.Ready(); err != nil {
+			return "", err
+		}
+		return "IDLE", nil
+	}
 	if err != nil {
 		return "", err
 	}

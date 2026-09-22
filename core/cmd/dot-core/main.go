@@ -15,12 +15,13 @@ import (
 
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: dot-core init|register|apply|status|recover|rollback --root NEW_DEMO_DIRECTORY [--plugin ABSOLUTE_BINARY] [--allow-audit-plugin]")
+		return fmt.Errorf("usage: dot-core init|register|apply|status|plan-id|recover|rollback|archive --root NEW_DEMO_DIRECTORY [--plugin ABSOLUTE_BINARY] [--allow-audit-plugin] [--plan-id SHA256]")
 	}
 	f := flag.NewFlagSet(args[0], flag.ContinueOnError)
 	root := f.String("root", "", "isolated hello demo directory (not your home/config)")
 	plugin := f.String("plugin", "", "absolute hello executable")
 	audit := f.Bool("allow-audit-plugin", false, "explicitly accept trusted unsandboxed demo plugin")
+	planID := f.String("plan-id", "", "exact sealed transaction ID to archive")
 	if err := f.Parse(args[1:]); err != nil {
 		return err
 	}
@@ -44,6 +45,14 @@ func run(args []string) error {
 		return host.Apply(ctx, e, *audit)
 	case "recover":
 		return e.Recover(false)
+	case "archive":
+		return e.Archive(*planID)
+	case "plan-id":
+		id, err := e.PlanID()
+		if err == nil {
+			fmt.Println(id)
+		}
+		return err
 	case "rollback":
 		return e.Recover(true)
 	case "status":
