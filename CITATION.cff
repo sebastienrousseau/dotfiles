@@ -23,7 +23,7 @@ url: "https://doc.dotfiles.io/"
 license:
   - Apache-2.0
   - MIT
-version: 0.2.522
+version: 0.2.523
 date-released: "2026-09-10"
 keywords:
   - dotfiles

@@ -4,6 +4,51 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+## v0.2.523 — 2026-09-22 (Unreleased)
+
+### Security
+
+- Require a key on the local AI gateway (`dot-ai-serve`): `DOT_AI_API_KEY`
+  or a generated 0600 token shared with `dot ai proxy local on`. Refuse
+  requests whose `Host` is not the gateway's loopback address (DNS
+  rebinding), compare keys in constant time, and run the `claude` engine
+  with all tools disabled in an empty temporary directory.
+- Verify downloads before they run: the Nix installer in `dot-bootstrap`
+  (pinned release and SHA-256), the Ollama tarball in `ai-update` (release
+  `sha256sum.txt` before `sudo tar`), the `ai_core` llamafile (pinned
+  revision and SHA-256) and the kiro-cli Linux archive (release manifest).
+- Linux plugin sandbox: kill x32-ABI system calls on amd64, deny
+  `rt_sigqueueinfo`/`rt_tgsigqueueinfo`, and close inherited descriptors
+  before exec. CI adds an arm64 Linux runner.
+- `dot secrets`: refuse key names with path separators or a leading `-`/`.`,
+  and never export bucket keys that are not shell identifiers.
+
+### Fixed
+
+- `dot rollback git-reset` no longer discards uncommitted work: it aborts
+  unless changes are stashed (untracked files included) and keeps the
+  previous HEAD on a `rollback-backup/<timestamp>` branch.
+- `install.sh` keeps an existing `chezmoi.toml` (it was overwritten when it
+  lacked `sourceDir`), and `--minimal`/container installs select the minimal
+  profile in the per-host config instead of silently doing nothing.
+- `dot fleet apply` rejects `--jobs 0` and non-numeric values (the throttle
+  spun forever), ssh targets starting with `-`, and host names containing
+  path separators; ssh gets `--` and keep-alive options.
+- Plugins that overrun the stderr budget are rejected for it promptly
+  instead of stalling on a full pipe.
+- zsh takes the `compinit -C` fast path when the completion dump is fresh;
+  the old check needed `EXTENDED_GLOB` and always rebuilt.
+- `vibe-delegate` keeps its scratch files in a private temp directory
+  (macOS `mktemp` left the `XXXXXX` literal, so runs collided in `/tmp`).
+- Global `mise` installs run from a scratch directory, so npm install
+  scripts no longer leave `archive-*` downloads in the dotfiles checkout.
+
+### Changed
+
+- The web manual at `doc.dotfiles.io/manual/` is built with ssg and the Lucid
+  documentation theme, keeping the terminal logo and green-on-ink palette
+  (WCAG AAA in light and dark). `make manual-site` builds it locally.
+
 ## v0.2.522 — 2026-09-21 (Unreleased)
 
 ### Fixed
