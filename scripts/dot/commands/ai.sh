@@ -275,7 +275,7 @@ cmd_ai_status() {
         pkg=$(_ai_mise_pkg "$bin")
         if [[ -n "$pkg" ]]; then
           if has_command gum; then
-            if gum spin --spinner dot --title "Installing $name ($pkg)" -- \
+            if _ai_in_scratch_dir gum spin --spinner dot --title "Installing $name ($pkg)" -- \
               mise use -g "$pkg@latest" 2>&1; then
               ui_ok "$name" "installed"
             else
@@ -283,7 +283,7 @@ cmd_ai_status() {
             fi
           else
             ui_info "Installing" "$name via mise ($pkg)"
-            mise use -g "$pkg@latest" 2>&1 || ui_warn "$name" "install failed (continuing)"
+            _ai_in_scratch_dir mise use -g "$pkg@latest" 2>&1 || ui_warn "$name" "install failed (continuing)"
           fi
         fi
       done
@@ -422,7 +422,7 @@ ${prompt}"
       fi
       if [[ "$do_install" == "yes" ]]; then
         ui_info "Installing" "$tool via mise ($mise_pkg)"
-        mise use -g "$mise_pkg@latest" 2>&1 || {
+        _ai_in_scratch_dir mise use -g "$mise_pkg@latest" 2>&1 || {
           ui_err "$tool" "installation failed"
           exit 1
         }

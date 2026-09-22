@@ -274,7 +274,7 @@ if [[ ${#_ai_missing[@]} -gt 0 ]] && [[ "$INTERACTIVE" == "1" ]]; then
           continue
         fi
         if command -v gum &>/dev/null; then
-          if gum spin --spinner dot --title "Installing $_label ($_pkg)" -- \
+          if _ai_in_scratch_dir gum spin --spinner dot --title "Installing $_label ($_pkg)" -- \
             mise use -g "$_pkg@latest" 2>&1; then
             ui_ok "$_label" "installed"
           else
@@ -282,7 +282,7 @@ if [[ ${#_ai_missing[@]} -gt 0 ]] && [[ "$INTERACTIVE" == "1" ]]; then
           fi
         else
           ui_info "Installing" "$_label via mise ($_pkg)"
-          mise use -g "$_pkg@latest" 2>&1 || ui_warn "$_label" "install failed (continuing)"
+          _ai_in_scratch_dir mise use -g "$_pkg@latest" 2>&1 || ui_warn "$_label" "install failed (continuing)"
         fi
       done
     fi

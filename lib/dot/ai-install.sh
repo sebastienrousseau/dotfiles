@@ -18,6 +18,18 @@ _AI_INSTALL_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=verified-download.sh disable=SC1091
 source "$_AI_INSTALL_LIB_DIR/verified-download.sh"
 
+# _ai_in_scratch_dir <cmd...> — run a command from a private scratch
+# directory, then remove it. npm install scripts (e.g. @charmland/crush)
+# unpack downloads into archive-XXXXXX dirs in the current directory, which
+# left hundreds of MB in the dotfiles checkout when run from there.
+_ai_in_scratch_dir() {
+  local dir rc=0
+  dir="$(mktemp -d "${TMPDIR:-/tmp}/dot-ai-install.XXXXXX")" || return 1
+  (cd "$dir" && "$@") || rc=$?
+  rm -rf "$dir"
+  return "$rc"
+}
+
 # _ai_mise_pkg <binary> — map an AI provider binary to its mise package.
 # claude is intentionally absent (native installer, not mise/npm: npm 11
 # drops the platform-native optionalDependency on global installs).

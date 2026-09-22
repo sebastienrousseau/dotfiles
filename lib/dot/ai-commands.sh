@@ -225,7 +225,7 @@ cmd_ai_install() {
       continue
     fi
     ui_info "Installing" "$b ($pkg)"
-    if mise use -g "$pkg@latest" 2>&1; then
+    if _ai_in_scratch_dir mise use -g "$pkg@latest" 2>&1; then
       ui_ok "$b" "installed"
     else
       ui_warn "$b" "install failed (continuing)"

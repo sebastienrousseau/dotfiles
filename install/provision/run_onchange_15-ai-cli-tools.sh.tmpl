@@ -80,10 +80,14 @@ if command -v mise >/dev/null 2>&1; then
     "aqua:ollama/ollama"
   )
 
+  # Run from a scratch dir: npm install scripts (e.g. crush) unpack into
+  # archive-XXXXXX dirs in the current directory.
+  mise_scratch="$(mktemp -d "${TMPDIR:-/tmp}/dot-ai-install.XXXXXX")"
   for tool in "${AI_MISE_TOOLS[@]}"; do
     log_info "Installing $tool via mise..."
-    mise use -g "$tool@latest" 2>&1 || log_error "Failed to install $tool (continuing...)"
+    (cd "$mise_scratch" && mise use -g "$tool@latest") 2>&1 || log_error "Failed to install $tool (continuing...)"
   done
+  rm -rf "$mise_scratch"
 
   log_info "AI tools installed via mise. Topgrade will keep them updated."
 
