@@ -28,6 +28,11 @@ type Operation struct {
 	Before Snapshot `json:"before"`
 	After  Snapshot `json:"after"`
 }
+type Effect struct {
+	Kind          string `json:"kind"`
+	Target        string `json:"target"`
+	FailurePolicy string `json:"failure_policy"`
+}
 type Plan struct {
 	Version      int         `json:"version"`
 	RootID       string      `json:"root_id"`
@@ -35,6 +40,7 @@ type Plan struct {
 	PluginDigest string      `json:"plugin_digest"`
 	ProposalID   string      `json:"proposal_id"`
 	Operations   []Operation `json:"operations"`
+	Effects      []Effect    `json:"effects,omitempty"`
 }
 type Sealed struct {
 	Plan Plan   `json:"plan"`

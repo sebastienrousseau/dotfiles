@@ -62,6 +62,10 @@ jobs:
         if: runner.os != 'Windows'
         working-directory: core
         run: go test ./transaction -run '^TestArchiveCrashBoundaries$' -count=10
+      - name: Repeat post-commit effect recovery (60 trials per Unix host)
+        if: runner.os != 'Windows'
+        working-directory: core
+        run: go test ./transaction -run '^TestEffect' -count=20
   contracts:
     runs-on: ubuntu-latest
     timeout-minutes: 5

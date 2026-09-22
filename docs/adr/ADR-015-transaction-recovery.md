@@ -18,6 +18,20 @@ Explicit rollback of a committed generation uses the same conflict protection.
 Incomplete trailing journal records are discarded, never interpreted as committed.
 Rollback interruption is resumable and repeated recovery is idempotent.
 
+Required post-commit effects use a separate append-only `effects.wal`. Core fsyncs
+an `ATTEMPTED` entry before the effect and a `FAILED` or `SUCCEEDED` entry after it.
+The stable idempotency key is derived from the sealed plan ID, commit phase and
+effect index. A committed plan with no effect record reports `POST_COMMIT_PENDING`;
+an attempted or failed effect reports `POST_COMMIT_FAILED`. `recover` and the
+explicit `retry-effects` command retry without starting a plugin. A durable success
+is never re-executed, and archive refuses an incomplete required effect.
+
+The guarantee is at-least-once when a process dies after the external action but
+before recording success. Future effect drivers must use the supplied key for
+deduplication; the prototype does not claim exactly-once external side effects.
+The only implemented effect is a managed-root directory fsync, so explicit rollback
+after it has run has no compensating external action to perform.
+
 ## Scope and limitations
 
 Hello admits at most 16 private, regular, single-link files, 64 KiB each, and flat
@@ -50,7 +64,8 @@ archived-generation rollback, or byte quota on arbitrary corrupted history entri
 ## Acceptance
 
 Inject failures after prepare, commit intent, flush, rename, commit and rollback;
-include a child process exiting without cleanup. Verify hashes/modes and absence
+include a child process exiting without cleanup. Inject effect failure, interruption
+after execution, and interruption after a durable success record. Verify hashes/modes and absence
 restoration, preservation of concurrent edits, seal tampering and lock exclusion.
 Additionally exercise five archive fault boundaries across staged/unstaged and
 committed/rolled-back transactions, repeat recovery, and exit a real child process

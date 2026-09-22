@@ -15,6 +15,7 @@ go build -o "$demo_parent/dot-hello" ./cmd/dot-hello
 "$demo_parent/dot-core" register --root "$demo_parent/managed" --plugin "$demo_parent/dot-hello"
 "$demo_parent/dot-core" apply --root "$demo_parent/managed" --allow-audit-plugin
 "$demo_parent/dot-core" status --root "$demo_parent/managed"  # COMMITTED
+"$demo_parent/dot-core" retry-effects --root "$demo_parent/managed" # idempotent
 "$demo_parent/dot-core" rollback --root "$demo_parent/managed"
 "$demo_parent/dot-core" status --root "$demo_parent/managed"  # ROLLED_BACK
 demo_plan=$("$demo_parent/dot-core" plan-id --root "$demo_parent/managed")
@@ -28,6 +29,19 @@ backups. Do not point this tool at HOME, a repository, or an existing config tre
 `init` refuses existing directories. Only core writes targets; the plugin writes
 two files in `.dot-stage`, returns hashes and exits before commit. Recovery needs
 no plugin and refuses to overwrite independently changed targets.
+
+The sealed hello plan also contains one required, typed `sync:managed-root`
+post-commit effect. Core records an attempt before executing it and records its
+result afterward in `effects.wal`; both records are fsynced. A failed or interrupted
+effect reports `POST_COMMIT_FAILED`, keeps the committed files and evidence, and can
+be retried with `retry-effects` or `recover`. Every retry reuses the same SHA-256
+idempotency key. Archiving is blocked until required effects have succeeded.
+
+This is deliberately a mechanical proof, not a general reload framework. The only
+driver fsyncs the managed demo root. Core rejects commands, paths, PIDs, plugin
+callbacks, optional failure policies and any unknown effect. An interruption after
+the external action but before its success record is at-least-once delivery; future
+externally visible drivers must deduplicate the stable key.
 
 Only an explicit `archive --plan-id` retires a terminal transaction. Its plan,
 WAL, artifacts, backups and stage are retained in `.dot-history/<plan-id>`;
@@ -59,7 +73,7 @@ drop/reorder capabilities after the user grants audit consent. This negotiation
 does not upgrade the audit-only process boundary into a sandbox.
 
 Garbage collection, production registry signatures, OS containment, full JCS,
-effect drivers, Windows ACL/replace semantics, secret brokering and read-only MCP
+production effect drivers, Windows ACL/replace semantics, secret brokering and read-only MCP
 isolation remain separate gates. The tests simulate process crashes and I/O errors;
 they do not certify physical power-loss durability or resistance to a malicious
 same-UID plugin. No release version is bumped by this experimental module.

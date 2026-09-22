@@ -94,6 +94,13 @@ func (e *Engine) terminal(r *os.Root, id string, targets bool) (Sealed, error) {
 	if s.ID != id || s.Plan.RootID != e.ID || (state != "COMMITTED" && state != "ROLLED_BACK") {
 		return s, fmt.Errorf("DOT_E_RECOVERY_REQUIRED: archive requires matching terminal plan")
 	}
+	effectState, err := effectsState(r, s)
+	if err != nil {
+		return s, err
+	}
+	if state == "COMMITTED" && effectState != "COMMITTED" {
+		return s, fmt.Errorf("DOT_E_POST_COMMIT: complete required effects before archive")
+	}
 	for i, o := range s.Plan.Operations {
 		_, a, err := read(r, fmt.Sprintf("artifact-%d", i))
 		if err != nil || a != o.After {

@@ -30,6 +30,7 @@ func TestCommandLifecycle(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		command("apply", "--allow-audit-plugin")
 		command("status")
+		command("retry-effects")
 		command("plan-id")
 		command("recover")
 		if i == 0 {

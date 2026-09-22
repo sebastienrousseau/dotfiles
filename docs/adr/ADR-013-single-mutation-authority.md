@@ -14,6 +14,12 @@ and process signals. Plugins calculate proposals and write only staged artifacts
 No plugin remains running during core commit. Effects are typed requests, never
 shell strings. Unimplemented effects fail closed. A plugin's validation is advisory.
 
+The restricted hello profile proves this boundary with one exact
+`sync:managed-root:required` effect. The plugin may request it, but only core
+interprets and executes it after a durable commit. The request contains no command,
+path, PID or arbitrary argument. This narrow driver does not authorize production
+terminal reloads or callbacks into a plugin.
+
 The first implementation is an opt-in hello profile in a newly created private
 directory, separate from `dot theme` and all existing workstation commands. Its
 two non-secret text outputs demonstrate the boundary without migrating user files.

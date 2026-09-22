@@ -22,7 +22,7 @@ const (
 	AssuranceAudit = "audit"
 )
 
-var HelloCapabilities = []string{"materialize", "plan", "validate"}
+var HelloCapabilities = []string{"materialize", "plan", "post-commit-effects", "validate"}
 
 type Message struct {
 	JSONRPC string          `json:"jsonrpc"`
@@ -157,7 +157,13 @@ type Identity struct {
 	ID           string   `json:"id"`
 }
 type Proposal struct {
-	Names []string `json:"names"`
+	Names   []string `json:"names"`
+	Effects []Effect `json:"effects"`
+}
+type Effect struct {
+	Kind          string `json:"kind"`
+	Target        string `json:"target"`
+	FailurePolicy string `json:"failure_policy"`
 }
 type Materialize struct {
 	Stage string `json:"stage"`

@@ -196,6 +196,14 @@ func validate(p Plan) error {
 			return fmt.Errorf("DOT_E_VALIDATION: absent precondition")
 		}
 	}
+	if len(p.Effects) > 4 {
+		return fmt.Errorf("DOT_E_VALIDATION: effect limit")
+	}
+	for _, effect := range p.Effects {
+		if effect != (Effect{Kind: "sync", Target: "managed-root", FailurePolicy: "required"}) {
+			return fmt.Errorf("DOT_E_POLICY: unsupported effect")
+		}
+	}
 	return nil
 }
 
@@ -474,7 +482,7 @@ func (e *Engine) Recover(explicitRollback bool) error {
 		return nil
 	}
 	if state == "COMMITTED" && !explicitRollback {
-		return nil
+		return e.ApplyEffects()
 	}
 	if state != "ROLLING_BACK" {
 		if err = e.record(r, "ROLLING_BACK"); err != nil {
@@ -539,6 +547,9 @@ func (e *Engine) Status() (string, error) {
 	s, state, err := load(r)
 	if err == nil && s.Plan.RootID != e.ID {
 		return "", fmt.Errorf("DOT_E_RECOVERY_REQUIRED: root identity mismatch")
+	}
+	if err == nil && state == "COMMITTED" {
+		return effectsState(r, s)
 	}
 	return state, err
 }
