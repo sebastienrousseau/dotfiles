@@ -25,7 +25,10 @@
 set -euo pipefail
 
 # Configuration
-LLAMAFILE_URL="https://huggingface.co/jart/inexpensive-llm/resolve/main/llamafile-server-0.1-llava-v1.5-7b-q4"
+# Pinned to a repository revision and the file's SHA-256 (Hugging Face LFS
+# oid): the download is made executable, so it must be exactly these bytes.
+LLAMAFILE_URL="https://huggingface.co/Mozilla/llava-v1.5-7b-llamafile/resolve/0db279b4f7b68a4df8b385893969264f4ffeaaee/llava-v1.5-7b-q4.llamafile"
+LLAMAFILE_SHA256="1650f51a1468d056e2a6fb1433cec34fd6b917cfc18c32917251d6471217d46b"
 MODEL_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/ai/models"
 MODEL_PATH="$MODEL_DIR/llava-v1.5-7b-q4.llamafile"
 # Default to port 8080 for llamafile server
@@ -60,14 +63,25 @@ download_model() {
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "Downloading llamafile..."
-    # Note: curl -L is used to follow redirects
-    if curl -L -o "$MODEL_PATH" "$LLAMAFILE_URL"; then
-      chmod +x "$MODEL_PATH"
-      echo "Download complete. Model saved to $MODEL_PATH"
-    else
+    local partial="$MODEL_PATH.partial" actual
+    if ! curl --proto '=https' --tlsv1.2 -fL -o "$partial" "$LLAMAFILE_URL"; then
+      rm -f "$partial"
       echo "Download failed."
       return 1
     fi
+    if command -v sha256sum >/dev/null 2>&1; then
+      actual="$(sha256sum "$partial" | awk '{print $1}')"
+    else
+      actual="$(shasum -a 256 "$partial" | awk '{print $1}')"
+    fi
+    if [[ "$actual" != "$LLAMAFILE_SHA256" ]]; then
+      rm -f "$partial"
+      echo "Checksum mismatch: expected $LLAMAFILE_SHA256, got $actual. Not installed."
+      return 1
+    fi
+    chmod +x "$partial"
+    mv "$partial" "$MODEL_PATH"
+    echo "Download verified. Model saved to $MODEL_PATH"
   else
     echo "Skipping download. AI features may be limited."
     return 1

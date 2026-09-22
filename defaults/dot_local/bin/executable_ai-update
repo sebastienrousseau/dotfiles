@@ -167,16 +167,24 @@ if command -v ollama >/dev/null 2>&1; then
       # Check for updates by comparing local vs remote version
       current_ver="$(ollama --version | awk '{print $NF}' | tr -d '[:space:]')"
       # This is a bit slow but safer than downloading every time
-      latest_ver="$(curl -fsSL -I https://github.com/ollama/ollama/releases/latest | grep -i location | sed 's/.*\/v//;s///' | tr -d '[:space:]')"
+      latest_ver="$(curl -fsSL -I https://github.com/ollama/ollama/releases/latest | grep -i location | sed 's/.*\/v//;s/
+//' | tr -d '[:space:]')"
 
-      if [[ "$current_ver" == "$latest_ver" ]]; then
+      if [[ ! "$latest_ver" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        skip "could not determine the latest release"
+      elif [[ "$current_ver" == "$latest_ver" ]]; then
         skip "already up to date"
       else
         tmp_tar="$(umask 077 && mktemp)"
         trap 'rm -f "$tmp_tar"' EXIT
-        tar_url="https://ollama.com/download/ollama-linux-${ollama_arch}.tar.zst"
+        # Pinned to the release tag and verified against its sha256sum.txt
+        # before anything is extracted as root.
+        release_url="https://github.com/ollama/ollama/releases/download/v${latest_ver}"
+        tar_name="ollama-linux-${ollama_arch}.tar.zst"
 
-        if curl -fsSL --retry 2 "$tar_url" -o "$tmp_tar" && zstd -t "$tmp_tar" >/dev/null 2>&1; then
+        if download_verified_asset "$release_url/$tar_name" "$release_url/sha256sum.txt" \
+          "$tar_name" "$tmp_tar" $((4 * 1024 * 1024 * 1024)) &&
+          zstd -t "$tmp_tar" >/dev/null 2>&1; then
           # Stop service safely
           if command -v systemctl >/dev/null 2>&1; then
             sudo systemctl stop ollama 2>/dev/null || true
