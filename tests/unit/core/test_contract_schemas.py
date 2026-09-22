@@ -27,6 +27,7 @@ class Contracts(unittest.TestCase):
                 "protocol": 1, "profile": "org.dot.hello/v1", "assurance": "audit"}
         v = validator("manifest")
         self.assertTrue(v.is_valid(good))
+        self.assertTrue(v.is_valid(dict(good, assurance="process")))
         for key, value in [("sha256", "bad"), ("protocol", 2),
                            ("profile", "org.dot.general/v1"),
                            ("assurance", "os-enforced"), ("executable", "from-PATH")]:
@@ -63,6 +64,8 @@ class Contracts(unittest.TestCase):
         event = {"schema_version": 1, "operation_id": "a" * 64,
                  "kind": "transaction", "state": "PREPARED"}
         self.assertTrue(validator("event").is_valid(event))
+        for code in ["DOT_E_SANDBOX_UNAVAILABLE", "DOT_E_TIMEOUT"]:
+            self.assertTrue(validator("event").is_valid(dict(event, code=code)))
         self.assertFalse(validator("event").is_valid(dict(event, message="CANARY_DO_NOT_LOG")))
 
     def test_rpc_params_are_closed(self):
@@ -72,6 +75,9 @@ class Contracts(unittest.TestCase):
                               "capabilities": ["materialize", "plan", "post-commit-effects", "validate"],
                               "nonce": "a" * 64}}
         self.assertTrue(validator("request").is_valid(request))
+        process = copy.deepcopy(request)
+        process["params"]["required_assurance"] = "process"
+        self.assertTrue(validator("request").is_valid(process))
         request["params"]["token"] = "CANARY_DO_NOT_LOG"
         self.assertFalse(validator("request").is_valid(request))
 
@@ -81,6 +87,7 @@ class Contracts(unittest.TestCase):
                     "nonce": "a" * 64, "id": "org.dot.hello"}
         v = validator("identity")
         self.assertTrue(v.is_valid(identity))
+        self.assertTrue(v.is_valid(dict(identity, assurance="process")))
         for key, value in [("protocol", 0), ("profile", "org.dot.general/v1"),
                            ("assurance", "none"), ("capabilities", ["plan"]),
                            ("id", "org.dot.other"), ("token", "secret")]:

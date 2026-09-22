@@ -32,6 +32,11 @@ func TestIdentityNegotiation(t *testing.T) {
 	if err := validateIdentity(manifest, request, identity); err != nil {
 		t.Fatal(err)
 	}
+	manifest.Assurance, request.RequiredAssurance, identity.Assurance = protocol.AssuranceProcess, protocol.AssuranceProcess, protocol.AssuranceProcess
+	if err := validateIdentity(manifest, request, identity); err != nil {
+		t.Fatal(err)
+	}
+	manifest.Assurance, request.RequiredAssurance, identity.Assurance = protocol.AssuranceAudit, protocol.AssuranceAudit, protocol.AssuranceAudit
 	for _, kind := range []string{"protocol", "profile", "assurance", "capability", "capability-order", "nonce", "id"} {
 		t.Run(kind, func(t *testing.T) {
 			bad := identity
@@ -152,6 +157,31 @@ func mustRead(t *testing.T, path string) []byte {
 		t.Fatal(err)
 	}
 	return b
+}
+
+func TestAssuranceMismatchFailsBeforeLaunch(t *testing.T) {
+	bin := filepath.Join(t.TempDir(), "hello")
+	if b, err := exec.Command("go", "build", "-o", bin, "../cmd/dot-hello").CombinedOutput(); err != nil {
+		t.Fatalf("build: %s %v", b, err)
+	}
+	root := filepath.Join(t.TempDir(), "demo")
+	if err := transaction.Init(root); err != nil {
+		t.Fatal(err)
+	}
+	e, err := transaction.Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer e.Close()
+	if err = RegisterWithAssurance(e, bin, protocol.AssuranceProcess); err != nil {
+		t.Fatal(err)
+	}
+	if err = Apply(context.Background(), e, true); err == nil || !strings.Contains(err.Error(), "DOT_E_PLUGIN_IDENTITY") {
+		t.Fatal("audit invocation accepted process manifest", err)
+	}
+	if _, err = os.Stat(filepath.Join(root, "hello.txt")); !os.IsNotExist(err) {
+		t.Fatal("assurance mismatch mutated production", err)
+	}
 }
 
 func TestChildGroupCleanup(t *testing.T) {

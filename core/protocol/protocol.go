@@ -18,8 +18,9 @@ import (
 const MaxFrame = 65536
 
 const (
-	HelloProfile   = "org.dot.hello/v1"
-	AssuranceAudit = "audit"
+	HelloProfile     = "org.dot.hello/v1"
+	AssuranceAudit   = "audit"
+	AssuranceProcess = "process"
 )
 
 var HelloCapabilities = []string{"materialize", "plan", "post-commit-effects", "validate"}

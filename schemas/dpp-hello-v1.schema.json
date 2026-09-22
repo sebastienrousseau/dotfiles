@@ -20,7 +20,7 @@
     "manifest": {
       "type": "object", "additionalProperties": false,
       "required": ["id", "sha256", "protocol", "profile", "assurance"],
-      "properties": {"id": {"const": "org.dot.hello"}, "sha256": {"$ref": "#/$defs/hash"}, "protocol": {"const": 1}, "profile": {"const": "org.dot.hello/v1"}, "assurance": {"const": "audit"}}
+      "properties": {"id": {"const": "org.dot.hello"}, "sha256": {"$ref": "#/$defs/hash"}, "protocol": {"const": 1}, "profile": {"const": "org.dot.hello/v1"}, "assurance": {"enum": ["audit", "process"]}}
     },
     "operation": {
       "type": "object", "additionalProperties": false,
@@ -56,7 +56,7 @@
         "params": {"type": "object"}
       },
       "allOf": [
-        {"if": {"properties": {"method": {"const": "dot.initialize"}}}, "then": {"properties": {"params": {"additionalProperties": false, "required": ["protocol", "profile", "required_assurance", "capabilities", "nonce"], "properties": {"protocol": {"const": 1}, "profile": {"const": "org.dot.hello/v1"}, "required_assurance": {"const": "audit"}, "capabilities": {"type": "array", "const": ["materialize", "plan", "post-commit-effects", "validate"]}, "nonce": {"$ref": "#/$defs/hash"}}}}}},
+        {"if": {"properties": {"method": {"const": "dot.initialize"}}}, "then": {"properties": {"params": {"additionalProperties": false, "required": ["protocol", "profile", "required_assurance", "capabilities", "nonce"], "properties": {"protocol": {"const": 1}, "profile": {"const": "org.dot.hello/v1"}, "required_assurance": {"enum": ["audit", "process"]}, "capabilities": {"type": "array", "const": ["materialize", "plan", "post-commit-effects", "validate"]}, "nonce": {"$ref": "#/$defs/hash"}}}}}},
         {"if": {"properties": {"method": {"const": "dot.materialize"}}}, "then": {"properties": {"params": {"additionalProperties": false, "required": ["stage"], "properties": {"stage": {"type": "string", "pattern": "^/[^\\u0000-\\u001f]+$", "maxLength": 4096}}}}}},
         {"if": {"properties": {"method": {"enum": ["dot.plan", "dot.validate", "dot.shutdown"]}}}, "then": {"properties": {"params": {"maxProperties": 0}}}}
       ]
@@ -66,7 +66,7 @@
       "required": ["protocol", "profile", "assurance", "capabilities", "nonce", "id"],
       "properties": {
         "protocol": {"const": 1}, "profile": {"const": "org.dot.hello/v1"},
-        "assurance": {"const": "audit"}, "capabilities": {"type": "array", "const": ["materialize", "plan", "post-commit-effects", "validate"]},
+        "assurance": {"enum": ["audit", "process"]}, "capabilities": {"type": "array", "const": ["materialize", "plan", "post-commit-effects", "validate"]},
         "nonce": {"$ref": "#/$defs/hash"}, "id": {"const": "org.dot.hello"}
       }
     },
@@ -76,7 +76,7 @@
         "schema_version": {"const": 1}, "operation_id": {"$ref": "#/$defs/hash"},
         "kind": {"enum": ["transaction", "diagnostic"]},
         "state": {"enum": ["PREPARING", "PREPARED", "COMMITTING", "COMMITTED", "POST_COMMIT_PENDING", "POST_COMMIT_FAILED", "ROLLING_BACK", "ROLLED_BACK", "RECOVERY_REQUIRED"]},
-        "code": {"enum": ["DOT_E_PROTOCOL", "DOT_E_PLUGIN_IDENTITY", "DOT_E_POLICY", "DOT_E_PATH_ESCAPE", "DOT_E_CONFLICT", "DOT_E_ARTIFACT_MISMATCH", "DOT_E_VALIDATION", "DOT_E_COMMIT", "DOT_E_RECOVERY_REQUIRED", "DOT_E_POST_COMMIT"]}
+        "code": {"enum": ["DOT_E_PROTOCOL", "DOT_E_PLUGIN_IDENTITY", "DOT_E_POLICY", "DOT_E_PATH_ESCAPE", "DOT_E_CONFLICT", "DOT_E_ARTIFACT_MISMATCH", "DOT_E_VALIDATION", "DOT_E_COMMIT", "DOT_E_RECOVERY_REQUIRED", "DOT_E_POST_COMMIT", "DOT_E_SANDBOX_UNAVAILABLE", "DOT_E_TIMEOUT"]}
       }
     },
     "secret_reference": {

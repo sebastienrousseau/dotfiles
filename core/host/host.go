@@ -2,7 +2,8 @@
 // Copyright (c) 2015-2026 Sebastien Rousseau
 
 // Package host runs only explicitly registered, digest-pinned hello-profile plugins.
-// Its process boundary is AUDIT ONLY; the caller must explicitly accept that policy.
+// Audit mode requires explicit consent. Process mode is a Linux-only experimental
+// Landlock/seccomp boundary and fails closed when its enforcement is unavailable.
 package host
 
 import (
@@ -13,7 +14,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"sync"
 	"time"
@@ -55,6 +55,13 @@ func binary(path string) ([]byte, error) {
 }
 
 func Register(e *transaction.Engine, source string) error {
+	return RegisterWithAssurance(e, source, protocol.AssuranceAudit)
+}
+
+func RegisterWithAssurance(e *transaction.Engine, source, assurance string) error {
+	if assurance != protocol.AssuranceAudit && assurance != protocol.AssuranceProcess {
+		return fmt.Errorf("DOT_E_POLICY: unsupported assurance")
+	}
 	if !filepath.IsAbs(source) {
 		return fmt.Errorf("DOT_E_POLICY: absolute executable required")
 	}
@@ -75,7 +82,7 @@ func Register(e *transaction.Engine, source string) error {
 	}
 	m := Manifest{
 		ID: "org.dot.hello", SHA256: transaction.Digest(b), Protocol: 1,
-		Profile: protocol.HelloProfile, Assurance: protocol.AssuranceAudit,
+		Profile: protocol.HelloProfile, Assurance: assurance,
 	}
 	f, err = e.Root.OpenFile(".dot-plugin.json", os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
 	if err != nil {
@@ -117,6 +124,14 @@ func Apply(ctx context.Context, e *transaction.Engine, allowAudit bool) error {
 	if !allowAudit {
 		return fmt.Errorf("DOT_E_POLICY: explicit --allow-audit-plugin required; no OS sandbox")
 	}
+	return apply(ctx, e, protocol.AssuranceAudit)
+}
+
+func ApplyContained(ctx context.Context, e *transaction.Engine) error {
+	return apply(ctx, e, protocol.AssuranceProcess)
+}
+
+func apply(ctx context.Context, e *transaction.Engine, requiredAssurance string) error {
 	if err := e.Ready(); err != nil {
 		return err
 	}
@@ -140,7 +155,7 @@ func Apply(ctx context.Context, e *transaction.Engine, allowAudit bool) error {
 	if err = protocol.Strict(metadata, &m); err != nil {
 		return err
 	}
-	if m.ID != "org.dot.hello" || m.Protocol != 1 || m.Profile != protocol.HelloProfile || m.Assurance != protocol.AssuranceAudit {
+	if m.ID != "org.dot.hello" || m.Protocol != 1 || m.Profile != protocol.HelloProfile || m.Assurance != requiredAssurance {
 		return fmt.Errorf("DOT_E_PLUGIN_IDENTITY: manifest policy")
 	}
 	path := filepath.Join(e.Root.Name(), ".dot-plugin")
@@ -157,7 +172,10 @@ func Apply(ctx context.Context, e *transaction.Engine, allowAudit bool) error {
 	stage := filepath.Join(e.Root.Name(), ".dot-stage")
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, path)
+	cmd, err := pluginCommand(ctx, path, stage, requiredAssurance)
+	if err != nil {
+		return err
+	}
 	stopGroup, err := configureProcess(cmd)
 	if err != nil {
 		return err
@@ -212,7 +230,7 @@ func Apply(ctx context.Context, e *transaction.Engine, allowAudit bool) error {
 	nonceText := hex.EncodeToString(nonce[:])
 	initialize := protocol.Initialize{
 		Protocol: 1, Profile: protocol.HelloProfile,
-		RequiredAssurance: protocol.AssuranceAudit,
+		RequiredAssurance: requiredAssurance,
 		Capabilities:      append([]string(nil), protocol.HelloCapabilities...), Nonce: nonceText,
 	}
 	var identity protocol.Identity
