@@ -75,7 +75,7 @@
       "properties": {
         "schema_version": {"const": 1}, "operation_id": {"$ref": "#/$defs/hash"},
         "kind": {"enum": ["transaction", "diagnostic"]},
-        "state": {"enum": ["PREPARING", "PREPARED", "COMMITTING", "COMMITTED", "POST_COMMIT_PENDING", "POST_COMMIT_FAILED", "ROLLING_BACK", "ROLLED_BACK", "RECOVERY_REQUIRED"]},
+        "state": {"enum": ["PREPARING", "ABANDONED", "PREPARED", "COMMITTING", "COMMITTED", "POST_COMMIT_PENDING", "POST_COMMIT_FAILED", "ROLLING_BACK", "ROLLED_BACK", "RECOVERY_REQUIRED"]},
         "code": {"enum": ["DOT_E_PROTOCOL", "DOT_E_PLUGIN_IDENTITY", "DOT_E_POLICY", "DOT_E_PATH_ESCAPE", "DOT_E_CONFLICT", "DOT_E_ARTIFACT_MISMATCH", "DOT_E_VALIDATION", "DOT_E_COMMIT", "DOT_E_RECOVERY_REQUIRED", "DOT_E_POST_COMMIT", "DOT_E_SANDBOX_UNAVAILABLE", "DOT_E_TIMEOUT"]}
       }
     },

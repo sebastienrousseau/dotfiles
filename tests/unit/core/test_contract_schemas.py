@@ -64,6 +64,7 @@ class Contracts(unittest.TestCase):
         event = {"schema_version": 1, "operation_id": "a" * 64,
                  "kind": "transaction", "state": "PREPARED"}
         self.assertTrue(validator("event").is_valid(event))
+        self.assertTrue(validator("event").is_valid(dict(event, state="ABANDONED")))
         for code in ["DOT_E_SANDBOX_UNAVAILABLE", "DOT_E_TIMEOUT"]:
             self.assertTrue(validator("event").is_valid(dict(event, code=code)))
         self.assertFalse(validator("event").is_valid(dict(event, message="CANARY_DO_NOT_LOG")))
