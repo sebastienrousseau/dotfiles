@@ -476,7 +476,7 @@ jobs:
     needs: changes
     uses: ./.github/workflows/reusable-test-suite.yml
     with:
-      min_coverage: "95"
+      min_coverage: "98"
       run_integration: true
       run_strict_checks: true
       # This job runs unit + regression + module coverage + the

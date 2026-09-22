@@ -63,8 +63,20 @@ def load_or_create_token(path=TOKEN_FILE):
     token = secrets.token_urlsafe(32)
     try:
         fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-    except FileExistsError:  # lost a race with another starter
-        return load_or_create_token(path)
+    except FileExistsError:
+        # Either another starter won the race (use its token) or the file
+        # exists but is empty (replace it atomically). Re-reading once is
+        # enough: an empty file would otherwise loop here forever.
+        with open(path, encoding="utf-8") as fh:
+            existing = fh.read().strip()
+        if existing:
+            return existing
+        tmp = f"{path}.{os.getpid()}.tmp"
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(token + "\n")
+        os.replace(tmp, path)
+        return token
     with os.fdopen(fd, "w", encoding="utf-8") as fh:
         fh.write(token + "\n")
     return token
@@ -320,7 +332,16 @@ def stream_claude(run_model, system_prompt, prompt):
         yield ("done", {}, f"claude CLI not found ({CLAUDE_BIN})")
         return
 
-    timer = threading.Timer(int(os.environ.get("DOT_AI_TIMEOUT", "600")), proc.kill)
+    expired = threading.Event()
+
+    def _expire():
+        # Record the timeout before killing: checking timer.is_alive()
+        # afterwards races with the timer thread finishing, which reported
+        # a timed-out engine as "no output from claude".
+        expired.set()
+        proc.kill()
+
+    timer = threading.Timer(int(os.environ.get("DOT_AI_TIMEOUT", "600")), _expire)
     timer.start()
     prev, usage, err, timed_out = "", {}, None, False
     try:
@@ -355,7 +376,7 @@ def stream_claude(run_model, system_prompt, prompt):
                         prev = final
         proc.wait()
     finally:
-        timed_out = not timer.is_alive() and proc.returncode is not None and proc.returncode < 0
+        timed_out = expired.is_set()
         timer.cancel()
         shutil.rmtree(workdir, ignore_errors=True)
 

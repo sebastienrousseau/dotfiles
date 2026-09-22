@@ -109,7 +109,7 @@ jobs:
     name: Nightly / Test Suite
     uses: ./.github/workflows/reusable-test-suite.yml
     with:
-      min_coverage: "95"
+      min_coverage: "98"
       run_integration: false
       run_strict_checks: false
       timeout_minutes: 12
