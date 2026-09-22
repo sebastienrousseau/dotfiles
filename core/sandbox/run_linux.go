@@ -20,8 +20,9 @@ import (
 )
 
 const (
-	maxArtifact = 65536
-	minimumABI  = 3 // includes REFER and TRUNCATE mediation
+	maxArtifact     = 65536
+	maxAddressSpace = 2 << 30 // leaves headroom for the Go runtime's reserved arenas
+	minimumABI      = 3       // includes REFER and TRUNCATE mediation
 )
 
 func Run(plugin, stage string) error {
@@ -107,7 +108,7 @@ func validateStaticELF(plugin string) error {
 
 func limits() error {
 	for resource, limit := range map[int]uint64{
-		unix.RLIMIT_AS:     1 << 30,
+		unix.RLIMIT_AS:     maxAddressSpace,
 		unix.RLIMIT_CORE:   0,
 		unix.RLIMIT_CPU:    2,
 		unix.RLIMIT_FSIZE:  maxArtifact,
