@@ -27,9 +27,12 @@ demo_plan=$("$demo_parent/dot-core" plan-id --root "$demo_parent/managed")
 ```
 
 On Linux kernels with Landlock ABI 3 or newer, the same hello lifecycle can require
-the experimental process boundary:
+the experimental process boundary. Process-assured plugins must be statically
+linked ELF executables so their loader and shared libraries cannot expand the
+Landlock read/execute boundary:
 
 ```sh
+CGO_ENABLED=0 go build -o "$demo_parent/dot-hello" ./cmd/dot-hello
 "$demo_parent/dot-core" init --root "$demo_parent/contained"
 "$demo_parent/dot-core" register --root "$demo_parent/contained" \
   --plugin "$demo_parent/dot-hello" --assurance process

@@ -22,7 +22,10 @@ which requires Landlock ABI 3, `no_new_privs`, a seccomp architecture check and
 deny policy, a parent-death signal, and hard address-space, CPU, output-file and
 descriptor limits. Landlock permits the plugin to read and execute only its exact
 binary and to operate only inside its private stage; execute permission is absent
-from the stage. Seccomp denies network creation and I/O, namespace and process-group
+from the stage. The runner therefore requires a statically linked ELF executable
+and rejects interpreter-backed or malformed binaries before installing Landlock;
+this keeps dynamic loaders and shared libraries outside the granted boundary.
+Seccomp denies network creation and I/O, namespace and process-group
 escape, new processes, tracing, external signalling, mount and selected kernel
 attack surfaces while preserving Go runtime threads. It also denies external
 metadata mutation, anonymous executable creation and changing the parent-death

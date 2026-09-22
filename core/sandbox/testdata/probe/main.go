@@ -14,6 +14,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"syscall"
+
+	"golang.org/x/sys/unix"
 )
 
 func main() {
@@ -49,10 +51,10 @@ func main() {
 	if _, _, errno := syscall.RawSyscall(syscall.SYS_PRCTL, uintptr(syscall.PR_SET_PDEATHSIG), 0, 0); errno != syscall.EPERM {
 		panic(fmt.Sprintf("parent-death reset result: %v", errno))
 	}
-	if _, _, errno := syscall.RawSyscall(syscall.SYS_MEMFD_CREATE, 0, 0, 0); errno != syscall.EPERM {
+	if _, _, errno := unix.RawSyscall(unix.SYS_MEMFD_CREATE, 0, 0, 0); errno != unix.EPERM {
 		panic(fmt.Sprintf("anonymous executable result: %v", errno))
 	}
-	if _, _, errno := syscall.RawSyscall6(syscall.SYS_EXECVEAT, 0, 0, 0, 0, 0, 0); errno != syscall.EPERM {
+	if _, _, errno := unix.RawSyscall6(unix.SYS_EXECVEAT, 0, 0, 0, 0, 0, 0); errno != unix.EPERM {
 		panic(fmt.Sprintf("execveat result: %v", errno))
 	}
 	if err = exec.Command("/bin/true").Run(); !errors.Is(err, os.ErrPermission) {

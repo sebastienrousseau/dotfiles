@@ -8,6 +8,7 @@
 package sandbox
 
 import (
+	"debug/elf"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -71,6 +72,26 @@ func validate(plugin, stage string) error {
 	ss, sok := si.Sys().(*syscall.Stat_t)
 	if !pok || !sok || ps.Uid != uint32(os.Geteuid()) || ss.Uid != uint32(os.Geteuid()) {
 		return fmt.Errorf("DOT_E_POLICY: sandbox paths must be owned by the effective user")
+	}
+	if err = validateStaticELF(plugin); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateStaticELF(plugin string) error {
+	binary, err := elf.Open(plugin)
+	if err != nil {
+		return fmt.Errorf("DOT_E_PLUGIN_IDENTITY: process-assured plugin must be an ELF executable: %w", err)
+	}
+	defer binary.Close()
+	if binary.FileHeader.Type != elf.ET_EXEC && binary.FileHeader.Type != elf.ET_DYN {
+		return fmt.Errorf("DOT_E_PLUGIN_IDENTITY: process-assured plugin has unsupported ELF type %s", binary.FileHeader.Type)
+	}
+	for _, program := range binary.Progs {
+		if program.Type == elf.PT_INTERP {
+			return fmt.Errorf("DOT_E_PLUGIN_IDENTITY: process-assured plugin must be statically linked")
+		}
 	}
 	return nil
 }

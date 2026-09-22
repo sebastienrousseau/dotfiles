@@ -29,7 +29,9 @@ func TestLinuxContainment(t *testing.T) {
 	probe := filepath.Join(parent, "probe")
 	runner := filepath.Join(parent, "dot-sandbox")
 	for output, source := range map[string]string{probe: "./testdata/probe", runner: "../cmd/dot-sandbox"} {
-		if b, err := exec.Command("go", "build", "-o", output, source).CombinedOutput(); err != nil {
+		build := exec.Command("go", "build", "-o", output, source)
+		build.Env = append(os.Environ(), "CGO_ENABLED=0")
+		if b, err := build.CombinedOutput(); err != nil {
 			t.Fatalf("build %s: %s %v", source, b, err)
 		}
 	}
@@ -80,5 +82,11 @@ func TestValidationFailsClosed(t *testing.T) {
 	}
 	if err := validate(plugin, stage); err == nil || !strings.Contains(err.Error(), "DOT_E_PATH_ESCAPE") {
 		t.Fatal("non-private stage accepted", err)
+	}
+	if err := os.Chmod(stage, 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := validate(plugin, stage); err == nil || !strings.Contains(err.Error(), "must be an ELF executable") {
+		t.Fatal("non-ELF plugin accepted", err)
 	}
 }
