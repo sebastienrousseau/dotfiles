@@ -142,11 +142,15 @@ if [[ "${DOTFILES_ENABLE_COMPINIT}" == "1" ]] && [[ "${DOTFILES_FAST:-0}" != "1"
     else
       _dotfiles_del_precmd _deferred_compinit
     fi
-    # Fresh dump (< 24 h) → use cached fast path; otherwise rebuild.
-    if [[ -n ${_DOTFILES_ZCOMPDUMP}(#qN.mh+24) ]]; then
-      compinit -d "${_DOTFILES_ZCOMPDUMP}"
-    else
+    # Fresh dump (< 24 h) → cached fast path; stale or missing → rebuild.
+    # Array assignment globs with bare qualifiers, so this needs no
+    # EXTENDED_GLOB (the `(#q…)` form inside [[ ]] silently did).
+    local -a _dotfiles_fresh_dump
+    _dotfiles_fresh_dump=( ${_DOTFILES_ZCOMPDUMP}(N.mh-24) )
+    if (( ${#_dotfiles_fresh_dump} )); then
       compinit -C -d "${_DOTFILES_ZCOMPDUMP}"
+    else
+      compinit -d "${_DOTFILES_ZCOMPDUMP}"
     fi
     # Compile to bytecode in background for faster subsequent loads
     { [[ ! -f "${_DOTFILES_ZCOMPDUMP}.zwc" || "${_DOTFILES_ZCOMPDUMP}" -nt "${_DOTFILES_ZCOMPDUMP}.zwc" ]] && zcompile "${_DOTFILES_ZCOMPDUMP}" } &!
