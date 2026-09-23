@@ -167,8 +167,7 @@ if command -v ollama >/dev/null 2>&1; then
       # Check for updates by comparing local vs remote version
       current_ver="$(ollama --version | awk '{print $NF}' | tr -d '[:space:]')"
       # This is a bit slow but safer than downloading every time
-      latest_ver="$(curl -fsSL -I https://github.com/ollama/ollama/releases/latest | grep -i location | sed 's/.*\/v//;s/
-//' | tr -d '[:space:]')"
+      latest_ver="$(curl -fsSL -I https://github.com/ollama/ollama/releases/latest | grep -i location | sed 's/.*\/v//;s/\r//' | tr -d '[:space:]')"
 
       if [[ ! "$latest_ver" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
         skip "could not determine the latest release"

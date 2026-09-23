@@ -283,7 +283,7 @@ cmd_ai_status() {
             fi
           else
             ui_info "Installing" "$name via mise ($pkg)"
-            _ai_in_scratch_dir mise use -g "$pkg@latest" 2>&1 || ui_warn "$name" "install failed (continuing)"
+            _ai_in_scratch_dir mise use -g "$pkg@latest" 2>&1 || ui_warn "$name" "install failed (continuing)" # mutation: ignore unreachable: gum answered the prompt above and stays hashed, so has_command gum is still true here
           fi
         fi
       done

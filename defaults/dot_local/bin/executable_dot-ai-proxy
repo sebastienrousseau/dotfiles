@@ -204,9 +204,12 @@ _gateway_token() {
   if [[ ! -s "$TOKEN_FILE" ]]; then
     (
       umask 077
+      # head closes the pipe on the 43rd byte, so tr always ends in SIGPIPE;
+      # under pipefail that would skip the newline the token file promises.
+      set +o pipefail
       mkdir -p "$STATE_DIR"
       local tmp
-      tmp="$(mktemp "$TOKEN_FILE.XXXXXX")" || exit 1
+      tmp="$(mktemp "$TOKEN_FILE.XXXXXX")" || exit 1 # mutation: ignore equivalent: with no temp file nothing is linked, and the empty read below fails either way
       LC_ALL=C tr -dc 'A-Za-z0-9_-' </dev/urandom | head -c 43 >"$tmp" && echo >>"$tmp"
       # Keep a token another process created first.
       ln "$tmp" "$TOKEN_FILE" 2>/dev/null || true

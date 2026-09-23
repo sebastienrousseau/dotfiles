@@ -282,7 +282,7 @@ if [[ ${#_ai_missing[@]} -gt 0 ]] && [[ "$INTERACTIVE" == "1" ]]; then
           fi
         else
           ui_info "Installing" "$_label via mise ($_pkg)"
-          _ai_in_scratch_dir mise use -g "$_pkg@latest" 2>&1 || ui_warn "$_label" "install failed (continuing)"
+          _ai_in_scratch_dir mise use -g "$_pkg@latest" 2>&1 || ui_warn "$_label" "install failed (continuing)" # mutation: ignore unreachable: _ai_to_install is only filled by gum choose, so this non-gum fallback never runs
         fi
       done
     fi
