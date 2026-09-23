@@ -14,6 +14,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 ROLLBACK_FILE="$REPO_ROOT/scripts/ops/rollback.sh"
+REAL_GIT="$(command -v git)"
 
 _tmp=$(mktemp -d -t dotfiles-rollback.XXXXXX)
 trap 'rm -rf "$_tmp"' EXIT
@@ -118,6 +119,56 @@ assert_equals "0" "$rc" "forced reset succeeds"
 test_start "git_reset_force_untracked_in_stash"
 untracked=$(git -C "$HOME/.dotfiles" show --name-only --format= 'stash@{0}^3' 2>/dev/null || true)
 assert_equals "dirty.txt" "$untracked" "forced reset stashes untracked files"
+
+# ── Answers other than y/Y are a decline, including "nay" ──────────
+test_start "git_reset_nay_is_not_yes"
+_setup
+_run 'nay\n'
+assert_equals "0" "$?" "declining the reset is a clean exit"
+assert_equals "$local_head" "$(git -C "$HOME/.dotfiles" rev-parse HEAD)" "HEAD not moved"
+test_start "git_reset_stash_prompt_nay_is_not_yes"
+_setup
+echo "edited" >>"$HOME/.dotfiles/tracked.txt"
+_run 'y\nnay\n'
+assert_equals "1" "$?" "declining the stash aborts with 1"
+assert_file_contains "$HOME/.dotfiles/tracked.txt" "edited" "edit preserved"
+
+# ── Not a repository ────────────────────────────────────────────────
+test_start "git_reset_outside_a_repository"
+_setup
+rm -rf "$HOME/.dotfiles/.git"
+_run '' --force
+assert_equals "1" "$?" "exit 1"
+assert_file_contains "$_tmp/out" "Not a git repository: " "refuses with the reason"
+assert_file_contains "$_tmp/out" "/home/.dotfiles" "names the source dir"
+
+# ── A failed safety step aborts before anything is reset ────────────
+# git shim: fail when the first two arguments match the glob in $1, pass
+# everything else to the real git.
+_fail_git() {
+  cat >"$_tmp/bin/git" <<SHIM
+#!/bin/sh
+case "\$1 \$2" in $1) echo "git \$*: injected failure" >&2; exit 1 ;; esac
+exec "$REAL_GIT" "\$@"
+SHIM
+  chmod +x "$_tmp/bin/git"
+}
+test_start "git_reset_stash_failure_aborts"
+_setup
+_fail_git "'stash push'"
+echo "edited" >>"$HOME/.dotfiles/tracked.txt"
+_run '' --force
+assert_equals "1" "$?" "exit 1"
+assert_file_contains "$_tmp/out" "Aborting: could not stash all changes" "names the failed step"
+assert_equals "$local_head" "$("$REAL_GIT" -C "$HOME/.dotfiles" rev-parse HEAD)" "HEAD not moved"
+assert_file_contains "$HOME/.dotfiles/tracked.txt" "edited" "edit preserved"
+test_start "git_reset_backup_branch_failure_aborts"
+_setup
+_fail_git "'branch rollback-backup/'*"
+_run '' --force
+assert_equals "1" "$?" "exit 1"
+assert_file_contains "$_tmp/out" "Aborting: could not create backup branch" "names the failed step"
+assert_equals "$local_head" "$("$REAL_GIT" -C "$HOME/.dotfiles" rev-parse HEAD)" "HEAD not moved"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -43,7 +43,6 @@ EXIT_BUSY=75
 
 # Logging — delegates to shared ui.sh primitives
 ui_init
-log() { printf '%b\n' "$*"; }
 log_info() { ui_info "$@"; }
 log_success() { ui_ok "$@"; }
 log_warn() { ui_warn "$@"; }
@@ -128,10 +127,6 @@ list_backups() {
 }
 
 # Create a backup
-# LCOV_EXCL_START — body mutates real $HOME (cp/mkdir of dotfiles);
-# can't be exercised under the coverage sandbox without destroying
-# fixture state. The dispatcher reaches this function but the body
-# is genuinely off-limits.
 create_backup() {
   local reason="${1:-manual}"
   local timestamp
@@ -177,7 +172,7 @@ create_backup() {
       mkdir -p "$dest_dir"
       cp -a "$target" "$backup_path/$rel_path" 2>/dev/null || true
       ((backed_up++)) || true
-      [[ "$VERBOSE" == "1" ]] && log_info "Backed up: $rel_path"
+      if [[ "$VERBOSE" == "1" ]]; then log_info "Backed up: $rel_path"; fi
     fi
   done
 
@@ -201,9 +196,7 @@ EOF
   # Cleanup old backups
   cleanup_old_backups
 }
-# LCOV_EXCL_STOP
 
-# LCOV_EXCL_START — rm -rf of real backup dirs.
 # Cleanup old backups, keeping only MAX_BACKUPS
 cleanup_old_backups() {
   local count
@@ -215,11 +208,10 @@ cleanup_old_backups() {
 
     find "$BACKUP_DIR" -maxdepth 1 -type d -name "backup_*" | sort | head -n "$to_delete" | while read -r old; do
       rm -rf "$old"
-      [[ "$VERBOSE" == "1" ]] && log_info "Removed: $(basename "$old")"
+      if [[ "$VERBOSE" == "1" ]]; then log_info "Removed: $(basename "$old")"; fi
     done
   fi
 }
-# LCOV_EXCL_STOP
 
 # Get the most recent backup
 get_latest_backup() {
@@ -232,8 +224,6 @@ get_backup_by_index() {
   find "$BACKUP_DIR" -maxdepth 1 -type d -name "backup_*" | sort -r | sed -n "${index}p"
 }
 
-# LCOV_EXCL_START — body restores files into real $HOME; dispatcher
-# reaches it but the actual mutation is off-limits under coverage.
 # Rollback to a specific backup
 perform_rollback() {
   local backup_path="$1"
@@ -268,7 +258,7 @@ perform_rollback() {
       mkdir -p "$dest_dir"
       cp -a "$file" "$dest"
       ((restored++)) || true
-      [[ "$VERBOSE" == "1" ]] && log_info "Restored: $rel_path"
+      if [[ "$VERBOSE" == "1" ]]; then log_info "Restored: $rel_path"; fi
     fi
   done < <(find "$backup_path" -type f -print0)
 
@@ -301,9 +291,7 @@ Analyze why the environment may have reached a state requiring rollback and sugg
     fi
   fi
 }
-# LCOV_EXCL_STOP
 
-# LCOV_EXCL_START — runs git reset --hard, mutates working tree.
 # Git-based rollback
 git_reset() {
   local dry_run="${1:-0}"
@@ -382,9 +370,7 @@ git_reset() {
     persist_log "GIT_RESET: to $target_commit"
   fi
 }
-# LCOV_EXCL_STOP
 
-# LCOV_EXCL_START — body copies files into real $HOME.
 # Restore a specific file from the latest backup
 restore_file() {
   local file_path="$1"
@@ -411,35 +397,36 @@ restore_file() {
   fi
 
   local source_file="$backup/$file_path"
-
-  # shellcheck disable=SC1091
-  # Verify resolved source path stays within the backup directory
-  local resolved_source
-  resolved_source="$(cd "$(dirname "$source_file")" 2>/dev/null && pwd)/$(basename "$source_file")" || {
-    # shellcheck disable=SC1091
-    log_error "Cannot resolve source path: $source_file"
-    return 1
-  }
-  if [[ "$resolved_source" != "$backup/"* ]]; then
-    log_error "Path traversal detected: resolved path escapes backup directory"
-    return 1
-  fi
-
-  # Verify resolved destination stays within HOME
-  local resolved_dest_dir
-  resolved_dest_dir="$(cd "$(dirname "$HOME/$file_path")" 2>/dev/null && pwd)" || {
-    log_error "Cannot resolve destination directory for: $file_path"
-    return 1
-  }
-  if [[ "$resolved_dest_dir" != "$HOME"* ]]; then
-    log_error "Path traversal detected: destination escapes HOME directory"
-    return 1
-  fi
-
   if [[ ! -f "$source_file" ]]; then
     log_error "File not found in backup: $file_path"
     log_info "Available files in backup:"
     find "$backup" -type f -name "*.backup_meta" -prune -o -type f -print | sed "s|$backup/||" | head -20
+    return 1
+  fi
+
+  # Containment is checked on physical paths (pwd -P) on both sides: a
+  # logical pwd keeps symlinks, so `$HOME/link -> /elsewhere` would pass,
+  # and an unnormalised root (a trailing slash in XDG_DATA_HOME gives
+  # `//`) would never match. A path that cannot be resolved stays empty
+  # and fails the check: closed, not open.
+  local backup_real home_real source_dir dest_dir_real probe
+  backup_real="$(cd "$backup" 2>/dev/null && pwd -P)" || backup_real=""
+  home_real="$(cd "$HOME" 2>/dev/null && pwd -P)" || home_real=""
+  source_dir="$(cd "$(dirname "$source_file")" 2>/dev/null && pwd -P)" || source_dir=""
+  if [[ -z "$backup_real" || -z "$source_dir" ||
+    ("$source_dir" != "$backup_real" && "$source_dir" != "$backup_real/"*) ]]; then
+    log_error "Path traversal detected: resolved path escapes backup directory"
+    return 1
+  fi
+
+  # The destination directory may have been deleted since the backup:
+  # check the nearest existing ancestor.
+  probe="$(dirname "$HOME/$file_path")"
+  while [[ ! -d "$probe" ]]; do probe="$(dirname "$probe")"; done
+  dest_dir_real="$(cd "$probe" 2>/dev/null && pwd -P)" || dest_dir_real=""
+  if [[ -z "$home_real" || -z "$dest_dir_real" ||
+    ("$dest_dir_real" != "$home_real" && "$dest_dir_real" != "$home_real/"*) ]]; then
+    log_error "Path traversal detected: destination escapes HOME directory"
     return 1
   fi
 
@@ -463,7 +450,6 @@ restore_file() {
     persist_log "RESTORE_FILE: $file_path"
   fi
 }
-# LCOV_EXCL_STOP
 
 # Show current status
 show_status() {
@@ -519,18 +505,10 @@ DRY_RUN=0
 VERBOSE=0
 
 main() {
-  local command="${1:-status}"
-  shift || true
-
-  if [[ "$command" == "help" ]]; then
-    usage
-    exit 0
-  fi
-
-  # Options may come before or after the command's own argument
-  # (`rollback-to 3 --force`). Stopping at the first positional used to
-  # drop a trailing --force, so the command prompted, read EOF and exited 0
-  # without doing anything.
+  # Options may come anywhere: before the command (`--dry-run restore X`)
+  # or after its argument (`rollback-to 3 --force`). Stopping at the first
+  # positional used to drop a trailing --force, so the command prompted,
+  # read EOF and exited 0 without doing anything.
   local args=()
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -546,6 +524,12 @@ main() {
     shift
   done
   set -- ${args[@]+"${args[@]}"}
+  local command="${1:-status}"
+  shift || true
+  if [[ "$command" == "help" ]]; then
+    usage
+    exit 0
+  fi
 
   ensure_dirs
 

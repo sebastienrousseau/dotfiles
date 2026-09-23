@@ -58,5 +58,25 @@ assert_equals "v2" "$(cat "$WORK/home/.bashrc")" "the latest backup, not the saf
 test_start "rollback_safety_copy_is_a_third_dir"
 assert_equals "3" "$(backups | wc -l | tr -d ' ')" "the safety copy did not reuse an existing directory"
 
+# ── Third and fourth collisions count up, not round in circles ──────
+# With two same-second backups only the first retry (`_2`) is exercised;
+# the suffix counter itself never advanced. A counter that does not
+# increment retries `_2` forever (mutation: `n + 1` -> `n + 0`), so the
+# run is time-boxed and a timeout is a failure, not a hang.
+test_start "rollback_same_second_suffix_counts_up"
+rc=0
+run_with_timeout 30 bash -c '
+  HOME="$1" XDG_DATA_HOME="$1/.local/share" XDG_STATE_HOME="$1/.local/state" \
+    XDG_RUNTIME_DIR="$2" PATH="$3:$PATH" bash "$4" backup </dev/null >/dev/null 2>&1 &&
+  HOME="$1" XDG_DATA_HOME="$1/.local/share" XDG_STATE_HOME="$1/.local/state" \
+    XDG_RUNTIME_DIR="$2" PATH="$3:$PATH" bash "$4" backup </dev/null >/dev/null 2>&1
+' _ "$WORK/home" "$WORK/run" "$WORK/stubs" "$ROLLBACK" || rc=$?
+assert_equals "0" "$rc" "two more backups in the same second complete (124 = counter never advanced)"
+assert_equals "backup_20260101_000000_manual
+backup_20260101_000000_manual_2
+backup_20260101_000000_manual_3
+backup_20260101_000000_manual_4
+backup_20260101_000000_pre_rollback" "$(backups | xargs -n1 basename)" "suffixes are _2, _3, _4 in order"
+
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
