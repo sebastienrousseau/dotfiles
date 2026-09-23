@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
+# test-kind: structural
 # shellcheck disable=SC1090,SC1091,SC2030,SC2031
 # Regression: Boundary & edge cases — extreme or unusual conditions.
 # Regression for: d7e7c2bc (v0.2.499 baseline)
