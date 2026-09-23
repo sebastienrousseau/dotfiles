@@ -351,7 +351,16 @@ cov_teardown_sandbox() {
 # Default arg-modes (run for every call): help, no-arg, invalid-flag.
 # Optional: dry-run (added when the script's source mentions --dry-run).
 # -----------------------------------------------------------------------------
+# DOTFILES_COV_EXERCISE=0 turns the exercise helpers into no-ops so a
+# coverage run measures only what behavioural tests execute. The --help /
+# no-arg / bad-flag probes raise line counts without asserting anything,
+# so the number they add says nothing about what the suite would catch.
+cov_exercise_enabled() {
+  [[ "${DOTFILES_COV_EXERCISE:-1}" != "0" ]]
+}
+
 cov_exercise_script() {
+  cov_exercise_enabled || return 0
   local script="$1"
   [[ -r "$script" ]] || return 0
 
@@ -535,6 +544,7 @@ cov_exercise_script() {
 # sandbox can't intercept it).
 # -----------------------------------------------------------------------------
 cov_exercise_script_help_only() {
+  cov_exercise_enabled || return 0
   local script="$1"
   [[ -r "$script" ]] || return 0
 
@@ -602,6 +612,7 @@ cov_exercise_script_help_only() {
 # unsafe patterns (logout, shutdown, kill*, reboot, halt) are skipped.
 # -----------------------------------------------------------------------------
 cov_exercise_functions_file() {
+  cov_exercise_enabled || return 0
   local script="$1"
   [[ -r "$script" ]] || return 0
 

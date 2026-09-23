@@ -120,6 +120,26 @@ maintainers can re-evaluate if the test infrastructure changes.
 The graduated approach in this doc replaces the original 95% target.
 The honest floor is the achievable one.
 
+## The behavioural-only number
+
+Most test files also call `cov_exercise_script` or
+`cov_exercise_functions_file` from `tests/framework/coverage_helpers.sh`.
+Those run a script with `--help`, no arguments and a bad flag inside the
+sandbox and assert nothing: they exist to raise line counts. The lines they
+add say nothing about what the suite would catch, which is how the figure
+above reached 98% while the mutation score sat at 67%.
+
+`DOTFILES_COV_EXERCISE=0` turns every exercise helper into a no-op. The
+`Coverage / behavioural tests only` job in `coverage.yml` runs the same
+measurement with the switch off and reports the result as a notice, with
+floor 0 until it has been observed on `main`. Ratchet that job's
+`MIN_COVERAGE_PCT` from the observed figure; the 98% floor on the full
+run stays as the regression guard for line reach.
+
+```bash
+DOTFILES_COV_EXERCISE=0 bash tools/ci/run-coverage.sh   # behavioural only
+```
+
 ## Running locally
 
 ```bash
