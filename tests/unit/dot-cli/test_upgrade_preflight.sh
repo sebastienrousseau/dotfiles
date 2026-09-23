@@ -51,9 +51,10 @@ chezmoi() {
     git("config", "branch.main.merge", "refs/heads/main")
     (repo / "pending").write_text("uncommitted\n")
     result = run()
-    checks += [(result.returncode == 1 and "uncommitted changes" in result.stdout,
-                "dirty checkout is preserved"),
-               (not (work / "updated").exists(), "dirty checkout never invokes update")]
+    checks += [(result.returncode == 0 and "uncommitted changes" in result.stdout,
+                "dirty checkout skips the phase with the reason, not a failure"),
+               (not (work / "updated").exists(), "dirty checkout never invokes update"),
+               ("Logs" not in result.stdout, "a skip is not reported as a failed step")]
     (repo / "pending").unlink()
     git("checkout", "--detach")
     result = run()

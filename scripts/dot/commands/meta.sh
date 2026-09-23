@@ -58,6 +58,9 @@ cmd_upgrade() {
   local log_dir
   log_dir="$(mktemp -d "${TMPDIR:-/tmp}/dot-upgrade.XXXXXX")"
   local fail_labels=() fail_logs=()
+  # sysexits EX_TEMPFAIL: a phase returns it to say "not now, and here is
+  # why" (last line of its log). It is rendered as a skip, not a failure.
+  local EX_TEMPFAIL=75
 
   _upgrade_dotfiles() {
     local update_source branch
@@ -71,9 +74,13 @@ cmd_upgrade() {
         printf 'Dotfiles branch %s has no upstream. Push it with -u or explicitly select a tracked branch; no files were changed.\n' "$branch" >&2
         return 1
       fi
+      # A dirty checkout is a working state, not a fault: editing the
+      # dotfiles is what a dotfiles repo is for. Decline the pull (a
+      # rebase over local edits is not something to do unasked) and let
+      # the other phases run, with the reason on the step line.
       if [[ -n "$(git -C "$update_source" status --porcelain)" ]]; then
-        printf 'Dotfiles checkout has uncommitted changes. Commit or stash them before upgrading; no files were changed.\n' >&2
-        return 1
+        printf 'uncommitted changes; commit or stash them, then rerun\n' >&2
+        return "$EX_TEMPFAIL"
       fi
     fi
     chezmoi update --no-tty
@@ -99,6 +106,10 @@ cmd_upgrade() {
     "$@" >"$log" 2>&1 </dev/null || rc=$?
     if [[ "$rc" -eq 0 ]]; then
       ui_step "$id" "" ok "$(_upgrade_last_line "$log")"
+    elif [[ "$rc" -eq "$EX_TEMPFAIL" ]]; then
+      # The phase declined to run and said why on its last line. Not a
+      # fault: it neither fails the run nor gets its log tail dumped.
+      ui_step "$id" "" skip "$(_upgrade_last_line "$log")"
     else
       ui_step "$id" "" fail "exited $rc"
       fail_labels+=("$label")

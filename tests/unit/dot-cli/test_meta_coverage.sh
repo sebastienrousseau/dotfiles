@@ -73,11 +73,13 @@ meta_run upgrade
 rm -f "$WORK/noupstream"
 assert_contains "has no upstream" "$DOT_FIXTURE_OUT" "missing upstream explained"
 
-test_start "upgrade_refuses_dirty_checkout"
+test_start "upgrade_skips_dirty_checkout"
 touch "$WORK/dirty"
 meta_run upgrade
 rm -f "$WORK/dirty"
+assert_equals "0" "$DOT_FIXTURE_RC" "a dirty tree is a skip, not a failed run"
 assert_contains "uncommitted changes" "$DOT_FIXTURE_OUT" "dirty tree explained"
+assert_false '[[ "$DOT_FIXTURE_OUT" == *"updated ok"* ]]' "update not invoked"
 
 test_start "upgrade_overwrite_prompt_hint"
 touch "$WORK/prompt"
