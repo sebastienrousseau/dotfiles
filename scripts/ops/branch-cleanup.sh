@@ -131,10 +131,12 @@ while IFS= read -r g; do
     cd "$ROOT"
     continue
   fi
+  # `|| true`: with no origin/HEAD, symbolic-ref fails and, under pipefail +
+  # errexit, would abort the whole run before the fallback below.
   def="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null |
-    sed 's|^origin/||')"
+    sed 's|^origin/||' || true)"
   [[ -z "$def" ]] && def="$(git remote show origin 2>/dev/null |
-    sed -n 's/.*HEAD branch: //p')"
+    sed -n 's/.*HEAD branch: //p' || true)"
   if [[ -z "$def" ]]; then
     say "SKIP $repo :: no default branch"
     row SKIP "$repo" - - - "no default branch"
