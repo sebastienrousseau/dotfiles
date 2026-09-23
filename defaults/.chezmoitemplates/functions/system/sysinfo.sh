@@ -13,8 +13,8 @@
 # Color Variables               #
 #-------------------------------#
 if [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]]; then
-  GREEN='\033[0;32m'
-  RESET='\033[0m'
+  GREEN=$'\033[0;32m'
+  RESET=$'\033[0m'
 else
   GREEN='' RESET=''
 fi
