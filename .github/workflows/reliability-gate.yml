@@ -24,6 +24,10 @@ jobs:
   reliability:
     name: Reliability / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    # main takes ~6 min on ubuntu and ~12 min on macOS. Without a bound a
+    # single hanging test held both macOS lanes for 4h+ and blocked
+    # merges; the runner names the file it killed, this names the lane.
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:

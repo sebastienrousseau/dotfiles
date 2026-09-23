@@ -212,6 +212,7 @@ Tests run automatically on every push to main, every pull request, and weekly sc
 
 | Variable | Default | Description |
 |----------|---------|-------------|
+| `TEST_FILE_TIMEOUT` | `900` | Seconds a single test file may run before the runner kills it, names it as timed out and counts a failure (`0` disables) |
 | `RUN_INTEGRATION` | `0` | Set to `1` to include integration tests |
 | `VERBOSE` | `0` | Set to `1` for verbose output |
 | `REPO_ROOT` | Auto-detected | Repository root directory |
