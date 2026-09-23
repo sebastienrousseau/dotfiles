@@ -5,7 +5,7 @@
 # Usage contract of tools/docs/build-manual-site.sh. The mutation gate
 # found both usage-error exits unprotected (`exit 64` -> `exit 0`
 # survived): a usage error must exit with EX_USAGE (64), not success,
-# so a CI step mis-spelling a flag fails loudly. Pinned here:
+# so a CI step misspelling a flag fails loudly. Pinned here:
 #   - an unknown argument exits 64 with "unknown argument: <arg>"
 #   - a --base-path that does not start and end with '/' exits 64 with
 #     the boundary message (both a missing trailing and a missing leading
