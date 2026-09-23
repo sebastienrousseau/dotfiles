@@ -19,10 +19,13 @@ trap 'rm -rf "$WORK"' EXIT
 mkdir -p "$WORK/tests/framework" "$WORK/tests/unit" "$WORK/tests/regression"
 cp "$REPO_ROOT/tests/framework/test_runner.sh" "$REPO_ROOT/tests/framework/assertions.sh" "$WORK/tests/framework/"
 
-cat >"$WORK/tests/unit/test_hangs.sh" <<'EOF'
+# The sleeper carries a unique argv (exec -a) so the orphan check cannot
+# match another test's sleep when the suite runs in parallel.
+TAG="rt-hang-$$"
+cat >"$WORK/tests/unit/test_hangs.sh" <<EOF
 #!/usr/bin/env bash
 echo "started"
-sleep 60 &
+exec -a "$TAG" sleep 60 &
 wait
 echo "RESULTS:1:1:0"
 EOF
@@ -53,7 +56,7 @@ for mode in "" "--jobs 2"; do
   assert_true "strip | grep -q 'Total passed: 2'" "the quick file's two passes are counted"
   assert_true "strip | grep -q 'Total failed: 1'" "the timeout counts as one failure"
   test_start "runner_${label}_leaves_no_orphan"
-  assert_equals "0" "$(pgrep -f "sleep 60" | wc -l | tr -d ' ')" "the hung file's sleep was killed with it"
+  assert_equals "0" "$(pgrep -f "$TAG" | wc -l | tr -d ' ')" "the hung file's sleep was killed with it"
 done
 
 test_start "runner_timeout_off_runs_to_completion"
