@@ -273,7 +273,11 @@ local_status() {
   else
     info "local routing: OFF"
   fi
-  [[ -n "${ANTHROPIC_BASE_URL:-}" ]] && info "this shell: ANTHROPIC_BASE_URL=$ANTHROPIC_BASE_URL"
+  # An `[[ … ]] && info` tail would make the status exit 1 whenever the
+  # variable is unset — the normal case — failing `dot ai local status`.
+  if [[ -n "${ANTHROPIC_BASE_URL:-}" ]]; then
+    info "this shell: ANTHROPIC_BASE_URL=$ANTHROPIC_BASE_URL"
+  fi
 }
 
 local_cmd() {

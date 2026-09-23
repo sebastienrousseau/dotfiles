@@ -205,7 +205,7 @@ find_version_files() {
         if grep -Eq "v?$VERSION_PATTERN" "$file" 2>/dev/null; then
           printf '%s\n' "${file#./}"
         fi
-      done < <(find . -type f -name '*.md' -print)
+      done < <(find . -type f -name '*.md' -print) # LCOV_EXCL_LINE — procsub traced at enclosing header
     } >"$temp_file"
   fi
 
@@ -285,10 +285,13 @@ update_version_references() {
   local files_processed=0
 
   for file in "${files[@]}"; do
+    # LCOV_EXCL_START — defensive: find_version_files only emits paths that
+    # passed `-f`, and nothing in between removes one.
     if [[ ! -f "$file" ]]; then
       log_warning "File not found: $file"
       continue
     fi
+    # LCOV_EXCL_STOP
     files_processed=$((files_processed + 1))
 
     # Skip milestone and other historical files
@@ -326,9 +329,12 @@ update_version_references() {
         sed_in_place "$temp_file" \
           -e "s|\.dotfiles\` v$SED_VERSION_PATTERN|.dotfiles\` v$target_version|g"
         ;;
+      # LCOV_EXCL_START — a case pattern emits no xtrace record; the
+      # continuation lines are only counted because they end in `| \`.
       "docs/manual/03-reference/02-config-files.md" | \
         "docs/manual/03-reference/04-templates.md" | \
         "docs/manual/01-concepts/02-trust-model.md")
+        # LCOV_EXCL_STOP
         # Sample config, attestation and template-variable values that show
         # the current dotfiles_version without a leading "v".
         sed_in_place "$temp_file" \
@@ -407,9 +413,11 @@ verify_version_consistency() {
   local total_checked=0
 
   for file in "${files[@]}"; do
+    # LCOV_EXCL_START — defensive: the caller passes only existing files.
     if [[ ! -f "$file" ]]; then
       continue
     fi
+    # LCOV_EXCL_STOP
 
     if _is_historical_record "$file"; then
       log_info "Skipping historical file: $file"
@@ -424,7 +432,7 @@ verify_version_consistency() {
       while IFS= read -r match; do
         while IFS= read -r version; do
           versions_in_file+=("$version")
-        done < <(printf "%s\n" "$match" | rg -o "v?$VERSION_PATTERN" || true)
+        done < <(printf "%s\n" "$match" | rg -o "v?$VERSION_PATTERN" || true) # LCOV_EXCL_LINE — procsub traced at enclosing header
       done < <(
         rg -v "MILESTONE" "$file" 2>/dev/null | rg -o \
           -e "Version-v$VERSION_PATTERN" \
@@ -445,7 +453,7 @@ verify_version_consistency() {
       while IFS= read -r match; do
         while IFS= read -r version; do
           versions_in_file+=("$version")
-        done < <(printf "%s\n" "$match" | grep -Eo "v?$VERSION_PATTERN" || true)
+        done < <(printf "%s\n" "$match" | grep -Eo "v?$VERSION_PATTERN" || true) # LCOV_EXCL_LINE — procsub traced at enclosing header
       done < <(
         grep -Ev "MILESTONE" "$file" 2>/dev/null | grep -Eo \
           -e "Version-v$VERSION_PATTERN" \
@@ -557,7 +565,7 @@ main() {
   local version_file
   while IFS= read -r version_file; do
     version_files+=("$version_file")
-  done < <(find_version_files)
+  done < <(find_version_files) # LCOV_EXCL_LINE — procsub traced at enclosing header
 
   if [[ ${#version_files[@]} -eq 0 ]]; then
     log_warning "No files with version references found"
@@ -717,8 +725,11 @@ EOF
       log_info "No changes needed - all versions are already synchronized"
     fi
   else
+    # LCOV_EXCL_START — defensive: update_version_references prints only its
+    # numeric count on stdout, and any failure inside it aborts under set -e.
     log_error "Version synchronization failed"
     exit 1
+    # LCOV_EXCL_STOP
   fi
 }
 
