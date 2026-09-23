@@ -71,6 +71,10 @@ _completion_subcommands() {
   ' "$cli"
 }
 
+# LCOV_EXCL_LINE on the `done < <(…)` lines below: inside a function, bash
+# attributes the process substitution's xtrace record to the function's
+# header line, so these lines can never be recorded (their loop bodies are).
+#
 # The printf templates below are the *text of the generated script*;
 # `$cur`, `$prev`, `$commands` must reach the output unexpanded.
 # shellcheck disable=SC2016
@@ -93,7 +97,7 @@ gen_bash() {
   # One case arm per parent command that has subcommands.
   while IFS=$'\t' read -r parent child desc; do
     printf '%s\t%s\n' "$parent" "$child"
-  done < <(_completion_subcommands) |
+  done < <(_completion_subcommands) | # LCOV_EXCL_LINE
     awk -F'\t' '{ subs[$1] = subs[$1] (subs[$1] == "" ? "" : " ") $2 }
       END { for (p in subs) printf "%s\t%s\n", p, subs[p] }' |
     LC_ALL=C sort |
@@ -115,7 +119,7 @@ gen_zsh() {
   printf '_dot() {\n  local -a commands\n  commands=(\n'
   while IFS=$'\t' read -r name desc; do
     printf "    '%s:%s'\n" "$name" "$desc"
-  done < <(_completion_commands)
+  done < <(_completion_commands) # LCOV_EXCL_LINE
   printf '  )\n  _describe '\''command'\'' commands\n}\n_dot "$@"\n'
 }
 
@@ -125,12 +129,12 @@ gen_fish() {
   printf 'complete -c dot -f\n'
   while IFS=$'\t' read -r name desc; do
     printf 'complete -c dot -n "__fish_use_subcommand" -a %s -d "%s"\n' "$name" "$desc"
-  done < <(_completion_commands)
+  done < <(_completion_commands) # LCOV_EXCL_LINE
   local parent child
   while IFS=$'\t' read -r parent child desc; do
     printf 'complete -c dot -n "__fish_seen_subcommand_from %s" -a %s -d "%s"\n' \
       "$parent" "$child" "$desc"
-  done < <(_completion_subcommands)
+  done < <(_completion_subcommands) # LCOV_EXCL_LINE
 }
 
 gen_nu() {
@@ -140,7 +144,7 @@ gen_nu() {
   printf 'def dot_commands [] {\n  [\n'
   while IFS=$'\t' read -r name desc; do
     printf '    { value: "%s", description: "%s" }\n' "$name" "$desc"
-  done < <(_completion_commands)
+  done < <(_completion_commands) # LCOV_EXCL_LINE
   printf '  ]\n}\n'
 }
 

@@ -179,11 +179,11 @@ cmd_ai_status() {
       ui_section "$category"
       current_category="$category"
     fi
-    # One awk over the cache line for this tool (was two: field 2 and field 3).
-    local _st_installed _st_ver
+    # One awk over the cache row; no row (EOF, `|| true`) reads as not installed.
+    local _st_installed="" _st_ver=""
     IFS=$'\t' read -r _st_installed _st_ver < <(
       awk -F'\t' -v b="$bin" '$1==b{print $2"\t"$3;exit}' "$AI_STATUS_CACHE_FILE" 2>/dev/null
-    )
+    ) || true
     if [[ "$_st_installed" == "1" ]]; then
       ver="$_st_ver"
       [[ -z "$ver" ]] && ver="installed"
