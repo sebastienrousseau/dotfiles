@@ -39,6 +39,10 @@ SRC_DIR, SOURCE_DIR, or a $SCRIPT_DIR/../.. walk), or a variable the
 test assigned such a path to. Running the file (`bash "$X"`, `source`,
 `"$X" args`), copying it into a fixture, or testing that it exists is
 not inspection.
+
+A second rule covers the feature-matrix suites: a `fm_expect_rc_in 0 1`
+row whose test function asserts nothing about the output passes whether
+the command worked or failed, so it is reported the same way.
 """
 
 from __future__ import annotations
@@ -138,7 +142,35 @@ def lint_file(path: Path) -> list[tuple[int, str]]:
             how = "bash -n" if tool not in TEXT_TOOLS else tool
             findings.append((n, f"{how} reads source {operand}"))
             break
-    return findings
+    findings += permissive_rows(lines)
+    return sorted(findings)
+
+
+FM_FUNC_RE = re.compile(r"^test_fm_\w+\(\)\s*\{")
+FM_PERMISSIVE_RE = re.compile(r"^\s*fm_expect_rc_in\s+0\s+1\s*(?:#.*)?$")
+FM_OUTCOME_RE = re.compile(r"\bfm_expect_(?:out|err|file|stdout|stderr|any)\w*\b")
+
+
+def permissive_rows(lines: list[str]) -> list[tuple[int, str]]:
+    """`fm_expect_rc_in 0 1` rows in a function with no outcome assertion."""
+    out: list[tuple[int, str]] = []
+    start = None
+    blocks: list[tuple[int, int]] = []
+    for i, ln in enumerate(lines):
+        if FM_FUNC_RE.match(ln):
+            if start is not None:
+                blocks.append((start, i))
+            start = i
+    if start is not None:
+        blocks.append((start, len(lines)))
+    for a, b in blocks:
+        body = lines[a:b]
+        if any(FM_OUTCOME_RE.search(x) for x in body):
+            continue
+        for j, x in enumerate(body):
+            if FM_PERMISSIVE_RE.match(x):
+                out.append((a + j + 1, "fm_expect_rc_in 0 1 with no outcome assertion"))
+    return out
 
 
 def load_baseline(path: Path) -> dict[str, int]:

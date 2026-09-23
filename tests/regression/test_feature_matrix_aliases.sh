@@ -24,19 +24,31 @@ fm_sandbox_setup
 test_fm_aliases_list() {
   test_start "fm_aliases_list"
   fm_run aliases list
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_aliases_list_is_populated"
   fm_expect_nonempty
   test_start "fm_aliases_list_has_a_table_header"
-  fm_expect_any "Name" "Aliases"
+  fm_expect_out_matches "^ +Name +Value +Source"
+  test_start "fm_aliases_list_resolves_an_alias_to_its_source_line"
+  fm_expect_out_matches "^ +ll +'[^']+'.*[a-z-]+\.aliases\.sh:[0-9]+"
 }
 
 test_fm_aliases_search() {
+  if ! command -v rg >/dev/null 2>&1; then
+    # `aliases search` pipes the manifest through rg with no grep fallback
+    # (the manifest itself has one), so without rg every query answers
+    # "No matches" and exits 1 — there is nothing to pin on such a host.
+    test_start "fm_aliases_search"
+    fm_pass "skipped — rg not installed"
+    return 0
+  fi
   test_start "fm_aliases_search"
   fm_run aliases search git
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_aliases_search_reports_the_query"
-  fm_expect_any "git" "Alias Search"
+  fm_expect_out_matches "Query +git$"
+  test_start "fm_aliases_search_lists_matching_aliases"
+  fm_expect_out_matches "^ +[A-Za-z0-9_.:-]+ +'git[^']*'"
 }
 
 test_fm_aliases_search_nomatch() {
@@ -55,9 +67,13 @@ test_fm_aliases_search_nomatch() {
 test_fm_aliases_why() {
   test_start "fm_aliases_why"
   fm_run aliases why ll
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
+  test_start "fm_aliases_why_names_the_alias"
+  fm_expect_out_matches "Alias +ll$"
   test_start "fm_aliases_why_shows_the_definition"
-  fm_expect_any "ll" "Alias Details"
+  fm_expect_out_matches "^ +[^ ]+ +ll +'[^']+'"
+  test_start "fm_aliases_why_shows_the_source_line"
+  fm_expect_out_matches "^ +source: .*[a-z-]+\.aliases\.sh:[0-9]+$"
 }
 
 test_fm_aliases_why_unknown() {
@@ -72,10 +88,13 @@ test_fm_aliases_stats() {
   printf ': 1700000000:0;ll\n: 1700000001:0;ll\n: 1700000002:0;gs\n' \
     >"$FM_SANDBOX/.zsh_history"
   test_start "fm_aliases_stats"
-  fm_run aliases stats
-  fm_expect_rc_in 0 1
+  HISTFILE="$FM_SANDBOX/.zsh_history" fm_run aliases stats
+  fm_expect_rc 0
+  test_start "fm_aliases_stats_names_the_history_file"
+  fm_expect_out "History file"
   test_start "fm_aliases_stats_counts_from_history"
-  fm_expect_any "ll" "Alias Usage"
+  # Two `ll` lines were seeded above; the count must come from them.
+  fm_expect_out_matches "^ +2 +ll$"
   rm -f "$FM_SANDBOX/.zsh_history"
 }
 
@@ -91,18 +110,28 @@ test_fm_aliases_stats_missing() {
 test_fm_aliases_cheatsheet_stdout() {
   test_start "fm_aliases_cheatsheet_stdout"
   fm_run aliases cheatsheet --output -
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_aliases_cheatsheet_stdout_is_markdown"
-  fm_expect_any "# Alias Cheatsheet" "Cheatsheet"
+  fm_expect_out "# Alias Cheatsheet"
+  test_start "fm_aliases_cheatsheet_stdout_lists_an_alias"
+  fm_expect_out_matches '^- `ll` '
 }
 
 test_fm_aliases_cheatsheet() {
   local out="$FM_SANDBOX/work/cheatsheet.md"
   test_start "fm_aliases_cheatsheet"
   fm_run aliases cheatsheet --output "$out"
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
+  test_start "fm_aliases_cheatsheet_reports_the_target"
+  fm_expect_out_matches "Generated +$out$"
   test_start "fm_aliases_cheatsheet_wrote_the_file"
   fm_expect_file "$out"
+  test_start "fm_aliases_cheatsheet_file_is_markdown"
+  if grep -q '^# Alias Cheatsheet' "$out" 2>/dev/null; then
+    fm_pass "heading present"
+  else
+    fm_fail "written file lacks the cheatsheet heading"
+  fi
   test_start "fm_aliases_cheatsheet_rejects_unknown_option"
   fm_run aliases cheatsheet --zzz-not-an-option
   fm_expect_rc 1
@@ -116,7 +145,9 @@ test_fm_aliases_cheatsheet_default() {
   repo="$(fm_repo_copy_aliases)"
   test_start "fm_aliases_cheatsheet_default"
   fm_run_bin "$repo/bin/dot" aliases cheatsheet
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
+  test_start "fm_aliases_cheatsheet_default_writes_into_the_source_tree"
+  fm_expect_file "$repo/docs/ALIASES_CHEATSHEET.md"
   test_start "fm_aliases_cheatsheet_default_did_not_touch_the_checkout"
   after="$(git -C "$REPO_ROOT" status --porcelain -- docs 2>/dev/null)"
   if [[ "$after" != "$before" ]]; then
@@ -129,9 +160,11 @@ test_fm_aliases_cheatsheet_default() {
 test_fm_aliases_tiers() {
   test_start "fm_aliases_tiers"
   fm_run aliases tiers
-  fm_expect_rc_in 0 1
-  test_start "fm_aliases_tiers_reports_the_tiers"
-  fm_expect_any "Alias Tiers" "Ecosystems"
+  fm_expect_rc 0
+  test_start "fm_aliases_tiers_reports_the_defaults"
+  fm_expect_out_matches "Ecosystems +all$"
+  test_start "fm_aliases_tiers_reports_each_ecosystem"
+  fm_expect_out_matches "python +enabled$"
 }
 
 test_fm_env_dotfiles_alias_tiers() {
@@ -178,11 +211,15 @@ test_fm_aliases_unknown() {
 test_fm_alias_check() {
   test_start "fm_alias_check"
   fm_run alias-check
-  # In a sandboxed HOME the deployed alias file is absent, so a non-zero
-  # "some aliases missing" verdict is the correct answer.
-  fm_expect_rc_in 0 1
+  # In a sandboxed HOME the deployed alias file is absent, so the "some
+  # aliases missing" verdict, and its exit 1, is the correct answer.
+  fm_expect_rc 1
+  test_start "fm_alias_check_names_the_missing_file"
+  fm_expect_out "Aliases file missing"
   test_start "fm_alias_check_reports_each_alias"
-  fm_expect_any "Alias Check" "alias"
+  fm_expect_out_matches "alias ll +missing$"
+  test_start "fm_alias_check_gives_a_verdict"
+  fm_expect_out "Some aliases are missing"
 }
 
 # ── run ────────────────────────────────────────────────────────────────────

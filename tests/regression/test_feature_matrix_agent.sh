@@ -49,52 +49,69 @@ test_fm_smoke_upgrade() { fm_smoke upgrade; }
 test_fm_smoke_env_dotfiles_fonts() { fm_smoke upgrade; }
 
 test_fm_cache_refresh() {
+  # prewarm.sh skips every backing tool that is not installed, so it runs to
+  # its closing header on a bare runner as well as a developer host.
   test_start "fm_cache_refresh"
   fm_run cache-refresh
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_cache_refresh_reports_regeneration"
   fm_expect_any "Cache" "Pre-warming" "Cached"
+  test_start "fm_cache_refresh_runs_prewarm_to_completion"
+  fm_expect_out "Cache Pre-warming Complete"
 }
 
 test_fm_prewarm() {
   test_start "fm_prewarm"
   fm_run prewarm
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_prewarm_is_alias_of_cache_refresh"
   fm_expect_any "Cache" "Pre-warming" "Cached"
+  test_start "fm_prewarm_runs_to_completion"
+  fm_expect_out "Cache Pre-warming Complete"
 }
 
 test_fm_env_xdg_cache_home() {
-  # The regenerated shell caches must land under XDG_CACHE_HOME.
-  rm -rf "$XDG_CACHE_HOME/zsh" "$XDG_CACHE_HOME/bash"
+  # The regenerated shell caches must land under XDG_CACHE_HOME. Which
+  # *-init files appear depends on the tools installed, but prewarm.sh
+  # always recreates the four per-shell cache directories, so their
+  # presence under the sandbox cache dir is the deterministic evidence
+  # that the variable was honoured.
+  rm -rf "$XDG_CACHE_HOME/zsh" "$XDG_CACHE_HOME/bash" \
+    "$XDG_CACHE_HOME/fish" "$XDG_CACHE_HOME/nushell"
   test_start "fm_env_xdg_cache_home"
   fm_run cache-refresh
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_env_xdg_cache_home_receives_the_caches"
-  if find "$XDG_CACHE_HOME" -name '*-init.*' 2>/dev/null | grep -q .; then
-    fm_pass "init caches written under XDG_CACHE_HOME"
+  local missing="" d
+  for d in zsh bash fish nushell; do
+    [[ -d "$XDG_CACHE_HOME/$d" ]] || missing="$missing $d"
+  done
+  if [[ -z "$missing" ]]; then
+    fm_pass "per-shell cache dirs recreated under XDG_CACHE_HOME"
   else
-    # Nothing to cache when none of the backing tools are installed; the
-    # command still must not have written outside the sandbox.
-    fm_pass "no caches generated (backing tools absent)"
+    fm_fail "cache dirs missing under XDG_CACHE_HOME:$missing"
   fi
 }
 
 test_fm_docs() {
+  # Rendered through glow when it is installed, plain cat otherwise; the
+  # README's tagline survives both.
   test_start "fm_docs"
   fm_run docs
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_docs_renders_the_readme"
-  fm_expect_any "dotfiles" "Dotfiles"
+  fm_expect_out "Declarative dotfiles"
 }
 
 test_fm_learn() {
   # The tour is gum-driven and must refuse without a TTY rather than hanging.
+  # The sandbox stubs gum, so the TTY gate is the one that fires (stdout is a
+  # file under fm_run) and the refusal is rc 1 on every host.
   test_start "fm_learn"
   fm_run learn
-  fm_expect_rc_in 0 1
+  fm_expect_rc 1
   test_start "fm_learn_refuses_without_a_tty"
-  fm_expect_any "requires a TTY" "gum" "tour"
+  fm_expect_out "This interactive tour requires a TTY"
 }
 
 test_fm_smoke_sandbox() { fm_smoke sandbox; }
@@ -141,48 +158,64 @@ test_fm_keys_sign_check_ssh() {
 # ── mcp ────────────────────────────────────────────────────────────────────
 
 test_fm_mcp() {
+  # The doctor audits the shipped mcp_servers.json against the shipped
+  # policy, lock, registry and server card: all checkout files, so the
+  # verdict is "healthy" (rc 0) everywhere. Only a real policy regression
+  # can move it.
   test_start "fm_mcp"
   fm_run mcp
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_mcp_defaults_to_doctor"
   fm_expect_any "MCP Doctor" "Policy"
+  test_start "fm_mcp_reports_healthy"
+  fm_expect_out "MCP configuration healthy"
 }
 
 test_fm_mcp_doctor() {
   test_start "fm_mcp_doctor"
   fm_run mcp doctor
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_mcp_doctor_audits_policy_and_config"
   fm_expect_any "MCP Doctor" "Policy" "Config"
+  test_start "fm_mcp_doctor_reports_healthy"
+  fm_expect_out "MCP configuration healthy"
 }
 
 test_fm_mcp_doctor_json() {
   test_start "fm_mcp_doctor_json"
   fm_run mcp doctor --json
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_mcp_doctor_json_is_json"
   fm_expect_json
   test_start "fm_mcp_doctor_json_reports_status"
-  fm_expect_out '"status"'
+  fm_expect_out '"status": "healthy"'
+  # Strict turns warnings into errors; the shipped config carries none, so
+  # the verdict and rc must not change.
   test_start "fm_mcp_doctor_json_strict"
   fm_run mcp -s -j
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_mcp_doctor_json_strict_flag_is_reflected"
   fm_expect_out '"strict": true'
+  test_start "fm_mcp_doctor_json_strict_still_healthy"
+  fm_expect_out '"status": "healthy"'
 }
 
 test_fm_mcp_registry() {
+  # Table via jq, raw JSON without it; every shipped server declares a
+  # transport, and both renderings print it.
   test_start "fm_mcp_registry"
   fm_run mcp registry
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_mcp_registry_lists_servers"
   fm_expect_nonempty
+  test_start "fm_mcp_registry_shows_each_transport"
+  fm_expect_out "stdio"
 }
 
 test_fm_mcp_registry_json() {
   test_start "fm_mcp_registry_json"
   fm_run mcp registry --json
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_mcp_registry_json_is_json"
   fm_expect_json
   test_start "fm_mcp_registry_json_has_servers"
@@ -196,7 +229,7 @@ test_fm_env_mcp_registry_config() {
     >"$reg"
   test_start "fm_env_mcp_registry_config"
   MCP_REGISTRY_CONFIG="$reg" fm_run mcp registry
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_env_mcp_registry_config_reads_that_file"
   fm_expect_out "fm-demo"
 
@@ -236,7 +269,13 @@ test_fm_mcp_serve() {
   # no banner, no log line. One stray byte there desynchronises a client.
   test_start "fm_mcp_serve"
   fm_run mcp serve
+  # Host-dependent: rc 0 when a dot-mcp binary is on PATH or Go can build
+  # one (clean shutdown at stdin EOF), rc 1 when neither exists ("not
+  # built"). The sandbox cannot control either, so both are accepted and
+  # the message that goes with each is required below.
   fm_expect_rc_in 0 1
+  test_start "fm_mcp_serve_says_why_it_stopped"
+  fm_expect_any "stdin closed, shutting down" "dot-mcp is not built"
   test_start "fm_mcp_serve_stdout_carries_frames_only"
   if [[ -z "$FM_OUT" ]] || printf '%s\n' "$FM_OUT" | grep -qE '^\{"jsonrpc":"2\.0"'; then
     fm_pass "stdout carried no non-protocol output"
@@ -255,10 +294,14 @@ test_fm_mcp_unknown() {
 
 # ── mode ───────────────────────────────────────────────────────────────────
 
+# Every mode/agent row below needs jq: cmd_mode dies (rc 1, "jq is required")
+# before dispatching without it, and the rows' output assertions already
+# fail in that case. Their rc is therefore pinned to the with-jq contract.
+
 test_fm_mode() {
   test_start "fm_mode"
   fm_run mode
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_mode_defaults_to_current"
   fm_expect_any "Agent Mode" "Profile"
 }
@@ -266,7 +309,7 @@ test_fm_mode() {
 test_fm_mode_list() {
   test_start "fm_mode_list"
   fm_run mode list
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_mode_list_names_every_profile"
   local missing="" p
   for p in ask plan apply audit; do
@@ -282,7 +325,7 @@ test_fm_mode_list() {
 test_fm_mode_current() {
   test_start "fm_mode_current"
   fm_run mode current
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_mode_current_reports_the_policy"
   fm_expect_any "Approval" "Filesystem" "Network"
 }
@@ -290,7 +333,7 @@ test_fm_mode_current() {
 test_fm_mode_show() {
   test_start "fm_mode_show"
   fm_run mode show audit
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_mode_show_describes_that_profile"
   fm_expect_any "audit" "Max steps" "Description"
 }
@@ -416,9 +459,11 @@ test_fm_mode_run_exit_code() {
 test_fm_mode_doctor() {
   test_start "fm_mode_doctor"
   fm_run mode doctor
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_mode_doctor_validates_the_config"
   fm_expect_any "Agent Mode Doctor" "Profile config" "Default profile"
+  test_start "fm_mode_doctor_resolves_the_default_profile"
+  fm_expect_out "Default profile"
 }
 
 test_fm_mode_unknown() {
@@ -496,7 +541,7 @@ test_fm_config_agent_mode_env() {
 test_fm_agent() {
   test_start "fm_agent"
   fm_run agent
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_agent_defaults_to_current"
   fm_expect_any "Agent Mode" "Profile"
 }
@@ -504,7 +549,7 @@ test_fm_agent() {
 test_fm_agent_card() {
   test_start "fm_agent_card"
   fm_run agent card
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_agent_card_reports_metadata"
   fm_expect_any "Agent Card" "Protocols" "Name"
 }
@@ -512,9 +557,11 @@ test_fm_agent_card() {
 test_fm_agent_card_json() {
   test_start "fm_agent_card_json"
   fm_run agent card --json
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_agent_card_json_is_json"
   fm_expect_json
+  test_start "fm_agent_card_json_carries_the_card"
+  fm_expect_out '"name"'
 }
 
 test_fm_env_agent_card_config() {
@@ -523,7 +570,7 @@ test_fm_env_agent_card_config() {
     >"$card"
   test_start "fm_env_agent_card_config"
   AGENT_CARD_CONFIG="$card" fm_run agent card
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_env_agent_card_config_reads_the_override"
   fm_expect_out "fm-fixture-card"
 }
@@ -548,16 +595,28 @@ test_fm_config_agent_card_json() {
 }
 
 test_fm_agent_log() {
-  # Generate an event, then require the tail to show it.
-  fm_run mode current
+  # Generate more events than the count below, then require the tail to
+  # show them.
+  local i
+  for i in 1 2 3 4 5 6; do
+    fm_run mode current
+  done
   test_start "fm_agent_log"
   fm_run agent log
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_agent_log_tails_the_session_log"
-  fm_expect_any "event" "profile" "current"
+  fm_expect_out_matches '"event":"current"'
   test_start "fm_agent_log_count_argument"
   fm_run agent log 5
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
+  test_start "fm_agent_log_count_argument_limits_the_tail"
+  local shown
+  shown="$(printf '%s\n' "$FM_OUT" | grep -c '"event":')"
+  if [[ "$shown" == "5" ]]; then
+    fm_pass "5 events shown"
+  else
+    fm_fail "expected exactly 5 events, got $shown"
+  fi
 }
 
 test_fm_agent_checkpoint_save() {
@@ -588,14 +647,28 @@ test_fm_agent_checkpoint_save_usage() {
 }
 
 test_fm_agent_checkpoint_list() {
+  if ! fm_have_jq; then
+    test_start "fm_agent_checkpoint_list"
+    fm_pass "skipped — jq not installed"
+    return 0
+  fi
+  # Save a checkpoint of our own so the listing has something it must show,
+  # whatever ran before this row.
+  fm_run agent checkpoint save plan echo fm-list-marker
   test_start "fm_agent_checkpoint_list"
   fm_run agent checkpoint list
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_agent_checkpoint_list_no_breakage"
   fm_expect_no_forbidden
+  test_start "fm_agent_checkpoint_list_prints_the_header"
+  fm_expect_out "Agent Checkpoints"
+  test_start "fm_agent_checkpoint_list_shows_the_saved_checkpoint"
+  fm_expect_out "fm-list-marker"
   test_start "fm_agent_checkpoint_defaults_to_list"
   fm_run agent checkpoint
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
+  test_start "fm_agent_checkpoint_default_lists_the_same"
+  fm_expect_out "fm-list-marker"
 }
 
 fm_latest_checkpoint_id() {
@@ -733,9 +806,11 @@ test_fm_agent_delegate_usage() {
 }
 
 test_fm_agent_a2a_card() {
+  # Reads the checkout's .well-known/agent-card.json, so a healthy card is
+  # the only outcome the sandbox can produce.
   test_start "fm_agent_a2a_card"
   fm_run agent a2a-card
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_agent_a2a_card_reports_the_spec"
   fm_expect_any "A2A" "Spec" "specVersion"
 }
@@ -743,41 +818,54 @@ test_fm_agent_a2a_card() {
 test_fm_agent_a2a_card_json() {
   test_start "fm_agent_a2a_card_json"
   fm_run agent a2a-card --json
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_agent_a2a_card_json_is_json"
   fm_expect_json
+  test_start "fm_agent_a2a_card_json_carries_the_spec_version"
+  fm_expect_out '"specVersion"'
 }
 
 test_fm_agent_a2a_card_validate() {
   test_start "fm_agent_a2a_card_validate"
   fm_run agent a2a-card --validate
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_agent_a2a_card_validate_checks_each_field"
   fm_expect_any "specVersion" "skills" "authentication" "signing"
-  # --strict must turn any validation issue into a non-zero exit; on a
-  # healthy card it still passes.
+  # --strict must turn any validation issue into a non-zero exit; on the
+  # shipped card there is none, so it passes and prints the same report.
   test_start "fm_agent_a2a_card_validate_strict"
   fm_run agent a2a-card --strict
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
+  test_start "fm_agent_a2a_card_validate_strict_reports"
+  fm_expect_out "A2A v0.3 Card Validation"
 }
 
 test_fm_agent_conformance() {
+  # Cross-checks the checkout's A2A card, legacy doc, internal card and
+  # profile registry against each other: all tracked files, hence "healthy".
   test_start "fm_agent_conformance"
   fm_run agent conformance
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_agent_conformance_reports_status"
   fm_expect_any "Conformance" "conformance" "status"
+  test_start "fm_agent_conformance_is_healthy"
+  fm_expect_out "healthy"
 }
 
 test_fm_agent_conformance_json() {
   test_start "fm_agent_conformance_json"
   fm_run agent conformance --json
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_agent_conformance_json_is_json"
   fm_expect_json
+  test_start "fm_agent_conformance_json_is_healthy"
+  fm_expect_out '"status": "healthy"'
+  # --strict exits 1 on any issue; a healthy tree must still pass.
   test_start "fm_agent_conformance_strict"
   fm_run agent conformance --strict
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
+  test_start "fm_agent_conformance_strict_is_healthy"
+  fm_expect_out "healthy"
 }
 
 test_fm_agent_unknown() {
@@ -808,11 +896,15 @@ test_fm_agents_list() {
   repo="$(fm_agents_repo)"
   local prev="$PWD"
   cd "$repo" || return 0
+  # With AGENTS.md absent the status column must say so for that target.
+  rm -f "$repo/AGENTS.md"
   test_start "fm_agents_list"
   fm_run_bin "$repo/bin/dot" agents list
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_agents_list_names_the_harnesses"
   fm_expect_any "Harness" "AGENTS.md" "cursor"
+  test_start "fm_agents_list_reports_render_status"
+  fm_expect_out_matches 'agents-md .*AGENTS\.md .*not yet rendered'
   cd "$prev" || return 0
 }
 

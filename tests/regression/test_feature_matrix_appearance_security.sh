@@ -31,9 +31,17 @@ fm_sandbox_setup
 # ── theme (read-only rows) ─────────────────────────────────────────────────
 
 test_fm_theme() {
+  # With no subcommand `dot theme` opens the picker. The harness captures
+  # stderr, so ui_pick sees no tty, runs no selector (fzf/gum are gated on
+  # `-t 2`, dot-ui on DOTFILES_NO_TUI) and reports that nothing changed —
+  # the same outcome on every host, whether or not a picker is installed.
   test_start "fm_theme"
   fm_run theme
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
+  test_start "fm_theme_reports_no_selection"
+  fm_expect_out "no selection"
+  test_start "fm_theme_still_names_the_configured_theme"
+  fm_expect_out_matches 'still on [a-z0-9]+-(dark|light)'
   test_start "fm_theme_no_breakage"
   fm_expect_no_forbidden
 }
@@ -41,19 +49,26 @@ test_fm_theme() {
 test_fm_theme_list() {
   test_start "fm_theme_list"
   fm_run theme list
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_theme_list_is_populated"
   fm_expect_nonempty
   test_start "fm_theme_list_has_a_source_column"
-  fm_expect_any "SOURCE" "WALLPAPER" "System"
+  fm_expect_out_matches '^  WALLPAPER +SOURCE$'
+  # WALLPAPER_DIR resolves under the sandbox HOME, which has no Pictures/
+  # Wallpapers, so every family is "System" here and the active one carries
+  # the ◀ marker.
+  test_start "fm_theme_list_marks_the_current_family"
+  fm_expect_out_matches '^  [^ ]+ +[a-z0-9]+ +System ◀'
+  test_start "fm_theme_list_counts_the_families"
+  fm_expect_out_matches 'Current +[a-z0-9]+-(dark|light) \([1-9][0-9]* wallpaper themes available\)'
 }
 
 test_fm_theme_current() {
   test_start "fm_theme_current"
   fm_run theme current
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_theme_current_names_the_active_theme"
-  fm_expect_any "Current" "dark" "light"
+  fm_expect_out_matches 'Current +[a-z0-9]+-(dark|light) \([a-z0-9]+, (dark|light); (auto|dark|light)\)'
   test_start "fm_theme_current_matches_chezmoidata"
   # The reported theme must be the one recorded in .chezmoidata.toml.
   local configured
@@ -140,31 +155,72 @@ test_fm_backup() {
   printf 'payload\n' >"$src/nested/file.txt"
   test_start "fm_backup"
   DOTFILES_BACKUP_SRC="$src" DOTFILES_BACKUP_DIR="$dest" fm_run backup
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
+  test_start "fm_backup_reports_the_archive_path"
+  fm_expect_out "Backup written"
+  test_start "fm_backup_reports_the_archive_under_backup_dir"
+  fm_expect_out "$dest/dotfiles-backup-"
   test_start "fm_backup_writes_an_archive"
-  if find "$dest" -name '*.tgz' 2>/dev/null | grep -q .; then
+  local archive
+  archive="$(find "$dest" -name '*.tgz' 2>/dev/null | head -1)"
+  if [[ -n "$archive" ]]; then
     fm_pass "archive written under DOTFILES_BACKUP_DIR"
   else
     fm_fail "no .tgz under $dest"
   fi
+  test_start "fm_backup_archives_the_source_tree"
+  if [[ -n "$archive" ]] && tar -tzf "$archive" 2>/dev/null | grep -q 'nested/file\.txt$'; then
+    fm_pass "nested/file.txt is in the archive"
+  else
+    fm_fail "DOTFILES_BACKUP_SRC content missing from the archive"
+  fi
 }
 
 test_fm_encrypt_check() {
+  # The real check probes the host disk — fdesetup on macOS, lsblk on Linux —
+  # so both probes are stubbed. The row pins how each verdict is parsed and
+  # signalled, not whether this particular machine happens to be encrypted.
+  fm_stub fdesetup "printf 'FileVault is On.\\n'"
+  fm_stub lsblk "printf 'NAME FSTYPE\\nsda1 crypto_LUKS\\n'"
   test_start "fm_encrypt_check"
   fm_run encrypt-check
-  fm_expect_rc_in 0 1
-  test_start "fm_encrypt_check_reports_a_verdict"
-  fm_expect_any "Encryption" "FileVault" "LUKS" "encryption"
+  fm_expect_rc 0
+  test_start "fm_encrypt_check_reports_an_encrypted_verdict"
+  fm_expect_out_matches 'FileVault +On|LUKS +encrypted block device detected'
+
+  # The negative verdict must reach the caller as rc=1, not be swallowed.
+  fm_stub fdesetup "printf 'FileVault is Off.\\n'"
+  fm_stub lsblk "printf 'NAME FSTYPE\\nsda1 ext4\\n'"
+  test_start "fm_encrypt_check_unencrypted"
+  fm_run encrypt-check
+  fm_expect_rc 1
+  test_start "fm_encrypt_check_unencrypted_says_so"
+  fm_expect_out_matches 'FileVault +appears to be off|LUKS +no crypto volume detected'
+  rm -f "$FM_SANDBOX/bin/fdesetup" "$FM_SANDBOX/bin/lsblk"
 }
 
 test_fm_telemetry() {
   # Opt-in by design: without DOTFILES_TELEMETRY=1 the command must refuse
-  # and say how to enable it, rather than disabling OS services silently.
+  # with rc=1 and say how to enable it, rather than disabling OS services
+  # silently. The variable is cleared explicitly so a developer shell that
+  # exports it cannot steer this row into the mutating path, and sudo is a
+  # recording stub so the refusal is shown to happen before any OS call.
+  fm_stub sudo "printf 'SUDO %s\\n' \"\$*\" >>'$FM_SANDBOX/telemetry-sudo.log'"
+  rm -f "$FM_SANDBOX/telemetry-sudo.log"
   test_start "fm_telemetry"
-  fm_run telemetry
-  fm_expect_rc_in 0 1
+  DOTFILES_TELEMETRY= fm_run telemetry
+  fm_expect_rc 1
   test_start "fm_telemetry_is_opt_in"
-  fm_expect_any "disabled by default" "DOTFILES_TELEMETRY"
+  fm_expect_out "disabled by default"
+  test_start "fm_telemetry_says_how_to_enable"
+  fm_expect_out "DOTFILES_TELEMETRY=1"
+  test_start "fm_telemetry_refuses_before_touching_the_os"
+  if [[ -e "$FM_SANDBOX/telemetry-sudo.log" ]]; then
+    fm_fail "refusal path called sudo: $(head -1 "$FM_SANDBOX/telemetry-sudo.log")"
+  else
+    fm_pass "no sudo call"
+  fi
+  fm_stub sudo 'exit 0'
 }
 
 test_fm_policy() {
@@ -177,12 +233,20 @@ test_fm_policy() {
   #
   # The scan itself is covered by test_enforce_policies_fires.sh, which plants
   # violations and asserts the specific check that catches each one.
-  DOTFILES_POLICY_DEPS_ONLY=1 fm_run policy
-  # Exits non-zero when opa/gitleaks are absent, which is the environment
-  # rather than a regression; what matters is the dependency check runs.
-  fm_expect_rc_in 0 1
-  test_start "fm_policy_runs_the_enforcement_pass"
-  fm_expect_any "security policy" "Checking dependencies" "policy"
+  #
+  # Only grep/find/git are fatal dependencies and every runner has them;
+  # opa/gitleaks/shellcheck being absent is a WARN with the checks skipped,
+  # and with DEPS_ONLY the scan that could fail never runs — so rc=0 is the
+  # deterministic outcome. DOTFILES_POLICY_STRICT is cleared because it would
+  # turn a skipped optional tool into a hard error on a developer shell.
+  DOTFILES_POLICY_STRICT= DOTFILES_POLICY_DEPS_ONLY=1 fm_run policy
+  fm_expect_rc 0
+  test_start "fm_policy_runs_the_dependency_check"
+  fm_expect_out "Dependency check complete"
+  test_start "fm_policy_deps_only_skips_the_scan"
+  fm_expect_out "no scan performed"
+  test_start "fm_policy_reports_the_dependency_verdict"
+  fm_expect_out "Dependencies checked"
 }
 
 test_fm_smoke_firewall() { fm_smoke firewall; }

@@ -31,34 +31,44 @@ fm_have_jq() { command -v jq >/dev/null 2>&1; }
 
 # ── fleet: read-only surface ───────────────────────────────────────────────
 
+# The status rows read hostname/uname and ask the sandbox's no-op `chezmoi`
+# stub for drift, so the report is always rc 0 with drift "clean"; a real
+# chezmoi leaking through would show up as "drifted".
+
 test_fm_fleet() {
   test_start "fm_fleet"
   fm_run fleet
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_fleet_defaults_to_status"
   fm_expect_any "Fleet Node Status" "Node ID"
+  test_start "fm_fleet_reports_drift_from_the_stub"
+  fm_expect_out_matches 'Drift +clean'
 }
 
 test_fm_fleet_status() {
   test_start "fm_fleet_status"
   fm_run fleet status
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_fleet_status_reports_the_node"
   fm_expect_any "Node ID" "Namespace" "Version"
+  test_start "fm_fleet_status_reports_drift_from_the_stub"
+  fm_expect_out_matches 'Drift +clean'
 }
 
 test_fm_fleet_json() {
   test_start "fm_fleet_json"
   fm_run fleet --json
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_fleet_json_is_json"
   fm_expect_json
+  test_start "fm_fleet_json_reports_drift_from_the_stub"
+  fm_expect_out '"drift":"clean"'
 }
 
 test_fm_fleet_status_json() {
   test_start "fm_fleet_status_json"
   fm_run fleet status --json
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_fleet_status_json_is_json"
   fm_expect_json
   test_start "fm_fleet_status_json_has_the_node_fields"
@@ -78,7 +88,7 @@ test_fm_config_fleet_node_id() {
   # hostname. Whichever applies, the JSON must not report them empty.
   test_start "fm_config_fleet_node_id"
   fm_run fleet status --json
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_config_fleet_node_id_is_never_empty"
   if printf '%s' "$FM_OUT" | grep -Eq '"node_id":"[^"]+"' &&
     printf '%s' "$FM_OUT" | grep -Eq '"namespace":"[^"]+"'; then
@@ -89,29 +99,37 @@ test_fm_config_fleet_node_id() {
 }
 
 test_fm_fleet_drift() {
+  # The stub chezmoi prints no status, so the only honest verdict is clean.
   test_start "fm_fleet_drift"
   fm_run fleet drift
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_fleet_drift_reports"
   fm_expect_any "Fleet Drift Report" "drift"
+  test_start "fm_fleet_drift_is_clean_under_the_stub"
+  fm_expect_out "No drift detected"
 }
 
 test_fm_fleet_drift_history() {
+  # The check above appended a clean entry; history must render it.
   fm_run fleet drift
   test_start "fm_fleet_drift_history"
   fm_run fleet drift history
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_fleet_drift_history_reads_the_log"
-  fm_expect_any "Drift History" "clean" "drifted"
+  fm_expect_out "Drift History"
+  test_start "fm_fleet_drift_history_shows_the_clean_check"
+  fm_expect_out_matches 'T[0-9:]+Z +clean'
 }
 
 test_fm_fleet_drift_predict() {
   fm_run fleet drift
   test_start "fm_fleet_drift_predict"
   fm_run fleet drift predict
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_fleet_drift_predict_reports"
-  fm_expect_any "Drift Prediction" "checks recorded" "history"
+  fm_expect_out "Drift Prediction"
+  test_start "fm_fleet_drift_predict_counts_the_history"
+  fm_expect_out_matches '[1-9][0-9]* checks recorded'
 }
 
 test_fm_fleet_drift_unknown() {
@@ -123,40 +141,61 @@ test_fm_fleet_drift_unknown() {
 }
 
 test_fm_fleet_events() {
-  fm_run fleet status
+  # Emit more events than the count argument below asks for.
+  local i
+  for i in 1 2 3 4; do
+    fm_run fleet status
+  done
   test_start "fm_fleet_events"
   fm_run fleet events
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_fleet_events_reads_the_event_log"
-  fm_expect_any "Fleet Events" "status" "No fleet events"
+  fm_expect_out "Fleet Events (last 20)"
+  test_start "fm_fleet_events_lists_the_status_events"
+  fm_expect_out_matches 'status +[0-9]{4}-[0-9]{2}-[0-9]{2}T'
   test_start "fm_fleet_events_count_argument"
   fm_run fleet events 3
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
+  test_start "fm_fleet_events_count_argument_limits_the_listing"
+  local shown
+  shown="$(printf '%s\n' "$FM_OUT" | grep -Ec '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:]+Z')"
+  if [[ "$FM_OUT" == *"(last 3)"* && "$shown" == "3" ]]; then
+    fm_pass "3 events shown"
+  else
+    fm_fail "expected '(last 3)' with exactly 3 events, got $shown"
+  fi
 }
 
 test_fm_fleet_events_empty() {
   rm -f "$XDG_STATE_HOME/dotfiles/fleet/events.jsonl"
   test_start "fm_fleet_events_empty"
   fm_run fleet events
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_fleet_events_empty_says_so"
-  fm_expect_any "No fleet events" "events.jsonl"
+  fm_expect_out "No fleet events recorded yet"
 }
 
+# The shipped .chezmoidata.toml has no [namespaces.*] table. Listing them
+# used to leak grep's 1 through pipefail into the exit status after a
+# correct report; the report must exit 0 with or without the table.
 test_fm_fleet_namespace() {
   test_start "fm_fleet_namespace"
   fm_run fleet namespace
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_fleet_namespace_reports_the_active_namespace"
-  fm_expect_any "Fleet Namespace" "Active"
+  fm_expect_out "Fleet Namespace"
+  test_start "fm_fleet_namespace_resolves_the_default"
+  fm_expect_out_matches 'Active +default'
 }
 
 test_fm_fleet_ns_alias() {
   test_start "fm_fleet_ns_alias"
   fm_run fleet ns show
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_fleet_ns_alias_matches_namespace"
-  fm_expect_any "Fleet Namespace" "Active"
+  fm_expect_out "Fleet Namespace"
+  test_start "fm_fleet_ns_alias_resolves_the_default"
+  fm_expect_out_matches 'Active +default'
 }
 
 test_fm_fleet_namespace_set() {
@@ -222,11 +261,15 @@ test_fm_fleet_namespace_set_invalid() {
 }
 
 test_fm_fleet_enforce() {
+  # Reads the checkout's agent-profiles.json through jq (the file's other
+  # enforce rows already require jq).
   test_start "fm_fleet_enforce"
   fm_run fleet enforce
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_fleet_enforce_reports_the_mode"
-  fm_expect_any "RBAC Enforcement" "Mode" "advisory" "strict"
+  fm_expect_out "RBAC Enforcement"
+  test_start "fm_fleet_enforce_mode_is_advisory_or_strict"
+  fm_expect_out_matches 'Mode +(advisory|strict)'
 }
 
 test_fm_fleet_enforce_set() {
@@ -502,11 +545,15 @@ test_fm_fleet_apply_rejects_option_target() {
 }
 
 test_fm_fleet_unknown() {
+  # Unlike every other group, cmd_fleet treats an unknown subcommand as a
+  # request for the command list and exits 0. Pinned as observed.
   test_start "fm_fleet_unknown"
   fm_run fleet zzz-not-a-subcommand
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_fleet_unknown_prints_the_command_list"
-  fm_expect_any "Fleet Commands" "status" "drift"
+  fm_expect_out "Fleet Commands"
+  test_start "fm_fleet_unknown_lists_the_subcommands"
+  fm_expect_out_matches 'apply +SSH out'
 }
 
 # ── registry ───────────────────────────────────────────────────────────────
@@ -765,11 +812,22 @@ test_fm_registry_installed() {
     fm_pass "skipped — jq not installed"
     return 0
   fi
+  # Plant an installed.json of our own so the listing has a module it must
+  # show regardless of whether the install rows ran first.
+  local mod="$XDG_DATA_HOME/dotfiles/modules/fm-installed-fixture"
+  mkdir -p "$mod"
+  printf '{"name":"fm-installed-fixture","version":"2.3.4","description":"planted by the matrix"}\n' \
+    >"$mod/installed.json"
   test_start "fm_registry_installed"
   fm_run registry installed
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_registry_installed_no_breakage"
   fm_expect_no_forbidden
+  test_start "fm_registry_installed_lists_the_module"
+  fm_expect_out "fm-installed-fixture"
+  test_start "fm_registry_installed_shows_its_version"
+  fm_expect_out "v2.3.4"
+  rm -rf "$mod"
 }
 
 test_fm_registry_set_url() {
@@ -853,7 +911,7 @@ test_fm_patterns_list() {
   fm_pattern_fixture
   test_start "fm_patterns_list"
   fm_run patterns list
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_patterns_list_shows_the_pattern"
   fm_expect_out "fm-demo"
   test_start "fm_patterns_defaults_to_list"
@@ -865,7 +923,7 @@ test_fm_patterns_view() {
   fm_pattern_fixture
   test_start "fm_patterns_view"
   fm_run patterns view fm-demo
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_patterns_view_renders_the_body"
   fm_expect_any "Steer like a fixture" "FM demo pattern"
 }
@@ -886,7 +944,8 @@ test_fm_patterns_edit() {
   fm_stub fm-pattern-editor "printf '%s\\n' \"\$1\" >'$FM_SANDBOX/pattern-edited'"
   test_start "fm_patterns_edit"
   EDITOR="$FM_SANDBOX/bin/fm-pattern-editor" fm_run patterns edit fm-demo
-  fm_expect_rc_in 0 1
+  # The stub editor exits 0 and `patterns edit` returns its status.
+  fm_expect_rc 0
   test_start "fm_patterns_edit_opens_the_pattern_file"
   if [[ -s "$FM_SANDBOX/pattern-edited" ]] &&
     grep -q 'fm-demo.md' "$FM_SANDBOX/pattern-edited"; then
@@ -921,7 +980,7 @@ test_fm_env_xdg_config_home() {
   printf '# alt\n' >"$alt/ai/patterns/fm-alt-pattern.md"
   test_start "fm_env_xdg_config_home"
   XDG_CONFIG_HOME="$alt" fm_run patterns list
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_env_xdg_config_home_relocates_the_pattern_dir"
   fm_expect_out "fm-alt-pattern"
 }

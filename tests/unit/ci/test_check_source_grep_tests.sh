@@ -92,6 +92,30 @@ run_lint
 assert_equals "0" "$rc" "below the ceiling passes"
 assert_file_contains "$WORK/err" "1 line(s) below the ceiling" "ratchet suggested"
 
+# ── Feature-matrix rows that accept 0 or 1 with no outcome assertion ─
+test_start "srcgrep_flags_permissive_feature_matrix_rows"
+cat >"$WORK/repo/tests/unit/test_fm_rows.sh" <<'EOF'
+#!/usr/bin/env bash
+test_fm_bare() {
+  fm_run thing
+  fm_expect_rc_in 0 1
+}
+test_fm_with_outcome() {
+  fm_run thing
+  fm_expect_rc_in 0 1 # host-dependent: explained here
+  fm_expect_out "ok"
+}
+test_fm_exact() {
+  fm_run thing
+  fm_expect_rc 0
+}
+EOF
+run_lint tests/unit/test_fm_rows.sh
+assert_equals "1" "$rc" "a bare permissive row fails"
+assert_file_contains "$WORK/out" "tests/unit/test_fm_rows.sh:4: fm_expect_rc_in 0 1 with no outcome assertion" "the bare row is named"
+assert_equals "1" "$(grep -c 'fm_expect_rc_in' "$WORK/out")" "a permissive row with an outcome assertion is not flagged"
+rm -f "$WORK/repo/tests/unit/test_fm_rows.sh"
+
 # ── The real tree is at or below its baseline ──────────────────────
 test_start "srcgrep_repo_holds_its_baseline"
 rc=0

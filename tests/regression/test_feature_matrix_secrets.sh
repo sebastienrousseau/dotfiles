@@ -29,6 +29,29 @@ export DOTFILES_SECRETS_PROVIDER=none
 
 fm_have_age() { command -v age >/dev/null 2>&1 && command -v age-keygen >/dev/null 2>&1; }
 
+# fm_expect_out_empty — the eval-payload contract: a refusal must leave
+# stdout empty, so `eval "$(dot secrets load …)"` sources nothing.
+fm_expect_out_empty() {
+  if [[ "$FM_OUT" == *[![:space:]]* ]]; then
+    fm_fail "stdout was not empty: $(printf '%s' "$FM_OUT" | head -1)"
+  else
+    fm_pass "stdout empty"
+  fi
+}
+
+# The shipped .chezmoidata.toml defines no [secrets.buckets] at all, so
+# against the checkout every `secrets load` takes the refusal path. To reach
+# the dialect emitters, a sandbox repo copy gets an `ai` bucket naming the
+# key the round-trip rows store. Needs the plain-enc provider (age).
+fm_secrets_bucket_repo() {
+  local repo
+  repo="$(fm_repo_copy)"
+  if ! grep -q '^\[secrets\.buckets\]' "$repo/defaults/.chezmoidata.toml"; then
+    printf '\n[secrets.buckets]\nai = ["FM_DEMO_KEY"]\n' >>"$repo/defaults/.chezmoidata.toml"
+  fi
+  printf '%s\n' "$repo"
+}
+
 # Bring up an age identity and switch to the plain-enc provider, so the
 # round-trip rows have a real backend. Returns 1 when age is unavailable.
 fm_secrets_enable_age() {
@@ -232,28 +255,83 @@ test_fm_secrets_load() {
   fm_run secrets load ai
   # With nothing in the bucket this must fail loudly rather than emitting an
   # empty eval payload the caller would silently source.
-  fm_expect_rc_in 0 1
-  test_start "fm_secrets_load_emits_or_refuses"
-  fm_expect_any "export " "No secrets loaded"
+  fm_expect_rc 1
+  test_start "fm_secrets_load_refuses_loudly"
+  fm_expect_err "No secrets loaded for bucket: ai"
+  test_start "fm_secrets_load_emits_no_eval_payload"
+  fm_expect_out_empty
+
+  if ! fm_secrets_enable_age; then
+    test_start "fm_secrets_load_posix"
+    fm_pass "skipped — no age identity available for the plain-enc provider"
+    return 0
+  fi
+  local repo
+  repo="$(fm_secrets_bucket_repo)"
+  fm_run secrets set FM_DEMO_KEY fm-demo-value
+  test_start "fm_secrets_load_posix"
+  fm_run_bin "$repo/bin/dot" secrets load ai
+  fm_expect_rc 0
+  test_start "fm_secrets_load_posix_exports_the_bucket"
+  fm_expect_out "export FM_DEMO_KEY=fm-demo-value"
 }
 
 test_fm_secrets_load_fish() {
   test_start "fm_secrets_load_fish"
   fm_run secrets load ai --shell fish
-  fm_expect_rc_in 0 1
+  fm_expect_rc 1
+  test_start "fm_secrets_load_fish_refuses_loudly"
+  fm_expect_err "No secrets loaded for bucket: ai"
+  test_start "fm_secrets_load_fish_emits_no_eval_payload"
+  fm_expect_out_empty
+
+  if ! fm_secrets_enable_age; then
+    test_start "fm_secrets_load_fish_dialect"
+    fm_pass "skipped — no age identity available for the plain-enc provider"
+    return 0
+  fi
+  local repo
+  repo="$(fm_secrets_bucket_repo)"
+  fm_run secrets set FM_DEMO_KEY fm-demo-value
   test_start "fm_secrets_load_fish_dialect"
-  fm_expect_any "set -gx" "No secrets loaded"
+  fm_run_bin "$repo/bin/dot" secrets load ai --shell fish
+  fm_expect_rc 0
+  test_start "fm_secrets_load_fish_dialect_sets_the_variable"
+  fm_expect_out "set -gx FM_DEMO_KEY 'fm-demo-value'"
 }
 
 test_fm_secrets_load_nu() {
   test_start "fm_secrets_load_nu"
   fm_run secrets load ai --shell=nu
-  fm_expect_rc_in 0 1
-  test_start "fm_secrets_load_nu_dialect"
-  fm_expect_any "{" "No secrets loaded"
+  fm_expect_rc 1
+  test_start "fm_secrets_load_nu_refuses_loudly"
+  fm_expect_err "No secrets loaded for bucket: ai"
+  test_start "fm_secrets_load_nu_emits_no_eval_payload"
+  fm_expect_out_empty
   test_start "fm_secrets_load_nushell_alias"
   fm_run secrets load ai --shell nushell
-  fm_expect_rc_in 0 1
+  fm_expect_rc 1
+  test_start "fm_secrets_load_nushell_alias_refuses_loudly"
+  fm_expect_err "No secrets loaded for bucket: ai"
+
+  if ! fm_secrets_enable_age; then
+    test_start "fm_secrets_load_nu_dialect"
+    fm_pass "skipped — no age identity available for the plain-enc provider"
+    return 0
+  fi
+  local repo
+  repo="$(fm_secrets_bucket_repo)"
+  fm_run secrets set FM_DEMO_KEY fm-demo-value
+  test_start "fm_secrets_load_nu_dialect"
+  fm_run_bin "$repo/bin/dot" secrets load ai --shell=nu
+  fm_expect_rc 0
+  test_start "fm_secrets_load_nu_dialect_emits_a_nuon_record"
+  fm_expect_out_matches '^\{$'
+  test_start "fm_secrets_load_nu_dialect_carries_the_variable"
+  fm_expect_out '"FM_DEMO_KEY": "fm-demo-value"'
+  test_start "fm_secrets_load_nushell_alias_is_the_same_dialect"
+  fm_run_bin "$repo/bin/dot" secrets load ai --shell nushell
+  fm_expect_out '"FM_DEMO_KEY": "fm-demo-value"'
 }
 
 test_fm_secrets_load_empty() {
@@ -276,9 +354,11 @@ test_fm_secrets_env_load() {
   # row asserts, together with the fact that the arm still exists.
   test_start "fm_secrets_env_load"
   fm_run_bin "$REPO_ROOT/scripts/dot/commands/secrets.sh" env load fm-no-such-bucket
-  fm_expect_rc_in 0 1
+  fm_expect_rc 1
   test_start "fm_secrets_env_load_reaches_the_loader"
-  fm_expect_any "No secrets loaded" "fm-no-such-bucket" "export "
+  fm_expect_err "No secrets loaded for bucket: fm-no-such-bucket"
+  test_start "fm_secrets_env_load_emits_no_eval_payload"
+  fm_expect_out_empty
 }
 
 # ── secrets edit / create ──────────────────────────────────────────────────
@@ -304,12 +384,19 @@ test_fm_secrets_edit() {
     fm_pass "skipped — no age identity available"
     return 0
   fi
-  # chezmoi is stubbed, so this exercises the guard + delegation path only.
+  # chezmoi is stubbed, so this exercises the guard + delegation path only:
+  # with a key present the command must hand off to `chezmoi edit --apply`
+  # on the encrypted file under the sandbox HOME. The stub echoes its argv
+  # so that hand-off is what the row pins; it is then reset to the no-op.
+  fm_stub chezmoi 'printf "chezmoi %s\n" "$*"'
   test_start "fm_secrets_edit"
   fm_run secrets edit
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
+  test_start "fm_secrets_edit_delegates_to_chezmoi_edit_apply"
+  fm_expect_out "chezmoi edit --apply $HOME/.config/chezmoi/encrypted_secrets.age"
   test_start "fm_secrets_edit_no_breakage"
   fm_expect_no_forbidden
+  fm_stub chezmoi 'exit 0'
 }
 
 test_fm_secrets_create_no_key() {
@@ -351,21 +438,30 @@ test_fm_ssh_key_missing() {
 }
 
 test_fm_ssh_cert_usage() {
+  # A bare `dot ssh-cert` prints usage and exits 0 (ssh-cert.sh's default
+  # arm has no exit status of its own), unlike the group's other usage
+  # paths which die with 1.
   test_start "fm_ssh_cert_usage"
   fm_run ssh-cert
-  fm_expect_rc_in 0 1
-  test_start "fm_ssh_cert_usage_lists_subcommands"
-  fm_expect_any "issue" "status" "revoke"
+  fm_expect_rc 0
+  test_start "fm_ssh_cert_usage_prints_usage"
+  fm_expect_out "Usage: dot ssh-cert"
+  test_start "fm_ssh_cert_usage_lists_issue"
+  fm_expect_out_matches "^ +issue .*Request a short-lived certificate"
+  test_start "fm_ssh_cert_usage_lists_revoke"
+  fm_expect_out_matches "^ +revoke +Revoke and remove certificate"
   test_start "fm_ssh_cert_usage_documents_env"
-  fm_expect_any "SSH_CERT_CA_URL" "Environment"
+  fm_expect_out "SSH_CERT_CA_URL"
 }
 
 test_fm_ssh_cert_status() {
+  # The sandbox HOME has no ~/.ssh, so status must report the exact path it
+  # looked at and succeed: "no certificate" is a state, not an error.
   test_start "fm_ssh_cert_status"
   fm_run ssh-cert status
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_ssh_cert_status_reports_absence"
-  fm_expect_any "No SSH certificate" "cert"
+  fm_expect_out "No SSH certificate found at $HOME/.ssh/id_ed25519-cert.pub"
 }
 
 test_fm_smoke_ssh_cert_issue() { fm_smoke ssh-cert; }

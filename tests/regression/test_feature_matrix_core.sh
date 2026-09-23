@@ -350,25 +350,31 @@ test_fm_commit() {
   local repo="$FM_SANDBOX/work/commitrepo"
   mkdir -p "$repo"
   git -C "$repo" init -q 2>/dev/null || true
+  # git-ai-commit refuses twice before it would talk to a model: no provider,
+  # then nothing staged. Which refusal fires first used to depend on the host
+  # (a developer machine has a provider, a CI runner does not), so this row
+  # names the provider explicitly and makes it a recording stub. That leaves
+  # one deterministic path — the staged-changes refusal — and the stub proves
+  # the refusal happens before the model would have been called.
+  fm_stub claude "printf 'RAN %s\\n' \"\$*\" >>'$FM_SANDBOX/provider-ran.log'"
+  rm -f "$FM_SANDBOX/provider-ran.log"
   test_start "fm_commit"
   # Not a `( cd … && fm_run )` subshell: fm_run's captured output would not
   # survive it, and the assertions below would silently read a stale run.
   local prev_pwd="$PWD"
   cd "$repo" || return 0
-  fm_run commit
+  GIT_AI_PROVIDER=claude fm_run commit
   cd "$prev_pwd" || return 0
-  # With nothing staged the helper must refuse cleanly rather than invoking a
-  # model. It is the one exit path reachable without an AI provider.
-  fm_expect_rc_in 0 1
-  # The contract is that `dot commit` REFUSES cleanly rather than invoking a
-  # model — not which refusal it reaches first. There are two, and which one
-  # fires depends on the host: with an AI provider installed (a developer
-  # machine) it gets as far as the staged-changes check; with none (a CI
-  # runner) it stops at the provider check. Asserting only the first was a
-  # macOS assumption, and it failed on the Linux runner where no provider
-  # exists.
+  fm_expect_rc 1
   test_start "fm_commit_refuses_without_staged_changes"
-  fm_expect_any "No staged changes" "staged" "No AI provider found"
+  fm_expect_out "No staged changes"
+  test_start "fm_commit_does_not_invoke_the_provider"
+  if [[ -e "$FM_SANDBOX/provider-ran.log" ]]; then
+    fm_fail "provider was invoked with nothing staged: $(head -1 "$FM_SANDBOX/provider-ran.log")"
+  else
+    fm_pass "provider never invoked"
+  fi
+  rm -f "$FM_SANDBOX/bin/claude"
 }
 
 test_fm_smoke_uninstall() {
