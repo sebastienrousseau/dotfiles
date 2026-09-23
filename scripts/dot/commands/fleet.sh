@@ -287,7 +287,9 @@ cmd_fleet_namespace() {
       if [[ -f "$data_file" ]]; then
         echo ""
         ui_section "Available Namespaces"
-        grep '^\[namespaces\.' "$data_file" | sed 's/\[namespaces\.\(.*\)\]/\1/' | while IFS= read -r name; do
+        # No [namespaces.*] table is the shipped default: grep's 1 must not
+        # become the command's exit status under pipefail.
+        { grep '^\[namespaces\.' "$data_file" || true; } | sed 's/\[namespaces\.\(.*\)\]/\1/' | while IFS= read -r name; do
           if [[ "$name" == "$ns" ]]; then
             ui_ok "$name" "[active]"
           else
