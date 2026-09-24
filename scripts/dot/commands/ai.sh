@@ -14,6 +14,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 # shellcheck source=../../../lib/dot/ai-commands.sh
 source "$SCRIPT_DIR/../../../lib/dot/ai-commands.sh"
+# shellcheck source=../../../lib/dot/ai-probe.sh
+source "$SCRIPT_DIR/../../../lib/dot/ai-probe.sh"
 
 [[ -n "${DOT_AI_RAW:-}" ]] || dot_ui_command_banner "AI and Agents" "${1:-}" # raw mode: no banner
 
@@ -61,14 +63,6 @@ _ai_cache_fresh() {
   ((now - mtime < AI_STATUS_TTL))
 }
 
-_ai_extract_version() {
-  local bin="$1"
-  local output version
-  output=$("$bin" --version 2>/dev/null | head -1) || true
-  version=$(printf '%s' "$output" | sed 's/^[^0-9]*//' | sed 's/[[:space:]]*$//' | sed 's/\.$//')
-  [[ -n "$version" ]] && printf '%s\n' "$version" || printf 'installed\n'
-}
-
 _ai_refresh_status_cache() {
   # Entries passed by value (not a `local -n` nameref — bash 4.3+; macOS bash is 3.2).
   local ai_entries=("$@")
@@ -106,7 +100,7 @@ _ai_refresh_status_cache() {
     i="${payload%%|*}"; entry="${payload#*|}"
     IFS="|" read -r category role name bin desc <<<"$entry"
     if command -v "$bin" >/dev/null 2>&1; then
-      output=$($to "$bin" --version </dev/null 2>/dev/null | head -1) || true
+      output=$(_ai_probe_version "$bin" "$to")
       version=$(printf "%s" "$output" | sed "s/^[^0-9]*//;s/[[:space:]]*$//;s/\.$//")
       printf "%s\t1\t%s\n" "$bin" "$version" >"$out_dir/$i"
     else
@@ -115,8 +109,9 @@ _ai_refresh_status_cache() {
   '
   # Use only `-I{}` and null records for BSD xargs and quote-safe descriptions.
   printf '%s\0' "${indexed[@]}" |
-    xargs -0 -I{} -P"$jobs" \
-      bash -c "$probe_script" _ {} "$probe_dir" "$_TO" \
+    AI_VERSION_RE="$AI_VERSION_RE" xargs -0 -I{} -P"$jobs" \
+      bash -c "$(declare -f _ai_version_line _ai_probe_version)$probe_script" \
+      _ {} "$probe_dir" "$_TO" \
       2>/dev/null || true
 
   # Re-assemble in original entry order.
