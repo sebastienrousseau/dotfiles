@@ -1639,16 +1639,21 @@ reload_nvim() {
     done
   fi
 
-  # Deduplicate sockets
+  # Deduplicate sockets. Not an associative array: `local -A` is bash 4+,
+  # and macOS /bin/bash 3.2 aborts the function on it ("local: -A: invalid
+  # option"), which under set -e silently dropped the Neovim reload.
   if [[ ${#sockets[@]} -gt 0 ]]; then
-    local -A seen=()
     local unique_sockets=()
-    local s
+    local s u dup
     for s in "${sockets[@]}"; do
-      if [[ -z "${seen[$s]:-}" ]]; then
-        seen[$s]=1
-        unique_sockets+=("$s")
-      fi
+      dup=0
+      for u in ${unique_sockets[@]+"${unique_sockets[@]}"}; do
+        if [[ "$u" == "$s" ]]; then
+          dup=1
+          break
+        fi
+      done
+      [[ "$dup" == 1 ]] || unique_sockets+=("$s")
     done
     sockets=("${unique_sockets[@]}")
   fi
