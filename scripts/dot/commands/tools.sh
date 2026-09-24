@@ -460,7 +460,7 @@ cmd_profile() {
     show)
       ui_header "Dotfiles Profile"
       local profile_val
-      profile_val="$(grep '^profile' "$data_file" | head -1 | sed 's/.*=\s*"\(.*\)"/\1/')"
+      profile_val="$(grep '^profile' "$data_file" | head -1 | sed 's/.*=[[:space:]]*"\(.*\)"/\1/')"
       ui_info "Profile" "${profile_val:-default}"
       echo ""
       ui_section "Feature Flags"

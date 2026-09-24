@@ -199,6 +199,30 @@ test_fm_encrypt_check() {
   rm -f "$FM_SANDBOX/bin/fdesetup" "$FM_SANDBOX/bin/lsblk"
 }
 
+test_fm_encrypt_check_undetermined() {
+  # Linux without lsblk has no probe to read. That used to fall off the end
+  # of the case with no verdict and rc=0 — "encrypted" by omission. It must
+  # say it cannot tell and signal it with a status distinct from both real
+  # verdicts (0 encrypted, 1 not encrypted): 2. uname is stubbed so the row
+  # takes the Linux arm on every host, and lsblk is hidden from PATH rather
+  # than assumed absent, since the Ubuntu runners ship it.
+  local no_lsblk
+  no_lsblk="$(fm_path_without lsblk)"
+  fm_stub uname "echo Linux"
+  test_start "fm_encrypt_check_undetermined"
+  PATH="$no_lsblk" fm_run encrypt-check
+  fm_expect_rc 2
+  test_start "fm_encrypt_check_undetermined_says_so"
+  fm_expect_out_matches 'lsblk +not found; cannot determine encryption status'
+  test_start "fm_encrypt_check_undetermined_claims_no_verdict"
+  if [[ "$FM_OUT" == *"encrypted block device detected"* || "$FM_OUT" == *"no crypto volume detected"* ]]; then
+    fm_fail "a verdict was reported without a probe"
+  else
+    fm_pass "no verdict"
+  fi
+  rm -f "$FM_SANDBOX/bin/uname"
+}
+
 test_fm_telemetry() {
   # Opt-in by design: without DOTFILES_TELEMETRY=1 the command must refuse
   # with rc=1 and say how to enable it, rather than disabling OS services
@@ -247,6 +271,36 @@ test_fm_policy() {
   fm_expect_out "no scan performed"
   test_start "fm_policy_reports_the_dependency_verdict"
   fm_expect_out "Dependencies checked"
+}
+
+test_fm_policy_audit_log_location() {
+  # The audit log is state, not source. It used to be hardcoded to
+  # <repo>/.security-audit.log, so every run — this suite included — wrote
+  # into the checkout. Drive a repo copy carrying scripts/security so the
+  # negative assertion is on a tree nothing else has ever written to, and
+  # require the log under XDG_STATE_HOME (the sandbox's) instead.
+  local repo log
+  repo="$(fm_repo_copy)"
+  [[ -d "$repo/scripts/security" ]] || cp -R "$REPO_ROOT/scripts/security" "$repo/scripts/security"
+  log="$XDG_STATE_HOME/dotfiles/security-audit.log"
+  rm -f "$log"
+  test_start "fm_policy_audit_log_location"
+  DOTFILES_POLICY_STRICT= DOTFILES_POLICY_DEPS_ONLY=1 fm_run_bin "$repo/bin/dot" policy
+  fm_expect_rc 0
+  test_start "fm_policy_audit_log_is_under_xdg_state"
+  fm_expect_file "$log"
+  test_start "fm_policy_audit_log_records_the_run"
+  if grep -q "Dependency check only" "$log" 2>/dev/null; then
+    fm_pass
+  else
+    fm_fail "log at $log does not record the run"
+  fi
+  test_start "fm_policy_leaves_the_repo_root_clean"
+  if [[ -e "$repo/.security-audit.log" ]]; then
+    fm_fail "audit log written into the repo root: $repo/.security-audit.log"
+  else
+    fm_pass "nothing written to the checkout"
+  fi
 }
 
 test_fm_smoke_firewall() { fm_smoke firewall; }
@@ -298,8 +352,10 @@ test_fm_fonts_patch_usage
 test_fm_smoke_tune
 test_fm_backup
 test_fm_encrypt_check
+test_fm_encrypt_check_undetermined
 test_fm_telemetry
 test_fm_policy
+test_fm_policy_audit_log_location
 test_fm_smoke_firewall
 test_fm_smoke_telemetry_apply
 test_fm_smoke_dns_doh
