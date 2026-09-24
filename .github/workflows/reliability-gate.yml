@@ -31,8 +31,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # macos-14 = Apple Silicon (M-series); macos-latest still
-        # resolves to Intel. Both kept to catch arch-specific drift.
+        # Both macOS labels are Apple Silicon: macos-14 runs macOS 14 and
+        # macos-latest runs macOS 26. There is no Intel macOS runner here;
+        # both are kept to catch drift between macOS releases.
         os: [ubuntu-latest, macos-latest, macos-14]
     steps:
       - name: Harden runner (audit mode)

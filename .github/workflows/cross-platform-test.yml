@@ -79,9 +79,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # macos-latest currently maps to macos-13 (Intel). macos-14 is
-        # Apple Silicon (M-series). Both Darwin variants are kept so we
-        # catch arch-specific regressions before Apple Silicon users do.
+        # Both macOS labels are Apple Silicon: macos-14 runs macOS 14 and
+        # macos-latest runs macOS 26. There is no Intel macOS runner here;
+        # both are kept to catch drift between macOS releases.
         os: [ubuntu-latest, macos-latest, macos-14]
         include:
           - os: ubuntu-latest
