@@ -32,7 +32,7 @@ BASE="$WORK/base"
 NOMKTEMP="$WORK/nomktemp"
 mkdir -p "$BASE" "$NOMKTEMP"
 ln -sf "${BASH:-$(command -v bash)}" "$BASE/bash"
-for tool in sh mkdir mktemp tr head ln rm cat kill; do
+for tool in sh mkdir mktemp tr head base64 ln rm cat kill; do
   resolved="$(command -v "$tool" 2>/dev/null || true)"
   [[ -n "$resolved" ]] && ln -sf "$resolved" "$BASE/$tool"
 done
@@ -82,6 +82,27 @@ assert_equals 1 "$RC" "local on fails when the temp file cannot be made"
 assert_contains "Could not read or create the gateway token" "$OUT" "the failure is reported"
 assert_false "[[ -e '$H/.local/state/dotfiles/ai-serve/gateway.token' ]]" "no token file appears"
 assert_false "[[ -e '$H/.config/dotfiles/ai-local.env' ]]" "no routing env is written"
+
+# ── Minting must not depend on SIGPIPE ───────────────────────────────
+# GitHub's runners start every step with SIGPIPE ignored. The old draw,
+# `tr -dc … </dev/urandom | head -c 43`, relied on head's exit killing tr;
+# with the signal ignored BSD tr read /dev/urandom until the job died,
+# and every macOS reliability lane hung for hours. Mint with the signal
+# ignored under a bound: it must finish, and the token must be whole.
+test_start "ai_proxy_mints_a_token_with_sigpipe_ignored"
+SIGPIPE_HOME="$WORK/sigpipe-home"
+mkdir -p "$SIGPIPE_HOME"
+rc=0
+run_with_timeout 15 bash -c '
+  trap "" PIPE
+  HOME="$1" XDG_STATE_HOME="$1/.local/state" XDG_CONFIG_HOME="$1/.config" \
+    PATH="$2:/usr/bin:/bin" bash "$3" local on' _ "$SIGPIPE_HOME" "$BASE" "$PROXY" >/dev/null 2>&1 || rc=$?
+assert_not_equals "124" "$rc" "minting finishes with SIGPIPE ignored (124 = hung until the bound)"
+assert_equals "0" "$rc" "local on succeeds"
+sigpipe_token="$SIGPIPE_HOME/.local/state/dotfiles/ai-serve/gateway.token"
+assert_file_exists "$sigpipe_token" "token file written"
+assert_equals "44" "$(wc -c <"$sigpipe_token" | tr -d ' ')" "43 characters plus one newline"
+assert_true "LC_ALL=C grep -qE '^[A-Za-z0-9_-]{43}\$' '$sigpipe_token'" "token is 43 URL-safe characters"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

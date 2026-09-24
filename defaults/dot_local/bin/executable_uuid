@@ -68,8 +68,10 @@ generate_uuid() {
   elif [[ -f /proc/sys/kernel/random/uuid ]]; then
     uuid=$(cat /proc/sys/kernel/random/uuid)
   else
-    # Fallback: generate using random data
-    uuid=$(od -x /dev/urandom | head -1 | awk '{OFS="-"; print $2$3,$4,$5,$6,$7$8$9}')
+    # Fallback: 16 random bytes. `-N 16` bounds the read; without it od
+    # relied on SIGPIPE from head's exit to stop, and where SIGPIPE is
+    # ignored (CI runners) it read /dev/urandom until the job was killed.
+    uuid=$(od -x -N 16 /dev/urandom | head -1 | awk '{OFS="-"; print $2$3,$4,$5,$6,$7$8$9}')
   fi
 
   # Convert to lowercase first

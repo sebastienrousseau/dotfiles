@@ -95,7 +95,7 @@ dot_fixture_basebin() {
   ln -sf "${BASH:-$(command -v bash)}" "$dir/bash"
   for tool in sh sed grep find sort head tail cut tr wc awk uniq mktemp \
     cp mv rm rmdir cat cmp diff basename dirname date chmod mkdir stat \
-    tput uname id printf env touch ln readlink sleep "$@"; do
+    tput uname id printf env touch ln readlink sleep base64 "$@"; do
     resolved="$(command -v "$tool" 2>/dev/null || true)"
     [[ -n "$resolved" ]] && ln -sf "$resolved" "$dir/$tool"
   done

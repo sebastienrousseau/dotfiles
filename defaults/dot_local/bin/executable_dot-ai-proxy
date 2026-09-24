@@ -204,13 +204,19 @@ _gateway_token() {
   if [[ ! -s "$TOKEN_FILE" ]]; then
     (
       umask 077
-      # head closes the pipe on the 43rd byte, so tr always ends in SIGPIPE;
-      # under pipefail that would skip the newline the token file promises.
-      set +o pipefail
       mkdir -p "$STATE_DIR"
-      local tmp
+      local tmp tok
       tmp="$(mktemp "$TOKEN_FILE.XXXXXX")" || exit 1 # mutation: ignore equivalent: with no temp file nothing is linked, and the empty read below fails either way
-      LC_ALL=C tr -dc 'A-Za-z0-9_-' </dev/urandom | head -c 43 >"$tmp" && echo >>"$tmp"
+      # 32 random bytes, base64url, trimmed to 43 chars. Every reader in
+      # this pipeline consumes a bounded input: the previous
+      # `tr -dc … </dev/urandom | head -c 43` relied on SIGPIPE to stop
+      # tr, and where SIGPIPE is ignored (GitHub's runners) BSD tr read
+      # /dev/urandom forever, hanging every caller for the job's lifetime.
+      tok="$(head -c 32 /dev/urandom | base64 | tr '+/' '-_')" || exit 1
+      tok="${tok//=/}"
+      tok="${tok//$'\n'/}"
+      tok="${tok:0:43}"
+      printf '%s\n' "$tok" >"$tmp"
       # Keep a token another process created first.
       ln "$tmp" "$TOKEN_FILE" 2>/dev/null || true
       rm -f "$tmp"
