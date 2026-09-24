@@ -106,6 +106,8 @@ assert_file_contains "$LOG" "$PATTERN_DIR/architect.md" "glow received the patte
 
 test_start "patterns_view_reports_an_unknown_pattern"
 _out="$(_run view nope)"
+_rc=$?
+assert_equals 1 "$_rc" "unknown pattern exits 1"
 assert_contains "Pattern not found" "$_out" "missing pattern reported"
 _refute_contains "Pattern: nope" "$_out" "no pattern body is rendered"
 

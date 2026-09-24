@@ -462,13 +462,26 @@ rc=$?
 assert_equals 0 "$rc" "flag-only argv exits 0"
 assert_contains '{"node_id"' "$out" "--json without subcommand runs status --json"
 
-test_start "fleet_unknown_subcommand_prints_usage"
-out="$(fleet bogus 2>&1)"
+test_start "fleet_help_prints_the_command_list"
+out="$(fleet help 2>&1)"
 rc=$?
-assert_equals 0 "$rc" "usage listing exits 0"
+assert_equals 0 "$rc" "help exits 0"
 assert_contains "Fleet Commands" "$out" "usage header"
+assert_contains "dot fleet [command]" "$out" "usage line"
 assert_contains "enforce" "$out" "enforce listed"
 assert_contains "apply" "$out" "apply listed"
+
+test_start "fleet_unknown_subcommand_fails"
+out="$(fleet bogus 2>/dev/null)"
+rc=$?
+assert_equals 1 "$rc" "unknown subcommand exits 1"
+assert_equals "" "$out" "nothing on stdout"
+err="$(fleet bogus 2>&1 >/dev/null)"
+assert_contains "Unknown subcommand" "$err" "error line on stderr"
+assert_contains "bogus" "$err" "the unknown word is named"
+assert_contains "Run 'dot fleet help' for usage." "$err" "points at help"
+assert_contains "Fleet Commands" "$err" "command list follows on stderr"
+assert_contains "apply" "$err" "apply listed"
 
 test_start "fleet_dispatch_without_fleet_prefix"
 out="$(bash "$FLEET" --json 2>&1)"

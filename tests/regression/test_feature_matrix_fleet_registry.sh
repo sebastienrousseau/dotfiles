@@ -544,16 +544,35 @@ test_fm_fleet_apply_rejects_option_target() {
   rm -f "$FM_SANDBOX/bin/ssh"
 }
 
+test_fm_fleet_help() {
+  # `dot fleet help` is the command list; the bare form is `status`
+  # (test_fm_fleet) and `--help` is intercepted by bin/dot.
+  test_start "fm_fleet_help"
+  fm_run fleet help
+  fm_expect_rc 0
+  test_start "fm_fleet_help_prints_the_command_list"
+  fm_expect_out "Fleet Commands"
+  test_start "fm_fleet_help_lists_the_subcommands"
+  fm_expect_out_matches 'apply +SSH out'
+}
+
 test_fm_fleet_unknown() {
-  # Unlike every other group, cmd_fleet treats an unknown subcommand as a
-  # request for the command list and exits 0. Pinned as observed.
+  # Like every other group: an unknown subcommand is named, the command
+  # list follows, and the exit status is 1.
   test_start "fm_fleet_unknown"
   fm_run fleet zzz-not-a-subcommand
-  fm_expect_rc 0
+  fm_expect_rc 1
+  test_start "fm_fleet_unknown_names_the_subcommand"
+  fm_expect_err "Unknown subcommand"
+  fm_expect_err "zzz-not-a-subcommand"
   test_start "fm_fleet_unknown_prints_the_command_list"
-  fm_expect_out "Fleet Commands"
+  fm_expect_err "Fleet Commands"
   test_start "fm_fleet_unknown_lists_the_subcommands"
-  fm_expect_out_matches 'apply +SSH out'
+  if printf '%s' "$FM_ERR$FM_OUT" | grep -Eq 'apply +SSH out'; then
+    fm_pass
+  else
+    fm_fail "command list does not name apply"
+  fi
 }
 
 # ── registry ───────────────────────────────────────────────────────────────
@@ -936,6 +955,8 @@ test_fm_patterns_view_missing() {
   fm_expect_any "Missing pattern name" "Usage: dot patterns view"
   test_start "fm_patterns_view_unknown_pattern"
   fm_run patterns view zzz-no-such-pattern
+  fm_expect_rc 1
+  test_start "fm_patterns_view_unknown_pattern_message"
   fm_expect_any "Pattern not found" "zzz-no-such-pattern"
 }
 
