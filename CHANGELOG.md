@@ -4,7 +4,7 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
-## v0.2.523 — 2026-09-22 (Unreleased)
+## v0.2.523 — 2026-09-24
 
 ### Security
 
@@ -42,14 +42,42 @@ This file documents all notable changes to this project.
   (macOS `mktemp` left the `XXXXXX` literal, so runs collided in `/tmp`).
 - Global `mise` installs run from a scratch directory, so npm install
   scripts no longer leave `archive-*` downloads in the dotfiles checkout.
+- `dot doctor` no longer dies on macOS without Homebrew on `PATH` (it
+  exited 127 with no output, `--json` included); the brew count reports n/a.
+- `dot doctor --json` emits a JSON document shaped like `dot health --json`,
+  and the chezmoi drift row is named `chezmoi state` so no two rows share a
+  check name.
+- `dot ai tools` probes each tool's version from a private scratch
+  directory and reports the real version line. The npm Crush shim unpacked
+  `archive-*` downloads into the current directory and its download
+  progress was shown as the version.
+- `dot fleet <unknown>` and `dot patterns view <unknown>` exit 1 naming the
+  word; bare `dot attest -w`/`-F`/`-I`/`--max-age` is a usage error (exit 2).
+- `dot restore --list`/`--latest` find the `backup_*` directories that
+  `dot rollback backup` writes; `dot locks` keeps comment spacing; `dot
+  profile show` prints the value on macOS; `dot aliases search` falls back
+  to `grep -Ei` without ripgrep; `dot policy` logs under XDG state.
+- The encryption check on Linux without `lsblk` exits 2 and says it cannot
+  tell, instead of passing by omission.
+- `dot-theme-sync` no longer crashes on macOS `/bin/bash` 3.2 when
+  reloading Neovim (`local -A` needs bash 4).
 
 ### Changed
 
-- The web manual at `doc.dotfiles.io/manual/` is built with ssg and the Lucid
-  documentation theme, keeping the terminal logo and green-on-ink palette
-  (WCAG AAA in light and dark). `make manual-site` builds it locally.
+- All of doc.dotfiles.io is built with local ssg and the Lucid theme,
+  replacing MkDocs Material: the documentation pages from `docs/_toc.yml`,
+  the landing page, and the manual under `/manual/`, with every internal
+  link checked (`make docs`). The manual keeps the terminal logo and
+  green-on-ink palette (WCAG AAA in light and dark).
+- The support matrix and minimum-toolchain pages match what CI runs:
+  macOS CI is Apple Silicon only (`macos-14`, `macos-latest` = macOS 26),
+  Ubuntu CI is 24.04, fish is the default shell, Fedora needs 41+, and
+  Windows PowerShell 7.4 LTS is CI tested.
+- Tests: behavioural cases replace source-grep assertions in the theme
+  sync, critical-path and error-prone suites, a source-grep ratchet keeps
+  the count from growing, and the behavioural-only coverage lane is gated.
 
-## v0.2.522 — 2026-09-21 (Unreleased)
+## v0.2.522 — 2026-09-21
 
 ### Fixed
 
