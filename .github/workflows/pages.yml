@@ -17,6 +17,7 @@ on:
     paths:
       - 'docs/**'
       - 'mkdocs.yml'
+      - 'tools/docs/build-manual-site.*'
       - 'requirements-docs.txt'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
@@ -34,7 +35,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build site (MkDocs Material)
+    name: Build site (MkDocs Material + ssg manual)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -61,6 +62,23 @@ jobs:
         # Emits the static site to ./site (docs_dir=docs, site_dir=site in
         # mkdocs.yml). CNAME is carried through via extra_files.
         run: mkdocs build --clean
+
+      - name: Install ssg (pinned release, SHA-256 verified)
+        env:
+          SSG_VERSION: 0.0.63
+          SSG_SHA256: b8402ae9bb7a4443e30a4926f067b40feb89477f70a4c9a9d062622bab86ae36
+        run: |
+          set -euo pipefail
+          asset="ssg-v${SSG_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+          curl --proto '=https' --tlsv1.2 -fsSL -o "$RUNNER_TEMP/$asset" \
+            "https://github.com/sebastienrousseau/static-site-generator/releases/download/v${SSG_VERSION}/${asset}"
+          echo "${SSG_SHA256}  $RUNNER_TEMP/$asset" | sha256sum --check --strict
+          mkdir -p "$RUNNER_TEMP/ssg"
+          tar -xzf "$RUNNER_TEMP/$asset" -C "$RUNNER_TEMP/ssg" ssg
+          echo "$RUNNER_TEMP/ssg" >>"$GITHUB_PATH"
+
+      - name: Build the manual with ssg (Lucid theme) into site/manual
+        run: bash tools/docs/build-manual-site.sh --out site/manual
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0

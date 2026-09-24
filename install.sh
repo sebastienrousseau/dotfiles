@@ -66,18 +66,72 @@ sed_in_place() {
   fi
 }
 
+toml_escape() { printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'; }
+
+# Rewrite $CHEZMOI_CONFIG_FILE through an awk program, atomically.
+# Values reach awk via the environment, so no sed/awk escaping applies.
+_chezmoi_config_rewrite() {
+  local prog="$1" tmp
+  tmp=$(mktemp "$CHEZMOI_CONFIG_FILE.XXXXXX") || return 1
+  if awk "$prog" "$CHEZMOI_CONFIG_FILE" >"$tmp"; then
+    mv "$tmp" "$CHEZMOI_CONFIG_FILE"
+  else
+    rm -f "$tmp"
+    return 1
+  fi
+}
+
+# Point chezmoi at the source dir. Existing config (data, git settings)
+# is preserved: only the top-level sourceDir key is set or inserted.
+ensure_chezmoi_source() {
+  local dir="$1"
+  mkdir -p "$CHEZMOI_CONFIG_DIR"
+  local line
+  line="sourceDir = \"$(toml_escape "$dir")\""
+  if [[ ! -f "$CHEZMOI_CONFIG_FILE" ]]; then
+    printf '%s\n' "$line" >"$CHEZMOI_CONFIG_FILE"
+    return
+  fi
+  # shellcheck disable=SC2016
+  DOT_LINE="$line" _chezmoi_config_rewrite '
+    !done && /^[[:space:]]*\[/ { print ENVIRON["DOT_LINE"]; done = 1 }
+    !done && /^[[:space:]]*sourceDir[[:space:]]*=/ { print ENVIRON["DOT_LINE"]; done = 1; next }
+    { print }
+    END { if (!done) print ENVIRON["DOT_LINE"] }'
+}
+
+# Select the minimal profile in the per-host chezmoi config ([data]
+# overrides .chezmoidata.toml), never in the tracked source tree.
+apply_minimal_profile_overrides() {
+  [[ -f "$CHEZMOI_CONFIG_FILE" ]] || printf '' >"$CHEZMOI_CONFIG_FILE"
+  # shellcheck disable=SC2016
+  _chezmoi_config_rewrite '
+    /^[[:space:]]*\[/ {
+      if (in_data && !done) { print "profile = \"minimal\""; done = 1 }
+      in_data = ($0 ~ /^[[:space:]]*\[data\][[:space:]]*$/)
+      print
+      next
+    }
+    in_data && !done && /^[[:space:]]*profile[[:space:]]*=/ { print "profile = \"minimal\""; done = 1; next }
+    { print }
+    END {
+      if (in_data && !done) { print "profile = \"minimal\""; done = 1 }
+      if (!done) printf "\n[data]\nprofile = \"minimal\"\n"
+    }'
+}
+
 show_help() {
   cat <<EOF
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.522)
+  version       The version (tag or branch) to install (default: v0.2.523)
 
 Options:
   --help        Show this help message
   --force       Non-interactive mode (sets DOTFILES_NONINTERACTIVE=1)
   --silent      Quiet mode (sets DOTFILES_SILENT=1)
-  --minimal     Minimal profile (disable nvim, tmux, zellij)
+  --minimal     Select the minimal profile (written to this host's chezmoi config)
   --provision   After applying configs, install the toolchain (packages,
                 fonts, language tools) via the install/provision scripts.
                 Also enabled by DOTFILES_PROVISION=1. Opt-in because it
@@ -87,7 +141,7 @@ EOF
 }
 
 main() {
-  local version="v0.2.522"
+  local version="v0.2.523"
   local version_set=0
   local minimal=0
   local provision="${DOTFILES_PROVISION:-0}"
@@ -117,7 +171,7 @@ main() {
         # like `foobar` doesn't trigger a 30s+ network download attempt.
         # Caught by the install.sh fuzz harness (#881).
         if [[ ! "$arg" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-+][a-zA-Z0-9.-]+)?$ ]]; then
-          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.522)."
+          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.523)."
         fi
         version="$arg"
         version_set=1
@@ -326,28 +380,6 @@ main() {
   # VERSION pinning for supply-chain security
   VERSION="$version"
 
-  ensure_chezmoi_source() {
-    local dir="$1"
-    mkdir -p "$CHEZMOI_CONFIG_DIR"
-    # Escape sed metacharacters in replacement string
-    local escaped_dir
-    escaped_dir=$(printf '%s\n' "$dir" | sed -e 's/[\/&]/\\&/g')
-    if [[ -f "$CHEZMOI_CONFIG_FILE" ]] && grep -q '^sourceDir' "$CHEZMOI_CONFIG_FILE"; then
-      sed_in_place "s,^sourceDir.*$,sourceDir = \"$escaped_dir\"," "$CHEZMOI_CONFIG_FILE"
-    else
-      printf 'sourceDir = "%s"\n' "$dir" >"$CHEZMOI_CONFIG_FILE"
-    fi
-  }
-
-  apply_minimal_profile_overrides() {
-    local data_file="$1"
-    [[ -f "$data_file" ]] || return 0
-    sed_in_place 's/^profile = ".*"/profile = "minimal"/' "$data_file"
-    sed_in_place 's/^nvim = true/nvim = false/' "$data_file"
-    sed_in_place 's/^tmux = true/tmux = false/' "$data_file"
-    sed_in_place 's/^zellij = true/zellij = false/' "$data_file"
-  }
-
   # Carry the user's existing global git identity into chezmoi's data.
   #
   # This installer sets up chezmoi via sourceDir rather than `chezmoi init`,
@@ -358,7 +390,6 @@ main() {
   # and commits fail with "Author identity unknown". Seed name/email/
   # signingkey from `git config --global` when present. Idempotent: skips if
   # the config already carries a [data] block.
-  toml_escape() { printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'; }
   seed_git_identity() {
     local cfg="$CHEZMOI_CONFIG_FILE"
     [[ -f "$cfg" ]] || return 0
@@ -426,16 +457,18 @@ main() {
     step "Detected container environment — using minimal profile"
   fi
 
-  # Apply --minimal overrides if requested
+  # --minimal (or a container) selects the minimal profile. It is written
+  # to the per-host chezmoi config after the source dir is configured and
+  # the git identity is seeded, so the tracked source stays clean.
+  local want_minimal=0
   if [[ $minimal -eq 1 ]] || [[ "${DOTFILES_MINIMAL:-0}" = "1" ]]; then
-    step "Applying minimal profile overrides..."
-    apply_minimal_profile_overrides "$SOURCE_DIR/.chezmoidata.toml"
+    want_minimal=1
   fi
 
   # 6. Initialize & Apply
   step "Applying Configuration..."
 
-  # ── Auto-migration for v0.2.522 reorg ─────────────────────────────────
+  # ── Auto-migration for v0.2.523 reorg ─────────────────────────────────
   # If the user is upgrading from a pre-0.2.503 install, run the
   # migration script BEFORE `chezmoi apply` so the reorg's source-
   # path moves don't cause chezmoi to delete deployed files.
@@ -444,7 +477,7 @@ main() {
   for migrate_src in "$SOURCE_DIR" "$LEGACY_SOURCE_DIR"; do
     migrate_script="$migrate_src/install/migrate/migrate-v0_2-to-v0_2_503.sh"
     if [[ -x "$migrate_script" ]]; then
-      echo "   Running v0.2.522 migration (idempotent; safe on fresh installs)..."
+      echo "   Running v0.2.523 migration (idempotent; safe on fresh installs)..."
       "$migrate_script" || echo "   migration exited non-zero — continuing apply"
       break
     fi
@@ -455,6 +488,10 @@ main() {
     echo "   Applying from local source: $SOURCE_DIR"
     ensure_chezmoi_source "$SOURCE_DIR"
     seed_git_identity
+    if [[ $want_minimal -eq 1 ]]; then
+      step "Applying minimal profile overrides..."
+      apply_minimal_profile_overrides
+    fi
     APPLY_FLAGS=()
     if [[ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]]; then
       APPLY_FLAGS=(--force --no-tty)
@@ -465,6 +502,10 @@ main() {
     mv "$LEGACY_SOURCE_DIR" "$SOURCE_DIR"
     ensure_chezmoi_source "$SOURCE_DIR"
     seed_git_identity
+    if [[ $want_minimal -eq 1 ]]; then
+      step "Applying minimal profile overrides..."
+      apply_minimal_profile_overrides
+    fi
     APPLY_FLAGS=()
     if [[ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]]; then
       APPLY_FLAGS=(--force --no-tty)
@@ -489,13 +530,12 @@ main() {
       printf '%b\n' "${RED}   WARNING: Checked out ref $ACTUAL_REF (requested: $VERSION) — version mismatch${NC}" >&2
     fi
 
-    if [[ $minimal -eq 1 ]]; then
-      step "Applying minimal profile overrides..."
-      apply_minimal_profile_overrides "$SOURCE_DIR/.chezmoidata.toml"
-    fi
-
     ensure_chezmoi_source "$SOURCE_DIR"
     seed_git_identity
+    if [[ $want_minimal -eq 1 ]]; then
+      step "Applying minimal profile overrides..."
+      apply_minimal_profile_overrides
+    fi
     APPLY_FLAGS=()
     if [[ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]]; then
       APPLY_FLAGS=(--force --no-tty)

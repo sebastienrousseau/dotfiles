@@ -99,9 +99,30 @@ px_run status
 assert_contains 'health: {"status":"ok"}' "$PX_OUT" \
   "with no jq on PATH the raw health body should be printed"
 
-test_start "ai_proxy_status_reports_routing_on"
+test_start "ai_proxy_local_on_creates_private_token"
 px_run local on
 assert_equals "0" "$PX_RC" "local on should exit 0"
+tok="$(cat "$STATE/gateway.token" 2>/dev/null)"
+assert_equals "43" "${#tok}" "a 43-char random token is generated"
+
+test_start "ai_proxy_token_file_mode"
+perms="$(stat -c '%a' "$STATE/gateway.token" 2>/dev/null || stat -f '%Lp' "$STATE/gateway.token" 2>/dev/null)"
+assert_equals "600" "$perms" "token file is 0600"
+
+test_start "ai_proxy_routing_env_uses_token"
+assert_file_contains "$CONFIG/ai-local.env" "ANTHROPIC_AUTH_TOKEN=\"$tok\"" \
+  "routing env carries the gateway token, not a dummy key"
+
+test_start "ai_proxy_token_reused"
+px_run local on
+assert_equals "$tok" "$(cat "$STATE/gateway.token" 2>/dev/null)" "an existing token is reused"
+
+test_start "ai_proxy_env_key_wins"
+DOT_AI_API_KEY=explicit-key px_run local on
+assert_file_contains "$CONFIG/ai-local.env" 'ANTHROPIC_AUTH_TOKEN="explicit-key"' \
+  "DOT_AI_API_KEY overrides the token file"
+
+test_start "ai_proxy_status_reports_routing_on"
 assert_file_exists "$CONFIG/ai-local.env" "the posix routing file should be written"
 px_run status
 assert_contains "local routing: ON" "$PX_OUT" \

@@ -52,7 +52,11 @@ check_cmd() {
     return 0
   fi
   if command -v mise >/dev/null 2>&1; then
-    if mise ls --installed 2>/dev/null | grep -qE "($cmd|aqua:.*$cmd)"; then
+    # Exact tool name: `go` must not match `golangci-lint`, and the name
+    # is data, not a regex. Backends prefix it (aqua:owner/name, npm:name).
+    if mise ls --installed 2>/dev/null | awk -v c="$cmd" '
+      { n = $1; if (n == c) f = 1; sub(/.*[:\/]/, "", n); if (n == c) f = 1 }
+      END { exit !f }'; then
       return 0
     fi
   fi

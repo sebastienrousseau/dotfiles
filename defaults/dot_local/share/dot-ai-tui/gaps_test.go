@@ -186,6 +186,11 @@ func TestFilterSqliteOutput(t *testing.T) {
 		{".timer on\n.headers off\nrow\n", "row"},
 		{"   .dotted after spaces\nkeep", "keep"},
 		{"only\nRun Time: x", "only"},
+		// Found by ClusterFuzzLite: an indented timer line became the first
+		// line once the dot-command above it was dropped and the result
+		// trimmed, so "Run Time:" leaked into the cost data.
+		{".timer on\n Run Time: real 0.001\n42", "42"},
+		{"\tRun Time: x\nrow", "row"},
 	}
 	for _, c := range cases {
 		if got := filterSqliteOutput([]byte(c.in)); got != c.want {

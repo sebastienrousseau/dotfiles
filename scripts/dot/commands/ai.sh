@@ -179,11 +179,11 @@ cmd_ai_status() {
       ui_section "$category"
       current_category="$category"
     fi
-    # One awk over the cache line for this tool (was two: field 2 and field 3).
-    local _st_installed _st_ver
+    # One awk over the cache row; no row (EOF, `|| true`) reads as not installed.
+    local _st_installed="" _st_ver=""
     IFS=$'\t' read -r _st_installed _st_ver < <(
       awk -F'\t' -v b="$bin" '$1==b{print $2"\t"$3;exit}' "$AI_STATUS_CACHE_FILE" 2>/dev/null
-    )
+    ) || true
     if [[ "$_st_installed" == "1" ]]; then
       ver="$_st_ver"
       [[ -z "$ver" ]] && ver="installed"
@@ -275,7 +275,7 @@ cmd_ai_status() {
         pkg=$(_ai_mise_pkg "$bin")
         if [[ -n "$pkg" ]]; then
           if has_command gum; then
-            if gum spin --spinner dot --title "Installing $name ($pkg)" -- \
+            if _ai_in_scratch_dir gum spin --spinner dot --title "Installing $name ($pkg)" -- \
               mise use -g "$pkg@latest" 2>&1; then
               ui_ok "$name" "installed"
             else
@@ -283,7 +283,7 @@ cmd_ai_status() {
             fi
           else
             ui_info "Installing" "$name via mise ($pkg)"
-            mise use -g "$pkg@latest" 2>&1 || ui_warn "$name" "install failed (continuing)"
+            _ai_in_scratch_dir mise use -g "$pkg@latest" 2>&1 || ui_warn "$name" "install failed (continuing)" # mutation: ignore unreachable: gum answered the prompt above and stays hashed, so has_command gum is still true here
           fi
         fi
       done
@@ -422,7 +422,7 @@ ${prompt}"
       fi
       if [[ "$do_install" == "yes" ]]; then
         ui_info "Installing" "$tool via mise ($mise_pkg)"
-        mise use -g "$mise_pkg@latest" 2>&1 || {
+        _ai_in_scratch_dir mise use -g "$mise_pkg@latest" 2>&1 || {
           ui_err "$tool" "installation failed"
           exit 1
         }

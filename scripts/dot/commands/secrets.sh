@@ -116,6 +116,9 @@ cmd_secrets_provider() {
 cmd_secrets_set() {
   local key="${1:-}" value="${2:-}"
   [[ -n "$key" ]] || die "Usage: dot secrets set <KEY> [VALUE]"
+  if [[ -n "$value" ]]; then
+    ui_warn "Value on the command line" "it may be saved in shell history; omit it to be prompted"
+  fi
 
   if [[ -z "$value" ]]; then
     read -r -s -p "Value for $key: " value

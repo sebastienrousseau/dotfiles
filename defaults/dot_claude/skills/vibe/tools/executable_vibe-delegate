@@ -62,21 +62,26 @@ echo "Timeout : ${TIMEOUT_SECS}s"
 echo "Prompt  : ${PROMPT:0:120}..."
 echo "==================="
 
+# All scratch files live in one private directory. (BSD mktemp leaves the
+# X's literal when a suffix follows them, so `mktemp /tmp/x-XXXXXX.sh` was a
+# fixed, pre-creatable path in the shared /tmp.)
+VIBE_TMP=$(mktemp -d "${TMPDIR:-/tmp}/vibe-delegate.XXXXXX")
+
 # Write prompt to a temp file — avoids shell injection when prompt contains
 # colons, quotes, emojis, accented chars, or multi-line Python/JS code.
-PROMPT_FILE=$(mktemp /tmp/vibe-prompt-XXXXXX.txt)
+PROMPT_FILE="$VIBE_TMP/prompt.txt"
 printf '%s' "$PROMPT" >"$PROMPT_FILE"
 
 # Write the vibe command to a temp script.
 # Reads the prompt from the file to stay safe from shell expansion.
-VIBE_SCRIPT=$(mktemp /tmp/vibe-cmd-XXXXXX.sh)
+VIBE_SCRIPT="$VIBE_TMP/cmd.sh"
 
 # Stats handoff file: Python parser writes JSON here; bash reads it for the log.
-DELEGATE_STATS_FILE=$(mktemp /tmp/delegate-stats-XXXXXX.json)
+DELEGATE_STATS_FILE="$VIBE_TMP/stats.json"
 printf '{}' >"$DELEGATE_STATS_FILE"
 export DELEGATE_STATS_FILE
 
-trap 'rm -f "$VIBE_SCRIPT" "$PROMPT_FILE" "$DELEGATE_STATS_FILE"' EXIT
+trap 'rm -rf "$VIBE_TMP"' EXIT
 
 {
   echo '#!/usr/bin/env bash'
@@ -265,7 +270,7 @@ FILES_AFTER=$(
 )
 CHANGED=$(comm -13 <(echo "$FILES_BEFORE" | sort) <(echo "$FILES_AFTER" | sort) 2>/dev/null)
 
-SYNTAX_COUNT_FILE=$(mktemp /tmp/vibe-syntax-count-XXXXXX.txt)
+SYNTAX_COUNT_FILE="$VIBE_TMP/syntax-count.txt"
 echo 0 >"$SYNTAX_COUNT_FILE"
 export DELEGATE_CHANGED="$CHANGED"
 export SYNTAX_COUNT_FILE

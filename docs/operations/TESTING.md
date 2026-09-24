@@ -153,6 +153,40 @@ For core internal behavior traceability, run:
 bash ./scripts/qa/traceability-coverage.sh
 ```
 
+## Mutation score
+
+Line coverage says a line ran. The mutation score says whether the suite
+would notice if that line were wrong. `tools/ci/mutation-test.py` plants one
+small, plausible bug per eligible line (a dropped regex anchor, a flipped
+exit code, a swapped comparison), runs the behavioural tests that exercise
+the file, and counts a mutant as *killed* only if one of them fails.
+
+```bash
+# What CI runs on a pull request: only the lines the PR changed
+python3 tools/ci/mutation-test.py --base origin/main --min-score 80
+
+# Every eligible line of one file
+python3 tools/ci/mutation-test.py --full scripts/ops/rollback.sh
+
+# See the mutants without running anything
+python3 tools/ci/mutation-test.py --list-mutants --full scripts/ops/rollback.sh
+```
+
+Rules that keep the score honest:
+
+- Kills only count from behavioural tests. Tests that grep or lint the
+  source text are listed in `tools/ci/mutation-structural.txt` and would
+  "kill" any edit, so they are ignored.
+- A test that fails on the unmutated tree is dropped and reported.
+- A mutant with no related test counts as survived.
+- A line that cannot be meaningfully mutated is opted out in place with
+  `# mutation: ignore <reason>`; the reason is mandatory.
+
+A survivor means the behaviour on that line is unprotected. Kill it with a
+test that pins the observable outcome (exit status, message, file written
+or not), never with a source grep. `tests/unit/ci/test_mutation_engine.sh`
+checks the engine itself fails a weak suite.
+
 ## CI integration
 
 Tests run automatically on every push to main, every pull request, and weekly scheduled runs (Monday 6 AM UTC).
@@ -178,6 +212,7 @@ Tests run automatically on every push to main, every pull request, and weekly sc
 
 | Variable | Default | Description |
 |----------|---------|-------------|
+| `TEST_FILE_TIMEOUT` | `900` | Seconds a single test file may run before the runner kills it, names it as timed out and counts a failure (`0` disables) |
 | `RUN_INTEGRATION` | `0` | Set to `1` to include integration tests |
 | `VERBOSE` | `0` | Set to `1` for verbose output |
 | `REPO_ROOT` | Auto-detected | Repository root directory |

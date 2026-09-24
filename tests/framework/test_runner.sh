@@ -44,6 +44,57 @@ detect_cores() {
   fi
 }
 
+# Per-file time limit in seconds (0 disables). A hung test file used to
+# hold a CI lane until the job's own limit, six hours by default, with
+# nothing naming the file. Now it is killed, reported as a timeout, and
+# counted as a failure. The slowest suites finish in a few minutes.
+TEST_FILE_TIMEOUT="${TEST_FILE_TIMEOUT:-900}"
+
+# run_bounded <seconds> <cmd...>: exit 124 on expiry, the command's own
+# status otherwise. perl gives fork + setsid + kill-the-group on both GNU
+# and BSD hosts, so a test's stray children die with it (the same
+# technique as run_with_timeout in assertions.sh; not sourced here to
+# keep the runner self-contained). Without perl the limit is not
+# enforced.
+run_bounded() {
+  local secs="$1"
+  shift
+  if [[ "$secs" -le 0 ]] || ! command -v perl >/dev/null 2>&1; then
+    "$@"
+    return $?
+  fi
+  perl -e '
+    use POSIX qw(setsid);
+    my $secs = shift @ARGV;
+    my $pid  = fork();
+    die "run_bounded: fork failed: $!\n" unless defined $pid;
+    if ($pid == 0) {
+      setsid();
+      exec { $ARGV[0] } @ARGV;
+      exit 127;
+    }
+    my $timed_out = 0;
+    $SIG{ALRM} = sub { $timed_out = 1; kill("KILL", -$pid); };
+    alarm($secs);
+    my $reaped;
+    do { $reaped = waitpid($pid, 0); } while ($reaped == -1 && $!{EINTR});
+    my $status = $?;
+    alarm(0);
+    kill("KILL", -$pid);
+    exit(124) if $timed_out;
+    exit($status & 127 ? 128 + ($status & 127) : $status >> 8);
+  ' "$secs" "$@"
+}
+
+# Describe a non-zero exit for the failure list and the log line.
+describe_exit() {
+  if [[ "$1" -eq 124 ]]; then
+    printf 'timed out after %ss' "$TEST_FILE_TIMEOUT"
+  else
+    printf 'crashed exit=%s' "$1"
+  fi
+}
+
 # Run a single test file in serial mode (live output).
 run_test_file_serial() {
   local test_file="$1"
@@ -60,7 +111,7 @@ run_test_file_serial() {
   echo "─────────────────────────────────────"
 
   local exit_status=0
-  bash "$test_file" </dev/null 2>&1 | tee "$temp_results" || exit_status=$?
+  run_bounded "$TEST_FILE_TIMEOUT" bash "$test_file" </dev/null 2>&1 | tee "$temp_results" || exit_status=$?
 
   local results_line
   results_line=$(grep "^RESULTS:" "$temp_results" | tail -1) || true
@@ -72,10 +123,10 @@ run_test_file_serial() {
     TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + passed + failed))
     if [[ "$failed" -gt 0 ]]; then TOTAL_FAILED_FILES+=("$(basename "$test_file") ($failed failed)"); fi
   elif [[ $exit_status -ne 0 ]]; then
-    printf '%b\n' "\033[0;31mERROR: $(basename "$test_file") crashed (exit $exit_status) without producing results\033[0m"
+    printf '%b\n' "\033[0;31mERROR: $(basename "$test_file") $(describe_exit "$exit_status") without producing results\033[0m"
     TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + 1))
     TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + 1))
-    TOTAL_FAILED_FILES+=("$(basename "$test_file") (crashed exit=$exit_status)")
+    TOTAL_FAILED_FILES+=("$(basename "$test_file") ($(describe_exit "$exit_status"))")
   fi
 }
 
@@ -91,7 +142,7 @@ run_test_file_worker() {
     echo "Running: $(basename "$test_file")"
     echo "─────────────────────────────────────"
     local exit_status=0
-    bash "$test_file" </dev/null 2>&1 || exit_status=$?
+    run_bounded "$TEST_FILE_TIMEOUT" bash "$test_file" </dev/null 2>&1 || exit_status=$?
     # Append exit status sentinel for the aggregator
     printf 'EXIT_STATUS:%d\n' "$exit_status"
   } >"$out_file" 2>&1
@@ -122,10 +173,10 @@ aggregate_parallel_results() {
       TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + passed + failed))
       if [[ "$failed" -gt 0 ]]; then TOTAL_FAILED_FILES+=("$(basename "$f" .out) ($failed failed)"); fi
     elif [[ $exit_status -ne 0 ]]; then
-      printf '%b\n' "\033[0;31mERROR: $(basename "$f" .out) crashed (exit $exit_status) without producing results\033[0m"
+      printf '%b\n' "\033[0;31mERROR: $(basename "$f" .out) $(describe_exit "$exit_status") without producing results\033[0m"
       TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + 1))
       TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + 1))
-      TOTAL_FAILED_FILES+=("$(basename "$f" .out) (crashed exit=$exit_status)")
+      TOTAL_FAILED_FILES+=("$(basename "$f" .out) ($(describe_exit "$exit_status"))")
     fi
   done
 }
@@ -153,7 +204,8 @@ run_test_list() {
     # shellcheck disable=SC2064  # capture $out_dir at trap-registration time
     trap "rm -rf '$out_dir'" RETURN
 
-    export -f run_test_file_worker
+    export -f run_test_file_worker run_bounded describe_exit
+    export TEST_FILE_TIMEOUT
     # shellcheck disable=SC2016  # $0 inside xargs invocation
     printf '%s\n' "$@" | xargs -I{} -P "$JOBS" \
       bash -c 'run_test_file_worker "$@"' _ {} "$out_dir"
@@ -197,6 +249,7 @@ Environment Variables:
   RUN_INTEGRATION=1   Enable integration tests
   VERBOSE=1           Enable verbose output
   TEST_JOBS=N         Default parallelism (overridden by --jobs)
+  TEST_FILE_TIMEOUT=S Kill a test file after S seconds (default 900, 0 = off)
 EOF
 }
 

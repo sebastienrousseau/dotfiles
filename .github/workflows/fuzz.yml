@@ -27,6 +27,9 @@ on:
     paths:
       - 'lib/dot/utils.sh'
       - 'scripts/dot/commands/init.sh'
+      - 'scripts/dot/commands/fleet.sh'
+      - 'scripts/lib/secrets_provider.sh'
+      - 'defaults/dot_local/bin/executable_dot-ai-serve'
       - 'fuzz/**'
       - 'defaults/dot_local/share/dot-ui/**'
       - 'defaults/dot_local/share/dot-ai-tui/**'
@@ -123,6 +126,12 @@ jobs:
           - harness: FuzzValidateName
             dir: fuzz
           - harness: FuzzInitURLResolver
+            dir: fuzz
+          - harness: FuzzFleetInputs
+            dir: fuzz
+          - harness: FuzzSecretKey
+            dir: fuzz
+          - harness: FuzzGatewayGate
             dir: fuzz
           # dot-ui, in-module against the real implementation.
           - harness: FuzzParseEvent

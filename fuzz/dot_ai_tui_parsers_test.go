@@ -92,7 +92,9 @@ func FuzzAISessionFile(f *testing.F) {
 func FilterAISqliteOutput(b []byte) string {
 	var keep []string
 	for _, ln := range strings.Split(strings.TrimSpace(string(b)), "\n") {
-		if strings.HasPrefix(ln, "Run Time:") || strings.HasPrefix(strings.TrimSpace(ln), ".") {
+		// Match on the trimmed line: the final TrimSpace would otherwise
+		// turn an indented meta line into a leading one.
+		if t := strings.TrimSpace(ln); strings.HasPrefix(t, "Run Time:") || strings.HasPrefix(t, ".") {
 			continue
 		}
 		keep = append(keep, ln)
@@ -105,7 +107,7 @@ func FilterAISqliteOutput(b []byte) string {
 func FuzzAISqliteOutput(f *testing.F) {
 	for _, s := range []string{
 		"Run Time: real 0.001\n$1.23\n", ".timer on\nrow\n", "", "   \n\n  ",
-		"keep\n   .dot\nkeep2", "only\nRun Time: x", ".\n..\n...",
+		"keep\n   .dot\nkeep2", "only\nRun Time: x", ".\n..\n...", ".timer on\n Run Time: 1\n42",
 	} {
 		f.Add([]byte(s))
 	}

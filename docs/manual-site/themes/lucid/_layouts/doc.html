@@ -1,0 +1,40 @@
+{{#extends "base"}}
+{{#block "main"}}
+<div class="lu-shell doc-shell">
+  <!-- Navigation, contents and pager are generated per page by
+       tools/docs/build-manual-site.py from docs/manual/_toc.yml and the
+       page's own headings: the template engine has no loops. -->
+  <nav class="doc-side" aria-label="{{label_docs_nav}}">
+    {{!side_nav}}
+  </nav>
+
+  <article class="doc-main">
+    <nav class="crumbs" aria-label="{{label_crumbs}}">
+      <ol>
+        <li><a href="{{base_path}}">{{nav_home}}</a></li>
+        {{!crumb_group}}
+        <li><span aria-current="page">{{headline}}</span></li>
+      </ol>
+    </nav>
+
+    <p class="eyebrow">{{eyebrow}}</p>
+    <h1 class="doc-h" id="{{headline_id}}">{{headline}}</h1>
+    <p class="doc-lead">{{lead}}</p>
+
+    <div class="prose">
+      {{!content}}
+    </div>
+
+    <nav class="pager" aria-label="{{label_pager}}">
+      {{!pager}}
+    </nav>
+  </article>
+
+  <aside class="doc-toc" aria-labelledby="toc-h">
+    <h2 class="side-h" id="toc-h">{{label_toc}}</h2>
+    <ul class="toc-list">
+      {{!toc_items}}
+    </ul>
+  </aside>
+</div>
+{{/block}}

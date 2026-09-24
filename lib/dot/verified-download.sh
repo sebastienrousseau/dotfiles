@@ -105,7 +105,9 @@ download_verified_asset() (
     rm -f "$destination"
     return 1
   fi
-  expected="$(awk -v asset="$asset_name" '{ name=$2; sub(/^\*/, "", name); if (name == asset) print $1 }' "$checksum_file")"
+  # Accept sha256sum's binary marker (*name) and ./name entries; every
+  # match is printed, so a duplicated asset fails the single-hash check.
+  expected="$(awk -v asset="$asset_name" '{ name=$2; sub(/^\*/, "", name); sub(/^\.\//, "", name); if (name == asset) print $1 }' "$checksum_file")"
   [[ "$expected" =~ ^[0-9a-f]{64}$ ]] || {
     printf 'Release asset is absent or ambiguous in checksum manifest: %s\n' "$asset_name" >&2
     rm -f "$destination"

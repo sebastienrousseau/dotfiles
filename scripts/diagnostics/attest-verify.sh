@@ -66,6 +66,8 @@ USAGE
       ;;
     --)
       shift
+      # Operands after `--` are still the evidence FILE, never options.
+      [[ $# -gt 0 ]] && EVIDENCE_FILE="$1"
       break
       ;;
     -*)

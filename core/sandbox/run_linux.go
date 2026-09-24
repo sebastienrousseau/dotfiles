@@ -54,6 +54,12 @@ func Run(plugin, stage string) error {
 	if err := restrictSyscalls(); err != nil {
 		return err
 	}
+	// Descriptors core passed down (the runner and plugin images) must not
+	// reach the plugin. Exec of /proc/self/fd/4 still works: the kernel
+	// resolves the path before close-on-exec takes effect.
+	if err := unix.CloseRange(3, ^uint(0), unix.CLOSE_RANGE_CLOEXEC); err != nil {
+		return fmt.Errorf("DOT_E_SANDBOX_UNAVAILABLE: close inherited descriptors: %w", err)
+	}
 	return unix.Exec(plugin, []string{plugin}, []string{"LANG=C", "DOT_STAGE_ROOT=" + stage})
 }
 
@@ -189,6 +195,7 @@ func restrictSyscalls() error {
 		unix.SYS_PROCESS_VM_WRITEV, unix.SYS_KCMP, unix.SYS_PIDFD_OPEN,
 		unix.SYS_PIDFD_GETFD, unix.SYS_PIDFD_SEND_SIGNAL,
 		unix.SYS_KILL, unix.SYS_TKILL, unix.SYS_TGKILL,
+		unix.SYS_RT_SIGQUEUEINFO, unix.SYS_RT_TGSIGQUEUEINFO,
 		unix.SYS_CLONE3, unix.SYS_MOUNT, unix.SYS_UMOUNT2, unix.SYS_PIVOT_ROOT,
 		unix.SYS_CHROOT, unix.SYS_OPEN_TREE, unix.SYS_MOVE_MOUNT, unix.SYS_FSOPEN,
 		unix.SYS_FSCONFIG, unix.SYS_FSMOUNT, unix.SYS_FSPICK, unix.SYS_MOUNT_SETATTR,
@@ -212,6 +219,9 @@ func restrictSyscalls() error {
 		{Code: uint16(unix.BPF_LD | unix.BPF_W | unix.BPF_ABS), K: 4},
 		{Code: uint16(unix.BPF_JMP | unix.BPF_JEQ | unix.BPF_K), Jt: 1, K: arch},
 		{Code: uint16(unix.BPF_RET | unix.BPF_K), K: uint32(unix.SECCOMP_RET_KILL_PROCESS)},
+	}
+	filter = append(filter, architectureSyscallGuard()...)
+	filter = append(filter, []unix.SockFilter{
 		{Code: uint16(unix.BPF_LD | unix.BPF_W | unix.BPF_ABS), K: 0},
 		// Permit prlimit64 only for the calling process (pid 0). The hard
 		// maxima cannot be raised, while another same-UID process stays out
@@ -230,7 +240,7 @@ func restrictSyscalls() error {
 		{Code: uint16(unix.BPF_JMP | unix.BPF_JSET | unix.BPF_K), Jt: 1, K: uint32(unix.CLONE_THREAD)},
 		{Code: uint16(unix.BPF_RET | unix.BPF_K), K: errno},
 		{Code: uint16(unix.BPF_LD | unix.BPF_W | unix.BPF_ABS), K: 0},
-	}
+	}...)
 	for _, number := range denied {
 		filter = append(filter,
 			unix.SockFilter{Code: uint16(unix.BPF_JMP | unix.BPF_JEQ | unix.BPF_K), Jf: 1, K: number},

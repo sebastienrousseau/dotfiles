@@ -41,21 +41,16 @@ uk_run() {
 
 # ── 1. uuid without uuidgen ────────────────────────────────────────────────
 # With uuidgen stubbed away, `uuid` tries the kernel source first and only
-# then `od -x /dev/urandom | head -1 | awk …`.
+# then `od -x -N 16 /dev/urandom | head -1 | awk …`.
 #
 #   Linux   /proc/sys/kernel/random/uuid exists, so a real id is produced
 #           and the fallback is never reached.
-#   macOS   neither source exists, so the fallback runs — and `head` closes
-#           the pipe while `od` keeps reading /dev/urandom. Whether od sees
-#           the closed pipe before its next write is a RACE. It usually dies
-#           of SIGPIPE, but when it loses, the command substitution waits on
-#           it forever: a CI runner burned six hours on exactly this and was
-#           killed by the job ceiling, leaving an orphaned `od` behind.
-#
-# So the scenario runs only where it is bounded. The macOS branch is left
-# unexercised deliberately — the same choice test_bin_uuid_open_recstop.sh
-# makes, and for the same reason: a unit test must not gamble on a race
-# whose losing side is an unkillable suite.
+#   macOS   neither source exists, so the fallback runs. It used to read
+#           /dev/urandom unbounded and rely on SIGPIPE from head's exit to
+#           stop od; where SIGPIPE is ignored (GitHub's runners) od read
+#           forever and a CI lane burned six hours on exactly this. `-N 16`
+#           bounds the read, so the fallback is exercised here with the
+#           signal ignored and a time limit: it must finish and produce an id.
 if [[ -r /proc/sys/kernel/random/uuid ]]; then
   test_start "uuid_uses_the_kernel_source_when_uuidgen_is_absent"
   uk_run executable_uuid
@@ -63,9 +58,15 @@ if [[ -r /proc/sys/kernel/random/uuid ]]; then
   assert_true "[[ \"\$UK_OUT\" =~ ^[0-9a-fA-F-]{36}$ ]]" \
     "and it should be a well-formed uuid"
 else
-  test_start "uuid_urandom_fallback_not_exercised_without_proc_uuid"
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (skipped: od + /dev/urandom can hang)"
+  test_start "uuid_urandom_fallback_finishes_with_sigpipe_ignored"
+  UK_RC=0
+  UK_OUT="$(run_with_timeout 20 bash -c '
+    trap "" PIPE
+    PATH="$1/stubs:$1/base" NO_COLOR=1 bash "$2/executable_uuid" 2>&1 </dev/null' _ "$WORK" "$BIN_DIR")" || UK_RC=$?
+  assert_not_equals "124" "$UK_RC" "the fallback finishes (124 = od read /dev/urandom until the bound)"
+  assert_equals "0" "$UK_RC" "the fallback produces an id"
+  assert_true "[[ \"\$UK_OUT\" =~ ^[0-9a-f-]{36}$ ]]" \
+    "and it is a well-formed lowercase uuid"
 fi
 
 # ── 2. kill-port walks its lookup tools ────────────────────────────────────

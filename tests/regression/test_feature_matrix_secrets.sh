@@ -119,6 +119,28 @@ test_fm_config_secrets_policy() {
 
 # ── secrets set / get / list ───────────────────────────────────────────────
 
+test_fm_secrets_set_invalid_key() {
+  # Key names become <store>/<key>.age, keychain services and export lines:
+  # a path separator or a leading '-'/'.' is refused before any provider
+  # runs, so nothing is written outside the store.
+  local key
+  for key in '../escape' 'a/b' '-flag' '.hidden'; do
+    test_start "fm_secrets_set_invalid_key_${key//[^a-z]/_}"
+    DOTFILES_SECRETS_PROVIDER=plain-enc fm_run secrets set "$key" value
+    fm_expect_rc 1
+  done
+  test_start "fm_secrets_set_invalid_key_message"
+  fm_expect_any "invalid key"
+  test_start "fm_secrets_set_invalid_key_writes_nothing"
+  if find "$FM_SANDBOX" -name 'escape.age' 2>/dev/null | grep -q .; then
+    fm_fail "a file was written for a path-like key"
+  else
+    fm_pass "nothing written"
+  fi
+  test_start "fm_secrets_set_value_argument_warns"
+  fm_expect_any "shell history"
+}
+
 test_fm_secrets_set() {
   if ! fm_secrets_enable_age; then
     test_start "fm_secrets_set"
@@ -393,6 +415,7 @@ test_fm_secrets_provider
 test_fm_env_dotfiles_secrets_provider
 test_fm_config_secrets_policy
 test_fm_secrets_set
+test_fm_secrets_set_invalid_key
 test_fm_secrets_set_usage
 test_fm_smoke_secrets_set_prompt
 test_fm_secrets_get

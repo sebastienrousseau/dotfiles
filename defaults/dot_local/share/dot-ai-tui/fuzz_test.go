@@ -258,6 +258,7 @@ func FuzzFilterSqliteOutput(f *testing.F) {
 	f.Add([]byte(""))
 	f.Add([]byte("   \n\n  "))
 	f.Add([]byte("keep\n   .dot\nkeep2"))
+	f.Add([]byte(".timer on\n Run Time: 1\n42"))
 	f.Fuzz(func(t *testing.T, data []byte) {
 		out := filterSqliteOutput(data)
 		if out != strings.TrimSpace(out) {

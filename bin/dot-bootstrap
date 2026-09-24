@@ -25,19 +25,39 @@ error() {
   exit 1
 }
 
-step "Starting Deterministic Bootstrap (v0.2.493 Frontier)"
+# The Nix installer runs as root (--daemon), so it is pinned to a release and
+# its SHA-256. Keep in sync with security/remote-installers.sha256 (tested).
+# The installer itself pins the per-platform tarball hashes it downloads.
+NIX_INSTALLER_URL="https://releases.nixos.org/nix/nix-2.35.2/install"
+NIX_INSTALLER_SHA256="9adda97297d9e8ab360df95c729eabff4f4f93d6db091953c3a68f29e3fb130c"
+
+sha256_of() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | awk '{print $1}'
+  else
+    return 127
+  fi
+}
+
+step "Starting Deterministic Bootstrap"
 
 # 1. Install Nix (if not present)
 if ! command -v nix >/dev/null 2>&1; then
   step "Installing Nix Package Manager..."
   nix_installer=$(umask 077 && mktemp)
-  if ! curl -fsSL -o "$nix_installer" https://nixos.org/nix/install; then
+  if ! curl --proto '=https' --tlsv1.2 -fsSL -o "$nix_installer" "$NIX_INSTALLER_URL"; then
     rm -f "$nix_installer"
     error "Failed to download Nix installer"
   fi
-  if ! head -1 "$nix_installer" | grep -q '^#!/'; then
+  if ! actual_sha="$(sha256_of "$nix_installer")"; then
     rm -f "$nix_installer"
-    error "Nix installer does not look like a shell script"
+    error "No SHA-256 tool (sha256sum or shasum) to verify the Nix installer"
+  fi
+  if [[ "$actual_sha" != "$NIX_INSTALLER_SHA256" ]]; then
+    rm -f "$nix_installer"
+    error "Nix installer checksum mismatch (expected $NIX_INSTALLER_SHA256, got $actual_sha)"
   fi
   sh "$nix_installer" --daemon
   rm -f "$nix_installer"

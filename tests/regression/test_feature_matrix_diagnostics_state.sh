@@ -140,10 +140,83 @@ test_fm_rollback_unknown() {
   fm_expect_any "Unknown command" "Usage"
 }
 
-test_fm_smoke_rollback_restore() {
-  # `rollback rollback` / `rollback-to N` / `git-reset` / `restore FILE`
-  # rewrite $HOME from a backup and reset the git checkout.
-  fm_smoke rollback
+# Content of <file> inside the Nth newest backup (1-based), as rollback-to
+# numbers them.
+fm_backup_content() {
+  local n="$1" file="$2" dir
+  dir="$(find "$XDG_DATA_HOME/dotfiles/backups" -maxdepth 1 -type d -name 'backup_*' | sort -r | sed -n "${n}p")"
+  cat "$dir/$file" 2>/dev/null
+}
+
+test_fm_rollback_restore_paths() {
+  # `rollback rollback` / `rollback-to N` / `restore FILE` rewrite $HOME from
+  # a backup. $HOME is the sandbox here, so the real paths run for real.
+  printf 'v1\n' >"$HOME/.bashrc"
+  fm_run rollback backup
+  test_start "fm_rollback_restore_paths_backup"
+  fm_expect_rc 0
+
+  printf 'v2\n' >"$HOME/.bashrc"
+  test_start "fm_rollback_rollback_force"
+  fm_run rollback rollback --force
+  fm_expect_rc 0
+  test_start "fm_rollback_rollback_restores_backup"
+  if [[ "$(cat "$HOME/.bashrc")" == "v1" ]]; then fm_pass "restored v1"; else fm_fail "got $(cat "$HOME/.bashrc")"; fi
+
+  printf 'v3\n' >"$HOME/.bashrc"
+  local want
+  want="$(fm_backup_content 1 .bashrc)"
+  test_start "fm_rollback_rollback_to_index"
+  fm_run rollback rollback-to 1 --force
+  fm_expect_rc 0
+  test_start "fm_rollback_rollback_to_restores_that_backup"
+  if [[ -n "$want" && "$(cat "$HOME/.bashrc")" == "$want" ]]; then fm_pass "restored backup #1"; else fm_fail "got $(cat "$HOME/.bashrc"), want $want"; fi
+
+  printf 'v4\n' >"$HOME/.bashrc"
+  want="$(fm_backup_content 1 .bashrc)"
+  test_start "fm_rollback_restore_file"
+  fm_run rollback restore .bashrc
+  fm_expect_rc 0
+  test_start "fm_rollback_restore_file_content"
+  if [[ "$(cat "$HOME/.bashrc")" == "$want" ]]; then fm_pass "file restored"; else fm_fail "got $(cat "$HOME/.bashrc"), want $want"; fi
+
+  test_start "fm_rollback_restore_rejects_traversal"
+  fm_run rollback restore ../../etc/passwd
+  fm_expect_rc 1
+}
+
+test_fm_rollback_git_reset_keeps_work() {
+  # git-reset runs against $HOME/.dotfiles, which the sandbox links to the
+  # real checkout, so this case gets its own HOME and throwaway repository.
+  local home="$FM_SANDBOX/rb-git-home" repo head
+  repo="$home/.dotfiles"
+  rm -rf "$home"
+  mkdir -p "$repo"
+  (
+    cd "$repo" || exit 1
+    git init -q -b main
+    git config user.email fm@example.invalid
+    git config user.name fm
+    git config commit.gpgsign false
+    git config tag.gpgsign false
+    echo base >tracked.txt
+    git add tracked.txt
+    git commit -qm base
+    git tag v1
+    echo local >>tracked.txt
+    git commit -qam local
+    echo dirty >untracked.txt
+  )
+  head="$(git -C "$repo" rev-parse HEAD)"
+  test_start "fm_rollback_git_reset_force"
+  HOME="$home" fm_run rollback git-reset --force
+  fm_expect_rc 0
+  test_start "fm_rollback_git_reset_resets_to_tag"
+  if [[ "$(git -C "$repo" rev-parse HEAD)" == "$(git -C "$repo" rev-parse 'v1^{commit}')" ]]; then fm_pass "HEAD at v1"; else fm_fail "HEAD not at v1"; fi
+  test_start "fm_rollback_git_reset_keeps_old_head"
+  if [[ "$(git -C "$repo" for-each-ref --format='%(objectname)' 'refs/heads/rollback-backup/*')" == "$head" ]]; then fm_pass "old HEAD kept on rollback-backup/*"; else fm_fail "no rollback-backup branch at the old HEAD"; fi
+  test_start "fm_rollback_git_reset_stashes_untracked"
+  if git -C "$repo" show --name-only --format= 'stash@{0}^3' 2>/dev/null | grep -qx untracked.txt; then fm_pass "untracked file stashed"; else fm_fail "untracked file not in the stash"; fi
 }
 
 # ── drift ──────────────────────────────────────────────────────────────────
@@ -443,7 +516,8 @@ test_fm_rollback_status
 test_fm_rollback_backup
 test_fm_rollback_clean
 test_fm_rollback_unknown
-test_fm_smoke_rollback_restore
+test_fm_rollback_restore_paths
+test_fm_rollback_git_reset_keeps_work
 test_fm_drift
 test_fm_drift_json
 test_fm_history

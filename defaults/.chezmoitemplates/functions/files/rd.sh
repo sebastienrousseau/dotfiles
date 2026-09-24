@@ -30,8 +30,11 @@ rd() {
     if [[ -d "$dangerous" ]]; then
       resolved_dangerous="$(cd "$dangerous" 2>/dev/null && pwd -P)" || true
     fi
+    # LCOV_EXCL_START — xtrace records this two-line [[ ]] only at its
+    # last line, so the first can never be hit; the body below is measured.
     if [[ "$resolved" == "$dangerous" || "$resolved" == "$dangerous/" ||
       "$resolved" == "$resolved_dangerous" || "$resolved" == "$resolved_dangerous/" ]]; then
+      # LCOV_EXCL_STOP
       echo "[ERROR] Refusing to delete protected path: $resolved" >&2
       return 1
     fi

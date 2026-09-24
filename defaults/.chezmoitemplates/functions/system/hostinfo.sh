@@ -57,7 +57,7 @@ hostinfo() {
   username=$(whoami)
   hostname=$(hostname)
   system_info=$(uname -a)
-  users_logged_on=$(w -h | awk '{print $1}' | sort | uniq | paste -sd ", " -)
+  users_logged_on=$(w -h | awk '{print $1}' | sort | uniq | paste -sd "," - | sed "s/,/, /g")
   current_date=$(date)
   machine_stats=$(uptime | sed 's/^ *//')
 
@@ -75,7 +75,7 @@ hostinfo() {
 
   # Fetch DNS configuration (macOS specific)
   if command -v scutil &>/dev/null; then
-    dns_config=$(scutil --dns | awk '/nameserver/ {print $3}' | paste -sd ", " -)
+    dns_config=$(scutil --dns | awk '/nameserver/ {print $3}' | paste -sd "," - | sed "s/,/, /g")
   fi
 
   # Display information in a table format

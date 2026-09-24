@@ -1,6 +1,6 @@
 #!/bin/sh
 # Interactive Tour using Gum
-# Part of Dotfiles v0.2.503
+# Part of Dotfiles
 
 set -eu
 
@@ -32,6 +32,8 @@ fi
 clear
 
 # Intro (match UI header style)
+# The installed version, read at run time so the banner never goes stale.
+tour_version="$(dot version 2>/dev/null | sed -n 's/.*\.dotfiles \([0-9][0-9.]*\).*/\1/p' | head -n 1)"
 banner='██████╗  ██████╗ ████████╗███████╗██╗██╗     ███████╗███████╗
 ██╔══██╗██╔═══██╗╚══██╔══╝██╔════╝██║██║     ██╔════╝██╔════╝
 ██║  ██║██║   ██║   ██║   █████╗  ██║██║     █████╗  ███████╗
@@ -39,7 +41,7 @@ banner='██████╗  ██████╗ ████████╗
 ██████╔╝╚██████╔╝   ██║   ██║     ██║███████╗███████╗███████║
 ╚═════╝  ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝
 
-v0.2.503 · Infrastructure‑grade shell environment'
+'"${tour_version:+v$tour_version · }"'Infrastructure‑grade shell environment'
 
 gum style \
   --foreground 212 --border-foreground 212 --border double \

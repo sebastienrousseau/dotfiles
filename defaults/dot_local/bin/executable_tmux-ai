@@ -102,7 +102,7 @@ launch_provider() {
 
 case "${1:-status}" in
   status)
-    shift
+    shift || true
     status_label "${1:-}" "${2:-}"
     ;;
   launch)

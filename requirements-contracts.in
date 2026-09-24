@@ -1,0 +1,3 @@
+# Python deps for the core-contracts CI job; compile with:
+#   uv pip compile --generate-hashes --python-version 3.12 requirements-contracts.in -o requirements-contracts.txt
+jsonschema==4.25.1

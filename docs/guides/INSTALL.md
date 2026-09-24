@@ -87,7 +87,9 @@ cd ~/.dotfiles
 
 ### Minimal install
 
-Install only shells and core tools. This skips editor and terminal extras:
+Install only shells and core tools. This selects the `minimal` profile in
+this host's `~/.config/chezmoi/chezmoi.toml` (the tracked source is not
+edited) and skips toolchain provisioning:
 
 ```bash
 ./install.sh --minimal

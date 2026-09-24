@@ -6,7 +6,7 @@ on:
       min_coverage:
         description: Minimum module coverage percentage.
         required: false
-        default: "95"
+        default: "98"
         type: string
       run_integration:
         description: Run integration tests after unit tests.

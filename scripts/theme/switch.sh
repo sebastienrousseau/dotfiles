@@ -581,8 +581,8 @@ ambient_theme() {
   if [[ (-z "$sunrise" || -z "$sunset") && -f "$state_file" ]]; then
     # shellcheck disable=SC1090
     source "$state_file"
-    sunrise="${sunrise:-$DOT_THEME_SUNRISE}"
-    sunset="${sunset:-$DOT_THEME_SUNSET}"
+    sunrise="${sunrise:-${DOT_THEME_SUNRISE:-}}"
+    sunset="${sunset:-${DOT_THEME_SUNSET:-}}"
     [[ -n "$sunrise$sunset" ]] && resolved_source="state-file"
   fi
 
@@ -1275,7 +1275,7 @@ EOF
     [[ -n "$live_dark" ]] && ui_info "Wallpaper (dark)" "$(echo "$live_dark" | sed 's|.*/||')"
     [[ -n "$kde_scheme" ]] && ui_info "KDE scheme" "$kde_scheme"
     [[ -n "$kde_accent" ]] && ui_info "KDE accent" "$kde_accent"
-    [[ -n "$de" ]] && ui_info "Detected DE" "$de"
+    if [[ -n "$de" ]]; then ui_info "Detected DE" "$de"; fi
     ;;
   rebuild)
     shift

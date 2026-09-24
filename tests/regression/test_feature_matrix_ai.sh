@@ -148,7 +148,67 @@ test_fm_smoke_ai_delegate_prompt() { fm_smoke ai; }
 test_fm_smoke_ai_ask_query() { fm_smoke ai; }
 test_fm_smoke_ai_chat() { fm_smoke ai; }
 test_fm_smoke_ai_install() { fm_smoke ai; }
-test_fm_smoke_ai_serve() { fm_smoke ai; }
+test_fm_ai_serve_gateway() {
+  # `dot ai serve` starts the real gateway through the real proxy script
+  # (repo copies, via wrapper stubs: chezmoi sources are not +x) and routes
+  # the fleet with the generated token. The HTTP rules are then checked on a
+  # gateway this test owns, since the sandbox kills a command's process
+  # group when it returns. `dot ai serve stop` removes the routing.
+  if ! command -v python3 >/dev/null 2>&1 || ! command -v curl >/dev/null 2>&1; then
+    test_start "fm_ai_serve_gateway"
+    fm_pass "python3/curl unavailable; skipped"
+    return 0
+  fi
+  local port base token_file tok gw_pid
+  port="$(python3 -c 'import socket;s=socket.socket();s.bind(("127.0.0.1",0));print(s.getsockname()[1]);s.close()')"
+  base="http://127.0.0.1:$port"
+  token_file="$XDG_STATE_HOME/dotfiles/ai-serve/gateway.token"
+  fm_stub dot-ai-proxy "exec bash '$REPO_ROOT/defaults/dot_local/bin/executable_dot-ai-proxy' \"\$@\""
+  fm_stub dot-ai-serve "exec python3 '$REPO_ROOT/defaults/dot_local/bin/executable_dot-ai-serve' \"\$@\""
+  fm_stub claude 'cat >/dev/null
+printf "%s\n" "{\"type\":\"result\",\"is_error\":false,\"result\":\"ok\",\"usage\":{}}"'
+
+  test_start "fm_ai_serve_gateway_starts"
+  DOT_AI_PORT="$port" fm_run ai serve
+  fm_expect_rc 0
+  test_start "fm_ai_serve_gateway_start_reports"
+  fm_expect_any "Proxy started"
+  test_start "fm_ai_serve_gateway_routes_fleet_with_token"
+  tok="$(cat "$token_file" 2>/dev/null)"
+  if [[ ${#tok} -ge 32 ]] && grep -q "ANTHROPIC_AUTH_TOKEN=\"$tok\"" "$XDG_CONFIG_HOME/dotfiles/ai-local.env" 2>/dev/null; then
+    fm_pass "routing env carries the generated token"
+  else
+    fm_fail "routing env does not carry the gateway token"
+  fi
+
+  DOT_AI_PORT="$port" DOT_AI_HOST=127.0.0.1 python3 "$REPO_ROOT/defaults/dot_local/bin/executable_dot-ai-serve" \
+    >"$FM_SANDBOX/work/gateway.log" 2>&1 &
+  gw_pid=$!
+  local i
+  for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do
+    curl -fsS "$base/health" >/dev/null 2>&1 && break
+    sleep 0.2
+  done
+  local body='{"model":"sonnet","messages":[{"role":"user","content":"hi"}]}' code
+  test_start "fm_ai_serve_gateway_rejects_missing_token"
+  code="$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' "$base/v1/messages" -d "$body")"
+  if [[ "$code" == 401 ]]; then fm_pass "401"; else fm_fail "got $code"; fi
+  test_start "fm_ai_serve_gateway_accepts_token"
+  code="$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -H "x-api-key: $tok" "$base/v1/messages" -d "$body")"
+  if [[ "$code" == 200 ]]; then fm_pass "200"; else fm_fail "got $code"; fi
+  test_start "fm_ai_serve_gateway_rejects_foreign_host"
+  code="$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: attacker.example' "$base/health")"
+  if [[ "$code" == 403 ]]; then fm_pass "403"; else fm_fail "got $code"; fi
+  kill "$gw_pid" 2>/dev/null
+  wait "$gw_pid" 2>/dev/null
+
+  test_start "fm_ai_serve_stop"
+  DOT_AI_PORT="$port" fm_run ai serve stop
+  fm_expect_rc_in 0 1
+  test_start "fm_ai_serve_stop_unroutes"
+  if [[ -e "$XDG_CONFIG_HOME/dotfiles/ai-local.env" ]]; then fm_fail "routing env left behind"; else fm_pass "routing removed"; fi
+  rm -f "$FM_SANDBOX/bin/dot-ai-proxy" "$FM_SANDBOX/bin/dot-ai-serve" "$FM_SANDBOX/bin/claude"
+}
 test_fm_smoke_ai_login() { fm_smoke ai; }
 test_fm_smoke_ai_dashboard() { fm_smoke ai; }
 test_fm_smoke_ai_setup() { fm_smoke ai-setup; }
@@ -272,7 +332,7 @@ test_fm_smoke_ai_delegate_prompt
 test_fm_smoke_ai_ask_query
 test_fm_smoke_ai_chat
 test_fm_smoke_ai_install
-test_fm_smoke_ai_serve
+test_fm_ai_serve_gateway
 test_fm_smoke_ai_login
 test_fm_smoke_ai_dashboard
 test_fm_smoke_ai_setup

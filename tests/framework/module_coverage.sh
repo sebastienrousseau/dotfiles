@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TESTS_DIR="${TESTS_DIR:-$(dirname "$SCRIPT_DIR")}"
 REPO_ROOT="${REPO_ROOT:-$(dirname "$TESTS_DIR")}"
 
-MIN_COVERAGE="${MIN_COVERAGE:-95}"
+MIN_COVERAGE="${MIN_COVERAGE:-98}"
 
 escape_regex() {
   printf '%s' "$1" | sed 's/[][(){}.^$*+?|\\/]/\\&/g'

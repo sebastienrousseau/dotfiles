@@ -276,6 +276,6 @@ chezmoi apply --verbose dot_tmp/stripe-key.txt
 ## Next
 
 - [Concept: Trust Model](../01-concepts/02-trust-model.md) — the security architecture
-- [Reference: Secret operations](../03-reference/01-dot-cli.md#secrets)
+- [Reference: Secret operations](../03-reference/01-dot-cli.md#dot-secrets)
 - [Security: Secret management](../../security/SECRETS.md)
 {% endraw %}

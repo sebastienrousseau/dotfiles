@@ -184,6 +184,44 @@ func TestAssuranceMismatchFailsBeforeLaunch(t *testing.T) {
 	}
 }
 
+// A plugin that overruns the stderr budget must be rejected for that reason
+// promptly, not stall on a full pipe until the 5s deadline.
+func TestStderrOverflowFailsFast(t *testing.T) {
+	bin := filepath.Join(t.TempDir(), "hello")
+	if b, err := exec.Command("go", "build", "-o", bin, "../cmd/dot-hello").CombinedOutput(); err != nil {
+		t.Fatalf("build: %s %v", b, err)
+	}
+	root := filepath.Join(t.TempDir(), "demo")
+	if err := transaction.Init(root); err != nil {
+		t.Fatal(err)
+	}
+	e, err := transaction.Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer e.Close()
+	noisy := filepath.Join(t.TempDir(), "noisy")
+	body := "#!/bin/sh\nhead -c 262144 /dev/zero >&2\nexec '" + bin + "'\n"
+	if err = os.WriteFile(noisy, []byte(body), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err = Register(e, noisy); err != nil {
+		t.Fatal(err)
+	}
+	start := time.Now()
+	err = Apply(context.Background(), e, true)
+	elapsed := time.Since(start)
+	if err == nil || !strings.Contains(err.Error(), "stderr budget") {
+		t.Fatalf("want stderr budget error, got %v", err)
+	}
+	if elapsed > 3*time.Second {
+		t.Fatalf("stderr overflow took %v; the plugin stalled on a full pipe", elapsed)
+	}
+	if _, err = os.Stat(filepath.Join(root, "hello.txt")); !os.IsNotExist(err) {
+		t.Fatal("noisy plugin mutated production", err)
+	}
+}
+
 func TestChildGroupCleanup(t *testing.T) {
 	bin := filepath.Join(t.TempDir(), "hello")
 	if b, err := exec.Command("go", "build", "-o", bin, "../cmd/dot-hello").CombinedOutput(); err != nil {

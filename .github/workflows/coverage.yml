@@ -139,8 +139,13 @@ jobs:
           #             run-to-run xtrace variance, matching the margin the
           #             previous entries carried. Ratchet again once CI has
           #             reported a figure that includes (c).
+          #   v0.2.523: 98.99% measured (12380/12506 lines, 890 tests,
+          #             0 killed) in the ubuntu:24.04 runner image after the
+          #             coverage slices for theme switch, branch-cleanup,
+          #             tmux, attestation, dot modules, ops and diagnostics.
+          #             floor=98 — the coverage policy's hard floor.
           # Bump in lockstep with the slice that lands the bump.
-          MIN_COVERAGE_PCT: '68'
+          MIN_COVERAGE_PCT: '98'
         run: bash tools/ci/run-coverage.sh
 
       - name: Upload lcov.info artifact

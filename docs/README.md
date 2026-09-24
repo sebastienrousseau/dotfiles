@@ -10,17 +10,17 @@ Start here. Then go deeper.
 
 The complete reference is the `.dotfiles` Manual — a multi-format book covering every concept, tutorial, reference, and recipe.
 
-- Online: <https://sebastienrousseau.github.io/dotfiles/manual/> (HTML, PDF, EPUB, ASCII)
+- Online: <https://doc.dotfiles.io/manual/> (single-page HTML, PDF, EPUB and ASCII editions are attached to each release)
 - Locally: `dot manual` opens the HTML in your browser
-- Sources: [`docs/manual/`](manual/)
+- Sources: [`docs/manual/`](https://github.com/sebastienrousseau/dotfiles/tree/main/docs/manual) (published at [/manual/](https://doc.dotfiles.io/manual/))
 
 Quick jumps into the Manual:
 
-- [Introduction](manual/00-introduction.md) — who, what, how
-- [Concepts](manual/01-concepts/) — architecture, trust model, theme engine, fleet, self-healing
-- [Tutorials](manual/02-tutorials/) — first install, wallpaper→theme, profiles, secrets, fleet
-- [Reference](manual/03-reference/) — CLI, config files, environment, templates, feature flags
-- [Cookbook](manual/04-cookbook/) — 40+ recipes, troubleshooting, FAQ
+- [Introduction](https://doc.dotfiles.io/manual/00-introduction/) — who, what, how
+- [Concepts](https://doc.dotfiles.io/manual/01-concepts/01-architecture/) — architecture, trust model, theme engine, fleet, self-healing
+- [Tutorials](https://doc.dotfiles.io/manual/02-tutorials/01-first-install/) — first install, wallpaper→theme, profiles, secrets, fleet
+- [Reference](https://doc.dotfiles.io/manual/03-reference/01-dot-cli/) — CLI, config files, environment, templates, feature flags
+- [Cookbook](https://doc.dotfiles.io/manual/04-cookbook/01-recipes/) — 40+ recipes, troubleshooting, FAQ
 
 ## Start
 

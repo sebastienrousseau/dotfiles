@@ -56,9 +56,53 @@ else
   filename="kirocli-${target_arch}-linux.zip"
 fi
 
-download_url="${BASE_URL}/latest/$filename"
+# The release manifest names the versioned archive and its SHA-256. It comes
+# from the same origin, so this pins the exact build and catches corrupt or
+# swapped files; it is not an independent signature.
+manifest="$ASDF_DOWNLOAD_PATH/kiro-manifest.json"
+archive="$ASDF_DOWNLOAD_PATH/kiro-cli.zip"
+curl --proto '=https' --tlsv1.2 -fsSL -o "$manifest" "${BASE_URL}/latest/manifest.json"
 
+select_entry='.packages[] | select(.os == "linux" and (.download | endswith("/" + $f))) | "\(.download) \(.sha256)"'
+if command -v jq >/dev/null 2>&1; then
+  entries="$(jq -r --arg f "$filename" "$select_entry" "$manifest")"
+elif command -v python3 >/dev/null 2>&1; then
+  entries="$(python3 -c '
+import json, sys
+f = sys.argv[2]
+for p in json.load(open(sys.argv[1]))["packages"]:
+    if p.get("os") == "linux" and p.get("download", "").endswith("/" + f):
+        print(p["download"], p["sha256"])
+' "$manifest" "$filename")"
+else
+  echo "Need jq or python3 to read the Kiro release manifest." >&2
+  exit 1
+fi
+rm -f "$manifest"
+
+count="$(printf '%s\n' "$entries" | grep -c . || true)"
+read -r download expected extra <<<"$entries" || true
+version_re='^[0-9]+\.[0-9]+\.[0-9]+/'
+sha_re='^[0-9a-f]{64}$'
+if [[ "$count" != "1" || -n "${extra:-}" ]] ||
+  [[ "${download:-}" != */"$filename" || ! "$download" =~ $version_re ]] ||
+  [[ ! "${expected:-}" =~ $sha_re ]]; then
+  echo "Kiro release manifest has no single valid entry for $filename" >&2
+  exit 1
+fi
+
+download_url="${BASE_URL}/${download}"
 echo "Downloading Kiro CLI from $download_url..."
-curl -fsSL -o "$ASDF_DOWNLOAD_PATH/kiro-cli.zip" "$download_url"
-unzip -q "$ASDF_DOWNLOAD_PATH/kiro-cli.zip" -d "$ASDF_DOWNLOAD_PATH"
-rm "$ASDF_DOWNLOAD_PATH/kiro-cli.zip"
+curl --proto '=https' --tlsv1.2 -fsSL -o "$archive" "$download_url"
+if command -v sha256sum >/dev/null 2>&1; then
+  actual="$(sha256sum "$archive" | awk '{print $1}')"
+else
+  actual="$(shasum -a 256 "$archive" | awk '{print $1}')"
+fi
+if [[ "$actual" != "$expected" ]]; then
+  rm -f "$archive"
+  echo "Kiro CLI checksum mismatch (expected $expected, got $actual)" >&2
+  exit 1
+fi
+unzip -q "$archive" -d "$ASDF_DOWNLOAD_PATH"
+rm "$archive"

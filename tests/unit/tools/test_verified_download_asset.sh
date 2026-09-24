@@ -119,4 +119,23 @@ assert_contains "VD_RC=1" "$VD_OUT" "a mismatched checksum should return 1"
 assert_file_not_exists "$WORK/out/asset.tar.gz" \
   "a mismatched download must not be left behind"
 
+# ── 5. Manifests that list names as ./asset (e.g. Ollama's sha256sum.txt) ──
+test_start "verified_download_accepts_dot_slash_manifest_names"
+rm -f "$WORK/out/asset.tar.gz"
+printf '%s  ./asset.tar.gz\n' "$PAYLOAD_SHA" >"$WORK/manifest-dotslash.txt"
+VD_MANIFEST="$WORK/manifest-dotslash.txt" vd_run "$WORK/shasum-only"
+assert_contains "VD_RC=0" "$VD_OUT" "a ./-prefixed manifest entry should match"
+assert_file_exists "$WORK/out/asset.tar.gz" "the verified asset should be kept"
+
+test_start "verified_download_rejects_ambiguous_dot_slash_names"
+rm -f "$WORK/out/asset.tar.gz"
+{
+  printf '%s  ./asset.tar.gz\n' "$PAYLOAD_SHA"
+  printf '%s  asset.tar.gz\n' "0000000000000000000000000000000000000000000000000000000000000000"
+} >"$WORK/manifest-ambiguous.txt"
+VD_MANIFEST="$WORK/manifest-ambiguous.txt" vd_run "$WORK/shasum-only"
+assert_contains "VD_RC=1" "$VD_OUT" "two entries for one asset should be refused"
+assert_file_not_exists "$WORK/out/asset.tar.gz" \
+  "an ambiguous manifest must not leave a download behind"
+
 print_summary

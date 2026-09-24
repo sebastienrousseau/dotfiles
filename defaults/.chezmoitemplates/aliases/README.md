@@ -5,7 +5,7 @@
   align="right"
 />
 
-# Dotfiles Aliases (v0.2.522)
+# Dotfiles Aliases (v0.2.523)
 
 Modular alias definitions managed by Chezmoi
 

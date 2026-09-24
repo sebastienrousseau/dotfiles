@@ -476,7 +476,7 @@ jobs:
     needs: changes
     uses: ./.github/workflows/reusable-test-suite.yml
     with:
-      min_coverage: "95"
+      min_coverage: "98"
       run_integration: true
       run_strict_checks: true
       # This job runs unit + regression + module coverage + the
@@ -486,6 +486,52 @@ jobs:
       # progress in integration when GitHub cancelled them at +15m. Keep a
       # finite budget, but leave enough headroom for hosted-runner variance.
       timeout_minutes: 25
+
+  # Mutation gate on the lines a PR changes (tools/ci/mutation-test.py).
+  # Line coverage says a line ran; this says whether the tests would notice
+  # it being wrong. One plausible bug per changed line, judged only by
+  # behavioural tests (source-grep tests are listed in
+  # tools/ci/mutation-structural.txt and do not count). Survivors are
+  # annotated on the PR diff. The sample cap bounds the runtime of a large
+  # PR; the score is over the sample.
+  test-mutation:
+    name: Test / Mutation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: changes
+    if: github.event_name == 'pull_request' && needs.changes.outputs.shell == 'true'
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Mutation score on changed lines (>= 80%)
+        run: |
+          set -euo pipefail
+          chmod +x tests/framework/*.sh
+          git fetch --no-tags --depth=1 origin "+refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+          python3 tools/ci/mutation-test.py \
+            --base "origin/${{ github.base_ref }}" \
+            --min-score 80 \
+            --max-mutants 60 \
+            --jobs 4 \
+            --timeout 240 \
+            --github \
+            --json mutation-report.json
+
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: mutation-report
+          path: mutation-report.json
+          if-no-files-found: ignore
+          retention-days: 14
 
   # ============================================================================
   # STAGE 4: QUALITY (Depends on lint + test passing)
@@ -773,7 +819,7 @@ jobs:
     name: Quality Gate
     runs-on: ubuntu-latest
     timeout-minutes: 2
-    needs: [lint-shell, lint-copyright, security-secrets, security-dependencies, test-unit]
+    needs: [lint-shell, lint-copyright, security-secrets, security-dependencies, test-unit, test-mutation]
     if: github.event_name == 'pull_request'
     steps:
       - name: Harden runner (audit mode)

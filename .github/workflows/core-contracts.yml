@@ -12,6 +12,7 @@ on:
       - 'tests/consumer/**'
       - 'tests/unit/ci/test_npx_consumer_lane.sh'
       - '.github/workflows/core-contracts.yml'
+      - 'requirements-contracts.txt'
   push:
     branches: [main]
   workflow_dispatch:
@@ -25,7 +26,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        # ubuntu-24.04-arm exercises the arm64 seccomp profile (no x32 guard);
+        # ubuntu-latest (amd64) runs TestX32SyscallsAreKilled.
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
@@ -89,7 +92,7 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
-      - run: python -m pip install jsonschema==4.25.1
+      - run: python -m pip install --require-hashes -r requirements-contracts.txt
       - run: python tests/unit/core/test_contract_schemas.py
       - run: python tests/unit/install/test_archive_adversarial.py
   visual:

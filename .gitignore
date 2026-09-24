@@ -93,6 +93,7 @@ security-report.md
 # rendered on contribute (post-clone) so the repo root stays uncluttered.
 .aider.conf.yml
 .clinerules
+.agy/
 .continuerc.json
 .codex/
 .cursor/

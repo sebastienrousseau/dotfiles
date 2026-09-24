@@ -22,8 +22,11 @@ site_dir: site
 exclude_docs: |
   _config.yml
   .vitepress/
-  manual/_toc.yml
   *.tmpl
+  # /manual/ is built separately by ssg with the Lucid theme
+  # (tools/docs/build-manual-site.sh) and merged into site/ by pages.yml.
+  manual/
+  manual-site/
 
 theme:
   name: material

@@ -13,18 +13,24 @@ Auth, prompt caching, and rate limits are owned by the `claude` CLI — this
 server only translates wire formats. Managed via `dot ai serve`.
 
 Features: real token-by-token streaming (SSE), model routing/aliases, cost
-metering (/metrics, /v1/usage), an optional daily budget cap, and a shared
-API-key gate. Multimodal image blocks are acknowledged but not forwarded
+metering (/metrics, /v1/usage), an optional daily budget cap, and a
+mandatory API-key gate: DOT_AI_API_KEY, or a random token generated on first
+start (0600; `dot-ai-serve --token-path` prints where it is stored). Requests whose Host
+header is not this server's loopback address are refused, which blocks DNS
+rebinding from browsers. Multimodal image blocks are acknowledged but not forwarded
 (the CLI engine is text-only); function/tool-calling is likewise unavailable
 through the CLI engine — `tools` requests are answered in plain text.
 Stdlib only — runs on any python3.
 """
 
+import hmac
 import json
 import os
+import secrets
 import shutil
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import uuid
@@ -34,7 +40,49 @@ HOST = os.environ.get("DOT_AI_HOST", "127.0.0.1")
 PORT = int(os.environ.get("DOT_AI_PORT", "3456"))
 CLAUDE_BIN = os.environ.get("DOT_AI_CLAUDE_BIN", "claude")
 DEFAULT_MODEL = os.environ.get("DOT_AI_DEFAULT_MODEL", "sonnet")
-API_KEY = os.environ.get("DOT_AI_API_KEY", "")  # optional shared-secret gate
+STATE_DIR = os.path.join(
+    os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"),
+    "dotfiles",
+    "ai-serve",
+)
+TOKEN_FILE = os.path.join(STATE_DIR, "gateway.token")
+# Extra Host header values to accept (comma-separated host[:port]).
+EXTRA_HOSTS = [h.strip() for h in os.environ.get("DOT_AI_ALLOWED_HOSTS", "").split(",") if h.strip()]
+
+
+def load_or_create_token(path=TOKEN_FILE):
+    """Return the gateway token, creating a random 0600 token file once."""
+    try:
+        with open(path, encoding="utf-8") as fh:
+            token = fh.read().strip()
+        if token:
+            return token
+    except FileNotFoundError:
+        pass
+    os.makedirs(os.path.dirname(path), mode=0o700, exist_ok=True)
+    token = secrets.token_urlsafe(32)
+    try:
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError:
+        # Either another starter won the race (use its token) or the file
+        # exists but is empty (replace it atomically). Re-reading once is
+        # enough: an empty file would otherwise loop here forever.
+        with open(path, encoding="utf-8") as fh:
+            existing = fh.read().strip()
+        if existing:
+            return existing
+        tmp = f"{path}.{os.getpid()}.tmp"
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(token + "\n")
+        os.replace(tmp, path)
+        return token
+    with os.fdopen(fd, "w", encoding="utf-8") as fh:
+        fh.write(token + "\n")
+    return token
+
+
+API_KEY = os.environ.get("DOT_AI_API_KEY", "")  # resolved in main(); never empty while serving
 
 # Advertised models (also accepts any id/alias the claude CLI understands).
 MODELS = [
@@ -259,11 +307,16 @@ def stream_claude(run_model, system_prompt, prompt):
         # Hermetic: ignore user/project/local settings and CLAUDE.md.
         "--setting-sources",
         "",
+        # A text bridge: no Read/Bash/etc., so a request cannot reach files.
+        "--tools",
+        "",
     ]
     stdin_text = prompt
     if system_prompt:
         stdin_text = system_prompt + "\n\n" + prompt
 
+    # Run in an empty private directory, never the server's cwd.
+    workdir = tempfile.mkdtemp(prefix="dot-ai-serve-")
     try:
         proc = subprocess.Popen(
             cmd,
@@ -272,12 +325,23 @@ def stream_claude(run_model, system_prompt, prompt):
             stderr=subprocess.PIPE,
             text=True,
             bufsize=1,
+            cwd=workdir,
         )
     except FileNotFoundError:
+        shutil.rmtree(workdir, ignore_errors=True)
         yield ("done", {}, f"claude CLI not found ({CLAUDE_BIN})")
         return
 
-    timer = threading.Timer(int(os.environ.get("DOT_AI_TIMEOUT", "600")), proc.kill)
+    expired = threading.Event()
+
+    def _expire():
+        # Record the timeout before killing: checking timer.is_alive()
+        # afterwards races with the timer thread finishing, which reported
+        # a timed-out engine as "no output from claude".
+        expired.set()
+        proc.kill()
+
+    timer = threading.Timer(int(os.environ.get("DOT_AI_TIMEOUT", "600")), _expire)
     timer.start()
     prev, usage, err, timed_out = "", {}, None, False
     try:
@@ -312,8 +376,9 @@ def stream_claude(run_model, system_prompt, prompt):
                         prev = final
         proc.wait()
     finally:
-        timed_out = not timer.is_alive() and proc.returncode is not None and proc.returncode < 0
+        timed_out = expired.is_set()
         timer.cancel()
+        shutil.rmtree(workdir, ignore_errors=True)
 
     if err is None and (not prev):
         if timed_out:
@@ -524,11 +589,31 @@ class Handler(BaseHTTPRequestHandler):
         log(fmt % args)
 
     def _authed(self):
-        if not API_KEY:
-            return True
-        sent = (self.headers.get("x-api-key") or "").strip()
-        auth = (self.headers.get("authorization") or "").replace("Bearer ", "").strip()
-        return API_KEY in (sent, auth)
+        if not API_KEY:  # main() always sets one; fail closed regardless
+            return False
+        expected = API_KEY.encode()
+        sent = (self.headers.get("x-api-key") or "").strip().encode()
+        auth = (self.headers.get("authorization") or "").strip()
+        if auth[:7].lower() == "bearer ":
+            auth = auth[7:].strip()
+        # Evaluate both comparisons so timing does not reveal which matched.
+        ok_sent = hmac.compare_digest(sent, expected)
+        ok_auth = hmac.compare_digest(auth.encode(), expected)
+        return ok_sent or ok_auth
+
+    def _host_allowed(self):
+        """Refuse requests whose Host header names anything but this server.
+        A DNS-rebinding page reaches 127.0.0.1 under its own hostname."""
+        host = (self.headers.get("host") or "").strip().lower()
+        return host in allowed_hosts()
+
+    def parse_request(self):
+        if not super().parse_request():
+            return False
+        if not self._host_allowed():
+            self._error(403, "forbidden host")
+            return False
+        return True
 
     def _send_json(self, code, obj):
         payload = json.dumps(obj).encode()
@@ -588,6 +673,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._error(401, "invalid or missing API key")
             self._send_json(200, usage_report())
         elif self.path == "/metrics":
+            if not self._authed():
+                return self._error(401, "invalid or missing API key")
             self._send_text(200, metrics_text())
         elif self.path == "/":
             self._send_json(
@@ -650,12 +737,36 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, openai_response(model, text, usage))
 
 
+def allowed_hosts():
+    """Host header values accepted: loopback names on our port, the bind
+    address itself, and DOT_AI_ALLOWED_HOSTS."""
+    names = {"127.0.0.1", "localhost", "[::1]"}
+    if HOST not in ("127.0.0.1", "localhost", "::1", "0.0.0.0", "::"):
+        names.add(f"[{HOST}]" if ":" in HOST else HOST)
+    hosts = {f"{n}:{PORT}" for n in names}
+    hosts.update(h.lower() for h in EXTRA_HOSTS)
+    return hosts
+
+
 def main():
+    global API_KEY
+    if sys.argv[1:] == ["--token-path"]:
+        # Where clients read the token from; the secret itself is never printed.
+        if not API_KEY:
+            load_or_create_token()
+        print(TOKEN_FILE)
+        return
+    if sys.argv[1:]:
+        log(f"unknown arguments: {' '.join(sys.argv[1:])} (supported: --token-path)")
+        sys.exit(64)
     if not shutil.which(CLAUDE_BIN):
         log(f"WARNING: '{CLAUDE_BIN}' not on PATH — requests will fail until it is installed and authenticated.")
     if HOST not in ("127.0.0.1", "localhost", "::1") and not API_KEY:
         log("REFUSING to bind a non-loopback host without DOT_AI_API_KEY set.")
         sys.exit(2)
+    if not API_KEY:
+        API_KEY = load_or_create_token()
+        log(f"auth: token from {TOKEN_FILE}")
     server = ThreadingHTTPServer((HOST, PORT), Handler)
     extra = f", budget: ${DAILY_BUDGET:.2f}/day" if DAILY_BUDGET > 0 else ""
     log(f"listening on http://{HOST}:{PORT}  (engine: {CLAUDE_BIN}, model: {DEFAULT_MODEL}{extra})")

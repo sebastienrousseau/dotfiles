@@ -225,11 +225,10 @@ cat >"$install_sandbox/bin/git" <<'EOF'
 #!/usr/bin/env bash
 if [[ "$1" == "clone" ]]; then
   dest="${@: -1}"
-  mkdir -p "$dest/.git"
-  cat >"$dest/.chezmoidata.toml" <<'DATA'
+  mkdir -p "$dest/.git" "$dest/defaults"
+  cat >"$dest/defaults/.chezmoidata.toml" <<'DATA'
 profile = "default"
-nvim = true
-tmux = true
+[features]
 zellij = true
 DATA
   printf 'git %s\n' "$*" >> "$TMP_LOG"
@@ -256,22 +255,26 @@ TMP_LOG="$install_sandbox/install.log" \
   DOTFILES_NONINTERACTIVE=1 \
   DOTFILES_SILENT=1 \
   bash "$INSTALL_SCRIPT" --minimal >/dev/null 2>&1
-cloned_data="$install_sandbox/home/.dotfiles/.chezmoidata.toml"
+cloned_data="$install_sandbox/home/.dotfiles/defaults/.chezmoidata.toml"
+host_config="$install_sandbox/home/.config/chezmoi/chezmoi.toml"
 clone_log="$(cat "$install_sandbox/install.log")"
 # Read the current default version from install.sh rather than hardcoding —
 # the repo bumps it at every release and the test would otherwise drift.
 EXPECTED_VERSION="$(grep -oE 'local version="v[0-9.]+"' "$INSTALL_SCRIPT" | head -1 | sed -E 's/.*"(v[0-9.]+)"$/\1/')"
 
+# --minimal selects the profile in the per-host chezmoi config and leaves
+# the tracked source data untouched.
 if grep -q -- "--branch $EXPECTED_VERSION" <<<"$clone_log" \
-  && grep -q '^profile = "minimal"$' "$cloned_data" \
-  && grep -q '^nvim = false$' "$cloned_data" \
-  && grep -q '^tmux = false$' "$cloned_data" \
-  && grep -q '^zellij = false$' "$cloned_data"; then
+  && grep -q '^profile = "default"$' "$cloned_data" \
+  && grep -q '^zellij = true$' "$cloned_data" \
+  && grep -q '^\[data\]$' "$host_config" \
+  && grep -q '^profile = "minimal"$' "$host_config" \
+  && grep -q '^sourceDir = ' "$host_config"; then
   ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --minimal keeps default version pin ($EXPECTED_VERSION) and rewrites feature flags"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --minimal keeps default version pin ($EXPECTED_VERSION) and selects the profile per host"
 else
   ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --minimal should not become the git ref and should rewrite features (expected $EXPECTED_VERSION)"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --minimal should keep the version pin and write profile=minimal to chezmoi.toml only (expected $EXPECTED_VERSION)"
 fi
 
 # Test: No hardcoded sensitive paths in install

@@ -38,6 +38,21 @@ compile_native_go_fuzzer \
 
 compile_native_go_fuzzer \
   github.com/sebastienrousseau/dotfiles/fuzz \
+  FuzzFleetInputs \
+  fuzz_fleet_inputs
+
+compile_native_go_fuzzer \
+  github.com/sebastienrousseau/dotfiles/fuzz \
+  FuzzSecretKey \
+  fuzz_secret_key
+
+compile_native_go_fuzzer \
+  github.com/sebastienrousseau/dotfiles/fuzz \
+  FuzzGatewayGate \
+  fuzz_gateway_gate
+
+compile_native_go_fuzzer \
+  github.com/sebastienrousseau/dotfiles/fuzz \
   FuzzInitURLResolver \
   fuzz_init_url_resolver
 

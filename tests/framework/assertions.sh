@@ -19,6 +19,12 @@ TESTS_PASSED=0
 TESTS_FAILED=0
 CURRENT_TEST=""
 
+# Hermetic defaults: the developer's own shell toggles must not change what
+# the code under test does. DOTFILES_AI=1 exported by an interactive shell
+# made every rollback test call the real `dot ai claude`. A test that
+# exercises one of these sets it explicitly after sourcing this file.
+unset DOTFILES_AI
+
 # Run a command with a time limit on GNU and BSD/macOS hosts. macOS does not
 # ship GNU timeout, so use gtimeout when available and Perl's alarm otherwise.
 run_with_timeout() {

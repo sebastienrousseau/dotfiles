@@ -19,7 +19,7 @@
 
 ## Project Overview
 
-Chezmoi-managed dotfiles for macOS, Linux, WSL, and PowerShell 7.5+. Version `0.2.522`.
+Chezmoi-managed dotfiles for macOS, Linux, WSL, and PowerShell 7.5+. Version `0.2.523`.
 
 ## Key Commands
 
@@ -29,6 +29,7 @@ chezmoi diff                # Show pending diffs
 dot health                  # Run health dashboard
 dot doctor                  # Run system diagnostics
 ./tests/framework/test_runner.sh  # Run unit tests
+python3 tools/ci/mutation-test.py --base origin/main  # Mutation score on changed lines (CI gate: 80%)
 ```
 
 ## Repository Layout

@@ -43,7 +43,6 @@ EXIT_BUSY=75
 
 # Logging — delegates to shared ui.sh primitives
 ui_init
-log() { printf '%b\n' "$*"; }
 log_info() { ui_info "$@"; }
 log_success() { ui_ok "$@"; }
 log_warn() { ui_warn "$@"; }
@@ -70,7 +69,7 @@ Commands:
   backup          Create a manual backup of current dotfiles
   rollback        Rollback to the previous backup
   rollback-to N   Rollback to specific backup number (from status list)
-  git-reset       Reset to last known good git commit
+  git-reset       Reset to last tag (stashes changes, keeps old HEAD on rollback-backup/*)
   restore FILE    Restore a specific file from backup
   clean           Remove old backups (keeps last $MAX_BACKUPS)
 
@@ -128,10 +127,6 @@ list_backups() {
 }
 
 # Create a backup
-# LCOV_EXCL_START — body mutates real $HOME (cp/mkdir of dotfiles);
-# can't be exercised under the coverage sandbox without destroying
-# fixture state. The dispatcher reaches this function but the body
-# is genuinely off-limits.
 create_backup() {
   local reason="${1:-manual}"
   local timestamp
@@ -139,10 +134,18 @@ create_backup() {
   local backup_name="backup_${timestamp}_${reason}"
   local backup_path="$BACKUP_DIR/$backup_name"
 
-  log_step "Creating Backup: $backup_name"
   ensure_dirs
+  # Names have one-second resolution. Two backups in the same second (a
+  # rollback's own pre_rollback safety copy, say) must not share a directory:
+  # the second would overwrite the backup being restored.
+  local n=2
+  while ! mkdir "$backup_path" 2>/dev/null; do
+    backup_name="backup_${timestamp}_${reason}_${n}"
+    backup_path="$BACKUP_DIR/$backup_name"
+    n=$((n + 1))
+  done
 
-  mkdir -p "$backup_path"
+  log_step "Creating Backup: $backup_name"
 
   # List of files/directories to backup
   local targets=(
@@ -169,7 +172,7 @@ create_backup() {
       mkdir -p "$dest_dir"
       cp -a "$target" "$backup_path/$rel_path" 2>/dev/null || true
       ((backed_up++)) || true
-      [[ "$VERBOSE" == "1" ]] && log_info "Backed up: $rel_path"
+      if [[ "$VERBOSE" == "1" ]]; then log_info "Backed up: $rel_path"; fi
     fi
   done
 
@@ -193,9 +196,7 @@ EOF
   # Cleanup old backups
   cleanup_old_backups
 }
-# LCOV_EXCL_STOP
 
-# LCOV_EXCL_START — rm -rf of real backup dirs.
 # Cleanup old backups, keeping only MAX_BACKUPS
 cleanup_old_backups() {
   local count
@@ -207,11 +208,10 @@ cleanup_old_backups() {
 
     find "$BACKUP_DIR" -maxdepth 1 -type d -name "backup_*" | sort | head -n "$to_delete" | while read -r old; do
       rm -rf "$old"
-      [[ "$VERBOSE" == "1" ]] && log_info "Removed: $(basename "$old")"
+      if [[ "$VERBOSE" == "1" ]]; then log_info "Removed: $(basename "$old")"; fi
     done
   fi
 }
-# LCOV_EXCL_STOP
 
 # Get the most recent backup
 get_latest_backup() {
@@ -224,8 +224,6 @@ get_backup_by_index() {
   find "$BACKUP_DIR" -maxdepth 1 -type d -name "backup_*" | sort -r | sed -n "${index}p"
 }
 
-# LCOV_EXCL_START — body restores files into real $HOME; dispatcher
-# reaches it but the actual mutation is off-limits under coverage.
 # Rollback to a specific backup
 perform_rollback() {
   local backup_path="$1"
@@ -260,7 +258,7 @@ perform_rollback() {
       mkdir -p "$dest_dir"
       cp -a "$file" "$dest"
       ((restored++)) || true
-      [[ "$VERBOSE" == "1" ]] && log_info "Restored: $rel_path"
+      if [[ "$VERBOSE" == "1" ]]; then log_info "Restored: $rel_path"; fi
     fi
   done < <(find "$backup_path" -type f -print0)
 
@@ -293,9 +291,7 @@ Analyze why the environment may have reached a state requiring rollback and sugg
     fi
   fi
 }
-# LCOV_EXCL_STOP
 
-# LCOV_EXCL_START — runs git reset --hard, mutates working tree.
 # Git-based rollback
 git_reset() {
   local dry_run="${1:-0}"
@@ -314,19 +310,29 @@ git_reset() {
   git log --oneline -5
   echo ""
 
-  # Check for uncommitted changes
+  # Uncommitted changes (tracked or untracked) are never discarded: either
+  # they are stashed and the stash is confirmed to exist, or we abort.
   if [[ -n "$(git status --porcelain)" ]]; then
     log_warn "Uncommitted changes detected"
+    local response="N"
     if [[ "$FORCE" == "1" ]]; then
-      git stash push -m "Auto-stash before rollback $(date +%Y%m%d_%H%M%S)"
-      log_success "Changes auto-stashed (use 'git stash pop' to recover)"
+      response="Y"
     else
       read -t 30 -rp "Stash changes? [y/N] " response || response="N"
-      if [[ "$response" =~ ^[Yy]$ ]]; then
-        git stash push -m "Auto-stash before rollback $(date +%Y%m%d_%H%M%S)"
-        log_success "Changes stashed"
-      fi
     fi
+    if [[ ! "$response" =~ ^[Yy]$ ]]; then
+      log_error "Aborting: uncommitted changes would be lost. Commit or stash them first."
+      return 1
+    fi
+    local stash_msg
+    stash_msg="dot-rollback $(date +%Y%m%d_%H%M%S)"
+    if ! git stash push --include-untracked -m "$stash_msg" ||
+      ! git stash list -n 1 | grep -qF "$stash_msg" ||
+      [[ -n "$(git status --porcelain)" ]]; then
+      log_error "Aborting: could not stash all changes"
+      return 1
+    fi
+    log_success "Changes stashed as '$stash_msg' (use 'git stash pop' to recover)"
   fi
 
   # Find last good commit (last tag or HEAD~1)
@@ -342,6 +348,15 @@ git_reset() {
     # Create backup first
     create_backup "pre_git_reset"
 
+    # Keep commits made since the target reachable on a named branch.
+    local backup_branch
+    backup_branch="rollback-backup/$(date +%Y%m%d_%H%M%S)"
+    if ! git branch "$backup_branch" HEAD; then
+      log_error "Aborting: could not create backup branch $backup_branch"
+      return 1
+    fi
+    log_info "Previous HEAD saved as branch: $backup_branch"
+
     git reset --hard "$target_commit"
     log_success "Git reset to: $target_commit"
 
@@ -355,9 +370,7 @@ git_reset() {
     persist_log "GIT_RESET: to $target_commit"
   fi
 }
-# LCOV_EXCL_STOP
 
-# LCOV_EXCL_START — body copies files into real $HOME.
 # Restore a specific file from the latest backup
 restore_file() {
   local file_path="$1"
@@ -384,35 +397,36 @@ restore_file() {
   fi
 
   local source_file="$backup/$file_path"
-
-  # shellcheck disable=SC1091
-  # Verify resolved source path stays within the backup directory
-  local resolved_source
-  resolved_source="$(cd "$(dirname "$source_file")" 2>/dev/null && pwd)/$(basename "$source_file")" || {
-    # shellcheck disable=SC1091
-    log_error "Cannot resolve source path: $source_file"
-    return 1
-  }
-  if [[ "$resolved_source" != "$backup/"* ]]; then
-    log_error "Path traversal detected: resolved path escapes backup directory"
-    return 1
-  fi
-
-  # Verify resolved destination stays within HOME
-  local resolved_dest_dir
-  resolved_dest_dir="$(cd "$(dirname "$HOME/$file_path")" 2>/dev/null && pwd)" || {
-    log_error "Cannot resolve destination directory for: $file_path"
-    return 1
-  }
-  if [[ "$resolved_dest_dir" != "$HOME"* ]]; then
-    log_error "Path traversal detected: destination escapes HOME directory"
-    return 1
-  fi
-
   if [[ ! -f "$source_file" ]]; then
     log_error "File not found in backup: $file_path"
     log_info "Available files in backup:"
     find "$backup" -type f -name "*.backup_meta" -prune -o -type f -print | sed "s|$backup/||" | head -20
+    return 1
+  fi
+
+  # Containment is checked on physical paths (pwd -P) on both sides: a
+  # logical pwd keeps symlinks, so `$HOME/link -> /elsewhere` would pass,
+  # and an unnormalised root (a trailing slash in XDG_DATA_HOME gives
+  # `//`) would never match. A path that cannot be resolved stays empty
+  # and fails the check: closed, not open.
+  local backup_real home_real source_dir dest_dir_real probe
+  backup_real="$(cd "$backup" 2>/dev/null && pwd -P)" || backup_real=""
+  home_real="$(cd "$HOME" 2>/dev/null && pwd -P)" || home_real=""
+  source_dir="$(cd "$(dirname "$source_file")" 2>/dev/null && pwd -P)" || source_dir=""
+  if [[ -z "$backup_real" || -z "$source_dir" ||
+    ("$source_dir" != "$backup_real" && "$source_dir" != "$backup_real/"*) ]]; then
+    log_error "Path traversal detected: resolved path escapes backup directory"
+    return 1
+  fi
+
+  # The destination directory may have been deleted since the backup:
+  # check the nearest existing ancestor.
+  probe="$(dirname "$HOME/$file_path")"
+  while [[ ! -d "$probe" ]]; do probe="$(dirname "$probe")"; done
+  dest_dir_real="$(cd "$probe" 2>/dev/null && pwd -P)" || dest_dir_real=""
+  if [[ -z "$home_real" || -z "$dest_dir_real" ||
+    ("$dest_dir_real" != "$home_real" && "$dest_dir_real" != "$home_real/"*) ]]; then
+    log_error "Path traversal detected: destination escapes HOME directory"
     return 1
   fi
 
@@ -436,7 +450,6 @@ restore_file() {
     persist_log "RESTORE_FILE: $file_path"
   fi
 }
-# LCOV_EXCL_STOP
 
 # Show current status
 show_status() {
@@ -492,36 +505,31 @@ DRY_RUN=0
 VERBOSE=0
 
 main() {
-  local command="${1:-status}"
-  shift || true
-
-  if [[ "$command" == "help" ]]; then
-    usage
-    exit 0
-  fi
-
-  # Parse global options
+  # Options may come anywhere: before the command (`--dry-run restore X`)
+  # or after its argument (`rollback-to 3 --force`). Stopping at the first
+  # positional used to drop a trailing --force, so the command prompted,
+  # read EOF and exited 0 without doing anything.
+  local args=()
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      -f | --force)
-        FORCE=1
-        shift
-        ;;
-      -n | --dry-run)
-        DRY_RUN=1
-        shift
-        ;;
-      -v | --verbose)
-        VERBOSE=1
-        shift
-        ;;
+      -f | --force) FORCE=1 ;;
+      -n | --dry-run) DRY_RUN=1 ;;
+      -v | --verbose) VERBOSE=1 ;;
       -h | --help)
         usage
         exit 0
         ;;
-      *) break ;;
+      *) args+=("$1") ;;
     esac
+    shift
   done
+  set -- ${args[@]+"${args[@]}"}
+  local command="${1:-status}"
+  shift || true
+  if [[ "$command" == "help" ]]; then
+    usage
+    exit 0
+  fi
 
   ensure_dirs
 

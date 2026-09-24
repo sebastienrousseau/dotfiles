@@ -17,7 +17,7 @@ FUZZTIME ?=
 .PHONY: help test test-unit test-integration test-quick examples \
         lint lint-shell lint-shell-all lint-docs lint-pins lint-copyright \
         lint-workflows lint-links lint-reuse lint-spdx \
-        docs docs-serve man completions generate check-drift verify-versions \
+        docs docs-serve manual-site manual-site-serve man completions generate check-drift verify-versions \
         audit-palettes sbom bench fuzz coverage clean check
 
 help: ## Show this help
@@ -124,6 +124,12 @@ docs: ## Build the MkDocs manual with warnings denied
 
 docs-serve: ## Serve the manual locally
 	mkdocs serve
+
+manual-site: ## Build doc.dotfiles.io/manual/ with ssg and the Lucid theme
+	bash tools/docs/build-manual-site.sh --out _build/site/manual
+
+manual-site-serve: manual-site ## Build, then serve the manual at http://127.0.0.1:8000/manual/
+	python3 -m http.server 8000 --bind 127.0.0.1 --directory _build/site
 
 # ── Supply chain / perf / fuzz ─────────────────────────────────────────
 sbom: ## CycloneDX SBOM of the source tree (syft) into build/

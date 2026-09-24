@@ -307,7 +307,9 @@ func sqlite(db, query string) string {
 func filterSqliteOutput(b []byte) string {
 	var keep []string
 	for _, ln := range strings.Split(strings.TrimSpace(string(b)), "\n") {
-		if strings.HasPrefix(ln, "Run Time:") || strings.HasPrefix(strings.TrimSpace(ln), ".") {
+		// Match on the trimmed line: the final TrimSpace would otherwise
+		// turn an indented meta line into a leading one.
+		if t := strings.TrimSpace(ln); strings.HasPrefix(t, "Run Time:") || strings.HasPrefix(t, ".") {
 			continue
 		}
 		keep = append(keep, ln)
