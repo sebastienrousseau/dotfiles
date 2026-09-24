@@ -14,7 +14,6 @@
   19 tests/regression/test_cross_platform.sh
    3 tests/regression/test_dot_help_registry_symmetry.sh
    1 tests/regression/test_enforce_policies_fires.sh
-  21 tests/regression/test_error_prone.sh
    2 tests/regression/test_feature_matrix_appearance_security.sh
    1 tests/regression/test_gate_integrity.sh
   40 tests/regression/test_integration.sh
