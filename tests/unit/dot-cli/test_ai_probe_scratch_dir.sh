@@ -6,7 +6,9 @@
 # its binary into the current directory (archive-XXXXXX) on first run and
 # prints download progress before "crush version v0.94.2", so the probe
 # littered ~/.dotfiles and showed the download line as the version.
-# Pinned here with a stub that behaves like that shim:
+# The probe lives in lib/dot/ai-probe.sh and runs through
+# scripts/dot/commands/ai.sh. Pinned here with a stub that behaves like
+# that shim:
 #   - the cold-cache refresh leaves nothing in the caller's directory;
 #   - the cached version is the real one, not the download noise;
 #   - _ai_extract_version does the same;
