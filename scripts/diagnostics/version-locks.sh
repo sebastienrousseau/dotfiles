@@ -49,6 +49,7 @@ if [[ -f "$mise_config" ]]; then
   awk -F= '
     /^\[tools\]/ {in_tools=1; next}
     /^\[/ {in_tools=0}
+    /^[[:space:]]*(#|$)/ {next}
     in_tools && NF {
       gsub(/"/, "", $0)
       tool=$1

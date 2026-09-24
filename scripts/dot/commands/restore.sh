@@ -162,6 +162,8 @@ restore_latest() {
   local backup_path="$BACKUP_DIR/$latest"
   local item rel_path target
   while IFS= read -r -d '' item; do
+    # rollback.sh keeps its metadata beside the files; it is not a dotfile.
+    [[ "${item##*/}" == ".backup_meta" ]] && continue
     rel_path="${item#"$backup_path"/}"
     target="$HOME/$rel_path"
     mkdir -p "$(dirname "$target")"
@@ -170,11 +172,14 @@ restore_latest() {
   done < <(find "$backup_path" -mindepth 1 -maxdepth 1 -print0)
 }
 
+# Both name shapes are backups: this script writes backup-<stamp>, and
+# scripts/ops/rollback.sh writes backup_<stamp>_<reason> into the same
+# directory. Users have years of the latter on disk, so neither is renamed.
 list_backup_names() {
   local backup_path
 
   shopt -s nullglob
-  for backup_path in "$BACKUP_DIR"/backup-*; do
+  for backup_path in "$BACKUP_DIR"/backup-* "$BACKUP_DIR"/backup_*; do
     [[ -d "$backup_path" ]] || continue
     printf '%s\n' "${backup_path##*/}"
   done | while IFS= read -r backup_name; do

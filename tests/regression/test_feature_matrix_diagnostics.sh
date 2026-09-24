@@ -150,13 +150,38 @@ test_fm_doctor_audit() {
 test_fm_doctor_json() {
   test_start "fm_doctor_json"
   fm_run doctor --json
-  # Same host verdict as the bare doctor row. doctor.sh accepts --json but
-  # does not yet render JSON — it prints the text dashboard — so this row
-  # pins routing (the flag reaches doctor.sh, which is not confused by it)
-  # and must gain fm_expect_json once the flag is implemented.
+  # Same host verdict as the bare doctor row, rendered as one JSON document
+  # in the shape of `dot health --json` (total/passed/warnings/failures/
+  # results) plus status and verdict. The exit code is the same signal as
+  # the text dashboard's, so status must agree with it.
   fm_expect_rc_in 0 1
-  test_start "fm_doctor_json_reaches_doctor"
-  fm_expect_out "--- Dotfiles Doctor ---"
+  test_start "fm_doctor_json_is_json"
+  fm_expect_json
+  test_start "fm_doctor_json_has_status"
+  fm_expect_out_matches '"status": "(healthy|unhealthy)"'
+  test_start "fm_doctor_json_status_matches_exit_code"
+  if { [[ "$FM_RC" -eq 0 && "$FM_OUT" == *'"status": "healthy"'* ]] ||
+    [[ "$FM_RC" -eq 1 && "$FM_OUT" == *'"status": "unhealthy"'* ]]; }; then
+    fm_pass "rc=$FM_RC"
+  else
+    fm_fail "status and rc=$FM_RC disagree"
+  fi
+  test_start "fm_doctor_json_has_verdict"
+  fm_expect_out '"verdict": "'
+  test_start "fm_doctor_json_counts_checks"
+  fm_expect_out_matches '"total": [1-9][0-9]*,'
+  test_start "fm_doctor_json_counts_failures"
+  fm_expect_out_matches '"failures": [0-9]+,'
+  test_start "fm_doctor_json_counts_warnings"
+  fm_expect_out_matches '"warnings": [0-9]+,'
+  test_start "fm_doctor_json_lists_results"
+  fm_expect_out_matches '"check":"zsh","status":"(pass|fail)"'
+  test_start "fm_doctor_json_drops_the_dashboard"
+  if [[ "$FM_OUT" == *"--- Dotfiles Doctor ---"* ]]; then
+    fm_fail "the text dashboard leaked into the JSON output"
+  else
+    fm_pass "stdout is the document only"
+  fi
   test_start "fm_doctor_json_no_breakage"
   fm_expect_no_forbidden
 }

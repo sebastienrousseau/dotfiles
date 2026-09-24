@@ -45,6 +45,16 @@ run_wa() {
   "$REAL_BASH" "$TEST_SCRIPT" "$@"
 }
 
+# A value-taking option with nothing after it is a usage error (rc=2, option
+# named on stderr). The parser runs before the jq guard, so this holds on a
+# runner without jq as well — which is why it sits above that gate.
+for opt in -w --write -F --fleet-store -I --fleet-id -a --max-age; do
+  test_start "wa_missing_value${opt//-/_}"
+  out="$(run_wa "$opt" 2>&1)"
+  rc=$?
+  assert_equals "2|yes" "$rc|$([[ "$out" == *"option '$opt' requires a value"* ]] && echo yes)" "$opt alone is a usage error naming the option"
+done
+
 if ! command -v jq >/dev/null 2>&1; then
   test_start "wa_requires_jq_for_remaining_cases"
   ((TESTS_PASSED++)) || true
