@@ -125,6 +125,15 @@ def lint_file(path: Path) -> list[tuple[int, str]]:
             if not words:
                 continue
             tool = words[0]
+            # `x=$(head -n 1 "$SRC")` and `x="$(grep … "$SRC")"`: the text tool
+            # sits inside a command substitution on the right of an
+            # assignment. Look at the substituted command instead.
+            m2 = re.match(r'^[A-Za-z_][A-Za-z0-9_]*=\$?"?\$\((.*)$', cmd)
+            if m2:
+                inner = m2.group(1).split()
+                if inner:
+                    tool = inner[0]
+                    cmd = m2.group(1)
             if tool not in TEXT_TOOLS and not BASH_SYNTAX_RE.search(cmd):
                 continue
             operand = None

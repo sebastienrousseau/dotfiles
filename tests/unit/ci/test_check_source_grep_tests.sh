@@ -19,12 +19,14 @@ trap 'rm -rf "$WORK"' EXIT
 mkdir -p "$WORK/repo/scripts" "$WORK/repo/tests/unit" "$WORK/repo/tools/ci"
 printf '#!/usr/bin/env bash\necho ok\n' >"$WORK/repo/scripts/thing.sh"
 
-# Greps the source through a variable and through a literal path: two hits.
+# Greps the source through a variable, through a literal path, and inside
+# an assignment's command substitution: three hits.
 cat >"$WORK/repo/tests/unit/test_greps.sh" <<'EOF'
 #!/usr/bin/env bash
 THING="$REPO_ROOT/scripts/thing.sh"
 assert_file_contains "$THING" "echo ok" "prints ok"
 grep -q 'echo' "$REPO_ROOT/scripts/thing.sh"
+first_line=$(head -n 1 "$THING")
 bash "$THING" >/dev/null
 EOF
 # Runs the code and asserts on its output: no hits.
@@ -53,9 +55,10 @@ run_lint
 assert_equals "1" "$rc" "exit 1 on findings"
 assert_file_contains "$WORK/out" "tests/unit/test_greps.sh:3: assert_file_contains reads source \$THING" "variable operand named"
 assert_file_contains "$WORK/out" "tests/unit/test_greps.sh:4: grep reads source scripts/thing.sh" "literal operand named"
+assert_file_contains "$WORK/out" "tests/unit/test_greps.sh:5: head reads source \$THING" "assignment substitution named"
 assert_equals "0" "$(grep -c 'test_runs.sh' "$WORK/out")" "a test that runs the code is not flagged"
 assert_equals "0" "$(grep -c 'test_lint.sh' "$WORK/out")" "a declared structural test is skipped"
-assert_file_contains "$WORK/err" "2 line(s) inspect source text (3 tests scanned)" "totals reported"
+assert_file_contains "$WORK/err" "3 line(s) inspect source text (3 tests scanned)" "totals reported"
 
 # ── --report never fails ───────────────────────────────────────────
 test_start "srcgrep_report_mode_only_counts"
@@ -67,7 +70,7 @@ assert_equals "0" "$(wc -c <"$WORK/out" | tr -d ' ')" "report mode prints no fin
 test_start "srcgrep_baseline_written_and_honoured"
 run_lint --write-baseline
 assert_equals "0" "$rc" "writing the baseline succeeds"
-assert_file_contains "$WORK/repo/tools/ci/source-grep-baseline.txt" "   2 tests/unit/test_greps.sh" "ceiling recorded per file"
+assert_file_contains "$WORK/repo/tools/ci/source-grep-baseline.txt" "   3 tests/unit/test_greps.sh" "ceiling recorded per file"
 run_lint
 assert_equals "0" "$rc" "at the ceiling the lint passes"
 
@@ -76,7 +79,7 @@ test_start "srcgrep_regression_above_ceiling_fails"
 printf 'grep -q ok "$THING"\n' >>"$WORK/repo/tests/unit/test_greps.sh"
 run_lint
 assert_equals "1" "$rc" "one more source grep fails"
-assert_file_contains "$WORK/err" "tests/unit/test_greps.sh: 3 line(s), ceiling 2" "names the file and ceiling"
+assert_file_contains "$WORK/err" "tests/unit/test_greps.sh: 4 line(s), ceiling 3" "names the file and ceiling"
 test_start "srcgrep_new_file_not_in_baseline_fails"
 sed -i.bak '$d' "$WORK/repo/tests/unit/test_greps.sh" && rm -f "$WORK/repo/tests/unit/test_greps.sh.bak"
 printf '#!/usr/bin/env bash\nassert_file_contains "$REPO_ROOT/scripts/thing.sh" ok\n' >"$WORK/repo/tests/unit/test_newgrep.sh"
