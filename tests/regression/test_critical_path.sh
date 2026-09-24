@@ -16,24 +16,88 @@ source "$SCRIPT_DIR/../framework/mocks.sh"
 DOT_CLI="$REPO_ROOT/bin/dot"
 CHEZMOIDATA="$REPO_ROOT/defaults/.chezmoidata.toml"
 
+# Sandbox for the behavioural cases: a throwaway HOME, stub tools, and an
+# isolated chezmoi config. Nothing here touches the real HOME. The
+# uninstaller is only ever run as a COPY with a PATH holding recording
+# stubs for rm/chezmoi/mv and nothing else.
+CP_WORK="$(mktemp -d "${TMPDIR:-/tmp}/critical-path.XXXXXX")"
+trap 'rm -rf "$CP_WORK"' EXIT
+mkdir -p "$CP_WORK/home" "$CP_WORK/bin" "$CP_WORK/only"
+printf '#!/bin/sh\necho "$@" >>"%s/chezmoi.spy"\nexit 0\n' "$CP_WORK" >"$CP_WORK/bin/chezmoi"
+printf '#!/bin/sh\n[ "$1" = init ] && echo "# starship-init-for-$2"\n' >"$CP_WORK/bin/starship"
+for t in rm chezmoi mv; do
+  printf '#!/bin/sh\necho "%s $*" >>"%s/destructive.spy"\n' "$t" "$CP_WORK" >"$CP_WORK/only/$t"
+done
+chmod +x "$CP_WORK"/bin/* "$CP_WORK"/only/*
+# jq is a read-only dependency of the agent and mode commands. Older macOS
+# (the macos-14 runners) has no /usr/bin/jq, so link the host's copy in.
+if cp_jq="$(command -v jq 2>/dev/null)"; then ln -s "$cp_jq" "$CP_WORK/bin/jq"; fi
+printf '{}' >"$CP_WORK/chezmoi.json"
+CP_CHEZMOI="$(command -v chezmoi 2>/dev/null || true)"
+
+# cp_env <cmd...>: run with the sandbox HOME/XDG dirs and stub-first PATH.
+cp_env() {
+  env -i HOME="$CP_WORK/home" XDG_CONFIG_HOME="$CP_WORK/home/.config" \
+    XDG_STATE_HOME="$CP_WORK/home/.local/state" XDG_DATA_HOME="$CP_WORK/home/.local/share" \
+    XDG_CACHE_HOME="$CP_WORK/home/.cache" PATH="$CP_WORK/bin:/usr/bin:/bin" \
+    TERM=dumb NO_COLOR=1 DOTFILES_NO_TUI=1 DOTFILES_NONINTERACTIVE=1 CI=1 \
+    CHEZMOI_SOURCE_DIR="$REPO_ROOT/defaults" "$@" </dev/null
+}
+# cp_dot <args...>: run bin/dot in the sandbox; sets CP_RC and CP_OUT.
+cp_dot() {
+  CP_RC=0
+  CP_OUT="$(cp_env bash "$DOT_CLI" "$@" 2>&1)" || CP_RC=$?
+}
+cp_skip() {
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (skipped: $1)"
+}
+
 # ═══════════════════════════════════════════════════════════════
 # 1. CHEZMOI APPLY (the most critical operation)
 # ═══════════════════════════════════════════════════════════════
 
+# The apply wrapper runs against a recording chezmoi stub: it must call
+# `chezmoi apply --force` and succeed.
+cp_apply() { # <prewarm 0|1>
+  rm -f "$CP_WORK/chezmoi.spy"
+  CP_RC=0
+  CP_OUT="$(cp_env env DOTFILES_SNAPSHOT_ON_APPLY=0 DOTFILES_POST_APPLY_REPAIR=0 \
+    DOTFILES_CHEZMOI_STATUS=0 DOTFILES_PREWARM_ON_APPLY="$1" \
+    bash "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" 2>&1)" || CP_RC=$?
+}
+cp_apply 0
 test_start "critical_chezmoi_apply_script_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/ops/chezmoi-apply.sh'"
+assert_equals 0 "$CP_RC" "the apply wrapper succeeds"
+test_start "critical_chezmoi_apply_calls_chezmoi"
+assert_file_contains "$CP_WORK/chezmoi.spy" "apply --force" "and hands off to chezmoi apply --force"
 
 test_start "critical_chezmoidata_exists"
 assert_file_exists "$CHEZMOIDATA" ".chezmoidata.toml must exist"
 
+# What templates actually see: chezmoi loads the manifest and exposes the
+# version, the features map and the profile as data.
+CP_DATA=""
+if [[ -n "$CP_CHEZMOI" ]]; then
+  CP_DATA="$(env -i HOME="$CP_WORK/home" PATH="/usr/bin:/bin" "$CP_CHEZMOI" \
+    --config "$CP_WORK/chezmoi.json" --source "$REPO_ROOT/defaults" \
+    --destination "$CP_WORK/home" --cache "$CP_WORK/cache" \
+    --persistent-state "$CP_WORK/state.boltdb" execute-template \
+    '{{ .dotfiles_version }}|{{ len .features }}|{{ .profile }}' 2>/dev/null)" || CP_DATA=""
+fi
 test_start "critical_chezmoidata_has_version"
-assert_file_contains "$CHEZMOIDATA" "dotfiles_version" "must define dotfiles_version"
-
+if [[ -z "$CP_CHEZMOI" ]]; then cp_skip "chezmoi not installed"; else
+  assert_true '[[ "${CP_DATA%%|*}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]' "templates see a semantic dotfiles_version ($CP_DATA)"
+fi
 test_start "critical_chezmoidata_has_features"
-assert_file_contains "$CHEZMOIDATA" "[features]" "must define features section"
-
+if [[ -z "$CP_CHEZMOI" ]]; then cp_skip "chezmoi not installed"; else
+  cp_nfeat="${CP_DATA#*|}"
+  assert_true '[[ "${cp_nfeat%%|*}" -gt 0 ]]' "templates see a non-empty features map"
+fi
 test_start "critical_chezmoidata_has_profile"
-assert_file_contains "$CHEZMOIDATA" "profile" "must define profile"
+if [[ -z "$CP_CHEZMOI" ]]; then cp_skip "chezmoi not installed"; else
+  assert_true '[[ -n "${CP_DATA##*|}" ]]' "templates see a default profile"
+fi
 
 # ═══════════════════════════════════════════════════════════════
 # 2. DOT CLI (the control plane)
@@ -42,8 +106,7 @@ assert_file_contains "$CHEZMOIDATA" "profile" "must define profile"
 test_start "critical_dot_cli_exists"
 assert_file_exists "$DOT_CLI" "dot CLI must exist"
 
-test_start "critical_dot_cli_syntax"
-assert_exit_code 0 "bash -n '$DOT_CLI'"
+# (bin/dot's syntax is proved by every case below that runs it.)
 
 test_start "critical_dot_version"
 assert_output_contains "dotfiles" "bash '$DOT_CLI' --version"
@@ -76,8 +139,12 @@ assert_file_exists "$REPO_ROOT/defaults/dot_zshenv" "zshenv must exist"
 test_start "critical_bashrc_exists"
 assert_file_exists "$REPO_ROOT/defaults/dot_bashrc" "bashrc must exist"
 
+# The bashrc must load in an interactive bash and set up its cached-eval
+# wrapper once the first prompt hydrates it.
 test_start "critical_bashrc_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/dot_bashrc'"
+cp_out="$(cp_env bash --noprofile --rcfile "$REPO_ROOT/defaults/dot_bashrc" -i -c \
+  '_deferred_hydration; type -t _cached_eval' 2>/dev/null | tail -1)" || true
+assert_equals "function" "$cp_out" "an interactive bash loads the bashrc and defines _cached_eval"
 
 test_start "critical_rc_d_ordering"
 # rc.d files must follow numeric prefix ordering
@@ -100,11 +167,14 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: rc.d files must follow numeric ordering"
 fi
 
+# Alias files must load in a clean bash and define something.
+cp_alias_count() {
+  cp_env bash -c 'source "$1" >/dev/null 2>&1 || exit 1; echo $(( $(alias | wc -l) + $(declare -F | wc -l) ))' _ "$1" 2>/dev/null || echo 0
+}
 test_start "critical_aliases_file_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh'"
-
+assert_true '[[ "$(cp_alias_count "$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh")" -gt 0 ]]' "AI aliases load and define aliases"
 test_start "critical_default_aliases_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/default/default.aliases.sh'"
+assert_true '[[ "$(cp_alias_count "$REPO_ROOT/defaults/.chezmoitemplates/aliases/default/default.aliases.sh")" -gt 0 ]]' "default aliases load and define aliases"
 
 # ═══════════════════════════════════════════════════════════════
 # 4. DIAGNOSTICS (must always be able to report health)
@@ -114,23 +184,25 @@ test_start "critical_doctor_script_exists"
 assert_file_exists "$REPO_ROOT/scripts/diagnostics/doctor.sh" "doctor.sh must exist"
 
 test_start "critical_doctor_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/diagnostics/doctor.sh'"
+cp_out="$(cp_env bash "$REPO_ROOT/scripts/diagnostics/doctor.sh" --json 2>/dev/null)" || true
+assert_contains '"results"' "$cp_out" "doctor runs to its report (--json document with results)"
 
 test_start "critical_health_script_exists"
 assert_file_exists "$REPO_ROOT/scripts/diagnostics/health.sh" "health.sh must exist"
 
 test_start "critical_smoke_test_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/diagnostics/smoke-test.sh'"
+cp_out="$(cp_env bash "$REPO_ROOT/scripts/diagnostics/smoke-test.sh" 2>&1)" || true
+assert_true 'grep -qE "([0-9]+ failed +[0-9]+ passed|All [0-9]+ tests passed)" <<<"$cp_out"' "the smoke test runs to its summary"
 
 # ═══════════════════════════════════════════════════════════════
 # 5. AI CLI STATUS (must always report, even with no tools)
 # ═══════════════════════════════════════════════════════════════
 
 test_start "critical_ai_command_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/ai.sh'"
-
-test_start "critical_ai_mise_pkg_mapping"
-assert_file_contains "$REPO_ROOT/scripts/dot/commands/ai.sh" "_ai_mise_pkg" "must define mise package mapping"
+cp_dot ai tools
+assert_contains "AI CLI Status" "$CP_OUT" "dot ai tools reports status with no tools installed"
+# (The mise package mapping is pinned behaviourally by
+# tests/unit/dot-cli/test_ai_install_pkg_map.sh.)
 
 test_start "critical_ai_bridge_help"
 output=$(bash "$REPO_ROOT/scripts/dot/commands/ai.sh" cl --help 2>&1 || true)
@@ -149,24 +221,36 @@ fi
 test_start "critical_installer_exists"
 assert_file_exists "$REPO_ROOT/install.sh" "install.sh must exist"
 
-test_start "critical_installer_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/install.sh'"
+# (install.sh's syntax is proved by the --help run below.)
 
 test_start "critical_installer_help"
 assert_output_contains "Usage" "bash '$REPO_ROOT/install.sh' --help"
 
+# The uninstaller asks first, and "n" must abort before anything is
+# touched. Run as a COPY with a PATH holding only recording stubs, so even
+# a broken prompt could not reach a real rm or chezmoi.
+cp "$REPO_ROOT/scripts/uninstall.sh" "$CP_WORK/uninstall.copy.sh"
+cp_out="$(printf 'n\n' | env -i HOME="$CP_WORK/home" PATH="$CP_WORK/only" /bin/bash "$CP_WORK/uninstall.copy.sh" 2>&1)" || true
 test_start "critical_uninstaller_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/uninstall.sh'"
+assert_contains "Aborted." "$cp_out" "answering n aborts the uninstall"
+test_start "critical_uninstaller_declined_touches_nothing"
+assert_file_not_exists "$CP_WORK/destructive.spy" "no rm, chezmoi or mv is run when declined"
 
 # ═══════════════════════════════════════════════════════════════
 # 7. PREWARM (must be able to regenerate caches)
 # ═══════════════════════════════════════════════════════════════
 
 test_start "critical_prewarm_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/ops/prewarm.sh'"
+rm -rf "$CP_WORK/home/.cache"
+cp_env bash "$REPO_ROOT/scripts/ops/prewarm.sh" >/dev/null 2>&1 || true
+assert_file_contains "$CP_WORK/home/.cache/bash/starship-init.bash" "starship-init-for-bash" "prewarm writes the starship init cache"
 
+cp_apply 1
 test_start "critical_prewarm_in_apply"
-assert_file_contains "$REPO_ROOT/scripts/ops/chezmoi-apply.sh" "DOTFILES_PREWARM_ON_APPLY" "apply must support prewarm"
+assert_contains "Pre-warm" "$CP_OUT" "DOTFILES_PREWARM_ON_APPLY=1 pre-warms after apply"
+cp_apply 0
+test_start "critical_prewarm_off_in_apply"
+assert_false '[[ "$CP_OUT" == *Pre-warm* ]]' "DOTFILES_PREWARM_ON_APPLY=0 skips it"
 
 # ═══════════════════════════════════════════════════════════════
 # 8. RC.D FILES — each must have valid bash/zsh syntax
@@ -200,44 +284,30 @@ assert_file_exists "$REPO_ROOT/defaults/dot_config/zsh/rc.d/99-alias-wrapper.zsh
 # 9. DOT COMMAND SCRIPTS — all must exist and have valid syntax
 # ═══════════════════════════════════════════════════════════════
 
-test_start "critical_dot_cmd_core_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/core.sh'"
-
-test_start "critical_dot_cmd_diagnostics_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/diagnostics.sh'"
-
-test_start "critical_dot_cmd_aliases_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/aliases.sh'"
-
-test_start "critical_dot_cmd_tools_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/tools.sh'"
-
-test_start "critical_dot_cmd_meta_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/meta.sh'"
-
-test_start "critical_dot_cmd_secrets_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/secrets.sh'"
-
-test_start "critical_dot_cmd_security_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/security.sh'"
-
-test_start "critical_dot_cmd_agent_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/agent.sh'"
-
-test_start "critical_dot_cmd_appearance_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/appearance.sh'"
-
-test_start "critical_dot_cmd_fleet_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/fleet.sh'"
-
-test_start "critical_dot_cmd_lint_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/lint.sh'"
-
-test_start "critical_dot_cmd_patterns_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/patterns.sh'"
-
-test_start "critical_dot_cmd_restore_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/scripts/dot/commands/restore.sh'"
+# Each module is loaded through bin/dot with one read-only command whose
+# outcome in the sandbox is known. (lint runs a full repo lint wherever
+# a shellcheck binary is installed; its module is pinned by tests/unit/dot-cli/test_lint.sh.)
+cp_module() { # <name> <want rc> <want output> <args...>
+  local name="$1" rc="$2" want="$3"
+  shift 3
+  cp_dot "$@"
+  test_start "critical_dot_cmd_${name}_syntax"
+  assert_equals "$rc" "$CP_RC" "dot $* exits $rc"
+  test_start "critical_dot_cmd_${name}_reports"
+  assert_contains "$want" "$CP_OUT" "dot $* reports '$want'"
+}
+cp_module core 0 "Dotfiles Status" status
+cp_module diagnostics 0 "mise toolchain" locks
+cp_module aliases 0 "Aliases" aliases list
+cp_module tools 0 "Dot Tools" tools
+cp_module meta 0 "Declarative dotfiles" docs
+cp_module secrets 1 "No age key found" secrets
+cp_module security 1 "Telemetry" telemetry
+cp_module agent 0 "Agent Card" agent card
+cp_module appearance 0 "Current" theme current
+cp_module fleet 0 "Fleet Commands" fleet help
+cp_module patterns 0 "AI Steering Patterns" patterns list
+cp_module restore 1 "No backups found" restore --list
 
 # ═══════════════════════════════════════════════════════════════
 # 10. KEY DOT_LOCAL/BIN EXECUTABLES

@@ -307,7 +307,13 @@ if [[ "$_os_name" == "Darwin" ]]; then
   _mem_used_gb="$(awk "BEGIN{printf \"%.2f\", ${_mem_pages:-0}*4096/1073741824}")"
   _mem="${_mem_used_gb} GiB / ${_mem_total_gb} GiB"
   _resolution="$(system_profiler SPDisplaysDataType 2>/dev/null | awk '/Resolution/{gsub(/^ +/,""); print; exit}' | sed 's/Resolution: //' || echo "n/a")"
-  _packages="$(brew list --formula 2>/dev/null | wc -l | tr -d ' ') (brew)"
+  # Guarded like the Linux branch: without brew on PATH the pipeline
+  # returns 127 under pipefail and set -e ended the whole report here.
+  if command -v brew >/dev/null 2>&1; then
+    _packages="$(brew list --formula 2>/dev/null | wc -l | tr -d ' ') (brew)"
+  else
+    _packages="n/a"
+  fi
   _de="Aqua"
 
 elif [[ -r "$os_release_file" ]]; then
