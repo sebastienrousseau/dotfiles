@@ -10,7 +10,6 @@
    9 tests/integration/test_install.sh
    1 tests/integration/test_rollback.sh
    5 tests/integration/test_shell_parity.sh
-  29 tests/regression/test_critical_path.sh
   19 tests/regression/test_cross_platform.sh
    3 tests/regression/test_dot_help_registry_symmetry.sh
    1 tests/regression/test_enforce_policies_fires.sh
