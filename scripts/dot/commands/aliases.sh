@@ -56,7 +56,14 @@ cmd_aliases() {
       ui_info "Query" "$query"
       echo ""
       local results
-      results="$(emit_alias_manifest | rg -i "$query" || true)"
+      # rg where present, grep otherwise: the manifest itself already falls
+      # back to grep, and without this a host without rg answered every
+      # query with "No matches".
+      if command -v rg >/dev/null 2>&1; then
+        results="$(emit_alias_manifest | rg -i "$query" || true)"
+      else
+        results="$(emit_alias_manifest | grep -Ei "$query" || true)"
+      fi
       if [[ -z "$results" ]]; then
         ui_warn "No matches" "$query"
         return 1

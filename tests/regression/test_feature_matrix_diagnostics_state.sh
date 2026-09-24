@@ -116,11 +116,24 @@ test_fm_attest_json() {
   fm_expect_out '"dotfiles_version"'
 }
 
+test_fm_attest_missing_value() {
+  # A value-taking option as the last argument is a usage error: rc=2 with
+  # the option named on stderr. It used to be `shift 2` failing under set -e
+  # — rc=1 and not one byte of output. The check runs before the jq guard,
+  # so the contract holds on a runner without jq too.
+  local opt
+  for opt in -w --write -F --fleet-store -I --fleet-id -a --max-age; do
+    test_start "fm_attest_missing_value${opt//-/_}"
+    fm_run attest "$opt"
+    fm_expect_rc 2
+    test_start "fm_attest_missing_value${opt//-/_}_names_the_option"
+    fm_expect_err "option '$opt' requires a value"
+  done
+}
+
 test_fm_attest_write() {
-  # --write takes a path. A bare `dot attest -w` is a different thing: the
-  # option parser runs `shift 2` on a single remaining argument, which under
-  # set -e ends the script with rc=1 and no output at all. That is a CLI bug
-  # to fix in the parser, not a contract to pin here.
+  # --write takes a path; the bare `dot attest -w` case is pinned by
+  # test_fm_attest_missing_value.
   local out="$FM_SANDBOX/work/attest-write.json"
   test_start "fm_attest_write"
   fm_run attest -w "$out"
@@ -554,14 +567,23 @@ fm_restore_git_fixture() {
 }
 
 test_fm_restore_list() {
-  # --list exits 1 when the backup directory is missing altogether; create
-  # it so the row does not depend on which earlier row happened to make it.
-  mkdir -p "$XDG_DATA_HOME/dotfiles/backups"
+  # Two writers share $XDG_DATA_HOME/dotfiles/backups: restore's own
+  # create_backup names its directories backup-<stamp>, rollback.sh names
+  # its backup_<stamp>_<reason>. --list must show both — it used to glob only
+  # the first shape, so `dot rollback backup` output was invisible to it.
+  mkdir -p "$XDG_DATA_HOME/dotfiles/backups/backup-19990101_000000"
+  test_start "fm_restore_list_rollback_backup"
+  fm_run rollback backup
+  fm_expect_rc 0
   test_start "fm_restore_list"
   fm_run restore --list
   fm_expect_rc 0
   test_start "fm_restore_list_reports"
   fm_expect_out "--- Available Backups ---"
+  test_start "fm_restore_list_shows_rollback_backups"
+  fm_expect_out_matches '^  backup_[0-9]{8}_[0-9]{6}_manual'
+  test_start "fm_restore_list_shows_its_own_backups"
+  fm_expect_out "  backup-19990101_000000"
   test_start "fm_restore_list_shows_git_history"
   fm_expect_out "--- Git History (last 10) ---"
 }
@@ -593,13 +615,41 @@ test_fm_restore_diff() {
 }
 
 test_fm_restore_latest() {
+  # --latest restores the newest backup by mtime, whichever writer made it.
+  # A `dot rollback backup` taken here is that backup: mtimes have
+  # one-second resolution, so wait one out to make it strictly the newest.
+  printf 'fm-restore-v1\n' >"$HOME/.bashrc"
+  sleep 1
+  fm_run rollback backup
+  test_start "fm_restore_latest_rollback_backup"
+  fm_expect_rc 0
+  printf 'fm-restore-v2\n' >"$HOME/.bashrc"
   test_start "fm_restore_latest"
   fm_run restore --latest
-  # restore only recognises backup-* directories, and nothing in this suite
-  # creates one (rollback writes backup_*), so it must fail cleanly rather
-  # than restore something arbitrary.
+  fm_expect_rc 0
+  test_start "fm_restore_latest_restores_the_rollback_backup"
+  fm_expect_out_matches 'Restoring from: backup_[0-9]{8}_[0-9]{6}_manual'
+  test_start "fm_restore_latest_restores_the_file"
+  if [[ "$(cat "$HOME/.bashrc")" == "fm-restore-v1" ]]; then
+    fm_pass "restored fm-restore-v1"
+  else
+    fm_fail "got $(cat "$HOME/.bashrc"), want fm-restore-v1"
+  fi
+  test_start "fm_restore_latest_keeps_metadata_out_of_home"
+  if [[ -e "$HOME/.backup_meta" ]]; then
+    fm_fail "rollback's .backup_meta was restored into \$HOME"
+  else
+    fm_pass "no .backup_meta in \$HOME"
+  fi
+}
+
+test_fm_restore_latest_none() {
+  # With nothing to restore it must fail cleanly rather than restore
+  # something arbitrary.
+  test_start "fm_restore_latest_none"
+  XDG_DATA_HOME="$FM_SANDBOX/work/no-backups-data" fm_run restore --latest
   fm_expect_rc 1
-  test_start "fm_restore_latest_handles_no_backups"
+  test_start "fm_restore_latest_none_handles_no_backups"
   fm_expect_out "No backups found"
 }
 
@@ -642,6 +692,7 @@ test_fm_snapshot_baseline
 test_fm_env_xdg_state_home
 test_fm_attest
 test_fm_attest_json
+test_fm_attest_missing_value
 test_fm_attest_write
 test_fm_attest_fleet_store
 test_fm_attestation
@@ -673,6 +724,7 @@ test_fm_restore_list
 test_fm_restore_git_dry_run
 test_fm_restore_diff
 test_fm_restore_latest
+test_fm_restore_latest_none
 test_fm_restore_usage
 test_fm_env_dotfiles_dir
 

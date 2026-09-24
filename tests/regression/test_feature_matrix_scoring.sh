@@ -164,6 +164,52 @@ test_fm_locks() {
   fi
 }
 
+test_fm_locks_skips_comments() {
+  # The [tools] table carries comments between pins. Only pin rows are
+  # toolchain entries: a comment used to come out as a row of its own with
+  # its spaces stripped (`#Rust--deliberatelyNOTmanagedbymise.`).
+  local src="$FM_SANDBOX/work/locks-src"
+  mkdir -p "$src/dot_config/mise/conf.d"
+  cat >"$src/dot_config/mise/conf.d/00-dotfiles.toml" <<'EOF'
+[settings]
+verbose = false
+
+[tools]
+# Node.js
+node = "24"
+
+# Rust -- deliberately NOT managed by mise.
+#
+ruby = "3.3"
+EOF
+  test_start "fm_locks_skips_comments"
+  CHEZMOI_SOURCE_DIR="$src" fm_run locks
+  fm_expect_rc 0
+  test_start "fm_locks_skips_comments_renders_node"
+  fm_expect_out_matches '^  node +24$'
+  test_start "fm_locks_skips_comments_renders_ruby"
+  fm_expect_out_matches '^  ruby +3\.3$'
+  # Only the mise section is under test: the "Node/Python pins" header that
+  # follows it is not a rendered comment.
+  local mise_rows
+  mise_rows="$(printf '%s\n' "$FM_OUT" |
+    sed -n '/== mise toolchain ==/,/== Node\/Python pins ==/p' | grep '^  ' || true)"
+  test_start "fm_locks_skips_comments_drops_comment_rows"
+  if printf '%s\n' "$mise_rows" | grep -Eq '#|Rust|Node'; then
+    fm_fail "a comment line was rendered as a pin row"
+  else
+    fm_pass "only pin rows rendered"
+  fi
+  test_start "fm_locks_skips_comments_two_pins_exactly"
+  local rows
+  rows="$(printf '%s\n' "$mise_rows" | grep -c . || true)"
+  if [[ "$rows" == "2" ]]; then
+    fm_pass "2 pin rows"
+  else
+    fm_fail "expected 2 pin rows in the mise section, got $rows"
+  fi
+}
+
 # ── run ────────────────────────────────────────────────────────────────────
 
 echo ""
@@ -180,5 +226,6 @@ test_fm_perf_json
 test_fm_perf_profile
 test_fm_conflicts
 test_fm_locks
+test_fm_locks_skips_comments
 
 fm_finish

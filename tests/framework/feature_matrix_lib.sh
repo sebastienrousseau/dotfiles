@@ -152,6 +152,29 @@ fm_stub() {
   chmod +x "$FM_SANDBOX/bin/$name"
 }
 
+# fm_path_without <tool>… — echo a PATH on which the named tools do not
+# resolve but everything else still does, so a row can run dot as a host
+# that lacks them (rg, lsblk). Every directory on the current PATH is
+# mirrored by symlink into one shadow directory — first hit wins, as PATH
+# lookup does — the named tools are removed from it, and the sandbox stub
+# directory stays in front so fm_stub shims still apply. Dropping whole
+# PATH entries would not do: on the Ubuntu runners rg lives in /usr/bin
+# next to everything else.
+fm_path_without() {
+  local shadow="$FM_SANDBOX/path-without-$1" dir tool
+  rm -rf "$shadow"
+  mkdir -p "$shadow"
+  local IFS=:
+  for dir in $PATH; do
+    [[ -d "$dir" && "$dir" != "$FM_SANDBOX/bin" ]] || continue
+    ln -s "$dir"/* "$shadow/" 2>/dev/null || true
+  done
+  for tool in "$@"; do
+    rm -f "$shadow/$tool"
+  done
+  printf '%s\n' "$FM_SANDBOX/bin:$shadow"
+}
+
 # fm_repo_copy — materialise a minimal writable copy of the repo inside the
 # sandbox and echo its path. For the handful of subcommands that write into
 # the source tree (see the header). Only the subset those commands read is

@@ -8,7 +8,11 @@
 ## remediation steps.
 ##
 ## # Usage
-## dot doctor
+## dot doctor [--json|-j] [--ai]
+##
+## --json renders the same probes as one JSON document (the shape and key
+## names of `dot health --json`, plus `status` and `verdict`) instead of the
+## text dashboard.
 ##
 ## # Exit Codes
 ## - 0: All checks passed (may have warnings)
@@ -41,23 +45,89 @@ export PATH="$HOME/.atuin/bin:$HOME/.local/bin:$PATH"
 
 Errors=0
 Warnings=0
+Passed=0
+Checks=0
+Results=()
 AI_DEBUG=0
+JSON_OUTPUT=0
 
 for arg in "$@"; do
   case "$arg" in
     --ai) AI_DEBUG=1 ;;
+    --json | -j) JSON_OUTPUT=1 ;;
   esac
 done
 
+# JSON mode: the dashboard is written by dozens of direct printf/ui_* calls,
+# so rather than guard each one, park the real stdout on fd 3 and send the
+# text to /dev/null. Only the document at the end goes to fd 3.
+if [[ $JSON_OUTPUT -eq 1 ]]; then
+  exec 3>&1 1>/dev/null
+fi
+
 # --- Output helpers (delegate to shared ui.sh) ---
-_ok() { ui_ok "$1" "${2:-}"; }
+# _record <status> <name> <message> — collect one probe for --json. Same
+# {check,status,message} rows health.sh emits; backslashes and quotes are
+# escaped so the document stays valid whatever a probe puts in its message.
+_record() {
+  local status="$1" name="$2" message="${3:-}"
+  name="${name//\\/\\\\}"
+  name="${name//\"/\\\"}"
+  message="${message//\\/\\\\}"
+  message="${message//\"/\\\"}"
+  Checks=$((Checks + 1))
+  Results+=("{\"check\":\"${name}\",\"status\":\"${status}\",\"message\":\"${message}\"}")
+}
+_ok() {
+  ui_ok "$1" "${2:-}"
+  _record pass "$1" "${2:-}"
+  Passed=$((Passed + 1))
+}
 _fail() {
   ui_err "$1" "${2:-}"
+  _record fail "$1" "${2:-}"
   Errors=$((Errors + 1))
 }
 _warn() {
   ui_warn "$1" "${2:-}"
+  _record warn "$1" "${2:-}"
   Warnings=$((Warnings + 1))
+}
+
+# _json_summary — the --json document. Keys follow `dot health --json`
+# (total/passed/warnings/failures/results); status and verdict carry what
+# the text dashboard says on its last line.
+_json_summary() {
+  local status verdict i=0
+  if [[ $Errors -eq 0 ]]; then
+    status="healthy"
+    if [[ $Warnings -eq 0 ]]; then
+      verdict="All checks passed."
+    else
+      verdict="$Warnings warning(s)."
+    fi
+  else
+    status="unhealthy"
+    verdict="$Errors error(s), $Warnings warning(s). Run 'dot heal' to repair."
+  fi
+  printf '{\n'
+  printf '  "status": "%s",\n' "$status"
+  printf '  "verdict": "%s",\n' "$verdict"
+  printf '  "total": %d,\n' "$Checks"
+  printf '  "passed": %d,\n' "$Passed"
+  printf '  "warnings": %d,\n' "$Warnings"
+  printf '  "failures": %d,\n' "$Errors"
+  printf '  "results": [\n'
+  local result
+  for result in "${Results[@]+"${Results[@]}"}"; do
+    if [[ $i -gt 0 ]]; then
+      printf ',\n'
+    fi
+    printf '    %s' "$result"
+    i=$((i + 1))
+  done
+  printf '\n  ]\n'
+  printf '}\n'
 }
 _section() {
   echo ""
@@ -766,6 +836,9 @@ fi
 dot_log info "doctor_complete" "errors=$Errors" "warnings=$Warnings"
 dot_metric "doctor_errors" "$Errors" "count"
 dot_metric "doctor_warnings" "$Warnings" "count"
+if [[ $JSON_OUTPUT -eq 1 ]]; then
+  _json_summary >&3
+fi
 echo ""
 if [[ $Errors -eq 0 ]]; then
   if [[ $Warnings -eq 0 ]]; then

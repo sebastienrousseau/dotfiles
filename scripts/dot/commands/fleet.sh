@@ -700,19 +700,29 @@ cmd_fleet() {
     apply | push)
       cmd_fleet_apply "$@"
       ;;
+    help | --help | -h)
+      _fleet_print_commands
+      ;;
     *)
-      ui_header "Fleet Commands"
-      echo ""
-      ui_info "Usage" "dot fleet [command]"
-      echo ""
-      ui_ok "status" "Show this node's fleet status (--json for machine output)"
-      ui_ok "drift" "Check for configuration drift"
-      ui_ok "events" "Show recent fleet events"
-      ui_ok "namespace" "Show or set the active namespace"
-      ui_ok "enforce" "Show or set RBAC enforcement mode (advisory|strict)"
-      ui_ok "apply" "SSH out to every host in fleet.toml and run 'dot sync'"
+      ui_err "Unknown subcommand" "$subcommand" >&2
+      echo "Run 'dot fleet help' for usage." >&2
+      _fleet_print_commands >&2
+      return 1
       ;;
   esac
+}
+
+_fleet_print_commands() {
+  ui_header "Fleet Commands"
+  echo ""
+  ui_info "Usage" "dot fleet [command]"
+  echo ""
+  ui_ok "status" "Show this node's fleet status (--json for machine output)"
+  ui_ok "drift" "Check for configuration drift"
+  ui_ok "events" "Show recent fleet events"
+  ui_ok "namespace" "Show or set the active namespace"
+  ui_ok "enforce" "Show or set RBAC enforcement mode (advisory|strict)"
+  ui_ok "apply" "SSH out to every host in fleet.toml and run 'dot sync'"
 }
 
 # Dispatch

@@ -12,7 +12,11 @@ readonly SCRIPT_DIR
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 readonly REPO_ROOT
 readonly POLICIES_DIR="${REPO_ROOT}/.github/security-policies"
-readonly LOG_FILE="${REPO_ROOT}/.security-audit.log"
+# The audit log is state, not source: it lives under XDG_STATE_HOME so a run
+# never writes into the checkout (or into whatever tree REPO_ROOT resolves to).
+readonly LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
+readonly LOG_FILE="${LOG_DIR}/security-audit.log"
+mkdir -p "${LOG_DIR}"
 
 # shellcheck source=../../lib/dot/ui.sh
 # shellcheck disable=SC1091

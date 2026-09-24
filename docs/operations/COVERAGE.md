@@ -131,10 +131,10 @@ above reached 98% while the mutation score sat at 67%.
 
 `DOTFILES_COV_EXERCISE=0` turns every exercise helper into a no-op. The
 `Coverage / behavioural tests only` job in `coverage.yml` runs the same
-measurement with the switch off and reports the result as a notice, with
-floor 0 until it has been observed on `main`. Ratchet that job's
-`MIN_COVERAGE_PCT` from the observed figure; the 98% floor on the full
-run stays as the regression guard for line reach.
+measurement with the switch off. Its first observation on `main` was
+97.93% against 98.72% for the full run, so the exercise probes add under
+a point; the job's floor is 96% and ratchets like the full run's. The 98%
+floor on the full run stays as the regression guard for line reach.
 
 ```bash
 DOTFILES_COV_EXERCISE=0 bash tools/ci/run-coverage.sh   # behavioural only

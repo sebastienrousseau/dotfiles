@@ -38,6 +38,7 @@ case "$command" in
       fi
     else
       ui_err "Pattern not found" "$name"
+      exit 1
     fi
     ;;
   edit)

@@ -34,14 +34,6 @@ test_fm_aliases_list() {
 }
 
 test_fm_aliases_search() {
-  if ! command -v rg >/dev/null 2>&1; then
-    # `aliases search` pipes the manifest through rg with no grep fallback
-    # (the manifest itself has one), so without rg every query answers
-    # "No matches" and exits 1 — there is nothing to pin on such a host.
-    test_start "fm_aliases_search"
-    fm_pass "skipped — rg not installed"
-    return 0
-  fi
   test_start "fm_aliases_search"
   fm_run aliases search git
   fm_expect_rc 0
@@ -49,6 +41,31 @@ test_fm_aliases_search() {
   fm_expect_out_matches "Query +git$"
   test_start "fm_aliases_search_lists_matching_aliases"
   fm_expect_out_matches "^ +[A-Za-z0-9_.:-]+ +'git[^']*'"
+}
+
+# The same contract on a host without ripgrep. `aliases search` once piped
+# the manifest through rg with no fallback (the manifest itself has one),
+# so without rg every query answered "No matches" with rc=1. rg is hidden
+# from PATH rather than skipped around, so this runs on every host.
+test_fm_aliases_search_without_rg() {
+  local no_rg
+  no_rg="$(fm_path_without rg)"
+  test_start "fm_aliases_search_without_rg_hides_rg"
+  if PATH="$no_rg" command -v rg >/dev/null 2>&1; then
+    fm_fail "rg still resolves on the shadow PATH"
+  else
+    fm_pass "rg hidden"
+  fi
+  test_start "fm_aliases_search_without_rg"
+  PATH="$no_rg" fm_run aliases search git
+  fm_expect_rc 0
+  test_start "fm_aliases_search_without_rg_lists_matching_aliases"
+  fm_expect_out_matches "^ +[A-Za-z0-9_.:-]+ +'git[^']*'"
+  test_start "fm_aliases_search_without_rg_nomatch"
+  PATH="$no_rg" fm_run aliases search zzz-no-such-alias-zzz
+  fm_expect_rc 1
+  test_start "fm_aliases_search_without_rg_nomatch_says_so"
+  fm_expect_any "No matches" "zzz-no-such-alias-zzz"
 }
 
 test_fm_aliases_search_nomatch() {
@@ -230,6 +247,7 @@ echo ""
 
 test_fm_aliases_list
 test_fm_aliases_search
+test_fm_aliases_search_without_rg
 test_fm_aliases_search_nomatch
 test_fm_aliases_why
 test_fm_aliases_why_unknown

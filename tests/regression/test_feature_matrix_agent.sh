@@ -671,12 +671,20 @@ test_fm_agent_checkpoint_list() {
   fm_expect_out "fm-list-marker"
 }
 
-fm_latest_checkpoint_id() {
+# fm_checkpoint_id_for <word>: the id of the checkpoint whose recorded
+# command contains <word>. Ids are "<UTC second>-<random trace id>", so two
+# saves in the same second sort in random order; picking "the newest" by
+# name made the replay row re-run the wrong checkpoint now and then.
+fm_checkpoint_id_for() {
   local f
-  f="$(find "$XDG_STATE_HOME/dotfiles/checkpoints" -name '*.json' 2>/dev/null |
-    sort | tail -1)"
-  [[ -n "$f" ]] || return 1
-  basename "$f" .json
+  for f in "$XDG_STATE_HOME"/dotfiles/checkpoints/*.json; do
+    [[ -f "$f" ]] || continue
+    if jq -e --arg w "$1" 'any(.argv[]?; . == $w)' "$f" >/dev/null 2>&1; then
+      basename "$f" .json
+      return 0
+    fi
+  done
+  return 1
 }
 
 test_fm_agent_checkpoint_show() {
@@ -687,7 +695,7 @@ test_fm_agent_checkpoint_show() {
   fi
   fm_run agent checkpoint save plan echo fm-show
   local id
-  if ! id="$(fm_latest_checkpoint_id)"; then
+  if ! id="$(fm_checkpoint_id_for fm-show)"; then
     test_start "fm_agent_checkpoint_show"
     fm_fail "no checkpoint to show"
     return 0
@@ -721,7 +729,7 @@ test_fm_agent_checkpoint_replay() {
   fi
   fm_run agent checkpoint save plan echo fm-replay-marker
   local id
-  if ! id="$(fm_latest_checkpoint_id)"; then
+  if ! id="$(fm_checkpoint_id_for fm-replay-marker)"; then
     test_start "fm_agent_checkpoint_replay"
     fm_fail "no checkpoint to replay"
     return 0

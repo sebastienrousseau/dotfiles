@@ -196,7 +196,8 @@ that the behaviour holds: it passes with a guard inverted and fails when a
 line is reworded. `tools/ci/check-source-grep-tests.py` finds assertions
 whose operand is a repository source file (a text tool or a file-content
 assertion on a path under `scripts/`, `lib/`, `bin/`, `defaults/`,
-`install.sh` and so on, directly or through a variable).
+`install.sh` and so on, directly, through a variable, or inside an
+assignment's command substitution such as `first=$(head -n 1 "$SCRIPT")`).
 
 ```bash
 python3 tools/ci/check-source-grep-tests.py            # what CI runs

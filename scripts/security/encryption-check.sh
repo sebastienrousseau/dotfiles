@@ -46,6 +46,11 @@ case "$(dot_platform_id)" in
       fi
       ui_warn "LUKS" "no crypto volume detected"
       exit 1
+    else
+      # Without lsblk there is no probe to read. Say so, and use a status
+      # distinct from both verdicts: 0 encrypted, 1 not encrypted, 2 unknown.
+      ui_warn "lsblk" "not found; cannot determine encryption status"
+      exit 2
     fi
     ;;
   *)

@@ -127,4 +127,28 @@ assert_file_contains "$CALLS" "stat -f %m" "BSD stat form is used"
 assert_file_contains "$OUT" "Restoring from: backup-new" "newest mtime wins"
 assert_file_contains "$H/.zshrc" "new" "newest backup content restored"
 
+# rollback.sh writes backup_<stamp>_<reason> beside restore's own
+# backup-<stamp>; both are backups, and rollback's .backup_meta is not a
+# dotfile to put back into $HOME.
+test_start "list_shows_both_backup_name_shapes"
+H="$(new_home shapes)"
+B="$H/.local/share/dotfiles/backups"
+mkdir -p "$B/backup-20200101_000000" "$B/backup_20260101_000000_manual" "$H/.dotfiles/.git"
+printf 'from-restore\n' >"$B/backup-20200101_000000/.zshrc"
+printf 'from-rollback\n' >"$B/backup_20260101_000000_manual/.zshrc"
+printf 'reason=manual\n' >"$B/backup_20260101_000000_manual/.backup_meta"
+touch -t 202001010000 "$B/backup-20200101_000000"
+: >"$CALLS"
+rc="$(run_restore "$H" "$BIN" --list)"
+assert_equals "0" "$rc" "--list exits 0"
+assert_file_contains "$OUT" "  backup-20200101_000000" "restore-style backup listed"
+assert_file_contains "$OUT" "  backup_20260101_000000_manual" "rollback-style backup listed"
+
+test_start "latest_restores_a_rollback_style_backup"
+rc="$(run_restore "$H" "$BIN" --latest)"
+assert_equals "0" "$rc" "--latest exits 0"
+assert_file_contains "$OUT" "Restoring from: backup_20260101_000000_manual" "newest rollback backup chosen"
+assert_file_contains "$H/.zshrc" "from-rollback" "rollback backup content restored"
+assert_false "[[ -e '$H/.backup_meta' ]]" ".backup_meta is not copied into HOME"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

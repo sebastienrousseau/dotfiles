@@ -102,11 +102,11 @@ _rc=$?
 assert_equals 1 "$_rc" "no crypto volume exits 1"
 assert_contains "no crypto volume detected" "$_out" "warning printed"
 
-test_start "linux_without_lsblk_falls_through_exit_0"
+test_start "linux_without_lsblk_cannot_determine_exits_2"
 _out="$(_run linux "$_base")"
 _rc=$?
-assert_equals 0 "$_rc" "no lsblk falls through the case with rc 0"
-assert_contains "Encryption Check" "$_out" "header still printed"
+assert_equals 2 "$_rc" "no lsblk is an undetermined verdict, rc 2"
+assert_contains "cannot determine encryption status" "$_out" "undetermined verdict printed"
 
 test_start "unsupported_platform_exits_1"
 _out="$(_run bsd "$_base")"

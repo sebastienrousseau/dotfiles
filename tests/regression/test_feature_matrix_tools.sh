@@ -186,24 +186,24 @@ test_fm_profile_show() {
   test_start "fm_profile_show"
   fm_run profile show
   fm_expect_rc 0
+  # The value is the bare TOML string, not the `profile = "x"` line it came
+  # from: the CLI's sed once used `\s`, which BSD sed reads literally, so on
+  # macOS this row showed `Profile  profile = "laptop"`.
   test_start "fm_profile_show_reports_a_profile"
-  fm_expect_out_matches "Profile +[^ ]"
+  fm_expect_out_matches "Profile +[A-Za-z0-9_-]+$"
   test_start "fm_profile_show_has_a_flags_section"
   fm_expect_out "Feature Flags"
   test_start "fm_profile_show_renders_the_flags_table"
   fm_expect_out_matches "^ +[^ ]+ +[a-z_]+ +(true|false)$"
 
   # The value shown must be the one in the data file: set a known profile
-  # on the sandbox copy through the CLI and require it back. NOTE: on macOS
-  # the line reads `Profile  profile = "x"` rather than `Profile  x`, because
-  # the CLI's sed uses `\s`, which BSD sed does not know; GNU sed on Linux
-  # extracts the bare value. Both carry the value, which is what is matched.
+  # on the sandbox copy through the CLI and require exactly it back.
   local repo
   repo="$(fm_repo_copy)"
   fm_run_bin "$repo/bin/dot" profile set fm-show-profile
   test_start "fm_profile_show_reports_the_active_profile"
   fm_run_bin "$repo/bin/dot" profile show
-  fm_expect_out_matches "Profile +.*fm-show-profile"
+  fm_expect_out_matches "Profile +fm-show-profile$"
 }
 
 test_fm_profile_set() {

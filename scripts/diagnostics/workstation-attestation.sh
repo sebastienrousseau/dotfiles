@@ -27,6 +27,22 @@ FLEET_STORE=""
 FLEET_ID=""
 VERIFY=0
 VERIFY_MAX_AGE=""
+
+# usage_error <message> — a malformed command line is exit 2 with the reason
+# on stderr, not the silent rc=1 a failed `shift 2` used to produce under
+# set -e when a value-taking option was the last argument.
+usage_error() {
+  printf 'dot attest: %s\n' "$1" >&2
+  exit 2
+}
+
+# require_value <option> <argc> — the option needs a value after it.
+require_value() {
+  if [[ "$2" -lt 2 ]]; then
+    usage_error "option '$1' requires a value"
+  fi
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --json | -j)
@@ -38,20 +54,24 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --max-age | -a)
-      VERIFY_MAX_AGE="${2:-}"
+      require_value "$1" $#
+      VERIFY_MAX_AGE="$2"
       VERIFY=1
       shift 2
       ;;
     --write | -w)
-      WRITE_PATH="${2:-}"
+      require_value "$1" $#
+      WRITE_PATH="$2"
       shift 2
       ;;
     --fleet-store | -F)
-      FLEET_STORE="${2:-}"
+      require_value "$1" $#
+      FLEET_STORE="$2"
       shift 2
       ;;
     --fleet-id | -I)
-      FLEET_ID="${2:-}"
+      require_value "$1" $#
+      FLEET_ID="$2"
       shift 2
       ;;
     *)
