@@ -666,6 +666,27 @@ EOF
   assert_contains "RELOADED=nvim" "$(cat "$OUT")" "nvim counts as reloaded"
 done
 
+# Every running Neovim gets the switch, each exactly once. With a second
+# server in the runtime dir, a dedupe that compared the wrong way would
+# keep only the first socket (or address one twice).
+nvim_sock2="$WORK/run/nvim.8765.0"
+python3 - "$nvim_sock2" <<'PY'
+import socket, sys
+socket.socket(socket.AF_UNIX).bind(sys.argv[1])
+PY
+for shell in "${nvim_shells[@]}"; do
+  test_start "nvim_switches_every_server_once ($("$shell" -c 'echo "bash ${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"'))"
+  reset_calls
+  run_fn Linux "$shell" <<'EOF'
+nvim() { printf '%s\n' "$*" >>"$CALLS/nvim"; }
+reload_nvim fixture-dark
+EOF
+  assert_equals 1 "$(calls nvim | grep -c -- "--server $nvim_sock --remote-expr" || true)" "first server addressed exactly once"
+  assert_equals 1 "$(calls nvim | grep -c -- "--server $nvim_sock2 --remote-expr" || true)" "second server addressed exactly once"
+  assert_equals 2 "$(calls nvim | grep -c -- "--remote-expr" || true)" "no server is skipped or repeated"
+done
+rm -f "$nvim_sock2"
+
 # ===========================================================================
 # Rendered templates (real chezmoi renderer, fixture data)
 # ===========================================================================
