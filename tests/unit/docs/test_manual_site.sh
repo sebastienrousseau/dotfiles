@@ -15,7 +15,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-STYLES="$REPO_ROOT/docs/manual-site/themes/lucid/_layouts/styles.css"
+STYLES="$REPO_ROOT/docs/site/themes/lucid/_layouts/styles.css"
 GEN="$REPO_ROOT/tools/docs/build-manual-site.py"
 
 WORK="$(mktemp -d -t manual-site.XXXXXX)"
