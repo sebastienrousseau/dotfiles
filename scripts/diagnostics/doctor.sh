@@ -447,9 +447,9 @@ _section "State"
 # on a fully synchronised machine. Files, dirs, symlinks and run_once/
 # run_onchange scripts still count.
 if chezmoi verify --exclude=always &>/dev/null; then
-  _ok "chezmoi" "synchronized"
+  _ok "chezmoi state" "synchronized"
 else
-  _fail "chezmoi" "drifted (run dot drift)"
+  _fail "chezmoi state" "drifted (run dot drift)"
 fi
 
 if [[ -f "$HOME/.zshrc" ]]; then
