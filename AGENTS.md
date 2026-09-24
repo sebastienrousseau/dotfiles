@@ -79,6 +79,7 @@ version-sync.sh             # Syncs dotfiles_version across non-template files
 - Integration tests: `tests/integration/`
 - Run: `./tests/framework/test_runner.sh`
 - Tests execute bash source files directly — do **not** use Go template syntax in non-`.tmpl` files.
+- Tests run the code and assert the outcome. A source grep (`assert_file_contains "$SCRIPT" ...`) fails the `lint-tests` ratchet unless the file declares `# test-kind: structural`.
 
 ## Do Not
 
