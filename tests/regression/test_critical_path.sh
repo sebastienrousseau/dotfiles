@@ -29,6 +29,9 @@ for t in rm chezmoi mv; do
   printf '#!/bin/sh\necho "%s $*" >>"%s/destructive.spy"\n' "$t" "$CP_WORK" >"$CP_WORK/only/$t"
 done
 chmod +x "$CP_WORK"/bin/* "$CP_WORK"/only/*
+# jq is a read-only dependency of the agent and mode commands. Older macOS
+# (the macos-14 runners) has no /usr/bin/jq, so link the host's copy in.
+if cp_jq="$(command -v jq 2>/dev/null)"; then ln -s "$cp_jq" "$CP_WORK/bin/jq"; fi
 printf '{}' >"$CP_WORK/chezmoi.json"
 CP_CHEZMOI="$(command -v chezmoi 2>/dev/null || true)"
 
