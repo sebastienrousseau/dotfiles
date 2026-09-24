@@ -239,6 +239,14 @@ _assert_contract() {
 
   test_start "${label}_verdict_pinned"
   assert_equals "$want_verdict" "$verdict" "verdict states the counts"
+  # Consumers index results by check name; a repeated name (the chezmoi
+  # binary and the chezmoi drift row were both "chezmoi") silently drops one.
+  test_start "${label}_check_names_unique"
+  assert_equals "" "$(_jq '[.results[].check] | group_by(.) | map(select(length > 1) | .[0]) | join(",")')" \
+    "every check name is unique"
+  test_start "${label}_drift_row_named"
+  assert_equals "1" "$(_jq '[.results[] | select(.check == "chezmoi state")] | length')" \
+    "the drift row is reported as 'chezmoi state'"
 }
 
 FULL_TOOLS="fish starship nu rg bat fzf zoxide atuin yazi zellij \
