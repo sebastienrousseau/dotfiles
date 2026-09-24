@@ -116,10 +116,13 @@ for ep_sh in "${ep_shells[@]}"; do
       _cached_eval badinit badinit; echo "bad_rc=$?"' 2>&1)" || true
   test_start "cached_eval_bash_caches_benign_init (bash $ep_ver)"
   assert_contains "good_rc=0 FIXTURE_INIT=loaded" "$ep_out" "benign init is evaluated"
+  test_start "cached_eval_bash_caches_benign_init_2 (bash $ep_ver)"
   assert_file_exists "$EP_WORK/home/.cache/bash/goodinit.bash" "and cached under XDG_CACHE_HOME/bash"
   test_start "cached_eval_bash_rejects_suspicious_init (bash $ep_ver)"
   assert_contains "bad_rc=1" "$ep_out" "a download piped into a shell is refused"
+  test_start "cached_eval_bash_rejects_suspicious_init_2 (bash $ep_ver)"
   assert_contains "Suspicious output from badinit" "$ep_out" "and the refusal is reported"
+  test_start "cached_eval_bash_rejects_suspicious_init_3 (bash $ep_ver)"
   assert_file_not_exists "$EP_WORK/home/.cache/bash/badinit.bash" "and nothing is cached"
 done
 
@@ -138,7 +141,9 @@ else
       _cached_eval goodinit goodinit; print "good_rc=$? FIXTURE_INIT=${FIXTURE_INIT:-unset}"
       _cached_eval badinit badinit; print "bad_rc=$?"' 2>&1)" || true
   assert_contains "good_rc=0 FIXTURE_INIT=loaded" "$ep_out" "zsh evaluates benign init"
+  test_start "cached_eval_zsh_rejects_suspicious_init_4"
   assert_contains "bad_rc=1" "$ep_out" "zsh refuses a download piped into a shell"
+  test_start "cached_eval_zsh_rejects_suspicious_init_5"
   assert_contains "Suspicious output from badinit" "$ep_out" "and reports it"
 fi
 
@@ -214,6 +219,7 @@ ep_git() { git config -f "$EP_GITCONFIG" --get "$1" 2>/dev/null || true; }
 test_start "gitconfig_commit_signing"
 if [[ -z "$EP_GITCONFIG" ]]; then ep_skip "chezmoi not installed"; else
   assert_equals "true" "$(ep_git commit.gpgsign)" "git signs every commit"
+  test_start "gitconfig_commit_signing_2"
   assert_equals "ssh" "$(ep_git gpg.format)" "with the configured SSH signing format"
 fi
 
@@ -445,6 +451,7 @@ for ep_alias in docker/docker kubernetes/kubernetes git/git cd/cd-core modern/mo
     test_start "aliases_$(basename "$ep_alias")_loads ($("$ep_sh" -c 'echo "bash ${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"'))"
     ep_out="$(ep_source_aliases "$ep_sh" "$REPO_ROOT/defaults/.chezmoitemplates/aliases/$ep_alias.aliases.sh")"
     assert_contains "rc=0" "$ep_out" "sources cleanly"
+    test_start "aliases_$(basename "$ep_alias")_loads_2 ($("$ep_sh" -c 'echo "bash ${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"'))"
     assert_false '[[ "$ep_out" == *"defined=0" ]]' "defines aliases or functions ($ep_out)"
   done
 done
@@ -500,6 +507,7 @@ else
   assert_contains "serveraliveinterval 60" "$EP_SSH" "Host * defaults apply to any host"
   test_start "ssh_config_has_kex_algorithms"
   assert_true 'grep -qE "^kexalgorithms curve25519-sha256" <<<"$EP_SSH"' "ssh negotiates curve25519 key exchange first"
+  test_start "ssh_config_has_kex_algorithms_2"
   assert_false 'grep -qiE "^kexalgorithms.*(diffie-hellman-group1|group14-sha1)" <<<"$EP_SSH"' "no legacy key exchange offered"
 fi
 
@@ -510,6 +518,7 @@ fi
 test_start "gitconfig_has_user_section"
 if [[ -z "$EP_GITCONFIG" ]]; then ep_skip "chezmoi not installed"; else
   assert_equals "Fixture User" "$(ep_git user.name)" "user.name comes from the machine data"
+  test_start "gitconfig_has_user_section_2"
   assert_equals "fixture@example.invalid" "$(ep_git user.email)" "user.email comes from the machine data"
 fi
 
@@ -541,6 +550,7 @@ for ep_alias in npm/npm python/python; do
     test_start "aliases_$(basename "$ep_alias")_loads ($("$ep_sh" -c 'echo "bash ${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"'))"
     ep_out="$(ep_source_aliases "$ep_sh" "$REPO_ROOT/defaults/.chezmoitemplates/aliases/$ep_alias.aliases.sh")"
     assert_contains "rc=0" "$ep_out" "sources cleanly"
+    test_start "aliases_$(basename "$ep_alias")_loads_2 ($("$ep_sh" -c 'echo "bash ${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"'))"
     assert_false '[[ "$ep_out" == *"defined=0" ]]' "defines aliases or functions ($ep_out)"
   done
 done
