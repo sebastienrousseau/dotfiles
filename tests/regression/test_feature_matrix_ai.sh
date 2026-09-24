@@ -41,18 +41,24 @@ test_fm_ai_tools() {
   fm_seed_ai_cache
   test_start "fm_ai_tools"
   DOTFILES_AI_STATUS_TTL=99999 fm_run ai tools
-  fm_expect_rc_in 0 1
-  test_start "fm_ai_tools_lists_providers"
-  fm_expect_any "AI CLI Status" "Claude Code"
+  fm_expect_rc 0
+  test_start "fm_ai_tools_shows_the_status_table"
+  fm_expect_out "AI CLI Status"
+  test_start "fm_ai_tools_lists_an_installed_provider"
+  fm_expect_out_matches "Claude Code +9\.9\.9-fixture"
+  test_start "fm_ai_tools_lists_a_missing_provider"
+  fm_expect_out_matches "Codex CLI .*\(not installed\)"
 }
 
 test_fm_ai_status_deprecated() {
   fm_seed_ai_cache
   test_start "fm_ai_status_deprecated"
   DOTFILES_AI_STATUS_TTL=99999 fm_run ai status
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_ai_status_deprecated_warns"
-  fm_expect_any "deprecated" "dot ai tools"
+  fm_expect_err "use: dot ai tools"
+  test_start "fm_ai_status_deprecated_still_renders_the_table"
+  fm_expect_out_matches "Claude Code +9\.9\.9-fixture"
 }
 
 test_fm_env_dotfiles_ai_status_ttl() {
@@ -61,7 +67,7 @@ test_fm_env_dotfiles_ai_status_ttl() {
   fm_seed_ai_cache
   test_start "fm_env_dotfiles_ai_status_ttl"
   DOTFILES_AI_STATUS_TTL=99999 fm_run ai tools
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_env_dotfiles_ai_status_ttl_uses_the_cache"
   fm_expect_out "9.9.9-fixture"
 }
@@ -74,22 +80,67 @@ test_fm_smoke_ai_tools_install() {
 # ── ai: cost / doctor ──────────────────────────────────────────────────────
 
 test_fm_ai_cost() {
-  test_start "fm_ai_cost"
+  # `ai cost` wraps the /vibe skill's delegate-report. In a sandboxed HOME
+  # the skill is not deployed, and the wrapper must say which tool it
+  # wanted and point at chezmoi apply rather than crash.
+  test_start "fm_ai_cost_undeployed"
   fm_run ai cost
-  fm_expect_rc_in 0 1
+  fm_expect_rc 1
+  test_start "fm_ai_cost_undeployed_names_the_tool"
+  fm_expect_err "delegate-report"
+  test_start "fm_ai_cost_undeployed_points_at_chezmoi_apply"
+  fm_expect_err "chezmoi apply"
   test_start "fm_ai_cost_no_breakage"
   fm_expect_no_forbidden
+
+  if ! command -v python3 >/dev/null 2>&1; then
+    test_start "fm_ai_cost"
+    fm_pass "skipped — python3 not installed (delegate-report)"
+    return 0
+  fi
+  # Deploy the report tool into the sandbox HOME the way chezmoi would.
+  # With no run log under that HOME it reports exactly that, offline, and
+  # exits 0 — so both forms must reach it and pass their flags through.
+  local tools="$HOME/.claude/skills/vibe/tools"
+  mkdir -p "$tools"
+  cp "$REPO_ROOT/defaults/dot_claude/skills/vibe/tools/executable_delegate-report" \
+    "$tools/delegate-report"
+  chmod +x "$tools/delegate-report"
+  test_start "fm_ai_cost"
+  fm_run ai cost
+  fm_expect_rc 0
+  test_start "fm_ai_cost_reports_no_run_log"
+  fm_expect_out "No run log found"
   test_start "fm_ai_cost_since"
   fm_run ai cost --since 7
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
+  test_start "fm_ai_cost_since_reports_no_run_log"
+  fm_expect_out "No run log found"
+  test_start "fm_ai_cost_since_rejects_a_non_integer"
+  fm_run ai cost --since zzz
+  fm_expect_rc 2
+  test_start "fm_ai_cost_since_rejects_a_non_integer_message"
+  fm_expect_err "invalid int value"
+  rm -rf "$HOME/.claude"
 }
 
 test_fm_ai_doctor() {
+  # Whether claude / dot-ai-serve are installed is the host's business; the
+  # hop to `dot-ai-proxy status` and the fleet tally are dot's. A stub that
+  # echoes its argv stands in for the proxy so the hop is observable on a
+  # host where it is not deployed; it is removed afterwards so the gateway
+  # row installs its own.
+  fm_stub dot-ai-proxy 'printf "fm-proxy-stub argv=%s\n" "$*"'
   test_start "fm_ai_doctor"
   fm_run ai doctor
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_ai_doctor_reports"
-  fm_expect_any "AI doctor" "gateway" "claude"
+  fm_expect_out "AI doctor"
+  test_start "fm_ai_doctor_delegates_gateway_status_to_the_proxy"
+  fm_expect_out "fm-proxy-stub argv=status"
+  test_start "fm_ai_doctor_tallies_the_fleet"
+  fm_expect_out_matches "Fleet +[0-9]+/[0-9]+ tools installed"
+  rm -f "$FM_SANDBOX/bin/dot-ai-proxy"
 }
 
 # ── ai: verbs that must refuse without a prompt ────────────────────────────
@@ -132,11 +183,26 @@ test_fm_ai_query_usage() {
 }
 
 test_fm_ai_proxy_deprecated() {
+  # Both deprecated verbs must warn and still hand off to dot-ai-proxy with
+  # their original argv: `proxy` strips itself (the proxy's default is
+  # status), `local` is forwarded as-is. The argv-echoing stub makes the
+  # hand-off observable on any host; removed afterwards (see fm_ai_doctor).
+  fm_stub dot-ai-proxy 'printf "fm-proxy-stub argv=%s\n" "$*"'
   test_start "fm_ai_proxy_deprecated"
   fm_run ai proxy
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_ai_proxy_deprecated_warns"
-  fm_expect_any "deprecated" "dot ai serve"
+  fm_expect_err "use: dot ai serve"
+  test_start "fm_ai_proxy_deprecated_hands_off_to_the_proxy"
+  fm_expect_out_matches "^fm-proxy-stub argv=$"
+  test_start "fm_ai_local_deprecated"
+  fm_run ai local status
+  fm_expect_rc 0
+  test_start "fm_ai_local_deprecated_warns"
+  fm_expect_err "use: dot ai serve"
+  test_start "fm_ai_local_deprecated_hands_off_to_the_proxy"
+  fm_expect_out_matches "^fm-proxy-stub argv=local status$"
+  rm -f "$FM_SANDBOX/bin/dot-ai-proxy"
 }
 
 # ── ai: rows that need the network or a TTY ────────────────────────────────
@@ -204,7 +270,16 @@ printf "%s\n" "{\"type\":\"result\",\"is_error\":false,\"result\":\"ok\",\"usage
 
   test_start "fm_ai_serve_stop"
   DOT_AI_PORT="$port" fm_run ai serve stop
-  fm_expect_rc_in 0 1
+  # The harness killed the gateway's process group when `dot ai serve`
+  # returned, so serve.pid names a dead process. A stop must still exit 0,
+  # say the proxy is not running, and clear the stale pid file.
+  fm_expect_rc 0
+  test_start "fm_ai_serve_stop_reports_not_running"
+  fm_expect_out "Proxy not running"
+  test_start "fm_ai_serve_stop_clears_the_stale_pid_file"
+  if [[ -e "$XDG_STATE_HOME/dotfiles/ai-serve/serve.pid" ]]; then fm_fail "serve.pid left behind"; else fm_pass "stale pid file removed"; fi
+  test_start "fm_ai_serve_stop_turns_routing_off"
+  fm_expect_out "Routing OFF"
   test_start "fm_ai_serve_stop_unroutes"
   if [[ -e "$XDG_CONFIG_HOME/dotfiles/ai-local.env" ]]; then fm_fail "routing env left behind"; else fm_pass "routing removed"; fi
   rm -f "$FM_SANDBOX/bin/dot-ai-proxy" "$FM_SANDBOX/bin/dot-ai-serve" "$FM_SANDBOX/bin/claude"

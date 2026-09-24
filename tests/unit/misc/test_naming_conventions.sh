@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
+# test-kind: structural
 ## Enforce the repository naming conventions (docs/NAMING_CONVENTIONS.md).
 ##
 ## Codifies the low-risk, unambiguous rules so drift is caught in CI:

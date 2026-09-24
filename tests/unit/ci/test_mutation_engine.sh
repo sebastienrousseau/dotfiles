@@ -46,7 +46,8 @@ exit 0
 EOF
 cat >"$WORK/lib/test_grep.sh" <<'EOF'
 #!/usr/bin/env bash
-# Structural: fails on any edit to the source text of scripts/check.sh.
+# test-kind: structural
+# Fails on any edit to the source text of scripts/check.sh.
 grep -qF '[[ "$1" =~ ^[a-z]+$ ]] || return 1' "$REPO_ROOT/scripts/check.sh" || exit 1
 grep -qF '  return 0' "$REPO_ROOT/scripts/check.sh" || exit 1
 EOF
@@ -65,7 +66,6 @@ fixture() {
   cp "$WORK/lib/check.sh" "$d/scripts/check.sh"
   local t
   for t in "$@"; do cp "$WORK/lib/$t" "$d/tests/unit/$t"; done
-  printf 'tests/unit/test_grep.sh\n' >"$d/tools/ci/mutation-structural.txt"
   git -C "$d" init -q
   git -C "$d" add -A
   git -C "$d" -c user.email=t@t -c user.name=t -c commit.gpgsign=false commit -qm init

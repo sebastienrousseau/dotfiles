@@ -27,24 +27,52 @@ FM_TIMEOUT=180
 
 # ── env (mise-backed) ──────────────────────────────────────────────────────
 #
-# mise is not guaranteed on a runner. Where it is missing the command must
-# say so and exit non-zero rather than crashing, which is itself the
-# assertion.
+# mise is not guaranteed on a runner, and where it is present its answer is
+# the host's tool inventory. Both rows therefore drive a stub that answers
+# exactly the mise calls tools.sh makes, so what is pinned is dot's own
+# behaviour: the table it renders from `mise ls`, the orphan warning it
+# derives from `mise prune --dry-run-code`, and that a bare `dot env prune`
+# only ever runs the dry-run form. Any other argv (a real `mise prune`, say)
+# exits 99, which no row accepts. The stub is removed afterwards so the
+# `env emit` rows still see the real tool, or its absence.
+
+fm_stub_mise() {
+  fm_stub mise 'case "$*" in
+  "ls --json") printf "{\"node\":[{\"version\":\"22.0.0-fixture\",\"source\":{\"path\":\"/fm/.tool-versions\"},\"requested_version\":\"22\"}]}\n" ;;
+  ls) printf "node  22.0.0-fixture  /fm/.tool-versions  22\n" ;;
+  "prune --dry-run-code --quiet") exit 1 ;;
+  "prune --dry-run") printf "would remove node@20.0.0-orphan\n" ;;
+  *)
+    printf "fm mise stub: unexpected argv: %s\n" "$*" >&2
+    exit 99
+    ;;
+esac'
+}
+
+fm_unstub_mise() { rm -f "$FM_SANDBOX/bin/mise"; }
 
 test_fm_env_list() {
+  fm_stub_mise
   test_start "fm_env_list"
   fm_run env list
-  fm_expect_rc_in 0 1
-  test_start "fm_env_list_reports_or_explains"
-  fm_expect_any "Tool" "mise" "Version"
+  fm_expect_rc 0
+  test_start "fm_env_list_renders_the_mise_inventory"
+  fm_expect_out_matches "node +22\.0\.0-fixture"
+  test_start "fm_env_list_flags_orphan_installs"
+  fm_expect_out "orphan installs"
+  fm_unstub_mise
 }
 
 test_fm_env_prune() {
+  fm_stub_mise
   test_start "fm_env_prune"
   fm_run env prune
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_env_prune_defaults_to_dry_run"
-  fm_expect_any "dry-run" "mise" "prune"
+  fm_expect_out "pass --yes to commit"
+  test_start "fm_env_prune_shows_what_mise_would_remove"
+  fm_expect_out "node@20.0.0-orphan"
+  fm_unstub_mise
 }
 
 test_fm_smoke_env_prune_yes() { fm_smoke env; }
@@ -157,9 +185,25 @@ test_fm_env_emit_help() {
 test_fm_profile_show() {
   test_start "fm_profile_show"
   fm_run profile show
-  fm_expect_rc_in 0 1
-  test_start "fm_profile_show_reports_profile_and_flags"
-  fm_expect_any "Profile" "Feature Flags"
+  fm_expect_rc 0
+  test_start "fm_profile_show_reports_a_profile"
+  fm_expect_out_matches "Profile +[^ ]"
+  test_start "fm_profile_show_has_a_flags_section"
+  fm_expect_out "Feature Flags"
+  test_start "fm_profile_show_renders_the_flags_table"
+  fm_expect_out_matches "^ +[^ ]+ +[a-z_]+ +(true|false)$"
+
+  # The value shown must be the one in the data file: set a known profile
+  # on the sandbox copy through the CLI and require it back. NOTE: on macOS
+  # the line reads `Profile  profile = "x"` rather than `Profile  x`, because
+  # the CLI's sed uses `\s`, which BSD sed does not know; GNU sed on Linux
+  # extracts the bare value. Both carry the value, which is what is matched.
+  local repo
+  repo="$(fm_repo_copy)"
+  fm_run_bin "$repo/bin/dot" profile set fm-show-profile
+  test_start "fm_profile_show_reports_the_active_profile"
+  fm_run_bin "$repo/bin/dot" profile show
+  fm_expect_out_matches "Profile +.*fm-show-profile"
 }
 
 test_fm_profile_set() {
@@ -209,7 +253,7 @@ test_fm_config_chezmoidata_profile() {
   # `dot profile show` contracts to surface out of .chezmoidata.toml.
   test_start "fm_config_chezmoidata_profile"
   fm_run profile show
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_config_chezmoidata_profile_reads_the_features_table"
   local key
   key="$(awk '/^\[features\]/{f=1;next} f && /^[a-z_]+ *=/{sub(/ *=.*/,"");print;exit}' \
@@ -228,9 +272,13 @@ test_fm_config_chezmoidata_profile() {
 test_fm_tools() {
   test_start "fm_tools"
   fm_run tools
-  fm_expect_rc_in 0 1
-  test_start "fm_tools_lists_subcommands"
-  fm_expect_any "Dot Tools" "install" "docs"
+  fm_expect_rc 0
+  test_start "fm_tools_shows_the_overview"
+  fm_expect_out "Dot Tools"
+  test_start "fm_tools_lists_install"
+  fm_expect_out_matches "install +Enter Nix development shell"
+  test_start "fm_tools_lists_docs"
+  fm_expect_out_matches "docs +Show full tools markdown documentation"
 }
 
 test_fm_tools_docs() {
@@ -289,11 +337,19 @@ test_fm_new_usage() {
 # ── packages ───────────────────────────────────────────────────────────────
 
 test_fm_packages() {
+  # The inventory is whatever the host has installed, so a stubbed manager
+  # is what proves the report is built by querying what is on PATH.
+  fm_stub gem 'printf "9.9.9-fixture\n"'
   test_start "fm_packages"
   fm_run packages
-  fm_expect_rc_in 0 1
-  test_start "fm_packages_reports_managers"
-  fm_expect_any "Package Managers" "Language Package Managers"
+  fm_expect_rc 0
+  test_start "fm_packages_reports_system_managers"
+  fm_expect_out_matches "^--- Package Managers ---$"
+  test_start "fm_packages_reports_language_managers"
+  fm_expect_out_matches "^--- Language Package Managers ---$"
+  test_start "fm_packages_queries_managers_on_path"
+  fm_expect_out "RubyGems: 9.9.9-fixture"
+  rm -f "$FM_SANDBOX/bin/gem"
 }
 
 # ── aliases ────────────────────────────────────────────────────────────────
@@ -357,9 +413,12 @@ test_fm_lint() {
   repo="$(fm_repo_copy)"
   test_start "fm_lint"
   fm_run_bin "$repo/bin/dot" lint
-  fm_expect_rc_in 0 1
+  # Default mode reports; only --check turns findings into a non-zero exit.
+  fm_expect_rc 0
   test_start "fm_lint_reports_a_summary"
-  fm_expect_any "Summary" "Files scanned" "shellcheck" "shfmt"
+  fm_expect_out "Summary"
+  test_start "fm_lint_counts_the_files_scanned"
+  fm_expect_out_matches "Files scanned +[1-9][0-9]*"
 }
 
 test_fm_lint_check() {
@@ -394,16 +453,23 @@ test_fm_lint_fix() {
   printf '#!/usr/bin/env bash\necho     "over-spaced"\n' >"$repo/scripts/dot/fm-ugly.sh"
   test_start "fm_lint_fix"
   fm_run_bin "$repo/bin/dot" lint --fix
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
+  test_start "fm_lint_fix_names_the_file"
+  fm_expect_out_matches "fixed +scripts/dot/fm-ugly\.sh"
   test_start "fm_lint_fix_reformats_the_file"
   if grep -q 'echo "over-spaced"' "$repo/scripts/dot/fm-ugly.sh"; then
     fm_pass "file reformatted in place"
   else
     fm_fail "--fix did not reformat the file"
   fi
+  # --fix has just reformatted everything shfmt objects to, and the copy is
+  # the checkout's bin/, lib/ and scripts/dot/, which CI keeps clean under
+  # the same shellcheck flags lint.sh uses — so --check must now pass.
   test_start "fm_lint_fix_then_check_is_clean"
   fm_run_bin "$repo/bin/dot" lint --check
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
+  test_start "fm_lint_fix_then_check_reports_all_passed"
+  fm_expect_out "All checks passed"
   rm -f "$repo/scripts/dot/fm-ugly.sh"
 }
 

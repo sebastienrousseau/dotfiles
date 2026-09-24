@@ -113,6 +113,25 @@ jobs:
       run_shfmt: true
       shfmt_targets: scripts/**/*.sh install.sh defaults/.chezmoitemplates/**/*.sh
 
+  # Tests that inspect source text instead of running it cannot catch
+  # wrong behaviour; tools/ci/check-source-grep-tests.py holds the count
+  # per file at or below tools/ci/source-grep-baseline.txt.
+  lint-tests:
+    name: Lint / Tests run the code
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    needs: changes
+    if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Source-grep ratchet
+        run: python3 tools/ci/check-source-grep-tests.py
+
   lint-lua:
     name: Lint / Lua
     needs: changes
@@ -819,7 +838,7 @@ jobs:
     name: Quality Gate
     runs-on: ubuntu-latest
     timeout-minutes: 2
-    needs: [lint-shell, lint-copyright, security-secrets, security-dependencies, test-unit, test-mutation]
+    needs: [lint-shell, lint-tests, lint-copyright, security-secrets, security-dependencies, test-unit, test-mutation]
     if: github.event_name == 'pull_request'
     steps:
       - name: Harden runner (audit mode)

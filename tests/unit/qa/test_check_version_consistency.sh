@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
+# test-kind: structural except scripts/qa/check-version-consistency.sh
 # Test: scripts/qa/check-version-consistency.sh
 #
 # Verifies the version-drift check exits 0 against the live tree

@@ -16,9 +16,10 @@ unprotected.
 
 Rules that keep the score honest:
   * one mutant per line (Google's model: more add noise, not signal);
-  * kills only count from behavioural tests: tests listed in
-    tools/ci/mutation-structural.txt (and anything under tests/structural/)
-    grep sources or lint, so they would "kill" any edit;
+  * kills only count from behavioural tests: a test that greps sources or
+    lints declares `# test-kind: structural` in its first 30 lines (or
+    lives under tests/structural/) and would "kill" any edit, so its kills
+    are ignored, except on sources it names after `except`;
   * every selected test must pass on the unmutated tree first, or it is
     dropped and reported;
   * a mutant with no related test counts as survived;
@@ -295,13 +296,23 @@ def load_map(path: Path) -> dict[str, list[str]]:
     return res
 
 
+STRUCTURAL_MARKER_RE = re.compile(
+    r"^#\s*test-kind:\s*structural\b(?:\s+except\s+(.+))?\s*$"
+)
+
+
+def structural_marker(text: str) -> tuple[bool, list[str]]:
+    """(declared structural, sources it is still behavioural for)."""
+    for ln in text.split("\n")[:30]:
+        m = STRUCTURAL_MARKER_RE.match(ln.strip())
+        if m:
+            return True, (m.group(1) or "").split()
+    return False, []
+
+
 class TestIndex:
-    def __init__(
-        self, root: Path, structural: dict[str, list[str]], extra: dict[str, list[str]]
-    ):
+    def __init__(self, root: Path, extra: dict[str, list[str]]):
         self.root = root
-        # test -> sources it is behavioural for (empty: structural for all)
-        self.structural = structural
         self.extra = extra
         self.files = sorted(
             str(p.relative_to(root))
@@ -313,7 +324,8 @@ class TestIndex:
     def is_structural(self, t: str, rel: str) -> bool:
         if t.startswith("tests/structural/"):
             return True
-        return t in self.structural and rel not in self.structural[t]
+        declared, behavioural_for = structural_marker(self.text(t))
+        return declared and rel not in behavioural_for
 
     def text(self, t: str) -> str:
         if t not in self._text:
@@ -551,9 +563,8 @@ def main(argv: list[str] | None = None) -> int:
         print("mutation: no eligible mutants in scope")
         return _finish(report, args)
 
-    structural = load_map(root / "tools/ci/mutation-structural.txt")
     extra = load_map(root / "tools/ci/mutation-map.txt")
-    index = TestIndex(root, structural, extra)
+    index = TestIndex(root, extra)
     per_file = {f: index.related(f) for f in {m.path for m in mutants}}
     all_tests = sorted({t for ts in per_file.values() for t in ts})
     print(

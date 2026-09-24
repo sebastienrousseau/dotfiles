@@ -14,6 +14,12 @@
 # suite. The scoring commands (doctor / health / security-score / score) stay
 # in the sibling file; everything that reads or writes local state lives here,
 # so the two run concurrently under `test_runner.sh --jobs auto`.
+#
+# Every row pins the exact exit code the sandbox produces and asserts on
+# output or files the command must produce. The two rows that time an
+# interactive zsh (benchmark, load-bench) skip — with a message, not a widened
+# code — when the runner has no zsh, which is the one host fact these
+# commands cannot work without.
 
 set -u
 
@@ -23,6 +29,29 @@ source "$SCRIPT_DIR/../framework/feature_matrix_lib.sh"
 
 trap fm_sandbox_teardown EXIT
 fm_sandbox_setup
+
+# fm_expect_attest_rc — workstation-attestation.sh needs jq and refuses
+# before doing anything else without it. Both outcomes are exact contracts:
+# rc=0 with jq, rc=1 plus the message without. The runner's toolbox decides
+# which one applies, not the command.
+fm_expect_attest_rc() {
+  if command -v jq >/dev/null 2>&1; then
+    fm_expect_rc 0
+  else
+    fm_expect_rc 1
+    fm_expect_err "jq is required"
+  fi
+}
+
+# fm_expect_file_under <dir> <name> — assert a file called <name> exists
+# somewhere below <dir>.
+fm_expect_file_under() {
+  if find "$1" -type f -name "$2" 2>/dev/null | grep -q .; then
+    fm_pass "$2 under $1"
+  else
+    fm_fail "no $2 under $1"
+  fi
+}
 
 # ── snapshot ───────────────────────────────────────────────────────────────
 
@@ -66,25 +95,46 @@ test_fm_env_xdg_state_home() {
 test_fm_attest() {
   test_start "fm_attest"
   fm_run attest
-  fm_expect_rc_in 0 1
+  fm_expect_attest_rc
   test_start "fm_attest_reports"
-  fm_expect_any "Attestation" "attestation"
+  fm_expect_out "--- Workstation Attestation ---"
+  test_start "fm_attest_reports_version"
+  fm_expect_out_matches 'Version +[0-9]+\.[0-9]+\.[0-9]+'
+  test_start "fm_attest_writes_default_attestation"
+  fm_expect_file "$XDG_STATE_HOME/dotfiles/attestations/workstation-attestation.json"
 }
 
 test_fm_attest_json() {
   test_start "fm_attest_json"
   fm_run attest --json
-  fm_expect_rc_in 0 1
+  fm_expect_attest_rc
   test_start "fm_attest_json_is_json"
   fm_expect_json
   test_start "fm_attest_json_has_platform"
   fm_expect_out '"platform"'
+  test_start "fm_attest_json_has_version"
+  fm_expect_out '"dotfiles_version"'
 }
 
 test_fm_attest_write() {
+  # --write takes a path. A bare `dot attest -w` is a different thing: the
+  # option parser runs `shift 2` on a single remaining argument, which under
+  # set -e ends the script with rc=1 and no output at all. That is a CLI bug
+  # to fix in the parser, not a contract to pin here.
+  local out="$FM_SANDBOX/work/attest-write.json"
   test_start "fm_attest_write"
-  fm_run attest -w
-  fm_expect_rc_in 0 1
+  fm_run attest -w "$out"
+  fm_expect_attest_rc
+  test_start "fm_attest_write_reports_the_path"
+  fm_expect_out "$out"
+  test_start "fm_attest_write_lands_at_the_path"
+  fm_expect_file "$out"
+  test_start "fm_attest_write_is_a_json_document"
+  if [[ "$(head -c 1 "$out" 2>/dev/null)" == "{" ]]; then
+    fm_pass "starts a JSON object"
+  else
+    fm_fail "$out does not start a JSON object"
+  fi
   test_start "fm_attest_write_no_breakage"
   fm_expect_no_forbidden
 }
@@ -93,17 +143,23 @@ test_fm_attest_fleet_store() {
   local store="$FM_SANDBOX/work/fleetstore"
   test_start "fm_attest_fleet_store"
   fm_run attest -F "$store" -I fmnode
-  fm_expect_rc_in 0 1
+  fm_expect_attest_rc
+  test_start "fm_attest_fleet_store_reports_the_store"
+  fm_expect_out "$store/fmnode/"
   test_start "fm_attest_fleet_store_writes_under_the_id"
   fm_expect_file "$store/fmnode"
+  test_start "fm_attest_fleet_store_writes_the_attestation"
+  fm_expect_file_under "$store/fmnode" "workstation-attestation.json"
 }
 
 test_fm_attestation() {
   test_start "fm_attestation"
   fm_run attestation
-  fm_expect_rc_in 0 1
+  fm_expect_attest_rc
   test_start "fm_attestation_is_alias_of_attest"
-  fm_expect_any "Attestation" "attestation"
+  fm_expect_out "--- Workstation Attestation ---"
+  test_start "fm_attestation_reports_version"
+  fm_expect_out_matches 'Version +[0-9]+\.[0-9]+\.[0-9]+'
 }
 
 # ── rollback ───────────────────────────────────────────────────────────────
@@ -111,25 +167,37 @@ test_fm_attestation() {
 test_fm_rollback_status() {
   test_start "fm_rollback_status"
   fm_run rollback status
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_rollback_status_reports"
-  fm_expect_any "Rollback Status" "Backups" "backup"
+  fm_expect_out "== Dotfiles Rollback Status =="
+  test_start "fm_rollback_status_reports_chezmoi"
+  fm_expect_out "Chezmoi:"
+  test_start "fm_rollback_status_lists_backups"
+  fm_expect_out "== Available Backups =="
 }
 
 test_fm_rollback_backup() {
   test_start "fm_rollback_backup"
   fm_run rollback backup
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_rollback_backup_creates_a_backup"
-  fm_expect_any "Backup created" "Creating Backup"
+  fm_expect_out_matches 'Backup created: .*/backup_[0-9]{8}_[0-9]{6}_manual'
+  test_start "fm_rollback_backup_lands_under_xdg_data_home"
+  if find "$XDG_DATA_HOME/dotfiles/backups" -maxdepth 1 -type d -name 'backup_*_manual' 2>/dev/null | grep -q .; then
+    fm_pass "backup directory written"
+  else
+    fm_fail "no backup_*_manual under $XDG_DATA_HOME/dotfiles/backups"
+  fi
 }
 
 test_fm_rollback_clean() {
   test_start "fm_rollback_clean"
   fm_run rollback clean
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_rollback_clean_reports"
-  fm_expect_any "Cleaning" "Cleanup"
+  fm_expect_out_matches 'Cleaning old backups \(keeping last [0-9]+\)'
+  test_start "fm_rollback_clean_completes"
+  fm_expect_out "Cleanup complete"
 }
 
 test_fm_rollback_unknown() {
@@ -224,19 +292,26 @@ test_fm_rollback_git_reset_keeps_work() {
 test_fm_drift() {
   test_start "fm_drift"
   fm_run drift
-  fm_expect_rc_in 0 1
+  # The chezmoi shim reports no status and no source path, and the orphan
+  # list lives under the sandboxed XDG_STATE_HOME, so every drift class is
+  # empty and the dashboard exits 0.
+  fm_expect_rc 0
   test_start "fm_drift_renders_dashboard"
-  fm_expect_any "Drift Dashboard" "drift"
+  fm_expect_out "--- Dotfiles Drift Dashboard ---"
+  test_start "fm_drift_finds_nothing_in_the_sandbox"
+  fm_expect_out "no drift detected"
 }
 
 test_fm_drift_json() {
   test_start "fm_drift_json"
   fm_run drift --json
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_drift_json_is_json"
   fm_expect_json
   test_start "fm_drift_json_has_total"
   fm_expect_out '"total"'
+  test_start "fm_drift_json_total_is_zero"
+  fm_expect_out_matches '"total": *0[^0-9]*$'
 }
 
 # ── history ────────────────────────────────────────────────────────────────
@@ -246,9 +321,13 @@ test_fm_history() {
     >"$FM_SANDBOX/.zsh_history"
   test_start "fm_history"
   fm_run history
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
+  test_start "fm_history_renders_analysis"
+  fm_expect_out "--- History Analysis ---"
   test_start "fm_history_counts_commands"
-  fm_expect_any "Top commands" "ls"
+  fm_expect_out_matches '^ +2 +ls$'
+  test_start "fm_history_counts_by_base_command"
+  fm_expect_out_matches '^ +1 +git$'
 }
 
 test_fm_history_missing() {
@@ -266,13 +345,21 @@ test_fm_history_missing() {
 
 test_fm_env_histfile() {
   # HISTFILE, not a hardcoded ~/.zsh_history, selects what gets analysed.
+  # ~/.zsh_history still holds the `ls` rows from test_fm_history, so the
+  # named file is only honoured if `ls` is absent from the analysis.
   local alt="$FM_SANDBOX/work/alt_history"
   printf ': 1700000000:0;kubectl\n: 1700000001:0;kubectl\n' >"$alt"
   test_start "fm_env_histfile"
   HISTFILE="$alt" fm_run history
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_env_histfile_analyses_the_named_file"
-  fm_expect_any "kubectl" "Top commands"
+  fm_expect_out_matches '^ +2 +kubectl$'
+  test_start "fm_env_histfile_ignores_the_default_file"
+  if printf '%s\n' "$FM_OUT" | grep -Eq '^ +[0-9]+ +ls$'; then
+    fm_fail "analysed ~/.zsh_history instead of \$HISTFILE"
+  else
+    fm_pass "no rows from ~/.zsh_history"
+  fi
 }
 
 # ── benchmark / load-bench ─────────────────────────────────────────────────
@@ -280,9 +367,25 @@ test_fm_env_histfile() {
 test_fm_benchmark() {
   test_start "fm_benchmark"
   fm_run benchmark
-  fm_expect_rc_in 0 1
+  # benchmark.sh times `zsh -i -c exit` (through hyperfine when installed,
+  # otherwise with its own loop). Without zsh there is nothing to time, so
+  # the row skips — zsh is absent from the Linux CI runner.
+  if ! command -v zsh >/dev/null 2>&1; then
+    fm_pass "skipped — zsh not installed (benchmark times an interactive zsh)"
+  else
+    fm_expect_rc 0
+  fi
   test_start "fm_benchmark_reports"
-  fm_expect_any "Benchmark" "benchmark" "hyperfine"
+  fm_expect_out "--- Shell Performance Benchmark ---"
+  test_start "fm_benchmark_reports_timings"
+  if ! command -v zsh >/dev/null 2>&1; then
+    fm_pass "skipped — zsh not installed"
+  else
+    # hyperfine present: "Mean: Nms". Absent (the macOS runners): the basic
+    # loop prints "Average startup time: Nms" in plain mode and
+    # "Average startup time   Nms" through ui_ok.
+    fm_expect_out_matches 'Mean: +[0-9]+ms|Average startup time:? +[0-9]+ms'
+  fi
 }
 
 test_fm_load_bench() {
@@ -302,10 +405,16 @@ test_fm_load_bench() {
   if [[ "$FM_RC" -eq 127 ]] && ! command -v zsh >/dev/null 2>&1; then
     fm_pass "skipped — zsh not installed (load-bench times an interactive zsh)"
   else
-    fm_expect_rc_in 0 1
+    fm_expect_rc 0
   fi
+  test_start "fm_load_bench_reports_header"
+  fm_expect_out "dot load benchmark (runs=5)"
   test_start "fm_load_bench_reports_timings"
-  fm_expect_any "load benchmark" "avg" "ms"
+  if [[ "$FM_RC" -eq 127 ]] && ! command -v zsh >/dev/null 2>&1; then
+    fm_pass "skipped — zsh not installed"
+  else
+    fm_expect_out_matches '^avg: [0-9]+(\.[0-9]+)? ms$'
+  fi
 }
 
 test_fm_smoke_load_bench_pty() {
@@ -327,9 +436,11 @@ test_fm_chaos() {
   # Without --force chaos must refuse: it deletes real config files.
   test_start "fm_chaos"
   fm_run chaos --dry-run
-  fm_expect_rc_in 0 1
+  fm_expect_rc 1
   test_start "fm_chaos_refuses_without_force"
-  fm_expect_any "WARNING" "--force"
+  fm_expect_out "WARNING"
+  test_start "fm_chaos_names_the_force_flag"
+  fm_expect_out "--force"
   test_start "fm_chaos_left_the_sandbox_intact"
   if [[ -L "$FM_SANDBOX/.dotfiles" ]]; then
     fm_pass "sandbox untouched"
@@ -365,9 +476,12 @@ test_fm_smoke_bundle() {
 test_fm_secret_audit() {
   test_start "fm_secret_audit"
   fm_run secret-audit
-  fm_expect_rc_in 0 1
+  # secret-governance.sh scans the checkout's git index, which the sandbox
+  # does not stage into. It exits 1 only when a staged file matches a
+  # plaintext-secret pattern — a real finding to act on, not host variance.
+  fm_expect_rc 0
   test_start "fm_secret_audit_reports"
-  fm_expect_any "Secret governance" "secret" "staged"
+  fm_expect_out "Secret governance:"
 }
 
 test_fm_metrics() {
@@ -397,17 +511,27 @@ test_fm_metrics_empty() {
 test_fm_smoke_test() {
   test_start "fm_smoke_test"
   fm_run smoke-test
-  fm_expect_rc_in 0 1
+  # Deterministic in the sandbox: the chezmoi shim prints nothing for
+  # --version, so smoke-test.sh must flag it as "output mismatch" and exit
+  # 1. That is the property worth pinning — the smoke test checks what a
+  # tool says, not merely that it resolves.
+  fm_expect_rc 1
   test_start "fm_smoke_test_reports"
-  fm_expect_any "Smoke Tests" "smoke"
+  fm_expect_out "--- Dotfiles Smoke Tests ---"
+  test_start "fm_smoke_test_flags_the_silent_chezmoi_shim"
+  fm_expect_out_matches 'chezmoi +output mismatch'
+  test_start "fm_smoke_test_summarises_failures"
+  fm_expect_out_matches '[0-9]+ failed +[0-9]+ passed'
 }
 
 test_fm_intelligence() {
   test_start "fm_intelligence"
   fm_run intelligence
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_intelligence_renders_surface"
-  fm_expect_any "DOTFILES" "Platform" "Security"
+  fm_expect_out "D O T F I L E S"
+  test_start "fm_intelligence_names_the_platform"
+  fm_expect_out_matches 'Platform.*@ (macOS|Linux|WSL)'
 }
 
 # ── restore ────────────────────────────────────────────────────────────────
@@ -430,11 +554,16 @@ fm_restore_git_fixture() {
 }
 
 test_fm_restore_list() {
+  # --list exits 1 when the backup directory is missing altogether; create
+  # it so the row does not depend on which earlier row happened to make it.
+  mkdir -p "$XDG_DATA_HOME/dotfiles/backups"
   test_start "fm_restore_list"
   fm_run restore --list
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_restore_list_reports"
-  fm_expect_any "Backups" "backups" "No backups"
+  fm_expect_out "--- Available Backups ---"
+  test_start "fm_restore_list_shows_git_history"
+  fm_expect_out "--- Git History (last 10) ---"
 }
 
 test_fm_restore_git_dry_run() {
@@ -466,11 +595,12 @@ test_fm_restore_diff() {
 test_fm_restore_latest() {
   test_start "fm_restore_latest"
   fm_run restore --latest
-  # With no backups recorded this must fail cleanly rather than restoring
-  # something arbitrary.
-  fm_expect_rc_in 0 1
+  # restore only recognises backup-* directories, and nothing in this suite
+  # creates one (rollback writes backup_*), so it must fail cleanly rather
+  # than restore something arbitrary.
+  fm_expect_rc 1
   test_start "fm_restore_latest_handles_no_backups"
-  fm_expect_any "No backups" "Restoring"
+  fm_expect_out "No backups found"
 }
 
 test_fm_restore_usage() {
@@ -491,11 +621,14 @@ test_fm_env_dotfiles_dir() {
   # with a known commit subject and require that subject back.
   local repo
   repo="$(fm_restore_git_fixture)"
+  mkdir -p "$XDG_DATA_HOME/dotfiles/backups"
   test_start "fm_env_dotfiles_dir"
   DOTFILES_DIR="$repo" fm_run restore --list
-  fm_expect_rc_in 0 1
+  fm_expect_rc 0
   test_start "fm_env_dotfiles_dir_reads_that_checkout"
-  fm_expect_any "add file" "Git History"
+  fm_expect_out_matches '^[0-9a-f]{7,} add file$'
+  test_start "fm_env_dotfiles_dir_reads_only_that_checkout"
+  fm_expect_out_matches '^[0-9a-f]{7,} base$'
 }
 
 # ── run ────────────────────────────────────────────────────────────────────

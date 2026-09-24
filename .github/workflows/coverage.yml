@@ -194,3 +194,56 @@ jobs:
           pct = (covered * 100.0 / total) if total else 0.0
           print(f"Coverage: {covered}/{total} = {pct:.2f}%")
           '
+
+  # The same measurement with the exercise-only probes switched off
+  # (DOTFILES_COV_EXERCISE=0): --help / no-arg / bad-flag runs that assert
+  # nothing. This is the share of lines a behavioural test executes, the
+  # figure the mutation gate relates to. Informational (floor 0) until it
+  # has been observed on main; ratchet MIN_COVERAGE_PCT here from that.
+  coverage-behavioural:
+    name: Coverage / behavioural tests only
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Ensure ancillary linters are present
+        run: |
+          set -euo pipefail
+          bash tools/ci/install-tools.sh shellcheck ripgrep:rg shfmt
+
+      - name: Run coverage without exercise-only probes
+        env:
+          DOTFILES_COV_EXERCISE: '0'
+          MIN_COVERAGE_PCT: '0'
+        run: bash tools/ci/run-coverage.sh
+
+      - name: Report
+        if: success() || failure()
+        run: |
+          set -euo pipefail
+          [ -s coverage/lcov.info ] || { echo "::warning::no lcov.info produced"; exit 0; }
+          python3 -c '
+          total = covered = 0
+          with open("coverage/lcov.info") as f:
+              for line in f:
+                  if line.startswith("DA:"):
+                      total += 1
+                      if int(line.split(",")[-1]) > 0:
+                          covered += 1
+          pct = (covered * 100.0 / total) if total else 0.0
+          print(f"::notice::behavioural-only coverage: {covered}/{total} = {pct:.2f}%")
+          '
+
+      - name: Upload lcov.info artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: coverage-lcov-behavioural
+          path: coverage/lcov.info
+          retention-days: 30

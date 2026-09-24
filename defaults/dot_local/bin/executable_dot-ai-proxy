@@ -77,7 +77,11 @@ _running_pid() {
   local pid
   pid="$(cat "$PID_FILE" 2>/dev/null || true)"
   [[ -n "$pid" ]] || return 0
-  kill -0 "$pid" 2>/dev/null && printf '%s\n' "$pid"
+  # A dead pid prints nothing and still returns 0: callers capture the
+  # output under `set -e`, so a 1 here aborted `stop` before it could say
+  # "Proxy not running" and clear the stale pid file.
+  if kill -0 "$pid" 2>/dev/null; then printf '%s\n' "$pid"; fi
+  return 0
 }
 
 # Refuse to expose the proxy off-loopback without an auth key — an open

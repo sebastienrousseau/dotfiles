@@ -174,9 +174,11 @@ python3 tools/ci/mutation-test.py --list-mutants --full scripts/ops/rollback.sh
 
 Rules that keep the score honest:
 
-- Kills only count from behavioural tests. Tests that grep or lint the
-  source text are listed in `tools/ci/mutation-structural.txt` and would
-  "kill" any edit, so they are ignored.
+- Kills only count from behavioural tests. A test that greps or lints the
+  source text would "kill" any edit, so it declares
+  `# test-kind: structural` in its first 30 lines and its kills are
+  ignored. `# test-kind: structural except scripts/x.sh` keeps the kills
+  on a source the test does run.
 - A test that fails on the unmutated tree is dropped and reported.
 - A mutant with no related test counts as survived.
 - A line that cannot be meaningfully mutated is opted out in place with
@@ -187,7 +189,28 @@ test that pins the observable outcome (exit status, message, file written
 or not), never with a source grep. `tests/unit/ci/test_mutation_engine.sh`
 checks the engine itself fails a weak suite.
 
-## CI integration
+## Tests must run the code
+
+`assert_file_contains "$SCRIPT" "main()"` proves the text is there, not
+that the behaviour holds: it passes with a guard inverted and fails when a
+line is reworded. `tools/ci/check-source-grep-tests.py` finds assertions
+whose operand is a repository source file (a text tool or a file-content
+assertion on a path under `scripts/`, `lib/`, `bin/`, `defaults/`,
+`install.sh` and so on, directly or through a variable).
+
+```bash
+python3 tools/ci/check-source-grep-tests.py            # what CI runs
+python3 tools/ci/check-source-grep-tests.py --report   # counts only
+python3 tools/ci/check-source-grep-tests.py --write-baseline
+```
+
+The suite carries hundreds of these from before the mutation gate, so the
+lint is a ratchet. `tools/ci/source-grep-baseline.txt` records the ceiling
+per file; a new file or a file above its ceiling fails CI. When you
+rewrite a case to run the code, rerun `--write-baseline` so the ceiling
+drops. A test whose purpose is the source text (a lint, a naming rule, a
+header check) declares `# test-kind: structural` and is skipped.
+
 
 Tests run automatically on every push to main, every pull request, and weekly scheduled runs (Monday 6 AM UTC).
 
