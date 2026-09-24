@@ -198,8 +198,8 @@ jobs:
   # The same measurement with the exercise-only probes switched off
   # (DOTFILES_COV_EXERCISE=0): --help / no-arg / bad-flag runs that assert
   # nothing. This is the share of lines a behavioural test executes, the
-  # figure the mutation gate relates to. Informational (floor 0) until it
-  # has been observed on main; ratchet MIN_COVERAGE_PCT here from that.
+  # figure the mutation gate relates to. Gated at MIN_COVERAGE_PCT below,
+  # ratcheted from what main reports.
   coverage-behavioural:
     name: Coverage / behavioural tests only
     runs-on: ubuntu-latest
@@ -220,7 +220,13 @@ jobs:
       - name: Run coverage without exercise-only probes
         env:
           DOTFILES_COV_EXERCISE: '0'
-          MIN_COVERAGE_PCT: '0'
+          # Floor history for the behavioural-only lane (bump in lockstep
+          # with the slice that lands the bump, as for the full run above):
+          #   First observation on main (789d6c6d, 2026-09-24): 97.93%
+          #             (12417/12680), identical to the PR run before it.
+          #             floor=96 — the same ~2 pt cushion the full run
+          #             carries for local<->CI drift and xtrace variance.
+          MIN_COVERAGE_PCT: '96'
         run: bash tools/ci/run-coverage.sh
 
       - name: Report
