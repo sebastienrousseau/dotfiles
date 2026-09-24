@@ -381,7 +381,10 @@ test_fm_benchmark() {
   if ! command -v zsh >/dev/null 2>&1; then
     fm_pass "skipped — zsh not installed"
   else
-    fm_expect_out_matches 'Mean: +[0-9]+ms|Average startup time +[0-9]+ms'
+    # hyperfine present: "Mean: Nms". Absent (the macOS runners): the basic
+    # loop prints "Average startup time: Nms" in plain mode and
+    # "Average startup time   Nms" through ui_ok.
+    fm_expect_out_matches 'Mean: +[0-9]+ms|Average startup time:? +[0-9]+ms'
   fi
 }
 
