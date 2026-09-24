@@ -36,6 +36,7 @@ for f in \
   "scripts/dot/commands/ai.sh" \
   "lib/dot/ai-commands.sh" \
   "lib/dot/ai-install.sh" \
+  "lib/dot/ai-probe.sh" \
   "scripts/ops/ai-setup.sh"; do
   bash -n "$repo_root/$f" || {
     printf 'FAIL: %s\n' "$f" >&2
