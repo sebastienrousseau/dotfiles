@@ -24,14 +24,14 @@ as expectation.
 |---|---|---|---|
 | **bash** (running `dot`, `install.sh`, every script) | **3.2** | macOS still ships bash 3.2 as `/bin/bash` and always will (GPLv3). The CLI must work there or `dot` breaks on a stock Mac. No associative arrays, no `mapfile`/`readarray`, no `${var,,}`. | `cross-platform-test.yml` and `reliability-gate.yml` on `macos-latest` + `macos-14`, whose stock `/bin/bash` is 3.2.57 |
 | **bash** (as an *interactive* shell with the full config) | **5.0** | The shell configuration (completions, prompt hooks) uses bash 5 features. This is a different, higher floor than the CLI's. | `reusable-test-suite.yml` on ubuntu-latest |
-| **zsh** | **5.8** | The default interactive shell; `rc.d` ordering and the completion system assume 5.8. | `cross-platform-test.yml` (macOS stock zsh 5.9, Ubuntu 5.9) |
+| **zsh** | **5.8** | A fully supported interactive shell (fish is the default login shell); `rc.d` ordering and the completion system assume 5.8. | `cross-platform-test.yml` (macOS stock zsh 5.9, Ubuntu 5.9) |
 | **fish** | **4.0** | `dot`, the alias bridge, and the generated completions target the fish 4 syntax. | `ci.yml` job `Lint / Fish` |
 | **nushell** | **0.98** | Tier-3 reference shell; see [ADR-011](adr/ADR-011-nushell-tier3-keep.md). | `ci.yml` job `Lint / Nushell` |
 | **PowerShell** | **7.5** | The Windows parity surface. Note `windows-latest` currently ships 7.4 LTS, so CI proves 7.4 and the 7.5 claim covers features gated behind it. | `reliability-gate.yml` job `PowerShell Contract` on `windows-latest` |
 | **git** | **2.34** | The oldest release with SSH commit/tag signing (`gpg.format = ssh`), which the signing and verification flow requires. | Not version-gated in CI; the signing workflows exercise it on runner git (≥ 2.40) |
 | **chezmoi** | **2.47.1** | The pinned, checksum-verified version `install.sh` and CI install. Newer works; older is untested. | `install.sh` and `CHEZMOI_VERSION` in `ci.yml`, `ci-enforced.yml`, `perf-baseline.yml` |
 | **Go** (fuzz harnesses and the two TUIs only — not needed to *use* the framework) | **1.23** | `fuzz/go.mod`. | `fuzz.yml`, `cockpit-test.yml`, `dot-ui-test.yml` |
-| **Python** (pre-commit and the docs build only) | **3.12** | `pre-commit.yml`, `requirements-docs.txt`. | `pre-commit.yml`, `pages.yml` |
+| **Python** (pre-commit and the docs build only) | **3.12** | `pre-commit.yml`; the docs build (`tools/docs/build-site.sh`) uses the standard library only. | `pre-commit.yml`, `pages.yml` (runner python3) |
 
 `make install` additionally needs GNU make or BSD make and a POSIX
 `install(1)`; nothing else.
