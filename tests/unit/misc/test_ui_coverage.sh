@@ -79,19 +79,27 @@ out="$(ui '
 ')"
 assert_contains "fd=[] rich=0 pid=[]" "$out" "writer state reset after EPIPE"
 
-test_start "steps_begin_falls_back_to_tmpdir"
-out="$(XDG_RUNTIME_DIR="$WORK/missing/run" ui '
+# Rich mode needs `exec {fd}>` (bash 4.1); the two cases below force
+# _ui_steps_rich_ok on, so under an older bash (macOS /bin/bash, and
+# `bash` on the macOS runners) they would only prove the fallback the
+# real guard already takes. Run them where rich mode can exist.
+_rich_capable() {
+  "$REAL_BASH" -c '((BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 1)))'
+}
+if _rich_capable; then
+  test_start "steps_begin_falls_back_to_tmpdir"
+  out="$(XDG_RUNTIME_DIR="$WORK/missing/run" ui '
   _ui_steps_rich_ok() { return 0; }
   ui_steps_begin "Title" "sub"
   echo "rich=$_UI_STEPS_RICH"
   ui_step one "One" ok "fine"
   ui_steps_end "done"
 ')"
-assert_contains "rich=1" "$out" "rich mode starts from the TMPDIR fifo"
-assert_equals "0" "$(find "$TMPDIR" -name 'dot-ui.*' | wc -l | tr -d ' ')" "fifo dir cleaned up"
+  assert_contains "rich=1" "$out" "rich mode starts from the TMPDIR fifo"
+  assert_equals "0" "$(find "$TMPDIR" -name 'dot-ui.*' | wc -l | tr -d ' ')" "fifo dir cleaned up"
 
-test_start "steps_begin_writer_open_failure_falls_back"
-out="$(ui '
+  test_start "steps_begin_writer_open_failure_falls_back"
+  out="$(ui '
   _ui_steps_rich_ok() { return 0; }
   ulimit -n 10
   ui_steps_begin "Title" "sub"
@@ -99,10 +107,15 @@ out="$(ui '
   ui_step one "One" ok "fine"
   ui_steps_end "done"
 ')"
-assert_contains "rich=0 pid=[]" "$out" "plain mode after the fifo writer fails"
-assert_contains "== Title · sub ==" "$out" "plain section header printed"
-assert_contains "One" "$out" "step still reported"
-assert_equals "0" "$(find "$XDG_RUNTIME_DIR" -name 'dot-ui.*' | wc -l | tr -d ' ')" "fifo dir removed"
+  assert_contains "rich=0 pid=[]" "$out" "plain mode after the fifo writer fails"
+  assert_contains "== Title · sub ==" "$out" "plain section header printed"
+  assert_contains "One" "$out" "step still reported"
+  assert_equals "0" "$(find "$XDG_RUNTIME_DIR" -name 'dot-ui.*' | wc -l | tr -d ' ')" "fifo dir removed"
+else
+  test_start "steps_rich_mode_cases_need_bash_4_1"
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (skipped: $("$REAL_BASH" -c 'echo "bash $BASH_VERSION"') has no {fd}> redirection)"
+fi
 
 test_start "pty_pick_fzf_preview_and_colour_spinners"
 if command -v script >/dev/null 2>&1; then

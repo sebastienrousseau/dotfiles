@@ -240,10 +240,16 @@ for t in mkdir date stat awk mktemp rm mv cksum; do
   p="$(command -v "$t" 2>/dev/null || true)"
   [[ -n "$p" ]] && ln -sf "$p" "$NJ/$t"
 done
+# `hash -r` first: bash 3.2 (macOS /bin/bash, and `bash` on the macOS
+# runners) answers `command -v jq` from its command hash even under a
+# temporary PATH, so jq run by the earlier cases still "existed" here and
+# the missing-tool path was never taken.
+hash -r
 out="$(PATH="$NJ" cmd_registry list 2>&1)"
 assert_contains "jq is required" "$out" "missing jq reported"
 use "$F/good.json"
 ln -sf "$(command -v jq)" "$NJ/jq"
+hash -r
 out="$(PATH="$NJ" cmd_registry list 2>&1)"
 assert_contains "curl not installed" "$out" "missing curl reported"
 

@@ -53,30 +53,29 @@ assert_contains "ABCD (Home)" "$out" "network location from scselect"
 assert_contains "203.0.113.7" "$out" "public IP via curl"
 assert_contains "1.1.1.1, 9.9.9.9, 8.8.8.8" "$out" "DNS from scutil"
 
+# Hide named tools from `command -v` for one call. The override lives at
+# top level on purpose: bash 3.2 (macOS /bin/bash, and `bash` on the
+# macOS runners) misparses a `case … ) …` pattern inside `$( … )`, and
+# the earlier in-substitution version printed its own source as output.
+HIDE=""
+command() {
+  local h
+  if [[ "${1:-}" == "-v" ]]; then
+    for h in $HIDE; do
+      [[ "${2:-}" == "$h" ]] && return 1
+    done
+  fi
+  builtin command "$@"
+}
+
 test_start "wget_fallback_and_no_macos_tools"
-out="$(
-  command() {
-    if [[ "${1:-}" == "-v" ]]; then
-      case "${2:-}" in curl | scselect | scutil) return 1 ;; esac
-    fi
-    builtin command "$@"
-  }
-  hostinfo 2>&1
-)"
+out="$(HIDE="curl scselect scutil" hostinfo 2>&1)"
 assert_equals "0" "$?" "returns 0"
 assert_contains "198.51.100.9" "$out" "public IP via wget"
 assert_contains "Not available" "$out" "network location default"
 
 test_start "no_http_client"
-out="$(
-  command() {
-    if [[ "${1:-}" == "-v" ]]; then
-      case "${2:-}" in curl | wget) return 1 ;; esac
-    fi
-    builtin command "$@"
-  }
-  hostinfo 2>&1
-)"
+out="$(HIDE="curl wget" hostinfo 2>&1)"
 assert_equals "0" "$?" "returns 0"
 assert_true "[[ \"\$(printf '%s\n' \"\$out\" | grep 'Public IP')\" == *'Not available'* ]]" "public IP not available"
 
