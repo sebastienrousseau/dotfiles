@@ -119,11 +119,11 @@ verify-versions: ## Assert every version surface matches the manifest
 	bash ./scripts/release-preflight
 
 # ── Docs ───────────────────────────────────────────────────────────────
-docs: ## Build the MkDocs manual with warnings denied
-	mkdocs build --strict
+docs: ## Build doc.dotfiles.io with ssg and the Lucid theme into _build/site
+	bash tools/docs/build-site.sh --out _build/site
 
-docs-serve: ## Serve the manual locally
-	mkdocs serve
+docs-serve: docs ## Build, then serve the site at http://127.0.0.1:8000/
+	python3 -m http.server 8000 --bind 127.0.0.1 --directory _build/site
 
 manual-site: ## Build doc.dotfiles.io/manual/ with ssg and the Lucid theme
 	bash tools/docs/build-manual-site.sh --out _build/site/manual

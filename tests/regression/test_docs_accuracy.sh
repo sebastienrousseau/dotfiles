@@ -332,16 +332,16 @@ assert_file_contains "$REPO_ROOT/CLAUDE.md" "chezmoi diff" "CLAUDE.md must list 
 # ═══════════════════════════════════════════════════════════════
 
 test_start "index_links_to_install"
-assert_file_contains "$REPO_ROOT/docs/index.md" "INSTALL.md" "index.md must link to install guide"
+assert_file_contains "$REPO_ROOT/docs/index.md" "guides/INSTALL/" "index.md must link to install guide"
 
 test_start "index_links_to_security"
-assert_file_contains "$REPO_ROOT/docs/index.md" "SECURITY" "index.md must link to security"
+assert_file_contains "$REPO_ROOT/docs/index.md" "security/SECURITY/" "index.md must link to security"
 
 test_start "index_links_to_operations"
-assert_file_contains "$REPO_ROOT/docs/index.md" "OPERATIONS" "index.md must link to operations"
+assert_file_contains "$REPO_ROOT/docs/index.md" "operations/OPERATIONS/" "index.md must link to operations"
 
 test_start "index_links_to_architecture"
-assert_file_contains "$REPO_ROOT/docs/index.md" "ARCHITECTURE" "index.md must link to architecture"
+assert_file_contains "$REPO_ROOT/docs/index.md" "ARCHITECTURE/" "index.md must link to architecture"
 
 # ═══════════════════════════════════════════════════════════════
 # 16. CHANGELOG — exists and has content

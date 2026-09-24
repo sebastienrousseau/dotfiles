@@ -1,7 +1,9 @@
 name: Pages
 
 # Builds and deploys the docs/ site to GitHub Pages (custom domain:
-# doc.dotfiles.io) with MkDocs Material. The repo's Pages settings have
+# doc.dotfiles.io) with ssg and the vendored Lucid theme
+# (tools/docs/build-site.sh: the docs pages, the landing page and the manual
+# under /manual/, with every internal link checked). The repo's Pages settings have
 # build_type=workflow, so this is the canonical deploy path — no
 # Jekyll-on-source-branch fallback.
 #
@@ -16,9 +18,8 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
-      - 'mkdocs.yml'
+      - 'tools/docs/build-site.sh'
       - 'tools/docs/build-manual-site.*'
-      - 'requirements-docs.txt'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -35,7 +36,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build site (MkDocs Material + ssg manual)
+    name: Build site (ssg + Lucid)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -46,22 +47,8 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Setup Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: '3.12'
-          cache: pip
-
-      - name: Install MkDocs Material
-        run: pip install --require-hashes -r requirements-docs.txt
-
       - name: Configure Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
-
-      - name: Build with MkDocs
-        # Emits the static site to ./site (docs_dir=docs, site_dir=site in
-        # mkdocs.yml). CNAME is carried through via extra_files.
-        run: mkdocs build --clean
 
       - name: Install ssg (pinned release, SHA-256 verified)
         env:
@@ -77,8 +64,9 @@ jobs:
           tar -xzf "$RUNNER_TEMP/$asset" -C "$RUNNER_TEMP/ssg" ssg
           echo "$RUNNER_TEMP/ssg" >>"$GITHUB_PATH"
 
-      - name: Build the manual with ssg (Lucid theme) into site/manual
-        run: bash tools/docs/build-manual-site.sh --out site/manual
+      - name: Build the site with ssg (Lucid theme) into ./site
+        # python3 (standard library only) is preinstalled on the runner.
+        run: bash tools/docs/build-site.sh --out site
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0

@@ -1,133 +1,45 @@
 ---
-title: .dotfiles — dark, signed, cross-platform
-description: Cross-platform, signed, local-first dotfiles for macOS, Linux, and WSL.
-hide:
-  - navigation
-  - toc
-render_with_liquid: false
+# Landing page for doc.dotfiles.io, rendered with Lucid's `index` layout.
+# Every visible string is a field here; tools/docs/build-site.sh adds the
+# shared labels. Keep values on one line in double quotes.
+description: "Cross-platform, signed, local-first dotfiles for macOS, Linux, WSL and PowerShell: multi-shell parity, a fast dot CLI, wallpaper-driven themes and AI-aware tooling."
+eyebrow: "Docs"
+hero_tag: "Open source"
+hero_tagline: "Apache-2.0 OR MIT"
+headline: ".dotfiles"
+lead: "Cross-platform, signed, local-first dotfiles for macOS on Intel and Apple Silicon, the major Linux distributions, WSL and PowerShell 7.5 or later. One configuration across bash, zsh, fish and nushell, driven by a fast dot CLI."
+cta_primary: "Install"
+cta_primary_href: "guides/INSTALL/"
+cta_secondary: "Read the manual"
+cta_secondary_href: "manual/"
+cta_final: "Install .dotfiles"
+start_h: "Quick start"
+start_lead: "Download and verify the release installer as the install guide shows, then let dot check the machine."
+snippet_caption: "After installing"
+snippet_code: "dot doctor      # verify state\ndot health      # dashboard with actionable warnings\ndot theme       # pick a wallpaper-driven theme\ndot ai          # the AI cockpit\ndot help all    # full CLI reference"
+features_h: "What's inside"
+features_lead: "Everything is chezmoi-managed, feature-flagged and tested on every supported platform."
+f1_h: "Multi-shell parity"
+f1_href: "ARCHITECTURE/"
+f1_body: "Bash, zsh, fish and nushell share the same aliases, functions, prompt and completions, driven from one data file."
+f2_h: "Signed and attested"
+f2_href: "security/SECURITY/"
+f2_body: "Every commit SSH-signed with DCO sign-off, signed releases with an SBOM, and secrets encrypted with age."
+f3_h: "Wallpaper-driven themes"
+f3_href: "reference/THEMES/"
+f3_body: "Colours extracted from your wallpaper theme the terminal, the editor and the desktop, in light and dark."
+f4_h: "AI and MCP aware"
+f4_href: "AI/"
+f4_body: "A local gateway for your coding agents, an MCP registry and provider secrets, all opt-in and keyless by default."
+proof_h: "Why trust it"
+proof_lead: "The behaviour is pinned by tests that run the code, not by text searches."
+proof_1_t: "Mutation-tested"
+proof_1_href: "operations/TESTING/"
+proof_1_d: "Every pull request plants small bugs in the lines it changes; at least 80% must be caught."
+proof_2_t: "Tested on three platforms"
+proof_2_href: "operations/OPERATIONS/"
+proof_2_d: "Ubuntu, macOS on Intel and macOS on Apple Silicon run the full suite on every change."
+proof_3_t: "Reversible"
+proof_3_href: "reference/UTILS/"
+proof_3_d: "dot rollback restores the previous state, and nothing is applied from a dirty checkout."
 ---
-
-<section class="dot-hero" markdown>
-
-# .dotfiles
-
-<p class="tagline">Cross-platform, signed, local-first dotfiles for macOS, Linux, and WSL — multi-shell parity (bash/zsh/fish/nushell), a fast <code>dot</code> CLI, wallpaper-driven themes, SLSA-signed releases, and AI/MCP-aware tooling.</p>
-
-<div class="buttons">
-  <a class="primary" href="guides/INSTALL/">Install →</a>
-  <a href="https://github.com/sebastienrousseau/dotfiles">GitHub</a>
-  <a href="reference/UTILS/">Utilities</a>
-  <a href="ARCHITECTURE/">Architecture</a>
-</div>
-
-</section>
-
-## What's inside
-
-<div class="grid cards" markdown>
-
-- :material-console:{ .lg .middle } **Multi-shell parity**
-
-    ---
-
-    Bash, Zsh, Fish, Nushell — same aliases, functions, prompt, and completions. Cross-shell env parity from `.chezmoidata.toml`.
-
-    [→ Shell hub](reference/UTILS.md)
-
-- :material-lock-check:{ .lg .middle } **Signed & attested**
-
-    ---
-
-    Every commit SSH-signed, DCO enforced, SLSA-signed releases, SBOM + CVE gate, secret encryption via age.
-
-    [→ Security](operations/ATTESTATION.md)
-
-- :material-palette:{ .lg .middle } **190 wallpaper-driven themes**
-
-    ---
-
-    K-Means CIELAB color extraction. Terminal, editor, DE — all follow the wallpaper. `dot theme rebuild --force` regenerates from `~/Pictures/Wallpapers/`.
-
-    [→ Theme system](reference/UTILS.md)
-
-- :material-rocket-launch:{ .lg .middle } **Fast `dot` CLI**
-
-    ---
-
-    142+ subcommands: apply, health, doctor, heal, ai, agent, fleet, secrets, teleport, uninstall — with fzf pickers and a Bubble Tea cockpit.
-
-    [→ CLI reference](reference/UTILS.md)
-
-- :material-check-decagram:{ .lg .middle } **CI you can trust**
-
-    ---
-
-    35+ checks — shellcheck, shfmt, luacheck, stylua, CodeQL, Snyk, grype/SBOM, deps.dev, doc-drift gate, examples contract at 100%.
-
-    [→ Operations](operations/OPERATIONS.md)
-
-- :material-earth:{ .lg .middle } **Cross-platform**
-
-    ---
-
-    macOS (Intel & Apple Silicon), Linux (Ubuntu, Fedora, Arch, Alpine, openSUSE), WSL, PowerShell 7.5+, real BSDs.
-
-    [→ Support matrix](reference/SUPPORT_MATRIX.md)
-
-- :material-brain:{ .lg .middle } **AI & MCP aware**
-
-    ---
-
-    18-agent fleet cockpit (`dot ai`), local Claude gateway, MCP registry, context patterns, provider secrets — first-class support, not bolted on.
-
-    [→ AI operations](AI.md)
-
-- :material-account-cog:{ .lg .middle } **Chezmoi under the hood**
-
-    ---
-
-    Deterministic templates, feature flags, profiles, `run_onchange_` hooks. Everything lives in `defaults/` and applies to `$HOME` on-demand.
-
-    [→ Architecture](ARCHITECTURE.md)
-
-</div>
-
-## Quick start
-
-Install onto a fresh machine:
-
-=== "macOS / Linux / WSL"
-
-    ```bash
-    # Download and SHA256-verify the release asset as shown in Install.
-    bash /tmp/dotfiles-install.sh
-    ```
-
-=== "Windows (PowerShell 7+)"
-
-    ```powershell
-    iwr -useb https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/install.ps1 | iex
-    ```
-
-Once installed:
-
-    dot doctor      # verify state
-    dot health      # dashboard with actionable warnings
-    dot ai          # launch the AI cockpit (Bubble Tea TUI)
-    dot theme       # pick a wallpaper-driven theme
-    dot help all    # full CLI reference
-
-## Where to next
-
-- [**Install guide**](guides/INSTALL.md) — full bootstrap walkthrough, per-platform.
-- [**Utilities & `dot` CLI**](reference/UTILS.md) — every subcommand with examples.
-- [**Architecture**](ARCHITECTURE.md) — how the layers fit together.
-- [**Trusted agent workstation**](operations/TRUSTED_AGENT_WORKSTATION.md) — hardening + attestation runbook.
-- [**Troubleshooting**](guides/TROUBLESHOOTING.md) — the common gotchas.
-- [**Support matrix**](reference/SUPPORT_MATRIX.md) — OS × shell × package-manager grid.
-- [**Security overview**](security/SECURITY.md) — signing, attestation, secret handling, threat model.
-
-## Current release
-
-- Release feed: [GitHub releases](https://github.com/sebastienrousseau/dotfiles/releases/latest)
-- Source: [sebastienrousseau/dotfiles](https://github.com/sebastienrousseau/dotfiles)
