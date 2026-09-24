@@ -227,7 +227,7 @@ def side_nav(order: list[Page], current: Page, base: str) -> str:
     for p in order:
         if p.group:
             name = p.group
-        elif not p.url or p.rel.name.startswith("00-") or p.rel.parent == PurePosixPath("."):
+        elif not p.url or p.rel.name.startswith("00-"):
             name = "Start"
         else:
             name = "Indexes"
@@ -390,6 +390,10 @@ def build_pages(
             return 1
         p.toc = headings(p.body)
 
+    first_in_group: dict[str, Page] = {}
+    for p in order:
+        if p.group:
+            first_in_group.setdefault(p.group, p)
     content_out.mkdir(parents=True, exist_ok=True)
     year = str(date.today().year)
     common = shared_fields(profile, base, root, year)
@@ -412,7 +416,11 @@ def build_pages(
             "changefreq": "weekly",
             **common,
             "side_nav": side_nav(order, p, base),
-            "crumb_group": f"<li><span>{html.escape(p.group)}</span></li>" if p.group else "",
+            # The group crumb links to the section's first page: a link is
+            # also what Lucid aligns (a bare span sat off the crumb baseline).
+            "crumb_group": (
+                f"<li>{a(base + first_in_group[p.group].url, p.group)}</li>" if p.group else ""
+            ),
             "pager": pager(prev, nxt, base),
             "toc_items": "".join(
                 f'<li><a href="#{i}">{html.escape(t)}</a></li>' for t, i in p.toc
