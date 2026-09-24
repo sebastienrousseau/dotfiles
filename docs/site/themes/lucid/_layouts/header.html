@@ -1,6 +1,6 @@
 <header class="masthead">
   <div class="lu-shell masthead-in">
-    <a class="brand" href="{{base_path}}">
+    <a class="brand" href="{{root}}">
       <!-- The .dotfiles terminal mark (Material Design Icons "console",
            Apache-2.0), inlined so it cannot 404. Decorative: the brand name
            follows it as text. -->
@@ -20,8 +20,9 @@
 
     <nav class="site-nav" id="site-nav" aria-label="{{label_nav}}">
       <ul class="nav-list">
-        <li><a href="{{docs_url}}">{{nav_docs}}</a></li>
-        <li><a href="{{base_path}}" aria-current="true">{{nav_manual}}</a></li>
+        <li><a href="{{root}}guides/INSTALL/"{{!cur_install}}>{{nav_install}}</a></li>
+        <li><a href="{{root}}reference/UTILS/"{{!cur_reference}}>{{nav_reference}}</a></li>
+        <li><a href="{{root}}manual/"{{!cur_manual}}>{{nav_manual}}</a></li>
         <li><a href="{{repo_url}}">{{nav_repo}}</a></li>
       </ul>
     </nav>

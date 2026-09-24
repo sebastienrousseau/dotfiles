@@ -1,0 +1,165 @@
+# Site navigation for doc.dotfiles.io, in reading order.
+# Built by tools/docs/build-site.sh with ssg and the Lucid theme; the
+# manual has its own contents in docs/manual/_toc.yml and lives at /manual/.
+
+sections:
+  - group: "Start"
+    files:
+      - README.md
+
+  - group: "Guides"
+    files:
+      - guides/INSTALL.md
+      - guides/MACOS_ICLOUD_SYMLINKS.md
+      - guides/NEOVIM_IDE_GUIDE.md
+      - guides/THEMING.md
+      - guides/TROUBLESHOOTING.md
+      - guides/WSL2_NIX_TROUBLESHOOTING.md
+
+  - group: "Reference"
+    files:
+      - reference/UTILS.md
+      - reference/TOOLS.md
+      - reference/ALIASES.md
+      - reference/ALIASES_CHEATSHEET.md
+      - reference/ALIASES_DEPRECATIONS.md
+      - reference/FEATURES.md
+      - reference/FEATURE-MATRIX.md
+      - reference/PROFILES.md
+      - reference/THEMES.md
+      - reference/FONTS.md
+      - reference/SCRIPTS.md
+      - reference/SUPPORT_MATRIX.md
+      - reference/POWERSHELL_PARITY.md
+      - reference/SCREENSHOTS.md
+
+  - group: "Architecture"
+    files:
+      - ARCHITECTURE.md
+      - architecture/AI_COST_OPTIMIZATION.md
+      - architecture/ARCHITECTURE.md
+      - architecture/INTEROP.md
+      - architecture/REPO_LAYOUT.md
+      - architecture/THEME_COMPATIBILITY_CONTRACTS.md
+      - architecture/WALKTHROUGH.md
+      - architecture/fleet-deployment.md
+      - CONFIG_STRATEGY.md
+      - STRUCTURE.md
+      - NAMING_CONVENTIONS.md
+      - AI.md
+      - ECOSYSTEM.md
+
+  - group: "Themes"
+    files:
+      - themes/README.md
+      - themes/VISUAL_INTEGRITY_REPORT.md
+
+  - group: "Operations"
+    files:
+      - operations/ARCHITECTURE_ROADMAP.md
+      - operations/ATTESTATION.md
+      - operations/CI_CADENCE.md
+      - operations/CI_COMPOSITES.md
+      - operations/COMPLETIONS.md
+      - operations/COVERAGE.md
+      - operations/DRIFT.md
+      - operations/HARD_AUDIT_2026.md
+      - operations/MAINTENANCE.md
+      - operations/MANIFEST.md
+      - operations/MIGRATION.md
+      - operations/OPERATIONS.md
+      - operations/PERFORMANCE.md
+      - operations/PERFORMANCE_BUDGETS.md
+      - operations/REGISTRY.md
+      - operations/RELEASE_PIPELINE.md
+      - operations/RELIABILITY.md
+      - operations/RFC_v0_2_503_reorganization.md
+      - operations/ROADMAP.md
+      - operations/ROADMAP_2026.md
+      - operations/ROADMAP_V0_2_503.md
+      - operations/TESTING.md
+      - operations/TRACEABILITY.md
+      - operations/TRUSTED_AGENT_WORKSTATION.md
+      - operations/VERSION_SYNC.md
+      - packaging.md
+      - MINIMUM-TOOLCHAIN.md
+
+  - group: "Security"
+    files:
+      - security/README.md
+      - security/AI_ACT_COMPLIANCE.md
+      - security/AUDIT_BYPASS.md
+      - security/AUTOMATION_SECRETS.md
+      - security/CI_EGRESS_ALLOWLIST.md
+      - security/CI_PINNING.md
+      - security/COMMIT_SIGNING.md
+      - security/COMPLIANCE.md
+      - security/DEPS_DEV_EXCEPTIONS.md
+      - security/DISCLOSURE.md
+      - security/ENCRYPTION.md
+      - security/FMEA.md
+      - security/FUZZING.md
+      - security/HISTORY_FILTERING.md
+      - security/INCIDENT_RESPONSE.md
+      - security/INSTALL_VERIFICATION.md
+      - security/KEYS.md
+      - security/KEY_ROTATION.md
+      - security/MCP_POLICY.md
+      - security/POLICY_RELEASES.md
+      - security/SCORECARD.md
+      - security/SECRETS.md
+      - security/SECURITY.md
+      - security/SECURITY_CHECKLIST.md
+      - security/SHELL_EXEMPTIONS.md
+      - security/SOUP_REGISTER.md
+      - security/THREAT_MODEL.md
+      - security/VERIFICATION_VALIDATION.md
+      - security/VERIFY_RELEASE.md
+
+  - group: "Decisions"
+    files:
+      - adr/README.md
+      - adr/ADR-001-ci-cd-pipeline.md
+      - adr/ADR-002-shell-performance.md
+      - adr/ADR-003-security-first.md
+      - adr/ADR-004-cli-architecture.md
+      - adr/ADR-005-chezmoi-choice.md
+      - adr/ADR-006-shell-selection.md
+      - adr/ADR-007-multi-shell-parity.md
+      - adr/ADR-008-alias-system-architecture.md
+      - adr/ADR-009-wallpaper-driven-theming.md
+      - adr/ADR-010-starship-transient-prompt.md
+      - adr/ADR-011-nushell-tier3-keep.md
+      - adr/ADR-012-ai-fleet-local-proxy.md
+      - adr/ADR-013-single-mutation-authority.md
+      - adr/ADR-014-dpp-v1.md
+      - adr/ADR-015-transaction-recovery.md
+      - adr/ADR-016-plugin-trust-sandbox.md
+      - adr/ADR-017-sensitive-data-boundary.md
+      - adr/ADR-018-read-only-mcp-isolation.md
+
+  - group: "Migration"
+    files:
+      - migration/README.md
+      - migration/from-bare-git-repo.md
+      - migration/from-gnu-stow.md
+      - migration/from-plain-chezmoi.md
+      - migration/from-yadm.md
+
+  - group: "Interop"
+    files:
+      - interop/A2A.md
+      - interop/POWERSHELL.md
+
+  - group: "Project"
+    files:
+      - GOVERNANCE.md
+      - MAINTAINERS.md
+      - GOLD-STANDARD-AUDIT.md
+
+  - group: "Articles"
+    files:
+      - articles/index.md
+      - articles/2026-07-05-custom-mkdocs-material-dark-theme.md
+      - articles/2026-07-05-fish-startup-abbr.md
+      - articles/2026-07-05-master-to-main-rename-runbook.md

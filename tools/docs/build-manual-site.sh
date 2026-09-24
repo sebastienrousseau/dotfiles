@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Build the web manual (doc.dotfiles.io/manual/) with ssg and the vendored
-# Lucid theme in docs/manual-site/themes/lucid.
+# Lucid theme in docs/site/themes/lucid.
 #
 # Usage: tools/docs/build-manual-site.sh [--out DIR] [--base-path /manual/]
 #
@@ -65,7 +65,7 @@ site_description = "The .dotfiles manual: a trusted agent workstation for macOS,
 base_url = "${SITE_URL}${BASE_PATH}"
 language = "en-GB"
 content_dir = "$work/content"
-template_dir = "$REPO_ROOT/docs/manual-site/themes/lucid/_layouts"
+template_dir = "$REPO_ROOT/docs/site/themes/lucid/_layouts"
 output_dir = "$work/out"
 EOF
 

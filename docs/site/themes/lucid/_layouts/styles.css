@@ -7,41 +7,37 @@
  * outside these two blocks.
  */
 
-/* .dotfiles palette: the terminal-green-on-ink scheme of doc.dotfiles.io,
- * with a light counterpart. Every pair below is asserted at WCAG AAA (7:1
- * text, 4.5:1 non-text) by tests/unit/docs/test_manual_site.sh, as the
- * upstream Lucid gate does. */
 :root,
 :root[data-theme="light"] {
   --bg: #ffffff;
-  --surface: #f3f6f4;
-  --surface-soft: #e6ece8;
-  --ink: #0b0e14;
-  --ink-soft: #1f2733;
-  --ink-muted: #3b4452;
-  --accent: #11501f;
-  --accent-hover: #0b3a16;
+  --surface: #f4f6f9;
+  --surface-soft: #e7ebf1;
+  --ink: #0d1117;
+  --ink-soft: #232a35;
+  --ink-muted: #3d4553;
+  --accent: #08417f;
+  --accent-hover: #052c57;
   --accent-ink: #ffffff;
-  --accent-soft: #dcf2e0;
-  --on-accent-soft: #0f4a1c;
-  --focus: #11501f;
+  --accent-soft: #dce8f7;
+  --on-accent-soft: #08417f;
+  --focus: #08417f;
   --line: #5f6976;
   color-scheme: light;
 }
 
 :root[data-theme="dark"] {
   --bg: #0b0e14;
-  --surface: #111621;
-  --surface-soft: #161b26;
-  --ink: #e4e7ec;
-  --ink-soft: #cbd2dc;
-  --ink-muted: #a3b1c4;
-  --accent: #7ee787;
-  --accent-hover: #b0f5b7;
-  --accent-ink: #0b0e14;
-  --accent-soft: #12301a;
-  --on-accent-soft: #b0f5b7;
-  --focus: #7ee787;
+  --surface: #141922;
+  --surface-soft: #1d2430;
+  --ink: #f2f5f9;
+  --ink-soft: #d3dae4;
+  --ink-muted: #adb7c5;
+  --accent: #93bef7;
+  --accent-hover: #bcd8fc;
+  --accent-ink: #06101d;
+  --accent-soft: #1b2a3f;
+  --on-accent-soft: #c6dbf7;
+  --focus: #93bef7;
   --line: #7d8b9f;
   color-scheme: dark;
 }
@@ -49,25 +45,25 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0b0e14;
-    --surface: #111621;
-    --surface-soft: #161b26;
-    --ink: #e4e7ec;
-    --ink-soft: #cbd2dc;
-    --ink-muted: #a3b1c4;
-    --accent: #7ee787;
-    --accent-hover: #b0f5b7;
-    --accent-ink: #0b0e14;
-    --accent-soft: #12301a;
-    --on-accent-soft: #b0f5b7;
-    --focus: #7ee787;
+    --surface: #141922;
+    --surface-soft: #1d2430;
+    --ink: #f2f5f9;
+    --ink-soft: #d3dae4;
+    --ink-muted: #adb7c5;
+    --accent: #93bef7;
+    --accent-hover: #bcd8fc;
+    --accent-ink: #06101d;
+    --accent-soft: #1b2a3f;
+    --on-accent-soft: #c6dbf7;
+    --focus: #93bef7;
     --line: #7d8b9f;
-    color-scheme: dark;
   }
+  color-scheme: dark;
 }
 
 :root {
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   --r: 8px;
   --gap: 1.5rem;
   --shell: 76rem;
@@ -387,7 +383,7 @@ a:hover { color: var(--accent-hover); }
 .crumbs li + li::before { content: "/"; color: var(--ink-muted); margin-inline-end: 0.5rem; }
 /* Navigation, not a sentence, so WCAG 2.5.5's inline exception does not
  * apply: these need the full 44px target like every other control. */
-.crumbs a, .crumbs [aria-current], .crumbs li > span {
+.crumbs a, .crumbs [aria-current] {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
@@ -647,9 +643,41 @@ a:hover { color: var(--accent-hover); }
   }
 }
 
-/* Upstream restates its blue accents for Display P3 here. The .dotfiles
-   greens are plain sRGB, so that block is removed rather than left to
-   repaint the accent on wide-gamut screens. */
+/* ---------------------------------------------------------------------
+   Wide colour (Display P3).
+
+   Every token above is sRGB and stays that way — this block only runs
+   where the display can actually show more, and only the chromatic
+   tokens are restated. Neutrals carry almost no chroma, so a wider
+   gamut has nothing to give them.
+
+   Each colour keeps its lightness and hue exactly and gains about a
+   fifth more chroma, which is the part sRGB was clipping. Because
+   lightness is unchanged, contrast is too: `scripts/contrast.py` checks
+   these P3 values against the same thresholds as the sRGB ones, via
+   their XYZ luminance.
+   --------------------------------------------------------------------- */
+@media (color-gamut: p3) {
+  :root,
+  :root[data-theme="light"] {
+    --accent: color(display-p3 0.0587 0.2417 0.5249);
+    --accent-hover: color(display-p3 0.034 0.1638 0.3599);
+    --focus: color(display-p3 0.0587 0.2417 0.5249);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --accent: color(display-p3 0.5846 0.7395 0.9918);
+      --accent-hover: color(display-p3 0.7449 0.8444 0.9979);
+      --focus: color(display-p3 0.5846 0.7395 0.9918);
+    }
+  }
+  :root[data-theme="dark"] {
+    --accent: color(display-p3 0.5846 0.7395 0.9918);
+    --accent-hover: color(display-p3 0.7449 0.8444 0.9979);
+    --focus: color(display-p3 0.5846 0.7395 0.9918);
+  }
+}
 
 /* Bilingual safety net.
    A heading that cannot break pushes its grid past the viewport as soon as
@@ -834,19 +862,3 @@ h1 {
     color: #090a0f;
   }
 }
-
-/* .dotfiles manual: the side navigation lists ~30 chapters in groups, so it
- * scrolls on its own instead of running past the viewport while sticky. */
-@media (min-width: 64.01rem) {
-  .doc-side {
-    max-height: calc(100vh - var(--masthead-h) - 2rem);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-}
-.doc-side .side-h + .side-list { margin-bottom: 1rem; }
-.pager-link[hidden] { display: none; }
-.pager-next:only-child { margin-left: auto; }
-/* Group crumbs are plain text (a group has no page of its own); give them
- * the same box as the current-page crumb so the trail shares a baseline. */
-.crumbs li > span:not([aria-current]) { color: var(--ink-muted); }

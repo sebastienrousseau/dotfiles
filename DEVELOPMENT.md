@@ -195,7 +195,7 @@ subset (lint + drift + test + examples) in one go.
 | `doc-drift.yml` | Generators / completions | `bash tools/docs/generate-completions.sh --check` |
 | `doc-drift.yml` | Generators / version-consistency | `bash scripts/verify-release-versions` |
 | `sync-versions.yml` | Verify Version Sync | `./scripts/version-sync.sh --verify` |
-| `pages.yml` | Build site | `make docs` (`mkdocs build --strict`) |
+| `pages.yml` | Build site | `make docs` (`tools/docs/build-site.sh`, ssg + Lucid) |
 | `manual-publish.yml` | Validate + Build Manual | `bash tools/docs/check-manual.sh` then `bash tools/docs/build-manual.sh` |
 | — | all four drift gates at once | `make check-drift` |
 
