@@ -61,10 +61,35 @@ _ai_cache_fresh() {
   ((now - mtime < AI_STATUS_TTL))
 }
 
+# A version line: a standalone token such as 1.2, v0.94.2 or 2025.09.12-abc,
+# not one embedded in a path or file name (crush_0.94.2_Darwin, /v0.94.2/).
+AI_VERSION_RE='(^|[[:space:]])v?[0-9]+[.][0-9]+[^[:space:]/_]*([[:space:]]|[(]|$)'
+
+# _ai_version_line — read `<tool> --version` output on stdin and print the
+# line that carries the version: the last line with a standalone version
+# token, else the first line. Install shims (the npm crush wrapper) print
+# download and extraction progress before the real version line.
+_ai_version_line() {
+  awk -v re="$AI_VERSION_RE" 'NR == 1 { first = $0 } $0 ~ re { last = $0 }
+    END { if (last != "") print last; else if (NR) print first }'
+}
+
+# _ai_probe_version <bin> [timeout-prefix] — run `<bin> --version` from a
+# private scratch directory (removed afterwards) and print its version line.
+# Some shims unpack downloads into the current directory (archive-XXXXXX),
+# which littered whatever directory `dot ai tools` ran from.
+_ai_probe_version() {
+  local bin="$1" to="${2:-}" dir
+  dir="$(mktemp -d "${TMPDIR:-/tmp}/dot-ai-probe.XXXXXX")" || return 0
+  # shellcheck disable=SC2086 # $to is an optional "timeout 8" prefix
+  (cd "$dir" && $to "$bin" --version </dev/null 2>/dev/null | _ai_version_line) || true
+  rm -rf "$dir"
+}
+
 _ai_extract_version() {
   local bin="$1"
   local output version
-  output=$("$bin" --version 2>/dev/null | head -1) || true
+  output=$(_ai_probe_version "$bin")
   version=$(printf '%s' "$output" | sed 's/^[^0-9]*//' | sed 's/[[:space:]]*$//' | sed 's/\.$//')
   [[ -n "$version" ]] && printf '%s\n' "$version" || printf 'installed\n'
 }
@@ -106,7 +131,7 @@ _ai_refresh_status_cache() {
     i="${payload%%|*}"; entry="${payload#*|}"
     IFS="|" read -r category role name bin desc <<<"$entry"
     if command -v "$bin" >/dev/null 2>&1; then
-      output=$($to "$bin" --version </dev/null 2>/dev/null | head -1) || true
+      output=$(_ai_probe_version "$bin" "$to")
       version=$(printf "%s" "$output" | sed "s/^[^0-9]*//;s/[[:space:]]*$//;s/\.$//")
       printf "%s\t1\t%s\n" "$bin" "$version" >"$out_dir/$i"
     else
@@ -115,8 +140,9 @@ _ai_refresh_status_cache() {
   '
   # Use only `-I{}` and null records for BSD xargs and quote-safe descriptions.
   printf '%s\0' "${indexed[@]}" |
-    xargs -0 -I{} -P"$jobs" \
-      bash -c "$probe_script" _ {} "$probe_dir" "$_TO" \
+    AI_VERSION_RE="$AI_VERSION_RE" xargs -0 -I{} -P"$jobs" \
+      bash -c "$(declare -f _ai_version_line _ai_probe_version)$probe_script" \
+      _ {} "$probe_dir" "$_TO" \
       2>/dev/null || true
 
   # Re-assemble in original entry order.
