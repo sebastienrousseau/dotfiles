@@ -24,10 +24,13 @@ verify_cmd() {
   local cmd="$1"
   local expected_output="${2:-}"
 
+  # A missing tool is a recorded failure, not an abort: this file runs
+  # under `set -e`, and returning 1 here used to end the run at the first
+  # absent tool with no summary and no exit status of its own.
   if ! check_cmd "$cmd"; then
     ui_err "$cmd" "not found"
     failed+=1
-    return 1
+    return 0
   fi
 
   if [[ -n "$expected_output" ]]; then
