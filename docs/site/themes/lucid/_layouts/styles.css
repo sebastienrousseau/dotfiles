@@ -361,6 +361,9 @@ a:hover { color: var(--accent-hover); }
   margin-bottom: 0.75rem;
 }
 .side-list, .toc-list { display: flex; flex-direction: column; }
+/* .dotfiles: the side navigation carries several sections (upstream Lucid
+ * has one), so each later section label is set apart from the list above. */
+.side-list + .side-h { margin-top: 1.75rem; }
 .side-list a, .toc-list a {
   display: block;
   padding: 0.6rem 0.75rem;
