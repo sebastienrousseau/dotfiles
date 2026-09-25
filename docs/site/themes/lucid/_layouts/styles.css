@@ -573,6 +573,10 @@ a:hover { color: var(--accent-hover); }
   .nav-btn { display: inline-flex; align-items: center; justify-content: center; }
   .site-nav { display: none; width: 100%; }
   .site-nav.is-open { display: block; }
+  /* Without JavaScript the toggle cannot open the menu: show the links
+     and drop the button (theme-init.js removes .no-js when scripts run). */
+  .no-js .nav-btn { display: none; }
+  .no-js .site-nav { display: block; }
   .nav-list { flex-direction: column; }
   .masthead-in { padding-bottom: 0.5rem; }
   /* Fallback for the no-JavaScript case, where --masthead-pos is never set:
