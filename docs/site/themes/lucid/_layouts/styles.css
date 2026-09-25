@@ -63,7 +63,9 @@
 
 :root {
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  /* Chrome and Firefox do not support ui-monospace/SFMono-Regular, and Menlo
+     draws hyphens nearly cell-wide (`-fsSL` reads as a dash): Monaco first. */
+  --mono: ui-monospace, Monaco, Consolas, "DejaVu Sans Mono", "Liberation Mono", Menlo, monospace;
   --r: 8px;
   --gap: 1.5rem;
   --shell: 76rem;
