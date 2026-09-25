@@ -327,6 +327,8 @@ a:hover { color: var(--accent-hover); }
   font-size: 0.8125rem;
   padding: 0.6rem 1rem;
   border-bottom: 1px solid var(--line);
+  /* Skeletonic caps every <p> at 65ch; the caption bar spans the snippet. */
+  max-width: none;
 }
 .snippet-body { margin: 0; padding: 1.1rem; overflow-x: auto; background: var(--surface); }
 .snippet-body code { font-family: var(--mono); font-size: 0.875rem; color: var(--ink); white-space: pre; }
