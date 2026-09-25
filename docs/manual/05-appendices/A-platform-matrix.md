@@ -74,14 +74,13 @@ fzf, atuin, delta, lazygit, neovim, shellcheck and age). `pandoc` and
 | Shell configs (zsh/fish/bash/nu) | ✓ | ✓ | ✓ |
 | Terminal emulator configs | ✓ | ✓ | ✗ (host handles) |
 | Theme engine (K-Means) | ✓ | ✓ | ✓ |
-| Dynamic HEIC dark/light | ✓ native | ⚠ HEIC→PNG converted | ✗ |
+| Dynamic HEIC dark/light | ✓ native | ⚠ PNG frames from `scripts/theme/extract-heic-frames.sh` | ✗ |
 | Neovim + LSP | ✓ | ✓ | ✓ |
 | AI tools (Claude, Codex, etc.) | ✓ | ✓ | ✓ |
-| MCP policy enforcement | ✓ | ✓ | ✓ |
+| MCP policy and registry inspection (`dot mcp`) | ✓ | ✓ | ✓ |
 | Attestation | ✓ | ✓ | ✓ |
 | Fleet (SSH-based) | ✓ | ✓ | ⚠ |
-| AeroSpace (WM) | ✓ | ✗ | ✗ |
 | Niri (WM) | ✗ | ✓ | ✗ |
 | GNOME gsettings | ✗ | ✓ | ⚠ |
-| Build artifact redirect | ✓ | ✓ | ✓ |
+| Build artifact redirect (`DOT_BUILD_ROOT`) | ✓ | ✓ | ✓ |
 | Self-healing (`dot heal`) | ✓ | ✓ | ✓ |
