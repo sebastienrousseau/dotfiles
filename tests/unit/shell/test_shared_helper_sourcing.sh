@@ -93,7 +93,10 @@ _closure_defines() {
       "$cur" 2>/dev/null && return 0
     while IFS= read -r next; do
       [[ -n "$next" ]] || continue
-      printf '%s\n' "$seen" | grep -qxF "$next" && continue
+      # String match, not `printf | grep -q`: grep -q exits at the first hit
+      # and, with SIGPIPE ignored on CI runners, printf's write error fails
+      # the pipeline under pipefail.
+      [[ $'\n'"$seen"$'\n' == *$'\n'"$next"$'\n'* ]] && continue
       seen="$seen"$'\n'"$next"
       queue="$queue"$'\n'"$next"
     done < <(_sources_of "$cur")
@@ -110,7 +113,7 @@ _parents_of() {
     while IFS= read -r cand; do
       [[ "$cand" == "$target" ]] && continue
       srcs="$(_sources_of "$cand")"
-      printf '%s\n' "$srcs" | grep -qxF "$target" && printf '%s\n' "$cand"
+      [[ $'\n'"$srcs"$'\n' == *$'\n'"$target"$'\n'* ]] && printf '%s\n' "$cand"
     done
 }
 
