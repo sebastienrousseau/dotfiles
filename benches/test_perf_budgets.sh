@@ -340,9 +340,16 @@ fi
 # made to accommodate a newly added assertion. 1000ms comes from the same
 # 2x rule as every other entry here, so it is calibrated rather than fudged.
 
+# Sample counts. The three gates below with 5 runs were tight on the
+# macos-latest runner: across 27 CI runs (2026-09-24/25) their 3-run medians
+# peaked at 1518/2000ms (docs coverage), 2610/3500ms (iCloud unit) and
+# 4688/5000ms (traceability; typical ~2700ms, local 2107ms), and one run
+# on a slow runner measured 6095ms and failed main with no code change.
+# A median of 5 needs three slow samples rather than two; the budgets stay
+# at 2x the local median, so a real regression still fails.
 _gate "gate_check_version_consistency" 500 5 bash "$REPO_ROOT/scripts/qa/check-version-consistency.sh"
 
-_gate "gate_docs_coverage" 2000 3 bash "$REPO_ROOT/scripts/qa/docs-coverage.sh"
+_gate "gate_docs_coverage" 2000 5 bash "$REPO_ROOT/scripts/qa/docs-coverage.sh"
 
 _gate "gate_icloud_regression_test" 1000 5 bash "$REPO_ROOT/tests/regression/test_macos_icloud_symlinks_safety.sh"
 
@@ -352,9 +359,9 @@ _gate "gate_icloud_regression_test" 1000 5 bash "$REPO_ROOT/tests/regression/tes
 # needs on a hosted runner.
 _gate "gate_icloud_manifest_test" 5000 3 bash "$REPO_ROOT/tests/regression/test_macos_icloud_symlinks_manifest.sh"
 
-_gate "gate_icloud_unit_test" 3500 3 bash "$REPO_ROOT/tests/unit/misc/test_macos_icloud_symlinks.sh"
+_gate "gate_icloud_unit_test" 3500 5 bash "$REPO_ROOT/tests/unit/misc/test_macos_icloud_symlinks.sh"
 
-_gate "gate_traceability_coverage" 5000 3 bash "$REPO_ROOT/scripts/qa/traceability-coverage.sh"
+_gate "gate_traceability_coverage" 5000 5 bash "$REPO_ROOT/scripts/qa/traceability-coverage.sh"
 
 _gate "gate_dot_subcommand_smoke" 7500 3 bash "$REPO_ROOT/tests/regression/test_dot_subcommand_smoke.sh"
 
