@@ -120,6 +120,39 @@ apply_minimal_profile_overrides() {
     }'
 }
 
+# Print the install target: macos, wsl2, debian, fedora, arch, linux or
+# unknown. WSL is checked first because a WSL Ubuntu also has
+# /etc/debian_version. $1 is a filesystem root for the /proc and /etc probes
+# (default: the real root); tests pass a fixture tree.
+detect_target_os() {
+  local root="${1:-}"
+  case "$(uname -s)" in
+    Darwin) echo "macos" ;;
+    Linux)
+      if grep -qi microsoft "$root/proc/version" 2>/dev/null; then
+        echo "wsl2"
+      elif [ -f "$root/etc/debian_version" ]; then
+        echo "debian"
+      elif [ -f "$root/etc/fedora-release" ]; then
+        echo "fedora"
+      elif [ -f "$root/etc/arch-release" ]; then
+        echo "arch"
+      else
+        echo "linux"
+      fi
+      ;;
+    *) echo "unknown" ;;
+  esac
+}
+
+# Succeed inside a devcontainer, Codespace or Docker container, where the
+# installer selects the minimal profile. $1 is a filesystem root for the
+# /.dockerenv probe (default: the real root).
+detect_container_env() {
+  local root="${1:-}"
+  [[ -f "$root/.dockerenv" ]] || [[ -n "${CODESPACES:-}" ]] || [[ -n "${REMOTE_CONTAINERS:-}" ]]
+}
+
 show_help() {
   cat <<EOF
 Usage: install.sh [version] [options]
@@ -184,23 +217,7 @@ main() {
 
   # Detect Operating System
   OS="$(uname -s)"
-  case "$OS" in
-    Darwin) target_os="macos" ;;
-    Linux)
-      if grep -qi microsoft /proc/version 2>/dev/null; then
-        target_os="wsl2"
-      elif [ -f /etc/debian_version ]; then
-        target_os="debian"
-      elif [ -f /etc/fedora-release ]; then
-        target_os="fedora"
-      elif [ -f /etc/arch-release ]; then
-        target_os="arch"
-      else
-        target_os="linux"
-      fi
-      ;;
-    *) target_os="unknown" ;;
-  esac
+  target_os="$(detect_target_os)"
 
   # Bootstrap gum for a better UI if available or install it
   bootstrap_gum() {
@@ -455,7 +472,7 @@ main() {
   fi
 
   # Detect devcontainer/Codespaces environment
-  if [[ -f /.dockerenv ]] || [[ -n "${CODESPACES:-}" ]] || [[ -n "${REMOTE_CONTAINERS:-}" ]]; then
+  if detect_container_env; then
     DOTFILES_MINIMAL=1
     step "Detected container environment — using minimal profile"
   fi
