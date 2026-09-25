@@ -34,8 +34,11 @@ esac
 
 if ! command -v niri &>/dev/null; then
   echo "dot-launch-or-focus requires niri (Wayland compositor)" >&2
-  # Fallback: just launch the app directly
-  exec "${@##*.}" "${@:2}"
+  # Fallback: launch the app directly, by its short name
+  # (com.mitchellh.ghostty → ghostty), with its arguments unchanged.
+  app="${1##*.}"
+  shift
+  exec "${app}" "$@"
 fi
 
 APP="${1}"
