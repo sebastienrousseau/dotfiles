@@ -8,8 +8,16 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
+# Since v0.2.503 the chezmoi-managed tree (dot_config/…) lives under the
+# directory named in .chezmoiroot (defaults/), while .well-known/ and docs/
+# stay at the repo root. Bundle paths keep the chezmoi-relative layout.
+CHEZMOI_ROOT="$REPO_ROOT"
+if [[ -f "$REPO_ROOT/.chezmoiroot" ]]; then
+  CHEZMOI_ROOT="$REPO_ROOT/$(tr -d '[:space:]' <"$REPO_ROOT/.chezmoiroot")"
+fi
+
 OUTPUT_DIR="${OUTPUT_DIR:-$REPO_ROOT/dist/policy-bundles}"
-BUNDLE_VERSION="${BUNDLE_VERSION:-$(jq -r '.schemaVersion' "$REPO_ROOT/defaults/dot_config/dotfiles/policy-bundles.json")}"
+BUNDLE_VERSION="${BUNDLE_VERSION:-$(jq -r '.schemaVersion' "$CHEZMOI_ROOT/dot_config/dotfiles/policy-bundles.json")}"
 JSON_MODE=0
 
 while [[ $# -gt 0 ]]; do
@@ -62,12 +70,14 @@ files=(
 )
 
 for file in "${files[@]}"; do
-  [[ -f "$REPO_ROOT/$file" ]] || {
+  src="$REPO_ROOT/$file"
+  [[ -f "$src" ]] || src="$CHEZMOI_ROOT/$file"
+  [[ -f "$src" ]] || {
     echo "Missing required policy bundle artifact: $file" >&2
     exit 1
   }
   mkdir -p "$bundle_root/$(dirname "$file")"
-  cp "$REPO_ROOT/$file" "$bundle_root/$file"
+  cp "$src" "$bundle_root/$file"
 done
 
 jq empty "$bundle_root/dot_config/dotfiles/policy-bundles.json" >/dev/null

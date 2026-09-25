@@ -53,8 +53,25 @@ cmd_apply() {
   exec chezmoi apply "$@"
 }
 
+## cmd_sync [--pull] [--check] [args...] — apply; --pull fetches and applies
+## (chezmoi-update.sh), --check previews without applying (chezmoi-diff.sh).
+## The flags are consumed here: chezmoi apply knows neither of them.
 cmd_sync() {
-  cmd_apply "$@"
+  local pull=0 check=0 arg rest=()
+  for arg in "$@"; do
+    case "$arg" in
+      --pull) pull=1 ;;
+      --check) check=1 ;;
+      *) rest+=("$arg") ;;
+    esac
+  done
+  if [[ "$pull" -eq 1 ]]; then
+    cmd_update ${rest[@]+"${rest[@]}"}
+  elif [[ "$check" -eq 1 ]]; then
+    cmd_diff ${rest[@]+"${rest[@]}"}
+  else
+    cmd_apply ${rest[@]+"${rest[@]}"}
+  fi
 }
 
 cmd_update() {
