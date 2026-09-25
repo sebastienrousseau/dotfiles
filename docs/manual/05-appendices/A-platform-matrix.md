@@ -21,7 +21,7 @@ which is the source of truth; minimum versions and their reasons are in
 | NixOS | 23.11 or later | x86_64, aarch64 | Supported, via the Nix flake | `nix flake check` when Nix files change |
 | Fedora | 41 or later | x86_64 | Community | No |
 | Arch Linux | Rolling | x86_64 | Community; AUR package published | No |
-| Windows | 10 / 11 | x86_64 | PowerShell 7.4 LTS or 7.5+: managed profile, `dot` wrapper, aliases | Yes: `windows-latest` |
+| Windows | 10 / 11 | x86_64 | PowerShell 7.4 LTS or 7.5+: managed profile, `dot` wrapper, aliases | Yes: `windows-latest` (PowerShell 7.6) |
 
 ## Supported Shells
 
