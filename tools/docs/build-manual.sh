@@ -251,7 +251,7 @@ write_css() {
 
   /* Type */
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Inter", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-mono: "SF Mono", SFMono-Regular, ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+  --font-mono: "SF Mono", ui-monospace, "JetBrains Mono", Monaco, Consolas, "DejaVu Sans Mono", Menlo, monospace;
   --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
 
   /* Layout */

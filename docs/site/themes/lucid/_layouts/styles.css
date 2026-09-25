@@ -63,7 +63,9 @@
 
 :root {
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  /* Chrome and Firefox do not support ui-monospace/SFMono-Regular, and Menlo
+     draws hyphens nearly cell-wide (`-fsSL` reads as a dash): Monaco first. */
+  --mono: ui-monospace, Monaco, Consolas, "DejaVu Sans Mono", "Liberation Mono", Menlo, monospace;
   --r: 8px;
   --gap: 1.5rem;
   --shell: 76rem;
@@ -325,6 +327,8 @@ a:hover { color: var(--accent-hover); }
   font-size: 0.8125rem;
   padding: 0.6rem 1rem;
   border-bottom: 1px solid var(--line);
+  /* Skeletonic caps every <p> at 65ch; the caption bar spans the snippet. */
+  max-width: none;
 }
 .snippet-body { margin: 0; padding: 1.1rem; overflow-x: auto; background: var(--surface); }
 .snippet-body code { font-family: var(--mono); font-size: 0.875rem; color: var(--ink); white-space: pre; }
@@ -569,6 +573,10 @@ a:hover { color: var(--accent-hover); }
   .nav-btn { display: inline-flex; align-items: center; justify-content: center; }
   .site-nav { display: none; width: 100%; }
   .site-nav.is-open { display: block; }
+  /* Without JavaScript the toggle cannot open the menu: show the links
+     and drop the button (theme-init.js removes .no-js when scripts run). */
+  .no-js .nav-btn { display: none; }
+  .no-js .site-nav { display: block; }
   .nav-list { flex-direction: column; }
   .masthead-in { padding-bottom: 0.5rem; }
   /* Fallback for the no-JavaScript case, where --masthead-pos is never set:
