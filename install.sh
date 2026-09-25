@@ -281,29 +281,30 @@ main() {
     base_url="https://github.com/twpayne/chezmoi/releases/download/v${chezmoi_version}"
     temp_dir="$(umask 077 && mktemp -d)"
 
+    # `set -e` does not apply in here: this subshell runs as an `if !`
+    # condition (and so does this function, inside install_chezmoi), so bash
+    # ignores errexit. Every step therefore ends the subshell explicitly on
+    # failure; before this, a checksum mismatch fell through to the install.
     if ! (
-      set -e
       if ! curl --proto '=https' --tlsv1.2 -fsSL \
         -o "$temp_dir/checksums.txt" "$base_url/$checksums_asset"; then
         curl --proto '=https' --tlsv1.2 -fsSL \
-          -o "$temp_dir/checksums.txt" "$base_url/checksums.txt"
+          -o "$temp_dir/checksums.txt" "$base_url/checksums.txt" || exit 1
       fi
       curl --proto '=https' --tlsv1.2 -fsSL \
-        -o "$temp_dir/$asset" "$base_url/$asset"
+        -o "$temp_dir/$asset" "$base_url/$asset" || exit 1
       checksum_line="$(grep -E "[[:space:]]${asset}$" "$temp_dir/checksums.txt" | head -n 1 || true)"
       [[ -n "$checksum_line" ]] || {
         echo "Checksum entry not found for $asset" >&2
         exit 1
       }
-      cd "$temp_dir"
-      if command -v sha256sum >/dev/null 2>&1; then
-        printf '%s\n' "$checksum_line" | sha256sum -c -
-      else
-        printf '%s\n' "$checksum_line" | shasum -a 256 -c -
-      fi
-      tar -xzf "$asset" chezmoi
-      mkdir -p "$destination"
-      install -m 755 chezmoi "$destination/chezmoi"
+      cd "$temp_dir" || exit 1
+      sha_check=(shasum -a 256 -c -)
+      command -v sha256sum >/dev/null 2>&1 && sha_check=(sha256sum -c -)
+      printf '%s\n' "$checksum_line" | "${sha_check[@]}" || exit 1
+      tar -xzf "$asset" chezmoi || exit 1
+      mkdir -p "$destination" || exit 1
+      install -m 755 chezmoi "$destination/chezmoi" || exit 1
     ); then
       rm -rf "$temp_dir"
       return 1
