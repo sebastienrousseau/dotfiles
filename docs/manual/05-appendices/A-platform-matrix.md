@@ -6,45 +6,39 @@ render_with_liquid: false
 
 ## Supported Platforms
 
-| OS | Version | Support | Notes |
-|:---|:---|:---:|:---|
-| macOS | 14 (Sonoma) | ✓ full | Primary development platform |
-| macOS | 15 (Sequoia) | ✓ full | |
-| macOS | 26 (Tahoe) | ✓ full | |
-| Ubuntu | 22.04 LTS | ✓ full | |
-| Ubuntu | 24.04 LTS | ✓ full | CI reference platform |
-| Debian | 12 (Bookworm) | ✓ full | |
-| Debian | 13 (Trixie) | ✓ full | |
-| Arch Linux | rolling | ✓ full | |
-| CachyOS | rolling | ✓ full | Arch-based |
-| Fedora | 39 | ✓ | Less tested |
-| Fedora | 40, 41 | ✓ | Less tested |
-| openSUSE | Tumbleweed | ✓ | Less tested |
-| Alpine | 3.20 | ⚠ partial | POSIX shells only; no Fish |
-| WSL2 | Ubuntu 22.04+ | ✓ full | Windows 11 host |
-| WSL2 | Debian | ✓ full | |
-| Windows PowerShell | 7.5+ | ⚠ baseline | Aliases + prompt; no chezmoi |
-| FreeBSD | 14 | ✗ untested | |
-| Termux (Android) | latest | ✗ untested | |
+This appendix follows the [support matrix](../../reference/SUPPORT_MATRIX.md),
+which is the source of truth; minimum versions and their reasons are in
+[MINIMUM-TOOLCHAIN.md](../../MINIMUM-TOOLCHAIN.md).
+
+| OS | Version | Architecture | Status | CI |
+|:---|:---|:---|:---|:---|
+| macOS | 14 (Sonoma) or later | aarch64 (Apple Silicon) | Supported, primary development platform | Yes: `macos-14` and `macos-latest` (macOS 26) |
+| macOS | 14 (Sonoma) or later | x86_64 (Intel) | Supported | No Intel runner |
+| Ubuntu | 22.04 or later | x86_64 | Supported | Yes: `ubuntu-latest` (24.04) |
+| Ubuntu | 22.04 or later | aarch64 | Supported | No |
+| Debian | 12 or later | x86_64 | Supported | No |
+| WSL2 | Ubuntu 22.04 or later | x86_64 | Supported, with a clipboard bridge | No |
+| NixOS | 23.11 or later | x86_64, aarch64 | Supported, via the Nix flake | `nix flake check` when Nix files change |
+| Fedora | 41 or later | x86_64 | Community | No |
+| Arch Linux | Rolling | x86_64 | Community; AUR package published | No |
+| Windows | 10 / 11 | x86_64 | PowerShell 7.4 LTS or 7.5+: managed profile, `dot` wrapper, aliases | Yes: `windows-latest` |
 
 ## Supported Shells
 
-| Shell | Version | Support |
-|:---|:---|:---:|
-| Fish | 3.6+ | ✓ primary |
-| Zsh | 5.9+ | ✓ full |
-| Bash | 5.0+ | ✓ full |
-| Nushell | 0.90+ | ✓ full |
-| PowerShell | 7.5+ | ⚠ baseline |
+| Shell | Minimum | Coverage |
+|:---|:---|:---|
+| Fish | 4.0 | Core CLI; the default login shell |
+| Zsh | 5.8 | Full |
+| Bash | 5.0 interactive; 3.2 for the `dot` CLI | Full |
+| Nushell | 0.98 | Core CLI |
+| PowerShell | 7.4 LTS or 7.5+ | Core CLI |
 
 ## Supported Architectures
 
 | Arch | Status |
-|:---:|:---:|
-| amd64 / x86_64 | ✓ |
-| arm64 / aarch64 | ✓ |
-| armv7 | ⚠ best-effort |
-| riscv64 | ✗ untested |
+|:---|:---|
+| x86_64 | Supported; CI on Linux and Windows |
+| aarch64 | Supported; CI on macOS |
 
 ## Required Binaries
 
@@ -54,32 +48,24 @@ render_with_liquid: false
 | `curl` | Installer | System package manager |
 | `chezmoi` | Template engine | Installer downloads verified binary |
 
-## Optional Binaries (installed by Mise on first apply)
+## Optional Binaries
 
-| Binary | Purpose |
-|:---|:---|
-| `mise` | Runtime version manager |
-| `age` | Secret encryption |
-| `sops` | YAML secret encryption |
-| `pandoc` | Manual generation |
-| `shellcheck` | Shell linting |
-| `shfmt` | Shell formatting |
-| `starship` | Prompt |
-| `fzf` | Fuzzy finder |
-| `zoxide` | Smart `cd` |
-| `atuin` | Shell history sync |
-| `delta` | Git diff pager |
-| `lazygit` | TUI Git client |
-| `neovim` | Editor |
+Runtimes and some CLI tools are pinned in `mise.toml` and `mise.lock`
+(for example node, go, rust, starship, zoxide, sops, nushell and gum).
+The rest come from the system package manager during provisioning: the
+Homebrew Brewfiles on macOS and the package script on Linux (for example
+fzf, atuin, delta, lazygit, neovim, shellcheck and age). `pandoc` and
+`shfmt` are only needed to build the manual or lint the repository.
 
 ## Tested CI Environments
 
-| Environment | Workflow |
-|:---|:---|
-| macOS 14 (GHA) | `ci.yml`, `ci-enforced.yml` |
-| Ubuntu 24.04 (GHA) | `ci.yml`, `ci-enforced.yml` |
-| GitHub Codespaces | `devcontainer-prebuild.yml` |
-| Docker Ubuntu 24.04 | `ci.yml` test-docker job |
+| Workflow | Platforms | Runs on |
+|:---|:---|:---|
+| `ci.yml` | `ubuntu-latest`, `macos-latest`, `windows-latest`; an Ubuntu container job | Pull requests that change code, config or workflows; pushes to `main`; scheduled |
+| `reliability-gate.yml` | `ubuntu-latest`, `macos-latest`, `macos-14` | Every pull request and push to `main` |
+| `cross-platform-test.yml` | `ubuntu-latest`, `macos-latest`, `macos-14` | Pull requests that change code or config; pushes to `main`; scheduled |
+| `ci-enforced.yml` | `ubuntu-latest` | Every pull request and push |
+| `devcontainer-prebuild.yml` | `ubuntu-latest` | Pre-built Codespaces images |
 
 ## Feature Matrix
 

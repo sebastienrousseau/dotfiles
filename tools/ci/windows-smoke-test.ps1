@@ -3,12 +3,13 @@
   Windows smoke test for the dotfiles framework.
 
 .DESCRIPTION
-  Ships under PowerShell 7.5+; verifies that the `dot` dispatcher
+  Runs under PowerShell 7.4 LTS or 7.5+; verifies that the `dot` dispatcher
   starts, that key read-only commands work, and that chezmoi can be
   invoked from PowerShell. Designed to run inside `windows-latest`
   GitHub Actions runners (B1 of ROADMAP_2026).
 
-  Closes the audit gap "PowerShell 7.5+ claim unverified."
+  Closes the audit gap "PowerShell 7.5+ claim unverified" (the floor is
+  7.4 LTS until it retires on 2026-11-10).
 
 .NOTES
   Exit codes:

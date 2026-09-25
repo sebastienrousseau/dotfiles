@@ -26,7 +26,7 @@ reliable cross-platform shell distribution.
 
 ### Predictability
 
-- Keep macOS, Linux, WSL, and PowerShell 7.5+ behaviour aligned across shell
+- Keep macOS, Linux, WSL, and PowerShell (7.4 LTS or 7.5+) behaviour aligned across shell
   startup, aliases, functions, and the `dot` CLI.
 - Preserve chezmoi idempotency and dry-run safety for every managed surface.
 - Continue pinning external actions, reusable workflows, tool versions, and
