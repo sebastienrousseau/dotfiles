@@ -4,7 +4,7 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
-## v0.2.524 — Unreleased
+## v0.2.524 — 2026-09-26
 
 ### Security
 
@@ -14,6 +14,40 @@ This file documents all notable changes to this project.
   an `if !` subshell, where bash ignores it: a failed `sha256sum -c` fell
   through to the install and reported success. Every step now stops on
   failure. Installers up to and including v0.2.523 are affected.
+
+### Fixed
+
+- The lazy alias layer loads on hosts without nmap or ufw (nearly every
+  Mac): those two alias files ended with a top-level `return` that, once
+  concatenated into `91-ux-aliases-lazy.sh`, stopped every alias file
+  after them (subversion, terraform, tmux, update, uuid, vagrant, wget,
+  yarn) from loading.
+- `dot sync --pull` fetches and applies and `dot sync --check` previews,
+  as documented; both flags used to be passed to `chezmoi apply`.
+- `dot env use node@22` and other versioned mise specs are accepted; the
+  name check rejected every spec with `@`, `:` or `/`.
+- `dot ai ask` searches `defaults/dot_config/shell` and
+  `defaults/.chezmoitemplates`; it searched paths that stopped existing
+  when the chezmoi root moved to `defaults/`, so only `docs/` was used.
+- `dot-launch-or-focus` without niri launches the app by its short name
+  with its arguments intact.
+- `tools/release/package-policy-bundles.sh` finds the policy files under
+  the chezmoi root.
+- `is_wsl` returns 1, not 2, when `/proc/version` is missing.
+
+### Changed
+
+- The support matrix, MINIMUM-TOOLCHAIN and the manual's platform
+  appendix match CI: macOS CI is Apple Silicon only, Ubuntu CI is 24.04,
+  and `windows-latest` runs PowerShell 7.6 (the floor stays 7.4 LTS until
+  2026-11-10). The appendix's feature table drops AeroSpace, which the
+  repository does not configure.
+- doc.dotfiles.io and dotfiles.io share one Lucid theme; code uses Monaco
+  before Menlo on macOS so command hyphens read as hyphens.
+- The three macOS performance gates that flaked on slow runners take the
+  median of five samples; budgets are unchanged.
+- Tests: 14 more suites run the code instead of grepping it (749 -> 520
+  source-grep lines), which is how the fixes above were found.
 
 ## v0.2.523 — 2026-09-24
 
