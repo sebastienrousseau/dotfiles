@@ -27,6 +27,11 @@ on:
 permissions:
   contents: read
 
+env:
+  # The minimum chezmoi the dotfiles support (MINIMUM-TOOLCHAIN.md), as in
+  # ci.yml and the reliability gate.
+  CHEZMOI_VERSION: "2.47.1"
+
 jobs:
   test-suite:
     name: Test Suite
@@ -39,6 +44,12 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Tests that render chezmoi templates (the zshrc, alias layers,
+      # gitconfig, installer paths) skip without chezmoi, so without this
+      # step they never ran here.
+      - name: Setup chezmoi
+        uses: ./.github/actions/setup-chezmoi
 
       - name: Unit tests (zero-failure policy)
         run: |
