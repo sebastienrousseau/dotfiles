@@ -245,14 +245,18 @@ cmd_mode() {
       ui_ok "MCP" "$(_agent_profile_field "$name" "mcpProfile")"
       ;;
     set)
-      local name="${1:-}" state_file
+      local name="${1:-}" state_file role=""
       [[ -n "$name" ]] || die "Usage: dot mode set <profile>"
       _agent_profile_exists "$name" || die "Unknown agent profile: $name"
       _agent_enforce_rbac "$name"
       state_file="$(_agent_state_file)"
       mkdir -p "$(dirname "$state_file")"
+      # The role lives in the same file; rewriting it without the role would
+      # drop the caller back to the default role on every mode switch.
+      [[ -f "$state_file" ]] && role="$(sed -n 's/^DOT_AGENT_ROLE=//p' "$state_file" | tail -n 1)"
       cat >"$state_file" <<EOF
-DOT_AGENT_PROFILE=$name
+${role:+DOT_AGENT_ROLE=$role
+}DOT_AGENT_PROFILE=$name
 DOT_AGENT_APPROVAL=$(_agent_profile_field "$name" "approval")
 DOT_AGENT_FILESYSTEM=$(_agent_profile_field "$name" "filesystem")
 DOT_AGENT_NETWORK=$(_agent_profile_field "$name" "network")
