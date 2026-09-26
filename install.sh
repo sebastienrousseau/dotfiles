@@ -120,37 +120,25 @@ apply_minimal_profile_overrides() {
     }'
 }
 
-# Print the install target: macos, wsl2, debian, fedora, arch, linux or
-# unknown. WSL is checked first because a WSL Ubuntu also has
-# /etc/debian_version. $1 is a filesystem root for the /proc and /etc probes
-# (default: the real root); tests pass a fixture tree.
+# Print macos, wsl2, debian, fedora, arch, linux or unknown. $1: fixture root.
 detect_target_os() {
-  local root="${1:-}"
+  local root="${1:-}" os="linux"
   case "$(uname -s)" in
-    Darwin) echo "macos" ;;
-    Linux)
-      if grep -qi microsoft "$root/proc/version" 2>/dev/null; then
-        echo "wsl2"
-      elif [ -f "$root/etc/debian_version" ]; then
-        echo "debian"
-      elif [ -f "$root/etc/fedora-release" ]; then
-        echo "fedora"
-      elif [ -f "$root/etc/arch-release" ]; then
-        echo "arch"
-      else
-        echo "linux"
-      fi
+    Darwin) os="macos" ;;
+    Linux) # Later checks win: wsl2 > debian > fedora > arch > linux.
+      [ -f "$root/etc/arch-release" ] && os="arch"
+      [ -f "$root/etc/fedora-release" ] && os="fedora"
+      [ -f "$root/etc/debian_version" ] && os="debian"
+      grep -qi microsoft "$root/proc/version" 2>/dev/null && os="wsl2"
       ;;
-    *) echo "unknown" ;;
+    *) os="unknown" ;;
   esac
+  echo "$os"
 }
 
-# Succeed inside a devcontainer, Codespace or Docker container, where the
-# installer selects the minimal profile. $1 is a filesystem root for the
-# /.dockerenv probe (default: the real root).
+# Succeed in a devcontainer, Codespace or Docker container. $1: a fixture root.
 detect_container_env() {
-  local root="${1:-}"
-  [[ -f "$root/.dockerenv" ]] || [[ -n "${CODESPACES:-}" ]] || [[ -n "${REMOTE_CONTAINERS:-}" ]]
+  [[ -f "${1:-}/.dockerenv" || -n "${CODESPACES:-}" || -n "${REMOTE_CONTAINERS:-}" ]]
 }
 
 show_help() {
@@ -215,7 +203,6 @@ main() {
   # 2. Check Prerequisites & Bootstrap Package Managers
   step "Checking Prerequisites..."
 
-  # Detect Operating System
   OS="$(uname -s)"
   target_os="$(detect_target_os)"
 
@@ -267,12 +254,10 @@ main() {
     fi
   }
 
-  # Standalone checksum-verified chezmoi bootstrap. Keep this implementation
-  # in the entry point so a release-pinned install.sh remains self-contained;
-  # repository and npm installs may use the identical helper script below.
+  # Standalone checksum-verified chezmoi bootstrap, kept here so a release-pinned
+  # install.sh stays self-contained (repo and npm installs use the helper script).
   install_chezmoi_verified_embedded() {
-    local chezmoi_version="$1"
-    local destination="$2"
+    local chezmoi_version="$1" destination="$2"
     local os arch asset checksums_asset base_url temp_dir checksum_line
 
     os="$(uname -s | tr '[:upper:]' '[:lower:]')"
@@ -298,10 +283,9 @@ main() {
     base_url="https://github.com/twpayne/chezmoi/releases/download/v${chezmoi_version}"
     temp_dir="$(umask 077 && mktemp -d)"
 
-    # `set -e` does not apply in here: this subshell runs as an `if !`
-    # condition (and so does this function, inside install_chezmoi), so bash
-    # ignores errexit. Every step therefore ends the subshell explicitly on
-    # failure; before this, a checksum mismatch fell through to the install.
+    # `set -e` does not apply here: this subshell (and this function) run as `if !`
+    # conditions, where bash ignores errexit, so every step exits on failure itself;
+    # before this, a checksum mismatch fell through to the install.
     if ! (
       if ! curl --proto '=https' --tlsv1.2 -fsSL \
         -o "$temp_dir/checksums.txt" "$base_url/$checksums_asset"; then
@@ -315,8 +299,7 @@ main() {
         echo "Checksum entry not found for $asset" >&2
         exit 1
       }
-      # cd and mkdir need no guard: if either fails, the checksum check or
-      # the install below fails and ends the subshell.
+      # cd/mkdir: a failure there fails the checksum check or install below.
       cd "$temp_dir"
       sha_check=(shasum -a 256 -c -)
       command -v sha256sum >/dev/null 2>&1 && sha_check=(sha256sum -c -)
