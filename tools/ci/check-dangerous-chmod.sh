@@ -11,7 +11,9 @@
 
 set -euo pipefail
 
-PATTERN='^[[:space:]]*chmod[[:space:]]+(-R[[:space:]]+)?(777|666)'
+# chmod anywhere in a command line (after sudo, &&, ;, a subshell ...), any
+# flags, optional leading 0. Sticky/setuid forms (1777, 2777) are not matched.
+PATTERN='(^|[;&|({[:space:]])chmod([[:space:]]+-[[:alpha:]]+)*[[:space:]]+0?(777|666)([^0-9]|$)'
 EXCLUDES=(
   --exclude=check-dangerous-chmod.sh
   --exclude=test_check_dangerous_chmod.sh
@@ -24,7 +26,7 @@ if grep -rn \
   --include='*.bash' \
   --include='*.zsh' \
   "${EXCLUDES[@]}" \
-  -E "$PATTERN" . 2>/dev/null | grep -v '^Binary'; then
+  -E "$PATTERN" . 2>/dev/null | grep -v '^Binary' | grep -vE '^[^:]+:[0-9]+:[[:space:]]*#'; then
   echo "ERROR: Dangerous chmod patterns found (777 or 666)." >&2
   echo "Use the minimum permissions actually required; document any exception." >&2
   exit 1

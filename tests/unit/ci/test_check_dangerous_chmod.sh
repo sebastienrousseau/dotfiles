@@ -27,20 +27,27 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
-test_start "uses_strict_mode"
-assert_file_contains "$SCRIPT_FILE" "set -euo pipefail" "must use strict mode"
+# chk_case <name> <relative file> <line> <want rc>: a one-file tree scanned
+# from its root; the checker must exit <want rc>.
+chk_case() {
+  local name="$1" rel="$2" line="$3" want="$4" dir="$HOME/chk-$1" rc=0
+  mkdir -p "$dir/$(dirname "$rel")"
+  printf '#!/usr/bin/env bash\n%s\n' "$line" >"$dir/$rel"
+  (cd "$dir" && bash "$SCRIPT_FILE" >/dev/null 2>&1) || rc=$?
+  test_start "$name"
+  assert_equals "$want" "$rc" "$rel: $line"
+}
 
-test_start "rejects_chmod_777"
-assert_file_contains "$SCRIPT_FILE" "777" "must scan for chmod 777"
-
-test_start "rejects_chmod_666"
-assert_file_contains "$SCRIPT_FILE" "666" "must scan for chmod 666"
-
-test_start "excludes_test_fixtures"
-assert_file_contains "$SCRIPT_FILE" "--exclude-dir=tests" "must exclude intentional test fixtures"
-
-test_start "scans_all_shell_extensions"
-assert_file_contains "$SCRIPT_FILE" "--include='*.zsh'" "must scan zsh scripts"
+chk_case rejects_666 bad.sh 'chmod 666 f' 1
+chk_case rejects_after_sudo bad.sh 'sudo chmod 777 /srv' 1
+chk_case rejects_mid_command bad.sh 'mkdir d && chmod 777 d' 1
+chk_case rejects_leading_zero bad.sh 'chmod 0777 f' 1
+chk_case rejects_with_flags bad.sh 'chmod -v -R 666 d' 1
+chk_case scans_zsh bad.zsh 'chmod 777 f' 1
+chk_case scans_bash_ext bad.bash 'chmod 777 f' 1
+chk_case allows_sticky_tmp ok.sh 'chmod 1777 /tmp/shared' 0
+chk_case ignores_comments ok.sh '# never chmod 777 anything' 0
+chk_case skips_test_fixtures tests/fixture.sh 'chmod 777 f' 0
 
 # Functional: scan a known-clean tree (HOME, sandboxed) — should exit 0.
 test_start "passes_on_clean_tree"
