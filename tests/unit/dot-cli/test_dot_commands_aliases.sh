@@ -15,52 +15,6 @@ ALIASES_FILE="$REPO_ROOT/scripts/dot/commands/aliases.sh"
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
-# Test: aliases.sh file exists
-test_start "aliases_cmd_file_exists"
-assert_file_exists "$ALIASES_FILE" "aliases.sh should exist"
-
-# Test: aliases.sh is valid shell syntax
-test_start "aliases_cmd_syntax_valid"
-if bash -n "$ALIASES_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: aliases.sh has valid syntax"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: aliases.sh has syntax errors"
-fi
-
-# Test: defines cmd_aliases
-test_start "aliases_cmd_defines_aliases"
-assert_file_contains "$ALIASES_FILE" "cmd_aliases" "defines cmd_aliases function"
-
-# Test: defines cmd_alias_check
-test_start "aliases_cmd_defines_alias_check"
-assert_file_contains "$ALIASES_FILE" "cmd_alias_check" "defines cmd_alias_check function"
-
-# Test: defines alias_manifest_path
-test_start "aliases_cmd_defines_manifest_path"
-assert_file_contains "$ALIASES_FILE" "alias_manifest_path" "defines alias_manifest_path function"
-
-# Test: defines emit_alias_manifest
-test_start "aliases_cmd_defines_emit_manifest"
-assert_file_contains "$ALIASES_FILE" "emit_alias_manifest" "defines emit_alias_manifest function"
-
-# Test: has strict mode
-test_start "aliases_cmd_strict_mode"
-assert_file_contains "$ALIASES_FILE" "set -euo pipefail" "should use strict mode"
-
-# Test: handles all subcommands
-test_start "aliases_cmd_subcommands"
-assert_file_contains "$ALIASES_FILE" "list)" "should handle list subcommand"
-assert_file_contains "$ALIASES_FILE" "search)" "should handle search subcommand"
-assert_file_contains "$ALIASES_FILE" "why)" "should handle why subcommand"
-assert_file_contains "$ALIASES_FILE" "stats)" "should handle stats subcommand"
-assert_file_contains "$ALIASES_FILE" "tiers)" "should handle tiers subcommand"
-
-echo ""
-echo "Aliases commands tests completed."
-
-test_start "aliases_cmd_deep_branches_execute"
 aliases_tmp="$DOTFILES_COV_TMPDIR/aliases-deep"
 mkdir -p "$aliases_tmp/repo/scripts/diagnostics" \
   "$aliases_tmp/repo/scripts/dot/data" \
@@ -113,6 +67,80 @@ printf 'source "$HOME/.config/shell/custom/auto_ls.zsh"\n' \
   >"$aliases_tmp/home/.config/zsh/.zshrc"
 printf '# auto ls\n' >"$aliases_tmp/home/.config/shell/custom/auto_ls.zsh"
 
+# run_aliases <var=value...> -- <args...>: run cmd_aliases in a subshell
+# against the fixture; sets A_OUT (stdout+stderr) and A_RC.
+run_aliases() {
+  local -a envs=()
+  while [[ "${1:-}" != "--" ]]; do
+    envs+=("$1")
+    shift
+  done
+  shift
+  A_RC=0
+  A_OUT="$(
+    set +e
+    export HOME="$aliases_tmp/home" HISTFILE="$aliases_tmp/history" NO_COLOR=1
+    for kv in ${envs[@]+"${envs[@]}"}; do export "${kv?}"; done
+    # shellcheck disable=SC1091
+    source "$REPO_ROOT/lib/dot/utils.sh"
+    # shellcheck disable=SC1091
+    source "$ALIASES_FILE"
+    _DOT_SOURCE_DIR_CACHE="$aliases_tmp/repo"
+    cmd_aliases "$@" 2>&1
+  )" || A_RC=$?
+}
+
+test_start "aliases_cmd_strict_mode"
+assert_equals "errexit|pipefail" \
+  "$(bash --norc --noprofile -c 'set +e +o pipefail; source "$1" >/dev/null 2>&1; [[ -o errexit ]] && printf errexit; [[ -o pipefail ]] && printf "|pipefail"' _ "$ALIASES_FILE")" \
+  "sourcing the module turns on errexit and pipefail"
+
+test_start "aliases_list"
+run_aliases -- list
+assert_true '[[ $A_RC == 0 && $A_OUT == *"gs"*"git status"*"git.aliases.sh:20"* && $A_OUT == *"ll"*"ls -la"*"default.aliases.sh:10"* ]]' \
+  "list shows every manifest alias with its value and source"
+
+test_start "aliases_search_hit"
+run_aliases -- search git
+assert_true '[[ $A_RC == 0 && $A_OUT == *"git status"* && $A_OUT != *"ls -la"* ]]' \
+  "search git returns only the matching alias"
+
+test_start "aliases_search_miss"
+run_aliases -- search nomatch
+assert_true '[[ $A_RC == 1 && $A_OUT == *"No matches"* ]]' "a search with no match exits 1"
+
+test_start "aliases_why_known"
+run_aliases -- why ll
+assert_true '[[ $A_RC == 0 && $A_OUT == *"ls -la"* && $A_OUT == *"default.aliases.sh:10"* ]]' \
+  "why explains an alias: value and source"
+
+test_start "aliases_why_deprecated"
+run_aliases -- why oldll
+assert_true '[[ $A_RC == 0 && $A_OUT == *"Deprecated"* && $A_OUT == *"Replacement"*"ll"* && $A_OUT == *"v0.3.0"* ]]' \
+  "why reports a deprecated alias, its replacement and removal version"
+
+test_start "aliases_why_missing"
+run_aliases -- why missing
+assert_true '[[ $A_RC == 1 && $A_OUT == *"not found: missing"* ]]' "why on an unknown alias exits 1"
+
+test_start "aliases_stats_counts_history"
+run_aliases -- stats
+assert_true '[[ $A_RC == 0 && $A_OUT =~ 2[[:space:]]+ll ]]' "stats counts alias use in history (ll twice)"
+
+test_start "aliases_tiers_follow_settings"
+run_aliases DOTFILES_ALIAS_ECOSYSTEMS=python DOTFILES_ALIAS_BUCKETS=system -- tiers
+assert_true '[[ $A_RC == 0 && $A_OUT =~ python[[:space:]]+enabled && $A_OUT =~ rust[[:space:]]+disabled ]]' \
+  "tiers reports enabled and disabled ecosystems from the settings"
+
+test_start "aliases_unknown_subcommand"
+run_aliases -- unknown
+assert_true '[[ $A_RC != 0 && $A_OUT == *"Unknown aliases subcommand: unknown"* ]]' \
+  "an unknown subcommand fails and names it"
+
+echo ""
+echo "Aliases commands tests completed."
+
+test_start "aliases_cmd_deep_branches_execute"
 (
   set +e
   export HOME="$aliases_tmp/home"
