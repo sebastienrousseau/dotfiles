@@ -78,7 +78,7 @@ _run_doctor() {
   local path="$1"
   DOC_OUT="$(
     cd "$S_HOME" &&
-      env PATH="$path" \
+      env -u ZDOTDIR PATH="$path" \
         HOME="$S_HOME" \
         XDG_CONFIG_HOME="$S_HOME/.config" \
         XDG_DATA_HOME="$S_HOME/.local/share" \
@@ -114,6 +114,44 @@ assert_contains "91 entries" "$DOC_OUT" "doctor counted exactly 91 entries"
 assert_contains "[WARN] PATH length" "$DOC_OUT" "91 entries is [WARN]"
 assert_contains "consider pruning" "$DOC_OUT" "91 entries carries the pruning advice"
 assert_false '[[ "$DOC_OUT" == *"[OK] PATH length"* ]]' "91 entries is not [OK]"
+
+# ── mise tool directories do not count towards the length verdict ──────
+# 100 entries, 70 of them mise install dirs: 30 other, so [OK], and the
+# message reports the mise share. It used to warn on every such machine.
+test_start "path_mise_tool_dirs_are_not_counted"
+mise_path="$S_BIN:$SYSBIN"
+for ((i = 1; i <= 70; i++)); do mise_path="$mise_path:$S_HOME/.local/share/mise/installs/tool$i/1.0/bin"; done
+for ((i = 3; i <= 28; i++)); do mise_path="$mise_path:$S_HOME/pathpad/$i"; done
+_run_doctor "$mise_path"
+assert_contains "[OK] PATH length 100 entries (70 mise tool dirs, 30 other)" "$DOC_OUT" \
+  "a PATH that is long only because of mise tool dirs is [OK]"
+
+# ── duplicates warn at any length ──────────────────────────────────────
+test_start "path_duplicates_warn"
+_run_doctor "$S_BIN:$SYSBIN:$S_HOME/pathpad/a:$S_HOME/pathpad/a:$S_HOME/pathpad/b"
+assert_contains "[WARN] PATH length" "$DOC_OUT" "a PATH with a repeated entry warns"
+assert_contains "1 duplicate(s)" "$DOC_OUT" "the warning counts the duplicates"
+
+# ── zsh hooks: one-shot hooks are fired before counting ───────────────
+# A zshrc with one persistent precmd hook and one preexec hook that
+# deregisters itself on first run (as the deferred-init hooks do): doctor
+# must report precmd=1 preexec=0, not the startup count of 1 and 1.
+test_start "zsh_hooks_count_after_one_shot_hooks_fire"
+ZSH_REAL="$(command -v zsh || true)"
+if [[ -n "$ZSH_REAL" ]]; then
+  ln -sf "$ZSH_REAL" "$S_BIN/zsh"
+  cat >"$S_HOME/.zshrc" <<'ZRC'
+persistent_precmd() { :; }
+one_shot_preexec() { preexec_functions=(${preexec_functions:#one_shot_preexec}); }
+precmd_functions=(persistent_precmd)
+preexec_functions=(one_shot_preexec)
+ZRC
+  _run_doctor "$S_BIN:$SYSBIN"
+  rm -f "$S_BIN/zsh" "$S_HOME/.zshrc"
+  assert_contains "zsh hooks precmd=1 preexec=0" "$DOC_OUT" "a self-removing preexec hook is not counted as per-prompt work"
+else
+  assert_true "true" "skipped: zsh not installed"
+fi
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

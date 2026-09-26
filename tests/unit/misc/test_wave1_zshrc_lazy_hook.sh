@@ -140,6 +140,13 @@ if true; then :; fi
 print "${#${(@M)LAYERS_LOADED:#91-ux-aliases-lazy}}"')" \
   "commands, builtins and keywords that already resolve do not load the lazy layers"
 
+test_start "zshrc_lazy_hook_leaves_once_layers_are_loaded"
+assert_equals "0" \
+  "$(zshrc_typed 'dot load
+true
+print "${preexec_functions[(I)_dotfiles_lazy_preexec]}"' | tail -1)" \
+  "after dot load the lazy-load preexec hook removes itself on the next command"
+
 test_start "zshrc_dot_load_loads_deferred_layers"
 assert_equals "ready|10-secrets 40-ls-colors 50-logic-functions-core 91-ux-aliases-lazy 51-logic-functions-extra" \
   "$(zshrc -i 'LAYERS_LOADED=(); dot load; print -r -- "$DOTFILES_LAYERS_LOAD_STATE|${LAYERS_LOADED[*]}"')" \

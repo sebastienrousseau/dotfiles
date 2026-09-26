@@ -536,7 +536,11 @@ if [[ "${DOTFILES_FAST}" != "1" ]]; then
   # handler only runs what they define (loading them itself when the
   # hook did not fire, e.g. in `zsh -c`).
   _dotfiles_lazy_preexec() {
-    [[ "${DOTFILES_LAYERS_LOADED}" == "1" ]] && return 0
+    # Layers already loaded (dot load, background prewarm): nothing left to do.
+    if [[ "${DOTFILES_LAYERS_LOADED}" == "1" ]]; then
+      _dotfiles_del_preexec _dotfiles_lazy_preexec
+      return 0
+    fi
     local word="${${(z)1}[1]}"
     [[ -z "$word" ]] && return 0
     (( ${+commands[$word]} || ${+functions[$word]} || ${+aliases[$word]} || ${+builtins[$word]} || ${+reswords[(r)$word]} )) && return 0
