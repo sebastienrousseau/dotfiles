@@ -4,6 +4,23 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+## v0.2.527 — 2026-09-26
+
+### Security
+
+- The MCP policy's `requireOauthForHttpTransports` now covers
+  `streamable-http` servers. It only checked plain `http`, so a
+  streamable-http server (the current remote MCP transport) registered
+  without OAuth2 passed. The HTTPS rule reports one verdict for both
+  transports instead of a success line beside a failure.
+
+### Tests
+
+- Four more suites run the code instead of grepping it: the strict alias
+  policy, branch-cleanup (on fixture repos, with restore), doctor-unified
+  flag routing, and the MCP doctor policy. Source-grep baseline: 434
+  lines, down from 473.
+
 ## v0.2.526 — 2026-09-26
 
 ### Fixed
