@@ -4,6 +4,17 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+## v0.2.524 — Unreleased
+
+### Security
+
+- `install.sh` no longer installs chezmoi when its checksum does not
+  match. The embedded verifier, which the standalone release installer
+  uses on machines without Homebrew or chezmoi, relied on `set -e` inside
+  an `if !` subshell, where bash ignores it: a failed `sha256sum -c` fell
+  through to the install and reported success. Every step now stops on
+  failure. Installers up to and including v0.2.523 are affected.
+
 ## v0.2.523 — 2026-09-24
 
 ### Security
