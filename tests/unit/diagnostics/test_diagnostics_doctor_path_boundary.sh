@@ -78,7 +78,7 @@ _run_doctor() {
   local path="$1"
   DOC_OUT="$(
     cd "$S_HOME" &&
-      env PATH="$path" \
+      env -u ZDOTDIR PATH="$path" \
         HOME="$S_HOME" \
         XDG_CONFIG_HOME="$S_HOME/.config" \
         XDG_DATA_HOME="$S_HOME/.local/share" \
@@ -106,6 +106,7 @@ assert_contains "90 entries" "$DOC_OUT" "doctor counted exactly 90 entries"
 assert_contains "[OK] PATH length" "$DOC_OUT" "90 entries is [OK]"
 assert_false '[[ "$DOC_OUT" == *"[WARN] PATH length"* ]]' "90 entries does not warn"
 assert_false '[[ "$DOC_OUT" == *"consider pruning"* ]]' "90 entries carries no pruning advice"
+assert_false '[[ "$DOC_OUT" == *"mise tool dirs"* ]]' "with no mise tool dirs the message has no mise breakdown"
 
 # ── 91 entries: first value past the ceiling warns ─────────────────────
 test_start "path_count_91_warns"
@@ -114,6 +115,61 @@ assert_contains "91 entries" "$DOC_OUT" "doctor counted exactly 91 entries"
 assert_contains "[WARN] PATH length" "$DOC_OUT" "91 entries is [WARN]"
 assert_contains "consider pruning" "$DOC_OUT" "91 entries carries the pruning advice"
 assert_false '[[ "$DOC_OUT" == *"[OK] PATH length"* ]]' "91 entries is not [OK]"
+
+# ── 120 entries still warns; 121 is the first [FAIL] ───────────────────
+test_start "path_count_120_warns"
+_run_doctor "$(_path_with_entries $((120 - DOCTOR_PREFIX_ENTRIES)))"
+assert_contains "[WARN] PATH length 120 entries" "$DOC_OUT" "120 entries is still [WARN]"
+
+test_start "path_count_121_fails"
+_run_doctor "$(_path_with_entries $((121 - DOCTOR_PREFIX_ENTRIES)))"
+assert_contains "[FAIL] PATH length 121 entries" "$DOC_OUT" "121 entries is [FAIL]"
+
+# ── mise tool directories do not count towards the length verdict ──────
+# 100 entries, 70 of them mise install dirs: 30 other, so [OK], and the
+# message reports the mise share. It used to warn on every such machine.
+test_start "path_mise_tool_dirs_are_not_counted"
+mise_path="$S_BIN:$SYSBIN"
+for ((i = 1; i <= 70; i++)); do mise_path="$mise_path:$S_HOME/.local/share/mise/installs/tool$i/1.0/bin"; done
+for ((i = 3; i <= 28; i++)); do mise_path="$mise_path:$S_HOME/pathpad/$i"; done
+_run_doctor "$mise_path"
+assert_contains "[OK] PATH length 100 entries (70 mise tool dirs, 30 other)" "$DOC_OUT" \
+  "a PATH that is long only because of mise tool dirs is [OK]"
+
+# ── duplicates warn at any length ──────────────────────────────────────
+test_start "path_duplicates_warn"
+_run_doctor "$S_BIN:$SYSBIN:$S_HOME/pathpad/a:$S_HOME/pathpad/a:$S_HOME/pathpad/b"
+assert_contains "[WARN] PATH length" "$DOC_OUT" "a PATH with a repeated entry warns"
+assert_contains "1 duplicate(s)" "$DOC_OUT" "the warning counts the duplicates"
+
+# ── doctor does not duplicate a directory the PATH already has ─────────
+test_start "path_doctor_prefix_does_not_duplicate"
+_run_doctor "$S_BIN:$SYSBIN:$S_HOME/.local/bin"
+assert_contains "[OK] PATH length 4 entries" "$DOC_OUT" \
+  "with ~/.local/bin already on PATH doctor adds only ~/.atuin/bin and reports no duplicate"
+
+# ── zsh hooks: one-shot hooks are fired before counting ───────────────
+# A zshrc with a persistent and a self-removing hook of each kind (the
+# deferred-init hooks remove themselves on first run): doctor must report
+# precmd=1 preexec=1, not the startup count of 2 and 2.
+test_start "zsh_hooks_count_after_one_shot_hooks_fire"
+ZSH_REAL="$(command -v zsh || true)"
+if [[ -n "$ZSH_REAL" ]]; then
+  ln -sf "$ZSH_REAL" "$S_BIN/zsh"
+  cat >"$S_HOME/.zshrc" <<'ZRC'
+persistent_precmd() { :; }
+one_shot_precmd() { precmd_functions=(${precmd_functions:#one_shot_precmd}); }
+persistent_preexec() { :; }
+one_shot_preexec() { preexec_functions=(${preexec_functions:#one_shot_preexec}); }
+precmd_functions=(persistent_precmd one_shot_precmd)
+preexec_functions=(persistent_preexec one_shot_preexec)
+ZRC
+  _run_doctor "$S_BIN:$SYSBIN"
+  rm -f "$S_BIN/zsh" "$S_HOME/.zshrc"
+  assert_contains "zsh hooks precmd=1 preexec=1" "$DOC_OUT" "self-removing precmd and preexec hooks are not counted; persistent ones are"
+else
+  assert_true "true" "skipped: zsh not installed"
+fi
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

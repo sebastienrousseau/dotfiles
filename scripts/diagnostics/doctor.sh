@@ -40,8 +40,16 @@ export DOT_COMMAND="doctor"
 
 ui_init
 
-# Extend PATH to include common non-standard install locations
-export PATH="$HOME/.atuin/bin:$HOME/.local/bin:$PATH"
+# Extend PATH to include common non-standard install locations, unless they
+# are already on it: prepending ~/.local/bin a second time made doctor's own
+# PATH check report a duplicate that the user's shell does not have.
+for _doctor_dir in "$HOME/.local/bin" "$HOME/.atuin/bin"; do
+  case ":$PATH:" in
+    *":$_doctor_dir:"*) ;;
+    *) PATH="$_doctor_dir:$PATH" ;;
+  esac
+done
+export PATH
 
 Errors=0
 Warnings=0
@@ -726,13 +734,27 @@ fi
 # microseconds of PATH scan for ~134ms on every single tool invocation. The
 # ceiling now matches the documented baseline; >90 still warns, because past
 # that the entries are worth auditing for tools you no longer use.
+#
+# The thresholds apply to the entries that are NOT mise tool directories:
+# those are by design (see above), so a machine with many mise tools is not
+# "long". A PATH of 88 entries, 68 of them mise installs, used to warn. The
+# message still reports the total, then the mise share. Duplicates are
+# pure waste, so any warn regardless of length.
 path_count=$(printf '%s' "${PATH:-}" | tr ':' '\n' | grep -c . || true)
-if [[ "$path_count" -le 90 ]]; then
-  _ok "PATH length" "$path_count entries"
-elif [[ "$path_count" -le 120 ]]; then
-  _warn "PATH length" "$path_count entries — consider pruning"
+path_unique=$(printf '%s' "${PATH:-}" | tr ':' '\n' | grep . | sort -u | grep -c . || true)
+path_mise=$(printf '%s' "${PATH:-}" | tr ':' '\n' | grep . | sort -u | grep -c '/mise/installs/' || true)
+path_other=$((path_unique - path_mise))
+path_dups=$((path_count - path_unique))
+path_detail="$path_count entries"
+[[ "$path_mise" -gt 0 ]] && path_detail="$path_detail ($path_mise mise tool dirs, $path_other other)"
+if [[ "$path_other" -gt 120 ]]; then
+  _fail "PATH length" "$path_detail — likely slowing every command"
+elif [[ "$path_other" -gt 90 ]]; then
+  _warn "PATH length" "$path_detail — consider pruning"
+elif [[ "$path_dups" -gt 0 ]]; then
+  _warn "PATH length" "$path_detail — $path_dups duplicate(s)"
 else
-  _fail "PATH length" "$path_count entries — likely slowing every command"
+  _ok "PATH length" "$path_detail"
 fi
 
 # 5. Shell coverage. Surface installed shells that the project's caching
@@ -762,7 +784,15 @@ fi
 # Probe an interactive zsh with a hard timeout so a broken zshrc doesn't
 # stall doctor; skip cleanly if the probe fails.
 if command -v zsh >/dev/null 2>&1 && command -v timeout >/dev/null 2>&1; then
-  hook_counts=$(timeout 5 zsh -i -c 'echo "$#precmd_functions $#preexec_functions"' 2>/dev/null || echo "")
+  # Fire every hook once first, as the first prompt and first command do:
+  # the deferred-init hooks deregister themselves after one run, so counting
+  # at startup reported one-shot work (zinit, compinit, carapace, layer
+  # loading) as per-prompt cost. What remains is what runs on every prompt.
+  # shellcheck disable=SC2016 # expanded by the probed zsh
+  hook_counts=$(timeout 5 zsh -i -c 'local -a _p _e; _p=($precmd_functions); _e=($preexec_functions)
+    for f in $_p; do (( $+functions[$f] )) && $f >/dev/null 2>&1; done
+    for f in $_e; do (( $+functions[$f] )) && $f true >/dev/null 2>&1; done
+    echo "$#precmd_functions $#preexec_functions"' 2>/dev/null | tail -1 || echo "")
   if [[ -n "$hook_counts" ]]; then
     read -r precmd_n preexec_n <<<"$hook_counts"
     if [[ "${precmd_n:-0}" -le 5 && "${preexec_n:-0}" -le 5 ]]; then
