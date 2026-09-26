@@ -29,33 +29,33 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: fleet.sh has syntax errors"
 fi
 
-# Test: defines fleet status command
-test_start "fleet_cmd_defines_status"
-assert_file_contains "$FLEET_FILE" "cmd_fleet_status" "defines fleet status command"
+# The subcommands run through `dot fleet` with a private state dir; each
+# one is expected to answer and to append its structured event.
+DOT_CLI="$REPO_ROOT/bin/dot"
+FLEET_TMP="$DOTFILES_COV_TMPDIR/fleet"
+export XDG_STATE_HOME="$FLEET_TMP/state"
+EVENTS="$XDG_STATE_HOME/dotfiles/fleet/events.jsonl"
+last_event() { tail -n 1 "$EVENTS" 2>/dev/null | jq -r .event 2>/dev/null; }
 
-# Test: defines fleet drift command
-test_start "fleet_cmd_defines_drift"
-assert_file_contains "$FLEET_FILE" "cmd_fleet_drift" "defines fleet drift command"
+test_start "fleet_status_json_is_structured"
+assert_equals "true" "$(bash "$DOT_CLI" fleet status --json 2>/dev/null | jq 'has("node_id") and has("namespace") and has("drift")' 2>/dev/null)" "status --json emits the node record"
 
-# Test: defines fleet events command
-test_start "fleet_cmd_defines_events"
-assert_file_contains "$FLEET_FILE" "cmd_fleet_events" "defines fleet events command"
+test_start "fleet_status_emits_event"
+bash "$DOT_CLI" fleet status >/dev/null 2>&1 || true
+assert_equals "status" "$(last_event)" "status appends a status event"
 
-# Test: defines fleet namespace command
-test_start "fleet_cmd_defines_namespace"
-assert_file_contains "$FLEET_FILE" "cmd_fleet_namespace" "defines fleet namespace command"
+test_start "fleet_drift_emits_event"
+bash "$DOT_CLI" fleet drift >/dev/null 2>&1 || true
+assert_equals "drift_check" "$(last_event)" "drift appends a drift_check event"
 
-# Test: has strict mode
-test_start "fleet_cmd_strict_mode"
-assert_file_contains "$FLEET_FILE" "set -euo pipefail" "should use strict mode"
+test_start "fleet_events_are_valid_jsonl"
+assert_exit_code 0 "jq -e -s 'length >= 2 and all(has(\"time\") and has(\"node_id\") and has(\"trace_id\"))' '$EVENTS'"
 
-# Test: emits structured events
-test_start "fleet_cmd_emits_events"
-assert_file_contains "$FLEET_FILE" "_fleet_emit_event" "should emit structured fleet events"
+test_start "fleet_events_lists_recorded_events"
+assert_output_contains "drift_check" "XDG_STATE_HOME='$XDG_STATE_HOME' bash '$DOT_CLI' fleet events"
 
-# Test: supports JSON output
-test_start "fleet_cmd_json_support"
-assert_file_contains "$FLEET_FILE" "json_mode" "should support JSON output mode"
+test_start "fleet_namespace_reports_active"
+assert_output_contains "Active" "XDG_STATE_HOME='$XDG_STATE_HOME' bash '$DOT_CLI' fleet namespace"
 
 # Test: no hardcoded paths
 test_start "fleet_cmd_no_hardcoded_paths"

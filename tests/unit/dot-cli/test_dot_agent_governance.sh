@@ -21,12 +21,15 @@ assert_file_exists "$PROMPT_REGISTRY" "prompt-registry.json should exist"
 assert_file_exists "$WORKSTATION_DOC" "trusted workstation doc should exist"
 
 test_start "policy_bundles_define_enterprise"
-assert_file_contains "$POLICY_BUNDLES" '"enterprise"' "policy bundles define enterprise"
-assert_file_contains "$POLICY_BUNDLES" '"regulated"' "policy bundles define regulated"
+assert_equals "true" "$(jq '.bundles | has("enterprise") and has("regulated")' "$POLICY_BUNDLES")" "policy bundles define enterprise and regulated"
 
-test_start "registries_require_signed_change_control"
-assert_file_contains "$MODEL_REGISTRY" 'signed-commit' "model registry enforces signed change control"
-assert_file_contains "$PROMPT_REGISTRY" 'signed-commit' "prompt registry enforces signed change control"
+# Every entry, not just one: a model or prompt set added without signed
+# change control would otherwise pass as long as another entry had it.
+test_start "every_model_requires_signed_change_control"
+assert_equals "true" "$(jq '[.models[].changeControl // ""] | length > 0 and all(startswith("signed-commit"))' "$MODEL_REGISTRY")" "each model's changeControl starts with signed-commit"
+
+test_start "every_prompt_set_requires_signed_change_control"
+assert_equals "true" "$(jq '[.promptSets[].changeControl // ""] | length > 0 and all(startswith("signed-commit"))' "$PROMPT_REGISTRY")" "each prompt set's changeControl starts with signed-commit"
 
 test_start "readme_links_trusted_workstation_doc"
 # The tagline no longer leads with "Trusted agent workstation" (it's been

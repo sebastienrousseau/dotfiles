@@ -89,15 +89,21 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should support -c flag"
 fi
 
-# Test: uses project shellcheck flags from CLAUDE.md
-test_start "lint_cmd_uses_project_flags"
-if grep -q 'SC1091' "$LINT_FILE" 2>/dev/null && grep -q '\-i 2' "$LINT_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses project-specific lint flags"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use project-specific lint flags"
-fi
+# Stub shellcheck/shfmt record their argv, so the flags the command really
+# passes are checked rather than the text of lint.sh.
+LINT_TMP="$DOTFILES_COV_TMPDIR/lint-flags"
+mkdir -p "$LINT_TMP/bin"
+for tool in shellcheck shfmt; do
+  printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >>"%s/%s.args"\n' "$LINT_TMP" "$tool" >"$LINT_TMP/bin/$tool"
+  chmod +x "$LINT_TMP/bin/$tool"
+done
+PATH="$LINT_TMP/bin:$PATH" bash "$LINT_FILE" --check >/dev/null 2>&1 || true
+
+test_start "lint_cmd_uses_project_shellcheck_flags"
+assert_contains "-f gcc --severity=error -e SC1091 -e SC2030 -e SC2031 " "$(head -n 1 "$LINT_TMP/shellcheck.args" 2>/dev/null)" "shellcheck gets the CI flags"
+
+test_start "lint_cmd_uses_project_shfmt_flags"
+assert_contains "-i 2 -ci -l " "$(head -n 1 "$LINT_TMP/shfmt.args" 2>/dev/null)" "shfmt gets -i 2 -ci"
 
 # Test: no hardcoded paths
 test_start "lint_cmd_no_hardcoded_paths"
