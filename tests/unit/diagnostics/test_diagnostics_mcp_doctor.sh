@@ -118,6 +118,12 @@ strict "$MCPX/plain-http.json"
 assert_true '[[ $S_RC -ne 0 && $S_OUT == *"example-remote streamable-http transport must use HTTPS"* && $S_OUT != *"HTTP transports are HTTPS"* ]]' \
   "a streamable-http server on http:// fails, with no contradicting success line"
 
+test_start "mcp_policy_requires_https_for_plain_http"
+jq '.mcpServers["example-remote"]={"transport":"http","url":"http://mcp.example.com/v1"}' "$MCP_CONFIG_FILE" >"$MCPX/plain-http-transport.json"
+strict "$MCPX/plain-http-transport.json"
+assert_true '[[ $S_OUT == *"example-remote http transport must use HTTPS"* ]]' \
+  "with requireHttpsForHttpTransports, a plain http transport on http:// is flagged too"
+
 test_start "mcp_policy_requires_oauth_for_streamable_http"
 strict "$MCPX/https.json" "$MCPX/registry-no-oauth.json"
 assert_true '[[ $S_OUT == *"example-remote HTTP transport is not registered for OAuth2"* ]]' \
