@@ -4,7 +4,7 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
-## v0.2.525 — Unreleased
+## v0.2.525 — 2026-09-26
 
 ### Changed
 
@@ -36,6 +36,13 @@ This file documents all notable changes to this project.
   timeout as one.
 - A build-cache test no longer writes to the real `~/.cache` when run
   on a machine with the dotfiles installed.
+- The unit test suite installs a pinned, checksum-verified fish 4.9.3,
+  so the fish tests run in CI instead of skipping (Ubuntu ships 3.7).
+- Four more suites run the code instead of grepping it: the fish `dot`
+  completion (asks fish what it completes), the `dot aliases`
+  subcommands, `health.sh` (from a fixture, with a recording heal stub)
+  and the coverage runner (on a fixture project). The source-grep
+  baseline falls from 520 to 473 lines.
 
 ## v0.2.524 — 2026-09-26
 

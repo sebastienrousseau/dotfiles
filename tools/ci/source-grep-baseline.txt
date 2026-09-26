@@ -26,7 +26,6 @@
    1 tests/unit/ci/test_check_regression_traceability.sh
    1 tests/unit/ci/test_docs_link_tracking.sh
    2 tests/unit/ci/test_mutation_engine.sh
-  10 tests/unit/ci/test_run_coverage.sh
    6 tests/unit/ci/test_run_coverage_aggregator.sh
    1 tests/unit/ci/test_validate_chezmoidata.sh
    1 tests/unit/diagnostics/test_diagnostics_a2a_conformance.sh
@@ -41,7 +40,6 @@
    1 tests/unit/diagnostics/test_diagnostics_drift.sh
    1 tests/unit/diagnostics/test_diagnostics_drift_dashboard.sh
    9 tests/unit/diagnostics/test_diagnostics_flag_aliases.sh
-  10 tests/unit/diagnostics/test_diagnostics_health.sh
    1 tests/unit/diagnostics/test_diagnostics_history_analysis.sh
    9 tests/unit/diagnostics/test_diagnostics_mcp_doctor.sh
    2 tests/unit/diagnostics/test_diagnostics_mcp_server_card.sh
@@ -66,7 +64,6 @@
    4 tests/unit/dot-cli/test_dot_agent_governance.sh
    8 tests/unit/dot-cli/test_dot_agent_mode.sh
    3 tests/unit/dot-cli/test_dot_cli.sh
-  10 tests/unit/dot-cli/test_dot_commands_aliases.sh
    1 tests/unit/dot-cli/test_dot_commands_appearance.sh
    2 tests/unit/dot-cli/test_dot_commands_core.sh
    1 tests/unit/dot-cli/test_dot_commands_diagnostics.sh
@@ -85,7 +82,6 @@
    6 tests/unit/fish/test_fish_conf_aliases.sh
    1 tests/unit/fish/test_fish_conf_modern_core.sh
    1 tests/unit/fish/test_fish_conf_zzz_path_cleanup.sh
-  11 tests/unit/fish/test_fish_dot_completion.sh
    4 tests/unit/fish/test_fish_func_dot_enterprise.sh
    2 tests/unit/functions/test_environment.sh
    6 tests/unit/functions/test_func_hiddenfiles.sh
@@ -122,7 +118,6 @@
    2 tests/unit/misc/test_tuning_scripts.sh
    1 tests/unit/misc/test_version_sync.sh
    4 tests/unit/misc/test_wave1_heal_fixes.sh
-   6 tests/unit/misc/test_wave1_install_gpg.sh
    3 tests/unit/misc/test_wave2_dot_new_guard.sh
    1 tests/unit/nushell/test_nushell_aliases.sh
    4 tests/unit/nushell/test_nushell_core_parity.sh

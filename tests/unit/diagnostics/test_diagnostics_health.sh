@@ -15,88 +15,126 @@ HEALTH_FILE="$REPO_ROOT/scripts/diagnostics/health.sh"
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
-# Test: health.sh file exists
-test_start "health_file_exists"
-assert_file_exists "$HEALTH_FILE" "health.sh should exist"
+# health.sh runs from a fixture repo: a copy of the script, lib/dot and the
+# chezmoi data, with scripts/ops/heal.sh replaced by a stub that records
+# how --fix called it, so nothing on the host is changed. Each case reads
+# the JSON report (--json) and asserts one check's status and message.
+HL="$DOTFILES_COV_TMPDIR/health-fixture"
+mkdir -p "$HL/repo/scripts/diagnostics" "$HL/repo/scripts/ops" "$HL/repo/defaults" "$HL/bin"
+cp "$HEALTH_FILE" "$HL/repo/scripts/diagnostics/health.sh"
+cp -R "$REPO_ROOT/lib" "$HL/repo/"
+cp "$REPO_ROOT/defaults/.chezmoidata.toml" "$HL/repo/defaults/.chezmoidata.toml"
+printf '#!/bin/sh\necho "heal $*" >>"%s/heal.log"\n' "$HL" >"$HL/repo/scripts/ops/heal.sh"
+chmod +x "$HL/repo/scripts/ops/heal.sh"
 
-# Test: health.sh is valid shell syntax
-test_start "health_syntax_valid"
-if bash -n "$HEALTH_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: health.sh has valid syntax"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: health.sh has syntax errors"
-fi
+# stub <name> [body]: a fake tool in the fixture PATH.
+stub() {
+  printf '#!/bin/sh\n%s\n' "${2:-exit 0}" >"$HL/bin/$1"
+  chmod +x "$HL/bin/$1"
+}
 
-# Test: defines health check functions
-test_start "health_defines_check_functions"
-if grep -qE 'check_|run_check|health_check' "$HEALTH_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines check functions"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define check functions"
-fi
+# health <home> [VAR=value...] -- [flags...]: run the fixture health.sh with a
+# clean environment; stdout to $HL/out, exit status in H_RC.
+health() {
+  local home="$1"
+  shift
+  local -a envs=()
+  while [[ "${1:-}" != "--" ]]; do
+    envs+=("$1")
+    shift
+  done
+  shift
+  mkdir -p "$home"
+  H_RC=0
+  env -i HOME="$home" PATH="$HL/bin:/usr/bin:/bin" NO_COLOR=1 DOTFILES_NONINTERACTIVE=1 \
+    ${envs[@]+"${envs[@]}"} bash "$HL/repo/scripts/diagnostics/health.sh" "$@" >"$HL/out" 2>/dev/null || H_RC=$?
+}
 
-# Test: checks for required tools
-test_start "health_checks_tools"
-if grep -qE 'command -v|which|type' "$HEALTH_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: checks for tool availability"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should check for tool availability"
-fi
+# check_of <name>: "status|message" of that check in the last JSON report.
+check_of() {
+  python3 -c 'import json,sys
+d=json.load(open(sys.argv[1]))
+m=[r for r in d["results"] if r["check"]==sys.argv[2]]
+print(m[0]["status"]+"|"+m[0]["message"] if m else "missing")' "$HL/out" "$1" 2>/dev/null || echo "invalid-json"
+}
 
-# Test: provides pass/fail output
-test_start "health_provides_status"
-if grep -qE 'PASS|FAIL|OK|ERROR|✓|✗' "$HEALTH_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: provides pass/fail status"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should provide pass/fail status"
-fi
+test_start "health_json_flags"
+health "$HL/h-json" -- -j
+short="$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))["results"]) > 0)' "$HL/out" 2>/dev/null)"
+health "$HL/h-json" -- --json
+long="$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))["results"]) > 0)' "$HL/out" 2>/dev/null)"
+assert_equals "True|True" "$short|$long" "-j and --json both emit a JSON report with results"
 
-# Test: no hardcoded paths
-test_start "health_no_hardcoded_paths"
-if grep -qE '"/home/[a-z]+' "$HEALTH_FILE" 2>/dev/null; then
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should not have hardcoded paths"
-else
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no hardcoded paths"
-fi
+test_start "health_verbose_flags"
+health "$HL/h-v" -- -v
+v1="$H_RC:$(grep -c Summary "$HL/out")"
+health "$HL/h-v" -- --verbose
+assert_equals "0:1|0:1" "$v1|$H_RC:$(grep -c Summary "$HL/out")" "-v and --verbose run the full report"
 
-# Test: shellcheck compliance
-test_start "health_shellcheck"
-if command -v shellcheck &>/dev/null; then
-  errors=$(shellcheck -S error "$HEALTH_FILE" 2>&1 | wc -l)
-  if [[ "$errors" -eq 0 ]]; then
-    ((TESTS_PASSED++)) || true
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
-  else
-    ((TESTS_FAILED++)) || true
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
-  fi
-else
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
-fi
+stub zsh
+test_start "health_active_shell_supported"
+health "$HL/h-shell" SHELL=/opt/bin/fish -- -j
+assert_equals "pass|fish" "$(check_of 'Active shell')" "a supported active shell passes"
 
-test_start "health_flag_aliases"
-assert_file_contains "$HEALTH_FILE" "--verbose | -v" "health supports -v"
-assert_file_contains "$HEALTH_FILE" "--json | -j" "health supports -j"
-assert_file_contains "$HEALTH_FILE" "--fix | -f" "health supports -f"
-assert_file_contains "$HEALTH_FILE" "--force | -F" "health supports -F"
+test_start "health_active_shell_unsupported"
+health "$HL/h-shell" SHELL=/opt/bin/tcsh -- -j
+assert_equals "warn|Current: /opt/bin/tcsh" "$(check_of 'Active shell')" "an unsupported active shell warns"
 
-test_start "health_supported_shell_logic"
-assert_file_contains "$HEALTH_FILE" 'check "Active shell" "pass"' "health accepts supported active shells"
-assert_file_contains "$HEALTH_FILE" "Not required for \$default_shell" "health skips zinit warning when zsh is not the configured default"
-assert_file_contains "$HEALTH_FILE" 'check "Node version manager" "pass" "mise"' "health accepts mise for node management"
-assert_file_contains "$HEALTH_FILE" 'check "Nerd Font available" "pass"' "health accepts any Nerd Font"
-assert_file_contains "$HEALTH_FILE" 'check "Git signing" "pass" "ssh"' "health accepts SSH commit signing"
+test_start "health_zinit_not_required_for_fish"
+health "$HL/h-zinit" SHELL=/opt/bin/zsh -- -j
+assert_equals "pass|Not required for $(sed -n 's/^default_shell = "\(.*\)".*/\1/p' "$HL/repo/defaults/.chezmoidata.toml")" \
+  "$(check_of 'Zinit plugin manager')" "zinit is not required when the default shell is not zsh"
+
+test_start "health_zinit_warns_when_zsh_is_default"
+cp "$HL/repo/defaults/.chezmoidata.toml" "$HL/data.bak"
+sed -i.tmp 's/^default_shell = ".*"/default_shell = "zsh"/' "$HL/repo/defaults/.chezmoidata.toml"
+health "$HL/h-zinit" SHELL=/opt/bin/zsh -- -j
+cp "$HL/data.bak" "$HL/repo/defaults/.chezmoidata.toml"
+assert_equals "warn|Not found" "$(check_of 'Zinit plugin manager')" "zinit is missing when zsh is the default and active shell"
+
+stub node 'echo v24.0.0'
+stub mise
+test_start "health_node_manager_mise"
+health "$HL/h-node" -- -j
+assert_equals "pass|mise" "$(check_of 'Node version manager')" "mise counts as the node version manager"
+
+test_start "health_nerd_font_found"
+mkdir -p "$HL/h-font/.local/share/fonts"
+: >"$HL/h-font/.local/share/fonts/FiraCodeNerdFont-Regular.ttf"
+health "$HL/h-font" -- -j
+assert_equals "pass|" "$(check_of 'Nerd Font available')" "a Nerd Font in ~/.local/share/fonts passes"
+
+stub gpg
+test_start "health_git_signing_ssh"
+G="$HL/h-git"
+mkdir -p "$G/.ssh" "$G/.config/git"
+: >"$G/.ssh/signing.pub"
+: >"$G/.config/git/allowed_signers"
+printf '[gpg]\n\tformat = ssh\n[user]\n\tsigningkey = ~/.ssh/signing.pub\n' >"$G/.gitconfig"
+health "$G" -- -j
+assert_equals "pass|ssh" "$(check_of 'Git signing')" "a complete SSH signing setup passes"
+
+test_start "health_fix_runs_heal"
+: >"$HL/heal.log"
+health "$HL/h-fix" -- -f -j
+fix_short="$(cat "$HL/heal.log")"
+: >"$HL/heal.log"
+health "$HL/h-fix" -- --fix -j
+assert_equals "heal |heal " "$fix_short|$(cat "$HL/heal.log")" "-f and --fix run heal.sh without --force"
+
+test_start "health_fix_force_passes_force"
+: >"$HL/heal.log"
+health "$HL/h-fix" -- -f -F -j
+force_short="$(cat "$HL/heal.log")"
+: >"$HL/heal.log"
+health "$HL/h-fix" -- --fix --force -j
+assert_equals "heal --force|heal --force" "$force_short|$(cat "$HL/heal.log")" "-F/--force passes --force to heal.sh"
+
+test_start "health_force_alone_does_not_heal"
+: >"$HL/heal.log"
+health "$HL/h-fix" -- -F -j
+assert_equals "" "$(cat "$HL/heal.log")" "--force without --fix changes nothing"
+rm -f "$HL/bin/zsh" "$HL/bin/node" "$HL/bin/mise" "$HL/bin/gpg"
 
 # A diagnostic tool has to survive the tools it is diagnosing. Every probed
 # binary is replaced with one that exits 1, which is what a broken install, a
