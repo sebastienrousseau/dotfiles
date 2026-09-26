@@ -37,7 +37,8 @@ for arg in "$@"; do
     --local) USE_LOCAL=true ;;
     --url=*) MANUAL_URL="${arg#*=}" ;;
     --help | -h)
-      sed -n 's/^# //p;s/^#$//p' "$0" | head -20
+      # The usage block, not the SPDX/copyright header above it.
+      sed -n '/^# dot manual/,/^[^#]/{/^#/{s/^# \{0,1\}//;p;};}' "$0"
       exit 0
       ;;
   esac
