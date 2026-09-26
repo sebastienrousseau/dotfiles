@@ -60,16 +60,22 @@ check_suite_invariant() {
   suite_name="$(basename "$suite_path")"
   test_start "framework_invariant_${suite_name%.sh}"
 
-  local out results run passed failed
-  # Give suites plenty of time (some do heavy shell probing).
-  out="$(run_with_timeout 180 bash "$suite_path" 2>&1)" || true
+  local out results run passed failed rc=0
+  # The slowest suite (feature-matrix diagnostics state) takes about 142s on
+  # an idle machine; 180s left too little headroom and it timed out under
+  # load. INVARIANT_SUITE_TIMEOUT overrides the budget.
+  out="$(run_with_timeout "${INVARIANT_SUITE_TIMEOUT:-360}" bash "$suite_path" 2>&1)" || rc=$?
 
   # The RESULTS: line is emitted by every well-formed suite.
   results="$(printf '%s\n' "$out" | grep -oE 'RESULTS:[0-9]+:[0-9]+:[0-9]+' | tail -1)"
 
   if [[ -z "$results" ]]; then
     ((TESTS_FAILED++)) || true
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: no RESULTS: line emitted"
+    if [[ "$rc" -eq 124 ]]; then
+      printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: timed out after ${INVARIANT_SUITE_TIMEOUT:-360}s before emitting RESULTS:"
+    else
+      printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: no RESULTS: line emitted"
+    fi
     printf '        last 3 output lines:\n'
     printf '%s\n' "$out" | tail -3 | sed 's/^/          /'
     return
