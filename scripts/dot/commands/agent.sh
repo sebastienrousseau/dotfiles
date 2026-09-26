@@ -438,6 +438,9 @@ EOF
       delegate_profile="$(jq -r --arg d "$delegate_name" '.delegation.allowedDelegates[$d].profile' "$profiles_file")"
       delegate_timeout="$(jq -r --arg d "$delegate_name" '.delegation.allowedDelegates[$d].timeout // 300' "$profiles_file")"
       delegate_max_steps="$(jq -r --arg d "$delegate_name" '.delegation.allowedDelegates[$d].maxSteps // 4' "$profiles_file")"
+      # A delegate runs under its own profile, so the caller's role must be
+      # allowed that profile too; otherwise delegation sidesteps RBAC.
+      _agent_enforce_rbac "$delegate_profile"
       # Apply delegate profile env
       _agent_apply_profile_env "$delegate_profile"
       export DOT_AGENT_MAX_STEPS="$delegate_max_steps"
