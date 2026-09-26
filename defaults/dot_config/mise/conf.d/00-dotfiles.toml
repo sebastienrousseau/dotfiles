@@ -125,7 +125,10 @@ starship = "latest"
 # Python tools
 "pipx:poetry" = "latest"
 uv = "latest"
-"pipx:aider-chat" = "latest"
+# aider supports Python 3.9-3.12. On 3.13+ it crashes at import: pydub
+# (aider's voice support) needs the stdlib audioop module, removed in 3.13.
+# uv builds aider's environment on 3.12 regardless of the default Python.
+"pipx:aider-chat" = { version = "latest", uvx_args = "--python 3.12" }
 "pipx:shell-gpt" = "latest"
 
 # AI tools

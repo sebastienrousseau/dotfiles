@@ -60,7 +60,7 @@ done <<'MAP'
 codex=npm:@openai/codex
 copilot=npm:@github/copilot
 crush=npm:@charmland/crush
-aider=pipx:aider-chat
+aider=pipx:aider-chat[uvx_args=--python 3.12]
 opencode=opencode
 sgpt=pipx:shell-gpt
 ollama=aqua:ollama/ollama

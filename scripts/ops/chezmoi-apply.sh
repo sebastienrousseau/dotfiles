@@ -195,7 +195,7 @@ _AI_PROVIDERS=(
   "sgpt|pipx:shell-gpt|Shell-GPT"
   "ollama|aqua:ollama/ollama|Ollama"
   "opencode|npm:opencode-ai|OpenCode"
-  "aider|pipx:aider-chat|Aider"
+  "aider|pipx:aider-chat[uvx_args=--python 3.12]|Aider"
   "kiro-cli|kiro-cli|Kiro CLI"
   "autohand|npm:autohand-cli|Autohand Code"
   "vibe|pipx:mistral-vibe|Mistral Vibe"
