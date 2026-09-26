@@ -106,6 +106,7 @@ assert_contains "90 entries" "$DOC_OUT" "doctor counted exactly 90 entries"
 assert_contains "[OK] PATH length" "$DOC_OUT" "90 entries is [OK]"
 assert_false '[[ "$DOC_OUT" == *"[WARN] PATH length"* ]]' "90 entries does not warn"
 assert_false '[[ "$DOC_OUT" == *"consider pruning"* ]]' "90 entries carries no pruning advice"
+assert_false '[[ "$DOC_OUT" == *"mise tool dirs"* ]]' "with no mise tool dirs the message has no mise breakdown"
 
 # ── 91 entries: first value past the ceiling warns ─────────────────────
 test_start "path_count_91_warns"
