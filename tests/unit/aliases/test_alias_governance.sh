@@ -43,16 +43,19 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
+# `cd` is only replaced on opt-in; otherwise the helper is `cdh`.
+# cd_probe [env...]: the alias names cd-init.aliases.sh defines.
+cd_probe() {
+  # shellcheck disable=SC2016
+  env -i HOME="$HOME" PATH="/usr/bin:/bin" "$@" bash --norc --noprofile -c '
+    shopt -s expand_aliases; source "$0" >/dev/null 2>&1
+    for a in cd cdh; do alias "$a" >/dev/null 2>&1 && printf "%s " "$a"; done; true' "$CD_INIT_FILE"
+}
 test_start "cd_override_is_opt_in"
-assert_file_contains "$CD_INIT_FILE" "DOTFILES_ENABLE_CD_ALIAS" "cd override should be opt-in"
+assert_equals "cdh |cd " "$(cd_probe)|$(cd_probe DOTFILES_ENABLE_CD_ALIAS=1)" "cd is aliased only with DOTFILES_ENABLE_CD_ALIAS=1"
 
-test_start "governance_supports_policy_tiers"
-assert_file_contains "$GOVERNANCE_SCRIPT" "DOTFILES_ALIAS_POLICY" "governance should support policy tiers"
-assert_file_contains "$GOVERNANCE_SCRIPT" "Policy:" "governance should print active policy"
-
-test_start "governance_enforces_deprecations"
-assert_file_contains "$GOVERNANCE_SCRIPT" "alias-deprecations.tsv" "governance should check deprecated aliases"
-assert_file_contains "$GOVERNANCE_SCRIPT" "expired deprecated aliases" "governance should fail when deprecated aliases are overdue"
+# Policy tiers and deprecation enforcement are exercised end to end in
+# test_alias_manifest_governance_fixtures.sh.
 
 # Slice 3 (#883): exercise the script under sandbox for line coverage
 cov_exercise_script "$GOVERNANCE_SCRIPT"
