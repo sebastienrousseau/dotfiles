@@ -4,6 +4,14 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+## v0.2.525 — Unreleased
+
+### Changed
+
+- chezmoi moves from 2.47.1 (March 2024) to 2.72.2: `install.sh`, the
+  devcontainer and every CI workflow install it, and MINIMUM-TOOLCHAIN
+  records it as the floor, since CI no longer exercises anything older.
+
 ## v0.2.524 — 2026-09-26
 
 ### Security

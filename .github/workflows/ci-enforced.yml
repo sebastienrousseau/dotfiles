@@ -23,7 +23,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CHEZMOI_VERSION: "2.47.1"
+  CHEZMOI_VERSION: "2.72.2"
   # Enforce warnings as errors globally
   WARNINGS_AS_ERRORS: "1"
 

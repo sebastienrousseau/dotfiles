@@ -60,13 +60,13 @@ for a packaging recipe:
 | `bash` | 3.2 | **required at runtime** |
 | `git` | 2.34 | required at runtime |
 | `curl` | any | required by the bootstrap path only |
-| `chezmoi` | 2.47.1 | **required at runtime** — the CLI is a control plane over chezmoi |
+| `chezmoi` | 2.72.2 | **required at runtime** — the CLI is a control plane over chezmoi |
 | `zsh` / `fish` / `nushell` | 5.8 / 4.0 / 0.98 | optional; only if the user wants that shell's integration |
 | `jq`, `gum`, `starship`, `fzf` | any | optional; enable JSON output, rich prompts, and interactive pickers |
 | `go` | 1.23 | **build/test only** — fuzz harnesses and the two Go TUIs. Not needed to build or run the package. |
 
 Suggested dependency split for a distro package: `Depends: bash (>= 3.2),
-git (>= 2.34), chezmoi (>= 2.47.1)`; `Recommends: jq, zsh`;
+git (>= 2.34), chezmoi (>= 2.72.2)`; `Recommends: jq, zsh`;
 `Suggests: fish, nushell, gum, starship, fzf`.
 
 ## Dependency pin model
@@ -95,8 +95,8 @@ Full provenance policy: [`supply-chain/README.md`](https://github.com/sebastienr
 From a release tarball (recommended — it is the attested artefact):
 
 ```sh
-tar -xzf dot-0.2.524.tar.gz
-cd dot-0.2.524
+tar -xzf dot-0.2.525.tar.gz
+cd dot-0.2.525
 make install PREFIX=/usr DESTDIR="$pkgdir"
 ```
 
@@ -166,7 +166,7 @@ and [`security/VERIFY_RELEASE.md`](security/VERIFY_RELEASE.md).
 Minimum a packager should do:
 
 ```sh
-TAG=v0.2.524
+TAG=v0.2.525
 REPO=sebastienrousseau/dotfiles
 
 # SLSA build provenance on the tarball itself
@@ -188,7 +188,7 @@ Tags are signed with an SSH ed25519 key published in
 which is itself a `git allowed_signers` file:
 
 ```sh
-git -c gpg.ssh.allowedSignersFile=KEYS.asc tag -v v0.2.524
+git -c gpg.ssh.allowedSignersFile=KEYS.asc tag -v v0.2.525
 ```
 
 An SBOM ships with every release in both CycloneDX and SPDX JSON.

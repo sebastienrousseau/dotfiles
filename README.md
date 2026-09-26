@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/sebastienrousseau/dotfiles/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=githubactions&logoColor=white" alt="Build" /></a>
-  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.524-blue?style=for-the-badge&logo=semanticrelease&logoColor=white" alt="Version" /></a>
+  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.525-blue?style=for-the-badge&logo=semanticrelease&logoColor=white" alt="Version" /></a>
   <a href="https://www.npmjs.com/package/@sebastienrousseau/dotfiles"><img src="https://img.shields.io/npm/v/@sebastienrousseau/dotfiles?style=for-the-badge&logo=npm&logoColor=white&label=npm" alt="npm" /></a>
   <a href="https://doc.dotfiles.io/"><img src="https://img.shields.io/badge/Manual-doc.dotfiles.io-66c2a5?style=for-the-badge&labelColor=555555" alt="Manual" /></a>
   <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge&logo=github&logoColor=white" alt="Downloads" /></a>
@@ -83,11 +83,11 @@ release process are documented in
 
 ```bash
 curl -fsSL -o /tmp/dotfiles-install.sh \
-  https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.524/dotfiles-install-0.2.524.sh
+  https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.525/dotfiles-install-0.2.525.sh
 if command -v sha256sum >/dev/null 2>&1; then
-  echo "fdf39188d796da8f62ab9bf52cf8a529ec128e26739de9e179f2bdff44ca487a  /tmp/dotfiles-install.sh" | sha256sum -c -
+  echo "74a0e45b515699fb700fb70e3f86a030ea1d791160c9163ee77d80029e3ee869  /tmp/dotfiles-install.sh" | sha256sum -c -
 else
-  echo "fdf39188d796da8f62ab9bf52cf8a529ec128e26739de9e179f2bdff44ca487a  /tmp/dotfiles-install.sh" | shasum -a 256 -c -
+  echo "74a0e45b515699fb700fb70e3f86a030ea1d791160c9163ee77d80029e3ee869  /tmp/dotfiles-install.sh" | shasum -a 256 -c -
 fi
 bash /tmp/dotfiles-install.sh
 ```
@@ -106,10 +106,10 @@ directory. The archive
 carries SLSA build provenance (keyless, via Fulcio + Rekor):
 
 ```bash
-gh release download v0.2.524 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
-gh attestation verify dot-0.2.524.tar.gz --repo sebastienrousseau/dotfiles
-tar -xzf dot-0.2.524.tar.gz
-make -C dot-0.2.524 install PREFIX=/usr/local
+gh release download v0.2.525 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
+gh attestation verify dot-0.2.525.tar.gz --repo sebastienrousseau/dotfiles
+tar -xzf dot-0.2.525.tar.gz
+make -C dot-0.2.525 install PREFIX=/usr/local
 ```
 
 [`release-install-smoke.yml`](.github/workflows/release-install-smoke.yml)
@@ -222,7 +222,7 @@ profile per machine and flip session flags when you need less.
   but 3.2 is not a supported interactive shell.
 
 - **chezmoi 2.40 or newer, git 2.35 or newer, curl.** CI pins
-  chezmoi `2.47.1` and installs it through a checksum-verified
+  chezmoi `2.72.2` and installs it through a checksum-verified
   fetch; `install.sh` does the same on your machine.
 
 - **A supported platform.** macOS 14+ (Apple Silicon and Intel),
@@ -305,7 +305,7 @@ every push.
 bash /tmp/dotfiles-install.sh  # after the verified download above
 
 # Only the dot CLI, from the attested release archive
-gh release download v0.2.524 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
+gh release download v0.2.525 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
 
 # The Go satellites are (re)built on apply by
 #   defaults/run_onchange_24-build-dot-ui.sh.tmpl
@@ -867,7 +867,7 @@ design is
 
 ```toml
 # defaults/.chezmoidata.toml — repo-wide defaults, schema-checked in CI
-dotfiles_version = "0.2.524"
+dotfiles_version = "0.2.525"
 
 [features]
 alias_wrapper = false   # confirm destructive aliases
