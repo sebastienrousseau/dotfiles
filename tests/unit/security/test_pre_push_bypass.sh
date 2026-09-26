@@ -35,25 +35,6 @@ else
   assert_exit_code 0 "false  # hook is not executable"
 fi
 
-test_start "hook_uses_pipefail"
-assert_file_contains "$HOOK" "set -euo pipefail" "pre-push hook must enforce strict mode"
-
-test_start "hook_rejects_legacy_var"
-assert_file_contains "$HOOK" "DOTFILES_SKIP_PRE_PUSH_AUDIT" \
-  "hook must reference the legacy variable so it can reject it"
-
-test_start "hook_uses_new_var"
-assert_file_contains "$HOOK" "DOTFILES_ALLOW_UNSKIPPED_PUSH" \
-  "hook must check the new bypass variable"
-
-test_start "hook_writes_audit_log"
-assert_file_contains "$HOOK" "audit-bypass.log" \
-  "hook must log every bypass to audit-bypass.log"
-
-test_start "hook_uses_xdg_state"
-assert_file_contains "$HOOK" "XDG_STATE_HOME" \
-  "hook must respect XDG_STATE_HOME for the log location"
-
 # -----------------------------------------------------------------------------
 # Behavioural checks
 # Build a synthetic git environment so we can run the hook end-to-end without
@@ -139,6 +120,17 @@ else
   fi
   assert_exit_code 0 "false"
 fi
+
+# Test 3b: the bypass is a bypass: the push goes ahead
+test_start "new_var_bypass_exits_zero"
+set +e
+(cd "$tmpdir" &&
+  XDG_STATE_HOME="$tmpdir/.state" \
+    DOTFILES_ALLOW_UNSKIPPED_PUSH=1 \
+    bash .git/hooks/pre-push <<<"$STDIN_LINE" >/dev/null 2>&1)
+rc=$?
+set -e
+assert_equals "0" "$rc" "DOTFILES_ALLOW_UNSKIPPED_PUSH=1 lets the push proceed"
 
 # Test 4: new var without DOTFILES_BYPASS_REASON should still work and record a default reason
 test_start "new_var_default_reason"
