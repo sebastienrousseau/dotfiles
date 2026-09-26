@@ -51,6 +51,25 @@ jobs:
       - name: Setup chezmoi
         uses: ./.github/actions/setup-chezmoi
 
+      # The fish tests (functions, completions, startup) skip without fish,
+      # and Ubuntu packages fish 3.7, below the 4.0 floor. Install the
+      # upstream self-contained Linux build, pinned and checksum-verified
+      # (the hash matches GitHub's recorded digest for the asset).
+      - name: Install fish (pinned release, SHA-256 verified)
+        env:
+          FISH_VERSION: 4.9.3
+          FISH_SHA256: 8f643d10ad1abb0ef7072764c01ceb5cf61b2d373fda400cf60f0bad69b7e095
+        run: |
+          set -euo pipefail
+          asset="fish-${FISH_VERSION}-linux-x86_64.tar.xz"
+          curl --proto '=https' --tlsv1.2 -fsSL -o "$RUNNER_TEMP/$asset" \
+            "https://github.com/fish-shell/fish-shell/releases/download/${FISH_VERSION}/${asset}"
+          echo "${FISH_SHA256}  $RUNNER_TEMP/$asset" | sha256sum --check --strict
+          mkdir -p "$RUNNER_TEMP/fish-bin"
+          tar -xJf "$RUNNER_TEMP/$asset" -C "$RUNNER_TEMP/fish-bin" fish
+          echo "$RUNNER_TEMP/fish-bin" >>"$GITHUB_PATH"
+          "$RUNNER_TEMP/fish-bin/fish" --version
+
       - name: Unit tests (zero-failure policy)
         run: |
           set -euo pipefail
