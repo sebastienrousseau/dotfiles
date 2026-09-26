@@ -29,13 +29,21 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: contains bash syntax"
 fi
 
+# Duplicates collapse to their first position and missing directories go;
+# the result must still be exported to child processes.
 test_start "fish_conf_zzz_path_cleanup_dedup_logic"
-if grep -q 'not contains' "$CONF_FILE" && grep -q 'test -d' "$CONF_FILE"; then
-  ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has dedup and prune logic"
+if FISH_BIN="$(command -v fish)"; then
+  PC_TMP="$(mktemp -d)"
+  mkdir -p "$PC_TMP/a" "$PC_TMP/b"
+  # shellcheck disable=SC2016
+  got="$("$FISH_BIN" --no-config -c '
+    set -gx PATH $argv[1]/a $argv[1]/gone $argv[1]/b $argv[1]/a /usr/bin $argv[1]/b /bin
+    source $argv[2]
+    /usr/bin/env | string match -r "^PATH=.*" | string replace "PATH=" ""' "$PC_TMP" "$CONF_FILE" 2>&1)"
+  assert_equals "$PC_TMP/a:$PC_TMP/b:/usr/bin:/bin" "$got" "exported PATH is deduplicated, pruned and ordered"
+  rm -rf "$PC_TMP"
 else
-  ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should contain dedup and prune logic"
+  assert_true "true" "fish not installed; skipped"
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

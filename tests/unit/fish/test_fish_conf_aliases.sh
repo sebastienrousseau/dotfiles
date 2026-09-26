@@ -33,10 +33,35 @@ fi
 test_start "fish_cat_function_exists"
 assert_file_exists "$CAT_FUNCTION_FILE" "cat.fish should exist"
 
-test_start "fish_cat_function_uses_bat_fallback"
-assert_file_contains "$CAT_FUNCTION_FILE" "function cat" "cat.fish defines cat function"
-assert_file_contains "$CAT_FUNCTION_FILE" "command -v bat" "cat.fish checks for bat"
-assert_file_contains "$CAT_FUNCTION_FILE" "command cat" "cat.fish falls back to system cat"
+# cat.fish picks bat, then batcat, then the system cat. Each case runs the
+# function in fish with a PATH holding only the stubs for that case.
+CAT_TMP="$(mktemp -d)"
+trap 'rm -rf "$CAT_TMP"' EXIT
+printf 'hello\n' >"$CAT_TMP/file"
+FISH_BIN="$(command -v fish || true)"
+fish_cat() {
+  local bin="$CAT_TMP/bin-$1" tool
+  mkdir -p "$bin"
+  # Only the real cat plus this case's stubs: /usr/bin may hold batcat.
+  ln -sf "$(command -v cat)" "$bin/cat"
+  shift
+  for tool in "$@"; do
+    printf '#!/bin/sh\necho "%s $*"\n' "$tool" >"$bin/$tool"
+    chmod +x "$bin/$tool"
+  done
+  # shellcheck disable=SC2016
+  PATH="$bin" "$FISH_BIN" --no-config -c 'source $argv[1]; cat $argv[2]' "$CAT_FUNCTION_FILE" "$CAT_TMP/file" 2>&1
+}
+for case in "prefers_bat:bat batcat:bat $CAT_TMP/file" "falls_back_to_batcat:batcat:batcat $CAT_TMP/file" "falls_back_to_system_cat::hello"; do
+  IFS=: read -r name tools want <<<"$case"
+  test_start "fish_cat_${name}"
+  if [[ -n "$FISH_BIN" ]]; then
+    # shellcheck disable=SC2086 # tools is a word list on purpose
+    assert_equals "$want" "$(fish_cat "$name" $tools)" "cat with: ${tools:-no bat}"
+  else
+    assert_true "true" "fish not installed; skipped"
+  fi
+done
 
 test_start "fish_alias_bridge_skips_bash_only_dot_helpers"
 assert_file_contains "$CONF_FILE" "string match -rq '^dot_[a-z0-9_]+\$'" "fish alias bridge skips dot_ helper targets"
