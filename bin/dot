@@ -242,6 +242,8 @@ AI|ai-query|Context-aware RAG query over your dotfiles|Ask questions over the re
 AI|mcp|Inspect MCP policy, supply chain, and registry; serve MCP over stdio|Governance surface plus the `dot mcp serve` MCP server.
 AI|mode|Set or inspect agent operating profiles (ask/plan/apply/audit)|Bounded-autonomy controls.
 AI|agent|Profile-aware execution, agent card, a2a-card, session log, checkpoints, and conformance|Agent metadata and local audit trail.
+AI|agents|Render and check AGENTS.md and per-harness agent config from CLAUDE.md|Keeps every coding agent on the same context.
+AI|patterns|List, view, and edit AI steering patterns|Reusable prompts for the AI tools.
 AI|cl|Claude CLI with context patterns|Context-aware Anthropic bridge.
 AI|copilot|GitHub Copilot CLI with context patterns|Context-aware Copilot bridge.
 AI|kimi|Kimi CLI with context patterns|Context-aware Moonshot AI bridge.
@@ -260,6 +262,8 @@ Tools|sandbox|Launch a safe sandbox preview (Docker/Podman)|Disposable environme
 Tools|lint|Lint shell scripts (--fix|-f to auto-format, --check|-c for CI)|Shell quality gate.
 Tools|learn|Start the interactive tour of your new tools|Guided onboarding.
 Tools|docs|Show repo README|Open the main documentation.
+Tools|aliases|List, search, and explain the shipped shell aliases|Alias inventory, usage, and deprecations.
+Tools|registry|Browse and install modules from the dot module registry|Module catalogue.
 Appearance|theme|Switch terminal theme (dark/light)|Terminal appearance control.
 Appearance|wallpaper|Apply a wallpaper from your library [macOS,Linux]|Desktop customization helper.
 Appearance|fonts|Install (default) or patch Nerd Fonts (JetBrainsMono by default)|Font bootstrap and patcher helper.

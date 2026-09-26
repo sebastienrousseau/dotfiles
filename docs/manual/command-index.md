@@ -21,6 +21,7 @@ adding or renaming a subcommand, run
 | `dot agent` | conformance Run the A2A conformance test suite |
 | `dot agent` | delegate Delegate execution to an allowed sub-agent |
 | `dot agent` | log Tail the agent session audit log |
+| `dot agents` | Render and check AGENTS.md and per-harness agent config from CLAUDE.md |
 | `dot agents` | check Verify AGENTS.md tracks CLAUDE.md (exit 1 if drifted) |
 | `dot agents` | list Show recognised AI agent harnesses and their config paths |
 | `dot agents` | render Regenerate AGENTS.md and per-harness config from CLAUDE.md |
@@ -39,6 +40,7 @@ adding or renaming a subcommand, run
 | `dot ai-query` | Context-aware RAG query over your dotfiles |
 | `dot ai-setup` | Interactive setup for all AI CLI tools |
 | `dot aider` | Aider with context patterns |
+| `dot aliases` | List, search, and explain the shipped shell aliases |
 | `dot aliases` | cheatsheet Generate the alias cheatsheet markdown |
 | `dot aliases` | list List all shell aliases shipped by the dotfiles |
 | `dot aliases` | search Search aliases by term |
@@ -112,6 +114,7 @@ adding or renaming a subcommand, run
 | `dot ollama` | Ollama with context patterns |
 | `dot opencode` | OpenCode with context patterns |
 | `dot packages` | List installed packages and package managers |
+| `dot patterns` | List, view, and edit AI steering patterns |
 | `dot patterns` | edit Edit an AI steering pattern in $EDITOR |
 | `dot patterns` | list List AI steering patterns |
 | `dot patterns` | view View an AI steering pattern |
@@ -122,6 +125,7 @@ adding or renaming a subcommand, run
 | `dot profile` | set Set the active configuration profile (run dot sync to apply) |
 | `dot profile` | show Show the active configuration profile and feature flags |
 | `dot qwen` | Run the Qwen Coder CLI with dotfiles context patterns. |
+| `dot registry` | Browse and install modules from the dot module registry |
 | `dot registry` | info Print full metadata for a registry module |
 | `dot registry` | install Install a registry module (scaffold) |
 | `dot registry` | list List modules in the configured module registry |
