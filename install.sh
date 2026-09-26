@@ -298,12 +298,14 @@ main() {
         echo "Checksum entry not found for $asset" >&2
         exit 1
       }
-      cd "$temp_dir" || exit 1
+      # cd and mkdir need no guard: if either fails, the checksum check or
+      # the install below fails and ends the subshell.
+      cd "$temp_dir"
       sha_check=(shasum -a 256 -c -)
       command -v sha256sum >/dev/null 2>&1 && sha_check=(sha256sum -c -)
       printf '%s\n' "$checksum_line" | "${sha_check[@]}" || exit 1
       tar -xzf "$asset" chezmoi || exit 1
-      mkdir -p "$destination" || exit 1
+      mkdir -p "$destination"
       install -m 755 chezmoi "$destination/chezmoi" || exit 1
     ); then
       rm -rf "$temp_dir"

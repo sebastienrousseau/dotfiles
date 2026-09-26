@@ -170,6 +170,32 @@ test_start "install_embedded_checksum_mismatch"
 assert_equals "1|absent" "$rc|$([[ -e "$SANDBOX/h8/.local/bin/chezmoi" ]] && echo present || echo absent)" \
   "a release whose checksum does not match is rejected and not installed"
 
+# The checksum list downloads but the release archive does not: refused.
+printf '%s  %s\n' "$sum" "$asset" >"$REL/chezmoi_2.47.1_checksums.txt"
+mv "$REL/$asset" "$REL/$asset.held"
+: >"$SANDBOX/calls.log"
+rc="$(run_install "$SANDBOX/h9" "$SANDBOX/has-curl:$SYS")"
+mv "$REL/$asset.held" "$REL/$asset"
+test_start "install_embedded_asset_download_failure"
+assert_equals "1|absent" "$rc|$([[ -e "$SANDBOX/h9/.local/bin/chezmoi" ]] && echo present || echo absent)" \
+  "a failed archive download is refused, not reported as installed"
+
+# An archive that matches its checksum but is not a tarball: refused.
+cp "$REL/$asset" "$REL/$asset.good"
+printf 'not a tarball\n' >"$REL/$asset"
+if command -v sha256sum >/dev/null 2>&1; then
+  bad="$(sha256sum "$REL/$asset" | awk '{print $1}')"
+else
+  bad="$(shasum -a 256 "$REL/$asset" | awk '{print $1}')"
+fi
+printf '%s  %s\n' "$bad" "$asset" >"$REL/chezmoi_2.47.1_checksums.txt"
+: >"$SANDBOX/calls.log"
+rc="$(run_install "$SANDBOX/h10" "$SANDBOX/has-curl:$SYS")"
+mv "$REL/$asset.good" "$REL/$asset"
+test_start "install_embedded_extract_failure"
+assert_equals "1|absent" "$rc|$([[ -e "$SANDBOX/h10/.local/bin/chezmoi" ]] && echo present || echo absent)" \
+  "an archive that cannot be extracted is refused, not reported as installed"
+
 # --- Paths and version pin (top level of install.sh) ---
 
 test_start "install_source_dir_defined"
