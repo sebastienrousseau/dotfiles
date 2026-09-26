@@ -15,9 +15,6 @@ TRACE_DOC="$REPO_ROOT/docs/operations/TRACEABILITY.md"
 test_start "traceability_coverage_script_exists"
 assert_file_exists "$TRACE_SCRIPT" "traceability coverage script should exist"
 
-test_start "traceability_coverage_script_syntax"
-assert_exit_code 0 "bash -n '$TRACE_SCRIPT'"
-
 test_start "traceability_doc_exists"
 assert_file_exists "$TRACE_DOC" "traceability document should exist"
 

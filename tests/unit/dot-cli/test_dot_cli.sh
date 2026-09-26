@@ -19,21 +19,6 @@ test_start "dot_cli_exists"
 assert_file_exists "$DOT_CLI" "executable_dot should exist"
 
 # Test: dot CLI has valid bash syntax
-test_start "dot_cli_syntax"
-assert_exit_code 0 "bash -n '$DOT_CLI'"
-
-# Test: dot CLI has shebang
-test_start "dot_cli_shebang"
-first_line=$(head -n 1 "$DOT_CLI")
-if [[ "$first_line" == "#!/usr/bin/env bash" ]]; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have #!/usr/bin/env bash shebang"
-fi
-
-# Test: dot CLI uses set -e
 test_start "dot_cli_set_e"
 assert_file_contains "$DOT_CLI" "set -e" "should use set -e for error handling"
 

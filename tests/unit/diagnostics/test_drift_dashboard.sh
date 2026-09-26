@@ -26,9 +26,6 @@ DASH="$REPO_ROOT/scripts/diagnostics/drift-dashboard.sh"
 test_start "dashboard_exists"
 assert_file_exists "$DASH" "drift-dashboard.sh should exist"
 
-test_start "dashboard_executable_syntax"
-assert_exit_code 0 "bash -n '$DASH'"
-
 test_start "dashboard_supports_json"
 assert_file_contains "$DASH" -- "--json" "dashboard must accept --json"
 

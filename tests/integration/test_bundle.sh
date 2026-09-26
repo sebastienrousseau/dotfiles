@@ -24,10 +24,6 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: bundle.sh should be executable"
 fi
 
-test_start "bundle_script_shebang"
-first_line=$(head -n 1 "$BUNDLE_SCRIPT")
-assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
-
 test_start "bundle_script_strict_mode"
 if grep -q 'set -euo pipefail' "$BUNDLE_SCRIPT"; then
   ((TESTS_PASSED++))

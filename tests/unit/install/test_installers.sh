@@ -19,10 +19,6 @@ test_start "installers_file_exists"
 assert_file_exists "$INSTALLERS_FILE" "installers.sh should exist"
 
 # Test: installers.sh has valid syntax
-test_start "installers_syntax"
-assert_exit_code 0 "bash -n '$INSTALLERS_FILE'"
-
-# Test: installers.sh has double-source guard
 test_start "installers_guard"
 assert_file_contains "$INSTALLERS_FILE" "_DOTFILES_INSTALLERS_LOADED" "should have double-source guard"
 

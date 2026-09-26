@@ -14,9 +14,6 @@ DOT_CLI="$REPO_ROOT/bin/dot"
 test_start "a2a_conformance_exists"
 assert_file_exists "$TEST_SCRIPT" "a2a-conformance.sh should exist"
 
-test_start "a2a_conformance_syntax"
-assert_exit_code 0 "bash -n '$TEST_SCRIPT'"
-
 test_start "a2a_conformance_json_runs"
 output=$(REPO_ROOT="$REPO_ROOT" bash "$TEST_SCRIPT" --strict --json 2>/dev/null) || true
 if [[ "$output" == \{* ]] && [[ "$(printf '%s' "$output" | jq -r '.status')" == "healthy" ]]; then

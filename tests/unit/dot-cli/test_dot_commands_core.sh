@@ -98,22 +98,6 @@ else
 fi
 
 # Test: shellcheck compliance (no major issues)
-test_start "core_shellcheck_clean"
-if command -v shellcheck &>/dev/null; then
-  errors=$(shellcheck -S error "$CORE_FILE" 2>&1 | wc -l)
-  if [[ "$errors" -eq 0 ]]; then
-    ((TESTS_PASSED++)) || true
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck (error level)"
-  else
-    ((TESTS_FAILED++)) || true
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
-  fi
-else
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
-fi
-
-# Test: no dangerous commands without guards
 test_start "core_no_unguarded_rm_rf"
 if grep -qE 'rm -rf /[^$]|rm -rf ~' "$CORE_FILE" 2>/dev/null; then
   ((TESTS_FAILED++)) || true

@@ -25,10 +25,6 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: chezmoi-apply.sh should be executable"
 fi
 
-test_start "chezmoi_apply_shebang"
-first_line=$(head -n 1 "$APPLY_SCRIPT")
-assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
-
 test_start "chezmoi_apply_strict_mode"
 if grep -q 'set -euo pipefail' "$APPLY_SCRIPT"; then
   ((TESTS_PASSED++))

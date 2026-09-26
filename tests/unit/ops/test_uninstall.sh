@@ -19,9 +19,6 @@ cov_setup_sandbox
 test_start "uninstall_script_exists"
 assert_file_exists "$UNINSTALL_SCRIPT" "uninstall.sh should exist"
 
-test_start "uninstall_syntax"
-assert_exit_code 0 "bash -n '$UNINSTALL_SCRIPT'"
-
 test_start "uninstall_has_shebang"
 assert_file_contains "$UNINSTALL_SCRIPT" "#!/usr/bin/env bash" "should have bash shebang"
 

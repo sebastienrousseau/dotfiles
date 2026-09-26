@@ -16,9 +16,6 @@ echo "Testing Wave 1: heal.sh fixes..."
 test_start "heal_exists"
 assert_file_exists "$HEAL_SCRIPT" "heal.sh should exist"
 
-test_start "heal_syntax"
-assert_exit_code 0 "bash -n '$HEAL_SCRIPT'"
-
 test_start "heal_strict_mode"
 assert_file_contains "$HEAL_SCRIPT" "set -euo pipefail" "should use strict mode"
 

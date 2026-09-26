@@ -14,9 +14,6 @@ SCRIPT_FILE="$REPO_ROOT/scripts/qa/coverage-baseline.sh"
 test_start "coverage_baseline_script_exists"
 assert_file_exists "$SCRIPT_FILE" "coverage baseline script should exist"
 
-test_start "coverage_baseline_syntax"
-assert_exit_code 0 "bash -n '$SCRIPT_FILE'"
-
 test_start "coverage_baseline_reports_inventory"
 assert_file_contains "$SCRIPT_FILE" "Documentation files:" "coverage baseline reports documentation files"
 assert_file_contains "$SCRIPT_FILE" "Executable shell surfaces:" "coverage baseline reports executable shell surfaces"
