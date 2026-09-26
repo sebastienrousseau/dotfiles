@@ -47,9 +47,9 @@ function Assert-Step {
 }
 
 # ─── PowerShell version contract ─────────────────────────────────────────────
-# 7.4 is current LTS (EOL 2026-11-10); 7.5 is current stable. README claims
-# "PowerShell 7.5+" forward-looking; the 7.4 LTS window keeps this gate
-# at 7.4+ until the bundled runner version rolls forward.
+# The documented floor is 7.4 LTS until it retires on 2026-11-10, then 7.5.
+# windows-latest ships PowerShell 7.6 (7.6.6 on 2026-09-25), so this gate
+# runs on 7.6; 7.4 itself is not exercised in CI.
 Assert-Step 'PowerShell >= 7.4 (LTS or current)' {
   if ($PSVersionTable.PSVersion.Major -lt 7 -or
       ($PSVersionTable.PSVersion.Major -eq 7 -and $PSVersionTable.PSVersion.Minor -lt 4)) {
