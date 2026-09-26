@@ -108,6 +108,34 @@ assert_equals "not-at-startup|lazy-alias-ran" \
     print -n "|"; lazyprobe')" \
   "a lazy alias is not loaded at startup but runs on first use"
 
+# zsh runs command_not_found_handler in the child it forked for the
+# command, so layers loaded there died with it: every lazy call re-sourced
+# them and nothing stayed defined. Lines fed on stdin to an interactive
+# shell fire preexec as typed commands do; after the first use the alias
+# must exist in the shell itself, and the layers are loaded once.
+zshrc_typed() {
+  env -i HOME="$H" PATH="$H/stubs:/usr/bin:/bin" TERM=dumb \
+    "$ZSH_BIN" -f -i 2>/dev/null <<EOF
+source "\$HOME/.zshrc"
+$1
+EOF
+}
+
+test_start "zshrc_lazy_alias_persists_after_first_use"
+assert_equals "lazy-alias-ran|persisted|1" \
+  "$(zshrc_typed 'lazyprobe
+alias lazyprobe >/dev/null && print -n "|persisted" || print -n "|gone"
+print "|${#${(@M)LAYERS_LOADED:#91-ux-aliases-lazy}}"' | tr -d '\n' | sed 's/.*lazy-alias-ran/lazy-alias-ran/')" \
+  "a lazy alias runs on first use and stays defined in the shell, loaded once"
+
+test_start "zshrc_known_commands_keep_layers_lazy"
+assert_equals "0" \
+  "$(zshrc_typed 'ls / >/dev/null
+print -n ""
+if true; then :; fi
+print "${#${(@M)LAYERS_LOADED:#91-ux-aliases-lazy}}"')" \
+  "commands, builtins and keywords that already resolve do not load the lazy layers"
+
 test_start "zshrc_dot_load_loads_deferred_layers"
 assert_equals "ready|10-secrets 40-ls-colors 50-logic-functions-core 91-ux-aliases-lazy 51-logic-functions-extra" \
   "$(zshrc -i 'LAYERS_LOADED=(); dot load; print -r -- "$DOTFILES_LAYERS_LOAD_STATE|${LAYERS_LOADED[*]}"')" \

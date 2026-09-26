@@ -530,36 +530,41 @@ if [[ "${DOTFILES_FAST}" != "1" ]]; then
     functions[_dotfiles_prev_command_not_found_handler]="${functions[command_not_found_handler]}"
   fi
 
+  # zsh runs command_not_found_handler in the child it forked for the
+  # command, so anything it loads dies with that child. The layers are
+  # therefore loaded in the shell itself by the preexec hook below; the
+  # handler only runs what they define (loading them itself when the
+  # hook did not fire, e.g. in `zsh -c`).
+  _dotfiles_lazy_preexec() {
+    [[ "${DOTFILES_LAYERS_LOADED}" == "1" ]] && return 0
+    local word="${${(z)1}[1]}"
+    [[ -z "$word" ]] && return 0
+    (( ${+commands[$word]} || ${+functions[$word]} || ${+aliases[$word]} || ${+builtins[$word]} || ${+reswords[(r)$word]} )) && return 0
+    _dotfiles_load_heavy_layers
+    _dotfiles_del_preexec _dotfiles_lazy_preexec
+  }
+  _dotfiles_add_preexec _dotfiles_lazy_preexec
+
   command_not_found_handler() {
     local cmd="$1"
     shift || true
+    local -a _args
+    _args=("$@")
 
-    if [[ "${DOTFILES_LAYERS_LOADED}" != "1" ]]; then
-      _dotfiles_load_heavy_layers_stage1
+    local stage
+    for stage in 1 2; do
+      if [[ "${DOTFILES_LAYERS_LOADED}" != "1" ]]; then
+        "_dotfiles_load_heavy_layers_stage${stage}"
+      fi
       if (( ${+functions[$cmd]} )); then
-        "$cmd" "$@"
+        "$cmd" "${_args[@]}"
         return $?
       fi
       if alias "$cmd" >/dev/null 2>&1; then
-        local -a _args
-        _args=("$@")
         eval "$cmd ${(@q)_args}"
-        unset _args
         return $?
       fi
-      _dotfiles_load_heavy_layers_stage2
-      if (( ${+functions[$cmd]} )); then
-        "$cmd" "$@"
-        return $?
-      fi
-      if alias "$cmd" >/dev/null 2>&1; then
-        local -a _args2
-        _args2=("$@")
-        eval "$cmd ${(@q)_args2}"
-        unset _args2
-        return $?
-      fi
-    fi
+    done
 
     if (( ${+functions[_dotfiles_prev_command_not_found_handler]} )); then
       _dotfiles_prev_command_not_found_handler "$cmd" "$@"
