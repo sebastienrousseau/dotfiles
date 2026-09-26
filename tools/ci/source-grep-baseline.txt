@@ -85,7 +85,6 @@
    6 tests/unit/fish/test_fish_conf_aliases.sh
    1 tests/unit/fish/test_fish_conf_modern_core.sh
    1 tests/unit/fish/test_fish_conf_zzz_path_cleanup.sh
-  11 tests/unit/fish/test_fish_dot_completion.sh
    4 tests/unit/fish/test_fish_func_dot_enterprise.sh
    2 tests/unit/functions/test_environment.sh
    6 tests/unit/functions/test_func_hiddenfiles.sh
@@ -122,7 +121,6 @@
    2 tests/unit/misc/test_tuning_scripts.sh
    1 tests/unit/misc/test_version_sync.sh
    4 tests/unit/misc/test_wave1_heal_fixes.sh
-   6 tests/unit/misc/test_wave1_install_gpg.sh
    3 tests/unit/misc/test_wave2_dot_new_guard.sh
    1 tests/unit/nushell/test_nushell_aliases.sh
    4 tests/unit/nushell/test_nushell_core_parity.sh
