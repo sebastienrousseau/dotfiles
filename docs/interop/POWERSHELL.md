@@ -5,7 +5,7 @@ render_with_liquid: false
 
 # PowerShell Parity
 
-This page documents how PowerShell 7.4 LTS / 7.5+ support is exercised in CI
+This page documents how PowerShell 7.5+ support is exercised in CI
 and what specifically is verified. Closes the docs slice of
 [#860](https://github.com/sebastienrousseau/dotfiles/issues/860).
 
