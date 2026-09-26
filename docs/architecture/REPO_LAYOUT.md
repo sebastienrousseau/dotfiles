@@ -29,7 +29,7 @@ carry semantics:
 | `private_`       | Sets `0600` perms on deploy                 | `private_dot_ssh/` → `~/.ssh/`                     |
 | `executable_`    | Sets `+x` on deploy                         | `executable_dot` → `~/.local/bin/dot`              |
 | `run_onchange_`  | Runs once when its content hash changes     | `run_onchange_20-ghostty-config.sh.tmpl`           |
-| `.tmpl`          | Rendered as a Go template at apply time     | `dot_npmrc.tmpl`                                    |
+| `.tmpl`          | Rendered as a Go template at apply time     | `dot_gitconfig.tmpl`                                 |
 
 > **Gotcha:** `executable_dot_foo` deploys as `.foo` (not `dot_foo`). Chezmoi
 > consumes the `dot_` prefix even when stacked with `executable_`.
@@ -51,7 +51,7 @@ carry semantics:
 | `dot_bashrc`, `dot_profile` | `~/.bashrc`, `~/.profile` | Bash startup |
 | `dot_zshenv`, `dot_zprofile`, `dot_zshrc` | `~/.zshenv` etc. | Zsh startup chain (see [`ARCHITECTURE.md`](ARCHITECTURE.md) for order) |
 | `dot_vimrc`, `dot_inputrc`, `dot_psqlrc`, `dot_sqliterc`, `dot_Xresources` | `~/.*` | Classic per-tool dotfiles |
-| `dot_gitconfig.tmpl`, `dot_npmrc.tmpl` | `~/.gitconfig`, `~/.npmrc` | Templated — identity/tokens injected at apply |
+| `dot_gitconfig.tmpl`, `modify_private_dot_npmrc` | `~/.gitconfig`, `~/.npmrc` | Templated — identity/tokens injected at apply |
 | `dot_cargo/config.toml.tmpl` | `~/.cargo/config.toml` | Rust build dirs redirected to `/tmp` |
 | `dot_fdignore`, `dot_noderc`, `dot_rustfmt.toml` | `~/.*` | Per-tool config |
 | `private_dot_netrc.tmpl`, `private_dot_ssh/` | `~/.netrc`, `~/.ssh/` | 0600 files |

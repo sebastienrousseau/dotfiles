@@ -47,7 +47,7 @@ Files that are templates (use Go template syntax like `{{ .variable }}`):
 - `dot_config/zsh/rc.d/*.tmpl` — zsh startup modules
 - `dot_gitconfig.tmpl` — git configuration
 - `private_dot_ssh/config.tmpl` — SSH configuration
-- `dot_npmrc.tmpl` — npm configuration
+- `modify_private_dot_npmrc` — npm configuration (keeps `npm login` tokens)
 - `private_dot_netrc.tmpl` — netrc credentials
 
 Files that are **NOT** templates (plain files, no `.tmpl` suffix):

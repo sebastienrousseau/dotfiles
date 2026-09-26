@@ -67,7 +67,7 @@ secrets = true  # Enable secret management
 Files ending in `.tmpl` are processed with Go templates:
 
 - `dot_gitconfig.tmpl` - Injects name, email, signing key
-- `dot_npmrc.tmpl` - Injects registry tokens
+- `modify_private_dot_npmrc` - Injects registry tokens and keeps the auth lines `npm login` writes
 - `dot_noderc.tmpl` - Injects Node.js settings
 
 ### Ignored Patterns (.chezmoiignore.tmpl)
