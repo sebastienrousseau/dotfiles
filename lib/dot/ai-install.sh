@@ -42,7 +42,7 @@ _ai_mise_pkg() {
     amp) echo "" ;; # native installer (npm versions are prerelease-only; mise filters them out)
     cursor-agent) echo "" ;;
     grok) echo "" ;;
-    aider) echo "pipx:aider-chat" ;;
+    aider) echo "pipx:aider-chat[uvx_args=--python 3.12]" ;; # 3.13+ lacks audioop, which aider needs
     opencode) echo "opencode" ;;
     sgpt) echo "pipx:shell-gpt" ;;
     agy) echo "" ;;
