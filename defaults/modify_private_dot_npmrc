@@ -1,0 +1,78 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /*
+  ~/.npmrc: the managed settings below, plus any registry auth lines the
+  file already has. `npm login` writes `//<registry>/:_authToken=...` into
+  ~/.npmrc; a plain template dropped those lines on every apply, so each
+  `dot upgrade` stopped at chezmoi's "has changed since chezmoi last wrote
+  it" prompt. A token set in chezmoi data (npm_token, github_npm_token)
+  still wins for its registry.
+*/ -}}
+# npm configuration
+# Managed by chezmoi - edit source at ~/.dotfiles/defaults/modify_private_dot_npmrc
+# Registry auth lines added by `npm login` are kept on apply.
+
+# Global packages location (keep out of system directories)
+prefix={{ .chezmoi.homeDir }}/.node_modules
+
+# Registry (default)
+registry=https://registry.npmjs.org/
+
+# Scoped registries (uncomment and configure as needed)
+# @mycompany:registry=https://npm.mycompany.com/
+# @github:registry=https://npm.pkg.github.com/
+
+# Security
+audit=true
+audit-level=moderate
+
+# Performance
+prefer-offline=true
+progress=false
+
+# Behavior
+save-exact=true
+engine-strict=false
+fund=false
+
+# Init defaults
+init-author-name={{ .chezmoi.username }}
+init-license=MIT
+init-version=0.1.0
+
+# Authentication tokens (configured via chezmoi secrets)
+# To set tokens, add them to ~/.config/chezmoi/chezmoi.toml:
+#   [data]
+#   npm_token = "npm_xxxx"
+#   github_npm_token = "ghp_xxxx"
+
+{{- if hasKey . "npm_token" }}
+# npm registry auth token
+//registry.npmjs.org/:_authToken={{ .npm_token }}
+{{- end }}
+
+{{- if hasKey . "github_npm_token" }}
+# GitHub Packages auth token
+//npm.pkg.github.com/:_authToken={{ .github_npm_token }}
+{{- end }}
+
+{{- /* Keep auth lines already in the file for registries data does not set. */ -}}
+{{- $managed := list }}
+{{- if hasKey . "npm_token" }}{{ $managed = append $managed "//registry.npmjs.org/" }}{{ end }}
+{{- if hasKey . "github_npm_token" }}{{ $managed = append $managed "//npm.pkg.github.com/" }}{{ end }}
+{{- $kept := list }}
+{{- range splitList "\n" .chezmoi.stdin }}
+{{-   $line := trim . }}
+{{-   if regexMatch "^//[^[:space:]]+:_(authToken|auth|password)=" $line }}
+{{-     $registry := regexReplaceAll ":_(authToken|auth|password)=.*$" $line "" }}
+{{-     if and (not (has $registry $managed)) (not (has $line $kept)) }}
+{{-       $kept = append $kept $line }}
+{{-     end }}
+{{-   end }}
+{{- end }}
+{{- if $kept }}
+
+# Registry auth kept from the existing file (e.g. written by `npm login`)
+{{- range $kept }}
+{{ . }}
+{{- end }}
+{{- end }}

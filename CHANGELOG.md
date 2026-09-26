@@ -14,6 +14,11 @@ This file documents all notable changes to this project.
 
 ### Fixed
 
+- `dot upgrade` no longer stops at `~/.npmrc` after `npm login`. The file
+  is now a chezmoi modify-template that keeps the registry auth lines
+  already in it; as a plain template it dropped them on every apply and
+  chezmoi's overwrite prompt failed without a terminal. A token set in
+  chezmoi data still wins for its registry.
 - zsh keeps the lazily loaded alias and function layers after their first
   use. zsh runs `command_not_found_handler` in the forked child, so the
   layers it sourced died with it and every lazy call re-sourced them; a
