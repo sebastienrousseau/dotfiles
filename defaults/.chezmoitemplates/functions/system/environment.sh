@@ -59,7 +59,9 @@ environment() {
   echo "${LOCAL_OS}"
 }
 
-# Detect Windows Subsystem for Linux
+# Detect Windows Subsystem for Linux. Returns 0 on WSL and 1 otherwise,
+# including when /proc/version is absent (macOS), where grep itself would
+# exit 2.
 is_wsl() {
-  [[ -f /proc/version ]] && grep -qi microsoft /proc/version 2>/dev/null
+  grep -qi microsoft /proc/version 2>/dev/null || return 1
 }

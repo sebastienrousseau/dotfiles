@@ -10,12 +10,10 @@
    9 tests/integration/test_install.sh
    1 tests/integration/test_rollback.sh
    5 tests/integration/test_shell_parity.sh
-  19 tests/regression/test_cross_platform.sh
    3 tests/regression/test_dot_help_registry_symmetry.sh
    1 tests/regression/test_enforce_policies_fires.sh
    2 tests/regression/test_feature_matrix_appearance_security.sh
    1 tests/regression/test_gate_integrity.sh
-  40 tests/regression/test_integration.sh
    1 tests/regression/test_macos_icloud_symlinks_safety.sh
    1 tests/unit/aliases/test_ai_aliases.sh
    5 tests/unit/aliases/test_alias_governance.sh
@@ -68,9 +66,6 @@
    4 tests/unit/dot-cli/test_dot_agent_governance.sh
    8 tests/unit/dot-cli/test_dot_agent_mode.sh
    3 tests/unit/dot-cli/test_dot_cli.sh
-  15 tests/unit/dot-cli/test_dot_cli_new_commands.sh
-  16 tests/unit/dot-cli/test_dot_commands_agent.sh
-  20 tests/unit/dot-cli/test_dot_commands_ai.sh
   10 tests/unit/dot-cli/test_dot_commands_aliases.sh
    1 tests/unit/dot-cli/test_dot_commands_appearance.sh
    2 tests/unit/dot-cli/test_dot_commands_core.sh
@@ -123,16 +118,11 @@
    3 tests/unit/misc/test_qa_docs_coverage.sh
    1 tests/unit/misc/test_qa_docs_repo_coverage.sh
    1 tests/unit/misc/test_qa_examples_coverage.sh
-  16 tests/unit/misc/test_qa_reliability.sh
    3 tests/unit/misc/test_qa_traceability_coverage.sh
-  12 tests/unit/misc/test_security_compliance_controls.sh
    2 tests/unit/misc/test_tuning_scripts.sh
    1 tests/unit/misc/test_version_sync.sh
-  23 tests/unit/misc/test_wave1_alias_split.sh
    4 tests/unit/misc/test_wave1_heal_fixes.sh
    6 tests/unit/misc/test_wave1_install_gpg.sh
-   9 tests/unit/misc/test_wave1_zshenv_path.sh
-  14 tests/unit/misc/test_wave1_zshrc_lazy_hook.sh
    3 tests/unit/misc/test_wave2_dot_new_guard.sh
    1 tests/unit/nushell/test_nushell_aliases.sh
    4 tests/unit/nushell/test_nushell_core_parity.sh
@@ -145,7 +135,6 @@
    1 tests/unit/ops/test_ops_chezmoi_remove.sh
    1 tests/unit/ops/test_ops_chezmoi_update.sh
    1 tests/unit/ops/test_ops_heal.sh
-  11 tests/unit/ops/test_ops_heal_components.sh
    1 tests/unit/ops/test_ops_health_check.sh
    1 tests/unit/ops/test_ops_post_apply_repair.sh
    2 tests/unit/ops/test_ops_prewarm.sh
@@ -188,6 +177,4 @@
    1 tests/unit/theme/test_themes_toml.sh
    2 tests/unit/tools/test_ai_core_download_verify.sh
    2 tests/unit/tools/test_dot_bootstrap_nix_verify.sh
-  19 tests/unit/tools/test_new_configs.sh
-  15 tests/unit/tools/test_new_scripts.sh
    1 tests/unit/tools/test_public_entrypoints.sh

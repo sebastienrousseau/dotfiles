@@ -85,9 +85,9 @@ release process are documented in
 curl -fsSL -o /tmp/dotfiles-install.sh \
   https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.524/dotfiles-install-0.2.524.sh
 if command -v sha256sum >/dev/null 2>&1; then
-  echo "60dc053f54e918737e4bdf18ad6a2ac687dfefe6aa42a58b67ef6f6c2eaa3dac  /tmp/dotfiles-install.sh" | sha256sum -c -
+  echo "fdf39188d796da8f62ab9bf52cf8a529ec128e26739de9e179f2bdff44ca487a  /tmp/dotfiles-install.sh" | sha256sum -c -
 else
-  echo "60dc053f54e918737e4bdf18ad6a2ac687dfefe6aa42a58b67ef6f6c2eaa3dac  /tmp/dotfiles-install.sh" | shasum -a 256 -c -
+  echo "fdf39188d796da8f62ab9bf52cf8a529ec128e26739de9e179f2bdff44ca487a  /tmp/dotfiles-install.sh" | shasum -a 256 -c -
 fi
 bash /tmp/dotfiles-install.sh
 ```

@@ -364,6 +364,17 @@ cmd_log_rotate() {
   run_script "scripts/tools/log-rotate.sh" "Log rotation script" "$@"
 }
 
+## _validate_tool_spec <spec> — die unless <spec> is a mise tool spec.
+## validate_name's [a-zA-Z0-9._-] rejected every versioned spec, so the
+## documented `dot env use node@22` could never run. A spec may carry a
+## backend prefix and a version (node@22, aqua:nushell/nushell@0.114.1,
+## npm:@openai/codex@latest); shell metacharacters and spaces stay out.
+_validate_tool_spec() {
+  if [[ ! "$1" =~ ^[A-Za-z0-9][A-Za-z0-9._@:/+-]*$ ]]; then
+    die "Invalid tool spec: $1 (allowed: letters, digits and . _ @ : / + -)"
+  fi
+}
+
 cmd_env_mise() {
   # `dot env emit` is a separate sub-handler — it doesn't need mise
   # at command-time, only when actually invoked (the script checks).
@@ -431,10 +442,9 @@ cmd_env_mise() {
       ;;
     install)
       shift
-      # Validate tool names to prevent injection
       for arg in "$@"; do
         [[ "$arg" == -* ]] && continue
-        validate_name "$arg" "tool name"
+        _validate_tool_spec "$arg"
       done
       mise install "$@"
       ;;
@@ -442,7 +452,7 @@ cmd_env_mise() {
       shift
       for arg in "$@"; do
         [[ "$arg" == -* ]] && continue
-        validate_name "$arg" "tool name"
+        _validate_tool_spec "$arg"
       done
       mise use "$@"
       ;;
