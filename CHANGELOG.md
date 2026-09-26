@@ -12,6 +12,26 @@ This file documents all notable changes to this project.
   devcontainer and every CI workflow install it, and MINIMUM-TOOLCHAIN
   records it as the floor, since CI no longer exercises anything older.
 
+### Fixed
+
+- zsh keeps the lazily loaded alias and function layers after their first
+  use. zsh runs `command_not_found_handler` in the forked child, so the
+  layers it sourced died with it and every lazy call re-sourced them; a
+  `preexec` hook now loads them in the shell itself.
+
+### CI and tests
+
+- The unit test suite installs chezmoi, so the template-rendering tests
+  (zshrc, alias layers, gitconfig, installer, cross-platform branches)
+  run in CI instead of skipping. Tests that relied on the host's own
+  chezmoi source or data now render against the checkout in a sandbox.
+- `Merge Gate` fails when a required job fails or is cancelled; it used
+  to be skipped, which GitHub counts as passed.
+- The framework-invariants suite gives each suite 360s and reports a
+  timeout as one.
+- A build-cache test no longer writes to the real `~/.cache` when run
+  on a machine with the dotfiles installed.
+
 ## v0.2.524 — 2026-09-26
 
 ### Security

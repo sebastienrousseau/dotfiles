@@ -33,8 +33,7 @@ CHEZMOI_BIN="$(command -v chezmoi)"
 mkdir -p "$SANDBOX/render-home"
 
 # render <template> <output> [data-json]: data-json goes in the config's
-# data section, which overrides .chezmoidata.toml (--override-data needs a
-# newer chezmoi than the 2.47.1 CI pins).
+# data section, which overrides .chezmoidata.toml on any chezmoi version.
 render() {
   local config="$SANDBOX/chezmoi.toml"
   if [[ -n "${3:-}" ]]; then
