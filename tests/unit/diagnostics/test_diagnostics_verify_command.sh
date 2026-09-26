@@ -27,17 +27,55 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
-test_start "verify_runs_dot_doctor"
-assert_file_contains "$VERIFY_FILE" "run_step \"dot doctor\"" "should run dot doctor"
+# Stub `dot` and `chezmoi` on PATH: dot records its argv (and fails when
+# asked to), chezmoi prints $STUB_DIFF as its diff and exits 0 as the real
+# one does, drift or not.
+VFY="$DOTFILES_COV_TMPDIR/verify"
+mkdir -p "$VFY/bin"
+cat >"$VFY/bin/dot" <<'STUB'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"$VFY_CALLS"
+[[ "$1" == "${VFY_FAIL:-}" ]] && exit 3
+exit 0
+STUB
+cat >"$VFY/bin/chezmoi" <<'STUB'
+#!/usr/bin/env bash
+printf '%s' "${STUB_DIFF:-}"
+exit 0
+STUB
+chmod +x "$VFY/bin/dot" "$VFY/bin/chezmoi"
 
-test_start "verify_runs_dot_status"
-assert_file_contains "$VERIFY_FILE" "run_step \"dot status\"" "should run dot status"
+# verify [args...]: runs verify.sh; sets rc, out and calls (dot argv, one per line).
+verify() {
+  : >"$VFY/calls"
+  out=$(PATH="$VFY/bin:$PATH" VFY_CALLS="$VFY/calls" bash "$VERIFY_FILE" "$@" 2>&1)
+  rc=$?
+  calls=$(tr '\n' ' ' <"$VFY/calls")
+}
 
-test_start "verify_runs_chezmoi_diff"
-assert_file_contains "$VERIFY_FILE" "chezmoi diff" "should run chezmoi diff"
+test_start "verify_clean_passes"
+STUB_DIFF="" verify
+assert_equals "0" "$rc" "no drift and passing dot steps exit 0"
 
-test_start "verify_supports_security_alias"
-assert_file_contains "$VERIFY_FILE" "--security | -s" "verify supports -s"
+test_start "verify_runs_doctor_then_status"
+assert_equals "doctor status " "$calls" "default mode runs dot doctor and dot status"
+
+test_start "verify_drift_fails_even_though_chezmoi_diff_exits_0"
+STUB_DIFF=$'diff --git a/.zshrc b/.zshrc\n+changed\n' verify
+assert_equals "1" "$rc" "diff output is drift"
+
+test_start "verify_drift_shows_the_diff"
+assert_contains "+changed" "$out" "the drift itself is printed"
+
+test_start "verify_failed_step_fails"
+STUB_DIFF="" VFY_FAIL=doctor verify
+assert_equals "1:1" "$rc:$(grep -c 'failed (exit 3)' <<<"$out")" "a failing dot doctor fails verify and reports its exit code"
+
+for flag in --security -s; do
+  test_start "verify_security_mode_${flag//-/}"
+  STUB_DIFF="" verify "$flag"
+  assert_equals "security-score " "$calls" "$flag runs only dot security-score"
+done
 
 # Slice 2: drive real line coverage of the script under test
 cov_exercise_script "$VERIFY_FILE"
