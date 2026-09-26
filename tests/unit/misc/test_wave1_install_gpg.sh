@@ -101,7 +101,7 @@ stub "$INST/tools/ci" install-chezmoi-verified.sh 'exit 0'
 rc="$(run_install "$SANDBOX/h3" "$SANDBOX/has-curl:$SYS")"
 
 test_start "install_local_bin_path"
-assert_equals "0|install-chezmoi-verified.sh 2.47.1 $SANDBOX/h3/.local/bin" "$rc|$(cat "$SANDBOX/calls.log")" \
+assert_equals "0|install-chezmoi-verified.sh 2.72.2 $SANDBOX/h3/.local/bin" "$rc|$(cat "$SANDBOX/calls.log")" \
   "without Homebrew, the verified installer targets ~/.local/bin (curl unused)"
 
 test_start "install_local_bin_created"
@@ -119,7 +119,7 @@ stub "$INST/tools/ci" install-chezmoi-verified.sh 'exit 1'
 rc="$(run_install "$SANDBOX/h5" "$SANDBOX/has-curl:$SYS")"
 
 test_start "install_verified_failure_refuses_fallback"
-assert_equals "1|install-chezmoi-verified.sh 2.47.1 $SANDBOX/h5/.local/bin|yes" \
+assert_equals "1|install-chezmoi-verified.sh 2.72.2 $SANDBOX/h5/.local/bin|yes" \
   "$rc|$(cat "$SANDBOX/calls.log")|$(grep -q 'Refusing to fall back' "$SANDBOX/out.txt" && echo yes || echo no)" \
   "a failed verified install fails without trying another source"
 
@@ -139,7 +139,7 @@ assert_equals "1|github.com/twpayne/chezmoi|no|yes" \
 os="$(uname -s | tr '[:upper:]' '[:lower:]')"
 arch="$(uname -m)"
 case "$arch" in x86_64 | amd64) arch=amd64 ;; arm64 | aarch64) arch=arm64 ;; esac
-asset="chezmoi_2.47.1_${os}_${arch}.tar.gz"
+asset="chezmoi_2.72.2_${os}_${arch}.tar.gz"
 REL="$SANDBOX/release"
 mkdir -p "$REL/pkg"
 printf '#!/bin/sh\necho fake-chezmoi\n' >"$REL/pkg/chezmoi"
@@ -155,7 +155,7 @@ stub "$SANDBOX/has-curl" curl "out=''; url=''
 while [ \$# -gt 0 ]; do case \"\$1\" in -o) out=\"\$2\"; shift ;; https://*) url=\"\$1\" ;; esac; shift; done
 cp \"$REL/\${url##*/}\" \"\$out\""
 
-printf '%s  %s\n' "$sum" "$asset" >"$REL/chezmoi_2.47.1_checksums.txt"
+printf '%s  %s\n' "$sum" "$asset" >"$REL/chezmoi_2.72.2_checksums.txt"
 : >"$SANDBOX/calls.log"
 rc="$(run_install "$SANDBOX/h7" "$SANDBOX/has-curl:$SYS")"
 test_start "install_embedded_verified_install"
@@ -163,7 +163,7 @@ assert_equals "0|fake-chezmoi" "$rc|$("$SANDBOX/h7/.local/bin/chezmoi" 2>/dev/nu
   "a release whose checksum matches is installed to ~/.local/bin"
 
 printf '%s  %s\n' "0000000000000000000000000000000000000000000000000000000000000000" "$asset" \
-  >"$REL/chezmoi_2.47.1_checksums.txt"
+  >"$REL/chezmoi_2.72.2_checksums.txt"
 : >"$SANDBOX/calls.log"
 rc="$(run_install "$SANDBOX/h8" "$SANDBOX/has-curl:$SYS")"
 test_start "install_embedded_checksum_mismatch"
@@ -171,7 +171,7 @@ assert_equals "1|absent" "$rc|$([[ -e "$SANDBOX/h8/.local/bin/chezmoi" ]] && ech
   "a release whose checksum does not match is rejected and not installed"
 
 # The checksum list downloads but the release archive does not: refused.
-printf '%s  %s\n' "$sum" "$asset" >"$REL/chezmoi_2.47.1_checksums.txt"
+printf '%s  %s\n' "$sum" "$asset" >"$REL/chezmoi_2.72.2_checksums.txt"
 mv "$REL/$asset" "$REL/$asset.held"
 : >"$SANDBOX/calls.log"
 rc="$(run_install "$SANDBOX/h9" "$SANDBOX/has-curl:$SYS")"
@@ -188,7 +188,7 @@ if command -v sha256sum >/dev/null 2>&1; then
 else
   bad="$(shasum -a 256 "$REL/$asset" | awk '{print $1}')"
 fi
-printf '%s  %s\n' "$bad" "$asset" >"$REL/chezmoi_2.47.1_checksums.txt"
+printf '%s  %s\n' "$bad" "$asset" >"$REL/chezmoi_2.72.2_checksums.txt"
 : >"$SANDBOX/calls.log"
 rc="$(run_install "$SANDBOX/h10" "$SANDBOX/has-curl:$SYS")"
 mv "$REL/$asset.good" "$REL/$asset"
@@ -198,7 +198,7 @@ assert_equals "1|absent" "$rc|$([[ -e "$SANDBOX/h10/.local/bin/chezmoi" ]] && ec
 
 # A verified archive whose install step fails (read-only ~/.local/bin):
 # refused, not reported as installed. Skipped as root, which ignores modes.
-printf '%s  %s\n' "$sum" "$asset" >"$REL/chezmoi_2.47.1_checksums.txt"
+printf '%s  %s\n' "$sum" "$asset" >"$REL/chezmoi_2.72.2_checksums.txt"
 mkdir -p "$SANDBOX/h11/.local/bin"
 chmod 555 "$SANDBOX/h11/.local/bin"
 : >"$SANDBOX/calls.log"

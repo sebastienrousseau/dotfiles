@@ -146,7 +146,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.524)
+  version       The version (tag or branch) to install (default: v0.2.525)
 
 Options:
   --help        Show this help message
@@ -162,7 +162,7 @@ EOF
 }
 
 main() {
-  local version="v0.2.524"
+  local version="v0.2.525"
   local version_set=0
   local minimal=0
   local provision="${DOTFILES_PROVISION:-0}"
@@ -192,7 +192,7 @@ main() {
         # like `foobar` doesn't trigger a 30s+ network download attempt.
         # Caught by the install.sh fuzz harness (#881).
         if [[ ! "$arg" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-+][a-zA-Z0-9.-]+)?$ ]]; then
-          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.524)."
+          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.525)."
         fi
         version="$arg"
         version_set=1
@@ -339,7 +339,7 @@ main() {
       verified_installer="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/tools/ci/install-chezmoi-verified.sh"
       if [[ -x "$verified_installer" ]] || [[ -f "$verified_installer" ]]; then
         echo "   Using checksum-verified installer..."
-        if ! bash "$verified_installer" "${CHEZMOI_VERSION:-2.47.1}" "$bin_dir"; then
+        if ! bash "$verified_installer" "${CHEZMOI_VERSION:-2.72.2}" "$bin_dir"; then
           echo "" >&2
           echo "   The verified chezmoi installer failed." >&2
           echo "   Refusing to fall back to an unverified bootstrap path." >&2
@@ -351,7 +351,7 @@ main() {
         return 0
       fi
       echo "   Using embedded checksum verifier..."
-      if ! install_chezmoi_verified_embedded "${CHEZMOI_VERSION:-2.47.1}" "$bin_dir"; then
+      if ! install_chezmoi_verified_embedded "${CHEZMOI_VERSION:-2.72.2}" "$bin_dir"; then
         echo "" >&2
         echo "   The embedded checksum-verified chezmoi bootstrap failed." >&2
         echo "   Refusing to fall back to an unverified remote script." >&2
@@ -471,7 +471,7 @@ main() {
   # 6. Initialize & Apply
   step "Applying Configuration..."
 
-  # ── Auto-migration for v0.2.524 reorg ─────────────────────────────────
+  # ── Auto-migration for v0.2.525 reorg ─────────────────────────────────
   # If the user is upgrading from a pre-0.2.503 install, run the
   # migration script BEFORE `chezmoi apply` so the reorg's source-
   # path moves don't cause chezmoi to delete deployed files.
@@ -480,7 +480,7 @@ main() {
   for migrate_src in "$SOURCE_DIR" "$LEGACY_SOURCE_DIR"; do
     migrate_script="$migrate_src/install/migrate/migrate-v0_2-to-v0_2_503.sh"
     if [[ -x "$migrate_script" ]]; then
-      echo "   Running v0.2.524 migration (idempotent; safe on fresh installs)..."
+      echo "   Running v0.2.525 migration (idempotent; safe on fresh installs)..."
       "$migrate_script" || echo "   migration exited non-zero — continuing apply"
       break
     fi

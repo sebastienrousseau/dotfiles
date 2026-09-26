@@ -14,7 +14,7 @@ env:
   # Pinned chezmoi version consumed by the `setup-chezmoi` composite
   # action (which reads $CHEZMOI_VERSION when no `version:` input is
   # supplied). Keep in lockstep with .github/workflows/ci.yml.
-  CHEZMOI_VERSION: "2.47.1"
+  CHEZMOI_VERSION: "2.72.2"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

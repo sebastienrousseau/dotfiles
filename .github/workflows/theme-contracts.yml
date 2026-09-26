@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-chezmoi
         with:
-          version: '2.47.1'
+          version: '2.72.2'
       - name: Validate comparison contract
         run: |
           bash tests/unit/theme/test_render_goldens.sh
