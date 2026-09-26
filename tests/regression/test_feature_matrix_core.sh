@@ -239,12 +239,20 @@ test_fm_env_no_color() {
 
 # ── core.sh ────────────────────────────────────────────────────────────────
 
+# `dot sync --check` previews (chezmoi diff) and never applies; it used to
+# forward --check to chezmoi apply. A logging chezmoi stub records what ran.
 test_fm_sync() {
+  local log="$FM_SANDBOX/sync-chezmoi.log"
+  : >"$log"
+  fm_stub chezmoi "printf '%s\\n' \"\$*\" >>'$log'; exit 0"
   test_start "fm_sync"
   fm_run sync --check
   fm_expect_rc 0
-  test_start "fm_sync_announces_apply"
-  fm_expect_any "Applying dotfiles" "Chezmoi apply"
+  test_start "fm_sync_check_previews_with_diff"
+  assert_contains "diff" "$(cat "$log")" "sync --check runs chezmoi diff"
+  test_start "fm_sync_check_never_applies"
+  assert_false "grep -q '^apply' '$log'" "sync --check never runs chezmoi apply"
+  fm_stub chezmoi 'exit 0' # the harness default
 }
 
 test_fm_apply() {
