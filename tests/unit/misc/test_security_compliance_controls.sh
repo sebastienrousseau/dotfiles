@@ -68,7 +68,7 @@ render() {
   sandboxed "$CHEZMOI_BIN" --config "$WORK/chezmoi.json" --source "$REPO_ROOT" \
     --destination "$WORK/chezmoi-dest" --cache "$WORK/chezmoi-cache" \
     --persistent-state "$WORK/chezmoi-state.boltdb" \
-    execute-template --file "$1" >"$2" 2>"$WORK/render.err"
+    execute-template <"$1" >"$2" 2>"$WORK/render.err"
 }
 
 # ===========================================================================

@@ -32,13 +32,18 @@ CHEZMOI_BIN="$(command -v chezmoi)"
 : >"$SANDBOX/chezmoi.toml"
 mkdir -p "$SANDBOX/render-home"
 
-# render <template> <output> [override-data-json]
+# render <template> <output> [data-json]: data-json goes in the config's
+# data section, which overrides .chezmoidata.toml (--override-data needs a
+# newer chezmoi than the 2.47.1 CI pins).
 render() {
-  local override=()
-  [[ -n "${3:-}" ]] && override=(--override-data "$3")
+  local config="$SANDBOX/chezmoi.toml"
+  if [[ -n "${3:-}" ]]; then
+    config="$SANDBOX/chezmoi-override.json"
+    printf '{"data":%s}\n' "$3" >"$config"
+  fi
   env -i HOME="$SANDBOX/render-home" PATH="$PATH" \
-    "$CHEZMOI_BIN" --config "$SANDBOX/chezmoi.toml" --source "$REPO_ROOT/defaults" \
-    --persistent-state "$SANDBOX/state.boltdb" "${override[@]}" execute-template <"$1" >"$2"
+    "$CHEZMOI_BIN" --config "$config" --source "$REPO_ROOT/defaults" \
+    --persistent-state "$SANDBOX/state.boltdb" execute-template <"$1" >"$2"
 }
 
 # ═══════════════════════════════════════════════════════════════
