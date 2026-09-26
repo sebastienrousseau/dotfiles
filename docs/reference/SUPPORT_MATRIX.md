@@ -26,7 +26,7 @@ verified by CI.
 | NixOS | 23.11 or later | x86_64, aarch64 | Supported, via the Nix flake | `nix flake check` in CI when Nix files change |
 | Fedora | 41 or later | x86_64 | Community | No |
 | Arch Linux | Rolling | x86_64 | Community; AUR package published | No |
-| Windows | 10 / 11 | x86_64 | PowerShell parity surface (see below) | Yes: `windows-latest` |
+| Windows | 10 / 11 | x86_64 | PowerShell parity surface (see below) | Yes: `windows-latest` (PowerShell 7.6) |
 
 ## Shells
 
@@ -36,7 +36,7 @@ verified by CI.
 | Zsh | 5.8 | Supported | Full | All features |
 | Bash | 5.0 interactive; 3.2 for the `dot` CLI and scripts | Supported | Full | The shared logic core; the CLI runs on macOS's stock `/bin/bash` 3.2 |
 | Nushell | 0.98 | Supported | Core CLI | Native `d`, `dm`, `da`, `dmc`, `datt` for core workflows; complex aliases are skipped |
-| PowerShell | 7.4 LTS or 7.5 and later | Supported | Core CLI | Managed profile, `dot` wrapper, listing helpers and attestation aliases. CI runs 7.4 LTS on `windows-latest` |
+| PowerShell | 7.4 LTS or 7.5 and later | Supported | Core CLI | Managed profile, `dot` wrapper, listing helpers and attestation aliases. CI runs PowerShell 7.6 on `windows-latest`; 7.4 itself is not exercised in CI |
 
 ## Terminal Emulators
 
