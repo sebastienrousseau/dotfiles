@@ -33,7 +33,8 @@ AWK_BODY='
       tok = $i
       if (tok == "curl") has_curl = 1
       if (tok == "wget") has_wget = 1
-      if (has_curl && (tok == "-k" || tok == "--insecure" || tok ~ /^--insecure=/)) {
+      # -k alone or inside a short-flag cluster (-sk, -fsSLk).
+      if (has_curl && (tok ~ /^-[A-Za-z]*k[A-Za-z]*$/ || tok == "--insecure" || tok ~ /^--insecure=/)) {
         bad = tok
       }
       if (has_wget && (tok == "--no-check-certificate" || tok ~ /^--no-check-certificate=/)) {
@@ -53,7 +54,7 @@ matches=$(
     -E '\b(curl|wget)\b' \
     "$ROOT" 2>/dev/null |
     xargs -I{} awk "$AWK_BODY" {} 2>/dev/null
-)
+) || true # no curl/wget anywhere makes grep exit 1: that is a clean tree
 
 if [[ -n "$matches" ]]; then
   echo "ERROR: Insecure TLS patterns found." >&2
