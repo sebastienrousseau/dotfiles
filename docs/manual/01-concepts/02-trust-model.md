@@ -98,7 +98,7 @@ Violations are logged to `~/.local/state/dotfiles/mcp-violations.log` and report
 
 ```json
 {
-  "version": "0.2.523",
+  "version": "0.2.524",
   "timestamp": "2026-04-16T09:00:00Z",
   "host": {
     "hostname_sha256": "...",

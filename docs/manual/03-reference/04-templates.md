@@ -13,7 +13,7 @@ Flat top-level keys:
 
 | Variable | Type | Example |
 |:---|:---|:---|
-| `.dotfiles_version` | string | `"0.2.523"` |
+| `.dotfiles_version` | string | `"0.2.524"` |
 | `.theme` | string | `"tahoe-dark"` |
 | `.machine` | string | `"macbook-t2"` |
 | `.profile` | string | `"laptop"` |

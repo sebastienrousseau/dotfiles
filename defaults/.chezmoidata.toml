@@ -1,6 +1,6 @@
 # Active profile - change this to switch configurations
-dotfiles_version = "0.2.523"
-previous_dotfiles_version = "0.2.522"
+dotfiles_version = "0.2.524"
+previous_dotfiles_version = "0.2.523"
 profile = "laptop"
 
 # Machine preset — set per-host in ~/.config/chezmoi/chezmoi.toml:
