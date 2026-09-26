@@ -61,7 +61,7 @@ test_start "npmrc_keeps_managed_settings"
 assert_equals "1" "$(grep -c '^save-exact=true$' "$H1/.npmrc")" "the managed settings are written"
 
 test_start "npmrc_stays_private"
-assert_equals "600" "$(stat -f '%Lp' "$H1/.npmrc" 2>/dev/null || stat -c '%a' "$H1/.npmrc")" \
+assert_equals "600" "$(stat -c '%a' "$H1/.npmrc" 2>/dev/null || stat -f '%Lp' "$H1/.npmrc")" \
   "~/.npmrc stays owner-only"
 
 rc=0

@@ -46,7 +46,7 @@ if command -v zsh >/dev/null 2>&1; then
   # zsh -f and no inherited ZDOTDIR/DOT_BUILD_ROOT: otherwise the caller's
   # own zshenv or build root leaks in and the root lands outside $WORK.
   runtime_root="$(env -u ZDOTDIR -u DOT_BUILD_ROOT XDG_CACHE_HOME="$WORK/cache" HOME="$WORK/home" zsh -f -c 'source "$1"; print -r -- "$DOT_BUILD_ROOT"' zsh "$ZSH_TARGET")"
-  runtime_mode="$(stat -f '%Lp' "$runtime_root" 2>/dev/null || stat -c '%a' "$runtime_root")"
+  runtime_mode="$(stat -c '%a' "$runtime_root" 2>/dev/null || stat -f '%Lp' "$runtime_root")"
   if env -u ZDOTDIR -u DOT_BUILD_ROOT XDG_CACHE_HOME="$WORK/cache" HOME="$WORK/home" zsh -f -c 'source "$1"; cd "$2"; ! rust-target-tmp "../escape" >/dev/null 2>&1 && [[ ! -e target ]]' zsh "$ZSH_TARGET" "$WORK/project"; then
     assert_equals "$WORK/cache/dot/builds:700" "$runtime_root:$runtime_mode" "Zsh creates a private XDG root and rejects traversal at runtime"
   else
