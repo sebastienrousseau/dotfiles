@@ -232,7 +232,9 @@ if command -v chezmoi >/dev/null 2>&1; then
     --source "$REPO_ROOT/defaults" --persistent-state "$SANDBOX/cz/state" \
     execute-template '{{ .dotfiles_version }}')"
 else
-  want="v0.2.523"
+  # Without chezmoi, read the manifest directly rather than pinning a
+  # literal that every release would have to edit.
+  want="v$(sed -n 's/^dotfiles_version = "\(.*\)"$/\1/p' "$REPO_ROOT/defaults/.chezmoidata.toml")"
 fi
 got="$(env -i HOME="$SANDBOX/h9" PATH="$SYS" "$BASH" --norc --noprofile -c 'source "$1"; show_help' _ "$INST/install.sh" |
   sed -n 's/.*(default: \(v[^)]*\)).*/\1/p')"
