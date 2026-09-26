@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-set -euo pipefail
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
@@ -16,17 +16,43 @@ SCORECARD="$REPO_ROOT/scripts/diagnostics/scorecard.sh"
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
+# doctor-unified.sh runs from a fixture repo where every target script is a
+# stub that records its name and arguments, so each flag's routing is
+# observed without running heal, health or the benchmarks for real.
+DU="$DOTFILES_COV_TMPDIR/doctor-unified"
+mkdir -p "$DU/scripts/diagnostics" "$DU/scripts/ops" "$DU/tests"
+cp "$DOCTOR_UNIFIED" "$DU/scripts/diagnostics/doctor-unified.sh"
+cp -R "$REPO_ROOT/lib" "$DU/"
+for t in scripts/diagnostics/doctor.sh scripts/ops/heal.sh scripts/diagnostics/health.sh \
+  scripts/diagnostics/scorecard.sh scripts/diagnostics/smoke-test.sh \
+  scripts/diagnostics/drift-dashboard.sh tests/benchmark.sh; do
+  printf '#!/usr/bin/env bash\necho "%s $*"\n' "$t" >"$DU/$t"
+done
+# routed <args...>: the "<target> <args>" line doctor-unified ran.
+routed() { NO_COLOR=1 bash "$DU/scripts/diagnostics/doctor-unified.sh" "$@" 2>/dev/null | tail -1; }
+
 test_start "doctor_unified_flag_aliases"
-assert_file_contains "$DOCTOR_UNIFIED" "--heal | -H" "doctor supports -H"
-assert_file_contains "$DOCTOR_UNIFIED" "--audit | -a" "doctor supports -a"
-assert_file_contains "$DOCTOR_UNIFIED" "--score | -s" "doctor supports -s"
-assert_file_contains "$DOCTOR_UNIFIED" "--smoke | -m" "doctor supports -m"
-assert_file_contains "$DOCTOR_UNIFIED" "--drift | -d" "doctor supports -d"
-assert_file_contains "$DOCTOR_UNIFIED" "--benchmark | -b" "doctor supports -b"
-assert_file_contains "$DOCTOR_UNIFIED" "--json | -j | --ai | -A" "doctor supports -j and -A"
+for pair in "--heal -H scripts/ops/heal.sh" "--audit -a scripts/diagnostics/health.sh" \
+  "--score -s scripts/diagnostics/scorecard.sh" "--smoke -m scripts/diagnostics/smoke-test.sh" \
+  "--drift -d scripts/diagnostics/drift-dashboard.sh" "--benchmark -b tests/benchmark.sh"; do
+  read -r long short target <<<"$pair"
+  assert_equals "$target |$target " "$(routed "$long")|$(routed "$short")" "$long and $short both run $target"
+done
+
+test_start "doctor_unified_default_and_passthrough"
+assert_equals "scripts/diagnostics/doctor.sh -j -A|scripts/diagnostics/doctor.sh --json --ai" \
+  "$(routed -j -A)|$(routed --json --ai)" "with no mode flag doctor.sh runs, and -j/-A/--json/--ai pass through"
+
+test_start "doctor_unified_missing_target_fails"
+rm -f "$DU/scripts/diagnostics/smoke-test.sh"
+rc=0
+NO_COLOR=1 bash "$DU/scripts/diagnostics/doctor-unified.sh" -m >/dev/null 2>&1 || rc=$?
+assert_equals "1" "$rc" "a mode whose script is missing exits 1"
 
 test_start "scorecard_flag_alias"
-assert_file_contains "$SCORECARD" "--json|-j" "scorecard supports -j"
+short="$(bash "$SCORECARD" -j 2>/dev/null | python3 -c 'import json,sys; print(sorted(json.load(sys.stdin)))' 2>/dev/null)"
+long="$(bash "$SCORECARD" --json 2>/dev/null | python3 -c 'import json,sys; print(sorted(json.load(sys.stdin)))' 2>/dev/null)"
+assert_true '[[ -n $short && $short == "$long" && $short == *health* ]]' "scorecard -j and --json emit the same JSON report"
 
 test_start "attest_json_short_runtime"
 output=$(REPO_ROOT="$REPO_ROOT" bash "$DOT_CLI" attest -j 2>/dev/null) || true
@@ -49,9 +75,6 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot mcp -s -j should emit JSON"
   printf '%b\n' "    Output: $output"
 fi
-
-test_start "scorecard_usage_mentions_short_flag"
-assert_file_contains "$SCORECARD" "# Usage: dot scorecard" "scorecard usage line is present"
 
 test_start "snapshot_short_flags_runtime"
 snapshot_state_dir="$(mktemp -d)"
