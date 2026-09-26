@@ -400,33 +400,34 @@ LUA
 if command -v nvim >/dev/null 2>&1; then
   dap_out="$(nvim --clean -l "$DAP_LUA" "$CFG/nvim/lua/plugins/dap.lua" 2>&1)"
   NVIM_DATA="$XDG_DATA_HOME/nvim"
+  dap_val() { printf '%s\n' "$dap_out" | awk -v k="$1=" 'index($0, k) == 1 { print substr($0, length(k) + 1) }'; }
   mason_has() { [[ ",${dap_out##*mason=}," == *",$1,"* ]] && echo yes || echo no; }
 
   test_start "dap_python"
-  assert_contains "python_launch=executable $NVIM_DATA/mason/bin/debugpy-adapter" "$dap_out" \
+  assert_equals "executable $NVIM_DATA/mason/bin/debugpy-adapter" "$(dap_val python_launch)" \
     "launching python starts the Mason debugpy adapter"
-  assert_contains "python_attach=server 127.0.0.1:5678" "$dap_out" \
+  assert_equals "server 127.0.0.1:5678" "$(dap_val python_attach)" \
     "attaching connects to the debugpy server"
-  assert_contains "ft_python=python" "$dap_out" "python files get debugpy configurations"
+  assert_equals "python" "$(dap_val ft_python)" "python files get debugpy configurations"
   assert_equals "yes" "$(mason_has python)" "Mason installs debugpy"
 
   test_start "dap_go"
-  assert_contains "delve=dlv" "$dap_out" "the delve adapter runs dlv"
-  assert_contains "ft_go=delve" "$dap_out" "go files get delve configurations"
+  assert_equals "dlv" "$(dap_val delve)" "the delve adapter runs dlv"
+  assert_equals "delve" "$(dap_val ft_go)" "go files get delve configurations"
   assert_equals "yes" "$(mason_has delve)" "Mason installs delve"
 
   test_start "dap_rust"
-  assert_contains "codelldb=$NVIM_DATA/mason/bin/codelldb" "$dap_out" \
+  assert_equals "$NVIM_DATA/mason/bin/codelldb" "$(dap_val codelldb)" \
     "the codelldb adapter runs Mason's codelldb"
   for ft in rust c cpp; do
-    assert_contains "ft_$ft=codelldb" "$dap_out" "$ft files get codelldb configurations"
+    assert_equals "codelldb" "$(dap_val ft_$ft)" "$ft files get codelldb configurations"
   done
   assert_equals "yes" "$(mason_has codelldb)" "Mason installs codelldb"
 
   test_start "dap_bash"
-  assert_contains "bashdb=$NVIM_DATA/mason/packages/bash-debug-adapter/bash-debug-adapter" \
-    "$dap_out" "the bashdb adapter runs Mason's bash-debug-adapter"
-  assert_contains "ft_sh=bashdb" "$dap_out" "sh files get bashdb configurations"
+  assert_equals "$NVIM_DATA/mason/packages/bash-debug-adapter/bash-debug-adapter" \
+    "$(dap_val bashdb)" "the bashdb adapter runs Mason's bash-debug-adapter"
+  assert_equals "bashdb" "$(dap_val ft_sh)" "sh files get bashdb configurations"
   assert_equals "yes" "$(mason_has bash)" "Mason installs the bash adapter"
 else
   skip_case "dap" "nvim not installed"

@@ -14,6 +14,10 @@
 # called — so routing is observed without applying, healing or snapshotting
 # anything. `profile set` rewrites the sandbox copy of .chezmoidata.toml,
 # never the real one. HOME and XDG_* point into the sandbox; mise is a stub.
+#
+# Command modules exercised: scripts/dot/commands/core.sh (sync, update),
+# commands/diagnostics.sh (verify, scorecard, snapshot, heal, doctor),
+# commands/tools.sh (env, profile), commands/meta.sh (keys sign-check).
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"

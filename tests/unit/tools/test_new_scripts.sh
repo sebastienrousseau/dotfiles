@@ -302,6 +302,7 @@ assert_equals "main master " "$(branches)" "main and master survive, the rest ar
 git -C "$BR" checkout -q -b topic
 make_branches develop
 run "$BR" gbd
+assert_equals "0" "$RC" "gbd exits 0 while on a feature branch"
 assert_equals "main master topic " "$(branches)" "the current branch is never deleted"
 git -C "$BR" checkout -q main
 
@@ -377,8 +378,11 @@ if [[ -x "$TOOLS/openssl" ]]; then
 else
   skip_case "pw_uses_cb" "openssl not installed"
 fi
+rm -f "$CALLS.cb"
 run "$NOREPO" pw 0
 assert_equals "1" "$RC" "a zero length is rejected"
+assert_contains "Usage: pw [length] (1-1024, default 48)" "$(out)" "the valid range is explained"
+assert_file_not_exists "$CALLS.cb" "nothing is copied to the clipboard"
 
 # ===========================================================================
 # dtags — Docker Hub tag listing

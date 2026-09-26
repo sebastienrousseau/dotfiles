@@ -20,7 +20,8 @@ DOTFILES_DIR="${HOME}/.dotfiles"
 
 ui_info "Searching dotfiles context for: $QUERY..."
 # 1. Retrieval: Use ripgrep to find relevant snippets from docs and configs
-CONTEXT=$(rg -i --no-filename --no-line-number -C 2 -m 10 "$(echo "$QUERY" | tr ' ' '|')" "$DOTFILES_DIR/docs" "$DOTFILES_DIR/dot_config/shell" "$DOTFILES_DIR/.chezmoitemplates" 2>/dev/null || true)
+# (the chezmoi source root is defaults/, see .chezmoiroot)
+CONTEXT=$(rg -i --no-filename --no-line-number -C 2 -m 10 "$(echo "$QUERY" | tr ' ' '|')" "$DOTFILES_DIR/docs" "$DOTFILES_DIR/defaults/dot_config/shell" "$DOTFILES_DIR/defaults/.chezmoitemplates" 2>/dev/null || true)
 
 if [[ -z "$CONTEXT" ]]; then
   CONTEXT="No specific context found in the local repository."
