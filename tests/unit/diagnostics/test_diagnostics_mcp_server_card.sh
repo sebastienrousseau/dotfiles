@@ -79,8 +79,14 @@ test_start "mcp_server_card_names_its_implementation"
 CARD_MODULE="$(jq -r '.implementation.module // empty' "$SERVER_CARD")"
 assert_file_exists "$REPO_ROOT/$CARD_MODULE/go.mod" "card implementation.module should be a Go module"
 
-test_start "mcp_serve_subcommand_exists"
-assert_file_contains "$REPO_ROOT/scripts/dot/commands/meta.sh" "cmd_mcp_serve" "dot mcp serve should be implemented"
+# `dot mcp serve` must exec the server with the repo it serves: a stub
+# dot-mcp on PATH reports what it was handed.
+MCP_STUB="$DOTFILES_COV_TMPDIR/mcp-stub"
+mkdir -p "$MCP_STUB"
+printf '#!/usr/bin/env bash\necho "argv=$* root=$DOT_MCP_REPO_ROOT"\n' >"$MCP_STUB/dot-mcp"
+chmod +x "$MCP_STUB/dot-mcp"
+test_start "mcp_serve_execs_the_server"
+assert_output_contains "argv=serve root=$REPO_ROOT" "PATH='$MCP_STUB':\"\$PATH\" bash '$REPO_ROOT/bin/dot' mcp serve </dev/null"
 
 test_start "mcp_server_card_declares_no_prompts"
 if [[ "$(jq -r '.capabilities.prompts' "$SERVER_CARD")" == "false" ]]; then
@@ -92,7 +98,8 @@ else
 fi
 
 test_start "mcp_doctor_validates_server_card"
-assert_file_contains "$MCP_DOCTOR" "Server Card (SEP-1649)" "mcp-doctor should validate server card"
+jq 'del(.cardVersion)' "$SERVER_CARD" >"$DOTFILES_COV_TMPDIR/card-no-version.json"
+assert_output_contains "missing cardVersion field" "MCP_SERVER_CARD='$DOTFILES_COV_TMPDIR/card-no-version.json' bash '$MCP_DOCTOR' 2>&1"
 
 test_start "agent_json_references_mcp_card"
 assert_file_contains "$REPO_ROOT/.well-known/agent.json" "mcpCard" "agent.json should reference MCP card"

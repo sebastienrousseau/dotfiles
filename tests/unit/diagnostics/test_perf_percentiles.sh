@@ -22,24 +22,9 @@ source "$REPO_ROOT/tests/framework/assertions.sh"
 
 PERF="$REPO_ROOT/scripts/diagnostics/perf.sh"
 
-# -----------------------------------------------------------------------------
-# Structural
-# -----------------------------------------------------------------------------
 
 test_start "perf_exists"
 assert_file_exists "$PERF" "perf.sh should exist"
-
-test_start "perf_supports_by_tool"
-assert_file_contains "$PERF" -- "--by-tool" "perf.sh must accept --by-tool"
-
-test_start "perf_supports_baseline"
-assert_file_contains "$PERF" -- "--baseline" "perf.sh must accept --baseline"
-
-test_start "perf_emits_percentiles"
-# The Python aggregator must compute p50/p95/p99.
-assert_file_contains "$PERF" "p50" "perf.sh aggregator must compute p50"
-assert_file_contains "$PERF" "p95" "perf.sh aggregator must compute p95"
-assert_file_contains "$PERF" "p99" "perf.sh aggregator must compute p99"
 
 # -----------------------------------------------------------------------------
 # Behavioural: feed a synthetic JSONL fixture through the aggregator
@@ -86,23 +71,11 @@ else
   assert_exit_code 0 "false"
 fi
 
-test_start "by_tool_p99_high_for_skewed"
-# mise-init: 1..100. P99 must be ≥98 (linear-interp gives 99.01).
-mise_row=$(echo "$out" | grep "mise-init")
-# Last numeric field before the shells column is p99.
-if [[ -n "$mise_row" ]]; then
-  # Extract all <num>ms tokens, the 5th-from-end is p99 in our table format
-  # (header is: label calls total mean p50 p95 p99 shells)
-  p99=$(echo "$mise_row" | grep -oE '[0-9]+ms' | tail -1 | tr -d 'ms')
-  if [[ "$p99" -ge 98 ]]; then
-    assert_exit_code 0 "true"
-  else
-    echo "mise-init p99 = $p99, expected ≥98" >&2
-    assert_exit_code 0 "false"
-  fi
-else
-  assert_exit_code 0 "false  # mise-init row not found"
-fi
+test_start "by_tool_percentiles_exact_for_skewed"
+# mise-init: 1..100 → calls 100, total 5050, mean 50, p50 50 (50.5),
+# p95 95 (95.05), p99 99 (99.01): linear interpolation, truncated.
+mise_row=$(echo "$out" | grep "mise-init" | tr -s ' ' | sed 's/^ //')
+assert_equals "mise-init 100 5050ms 50ms 50ms 95ms 99ms zsh" "$mise_row" "mise-init row carries exact count/total/mean/p50/p95/p99"
 
 # -----------------------------------------------------------------------------
 # Baseline write + regression detection
