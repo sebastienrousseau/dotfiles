@@ -27,7 +27,7 @@ as expectation.
 | **zsh** | **5.8** | A fully supported interactive shell (fish is the default login shell); `rc.d` ordering and the completion system assume 5.8. | `cross-platform-test.yml` (macOS stock zsh 5.9, Ubuntu 5.9) |
 | **fish** | **4.0** | `dot`, the alias bridge, and the generated completions target the fish 4 syntax. | `ci.yml` job `Lint / Fish` |
 | **nushell** | **0.98** | Tier-3 reference shell; see [ADR-011](adr/ADR-011-nushell-tier3-keep.md). | `ci.yml` job `Lint / Nushell` |
-| **PowerShell** | **7.4 LTS** | The Windows parity surface. No feature needs 7.5. 7.4 LTS retires on 2026-11-10, when the floor moves to 7.5. | `reliability-gate.yml` job `PowerShell Contract` and the `ci.yml` Windows job, on `windows-latest`, which ships PowerShell 7.6; 7.4 is not exercised |
+| **PowerShell** | **7.5** | The Windows parity surface. 7.4 LTS retired on 2026-11-10. | `reliability-gate.yml` job `PowerShell Contract` and the `ci.yml` Windows job, on `windows-latest`, which ships PowerShell 7.6 |
 | **git** | **2.34** | The oldest release with SSH commit/tag signing (`gpg.format = ssh`), which the signing and verification flow requires. | Not version-gated in CI; the signing workflows exercise it on runner git (≥ 2.40) |
 | **chezmoi** | **2.47.1** | The pinned, checksum-verified version `install.sh` and CI install. Newer works; older is untested. | `install.sh` and `CHEZMOI_VERSION` in `ci.yml`, `ci-enforced.yml`, `perf-baseline.yml` |
 | **Go** (fuzz harnesses and the two TUIs only — not needed to *use* the framework) | **1.23** | `fuzz/go.mod`. | `fuzz.yml`, `cockpit-test.yml`, `dot-ui-test.yml` |

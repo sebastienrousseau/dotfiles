@@ -36,7 +36,7 @@ verified by CI.
 | Zsh | 5.8 | Supported | Full | All features |
 | Bash | 5.0 interactive; 3.2 for the `dot` CLI and scripts | Supported | Full | The shared logic core; the CLI runs on macOS's stock `/bin/bash` 3.2 |
 | Nushell | 0.98 | Supported | Core CLI | Native `d`, `dm`, `da`, `dmc`, `datt` for core workflows; complex aliases are skipped |
-| PowerShell | 7.4 LTS or 7.5 and later | Supported | Core CLI | Managed profile, `dot` wrapper, listing helpers and attestation aliases. CI runs PowerShell 7.6 on `windows-latest`; 7.4 itself is not exercised in CI |
+| PowerShell | 7.5 or later | Supported | Core CLI | Managed profile, `dot` wrapper, listing helpers and attestation aliases. CI runs PowerShell 7.6 on `windows-latest` |
 
 ## Terminal Emulators
 

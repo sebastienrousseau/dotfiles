@@ -414,15 +414,15 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Verify PowerShell 7.4+
-        # The documented floor is 7.4 LTS until it retires on 2026-11-10,
-        # then 7.5. windows-latest ships PowerShell 7.6 (7.6.6 on
-        # 2026-09-25), so this job proves 7.6; 7.4 itself is not exercised.
+      - name: Verify PowerShell 7.5+
+        # The floor is 7.5 since PowerShell 7.4 LTS retired on 2026-11-10.
+        # windows-latest ships PowerShell 7.6 (7.6.6 on 2026-09-25), so
+        # this job proves 7.6.
         shell: pwsh
         run: |
           if ($PSVersionTable.PSVersion.Major -lt 7 -or
-              ($PSVersionTable.PSVersion.Major -eq 7 -and $PSVersionTable.PSVersion.Minor -lt 4)) {
-            Write-Error "PowerShell $($PSVersionTable.PSVersion) — need 7.4+ (LTS) or 7.5+"
+              ($PSVersionTable.PSVersion.Major -eq 7 -and $PSVersionTable.PSVersion.Minor -lt 5)) {
+            Write-Error "PowerShell $($PSVersionTable.PSVersion) — need 7.5 or later"
             exit 1
           }
           Write-Host "PowerShell $($PSVersionTable.PSVersion) ✓"

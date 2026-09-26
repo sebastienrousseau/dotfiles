@@ -258,7 +258,7 @@ function Invoke-DotDoctor {
     [CmdletBinding()]
     param([switch]$AsObject)
     $checks = @(
-        [pscustomobject]@{ Name = 'PowerShell 7.4+'; Ok = ($PSVersionTable.PSVersion -ge [version]'7.4') }
+        [pscustomobject]@{ Name = 'PowerShell 7.5+'; Ok = ($PSVersionTable.PSVersion -ge [version]'7.5') }
         [pscustomobject]@{ Name = 'chezmoi'; Ok = [bool](Get-Command chezmoi -ErrorAction SilentlyContinue) }
         [pscustomobject]@{ Name = 'git'; Ok = [bool](Get-Command git -ErrorAction SilentlyContinue) }
         [pscustomobject]@{ Name = 'repository data'; Ok = (Test-Path $script:DataFile) }

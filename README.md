@@ -7,7 +7,7 @@
 
 <p align="center">
   Declarative dotfiles for macOS, Linux, WSL, and Windows-native
-  PowerShell 7.4 LTS / 7.5+. Multi-shell by default. Sub-100ms
+  PowerShell 7.5+. Multi-shell by default. Sub-100ms
   <code>dot</code> cold-start. Wallpaper-driven themes. Signed and
   attested releases. Fleet apply over SSH.
 </p>
@@ -231,7 +231,7 @@ profile per machine and flip session flags when you need less.
   table, with per-tool floors, is
   [`docs/MINIMUM-TOOLCHAIN.md`](docs/MINIMUM-TOOLCHAIN.md).
 
-- **Windows.** PowerShell 7.4 LTS / 7.5+ runs the native
+- **Windows.** PowerShell 7.5+ runs the native
   `dot.ps1` for the daily workflow (apply, status, doctor, mise
   inventory, agent checks, fleet status); the `Test / Windows` job
   exercises the cmdlets on `windows-latest` every push.
