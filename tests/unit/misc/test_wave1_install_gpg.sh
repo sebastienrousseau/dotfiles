@@ -196,6 +196,22 @@ test_start "install_embedded_extract_failure"
 assert_equals "1|absent" "$rc|$([[ -e "$SANDBOX/h10/.local/bin/chezmoi" ]] && echo present || echo absent)" \
   "an archive that cannot be extracted is refused, not reported as installed"
 
+# A verified archive whose install step fails (read-only ~/.local/bin):
+# refused, not reported as installed. Skipped as root, which ignores modes.
+printf '%s  %s\n' "$sum" "$asset" >"$REL/chezmoi_2.47.1_checksums.txt"
+mkdir -p "$SANDBOX/h11/.local/bin"
+chmod 555 "$SANDBOX/h11/.local/bin"
+: >"$SANDBOX/calls.log"
+rc="$(run_install "$SANDBOX/h11" "$SANDBOX/has-curl:$SYS")"
+chmod 755 "$SANDBOX/h11/.local/bin"
+test_start "install_embedded_install_step_failure"
+if [[ "$(id -u)" == 0 ]]; then
+  assert_true "true" "skipped as root"
+else
+  assert_equals "1|absent" "$rc|$([[ -e "$SANDBOX/h11/.local/bin/chezmoi" ]] && echo present || echo absent)" \
+    "a failed install step is refused, not reported as installed"
+fi
+
 # --- Paths and version pin (top level of install.sh) ---
 
 test_start "install_source_dir_defined"
