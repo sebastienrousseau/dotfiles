@@ -40,8 +40,16 @@ export DOT_COMMAND="doctor"
 
 ui_init
 
-# Extend PATH to include common non-standard install locations
-export PATH="$HOME/.atuin/bin:$HOME/.local/bin:$PATH"
+# Extend PATH to include common non-standard install locations, unless they
+# are already on it: prepending ~/.local/bin a second time made doctor's own
+# PATH check report a duplicate that the user's shell does not have.
+for _doctor_dir in "$HOME/.local/bin" "$HOME/.atuin/bin"; do
+  case ":$PATH:" in
+    *":$_doctor_dir:"*) ;;
+    *) PATH="$_doctor_dir:$PATH" ;;
+  esac
+done
+export PATH
 
 Errors=0
 Warnings=0

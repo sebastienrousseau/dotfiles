@@ -132,23 +132,31 @@ _run_doctor "$S_BIN:$SYSBIN:$S_HOME/pathpad/a:$S_HOME/pathpad/a:$S_HOME/pathpad/
 assert_contains "[WARN] PATH length" "$DOC_OUT" "a PATH with a repeated entry warns"
 assert_contains "1 duplicate(s)" "$DOC_OUT" "the warning counts the duplicates"
 
+# ── doctor does not duplicate a directory the PATH already has ─────────
+test_start "path_doctor_prefix_does_not_duplicate"
+_run_doctor "$S_BIN:$SYSBIN:$S_HOME/.local/bin"
+assert_contains "[OK] PATH length 4 entries" "$DOC_OUT" \
+  "with ~/.local/bin already on PATH doctor adds only ~/.atuin/bin and reports no duplicate"
+
 # ── zsh hooks: one-shot hooks are fired before counting ───────────────
-# A zshrc with one persistent precmd hook and one preexec hook that
-# deregisters itself on first run (as the deferred-init hooks do): doctor
-# must report precmd=1 preexec=0, not the startup count of 1 and 1.
+# A zshrc with a persistent and a self-removing hook of each kind (the
+# deferred-init hooks remove themselves on first run): doctor must report
+# precmd=1 preexec=1, not the startup count of 2 and 2.
 test_start "zsh_hooks_count_after_one_shot_hooks_fire"
 ZSH_REAL="$(command -v zsh || true)"
 if [[ -n "$ZSH_REAL" ]]; then
   ln -sf "$ZSH_REAL" "$S_BIN/zsh"
   cat >"$S_HOME/.zshrc" <<'ZRC'
 persistent_precmd() { :; }
+one_shot_precmd() { precmd_functions=(${precmd_functions:#one_shot_precmd}); }
+persistent_preexec() { :; }
 one_shot_preexec() { preexec_functions=(${preexec_functions:#one_shot_preexec}); }
-precmd_functions=(persistent_precmd)
-preexec_functions=(one_shot_preexec)
+precmd_functions=(persistent_precmd one_shot_precmd)
+preexec_functions=(persistent_preexec one_shot_preexec)
 ZRC
   _run_doctor "$S_BIN:$SYSBIN"
   rm -f "$S_BIN/zsh" "$S_HOME/.zshrc"
-  assert_contains "zsh hooks precmd=1 preexec=0" "$DOC_OUT" "a self-removing preexec hook is not counted as per-prompt work"
+  assert_contains "zsh hooks precmd=1 preexec=1" "$DOC_OUT" "self-removing precmd and preexec hooks are not counted; persistent ones are"
 else
   assert_true "true" "skipped: zsh not installed"
 fi
