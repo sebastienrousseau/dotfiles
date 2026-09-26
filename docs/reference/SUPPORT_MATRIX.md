@@ -56,7 +56,7 @@ verified by CI.
 
 | Tool | Minimum | Required | Notes |
 |------|---------|----------|-------|
-| chezmoi | 2.47.1 | Yes | The pinned, checksum-verified version `install.sh` downloads |
+| chezmoi | 2.72.2 | Yes | The pinned, checksum-verified version `install.sh` downloads |
 | git | 2.34 | Yes | The first release with SSH commit and tag signing |
 | curl | — | Yes | Used by the bootstrap installer |
 | Neovim | 0.11.2 | No | Enforced by `init.lua`; the config refuses to load on older versions |

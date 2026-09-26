@@ -23,7 +23,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CHEZMOI_VERSION: "2.47.1"
+  CHEZMOI_VERSION: "2.72.2"
   # Enforce warnings as errors globally
   WARNINGS_AS_ERRORS: "1"
 
@@ -298,6 +298,11 @@ jobs:
       test-matrix,
       test-unit,
     ]
+    # Run even when a dependency fails. Without this the gate is *skipped*
+    # when test-unit fails, and GitHub counts a skipped required check as
+    # passed, so a red test job could merge (it did, in #1154). A needed job
+    # that was legitimately skipped still passes.
+    if: always()
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
@@ -305,7 +310,16 @@ jobs:
           egress-policy: audit
 
       - name: All checks passed
+        env:
+          RESULTS: ${{ toJSON(needs) }}
         run: |
+          set -euo pipefail
+          failed="$(jq -r 'to_entries[] | select(.value.result == "failure" or .value.result == "cancelled") | "\(.key): \(.value.result)"' <<<"$RESULTS")"
+          if [[ -n "$failed" ]]; then
+            echo "::error::Merge blocked; these required jobs did not pass:"
+            printf '%s\n' "$failed"
+            exit 1
+          fi
           echo "::notice::All CI checks passed - merge approved"
           echo "✅ All quality gates satisfied"
 

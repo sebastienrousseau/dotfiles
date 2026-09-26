@@ -98,7 +98,7 @@ Violations are logged to `~/.local/state/dotfiles/mcp-violations.log` and report
 
 ```json
 {
-  "version": "0.2.524",
+  "version": "0.2.525",
   "timestamp": "2026-04-16T09:00:00Z",
   "host": {
     "hostname_sha256": "...",
@@ -114,7 +114,7 @@ Violations are logged to `~/.local/state/dotfiles/mcp-violations.log` and report
     "agent_profile": "architect"
   },
   "tools": {
-    "chezmoi": "2.47.1",
+    "chezmoi": "2.72.2",
     "mise": "2026.4.0"
   },
   "git": {

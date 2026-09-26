@@ -262,13 +262,20 @@ test_start "template_options_zsh_has_balanced_braces"
 # asking chezmoi to render it — if it parses, the braces are balanced.
 options_tmpl="$REPO_ROOT/defaults/dot_config/zsh/rc.d/30-options.zsh.tmpl"
 if command -v chezmoi >/dev/null 2>&1; then
-  if chezmoi execute-template <"$options_tmpl" >/dev/null 2>&1; then
+  # Against this checkout in a sandbox: without --source/--config chezmoi
+  # used the host's own source and data, so CI (none) failed to render.
+  cz_sb="$(mktemp -d "${TMPDIR:-/tmp}/ep-cz.XXXXXX")"
+  : >"$cz_sb/chezmoi.toml"
+  if env -i HOME="$cz_sb" PATH="/usr/bin:/bin" "$(command -v chezmoi)" --config "$cz_sb/chezmoi.toml" \
+    --source "$REPO_ROOT" --destination "$cz_sb" --cache "$cz_sb/cache" \
+    --persistent-state "$cz_sb/state.boltdb" execute-template <"$options_tmpl" >/dev/null 2>&1; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: chezmoi parses the template"
   else
     ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: chezmoi failed to parse the template"
   fi
+  rm -rf "$cz_sb"
 else
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (chezmoi not installed)"

@@ -52,19 +52,35 @@ fi
 
 # ── Idempotency check ──────────────────────────────────────────
 
-test_start "chezmoi_apply_dry_run"
+# Both cases apply THIS checkout to a throwaway destination with an empty
+# config: without --source/--destination they used the host's own chezmoi
+# source and home, so on a clean runner they errored and locally they
+# dry-ran the user's real home. Scripts, externals and encrypted files are
+# excluded, so nothing is installed or downloaded.
+CZ_SB=""
 if command -v chezmoi >/dev/null 2>&1; then
+  CZ_SB="$(cd "$(mktemp -d "${TMPDIR:-/tmp}/cz-apply.XXXXXX")" && pwd)"
+  trap 'rm -rf "$CZ_SB"' EXIT
+  mkdir -p "$CZ_SB/home"
+  : >"$CZ_SB/chezmoi.toml"
+fi
+cz() {
+  env -i HOME="$CZ_SB/home" PATH="/usr/bin:/bin" "$(command -v chezmoi)" \
+    --config "$CZ_SB/chezmoi.toml" --source "$REPO_ROOT" --destination "$CZ_SB/home" \
+    --cache "$CZ_SB/cache" --persistent-state "$CZ_SB/state.boltdb" "$@"
+}
+CZ_EXCLUDE=(--exclude=scripts,externals,encrypted)
+
+test_start "chezmoi_apply_dry_run"
+if [[ -n "$CZ_SB" ]]; then
   exit_code=0
-  dry_run_out=$(chezmoi apply --dry-run 2>&1) || exit_code=$?
+  dry_run_err="$(cz apply --dry-run "${CZ_EXCLUDE[@]}" 2>&1 >/dev/null)" || exit_code=$?
   if [[ $exit_code -eq 0 ]]; then
     ((TESTS_PASSED++))
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dry-run succeeds (templates valid)"
-  elif [[ "$dry_run_out" == *"operation not permitted"* || "$dry_run_out" == *"Permission denied"* || "$dry_run_out" == *"could not open a new TTY"* ]]; then
-    ((TESTS_PASSED++))
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (chezmoi state unavailable in sandbox)"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dry-run of the checkout succeeds (templates valid)"
   else
     ((TESTS_FAILED++))
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dry-run failed (exit=$exit_code)"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dry-run failed (exit=$exit_code): ${dry_run_err:0:300}"
   fi
 else
   ((TESTS_PASSED++))
@@ -72,15 +88,16 @@ else
 fi
 
 test_start "chezmoi_apply_idempotent"
-if command -v chezmoi >/dev/null 2>&1; then
-  # Running diff after apply should produce no output if idempotent
-  diff_out=$(chezmoi diff 2>/dev/null || true)
-  if [[ -z "$diff_out" ]]; then
+if [[ -n "$CZ_SB" ]]; then
+  apply_rc=0
+  cz apply "${CZ_EXCLUDE[@]}" >/dev/null 2>&1 || apply_rc=$?
+  diff_out="$(cz diff "${CZ_EXCLUDE[@]}" 2>/dev/null || true)"
+  if [[ $apply_rc -eq 0 && -z "$diff_out" && -f "$CZ_SB/home/.zshrc" ]]; then
     ((TESTS_PASSED++))
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no pending changes (idempotent)"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: apply, then diff shows no pending changes"
   else
-    ((TESTS_PASSED++))
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: pending changes exist (expected during dev)"
+    ((TESTS_FAILED++))
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: apply rc=$apply_rc; pending after apply: ${diff_out:0:300}"
   fi
 else
   ((TESTS_PASSED++))
