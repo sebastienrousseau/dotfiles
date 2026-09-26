@@ -1,12 +1,12 @@
 ---
 render_with_liquid: false
 title: "PowerShell parity matrix"
-description: "What works on Windows-native PowerShell 7.4 LTS / 7.5+ vs the bash surface."
+description: "What works on Windows-native PowerShell 7.5+ vs the bash surface."
 ---
 
 # PowerShell parity matrix
 
-This document tracks what is supported on Windows-native PowerShell 7.4 LTS / 7.5+ compared to the bash/zsh surface that ships on macOS and Linux. The repo's positioning has shifted (per [ROADMAP_2026 §6.9](../operations/ROADMAP_2026.md)) to call PowerShell a first-class target rather than "best effort." This page is the contract.
+This document tracks what is supported on Windows-native PowerShell 7.5+ compared to the bash/zsh surface that ships on macOS and Linux. The repo's positioning has shifted (per [ROADMAP_2026 §6.9](../operations/ROADMAP_2026.md)) to call PowerShell a first-class target rather than "best effort." This page is the contract.
 
 ## Support tiers
 
@@ -52,7 +52,7 @@ This document tracks what is supported on Windows-native PowerShell 7.4 LTS / 7.
 | `dot agents check` exits 0 | windows-latest (native), ubuntu-latest, macos-latest, macos-14 |
 | Native module import, agent-body sync, harness inventory, doctor baseline, and chezmoi diff | windows-latest |
 | Native dispatcher version, help, and agents check | windows-latest |
-| PowerShell ≥ 7.4 | windows-latest (smoke test at `tools/ci/windows-smoke-test.ps1`) |
+| PowerShell ≥ 7.5 | windows-latest (smoke test at `tools/ci/windows-smoke-test.ps1`) |
 | PSScriptAnalyzer Error-level findings | windows-latest |
 | `chezmoi --version` exits 0 | windows-latest (via scoop), all Unix matrices |
 | `bash tools/ci/dot-cli-startup-bench.sh` median < 200ms | macos-latest |
@@ -77,6 +77,6 @@ These are scoped in [`ROADMAP_2026 §C5`](../operations/ROADMAP_2026.md) but not
 
 ## Why this matters
 
-The 2026 trend brief flagged Windows-as-first-class as the highest-leverage move post-Codex-Windows-GA (launched 2026-03-04 with 500k waitlist → 2M WAU in 4 weeks). PowerShell 7.4 LTS retires 2026-11-10, so the gate sits at "7.4+" today and will tighten to "7.5+" in November. Documented here so the gate change is not a surprise.
+The 2026 trend brief flagged Windows-as-first-class as the highest-leverage move post-Codex-Windows-GA (launched 2026-03-04 with 500k waitlist → 2M WAU in 4 weeks). PowerShell 7.4 LTS retired on 2026-11-10, and the gate moved from "7.4+" to "7.5+" then.
 
 Generated 2026-05-16 alongside the round-2 hard audit. Maintained: when adding a `dot` subcommand, update this matrix in the same PR.
