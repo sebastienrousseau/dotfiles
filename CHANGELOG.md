@@ -4,6 +4,23 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+## v0.2.526 — 2026-09-26
+
+### Fixed
+
+- aider starts again. mise installed it on the default Python 3.13, where
+  it crashes at import (pydub needs the stdlib `audioop` module, removed in
+  3.13); its environment is now built on Python 3.12, and `dot ai install
+  aider` uses the same pinned spec.
+- `dot doctor` no longer warns on a healthy mise machine. The PATH-length
+  thresholds apply to the entries that are not mise tool directories
+  (those are there on purpose), duplicates warn at any length, and doctor
+  stops adding a duplicate `~/.local/bin` of its own. The zsh-hook count
+  fires each hook once first, so self-removing deferred-init hooks are no
+  longer reported as per-prompt work.
+- The zsh lazy-layer `preexec` hook removes itself once the layers are
+  loaded by other means (`dot load`, background prewarm).
+
 ## v0.2.525 — 2026-09-26
 
 ### Changed
