@@ -116,6 +116,15 @@ assert_contains "[WARN] PATH length" "$DOC_OUT" "91 entries is [WARN]"
 assert_contains "consider pruning" "$DOC_OUT" "91 entries carries the pruning advice"
 assert_false '[[ "$DOC_OUT" == *"[OK] PATH length"* ]]' "91 entries is not [OK]"
 
+# ── 120 entries still warns; 121 is the first [FAIL] ───────────────────
+test_start "path_count_120_warns"
+_run_doctor "$(_path_with_entries $((120 - DOCTOR_PREFIX_ENTRIES)))"
+assert_contains "[WARN] PATH length 120 entries" "$DOC_OUT" "120 entries is still [WARN]"
+
+test_start "path_count_121_fails"
+_run_doctor "$(_path_with_entries $((121 - DOCTOR_PREFIX_ENTRIES)))"
+assert_contains "[FAIL] PATH length 121 entries" "$DOC_OUT" "121 entries is [FAIL]"
+
 # ── mise tool directories do not count towards the length verdict ──────
 # 100 entries, 70 of them mise install dirs: 30 other, so [OK], and the
 # message reports the mise share. It used to warn on every such machine.
