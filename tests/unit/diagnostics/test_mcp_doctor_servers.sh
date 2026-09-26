@@ -163,7 +163,7 @@ test_start "plain_http_transport_url_is_flagged"
 printf '{"mcpServers":{"remote":{"command":"npx","transport":"http","url":"http://mcp.example.com","args":[]}}}' \
   >"$FIX/insecure.json"
 check "$FIX/insecure.json" "$FULL_POLICY"
-out_has "remote uses non-HTTPS HTTP transport" "warning"
+out_has "remote http transport must use HTTPS" "warning"
 
 test_start "streamable_http_must_use_https"
 printf '{"mcpServers":{"stream":{"command":"npx","transport":"streamable-http","url":"http://x.example","args":[]}}}' \
