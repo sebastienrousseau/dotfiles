@@ -204,7 +204,7 @@ main() {
   step "Checking Prerequisites..."
 
   OS="$(uname -s)"
-  target_os="$(detect_target_os)"
+  target_os="$(detect_target_os "")" # "": the real filesystem root
 
   # Bootstrap gum for a better UI if available or install it
   bootstrap_gum() {
@@ -455,7 +455,7 @@ main() {
   fi
 
   # Detect devcontainer/Codespaces environment
-  if detect_container_env; then
+  if detect_container_env ""; then
     DOTFILES_MINIMAL=1
     step "Detected container environment — using minimal profile"
   fi
