@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-set -euo pipefail
+set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
@@ -30,12 +30,14 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax error"
 fi
 
-test_start "mcp_doctor_shebang"
-first_line=$(head -n 1 "$TEST_SCRIPT")
-assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
+# meta <args...>: run `dot mcp` through the meta command module.
+meta() {
+  REPO_ROOT="$REPO_ROOT" MCP_CONFIG="$MCP_CONFIG_FILE" NO_COLOR=1 bash "$META_COMMANDS_SCRIPT" "$@" 2>&1
+}
 
 test_start "mcp_meta_accepts_flag_form"
-assert_file_contains "$META_COMMANDS_SCRIPT" "[[ \"\${1:-}\" == --* ]]" "dot mcp accepts flag-only form"
+assert_equals "healthy" "$(meta mcp --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["status"])' 2>/dev/null)" \
+  "dot mcp --json (flag only) runs the doctor"
 
 test_start "mcp_policy_exists"
 assert_file_exists "$MCP_POLICY_FILE" "mcp-policy.json should exist"
@@ -79,10 +81,6 @@ else
   printf '%b\n' "    Output: $output"
 fi
 
-test_start "mcp_doctor_short_flags_supported"
-assert_file_contains "$TEST_SCRIPT" "--strict | -s" "mcp-doctor supports -s"
-assert_file_contains "$TEST_SCRIPT" "--json | -j" "mcp-doctor supports -j"
-
 test_start "mcp_doctor_short_flag_json_output"
 output=$(REPO_ROOT="$REPO_ROOT" MCP_CONFIG="$MCP_CONFIG_FILE" bash "$TEST_SCRIPT" -s -j 2>/dev/null) || true
 if [[ "$output" == \{* ]] && [[ "$output" == *"\"status\""* ]]; then
@@ -94,14 +92,55 @@ else
   printf '%b\n' "    Output: $output"
 fi
 
-test_start "mcp_policy_requires_registry_controls"
-assert_file_contains "$MCP_POLICY_FILE" "\"requireRegistryEntry\": true" "policy requires tracked registry entries"
-assert_file_contains "$MCP_POLICY_FILE" "\"requireHttpsForHttpTransports\": true" "policy requires HTTPS for HTTP transports"
-assert_file_contains "$MCP_POLICY_FILE" "\"requireOauthForHttpTransports\": true" "policy requires OAuth for HTTP transports"
+# Policy enforcement, run against configs that break one rule each.
+MCPX="$DOTFILES_COV_TMPDIR/mcp-policy"
+mkdir -p "$MCPX"
+jq '.mcpServers.rogue={"command":"npx","args":["-y","mcp-server-rogue@1.0.0"],"env":{}}' "$MCP_CONFIG_FILE" >"$MCPX/unregistered.json"
+jq '.mcpServers["example-remote"]={"transport":"streamable-http","url":"http://mcp.example.com/v1"}' "$MCP_CONFIG_FILE" >"$MCPX/plain-http.json"
+jq '.mcpServers["example-remote"]={"transport":"streamable-http","url":"https://mcp.example.com/v1"}' "$MCP_CONFIG_FILE" >"$MCPX/https.json"
+jq '.servers["example-remote"].auth="none" | .servers["example-remote"].authProfile="none"' "$MCP_REGISTRY_FILE" >"$MCPX/registry-no-oauth.json"
+
+# strict <config> [registry]: mcp-doctor --strict; sets S_OUT and S_RC.
+strict() {
+  local -a extra=()
+  [[ -n "${2:-}" ]] && extra=(MCP_REGISTRY_CONFIG="$2")
+  S_RC=0
+  S_OUT="$(env REPO_ROOT="$REPO_ROOT" MCP_CONFIG="$1" NO_COLOR=1 ${extra[@]+"${extra[@]}"} bash "$TEST_SCRIPT" --strict 2>&1)" || S_RC=$?
+}
+
+test_start "mcp_policy_requires_registry_entry"
+strict "$MCPX/unregistered.json"
+assert_true '[[ $S_RC -ne 0 && $S_OUT == *"rogue is missing or diverges from the tracked MCP registry"* ]]' \
+  "a server missing from the registry fails strict mode"
+
+test_start "mcp_policy_requires_https"
+strict "$MCPX/plain-http.json"
+assert_true '[[ $S_RC -ne 0 && $S_OUT == *"example-remote streamable-http transport must use HTTPS"* && $S_OUT != *"HTTP transports are HTTPS"* ]]' \
+  "a streamable-http server on http:// fails, with no contradicting success line"
+
+test_start "mcp_policy_requires_https_for_plain_http"
+jq '.mcpServers["example-remote"]={"transport":"http","url":"http://mcp.example.com/v1"}' "$MCP_CONFIG_FILE" >"$MCPX/plain-http-transport.json"
+strict "$MCPX/plain-http-transport.json"
+assert_true '[[ $S_OUT == *"example-remote http transport must use HTTPS"* ]]' \
+  "with requireHttpsForHttpTransports, a plain http transport on http:// is flagged too"
+
+test_start "mcp_policy_requires_oauth_for_streamable_http"
+strict "$MCPX/https.json" "$MCPX/registry-no-oauth.json"
+assert_true '[[ $S_OUT == *"example-remote HTTP transport is not registered for OAuth2"* ]]' \
+  "a streamable-http server registered without OAuth2 is flagged (the rule used to cover only plain http)"
+
+test_start "mcp_policy_https_oauth_server_passes_those_rules"
+strict "$MCPX/https.json"
+assert_true '[[ $S_OUT == *"HTTP transports are HTTPS"* && $S_OUT == *"HTTP transports are registry-approved for OAuth2"* && $S_OUT != *"must use HTTPS"* ]]' \
+  "an HTTPS, OAuth2-registered remote server passes the HTTPS and OAuth rules"
 
 test_start "mcp_meta_registry_subcommand"
-assert_file_contains "$META_COMMANDS_SCRIPT" "registry)" "dot mcp supports registry subcommand"
-assert_file_contains "$META_COMMANDS_SCRIPT" "Usage: dot mcp [doctor|registry|serve]" "dot mcp usage includes registry and serve"
+assert_true '[[ "$(meta mcp registry)" == *"git"*"mcp-server-git@2026.3.0"* ]]' "dot mcp registry lists the tracked servers"
+
+test_start "mcp_meta_unknown_subcommand_shows_usage"
+rc=0
+out="$(meta mcp bogus)" || rc=$?
+assert_equals "1|Usage: dot mcp [doctor|registry|serve]" "$rc|$out" "an unknown subcommand prints the usage and exits 1"
 
 test_start "mcp_doctor_strict_local_passes"
 if REPO_ROOT="$REPO_ROOT" MCP_CONFIG="$MCP_CONFIG_FILE" bash "$TEST_SCRIPT" --strict >/dev/null 2>&1; then

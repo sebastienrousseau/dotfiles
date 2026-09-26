@@ -18,7 +18,6 @@
    1 tests/unit/aliases/test_ai_aliases.sh
    5 tests/unit/aliases/test_alias_governance.sh
    6 tests/unit/aliases/test_alias_hardening.sh
-  11 tests/unit/aliases/test_alias_strict_mode.sh
    1 tests/unit/aliases/test_aliases_templates.sh
    6 tests/unit/auto/test_auto_bin_corralctl_sync_sh.sh
    5 tests/unit/ci/test_check_dangerous_chmod.sh
@@ -39,9 +38,7 @@
    2 tests/unit/diagnostics/test_diagnostics_doctor.sh
    1 tests/unit/diagnostics/test_diagnostics_drift.sh
    1 tests/unit/diagnostics/test_diagnostics_drift_dashboard.sh
-   9 tests/unit/diagnostics/test_diagnostics_flag_aliases.sh
    1 tests/unit/diagnostics/test_diagnostics_history_analysis.sh
-   9 tests/unit/diagnostics/test_diagnostics_mcp_doctor.sh
    2 tests/unit/diagnostics/test_diagnostics_mcp_server_card.sh
    5 tests/unit/diagnostics/test_diagnostics_perf.sh
    1 tests/unit/diagnostics/test_diagnostics_scorecard.sh
@@ -122,7 +119,6 @@
    1 tests/unit/nushell/test_nushell_aliases.sh
    4 tests/unit/nushell/test_nushell_core_parity.sh
    2 tests/unit/ops/test_ops_ai_setup.sh
-  10 tests/unit/ops/test_ops_branch_cleanup.sh
    2 tests/unit/ops/test_ops_bundle.sh
    1 tests/unit/ops/test_ops_chaos.sh
    1 tests/unit/ops/test_ops_chezmoi_apply.sh

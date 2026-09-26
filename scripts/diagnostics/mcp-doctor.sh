@@ -316,37 +316,27 @@ if command -v jq >/dev/null 2>&1; then
       log_success "Transport policy" "all servers use trusted transports"
     fi
 
-    if [[ "$REQUIRE_HTTPS_FOR_HTTP" -eq 1 ]]; then
-      insecure_http_servers="$(jq -r '
-        .mcpServers
-        | to_entries[]?
-        | select((.value.transport // "") == "http")
-        | select((.value.url // "") | startswith("https://") | not)
-        | .key
-      ' "$MCP_CONFIG" 2>/dev/null || true)"
-      if [[ -n "$insecure_http_servers" ]]; then
-        while IFS= read -r item; do
-          [[ -z "$item" ]] && continue
-          log_warn "Transport security" "$item uses non-HTTPS HTTP transport"
-        done <<<"$insecure_http_servers"
-      else
-        log_success "Transport security" "HTTP transports are HTTPS"
-      fi
-    fi
-
-    # Streamable-HTTP HTTPS validation
-    insecure_streamable_servers="$(jq -r '
+    # HTTPS for remote transports. Both http and streamable-http carry the
+    # session over the network; streamable-http is always held to HTTPS,
+    # and requireHttpsForHttpTransports extends the rule to plain http.
+    # One verdict, so a success line never sits beside a failure.
+    https_transports='["streamable-http"]'
+    [[ "$REQUIRE_HTTPS_FOR_HTTP" -eq 1 ]] && https_transports='["http","streamable-http"]'
+    insecure_http_servers="$(jq -r --argjson ts "$https_transports" '
       .mcpServers
       | to_entries[]?
-      | select((.value.transport // "") == "streamable-http")
+      | (.value.transport // "") as $t
+      | select($t | IN($ts[]))
       | select((.value.url // "") | startswith("https://") | not)
-      | .key
+      | "\(.key)\t\($t)"
     ' "$MCP_CONFIG" 2>/dev/null || true)"
-    if [[ -n "$insecure_streamable_servers" ]]; then
-      while IFS= read -r item; do
+    if [[ -n "$insecure_http_servers" ]]; then
+      while IFS=$'\t' read -r item transport; do
         [[ -z "$item" ]] && continue
-        log_warn "Transport security" "$item streamable-http transport must use HTTPS"
-      done <<<"$insecure_streamable_servers"
+        log_warn "Transport security" "$item $transport transport must use HTTPS"
+      done <<<"$insecure_http_servers"
+    elif [[ "$REQUIRE_HTTPS_FOR_HTTP" -eq 1 ]]; then
+      log_success "Transport security" "HTTP transports are HTTPS"
     fi
 
     # Auth Profiles validation
@@ -380,7 +370,7 @@ if command -v jq >/dev/null 2>&1; then
         .mcpServers
         | to_entries[]?
         | .key as $name
-        | select((.value.transport // "") == "http")
+        | select((.value.transport // "") | IN("http", "streamable-http"))
         | select(($registry[$name].auth // "") != "oauth2")
         | $name
       ' "$MCP_CONFIG" 2>/dev/null || true)"
