@@ -46,16 +46,6 @@ else
   _fail "exports_dot_env_emit_function" "function not found"
 fi
 
-# `dot env emit` goes through tools.sh's dispatch; the manifest it prints
-# must name the v1 schema.
-EMIT_HOME="$(mktemp -d)"
-emit_schema="$(HOME="$EMIT_HOME" bash "$REPO_ROOT/bin/dot" env emit 2>/dev/null | jq -r .schema_version 2>/dev/null || true)"
-rm -rf "$EMIT_HOME"
-if [[ "$emit_schema" == */schema/dot-env-v1.json ]]; then
-  _pass "dispatched_via_tools_sh"
-else
-  _fail "dispatched_via_tools_sh" "dot env emit did not print a v1 manifest (schema_version='$emit_schema')"
-fi
 
 if [[ -f "$REPO_ROOT/docs/schema/dot-env-v1.json" ]]; then
   _pass "v1_schema_present"
@@ -102,6 +92,17 @@ cat <<'JSON'
 JSON
 EOF_MISE
 chmod +x "$tmp/bin/mise"
+
+# `dot env emit` goes through tools.sh's dispatch; the manifest it prints
+# must name the v1 schema (mise is the stub above; CI has no real mise).
+EMIT_HOME="$(mktemp -d)"
+emit_schema="$(HOME="$EMIT_HOME" PATH="$tmp/bin:$PATH" bash "$REPO_ROOT/bin/dot" env emit 2>/dev/null | jq -r .schema_version 2>/dev/null || true)"
+rm -rf "$EMIT_HOME"
+if [[ "$emit_schema" == */schema/dot-env-v1.json ]]; then
+  _pass "dispatched_via_tools_sh"
+else
+  _fail "dispatched_via_tools_sh" "dot env emit did not print a v1 manifest (schema_version='$emit_schema')"
+fi
 
 deep_out="$(
   set +e
