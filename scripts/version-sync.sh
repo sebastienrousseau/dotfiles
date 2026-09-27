@@ -262,12 +262,15 @@ create_backup() {
   rm -rf "$BACKUP_DIR"
   mkdir -p "$BACKUP_DIR"
 
-  local backup_count=0
+  # Keep each file's relative path: basenames collide (README.md exists in
+  # several directories), and a flat name made later copies overwrite
+  # earlier ones.
+  local backup_count=0 stamp
+  stamp="$(date +%Y%m%d_%H%M%S)"
   for file in "${files[@]}"; do
     if [[ -f "$file" ]]; then
-      local backup_name
-      backup_name="$(basename "$file").$(date +%Y%m%d_%H%M%S).backup"
-      cp "$file" "$BACKUP_DIR/$backup_name"
+      mkdir -p "$BACKUP_DIR/$(dirname "$file")"
+      cp "$file" "$BACKUP_DIR/$file.$stamp.backup"
       backup_count=$((backup_count + 1))
     fi
   done
