@@ -245,14 +245,18 @@ cmd_mode() {
       ui_ok "MCP" "$(_agent_profile_field "$name" "mcpProfile")"
       ;;
     set)
-      local name="${1:-}" state_file
+      local name="${1:-}" state_file role=""
       [[ -n "$name" ]] || die "Usage: dot mode set <profile>"
       _agent_profile_exists "$name" || die "Unknown agent profile: $name"
       _agent_enforce_rbac "$name"
       state_file="$(_agent_state_file)"
       mkdir -p "$(dirname "$state_file")"
+      # The role lives in the same file; rewriting it without the role would
+      # drop the caller back to the default role on every mode switch.
+      [[ -f "$state_file" ]] && role="$(sed -n 's/^DOT_AGENT_ROLE=//p' "$state_file" | tail -n 1)"
       cat >"$state_file" <<EOF
-DOT_AGENT_PROFILE=$name
+${role:+DOT_AGENT_ROLE=$role
+}DOT_AGENT_PROFILE=$name
 DOT_AGENT_APPROVAL=$(_agent_profile_field "$name" "approval")
 DOT_AGENT_FILESYSTEM=$(_agent_profile_field "$name" "filesystem")
 DOT_AGENT_NETWORK=$(_agent_profile_field "$name" "network")
@@ -434,6 +438,9 @@ EOF
       delegate_profile="$(jq -r --arg d "$delegate_name" '.delegation.allowedDelegates[$d].profile' "$profiles_file")"
       delegate_timeout="$(jq -r --arg d "$delegate_name" '.delegation.allowedDelegates[$d].timeout // 300' "$profiles_file")"
       delegate_max_steps="$(jq -r --arg d "$delegate_name" '.delegation.allowedDelegates[$d].maxSteps // 4' "$profiles_file")"
+      # A delegate runs under its own profile, so the caller's role must be
+      # allowed that profile too; otherwise delegation sidesteps RBAC.
+      _agent_enforce_rbac "$delegate_profile"
       # Apply delegate profile env
       _agent_apply_profile_env "$delegate_profile"
       export DOT_AGENT_MAX_STEPS="$delegate_max_steps"

@@ -53,9 +53,6 @@ run_cmd() {
 
 meta() { run_cmd bash "$META" "$@"; }
 
-test_start "module_defines_cmd_mode"
-assert_file_contains "$AGENT_MODULE" "cmd_mode()" "agent.sh defines cmd_mode"
-
 # ── current / list / show ───────────────────────────────────────────────
 test_start "mode_no_args_reports_current_profile_from_state_file"
 meta mode
