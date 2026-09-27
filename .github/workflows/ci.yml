@@ -532,7 +532,10 @@ jobs:
         run: |
           set -euo pipefail
           chmod +x tests/framework/*.sh
-          git fetch --no-tags --depth=1 origin "+refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+          # No --depth: in this full clone a shallow fetch of a base branch
+          # that moved since checkout grafts its tip parentless, and
+          # origin/<base>...HEAD then has no merge base (git exits 128).
+          git fetch --no-tags origin "+refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
           python3 tools/ci/mutation-test.py \
             --base "origin/${{ github.base_ref }}" \
             --min-score 80 \

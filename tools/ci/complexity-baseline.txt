@@ -133,7 +133,6 @@
   13   13   21.2   26     0 scripts/diagnostics/health.sh::check_terminal
   17   26   34.5   93     0 scripts/diagnostics/health.sh::print_summary
    5    5   17.0   65    65 scripts/diagnostics/history-analysis.sh::<top>
-  65   78   84.8  310   371 scripts/diagnostics/perf.sh::<top>
   16   18   41.4   86    89 scripts/diagnostics/scorecard.sh::<top>
   17   19   27.8   40    46 scripts/diagnostics/secret-governance.sh::<top>
   14   18   28.5   38     0 scripts/diagnostics/security-score.sh::check_encryption
@@ -222,10 +221,6 @@
   12   15   41.8   39     0 scripts/theme/rebuild-themes.sh::discover_custom
   11   20   29.5   37     0 scripts/theme/rebuild-themes.sh::discover_linux_system
   13   24   28.7   43     0 scripts/theme/rebuild-themes.sh::discover_macos_system
- 191  214  131.0  713  1177 scripts/theme/switch.sh::<top>
-  17   20   42.4   52     0 scripts/theme/switch.sh::ambient_theme
-  11   14   24.7   98     0 scripts/theme/switch.sh::pick_theme
-  11   16   16.6   32     0 scripts/theme/switch.sh::system_appearance_mode
   11   10   19.9   47   120 scripts/theme/wallpaper-rotate.sh::<top>
   18   20   33.0   47   519 scripts/theme/wallpaper-sync.sh::<top>
   34   59   60.6  156     0 scripts/theme/wallpaper-sync.sh::apply_wallpaper
