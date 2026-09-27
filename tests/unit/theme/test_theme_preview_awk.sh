@@ -48,18 +48,18 @@ c15 = "#ffffff"
 accent = "#2ecc71"
 EOF
 
-# The preview program is read out of scripts/theme/switch.sh, not copied
+# The preview program is read out of scripts/theme/switch/picker.sh (the picker), not copied
 # here. A copy drifts silently in both directions: on 2026-09-19 the shipped
 # program used gawk's three-argument match(), which macOS awk rejects outright,
 # and this file's copy had the same bug — so the test "agreed" with the code
 # while the preview was dead on macOS for every user. Reading the real program
-# means a change to switch.sh is tested, not a change to a duplicate of it.
+# means a change to the picker is tested, not a change to a duplicate of it.
 _preview_awk_program() {
   awk '
     /preview_cmd=.*awk -v F=/ { inprog = 1; next }
     inprog && $0 ~ /^\}.*"\$f"/ { print "}"; exit }
     inprog { print }
-  ' "$REPO_ROOT/scripts/theme/switch.sh"
+  ' "$REPO_ROOT/scripts/theme/switch/picker.sh"
 }
 
 _render_preview() {
