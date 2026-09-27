@@ -334,8 +334,38 @@ class TestIndex:
             )
         return self._text[t]
 
+    def parents(self, rel: str) -> list[str]:
+        """Scripts that `source` (or `.`) rel, matched by its last two path
+        parts. A module split out of a script is exercised through it, so
+        it inherits that script's tests."""
+        parts = Path(rel).parts
+        if len(parts) < 2:
+            return []
+        pat = re.compile(
+            r"^\s*(?:source|\.)\s+[^\n#]*" + re.escape("/".join(parts[-2:])) + r"\b", re.M
+        )
+        if not hasattr(self, "_sources"):
+            self._sources = sorted(
+                str(p.relative_to(self.root))
+                for p in self.root.rglob("*.sh")
+                if p.is_file() and "tests" not in p.relative_to(self.root).parts
+            )
+        out = []
+        for src in self._sources:
+            if src == rel:
+                continue
+            try:
+                text = (self.root / src).read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            if pat.search(text):
+                out.append(src)
+        return out
+
     def related(self, rel: str) -> list[str]:
-        needles = needles_for(rel)
+        needles = set(needles_for(rel))
+        for parent in self.parents(rel):
+            needles.update(needles_for(parent))
         out = [t for t in self.files if any(n in self.text(t) for n in needles)]
         out += [t for t in self.extra.get(rel, []) if (self.root / t).is_file()]
         return sorted({t for t in out if not self.is_structural(t, rel)})
