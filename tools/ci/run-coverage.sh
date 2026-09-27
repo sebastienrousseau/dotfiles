@@ -472,8 +472,8 @@ _cov_audit_silent() {
     slug="$(basename "$status_file" .status)"
     trace_file="$trace_dir/${slug}.trace"
     rel="$(cut -f3 "$status_file")"
-    if [[ ! -s "$trace_file" ]] ||
-      ! grep -qE '^\++@COV@:[0-9]+:' "$trace_file" 2>/dev/null; then
+    # grep also fails on an empty or missing trace, so it alone decides.
+    if ! grep -qE '^\++@COV@:[0-9]+:' "$trace_file" 2>/dev/null; then
       silent_tests+=("${rel:-$slug}")
     fi
   done
