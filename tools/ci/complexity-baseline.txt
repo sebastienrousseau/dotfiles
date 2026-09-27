@@ -203,7 +203,6 @@
   15   21   30.8   50     0 scripts/ops/rollback.sh::perform_rollback
   23   22   37.5   57     0 scripts/ops/rollback.sh::restore_file
   11   12   18.7   86   108 scripts/ops/setup.sh::<top>
-  48   69   63.8  174   179 scripts/qa/check-feature-matrix.sh::<top>
   11   12   30.8   89    89 scripts/qa/scorecard-snapshot.sh::<top>
   15   16   34.9   56    66 scripts/qa/validate-examples.sh::<top>
   17   14   34.9   63    63 scripts/security/check-disclosure-key-expiry.sh::<top>
