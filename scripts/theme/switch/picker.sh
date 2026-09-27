@@ -274,21 +274,22 @@ _theme_cmd_preview() {
 _theme_random_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --mode)
-        shift
-        case "${1:-}" in
+      --mode | --mode=*)
+        local value="${1#--mode=}"
+        if [[ "$1" == --mode ]]; then
+          shift
+          value="${1:-}"
+        fi
+        # Both spellings are checked: --mode=purple used to reach
+        # dot-theme-sync as the theme "<family>-purple".
+        case "$value" in
           dark | light) ;;
           *)
             ui_err "Usage" "--mode dark|light"
             exit 1
             ;;
         esac
-        _rand_mode="$1"
-        _rand_explicit=true
-        shift
-        ;;
-      --mode=*)
-        _rand_mode="${1#--mode=}"
+        _rand_mode="$value"
         _rand_explicit=true
         shift
         ;;
