@@ -34,6 +34,11 @@ SHELL_FILTER=""
 BY_TOOL=false
 RESET_TIMINGS=false
 
+_perf_usage_error() {
+  ui_err "perf" "$1"
+  exit 2
+}
+
 # A flag that takes a value: --runs/-r, --target/-t, --shell/-s.
 _perf_set_option() {
   case "$1" in
@@ -57,12 +62,20 @@ _perf_parse_args() {
       # the very first run on a machine, or for short-lived CI.
       --no-baseline-check) NO_BASELINE_CHECK=true ;;
       --runs | -r | --target | -t | --shell | -s)
-        _perf_set_option "$1" "${2:-}"
+        [[ $# -ge 2 ]] || _perf_usage_error "$1 needs a value"
+        _perf_set_option "$1" "$2"
         shift
         ;;
     esac
     shift
   done
+  _perf_validate_args
+}
+
+# --runs 0 divided by zero; non-numbers failed in seq or arithmetic.
+_perf_validate_args() {
+  [[ "$RUNS" =~ ^[1-9][0-9]*$ ]] || _perf_usage_error "--runs must be a positive integer (got '$RUNS')"
+  [[ "$TARGET_MS" =~ ^[0-9]+$ ]] || _perf_usage_error "--target must be a whole number of ms (got '$TARGET_MS')"
 }
 
 # --by-tool reader: aggregate $XDG_STATE_HOME/dotfiles/eval-timings.jsonl

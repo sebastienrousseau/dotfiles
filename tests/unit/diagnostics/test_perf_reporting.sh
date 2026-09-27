@@ -39,6 +39,17 @@ test_start "script_exists_and_parses"
 assert_file_exists "$PERF" "perf.sh must exist"
 assert_true "bash -n '$PERF'" "valid bash syntax"
 
+# ── argument errors ───────────────────────────────────────────────────
+# A flag with no value, or a value that is not a number, is a usage error
+# (exit 2, with a message) rather than a silent exit 1 or a division by 0.
+for bad in "--runs" "-r" "-t" "--shell" "--runs 0" "--runs abc" "-r -1" "--target soon"; do
+  test_start "perf_rejects_${bad// /_}"
+  # shellcheck disable=SC2086
+  perf $bad 2>"$OUTF.err"
+  assert_equals "2:yes" "$RC:$(cat "$OUTF" "$OUTF.err" | grep -qE 'needs a value|must be' && echo yes)" \
+    "'perf $bad' explains the problem and exits 2"
+done
+
 # ── --by-tool / --reset ─────────────────────────────────────────────────
 test_start "by_tool_without_data_warns_and_exits_0"
 : >"$TIMINGS"
