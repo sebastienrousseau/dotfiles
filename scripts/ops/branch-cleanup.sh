@@ -201,8 +201,9 @@ _bc_triage() {
     row KEEP "$repo" "$scope" "$b" "$sha" protected
     return 1
   fi
+  # (A local branch equal to cur is covered too: preconditions require
+  # cur == def.)
   [[ "$b" == "$def" ]] && return 1
-  [[ "$scope" == local && "$b" == "$cur" ]] && return 1
   read -r verdict reason < <(decide "$scope" "$b" "$sha")
   if [[ "$verdict" == "LEAVE" ]]; then
     row LEFT "$repo" "$scope" "$b" "$sha" "$reason"
