@@ -9,10 +9,22 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 TARGET="$REPO_ROOT/defaults/dot_config/nushell/aliases.nu"
 
-test_start "nushell_core_parity_aliases"
-assert_file_contains "$TARGET" "alias dm = dot mode list" "nushell exposes dm"
-assert_file_contains "$TARGET" "alias da = dot agent list" "nushell exposes da"
-assert_file_contains "$TARGET" "alias dmc = dot mcp registry" "nushell exposes dmc"
-assert_file_contains "$TARGET" "alias datt = dot attest --json" "nushell exposes datt"
+# Load aliases.nu in nu and read each alias's expansion back. env.nu
+# always creates the bash-alias cache it sources, so the sandbox HOME does
+# too (empty, as on a first run).
+NU_HOME="$(mktemp -d)"
+trap 'rm -rf "$NU_HOME"' EXIT
+mkdir -p "$NU_HOME/.cache/nushell"
+: >"$NU_HOME/.cache/nushell/bash-aliases.nu"
+for pair in "dm:dot mode list" "da:dot agent list" "dmc:dot mcp registry" "datt:dot attest --json"; do
+  name="${pair%%:*}" want="${pair#*:}"
+  test_start "nushell_alias_${name}"
+  if NU_BIN="$(command -v nu)"; then
+    got="$(HOME="$NU_HOME" "$NU_BIN" --no-config-file -c "source '$TARGET'; scope aliases | where name == '$name' | get expansion.0" 2>&1 || true)"
+    assert_equals "$want" "$got" "$name expands to $want"
+  else
+    assert_true "true" "nu not installed; skipped"
+  fi
+done
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

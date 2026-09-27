@@ -36,16 +36,28 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
-test_start "uses_strict_mode"
-assert_file_contains "$SCRIPT_FILE" "set -euo pipefail" "must use strict mode"
+# tls_case <name> <relative file> <line> <want rc>: scan a one-file tree.
+tls_case() {
+  local name="$1" rel="$2" line="$3" want="$4" dir="$DOTFILES_COV_TMPDIR/tls-$1" rc=0
+  mkdir -p "$dir/$(dirname "$rel")"
+  printf '#!/usr/bin/env bash\n%s\n' "$line" >"$dir/$rel"
+  bash "$SCRIPT_FILE" "$dir" >/dev/null 2>&1 || rc=$?
+  test_start "$name"
+  assert_equals "$want" "$rc" "$rel: $line"
+}
 
-test_start "self_excludes_from_grep"
-# Source has quoted exclude, e.g. `--exclude='check-insecure-tls.sh'`,
-# so match the value alone rather than the verbatim `=value` form.
-assert_file_contains "$SCRIPT_FILE" "check-insecure-tls.sh" "must skip itself"
+tls_case flags_curl_insecure bad.sh 'curl --insecure https://x' 1
+tls_case flags_curl_k_in_cluster bad.sh 'curl -fsSLk https://x' 1
+tls_case flags_curl_sk bad.sh 'curl -sk https://x -o f' 1
+tls_case flags_wget_no_check bad.sh 'wget --no-check-certificate https://x' 1
+tls_case scans_templates bad.sh.tmpl 'curl -k https://x' 1
+tls_case allows_plain_curl ok.sh 'curl -fsSL https://x' 0
+tls_case allows_keyring_package ok.sh 'apt-get install -y ubuntu-keyring && curl -fsSL https://x' 0
+tls_case skips_test_fixtures tests/fixture.sh 'curl -k https://x' 0
+tls_case passes_tree_without_curl ok.sh 'echo no downloads here' 0
 
-test_start "negative_fixtures_are_excluded"
-assert_file_contains "$SCRIPT_FILE" "--exclude-dir='tests'" "repo scan must skip intentional test fixtures"
+test_start "repo_scan_is_clean"
+assert_exit_code 0 "bash '$SCRIPT_FILE' '$REPO_ROOT'"
 
 # Exercise the scanner against a tmp dir with one clean file: should
 # return 0 (no insecure patterns).

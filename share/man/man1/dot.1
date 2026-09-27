@@ -125,6 +125,12 @@ Set or inspect agent operating profiles (ask/plan/apply/audit)
 .B agent
 Profile\-aware execution, agent card, a2a\-card, session log, checkpoints, and conformance
 .TP
+.B agents
+Render and check AGENTS.md and per\-harness agent config from CLAUDE.md
+.TP
+.B patterns
+List, view, and edit AI steering patterns
+.TP
 .B cl
 Claude CLI with context patterns
 .TP
@@ -272,6 +278,12 @@ Start the interactive tour of your new tools
 .TP
 .B docs
 Show repo README
+.TP
+.B aliases
+List, search, and explain the shipped shell aliases
+.TP
+.B registry
+Browse and install modules from the dot module registry
 .TP
 .B env list
 List managed tool versions via mise
@@ -491,14 +503,8 @@ deprecated bridges, or advanced entry points that are kept out of
 to reduce noise; each still works and documents itself with
 .BR \-\-help .
 .TP
-.B agents
-Synchronize and render instructions for supported AI coding harnesses.
-.TP
 .B alias\-check
 Routed to the tools module; run dot alias\-check \-\-help.
-.TP
-.B aliases
-Inspect or audit shell aliases shipped by the dotfiles.
 .TP
 .B apply
 Apply the current dotfiles to this machine.
@@ -551,17 +557,11 @@ Routed to the tools module; run dot log\-rotate \-\-help.
 .B manual
 Open or download the dotfiles manual in HTML, PDF, EPUB, or text.
 .TP
-.B patterns
-Routed to the patterns module; run dot patterns \-\-help.
-.TP
 .B prewarm
 Alias of cache\-refresh — regenerate shell init caches.
 .TP
 .B qwen
 Run the Qwen Coder CLI with dotfiles context patterns.
-.TP
-.B registry
-Browse and manage reusable dotfile modules.
 .TP
 .B restore
 Restore from a backup or git ref.

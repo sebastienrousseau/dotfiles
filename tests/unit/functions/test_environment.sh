@@ -16,10 +16,6 @@ echo "Testing environment function..."
 test_start "environment_file_exists"
 assert_file_exists "$FUNC_FILE" "environment.sh should exist"
 
-# Test: environment.sh has valid syntax
-test_start "environment_syntax"
-assert_exit_code 0 "bash -n '$FUNC_FILE'"
-
 # Source the function
 if [[ -f "$FUNC_FILE" ]]; then
   source "$FUNC_FILE"
@@ -53,9 +49,22 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --help should show help text"
 fi
 
-# Test: environment uses case statement (no repeated uname calls)
+# Test: environment asks uname once per call, whatever the answer
 test_start "environment_single_uname"
-assert_file_contains "$FUNC_FILE" 'case "$os_name"' "should use case statement for single uname call"
+UNAME_LOG="$(mktemp)"
+uname() {
+  echo called >>"$UNAME_LOG"
+  echo "${FAKE_UNAME:-Linux}"
+}
+calls=""
+for FAKE_UNAME in Darwin Linux MINGW64_NT-10.0 FreeBSD; do
+  : >"$UNAME_LOG"
+  environment >/dev/null 2>&1
+  calls+="$(wc -l <"$UNAME_LOG" | tr -d ' ')"
+done
+unset -f uname
+rm -f "$UNAME_LOG"
+assert_equals "1111" "$calls" "one uname call on every platform branch"
 
 # Test: on macOS, environment returns "mac"
 test_start "environment_macos_detection"

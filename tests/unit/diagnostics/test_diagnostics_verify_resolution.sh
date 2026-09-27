@@ -49,6 +49,18 @@ vfy_stub() {
   chmod +x "$dir/$name"
 }
 
+# vfy_chezmoi <dir> [diff-text] — a stub chezmoi that behaves like the real
+# `chezmoi diff`: prints the diff (nothing when clean) and exits 0 either way.
+vfy_chezmoi() {
+  local dir="$1" text="${2:-}"
+  {
+    printf '#!/bin/sh\n'
+    [ -n "$text" ] && printf 'printf "%%s\\n" "%s"\n' "$text"
+    printf 'exit 0\n'
+  } >"$dir/chezmoi"
+  chmod +x "$dir/chezmoi"
+}
+
 # vfy_run <root> [args...] — run verify.sh with the case's HOME and a PATH
 # whose only non-system entry is the case's stub dir. CHEZMOI_SOURCE_DIR is
 # passed through from the caller's environment when set.
@@ -77,7 +89,7 @@ vfy_run() {
 # ── 1. `dot` on PATH, everything green ─────────────────────────────────────
 root="$(vfy_case path_ok)"
 vfy_stub "$root/bin" dot 0
-vfy_stub "$root/bin" chezmoi 0
+vfy_chezmoi "$root/bin"
 VFY_CHEZMOI_SRC="" vfy_run "$root"
 
 test_start "verify_passes_when_dot_and_chezmoi_are_healthy"
@@ -95,7 +107,7 @@ assert_contains "clean" "$VFY_OUT" "a zero-exit chezmoi diff should read as clea
 # ── 2. --security swaps the two default steps for security-score ───────────
 root="$(vfy_case security)"
 vfy_stub "$root/bin" dot 0
-vfy_stub "$root/bin" chezmoi 0
+vfy_chezmoi "$root/bin"
 VFY_CHEZMOI_SRC="" vfy_run "$root" --security
 
 test_start "verify_security_flag_exits_clean"
@@ -111,7 +123,7 @@ assert_false "[[ \"\$VFY_OUT\" == *'dot doctor'* ]]" \
 # ── 3. A failing step is counted, not fatal ────────────────────────────────
 root="$(vfy_case step_fails)"
 vfy_stub "$root/bin" dot 3
-vfy_stub "$root/bin" chezmoi 0
+vfy_chezmoi "$root/bin"
 VFY_CHEZMOI_SRC="" vfy_run "$root"
 
 test_start "verify_fails_when_a_step_fails"
@@ -126,17 +138,27 @@ assert_contains "dot heal" "$VFY_OUT" "the failure verdict should suggest dot he
 # ── 4. chezmoi diff reporting drift ────────────────────────────────────────
 root="$(vfy_case diff_drift)"
 vfy_stub "$root/bin" dot 0
-vfy_stub "$root/bin" chezmoi 1
+vfy_chezmoi "$root/bin" "diff --git a/.zshrc b/.zshrc"
 VFY_CHEZMOI_SRC="" vfy_run "$root"
 
 test_start "verify_fails_on_chezmoi_drift"
-assert_equals "1" "$VFY_RC" "a non-zero chezmoi diff should make verify exit 1"
+assert_equals "1" "$VFY_RC" "diff output (with chezmoi exiting 0) should make verify exit 1"
 
 test_start "verify_reports_drift"
 assert_contains "drift detected" "$VFY_OUT" "drift should be named"
 
 test_start "verify_echoes_the_diff_output"
-assert_contains "chezmoi diff" "$VFY_OUT" "the captured diff body should be replayed"
+assert_contains "diff --git a/.zshrc b/.zshrc" "$VFY_OUT" "the captured diff body should be replayed"
+
+# ── 4b. chezmoi itself failing, silently ───────────────────────────────────
+root="$(vfy_case diff_error)"
+vfy_stub "$root/bin" dot 0
+printf '#!/bin/sh\nexit 1\n' >"$root/bin/chezmoi"
+chmod +x "$root/bin/chezmoi"
+VFY_CHEZMOI_SRC="" vfy_run "$root"
+
+test_start "verify_fails_when_chezmoi_diff_errors"
+assert_equals "1" "$VFY_RC" "a failing chezmoi diff is not a clean result"
 
 # ── 5. Resolution fallbacks, in the order resolve_dot_bin tries them ───────
 
@@ -144,7 +166,7 @@ assert_contains "chezmoi diff" "$VFY_OUT" "the captured diff body should be repl
 root="$(vfy_case home_local_bin)"
 mkdir -p "$root/home/.local/bin"
 vfy_stub "$root/home/.local/bin" dot 0
-vfy_stub "$root/bin" chezmoi 0
+vfy_chezmoi "$root/bin"
 VFY_CHEZMOI_SRC="" vfy_run "$root"
 
 test_start "verify_falls_back_to_home_local_bin"
@@ -154,7 +176,7 @@ assert_equals "0" "$VFY_RC" "the home-local-bin fallback should be found and use
 root="$(vfy_case chezmoi_src)"
 mkdir -p "$root/src/bin"
 vfy_stub "$root/src/bin" dot 0
-vfy_stub "$root/bin" chezmoi 0
+vfy_chezmoi "$root/bin"
 VFY_CHEZMOI_SRC="$root/src" vfy_run "$root"
 
 test_start "verify_falls_back_to_chezmoi_source_dir"
@@ -164,7 +186,7 @@ assert_equals "0" "$VFY_RC" "CHEZMOI_SOURCE_DIR/bin/dot should be found and used
 root="$(vfy_case home_dotfiles)"
 mkdir -p "$root/home/.dotfiles/bin"
 vfy_stub "$root/home/.dotfiles/bin" dot 0
-vfy_stub "$root/bin" chezmoi 0
+vfy_chezmoi "$root/bin"
 VFY_CHEZMOI_SRC="" vfy_run "$root"
 
 test_start "verify_falls_back_to_home_dotfiles"
@@ -174,7 +196,7 @@ assert_equals "0" "$VFY_RC" "the home-dotfiles fallback should be found and used
 root="$(vfy_case home_share_chezmoi)"
 mkdir -p "$root/home/.local/share/chezmoi/bin"
 vfy_stub "$root/home/.local/share/chezmoi/bin" dot 0
-vfy_stub "$root/bin" chezmoi 0
+vfy_chezmoi "$root/bin"
 VFY_CHEZMOI_SRC="" vfy_run "$root"
 
 test_start "verify_falls_back_to_local_share_chezmoi"
@@ -184,7 +206,7 @@ assert_equals "0" "$VFY_RC" "the local-share-chezmoi fallback should be found an
 #     must give up rather than half-succeed.
 root="$(vfy_case src_without_dot)"
 mkdir -p "$root/src"
-vfy_stub "$root/bin" chezmoi 0
+vfy_chezmoi "$root/bin"
 VFY_CHEZMOI_SRC="$root/src" vfy_run "$root"
 
 test_start "verify_reports_a_missing_dot_binary"

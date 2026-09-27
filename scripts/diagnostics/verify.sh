@@ -84,10 +84,12 @@ fi
 
 ui_info "Running" "chezmoi diff"
 set +e
-diff_output="$(chezmoi diff 2>&1)"
+diff_output="$(chezmoi diff --no-pager 2>&1)"
 diff_ec=$?
 set -e
-if [[ $diff_ec -eq 0 ]]; then
+# `chezmoi diff` exits 0 whether or not there is drift (only --exit-code,
+# which older releases lack, changes that), so any output counts as drift.
+if [[ $diff_ec -eq 0 && -z "$diff_output" ]]; then
   ui_ok "chezmoi diff" "clean"
 else
   ui_warn "chezmoi diff" "drift detected"

@@ -16,48 +16,32 @@ echo "Testing Wave 2: dot new Python pre-flight guard..."
 test_start "dot_cli_exists"
 assert_file_exists "$DOT_CLI" "executable_dot should exist"
 
-test_start "dot_cli_syntax"
-assert_exit_code 0 "bash -n '$DOT_CLI'"
-
-# The Python check lives in the tools.sh command module (dispatched from executable_dot)
-TOOLS_MODULE="$REPO_ROOT/scripts/dot/commands/tools.sh"
+# Run `dot new` for real in a scratch cwd. The python-less case gets a PATH
+# of symlinks to every system tool except python*, so the pre-flight sees
+# no interpreter while everything else `dot` needs is still there.
+NEW_TMP="$(mktemp -d)"
+trap 'rm -rf "$NEW_TMP"' EXIT
+mkdir -p "$NEW_TMP/nopy" "$NEW_TMP/work"
+IFS=: read -ra _path_dirs <<<"$PATH"
+for d in "${_path_dirs[@]}"; do
+  [[ -d "$d" ]] || continue
+  for exe in "$d"/*; do
+    name="${exe##*/}"
+    [[ "$name" == python* || -e "$NEW_TMP/nopy/$name" || ! -x "$exe" ]] && continue
+    ln -s "$exe" "$NEW_TMP/nopy/$name" 2>/dev/null || true
+  done
+done
 
 test_start "python_check_before_filesystem_ops"
-# Extract the cmd_new function and verify python check comes before mkdir
-if [[ -f "$TOOLS_MODULE" ]]; then
-  new_block=$(sed -n '/cmd_new()/,/^}/p' "$TOOLS_MODULE")
-  python_line=$(echo "$new_block" | grep -n 'python3\|PYTHON_CMD' | head -1 | cut -d: -f1)
-  mkdir_line=$(echo "$new_block" | grep -n 'mkdir' | head -1 | cut -d: -f1)
-
-  if [[ -n "$python_line" && -n "$mkdir_line" ]]; then
-    if [[ "$python_line" -lt "$mkdir_line" ]]; then
-      ((TESTS_PASSED++)) || true
-      printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: Python check (line $python_line) before mkdir (line $mkdir_line)"
-    else
-      ((TESTS_FAILED++)) || true
-      printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: Python check should come before mkdir"
-    fi
-  elif [[ -n "$python_line" ]]; then
-    ((TESTS_PASSED++)) || true
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: Python check present in new block"
-  else
-    ((TESTS_FAILED++)) || true
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: Python check not found in new block"
-  fi
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: tools.sh module not found"
-fi
+(cd "$NEW_TMP/work" && PATH="$NEW_TMP/nopy" CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" new python demo >"$NEW_TMP/out" 2>&1) && rc=0 || rc=$?
+assert_equals "1|no" "$([[ $rc -ne 0 ]] && echo 1 || echo 0)|$([[ -e "$NEW_TMP/work/demo" ]] && echo yes || echo no)" "without python, dot new fails before creating anything"
 
 test_start "python_error_to_stderr"
-# The error message should go to stderr (in tools.sh module)
-if [[ -f "$TOOLS_MODULE" ]] && grep -q 'python3.*required' "$TOOLS_MODULE"; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: Python requirement check present in tools module"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: Python error should be checked in tools module"
-fi
+assert_contains "python3 is required" "$(cat "$NEW_TMP/out")" "the missing interpreter is named"
+
+test_start "dot_new_renders_the_project_name"
+(cd "$NEW_TMP/work" && CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" new python demo >/dev/null 2>&1) || true
+assert_equals "0|1" "$(grep -rl '__PROJECT_NAME__' "$NEW_TMP/work/demo" 2>/dev/null | wc -l | tr -d ' ')|$([[ -d "$NEW_TMP/work/demo" ]] && echo 1 || echo 0)" "the project exists with every placeholder replaced"
 
 test_start "dot_new_no_args_usage"
 set +e

@@ -23,12 +23,29 @@ for v in "${VERBS[@]}"; do
   assert_file_contains "$ZSH" "'$v:" "zsh completes 'dot ai $v'"
 done
 
+# bash: load the completion and ask it, the way readline would.
+# bash_complete <words...>: COMPREPLY for completing the last word.
+bash_complete() {
+  # shellcheck disable=SC2016
+  bash --norc --noprofile -c '
+    source "$1"; shift
+    COMP_WORDS=("$@"); COMP_CWORD=$((${#COMP_WORDS[@]} - 1))
+    _dot_completions
+    printf "%s\n" "${COMPREPLY[@]}" | sort | tr "\n" " "' _ "$BASH" "$@"
+}
+
 test_start "completions_bash_ai_verbs"
-# bash exposes `ai` as a top-level command and lists the verbs in its case arm.
-assert_file_contains "$BASH" " ai " "bash completes 'dot ai' as a command"
-for v in "${VERBS[@]}"; do
-  assert_file_contains "$BASH" "$v" "bash lists 'dot ai $v'"
-done
+assert_equals "$(printf '%s\n' "${VERBS[@]}" | sort | tr '\n' ' ')" "$(bash_complete dot ai "")" "dot ai <TAB> offers every verb"
+
+test_start "completions_bash_top_level_ai"
+assert_equals "ai ai-query ai-setup aider " "$(bash_complete dot ai)" "dot ai<TAB> offers the ai commands"
+
+# Commands whose subcommands were registered without a top-level entry
+# never showed up at `dot <TAB>`.
+test_start "completions_bash_top_level_has_every_parent"
+assert_equals "agent agents |aliases |patterns |registry " \
+  "$(bash_complete dot agent)|$(bash_complete dot alias)|$(bash_complete dot pat)|$(bash_complete dot reg)" \
+  "agents, aliases, patterns and registry complete at the top level"
 
 test_start "completions_fish_ai_verbs"
 assert_file_contains "$FISH" '-a ai ' "fish completes 'dot ai' as a subcommand"

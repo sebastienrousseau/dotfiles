@@ -37,29 +37,62 @@ fi
 # `-d ffmpeg` flag is non-obvious and was the key debugging insight
 # (libde265 fails where ffmpeg succeeds on Apple dynamic HEIC); pin
 # the test so a future refactor can't silently drop it.
-test_start "uses_heif_dec_ffmpeg"
-assert_file_contains "$SCRIPT_FILE" "heif-dec -d ffmpeg" \
-  "must use heif-dec -d ffmpeg (libde265 default decoder fails)"
+# Stub magick/heif-dec: a .heic file's content is its frame count; heif-dec
+# writes <out>-1.png .. <out>-N.png like the real `-d ffmpeg` decoder, or
+# fails when the file says "broken".
+HX="$DOTFILES_COV_TMPDIR/heic"
+mkdir -p "$HX/bin" "$HX/walls"
+cat >"$HX/bin/magick" <<'STUB'
+#!/bin/sh
+# magick identify <file>: one line per frame
+n=$(head -c 1 "$2")
+i=0; while [ "$i" -lt "$n" ]; do echo "$2[$i] HEIC"; i=$((i + 1)); done
+STUB
+cat >"$HX/bin/heif-dec" <<'STUB'
+#!/bin/sh
+# heif-dec -d ffmpeg <in> <out.png>
+grep -q broken "$3" && exit 1
+n=$(head -c 1 "$3"); base="${4%.png}"
+i=1; while [ "$i" -le "$n" ]; do echo "frame $i of $3" >"$base-$i.png"; i=$((i + 1)); done
+STUB
+chmod +x "$HX/bin/magick" "$HX/bin/heif-dec"
 
-test_start "honours_dotfiles_wallpaper_dir"
-assert_file_contains "$SCRIPT_FILE" "DOTFILES_WALLPAPER_DIR" \
-  "must honour DOTFILES_WALLPAPER_DIR override"
+# heic [args...]: run the script on $HX/walls; sets rc and out.
+heic() {
+  out=$(DOTFILES_WALLPAPER_DIR="$HX/walls" PATH="$HX/bin:$PATH" bash "$SCRIPT_FILE" "$@" 2>&1)
+  rc=$?
+}
+printf '2' >"$HX/walls/dune.heic"
+printf '1' >"$HX/walls/flat.heic"
 
-test_start "writes_zero_indexed_frames"
-assert_file_contains "$SCRIPT_FILE" '${name}-0.png' \
-  "must write the 0-indexed light frame next to the HEIC"
-assert_file_contains "$SCRIPT_FILE" '${name}-1.png' \
-  "must write the 1-indexed dark frame next to the HEIC"
+test_start "dry_run_writes_nothing"
+heic --dry-run
+assert_equals "0:0" "$rc:$(find "$HX/walls" -name '*.png' | wc -l | tr -d ' ')" "--dry-run only reports"
 
-test_start "supports_force_flag"
-assert_file_contains "$SCRIPT_FILE" -- "--force" \
-  "must accept --force to re-extract existing PNGs"
+test_start "extracts_two_frames_zero_indexed"
+heic
+assert_equals "frame 1 of dune.heic|frame 2 of dune.heic" "$(cat "$HX/walls/dune-0.png")|$(cat "$HX/walls/dune-1.png")" "decoder frames 1,2 land as -0/-1"
 
-test_start "supports_dry_run"
-assert_file_contains "$SCRIPT_FILE" -- "--dry-run" \
-  "must support --dry-run for inspection"
+test_start "single_frame_is_skipped"
+assert_contains "extracted: 1  skipped (already have PNGs): 0  single-frame: 1  failed: 0" "$out" "summary counts one extraction and one single-frame file"
 
-# Drive real line coverage of the script under test.
+test_start "existing_pngs_are_kept"
+heic
+assert_contains "extracted: 0  skipped (already have PNGs): 1" "$out" "a rerun skips files that already have both PNGs"
+
+test_start "force_reextracts"
+heic --force
+assert_contains "extracted: 1" "$out" "--force extracts again"
+
+test_start "decoder_failure_fails_the_run"
+printf '2 broken' >"$HX/walls/bad.heic"
+heic
+assert_equals "1" "$rc" "a failed decode exits 1 and is listed"
+
+test_start "missing_wallpaper_dir_fails"
+out=$(DOTFILES_WALLPAPER_DIR="$HX/nope" PATH="$HX/bin:$PATH" bash "$SCRIPT_FILE" 2>&1) && rc=0 || rc=$?
+assert_equals "1" "$rc" "an absent wallpaper dir is an error"
+
 cov_exercise_script "$SCRIPT_FILE"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
