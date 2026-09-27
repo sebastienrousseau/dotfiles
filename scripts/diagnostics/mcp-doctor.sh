@@ -117,7 +117,7 @@ _mcp_find_config() {
 # Read the policy, package lock and registry (defaults above when absent)
 # _mcp_json_ok <file>: jq is available and <file> exists and parses.
 _mcp_json_ok() {
-  command -v jq >/dev/null 2>&1 && [[ -f "$1" ]] && jq empty "$1" >/dev/null 2>&1
+  command -v jq >/dev/null 2>&1 && [[ -f "$1" ]] && jq empty "$1" >/dev/null 2>&1 # mutation: ignore equivalent: jq empty fails on a missing file too
 }
 
 # _mcp_policy_flag <key>: 1 when the policy's default profile sets <key> to
@@ -320,10 +320,8 @@ _mcp_report_text() {
     [[ "$JSON_MODE" -eq 1 ]] || ui_ok "MCP configuration healthy"
     return 0
   fi
-  if [[ "$STRICT_MODE" -eq 1 ]]; then
-    [[ "$JSON_MODE" -eq 1 ]] || ui_err "MCP issues found" "$Warnings policy warnings (strict mode)"
-    exit 1
-  fi
+  # Warnings without errors: under --strict log_warn counts every warning as
+  # an error too, so this is only reached in the default mode.
   [[ "$JSON_MODE" -eq 1 ]] || ui_warn "MCP configuration healthy" "$Warnings warnings"
   return 0
 }

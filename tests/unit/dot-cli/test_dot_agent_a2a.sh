@@ -105,6 +105,18 @@ assert_contains "missing or empty" "$OUT" "skills"
 assert_contains "authentication" "$OUT" "authentication row"
 assert_contains "missing method" "$OUT" "signing"
 
+# Each check on its own must fail strict validation: a card whose only
+# defect is its specVersion still exits 1.
+test_start "a2a_card_validate_spec_version_alone_fails"
+jq '.specVersion = "0.2"' "$REPO_ROOT/.well-known/agent-card.json" >"$FAKE/.well-known/agent-card.json"
+fmeta agent a2a-card -s
+assert_equals 1 "$RC" "strict exit on a wrong specVersion alone"
+
+test_start "a2a_card_validate_signing_alone_fails"
+jq 'del(.signing)' "$REPO_ROOT/.well-known/agent-card.json" >"$FAKE/.well-known/agent-card.json"
+fmeta agent a2a-card -s
+assert_equals 1 "$RC" "strict exit on a missing signing method alone"
+
 test_start "a2a_card_missing_file"
 rm -f "$FAKE/.well-known/agent-card.json"
 fmeta agent a2a-card

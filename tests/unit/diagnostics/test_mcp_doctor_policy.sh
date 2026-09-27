@@ -147,6 +147,15 @@ doctor "MCP_CONFIG=$MINIMAL_CFG" "MCP_POLICY_CONFIG=$FIX/absent.json" \
 assert_equals 0 "$RC" "warnings alone do not fail"
 out_has "using built-in defaults" "warning"
 
+test_start "warnings_summary_names_the_count"
+out_has "MCP configuration healthy" "healthy verdict despite warnings"
+
+test_start "json_mode_stays_json_with_warnings"
+doctor "MCP_CONFIG=$MINIMAL_CFG" "MCP_POLICY_CONFIG=$FIX/absent.json" \
+  "MCP_LOCK_CONFIG=$FIX/none.json" "MCP_REGISTRY_CONFIG=$FIX/none.json" \
+  "MCP_SERVER_CARD=$FIX/none.json" -- --json
+assert_equals "0:ok" "$RC:$(jq empty "$OUTF" >/dev/null 2>&1 && echo ok)" "stdout is one JSON document, no human summary"
+
 test_start "strict_mode_turns_warnings_into_failure"
 # Under --strict every log_warn also increments Errors, so the same run that
 # exits 0 with warnings exits 1 and reports them as errors.

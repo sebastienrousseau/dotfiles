@@ -362,10 +362,7 @@ _agent_checkpoint_save() {
 _agent_checkpoint_list() {
   local count="${1:-20}"
   dot_agent_session_log "checkpoint_list" "$(_agent_current_profile)" "ok"
-  if ! command -v jq >/dev/null 2>&1; then
-    dot_agent_checkpoint_tail "$count"
-    return 0
-  fi
+  # No jq fallback: cmd_mode refuses to run without jq.
   ui_header "Agent Checkpoints"
   dot_agent_checkpoint_tail "$count" | jq -r '"\(.id)\t\(.profile)\t\(.status)\t\(.created_at)\t\(.argv | join(" "))"' | while IFS=$'\t' read -r id profile status created_at argv; do
     ui_ok "$id" "$profile / $status / $created_at / $argv"
