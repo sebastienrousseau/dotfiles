@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck shell=bash
+# Sourced by mcp-doctor.sh; inherits set -euo pipefail
 # Policy checks of dot mcp doctor, one function per rule. Sourced by
 # scripts/diagnostics/mcp-doctor.sh; uses its log_* helpers and policy globals
 # (MCP_CONFIG, ALLOWED_LAUNCHERS, REQUIRE_*, ...).

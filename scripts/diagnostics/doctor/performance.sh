@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck shell=bash
+# Sourced by doctor.sh; inherits set -euo pipefail
 # Performance section of dot doctor: cache freshness, uncached inits,
 # zcompdump, PATH length, shell coverage, zsh hooks, perf baseline.
 # Sourced by scripts/diagnostics/doctor.sh; uses its helpers and globals.

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck shell=bash
+# Sourced by doctor.sh; inherits set -euo pipefail
 # Platform section of dot doctor: OS/hardware detection, WSL, the
 # platform block. Sourced by scripts/diagnostics/doctor.sh; uses its helpers
 # and globals (_ok/_warn, _os_name, _arch, ...).
