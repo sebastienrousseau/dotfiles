@@ -13,10 +13,12 @@ Every shell function (and each file's top-level code, reported as
   and ``case`` cost 1 plus their nesting depth; ``elif``/``else`` cost 1;
   each run of like ``&&``/``||`` operators costs 1. Bodies of ``if``,
   loops, ``case`` arms and nested functions increase the depth.
-* **effort** (Halstead E = D * V): operators are keywords, command names,
-  list/test/arithmetic/redirection/expansion operators and assignments;
-  operands are literals, variable names and assigned names.
+* **difficulty** (Halstead D = n1/2 * N2/n2; effort E = D * V is reported
+  too): operators are keywords, command names, list/test/arithmetic/
+  redirection/expansion operators and assignments; operands are literals,
+  variable names and assigned names.
 * **nloc**: non-blank, non-comment lines in the function's span.
+* **file_nloc**: the same count for the whole file, carried by ``<top>``.
 
 A unit is *complex* when any measure exceeds its limit (``LIMITS``). The
 ratchet (``tools/ci/complexity-baseline.txt``) lists today's complex units
@@ -26,7 +28,7 @@ ceilings after a refactor with ``--write-baseline``.
 
 Usage:
   tools/ci/complexity.py                 # ratchet check (CI)
-  tools/ci/complexity.py --report [-n N] [--sort cc|cog|effort|nloc]
+  tools/ci/complexity.py --report [-n N] [--sort cc|cog|difficulty|nloc|file_nloc|effort]
   tools/ci/complexity.py --summary       # totals and distribution
   tools/ci/complexity.py --json          # every unit, machine-readable
   tools/ci/complexity.py --report --files a.sh b.sh   # just these files
@@ -48,10 +50,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "tools/ci/complexity-baseline.txt"
 
-# Limits a unit may reach without being "complex". cc/cog 15 are the
-# lizard and SonarSource defaults; nloc 60 keeps a function on one screen;
-# effort 60k is roughly the 95th percentile of this codebase on 2026-09-27.
-LIMITS = {"cc": 15, "cog": 15, "effort": 60000.0, "nloc": 60}
+# Limits a unit may reach without being "complex": cyclomatic 10, cognitive
+# 15, Halstead difficulty 30, 60 lines per function, 500 per file.
+LIMITS = {"cc": 10, "cog": 15, "difficulty": 30.0, "nloc": 60, "file_nloc": 500}
 
 def _list_op_codes() -> tuple[int, int]:
     """shfmt's numeric codes for && and ||, read from shfmt itself.
@@ -99,24 +100,35 @@ class Unit:
     operators: dict = field(default_factory=dict)
     operands: dict = field(default_factory=dict)
     nloc: int = 0
+    file_nloc: int = 0
 
     @property
     def key(self) -> str:
         return f"{self.path}::{self.name}"
 
     @property
-    def effort(self) -> float:
+    def difficulty(self) -> float:
         n1, n2 = len(self.operators), len(self.operands)
-        big_n1, big_n2 = sum(self.operators.values()), sum(self.operands.values())
-        n, big_n = n1 + n2, big_n1 + big_n2
-        if n < 2 or n2 == 0:
+        if n2 == 0:
             return 0.0
-        volume = big_n * math.log2(n)
-        difficulty = (n1 / 2) * (big_n2 / n2)
-        return round(volume * difficulty, 1)
+        return round((n1 / 2) * (sum(self.operands.values()) / n2), 1)
+
+    @property
+    def effort(self) -> float:
+        n = len(self.operators) + len(self.operands)
+        big_n = sum(self.operators.values()) + sum(self.operands.values())
+        if n < 2:
+            return 0.0
+        return round(big_n * math.log2(n) * self.difficulty, 1)
 
     def measures(self) -> dict:
-        return {"cc": self.cc, "cog": self.cog, "effort": self.effort, "nloc": self.nloc}
+        return {
+            "cc": self.cc,
+            "cog": self.cog,
+            "difficulty": self.difficulty,
+            "nloc": self.nloc,
+            "file_nloc": self.file_nloc,
+        }
 
     def over(self) -> list[str]:
         m = self.measures()
@@ -162,6 +174,7 @@ class Walker:
         self.units.append(top)
         self.stmts(ast.get("Stmts") or [], top, 0)
         top.nloc = self._nloc_top()
+        top.file_nloc = self._nloc(1, len(self.lines))
 
     # -- helpers ---------------------------------------------------------
     def stmts(self, stmts, unit: Unit, depth: int) -> None:
@@ -375,8 +388,14 @@ def read_baseline() -> dict[str, dict]:
         for line in BASELINE.read_text().splitlines():
             if not line.strip() or line.startswith("#"):
                 continue
-            cc, cog, effort, nloc, key = line.split(None, 4)
-            base[key] = {"cc": int(cc), "cog": int(cog), "effort": float(effort), "nloc": int(nloc)}
+            cc, cog, difficulty, nloc, file_nloc, key = line.split(None, 5)
+            base[key] = {
+                "cc": int(cc),
+                "cog": int(cog),
+                "difficulty": float(difficulty),
+                "nloc": int(nloc),
+                "file_nloc": int(file_nloc),
+            }
     return base
 
 
@@ -385,10 +404,11 @@ def write_baseline(units: list[Unit]) -> int:
     lines = [
         "# Complexity ceilings per unit, written by",
         "#   tools/ci/complexity.py --write-baseline",
-        "# Columns: cc cog effort nloc path::function. A unit may only go down;",
+        "# Columns: cc cog difficulty nloc file_nloc path::function (file_nloc on",
+        "# <top> only). A unit may only go down;",
         "# refactor it, then rewrite this file. New units must stay under LIMITS.",
     ]
-    lines += [f"{u.cc:4d} {u.cog:4d} {u.effort:10.1f} {u.nloc:4d} {u.key}" for u in rows]
+    lines += [f"{u.cc:4d} {u.cog:4d} {u.difficulty:6.1f} {u.nloc:4d} {u.file_nloc:5d} {u.key}" for u in rows]
     BASELINE.write_text("\n".join(lines) + "\n")
     print(f"wrote {len(rows)} complex units to {BASELINE.relative_to(ROOT)}")
     return 0
@@ -418,13 +438,20 @@ def check(units: list[Unit]) -> int:
 
 
 # -- reports -------------------------------------------------------------
+def _sort_key(u: Unit, sort: str):
+    return u.effort if sort == "effort" else u.measures()[sort]
+
+
 def report(units: list[Unit], top: int, sort: str) -> int:
-    rows = sorted(units, key=lambda u: u.measures()[sort], reverse=True)[:top]
-    print(f"{'cc':>4} {'cog':>4} {'effort':>10} {'nloc':>5}  unit")
+    rows = sorted(units, key=lambda u: _sort_key(u, sort), reverse=True)[:top]
+    print(f"{'cc':>4} {'cog':>4} {'diff':>6} {'nloc':>5} {'file':>5} {'effort':>10}  unit")
     for u in rows:
         m = u.measures()
         flag = "*" if u.over() else " "
-        print(f"{m['cc']:4d} {m['cog']:4d} {m['effort']:10.1f} {m['nloc']:5d} {flag}{u.key}:{u.start}")
+        print(
+            f"{m['cc']:4d} {m['cog']:4d} {m['difficulty']:6.1f} {m['nloc']:5d} {m['file_nloc']:5d} "
+            f"{u.effort:10.1f} {flag}{u.key}:{u.start}"
+        )
     return 0
 
 
@@ -432,7 +459,8 @@ def summary(units: list[Unit]) -> int:
     funcs = [u for u in units if u.name != "<top>"]
     print(f"units: {len(units)} ({len(funcs)} functions, {len(units) - len(funcs)} files)")
     for k in LIMITS:
-        vals = sorted(u.measures()[k] for u in units)
+        pool = [u for u in units if u.name == "<top>"] if k == "file_nloc" else units
+        vals = sorted(u.measures()[k] for u in pool)
         over = sum(1 for v in vals if v > LIMITS[k])
         pct = lambda q: vals[min(len(vals) - 1, int(q * len(vals)))]  # noqa: E731
         print(
@@ -449,7 +477,7 @@ def main() -> int:
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--write-baseline", action="store_true")
     ap.add_argument("-n", type=int, default=25)
-    ap.add_argument("--sort", choices=list(LIMITS), default="cog")
+    ap.add_argument("--sort", choices=[*LIMITS, "effort"], default="cog")
     ap.add_argument("--files", nargs="+", metavar="PATH", help="measure these files instead of the repo")
     args = ap.parse_args()
 
@@ -457,7 +485,9 @@ def main() -> int:
     for e in errors:
         print(f"parse error: {e}", file=sys.stderr)
     if args.json:
-        json.dump([{"unit": u.key, "line": u.start, **u.measures()} for u in units], sys.stdout, indent=1)
+        json.dump(
+            [{"unit": u.key, "line": u.start, **u.measures(), "effort": u.effort} for u in units], sys.stdout, indent=1
+        )
         print()
         return 0
     if args.summary:

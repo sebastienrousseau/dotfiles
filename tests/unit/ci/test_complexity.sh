@@ -86,7 +86,7 @@ assert_equals "1 0 3" "$(measure "$CX_TMP/sample.sh" flat)" "flat(): header, ech
 REPO="$CX_TMP/repo"
 mkdir -p "$REPO/tools/ci" "$REPO/scripts"
 cp "$TOOL" "$REPO/tools/ci/complexity.py"
-# big(): 16 if-arms, over the cc limit of 15.
+# big(): 16 if-arms, over the cc limit of 10.
 {
   echo '#!/usr/bin/env bash'
   echo 'big() {'
@@ -106,7 +106,7 @@ ratchet
 assert_equals "1" "$rc" "big() is complex and not in the (absent) baseline"
 
 test_start "ratchet_names_the_new_unit_and_limit"
-assert_contains "scripts/code.sh::big: new complex unit (cc=17>15" "$out" "the report names unit and limit"
+assert_contains "scripts/code.sh::big: new complex unit (cc=17>10" "$out" "the report names unit and limit"
 
 test_start "ratchet_passes_once_baselined"
 ratchet --write-baseline

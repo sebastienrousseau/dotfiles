@@ -1,206 +1,272 @@
 # Complexity ceilings per unit, written by
 #   tools/ci/complexity.py --write-baseline
-# Columns: cc cog effort nloc path::function. A unit may only go down;
+# Columns: cc cog difficulty nloc file_nloc path::function (file_nloc on
+# <top> only). A unit may only go down;
 # refactor it, then rewrite this file. New units must stay under LIMITS.
-   4    3     3285.2   62 .clusterfuzzlite/build.sh::<top>
-  14   28    25304.0   87 .devcontainer/install-lite.sh::<top>
-  32   27   216060.3  154 benches/dot_command_bench.sh::<top>
-   1    0        0.0  158 benches/dot_command_bench.sh::bench_run_cases
-  26   32    96046.8   82 benches/test_help_gates_wall_clock.sh::<top>
-  25   18    38861.8   37 bin/dot-theme-sync::_apply_gnome_family_desktop
-  42   37   109678.8   65 bin/dot-theme-sync::_apply_kde_desktop
-  25   19    45230.1   32 bin/dot-theme-sync::_apply_wlroots_desktop
-  20   15    39948.0   29 bin/dot-theme-sync::_apply_xfce_desktop
-  20    9    14072.5   83 bin/dot-theme-sync::_detect_linux_de
-  20   26    35401.2   48 bin/dot-theme-sync::_run_reloads_parallel
-  22   36    61548.6   68 bin/dot-theme-sync::apply_theme_configs
-  48   45   306467.5  209 bin/dot-theme-sync::main
-  39   38    97161.6   78 bin/dot-theme-sync::reload_browsers
-  33   39    96830.8  149 bin/dot-theme-sync::reload_desktop
-  17   19    25978.8   43 bin/dot-theme-sync::reload_ghostty
-  34   34    74526.9  106 bin/dot-theme-sync::reload_nvim
-  37   44   134112.8  126 bin/dot::<top>
-   1    0        0.0  111 bin/dot::_dot_command_routes
-   1    0        0.0   94 bin/dot::_dot_help_details
-   1    0        0.0  153 bin/dot::_dot_help_specs
-  20   24    27567.0   39 bin/dot::_resolve_source_dir
-  21   21     7305.3  111 defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh::<top>
-  53   57   291641.6  145 defaults/.chezmoitemplates/aliases/archives/archives.aliases.sh::compress
-  26    9    36456.4   42 defaults/.chezmoitemplates/aliases/archives/archives.aliases.sh::extract
-  19   27    32148.5   53 defaults/.chezmoitemplates/aliases/cd/cd-core.aliases.sh::cd_with_history
-  16   15     2530.7   22 defaults/.chezmoitemplates/aliases/cd/cd-shortcuts.aliases.sh::<top>
-  23   21    27228.4   77 defaults/.chezmoitemplates/aliases/cd/cd.aliases.sh::<top>
-  19   27    32148.5   53 defaults/.chezmoitemplates/aliases/cd/cd.aliases.sh::cd_with_history
-  12   17     9541.5   29 defaults/.chezmoitemplates/aliases/chmod/chmod.aliases.sh::show_permissions
-  15   20    12690.2   62 defaults/.chezmoitemplates/aliases/default/default.aliases.sh::set_default_aliases
-   8    7     8413.5  126 defaults/.chezmoitemplates/aliases/docker/docker.aliases.sh::<top>
-  13   20     6696.0   57 defaults/.chezmoitemplates/aliases/editor/editor.aliases.sh::<top>
-   2    1     2286.8   84 defaults/.chezmoitemplates/aliases/gcloud/gcloud.aliases.sh::<top>
-   6    9     5890.5   91 defaults/.chezmoitemplates/aliases/git/git.aliases.sh::<top>
-  14   13     3337.0   61 defaults/.chezmoitemplates/aliases/modern/modern.aliases.sh::<top>
-   3    2     2081.4   79 defaults/.chezmoitemplates/aliases/rust/rust.aliases.sh::<top>
-  19   20    17199.9   46 defaults/.chezmoitemplates/aliases/security/security.aliases.sh::<top>
-  24   41    26540.5   87 defaults/.chezmoitemplates/aliases/update/update.aliases.sh::update_programming_tools
-  20   32    19947.4   78 defaults/.chezmoitemplates/functions/api/apihealth.sh::parse_arguments
-  13    9    19108.4   65 defaults/.chezmoitemplates/functions/curl/httpdebug.sh::httpdebug
-  15   21    48587.5   87 defaults/.chezmoitemplates/functions/files/backup.sh::backup
-  18   18    20303.5   43 defaults/.chezmoitemplates/functions/files/rd.sh::rd
-  35   26    75223.4  124 defaults/.chezmoitemplates/functions/interactive/matrix.sh::matrix
-  14   37    35747.1   79 defaults/.chezmoitemplates/functions/misc/caffeine.sh::caffeine_start_daemon
-  12   14    12408.7   72 defaults/.chezmoitemplates/functions/misc/logout.sh::logout
-  25   32    74654.9  127 defaults/.chezmoitemplates/functions/security/keygen.sh::keygen
-  13   22    88876.2   84 defaults/.chezmoitemplates/functions/system/sysinfo.sh::<top>
-  57  105   352818.7  155 defaults/dot_local/bin/executable_ai-update::<top>
-  14   19    21596.2   53 defaults/dot_local/bin/executable_b64::<top>
-  16   18    28251.7   68 defaults/dot_local/bin/executable_bm::<top>
-  20   38    26177.9   36 defaults/dot_local/bin/executable_cb::<top>
-  17   21    31517.8   58 defaults/dot_local/bin/executable_epoch::<top>
-  22   18    68392.8  107 defaults/dot_local/bin/executable_git-ai-commit::<top>
-  20   14    44054.8  107 defaults/dot_local/bin/executable_git-ai-diff::<top>
-  17   13    25450.1   78 defaults/dot_local/bin/executable_hash::<top>
-  13   17     6620.8   33 defaults/dot_local/bin/executable_hash::get_hash_cmd
-  18   14    27470.6   84 defaults/dot_local/bin/executable_hashsum::<top>
-  20   20    38889.8   70 defaults/dot_local/bin/executable_hex::<top>
-  11   13    27886.6   63 defaults/dot_local/bin/executable_lorem::<top>
-  18   20    30556.1   84 defaults/dot_local/bin/executable_regex::<top>
-  21    1     2386.8   27 defaults/dot_local/bin/executable_tmux-ai::provider_label
-  13   21    24326.5   38 defaults/dot_local/bin/executable_tmux-sessionizer::build_list
-  13   16    31075.1   41 defaults/dot_local/bin/executable_tmux-status::system_linux
-  18   17    47327.1  142 defaults/dot_local/bin/executable_tour::<top>
-  34   43    49334.2   98 defaults/dot_local/bin/executable_update::<top>
-   1    0      338.0  167 examples/example-command-reference.sh::<top>
-  11   19    21181.3   39 install.sh::bootstrap_gum
-   8   17    15430.5   38 install.sh::install_chezmoi
-  15   17    43871.3   50 install.sh::install_chezmoi_verified_embedded
-  57   79   318226.3  319 install.sh::main
-  10   16    13754.2   43 install/lib/hide_menu_entries.sh::<top>
-  19   27    56541.8   74 install/lib/install_neovim.sh::<top>
-  17   19    18872.8   36 install/lib/installers.sh::archive_paths_are_safe
-  16   13    30935.8   51 install/migrate/migrate-v0_2-to-v0_2_503.sh::<top>
-  16   39    21461.1   62 install/migrate/migrate-v0_2-to-v0_2_503.sh::do_migration
-  21   23    72546.2   64 install/provision/run_onchange_50-install-fonts.sh::<top>
-  39   20    48332.0   29 lib/dot/ai-commands.sh::_ai_invoke_provider
-  18   19    28497.7   72 lib/dot/ai-commands.sh::cmd_ai_install
-  19    1      781.4   23 lib/dot/ai-install.sh::_ai_mise_pkg
-  13   16    49963.5   47 lib/dot/ui.sh::_ui_table_printf_fallback
-  20   18    35427.0   57 lib/dot/ui.sh::ui_pick
-  16   19    28252.5   38 lib/dot/ui.sh::ui_steps_begin
-  16   12    22384.3   50 lib/dot/ui.sh::ui_table_end
-  59    1     4343.1  181 lib/dot/utils.sh::dot_command_summary
-  17   21    25455.8   36 lib/dot/utils.sh::resolve_source_dir
-  40   49   165821.4  116 scripts/diagnostics/a2a-conformance.sh::<top>
-  27   49   107259.8   98 scripts/diagnostics/alias-governance.sh::<top>
-  22   22    83969.5  109 scripts/diagnostics/attest-verify.sh::<top>
-  13   11    32259.0   73 scripts/diagnostics/benchmark.sh::<top>
-  15   17    47585.8   60 scripts/diagnostics/benchmark.sh::render_waterfall
-  15   36    48756.3   74 scripts/diagnostics/benchmark.sh::run_hyperfine
- 171  262  3098836.3  585 scripts/diagnostics/doctor.sh::<top>
-  37   48   157301.8  121 scripts/diagnostics/drift-dashboard.sh::<top>
-  16   22    30557.8   66 scripts/diagnostics/health.sh::<top>
-  12   21    17422.2   46 scripts/diagnostics/health.sh::check
-  30   39    53266.2   62 scripts/diagnostics/health.sh::check_security
-   8   16    13441.9   36 scripts/diagnostics/health.sh::check_sync_status
-  17   26    65888.6   93 scripts/diagnostics/health.sh::print_summary
-   5    5     7384.9   65 scripts/diagnostics/history-analysis.sh::<top>
- 125  289   836960.5  476 scripts/diagnostics/mcp-doctor.sh::<top>
-  65   78   523095.0  310 scripts/diagnostics/perf.sh::<top>
-  16   18    94337.1   86 scripts/diagnostics/scorecard.sh::<top>
-  17   19    28991.3   40 scripts/diagnostics/secret-governance.sh::<top>
-  14   18    30562.9   38 scripts/diagnostics/security-score.sh::check_encryption
-  22   32    61696.4   53 scripts/diagnostics/security-score.sh::check_system
-  11   16    29822.8   62 scripts/diagnostics/security-score.sh::print_summary
-  12   12    25450.0   61 scripts/diagnostics/snapshot.sh::<top>
-  34   32   214517.7  184 scripts/diagnostics/workstation-attestation.sh::<top>
-  80  117   805632.3  327 scripts/dot/commands/agent.sh::cmd_mode
-  18   21    93622.4  163 scripts/dot/commands/agents.sh::cmd_agents
-  34   21    72931.2  136 scripts/dot/commands/ai.sh::<top>
-  47   87   239544.3  174 scripts/dot/commands/ai.sh::cmd_ai_status
-  27   39   106355.6  110 scripts/dot/commands/ai.sh::run_ai_with_context
-  35   63   189657.7  196 scripts/dot/commands/aliases.sh::cmd_aliases
-  17    3    18446.2   67 scripts/dot/commands/core.sh::<top>
-  29    2    44382.3  117 scripts/dot/commands/diagnostics.sh::<top>
-  23   19    59686.3  148 scripts/dot/commands/env-emit.sh::dot_env_emit
-  40   46   255207.8  184 scripts/dot/commands/fleet.sh::cmd_fleet_apply
-  22   34    67001.4   84 scripts/dot/commands/fleet.sh::cmd_fleet_drift
-  16   31    30356.3   62 scripts/dot/commands/fleet.sh::cmd_fleet_namespace
-  23   24    49507.1  106 scripts/dot/commands/init.sh::cmd_init
-  27   41   146471.9  110 scripts/dot/commands/lint.sh::cmd_lint
-  14    4    17090.9   61 scripts/dot/commands/meta.sh::<top>
-  17   38    25825.7   54 scripts/dot/commands/meta.sh::cmd_keys
-  19   25    26511.6   53 scripts/dot/commands/meta.sh::cmd_mcp
-  11   16    27206.4   84 scripts/dot/commands/meta.sh::cmd_upgrade
-  17   16    98246.9   73 scripts/dot/commands/registry.sh::_registry_install
-  35   38   142099.9  152 scripts/dot/commands/registry.sh::cmd_registry
-  21   12    30513.3   69 scripts/dot/commands/secrets.sh::<top>
-  16   16    25653.8   61 scripts/dot/commands/secrets.sh::cmd_env_load
-  14    2    14814.5   68 scripts/dot/commands/tools.sh::<top>
-  23   21    25588.7   84 scripts/dot/commands/tools.sh::apply_template_security_baseline
-  17   26    29992.4   77 scripts/dot/commands/tools.sh::cmd_env_mise
-  11   18    16260.6   56 scripts/dot/commands/tools.sh::cmd_tools
-  13   17    16731.8   43 scripts/dot/commands/tools.sh::show_language_package_managers
-  18   31   129029.5  112 scripts/git-hooks/pre-commit-audit.sh::<top>
-  48   76   500159.4  187 scripts/ops/branch-cleanup.sh::<top>
-  17   16    54217.9   69 scripts/ops/bundle.sh::<top>
-  54  120   315143.8  214 scripts/ops/chezmoi-apply.sh::<top>
-   9   17    13890.6   32 scripts/ops/chezmoi-apply.sh::run_step
-  19   30    37164.6   48 scripts/ops/heal-system.sh::heal_broken_symlinks
-  12   18    13728.6   30 scripts/ops/heal-system.sh::heal_missing_critical_files
-  17   24    39559.1   58 scripts/ops/heal-tools.sh::heal_missing_dependencies
-  13   15    34329.9   66 scripts/ops/heal.sh::<top>
-  21   25    27966.3   51 scripts/ops/heal.sh::main
-  12   17    80535.4   76 scripts/ops/prewarm.sh::<top>
-  22   24   127193.8  138 scripts/ops/release.sh::main
-  13   18    28231.0   58 scripts/ops/rollback.sh::git_reset
-  35   33    91992.9  100 scripts/ops/rollback.sh::main
-  15   21    38649.1   50 scripts/ops/rollback.sh::perform_rollback
-  23   22    60034.4   57 scripts/ops/rollback.sh::restore_file
-  11   12    29223.1   86 scripts/ops/setup.sh::<top>
-  48   69   357268.2  174 scripts/qa/check-feature-matrix.sh::<top>
-  11   12    43238.2   89 scripts/qa/scorecard-snapshot.sh::<top>
-  15   16    48142.6   56 scripts/qa/validate-examples.sh::<top>
-  17   14    56390.9   63 scripts/security/check-disclosure-key-expiry.sh::<top>
-  11   22    19259.0   48 scripts/security/encryption-check.sh::<top>
-  15   23    32641.5   50 scripts/security/enforce-policies.sh::scan_secrets
-  13   21    12972.1   49 scripts/security/lock-configs.sh::<top>
-  15   16    21723.6   40 scripts/security/lock-screen.sh::<top>
-   5    2     1866.7   92 scripts/security/manage-secrets.sh::rotate_secrets
-   8    8    20490.3   70 scripts/security/ssh-cert.sh::cmd_issue
-  15   15    46415.2   93 scripts/theme/apply-gnome-theme.sh::apply_catppuccin_theme
-  21   26    55020.3   59 scripts/theme/apply-gnome-theme.sh::apply_wallpaper
-  22   25    63978.5   67 scripts/theme/extract-heic-frames.sh::<top>
-  11   19    11851.6   35 scripts/theme/install-catppuccin-themes.sh::install_wallpapers
-  12   17    17670.5   49 scripts/theme/merge-wallpaper.sh::<top>
-  45   56   299853.1  281 scripts/theme/rebuild-themes.sh::<top>
-  11   20    25239.3   37 scripts/theme/rebuild-themes.sh::discover_linux_system
-  13   24    23793.1   43 scripts/theme/rebuild-themes.sh::discover_macos_system
- 191  214  2760421.8  713 scripts/theme/switch.sh::<top>
-  17   20    83911.7   52 scripts/theme/switch.sh::ambient_theme
-  11   14    24132.5   98 scripts/theme/switch.sh::pick_theme
-  11   16    10381.4   32 scripts/theme/switch.sh::system_appearance_mode
-  18   20    44513.3   47 scripts/theme/wallpaper-sync.sh::<top>
-  34   59   172465.8  156 scripts/theme/wallpaper-sync.sh::apply_wallpaper
-  17   23    52689.0   58 scripts/theme/wallpaper-sync.sh::ensure_linux_compatible
-  19   16    23257.5   45 scripts/theme/wallpaper-sync.sh::system_wallpaper_for_theme
-  26   42    60169.6   81 scripts/theme/wallpaper-sync.sh::wallpaper_for_theme
-  11    7    29730.7   91 scripts/tuning/linux.sh::<top>
-  40   63   198548.2  187 scripts/version-sync.sh::main
-  13   18    67443.2   78 scripts/version-sync.sh::update_version_references
-  17   35    81504.4   78 scripts/version-sync.sh::verify_version_consistency
-  27   34    86827.8   93 tools/ci/check-copyright-headers.sh::<top>
-   9    9    31790.0   61 tools/ci/check-deps-dev.sh::<top>
-  16   18    50609.3   52 tools/ci/check-fuzz-harness-self-contained.sh::<top>
-  18    7     8421.0   38 tools/ci/check-shell-preamble.sh::check_one
-  14   11    65615.7   67 tools/ci/dot-cli-startup-bench.sh::<top>
-  19   17    52733.7   59 tools/ci/normalize-spdx-headers.sh::<top>
-  48   61   541326.3  727 tools/ci/run-coverage.sh::<top>
-  15   23   126438.5  137 tools/ci/validate-ci-config.sh::<top>
-  14   12    37324.2   65 tools/docs/build-manual.sh::<top>
-   8    8    53984.5   99 tools/docs/build-manual.sh::build_html_multi
-  10    9    13020.7  174 tools/docs/build-manual.sh::build_landing
-   1    0     1180.1   90 tools/docs/build-manual.sh::build_search_index
-   1    0       31.0  446 tools/docs/build-manual.sh::write_css
-   9    9    34430.4   68 tools/docs/generate-command-index.sh::<top>
-  19   21    95796.8   79 tools/docs/generate-completions.sh::<top>
-  29   31   166087.1  123 tools/docs/generate-manpage.sh::<top>
-  14   14    92503.5  111 tools/release/package-policy-bundles.sh::<top>
-  17   11    58415.6   47 tools/release/stage-dot.sh::<top>
+   4    3    7.4   62    62 .clusterfuzzlite/build.sh::<top>
+  14   28   21.8   87    98 .devcontainer/install-lite.sh::<top>
+  32   27   57.7  154   374 benches/dot_command_bench.sh::<top>
+   1    0    0.0  158     0 benches/dot_command_bench.sh::bench_run_cases
+  26   32   45.4   82    82 benches/test_help_gates_wall_clock.sh::<top>
+  11   13   27.7   37     0 benches/test_perf_budgets.sh::_gate_max_rc
+   9    9   21.2   36  1659 bin/dot-theme-sync::<top>
+  25   18   28.6   37     0 bin/dot-theme-sync::_apply_gnome_family_desktop
+  42   37   46.0   65     0 bin/dot-theme-sync::_apply_kde_desktop
+  25   19   31.6   32     0 bin/dot-theme-sync::_apply_wlroots_desktop
+  20   15   33.6   29     0 bin/dot-theme-sync::_apply_xfce_desktop
+  20    9   15.3   83     0 bin/dot-theme-sync::_detect_linux_de
+  12   12   12.8   21     0 bin/dot-theme-sync::_resolve_theme_wallpapers
+  20   26   38.2   48     0 bin/dot-theme-sync::_run_reloads_parallel
+  22   36   47.4   68     0 bin/dot-theme-sync::apply_theme_configs
+  48   45   69.7  209     0 bin/dot-theme-sync::main
+  39   38   41.3   78     0 bin/dot-theme-sync::reload_browsers
+  33   39   35.4  149     0 bin/dot-theme-sync::reload_desktop
+  17   19   28.7   43     0 bin/dot-theme-sync::reload_ghostty
+  34   34   34.2  106     0 bin/dot-theme-sync::reload_nvim
+  11   11   20.7   33     0 bin/dot-theme-sync::reload_tmux
+  37   44   46.3  126   762 bin/dot::<top>
+   1    0    0.0  111     0 bin/dot::_dot_command_routes
+   1    0    0.0   94     0 bin/dot::_dot_help_details
+   1    0    0.0  153     0 bin/dot::_dot_help_specs
+  20   24   31.1   39     0 bin/dot::_resolve_source_dir
+  21   21    4.2  111   111 defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh::<top>
+  11    5   16.0   28     0 defaults/.chezmoitemplates/aliases/archives/archives.aliases.sh::backup
+  53   57   74.5  145     0 defaults/.chezmoitemplates/aliases/archives/archives.aliases.sh::compress
+  26    9   32.7   42     0 defaults/.chezmoitemplates/aliases/archives/archives.aliases.sh::extract
+  13    3   13.0   23     0 defaults/.chezmoitemplates/aliases/archives/archives.aliases.sh::list_archive
+  19   27   29.6   53     0 defaults/.chezmoitemplates/aliases/cd/cd-core.aliases.sh::cd_with_history
+  16   15    4.1   22    22 defaults/.chezmoitemplates/aliases/cd/cd-shortcuts.aliases.sh::<top>
+  23   21   12.6   77   361 defaults/.chezmoitemplates/aliases/cd/cd.aliases.sh::<top>
+  19   27   29.6   53     0 defaults/.chezmoitemplates/aliases/cd/cd.aliases.sh::cd_with_history
+  12   17   18.4   29     0 defaults/.chezmoitemplates/aliases/chmod/chmod.aliases.sh::show_permissions
+  15   20   15.4   62     0 defaults/.chezmoitemplates/aliases/default/default.aliases.sh::set_default_aliases
+   8    7    4.4  126   187 defaults/.chezmoitemplates/aliases/docker/docker.aliases.sh::<top>
+  13   20    7.7   57    72 defaults/.chezmoitemplates/aliases/editor/editor.aliases.sh::<top>
+   2    1    2.1   84    84 defaults/.chezmoitemplates/aliases/gcloud/gcloud.aliases.sh::<top>
+   6    9    4.4   91   150 defaults/.chezmoitemplates/aliases/git/git.aliases.sh::<top>
+  14   13    3.7   61   119 defaults/.chezmoitemplates/aliases/modern/modern.aliases.sh::<top>
+   3    2    2.1   79    79 defaults/.chezmoitemplates/aliases/rust/rust.aliases.sh::<top>
+  19   20   17.0   46    46 defaults/.chezmoitemplates/aliases/security/security.aliases.sh::<top>
+  24   41   15.3   87     0 defaults/.chezmoitemplates/aliases/update/update.aliases.sh::update_programming_tools
+   8    9   33.0   30     0 defaults/.chezmoitemplates/aliases/uuid/uuid.aliases.sh::uuid_copy
+  20   32   19.1   78     0 defaults/.chezmoitemplates/functions/api/apihealth.sh::parse_arguments
+  13    9   15.0   65     0 defaults/.chezmoitemplates/functions/curl/httpdebug.sh::httpdebug
+  15   21   33.5   87     0 defaults/.chezmoitemplates/functions/files/backup.sh::backup
+  15    6   15.2   52     0 defaults/.chezmoitemplates/functions/files/extract.sh::extract
+  18   18   21.4   43     0 defaults/.chezmoitemplates/functions/files/rd.sh::rd
+  35   26   36.7  124     0 defaults/.chezmoitemplates/functions/interactive/matrix.sh::matrix
+  12    2    9.5   43     0 defaults/.chezmoitemplates/functions/misc/caffeine.sh::caffeine
+  15   15   13.4   44     0 defaults/.chezmoitemplates/functions/misc/caffeine.sh::caffeine_show_diagnostic
+  14   37   34.8   79     0 defaults/.chezmoitemplates/functions/misc/caffeine.sh::caffeine_start_daemon
+  12   14   18.2   72     0 defaults/.chezmoitemplates/functions/misc/logout.sh::logout
+  13   13   31.3   60     0 defaults/.chezmoitemplates/functions/security/genpass.sh::genpass
+  25   32   38.5  127     0 defaults/.chezmoitemplates/functions/security/keygen.sh::keygen
+  13   22   37.8   84   100 defaults/.chezmoitemplates/functions/system/sysinfo.sh::<top>
+  13   14   25.8   27    27 defaults/dot_config/shell/10-secrets.sh::<top>
+  57  105   63.4  155   165 defaults/dot_local/bin/executable_ai-update::<top>
+  14   19   22.0   53    67 defaults/dot_local/bin/executable_b64::<top>
+  16   18   25.9   68    78 defaults/dot_local/bin/executable_bm::<top>
+  20   38   28.6   36    43 defaults/dot_local/bin/executable_cb::<top>
+  11    4   13.9   41   265 defaults/dot_local/bin/executable_dot-ai-proxy::<top>
+  17   21   27.5   58    58 defaults/dot_local/bin/executable_epoch::<top>
+  11    2   10.1   29    46 defaults/dot_local/bin/executable_extract::<top>
+  13   11   28.2   49    55 defaults/dot_local/bin/executable_gbd::<top>
+  22   18   32.1  107   124 defaults/dot_local/bin/executable_git-ai-commit::<top>
+  20   14   23.2  107   124 defaults/dot_local/bin/executable_git-ai-diff::<top>
+  17   13   20.8   78   144 defaults/dot_local/bin/executable_hash::<top>
+  13   17   12.5   33     0 defaults/dot_local/bin/executable_hash::get_hash_cmd
+  18   14   21.0   84   125 defaults/dot_local/bin/executable_hashsum::<top>
+  13    9    6.4   19     0 defaults/dot_local/bin/executable_hashsum::get_cmd
+  20   20   30.5   70    86 defaults/dot_local/bin/executable_hex::<top>
+  14   13   16.7   32    44 defaults/dot_local/bin/executable_kill-port::<top>
+  11   13   15.4   63    93 defaults/dot_local/bin/executable_lorem::<top>
+  11   13   18.3   37    37 defaults/dot_local/bin/executable_monitor::<top>
+  11   13   20.6   29    29 defaults/dot_local/bin/executable_rec-start::<top>
+  18   20   24.7   84   100 defaults/dot_local/bin/executable_regex::<top>
+  21    1    5.5   27     0 defaults/dot_local/bin/executable_tmux-ai::provider_label
+  13   21   27.2   38     0 defaults/dot_local/bin/executable_tmux-sessionizer::build_list
+   9    9   38.8   35     0 defaults/dot_local/bin/executable_tmux-status::apply_colours
+  13   16   26.2   41     0 defaults/dot_local/bin/executable_tmux-status::system_linux
+  18   17   21.1  142   142 defaults/dot_local/bin/executable_tour::<top>
+  34   43   27.1   98   101 defaults/dot_local/bin/executable_update::<top>
+   1    0    1.0  167   167 examples/example-command-reference.sh::<top>
+  11   19   20.7   39     0 install.sh::bootstrap_gum
+   8   17   21.6   38     0 install.sh::install_chezmoi
+  15   17   32.7   50     0 install.sh::install_chezmoi_verified_embedded
+  57   79   70.3  319     0 install.sh::main
+  11   10   18.5   17     0 install.sh::seed_git_identity
+  10   16   20.6   43    50 install/lib/hide_menu_entries.sh::<top>
+  19   27   27.7   74   102 install/lib/install_neovim.sh::<top>
+  17   19   19.9   36     0 install/lib/installers.sh::archive_paths_are_safe
+  11   12   22.9   41    51 install/lib/upgrade_neovim_nightly.sh::<top>
+  16   13   28.1   51   123 install/migrate/migrate-v0_2-to-v0_2_503.sh::<top>
+  16   39   25.0   62     0 install/migrate/migrate-v0_2-to-v0_2_503.sh::do_migration
+  11    9   20.0   28    33 install/migrate/rollback-v0_2_503.sh::<top>
+  11   12   19.8   33    33 install/provision/run_onchange_30-darwin-mas.sh::<top>
+  21   23   41.8   64    65 install/provision/run_onchange_50-install-fonts.sh::<top>
+  39   20   35.3   29     0 lib/dot/ai-commands.sh::_ai_invoke_provider
+  18   19   26.4   72     0 lib/dot/ai-commands.sh::cmd_ai_install
+  19    1    2.1   23     0 lib/dot/ai-install.sh::_ai_mise_pkg
+  12   12   24.7   29     0 lib/dot/theme-transaction.sh::_theme_txn_restore_files
+   2    1    4.2   35   756 lib/dot/ui.sh::<top>
+  13   16   47.8   47     0 lib/dot/ui.sh::_ui_table_printf_fallback
+  13   12   23.5   19     0 lib/dot/ui.sh::_ui_theme_files
+  20   18   30.8   57     0 lib/dot/ui.sh::ui_pick
+   7   11   40.0   50     0 lib/dot/ui.sh::ui_run_cmd
+  16   19   29.6   38     0 lib/dot/ui.sh::ui_steps_begin
+  16   12   25.4   50     0 lib/dot/ui.sh::ui_table_end
+  59    1    2.5  181     0 lib/dot/utils.sh::dot_command_summary
+  17   21   34.7   36     0 lib/dot/utils.sh::resolve_source_dir
+  12   11   35.2   53     0 lib/dot/verified-download.sh::download_verified_asset
+   9    8   32.9   46     0 lib/dot/verified-download.sh::download_verified_script
+  40   49   47.4  116   116 scripts/diagnostics/a2a-conformance.sh::<top>
+  27   49   43.1   98   129 scripts/diagnostics/alias-governance.sh::<top>
+  22   22   36.8  109   109 scripts/diagnostics/attest-verify.sh::<top>
+  13   11   27.4   73   292 scripts/diagnostics/benchmark.sh::<top>
+  15   17   31.0   60     0 scripts/diagnostics/benchmark.sh::render_waterfall
+  15   36   31.8   74     0 scripts/diagnostics/benchmark.sh::run_hyperfine
+  12    6   13.7   27    27 scripts/diagnostics/doctor-unified.sh::<top>
+ 171  262  135.0  585   677 scripts/diagnostics/doctor.sh::<top>
+  37   48   54.9  121   121 scripts/diagnostics/drift-dashboard.sh::<top>
+  16   22   25.8   66   539 scripts/diagnostics/health.sh::<top>
+  12   21   20.4   46     0 scripts/diagnostics/health.sh::check
+  30   39   30.5   62     0 scripts/diagnostics/health.sh::check_security
+   8   16   18.8   36     0 scripts/diagnostics/health.sh::check_sync_status
+  13   13   21.2   26     0 scripts/diagnostics/health.sh::check_terminal
+  17   26   34.5   93     0 scripts/diagnostics/health.sh::print_summary
+   5    5   17.0   65    65 scripts/diagnostics/history-analysis.sh::<top>
+ 125  289   74.8  476   497 scripts/diagnostics/mcp-doctor.sh::<top>
+  65   78   84.8  310   371 scripts/diagnostics/perf.sh::<top>
+  16   18   41.4   86    89 scripts/diagnostics/scorecard.sh::<top>
+  17   19   27.8   40    46 scripts/diagnostics/secret-governance.sh::<top>
+  14   18   28.5   38     0 scripts/diagnostics/security-score.sh::check_encryption
+  22   32   40.2   53     0 scripts/diagnostics/security-score.sh::check_system
+  11   11    5.6   26     0 scripts/diagnostics/security-score.sh::get_grade
+  11   16   24.0   62     0 scripts/diagnostics/security-score.sh::print_summary
+  12   12   27.3   61    70 scripts/diagnostics/snapshot.sh::<top>
+  13   14   21.3   54    69 scripts/diagnostics/version-locks.sh::<top>
+  34   32   49.2  184   193 scripts/diagnostics/workstation-attestation.sh::<top>
+   1    0    1.0    1   526 scripts/dot/commands/agent.sh::<top>
+  16    5   25.7   51     0 scripts/dot/commands/agent.sh::cmd_mode
+  12   12   25.8   22     0 scripts/dot/commands/agents.sh::_agents_repo_root
+  18   21   43.4  163     0 scripts/dot/commands/agents.sh::cmd_agents
+  34   21   35.4  136   495 scripts/dot/commands/ai.sh::<top>
+  47   87   64.4  174     0 scripts/dot/commands/ai.sh::cmd_ai_status
+  27   39   43.8  110     0 scripts/dot/commands/ai.sh::run_ai_with_context
+  35   63   49.4  196     0 scripts/dot/commands/aliases.sh::cmd_aliases
+  17    3   25.6   67   184 scripts/dot/commands/core.sh::<top>
+  29    2   34.9  117   223 scripts/dot/commands/diagnostics.sh::<top>
+  23   19   31.2  148     0 scripts/dot/commands/env-emit.sh::dot_env_emit
+   3    2    8.8   17   593 scripts/dot/commands/fleet.sh::<top>
+  11    5   19.6   37     0 scripts/dot/commands/fleet.sh::cmd_fleet
+  40   46   66.6  184     0 scripts/dot/commands/fleet.sh::cmd_fleet_apply
+  22   34   37.7   84     0 scripts/dot/commands/fleet.sh::cmd_fleet_drift
+  16   31   29.8   62     0 scripts/dot/commands/fleet.sh::cmd_fleet_namespace
+  11   12   24.2   45     0 scripts/dot/commands/fleet.sh::cmd_fleet_status
+  23   24   29.9  106     0 scripts/dot/commands/init.sh::cmd_init
+  27   41   58.9  110     0 scripts/dot/commands/lint.sh::cmd_lint
+  11    5   12.3   27   136 scripts/dot/commands/manual.sh::<top>
+  11   11   15.2   34     0 scripts/dot/commands/manual.sh::cmd_open
+  14    4   24.5   61   351 scripts/dot/commands/meta.sh::<top>
+  17   38   24.9   54     0 scripts/dot/commands/meta.sh::cmd_keys
+  19   25   27.4   53     0 scripts/dot/commands/meta.sh::cmd_mcp
+  14   14   23.5   28     0 scripts/dot/commands/meta.sh::cmd_mcp_serve
+  11   16   24.2   84     0 scripts/dot/commands/meta.sh::cmd_upgrade
+  12   15   30.9   50     0 scripts/dot/commands/registry.sh::_registry_fetch
+  17   16   45.7   73     0 scripts/dot/commands/registry.sh::_registry_install
+  35   38   51.0  152     0 scripts/dot/commands/registry.sh::cmd_registry
+  21   12   31.5   69   248 scripts/dot/commands/secrets.sh::<top>
+  16   16   23.8   61     0 scripts/dot/commands/secrets.sh::cmd_env_load
+  12    2   18.2   49    81 scripts/dot/commands/security.sh::<top>
+  14    2   22.0   68   484 scripts/dot/commands/tools.sh::<top>
+  23   21   25.3   84     0 scripts/dot/commands/tools.sh::apply_template_security_baseline
+  17   26   30.0   77     0 scripts/dot/commands/tools.sh::cmd_env_mise
+  11   11   24.9   56     0 scripts/dot/commands/tools.sh::cmd_new
+  11   18   17.2   56     0 scripts/dot/commands/tools.sh::cmd_tools
+  13   17   18.6   43     0 scripts/dot/commands/tools.sh::show_language_package_managers
+  18   31   39.3  112   112 scripts/git-hooks/pre-commit-audit.sh::<top>
+  11    7   24.4   32     0 scripts/lib/secrets_provider.sh::dot_secrets_get
+  48   76   70.5  187   213 scripts/ops/branch-cleanup.sh::<top>
+  17   16   33.2   69    75 scripts/ops/bundle.sh::<top>
+  54  120   63.1  214   261 scripts/ops/chezmoi-apply.sh::<top>
+   9   17   28.0   32     0 scripts/ops/chezmoi-apply.sh::run_step
+  12   14   22.6   41    45 scripts/ops/chezmoi-update.sh::<top>
+   8   10   31.5   42     0 scripts/ops/heal-chezmoi.sh::heal_chezmoi_drift
+  19   30   32.9   48     0 scripts/ops/heal-system.sh::heal_broken_symlinks
+  12   18   23.6   30     0 scripts/ops/heal-system.sh::heal_missing_critical_files
+  17   24   31.4   58     0 scripts/ops/heal-tools.sh::heal_missing_dependencies
+  15   15   31.5   55     0 scripts/ops/heal-tools.sh::install_package
+  13   15   26.2   66   156 scripts/ops/heal.sh::<top>
+  21   25   31.8   51     0 scripts/ops/heal.sh::main
+  12   17   36.0   76   102 scripts/ops/prewarm.sh::<top>
+  22   24   40.0  138     0 scripts/ops/release.sh::main
+  13   18   22.8   58     0 scripts/ops/rollback.sh::git_reset
+  35   33   45.3  100     0 scripts/ops/rollback.sh::main
+  15   21   30.8   50     0 scripts/ops/rollback.sh::perform_rollback
+  23   22   37.5   57     0 scripts/ops/rollback.sh::restore_file
+  11   12   18.7   86   108 scripts/ops/setup.sh::<top>
+  48   69   63.8  174   179 scripts/qa/check-feature-matrix.sh::<top>
+  11   12   30.8   89    89 scripts/qa/scorecard-snapshot.sh::<top>
+  15   16   34.9   56    66 scripts/qa/validate-examples.sh::<top>
+  17   14   34.9   63    63 scripts/security/check-disclosure-key-expiry.sh::<top>
+  11   22   23.6   48    48 scripts/security/encryption-check.sh::<top>
+  12   15   22.4   29     0 scripts/security/enforce-policies.sh::check_file_permissions
+  12   14   40.2   56     0 scripts/security/enforce-policies.sh::main
+  15   23   30.5   50     0 scripts/security/enforce-policies.sh::scan_secrets
+  13   21   15.2   49    49 scripts/security/lock-configs.sh::<top>
+  15   16   23.5   40    43 scripts/security/lock-screen.sh::<top>
+   5    2    7.8   92     0 scripts/security/manage-secrets.sh::rotate_secrets
+   8    8   18.7   70     0 scripts/security/ssh-cert.sh::cmd_issue
+  14   13   24.0   36    39 scripts/security/telemetry-kill.sh::<top>
+  11   12   20.7   37    40 scripts/security/usb-safety.sh::<top>
+  15   15   23.2   93     0 scripts/theme/apply-gnome-theme.sh::apply_catppuccin_theme
+  21   26   33.6   59     0 scripts/theme/apply-gnome-theme.sh::apply_wallpaper
+  22   25   38.6   67    67 scripts/theme/extract-heic-frames.sh::<top>
+  13    6   17.8   58   263 scripts/theme/install-catppuccin-themes.sh::<top>
+  11   19   18.3   35     0 scripts/theme/install-catppuccin-themes.sh::install_wallpapers
+  12   17   20.3   49   103 scripts/theme/merge-wallpaper.sh::<top>
+  12   13   28.8   40     0 scripts/theme/merge-wallpaper.sh::merge_pair
+  45   56   66.9  281   417 scripts/theme/rebuild-themes.sh::<top>
+  12   15   41.8   39     0 scripts/theme/rebuild-themes.sh::discover_custom
+  11   20   29.5   37     0 scripts/theme/rebuild-themes.sh::discover_linux_system
+  13   24   28.7   43     0 scripts/theme/rebuild-themes.sh::discover_macos_system
+ 191  214  131.0  713  1177 scripts/theme/switch.sh::<top>
+  17   20   42.4   52     0 scripts/theme/switch.sh::ambient_theme
+  11   14   24.7   98     0 scripts/theme/switch.sh::pick_theme
+  11   16   16.6   32     0 scripts/theme/switch.sh::system_appearance_mode
+  11   10   19.9   47   120 scripts/theme/wallpaper-rotate.sh::<top>
+  18   20   33.0   47   519 scripts/theme/wallpaper-sync.sh::<top>
+  34   59   60.6  156     0 scripts/theme/wallpaper-sync.sh::apply_wallpaper
+  17   23   45.5   58     0 scripts/theme/wallpaper-sync.sh::ensure_linux_compatible
+  11   11   27.0   40     0 scripts/theme/wallpaper-sync.sh::macos_appearance_frame
+  10   12   35.8   31     0 scripts/theme/wallpaper-sync.sh::pick_wallpaper
+  19   16   21.2   45     0 scripts/theme/wallpaper-sync.sh::system_wallpaper_for_theme
+  26   42   39.8   81     0 scripts/theme/wallpaper-sync.sh::wallpaper_for_theme
+  11    7   21.3   91    99 scripts/tuning/linux.sh::<top>
+   3    2    6.1   52   529 scripts/version-sync.sh::<top>
+  40   63   59.5  187     0 scripts/version-sync.sh::main
+  13   18   39.5   78     0 scripts/version-sync.sh::update_version_references
+  17   35   46.4   78     0 scripts/version-sync.sh::verify_version_consistency
+  27   34   35.0   93    93 tools/ci/check-copyright-headers.sh::<top>
+   9    9   27.8   61   159 tools/ci/check-deps-dev.sh::<top>
+  16   18   35.6   52    52 tools/ci/check-fuzz-harness-self-contained.sh::<top>
+  13   15   26.8   27    27 tools/ci/check-remote-installers.sh::<top>
+  18    7   15.4   38     0 tools/ci/check-shell-preamble.sh::check_one
+  14   11   37.0   67    79 tools/ci/dot-cli-startup-bench.sh::<top>
+  12   15   28.1   42    42 tools/ci/lint-reusable-pins.sh::<top>
+  19   17   33.4   59    59 tools/ci/normalize-spdx-headers.sh::<top>
+  48   61   75.7  727   787 tools/ci/run-coverage.sh::<top>
+  15   23   34.4  137   175 tools/ci/validate-ci-config.sh::<top>
+  14   12   24.3   65  1075 tools/docs/build-manual.sh::<top>
+   8    8   28.7   99     0 tools/docs/build-manual.sh::build_html_multi
+  10    9   18.0  174     0 tools/docs/build-manual.sh::build_landing
+   1    0    6.5   90     0 tools/docs/build-manual.sh::build_search_index
+   1    0    2.0  446     0 tools/docs/build-manual.sh::write_css
+   8    7   30.9   57    57 tools/docs/build-site.sh::<top>
+  11   15   27.0   27     0 tools/docs/check-manual.sh::check_links
+  11   11   20.8   30    30 tools/docs/checksum-manual.sh::<top>
+   9    9   31.5   68   113 tools/docs/generate-command-index.sh::<top>
+  19   21   48.0   79    83 tools/docs/generate-completions.sh::<top>
+  29   31   49.3  123   140 tools/docs/generate-manpage.sh::<top>
+  14   14   38.6  111   111 tools/release/package-policy-bundles.sh::<top>
+  17   11   33.6   47    50 tools/release/stage-dot.sh::<top>
