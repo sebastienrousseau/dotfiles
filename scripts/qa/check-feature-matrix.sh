@@ -222,7 +222,7 @@ _fm_check_called() {
     # shellcheck disable=SC2086
     if ! grep -hqE "^[[:space:]]*${fn}([[:space:]]|$)" $TEST_GLOB 2>/dev/null; then
       fail "test function is defined but never called: $fn"
-      uncalled=$((uncalled + 1))
+      uncalled=1
     fi
   done <"$work/matrix-tests.txt"
   if [[ "$uncalled" -eq 0 ]]; then
@@ -241,7 +241,7 @@ _fm_check_cold_start() {
     [[ -n "$cmd" ]] || continue
     if ! grep -qx "help:$cmd" "$work/bench-ids.txt"; then
       fail "no cold-start benchmark for routable command: dot $cmd"
-      missing_bench=$((missing_bench + 1))
+      missing_bench=1
     fi
   done <"$work/routed.txt"
   if [[ "$missing_bench" -eq 0 ]]; then
@@ -275,10 +275,10 @@ _fm_check_examples() {
     [[ -n "$path" ]] || continue
     if [[ ! -f "$path" ]]; then
       fail "FEATURE-MATRIX names an example that does not exist: $path"
-      missing_example=$((missing_example + 1))
+      missing_example=1
     elif [[ "$path" != examples/*.sh ]]; then
       fail "example is outside the directory validate-examples.sh runs: $path"
-      missing_example=$((missing_example + 1))
+      missing_example=1
     fi
   done <"$work/matrix-examples.txt"
   if [[ "$missing_example" -eq 0 ]]; then
@@ -294,7 +294,7 @@ _fm_check_modules() {
     name="$(basename "$module" .sh)"
     if ! grep -rqlE "scripts/dot/commands/${name}\.sh" examples/ 2>/dev/null; then
       fail "no example references the command module: $module"
-      missing_group=$((missing_group + 1))
+      missing_group=1
     fi
   done
   if [[ "$missing_group" -eq 0 ]]; then
