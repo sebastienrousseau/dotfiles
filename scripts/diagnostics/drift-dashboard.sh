@@ -173,7 +173,11 @@ fi
 # Class 3
 if ((orphan_count > 0)); then
   echo ""
-  ui_warn "Orphan deployed" "$orphan_count file(s) — review $(pretty_path "$orphan_file")"
+  # ~-relative, as doctor's pretty_path renders it (that helper lives in
+  # doctor.sh, not in a lib this script sources). The tilde goes through a
+  # variable: bash 3.2 keeps a literal backslash from `\~` here.
+  tilde='~'
+  ui_warn "Orphan deployed" "$orphan_count file(s) — review ${orphan_file/#$HOME/$tilde}"
 else
   ui_ok "Orphan deployed" "clean"
 fi
