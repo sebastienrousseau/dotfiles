@@ -66,8 +66,11 @@ done
 # Discover wallpapers from all sources
 # ---------------------------------------------------------------------------
 
-declare -A WALLPAPERS # name -> path (custom overrides system)
-declare -A WP_SOURCE  # name -> "system" | "custom"
+# Explicit empty init: with no wallpapers at all, ${#WALLPAPERS[@]} on a
+# never-assigned `declare -A` trips `set -u` and the rebuild died before
+# writing the fallback themes.
+declare -A WALLPAPERS=() # name -> path (custom overrides system)
+declare -A WP_SOURCE=()  # name -> "system" | "custom"
 
 # _rt_register <name> <path> <source>: add or replace a wallpaper.
 _rt_register() {
@@ -176,6 +179,10 @@ _rt_custom_dynamic() {
   local file="$1" name="$2" frame_count
   _rt_dynamic=0
   [[ "$(echo "${file##*.}" | tr '[:upper:]' '[:lower:]')" == "heic" ]] || return 0
+  # No magick: treat it as one frame. _rt_check_deps reports the missing
+  # tool before any rebuild (under pipefail + errexit the identify pipeline
+  # used to end the run with a bare 127), and --list needs no magick.
+  command -v magick >/dev/null 2>&1 || return 0
   frame_count="$(magick identify "$file" 2>/dev/null | wc -l | tr -d ' ')"
   [[ "$frame_count" -ge 2 && "$name" != *-dark && "$name" != *-light ]] || return 0
   _rt_register "${name}-light" "${file}[0]" custom
