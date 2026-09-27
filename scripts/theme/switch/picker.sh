@@ -6,6 +6,43 @@
 # Picking and browsing themes for dot theme: the fzf picker, list, toggle,
 # family, current, preview, random and help. Sourced by scripts/theme/switch.sh.
 
+# _theme_picker_rows <current family> <current mode>: one picker row per
+# paired family: marker, family, wallpaper source, active mode.
+_theme_picker_rows() {
+  local family source marker active_mode
+  while IFS= read -r family; do
+    [[ -n "$family" ]] || continue
+    source="$(wallpaper_source "$family")"
+    marker="○"
+    active_mode=""
+    if [[ "$family" == "$1" ]]; then
+      marker="✓"
+      active_mode="$2"
+    fi
+    printf '%s  %-35s  %-8s  %s\n' "$marker" "$family" "$source" "$active_mode"
+  done < <(paired_families)
+}
+
+# _theme_apply_pick <selected family or ""> <current theme>
+_theme_apply_pick() {
+  local new_theme
+  if [[ -z "$1" ]]; then
+    # Cancelled, or no selector could run. Either way nothing changed, and
+    # saying so beats exiting mute on a command the user asked to be
+    # interactive.
+    ui_info "Theme" "no selection — still on $2"
+    return 0
+  fi
+  # Families selected from the picker follow the system appearance. The
+  # concrete variant remains available to templates as a resolved cache.
+  new_theme="$1-$(system_appearance_mode)"
+  if [[ "$new_theme" != "$2" || "$(theme_mode_preference)" != "auto" ]]; then
+    run_theme_sync "$new_theme" --auto
+  else
+    ui_info "Theme" "already on $2 (auto)"
+  fi
+}
+
 # Interactive theme picker — prefers fzf, falls back to a numbered menu
 # when fzf isn't installed (useful in restricted environments / CI).
 pick_theme() {
@@ -17,89 +54,19 @@ pick_theme() {
     exit 1
   fi
 
-  local current_family="${current%-dark}"
-  [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
-  local current_mode="dark"
+  local current_family current_mode="dark"
+  current_family="$(_theme_family_of "$current")"
   is_dark_theme "$current" 2>/dev/null || current_mode="light"
 
-  # Build theme list: one row per family, shows active mode
-  local theme_list=""
-  local family source marker active_mode
-  while IFS= read -r family; do
-    [[ -n "$family" ]] || continue
-    source="$(wallpaper_source "$family")"
-    marker="○"
-    active_mode=""
-    if [[ "$family" == "$current_family" ]]; then
-      marker="✓"
-      active_mode="$current_mode"
-    fi
-    theme_list+="$(printf '%s  %-35s  %-8s  %s' "$marker" "$family" "$source" "$active_mode")"$'\n'
-  done < <(paired_families)
+  local theme_list
+  theme_list="$(_theme_picker_rows "$current_family" "$current_mode")"
 
   # Preview helper: awk-extracts the theme's accent + wallpaper + full
   # 16-colour ANSI palette, then renders live swatches using 24-bit
   # terminal escapes. Fast — one awk pass, no forks-per-swatch, no
   # image decoding.
   local preview_cmd
-  preview_cmd='family={2}; mode='"$current_mode"'; f="'"$THEMES_FILE"'"; awk -v F="$family" -v M="$mode" '"'"'
-BEGIN {
-  root = "[themes." F "-" M "]"
-  ui   = "[themes." F "-" M ".ui]"
-  term = "[themes." F "-" M ".term]"
-  esc  = sprintf("%c[", 27)
-}
-function hex2int(h,   n, i, c, digits) {
-  digits = "0123456789abcdef"
-  n = 0
-  h = tolower(h)
-  for (i = 1; i <= length(h); i++) {
-    c = index(digits, substr(h, i, 1))
-    if (c == 0) return 0
-    n = n * 16 + (c - 1)
-  }
-  return n
-}
-function swatch(hex,   clean, r, g, b) {
-  clean = hex
-  sub(/^#/, "", clean)
-  r = hex2int(substr(clean, 1, 2))
-  g = hex2int(substr(clean, 3, 2))
-  b = hex2int(substr(clean, 5, 2))
-  return esc "48;2;" r ";" g ";" b "m    " esc "0m"
-}
-$0 == root { in_root=1; in_ui=0; in_term=0; next }
-$0 == ui   { in_ui=1; in_root=0; in_term=0; next }
-$0 == term { in_term=1; in_root=0; in_ui=0; next }
-/^\[/ { in_root=0; in_ui=0; in_term=0; next }
-in_root && /^wallpaper /   { sub(/.*= *"?/,""); sub(/"$/,""); wallpaper=$0 }
-in_root && /^macos_accent/ { sub(/.*= */,"");   accent_int=$0 }
-in_ui && /^accent /        { sub(/.*= *"?/,""); sub(/"$/,""); accent=$0 }
-in_term && /^bg /          { sub(/.*= *"?/,""); sub(/"$/,""); bg=$0 }
-in_term && /^fg /          { sub(/.*= *"?/,""); sub(/"$/,""); fg=$0 }
-in_term && /^c[0-9]+ *= *"/ {
-    # Not match($0, re, m): the three-argument form is a gawk extension,
-    # and macOS ships the one-true-awk, which rejects it outright — the
-    # whole preview then dies with a syntax error.
-    _k = $0; sub(/ *=.*$/, "", _k); sub(/^c/, "", _k)
-    _v = $0; sub(/^[^"]*"/, "", _v); sub(/".*$/, "", _v)
-    term_c[_k+0] = _v
-  }
-END {
-  print "family:    " F " (" M ")"
-  print "wallpaper: " wallpaper
-  print "accent:    " swatch(accent) " " accent " (macos=" accent_int ")"
-  print "bg:        " swatch(bg) " " bg
-  print "fg:        " swatch(fg) " " fg
-  print ""
-  # 16-colour ANSI palette, laid out 8 wide × 2 rows.
-  line1 = ""; line2 = ""
-  for (i = 0; i <= 7; i++)  line1 = line1 swatch(term_c[i])
-  for (i = 8; i <= 15; i++) line2 = line2 swatch(term_c[i])
-  print "palette:"
-  print "  " line1
-  print "  " line2
-}'"'"' "$f"'
+  preview_cmd='family={2}; mode='"$current_mode"'; f="'"$THEMES_FILE"'"; awk -v F="$family" -v M="$mode" -f "'"$SCRIPT_DIR/switch/preview.awk"'" "$f"'
 
   local selected_family
   selected_family="$(printf '%s' "$theme_list" | ui_pick \
@@ -108,23 +75,7 @@ END {
     --preview "$preview_cmd" |
     awk '$1 !~ /^#/ && NF >= 2 {print $2}')" || return 0
 
-  if [[ -n "$selected_family" ]]; then
-    # Families selected from the picker follow the system appearance. The
-    # concrete variant remains available to templates as a resolved cache.
-    local selected_mode
-    selected_mode="$(system_appearance_mode)"
-    local new_theme="${selected_family}-${selected_mode}"
-    if [[ "$new_theme" != "$current" || "$(theme_mode_preference)" != "auto" ]]; then
-      run_theme_sync "$new_theme" --auto
-    else
-      ui_info "Theme" "already on $current (auto)"
-    fi
-  else
-    # Cancelled, or no selector could run. Either way nothing changed, and
-    # saying so beats exiting mute on a command the user asked to be
-    # interactive.
-    ui_info "Theme" "no selection — still on $current"
-  fi
+  _theme_apply_pick "$selected_family" "$current"
 }
 
 list_themes() {
@@ -266,9 +217,6 @@ _theme_cmd_preview() {
   ui_ok "Kept" "$preview"
 }
 
-# dot theme random
-# Pick a random paired family and apply it. Default mode = current
-# mode; override with `--mode dark|light`.
 # _theme_random_args <args...>: parse `random` options into the caller's
 # _rand_mode / _rand_explicit.
 _theme_random_args() {
@@ -319,6 +267,9 @@ _theme_random_family() {
   printf '%s\n' "${picks[RANDOM % ${#picks[@]}]}"
 }
 
+# dot theme random
+# Pick a random paired family and apply it. Default mode = current
+# mode; override with `--mode dark|light`.
 _theme_cmd_random() {
   shift
   local current pick _rand_mode="" _rand_explicit=false
