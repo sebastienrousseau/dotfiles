@@ -33,7 +33,8 @@ scripts/diagnostics/doctor.sh|1
 scripts/diagnostics/health.sh|1
 scripts/diagnostics/scorecard.sh|1
 scripts/diagnostics/drift-dashboard.sh|1
-scripts/dot/commands/fleet.sh|2
+scripts/dot/commands/fleet.sh|1
+scripts/dot/commands/fleet/drift.sh|1
 LIST
 
 print_summary

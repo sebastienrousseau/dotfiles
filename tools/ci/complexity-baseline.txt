@@ -154,12 +154,6 @@
   17    3   25.6   67   184 scripts/dot/commands/core.sh::<top>
   29    2   34.9  117   223 scripts/dot/commands/diagnostics.sh::<top>
   23   19   31.2  148     0 scripts/dot/commands/env-emit.sh::dot_env_emit
-   3    2    8.8   17   593 scripts/dot/commands/fleet.sh::<top>
-  11    5   19.6   37     0 scripts/dot/commands/fleet.sh::cmd_fleet
-  40   46   66.6  184     0 scripts/dot/commands/fleet.sh::cmd_fleet_apply
-  22   34   37.7   84     0 scripts/dot/commands/fleet.sh::cmd_fleet_drift
-  16   31   29.8   62     0 scripts/dot/commands/fleet.sh::cmd_fleet_namespace
-  11   12   24.2   45     0 scripts/dot/commands/fleet.sh::cmd_fleet_status
   23   24   29.9  106     0 scripts/dot/commands/init.sh::cmd_init
   27   41   58.9  110     0 scripts/dot/commands/lint.sh::cmd_lint
   11    5   12.3   27   136 scripts/dot/commands/manual.sh::<top>
