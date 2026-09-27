@@ -240,12 +240,17 @@ _apply_ai_choose() {
 }
 
 # _apply_ai_install <entry>: native installer for "native" packages, else
-# mise under a gum spinner (gum is present: only gum fills the list).
+# mise (under a gum spinner when gum is still there).
 _apply_ai_install() {
   local bin pkg label
   IFS='|' read -r bin pkg label <<<"$1"
   if [[ "$pkg" == "native" ]]; then
     "install_${bin}_native" "$label"
+    return 0
+  fi
+  if ! command -v gum &>/dev/null; then
+    ui_info "Installing" "$label via mise ($pkg)"
+    _ai_in_scratch_dir mise use -g "$pkg@latest" 2>&1 || ui_warn "$label" "install failed (continuing)" # mutation: ignore unreachable: _ai_to_install is only filled by gum choose, so this non-gum fallback never runs
     return 0
   fi
   if _ai_in_scratch_dir gum spin --spinner dot --title "Installing $label ($pkg)" -- \
