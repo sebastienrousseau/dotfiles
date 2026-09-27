@@ -311,36 +311,6 @@ pick_wallpaper() {
   fi
 }
 
-THEME="$(current_theme || true)"
-
-# Derive mode from theme name (authoritative) instead of querying DMS
-# which may have just restarted and report stale state.
-if [[ "$THEME" == *-dark ]]; then
-  MODE="dark"
-elif [[ "$THEME" == *-light ]]; then
-  MODE="light"
-else
-  MODE="$(detect_mode)"
-fi
-
-WALLPAPER=""
-if [[ "$WALLPAPER_DIR_EXISTS" == "true" ]]; then
-  WALLPAPER="$(pick_wallpaper "$MODE" "$THEME" || true)"
-fi
-
-# Fallback: try OS-native system wallpapers
-if [[ -z "$WALLPAPER" ]]; then
-  WALLPAPER="$(system_wallpaper_for_theme "$THEME" "$MODE" || true)"
-  if [[ -n "$WALLPAPER" ]]; then
-    ui_info "Wallpaper" "using system wallpaper: $(basename "$WALLPAPER")"
-  fi
-fi
-
-if [[ -z "$WALLPAPER" ]]; then
-  ui_info "Wallpaper" "no wallpaper for ${THEME:-unknown} (skipping — theme colors still apply)"
-  exit 0
-fi
-
 # Convert .heic to .png on Linux (HEIC not universally supported)
 ensure_linux_compatible() {
   local wp="$1"
@@ -687,6 +657,39 @@ end tell" 2>/dev/null || true
       ;;
   esac
 }
+
+# Resolve the theme, mode and wallpaper only now, after every helper is
+# defined: wallpaper_for_theme calls ensure_linux_compatible for a family
+# .heic on Linux, which used to run before that function existed.
+THEME="$(current_theme || true)"
+
+# Derive mode from theme name (authoritative) instead of querying DMS
+# which may have just restarted and report stale state.
+if [[ "$THEME" == *-dark ]]; then
+  MODE="dark"
+elif [[ "$THEME" == *-light ]]; then
+  MODE="light"
+else
+  MODE="$(detect_mode)"
+fi
+
+WALLPAPER=""
+if [[ "$WALLPAPER_DIR_EXISTS" == "true" ]]; then
+  WALLPAPER="$(pick_wallpaper "$MODE" "$THEME" || true)"
+fi
+
+# Fallback: try OS-native system wallpapers
+if [[ -z "$WALLPAPER" ]]; then
+  WALLPAPER="$(system_wallpaper_for_theme "$THEME" "$MODE" || true)"
+  if [[ -n "$WALLPAPER" ]]; then
+    ui_info "Wallpaper" "using system wallpaper: $(basename "$WALLPAPER")"
+  fi
+fi
+
+if [[ -z "$WALLPAPER" ]]; then
+  ui_info "Wallpaper" "no wallpaper for ${THEME:-unknown} (skipping — theme colors still apply)"
+  exit 0
+fi
 
 apply_wallpaper "$WALLPAPER" "$MODE"
 if [[ -n "$THEME" ]]; then
