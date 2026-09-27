@@ -143,7 +143,6 @@
   16    5   25.7   51     0 scripts/dot/commands/agent.sh::cmd_mode
   12   12   25.8   22     0 scripts/dot/commands/agents.sh::_agents_repo_root
   18   21   43.4  163     0 scripts/dot/commands/agents.sh::cmd_agents
-  35   63   49.4  196     0 scripts/dot/commands/aliases.sh::cmd_aliases
   17    3   25.6   67   184 scripts/dot/commands/core.sh::<top>
   29    2   34.9  117   223 scripts/dot/commands/diagnostics.sh::<top>
   23   19   31.2  148     0 scripts/dot/commands/env-emit.sh::dot_env_emit
