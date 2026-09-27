@@ -107,32 +107,39 @@ compress() {
     shift 2
   fi
 
-  # The last argument might be the output file if it doesn't exist as a file or directory
-  local inputs=("$@")
-  local num_inputs=${#inputs[@]}
+  # The last argument might be the output file if it doesn't exist as a file or directory.
+  # No array indexing here: this file is sourced into zsh too, whose arrays
+  # are 1-based, so $first read as empty and a.txt compressed to ".tar".
+  local inputs=() first="$1" last="" arg n=0
   local output=""
+  for arg in "$@"; do last="$arg"; done
 
   # If the last argument doesn't exist as a file or directory and has more than 1 argument
-  if [[ "$num_inputs" -gt 1 ]] && [[ ! -e "${inputs[$num_inputs - 1]}" ]]; then
-    output="${inputs[$num_inputs - 1]}"
-    # shellcheck disable=SC2184,SC2086
-    unset inputs[$num_inputs-1]
+  if [[ "$#" -gt 1 ]] && [[ ! -e "$last" ]]; then
+    output="$last"
+    for arg in "$@"; do
+      n=$((n + 1))
+      if [[ "$n" -lt "$#" ]]; then
+        inputs+=("$arg")
+      fi
+    done
   else
+    inputs=("$@")
     # Default output name based on the first input
     case "$format" in
-      tar) output="${inputs[0]}.tar" ;;
-      tgz) output="${inputs[0]}.tar.gz" ;;
-      tbz2) output="${inputs[0]}.tar.bz2" ;;
-      txz) output="${inputs[0]}.tar.xz" ;;
-      tzst) output="${inputs[0]}.tar.zst" ;;
-      zip) output="${inputs[0]}.zip" ;;
-      7z) output="${inputs[0]}.7z" ;;
-      gz) output="${inputs[0]}.gz" ;;
-      bz2) output="${inputs[0]}.bz2" ;;
-      xz) output="${inputs[0]}.xz" ;;
-      zst) output="${inputs[0]}.zst" ;;
-      lz4) output="${inputs[0]}.lz4" ;;
-      rar) output="${inputs[0]}.rar" ;;
+      tar) output="$first.tar" ;;
+      tgz) output="$first.tar.gz" ;;
+      tbz2) output="$first.tar.bz2" ;;
+      txz) output="$first.tar.xz" ;;
+      tzst) output="$first.tar.zst" ;;
+      zip) output="$first.zip" ;;
+      7z) output="$first.7z" ;;
+      gz) output="$first.gz" ;;
+      bz2) output="$first.bz2" ;;
+      xz) output="$first.xz" ;;
+      zst) output="$first.zst" ;;
+      lz4) output="$first.lz4" ;;
+      rar) output="$first.rar" ;;
       *) echo "Error: Unsupported format '$format'" && return 1 ;;
     esac
   fi
@@ -152,14 +159,14 @@ compress() {
       tar -cf "$output" "${inputs[@]}"
       ;;
     tgz)
-      if [[ $has_pv -eq 1 ]] && [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
-        pv "${inputs[0]}" | tar -cz -f "$output" -C "$(dirname "${inputs[0]}")" "$(basename "${inputs[0]}")"
+      if [[ $has_pv -eq 1 ]] && [[ ${#inputs[@]} -eq 1 ]] && [[ -f "$first" ]]; then
+        pv "$first" | tar -cz -f "$output" -C "$(dirname "$first")" "$(basename "$first")"
       else
         tar -czf "$output" "${inputs[@]}"
       fi
       ;;
     tbz2)
-      tar -cjf "$output" -C "$(dirname "${inputs[0]}")" "${inputs[@]}"
+      tar -cjf "$output" -C "$(dirname "$first")" "${inputs[@]}"
       ;;
     txz)
       XZ_OPT="-$level" tar -cJf "$output" "${inputs[@]}"
@@ -174,11 +181,11 @@ compress() {
       7z a "-mx=$level" "$output" "${inputs[@]}"
       ;;
     gz)
-      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
+      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "$first" ]]; then
         if [[ $has_pv -eq 1 ]]; then
-          pv "${inputs[0]}" | gzip "-$level" >"$output"
+          pv "$first" | gzip "-$level" >"$output"
         else
-          gzip -c "-$level" "${inputs[0]}" >"$output"
+          gzip -c "-$level" "$first" >"$output"
         fi
       else
         echo "Error: gzip compression requires a single input file" | tee -a "$LOG_FILE"
@@ -186,11 +193,11 @@ compress() {
       fi
       ;;
     bz2)
-      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
+      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "$first" ]]; then
         if [[ $has_pv -eq 1 ]]; then
-          pv "${inputs[0]}" | bzip2 "-$level" >"$output"
+          pv "$first" | bzip2 "-$level" >"$output"
         else
-          bzip2 -c "-$level" "${inputs[0]}" >"$output"
+          bzip2 -c "-$level" "$first" >"$output"
         fi
       else
         echo "Error: bzip2 compression requires a single input file" | tee -a "$LOG_FILE"
@@ -198,11 +205,11 @@ compress() {
       fi
       ;;
     xz)
-      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
+      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "$first" ]]; then
         if [[ $has_pv -eq 1 ]]; then
-          pv "${inputs[0]}" | xz "-$level" >"$output"
+          pv "$first" | xz "-$level" >"$output"
         else
-          xz -c "-$level" "${inputs[0]}" >"$output"
+          xz -c "-$level" "$first" >"$output"
         fi
       else
         echo "Error: xz compression requires a single input file" | tee -a "$LOG_FILE"
@@ -210,11 +217,11 @@ compress() {
       fi
       ;;
     zst)
-      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
+      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "$first" ]]; then
         if [[ $has_pv -eq 1 ]]; then
-          pv "${inputs[0]}" | zstd "-$level" >"$output"
+          pv "$first" | zstd "-$level" >"$output"
         else
-          zstd -c "-$level" "${inputs[0]}" >"$output"
+          zstd -c "-$level" "$first" >"$output"
         fi
       else
         echo "Error: zstd compression requires a single input file" | tee -a "$LOG_FILE"
@@ -222,11 +229,11 @@ compress() {
       fi
       ;;
     lz4)
-      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
+      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "$first" ]]; then
         if [[ $has_pv -eq 1 ]]; then
-          pv "${inputs[0]}" | lz4 "-$level" >"$output"
+          pv "$first" | lz4 "-$level" >"$output"
         else
-          lz4 -c "-$level" "${inputs[0]}" >"$output"
+          lz4 -c "-$level" "$first" >"$output"
         fi
       else
         echo "Error: lz4 compression requires a single input file" | tee -a "$LOG_FILE"
