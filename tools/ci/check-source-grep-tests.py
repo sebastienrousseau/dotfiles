@@ -146,6 +146,12 @@ def lint_file(path: Path) -> list[tuple[int, str]]:
                         break
             if operand is None:
                 continue
+            # `awk -f prog.awk data` runs prog.awk as the program: that is
+            # executing the source, like `bash script.sh`, not reading it.
+            if tool in ("awk", "gawk", "mawk") and re.search(
+                r"(?:^|\s)-f\s+\"?[^\s\"]*" + re.escape(operand.lstrip("$").split("/")[-1]), cmd
+            ):
+                continue
             if NOT_INSPECTION_RE.search(" " + cmd) and tool not in TEXT_TOOLS:
                 continue
             how = "bash -n" if tool not in TEXT_TOOLS else tool
