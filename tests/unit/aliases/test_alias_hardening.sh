@@ -50,7 +50,7 @@ alias_probe() {
   done
   shift
   # shellcheck disable=SC2016
-  env -i HOME="$AH_TMP" PATH="$pathdir:/usr/bin:/bin" "${envs[@]}" bash --norc --noprofile -c '
+  env -i HOME="$AH_TMP" PATH="$pathdir:/usr/bin:/bin" ${envs[@]+"${envs[@]}"} bash --norc --noprofile -c '
     shopt -s expand_aliases
     dot_confirm_destructive() { :; }
     source "$1" >/dev/null 2>&1
