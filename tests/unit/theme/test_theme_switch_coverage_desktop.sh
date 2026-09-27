@@ -174,6 +174,8 @@ if [[ "${1:-}" == get ]]; then
   esac
   exit 0
 fi
+# FAKE_GS_FAIL_KEY fails one key's `set`; FAKE_GS_SET_RC fails them all.
+[[ "${1:-}" == set && -n "${FAKE_GS_FAIL_KEY:-}" && "${3:-}" == "$FAKE_GS_FAIL_KEY" ]] && exit 1
 [[ "${1:-}" == set ]] && exit "${FAKE_GS_SET_RC:-0}"
 exit 0
 EOF
@@ -515,5 +517,72 @@ assert_equals "0" "$rc" "status --json exits 0"
 assert_file_contains "$OUT" '"recorded": "maui-dark"' "the recorded theme is emitted"
 assert_file_contains "$OUT" '"detected_de": "kde"' "the desktop is emitted"
 assert_file_contains "$OUT" '"accent": "#3daee9"' "the KDE accent is emitted"
+
+# ===========================================================================
+# gaps found by the mutation gate in the refactored modules
+# ===========================================================================
+test_start "status_shows_the_dark_wallpaper_row"
+set_theme_to maui-dark
+rc="$(sw status)"
+assert_file_contains "$OUT" "Wallpaper (dark)" "a live dark wallpaper is listed"
+
+WALL_FILE="$WALLPAPERS/any.jpg"
+printf 'JPEG' >"$WALL_FILE"
+for fail in picture-uri picture-uri-dark; do
+  test_start "gnome_wallpaper_applies_when_only_${fail}_fails"
+  rc="$(FAKE_GS_FAIL_KEY="$fail" sw wallpaper "$WALL_FILE")"
+  assert_equals "0" "$rc" "one successful gsettings set is enough"
+done
+
+test_start "gnome_wallpaper_fails_when_every_set_fails"
+rc="$(FAKE_GS_SET_RC=1 sw wallpaper "$WALL_FILE")"
+assert_equals "1" "$rc" "no mechanism took the image"
+
+test_start "list_counts_the_families"
+rc="$(sw list)"
+assert_file_contains "$OUT" "(2 wallpaper themes available)" "both paired families are counted"
+
+test_start "sync_if_auto_skips_in_manual_mode"
+set_theme_to maui-dark dark
+reset_calls
+rc="$(sw sync --if-auto)"
+assert_equals "0:" "$rc:$(last_sync)" "manual mode: skipped, exit 0, nothing applied"
+
+test_start "ambient_sunwait_fills_the_missing_time"
+set_theme_to bloom-dark
+rm -f "$AMB_STATE"
+USE="$DEFAULT_USE sunwait" FAKE_RISE=05:00 FAKE_SET=21:30 DOT_THEME_LOCATION="51.5N,0.13W" \
+  DOT_THEME_SUNRISE=06:00 sw ambient >/dev/null
+assert_file_contains "$OUT" "sunwait(51.5N,0.13W) sunrise=06:00 sunset=21:30" "env sunrise kept, sunset from sunwait"
+
+test_start "ambient_state_file_fills_the_missing_time"
+printf 'DOT_THEME_SUNSET=22:15\n' >"$AMB_STATE"
+DOT_THEME_SUNRISE=06:00 sw ambient >/dev/null
+assert_file_contains "$OUT" "state-file sunrise=06:00 sunset=22:15" "env sunrise kept, sunset from the state file"
+rm -f "$AMB_STATE"
+
+# The picker via the dot-ui backend: a stub records the header and picks maui.
+mkstub dot-ui <<'EOF'
+printf '%s\n' "$*" >>"$CALLS/dot-ui"
+grep maui
+EOF
+test_start "picker_header_shows_the_current_mode"
+set_theme_to bloom-light auto
+reset_calls
+rc="$(USE="$DEFAULT_USE dot-ui" sw)"
+assert_contains "current: bloom [light]" "$(cat "$CALLS/dot-ui" 2>/dev/null)" "a light current theme is shown as light"
+
+test_start "picker_applies_the_pick_in_auto_mode"
+assert_equals "0:maui-dark --auto" "$rc:$(last_sync)" "the picked family follows the system (dark)"
+
+test_start "a_family_with_one_variant_is_not_a_quick_switch"
+SOLO_SRC="$WORK/solo-src"
+mkdir -p "$SOLO_SRC/.chezmoidata"
+printf 'theme = "maui-dark"\ntheme_mode = "dark"\n' >"$SOLO_SRC/.chezmoidata.toml"
+printf '[themes.solo-dark]\nmode = "dark"\n[themes.maui-dark]\nmode = "dark"\n[themes.maui-light]\nmode = "light"\n' \
+  >"$SOLO_SRC/.chezmoidata/themes.toml"
+reset_calls
+rc="$(SRC_OVERRIDE="$SOLO_SRC" sw solo)"
+assert_equals "1:" "$rc:$(last_sync)" "solo has no light variant: unknown, nothing applied"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
