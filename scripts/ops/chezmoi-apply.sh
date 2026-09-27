@@ -31,10 +31,8 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Help flag
-case "${1:-}" in
-  -h | --help)
-    cat <<HELP
+_apply_help() {
+  cat <<HELP
 chezmoi-apply.sh - Apply dotfiles with enhanced diagnostics
 
 Usage:
@@ -52,24 +50,7 @@ Environment Variables:
   DOTFILES_POST_APPLY_REPAIR=1   Run post-apply repairs (default)
   DOTFILES_CHEZMOI_STATUS=1      Show status after apply (default)
 HELP
-    exit 0
-    ;;
-esac
-
-args=("$@")
-if [[ -n "${DOTFILES_CHEZMOI_APPLY_FLAGS:-}" ]]; then
-  # Safely parse space-separated flags into array
-  read -ra flag_array <<<"$DOTFILES_CHEZMOI_APPLY_FLAGS"
-  args+=("${flag_array[@]}")
-fi
-
-if [[ "${DOTFILES_CHEZMOI_VERBOSE:-0}" = "1" ]]; then
-  args+=("--verbose")
-fi
-
-if [[ "${DOTFILES_CHEZMOI_KEEP_GOING:-0}" = "1" ]]; then
-  args+=("--keep-going")
-fi
+}
 
 has_flag() {
   local needle="$1"
@@ -83,106 +64,106 @@ has_flag() {
   return 1
 }
 
-# Apply unattended by default, like an OS package manager. chezmoi is
-# always run below under `gum spin` or with its output captured, so it
-# never has a controlling TTY; its "<file> has changed since chezmoi last
-# wrote it" confirmation prompt therefore cannot be answered and aborts
-# the run with "could not open a new TTY". Passing --force applies the
-# canonical source without prompting, so local drift to *managed* files
-# yields to the source — exactly how `apt`/system updates behave. Keep
-# machine-specific tweaks in the unmanaged ~/.zshrc.local or
-# ~/.config/zsh/rc.d.local/*.zsh, which chezmoi never overwrites.
-# Opt back into chezmoi's prompts with DOTFILES_INTERACTIVE_APPLY=1.
-if [[ "${DOTFILES_INTERACTIVE_APPLY:-0}" != "1" ]] && ! has_flag "--force"; then
-  args+=("--force")
-fi
+# _apply_build_args <args...>: the arguments for `chezmoi apply` (global args).
+_apply_build_args() {
+  args=("$@")
+  if [[ -n "${DOTFILES_CHEZMOI_APPLY_FLAGS:-}" ]]; then
+    # Safely parse space-separated flags into array
+    read -ra flag_array <<<"$DOTFILES_CHEZMOI_APPLY_FLAGS"
+    args+=("${flag_array[@]}")
+  fi
+  [[ "${DOTFILES_CHEZMOI_VERBOSE:-0}" = "1" ]] && args+=("--verbose")
+  [[ "${DOTFILES_CHEZMOI_KEEP_GOING:-0}" = "1" ]] && args+=("--keep-going")
+  # Apply unattended by default, like an OS package manager. chezmoi is
+  # always run below under `gum spin` or with its output captured, so it
+  # never has a controlling TTY; its "<file> has changed since chezmoi last
+  # wrote it" confirmation prompt therefore cannot be answered and aborts
+  # the run with "could not open a new TTY". Passing --force applies the
+  # canonical source without prompting, so local drift to *managed* files
+  # yields to the source — exactly how `apt`/system updates behave. Keep
+  # machine-specific tweaks in the unmanaged ~/.zshrc.local or
+  # ~/.config/zsh/rc.d.local/*.zsh, which chezmoi never overwrites.
+  # Opt back into chezmoi's prompts with DOTFILES_INTERACTIVE_APPLY=1.
+  if [[ "${DOTFILES_INTERACTIVE_APPLY:-0}" != "1" ]] && ! has_flag "--force"; then
+    args+=("--force")
+  fi
+}
 
 # Whether interactive menus (the optional AI-provider installer below) may
 # prompt. Suppressed without a TTY, under CI, or when non-interactive is
 # requested — so unattended runs never hang waiting on input.
-INTERACTIVE=1
-if [[ "${DOTFILES_NONINTERACTIVE:-0}" == "1" ]] || [[ -n "${CI:-}" ]] || [[ ! -t 0 ]] || [[ ! -t 1 ]]; then
-  INTERACTIVE=0
-fi
-
-ui_init
+_apply_interactive() {
+  INTERACTIVE=1
+  if [[ "${DOTFILES_NONINTERACTIVE:-0}" == "1" ]] || [[ -n "${CI:-}" ]] || [[ ! -t 0 ]] || [[ ! -t 1 ]]; then
+    INTERACTIVE=0
+  fi
+}
 
 # Prevent concurrent execution. flock(1) is Linux-only — it does not exist
 # on macOS, where `! flock` previously took the "already running" branch and
 # made `dot apply` a silent no-op. Use flock where present, otherwise fall
 # back to an atomic mkdir lock (portable to macOS/BSD).
-_lock_base="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/dotfiles-chezmoi-apply"
-if command -v flock >/dev/null 2>&1; then
-  exec 9>"${_lock_base}.lock"
-  if ! flock -n 9; then
+_apply_lock() {
+  local lock_base="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/dotfiles-chezmoi-apply"
+  if command -v flock >/dev/null 2>&1; then
+    exec 9>"${lock_base}.lock"
+    if ! flock -n 9; then
+      ui_warn "Already running" "Another instance is active"
+      exit 0
+    fi
+  elif ! mkdir "${lock_base}.lock.d" 2>/dev/null; then
     ui_warn "Already running" "Another instance is active"
     exit 0
+  else
+    _LOCK_DIR="${lock_base}.lock.d" # removed by cleanup() on exit
   fi
-elif ! mkdir "${_lock_base}.lock.d" 2>/dev/null; then
-  ui_warn "Already running" "Another instance is active"
-  exit 0
-else
-  _LOCK_DIR="${_lock_base}.lock.d" # removed by cleanup() on exit
-fi
+}
 
+# run_step <title> <cmd...>: run cmd under a gum spinner (or a plain
+# "title..." line), its output captured; show it with --verbose, or on
+# failure, which ends the apply.
 run_step() {
-  local title="$1"
+  local title="$1" out rc=0
   shift
-  local out
   out="$(umask 077 && mktemp)"
   _TMPFILES+=("$out")
   if [[ "$UI_ENABLED" = "1" ]]; then
-    if gum spin --spinner dot --title "$title" -- "$@" >"$out" 2>&1; then
-      ui_ok "$title"
-      if [[ "${DOTFILES_CHEZMOI_VERBOSE:-0}" = "1" ]] && [[ -s "$out" ]]; then
-        cat "$out"
-      fi
-    else
-      ui_err "$title"
-      cat "$out"
-      rm -f "$out"
-      exit 1
-    fi
+    gum spin --spinner dot --title "$title" -- "$@" >"$out" 2>&1 || rc=$?
   else
     echo "$title..."
-    if "$@" >"$out" 2>&1; then
-      if [[ "${DOTFILES_CHEZMOI_VERBOSE:-0}" = "1" ]] && [[ -s "$out" ]]; then
-        cat "$out"
-      fi
-    else
-      cat "$out"
-      rm -f "$out"
-      exit 1
-    fi
+    "$@" >"$out" 2>&1 || rc=$?
+  fi
+  if [[ $rc -ne 0 ]]; then
+    [[ "$UI_ENABLED" = "1" ]] && ui_err "$title"
+    cat "$out"
+    rm -f "$out"
+    exit 1
+  fi
+  [[ "$UI_ENABLED" = "1" ]] && ui_ok "$title"
+  if [[ "${DOTFILES_CHEZMOI_VERBOSE:-0}" = "1" && -s "$out" ]]; then
+    cat "$out"
   fi
   rm -f "$out"
 }
 
-dot_log info "apply_start"
-_apply_start=$(date +%s)
-ui_header "Applying dotfiles"
-if [[ "${DOTFILES_ALIAS_STRICT_MODE:-0}" == "1" ]]; then
-  governance_script="$SCRIPT_DIR/../diagnostics/alias-governance.sh"
-  if [[ -f "$governance_script" ]]; then
-    run_step "Alias governance (strict)" env DOTFILES_ALIAS_POLICY=strict bash "$governance_script"
-  fi
-fi
-run_step "Chezmoi apply" chezmoi apply "${args[@]}"
+_apply_governance() {
+  local governance_script="$SCRIPT_DIR/../diagnostics/alias-governance.sh"
+  [[ "${DOTFILES_ALIAS_STRICT_MODE:-0}" == "1" && -f "$governance_script" ]] || return 0
+  run_step "Alias governance (strict)" env DOTFILES_ALIAS_POLICY=strict bash "$governance_script"
+}
 
-if [[ "${DOTFILES_SNAPSHOT_ON_APPLY:-1}" = "1" ]]; then
-  snapshot_script="$SCRIPT_DIR/../diagnostics/snapshot.sh"
-  snapshot_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/snapshots"
-  snapshot_file="${snapshot_dir}/baseline.json"
-  if [[ -f "$snapshot_script" && ! -f "$snapshot_file" ]]; then
+# A baseline snapshot on the first apply (never overwritten).
+_apply_snapshot() {
+  local snapshot_script="$SCRIPT_DIR/../diagnostics/snapshot.sh"
+  local snapshot_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/snapshots"
+  [[ "${DOTFILES_SNAPSHOT_ON_APPLY:-1}" = "1" ]] || return 0
+  if [[ -f "$snapshot_script" && ! -f "$snapshot_dir/baseline.json" ]]; then
     mkdir -p "$snapshot_dir"
     bash "$snapshot_script" --baseline >/dev/null 2>&1 || true
   fi
-fi
+}
 
 # check_cmd() is provided by lib/dot/utils.sh — sourced above.
-
-echo ""
-ui_header "AI provider CLI checks (optional)"
 
 # binary|mise_package|label  (claude uses the native installer, not mise)
 _AI_PROVIDERS=(
@@ -203,95 +184,98 @@ _AI_PROVIDERS=(
   "zai|npm:@guizmo-ai/zai-cli|ZAI"
 )
 
-_ai_missing=()
-for _entry in "${_AI_PROVIDERS[@]}"; do
-  IFS='|' read -r _bin _pkg _label <<<"$_entry"
-  if check_cmd "$_bin"; then
-    ui_ok "$_label"
-  else
-    ui_info "$_label" "not installed"
-    _ai_missing+=("$_entry")
-  fi
-done
-
-if [[ ${#_ai_missing[@]} -gt 0 ]] && [[ "$INTERACTIVE" == "1" ]]; then
-  if command -v mise &>/dev/null; then
-    echo ""
-    _ai_install_action=""
-    if command -v gum &>/dev/null; then
-      _ai_install_action=$(printf '%s\n' "Install all" "Choose which to install" "Skip" |
-        gum choose --header "Missing AI providers — install via mise?") || _ai_install_action=""
+# _apply_ai_scan: one row per provider; missing entries go to _ai_missing.
+_apply_ai_scan() {
+  local entry bin pkg label
+  _ai_missing=()
+  for entry in "${_AI_PROVIDERS[@]}"; do
+    IFS='|' read -r bin pkg label <<<"$entry"
+    if check_cmd "$bin"; then
+      ui_ok "$label"
     else
-      ui_info "Tip" "Install all missing AI providers with: mise install"
-      ui_info "Tip" "Or individually: mise use -g <package>@latest"
+      ui_info "$label" "not installed"
+      _ai_missing+=("$entry")
     fi
+  done
+}
 
-    _ai_to_install=()
-    case "$_ai_install_action" in
-      "Install all")
-        _ai_to_install=("${_ai_missing[@]}")
-        ;;
-      "Choose which to install")
-        _ai_pick_choices=()
-        for _entry in "${_ai_missing[@]}"; do
-          IFS='|' read -r _bin _pkg _label <<<"$_entry"
-          _ai_pick_choices+=("$_label")
-        done
-        _ai_picked=$(printf '%s\n' "${_ai_pick_choices[@]}" |
-          gum choose --no-limit --header "Select providers to install (Space to toggle, Enter to confirm)") || _ai_picked=""
-        if [[ -n "$_ai_picked" ]]; then
-          while IFS= read -r _selected; do
-            [[ -z "$_selected" ]] && continue
-            for _entry in "${_ai_missing[@]}"; do
-              IFS='|' read -r _bin _pkg _label <<<"$_entry"
-              if [[ "$_label" == "$_selected" ]]; then
-                _ai_to_install+=("$_entry")
-              fi
-            done
-          done <<<"$_ai_picked"
-        fi
-        ;;
-    esac
+# _apply_ai_pick: the missing entries whose labels the user ticked.
+_apply_ai_pick() {
+  local entry bin pkg label picked selected
+  local -a choices=()
+  for entry in "${_ai_missing[@]}"; do
+    IFS='|' read -r bin pkg label <<<"$entry"
+    choices+=("$label")
+  done
+  picked=$(printf '%s\n' "${choices[@]}" |
+    gum choose --no-limit --header "Select providers to install (Space to toggle, Enter to confirm)") || picked=""
+  [[ -n "$picked" ]] || return 0
+  while IFS= read -r selected; do
+    [[ -z "$selected" ]] && continue
+    for entry in "${_ai_missing[@]}"; do
+      IFS='|' read -r bin pkg label <<<"$entry"
+      if [[ "$label" == "$selected" ]]; then
+        _ai_to_install+=("$entry")
+      fi
+    done
+  done <<<"$picked"
+}
 
-    if [[ ${#_ai_to_install[@]} -gt 0 ]]; then
-      echo ""
-      for _entry in "${_ai_to_install[@]}"; do
-        IFS='|' read -r _bin _pkg _label <<<"$_entry"
-        if [[ "$_bin" == "claude" ]]; then
-          install_claude_native "$_label"
-          continue
-        fi
-        if [[ "$_bin" == "goose" ]]; then
-          install_goose_native "$_label"
-          continue
-        fi
-        if [[ "$_bin" == "agy" ]]; then
-          install_agy_native "$_label"
-          continue
-        fi
-        if [[ "$_bin" == "kimi" ]]; then
-          install_kimi_native "$_label"
-          continue
-        fi
-        if command -v gum &>/dev/null; then
-          if _ai_in_scratch_dir gum spin --spinner dot --title "Installing $_label ($_pkg)" -- \
-            mise use -g "$_pkg@latest" 2>&1; then
-            ui_ok "$_label" "installed"
-          else
-            ui_warn "$_label" "install failed (continuing)"
-          fi
-        else
-          ui_info "Installing" "$_label via mise ($_pkg)"
-          _ai_in_scratch_dir mise use -g "$_pkg@latest" 2>&1 || ui_warn "$_label" "install failed (continuing)" # mutation: ignore unreachable: _ai_to_install is only filled by gum choose, so this non-gum fallback never runs
-        fi
-      done
-    fi
-  else
-    ui_warn "mise" "not found — install mise first to manage AI providers"
+# _apply_ai_choose: fill _ai_to_install through gum (all, a choice, or
+# none); without gum, print how to install them instead.
+_apply_ai_choose() {
+  local action=""
+  _ai_to_install=()
+  if ! command -v gum &>/dev/null; then
+    ui_info "Tip" "Install all missing AI providers with: mise install"
+    ui_info "Tip" "Or individually: mise use -g <package>@latest"
+    return 0
   fi
-fi
+  action=$(printf '%s\n' "Install all" "Choose which to install" "Skip" |
+    gum choose --header "Missing AI providers — install via mise?") || action=""
+  case "$action" in
+    "Install all") _ai_to_install=("${_ai_missing[@]}") ;;
+    "Choose which to install") _apply_ai_pick ;;
+  esac
+}
 
-if [[ "${DOTFILES_CHEZMOI_STATUS:-1}" = "1" ]]; then
+# _apply_ai_install <entry>: native installer for "native" packages, else
+# mise under a gum spinner (gum is present: only gum fills the list).
+_apply_ai_install() {
+  local bin pkg label
+  IFS='|' read -r bin pkg label <<<"$1"
+  if [[ "$pkg" == "native" ]]; then
+    "install_${bin}_native" "$label"
+    return 0
+  fi
+  if _ai_in_scratch_dir gum spin --spinner dot --title "Installing $label ($pkg)" -- \
+    mise use -g "$pkg@latest" 2>&1; then
+    ui_ok "$label" "installed"
+  else
+    ui_warn "$label" "install failed (continuing)"
+  fi
+}
+
+# _apply_ai_offer: offer to install missing providers (interactive runs only).
+_apply_ai_offer() {
+  local entry
+  [[ ${#_ai_missing[@]} -gt 0 && "$INTERACTIVE" == "1" ]] || return 0
+  if ! command -v mise &>/dev/null; then
+    ui_warn "mise" "not found — install mise first to manage AI providers"
+    return 0
+  fi
+  echo ""
+  _apply_ai_choose
+  [[ ${#_ai_to_install[@]} -gt 0 ]] || return 0
+  echo ""
+  for entry in "${_ai_to_install[@]}"; do
+    _apply_ai_install "$entry"
+  done
+}
+
+_apply_status() {
+  local status_out
+  [[ "${DOTFILES_CHEZMOI_STATUS:-1}" = "1" ]] || return 0
   printf "\n"
   ui_header "Status"
   status_out="$(chezmoi status || true)"
@@ -300,23 +284,50 @@ if [[ "${DOTFILES_CHEZMOI_STATUS:-1}" = "1" ]]; then
   else
     printf "%s\n" "$status_out"
   fi
-fi
+}
 
-if [[ "${DOTFILES_POST_APPLY_REPAIR:-1}" = "1" ]]; then
-  post_apply_script="$SCRIPT_DIR/post-apply-repair.sh"
-  if [[ -f "$post_apply_script" ]]; then
-    printf "\n"
-    bash "$post_apply_script" || true
-  fi
-fi
+_apply_repair() {
+  local post_apply_script="$SCRIPT_DIR/post-apply-repair.sh"
+  [[ "${DOTFILES_POST_APPLY_REPAIR:-1}" = "1" && -f "$post_apply_script" ]] || return 0
+  printf "\n"
+  bash "$post_apply_script" || true
+}
 
-if [[ "${DOTFILES_PREWARM_ON_APPLY:-1}" = "1" ]]; then
-  prewarm_script="$SCRIPT_DIR/prewarm.sh"
-  if [[ -f "$prewarm_script" ]]; then
-    printf "\n"
-    run_step "Pre-warming shell caches" bash "$prewarm_script"
-  fi
-fi
+_apply_prewarm() {
+  local prewarm_script="$SCRIPT_DIR/prewarm.sh"
+  [[ "${DOTFILES_PREWARM_ON_APPLY:-1}" = "1" && -f "$prewarm_script" ]] || return 0
+  printf "\n"
+  run_step "Pre-warming shell caches" bash "$prewarm_script"
+}
+
+# --- main ---
+case "${1:-}" in
+  -h | --help)
+    _apply_help
+    exit 0
+    ;;
+esac
+
+_apply_build_args "$@"
+_apply_interactive
+ui_init
+_apply_lock
+
+dot_log info "apply_start"
+_apply_start=$(date +%s)
+ui_header "Applying dotfiles"
+_apply_governance
+run_step "Chezmoi apply" chezmoi apply "${args[@]}"
+_apply_snapshot
+
+echo ""
+ui_header "AI provider CLI checks (optional)"
+_apply_ai_scan
+_apply_ai_offer
+
+_apply_status
+_apply_repair
+_apply_prewarm
 
 printf "\n"
 _apply_end=$(date +%s)
