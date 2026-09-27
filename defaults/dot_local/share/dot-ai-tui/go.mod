@@ -2,6 +2,8 @@ module dotfiles.local/dot-ai-tui
 
 go 1.26
 
+toolchain go1.26.8
+
 require (
 	github.com/alecthomas/chroma/v2 v2.27.0
 	github.com/charmbracelet/bubbles v0.21.0
