@@ -114,22 +114,18 @@ _ws_stored_wallpaper() {
     /^\[/ { found=0 }
     found && /^wallpaper/ { sub(/.*= *"/, ""); sub(/".*/, ""); print; exit }
   ' "$themes_file")"
-  [[ -n "$stored_wp" ]] || return 1
   # Home-relative form (current generator): ~/Pictures/... → $HOME/Pictures/...
   # Prefix-strip comparison avoids a quoted-tilde glob (SC2088); the tilde
   # here is a literal leading character, not a path to expand.
   if [[ "$stored_wp" != "${stored_wp#\~/}" ]]; then
     stored_wp="${HOME}/${stored_wp#\~/}"
   fi
-  # Cross-platform: resolve legacy absolute macOS paths on Linux
-  if [[ ! -f "$stored_wp" ]]; then
-    if [[ "$stored_wp" == /Users/* ]]; then
-      # /Users/<user>/Pictures/... → $HOME/Pictures/... (pre-relativize data)
-      stored_wp="${HOME}/${stored_wp#/Users/*/}"
-    elif [[ "$stored_wp" == /System/* ]]; then
-      # macOS system wallpapers don't exist on Linux — skip to next fallback
-      stored_wp=""
-    fi
+  # Cross-platform: resolve legacy absolute macOS paths on Linux:
+  # /Users/<user>/Pictures/... → $HOME/Pictures/... (pre-relativize data).
+  # A missing /System/... path (a macOS system wallpaper on Linux) or an
+  # empty value falls through to the next lookup via the -f test.
+  if [[ ! -f "$stored_wp" && "$stored_wp" == /Users/* ]]; then
+    stored_wp="${HOME}/${stored_wp#/Users/*/}"
   fi
   [[ -n "$stored_wp" && -f "$stored_wp" ]] || return 1
   printf '%s\n' "$stored_wp"
@@ -182,7 +178,7 @@ wallpaper_for_theme() {
 # have brew bash get the same behaviour; first-run users with stock
 # bash do too.
 _ws_macos_system_wallpaper() {
-  local family="$1" sys_mac="/System/Library/Desktop Pictures" name
+  local family="$1" sys_mac="${DOTFILES_THEME_SYSTEM_ROOT:-}/System/Library/Desktop Pictures" name
   name="$(
     awk -F'|' -v f="$family" '$1 == f { print $2; exit }' <<'MAP'
 macos - sonoma|Sonoma.heic
@@ -204,7 +200,7 @@ _ws_linux_system_wallpaper() {
   local keyword="${1#macos-}" dir match
   keyword="${keyword%-dark}"
   keyword="${keyword%-light}"
-  for dir in /usr/share/backgrounds /usr/share/wallpapers; do
+  for dir in "${DOTFILES_THEME_SYSTEM_ROOT:-}"/usr/share/{backgrounds,wallpapers}; do
     [[ -d "$dir" ]] || continue
     match="$(find "$dir" -maxdepth 3 -type f \( -name "*.jpg" -o -name "*.png" -o -name "*.webp" \) \
       -iname "*${keyword}*" 2>/dev/null | head -1)"
@@ -218,10 +214,12 @@ _ws_linux_system_wallpaper() {
 
 # Fallback: find a matching system wallpaper when no custom one exists.
 # Maps theme names to platform-native wallpapers shipped with the OS.
+# DOTFILES_THEME_SYSTEM_ROOT prefixes the system paths (a chroot or a test
+# tree), as in rebuild-themes.sh.
 system_wallpaper_for_theme() {
   local theme="${1:-}"
   [[ -n "$theme" ]] || return 1
-  if [[ "$(uname -s)" == "Darwin" && -d "/System/Library/Desktop Pictures" ]]; then
+  if [[ "$(uname -s)" == "Darwin" && -d "${DOTFILES_THEME_SYSTEM_ROOT:-}/System/Library/Desktop Pictures" ]]; then
     _ws_macos_system_wallpaper "$(_ws_family "$theme")" && return 0
   fi
   if [[ "$(uname -s)" == "Linux" ]]; then

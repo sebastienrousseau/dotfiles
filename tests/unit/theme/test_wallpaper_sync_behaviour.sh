@@ -49,6 +49,7 @@ mkstub dms 'case "$*" in
 esac; exit 0'
 mkstub magick 'case "${MAGICK_MODE:-}" in
   fail) exit 1 ;;
+  extractfail) [ "$1" = identify ] || exit 1 ;;
 esac
 case "$1" in
   identify) if [ "${MAGICK_MODE:-}" = single ]; then echo a; else printf "a\nb\n"; fi ;;
@@ -88,7 +89,7 @@ ws() {
   local t path=""
   for t in $TOOLS; do path="$path$WORK/t/$t:"; done
   OUT="$(env -i HOME="$W/h" PATH="${path}/usr/bin:/bin" TERM=dumb NO_COLOR=1 CALLS="$W/calls" \
-    STUB_OS="$OS" ${ENVS[@]+"${ENVS[@]}"} "$REAL_BASH" "$WS" </dev/null 2>&1)"
+    STUB_OS="$OS" DOTFILES_THEME_SYSTEM_ROOT="$W/sys" ${ENVS[@]+"${ENVS[@]}"} "$REAL_BASH" "$WS" </dev/null 2>&1)"
   RC=$?
 }
 called() { grep -qF -- "$1" "$W/calls" 2>/dev/null && echo yes || echo no; }
@@ -118,7 +119,8 @@ test_start "wallpaper_light_frame_on_linux"
 setup Linux ocean-light ocean-0.jpg ocean-1.jpg
 use gsettings
 ws
-assert_equals "yes:yes" "$(applied ocean-0.jpg):$(called 'picture-uri-dark file://')" "frame -0 is light; the pair goes to gsettings"
+assert_equals "yes:yes" "$(applied ocean-0.jpg):$(called 'picture-uri-dark file://'"$W"'/h/Pictures/Wallpapers/ocean-1.jpg')" \
+  "frame -0 is light; its -1 partner is the dark picture"
 
 test_start "wallpaper_exact_theme_name"
 setup Darwin hello-dark hello-dark.png hello.png
@@ -300,7 +302,8 @@ setup Linux cv-dark cv-dark.heic
 use gsettings
 use convert
 ws
-assert_equals "yes" "$(called 'picture-uri file://'"$W"'/h/Pictures/Wallpapers/cv-dark.png')" "ImageMagick 6 convert"
+assert_equals "yes:no" "$(called 'picture-uri file://'"$W"'/h/Pictures/Wallpapers/cv-dark.png'):$(called 'picture-uri file://'"$W"'/h/Pictures/Wallpapers/cv-dark.heic')" \
+  "ImageMagick 6 convert, and only the png is applied"
 
 test_start "wallpaper_linux_heic_without_a_converter_uses_the_original"
 setup Linux nc-dark nc-dark.heic
@@ -321,5 +324,92 @@ use magick
 ENVS+=(MAGICK_MODE=single)
 ws
 assert_equals "no" "$([[ -d "$W/h/Pictures/Wallpapers/.dot-frames" ]] && echo yes || echo no)" "no frame cache for one frame"
+
+# ── system wallpapers (under a fake DOTFILES_THEME_SYSTEM_ROOT) ─────────
+test_start "wallpaper_macos_system_wallpaper_for_a_mapped_family"
+setup Darwin "macos - pink-dark"
+mkdir -p "$W/sys/System/Library/Desktop Pictures" && : >"$W/sys/System/Library/Desktop Pictures/Mac Pink.heic"
+ws
+assert_equals "yes:yes" "$(applied 'Mac Pink.heic'):$([[ "$OUT" == *"using system wallpaper"* ]] && echo yes)" "the mapped system file"
+
+test_start "wallpaper_macos_unmapped_family_has_no_system_wallpaper"
+setup Darwin "macos - teal-dark"
+mkdir -p "$W/sys/System/Library/Desktop Pictures" && : >"$W/sys/System/Library/Desktop Pictures/Teal.heic"
+ws
+assert_equals "0:yes" "$RC:$([[ "$OUT" == *"no wallpaper for macos - teal-dark"* ]] && echo yes)" "no mapping, no wallpaper"
+
+test_start "wallpaper_macos_mapped_but_missing_system_file"
+setup Darwin "macos - blue-dark"
+mkdir -p "$W/sys/System/Library/Desktop Pictures"
+ws
+assert_equals "yes" "$([[ "$OUT" == *"no wallpaper for macos - blue-dark"* ]] && echo yes)" "a missing file is no wallpaper"
+
+test_start "wallpaper_linux_system_wallpaper_by_keyword"
+setup Linux macos-hill-dark
+use gsettings
+mkdir -p "$W/sys/usr/share/wallpapers/x" && : >"$W/sys/usr/share/wallpapers/x/Green-Hill.jpg"
+ws
+assert_equals "yes" "$(applied Green-Hill.jpg)" "backgrounds/ absent, wallpapers/ searched by keyword"
+
+# ── HEIC conversion failures and the macOS frame cache ──────────────────
+test_start "wallpaper_linux_magick_failure_falls_back_to_the_heic"
+setup Linux mf-dark mf-dark.heic
+use gsettings magick
+ENVS+=(MAGICK_MODE=fail)
+ws
+assert_equals "yes" "$(called 'picture-uri file://'"$W"'/h/Pictures/Wallpapers/mf-dark.heic')" "the original is used"
+
+test_start "wallpaper_linux_heif_convert_failure_falls_back_to_the_heic"
+setup Linux hf-dark hf-dark.heic
+use gsettings
+mkstub heif-convert-fail 'exit 1'
+mv "$WORK/t/heif-convert-fail/heif-convert-fail" "$WORK/t/heif-convert-fail/heif-convert"
+use heif-convert-fail
+ws
+assert_equals "yes" "$(called 'picture-uri file://'"$W"'/h/Pictures/Wallpapers/hf-dark.heic')" "the original is used"
+
+test_start "wallpaper_macos_reuses_a_fresh_cached_frame"
+setup Darwin dyn-dark dyn.heic
+use magick
+mkdir -p "$W/h/Pictures/Wallpapers/.dot-frames"
+touch -t 202001010000 "$W/h/Pictures/Wallpapers/dyn.heic"
+: >"$W/h/Pictures/Wallpapers/.dot-frames/dyn-dark.heic"
+ws
+assert_equals "no:yes" "$(called 'dyn.heic[1]'):$(called 'macos-wallpaper-store.py '"$W"'/h/Pictures/Wallpapers/.dot-frames/dyn-dark.heic')" \
+  "no extraction; the cached frame is applied"
+
+test_start "wallpaper_macos_failed_frame_extraction_keeps_the_original"
+setup Darwin dyn-dark dyn.heic
+use magick
+ENVS+=(MAGICK_MODE=extractfail)
+ws
+assert_equals "yes" "$(applied dyn.heic)" "extraction failed, the dynamic HEIC is applied as is"
+
+test_start "wallpaper_macos_agent_that_never_returns_is_waited_for_then_left"
+setup Darwin ocean-dark ocean-dark.png
+ENVS+=(PGREP_MODE=never)
+ws
+assert_equals "0:60" "$RC:$(grep -c '^sleep 0.1' "$W/calls")" "sixty 0.1s waits, then the wallpaper is applied anyway"
+
+# ── gsettings pairs ─────────────────────────────────────────────────────
+test_start "wallpaper_linux_gsettings_light_dark_pair"
+setup Linux p-dark p-dark.png p-light.png
+use gsettings
+ws
+assert_equals "yes:yes:yes" \
+  "$(called 'background picture-uri file://'"$W"'/h/Pictures/Wallpapers/p-light.png'):$(called 'picture-uri-dark file://'"$W"'/h/Pictures/Wallpapers/p-dark.png'):$(called 'screensaver picture-uri file://'"$W"'/h/Pictures/Wallpapers/p-dark.png')" \
+  "light, dark, and the dark lock screen"
+
+test_start "wallpaper_linux_gsettings_pair_from_the_theme_family"
+# Only an extension the lookup never tries (.tiff) reaches this: the theme's
+# stored wallpaper has no -light/-dark or -0/-1 suffix, so the pair is
+# looked up by the theme's family instead.
+setup Linux pp-light pp.tiff pp-light.tiff pp-dark.tiff
+use gsettings
+toml pp-light "$W/h/Pictures/Wallpapers/pp.tiff"
+ws
+assert_equals "yes:yes:yes" \
+  "$(called 'background picture-uri file://'"$W"'/h/Pictures/Wallpapers/pp-light.tiff'):$(called 'picture-uri-dark file://'"$W"'/h/Pictures/Wallpapers/pp-dark.tiff'):$(called 'screensaver picture-uri file://'"$W"'/h/Pictures/Wallpapers/pp-light.tiff')" \
+  "a wallpaper with neither suffix pairs by the theme's family"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
