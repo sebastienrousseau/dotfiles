@@ -74,7 +74,7 @@ RUN bash -n "$HOME/.dotfiles/install.sh" && echo "=== Ubuntu 24.04: ALL TESTS PA
 # =============================================================================
 # Debian 12 (Bookworm) - Tests Debian prerequisites + install.sh
 # =============================================================================
-FROM debian:12@sha256:85019db29298555fd1a5f4bb57673ae989414a9884117c75d7a3e1a6cce21688 AS debian-test
+FROM debian:13@sha256:9cc080028c43b27d2074d63a5f9caf7166d731494965616c1a6d2827a004585c AS debian-test
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
