@@ -123,7 +123,6 @@
   15   17   31.0   60     0 scripts/diagnostics/benchmark.sh::render_waterfall
   15   36   31.8   74     0 scripts/diagnostics/benchmark.sh::run_hyperfine
   12    6   13.7   27    27 scripts/diagnostics/doctor-unified.sh::<top>
-  37   48   54.9  121   121 scripts/diagnostics/drift-dashboard.sh::<top>
   16   22   25.8   66   539 scripts/diagnostics/health.sh::<top>
   12   21   20.4   46     0 scripts/diagnostics/health.sh::check
   30   39   30.5   62     0 scripts/diagnostics/health.sh::check_security
