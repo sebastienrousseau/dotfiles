@@ -16,34 +16,79 @@ WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 N=0
 
-stub() {
-  printf '#!%s\necho "%s $*" >>"%s/calls"\n%s\n' "$REAL_BASH" "$1" "$W" "$2" >"$W/stubs/$1"
-  chmod +x "$W/stubs/$1"
+# Every stub is written once, into its own directory, and each case builds
+# PATH from the tools it wants; behaviour comes from environment variables.
+# (Creating fresh executables per case costs ~0.4s each on macOS, where
+# every new binary is assessed on first run.) Each stub appends
+# "<name> <args>" to $CALLS.
+mkstub() {
+  mkdir -p "$WORK/t/$1"
+  printf '#!%s\necho "%s $*" >>"$CALLS"\n%s\n' "$REAL_BASH" "$1" "$2" >"$WORK/t/$1/$1"
+  chmod +x "$WORK/t/$1/$1"
 }
+mkstub uname 'echo "$STUB_OS"'
+mkstub sleep 'exit 0'
+mkstub killall 'exit 0'
+mkstub osascript 'exit 0'
+mkstub shuf 'head -1'
+# The store patcher has its own test (test_macos_wallpaper_patcher.sh);
+# here it is only recorded. The real /usr/bin/python3 on macOS is an Xcode
+# shim that takes seconds to start under `env -i`.
+mkstub python3 'exit 0'
+mkstub defaults '[ "${DEFAULTS_DARK:-0}" = 1 ] && echo Dark || exit 1'
+mkstub pgrep 'case "${PGREP_MODE:-ok}" in
+  never) exit 1 ;;
+  slow) n=$(cat "$CALLS.pg" 2>/dev/null || echo 0); n=$((n + 1)); echo $n >"$CALLS.pg"; [ $n -ge 3 ] ;;
+  *) exit 0 ;;
+esac'
+mkstub gsettings 'case "$1" in get) echo "${GS_SCHEME:-default}" ;; esac; exit 0'
+mkstub dms 'case "$*" in
+  "ipc theme getMode") echo "${DMS_GETMODE:-}" ;;
+  "ipc wallpaper set"*) echo "${DMS_SET:-}" ;;
+  "ipc outputs current") echo "${DMS_OUTPUTS:-}" ;;
+esac; exit 0'
+mkstub magick 'case "${MAGICK_MODE:-}" in
+  fail) exit 1 ;;
+esac
+case "$1" in
+  identify) if [ "${MAGICK_MODE:-}" = single ]; then echo a; else printf "a\nb\n"; fi ;;
+  *) last="${!#}"; base="${last%.png}"
+     if [ "${last##*.}" = png ]; then : >"${base}-0.png"; : >"${base}-1.png"; else echo x >"$last"; fi ;;
+esac'
+mkstub heif-convert 'echo x >"$2"'
+mkstub convert 'echo x >"$2"'
+mkstub feh 'exit 0'
+mkstub swaybg 'exit 0'
+mkstub pkill 'exit 1'
+mkstub wallpaper 'exit 0'
 
-# setup <os> <theme> [wallpaper...]: a sandbox HOME with that theme.
+# setup <os> <theme> [wallpaper...]: a sandbox HOME with that theme; resets
+# the tool set to the always-present stubs.
 setup() {
   W="$WORK/c$((++N))"
-  mkdir -p "$W/h/.dotfiles/defaults/.chezmoidata" "$W/h/Pictures/Wallpapers" "$W/stubs"
+  mkdir -p "$W/h/.dotfiles/defaults/.chezmoidata" "$W/h/Pictures/Wallpapers"
   echo defaults >"$W/h/.dotfiles/.chezmoiroot"
   if [[ -n "$2" ]]; then
     printf 'theme = "%s"\n' "$2" >"$W/h/.dotfiles/defaults/.chezmoidata.toml"
   else
     : >"$W/h/.dotfiles/defaults/.chezmoidata.toml"
   fi
-  stub uname "echo $1"
-  stub sleep 'exit 0'
-  stub killall 'exit 0'
-  stub pgrep 'exit 0'
-  stub osascript 'exit 0'
-  stub shuf 'head -1'
+  OS="$1"
+  TOOLS="uname sleep killall osascript shuf python3 defaults pgrep"
+  ENVS=()
   shift 2
   local f
   for f in "$@"; do : >"$W/h/Pictures/Wallpapers/$f"; done
 }
 
+# use <tool>...: add stubs to this case's PATH.
+use() { TOOLS="$TOOLS $*"; }
+
 ws() {
-  OUT="$(env -i HOME="$W/h" PATH="$W/stubs:/usr/bin:/bin" TERM=dumb NO_COLOR=1 "$REAL_BASH" "$WS" </dev/null 2>&1)"
+  local t path=""
+  for t in $TOOLS; do path="$path$WORK/t/$t:"; done
+  OUT="$(env -i HOME="$W/h" PATH="${path}/usr/bin:/bin" TERM=dumb NO_COLOR=1 CALLS="$W/calls" \
+    STUB_OS="$OS" ${ENVS[@]+"${ENVS[@]}"} "$REAL_BASH" "$WS" </dev/null 2>&1)"
   RC=$?
 }
 called() { grep -qF -- "$1" "$W/calls" 2>/dev/null && echo yes || echo no; }
@@ -52,8 +97,8 @@ called() { grep -qF -- "$1" "$W/calls" 2>/dev/null && echo yes || echo no; }
 # frames on Linux and the mode's frame applied.
 test_start "wallpaper_linux_dynamic_heic_applies_the_mode_frame"
 setup Linux dyn-dark dyn.heic
-stub gsettings 'exit 0'
-stub magick 'last="${!#}"; base="${last%.png}"; : >"${base}-0.png"; : >"${base}-1.png"'
+use gsettings
+use magick
 ws
 assert_equals "0:yes:yes" \
   "$RC:$(called 'magick '):$([[ "$OUT" == *"dyn-1.png ← dyn-dark"* ]] && echo yes || echo no)" \
@@ -71,7 +116,7 @@ assert_equals "0:yes" "$RC:$(applied ocean-1.png)" "frame -1 is the dark one"
 
 test_start "wallpaper_light_frame_on_linux"
 setup Linux ocean-light ocean-0.jpg ocean-1.jpg
-stub gsettings 'exit 0'
+use gsettings
 ws
 assert_equals "yes:yes" "$(applied ocean-0.jpg):$(called 'picture-uri-dark file://')" "frame -0 is light; the pair goes to gsettings"
 
@@ -82,13 +127,12 @@ assert_equals "yes" "$(applied hello-dark.png)" "the exact theme file"
 
 test_start "wallpaper_family_mode_variant_uses_the_detected_mode"
 setup Darwin hello hello-dark.heic hello-light.webp
-stub defaults 'echo Dark'
+ENVS+=(DEFAULTS_DARK=1)
 ws
 assert_equals "yes" "$(applied hello-dark.heic)" "no suffix in the theme: macOS dark mode picks -dark"
 
 test_start "wallpaper_family_mode_variant_light_by_default"
 setup Darwin hello hello-light.webp
-stub defaults 'exit 1'
 ws
 assert_equals "yes" "$(applied hello-light.webp)" "macOS light mode"
 
@@ -102,7 +146,7 @@ assert_equals "yes" "$(applied sea.jpg)" "themes.toml ~/ path resolved"
 
 test_start "wallpaper_stored_legacy_users_path"
 setup Linux sea-dark
-stub gsettings 'exit 0'
+use gsettings
 mkdir -p "$W/h/Pictures/Other" && : >"$W/h/Pictures/Other/sea.jpg"
 toml sea-dark "/Users/bob/Pictures/Other/sea.jpg"
 ws
@@ -110,7 +154,7 @@ assert_equals "yes" "$(applied sea.jpg)" "/Users/<name>/ maps to \$HOME"
 
 test_start "wallpaper_stored_macos_system_path_skipped_on_linux"
 setup Linux sea-dark sea.png
-stub gsettings 'exit 0'
+use gsettings
 toml sea-dark "/System/Library/Desktop Pictures/Sea.heic"
 ws
 assert_equals "yes" "$(applied sea.png)" "falls through to the family file"
@@ -151,20 +195,22 @@ assert_equals "yes" "$(applied cfg-light.png)" "chezmoi.toml theme over .chezmoi
 # ── mode detection without a theme ──────────────────────────────────────
 test_start "wallpaper_dms_mode"
 setup Linux "" q-light.png q-dark.png
-stub gsettings 'exit 0'
-stub dms 'case "$*" in "ipc theme getMode") echo light ;; "ipc wallpaper set"*) echo SUCCESS: ok ;; esac'
+use gsettings
+use dms
+ENVS+=(DMS_GETMODE=light DMS_SET='SUCCESS: ok')
 ws
 assert_equals "yes:yes" "$(applied q-light.png):$([[ "$OUT" == *"dms ipc"* ]] && echo yes)" "dms decides the mode and applies"
 
 test_start "wallpaper_gsettings_prefer_dark"
 setup Linux "" q-light.png q-dark.png
-stub gsettings 'case "$1" in get) echo prefer-dark ;; esac; exit 0'
+use gsettings
+ENVS+=(GS_SCHEME=prefer-dark)
 ws
 assert_equals "yes" "$(applied q-dark.png)" "gsettings color-scheme"
 
 test_start "wallpaper_linux_without_gsettings_defaults_dark"
 setup Linux "" q-dark.png q-light.png
-stub feh 'exit 0'
+use feh
 ws
 assert_equals "yes:yes" "$(applied q-dark.png):$(called 'feh --bg-fill')" "dark, applied with feh"
 
@@ -172,37 +218,39 @@ assert_equals "yes:yes" "$(applied q-dark.png):$(called 'feh --bg-fill')" "dark,
 test_start "wallpaper_macos_restarts_the_agent_and_reasserts"
 setup Darwin ocean-dark ocean-dark.png
 ws
-assert_equals "yes:yes" "$(called 'killall WallpaperAgent'):$(called 'osascript -e')" "agent restart and AppleScript"
+assert_equals "yes:yes:yes" "$(called 'macos-wallpaper-store.py '"$W"'/h/Pictures/Wallpapers/ocean-dark.png'):$(called 'killall WallpaperAgent'):$(called 'osascript -e')" \
+  "store patch, agent restart and AppleScript"
 
 test_start "wallpaper_macos_skip_agent_uses_the_wallpaper_cli"
 setup Darwin ocean-dark ocean-dark.png
-stub wallpaper 'exit 0'
-OUT="$(env -i HOME="$W/h" PATH="$W/stubs:/usr/bin:/bin" TERM=dumb DOT_THEME_SKIP_WALLPAPER_AGENT=1 "$REAL_BASH" "$WS" </dev/null 2>&1)"
+use wallpaper
+ENVS+=(DOT_THEME_SKIP_WALLPAPER_AGENT=1)
+ws
 assert_equals "no:yes" "$(called 'killall'):$(called 'wallpaper set')" "no restart; wallpaper(1) sets it"
 
 test_start "wallpaper_macos_agent_slow_to_return_still_applies"
 setup Darwin ocean-dark ocean-dark.png
-stub pgrep 'n=$(cat "'"$W"'/pg" 2>/dev/null || echo 0); n=$((n+1)); echo $n >"'"$W"'/pg"; [ $n -ge 3 ]'
+ENVS+=(PGREP_MODE=slow)
 ws
 assert_equals "0:yes" "$RC:$(applied ocean-dark.png)" "waits, then applies"
 
 test_start "wallpaper_linux_dms_per_monitor"
 setup Linux p-dark p-dark.png
-stub feh 'exit 0'
-stub dms 'case "$*" in "ipc wallpaper set"*) echo "ERROR: Per-monitor mode enabled" ;; "ipc outputs current") echo "[\"DP-1\",\"HDMI-A-1\",\"\"]" ;; esac'
+use feh
+use dms
+ENVS+=(DMS_SET='ERROR: Per-monitor mode enabled' DMS_OUTPUTS='["DP-1","HDMI-A-1",""]')
 ws
 assert_equals "yes:yes" "$(called 'setFor DP-1'):$(called 'setFor HDMI-A-1')" "each output gets it"
 
 test_start "wallpaper_linux_gsettings_single_file"
 setup Linux solo-dark solo-dark.jpg
-stub gsettings 'exit 0'
+use gsettings
 ws
 assert_equals "yes" "$(called 'screensaver picture-uri file://')" "one file for desktop and lock screen"
 
 test_start "wallpaper_linux_swaybg"
 setup Linux p-dark p-dark.png
-stub swaybg 'exit 0'
-stub pkill 'exit 1'
+use swaybg pkill
 ws
 assert_equals "0:yes" "$RC:$([[ "$OUT" == *"swaybg"* ]] && echo yes)" "swaybg when there is no gsettings"
 
@@ -221,8 +269,8 @@ assert_equals "1" "$RC" "only Darwin and Linux"
 # mode fallback, where the sorted listing puts x-dark.heic before x-dark.png.
 test_start "wallpaper_linux_heic_uses_a_fresh_large_cached_png"
 setup Linux nomatch-dark big-dark.heic
-stub gsettings 'exit 0'
-stub heif-convert 'echo x >"$2"'
+use gsettings
+use heif-convert
 touch -t 202001010000 "$W/h/Pictures/Wallpapers/big-dark.heic"
 head -c 1100000 /dev/zero >"$W/h/Pictures/Wallpapers/big-dark.png"
 ws
@@ -231,8 +279,8 @@ assert_equals "no:yes" "$(called 'heif-convert '):$(called 'picture-uri file://'
 
 test_start "wallpaper_linux_heic_small_cache_is_reconverted"
 setup Linux nomatch-dark sm-dark.heic
-stub gsettings 'exit 0'
-stub heif-convert 'echo x >"$2"'
+use gsettings
+use heif-convert
 touch -t 202001010000 "$W/h/Pictures/Wallpapers/sm-dark.heic"
 echo tiny >"$W/h/Pictures/Wallpapers/sm-dark.png"
 ws
@@ -240,8 +288,8 @@ assert_equals "yes" "$(called 'heif-convert ')" "a tiny cached png is not truste
 
 test_start "wallpaper_linux_heic_stale_cache_is_reconverted"
 setup Linux nomatch-dark st-dark.heic
-stub gsettings 'exit 0'
-stub heif-convert 'echo x >"$2"'
+use gsettings
+use heif-convert
 head -c 1100000 /dev/zero >"$W/h/Pictures/Wallpapers/st-dark.png"
 touch -t 202001010000 "$W/h/Pictures/Wallpapers/st-dark.png"
 ws
@@ -249,27 +297,28 @@ assert_equals "yes" "$(called 'heif-convert ')" "a png older than its heic is no
 
 test_start "wallpaper_linux_heic_convert_fallback"
 setup Linux cv-dark cv-dark.heic
-stub gsettings 'exit 0'
-stub convert 'echo x >"$2"'
+use gsettings
+use convert
 ws
 assert_equals "yes" "$(called 'picture-uri file://'"$W"'/h/Pictures/Wallpapers/cv-dark.png')" "ImageMagick 6 convert"
 
 test_start "wallpaper_linux_heic_without_a_converter_uses_the_original"
 setup Linux nc-dark nc-dark.heic
-stub gsettings 'exit 0'
+use gsettings
 ws
 assert_equals "yes" "$(called 'picture-uri file://'"$W"'/h/Pictures/Wallpapers/nc-dark.heic')" "the HEIC itself"
 
 test_start "wallpaper_macos_dynamic_heic_is_reduced_to_the_mode_frame"
 setup Darwin dyn-dark dyn.heic
-stub magick 'case "$1" in identify) printf "a\nb\n" ;; *) echo x >"${!#}" ;; esac'
+use magick
 ws
 assert_equals "yes:yes" "$(called 'magick '"$W"'/h/Pictures/Wallpapers/dyn.heic[1]'):$([[ -f "$W/h/Pictures/Wallpapers/.dot-frames/dyn-dark.heic" ]] && echo yes)" \
   "frame 1 extracted into the frame cache"
 
 test_start "wallpaper_macos_single_frame_heic_is_used_as_is"
 setup Darwin dyn-dark dyn.heic
-stub magick 'case "$1" in identify) echo a ;; esac'
+use magick
+ENVS+=(MAGICK_MODE=single)
 ws
 assert_equals "no" "$([[ -d "$W/h/Pictures/Wallpapers/.dot-frames" ]] && echo yes || echo no)" "no frame cache for one frame"
 
