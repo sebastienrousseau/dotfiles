@@ -10,7 +10,20 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-REAL_BASH="$(command -v bash)"
+# rebuild-themes.sh needs bash >= 4 (associative arrays, wait -n) and
+# refuses to run otherwise; macOS runners may have only /bin/bash 3.2.
+REAL_BASH=""
+for _b in "$(command -v bash)" /opt/homebrew/bin/bash /usr/local/bin/bash; do
+  if [[ -x "$_b" ]] && "$_b" -c '((BASH_VERSINFO[0] >= 4))' 2>/dev/null; then
+    REAL_BASH="$_b"
+    break
+  fi
+done
+if [[ -z "$REAL_BASH" ]]; then
+  echo "  (skipped: no bash >= 4 available, which rebuild-themes.sh requires)"
+  echo "RESULTS:0:0:0"
+  exit 0
+fi
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
