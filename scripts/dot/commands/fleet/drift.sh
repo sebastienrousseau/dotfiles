@@ -108,7 +108,10 @@ _fleet_drift_predict() {
   fi
   # Simple heuristic: files that drifted in >50% of the last 10 checks
   local threshold=5
-  jq -r '.files[]?' "$_DRIFT_HISTORY_FILE" | tail -n 1000 | sort | uniq -c | sort -rn | while read -r count file; do
+  # -R + fromjson?: an unparsable line (a torn write) is skipped. Plain
+  # `jq '.files[]?'` stopped at it, and under pipefail the whole prediction
+  # exited with jq's status before printing its summary.
+  jq -rR 'fromjson? | .files[]?' "$_DRIFT_HISTORY_FILE" | tail -n 1000 | sort | uniq -c | sort -rn | while read -r count file; do
     if [[ "$count" -ge "$threshold" ]]; then
       ui_warn "Likely to drift" "$file (drifted $count times recently)"
     fi
