@@ -26,7 +26,11 @@ setup() {
   W="$WORK/c$((++N))"
   mkdir -p "$W/h/.dotfiles/defaults/.chezmoidata" "$W/h/Pictures/Wallpapers" "$W/stubs"
   echo defaults >"$W/h/.dotfiles/.chezmoiroot"
-  printf 'theme = "%s"\n' "$2" >"$W/h/.dotfiles/defaults/.chezmoidata.toml"
+  if [[ -n "$2" ]]; then
+    printf 'theme = "%s"\n' "$2" >"$W/h/.dotfiles/defaults/.chezmoidata.toml"
+  else
+    : >"$W/h/.dotfiles/defaults/.chezmoidata.toml"
+  fi
   stub uname "echo $1"
   stub sleep 'exit 0'
   stub killall 'exit 0'
@@ -54,5 +58,219 @@ ws
 assert_equals "0:yes:yes" \
   "$RC:$(called 'magick '):$([[ "$OUT" == *"dyn-1.png ← dyn-dark"* ]] && echo yes || echo no)" \
   "frames extracted and the dark frame applied"
+
+# applied <name>: yes when the run reports that wallpaper file as applied.
+applied() { if [[ "$OUT" == *"Applied wallpaper ("*") "*"$1"* ]]; then echo yes; else echo no; fi; }
+toml() { printf '[themes.%s]\nwallpaper = "%s"\n\n' "$1" "$2" >>"$W/h/.dotfiles/defaults/.chezmoidata/themes.toml"; }
+
+# ── lookup order ─────────────────────────────────────────────────────────
+test_start "wallpaper_prefers_extracted_frames"
+setup Darwin ocean-dark ocean-1.png ocean-0.png ocean-dark.png
+ws
+assert_equals "0:yes" "$RC:$(applied ocean-1.png)" "frame -1 is the dark one"
+
+test_start "wallpaper_light_frame_on_linux"
+setup Linux ocean-light ocean-0.jpg ocean-1.jpg
+stub gsettings 'exit 0'
+ws
+assert_equals "yes:yes" "$(applied ocean-0.jpg):$(called 'picture-uri-dark file://')" "frame -0 is light; the pair goes to gsettings"
+
+test_start "wallpaper_exact_theme_name"
+setup Darwin hello-dark hello-dark.png hello.png
+ws
+assert_equals "yes" "$(applied hello-dark.png)" "the exact theme file"
+
+test_start "wallpaper_family_mode_variant_uses_the_detected_mode"
+setup Darwin hello hello-dark.heic hello-light.webp
+stub defaults 'echo Dark'
+ws
+assert_equals "yes" "$(applied hello-dark.heic)" "no suffix in the theme: macOS dark mode picks -dark"
+
+test_start "wallpaper_family_mode_variant_light_by_default"
+setup Darwin hello hello-light.webp
+stub defaults 'exit 1'
+ws
+assert_equals "yes" "$(applied hello-light.webp)" "macOS light mode"
+
+test_start "wallpaper_stored_home_relative_path"
+setup Darwin sea-dark
+mkdir -p "$W/h/Pictures/Other" && : >"$W/h/Pictures/Other/sea.jpg"
+# shellcheck disable=SC2088 # a literal ~/ path, as themes.toml stores it
+toml sea-dark "~/Pictures/Other/sea.jpg"
+ws
+assert_equals "yes" "$(applied sea.jpg)" "themes.toml ~/ path resolved"
+
+test_start "wallpaper_stored_legacy_users_path"
+setup Linux sea-dark
+stub gsettings 'exit 0'
+mkdir -p "$W/h/Pictures/Other" && : >"$W/h/Pictures/Other/sea.jpg"
+toml sea-dark "/Users/bob/Pictures/Other/sea.jpg"
+ws
+assert_equals "yes" "$(applied sea.jpg)" "/Users/<name>/ maps to \$HOME"
+
+test_start "wallpaper_stored_macos_system_path_skipped_on_linux"
+setup Linux sea-dark sea.png
+stub gsettings 'exit 0'
+toml sea-dark "/System/Library/Desktop Pictures/Sea.heic"
+ws
+assert_equals "yes" "$(applied sea.png)" "falls through to the family file"
+
+test_start "wallpaper_family_only_file"
+setup Darwin fam-dark fam.jpg
+ws
+assert_equals "yes" "$(applied fam.jpg)" "family.jpg for fam-dark"
+
+# ── pick fallbacks ───────────────────────────────────────────────────────
+test_start "wallpaper_any_mode_file_when_the_theme_has_none"
+setup Darwin nomatch-dark a-dark.png b-dark.jpg c-light.png
+ws
+assert_equals "yes" "$(applied a-dark.png)" "first *-dark file (shuf stubbed to head)"
+
+test_start "wallpaper_any_frame_file_as_last_resort"
+setup Darwin nomatch-dark x-1.png y-0.png
+ws
+assert_equals "yes" "$(applied x-1.png)" "*-1 frames are dark"
+
+test_start "wallpaper_nothing_matches_skips_cleanly"
+setup Darwin nomatch-dark z-light.png
+ws
+assert_equals "0:yes" "$RC:$([[ "$OUT" == *"no wallpaper for nomatch-dark"* ]] && echo yes)" "skip, exit 0"
+
+test_start "wallpaper_without_a_wallpaper_dir"
+setup Darwin ocean-dark
+rm -rf "$W/h/Pictures/Wallpapers"
+ws
+assert_equals "0:yes" "$RC:$([[ "$OUT" == *"no wallpaper for ocean-dark"* ]] && echo yes)" "no dir, skip"
+
+test_start "wallpaper_chezmoi_config_theme_wins"
+setup Darwin ocean-dark cfg-light.png ocean-dark.png
+mkdir -p "$W/h/.config/chezmoi" && printf 'theme = "cfg-light"\n' >"$W/h/.config/chezmoi/chezmoi.toml"
+ws
+assert_equals "yes" "$(applied cfg-light.png)" "chezmoi.toml theme over .chezmoidata"
+
+# ── mode detection without a theme ──────────────────────────────────────
+test_start "wallpaper_dms_mode"
+setup Linux "" q-light.png q-dark.png
+stub gsettings 'exit 0'
+stub dms 'case "$*" in "ipc theme getMode") echo light ;; "ipc wallpaper set"*) echo SUCCESS: ok ;; esac'
+ws
+assert_equals "yes:yes" "$(applied q-light.png):$([[ "$OUT" == *"dms ipc"* ]] && echo yes)" "dms decides the mode and applies"
+
+test_start "wallpaper_gsettings_prefer_dark"
+setup Linux "" q-light.png q-dark.png
+stub gsettings 'case "$1" in get) echo prefer-dark ;; esac; exit 0'
+ws
+assert_equals "yes" "$(applied q-dark.png)" "gsettings color-scheme"
+
+test_start "wallpaper_linux_without_gsettings_defaults_dark"
+setup Linux "" q-dark.png q-light.png
+stub feh 'exit 0'
+ws
+assert_equals "yes:yes" "$(applied q-dark.png):$(called 'feh --bg-fill')" "dark, applied with feh"
+
+# ── appliers ─────────────────────────────────────────────────────────────
+test_start "wallpaper_macos_restarts_the_agent_and_reasserts"
+setup Darwin ocean-dark ocean-dark.png
+ws
+assert_equals "yes:yes" "$(called 'killall WallpaperAgent'):$(called 'osascript -e')" "agent restart and AppleScript"
+
+test_start "wallpaper_macos_skip_agent_uses_the_wallpaper_cli"
+setup Darwin ocean-dark ocean-dark.png
+stub wallpaper 'exit 0'
+OUT="$(env -i HOME="$W/h" PATH="$W/stubs:/usr/bin:/bin" TERM=dumb DOT_THEME_SKIP_WALLPAPER_AGENT=1 "$REAL_BASH" "$WS" </dev/null 2>&1)"
+assert_equals "no:yes" "$(called 'killall'):$(called 'wallpaper set')" "no restart; wallpaper(1) sets it"
+
+test_start "wallpaper_macos_agent_slow_to_return_still_applies"
+setup Darwin ocean-dark ocean-dark.png
+stub pgrep 'n=$(cat "'"$W"'/pg" 2>/dev/null || echo 0); n=$((n+1)); echo $n >"'"$W"'/pg"; [ $n -ge 3 ]'
+ws
+assert_equals "0:yes" "$RC:$(applied ocean-dark.png)" "waits, then applies"
+
+test_start "wallpaper_linux_dms_per_monitor"
+setup Linux p-dark p-dark.png
+stub feh 'exit 0'
+stub dms 'case "$*" in "ipc wallpaper set"*) echo "ERROR: Per-monitor mode enabled" ;; "ipc outputs current") echo "[\"DP-1\",\"HDMI-A-1\",\"\"]" ;; esac'
+ws
+assert_equals "yes:yes" "$(called 'setFor DP-1'):$(called 'setFor HDMI-A-1')" "each output gets it"
+
+test_start "wallpaper_linux_gsettings_single_file"
+setup Linux solo-dark solo-dark.jpg
+stub gsettings 'exit 0'
+ws
+assert_equals "yes" "$(called 'screensaver picture-uri file://')" "one file for desktop and lock screen"
+
+test_start "wallpaper_linux_swaybg"
+setup Linux p-dark p-dark.png
+stub swaybg 'exit 0'
+stub pkill 'exit 1'
+ws
+assert_equals "0:yes" "$RC:$([[ "$OUT" == *"swaybg"* ]] && echo yes)" "swaybg when there is no gsettings"
+
+test_start "wallpaper_linux_without_any_setter_fails"
+setup Linux p-dark p-dark.png
+ws
+assert_equals "1" "$RC" "no gsettings/swaybg/feh is an error"
+
+test_start "wallpaper_unsupported_os_fails"
+setup FreeBSD p-dark p-dark.png
+ws
+assert_equals "1" "$RC" "only Darwin and Linux"
+
+# ── HEIC handling ────────────────────────────────────────────────────────
+# The cache is only consulted for a HEIC the lookup picked, e.g. through the
+# mode fallback, where the sorted listing puts x-dark.heic before x-dark.png.
+test_start "wallpaper_linux_heic_uses_a_fresh_large_cached_png"
+setup Linux nomatch-dark big-dark.heic
+stub gsettings 'exit 0'
+stub heif-convert 'echo x >"$2"'
+touch -t 202001010000 "$W/h/Pictures/Wallpapers/big-dark.heic"
+head -c 1100000 /dev/zero >"$W/h/Pictures/Wallpapers/big-dark.png"
+ws
+assert_equals "no:yes" "$(called 'heif-convert '):$(called 'picture-uri file://'"$W"'/h/Pictures/Wallpapers/big-dark.png')" \
+  "the cache is used, nothing converted"
+
+test_start "wallpaper_linux_heic_small_cache_is_reconverted"
+setup Linux nomatch-dark sm-dark.heic
+stub gsettings 'exit 0'
+stub heif-convert 'echo x >"$2"'
+touch -t 202001010000 "$W/h/Pictures/Wallpapers/sm-dark.heic"
+echo tiny >"$W/h/Pictures/Wallpapers/sm-dark.png"
+ws
+assert_equals "yes" "$(called 'heif-convert ')" "a tiny cached png is not trusted"
+
+test_start "wallpaper_linux_heic_stale_cache_is_reconverted"
+setup Linux nomatch-dark st-dark.heic
+stub gsettings 'exit 0'
+stub heif-convert 'echo x >"$2"'
+head -c 1100000 /dev/zero >"$W/h/Pictures/Wallpapers/st-dark.png"
+touch -t 202001010000 "$W/h/Pictures/Wallpapers/st-dark.png"
+ws
+assert_equals "yes" "$(called 'heif-convert ')" "a png older than its heic is not trusted"
+
+test_start "wallpaper_linux_heic_convert_fallback"
+setup Linux cv-dark cv-dark.heic
+stub gsettings 'exit 0'
+stub convert 'echo x >"$2"'
+ws
+assert_equals "yes" "$(called 'picture-uri file://'"$W"'/h/Pictures/Wallpapers/cv-dark.png')" "ImageMagick 6 convert"
+
+test_start "wallpaper_linux_heic_without_a_converter_uses_the_original"
+setup Linux nc-dark nc-dark.heic
+stub gsettings 'exit 0'
+ws
+assert_equals "yes" "$(called 'picture-uri file://'"$W"'/h/Pictures/Wallpapers/nc-dark.heic')" "the HEIC itself"
+
+test_start "wallpaper_macos_dynamic_heic_is_reduced_to_the_mode_frame"
+setup Darwin dyn-dark dyn.heic
+stub magick 'case "$1" in identify) printf "a\nb\n" ;; *) echo x >"${!#}" ;; esac'
+ws
+assert_equals "yes:yes" "$(called 'magick '"$W"'/h/Pictures/Wallpapers/dyn.heic[1]'):$([[ -f "$W/h/Pictures/Wallpapers/.dot-frames/dyn-dark.heic" ]] && echo yes)" \
+  "frame 1 extracted into the frame cache"
+
+test_start "wallpaper_macos_single_frame_heic_is_used_as_is"
+setup Darwin dyn-dark dyn.heic
+stub magick 'case "$1" in identify) echo a ;; esac'
+ws
+assert_equals "no" "$([[ -d "$W/h/Pictures/Wallpapers/.dot-frames" ]] && echo yes || echo no)" "no frame cache for one frame"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
