@@ -206,13 +206,6 @@
   12   17   20.3   49   103 scripts/theme/merge-wallpaper.sh::<top>
   12   13   28.8   40     0 scripts/theme/merge-wallpaper.sh::merge_pair
   11   10   19.9   47   120 scripts/theme/wallpaper-rotate.sh::<top>
-  18   20   33.0   47   519 scripts/theme/wallpaper-sync.sh::<top>
-  34   59   60.6  156     0 scripts/theme/wallpaper-sync.sh::apply_wallpaper
-  17   23   45.5   58     0 scripts/theme/wallpaper-sync.sh::ensure_linux_compatible
-  11   11   27.0   40     0 scripts/theme/wallpaper-sync.sh::macos_appearance_frame
-  10   12   35.8   31     0 scripts/theme/wallpaper-sync.sh::pick_wallpaper
-  19   16   21.2   45     0 scripts/theme/wallpaper-sync.sh::system_wallpaper_for_theme
-  26   42   39.8   81     0 scripts/theme/wallpaper-sync.sh::wallpaper_for_theme
   11    7   21.3   91    99 scripts/tuning/linux.sh::<top>
    3    2    6.1   52   510 scripts/version-sync.sh::<top>
   27   34   35.0   93    93 tools/ci/check-copyright-headers.sh::<top>
