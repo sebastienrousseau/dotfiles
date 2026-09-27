@@ -667,65 +667,63 @@ ambient_disable() {
 # Main
 # =============================================================================
 
-case "${1:-}" in
-  list)
-    list_themes
-    ;;
-  set)
-    shift
-    # `"${1:-}"`, not `"$1"`: with no theme name the bare positional aborts
-    # the script under `set -u` before set_theme's own empty-string check can
-    # open the picker `dot help theme` promises. Worse, the abort is silent
-    # about its status on bash 3.2 (macOS /bin/bash): when a script dies on an
-    # unbound variable with an EXIT trap installed — switch.sh installs
-    # `trap cleanup EXIT` — 3.2 exits 0, and no handler can recover the status
-    # because `$?` is already 0 when the handler runs. So on a stock Mac this
-    # one missing default turned every `dot theme set` typo into a reported
-    # success. Keep every expansion in this script guarded.
-    set_theme "${1:-}"
-    ;;
-  toggle)
-    toggle_theme
-    ;;
-  mode)
-    shift
-    want="${1:-}"
-    case "$want" in
-      dark | light) : ;;
-      auto)
-        sync_theme
-        exit 0
-        ;;
-      *)
-        ui_err "Usage" "dot theme mode <dark|light|auto>"
-        exit 1
-        ;;
-    esac
-    current="$(current_theme)"
-    family="${current%-dark}"
-    [[ "$family" != "$current" ]] || family="${current%-light}"
-    target="${family}-${want}"
-    if [[ "$current" == "$target" && "$(theme_mode_preference)" == "$want" ]]; then
-      ui_ok "Mode" "$current — already in $want mode"
-    else
-      set_theme "$target"
-    fi
-    ;;
-  rotate)
-    # Periodic wallpaper rotator built on the same timer pattern as
-    # `dot theme ambient`. Applies `dot theme random --mode <current>`
-    # on the requested interval so the wallpaper family cycles while
-    # the ambient timer independently drives light/dark.
-    shift
-    case "${1:-}" in
-      enable | "")
-        interval="${2:-30m}"
-        # Accept 5m / 1h / 30s / 3600 (raw seconds also fine — systemd
-        # OnUnitActiveSec is quite forgiving).
-        unit_dir="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
-        mkdir -p "$unit_dir"
-        dot_path="$(command -v dot 2>/dev/null || echo "$HOME/.local/bin/dot")"
-        cat >"$unit_dir/dot-theme-rotate.service" <<EOF
+# dot theme set
+_theme_cmd_set() {
+  shift
+  # `"${1:-}"`, not `"$1"`: with no theme name the bare positional aborts
+  # the script under `set -u` before set_theme's own empty-string check can
+  # open the picker `dot help theme` promises. Worse, the abort is silent
+  # about its status on bash 3.2 (macOS /bin/bash): when a script dies on an
+  # unbound variable with an EXIT trap installed — switch.sh installs
+  # `trap cleanup EXIT` — 3.2 exits 0, and no handler can recover the status
+  # because `$?` is already 0 when the handler runs. So on a stock Mac this
+  # one missing default turned every `dot theme set` typo into a reported
+  # success. Keep every expansion in this script guarded.
+  set_theme "${1:-}"
+}
+
+# dot theme mode
+_theme_cmd_mode() {
+  shift
+  want="${1:-}"
+  case "$want" in
+    dark | light) : ;;
+    auto)
+      sync_theme
+      exit 0
+      ;;
+    *)
+      ui_err "Usage" "dot theme mode <dark|light|auto>"
+      exit 1
+      ;;
+  esac
+  current="$(current_theme)"
+  family="${current%-dark}"
+  [[ "$family" != "$current" ]] || family="${current%-light}"
+  target="${family}-${want}"
+  if [[ "$current" == "$target" && "$(theme_mode_preference)" == "$want" ]]; then
+    ui_ok "Mode" "$current — already in $want mode"
+  else
+    set_theme "$target"
+  fi
+}
+
+# dot theme rotate
+# Periodic wallpaper rotator built on the same timer pattern as
+# `dot theme ambient`. Applies `dot theme random --mode <current>`
+# on the requested interval so the wallpaper family cycles while
+# the ambient timer independently drives light/dark.
+_theme_cmd_rotate() {
+  shift
+  case "${1:-}" in
+    enable | "")
+      interval="${2:-30m}"
+      # Accept 5m / 1h / 30s / 3600 (raw seconds also fine — systemd
+      # OnUnitActiveSec is quite forgiving).
+      unit_dir="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
+      mkdir -p "$unit_dir"
+      dot_path="$(command -v dot 2>/dev/null || echo "$HOME/.local/bin/dot")"
+      cat >"$unit_dir/dot-theme-rotate.service" <<EOF
 [Unit]
 Description=Rotate wallpaper family (dot theme random)
 After=graphical-session.target
@@ -734,7 +732,7 @@ After=graphical-session.target
 Type=oneshot
 ExecStart=${dot_path} theme random
 EOF
-        cat >"$unit_dir/dot-theme-rotate.timer" <<EOF
+      cat >"$unit_dir/dot-theme-rotate.timer" <<EOF
 [Unit]
 Description=Rotate wallpaper family on interval
 
@@ -747,190 +745,193 @@ Persistent=true
 [Install]
 WantedBy=timers.target
 EOF
-        systemctl --user daemon-reload
-        systemctl --user enable --now dot-theme-rotate.timer
-        ui_ok "Rotate" "timer enabled — will fire every $interval"
-        ;;
-      disable)
-        systemctl --user disable --now dot-theme-rotate.timer 2>/dev/null || true
-        unit_dir="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
-        rm -f "$unit_dir/dot-theme-rotate.service" "$unit_dir/dot-theme-rotate.timer"
-        systemctl --user daemon-reload
-        ui_ok "Rotate" "timer disabled and removed"
-        ;;
-      status)
-        if systemctl --user is-active dot-theme-rotate.timer >/dev/null 2>&1; then
-          ui_ok "Timer" "active"
-          systemctl --user list-timers dot-theme-rotate.timer --no-pager 2>&1 | grep -v '^$' | tail -3
-        else
-          ui_info "Timer" "inactive — run 'dot theme rotate enable [interval]'"
-        fi
-        ;;
-      *)
-        ui_err "Usage" "dot theme rotate [enable [interval]|disable|status]"
-        exit 1
-        ;;
-    esac
-    ;;
-  sync)
-    sync_theme "${2:-}"
-    ;;
-  ambient)
-    shift
-    case "${1:-run}" in
-      run | "") ambient_theme ;;
-      enable) ambient_enable ;;
-      disable) ambient_disable ;;
-      status)
-        state_file="${XDG_STATE_HOME:-$HOME/.local/state}/dot/theme-ambient.conf"
-        ui_info "Sunrise" "${DOT_THEME_SUNRISE:-$(grep -h '^sunrise=' "$state_file" 2>/dev/null | cut -d= -f2 || echo '07:00 (default)')}"
-        ui_info "Sunset" "${DOT_THEME_SUNSET:-$(grep -h '^sunset=' "$state_file" 2>/dev/null | cut -d= -f2 || echo '19:00 (default)')}"
-        if systemctl --user is-active dot-theme-ambient.timer >/dev/null 2>&1; then
-          ui_ok "Timer" "active"
-          systemctl --user list-timers dot-theme-ambient.timer --no-pager 2>&1 | grep -v '^$' | tail -3
-        else
-          ui_info "Timer" "inactive — run 'dot theme ambient enable'"
-        fi
-        ;;
-      *)
-        ui_err "Unknown" "ambient subcommand '$1' (use: run|enable|disable|status)"
-        exit 1
-        ;;
-    esac
-    ;;
-  family)
-    switch_family
-    ;;
-  current)
-    show_current
-    ;;
-  plan)
-    shift
-    plan_name="${1:-}"
-    if [[ -z "$plan_name" ]]; then
-      ui_err "Usage" "dot theme plan <family|variant> [--mode auto|dark|light] [--json]"
-      exit 1
-    fi
-    shift
-    plan_mode=""
-    plan_json=false
-    while [[ $# -gt 0 ]]; do
-      case "$1" in
-        --mode)
-          shift
-          plan_mode="${1:-}"
-          [[ -n "$plan_mode" ]] || {
-            ui_err "Usage" "--mode requires auto, dark, or light"
-            exit 1
-          }
-          shift
-          ;;
-        --mode=*)
-          plan_mode="${1#--mode=}"
-          shift
-          ;;
-        --json)
-          plan_json=true
-          shift
-          ;;
-        *)
-          ui_err "Unknown option" "$1"
-          exit 1
-          ;;
-      esac
-    done
-    case "$plan_mode" in
-      "" | auto | dark | light) ;;
-      *)
-        ui_err "Usage" "--mode requires auto, dark, or light"
-        exit 1
-        ;;
-    esac
-
-    plan_family="${plan_name%-dark}"
-    [[ "$plan_family" != "$plan_name" ]] || plan_family="${plan_name%-light}"
-    plan_args=(--plan)
-    [[ "$plan_json" == true ]] && plan_args+=(--json)
-
-    if [[ -z "$plan_mode" && "$plan_family" != "$plan_name" ]]; then
-      plan_target="$plan_name"
-    else
-      [[ -n "$plan_mode" ]] || plan_mode="auto"
-      if [[ "$plan_mode" == "auto" ]]; then
-        plan_target="${plan_family}-$(system_appearance_mode)"
-        plan_args+=(--auto)
+      systemctl --user daemon-reload
+      systemctl --user enable --now dot-theme-rotate.timer
+      ui_ok "Rotate" "timer enabled — will fire every $interval"
+      ;;
+    disable)
+      systemctl --user disable --now dot-theme-rotate.timer 2>/dev/null || true
+      unit_dir="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
+      rm -f "$unit_dir/dot-theme-rotate.service" "$unit_dir/dot-theme-rotate.timer"
+      systemctl --user daemon-reload
+      ui_ok "Rotate" "timer disabled and removed"
+      ;;
+    status)
+      if systemctl --user is-active dot-theme-rotate.timer >/dev/null 2>&1; then
+        ui_ok "Timer" "active"
+        systemctl --user list-timers dot-theme-rotate.timer --no-pager 2>&1 | grep -v '^$' | tail -3
       else
-        plan_target="${plan_family}-${plan_mode}"
+        ui_info "Timer" "inactive — run 'dot theme rotate enable [interval]'"
       fi
-    fi
-    run_theme_sync "$plan_target" "${plan_args[@]}"
-    ;;
-  undo)
-    # Step back one entry in the theme-history stack. Applied theme goes
-    # to the top so a second `undo` returns to it (toggle behaviour).
-    hist="${XDG_STATE_HOME:-$HOME/.local/state}/dot/theme-history"
-    if [[ ! -s "$hist" ]]; then
-      ui_err "History" "empty — no previous theme recorded"
+      ;;
+    *)
+      ui_err "Usage" "dot theme rotate [enable [interval]|disable|status]"
       exit 1
-    fi
-    prev="$(head -1 "$hist")"
-    current="$(current_theme)"
-    rest="$(tail -n +2 "$hist" 2>/dev/null | grep -Fxv -- "$current" || true)"
-    tmp="$(mktemp)"
-    {
-      printf '%s\n' "$current"
-      [[ -n "$rest" ]] && printf '%s\n' "$rest"
-    } >"$tmp"
-    mv "$tmp" "$hist"
-    set_theme "$prev"
-    ;;
-  history)
-    hist="${XDG_STATE_HOME:-$HOME/.local/state}/dot/theme-history"
-    if [[ ! -s "$hist" ]]; then
-      ui_info "History" "empty — apply a theme to start tracking"
-      exit 0
-    fi
-    ui_header "Recent themes (newest first)"
-    n=1
-    while IFS= read -r line; do
-      printf '  %2d  %s\n' "$n" "$line"
-      n=$((n + 1))
-    done <"$hist"
-    ui_info "Current" "$(current_theme)"
-    ;;
-  reset)
-    # Restore sane defaults: Adwaita GTK, default cursor/font, remove
-    # accent + shell theme. Wallpaper stays — we don't clobber user
-    # media choices. Use --force so DE handlers actually re-apply.
-    if command -v gsettings >/dev/null 2>&1; then
-      gsettings reset org.gnome.desktop.interface accent-color 2>/dev/null || true
-      gsettings reset org.gnome.desktop.interface cursor-theme 2>/dev/null || true
-      gsettings reset org.gnome.desktop.interface monospace-font-name 2>/dev/null || true
-      gsettings reset org.gnome.desktop.interface font-name 2>/dev/null || true
-      gsettings reset org.gnome.desktop.interface document-font-name 2>/dev/null || true
-      gsettings set org.gnome.shell.extensions.user-theme name "" 2>/dev/null || true
-    fi
-    ui_ok "Reset" "GNOME accent / cursor / fonts / shell-theme restored to defaults"
-    ui_info "Note" "wallpaper untouched — re-run 'dot theme set <name>' to apply a theme"
-    ;;
-  diff)
-    shift
-    if [[ $# -lt 2 ]]; then
-      ui_err "Usage" "dot theme diff <theme-a> <theme-b>"
+      ;;
+  esac
+}
+
+# dot theme ambient
+_theme_cmd_ambient() {
+  shift
+  case "${1:-run}" in
+    run | "") ambient_theme ;;
+    enable) ambient_enable ;;
+    disable) ambient_disable ;;
+    status)
+      state_file="${XDG_STATE_HOME:-$HOME/.local/state}/dot/theme-ambient.conf"
+      ui_info "Sunrise" "${DOT_THEME_SUNRISE:-$(grep -h '^sunrise=' "$state_file" 2>/dev/null | cut -d= -f2 || echo '07:00 (default)')}"
+      ui_info "Sunset" "${DOT_THEME_SUNSET:-$(grep -h '^sunset=' "$state_file" 2>/dev/null | cut -d= -f2 || echo '19:00 (default)')}"
+      if systemctl --user is-active dot-theme-ambient.timer >/dev/null 2>&1; then
+        ui_ok "Timer" "active"
+        systemctl --user list-timers dot-theme-ambient.timer --no-pager 2>&1 | grep -v '^$' | tail -3
+      else
+        ui_info "Timer" "inactive — run 'dot theme ambient enable'"
+      fi
+      ;;
+    *)
+      ui_err "Unknown" "ambient subcommand '$1' (use: run|enable|disable|status)"
       exit 1
-    fi
-    a="$1"
-    b="$2"
-    if ! grep -q "^\[themes\.${a}\]$" "$THEMES_FILE"; then
-      ui_err "Unknown" "theme '$a'"
+      ;;
+  esac
+}
+
+# dot theme plan
+_theme_cmd_plan() {
+  shift
+  plan_name="${1:-}"
+  if [[ -z "$plan_name" ]]; then
+    ui_err "Usage" "dot theme plan <family|variant> [--mode auto|dark|light] [--json]"
+    exit 1
+  fi
+  shift
+  plan_mode=""
+  plan_json=false
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --mode)
+        shift
+        plan_mode="${1:-}"
+        [[ -n "$plan_mode" ]] || {
+          ui_err "Usage" "--mode requires auto, dark, or light"
+          exit 1
+        }
+        shift
+        ;;
+      --mode=*)
+        plan_mode="${1#--mode=}"
+        shift
+        ;;
+      --json)
+        plan_json=true
+        shift
+        ;;
+      *)
+        ui_err "Unknown option" "$1"
+        exit 1
+        ;;
+    esac
+  done
+  case "$plan_mode" in
+    "" | auto | dark | light) ;;
+    *)
+      ui_err "Usage" "--mode requires auto, dark, or light"
       exit 1
+      ;;
+  esac
+
+  plan_family="${plan_name%-dark}"
+  [[ "$plan_family" != "$plan_name" ]] || plan_family="${plan_name%-light}"
+  plan_args=(--plan)
+  [[ "$plan_json" == true ]] && plan_args+=(--json)
+
+  if [[ -z "$plan_mode" && "$plan_family" != "$plan_name" ]]; then
+    plan_target="$plan_name"
+  else
+    [[ -n "$plan_mode" ]] || plan_mode="auto"
+    if [[ "$plan_mode" == "auto" ]]; then
+      plan_target="${plan_family}-$(system_appearance_mode)"
+      plan_args+=(--auto)
+    else
+      plan_target="${plan_family}-${plan_mode}"
     fi
-    if ! grep -q "^\[themes\.${b}\]$" "$THEMES_FILE"; then
-      ui_err "Unknown" "theme '$b'"
-      exit 1
-    fi
-    ui_header "Theme diff: $a  vs  $b"
-    awk -v A="$a" -v B="$b" '
+  fi
+  run_theme_sync "$plan_target" "${plan_args[@]}"
+}
+
+# dot theme undo
+# Step back one entry in the theme-history stack. Applied theme goes
+# to the top so a second `undo` returns to it (toggle behaviour).
+_theme_cmd_undo() {
+  hist="${XDG_STATE_HOME:-$HOME/.local/state}/dot/theme-history"
+  if [[ ! -s "$hist" ]]; then
+    ui_err "History" "empty — no previous theme recorded"
+    exit 1
+  fi
+  prev="$(head -1 "$hist")"
+  current="$(current_theme)"
+  rest="$(tail -n +2 "$hist" 2>/dev/null | grep -Fxv -- "$current" || true)"
+  tmp="$(mktemp)"
+  {
+    printf '%s\n' "$current"
+    [[ -n "$rest" ]] && printf '%s\n' "$rest"
+  } >"$tmp"
+  mv "$tmp" "$hist"
+  set_theme "$prev"
+}
+
+# dot theme history
+_theme_cmd_history() {
+  hist="${XDG_STATE_HOME:-$HOME/.local/state}/dot/theme-history"
+  if [[ ! -s "$hist" ]]; then
+    ui_info "History" "empty — apply a theme to start tracking"
+    exit 0
+  fi
+  ui_header "Recent themes (newest first)"
+  n=1
+  while IFS= read -r line; do
+    printf '  %2d  %s\n' "$n" "$line"
+    n=$((n + 1))
+  done <"$hist"
+  ui_info "Current" "$(current_theme)"
+}
+
+# dot theme reset
+# Restore sane defaults: Adwaita GTK, default cursor/font, remove
+# accent + shell theme. Wallpaper stays — we don't clobber user
+# media choices. Use --force so DE handlers actually re-apply.
+_theme_cmd_reset() {
+  if command -v gsettings >/dev/null 2>&1; then
+    gsettings reset org.gnome.desktop.interface accent-color 2>/dev/null || true
+    gsettings reset org.gnome.desktop.interface cursor-theme 2>/dev/null || true
+    gsettings reset org.gnome.desktop.interface monospace-font-name 2>/dev/null || true
+    gsettings reset org.gnome.desktop.interface font-name 2>/dev/null || true
+    gsettings reset org.gnome.desktop.interface document-font-name 2>/dev/null || true
+    gsettings set org.gnome.shell.extensions.user-theme name "" 2>/dev/null || true
+  fi
+  ui_ok "Reset" "GNOME accent / cursor / fonts / shell-theme restored to defaults"
+  ui_info "Note" "wallpaper untouched — re-run 'dot theme set <name>' to apply a theme"
+}
+
+# dot theme diff
+_theme_cmd_diff() {
+  shift
+  if [[ $# -lt 2 ]]; then
+    ui_err "Usage" "dot theme diff <theme-a> <theme-b>"
+    exit 1
+  fi
+  a="$1"
+  b="$2"
+  if ! grep -q "^\[themes\.${a}\]$" "$THEMES_FILE"; then
+    ui_err "Unknown" "theme '$a'"
+    exit 1
+  fi
+  if ! grep -q "^\[themes\.${b}\]$" "$THEMES_FILE"; then
+    ui_err "Unknown" "theme '$b'"
+    exit 1
+  fi
+  ui_header "Theme diff: $a  vs  $b"
+  awk -v A="$a" -v B="$b" '
       BEGIN {
         esc = sprintf("%c[", 27)
         for (side in slot) delete slot[side]
@@ -985,121 +986,129 @@ EOF
         row_sw("term.fg",   get(A,"term","fg"),        get(B,"term","fg"))
       }
     ' "$THEMES_FILE"
-    ;;
-  export)
-    # Snapshot the current theme + DE state to a portable JSON file.
-    # `dot theme import` on any machine restores the same theme name
-    # (wallpaper/accent/cursor are derived from the theme + machine
-    # env, so we only ship what makes the snapshot reproducible).
-    shift
-    out="${1:-}"
-    payload_theme="$(current_theme)"
-    payload_hostname="$(hostname 2>/dev/null || echo unknown)"
-    payload_date="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-    payload_fit=""
-    if command -v gsettings >/dev/null 2>&1; then
-      payload_fit="$(gsettings get org.gnome.desktop.background picture-options 2>/dev/null | tr -d "'")"
-    fi
-    payload="$(printf '{
+}
+
+# dot theme export
+# Snapshot the current theme + DE state to a portable JSON file.
+# `dot theme import` on any machine restores the same theme name
+# (wallpaper/accent/cursor are derived from the theme + machine
+# env, so we only ship what makes the snapshot reproducible).
+_theme_cmd_export() {
+  shift
+  out="${1:-}"
+  payload_theme="$(current_theme)"
+  payload_hostname="$(hostname 2>/dev/null || echo unknown)"
+  payload_date="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  payload_fit=""
+  if command -v gsettings >/dev/null 2>&1; then
+    payload_fit="$(gsettings get org.gnome.desktop.background picture-options 2>/dev/null | tr -d "'")"
+  fi
+  payload="$(printf '{
   "version": 1,
   "theme": "%s",
   "fit": "%s",
   "exported_from": "%s",
   "exported_at": "%s"
 }\n' "$payload_theme" "$payload_fit" "$payload_hostname" "$payload_date")"
-    if [[ -z "$out" || "$out" == "-" ]]; then
-      printf '%s\n' "$payload"
-    else
-      printf '%s\n' "$payload" >"$out"
-      ui_ok "Export" "$out"
-    fi
-    ;;
-  import)
-    shift
-    in_file="${1:-}"
-    if [[ -z "$in_file" || ! -f "$in_file" ]]; then
-      ui_err "Usage" "dot theme import <file.json>"
+  if [[ -z "$out" || "$out" == "-" ]]; then
+    printf '%s\n' "$payload"
+  else
+    printf '%s\n' "$payload" >"$out"
+    ui_ok "Export" "$out"
+  fi
+}
+
+# dot theme import
+_theme_cmd_import() {
+  shift
+  in_file="${1:-}"
+  if [[ -z "$in_file" || ! -f "$in_file" ]]; then
+    ui_err "Usage" "dot theme import <file.json>"
+    exit 1
+  fi
+  # Minimal JSON reader — extract "theme" and "fit" via awk. Avoids a
+  # hard jq dependency; JSON emitted by `dot theme export` is fixed
+  # shape, so brittle parsing is fine.
+  imp_theme="$(awk -F'"' '/"theme"/ {print $4; exit}' "$in_file")"
+  imp_fit="$(awk -F'"' '/"fit"/ {print $4; exit}' "$in_file")"
+  if [[ -z "$imp_theme" ]]; then
+    ui_err "Import" "no theme field in $in_file"
+    exit 1
+  fi
+  if ! grep -q "^\[themes\.${imp_theme}\]$" "$THEMES_FILE"; then
+    ui_err "Import" "theme '$imp_theme' not in themes.toml — run 'dot theme rebuild' first"
+    exit 1
+  fi
+  ui_info "Import" "$in_file"
+  set_theme "$imp_theme"
+  if [[ -n "$imp_fit" && "$imp_fit" != "" ]] && command -v gsettings >/dev/null 2>&1; then
+    gsettings set org.gnome.desktop.background picture-options "$imp_fit" 2>/dev/null &&
+      ui_ok "Fit" "$imp_fit"
+  fi
+}
+
+# dot theme fit
+_theme_cmd_fit() {
+  shift
+  want="${1:-}"
+  if [[ -z "$want" ]]; then
+    command -v gsettings >/dev/null 2>&1 && {
+      ui_info "GNOME fit" "$(gsettings get org.gnome.desktop.background picture-options 2>/dev/null | tr -d "'")"
+    }
+    ui_info "Valid" "zoom | spanned | centered | scaled | stretched | wallpaper | none"
+    exit 0
+  fi
+  case "$want" in
+    zoom | spanned | centered | scaled | stretched | wallpaper | none) : ;;
+    *)
+      ui_err "Usage" "dot theme fit <zoom|spanned|centered|scaled|stretched|wallpaper|none>"
       exit 1
-    fi
-    # Minimal JSON reader — extract "theme" and "fit" via awk. Avoids a
-    # hard jq dependency; JSON emitted by `dot theme export` is fixed
-    # shape, so brittle parsing is fine.
-    imp_theme="$(awk -F'"' '/"theme"/ {print $4; exit}' "$in_file")"
-    imp_fit="$(awk -F'"' '/"fit"/ {print $4; exit}' "$in_file")"
-    if [[ -z "$imp_theme" ]]; then
-      ui_err "Import" "no theme field in $in_file"
-      exit 1
-    fi
-    if ! grep -q "^\[themes\.${imp_theme}\]$" "$THEMES_FILE"; then
-      ui_err "Import" "theme '$imp_theme' not in themes.toml — run 'dot theme rebuild' first"
-      exit 1
-    fi
-    ui_info "Import" "$in_file"
-    set_theme "$imp_theme"
-    if [[ -n "$imp_fit" && "$imp_fit" != "" ]] && command -v gsettings >/dev/null 2>&1; then
-      gsettings set org.gnome.desktop.background picture-options "$imp_fit" 2>/dev/null &&
-        ui_ok "Fit" "$imp_fit"
-    fi
-    ;;
-  fit)
-    shift
-    want="${1:-}"
-    if [[ -z "$want" ]]; then
-      command -v gsettings >/dev/null 2>&1 && {
-        ui_info "GNOME fit" "$(gsettings get org.gnome.desktop.background picture-options 2>/dev/null | tr -d "'")"
-      }
-      ui_info "Valid" "zoom | spanned | centered | scaled | stretched | wallpaper | none"
-      exit 0
-    fi
-    case "$want" in
-      zoom | spanned | centered | scaled | stretched | wallpaper | none) : ;;
-      *)
-        ui_err "Usage" "dot theme fit <zoom|spanned|centered|scaled|stretched|wallpaper|none>"
-        exit 1
-        ;;
-    esac
-    if command -v gsettings >/dev/null 2>&1; then
-      gsettings set org.gnome.desktop.background picture-options "$want" 2>/dev/null
-      ui_ok "Fit" "$want"
-    else
-      ui_err "Fit" "gsettings not available"
-      exit 1
-    fi
-    ;;
-  wallpaper)
-    shift
-    wp="${1:-}"
-    if [[ -z "$wp" ]]; then
-      command -v gsettings >/dev/null 2>&1 && {
-        ui_info "Current" "wallpaper (light)"
-        ui_info "  " "$(gsettings get org.gnome.desktop.background picture-uri 2>/dev/null | tr -d "'")"
-        ui_info "Current" "wallpaper (dark)"
-        ui_info "  " "$(gsettings get org.gnome.desktop.background picture-uri-dark 2>/dev/null | tr -d "'")"
-      }
-      exit 0
-    fi
-    # Resolve to absolute path.
-    if [[ "$wp" != /* ]]; then
-      wp="$(realpath -- "$wp" 2>/dev/null || readlink -f -- "$wp")"
-    fi
-    if [[ ! -f "$wp" ]]; then
-      ui_err "Wallpaper" "file not found: $wp"
-      exit 1
-    fi
-    # Detect DE (inlined mini-detector matching dot-theme-sync).
-    raw="$(printf '%s' "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}" | tr '[:upper:]' '[:lower:]')"
-    case "$raw" in
-      *kde* | *plasma*) de=kde ;;
-      *xfce*) de=xfce ;;
-      *) de=gnome ;;
-    esac
-    changed=0
-    case "$de" in
-      kde)
-        if command -v plasma-apply-wallpaperimage >/dev/null 2>&1; then
-          plasma-apply-wallpaperimage "$wp" >/dev/null 2>&1 && changed=1
-        elif command -v qdbus >/dev/null 2>&1; then
-          qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "
+      ;;
+  esac
+  if command -v gsettings >/dev/null 2>&1; then
+    gsettings set org.gnome.desktop.background picture-options "$want" 2>/dev/null
+    ui_ok "Fit" "$want"
+  else
+    ui_err "Fit" "gsettings not available"
+    exit 1
+  fi
+}
+
+# dot theme wallpaper
+_theme_cmd_wallpaper() {
+  shift
+  wp="${1:-}"
+  if [[ -z "$wp" ]]; then
+    command -v gsettings >/dev/null 2>&1 && {
+      ui_info "Current" "wallpaper (light)"
+      ui_info "  " "$(gsettings get org.gnome.desktop.background picture-uri 2>/dev/null | tr -d "'")"
+      ui_info "Current" "wallpaper (dark)"
+      ui_info "  " "$(gsettings get org.gnome.desktop.background picture-uri-dark 2>/dev/null | tr -d "'")"
+    }
+    exit 0
+  fi
+  # Resolve to absolute path.
+  if [[ "$wp" != /* ]]; then
+    wp="$(realpath -- "$wp" 2>/dev/null || readlink -f -- "$wp")"
+  fi
+  if [[ ! -f "$wp" ]]; then
+    ui_err "Wallpaper" "file not found: $wp"
+    exit 1
+  fi
+  # Detect DE (inlined mini-detector matching dot-theme-sync).
+  raw="$(printf '%s' "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}" | tr '[:upper:]' '[:lower:]')"
+  case "$raw" in
+    *kde* | *plasma*) de=kde ;;
+    *xfce*) de=xfce ;;
+    *) de=gnome ;;
+  esac
+  changed=0
+  case "$de" in
+    kde)
+      if command -v plasma-apply-wallpaperimage >/dev/null 2>&1; then
+        plasma-apply-wallpaperimage "$wp" >/dev/null 2>&1 && changed=1
+      elif command -v qdbus >/dev/null 2>&1; then
+        qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "
             var Desktops = desktops();
             for (i=0; i<Desktops.length; i++) {
               d = Desktops[i];
@@ -1107,296 +1116,377 @@ EOF
               d.currentConfigGroup = ['Wallpaper', 'org.kde.image', 'General'];
               d.writeConfig('Image', '$wp');
             }" >/dev/null 2>&1 && changed=1
-        fi
-        ;;
-      xfce)
-        if command -v xfconf-query >/dev/null 2>&1; then
-          while IFS= read -r prop; do
-            [[ -z "$prop" ]] && continue
-            xfconf-query -c xfce4-desktop -p "$prop" -s "$wp" 2>/dev/null && changed=1
-          done < <(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep -E '/last-image$' || true)
-        fi
-        ;;
-      *)
-        if command -v gsettings >/dev/null 2>&1; then
-          gsettings set org.gnome.desktop.background picture-uri "file://$wp" 2>/dev/null && changed=1
-          gsettings set org.gnome.desktop.background picture-uri-dark "file://$wp" 2>/dev/null && changed=1
-          gsettings set org.gnome.desktop.screensaver picture-uri "file://$wp" 2>/dev/null || true
-        fi
-        ;;
-    esac
-    if [[ $changed -gt 0 ]]; then
-      ui_ok "Wallpaper" "$wp ($de)"
-    else
-      ui_err "Wallpaper" "no wallpaper mechanism found for $de"
+      fi
+      ;;
+    xfce)
+      if command -v xfconf-query >/dev/null 2>&1; then
+        while IFS= read -r prop; do
+          [[ -z "$prop" ]] && continue
+          xfconf-query -c xfce4-desktop -p "$prop" -s "$wp" 2>/dev/null && changed=1
+        done < <(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep -E '/last-image$' || true)
+      fi
+      ;;
+    *)
+      if command -v gsettings >/dev/null 2>&1; then
+        gsettings set org.gnome.desktop.background picture-uri "file://$wp" 2>/dev/null && changed=1
+        gsettings set org.gnome.desktop.background picture-uri-dark "file://$wp" 2>/dev/null && changed=1
+        gsettings set org.gnome.desktop.screensaver picture-uri "file://$wp" 2>/dev/null || true
+      fi
+      ;;
+  esac
+  if [[ $changed -gt 0 ]]; then
+    ui_ok "Wallpaper" "$wp ($de)"
+  else
+    ui_err "Wallpaper" "no wallpaper mechanism found for $de"
+    exit 1
+  fi
+}
+
+# dot theme accent
+# Live-tweak the desktop accent colour without changing the theme
+# or the wallpaper. Accepts either a GNOME accent enum name
+# (blue|teal|green|yellow|orange|red|pink|purple|slate) or an
+# int 0-6 / -1 matching the macos_accent scale. Applies via the
+# detected DE handler; skips silently on DEs without native accent.
+_theme_cmd_accent() {
+  shift
+  want="${1:-}"
+  if [[ -z "$want" ]]; then
+    ui_info "Current" "accent"
+    command -v gsettings >/dev/null 2>&1 &&
+      ui_info "GNOME" "$(gsettings get org.gnome.desktop.interface accent-color 2>/dev/null | tr -d "'")"
+    command -v kreadconfig6 >/dev/null 2>&1 &&
+      ui_info "KDE" "$(kreadconfig6 --file kdeglobals --group General --key AccentColor 2>/dev/null)"
+    exit 0
+  fi
+  # Map int → GNOME enum name if numeric.
+  case "$want" in
+    -1) want="slate" ;;
+    0) want="red" ;;
+    1) want="orange" ;;
+    2) want="yellow" ;;
+    3) want="green" ;;
+    4) want="blue" ;;
+    5) want="purple" ;;
+    6) want="pink" ;;
+    blue | teal | green | yellow | orange | red | pink | purple | slate) : ;;
+    *)
+      ui_err "Usage" "dot theme accent <int -1..6 | blue|teal|green|yellow|orange|red|pink|purple|slate>"
       exit 1
-    fi
-    ;;
-  accent)
-    # Live-tweak the desktop accent colour without changing the theme
-    # or the wallpaper. Accepts either a GNOME accent enum name
-    # (blue|teal|green|yellow|orange|red|pink|purple|slate) or an
-    # int 0-6 / -1 matching the macos_accent scale. Applies via the
-    # detected DE handler; skips silently on DEs without native accent.
-    shift
-    want="${1:-}"
-    if [[ -z "$want" ]]; then
-      ui_info "Current" "accent"
-      command -v gsettings >/dev/null 2>&1 &&
-        ui_info "GNOME" "$(gsettings get org.gnome.desktop.interface accent-color 2>/dev/null | tr -d "'")"
-      command -v kreadconfig6 >/dev/null 2>&1 &&
-        ui_info "KDE" "$(kreadconfig6 --file kdeglobals --group General --key AccentColor 2>/dev/null)"
-      exit 0
-    fi
-    # Map int → GNOME enum name if numeric.
-    case "$want" in
-      -1) want="slate" ;;
-      0) want="red" ;;
-      1) want="orange" ;;
-      2) want="yellow" ;;
-      3) want="green" ;;
-      4) want="blue" ;;
-      5) want="purple" ;;
-      6) want="pink" ;;
-      blue | teal | green | yellow | orange | red | pink | purple | slate) : ;;
+      ;;
+  esac
+  changed=0
+  if command -v gsettings >/dev/null 2>&1; then
+    gsettings set org.gnome.desktop.interface accent-color "$want" 2>/dev/null && changed=1
+  fi
+  # Map GNOME name back to a KDE Plasma hex for kdeglobals.
+  case "$want" in
+    slate) hex="#4d4d4d" ;;
+    red) hex="#da4453" ;;
+    orange) hex="#f67400" ;;
+    yellow) hex="#f6bb00" ;;
+    green) hex="#2ecc71" ;;
+    teal) hex="#1abc9c" ;;
+    blue) hex="#3daee9" ;;
+    purple) hex="#9b59b6" ;;
+    pink) hex="#e91e63" ;;
+  esac
+  if command -v kwriteconfig6 >/dev/null 2>&1; then
+    kwriteconfig6 --file kdeglobals --group General --key AccentColor "$hex" 2>/dev/null && changed=1
+    command -v qdbus >/dev/null 2>&1 && qdbus org.kde.KWin /KWin reconfigure >/dev/null 2>&1 || true
+  fi
+  if [[ $changed -gt 0 ]]; then
+    ui_ok "Accent" "$want ($hex)"
+  else
+    ui_err "Accent" "no gsettings or kwriteconfig6 available"
+    exit 1
+  fi
+}
+
+# dot theme status
+# Comprehensive dashboard: recorded theme, live gsettings/kwriteconfig
+# state, wallpaper file existence, detected DE. Great for diagnosing
+# "why doesn't my theme match my terminal?" moments.
+# `--json` emits machine-readable output for scripting / monitoring.
+_theme_cmd_status() {
+  shift
+  _status_json=false
+  [[ "${1:-}" == "--json" ]] && _status_json=true
+  current="$(current_theme)"
+  current_family="${current%-dark}"
+  [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
+
+  live_dark=""
+  live_light=""
+  live_accent=""
+  live_scheme=""
+  live_cursor=""
+  kde_scheme=""
+  kde_accent=""
+  if command -v gsettings >/dev/null 2>&1; then
+    live_dark="$(gsettings get org.gnome.desktop.background picture-uri-dark 2>/dev/null | tr -d "'")"
+    live_light="$(gsettings get org.gnome.desktop.background picture-uri 2>/dev/null | tr -d "'")"
+    live_accent="$(gsettings get org.gnome.desktop.interface accent-color 2>/dev/null | tr -d "'")"
+    live_scheme="$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")"
+    live_cursor="$(gsettings get org.gnome.desktop.interface cursor-theme 2>/dev/null | tr -d "'")"
+  fi
+  if command -v kreadconfig6 >/dev/null 2>&1; then
+    kde_scheme="$(kreadconfig6 --file kdeglobals --group General --key ColorScheme 2>/dev/null)"
+    kde_accent="$(kreadconfig6 --file kdeglobals --group General --key AccentColor 2>/dev/null)"
+  fi
+  # DE detection (inlined to match _detect_linux_de).
+  de=""
+  if [[ "$(uname -s)" == "Linux" ]]; then
+    raw="${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}"
+    raw="$(printf '%s' "$raw" | tr '[:upper:]' '[:lower:]')"
+    case "$raw" in
+      *budgie*) de=budgie ;;
+      *cinnamon*) de=cinnamon ;;
+      *mate*) de=mate ;;
+      *unity*) de=unity ;;
+      *lxqt*) de=lxqt ;;
+      *kde* | *plasma*) de=kde ;;
+      *xfce*) de=xfce ;;
+      *sway*) de=sway ;;
+      *hyprland*) de=hyprland ;;
+      *niri*) de=niri ;;
+      *gnome*) de=gnome ;;
+      *) de=unknown ;;
+    esac
+  fi
+
+  if [[ "$_status_json" == true ]]; then
+    # Minimal jq-free JSON emission. Values are strings (no interior
+    # double-quotes expected from any of these gsettings/kreadconfig
+    # fields), so we can quote them directly.
+    printf '{\n'
+    printf '  "recorded": "%s",\n' "$current"
+    printf '  "family": "%s",\n' "$current_family"
+    printf '  "detected_de": "%s",\n' "$de"
+    printf '  "gnome": {\n'
+    printf '    "color_scheme": "%s",\n' "$live_scheme"
+    printf '    "accent": "%s",\n' "$live_accent"
+    printf '    "cursor": "%s",\n' "$live_cursor"
+    printf '    "wallpaper_light": "%s",\n' "$live_light"
+    printf '    "wallpaper_dark": "%s"\n' "$live_dark"
+    printf '  },\n'
+    printf '  "kde": {\n'
+    printf '    "color_scheme": "%s",\n' "$kde_scheme"
+    printf '    "accent": "%s"\n' "$kde_accent"
+    printf '  }\n'
+    printf '}\n'
+    exit 0
+  fi
+
+  ui_header "dot theme status"
+  ui_info "Recorded" "$current"
+  ui_info "Family" "$current_family"
+  [[ -n "$live_scheme" ]] && ui_info "Color scheme" "$live_scheme"
+  [[ -n "$live_accent" ]] && ui_info "Accent" "$live_accent"
+  [[ -n "$live_cursor" ]] && ui_info "Cursor" "$live_cursor"
+  [[ -n "$live_light" ]] && ui_info "Wallpaper (light)" "$(echo "$live_light" | sed 's|.*/||')"
+  [[ -n "$live_dark" ]] && ui_info "Wallpaper (dark)" "$(echo "$live_dark" | sed 's|.*/||')"
+  [[ -n "$kde_scheme" ]] && ui_info "KDE scheme" "$kde_scheme"
+  [[ -n "$kde_accent" ]] && ui_info "KDE accent" "$kde_accent"
+  if [[ -n "$de" ]]; then ui_info "Detected DE" "$de"; fi
+}
+
+# dot theme preview
+_theme_cmd_preview() {
+  shift
+  preview="${1:-}"
+  if [[ -z "$preview" ]]; then
+    ui_err "Usage" "dot theme preview <name>"
+    exit 1
+  fi
+  prev="$(current_theme)"
+  ui_info "Preview" "$preview (was $prev)"
+  # Revert on Ctrl-C. Trap fires before exit so the shell prompt
+  # returns with the original theme active.
+  trap 'echo; run_theme_sync --force "'"$prev"'" >/dev/null 2>&1; ui_info "Reverted" "'"$prev"'"; exit 130' INT
+  if ! run_theme_sync --force "$preview"; then
+    ui_err "Preview" "apply failed — reverting"
+    run_theme_sync --force "$prev" >/dev/null 2>&1
+    exit 1
+  fi
+  echo ""
+  read -r -p "  Press ENTER to keep '$preview' or Ctrl-C to revert to '$prev': " _
+  trap - INT
+  ui_ok "Kept" "$preview"
+}
+
+# dot theme random
+# Pick a random paired family and apply it. Default mode = current
+# mode; override with `--mode dark|light`.
+_theme_cmd_random() {
+  shift
+  _rand_mode=""
+  _rand_explicit=false
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --mode)
+        shift
+        case "${1:-}" in
+          dark | light)
+            _rand_mode="$1"
+            _rand_explicit=true
+            ;;
+          *)
+            ui_err "Usage" "--mode dark|light"
+            exit 1
+            ;;
+        esac
+        shift
+        ;;
+      --mode=*)
+        _rand_mode="${1#--mode=}"
+        _rand_explicit=true
+        shift
+        ;;
       *)
-        ui_err "Usage" "dot theme accent <int -1..6 | blue|teal|green|yellow|orange|red|pink|purple|slate>"
+        ui_err "Usage" "dot theme random [--mode dark|light]"
         exit 1
         ;;
     esac
-    changed=0
-    if command -v gsettings >/dev/null 2>&1; then
-      gsettings set org.gnome.desktop.interface accent-color "$want" 2>/dev/null && changed=1
-    fi
-    # Map GNOME name back to a KDE Plasma hex for kdeglobals.
-    case "$want" in
-      slate) hex="#4d4d4d" ;;
-      red) hex="#da4453" ;;
-      orange) hex="#f67400" ;;
-      yellow) hex="#f6bb00" ;;
-      green) hex="#2ecc71" ;;
-      teal) hex="#1abc9c" ;;
-      blue) hex="#3daee9" ;;
-      purple) hex="#9b59b6" ;;
-      pink) hex="#e91e63" ;;
-    esac
-    if command -v kwriteconfig6 >/dev/null 2>&1; then
-      kwriteconfig6 --file kdeglobals --group General --key AccentColor "$hex" 2>/dev/null && changed=1
-      command -v qdbus >/dev/null 2>&1 && qdbus org.kde.KWin /KWin reconfigure >/dev/null 2>&1 || true
-    fi
-    if [[ $changed -gt 0 ]]; then
-      ui_ok "Accent" "$want ($hex)"
-    else
-      ui_err "Accent" "no gsettings or kwriteconfig6 available"
-      exit 1
-    fi
+  done
+  current="$(current_theme)"
+  if [[ -z "$_rand_mode" ]]; then
+    _rand_mode="dark"
+    is_dark_theme "$current" 2>/dev/null || _rand_mode="light"
+  fi
+  current_family="${current%-dark}"
+  [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
+  # Not `mapfile -t`: that is bash 4 only, and macOS ships bash 3.2 as
+  # /bin/bash. tests/unit/shell/test_bash32_portability.sh gates on it.
+  families=()
+  while IFS= read -r _fam; do
+    [[ -n "$_fam" ]] && families+=("$_fam")
+  done < <(paired_families)
+  if [[ ${#families[@]} -eq 0 ]]; then
+    ui_err "No themes" "run 'dot theme rebuild' first"
+    exit 1
+  fi
+  # Filter out the current family so `random` always changes something.
+  picks=()
+  for f in "${families[@]}"; do
+    [[ "$f" != "$current_family" ]] && picks+=("$f")
+  done
+  [[ ${#picks[@]} -eq 0 ]] && picks=("${families[@]}")
+  pick="${picks[RANDOM % ${#picks[@]}]}"
+  if [[ "$(theme_mode_preference)" == "auto" && "$_rand_explicit" == false ]]; then
+    set_theme "${pick}-${_rand_mode}" --auto
+  else
+    set_theme "${pick}-${_rand_mode}"
+  fi
+}
+
+# dot theme help | --help | -h
+_theme_cmd_help() {
+  ui_header "Usage"
+  ui_info "dot theme" "[command]"
+  echo ""
+  ui_header "Commands"
+  ui_ok "(no args)" "Interactive theme picker (fzf)"
+  ui_ok "list" "Show all available themes"
+  ui_ok "set [NAME]" "Set a family to auto, or an explicit light/dark variant"
+  ui_ok "toggle" "Toggle between light/dark within current family"
+  ui_ok "mode <dark|light|auto>" "Choose manual mode or follow the system"
+  ui_ok "rotate [enable [N]|disable|status]" "Wallpaper rotation timer"
+  ui_ok "family" "Cycle to the next family"
+  ui_ok "random" "Pick a random family, keep current mode"
+  ui_ok "preview [NAME]" "Try a theme, ENTER to keep or Ctrl-C to revert"
+  ui_ok "plan <NAME> [--mode M] [--json]" "Pure, versioned operation plan"
+  ui_ok "undo" "Step back to the previous theme (re-run to toggle)"
+  ui_ok "history" "Show recently-applied themes"
+  ui_ok "reset" "Restore GNOME defaults (accent/cursor/fonts/shell theme)"
+  ui_ok "current" "Show current theme info"
+  ui_ok "status" "Dashboard: recorded vs applied theme state"
+  ui_ok "diff <a> <b>" "Side-by-side comparison of two themes"
+  ui_ok "accent [color]" "Tweak accent live (no wallpaper/theme change)"
+  ui_ok "wallpaper [path]" "Set an arbitrary wallpaper without theme swap"
+  ui_ok "fit <mode>" "Wallpaper fit: zoom|spanned|centered|scaled|stretched"
+  ui_ok "export [file]" "Snapshot current theme+fit to JSON"
+  ui_ok "import <file>" "Restore theme+fit from a snapshot"
+  ui_ok "sync" "Enable auto mode and sync with system appearance"
+  ui_ok "ambient" "Time-based mode switch (run|enable|disable|status)"
+  ui_ok "rebuild" "Regenerate themes from system + custom wallpapers"
+  echo ""
+  show_current
+}
+
+case "${1:-}" in
+  list)
+    list_themes
+    ;;
+  set)
+    _theme_cmd_set "$@"
+    ;;
+  toggle)
+    toggle_theme
+    ;;
+  mode)
+    _theme_cmd_mode "$@"
+    ;;
+  rotate)
+    _theme_cmd_rotate "$@"
+    ;;
+  sync)
+    sync_theme "${2:-}"
+    ;;
+  ambient)
+    _theme_cmd_ambient "$@"
+    ;;
+  family)
+    switch_family
+    ;;
+  current)
+    show_current
+    ;;
+  plan)
+    _theme_cmd_plan "$@"
+    ;;
+  undo)
+    _theme_cmd_undo "$@"
+    ;;
+  history)
+    _theme_cmd_history "$@"
+    ;;
+  reset)
+    _theme_cmd_reset "$@"
+    ;;
+  diff)
+    _theme_cmd_diff "$@"
+    ;;
+  export)
+    _theme_cmd_export "$@"
+    ;;
+  import)
+    _theme_cmd_import "$@"
+    ;;
+  fit)
+    _theme_cmd_fit "$@"
+    ;;
+  wallpaper)
+    _theme_cmd_wallpaper "$@"
+    ;;
+  accent)
+    _theme_cmd_accent "$@"
     ;;
   status)
-    # Comprehensive dashboard: recorded theme, live gsettings/kwriteconfig
-    # state, wallpaper file existence, detected DE. Great for diagnosing
-    # "why doesn't my theme match my terminal?" moments.
-    # `--json` emits machine-readable output for scripting / monitoring.
-    shift
-    _status_json=false
-    [[ "${1:-}" == "--json" ]] && _status_json=true
-    current="$(current_theme)"
-    current_family="${current%-dark}"
-    [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
-
-    live_dark=""
-    live_light=""
-    live_accent=""
-    live_scheme=""
-    live_cursor=""
-    kde_scheme=""
-    kde_accent=""
-    if command -v gsettings >/dev/null 2>&1; then
-      live_dark="$(gsettings get org.gnome.desktop.background picture-uri-dark 2>/dev/null | tr -d "'")"
-      live_light="$(gsettings get org.gnome.desktop.background picture-uri 2>/dev/null | tr -d "'")"
-      live_accent="$(gsettings get org.gnome.desktop.interface accent-color 2>/dev/null | tr -d "'")"
-      live_scheme="$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")"
-      live_cursor="$(gsettings get org.gnome.desktop.interface cursor-theme 2>/dev/null | tr -d "'")"
-    fi
-    if command -v kreadconfig6 >/dev/null 2>&1; then
-      kde_scheme="$(kreadconfig6 --file kdeglobals --group General --key ColorScheme 2>/dev/null)"
-      kde_accent="$(kreadconfig6 --file kdeglobals --group General --key AccentColor 2>/dev/null)"
-    fi
-    # DE detection (inlined to match _detect_linux_de).
-    de=""
-    if [[ "$(uname -s)" == "Linux" ]]; then
-      raw="${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}"
-      raw="$(printf '%s' "$raw" | tr '[:upper:]' '[:lower:]')"
-      case "$raw" in
-        *budgie*) de=budgie ;;
-        *cinnamon*) de=cinnamon ;;
-        *mate*) de=mate ;;
-        *unity*) de=unity ;;
-        *lxqt*) de=lxqt ;;
-        *kde* | *plasma*) de=kde ;;
-        *xfce*) de=xfce ;;
-        *sway*) de=sway ;;
-        *hyprland*) de=hyprland ;;
-        *niri*) de=niri ;;
-        *gnome*) de=gnome ;;
-        *) de=unknown ;;
-      esac
-    fi
-
-    if [[ "$_status_json" == true ]]; then
-      # Minimal jq-free JSON emission. Values are strings (no interior
-      # double-quotes expected from any of these gsettings/kreadconfig
-      # fields), so we can quote them directly.
-      printf '{\n'
-      printf '  "recorded": "%s",\n' "$current"
-      printf '  "family": "%s",\n' "$current_family"
-      printf '  "detected_de": "%s",\n' "$de"
-      printf '  "gnome": {\n'
-      printf '    "color_scheme": "%s",\n' "$live_scheme"
-      printf '    "accent": "%s",\n' "$live_accent"
-      printf '    "cursor": "%s",\n' "$live_cursor"
-      printf '    "wallpaper_light": "%s",\n' "$live_light"
-      printf '    "wallpaper_dark": "%s"\n' "$live_dark"
-      printf '  },\n'
-      printf '  "kde": {\n'
-      printf '    "color_scheme": "%s",\n' "$kde_scheme"
-      printf '    "accent": "%s"\n' "$kde_accent"
-      printf '  }\n'
-      printf '}\n'
-      exit 0
-    fi
-
-    ui_header "dot theme status"
-    ui_info "Recorded" "$current"
-    ui_info "Family" "$current_family"
-    [[ -n "$live_scheme" ]] && ui_info "Color scheme" "$live_scheme"
-    [[ -n "$live_accent" ]] && ui_info "Accent" "$live_accent"
-    [[ -n "$live_cursor" ]] && ui_info "Cursor" "$live_cursor"
-    [[ -n "$live_light" ]] && ui_info "Wallpaper (light)" "$(echo "$live_light" | sed 's|.*/||')"
-    [[ -n "$live_dark" ]] && ui_info "Wallpaper (dark)" "$(echo "$live_dark" | sed 's|.*/||')"
-    [[ -n "$kde_scheme" ]] && ui_info "KDE scheme" "$kde_scheme"
-    [[ -n "$kde_accent" ]] && ui_info "KDE accent" "$kde_accent"
-    if [[ -n "$de" ]]; then ui_info "Detected DE" "$de"; fi
+    _theme_cmd_status "$@"
     ;;
   rebuild)
     shift
     bash "$SCRIPT_DIR/rebuild-themes.sh" "$@"
     ;;
   preview)
-    shift
-    preview="${1:-}"
-    if [[ -z "$preview" ]]; then
-      ui_err "Usage" "dot theme preview <name>"
-      exit 1
-    fi
-    prev="$(current_theme)"
-    ui_info "Preview" "$preview (was $prev)"
-    # Revert on Ctrl-C. Trap fires before exit so the shell prompt
-    # returns with the original theme active.
-    trap 'echo; run_theme_sync --force "'"$prev"'" >/dev/null 2>&1; ui_info "Reverted" "'"$prev"'"; exit 130' INT
-    if ! run_theme_sync --force "$preview"; then
-      ui_err "Preview" "apply failed — reverting"
-      run_theme_sync --force "$prev" >/dev/null 2>&1
-      exit 1
-    fi
-    echo ""
-    read -r -p "  Press ENTER to keep '$preview' or Ctrl-C to revert to '$prev': " _
-    trap - INT
-    ui_ok "Kept" "$preview"
+    _theme_cmd_preview "$@"
     ;;
   random)
-    # Pick a random paired family and apply it. Default mode = current
-    # mode; override with `--mode dark|light`.
-    shift
-    _rand_mode=""
-    _rand_explicit=false
-    while [[ $# -gt 0 ]]; do
-      case "$1" in
-        --mode)
-          shift
-          case "${1:-}" in
-            dark | light)
-              _rand_mode="$1"
-              _rand_explicit=true
-              ;;
-            *)
-              ui_err "Usage" "--mode dark|light"
-              exit 1
-              ;;
-          esac
-          shift
-          ;;
-        --mode=*)
-          _rand_mode="${1#--mode=}"
-          _rand_explicit=true
-          shift
-          ;;
-        *)
-          ui_err "Usage" "dot theme random [--mode dark|light]"
-          exit 1
-          ;;
-      esac
-    done
-    current="$(current_theme)"
-    if [[ -z "$_rand_mode" ]]; then
-      _rand_mode="dark"
-      is_dark_theme "$current" 2>/dev/null || _rand_mode="light"
-    fi
-    current_family="${current%-dark}"
-    [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
-    # Not `mapfile -t`: that is bash 4 only, and macOS ships bash 3.2 as
-    # /bin/bash. tests/unit/shell/test_bash32_portability.sh gates on it.
-    families=()
-    while IFS= read -r _fam; do
-      [[ -n "$_fam" ]] && families+=("$_fam")
-    done < <(paired_families)
-    if [[ ${#families[@]} -eq 0 ]]; then
-      ui_err "No themes" "run 'dot theme rebuild' first"
-      exit 1
-    fi
-    # Filter out the current family so `random` always changes something.
-    picks=()
-    for f in "${families[@]}"; do
-      [[ "$f" != "$current_family" ]] && picks+=("$f")
-    done
-    [[ ${#picks[@]} -eq 0 ]] && picks=("${families[@]}")
-    pick="${picks[RANDOM % ${#picks[@]}]}"
-    if [[ "$(theme_mode_preference)" == "auto" && "$_rand_explicit" == false ]]; then
-      set_theme "${pick}-${_rand_mode}" --auto
-    else
-      set_theme "${pick}-${_rand_mode}"
-    fi
+    _theme_cmd_random "$@"
     ;;
   help | --help | -h)
-    ui_header "Usage"
-    ui_info "dot theme" "[command]"
-    echo ""
-    ui_header "Commands"
-    ui_ok "(no args)" "Interactive theme picker (fzf)"
-    ui_ok "list" "Show all available themes"
-    ui_ok "set [NAME]" "Set a family to auto, or an explicit light/dark variant"
-    ui_ok "toggle" "Toggle between light/dark within current family"
-    ui_ok "mode <dark|light|auto>" "Choose manual mode or follow the system"
-    ui_ok "rotate [enable [N]|disable|status]" "Wallpaper rotation timer"
-    ui_ok "family" "Cycle to the next family"
-    ui_ok "random" "Pick a random family, keep current mode"
-    ui_ok "preview [NAME]" "Try a theme, ENTER to keep or Ctrl-C to revert"
-    ui_ok "plan <NAME> [--mode M] [--json]" "Pure, versioned operation plan"
-    ui_ok "undo" "Step back to the previous theme (re-run to toggle)"
-    ui_ok "history" "Show recently-applied themes"
-    ui_ok "reset" "Restore GNOME defaults (accent/cursor/fonts/shell theme)"
-    ui_ok "current" "Show current theme info"
-    ui_ok "status" "Dashboard: recorded vs applied theme state"
-    ui_ok "diff <a> <b>" "Side-by-side comparison of two themes"
-    ui_ok "accent [color]" "Tweak accent live (no wallpaper/theme change)"
-    ui_ok "wallpaper [path]" "Set an arbitrary wallpaper without theme swap"
-    ui_ok "fit <mode>" "Wallpaper fit: zoom|spanned|centered|scaled|stretched"
-    ui_ok "export [file]" "Snapshot current theme+fit to JSON"
-    ui_ok "import <file>" "Restore theme+fit from a snapshot"
-    ui_ok "sync" "Enable auto mode and sync with system appearance"
-    ui_ok "ambient" "Time-based mode switch (run|enable|disable|status)"
-    ui_ok "rebuild" "Regenerate themes from system + custom wallpapers"
-    echo ""
-    show_current
+    _theme_cmd_help "$@"
     ;;
   "")
     pick_theme
