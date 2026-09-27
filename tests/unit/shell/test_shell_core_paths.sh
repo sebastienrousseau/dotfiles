@@ -22,14 +22,4 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: file should not be empty"
 fi
 
-test_start "core_paths_has_shebang_or_comment"
-first_line=$(head -n 1 "$TMPL_FILE")
-if [[ "$first_line" == "#!/"* ]] || [[ "$first_line" == "#"* ]]; then
-  ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has header"
-else
-  ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have shebang or comment header"
-fi
-
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

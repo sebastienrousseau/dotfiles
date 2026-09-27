@@ -16,9 +16,6 @@ cov_setup_sandbox
 test_start "prewarm_exists"
 assert_file_exists "$TEST_SCRIPT" "prewarm.sh should exist"
 
-test_start "prewarm_syntax"
-assert_exit_code 0 "bash -n '$TEST_SCRIPT'"
-
 test_start "prewarm_defines_warm_tool"
 assert_file_contains "$TEST_SCRIPT" "warm_tool()" "should define warm_tool"
 

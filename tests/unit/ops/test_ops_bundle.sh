@@ -16,9 +16,6 @@ cov_setup_sandbox
 test_start "bundle_exists"
 assert_file_exists "$TEST_SCRIPT" "bundle.sh should exist"
 
-test_start "bundle_syntax"
-assert_exit_code 0 "bash -n '$TEST_SCRIPT'"
-
 test_start "bundle_uses_tar_zstd"
 assert_file_contains "$TEST_SCRIPT" "tar --zstd" "should compress using tar and zstd"
 

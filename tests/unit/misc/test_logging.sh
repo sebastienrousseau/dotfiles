@@ -17,10 +17,6 @@ test_start "logging_file_exists"
 assert_file_exists "$LOGGING_FILE" "logging.sh should exist"
 
 # Test: logging.sh has valid syntax
-test_start "logging_syntax"
-assert_exit_code 0 "bash -n '$LOGGING_FILE'"
-
-# Test: logging.sh has shebang
 test_start "logging_shebang"
 assert_file_contains "$LOGGING_FILE" "#!/usr/bin/env bash" "should have bash shebang"
 

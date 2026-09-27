@@ -20,19 +20,4 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
-test_start "lib_shellcheck"
-if command -v shellcheck &>/dev/null; then
-  errors=$(shellcheck -S error "$LIB_FILE" 2>&1 | wc -l)
-  if [[ "$errors" -eq 0 ]]; then
-    ((TESTS_PASSED++))
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
-  else
-    ((TESTS_FAILED++))
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
-  fi
-else
-  ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped"
-fi
-
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

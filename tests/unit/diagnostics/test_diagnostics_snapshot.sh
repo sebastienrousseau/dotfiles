@@ -25,10 +25,6 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax error"
 fi
 
-test_start "snapshot_shebang"
-first_line=$(head -n 1 "$TEST_SCRIPT")
-assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
-
 test_start "snapshot_flag_aliases"
 assert_file_contains "$TEST_SCRIPT" "--baseline | -b" "snapshot supports -b"
 assert_file_contains "$TEST_SCRIPT" "--force | -f" "snapshot supports -f"

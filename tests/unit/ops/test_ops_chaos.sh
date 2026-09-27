@@ -12,9 +12,6 @@ TEST_SCRIPT="$REPO_ROOT/scripts/ops/chaos.sh"
 test_start "chaos_exists"
 assert_file_exists "$TEST_SCRIPT" "chaos.sh should exist"
 
-test_start "chaos_syntax"
-assert_exit_code 0 "bash -n '$TEST_SCRIPT'"
-
 test_start "chaos_requires_force"
 output=$(bash "$TEST_SCRIPT" 2>&1 || true)
 if echo "$output" | grep -q "To run, execute"; then

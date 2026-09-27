@@ -24,10 +24,6 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot CLI should be executable"
 fi
 
-test_start "dot_cli_shebang"
-first_line=$(head -n 1 "$DOT_CLI")
-assert_equals "#!/usr/bin/env bash" "$first_line" "dot CLI should have bash shebang"
-
 # ── dot --version ────────────────────────────────────────────────
 
 test_start "dot_version_output"

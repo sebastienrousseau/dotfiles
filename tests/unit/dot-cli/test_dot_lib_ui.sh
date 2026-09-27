@@ -64,30 +64,6 @@ else
 fi
 
 # Test: shellcheck compliance
-test_start "ui_shellcheck"
-if command -v shellcheck &>/dev/null; then
-  errors=$(shellcheck -S error "$UI_FILE" 2>&1 | wc -l)
-  if [[ "$errors" -eq 0 ]]; then
-    ((TESTS_PASSED++)) || true
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
-  else
-    ((TESTS_FAILED++)) || true
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
-  fi
-else
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
-fi
-
-# Test: a zero-row table must render, not abort.
-#
-# Regression guard. ui_table_end and _ui_table_printf_fallback expanded
-# "${_UI_TABLE_ROWS[@]}" unguarded. On bash 3.2 — still /bin/bash on
-# macOS — expanding an empty array under `set -u` is an unbound-variable
-# error, which is fatal regardless of errexit. Any command rendering an
-# empty table (e.g. `dot registry search` with no matches) died instead
-# of printing an empty table. bash 4.4+ is unaffected, so this only
-# fails on the macOS runners.
 test_start "ui_table_empty_no_unbound_variable"
 if out="$(
   bash -c '

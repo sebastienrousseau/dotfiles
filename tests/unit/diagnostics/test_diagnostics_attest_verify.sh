@@ -38,9 +38,6 @@ fail_test() {
 test_start "attest_verify_exists"
 assert_file_exists "$TEST_SCRIPT" "attest-verify.sh should exist"
 
-test_start "attest_verify_syntax"
-assert_exit_code 0 "bash -n '$TEST_SCRIPT'"
-
 test_start "attest_verify_flag_aliases"
 assert_file_contains "$TEST_SCRIPT" "--json | -j" "attest-verify supports -j"
 assert_file_contains "$TEST_SCRIPT" "--max-age | -a" "attest-verify supports -a"

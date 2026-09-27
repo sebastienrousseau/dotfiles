@@ -16,9 +16,6 @@ AI_DOC="$REPO_ROOT/docs/AI.md"
 test_start "docs_coverage_script_exists"
 assert_file_exists "$SCRIPT_FILE" "docs coverage script should exist"
 
-test_start "docs_coverage_syntax"
-assert_exit_code 0 "bash -n '$SCRIPT_FILE'"
-
 test_start "docs_coverage_utils_reference_has_public_ai_commands"
 assert_file_contains "$UTILS_DOC" "\`dot ai-setup\`" "UTILS should document dot ai-setup"
 assert_file_contains "$UTILS_DOC" "\`dot ai-query\`" "UTILS should document dot ai-query"

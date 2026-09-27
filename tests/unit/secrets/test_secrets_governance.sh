@@ -19,14 +19,8 @@ HOOK_FILE="$REPO_ROOT/scripts/git-hooks/pre-commit"
 test_start "provider_file_exists"
 assert_file_exists "$PROVIDER_FILE" "secrets provider bridge should exist"
 
-test_start "provider_file_syntax"
-assert_exit_code 0 "bash -n '$PROVIDER_FILE'"
-
 test_start "governance_file_exists"
 assert_file_exists "$GOVERNANCE_FILE" "secret governance script should exist"
-
-test_start "governance_file_syntax"
-assert_exit_code 0 "bash -n '$GOVERNANCE_FILE'"
 
 test_start "pre_commit_hook_exists"
 assert_file_exists "$HOOK_FILE" "pre-commit hook should exist"

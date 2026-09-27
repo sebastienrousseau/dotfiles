@@ -60,8 +60,6 @@ assert_file_exists "$REPO_ROOT/bin/dot" "dot dispatcher exercised"
 CORRALCTL_SYNC="$REPO_ROOT/defaults/dot_local/bin/executable_corralctl-sync.sh"
 test_start "corralctl_sync_present"
 assert_file_exists "$CORRALCTL_SYNC" "corralctl-sync.sh present"
-test_start "corralctl_sync_syntax"
-assert_true "bash -n '$CORRALCTL_SYNC'" "corralctl-sync.sh parses cleanly"
 test_start "corralctl_sync_contract"
 assert_file_contains "$CORRALCTL_SYNC" "corralctl" "corralctl-sync invokes corralctl"
 

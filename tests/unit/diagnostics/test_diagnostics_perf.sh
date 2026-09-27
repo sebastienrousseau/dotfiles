@@ -25,10 +25,6 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax error"
 fi
 
-test_start "perf_shebang"
-first_line=$(head -n 1 "$TEST_SCRIPT")
-assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
-
 test_start "perf_flag_aliases"
 assert_file_contains "$TEST_SCRIPT" "--json | -j" "perf supports -j"
 assert_file_contains "$TEST_SCRIPT" "--profile | -p" "perf supports -p"

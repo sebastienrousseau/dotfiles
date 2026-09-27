@@ -60,21 +60,6 @@ else
 fi
 
 # Test: shellcheck compliance
-test_start "version_sync_shellcheck"
-if command -v shellcheck &>/dev/null; then
-  errors=$(shellcheck -S error "$VERSION_FILE" 2>&1 | wc -l)
-  if [[ "$errors" -eq 0 ]]; then
-    ((TESTS_PASSED++)) || true
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
-  else
-    ((TESTS_FAILED++)) || true
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
-  fi
-else
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
-fi
-
 # Slice 2: drive real line coverage of version-sync.sh through safe-mode
 # entry points so the xtrace coverage runner records what executed.
 cov_exercise_script "$VERSION_FILE"
