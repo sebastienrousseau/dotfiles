@@ -36,7 +36,6 @@ _theme_mode_linux() {
       *Dark* | *dark*) os_mode="dark" ;;
     esac
   fi
-  return 0
 }
 
 system_appearance_mode() {
