@@ -100,7 +100,7 @@ assert_false "grep -q 'releases/download/' '$CALLS'" "no download is attempted"
 
 test_start "ai_update_ollama_outdated_downloads_the_release"
 run_update 0.1.0 0.2.0
-assert_equals 0 "$RC" "the updater still completes"
+assert_equals 1 "$RC" "a refused download fails the run"
 assert_false "[[ \"\$OUT\" == *'already up to date'* ]]" "a different version is not reported as current"
 assert_file_contains "$CALLS" "releases/download/v0.2.0/sha256sum.txt" "the pinned release manifest is requested"
 assert_contains "Integrity check failed" "$OUT" "the refused download is reported"

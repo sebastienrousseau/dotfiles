@@ -63,7 +63,6 @@
   25   32   38.5  127     0 defaults/.chezmoitemplates/functions/security/keygen.sh::keygen
   13   22   37.8   84   100 defaults/.chezmoitemplates/functions/system/sysinfo.sh::<top>
   13   14   25.8   27    27 defaults/dot_config/shell/10-secrets.sh::<top>
-  57  105   63.4  155   165 defaults/dot_local/bin/executable_ai-update::<top>
   14   19   22.0   53    67 defaults/dot_local/bin/executable_b64::<top>
   16   18   25.9   68    78 defaults/dot_local/bin/executable_bm::<top>
   20   38   28.6   36    43 defaults/dot_local/bin/executable_cb::<top>
@@ -147,9 +146,6 @@
   16    5   25.7   51     0 scripts/dot/commands/agent.sh::cmd_mode
   12   12   25.8   22     0 scripts/dot/commands/agents.sh::_agents_repo_root
   18   21   43.4  163     0 scripts/dot/commands/agents.sh::cmd_agents
-  34   21   35.4  136   495 scripts/dot/commands/ai.sh::<top>
-  47   87   64.4  174     0 scripts/dot/commands/ai.sh::cmd_ai_status
-  27   39   43.8  110     0 scripts/dot/commands/ai.sh::run_ai_with_context
   35   63   49.4  196     0 scripts/dot/commands/aliases.sh::cmd_aliases
   17    3   25.6   67   184 scripts/dot/commands/core.sh::<top>
   29    2   34.9  117   223 scripts/dot/commands/diagnostics.sh::<top>
@@ -184,8 +180,6 @@
   18   31   39.3  112   112 scripts/git-hooks/pre-commit-audit.sh::<top>
   11    7   24.4   32     0 scripts/lib/secrets_provider.sh::dot_secrets_get
   17   16   33.2   69    75 scripts/ops/bundle.sh::<top>
-  54  120   63.1  214   261 scripts/ops/chezmoi-apply.sh::<top>
-   9   17   28.0   32     0 scripts/ops/chezmoi-apply.sh::run_step
   12   14   22.6   41    45 scripts/ops/chezmoi-update.sh::<top>
    8   10   31.5   42     0 scripts/ops/heal-chezmoi.sh::heal_chezmoi_drift
   19   30   32.9   48     0 scripts/ops/heal-system.sh::heal_broken_symlinks
@@ -226,10 +220,6 @@
   12   15   41.8   39     0 scripts/theme/rebuild-themes.sh::discover_custom
   11   20   29.5   37     0 scripts/theme/rebuild-themes.sh::discover_linux_system
   13   24   28.7   43     0 scripts/theme/rebuild-themes.sh::discover_macos_system
- 191  214  131.0  713  1177 scripts/theme/switch.sh::<top>
-  17   20   42.4   52     0 scripts/theme/switch.sh::ambient_theme
-  11   14   24.7   98     0 scripts/theme/switch.sh::pick_theme
-  11   16   16.6   32     0 scripts/theme/switch.sh::system_appearance_mode
   11   10   19.9   47   120 scripts/theme/wallpaper-rotate.sh::<top>
   18   20   33.0   47   519 scripts/theme/wallpaper-sync.sh::<top>
   34   59   60.6  156     0 scripts/theme/wallpaper-sync.sh::apply_wallpaper
