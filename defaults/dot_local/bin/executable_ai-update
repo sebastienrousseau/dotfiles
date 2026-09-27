@@ -51,6 +51,13 @@ ok() { printf '%b\n' "${GREEN}done${NC}"; }
 skip() { printf '%b\n' "${YELLOW}skipped${NC} ${GRAY}($1)${NC}"; }
 err() { printf '%b\n' "${RED}error${NC}
    ${RED}$1${NC}"; }
+# fail <message>: report an updater that failed; the run carries on and
+# exits 1 at the end.
+AIU_FAILURES=0
+fail() {
+  err "$1"
+  AIU_FAILURES=$((AIU_FAILURES + 1))
+}
 
 # --- Initialization ---
 log_header
@@ -65,44 +72,62 @@ if [[ "$(uname -s)" == "Linux" ]]; then
 fi
 
 # --- 1. mise Core (Multi-Method Detection) ---
-if command -v mise >/dev/null 2>&1; then
-  step "Checking mise core"
+# _aiu_mise_method: how mise was installed: pacman, apt, brew or self.
+_aiu_mise_method() {
   if [[ "$(uname -s)" == "Linux" ]] && command -v pacman >/dev/null 2>&1 && pacman -Qs mise >/dev/null 2>&1; then
-    # Handle Arch/CachyOS AUR/Official package
-    sudo pacman -S --noconfirm mise >/dev/null 2>&1 || true
-    ok
+    echo pacman
   elif [[ "$(uname -s)" == "Linux" ]] && command -v dpkg >/dev/null 2>&1 && dpkg -s mise >/dev/null 2>&1; then
-    # Handle your ZorinOS APT installation
-    sudo apt update -y -o Dir::Etc::sourcelist="sources.list.d/jdx.list" >/dev/null 2>&1 || true
-    sudo apt install --only-upgrade -y mise >/dev/null 2>&1
-    ok
+    echo apt
   elif command -v brew >/dev/null 2>&1 && brew list mise >/dev/null 2>&1; then
-    # Handle macOS/Linux Brew installation
-    brew upgrade mise >/dev/null 2>&1
-    ok
+    echo brew
   else
-    # Fallback for standalone binary installation
-    if mise self-update -y >/dev/null 2>&1; then ok; else skip "manual update needed"; fi
+    echo self
   fi
-else
-  skip "mise not found"
-fi
+}
+
+_aiu_mise_core() {
+  if ! command -v mise >/dev/null 2>&1; then
+    skip "mise not found"
+    return 0
+  fi
+  step "Checking mise core"
+  case "$(_aiu_mise_method)" in
+    pacman)
+      # Handle Arch/CachyOS AUR/Official package
+      sudo pacman -S --noconfirm mise >/dev/null 2>&1 || true
+      ok
+      ;;
+    apt)
+      # Handle your ZorinOS APT installation
+      sudo apt update -y -o Dir::Etc::sourcelist="sources.list.d/jdx.list" >/dev/null 2>&1 || true
+      if sudo apt install --only-upgrade -y mise >/dev/null 2>&1; then ok; else fail "apt could not upgrade mise"; fi
+      ;;
+    brew)
+      # Handle macOS/Linux Brew installation
+      if brew upgrade mise >/dev/null 2>&1; then ok; else fail "brew could not upgrade mise"; fi
+      ;;
+    *)
+      # Fallback for standalone binary installation
+      if mise self-update -y >/dev/null 2>&1; then ok; else skip "manual update needed"; fi
+      ;;
+  esac
+}
 
 # --- 2. System & Language Packages ---
-
 # Homebrew
-if command -v brew >/dev/null 2>&1; then
+_aiu_brew() {
+  command -v brew >/dev/null 2>&1 || return 0
   step "Homebrew packages"
-  brew update >/dev/null && brew upgrade --quiet >/dev/null
-  ok
-fi
+  if brew update >/dev/null && brew upgrade --quiet >/dev/null; then ok; else fail "brew update/upgrade failed"; fi
+}
 
 # NPM Globals (via mise)
-if command -v mise >/dev/null 2>&1; then
+_aiu_npm() {
   step "NPM (claude, agy, etc)"
-  mise exec node -- npm update -g --audit=false >/dev/null 2>&1
-  ok
+  if mise exec node -- npm update -g --audit=false >/dev/null 2>&1; then ok; else fail "npm update -g failed"; fi
+}
 
+_aiu_kiro() {
   step "Kiro CLI"
   if [[ "$(uname -s)" == "Darwin" ]]; then
     skip "managed by Kiro app bundle via mise plugin"
@@ -111,132 +136,182 @@ if command -v mise >/dev/null 2>&1; then
   else
     skip "mise plugin update unavailable"
   fi
-fi
+}
 
 # Pipx (aider, sgpt)
-if command -v pipx >/dev/null 2>&1; then
+_aiu_pipx() {
+  command -v pipx >/dev/null 2>&1 || return 0
   step "Pipx tools"
-  pipx upgrade-all >/dev/null 2>&1
-  ok
-fi
+  if pipx upgrade-all >/dev/null 2>&1; then ok; else fail "pipx upgrade-all failed"; fi
+}
+
+_aiu_packages() {
+  _aiu_brew
+  if command -v mise >/dev/null 2>&1; then
+    _aiu_npm
+    _aiu_kiro
+  fi
+  _aiu_pipx
+}
 
 # --- 3. Specialized AI Binaries ---
-
 # Claude Code (self-updating native binary)
-if command -v claude >/dev/null 2>&1; then
+_aiu_claude() {
+  command -v claude >/dev/null 2>&1 || return 0
   step "Claude Code"
   if claude update --force >/dev/null 2>&1; then ok; else skip "already up to date"; fi
-fi
+}
 
-# Goose (Block — native binary, re-run installer to update)
-if command -v goose >/dev/null 2>&1 || [ -x "$HOME/.local/bin/goose" ]; then
-  step "Goose"
-  goose_installer="$(umask 077 && mktemp)"
-  if download_verified_script https://github.com/block/goose/releases/download/stable/download_cli.sh "$goose_installer"; then
-    if CONFIGURE=false bash "$goose_installer" >/dev/null 2>&1; then ok; else skip "installer failed"; fi
+# _aiu_reinstall <label> <bin> <installer-url> <max-bytes|-> [VAR=value...]:
+# update a native binary by re-running its verified installer.
+_aiu_reinstall() {
+  local label="$1" bin="$2" url="$3" max="$4" installer
+  shift 4
+  command -v "$bin" >/dev/null 2>&1 || [ -x "$HOME/.local/bin/$bin" ] || return 0
+  step "$label"
+  installer="$(umask 077 && mktemp)"
+  local -a fetch=(download_verified_script "$url" "$installer")
+  [[ "$max" == "-" ]] || fetch+=("$max")
+  if "${fetch[@]}"; then
+    if env "$@" bash "$installer" >/dev/null 2>&1; then ok; else skip "installer failed"; fi
   else
     skip "could not fetch installer"
   fi
-  rm -f "$goose_installer"
-fi
+  rm -f "$installer"
+}
 
-# Antigravity CLI — agy (native binary, re-run installer to update)
-if command -v agy >/dev/null 2>&1 || [ -x "$HOME/.local/bin/agy" ]; then
-  step "Antigravity CLI (agy)"
-  agy_installer="$(umask 077 && mktemp)"
-  if download_verified_script https://antigravity.google/cli/install.sh "$agy_installer" 262144; then
-    if bash "$agy_installer" >/dev/null 2>&1; then ok; else skip "installer failed"; fi
+# _aiu_ollama_arch: ollama's release arch for this machine (empty if none).
+_aiu_ollama_arch() {
+  case "$(uname -m)" in
+    x86_64 | amd64) echo amd64 ;;
+    aarch64 | arm64) echo arm64 ;;
+  esac
+}
+
+# _aiu_ollama_deploy <arch> <version>: fetch, verify and install a release.
+_aiu_ollama_deploy() {
+  tmp_tar="$(umask 077 && mktemp)"
+  trap 'rm -f "$tmp_tar"' EXIT
+  # Pinned to the release tag and verified against its sha256sum.txt
+  # before anything is extracted as root.
+  release_url="https://github.com/ollama/ollama/releases/download/v$2"
+  tar_name="ollama-linux-$1.tar.zst"
+
+  if download_verified_asset "$release_url/$tar_name" "$release_url/sha256sum.txt" \
+    "$tar_name" "$tmp_tar" $((4 * 1024 * 1024 * 1024)) &&
+    zstd -t "$tmp_tar" >/dev/null 2>&1; then
+    # Stop service safely
+    if command -v systemctl >/dev/null 2>&1; then
+      sudo systemctl stop ollama 2>/dev/null || true
+    fi
+
+    # Extract
+    zstd -dc "$tmp_tar" | sudo tar -x -C /usr/local >/dev/null
+
+    # Ensure permissions
+    sudo chmod +x /usr/local/bin/ollama
+
+    # Restart if systemd exists
+    if command -v systemctl >/dev/null 2>&1; then
+      sudo systemctl daemon-reload
+      sudo systemctl start ollama 2>/dev/null || true
+    fi
+    ok
   else
-    skip "could not fetch installer"
+    fail "Integrity check failed"
   fi
-  rm -f "$agy_installer"
-fi
+}
 
-# Ollama (Verified Manual Override)
-if command -v ollama >/dev/null 2>&1; then
+# Ollama (Verified Manual Override) on Linux.
+_aiu_ollama_linux() {
+  local ollama_arch current_ver latest_ver
+  step "Ollama (Manual Deployment)"
+  ollama_arch="$(_aiu_ollama_arch)"
+  if [[ -z "$ollama_arch" ]]; then
+    skip "unsupported arch"
+    return 0
+  fi
+  # Check for updates by comparing local vs remote version
+  current_ver="$(ollama --version | awk '{print $NF}' | tr -d '[:space:]')"
+  # This is a bit slow but safer than downloading every time
+  latest_ver="$(curl -fsSL -I https://github.com/ollama/ollama/releases/latest | grep -i location | sed 's/.*\/v//;s/\r//' | tr -d '[:space:]')"
+  if [[ ! "$latest_ver" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    skip "could not determine the latest release"
+  elif [[ "$current_ver" == "$latest_ver" ]]; then
+    skip "already up to date"
+  else
+    _aiu_ollama_deploy "$ollama_arch" "$latest_ver"
+  fi
+}
+
+_aiu_ollama() {
+  command -v ollama >/dev/null 2>&1 || return 0
   if [[ "$(uname -s)" == "Linux" ]]; then
-    step "Ollama (Manual Deployment)"
-    arch="$(uname -m)"
-    case "$arch" in
-      x86_64 | amd64) ollama_arch="amd64" ;;
-      aarch64 | arm64) ollama_arch="arm64" ;;
-      *) ollama_arch="" ;;
-    esac
-
-    if [[ -n "$ollama_arch" ]]; then
-      # Check for updates by comparing local vs remote version
-      current_ver="$(ollama --version | awk '{print $NF}' | tr -d '[:space:]')"
-      # This is a bit slow but safer than downloading every time
-      latest_ver="$(curl -fsSL -I https://github.com/ollama/ollama/releases/latest | grep -i location | sed 's/.*\/v//;s/\r//' | tr -d '[:space:]')"
-
-      if [[ ! "$latest_ver" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        skip "could not determine the latest release"
-      elif [[ "$current_ver" == "$latest_ver" ]]; then
-        skip "already up to date"
-      else
-        tmp_tar="$(umask 077 && mktemp)"
-        trap 'rm -f "$tmp_tar"' EXIT
-        # Pinned to the release tag and verified against its sha256sum.txt
-        # before anything is extracted as root.
-        release_url="https://github.com/ollama/ollama/releases/download/v${latest_ver}"
-        tar_name="ollama-linux-${ollama_arch}.tar.zst"
-
-        if download_verified_asset "$release_url/$tar_name" "$release_url/sha256sum.txt" \
-          "$tar_name" "$tmp_tar" $((4 * 1024 * 1024 * 1024)) &&
-          zstd -t "$tmp_tar" >/dev/null 2>&1; then
-          # Stop service safely
-          if command -v systemctl >/dev/null 2>&1; then
-            sudo systemctl stop ollama 2>/dev/null || true
-          fi
-
-          # Extract
-          zstd -dc "$tmp_tar" | sudo tar -x -C /usr/local >/dev/null
-
-          # Ensure permissions
-          sudo chmod +x /usr/local/bin/ollama
-
-          # Restart if systemd exists
-          if command -v systemctl >/dev/null 2>&1; then
-            sudo systemctl daemon-reload
-            sudo systemctl start ollama 2>/dev/null || true
-          fi
-          ok
-        else
-          err "Integrity check failed"
-        fi
-      fi
-    else
-      skip "unsupported arch"
-    fi
-  else
-    # macOS users typically use the .app or Brew
-    step "Ollama (macOS)"
-    if command -v brew >/dev/null 2>&1 && brew upgrade ollama --cask >/dev/null 2>&1; then
-      ok
-    else
-      skip "Update via App"
-    fi
+    _aiu_ollama_linux
+    return
   fi
-fi
+  # macOS users typically use the .app or Brew
+  step "Ollama (macOS)"
+  if command -v brew >/dev/null 2>&1 && brew upgrade ollama --cask >/dev/null 2>&1; then
+    ok
+  else
+    skip "Update via App"
+  fi
+}
 
 # LM Studio Runtime
-if command -v lms >/dev/null 2>&1; then
+_aiu_lms() {
+  command -v lms >/dev/null 2>&1 || return 0
   step "LM Studio Runtime"
-  lms runtime update >/dev/null 2>&1
-  ok
-fi
+  if lms runtime update >/dev/null 2>&1; then ok; else fail "lms runtime update failed"; fi
+}
+
+_aiu_binaries() {
+  _aiu_claude
+  # Goose (Block — native binary, re-run installer to update)
+  _aiu_reinstall "Goose" goose https://github.com/block/goose/releases/download/stable/download_cli.sh - CONFIGURE=false
+  # Antigravity CLI — agy (native binary, re-run installer to update)
+  _aiu_reinstall "Antigravity CLI (agy)" agy https://antigravity.google/cli/install.sh 262144
+  _aiu_ollama
+  _aiu_lms
+}
 
 # --- 4. Final Summary ---
-printf '%b\n' "${GRAY}-----------------------------------------------------------${NC}"
-printf '%b\n' "${GREEN}${BOLD}Dotfiles Environment Ready${NC}"
+# _aiu_version <awk-field|-> <cmd...>: the tool's version (optionally one
+# awk field of it), or N/A when the tool is missing or prints nothing.
+_aiu_version() {
+  local field="$1" v
+  shift
+  if [[ "$field" == "-" ]]; then
+    v="$("$@" 2>/dev/null || true)"
+  else
+    v="$("$@" 2>/dev/null | awk "{print \$$field}" || true)"
+  fi
+  printf '%s\n' "${v:-N/A}"
+}
 
-# Version Report
-printf '%b\n' "
+_aiu_summary() {
+  printf '%b\n' "${GRAY}-----------------------------------------------------------${NC}"
+  if [[ $AIU_FAILURES -eq 0 ]]; then
+    printf '%b\n' "${GREEN}${BOLD}Dotfiles Environment Ready${NC}"
+  else
+    printf '%b\n' "${RED}${BOLD}${AIU_FAILURES} update(s) failed${NC} ${GRAY}(see the errors above)${NC}"
+  fi
+
+  # Version Report
+  printf '%b\n' "
 ${BOLD}System Version Status:${NC}"
-printf "%b%-12s%b %s\n" "${GRAY}" "Node:" "${NC}" "$(node -v 2>/dev/null || echo 'N/A')"
-printf "%b%-12s%b %s\n" "${GRAY}" "Kiro:" "${NC}" "$(kiro-cli --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
-printf "%b%-12s%b %s\n" "${GRAY}" "Ollama:" "${NC}" "$(ollama --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
-printf "%b%-12s%b %s\n" "${GRAY}" "Pipx:" "${NC}" "$(pipx --version 2>/dev/null || echo 'N/A')"
-printf "%b%-12s%b %s\n" "${GRAY}" "Mise:" "${NC}" "$(mise --version 2>/dev/null | awk '{print $1}' || echo 'N/A')"
+  printf "%b%-12s%b %s\n" "${GRAY}" "Node:" "${NC}" "$(_aiu_version - node -v)"
+  printf "%b%-12s%b %s\n" "${GRAY}" "Kiro:" "${NC}" "$(_aiu_version NF kiro-cli --version)"
+  printf "%b%-12s%b %s\n" "${GRAY}" "Ollama:" "${NC}" "$(_aiu_version NF ollama --version)"
+  printf "%b%-12s%b %s\n" "${GRAY}" "Pipx:" "${NC}" "$(_aiu_version - pipx --version)"
+  printf "%b%-12s%b %s\n" "${GRAY}" "Mise:" "${NC}" "$(_aiu_version 1 mise --version)"
 
-trap - EXIT
+  trap - EXIT
+}
+
+_aiu_mise_core
+_aiu_packages
+_aiu_binaries
+_aiu_summary
+[[ $AIU_FAILURES -eq 0 ]] || exit 1
