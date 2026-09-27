@@ -39,7 +39,7 @@ N=0
 # rt [args...]: run the sandboxed script; sets OUT and RC.
 rt() {
   OUT="$(env -i HOME="$W/home" XDG_CACHE_HOME="$W/home/.cache" PATH="$W/stubs:/usr/bin:/bin" \
-    TERM=dumb LANG=C.UTF-8 "$REAL_BASH" "$W/s/rebuild-themes.sh" "$@" </dev/null 2>&1)"
+    TERM=dumb LANG=C.UTF-8 DOTFILES_THEME_SYSTEM=1 DOTFILES_THEME_SYSTEM_ROOT="$W/sys" "$REAL_BASH" "$W/s/rebuild-themes.sh" "$@" </dev/null 2>&1)"
   RC=$?
 }
 themes() { cat "$W/home/.dotfiles/defaults/.chezmoidata/themes.toml" 2>/dev/null; }
@@ -116,5 +116,93 @@ assert_equals "1:yes" "$RC:$(has "$OUT" 'ImageMagick (magick) required')" "not a
 test_start "rebuild_list_works_without_magick"
 rt --list
 assert_equals "0:yes" "$RC:$(has "$OUT" 'single-dark')" "listing needs no magick; a HEIC counts as one frame"
+
+# ── System wallpapers (DOTFILES_THEME_SYSTEM=1, under a fake system root) ──
+# sys_os <Darwin|Linux>: make uname report that OS.
+sys_os() {
+  printf '#!%s\necho %s\n' "$REAL_BASH" "$1" >"$W/stubs/uname"
+  chmod +x "$W/stubs/uname"
+}
+
+test_start "rebuild_macos_system_prefers_explicit_variants"
+setup
+sys_os Darwin
+d="$W/sys/System/Library/Desktop Pictures"
+mkdir -p "$d/.thumbnails"
+for f in "Big Sur Graphic.heic" "Monterey.heic" "Sonoma.heic" "notes.txt"; do printf i >"$d/$f"; done
+for f in "Big Sur Graphic Dark.heic" "Big Sur Graphic Light.heic" "Monterey.heic" "Sonoma Light.heic"; do
+  printf i >"$d/.thumbnails/$f"
+done
+rt --list
+listed="$(printf '%s\n' "$OUT" | awk '$2 == "system" {print $1}' | tr '\n' ' ')"
+assert_equals "big-sur-graphic-dark big-sur-graphic-light monterey sonoma-light " "$listed" \
+  "bases with a -dark or -light variant are dropped; others stay"
+
+test_start "rebuild_macos_system_keeps_the_top_level_file_over_a_thumbnail"
+assert_contains "Desktop Pictures/Monterey.heic" "$(printf '%s\n' "$OUT" | grep '^monterey ')" "the thumbnail does not replace it"
+
+test_start "rebuild_macos_system_without_thumbnails"
+rm -rf "$d/.thumbnails"
+rt --list
+assert_contains "Total: 3 wallpapers" "$OUT" "top-level files only, none dropped"
+
+test_start "rebuild_linux_system_images_get_both_modes"
+setup
+sys_os Linux
+mkdir -p "$W/sys/usr/share/backgrounds" "$W/sys/usr/share/wallpapers/gnome"
+for f in "Ubuntu_Default.png" "night-dark.jpg" "---.png"; do printf i >"$W/sys/usr/share/backgrounds/$f"; done
+printf i >"$W/sys/usr/share/wallpapers/gnome/Adwaita Morning.jpg"
+rt --list
+listed="$(printf '%s\n' "$OUT" | awk '$2 == "system" {print $1}' | tr '\n' ' ')"
+assert_equals "adwaita-morning-dark adwaita-morning-light night-dark ubuntu-default-dark ubuntu-default-light " "$listed" \
+  "statics become pairs, an explicit -dark stays single, an empty name is skipped"
+
+test_start "rebuild_custom_wallpaper_overrides_a_system_one"
+printf img >"$W/home/Pictures/Wallpapers/Ubuntu Default.png"
+rt --list
+assert_contains "custom" "$(printf '%s\n' "$OUT" | grep '^ubuntu-default-dark ')" "the custom file wins"
+
+# ── Dependencies, the cache, and the job limit ─────────────────────────────
+test_start "rebuild_without_the_extractor_is_an_error"
+setup ok.png
+rm "$W/s/extract-theme.py"
+rt
+assert_equals "1:yes" "$RC:$(has "$OUT" 'extract-theme.py not found')" "a missing extractor stops the rebuild"
+
+test_start "rebuild_without_python3_is_an_error"
+setup ok.png
+mkdir -p "$W/tools"
+for t in head tr basename find sort wc grep mkdir cat rm date awk dirname sed shasum sha256sum; do
+  p="$(command -v "$t" 2>/dev/null)" && ln -s "$p" "$W/tools/$t"
+done
+OUT="$(env -i HOME="$W/home" XDG_CACHE_HOME="$W/home/.cache" PATH="$W/stubs:$W/tools" TERM=dumb \
+  "$REAL_BASH" "$W/s/rebuild-themes.sh" </dev/null 2>&1)"
+RC=$?
+assert_equals "1:yes" "$RC:$(has "$OUT" 'python3 required')" "python3 is required"
+
+test_start "rebuild_all_cached_starts_no_jobs"
+setup ok.png
+rt
+rt
+assert_equals "no:yes" "$(has "$OUT" 'Processing'):$(has "$OUT" '0 generated, 2 cached')" "nothing to do, nothing started"
+
+test_start "rebuild_runs_at_most_four_jobs_at_once"
+setup a.png b.png c.png d.png e.png f.png g.png h.png
+mkdir -p "$W/conc"
+cat >"$W/s/extract-theme.py" <<PY
+import os, sys, time
+d = "$W/conc"
+me = os.path.join(d, str(os.getpid()))
+open(me, "w").close()
+n = len([f for f in os.listdir(d) if not f.endswith(".max")])
+open(me + ".max", "w").write(str(n) + "\n")
+time.sleep(0.4)
+os.remove(me)
+a = sys.argv[1:]
+print("[themes." + a[a.index("--name") + 1] + "]")
+PY
+rt
+peak="$(cat "$W/conc/"*.max | sort -n | tail -1)"
+assert_equals "0:yes" "$RC:$([[ "$peak" -ge 2 && "$peak" -le 4 ]] && echo yes)" "parallel, but never more than 4 (peak $peak)"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

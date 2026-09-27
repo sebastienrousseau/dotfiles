@@ -27,7 +27,7 @@ _rt_require_bash4() {
     /usr/local/bin/bash \
     "${HOMEBREW_PREFIX:-}/bin/bash" \
     "$(command -v bash 2>/dev/null || true)"; do
-    if [[ -n "$newer" && -x "$newer" ]] &&
+    if [[ -n "$newer" && -x "$newer" ]] && # mutation: ignore bash < 4 only; CI runs bash 5, so this line never executes there
       "$newer" -c '((BASH_VERSINFO[0] >= 4))' 2>/dev/null; then
       exec "$newer" "$0" "$@"
     fi
@@ -123,7 +123,7 @@ _rt_mac_drop_bases() {
 }
 
 discover_macos_system() {
-  local sys_dir="/System/Library/Desktop Pictures"
+  local sys_dir="${DOTFILES_THEME_SYSTEM_ROOT:-}/System/Library/Desktop Pictures"
   [[ -d "$sys_dir" ]] || return 0
 
   # Register top-level system wallpapers (will be deduped later if thumbnails have dark/light)
@@ -162,7 +162,7 @@ _rt_linux_file() {
 
 discover_linux_system() {
   local dir file
-  for dir in /usr/share/backgrounds /usr/share/wallpapers; do
+  for dir in "${DOTFILES_THEME_SYSTEM_ROOT:-}"/usr/share/{backgrounds,wallpapers}; do
     [[ -d "$dir" ]] || continue
     while IFS= read -r file; do
       _rt_linux_file "$file"
@@ -238,7 +238,8 @@ cleanup_dynamic_entries() {
   done
 }
 
-# Discover in order: system first, custom overrides. System (OS-shipped)
+# Discover in order: system first, custom overrides. DOTFILES_THEME_SYSTEM_ROOT
+# prefixes the system wallpaper paths (a chroot or a test tree). System (OS-shipped)
 # wallpapers are opt-in — most users only want themes from their own
 # wallpapers. Enable the ~100 built-in ones with DOTFILES_THEME_SYSTEM=1.
 _rt_discover() {
