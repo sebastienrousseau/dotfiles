@@ -51,6 +51,13 @@ ok() { printf '%b\n' "${GREEN}done${NC}"; }
 skip() { printf '%b\n' "${YELLOW}skipped${NC} ${GRAY}($1)${NC}"; }
 err() { printf '%b\n' "${RED}error${NC}
    ${RED}$1${NC}"; }
+# fail <message>: report an updater that failed; the run carries on and
+# exits 1 at the end.
+AIU_FAILURES=0
+fail() {
+  err "$1"
+  AIU_FAILURES=$((AIU_FAILURES + 1))
+}
 
 # --- Initialization ---
 log_header
@@ -93,13 +100,11 @@ _aiu_mise_core() {
     apt)
       # Handle your ZorinOS APT installation
       sudo apt update -y -o Dir::Etc::sourcelist="sources.list.d/jdx.list" >/dev/null 2>&1 || true
-      sudo apt install --only-upgrade -y mise >/dev/null 2>&1
-      ok
+      if sudo apt install --only-upgrade -y mise >/dev/null 2>&1; then ok; else fail "apt could not upgrade mise"; fi
       ;;
     brew)
       # Handle macOS/Linux Brew installation
-      brew upgrade mise >/dev/null 2>&1
-      ok
+      if brew upgrade mise >/dev/null 2>&1; then ok; else fail "brew could not upgrade mise"; fi
       ;;
     *)
       # Fallback for standalone binary installation
@@ -109,37 +114,44 @@ _aiu_mise_core() {
 }
 
 # --- 2. System & Language Packages ---
+# Homebrew
+_aiu_brew() {
+  command -v brew >/dev/null 2>&1 || return 0
+  step "Homebrew packages"
+  if brew update >/dev/null && brew upgrade --quiet >/dev/null; then ok; else fail "brew update/upgrade failed"; fi
+}
+
+# NPM Globals (via mise)
+_aiu_npm() {
+  step "NPM (claude, agy, etc)"
+  if mise exec node -- npm update -g --audit=false >/dev/null 2>&1; then ok; else fail "npm update -g failed"; fi
+}
+
+_aiu_kiro() {
+  step "Kiro CLI"
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    skip "managed by Kiro app bundle via mise plugin"
+  elif mise upgrade kiro-cli >/dev/null 2>&1; then
+    ok
+  else
+    skip "mise plugin update unavailable"
+  fi
+}
+
+# Pipx (aider, sgpt)
+_aiu_pipx() {
+  command -v pipx >/dev/null 2>&1 || return 0
+  step "Pipx tools"
+  if pipx upgrade-all >/dev/null 2>&1; then ok; else fail "pipx upgrade-all failed"; fi
+}
+
 _aiu_packages() {
-
-  # Homebrew
-  if command -v brew >/dev/null 2>&1; then
-    step "Homebrew packages"
-    brew update >/dev/null && brew upgrade --quiet >/dev/null
-    ok
-  fi
-
-  # NPM Globals (via mise)
+  _aiu_brew
   if command -v mise >/dev/null 2>&1; then
-    step "NPM (claude, agy, etc)"
-    mise exec node -- npm update -g --audit=false >/dev/null 2>&1
-    ok
-
-    step "Kiro CLI"
-    if [[ "$(uname -s)" == "Darwin" ]]; then
-      skip "managed by Kiro app bundle via mise plugin"
-    elif mise upgrade kiro-cli >/dev/null 2>&1; then
-      ok
-    else
-      skip "mise plugin update unavailable"
-    fi
+    _aiu_npm
+    _aiu_kiro
   fi
-
-  # Pipx (aider, sgpt)
-  if command -v pipx >/dev/null 2>&1; then
-    step "Pipx tools"
-    pipx upgrade-all >/dev/null 2>&1
-    ok
-  fi
+  _aiu_pipx
 }
 
 # --- 3. Specialized AI Binaries ---
@@ -206,7 +218,7 @@ _aiu_ollama_deploy() {
     fi
     ok
   else
-    err "Integrity check failed"
+    fail "Integrity check failed"
   fi
 }
 
@@ -251,8 +263,7 @@ _aiu_ollama() {
 _aiu_lms() {
   command -v lms >/dev/null 2>&1 || return 0
   step "LM Studio Runtime"
-  lms runtime update >/dev/null 2>&1
-  ok
+  if lms runtime update >/dev/null 2>&1; then ok; else fail "lms runtime update failed"; fi
 }
 
 _aiu_binaries() {
@@ -266,18 +277,35 @@ _aiu_binaries() {
 }
 
 # --- 4. Final Summary ---
+# _aiu_version <awk-field|-> <cmd...>: the tool's version (optionally one
+# awk field of it), or N/A when the tool is missing or prints nothing.
+_aiu_version() {
+  local field="$1" v
+  shift
+  if [[ "$field" == "-" ]]; then
+    v="$("$@" 2>/dev/null || true)"
+  else
+    v="$("$@" 2>/dev/null | awk "{print \$$field}" || true)"
+  fi
+  printf '%s\n' "${v:-N/A}"
+}
+
 _aiu_summary() {
   printf '%b\n' "${GRAY}-----------------------------------------------------------${NC}"
-  printf '%b\n' "${GREEN}${BOLD}Dotfiles Environment Ready${NC}"
+  if [[ $AIU_FAILURES -eq 0 ]]; then
+    printf '%b\n' "${GREEN}${BOLD}Dotfiles Environment Ready${NC}"
+  else
+    printf '%b\n' "${RED}${BOLD}${AIU_FAILURES} update(s) failed${NC} ${GRAY}(see the errors above)${NC}"
+  fi
 
   # Version Report
   printf '%b\n' "
 ${BOLD}System Version Status:${NC}"
-  printf "%b%-12s%b %s\n" "${GRAY}" "Node:" "${NC}" "$(node -v 2>/dev/null || echo 'N/A')"
-  printf "%b%-12s%b %s\n" "${GRAY}" "Kiro:" "${NC}" "$(kiro-cli --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
-  printf "%b%-12s%b %s\n" "${GRAY}" "Ollama:" "${NC}" "$(ollama --version 2>/dev/null | awk '{print $NF}' || echo 'N/A')"
-  printf "%b%-12s%b %s\n" "${GRAY}" "Pipx:" "${NC}" "$(pipx --version 2>/dev/null || echo 'N/A')"
-  printf "%b%-12s%b %s\n" "${GRAY}" "Mise:" "${NC}" "$(mise --version 2>/dev/null | awk '{print $1}' || echo 'N/A')"
+  printf "%b%-12s%b %s\n" "${GRAY}" "Node:" "${NC}" "$(_aiu_version - node -v)"
+  printf "%b%-12s%b %s\n" "${GRAY}" "Kiro:" "${NC}" "$(_aiu_version NF kiro-cli --version)"
+  printf "%b%-12s%b %s\n" "${GRAY}" "Ollama:" "${NC}" "$(_aiu_version NF ollama --version)"
+  printf "%b%-12s%b %s\n" "${GRAY}" "Pipx:" "${NC}" "$(_aiu_version - pipx --version)"
+  printf "%b%-12s%b %s\n" "${GRAY}" "Mise:" "${NC}" "$(_aiu_version 1 mise --version)"
 
   trap - EXIT
 }
@@ -286,3 +314,4 @@ _aiu_mise_core
 _aiu_packages
 _aiu_binaries
 _aiu_summary
+[[ $AIU_FAILURES -eq 0 ]] || exit 1
