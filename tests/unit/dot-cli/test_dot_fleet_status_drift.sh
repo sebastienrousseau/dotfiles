@@ -294,6 +294,16 @@ assert_contains ".zshrc (drifted 6 times recently)" "$out" "count reported"
 assert_not_contains ".rare (drifted" "$out" "below-threshold file not flagged"
 assert_contains "7 checks recorded" "$out" "total checks reported"
 
+# One unparsable history line (a torn write) must not sink the prediction:
+# `history` already renders such lines as `?`.
+test_start "fleet_drift_predict_survives_a_corrupt_history_line"
+echo 'not json' >>"$HISTORY"
+out="$(fleet drift predict 2>&1)"
+rc=$?
+assert_equals 0 "$rc" "predict still exits 0"
+assert_contains ".zshrc (drifted 6 times recently)" "$out" "the good lines still count"
+assert_contains "8 checks recorded" "$out" "the summary still prints"
+
 test_start "fleet_drift_unknown_subcommand"
 out="$(fleet drift bogus 2>&1)"
 rc=$?

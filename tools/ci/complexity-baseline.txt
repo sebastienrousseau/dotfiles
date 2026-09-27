@@ -148,12 +148,6 @@
   17    3   25.6   67   184 scripts/dot/commands/core.sh::<top>
   29    2   34.9  117   223 scripts/dot/commands/diagnostics.sh::<top>
   23   19   31.2  148     0 scripts/dot/commands/env-emit.sh::dot_env_emit
-   3    2    8.8   17   593 scripts/dot/commands/fleet.sh::<top>
-  11    5   19.6   37     0 scripts/dot/commands/fleet.sh::cmd_fleet
-  40   46   66.6  184     0 scripts/dot/commands/fleet.sh::cmd_fleet_apply
-  22   34   37.7   84     0 scripts/dot/commands/fleet.sh::cmd_fleet_drift
-  16   31   29.8   62     0 scripts/dot/commands/fleet.sh::cmd_fleet_namespace
-  11   12   24.2   45     0 scripts/dot/commands/fleet.sh::cmd_fleet_status
   23   24   29.9  106     0 scripts/dot/commands/init.sh::cmd_init
   27   41   58.9  110     0 scripts/dot/commands/lint.sh::cmd_lint
   11    5   12.3   27   136 scripts/dot/commands/manual.sh::<top>
@@ -213,10 +207,6 @@
   11   19   18.3   35     0 scripts/theme/install-catppuccin-themes.sh::install_wallpapers
   12   17   20.3   49   103 scripts/theme/merge-wallpaper.sh::<top>
   12   13   28.8   40     0 scripts/theme/merge-wallpaper.sh::merge_pair
-  45   56   66.9  281   417 scripts/theme/rebuild-themes.sh::<top>
-  12   15   41.8   39     0 scripts/theme/rebuild-themes.sh::discover_custom
-  11   20   29.5   37     0 scripts/theme/rebuild-themes.sh::discover_linux_system
-  13   24   28.7   43     0 scripts/theme/rebuild-themes.sh::discover_macos_system
   11   10   19.9   47   120 scripts/theme/wallpaper-rotate.sh::<top>
   18   20   33.0   47   519 scripts/theme/wallpaper-sync.sh::<top>
   34   59   60.6  156     0 scripts/theme/wallpaper-sync.sh::apply_wallpaper
