@@ -15,23 +15,7 @@ policy="${DOTFILES_ALIAS_POLICY:-standard}"
 if [[ -n "${CI:-}" && "${DOTFILES_ALIAS_POLICY:-}" == "" ]]; then
   policy="strict"
 fi
-
-if [[ ! -x "$manifest_script" ]]; then
-  echo "ERROR: aliases-manifest.sh not found or not executable" >&2
-  exit 1
-fi
-
-tmp_manifest="$(umask 077 && mktemp)"
-trap 'rm -f "$tmp_manifest"' EXIT
-
-bash "$manifest_script" >"$tmp_manifest"
-
 errors=0
-
-echo "Alias Governance"
-echo ""
-echo "Policy: $policy"
-echo ""
 
 version_ge() {
   local a="${1#v}" b="${2#v}"
@@ -48,11 +32,14 @@ version_ge() {
   return 0
 }
 
-repo_version="0.0.0"
-if [[ -f "$SCRIPT_DIR/../../package.json" ]]; then
-  repo_version="$(sed -n 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"\([0-9][0-9.]*\)".*/\1/p' "$SCRIPT_DIR/../../package.json" | head -1)"
-fi
-repo_version="${repo_version:-0.0.0}"
+# The version in package.json (0.0.0 when absent).
+_gov_repo_version() {
+  local v=""
+  if [[ -f "$SCRIPT_DIR/../../package.json" ]]; then
+    v="$(sed -n 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"\([0-9][0-9.]*\)".*/\1/p' "$SCRIPT_DIR/../../package.json" | head -1)"
+  fi
+  printf '%s\n' "${v:-0.0.0}"
+}
 
 # ripgrep is preferred but is NOT guaranteed to be installed (the CI
 # runners and minimal setups often lack it, which is why
@@ -80,86 +67,113 @@ _gov_grep_tree() { # <ere-pattern> <dir>...
 }
 
 # 1) Duplicate alias names
-dupes="$(awk -F'\t' '{count[$1]++} END {for (k in count) if (count[k] > 1) print k}' "$tmp_manifest" | sort)"
-if [[ -n "$dupes" ]]; then
+_gov_check_dupes() {
+  local dupes
+  dupes="$(awk -F'\t' '{count[$1]++} END {for (k in count) if (count[k] > 1) print k}' "$tmp_manifest" | sort)"
+  if [[ -z "$dupes" ]]; then
+    echo "OK: no duplicate alias names"
+    return 0
+  fi
   if [[ "$policy" == "strict" ]]; then
     echo "ERROR: duplicate alias names detected:"
-    printf "%s\n" "$dupes" | sed 's/^/  - /'
     errors=$((errors + 1))
   else
     echo "WARN: duplicate alias names detected (review recommended):"
-    printf "%s\n" "$dupes" | sed 's/^/  - /'
   fi
-else
-  echo "OK: no duplicate alias names"
-fi
+  printf "%s\n" "$dupes" | sed 's/^/  - /'
+}
 
 # 2) Risky overrides must be gated
-while IFS=$'\t' read -r name _value file _line; do
-  case "$name" in
-    cd | sudo | su | cp | mv | rm | mkdir | alias)
-      # GNU coreutils aliases are intentionally centralized overrides.
-      if [[ "$file" == *"/aliases/gnu/"* ]]; then
-        continue
-      fi
-      if ! _gov_grep_file 'DOTFILES_(ENABLE|SAFE|ALIAS)' "$file"; then
-        echo "ERROR: risky override '$name' in $file is not gated by a DOTFILES_* flag"
-        errors=$((errors + 1))
-      fi
-      ;;
-  esac
-done <"$tmp_manifest"
+_gov_check_risky() {
+  local name _value file _line
+  while IFS=$'\t' read -r name _value file _line; do
+    case "$name" in
+      cd | sudo | su | cp | mv | rm | mkdir | alias) ;;
+      *) continue ;;
+    esac
+    # GNU coreutils aliases are intentionally centralized overrides.
+    [[ "$file" != *"/aliases/gnu/"* ]] || continue
+    if ! _gov_grep_file 'DOTFILES_(ENABLE|SAFE|ALIAS)' "$file"; then
+      echo "ERROR: risky override '$name' in $file is not gated by a DOTFILES_* flag"
+      errors=$((errors + 1))
+    fi
+  done <"$tmp_manifest"
 
-if [[ $errors -eq 0 ]]; then
-  echo "OK: risky overrides are gated"
-fi
+  if [[ $errors -eq 0 ]]; then
+    echo "OK: risky overrides are gated"
+  fi
+}
 
 # 3) Hardcoded /Users path check (alias value only)
-hardcoded="$(awk -F'\t' '$2 ~ /\/Users\// {print $1 "\t" $2 "\t" $3 ":" $4}' "$tmp_manifest")"
-if [[ -n "$hardcoded" ]]; then
-  echo "ERROR: hardcoded /Users paths detected in aliases:"
-  printf "%s\n" "$hardcoded" | sed 's/^/  - /'
-  errors=$((errors + 1))
-else
-  echo "OK: no hardcoded /Users paths in aliases"
-fi
+_gov_check_hardcoded() {
+  local hardcoded
+  hardcoded="$(awk -F'\t' '$2 ~ /\/Users\// {print $1 "\t" $2 "\t" $3 ":" $4}' "$tmp_manifest")"
+  if [[ -n "$hardcoded" ]]; then
+    echo "ERROR: hardcoded /Users paths detected in aliases:"
+    printf "%s\n" "$hardcoded" | sed 's/^/  - /'
+    errors=$((errors + 1))
+  else
+    echo "OK: no hardcoded /Users paths in aliases"
+  fi
+}
+
+# Whether an expired alias (or a function of that name) still exists.
+_gov_still_defined() {
+  local alias_name="$1"
+  awk -F'\t' -v n="$alias_name" '$1==n{found=1} END{exit(found?0:1)}' "$tmp_manifest" && return 0
+  _gov_grep_tree "^[[:space:]]*(function[[:space:]]+)?${alias_name}[[:space:]]*\\(\\)" \
+    "$SCRIPT_DIR/../../defaults/.chezmoitemplates/aliases" \
+    "$SCRIPT_DIR/../../scripts/dot"
+}
 
 # 4) Deprecation window enforcement
-if [[ -f "$deprecations_file" ]]; then
-  expired_hits=0
+_gov_check_deprecations() {
+  local repo_version alias_name replacement remove_in expired_hits=0
+  [[ -f "$deprecations_file" ]] || return 0
+  repo_version="$(_gov_repo_version)"
   while IFS=$'\t' read -r alias_name replacement remove_in; do
     [[ -z "${alias_name:-}" ]] && continue
     [[ "${alias_name:0:1}" == "#" ]] && continue
-    if version_ge "$repo_version" "$remove_in"; then
-      alias_found=0
-      if awk -F'\t' -v n="$alias_name" '$1==n{found=1} END{exit(found?0:1)}' "$tmp_manifest"; then
-        alias_found=1
-      fi
-      function_found=0
-      if _gov_grep_tree "^[[:space:]]*(function[[:space:]]+)?${alias_name}[[:space:]]*\\(\\)" \
-        "$SCRIPT_DIR/../../defaults/.chezmoitemplates/aliases" \
-        "$SCRIPT_DIR/../../scripts/dot"; then
-        function_found=1
-      fi
-      if [[ $alias_found -eq 1 || $function_found -eq 1 ]]; then
-        [[ $expired_hits -eq 0 ]] && echo "ERROR: expired deprecated aliases still present:"
-        echo "  - $alias_name (remove_in=$remove_in, replacement=$replacement)"
-        expired_hits=$((expired_hits + 1))
-      fi
-    fi
+    version_ge "$repo_version" "$remove_in" || continue
+    _gov_still_defined "$alias_name" || continue
+    [[ $expired_hits -eq 0 ]] && echo "ERROR: expired deprecated aliases still present:"
+    echo "  - $alias_name (remove_in=$remove_in, replacement=$replacement)"
+    expired_hits=$((expired_hits + 1))
   done < <(cut -f1-3 "$deprecations_file")
   if [[ $expired_hits -gt 0 ]]; then
     errors=$((errors + 1))
   else
     echo "OK: no expired deprecated aliases (repo version: v$repo_version)"
   fi
-fi
+}
 
-echo ""
-if [[ $errors -eq 0 ]]; then
-  echo "Alias governance checks passed."
-  exit 0
-fi
+_gov_main() {
+  if [[ ! -x "$manifest_script" ]]; then
+    echo "ERROR: aliases-manifest.sh not found or not executable" >&2
+    exit 1
+  fi
 
-echo "Alias governance checks failed: $errors issue(s)." >&2
-exit 1
+  tmp_manifest="$(umask 077 && mktemp)"
+  trap 'rm -f "$tmp_manifest"' EXIT
+  bash "$manifest_script" >"$tmp_manifest"
+
+  echo "Alias Governance"
+  echo ""
+  echo "Policy: $policy"
+  echo ""
+
+  _gov_check_dupes
+  _gov_check_risky
+  _gov_check_hardcoded
+  _gov_check_deprecations
+
+  echo ""
+  if [[ $errors -eq 0 ]]; then
+    echo "Alias governance checks passed."
+    exit 0
+  fi
+  echo "Alias governance checks failed: $errors issue(s)." >&2
+  exit 1
+}
+
+_gov_main
