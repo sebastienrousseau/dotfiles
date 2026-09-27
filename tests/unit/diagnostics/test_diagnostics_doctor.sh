@@ -49,9 +49,30 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should check system configuration"
 fi
 
+# The shell-coverage check counts pwsh as managed when its profile loads the
+# Get-DotfilesCachedInit helper; a pwsh stub stands in for PowerShell.
+PS_TMP="$(mktemp -d)"
+mkdir -p "$PS_TMP/bin" "$PS_TMP/home/.config/powershell"
+printf '#!/bin/sh\nexit 0\n' >"$PS_TMP/bin/pwsh"
+chmod +x "$PS_TMP/bin/pwsh"
+# shell_coverage: the check's verdict line for this sandbox.
+shell_coverage() {
+  # shellcheck disable=SC2016
+  HOME="$PS_TMP/home" PATH="$PS_TMP/bin:/usr/bin:/bin" bash -c '
+    _ok() { echo "OK $1: $2"; }
+    _warn() { echo "WARN $1: $2"; }
+    cache_base="$HOME/.cache"
+    source "$1"
+    _doctor_perf_shell_coverage' _ "$REPO_ROOT/scripts/diagnostics/doctor/performance.sh" 2>&1
+}
 test_start "doctor_recognizes_powershell_cached_init"
-assert_file_contains "$DOCTOR_FILE" "Get-DotfilesCachedInit" \
-  "doctor should recognize the managed PowerShell cached-init helper"
+printf 'Get-DotfilesCachedInit starship\n' >"$PS_TMP/home/.config/powershell/Microsoft.PowerShell_profile.ps1"
+assert_contains "OK shell coverage" "$(shell_coverage)" "a profile that loads the helper counts pwsh as managed"
+
+test_start "doctor_flags_powershell_without_cached_init"
+printf 'Write-Host hi\n' >"$PS_TMP/home/.config/powershell/Microsoft.PowerShell_profile.ps1"
+assert_contains "pwsh" "$(shell_coverage | grep '^WARN shell coverage')" "a profile without it is reported"
+rm -rf "$PS_TMP"
 
 # Test: provides remediation suggestions
 test_start "doctor_provides_remediation"

@@ -36,6 +36,10 @@ source "$SCRIPT_DIR/../../lib/dot/log.sh"
 # shellcheck source=../../lib/dot/utils.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../../lib/dot/utils.sh" # check_cmd
+# shellcheck source=doctor/platform.sh
+source "$SCRIPT_DIR/doctor/platform.sh"
+# shellcheck source=doctor/performance.sh
+source "$SCRIPT_DIR/doctor/performance.sh"
 export DOT_COMMAND="doctor"
 
 ui_init
@@ -283,210 +287,6 @@ _doctor_environment() {
   fi
 }
 
-# --- Platform ---
-_doctor_platform() {
-  _section "Platform"
-
-  platform_id="$(dot_platform_id)"
-  _os_name="$(uname -s)"
-  _kernel="$(uname -sr)"
-  _arch="$(uname -m)"
-  _user="$(whoami 2>/dev/null || echo "${USER:-unknown}")"
-  _hostname_val="$(hostname -s 2>/dev/null || hostname 2>/dev/null || echo "unknown")"
-
-  # Shell version
-  _shell_name="${SHELL##*/}"
-  _shell_ver="$("$SHELL" --version 2>&1 | head -1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1 || true)"
-  _shell="${_shell_name}${_shell_ver:+ $_shell_ver}"
-
-  # Terminal
-  _terminal="${TERM_PROGRAM:-${TERM:-unknown}}"
-
-  # Uptime (portable)
-  if uptime -p >/dev/null 2>&1; then
-    _uptime="$(uptime -p 2>/dev/null | sed 's/^up //')"
-  else
-    _uptime="$(uptime 2>/dev/null | sed -E 's/^.* up ([^,]+(, [^,]+){0,2}), [0-9]+ users?.*$/\1/' || true)"
-  fi
-}
-
-# --- OS-specific detection ---
-# macOS: model, CPU, GPU, memory, display, packages
-_doctor_detect_macos() {
-  # macOS
-  _os="macOS $(sw_vers -productVersion 2>/dev/null || echo "unknown")"
-  _host="$(/usr/sbin/system_profiler SPHardwareDataType 2>/dev/null | awk -F': ' '/Model Name/{print $2}' || sysctl -n hw.model 2>/dev/null || echo "Mac")"
-  _cpu="$(sysctl -n machdep.cpu.brand_string 2>/dev/null || echo "$_arch")"
-  _cpu_cores="$(sysctl -n hw.ncpu 2>/dev/null || echo "?")"
-  _gpu="$(system_profiler SPDisplaysDataType 2>/dev/null | awk -F': ' '/Chipset Model|Chip/{print $2; exit}' || echo "n/a")"
-  _mem_total="$(sysctl -n hw.memsize 2>/dev/null || echo 0)"
-  _mem_total_gb="$(awk "BEGIN{printf \"%.2f\", ${_mem_total}/1073741824}")"
-  _mem_pages="$(vm_stat 2>/dev/null | awk '/Pages active/{gsub(/\./,"",$3); print $3}')"
-  _mem_used_gb="$(awk "BEGIN{printf \"%.2f\", ${_mem_pages:-0}*4096/1073741824}")"
-  _mem="${_mem_used_gb} GiB / ${_mem_total_gb} GiB"
-  _resolution="$(system_profiler SPDisplaysDataType 2>/dev/null | awk '/Resolution/{gsub(/^ +/,""); print; exit}' | sed 's/Resolution: //' || echo "n/a")"
-  # Guarded like the Linux branch: without brew on PATH the pipeline
-  # returns 127 under pipefail and set -e ended the whole report here.
-  if command -v brew >/dev/null 2>&1; then
-    _packages="$(brew list --formula 2>/dev/null | wc -l | tr -d ' ') (brew)"
-  else
-    _packages="n/a"
-  fi
-  _de="Aqua"
-}
-
-# Linux (Debian, Ubuntu, Arch, Fedora, RHEL, ...) via os-release, /sys and /proc
-_doctor_detect_linux() {
-  # Linux (Debian, Ubuntu, Arch, Fedora, RHEL, etc.)
-  # shellcheck disable=SC1091
-  . "$os_release_file"
-  _os="${PRETTY_NAME:-$ID}"
-
-  _host="$(cat "$sys_root/devices/virtual/dmi/id/product_name" 2>/dev/null || cat "$sys_root/firmware/devicetree/base/model" 2>/dev/null || echo "Linux")"
-
-  if command -v lscpu >/dev/null 2>&1; then
-    _cpu="$(lscpu | awk -F': +' '/Model name/{print $2}')"
-    _cpu_cores="$(lscpu | awk -F': +' '/^CPU\(s\):/{print $2}')"
-  else
-    _cpu="$(grep -m1 'model name' "$proc_root/cpuinfo" 2>/dev/null | cut -d: -f2 | sed 's/^ //' || uname -p)"
-    _cpu_cores="$(grep -c '^processor' "$proc_root/cpuinfo" 2>/dev/null || echo "?")"
-  fi
-
-  if command -v lspci >/dev/null 2>&1; then
-    # Headless hosts (VMs, containers, CI runners) expose no display
-    # controller, so `grep` exits 1 and — under `set -euo pipefail` —
-    # would abort the whole report mid-section. Absorb the miss.
-    _gpu="$(lspci 2>/dev/null | grep -iE 'vga|3d|display' | head -1 | sed 's/.*: //' || true)"
-    _gpu="${_gpu:-n/a}"
-  else
-    _gpu="n/a"
-  fi
-
-  if command -v free >/dev/null 2>&1; then
-    _mem="$(free -b | awk '/Mem:/{printf "%.2f GiB / %.2f GiB", $3/1073741824, $2/1073741824}')"
-  elif [[ -r "$proc_root/meminfo" ]]; then
-    _mem_total_kb="$(awk '/MemTotal/{print $2}' "$proc_root/meminfo")"
-    _mem_avail_kb="$(awk '/MemAvailable/{print $2}' "$proc_root/meminfo")"
-    _mem_used_kb=$((_mem_total_kb - _mem_avail_kb))
-    _mem="$(awk "BEGIN{printf \"%.2f GiB / %.2f GiB\", ${_mem_used_kb}/1048576, ${_mem_total_kb}/1048576}")"
-  else
-    _mem="n/a"
-  fi
-
-  # Resolution (Wayland or X11)
-  if command -v wlr-randr >/dev/null 2>&1; then
-    _resolution="$(wlr-randr 2>/dev/null | awk '/current/{print $1; exit}' || echo "n/a")"
-  elif command -v xrandr >/dev/null 2>&1; then
-    _resolution="$(xrandr 2>/dev/null | awk '/\*/{print $1; exit}' || echo "n/a")"
-  elif command -v xdpyinfo >/dev/null 2>&1; then
-    _resolution="$(xdpyinfo 2>/dev/null | awk '/dimensions/{print $2}' || echo "n/a")"
-  else
-    _resolution="n/a"
-  fi
-
-  # Packages (multi-distro)
-  _pkg_count=0
-  _pkg_mgr="pkg"
-  if command -v dpkg >/dev/null 2>&1; then
-    _pkg_count="$(dpkg --get-selections 2>/dev/null | wc -l | tr -d ' ')"
-    _pkg_mgr="dpkg"
-  elif command -v rpm >/dev/null 2>&1; then
-    _pkg_count="$(rpm -qa 2>/dev/null | wc -l | tr -d ' ')"
-    _pkg_mgr="rpm"
-  elif command -v pacman >/dev/null 2>&1; then
-    _pkg_count="$(pacman -Q 2>/dev/null | wc -l | tr -d ' ')"
-    _pkg_mgr="pacman"
-  fi
-  _packages="${_pkg_count} (${_pkg_mgr})"
-
-  _de="${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-n/a}}"
-}
-
-# Unknown OS: what uname can tell
-_doctor_detect_other() {
-  # Fallback (unknown OS)
-  _os="$(uname -sr)"
-  _host="unknown"
-  _cpu="$(uname -p 2>/dev/null || echo "unknown")"
-  _cpu_cores="?"
-  _gpu="n/a"
-  _mem="n/a"
-  _resolution="n/a"
-  _packages="n/a"
-  _de="n/a"
-}
-
-# WSL detection and overrides
-_doctor_detect_wsl() {
-  _wsl=""
-  if [[ -f "$proc_root/version" ]] && grep -qi microsoft "$proc_root/version" 2>/dev/null; then
-    _wsl="yes"
-    _os="${_os} (WSL)"
-    _de="Windows Desktop (WSL)"
-    _terminal="${TERM_PROGRAM:-Windows Terminal}"
-  fi
-}
-
-# The neofetch-style platform block
-_doctor_print_platform() {
-  _C='\033[0;36m'
-  _W='\033[1;37m'
-  _N='\033[0m'
-  _D='\033[2m'
-
-  printf '\n'
-  printf '  %b%s%b@%b%s%b\n' "$_C" "$_user" "$_N" "$_C" "$_hostname_val" "$_N"
-  printf '  %b%s%b\n' "$_D" "$(printf '%*s' "$((${#_user} + 1 + ${#_hostname_val}))" '' | tr ' ' '-')" "$_N"
-  printf '  %bOS:%b         %s\n' "$_W" "$_N" "$_os"
-  printf '  %bHost:%b       %s\n' "$_W" "$_N" "$_host"
-  printf '  %bKernel:%b     %s\n' "$_W" "$_N" "$_kernel"
-  printf '  %bUptime:%b     %s\n' "$_W" "$_N" "${_uptime:-n/a}"
-  printf '  %bPackages:%b   %s\n' "$_W" "$_N" "$_packages"
-  printf '  %bShell:%b      %s\n' "$_W" "$_N" "$_shell"
-  printf '  %bResolution:%b %s\n' "$_W" "$_N" "$_resolution"
-  printf '  %bDE:%b         %s\n' "$_W" "$_N" "$_de"
-  printf '  %bTerminal:%b   %s\n' "$_W" "$_N" "$_terminal"
-  printf '  %bCPU:%b        %s (%s)\n' "$_W" "$_N" "$_cpu" "$_cpu_cores"
-  printf '  %bGPU:%b        %s\n' "$_W" "$_N" "${_gpu:-n/a}"
-  printf '  %bMemory:%b     %s\n' "$_W" "$_N" "$_mem"
-  printf '  %bArch:%b       %s\n' "$_W" "$_N" "$_arch"
-}
-
-# WSL-only checks
-_doctor_check_wsl() {
-  echo ""
-  if command -v wslpath >/dev/null 2>&1; then
-    _ok "WSL bridge" "wslpath available"
-  else
-    _warn "WSL bridge" "wslpath missing"
-  fi
-  if [[ "$PWD" == /mnt/* ]]; then
-    _warn "WSL filesystem" "/mnt causes IO latency"
-  else
-    _ok "WSL filesystem" "native"
-  fi
-}
-
-_doctor_os_specific_detection() {
-  _os="" _host="" _cpu="" _cpu_cores="" _gpu="" _mem="" _resolution="" _packages="" _de=""
-  os_release_file="${DOT_DOCTOR_OS_RELEASE:-/etc/os-release}"
-  proc_root="${DOT_DOCTOR_PROC_ROOT:-/proc}"
-  sys_root="${DOT_DOCTOR_SYS_ROOT:-/sys}"
-
-  if [[ "$_os_name" == "Darwin" ]]; then
-    _doctor_detect_macos
-  elif [[ -r "$os_release_file" ]]; then
-    _doctor_detect_linux
-  else
-    _doctor_detect_other
-  fi
-  _doctor_detect_wsl
-  _doctor_print_platform
-  if [[ -n "$_wsl" ]]; then
-    _doctor_check_wsl
-  fi
-}
-
 # --- State ---
 _doctor_state() {
   _section "State"
@@ -603,25 +403,35 @@ _doctor_topgrade_integration() {
 }
 
 # --- Symlinks ---
+# _doctor_link_ok <link>: true for links that are not worth reporting: live
+# ones, browser singleton/backup links, and links into ~/Library/Caches.
+_doctor_link_ok() {
+  local link="$1" name
+  name="$(basename "$link")"
+  [[ -e "$link" ]] && return 0
+  [[ "$link" == *"google-chrome-backup"* ]] && return 0
+  case "$name" in
+    SingletonLock | SingletonCookie | SingletonSocket) return 0 ;;
+  esac
+  # A link into ~/Library/Caches dangling is macOS working as designed, not a
+  # health problem: the OS purges that directory whenever it wants the space,
+  # and the owning tool recreates its cache on next use. ~/.config/swiftpm/cache
+  # -> ~/Library/Caches/org.swift.swiftpm is the usual one; it was "fixed" by
+  # recreating the target earlier the same day and had broken again by evening,
+  # which is the tell that it is not fixable, only re-reported.
+  case "$(readlink "$link" 2>/dev/null)" in
+    "$HOME/Library/Caches/"*) return 0 ;;
+  esac
+  return 1
+}
+
 _doctor_symlinks() {
   broken_links=0
   broken_list=""
   for root in "$HOME/.config" "$HOME/.local/bin" "$HOME/.local/share" "$HOME/.ssh"; do
     [[ -d "$root" ]] || continue
     while IFS= read -r -d '' link; do
-      link_name="$(basename "$link")"
-      [[ "$link" == *"google-chrome-backup"* ]] && continue
-      [[ "$link_name" == SingletonLock || "$link_name" == SingletonCookie || "$link_name" == SingletonSocket ]] && continue
-      [[ -e "$link" ]] && continue
-      # A link into ~/Library/Caches dangling is macOS working as designed, not a
-      # health problem: the OS purges that directory whenever it wants the space,
-      # and the owning tool recreates its cache on next use. ~/.config/swiftpm/cache
-      # -> ~/Library/Caches/org.swift.swiftpm is the usual one; it was "fixed" by
-      # recreating the target earlier the same day and had broken again by evening,
-      # which is the tell that it is not fixable, only re-reported.
-      case "$(readlink "$link" 2>/dev/null)" in
-        "$HOME/Library/Caches/"*) continue ;;
-      esac
+      _doctor_link_ok "$link" && continue
       broken_links=$((broken_links + 1))
       broken_list="${broken_list:+$broken_list, }$(pretty_path "$link")"
     done < <(find "$root" -maxdepth 3 -type l -print0 2>/dev/null)
@@ -671,278 +481,6 @@ _doctor_portability() {
   fi
 }
 
-# --- Performance ---
-# 1. Shell cache freshness for tools the project already wraps in _cached_eval.
-# Stale caches force runtime regeneration on next shell start.
-_doctor_perf_cache_freshness() {
-  stale_caches=0
-  stale_tools=""
-  for tool in mise starship zoxide atuin fzf direnv; do
-    tool_bin="$(command -v "$tool" 2>/dev/null || true)"
-    [[ -n "$tool_bin" ]] || continue
-    for shell_dir in zsh bash fish; do
-      case "$shell_dir" in
-        fish) cache_file="$cache_base/$shell_dir/${tool}-init.fish" ;;
-        *) cache_file="$cache_base/$shell_dir/${tool}-init.$shell_dir" ;;
-      esac
-      if [[ ! -f "$cache_file" ]] || [[ "$tool_bin" -nt "$cache_file" ]]; then
-        stale_caches=$((stale_caches + 1))
-        case "$stale_tools" in
-          *"$tool"*) ;;
-          *) stale_tools="${stale_tools:+$stale_tools, }$tool" ;;
-        esac
-        break
-      fi
-    done
-  done
-  if [[ $stale_caches -eq 0 ]]; then
-    caches_fresh="fresh"
-    _ok "shell caches" "fresh"
-  else
-    caches_fresh="stale"
-    _warn "shell caches" "stale ($stale_tools) — run dot prewarm"
-  fi
-}
-
-# 2. Slow-init tools that are present but NOT wrapped in _cached_eval.
-# Each of these runs uncached on every shell start; common offenders eat
-# 100-500ms apiece on a populated dev machine.
-#
-# Only flag tools that actually emit shell init via `<tool> init <shell>`
-# (or equivalent) and would benefit from caching that output. Plain CLIs
-# like gh/cargo/pnpm/yarn don't have init eval; their completions are
-# cached separately under $ZSH_COMPLETIONS_DIR.
-_doctor_perf_uncached_inits() {
-  unwrapped=""
-  for tool in nvm fnm pyenv rbenv jenv asdf sdkman conda kubectl helm thefuck broot mcfly direnv; do
-    command -v "$tool" >/dev/null 2>&1 || continue
-    # If the tool is installed but no shell config sources or evals its
-    # init (no `$tool env`, `$tool init`, `$tool.sh`, lazy-load stub), it
-    # isn't adding startup cost — skip the warning.
-    init_referenced=0
-    if grep -rIlqE "\\b${tool}([[:space:]]+(env|init|hook)|\\.sh|_lazy_load_${tool}|_dot_lazy[[:space:]]+${tool})" \
-      "$HOME/.config/zsh" "$HOME/.config/fish" "$HOME/.config/shell" 2>/dev/null; then
-      init_referenced=1
-    fi
-    ((init_referenced == 0)) && continue
-    # Tools we lazy-load via shell stubs don't need init-eval cache files.
-    case "$tool" in
-      fnm | nvm | sdkman)
-        grep -rIlqE "_lazy_load_${tool}|_dot_lazy[[:space:]]+${tool}" \
-          "$HOME/.config/zsh" "$HOME/.config/fish" 2>/dev/null && continue
-        ;;
-    esac
-    found=0
-    for shell_dir in zsh bash fish; do
-      case "$shell_dir" in
-        fish) [[ -f "$cache_base/$shell_dir/${tool}-init.fish" ]] && found=1 ;;
-        *) [[ -f "$cache_base/$shell_dir/${tool}-init.$shell_dir" ]] && found=1 ;;
-      esac
-      ((found == 1)) && break
-    done
-    ((found == 0)) && unwrapped="${unwrapped:+$unwrapped, }$tool"
-  done
-  if [[ -z "$unwrapped" ]]; then
-    _ok "uncached slow-init tools" "none detected"
-  else
-    _warn "uncached slow-init tools" "$unwrapped — consider wrapping in _cached_eval"
-  fi
-}
-
-# 3. Zsh completion dump health. compinit is usually the single biggest
-# cost on a zsh startup; a stale or uncompiled .zcompdump compounds it.
-_doctor_perf_zcompdump() {
-  if command -v zsh >/dev/null 2>&1; then
-    zcompdump="${HOME}/.zcompdump"
-    if [[ -f "$zcompdump" ]]; then
-      dump_mtime=$(stat -c %Y "$zcompdump" 2>/dev/null || stat -f %m "$zcompdump" 2>/dev/null || echo 0)
-      age_days=$((($(date +%s) - dump_mtime) / 86400))
-      if ((age_days > 7)); then
-        _warn ".zcompdump" "${age_days}d old — refresh: rm ~/.zcompdump* && zsh -ic exit"
-      else
-        _ok ".zcompdump" "fresh (${age_days}d)"
-      fi
-      if [[ ! -f "${zcompdump}.zwc" ]]; then
-        _warn ".zcompdump.zwc" "missing — completion init slower than necessary"
-      fi
-    fi
-  fi
-}
-
-# 4. PATH length. Each entry is searched on every command resolution.
-# A mise-managed 2026 dev machine routinely adds 60-90 entries (one per
-# installed tool version + per-shim path), so the warn/fail thresholds
-# reflect that baseline rather than a lean default (~40).
-#
-# The OK ceiling was 75, which contradicted the 60-90 baseline stated right
-# above it and warned on every healthy mise machine. Worse, the implied remedy
-# was backwards: those per-tool entries are what let a command resolve to the
-# real binary instead of falling through to a mise shim. Measured 2026-08-20,
-# 20 invocations of ripgrep --version:
-#
-#     via shim            2741ms   (137ms per call)
-#     direct install dir    62ms   (3.1ms per call)
-#
-# ~44x. "Pruning" those entries to satisfy a length check would trade
-# microseconds of PATH scan for ~134ms on every single tool invocation. The
-# ceiling now matches the documented baseline; >90 still warns, because past
-# that the entries are worth auditing for tools you no longer use.
-#
-# The thresholds apply to the entries that are NOT mise tool directories:
-# those are by design (see above), so a machine with many mise tools is not
-# "long". A PATH of 88 entries, 68 of them mise installs, used to warn. The
-# message still reports the total, then the mise share. Duplicates are
-# pure waste, so any warn regardless of length.
-_doctor_perf_path_length() {
-  path_count=$(printf '%s' "${PATH:-}" | tr ':' '\n' | grep -c . || true)
-  path_unique=$(printf '%s' "${PATH:-}" | tr ':' '\n' | grep . | sort -u | grep -c . || true)
-  path_mise=$(printf '%s' "${PATH:-}" | tr ':' '\n' | grep . | sort -u | grep -c '/mise/installs/' || true)
-  path_other=$((path_unique - path_mise))
-  path_dups=$((path_count - path_unique))
-  path_detail="$path_count entries"
-  [[ "$path_mise" -gt 0 ]] && path_detail="$path_detail ($path_mise mise tool dirs, $path_other other)"
-  if [[ "$path_other" -gt 120 ]]; then
-    _fail "PATH length" "$path_detail — likely slowing every command"
-  elif [[ "$path_other" -gt 90 ]]; then
-    _warn "PATH length" "$path_detail — consider pruning"
-  elif [[ "$path_dups" -gt 0 ]]; then
-    _warn "PATH length" "$path_detail — $path_dups duplicate(s)"
-  else
-    _ok "PATH length" "$path_detail"
-  fi
-}
-
-# 5. Shell coverage. Surface installed shells that the project's caching
-# infrastructure doesn't currently maintain caches for.
-_doctor_perf_shell_coverage() {
-  shells_unmanaged=""
-  for sh in nu pwsh; do
-    command -v "$sh" >/dev/null 2>&1 || continue
-    case "$sh" in
-      nu)
-        [[ -f "$HOME/.config/nushell/cached_eval.nu" ]] && continue
-        ;;
-      pwsh)
-        pwsh -NoLogo -NoProfile -NonInteractive -Command 'exit 0' >/dev/null 2>&1 || continue
-        pwsh_profile="$HOME/.config/powershell/Microsoft.PowerShell_profile.ps1"
-        [[ -f "$pwsh_profile" ]] && grep -q 'Get-DotfilesCachedInit' "$pwsh_profile" && continue
-        ;;
-    esac
-    shells_unmanaged="${shells_unmanaged:+$shells_unmanaged, }$sh"
-  done
-  if [[ -z "$shells_unmanaged" ]]; then
-    _ok "shell coverage" "all installed shells have _cached_eval support"
-  else
-    _warn "shell coverage" "$shells_unmanaged installed — no _cached_eval helper"
-  fi
-}
-
-# 6. Zsh hook count. Heavy precmd/preexec functions compound per-prompt.
-# Probe an interactive zsh with a hard timeout so a broken zshrc doesn't
-# stall doctor; skip cleanly if the probe fails.
-_doctor_perf_zsh_hooks() {
-  if command -v zsh >/dev/null 2>&1 && command -v timeout >/dev/null 2>&1; then
-    # Fire every hook once first, as the first prompt and first command do:
-    # the deferred-init hooks deregister themselves after one run, so counting
-    # at startup reported one-shot work (zinit, compinit, carapace, layer
-    # loading) as per-prompt cost. What remains is what runs on every prompt.
-    # shellcheck disable=SC2016 # expanded by the probed zsh
-    hook_counts=$(timeout 5 zsh -i -c 'local -a _p _e; _p=($precmd_functions); _e=($preexec_functions)
-    for f in $_p; do (( $+functions[$f] )) && $f >/dev/null 2>&1; done
-    for f in $_e; do (( $+functions[$f] )) && $f true >/dev/null 2>&1; done
-    echo "$#precmd_functions $#preexec_functions"' 2>/dev/null | tail -1 || echo "")
-    if [[ -n "$hook_counts" ]]; then
-      read -r precmd_n preexec_n <<<"$hook_counts"
-      if [[ "${precmd_n:-0}" -le 5 && "${preexec_n:-0}" -le 5 ]]; then
-        _ok "zsh hooks" "precmd=$precmd_n preexec=$preexec_n"
-      else
-        _warn "zsh hooks" "precmd=$precmd_n preexec=$preexec_n — heavy per-prompt work"
-      fi
-    fi
-  fi
-
-  if command -v hyperfine >/dev/null 2>&1; then
-    if bash "$SCRIPT_DIR/../../benches/bench.sh" 2>/dev/null; then
-      _ok "startup latency" "within target thresholds"
-    else
-      # Only suggest prewarm when it could actually help. The caches were
-      # already reported fresh above in the common case, and telling someone to
-      # re-run a no-op sends them in a circle — as it did on 2026-08-20, where
-      # prewarm changed nothing because nothing was cold.
-      if [[ "${caches_fresh:-unknown}" == "fresh" ]]; then
-        _warn "startup latency" "threshold exceeded (caches already fresh — profile with 'dot benchmark')"
-      else
-        _warn "startup latency" "threshold exceeded (run dot prewarm)"
-      fi
-    fi
-  else
-    _warn "hyperfine" "missing (benchmark skipped)"
-  fi
-}
-
-# 7. Baseline check + top-3 slowest tools from EVALCACHE_TIMING.
-# Closes part of #863. Reads the same baseline file `dot perf` writes,
-# and the same eval-timings.jsonl _cached_eval populates. Skipped
-# silently when either file is absent (first-run state).
-_doctor_perf_baseline() {
-  baseline_file="$cache_base/dotfiles/perf-baseline.json"
-  if [[ -s "$baseline_file" ]] && command -v python3 >/dev/null 2>&1; then
-    baseline_age_days=$(python3 -c '
-import json, sys, datetime
-try:
-    d = json.load(open(sys.argv[1]))
-    rec = d.get("recorded_at", "")
-    if not rec: print(-1); sys.exit(0)
-    rec = rec.replace("Z", "+00:00")
-    age = (datetime.datetime.now(datetime.timezone.utc) - datetime.datetime.fromisoformat(rec)).days
-    print(age)
-except Exception:
-    print(-1)
-' "$baseline_file" 2>/dev/null)
-    if [[ "$baseline_age_days" -ge 0 ]]; then
-      _ok "perf baseline" "recorded ${baseline_age_days}d ago — run \`dot perf\` to compare"
-    fi
-  fi
-
-  timings_file="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/eval-timings.jsonl"
-  if [[ -s "$timings_file" ]] && command -v python3 >/dev/null 2>&1; then
-    top_tools=$(python3 -c '
-import json, sys
-from collections import defaultdict
-samples = defaultdict(list)
-try:
-    for line in open(sys.argv[1]):
-        try:
-            ev = json.loads(line)
-            ms = int(ev.get("ms", 0) or 0)
-            samples[ev.get("label", "?")].append(ms)
-        except Exception:
-            pass
-    rows = sorted(samples.items(), key=lambda kv: sum(kv[1]) // max(len(kv[1]), 1), reverse=True)[:3]
-    print(", ".join(f"{lbl}({sum(v)//max(len(v),1)}ms)" for lbl, v in rows))
-except Exception:
-    pass
-' "$timings_file" 2>/dev/null)
-    if [[ -n "$top_tools" ]]; then
-      _ok "perf top-tools" "$top_tools"
-    fi
-  fi
-}
-
-_doctor_performance() {
-  _section "Performance"
-
-  cache_base="${XDG_CACHE_HOME:-$HOME/.cache}"
-
-  _doctor_perf_cache_freshness
-  _doctor_perf_uncached_inits
-  _doctor_perf_zcompdump
-  _doctor_perf_path_length
-  _doctor_perf_shell_coverage
-  _doctor_perf_zsh_hooks
-  _doctor_perf_baseline
-}
-
 # --- Summary ---
 _doctor_summary() {
   dot_log info "doctor_complete" "errors=$Errors" "warnings=$Warnings"
@@ -976,19 +514,24 @@ Suggest specific shell commands to fix these issues according to our architectur
   echo ""
 }
 
-_doctor_header
-_doctor_core_shells
-_doctor_modern_cli_tools
-_doctor_infrastructure
-_doctor_ai_clis
-_doctor_environment
-_doctor_platform
-_doctor_os_specific_detection
-_doctor_state
-_doctor_pre_push_audit_bypass_log
-_doctor_atuin_history_filter
-_doctor_topgrade_integration
-_doctor_symlinks
-_doctor_portability
-_doctor_performance
-_doctor_summary
+# Sections in report order.
+_doctor_main() {
+  _doctor_header
+  _doctor_core_shells
+  _doctor_modern_cli_tools
+  _doctor_infrastructure
+  _doctor_ai_clis
+  _doctor_environment
+  _doctor_platform
+  _doctor_os_specific_detection
+  _doctor_state
+  _doctor_pre_push_audit_bypass_log
+  _doctor_atuin_history_filter
+  _doctor_topgrade_integration
+  _doctor_symlinks
+  _doctor_portability
+  _doctor_performance
+  _doctor_summary
+}
+
+_doctor_main
