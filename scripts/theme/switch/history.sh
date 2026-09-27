@@ -7,16 +7,9 @@
 # snapshots and reset. Sourced by scripts/theme/switch.sh.
 
 # dot theme plan
-_theme_cmd_plan() {
-  shift
-  plan_name="${1:-}"
-  if [[ -z "$plan_name" ]]; then
-    ui_err "Usage" "dot theme plan <family|variant> [--mode auto|dark|light] [--json]"
-    exit 1
-  fi
-  shift
-  plan_mode=""
-  plan_json=false
+# _theme_plan_args <args...>: parse `plan` options into the caller's
+# plan_mode / plan_json.
+_theme_plan_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --mode)
@@ -49,22 +42,29 @@ _theme_cmd_plan() {
       exit 1
       ;;
   esac
+}
 
-  plan_family="${plan_name%-dark}"
-  [[ "$plan_family" != "$plan_name" ]] || plan_family="${plan_name%-light}"
-  plan_args=(--plan)
+_theme_cmd_plan() {
+  shift
+  local plan_name="${1:-}" plan_mode="" plan_json=false plan_family plan_target
+  local -a plan_args=(--plan)
+  if [[ -z "$plan_name" ]]; then
+    ui_err "Usage" "dot theme plan <family|variant> [--mode auto|dark|light] [--json]"
+    exit 1
+  fi
+  shift
+  _theme_plan_args "$@"
+  plan_family="$(_theme_family_of "$plan_name")"
   [[ "$plan_json" == true ]] && plan_args+=(--json)
 
   if [[ -z "$plan_mode" && "$plan_family" != "$plan_name" ]]; then
+    # An explicit variant with no --mode is planned as named.
     plan_target="$plan_name"
+  elif [[ "${plan_mode:-auto}" == "auto" ]]; then
+    plan_target="${plan_family}-$(system_appearance_mode)"
+    plan_args+=(--auto)
   else
-    [[ -n "$plan_mode" ]] || plan_mode="auto"
-    if [[ "$plan_mode" == "auto" ]]; then
-      plan_target="${plan_family}-$(system_appearance_mode)"
-      plan_args+=(--auto)
-    else
-      plan_target="${plan_family}-${plan_mode}"
-    fi
+    plan_target="${plan_family}-${plan_mode}"
   fi
   run_theme_sync "$plan_target" "${plan_args[@]}"
 }

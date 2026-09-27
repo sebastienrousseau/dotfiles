@@ -209,6 +209,14 @@ get_theme_family() {
   echo "$family"
 }
 
+# _theme_family_of <theme>: the family, i.e. the name without its
+# -dark/-light suffix (unchanged when it has neither).
+_theme_family_of() {
+  local family="${1%-dark}"
+  [[ "$family" != "$1" ]] || family="${1%-light}"
+  printf '%s\n' "$family"
+}
+
 is_dark_theme() {
   local theme="${1:-}"
   case "$theme" in
@@ -267,93 +275,49 @@ source "$SCRIPT_DIR/switch/history.sh"
 # shellcheck source-path=SCRIPTDIR source=switch/desktop.sh
 source "$SCRIPT_DIR/switch/desktop.sh"
 
-case "${1:-}" in
-  list)
-    list_themes
-    ;;
-  set)
-    _theme_cmd_set "$@"
-    ;;
-  toggle)
-    toggle_theme
-    ;;
-  mode)
-    _theme_cmd_mode "$@"
-    ;;
-  rotate)
-    _theme_cmd_rotate "$@"
-    ;;
-  sync)
-    sync_theme "${2:-}"
-    ;;
-  ambient)
-    _theme_cmd_ambient "$@"
-    ;;
-  family)
-    switch_family
-    ;;
-  current)
-    show_current
-    ;;
-  plan)
-    _theme_cmd_plan "$@"
-    ;;
-  undo)
-    _theme_cmd_undo "$@"
-    ;;
-  history)
-    _theme_cmd_history "$@"
-    ;;
-  reset)
-    _theme_cmd_reset "$@"
-    ;;
-  diff)
-    _theme_cmd_diff "$@"
-    ;;
-  export)
-    _theme_cmd_export "$@"
-    ;;
-  import)
-    _theme_cmd_import "$@"
-    ;;
-  fit)
-    _theme_cmd_fit "$@"
-    ;;
-  wallpaper)
-    _theme_cmd_wallpaper "$@"
-    ;;
-  accent)
-    _theme_cmd_accent "$@"
-    ;;
-  status)
-    _theme_cmd_status "$@"
-    ;;
-  rebuild)
-    shift
-    bash "$SCRIPT_DIR/rebuild-themes.sh" "$@"
-    ;;
-  preview)
-    _theme_cmd_preview "$@"
-    ;;
-  random)
-    _theme_cmd_random "$@"
-    ;;
-  help | --help | -h)
-    _theme_cmd_help "$@"
-    ;;
-  "")
-    pick_theme
-    ;;
-  *)
-    # Treat known variants or paired family names as quick switches.
-    if grep -q "^\[themes\.${1}\]" "$THEMES_FILE" 2>/dev/null; then
-      run_theme_sync "$1"
-    elif theme_exists "${1}-dark" && theme_exists "${1}-light"; then
-      set_theme "$1"
-    else
-      ui_err "Unknown command or theme" "$1"
-      ui_info "Usage" "dot theme [list|set <name>|toggle|family|current|help]"
-      exit 1
-    fi
-    ;;
-esac
+# One-line subcommands; the rest live in the switch/ modules.
+_theme_cmd_list() { list_themes; }
+_theme_cmd_toggle() { toggle_theme; }
+_theme_cmd_sync() { sync_theme "${2:-}"; }
+_theme_cmd_family() { switch_family; }
+_theme_cmd_current() { show_current; }
+_theme_cmd_rebuild() {
+  shift
+  bash "$SCRIPT_DIR/rebuild-themes.sh" "$@"
+}
+
+# _theme_quick_switch <name>: a known variant or a paired family name
+# switches directly; anything else is an unknown command.
+_theme_quick_switch() {
+  if grep -q "^\[themes\.${1}\]" "$THEMES_FILE" 2>/dev/null; then
+    run_theme_sync "$1"
+  elif theme_exists "${1}-dark" && theme_exists "${1}-light"; then
+    set_theme "$1"
+  else
+    ui_err "Unknown command or theme" "$1"
+    ui_info "Usage" "dot theme [list|set <name>|toggle|family|current|help]"
+    exit 1
+  fi
+}
+
+# Every subcommand is _theme_cmd_<name>, called with the full argument list
+# (the subcommand is still $1, as each expects).
+_THEME_COMMANDS="list set toggle mode rotate sync ambient family current plan undo history reset diff export import fit wallpaper accent status rebuild preview random help"
+
+_theme_main() {
+  local cmd="${1:-}"
+  case "$cmd" in
+    "")
+      pick_theme
+      return
+      ;;
+    --help | -h) cmd="help" ;;
+  esac
+  if [[ "$cmd" =~ ^[a-z]+$ && " $_THEME_COMMANDS " == *" $cmd "* ]]; then
+    "_theme_cmd_$cmd" "$@"
+  else
+    _theme_quick_switch "$@"
+  fi
+}
+
+_theme_main "$@"

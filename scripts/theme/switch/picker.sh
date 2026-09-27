@@ -269,24 +269,22 @@ _theme_cmd_preview() {
 # dot theme random
 # Pick a random paired family and apply it. Default mode = current
 # mode; override with `--mode dark|light`.
-_theme_cmd_random() {
-  shift
-  _rand_mode=""
-  _rand_explicit=false
+# _theme_random_args <args...>: parse `random` options into the caller's
+# _rand_mode / _rand_explicit.
+_theme_random_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --mode)
         shift
         case "${1:-}" in
-          dark | light)
-            _rand_mode="$1"
-            _rand_explicit=true
-            ;;
+          dark | light) ;;
           *)
             ui_err "Usage" "--mode dark|light"
             exit 1
             ;;
         esac
+        _rand_mode="$1"
+        _rand_explicit=true
         shift
         ;;
       --mode=*)
@@ -300,30 +298,39 @@ _theme_cmd_random() {
         ;;
     esac
   done
+}
+
+# _theme_random_family <current family>: a random paired family other than
+# the current one (the current one only when it is the sole family).
+_theme_random_family() {
+  local fam
+  local -a families=() picks=()
+  # Not `mapfile -t`: that is bash 4 only, and macOS ships bash 3.2 as
+  # /bin/bash. tests/unit/shell/test_bash32_portability.sh gates on it.
+  while IFS= read -r fam; do
+    [[ -n "$fam" ]] && families+=("$fam")
+  done < <(paired_families)
+  [[ ${#families[@]} -gt 0 ]] || return 1
+  for fam in "${families[@]}"; do
+    [[ "$fam" != "$1" ]] && picks+=("$fam")
+  done
+  [[ ${#picks[@]} -gt 0 ]] || picks=("${families[@]}")
+  printf '%s\n' "${picks[RANDOM % ${#picks[@]}]}"
+}
+
+_theme_cmd_random() {
+  shift
+  local current pick _rand_mode="" _rand_explicit=false
+  _theme_random_args "$@"
   current="$(current_theme)"
   if [[ -z "$_rand_mode" ]]; then
     _rand_mode="dark"
     is_dark_theme "$current" 2>/dev/null || _rand_mode="light"
   fi
-  current_family="${current%-dark}"
-  [[ "$current_family" != "$current" ]] || current_family="${current%-light}"
-  # Not `mapfile -t`: that is bash 4 only, and macOS ships bash 3.2 as
-  # /bin/bash. tests/unit/shell/test_bash32_portability.sh gates on it.
-  families=()
-  while IFS= read -r _fam; do
-    [[ -n "$_fam" ]] && families+=("$_fam")
-  done < <(paired_families)
-  if [[ ${#families[@]} -eq 0 ]]; then
+  if ! pick="$(_theme_random_family "$(_theme_family_of "$current")")"; then
     ui_err "No themes" "run 'dot theme rebuild' first"
     exit 1
   fi
-  # Filter out the current family so `random` always changes something.
-  picks=()
-  for f in "${families[@]}"; do
-    [[ "$f" != "$current_family" ]] && picks+=("$f")
-  done
-  [[ ${#picks[@]} -eq 0 ]] && picks=("${families[@]}")
-  pick="${picks[RANDOM % ${#picks[@]}]}"
   if [[ "$(theme_mode_preference)" == "auto" && "$_rand_explicit" == false ]]; then
     set_theme "${pick}-${_rand_mode}" --auto
   else

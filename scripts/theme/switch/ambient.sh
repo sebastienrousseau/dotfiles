@@ -9,39 +9,42 @@
 
 # Detect system appearance. KDE Plasma's color scheme is included so KDE
 # users get the same auto-sync as GNOME and macOS users.
+# _theme_mode_macos / _theme_mode_linux: set the caller's os_mode.
+_theme_mode_macos() {
+  if defaults read -g AppleInterfaceStyle >/dev/null 2>&1; then
+    os_mode="dark"
+  else
+    os_mode="light"
+  fi
+}
+
+_theme_mode_linux() {
+  local scheme kde_scheme
+  # GNOME family via gsettings
+  if command -v gsettings >/dev/null 2>&1; then
+    scheme=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")
+    case "$scheme" in
+      prefer-light) os_mode="light" ;;
+      prefer-dark | default) os_mode="dark" ;;
+    esac
+  fi
+  # KDE — kreadconfig6 wins on KDE sessions
+  if command -v kreadconfig6 >/dev/null 2>&1; then
+    kde_scheme="$(kreadconfig6 --file kdeglobals --group General --key ColorScheme 2>/dev/null)"
+    case "$kde_scheme" in
+      *Light* | *light*) os_mode="light" ;;
+      *Dark* | *dark*) os_mode="dark" ;;
+    esac
+  fi
+  return 0
+}
+
 system_appearance_mode() {
   local os_mode="dark" # Default fallback
   case "$(uname -s)" in
-    Darwin)
-      if defaults read -g AppleInterfaceStyle >/dev/null 2>&1; then
-        os_mode="dark"
-      else
-        os_mode="light"
-      fi
-      ;;
-    Linux)
-      # GNOME family via gsettings
-      if command -v gsettings >/dev/null 2>&1; then
-        local scheme
-        scheme=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null | tr -d "'")
-        if [[ "$scheme" == "prefer-light" ]]; then
-          os_mode="light"
-        elif [[ "$scheme" == "prefer-dark" || "$scheme" == "default" ]]; then
-          os_mode="dark"
-        fi
-      fi
-      # KDE — kreadconfig6 wins on KDE sessions
-      if command -v kreadconfig6 >/dev/null 2>&1; then
-        local kde_scheme
-        kde_scheme="$(kreadconfig6 --file kdeglobals --group General --key ColorScheme 2>/dev/null)"
-        case "$kde_scheme" in
-          *Light* | *light*) os_mode="light" ;;
-          *Dark* | *dark*) os_mode="dark" ;;
-        esac
-      fi
-      ;;
+    Darwin) _theme_mode_macos ;;
+    Linux) _theme_mode_linux ;;
   esac
-
   printf '%s\n' "$os_mode"
 }
 
@@ -84,8 +87,44 @@ sync_theme() {
 #   3. State file at ~/.local/state/dot/theme-ambient.conf
 #   4. Fixed defaults: 07:00 / 19:00
 # Applies to the current wallpaper family — never changes wallpaper choice.
+# _theme_hhmm_min <HH:MM>: minutes since midnight.
+_theme_hhmm_min() {
+  local hour minute
+  IFS=':' read -r hour minute <<<"$1"
+  echo $((10#$hour * 60 + 10#$minute))
+}
+
+# _ambient_from_sunwait / _ambient_from_state: fill the caller's missing
+# sunrise/sunset (and resolved_source) from sunwait or the state file.
+_ambient_from_sunwait() {
+  [[ (-z "$sunrise" || -z "$sunset") && -n "${DOT_THEME_LOCATION:-}" ]] || return 0
+  command -v sunwait >/dev/null 2>&1 || return 0
+  IFS=',' read -r lat lon <<<"$DOT_THEME_LOCATION"
+  [[ -n "$lat" && -n "$lon" ]] || return 0
+  # sunwait "list rise/set civil <lat> <lon>" prints HH:MM
+  local computed_rise computed_set
+  computed_rise="$(sunwait list rise "$lat" "$lon" 2>/dev/null | head -1)"
+  computed_set="$(sunwait list set "$lat" "$lon" 2>/dev/null | head -1)"
+  if [[ "$computed_rise" =~ ^[0-9]{2}:[0-9]{2}$ && "$computed_set" =~ ^[0-9]{2}:[0-9]{2}$ ]]; then
+    sunrise="${sunrise:-$computed_rise}"
+    sunset="${sunset:-$computed_set}"
+    resolved_source="sunwait($DOT_THEME_LOCATION)"
+  fi
+}
+
+_ambient_from_state() {
+  [[ (-z "$sunrise" || -z "$sunset") && -f "$state_file" ]] || return 0
+  # shellcheck disable=SC1090
+  source "$state_file"
+  sunrise="${sunrise:-${DOT_THEME_SUNRISE:-}}"
+  sunset="${sunset:-${DOT_THEME_SUNSET:-}}"
+  if [[ -n "$sunrise$sunset" ]]; then
+    resolved_source="state-file"
+  fi
+}
+
 ambient_theme() {
-  local sunrise sunset now hour minute now_min sunrise_min sunset_min desired
+  local sunrise sunset now now_min sunrise_min sunset_min desired current target
   local state_file="${XDG_STATE_HOME:-$HOME/.local/state}/dot/theme-ambient.conf"
   local resolved_source="defaults"
 
@@ -93,57 +132,24 @@ ambient_theme() {
   sunrise="${DOT_THEME_SUNRISE:-}"
   sunset="${DOT_THEME_SUNSET:-}"
   [[ -n "$sunrise$sunset" ]] && resolved_source="env"
-
-  # Priority 2: sunwait + location
-  if [[ (-z "$sunrise" || -z "$sunset") && -n "${DOT_THEME_LOCATION:-}" ]] && command -v sunwait >/dev/null 2>&1; then
-    IFS=',' read -r lat lon <<<"$DOT_THEME_LOCATION"
-    if [[ -n "$lat" && -n "$lon" ]]; then
-      # sunwait "list rise/set civil <lat> <lon>" prints HH:MM
-      local computed_rise computed_set
-      computed_rise="$(sunwait list rise "$lat" "$lon" 2>/dev/null | head -1)"
-      computed_set="$(sunwait list set "$lat" "$lon" 2>/dev/null | head -1)"
-      if [[ "$computed_rise" =~ ^[0-9]{2}:[0-9]{2}$ && "$computed_set" =~ ^[0-9]{2}:[0-9]{2}$ ]]; then
-        sunrise="${sunrise:-$computed_rise}"
-        sunset="${sunset:-$computed_set}"
-        resolved_source="sunwait($DOT_THEME_LOCATION)"
-      fi
-    fi
-  fi
-
-  # Priority 3: state file
-  if [[ (-z "$sunrise" || -z "$sunset") && -f "$state_file" ]]; then
-    # shellcheck disable=SC1090
-    source "$state_file"
-    sunrise="${sunrise:-${DOT_THEME_SUNRISE:-}}"
-    sunset="${sunset:-${DOT_THEME_SUNSET:-}}"
-    [[ -n "$sunrise$sunset" ]] && resolved_source="state-file"
-  fi
-
-  # Priority 4: defaults
+  # Priority 2: sunwait + location; 3: state file; 4: defaults
+  _ambient_from_sunwait
+  _ambient_from_state
   sunrise="${sunrise:-07:00}"
   sunset="${sunset:-19:00}"
 
-  # Convert HH:MM strings to minutes since midnight for cheap comparison.
-  IFS=':' read -r hour minute <<<"$sunrise"
-  sunrise_min=$((10#$hour * 60 + 10#$minute))
-  IFS=':' read -r hour minute <<<"$sunset"
-  sunset_min=$((10#$hour * 60 + 10#$minute))
+  # Plain assignments, so a malformed HH:MM still stops the run (set -e).
   now="$(date +%H:%M)"
-  IFS=':' read -r hour minute <<<"$now"
-  now_min=$((10#$hour * 60 + 10#$minute))
-
+  now_min="$(_theme_hhmm_min "$now")"
+  sunrise_min="$(_theme_hhmm_min "$sunrise")"
+  sunset_min="$(_theme_hhmm_min "$sunset")"
+  desired="dark"
   if ((now_min >= sunrise_min && now_min < sunset_min)); then
     desired="light"
-  else
-    desired="dark"
   fi
 
-  local current family target
   current="$(current_theme)"
-  family="${current%-dark}"
-  [[ "$family" != "$current" ]] || family="${current%-light}"
-  target="${family}-${desired}"
-
+  target="$(_theme_family_of "$current")-${desired}"
   if [[ "$current" == "$target" ]]; then
     ui_ok "Ambient" "$current — already matches (${resolved_source} sunrise=$sunrise sunset=$sunset now=$now)"
     return 0
