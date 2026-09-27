@@ -118,7 +118,6 @@
   17   21   34.7   36     0 lib/dot/utils.sh::resolve_source_dir
   12   11   35.2   53     0 lib/dot/verified-download.sh::download_verified_asset
    9    8   32.9   46     0 lib/dot/verified-download.sh::download_verified_script
-  40   49   47.4  116   116 scripts/diagnostics/a2a-conformance.sh::<top>
   27   49   43.1   98   129 scripts/diagnostics/alias-governance.sh::<top>
   22   22   36.8  109   109 scripts/diagnostics/attest-verify.sh::<top>
   13   11   27.4   73   292 scripts/diagnostics/benchmark.sh::<top>
