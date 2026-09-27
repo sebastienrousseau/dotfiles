@@ -341,12 +341,8 @@ _ai_log_run() {
   "$log_bin" "$provider" "$project" "$exit_code" "$duration_secs" "$prompt_words" "$ts" || true
 }
 
-run_ai_with_context() {
-  local tool="$1"
-  shift
-  local pattern_name=""
-  local prompt=""
-
+# _ai_bridge_args <args...>: parse into the caller's pattern_name / prompt.
+_ai_bridge_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --help | -h)
@@ -363,108 +359,136 @@ run_ai_with_context() {
         ;;
     esac
   done
+}
 
-  if [[ -z "$prompt" ]]; then
-    _show_ai_bridge_usage
-    exit 1
-  fi
-
-  local system_context=""
+# _ai_bridge_prompt: build the caller's full_prompt from pattern_name and
+# prompt. Raw mode (DOT_AI_RAW) skips the system-metadata banner so callers
+# like the cockpit get clean, streamable output.
+_ai_bridge_prompt() {
+  local system_context="" pattern_file metadata
   if [[ -n "$pattern_name" ]]; then
-    local pattern_file="$PATTERN_DIR/${pattern_name}.md"
-    if [[ -f "$pattern_file" ]]; then
-      system_context=$(cat "$pattern_file")
-    else
+    pattern_file="$PATTERN_DIR/${pattern_name}.md"
+    if [[ ! -f "$pattern_file" ]]; then
       ui_err "Pattern not found" "$pattern_name"
       exit 1
     fi
+    system_context=$(cat "$pattern_file")
   fi
-
-  # Build the prompt. Raw mode (DOT_AI_RAW) skips the system-metadata banner
-  # so callers like the cockpit get clean, streamable output.
-  local full_prompt
   if [[ -n "${DOT_AI_RAW:-}" ]]; then
     full_prompt="${system_context:+${system_context}
 
 }${prompt}"
-  else
-    local metadata
-    metadata="## System Metadata
+    return 0
+  fi
+  metadata="## System Metadata
 - OS: $(uname -s) $(uname -r)
 - Arch: $(uname -m)
 - Date: $(date -u)"
-    full_prompt="${system_context}
+  full_prompt="${system_context}
 
 ${metadata}
 
 ## User Request
 ${prompt}"
-  fi
+}
 
-  # Resolve the binary name for the tool
-  local tool_bin="$tool"
-  case "$tool" in
-    cl) tool_bin="claude" ;;
-    kiro) tool_bin="kiro-cli" ;;
+# _ai_tool_bin <tool>: the executable behind a tool name.
+_ai_tool_bin() {
+  case "$1" in
+    cl) echo "claude" ;;
+    kiro) echo "kiro-cli" ;;
+    *) echo "$1" ;;
   esac
+}
 
-  # Check if the tool is installed; offer mise install if not
-  if ! has_command "$tool_bin"; then
-    local mise_pkg
-    mise_pkg=$(_ai_mise_pkg "$tool_bin")
-    if [[ -n "$mise_pkg" ]] && has_command mise; then
-      ui_warn "$tool" "not installed"
-      local do_install=""
-      if has_command gum; then
-        do_install=$(gum confirm "Install $tool via mise ($mise_pkg)?" && echo "yes" || echo "no")
-      else
-        printf "Install %s via mise (%s)? [y/N] " "$tool" "$mise_pkg"
-        # `|| true`: at EOF (piped, cron, CI) `read` returns 1 and
-        # `set -e` killed the script mid-prompt. EOF means "no".
-        read -r do_install || true
-        case "$do_install" in y | Y | yes) do_install="yes" ;; *) do_install="no" ;; esac
-      fi
-      if [[ "$do_install" == "yes" ]]; then
-        ui_info "Installing" "$tool via mise ($mise_pkg)"
-        _ai_in_scratch_dir mise use -g "$mise_pkg@latest" 2>&1 || {
-          ui_err "$tool" "installation failed"
-          exit 1
-        }
-        rm -f "$AI_STATUS_CACHE_FILE"
-      else
-        ui_err "$tool" "not installed — install with: mise use -g $mise_pkg@latest"
-        exit 1
-      fi
-    elif [[ "$tool_bin" == "agy" ]]; then
+# _ai_confirm_mise <tool> <pkg>: ask whether to install; sets the caller's
+# do_install to yes or no.
+_ai_confirm_mise() {
+  if has_command gum; then
+    do_install=$(gum confirm "Install $1 via mise ($2)?" && echo "yes" || echo "no")
+    return 0
+  fi
+  printf "Install %s via mise (%s)? [y/N] " "$1" "$2"
+  # `|| true`: at EOF (piped, cron, CI) `read` returns 1 and
+  # `set -e` killed the script mid-prompt. EOF means "no".
+  read -r do_install || true
+  case "$do_install" in y | Y | yes) do_install="yes" ;; *) do_install="no" ;; esac
+}
+
+# _ai_offer_mise <tool> <pkg>: install the tool via mise if the user agrees;
+# otherwise exit 1 with the install command.
+_ai_offer_mise() {
+  local tool="$1" mise_pkg="$2" do_install=""
+  ui_warn "$tool" "not installed"
+  _ai_confirm_mise "$tool" "$mise_pkg"
+  if [[ "$do_install" != "yes" ]]; then
+    ui_err "$tool" "not installed — install with: mise use -g $mise_pkg@latest"
+    exit 1
+  fi
+  ui_info "Installing" "$tool via mise ($mise_pkg)"
+  _ai_in_scratch_dir mise use -g "$mise_pkg@latest" 2>&1 || {
+    ui_err "$tool" "installation failed"
+    exit 1
+  }
+  rm -f "$AI_STATUS_CACHE_FILE"
+}
+
+# _ai_ensure_installed <tool> <bin>: return when the tool is installed or
+# was just installed; otherwise explain how to get it and exit 1.
+_ai_ensure_installed() {
+  local tool="$1" tool_bin="$2" mise_pkg
+  has_command "$tool_bin" && return 0
+  mise_pkg=$(_ai_mise_pkg "$tool_bin")
+  if [[ -n "$mise_pkg" ]] && has_command mise; then
+    _ai_offer_mise "$tool" "$mise_pkg"
+    return 0
+  fi
+  case "$tool_bin" in
+    agy)
       ui_warn "$tool" "not installed"
       ui_info "Install" "dot ai install agy (checksum verified)"
-      exit 1
-    elif [[ "$tool_bin" == "kimi" ]]; then
+      ;;
+    kimi)
       ui_warn "$tool" "not installed"
       ui_info "Install" "dot ai install kimi"
       ui_info "PATH" "Kimi Code installs to ~/.kimi-code/bin; restart your shell after install"
-      exit 1
-    else
-      ui_err "$tool" "not installed and mise not available"
-      exit 1
-    fi
-  fi
+      ;;
+    *) ui_err "$tool" "not installed and mise not available" ;;
+  esac
+  exit 1
+}
 
-  [[ -n "${DOT_AI_RAW:-}" ]] || ui_info "Executing $tool with pattern: ${pattern_name:-none}"
-
-  # Route non-Claude tools through the local gateway when one is running.
-  # The primary Claude ALWAYS uses its native session — never route it,
-  # and never set ANTHROPIC_API_KEY where Claude Code can see it (that
-  # disables claude.ai connectors). Routing is scoped to this run's
-  # subprocess; the interactive shell is never touched.
-  case "$tool" in
+# Route non-Claude tools through the local gateway when one is running.
+# The primary Claude ALWAYS uses its native session — never route it,
+# and never set ANTHROPIC_API_KEY where Claude Code can see it (that
+# disables claude.ai connectors). Routing is scoped to this run's
+# subprocess; the interactive shell is never touched.
+_ai_gateway_env() {
+  local _ai_local_env="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/ai-local.env"
+  case "$1" in
     cl | claude) : ;;
     *)
-      local _ai_local_env="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/ai-local.env"
       # shellcheck disable=SC1090
       [[ -r "$_ai_local_env" ]] && source "$_ai_local_env"
       ;;
   esac
+  return 0
+}
+
+run_ai_with_context() {
+  local tool="$1" pattern_name="" prompt="" full_prompt tool_bin
+  shift
+  _ai_bridge_args "$@"
+  if [[ -z "$prompt" ]]; then
+    _show_ai_bridge_usage
+    exit 1
+  fi
+  _ai_bridge_prompt
+  # Resolve the binary name for the tool; install it via mise if missing.
+  tool_bin="$(_ai_tool_bin "$tool")"
+  _ai_ensure_installed "$tool" "$tool_bin"
+  [[ -n "${DOT_AI_RAW:-}" ]] || ui_info "Executing $tool with pattern: ${pattern_name:-none}"
+  _ai_gateway_env "$tool"
 
   # Wrap the provider invocation so we can log it to the unified AI run
   # log. Each entry feeds `dot ai cost` so users see spend across every
