@@ -42,7 +42,7 @@ assert_true "bash -n '$PERF'" "valid bash syntax"
 # ── argument errors ───────────────────────────────────────────────────
 # A flag with no value, or a value that is not a number, is a usage error
 # (exit 2, with a message) rather than a silent exit 1 or a division by 0.
-for bad in "--runs" "-r" "-t" "--shell" "--runs 0" "--runs abc" "-r -1" "--target soon"; do
+for bad in "--runs" "-r" "-t" "--shell" "--runs 0" "--runs abc" "-r -1" "--target soon" "--target x5" "--target 5x"; do
   test_start "perf_rejects_${bad// /_}"
   # shellcheck disable=SC2086
   perf $bad 2>"$OUTF.err"

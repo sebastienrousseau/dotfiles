@@ -229,7 +229,8 @@ _perf_primary_mean() {
       break
     fi
   done
-  if [[ "$mean" -eq 0 && "${#shell_means[@]}" -gt 0 ]]; then
+  # _perf_discover exits when nothing is measurable, so shell_means[0] exists.
+  if [[ "$mean" -eq 0 ]]; then
     mean="${shell_means[0]}"
   fi
 }
