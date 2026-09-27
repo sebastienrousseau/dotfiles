@@ -175,7 +175,7 @@ cmd_lint() {
   total=${#files[@]}
   if [[ "$total" -eq 0 ]]; then
     ui_warn "No files" "No shell scripts found to lint"
-    return 0
+    return 0 # mutation: ignore unreachable in a checkout: lint.sh itself is one of the scripts/*.sh it collects
   fi
 
   case "$mode" in
@@ -187,7 +187,7 @@ cmd_lint() {
     *)
       ui_err "Unknown lint mode: $mode"
       echo "Usage: dot lint [--fix|-f | --check|-c]"
-      exit 1
+      exit 1 # mutation: ignore unreachable from the CLI: the dispatcher only passes all/check/fix
       ;;
   esac
   _lint_summary
