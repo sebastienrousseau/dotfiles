@@ -24,29 +24,54 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: missing enforcement field"
 fi
 
-test_start "enforcement_rbac_function"
-assert_file_contains "$AGENT_SCRIPT" "_agent_rbac_enforcement" "agent.sh should have _agent_rbac_enforcement"
+# Every case below runs `dot` against a private copy of the profiles and a
+# private state file, so neither the repo nor ~/.config is touched.
+DOT_CLI="$REPO_ROOT/bin/dot"
+RBAC_TMP="$DOTFILES_COV_TMPDIR/rbac"
+mkdir -p "$RBAC_TMP"
+export AGENT_PROFILE_CONFIG="$RBAC_TMP/agent-profiles.json"
+export AGENT_STATE_FILE="$RBAC_TMP/agent-mode.env"
+cp "$PROFILES_FILE" "$AGENT_PROFILE_CONFIG"
+PROFILES_BEFORE="$(cat "$PROFILES_FILE")"
 
-test_start "enforcement_current_role_function"
-assert_file_contains "$AGENT_SCRIPT" "_agent_current_role" "agent.sh should have _agent_current_role"
+dot_rc() { bash "$DOT_CLI" "$@" >/dev/null 2>&1 && echo 0 || echo $?; }
+role() { printf 'DOT_AGENT_ROLE=%s\n' "$1" >"$AGENT_STATE_FILE"; }
 
-test_start "enforcement_role_allows_profile_function"
-assert_file_contains "$AGENT_SCRIPT" "_agent_role_allows_profile" "agent.sh should have _agent_role_allows_profile"
+test_start "fleet_enforce_status_reports_mode"
+assert_output_contains "advisory" "bash '$DOT_CLI' fleet enforce status"
 
-test_start "enforcement_enforce_rbac_function"
-assert_file_contains "$AGENT_SCRIPT" "_agent_enforce_rbac" "agent.sh should have _agent_enforce_rbac"
+test_start "fleet_enforce_set_writes_the_override_file"
+bash "$DOT_CLI" fleet enforce set strict >/dev/null 2>&1 || true
+assert_equals "strict" "$(jq -r .rbac.enforcement "$AGENT_PROFILE_CONFIG")" "enforce set writes AGENT_PROFILE_CONFIG"
 
-test_start "enforcement_called_in_mode_set"
-assert_file_contains "$AGENT_SCRIPT" "_agent_enforce_rbac \"\$name\"" "mode set should call _agent_enforce_rbac"
+test_start "fleet_enforce_set_leaves_repo_file_alone"
+assert_equals "$PROFILES_BEFORE" "$(cat "$PROFILES_FILE")" "the tracked profiles file is unchanged"
 
-test_start "fleet_enforce_subcommand"
-assert_file_contains "$FLEET_SCRIPT" "cmd_fleet_enforce" "fleet.sh should have enforce subcommand"
+test_start "fleet_enforce_set_rejects_unknown_mode"
+assert_equals "1" "$(dot_rc fleet enforce set lenient)" "only advisory|strict are accepted"
 
-test_start "fleet_enforce_status_subcommand"
-assert_file_contains "$FLEET_SCRIPT" "enforce)" "fleet dispatch should include enforce"
+test_start "strict_denies_profile_outside_role"
+role viewer
+assert_equals "1" "$(dot_rc mode set plan)" "viewer cannot switch to plan under strict"
 
-test_start "fleet_enforce_set_subcommand"
-assert_file_contains "$FLEET_SCRIPT" "advisory | strict" "fleet enforce set should accept advisory or strict"
+test_start "strict_allows_profile_inside_role"
+role viewer
+assert_equals "0" "$(dot_rc mode set ask)" "viewer can switch to ask under strict"
+
+test_start "mode_set_keeps_role"
+assert_equals "viewer" "$(sed -n 's/^DOT_AGENT_ROLE=//p' "$AGENT_STATE_FILE")" "switching mode keeps DOT_AGENT_ROLE"
+
+test_start "role_survives_mode_switch_under_strict"
+assert_equals "1" "$(dot_rc mode set apply)" "viewer stays denied after a permitted switch"
+
+test_start "strict_default_role_is_developer"
+rm -f "$AGENT_STATE_FILE"
+assert_equals "1" "$(dot_rc mode set audit)" "with no role set, developer cannot use audit"
+
+test_start "advisory_warns_but_allows"
+bash "$DOT_CLI" fleet enforce set advisory >/dev/null 2>&1 || true
+role viewer
+assert_output_contains "not recommended for profile 'plan'" "bash '$DOT_CLI' mode set plan 2>&1"
 
 # Slice 3 (#883): exercise the script under sandbox for line coverage
 cov_exercise_script "$AGENT_SCRIPT"

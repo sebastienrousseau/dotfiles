@@ -357,7 +357,8 @@ cmd_fleet_enforce() {
   local repo_root
   repo_root="$(resolve_chezmoi_source_dir)"
   [[ -z "$repo_root" ]] && repo_root="$(resolve_source_dir)"
-  local profiles_file="$repo_root/dot_config/dotfiles/agent-profiles.json"
+  # Same file `dot mode` enforces against (agent.sh _agent_profiles_file).
+  local profiles_file="${AGENT_PROFILE_CONFIG:-$repo_root/dot_config/dotfiles/agent-profiles.json}"
 
   case "$subcommand" in
     status)

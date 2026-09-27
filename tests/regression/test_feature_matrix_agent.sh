@@ -935,6 +935,11 @@ test_fm_agents_render() {
   repo="$(fm_agents_repo)"
   local prev="$PWD"
   cd "$repo" || return 0
+  # Compare against the checkout's own state rather than expecting it clean:
+  # a copy with no commits (the mutation gate's pool) lists everything as
+  # untracked before the render has run.
+  local checkout_before
+  checkout_before="$(git -C "$REPO_ROOT" status --porcelain -- AGENTS.md .cursor .codex 2>/dev/null)"
   test_start "fm_agents_render"
   fm_run_bin "$repo/bin/dot" agents render
   fm_expect_rc 0
@@ -953,7 +958,7 @@ test_fm_agents_render() {
     fm_fail "harness files not rendered:$missing"
   fi
   test_start "fm_agents_render_did_not_touch_the_checkout"
-  if [[ -n "$(git -C "$REPO_ROOT" status --porcelain -- AGENTS.md .cursor .codex 2>/dev/null)" ]]; then
+  if [[ "$(git -C "$REPO_ROOT" status --porcelain -- AGENTS.md .cursor .codex 2>/dev/null)" != "$checkout_before" ]]; then
     fm_fail "render modified the real checkout"
   else
     fm_pass "checkout untouched"

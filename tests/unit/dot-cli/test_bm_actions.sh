@@ -156,53 +156,22 @@ _run_bm "$TMP" teleport
 _bm_expect "unknown_action_exits_1" 1 "Unknown action: teleport"
 
 # =======================================================================
-# 8. _sed_i picks the GNU branch when `sed --version` succeeds.
+# 8. Names are literal strings, one entry per name.
 # =======================================================================
-GNU_SED_BIN="$TMP/bm-gnused"
-mkdir -p "$GNU_SED_BIN"
-for tool in grep cut pwd mkdir touch dirname cat echo env; do
-  p="$(command -v "$tool" 2>/dev/null || true)"
-  [[ -n "$p" ]] && ln -sf "$p" "$GNU_SED_BIN/$tool"
-done
-ln -sf "$BASH" "$GNU_SED_BIN/bash"
-cat >"$GNU_SED_BIN/sed" <<EOF
-#!/usr/bin/env bash
-# A GNU-style sed: it answers --version, and its -i takes no suffix
-# argument. Delegates the edit to the host sed, adding the empty suffix
-# the BSD form requires so the fixture works on either platform.
-if [[ "\${1:-}" == "--version" ]]; then
-  echo "sed (GNU sed) 4.9"
-  exit 0
-fi
-args=()
-for a in "\$@"; do
-  if [[ "\$a" == "-i" ]] && $(command -v sed) --version >/dev/null 2>&1; then
-    args+=("-i")
-  elif [[ "\$a" == "-i" ]]; then
-    args+=("-i" "")
-  else
-    args+=("\$a")
-  fi
-done
-exec $(command -v sed) "\${args[@]}"
-EOF
-chmod +x "$GNU_SED_BIN/sed"
+_run_bm "$TMP/bm-work/alpha" add dup
+_run_bm "$TMP/bm-work/beta" add dup
+_run_bm "$TMP" goto dup
+_bm_expect "readd_repoints_bookmark" 0 "$TMP/bm-work/beta"
 
-printf 'gnu %s\n' "$TMP/bm-work/alpha" >>"$BOOKMARKS"
-BM_RC=0
-BM_OUT="$(
-  cd "$TMP" &&
-    env BASH_XTRACEFD=21 PATH="$GNU_SED_BIN" HOME="$BM_HOME" "$BASH" "$BM_FILE" remove gnu </dev/null 2>&1
-)" || BM_RC=$?
-_bm_expect "gnu_sed_branch_removes_entry" 0 "Bookmark 'gnu' removed"
+_run_bm "$TMP/bm-work/beta" add 'a/b'
+_run_bm "$TMP" remove 'a/b'
+_bm_expect "name_with_slash_is_removable" 0 "Bookmark 'a/b' removed"
 
-test_start "gnu_sed_branch_dropped_the_line"
-if ! grep -q '^gnu ' "$BOOKMARKS"; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: the GNU sed branch did not remove the entry"
-fi
+test_start "name_with_slash_dropped_the_line"
+assert_equals "0" "$(grep -c '^a/b ' "$BOOKMARKS")" "the a/b entry is gone"
+
+_run_bm "$TMP/bm-work/beta" add abc
+_run_bm "$TMP" goto 'a.c'
+_bm_expect "name_is_literal_not_regex" 1 "Bookmark 'a.c' not found"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
