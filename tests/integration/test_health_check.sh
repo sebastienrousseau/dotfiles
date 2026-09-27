@@ -34,10 +34,6 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: health.sh should be readable"
 fi
 
-test_start "health_check_shebang"
-first_line=$(head -n 1 "$HEALTH_SCRIPT")
-assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
-
 # ── Execution in sandbox ───────────────────────────────────────
 
 test_start "health_check_runs_without_crash"

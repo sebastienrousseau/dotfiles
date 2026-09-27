@@ -146,9 +146,6 @@ assert_file_contains "${TMPDIR:-/tmp}/test_ai_aliases_$$" "ollama_show_not_defin
 rm -f ${TMPDIR:-/tmp}/test_ai_aliases_$$
 mock_cleanup
 
-test_start "aliases_syntax_check"
-assert_exit_code 0 "bash -n '$ALIASES_FILE'"
-
 test_start "aliases_shellcheck"
 if command -v shellcheck >/dev/null 2>&1; then
   assert_exit_code 0 "shellcheck '$ALIASES_FILE'"

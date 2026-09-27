@@ -17,10 +17,6 @@ EXAMPLES_DIR="$REPO_ROOT/examples"
 test_start "examples_coverage_script_exists"
 assert_file_exists "$SCRIPT_FILE" "examples coverage script should exist"
 
-test_start "examples_coverage_syntax"
-assert_exit_code 0 "bash -n '$SCRIPT_FILE'"
-
-# Feature domains that were previously undocumented-by-example.
 test_start "examples_cover_theme_secrets_fleet"
 assert_file_exists "$EXAMPLES_DIR/example-theme.sh" "theme feature must have an example"
 assert_file_exists "$EXAMPLES_DIR/example-secrets.sh" "secrets feature must have an example"

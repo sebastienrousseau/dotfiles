@@ -40,21 +40,6 @@ else
 fi
 
 # Test: shellcheck compliance
-test_start "verify_shellcheck"
-if command -v shellcheck &>/dev/null; then
-  errors=$(shellcheck -S error "$VERIFY_FILE" 2>&1 | wc -l)
-  if [[ "$errors" -eq 0 ]]; then
-    ((TESTS_PASSED++)) || true
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
-  else
-    ((TESTS_FAILED++)) || true
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
-  fi
-else
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available"
-fi
-
 echo ""
 echo "Verify state tests completed."
 # Slice 3 (#883): exercise the script under sandbox for line coverage

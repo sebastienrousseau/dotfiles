@@ -41,18 +41,67 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: missing securityPolicy"
 fi
 
-test_start "delegate_subcommand_exists"
-assert_file_contains "$AGENT_SCRIPT" "delegate)" "agent.sh should have delegate subcommand"
+# The delegate cases run `dot agent delegate` against a private profiles
+# copy, state file and log dir, so neither the repo nor ~/.config is touched.
+DOT_CLI="$REPO_ROOT/bin/dot"
+DEL_TMP="$DOTFILES_COV_TMPDIR/delegate"
+mkdir -p "$DEL_TMP/state"
+unset DOT_AGENT_PROFILE DOT_AGENT_ROLE
+export AGENT_PROFILE_CONFIG="$DEL_TMP/agent-profiles.json"
+export AGENT_STATE_FILE="$DEL_TMP/agent-mode.env"
+export XDG_STATE_HOME="$DEL_TMP/state"
+SESSIONS="$XDG_STATE_HOME/dotfiles/agent-sessions.jsonl"
 
-test_start "delegate_checks_enabled"
-assert_file_contains "$AGENT_SCRIPT" "delegation.enabled" "delegate should check if delegation is enabled"
+# profiles <jq filter applied to the tracked file>
+profiles() { jq "$1" "$PROFILES_FILE" >"$AGENT_PROFILE_CONFIG"; }
+state() { printf '%s\n' "$@" >"$AGENT_STATE_FILE"; }
+delegate() {
+  out=$(bash "$DOT_CLI" agent delegate "$@" 2>&1)
+  rc=$?
+}
 
-test_start "delegate_checks_can_delegate"
-assert_file_contains "$AGENT_SCRIPT" "canDelegate" "delegate should check canDelegate"
+profiles '.'
+state DOT_AGENT_PROFILE=apply
 
-test_start "delegate_logs_events"
-assert_file_contains "$AGENT_SCRIPT" "delegate_start" "delegate should log start event"
-assert_file_contains "$AGENT_SCRIPT" "delegate_finish" "delegate should log finish event"
+test_start "delegate_refused_while_disabled"
+delegate test-runner true || true
+assert_contains "Delegation is not enabled" "$rc:$out" "the shipped config keeps delegation off"
+
+profiles '.delegation.enabled = true'
+
+test_start "delegate_refused_from_profile_without_canDelegate"
+state DOT_AGENT_PROFILE=ask
+delegate test-runner true || true
+assert_true "[[ \$rc == 1 && \$out == *\"Profile 'ask' cannot delegate\"* ]]" "ask cannot delegate (rc=$rc)"
+
+test_start "delegate_refuses_unknown_name"
+state DOT_AGENT_PROFILE=apply
+delegate no-such-delegate true || true
+assert_contains "Unknown delegate: no-such-delegate" "$out"
+
+test_start "delegate_runs_command_with_delegate_env"
+delegate test-runner sh -c 'echo "env=$DOT_AGENT_DELEGATE:$DOT_AGENT_MAX_STEPS:$DOT_AGENT_PARENT_PROFILE:$DOT_AGENT_PROFILE"' || true
+assert_contains "env=test-runner:6:apply:apply" "$out"
+
+test_start "delegate_logs_start_and_finish"
+assert_equals "delegate_start delegate_finish" \
+  "$(jq -r 'select(.event? // .action? // "" | test("delegate")) | (.event // .action)' "$SESSIONS" 2>/dev/null | tail -n 2 | xargs)" \
+  "one start and one finish event per delegation"
+
+test_start "delegate_propagates_failure_exit_code"
+delegate test-runner sh -c 'exit 3' || true
+assert_equals "3" "$rc" "the delegated command's exit code is returned"
+
+test_start "delegate_strict_rbac_denies_profile_outside_role"
+profiles '.delegation.enabled = true | .rbac.enforcement = "strict"'
+state DOT_AGENT_PROFILE=apply
+delegate security-reviewer true || true
+assert_contains "RBAC: role 'developer' is not allowed to use profile 'audit'" "$out"
+
+test_start "delegate_strict_rbac_allows_admin"
+state DOT_AGENT_ROLE=admin DOT_AGENT_PROFILE=apply
+delegate security-reviewer true || true
+assert_equals "0" "$rc" "admin may delegate to an audit-profile delegate"
 
 test_start "apply_profile_can_delegate"
 cd="$(jq -r '.profiles.apply.canDelegate' "$PROFILES_FILE")"

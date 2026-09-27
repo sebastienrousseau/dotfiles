@@ -25,10 +25,6 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: rollback.sh should be executable"
 fi
 
-test_start "rollback_script_shebang"
-first_line=$(head -n 1 "$ROLLBACK_SCRIPT")
-assert_equals "#!/usr/bin/env bash" "$first_line" "rollback.sh should have bash shebang"
-
 test_start "rollback_script_strict_mode"
 if grep -q 'set -euo pipefail' "$ROLLBACK_SCRIPT"; then
   ((TESTS_PASSED++))

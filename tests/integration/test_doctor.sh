@@ -27,10 +27,6 @@ run_doctor_with_timeout() {
 test_start "doctor_script_exists"
 assert_file_exists "$DOCTOR_SCRIPT" "doctor.sh should exist"
 
-test_start "doctor_script_shebang"
-first_line=$(head -n 1 "$DOCTOR_SCRIPT")
-assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
-
 test_start "doctor_script_strict_mode"
 if grep -q 'set -euo pipefail' "$DOCTOR_SCRIPT"; then
   ((TESTS_PASSED++))

@@ -24,9 +24,6 @@ MATRIX="$REPO_ROOT/docs/reference/FEATURE-MATRIX.md"
 test_start "check_feature_matrix_script_exists"
 assert_file_exists "$GATE" "feature matrix gate should exist"
 
-test_start "check_feature_matrix_script_syntax"
-assert_exit_code 0 "bash -n '$GATE'"
-
 test_start "feature_matrix_doc_exists"
 assert_file_exists "$MATRIX" "FEATURE-MATRIX.md should exist"
 

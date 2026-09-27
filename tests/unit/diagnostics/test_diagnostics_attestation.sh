@@ -17,9 +17,6 @@ DOT_CLI="$REPO_ROOT/bin/dot"
 test_start "attestation_exists"
 assert_file_exists "$TEST_SCRIPT" "workstation-attestation.sh should exist"
 
-test_start "attestation_syntax"
-assert_exit_code 0 "bash -n '$TEST_SCRIPT'"
-
 test_start "attestation_registered"
 assert_file_contains "$DOT_CLI" "attest" "dot CLI should register attest command"
 

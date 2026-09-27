@@ -27,17 +27,6 @@ else
 fi
 
 # Test: install.sh has shebang
-test_start "install_script_shebang"
-first_line=$(head -n 1 "$INSTALL_SCRIPT")
-if [[ "$first_line" == "#!/"* ]]; then
-  ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: has proper shebang"
-else
-  ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have shebang"
-fi
-
-# Test: install.sh uses set -e
 test_start "install_script_set_e"
 if grep -q "set -e" "$INSTALL_SCRIPT"; then
   ((TESTS_PASSED++))

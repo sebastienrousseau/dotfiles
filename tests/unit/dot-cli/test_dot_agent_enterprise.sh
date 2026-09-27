@@ -22,11 +22,12 @@ test_start "agent_card_exists"
 assert_file_exists "$AGENT_CARD" "agent-card.json should exist"
 assert_file_exists "$WELL_KNOWN" ".well-known agent.json should exist"
 
-test_start "agent_meta_supports_enterprise_subcommands"
-assert_file_contains "$AGENT_MODULE" "card)" "dot mode supports card"
-assert_file_contains "$AGENT_MODULE" "log)" "dot mode supports log"
-assert_file_contains "$AGENT_MODULE" "checkpoint)" "dot mode supports checkpoint"
-assert_file_contains "$AGENT_MODULE" "conformance)" "dot mode supports conformance"
+# card and conformance are exercised by the *_runs cases below.
+test_start "agent_log_shows_session_events"
+assert_output_contains '"event":"log"' "XDG_STATE_HOME='$DOTFILES_COV_TMPDIR/ent-state' bash '$DOT_CLI' agent log"
+
+test_start "agent_checkpoint_lists_checkpoints"
+assert_output_contains "Agent Checkpoints" "XDG_STATE_HOME='$DOTFILES_COV_TMPDIR/ent-state' bash '$DOT_CLI' agent checkpoint"
 
 test_start "agent_card_runs"
 assert_output_contains "Agent Card" "bash '$DOT_CLI' agent card"

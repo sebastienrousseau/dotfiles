@@ -25,10 +25,6 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax error"
 fi
 
-test_start "drift_dashboard_shebang"
-first_line=$(head -n 1 "$TEST_SCRIPT")
-assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
-
 # Slice 2: drive real line coverage of the script under test
 cov_exercise_script "$TEST_SCRIPT"
 

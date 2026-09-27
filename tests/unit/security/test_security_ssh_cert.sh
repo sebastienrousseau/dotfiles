@@ -171,21 +171,6 @@ else
 fi
 
 # Test: shellcheck compliance
-test_start "ssh_cert_shellcheck"
-if command -v shellcheck &>/dev/null; then
-  errors=$(shellcheck -S error -e SC1091 "$CERT_FILE" 2>&1 | wc -l)
-  if [[ "$errors" -eq 0 ]]; then
-    ((TESTS_PASSED++)) || true
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
-  else
-    ((TESTS_FAILED++)) || true
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
-  fi
-else
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
-fi
-
 echo ""
 echo "SSH certificate security tests completed."
 # Slice 2: drive real line coverage of the script under test

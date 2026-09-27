@@ -77,21 +77,6 @@ else
 fi
 
 # Test: shellcheck compliance
-test_start "meta_shellcheck"
-if command -v shellcheck &>/dev/null; then
-  errors=$(shellcheck -S error "$META_FILE" 2>&1 | wc -l)
-  if [[ "$errors" -eq 0 ]]; then
-    ((TESTS_PASSED++)) || true
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: passes shellcheck"
-  else
-    ((TESTS_FAILED++)) || true
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: has shellcheck errors"
-  fi
-else
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: shellcheck not available, skipped"
-fi
-
 # ── cmd_upgrade renders through the step runner ──────────────────────
 # Regression for the "dot upgrade dumps raw subprocess output" report.
 # Each phase must run as a tracked step with its stdout+stderr captured

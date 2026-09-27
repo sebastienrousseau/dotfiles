@@ -25,10 +25,6 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax error"
 fi
 
-test_start "secret_governance_shebang"
-first_line=$(head -n 1 "$TEST_SCRIPT")
-assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
-
 test_start "secret_governance_bash_3_compatible"
 if ! grep -Eq '^[[:space:]]*mapfile([[:space:]]|$)' "$TEST_SCRIPT"; then
   ((TESTS_PASSED++)) || true

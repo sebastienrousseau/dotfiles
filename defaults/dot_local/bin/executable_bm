@@ -4,13 +4,15 @@
 
 set -eu
 
-# Cross-platform sed in-place (BSD vs GNU)
-_sed_i() {
-  if sed --version >/dev/null 2>&1; then
-    sed -i "$@" # GNU
-  else
-    sed -i '' "$@" # BSD (macOS)
-  fi
+# Names are matched as literal strings (passed through the environment, not
+# as a regex or awk -v, so '.', '/' and '\' are ordinary characters).
+_bm_lookup() {
+  BM_NAME="$1" awk 'index($0, ENVIRON["BM_NAME"] " ") == 1 { p = substr($0, length(ENVIRON["BM_NAME"]) + 2) } END { if (p != "") print p }' "$BOOKMARKS_FILE"
+}
+
+_bm_drop() {
+  BM_NAME="$1" awk 'index($0, ENVIRON["BM_NAME"] " ") != 1' "$BOOKMARKS_FILE" >"$BOOKMARKS_FILE.tmp"
+  mv "$BOOKMARKS_FILE.tmp" "$BOOKMARKS_FILE"
 }
 
 BOOKMARKS_FILE="$HOME/.config/shell/bookmarks"
@@ -41,6 +43,8 @@ case "$action" in
       echo "Usage: bm add <name>"
       exit 1
     fi
+    # One entry per name: re-adding repoints it instead of shadowing it.
+    _bm_drop "$name"
     echo "$name $(pwd)" >>"$BOOKMARKS_FILE"
     echo "Bookmark '$name' added for $(pwd)"
     ;;
@@ -49,7 +53,7 @@ case "$action" in
       echo "Usage: bm goto <name>"
       exit 1
     fi
-    target=$(grep "^$name " "$BOOKMARKS_FILE" | cut -d' ' -f2-)
+    target=$(_bm_lookup "$name")
     if [ -n "$target" ] && [ -d "$target" ]; then
       # We output the target path, the shell alias/function must handle the cd
       echo "$target"
@@ -70,7 +74,7 @@ case "$action" in
       echo "Usage: bm remove <name>"
       exit 1
     fi
-    _sed_i "/^$name /d" "$BOOKMARKS_FILE"
+    _bm_drop "$name"
     echo "Bookmark '$name' removed"
     ;;
   update)
@@ -78,7 +82,7 @@ case "$action" in
       echo "Usage: bm update <name>"
       exit 1
     fi
-    _sed_i "/^$name /d" "$BOOKMARKS_FILE"
+    _bm_drop "$name"
     echo "$name $(pwd)" >>"$BOOKMARKS_FILE"
     echo "Bookmark '$name' updated to $(pwd)"
     ;;

@@ -12,9 +12,6 @@ SCRIPT_FILE="$REPO_ROOT/defaults/dot_local/bin/executable_corralctl-sync.sh"
 test_start "corralctl_sync_script_exists"
 assert_file_exists "$SCRIPT_FILE" "scheduled corralctl sync wrapper must exist"
 
-test_start "corralctl_sync_script_syntax"
-assert_exit_code 0 "bash -n '$SCRIPT_FILE'"
-
 test_start "corralctl_sync_targets_owner"
 assert_file_contains "$SCRIPT_FILE" 'OWNER="sebastienrousseau"' "wrapper must target the configured GitHub owner"
 

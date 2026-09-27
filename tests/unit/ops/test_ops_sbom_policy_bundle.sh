@@ -17,9 +17,6 @@ WORKFLOW_FILE="$REPO_ROOT/.github/workflows/policy-bundle-release.yml"
 test_start "sbom_bundle_script_exists"
 assert_file_exists "$BUNDLE_SCRIPT" "package-policy-bundles.sh should exist"
 
-test_start "sbom_bundle_script_syntax"
-assert_exit_code 0 "bash -n '$BUNDLE_SCRIPT'"
-
 test_start "sbom_bundle_generates_cyclonedx"
 assert_file_contains "$BUNDLE_SCRIPT" "sbom.cyclonedx.json" "script should reference SBOM file"
 

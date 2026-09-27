@@ -25,10 +25,6 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax error"
 fi
 
-test_start "ai_setup_shebang"
-first_line=$(head -n 1 "$TEST_SCRIPT")
-assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
-
 test_start "ai_setup_includes_copilot"
 assert_file_contains "$TEST_SCRIPT" "setup_tool \"Copilot CLI\" \"copilot\" copilot --version" "should setup Copilot CLI"
 

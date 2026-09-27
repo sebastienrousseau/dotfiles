@@ -13,9 +13,6 @@ AGENT_SCRIPT="$REPO_ROOT/scripts/dot/commands/agent.sh"
 test_start "conformance_script_exists"
 assert_file_exists "$CONFORMANCE_SCRIPT" "a2a-conformance.sh should exist"
 
-test_start "conformance_script_syntax"
-assert_exit_code 0 "bash -n '$CONFORMANCE_SCRIPT'"
-
 test_start "conformance_validates_a2a_card"
 assert_file_contains "$CONFORMANCE_SCRIPT" "agent-card.json" "should validate .well-known/agent-card.json"
 

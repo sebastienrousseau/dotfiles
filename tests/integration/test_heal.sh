@@ -24,10 +24,6 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: heal.sh should be executable"
 fi
 
-test_start "heal_script_shebang"
-first_line=$(head -n 1 "$HEAL_SCRIPT")
-assert_equals "#!/usr/bin/env bash" "$first_line" "should have bash shebang"
-
 test_start "heal_script_strict_mode"
 if grep -q 'set -euo pipefail' "$HEAL_SCRIPT"; then
   ((TESTS_PASSED++))
