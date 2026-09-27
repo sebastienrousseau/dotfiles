@@ -14,6 +14,8 @@ mkdir -p "$REPORT_DIR"
 
 check_github_actions_updates() {
   echo "=== GitHub Actions Updates ===" >>"$REPORT_DIR/updates.txt"
+  # Rebuilt from scratch each run; appending repeated every action per run.
+  true >"$REPORT_DIR/actions-current.txt"
 
   # Extract all GitHub Actions from workflow files
   find "$REPO_ROOT/.github/workflows" -name "*.yml" -o -name "*.yaml" | while read -r workflow; do
@@ -52,13 +54,18 @@ check_chezmoi_updates() {
   echo "=== Chezmoi Updates ===" >>"$REPORT_DIR/updates.txt"
 
   if command -v curl &>/dev/null; then
-    LATEST_VERSION=$(curl -s "https://api.github.com/repos/twpayne/chezmoi/releases/latest" | grep '"tag_name"' | cut -d'"' -f4 | sed 's/^v//')
-    CURRENT_VERSION=$(grep "CHEZMOI_VERSION:" "$REPO_ROOT/.github/workflows/ci.yml" | cut -d'"' -f2 | head -1)
+    # Offline or rate-limited: no tag_name, which must not end the run either.
+    LATEST_VERSION=$(curl -s "https://api.github.com/repos/twpayne/chezmoi/releases/latest" | grep '"tag_name"' | cut -d'"' -f4 | sed 's/^v//' || true)
+    # No pin in ci.yml must not end the run (grep's exit 1 under pipefail did).
+    CURRENT_VERSION=$(grep "CHEZMOI_VERSION:" "$REPO_ROOT/.github/workflows/ci.yml" 2>/dev/null | cut -d'"' -f2 | head -1 || true)
+    CURRENT_VERSION="${CURRENT_VERSION:-unknown}"
 
     echo "Current Chezmoi: $CURRENT_VERSION" >>"$REPORT_DIR/updates.txt"
     echo "Latest Chezmoi:  $LATEST_VERSION" >>"$REPORT_DIR/updates.txt"
 
-    if [[ "$CURRENT_VERSION" != "$LATEST_VERSION" ]]; then
+    if [[ -z "$LATEST_VERSION" ]]; then
+      echo "Latest Chezmoi version unavailable (GitHub API unreachable)" >>"$REPORT_DIR/updates.txt"
+    elif [[ "$CURRENT_VERSION" != "$LATEST_VERSION" ]]; then
       echo "⚠️  Chezmoi update available: $CURRENT_VERSION → $LATEST_VERSION" >>"$REPORT_DIR/updates.txt"
     else
       echo "✅ Chezmoi is up to date" >>"$REPORT_DIR/updates.txt"
@@ -100,7 +107,9 @@ generate_summary() {
 
   # Count potential updates (simplified heuristic)
   local update_count
-  update_count=$(grep -c "⚠️\|→" "$REPORT_DIR/updates.txt" 2>/dev/null || echo "0")
+  # grep -c prints 0 itself when nothing matches (and exits 1).
+  update_count=$(grep -c "⚠️\|→" "$REPORT_DIR/updates.txt" 2>/dev/null || true)
+  update_count="${update_count:-0}"
 
   if [[ $update_count -gt 0 ]]; then
     echo "🔄 $update_count potential updates found" >>"$REPORT_DIR/updates.txt"
