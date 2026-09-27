@@ -3,6 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091
 # test-kind: structural
+# Regression for: GH-1168
 # Repo-wide hygiene for every shell script meant to be executed: a portable
 # shebang (#!/usr/bin/env <interpreter>, or #!/bin/sh), and bash scripts
 # must parse (bash -n). This replaces the per-file shebang and `bash -n`
