@@ -246,18 +246,19 @@ _apply_ai_install() {
   IFS='|' read -r bin pkg label <<<"$1"
   if [[ "$pkg" == "native" ]]; then
     "install_${bin}_native" "$label"
-    return 0
-  fi
-  if ! command -v gum &>/dev/null; then
-    ui_info "Installing" "$label via mise ($pkg)"
-    _ai_in_scratch_dir mise use -g "$pkg@latest" 2>&1 || ui_warn "$label" "install failed (continuing)" # mutation: ignore unreachable: _ai_to_install is only filled by gum choose, so this non-gum fallback never runs
-    return 0
-  fi
-  if _ai_in_scratch_dir gum spin --spinner dot --title "Installing $label ($pkg)" -- \
-    mise use -g "$pkg@latest" 2>&1; then
-    ui_ok "$label" "installed"
+  elif command -v gum &>/dev/null; then
+    if _ai_in_scratch_dir gum spin --spinner dot --title "Installing $label ($pkg)" -- \
+      mise use -g "$pkg@latest" 2>&1; then
+      ui_ok "$label" "installed"
+    else
+      ui_warn "$label" "install failed (continuing)"
+    fi
   else
-    ui_warn "$label" "install failed (continuing)"
+    # Unreachable in practice: _ai_to_install is only filled by gum choose,
+    # and bash's command hash keeps `command -v gum` true for the rest of
+    # the run even if gum is removed.
+    ui_info "Installing" "$label via mise ($pkg)"
+    _ai_in_scratch_dir mise use -g "$pkg@latest" 2>&1 || ui_warn "$label" "install failed (continuing)" # mutation: ignore unreachable: see above
   fi
 }
 

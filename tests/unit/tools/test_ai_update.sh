@@ -26,13 +26,14 @@ aiu() {
   mk() {
     {
       printf '#!%s\n' "$REAL_BASH"
+      printf 'printf "%%s\\n" "%s $*" >>"%s/calls"\n' "$1" "$d"
       [[ " $failing " == *" $1 "* ]] && printf 'exit 1\n'
       printf '%s\n' "$2"
     } >"$d/stubs/$1"
     chmod +x "$d/stubs/$1"
   }
   mk chezmoi "echo '$REPO_ROOT/defaults'"
-  mk uname "case \"\${1:-}\" in -m) echo x86_64 ;; *) echo $os ;; esac"
+  mk uname "case \"\${1:-}\" in -m) echo ${AIU_ARCH:-x86_64} ;; *) echo $os ;; esac"
   mk sudo 'exit 0'
   mk curl 'exit 1'
   for t in $present; do
@@ -40,6 +41,8 @@ aiu() {
       node) mk node 'echo v24.1.0' ;;
       mise) mk mise '[ "${1:-}" = --version ] && echo "2026.9.9 macos-arm64"; exit 0' ;;
       ollama) mk ollama 'echo "ollama version is 0.9.1"' ;;
+      local-goose) mkdir -p "$d/home/.local/bin" && printf '#!/bin/sh\n' >"$d/home/.local/bin/goose" &&
+        chmod +x "$d/home/.local/bin/goose" ;;
       *) mk "$t" 'exit 0' ;;
     esac
   done
@@ -86,5 +89,30 @@ assert_contains "v24.1.0" "$(printf '%s\n' "$out" | grep 'Node:')" "node's versi
 test_start "ai_update_linux_sudo_failure_stops_early"
 aiu Linux "mise" "sudo"
 assert_equals "1:yes" "$rc:$([[ "$out" == *"Sudo required"* ]] && echo yes)" "no sudo, no system updates"
+
+# A native tool installed only under ~/.local/bin (not on PATH) is still
+# updated; one that is nowhere is left alone.
+test_start "ai_update_reinstalls_a_tool_found_only_in_local_bin"
+aiu Darwin "local-goose" ""
+assert_contains "Goose" "$out" "the ~/.local/bin copy is found"
+
+test_start "ai_update_skips_a_native_tool_that_is_not_installed"
+aiu Darwin "" ""
+assert_equals "no" "$([[ "$out" == *Goose* ]] && echo yes || echo no)" "no goose, no goose step"
+
+test_start "ai_update_macos_ollama_upgrades_through_brew"
+aiu Darwin "ollama brew" ""
+assert_file_contains "$WORK/case/calls" "brew upgrade ollama --cask" "brew is asked to upgrade the cask"
+
+test_start "ai_update_macos_ollama_brew_failure_falls_back_to_the_app"
+aiu Darwin "ollama brew" "brew"
+assert_contains "Update via App" "$(printf '%s\n' "$out" | grep -A1 'Ollama (macOS)')" "a failed brew upgrade is not reported as done"
+
+test_start "ai_update_linux_ollama_unsupported_arch_is_skipped"
+AIU_ARCH=riscv64 aiu Linux "ollama" ""
+assert_equals "0:yes" "$rc:$([[ "$out" == *"unsupported arch"* ]] && echo yes)" "an unknown arch skips ollama and the run succeeds"
+
+test_start "ai_update_linux_ollama_unsupported_arch_does_not_stop_the_run"
+assert_contains "Dotfiles Environment Ready" "$out" "the summary still prints"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
