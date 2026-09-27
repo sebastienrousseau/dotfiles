@@ -157,7 +157,6 @@
   16   31   29.8   62     0 scripts/dot/commands/fleet.sh::cmd_fleet_namespace
   11   12   24.2   45     0 scripts/dot/commands/fleet.sh::cmd_fleet_status
   23   24   29.9  106     0 scripts/dot/commands/init.sh::cmd_init
-  27   41   58.9  110     0 scripts/dot/commands/lint.sh::cmd_lint
   11    5   12.3   27   136 scripts/dot/commands/manual.sh::<top>
   11   11   15.2   34     0 scripts/dot/commands/manual.sh::cmd_open
   14    4   24.5   61   351 scripts/dot/commands/meta.sh::<top>
