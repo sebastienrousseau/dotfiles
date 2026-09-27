@@ -30,18 +30,22 @@ AI_STATUS_CACHE_FILE="${AI_CACHE_DIR}/status.tsv"
 # `.chezmoiroot` moves the source tree one level down (it holds
 # `defaults` here), so probing <repo>/dot_config/… alone made this a
 # no-op and `--style` died with "Pattern not found" off-deployment.
-if [[ ! -d "$PATTERN_DIR" ]]; then
-  _AI_SRC="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-  _AI_SUB=""
-  [[ -f "$_AI_SRC/.chezmoiroot" ]] &&
-    _AI_SUB="/$(head -1 "$_AI_SRC/.chezmoiroot" | tr -d '[:space:]')"
-  for _AI_CAND in "$_AI_SRC/dot_config/ai/patterns" "$_AI_SRC$_AI_SUB/dot_config/ai/patterns"; do
-    if [[ -d "$_AI_CAND" ]]; then
-      PATTERN_DIR="$_AI_CAND"
-      break
+_ai_resolve_pattern_dir() {
+  [[ -d "$PATTERN_DIR" ]] && return 0
+  local src sub="" cand
+  src="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+  if [[ -f "$src/.chezmoiroot" ]]; then
+    sub="/$(head -1 "$src/.chezmoiroot" | tr -d '[:space:]')"
+  fi
+  for cand in "$src/dot_config/ai/patterns" "$src$sub/dot_config/ai/patterns"; do
+    if [[ -d "$cand" ]]; then
+      PATTERN_DIR="$cand"
+      return 0
     fi
   done
-fi
+  return 0
+}
+_ai_resolve_pattern_dir
 
 _show_ai_bridge_usage() {
   echo "Usage: dot ai \"<prompt>\"              # one-shot on Claude"
@@ -358,10 +362,8 @@ run_ai_with_context() {
   return "$_ai_exit"
 }
 
-# Dispatch — flat, verb-first surface (see docs/AI.md).
-case "${1:-}" in
-  --help | -h | help)
-    cat <<'EOF'
+_ai_usage() {
+  cat <<'EOF'
 Usage: ai.sh <command> [args...]
 
 Commands:
@@ -369,113 +371,91 @@ Commands:
   cursor-agent, grok, kimi, agy, kiro, sgpt, ollama, opencode, aider, autohand,
   vibe, qwen, zai
 EOF
-    ;;
-  "")
-    cat <<'EOF'
-Usage: ai.sh <command> [args...]
+}
 
-Commands:
-  ai, ai-setup, ai-query, cl, claude, codex, copilot, goose, crush, amp,
-  cursor-agent, grok, kimi, agy, kiro, sgpt, ollama, opencode, aider, autohand,
-  vibe, qwen, zai
-EOF
-    exit 1
-    ;;
-  ai)
-    shift
-    case "${1:-}" in
-      "")
-        # Bare `dot ai` → the Bubble Tea cockpit (or the launcher fallback).
-        _ai_cockpit cmd_ai_status
-        ;;
-      chat)
-        shift
-        cmd_ai_chat "$@"
-        ;;
-      tools)
-        shift
-        if [[ "${1:-}" == install ]]; then
-          shift
-          cmd_ai_install "$@"
-        else
-          cmd_ai_status "$@"
-        fi
-        ;;
-      install)
+# `dot ai <verb> …` → the function that takes the remaining arguments.
+_AI_VERBS="chat:cmd_ai_chat install:cmd_ai_install serve:_ai_serve cost:cmd_ai_cost
+login:cmd_ai_setup doctor:cmd_ai_doctor ask:cmd_ai_query run:_ai_oneshot delegate:cmd_ai_delegate"
+
+# Deprecated `dot ai` verbs and the bare / unknown forms. `status` and
+# `local` keep their verb in "$@", as they always have.
+_ai_other_verb() {
+  case "${1:-}" in
+    # Bare `dot ai` → the Bubble Tea cockpit (or the launcher fallback).
+    "") _ai_cockpit cmd_ai_status ;;
+    tools)
+      shift
+      if [[ "${1:-}" == install ]]; then
         shift
         cmd_ai_install "$@"
-        ;;
-      serve)
-        shift
-        _ai_serve "$@"
-        ;;
-      cost)
-        shift
-        cmd_ai_cost "$@"
-        ;;
-      login)
-        shift
-        cmd_ai_setup "$@"
-        ;;
-      doctor)
-        shift
-        cmd_ai_doctor "$@"
-        ;;
-      ask)
-        shift
-        cmd_ai_query "$@"
-        ;;
-      run)
-        shift
-        _ai_oneshot "$@"
-        ;;
-      delegate)
-        shift
-        cmd_ai_delegate "$@"
-        ;;
-      # Deprecated verbs — still work, with a one-line hint to the new name.
-      status)
-        _ai_deprecated "dot ai tools"
+      else
         cmd_ai_status "$@"
-        ;;
-      dashboard | dash)
-        _ai_deprecated "dot ai  (cockpit)"
-        _ai_cockpit cmd_ai_status
-        ;;
-      proxy)
-        shift
-        _ai_deprecated "dot ai serve"
-        has_command dot-ai-proxy && exec dot-ai-proxy "$@" || exit 1
-        ;;
-      local)
-        _ai_deprecated "dot ai serve"
-        has_command dot-ai-proxy && exec dot-ai-proxy "$@" || exit 1
-        ;;
-      *)
-        # Bare prompt (`dot ai "fix this"`) or `dot ai <tool> "…"` → one-shot.
-        _ai_oneshot "$@"
-        ;;
-    esac
-    ;;
-  # Deprecated top-level forms — kept for muscle memory.
-  ai-setup)
-    _ai_deprecated "dot ai login"
-    shift
-    cmd_ai_setup "$@"
-    ;;
-  ai-query)
-    _ai_deprecated "dot ai ask"
-    shift
-    cmd_ai_query "$@"
-    ;;
-  cl | claude | codex | copilot | goose | crush | amp | cursor-agent | grok | kimi | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
-    _ai_deprecated "dot ai $1"
-    tool="$1"
-    shift
-    run_ai_with_context "$tool" "$@"
-    ;;
-  *)
-    echo "Unknown ai command: ${1:-}" >&2
-    exit 1
-    ;;
-esac
+      fi
+      ;;
+    status)
+      _ai_deprecated "dot ai tools"
+      cmd_ai_status "$@"
+      ;;
+    dashboard | dash)
+      _ai_deprecated "dot ai  (cockpit)"
+      _ai_cockpit cmd_ai_status
+      ;;
+    proxy | local)
+      [[ "$1" == proxy ]] && shift
+      _ai_deprecated "dot ai serve"
+      has_command dot-ai-proxy && exec dot-ai-proxy "$@" || exit 1
+      ;;
+    # Bare prompt (`dot ai "fix this"`) or `dot ai <tool> "…"` → one-shot.
+    *) _ai_oneshot "$@" ;;
+  esac
+}
+
+_ai_verb() {
+  local entry
+  for entry in $_AI_VERBS; do
+    if [[ "${entry%%:*}" == "${1:-}" ]]; then
+      shift
+      "${entry#*:}" "$@"
+      return
+    fi
+  done
+  _ai_other_verb "$@"
+}
+
+# Dispatch — flat, verb-first surface (see docs/AI.md).
+_ai_main() {
+  case "${1:-}" in
+    --help | -h | help) _ai_usage ;;
+    "")
+      _ai_usage
+      exit 1
+      ;;
+    ai)
+      shift
+      _ai_verb "$@"
+      ;;
+    # Deprecated top-level forms — kept for muscle memory.
+    ai-setup)
+      _ai_deprecated "dot ai login"
+      shift
+      cmd_ai_setup "$@"
+      ;;
+    ai-query)
+      _ai_deprecated "dot ai ask"
+      shift
+      cmd_ai_query "$@"
+      ;;
+    cl | claude | codex | copilot | goose | crush | amp | cursor-agent | grok | kimi | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
+      _ai_deprecated "dot ai $1"
+      local tool="$1"
+      shift
+      run_ai_with_context "$tool" "$@"
+      ;;
+    *)
+      echo "Unknown ai command: ${1:-}" >&2
+      exit 1
+      ;;
+  esac
+}
+
+_ai_main "$@"
