@@ -52,30 +52,21 @@
    5 tests/unit/diagnostics/test_perf_percentiles.sh
    2 tests/unit/docs/test_build_manual.sh
    2 tests/unit/docs/test_check_manual.sh
-   8 tests/unit/dot-cli/test_bm.sh
-   1 tests/unit/dot-cli/test_cmd_env_emit.sh
    8 tests/unit/dot-cli/test_dot_a2a_conformance.sh
-   5 tests/unit/dot-cli/test_dot_agent_delegation.sh
-   1 tests/unit/dot-cli/test_dot_agent_dispatch.sh
-   4 tests/unit/dot-cli/test_dot_agent_enterprise.sh
-   4 tests/unit/dot-cli/test_dot_agent_governance.sh
-   8 tests/unit/dot-cli/test_dot_agent_mode.sh
    3 tests/unit/dot-cli/test_dot_cli.sh
    1 tests/unit/dot-cli/test_dot_commands_appearance.sh
    2 tests/unit/dot-cli/test_dot_commands_core.sh
    1 tests/unit/dot-cli/test_dot_commands_diagnostics.sh
-   7 tests/unit/dot-cli/test_dot_commands_fleet.sh
-   3 tests/unit/dot-cli/test_dot_commands_manual.sh
+   1 tests/unit/dot-cli/test_dot_commands_manual.sh
    3 tests/unit/dot-cli/test_dot_commands_meta.sh
    1 tests/unit/dot-cli/test_dot_commands_patterns.sh
    6 tests/unit/dot-cli/test_dot_commands_restore.sh
    1 tests/unit/dot-cli/test_dot_commands_secrets.sh
    1 tests/unit/dot-cli/test_dot_commands_security.sh
    1 tests/unit/dot-cli/test_dot_commands_tools.sh
-   8 tests/unit/dot-cli/test_dot_fleet_enforcement.sh
+   1 tests/unit/dot-cli/test_dot_fleet_enforcement.sh
    3 tests/unit/dot-cli/test_dot_lib_ui.sh
    2 tests/unit/dot-cli/test_dot_lib_utils.sh
-   1 tests/unit/dot-cli/test_lint.sh
    6 tests/unit/fish/test_fish_conf_aliases.sh
    1 tests/unit/fish/test_fish_conf_modern_core.sh
    1 tests/unit/fish/test_fish_conf_zzz_path_cleanup.sh
