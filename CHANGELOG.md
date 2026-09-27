@@ -4,6 +4,46 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+## v0.2.528 — 2026-09-27
+
+### Security
+
+- Agent RBAC kept the caller's role across mode switches. `dot mode set`
+  rewrote `agent-mode.env` without `DOT_AGENT_ROLE`, so under strict
+  enforcement a viewer could run `dot mode set ask` then
+  `dot mode set apply`. The role is now carried forward.
+- `dot agent delegate` now checks that the caller's role may use the
+  delegate's profile; before, a developer on `apply` could run an
+  `audit`-profile delegate.
+- `dot fleet enforce` writes the same profiles file `dot mode` enforces
+  (it ignored `AGENT_PROFILE_CONFIG`).
+- The chmod pre-commit check catches `chmod 777/666` anywhere on a
+  command line (`sudo chmod 777`, `x && chmod 666`, `chmod 0777`,
+  `chmod -v -R 666`); it only matched line starts. The TLS check flags
+  `-k` inside a flag cluster (`curl -sk`, `curl -fsSLk`) and no longer
+  fails on a tree without curl or wget.
+
+### Fixed
+
+- `dot verify` reports drift. It read the exit code of `chezmoi diff`,
+  which is 0 whether or not anything differs, so drift was "clean".
+- `dot <TAB>` completes `agents`, `aliases`, `patterns` and `registry`
+  in every shell; the command registry listed their subcommands only.
+- `bm`: re-adding a name repoints it instead of breaking `bm goto`, and
+  names are matched literally (`bm remove a/b` no longer crashes sed).
+- `dot manual --help` shows the usage block, not the license header.
+- `tools/maintenance/check-updates.sh` no longer throws an arithmetic
+  error on zero updates, repeats actions on every run, or stops silently
+  without a `CHEZMOI_VERSION` pin or GitHub API access.
+
+### Tests
+
+- One repo-wide hygiene suite (portable shebang, `bash -n`, shellcheck
+  for the 43 extensionless executables CI lint never covered) replaces
+  the per-file checks in 96 suites.
+- About 45 more suites run the code instead of grepping it. Source-grep
+  baseline: 195 lines, down from 434.
+
 ## v0.2.527 — 2026-09-26
 
 ### Security
