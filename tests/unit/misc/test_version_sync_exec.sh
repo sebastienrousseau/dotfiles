@@ -229,6 +229,16 @@ assert_equals "0" "$VS_RC" "a backed-up sync should still succeed"
 assert_dir_exists "$SANDBOX/.version-sync-backup" \
   "the default --backup path should create the backup directory"
 
+# Two files share a basename (README.md at the root and under docs/); both
+# must be backed up, each under its own path.
+build_sandbox "6.6.6" "0.0.1" "0.0.1"
+printf '# Docs\n\nVersion: v0.0.1\n' >"$SANDBOX/docs/README.md"
+test_start "version_sync_exec_backup_keeps_same_named_files_apart"
+ALLOW_W=1 run_vs --force
+assert_equals "0:1:1" \
+  "$VS_RC:$(find "$SANDBOX/.version-sync-backup" -maxdepth 1 -name 'README.md.*.backup' | wc -l | tr -d ' '):$(find "$SANDBOX/.version-sync-backup/docs" -maxdepth 1 -name 'README.md.*.backup' 2>/dev/null | wc -l | tr -d ' ')" \
+  "root and docs/ README.md each get their own backup"
+
 # 11. Write path with neither rg nor jq on PATH: package.json is rewritten by
 # sed instead of jq, and the markdown scan uses find+grep.
 build_sandbox "5.5.5" "0.0.1" "0.0.1"

@@ -310,4 +310,60 @@ test_start "feature_matrix_undemonstrated_module_is_named"
 assert_contains "orphanmod.sh" "$(fm_run "$fx" --quiet 2>&1)" \
   "the undemonstrated-module failure should name the module"
 
+# ── Success lines, the 50-row floor, and checks that keep going ────────────
+# Each check prints its ✓ line exactly when it found nothing wrong.
+fx="$(fm_fresh)"
+loud="$(fm_run "$fx" 2>&1)"
+for line in "every routable command has a row" "every documented command has a row" \
+  "no phantom command rows" "every named test function exists" \
+  "every named test function is invoked by its file" "every named benchmark id exists" \
+  "every routable command has a cold-start benchmark" "every named example exists" \
+  "every command module is referenced by an example"; do
+  test_start "feature_matrix_clean_run_reports_${line// /_}"
+  assert_contains "✓ $line" "$loud" "a clean run says: $line"
+done
+
+# fm_lacks <dir> <text>: "yes" when a loud run's output does not contain text.
+fm_lacks() {
+  local out
+  out="$(fm_run "$1" 2>&1)"
+  if [[ "$out" == *"$2"* ]]; then echo no; else echo yes; fi
+}
+
+fx="$(fm_fresh)"
+grep -v '^test_fm_c07$' "$fx/tests/regression/test_feature_matrix_fake.sh" >"$fx/t.new"
+mv "$fx/t.new" "$fx/tests/regression/test_feature_matrix_fake.sh"
+test_start "feature_matrix_uncalled_function_suppresses_its_success_line"
+assert_equals "yes" "$(fm_lacks "$fx" "every named test function is invoked")" "no ✓ when one is uncalled"
+
+fx="$(fm_fresh)"
+grep -v '^help:c04$' "$fx/benches/dot_command_bench.sh" >"$fx/b.new"
+mv "$fx/b.new" "$fx/benches/dot_command_bench.sh"
+test_start "feature_matrix_missing_cold_start_suppresses_its_success_line"
+assert_equals "yes" "$(fm_lacks "$fx" "every routable command has a cold-start benchmark")" "no ✓ when one is missing"
+
+fx="$(fm_fresh)"
+rm -f "$fx/examples/example-c09.sh"
+test_start "feature_matrix_missing_example_suppresses_its_success_line"
+assert_equals "yes" "$(fm_lacks "$fx" "every named example exists")" "no ✓ when one is missing"
+
+fx="$(fm_fresh)"
+printf '#!/usr/bin/env bash\n:\n' >"$fx/scripts/dot/commands/lonely.sh"
+test_start "feature_matrix_undemonstrated_module_suppresses_its_success_line"
+assert_equals "yes" "$(fm_lacks "$fx" "every command module is referenced")" "no ✓ when one is missing"
+
+fx="$(fm_fresh 50)"
+test_start "feature_matrix_accepts_exactly_50_rows"
+assert_equals "0" "$(fm_rc "$fx" --quiet)" "50 rows is the floor, not below it"
+
+fx="$(fm_fresh)"
+rm -f "$fx"/tests/regression/test_feature_matrix_*.sh
+test_start "feature_matrix_later_checks_run_after_an_empty_test_tier"
+assert_contains "every named example exists" "$(fm_run "$fx" 2>&1)" "the example check still runs"
+
+fx="$(fm_fresh)"
+printf '#!/usr/bin/env bash\nexit 1\n' >"$fx/benches/dot_command_bench.sh"
+test_start "feature_matrix_later_checks_run_after_an_unlistable_harness"
+assert_contains "every named example exists" "$(fm_run "$fx" 2>&1)" "the example check still runs"
+
 print_summary
