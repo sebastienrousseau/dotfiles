@@ -134,6 +134,9 @@ cat >"$SF_TMP/bin/tmux" <<'STUB'
 exit 0
 STUB
 chmod +x "$SF_TMP/bin/tmux"
+# The script refuses to start without fzf; the direct-path form never runs it.
+printf '#!/bin/sh\nexit 0\n' >"$SF_TMP/bin/fzf"
+chmod +x "$SF_TMP/bin/fzf"
 hostile="$SF_TMP/my.proj \$(id);x"
 mkdir -p "$hostile"
 env HOME="$SF_TMP/home" PATH="$SF_TMP/bin:$PATH" SF_TMP_SESSION="$SF_TMP/session" TMUX= \
