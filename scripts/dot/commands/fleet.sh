@@ -78,43 +78,31 @@ _fleet_emit_event() {
   fi
 }
 
-cmd_fleet_status() {
-  local json_mode=0
-  [[ "${1:-}" == "--json" || "${1:-}" == "-j" ]] && json_mode=1
-
-  local node_id namespace version os_type kernel shell_type
-  node_id="$(_fleet_node_id)"
-  namespace="$(_fleet_namespace)"
-  version="$(dotfiles_version)"
-  os_type="$(uname -s)"
-  kernel="$(uname -r)"
-  shell_type="${SHELL##*/}"
-
-  local drift_status="clean"
+# "clean" or "drifted", from `chezmoi status` when chezmoi is installed.
+_fleet_drift_state() {
+  local drift_output
   if has_command chezmoi; then
-    local drift_output
     # --exclude=always: always-run scripts are pending by design, not drift.
     drift_output="$(chezmoi status --exclude=always 2>/dev/null || true)"
     if [[ -n "$drift_output" ]]; then
-      drift_status="drifted"
+      echo drifted
+      return 0
     fi
   fi
+  echo clean
+}
 
-  local last_apply=""
+# The timestamp of the last apply recorded in dot.log (empty if none).
+_fleet_last_apply() {
   local state_log="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/dot.log"
-  if [[ -f "$state_log" ]]; then
-    # `set -euo pipefail` at the top of this script kills the whole
-    # command when grep matches nothing (rc=1). Wrap the pipeline so
-    # `last_apply` cleanly becomes empty and the UI still renders.
-    last_apply="$(grep 'apply' "$state_log" 2>/dev/null | tail -1 | sed -n 's/^\[\([^]]*\)\].*/\1/p' || true)"
-  fi
+  [[ -f "$state_log" ]] || return 0
+  # `set -euo pipefail` at the top of this script kills the whole
+  # command when grep matches nothing (rc=1). Wrap the pipeline so
+  # `last_apply` cleanly becomes empty and the UI still renders.
+  grep 'apply' "$state_log" 2>/dev/null | tail -1 | sed -n 's/^\[\([^]]*\)\].*/\1/p' || true
+}
 
-  if [[ "$json_mode" -eq 1 ]]; then
-    printf '{"node_id":"%s","namespace":"%s","version":"%s","os":"%s","kernel":"%s","shell":"%s","drift":"%s","last_apply":"%s"}\n' \
-      "$node_id" "$namespace" "$version" "$os_type" "$kernel" "$shell_type" "$drift_status" "$last_apply"
-    return 0
-  fi
-
+_fleet_status_print() {
   ui_header "Fleet Node Status"
   echo ""
   ui_ok "Node ID" "$node_id"
@@ -130,121 +118,30 @@ cmd_fleet_status() {
   if [[ -n "$last_apply" ]]; then
     ui_info "Last Apply" "$last_apply"
   fi
+}
 
+cmd_fleet_status() {
+  local json_mode=0
+  [[ "${1:-}" == "--json" || "${1:-}" == "-j" ]] && json_mode=1
+
+  local node_id namespace version os_type kernel shell_type drift_status last_apply
+  node_id="$(_fleet_node_id)"
+  namespace="$(_fleet_namespace)"
+  version="$(dotfiles_version)"
+  os_type="$(uname -s)"
+  kernel="$(uname -r)"
+  shell_type="${SHELL##*/}"
+  drift_status="$(_fleet_drift_state)"
+  last_apply="$(_fleet_last_apply)"
+
+  if [[ "$json_mode" -eq 1 ]]; then
+    printf '{"node_id":"%s","namespace":"%s","version":"%s","os":"%s","kernel":"%s","shell":"%s","drift":"%s","last_apply":"%s"}\n' \
+      "$node_id" "$namespace" "$version" "$os_type" "$kernel" "$shell_type" "$drift_status" "$last_apply"
+    return 0
+  fi
+
+  _fleet_status_print
   _fleet_emit_event "status" "ok" "version=$version" "drift=$drift_status"
-}
-
-_DRIFT_HISTORY_FILE="$_FLEET_STATE_DIR/drift-history.jsonl"
-
-_fleet_drift_append_history() {
-  local drift_output="$1"
-  local ts
-  ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  mkdir -p "$_FLEET_STATE_DIR" 2>/dev/null || return 0
-  if [[ -z "$drift_output" ]]; then
-    printf '{"time":"%s","status":"clean","files":[]}\n' "$ts" >>"$_DRIFT_HISTORY_FILE" 2>/dev/null || true
-  else
-    local files_json
-    files_json="$(printf '%s\n' "$drift_output" | awk '{print $NF}' | jq -R . | jq -s . 2>/dev/null || echo '[]')"
-    printf '{"time":"%s","status":"drifted","files":%s}\n' "$ts" "$files_json" >>"$_DRIFT_HISTORY_FILE" 2>/dev/null || true
-  fi
-}
-
-cmd_fleet_drift() {
-  local subcommand="${1:-check}"
-  if [[ "${1:-}" == --* ]] || [[ -z "${1:-}" ]]; then
-    subcommand="check"
-  else
-    shift || true
-  fi
-
-  case "$subcommand" in
-    check)
-      ui_header "Fleet Drift Report"
-      echo ""
-
-      if ! has_command chezmoi; then
-        ui_err "chezmoi" "not installed"
-        return 1
-      fi
-
-      local drift_output
-      drift_output="$(chezmoi status --exclude=always 2>/dev/null || true)"
-
-      _fleet_drift_append_history "$drift_output"
-
-      if [[ -z "$drift_output" ]]; then
-        ui_ok "Status" "No drift detected"
-        _fleet_emit_event "drift_check" "clean"
-        return 0
-      fi
-
-      ui_warn "Status" "Configuration drift detected"
-      echo ""
-      printf '%s\n' "$drift_output" | while IFS= read -r line; do
-        local change_type="${line:0:2}"
-        local file_path="${line:3}"
-        case "$change_type" in
-          "MM" | "A " | " M")
-            ui_warn "$change_type" "$file_path"
-            ;;
-          *)
-            ui_info "$change_type" "$file_path"
-            ;;
-        esac
-      done
-
-      _fleet_emit_event "drift_check" "drifted" "count=$(echo "$drift_output" | wc -l | tr -d ' ')"
-      ;;
-    history)
-      ui_header "Drift History"
-      echo ""
-      if [[ ! -f "$_DRIFT_HISTORY_FILE" ]]; then
-        ui_info "No drift history recorded yet."
-        return 0
-      fi
-      local count="${1:-20}"
-      tail -n "$count" "$_DRIFT_HISTORY_FILE" | while IFS= read -r line; do
-        local time status file_count
-        # One jq per line (was three: .time, .status, .files|length).
-        # `|| true`: on an unparsable line jq prints nothing, `read`
-        # hits EOF and returns 1, and `set -e` would otherwise abort the
-        # whole listing instead of rendering the `?` placeholders below.
-        IFS=$'\t' read -r time status file_count < <(
-          printf '%s' "$line" | jq -r '[.time, .status, (.files | length)] | @tsv' 2>/dev/null
-        ) || true
-        [[ -n "$time" ]] || time="?"
-        [[ -n "$status" ]] || status="?"
-        [[ -n "$file_count" ]] || file_count=0
-        if [[ "$status" == "clean" ]]; then
-          ui_ok "$time" "clean"
-        else
-          ui_warn "$time" "drifted ($file_count files)"
-        fi
-      done
-      ;;
-    predict)
-      ui_header "Drift Prediction"
-      echo ""
-      if [[ ! -f "$_DRIFT_HISTORY_FILE" ]]; then
-        ui_info "Not enough history for prediction."
-        return 0
-      fi
-      # Simple heuristic: files that drifted in >50% of the last 10 checks
-      local threshold=5
-      jq -r '.files[]?' "$_DRIFT_HISTORY_FILE" | tail -n 1000 | sort | uniq -c | sort -rn | while read -r count file; do
-        if [[ "$count" -ge "$threshold" ]]; then
-          ui_warn "Likely to drift" "$file (drifted $count times recently)"
-        fi
-      done
-      local total_checks
-      total_checks="$(wc -l <"$_DRIFT_HISTORY_FILE" | tr -d ' ')"
-      ui_info "History" "$total_checks checks recorded"
-      ;;
-    *)
-      die "Usage: dot fleet drift [check|history|predict]"
-      ;;
-  esac
 }
 
 cmd_fleet_events() {
@@ -271,82 +168,79 @@ cmd_fleet_events() {
   fi
 }
 
+_fleet_namespace_show() {
+  local ns data_file name
+  ns="$(_fleet_namespace)"
+  ui_header "Fleet Namespace"
+  ui_ok "Active" "$ns"
+
+  data_file="$(resolve_chezmoi_source_dir)/.chezmoidata.toml"
+  [[ -f "$data_file" ]] || return 0
+  echo ""
+  ui_section "Available Namespaces"
+  # No [namespaces.*] table is the shipped default: grep's 1 must not
+  # become the command's exit status under pipefail.
+  { grep '^\[namespaces\.' "$data_file" || true; } | sed 's/\[namespaces\.\(.*\)\]/\1/' | while IFS= read -r name; do
+    if [[ "$name" == "$ns" ]]; then
+      ui_ok "$name" "[active]"
+    else
+      ui_info "$name" ""
+    fi
+  done
+}
+
+# _fleet_namespace_render <data-file> <out> <name>: write the data file with
+# `namespace = "<name>"` set; returns the renderer's status.
+_fleet_namespace_render() {
+  local data_file="$1" out="$2" new_ns="$3"
+  if grep -q "^namespace = " "$data_file"; then
+    sed "s/^namespace = \".*\"/namespace = \"$new_ns\"/" "$data_file" >"$out"
+    return
+  fi
+  # No key yet — the shipped .chezmoidata.toml has none, and rewriting
+  # only when one already existed made `set` a silent no-op on a fresh
+  # checkout while still reporting success. Insert it after the first
+  # line: appending at the end would land the key inside whatever
+  # [table] the file happens to end with, which TOML reads as a
+  # different key entirely. `dot profile set` does the same for
+  # `profile`.
+  awk -v ns="$new_ns" '
+    NR == 1 { print; printf "namespace = \"%s\"\n", ns; inserted = 1; next }
+    { print }
+    END { if (!inserted) printf "namespace = \"%s\"\n", ns }
+  ' "$data_file" >"$out"
+}
+
+_fleet_namespace_set() {
+  local new_ns="${1:-}" data_file _tmp
+  [[ -n "$new_ns" ]] || die "Usage: dot fleet namespace set <name>"
+  validate_name "$new_ns" "namespace"
+  data_file="$(resolve_chezmoi_source_dir)/.chezmoidata.toml"
+  [[ -f "$data_file" ]] || die ".chezmoidata.toml not found: $data_file"
+  # Atomic write: render into a tempfile + mv so concurrent
+  # `dot fleet namespace set` callers can't corrupt the TOML.
+  # Avoids `sed -i` portability dance (GNU `-i` vs BSD `-i ''`).
+  _tmp="$(mktemp "${data_file}.XXXXXX")" || die "Cannot create tempfile"
+  if ! _fleet_namespace_render "$data_file" "$_tmp" "$new_ns"; then
+    rm -f "$_tmp"
+    die "Failed to render namespace update"
+  fi
+  if ! mv "$_tmp" "$data_file"; then
+    rm -f "$_tmp"
+    die "Failed to commit namespace update"
+  fi
+  ui_ok "Namespace" "Set to '$new_ns'. Run 'dot sync' to apply."
+  _fleet_emit_event "namespace_set" "ok" "namespace=$new_ns"
+}
+
 cmd_fleet_namespace() {
   local subcommand="${1:-show}"
   shift || true
 
   case "$subcommand" in
-    show)
-      local ns
-      ns="$(_fleet_namespace)"
-      ui_header "Fleet Namespace"
-      ui_ok "Active" "$ns"
-
-      local data_file
-      data_file="$(resolve_chezmoi_source_dir)/.chezmoidata.toml"
-      if [[ -f "$data_file" ]]; then
-        echo ""
-        ui_section "Available Namespaces"
-        # No [namespaces.*] table is the shipped default: grep's 1 must not
-        # become the command's exit status under pipefail.
-        { grep '^\[namespaces\.' "$data_file" || true; } | sed 's/\[namespaces\.\(.*\)\]/\1/' | while IFS= read -r name; do
-          if [[ "$name" == "$ns" ]]; then
-            ui_ok "$name" "[active]"
-          else
-            ui_info "$name" ""
-          fi
-        done
-      fi
-      ;;
-    set)
-      local new_ns="${1:-}"
-      [[ -n "$new_ns" ]] || die "Usage: dot fleet namespace set <name>"
-      validate_name "$new_ns" "namespace"
-      local data_file
-      data_file="$(resolve_chezmoi_source_dir)/.chezmoidata.toml"
-      [[ -f "$data_file" ]] || die ".chezmoidata.toml not found: $data_file"
-      # Atomic write: render into a tempfile + mv so concurrent
-      # `dot fleet namespace set` callers can't corrupt the TOML.
-      # Avoids `sed -i` portability dance (GNU `-i` vs BSD `-i ''`).
-      local _tmp _rendered=0
-      _tmp="$(mktemp "${data_file}.XXXXXX")" || die "Cannot create tempfile"
-      # Explicit if/else instead of A && B || C — the latter (SC2015)
-      # silently runs C when B itself fails, masking real mv errors.
-      if grep -q "^namespace = " "$data_file"; then
-        if sed "s/^namespace = \".*\"/namespace = \"$new_ns\"/" "$data_file" >"$_tmp"; then
-          _rendered=1
-        fi
-      else
-        # No key yet — the shipped .chezmoidata.toml has none, and rewriting
-        # only when one already existed made `set` a silent no-op on a fresh
-        # checkout while still reporting success. Insert it after the first
-        # line: appending at the end would land the key inside whatever
-        # [table] the file happens to end with, which TOML reads as a
-        # different key entirely. `dot profile set` does the same for
-        # `profile`.
-        if awk -v ns="$new_ns" '
-          NR == 1 { print; printf "namespace = \"%s\"\n", ns; inserted = 1; next }
-          { print }
-          END { if (!inserted) printf "namespace = \"%s\"\n", ns }
-        ' "$data_file" >"$_tmp"; then
-          _rendered=1
-        fi
-      fi
-      if [[ "$_rendered" -eq 1 ]]; then
-        if ! mv "$_tmp" "$data_file"; then
-          rm -f "$_tmp"
-          die "Failed to commit namespace update"
-        fi
-      else
-        rm -f "$_tmp"
-        die "Failed to render namespace update"
-      fi
-      ui_ok "Namespace" "Set to '$new_ns'. Run 'dot sync' to apply."
-      _fleet_emit_event "namespace_set" "ok" "namespace=$new_ns"
-      ;;
-    *)
-      die "Usage: dot fleet namespace [show|set <name>]"
-      ;;
+    show) _fleet_namespace_show ;;
+    set) _fleet_namespace_set "$@" ;;
+    *) die "Usage: dot fleet namespace [show|set <name>]" ;;
   esac
 }
 
@@ -395,322 +289,30 @@ cmd_fleet_enforce() {
   esac
 }
 
-_fleet_hosts_file() {
-  printf '%s\n' "${DOTFILES_FLEET_HOSTS:-$HOME/.config/dotfiles/fleet.toml}"
-}
-
-# Parse the hosts file. Format:
-#   [hosts.laptop]
-#   ssh = "user@laptop.local"
-#   profile = "workstation"
-#
-# Echoes one record per line: "<name>\t<ssh-target>\t<profile>".
-_fleet_hosts_iter() {
-  local f
-  f="$(_fleet_hosts_file)"
-  [[ -f "$f" ]] || return 0
-  awk '
-    BEGIN { name = ""; ssh = ""; profile = "" }
-    /^\[hosts\./ {
-      if (name != "") { printf "%s\t%s\t%s\n", name, ssh, profile }
-      gsub(/[\[\]]/, "", $0); sub(/^hosts\./, "", $0); name = $0
-      ssh = ""; profile = ""
-      next
-    }
-    /^ssh[[:space:]]*=/    { sub(/^ssh[[:space:]]*=[[:space:]]*/, ""); gsub(/"/, ""); ssh = $0; next }
-    /^profile[[:space:]]*=/ { sub(/^profile[[:space:]]*=[[:space:]]*/, ""); gsub(/"/, ""); profile = $0; next }
-    END {
-      if (name != "") { printf "%s\t%s\t%s\n", name, ssh, profile }
-    }
-  ' "$f"
-}
-
-# SSH-based "dot fleet apply" — push the local dotfiles state out to
-# each registered host. The §3 hero-feature: nobody else owns the
-# "Ansible for personal devices" niche.
-cmd_fleet_apply() {
-  local dry_run=0 only_host="" cmd="" jobs=4 verify_hosts=0
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --dry-run | -n)
-        dry_run=1
-        shift
-        ;;
-      --verify-hosts)
-        # Pre-flight check that every host already has a known_hosts
-        # entry, closing the TOFU window before any SSH connection.
-        # R3 audit N4. Without this, accept-new is the default and a
-        # first-connection MITM can seed an attacker key.
-        verify_hosts=1
-        shift
-        ;;
-      --host)
-        only_host="$2"
-        shift 2
-        ;;
-      --cmd)
-        cmd="$2"
-        shift 2
-        ;;
-      --jobs | -j)
-        jobs="$2"
-        shift 2
-        ;;
-      --help | -h)
-        cat <<EOF
-Usage: dot fleet apply [--host <name>] [--cmd <shell>] [--dry-run] [--jobs <n>]
-
-Push dotfiles state to every host registered in:
-  ${DOTFILES_FLEET_HOSTS:-\$HOME/.config/dotfiles/fleet.toml}
-
-Format of fleet.toml:
-  [hosts.laptop]
-  ssh     = "user@laptop.local"
-  profile = "workstation"
-
-Hostnames are validated against [A-Za-z0-9._@:+/-]+ before any SSH
-fan-out; invalid entries abort the apply.
-
-First-time SSH connections use StrictHostKeyChecking=accept-new (TOFU).
-If your threat model requires no TOFU window, pre-populate
-~/.ssh/known_hosts before running this command.
-
-Behavior:
-  By default each host runs:  dot sync && dot doctor --quiet
-  Override with --cmd "<shell>" to run an arbitrary command on every
-  host (e.g. --cmd "uptime").
-
-  WARNING: --cmd is the trust boundary. Whatever string you pass
-  executes on every remote host with the credentials your SSH key
-  carries. Verify the command before running.
-
-Flags:
-  --host <name>      Apply to a single host only.
-  --cmd <shell>      Run a custom command instead of 'dot sync'.
-  --dry-run, -n      Print resolved hosts + planned command; don't SSH.
-  --jobs <n>         Parallelism (default 4).
-  --verify-hosts     Refuse to open any SSH connection unless every
-                     target host already has a key in ~/.ssh/known_hosts.
-                     Use when your threat model excludes the TOFU window.
-EOF
-        return 0
-        ;;
-      *)
-        ui_err "Unknown arg" "$1"
-        return 1
-        ;;
-    esac
-  done
-
-  # The throttle loop below waits while the running-job count is >= jobs,
-  # so 0 or a non-number would spin forever.
-  if [[ ! "$jobs" =~ ^[1-9][0-9]*$ ]]; then
-    ui_err "--jobs" "expected a positive integer, got '$jobs'"
-    return 2
-  fi
-
-  local hosts_file
-  hosts_file="$(_fleet_hosts_file)"
-  if [[ ! -f "$hosts_file" ]]; then
-    ui_err "Fleet" "no hosts file at $hosts_file"
-    ui_info "Hint" "create it with stanzas like '[hosts.laptop]\\nssh = \"user@laptop.local\"'"
-    return 1
-  fi
-
-  local entries
-  entries="$(_fleet_hosts_iter)"
-  if [[ -z "$entries" ]]; then
-    ui_err "Fleet" "hosts file is empty: $hosts_file"
-    return 1
-  fi
-  if [[ -n "$only_host" ]]; then
-    entries="$(printf '%s\n' "$entries" | awk -F'\t' -v h="$only_host" '$1 == h')"
-    [[ -n "$entries" ]] || {
-      ui_err "Fleet" "host not found: $only_host"
-      return 1
-    }
-  fi
-
-  local default_cmd='dot sync && dot doctor --quiet'
-  local effective_cmd="${cmd:-$default_cmd}"
-
-  ui_header "Fleet apply"
-  ui_info "Hosts file" "$hosts_file"
-  ui_info "Command" "$effective_cmd"
-  ui_info "Parallel" "$jobs"
-
-  if [[ "$dry_run" -eq 1 ]]; then
-    printf '%s\n' "$entries" | while IFS=$'\t' read -r name ssh profile; do
-      ui_info "$name" "$ssh  profile=$profile  cmd=$effective_cmd"
-    done
-    ui_ok "Dry-run" "no SSH connections opened"
-    return 0
-  fi
-
-  if ! command -v ssh >/dev/null 2>&1; then
-    ui_err "ssh" "not installed"
-    return 127
-  fi
-
-  local total=0 ok=0 fail=0
-  local tmpdir
-  # `-t` template includes PID + random, so two concurrent `dot fleet
-  # apply` invocations from the same user can't collide on $tmpdir.
-  tmpdir="$(mktemp -d -t dotfiles-fleet.XXXXXX)"
-  # Capture tmpdir's value at trap-definition time (via the eval-on-
-  # define `printf -v`), NOT at trap-fire time. A naive
-  # `trap 'rm -rf "$tmpdir"' RETURN` is unsafe under set -u because
-  # `local tmpdir` is destroyed before the RETURN trap evaluates.
-  # The SC2064 warning ("Use single quotes, otherwise this expands now
-  # rather than when signalled") is exactly the behaviour we want here —
-  # we explicitly want eager expansion. Suppress per-line.
-  local _cleanup
-  printf -v _cleanup 'rm -rf %q' "$tmpdir"
-  # shellcheck disable=SC2064
-  trap "$_cleanup" RETURN
-
-  # Validate every hostname against a conservative regex BEFORE fan-out.
-  # `user@host:port` characters only — refuses single quotes, backticks,
-  # `$()`, semicolons, spaces, any shell metacharacter. Closes the
-  # round-2 audit's hostname-injection finding.
-  # A leading '-' would be parsed by ssh as an option (e.g. -F/-o), and
-  # the host name becomes a temp-file name, so it may not contain '/'.
-  while IFS=$'\t' read -r name ssh profile; do
-    [[ -n "$name" ]] || continue
-    if [[ ! "$name" =~ ^[a-zA-Z0-9._-]+$ || "$name" == .* ]]; then
-      ui_err "$name" "invalid host name — only [a-zA-Z0-9._-] allowed, no leading '.'"
-      return 1
-    fi
-    if [[ ! "$ssh" =~ ^[a-zA-Z0-9._@:+/-]+$ || "$ssh" == -* ]]; then
-      ui_err "$name" "invalid ssh target ($ssh) — only [a-zA-Z0-9._@:+/-] allowed, no leading '-'"
-      return 1
-    fi
-  done <<<"$entries"
-
-  # --verify-hosts: refuse the apply when any target host is missing
-  # from ~/.ssh/known_hosts. Closes the R3 audit N4 TOFU-window gap.
-  if ((verify_hosts == 1)); then
-    local known_hosts="${HOME}/.ssh/known_hosts"
-    if [[ ! -f "$known_hosts" ]]; then
-      ui_err "verify-hosts" "no $known_hosts — populate before --verify-hosts"
-      return 1
-    fi
-    local unknown_count=0
-    while IFS=$'\t' read -r name ssh profile; do
-      [[ -n "$name" && -n "$ssh" ]] || continue
-      # Strip `user@` prefix and `:port` suffix for the lookup.
-      local hostpart="${ssh#*@}"
-      hostpart="${hostpart%%:*}"
-      if ! ssh-keygen -F "$hostpart" -f "$known_hosts" >/dev/null 2>&1; then
-        ui_err "$name" "no known_hosts entry for $hostpart — would TOFU on first connect"
-        unknown_count=$((unknown_count + 1))
-      fi
-    done <<<"$entries"
-    if ((unknown_count > 0)); then
-      ui_err "verify-hosts" "$unknown_count host(s) missing from known_hosts — aborting"
-      return 1
-    fi
-    ui_ok "verify-hosts" "all hosts found in known_hosts"
-  fi
-
-  # Run one SSH per host, parallelised via background jobs with a
-  # semaphore. We DO NOT use `xargs -d` because that flag is GNU-only
-  # and the §3 hero feature must work on macOS BSD xargs too. Also
-  # avoids embedding `{}` substitution into a `bash -c` (the previous
-  # implementation had a quoting hazard around TOML hostnames).
-  _fleet_apply_one() {
-    local _name="$1" _ssh="$2" _cmd="$3" _tmp="$4"
-    if ssh -o BatchMode=yes -o ConnectTimeout=10 \
-      -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
-      -o StrictHostKeyChecking=accept-new \
-      -- "$_ssh" "$_cmd" </dev/null \
-      >"$_tmp/$_name.out" 2>"$_tmp/$_name.err"; then
-      printf 'ok\n' >"$_tmp/$_name.status"
-    else
-      printf 'fail %d\n' "$?" >"$_tmp/$_name.status"
-    fi
-  }
-
-  # Throttle to `jobs` concurrent workers. `wait -n` (wait for the next
-  # job to finish) is bash 4.3+, but macOS ships bash 3.2 — there it
-  # silently fails and the throttle collapses to unbounded parallelism.
-  # Track PIDs and block on the oldest when at capacity instead; works on
-  # bash 3.2 and 4+ alike.
-  local _pids=()
-  while IFS=$'\t' read -r name ssh profile; do
-    [[ -n "$name" && -n "$ssh" ]] || continue
-    total=$((total + 1))
-    while ((${#_pids[@]} >= jobs)); do
-      wait "${_pids[0]}" 2>/dev/null || true
-      _pids=("${_pids[@]:1}")
-    done
-    _fleet_apply_one "$name" "$ssh" "$effective_cmd" "$tmpdir" &
-    _pids+=("$!")
-  done <<<"$entries"
-  wait
-
-  # `while < <(printf ...)` instead of `printf ... | while` — the
-  # pipe form runs the loop body in a subshell, so the ok/fail
-  # counters never propagate back to the parent. Caught by
-  # tests/unit/fleet/test_fleet_apply_mocked_ssh.sh which exercised
-  # the full apply path (the dry-run test missed this).
-  while IFS=$'\t' read -r name ssh profile; do
-    [[ -n "$name" ]] || continue
-    if [[ -s "$tmpdir/$name.status" ]] && head -1 "$tmpdir/$name.status" | grep -q '^ok'; then
-      ui_ok "$name" "$ssh"
-      ok=$((ok + 1))
-    else
-      local err_summary=""
-      [[ -s "$tmpdir/$name.err" ]] && err_summary=" — $(head -1 "$tmpdir/$name.err")"
-      ui_err "$name" "$ssh${err_summary}"
-      fail=$((fail + 1))
-    fi
-    local _evt_status="unknown"
-    [[ -s "$tmpdir/$name.status" ]] && _evt_status="$(head -1 "$tmpdir/$name.status")"
-    _fleet_emit_event "apply" "$_evt_status" "host=$name" "cmd=$effective_cmd"
-  done < <(printf '%s\n' "$entries")
-
-  ui_info "Summary" "$ok ok / $fail failed / $total total"
-  [[ "$fail" -eq 0 ]]
-}
+# `dot fleet <subcommand>` → the function that takes the remaining args.
+_FLEET_SUBCOMMANDS="status:cmd_fleet_status drift:cmd_fleet_drift events:cmd_fleet_events
+namespace:cmd_fleet_namespace ns:cmd_fleet_namespace enforce:cmd_fleet_enforce
+apply:cmd_fleet_apply push:cmd_fleet_apply help:_fleet_print_commands
+--help:_fleet_print_commands -h:_fleet_print_commands"
 
 cmd_fleet() {
-  local subcommand="${1:-status}"
+  local subcommand="${1:-status}" entry
   if [[ "${1:-}" == --* ]] || [[ -z "${1:-}" ]]; then
     subcommand="status"
   else
     shift || true
   fi
 
-  case "$subcommand" in
-    status)
-      cmd_fleet_status "$@"
-      ;;
-    drift)
-      cmd_fleet_drift "$@"
-      ;;
-    events)
-      cmd_fleet_events "$@"
-      ;;
-    namespace | ns)
-      cmd_fleet_namespace "$@"
-      ;;
-    enforce)
-      cmd_fleet_enforce "$@"
-      ;;
-    apply | push)
-      cmd_fleet_apply "$@"
-      ;;
-    help | --help | -h)
-      _fleet_print_commands
-      ;;
-    *)
-      ui_err "Unknown subcommand" "$subcommand" >&2
-      echo "Run 'dot fleet help' for usage." >&2
-      _fleet_print_commands >&2
-      return 1
-      ;;
-  esac
+  for entry in $_FLEET_SUBCOMMANDS; do
+    if [[ "${entry%%:*}" == "$subcommand" ]]; then
+      "${entry#*:}" "$@"
+      return
+    fi
+  done
+  ui_err "Unknown subcommand" "$subcommand" >&2
+  echo "Run 'dot fleet help' for usage." >&2
+  _fleet_print_commands >&2
+  return 1
 }
 
 _fleet_print_commands() {
@@ -725,6 +327,11 @@ _fleet_print_commands() {
   ui_ok "enforce" "Show or set RBAC enforcement mode (advisory|strict)"
   ui_ok "apply" "SSH out to every host in fleet.toml and run 'dot sync'"
 }
+
+# shellcheck source-path=SCRIPTDIR source=fleet/drift.sh
+source "$SCRIPT_DIR/fleet/drift.sh"
+# shellcheck source-path=SCRIPTDIR source=fleet/apply.sh
+source "$SCRIPT_DIR/fleet/apply.sh"
 
 # Dispatch
 case "${1:-}" in
