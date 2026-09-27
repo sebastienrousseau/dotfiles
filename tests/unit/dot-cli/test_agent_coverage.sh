@@ -44,11 +44,16 @@ for c in sed tail find sort cat date mkdir dirname basename head tr uname; do
   [[ -n "$p" ]] && ln -sf "$p" "$NOJQ/$c"
 done
 
-test_start "checkpoint_list_without_jq_prints_raw_json"
-printf '{"id":"raw1","profile":"ask"}\n' >"$XDG_STATE_HOME/dotfiles/checkpoints/raw1.json"
-out="$(agent "$NOJQ" checkpoint list 5)"
-assert_contains '{"id":"raw1","profile":"ask"}' "$out" "raw checkpoint JSON is printed"
-assert_output_not_contains "Agent Checkpoints" "printf '%s' '$out'"
+# Without jq, cmd_mode refuses before any subcommand runs (the dependency
+# check is real here, unlike in agent()).
+test_start "checkpoint_list_without_jq_is_refused"
+out="$(PATH="$NOJQ" "$REAL_BASH" -c '
+  source "$1/lib/dot/utils.sh"
+  source "$1/lib/dot/log.sh"
+  source "$1/scripts/dot/commands/agent.sh"
+  cmd_mode checkpoint list 5
+' _ "$REPO_ROOT" 2>&1)" && rc=0 || rc=$?
+assert_equals "1:yes" "$rc:$([[ "$out" == *"jq is required for dot mode"* ]] && echo yes)" "a clear refusal, not a partial listing"
 
 test_start "checkpoint_replay_refuses_an_empty_argv"
 if command -v jq >/dev/null 2>&1; then

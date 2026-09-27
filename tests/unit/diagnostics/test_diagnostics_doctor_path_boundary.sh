@@ -171,5 +171,27 @@ else
   assert_true "true" "skipped: zsh not installed"
 fi
 
+# ── zsh hooks: the limit is 5 of each, inclusive ──────────────────────
+# zshrc_with_hooks <n>: n persistent precmd and n persistent preexec hooks.
+zshrc_with_hooks() {
+  local i
+  for ((i = 1; i <= $1; i++)); do
+    printf 'pc%d() { :; }\npe%d() { :; }\nprecmd_functions+=(pc%d)\npreexec_functions+=(pe%d)\n' "$i" "$i" "$i" "$i"
+  done >"$S_HOME/.zshrc"
+}
+for n_verdict in "5:[OK]" "6:[WARN]"; do
+  n="${n_verdict%%:*}" verdict="${n_verdict#*:}"
+  test_start "zsh_hooks_limit_${n}_each"
+  if [[ -n "$ZSH_REAL" ]]; then
+    ln -sf "$ZSH_REAL" "$S_BIN/zsh"
+    zshrc_with_hooks "$n"
+    _run_doctor "$S_BIN:$SYSBIN"
+    rm -f "$S_BIN/zsh" "$S_HOME/.zshrc"
+    assert_contains "$verdict zsh hooks precmd=$n preexec=$n" "$DOC_OUT" "$n hooks of each kind is $verdict"
+  else
+    assert_true "true" "skipped: zsh not installed"
+  fi
+done
+
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

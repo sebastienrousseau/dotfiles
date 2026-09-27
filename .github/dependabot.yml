@@ -108,3 +108,52 @@ updates:
     labels:
       - "dependencies"
       - "security"
+
+  # The Go modules and the Rust crate had no Dependabot coverage, so a
+  # vulnerable dependency there raised no alert and no update PR.
+  - package-ecosystem: "gomod"
+    directories:
+      - "/core"
+      - "/fuzz"
+      - "/defaults/dot_local/share/dot-ai-tui"
+      - "/defaults/dot_local/share/dot-mcp"
+      - "/defaults/dot_local/share/dot-ui"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:15"
+      timezone: "UTC"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+    groups:
+      gomod-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "cargo"
+    directory: "/lib/wasm-tools"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:30"
+      timezone: "UTC"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+    groups:
+      cargo-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"

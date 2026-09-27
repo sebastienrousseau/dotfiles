@@ -38,32 +38,6 @@ fi
 
 # ── Required sections ─────────────────────────────────────────
 
-test_start "doctor_has_core_sections"
-missing_sections=()
-for section in "Core Shells" "Modern CLI Tools" "Environment" "Platform" "State" "Performance"; do
-  if ! grep -q "$section" "$DOCTOR_SCRIPT"; then
-    missing_sections+=("$section")
-  fi
-done
-if [[ ${#missing_sections[@]} -eq 0 ]]; then
-  ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: all expected sections present"
-else
-  ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: missing sections: ${missing_sections[*]}"
-fi
-
-# ── Cache freshness check ────────────────────────────────────
-
-test_start "doctor_has_cache_check"
-if grep -q 'shell caches' "$DOCTOR_SCRIPT"; then
-  ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: includes shell cache freshness check"
-else
-  ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should include shell cache freshness check"
-fi
-
 # ── Execution test ────────────────────────────────────────────
 
 test_start "doctor_runs_without_crash"
@@ -96,6 +70,18 @@ else
   ((TESTS_FAILED++))
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: output should contain summary"
 fi
+
+# The sections and the cache check are read from what the doctor printed,
+# not from its source (the sections now live in scripts/diagnostics/doctor/).
+test_start "doctor_has_core_sections"
+missing_sections=""
+for section in "Core Shells" "Modern CLI Tools" "Environment" "Platform" "State" "Performance"; do
+  grep -q -- "$section" <<<"$output" || missing_sections+=" $section"
+done
+assert_equals "" "$missing_sections" "every core section is printed"
+
+test_start "doctor_has_cache_check"
+assert_contains "shell caches" "$output" "the shell cache freshness check runs"
 
 # ── Summary ────────────────────────────────────────────────────
 

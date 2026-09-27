@@ -194,6 +194,383 @@ _agent_enforce_rbac() {
   fi
 }
 
+# dot mode list
+_agent_mode_list() {
+  local current
+  current="$(_agent_current_profile)"
+  dot_agent_session_log "list" "$current" "ok"
+  ui_header "Agent Modes"
+  jq -r '.profiles | to_entries[] | "\(.key)\t\(.value.description)"' "$(_agent_profiles_file)" |
+    while IFS=$'\t' read -r name description; do
+      if [[ "$name" == "$current" ]]; then
+        ui_ok "$name" "$description [current]"
+      else
+        ui_info "$name" "$description"
+      fi
+    done
+}
+
+# dot mode current
+_agent_mode_current() {
+  local current
+  current="$(_agent_current_profile)"
+  dot_agent_session_log "current" "$current" "ok"
+  ui_header "Agent Mode"
+  ui_ok "Profile" "$current"
+  ui_ok "Approval" "$(_agent_profile_field "$current" "approval")"
+  ui_ok "Filesystem" "$(_agent_profile_field "$current" "filesystem")"
+  ui_ok "Network" "$(_agent_profile_field "$current" "network")"
+  ui_ok "MCP" "$(_agent_profile_field "$current" "mcpProfile")"
+}
+
+# dot mode show
+_agent_mode_show() {
+  local name="${1:-}"
+  [[ -n "$name" ]] || die "Usage: dot mode show <profile>"
+  _agent_profile_exists "$name" || die "Unknown agent profile: $name"
+  dot_agent_session_log "show" "$name" "ok"
+  ui_header "Agent Mode"
+  ui_ok "Profile" "$name"
+  ui_ok "Description" "$(_agent_profile_field "$name" "description")"
+  ui_ok "Approval" "$(_agent_profile_field "$name" "approval")"
+  ui_ok "Filesystem" "$(_agent_profile_field "$name" "filesystem")"
+  ui_ok "Network" "$(_agent_profile_field "$name" "network")"
+  ui_ok "Max steps" "$(_agent_profile_field "$name" "maxSteps")"
+  ui_ok "MCP" "$(_agent_profile_field "$name" "mcpProfile")"
+}
+
+# dot mode set
+_agent_mode_set() {
+  local name="${1:-}" state_file role=""
+  [[ -n "$name" ]] || die "Usage: dot mode set <profile>"
+  _agent_profile_exists "$name" || die "Unknown agent profile: $name"
+  _agent_enforce_rbac "$name"
+  state_file="$(_agent_state_file)"
+  mkdir -p "$(dirname "$state_file")"
+  # The role lives in the same file; rewriting it without the role would
+  # drop the caller back to the default role on every mode switch.
+  [[ -f "$state_file" ]] && role="$(sed -n 's/^DOT_AGENT_ROLE=//p' "$state_file" | tail -n 1)"
+  cat >"$state_file" <<EOF
+${role:+DOT_AGENT_ROLE=$role
+}DOT_AGENT_PROFILE=$name
+DOT_AGENT_APPROVAL=$(_agent_profile_field "$name" "approval")
+DOT_AGENT_FILESYSTEM=$(_agent_profile_field "$name" "filesystem")
+DOT_AGENT_NETWORK=$(_agent_profile_field "$name" "network")
+DOT_AGENT_MCP_PROFILE=$(_agent_profile_field "$name" "mcpProfile")
+DOT_AGENT_MAX_STEPS=$(_agent_profile_field "$name" "maxSteps")
+EOF
+  dot_agent_session_log "set" "$name" "ok" "state_file=$state_file"
+  ui_ok "Agent mode" "$name"
+  ui_info "State file" "$state_file"
+}
+
+# dot mode run
+_agent_mode_run() {
+  local name="${1:-}" current
+  if [[ -n "$name" ]] && _agent_profile_exists "$name"; then
+    shift || true
+  else
+    name="$(_agent_current_profile)"
+  fi
+  [[ $# -gt 0 ]] || die "Usage: dot mode run [profile] <command> [args...]"
+  _agent_apply_profile_env "$name"
+  local checkpoint_file checkpoint_id
+  checkpoint_file="$(dot_agent_checkpoint_create "$name" "ready" "$@")"
+  checkpoint_id="$(basename "$checkpoint_file" .json)"
+  ui_info "Agent mode" "$name"
+  dot_agent_session_log "run_start" "$name" "running" "argv=$*" "checkpoint_id=$checkpoint_id"
+  # Run inside the `if` condition (errexit is suspended there) and
+  # read `$?` in the else-branch: it holds the command's own status.
+  # `if ! cmd; then exit_code=$?` reads the negation's status (0) and
+  # silently reported every failure as exit 0.
+  local exit_code=0
+  if "$@"; then
+    dot_agent_session_log "run_finish" "$name" "ok" "exit_code=$exit_code" "checkpoint_id=$checkpoint_id"
+  else
+    exit_code=$?
+    dot_agent_session_log "run_finish" "$name" "failed" "exit_code=$exit_code" "checkpoint_id=$checkpoint_id"
+  fi
+  return "$exit_code"
+}
+
+# dot mode doctor
+_agent_mode_doctor() {
+  local file
+  file="$(_agent_profiles_file)"
+  dot_agent_session_log "doctor" "$(_agent_current_profile)" "ok"
+  ui_header "Agent Mode Doctor"
+  if jq empty "$file" >/dev/null 2>&1; then
+    ui_ok "Profile config" "$file"
+  else
+    die "Invalid JSON: $file"
+  fi
+  jq -e '.profiles[.defaultProfile]' "$file" >/dev/null 2>&1 || die "Default profile missing"
+  ui_ok "Default profile" "$(_agent_default_profile)"
+}
+
+# dot mode card
+_agent_mode_card() {
+  local card_file json_mode=0
+  card_file="$(_agent_card_file)"
+  [[ -f "$card_file" ]] || die "Agent card not found: $card_file"
+  if [[ "${1:-}" == "--json" ]]; then
+    json_mode=1
+  fi
+  dot_agent_session_log "card" "$(_agent_current_profile)" "ok"
+  if [[ "$json_mode" -eq 1 ]] || ! command -v jq >/dev/null 2>&1; then
+    exec cat "$card_file"
+  fi
+  ui_header "Agent Card"
+  jq -r '
+        "Name\t\(.name)",
+        "Version\t\(.version)",
+        "Protocols\t\(.protocols | join(", "))",
+        "Default mode\t\(.defaultProfile)",
+        "Support\t\(.platforms | join(", "))"
+      ' "$card_file" | while IFS=$'\t' read -r key value; do
+    ui_ok "$key" "$value"
+  done
+}
+
+# dot mode log
+_agent_mode_log() {
+  dot_agent_session_log "log" "$(_agent_current_profile)" "ok"
+  dot_agent_session_tail "${1:-20}"
+}
+
+# dot mode checkpoint save
+_agent_checkpoint_save() {
+  local name="${1:-}" checkpoint_file checkpoint_id
+  if [[ -n "$name" ]] && _agent_profile_exists "$name"; then
+    shift || true
+  else
+    name="$(_agent_current_profile)"
+  fi
+  [[ $# -gt 0 ]] || die "Usage: dot agent checkpoint save [profile] <command> [args...]"
+  _agent_apply_profile_env "$name"
+  checkpoint_file="$(dot_agent_checkpoint_create "$name" "saved" "$@")"
+  checkpoint_id="$(basename "$checkpoint_file" .json)"
+  dot_agent_session_log "checkpoint_save" "$name" "ok" "checkpoint_id=$checkpoint_id"
+  ui_header "Agent Checkpoint"
+  ui_ok "ID" "$checkpoint_id"
+  ui_ok "Profile" "$name"
+  ui_ok "Command" "$*"
+  ui_ok "File" "$checkpoint_file"
+}
+
+# dot mode checkpoint list
+_agent_checkpoint_list() {
+  local count="${1:-20}"
+  dot_agent_session_log "checkpoint_list" "$(_agent_current_profile)" "ok"
+  # No jq fallback: cmd_mode refuses to run without jq.
+  ui_header "Agent Checkpoints"
+  dot_agent_checkpoint_tail "$count" | jq -r '"\(.id)\t\(.profile)\t\(.status)\t\(.created_at)\t\(.argv | join(" "))"' | while IFS=$'\t' read -r id profile status created_at argv; do
+    ui_ok "$id" "$profile / $status / $created_at / $argv"
+  done
+}
+
+# dot mode checkpoint show
+_agent_checkpoint_show() {
+  local checkpoint_id="${1:-}" checkpoint_file json_mode=0
+  [[ -n "$checkpoint_id" ]] || die "Usage: dot agent checkpoint show <id> [--json]"
+  shift || true
+  [[ "${1:-}" == "--json" || "${1:-}" == "-j" ]] && json_mode=1
+  checkpoint_file="$(_agent_checkpoint_file "$checkpoint_id")"
+  [[ -f "$checkpoint_file" ]] || die "Checkpoint not found: $checkpoint_id"
+  dot_agent_session_log "checkpoint_show" "$(_agent_current_profile)" "ok" "checkpoint_id=$checkpoint_id"
+  if [[ "$json_mode" -eq 1 ]] || ! command -v jq >/dev/null 2>&1; then
+    exec cat "$checkpoint_file"
+  fi
+  ui_header "Agent Checkpoint"
+  jq -r '"ID\t\(.id)",
+            "Profile\t\(.profile)",
+            "Status\t\(.status)",
+            "Created\t\(.created_at)",
+            "Command\t\(.argv | join(" "))"' "$checkpoint_file" | while IFS=$'\t' read -r key value; do
+    ui_ok "$key" "$value"
+  done
+}
+
+# dot mode checkpoint replay
+_agent_checkpoint_replay() {
+  local checkpoint_id="${1:-}" checkpoint_file replay_profile
+  local -a replay_argv=()
+  [[ -n "$checkpoint_id" ]] || die "Usage: dot agent checkpoint replay <id>"
+  checkpoint_file="$(_agent_checkpoint_file "$checkpoint_id")"
+  [[ -f "$checkpoint_file" ]] || die "Checkpoint not found: $checkpoint_id"
+  replay_profile="$(jq -r '.profile' "$checkpoint_file")"
+  while IFS= read -r item; do
+    replay_argv+=("$item")
+  done < <(jq -r '.argv[]' "$checkpoint_file")
+  [[ "${#replay_argv[@]}" -gt 0 ]] || die "Checkpoint has no replayable command: $checkpoint_id"
+  _agent_apply_profile_env "$replay_profile"
+  dot_agent_session_log "checkpoint_replay" "$replay_profile" "running" "checkpoint_id=$checkpoint_id"
+  local exit_code=0
+  if "${replay_argv[@]}"; then
+    dot_agent_session_log "checkpoint_replay_finish" "$replay_profile" "ok" "checkpoint_id=$checkpoint_id" "exit_code=$exit_code"
+  else
+    exit_code=$?
+    dot_agent_session_log "checkpoint_replay_finish" "$replay_profile" "failed" "checkpoint_id=$checkpoint_id" "exit_code=$exit_code"
+  fi
+  return "$exit_code"
+}
+
+# dot mode checkpoint
+_agent_mode_checkpoint() {
+  local action="${1:-list}"
+  shift || true
+  case "$action" in
+    save)
+      _agent_checkpoint_save "$@"
+      ;;
+    list)
+      _agent_checkpoint_list "$@"
+      ;;
+    show)
+      _agent_checkpoint_show "$@"
+      ;;
+    replay)
+      _agent_checkpoint_replay "$@"
+      ;;
+    *)
+      echo "Usage: dot agent checkpoint [save|list|show|replay]" >&2
+      exit 1
+      ;;
+  esac
+}
+
+# dot mode delegate
+_agent_mode_delegate() {
+  local delegate_name="${1:-}"
+  [[ -n "$delegate_name" ]] || die "Usage: dot agent delegate <name> <command> [args...]"
+  shift || true
+  [[ $# -gt 0 ]] || die "Usage: dot agent delegate <name> <command> [args...]"
+  local profiles_file current_profile
+  profiles_file="$(_agent_profiles_file)"
+  current_profile="$(_agent_current_profile)"
+  # Check delegation is enabled
+  local delegation_enabled
+  delegation_enabled="$(jq -r '.delegation.enabled // false' "$profiles_file")"
+  [[ "$delegation_enabled" == "true" ]] || die "Delegation is not enabled in agent-profiles.json"
+  # Check current profile can delegate
+  local can_delegate
+  can_delegate="$(jq -r --arg p "$current_profile" '.profiles[$p].canDelegate // false' "$profiles_file")"
+  [[ "$can_delegate" == "true" ]] || die "Profile '$current_profile' cannot delegate"
+  # Check delegate name exists
+  jq -e --arg d "$delegate_name" '.delegation.allowedDelegates[$d]' "$profiles_file" >/dev/null 2>&1 || die "Unknown delegate: $delegate_name"
+  # Read delegate config
+  local delegate_profile delegate_timeout delegate_max_steps
+  delegate_profile="$(jq -r --arg d "$delegate_name" '.delegation.allowedDelegates[$d].profile' "$profiles_file")"
+  delegate_timeout="$(jq -r --arg d "$delegate_name" '.delegation.allowedDelegates[$d].timeout // 300' "$profiles_file")"
+  delegate_max_steps="$(jq -r --arg d "$delegate_name" '.delegation.allowedDelegates[$d].maxSteps // 4' "$profiles_file")"
+  # A delegate runs under its own profile, so the caller's role must be
+  # allowed that profile too; otherwise delegation sidesteps RBAC.
+  _agent_enforce_rbac "$delegate_profile"
+  # Apply delegate profile env
+  _agent_apply_profile_env "$delegate_profile"
+  export DOT_AGENT_MAX_STEPS="$delegate_max_steps"
+  export DOT_AGENT_DELEGATE="$delegate_name"
+  export DOT_AGENT_PARENT_PROFILE="$current_profile"
+  dot_agent_session_log "delegate_start" "$delegate_profile" "running" "delegate=$delegate_name" "parent=$current_profile" "timeout=$delegate_timeout"
+  ui_info "Delegating" "$delegate_name (profile: $delegate_profile, timeout: ${delegate_timeout}s)"
+  local exit_code=0
+  if _agent_run_bounded "$delegate_timeout" "$@"; then
+    dot_agent_session_log "delegate_finish" "$delegate_profile" "ok" "delegate=$delegate_name" "exit_code=$exit_code"
+    ui_ok "Delegate" "$delegate_name completed"
+  else
+    exit_code=$?
+    dot_agent_session_log "delegate_finish" "$delegate_profile" "failed" "delegate=$delegate_name" "exit_code=$exit_code"
+    ui_err "Delegate" "$delegate_name failed (exit $exit_code)"
+  fi
+  return "$exit_code"
+}
+
+# _agent_a2a_expect <card> <label> <jq test> <jq ok-value> <error>: one
+# validation line; returns 1 when the test fails.
+_agent_a2a_expect() {
+  local card="$1" label="$2" test="$3" ok="$4" err="$5"
+  if jq -e "$test" "$card" >/dev/null 2>&1; then
+    ui_ok "$label" "$(jq -r "$ok" "$card")"
+  else
+    ui_err "$label" "$err"
+    return 1
+  fi
+}
+
+# _agent_a2a_validate <card>: check an A2A v0.3 card; returns 1 on any issue.
+_agent_a2a_validate() {
+  local card="$1" issues=0 sv
+  jq empty "$card" >/dev/null 2>&1 || {
+    ui_err "JSON" "invalid"
+    exit 1
+  }
+  ui_header "A2A v0.3 Card Validation"
+  sv="$(jq -r '.specVersion // empty' "$card")"
+  if [[ "$sv" == "0.3" ]]; then
+    ui_ok "specVersion" "$sv"
+  else
+    ui_err "specVersion" "expected 0.3, got $sv"
+    issues=$((issues + 1))
+  fi
+  _agent_a2a_expect "$card" skills '.skills | type == "array" and length > 0' '"\(.skills | length) skills"' "missing or empty" || issues=$((issues + 1))
+  _agent_a2a_expect "$card" authentication '.authentication' '"present"' "missing" || issues=$((issues + 1))
+  _agent_a2a_expect "$card" signing '.signing.method' '.signing.method' "missing method" || issues=$((issues + 1))
+  [[ "$issues" -eq 0 ]]
+}
+
+# dot mode a2a-card
+_agent_mode_a2a_card() {
+  local a2a_card_file json_mode=0 validate_mode=0 strict_mode=0
+  local repo_root
+  # `.well-known/` is NOT chezmoi-tracked — it lives at the
+  # actual repo root, not the descended `defaults/` subdir.
+  # Bypass `_agent_repo_root` (which descends) and read the
+  # true root directly.
+  repo_root="$(require_source_dir)"
+  a2a_card_file="$repo_root/.well-known/agent-card.json"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --json | -j)
+        json_mode=1
+        shift
+        ;;
+      --validate | --strict | -s)
+        validate_mode=1
+        strict_mode=1
+        shift
+        ;;
+      *) shift ;;
+    esac
+  done
+  [[ -f "$a2a_card_file" ]] || die "A2A v0.3 card not found: $a2a_card_file"
+  dot_agent_session_log "a2a-card" "$(_agent_current_profile)" "ok"
+  if [[ "$json_mode" -eq 1 ]]; then
+    exec cat "$a2a_card_file"
+  fi
+  if [[ "$validate_mode" -eq 1 ]]; then
+    _agent_a2a_validate "$a2a_card_file" || [[ "$strict_mode" -ne 1 ]] || exit 1
+    return 0
+  fi
+  ui_header "A2A v0.3 Agent Card"
+  jq -r '
+        "Name\t\(.name)",
+        "Version\t\(.version)",
+        "Spec\t\(.specVersion)",
+        "Protocols\t\(.protocols | join(", "))",
+        "Skills\t\(.skills | length) defined",
+        "Auth\t\(.authentication.schemes | join(", "))",
+        "Signing\t\(.signing.method)"
+      ' "$a2a_card_file" | while IFS=$'\t' read -r key value; do
+    ui_ok "$key" "$value"
+  done
+}
+
+# dot mode conformance
+_agent_mode_conformance() {
+  dot_agent_session_log "conformance" "$(_agent_current_profile)" "ok"
+  run_script "scripts/diagnostics/a2a-conformance.sh" "A2A conformance script" "$@"
+}
+
 cmd_mode() {
   _agent_assert_dependencies
 
@@ -206,333 +583,40 @@ cmd_mode() {
 
   case "$subcommand" in
     list)
-      local current
-      current="$(_agent_current_profile)"
-      dot_agent_session_log "list" "$current" "ok"
-      ui_header "Agent Modes"
-      jq -r '.profiles | to_entries[] | "\(.key)\t\(.value.description)"' "$(_agent_profiles_file)" |
-        while IFS=$'\t' read -r name description; do
-          if [[ "$name" == "$current" ]]; then
-            ui_ok "$name" "$description [current]"
-          else
-            ui_info "$name" "$description"
-          fi
-        done
+      _agent_mode_list "$@"
       ;;
     current)
-      local current
-      current="$(_agent_current_profile)"
-      dot_agent_session_log "current" "$current" "ok"
-      ui_header "Agent Mode"
-      ui_ok "Profile" "$current"
-      ui_ok "Approval" "$(_agent_profile_field "$current" "approval")"
-      ui_ok "Filesystem" "$(_agent_profile_field "$current" "filesystem")"
-      ui_ok "Network" "$(_agent_profile_field "$current" "network")"
-      ui_ok "MCP" "$(_agent_profile_field "$current" "mcpProfile")"
+      _agent_mode_current "$@"
       ;;
     show)
-      local name="${1:-}"
-      [[ -n "$name" ]] || die "Usage: dot mode show <profile>"
-      _agent_profile_exists "$name" || die "Unknown agent profile: $name"
-      dot_agent_session_log "show" "$name" "ok"
-      ui_header "Agent Mode"
-      ui_ok "Profile" "$name"
-      ui_ok "Description" "$(_agent_profile_field "$name" "description")"
-      ui_ok "Approval" "$(_agent_profile_field "$name" "approval")"
-      ui_ok "Filesystem" "$(_agent_profile_field "$name" "filesystem")"
-      ui_ok "Network" "$(_agent_profile_field "$name" "network")"
-      ui_ok "Max steps" "$(_agent_profile_field "$name" "maxSteps")"
-      ui_ok "MCP" "$(_agent_profile_field "$name" "mcpProfile")"
+      _agent_mode_show "$@"
       ;;
     set)
-      local name="${1:-}" state_file role=""
-      [[ -n "$name" ]] || die "Usage: dot mode set <profile>"
-      _agent_profile_exists "$name" || die "Unknown agent profile: $name"
-      _agent_enforce_rbac "$name"
-      state_file="$(_agent_state_file)"
-      mkdir -p "$(dirname "$state_file")"
-      # The role lives in the same file; rewriting it without the role would
-      # drop the caller back to the default role on every mode switch.
-      [[ -f "$state_file" ]] && role="$(sed -n 's/^DOT_AGENT_ROLE=//p' "$state_file" | tail -n 1)"
-      cat >"$state_file" <<EOF
-${role:+DOT_AGENT_ROLE=$role
-}DOT_AGENT_PROFILE=$name
-DOT_AGENT_APPROVAL=$(_agent_profile_field "$name" "approval")
-DOT_AGENT_FILESYSTEM=$(_agent_profile_field "$name" "filesystem")
-DOT_AGENT_NETWORK=$(_agent_profile_field "$name" "network")
-DOT_AGENT_MCP_PROFILE=$(_agent_profile_field "$name" "mcpProfile")
-DOT_AGENT_MAX_STEPS=$(_agent_profile_field "$name" "maxSteps")
-EOF
-      dot_agent_session_log "set" "$name" "ok" "state_file=$state_file"
-      ui_ok "Agent mode" "$name"
-      ui_info "State file" "$state_file"
+      _agent_mode_set "$@"
       ;;
     run)
-      local name="${1:-}" current
-      if [[ -n "$name" ]] && _agent_profile_exists "$name"; then
-        shift || true
-      else
-        name="$(_agent_current_profile)"
-      fi
-      [[ $# -gt 0 ]] || die "Usage: dot mode run [profile] <command> [args...]"
-      _agent_apply_profile_env "$name"
-      local checkpoint_file checkpoint_id
-      checkpoint_file="$(dot_agent_checkpoint_create "$name" "ready" "$@")"
-      checkpoint_id="$(basename "$checkpoint_file" .json)"
-      ui_info "Agent mode" "$name"
-      dot_agent_session_log "run_start" "$name" "running" "argv=$*" "checkpoint_id=$checkpoint_id"
-      # Run inside the `if` condition (errexit is suspended there) and
-      # read `$?` in the else-branch: it holds the command's own status.
-      # `if ! cmd; then exit_code=$?` reads the negation's status (0) and
-      # silently reported every failure as exit 0.
-      local exit_code=0
-      if "$@"; then
-        dot_agent_session_log "run_finish" "$name" "ok" "exit_code=$exit_code" "checkpoint_id=$checkpoint_id"
-      else
-        exit_code=$?
-        dot_agent_session_log "run_finish" "$name" "failed" "exit_code=$exit_code" "checkpoint_id=$checkpoint_id"
-      fi
-      return "$exit_code"
+      _agent_mode_run "$@"
       ;;
     doctor)
-      local file
-      file="$(_agent_profiles_file)"
-      dot_agent_session_log "doctor" "$(_agent_current_profile)" "ok"
-      ui_header "Agent Mode Doctor"
-      if jq empty "$file" >/dev/null 2>&1; then
-        ui_ok "Profile config" "$file"
-      else
-        die "Invalid JSON: $file"
-      fi
-      jq -e '.profiles[.defaultProfile]' "$file" >/dev/null 2>&1 || die "Default profile missing"
-      ui_ok "Default profile" "$(_agent_default_profile)"
+      _agent_mode_doctor "$@"
       ;;
     card)
-      local card_file json_mode=0
-      card_file="$(_agent_card_file)"
-      [[ -f "$card_file" ]] || die "Agent card not found: $card_file"
-      if [[ "${1:-}" == "--json" ]]; then
-        json_mode=1
-      fi
-      dot_agent_session_log "card" "$(_agent_current_profile)" "ok"
-      if [[ "$json_mode" -eq 1 ]] || ! command -v jq >/dev/null 2>&1; then
-        exec cat "$card_file"
-      fi
-      ui_header "Agent Card"
-      jq -r '
-        "Name\t\(.name)",
-        "Version\t\(.version)",
-        "Protocols\t\(.protocols | join(", "))",
-        "Default mode\t\(.defaultProfile)",
-        "Support\t\(.platforms | join(", "))"
-      ' "$card_file" | while IFS=$'\t' read -r key value; do
-        ui_ok "$key" "$value"
-      done
+      _agent_mode_card "$@"
       ;;
     log)
-      dot_agent_session_log "log" "$(_agent_current_profile)" "ok"
-      dot_agent_session_tail "${1:-20}"
+      _agent_mode_log "$@"
       ;;
     checkpoint)
-      local action="${1:-list}"
-      shift || true
-      case "$action" in
-        save)
-          local name="${1:-}" checkpoint_file checkpoint_id
-          if [[ -n "$name" ]] && _agent_profile_exists "$name"; then
-            shift || true
-          else
-            name="$(_agent_current_profile)"
-          fi
-          [[ $# -gt 0 ]] || die "Usage: dot agent checkpoint save [profile] <command> [args...]"
-          _agent_apply_profile_env "$name"
-          checkpoint_file="$(dot_agent_checkpoint_create "$name" "saved" "$@")"
-          checkpoint_id="$(basename "$checkpoint_file" .json)"
-          dot_agent_session_log "checkpoint_save" "$name" "ok" "checkpoint_id=$checkpoint_id"
-          ui_header "Agent Checkpoint"
-          ui_ok "ID" "$checkpoint_id"
-          ui_ok "Profile" "$name"
-          ui_ok "Command" "$*"
-          ui_ok "File" "$checkpoint_file"
-          ;;
-        list)
-          local count="${1:-20}"
-          dot_agent_session_log "checkpoint_list" "$(_agent_current_profile)" "ok"
-          if ! command -v jq >/dev/null 2>&1; then
-            dot_agent_checkpoint_tail "$count"
-            return 0
-          fi
-          ui_header "Agent Checkpoints"
-          dot_agent_checkpoint_tail "$count" | jq -r '"\(.id)\t\(.profile)\t\(.status)\t\(.created_at)\t\(.argv | join(" "))"' | while IFS=$'\t' read -r id profile status created_at argv; do
-            ui_ok "$id" "$profile / $status / $created_at / $argv"
-          done
-          ;;
-        show)
-          local checkpoint_id="${1:-}" checkpoint_file json_mode=0
-          [[ -n "$checkpoint_id" ]] || die "Usage: dot agent checkpoint show <id> [--json]"
-          shift || true
-          [[ "${1:-}" == "--json" || "${1:-}" == "-j" ]] && json_mode=1
-          checkpoint_file="$(_agent_checkpoint_file "$checkpoint_id")"
-          [[ -f "$checkpoint_file" ]] || die "Checkpoint not found: $checkpoint_id"
-          dot_agent_session_log "checkpoint_show" "$(_agent_current_profile)" "ok" "checkpoint_id=$checkpoint_id"
-          if [[ "$json_mode" -eq 1 ]] || ! command -v jq >/dev/null 2>&1; then
-            exec cat "$checkpoint_file"
-          fi
-          ui_header "Agent Checkpoint"
-          jq -r '"ID\t\(.id)",
-            "Profile\t\(.profile)",
-            "Status\t\(.status)",
-            "Created\t\(.created_at)",
-            "Command\t\(.argv | join(" "))"' "$checkpoint_file" | while IFS=$'\t' read -r key value; do
-            ui_ok "$key" "$value"
-          done
-          ;;
-        replay)
-          local checkpoint_id="${1:-}" checkpoint_file replay_profile
-          local -a replay_argv=()
-          [[ -n "$checkpoint_id" ]] || die "Usage: dot agent checkpoint replay <id>"
-          checkpoint_file="$(_agent_checkpoint_file "$checkpoint_id")"
-          [[ -f "$checkpoint_file" ]] || die "Checkpoint not found: $checkpoint_id"
-          replay_profile="$(jq -r '.profile' "$checkpoint_file")"
-          while IFS= read -r item; do
-            replay_argv+=("$item")
-          done < <(jq -r '.argv[]' "$checkpoint_file")
-          [[ "${#replay_argv[@]}" -gt 0 ]] || die "Checkpoint has no replayable command: $checkpoint_id"
-          _agent_apply_profile_env "$replay_profile"
-          dot_agent_session_log "checkpoint_replay" "$replay_profile" "running" "checkpoint_id=$checkpoint_id"
-          local exit_code=0
-          if "${replay_argv[@]}"; then
-            dot_agent_session_log "checkpoint_replay_finish" "$replay_profile" "ok" "checkpoint_id=$checkpoint_id" "exit_code=$exit_code"
-          else
-            exit_code=$?
-            dot_agent_session_log "checkpoint_replay_finish" "$replay_profile" "failed" "checkpoint_id=$checkpoint_id" "exit_code=$exit_code"
-          fi
-          return "$exit_code"
-          ;;
-        *)
-          echo "Usage: dot agent checkpoint [save|list|show|replay]" >&2
-          exit 1
-          ;;
-      esac
+      _agent_mode_checkpoint "$@"
       ;;
     delegate)
-      local delegate_name="${1:-}"
-      [[ -n "$delegate_name" ]] || die "Usage: dot agent delegate <name> <command> [args...]"
-      shift || true
-      [[ $# -gt 0 ]] || die "Usage: dot agent delegate <name> <command> [args...]"
-      local profiles_file current_profile
-      profiles_file="$(_agent_profiles_file)"
-      current_profile="$(_agent_current_profile)"
-      # Check delegation is enabled
-      local delegation_enabled
-      delegation_enabled="$(jq -r '.delegation.enabled // false' "$profiles_file")"
-      [[ "$delegation_enabled" == "true" ]] || die "Delegation is not enabled in agent-profiles.json"
-      # Check current profile can delegate
-      local can_delegate
-      can_delegate="$(jq -r --arg p "$current_profile" '.profiles[$p].canDelegate // false' "$profiles_file")"
-      [[ "$can_delegate" == "true" ]] || die "Profile '$current_profile' cannot delegate"
-      # Check delegate name exists
-      jq -e --arg d "$delegate_name" '.delegation.allowedDelegates[$d]' "$profiles_file" >/dev/null 2>&1 || die "Unknown delegate: $delegate_name"
-      # Read delegate config
-      local delegate_profile delegate_timeout delegate_max_steps
-      delegate_profile="$(jq -r --arg d "$delegate_name" '.delegation.allowedDelegates[$d].profile' "$profiles_file")"
-      delegate_timeout="$(jq -r --arg d "$delegate_name" '.delegation.allowedDelegates[$d].timeout // 300' "$profiles_file")"
-      delegate_max_steps="$(jq -r --arg d "$delegate_name" '.delegation.allowedDelegates[$d].maxSteps // 4' "$profiles_file")"
-      # A delegate runs under its own profile, so the caller's role must be
-      # allowed that profile too; otherwise delegation sidesteps RBAC.
-      _agent_enforce_rbac "$delegate_profile"
-      # Apply delegate profile env
-      _agent_apply_profile_env "$delegate_profile"
-      export DOT_AGENT_MAX_STEPS="$delegate_max_steps"
-      export DOT_AGENT_DELEGATE="$delegate_name"
-      export DOT_AGENT_PARENT_PROFILE="$current_profile"
-      dot_agent_session_log "delegate_start" "$delegate_profile" "running" "delegate=$delegate_name" "parent=$current_profile" "timeout=$delegate_timeout"
-      ui_info "Delegating" "$delegate_name (profile: $delegate_profile, timeout: ${delegate_timeout}s)"
-      local exit_code=0
-      if _agent_run_bounded "$delegate_timeout" "$@"; then
-        dot_agent_session_log "delegate_finish" "$delegate_profile" "ok" "delegate=$delegate_name" "exit_code=$exit_code"
-        ui_ok "Delegate" "$delegate_name completed"
-      else
-        exit_code=$?
-        dot_agent_session_log "delegate_finish" "$delegate_profile" "failed" "delegate=$delegate_name" "exit_code=$exit_code"
-        ui_err "Delegate" "$delegate_name failed (exit $exit_code)"
-      fi
-      return "$exit_code"
+      _agent_mode_delegate "$@"
       ;;
     a2a-card)
-      local a2a_card_file json_mode=0 validate_mode=0 strict_mode=0
-      local repo_root
-      # `.well-known/` is NOT chezmoi-tracked — it lives at the
-      # actual repo root, not the descended `defaults/` subdir.
-      # Bypass `_agent_repo_root` (which descends) and read the
-      # true root directly.
-      repo_root="$(require_source_dir)"
-      a2a_card_file="$repo_root/.well-known/agent-card.json"
-      while [[ $# -gt 0 ]]; do
-        case "$1" in
-          --json | -j)
-            json_mode=1
-            shift
-            ;;
-          --validate | --strict | -s)
-            validate_mode=1
-            strict_mode=1
-            shift
-            ;;
-          *) shift ;;
-        esac
-      done
-      [[ -f "$a2a_card_file" ]] || die "A2A v0.3 card not found: $a2a_card_file"
-      dot_agent_session_log "a2a-card" "$(_agent_current_profile)" "ok"
-      if [[ "$json_mode" -eq 1 ]]; then
-        exec cat "$a2a_card_file"
-      fi
-      if [[ "$validate_mode" -eq 1 ]]; then
-        local v_issues=0
-        jq empty "$a2a_card_file" >/dev/null 2>&1 || {
-          ui_err "JSON" "invalid"
-          exit 1
-        }
-        ui_header "A2A v0.3 Card Validation"
-        local sv
-        sv="$(jq -r '.specVersion // empty' "$a2a_card_file")"
-        if [[ "$sv" == "0.3" ]]; then ui_ok "specVersion" "$sv"; else
-          ui_err "specVersion" "expected 0.3, got $sv"
-          v_issues=$((v_issues + 1))
-        fi
-        if jq -e '.skills | type == "array" and length > 0' "$a2a_card_file" >/dev/null 2>&1; then
-          ui_ok "skills" "$(jq '.skills | length' "$a2a_card_file") skills"
-        else
-          ui_err "skills" "missing or empty"
-          v_issues=$((v_issues + 1))
-        fi
-        if jq -e '.authentication' "$a2a_card_file" >/dev/null 2>&1; then ui_ok "authentication" "present"; else
-          ui_err "authentication" "missing"
-          v_issues=$((v_issues + 1))
-        fi
-        if jq -e '.signing.method' "$a2a_card_file" >/dev/null 2>&1; then ui_ok "signing" "$(jq -r '.signing.method' "$a2a_card_file")"; else
-          ui_err "signing" "missing method"
-          v_issues=$((v_issues + 1))
-        fi
-        if [[ "$v_issues" -gt 0 && "$strict_mode" -eq 1 ]]; then exit 1; fi
-        return 0
-      fi
-      ui_header "A2A v0.3 Agent Card"
-      jq -r '
-        "Name\t\(.name)",
-        "Version\t\(.version)",
-        "Spec\t\(.specVersion)",
-        "Protocols\t\(.protocols | join(", "))",
-        "Skills\t\(.skills | length) defined",
-        "Auth\t\(.authentication.schemes | join(", "))",
-        "Signing\t\(.signing.method)"
-      ' "$a2a_card_file" | while IFS=$'\t' read -r key value; do
-        ui_ok "$key" "$value"
-      done
+      _agent_mode_a2a_card "$@"
       ;;
     conformance)
-      dot_agent_session_log "conformance" "$(_agent_current_profile)" "ok"
-      run_script "scripts/diagnostics/a2a-conformance.sh" "A2A conformance script" "$@"
+      _agent_mode_conformance "$@"
       ;;
     *)
       echo "Usage: dot mode [list|current|show|set|run|doctor|card|log|checkpoint|conformance|a2a-card]" >&2
