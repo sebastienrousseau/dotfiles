@@ -112,11 +112,11 @@ check-drift: ## Fail if any generated artefact is stale (what doc-drift.yml runs
 	bash ./tools/docs/generate-manpage.sh --check
 	bash ./tools/docs/generate-completions.sh --check
 	bash ./scripts/verify-release-versions
-	bash ./scripts/release-preflight
+	bash ./scripts/release-preflight --development
 
 verify-versions: ## Assert every version surface matches the manifest
 	bash ./scripts/verify-release-versions
-	bash ./scripts/release-preflight
+	bash ./scripts/release-preflight --development
 
 # ── Docs ───────────────────────────────────────────────────────────────
 docs: ## Build doc.dotfiles.io with ssg and the Lucid theme into _build/site
