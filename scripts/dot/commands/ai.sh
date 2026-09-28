@@ -16,6 +16,8 @@ source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 source "$SCRIPT_DIR/../../../lib/dot/ai-commands.sh"
 # shellcheck source=../../../lib/dot/ai-probe.sh
 source "$SCRIPT_DIR/../../../lib/dot/ai-probe.sh"
+# shellcheck source-path=SCRIPTDIR source=ai/status.sh
+source "$SCRIPT_DIR/ai/status.sh"
 
 [[ -n "${DOT_AI_RAW:-}" ]] || dot_ui_command_banner "AI and Agents" "${1:-}" # raw mode: no banner
 
@@ -28,18 +30,22 @@ AI_STATUS_CACHE_FILE="${AI_CACHE_DIR}/status.tsv"
 # `.chezmoiroot` moves the source tree one level down (it holds
 # `defaults` here), so probing <repo>/dot_config/… alone made this a
 # no-op and `--style` died with "Pattern not found" off-deployment.
-if [[ ! -d "$PATTERN_DIR" ]]; then
-  _AI_SRC="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-  _AI_SUB=""
-  [[ -f "$_AI_SRC/.chezmoiroot" ]] &&
-    _AI_SUB="/$(head -1 "$_AI_SRC/.chezmoiroot" | tr -d '[:space:]')"
-  for _AI_CAND in "$_AI_SRC/dot_config/ai/patterns" "$_AI_SRC$_AI_SUB/dot_config/ai/patterns"; do
-    if [[ -d "$_AI_CAND" ]]; then
-      PATTERN_DIR="$_AI_CAND"
-      break
+_ai_resolve_pattern_dir() {
+  [[ -d "$PATTERN_DIR" ]] && return 0
+  local src sub="" cand
+  src="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+  if [[ -f "$src/.chezmoiroot" ]]; then
+    sub="/$(head -1 "$src/.chezmoiroot" | tr -d '[:space:]')"
+  fi
+  for cand in "$src/dot_config/ai/patterns" "$src$sub/dot_config/ai/patterns"; do
+    if [[ -d "$cand" ]]; then
+      PATTERN_DIR="$cand"
+      return 0
     fi
   done
-fi
+  return 0
+}
+_ai_resolve_pattern_dir
 
 _show_ai_bridge_usage() {
   echo "Usage: dot ai \"<prompt>\"              # one-shot on Claude"
@@ -163,131 +169,10 @@ cmd_ai_status() {
     _ai_refresh_status_cache "${ai_clis[@]}"
   fi
 
-  local -a installed=()
-  local -a missing=()
-  local current_category=""
-  local category role name bin desc ver
-  for entry in "${ai_clis[@]}"; do
-    IFS='|' read -r category role name bin desc <<<"$entry"
-    if [[ "$category" != "$current_category" ]]; then
-      echo ""
-      ui_section "$category"
-      current_category="$category"
-    fi
-    # One awk over the cache row; no row (EOF, `|| true`) reads as not installed.
-    local _st_installed="" _st_ver=""
-    IFS=$'\t' read -r _st_installed _st_ver < <(
-      awk -F'\t' -v b="$bin" '$1==b{print $2"\t"$3;exit}' "$AI_STATUS_CACHE_FILE" 2>/dev/null
-    ) || true
-    if [[ "$_st_installed" == "1" ]]; then
-      ver="$_st_ver"
-      [[ -z "$ver" ]] && ver="installed"
-      [[ "$bin" == "claude" ]] && ver="${ver%% *}"
-      ui_ok "$name" "$ver — $desc"
-      installed+=("$name|$bin|$role")
-    else
-      ui_info "$name" "— $desc (not installed)"
-      missing+=("$name|$bin")
-    fi
-  done
-
+  local -a installed=() missing=()
+  _ai_status_rows "${ai_clis[@]}"
   # Offer to install missing providers via mise
-  if [[ ${#missing[@]} -gt 0 ]] && has_command mise && [[ -t 0 && -t 1 ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]]; then
-    echo ""
-    local _ai_install_action=""
-    if has_command gum; then
-      _ai_install_action=$(printf '%s\n' "Install all" "Choose which to install" "Skip" |
-        gum choose --header "Missing AI providers — install via mise?") || _ai_install_action=""
-    else
-      ui_info "Tip" "Install missing providers: mise install"
-      ui_info "Tip" "Or individually: mise use -g <package>@latest"
-    fi
-
-    local -a _ai_to_install=()
-    case "$_ai_install_action" in
-      "Install all")
-        _ai_to_install=("${missing[@]}")
-        ;;
-      "Choose which to install")
-        local -a _ai_pick_choices=()
-        for entry in "${missing[@]}"; do
-          IFS='|' read -r name bin <<<"$entry"
-          _ai_pick_choices+=("$name")
-        done
-        local _ai_picked
-        _ai_picked=$(printf '%s\n' "${_ai_pick_choices[@]}" |
-          gum choose --no-limit --header "Select providers to install (Space to toggle, Enter to confirm)") || _ai_picked=""
-        if [[ -n "$_ai_picked" ]]; then
-          while IFS= read -r selected; do
-            [[ -z "$selected" ]] && continue
-            for entry in "${missing[@]}"; do
-              IFS='|' read -r name bin <<<"$entry"
-              if [[ "$name" == "$selected" ]]; then
-                _ai_to_install+=("$entry")
-              fi
-            done
-          done <<<"$_ai_picked"
-        fi
-        ;;
-    esac
-
-    if [[ ${#_ai_to_install[@]} -gt 0 ]]; then
-      echo ""
-      for entry in "${_ai_to_install[@]}"; do
-        IFS='|' read -r name bin <<<"$entry"
-        # Tools without a mise package use their vendor's native installer.
-        case "$bin" in
-          claude)
-            install_claude_native "$name"
-            continue
-            ;;
-          goose)
-            install_goose_native "$name"
-            continue
-            ;;
-          agy)
-            install_agy_native "$name"
-            continue
-            ;;
-          amp)
-            install_amp_native "$name"
-            continue
-            ;;
-          cursor-agent)
-            install_cursor_native "$name"
-            continue
-            ;;
-          grok)
-            install_grok_native "$name"
-            continue
-            ;;
-          kimi)
-            install_kimi_native "$name"
-            continue
-            ;;
-        esac
-        local pkg
-        pkg=$(_ai_mise_pkg "$bin")
-        if [[ -n "$pkg" ]]; then
-          if has_command gum; then
-            if _ai_in_scratch_dir gum spin --spinner dot --title "Installing $name ($pkg)" -- \
-              mise use -g "$pkg@latest" 2>&1; then
-              ui_ok "$name" "installed"
-            else
-              ui_warn "$name" "install failed (continuing)"
-            fi
-          else
-            ui_info "Installing" "$name via mise ($pkg)"
-            _ai_in_scratch_dir mise use -g "$pkg@latest" 2>&1 || ui_warn "$name" "install failed (continuing)" # mutation: ignore unreachable: gum answered the prompt above and stays hashed, so has_command gum is still true here
-          fi
-        fi
-      done
-      # Invalidate cache after installs
-      rm -f "$AI_STATUS_CACHE_FILE"
-      echo ""
-      ui_ok "Done" "Run 'dot ai' again to see updated status"
-    fi
-  fi
+  _ai_offer_install
 
   echo ""
   if [ ${#installed[@]} -eq 0 ]; then
@@ -295,26 +180,7 @@ cmd_ai_status() {
   elif [[ ! -t 0 || ! -t 1 || "${DOTFILES_NONINTERACTIVE:-0}" == "1" ]]; then
     return 0
   elif has_command gum; then
-    ui_info "Launch" "Select an AI CLI to start"
-    local -a choices=()
-    for entry in "${installed[@]}"; do
-      IFS='|' read -r name bin role <<<"$entry"
-      choices+=("$(printf '%-16s — %s' "$name" "$role")")
-    done
-    local pick
-    pick=$(printf '%s\n' "${choices[@]}" | gum choose --header "Select an AI CLI") || true
-    if [ -n "$pick" ]; then
-      pick="${pick%% — *}"
-      pick="${pick%"${pick##*[![:space:]]}"}"
-      for entry in "${installed[@]}"; do
-        IFS='|' read -r name bin role <<<"$entry"
-        if [ "$name" = "$pick" ]; then
-          echo ""
-          ui_info "Starting" "$name ($bin)"
-          exec "$bin"
-        fi
-      done
-    fi
+    _ai_launch_menu
   else
     ui_info "Tip" "Install gum for interactive launcher: mise use -g gum"
   fi
@@ -332,12 +198,8 @@ _ai_log_run() {
   "$log_bin" "$provider" "$project" "$exit_code" "$duration_secs" "$prompt_words" "$ts" || true
 }
 
-run_ai_with_context() {
-  local tool="$1"
-  shift
-  local pattern_name=""
-  local prompt=""
-
+# _ai_bridge_args <args...>: parse into the caller's pattern_name / prompt.
+_ai_bridge_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --help | -h)
@@ -354,108 +216,136 @@ run_ai_with_context() {
         ;;
     esac
   done
+}
 
-  if [[ -z "$prompt" ]]; then
-    _show_ai_bridge_usage
-    exit 1
-  fi
-
-  local system_context=""
+# _ai_bridge_prompt: build the caller's full_prompt from pattern_name and
+# prompt. Raw mode (DOT_AI_RAW) skips the system-metadata banner so callers
+# like the cockpit get clean, streamable output.
+_ai_bridge_prompt() {
+  local system_context="" pattern_file metadata
   if [[ -n "$pattern_name" ]]; then
-    local pattern_file="$PATTERN_DIR/${pattern_name}.md"
-    if [[ -f "$pattern_file" ]]; then
-      system_context=$(cat "$pattern_file")
-    else
+    pattern_file="$PATTERN_DIR/${pattern_name}.md"
+    if [[ ! -f "$pattern_file" ]]; then
       ui_err "Pattern not found" "$pattern_name"
       exit 1
     fi
+    system_context=$(cat "$pattern_file")
   fi
-
-  # Build the prompt. Raw mode (DOT_AI_RAW) skips the system-metadata banner
-  # so callers like the cockpit get clean, streamable output.
-  local full_prompt
   if [[ -n "${DOT_AI_RAW:-}" ]]; then
     full_prompt="${system_context:+${system_context}
 
 }${prompt}"
-  else
-    local metadata
-    metadata="## System Metadata
+    return 0
+  fi
+  metadata="## System Metadata
 - OS: $(uname -s) $(uname -r)
 - Arch: $(uname -m)
 - Date: $(date -u)"
-    full_prompt="${system_context}
+  full_prompt="${system_context}
 
 ${metadata}
 
 ## User Request
 ${prompt}"
-  fi
+}
 
-  # Resolve the binary name for the tool
-  local tool_bin="$tool"
-  case "$tool" in
-    cl) tool_bin="claude" ;;
-    kiro) tool_bin="kiro-cli" ;;
+# _ai_tool_bin <tool>: the executable behind a tool name.
+_ai_tool_bin() {
+  case "$1" in
+    cl) echo "claude" ;;
+    kiro) echo "kiro-cli" ;;
+    *) echo "$1" ;;
   esac
+}
 
-  # Check if the tool is installed; offer mise install if not
-  if ! has_command "$tool_bin"; then
-    local mise_pkg
-    mise_pkg=$(_ai_mise_pkg "$tool_bin")
-    if [[ -n "$mise_pkg" ]] && has_command mise; then
-      ui_warn "$tool" "not installed"
-      local do_install=""
-      if has_command gum; then
-        do_install=$(gum confirm "Install $tool via mise ($mise_pkg)?" && echo "yes" || echo "no")
-      else
-        printf "Install %s via mise (%s)? [y/N] " "$tool" "$mise_pkg"
-        # `|| true`: at EOF (piped, cron, CI) `read` returns 1 and
-        # `set -e` killed the script mid-prompt. EOF means "no".
-        read -r do_install || true
-        case "$do_install" in y | Y | yes) do_install="yes" ;; *) do_install="no" ;; esac
-      fi
-      if [[ "$do_install" == "yes" ]]; then
-        ui_info "Installing" "$tool via mise ($mise_pkg)"
-        _ai_in_scratch_dir mise use -g "$mise_pkg@latest" 2>&1 || {
-          ui_err "$tool" "installation failed"
-          exit 1
-        }
-        rm -f "$AI_STATUS_CACHE_FILE"
-      else
-        ui_err "$tool" "not installed — install with: mise use -g $mise_pkg@latest"
-        exit 1
-      fi
-    elif [[ "$tool_bin" == "agy" ]]; then
+# _ai_confirm_mise <tool> <pkg>: ask whether to install; sets the caller's
+# do_install to yes or no.
+_ai_confirm_mise() {
+  if has_command gum; then
+    do_install=$(gum confirm "Install $1 via mise ($2)?" && echo "yes" || echo "no")
+    return 0
+  fi
+  printf "Install %s via mise (%s)? [y/N] " "$1" "$2"
+  # `|| true`: at EOF (piped, cron, CI) `read` returns 1 and
+  # `set -e` killed the script mid-prompt. EOF means "no".
+  read -r do_install || true
+  case "$do_install" in y | Y | yes) do_install="yes" ;; *) do_install="no" ;; esac
+}
+
+# _ai_offer_mise <tool> <pkg>: install the tool via mise if the user agrees;
+# otherwise exit 1 with the install command.
+_ai_offer_mise() {
+  local tool="$1" mise_pkg="$2" do_install=""
+  ui_warn "$tool" "not installed"
+  _ai_confirm_mise "$tool" "$mise_pkg"
+  if [[ "$do_install" != "yes" ]]; then
+    ui_err "$tool" "not installed — install with: mise use -g $mise_pkg@latest"
+    exit 1
+  fi
+  ui_info "Installing" "$tool via mise ($mise_pkg)"
+  _ai_in_scratch_dir mise use -g "$mise_pkg@latest" 2>&1 || {
+    ui_err "$tool" "installation failed"
+    exit 1
+  }
+  rm -f "$AI_STATUS_CACHE_FILE"
+}
+
+# _ai_ensure_installed <tool> <bin>: return when the tool is installed or
+# was just installed; otherwise explain how to get it and exit 1.
+_ai_ensure_installed() {
+  local tool="$1" tool_bin="$2" mise_pkg
+  has_command "$tool_bin" && return 0
+  mise_pkg=$(_ai_mise_pkg "$tool_bin")
+  if [[ -n "$mise_pkg" ]] && has_command mise; then
+    _ai_offer_mise "$tool" "$mise_pkg"
+    return 0
+  fi
+  case "$tool_bin" in
+    agy)
       ui_warn "$tool" "not installed"
       ui_info "Install" "dot ai install agy (checksum verified)"
-      exit 1
-    elif [[ "$tool_bin" == "kimi" ]]; then
+      ;;
+    kimi)
       ui_warn "$tool" "not installed"
       ui_info "Install" "dot ai install kimi"
       ui_info "PATH" "Kimi Code installs to ~/.kimi-code/bin; restart your shell after install"
-      exit 1
-    else
-      ui_err "$tool" "not installed and mise not available"
-      exit 1
-    fi
-  fi
+      ;;
+    *) ui_err "$tool" "not installed and mise not available" ;;
+  esac
+  exit 1
+}
 
-  [[ -n "${DOT_AI_RAW:-}" ]] || ui_info "Executing $tool with pattern: ${pattern_name:-none}"
-
-  # Route non-Claude tools through the local gateway when one is running.
-  # The primary Claude ALWAYS uses its native session — never route it,
-  # and never set ANTHROPIC_API_KEY where Claude Code can see it (that
-  # disables claude.ai connectors). Routing is scoped to this run's
-  # subprocess; the interactive shell is never touched.
-  case "$tool" in
+# Route non-Claude tools through the local gateway when one is running.
+# The primary Claude ALWAYS uses its native session — never route it,
+# and never set ANTHROPIC_API_KEY where Claude Code can see it (that
+# disables claude.ai connectors). Routing is scoped to this run's
+# subprocess; the interactive shell is never touched.
+_ai_gateway_env() {
+  local _ai_local_env="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/ai-local.env"
+  case "$1" in
     cl | claude) : ;;
     *)
-      local _ai_local_env="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/ai-local.env"
       # shellcheck disable=SC1090
       [[ -r "$_ai_local_env" ]] && source "$_ai_local_env"
       ;;
   esac
+  return 0
+}
+
+run_ai_with_context() {
+  local tool="$1" pattern_name="" prompt="" full_prompt tool_bin
+  shift
+  _ai_bridge_args "$@"
+  if [[ -z "$prompt" ]]; then
+    _show_ai_bridge_usage
+    exit 1
+  fi
+  _ai_bridge_prompt
+  # Resolve the binary name for the tool; install it via mise if missing.
+  tool_bin="$(_ai_tool_bin "$tool")"
+  _ai_ensure_installed "$tool" "$tool_bin"
+  [[ -n "${DOT_AI_RAW:-}" ]] || ui_info "Executing $tool with pattern: ${pattern_name:-none}"
+  _ai_gateway_env "$tool"
 
   # Wrap the provider invocation so we can log it to the unified AI run
   # log. Each entry feeds `dot ai cost` so users see spend across every
@@ -472,10 +362,8 @@ ${prompt}"
   return "$_ai_exit"
 }
 
-# Dispatch — flat, verb-first surface (see docs/AI.md).
-case "${1:-}" in
-  --help | -h | help)
-    cat <<'EOF'
+_ai_usage() {
+  cat <<'EOF'
 Usage: ai.sh <command> [args...]
 
 Commands:
@@ -483,113 +371,91 @@ Commands:
   cursor-agent, grok, kimi, agy, kiro, sgpt, ollama, opencode, aider, autohand,
   vibe, qwen, zai
 EOF
-    ;;
-  "")
-    cat <<'EOF'
-Usage: ai.sh <command> [args...]
+}
 
-Commands:
-  ai, ai-setup, ai-query, cl, claude, codex, copilot, goose, crush, amp,
-  cursor-agent, grok, kimi, agy, kiro, sgpt, ollama, opencode, aider, autohand,
-  vibe, qwen, zai
-EOF
-    exit 1
-    ;;
-  ai)
-    shift
-    case "${1:-}" in
-      "")
-        # Bare `dot ai` → the Bubble Tea cockpit (or the launcher fallback).
-        _ai_cockpit cmd_ai_status
-        ;;
-      chat)
-        shift
-        cmd_ai_chat "$@"
-        ;;
-      tools)
-        shift
-        if [[ "${1:-}" == install ]]; then
-          shift
-          cmd_ai_install "$@"
-        else
-          cmd_ai_status "$@"
-        fi
-        ;;
-      install)
+# `dot ai <verb> …` → the function that takes the remaining arguments.
+_AI_VERBS="chat:cmd_ai_chat install:cmd_ai_install serve:_ai_serve cost:cmd_ai_cost
+login:cmd_ai_setup doctor:cmd_ai_doctor ask:cmd_ai_query run:_ai_oneshot delegate:cmd_ai_delegate"
+
+# Deprecated `dot ai` verbs and the bare / unknown forms. `status` and
+# `local` keep their verb in "$@", as they always have.
+_ai_other_verb() {
+  case "${1:-}" in
+    # Bare `dot ai` → the Bubble Tea cockpit (or the launcher fallback).
+    "") _ai_cockpit cmd_ai_status ;;
+    tools)
+      shift
+      if [[ "${1:-}" == install ]]; then
         shift
         cmd_ai_install "$@"
-        ;;
-      serve)
-        shift
-        _ai_serve "$@"
-        ;;
-      cost)
-        shift
-        cmd_ai_cost "$@"
-        ;;
-      login)
-        shift
-        cmd_ai_setup "$@"
-        ;;
-      doctor)
-        shift
-        cmd_ai_doctor "$@"
-        ;;
-      ask)
-        shift
-        cmd_ai_query "$@"
-        ;;
-      run)
-        shift
-        _ai_oneshot "$@"
-        ;;
-      delegate)
-        shift
-        cmd_ai_delegate "$@"
-        ;;
-      # Deprecated verbs — still work, with a one-line hint to the new name.
-      status)
-        _ai_deprecated "dot ai tools"
+      else
         cmd_ai_status "$@"
-        ;;
-      dashboard | dash)
-        _ai_deprecated "dot ai  (cockpit)"
-        _ai_cockpit cmd_ai_status
-        ;;
-      proxy)
-        shift
-        _ai_deprecated "dot ai serve"
-        has_command dot-ai-proxy && exec dot-ai-proxy "$@" || exit 1
-        ;;
-      local)
-        _ai_deprecated "dot ai serve"
-        has_command dot-ai-proxy && exec dot-ai-proxy "$@" || exit 1
-        ;;
-      *)
-        # Bare prompt (`dot ai "fix this"`) or `dot ai <tool> "…"` → one-shot.
-        _ai_oneshot "$@"
-        ;;
-    esac
-    ;;
-  # Deprecated top-level forms — kept for muscle memory.
-  ai-setup)
-    _ai_deprecated "dot ai login"
-    shift
-    cmd_ai_setup "$@"
-    ;;
-  ai-query)
-    _ai_deprecated "dot ai ask"
-    shift
-    cmd_ai_query "$@"
-    ;;
-  cl | claude | codex | copilot | goose | crush | amp | cursor-agent | grok | kimi | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
-    _ai_deprecated "dot ai $1"
-    tool="$1"
-    shift
-    run_ai_with_context "$tool" "$@"
-    ;;
-  *)
-    echo "Unknown ai command: ${1:-}" >&2
-    exit 1
-    ;;
-esac
+      fi
+      ;;
+    status)
+      _ai_deprecated "dot ai tools"
+      cmd_ai_status "$@"
+      ;;
+    dashboard | dash)
+      _ai_deprecated "dot ai  (cockpit)"
+      _ai_cockpit cmd_ai_status
+      ;;
+    proxy | local)
+      [[ "$1" == proxy ]] && shift
+      _ai_deprecated "dot ai serve"
+      has_command dot-ai-proxy && exec dot-ai-proxy "$@" || exit 1
+      ;;
+    # Bare prompt (`dot ai "fix this"`) or `dot ai <tool> "…"` → one-shot.
+    *) _ai_oneshot "$@" ;;
+  esac
+}
+
+_ai_verb() {
+  local entry
+  for entry in $_AI_VERBS; do
+    if [[ "${entry%%:*}" == "${1:-}" ]]; then
+      shift
+      "${entry#*:}" "$@"
+      return
+    fi
+  done
+  _ai_other_verb "$@"
+}
+
+# Dispatch — flat, verb-first surface (see docs/AI.md).
+_ai_main() {
+  case "${1:-}" in
+    --help | -h | help) _ai_usage ;;
+    "")
+      _ai_usage
+      exit 1
+      ;;
+    ai)
+      shift
+      _ai_verb "$@"
+      ;;
+    # Deprecated top-level forms — kept for muscle memory.
+    ai-setup)
+      _ai_deprecated "dot ai login"
+      shift
+      cmd_ai_setup "$@"
+      ;;
+    ai-query)
+      _ai_deprecated "dot ai ask"
+      shift
+      cmd_ai_query "$@"
+      ;;
+    cl | claude | codex | copilot | goose | crush | amp | cursor-agent | grok | kimi | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
+      _ai_deprecated "dot ai $1"
+      local tool="$1"
+      shift
+      run_ai_with_context "$tool" "$@"
+      ;;
+    *)
+      echo "Unknown ai command: ${1:-}" >&2
+      exit 1
+      ;;
+  esac
+}
+
+_ai_main "$@"

@@ -3,6 +3,48 @@
 #-----------------------------------------------------------------------------
 # Archive and Compression Management
 
+# extract's per-family unpackers (tar archives, single-file compressors,
+# other archivers). extract checks the tar patterns first.
+_extract_tar() {
+  case "$1" in
+    *.tar.bz2 | *.tbz2) tar xvjf "$1" ;;
+    *.tar.gz | *.tgz) tar xvzf "$1" ;;
+    *.tar.xz) tar xvJf "$1" ;;
+    *.tar.zst) tar --zstd -xvf "$1" ;;
+    *) tar xvf "$1" ;;
+  esac
+}
+
+_extract_stream() {
+  case "$1" in
+    *.bz2) bunzip2 "$1" ;;
+    *.gz) gunzip "$1" ;;
+    *.Z) uncompress "$1" ;;
+    *.zst) unzstd "$1" ;;
+    *.xz) unxz "$1" ;;
+    *) lz4 -d "$1" ;;
+  esac
+}
+
+_extract_archive() {
+  case "$1" in
+    *.rar) unrar x "$1" ;;
+    *.zip) unzip "$1" ;;
+    *.7z) 7z x "$1" ;;
+    *.lha | *.lzh) lha e "$1" ;;
+    *.arj) arj x "$1" ;;
+    *.arc) arc e "$1" ;;
+    *) xdms u "$1" ;;
+  esac
+}
+
+# _extract_into <flag> <dir>: with `-d <dir>`, create <dir> and cd into it.
+_extract_into() {
+  [[ "$1" = "-d" ]] && [[ -n "$2" ]] || return 0
+  mkdir -p "$2"
+  cd "$2" || return 1
+}
+
 extract() {
   if [[ -z "$1" ]]; then
     echo "Usage: extract <archive_file>"
@@ -21,30 +63,12 @@ extract() {
   local filename="$1"
 
   # Create extract directory for archives with multiple files
-  if [[ "$2" = "-d" ]] && [[ -n "$3" ]]; then
-    mkdir -p "$3"
-    cd "$3" || return 1
-  fi
+  _extract_into "$2" "$3" || return 1
 
   case "$filename" in
-    *.tar.bz2 | *.tbz2) tar xvjf "$filename" ;;
-    *.tar.gz | *.tgz) tar xvzf "$filename" ;;
-    *.tar.xz) tar xvJf "$filename" ;;
-    *.tar.zst) tar --zstd -xvf "$filename" ;;
-    *.tar) tar xvf "$filename" ;;
-    *.bz2) bunzip2 "$filename" ;;
-    *.gz) gunzip "$filename" ;;
-    *.rar) unrar x "$filename" ;;
-    *.zip) unzip "$filename" ;;
-    *.Z) uncompress "$filename" ;;
-    *.7z) 7z x "$filename" ;;
-    *.zst) unzstd "$filename" ;;
-    *.xz) unxz "$filename" ;;
-    *.lz4) lz4 -d "$filename" ;;
-    *.lha | *.lzh) lha e "$filename" ;;
-    *.arj) arj x "$filename" ;;
-    *.arc) arc e "$filename" ;;
-    *.dms) xdms u "$filename" ;;
+    *.tar.bz2 | *.tbz2 | *.tar.gz | *.tgz | *.tar.xz | *.tar.zst | *.tar) _extract_tar "$filename" ;;
+    *.bz2 | *.gz | *.Z | *.zst | *.xz | *.lz4) _extract_stream "$filename" ;;
+    *.rar | *.zip | *.7z | *.lha | *.lzh | *.arj | *.arc | *.dms) _extract_archive "$filename" ;;
     *) echo "Error: '$filename' cannot be extracted - unknown format" | tee -a "$LOG_FILE" && return 1 ;;
   esac
 
@@ -60,6 +84,26 @@ extract() {
 #-----------------------------------------------------------------------------
 # List Archive Contents Function
 #-----------------------------------------------------------------------------
+_list_tar() {
+  case "$1" in
+    *.tar.bz2 | *.tbz2) tar tjf "$1" ;;
+    *.tar.gz | *.tgz) tar tzf "$1" ;;
+    *.tar.xz) tar tJf "$1" ;;
+    *.tar.zst) tar --zstd -tvf "$1" ;;
+    *) tar tf "$1" ;;
+  esac
+}
+
+_list_archive() {
+  case "$1" in
+    *.rar) unrar l "$1" ;;
+    *.zip) unzip -l "$1" ;;
+    *.7z) 7z l "$1" ;;
+    *.lha | *.lzh) lha l "$1" ;;
+    *) arj l "$1" ;;
+  esac
+}
+
 list_archive() {
   if [[ -z "$1" ]]; then
     echo "Usage: list_archive <archive_file>"
@@ -72,16 +116,8 @@ list_archive() {
   fi
 
   case "$1" in
-    *.tar.bz2 | *.tbz2) tar tjf "$1" ;;
-    *.tar.gz | *.tgz) tar tzf "$1" ;;
-    *.tar.xz) tar tJf "$1" ;;
-    *.tar.zst) tar --zstd -tvf "$1" ;;
-    *.tar) tar tf "$1" ;;
-    *.rar) unrar l "$1" ;;
-    *.zip) unzip -l "$1" ;;
-    *.7z) 7z l "$1" ;;
-    *.lha | *.lzh) lha l "$1" ;;
-    *.arj) arj l "$1" ;;
+    *.tar.bz2 | *.tbz2 | *.tar.gz | *.tgz | *.tar.xz | *.tar.zst | *.tar) _list_tar "$1" ;;
+    *.rar | *.zip | *.7z | *.lha | *.lzh | *.arj) _list_archive "$1" ;;
     *) echo "Error: Cannot list contents of '$1' - unknown format" ;;
   esac
 }
@@ -89,158 +125,114 @@ list_archive() {
 #-----------------------------------------------------------------------------
 # Compress Function with Progress
 #-----------------------------------------------------------------------------
-compress() {
-  if [[ -z "$1" ]] || [[ -z "$2" ]]; then
-    echo "Usage: compress <format> <input_files...> [output_file]"
-    echo "Formats: tar, tgz, tbz2, txz, tzst, zip, 7z, gz, bz2, xz, zst, lz4, rar"
-    echo "Options: -l <1-9> compression level (if supported by format)"
+# _compress_ext <format>: the default archive suffix; returns 1 for an
+# unsupported format.
+_compress_ext() {
+  case "$1" in
+    tar) echo tar ;;
+    tgz) echo tar.gz ;;
+    tbz2) echo tar.bz2 ;;
+    txz) echo tar.xz ;;
+    tzst) echo tar.zst ;;
+    zip | 7z | gz | bz2 | xz | zst | lz4 | rar) echo "$1" ;;
+    *) return 1 ;;
+  esac
+}
+
+# _compress_stream <tool> <level> <input> <output>: one file through a
+# stream compressor, with a pv progress bar when pv is installed.
+_compress_stream() {
+  if [[ $has_pv -eq 1 ]]; then
+    pv "$3" | "$1" "-$2" >"$4"
+  else
+    "$1" -c "-$2" "$3" >"$4"
+  fi
+}
+
+# _compress_tar <format> <level> <output> <input>...: the tar formats.
+_compress_tar() {
+  local format="$1" level="$2" output="$3"
+  shift 3
+  case "$format" in
+    tar) tar -cf "$output" "$@" ;;
+    tgz)
+      if [[ $has_pv -eq 1 ]] && [[ $# -eq 1 ]] && [[ -f "$1" ]]; then
+        pv "$1" | tar -cz -f "$output" -C "$(dirname "$1")" "$(basename "$1")"
+      else
+        tar -czf "$output" "$@"
+      fi
+      ;;
+    tbz2) tar -cjf "$output" -C "$(dirname "$1")" "$@" ;;
+    txz) XZ_OPT="-$level" tar -cJf "$output" "$@" ;;
+    *) ZSTD_CLEVEL="$level" tar --zstd -cf "$output" "$@" ;;
+  esac
+}
+
+# _compress_multi <format> <level> <output> <input>...: the multi-file
+# archivers.
+_compress_multi() {
+  local format="$1" level="$2" output="$3"
+  shift 3
+  case "$format" in
+    zip) zip -r "$output" "$@" "-$level" ;;
+    7z) 7z a "-mx=$level" "$output" "$@" ;;
+    rar) rar a "-m$level" "$output" "$@" ;;
+    *) _compress_tar "$format" "$level" "$output" "$@" ;;
+  esac
+}
+
+# _compress_tool <format>: the stream compressor for a single-file format;
+# returns 1 for the archive formats.
+_compress_tool() {
+  case "$1" in
+    gz) echo gzip ;;
+    bz2) echo bzip2 ;;
+    xz) echo xz ;;
+    zst) echo zstd ;;
+    lz4) echo lz4 ;;
+    *) return 1 ;;
+  esac
+}
+
+# Sets compress's first / inputs / output / explicit from its remaining
+# arguments: the last one names the output when it does not exist yet.
+# No array indexing: this file is sourced into zsh too, whose arrays are
+# 1-based, so ${inputs[0]} read as empty and a.txt compressed to ".tar".
+_compress_split() {
+  local arg last="" n=0
+  first="$1"
+  for arg in "$@"; do last="$arg"; done
+  if [[ "$#" -gt 1 ]] && [[ ! -e "$last" ]]; then
+    explicit=1
+    output="$last"
+    for arg in "$@"; do
+      n=$((n + 1))
+      if [[ "$n" -lt "$#" ]]; then
+        inputs+=("$arg")
+      fi
+    done
+  else
+    inputs=("$@")
+  fi
+}
+
+# _compress_run <format> <level> <first-input> <output>: compress's inputs
+# (and has_pv) into <output>, logging the result to $LOG_FILE.
+_compress_run() {
+  local format="$1" level="$2" first="$3" output="$4" tool
+  if ! _compress_ext "$format" >/dev/null; then
+    echo "Error: Unsupported format '$format'" | tee -a "$LOG_FILE"
     return 1
   fi
-
-  local format="$1"
-  shift
-
-  # Check for compression level option
-  local level=6 # Default compression level
-  if [[ "$1" = "-l" ]]; then
-    level="$2"
-    shift 2
-  fi
-
-  # The last argument might be the output file if it doesn't exist as a file or directory
-  local inputs=("$@")
-  local num_inputs=${#inputs[@]}
-  local output=""
-
-  # If the last argument doesn't exist as a file or directory and has more than 1 argument
-  if [[ "$num_inputs" -gt 1 ]] && [[ ! -e "${inputs[$num_inputs - 1]}" ]]; then
-    output="${inputs[$num_inputs - 1]}"
-    # shellcheck disable=SC2184,SC2086
-    unset inputs[$num_inputs-1]
-  else
-    # Default output name based on the first input
-    case "$format" in
-      tar) output="${inputs[0]}.tar" ;;
-      tgz) output="${inputs[0]}.tar.gz" ;;
-      tbz2) output="${inputs[0]}.tar.bz2" ;;
-      txz) output="${inputs[0]}.tar.xz" ;;
-      tzst) output="${inputs[0]}.tar.zst" ;;
-      zip) output="${inputs[0]}.zip" ;;
-      7z) output="${inputs[0]}.7z" ;;
-      gz) output="${inputs[0]}.gz" ;;
-      bz2) output="${inputs[0]}.bz2" ;;
-      xz) output="${inputs[0]}.xz" ;;
-      zst) output="${inputs[0]}.zst" ;;
-      lz4) output="${inputs[0]}.lz4" ;;
-      rar) output="${inputs[0]}.rar" ;;
-      *) echo "Error: Unsupported format '$format'" && return 1 ;;
-    esac
-  fi
-
-  # Check if we have pv installed for progress indication
-  local has_pv=0
-  if command -v pv >/dev/null 2>&1; then
-    has_pv=1
-  fi
-
-  # Log file for operations
-  LOG_FILE=${ARCHIVE_LOG_FILE:-"$HOME/.archive_operations.log"}
-
-  echo "Compressing to $output..."
-  case "$format" in
-    tar)
-      tar -cf "$output" "${inputs[@]}"
-      ;;
-    tgz)
-      if [[ $has_pv -eq 1 ]] && [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
-        pv "${inputs[0]}" | tar -cz -f "$output" -C "$(dirname "${inputs[0]}")" "$(basename "${inputs[0]}")"
-      else
-        tar -czf "$output" "${inputs[@]}"
-      fi
-      ;;
-    tbz2)
-      tar -cjf "$output" -C "$(dirname "${inputs[0]}")" "${inputs[@]}"
-      ;;
-    txz)
-      XZ_OPT="-$level" tar -cJf "$output" "${inputs[@]}"
-      ;;
-    tzst)
-      ZSTD_CLEVEL="$level" tar --zstd -cf "$output" "${inputs[@]}"
-      ;;
-    zip)
-      zip -r "$output" "${inputs[@]}" "-$level"
-      ;;
-    7z)
-      7z a "-mx=$level" "$output" "${inputs[@]}"
-      ;;
-    gz)
-      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
-        if [[ $has_pv -eq 1 ]]; then
-          pv "${inputs[0]}" | gzip "-$level" >"$output"
-        else
-          gzip -c "-$level" "${inputs[0]}" >"$output"
-        fi
-      else
-        echo "Error: gzip compression requires a single input file" | tee -a "$LOG_FILE"
-        return 1
-      fi
-      ;;
-    bz2)
-      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
-        if [[ $has_pv -eq 1 ]]; then
-          pv "${inputs[0]}" | bzip2 "-$level" >"$output"
-        else
-          bzip2 -c "-$level" "${inputs[0]}" >"$output"
-        fi
-      else
-        echo "Error: bzip2 compression requires a single input file" | tee -a "$LOG_FILE"
-        return 1
-      fi
-      ;;
-    xz)
-      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
-        if [[ $has_pv -eq 1 ]]; then
-          pv "${inputs[0]}" | xz "-$level" >"$output"
-        else
-          xz -c "-$level" "${inputs[0]}" >"$output"
-        fi
-      else
-        echo "Error: xz compression requires a single input file" | tee -a "$LOG_FILE"
-        return 1
-      fi
-      ;;
-    zst)
-      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
-        if [[ $has_pv -eq 1 ]]; then
-          pv "${inputs[0]}" | zstd "-$level" >"$output"
-        else
-          zstd -c "-$level" "${inputs[0]}" >"$output"
-        fi
-      else
-        echo "Error: zstd compression requires a single input file" | tee -a "$LOG_FILE"
-        return 1
-      fi
-      ;;
-    lz4)
-      if [[ ${#inputs[@]} -eq 1 ]] && [[ -f "${inputs[0]}" ]]; then
-        if [[ $has_pv -eq 1 ]]; then
-          pv "${inputs[0]}" | lz4 "-$level" >"$output"
-        else
-          lz4 -c "-$level" "${inputs[0]}" >"$output"
-        fi
-      else
-        echo "Error: lz4 compression requires a single input file" | tee -a "$LOG_FILE"
-        return 1
-      fi
-      ;;
-    rar)
-      rar a "-m$level" "$output" "${inputs[@]}"
-      ;;
-    *)
-      echo "Error: Unsupported format '$format'" | tee -a "$LOG_FILE"
+  if tool="$(_compress_tool "$format")"; then
+    if [[ ${#inputs[@]} -ne 1 ]] || [[ ! -f "$first" ]]; then
+      echo "Error: $tool compression requires a single input file" | tee -a "$LOG_FILE"
       return 1
-      ;;
-  esac
+    fi
+    _compress_stream "$tool" "$level" "$first" "$output"
+  else
+    _compress_multi "$format" "$level" "$output" "${inputs[@]}"
+  fi
 
   # Log result
   # shellcheck disable=SC2181
@@ -250,6 +242,42 @@ compress() {
     echo "Failed to compress to $output" | tee -a "$LOG_FILE"
     return 1
   fi
+}
+
+compress() {
+  if [[ -z "$1" ]] || [[ -z "$2" ]]; then
+    echo "Usage: compress <format> <input_files...> [output_file]"
+    echo "Formats: tar, tgz, tbz2, txz, tzst, zip, 7z, gz, bz2, xz, zst, lz4, rar"
+    echo "Options: -l <1-9> compression level (if supported by format)"
+    return 1
+  fi
+
+  local format="$1" level=6 first="" output="" explicit=0 ext has_pv=0
+  local inputs=()
+  shift
+  # Check for compression level option
+  if [[ "$1" = "-l" ]]; then
+    level="$2"
+    shift 2
+  fi
+  _compress_split "$@"
+  if [[ "$explicit" -eq 0 ]]; then
+    # Default output name based on the first input
+    ext="$(_compress_ext "$format")" || {
+      echo "Error: Unsupported format '$format'"
+      return 1
+    }
+    output="$first.$ext"
+  fi
+
+  # Check if we have pv installed for progress indication
+  command -v pv >/dev/null 2>&1 && has_pv=1
+
+  # Log file for operations
+  LOG_FILE=${ARCHIVE_LOG_FILE:-"$HOME/.archive_operations.log"}
+
+  echo "Compressing to $output..."
+  _compress_run "$format" "$level" "$first" "$output"
 }
 
 #-----------------------------------------------------------------------------
@@ -306,15 +334,16 @@ backup() {
   local basename=$(basename "$target")
   local output="${basename}-backup-${timestamp}"
 
+  local ext
   case "$format" in
-    tgz) compress tgz "$target" "$output.tar.gz" ;;
-    tbz2) compress tbz2 "$target" "$output.tar.bz2" ;;
-    txz) compress txz "$target" "$output.tar.xz" ;;
-    tzst) compress tzst "$target" "$output.tar.zst" ;;
-    zip) compress zip "$target" "$output.zip" ;;
-    7z) compress 7z "$target" "$output.7z" ;;
+    tgz) ext=tar.gz ;;
+    tbz2) ext=tar.bz2 ;;
+    txz) ext=tar.xz ;;
+    tzst) ext=tar.zst ;;
+    zip | 7z) ext="$format" ;;
     *) echo "Error: Unsupported backup format '$format'" && return 1 ;;
   esac
+  compress "$format" "$target" "$output.$ext"
 
   # shellcheck disable=SC2181
   if [[ $? -eq 0 ]]; then
