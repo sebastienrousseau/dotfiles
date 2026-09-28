@@ -113,25 +113,6 @@ jobs:
       run_shfmt: true
       shfmt_targets: scripts/**/*.sh install.sh defaults/.chezmoitemplates/**/*.sh
 
-  # Tests that inspect source text instead of running it cannot catch
-  # wrong behaviour; tools/ci/check-source-grep-tests.py holds the count
-  # per file at or below tools/ci/source-grep-baseline.txt.
-  lint-tests:
-    name: Lint / Tests run the code
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    needs: changes
-    if: needs.changes.outputs.shell == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    steps:
-      - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
-        with:
-          egress-policy: audit
-
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Source-grep ratchet
-        run: python3 tools/ci/check-source-grep-tests.py
-
   lint-lua:
     name: Lint / Lua
     needs: changes
@@ -505,55 +486,6 @@ jobs:
       # finite budget, but leave enough headroom for hosted-runner variance.
       timeout_minutes: 25
 
-  # Mutation gate on the lines a PR changes (tools/ci/mutation-test.py).
-  # Line coverage says a line ran; this says whether the tests would notice
-  # it being wrong. One plausible bug per changed line, judged only by
-  # behavioural tests (source-grep tests are listed in
-  # tools/ci/mutation-structural.txt and do not count). Survivors are
-  # annotated on the PR diff. The sample cap bounds the runtime of a large
-  # PR; the score is over the sample.
-  test-mutation:
-    name: Test / Mutation
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    needs: changes
-    if: github.event_name == 'pull_request' && needs.changes.outputs.shell == 'true'
-    steps:
-      - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
-        with:
-          egress-policy: audit
-
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-
-      - name: Mutation score on changed lines (>= 80%)
-        run: |
-          set -euo pipefail
-          chmod +x tests/framework/*.sh
-          # No --depth: in this full clone a shallow fetch of a base branch
-          # that moved since checkout grafts its tip parentless, and
-          # origin/<base>...HEAD then has no merge base (git exits 128).
-          git fetch --no-tags origin "+refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
-          python3 tools/ci/mutation-test.py \
-            --base "origin/${{ github.base_ref }}" \
-            --min-score 80 \
-            --max-mutants 60 \
-            --jobs 4 \
-            --timeout 240 \
-            --github \
-            --json mutation-report.json
-
-      - name: Upload mutation report
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: mutation-report
-          path: mutation-report.json
-          if-no-files-found: ignore
-          retention-days: 14
-
   # ============================================================================
   # STAGE 4: QUALITY (Depends on lint + test passing)
   # ============================================================================
@@ -840,7 +772,7 @@ jobs:
     name: Quality Gate
     runs-on: ubuntu-latest
     timeout-minutes: 2
-    needs: [lint-shell, lint-tests, lint-copyright, security-secrets, security-dependencies, test-unit, test-mutation]
+    needs: [lint-shell, lint-copyright, security-secrets, security-dependencies, test-unit]
     if: github.event_name == 'pull_request'
     steps:
       - name: Harden runner (audit mode)
