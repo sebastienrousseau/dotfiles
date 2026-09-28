@@ -217,7 +217,6 @@
   14   11   37.0   67    79 tools/ci/dot-cli-startup-bench.sh::<top>
   12   15   28.1   42    42 tools/ci/lint-reusable-pins.sh::<top>
   19   17   33.4   59    59 tools/ci/normalize-spdx-headers.sh::<top>
-  48   61   75.7  727   787 tools/ci/run-coverage.sh::<top>
   15   23   34.4  137   175 tools/ci/validate-ci-config.sh::<top>
   14   12   24.3   65  1075 tools/docs/build-manual.sh::<top>
    8    8   28.7   99     0 tools/docs/build-manual.sh::build_html_multi
