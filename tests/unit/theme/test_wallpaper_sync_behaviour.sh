@@ -50,6 +50,7 @@ esac; exit 0'
 mkstub magick 'case "${MAGICK_MODE:-}" in
   fail) exit 1 ;;
   extractfail) [ "$1" = identify ] || exit 1 ;;
+  extractempty) [ "$1" = identify ] || { : >"${!#}"; exit 0; } ;;
 esac
 case "$1" in
   identify) if [ "${MAGICK_MODE:-}" = single ]; then echo a; else printf "a\nb\n"; fi ;;
@@ -248,7 +249,8 @@ test_start "wallpaper_linux_gsettings_single_file"
 setup Linux solo-dark solo-dark.jpg
 use gsettings
 ws
-assert_equals "yes" "$(called 'screensaver picture-uri file://')" "one file for desktop and lock screen"
+assert_equals "yes:no" "$(called 'background picture-uri file://'"$W"'/h/Pictures/Wallpapers/solo-dark.jpg'):$(called 'solo-light')" \
+  "a lone -dark file is not paired with a missing -light one"
 
 test_start "wallpaper_linux_swaybg"
 setup Linux p-dark p-dark.png
@@ -411,5 +413,28 @@ ws
 assert_equals "yes:yes:yes" \
   "$(called 'background picture-uri file://'"$W"'/h/Pictures/Wallpapers/pp-light.tiff'):$(called 'picture-uri-dark file://'"$W"'/h/Pictures/Wallpapers/pp-dark.tiff'):$(called 'screensaver picture-uri file://'"$W"'/h/Pictures/Wallpapers/pp-light.tiff')" \
   "a wallpaper with neither suffix pairs by the theme's family"
+
+test_start "wallpaper_linux_lone_frame_is_not_paired"
+setup Linux f-dark f-1.png
+use gsettings
+ws
+assert_equals "yes:no" "$(called 'background picture-uri file://'"$W"'/h/Pictures/Wallpapers/f-1.png'):$(called 'f-0.png')" \
+  "a lone -1 frame is not paired with a missing -0 one"
+
+test_start "wallpaper_linux_heic_cache_of_exactly_1mb_is_reconverted"
+setup Linux nomatch-dark eq-dark.heic
+use gsettings heif-convert
+touch -t 202001010000 "$W/h/Pictures/Wallpapers/eq-dark.heic"
+head -c 1000000 /dev/zero >"$W/h/Pictures/Wallpapers/eq-dark.png"
+ws
+assert_equals "yes" "$(called 'heif-convert ')" "the cache must be larger than 1,000,000 bytes"
+
+test_start "wallpaper_macos_empty_extracted_frame_keeps_the_original"
+setup Darwin dyn-dark dyn.heic
+use magick
+ENVS+=(MAGICK_MODE=extractempty)
+ws
+assert_equals "yes:no" "$(called 'macos-wallpaper-store.py '"$W"'/h/Pictures/Wallpapers/dyn.heic'):$([[ -f "$W/h/Pictures/Wallpapers/.dot-frames/dyn-dark.heic" ]] && echo yes || echo no)" \
+  "an empty frame is discarded and the original applied"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
