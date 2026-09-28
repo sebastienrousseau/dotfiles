@@ -124,7 +124,23 @@ fi
 # commits; their guards stay false until the corresponding source
 # paths exist in the new layout.
 
-do_migration() {
+# _forget_paths <path...>: stop chezmoi tracking each existing path, or
+# say what would happen under --dry-run. The output goes to the snapshot.
+_forget_paths() {
+  local old
+  for old in "$@"; do
+    [[ -f "$old" ]] || continue
+    if ((DRY_RUN)); then
+      _say "  [dry-run] would forget: $old"
+    elif chezmoi forget --force "$old" >>"$SNAPSHOT" 2>&1; then
+      _log "  forgot: $old"
+    else
+      _warn "  forget failed: $old"
+    fi
+  done
+}
+
+_write_snapshot_header() {
   mkdir -p "$STATE_DIR"
   {
     printf '## v0.2.503 migration snapshot\n'
@@ -133,50 +149,29 @@ do_migration() {
     printf 'target ver:     %s\n' "$NEW_VERSION"
     printf 'dry-run:        %s\n\n' "$DRY_RUN"
   } >"$SNAPSHOT"
+}
 
+do_migration() {
+  _write_snapshot_header
   local did_work=0
 
   # ── Phase 2: bin/ — fires once `bin/dot` exists in the source ─────
   if [[ -f "$CHEZMOI_SOURCE/bin/dot" ]] && [[ -f "$HOME/.local/bin/dot" ]]; then
     _say "Phase 2: untracking dot_local/bin/* paths"
-    for old in \
+    _forget_paths \
       "$HOME/.local/bin/dot" \
       "$HOME/.local/bin/dot-bootstrap" \
       "$HOME/.local/bin/dot-theme-sync" \
-      "$HOME/.local/bin/dot-load-benchmark-pty"; do
-      if [[ -f "$old" ]]; then
-        if ((DRY_RUN)); then
-          _say "  [dry-run] would forget: $old"
-        else
-          if chezmoi forget --force "$old" >>"$SNAPSHOT" 2>&1; then
-            _log "  forgot: $old"
-          else
-            _warn "  forget failed: $old"
-          fi
-        fi
-      fi
-    done
+      "$HOME/.local/bin/dot-load-benchmark-pty"
     did_work=1
   fi
 
   # ── Phase 3: share/ — man + completions ─────────────────────────────
   if [[ -f "$CHEZMOI_SOURCE/share/man/man1/dot.1" ]] && [[ -f "$HOME/.local/share/man/man1/dot.1" ]]; then
     _say "Phase 3: untracking dot_local/share/* paths"
-    for old in \
+    _forget_paths \
       "$HOME/.local/share/man/man1/dot.1" \
-      "$HOME/.local/share/zsh/completions/_dot"; do
-      if [[ -f "$old" ]]; then
-        if ((DRY_RUN)); then
-          _say "  [dry-run] would forget: $old"
-        else
-          if chezmoi forget --force "$old" >>"$SNAPSHOT" 2>&1; then
-            _log "  forgot: $old"
-          else
-            _warn "  forget failed: $old"
-          fi
-        fi
-      fi
-    done
+      "$HOME/.local/share/zsh/completions/_dot"
     did_work=1
   fi
 
@@ -192,7 +187,7 @@ do_migration() {
     _log "no migration required (Phases 2-4 not yet shipped in source)"
   fi
 
-  # Mark complete (even in dry-run, so we don't keep re-checking).
+  # Mark complete, except in a dry run, which must stay repeatable.
   if ((DRY_RUN == 0)); then
     : >"$STATE_FILE"
     _log "marked migration complete: $STATE_FILE"
