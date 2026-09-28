@@ -47,6 +47,17 @@ for sh in $SHELLS; do
   test_start "${sh}_leaves_no_output_variables_behind"
   upt "$sh" "$ALL" -- 'update_programming_tools >/dev/null; set | grep -c "^[a-z]*_output=" || true'
   assert_equals "0" "$OUT_TEXT" "no *_output globals leak into the interactive shell"
+
+  test_start "${sh}_reports_a_failing_updater_as_failed"
+  upt "$sh" "npm,pnpm,rustup,cargo,gem,brew,deno" RC=1
+  assert_equals "0" "$(printf '%s\n' "$OUT_TEXT" | grep -c 'updated successfully')" "no success note after a failed update"
+  assert_equals "7" "$(printf '%s\n' "$OUT_TEXT" | grep -c 'update failed (exit 1)')" "each failed updater is reported"
+
+  test_start "${sh}_reports_current_and_updated_tools"
+  upt "$sh" "npm,deno" OUT="up to date"
+  assert_contains "npm global packages are already up to date." "$OUT_TEXT" "npm marker found"
+  assert_contains "Deno updated successfully." "$OUT_TEXT" "deno needs its own marker"
+  assert_equals "npm update -g;deno upgrade;" "$(tr '\n' ';' <"$CALLS_FILE")" "each updater runs once, in order"
 done
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

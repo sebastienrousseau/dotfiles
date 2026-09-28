@@ -166,13 +166,18 @@ update_windows() {
 # Programming Environment Tools #
 #-------------------------------#
 
-# _upt_report: note whether <output> says the tool was already current.
-# Usage: _upt_report <output> <up-to-date pattern> <same msg> <updated msg>
+# _upt_report: report a failed updater, else note whether <output> says
+# the tool was already current.
+# Usage: _upt_report <status> <tool> <output> <up-to-date pattern> <same msg> <updated msg>
 _upt_report() {
-  if echo "$1" | grep -q "$2"; then
-    print_note "$3"
+  if [ "$1" -ne 0 ]; then
+    print_error "$2 update failed (exit $1)"
+    return "$1"
+  fi
+  if echo "$3" | grep -q "$4"; then
+    print_note "$5"
   else
-    print_note "$4"
+    print_note "$6"
   fi
 }
 
@@ -184,23 +189,27 @@ _upt_update() {
   cmd_exists "${tool}" || return 0
   print_step "${step}"
   output=$("$@" 2>&1)
-  _upt_report "${output}" "${pattern}" "${same}" "${updated}"
+  _upt_report "$?" "${tool}" "${output}" "${pattern}" "${same}" "${updated}"
 }
 
 _upt_gem() {
+  local output
   cmd_exists gem || return 0
   print_step "Updating RubyGems and installed gems"
   gem update --system >/dev/null 2>&1 && print_note "RubyGems system updated successfully."
-  _upt_report "$(gem update 2>&1)" "Nothing to update" \
+  output=$(gem update 2>&1)
+  _upt_report "$?" gem "${output}" "Nothing to update" \
     "All Ruby gems are already up to date." "Ruby gems updated successfully."
   gem cleanup && print_note "Ruby gems cleanup completed."
 }
 
 _upt_brew() {
+  local output
   cmd_exists brew || return 0
   print_step "Updating Homebrew packages"
   brew update >/dev/null
-  _upt_report "$(brew upgrade 2>&1)" "already up-to-date" \
+  output=$(brew upgrade 2>&1)
+  _upt_report "$?" brew "${output}" "already up-to-date" \
     "Homebrew packages are already up to date." "Homebrew packages updated successfully."
   brew cleanup && print_note "Homebrew cleanup completed."
 }
