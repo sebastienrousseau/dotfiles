@@ -294,14 +294,6 @@ _vs_rewrite() {
         -e "s|/releases/tag/v$SED_VERSION_PATTERN|/releases/tag/v$target_version|g" \
         -e "s|/dotfiles/v$SED_VERSION_PATTERN/|/dotfiles/v$target_version/|g"
       ;;
-    "scripts/git-hooks/pre-commit-audit.sh")
-      # "vX.Y.Z standards maintained" banner. Matched explicitly with a
-      # portable pattern — the generic `\bvX.Y.Z\b` rule below relies on
-      # GNU `\b`, which BSD/macOS sed does not support, so a local
-      # `version-sync` run would otherwise leave this script stale.
-      sed_in_place "$temp_file" \
-        -e "s|v$SED_VERSION_PATTERN standards maintained|v$target_version standards maintained|g"
-      ;;
     "docs/manual/00-introduction.md")
       sed_in_place "$temp_file" \
         -e "s|\.dotfiles\` v$SED_VERSION_PATTERN|.dotfiles\` v$target_version|g"
@@ -321,7 +313,11 @@ _vs_rewrite() {
       ;;
     *)
       # Update explicit markdown version labels, backticks, and parentheses.
-      # Skip lines containing MILESTONE.
+      # Skip lines containing MILESTONE. A bare vX.Y.Z needs word boundaries
+      # on both sides and BSD sed has no \b, so it takes three steps: mark
+      # each candidate (consuming only the character before it, so adjacent
+      # versions all match), unmark those followed by a word character,
+      # then replace what is left.
       sed_in_place "$temp_file" \
         -e "/MILESTONE/!s|(\*\*Version\*\*:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
         -e "/MILESTONE/!s|(\*\*Dotfiles Version\*\*:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
@@ -330,7 +326,9 @@ _vs_rewrite() {
         -e "/MILESTONE/!s|Version[[:space:]]*\`v?$SED_VERSION_PATTERN\`|Version \`$target_version\`|g" \
         -e "/MILESTONE/!s|\(v$SED_VERSION_PATTERN\)|\(v$target_version\)|g" \
         -e "/MILESTONE/!s|/v$SED_VERSION_PATTERN/|/v$target_version/|g" \
-        -e "/MILESTONE/!s|\bv$SED_VERSION_PATTERN\b|v$target_version|g" \
+        -e "/MILESTONE/!s#(^|[^[:alnum:]_])v($SED_VERSION_PATTERN)#\\1@VSYNC<\\2>@#g" \
+        -e "s#@VSYNC<($SED_VERSION_PATTERN)>@([[:alnum:]_])#v\\1\\2#g" \
+        -e "s#@VSYNC<$SED_VERSION_PATTERN>@#v$target_version#g" \
         -e "/MILESTONE/!s|dotfiles:v?$SED_VERSION_PATTERN|dotfiles:$target_version|g" \
         -e "/MILESTONE/!s|notes — v$SED_VERSION_PATTERN|notes — v$target_version|g"
       ;;
@@ -721,5 +719,5 @@ main() {
   _vs_finish
 }
 
-# Run main function
-main "$@"
+# Run main function, unless sourced (tests call the rewrite rules directly).
+[[ "${BASH_SOURCE[0]}" != "$0" ]] || main "$@"
