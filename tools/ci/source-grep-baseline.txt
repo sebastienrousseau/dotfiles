@@ -15,11 +15,9 @@
    1 tests/unit/ci/test_check_regression_traceability.sh
    1 tests/unit/ci/test_docs_link_tracking.sh
    2 tests/unit/ci/test_mutation_engine.sh
-   6 tests/unit/ci/test_run_coverage_aggregator.sh
    1 tests/unit/ci/test_validate_chezmoidata.sh
    6 tests/unit/diagnostics/test_diagnostics_attest_verify.sh
    5 tests/unit/diagnostics/test_diagnostics_attestation.sh
-   1 tests/unit/diagnostics/test_diagnostics_doctor.sh
    4 tests/unit/diagnostics/test_diagnostics_perf.sh
    3 tests/unit/diagnostics/test_diagnostics_security_score.sh
    2 tests/unit/diagnostics/test_diagnostics_snapshot.sh
