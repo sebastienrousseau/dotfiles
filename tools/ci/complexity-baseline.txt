@@ -43,7 +43,6 @@
   14   13    3.7   61   119 defaults/.chezmoitemplates/aliases/modern/modern.aliases.sh::<top>
    3    2    2.1   79    79 defaults/.chezmoitemplates/aliases/rust/rust.aliases.sh::<top>
   19   20   17.0   46    46 defaults/.chezmoitemplates/aliases/security/security.aliases.sh::<top>
-  24   41   15.3   87     0 defaults/.chezmoitemplates/aliases/update/update.aliases.sh::update_programming_tools
    8    9   33.0   30     0 defaults/.chezmoitemplates/aliases/uuid/uuid.aliases.sh::uuid_copy
   20   32   19.1   78     0 defaults/.chezmoitemplates/functions/api/apihealth.sh::parse_arguments
   13    9   15.0   65     0 defaults/.chezmoitemplates/functions/curl/httpdebug.sh::httpdebug
@@ -83,7 +82,6 @@
    9    9   38.8   35     0 defaults/dot_local/bin/executable_tmux-status::apply_colours
   13   16   26.2   41     0 defaults/dot_local/bin/executable_tmux-status::system_linux
   18   17   21.1  142   142 defaults/dot_local/bin/executable_tour::<top>
-  34   43   27.1   98   101 defaults/dot_local/bin/executable_update::<top>
    1    0    1.0  167   167 examples/example-command-reference.sh::<top>
   11   19   20.7   39     0 install.sh::bootstrap_gum
    8   17   21.6   38     0 install.sh::install_chezmoi
@@ -94,8 +92,7 @@
   19   27   27.7   74   102 install/lib/install_neovim.sh::<top>
   17   19   19.9   36     0 install/lib/installers.sh::archive_paths_are_safe
   11   12   22.9   41    51 install/lib/upgrade_neovim_nightly.sh::<top>
-  16   13   28.1   51   123 install/migrate/migrate-v0_2-to-v0_2_503.sh::<top>
-  16   39   25.0   62     0 install/migrate/migrate-v0_2-to-v0_2_503.sh::do_migration
+  16   13   28.1   51   115 install/migrate/migrate-v0_2-to-v0_2_503.sh::<top>
   11    9   20.0   28    33 install/migrate/rollback-v0_2_503.sh::<top>
   11   12   19.8   33    33 install/provision/run_onchange_30-darwin-mas.sh::<top>
   21   23   41.8   64    65 install/provision/run_onchange_50-install-fonts.sh::<top>
