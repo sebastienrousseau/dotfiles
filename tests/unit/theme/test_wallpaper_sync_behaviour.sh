@@ -64,6 +64,18 @@ mkstub swaybg 'exit 0'
 mkstub pkill 'exit 1'
 mkstub wallpaper 'exit 0'
 
+# The host's tools minus everything stubbed here, so a case that leaves a
+# tool out really lacks it (CI runners ship ImageMagick's convert, for one).
+SYS="$WORK/sys"
+mkdir -p "$SYS"
+for _f in /usr/bin/* /bin/*; do
+  case "${_f##*/}" in
+    uname | sleep | killall | osascript | shuf | python3 | defaults | pgrep | gsettings | dms | \
+      magick | heif-convert | convert | feh | swaybg | pkill | wallpaper) continue ;;
+  esac
+  [[ -e "$SYS/${_f##*/}" ]] || ln -s "$_f" "$SYS/${_f##*/}"
+done
+
 # setup <os> <theme> [wallpaper...]: a sandbox HOME with that theme; resets
 # the tool set to the always-present stubs.
 setup() {
@@ -89,7 +101,7 @@ use() { TOOLS="$TOOLS $*"; }
 ws() {
   local t path=""
   for t in $TOOLS; do path="$path$WORK/t/$t:"; done
-  OUT="$(env -i HOME="$W/h" PATH="${path}/usr/bin:/bin" TERM=dumb NO_COLOR=1 CALLS="$W/calls" \
+  OUT="$(env -i HOME="$W/h" PATH="${path}$SYS" TERM=dumb NO_COLOR=1 CALLS="$W/calls" \
     STUB_OS="$OS" DOTFILES_THEME_SYSTEM_ROOT="$W/sys" ${ENVS[@]+"${ENVS[@]}"} "$REAL_BASH" "$WS" </dev/null 2>&1)"
   RC=$?
 }
