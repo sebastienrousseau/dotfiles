@@ -46,13 +46,10 @@ _lint_is_shell() {
   esac
 }
 
-cmd_lint() {
-  local mode="${1:-all}"
-  local src_dir
-  src_dir="$(require_source_dir)"
-
-  # Collect target files
-  local -a files=()
+# Fills the caller's files array: scripts/**/*.sh, install.sh, the shell
+# executables under dot_local/bin, and .chezmoitemplates/**/*.sh.
+_lint_collect() {
+  local src_dir="$1" chezmoi_src f
   while IFS= read -r -d '' f; do
     files+=("$f")
   done < <(find "$src_dir/scripts" -name '*.sh' -type f -print0 2>/dev/null)
@@ -63,7 +60,6 @@ cmd_lint() {
   fi
 
   # Post-Phase-4b chezmoi-tracked content lives under defaults/.
-  local chezmoi_src
   chezmoi_src="$(resolve_chezmoi_source_dir)"
   [[ -z "$chezmoi_src" ]] && chezmoi_src="$src_dir"
 
@@ -79,94 +75,82 @@ cmd_lint() {
   while IFS= read -r -d '' f; do
     files+=("$f")
   done < <(find "$chezmoi_src/.chezmoitemplates" -name '*.sh' -type f -print0 2>/dev/null)
+}
 
-  local total=${#files[@]}
-  if [[ "$total" -eq 0 ]]; then
-    ui_warn "No files" "No shell scripts found to lint"
+# ── ShellCheck ──────────────────────────────────────────────────────
+# One shellcheck invocation over all files (was one fork per file).
+# gcc format is one line per issue, so failing files = unique paths.
+# Sets the caller's sc_errors.
+_lint_shellcheck() {
+  local sc_out
+  if ! has_command shellcheck; then
+    ui_warn "shellcheck" "not installed, skipping"
+    echo ""
     return 0
   fi
+  ui_section "ShellCheck"
+  echo ""
+  sc_out="$(shellcheck -f gcc "${SHELLCHECK_ARGS[@]}" "${files[@]}" 2>/dev/null || true)"
+  if [[ -z "$sc_out" ]]; then
+    ui_ok "shellcheck" "$total files clean"
+  else
+    printf '%s\n' "$sc_out"
+    sc_errors=$(printf '%s\n' "$sc_out" | cut -d: -f1 | sort -u | grep -c .)
+    ui_err "shellcheck" "$sc_errors file(s) with errors"
+  fi
+  echo ""
+}
 
-  local sc_errors=0
-  local fmt_errors=0
+# ── shfmt ───────────────────────────────────────────────────────────
+# `shfmt -l` lists files needing formatting in one invocation (was
+# `shfmt -d` per file). Sets the caller's fmt_errors.
+_lint_shfmt() {
+  local fmt_list
+  if ! has_command shfmt; then
+    ui_warn "shfmt" "not installed, skipping"
+    echo ""
+    return 0
+  fi
+  ui_section "shfmt"
+  echo ""
+  fmt_list="$(shfmt "${SHFMT_ARGS[@]}" -l "${files[@]}" 2>/dev/null || true)"
+  if [[ -z "$fmt_list" ]]; then
+    ui_ok "shfmt" "$total files formatted correctly"
+  else
+    fmt_errors=$(printf '%s\n' "$fmt_list" | grep -c .)
+    ui_err "shfmt" "$fmt_errors file(s) need formatting"
+  fi
+  echo ""
+}
 
-  case "$mode" in
-    all | check)
-      # ── ShellCheck ──────────────────────────────────────────────────────
-      if has_command shellcheck; then
-        ui_section "ShellCheck"
-        echo ""
-        # One shellcheck invocation over all files (was one fork per file).
-        # gcc format is one line per issue, so failing files = unique paths.
-        local sc_out
-        sc_out="$(shellcheck -f gcc "${SHELLCHECK_ARGS[@]}" "${files[@]}" 2>/dev/null || true)"
-        if [[ -z "$sc_out" ]]; then
-          ui_ok "shellcheck" "$total files clean"
-        else
-          printf '%s\n' "$sc_out"
-          sc_errors=$(printf '%s\n' "$sc_out" | cut -d: -f1 | sort -u | grep -c .)
-          ui_err "shellcheck" "$sc_errors file(s) with errors"
-        fi
-        echo ""
-      else
-        ui_warn "shellcheck" "not installed, skipping"
-        echo ""
-      fi
+# ── Auto-fix with shfmt ─────────────────────────────────────────────
+# Find files needing formatting in one `shfmt -l` pass, then only
+# rewrite that (usually small) set — was `shfmt -d` per file.
+_lint_fix() {
+  local src_dir="$1" fmt_list f fixed=0
+  if ! has_command shfmt; then
+    ui_err "shfmt" "not installed — cannot auto-fix"
+    exit 1
+  fi
+  ui_section "Auto-fixing with shfmt"
+  echo ""
+  fmt_list="$(shfmt "${SHFMT_ARGS[@]}" -l "${files[@]}" 2>/dev/null || true)"
+  if [[ -z "$fmt_list" ]]; then
+    ui_ok "shfmt" "All files already formatted"
+  else
+    while IFS= read -r f; do
+      [[ -n "$f" ]] || continue
+      shfmt "${SHFMT_ARGS[@]}" -w "$f"
+      ui_ok "fixed" "${f#"$src_dir/"}"
+      fixed=$((fixed + 1))
+    done <<<"$fmt_list"
+    ui_ok "shfmt" "$fixed file(s) reformatted"
+  fi
+  echo ""
+}
 
-      # ── shfmt ───────────────────────────────────────────────────────────
-      if has_command shfmt; then
-        ui_section "shfmt"
-        echo ""
-        # `shfmt -l` lists files needing formatting in one invocation
-        # (was `shfmt -d` per file).
-        local fmt_list
-        fmt_list="$(shfmt "${SHFMT_ARGS[@]}" -l "${files[@]}" 2>/dev/null || true)"
-        if [[ -z "$fmt_list" ]]; then
-          ui_ok "shfmt" "$total files formatted correctly"
-        else
-          fmt_errors=$(printf '%s\n' "$fmt_list" | grep -c .)
-          ui_err "shfmt" "$fmt_errors file(s) need formatting"
-        fi
-        echo ""
-      else
-        ui_warn "shfmt" "not installed, skipping"
-        echo ""
-      fi
-      ;;
-
-    fix)
-      # ── Auto-fix with shfmt ─────────────────────────────────────────────
-      if ! has_command shfmt; then
-        ui_err "shfmt" "not installed — cannot auto-fix"
-        exit 1
-      fi
-      ui_section "Auto-fixing with shfmt"
-      echo ""
-      # Find files needing formatting in one `shfmt -l` pass, then only
-      # rewrite that (usually small) set — was `shfmt -d` per file.
-      local fmt_list fixed=0
-      fmt_list="$(shfmt "${SHFMT_ARGS[@]}" -l "${files[@]}" 2>/dev/null || true)"
-      if [[ -z "$fmt_list" ]]; then
-        ui_ok "shfmt" "All files already formatted"
-      else
-        while IFS= read -r f; do
-          [[ -n "$f" ]] || continue
-          shfmt "${SHFMT_ARGS[@]}" -w "$f"
-          ui_ok "fixed" "${f#"$src_dir/"}"
-          fixed=$((fixed + 1))
-        done <<<"$fmt_list"
-        ui_ok "shfmt" "$fixed file(s) reformatted"
-      fi
-      echo ""
-      ;;
-
-    *)
-      ui_err "Unknown lint mode: $mode"
-      echo "Usage: dot lint [--fix|-f | --check|-c]"
-      exit 1
-      ;;
-  esac
-
-  # ── Summary ───────────────────────────────────────────────────────────────
+# ── Summary ───────────────────────────────────────────────────────────
+_lint_summary() {
   ui_section "Summary"
   echo ""
   ui_info "Files scanned" "$total"
@@ -180,6 +164,33 @@ cmd_lint() {
     ui_ok "Result" "All checks passed"
   fi
   echo ""
+}
+
+cmd_lint() {
+  local mode="${1:-all}" src_dir total sc_errors=0 fmt_errors=0
+  local -a files=()
+  src_dir="$(require_source_dir)"
+  _lint_collect "$src_dir"
+
+  total=${#files[@]}
+  if [[ "$total" -eq 0 ]]; then
+    ui_warn "No files" "No shell scripts found to lint"
+    return 0 # mutation: ignore unreachable in a checkout: lint.sh itself is one of the scripts/*.sh it collects
+  fi
+
+  case "$mode" in
+    all | check)
+      _lint_shellcheck
+      _lint_shfmt
+      ;;
+    fix) _lint_fix "$src_dir" ;;
+    *)
+      ui_err "Unknown lint mode: $mode"
+      echo "Usage: dot lint [--fix|-f | --check|-c]"
+      exit 1 # mutation: ignore unreachable from the CLI: the dispatcher only passes all/check/fix
+      ;;
+  esac
+  _lint_summary
 
   # Exit 1 in check mode if any errors
   if [[ "$mode" == "check" ]] && [[ $((sc_errors + fmt_errors)) -gt 0 ]]; then
@@ -188,21 +199,12 @@ cmd_lint() {
 }
 
 # ── Dispatch ─────────────────────────────────────────────────────────────────
-case "${1:-}" in
-  lint)
-    shift
-    case "${1:---}" in
-      --fix | -f) cmd_lint "fix" ;;
-      --check | -c) cmd_lint "check" ;;
-      *) cmd_lint "all" ;;
-    esac
-    ;;
-  *)
-    # Direct invocation (dot lint)
-    case "${1:---}" in
-      --fix | -f) cmd_lint "fix" ;;
-      --check | -c) cmd_lint "check" ;;
-      *) cmd_lint "all" ;;
-    esac
-    ;;
+# `dot lint …` or direct invocation.
+if [[ "${1:-}" == lint ]]; then
+  shift
+fi
+case "${1:---}" in
+  --fix | -f) cmd_lint "fix" ;;
+  --check | -c) cmd_lint "check" ;;
+  *) cmd_lint "all" ;;
 esac
