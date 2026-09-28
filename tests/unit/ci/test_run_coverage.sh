@@ -95,4 +95,57 @@ test_start "run_coverage_passes_at_minimum"
 run_cov cov-met 80
 assert_equals "0" "$COV_RC" "coverage at MIN_COVERAGE_PCT passes"
 
+test_start "run_coverage_names_skipped_tests_only_when_there_are_some"
+assert_equals "no" "$(grep -q 'skipped-by-policy' "$FX/cov.log" && echo yes || echo no)" \
+  "no skip list, no skipped-by-policy line"
+
+# run_tree <name> [VAR=value...]: the runner on $FX/<name> (a tests/ tree
+# built by the caller), reporting on the fixture script.
+run_tree() {
+  local name="$1"
+  shift
+  COV_RC=0
+  env REPO_ROOT="$FX/repo" TESTS_DIR="$FX/$name" COVERAGE_DIR="$FX/$name-cov" \
+    COV_INCLUDE_DIRS="$FX/repo/scripts" JOBS=1 MIN_COVERAGE_PCT=0 "$@" \
+    bash "$RUNNER" >"$FX/$name.log" 2>&1 || COV_RC=$?
+}
+
+test_start "run_coverage_without_tests_fails"
+mkdir -p "$FX/empty/unit" "$FX/empty/regression"
+run_tree empty
+assert_equals "1:yes" "$COV_RC:$(grep -q 'no unit or regression test files discovered' "$FX/empty.log" && echo yes)" \
+  "nothing to trace is an error"
+
+test_start "run_coverage_lists_at_most_ten_missing_results"
+# The first test kills its xargs worker; with JOBS=1 xargs then stops, and
+# the twelve tests after it never record a result.
+mkdir -p "$FX/partial/unit" "$FX/partial/regression"
+printf '#!/usr/bin/env bash\nkill -TERM $PPID\n' >"$FX/partial/unit/test_00_killer.sh"
+for i in 01 02 03 04 05 06 07 08 09 10 11 12; do
+  printf '#!/usr/bin/env bash\necho "RESULTS:1:1:0"\n' >"$FX/partial/unit/test_${i}.sh"
+done
+run_tree partial COV_TIMEOUT_CMD=
+assert_equals "5:10:yes" \
+  "$COV_RC:$(grep -c '::error::no result recorded for:' "$FX/partial.log"):$(grep -q '… and [0-9]* more' "$FX/partial.log" && echo yes)" \
+  "ten missing tests are named, the rest summarised, and the run is invalid"
+
+test_start "run_coverage_empty_report_fails"
+# A test tree that runs fine but touches nothing under an include dir that
+# holds no scripts: the aggregator writes an empty lcov.info.
+mkdir -p "$FX/noscripts/unit" "$FX/noscripts/regression" "$FX/empty-include"
+printf '#!/usr/bin/env bash\necho "RESULTS:1:1:0"\n' >"$FX/noscripts/unit/test_x.sh"
+run_tree noscripts COV_INCLUDE_DIRS="$FX/empty-include"
+assert_equals "1:yes" "$COV_RC:$(grep -q 'failed to produce lcov.info' "$FX/noscripts.log" && echo yes)" \
+  "an empty report is an error, not 0%"
+
+test_start "run_coverage_truncated_records_invalidate_the_run"
+# A test whose trace carries a record for a measured file that lost its
+# terminator (as bash 3.2 does to a long PS4): the aggregator fails with 4.
+mkdir -p "$FX/cut/unit" "$FX/cut/regression"
+printf '#!/usr/bin/env bash\nsource "%s/repo/scripts/lib.sh"\nsubst_line >/dev/null\necho "+@COV@:3:%s/repo/scripts/li" >&2\necho "RESULTS:1:1:0"\n' \
+  "$FX" "$FX" >"$FX/cut/unit/test_cut.sh"
+run_tree cut
+assert_equals "4:yes" "$COV_RC:$(grep -q 'trace records for measured files were truncated' "$FX/cut.log" && echo yes)" \
+  "the runner exits with the aggregator's status"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

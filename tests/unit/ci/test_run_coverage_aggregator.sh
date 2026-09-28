@@ -391,7 +391,7 @@ if [[ -x /bin/bash ]] && /bin/bash --version 2>/dev/null | head -1 | grep -q 've
   deep="$SANDBOX/aaaaaaaaaa/bbbbbbbbbb/cccccccccc/dddddddddd/eeeeeeeeee/ffffffffff"
   mkdir -p "$deep"
   printf '#!/usr/bin/env bash\necho deep\n' >"$deep/deep.sh"
-  cov_ps4="$(grep -m1 '^COV_PS4=' "$RUNNER" | cut -d= -f2- | sed "s/^'//; s/'$//")"
+  cov_ps4="$(bash "$RUNNER" --print-ps4)"
   deep_trace="$SANDBOX/deep.trace"
   COV_ROOT="$SANDBOX" PS4="$cov_ps4" /bin/bash -xu "$deep/deep.sh" \
     2>"$deep_trace" >/dev/null || true
@@ -450,8 +450,14 @@ test_start "empty_bash_source_is_not_mistaken_for_truncation"
 # file field. Those must parse (and then be skipped for having no file),
 # not be counted as mangled — otherwise the truncation audit cries wolf on
 # every run and the real signal is lost in the noise.
-assert_file_contains "$RUNNER" 'hit_re = re.compile(r"^\++@COV@:(\d+):([^:]*):@")' \
-  "the record pattern must accept an empty BASH_SOURCE field"
+empty_dir="$SANDBOX/empty-source-traces"
+mkdir -p "$empty_dir"
+printf '+@COV@:3::@ echo from bash -c\n+@COV@:4::@ true\n' >"$empty_dir/bash_c.trace"
+empty_rc=0
+python3 "$REPO_ROOT/tools/ci/coverage_aggregate.py" "$SANDBOX/empty-source.lcov" "$empty_dir" \
+  "$SANDBOX" "$SANDBOX/src" >/dev/null 2>"$SANDBOX/empty-source.err" || empty_rc=$?
+assert_equals "0:yes" "$empty_rc:$(grep -q 'truncated-trace-records: 0' "$SANDBOX/empty-source.err" && echo yes)" \
+  "records with an empty BASH_SOURCE field parse, and are not counted as truncated"
 
 test_start "incomplete_sweep_is_a_hard_error"
 # A worker that dies before recording a status leaves the sweep short, and
@@ -497,20 +503,52 @@ else
 fi
 
 test_start "xtrace_uses_a_dedicated_descriptor"
-assert_file_contains "$RUNNER" "BASH_XTRACEFD=" \
-  "xtrace must not be written to fd 2, where a test's redirection can eat it"
+# A test that discards a child's stderr must not take the child's coverage
+# with it: xtrace goes to a descriptor of the runner's own (bash >= 4.1).
+if bash -c '((BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 1)))'; then
+  mkdir -p "$SANDBOX/tests-xfd/unit" "$SANDBOX/tests-xfd/regression" "$SANDBOX/src-xfd"
+  printf '#!/usr/bin/env bash
+echo child-one
+echo child-two
+' >"$SANDBOX/src-xfd/child.sh"
+  printf '#!/usr/bin/env bash
+out=$(bash "$COV_ROOT/src-xfd/child.sh" 2>/dev/null)
+echo "RESULTS:1:1:0"
+' \
+    >"$SANDBOX/tests-xfd/unit/test_capture.sh"
+  env REPO_ROOT="$SANDBOX" TESTS_DIR="$SANDBOX/tests-xfd" COVERAGE_DIR="$SANDBOX/coverage-xfd" \
+    COVERAGE_OUT="$SANDBOX/coverage-xfd/lcov.info" COV_INCLUDE_DIRS="$SANDBOX/src-xfd" \
+    MIN_COVERAGE_PCT=0 JOBS=1 bash "$RUNNER" >"$SANDBOX/runner-xfd.log" 2>&1
+  assert_equals "DA:2,1 DA:3,1" "$(grep '^DA:' "$SANDBOX/coverage-xfd/lcov.info" 2>/dev/null | tr '\n' ' ' | sed 's/ $//')" \
+    "the child's lines are covered although its stderr went to /dev/null"
+else
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (bash < 4.1 has no BASH_XTRACEFD)"
+fi
 
 test_start "truncated_records_are_audited"
-assert_file_contains "$RUNNER" "truncated-trace-records:" \
-  "a record that lost its terminator must be counted and reported"
+# A record for a measured file that lost its `:@` terminator (bash 3.2 cut
+# the PS4 expansion short) must be counted, and fail the aggregation.
+trunc_dir="$SANDBOX/truncated-traces"
+mkdir -p "$trunc_dir"
+# Absolute, as when a sandbox scrubbed COV_ROOT: the surviving prefix is
+# inside the repo, so the lost record could have been for a measured file.
+printf '+@COV@:2:src/funcs.sh:@ echo ok\n+@COV@:3:%s/src/fun\n' "$SANDBOX" >"$trunc_dir/cut.trace"
+trunc_rc=0
+python3 "$REPO_ROOT/tools/ci/coverage_aggregate.py" "$SANDBOX/truncated.lcov" "$trunc_dir" \
+  "$SANDBOX" "$SANDBOX/src" >/dev/null 2>"$SANDBOX/truncated.err" || trunc_rc=$?
+assert_equals "4:yes" "$trunc_rc:$(grep -q 'truncated-trace-records: 1 record(s) in 1 trace file(s)' "$SANDBOX/truncated.err" && echo yes)" \
+  "a record that lost its terminator is counted, reported, and fails the run"
 
-test_start "timeout_default_is_documented"
-assert_file_contains "$RUNNER" 'COV_TEST_TIMEOUT:-300' \
-  "the per-test budget must stay above the slowest real suite"
+test_start "timeout_default_is_300s"
+# The per-test budget must stay above the slowest real suite; the silent
+# run above used the default.
+assert_file_contains "$SANDBOX/runner-silent.log" "timeout 300s/test" \
+  "the default COV_TEST_TIMEOUT is 300s"
 
 test_start "killed_tests_are_summarised"
-assert_file_contains "$RUNNER" "killed-by-timeout:" \
-  "the runner must print a summary line naming any killed file"
+assert_file_contains "$SANDBOX/runner-timeout.log" "killed-by-timeout: 1 test(s): unit/test_hangs.sh" \
+  "the runner prints a summary line naming the killed file"
 
 # Note: do NOT add cov_exercise_script here. This test asserts properties of
 # the coverage runner itself; running the runner during a coverage run would

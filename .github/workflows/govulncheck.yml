@@ -1,0 +1,47 @@
+name: govulncheck
+
+# Reachability-aware vulnerability scan of every Go module, stdlib included.
+# setup-go reads each go.mod's toolchain directive, so a stale toolchain pin
+# fails here once the vulnerability database names a fix.
+on:
+  pull_request:
+    paths:
+      - '**/*.go'
+      - '**/go.mod'
+      - '**/go.sum'
+      - '.github/workflows/govulncheck.yml'
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  govulncheck:
+    name: govulncheck / ${{ matrix.dir }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        dir:
+          - core
+          - fuzz
+          - defaults/dot_local/share/dot-ai-tui
+          - defaults/dot_local/share/dot-mcp
+          - defaults/dot_local/share/dot-ui
+    steps:
+      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: ${{ matrix.dir }}/go.mod
+          cache: false
+      - name: govulncheck
+        working-directory: ${{ matrix.dir }}
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.8.0 ./...

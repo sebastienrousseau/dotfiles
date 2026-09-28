@@ -120,6 +120,22 @@ assert_equals "1" "$(grep -c 'fm_expect_rc_in' "$WORK/out")" "a permissive row w
 rm -f "$WORK/repo/tests/unit/test_fm_rows.sh"
 
 # ── The real tree is at or below its baseline ──────────────────────
+# ── awk -f runs a program; awk on a program's text reads it ─────────
+test_start "srcgrep_awk_program_file_is_execution"
+AWK_REPO="$WORK/awkrepo"
+mkdir -p "$AWK_REPO/scripts" "$AWK_REPO/tests/unit" "$AWK_REPO/tools/ci"
+printf '{ print $1 }\n' >"$AWK_REPO/scripts/prog.awk"
+cat >"$AWK_REPO/tests/unit/test_awk.sh" <<'EOF'
+PROG="$REPO_ROOT/scripts/prog.awk"
+out="$(awk -v X=1 -f "$REPO_ROOT/scripts/prog.awk" data.txt)"
+out="$(awk -f "$PROG" data.txt)"
+grep -c print "$REPO_ROOT/scripts/prog.awk"
+awk '/print/' "$PROG"
+EOF
+rc=0
+(cd "$AWK_REPO" && python3 "$LINT") >"$WORK/awk.out" 2>&1 || rc=$?
+assert_equals "4,5" "$(grep -oE 'test_awk.sh:[0-9]+' "$WORK/awk.out" | cut -d: -f2 | paste -sd, -)" "the two -f runs pass; grep and awk on the text are flagged"
+
 test_start "srcgrep_repo_holds_its_baseline"
 rc=0
 (cd "$REPO_ROOT" && python3 "$LINT") >"$WORK/repo.out" 2>"$WORK/repo.err" || rc=$?

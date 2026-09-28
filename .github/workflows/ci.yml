@@ -281,7 +281,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: TruffleHog Scan
-        uses: trufflesecurity/trufflehog@f714bf454f350590f4a24c3ddb1aef02c35bf5b6 # v3.97.5
+        uses: trufflesecurity/trufflehog@4dd8831c5f12599465d4d45c3c447b4018a34c85 # v3.97.9
         with:
           extra_args: --only-verified
 
@@ -532,7 +532,10 @@ jobs:
         run: |
           set -euo pipefail
           chmod +x tests/framework/*.sh
-          git fetch --no-tags --depth=1 origin "+refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+          # No --depth: in this full clone a shallow fetch of a base branch
+          # that moved since checkout grafts its tip parentless, and
+          # origin/<base>...HEAD then has no merge base (git exits 128).
+          git fetch --no-tags origin "+refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
           python3 tools/ci/mutation-test.py \
             --base "origin/${{ github.base_ref }}" \
             --min-score 80 \

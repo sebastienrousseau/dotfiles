@@ -262,12 +262,15 @@ create_backup() {
   rm -rf "$BACKUP_DIR"
   mkdir -p "$BACKUP_DIR"
 
-  local backup_count=0
+  # Keep each file's relative path: basenames collide (README.md exists in
+  # several directories), and a flat name made later copies overwrite
+  # earlier ones.
+  local backup_count=0 stamp
+  stamp="$(date +%Y%m%d_%H%M%S)"
   for file in "${files[@]}"; do
     if [[ -f "$file" ]]; then
-      local backup_name
-      backup_name="$(basename "$file").$(date +%Y%m%d_%H%M%S).backup"
-      cp "$file" "$BACKUP_DIR/$backup_name"
+      mkdir -p "$BACKUP_DIR/$(dirname "$file")"
+      cp "$file" "$BACKUP_DIR/$file.$stamp.backup"
       backup_count=$((backup_count + 1))
     fi
   done
@@ -275,6 +278,89 @@ create_backup() {
   log_success "Backed up $backup_count files"
 }
 # LCOV_EXCL_STOP
+
+# _vs_rewrite <file> <copy> <version>: apply <file>'s version rules to <copy>.
+_vs_rewrite() {
+  local file="$1" temp_file="$2" target_version="$3"
+  # Update various version reference patterns. Match on the full repo
+  # path (not basename) so the root README's badge rules don't also
+  # capture other README.md files (e.g. the .chezmoitemplates READMEs),
+  # which carry a `(vX.Y.Z)` stamp handled by the generic case below.
+  case "$file" in
+    "README.md")
+      # Update badge and release link versions.
+      sed_in_place "$temp_file" \
+        -e "s|Version-v$SED_VERSION_PATTERN|Version-v$target_version|g" \
+        -e "s|/releases/tag/v$SED_VERSION_PATTERN|/releases/tag/v$target_version|g" \
+        -e "s|/dotfiles/v$SED_VERSION_PATTERN/|/dotfiles/v$target_version/|g"
+      ;;
+    "scripts/git-hooks/pre-commit-audit.sh")
+      # "vX.Y.Z standards maintained" banner. Matched explicitly with a
+      # portable pattern — the generic `\bvX.Y.Z\b` rule below relies on
+      # GNU `\b`, which BSD/macOS sed does not support, so a local
+      # `version-sync` run would otherwise leave this script stale.
+      sed_in_place "$temp_file" \
+        -e "s|v$SED_VERSION_PATTERN standards maintained|v$target_version standards maintained|g"
+      ;;
+    "docs/manual/00-introduction.md")
+      sed_in_place "$temp_file" \
+        -e "s|\.dotfiles\` v$SED_VERSION_PATTERN|.dotfiles\` v$target_version|g"
+      ;;
+    # LCOV_EXCL_START — a case pattern emits no xtrace record; the
+    # continuation lines are only counted because they end in `| \`.
+    "docs/manual/03-reference/02-config-files.md" | \
+      "docs/manual/03-reference/04-templates.md" | \
+      "docs/manual/01-concepts/02-trust-model.md")
+      # LCOV_EXCL_STOP
+      # Sample config, attestation and template-variable values that show
+      # the current dotfiles_version without a leading "v".
+      sed_in_place "$temp_file" \
+        -e "s|dotfiles_version = \"$SED_VERSION_PATTERN\"|dotfiles_version = \"$target_version\"|g" \
+        -e "s|\"version\": \"$SED_VERSION_PATTERN\"|\"version\": \"$target_version\"|g" \
+        -e "s|(\.dotfiles_version\` \| string \| \`\")$SED_VERSION_PATTERN|\\1$target_version|g"
+      ;;
+    *)
+      # Update explicit markdown version labels, backticks, and parentheses.
+      # Skip lines containing MILESTONE.
+      sed_in_place "$temp_file" \
+        -e "/MILESTONE/!s|(\*\*Version\*\*:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
+        -e "/MILESTONE/!s|(\*\*Dotfiles Version\*\*:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
+        -e "/MILESTONE/!s|(Version:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
+        -e "/MILESTONE/!s|(Dotfiles Version:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
+        -e "/MILESTONE/!s|Version[[:space:]]*\`v?$SED_VERSION_PATTERN\`|Version \`$target_version\`|g" \
+        -e "/MILESTONE/!s|\(v$SED_VERSION_PATTERN\)|\(v$target_version\)|g" \
+        -e "/MILESTONE/!s|/v$SED_VERSION_PATTERN/|/v$target_version/|g" \
+        -e "/MILESTONE/!s|\bv$SED_VERSION_PATTERN\b|v$target_version|g" \
+        -e "/MILESTONE/!s|dotfiles:v?$SED_VERSION_PATTERN|dotfiles:$target_version|g" \
+        -e "/MILESTONE/!s|notes — v$SED_VERSION_PATTERN|notes — v$target_version|g"
+      ;;
+  esac
+}
+
+# _vs_update_one <file> <version> <dry_run>: rewrite one file; sets
+# _vs_changed.
+_vs_update_one() {
+  local file="$1" target_version="$2" dry_run="$3" temp_file
+  temp_file=$(umask 077 && mktemp)
+  cp "$file" "$temp_file"
+  _vs_rewrite "$file" "$temp_file" "$target_version"
+  _vs_changed=0
+  if ! cmp -s "$file" "$temp_file"; then
+    _vs_changed=1
+    if [[ "$dry_run" == "true" ]]; then
+      log_info "Would update: $file"
+      # Show diff preview
+      diff -u "$file" "$temp_file" | head -20 >&2 || true
+    else
+      # Use cat to preserve permissions and ownership
+      cat "$temp_file" >"$file"
+      log_success "Updated: $file"
+    fi
+  else
+    log_info "No changes needed: $file"
+  fi
+  rm -f "$temp_file"
+}
 
 update_version_references() {
   local target_version="$1"
@@ -299,83 +385,8 @@ update_version_references() {
       log_info "Skipping historical file: $file"
       continue
     fi
-
-    # Create temporary file for changes
-    local temp_file
-    temp_file=$(umask 077 && mktemp)
-    cp "$file" "$temp_file"
-
-    # Update various version reference patterns. Match on the full repo
-    # path (not basename) so the root README's badge rules don't also
-    # capture other README.md files (e.g. the .chezmoitemplates READMEs),
-    # which carry a `(vX.Y.Z)` stamp handled by the generic case below.
-    case "$file" in
-      "README.md")
-        # Update badge and release link versions.
-        sed_in_place "$temp_file" \
-          -e "s|Version-v$SED_VERSION_PATTERN|Version-v$target_version|g" \
-          -e "s|/releases/tag/v$SED_VERSION_PATTERN|/releases/tag/v$target_version|g" \
-          -e "s|/dotfiles/v$SED_VERSION_PATTERN/|/dotfiles/v$target_version/|g"
-        ;;
-      "scripts/git-hooks/pre-commit-audit.sh")
-        # "vX.Y.Z standards maintained" banner. Matched explicitly with a
-        # portable pattern — the generic `\bvX.Y.Z\b` rule below relies on
-        # GNU `\b`, which BSD/macOS sed does not support, so a local
-        # `version-sync` run would otherwise leave this script stale.
-        sed_in_place "$temp_file" \
-          -e "s|v$SED_VERSION_PATTERN standards maintained|v$target_version standards maintained|g"
-        ;;
-      "docs/manual/00-introduction.md")
-        sed_in_place "$temp_file" \
-          -e "s|\.dotfiles\` v$SED_VERSION_PATTERN|.dotfiles\` v$target_version|g"
-        ;;
-      # LCOV_EXCL_START — a case pattern emits no xtrace record; the
-      # continuation lines are only counted because they end in `| \`.
-      "docs/manual/03-reference/02-config-files.md" | \
-        "docs/manual/03-reference/04-templates.md" | \
-        "docs/manual/01-concepts/02-trust-model.md")
-        # LCOV_EXCL_STOP
-        # Sample config, attestation and template-variable values that show
-        # the current dotfiles_version without a leading "v".
-        sed_in_place "$temp_file" \
-          -e "s|dotfiles_version = \"$SED_VERSION_PATTERN\"|dotfiles_version = \"$target_version\"|g" \
-          -e "s|\"version\": \"$SED_VERSION_PATTERN\"|\"version\": \"$target_version\"|g" \
-          -e "s|(\.dotfiles_version\` \| string \| \`\")$SED_VERSION_PATTERN|\\1$target_version|g"
-        ;;
-      *)
-        # Update explicit markdown version labels, backticks, and parentheses.
-        # Skip lines containing MILESTONE.
-        sed_in_place "$temp_file" \
-          -e "/MILESTONE/!s|(\*\*Version\*\*:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
-          -e "/MILESTONE/!s|(\*\*Dotfiles Version\*\*:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
-          -e "/MILESTONE/!s|(Version:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
-          -e "/MILESTONE/!s|(Dotfiles Version:[[:space:]]*)v?$SED_VERSION_PATTERN|\\1v$target_version|g" \
-          -e "/MILESTONE/!s|Version[[:space:]]*\`v?$SED_VERSION_PATTERN\`|Version \`$target_version\`|g" \
-          -e "/MILESTONE/!s|\(v$SED_VERSION_PATTERN\)|\(v$target_version\)|g" \
-          -e "/MILESTONE/!s|/v$SED_VERSION_PATTERN/|/v$target_version/|g" \
-          -e "/MILESTONE/!s|\bv$SED_VERSION_PATTERN\b|v$target_version|g" \
-          -e "/MILESTONE/!s|dotfiles:v?$SED_VERSION_PATTERN|dotfiles:$target_version|g" \
-          -e "/MILESTONE/!s|notes — v$SED_VERSION_PATTERN|notes — v$target_version|g"
-        ;;
-    esac
-
-    # Check if file was changed
-    if ! cmp -s "$file" "$temp_file"; then
-      if [[ "$dry_run" == "true" ]]; then
-        log_info "Would update: $file"
-        # Show diff preview
-        diff -u "$file" "$temp_file" | head -20 >&2 || true
-      else
-        # Use cat to preserve permissions and ownership
-        cat "$temp_file" >"$file"
-        log_success "Updated: $file"
-      fi
-      rm -f "$temp_file"
-      changes_made=$((changes_made + 1))
-    else
-      log_info "No changes needed: $file"
-      rm -f "$temp_file"
-    fi
+    _vs_update_one "$file" "$target_version" "$dry_run"
+    changes_made=$((changes_made + _vs_changed))
   done
 
   if [[ "$dry_run" == "true" ]]; then
@@ -403,16 +414,48 @@ _is_historical_record() {
   esac
 }
 
+# _vs_versions_in <file>: every dotfiles-targeted version reference in it,
+# one per line (unrelated tool versions and MILESTONE lines are ignored).
+# rg and grep take the same patterns except the word-boundary one: grep -E
+# has no portable \b.
+_vs_versions_in() {
+  local file="$1" tool=grep boundary="v$VERSION_PATTERN([^0-9.]|$)"
+  if command -v rg &>/dev/null; then
+    tool=rg
+    boundary="v$VERSION_PATTERN\\b"
+  fi
+  local -a pats=(
+    -e "Version-v$VERSION_PATTERN"
+    -e "/releases/tag/v$VERSION_PATTERN"
+    -e "/dotfiles/v$VERSION_PATTERN/"
+    -e "\\*\\*Version\\*\\*:[[:space:]]*v?$VERSION_PATTERN"
+    -e "\\*\\*Dotfiles Version\\*\\*:[[:space:]]*v?$VERSION_PATTERN"
+    -e "(^|[[:space:]])Version:[[:space:]]*v?$VERSION_PATTERN"
+    -e "(^|[[:space:]])Dotfiles Version:[[:space:]]*v?$VERSION_PATTERN"
+    -e "Version[[:space:]]*\`v?$VERSION_PATTERN\`"
+    -e "\\(v$VERSION_PATTERN\\)"
+    -e "/v$VERSION_PATTERN/"
+    -e "$boundary"
+    -e "dotfiles:v?$VERSION_PATTERN"
+    -e "notes — v$VERSION_PATTERN"
+  )
+  if [[ "$tool" == rg ]]; then
+    { rg -v "MILESTONE" "$file" 2>/dev/null | rg -o "${pats[@]}" | rg -o "v?$VERSION_PATTERN"; } || true
+  else
+    { grep -Ev "MILESTONE" "$file" 2>/dev/null | grep -Eo "${pats[@]}" | grep -Eo "v?$VERSION_PATTERN"; } || true
+  fi
+}
+
 verify_version_consistency() {
-  local expected_version="$1"
-  local files=("${@:2}")
+  local expected_version="$1" file version
+  shift
 
   log_info "Verifying version consistency (expected: v$expected_version)"
 
   local inconsistencies=0
   local total_checked=0
 
-  for file in "${files[@]}"; do
+  for file in "$@"; do
     # LCOV_EXCL_START — defensive: the caller passes only existing files.
     if [[ ! -f "$file" ]]; then
       continue
@@ -425,65 +468,13 @@ verify_version_consistency() {
     fi
 
     total_checked=$((total_checked + 1))
-
-    # Extract only dotfiles-targeted version references (ignore unrelated tool versions).
-    local versions_in_file=()
-    if command -v rg &>/dev/null; then
-      while IFS= read -r match; do
-        while IFS= read -r version; do
-          versions_in_file+=("$version")
-        done < <(printf "%s\n" "$match" | rg -o "v?$VERSION_PATTERN" || true) # LCOV_EXCL_LINE — procsub traced at enclosing header
-      done < <(
-        rg -v "MILESTONE" "$file" 2>/dev/null | rg -o \
-          -e "Version-v$VERSION_PATTERN" \
-          -e "/releases/tag/v$VERSION_PATTERN" \
-          -e "/dotfiles/v$VERSION_PATTERN/" \
-          -e "\\*\\*Version\\*\\*:[[:space:]]*v?$VERSION_PATTERN" \
-          -e "\\*\\*Dotfiles Version\\*\\*:[[:space:]]*v?$VERSION_PATTERN" \
-          -e "(^|[[:space:]])Version:[[:space:]]*v?$VERSION_PATTERN" \
-          -e "(^|[[:space:]])Dotfiles Version:[[:space:]]*v?$VERSION_PATTERN" \
-          -e "Version[[:space:]]*\`v?$VERSION_PATTERN\`" \
-          -e "\\(v$VERSION_PATTERN\\)" \
-          -e "/v$VERSION_PATTERN/" \
-          -e "v$VERSION_PATTERN\\b" \
-          -e "dotfiles:v?$VERSION_PATTERN" \
-          -e "notes — v$VERSION_PATTERN" || true
-      )
-    else
-      while IFS= read -r match; do
-        while IFS= read -r version; do
-          versions_in_file+=("$version")
-        done < <(printf "%s\n" "$match" | grep -Eo "v?$VERSION_PATTERN" || true) # LCOV_EXCL_LINE — procsub traced at enclosing header
-      done < <(
-        grep -Ev "MILESTONE" "$file" 2>/dev/null | grep -Eo \
-          -e "Version-v$VERSION_PATTERN" \
-          -e "/releases/tag/v$VERSION_PATTERN" \
-          -e "/dotfiles/v$VERSION_PATTERN/" \
-          -e "\\*\\*Version\\*\\*:[[:space:]]*v?$VERSION_PATTERN" \
-          -e "\\*\\*Dotfiles Version\\*\\*:[[:space:]]*v?$VERSION_PATTERN" \
-          -e "(^|[[:space:]])Version:[[:space:]]*v?$VERSION_PATTERN" \
-          -e "(^|[[:space:]])Dotfiles Version:[[:space:]]*v?$VERSION_PATTERN" \
-          -e "Version[[:space:]]*\`v?$VERSION_PATTERN\`" \
-          -e "\\(v$VERSION_PATTERN\\)" \
-          -e "/v$VERSION_PATTERN/" \
-          -e "v$VERSION_PATTERN([^0-9.]|$)" \
-          -e "dotfiles:v?$VERSION_PATTERN" \
-          -e "notes — v$VERSION_PATTERN" || true
-      )
-    fi
-
-    if [[ ${#versions_in_file[@]} -eq 0 ]]; then
-      continue
-    fi
-
-    for version in "${versions_in_file[@]}"; do
-      # Remove 'v' prefix if present for comparison
-      local clean_version="${version#v}"
-      if [[ "$clean_version" != "$expected_version" ]]; then
+    while IFS= read -r version; do
+      # Compare without the 'v' prefix.
+      if [[ "${version#v}" != "$expected_version" ]]; then
         log_error "Inconsistent version in $file: $version (expected: v$expected_version)"
         inconsistencies=$((inconsistencies + 1))
       fi
-    done
+    done < <(_vs_versions_in "$file") # LCOV_EXCL_LINE — procsub traced at enclosing header
   done
 
   if [[ $inconsistencies -eq 0 ]]; then
@@ -495,115 +486,52 @@ verify_version_consistency() {
   fi
 }
 
-main() {
-  local target_version=""
-  local dry_run="false"
-  local verify_only="false"
-  local create_backup_flag="true"
-  local force_sync="false"
-
-  # Parse arguments
+# Sets main's target_version / dry_run / verify_only / create_backup_flag /
+# force_sync.
+_vs_parse_args() {
   while [[ $# -gt 0 ]]; do
     case $1 in
       -h | --help)
         show_help
         exit 0
         ;;
-      -d | --dry-run)
-        dry_run="true"
-        shift
-        ;;
-      -v | --verify)
-        verify_only="true"
-        shift
-        ;;
-      -b | --backup)
-        create_backup_flag="true"
-        shift
-        ;;
-      --no-backup)
-        create_backup_flag="false"
-        shift
-        ;;
-      -f | --force)
-        force_sync="true"
-        shift
-        ;;
+      -d | --dry-run) dry_run="true" ;;
+      -v | --verify) verify_only="true" ;;
+      -b | --backup) create_backup_flag="true" ;;
+      --no-backup) create_backup_flag="false" ;;
+      -f | --force) force_sync="true" ;;
       -*)
         log_error "Unknown option: $1"
         show_help
         exit 1
         ;;
-      *)
-        target_version="$1"
-        shift
-        ;;
+      *) target_version="$1" ;;
     esac
+    shift
   done
+}
 
-  if [[ -n "${DOTFILES_COV_TMPDIR:-}" && "${DOTFILES_ALLOW_COVERAGE_WRITES:-0}" != "1" ]]; then
-    dry_run="true"
-    create_backup_flag="false"
-    log_info "Coverage sandbox detected; forcing --dry-run"
-  fi
-
-  # Change to project root
-  cd "$PROJECT_ROOT"
-
-  # Determine target version
-  if [[ -z "$target_version" ]]; then
-    target_version=$(get_canonical_version)
-    validate_version "$target_version"
-    log_info "Using canonical dotfiles_version: $target_version"
-  else
-    validate_version "$target_version"
-    log_info "Using specified version: $target_version"
-  fi
-
-  # Find files with version references
-  local version_files=()
-  local version_file
-  while IFS= read -r version_file; do
-    version_files+=("$version_file")
-  done < <(find_version_files) # LCOV_EXCL_LINE — procsub traced at enclosing header
-
-  if [[ ${#version_files[@]} -eq 0 ]]; then
-    log_warning "No files with version references found"
-    return 0
-  fi
-  log_info "Found ${#version_files[@]} files with version references"
-
-  # Verify mode - just check consistency
-  if [[ "$verify_only" == "true" ]]; then
-    if verify_version_consistency "$target_version" "${version_files[@]}"; then
-      exit 0
-    else
-      exit 1
-    fi
-  fi
-
-  # Create backup if requested and not dry run
-  if [[ "$create_backup_flag" == "true" && "$dry_run" == "false" ]]; then
-    create_backup "${version_files[@]}"
-  fi
-
-  # Sync chezmoidata.toml (single source of truth for the release identity).
-  # Post-Phase-4b lives under defaults/ — kept old root location as a
-  # fallback so this script is forward- and backward-compatible.
+# Sync chezmoidata.toml (single source of truth for the release identity).
+# Post-Phase-4b lives under defaults/ — kept old root location as a
+# fallback so this script is forward- and backward-compatible.
+_vs_sync_manifest() {
+  local target_version="$1" dry_run="$2"
   local chezmoidata="$PROJECT_ROOT/defaults/.chezmoidata.toml"
   [[ -f "$chezmoidata" ]] || chezmoidata="$PROJECT_ROOT/.chezmoidata.toml"
-  if [[ -f "$chezmoidata" ]]; then
-    if [[ "$dry_run" == "true" ]]; then
-      log_info "Would update ${chezmoidata#"$PROJECT_ROOT/"}: dotfiles_version = \"$target_version\""
-    else
-      sed_in_place "$chezmoidata" \
-        "s|^dotfiles_version = \"$SED_VERSION_PATTERN\"|dotfiles_version = \"$target_version\"|"
-      log_success "Updated ${chezmoidata#"$PROJECT_ROOT/"}"
-    fi
+  [[ -f "$chezmoidata" ]] || return 0
+  if [[ "$dry_run" == "true" ]]; then
+    log_info "Would update ${chezmoidata#"$PROJECT_ROOT/"}: dotfiles_version = \"$target_version\""
+  else
+    sed_in_place "$chezmoidata" \
+      "s|^dotfiles_version = \"$SED_VERSION_PATTERN\"|dotfiles_version = \"$target_version\"|"
+    log_success "Updated ${chezmoidata#"$PROJECT_ROOT/"}"
   fi
+}
 
-  # package.json is generated release metadata. Keep it synchronized from the
-  # canonical chezmoi data manifest before downstream verification.
+# package.json is generated release metadata. Keep it synchronized from the
+# canonical chezmoi data manifest before downstream verification.
+_vs_sync_package() {
+  local target_version="$1" dry_run="$2" package_tmp
   local package_json="$PROJECT_ROOT/package.json"
   if [[ ! -f "$package_json" ]]; then
     log_error "package.json not found at $package_json"
@@ -611,21 +539,39 @@ main() {
   fi
   if [[ "$dry_run" == "true" ]]; then
     log_info "Would update package.json: version = \"$target_version\""
-  else
-    local package_tmp
-    package_tmp=$(umask 077 && mktemp)
-    if command -v jq >/dev/null 2>&1; then
-      jq --arg version "$target_version" '.version = $version' "$package_json" >"$package_tmp"
-    else
-      cp "$package_json" "$package_tmp"
-      sed_in_place "$package_tmp" "s|\"version\": \"$SED_VERSION_PATTERN\"|\"version\": \"$target_version\"|"
-    fi
-    cat "$package_tmp" >"$package_json"
-    rm -f "$package_tmp"
-    log_success "Updated package.json"
+    return 0
   fi
+  package_tmp=$(umask 077 && mktemp)
+  if command -v jq >/dev/null 2>&1; then
+    jq --arg version "$target_version" '.version = $version' "$package_json" >"$package_tmp"
+  else
+    cp "$package_json" "$package_tmp"
+    sed_in_place "$package_tmp" "s|\"version\": \"$SED_VERSION_PATTERN\"|\"version\": \"$target_version\"|"
+  fi
+  cat "$package_tmp" >"$package_json"
+  rm -f "$package_tmp"
+  log_success "Updated package.json"
+}
 
-  # Sync non-template script files that embed the version
+# _vs_commit <path> <rewritten copy> <dry_run>: write the copy over <path>
+# when it differs (cat keeps permissions and ownership). Sets _vs_changed
+# rather than returning it, so a failed write still aborts under set -e.
+_vs_commit() {
+  local rel="$1" temp_file="$2" dry_run="$3"
+  _vs_changed=0
+  cmp -s "$PROJECT_ROOT/$rel" "$temp_file" && return 0
+  _vs_changed=1
+  if [[ "$dry_run" == "true" ]]; then
+    log_info "Would update: $rel"
+  else
+    cat "$temp_file" >"$PROJECT_ROOT/$rel"
+    log_success "Updated: $rel"
+  fi
+}
+
+# Sync non-template script files that embed the version
+_vs_sync_scripts() {
+  local target_version="$1" dry_run="$2" script_file temp_file
   local script_files=(
     "bin/dot"
     "dot_local/bin/executable_tour"
@@ -639,73 +585,53 @@ main() {
     "defaults/dot_local/share/dot-mcp/main.go"
   )
   for script_file in "${script_files[@]}"; do
-    local full_path="$PROJECT_ROOT/$script_file"
-    if [[ -f "$full_path" ]]; then
-      local temp_file
-      temp_file=$(umask 077 && mktemp)
-      cp "$full_path" "$temp_file"
-      sed_in_place "$temp_file" "s|v$SED_VERSION_PATTERN|v$target_version|g"
-      sed_in_place "$temp_file" "s|\"$SED_VERSION_PATTERN\"|\"$target_version\"|g"
-      if ! cmp -s "$full_path" "$temp_file"; then
-        if [[ "$dry_run" == "true" ]]; then
-          log_info "Would update: $script_file"
-        else
-          # Use cat to preserve permissions and ownership
-          cat "$temp_file" >"$full_path"
-          log_success "Updated: $script_file"
-        fi
-      else
-        rm -f "$temp_file"
-      fi
-    fi
+    [[ -f "$PROJECT_ROOT/$script_file" ]] || continue
+    temp_file=$(umask 077 && mktemp)
+    cp "$PROJECT_ROOT/$script_file" "$temp_file"
+    sed_in_place "$temp_file" "s|v$SED_VERSION_PATTERN|v$target_version|g"
+    sed_in_place "$temp_file" "s|\"$SED_VERSION_PATTERN\"|\"$target_version\"|g"
+    _vs_commit "$script_file" "$temp_file" "$dry_run"
+    # An unchanged copy is removed; a written one is left, as it always was.
+    [[ "$_vs_changed" == 1 ]] || rm -f "$temp_file"
   done
+}
 
-  # Machine-readable discovery cards. These are JSON with a bare
-  # `"version"` key, so the `v$VERSION` substitution above does not
-  # reach them — which is exactly why the MCP card sat at 0.2.501
-  # while the project shipped 0.2.519. Agents fetch these over the
-  # network, so a stale version here misroutes tooling rather than
-  # merely reading wrong. Gated by scripts/verify-release-versions.
+# Machine-readable discovery cards. These are JSON with a bare
+# `"version"` key, so the `v$VERSION` substitution above does not
+# reach them — which is exactly why the MCP card sat at 0.2.501
+# while the project shipped 0.2.519. Agents fetch these over the
+# network, so a stale version here misroutes tooling rather than
+# merely reading wrong. Gated by scripts/verify-release-versions.
+_vs_sync_cards() {
+  local target_version="$1" dry_run="$2" card_file card_tmp
   local card_files=(
     ".well-known/mcp/server-card.json"
     ".well-known/agent-card.json"
   )
   for card_file in "${card_files[@]}"; do
-    local card_path="$PROJECT_ROOT/$card_file"
-    [[ -f "$card_path" ]] || continue
+    [[ -f "$PROJECT_ROOT/$card_file" ]] || continue
     # Deliberately sed, not jq: jq re-serialises the whole document and
     # would reflow the hand-formatted arrays in these cards, producing a
     # large diff for a one-token change. Only the top-level "version"
     # key is rewritten (it is the first such key in both files).
-    local card_tmp
     card_tmp=$(umask 077 && mktemp)
-    cp "$card_path" "$card_tmp"
+    cp "$PROJECT_ROOT/$card_file" "$card_tmp"
     sed_in_place "$card_tmp" \
       "1,6s|\"version\": \"$SED_VERSION_PATTERN\"|\"version\": \"$target_version\"|"
-    if ! cmp -s "$card_path" "$card_tmp"; then
-      if [[ "$dry_run" == "true" ]]; then
-        log_info "Would update: $card_file"
-      else
-        cat "$card_tmp" >"$card_path"
-        log_success "Updated: $card_file"
-      fi
-    fi
+    _vs_commit "$card_file" "$card_tmp" "$dry_run"
     rm -f "$card_tmp"
   done
+}
 
-  # Update version references
-  local changes_made
-  changes_made="$(update_version_references "$target_version" "$dry_run" "${version_files[@]}")"
-  if [[ "$changes_made" =~ ^[0-9]+$ ]]; then
-
-    if [[ $changes_made -gt 0 || "$force_sync" == "true" ]]; then
-      if [[ "$dry_run" == "false" ]]; then
-        # Verify the changes
-        if verify_version_consistency "$target_version" "${version_files[@]}"; then
-          log_success "Version synchronization completed successfully"
-
-          # Show summary
-          cat <<EOF
+# Verify a real sync and print its summary.
+_vs_report() {
+  local target_version="$1" changes_made="$2" create_backup_flag="$3"
+  if ! verify_version_consistency "$target_version" "${version_files[@]}"; then
+    log_error "Version synchronization failed verification"
+    exit 1
+  fi
+  log_success "Version synchronization completed successfully"
+  cat <<EOF
 
 ═══════════════════════════════════════
 Version Sync Summary
@@ -716,21 +642,83 @@ Backup Created: $create_backup_flag
 Verification:   ✅ Passed
 
 EOF
-        else
-          log_error "Version synchronization failed verification"
-          exit 1
-        fi
-      fi
-    else
-      log_info "No changes needed - all versions are already synchronized"
-    fi
+}
+
+# Sets main's target_version: the argument, else the canonical version.
+_vs_resolve_target() {
+  if [[ -z "$target_version" ]]; then
+    target_version=$(get_canonical_version)
+    validate_version "$target_version"
+    log_info "Using canonical dotfiles_version: $target_version"
   else
-    # LCOV_EXCL_START — defensive: update_version_references prints only its
-    # numeric count on stdout, and any failure inside it aborts under set -e.
+    validate_version "$target_version"
+    log_info "Using specified version: $target_version"
+  fi
+}
+
+# Update the version references, then verify and summarise a real sync.
+_vs_finish() {
+  local changes_made
+  changes_made="$(update_version_references "$target_version" "$dry_run" "${version_files[@]}")"
+  # LCOV_EXCL_START — defensive: update_version_references prints only its
+  # numeric count on stdout, and any failure inside it aborts under set -e.
+  if [[ ! "$changes_made" =~ ^[0-9]+$ ]]; then
     log_error "Version synchronization failed"
     exit 1
-    # LCOV_EXCL_STOP
   fi
+  # LCOV_EXCL_STOP
+  if [[ $changes_made -eq 0 && "$force_sync" != "true" ]]; then
+    log_info "No changes needed - all versions are already synchronized"
+  elif [[ "$dry_run" == "false" ]]; then
+    _vs_report "$target_version" "$changes_made" "$create_backup_flag"
+  fi
+}
+
+main() {
+  local target_version=""
+  local dry_run="false"
+  local verify_only="false"
+  local create_backup_flag="true"
+  local force_sync="false"
+  _vs_parse_args "$@"
+
+  if [[ -n "${DOTFILES_COV_TMPDIR:-}" && "${DOTFILES_ALLOW_COVERAGE_WRITES:-0}" != "1" ]]; then
+    dry_run="true"
+    create_backup_flag="false"
+    log_info "Coverage sandbox detected; forcing --dry-run"
+  fi
+
+  # Change to project root
+  cd "$PROJECT_ROOT"
+  _vs_resolve_target
+
+  # Find files with version references
+  local version_files=() version_file
+  while IFS= read -r version_file; do
+    version_files+=("$version_file")
+  done < <(find_version_files) # LCOV_EXCL_LINE — procsub traced at enclosing header
+  if [[ ${#version_files[@]} -eq 0 ]]; then
+    log_warning "No files with version references found"
+    return 0
+  fi
+  log_info "Found ${#version_files[@]} files with version references"
+
+  # Verify mode - just check consistency
+  if [[ "$verify_only" == "true" ]]; then
+    verify_version_consistency "$target_version" "${version_files[@]}" && exit 0
+    exit 1
+  fi
+
+  # Create backup if requested and not dry run
+  if [[ "$create_backup_flag" == "true" && "$dry_run" == "false" ]]; then
+    create_backup "${version_files[@]}"
+  fi
+
+  _vs_sync_manifest "$target_version" "$dry_run"
+  _vs_sync_package "$target_version" "$dry_run"
+  _vs_sync_scripts "$target_version" "$dry_run"
+  _vs_sync_cards "$target_version" "$dry_run"
+  _vs_finish
 }
 
 # Run main function
