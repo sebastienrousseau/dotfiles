@@ -38,12 +38,8 @@ source "$SCRIPT_DIR/../../lib/dot/ui.sh"
 JSON_MODE=0
 SHOW_DIFF="${DOTFILES_DRIFT_SHOW_DIFF:-0}"
 
-for arg in "$@"; do
-  case "$arg" in
-    --json | -j) JSON_MODE=1 ;;
-    --diff | -d) SHOW_DIFF=1 ;;
-    --help | -h)
-      cat <<EOF
+_dd_help() {
+  cat <<EOF
 Usage: drift-dashboard.sh [options]
 
 Options:
@@ -51,70 +47,92 @@ Options:
   --diff, -d    Also print the chezmoi diff (excluding scripts/install/tests).
   --help, -h    Show this help.
 EOF
-      exit 0
-      ;;
-  esac
-done
+}
 
-ui_init
+_dd_parse_args() {
+  local arg
+  for arg in "$@"; do
+    case "$arg" in
+      --json | -j) JSON_MODE=1 ;;
+      --diff | -d) SHOW_DIFF=1 ;;
+      --help | -h)
+        _dd_help
+        exit 0
+        ;;
+    esac
+  done
+}
 
-if ! command -v chezmoi >/dev/null; then
+_dd_require_chezmoi() {
+  command -v chezmoi >/dev/null && return 0
   if [[ $JSON_MODE -eq 1 ]]; then
     printf '{"error":"chezmoi not found"}\n'
   else
     ui_err "chezmoi" "not found"
   fi
   exit 2
-fi
+}
+
+# count <text>: its line count (0 for empty text).
+_dd_count() {
+  if [[ -n "$1" ]]; then
+    printf '%s\n' "$1" | wc -l | tr -d ' '
+  else
+    echo 0
+  fi
+}
 
 # -----------------------------------------------------------------------------
 # Class 1: chezmoi-managed drift
 # -----------------------------------------------------------------------------
-
-# --exclude=always: always-run scripts are pending by design, not drift.
-cm_status="$(chezmoi status --exclude=always 2>/dev/null || true)"
-cm_count=0
-if [[ -n "$cm_status" ]]; then
-  cm_count=$(printf '%s\n' "$cm_status" | wc -l | tr -d ' ')
-fi
+_dd_managed() {
+  # --exclude=always: always-run scripts are pending by design, not drift.
+  cm_status="$(chezmoi status --exclude=always 2>/dev/null || true)"
+  cm_count="$(_dd_count "$cm_status")"
+}
 
 # -----------------------------------------------------------------------------
 # Class 2: untracked source files (chezmoi source tree only)
 # -----------------------------------------------------------------------------
-
-untracked=""
-untracked_count=0
-src_dir="$(chezmoi source-path 2>/dev/null || true)"
-if [[ -n "$src_dir" && -d "$src_dir/.git" ]]; then
+_dd_untracked() {
+  untracked=""
+  untracked_count=0
+  [[ -n "$src_dir" && -d "$src_dir/.git" ]] || return 0
   untracked="$(git -C "$src_dir" ls-files --others --exclude-standard 2>/dev/null || true)"
-  if [[ -n "$untracked" ]]; then
-    untracked_count=$(printf '%s\n' "$untracked" | wc -l | tr -d ' ')
-  fi
-fi
+  untracked_count="$(_dd_count "$untracked")"
+}
 
 # -----------------------------------------------------------------------------
 # Class 4: stale source (source older than deployed = pending revert risk)
 # Compute by walking chezmoi-managed targets and comparing mtimes.
 # -----------------------------------------------------------------------------
 
-stale_list=""
-stale_count=0
-if [[ -n "$src_dir" ]]; then
-  while IFS= read -r target; do
-    [[ -z "$target" ]] && continue
-    target_path="$target"
-    [[ ! -e "$target_path" ]] && continue
-    src_path="$(chezmoi source-path "$target_path" 2>/dev/null || true)"
-    [[ -z "$src_path" || ! -e "$src_path" ]] && continue
-    if [[ "$target_path" -nt "$src_path" ]]; then
-      stale_list+="$target_path"$'\n'
-      stale_count=$((stale_count + 1))
-    fi
-  done < <(chezmoi managed 2>/dev/null | head -200 | while IFS= read -r rel; do
-    printf '%s\n' "$HOME/$rel"
-  done)
-fi
-stale_list="${stale_list%$'\n'}"
+# _dd_stale_target <path>: count it when it is newer than its source.
+_dd_stale_target() {
+  local target_path="$1" src_path
+  [[ -e "$target_path" ]] || return 0
+  src_path="$(chezmoi source-path "$target_path" 2>/dev/null || true)"
+  [[ -n "$src_path" && -e "$src_path" ]] || return 0
+  if [[ "$target_path" -nt "$src_path" ]]; then
+    stale_list+="$target_path"$'\n'
+    stale_count=$((stale_count + 1))
+  fi
+}
+
+_dd_stale() {
+  local target
+  stale_list=""
+  stale_count=0
+  if [[ -n "$src_dir" ]]; then
+    while IFS= read -r target; do
+      [[ -z "$target" ]] && continue
+      _dd_stale_target "$target"
+    done < <(chezmoi managed 2>/dev/null | head -200 | while IFS= read -r rel; do
+      printf '%s\n' "$HOME/$rel"
+    done)
+  fi
+  stale_list="${stale_list%$'\n'}"
+}
 
 # -----------------------------------------------------------------------------
 # Class 3: orphan deployed files (chezmoi no longer claims them)
@@ -123,20 +141,18 @@ stale_list="${stale_list%$'\n'}"
 # ~/.local/state/dotfiles/orphans file (drift-history feature in fleet
 # already maintains one); future work tracked under #875.
 # -----------------------------------------------------------------------------
-
-orphan_count=0
-orphan_file="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/orphans"
-if [[ -s "$orphan_file" ]]; then
-  orphan_count=$(wc -l <"$orphan_file" | tr -d ' ')
-fi
+_dd_orphans() {
+  orphan_count=0
+  orphan_file="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/orphans"
+  if [[ -s "$orphan_file" ]]; then
+    orphan_count=$(wc -l <"$orphan_file" | tr -d ' ')
+  fi
+}
 
 # -----------------------------------------------------------------------------
 # Report
 # -----------------------------------------------------------------------------
-
-total=$((cm_count + untracked_count + orphan_count + stale_count))
-
-if [[ $JSON_MODE -eq 1 ]]; then
+_dd_json() {
   python3 - <<PY
 import json, sys
 print(json.dumps({
@@ -147,57 +163,64 @@ print(json.dumps({
     "total": $total
 }))
 PY
-  if ((total > 0)); then exit 1; else exit 0; fi
-fi
+}
 
-ui_header "Dotfiles Drift Dashboard"
+# _dd_section <count> <label> <message> [<detail>]: a warning with its detail
+# lines when the count is non-zero, else "clean".
+_dd_section() {
+  if (($1 > 0)); then
+    echo ""
+    ui_warn "$2" "$3"
+    if (($# > 3)); then
+      printf '%s\n' "$4"
+    fi
+  else
+    ui_ok "$2" "clean"
+  fi
+}
 
-# Class 1
-if ((cm_count > 0)); then
+_dd_report() {
+  ui_header "Dotfiles Drift Dashboard"
+  _dd_section "$cm_count" "Managed drift" "$cm_count file(s) — deployed differs from rendered source" "$cm_status"
+  _dd_section "$untracked_count" "Untracked source" "$untracked_count file(s) in chezmoi source not tracked by git" "$untracked"
+  # ~-relative, as doctor's pretty_path renders it (that helper lives in
+  # doctor.sh, not in a lib this script sources). The tilde goes through a
+  # variable: bash 3.2 keeps a literal backslash from `\~` here.
+  local tilde='~'
+  _dd_section "$orphan_count" "Orphan deployed" "$orphan_count file(s) — review ${orphan_file/#$HOME/$tilde}"
+  _dd_section "$stale_count" "Stale source" "$stale_count target(s) newer than source — next \`chezmoi apply\` would revert" "$stale_list"
+
   echo ""
-  ui_warn "Managed drift" "$cm_count file(s) — deployed differs from rendered source"
-  printf '%s\n' "$cm_status"
-else
-  ui_ok "Managed drift" "clean"
-fi
+  if ((total > 0)); then
+    ui_warn "Total drift signals" "$total"
+  else
+    ui_ok "Total" "no drift detected"
+  fi
 
-# Class 2
-if ((untracked_count > 0)); then
-  echo ""
-  ui_warn "Untracked source" "$untracked_count file(s) in chezmoi source not tracked by git"
-  printf '%s\n' "$untracked"
-else
-  ui_ok "Untracked source" "clean"
-fi
+  if [[ "$SHOW_DIFF" = "1" && $cm_count -gt 0 ]]; then
+    echo ""
+    ui_header "chezmoi diff (excluding scripts/install/tests)"
+    chezmoi diff --exclude scripts --exclude install --exclude tests || true
+  fi
+}
 
-# Class 3
-if ((orphan_count > 0)); then
-  echo ""
-  ui_warn "Orphan deployed" "$orphan_count file(s) — review $(pretty_path "$orphan_file")"
-else
-  ui_ok "Orphan deployed" "clean"
-fi
+_dd_main() {
+  _dd_parse_args "$@"
+  ui_init
+  _dd_require_chezmoi
+  _dd_managed
+  src_dir="$(chezmoi source-path 2>/dev/null || true)"
+  _dd_untracked
+  _dd_stale
+  _dd_orphans
+  total=$((cm_count + untracked_count + orphan_count + stale_count))
 
-# Class 4
-if ((stale_count > 0)); then
-  echo ""
-  ui_warn "Stale source" "$stale_count target(s) newer than source — next \`chezmoi apply\` would revert"
-  printf '%s\n' "$stale_list"
-else
-  ui_ok "Stale source" "clean"
-fi
+  if [[ $JSON_MODE -eq 1 ]]; then
+    _dd_json
+    if ((total > 0)); then exit 1; else exit 0; fi
+  fi
+  _dd_report
+  ((total > 0)) && exit 1 || exit 0
+}
 
-echo ""
-if ((total > 0)); then
-  ui_warn "Total drift signals" "$total"
-else
-  ui_ok "Total" "no drift detected"
-fi
-
-if [[ "$SHOW_DIFF" = "1" && $cm_count -gt 0 ]]; then
-  echo ""
-  ui_header "chezmoi diff (excluding scripts/install/tests)"
-  chezmoi diff --exclude scripts --exclude install --exclude tests || true
-fi
-
-((total > 0)) && exit 1 || exit 0
+_dd_main "$@"
