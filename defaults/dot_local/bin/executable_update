@@ -32,6 +32,26 @@ log_section() { printf '%b\n' "\n${CYAN}--- $1 ---${NC}"; }
 log_success() { printf '%b\n' "${GREEN}Done:${NC} $1"; }
 log_skip() { printf '%b\n' "${YELLOW}Skipped:${NC} $1"; }
 
+usage() {
+  printf '%s\n' \
+    'Usage: update [option...]' \
+    '' \
+    'Update every detected package manager, or only the ones named.' \
+    '' \
+    'Options:' \
+    '  --all      Update everything (the default)' \
+    '  --brew     Homebrew' \
+    '  --apt      APT (uses sudo)' \
+    '  --npm      npm global packages' \
+    '  --cargo    Cargo binaries and the stable Rust toolchain' \
+    '  --pip      Outdated pip3 packages' \
+    '  -h, --help Show this help' \
+    '' \
+    'Examples:' \
+    '  update --brew' \
+    '  update --npm --pip'
+}
+
 # Parse arguments
 UPDATE_ALL=true
 UPDATE_BREW=false
@@ -62,6 +82,15 @@ for arg in "$@"; do
     --pip)
       UPDATE_PIP=true
       UPDATE_ALL=false
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'update: unknown option: %s\n' "$arg" >&2
+      usage >&2
+      exit 2
       ;;
   esac
 done
