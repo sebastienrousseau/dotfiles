@@ -216,7 +216,10 @@ repos:
 
       - id: version-consistency
         name: Version surfaces and release identity are valid
-        entry: scripts/release-preflight
+        # --development, as in doc-drift.yml: a commit after a published
+        # release (docs, a regenerated manpage) is not a retag. Release
+        # creation still runs --require-untagged.
+        entry: scripts/release-preflight --development
         language: script
         pass_filenames: false
         stages: [pre-commit]

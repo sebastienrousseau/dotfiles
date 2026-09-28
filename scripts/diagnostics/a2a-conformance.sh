@@ -13,25 +13,14 @@ source "$SCRIPT_DIR/../../lib/dot/ui.sh"
 
 JSON_MODE=0
 STRICT_MODE=0
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --json | -j)
-      JSON_MODE=1
-      shift
-      ;;
-    --strict | -s)
-      STRICT_MODE=1
-      shift
-      ;;
-    *)
-      shift
-      ;;
-  esac
-done
-
-command -v jq >/dev/null 2>&1 || {
-  echo "jq is required for A2A conformance checks." >&2
-  exit 1
+_a2a_parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --json | -j) JSON_MODE=1 ;;
+      --strict | -s) STRICT_MODE=1 ;;
+    esac
+    shift
+  done
 }
 
 a2a_card="$REPO_ROOT/.well-known/agent-card.json"
@@ -41,66 +30,67 @@ agent_profiles="$REPO_ROOT/defaults/dot_config/dotfiles/agent-profiles.json"
 status="healthy"
 issues=()
 
-# Check primary A2A v0.3 card
-if [[ ! -f "$a2a_card" ]]; then
-  issues+=("missing:.well-known/agent-card.json")
-fi
+# _a2a_require <file> <jq-expr> <issue>: record <issue> unless the
+# expression holds.
+_a2a_require() {
+  jq -e "$2" "$1" >/dev/null 2>&1 || issues+=("$3")
+}
 
-# Check legacy agent.json
-if [[ ! -f "$legacy_doc" ]]; then
-  issues+=("missing:.well-known/agent.json")
-fi
+# _a2a_forbid <file> <jq-expr> <issue>: record <issue> if it holds.
+_a2a_forbid() {
+  if jq -e "$2" "$1" >/dev/null 2>&1; then
+    issues+=("$3")
+  fi
+}
 
-# Check internal card
-if [[ ! -f "$internal_card" ]]; then
-  issues+=("missing:agent-card.json")
-fi
+# The primary A2A card, the legacy document, the internal card and the
+# agent profiles must all exist.
+_a2a_check_files() {
+  [[ -f "$a2a_card" ]] || issues+=("missing:.well-known/agent-card.json")
+  [[ -f "$legacy_doc" ]] || issues+=("missing:.well-known/agent.json")
+  [[ -f "$internal_card" ]] || issues+=("missing:agent-card.json")
+  [[ -f "$agent_profiles" ]] || issues+=("missing:agent-profiles.json")
+}
 
-# Check agent profiles
-if [[ ! -f "$agent_profiles" ]]; then
-  issues+=("missing:agent-profiles.json")
-fi
-
-if [[ "${#issues[@]}" -eq 0 ]]; then
-  # Validate A2A v0.3 card
+# Validate the A2A v0.3 card.
+_a2a_check_card() {
+  local spec_version skills_count signing_method
   spec_version="$(jq -r '.specVersion // empty' "$a2a_card")"
   [[ "$spec_version" == "0.3" ]] || issues+=("specVersion:expected 0.3, got $spec_version")
 
   # Skills array
-  jq -e '.skills | type == "array"' "$a2a_card" >/dev/null 2>&1 || issues+=("skills:missing or not array")
+  _a2a_require "$a2a_card" '.skills | type == "array"' "skills:missing or not array"
   skills_count="$(jq '.skills | length' "$a2a_card" 2>/dev/null || echo 0)"
   [[ "$skills_count" -gt 0 ]] || issues+=("skills:empty array")
 
-  # Authentication block
-  jq -e '.authentication' "$a2a_card" >/dev/null 2>&1 || issues+=("authentication:missing")
+  _a2a_require "$a2a_card" '.authentication' "authentication:missing"
 
   # Signing metadata
   signing_method="$(jq -r '.signing.method // empty' "$a2a_card")"
   [[ -n "$signing_method" ]] || issues+=("signing:missing method")
 
-  # Capabilities
-  jq -e '.capabilities' "$a2a_card" >/dev/null 2>&1 || issues+=("capabilities:missing")
+  _a2a_require "$a2a_card" '.capabilities' "capabilities:missing"
 
   # Protocol must be "a2a" not "a2a-ready"
-  if jq -e '.protocols | index("a2a-ready")' "$a2a_card" >/dev/null 2>&1; then
-    issues+=("protocols:should use 'a2a' not 'a2a-ready'")
-  fi
-  jq -e '.protocols | index("a2a")' "$a2a_card" >/dev/null 2>&1 || issues+=("protocols:missing 'a2a'")
+  _a2a_forbid "$a2a_card" '.protocols | index("a2a-ready")' "protocols:should use 'a2a' not 'a2a-ready'"
+  _a2a_require "$a2a_card" '.protocols | index("a2a")' "protocols:missing 'a2a'"
+}
 
-  # Validate internal card also uses v0.3 and "a2a"
+# The internal card also uses v0.3 and "a2a"; the legacy doc points to the
+# new card.
+_a2a_check_internal_and_legacy() {
+  local internal_spec
   internal_spec="$(jq -r '.specVersion // empty' "$internal_card")"
   [[ "$internal_spec" == "0.3" ]] || issues+=("internal-card:specVersion expected 0.3")
-  if jq -e '.protocols | index("a2a-ready")' "$internal_card" >/dev/null 2>&1; then
-    issues+=("internal-card:should use 'a2a' not 'a2a-ready'")
-  fi
+  _a2a_forbid "$internal_card" '.protocols | index("a2a-ready")' "internal-card:should use 'a2a' not 'a2a-ready'"
 
-  # Validate legacy doc points to new card
-  jq -e '.a2aCard' "$legacy_doc" >/dev/null 2>&1 || issues+=("legacy:missing a2aCard pointer")
-  if jq -e '.protocols | index("a2a-ready")' "$legacy_doc" >/dev/null 2>&1; then
-    issues+=("legacy:should use 'a2a' not 'a2a-ready'")
-  fi
+  _a2a_require "$legacy_doc" '.a2aCard' "legacy:missing a2aCard pointer"
+  _a2a_forbid "$legacy_doc" '.protocols | index("a2a-ready")' "legacy:should use 'a2a' not 'a2a-ready'"
+}
 
-  # Name consistency
+# Name consistency, the default profile, and card signing.
+_a2a_check_consistency() {
+  local a2a_name internal_name legacy_name default_profile
   a2a_name="$(jq -r '.name // empty' "$a2a_card")"
   internal_name="$(jq -r '.name // empty' "$internal_card")"
   legacy_name="$(jq -r '.name // empty' "$legacy_doc")"
@@ -114,33 +104,31 @@ if [[ "${#issues[@]}" -eq 0 ]]; then
   fi
 
   # Card signing in internal card
-  jq -e '.security.cardSigning' "$internal_card" >/dev/null 2>&1 || issues+=("internal-card:missing cardSigning in security")
-fi
+  _a2a_require "$internal_card" '.security.cardSigning' "internal-card:missing cardSigning in security"
+}
 
-if [[ "${#issues[@]}" -gt 0 ]]; then
-  status="issues"
-fi
+# Build the JSON payload (issues escaped by jq).
+_a2a_payload() {
+  local issues_json strict=false
+  if [[ "${#issues[@]}" -gt 0 ]]; then
+    issues_json="$(printf '%s\n' "${issues[@]}" | jq -R . | jq -s .)"
+  else
+    issues_json="[]"
+  fi
+  [[ "$STRICT_MODE" -eq 1 ]] && strict=true
+  jq -n \
+    --arg status "$status" \
+    --arg a2a_card "$a2a_card" \
+    --arg legacy_doc "$legacy_doc" \
+    --arg internal_card "$internal_card" \
+    --arg agent_profiles "$agent_profiles" \
+    --argjson strict "$strict" \
+    --argjson issues "$issues_json" \
+    '{status: $status, strict: $strict, specVersion: "0.3", files: {a2a_card: $a2a_card, legacy_doc: $legacy_doc, internal_card: $internal_card, agent_profiles: $agent_profiles}, issues: $issues}'
+}
 
-# Build issues JSON safely
-if [[ "${#issues[@]}" -gt 0 ]]; then
-  issues_json="$(printf '%s\n' "${issues[@]}" | jq -R . | jq -s .)"
-else
-  issues_json="[]"
-fi
-
-payload="$(jq -n \
-  --arg status "$status" \
-  --arg a2a_card "$a2a_card" \
-  --arg legacy_doc "$legacy_doc" \
-  --arg internal_card "$internal_card" \
-  --arg agent_profiles "$agent_profiles" \
-  --argjson strict "$([[ "$STRICT_MODE" -eq 1 ]] && echo true || echo false)" \
-  --argjson issues "$issues_json" \
-  '{status: $status, strict: $strict, specVersion: "0.3", files: {a2a_card: $a2a_card, legacy_doc: $legacy_doc, internal_card: $internal_card, agent_profiles: $agent_profiles}, issues: $issues}')"
-
-if [[ "$JSON_MODE" -eq 1 ]]; then
-  printf '%s\n' "$payload"
-else
+_a2a_report() {
+  local issue
   ui_dot_banner "AI and Agents"
   ui_header "A2A v0.3 Conformance"
   if [[ "$status" == "healthy" ]]; then
@@ -149,15 +137,39 @@ else
     ui_ok "A2A card" "$a2a_card"
     ui_ok "Legacy doc" "$legacy_doc"
     ui_ok "Internal card" "$internal_card"
-  else
-    ui_warn "Status" "issues"
-    while IFS= read -r issue; do
-      [[ -n "$issue" ]] || continue
-      ui_warn "Issue" "$issue"
-    done < <(printf '%s' "$payload" | jq -r '.issues[]')
+    return 0
   fi
-fi
+  ui_warn "Status" "issues"
+  while IFS= read -r issue; do
+    [[ -n "$issue" ]] || continue
+    ui_warn "Issue" "$issue"
+  done < <(printf '%s' "$payload" | jq -r '.issues[]')
+}
 
-if [[ "$STRICT_MODE" -eq 1 && "$status" != "healthy" ]]; then
-  exit 1
-fi
+_a2a_main() {
+  _a2a_parse_args "$@"
+  command -v jq >/dev/null 2>&1 || {
+    echo "jq is required for A2A conformance checks." >&2
+    exit 1
+  }
+  _a2a_check_files
+  if [[ "${#issues[@]}" -eq 0 ]]; then
+    _a2a_check_card
+    _a2a_check_internal_and_legacy
+    _a2a_check_consistency
+  fi
+  if [[ "${#issues[@]}" -gt 0 ]]; then
+    status="issues"
+  fi
+  payload="$(_a2a_payload)"
+  if [[ "$JSON_MODE" -eq 1 ]]; then
+    printf '%s\n' "$payload"
+  else
+    _a2a_report
+  fi
+  if [[ "$STRICT_MODE" -eq 1 && "$status" != "healthy" ]]; then
+    exit 1
+  fi
+}
+
+_a2a_main "$@"

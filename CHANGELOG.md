@@ -4,6 +4,65 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+## v0.2.529 — 2026-09-28
+
+### Security
+
+- Go toolchain pinned to 1.26.8 (`mise.toml`, lockfiles and a
+  `toolchain` directive in every `go.mod`). go1.26.5 and earlier have
+  reachable stdlib vulnerabilities (GO-2026-6218 net/url, GO-2026-6090
+  crypto/tls, GO-2026-6088 encoding/xml, GO-2026-5972 encoding/asn1).
+  A new `govulncheck` workflow scans every Go module on change, on
+  `main` and weekly.
+
+### Fixed
+
+- `dot theme rebuild` no longer crashes with no wallpapers. It used to
+  die before writing even the fallback themes. A `.heic` without
+  ImageMagick no longer ends in a bare exit 127, and `--list` works
+  without ImageMagick.
+- Linux dynamic HEIC wallpapers apply again. `wallpaper-sync` called a
+  converter before it was defined, so no frame was ever extracted.
+- `compress` names its archive correctly under zsh. With zsh's 1-based
+  arrays, `compress tar a.txt` wrote a hidden `.tar`.
+- `dot fleet drift predict` survives a corrupt history line (it exited 5).
+- The drift dashboard names the orphans file. It printed
+  "pretty_path: command not found" and an empty path.
+- `version-sync.sh` backups keep same-named files apart. The four
+  `README.md` backups overwrote each other.
+- `dot perf` rejects a missing or non-numeric flag value (exit 2).
+  Before, `--runs` with no value exited silently and `--runs 0` divided
+  by zero.
+- `dot theme random --mode=` is validated.
+- `ai-update` reports each failing updater and exits 1. Before, one
+  failure stopped or hid the rest.
+- The `version-consistency` pre-commit hook runs `release-preflight` in
+  development mode, as CI does. Doc and manpage commits after a release
+  no longer fail it.
+- CI: the mutation gate full-fetches the base branch. A shallow fetch
+  could leave no merge base and fail with exit 128.
+
+### Changed
+
+- Complexity burn-down. These now meet the limits (cyclomatic ≤ 10,
+  cognitive ≤ 15, Halstead difficulty ≤ 30, ≤ 60 lines per function):
+  `dot theme`, `dot apply`, `ai-update`, `dot ai`, `dot perf`,
+  `dot health`, `dot fleet` (now in modules), `dot aliases`, `dot lint`,
+  the drift dashboard, A2A conformance, alias governance, branch-cleanup,
+  the feature-matrix gate, `version-sync.sh`, `rebuild-themes.sh`,
+  `wallpaper-sync.sh`, the archives aliases and the coverage runner.
+  The CI-enforced baseline, introduced at 265 over-limit units, is now 217.
+  Each refactor was verified byte-identical against a golden harness.
+- The coverage runner's aggregator moved to
+  `tools/ci/coverage_aggregate.py`; `run-coverage.sh --print-ps4` prints
+  the trace format.
+- Tests run the code they check. The source-grep ratchet dropped from
+  195 to 188 lines. New behavioural suites cover apply phases, perf
+  scoring, branch-cleanup, lint, rebuild-themes, wallpaper-sync and the
+  archives functions.
+- Dependencies: bubbles 1.0, Debian 13 and Ubuntu test images, and
+  GitHub Actions updates.
+
 ## v0.2.528 — 2026-09-27
 
 ### Security

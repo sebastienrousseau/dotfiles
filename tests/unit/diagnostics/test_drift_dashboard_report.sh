@@ -143,7 +143,7 @@ test_start "orphan_file_is_counted"
 printf '%s\n' ".config/gone.conf" >"$ORPHANS"
 drift
 assert_equals 1 "$RC" "rc"
-out_has "1 file(s) — review" "orphan warning"
+out_has "1 file(s) — review ~/" "orphan warning names the file, relative to ~"
 
 test_start "stale_source_is_detected_by_mtime"
 rm -f "$ORPHANS"

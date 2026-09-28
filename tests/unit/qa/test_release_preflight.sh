@@ -75,6 +75,16 @@ test_start "release_preflight_development_accepts_published_ancestor"
 output="$(run_preflight "$root" --development)"
 assert_contains "not eligible to reuse this tag" "$output" "development does not authorize retagging"
 
+# The pre-commit hook runs on README/CHANGELOG/manpage edits between
+# releases; its configured entry must accept a published ancestor tag.
+test_start "release_preflight_precommit_hook_accepts_published_ancestor"
+hook_entry="$(awk '/id: version-consistency/{f=1} f && /entry:/{sub(/.*entry:[[:space:]]*/, ""); print; exit}' \
+  "$REPO_ROOT/config/pre-commit-config.yaml")"
+read -r -a hook_argv <<<"$hook_entry"
+rc=0
+output="$(REPO_ROOT="$root" bash "$REPO_ROOT/${hook_argv[0]}" "${hook_argv[@]:1}" 2>&1)" || rc=$?
+assert_equals 0 "$rc" "hook entry '$hook_entry' passes after a published release"
+
 test_start "release_preflight_development_cannot_weaken_creation"
 rc=0
 output="$(run_preflight "$root" --development --require-untagged)" || rc=$?

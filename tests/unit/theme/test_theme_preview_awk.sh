@@ -48,26 +48,14 @@ c15 = "#ffffff"
 accent = "#2ecc71"
 EOF
 
-# The preview program is read out of scripts/theme/switch.sh, not copied
-# here. A copy drifts silently in both directions: on 2026-09-19 the shipped
-# program used gawk's three-argument match(), which macOS awk rejects outright,
-# and this file's copy had the same bug — so the test "agreed" with the code
-# while the preview was dead on macOS for every user. Reading the real program
-# means a change to switch.sh is tested, not a change to a duplicate of it.
-_preview_awk_program() {
-  awk '
-    /preview_cmd=.*awk -v F=/ { inprog = 1; next }
-    inprog && $0 ~ /^\}.*"\$f"/ { print "}"; exit }
-    inprog { print }
-  ' "$REPO_ROOT/scripts/theme/switch.sh"
-}
-
+# The preview program lives in scripts/theme/switch/preview.awk and the
+# picker runs it with `awk -f`; this runs the same file. A copy drifts
+# silently in both directions: on 2026-09-19 the shipped program used gawk's
+# three-argument match(), which macOS awk rejects outright, and this file's
+# copy had the same bug, so the test "agreed" with the code while the preview
+# was dead on macOS for every user.
 _render_preview() {
-  local family="$1" mode="$2" f="$3" prog
-  prog="$(mktemp)"
-  _preview_awk_program >"$prog"
-  awk -v F="$family" -v M="$mode" -f "$prog" "$f"
-  rm -f "$prog"
+  awk -v F="$1" -v M="$2" -f "$REPO_ROOT/scripts/theme/switch/preview.awk" "$3"
 }
 
 # ---------------------------------------------------------------------------

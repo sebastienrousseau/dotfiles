@@ -9,7 +9,7 @@
 # Base images pinned by sha256 digest per Scorecard's Pinned-
 # Dependencies check. Refresh with `docker pull <image> && docker
 # inspect --format '{{index .RepoDigests 0}}' <image>`.
-FROM ubuntu:26.04@sha256:f3d28607ddd78734bb7f71f117f3c6706c666b8b76cbff7c9ff6e5718d46ff64 AS ubuntu-test
+FROM ubuntu:26.04@sha256:da6fc2be547864451aa253836dd926da33623312df4a9a243e35dc877c378a78 AS ubuntu-test
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
@@ -74,7 +74,7 @@ RUN bash -n "$HOME/.dotfiles/install.sh" && echo "=== Ubuntu 24.04: ALL TESTS PA
 # =============================================================================
 # Debian 12 (Bookworm) - Tests Debian prerequisites + install.sh
 # =============================================================================
-FROM debian:12@sha256:85019db29298555fd1a5f4bb57673ae989414a9884117c75d7a3e1a6cce21688 AS debian-test
+FROM debian:13@sha256:9cc080028c43b27d2074d63a5f9caf7166d731494965616c1a6d2827a004585c AS debian-test
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
@@ -180,7 +180,7 @@ USER testuser
 # =============================================================================
 # Ubuntu 26.04 + eza - Tests modern aliases with eza installed
 # =============================================================================
-FROM ubuntu:26.04@sha256:f3d28607ddd78734bb7f71f117f3c6706c666b8b76cbff7c9ff6e5718d46ff64 AS ubuntu-eza-test
+FROM ubuntu:26.04@sha256:da6fc2be547864451aa253836dd926da33623312df4a9a243e35dc877c378a78 AS ubuntu-eza-test
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
