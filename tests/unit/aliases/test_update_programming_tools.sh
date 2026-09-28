@@ -58,6 +58,11 @@ for sh in $SHELLS; do
   assert_contains "npm global packages are already up to date." "$OUT_TEXT" "npm marker found"
   assert_contains "Deno updated successfully." "$OUT_TEXT" "deno needs its own marker"
   assert_equals "npm update -g;deno upgrade;" "$(tr '\n' ';' <"$CALLS_FILE")" "each updater runs once, in order"
+
+  test_start "${sh}_leaves_the_go_module_in_the_working_directory_alone"
+  upt "$sh" "go" -- 'printf "module example.com/p\n" >go.mod; update_programming_tools; echo rc=$?'
+  assert_equals "0" "$(grep -c '^go get' "$CALLS_FILE" || true)" "no go get -u all in the caller's project"
+  assert_contains "rc=0" "$OUT_TEXT" "still succeeds"
 done
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

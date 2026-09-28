@@ -214,18 +214,6 @@ _upt_brew() {
   brew cleanup && print_note "Homebrew cleanup completed."
 }
 
-_upt_go() {
-  local go_output
-  cmd_exists go || return 0
-  print_step "Checking for Go module updates"
-  go_output=$(go list -u -m all 2>&1)
-  if echo "${go_output}" | grep -q "no updates"; then
-    print_note "All Go modules are already up to date."
-  else
-    go get -u all && print_note "Go modules updated successfully."
-  fi
-}
-
 # Last step of update_programming_tools, so its status is the caller's.
 _upt_vscode() {
   local vscode_output
@@ -254,7 +242,6 @@ update_programming_tools() {
     cargo install-update -a
   _upt_gem
   _upt_brew
-  _upt_go
   _upt_update deno "Updating Deno runtime" "already up to date" \
     "Deno is already up to date." "Deno updated successfully." \
     deno upgrade
