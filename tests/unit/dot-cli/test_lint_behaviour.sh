@@ -15,6 +15,15 @@ WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 N=0
 
+# The system tools minus shellcheck/shfmt, so a case that removes a stub
+# really has no such tool (CI runners ship shellcheck in /usr/bin).
+SYS="$WORK/sys"
+mkdir -p "$SYS"
+for _f in /usr/bin/* /bin/*; do
+  case "${_f##*/}" in shellcheck | shfmt) continue ;; esac
+  [[ -e "$SYS/${_f##*/}" ]] || ln -s "$_f" "$SYS/${_f##*/}"
+done
+
 # setup [SC] [FMT]: a fresh tree in $W/t and stubs in $W/stubs.
 setup() {
   W="$WORK/c$((++N))"
@@ -47,7 +56,7 @@ SH
 }
 
 lint() {
-  OUT="$(cd "$W" && env -i HOME="$W" PATH="$W/stubs:/usr/bin:/bin" TERM=dumb NO_COLOR=1 \
+  OUT="$(cd "$W" && env -i HOME="$W" PATH="$W/stubs:$SYS" TERM=dumb NO_COLOR=1 \
     "$REAL_BASH" t/scripts/dot/commands/lint.sh "$@" </dev/null 2>&1)"
   RC=$?
 }
