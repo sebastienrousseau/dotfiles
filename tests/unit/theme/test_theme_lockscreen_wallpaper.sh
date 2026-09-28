@@ -99,7 +99,12 @@ for pair in "catppuccin-mocha:dark" "catppuccin-latte:light"; do
 done
 
 # ------------------------------------------------------------ wallpaper-sync
-SYNC_FN="$(_extract_fn apply_wallpaper "$REPO_ROOT/scripts/theme/wallpaper-sync.sh")"
+# apply_wallpaper hands Linux to _ws_apply_linux, which uses the dms and
+# gsettings helpers; extract the whole chain.
+SYNC_FN=""
+for _fn in apply_wallpaper _ws_apply_linux _ws_apply_dms _ws_apply_gsettings _ws_gsettings_pair; do
+  SYNC_FN+="$(_extract_fn "$_fn" "$REPO_ROOT/scripts/theme/wallpaper-sync.sh")"$'\n'
+done
 
 test_start "apply_wallpaper was extracted from wallpaper-sync.sh"
 if [[ "$SYNC_FN" == *"screensaver picture-uri"* ]]; then

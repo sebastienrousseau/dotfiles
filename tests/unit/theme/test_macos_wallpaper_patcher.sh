@@ -32,17 +32,15 @@ if ! command -v python3 >/dev/null 2>&1; then
   exit 0
 fi
 
-# --- Extract the patcher heredoc into a standalone script -------------------
-# The patcher lives between `python3 - "$wp" <<'PYEOF'` and `PYEOF` in the
-# Darwin branch of apply_wallpaper. awk between the markers gives us the
-# body verbatim, which we then write to a temp file and exec.
+# --- The patcher ------------------------------------------------------------
+# wallpaper-sync.sh runs scripts/theme/macos-wallpaper-store.py from the
+# Darwin branch of apply_wallpaper; copy it and exec the copy.
 
 tmpdir="$(mktemp -d -t patcher-test.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
 patcher="$tmpdir/patcher.py"
-awk "/python3 - \"\\\$wp\" <<.PYEOF./ {flag=1; next} /^PYEOF\$/ {flag=0} flag" \
-  "$WALLPAPER_SYNC" >"$patcher"
+cp "$REPO_ROOT/scripts/theme/macos-wallpaper-store.py" "$patcher"
 
 test_start "patcher_extracted_from_wallpaper_sync"
 if [[ -s "$patcher" ]]; then
