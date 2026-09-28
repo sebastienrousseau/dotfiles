@@ -63,6 +63,16 @@ for sh in $SHELLS; do
   upt "$sh" "go" -- 'printf "module example.com/p\n" >go.mod; update_programming_tools; echo rc=$?'
   assert_equals "0" "$(grep -c '^go get' "$CALLS_FILE" || true)" "no go get -u all in the caller's project"
   assert_contains "rc=0" "$OUT_TEXT" "still succeeds"
+
+  test_start "${sh}_notes_cleanups_and_extensions_only_when_they_succeed"
+  upt "$sh" "gem,brew,code"
+  assert_contains "Ruby gems cleanup completed." "$OUT_TEXT" "gem cleanup note"
+  assert_contains "Homebrew cleanup completed." "$OUT_TEXT" "brew cleanup note"
+  assert_contains "Visual Studio Code extensions updated successfully." "$OUT_TEXT" "extensions note"
+  assert_contains "rc=0" "$OUT_TEXT" "all succeeded"
+  upt "$sh" "gem,brew,code" RC=2
+  assert_equals "0" "$(printf '%s\n' "$OUT_TEXT" | grep -cE 'cleanup completed|extensions updated')" "no note after a failed step"
+  assert_contains "rc=2" "$OUT_TEXT" "a failed extension update is the function's status"
 done
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
