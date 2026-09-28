@@ -203,6 +203,105 @@ jobs:
       timeout_minutes: 25
 
   # ----------------------------------------------------------------------------
+  # Ratchets and the mutation gate live here so Merge Gate (a required check)
+  # aggregates them; in ci.yml they fed only the unrequired Quality Gate and
+  # could not block a merge.
+  # ----------------------------------------------------------------------------
+  # Tests that inspect source text instead of running it cannot catch
+  # wrong behaviour; tools/ci/check-source-grep-tests.py holds the count
+  # per file at or below tools/ci/source-grep-baseline.txt.
+  lint-tests:
+    name: Lint / Tests run the code
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Source-grep ratchet
+        run: python3 tools/ci/check-source-grep-tests.py
+
+  # Per-function cyclomatic, cognitive, Halstead and NLOC measures for the
+  # shell code; tools/ci/complexity.py fails when a unit crosses a limit
+  # without being in tools/ci/complexity-baseline.txt, or a baselined unit
+  # gets worse. shfmt supplies the AST, pinned by version and checksum.
+  lint-complexity:
+    name: Lint / Complexity ratchet
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SHFMT_VERSION: v3.13.1
+      SHFMT_SHA256: fb096c5d1ac6beabbdbaa2874d025badb03ee07929f0c9ff67563ce8c75398b1
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install pinned shfmt
+        run: |
+          set -euo pipefail
+          curl -fsSL -o "$RUNNER_TEMP/shfmt" \
+            "https://github.com/mvdan/sh/releases/download/${SHFMT_VERSION}/shfmt_${SHFMT_VERSION}_linux_amd64"
+          echo "${SHFMT_SHA256}  $RUNNER_TEMP/shfmt" | sha256sum -c -
+          install -m 0755 "$RUNNER_TEMP/shfmt" /usr/local/bin/shfmt
+          shfmt --version
+      - name: Complexity ratchet
+        run: python3 tools/ci/complexity.py
+
+  # Mutation gate on the lines a PR changes (tools/ci/mutation-test.py).
+  # Line coverage says a line ran; this says whether the tests would notice
+  # it being wrong. One plausible bug per changed line, judged only by
+  # behavioural tests (source-grep tests are listed in
+  # tools/ci/mutation-structural.txt and do not count). Survivors are
+  # annotated on the PR diff. The sample cap bounds the runtime of a large
+  # PR; the score is over the sample.
+  test-mutation:
+    name: Test / Mutation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Mutation score on changed lines (>= 80%)
+        run: |
+          set -euo pipefail
+          chmod +x tests/framework/*.sh
+          # No --depth: in this full clone a shallow fetch of a base branch
+          # that moved since checkout grafts its tip parentless, and
+          # origin/<base>...HEAD then has no merge base (git exits 128).
+          git fetch --no-tags origin "+refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+          python3 tools/ci/mutation-test.py \
+            --base "origin/${{ github.base_ref }}" \
+            --min-score 80 \
+            --max-mutants 60 \
+            --jobs 4 \
+            --timeout 240 \
+            --github \
+            --json mutation-report.json
+
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: mutation-report
+          path: mutation-report.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # ----------------------------------------------------------------------------
   # scripts/security/enforce-policies.sh. This job lives here, not in
   # security-enhanced.yml, because Merge Gate is the only required check that
   # aggregates jobs, and it aggregates only this workflow. A copy in
@@ -297,6 +396,9 @@ jobs:
       security-policy-script,
       test-matrix,
       test-unit,
+      lint-tests,
+      lint-complexity,
+      test-mutation,
     ]
     # Run even when a dependency fails. Without this the gate is *skipped*
     # when test-unit fails, and GitHub counts a skipped required check as
