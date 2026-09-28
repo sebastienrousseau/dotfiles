@@ -102,7 +102,7 @@ false positives in Scorecard's regex.
 | Path | Reason | Comment to paste |
 |---|---|---|
 | `.chezmoitemplates/aliases/legal/legal.aliases.sh:64` | **Won't fix** | User-facing convenience alias — `go install <fortune-style joke command>@latest`. Pinning by SHA would require users to update the alias manually on every upstream change. Intentional. |
-| `.chezmoitemplates/aliases/update/update.aliases.sh:173` | **Won't fix** | User-facing convenience alias — bulk-update wrapper around `npm`. The alias's purpose is to update everything; pinning defeats it. Intentional. |
+| `.chezmoitemplates/aliases/update/update.aliases.sh:236` | **Won't fix** | User-facing convenience alias — bulk-update wrapper around `npm`. The alias's purpose is to update everything; pinning defeats it. Intentional. |
 | `dot_local/bin/executable_update:99` | **Won't fix** | `dot_local/bin/executable_update` is the user-invoked "update everything" command. The literal point of `npm update -g` is to update to whatever's latest. Pinning defeats it. Intentional. |
 | `scripts/dot/commands/tools.sh:121` | **False positive** | `npm install --package-lock-only --ignore-scripts --silent` generates a lockfile and does NOT fetch packages. Scorecard's regex matches `npm install` blindly; this invocation has no supply-chain surface. |
 | `install/provision/run_onchange_10-linux-packages.sh.tmpl:369` | **Won't fix** | Already exact-version-pins `aider-chat==0.86.2`. Scorecard wants sha256-hash pinning, which would require a ~2,700-line lockfile covering all 108 transitive deps and re-generated on every aider release — disproportionate maintenance for a single optional provisioning install. |

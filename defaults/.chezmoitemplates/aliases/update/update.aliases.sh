@@ -166,112 +166,90 @@ update_windows() {
 # Programming Environment Tools #
 #-------------------------------#
 
+# _upt_report: note whether <output> says the tool was already current.
+# Usage: _upt_report <output> <up-to-date pattern> <same msg> <updated msg>
+_upt_report() {
+  if echo "$1" | grep -q "$2"; then
+    print_note "$3"
+  else
+    print_note "$4"
+  fi
+}
+
+# _upt_update: when <tool> is installed, run <command...> and report.
+# Usage: _upt_update <tool> <step> <pattern> <same msg> <updated msg> <command...>
+_upt_update() {
+  local tool="$1" step="$2" pattern="$3" same="$4" updated="$5" output
+  shift 5
+  cmd_exists "${tool}" || return 0
+  print_step "${step}"
+  output=$("$@" 2>&1)
+  _upt_report "${output}" "${pattern}" "${same}" "${updated}"
+}
+
+_upt_gem() {
+  cmd_exists gem || return 0
+  print_step "Updating RubyGems and installed gems"
+  gem update --system >/dev/null 2>&1 && print_note "RubyGems system updated successfully."
+  _upt_report "$(gem update 2>&1)" "Nothing to update" \
+    "All Ruby gems are already up to date." "Ruby gems updated successfully."
+  gem cleanup && print_note "Ruby gems cleanup completed."
+}
+
+_upt_brew() {
+  cmd_exists brew || return 0
+  print_step "Updating Homebrew packages"
+  brew update >/dev/null
+  _upt_report "$(brew upgrade 2>&1)" "already up-to-date" \
+    "Homebrew packages are already up to date." "Homebrew packages updated successfully."
+  brew cleanup && print_note "Homebrew cleanup completed."
+}
+
+_upt_go() {
+  local go_output
+  cmd_exists go || return 0
+  print_step "Checking for Go module updates"
+  go_output=$(go list -u -m all 2>&1)
+  if echo "${go_output}" | grep -q "no updates"; then
+    print_note "All Go modules are already up to date."
+  else
+    go get -u all && print_note "Go modules updated successfully."
+  fi
+}
+
+# Last step of update_programming_tools, so its status is the caller's.
+_upt_vscode() {
+  local vscode_output
+  cmd_exists code || return 0
+  print_step "Updating Visual Studio Code extensions"
+  vscode_output=$(code --list-extensions --show-versions 2>&1)
+  if echo "${vscode_output}" | grep -q "No updates available"; then
+    print_note "All Visual Studio Code extensions are already up to date."
+  else
+    code --update-extensions && print_note "Visual Studio Code extensions updated successfully."
+  fi
+}
+
 update_programming_tools() {
-  local npm_output pnpm_output rust_output cargo_output gem_output
-  local brew_output go_output deno_output vscode_output
-
-  # npm
-  if cmd_exists npm; then
-    print_step "Updating npm global packages"
-    npm_output=$(npm update -g 2>&1)
-    if echo "${npm_output}" | grep -q "up to date"; then
-      print_note "npm global packages are already up to date."
-    else
-      print_note "npm global packages updated successfully."
-    fi
-  fi
-
-  # pnpm
-  if cmd_exists pnpm; then
-    print_step "Updating pnpm global packages"
-    pnpm_output=$(pnpm up -g 2>&1)
-    if echo "${pnpm_output}" | grep -q "Nothing to update"; then
-      print_note "pnpm global packages are already up to date."
-    else
-      print_note "pnpm global packages updated successfully."
-    fi
-  fi
-
-  # Rust toolchain
-  if cmd_exists rustup; then
-    print_step "Updating Rust toolchain"
-    rust_output=$(rustup update stable 2>&1)
-    if echo "${rust_output}" | grep -q "unchanged"; then
-      print_note "Rust toolchain is already up to date."
-    else
-      print_note "Rust toolchain updated successfully."
-    fi
-  fi
-
-  # Cargo binaries
-  if cmd_exists cargo; then
-    print_step "Updating Cargo binaries"
-    cargo_output=$(cargo install-update -a 2>&1)
-    if echo "${cargo_output}" | grep -q "All packages are up to date"; then
-      print_note "Cargo binaries are already up to date."
-    else
-      print_note "Cargo binaries updated successfully."
-    fi
-  fi
-
-  # Ruby Gems
-  if cmd_exists gem; then
-    print_step "Updating RubyGems and installed gems"
-    gem update --system >/dev/null 2>&1 && print_note "RubyGems system updated successfully."
-    gem_output=$(gem update 2>&1)
-    if echo "${gem_output}" | grep -q "Nothing to update"; then
-      print_note "All Ruby gems are already up to date."
-    else
-      print_note "Ruby gems updated successfully."
-    fi
-    gem cleanup && print_note "Ruby gems cleanup completed."
-  fi
-
-  # Homebrew
-  if cmd_exists brew; then
-    print_step "Updating Homebrew packages"
-    brew update >/dev/null
-    brew_output=$(brew upgrade 2>&1)
-    if echo "${brew_output}" | grep -q "already up-to-date"; then
-      print_note "Homebrew packages are already up to date."
-    else
-      print_note "Homebrew packages updated successfully."
-    fi
-    brew cleanup && print_note "Homebrew cleanup completed."
-  fi
-
-  # Go modules
-  if cmd_exists go; then
-    print_step "Checking for Go module updates"
-    go_output=$(go list -u -m all 2>&1)
-    if echo "${go_output}" | grep -q "no updates"; then
-      print_note "All Go modules are already up to date."
-    else
-      go get -u all && print_note "Go modules updated successfully."
-    fi
-  fi
-
-  # Deno
-  if cmd_exists deno; then
-    print_step "Updating Deno runtime"
-    deno_output=$(deno upgrade 2>&1)
-    if echo "${deno_output}" | grep -q "already up to date"; then
-      print_note "Deno is already up to date."
-    else
-      print_note "Deno updated successfully."
-    fi
-  fi
-
-  # VS Code extensions
-  if cmd_exists code; then
-    print_step "Updating Visual Studio Code extensions"
-    vscode_output=$(code --list-extensions --show-versions 2>&1)
-    if echo "${vscode_output}" | grep -q "No updates available"; then
-      print_note "All Visual Studio Code extensions are already up to date."
-    else
-      code --update-extensions && print_note "Visual Studio Code extensions updated successfully."
-    fi
-  fi
+  _upt_update npm "Updating npm global packages" "up to date" \
+    "npm global packages are already up to date." "npm global packages updated successfully." \
+    npm update -g
+  _upt_update pnpm "Updating pnpm global packages" "Nothing to update" \
+    "pnpm global packages are already up to date." "pnpm global packages updated successfully." \
+    pnpm up -g
+  _upt_update rustup "Updating Rust toolchain" "unchanged" \
+    "Rust toolchain is already up to date." "Rust toolchain updated successfully." \
+    rustup update stable
+  _upt_update cargo "Updating Cargo binaries" "All packages are up to date" \
+    "Cargo binaries are already up to date." "Cargo binaries updated successfully." \
+    cargo install-update -a
+  _upt_gem
+  _upt_brew
+  _upt_go
+  _upt_update deno "Updating Deno runtime" "already up to date" \
+    "Deno is already up to date." "Deno updated successfully." \
+    deno upgrade
+  _upt_vscode
 }
 
 #-------------------------------#
