@@ -123,12 +123,7 @@
   15   17   31.0   60     0 scripts/diagnostics/benchmark.sh::render_waterfall
   15   36   31.8   74     0 scripts/diagnostics/benchmark.sh::run_hyperfine
   12    6   13.7   27    27 scripts/diagnostics/doctor-unified.sh::<top>
-  16   22   25.8   66   539 scripts/diagnostics/health.sh::<top>
-  12   21   20.4   46     0 scripts/diagnostics/health.sh::check
-  30   39   30.5   62     0 scripts/diagnostics/health.sh::check_security
-   8   16   18.8   36     0 scripts/diagnostics/health.sh::check_sync_status
-  13   13   21.2   26     0 scripts/diagnostics/health.sh::check_terminal
-  17   26   34.5   93     0 scripts/diagnostics/health.sh::print_summary
+   4    4   14.4   20   537 scripts/diagnostics/health.sh::<top>
    5    5   17.0   65    65 scripts/diagnostics/history-analysis.sh::<top>
   16   18   41.4   86    89 scripts/diagnostics/scorecard.sh::<top>
   17   19   27.8   40    46 scripts/diagnostics/secret-governance.sh::<top>
@@ -143,12 +138,10 @@
   16    5   25.7   51     0 scripts/dot/commands/agent.sh::cmd_mode
   12   12   25.8   22     0 scripts/dot/commands/agents.sh::_agents_repo_root
   18   21   43.4  163     0 scripts/dot/commands/agents.sh::cmd_agents
-  35   63   49.4  196     0 scripts/dot/commands/aliases.sh::cmd_aliases
   17    3   25.6   67   184 scripts/dot/commands/core.sh::<top>
   29    2   34.9  117   223 scripts/dot/commands/diagnostics.sh::<top>
   23   19   31.2  148     0 scripts/dot/commands/env-emit.sh::dot_env_emit
   23   24   29.9  106     0 scripts/dot/commands/init.sh::cmd_init
-  27   41   58.9  110     0 scripts/dot/commands/lint.sh::cmd_lint
   11    5   12.3   27   136 scripts/dot/commands/manual.sh::<top>
   11   11   15.2   34     0 scripts/dot/commands/manual.sh::cmd_open
   14    4   24.5   61   351 scripts/dot/commands/meta.sh::<top>
