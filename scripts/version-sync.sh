@@ -721,5 +721,7 @@ main() {
   _vs_finish
 }
 
-# Run main function
-main "$@"
+# Run main function, unless sourced (tests call the rewrite rules directly).
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi
