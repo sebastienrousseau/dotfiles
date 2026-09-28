@@ -255,13 +255,12 @@ assert_file_contains "$CHEZMOIDATA" 'dotfiles_version = "5.5.4"' \
 
 # 12. Post-write verification catches a reference the rewrite could not reach.
 #
-# scripts/git-hooks/pre-commit-audit.sh gets a `case` arm of its own, which
-# rewrites only its "vX.Y.Z standards maintained" banner. A second, differently
-# shaped stamp in the same file is therefore left behind by the sync and then
-# found by the verification pass — which is exactly the failure mode that pass
-# exists for.
+# docs/manual/00-introduction.md gets a `case` arm of its own, which rewrites
+# only its "`.dotfiles` vX.Y.Z" stamp. A second, differently shaped stamp in
+# the same file is therefore left behind by the sync and then found by the
+# verification pass — which is exactly the failure mode that pass exists for.
 build_sandbox "0.0.1" "0.0.1" "4.4.4"
-printf 'echo "(v0.0.2)"\n' >>"$SANDBOX/scripts/git-hooks/pre-commit-audit.sh"
+printf '\nSee (v0.0.2).\n' >>"$SANDBOX/docs/manual/00-introduction.md"
 test_start "version_sync_exec_post_write_verification_failure"
 ALLOW_W=1 run_vs --force --no-backup
 assert_equals "1" "$VS_RC" "a sync that leaves a stale reference must fail"
