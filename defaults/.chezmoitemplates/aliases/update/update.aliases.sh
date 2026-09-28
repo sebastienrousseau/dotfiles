@@ -167,6 +167,9 @@ update_windows() {
 #-------------------------------#
 
 update_programming_tools() {
+  local npm_output pnpm_output rust_output cargo_output gem_output
+  local brew_output go_output deno_output vscode_output
+
   # npm
   if cmd_exists npm; then
     print_step "Updating npm global packages"
