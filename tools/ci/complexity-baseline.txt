@@ -93,8 +93,7 @@
   19   27   27.7   74   102 install/lib/install_neovim.sh::<top>
   17   19   19.9   36     0 install/lib/installers.sh::archive_paths_are_safe
   11   12   22.9   41    51 install/lib/upgrade_neovim_nightly.sh::<top>
-  16   13   28.1   51   123 install/migrate/migrate-v0_2-to-v0_2_503.sh::<top>
-  16   39   25.0   62     0 install/migrate/migrate-v0_2-to-v0_2_503.sh::do_migration
+  16   13   28.1   51   115 install/migrate/migrate-v0_2-to-v0_2_503.sh::<top>
   11    9   20.0   28    33 install/migrate/rollback-v0_2_503.sh::<top>
   11   12   19.8   33    33 install/provision/run_onchange_30-darwin-mas.sh::<top>
   21   23   41.8   64    65 install/provision/run_onchange_50-install-fonts.sh::<top>
