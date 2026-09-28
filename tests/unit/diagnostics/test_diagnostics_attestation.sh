@@ -18,7 +18,9 @@ test_start "attestation_exists"
 assert_file_exists "$TEST_SCRIPT" "workstation-attestation.sh should exist"
 
 test_start "attestation_registered"
-assert_file_contains "$DOT_CLI" "attest" "dot CLI should register attest command"
+output=$(REPO_ROOT="$REPO_ROOT" bash "$DOT_CLI" attest -j 2>/dev/null) || true
+assert_equals "true" "$(printf '%s' "$output" | jq 'has("dotfiles_version")' 2>/dev/null || echo false)" \
+  "dot attest dispatches to the attestation script"
 
 test_start "attestation_json_runs"
 output=$(REPO_ROOT="$REPO_ROOT" bash "$TEST_SCRIPT" --json 2>/dev/null) || true
@@ -31,11 +33,13 @@ else
   printf '%b\n' "    Output: $output"
 fi
 
+# -j is run below and -F/-I by the fleet-store test; -w writes the file.
 test_start "attestation_short_flags_supported"
-assert_file_contains "$TEST_SCRIPT" "--json | -j" "attestation supports -j"
-assert_file_contains "$TEST_SCRIPT" "--write | -w" "attestation supports -w"
-assert_file_contains "$TEST_SCRIPT" "--fleet-store | -F" "attestation supports -F"
-assert_file_contains "$TEST_SCRIPT" "--fleet-id | -I" "attestation supports -I"
+write_dir="$(mktemp -d)"
+REPO_ROOT="$REPO_ROOT" bash "$TEST_SCRIPT" -j -w "$write_dir/sub/att.json" >/dev/null 2>&1 || true
+assert_equals "true" "$(jq 'has("dotfiles_version")' "$write_dir/sub/att.json" 2>/dev/null || echo false)" \
+  "-w writes the attestation JSON, creating its directory"
+rm -rf "$write_dir"
 
 test_start "attestation_short_json_runs"
 output=$(REPO_ROOT="$REPO_ROOT" bash "$TEST_SCRIPT" -j 2>/dev/null) || true
