@@ -30,10 +30,6 @@
    1    0    0.0  153     0 bin/dot::_dot_help_specs
   20   24   31.1   39     0 bin/dot::_resolve_source_dir
   21   21    4.2  111   111 defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh::<top>
-  11    5   16.0   28     0 defaults/.chezmoitemplates/aliases/archives/archives.aliases.sh::backup
-  53   57   74.5  145     0 defaults/.chezmoitemplates/aliases/archives/archives.aliases.sh::compress
-  26    9   32.7   42     0 defaults/.chezmoitemplates/aliases/archives/archives.aliases.sh::extract
-  13    3   13.0   23     0 defaults/.chezmoitemplates/aliases/archives/archives.aliases.sh::list_archive
   19   27   29.6   53     0 defaults/.chezmoitemplates/aliases/cd/cd-core.aliases.sh::cd_with_history
   16   15    4.1   22    22 defaults/.chezmoitemplates/aliases/cd/cd-shortcuts.aliases.sh::<top>
   23   21   12.6   77   361 defaults/.chezmoitemplates/aliases/cd/cd.aliases.sh::<top>
