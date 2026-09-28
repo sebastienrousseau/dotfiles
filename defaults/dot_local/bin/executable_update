@@ -31,6 +31,7 @@ NC='\033[0m'
 log_section() { printf '%b\n' "\n${CYAN}--- $1 ---${NC}"; }
 log_success() { printf '%b\n' "${GREEN}Done:${NC} $1"; }
 log_skip() { printf '%b\n' "${YELLOW}Skipped:${NC} $1"; }
+log_warn() { printf '%b\n' "${YELLOW}Warning:${NC} $1"; }
 
 usage() {
   printf '%s\n' \
@@ -129,8 +130,13 @@ update_cargo() {
   else
     echo "  Install cargo-update for automatic updates: cargo install cargo-update"
   fi
-  rustup update stable 2>/dev/null || true
-  log_success "Rust toolchain updated"
+  if ! _have rustup; then
+    log_skip "rustup not installed"
+  elif rustup update stable 2>/dev/null; then
+    log_success "Rust toolchain updated"
+  else
+    log_warn "rustup update failed"
+  fi
 }
 
 # Pip (Python)
@@ -139,17 +145,33 @@ update_pip() {
     $UPDATE_PIP && log_skip "Pip not installed"
     return 0
   fi
+  local names name failed=0
   log_section "Pip"
-  pip3 list --outdated --format=json | python3 -c "import json,sys; print('\n'.join([p['name'] for p in json.load(sys.stdin)]))" 2>/dev/null | xargs -n1 pip3 install -U 2>/dev/null || true
-  log_success "Pip packages updated"
+  if ! names=$(pip3 list --outdated --format=json 2>/dev/null |
+    python3 -c "import json,sys; print('\n'.join([p['name'] for p in json.load(sys.stdin)]))" 2>/dev/null); then
+    log_warn "pip3 could not list outdated packages"
+    return 0
+  fi
+  while IFS= read -r name; do
+    [ -n "$name" ] || continue
+    pip3 install -U "$name" 2>/dev/null || failed=$((failed + 1))
+  done <<<"$names"
+  if [ "$failed" -gt 0 ]; then
+    log_warn "$failed pip package(s) failed to update"
+  else
+    log_success "Pip packages updated"
+  fi
 }
 
 # Chezmoi (dotfiles)
 update_dotfiles() {
   _have chezmoi || return 0
   log_section "Dotfiles"
-  chezmoi update --apply=false 2>/dev/null || true
-  log_success "Dotfiles checked"
+  if chezmoi update --apply=false 2>/dev/null; then
+    log_success "Dotfiles checked"
+  else
+    log_warn "chezmoi update failed"
+  fi
 }
 
 main() {
