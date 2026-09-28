@@ -52,120 +52,125 @@ usage() {
     '  update --npm --pip'
 }
 
-# Parse arguments
-UPDATE_ALL=true
-UPDATE_BREW=false
-UPDATE_APT=false
-UPDATE_NPM=false
-UPDATE_CARGO=false
-UPDATE_PIP=false
+_have() { command -v "$1" >/dev/null 2>&1; }
 
-for arg in "$@"; do
-  case "$arg" in
-    --all) UPDATE_ALL=true ;;
-    --brew)
-      UPDATE_BREW=true
-      UPDATE_ALL=false
-      ;;
-    --apt)
-      UPDATE_APT=true
-      UPDATE_ALL=false
-      ;;
-    --npm)
-      UPDATE_NPM=true
-      UPDATE_ALL=false
-      ;;
-    --cargo)
-      UPDATE_CARGO=true
-      UPDATE_ALL=false
-      ;;
-    --pip)
-      UPDATE_PIP=true
-      UPDATE_ALL=false
-      ;;
-    -h | --help)
-      usage
-      exit 0
-      ;;
-    *)
-      printf 'update: unknown option: %s\n' "$arg" >&2
-      usage >&2
-      exit 2
-      ;;
-  esac
-done
+# _wanted <flag>: true when updating everything or <flag> is true.
+_wanted() { $UPDATE_ALL || $1; }
+
+parse_args() {
+  local arg
+  for arg in "$@"; do
+    case "$arg" in
+      --all) UPDATE_ALL=true ;;
+      --brew) UPDATE_BREW=true UPDATE_ALL=false ;;
+      --apt) UPDATE_APT=true UPDATE_ALL=false ;;
+      --npm) UPDATE_NPM=true UPDATE_ALL=false ;;
+      --cargo) UPDATE_CARGO=true UPDATE_ALL=false ;;
+      --pip) UPDATE_PIP=true UPDATE_ALL=false ;;
+      -h | --help)
+        usage
+        exit 0
+        ;;
+      *)
+        printf 'update: unknown option: %s\n' "$arg" >&2
+        usage >&2
+        exit 2
+        ;;
+    esac
+  done
+}
 
 # Homebrew (macOS/Linux)
-if $UPDATE_ALL || $UPDATE_BREW; then
-  if command -v brew >/dev/null 2>&1; then
-    log_section "Homebrew"
-    brew update
-    brew upgrade
-    brew cleanup
-    log_success "Homebrew updated"
-  else
+update_brew() {
+  if ! _have brew; then
     $UPDATE_BREW && log_skip "Homebrew not installed"
+    return 0
   fi
-fi
+  log_section "Homebrew"
+  brew update
+  brew upgrade
+  brew cleanup
+  log_success "Homebrew updated"
+}
 
 # APT (Debian/Ubuntu)
-if $UPDATE_ALL || $UPDATE_APT; then
-  if command -v apt >/dev/null 2>&1; then
-    log_section "APT"
-    sudo apt update
-    sudo apt upgrade -y
-    sudo apt autoremove -y
-    log_success "APT packages updated"
-  else
+update_apt() {
+  if ! _have apt; then
     $UPDATE_APT && log_skip "APT not available"
+    return 0
   fi
-fi
+  log_section "APT"
+  sudo apt update
+  sudo apt upgrade -y
+  sudo apt autoremove -y
+  log_success "APT packages updated"
+}
 
 # NPM global packages
-if $UPDATE_ALL || $UPDATE_NPM; then
-  if command -v npm >/dev/null 2>&1; then
-    log_section "NPM"
-    npm update -g
-    log_success "NPM packages updated"
-  else
+update_npm() {
+  if ! _have npm; then
     $UPDATE_NPM && log_skip "NPM not installed"
+    return 0
   fi
-fi
+  log_section "NPM"
+  npm update -g
+  log_success "NPM packages updated"
+}
 
 # Cargo (Rust)
-if $UPDATE_ALL || $UPDATE_CARGO; then
-  if command -v cargo >/dev/null 2>&1; then
-    log_section "Cargo"
-    if command -v cargo-install-update >/dev/null 2>&1; then
-      cargo install-update -a
-    else
-      echo "  Install cargo-update for automatic updates: cargo install cargo-update"
-    fi
-    rustup update stable 2>/dev/null || true
-    log_success "Rust toolchain updated"
-  else
+update_cargo() {
+  if ! _have cargo; then
     $UPDATE_CARGO && log_skip "Cargo not installed"
+    return 0
   fi
-fi
+  log_section "Cargo"
+  if _have cargo-install-update; then
+    cargo install-update -a
+  else
+    echo "  Install cargo-update for automatic updates: cargo install cargo-update"
+  fi
+  rustup update stable 2>/dev/null || true
+  log_success "Rust toolchain updated"
+}
 
 # Pip (Python)
-if $UPDATE_ALL || $UPDATE_PIP; then
-  if command -v pip3 >/dev/null 2>&1; then
-    log_section "Pip"
-    pip3 list --outdated --format=json | python3 -c "import json,sys; print('\n'.join([p['name'] for p in json.load(sys.stdin)]))" 2>/dev/null | xargs -n1 pip3 install -U 2>/dev/null || true
-    log_success "Pip packages updated"
-  else
+update_pip() {
+  if ! _have pip3; then
     $UPDATE_PIP && log_skip "Pip not installed"
+    return 0
   fi
-fi
+  log_section "Pip"
+  pip3 list --outdated --format=json | python3 -c "import json,sys; print('\n'.join([p['name'] for p in json.load(sys.stdin)]))" 2>/dev/null | xargs -n1 pip3 install -U 2>/dev/null || true
+  log_success "Pip packages updated"
+}
 
 # Chezmoi (dotfiles)
-if $UPDATE_ALL; then
-  if command -v chezmoi >/dev/null 2>&1; then
-    log_section "Dotfiles"
-    chezmoi update --apply=false 2>/dev/null || true
-    log_success "Dotfiles checked"
-  fi
-fi
+update_dotfiles() {
+  _have chezmoi || return 0
+  log_section "Dotfiles"
+  chezmoi update --apply=false 2>/dev/null || true
+  log_success "Dotfiles checked"
+}
 
-printf '%b\n' "\n${GREEN}Update complete!${NC}"
+main() {
+  UPDATE_ALL=true
+  UPDATE_BREW=false
+  UPDATE_APT=false
+  UPDATE_NPM=false
+  UPDATE_CARGO=false
+  UPDATE_PIP=false
+  parse_args "$@"
+
+  # `if`, not `&&`: a function called from an && list runs without
+  # errexit, and a failing package manager must still stop the run.
+  if _wanted "$UPDATE_BREW"; then update_brew; fi
+  if _wanted "$UPDATE_APT"; then update_apt; fi
+  if _wanted "$UPDATE_NPM"; then update_npm; fi
+  if _wanted "$UPDATE_CARGO"; then update_cargo; fi
+  if _wanted "$UPDATE_PIP"; then update_pip; fi
+  if $UPDATE_ALL; then update_dotfiles; fi
+
+  printf '%b\n' "\n${GREEN}Update complete!${NC}"
+}
+
+main "$@"
