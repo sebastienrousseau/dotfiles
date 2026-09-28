@@ -38,15 +38,43 @@ fail_test() {
 test_start "attest_verify_exists"
 assert_file_exists "$TEST_SCRIPT" "attest-verify.sh should exist"
 
+# A recording stand-in for wasmtime: it keeps its arguments and stdin and
+# returns a passing verdict, so the flag plumbing is checked without a real
+# runtime or module.
+STUB_DIR="$DOTFILES_COV_TMPDIR/attest-stub"
+mkdir -p "$STUB_DIR"
+cat >"$STUB_DIR/wasmtime" <<'STUB'
+#!/bin/sh
+[ "$1" = --version ] && { echo "wasmtime-stub 0.0.0"; exit 0; }
+printf '%s\n' "$*" >"$STUB_ARGS"
+cat >"$STUB_STDIN"
+echo '{"status":"pass"}'
+STUB
+chmod +x "$STUB_DIR/wasmtime"
+: >"$STUB_DIR/dot-sys.wasm"
+export STUB_ARGS="$STUB_DIR/args" STUB_STDIN="$STUB_DIR/stdin"
+stub_verify() {
+  : >"$STUB_ARGS"
+  WASMTIME="$STUB_DIR/wasmtime" DOT_SYS_WASM="$STUB_DIR/dot-sys.wasm" "$@" </dev/null >/dev/null 2>&1 || true
+}
+
 test_start "attest_verify_flag_aliases"
-assert_file_contains "$TEST_SCRIPT" "--json | -j" "attest-verify supports -j"
-assert_file_contains "$TEST_SCRIPT" "--max-age | -a" "attest-verify supports -a"
-assert_file_contains "$TEST_SCRIPT" "--verify | -V" "attest-verify accepts -V"
+stub_verify bash "$TEST_SCRIPT" -V -j -a 60 "$FIXTURES/compliant.json"
+assert_equals "run $STUB_DIR/dot-sys.wasm verify --json --max-age 60" "$(cat "$STUB_ARGS")" \
+  "-V, -j and -a reach the verifier as --json --max-age"
+stub_verify bash "$TEST_SCRIPT" --verify --json --max-age any "$FIXTURES/compliant.json"
+assert_equals "run $STUB_DIR/dot-sys.wasm verify --json --max-age any" "$(cat "$STUB_ARGS")" \
+  "the long forms behave the same"
 
 test_start "attest_registers_verify"
-assert_file_contains "$ATTEST_SCRIPT" "--verify | -V" "dot attest supports --verify"
-assert_file_contains "$ATTEST_SCRIPT" "attest-verify.sh" "dot attest calls the verifier"
-assert_file_contains "$DOT_CLI" "--verify|-V" "dot CLI documents --verify"
+stub_verify bash "$ATTEST_SCRIPT" -V -j
+assert_equals "run $STUB_DIR/dot-sys.wasm verify --json" "$(cat "$STUB_ARGS")" \
+  "dot attest -V runs the verifier and forwards -j"
+assert_contains '"generated_at"' "$(cat "$STUB_STDIN")" "and pipes it fresh evidence"
+stub_verify bash "$ATTEST_SCRIPT" -a 30
+assert_equals "run $STUB_DIR/dot-sys.wasm verify --max-age 30" "$(cat "$STUB_ARGS")" \
+  "-a alone implies --verify and forwards the window"
+assert_output_contains "--verify" "bash '$DOT_CLI' help attest"
 
 test_start "attest_verify_rejects_unknown_options"
 assert_exit_code 2 "bash '$TEST_SCRIPT' --nonsense </dev/null"
