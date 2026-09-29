@@ -20,6 +20,7 @@
 {{- $error := $t.ui.error -}}
 {{- $warning := $t.ui.warning -}}
 {{- $status_text := (index $t.ui "status_text") | default $t.ui.accent_text -}}
+{{- $muted := (index $t.ui "text_muted") | default $t.term.fg -}}
 {{- $sessions := dig "apple_sessions" $t.mode (list) . -}}
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
@@ -250,7 +251,9 @@ set -g pane-border-format "\
 #[fg={{ $accent_on }}#,bg={{ $border }}] #P: #{pane_current_command} #[fill={{ $border }}]}"
 
 # --- Pane Borders ---
-set -g pane-border-style "fg={{ $border }}"
+# Border lines are UI, not text, but the border tint sits under WCAG's 3:1
+# non-text floor on some themes; muted text reads at 7:1 on bg.
+set -g pane-border-style "fg={{ $muted }}"
 set -g pane-active-border-style "fg=#{@dot_session_colour}"
 set -g display-panes-colour "{{ $tertiary }}"
 set -g display-panes-active-colour "{{ $accent }}"

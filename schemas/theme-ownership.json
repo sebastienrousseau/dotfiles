@@ -8,6 +8,8 @@
     {"path": "$HOME/.config/tmux/tmux.conf", "platform": "all", "adapter": "chezmoi", "format": "tmux", "ownership": "file", "keys": []},
     {"path": "$HOME/.config/alacritty/alacritty.toml", "platform": "all", "adapter": "chezmoi", "format": "toml", "ownership": "file", "keys": []},
     {"path": "$HOME/.config/kitty/kitty.conf", "platform": "all", "adapter": "chezmoi", "format": "kitty", "ownership": "file", "keys": []},
+    {"path": "$HOME/.config/nvim/colors/dotfiles.lua", "platform": "all", "adapter": "chezmoi", "format": "lua", "ownership": "file", "keys": []},
+    {"path": "$HOME/.config/nvim/lua/lualine/themes/dotfiles.lua", "platform": "all", "adapter": "chezmoi", "format": "lua", "ownership": "file", "keys": []},
     {"path": "$HOME/.config/starship.toml", "platform": "all", "adapter": "chezmoi", "format": "toml", "ownership": "file", "keys": []},
     {"path": "$HOME/.config/zsh/rc.d/10-env.zsh", "platform": "all", "adapter": "chezmoi", "format": "shell", "ownership": "file", "keys": []},
     {"path": "$HOME/.config/fish/conf.d/env.fish", "platform": "all", "adapter": "chezmoi", "format": "fish", "ownership": "file", "keys": []},

@@ -337,6 +337,8 @@ theme_transaction_targets() {
     "$HOME/.config/tmux/tmux.conf" \
     "$HOME/.config/alacritty/alacritty.toml" \
     "$HOME/.config/kitty/kitty.conf" \
+    "$HOME/.config/nvim/colors/dotfiles.lua" \
+    "$HOME/.config/nvim/lua/lualine/themes/dotfiles.lua" \
     "$HOME/.config/starship.toml" \
     "$HOME/.config/zsh/rc.d/10-env.zsh" \
     "$HOME/.config/fish/conf.d/env.fish" \
@@ -1561,7 +1563,7 @@ reload_browsers() {
 reload_nvim() {
   local theme="$1"
   local nvim_colorscheme nvim_style
-  nvim_colorscheme="$(theme_app_value "$theme" "nvim" 2>/dev/null || true)"
+  nvim_colorscheme="$(_theme_nvim_scheme "$theme")"
   nvim_style="$(theme_app_value "$theme" "nvim_style" 2>/dev/null || true)"
 
   if [[ -z "$nvim_colorscheme" ]]; then
@@ -1605,12 +1607,6 @@ reload_nvim() {
       [[ "$nvim_style" == "light" ]] && style="light"
       lua_cmd="require('onedark').setup({style='${style}'}) vim.cmd.colorscheme('onedark')"
       ;;
-    rose-pine*)
-      lua_cmd="vim.cmd.colorscheme('${nvim_colorscheme}')"
-      ;;
-    dracula)
-      lua_cmd="vim.cmd.colorscheme('dracula')"
-      ;;
     nord)
       lua_cmd="require('nord').set()"
       ;;
@@ -1623,41 +1619,17 @@ reload_nvim() {
   # Neovim versions use different socket paths:
   #   0.9-:  /tmp/nvimXXXXXX/0  (random suffix, no dot)
   #   0.10+: $XDG_RUNTIME_DIR/nvim.PID.0
-  local sockets=()
+  local sockets=() sock
   local runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 
-  # Collect candidate sockets from known locations
-  local sock
-  for sock in /tmp/nvim*/0; do
+  # Collect candidate sockets from known locations; a glob that matches
+  # nothing stays literal and fails -S. awk drops duplicates (the runtime
+  # dir is often /run/user/UID as well) without `local -A`, which macOS
+  # /bin/bash 3.2 rejects ("local: -A: invalid option") and which under
+  # set -e silently dropped the Neovim reload.
+  while IFS= read -r sock; do
     [[ -S "$sock" ]] && sockets+=("$sock")
-  done
-  for sock in /run/user/*/nvim.*.0; do
-    [[ -S "$sock" ]] && sockets+=("$sock")
-  done
-  if [[ -d "$runtime_dir" ]]; then
-    for sock in "$runtime_dir"/nvim.*.0; do
-      [[ -S "$sock" ]] && sockets+=("$sock")
-    done
-  fi
-
-  # Deduplicate sockets. Not an associative array: `local -A` is bash 4+,
-  # and macOS /bin/bash 3.2 aborts the function on it ("local: -A: invalid
-  # option"), which under set -e silently dropped the Neovim reload.
-  if [[ ${#sockets[@]} -gt 0 ]]; then
-    local unique_sockets=()
-    local s u dup
-    for s in "${sockets[@]}"; do
-      dup=0
-      for u in ${unique_sockets[@]+"${unique_sockets[@]}"}; do
-        if [[ "$u" == "$s" ]]; then
-          dup=1
-          break
-        fi
-      done
-      [[ "$dup" == 1 ]] || unique_sockets+=("$s")
-    done
-    sockets=("${unique_sockets[@]}")
-  fi
+  done < <(printf '%s\n' /tmp/nvim*/0 /run/user/*/nvim.*.0 "$runtime_dir"/nvim.*.0 | awk '!seen[$0]++')
 
   if [[ ${#sockets[@]} -eq 0 ]]; then
     SKIPPED+=("nvim")

@@ -32,7 +32,7 @@ with tempfile.TemporaryDirectory() as temporary:
     checks.append(("unexpected fixture" in module.compare(expected, fixtures)[0], "obsolete golden fails"))
 
 actual = list(module.GOLDENS.rglob("*.golden"))
-checks.append((len(actual) == len(module.THEMES) * len(module.PLATFORMS) * len(module.CONSUMERS), "complete 72-case baseline is committed"))
+checks.append((len(actual) == len(module.THEMES) * len(module.PLATFORMS) * len(module.CONSUMERS), "complete theme x platform x consumer baseline is committed"))
 for platform in module.PLATFORMS:
     for family in ("maui", "berlin"):
         for consumer in module.CONSUMERS:

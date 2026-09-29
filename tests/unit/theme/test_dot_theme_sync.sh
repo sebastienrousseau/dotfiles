@@ -687,6 +687,22 @@ EOF
 done
 rm -f "$nvim_sock2"
 
+# With the palette colourscheme rendered for the active theme, running
+# Neovims switch to it rather than the theme's app.nvim family.
+mkdir -p "$HOME/.config/nvim/colors"
+: >"$HOME/.config/nvim/colors/dotfiles.lua"
+for shell in "${nvim_shells[@]}"; do
+  test_start "nvim_prefers_the_palette_colourscheme ($("$shell" -c 'echo "bash ${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"'))"
+  reset_calls
+  run_fn Linux "$shell" <<'EOF'
+nvim() { printf '%s\n' "$*" >>"$CALLS/nvim"; }
+reload_nvim fixture-dark
+EOF
+  assert_contains "vim.cmd.colorscheme('dotfiles')" "$(calls nvim)" "Lua switches to the generated palette scheme"
+  assert_equals 0 "$(calls nvim | grep -c tokyonight || true)" "the app.nvim family is not used"
+done
+rm -f "$HOME/.config/nvim/colors/dotfiles.lua"
+
 # ===========================================================================
 # Rendered templates (real chezmoi renderer, fixture data)
 # ===========================================================================

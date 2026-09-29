@@ -95,6 +95,9 @@ vim.api.nvim_create_autocmd("User", {
     -- Defer to let lazy.nvim finish its reload cycle
     vim.defer_fn(function()
       local cs = theme:match("^catppuccin") and "catppuccin" or theme:match("^tokyonight") and theme or theme
+      if #vim.api.nvim_get_runtime_file("colors/dotfiles.lua", false) > 0 then
+        cs = "dotfiles"
+      end
       pcall(vim.cmd.colorscheme, cs)
     end, 5)
   end,

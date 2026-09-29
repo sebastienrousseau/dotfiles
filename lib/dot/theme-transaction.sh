@@ -77,6 +77,18 @@ emit_theme_plan() {
   fi
 }
 
+# _theme_nvim_scheme <theme>: the colourscheme to push to running Neovims.
+# The palette scheme rendered for the active theme (colors/dotfiles.lua, the
+# same Apple AAA colours as the terminal) wins over the theme's app.nvim.
+# Uses theme_app_value from dot-theme-sync, which sources this file.
+_theme_nvim_scheme() {
+  if [[ -f "$HOME/.config/nvim/colors/dotfiles.lua" ]]; then
+    printf 'dotfiles\n'
+  else
+    theme_app_value "$1" "nvim" 2>/dev/null || true
+  fi
+}
+
 _theme_txn_hash() {
   local path="${1:-}"
   [[ -f "$path" ]] || return 0

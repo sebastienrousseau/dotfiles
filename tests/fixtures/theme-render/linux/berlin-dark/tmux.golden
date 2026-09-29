@@ -224,7 +224,9 @@ set -g pane-border-format "\
 #[fg=#c5c7ff#,bg=#3a3940] #P: #{pane_current_command} #[fill=#3a3940]}"
 
 # --- Pane Borders ---
-set -g pane-border-style "fg=#3a3940"
+# Border lines are UI, not text, but the border tint sits under WCAG's 3:1
+# non-text floor on some themes; muted text reads at 7:1 on bg.
+set -g pane-border-style "fg=#cbcad1"
 set -g pane-active-border-style "fg=#{@dot_session_colour}"
 set -g display-panes-colour "#ffb4ee"
 set -g display-panes-active-colour "#a7aaff"
