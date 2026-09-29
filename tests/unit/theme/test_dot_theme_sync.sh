@@ -755,14 +755,20 @@ if [[ -n "$CHEZMOI_BIN" ]]; then
     "until sessions are coloured the bar is the accent, labelled in accent_text"
   assert_file_contains "$RENDER/tmux-light.conf" 'set -g @dot_session_colour "#0066ff"' \
     "the light theme seeds its own accent as the default session colour"
-  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g window-status-current-format "#[fg=#{@dot_session_text},bg=#{@dot_session_colour},bold]' \
+  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g window-status-format "#[fg=#{@dot_session_text},bg=#{@dot_session_colour},nobold]' \
     "windows sit on the per-session block"
-  assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#22ccaa,bg=#2a3444,nobold] ' \
-    "without a secondary_container the clock falls back to audited text on border"
+  assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#22ccaa#,bg=#2a3444] ' \
+    "without a secondary_container the top-bar clock falls back to audited text on border"
+  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g window-status-current-format ""' \
+    "the bottom bar lists only the other windows; the current one is in the top bar"
+  assert_equals "0" "$(awk '/^set -g status-right/ {f = 1} f {print} f && !/\\$/ {exit}' "$RENDER/tmux-dark.conf" | grep -c '%H:%M')" \
+    "the time is shown once, in the top bar"
+  assert_equals "1" "$(grep -c '%H:%M' "$RENDER/tmux-dark.conf")" "exactly one clock in the whole config"
   assert_file_contains "$RENDER/tmux-dark.conf" $'#[fg=#{?client_prefix,#000000,#{@dot_session_text}},bg=#{?client_prefix,#ff2255,#{@dot_session_colour}},bold] #{?client_prefix,\uf11c ,\uf489 }#S ' \
     "the terminal icon leads the session and becomes a keyboard in the error colour on prefix"
   assert_file_contains "$RENDER/tmux-dark.conf" 'set -g pane-border-status top' "the top bar is the pane border line"
-  assert_file_contains "$RENDER/tmux-dark.conf" '%A#, %Y-%m-%d %H:%M' "the top bar carries the full weekday, date and time"
+  assert_file_contains "$RENDER/tmux-dark.conf" '#{?#{==:#{@dot_status_show_date},on},%A#, %Y-%m-%d ,}%H:%M' \
+    "the top bar carries the weekday, date (optional) and time"
   assert_equals "0" "$(grep -c 'apply-colours' "$RENDER/tmux-dark.conf")" \
     "without an apple_sessions table no session hook is installed"
   assert_equals "1" "$(grep -c '#{?client_prefix,.* }#S ' "$RENDER/tmux-dark.conf")" \
