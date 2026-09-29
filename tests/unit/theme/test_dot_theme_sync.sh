@@ -757,10 +757,11 @@ if [[ -n "$CHEZMOI_BIN" ]]; then
     "the light theme seeds its own accent as the default session colour"
   assert_file_contains "$RENDER/tmux-dark.conf" 'set -g window-status-format "#[fg=#{@dot_session_text},bg=#{@dot_session_colour},nobold]' \
     "windows sit on the per-session block"
-  assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#{@dot_session_top_text},bg=#{@dot_session_top},bold] %H:%M "' \
-    "the time ends the bottom bar on the session's partner colour"
-  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g @dot_session_top "#22ccaa"' \
-    "until sessions are coloured the partner is the theme's secondary block"
+  assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#000000,bg=#22ccaa,bold] %H:%M "' \
+    "the time ends the bottom bar on the fixed bar colour (the secondary block without the Apple table)"
+  assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#ffffff#,bg=#000000#,bold] #I:#W#F' \
+    "the top bar's window block is always white on black"
+  assert_equals "0" "$(grep -c 'dot_session_top' "$RENDER/tmux-dark.conf")" "the top bar has no per-session colour"
   assert_file_contains "$RENDER/tmux-dark.conf" 'set -g window-status-current-format ""' \
     "the bottom bar lists only the other windows; the current one is in the top bar"
   assert_equals "1" "$(grep -c '%H:%M' "$RENDER/tmux-dark.conf")" "exactly one clock in the whole config"

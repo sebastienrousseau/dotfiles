@@ -154,17 +154,18 @@ bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 # ║  Colors from .chezmoidata/themes.toml (berlin-dark)  ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 #
-# Every session gets its own pair of Apple system colours (exact Default
-# values at 18pt and up), so sessions are told apart at a glance and the two
-# bars never match: the bottom bar is the session colour with the time on its
-# partner, the top bar (the pane border line) is the partner with the system
-# indicators on the session colour. Nothing appears in both bars, and
-# nothing depends on the window width.
+# A fixed frame with one per-session colour: the top bar (the pane border
+# line) is black with the current window in white and the system indicators
+# on Apple cyan; the bottom bar is the session's own Apple system colour
+# (unique per session, exact Default values at 18pt and up) with the time on
+# the same cyan. Cyan is never a session colour. Nothing appears in both
+# bars, and nothing depends on the window width.
 # Following the Apple HIG colour guidance:
 #   - colour on large areas, one black or white label per block (7:1, or
 #     WCAG large-text 4.5:1 for Apple's exact values at 18pt and up);
-#   - one meaning per colour: the session's pair = this session, error =
-#     prefix armed or bell, warning = activity;
+#   - one meaning per colour: session colour = this session, cyan = the
+#     fixed readouts (time, indicators), error = prefix armed or bell,
+#     warning = activity;
 #   - no state by colour alone: the terminal icon becomes a keyboard while
 #     the prefix is armed, the active window is bold and flagged `*`, and
 #     bell/activity keep tmux's own `!`/`#` flags;
@@ -173,11 +174,9 @@ bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 # --- Session colours: the theme accent until tmux-status assigns each one ---
 set -g @dot_session_colour "#a7aaff"
 set -g @dot_session_text "#000000"
-set -g @dot_session_top "#ff6165"
-set -g @dot_session_top_text "#000000"
-run-shell -b "test ! -x ~/.local/bin/tmux-status || ~/.local/bin/tmux-status apply-colours '#ff4245/#000000' '#ff9230/#000000' '#ffd600/#000000' '#30d158/#000000' '#00dac3/#000000' '#00d2e0/#000000' '#3cd3fe/#000000' '#0091ff/#000000' '#6d7cff/#000000' '#db34f2/#000000' '#ff375f/#000000' '#b78a66/#000000'"
-set-hook -g session-created "run-shell -b \"~/.local/bin/tmux-status apply-colours '#ff4245/#000000' '#ff9230/#000000' '#ffd600/#000000' '#30d158/#000000' '#00dac3/#000000' '#00d2e0/#000000' '#3cd3fe/#000000' '#0091ff/#000000' '#6d7cff/#000000' '#db34f2/#000000' '#ff375f/#000000' '#b78a66/#000000'\""
-set-hook -g session-renamed "run-shell -b \"~/.local/bin/tmux-status apply-colours '#ff4245/#000000' '#ff9230/#000000' '#ffd600/#000000' '#30d158/#000000' '#00dac3/#000000' '#00d2e0/#000000' '#3cd3fe/#000000' '#0091ff/#000000' '#6d7cff/#000000' '#db34f2/#000000' '#ff375f/#000000' '#b78a66/#000000'\""
+run-shell -b "test ! -x ~/.local/bin/tmux-status || ~/.local/bin/tmux-status apply-colours '#ff4245/#000000' '#ff9230/#000000' '#ffd600/#000000' '#30d158/#000000' '#00dac3/#000000' '#0091ff/#000000' '#6d7cff/#000000' '#db34f2/#000000' '#ff375f/#000000' '#b78a66/#000000'"
+set-hook -g session-created "run-shell -b \"~/.local/bin/tmux-status apply-colours '#ff4245/#000000' '#ff9230/#000000' '#ffd600/#000000' '#30d158/#000000' '#00dac3/#000000' '#0091ff/#000000' '#6d7cff/#000000' '#db34f2/#000000' '#ff375f/#000000' '#b78a66/#000000'\""
+set-hook -g session-renamed "run-shell -b \"~/.local/bin/tmux-status apply-colours '#ff4245/#000000' '#ff9230/#000000' '#ffd600/#000000' '#30d158/#000000' '#00dac3/#000000' '#0091ff/#000000' '#6d7cff/#000000' '#db34f2/#000000' '#ff375f/#000000' '#b78a66/#000000'\""
 
 # --- Bottom bar ---
 set -g status on
@@ -204,7 +203,7 @@ set -g status-left "\
 set -g status-right "\
 #[fg=#{@dot_session_text},bg=#{@dot_session_colour},bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
 #[nobold]#{?#{==:#{@dot_status_show_path},on},#{b:pane_current_path} ,}\
-#[fg=#{@dot_session_top_text},bg=#{@dot_session_top},bold] %H:%M "
+#[fg=#000000,bg=#3cd3fe,bold] %H:%M "
 
 # Window tabs sit on the session block and take its label colour. The
 # current window is named in the top bar, so the bottom lists only the
@@ -217,16 +216,16 @@ set -g window-status-bell-style "bg=#ff8ac4,fg=#000000,bold"
 set -g window-status-activity-style "bg=#ff9230,fg=#000000,bold"
 
 # --- Top bar: the pane border line, as in the reference layout ---
-# The active pane shows the window on the session's partner colour and the
-# system indicators (one `tmux-status system` sample per interval) on the
-# session colour; other panes show a quiet label on the border surface
-# (accent_on_surface is audited at 7:1 on border).
+# The active pane shows the window in white on black (21:1) and the system
+# indicators (one `tmux-status system` sample per interval) on Apple cyan;
+# other panes show a quiet label on the border surface (accent_on_surface is
+# audited at 7:1 on border).
 set -g pane-border-status top
 set -g pane-border-lines single
 set -g pane-border-format "\
 #{?pane_active,\
-#[fg=#{@dot_session_top_text}#,bg=#{@dot_session_top}#,bold] #I:#W#F#{?window_zoomed_flag, ,} #[fill=#{@dot_session_top}]\
-#{?#{==:#{@dot_status_show_system},on},#[align=right]#[fg=#{@dot_session_text}#,bg=#{@dot_session_colour}#,bold] #(~/.local/bin/tmux-status system) ,},\
+#[fg=#ffffff#,bg=#000000#,bold] #I:#W#F#{?window_zoomed_flag, ,} #[fill=#000000]\
+#{?#{==:#{@dot_status_show_system},on},#[align=right]#[fg=#000000#,bg=#3cd3fe#,bold] #(~/.local/bin/tmux-status system) ,},\
 #[fg=#c5c7ff#,bg=#3a3940] #P: #{pane_current_command} #[fill=#3a3940]}"
 
 # --- Pane Borders ---

@@ -51,26 +51,26 @@ print(apple.block("orange", False))
 ')"
 assert_equals "('#ff8d28', '#000000')" "$got" "every block reads at 7:1; light orange is Apple exact with black"
 
-test_start "apple_sessions_are_distinct_and_aaa"
+test_start "apple_sessions_are_distinct_aaa_and_never_the_bar_colour"
 got="$(py '
 for dark in (True, False):
     s = apple.sessions(dark)
-    assert len({b for b, _ in s}) == 12, s
+    assert len({b for b, _ in s}) == len(s) == 10, s
     assert all(aaa.contrast(aaa.hex_rgb(b), aaa.hex_rgb(l)) >= 7 for b, l in s)
-print("ok")
+print(sorted(n for n in apple.SYSTEM if apple._near_bar(n)))
 ')"
-assert_equals "ok" "$got" "12 distinct session blocks per mode, each AAA"
+assert_equals "['cyan', 'teal']" "$got" "10 distinct AAA session blocks; cyan (the bar) and teal (dE 16 from it) are reserved"
 
 test_start "apple_large_text_sessions_are_exact_default_values"
 got="$(py '
 for dark in (True, False):
     s = apple.sessions(dark, apple.LARGE_TEXT_RATIO)
-    exact = [apple.variants(n, dark)[0] for n in apple.SYSTEM]
+    exact = [apple.variants(n, dark)[0] for n in apple.SYSTEM if not apple._near_bar(n)]
     assert [b for b, _ in s] == exact, s
     assert all(aaa.contrast(aaa.hex_rgb(b), aaa.hex_rgb(l)) >= 4.5 for b, l in s)
 print("ok")
 ')"
-assert_equals "ok" "$got" "all 12 blocks are Apple Default, labels at WCAG AAA large-text 4.5:1"
+assert_equals "ok" "$got" "every session block is Apple Default, labels at WCAG AAA large-text 4.5:1"
 
 test_start "apple_session_table_follows_font_size"
 # Bar labels at 18pt or more are large text: exact Apple values; smaller
@@ -83,6 +83,8 @@ if command -v chezmoi >/dev/null 2>&1; then
   done
   assert_file_contains "$WORK/tmux-20.conf" "apply-colours '#ff4245/#000000'"
   assert_file_contains "$WORK/tmux-12.conf" "apply-colours '#ff6165/#000000'"
+  assert_file_contains "$WORK/tmux-20.conf" '#[fg=#000000,bg=#3cd3fe,bold] %H:%M "'
+  assert_equals "0" "$(grep -c '#3cd3fe/' "$WORK/tmux-20.conf")" "cyan is never handed to a session"
 else
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (skipped: chezmoi unavailable)"

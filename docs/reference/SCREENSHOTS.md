@@ -102,12 +102,13 @@ The Neovim configuration includes:
 
 ## tmux
 
-Every tmux session gets its own Apple system color, so sessions are told apart
-at a glance, and every label on it reaches 7:1 (WCAG AAA) in light and dark
-themes alike. Both bars show the same elements at any window width:
+Each tmux session gets its own Apple system color in the bottom-left of the bar,
+so sessions are told apart at a glance; the rest of the frame is fixed. Every
+label meets WCAG AAA in light and dark themes alike, and both bars show the same
+elements at any window width:
 
-- Top bar: the current window (bold, `*`, zoom flag), then the CPU, memory, and battery indicators on a tint of the theme's secondary hue
-- Bottom bar: a terminal icon and the session name (while the tmux prefix is active the icon becomes a keyboard and the session turns the error color), the other windows with their native last, bell, and activity flags, the directory, and the time on the same tint
+- Top bar: the current window (bold, `*`, zoom flag) in white on black, then the CPU, memory, and battery indicators on Apple cyan
+- Bottom bar: a terminal icon and the session name on the session's color (while the tmux prefix is active the icon becomes a keyboard and the session turns the error color), the other windows with their native last, bell, and activity flags, the directory, and the time on Apple cyan
 - Copy, synchronized-pane, and SSH indicators only when relevant
 
 Press `prefix + A` to open the AI CLI launcher in the current workspace.

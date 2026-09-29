@@ -83,26 +83,15 @@ TMUX_STATUS_TEST_SESSIONS="" run_status apply-colours '#ff6165/#000000' '#ff9230
 assert_equals "0" "$(wc -l <"$TMUX_STATUS_TEST_LOG" | tr -d ' ')" \
   "no sessions means no set-option calls"
 
-test_start "tmux_status_pairs_each_session_with_the_opposite_hue"
-# Apple's order: a session's top bar takes the colour six places on, so the
-# top-left and bottom-left blocks never match (orange pairs with blue).
+test_start "tmux_status_sets_one_colour_per_session"
+# The top bar and the right-hand blocks are fixed (black, cyan); a session
+# owns only its bottom-left colour, label and bar style.
 export TMUX_STATUS_TEST_FULL="$SANDBOX/full.log"
 : >"$TMUX_STATUS_TEST_FULL"
-TMUX_STATUS_TEST_SESSIONS=$'$1|alpha\n$2|beta\n$3|gamma\n' run_status apply-colours \
-  '#ff4245/#000000' '#ff9230/#000000' '#ffd600/#000000' '#30d158/#000000' '#00dac3/#000000' '#00d2e0/#000000' \
-  '#3cd3fe/#000000' '#0091ff/#000000' '#6d7cff/#000000' '#db34f2/#000000' '#ff375f/#000000' '#b78a66/#000000'
-pairs=(ff4245 ff9230 ffd600 30d158 00dac3 00d2e0 3cd3fe 0091ff 6d7cff db34f2 ff375f b78a66)
-mismatched=0
-while IFS= read -r line; do
-  bottom="$(sed -n 's/.*@dot_session_colour #\([0-9a-f]*\) .*/\1/p' <<<"$line")"
-  top="$(sed -n 's/.*@dot_session_top #\([0-9a-f]*\) .*/\1/p' <<<"$line")"
-  for i in "${!pairs[@]}"; do
-    [[ "${pairs[$i]}" == "$bottom" ]] && [[ "${pairs[$(((i + 6) % 12))]}" != "$top" ]] && mismatched=$((mismatched + 1))
-  done
-  [[ -n "$top" && "$top" != "$bottom" ]] || mismatched=$((mismatched + 1))
-done <"$TMUX_STATUS_TEST_FULL"
-assert_equals "3:0" "$(wc -l <"$TMUX_STATUS_TEST_FULL" | tr -d ' '):$mismatched" \
-  "every session's top colour is the one six on, never its bottom colour"
+TMUX_STATUS_TEST_SESSIONS=$'$1|alpha\n$2|beta\n' run_status apply-colours '#ff4245/#000000' '#ff9230/#000000' '#ffd600/#000000'
+assert_equals "2:0:2" \
+  "$(wc -l <"$TMUX_STATUS_TEST_FULL" | tr -d ' '):$(grep -c '@dot_session_top' "$TMUX_STATUS_TEST_FULL" || true):$(grep -c 'status-style bg=#[0-9a-f]*,fg=#000000' "$TMUX_STATUS_TEST_FULL" || true)" \
+  "each session gets its colour, label and bar style, and nothing for the top bar"
 unset TMUX_STATUS_TEST_FULL
 
 test_start "tmux_status_other_sessions"
