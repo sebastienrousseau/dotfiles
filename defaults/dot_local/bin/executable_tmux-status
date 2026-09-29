@@ -6,63 +6,43 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: tmux-status apply-colours <primary> <secondary> <tertiary>
+Usage: tmux-status apply-colours <block/label>...
        tmux-status other-sessions <current-session>
        tmux-status short-path <path>
        tmux-status system
 EOF
 }
 
+# apply_colours <block/label>...: give every session its own bar colour.
+# Each argument is an AAA pair from .chezmoidata/apple.toml: an Apple system
+# colour and the black or white label that reads at 7:1 on it. Linear probing
+# keeps colours unique across the active sessions while the checksum keeps
+# the assignment deterministic for a given set of session names.
 apply_colours() {
-  local primary="${1:-}"
-  local secondary="${2:-}"
-  local tertiary="${3:-}"
-  local session_id session_name checksum colour candidate offset
+  local session_id session_name checksum candidate offset pair colour text
   local used="|"
-  local -a colours
+  local -a pairs=("$@")
 
-  [[ "$primary" =~ ^#[0-9A-Fa-f]{6}$ ]] || return 2
-  [[ "$secondary" =~ ^#[0-9A-Fa-f]{6}$ ]] || return 2
-  [[ "$tertiary" =~ ^#[0-9A-Fa-f]{6}$ ]] || return 2
-
-  # Build twelve wallpaper-derived slots. Linear probing makes colours unique
-  # across the active session set while the checksum keeps the assignment
-  # deterministic for a given set of session names.
-  colours=(
-    "$primary" "$secondary" "$tertiary"
-    "$(blend_colour "$primary" "$secondary" 3)"
-    "$(blend_colour "$primary" "$tertiary" 3)"
-    "$(blend_colour "$secondary" "$primary" 3)"
-    "$(blend_colour "$secondary" "$tertiary" 3)"
-    "$(blend_colour "$tertiary" "$primary" 3)"
-    "$(blend_colour "$tertiary" "$secondary" 3)"
-    "$(blend_colour "$primary" "$secondary" 1)"
-    "$(blend_colour "$primary" "$tertiary" 1)"
-    "$(blend_colour "$secondary" "$tertiary" 1)"
-  )
+  ((${#pairs[@]} > 0)) || return 2
+  for pair in "${pairs[@]}"; do
+    [[ "$pair" =~ ^#[0-9A-Fa-f]{6}/#[0-9A-Fa-f]{6}$ ]] || return 2
+  done
 
   while IFS='|' read -r session_id session_name; do
     [[ -n "$session_id" ]] || continue
     checksum="$(printf '%s' "$session_name" | cksum | awk '{print $1}')"
-    candidate=$((checksum % ${#colours[@]}))
-    colour="${colours[$candidate]}"
-    for ((offset = 0; offset < ${#colours[@]}; offset++)); do
-      colour="${colours[$(((candidate + offset) % ${#colours[@]}))]}"
-      [[ "$used" == *"|$colour|"* ]] || break
+    candidate=$((checksum % ${#pairs[@]}))
+    pair="${pairs[$candidate]}"
+    for ((offset = 0; offset < ${#pairs[@]}; offset++)); do
+      pair="${pairs[$(((candidate + offset) % ${#pairs[@]}))]}"
+      [[ "$used" == *"|$pair|"* ]] || break
     done
-    used+="$colour|"
-    tmux set-option -q -t "$session_id" @dot_session_colour "$colour"
+    used+="$pair|"
+    colour="${pair%/*}" text="${pair#*/}"
+    tmux set-option -q -t "$session_id" @dot_session_colour "$colour" \; \
+      set-option -q -t "$session_id" @dot_session_text "$text" \; \
+      set-option -q -t "$session_id" status-style "bg=$colour,fg=$text"
   done < <(tmux list-sessions -F '#{session_id}|#{session_name}' 2>/dev/null | sort -t '|' -k2 || true)
-}
-
-blend_colour() {
-  local left="${1#\#}" right="${2#\#}" left_weight="${3:-1}"
-  local divisor=$((left_weight + 1)) red green blue
-
-  red=$(((left_weight * 16#${left:0:2} + 16#${right:0:2}) / divisor))
-  green=$(((left_weight * 16#${left:2:2} + 16#${right:2:2}) / divisor))
-  blue=$(((left_weight * 16#${left:4:2} + 16#${right:4:2}) / divisor))
-  printf '#%02x%02x%02x' "$red" "$green" "$blue"
 }
 
 other_sessions() {

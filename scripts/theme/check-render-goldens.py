@@ -66,10 +66,11 @@ def render_all(chezmoi: str) -> dict[str, str]:
         # secrets, or source checkout mutation participates in the fixture.
         (source / ".chezmoidata").mkdir()
         (source / ".chezmoitemplates").mkdir()
-        shutil.copyfile(
-            REPO / "defaults/.chezmoidata/themes.toml",
-            source / ".chezmoidata/themes.toml",
-        )
+        for data in ("themes.toml", "apple.toml"):
+            shutil.copyfile(
+                REPO / "defaults/.chezmoidata" / data,
+                source / ".chezmoidata" / data,
+            )
         shutil.copyfile(
             REPO / "defaults/.chezmoitemplates/theme-name",
             source / ".chezmoitemplates/theme-name",

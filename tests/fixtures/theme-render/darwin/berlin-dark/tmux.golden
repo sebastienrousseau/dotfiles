@@ -149,23 +149,31 @@ bind C-f command-prompt -p find-session 'switch-client -t %%'
 bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
-# ║  THEME — Wallpaper Block Status Bar                                      ║
+# ║  THEME — Session Block Bars                                              ║
 # ║  Colors from .chezmoidata/themes.toml (berlin-dark)  ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 #
-# The wallpaper's accent fills the bar as one solid block behind the session
-# and windows; the clock sits on a tint of the wallpaper's secondary hue
-# (deep on dark themes, pale on light ones). Following the Apple HIG colour
-# guidance:
-#   - colour on a large area, with one monochrome label colour on it;
-#   - one meaning per colour: accent = your windows, secondary tint = time,
-#     error = prefix armed or bell, warning = activity;
+# Every session gets its own Apple system colour as a solid block, so
+# sessions are told apart at a glance. The bottom bar carries the session,
+# windows and context; a top bar (the pane border line) repeats the block
+# with the window and the full date and time, as in the reference layout.
+# Following the Apple HIG colour guidance:
+#   - colour on large areas, one black or white label per block (7:1);
+#   - one meaning per colour: session colour = this session, secondary tint
+#     = time, error = prefix armed or bell, warning = activity;
 #   - no state by colour alone: the terminal icon becomes a keyboard while
 #     the prefix is armed, the active window is bold and flagged `*`, and
 #     bell/activity keep tmux's own `!`/`#` flags;
 #   - every label reaches 7:1 (WCAG AAA) in the -light and -dark theme alike.
 
-# --- Status Bar ---
+# --- Session colours: the theme accent until tmux-status assigns each one ---
+set -g @dot_session_colour "#a7aaff"
+set -g @dot_session_text "#000000"
+run-shell -b "test ! -x ~/.local/bin/tmux-status || ~/.local/bin/tmux-status apply-colours '#ff6165/#000000' '#ff9230/#000000' '#ffd600/#000000' '#30d158/#000000' '#00dac3/#000000' '#00d2e0/#000000' '#3cd3fe/#000000' '#5cb8ff/#000000' '#a7aaff/#000000' '#ea8dff/#000000' '#ff8ac4/#000000' '#dba679/#000000'"
+set-hook -g session-created "run-shell -b \"~/.local/bin/tmux-status apply-colours '#ff6165/#000000' '#ff9230/#000000' '#ffd600/#000000' '#30d158/#000000' '#00dac3/#000000' '#00d2e0/#000000' '#3cd3fe/#000000' '#5cb8ff/#000000' '#a7aaff/#000000' '#ea8dff/#000000' '#ff8ac4/#000000' '#dba679/#000000'\""
+set-hook -g session-renamed "run-shell -b \"~/.local/bin/tmux-status apply-colours '#ff6165/#000000' '#ff9230/#000000' '#ffd600/#000000' '#30d158/#000000' '#00dac3/#000000' '#00d2e0/#000000' '#3cd3fe/#000000' '#5cb8ff/#000000' '#a7aaff/#000000' '#ea8dff/#000000' '#ff8ac4/#000000' '#dba679/#000000'\""
+
+# --- Bottom bar ---
 set -g status on
 set -g status-interval 10
 set -g status-position bottom
@@ -180,32 +188,44 @@ set -ogq @dot_status_show_path on
 set -ogq @dot_status_show_system on
 set -ogq @dot_status_show_date on
 
-# --- Session: terminal icon and name; prefix swaps icon and colour ---
+# Session: terminal icon and name; prefix swaps the icon and the colour.
 set -g status-left "\
-#[fg=#000000,bg=#{?client_prefix,#ff8ac4,#a7aaff},bold] #{?client_prefix, , }#S \
-#[bg=#a7aaff,nobold] "
+#[fg=#{?client_prefix,#000000,#{@dot_session_text}},bg=#{?client_prefix,#ff8ac4,#{@dot_session_colour}},bold] #{?client_prefix, , }#S \
+#[bg=#{@dot_session_colour},nobold] "
 
-# --- Context on the accent block, then the clock on its tinted block ---
+# Context on the session block, then the clock on its tinted block.
 # `tmux-status system` performs one platform-aware sample per interval. Path,
 # monitoring, and date modules can be disabled independently with the options
 # above; narrower clients progressively retain only the clock.
 set -g status-right "\
-#[fg=#000000,bg=#a7aaff,bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
+#[fg=#{@dot_session_text},bg=#{@dot_session_colour},bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
 #[nobold]#{?#{==:#{@dot_status_show_path},on},#{b:pane_current_path} · ,}\
 #{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#(~/.local/bin/tmux-status system) ,}\
 #[fg=#ffb9b4,bg=#5d2a29,nobold] #{?#{&&:#{==:#{@dot_status_show_date},on},#{e|>=:#{client_width},155}},%A#, %Y-%m-%d ,}%H:%M "
 
-# --- Window Tabs ---
-set -g window-status-format "#[fg=#000000,bg=#a7aaff,nobold] #I:#W#F "
-set -g window-status-current-format "#[fg=#000000,bg=#a7aaff,bold] #I:#W#F#{?window_zoomed_flag, ,} "
+# Window tabs sit on the session block and take its label colour.
+set -g window-status-format "#[fg=#{@dot_session_text},bg=#{@dot_session_colour},nobold] #I:#W#F "
+set -g window-status-current-format "#[fg=#{@dot_session_text},bg=#{@dot_session_colour},bold] #I:#W#F#{?window_zoomed_flag, ,} "
 
 set -g window-status-separator ""
 set -g window-status-bell-style "bg=#ff8ac4,fg=#000000,bold"
 set -g window-status-activity-style "bg=#ff9230,fg=#000000,bold"
 
+# --- Top bar: the pane border line, as in the reference layout ---
+# The active pane shows the window on the session block and the full date
+# and time on the clock tint; other panes show a quiet label on the border
+# surface (accent_on_surface is audited at 7:1 on border).
+set -g pane-border-status top
+set -g pane-border-lines single
+set -g pane-border-format "\
+#{?pane_active,\
+#[fg=#{@dot_session_text}#,bg=#{@dot_session_colour}#,bold] #I:#W#F #[nobold]#[fill=#{@dot_session_colour}]\
+#[align=right]#[fg=#ffb9b4#,bg=#5d2a29] %A#, %Y-%m-%d %H:%M ,\
+#[fg=#c5c7ff#,bg=#3a3940] #P: #{pane_current_command} #[fill=#3a3940]}"
+
 # --- Pane Borders ---
 set -g pane-border-style "fg=#3a3940"
-set -g pane-active-border-style "fg=#a7aaff"
+set -g pane-active-border-style "fg=#{@dot_session_colour}"
 set -g display-panes-colour "#ffb4ee"
 set -g display-panes-active-colour "#a7aaff"
 

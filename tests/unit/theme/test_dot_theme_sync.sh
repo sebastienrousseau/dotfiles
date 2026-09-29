@@ -736,13 +736,19 @@ if [[ -n "$CHEZMOI_BIN" ]]; then
   assert_file_contains "$RENDER/tmux-dark.conf" 'bind A display-menu -T "#[align=centre] AI CLI cockpit "' "prefix+A exposes the AI launcher"
   assert_file_contains "$RENDER/tmux-dark.conf" 'set -g status-position bottom' "the block bar stays at the bottom"
   assert_file_contains "$RENDER/tmux-dark.conf" 'set -g status-style "bg=#ff8800,fg=#000000"' \
-    "the bar is one accent block, labelled in accent_text"
-  assert_file_contains "$RENDER/tmux-light.conf" 'set -g status-style "bg=#0066ff,fg=#ffffff"' \
-    "the light theme swaps to its own accent and white labels"
+    "until sessions are coloured the bar is the accent, labelled in accent_text"
+  assert_file_contains "$RENDER/tmux-light.conf" 'set -g @dot_session_colour "#0066ff"' \
+    "the light theme seeds its own accent as the default session colour"
+  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g window-status-current-format "#[fg=#{@dot_session_text},bg=#{@dot_session_colour},bold]' \
+    "windows sit on the per-session block"
   assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#22ccaa,bg=#2a3444,nobold] ' \
     "without a secondary_container the clock falls back to audited text on border"
-  assert_file_contains "$RENDER/tmux-dark.conf" $'#[fg=#000000,bg=#{?client_prefix,#ff2255,#ff8800},bold] #{?client_prefix,\uf11c ,\uf489 }#S ' \
+  assert_file_contains "$RENDER/tmux-dark.conf" $'#[fg=#{?client_prefix,#000000,#{@dot_session_text}},bg=#{?client_prefix,#ff2255,#{@dot_session_colour}},bold] #{?client_prefix,\uf11c ,\uf489 }#S ' \
     "the terminal icon leads the session and becomes a keyboard in the error colour on prefix"
+  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g pane-border-status top' "the top bar is the pane border line"
+  assert_file_contains "$RENDER/tmux-dark.conf" '%A#, %Y-%m-%d %H:%M' "the top bar carries the full weekday, date and time"
+  assert_equals "0" "$(grep -c 'apply-colours' "$RENDER/tmux-dark.conf")" \
+    "without an apple_sessions table no session hook is installed"
   assert_equals "1" "$(grep -c '#{?client_prefix,.* }#S ' "$RENDER/tmux-dark.conf")" \
     "session name is the primary left-side identity"
   assert_file_contains "$RENDER/tmux-dark.conf" 'set -g status-justify left' "session and windows form one compact group"

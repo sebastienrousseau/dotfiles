@@ -54,12 +54,14 @@ export TMUX_STATUS_TEST_LOG="$SANDBOX/colours.log"
 run_status() { "$BASH_BIN" "$TMUX_STATUS" "$@"; }
 
 test_start "tmux_status_rejects_invalid_colours"
-run_status apply-colours 'red' '#61b9f2' '#ef8ee9'
-assert_equals "2" "$?" "invalid primary is rejected"
-run_status apply-colours '#60daee' '#xyzxyz' '#ef8ee9'
-assert_equals "2" "$?" "invalid secondary is rejected"
-run_status apply-colours '#60daee' '#61b9f2' '#12345'
-assert_equals "2" "$?" "invalid tertiary is rejected"
+run_status apply-colours 'red/#000000' '#61b9f2/#000000'
+assert_equals "2" "$?" "an invalid block colour is rejected"
+run_status apply-colours '#60daee/#000000' '#61b9f2/#xyzxyz'
+assert_equals "2" "$?" "an invalid label colour is rejected"
+run_status apply-colours '#60daee' '#61b9f2'
+assert_equals "2" "$?" "a bare colour without its label is rejected"
+run_status apply-colours
+assert_equals "2" "$?" "no pairs at all is rejected"
 
 test_start "tmux_status_colour_probing_with_many_sessions"
 sessions=$'\n'
@@ -67,14 +69,14 @@ for i in $(seq 1 14); do
   sessions+="\$$i|session-$i"$'\n'
 done
 : >"$TMUX_STATUS_TEST_LOG"
-TMUX_STATUS_TEST_SESSIONS="$sessions" run_status apply-colours '#60daee' '#61b9f2' '#ef8ee9'
+TMUX_STATUS_TEST_SESSIONS="$sessions" run_status apply-colours '#ff6165/#000000' '#ff9230/#000000' '#ffd600/#000000' '#30d158/#000000' '#00dac3/#000000' '#00d2e0/#000000' '#3cd3fe/#000000' '#5cb8ff/#000000' '#a7aaff/#000000' '#ea8dff/#000000' '#ff8ac4/#000000' '#dba679/#000000'
 assert_equals "0" "$?" "apply-colours succeeds with more sessions than slots"
 assert_equals "14" "$(wc -l <"$TMUX_STATUS_TEST_LOG" | tr -d ' ')" \
   "every non-blank session line gets a colour"
 assert_equals "12" "$(cut -d '|' -f2 "$TMUX_STATUS_TEST_LOG" | sort -u | wc -l | tr -d ' ')" \
   "the first twelve sessions receive distinct colours"
 : >"$TMUX_STATUS_TEST_LOG"
-TMUX_STATUS_TEST_SESSIONS="" run_status apply-colours '#60daee' '#61b9f2' '#ef8ee9'
+TMUX_STATUS_TEST_SESSIONS="" run_status apply-colours '#ff6165/#000000' '#ff9230/#000000' '#ffd600/#000000' '#30d158/#000000' '#00dac3/#000000' '#00d2e0/#000000' '#3cd3fe/#000000' '#5cb8ff/#000000' '#a7aaff/#000000' '#ea8dff/#000000' '#ff8ac4/#000000' '#dba679/#000000'
 assert_equals "0" "$(wc -l <"$TMUX_STATUS_TEST_LOG" | tr -d ' ')" \
   "no sessions means no set-option calls"
 

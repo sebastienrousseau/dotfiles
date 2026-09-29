@@ -60,10 +60,10 @@ chmod +x "$SANDBOX/bin/sysctl" "$SANDBOX/bin/ps" \
 test_start "tmux_status_exists"
 assert_file_exists "$TMUX_STATUS" "tmux status helper must exist"
 
-test_start "tmux_status_assigns_unique_wallpaper_colours"
+test_start "tmux_status_assigns_unique_apple_session_colours"
 TMUX_STATUS_TEST_LOG="$SANDBOX/colours.log" \
   PATH="$SANDBOX/bin:$PATH" \
-  bash "$TMUX_STATUS" apply-colours '#60daee' '#61b9f2' '#ef8ee9'
+  bash "$TMUX_STATUS" apply-colours '#ff6165/#000000' '#ff9230/#000000' '#ffd600/#000000' '#30d158/#000000' '#00dac3/#000000' '#00d2e0/#000000' '#3cd3fe/#000000' '#5cb8ff/#000000' '#a7aaff/#000000' '#ea8dff/#000000' '#ff8ac4/#000000' '#dba679/#000000'
 assigned="$(wc -l <"$SANDBOX/colours.log" | tr -d ' ')"
 unique="$(cut -d '|' -f2 "$SANDBOX/colours.log" | sort -u | wc -l | tr -d ' ')"
 assert_equals "4" "$assigned" "every active session receives a color"
