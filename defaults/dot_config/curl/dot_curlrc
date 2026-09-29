@@ -1,7 +1,6 @@
 # cURL Configuration
--w "\n"
+-w "%{stderr}\n"
 --anyauth
---continue-at -
 --connect-timeout 60
 --compressed
 --ipv4
