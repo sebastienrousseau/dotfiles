@@ -4,6 +4,49 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+## v0.2.530 — 2026-09-29
+
+### Fixed
+
+- `upd` no longer upgrades the Go project you run it from. Its Go step
+  ran `go get -u all` in the current directory, which upgraded every
+  dependency of that module and rewrote its `go` directive. Go has no
+  global module set, so the step is removed; Go toolchains stay with
+  mise.
+- `update --help`, or any unknown flag such as `update --dry-run`, no
+  longer runs a full update. Unknown arguments were ignored, so either
+  ran brew upgrade, `sudo apt upgrade -y`, npm, cargo, pip and a chezmoi
+  pull. `--help` now prints usage; an unknown option exits 2 before
+  anything runs.
+- `update` and `upd` report failed steps instead of claiming success.
+  A failed npm, pnpm, rustup, cargo, gem, brew or deno update printed
+  "updated successfully"; rustup, pip and the chezmoi pull in `update`
+  printed "Done:" whatever happened. On a PEP 668 (externally managed)
+  Python every pip install fails, and each run said it had succeeded.
+- `upd` no longer leaves nine `*_output` variables set in your shell.
+- `version-sync` updates bare `vX.Y.Z` references under macOS sed. Its
+  rule relied on GNU `\b`, so a local run on macOS left 184 files
+  stale, `install.sh`'s default version among them. Releases, which
+  run on Linux, were unaffected.
+- `install.sh` names the migration it runs. `version-sync` had
+  restamped the 0.2.503 migration's label with every release number.
+
+### Changed
+
+- The mutation gate and the source-grep and complexity ratchets run
+  under Merge Gate, so they now block merges; before, none of them
+  could.
+- Complexity burn-down: `update_programming_tools`, the `update`
+  script and the v0.2.503 migration now meet the limits. The baseline
+  is down to 214 over-limit units. Each refactor was verified
+  byte-identical against a golden harness.
+- Tests run the code they check. The source-grep ratchet dropped from
+  188 to 170 lines. New behavioural suites cover the update aliases,
+  the `update` script, the v0.2.503 migration and `version-sync`'s
+  rewrite rules; the attestation and A2A tests run the code instead of
+  grepping it.
+- Dependencies: x/ansi 0.11.8 in the Go TUIs, jsonschema 4.26.0.
+
 ## v0.2.529 — 2026-09-28
 
 ### Security
