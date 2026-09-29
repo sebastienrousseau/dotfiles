@@ -102,12 +102,13 @@ The Neovim configuration includes:
 
 ## tmux
 
-The tmux status bar sits at the top as two solid blocks taken from the active
-wallpaper: its primary color behind the session and windows, its secondary color
-behind the clock. Each wallpaper's `-light` and `-dark` theme supplies its own
-pair, and every label on them reaches 7:1 (WCAG AAA). It displays:
+The tmux status bar sits at the bottom as one solid block in the active
+wallpaper's primary color behind the session and windows, with the clock on a
+tint of the wallpaper's secondary hue (deep on dark themes, pale on light ones).
+Each wallpaper's `-light` and `-dark` theme supplies its own colors, and every
+label reaches 7:1 (WCAG AAA). It displays:
 
-- The session name, which turns the warning color and gains a keyboard glyph while the tmux prefix is active
+- A terminal icon and the session name; while the tmux prefix is active the icon becomes a keyboard and the session turns the error color
 - Window tabs with native current (bold, `*`), zoom, last, bell, and activity flags, so no state relies on color alone
 - A single lightweight CPU, memory, and battery sample on macOS, Linux/Arch, WSL, and Windows
 - An always-visible directory, a responsive weekday and date, and an always-visible clock
