@@ -734,10 +734,15 @@ if [[ -n "$CHEZMOI_BIN" ]]; then
   assert_file_contains "$RENDER/tmux-light.conf" 'set-environment -g COLORFGBG "0;15"' "light panes inherit a light appearance signal"
   assert_file_contains "$RENDER/tmux-dark.conf" 'set -g focus-events on' "tmux receives terminal focus events"
   assert_file_contains "$RENDER/tmux-dark.conf" 'bind A display-menu -T "#[align=centre] AI CLI cockpit "' "prefix+A exposes the AI launcher"
-  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g @dot_session_colour "#ff8800"' "session colour is the theme accent"
-  assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#{?client_prefix,#ff2255,#{@dot_session_colour}},bg=#1b2430,bold] #{?client_prefix,' \
-    "session identity reacts to prefix state in the theme's error colour"
-  assert_equals "1" "$(grep -c '#{?client_prefix,.* }#S ' "$RENDER/tmux-dark.conf")" \
+  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g status-position top' "the block bar sits at the top"
+  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g status-style "bg=#ff8800,fg=#000000"' \
+    "the primary block is the accent, labelled in accent_text"
+  assert_file_contains "$RENDER/tmux-light.conf" 'set -g status-style "bg=#0066ff,fg=#ffffff"' \
+    "the light theme swaps to its own accent and white labels"
+  assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#000000,bg=#22ccaa,bold] ' "the clock sits in the secondary block"
+  assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#000000,bg=#{?client_prefix,#ffcc00,#ff8800},bold] #{?client_prefix,⌨ ,}#S ' \
+    "prefix mode turns the session warning and adds a glyph, not colour alone"
+  assert_equals "1" "$(grep -c '#{?client_prefix,.* ,}#S ' "$RENDER/tmux-dark.conf")" \
     "session name is the primary left-side identity"
   assert_file_contains "$RENDER/tmux-dark.conf" 'set -g status-justify left' "session and windows form one compact group"
   assert_file_contains "$RENDER/tmux-dark.conf" ' #I:#W#F#{?window_zoomed_flag,' "current window shows native flags and zoom state"

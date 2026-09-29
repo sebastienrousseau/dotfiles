@@ -149,17 +149,29 @@ bind C-f command-prompt -p find-session 'switch-client -t %%'
 bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
-# ║  THEME — Minimal Status Bar                                             ║
+# ║  THEME — Wallpaper Block Status Bar                                      ║
 # ║  Colors from .chezmoidata/themes.toml (maui-light)  ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Two solid blocks across the top: the wallpaper's primary colour carries the
+# session and windows, its secondary colour carries the clock. Following the
+# Apple HIG colour guidance:
+#   - colour goes on large areas; every label on them is the one monochrome
+#     accent_text, which the palette audit holds at 7:1 (WCAG AAA, the
+#     increased-contrast bar) on accent, secondary, warning and error;
+#   - each colour keeps one meaning: accent = your windows, secondary = time,
+#     warning = prefix armed, error = bell;
+#   - no state is shown by colour alone: the active window is bold and flagged
+#     `*`, prefix mode adds a ⌨ glyph, bell and activity keep tmux's `!`/`#`;
+#   - light and dark come from the wallpaper's own -light/-dark theme pair.
 
 # --- Status Bar ---
 set -g status on
 set -g status-interval 10
-set -g status-position bottom
+set -g status-position top
 set -g status-justify left
-set -g status-style "bg=#dce5ea,fg=#1c1d1e"
-set -g status-left-length 32
+set -g status-style "bg=#005a75,fg=#ffffff"
+set -g status-left-length 40
 set -g status-right-length 120
 
 # User-overridable modules. `set -o` keeps values from a local tmux.conf or
@@ -168,36 +180,28 @@ set -ogq @dot_status_show_path on
 set -ogq @dot_status_show_system on
 set -ogq @dot_status_show_date on
 
-# Give every session a stable colour from the active wallpaper palette. The
-# helper refreshes all sessions after a theme change and colours new/renamed
-# sessions without requiring hand-maintained per-project rules.
-set -g @dot_session_colour "#005a75"
-run-shell -b "test ! -x ~/.local/bin/tmux-status || ~/.local/bin/tmux-status apply-colours '#005a75' '#610a89' '#583500'"
-set-hook -g session-created "run-shell -b \"~/.local/bin/tmux-status apply-colours '#005a75' '#610a89' '#583500'\""
-set-hook -g session-renamed "run-shell -b \"~/.local/bin/tmux-status apply-colours '#005a75' '#610a89' '#583500'\""
-
-# --- Minimal session identity — the bar's only persistent chromatic element ---
+# --- Session: the block's leading label; prefix mode turns it warning ---
 set -g status-left "\
-#[fg=#{?client_prefix,#9f1239,#{@dot_session_colour}},bg=#dce5ea,bold] #{?client_prefix, , }#S \
-#[fg=#cad1d5,bg=#dce5ea,nobold]│ "
+#[fg=#ffffff,bg=#{?client_prefix,#6b3f00,#005a75},bold] #{?client_prefix,⌨ ,}#S \
+#[bg=#005a75,nobold] "
 
-# --- One lightweight system sample, responsive context, and time ---
+# --- Context in the primary block, then the clock in the secondary block ---
 # `tmux-status system` performs one platform-aware sample per interval. Path,
 # monitoring, and date modules can be disabled independently with the options
 # above; narrower clients progressively retain only the clock.
 set -g status-right "\
-#[fg=#1c1d1e,bg=#dce5ea,bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
-#[fg=#393e40,bg=#dce5ea,nobold]#{?#{==:#{@dot_status_show_path},on}, #[fg=#1c1d1e]#{b:pane_current_path} #[fg=#cad1d5]│ #[fg=#393e40],}\
-#{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#(~/.local/bin/tmux-status system) #[fg=#cad1d5]│ #[fg=#393e40],}\
-#{?#{&&:#{==:#{@dot_status_show_date},on},#{e|>=:#{client_width},155}},%d %b · ,}%H:%M "
+#[fg=#ffffff,bg=#005a75,bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
+#[nobold]#{?#{==:#{@dot_status_show_path},on},#{b:pane_current_path} · ,}\
+#{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#(~/.local/bin/tmux-status system) ,}\
+#[fg=#ffffff,bg=#7f2ea7,bold] #{?#{&&:#{==:#{@dot_status_show_date},on},#{e|>=:#{client_width},155}},%A#, %Y-%m-%d  ,}%H:%M "
 
 # --- Window Tabs ---
-set -g window-status-format "#[fg=#393e40,bg=#dce5ea,nobold] #I:#W#F "
-set -g window-status-current-format "#[fg=#1c1d1e,bg=#dce5ea,bold] #I:#W#F#{?window_zoomed_flag, ,} "
+set -g window-status-format "#[fg=#ffffff,bg=#005a75,nobold] #I:#W#F "
+set -g window-status-current-format "#[fg=#ffffff,bg=#005a75,bold] #I:#W#F#{?window_zoomed_flag, ,} "
 
-set -g window-status-separator "#[fg=#cad1d5,bg=#dce5ea,nobold]·"
-set -g window-status-bell-style "bg=#dce5ea,fg=#9f1239,bold"
-set -g window-status-activity-style "bg=#dce5ea,fg=#6b3f00,bold"
+set -g window-status-separator ""
+set -g window-status-bell-style "bg=#9f1239,fg=#ffffff,bold"
+set -g window-status-activity-style "bg=#6b3f00,fg=#ffffff,bold"
 
 # --- Pane Borders ---
 set -g pane-border-style "fg=#cad1d5"
@@ -205,17 +209,17 @@ set -g pane-active-border-style "fg=#005a75"
 set -g display-panes-colour "#583500"
 set -g display-panes-active-colour "#005a75"
 
-# --- Messages & Menus ---
-set -g message-style "bg=#cad1d5,fg=#005a75"
-set -g message-command-style "bg=#cad1d5,fg=#005a75"
-set -g mode-style "bg=#cad1d5,fg=#005a75,bold"
+# --- Messages & Menus: text on a block, same 7:1 pairing as the bar ---
+set -g message-style "bg=#7f2ea7,fg=#ffffff"
+set -g message-command-style "bg=#7f2ea7,fg=#ffffff"
+set -g mode-style "bg=#005a75,fg=#ffffff,bold"
 
 # --- Clock ---
 setw -g clock-mode-colour "#005a75"
 setw -g clock-mode-style 24
 
 # --- Copy Mode Highlight ---
-set -g copy-mode-match-style "bg=#6b3f00,fg=#e9f4fa"
+set -g copy-mode-match-style "bg=#6b3f00,fg=#ffffff"
 set -g copy-mode-current-match-style "bg=#005a75,fg=#ffffff,bold"
 
 # --- LINUX SPECIFIC ---

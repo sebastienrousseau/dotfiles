@@ -1,28 +1,18 @@
-{{- /* Every tmux surface follows the active wallpaper variant. The generated
-       ui.*_on_surface slots already enforce readable text contrast against
-       that variant's panel and border colours. */ -}}
+{{- /* Every tmux surface follows the active wallpaper variant. The status bar
+       is two solid blocks (accent, then secondary) labelled in accent_text,
+       which the palette audit holds at 7:1 on accent, secondary, tertiary,
+       warning and error in both the -light and -dark theme. */ -}}
 {{- $themeName := includeTemplate "theme-name" . -}}
 {{- $t := index .themes $themeName -}}
-{{- $bg := $t.term.bg -}}
-{{- $fg := $t.term.fg -}}
 {{- $accent := $t.ui.accent -}}
 {{- $accent_text := $t.ui.accent_text -}}
-{{- $panel := $t.ui.panel -}}
 {{- $border := $t.ui.border -}}
-{{- /* muted: de-emphasised but still TEXT. term.c8 is ANSI bright-black,
-       floored at 2.5:1 against bg, and using it here put the clock at
-       2.12:1 and the inactive window names at 2.45:1. ui.text_muted is
-       floored at 4.5:1 against BOTH panel and border, which are the two
-       surfaces this bar paints on. */ -}}
-{{- $muted := (index $t.ui "text_muted") | default $t.term.c8 -}}
-{{- /* The wallpaper's 2nd and 3rd chromatic colours, so the bar carries
-       more of the image than a single accent. Their mode-aware text colour
-       reaches at least 7:1: black on dark-mode blocks, white in light mode.
-       `index` rather than `.secondary`: a missing map key is an ERROR
-       with field syntax and nil with index, and only nil reaches
-       `default`. This template must survive a themes.toml generated
-       before these keys existed. */ -}}
-{{- $secondary := (index $t.ui "secondary_on_surface") | default $t.ui.accent -}}
+{{- /* The wallpaper's second chromatic colour as a block, and its third as
+       text on a surface. `index` rather than `.secondary`: a missing map
+       key is an ERROR with field syntax and nil with index, and only nil
+       reaches `default`. This template must survive a themes.toml
+       generated before these keys existed. */ -}}
+{{- $secondary_block := (index $t.ui "secondary") | default $t.ui.accent -}}
 {{- $tertiary := (index $t.ui "tertiary_on_surface") | default $t.ui.accent -}}
 {{- $error := $t.ui.error -}}
 {{- $warning := $t.ui.warning -}}
@@ -178,17 +168,29 @@ bind C-f command-prompt -p find-session 'switch-client -t %%'
 bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
-# ║  THEME — Minimal Status Bar                                             ║
+# ║  THEME — Wallpaper Block Status Bar                                      ║
 # ║  Colors from .chezmoidata/themes.toml ({{ $themeName }})  ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# Two solid blocks across the top: the wallpaper's primary colour carries the
+# session and windows, its secondary colour carries the clock. Following the
+# Apple HIG colour guidance:
+#   - colour goes on large areas; every label on them is the one monochrome
+#     accent_text, which the palette audit holds at 7:1 (WCAG AAA, the
+#     increased-contrast bar) on accent, secondary, warning and error;
+#   - each colour keeps one meaning: accent = your windows, secondary = time,
+#     warning = prefix armed, error = bell;
+#   - no state is shown by colour alone: the active window is bold and flagged
+#     `*`, prefix mode adds a ⌨ glyph, bell and activity keep tmux's `!`/`#`;
+#   - light and dark come from the wallpaper's own -light/-dark theme pair.
 
 # --- Status Bar ---
 set -g status on
 set -g status-interval 10
-set -g status-position bottom
+set -g status-position top
 set -g status-justify left
-set -g status-style "bg={{ $panel }},fg={{ $fg }}"
-set -g status-left-length 32
+set -g status-style "bg={{ $accent }},fg={{ $accent_text }}"
+set -g status-left-length 40
 set -g status-right-length 120
 
 # User-overridable modules. `set -o` keeps values from a local tmux.conf or
@@ -197,36 +199,28 @@ set -ogq @dot_status_show_path on
 set -ogq @dot_status_show_system on
 set -ogq @dot_status_show_date on
 
-# Give every session a stable colour from the active wallpaper palette. The
-# helper refreshes all sessions after a theme change and colours new/renamed
-# sessions without requiring hand-maintained per-project rules.
-set -g @dot_session_colour "{{ $accent }}"
-run-shell -b "test ! -x ~/.local/bin/tmux-status || ~/.local/bin/tmux-status apply-colours '{{ $accent }}' '{{ $secondary }}' '{{ $tertiary }}'"
-set-hook -g session-created "run-shell -b \"~/.local/bin/tmux-status apply-colours '{{ $accent }}' '{{ $secondary }}' '{{ $tertiary }}'\""
-set-hook -g session-renamed "run-shell -b \"~/.local/bin/tmux-status apply-colours '{{ $accent }}' '{{ $secondary }}' '{{ $tertiary }}'\""
-
-# --- Minimal session identity — the bar's only persistent chromatic element ---
+# --- Session: the block's leading label; prefix mode turns it warning ---
 set -g status-left "\
-#[fg=#{?client_prefix,{{ $error }},#{@dot_session_colour}},bg={{ $panel }},bold] #{?client_prefix, , }#S \
-#[fg={{ $border }},bg={{ $panel }},nobold]│ "
+#[fg={{ $accent_text }},bg=#{?client_prefix,{{ $warning }},{{ $accent }}},bold] #{?client_prefix,⌨ ,}#S \
+#[bg={{ $accent }},nobold] "
 
-# --- One lightweight system sample, responsive context, and time ---
+# --- Context in the primary block, then the clock in the secondary block ---
 # `tmux-status system` performs one platform-aware sample per interval. Path,
 # monitoring, and date modules can be disabled independently with the options
 # above; narrower clients progressively retain only the clock.
 set -g status-right "\
-#[fg={{ $fg }},bg={{ $panel }},bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
-#[fg={{ $muted }},bg={{ $panel }},nobold]#{?#{==:#{@dot_status_show_path},on}, #[fg={{ $fg }}]#{b:pane_current_path} #[fg={{ $border }}]│ #[fg={{ $muted }}],}\
-#{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#(~/.local/bin/tmux-status system) #[fg={{ $border }}]│ #[fg={{ $muted }}],}\
-#{?#{&&:#{==:#{@dot_status_show_date},on},#{e|>=:#{client_width},155}},%d %b · ,}%H:%M "
+#[fg={{ $accent_text }},bg={{ $accent }},bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
+#[nobold]#{?#{==:#{@dot_status_show_path},on},#{b:pane_current_path} · ,}\
+#{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#(~/.local/bin/tmux-status system) ,}\
+#[fg={{ $accent_text }},bg={{ $secondary_block }},bold] #{?#{&&:#{==:#{@dot_status_show_date},on},#{e|>=:#{client_width},155}},%A#, %Y-%m-%d  ,}%H:%M "
 
 # --- Window Tabs ---
-set -g window-status-format "#[fg={{ $muted }},bg={{ $panel }},nobold] #I:#W#F "
-set -g window-status-current-format "#[fg={{ $fg }},bg={{ $panel }},bold] #I:#W#F#{?window_zoomed_flag, ,} "
+set -g window-status-format "#[fg={{ $accent_text }},bg={{ $accent }},nobold] #I:#W#F "
+set -g window-status-current-format "#[fg={{ $accent_text }},bg={{ $accent }},bold] #I:#W#F#{?window_zoomed_flag, ,} "
 
-set -g window-status-separator "#[fg={{ $border }},bg={{ $panel }},nobold]·"
-set -g window-status-bell-style "bg={{ $panel }},fg={{ $error }},bold"
-set -g window-status-activity-style "bg={{ $panel }},fg={{ $warning }},bold"
+set -g window-status-separator ""
+set -g window-status-bell-style "bg={{ $error }},fg={{ $accent_text }},bold"
+set -g window-status-activity-style "bg={{ $warning }},fg={{ $accent_text }},bold"
 
 # --- Pane Borders ---
 set -g pane-border-style "fg={{ $border }}"
@@ -234,17 +228,17 @@ set -g pane-active-border-style "fg={{ $accent }}"
 set -g display-panes-colour "{{ $tertiary }}"
 set -g display-panes-active-colour "{{ $accent }}"
 
-# --- Messages & Menus ---
-set -g message-style "bg={{ $border }},fg={{ $accent }}"
-set -g message-command-style "bg={{ $border }},fg={{ $accent }}"
-set -g mode-style "bg={{ $border }},fg={{ $accent }},bold"
+# --- Messages & Menus: text on a block, same 7:1 pairing as the bar ---
+set -g message-style "bg={{ $secondary_block }},fg={{ $accent_text }}"
+set -g message-command-style "bg={{ $secondary_block }},fg={{ $accent_text }}"
+set -g mode-style "bg={{ $accent }},fg={{ $accent_text }},bold"
 
 # --- Clock ---
 setw -g clock-mode-colour "{{ $accent }}"
 setw -g clock-mode-style 24
 
 # --- Copy Mode Highlight ---
-set -g copy-mode-match-style "bg={{ $warning }},fg={{ $bg }}"
+set -g copy-mode-match-style "bg={{ $warning }},fg={{ $accent_text }}"
 set -g copy-mode-current-match-style "bg={{ $accent }},fg={{ $accent_text }},bold"
 
 # --- LINUX SPECIFIC ---
