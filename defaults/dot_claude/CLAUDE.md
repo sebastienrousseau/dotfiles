@@ -57,6 +57,33 @@ captured in.
 - Editor: Neovim with lazy.nvim
 - Dotfiles: chezmoi-managed
 
+## Hygiene first
+
+The first step in any repository, before the task I asked for: check its
+health and clear what the check finds. This is a hard gate, not a quota.
+
+- Open Dependabot PRs and alerts, code-scanning and secret-scanning alerts,
+  the native vulnerability audit, and a red default-branch CI: fix each, or
+  open the PR that fixes it. A disabled scanner is a finding.
+- Lint and format clean, with no new suppressions.
+- Complexity per function: cyclomatic ≤ 10, cognitive ≤ 15, Halstead
+  difficulty ≤ 30, ≤ 60 lines (≤ 500 per file). Code you write or touch
+  meets them; existing offenders never get worse and shrink worst-first
+  against a committed, CI-enforced baseline.
+
+Merge authority is unchanged: this authorises preparing fixes, not merging
+them. Report what the check found and fixed before starting the task.
+`~/Code/AGENTS.md` §0 has the commands and per-ecosystem tools.
+
+## Accountability
+
+- Never add `Signed-off-by:` or any other certification on my behalf; I
+  review and certify. Record your part with an `Assisted-by:` trailer.
+- Never send anything to other people or projects yourself (emails, issues
+  or security reports elsewhere, publishes, posts): prepare it for me.
+- For a bug: reproduce it first, keep only a fix seen to work, and say what
+  you could not verify (`~/Code/AGENTS.md` §9).
+
 ## Working discipline
 
 Read every instruction — mine, a repo's, or a skill's — as **conditions,
