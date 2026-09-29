@@ -27,6 +27,12 @@ SURFACE_TEXT_ROLES = (
     "secondary_on_surface",
     "tertiary_on_surface",
 )
+# Neutral ANSI slots painted as text. Dark c0 and light c15 are exempt: they
+# are the palette's background-tone slots (see scripts/theme/aaa.py).
+STRUCTURAL_TEXT = {"dark": ("c7", "c8", "c15"), "light": ("c0", "c7", "c8")}
+# WCAG 2.2 AAA (1.4.6) for everything drawn as text; 1.4.11 has no AAA level,
+# so non-text focus indicators keep its 3:1.
+AAA = 7.0
 
 # Full-severity approximations used as deterministic regression simulations.
 # They are not medical diagnostics; they ensure semantic roles do not collapse
@@ -195,9 +201,19 @@ def audit_theme(name: str, theme: dict[str, Any]) -> dict[str, Any]:
 
         text_contrast = contrast(foreground, background)
         selection_contrast = contrast(hex_rgb(term["sel_fg"]), hex_rgb(term["sel_bg"]))
+        structural_text_contrast = min(
+            contrast(hex_rgb(term[slot]), background) for slot in STRUCTURAL_TEXT[mode]
+        )
+        cursor_text_contrast = contrast(
+            hex_rgb(term["cursor_text"]), hex_rgb(term["cursor"])
+        )
         focus_contrast = min(
             contrast(hex_rgb(ui["accent"]), background),
             contrast(hex_rgb(term["cursor"]), background),
+        )
+        # Text painted ON the accent/secondary/tertiary blocks (tmux bar).
+        block_text_contrast = min(
+            contrast(accent_text, hex_rgb(ui[role])) for role in SUPPORT_ROLES
         )
         status_text_contrast = min(
             contrast(accent_text, hex_rgb(ui[role])) for role in SEMANTIC_ROLES
@@ -208,7 +224,8 @@ def audit_theme(name: str, theme: dict[str, Any]) -> dict[str, Any]:
             for surface in (background, panel, border)
         )
         muted_text_contrast = min(
-            contrast(hex_rgb(ui["text_muted"]), surface) for surface in (panel, border)
+            contrast(hex_rgb(ui["text_muted"]), surface)
+            for surface in (background, panel, border)
         )
         ansi_colors = [hex_rgb(term[f"c{index}"]) for index in ANSI_CHROMATIC]
         ansi_truecolor_contrast = min(
@@ -232,8 +249,11 @@ def audit_theme(name: str, theme: dict[str, Any]) -> dict[str, Any]:
         metrics = {
             "text_contrast": rounded(text_contrast),
             "status_text_contrast": rounded(status_text_contrast),
+            "block_text_contrast": rounded(block_text_contrast),
             "focus_contrast": rounded(focus_contrast),
             "selection_contrast": rounded(selection_contrast),
+            "structural_text_contrast": rounded(structural_text_contrast),
+            "cursor_text_contrast": rounded(cursor_text_contrast),
             "surface_text_contrast": rounded(surface_text_contrast),
             "muted_text_contrast": rounded(muted_text_contrast),
             "ansi_truecolor_contrast": rounded(ansi_truecolor_contrast),
@@ -246,17 +266,18 @@ def audit_theme(name: str, theme: dict[str, Any]) -> dict[str, Any]:
             },
         }
 
-        require("text_contrast", text_contrast, 7.0)
-        require("status_text_contrast", status_text_contrast, 7.0)
+        require("text_contrast", text_contrast, AAA)
+        require("status_text_contrast", status_text_contrast, AAA)
+        require("block_text_contrast", block_text_contrast, AAA)
         require("focus_contrast", focus_contrast, 3.0)
-        require("selection_contrast", selection_contrast, 4.5)
-        require("surface_text_contrast", surface_text_contrast, 4.5)
-        require("muted_text_contrast", muted_text_contrast, 4.5)
-        require(
-            "ansi_truecolor_contrast",
-            ansi_truecolor_contrast,
-            4.5 if mode == "dark" else 7.0,
-        )
+        require("selection_contrast", selection_contrast, AAA)
+        require("structural_text_contrast", structural_text_contrast, AAA)
+        require("cursor_text_contrast", cursor_text_contrast, AAA)
+        require("surface_text_contrast", surface_text_contrast, AAA)
+        require("muted_text_contrast", muted_text_contrast, AAA)
+        require("ansi_truecolor_contrast", ansi_truecolor_contrast, AAA)
+        # The xterm-256 approximation cannot reach 7:1 in every hue (see
+        # scripts/theme/aaa.py); every configured terminal renders the exact hex.
         require("ansi_256_contrast", ansi_256_contrast, 4.5)
         require("support_delta_e", support_distance, 18.0)
         require("semantic_cvd_delta_e", semantic_cvd_distance, 8.0)

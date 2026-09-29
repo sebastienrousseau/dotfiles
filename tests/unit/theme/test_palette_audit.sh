@@ -51,7 +51,9 @@ m=[r[\"metrics\"] for r in d[\"results\"]]
 assert min(x[\"text_contrast\"] for x in m) >= 7
 assert min(x[\"status_text_contrast\"] for x in m) >= 7
 assert min(x[\"focus_contrast\"] for x in m) >= 3
-assert min(x[\"ansi_truecolor_contrast\"] for x in m) >= 4.5
+for k in (\"selection_contrast\", \"block_text_contrast\", \"structural_text_contrast\", \"cursor_text_contrast\",
+          \"surface_text_contrast\", \"muted_text_contrast\", \"ansi_truecolor_contrast\"):
+    assert min(x[k] for x in m) >= 7, k
 assert min(x[\"ansi_256_contrast\"] for x in m) >= 4.5
 assert min(x[\"support_delta_e\"] for x in m) >= 18
 assert min(x[\"semantic_cvd_delta_e\"] for x in m) >= 8
@@ -66,6 +68,7 @@ mode = "dark"
 bg = "#101010"
 fg = "#111111"
 cursor = "#101010"
+cursor_text = "#111111"
 sel_bg = "#101010"
 sel_fg = "#111111"
 c1 = "#111111"
@@ -74,12 +77,15 @@ c3 = "#111111"
 c4 = "#111111"
 c5 = "#111111"
 c6 = "#111111"
+c7 = "#111111"
+c8 = "#111111"
 c9 = "#111111"
 c10 = "#111111"
 c11 = "#111111"
 c12 = "#111111"
 c13 = "#111111"
 c14 = "#111111"
+c15 = "#111111"
 
 [themes.broken-dark.ui]
 accent = "#101010"
@@ -108,6 +114,9 @@ assert_equals "1" "$broken_rc"
 test_start "palette_audit_names_actionable_failures"
 assert_file_contains "$broken_output" "text_contrast"
 assert_file_contains "$broken_output" "semantic_cvd_delta_e"
+assert_file_contains "$broken_output" "structural_text_contrast"
+assert_file_contains "$broken_output" "cursor_text_contrast"
+assert_file_contains "$broken_output" "block_text_contrast"
 
 test_start "palette_audit_schema_is_committed"
 assert_file_exists "$REPO_ROOT/schemas/palette-audit.schema.json"

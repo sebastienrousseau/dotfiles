@@ -322,6 +322,11 @@ generator_digest() {
 _rt_generator_state() {
   GENERATOR_STAMP="$CACHE_DIR/.extract-theme.sha256"
   GENERATOR_HASH="$(generator_digest "$EXTRACT_SCRIPT")"
+  # extract-theme.py imports aaa.py for its final AAA pass; an edit there
+  # changes every generated palette just as much.
+  if [[ -f "$SCRIPT_DIR/aaa.py" ]]; then
+    GENERATOR_HASH="$GENERATOR_HASH:$(generator_digest "$SCRIPT_DIR/aaa.py")"
+  fi
   GENERATOR_STALE=false
   if [[ ! -f "$GENERATOR_STAMP" || "$(cat "$GENERATOR_STAMP")" != "$GENERATOR_HASH" ]]; then
     GENERATOR_STALE=true

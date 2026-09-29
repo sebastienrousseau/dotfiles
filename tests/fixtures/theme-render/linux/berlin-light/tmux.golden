@@ -172,9 +172,9 @@ set -ogq @dot_status_show_date on
 # helper refreshes all sessions after a theme change and colours new/renamed
 # sessions without requiring hand-maintained per-project rules.
 set -g @dot_session_colour "#001867"
-run-shell -b "test ! -x ~/.local/bin/tmux-status || ~/.local/bin/tmux-status apply-colours '#001867' '#b00027' '#0051a5'"
-set-hook -g session-created "run-shell -b \"~/.local/bin/tmux-status apply-colours '#001867' '#b00027' '#0051a5'\""
-set-hook -g session-renamed "run-shell -b \"~/.local/bin/tmux-status apply-colours '#001867' '#b00027' '#0051a5'\""
+run-shell -b "test ! -x ~/.local/bin/tmux-status || ~/.local/bin/tmux-status apply-colours '#001867' '#800004' '#003888'"
+set-hook -g session-created "run-shell -b \"~/.local/bin/tmux-status apply-colours '#001867' '#800004' '#003888'\""
+set-hook -g session-renamed "run-shell -b \"~/.local/bin/tmux-status apply-colours '#001867' '#800004' '#003888'\""
 
 # --- Minimal session identity — the bar's only persistent chromatic element ---
 set -g status-left "\
@@ -187,12 +187,12 @@ set -g status-left "\
 # above; narrower clients progressively retain only the clock.
 set -g status-right "\
 #[fg=#1d1d1e,bg=#e5e3ea,bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
-#[fg=#59595c,bg=#e5e3ea,nobold]#{?#{==:#{@dot_status_show_path},on}, #[fg=#1d1d1e]#{b:pane_current_path} #[fg=#d1cfd5]│ #[fg=#59595c],}\
-#{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#(~/.local/bin/tmux-status system) #[fg=#d1cfd5]│ #[fg=#59595c],}\
+#[fg=#3d3d40,bg=#e5e3ea,nobold]#{?#{==:#{@dot_status_show_path},on}, #[fg=#1d1d1e]#{b:pane_current_path} #[fg=#d1cfd5]│ #[fg=#3d3d40],}\
+#{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#(~/.local/bin/tmux-status system) #[fg=#d1cfd5]│ #[fg=#3d3d40],}\
 #{?#{&&:#{==:#{@dot_status_show_date},on},#{e|>=:#{client_width},155}},%d %b · ,}%H:%M "
 
 # --- Window Tabs ---
-set -g window-status-format "#[fg=#59595c,bg=#e5e3ea,nobold] #I:#W#F "
+set -g window-status-format "#[fg=#3d3d40,bg=#e5e3ea,nobold] #I:#W#F "
 set -g window-status-current-format "#[fg=#1d1d1e,bg=#e5e3ea,bold] #I:#W#F#{?window_zoomed_flag, ,} "
 
 set -g window-status-separator "#[fg=#d1cfd5,bg=#e5e3ea,nobold]·"
@@ -202,7 +202,7 @@ set -g window-status-activity-style "bg=#e5e3ea,fg=#6b3f00,bold"
 # --- Pane Borders ---
 set -g pane-border-style "fg=#d1cfd5"
 set -g pane-active-border-style "fg=#001867"
-set -g display-panes-colour "#0051a5"
+set -g display-panes-colour "#003888"
 set -g display-panes-active-colour "#001867"
 
 # --- Messages & Menus ---

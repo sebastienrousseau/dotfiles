@@ -25,7 +25,7 @@ set-environment -g AIDER_DARK_MODE "true"
 set-environment -g AIDER_LIGHT_MODE "false"
 set-environment -g AIDER_CODE_THEME "solarized-dark"
 set-environment -g AIDER_USER_INPUT_COLOR "#61d677"
-set-environment -g AIDER_TOOL_ERROR_COLOR "#fb7373"
+set-environment -g AIDER_TOOL_ERROR_COLOR "#ff8180"
 set-environment -g AIDER_TOOL_WARNING_COLOR "#d5a880"
 set-environment -g AIDER_ASSISTANT_OUTPUT_COLOR "#acaaf3"
 setw -g xterm-keys on
@@ -172,9 +172,9 @@ set -ogq @dot_status_show_date on
 # helper refreshes all sessions after a theme change and colours new/renamed
 # sessions without requiring hand-maintained per-project rules.
 set -g @dot_session_colour "#acaaf3"
-run-shell -b "test ! -x ~/.local/bin/tmux-status || ~/.local/bin/tmux-status apply-colours '#acaaf3' '#ff7c7b' '#fd8fa8'"
-set-hook -g session-created "run-shell -b \"~/.local/bin/tmux-status apply-colours '#acaaf3' '#ff7c7b' '#fd8fa8'\""
-set-hook -g session-renamed "run-shell -b \"~/.local/bin/tmux-status apply-colours '#acaaf3' '#ff7c7b' '#fd8fa8'\""
+run-shell -b "test ! -x ~/.local/bin/tmux-status || ~/.local/bin/tmux-status apply-colours '#acaaf3' '#ffbab6' '#ffb7d0'"
+set-hook -g session-created "run-shell -b \"~/.local/bin/tmux-status apply-colours '#acaaf3' '#ffbab6' '#ffb7d0'\""
+set-hook -g session-renamed "run-shell -b \"~/.local/bin/tmux-status apply-colours '#acaaf3' '#ffbab6' '#ffb7d0'\""
 
 # --- Minimal session identity — the bar's only persistent chromatic element ---
 set -g status-left "\
@@ -187,12 +187,12 @@ set -g status-left "\
 # above; narrower clients progressively retain only the clock.
 set -g status-right "\
 #[fg=#f5f5f8,bg=#2d2c35,bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
-#[fg=#a6a5ac,bg=#2d2c35,nobold]#{?#{==:#{@dot_status_show_path},on}, #[fg=#f5f5f8]#{b:pane_current_path} #[fg=#3a3940]│ #[fg=#a6a5ac],}\
-#{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#(~/.local/bin/tmux-status system) #[fg=#3a3940]│ #[fg=#a6a5ac],}\
+#[fg=#cbcad1,bg=#2d2c35,nobold]#{?#{==:#{@dot_status_show_path},on}, #[fg=#f5f5f8]#{b:pane_current_path} #[fg=#3a3940]│ #[fg=#cbcad1],}\
+#{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#(~/.local/bin/tmux-status system) #[fg=#3a3940]│ #[fg=#cbcad1],}\
 #{?#{&&:#{==:#{@dot_status_show_date},on},#{e|>=:#{client_width},155}},%d %b · ,}%H:%M "
 
 # --- Window Tabs ---
-set -g window-status-format "#[fg=#a6a5ac,bg=#2d2c35,nobold] #I:#W#F "
+set -g window-status-format "#[fg=#cbcad1,bg=#2d2c35,nobold] #I:#W#F "
 set -g window-status-current-format "#[fg=#f5f5f8,bg=#2d2c35,bold] #I:#W#F#{?window_zoomed_flag, ,} "
 
 set -g window-status-separator "#[fg=#3a3940,bg=#2d2c35,nobold]·"
@@ -202,7 +202,7 @@ set -g window-status-activity-style "bg=#2d2c35,fg=#ffd166,bold"
 # --- Pane Borders ---
 set -g pane-border-style "fg=#3a3940"
 set -g pane-active-border-style "fg=#acaaf3"
-set -g display-panes-colour "#fd8fa8"
+set -g display-panes-colour "#ffb7d0"
 set -g display-panes-active-colour "#acaaf3"
 
 # --- Messages & Menus ---

@@ -23,7 +23,7 @@ text = "#f5f5f8"
 
 [colors.normal]
 black = "#3e3d49"
-red = "#fb7373"
+red = "#ff8180"
 green = "#61d677"
 yellow = "#d5a880"
 blue = "#acaaf3"
@@ -32,7 +32,7 @@ cyan = "#00def1"
 white = "#b9b8ba"
 
 [colors.bright]
-black = "#5d5c68"
+black = "#a6a5b2"
 red = "#ff9e9a"
 green = "#7ef391"
 yellow = "#f2c39b"
