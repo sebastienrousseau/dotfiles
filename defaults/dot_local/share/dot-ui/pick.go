@@ -66,8 +66,10 @@ func fuzzyMatch(s, query string) bool {
 	return i == len(q)
 }
 
+// refilter builds a fresh slice: filtered starts out aliasing all, so
+// reusing its backing array would overwrite all's head with matches.
 func (m *pickModel) refilter() {
-	m.filtered = m.filtered[:0]
+	m.filtered = make([]string, 0, len(m.all))
 	for _, it := range m.all {
 		if fuzzyMatch(it, m.query) {
 			m.filtered = append(m.filtered, it)
