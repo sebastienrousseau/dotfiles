@@ -79,7 +79,6 @@
   18   20   24.7   84   100 defaults/dot_local/bin/executable_regex::<top>
   21    1    5.5   27     0 defaults/dot_local/bin/executable_tmux-ai::provider_label
   13   21   27.2   38     0 defaults/dot_local/bin/executable_tmux-sessionizer::build_list
-   9    9   33.4   24     0 defaults/dot_local/bin/executable_tmux-status::apply_colours
   13   16   26.2   41     0 defaults/dot_local/bin/executable_tmux-status::system_linux
   18   17   21.1  142   142 defaults/dot_local/bin/executable_tour::<top>
    1    0    1.0  167   167 examples/example-command-reference.sh::<top>

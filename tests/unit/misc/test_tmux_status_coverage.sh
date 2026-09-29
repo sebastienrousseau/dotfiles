@@ -23,7 +23,10 @@ cat >"$SANDBOX/bin/tmux" <<'EOF'
 #!/usr/bin/env bash
 case "${1:-}" in
   list-sessions) printf '%s' "${TMUX_STATUS_TEST_SESSIONS:-}" ;;
-  set-option) printf '%s|%s\n' "$4" "$6" >>"$TMUX_STATUS_TEST_LOG" ;;
+  set-option)
+    printf '%s|%s\n' "$4" "$6" >>"$TMUX_STATUS_TEST_LOG"
+    [[ -z "${TMUX_STATUS_TEST_FULL:-}" ]] || printf '%s\n' "$*" >>"$TMUX_STATUS_TEST_FULL"
+    ;;
   *) exit 2 ;;
 esac
 EOF
@@ -79,6 +82,28 @@ assert_equals "12" "$(cut -d '|' -f2 "$TMUX_STATUS_TEST_LOG" | sort -u | wc -l |
 TMUX_STATUS_TEST_SESSIONS="" run_status apply-colours '#ff6165/#000000' '#ff9230/#000000' '#ffd600/#000000' '#30d158/#000000' '#00dac3/#000000' '#00d2e0/#000000' '#3cd3fe/#000000' '#5cb8ff/#000000' '#a7aaff/#000000' '#ea8dff/#000000' '#ff8ac4/#000000' '#dba679/#000000'
 assert_equals "0" "$(wc -l <"$TMUX_STATUS_TEST_LOG" | tr -d ' ')" \
   "no sessions means no set-option calls"
+
+test_start "tmux_status_pairs_each_session_with_the_opposite_hue"
+# Apple's order: a session's top bar takes the colour six places on, so the
+# top-left and bottom-left blocks never match (orange pairs with blue).
+export TMUX_STATUS_TEST_FULL="$SANDBOX/full.log"
+: >"$TMUX_STATUS_TEST_FULL"
+TMUX_STATUS_TEST_SESSIONS=$'$1|alpha\n$2|beta\n$3|gamma\n' run_status apply-colours \
+  '#ff4245/#000000' '#ff9230/#000000' '#ffd600/#000000' '#30d158/#000000' '#00dac3/#000000' '#00d2e0/#000000' \
+  '#3cd3fe/#000000' '#0091ff/#000000' '#6d7cff/#000000' '#db34f2/#000000' '#ff375f/#000000' '#b78a66/#000000'
+pairs=(ff4245 ff9230 ffd600 30d158 00dac3 00d2e0 3cd3fe 0091ff 6d7cff db34f2 ff375f b78a66)
+mismatched=0
+while IFS= read -r line; do
+  bottom="$(sed -n 's/.*@dot_session_colour #\([0-9a-f]*\) .*/\1/p' <<<"$line")"
+  top="$(sed -n 's/.*@dot_session_top #\([0-9a-f]*\) .*/\1/p' <<<"$line")"
+  for i in "${!pairs[@]}"; do
+    [[ "${pairs[$i]}" == "$bottom" ]] && [[ "${pairs[$(((i + 6) % 12))]}" != "$top" ]] && mismatched=$((mismatched + 1))
+  done
+  [[ -n "$top" && "$top" != "$bottom" ]] || mismatched=$((mismatched + 1))
+done <"$TMUX_STATUS_TEST_FULL"
+assert_equals "3:0" "$(wc -l <"$TMUX_STATUS_TEST_FULL" | tr -d ' '):$mismatched" \
+  "every session's top colour is the one six on, never its bottom colour"
+unset TMUX_STATUS_TEST_FULL
 
 test_start "tmux_status_other_sessions"
 assert_equals "" "$(TMUX_STATUS_TEST_SESSIONS=$'main\n' run_status other-sessions main)" \

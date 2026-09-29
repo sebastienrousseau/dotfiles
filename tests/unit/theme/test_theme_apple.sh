@@ -12,6 +12,8 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 APPLE="$REPO_ROOT/scripts/theme/apple.py"
+WORK="$(mktemp -d -t dot-theme-apple.XXXXXX)"
+trap 'rm -rf "$WORK"' EXIT
 CATALOG="$REPO_ROOT/defaults/.chezmoidata/themes.toml"
 
 py() {
@@ -59,6 +61,33 @@ print("ok")
 ')"
 assert_equals "ok" "$got" "12 distinct session blocks per mode, each AAA"
 
+test_start "apple_large_text_sessions_are_exact_default_values"
+got="$(py '
+for dark in (True, False):
+    s = apple.sessions(dark, apple.LARGE_TEXT_RATIO)
+    exact = [apple.variants(n, dark)[0] for n in apple.SYSTEM]
+    assert [b for b, _ in s] == exact, s
+    assert all(aaa.contrast(aaa.hex_rgb(b), aaa.hex_rgb(l)) >= 4.5 for b, l in s)
+print("ok")
+')"
+assert_equals "ok" "$got" "all 12 blocks are Apple Default, labels at WCAG AAA large-text 4.5:1"
+
+test_start "apple_session_table_follows_font_size"
+# Bar labels at 18pt or more are large text: exact Apple values; smaller
+# fonts fall back to the 7:1 table.
+if command -v chezmoi >/dev/null 2>&1; then
+  for size in 20 12; do
+    chezmoi execute-template --source "$REPO_ROOT/defaults" \
+      --override-data "{\"theme\":\"maui-dark\",\"terminal_font_size\":$size}" \
+      <"$REPO_ROOT/defaults/dot_config/tmux/tmux.conf.tmpl" >"$WORK/tmux-$size.conf"
+  done
+  assert_file_contains "$WORK/tmux-20.conf" "apply-colours '#ff4245/#000000'"
+  assert_file_contains "$WORK/tmux-12.conf" "apply-colours '#ff6165/#000000'"
+else
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (skipped: chezmoi unavailable)"
+fi
+
 test_start "apple_session_table_is_committed_and_current"
 assert_exit_code 0 "python3 '$APPLE' >/dev/null"
 
@@ -86,8 +115,6 @@ assert_equals "True" "$got" "a resolved palette maps to itself"
 test_start "apple_generator_emits_a_complete_aaa_theme"
 # The generator's TOML writer once used a fixed key list and silently dropped
 # the derived roles; the emitted block must pass the audit on its own.
-WORK="$(mktemp -d -t dot-theme-apple.XXXXXX)"
-trap 'rm -rf "$WORK"' EXIT
 python3 - "$REPO_ROOT/scripts/theme" >"$WORK/gen.toml" <<'PY'
 import importlib.util, sys
 spec = importlib.util.spec_from_file_location("et", sys.argv[1] + "/extract-theme.py")
