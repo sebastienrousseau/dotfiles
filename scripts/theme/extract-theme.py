@@ -1006,6 +1006,11 @@ def theme_to_toml(theme: Dict) -> str:
         key = f"c{i}"
         pad = " " * (4 - len(key))
         lines.append(f'{key}{pad}= "{theme["term"][key]}"')
+    # Then every derived slot (the AAA extended-palette greys, ...).
+    listed = {"bg", "fg", "cursor", "cursor_text", "sel_bg", "sel_fg", *(f"c{i}" for i in range(16))}
+    for key, value in theme["term"].items():
+        if key not in listed:
+            lines.append(f'{key} = "{value}"')
     lines.append("")
 
     lines.append(f"[themes.{name}.ui]")

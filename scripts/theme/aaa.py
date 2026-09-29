@@ -21,6 +21,12 @@ Text slots and the surfaces they land on:
   ui text_muted        de-emphasised text on bg, panel, border
   ui on_secondary_container   the tmux clock on its tinted block
 
+Extended-palette text greys: term grey0..grey11 replace the half of the
+xterm-256 grey ramp that apps draw as text (244-255 on a dark theme, 232-243
+on a light one), evenly spaced in lightness from the first grey that reaches
+7:1 on bg to the far end of the ramp. Apps pick these slots themselves
+(Claude Code's dim text is slot 246, 5.61:1 on a dark bg before this).
+
 Derived roles: secondary_container is always remade from ui.secondary's hue,
 a deep tint on a dark theme and a pale one on a light theme, so it follows
 the secondary. on_secondary_container is that hue as text, walked to 7:1.
@@ -229,6 +235,21 @@ def _secondary_container(ui: dict[str, str], dark: bool) -> None:
     )
 
 
+GREY_SLOTS = 12
+
+
+def text_greys(bg: str, dark: bool) -> list[str]:
+    """Twelve AAA greys for the text half of the xterm-256 grey ramp."""
+    if dark:
+        near, far = legible("#808080", [bg]), "#eeeeee"
+    else:
+        near, far = legible("#767676", [bg]), "#080808"
+    start, end = _lab(hex_rgb(near))[0], _lab(hex_rgb(far))[0]
+    steps = [start + (end - start) * i / (GREY_SLOTS - 1) for i in range(GREY_SLOTS)]
+    greys = [legible(rgb_hex(_rgb(lightness, 0.0, 0.0)), [bg]) for lightness in steps]
+    return greys if dark else greys[::-1]
+
+
 def enforce(theme: dict[str, Any]) -> dict[str, Any]:
     """Return a copy of `theme` whose text colours all reach AAA."""
     out = copy.deepcopy(theme)
@@ -246,6 +267,8 @@ def enforce(theme: dict[str, Any]) -> dict[str, Any]:
     for key in SURFACE_TEXT:
         ui[key] = legible(ui[key], surfaces)
     _secondary_container(ui, out["mode"] == "dark")
+    for index, grey in enumerate(text_greys(bg, out["mode"] == "dark")):
+        term[f"grey{index}"] = grey
     return out
 
 

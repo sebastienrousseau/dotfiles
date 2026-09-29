@@ -3,12 +3,17 @@ bold_font SF Mono Bold
 italic_font SF Mono Regular Italic
 bold_italic_font SF Mono Bold Italic
 font_size 20
+# Taller rows, bars included, for the airier reference layout. Override with
+# terminal_cell_height in chezmoi data (e.g. "100%" to restore the default).
+modify_font cell_height 130%
 
 window_padding_width 16
 # A terminal is a large reading surface: keep it opaque so generated sRGB
 # colours retain their tested contrast instead of blending with the wallpaper.
 background_opacity 1.0
-dim_opacity 0.75
+# Faint (SGR 2) text is still text: kitty draws it at dim_opacity, and 0.75
+# turned a 7:1 colour into roughly 4.5:1. 1.0 keeps faint text at AAA.
+dim_opacity 1.0
 confirm_os_window_close 0
 enable_audio_bell no
 cursor_trail 0
@@ -35,3 +40,15 @@ color12 #3334c3
 color13 #7d0091
 color14 #00596f
 color15 #969697
+color232 #080808
+color233 #111111
+color234 #181818
+color235 #1d1d1d
+color236 #232323
+color237 #2a2a2a
+color238 #303030
+color239 #363636
+color240 #3d3d3d
+color241 #434343
+color242 #4a4a4a
+color243 #515151

@@ -51,7 +51,7 @@ m=[r[\"metrics\"] for r in d[\"results\"]]
 assert min(x[\"text_contrast\"] for x in m) >= 7
 assert min(x[\"status_text_contrast\"] for x in m) >= 7
 assert min(x[\"focus_contrast\"] for x in m) >= 3
-for k in (\"selection_contrast\", \"block_text_contrast\", \"container_text_contrast\", \"structural_text_contrast\", \"cursor_text_contrast\",
+for k in (\"selection_contrast\", \"block_text_contrast\", \"container_text_contrast\", \"grey_text_contrast\", \"structural_text_contrast\", \"cursor_text_contrast\",
           \"surface_text_contrast\", \"muted_text_contrast\", \"ansi_truecolor_contrast\"):
     assert min(x[k] for x in m) >= 7, k
 assert min(x[\"ansi_256_contrast\"] for x in m) >= 4.5
@@ -86,6 +86,18 @@ c12 = "#111111"
 c13 = "#111111"
 c14 = "#111111"
 c15 = "#111111"
+grey0 = "#111111"
+grey1 = "#111111"
+grey2 = "#111111"
+grey3 = "#111111"
+grey4 = "#111111"
+grey5 = "#111111"
+grey6 = "#111111"
+grey7 = "#111111"
+grey8 = "#111111"
+grey9 = "#111111"
+grey10 = "#111111"
+grey11 = "#111111"
 
 [themes.broken-dark.ui]
 accent = "#101010"
@@ -120,6 +132,7 @@ assert_file_contains "$broken_output" "structural_text_contrast"
 assert_file_contains "$broken_output" "cursor_text_contrast"
 assert_file_contains "$broken_output" "block_text_contrast"
 assert_file_contains "$broken_output" "container_text_contrast"
+assert_file_contains "$broken_output" "grey_text_contrast"
 
 test_start "palette_audit_schema_is_committed"
 assert_file_exists "$REPO_ROOT/schemas/palette-audit.schema.json"

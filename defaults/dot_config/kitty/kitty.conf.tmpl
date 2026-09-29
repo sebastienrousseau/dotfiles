@@ -1,5 +1,6 @@
 {{- $fontFamily := default "JetBrainsMono Nerd Font" .terminal_font_family -}}
 {{- $fontSize := default 20 .terminal_font_size -}}
+{{- $cellHeight := default "130%" (index . "terminal_cell_height") -}}
 {{- $linuxDesktop := or .features.linux_desktop .features.niri -}}
 
 font_family {{ $fontFamily }}
@@ -11,12 +12,17 @@ bold_italic_font SF Mono Bold Italic
 symbol_map U+E000-U+F8FF Symbols Nerd Font
 {{- end }}
 font_size {{ $fontSize }}
+# Taller rows, bars included, for the airier reference layout. Override with
+# terminal_cell_height in chezmoi data (e.g. "100%" to restore the default).
+modify_font cell_height {{ $cellHeight }}
 
 window_padding_width 16
 # A terminal is a large reading surface: keep it opaque so generated sRGB
 # colours retain their tested contrast instead of blending with the wallpaper.
 background_opacity 1.0
-dim_opacity 0.75
+# Faint (SGR 2) text is still text: kitty draws it at dim_opacity, and 0.75
+# turned a 7:1 colour into roughly 4.5:1. 1.0 keeps faint text at AAA.
+dim_opacity 1.0
 confirm_os_window_close 0
 enable_audio_bell no
 cursor_trail 0
@@ -48,3 +54,13 @@ color12 {{ $t.term.c12 }}
 color13 {{ $t.term.c13 }}
 color14 {{ $t.term.c14 }}
 color15 {{ $t.term.c15 }}
+{{- /* The text half of the xterm-256 grey ramp (244-255 dark, 232-243
+       light), held at 7:1 on bg by scripts/theme/aaa.py. Apps choose these
+       slots themselves, so the 16 themed colours alone cannot guarantee
+       AAA. Skipped for a catalog generated before the keys existed. */}}
+{{- $greyBase := ternary 244 232 (eq $t.mode "dark") }}
+{{- range $i := until 12 }}
+{{- with index $t.term (printf "grey%d" $i) }}
+color{{ add $greyBase $i }} {{ . }}
+{{- end }}
+{{- end }}
