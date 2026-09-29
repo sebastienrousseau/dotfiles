@@ -49,6 +49,8 @@ text_muted = "#c8cbd5"
 accent_on_surface = "#aecdff"
 secondary_on_surface = "#feb1ff"
 tertiary_on_surface = "#44e86c"
+on_secondary_container = "#ecbaff"
+secondary_container = "#492f54"
 
 [themes.fallback-dark.app]
 nvim = "tokyonight"
@@ -112,6 +114,8 @@ text_muted = "#3c3d42"
 accent_on_surface = "#003a83"
 secondary_on_surface = "#600097"
 tertiary_on_surface = "#004704"
+on_secondary_container = "#59316c"
+secondary_container = "#f5e6fb"
 
 [themes.fallback-light.app]
 nvim = "catppuccin"

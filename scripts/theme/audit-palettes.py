@@ -215,6 +215,10 @@ def audit_theme(name: str, theme: dict[str, Any]) -> dict[str, Any]:
         block_text_contrast = min(
             contrast(accent_text, hex_rgb(ui[role])) for role in SUPPORT_ROLES
         )
+        # The tmux clock: its text on its tinted block.
+        container_text_contrast = contrast(
+            hex_rgb(ui["on_secondary_container"]), hex_rgb(ui["secondary_container"])
+        )
         status_text_contrast = min(
             contrast(accent_text, hex_rgb(ui[role])) for role in SEMANTIC_ROLES
         )
@@ -250,6 +254,7 @@ def audit_theme(name: str, theme: dict[str, Any]) -> dict[str, Any]:
             "text_contrast": rounded(text_contrast),
             "status_text_contrast": rounded(status_text_contrast),
             "block_text_contrast": rounded(block_text_contrast),
+            "container_text_contrast": rounded(container_text_contrast),
             "focus_contrast": rounded(focus_contrast),
             "selection_contrast": rounded(selection_contrast),
             "structural_text_contrast": rounded(structural_text_contrast),
@@ -269,6 +274,7 @@ def audit_theme(name: str, theme: dict[str, Any]) -> dict[str, Any]:
         require("text_contrast", text_contrast, AAA)
         require("status_text_contrast", status_text_contrast, AAA)
         require("block_text_contrast", block_text_contrast, AAA)
+        require("container_text_contrast", container_text_contrast, AAA)
         require("focus_contrast", focus_contrast, 3.0)
         require("selection_contrast", selection_contrast, AAA)
         require("structural_text_contrast", structural_text_contrast, AAA)

@@ -172,6 +172,39 @@ test_start "aaa_exempts_background_tone_slots"
 assert_file_contains "$WORK/cat.toml" 'c0  = "#373e50"'
 assert_file_contains "$WORK/cat.toml" 'c15 = "#969697"'
 
+# The tmux clock block: derived from ui.secondary when a theme lacks it.
+# Built on the full probe palettes above, plus a secondary hue per mode.
+sed -e '/^\[themes\.probe-dark\.ui\]$/a\
+secondary = "#61b9f2"' -e '/^\[themes\.probe-light\.ui\]$/a\
+secondary = "#7f2ea7"' "$WORK/cat.toml" >"$WORK/cont.toml"
+
+test_start "aaa_derives_the_clock_container_in_both_modes"
+got="$(
+  PYTHONPATH="$REPO_ROOT/scripts/theme" python3 - "$WORK/cont.toml" <<'PY'
+import math, sys, tomllib, aaa
+def hue(h):
+    _, a, b = aaa._lab(aaa.hex_rgb(h)); return math.degrees(math.atan2(b, a)) % 360
+for name, t in tomllib.load(open(sys.argv[1], "rb"))["themes"].items():
+    ui = aaa.enforce(t)["ui"]
+    box, text = aaa.hex_rgb(ui["secondary_container"]), aaa.hex_rgb(ui["on_secondary_container"])
+    tint = aaa.luminance(box) < 0.05 if t["mode"] == "dark" else aaa.luminance(box) > 0.75
+    same_hue = min(abs(hue(ui["secondary_container"]) - hue(ui["secondary"])) % 360,
+                   360 - abs(hue(ui["secondary_container"]) - hue(ui["secondary"])) % 360) < 25
+    print(t["mode"], tint, aaa.contrast(text, box) >= 7, same_hue)
+PY
+)"
+assert_equals $'dark True True True\nlight True True True' "$got" \
+  "a deep tint (dark) or pale tint (light) of the secondary hue, with 7:1 text"
+
+test_start "aaa_write_inserts_derived_roles_into_their_table"
+python3 "$AAA" --write "$WORK/cont.toml" >/dev/null
+got="$(awk '/^\[/{s=$0} /secondary_container/{print s}' "$WORK/cont.toml" | sort | uniq -c | awk '{print $1, $2}')"
+assert_equals $'2 [themes.probe-dark.ui]\n2 [themes.probe-light.ui]' "$got" "both keys land in each theme's ui table"
+assert_exit_code 0 "python3 -c 'import tomllib; tomllib.load(open(\"$WORK/cont.toml\",\"rb\"))'"
+cp "$WORK/cont.toml" "$WORK/cont-once.toml"
+python3 "$AAA" --write "$WORK/cont.toml" >/dev/null
+assert_exit_code 0 "cmp -s '$WORK/cont-once.toml' '$WORK/cont.toml'"
+
 test_start "aaa_committed_catalogs_are_already_aaa"
 assert_exit_code 0 "python3 '$AAA' >/dev/null"
 

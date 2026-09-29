@@ -19,6 +19,11 @@ Text slots and the surfaces they land on:
   term cursor_text     the glyph under the block cursor
   ui *_on_surface      accent/secondary/tertiary text on bg, panel, border
   ui text_muted        de-emphasised text on bg, panel, border
+  ui on_secondary_container   the tmux clock on its tinted block
+
+Derived roles: when a theme has no secondary_container, one is made from
+ui.secondary's hue: a deep tint on a dark theme, a pale tint on a light one.
+on_secondary_container is that hue as text, walked to 7:1 on the tint.
 
 Exempt: c0 on a dark bg and c15 on a light bg. Those are the palette's
 background-tone slots (programs paint them as fills, e.g. `tput setab 0`),
@@ -200,6 +205,31 @@ def _keep_ramp(term: dict[str, str], dark: bool) -> None:
         term["c0"] = _beyond(term["c0"], term["c8"], False, 1.0)
 
 
+def _tint(value: str, lightness: float, chroma_cap: float) -> str:
+    """`value`'s hue at a fixed lightness, chroma capped (then gamut-clipped)."""
+    _l, a, b = _lab(hex_rgb(value))
+    chroma = (a * a + b * b) ** 0.5
+    scale = min(1.0, chroma_cap / chroma) if chroma else 0.0
+    return rgb_hex(_rgb(lightness, a * scale, b * scale))
+
+
+def _secondary_container(ui: dict[str, str], dark: bool) -> None:
+    """Fill the tinted block behind the tmux clock and its text colour."""
+    if "secondary" not in ui:
+        return
+    if "secondary_container" not in ui:
+        ui["secondary_container"] = _tint(
+            ui["secondary"], 24.0 if dark else 93.0, 26.0 if dark else 12.0
+        )
+    if "on_secondary_container" not in ui:
+        ui["on_secondary_container"] = _tint(
+            ui["secondary"], 82.0 if dark else 28.0, 40.0
+        )
+    ui["on_secondary_container"] = legible(
+        ui["on_secondary_container"], [ui["secondary_container"]]
+    )
+
+
 def enforce(theme: dict[str, Any]) -> dict[str, Any]:
     """Return a copy of `theme` whose text colours all reach AAA."""
     out = copy.deepcopy(theme)
@@ -216,6 +246,7 @@ def enforce(theme: dict[str, Any]) -> dict[str, Any]:
     surfaces = [bg, ui["panel"], ui["border"]]
     for key in SURFACE_TEXT:
         ui[key] = legible(ui[key], surfaces)
+    _secondary_container(ui, out["mode"] == "dark")
     return out
 
 
@@ -231,14 +262,18 @@ def _changes(catalog: dict[str, Any]) -> dict[tuple[str, str, str], str]:
         fixed = enforce(theme)
         for table in ("term", "ui"):
             for key, value in fixed[table].items():
-                if value != theme[table][key]:
+                if value != theme[table].get(key):
                     changed[(name, table, key)] = value
     return changed
 
 
 def _rewrite(text: str, changed: dict[tuple[str, str, str], str]) -> str:
-    """Swap changed values in place so comments and alignment survive."""
-    lines, section = [], None
+    """Swap changed values in place so comments and alignment survive.
+
+    Keys a table does not have yet (derived roles) go after its last entry.
+    """
+    lines, section, last = [], None, {}
+    pending = dict(changed)
     for line in text.splitlines(keepends=True):
         header = _SECTION.match(line)
         if header:
@@ -246,11 +281,23 @@ def _rewrite(text: str, changed: dict[tuple[str, str, str], str]) -> str:
         elif line.startswith("["):
             section = None
         entry = _ENTRY.match(line)
-        if section and entry and (*section, entry.group(2)) in changed:
-            indent, key, sep, _old, rest = entry.groups()
-            value = changed[(*section, key)]
-            line = f'{indent}{key}{sep}"{value}"{rest}\n'
+        if section and entry:
+            last[section] = len(lines)
+            value = pending.pop((*section, entry.group(2)), None)
+            if value is not None:
+                indent, key, sep, _old, rest = entry.groups()
+                line = f'{indent}{key}{sep}"{value}"{rest}\n'
         lines.append(line)
+    # Bottom-up, so an insertion never shifts a position still to be used.
+    inserts = sorted(
+        (
+            (last[(name, table)] + 1, key, value)
+            for (name, table, key), value in pending.items()
+        ),
+        reverse=True,
+    )
+    for at, key, value in inserts:
+        lines.insert(at, f'{key} = "{value}"\n')
     return "".join(lines)
 
 

@@ -57,6 +57,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#242e35"
 border = "#343b40"
+on_secondary_container = "#d8ce81"
+secondary_container = "#3e3a10"
 
 [themes.altai-dark.app]
 nvim = "tokyonight"
@@ -119,6 +121,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#dfe5ec"
 border = "#ccd1d6"
+on_secondary_container = "#504100"
+secondary_container = "#f5ead4"
 
 [themes.altai-light.app]
 nvim = "tokyonight"
@@ -181,6 +185,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2a2d35"
 border = "#383a40"
+on_secondary_container = "#ffb4ed"
+secondary_container = "#532b4a"
 
 [themes.anuenue-dark.app]
 nvim = "catppuccin"
@@ -243,6 +249,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e4e4ea"
 border = "#d0d0d5"
+on_secondary_container = "#622d66"
+secondary_container = "#f8e5f8"
 
 [themes.anuenue-light.app]
 nvim = "catppuccin"
@@ -305,6 +313,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2f2d24"
 border = "#3c3a33"
+on_secondary_container = "#ffbaa4"
+secondary_container = "#5a2c22"
 
 [themes.bauhaus-dark.app]
 nvim = "everforest"
@@ -367,6 +377,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e4e4e8"
 border = "#d0d0d3"
+on_secondary_container = "#4d4121"
+secondary_container = "#f5ead4"
 
 [themes.bauhaus-light.app]
 nvim = "catppuccin"
@@ -429,6 +441,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#302a38"
 border = "#3d3843"
+on_secondary_container = "#fab6f3"
+secondary_container = "#502d4e"
 
 [themes.beach-dark.app]
 nvim = "catppuccin"
@@ -491,6 +505,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#eae3da"
 border = "#d5cfc9"
+on_secondary_container = "#004a60"
+secondary_container = "#d2f0fd"
 
 [themes.beach-light.app]
 nvim = "everforest"
@@ -553,6 +569,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2d2c35"
 border = "#3a3940"
+on_secondary_container = "#ffb9b4"
+secondary_container = "#5d2a29"
 
 [themes.berlin-dark.app]
 nvim = "catppuccin"
@@ -615,6 +633,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e5e3ea"
 border = "#d1cfd5"
+on_secondary_container = "#772628"
+secondary_container = "#ffe4e1"
 
 [themes.berlin-light.app]
 nvim = "catppuccin"
@@ -677,6 +697,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#242e34"
 border = "#333b40"
+on_secondary_container = "#73dec8"
+secondary_container = "#004337"
 
 [themes.bloom-dark.app]
 nvim = "tokyonight"
@@ -739,6 +761,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e4e4e8"
 border = "#d0d0d3"
+on_secondary_container = "#004a61"
+secondary_container = "#d2f0fd"
 
 [themes.bloom-light.app]
 nvim = "catppuccin"
@@ -801,6 +825,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2a2c39"
 border = "#383944"
+on_secondary_container = "#becbf1"
+secondary_container = "#2a3957"
 
 [themes.blossoms-dark.app]
 nvim = "catppuccin"
@@ -863,6 +889,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e6e4dd"
 border = "#d2d0cb"
+on_secondary_container = "#004571"
+secondary_container = "#ddecff"
 
 [themes.blossoms-light.app]
 nvim = "everforest"
@@ -925,6 +953,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2e2e25"
 border = "#3b3b34"
+on_secondary_container = "#88d4ff"
+secondary_container = "#003d5f"
 
 [themes.bosquet-dark.app]
 nvim = "everforest"
@@ -987,6 +1017,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e5e5dc"
 border = "#d1d1cb"
+on_secondary_container = "#454411"
+secondary_container = "#efecd4"
 
 [themes.bosquet-light.app]
 nvim = "everforest"
@@ -1049,6 +1081,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2a2d38"
 border = "#383a42"
+on_secondary_container = "#e5ca80"
+secondary_container = "#443810"
 
 [themes.butterfly-dark.app]
 nvim = "catppuccin"
@@ -1111,6 +1145,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#eae4da"
 border = "#d5d0c9"
+on_secondary_container = "#243f7d"
+secondary_container = "#e7eaff"
 
 [themes.butterfly-light.app]
 nvim = "everforest"
@@ -1173,6 +1209,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2f2d20"
 border = "#3c3a30"
+on_secondary_container = "#ffb5d0"
+secondary_container = "#5c2838"
 
 [themes.canary-dark.app]
 nvim = "everforest"
@@ -1235,6 +1273,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e7e4d9"
 border = "#d3d0c8"
+on_secondary_container = "#78213e"
+secondary_container = "#ffe3e9"
 
 [themes.canary-light.app]
 nvim = "everforest"
@@ -1297,6 +1337,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#332b25"
 border = "#3f3834"
+on_secondary_container = "#9fdb9c"
+secondary_container = "#1f4020"
 
 [themes.capitan-dark.app]
 nvim = "everforest"
@@ -1359,6 +1401,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e9e3df"
 border = "#d4cfcc"
+on_secondary_container = "#1f4b1f"
+secondary_container = "#dff0dc"
 
 [themes.capitan-light.app]
 nvim = "everforest"
@@ -1421,6 +1465,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2c2d35"
 border = "#393a40"
+on_secondary_container = "#ffb8ba"
+secondary_container = "#5d292c"
 
 [themes.catalina-dark.app]
 nvim = "catppuccin"
@@ -1483,6 +1529,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e3e4eb"
 border = "#d0d0d6"
+on_secondary_container = "#433977"
+secondary_container = "#eee8ff"
 
 [themes.catalina-light.app]
 nvim = "catppuccin"
@@ -1545,6 +1593,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#242e34"
 border = "#333b40"
+on_secondary_container = "#dfcc81"
+secondary_container = "#413910"
 
 [themes.champ-dark.app]
 nvim = "tokyonight"
@@ -1607,6 +1657,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5e9"
 border = "#cdd1d4"
+on_secondary_container = "#3d4700"
+secondary_container = "#ececd5"
 
 [themes.champ-light.app]
 nvim = "tokyonight"
@@ -1669,6 +1721,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#282d36"
 border = "#373a41"
+on_secondary_container = "#85dafc"
+secondary_container = "#004159"
 
 [themes.coast-dark.app]
 nvim = "catppuccin"
@@ -1731,6 +1785,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ee"
 border = "#cdd1d8"
+on_secondary_container = "#134761"
+secondary_container = "#d7eeff"
 
 [themes.coast-light.app]
 nvim = "catppuccin"
@@ -1793,6 +1849,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2f2e24"
 border = "#3c3b33"
+on_secondary_container = "#bfd589"
+secondary_container = "#313e15"
 
 [themes.cobalt-dark.app]
 nvim = "everforest"
@@ -1855,6 +1913,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e5e5da"
 border = "#d1d1c9"
+on_secondary_container = "#343d7b"
+secondary_container = "#eae9ff"
 
 [themes.cobalt-light.app]
 nvim = "everforest"
@@ -1917,6 +1977,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#302b38"
 border = "#3c3843"
+on_secondary_container = "#febf8c"
+secondary_container = "#513216"
 
 [themes.comet-dark.app]
 nvim = "catppuccin"
@@ -1979,6 +2041,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e6e2ed"
 border = "#d2cfd7"
+on_secondary_container = "#423977"
+secondary_container = "#eee8ff"
 
 [themes.comet-light.app]
 nvim = "catppuccin"
@@ -2041,6 +2105,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#392925"
 border = "#443734"
+on_secondary_container = "#d3cf82"
+secondary_container = "#3b3b11"
 
 [themes.coral-dark.app]
 nvim = "catppuccin"
@@ -2103,6 +2169,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#efe1dd"
 border = "#d8cecb"
+on_secondary_container = "#484400"
+secondary_container = "#f1ebd4"
 
 [themes.coral-light.app]
 nvim = "catppuccin"
@@ -2165,6 +2233,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#292e36"
 border = "#373b41"
+on_secondary_container = "#ffb9af"
+secondary_container = "#5c2a26"
 
 [themes.corona-dark.app]
 nvim = "catppuccin"
@@ -2227,6 +2297,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5eb"
 border = "#ced1d6"
+on_secondary_container = "#524000"
+secondary_container = "#f5ead4"
 
 [themes.corona-light.app]
 nvim = "catppuccin"
@@ -2289,6 +2361,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#312c25"
 border = "#3e3933"
+on_secondary_container = "#85d8fc"
+secondary_container = "#00405a"
 
 [themes.cove-dark.app]
 nvim = "everforest"
@@ -2351,6 +2425,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#eae3da"
 border = "#d5cfc9"
+on_secondary_container = "#004c48"
+secondary_container = "#cff2ee"
 
 [themes.cove-light.app]
 nvim = "everforest"
@@ -2413,6 +2489,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#312d24"
 border = "#3e3a33"
+on_secondary_container = "#edc598"
+secondary_container = "#4d3413"
 
 [themes.crest-dark.app]
 nvim = "everforest"
@@ -2475,6 +2553,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e8e4df"
 border = "#d3d0cc"
+on_secondary_container = "#114d18"
+secondary_container = "#def0dc"
 
 [themes.crest-light.app]
 nvim = "everforest"
@@ -2537,6 +2617,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2a2d36"
 border = "#383a41"
+on_secondary_container = "#ffbba0"
+secondary_container = "#5a2d20"
 
 [themes.dahlia-dark.app]
 nvim = "catppuccin"
@@ -2599,6 +2681,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e1e4ef"
 border = "#ced0d8"
+on_secondary_container = "#353e73"
+secondary_container = "#e9e9ff"
 
 [themes.dahlia-light.app]
 nvim = "catppuccin"
@@ -2661,6 +2745,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2b2e26"
 border = "#393b34"
+on_secondary_container = "#84deaf"
+secondary_container = "#0a422a"
 
 [themes.daisy-dark.app]
 nvim = "everforest"
@@ -2723,6 +2809,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e1e5dc"
 border = "#ced1ca"
+on_secondary_container = "#004e28"
+secondary_container = "#d8f1e1"
 
 [themes.daisy-light.app]
 nvim = "everforest"
@@ -2785,6 +2873,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2c2c36"
 border = "#393941"
+on_secondary_container = "#ffbaaa"
+secondary_container = "#5b2b24"
 
 [themes.denim-dark.app]
 nvim = "catppuccin"
@@ -2847,6 +2937,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e4e3ef"
 border = "#d0cfd8"
+on_secondary_container = "#752920"
+secondary_container = "#ffe4de"
 
 [themes.denim-light.app]
 nvim = "catppuccin"
@@ -2909,6 +3001,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2a2d35"
 border = "#383a40"
+on_secondary_container = "#ffbba0"
+secondary_container = "#5a2d20"
 
 [themes.dune-dark.app]
 nvim = "catppuccin"
@@ -2971,6 +3065,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e3e4ea"
 border = "#d0d0d5"
+on_secondary_container = "#004480"
+secondary_container = "#e2ebff"
 
 [themes.dune-light.app]
 nvim = "catppuccin"
@@ -3033,6 +3129,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#382927"
 border = "#433735"
+on_secondary_container = "#94d1ff"
+secondary_container = "#013c60"
 
 [themes.dusk-dark.app]
 nvim = "catppuccin"
@@ -3095,6 +3193,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#efe0df"
 border = "#d8cdcc"
+on_secondary_container = "#06427f"
+secondary_container = "#e4eaff"
 
 [themes.dusk-light.app]
 nvim = "catppuccin"
@@ -3157,6 +3257,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#3b2823"
 border = "#463632"
+on_secondary_container = "#82deb1"
+secondary_container = "#07422b"
 
 [themes.dynamic-dark.app]
 nvim = "catppuccin"
@@ -3219,6 +3321,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#efe1dc"
 border = "#d8ceca"
+on_secondary_container = "#00486f"
+secondary_container = "#d9eeff"
 
 [themes.dynamic-light.app]
 nvim = "catppuccin"
@@ -3281,6 +3385,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#382925"
 border = "#433734"
+on_secondary_container = "#72dfcc"
+secondary_container = "#004339"
 
 [themes.eclipse-dark.app]
 nvim = "catppuccin"
@@ -3343,6 +3449,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#efe1dd"
 border = "#d8cecb"
+on_secondary_container = "#004d41"
+secondary_container = "#d1f2ea"
 
 [themes.eclipse-light.app]
 nvim = "catppuccin"
@@ -3405,6 +3513,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#292d35"
 border = "#373a40"
+on_secondary_container = "#efc58d"
+secondary_container = "#4b3512"
 
 [themes.eiffel-dark.app]
 nvim = "catppuccin"
@@ -3467,6 +3577,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e1e4ed"
 border = "#ced0d7"
+on_secondary_container = "#5d3a1a"
+secondary_container = "#fde7d6"
 
 [themes.eiffel-light.app]
 nvim = "catppuccin"
@@ -3529,6 +3641,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#222f2e"
 border = "#313c3b"
+on_secondary_container = "#d6ce82"
+secondary_container = "#3d3a11"
 
 [themes.facet-dark.app]
 nvim = "catppuccin"
@@ -3591,6 +3705,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#dee5e5"
 border = "#ccd1d1"
+on_secondary_container = "#494300"
+secondary_container = "#f1ebd4"
 
 [themes.facet-light.app]
 nvim = "catppuccin"
@@ -3653,6 +3769,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#282e35"
 border = "#363a40"
+on_secondary_container = "#ffb9b2"
+secondary_container = "#5d2a28"
 
 [themes.firewatch-dark.app]
 nvim = "tokyonight"
@@ -3715,6 +3833,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#dee5eb"
 border = "#ccd1d5"
+on_secondary_container = "#792238"
+secondary_container = "#ffe3e7"
 
 [themes.firewatch-light.app]
 nvim = "tokyonight"
@@ -3777,6 +3897,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#262d35"
 border = "#353a40"
+on_secondary_container = "#80debc"
+secondary_container = "#004230"
 
 [themes.flower-dark.app]
 nvim = "tokyonight"
@@ -3839,6 +3961,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e2e4ea"
 border = "#cfd0d4"
+on_secondary_container = "#00486a"
+secondary_container = "#d6eeff"
 
 [themes.flower-light.app]
 nvim = "catppuccin"
@@ -3901,6 +4025,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#322a38"
 border = "#3e3842"
+on_secondary_container = "#c9c4ff"
+secondary_container = "#35355c"
 
 [themes.flux-dark.app]
 nvim = "catppuccin"
@@ -3963,6 +4089,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e9e2ec"
 border = "#d4cfd7"
+on_secondary_container = "#383c7a"
+secondary_container = "#ebe8ff"
 
 [themes.flux-light.app]
 nvim = "catppuccin"
@@ -4025,6 +4153,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#282e36"
 border = "#363b41"
+on_secondary_container = "#65deef"
+secondary_container = "#00424e"
 
 [themes.forest-dark.app]
 nvim = "tokyonight"
@@ -4087,6 +4217,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ea"
 border = "#ced1d5"
+on_secondary_container = "#004b57"
+secondary_container = "#cff1f8"
 
 [themes.forest-light.app]
 nvim = "tokyonight"
@@ -4149,6 +4281,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#302b37"
 border = "#3d3842"
+on_secondary_container = "#b9c8ff"
+secondary_container = "#2b375e"
 
 [themes.fuchsia-dark.app]
 nvim = "catppuccin"
@@ -4211,6 +4345,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#eae1eb"
 border = "#d4ced6"
+on_secondary_container = "#503572"
+secondary_container = "#f2e7fd"
 
 [themes.fuchsia-light.app]
 nvim = "catppuccin"
@@ -4273,6 +4409,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2e2c34"
 border = "#3b3940"
+on_secondary_container = "#ffb6c8"
+secondary_container = "#5d2834"
 
 [themes.fuji-dark.app]
 nvim = "catppuccin"
@@ -4335,6 +4473,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e5e3eb"
 border = "#d1d0d6"
+on_secondary_container = "#79223a"
+secondary_container = "#ffe3e8"
 
 [themes.fuji-light.app]
 nvim = "catppuccin"
@@ -4397,6 +4537,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#272d35"
 border = "#353a40"
+on_secondary_container = "#ffb7ba"
+secondary_container = "#5d292c"
 
 [themes.galaxy-dark.app]
 nvim = "tokyonight"
@@ -4459,6 +4601,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ea"
 border = "#ced1d5"
+on_secondary_container = "#78242e"
+secondary_container = "#ffe3e3"
 
 [themes.galaxy-light.app]
 nvim = "tokyonight"
@@ -4521,6 +4665,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#292d35"
 border = "#373a40"
+on_secondary_container = "#fbb6f2"
+secondary_container = "#512c4d"
 
 [themes.geisha-dark.app]
 nvim = "catppuccin"
@@ -4583,6 +4729,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e8e3e8"
 border = "#d3d0d3"
+on_secondary_container = "#004677"
+secondary_container = "#ddecff"
 
 [themes.geisha-light.app]
 nvim = "catppuccin"
@@ -4645,6 +4793,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2c2d35"
 border = "#393a40"
+on_secondary_container = "#ffba95"
+secondary_container = "#572e1c"
 
 [themes.goldengate-dark.app]
 nvim = "catppuccin"
@@ -4707,6 +4857,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e9e3df"
 border = "#d4cfcc"
+on_secondary_container = "#573c24"
+secondary_container = "#fde7d6"
 
 [themes.goldengate-light.app]
 nvim = "everforest"
@@ -4769,6 +4921,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#282e27"
 border = "#363b35"
+on_secondary_container = "#90d2ff"
+secondary_container = "#003d5f"
 
 [themes.grass-dark.app]
 nvim = "everforest"
@@ -4831,6 +4985,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#dfe6de"
 border = "#ccd2cc"
+on_secondary_container = "#004e29"
+secondary_container = "#d8f1e1"
 
 [themes.grass-light.app]
 nvim = "everforest"
@@ -4893,6 +5049,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#242e35"
 border = "#343b40"
+on_secondary_container = "#ffb9c9"
+secondary_container = "#5d2837"
 
 [themes.grove-dark.app]
 nvim = "tokyonight"
@@ -4955,6 +5113,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#dee5eb"
 border = "#ccd1d5"
+on_secondary_container = "#78213c"
+secondary_container = "#ffe3e8"
 
 [themes.grove-light.app]
 nvim = "tokyonight"
@@ -5017,6 +5177,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#252d35"
 border = "#343a40"
+on_secondary_container = "#ebc783"
+secondary_container = "#473711"
 
 [themes.halo-dark.app]
 nvim = "tokyonight"
@@ -5079,6 +5241,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ea"
 border = "#ced1d5"
+on_secondary_container = "#573e00"
+secondary_container = "#f8e9d4"
 
 [themes.halo-light.app]
 nvim = "tokyonight"
@@ -5141,6 +5305,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#282d36"
 border = "#373a41"
+on_secondary_container = "#8cd8ff"
+secondary_container = "#00405c"
 
 [themes.hawaiian-dark.app]
 nvim = "catppuccin"
@@ -5203,6 +5369,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ea"
 border = "#cdd1d5"
+on_secondary_container = "#004480"
+secondary_container = "#e2ebff"
 
 [themes.hawaiian-light.app]
 nvim = "tokyonight"
@@ -5265,6 +5433,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2f2b39"
 border = "#3c3844"
+on_secondary_container = "#ffbe8a"
+secondary_container = "#523116"
 
 [themes.helix-dark.app]
 nvim = "catppuccin"
@@ -5327,6 +5497,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e6e2ee"
 border = "#d2cfd8"
+on_secondary_container = "#58326d"
+secondary_container = "#f5e6fb"
 
 [themes.helix-light.app]
 nvim = "catppuccin"
@@ -5389,6 +5561,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#222e33"
 border = "#323b3f"
+on_secondary_container = "#ebc783"
+secondary_container = "#473711"
 
 [themes.honu-dark.app]
 nvim = "tokyonight"
@@ -5451,6 +5625,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#dee5e8"
 border = "#ccd1d3"
+on_secondary_container = "#593d00"
+secondary_container = "#f8e9d4"
 
 [themes.honu-light.app]
 nvim = "tokyonight"
@@ -5513,6 +5689,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2f2b39"
 border = "#3c3844"
+on_secondary_container = "#a3ceff"
+secondary_container = "#1a3a60"
 
 [themes.hydrangea-dark.app]
 nvim = "catppuccin"
@@ -5575,6 +5753,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e1e5ea"
 border = "#ced1d5"
+on_secondary_container = "#484400"
+secondary_container = "#f1ebd4"
 
 [themes.hydrangea-light.app]
 nvim = "tokyonight"
@@ -5637,6 +5817,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2c2c38"
 border = "#3a3943"
+on_secondary_container = "#f3c39b"
+secondary_container = "#513215"
 
 [themes.indigo-dark.app]
 nvim = "catppuccin"
@@ -5699,6 +5881,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e5e3ef"
 border = "#d1d0d8"
+on_secondary_container = "#3f3a78"
+secondary_container = "#ede8ff"
 
 [themes.indigo-light.app]
 nvim = "catppuccin"
@@ -5761,6 +5945,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#302b38"
 border = "#3c3843"
+on_secondary_container = "#ffb4e0"
+secondary_container = "#592942"
 
 [themes.ion-dark.app]
 nvim = "catppuccin"
@@ -5823,6 +6009,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e6e2ed"
 border = "#d2cfd7"
+on_secondary_container = "#3e3b78"
+secondary_container = "#ede8ff"
 
 [themes.ion-light.app]
 nvim = "catppuccin"
@@ -5885,6 +6073,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2f2b39"
 border = "#3c3844"
+on_secondary_container = "#a8cdff"
+secondary_container = "#1c3a60"
 
 [themes.iris-dark.app]
 nvim = "catppuccin"
@@ -5947,6 +6137,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e2e4ea"
 border = "#cfd0d5"
+on_secondary_container = "#004770"
+secondary_container = "#daedff"
 
 [themes.iris-light.app]
 nvim = "catppuccin"
@@ -6009,6 +6201,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#322c25"
 border = "#3e3933"
+on_secondary_container = "#e9c881"
+secondary_container = "#463710"
 
 [themes.isles-dark.app]
 nvim = "everforest"
@@ -6071,6 +6265,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e8e4df"
 border = "#d3d0cc"
+on_secondary_container = "#543f11"
+secondary_container = "#f8e9d4"
 
 [themes.isles-light.app]
 nvim = "everforest"
@@ -6133,6 +6329,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2a2d35"
 border = "#383a40"
+on_secondary_container = "#ebc783"
+secondary_container = "#473711"
 
 [themes.lanai-dark.app]
 nvim = "catppuccin"
@@ -6195,6 +6393,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e4ed"
 border = "#ced0d7"
+on_secondary_container = "#5c3c00"
+secondary_container = "#fae8d5"
 
 [themes.lanai-light.app]
 nvim = "catppuccin"
@@ -6257,6 +6457,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#292c3b"
 border = "#373945"
+on_secondary_container = "#8ad6ff"
+secondary_container = "#003f5c"
 
 [themes.lotus-dark.app]
 nvim = "catppuccin"
@@ -6319,6 +6521,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ea"
 border = "#ced1d5"
+on_secondary_container = "#4a4300"
+secondary_container = "#f2ebd4"
 
 [themes.lotus-light.app]
 nvim = "tokyonight"
@@ -6381,6 +6585,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#342b26"
 border = "#403835"
+on_secondary_container = "#e9c881"
+secondary_container = "#463710"
 
 [themes.lumiere-dark.app]
 nvim = "catppuccin"
@@ -6443,6 +6649,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#eee2dc"
 border = "#d8cfcb"
+on_secondary_container = "#623802"
+secondary_container = "#fde7d6"
 
 [themes.lumiere-light.app]
 nvim = "catppuccin"
@@ -6505,6 +6713,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#252d35"
 border = "#343a40"
+on_secondary_container = "#e2cb80"
+secondary_container = "#423910"
 
 [themes.manini-dark.app]
 nvim = "tokyonight"
@@ -6567,6 +6777,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ea"
 border = "#cdd1d5"
+on_secondary_container = "#4f4100"
+secondary_container = "#f4ead4"
 
 [themes.manini-light.app]
 nvim = "tokyonight"
@@ -6629,6 +6841,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#222f31"
 border = "#323c3d"
+on_secondary_container = "#81d6ff"
+secondary_container = "#003e5f"
 
 [themes.maui-dark.app]
 nvim = "tokyonight"
@@ -6691,6 +6905,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#dce5ea"
 border = "#cad1d5"
+on_secondary_container = "#5a316c"
+secondary_container = "#f5e6fb"
 
 [themes.maui-light.app]
 nvim = "tokyonight"
@@ -6753,6 +6969,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#252f2a"
 border = "#343c38"
+on_secondary_container = "#a5cdff"
+secondary_container = "#1a3a60"
 
 [themes.mavericks-dark.app]
 nvim = "catppuccin"
@@ -6815,6 +7033,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#dbe7e0"
 border = "#cad3ce"
+on_secondary_container = "#004480"
+secondary_container = "#e2ebff"
 
 [themes.mavericks-light.app]
 nvim = "catppuccin"
@@ -6877,6 +7097,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2e2e25"
 border = "#3b3b34"
+on_secondary_container = "#ebbbff"
+secondary_container = "#492f54"
 
 [themes.miami-dark.app]
 nvim = "everforest"
@@ -6939,6 +7161,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e5e5db"
 border = "#d1d1ca"
+on_secondary_container = "#59316c"
+secondary_container = "#f5e6fb"
 
 [themes.miami-light.app]
 nvim = "everforest"
@@ -7001,6 +7225,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#302a38"
 border = "#3c3743"
+on_secondary_container = "#ffb4d8"
+secondary_container = "#5b283d"
 
 [themes.modern-dark.app]
 nvim = "catppuccin"
@@ -7063,6 +7289,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#dfe5eb"
 border = "#ccd1d6"
+on_secondary_container = "#313d7b"
+secondary_container = "#eae9ff"
 
 [themes.modern-light.app]
 nvim = "tokyonight"
@@ -7125,6 +7353,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#332c25"
 border = "#3f3934"
+on_secondary_container = "#ffbe8a"
+secondary_container = "#523216"
 
 [themes.mojave-dark.app]
 nvim = "everforest"
@@ -7187,6 +7417,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#ede2da"
 border = "#d7cfc9"
+on_secondary_container = "#663428"
+secondary_container = "#ffe5dc"
 
 [themes.mojave-light.app]
 nvim = "everforest"
@@ -7249,6 +7481,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#252d35"
 border = "#343a40"
+on_secondary_container = "#ffb7c1"
+secondary_container = "#5d2830"
 
 [themes.monk-dark.app]
 nvim = "tokyonight"
@@ -7311,6 +7545,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ea"
 border = "#cdd1d5"
+on_secondary_container = "#254658"
+secondary_container = "#d6eeff"
 
 [themes.monk-light.app]
 nvim = "tokyonight"
@@ -7373,6 +7609,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#302a38"
 border = "#3d3843"
+on_secondary_container = "#ffb4e3"
+secondary_container = "#582944"
 
 [themes.monterey-dark.app]
 nvim = "catppuccin"
@@ -7435,6 +7673,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e8e2ed"
 border = "#d3cfd7"
+on_secondary_container = "#493775"
+secondary_container = "#f0e7fe"
 
 [themes.monterey-light.app]
 nvim = "catppuccin"
@@ -7497,6 +7737,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2c2c39"
 border = "#3a3944"
+on_secondary_container = "#f4b8f9"
+secondary_container = "#4d2e50"
 
 [themes.neon-dark.app]
 nvim = "catppuccin"
@@ -7559,6 +7801,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e5e3ee"
 border = "#d1d0d8"
+on_secondary_container = "#732450"
+secondary_container = "#ffe4f0"
 
 [themes.neon-light.app]
 nvim = "catppuccin"
@@ -7621,6 +7865,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#282d3a"
 border = "#363a45"
+on_secondary_container = "#69e0d6"
+secondary_container = "#00433e"
 
 [themes.nigella-dark.app]
 nvim = "catppuccin"
@@ -7683,6 +7929,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e7e4da"
 border = "#d3d0c9"
+on_secondary_container = "#00486f"
+secondary_container = "#d9eeff"
 
 [themes.nigella-light.app]
 nvim = "everforest"
@@ -7745,6 +7993,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#272d35"
 border = "#353a40"
+on_secondary_container = "#ffbc95"
+secondary_container = "#562f1b"
 
 [themes.nihoa-dark.app]
 nvim = "tokyonight"
@@ -7807,6 +8057,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5eb"
 border = "#cdd1d6"
+on_secondary_container = "#19475d"
+secondary_container = "#d5efff"
 
 [themes.nihoa-light.app]
 nvim = "tokyonight"
@@ -7869,6 +8121,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2a2d37"
 border = "#383a42"
+on_secondary_container = "#ffba9e"
+secondary_container = "#592d1f"
 
 [themes.nova-dark.app]
 nvim = "catppuccin"
@@ -7931,6 +8185,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e5e3ef"
 border = "#d1d0d8"
+on_secondary_container = "#19417e"
+secondary_container = "#e6eaff"
 
 [themes.nova-light.app]
 nvim = "catppuccin"
@@ -7993,6 +8249,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#242e35"
 border = "#343b40"
+on_secondary_container = "#ffb9c9"
+secondary_container = "#5d2837"
 
 [themes.odyssey-dark.app]
 nvim = "tokyonight"
@@ -8055,6 +8313,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ea"
 border = "#ced1d5"
+on_secondary_container = "#004a5f"
+secondary_container = "#d1f0fc"
 
 [themes.odyssey-light.app]
 nvim = "tokyonight"
@@ -8117,6 +8377,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#222f31"
 border = "#323c3d"
+on_secondary_container = "#d2d083"
+secondary_container = "#3b3b11"
 
 [themes.origami-dark.app]
 nvim = "tokyonight"
@@ -8179,6 +8441,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#dbe6e9"
 border = "#c9d2d4"
+on_secondary_container = "#444500"
+secondary_container = "#efecd4"
 
 [themes.origami-light.app]
 nvim = "tokyonight"
@@ -8241,6 +8505,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#292d35"
 border = "#373a40"
+on_secondary_container = "#d0d083"
+secondary_container = "#393b12"
 
 [themes.palm-dark.app]
 nvim = "catppuccin"
@@ -8303,6 +8569,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e2e4ea"
 border = "#cfd0d5"
+on_secondary_container = "#404600"
+secondary_container = "#edecd5"
 
 [themes.palm-light.app]
 nvim = "catppuccin"
@@ -8365,6 +8633,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2f2d24"
 border = "#3c3a33"
+on_secondary_container = "#ffb9b0"
+secondary_container = "#5c2a27"
 
 [themes.parasol-dark.app]
 nvim = "everforest"
@@ -8427,6 +8697,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e6e4df"
 border = "#d2d0cc"
+on_secondary_container = "#752920"
+secondary_container = "#ffe4de"
 
 [themes.parasol-light.app]
 nvim = "everforest"
@@ -8489,6 +8761,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#292e36"
 border = "#373b41"
+on_secondary_container = "#87dead"
+secondary_container = "#0d4229"
 
 [themes.plasma-dark.app]
 nvim = "catppuccin"
@@ -8551,6 +8825,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e1e5eb"
 border = "#ced1d5"
+on_secondary_container = "#004e27"
+secondary_container = "#d9f1e1"
 
 [themes.plasma-light.app]
 nvim = "catppuccin"
@@ -8613,6 +8889,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2c2c3a"
 border = "#3a3945"
+on_secondary_container = "#ffbb90"
+secondary_container = "#553019"
 
 [themes.poppy-dark.app]
 nvim = "catppuccin"
@@ -8675,6 +8953,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e4e3ef"
 border = "#d0cfd8"
+on_secondary_container = "#243f7d"
+secondary_container = "#e7eaff"
 
 [themes.poppy-light.app]
 nvim = "catppuccin"
@@ -8737,6 +9017,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#362a2b"
 border = "#413838"
+on_secondary_container = "#ffb4d7"
+secondary_container = "#5b283d"
 
 [themes.prism-dark.app]
 nvim = "catppuccin"
@@ -8799,6 +9081,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#efe1e2"
 border = "#d8cecf"
+on_secondary_container = "#762247"
+secondary_container = "#ffe3ed"
 
 [themes.prism-light.app]
 nvim = "catppuccin"
@@ -8861,6 +9145,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#342a2e"
 border = "#40383b"
+on_secondary_container = "#abcdff"
+secondary_container = "#1e3a60"
 
 [themes.protea-dark.app]
 nvim = "catppuccin"
@@ -8923,6 +9209,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#ebe2e5"
 border = "#d5cfd1"
+on_secondary_container = "#03427f"
+secondary_container = "#e4eaff"
 
 [themes.protea-light.app]
 nvim = "catppuccin"
@@ -8985,6 +9273,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2e2b39"
 border = "#3b3844"
+on_secondary_container = "#ffbd8c"
+secondary_container = "#533117"
 
 [themes.pulse-dark.app]
 nvim = "catppuccin"
@@ -9047,6 +9337,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e6e3ee"
 border = "#d2d0d8"
+on_secondary_container = "#293f7d"
+secondary_container = "#e8e9ff"
 
 [themes.pulse-light.app]
 nvim = "catppuccin"
@@ -9109,6 +9401,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#392924"
 border = "#443733"
+on_secondary_container = "#6adfe0"
+secondary_container = "#004344"
 
 [themes.pyramid-dark.app]
 nvim = "catppuccin"
@@ -9171,6 +9465,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#dde5e5"
 border = "#cbd1d1"
+on_secondary_container = "#722d19"
+secondary_container = "#ffe5dc"
 
 [themes.pyramid-light.app]
 nvim = "catppuccin"
@@ -9233,6 +9529,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#342937"
 border = "#403742"
+on_secondary_container = "#bfc7ff"
+secondary_container = "#30365e"
 
 [themes.quasar-dark.app]
 nvim = "catppuccin"
@@ -9295,6 +9593,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#eae1eb"
 border = "#d4ced6"
+on_secondary_container = "#4b3774"
+secondary_container = "#f0e7fd"
 
 [themes.quasar-light.app]
 nvim = "catppuccin"
@@ -9357,6 +9657,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#222f30"
 border = "#323c3d"
+on_secondary_container = "#f4b8f9"
+secondary_container = "#4d2e51"
 
 [themes.quay-dark.app]
 nvim = "catppuccin"
@@ -9419,6 +9721,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#dbe6e7"
 border = "#c9d2d3"
+on_secondary_container = "#174855"
+secondary_container = "#d0f0fc"
 
 [themes.quay-light.app]
 nvim = "catppuccin"
@@ -9481,6 +9785,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#392927"
 border = "#443735"
+on_secondary_container = "#65deee"
+secondary_container = "#00424d"
 
 [themes.rainbow-dark.app]
 nvim = "catppuccin"
@@ -9543,6 +9849,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#efe0df"
 border = "#d8cdcc"
+on_secondary_container = "#004b54"
+secondary_container = "#cef1f6"
 
 [themes.rainbow-light.app]
 nvim = "catppuccin"
@@ -9605,6 +9913,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#372a21"
 border = "#423831"
+on_secondary_container = "#ffb8ba"
+secondary_container = "#5d292c"
 
 [themes.rancho-dark.app]
 nvim = "everforest"
@@ -9667,6 +9977,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#eee2da"
 border = "#d8cfc9"
+on_secondary_container = "#6e3013"
+secondary_container = "#ffe5da"
 
 [themes.rancho-light.app]
 nvim = "everforest"
@@ -9729,6 +10041,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2b2c3a"
 border = "#393945"
+on_secondary_container = "#ffbc95"
+secondary_container = "#572f1b"
 
 [themes.ranunculus-dark.app]
 nvim = "catppuccin"
@@ -9791,6 +10105,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ea"
 border = "#ced1d5"
+on_secondary_container = "#08427f"
+secondary_container = "#e4eaff"
 
 [themes.ranunculus-light.app]
 nvim = "tokyonight"
@@ -9853,6 +10169,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#242e34"
 border = "#333b40"
+on_secondary_container = "#ffbb90"
+secondary_container = "#553019"
 
 [themes.reef-dark.app]
 nvim = "tokyonight"
@@ -9915,6 +10233,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#dde5eb"
 border = "#cbd1d6"
+on_secondary_container = "#6c320f"
+secondary_container = "#ffe6d9"
 
 [themes.reef-light.app]
 nvim = "tokyonight"
@@ -9977,6 +10297,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#302b38"
 border = "#3c3843"
+on_secondary_container = "#ffb9b1"
+secondary_container = "#5c2a28"
 
 [themes.ridge-dark.app]
 nvim = "catppuccin"
@@ -10039,6 +10361,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e6e2ee"
 border = "#d2cfd8"
+on_secondary_container = "#77252a"
+secondary_container = "#ffe4e1"
 
 [themes.ridge-light.app]
 nvim = "catppuccin"
@@ -10101,6 +10425,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#232e33"
 border = "#323b3f"
+on_secondary_container = "#ffb7d9"
+secondary_container = "#592942"
 
 [themes.ripple-dark.app]
 nvim = "tokyonight"
@@ -10163,6 +10489,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#dee5e8"
 border = "#ccd1d3"
+on_secondary_container = "#74234e"
+secondary_container = "#ffe3ef"
 
 [themes.ripple-light.app]
 nvim = "tokyonight"
@@ -10225,6 +10553,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#282e36"
 border = "#363b41"
+on_secondary_container = "#ffb9b0"
+secondary_container = "#5c2a27"
 
 [themes.rivoli-dark.app]
 nvim = "tokyonight"
@@ -10287,6 +10617,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e1e5ea"
 border = "#ced1d5"
+on_secondary_container = "#5f3a00"
+secondary_container = "#fbe8d5"
 
 [themes.rivoli-light.app]
 nvim = "tokyonight"
@@ -10349,6 +10681,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#282e35"
 border = "#363a40"
+on_secondary_container = "#ffb9b2"
+secondary_container = "#5d2a28"
 
 [themes.rose-dark.app]
 nvim = "tokyonight"
@@ -10411,6 +10745,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e3e4ea"
 border = "#d0d0d5"
+on_secondary_container = "#004672"
+secondary_container = "#ddecff"
 
 [themes.rose-light.app]
 nvim = "catppuccin"
@@ -10473,6 +10809,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2b2d35"
 border = "#393a40"
+on_secondary_container = "#e8bbff"
+secondary_container = "#473055"
 
 [themes.sakura-dark.app]
 nvim = "catppuccin"
@@ -10535,6 +10873,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e3e4ea"
 border = "#d0d0d5"
+on_secondary_container = "#343d78"
+secondary_container = "#eae9ff"
 
 [themes.sakura-light.app]
 nvim = "catppuccin"
@@ -10597,6 +10937,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#272d35"
 border = "#353a40"
+on_secondary_container = "#d6ce82"
+secondary_container = "#3d3a11"
 
 [themes.seine-dark.app]
 nvim = "tokyonight"
@@ -10659,6 +11001,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ea"
 border = "#ced1d5"
+on_secondary_container = "#454500"
+secondary_container = "#f0ecd4"
 
 [themes.seine-light.app]
 nvim = "tokyonight"
@@ -10721,6 +11065,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#302b39"
 border = "#3c3844"
+on_secondary_container = "#a7ccff"
+secondary_container = "#1f3960"
 
 [themes.sequoia-dark.app]
 nvim = "catppuccin"
@@ -10783,6 +11129,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e6e3ee"
 border = "#d2d0d8"
+on_secondary_container = "#60391e"
+secondary_container = "#ffe6d8"
 
 [themes.sequoia-light.app]
 nvim = "catppuccin"
@@ -10845,6 +11193,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#292d36"
 border = "#373a41"
+on_secondary_container = "#e6c980"
+secondary_container = "#443810"
 
 [themes.shoal-dark.app]
 nvim = "catppuccin"
@@ -10907,6 +11257,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e4ef"
 border = "#cdd0d8"
+on_secondary_container = "#524000"
+secondary_container = "#f6ead4"
 
 [themes.shoal-light.app]
 nvim = "catppuccin"
@@ -10969,6 +11321,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2e2e25"
 border = "#3b3b34"
+on_secondary_container = "#85dafc"
+secondary_container = "#004159"
 
 [themes.shore-dark.app]
 nvim = "everforest"
@@ -11031,6 +11385,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e5e5df"
 border = "#d1d1cc"
+on_secondary_container = "#004a62"
+secondary_container = "#d2f0fe"
 
 [themes.shore-light.app]
 nvim = "everforest"
@@ -11093,6 +11449,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#362a27"
 border = "#413835"
+on_secondary_container = "#ffbc8d"
+secondary_container = "#543018"
 
 [themes.snake-dark.app]
 nvim = "catppuccin"
@@ -11155,6 +11513,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#eae3dc"
 border = "#d5cfca"
+on_secondary_container = "#732b1d"
+secondary_container = "#ffe4dd"
 
 [themes.snake-light.app]
 nvim = "everforest"
@@ -11217,6 +11577,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2b2e20"
 border = "#383b30"
+on_secondary_container = "#c8c5ff"
+secondary_container = "#35355d"
 
 [themes.sonoma-dark.app]
 nvim = "everforest"
@@ -11279,6 +11641,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e3e5da"
 border = "#d0d1c9"
+on_secondary_container = "#3d3b79"
+secondary_container = "#ece8ff"
 
 [themes.sonoma-light.app]
 nvim = "everforest"
@@ -11341,6 +11705,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2a2d35"
 border = "#383a40"
+on_secondary_container = "#ffbba0"
+secondary_container = "#5a2d20"
 
 [themes.spinner-dark.app]
 nvim = "catppuccin"
@@ -11403,6 +11769,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e1e4ee"
 border = "#ced0d8"
+on_secondary_container = "#303d7c"
+secondary_container = "#eae9ff"
 
 [themes.spinner-light.app]
 nvim = "catppuccin"
@@ -11465,6 +11833,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2e2b39"
 border = "#3b3844"
+on_secondary_container = "#79d9ff"
+secondary_container = "#003f5d"
 
 [themes.sunflower-dark.app]
 nvim = "catppuccin"
@@ -11527,6 +11897,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e6e3ee"
 border = "#d2d0d8"
+on_secondary_container = "#463876"
+secondary_container = "#efe8fe"
 
 [themes.sunflower-light.app]
 nvim = "catppuccin"
@@ -11589,6 +11961,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#282e36"
 border = "#363b41"
+on_secondary_container = "#c6c5ff"
+secondary_container = "#34355d"
 
 [themes.tahoe-dark.app]
 nvim = "tokyonight"
@@ -11651,6 +12025,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ed"
 border = "#cdd1d7"
+on_secondary_container = "#3c3b79"
+secondary_container = "#ece8ff"
 
 [themes.tahoe-light.app]
 nvim = "catppuccin"
@@ -11713,6 +12089,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#282e35"
 border = "#363a40"
+on_secondary_container = "#e3ca80"
+secondary_container = "#433810"
 
 [themes.tang-dark.app]
 nvim = "tokyonight"
@@ -11775,6 +12153,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ed"
 border = "#cdd1d7"
+on_secondary_container = "#4f4100"
+secondary_container = "#f4ead4"
 
 [themes.tang-light.app]
 nvim = "tokyonight"
@@ -11837,6 +12217,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2c2c35"
 border = "#393940"
+on_secondary_container = "#ffb3ea"
+secondary_container = "#542b49"
 
 [themes.tarn-dark.app]
 nvim = "catppuccin"
@@ -11899,6 +12281,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e4e4ec"
 border = "#d0d0d7"
+on_secondary_container = "#712553"
+secondary_container = "#ffe4f1"
 
 [themes.tarn-light.app]
 nvim = "catppuccin"
@@ -11961,6 +12345,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#322c25"
 border = "#3e3933"
+on_secondary_container = "#ffba9e"
+secondary_container = "#592d1f"
 
 [themes.terracotta-dark.app]
 nvim = "everforest"
@@ -12023,6 +12409,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e9e3dd"
 border = "#d4cfcb"
+on_secondary_container = "#6e3012"
+secondary_container = "#ffe5da"
 
 [themes.terracotta-light.app]
 nvim = "everforest"
@@ -12085,6 +12473,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#282d36"
 border = "#373a41"
+on_secondary_container = "#acd993"
+secondary_container = "#273f1b"
 
 [themes.tiburon-dark.app]
 nvim = "catppuccin"
@@ -12147,6 +12537,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e6db"
 border = "#cdd2ca"
+on_secondary_container = "#00447d"
+secondary_container = "#e1ebff"
 
 [themes.tiburon-light.app]
 nvim = "everforest"
@@ -12209,6 +12601,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#262d35"
 border = "#353a40"
+on_secondary_container = "#ffb7c0"
+secondary_container = "#5d282f"
 
 [themes.tide-dark.app]
 nvim = "tokyonight"
@@ -12271,6 +12665,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ea"
 border = "#ced1d5"
+on_secondary_container = "#78242d"
+secondary_container = "#ffe3e3"
 
 [themes.tide-light.app]
 nvim = "tokyonight"
@@ -12333,6 +12729,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#362a2a"
 border = "#413838"
+on_secondary_container = "#e4ca80"
+secondary_container = "#433810"
 
 [themes.tiger-dark.app]
 nvim = "catppuccin"
@@ -12395,6 +12793,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#eee1e1"
 border = "#d8cece"
+on_secondary_container = "#004867"
+secondary_container = "#d6eeff"
 
 [themes.tiger-light.app]
 nvim = "catppuccin"
@@ -12457,6 +12857,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#262d35"
 border = "#353a40"
+on_secondary_container = "#ffbc8d"
+secondary_container = "#543018"
 
 [themes.trilogy-dark.app]
 nvim = "tokyonight"
@@ -12519,6 +12921,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#dde5ed"
 border = "#cbd1d7"
+on_secondary_container = "#603920"
+secondary_container = "#ffe6d8"
 
 [themes.trilogy-light.app]
 nvim = "tokyonight"
@@ -12581,6 +12985,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#262d35"
 border = "#353a40"
+on_secondary_container = "#ebc697"
+secondary_container = "#4b3512"
 
 [themes.trocadero-dark.app]
 nvim = "tokyonight"
@@ -12643,6 +13049,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ea"
 border = "#ced1d5"
+on_secondary_container = "#5c3c00"
+secondary_container = "#fae8d5"
 
 [themes.trocadero-light.app]
 nvim = "tokyonight"
@@ -12705,6 +13113,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#292d38"
 border = "#373a43"
+on_secondary_container = "#7cd7ff"
+secondary_container = "#003e5e"
 
 [themes.tulip-dark.app]
 nvim = "catppuccin"
@@ -12767,6 +13177,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ea"
 border = "#ced1d5"
+on_secondary_container = "#474400"
+secondary_container = "#f0ebd4"
 
 [themes.tulip-light.app]
 nvim = "tokyonight"
@@ -12829,6 +13241,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#272d35"
 border = "#353a40"
+on_secondary_container = "#ffb9a7"
+secondary_container = "#5b2b23"
 
 [themes.urchin-dark.app]
 nvim = "tokyonight"
@@ -12891,6 +13305,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e0e5ea"
 border = "#cdd1d5"
+on_secondary_container = "#742a1e"
+secondary_container = "#ffe4dd"
 
 [themes.urchin-light.app]
 nvim = "tokyonight"
@@ -12953,6 +13369,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#39282b"
 border = "#443638"
+on_secondary_container = "#ffb5d4"
+secondary_container = "#5c283a"
 
 [themes.valentine-dark.app]
 nvim = "catppuccin"
@@ -13015,6 +13433,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#efe0e2"
 border = "#d8cdcf"
+on_secondary_container = "#623802"
+secondary_container = "#fce7d6"
 
 [themes.valentine-light.app]
 nvim = "catppuccin"
@@ -13077,6 +13497,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#302a38"
 border = "#3d3843"
+on_secondary_container = "#ffb4e3"
+secondary_container = "#582944"
 
 [themes.vapor-dark.app]
 nvim = "catppuccin"
@@ -13139,6 +13561,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e7e2ed"
 border = "#d3cfd7"
+on_secondary_container = "#54346f"
+secondary_container = "#f3e6fc"
 
 [themes.vapor-light.app]
 nvim = "catppuccin"
@@ -13201,6 +13625,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#342b22"
 border = "#403831"
+on_secondary_container = "#ffbb98"
+secondary_container = "#572e1c"
 
 [themes.ventura-dark.app]
 nvim = "everforest"
@@ -13263,6 +13689,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#ece3da"
 border = "#d7d0c9"
+on_secondary_container = "#5d3a1a"
+secondary_container = "#fde7d6"
 
 [themes.ventura-light.app]
 nvim = "everforest"
@@ -13325,6 +13753,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#322a38"
 border = "#3e3842"
+on_secondary_container = "#ffb7bd"
+secondary_container = "#5d292e"
 
 [themes.vertex-dark.app]
 nvim = "catppuccin"
@@ -13387,6 +13817,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e6e2ed"
 border = "#d2cfd7"
+on_secondary_container = "#78242e"
+secondary_container = "#ffe3e3"
 
 [themes.vertex-light.app]
 nvim = "catppuccin"
@@ -13449,6 +13881,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#302b39"
 border = "#3c3844"
+on_secondary_container = "#ffb4ec"
+secondary_container = "#542b4a"
 
 [themes.vista-dark.app]
 nvim = "catppuccin"
@@ -13511,6 +13945,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e6e2ee"
 border = "#d2cfd8"
+on_secondary_container = "#5f2f68"
+secondary_container = "#f7e5f9"
 
 [themes.vista-light.app]
 nvim = "catppuccin"
@@ -13573,6 +14009,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#252e35"
 border = "#343b40"
+on_secondary_container = "#66dff4"
+secondary_container = "#004250"
 
 [themes.wave-dark.app]
 nvim = "tokyonight"
@@ -13635,6 +14073,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#dce5ec"
 border = "#cbd1d6"
+on_secondary_container = "#004480"
+secondary_container = "#e2ebff"
 
 [themes.wave-light.app]
 nvim = "tokyonight"
@@ -13697,6 +14137,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2d2b3a"
 border = "#3a3844"
+on_secondary_container = "#ffbc8e"
+secondary_container = "#543018"
 
 [themes.windows-dark.app]
 nvim = "catppuccin"
@@ -13759,6 +14201,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e6e2ed"
 border = "#d2cfd7"
+on_secondary_container = "#1f407e"
+secondary_container = "#e7eaff"
 
 [themes.windows-light.app]
 nvim = "catppuccin"
@@ -13821,6 +14265,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#312c25"
 border = "#3e3933"
+on_secondary_container = "#e5ca80"
+secondary_container = "#443810"
 
 [themes.wireless-dark.app]
 nvim = "everforest"
@@ -13883,6 +14329,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e8e4dc"
 border = "#d3d0ca"
+on_secondary_container = "#004b52"
+secondary_container = "#cef2f5"
 
 [themes.wireless-light.app]
 nvim = "everforest"
@@ -13945,6 +14393,8 @@ success = "#5ee17a"
 info = "#65b8ff"
 panel = "#2f2b39"
 border = "#3c3844"
+on_secondary_container = "#ffbe8a"
+secondary_container = "#523116"
 
 [themes.zenith-dark.app]
 nvim = "catppuccin"
@@ -14007,6 +14457,8 @@ success = "#14532d"
 info = "#1e3a8a"
 panel = "#e6e3ee"
 border = "#d2d0d8"
+on_secondary_container = "#353c7b"
+secondary_container = "#ebe9ff"
 
 [themes.zenith-light.app]
 nvim = "catppuccin"
@@ -14073,6 +14525,8 @@ text_muted = "#c8cbd5"
 accent_on_surface = "#aecdff"
 secondary_on_surface = "#feb1ff"
 tertiary_on_surface = "#44e86c"
+on_secondary_container = "#ecbaff"
+secondary_container = "#492f54"
 
 [themes.fallback-dark.app]
 nvim = "tokyonight"
@@ -14136,6 +14590,8 @@ text_muted = "#3c3d42"
 accent_on_surface = "#003a83"
 secondary_on_surface = "#600097"
 tertiary_on_surface = "#004704"
+on_secondary_container = "#59316c"
+secondary_container = "#f5e6fb"
 
 [themes.fallback-light.app]
 nvim = "catppuccin"
