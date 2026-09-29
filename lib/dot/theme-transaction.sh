@@ -41,8 +41,10 @@ _theme_txn_state_root() {
   printf '%s' "${DOT_THEME_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/dot/theme-transactions}"
 }
 
+# Keyed on HOME alone: the launchd auto-sync agent sees neither the shell's
+# XDG_RUNTIME_DIR nor its TMPDIR, so either would split one lock in two.
 _theme_txn_lock_root() {
-  local root="${DOT_THEME_LOCK_ROOT:-${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}}"
+  local root="${DOT_THEME_LOCK_ROOT:-$HOME/.local/state/dot}"
   printf '%s' "$root"
 }
 

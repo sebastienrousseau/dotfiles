@@ -43,7 +43,17 @@ assert_equals 'a\\b\"c\nd\re\tf' "$got" "backslash, quote, newline, CR, tab esca
 test_start "txn_state_and_lock_root_defaults"
 got="$(env -u DOT_THEME_STATE_DIR -u DOT_THEME_LOCK_ROOT -u XDG_RUNTIME_DIR TMPDIR=/tmpx \
   bash -c 'source "$1"; printf "%s|%s" "$(_theme_txn_state_root)" "$(_theme_txn_lock_root)"' _ "$LIB")"
-assert_equals "$XDG_STATE_HOME/dot/theme-transactions|/tmpx" "$got" "fallback roots"
+assert_equals "$XDG_STATE_HOME/dot/theme-transactions|$HOME/.local/state/dot" "$got" "fallback roots"
+
+# The launchd auto-sync agent has neither the shell's XDG_RUNTIME_DIR nor
+# its TMPDIR; a lock root derived from either let an interactive `dot theme`
+# and the agent hold "the" lock at once and collide on chezmoi's own lock.
+test_start "txn_lock_root_ignores_session_env"
+agent="$(env -u DOT_THEME_LOCK_ROOT -u XDG_RUNTIME_DIR -u TMPDIR \
+  bash -c 'source "$1"; _theme_txn_lock_root' _ "$LIB")"
+shell="$(env -u DOT_THEME_LOCK_ROOT XDG_RUNTIME_DIR=/run/x TMPDIR=/tmpy \
+  bash -c 'source "$1"; _theme_txn_lock_root' _ "$LIB")"
+assert_equals "$agent" "$shell" "agent and shell resolve the same lock root"
 
 test_start "txn_hash_missing_file_is_empty"
 assert_equals "" "$(_theme_txn_hash "$WORK/nope")" "no hash for a missing path"
