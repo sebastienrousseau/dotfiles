@@ -156,13 +156,14 @@ bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 #
 # Every session gets its own Apple system colour as a solid block, so
 # sessions are told apart at a glance. The top bar (the pane border line)
-# names the current window and shows the date and time, as in the reference
-# layout; the bottom bar carries the session, the other windows and context.
-# Nothing appears in both.
+# names the current window and shows the system indicators; the bottom bar
+# carries the session, the other windows, the path and the time. Nothing
+# appears in both, and nothing depends on the window width.
 # Following the Apple HIG colour guidance:
 #   - colour on large areas, one black or white label per block (7:1);
 #   - one meaning per colour: session colour = this session, secondary tint
-#     = time, error = prefix armed or bell, warning = activity;
+#     = time and system readings, error = prefix armed or bell, warning =
+#     activity;
 #   - no state by colour alone: the terminal icon becomes a keyboard while
 #     the prefix is armed, the active window is bold and flagged `*`, and
 #     bell/activity keep tmux's own `!`/`#` flags;
@@ -188,21 +189,19 @@ set -g status-right-length 120
 # command line, making the generated theme customizable without forking it.
 set -ogq @dot_status_show_path on
 set -ogq @dot_status_show_system on
-set -ogq @dot_status_show_date on
 
 # Session: terminal icon and name; prefix swaps the icon and the colour.
 set -g status-left "\
 #[fg=#{?client_prefix,#000000,#{@dot_session_text}},bg=#{?client_prefix,#ff5b79,#{@dot_session_colour}},bold] #{?client_prefix, , }#S \
 #[bg=#{@dot_session_colour},nobold] "
 
-# Context on the session block. The date and time live in the top bar only,
-# so nothing is shown twice. `tmux-status system` performs one platform-aware
-# sample per interval; path and monitoring can be disabled independently with
-# the options above, and monitoring drops out on narrow clients.
+# Context on the session block, then the time on its tinted block. Nothing
+# depends on the client width, so a half-screen window shows exactly what a
+# full-screen one does.
 set -g status-right "\
 #[fg=#{@dot_session_text},bg=#{@dot_session_colour},bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
 #[nobold]#{?#{==:#{@dot_status_show_path},on},#{b:pane_current_path} ,}\
-#{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#{?#{==:#{@dot_status_show_path},on},· ,}#(~/.local/bin/tmux-status system) ,}"
+#[fg=#612e67,bg=#f8e5f9,nobold] %H:%M "
 
 # Window tabs sit on the session block and take its label colour. The
 # current window is named in the top bar, so the bottom lists only the
@@ -215,15 +214,16 @@ set -g window-status-bell-style "bg=#ff5b79,fg=#000000,bold"
 set -g window-status-activity-style "bg=#ff8d28,fg=#000000,bold"
 
 # --- Top bar: the pane border line, as in the reference layout ---
-# The active pane shows the window on the session block and the full date
-# and time on the clock tint; other panes show a quiet label on the border
-# surface (accent_on_surface is audited at 7:1 on border).
+# The active pane shows the window on the session block and the system
+# indicators (one `tmux-status system` sample per interval) on the tint; other
+# panes show a quiet label on the border surface (accent_on_surface is
+# audited at 7:1 on border).
 set -g pane-border-status top
 set -g pane-border-lines single
 set -g pane-border-format "\
 #{?pane_active,\
 #[fg=#{@dot_session_text}#,bg=#{@dot_session_colour}#,bold] #I:#W#F#{?window_zoomed_flag, ,} #[nobold]#[fill=#{@dot_session_colour}]\
-#[align=right]#[fg=#612e67#,bg=#f8e5f9] #{?#{==:#{@dot_status_show_date},on},%A#, %Y-%m-%d ,}%H:%M ,\
+#{?#{==:#{@dot_status_show_system},on},#[align=right]#[fg=#612e67#,bg=#f8e5f9] #(~/.local/bin/tmux-status system) ,},\
 #[fg=#003f6a#,bg=#cad1d5] #P: #{pane_current_command} #[fill=#cad1d5]}"
 
 # --- Pane Borders ---
