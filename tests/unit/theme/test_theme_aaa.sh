@@ -56,6 +56,13 @@ c15 = "#f4f5fb"
 
 [themes.probe-dark.ui]
 accent = "#90b0fe"
+accent_text = "#000000"
+secondary = "#61b9f2"
+tertiary = "#ef8ee9"
+error = "#ff6b6b"
+warning = "#ffd166"
+success = "#5ee17a"
+info = "#65b8ff"
 panel = "#1f2738"
 border = "#2b3446"
 text_muted = "#8089a0"
@@ -92,6 +99,13 @@ c15 = "#969697"
 
 [themes.probe-light.ui]
 accent = "#1e4fb0"
+accent_text = "#ffffff"
+secondary = "#7f2ea7"
+tertiary = "#754e00"
+error = "#9f1239"
+warning = "#6b3f00"
+success = "#14532d"
+info = "#1e3a8a"
 panel = "#dfe6ef"
 border = "#cdd5df"
 text_muted = "#5d646c"
@@ -99,6 +113,8 @@ accent_on_surface = "#3f68c0"
 secondary_on_surface = "#8a4aa0"
 tertiary_on_surface = "#307a60"
 TOML
+
+cp "$WORK/cat.toml" "$WORK/pristine.toml"
 
 test_start "aaa_leaves_passing_colours_untouched"
 got="$(py 'print(aaa.legible("#ffffff", ["#000000"]), aaa.legible("#000000", ["#ffffff"]))')"
@@ -173,10 +189,8 @@ assert_file_contains "$WORK/cat.toml" 'c0  = "#373e50"'
 assert_file_contains "$WORK/cat.toml" 'c15 = "#969697"'
 
 # The tmux clock block: derived from ui.secondary when a theme lacks it.
-# Built on the full probe palettes above, plus a secondary hue per mode.
-sed -e '/^\[themes\.probe-dark\.ui\]$/a\
-secondary = "#61b9f2"' -e '/^\[themes\.probe-light\.ui\]$/a\
-secondary = "#7f2ea7"' "$WORK/cat.toml" >"$WORK/cont.toml"
+# Built on the full probe palettes above, before any --write touched them.
+cp "$WORK/pristine.toml" "$WORK/cont.toml"
 
 test_start "aaa_derives_the_clock_container_in_both_modes"
 got="$(

@@ -193,7 +193,7 @@ for name in sorted(themes):
     checks = [
         cr(fg, bg) >= 7.0,
         cr(ui["accent_text"], ui["accent"]) >= 7.0,
-        all(cr(ui["accent_text"], ui[role]) >= 7.0
+        all(cr(ui.get("status_text", ui["accent_text"]), ui[role]) >= 7.0
             for role in ("error", "warning", "success", "info")),
         ui["accent_text"] == ("#000000" if t["mode"] == "dark" else "#ffffff"),
         cr(term["c0"], bg) >= 1.5,

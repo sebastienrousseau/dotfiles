@@ -35,12 +35,12 @@ config.window_decorations = "RESIZE"
 config.colors = {
   foreground = "#1d1d1e",
   background = "#f3f1fa",
-  cursor_bg = "#001867",
-  cursor_fg = "#f3f1fa",
+  cursor_bg = "#4840d3",
+  cursor_fg = "#fffdff",
   selection_bg = "#d3cceb",
   selection_fg = "#1d1d1e",
-  ansi = { "#2c2c2d", "#a6001b", "#006011", "#6c4827", "#1a38b1", "#91038b", "#005763", "#515152" },
-  brights = { "#48484a", "#a5000c", "#00600f", "#6f4721", "#0036c2", "#95008f", "#005763", "#969697" },
+  ansi = { "#2c2c2d", "#a80000", "#005f08", "#764600", "#0046c3", "#8e00a1", "#005582", "#515152" },
+  brights = { "#48484a", "#a70022", "#005d4f", "#972c00", "#3334c3", "#7d0091", "#00596f", "#969697" },
 }
 
 return config

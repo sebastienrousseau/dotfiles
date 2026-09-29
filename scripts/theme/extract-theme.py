@@ -22,6 +22,7 @@ from typing import List, Tuple, Dict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import aaa  # sibling module: the final 7:1 pass on every text colour
+import apple  # sibling module: Apple system colours, resolved to 7:1
 
 # ---------------------------------------------------------------------------
 # Color space conversions (RGB ↔ XYZ ↔ CIELAB)
@@ -909,9 +910,10 @@ def generate_theme(
 
     mode = "dark" if is_dark else "light"
 
-    # The floors above shape each colour; aaa.enforce is the single place that
+    # The wallpaper sets bg, surfaces and which colours lead; apple.apply
+    # swaps in Apple system colours, and aaa.enforce is the single place that
     # guarantees WCAG AAA (7:1) for everything painted as text.
-    return aaa.enforce({
+    return aaa.enforce(apple.apply({
         "name": name,
         "mode": mode,
         "family": name.rsplit("-", 1)[0] if name.endswith(f"-{mode}") else name,
@@ -978,7 +980,7 @@ def generate_theme(
             "cat_wallpaper": "",
             "starship_palette": f"catppuccin_{'mocha' if is_dark else 'latte'}",
         },
-    })
+    }))
 
 
 # ---------------------------------------------------------------------------
@@ -1007,9 +1009,13 @@ def theme_to_toml(theme: Dict) -> str:
     lines.append("")
 
     lines.append(f"[themes.{name}.ui]")
-    for key in ["accent", "accent_text", "secondary", "tertiary", "text_muted",
-                "accent_on_surface", "secondary_on_surface", "tertiary_on_surface",
-                "error", "warning", "success", "info", "panel", "border"]:
+    ordered = ["accent", "accent_text", "secondary", "tertiary", "text_muted",
+               "accent_on_surface", "secondary_on_surface", "tertiary_on_surface",
+               "error", "warning", "success", "info", "panel", "border"]
+    # Then every role the Apple/AAA passes derived (status_text, the clock's
+    # secondary_container pair, ...): a fixed list silently dropped them.
+    ordered += [key for key in theme["ui"] if key not in ordered]
+    for key in ordered:
         lines.append(f'{key} = "{theme["ui"][key]}"')
     lines.append("")
 

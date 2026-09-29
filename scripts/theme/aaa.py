@@ -21,9 +21,9 @@ Text slots and the surfaces they land on:
   ui text_muted        de-emphasised text on bg, panel, border
   ui on_secondary_container   the tmux clock on its tinted block
 
-Derived roles: when a theme has no secondary_container, one is made from
-ui.secondary's hue: a deep tint on a dark theme, a pale tint on a light one.
-on_secondary_container is that hue as text, walked to 7:1 on the tint.
+Derived roles: secondary_container is always remade from ui.secondary's hue,
+a deep tint on a dark theme and a pale one on a light theme, so it follows
+the secondary. on_secondary_container is that hue as text, walked to 7:1.
 
 Exempt: c0 on a dark bg and c15 on a light bg. Those are the palette's
 background-tone slots (programs paint them as fills, e.g. `tput setab 0`),
@@ -46,11 +46,13 @@ from __future__ import annotations
 
 import argparse
 import copy
+import functools
 import re
 import sys
 from pathlib import Path
 from typing import Any
 
+import apple
 import tomllib
 
 MIN_RATIO = 7.0
@@ -138,6 +140,7 @@ def _rgb(lightness: float, a: float, b: float) -> RGB:
     )
 
 
+@functools.cache
 def nearest_xterm(rgb: RGB) -> RGB:
     return min(_XTERM_256, key=lambda c: sum((c[i] - rgb[i]) ** 2 for i in range(3)))
 
@@ -217,14 +220,10 @@ def _secondary_container(ui: dict[str, str], dark: bool) -> None:
     """Fill the tinted block behind the tmux clock and its text colour."""
     if "secondary" not in ui:
         return
-    if "secondary_container" not in ui:
-        ui["secondary_container"] = _tint(
-            ui["secondary"], 24.0 if dark else 93.0, 26.0 if dark else 12.0
-        )
-    if "on_secondary_container" not in ui:
-        ui["on_secondary_container"] = _tint(
-            ui["secondary"], 82.0 if dark else 28.0, 40.0
-        )
+    ui["secondary_container"] = _tint(
+        ui["secondary"], 24.0 if dark else 93.0, 26.0 if dark else 12.0
+    )
+    ui["on_secondary_container"] = _tint(ui["secondary"], 82.0 if dark else 28.0, 40.0)
     ui["on_secondary_container"] = legible(
         ui["on_secondary_container"], [ui["secondary_container"]]
     )
@@ -259,7 +258,7 @@ def _changes(catalog: dict[str, Any]) -> dict[tuple[str, str, str], str]:
     for name, theme in catalog.get("themes", {}).items():
         if not isinstance(theme, dict) or "term" not in theme or "ui" not in theme:
             continue
-        fixed = enforce(theme)
+        fixed = enforce(apple.apply(theme))
         for table in ("term", "ui"):
             for key, value in fixed[table].items():
                 if value != theme[table].get(key):

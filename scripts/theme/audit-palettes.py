@@ -219,8 +219,12 @@ def audit_theme(name: str, theme: dict[str, Any]) -> dict[str, Any]:
         container_text_contrast = contrast(
             hex_rgb(ui["on_secondary_container"]), hex_rgb(ui["secondary_container"])
         )
+        # Status blocks carry their own label (ui.status_text, black) so the
+        # four stay apart under colour-blind simulation; older catalogs label
+        # them with accent_text.
+        status_text = hex_rgb(ui.get("status_text", ui["accent_text"]))
         status_text_contrast = min(
-            contrast(accent_text, hex_rgb(ui[role])) for role in SEMANTIC_ROLES
+            contrast(status_text, hex_rgb(ui[role])) for role in SEMANTIC_ROLES
         )
         surface_text_contrast = min(
             contrast(hex_rgb(ui[role]), surface)

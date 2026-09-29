@@ -24,10 +24,10 @@ set-environment -g COLORFGBG "15;0"
 set-environment -g AIDER_DARK_MODE "true"
 set-environment -g AIDER_LIGHT_MODE "false"
 set-environment -g AIDER_CODE_THEME "solarized-dark"
-set-environment -g AIDER_USER_INPUT_COLOR "#61d677"
-set-environment -g AIDER_TOOL_ERROR_COLOR "#ff837a"
-set-environment -g AIDER_TOOL_WARNING_COLOR "#e5cc4b"
-set-environment -g AIDER_ASSISTANT_OUTPUT_COLOR "#61b9f2"
+set-environment -g AIDER_USER_INPUT_COLOR "#30d158"
+set-environment -g AIDER_TOOL_ERROR_COLOR "#ff8282"
+set-environment -g AIDER_TOOL_WARNING_COLOR "#ffd600"
+set-environment -g AIDER_ASSISTANT_OUTPUT_COLOR "#5cb8ff"
 setw -g xterm-keys on
 set -g base-index 1
 setw -g pane-base-index 1
@@ -170,7 +170,7 @@ set -g status on
 set -g status-interval 10
 set -g status-position bottom
 set -g status-justify left
-set -g status-style "bg=#60daee,fg=#000000"
+set -g status-style "bg=#00d2e0,fg=#000000"
 set -g status-left-length 40
 set -g status-right-length 120
 
@@ -182,45 +182,45 @@ set -ogq @dot_status_show_date on
 
 # --- Session: terminal icon and name; prefix swaps icon and colour ---
 set -g status-left "\
-#[fg=#000000,bg=#{?client_prefix,#ff6b6b,#60daee},bold] #{?client_prefix, , }#S \
-#[bg=#60daee,nobold] "
+#[fg=#000000,bg=#{?client_prefix,#ff8ac4,#00d2e0},bold] #{?client_prefix, , }#S \
+#[bg=#00d2e0,nobold] "
 
 # --- Context on the accent block, then the clock on its tinted block ---
 # `tmux-status system` performs one platform-aware sample per interval. Path,
 # monitoring, and date modules can be disabled independently with the options
 # above; narrower clients progressively retain only the clock.
 set -g status-right "\
-#[fg=#000000,bg=#60daee,bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
+#[fg=#000000,bg=#00d2e0,bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
 #[nobold]#{?#{==:#{@dot_status_show_path},on},#{b:pane_current_path} · ,}\
 #{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#(~/.local/bin/tmux-status system) ,}\
-#[fg=#81d6ff,bg=#003e5f,nobold] #{?#{&&:#{==:#{@dot_status_show_date},on},#{e|>=:#{client_width},155}},%A#, %Y-%m-%d ,}%H:%M "
+#[fg=#53dfff,bg=#004157,nobold] #{?#{&&:#{==:#{@dot_status_show_date},on},#{e|>=:#{client_width},155}},%A#, %Y-%m-%d ,}%H:%M "
 
 # --- Window Tabs ---
-set -g window-status-format "#[fg=#000000,bg=#60daee,nobold] #I:#W#F "
-set -g window-status-current-format "#[fg=#000000,bg=#60daee,bold] #I:#W#F#{?window_zoomed_flag, ,} "
+set -g window-status-format "#[fg=#000000,bg=#00d2e0,nobold] #I:#W#F "
+set -g window-status-current-format "#[fg=#000000,bg=#00d2e0,bold] #I:#W#F#{?window_zoomed_flag, ,} "
 
 set -g window-status-separator ""
-set -g window-status-bell-style "bg=#ff6b6b,fg=#000000,bold"
-set -g window-status-activity-style "bg=#ffd166,fg=#000000,bold"
+set -g window-status-bell-style "bg=#ff8ac4,fg=#000000,bold"
+set -g window-status-activity-style "bg=#ff9230,fg=#000000,bold"
 
 # --- Pane Borders ---
 set -g pane-border-style "fg=#323c3d"
-set -g pane-active-border-style "fg=#60daee"
-set -g display-panes-colour "#ffb2ff"
-set -g display-panes-active-colour "#60daee"
+set -g pane-active-border-style "fg=#00d2e0"
+set -g display-panes-colour "#ffb1ff"
+set -g display-panes-active-colour "#00d2e0"
 
 # --- Messages & Menus: the clock's tint, so text stays 7:1 ---
-set -g message-style "bg=#003e5f,fg=#81d6ff"
-set -g message-command-style "bg=#003e5f,fg=#81d6ff"
-set -g mode-style "bg=#323c3d,fg=#63ddf1,bold"
+set -g message-style "bg=#004157,fg=#53dfff"
+set -g message-command-style "bg=#004157,fg=#53dfff"
+set -g mode-style "bg=#323c3d,fg=#40e0ef,bold"
 
 # --- Clock ---
-setw -g clock-mode-colour "#60daee"
+setw -g clock-mode-colour "#00d2e0"
 setw -g clock-mode-style 24
 
 # --- Copy Mode Highlight ---
-set -g copy-mode-match-style "bg=#ffd166,fg=#000000"
-set -g copy-mode-current-match-style "bg=#60daee,fg=#000000,bold"
+set -g copy-mode-match-style "bg=#ff9230,fg=#000000"
+set -g copy-mode-current-match-style "bg=#00d2e0,fg=#000000,bold"
 
 # --- LINUX SPECIFIC ---
 if-shell 'uname | grep -q Linux' {
