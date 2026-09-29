@@ -153,22 +153,22 @@ bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 # ║  Colors from .chezmoidata/themes.toml (maui-light)  ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 #
-# Two solid blocks across the top: the wallpaper's primary colour carries the
-# session and windows, its secondary colour carries the clock. Following the
-# Apple HIG colour guidance:
-#   - colour goes on large areas; every label on them is the one monochrome
-#     accent_text, which the palette audit holds at 7:1 (WCAG AAA, the
-#     increased-contrast bar) on accent, secondary, warning and error;
-#   - each colour keeps one meaning: accent = your windows, secondary = time,
-#     warning = prefix armed, error = bell;
-#   - no state is shown by colour alone: the active window is bold and flagged
-#     `*`, prefix mode adds a ⌨ glyph, bell and activity keep tmux's `!`/`#`;
-#   - light and dark come from the wallpaper's own -light/-dark theme pair.
+# The wallpaper's accent fills the bar as one solid block behind the session
+# and windows; the clock sits on a tint of the wallpaper's secondary hue
+# (deep on dark themes, pale on light ones). Following the Apple HIG colour
+# guidance:
+#   - colour on a large area, with one monochrome label colour on it;
+#   - one meaning per colour: accent = your windows, secondary tint = time,
+#     error = prefix armed or bell, warning = activity;
+#   - no state by colour alone: the terminal icon becomes a keyboard while
+#     the prefix is armed, the active window is bold and flagged `*`, and
+#     bell/activity keep tmux's own `!`/`#` flags;
+#   - every label reaches 7:1 (WCAG AAA) in the -light and -dark theme alike.
 
 # --- Status Bar ---
 set -g status on
 set -g status-interval 10
-set -g status-position top
+set -g status-position bottom
 set -g status-justify left
 set -g status-style "bg=#005a75,fg=#ffffff"
 set -g status-left-length 40
@@ -180,12 +180,12 @@ set -ogq @dot_status_show_path on
 set -ogq @dot_status_show_system on
 set -ogq @dot_status_show_date on
 
-# --- Session: the block's leading label; prefix mode turns it warning ---
+# --- Session: terminal icon and name; prefix swaps icon and colour ---
 set -g status-left "\
-#[fg=#ffffff,bg=#{?client_prefix,#6b3f00,#005a75},bold] #{?client_prefix,⌨ ,}#S \
+#[fg=#ffffff,bg=#{?client_prefix,#9f1239,#005a75},bold] #{?client_prefix, , }#S \
 #[bg=#005a75,nobold] "
 
-# --- Context in the primary block, then the clock in the secondary block ---
+# --- Context on the accent block, then the clock on its tinted block ---
 # `tmux-status system` performs one platform-aware sample per interval. Path,
 # monitoring, and date modules can be disabled independently with the options
 # above; narrower clients progressively retain only the clock.
@@ -193,7 +193,7 @@ set -g status-right "\
 #[fg=#ffffff,bg=#005a75,bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
 #[nobold]#{?#{==:#{@dot_status_show_path},on},#{b:pane_current_path} · ,}\
 #{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#(~/.local/bin/tmux-status system) ,}\
-#[fg=#ffffff,bg=#7f2ea7,bold] #{?#{&&:#{==:#{@dot_status_show_date},on},#{e|>=:#{client_width},155}},%A#, %Y-%m-%d  ,}%H:%M "
+#[fg=#5a316c,bg=#f5e6fb,nobold] #{?#{&&:#{==:#{@dot_status_show_date},on},#{e|>=:#{client_width},155}},%A#, %Y-%m-%d ,}%H:%M "
 
 # --- Window Tabs ---
 set -g window-status-format "#[fg=#ffffff,bg=#005a75,nobold] #I:#W#F "
@@ -209,10 +209,10 @@ set -g pane-active-border-style "fg=#005a75"
 set -g display-panes-colour "#583500"
 set -g display-panes-active-colour "#005a75"
 
-# --- Messages & Menus: text on a block, same 7:1 pairing as the bar ---
-set -g message-style "bg=#7f2ea7,fg=#ffffff"
-set -g message-command-style "bg=#7f2ea7,fg=#ffffff"
-set -g mode-style "bg=#005a75,fg=#ffffff,bold"
+# --- Messages & Menus: the clock's tint, so text stays 7:1 ---
+set -g message-style "bg=#f5e6fb,fg=#5a316c"
+set -g message-command-style "bg=#f5e6fb,fg=#5a316c"
+set -g mode-style "bg=#cad1d5,fg=#00415b,bold"
 
 # --- Clock ---
 setw -g clock-mode-colour "#005a75"

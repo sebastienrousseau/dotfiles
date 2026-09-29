@@ -734,15 +734,16 @@ if [[ -n "$CHEZMOI_BIN" ]]; then
   assert_file_contains "$RENDER/tmux-light.conf" 'set-environment -g COLORFGBG "0;15"' "light panes inherit a light appearance signal"
   assert_file_contains "$RENDER/tmux-dark.conf" 'set -g focus-events on' "tmux receives terminal focus events"
   assert_file_contains "$RENDER/tmux-dark.conf" 'bind A display-menu -T "#[align=centre] AI CLI cockpit "' "prefix+A exposes the AI launcher"
-  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g status-position top' "the block bar sits at the top"
+  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g status-position bottom' "the block bar stays at the bottom"
   assert_file_contains "$RENDER/tmux-dark.conf" 'set -g status-style "bg=#ff8800,fg=#000000"' \
-    "the primary block is the accent, labelled in accent_text"
+    "the bar is one accent block, labelled in accent_text"
   assert_file_contains "$RENDER/tmux-light.conf" 'set -g status-style "bg=#0066ff,fg=#ffffff"' \
     "the light theme swaps to its own accent and white labels"
-  assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#000000,bg=#22ccaa,bold] ' "the clock sits in the secondary block"
-  assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#000000,bg=#{?client_prefix,#ffcc00,#ff8800},bold] #{?client_prefix,⌨ ,}#S ' \
-    "prefix mode turns the session warning and adds a glyph, not colour alone"
-  assert_equals "1" "$(grep -c '#{?client_prefix,.* ,}#S ' "$RENDER/tmux-dark.conf")" \
+  assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#22ccaa,bg=#2a3444,nobold] ' \
+    "without a secondary_container the clock falls back to audited text on border"
+  assert_file_contains "$RENDER/tmux-dark.conf" $'#[fg=#000000,bg=#{?client_prefix,#ff2255,#ff8800},bold] #{?client_prefix,\uf11c ,\uf489 }#S ' \
+    "the terminal icon leads the session and becomes a keyboard in the error colour on prefix"
+  assert_equals "1" "$(grep -c '#{?client_prefix,.* }#S ' "$RENDER/tmux-dark.conf")" \
     "session name is the primary left-side identity"
   assert_file_contains "$RENDER/tmux-dark.conf" 'set -g status-justify left' "session and windows form one compact group"
   assert_file_contains "$RENDER/tmux-dark.conf" ' #I:#W#F#{?window_zoomed_flag,' "current window shows native flags and zoom state"
