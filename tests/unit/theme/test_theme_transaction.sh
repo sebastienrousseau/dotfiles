@@ -196,6 +196,21 @@ test_start "optional_provider_failure_preserves_corrupt_config"
 assert_equals "$invalid_provider_before" \
   "$(shasum -a 256 "$HOME/.claude/settings.json" | awk '{print $1}')"
 
+# A bare `--force` re-renders the active theme and names no preference, so it
+# must keep the stored one. Deriving "dark" from the theme name made the
+# read-back compare "auto" != "dark" and roll back every re-apply.
+sed -i.bak 's/^theme_mode = .*/theme_mode = "auto"/' "$HOME/.config/chezmoi/chezmoi.toml"
+reapply_rc=0
+reapply_output="$WORK/reapply.out"
+DOT_THEME_OPERATION_ID="reapply-case" "$THEME_SYNC" --force >"$reapply_output" 2>&1 || reapply_rc=$?
+
+test_start "bare_force_reapply_under_auto_succeeds"
+assert_equals "0" "$reapply_rc" "re-apply exits zero: $(grep -F 'Verify' "$reapply_output")"
+assert_file_contains "$DOT_THEME_STATE_DIR/reapply-case/journal.json" '"status": "succeeded"'
+
+test_start "bare_force_reapply_keeps_the_stored_preference"
+assert_file_contains "$HOME/.config/chezmoi/chezmoi.toml" 'theme_mode = "auto"'
+
 switch_calls="$WORK/switch.calls"
 cat >"$WORK/bin/dot-theme-sync" <<EOF
 #!$REAL_BASH

@@ -452,6 +452,7 @@ emit_theme_plan_json() {
 
 emit_theme_plan_human() {
   local target="$1" preference="$2" operation_id="$3" count=0 path
+  printf '%s\n\n' "${BOLD}${CYAN}dot-theme-sync plan${RESET}"
   _info "Operation" "$operation_id"
   _info "Theme" "$target ($preference)"
   while IFS= read -r path; do
@@ -1907,26 +1908,18 @@ main() {
     exit 1
   fi
 
-  local prev_theme prev_preference target_theme desired_mode requested_preference operation_id
+  local prev_theme prev_preference target_theme requested_preference operation_id
   prev_theme="$(current_theme)"
   prev_preference="$(current_theme_mode)"
   target_theme="${new_theme:-$prev_theme}"
   _validate_theme_name "$target_theme" || exit 1
-  desired_mode="$(_theme_mode_for_name "$target_theme")"
-  requested_preference="$desired_mode"
-  [[ "$do_auto" == true ]] && requested_preference="auto"
+  requested_preference="$(_theme_txn_preference "$new_theme" "$target_theme" "$do_auto")"
   operation_id="$(_theme_txn_new_id)"
 
   # Planning is intentionally pure: no lock, state directory, temporary file,
   # renderer, reload command, or network access is touched.
   if [[ "$do_plan" == true ]]; then
-    if [[ "$do_json" == true ]]; then
-      emit_theme_plan_json "$target_theme" "$requested_preference" "$operation_id"
-    else
-      printf '%s\n' "${BOLD}${CYAN}dot-theme-sync plan${RESET}"
-      echo ""
-      emit_theme_plan_human "$target_theme" "$requested_preference" "$operation_id"
-    fi
+    emit_theme_plan "$do_json" "$target_theme" "$requested_preference" "$operation_id"
     exit 0
   fi
 

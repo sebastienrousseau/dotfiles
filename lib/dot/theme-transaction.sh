@@ -48,6 +48,35 @@ _theme_txn_lock_root() {
   printf '%s' "$root"
 }
 
+# _theme_txn_preference <new theme> <target theme> <--auto?>
+# The appearance preference a run commits and later reads back. --auto always
+# wins. A re-apply with no theme argument names no preference and writes none,
+# so it must expect the stored one (e.g. "auto"), not the mode implied by the
+# theme's name — that mismatch rolled back every bare --force. Uses
+# current_theme_mode and _theme_mode_for_name from dot-theme-sync, which
+# sources this file.
+_theme_txn_preference() {
+  if [[ "$3" == true ]]; then
+    printf 'auto\n'
+  elif [[ -z "$1" ]]; then
+    current_theme_mode
+  else
+    _theme_mode_for_name "$2"
+  fi
+}
+
+# emit_theme_plan <json?> <target> <preference> <operation id>
+# Prints the pure --plan report through dot-theme-sync's JSON or human emitter.
+emit_theme_plan() {
+  local as_json="$1"
+  shift
+  if [[ "$as_json" == true ]]; then
+    emit_theme_plan_json "$@"
+  else
+    emit_theme_plan_human "$@"
+  fi
+}
+
 _theme_txn_hash() {
   local path="${1:-}"
   [[ -f "$path" ]] || return 0
