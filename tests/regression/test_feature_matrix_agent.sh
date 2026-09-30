@@ -47,6 +47,12 @@ fm_profiles_copy() {
 
 test_fm_smoke_upgrade() { fm_smoke upgrade; }
 test_fm_smoke_env_dotfiles_fonts() { fm_smoke upgrade; }
+test_fm_smoke_upgrade_yes() {
+  fm_smoke upgrade
+  test_start "fm_smoke_upgrade_help_documents_yes"
+  fm_run upgrade --help
+  fm_expect_any "--yes" "DOTFILES_YES"
+}
 
 test_fm_cache_refresh() {
   # prewarm.sh skips every backing tool that is not installed, so it runs to
@@ -1007,6 +1013,7 @@ echo ""
 
 test_fm_smoke_upgrade
 test_fm_smoke_env_dotfiles_fonts
+test_fm_smoke_upgrade_yes
 test_fm_cache_refresh
 test_fm_prewarm
 test_fm_env_xdg_cache_home

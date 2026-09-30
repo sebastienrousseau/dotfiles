@@ -14,6 +14,7 @@ Variables you can set in your shell to change behaviour.
 |:---|:---|:---|
 | `DOTFILES_VERBOSE` | unset | Verbose output from `dot` commands |
 | `DOTFILES_NONINTERACTIVE` | unset | Skip interactive prompts (for CI) |
+| `DOTFILES_YES` | unset | `1` answers yes to `dot upgrade` and `dot ai install` questions (installing mise, AI tools, upgrading system packages); same as `--yes`. Without it and without a terminal, those commands install nothing extra |
 | `DOTFILES_SILENT` | unset | Suppress non-error output |
 | `DOTFILES_DEBUG` | unset | Print shell-init timing to stderr |
 | `DOTFILES_SOURCE_DIR` | `~/.dotfiles` | Override the source directory |
@@ -72,7 +73,7 @@ Variables relevant in GitHub Actions.
 
 | Variable | Purpose |
 |:---|:---|
-| `CI` | Set to `true` in CI; disables prompts |
+| `CI` | Set to `true` in CI; disables prompts, and questions that would install software are answered no |
 | `GITHUB_ACTIONS` | GHA-specific; enables step summary output |
 | `CHEZMOI_VERSION` | Pinned chezmoi version for CI |
 | `COVERAGE_THRESHOLD` | Executable module-mapping threshold (100 in enforced CI; not line coverage) |

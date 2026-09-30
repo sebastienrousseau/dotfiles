@@ -32,6 +32,8 @@ with tempfile.TemporaryDirectory(prefix="dot-upgrade-test-") as temporary:
     script = '''
 set -euo pipefail
 source "$1/lib/dot/ui.sh"
+source "$1/lib/dot/preflight.sh"
+source "$1/lib/dot/upgrade.sh"
 require_source_dir() { printf '%s\n' "$UPGRADE_FIXTURE"; }
 has_command() { return 1; }
 chezmoi() {

@@ -21,7 +21,7 @@ Dot • Reference
   •  status           Show local drift.
   •  diff             Preview pending changes.
   •  edit             Open the source directory.
-  •  upgrade          Update tools and dotfiles.
+  •  upgrade          Update dotfiles, mise tools and system packages.
 
 == Inspect and Repair ==
   •  doctor           Run the main health check.

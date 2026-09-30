@@ -205,6 +205,8 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot ai ask` | "<question>" RAG query | `test_fm_smoke_ai_ask_query` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — embeds the repo and calls an LLM (network) |
 | `dot ai chat` | [tool] | `test_fm_smoke_ai_chat` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — starts an interactive AI session (TTY) |
 | `dot ai install` | [tool] | `test_fm_smoke_ai_install` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — installs AI CLIs (network, mutates $HOME) |
+| `dot ai install` | (no terminal, no --yes) asks first, so an unattended bulk install installs nothing | `test_fm_ai_install_unattended_installs_nothing` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot ai install` | --yes / DOTFILES_YES=1 installs prerequisites and tools without asking | `test_fm_ai_install_yes_flag` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 | `dot ai serve` | (default) start + fleet routing with the generated token; gateway refuses a missing token and a foreign Host; stop | `test_fm_ai_serve_gateway` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot ai login` | (default) | `test_fm_smoke_ai_login` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — interactive OAuth / API-key prompts (TTY, network) |
 | `dot ai` | dashboard / dash (deprecated cockpit alias) | `test_fm_smoke_ai_dashboard` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — launches the cockpit TUI (interactive TTY) |
@@ -353,7 +355,8 @@ bash scripts/qa/check-feature-matrix.sh
 
 | Command | Variant | Regression test | Benchmark | Example | Manual | Coverage |
 |---------|---------|-----------------|-----------|---------|--------|----------|
-| `dot upgrade` | (default) | `test_fm_smoke_upgrade` | `help:upgrade` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — runs nix flake update, chezmoi update, and a headless Neovim plugin sync (network, mutates $HOME) |
+| `dot upgrade` | (default) | `test_fm_smoke_upgrade` | `help:upgrade` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — runs nix flake update, chezmoi update, mise install + upgrade, a headless Neovim plugin sync, and (asked first) a system-package upgrade (network, mutates $HOME) |
+| `dot upgrade` | --yes / DOTFILES_YES=1 answers yes to installing mise and upgrading system packages | `test_fm_smoke_upgrade_yes` | `help:upgrade` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/03-environment.md` | **smoke** — the consented phases install and upgrade software (network, mutates the system) |
 | `dot upgrade` | DOTFILES_FONTS=1 adds the Nerd Font step to upgrade | `test_fm_smoke_env_dotfiles_fonts` | `help:upgrade` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/03-environment.md` | **smoke** — only observable inside the real upgrade run (network) |
 | `dot cache-refresh` | (default) | `test_fm_cache_refresh` | `run:cache-refresh` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot prewarm` | alias of cache-refresh | `test_fm_prewarm` | `help:prewarm` | `examples/example-dot-meta.sh` | `docs/manual/command-index.md` | regression |
@@ -592,7 +595,8 @@ hunted through the table.
 | `dot dns-doh` | (default) | rewrites the system resolver configuration with sudo (system mutation) |
 | `dot lock-screen` | (default) | writes screensaver / idle-lock OS settings (system mutation) |
 | `dot usb-safety` | (default) | writes udev / automount policy with sudo (system mutation) |
-| `dot upgrade` | (default) | runs nix flake update, chezmoi update, and a headless Neovim plugin sync (network, mutates $HOME) |
+| `dot upgrade` | (default) | runs nix flake update, chezmoi update, mise install + upgrade, a headless Neovim plugin sync, and (asked first) a system-package upgrade (network, mutates $HOME) |
+| `dot upgrade` | --yes / DOTFILES_YES=1 answers yes to installing mise and upgrading system packages | the consented phases install and upgrade software (network, mutates the system) |
 | `dot upgrade` | DOTFILES_FONTS=1 adds the Nerd Font step to upgrade | only observable inside the real upgrade run (network) |
 | `dot sandbox` | (default) | builds and runs a Docker/Podman image interactively (network, TTY) |
 | `dot init` | <user> (clone + apply), --force / -f | clones a remote repository and applies it over $HOME (network) |

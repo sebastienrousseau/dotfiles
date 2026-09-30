@@ -127,7 +127,9 @@ run_ai() {
   set +e
   if [[ "${AI_TEST_TTY:-0}" == "1" ]]; then
     OUT="$(
-      PATH="$p" "$REAL_PYTHON" - "$REAL_BASH" "$AI_SCRIPT" "$@" <<'PYTTY'
+      # env -u CI: a simulated person at a terminal; under CI=true the
+      # consent rule (rightly) treats nobody as there to ask.
+      env -u CI PATH="$p" "$REAL_PYTHON" - "$REAL_BASH" "$AI_SCRIPT" "$@" <<'PYTTY'
 import errno
 import os
 import pty
@@ -136,6 +138,10 @@ import sys
 pid, fd = pty.fork()
 if pid == 0:
     os.execv(sys.argv[1], sys.argv[1:])
+# Typed answers (AI_TTY_INPUT) wait in the terminal input queue until a
+# prompt reads them, the way a person answers.
+if os.environ.get("AI_TTY_INPUT"):
+    os.write(fd, os.environ["AI_TTY_INPUT"].encode())
 while True:
     try:
         data = os.read(fd, 65536)
@@ -169,7 +175,8 @@ assert_contains "Run 'dot ai' again to see updated status" "$OUT" "install-all c
 assert_contains "Codex CLI" "$OUT" "codex listed"
 assert_file_contains "$CALLS" "mise use -g npm:@openai/codex@latest" "codex installed through mise"
 assert_file_contains "$CALLS" "mise use -g pipx:aider-chat[uvx_args=--python 3.12]@latest" "aider attempted through mise"
-assert_contains "install failed (continuing)" "$OUT" "failed mise install is reported and skipped"
+assert_contains "mise: install failed" "$OUT" "the failed mise install is reported"
+assert_contains "Ollama" "$OUT" "and the run continues past it"
 assert_contains "No AI CLIs installed" "$OUT" "nothing installed warning"
 assert_file_not_exists "$CACHE" "status cache invalidated after installs"
 
@@ -201,17 +208,23 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: nothing installed"
 fi
 
-# ── `dot ai tools`: mise present, no gum → tips only ───────────────
-test_start "ai_tools_missing_without_gum"
-run_ai "$MISE:$BASE_PATH" ai tools
-assert_equals 0 "$RC" "no-gum tips exit 0"
-assert_contains "Install missing providers: mise install" "$OUT" "mise tip"
-assert_contains "Or individually: mise use -g <package>@latest" "$OUT" "per-package tip"
+# ── `dot ai tools`: mise present, no gum → a plain yes/no ──────────
+test_start "ai_tools_missing_without_gum_asks_and_respects_no"
+AI_TTY_INPUT=$'n\n' run_ai "$MISE:$BASE_PATH" ai tools
+assert_equals 0 "$RC" "declining exits 0"
+assert_contains "missing AI tool(s)? [y/N]" "$OUT" "a plain yes/no is asked"
+assert_false "grep -q 'mise use' '$CALLS'" "no means nothing installs"
+
+test_start "ai_tools_missing_without_gum_yes_installs"
+AI_TTY_INPUT=$'y\n' run_ai "$MISE:$BASE_PATH" ai tools
+assert_equals 0 "$RC" "consenting exits 0"
+assert_file_contains "$CALLS" "mise use -g npm:@openai/codex@latest" "yes installs the missing tools"
 
 # ── `dot ai tools`: something installed, no gum → launcher tip ─────
 mk_tool claude
 test_start "ai_tools_installed_without_gum"
-run_ai "$TOOLS:$BASE_PATH" ai tools
+# Other tools are still missing, so the install question comes first: no.
+AI_TTY_INPUT=$'n\n' run_ai "$TOOLS:$BASE_PATH" ai tools
 assert_equals 0 "$RC" "launcher tip exits 0"
 assert_contains "Install gum for interactive launcher" "$OUT" "gum launcher tip"
 assert_file_exists "$CACHE" "status cache written"
@@ -265,30 +278,36 @@ assert_equals 0 "$RC" "raw styled one-shot exits 0"
 assert_contains "claude-ran" "$OUT" "claude invoked in raw mode"
 
 # ── Bridge: tool missing → install prompts ─────────────────────────
-test_start "ai_bridge_missing_tool_plain_prompt_declines"
+test_start "ai_bridge_missing_tool_unattended_declines"
+# No terminal and no --yes: nothing installs, and the command says how.
 run_ai "$MISE:$BASE_PATH" ai codex "hi"
 assert_equals 1 "$RC" "declined install exits 1"
-assert_contains "Install codex via mise (npm:@openai/codex)? [y/N]" "$OUT" "plain prompt shown"
-assert_contains "install with: mise use -g npm:@openai/codex@latest" "$OUT" "install hint"
+assert_contains "not installed" "$OUT" "the missing tool is named"
+assert_contains "dot ai install codex" "$OUT" "install hint"
+assert_false "grep -q 'mise use' '$CALLS'" "nothing installs unattended"
 
-test_start "ai_bridge_missing_tool_gum_confirm_installs"
-run_ai "$GUM:$MISE:$BASE_PATH" ai codex "hi"
-assert_file_contains "$CALLS" "mise use -g npm:@openai/codex@latest" "gum confirm triggers mise install"
+test_start "ai_bridge_missing_tool_consent_installs"
+DOTFILES_YES=1 run_ai "$GUM:$MISE:$BASE_PATH" ai codex "hi"
+assert_file_contains "$CALLS" "mise use -g npm:@openai/codex@latest" "consent triggers the mise install"
 
 test_start "ai_bridge_missing_tool_install_fails"
-MISE_FAIL_PKG="npm:@openai/codex" run_ai "$GUM:$MISE:$BASE_PATH" ai codex "hi"
+DOTFILES_YES=1 MISE_FAIL_PKG="npm:@openai/codex" run_ai "$GUM:$MISE:$BASE_PATH" ai codex "hi"
 assert_equals 1 "$RC" "failed install exits 1"
-assert_contains "installation failed" "$OUT" "failure reported"
+assert_contains "install failed" "$OUT" "failure reported"
 
 test_start "ai_bridge_missing_tool_no_mise"
 run_ai "$NOMISE:/usr/bin:/bin" ai codex "hi"
 assert_equals 1 "$RC" "no mise exits 1"
-assert_contains "not installed and mise not available" "$OUT" "no-mise message"
+assert_contains "dot ai install codex" "$OUT" "install hint"
 
-test_start "ai_bridge_missing_tool_without_package"
+test_start "ai_bridge_native_tool_is_not_blamed_on_mise"
+# goose installs natively; the old message blamed a missing mise.
 run_ai "$MISE:$BASE_PATH" ai goose "hi"
-assert_equals 1 "$RC" "tool without a mise package exits 1"
-assert_contains "not installed and mise not available" "$OUT" "falls to the generic message"
+assert_equals 1 "$RC" "missing goose exits 1"
+assert_contains "dot ai install goose" "$OUT" "the real install command"
+# (grep via assert_output_not_contains: bash 3.2 cannot parse *'…'* nested
+# inside a double-quoted [[ ]] string.)
+assert_output_not_contains "mise not available" "printf '%s' \"\$OUT\""
 
 # ── Deprecated verbs ───────────────────────────────────────────────
 test_start "ai_deprecated_local_without_proxy"

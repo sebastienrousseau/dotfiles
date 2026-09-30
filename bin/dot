@@ -191,7 +191,7 @@ Daily Use|init|Bootstrap a foreign dotfiles repo through chezmoi + dot.|Usage: `
 Daily Use|status|Show local drift.|See what changed since the last apply.
 Daily Use|diff|Preview pending changes.|Safe way to inspect before applying.
 Daily Use|edit|Open the source directory.|Use the configured editor.
-Daily Use|upgrade|Update tools and dotfiles.|Runs the managed upgrade path.
+Daily Use|upgrade|Update dotfiles, mise tools and system packages.|Asks before installing or upgrading anything beyond the dotfiles.
 Inspect and Repair|doctor|Run the main health check.|Supports deeper audit flags.
 Inspect and Repair|attest|Export workstation evidence, or verify it in WebAssembly.|Use `--verify|-V`, `--json|-j`, `--write|-w`, or `--fleet-store|-F`.
 Inspect and Repair|rollback|Return to a previous state.|Use after a broken change.
@@ -286,7 +286,7 @@ Fleet|fleet drift|Check for configuration drift across managed files|Drift detec
 Fleet|fleet namespace|Show or set the active namespace for multi-tenant isolation|Namespace management.
 Fleet|fleet events|Show recent fleet events from local event log|Fleet observability.
 Fleet|teleport|Deploy the dotfiles environment to a remote host over SSH|Ephemeral remote provisioning.
-Meta|upgrade|Update system toolchains, plugins, and dotfiles|Managed upgrade flow.
+Meta|upgrade|Update dotfiles, mise tools and (with consent) system packages|Managed upgrade flow.
 Meta|packages|List installed packages and package managers|Inventory and package surfaces.
 Meta|cache-refresh|Regenerate shell caches for ultra-fast startup|Refresh generated shell state.
 Meta|completion|Generate shell completions (bash/zsh/fish/nu) from the command registry|e.g. dot completion fish > ~/.config/fish/completions/dot.fish
@@ -376,7 +376,7 @@ add|Start managing a file with chezmoi.|dot add ~/.gitconfig
 diff|Show pending dotfile changes before applying.|dot diff
 status|Show local drift in the managed home state.|dot status
 edit|Open the dotfiles source tree in the configured editor.|dot edit
-upgrade|Run the managed update path for tools and dotfiles.|dot upgrade
+upgrade|Pull and apply the dotfiles, then install and upgrade mise tools, sync Neovim plugins, and (asked first) upgrade system packages. Offers to install mise when it is missing. --yes (or DOTFILES_YES=1) answers yes; with no terminal to ask, it installs nothing extra.|dot upgrade\ndot upgrade --yes
 doctor|Inspect shell tools, paths, portability, and health.|dot doctor\ndot doctor --score\ndot doctor -H
 attest|Export workstation attestation evidence, or verify it with the WebAssembly verifier.|dot attest\ndot attest --json\ndot attest --verify\ndot attest -V -j\ndot attest -F /srv/dotfiles-fleet
 health|Run the health dashboard with optional fixes.|dot health -v\ndot health -j\ndot health -f
@@ -388,7 +388,7 @@ snapshot|Capture the current workstation snapshot.|dot snapshot -b\ndot snapshot
 restore|Restore from a backup or git ref.|dot restore -l\ndot restore -L\ndot restore -g HEAD~1
 rollback|Restore a previous configuration snapshot.|dot rollback
 lint|Run shell quality checks for the repo.|dot lint\ndot lint -c\ndot lint -f
-ai|Show installed AI tools, delegate a task to a cheap model, or report spend.|dot ai\ndot ai delegate "rename UserService.get* to fetch*"\ndot ai cost --since 7
+ai|Show installed AI tools, install missing ones (and mise, asked first), delegate a task to a cheap model, or report spend.|dot ai\ndot ai install --yes\ndot ai delegate "rename UserService.get* to fetch*"\ndot ai cost --since 7
 mcp|Inspect MCP configuration, policy, and registry, or run the MCP server.|dot mcp\ndot mcp -s -j\ndot mcp registry\ndot mcp serve
 mode|Inspect or switch the active agent mode.|dot mode list\ndot mode show ask\ndot mode set audit
 agent|Inspect agent metadata or run profile-aware actions.|dot agent card\ndot agent a2a-card --validate\ndot agent checkpoint list\ndot agent conformance --strict --json

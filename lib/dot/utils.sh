@@ -19,6 +19,12 @@ source "$_DOT_LIB_DIR/ui.sh"
 source "$_DOT_LIB_DIR/platform.sh"
 # shellcheck source=ai-install.sh
 source "$_DOT_LIB_DIR/ai-install.sh"
+# shellcheck source=preflight.sh
+source "$_DOT_LIB_DIR/preflight.sh"
+# shellcheck source=upgrade.sh
+source "$_DOT_LIB_DIR/upgrade.sh"
+# shellcheck source=ai-provision.sh
+source "$_DOT_LIB_DIR/ai-provision.sh"
 
 _DOT_SOURCE_DIR_CACHE=""
 
@@ -389,7 +395,7 @@ dot_command_summary() {
       echo "Show fleet node status, drift, and namespace."
       ;;
     upgrade)
-      echo "Update system toolchains, plugins, and dotfiles."
+      echo "Update dotfiles, mise tools and (with consent) system packages."
       ;;
     docs)
       echo "Show dotfiles documentation."

@@ -118,17 +118,14 @@ cmd_upgrade() {
     return 0
   }
 
+  # Every question is asked here, before the phases take the terminal.
+  dot_upgrade_prepare "$@"
   ui_steps_begin "Upgrade" ""
-
-  if [ -f "$src_dir/nix/flake.nix" ] && has_command nix; then
-    _upgrade_step nix-flake "Nix flake" "updating…" -- \
-      sh -c 'cd "$1" && nix flake update' _ "$src_dir"
-    _upgrade_step nix-gc "Nix GC" "collecting…" -- nix-collect-garbage -d
-  fi
-
+  dot_upgrade_nix_steps "$src_dir"
   # --no-tty: chezmoi otherwise opens /dev/tty directly for its
   # overwrite prompt, bypassing the closed stdin above and hanging.
   _upgrade_step dotfiles "Dotfiles" "chezmoi update…" -- _upgrade_dotfiles
+  dot_upgrade_toolchain_steps
 
   if has_command nvim; then
     # scripts/nvim/headless-upgrade.lua runs Lazy sync AND waits for

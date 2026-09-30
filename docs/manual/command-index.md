@@ -169,7 +169,7 @@ adding or renaming a subcommand, run
 | `dot tools` | install Enter the Nix development shell with all managed tools |
 | `dot tune` | Apply OS tuning (opt-in) [macOS,Linux] |
 | `dot uninstall` | Remove the managed dotfiles environment (prompts unless --force) |
-| `dot upgrade` | Update system toolchains, plugins, and dotfiles |
+| `dot upgrade` | Update dotfiles, mise tools and (with consent) system packages |
 | `dot usb-safety` | Disable automount for removable media [Linux] |
 | `dot version` | Show version information. |
 | `dot vibe` | Run the Vibe AI CLI with dotfiles context patterns. |

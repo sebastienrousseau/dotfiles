@@ -360,7 +360,7 @@ if ! command -v mise >/dev/null; then
     aarch64) target="arm64" ;;
   esac
   url="$(github_asset_url "jdx/mise" "mise-${MISE_TAG}-linux-${target}.tar.gz" "$MISE_TAG")"
-  sha_url="$(github_asset_url "jdx/mise" "SHASUMS" "$MISE_TAG")"
+  sha_url="$(github_asset_url "jdx/mise" "SHASUMS256.txt" "$MISE_TAG")"
   install_from_tarball_checksums "$url" "$sha_url" "mise" "$HOME/.local/bin"
 fi
 

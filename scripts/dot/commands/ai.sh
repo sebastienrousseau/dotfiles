@@ -52,6 +52,7 @@ _show_ai_bridge_usage() {
   echo "       dot ai <tool> \"<prompt>\"       # one-shot on a tool"
   echo "       dot ai <tool> --style <name> \"<prompt>\""
   echo "       dot ai chat [tool]             # interactive session"
+  echo "       dot ai install [tool] [--yes]  # install tools and what they need (asks first)"
   echo ""
   echo "Tools: cl codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai"
   echo ""
@@ -258,61 +259,28 @@ _ai_tool_bin() {
   esac
 }
 
-# _ai_confirm_mise <tool> <pkg>: ask whether to install; sets the caller's
-# do_install to yes or no.
-_ai_confirm_mise() {
-  if has_command gum; then
-    do_install=$(gum confirm "Install $1 via mise ($2)?" && echo "yes" || echo "no")
-    return 0
-  fi
-  printf "Install %s via mise (%s)? [y/N] " "$1" "$2"
-  # `|| true`: at EOF (piped, cron, CI) `read` returns 1 and
-  # `set -e` killed the script mid-prompt. EOF means "no".
-  read -r do_install || true
-  case "$do_install" in y | Y | yes) do_install="yes" ;; *) do_install="no" ;; esac
-}
-
-# _ai_offer_mise <tool> <pkg>: install the tool via mise if the user agrees;
-# otherwise exit 1 with the install command.
-_ai_offer_mise() {
-  local tool="$1" mise_pkg="$2" do_install=""
-  ui_warn "$tool" "not installed"
-  _ai_confirm_mise "$tool" "$mise_pkg"
-  if [[ "$do_install" != "yes" ]]; then
-    ui_err "$tool" "not installed — install with: mise use -g $mise_pkg@latest"
-    exit 1
-  fi
-  ui_info "Installing" "$tool via mise ($mise_pkg)"
-  _ai_in_scratch_dir mise use -g "$mise_pkg@latest" 2>&1 || {
-    ui_err "$tool" "installation failed"
-    exit 1
-  }
-  rm -f "$AI_STATUS_CACHE_FILE"
-}
-
-# _ai_ensure_installed <tool> <bin>: return when the tool is installed or
-# was just installed; otherwise explain how to get it and exit 1.
+# _ai_ensure_installed <tool> <bin>: return when the tool is installed or was
+# just installed with consent; otherwise say how to get it and exit 1.
 _ai_ensure_installed() {
-  local tool="$1" tool_bin="$2" mise_pkg
+  local tool="$1" tool_bin="$2" rc=0
   has_command "$tool_bin" && return 0
-  mise_pkg=$(_ai_mise_pkg "$tool_bin")
-  if [[ -n "$mise_pkg" ]] && has_command mise; then
-    _ai_offer_mise "$tool" "$mise_pkg"
-    return 0
+  ui_warn "$tool" "not installed"
+  if ! ai_install_method "$tool_bin" >/dev/null; then
+    ui_err "$tool" "no installer available for $tool_bin"
+    exit 1
   fi
-  case "$tool_bin" in
-    agy)
-      ui_warn "$tool" "not installed"
-      ui_info "Install" "dot ai install agy (checksum verified)"
-      ;;
-    kimi)
-      ui_warn "$tool" "not installed"
-      ui_info "Install" "dot ai install kimi"
-      ui_info "PATH" "Kimi Code installs to ~/.kimi-code/bin; restart your shell after install"
-      ;;
-    *) ui_err "$tool" "not installed and mise not available" ;;
-  esac
-  exit 1
+  if ! dot_consent "Install $tool now?"; then
+    ui_info "Install" "dot ai install $tool_bin"
+    [[ "$tool_bin" != kimi ]] || ui_info "PATH" "Kimi Code installs to ~/.kimi-code/bin; restart your shell after install"
+    exit 1
+  fi
+  ai_prepare "$tool_bin" || exit 1
+  ai_install_tool "$tool_bin" "$tool" || rc=$?
+  ai_install_report "$tool_bin" "$tool" "$rc"
+  [[ "$rc" == 0 ]] || exit 1
+  rm -f "${AI_STATUS_CACHE_FILE:-}"
+  # A native installer may write outside this shell's PATH.
+  PATH="$HOME/.local/bin:$HOME/.kimi-code/bin:$PATH"
 }
 
 # Route non-Claude tools through the local gateway when one is running.

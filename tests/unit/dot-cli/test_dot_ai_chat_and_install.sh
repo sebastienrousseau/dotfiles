@@ -52,14 +52,40 @@ assert_contains "kiro-cli" "$DOT_FIXTURE_OUT" \
 test_start "ai_install_continues_past_a_failed_install"
 dot_fixture_stub "$FX/stubs" mise 1
 ai_run ai install codex
-assert_contains "install failed (continuing)" "$DOT_FIXTURE_OUT" \
+assert_contains "install failed" "$DOT_FIXTURE_OUT" \
   "a failing install should be reported without aborting the run"
+assert_equals "1" "$DOT_FIXTURE_RC" "a failed install must not end in success"
+assert_contains "1 tool(s) not installed" "$DOT_FIXTURE_OUT" "the failure count is reported"
 
 test_start "ai_install_reports_a_missing_package_manager"
 rm -f "$FX/stubs/mise"
 ai_run ai install codex
-assert_contains "mise not available" "$DOT_FIXTURE_OUT" \
-  "with no mise at all the manual command should be suggested"
+assert_contains "not installed" "$DOT_FIXTURE_OUT" \
+  "with no mise at all the missing prerequisite should be named"
+assert_contains "mise" "$DOT_FIXTURE_OUT" "the prerequisite is mise"
+assert_equals "1" "$DOT_FIXTURE_RC" "nothing could be installed"
+
+test_start "ai_install_yes_installs_mise_then_the_tool"
+# --yes consents to the prerequisite: mise comes from Homebrew, then the tool.
+# The brew stub "installs" mise by copying a logging mise stub into place.
+cat >"$FX/mise-stub" <<'EOF'
+#!/usr/bin/env bash
+printf 'mise %s\n' "$*" >>"$MISE_LOG"
+EOF
+cat >"$FX/stubs/brew" <<'EOF'
+#!/usr/bin/env bash
+printf 'brew %s\n' "$*" >>"$BREW_LOG"
+cp "$MISE_STUB" "$STUB_DIR/mise" && chmod +x "$STUB_DIR/mise"
+EOF
+chmod +x "$FX/stubs/brew"
+export BREW_LOG="$FX/brew.log" MISE_LOG="$FX/mise.log" MISE_STUB="$FX/mise-stub" STUB_DIR="$FX/stubs"
+ai_run ai install codex --yes
+assert_contains "brew install mise" "$(cat "$FX/brew.log" 2>/dev/null)" "mise is installed with consent"
+assert_contains "mise use -g npm:@openai/codex@latest" "$(cat "$FX/mise.log" 2>/dev/null)" \
+  "then the tool installs through it"
+assert_equals "0" "$DOT_FIXTURE_RC" "the install succeeds"
+rm -f "$FX/stubs/brew" "$FX/stubs/mise"
+unset BREW_LOG MISE_LOG MISE_STUB STUB_DIR
 
 # ── 3. serve delegates to the proxy ────────────────────────────────────────
 test_start "ai_serve_requires_the_proxy"
