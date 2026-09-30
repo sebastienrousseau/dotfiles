@@ -84,6 +84,10 @@ printf '%s\n' "$*" >>"$CALLS/launchctl"
 [[ "${1:-}" == bootstrap && "${FAKE_LAUNCHCTL_FAIL:-0}" == 1 ]] && exit 1
 exit 0
 EOF
+# The account's directory-service home, which a sandboxed apply's $HOME is not.
+mkstub launchctl dscl <<'EOF'
+printf 'NFSHomeDirectory: %s\n' "${FAKE_ACCOUNT_HOME:-$HOME}"
+EOF
 
 # ---------------------------------------------------------------------------
 # Synthetic chezmoi source tree with fixture theme data.
@@ -826,6 +830,15 @@ PY
     "$REAL_BASH" "$RENDER/install-agent.sh" >"$OUT" 2>"$ERR"
   assert_equals 0 $? "a failed bootstrap does not fail chezmoi apply"
   assert_contains "could not bootstrap" "$(cat "$ERR")" "bootstrap failure is warned about"
+  # A sandboxed apply (HOME under a temp dir) shares the login GUI domain:
+  # bootstrapping there would replace the real agent with one watching the
+  # sandbox's preference file, so appearance changes stop reaching dot.
+  reset_calls
+  command env -i HOME="$HOME" PATH="$STUBS/launchctl:$TOOLS" CALLS="$CALLS" FAKE_ACCOUNT_HOME="$WORK" \
+    "$REAL_BASH" "$RENDER/install-agent.sh" >"$OUT" 2>"$ERR"
+  assert_equals 0 $? "a sandboxed apply does not fail"
+  assert_equals "" "$(calls launchctl)" "a sandboxed apply leaves the login GUI domain alone"
+  assert_contains "not the account home" "$(cat "$ERR")" "the skipped registration is explained"
   render_template "$INSTALLER_TEMPLATE" linux fixture-dark "$RENDER/install-agent-linux.sh"
   assert_equals no "$(has launchctl "$(cat "$RENDER/install-agent-linux.sh")")" "installer is inert outside macOS"
 else
