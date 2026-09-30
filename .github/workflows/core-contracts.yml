@@ -9,6 +9,11 @@ on:
       - 'tests/unit/core/**'
       - 'tests/unit/install/test_archive_adversarial.py'
       - 'tests/visual/**'
+      # The visual job renders the tmux config through its helper and the
+      # theme goldens; #1211 changed all three and this never ran.
+      - 'defaults/dot_config/tmux/**'
+      - 'defaults/dot_local/bin/executable_tmux-status'
+      - 'tests/fixtures/theme-render/**'
       - 'tests/consumer/**'
       - 'tests/unit/ci/test_npx_consumer_lane.sh'
       - '.github/workflows/core-contracts.yml'

@@ -46,6 +46,21 @@ def focus(window):
     return True
 
 
+# The themed part of tmux.conf: from the first bar section to the Linux block.
+# The heading line is kept whole, so no part of it is left as a stray line.
+THEME_START = "# --- Session colours"
+THEME_END = "# --- LINUX SPECIFIC ---"
+
+
+def theme_section(source):
+    """The themed sections of a rendered tmux.conf; name the marker if one is gone."""
+    for marker in (THEME_START, THEME_END):
+        if marker not in source:
+            raise SystemExit(f"tmux.golden has no '{marker}' heading; update capture_tmux.py to the new layout")
+    start = source.index(THEME_START)
+    return source[start:source.index(THEME_END, start)]
+
+
 def capture(output, quick=False):
     output.mkdir(parents=True, exist_ok=True)
     reports = []
@@ -100,7 +115,7 @@ def capture(output, quick=False):
                                                     if re.match(r"^(background |foreground |cursor |selection_|color\d+ )", line)))
                         run(*remote_cmd, "set-colors", str(colors))
                         source = (goldens / "tmux.golden").read_text()
-                        theme_config = source.split("# --- Status Bar ---", 1)[1].split("# --- LINUX SPECIFIC ---", 1)[0]
+                        theme_config = theme_section(source)
                         # No plugin manager or desktop/user hooks are loaded. The
                         # actual status rules and helper operate on our private server.
                         theme_config = theme_config.replace("~/.local/bin/tmux-status", str(helper))
