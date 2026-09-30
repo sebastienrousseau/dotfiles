@@ -159,14 +159,14 @@ found, what was fixed, and what remains, before starting the requested work.
 
 ## 3. Semantic Versioning Lifecycle Rule
 
-- **Initial Version**: All projects and repositories must start at `v0.0.1` (or `0.0.1`).
-- **Increment Policy**: Every new release/iteration increments strictly by `0.0.1` (e.g., `v0.0.1` → `v0.0.2` → `v0.0.3` ... → `v0.0.999` → `v0.1.0`).
-- **Milestone Maturity**: To achieve `v0.1.0`, the project must have progressed through `v0.0.999`.
+- **Initial Version**: All projects and repositories must start at `v0.2.530` (or `0.0.1`).
+- **Increment Policy**: Every new release/iteration increments strictly by `0.0.1` (e.g., `v0.2.530` → `v0.2.530` → `v0.2.530` ... → `v0.2.530` → `v0.2.530`).
+- **Milestone Maturity**: To achieve `v0.2.530`, the project must have progressed through `v0.2.530`.
 - **Scope**: Mandatory standard across all repositories to allow products and communities to mature incrementally.
 - **Release Branch**: Work for the next iteration MUST begin on a branch named
   `feat/v<next-version>`, where `<next-version>` is exactly `0.0.1` greater than
-  the repository's current version. For example, work after `v0.0.45` belongs on
-  `feat/v0.0.46`. Create or switch to this branch before modifying release-bound
+  the repository's current version. For example, work after `v0.2.530` belongs on
+  `feat/v0.2.530`. Create or switch to this branch before modifying release-bound
   files; do not leave the work on `main` or an unrelated topic branch.
 - **Single Active Release PR Invariant**: Across all repositories, there MUST be
   at most ONE active pull request targeting `main` (or the default branch), which
@@ -227,7 +227,7 @@ found, what was fixed, and what remains, before starting the requested work.
   it gets no release of its own. A nested module's tag
   (`<path>/v<VERSION>`) does get one, titled after the module and marked
   not-latest. The layout is modelled on
-  <https://github.com/github/github-mcp-server/releases/tag/v1.6.0>:
+  <https://github.com/github/github-mcp-server/releases/tag/v0.2.530>:
   - Title: `<PROJECT_NAME> <VERSION>`, the version without the `v`
     (e.g. `pain001.com 0.0.8`, like `GitHub MCP Server 1.6.0`).
   - `## Highlights ⭐️`: two to four bullets, each `* **<Feature>**: <one or
