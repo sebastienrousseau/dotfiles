@@ -1,0 +1,5 @@
+# Included by ~/.gitconfig for third-party checkouts (lazy.nvim plugins).
+# Swap the global attributes for a neutral file so upstream line endings
+# are left exactly as committed.
+[core]
+	attributesFile = ~/.config/git/attributes-vendored
