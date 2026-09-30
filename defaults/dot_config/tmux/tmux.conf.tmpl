@@ -1,31 +1,53 @@
-{{- /* Every tmux surface follows the active wallpaper variant. The generated
-       ui.*_on_surface slots already enforce readable text contrast against
-       that variant's panel and border colours. */ -}}
+{{- /* Every tmux surface follows the active theme. Each session gets its own
+       Apple system colour as a solid block (tmux-status apply-colours, from
+       .chezmoidata/apple.toml), drawn at the bottom and repeated in the top
+       bar; the clock sits on a tint of the wallpaper's secondary hue. The
+       palette audit and apple.py hold every label here at 7:1 (WCAG AAA) in
+       both the -light and -dark theme. */ -}}
 {{- $themeName := includeTemplate "theme-name" . -}}
 {{- $t := index .themes $themeName -}}
-{{- $bg := $t.term.bg -}}
-{{- $fg := $t.term.fg -}}
 {{- $accent := $t.ui.accent -}}
 {{- $accent_text := $t.ui.accent_text -}}
-{{- $panel := $t.ui.panel -}}
 {{- $border := $t.ui.border -}}
-{{- /* muted: de-emphasised but still TEXT. term.c8 is ANSI bright-black,
-       floored at 2.5:1 against bg, and using it here put the clock at
-       2.12:1 and the inactive window names at 2.45:1. ui.text_muted is
-       floored at 4.5:1 against BOTH panel and border, which are the two
-       surfaces this bar paints on. */ -}}
-{{- $muted := (index $t.ui "text_muted") | default $t.term.c8 -}}
-{{- /* The wallpaper's 2nd and 3rd chromatic colours, so the bar carries
-       more of the image than a single accent. Their mode-aware text colour
-       reaches at least 7:1: black on dark-mode blocks, white in light mode.
-       `index` rather than `.secondary`: a missing map key is an ERROR
-       with field syntax and nil with index, and only nil reaches
-       `default`. This template must survive a themes.toml generated
-       before these keys existed. */ -}}
-{{- $secondary := (index $t.ui "secondary_on_surface") | default $t.ui.accent -}}
+{{- /* `index` rather than `.field`: a missing map key is an ERROR with field
+       syntax and nil with index, and only nil reaches `default`. This
+       template must survive a themes.toml generated before these keys
+       existed; each fallback pair is itself audited at 7:1. */ -}}
+{{- $accent_on := (index $t.ui "accent_on_surface") | default $t.ui.accent -}}
 {{- $tertiary := (index $t.ui "tertiary_on_surface") | default $t.ui.accent -}}
+{{- $clock_bg := (index $t.ui "secondary_container") | default $t.ui.border -}}
+{{- $clock_fg := (index $t.ui "on_secondary_container") | default (index $t.ui "secondary_on_surface") | default $t.term.fg -}}
 {{- $error := $t.ui.error -}}
 {{- $warning := $t.ui.warning -}}
+{{- $status_text := (index $t.ui "status_text") | default $t.ui.accent_text -}}
+{{- $muted := (index $t.ui "text_muted") | default $t.term.fg -}}
+{{- /* Bar labels at 18pt or more are WCAG large text (AAA 4.5:1), which lets
+       every session block be Apple's exact Default colour; smaller fonts use
+       the 7:1 table. */ -}}
+{{- $largeText := ge (int (default 20 (index . "terminal_font_size"))) 18 -}}
+{{- $sessionTable := ternary "apple_sessions_large" "apple_sessions" $largeText -}}
+{{- $sessions := dig $sessionTable $t.mode (list) . -}}
+{{- /* The bars' fixed right-hand colour (Apple cyan) and the prefix/bell and
+       activity blocks, all white-labelled Apple colours from apple.toml.
+       Without the Apple table, audited theme pairs stand in. */ -}}
+{{- $barPair := dig $sessionTable "bar" (printf "%s/%s" ((index $t.ui "secondary") | default $t.ui.accent) $accent_text) . -}}
+{{- $bar := index (splitList "/" $barPair) 0 -}}
+{{- $bar_text := index (splitList "/" $barPair) 1 -}}
+{{- $alertPair := dig $sessionTable "alert" (printf "%s/%s" $t.ui.error ((index $t.ui "status_text") | default $accent_text)) . -}}
+{{- $alert := index (splitList "/" $alertPair) 0 -}}
+{{- $alert_text := index (splitList "/" $alertPair) 1 -}}
+{{- $activityPair := dig $sessionTable "activity" (printf "%s/%s" $t.ui.warning ((index $t.ui "status_text") | default $accent_text)) . -}}
+{{- $activity := index (splitList "/" $activityPair) 0 -}}
+{{- $activity_text := index (splitList "/" $activityPair) 1 -}}
+{{- $framePair := dig $sessionTable "frame" "#000000/#ffffff" . -}}
+{{- $frame := index (splitList "/" $framePair) 0 -}}
+{{- $frame_text := index (splitList "/" $framePair) 1 -}}
+{{- /* Badge styles, written once. Inside a #{?...} branch (the top bar) a
+       comma must be escaped as #, so each has an escaped twin. */ -}}
+{{- $barStyle := printf "fg=%s,bg=%s,bold" $bar_text $bar -}}
+{{- $frameStyle := printf "fg=%s,bg=%s,bold" $frame_text $frame -}}
+{{- $barStyleEsc := replace "," "#," $barStyle -}}
+{{- $frameStyleEsc := replace "," "#," $frameStyle -}}
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  TMUX CONFIGURATION (Universal)                                          ║
@@ -116,6 +138,11 @@ bind -T copy-mode-vi C-l select-pane -R
 # Reload Config
 bind r source-file ~/.config/tmux/tmux.conf \; display "tmux.conf reloaded"
 
+# Themes without leaving tmux: the `dot theme` picker in a popup, or a random
+# wallpaper theme. Both run the same AAA pipeline and reload tmux themselves.
+bind T display-popup -E -w 80% -h 80% -T " Theme " "~/.local/bin/dot theme"
+bind C-t run-shell -b "~/.local/bin/dot theme random >/dev/null 2>&1" \; display "theme: random wallpaper theme…"
+
 # Sessionizer (fuzzy session switcher)
 bind f run-shell "~/.local/bin/tmux-sessionizer"
 
@@ -124,8 +151,9 @@ bind -r C-h previous-window
 bind -r C-l next-window
 bind a last-window
 bind Tab last-window
-bind N new-window
-bind n command-prompt -p "New window name:" "new-window -n '%%'"
+bind c new-window -c "#{pane_current_path}"
+bind N new-window -c "#{pane_current_path}"
+bind n command-prompt -p "New window name:" "new-window -n '%%' -c '#{pane_current_path}'"
 bind R command-prompt -p "Rename window:" "rename-window '%%'"
 bind X confirm-before -p "kill-window #W? (y/n)" kill-window
 
@@ -134,8 +162,8 @@ bind % split-window -h -c "#{pane_current_path}"
 bind '"' split-window -v -c "#{pane_current_path}"
 bind '\' split-window -v -c "#{pane_current_path}"
 bind | split-window -h -c "#{pane_current_path}"
-bind - split-window -v
-bind _ split-window -h
+bind - split-window -v -c "#{pane_current_path}"
+bind _ split-window -h -c "#{pane_current_path}"
 
 # Pane Navigation (Vim-style)
 bind -r h select-pane -L
@@ -178,73 +206,111 @@ bind C-f command-prompt -p find-session 'switch-client -t %%'
 bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
-# ║  THEME — Minimal Status Bar                                             ║
+# ║  THEME — Session Block Bars                                              ║
 # ║  Colors from .chezmoidata/themes.toml ({{ $themeName }})  ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# A fixed frame with one per-session colour, every label white: the top bar
+# (the pane border line) is black with the current window and the system
+# indicators on Apple cyan; the bottom bar is the session's own Apple colour
+# (unique per session) with the time on the same cyan. Bar blocks are Apple's
+# Increased contrast (light) values, the deep variants Apple defines for
+# white text (exact at 18pt and up). Cyan is never a session colour. Nothing
+# appears in both bars, and nothing depends on the window width.
+# Following the Apple HIG colour guidance:
+#   - colour on large areas, white labels on every bar block (7:1, or WCAG
+#     large-text 4.5:1 for Apple's exact values at 18pt and up);
+#   - one meaning per colour: session colour = this session, cyan = the
+#     fixed readouts (time, indicators), error = prefix armed or bell,
+#     warning = activity;
+#   - no state by colour alone: the terminal icon becomes a keyboard while
+#     the prefix is armed, the active window is bold and flagged `*`, and
+#     bell/activity keep tmux's own `!`/`#` flags;
+#   - every label meets WCAG AAA in the -light and -dark theme alike.
 
-# --- Status Bar ---
+# --- Session colours: the theme accent until tmux-status assigns each one ---
+set -g @dot_session_colour "{{ $accent }}"
+set -g @dot_session_text "{{ $accent_text }}"
+{{- if $sessions }}
+run-shell -b "test ! -x ~/.local/bin/tmux-status || ~/.local/bin/tmux-status apply-colours{{ range $sessions }} '{{ . }}'{{ end }}"
+set-hook -g session-created "run-shell -b \"~/.local/bin/tmux-status apply-colours{{ range $sessions }} '{{ . }}'{{ end }}\""
+set-hook -g session-renamed "run-shell -b \"~/.local/bin/tmux-status apply-colours{{ range $sessions }} '{{ . }}'{{ end }}\""
+{{- end }}
+
+# --- Bottom bar ---
 set -g status on
 set -g status-interval 10
 set -g status-position bottom
 set -g status-justify left
-set -g status-style "bg={{ $panel }},fg={{ $fg }}"
-set -g status-left-length 32
+# Transparent between the badges, as in the reference: the terminal's own
+# background with the theme's text colour (7:1 on it in light and dark).
+set -g status-style "bg=default,fg={{ $t.term.fg }}"
+set -g status-left-length 40
 set -g status-right-length 120
 
 # User-overridable modules. `set -o` keeps values from a local tmux.conf or
 # command line, making the generated theme customizable without forking it.
 set -ogq @dot_status_show_path on
 set -ogq @dot_status_show_system on
-set -ogq @dot_status_show_date on
 
-# Give every session a stable colour from the active wallpaper palette. The
-# helper refreshes all sessions after a theme change and colours new/renamed
-# sessions without requiring hand-maintained per-project rules.
-set -g @dot_session_colour "{{ $accent }}"
-run-shell -b "test ! -x ~/.local/bin/tmux-status || ~/.local/bin/tmux-status apply-colours '{{ $accent }}' '{{ $secondary }}' '{{ $tertiary }}'"
-set-hook -g session-created "run-shell -b \"~/.local/bin/tmux-status apply-colours '{{ $accent }}' '{{ $secondary }}' '{{ $tertiary }}'\""
-set-hook -g session-renamed "run-shell -b \"~/.local/bin/tmux-status apply-colours '{{ $accent }}' '{{ $secondary }}' '{{ $tertiary }}'\""
-
-# --- Minimal session identity — the bar's only persistent chromatic element ---
+# Mode badge (like Neovim's NORMAL): the session on its own colour, PREFIX
+# on the alert colour while the prefix is armed, COPY in copy mode. Each
+# state is named in text, not colour alone.
 set -g status-left "\
-#[fg=#{?client_prefix,{{ $error }},#{@dot_session_colour}},bg={{ $panel }},bold] #{?client_prefix, , }#S \
-#[fg={{ $border }},bg={{ $panel }},nobold]│ "
+#[fg=#{?client_prefix,{{ $alert_text }},#{@dot_session_text}},bg=#{?client_prefix,{{ $alert }},#{@dot_session_colour}},bold] #{?client_prefix, PREFIX,#{?pane_in_mode,COPY, #S}} \
+#[bg=default,nobold] "
 
-# --- One lightweight system sample, responsive context, and time ---
-# `tmux-status system` performs one platform-aware sample per interval. Path,
-# monitoring, and date modules can be disabled independently with the options
-# above; narrower clients progressively retain only the clock.
+# Context on the transparent middle, then the time on its cyan badge.
+# Nothing depends on the client width, so a half-screen window shows exactly
+# what a full-screen one does.
 set -g status-right "\
-#[fg={{ $fg }},bg={{ $panel }},bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
-#[fg={{ $muted }},bg={{ $panel }},nobold]#{?#{==:#{@dot_status_show_path},on}, #[fg={{ $fg }}]#{b:pane_current_path} #[fg={{ $border }}]│ #[fg={{ $muted }}],}\
-#{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#(~/.local/bin/tmux-status system) #[fg={{ $border }}]│ #[fg={{ $muted }}],}\
-#{?#{&&:#{==:#{@dot_status_show_date},on},#{e|>=:#{client_width},155}},%d %b · ,}%H:%M "
+#[fg={{ $t.term.fg }},bg=default,bold]#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
+#[nobold]#{?#{==:#{@dot_status_show_path},on},#{b:pane_current_path} ,}\
+#[{{ $barStyle }}] %H:%M "
 
-# --- Window Tabs ---
-set -g window-status-format "#[fg={{ $muted }},bg={{ $panel }},nobold] #I:#W#F "
-set -g window-status-current-format "#[fg={{ $fg }},bg={{ $panel }},bold] #I:#W#F#{?window_zoomed_flag, ,} "
+# The other windows sit on the transparent middle; the current one is named
+# in the top bar, so the bottom lists only the ones you would switch to.
+set -g window-status-format "#[fg={{ $t.term.fg }},bg=default,nobold] #I:#W#F "
+set -g window-status-current-format ""
 
-set -g window-status-separator "#[fg={{ $border }},bg={{ $panel }},nobold]·"
-set -g window-status-bell-style "bg={{ $panel }},fg={{ $error }},bold"
-set -g window-status-activity-style "bg={{ $panel }},fg={{ $warning }},bold"
+set -g window-status-separator ""
+set -g window-status-bell-style "bg={{ $alert }},fg={{ $alert_text }},bold"
+set -g window-status-activity-style "bg={{ $activity }},fg={{ $activity_text }},bold"
+
+# --- Top bar: the pane border line, as in the reference layout ---
+# The active pane shows the window in white on black (21:1) and the system
+# indicators (one `tmux-status system` sample per interval) on Apple cyan;
+# other panes show a quiet label on the border surface (accent_on_surface is
+# audited at 7:1 on border).
+set -g pane-border-status top
+set -g pane-border-lines single
+set -g pane-border-format "\
+#{?pane_active,\
+#[{{ $frameStyleEsc }}] #I:#W#F#{?window_zoomed_flag, ,} #[fill={{ $frame }}]\
+#{?#{==:#{@dot_status_show_system},on},#[align=right]#[{{ $barStyleEsc }}] #(~/.local/bin/tmux-status system) ,},\
+#[fg={{ $accent_on }}#,bg={{ $border }}] #P: #{pane_current_command} #[fill={{ $border }}]}"
 
 # --- Pane Borders ---
-set -g pane-border-style "fg={{ $border }}"
-set -g pane-active-border-style "fg={{ $accent }}"
+# Border lines are UI, not text, but the border tint sits under WCAG's 3:1
+# non-text floor on some themes; muted text reads at 7:1 on bg.
+set -g pane-border-style "fg={{ $muted }}"
+# Black on black: the active pane's top-bar border cells blend into the black
+# window block, so the top bar starts at the left edge like the reference.
+set -g pane-active-border-style "fg={{ $frame }},bg={{ $frame }}"
 set -g display-panes-colour "{{ $tertiary }}"
 set -g display-panes-active-colour "{{ $accent }}"
 
-# --- Messages & Menus ---
-set -g message-style "bg={{ $border }},fg={{ $accent }}"
-set -g message-command-style "bg={{ $border }},fg={{ $accent }}"
-set -g mode-style "bg={{ $border }},fg={{ $accent }},bold"
+# --- Messages & Menus: the clock's tint, so text stays 7:1 ---
+set -g message-style "bg={{ $clock_bg }},fg={{ $clock_fg }}"
+set -g message-command-style "bg={{ $clock_bg }},fg={{ $clock_fg }}"
+set -g mode-style "bg={{ $border }},fg={{ $accent_on }},bold"
 
 # --- Clock ---
 setw -g clock-mode-colour "{{ $accent }}"
 setw -g clock-mode-style 24
 
 # --- Copy Mode Highlight ---
-set -g copy-mode-match-style "bg={{ $warning }},fg={{ $bg }}"
+set -g copy-mode-match-style "bg={{ $warning }},fg={{ $status_text }}"
 set -g copy-mode-current-match-style "bg={{ $accent }},fg={{ $accent_text }},bold"
 
 # --- LINUX SPECIFIC ---
@@ -266,3 +332,8 @@ set -g @continuum-save-interval '15'
 
 # Initialize TMUX plugin manager
 run '~/.tmux/plugins/tpm/tpm'
+
+# --- LOCAL OVERRIDES ---
+# Loaded last, so your own keys and options win over the generated defaults,
+# the theme and plugins, and survive every `dot theme` re-render. Optional.
+source-file -q ~/.config/tmux/local.conf

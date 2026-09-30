@@ -53,6 +53,25 @@ func TestPickRefilter(t *testing.T) {
 	}
 }
 
+// Typing a query one key at a time must never rewrite the source list:
+// filtered once shared all's backing array, so each refilter overwrote
+// all's head and the picker showed every match twice ("mau" → 14/113).
+func TestPickRefilterKeepsAllIntact(t *testing.T) {
+	m := newTestPick()
+	want := append([]string(nil), m.all...)
+	var mm tea.Model = m
+	for _, k := range []string{"b", "l", "backspace", "backspace"} {
+		mm, _ = mm.Update(key(k))
+	}
+	fm := mm.(pickModel)
+	if strings.Join(fm.all, ",") != strings.Join(want, ",") {
+		t.Fatalf("all mutated by refilter: got %v want %v", fm.all, want)
+	}
+	if strings.Join(fm.filtered, ",") != strings.Join(want, ",") {
+		t.Fatalf("empty query should list every item once: %v", fm.filtered)
+	}
+}
+
 func key(s string) tea.KeyMsg {
 	switch s {
 	case "down":

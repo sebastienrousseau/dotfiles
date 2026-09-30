@@ -24,13 +24,15 @@ CONSUMERS = {
     "wezterm": "dot_config/wezterm/wezterm.lua.tmpl",
     "foot": "dot_config/foot/foot.ini.tmpl",
     "tmux": "dot_config/tmux/tmux.conf.tmpl",
+    "nvim-colors": "dot_config/nvim/colors/dotfiles.lua.tmpl",
+    "nvim-lualine": "dot_config/nvim/lua/lualine/themes/dotfiles.lua.tmpl",
 }
 THEMES = ("maui-dark", "maui-light", "berlin-dark", "berlin-light")
 PLATFORMS = ("darwin", "linux", "wsl")
 
 
 def fixture_data(theme: str, platform: str) -> dict:
-    """Fix every host-dependent input used by these six templates."""
+    """Fix every host-dependent input used by these templates."""
     return {
         "dotfiles_version": "0.0.0",
         "theme": theme,
@@ -66,10 +68,11 @@ def render_all(chezmoi: str) -> dict[str, str]:
         # secrets, or source checkout mutation participates in the fixture.
         (source / ".chezmoidata").mkdir()
         (source / ".chezmoitemplates").mkdir()
-        shutil.copyfile(
-            REPO / "defaults/.chezmoidata/themes.toml",
-            source / ".chezmoidata/themes.toml",
-        )
+        for data in ("themes.toml", "apple.toml"):
+            shutil.copyfile(
+                REPO / "defaults/.chezmoidata" / data,
+                source / ".chezmoidata" / data,
+            )
         shutil.copyfile(
             REPO / "defaults/.chezmoitemplates/theme-name",
             source / ".chezmoitemplates/theme-name",

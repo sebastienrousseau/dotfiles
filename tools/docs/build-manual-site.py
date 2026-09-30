@@ -40,6 +40,9 @@ from pathlib import Path, PurePosixPath
 
 REPO_URL = "https://github.com/sebastienrousseau/dotfiles"
 DOCS_URL = "https://doc.dotfiles.io/"
+AUTHOR_NAME = "Sebastien Rousseau"
+AUTHOR_URL = "https://sebastienrousseau.com/"
+COPYRIGHT_LICENCE = "Licensed under Apache-2.0 OR MIT."
 
 # ── slugs ────────────────────────────────────────────────────────────────
 
@@ -318,7 +321,7 @@ def shared_fields(profile: dict, base: str, root: str, year: str) -> dict:
     if profile["current"]:
         cur[f"cur_{profile['current']}"] = ' aria-current="true"'
     return {
-        "author": "Sebastien Rousseau",
+        "author": AUTHOR_NAME,
         "language": "en-GB",
         "name": profile["name"],
         "base_path": base,
@@ -344,7 +347,14 @@ def shared_fields(profile: dict, base: str, root: str, year: str) -> dict:
         "label_theme_light": "Light",
         "label_theme_dark": "Dark",
         "footer_note": "Chezmoi-managed dotfiles for macOS, Linux, WSL and PowerShell — signed, attested and multi-shell.",
-        "copyright": f"© 2015–{year} Sebastien Rousseau. Licensed under Apache-2.0 OR MIT.",
+        "copyright": f"© 2015–{year} {AUTHOR_NAME}. {COPYRIGHT_LICENCE}",
+        # The footer prints the parts apart so it can link the author's
+        # name to the author's own site (rel="author"); the feeds keep
+        # the plain line.
+        "copyright_years": f"© 2015–{year}",
+        "author_name": AUTHOR_NAME,
+        "author_url": AUTHOR_URL,
+        "copyright_licence": COPYRIGHT_LICENCE,
         **cur,
     }
 

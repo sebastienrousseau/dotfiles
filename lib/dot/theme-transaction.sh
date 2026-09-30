@@ -41,9 +41,52 @@ _theme_txn_state_root() {
   printf '%s' "${DOT_THEME_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/dot/theme-transactions}"
 }
 
+# Keyed on HOME alone: the launchd auto-sync agent sees neither the shell's
+# XDG_RUNTIME_DIR nor its TMPDIR, so either would split one lock in two.
 _theme_txn_lock_root() {
-  local root="${DOT_THEME_LOCK_ROOT:-${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}}"
+  local root="${DOT_THEME_LOCK_ROOT:-$HOME/.local/state/dot}"
   printf '%s' "$root"
+}
+
+# _theme_txn_preference <new theme> <target theme> <--auto?>
+# The appearance preference a run commits and later reads back. --auto always
+# wins. A re-apply with no theme argument names no preference and writes none,
+# so it must expect the stored one (e.g. "auto"), not the mode implied by the
+# theme's name — that mismatch rolled back every bare --force. Uses
+# current_theme_mode and _theme_mode_for_name from dot-theme-sync, which
+# sources this file.
+_theme_txn_preference() {
+  if [[ "$3" == true ]]; then
+    printf 'auto\n'
+  elif [[ -z "$1" ]]; then
+    current_theme_mode
+  else
+    _theme_mode_for_name "$2"
+  fi
+}
+
+# emit_theme_plan <json?> <target> <preference> <operation id>
+# Prints the pure --plan report through dot-theme-sync's JSON or human emitter.
+emit_theme_plan() {
+  local as_json="$1"
+  shift
+  if [[ "$as_json" == true ]]; then
+    emit_theme_plan_json "$@"
+  else
+    emit_theme_plan_human "$@"
+  fi
+}
+
+# _theme_nvim_scheme <theme>: the colourscheme to push to running Neovims.
+# The palette scheme rendered for the active theme (colors/dotfiles.lua, the
+# same Apple AAA colours as the terminal) wins over the theme's app.nvim.
+# Uses theme_app_value from dot-theme-sync, which sources this file.
+_theme_nvim_scheme() {
+  if [[ -f "$HOME/.config/nvim/colors/dotfiles.lua" ]]; then
+    printf 'dotfiles\n'
+  else
+    theme_app_value "$1" "nvim" 2>/dev/null || true
+  fi
 }
 
 _theme_txn_hash() {

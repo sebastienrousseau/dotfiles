@@ -40,10 +40,51 @@ test_start "txn_json_escape_control_chars"
 got="$(_theme_txn_json_escape "a\\b\"c"$'\n'"d"$'\r'"e"$'\t'"f")"
 assert_equals 'a\\b\"c\nd\re\tf' "$got" "backslash, quote, newline, CR, tab escaped"
 
+test_start "txn_preference_auto_wins"
+# The helpers call dot-theme-sync's own lookups; stand-ins make each route
+# visible in the output.
+current_theme_mode() { printf 'stored\n'; }
+_theme_mode_for_name() { printf 'named:%s\n' "$1"; }
+assert_equals "auto" "$(_theme_txn_preference maui-dark maui-dark true)" "--auto always wins"
+assert_equals "auto" "$(_theme_txn_preference "" maui-dark true)" "--auto wins on a bare re-apply too"
+
+test_start "txn_preference_bare_reapply_keeps_the_stored_one"
+assert_equals "stored" "$(_theme_txn_preference "" maui-dark false)" "no theme named: the stored preference"
+
+test_start "txn_preference_named_theme_uses_its_mode"
+assert_equals "named:maui-light" "$(_theme_txn_preference maui-light maui-light false)" "a named theme: its own mode"
+unset -f current_theme_mode _theme_mode_for_name
+
+test_start "txn_emit_plan_dispatches_json_or_human"
+emit_theme_plan_json() { printf 'json:%s\n' "$*"; }
+emit_theme_plan_human() { printf 'human:%s\n' "$*"; }
+assert_equals "json:t p op" "$(emit_theme_plan true t p op)" "--json selects the JSON emitter"
+assert_equals "human:t p op" "$(emit_theme_plan false t p op)" "otherwise the human report"
+unset -f emit_theme_plan_json emit_theme_plan_human
+
+test_start "txn_nvim_scheme_prefers_the_palette"
+theme_app_value() { printf 'tokyonight-night\n'; }
+nvim_home="$WORK/nvim-home"
+mkdir -p "$nvim_home/.config/nvim/colors"
+assert_equals "tokyonight-night" "$(HOME="$nvim_home" _theme_nvim_scheme maui-dark)" "no palette scheme: the theme's app.nvim"
+: >"$nvim_home/.config/nvim/colors/dotfiles.lua"
+assert_equals "dotfiles" "$(HOME="$nvim_home" _theme_nvim_scheme maui-dark)" "the rendered palette scheme wins"
+unset -f theme_app_value
+
 test_start "txn_state_and_lock_root_defaults"
 got="$(env -u DOT_THEME_STATE_DIR -u DOT_THEME_LOCK_ROOT -u XDG_RUNTIME_DIR TMPDIR=/tmpx \
   bash -c 'source "$1"; printf "%s|%s" "$(_theme_txn_state_root)" "$(_theme_txn_lock_root)"' _ "$LIB")"
-assert_equals "$XDG_STATE_HOME/dot/theme-transactions|/tmpx" "$got" "fallback roots"
+assert_equals "$XDG_STATE_HOME/dot/theme-transactions|$HOME/.local/state/dot" "$got" "fallback roots"
+
+# The launchd auto-sync agent has neither the shell's XDG_RUNTIME_DIR nor
+# its TMPDIR; a lock root derived from either let an interactive `dot theme`
+# and the agent hold "the" lock at once and collide on chezmoi's own lock.
+test_start "txn_lock_root_ignores_session_env"
+agent="$(env -u DOT_THEME_LOCK_ROOT -u XDG_RUNTIME_DIR -u TMPDIR \
+  bash -c 'source "$1"; _theme_txn_lock_root' _ "$LIB")"
+shell="$(env -u DOT_THEME_LOCK_ROOT XDG_RUNTIME_DIR=/run/x TMPDIR=/tmpy \
+  bash -c 'source "$1"; _theme_txn_lock_root' _ "$LIB")"
+assert_equals "$agent" "$shell" "agent and shell resolve the same lock root"
 
 test_start "txn_hash_missing_file_is_empty"
 assert_equals "" "$(_theme_txn_hash "$WORK/nope")" "no hash for a missing path"

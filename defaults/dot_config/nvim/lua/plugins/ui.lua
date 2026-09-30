@@ -129,6 +129,10 @@ Simply design to fit your shell life
     opts = {
       options = {
         theme = (function()
+          -- The palette theme generated from the active dotfiles theme wins.
+          if #vim.api.nvim_get_runtime_file("lua/lualine/themes/dotfiles.lua", false) > 0 then
+            return "dotfiles"
+          end
           local theme = vim.env.DOTFILES_THEME or "macos-monterey-dark"
           if theme:match("^tokyonight") then
             return "tokyonight"
@@ -311,6 +315,13 @@ Simply design to fit your shell life
     lazy = false,
     priority = 1001,
     config = function()
+      -- The palette colourscheme generated from the active dotfiles theme
+      -- (colors/dotfiles.lua) keeps the editor in the same Apple, AAA
+      -- colours as the terminal and tmux; the named themes remain fallbacks.
+      if #vim.api.nvim_get_runtime_file("colors/dotfiles.lua", false) > 0 then
+        vim.cmd.colorscheme("dotfiles")
+        return
+      end
       local theme = vim.env.DOTFILES_THEME or "macos-monterey-dark"
       local function load_theme(name)
         local ok, lazy = pcall(require, "lazy")

@@ -687,6 +687,22 @@ EOF
 done
 rm -f "$nvim_sock2"
 
+# With the palette colourscheme rendered for the active theme, running
+# Neovims switch to it rather than the theme's app.nvim family.
+mkdir -p "$HOME/.config/nvim/colors"
+: >"$HOME/.config/nvim/colors/dotfiles.lua"
+for shell in "${nvim_shells[@]}"; do
+  test_start "nvim_prefers_the_palette_colourscheme ($("$shell" -c 'echo "bash ${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"'))"
+  reset_calls
+  run_fn Linux "$shell" <<'EOF'
+nvim() { printf '%s\n' "$*" >>"$CALLS/nvim"; }
+reload_nvim fixture-dark
+EOF
+  assert_contains "vim.cmd.colorscheme('dotfiles')" "$(calls nvim)" "Lua switches to the generated palette scheme"
+  assert_equals 0 "$(calls nvim | grep -c tokyonight || true)" "the app.nvim family is not used"
+done
+rm -f "$HOME/.config/nvim/colors/dotfiles.lua"
+
 # ===========================================================================
 # Rendered templates (real chezmoi renderer, fixture data)
 # ===========================================================================
@@ -734,15 +750,47 @@ if [[ -n "$CHEZMOI_BIN" ]]; then
   assert_file_contains "$RENDER/tmux-light.conf" 'set-environment -g COLORFGBG "0;15"' "light panes inherit a light appearance signal"
   assert_file_contains "$RENDER/tmux-dark.conf" 'set -g focus-events on' "tmux receives terminal focus events"
   assert_file_contains "$RENDER/tmux-dark.conf" 'bind A display-menu -T "#[align=centre] AI CLI cockpit "' "prefix+A exposes the AI launcher"
-  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g @dot_session_colour "#ff8800"' "session colour is the theme accent"
-  assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#{?client_prefix,#ff2255,#{@dot_session_colour}},bg=#1b2430,bold] #{?client_prefix,' \
-    "session identity reacts to prefix state in the theme's error colour"
-  assert_equals "1" "$(grep -c '#{?client_prefix,.* }#S ' "$RENDER/tmux-dark.conf")" \
+  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g status-position bottom' "the block bar stays at the bottom"
+  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g status-style "bg=default,fg=#e6edf3"' \
+    "the bottom bar is transparent between its badges, in the theme's text colour"
+  assert_file_contains "$RENDER/tmux-light.conf" 'set -g @dot_session_colour "#0066ff"' \
+    "the light theme seeds its own accent as the default session colour"
+  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g window-status-format "#[fg=#e6edf3,bg=default,nobold]' \
+    "the other windows sit on the transparent middle"
+  assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#000000,bg=#22ccaa,bold] %H:%M "' \
+    "the time ends the bottom bar on the fixed bar colour (the secondary block without the Apple table)"
+  assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#ffffff#,bg=#000000#,bold] #I:#W#F' \
+    "the top bar's window block is always white on black"
+  assert_equals "0" "$(grep -c 'dot_session_top' "$RENDER/tmux-dark.conf")" "the top bar has no per-session colour"
+  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g window-status-current-format ""' \
+    "the bottom bar lists only the other windows; the current one is in the top bar"
+  assert_equals "1" "$(grep -c '%H:%M' "$RENDER/tmux-dark.conf")" "exactly one clock in the whole config"
+  assert_equals "0" "$(grep -cE '%A|%Y|%d' "$RENDER/tmux-dark.conf")" "no date anywhere"
+  assert_equals "0" "$(grep -c 'client_width' "$RENDER/tmux-dark.conf")" \
+    "no element depends on the window width, so half and full screen match"
+  assert_file_contains "$RENDER/tmux-dark.conf" $'#[fg=#{?client_prefix,#000000,#{@dot_session_text}},bg=#{?client_prefix,#ff2255,#{@dot_session_colour}},bold] #{?client_prefix,\uf11c PREFIX,#{?pane_in_mode,COPY,\uf489 #S}} ' \
+    "the mode badge: session with the terminal icon, PREFIX (keyboard, alert colour) or COPY, named in text"
+  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g pane-active-border-style "fg=#000000,bg=#000000"' \
+    "the active top-bar border blends into the black block, so the bar starts at the edge"
+  assert_file_contains "$RENDER/tmux-dark.conf" 'set -g pane-border-status top' "the top bar is the pane border line"
+  assert_file_contains "$RENDER/tmux-dark.conf" 'bind T display-popup -E -w 80% -h 80% -T " Theme " "~/.local/bin/dot theme"' \
+    "prefix T opens the theme picker in a popup"
+  assert_file_contains "$RENDER/tmux-dark.conf" 'bind C-t run-shell -b "~/.local/bin/dot theme random' \
+    "prefix C-t applies a random theme"
+  assert_equals "source-file -q ~/.config/tmux/local.conf" "$(grep -v '^#' "$RENDER/tmux-dark.conf" | grep -v '^$' | tail -1)" \
+    "an optional local.conf is loaded last, after the theme and plugins"
+  assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#ffffff#,bg=#000000#,bold] #I:#W#F' \
+    "without the Apple table the frame falls back to white on black"
+  assert_file_contains "$RENDER/tmux-dark.conf" '#{?#{==:#{@dot_status_show_system},on},#[align=right]' \
+    "the top bar ends with the system indicators, which stay user-configurable"
+  assert_equals "0" "$(grep -c 'apply-colours' "$RENDER/tmux-dark.conf")" \
+    "without an apple_sessions table no session hook is installed"
+  assert_equals "1" "$(grep -c '#S}} ' "$RENDER/tmux-dark.conf")" \
     "session name is the primary left-side identity"
   assert_file_contains "$RENDER/tmux-dark.conf" 'set -g status-justify left' "session and windows form one compact group"
   assert_file_contains "$RENDER/tmux-dark.conf" ' #I:#W#F#{?window_zoomed_flag,' "current window shows native flags and zoom state"
-  assert_file_contains "$RENDER/tmux-dark.conf" '#{?#{&&:#{==:#{@dot_status_show_system},on},#{e|>=:#{client_width},120}},#(~/.local/bin/tmux-status system)' \
-    "system sample is user-configurable and disappears on narrow clients"
+  assert_equals "1" "$(grep -c '#(~/.local/bin/tmux-status system)' "$RENDER/tmux-dark.conf")" \
+    "one system sample, in the top bar only"
 
   test_start "macos_auto_theme_agent_renders_watch_and_if_auto"
   render_template "$PLIST_TEMPLATE" darwin fixture-dark "$RENDER/agent.plist"

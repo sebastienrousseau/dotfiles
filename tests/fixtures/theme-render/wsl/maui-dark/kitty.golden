@@ -1,12 +1,17 @@
 font_family JetBrainsMono Nerd Font
 symbol_map U+E000-U+F8FF Symbols Nerd Font
 font_size 20
+# Taller rows, bars included, for the airier reference layout. Override with
+# terminal_cell_height in chezmoi data (e.g. "100%" to restore the default).
+modify_font cell_height 130%
 
 window_padding_width 16
 # A terminal is a large reading surface: keep it opaque so generated sRGB
 # colours retain their tested contrast instead of blending with the wallpaper.
 background_opacity 1.0
-dim_opacity 0.75
+# Faint (SGR 2) text is still text: kitty draws it at dim_opacity, and 0.75
+# turned a 7:1 colour into roughly 4.5:1. 1.0 keeps faint text at AAA.
+dim_opacity 1.0
 confirm_os_window_close 0
 enable_audio_bell no
 cursor_trail 0
@@ -15,21 +20,33 @@ background #0f1f21
 foreground #f1f6f7
 selection_background #1c4248
 selection_foreground #f1f6f7
-cursor #60daee
+cursor #00d2e0
 
 color0  #314143
-color1  #fa756d
-color2  #61d677
-color3  #e5cc4b
-color4  #61b9f2
-color5  #f28de7
-color6  #60daee
+color1  #ff8282
+color2  #30d158
+color3  #ffd600
+color4  #5cb8ff
+color5  #ea8dff
+color6  #3cd3fe
 color7  #b7b9b9
-color8  #4e6163
-color9  #ff9d93
-color10 #7ef391
-color11 #ffe866
-color12 #97d3ff
-color13 #ffb2f8
-color14 #9df3ff
+color8  #97abae
+color9  #ff8ac4
+color10 #00dac3
+color11 #ff9230
+color12 #a7aaff
+color13 #fa9cff
+color14 #00d2e0
 color15 #e2e3e3
+color244 #a7a7a7
+color245 #adadad
+color246 #b4b4b4
+color247 #bababa
+color248 #c0c0c0
+color249 #c7c7c7
+color250 #cdcdcd
+color251 #d4d4d4
+color252 #dadada
+color253 #e1e1e1
+color254 #e7e7e7
+color255 #eeeeee

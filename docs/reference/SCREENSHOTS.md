@@ -102,16 +102,17 @@ The Neovim configuration includes:
 
 ## tmux
 
-The tmux status bar displays:
+Each tmux session gets its own Apple system color, so sessions are told apart at
+a glance; the rest of the frame is fixed. Every badge has a white label and
+meets WCAG AAA, and both bars show the same elements at any window width:
 
-- A compact session name with a stable, wallpaper-derived per-session color
-- A keyboard icon while the tmux prefix is active
-- Neutral, text-only window tabs with native current, zoom, last, bell, and activity flags
-- A single lightweight CPU, memory, and battery sample on macOS, Linux/Arch, WSL, and Windows
-- An always-visible directory, a responsive date, and an always-visible clock
-- Copy, synchronized-pane, and SSH indicators only when relevant
+- Top bar: the current window (bold, `*`, zoom flag) in white on black from the left edge, then the CPU, memory, and battery indicators on Apple cyan
+- Bottom bar, transparent between its badges: a mode badge on the session's color (terminal icon and session name; a keyboard and `PREFIX` while the tmux prefix is armed; `COPY` in copy mode), the other windows with their native last, bell, and activity flags, `SYNC` and `SSH` when relevant, the directory, and the time on Apple cyan
 
 Press `prefix + A` to open the AI CLI launcher in the current workspace.
+Press `prefix + T` to pick a theme in a popup, or `prefix + C-t` for a random
+wallpaper theme; both reload tmux in place. Keys and options you put in
+`~/.config/tmux/local.conf` load last, so they survive every theme change.
 AI provider sessions started after a theme switch inherit the same light/dark
 mode and wallpaper palette; restart existing TUIs because providers cache their
 appearance independently from tmux.

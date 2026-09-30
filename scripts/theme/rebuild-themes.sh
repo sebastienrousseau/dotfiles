@@ -322,6 +322,14 @@ generator_digest() {
 _rt_generator_state() {
   GENERATOR_STAMP="$CACHE_DIR/.extract-theme.sha256"
   GENERATOR_HASH="$(generator_digest "$EXTRACT_SCRIPT")"
+  # extract-theme.py imports apple.py (Apple system colours) and aaa.py (the
+  # final AAA pass); an edit to either changes every generated palette too.
+  local module
+  for module in apple.py aaa.py; do
+    if [[ -f "$SCRIPT_DIR/$module" ]]; then
+      GENERATOR_HASH="$GENERATOR_HASH:$(generator_digest "$SCRIPT_DIR/$module")"
+    fi
+  done
   GENERATOR_STALE=false
   if [[ ! -f "$GENERATOR_STAMP" || "$(cat "$GENERATOR_STAMP")" != "$GENERATOR_HASH" ]]; then
     GENERATOR_STALE=true

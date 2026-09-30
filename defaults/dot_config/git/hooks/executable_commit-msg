@@ -26,11 +26,12 @@ detect_ai_agent() {
   # key unless the user pins one. So there is nothing to read it from, and
   # the default goes stale whenever a new Opus ships — it was still
   # claude-opus-4-7 while sessions were running on Opus 5, quietly
-  # misattributing every commit.
+  # misattributing every commit. It was claude-opus-5 while sessions ran
+  # on Opus 5.5, until 2026-09-29.
   #
   # Override per session without editing this hook:
   #   export CLAUDE_MODEL=claude-sonnet-5
-  local claude_default="${CLAUDE_MODEL:-claude-opus-5}"
+  local claude_default="${CLAUDE_MODEL:-claude-opus-5-5}"
 
   # Claude Code (Anthropic). The CLI actually sets CLAUDECODE=1 (no
   # underscore); the other vars are kept as historical aliases and for

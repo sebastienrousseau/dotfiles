@@ -98,6 +98,17 @@ printf '\n# changed\n' >>"$W/s/extract-theme.py"
 rt
 assert_equals "yes:yes" "$(has "$OUT" 'Generator changed'):$(has "$OUT" 'Results: 2 generated, 0 cached')" "a new generator rebuilds"
 
+test_start "rebuild_aaa_pass_change_invalidates_the_cache"
+rt
+printf '# v1\n' >"$W/s/aaa.py"
+rt
+assert_equals "yes:yes" "$(has "$OUT" 'Generator changed'):$(has "$OUT" 'Results: 2 generated, 0 cached')" "a new AAA pass rebuilds"
+rt
+assert_contains "Results: 0 generated, 2 cached" "$OUT" "an unchanged AAA pass reuses the cache"
+printf '# v1\n' >"$W/s/apple.py"
+rt
+assert_contains "Results: 2 generated, 0 cached" "$OUT" "a new Apple colour table rebuilds"
+
 test_start "rebuild_drops_orphaned_cache_entries"
 printf 'x' >"$W/home/.cache/dotfiles/themes/gone-dark.toml"
 rt

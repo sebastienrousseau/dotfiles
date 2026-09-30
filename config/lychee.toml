@@ -18,6 +18,10 @@ exclude_path = [
   "CHANGELOG.md",
   "defaults/dot_config",
   "defaults/dot_claude",
+  # The ~/Code workspace standards and templates: their relative links
+  # (docs/…, SECURITY.md, LICENSE) resolve in each repository that uses
+  # them, never here, like the other deployed files above.
+  "defaults/Code",
   "lib/wasm-tools/target",
 ]
 
