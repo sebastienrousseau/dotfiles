@@ -147,11 +147,24 @@ DESCRIPTION:
 EOF
 }
 
+# Directories deployed into $HOME whose version strings belong to other
+# projects: the ~/Code workspace standards quote v0.0.1, v0.0.45 and a
+# GitHub release tag on purpose, and the sync once stamped v0.2.530 over
+# all of them.
+EXCLUDE_DIRS=(
+  "defaults/Code/"
+)
+
 is_excluded_file() {
   local file="$1"
   local excluded
   for excluded in "${EXCLUDE_FILES[@]}"; do
     if [[ "$file" == "$excluded" ]]; then
+      return 0
+    fi
+  done
+  for excluded in "${EXCLUDE_DIRS[@]}"; do
+    if [[ "$file" == "$excluded"* ]]; then
       return 0
     fi
   done

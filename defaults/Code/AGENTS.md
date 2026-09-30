@@ -159,14 +159,14 @@ found, what was fixed, and what remains, before starting the requested work.
 
 ## 3. Semantic Versioning Lifecycle Rule
 
-- **Initial Version**: All projects and repositories must start at `v0.2.530` (or `0.0.1`).
-- **Increment Policy**: Every new release/iteration increments strictly by `0.0.1` (e.g., `v0.2.530` → `v0.2.530` → `v0.2.530` ... → `v0.2.530` → `v0.2.530`).
-- **Milestone Maturity**: To achieve `v0.2.530`, the project must have progressed through `v0.2.530`.
+- **Initial Version**: All projects and repositories must start at `v0.0.1` (or `0.0.1`).
+- **Increment Policy**: Every new release/iteration increments strictly by `0.0.1` (e.g., `v0.0.1` → `v0.0.2` → `v0.0.3` ... → `v0.0.999` → `v0.1.0`).
+- **Milestone Maturity**: To achieve `v0.1.0`, the project must have progressed through `v0.0.999`.
 - **Scope**: Mandatory standard across all repositories to allow products and communities to mature incrementally.
 - **Release Branch**: Work for the next iteration MUST begin on a branch named
   `feat/v<next-version>`, where `<next-version>` is exactly `0.0.1` greater than
-  the repository's current version. For example, work after `v0.2.530` belongs on
-  `feat/v0.2.530`. Create or switch to this branch before modifying release-bound
+  the repository's current version. For example, work after `v0.0.45` belongs on
+  `feat/v0.0.46`. Create or switch to this branch before modifying release-bound
   files; do not leave the work on `main` or an unrelated topic branch.
 - **Single Active Release PR Invariant**: Across all repositories, there MUST be
   at most ONE active pull request targeting `main` (or the default branch), which
@@ -227,7 +227,7 @@ found, what was fixed, and what remains, before starting the requested work.
   it gets no release of its own. A nested module's tag
   (`<path>/v<VERSION>`) does get one, titled after the module and marked
   not-latest. The layout is modelled on
-  <https://github.com/github/github-mcp-server/releases/tag/v0.2.530>:
+  <https://github.com/github/github-mcp-server/releases/tag/v1.6.0>:
   - Title: `<PROJECT_NAME> <VERSION>`, the version without the `v`
     (e.g. `pain001.com 0.0.8`, like `GitHub MCP Server 1.6.0`).
   - `## Highlights ⭐️`: two to four bullets, each `* **<Feature>**: <one or
@@ -425,6 +425,24 @@ language has an established equivalent.
 - A change that alters what the demo shows re-renders it in the same
   change. A GIF is an opaque binary: its commit message says what the
   demo shows and which command produced it (§4).
+
+### 7.1.2 Author link on websites
+
+- Every website under `~/Code/Public/Web`, and every generated site or
+  manual a repository publishes (MkDocs, SSG, Hugo and the like), links
+  the copyright line that names Sebastien Rousseau to
+  <https://sebastienrousseau.com/>. The line reads
+  `© <YEAR> Sebastien Rousseau`, and the link sits on the name alone:
+  `© <YEAR> <a href="https://sebastienrousseau.com/" rel="author">Sebastien Rousseau</a>`,
+  on every page.
+- A site that names a product, a project or only its domain in the
+  copyright line still reads `© <YEAR> Sebastien Rousseau`, linked the
+  same way; the product name may follow in the rest of the line.
+- The link is set where the footer is generated (the layout, template or
+  `copyright:` setting), never page by page, and checked on the built
+  output: every page carries it.
+- A site whose copyright line names someone else (a client's site) is
+  left as it is; the rule is about the owner's own name.
 
 ### 7.2 Tone invariants
 
