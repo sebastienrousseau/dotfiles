@@ -41,6 +41,15 @@ precedence = "override"
 SPDX-FileCopyrightText = "2015-2026 Sebastien Rousseau"
 SPDX-License-Identifier = "Apache-2.0 OR MIT"
 
+# The ~/Code README template, deployed into $HOME: its own SPDX line is a
+# placeholder ({{LICENSE_SPDX}}) that each repository fills in, so the
+# tree's default applies to it here instead.
+[[annotations]]
+path = ["defaults/Code/README-TEMPLATE.md"]
+precedence = "override"
+SPDX-FileCopyrightText = "2015-2026 Sebastien Rousseau"
+SPDX-License-Identifier = "Apache-2.0 OR MIT"
+
 # Generated or machine-managed files. Listed by name so it is visible
 # that they are outputs rather than source; regenerate, do not edit.
 [[annotations]]
