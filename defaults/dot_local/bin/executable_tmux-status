@@ -54,8 +54,7 @@ free_slot() {
 set_session_colours() {
   local id="$1" colour="${2%/*}" text="${2#*/}"
   tmux set-option -q -t "$id" @dot_session_colour "$colour" \; \
-    set-option -q -t "$id" @dot_session_text "$text" \; \
-    set-option -q -t "$id" status-style "bg=$colour,fg=$text"
+    set-option -q -t "$id" @dot_session_text "$text"
 }
 
 other_sessions() {

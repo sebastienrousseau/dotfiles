@@ -51,40 +51,41 @@ print(apple.block("orange", False))
 ')"
 assert_equals "('#ff8d28', '#000000')" "$got" "every block reads at 7:1; light orange is Apple exact with black"
 
-test_start "apple_sessions_are_distinct_aaa_and_never_the_bar_colour"
+test_start "apple_bar_blocks_are_white_labelled_and_never_the_bar_colour"
 got="$(py '
-for dark in (True, False):
-    s = apple.sessions(dark)
-    assert len({b for b, _ in s}) == len(s) == 10, s
-    assert all(aaa.contrast(aaa.hex_rgb(b), aaa.hex_rgb(l)) >= 7 for b, l in s)
+s = apple.sessions()
+assert len({b for b, _ in s}) == len(s) == 10, s
+assert all(lab == "#ffffff" for _, lab in s)
+assert all(aaa.contrast(aaa.hex_rgb(b), aaa.hex_rgb(l)) >= 7 for b, l in s)
 print(sorted(n for n in apple.SYSTEM if apple._near_bar(n)))
 ')"
-assert_equals "['cyan', 'teal']" "$got" "10 distinct AAA session blocks; cyan (the bar) and teal (dE 16 from it) are reserved"
+assert_equals "['cyan', 'teal']" "$got" "10 distinct white-labelled 7:1 blocks; cyan (the bar) and teal (next to it) are reserved"
 
-test_start "apple_large_text_sessions_are_exact_default_values"
+test_start "apple_large_text_bar_blocks_are_exact_increased_contrast_values"
+# White labels need deep blocks; Apple defines one per colour, its Increased
+# contrast (light) value, which reads at 4.5:1 or more under white.
 got="$(py '
-for dark in (True, False):
-    s = apple.sessions(dark, apple.LARGE_TEXT_RATIO)
-    exact = [apple.variants(n, dark)[0] for n in apple.SYSTEM if not apple._near_bar(n)]
-    assert [b for b, _ in s] == exact, s
-    assert all(aaa.contrast(aaa.hex_rgb(b), aaa.hex_rgb(l)) >= 4.5 for b, l in s)
-print("ok")
+s = apple.sessions(apple.LARGE_TEXT_RATIO)
+exact = [apple.SYSTEM[n][2] for n in apple.SYSTEM if not apple._near_bar(n)]
+assert [b for b, _ in s] == exact, s
+assert all(aaa.contrast(aaa.hex_rgb(b), aaa.hex_rgb("#ffffff")) >= 4.5 for b, _ in s)
+print(apple.bar_block("cyan", apple.LARGE_TEXT_RATIO), apple.bar_block("pink", apple.LARGE_TEXT_RATIO))
 ')"
-assert_equals "ok" "$got" "every session block is Apple Default, labels at WCAG AAA large-text 4.5:1"
+assert_equals "#007eae #e7124d" "$got" "exact Apple values under white at WCAG AAA large text; cyan bar and pink alert too"
 
 test_start "apple_session_table_follows_font_size"
 # Bar labels at 18pt or more are large text: exact Apple values; smaller
-# fonts fall back to the 7:1 table.
+# fonts deepen them further to 7:1 under white.
 if command -v chezmoi >/dev/null 2>&1; then
   for size in 20 12; do
     chezmoi execute-template --source "$REPO_ROOT/defaults" \
       --override-data "{\"theme\":\"maui-dark\",\"terminal_font_size\":$size}" \
       <"$REPO_ROOT/defaults/dot_config/tmux/tmux.conf.tmpl" >"$WORK/tmux-$size.conf"
   done
-  assert_file_contains "$WORK/tmux-20.conf" "apply-colours '#ff4245/#000000'"
-  assert_file_contains "$WORK/tmux-12.conf" "apply-colours '#ff6165/#000000'"
-  assert_file_contains "$WORK/tmux-20.conf" '#[fg=#000000,bg=#3cd3fe,bold] %H:%M "'
-  assert_equals "0" "$(grep -c '#3cd3fe/' "$WORK/tmux-20.conf")" "cyan is never handed to a session"
+  assert_file_contains "$WORK/tmux-20.conf" "apply-colours '#e9152d/#ffffff'"
+  assert_file_contains "$WORK/tmux-12.conf" "apply-colours '#b6000b/#ffffff'"
+  assert_file_contains "$WORK/tmux-20.conf" '#[fg=#ffffff,bg=#007eae,bold] %H:%M "'
+  assert_equals "0" "$(grep -c '#007eae/' "$WORK/tmux-20.conf")" "cyan is never handed to a session"
 else
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (skipped: chezmoi unavailable)"

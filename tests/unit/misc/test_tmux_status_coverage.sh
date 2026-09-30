@@ -84,14 +84,14 @@ assert_equals "0" "$(wc -l <"$TMUX_STATUS_TEST_LOG" | tr -d ' ')" \
   "no sessions means no set-option calls"
 
 test_start "tmux_status_sets_one_colour_per_session"
-# The top bar and the right-hand blocks are fixed (black, cyan); a session
-# owns only its bottom-left colour, label and bar style.
+# The bar is transparent and the top bar fixed (black, cyan): a session owns
+# only its badge colour and label, never the whole bar's style.
 export TMUX_STATUS_TEST_FULL="$SANDBOX/full.log"
 : >"$TMUX_STATUS_TEST_FULL"
-TMUX_STATUS_TEST_SESSIONS=$'$1|alpha\n$2|beta\n' run_status apply-colours '#ff4245/#000000' '#ff9230/#000000' '#ffd600/#000000'
-assert_equals "2:0:2" \
-  "$(wc -l <"$TMUX_STATUS_TEST_FULL" | tr -d ' '):$(grep -c '@dot_session_top' "$TMUX_STATUS_TEST_FULL" || true):$(grep -c 'status-style bg=#[0-9a-f]*,fg=#000000' "$TMUX_STATUS_TEST_FULL" || true)" \
-  "each session gets its colour, label and bar style, and nothing for the top bar"
+TMUX_STATUS_TEST_SESSIONS=$'$1|alpha\n$2|beta\n' run_status apply-colours '#e9152d/#ffffff' '#c55300/#ffffff' '#a16a00/#ffffff'
+assert_equals "2:2:0:0" \
+  "$(wc -l <"$TMUX_STATUS_TEST_FULL" | tr -d ' '):$(grep -c '@dot_session_text #ffffff' "$TMUX_STATUS_TEST_FULL" || true):$(grep -c '@dot_session_top' "$TMUX_STATUS_TEST_FULL" || true):$(grep -c 'status-style' "$TMUX_STATUS_TEST_FULL" || true)" \
+  "each session gets its badge colour and white label, and no bar-wide style"
 unset TMUX_STATUS_TEST_FULL
 
 test_start "tmux_status_other_sessions"

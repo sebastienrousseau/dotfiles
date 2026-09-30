@@ -27,11 +27,18 @@
 {{- $largeText := ge (int (default 20 (index . "terminal_font_size"))) 18 -}}
 {{- $sessionTable := ternary "apple_sessions_large" "apple_sessions" $largeText -}}
 {{- $sessions := dig $sessionTable $t.mode (list) . -}}
-{{- /* The bars' fixed right-hand colour: Apple cyan with its label. Without
-       the Apple table, the theme's secondary block (audited at 7:1). */ -}}
-{{- $barPair := dig $sessionTable (printf "%s_bar" $t.mode) (printf "%s/%s" ((index $t.ui "secondary") | default $t.ui.accent) $accent_text) . -}}
+{{- /* The bars' fixed right-hand colour (Apple cyan) and the prefix/bell and
+       activity blocks, all white-labelled Apple colours from apple.toml.
+       Without the Apple table, audited theme pairs stand in. */ -}}
+{{- $barPair := dig $sessionTable "bar" (printf "%s/%s" ((index $t.ui "secondary") | default $t.ui.accent) $accent_text) . -}}
 {{- $bar := index (splitList "/" $barPair) 0 -}}
 {{- $bar_text := index (splitList "/" $barPair) 1 -}}
+{{- $alertPair := dig $sessionTable "alert" (printf "%s/%s" $t.ui.error ((index $t.ui "status_text") | default $accent_text)) . -}}
+{{- $alert := index (splitList "/" $alertPair) 0 -}}
+{{- $alert_text := index (splitList "/" $alertPair) 1 -}}
+{{- $activityPair := dig $sessionTable "activity" (printf "%s/%s" $t.ui.warning ((index $t.ui "status_text") | default $accent_text)) . -}}
+{{- $activity := index (splitList "/" $activityPair) 0 -}}
+{{- $activity_text := index (splitList "/" $activityPair) 1 -}}
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  TMUX CONFIGURATION (Universal)                                          ║
@@ -189,15 +196,16 @@ bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 # ║  Colors from .chezmoidata/themes.toml ({{ $themeName }})  ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 #
-# A fixed frame with one per-session colour: the top bar (the pane border
-# line) is black with the current window in white and the system indicators
-# on Apple cyan; the bottom bar is the session's own Apple system colour
-# (unique per session, exact Default values at 18pt and up) with the time on
-# the same cyan. Cyan is never a session colour. Nothing appears in both
-# bars, and nothing depends on the window width.
+# A fixed frame with one per-session colour, every label white: the top bar
+# (the pane border line) is black with the current window and the system
+# indicators on Apple cyan; the bottom bar is the session's own Apple colour
+# (unique per session) with the time on the same cyan. Bar blocks are Apple's
+# Increased contrast (light) values, the deep variants Apple defines for
+# white text (exact at 18pt and up). Cyan is never a session colour. Nothing
+# appears in both bars, and nothing depends on the window width.
 # Following the Apple HIG colour guidance:
-#   - colour on large areas, one black or white label per block (7:1, or
-#     WCAG large-text 4.5:1 for Apple's exact values at 18pt and up);
+#   - colour on large areas, white labels on every bar block (7:1, or WCAG
+#     large-text 4.5:1 for Apple's exact values at 18pt and up);
 #   - one meaning per colour: session colour = this session, cyan = the
 #     fixed readouts (time, indicators), error = prefix armed or bell,
 #     warning = activity;
@@ -220,7 +228,9 @@ set -g status on
 set -g status-interval 10
 set -g status-position bottom
 set -g status-justify left
-set -g status-style "bg={{ $accent }},fg={{ $accent_text }}"
+# Transparent between the badges, as in the reference: the terminal's own
+# background with the theme's text colour (7:1 on it in light and dark).
+set -g status-style "bg=default,fg={{ $t.term.fg }}"
 set -g status-left-length 40
 set -g status-right-length 120
 
@@ -229,28 +239,29 @@ set -g status-right-length 120
 set -ogq @dot_status_show_path on
 set -ogq @dot_status_show_system on
 
-# Session: terminal icon and name; prefix swaps the icon and the colour.
+# Mode badge (like Neovim's NORMAL): the session on its own colour, PREFIX
+# on the alert colour while the prefix is armed, COPY in copy mode. Each
+# state is named in text, not colour alone.
 set -g status-left "\
-#[fg=#{?client_prefix,{{ $status_text }},#{@dot_session_text}},bg=#{?client_prefix,{{ $error }},#{@dot_session_colour}},bold] #{?client_prefix, , }#S \
-#[bg=#{@dot_session_colour},nobold] "
+#[fg=#{?client_prefix,{{ $alert_text }},#{@dot_session_text}},bg=#{?client_prefix,{{ $alert }},#{@dot_session_colour}},bold] #{?client_prefix, PREFIX,#{?pane_in_mode,COPY, #S}} \
+#[bg=default,nobold] "
 
-# Context on the session block, then the time on its tinted block. Nothing
-# depends on the client width, so a half-screen window shows exactly what a
-# full-screen one does.
+# Context on the transparent middle, then the time on its cyan badge.
+# Nothing depends on the client width, so a half-screen window shows exactly
+# what a full-screen one does.
 set -g status-right "\
-#[fg=#{@dot_session_text},bg=#{@dot_session_colour},bold]#{?pane_in_mode,COPY · ,}#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
+#[fg={{ $t.term.fg }},bg=default,bold]#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
 #[nobold]#{?#{==:#{@dot_status_show_path},on},#{b:pane_current_path} ,}\
 #[fg={{ $bar_text }},bg={{ $bar }},bold] %H:%M "
 
-# Window tabs sit on the session block and take its label colour. The
-# current window is named in the top bar, so the bottom lists only the
-# others: the ones you would switch to.
-set -g window-status-format "#[fg=#{@dot_session_text},bg=#{@dot_session_colour},nobold] #I:#W#F "
+# The other windows sit on the transparent middle; the current one is named
+# in the top bar, so the bottom lists only the ones you would switch to.
+set -g window-status-format "#[fg={{ $t.term.fg }},bg=default,nobold] #I:#W#F "
 set -g window-status-current-format ""
 
 set -g window-status-separator ""
-set -g window-status-bell-style "bg={{ $error }},fg={{ $status_text }},bold"
-set -g window-status-activity-style "bg={{ $warning }},fg={{ $status_text }},bold"
+set -g window-status-bell-style "bg={{ $alert }},fg={{ $alert_text }},bold"
+set -g window-status-activity-style "bg={{ $activity }},fg={{ $activity_text }},bold"
 
 # --- Top bar: the pane border line, as in the reference layout ---
 # The active pane shows the window in white on black (21:1) and the system
@@ -269,7 +280,9 @@ set -g pane-border-format "\
 # Border lines are UI, not text, but the border tint sits under WCAG's 3:1
 # non-text floor on some themes; muted text reads at 7:1 on bg.
 set -g pane-border-style "fg={{ $muted }}"
-set -g pane-active-border-style "fg=#{@dot_session_colour}"
+# Black on black: the active pane's top-bar border cells blend into the black
+# window block, so the top bar starts at the left edge like the reference.
+set -g pane-active-border-style "fg=#000000,bg=#000000"
 set -g display-panes-colour "{{ $tertiary }}"
 set -g display-panes-active-colour "{{ $accent }}"
 
