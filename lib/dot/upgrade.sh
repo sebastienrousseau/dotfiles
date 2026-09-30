@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # The toolchain side of `dot upgrade`: prerequisites and consent up front,
-# then mise, system-package and Nix phases. Sourced by
-# scripts/dot/commands/meta.sh; inherits set -euo pipefail.
+# then mise, system-package and Nix phases, used by cmd_upgrade in
+# scripts/dot/commands/meta.sh.
+# Sourced by utils.sh; inherits set -euo pipefail
 #
 # cmd_upgrade renders its phases with _upgrade_step, which closes stdin and
 # hands the terminal to the step renderer, so nothing here may prompt once

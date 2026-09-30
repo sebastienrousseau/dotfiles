@@ -20,7 +20,8 @@ trap 'rm -rf "$WORK"' EXIT
 BASE="$WORK/base"
 STUBS="$WORK/stubs"
 mkdir -p "$BASE" "$STUBS" "$WORK/home"
-for c in bash env cat cp sed awk grep tr head cut mktemp dirname basename rm mkdir chmod install tar uname printf; do
+# gzip: GNU tar execs it for -z (bsdtar on macOS has it built in).
+for c in bash env cat cp sed awk grep tr head cut mktemp dirname basename rm mkdir chmod install tar gzip uname printf; do
   p="$(command -v "$c" 2>/dev/null)" && ln -sf "$p" "$BASE/$c"
 done
 

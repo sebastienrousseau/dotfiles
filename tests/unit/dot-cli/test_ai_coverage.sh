@@ -122,7 +122,9 @@ TTY_OUT="$WORK/tty.out"
 tty_ai() {
   local inner="$WORK/tty_inner.sh" rcfile="$WORK/tty.rc" rc
   rm -f "$rcfile"
-  printf '%s %q ai tools\necho $? >%q\n' "$REAL_BASH" "$AI" "$rcfile" >"$inner"
+  # `env -u CI`: these cases simulate a person at a terminal; under CI=true
+  # the consent rule (rightly) treats nobody as there to ask.
+  printf 'env -u CI %s %q ai tools\necho $? >%q\n' "$REAL_BASH" "$AI" "$rcfile" >"$inner"
   {
     local _i=0
     # script(1) hangs up the child once its stdin hits EOF, so stdin stays

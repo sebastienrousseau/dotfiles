@@ -127,7 +127,9 @@ run_ai() {
   set +e
   if [[ "${AI_TEST_TTY:-0}" == "1" ]]; then
     OUT="$(
-      PATH="$p" "$REAL_PYTHON" - "$REAL_BASH" "$AI_SCRIPT" "$@" <<'PYTTY'
+      # env -u CI: a simulated person at a terminal; under CI=true the
+      # consent rule (rightly) treats nobody as there to ask.
+      env -u CI PATH="$p" "$REAL_PYTHON" - "$REAL_BASH" "$AI_SCRIPT" "$@" <<'PYTTY'
 import errno
 import os
 import pty
@@ -136,7 +138,7 @@ import sys
 pid, fd = pty.fork()
 if pid == 0:
     os.execv(sys.argv[1], sys.argv[1:])
-# Typed answers (AI_TTY_INPUT) wait in the terminal's input queue until a
+# Typed answers (AI_TTY_INPUT) wait in the terminal input queue until a
 # prompt reads them, the way a person answers.
 if os.environ.get("AI_TTY_INPUT"):
     os.write(fd, os.environ["AI_TTY_INPUT"].encode())
@@ -303,7 +305,9 @@ test_start "ai_bridge_native_tool_is_not_blamed_on_mise"
 run_ai "$MISE:$BASE_PATH" ai goose "hi"
 assert_equals 1 "$RC" "missing goose exits 1"
 assert_contains "dot ai install goose" "$OUT" "the real install command"
-assert_false "[[ \"\$OUT\" == *'mise not available'* ]]" "no misleading mise message"
+# (grep via assert_output_not_contains: bash 3.2 cannot parse *'…'* nested
+# inside a double-quoted [[ ]] string.)
+assert_output_not_contains "mise not available" "printf '%s' \"\$OUT\""
 
 # ── Deprecated verbs ───────────────────────────────────────────────
 test_start "ai_deprecated_local_without_proxy"
