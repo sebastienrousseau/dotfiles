@@ -3,7 +3,7 @@
 # labels (format: block/label), identical in both appearances. <mode> lists
 # the per-session colours; bar is the cyan of the right-hand blocks (kept
 # out of the session lists); alert and activity mark prefix/bell and
-# activity.
+# activity; frame is the top bar's window block.
 
 # 7:1 labels, for fonts under 18pt
 [apple_sessions]
@@ -12,6 +12,7 @@ light = ["#b6000b/#ffffff", "#a03400/#ffffff", "#7e4d00/#ffffff", "#006812/#ffff
 bar = "#005e8b/#ffffff"
 alert = "#b5002b/#ffffff"
 activity = "#a03400/#ffffff"
+frame = "#000000/#ffffff"
 
 # exact Apple values; WCAG AAA large text (4.5:1)
 [apple_sessions_large]
@@ -20,3 +21,4 @@ light = ["#e9152d/#ffffff", "#c55300/#ffffff", "#a16a00/#ffffff", "#008932/#ffff
 bar = "#007eae/#ffffff"
 alert = "#e7124d/#ffffff"
 activity = "#c55300/#ffffff"
+frame = "#000000/#ffffff"

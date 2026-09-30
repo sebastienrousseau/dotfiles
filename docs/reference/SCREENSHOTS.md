@@ -110,6 +110,9 @@ meets WCAG AAA, and both bars show the same elements at any window width:
 - Bottom bar, transparent between its badges: a mode badge on the session's color (terminal icon and session name; a keyboard and `PREFIX` while the tmux prefix is armed; `COPY` in copy mode), the other windows with their native last, bell, and activity flags, `SYNC` and `SSH` when relevant, the directory, and the time on Apple cyan
 
 Press `prefix + A` to open the AI CLI launcher in the current workspace.
+Press `prefix + T` to pick a theme in a popup, or `prefix + C-t` for a random
+wallpaper theme; both reload tmux in place. Keys and options you put in
+`~/.config/tmux/local.conf` load last, so they survive every theme change.
 AI provider sessions started after a theme switch inherit the same light/dark
 mode and wallpaper palette; restart existing TUIs because providers cache their
 appearance independently from tmux.

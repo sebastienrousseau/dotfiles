@@ -39,6 +39,15 @@
 {{- $activityPair := dig $sessionTable "activity" (printf "%s/%s" $t.ui.warning ((index $t.ui "status_text") | default $accent_text)) . -}}
 {{- $activity := index (splitList "/" $activityPair) 0 -}}
 {{- $activity_text := index (splitList "/" $activityPair) 1 -}}
+{{- $framePair := dig $sessionTable "frame" "#000000/#ffffff" . -}}
+{{- $frame := index (splitList "/" $framePair) 0 -}}
+{{- $frame_text := index (splitList "/" $framePair) 1 -}}
+{{- /* Badge styles, written once. Inside a #{?...} branch (the top bar) a
+       comma must be escaped as #, so each has an escaped twin. */ -}}
+{{- $barStyle := printf "fg=%s,bg=%s,bold" $bar_text $bar -}}
+{{- $frameStyle := printf "fg=%s,bg=%s,bold" $frame_text $frame -}}
+{{- $barStyleEsc := replace "," "#," $barStyle -}}
+{{- $frameStyleEsc := replace "," "#," $frameStyle -}}
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  TMUX CONFIGURATION (Universal)                                          ║
@@ -128,6 +137,11 @@ bind -T copy-mode-vi C-l select-pane -R
 
 # Reload Config
 bind r source-file ~/.config/tmux/tmux.conf \; display "tmux.conf reloaded"
+
+# Themes without leaving tmux: the `dot theme` picker in a popup, or a random
+# wallpaper theme. Both run the same AAA pipeline and reload tmux themselves.
+bind T display-popup -E -w 80% -h 80% -T " Theme " "~/.local/bin/dot theme"
+bind C-t run-shell -b "~/.local/bin/dot theme random >/dev/null 2>&1" \; display "theme: random wallpaper theme…"
 
 # Sessionizer (fuzzy session switcher)
 bind f run-shell "~/.local/bin/tmux-sessionizer"
@@ -252,7 +266,7 @@ set -g status-left "\
 set -g status-right "\
 #[fg={{ $t.term.fg }},bg=default,bold]#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
 #[nobold]#{?#{==:#{@dot_status_show_path},on},#{b:pane_current_path} ,}\
-#[fg={{ $bar_text }},bg={{ $bar }},bold] %H:%M "
+#[{{ $barStyle }}] %H:%M "
 
 # The other windows sit on the transparent middle; the current one is named
 # in the top bar, so the bottom lists only the ones you would switch to.
@@ -272,8 +286,8 @@ set -g pane-border-status top
 set -g pane-border-lines single
 set -g pane-border-format "\
 #{?pane_active,\
-#[fg=#ffffff#,bg=#000000#,bold] #I:#W#F#{?window_zoomed_flag, ,} #[fill=#000000]\
-#{?#{==:#{@dot_status_show_system},on},#[align=right]#[fg={{ $bar_text }}#,bg={{ $bar }}#,bold] #(~/.local/bin/tmux-status system) ,},\
+#[{{ $frameStyleEsc }}] #I:#W#F#{?window_zoomed_flag, ,} #[fill={{ $frame }}]\
+#{?#{==:#{@dot_status_show_system},on},#[align=right]#[{{ $barStyleEsc }}] #(~/.local/bin/tmux-status system) ,},\
 #[fg={{ $accent_on }}#,bg={{ $border }}] #P: #{pane_current_command} #[fill={{ $border }}]}"
 
 # --- Pane Borders ---
@@ -282,7 +296,7 @@ set -g pane-border-format "\
 set -g pane-border-style "fg={{ $muted }}"
 # Black on black: the active pane's top-bar border cells blend into the black
 # window block, so the top bar starts at the left edge like the reference.
-set -g pane-active-border-style "fg=#000000,bg=#000000"
+set -g pane-active-border-style "fg={{ $frame }},bg={{ $frame }}"
 set -g display-panes-colour "{{ $tertiary }}"
 set -g display-panes-active-colour "{{ $accent }}"
 
@@ -318,3 +332,8 @@ set -g @continuum-save-interval '15'
 
 # Initialize TMUX plugin manager
 run '~/.tmux/plugins/tpm/tpm'
+
+# --- LOCAL OVERRIDES ---
+# Loaded last, so your own keys and options win over the generated defaults,
+# the theme and plugins, and survive every `dot theme` re-render. Optional.
+source-file -q ~/.config/tmux/local.conf

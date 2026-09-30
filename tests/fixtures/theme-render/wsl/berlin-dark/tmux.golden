@@ -87,6 +87,11 @@ bind -T copy-mode-vi C-l select-pane -R
 # Reload Config
 bind r source-file ~/.config/tmux/tmux.conf \; display "tmux.conf reloaded"
 
+# Themes without leaving tmux: the `dot theme` picker in a popup, or a random
+# wallpaper theme. Both run the same AAA pipeline and reload tmux themselves.
+bind T display-popup -E -w 80% -h 80% -T " Theme " "~/.local/bin/dot theme"
+bind C-t run-shell -b "~/.local/bin/dot theme random >/dev/null 2>&1" \; display "theme: random wallpaper theme…"
+
 # Sessionizer (fuzzy session switcher)
 bind f run-shell "~/.local/bin/tmux-sessionizer"
 
@@ -274,3 +279,8 @@ set -g @continuum-save-interval '15'
 
 # Initialize TMUX plugin manager
 run '~/.tmux/plugins/tpm/tpm'
+
+# --- LOCAL OVERRIDES ---
+# Loaded last, so your own keys and options win over the generated defaults,
+# the theme and plugins, and survive every `dot theme` re-render. Optional.
+source-file -q ~/.config/tmux/local.conf

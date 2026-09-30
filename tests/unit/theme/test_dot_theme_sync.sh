@@ -773,6 +773,14 @@ if [[ -n "$CHEZMOI_BIN" ]]; then
   assert_file_contains "$RENDER/tmux-dark.conf" 'set -g pane-active-border-style "fg=#000000,bg=#000000"' \
     "the active top-bar border blends into the black block, so the bar starts at the edge"
   assert_file_contains "$RENDER/tmux-dark.conf" 'set -g pane-border-status top' "the top bar is the pane border line"
+  assert_file_contains "$RENDER/tmux-dark.conf" 'bind T display-popup -E -w 80% -h 80% -T " Theme " "~/.local/bin/dot theme"' \
+    "prefix T opens the theme picker in a popup"
+  assert_file_contains "$RENDER/tmux-dark.conf" 'bind C-t run-shell -b "~/.local/bin/dot theme random' \
+    "prefix C-t applies a random theme"
+  assert_equals "source-file -q ~/.config/tmux/local.conf" "$(grep -v '^#' "$RENDER/tmux-dark.conf" | grep -v '^$' | tail -1)" \
+    "an optional local.conf is loaded last, after the theme and plugins"
+  assert_file_contains "$RENDER/tmux-dark.conf" '#[fg=#ffffff#,bg=#000000#,bold] #I:#W#F' \
+    "without the Apple table the frame falls back to white on black"
   assert_file_contains "$RENDER/tmux-dark.conf" '#{?#{==:#{@dot_status_show_system},on},#[align=right]' \
     "the top bar ends with the system indicators, which stay user-configurable"
   assert_equals "0" "$(grep -c 'apply-colours' "$RENDER/tmux-dark.conf")" \

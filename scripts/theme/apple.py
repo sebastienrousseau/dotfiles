@@ -209,6 +209,8 @@ BAR_LABEL = WHITE
 BAR_COLOUR = "cyan"
 # Prefix-armed/bell and activity blocks on the bar, in the same white-label set.
 BAR_ALERT, BAR_ACTIVITY = "pink", "orange"
+# The top bar's window block: white on black (21:1) in every appearance.
+FRAME = (BLACK, WHITE)
 
 
 def bar_block(name: str, ratio: float = TEXT_RATIO) -> str:
@@ -241,7 +243,7 @@ def sessions_toml() -> str:
         "# labels (format: block/label), identical in both appearances. <mode> lists",
         "# the per-session colours; bar is the cyan of the right-hand blocks (kept",
         "# out of the session lists); alert and activity mark prefix/bell and",
-        "# activity.",
+        "# activity; frame is the top bar's window block.",
     ]
     tables = (
         ("apple_sessions", TEXT_RATIO, "7:1 labels, for fonts under 18pt"),
@@ -261,6 +263,7 @@ def sessions_toml() -> str:
             ("activity", BAR_ACTIVITY),
         ):
             lines.append(f'{key} = "{bar_block(name, ratio)}/{BAR_LABEL}"')
+        lines.append(f'frame = "{FRAME[0]}/{FRAME[1]}"')
     return "\n".join(lines) + "\n"
 
 
