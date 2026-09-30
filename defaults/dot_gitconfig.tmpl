@@ -184,3 +184,10 @@
 # Create ~/.config/git/config-work with [user] overrides as needed
 [includeIf "gitdir:~/work/"]
 	path = {{ .chezmoi.homeDir }}/.config/git/config-work
+
+# Plugin-manager checkouts are third-party clones we never commit to. The
+# global eol=lf policy above makes any file upstream committed with CRLF show
+# as modified there, and lazy.nvim then refuses to update the plugin. Must
+# stay after [core] so its attributesFile wins.
+[includeIf "gitdir:~/.local/share/nvim/lazy/"]
+	path = {{ .chezmoi.homeDir }}/.config/git/config-vendored
