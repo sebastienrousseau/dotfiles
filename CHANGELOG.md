@@ -4,6 +4,13 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+### Changed
+
+- The doc.dotfiles.io footer links the author's name to
+  https://sebastienrousseau.com/ (`rel="author"`), and the shared Lucid
+  footer matches dotfiles.io's byte for byte. The feeds keep the plain
+  copyright line.
+
 ## v0.2.530 — 2026-09-29
 
 ### Fixed

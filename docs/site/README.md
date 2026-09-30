@@ -33,7 +33,9 @@ pinned, SHA-256-verified ssg release and publishes `_build/site` as-is.
   - `index.html`: the landing layout without the stock hero photo, with the
     cards linking to their pages;
   - `base.html`: no theme screenshot or `.ico`;
-  - `footer.html`: the "Made with SSG" credit ssg's quality gate looks for.
+  - `footer.html`: the "Made with SSG" credit ssg's quality gate looks for,
+    and the copyright line with the author's name linked to his site
+    (`rel="author"`), identical to dotfiles.io's footer.
 - `tools/docs/build-manual-site.py` does what the template engine cannot
   (it has no loops): it reads the table of contents, writes one ssg content
   page per entry with the side navigation, contents list and pager in front
