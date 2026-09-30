@@ -142,6 +142,8 @@ cmd_ai_doctor() {
     ui_warn "gateway engine" "dot-ai-serve not deployed — run: chezmoi apply"
   fi
   has_command dot-ai-proxy && dot-ai-proxy status
+  ui_section "Prerequisites"
+  ai_prereq_rows
   local installed=0 total=0 b
   for b in claude codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider kiro-cli autohand vibe qwen zai; do
     total=$((total + 1))
@@ -160,79 +162,52 @@ cmd_ai_query() {
   run_script "dot_local/bin/executable_dot-ai" "AI RAG script" "$@"
 }
 
-# cmd_ai_install [all|<tool>] — install missing fleet tools, or one tool.
-# Uses the native installers for claude/goose/agy and mise for the rest.
+# cmd_ai_install [all|<tool>] [--yes] — install missing roster tools, or one.
+# Prerequisites (mise, curl) are offered first; a bulk install asks once for
+# the whole list. Non-zero when any tool failed to install.
 cmd_ai_install() {
-  local target="${1:-all}"
-  local fleet=(claude codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider kiro-cli autohand vibe qwen zai)
+  local target="" arg failed=0 b rc
   local -a todo=()
-  local b pkg
-  case "$target" in
-    all | "")
-      for b in "${fleet[@]}"; do has_command "$b" || todo+=("$b"); done
-      if [[ ${#todo[@]} -eq 0 ]]; then
-        ui_ok "AI fleet" "all tools already installed"
-        return 0
-      fi
-      ui_info "Installing" "${#todo[@]} missing tool(s)"
-      ;;
-    *)
-      if has_command "$target"; then
-        ui_ok "$target" "already installed"
-        return 0
-      fi
-      todo=("$target")
-      ;;
-  esac
+  dot_apply_yes_flag "$@"
+  for arg in "$@"; do [[ "$arg" == -* ]] || target="${target:-$arg}"; done
+  _ai_install_todo "${target:-all}" || return 0
+  ai_prepare "${todo[@]}" || return 1
+  if [[ "${target:-all}" == all ]] && ! dot_consent "Install ${#todo[@]} AI tool(s): ${todo[*]}?"; then
+    ui_info "AI roster" "nothing installed — rerun with --yes, or: dot ai install <tool>"
+    return 0
+  fi
   for b in "${todo[@]}"; do
-    case "$b" in
-      claude)
-        install_claude_native "Claude Code"
-        continue
-        ;;
-      goose)
-        install_goose_native "Goose"
-        continue
-        ;;
-      agy)
-        install_agy_native "Antigravity CLI"
-        continue
-        ;;
-      amp)
-        install_amp_native "Amp"
-        continue
-        ;;
-      cursor-agent)
-        install_cursor_native "Cursor CLI"
-        continue
-        ;;
-      grok)
-        install_grok_native "Grok Build"
-        continue
-        ;;
-      kimi)
-        install_kimi_native "Kimi CLI"
-        continue
-        ;;
-    esac
-    pkg="$(_ai_mise_pkg "$b")"
-    if [[ -z "$pkg" ]]; then
-      ui_warn "$b" "no installer mapping — skipping"
-      continue
-    fi
-    if ! has_command mise; then
-      ui_err "$b" "mise not available — install: mise use -g $pkg@latest"
-      continue
-    fi
-    ui_info "Installing" "$b ($pkg)"
-    if _ai_in_scratch_dir mise use -g "$pkg@latest" 2>&1; then
-      ui_ok "$b" "installed"
-    else
-      ui_warn "$b" "install failed (continuing)"
-    fi
+    rc=0
+    ai_install_tool "$b" "$b" || rc=$?
+    ai_install_report "$b" "$b" "$rc"
+    [[ "$rc" == 0 ]] || failed=$((failed + 1))
   done
   rm -f "${AI_STATUS_CACHE_FILE:-}" 2>/dev/null || true
+  [[ "$failed" == 0 ]] || {
+    ui_err "AI roster" "$failed tool(s) not installed"
+    return 1
+  }
   ui_ok "Done" "run 'dot ai tools' to verify"
+}
+
+# _ai_install_todo <all|tool>: fill the caller's todo with what is missing.
+# Returns 1 (having said so) when there is nothing to install.
+_ai_install_todo() {
+  local b
+  if [[ "$1" != all ]]; then
+    has_command "$1" && {
+      ui_ok "$1" "already installed"
+      return 1
+    }
+    todo=("$1")
+    return 0
+  fi
+  for b in claude codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider kiro-cli autohand vibe qwen zai; do
+    has_command "$b" || todo+=("$b")
+  done
+  [[ ${#todo[@]} -gt 0 ]] && return 0
+  ui_ok "AI roster" "all tools already installed"
+  return 1
 }
 
 # Locate the vibe-delegate / delegate-report tools deployed by the /vibe

@@ -83,7 +83,7 @@ printf '  dot fleet namespace — Show or set the active namespace for multi-ten
 printf '  dot fleet events — Show recent fleet events from local event log\n'
 printf '  dot teleport — Deploy the dotfiles environment to a remote host over SSH\n'
 printf '\n[Meta]\n'
-printf '  dot upgrade — Update system toolchains, plugins, and dotfiles\n'
+printf '  dot upgrade — Update dotfiles, mise tools and (with consent) system packages\n'
 printf '  dot packages — List installed packages and package managers\n'
 printf '  dot cache-refresh — Regenerate shell caches for ultra-fast startup\n'
 printf '  dot completion — Generate shell completions (bash/zsh/fish/nu) from the command registry\n'

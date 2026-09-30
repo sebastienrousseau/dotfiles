@@ -96,7 +96,7 @@
   11   12   19.8   33    33 install/provision/run_onchange_30-darwin-mas.sh::<top>
   21   23   41.8   64    65 install/provision/run_onchange_50-install-fonts.sh::<top>
   39   20   35.3   29     0 lib/dot/ai-commands.sh::_ai_invoke_provider
-  18   19   26.4   72     0 lib/dot/ai-commands.sh::cmd_ai_install
+  12   11   23.7   24     0 lib/dot/ai-commands.sh::cmd_ai_install
   19    1    2.1   23     0 lib/dot/ai-install.sh::_ai_mise_pkg
   12   12   24.7   29     0 lib/dot/theme-transaction.sh::_theme_txn_restore_files
    2    1    4.2   35   756 lib/dot/ui.sh::<top>
@@ -136,11 +136,11 @@
   23   24   29.9  106     0 scripts/dot/commands/init.sh::cmd_init
   11    5   12.3   27   136 scripts/dot/commands/manual.sh::<top>
   11   11   15.2   34     0 scripts/dot/commands/manual.sh::cmd_open
-  14    4   24.5   61   351 scripts/dot/commands/meta.sh::<top>
+  14    4   24.5   61   349 scripts/dot/commands/meta.sh::<top>
   17   38   24.9   54     0 scripts/dot/commands/meta.sh::cmd_keys
   19   25   27.4   53     0 scripts/dot/commands/meta.sh::cmd_mcp
   14   14   23.5   28     0 scripts/dot/commands/meta.sh::cmd_mcp_serve
-  11   16   24.2   84     0 scripts/dot/commands/meta.sh::cmd_upgrade
+   9   14   25.7   82     0 scripts/dot/commands/meta.sh::cmd_upgrade
   12   15   30.9   50     0 scripts/dot/commands/registry.sh::_registry_fetch
   17   16   45.7   73     0 scripts/dot/commands/registry.sh::_registry_install
   35   38   51.0  152     0 scripts/dot/commands/registry.sh::cmd_registry

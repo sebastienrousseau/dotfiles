@@ -263,28 +263,34 @@ stub opencode
 
 test_start "a_tool_with_no_installer_mapping_is_skipped"
 ai_min cmd_ai_install definitely-not-a-tool
-assert_equals 0 "$RC" "rc"
-out_has "no installer mapping — skipping" "warning"
+assert_equals 1 "$RC" "rc: an explicit install that cannot happen is not a success"
+out_has "no installer" "warning"
 
 test_start "native_installers_are_preferred_for_the_tools_that_have_one"
+# Routing, not the network: the native-installer tools map to their pinned
+# installers, the rest to mise packages.
+ai_min ai_install_method claude
+out_has "native:install_claude_native" "claude uses its native installer"
+ai_min ai_install_method cursor-agent
+out_has "native:install_cursor_native" "cursor-agent uses its native installer"
+ai_min ai_install_method codex
+out_has "mise:npm:@openai/codex" "codex installs through mise"
+
+test_start "a_bulk_install_asks_first_and_installs_nothing_unattended"
 rm -f "$BIN/claude" "$BIN/goose"
 ai_min cmd_ai_install
 assert_equals 0 "$RC" "rc"
-out_has "Installing" "progress line"
+out_has "nothing installed — rerun with --yes" "no consent, no install"
 stub claude
 stub goose
 
-test_start "an_empty_fleet_routes_each_tool_to_its_installer"
-# With nothing on PATH every tool is missing, so each native-installer arm
-# and the mise mapping arm runs. The native installers fetch over the
-# network, which cannot happen here (no curl on this PATH), and the
-# library's contract is that a failed install is reported, never fatal.
-PATH="$NONE" ai cmd_ai_install
-assert_equals 0 "$RC" "rc"
-out_has "Installing" "progress line"
-out_has "19 missing tool(s)" "the whole fleet is missing"
-out_has "mise not available" "the mise arm reports the missing installer"
-out_has "run 'dot ai tools' to verify" "closing hint"
+test_start "an_empty_fleet_with_no_install_route_stops_early"
+# Nothing on PATH: every tool is missing, and neither curl (native
+# installers) nor a way to get mise exists, so nothing can be installed.
+PATH="$NONE" ai cmd_ai_install --yes
+assert_equals 1 "$RC" "rc"
+out_has "curl" "the missing native-installer prerequisite is named"
+out_has "mise" "the missing mise prerequisite is named"
 
 # ── delegate / cost ─────────────────────────────────────────────────────
 VIBE_TOOLS="$HOME/.claude/skills/vibe/tools"

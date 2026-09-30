@@ -28,6 +28,17 @@ dot ai "fix the auth bug" # one-shot on Claude — just like `claude "…"`
 dot ai serve              # serve your Claude subscription locally to the fleet
 ```
 
+## Prerequisites
+
+Most tools install through [mise](https://mise.jdx.dev); `claude`, `goose`,
+`agy`, `amp`, `cursor-agent`, `grok` and `kimi` use their own pinned native
+installers, which need `curl`. When a tool you install needs mise and it is
+missing, `dot ai` offers to install it first. Nothing installs without your
+yes: `dot ai install` asks before a bulk install, `dot ai <tool>` asks before
+installing a missing tool, and `--yes` (or `DOTFILES_YES=1`) answers yes.
+With no terminal to ask, nothing installs. `dot ai doctor` lists what is
+missing (mise, node, uv, curl, go) and how to add it.
+
 ## Command surface
 
 The interface is flat and verb-first, modelled on the Claude CLI: bare opens an interactive view, a prompt runs it, and old commands keep working as deprecated aliases.
@@ -39,7 +50,7 @@ The interface is flat and verb-first, modelled on the Claude CLI: bare opens an 
 | `dot ai <tool> "<prompt>"` | One-shot prompt on a named tool (e.g. `dot ai codex "add tests"`) |
 | `dot ai chat [tool]` | Open an interactive session (picker if no tool) |
 | `dot ai tools` | Install / manage the fleet |
-| `dot ai install [all\|<tool>]` | Install all missing tools, or one |
+| `dot ai install [all\|<tool>] [--yes]` | Install all missing tools, or one, with what they need (asks first) |
 | `dot ai serve [stop\|status]` | Start the local Claude gateway **and** route the fleet through it |
 | `dot ai cost` | Spend report across providers |
 | `dot ai login [tool]` | Authenticate a tool |

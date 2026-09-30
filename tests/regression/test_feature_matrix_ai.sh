@@ -124,6 +124,25 @@ test_fm_ai_cost() {
   rm -rf "$HOME/.claude"
 }
 
+test_fm_ai_install_unattended_installs_nothing() {
+  # No terminal and no --yes: a bulk install asks first, so it installs
+  # nothing (or finds nothing missing on a fully provisioned host).
+  test_start "fm_ai_install_unattended_installs_nothing"
+  fm_run ai install
+  fm_expect_rc 0
+  test_start "fm_ai_install_unattended_says_how_to_proceed"
+  fm_expect_any "rerun with --yes" "all tools already installed"
+}
+
+test_fm_ai_install_yes_flag() {
+  # --yes is a flag, not the tool name: the tool is still found next to it.
+  test_start "fm_ai_install_yes_flag"
+  fm_run ai install fm-no-such-tool --yes
+  fm_expect_rc 1
+  test_start "fm_ai_install_yes_flag_keeps_the_tool_name"
+  fm_expect_any "no installer" "fm-no-such-tool"
+}
+
 test_fm_ai_doctor() {
   # Whether claude / dot-ai-serve are installed is the host's business; the
   # hop to `dot-ai-proxy status` and the fleet tally are dot's. A stub that
@@ -140,6 +159,8 @@ test_fm_ai_doctor() {
   fm_expect_out "fm-proxy-stub argv=status"
   test_start "fm_ai_doctor_tallies_the_fleet"
   fm_expect_out_matches "Fleet +[0-9]+/[0-9]+ tools installed"
+  test_start "fm_ai_doctor_reports_prerequisites"
+  fm_expect_out "Prerequisites"
   rm -f "$FM_SANDBOX/bin/dot-ai-proxy"
 }
 
@@ -431,5 +452,8 @@ test_fm_ai_bridge_zai
 test_fm_ai_bridge_every_routed_provider_refuses
 test_fm_ai_bridge_style
 test_fm_env_dot_ai_raw
+
+test_fm_ai_install_unattended_installs_nothing
+test_fm_ai_install_yes_flag
 
 fm_finish

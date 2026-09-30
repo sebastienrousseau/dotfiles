@@ -83,13 +83,30 @@ Open the source directory in `$EDITOR`. Shorthand for `cd ~/.dotfiles && $EDITOR
 
 ### `dot upgrade`
 
-Update tools, plugins, and dotfiles.
+Update the dotfiles, your mise tools and, if you agree, your system packages.
 
 ```
-dot upgrade [--tools-only] [--dotfiles-only]
+dot upgrade [--yes]
 ```
 
-Runs `topgrade`-style upgrade of Mise tools, Nix flakes, homebrew (macOS), and pulls the latest `.dotfiles`.
+Every question is asked before anything runs:
+
+1. If mise is missing, `dot upgrade` offers to install it (through Homebrew
+   when present, otherwise the pinned mise release, verified against its
+   published checksums, into `~/.local/bin`).
+2. If a system package manager is found (Homebrew, apt, dnf or pacman), it
+   asks whether to upgrade system packages too. apt, dnf and pacman ask for
+   your sudo password once, up front.
+
+Then it runs, as tracked steps: the Nix flake update and garbage collection
+(when a flake is present), `chezmoi update` (pull and apply the dotfiles),
+`mise install` and `mise upgrade` (plus `mise self-update` for a mise that
+`dot` installed), the Neovim plugin sync, and the system-package upgrade you
+agreed to. A step that cannot run is shown as skipped with the reason.
+
+The answer to every question is **no** unless you say yes. `--yes` (or
+`DOTFILES_YES=1`) answers yes to all of them; with no terminal to ask (a pipe,
+cron, CI) and no `--yes`, `dot upgrade` installs nothing extra and says so.
 
 ### `dot commit`
 

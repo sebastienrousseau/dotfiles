@@ -118,7 +118,7 @@ constraint.
 |---|---|
 | `chezmoi apply` | Fresh macOS: minutes. Depends on iCloud sync + package installs. Gated at suite level only. |
 | `install.sh` full | Downloads + installs packages. Network-bound. |
-| `dot upgrade` | Runs `mise upgrade`, `chezmoi apply`, package manager upgrades. |
+| `dot upgrade` | Runs `chezmoi update`, `mise install` + `mise upgrade`, the Neovim plugin sync, and (with consent) a system-package upgrade. |
 | Full test suite | 15+ minutes on CI. Gated by workflow timeout, not per-run assertion. |
 
 ## Ratchet vs aspiration

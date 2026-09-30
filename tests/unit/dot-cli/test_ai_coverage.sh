@@ -200,7 +200,7 @@ else
   for n in claude agy amp cursor grok kimi; do
     assert_file_contains "$CALLS" "native $n " "$n uses native installer"
   done
-  assert_file_contains "$TTY_OUT" "install failed (continuing)" "gum spin failure reported"
+  assert_file_contains "$TTY_OUT" "install failed" "a failed install is reported"
   assert_file_contains "$TTY_OUT" "Run 'dot ai' again" "done message"
   assert_file_not_exists "$CACHE" "cache invalidated after installs"
   assert_file_contains "$CALLS" "launched codex" "picked CLI is exec'd"
@@ -228,7 +228,7 @@ else
   test_start "tty_no_gum_tips"
   seed_cache
   PATH="$NOGUM_PATH" tty_ai
-  assert_file_contains "$TTY_OUT" "Install missing providers: mise install" "mise tip without gum"
+  assert_file_contains "$TTY_OUT" "missing AI tool(s)? [y/N]" "without gum a plain yes/no is asked"
 fi
 
 # ===========================================================================
@@ -262,22 +262,23 @@ assert_file_contains "$CALLS" "raw prompt" "raw prompt passed"
 rm -f "$HOME/.local/bin/dot-ai-log"
 
 test_start "bridge_not_installed_arms"
-rc="$(GUM_CONFIRM_RC=0 ai copilot "x")"
-assert_equals "0" "$rc" "gum-confirmed install proceeds"
+# Consent: DOTFILES_YES=1 (or --yes) installs unattended; with no terminal
+# to ask and no yes, nothing installs and the install command is printed.
+rc="$(DOTFILES_YES=1 ai copilot "x")"
+assert_equals "0" "$rc" "consented install proceeds"
 assert_file_contains "$OUT" "Installing" "install announced"
-rc="$(GUM_CONFIRM_RC=0 MISE_RC=1 ai copilot "x")"
+rc="$(DOTFILES_YES=1 MISE_RC=1 ai copilot "x")"
 assert_equals "1" "$rc" "mise failure exits 1"
-assert_file_contains "$OUT" "installation failed" "mise failure reported"
-rc="$(GUM_CONFIRM_RC=1 ai copilot "x")"
-assert_equals "1" "$rc" "declined install exits 1"
-assert_file_contains "$OUT" "install with: mise use -g npm:copilot@latest" "hint"
+assert_file_contains "$OUT" "install failed" "mise failure reported"
+rc="$(GUM_CONFIRM_RC=0 ai copilot "x")"
+assert_equals "1" "$rc" "no terminal and no --yes: nothing installs, even with gum"
+assert_file_contains "$OUT" "dot ai install copilot" "hint"
 rc=0
 printf 'y\n' | PATH="$NOGUM_PATH" "$REAL_BASH" "$AI" sgpt "x" >"$OUT" 2>&1 || rc=$?
-assert_equals "0" "$rc" "typed yes installs"
-assert_file_contains "$OUT" "[y/N]" "plain prompt shown"
+assert_equals "1" "$rc" "piped input is not a terminal: no install"
 rc="$(PATH="$NOGUM_PATH" ai kiro "x")"
 assert_equals "1" "$rc" "EOF means no"
-assert_file_contains "$OUT" "npm:kiro-cli" "kiro maps to kiro-cli"
+assert_file_contains "$OUT" "dot ai install kiro-cli" "kiro maps to kiro-cli"
 rc="$(ai agy "x")"
 assert_equals "1" "$rc" "agy not installed"
 assert_file_contains "$OUT" "dot ai install agy" "agy hint"
@@ -286,7 +287,10 @@ assert_equals "1" "$rc" "kimi not installed"
 assert_file_contains "$OUT" "restart your shell" "kimi PATH hint"
 rc="$(PATH="$NOMISE_PATH" ai zai "x")"
 assert_equals "1" "$rc" "no mise"
-assert_file_contains "$OUT" "mise not available" "no-mise error"
+assert_file_contains "$OUT" "dot ai install zai" "no-mise hint"
+rc="$(PATH="$NOMISE_PATH" DOTFILES_YES=1 ai zai "x")"
+assert_equals "1" "$rc" "no mise and no way to get it: consent cannot help"
+assert_file_contains "$OUT" "mise" "the missing prerequisite is named"
 
 test_start "dispatcher"
 rc="$(ai --help)"
