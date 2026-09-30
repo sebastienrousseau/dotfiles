@@ -17,6 +17,11 @@ VERSION_PATTERN='[0-9]+\.[0-9]+\.[0-9]+'
 SED_VERSION_PATTERN='[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*'
 BACKUP_DIR="$PROJECT_ROOT/.version-sync-backup"
 EXCLUDE_FILES=(
+  # Deployed into $HOME, with other projects' versions on purpose: the ~/Code
+  # standards quote v0.0.1, v0.0.45 and a GitHub release tag, and the sync
+  # once stamped v0.2.530 over all of them.
+  "defaults/Code/*"
+
   # Historical / referential docs — version refs inside are intentional
   # pointers at prior versions, not "this is the current version" claims.
   "CHANGELOG.md"
@@ -147,26 +152,11 @@ DESCRIPTION:
 EOF
 }
 
-# Directories deployed into $HOME whose version strings belong to other
-# projects: the ~/Code workspace standards quote v0.0.1, v0.0.45 and a
-# GitHub release tag on purpose, and the sync once stamped v0.2.530 over
-# all of them.
-EXCLUDE_DIRS=(
-  "defaults/Code/"
-)
-
 is_excluded_file() {
-  local file="$1"
-  local excluded
+  local file="$1" excluded
   for excluded in "${EXCLUDE_FILES[@]}"; do
-    if [[ "$file" == "$excluded" ]]; then
-      return 0
-    fi
-  done
-  for excluded in "${EXCLUDE_DIRS[@]}"; do
-    if [[ "$file" == "$excluded"* ]]; then
-      return 0
-    fi
+    # shellcheck disable=SC2053  # an entry may be a glob (defaults/Code/*)
+    [[ "$file" == $excluded ]] && return 0
   done
   return 1
 }

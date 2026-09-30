@@ -62,6 +62,10 @@
     "**/*.lock",
     "**/target/**",
     "docs/.vitepress/reports/**",
-    "docs/COPYRIGHT"
+    "docs/COPYRIGHT",
+    // The ~/Code workspace standards, deployed into $HOME: their style is
+    // theirs (a PR template's `*` bullets, a quoted "This PR " prefix,
+    // {{PLACEHOLDER}} anchors), as for their relative links in lychee.toml.
+    "defaults/Code/**"
   ]
 }
