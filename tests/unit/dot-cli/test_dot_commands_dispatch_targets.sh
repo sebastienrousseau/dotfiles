@@ -184,7 +184,7 @@ test_start "security_reports_a_missing_target_script"
 # resolver at a tree that has neither.
 EMPTY_TREE="$WORK/empty-tree/lib/dot"
 mkdir -p "$EMPTY_TREE"
-for lib in ui.sh utils.sh platform.sh ai-install.sh log.sh verified-download.sh; do
+for lib in ui.sh utils.sh platform.sh ai-install.sh preflight.sh upgrade.sh ai-provision.sh log.sh verified-download.sh; do
   ln -sf "$REPO_ROOT/lib/dot/$lib" "$EMPTY_TREE/$lib"
 done
 mkdir -p "$WORK/empty-tree/scripts/dot/commands"
