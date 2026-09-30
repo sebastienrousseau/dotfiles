@@ -50,7 +50,13 @@ _va_mkrepo() {
     git -C "$1" -c core.attributesFile=/dev/null -c user.name=t -c user.email=t@t \
       -c commit.gpgsign=false commit -q -m crlf
 }
-_va_dirty() { git -C "$1" status --porcelain -- spec.lua; }
+# Back-date the file so its stat no longer matches the index: git then
+# re-reads the content through the attributes instead of trusting a
+# stat-clean entry, which only happens by chance within the racy window.
+_va_dirty() {
+  touch -t 200001010000 "$1/spec.lua"
+  git -C "$1" status --porcelain -- spec.lua
+}
 
 _va_plugin="$HOME/.local/share/nvim/lazy/some-plugin"
 _va_other="$HOME/src/project"
