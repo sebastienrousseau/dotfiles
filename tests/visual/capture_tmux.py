@@ -158,7 +158,10 @@ def capture(output, quick=False):
                                 run(*tmux, "refresh-client", "-S")
                                 time.sleep(.18)
                                 screen = run(*remote_cmd, "get-text", "--extent", "screen")
-                                if "DOT" not in screen or "project" not in screen:
+                                # The session badge gives way to PREFIX while the prefix key is
+                                # held (#{?client_prefix, PREFIX, #S} in tmux.conf).
+                                identity = "PREFIX" if state == "prefix" else "DOT"
+                                if identity not in screen or "project" not in screen:
                                     raise AssertionError(f"identity/location missing: {theme}/{label}/{width}/{state}: {screen[-250:]}")
                                 if "bg=#" in screen or "fg=#" in screen:
                                     raise AssertionError("unrendered tmux style escaped into text")
