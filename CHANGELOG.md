@@ -10,6 +10,21 @@ This file documents all notable changes to this project.
   https://sebastienrousseau.com/ (`rel="author"`), and the shared Lucid
   footer matches dotfiles.io's byte for byte. The feeds keep the plain
   copyright line.
+- The manual and README describe the mise and build-cache setup as it
+  is. They no longer show a `GITHUB_TOKEN` exported from mise `[env]`
+  (the config forbids that), `/tmp/builds` caches (now
+  `~/.cache/dot/builds`), a shared Cargo `target-dir` (deliberately
+  unset) or a chezmoi-managed `~/.config/mise/config.toml` (the managed
+  file is `conf.d/00-dotfiles.toml`).
+
+### Fixed
+
+- mise authenticates its own GitHub API calls through
+  `github.credential_command = "gh auth token"`. Without it, one
+  `mise install` lockfile refresh could use up the anonymous
+  60-requests-per-hour budget, and later installs and `self-update`
+  failed with 403. The token stays inside mise: `[env]` still exports
+  none, and the test that guards this now checks `[env]` specifically.
 
 ## v0.2.530 — 2026-09-29
 

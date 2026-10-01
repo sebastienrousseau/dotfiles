@@ -39,8 +39,22 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: GitHub credentials remain task-scoped"
 fi
 
+# Print the body of one top-level TOML table ([env], [settings], ...).
+toml_table() {
+  awk -v want="[$2]" '/^\[/ { on = ($0 == want); next } on' "$1"
+}
+
+# [env] values are exported to every process mise launches, so a gh token
+# must never be resolved there. [settings] is read by mise alone.
+test_start "mise_global_config_env_table_is_parsed"
+assert_output_contains 'MISE_EXPERIMENTAL' "toml_table '$global_config' env"
+
 test_start "mise_global_config_does_not_materialize_gh_token"
-assert_output_not_contains "gh auth token" "cat '$global_config'"
+assert_output_not_contains "gh auth token" "toml_table '$global_config' env"
+
+test_start "mise_global_config_authenticates_mise_in_process"
+assert_output_contains 'github.credential_command = "gh auth token"' \
+  "toml_table '$global_config' settings"
 
 for tool in node rust go bun starship wasmtime sops yazi zellij; do
   test_start "mise_lock_contains_${tool}"
