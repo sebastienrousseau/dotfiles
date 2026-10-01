@@ -96,7 +96,9 @@ Every question is asked before anything runs:
    published checksums, into `~/.local/bin`).
 2. If a system package manager is found (Homebrew, apt, dnf or pacman), it
    asks whether to upgrade system packages too. apt, dnf and pacman ask for
-   your sudo password once, up front.
+   your sudo password once, up front. Homebrew asks only when an outdated
+   cask may need it (a cask installed from a `.pkg`); with no terminal to
+   ask, it names those casks and upgrades everything else.
 
 Then it runs, as tracked steps: the Nix flake update and garbage collection
 (when a flake is present), `chezmoi update` (pull and apply the dotfiles),
