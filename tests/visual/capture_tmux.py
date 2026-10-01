@@ -156,12 +156,22 @@ def capture(output, quick=False):
                                     other_window = wait_for(lambda: run("xdotool", "search", "--onlyvisible", "--name", "^focus-target$").splitlines()[-1])
                                     wait_for(lambda: focus(other_window))
                                 run(*tmux, "refresh-client", "-S")
-                                time.sleep(.18)
-                                screen = run(*remote_cmd, "get-text", "--extent", "screen")
                                 # The session badge gives way to PREFIX while the prefix key is
                                 # held (#{?client_prefix, PREFIX, #S} in tmux.conf).
                                 identity = "PREFIX" if state == "prefix" else "DOT"
-                                if identity not in screen or "project" not in screen:
+
+                                def rendered(cmd=remote_cmd, want=identity):
+                                    text = run(*cmd, "get-text", "--extent", "screen")
+                                    return text if want in text and "project" in text else ""
+
+                                # Poll rather than sleep a fixed interval: after a zoom or a
+                                # resize, kitty can show the redrawn pane before tmux's
+                                # status line, and a slow runner then caught a screen with
+                                # no bottom bar at all.
+                                try:
+                                    screen = wait_for(rendered)
+                                except RuntimeError:
+                                    screen = run(*remote_cmd, "get-text", "--extent", "screen")
                                     raise AssertionError(f"identity/location missing: {theme}/{label}/{width}/{state}: {screen[-250:]}")
                                 if "bg=#" in screen or "fg=#" in screen:
                                     raise AssertionError("unrendered tmux style escaped into text")
