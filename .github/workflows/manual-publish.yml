@@ -96,6 +96,11 @@ jobs:
 
       - name: Install pandoc + TeX Live (for PDF)
         run: |
+          # A stalled mirror connection used to hang this step until the job's
+          # 20-minute limit (twice on main, 2026-10-01). Time out and retry
+          # instead; a normal install takes about two minutes.
+          printf '%s\n' 'Acquire::Retries "5";' 'Acquire::http::Timeout "30";' 'Acquire::https::Timeout "30";' |
+            sudo tee /etc/apt/apt.conf.d/80-retries >/dev/null
           sudo apt-get update
           # Retain downloaded .debs so the cache above stays populated.
           sudo rm -f /etc/apt/apt.conf.d/docker-clean
