@@ -186,6 +186,34 @@ lib '_dot_upgrade_system zypper || echo REFUSED'
 assert_contains "REFUSED" "$OUT" "an unknown manager is refused"
 rm -f "$STUBS/brew" "$STUBS/sudo"
 
+# A cask whose uninstall step runs sudo (a .pkg cask) fails `brew upgrade`
+# when nobody can type the password. Warn before the phases run, and name
+# what is left when it fails, instead of a bare "exited 1".
+test_start "brew_casks_needing_sudo_are_named_up_front"
+stub brew 'case "$*" in "outdated --cask --quiet") echo draft ;; esac'
+stub sudo 'exit 1'
+YES=1 lib 'dot_upgrade_prepare; echo "rc=$? system=[$DOT_UPGRADE_SYSTEM]"'
+assert_contains "rc=0 system=[brew]" "$OUT" "brew formulae still upgrade unattended"
+assert_contains "draft" "$OUT" "the outdated cask is named before the phases run"
+assert_contains "sudo" "$OUT" "and the reason is given"
+
+test_start "brew_casks_without_updates_need_no_warning"
+stub brew
+YES=1 lib 'dot_upgrade_prepare; echo "system=[$DOT_UPGRADE_SYSTEM]"'
+assert_contains "system=[brew]" "$OUT" "brew is included"
+assert_equals "0" "$(grep -c sudo <<<"$OUT")" "no outdated casks, no sudo warning"
+
+test_start "brew_upgrade_failure_names_the_casks_left"
+stub brew 'case "$*" in upgrade) exit 1 ;; "outdated --cask --quiet") echo draft ;; esac'
+lib '_dot_upgrade_system brew; echo "rc=$?"'
+assert_contains "rc=1" "$OUT" "the failure is still a failure"
+assert_contains "draft" "$OUT" "the cask still outdated is named"
+assert_contains "brew upgrade --cask draft" "$OUT" "with the command that finishes it"
+stub brew 'case "$*" in upgrade) exit 1 ;; esac'
+lib '_dot_upgrade_system brew; echo "rc=$?"'
+assert_contains "rc=1" "$OUT" "a formula failure with no casks left is still a failure"
+rm -f "$STUBS/brew" "$STUBS/sudo"
+
 test_start "mise_phase_upgrades_from_home"
 stub mise
 lib '_dot_upgrade_mise; pwd'

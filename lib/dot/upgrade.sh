@@ -44,11 +44,37 @@ _dot_upgrade_consent_system() {
   DOT_UPGRADE_SYSTEM=""
   pm="$(dot_upgrade_system_pm)" || return 0
   dot_consent "Also upgrade system packages ($pm)?" || return 0
-  if [[ "$pm" != "brew" ]] && ! _dot_upgrade_sudo_ready; then
+  if [[ "$pm" == "brew" ]]; then
+    _dot_upgrade_brew_sudo
+  elif ! _dot_upgrade_sudo_ready; then
     ui_warn "System packages" "skipped — sudo is needed and could not be confirmed"
     return 0
   fi
   DOT_UPGRADE_SYSTEM="$pm"
+}
+
+# _dot_upgrade_brew_sudo: formulae never need sudo, but a cask whose upgrade
+# removes a .pkg install runs sudo, and with nobody to type the password
+# `brew upgrade` fails. With outdated casks, cache sudo now while there is
+# a terminal, or name the casks that may fail when there is none.
+_dot_upgrade_brew_sudo() {
+  local casks
+  casks="$(brew outdated --cask --quiet 2>/dev/null | tr '\n' ' ')"
+  casks="${casks% }"
+  [[ -n "$casks" ]] || return 0
+  _dot_upgrade_sudo_ready && return 0
+  ui_warn "Casks" "$casks may need sudo — run dot upgrade in a terminal to upgrade them"
+}
+
+# _dot_upgrade_brew_left: after a failed `brew upgrade`, name the casks still
+# outdated (a cask that needed sudo is the usual cause) and how to finish.
+_dot_upgrade_brew_left() {
+  local casks
+  casks="$(brew outdated --cask --quiet 2>/dev/null | tr '\n' ' ')"
+  casks="${casks% }"
+  [[ -n "$casks" ]] || return 1
+  printf 'Still outdated: %s. A cask upgrade can need sudo; run: brew upgrade --cask %s\n' "$casks" "$casks" >&2
+  return 1
 }
 
 # dot_upgrade_prepare <args...>: every question `dot upgrade` will ask,
@@ -77,7 +103,7 @@ _dot_upgrade_mise() (
 # _dot_upgrade_system <pm>: the consented system-package upgrade.
 _dot_upgrade_system() {
   case "$1" in
-    brew) brew update && brew upgrade ;;
+    brew) brew update && { brew upgrade || _dot_upgrade_brew_left; } ;;
     apt-get) sudo -n apt-get update && sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y upgrade ;;
     dnf) sudo -n dnf -y upgrade ;;
     pacman) sudo -n pacman -Syu --noconfirm ;;
