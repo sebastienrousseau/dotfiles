@@ -148,17 +148,17 @@ else
   parse_roster "$roster"
   assert_equals "0" "$bad" "every roster key parses with ssh-keygen ($entries entries)"
   assert_contains "action@github.com ssh-ed25519" "$principals" "the Actions bot signer is trusted"
-  assert_contains "sebastian.rousseau@gmail.com ssh-ed25519" "$principals" "the maintainer signer is trusted"
+  assert_contains "sebastienrousseau@users.noreply.github.com ssh-ed25519" "$principals" "the maintainer signer is trusted"
 
   test_start "allowed_signers_adds_maintainer_keys_for_the_maintainer"
   owner_roster="$WORK/allowed_signers.owner"
   render "$REPO_ROOT/defaults/dot_config/git/allowed_signers.tmpl" "$owner_roster" \
-    '{"git_email":"sebastian.rousseau@gmail.com"}'
+    '{"git_email":"sebastienrousseau@users.noreply.github.com"}'
   assert_equals "0" "$?" "allowed_signers.tmpl renders for the maintainer"
   parse_roster "$owner_roster"
   assert_equals "0" "$bad" "every maintainer roster key parses with ssh-keygen ($entries entries)"
-  owner_keys="$(awk '$1 == "sebastian.rousseau@gmail.com"' "$owner_roster" | wc -l | tr -d ' ')"
-  other_keys="$(awk '$1 == "sebastian.rousseau@gmail.com"' "$roster" | wc -l | tr -d ' ')"
+  owner_keys="$(awk '$1 == "sebastienrousseau@users.noreply.github.com"' "$owner_roster" | wc -l | tr -d ' ')"
+  other_keys="$(awk '$1 == "sebastienrousseau@users.noreply.github.com"' "$roster" | wc -l | tr -d ' ')"
   if ((owner_keys > other_keys)); then
     pass "the maintainer's hardware and device keys are added only on the maintainer's machine ($other_keys -> $owner_keys)"
   else

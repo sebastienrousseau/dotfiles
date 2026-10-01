@@ -3,10 +3,11 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091
 # Regression: allowed_signers listed the owner's signing keys only when
-# git_email was the gmail address, so switching to the GitHub noreply
+# git_email was the personal address, so switching to the GitHub noreply
 # address dropped them and every own commit verified as U, not G.
 # Regression for: GH-1215
-# Why: the commit email is a privacy choice; it must not break verification.
+# Why: the owner commits as the noreply address; the roster must follow it
+# and must not publish the personal address.
 
 set -uo pipefail
 
@@ -44,15 +45,13 @@ _as_base="$(_as_keys you@example.com)"
 test_start "signers_other_user_gets_the_base_roster"
 assert_not_equals "0" "$_as_base" "another user's roster still has the always-on entries"
 
-test_start "signers_gmail_adds_owner_keys"
-_as_n="$(_as_keys sebastian.rousseau@gmail.com)"
-assert_equals "true" "$([[ $_as_n -gt $_as_base ]] && echo true || echo false)" \
-  "gmail git_email adds the owner keys ($_as_base -> $_as_n)"
-
 test_start "signers_noreply_adds_owner_keys"
 _as_n="$(_as_keys sebastienrousseau@users.noreply.github.com)"
 assert_equals "true" "$([[ $_as_n -gt $_as_base ]] && echo true || echo false)" \
   "GitHub noreply git_email adds the owner keys ($_as_base -> $_as_n)"
+
+test_start "signers_render_has_no_personal_address"
+assert_output_not_contains "gmail" _as_render sebastienrousseau@users.noreply.github.com
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
