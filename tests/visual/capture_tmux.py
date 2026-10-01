@@ -172,7 +172,10 @@ def capture(output, quick=False):
                                     screen = wait_for(rendered)
                                 except RuntimeError:
                                     screen = run(*remote_cmd, "get-text", "--extent", "screen")
-                                    raise AssertionError(f"identity/location missing: {theme}/{label}/{width}/{state}: {screen[-250:]}")
+                                    prefix = run(*tmux, "list-clients", "-F", "#{client_prefix}")
+                                    top = (screen.splitlines() or [""])[0]
+                                    raise AssertionError(f"identity/location missing: {theme}/{label}/{width}/{state}: "
+                                                         f"prefix={prefix} top={top!r} bottom={screen[-250:]}")
                                 if "bg=#" in screen or "fg=#" in screen:
                                     raise AssertionError("unrendered tmux style escaped into text")
                                 filename = f"{theme}-{label}-{width}-{state}.png"
@@ -187,6 +190,9 @@ def capture(output, quick=False):
                                                 "status_text": screen.splitlines()[-1]})
                                 if state == "prefix":
                                     run(*remote_cmd, "send-text", "\\x1b")
+                                    # tmux holds a lone ESC for escape-time (500ms) before it
+                                    # leaves the prefix table; capturing sooner shows PREFIX.
+                                    wait_for(lambda: run(*tmux, "list-clients", "-F", "#{client_prefix}") == "0")
                                 if state == "zoom":
                                     run(*tmux, "resize-pane", "-Z", "-t", "DOT")
                                 if other:
