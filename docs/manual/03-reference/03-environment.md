@@ -16,6 +16,7 @@ Variables you can set in your shell to change behaviour.
 | `DOTFILES_NONINTERACTIVE` | unset | Skip interactive prompts (for CI) |
 | `DOTFILES_YES` | unset | `1` answers yes to `dot upgrade` and `dot ai install` questions (installing mise, AI tools, upgrading system packages); same as `--yes`. Without it and without a terminal, those commands install nothing extra |
 | `DOTFILES_SILENT` | unset | Suppress non-error output |
+| `DOTFILES_PACKAGES_TIMEOUT` | `10` | Seconds each `dot packages` query may take before it is reported as `timed out` |
 | `DOTFILES_DEBUG` | unset | Print shell-init timing to stderr |
 | `DOTFILES_SOURCE_DIR` | `~/.dotfiles` | Override the source directory |
 | `DOTFILES_WALLPAPER_DIR` | `~/Pictures/Wallpapers` | Custom wallpaper directory |
