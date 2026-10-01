@@ -10,6 +10,16 @@ label="com.sebastienrousseau.dot-theme-auto"
 domain="gui/$(id -u)"
 plist="$HOME/Library/LaunchAgents/${label}.plist"
 
+# The GUI domain is per user, not per $HOME: an apply into a sandbox HOME
+# (demo, test) would replace the real agent with one watching the sandbox's
+# preference file, and appearance changes would stop reaching dot.
+account_home="$(dscl . -read "/Users/$(id -un)" NFSHomeDirectory 2>/dev/null | sed -n 's/^NFSHomeDirectory: //p')"
+if [[ -z "$account_home" || ! "$HOME" -ef "$account_home" ]]; then
+  printf 'note: skipping %s: HOME (%s) is not the account home (%s)\n' \
+    "$label" "$HOME" "${account_home:-unknown}" >&2
+  exit 0
+fi
+
 mkdir -p "$HOME/Library/Logs"
 launchctl bootout "$domain" "$plist" >/dev/null 2>&1 || true
 if launchctl bootstrap "$domain" "$plist"; then
