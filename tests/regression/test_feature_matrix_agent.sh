@@ -277,9 +277,9 @@ test_fm_mcp_serve() {
   fm_run mcp serve
   # Host-dependent: rc 0 when a dot-mcp binary is on PATH or Go can build
   # one (clean shutdown at stdin EOF), rc 1 when neither exists ("not
-  # built"). The sandbox cannot control either, so both are accepted and
-  # the message that goes with each is required below.
-  fm_expect_rc_in 0 1
+  # built"). The sandbox cannot control which, so the exit is checked
+  # against the message: "not built" must exit 1, a clean shutdown 0.
+  if [[ "$FM_OUT$FM_ERR" == *"dot-mcp is not built"* ]]; then fm_expect_rc 1; else fm_expect_rc 0; fi
   test_start "fm_mcp_serve_says_why_it_stopped"
   fm_expect_any "stdin closed, shutting down" "dot-mcp is not built"
   test_start "fm_mcp_serve_stdout_carries_frames_only"

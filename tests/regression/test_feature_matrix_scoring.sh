@@ -49,7 +49,8 @@ test_fm_security_score() {
 test_fm_security_score_json() {
   test_start "fm_security_score_json"
   fm_run security-score -j
-  fm_expect_rc_in 0 1
+  # --json reports its verdict in the document and exits 0 once written.
+  fm_expect_rc 0
   test_start "fm_security_score_json_is_json"
   fm_expect_json
   test_start "fm_security_score_json_has_grade"
@@ -94,7 +95,8 @@ test_fm_score() {
 test_fm_score_json() {
   test_start "fm_score_json"
   fm_run score --json
-  fm_expect_rc_in 0 1
+  # --json reports its verdict in the document and exits 0 once written.
+  fm_expect_rc 0
   test_start "fm_score_json_is_json"
   fm_expect_json
   test_start "fm_score_json_has_health"
@@ -104,7 +106,8 @@ test_fm_score_json() {
 test_fm_scorecard() {
   test_start "fm_scorecard"
   fm_run scorecard --json
-  fm_expect_rc_in 0 1
+  # --json reports its verdict in the document and exits 0 once written.
+  fm_expect_rc 0
   test_start "fm_scorecard_is_alias_of_score"
   fm_expect_out '"health"'
 }
@@ -112,7 +115,8 @@ test_fm_scorecard() {
 test_fm_perf_json() {
   test_start "fm_perf_json"
   fm_run perf -j -r 1
-  fm_expect_rc_in 0 1
+  # --json reports its verdict in the document and exits 0 once written.
+  fm_expect_rc 0
   test_start "fm_perf_json_is_json"
   fm_expect_json
   test_start "fm_perf_json_has_shells"
@@ -124,7 +128,8 @@ test_fm_perf_profile() {
   # the cheapest way to prove the flag is parsed rather than ignored.
   test_start "fm_perf_profile"
   fm_run perf -j -r 1 -t 999
-  fm_expect_rc_in 0 1
+  # --json reports its verdict in the document and exits 0 once written.
+  fm_expect_rc 0
   test_start "fm_perf_profile_honours_target"
   fm_expect_out '"target_ms": 999'
 }
