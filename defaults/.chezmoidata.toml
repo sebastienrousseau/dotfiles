@@ -1,5 +1,5 @@
 # Active profile - change this to switch configurations
-dotfiles_version = "0.2.530"
+dotfiles_version = "0.2.531"
 previous_dotfiles_version = "0.2.529"
 profile = "laptop"
 

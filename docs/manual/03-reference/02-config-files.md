@@ -34,7 +34,7 @@ Every config file read or written by `.dotfiles`, with its schema and purpose.
 
 ```toml
 # Version — bumped by version-sync.sh at release time
-dotfiles_version = "0.2.530"
+dotfiles_version = "0.2.531"
 
 # Machine preset — override in ~/.config/chezmoi/chezmoi.toml per host
 machine = ""
@@ -230,7 +230,7 @@ Agent Card (MCP A2A spec):
 ```json
 {
   "name": "dotfiles-agent",
-  "version": "0.2.530",
+  "version": "0.2.531",
   "capabilities": ["chezmoi.apply", "theme.switch", "secrets.decrypt"],
   "policy_hash": "0x7f2a..."
 }
