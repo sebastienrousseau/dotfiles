@@ -658,10 +658,11 @@ _health_main() {
   export DOT_COMMAND="health"
   print_header
   run_checks
-  if $APPLY_FIX; then
-    _health_fix
-  fi
+  ! $APPLY_FIX || _health_fix
   print_summary
+  # Exit 1 when any check failed (warnings alone stay 0), as `dot doctor`
+  # does, so a script or CI job can act on the result without parsing it.
+  ((FAILURES == 0)) || exit 1
 }
 
 _health_main

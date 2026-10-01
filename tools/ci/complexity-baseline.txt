@@ -115,9 +115,9 @@
   15   17   31.0   60     0 scripts/diagnostics/benchmark.sh::render_waterfall
   15   36   31.8   74     0 scripts/diagnostics/benchmark.sh::run_hyperfine
   12    6   13.7   27    27 scripts/diagnostics/doctor-unified.sh::<top>
-   4    4   14.4   20   537 scripts/diagnostics/health.sh::<top>
+   4    4   14.4   20   536 scripts/diagnostics/health.sh::<top>
    5    5   17.0   65    65 scripts/diagnostics/history-analysis.sh::<top>
-  16   18   41.4   86    89 scripts/diagnostics/scorecard.sh::<top>
+  16   18   37.3   86    92 scripts/diagnostics/scorecard.sh::<top>
   17   19   27.8   40    46 scripts/diagnostics/secret-governance.sh::<top>
   14   18   28.5   38     0 scripts/diagnostics/security-score.sh::check_encryption
   22   32   40.2   53     0 scripts/diagnostics/security-score.sh::check_system

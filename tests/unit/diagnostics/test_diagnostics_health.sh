@@ -66,10 +66,14 @@ long="$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))["res
 assert_equals "True|True" "$short|$long" "-j and --json both emit a JSON report with results"
 
 test_start "health_verbose_flags"
+# The sandbox has failing checks, so health exits 1; the flags must not
+# change that or skip the report.
+health "$HL/h-v" --
+base_rc="$H_RC"
 health "$HL/h-v" -- -v
 v1="$H_RC:$(grep -c Summary "$HL/out")"
 health "$HL/h-v" -- --verbose
-assert_equals "0:1|0:1" "$v1|$H_RC:$(grep -c Summary "$HL/out")" "-v and --verbose run the full report"
+assert_equals "$base_rc:1|$base_rc:1" "$v1|$H_RC:$(grep -c Summary "$HL/out")" "-v and --verbose run the full report with the same exit as no flag"
 
 stub zsh
 test_start "health_active_shell_supported"

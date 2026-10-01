@@ -148,8 +148,18 @@ test_fm_doctor_audit() {
   # the health dashboard — the audit-shaped diagnostic the name meant.
   test_start "fm_doctor_audit"
   fm_run doctor --audit
-  # health.sh reports failures in its summary, never through its exit code.
-  fm_expect_rc 0
+  # health.sh exits 1 when any check fails and 0 otherwise; the sandbox's
+  # failures depend on the host's tools, so check the exit code against the
+  # failure count the summary prints.
+  local failures
+  failures="$(printf '%s\n' "$FM_OUT" | sed -n 's/.*Failures:[^0-9]*\([0-9][0-9]*\).*/\1/p' | tail -1)"
+  if [[ -z "$failures" ]]; then
+    fm_fail "the summary has no Failures count"
+  elif [[ "$failures" -gt 0 ]]; then
+    fm_expect_rc 1
+  else
+    fm_expect_rc 0
+  fi
   test_start "fm_doctor_audit_is_routed"
   fm_expect_out "Dotfiles Health Dashboard"
   test_start "fm_doctor_audit_target_exists"
