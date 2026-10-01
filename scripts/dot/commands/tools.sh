@@ -128,90 +128,6 @@ EOF
   esac
 }
 
-show_system_package_managers() {
-  if has_command brew; then
-    local brew_version brew_formulae brew_casks
-    brew_version=$(brew --version | head -1)
-    brew_formulae=$(brew list --formula 2>/dev/null | wc -l | tr -d ' ')
-    brew_casks=$(brew list --cask 2>/dev/null | wc -l | tr -d ' ')
-    echo "  Homebrew: $brew_version"
-    echo "    Formulae: $brew_formulae"
-    echo "    Casks: $brew_casks"
-  fi
-  if has_command apt; then
-    local apt_version apt_packages
-    apt_version=$(apt --version 2>/dev/null | head -1 || echo 'installed')
-    apt_packages=$(dpkg -l 2>/dev/null | grep -c '^ii' || echo 'N/A')
-    echo "  APT: $apt_version"
-    echo "    Packages: $apt_packages"
-  fi
-  if has_command dnf; then
-    echo "  DNF: $(dnf --version 2>/dev/null | head -1 || echo 'installed')"
-  fi
-  if has_command pacman; then
-    local pacman_packages
-    pacman_packages=$(pacman -Q 2>/dev/null | wc -l | tr -d ' ')
-    echo "  Pacman: $(pacman --version | head -1)"
-    echo "    Packages: $pacman_packages"
-  fi
-  if has_command nix; then
-    echo "  Nix: $(nix --version)"
-  fi
-}
-
-show_language_package_managers() {
-  if has_command npm; then
-    local npm_globals
-    npm_globals=$(npm list -g --depth=0 2>/dev/null | grep -c '├──\|└──' || echo 'N/A')
-    echo "  npm: $(npm --version)"
-    echo "    Global packages: $npm_globals"
-  fi
-  if has_command pnpm; then
-    echo "  pnpm: $(pnpm --version)"
-  fi
-  if has_command bun; then
-    echo "  Bun: $(bun --version)"
-  fi
-  if has_command cargo; then
-    local cargo_installed
-    cargo_installed=$(cargo install --list 2>/dev/null | grep -c ':$' || echo 'N/A')
-    echo "  Cargo: $(cargo --version | cut -d' ' -f2)"
-    echo "    Installed: $cargo_installed"
-  fi
-  if has_command pip3; then
-    echo "  pip: $(pip3 --version | cut -d' ' -f2)"
-  fi
-  if has_command pipx; then
-    local pipx_installed pipx_list_out
-    # `pipx list --short` returns non-zero when any installed package
-    # has a broken interpreter (common). Under `set -euo pipefail` a
-    # naive `local x=$(pipx …)` cascades and kills `dot packages`
-    # mid-output. Capture the pipeline separately so we can fall back
-    # cleanly without stray "N/A" lines from pipe-with-|| tricks.
-    if pipx_list_out="$(pipx list --short 2>/dev/null)"; then
-      # Command substitution strips the trailing newline, so counting
-      # with `printf '%s' … | wc -l` reported one package fewer than
-      # installed (and 0 when exactly one was installed). Re-add the
-      # terminator, and treat "no output" as zero rather than one.
-      if [[ -n "$pipx_list_out" ]]; then
-        pipx_installed="$(printf '%s\n' "$pipx_list_out" | wc -l | tr -d ' ')"
-      else
-        pipx_installed=0
-      fi
-    else
-      pipx_installed="N/A"
-    fi
-    echo "  pipx: $(pipx --version)"
-    echo "    Installed: $pipx_installed"
-  fi
-  if has_command gem; then
-    echo "  RubyGems: $(gem --version)"
-  fi
-  if has_command go; then
-    echo "  Go: $(go version | cut -d' ' -f3)"
-  fi
-}
-
 cmd_setup() {
   run_script "scripts/ops/setup.sh" "Setup script" "$@"
 }
@@ -352,6 +268,8 @@ PY
 }
 
 cmd_packages() {
+  # shellcheck source-path=SCRIPTDIR source=tools/packages.sh
+  source "$_TOOLS_DIR/tools/packages.sh"
   ui_header "Package Managers"
   echo ""
   show_system_package_managers

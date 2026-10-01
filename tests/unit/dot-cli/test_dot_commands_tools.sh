@@ -298,4 +298,76 @@ assert_file_contains "$_docs_out" "TOOLS.md not found" "the missing document is 
 # Slice 3 (#883): exercise the script under sandbox for line coverage
 cov_exercise_script "$TOOLS_FILE"
 
+# Each present manager prints its exact line; the helpers' edge cases hold.
+test_start "packages_lines_and_probe_edge_cases"
+pk_tmp="$(mktemp -d)"
+mkdir -p "$pk_tmp/bin" "$pk_tmp/home"
+for m in pnpm bun; do printf '#!/usr/bin/env bash\necho 9.9.9\n' >"$pk_tmp/bin/$m"; done
+printf '#!/usr/bin/env bash\necho "pip 8.8.8 from /x"\n' >"$pk_tmp/bin/pip3"
+printf '#!/usr/bin/env bash\necho "go version go7.7.7 linux/amd64"\n' >"$pk_tmp/bin/go"
+printf '#!/usr/bin/env bash\necho one; echo two; exit 3\n' >"$pk_tmp/bin/fails-with-output"
+printf '#!/usr/bin/env bash\nexit 3\n' >"$pk_tmp/bin/fails-silently"
+printf '#!/usr/bin/env bash\nexit 0\n' >"$pk_tmp/bin/says-nothing"
+printf '#!/usr/bin/env bash\necho late; sleep 30\n' >"$pk_tmp/bin/never-ends"
+chmod +x "$pk_tmp/bin/"*
+pk_out="$(
+  run_with_timeout 30 env PATH="$pk_tmp/bin:/usr/bin:/bin" HOME="$pk_tmp/home" bash -c '
+    f="$1"; set -- tools; source "$f"
+    source "${f%/*}/tools/packages.sh"
+    show_language_package_managers
+    echo "count-fail-out=[$(_pkg_count . fails-with-output)]"
+    echo "count-fail-silent=[$(_pkg_count . fails-silently)]"
+    echo "count-ok=[$(_pkg_count . pnpm)]"
+    echo "word-empty=[$(_pkg_word 0 says-nothing)]"
+    echo "word-field=[$(_pkg_word 2 pip3)]"
+    echo "word-timeout=[$(DOTFILES_PACKAGES_TIMEOUT=1 _pkg_word 0 never-ends)]"
+  ' _ "$TOOLS_FILE" 2>&1
+)"
+assert_contains "  pnpm: 9.9.9" "$pk_out" "pnpm line"
+assert_contains "  Bun: 9.9.9" "$pk_out" "Bun line"
+assert_contains "  pip: 8.8.8" "$pk_out" "pip line takes the version field"
+assert_contains "  Go: go7.7.7" "$pk_out" "Go line takes the version field"
+assert_contains "count-fail-out=[2]" "$pk_out" "a failing command's output still counts"
+assert_contains "count-fail-silent=[N/A]" "$pk_out" "a silent failure reads N/A"
+assert_contains "count-ok=[1]" "$pk_out" "a successful command is counted"
+assert_contains "word-empty=[installed]" "$pk_out" "no output reads installed"
+assert_contains "word-field=[8.8.8]" "$pk_out" "field selection"
+assert_contains "word-timeout=[timed out]" "$pk_out" "a version probe past its limit reads timed out"
+rm -rf "$pk_tmp"
+
+# A package manager that never answers must not hang `dot packages`. The
+# stuck cargo leaves a grandchild holding stdout, as rustup's proxy does, so
+# only killing the whole process group lets the $( ) capture return.
+test_start "packages_bounds_a_stuck_package_manager"
+stuck_tmp="$(mktemp -d)"
+mkdir -p "$stuck_tmp/bin" "$stuck_tmp/home"
+cat >"$stuck_tmp/bin/cargo" <<'SHIM'
+#!/usr/bin/env bash
+case "${1:-}" in
+  install) sleep 60 & wait ;;
+  --version) echo "cargo 9.9.9" ;;
+esac
+SHIM
+cat >"$stuck_tmp/bin/npm" <<'SHIM'
+#!/usr/bin/env bash
+case "${1:-}" in
+  --version) echo "9.9.9" ;;
+  list) echo "├── one" ;;
+esac
+SHIM
+chmod +x "$stuck_tmp/bin/"*
+stuck_start=$SECONDS
+stuck_out="$(
+  run_with_timeout 30 env PATH="$stuck_tmp/bin:/usr/bin:/bin" HOME="$stuck_tmp/home" \
+    DOTFILES_PACKAGES_TIMEOUT=2 bash -c 'f="$1"; set -- tools; source "$f"; cmd_packages' _ "$TOOLS_FILE" 2>&1
+)"
+stuck_rc=$?
+stuck_elapsed=$((SECONDS - stuck_start))
+assert_equals "0" "$stuck_rc" "dot packages finishes with a stuck package manager (took ${stuck_elapsed}s)"
+assert_equals "true" "$([[ $stuck_elapsed -lt 15 ]] && echo true || echo false)" \
+  "the stuck probe is cut off at its limit, not the 60s it would take (${stuck_elapsed}s)"
+assert_contains "Installed: timed out" "$stuck_out" "the stuck cargo count is reported as timed out"
+assert_contains "npm: 9.9.9" "$stuck_out" "the other package managers are still reported"
+rm -rf "$stuck_tmp"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

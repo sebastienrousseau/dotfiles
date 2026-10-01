@@ -464,6 +464,10 @@ dot packages
 dot packages --manager mise|nix|brew|apt
 ```
 
+Each query has a time limit (`DOTFILES_PACKAGES_TIMEOUT`, 10 seconds by
+default). A package manager that does not answer in time shows `timed out`
+and the rest are still listed.
+
 ## Environment Variables
 
 | Variable | Purpose |
