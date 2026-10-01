@@ -7,7 +7,7 @@
 FROM gcr.io/oss-fuzz-base/base-builder-go
 
 # Maintainer (per OSS-Fuzz convention).
-LABEL maintainer="Sebastien Rousseau <sebastian.rousseau@gmail.com>"
+LABEL maintainer="Sebastien Rousseau <sebastienrousseau@users.noreply.github.com>"
 
 # Clone the project repo. OSS-Fuzz builders run `git clone <url> $SRC/<repo>`
 # during the seed phase; ARG SRC defaults to /src.

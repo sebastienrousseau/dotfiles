@@ -7,7 +7,7 @@ description: |
   active agent profile (`ask` / `plan` / `apply` / `audit`) so it
   defaults to dry-run in safer modes and full apply in `apply`.
 version: 1.0.0
-maintainer: Sebastien Rousseau <sebastian.rousseau@gmail.com>
+maintainer: Sebastien Rousseau <sebastienrousseau@users.noreply.github.com>
 license: MIT
 tags: [dotfiles, chezmoi, bootstrap, provisioning, workstation, agents]
 requires:

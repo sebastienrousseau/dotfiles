@@ -10,7 +10,7 @@ description: |
   Trigger: /vibe <instruction>. Also handles /vibe-report, /vibeon,
   /vibeoff, /vibestatus, /vibe-model-pick, /vibe-model-clear.
 version: 1.0.0
-maintainer: Sebastien Rousseau <sebastian.rousseau@gmail.com>
+maintainer: Sebastien Rousseau <sebastienrousseau@users.noreply.github.com>
 license: MIT
 tags: [ai, delegation, cost-optimization, mistral, vibe, claude-code]
 upstream: https://github.com/pcx-wave/vibe-skill

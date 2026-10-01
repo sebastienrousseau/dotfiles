@@ -165,7 +165,7 @@ jobs:
 
           cd aur-pkg
           git config user.name "Sebastien Rousseau"
-          git config user.email "sebastian.rousseau@gmail.com"
+          git config user.email "sebastienrousseau@users.noreply.github.com"
 
           git add PKGBUILD .SRCINFO
           git commit -m "dot ${VERSION}"

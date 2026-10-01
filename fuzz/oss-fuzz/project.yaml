@@ -11,6 +11,9 @@
 
 homepage: "https://github.com/sebastienrousseau/dotfiles"
 language: go
+# OSS-Fuzz grants bug and dashboard access by Google account, so this is the
+# one place the maintainer's personal address stays; everything else in the
+# repository uses the GitHub noreply address.
 primary_contact: "sebastian.rousseau@gmail.com"
 auto_ccs:
   - "sebastian.rousseau@gmail.com"

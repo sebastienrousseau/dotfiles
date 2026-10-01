@@ -17,7 +17,7 @@ type: software
 authors:
   - family-names: Rousseau
     given-names: Sebastien
-    email: sebastian.rousseau@gmail.com
+    email: sebastienrousseau@users.noreply.github.com
 repository-code: "https://github.com/sebastienrousseau/dotfiles"
 url: "https://doc.dotfiles.io/"
 license:
