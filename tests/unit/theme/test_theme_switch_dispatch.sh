@@ -435,6 +435,12 @@ set_theme_to aurora-dark
 rc="$(switch current)"
 assert_equals "0" "$rc" "a listed theme reports"
 assert_file_contains "$OUT" "aurora-dark (maui, dark" "the family is read from its own table"
+# The mode, too: aurora-dusk is light, though every table before it in the
+# file says dark and its name has no -light suffix to fall back on.
+printf '\n[themes.aurora-dusk]\nfamily = "maui"\nmode = "light"\n' >>"$THEMES_FILE"
+set_theme_to aurora-dusk
+rc="$(switch current)"
+assert_file_contains "$OUT" "aurora-dusk (maui, light" "the mode is read from its own table"
 cp "$WORK/themes.toml.orig" "$THEMES_FILE"
 
 test_start "a_theme_absent_from_themes_toml_falls_back_to_suffix_stripping"

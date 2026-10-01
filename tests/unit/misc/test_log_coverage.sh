@@ -55,6 +55,9 @@ assert_contains '"metric":"size","value":3,"unit":"kb"' "$out" "last metric show
 test_start "agent_session_log_and_tail"
 out="$(lib "$WORK/fresh2" 'dot_agent_session_tail')"
 assert_contains "No agent sessions recorded yet." "$out" "empty session state"
+# Nothing recorded is not an error: `dot agent sessions` must exit 0.
+out="$(lib "$WORK/fresh3" 'dot_agent_session_tail; echo "rc=$?"')"
+assert_contains "rc=0" "$out" "an empty session log exits 0"
 lib "$S" 'dot_agent_session_log start plan ok tool=claude; dot_agent_session_log stop plan' >/dev/null
 out="$(lib "$S" 'dot_agent_session_tail 5')"
 assert_contains '"event":"start","profile":"plan","status":"ok"' "$out" "session recorded"

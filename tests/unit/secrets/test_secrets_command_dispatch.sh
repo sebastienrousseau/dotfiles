@@ -108,14 +108,14 @@ OUT="$WORK/out.txt"
 ERR="$WORK/err.txt"
 # _run <script> <args…> — shared runner. The provider is pinned to the
 # file-backed `pass` stub so nothing reaches a keychain, GPG agent or age
-# key. Stdout is captured; stderr is replayed so the coverage runner keeps
+# key; FORCE_PROVIDER="" (set but empty) leaves it to the data file's policy. Stdout is captured; stderr is replayed so the coverage runner keeps
 # its xtrace records. Echoes the exit status.
 _run() {
   local script="$1" rc=0
   shift
   PATH="$BIN:/usr/bin:/bin" \
     DOTFILES_SHOW_LOGO=0 \
-    DOTFILES_SECRETS_PROVIDER="${FORCE_PROVIDER:-pass}" \
+    DOTFILES_SECRETS_PROVIDER="${FORCE_PROVIDER-pass}" \
     DOT_SECRETS_HOME="$WORK/secrets-home" \
     DOT_SECRETS_STORE_DIR="$WORK/secrets-home/store" \
     DOT_SECRETS_INDEX_FILE="$WORK/secrets-home/index.txt" \
@@ -193,6 +193,14 @@ assert_equals "1" "$(auto_load_seen $'[secrets.policy]\nprovider = "pass"\nauto_
 assert_equals "0" "$(auto_load_seen $'[secrets.policy]\nprovider = "pass"\nauto_load = false')" "false exports 0"
 assert_equals "0" "$(auto_load_seen $'[features]\nauto_load = true\n[secrets.policy]\nprovider = "pass"\nauto_load = false\n[other]\nauto_load = true')" \
   "an auto_load outside [secrets.policy] is ignored"
+
+test_start "only_the_policy_table_sets_the_provider"
+printf '%s\n' '[features]' 'provider = "keychain"' '[secrets.policy]' 'provider = "pass"' '[other]' 'provider = "keychain"' \
+  >"$SRC/.chezmoidata.toml"
+rc="$(FORCE_PROVIDER="" secrets_fixture secrets provider)"
+assert_equals "0" "$rc" "provider exits 0"
+assert_file_contains "$OUT" "pass" "the provider comes from [secrets.policy] only"
+assert_equals "0" "$(grep -c keychain "$OUT")" "a provider key in another table is ignored"
 cp "$WORK/data.orig" "$SRC/.chezmoidata.toml"
 rm -f "$HOME/.config/chezmoi/key.txt"
 

@@ -126,15 +126,6 @@ theme_mode_preference() {
   esac
 }
 
-theme_mode() {
-  local name="${1:-}"
-  awk -v n="$name" '
-    $0 == "[themes." n "]" { found=1; next }
-    /^\[/ { found=0 }
-    found && /^mode/ { sub(/.*= *"/, ""); sub(/".*/, ""); print; exit }
-  ' "$THEMES_FILE"
-}
-
 theme_exists() {
   local name="${1:-}"
   grep -q "^\[themes\.${name}\]$" "$THEMES_FILE" 2>/dev/null
