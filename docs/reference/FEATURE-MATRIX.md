@@ -27,11 +27,11 @@ deleted without the matrix going red.
 
 | Measure | Count |
 |---------|-------|
-| Feature rows | 376 |
-| Covered by a regression test | 326 (87%) |
-| Unmeasurable, with a recorded reason + `--help` smoke test | 50 (13%) |
-| Benchmarked | 376 (100%) |
-| With a runnable example | 376 (100%) |
+| Feature rows | 379 |
+| Covered by a regression test | 331 (87%) |
+| Unmeasurable, with a recorded reason + `--help` smoke test | 48 (13%) |
+| Benchmarked | 379 (100%) |
+| With a runnable example | 379 (100%) |
 | Distinct commands covered | 103 |
 
 Every row is covered: a row is either exercised end to end against the real
@@ -114,8 +114,8 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot edit` | (honours $EDITOR) | `test_fm_edit` | `run:edit` | `examples/example-dot-core.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot edit` | EDITOR env selects the editor | `test_fm_env_editor` | `help:edit` | `examples/example-dot-core.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 | `dot commit` | (no staged changes, exit 1) | `test_fm_commit` | `run:commit` | `examples/example-dot-core.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot uninstall` | (prompts unless --force) | `test_fm_smoke_uninstall` | `help:uninstall` | `examples/example-dot-core.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — destructive — removes the managed environment from $HOME; only --help is exercised |
-| `dot uninstall` | --force | `test_fm_smoke_uninstall_force` | `help:uninstall` | `examples/example-dot-core.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — destructive — --force skips the confirmation and purges real files |
+| `dot uninstall` | (prompts unless --force; declining deletes nothing) | `test_fm_uninstall_declined` | `help:uninstall` | `examples/example-dot-core.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot uninstall` | --force (purges every managed path, keeps unmanaged files) | `test_fm_uninstall_force` | `help:uninstall` | `examples/example-dot-core.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 
 ## diagnostics.sh
 
@@ -175,7 +175,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot load-bench` | (default, runs count) | `test_fm_load_bench` | `run:load-bench` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot load-bench-pty` | (default) | `test_fm_smoke_load_bench_pty` | `help:load-bench-pty` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | **smoke** — needs the chezmoi-rendered dot-load-benchmark-pty template and a pseudo-terminal |
 | `dot chaos` | (refuses without --force) | `test_fm_chaos` | `run:chaos` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot chaos` | --force | `test_fm_smoke_chaos_force` | `help:chaos` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — deliberately deletes ~/.zshrc and terminal configs |
+| `dot chaos` | --force (deletes its three targets, plants a broken symlink, spares the rest) | `test_fm_chaos_force` | `help:chaos` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot teleport` | user@host | `test_fm_smoke_teleport` | `help:teleport` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | **smoke** — opens an SSH session to a remote host (network) |
 | `dot teleport` | (no host, exit 1) | `test_fm_teleport_usage` | `run:teleport-usage` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot bundle` | [output-dir] | `test_fm_smoke_bundle` | `help:bundle` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — archives ~/.dotfiles plus tool caches with zstd (hundreds of MB, minutes) |
@@ -552,12 +552,9 @@ hunted through the table.
 
 | Command | Variant | Why it cannot be measured in CI |
 |---------|---------|----------------------------------|
-| `dot uninstall` | (prompts unless --force) | destructive — removes the managed environment from $HOME; only --help is exercised |
-| `dot uninstall` | --force | destructive — --force skips the confirmation and purges real files |
 | `dot doctor` | --benchmark / -b | runs tests/benchmark.sh (hyperfine over every shell, minutes) — covered by benches/bench.sh |
 | `dot health` | --fix / -f, --force / -F | --fix re-applies chezmoi and rewrites shell configs in $HOME |
 | `dot load-bench-pty` | (default) | needs the chezmoi-rendered dot-load-benchmark-pty template and a pseudo-terminal |
-| `dot chaos` | --force | deliberately deletes ~/.zshrc and terminal configs |
 | `dot teleport` | user@host | opens an SSH session to a remote host (network) |
 | `dot bundle` | [output-dir] | archives ~/.dotfiles plus tool caches with zstd (hundreds of MB, minutes) |
 | `dot ai` | (default cockpit TUI) | launches the Bubble Tea cockpit / gum launcher (interactive TTY) |
