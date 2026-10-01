@@ -370,4 +370,27 @@ assert_contains "Installed: timed out" "$stuck_out" "the stuck cargo count is re
 assert_contains "npm: 9.9.9" "$stuck_out" "the other package managers are still reported"
 rm -rf "$stuck_tmp"
 
+# `dot tools install` checks every tool name before entering the Nix shell
+# and passes flags through: a name with shell metacharacters must never
+# reach nix, and a flag must not be rejected as a name.
+test_start "tools_install_validates_names_and_passes_flags"
+nix_tmp="$(mktemp -d)"
+mkdir -p "$nix_tmp/bin" "$nix_tmp/home"
+printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >>"%s/nix.calls"\n' "$nix_tmp" >"$nix_tmp/bin/nix"
+chmod +x "$nix_tmp/bin/nix"
+nix_run() {
+  env PATH="$nix_tmp/bin:$PATH" HOME="$nix_tmp/home" CHEZMOI_SOURCE_DIR="$REPO_ROOT" \
+    bash "$TOOLS_FILE" tools install "$@" >"$nix_tmp/out" 2>&1
+}
+nix_run 'bad;name'
+bad_rc=$?
+assert_not_equals "0" "$bad_rc" "an invalid tool name fails"
+assert_file_contains "$nix_tmp/out" "Invalid tool name: bad;name" "and is named"
+assert_equals "0" "$(cat "$nix_tmp/nix.calls" 2>/dev/null | wc -l | tr -d ' ')" "nix is never run for it"
+nix_run --impure node
+assert_equals "0" "$?" "a flag and a valid name are accepted"
+assert_contains "develop $REPO_ROOT/nix --impure node" "$(cat "$nix_tmp/nix.calls" 2>/dev/null)" \
+  "nix develop receives the flag and the name"
+rm -rf "$nix_tmp"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

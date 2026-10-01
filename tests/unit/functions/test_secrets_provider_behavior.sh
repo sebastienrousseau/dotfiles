@@ -181,6 +181,27 @@ assert_equals "2" "$?" "dot_secrets_get with no provider should return exit code
 # Run in a child shell with `set -euo pipefail` — this file runs with `set +e`,
 # which is exactly the condition that hides the bug.
 # ──────────────────────────────────────────────────────────────────────────────
+# A pass lookup that fails is a provider failure, not "not found": callers
+# fall back differently for the two. dot runs under pipefail, so this does.
+test_start "secrets_get_reports_a_failing_pass_as_a_provider_failure"
+mock_command "pass" "" 1
+pass_err="$( (
+  set -o pipefail
+  DOTFILES_SECRETS_PROVIDER=pass dot_secrets_get "some-key"
+) 2>&1 >/dev/null)"
+pass_rc=$?
+assert_equals "1" "$pass_rc" "the failing provider's exit code is returned"
+assert_contains "provider pass failed (rc=1)" "$pass_err" "reported as a provider failure"
+
+test_start "secrets_get_returns_a_pass_value"
+mock_command "pass" "s3cret" 0
+assert_equals "s3cret" "$( (
+  set -o pipefail
+  DOTFILES_SECRETS_PROVIDER=pass dot_secrets_get "some-key"
+) 2>/dev/null)" \
+  "the first line of pass show"
+rm -f "$MOCK_BIN_DIR/pass"
+
 test_start "secrets_set_plain_enc_reports_a_successful_write"
 _PLAIN_TMP="$(portable_mktemp_dir)"
 mkdir -p "$_PLAIN_TMP/bin"

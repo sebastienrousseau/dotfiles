@@ -110,6 +110,25 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: backup should include .backup_meta"
 fi
 
+test_start "rollback_backup_records_the_source_commit"
+# With ~/.dotfiles a git checkout, the metadata names its short commit, and
+# only that: no "unknown" left over from the fallback.
+git init -q "$SANDBOX_HOME/.dotfiles"
+git -C "$SANDBOX_HOME/.dotfiles" -c user.name=t -c user.email=t@t -c commit.gpgsign=false \
+  -c core.hooksPath=/dev/null commit -q --allow-empty -m init
+expected_commit="$(git -C "$SANDBOX_HOME/.dotfiles" rev-parse --short HEAD)"
+rm -rf "$SANDBOX_BACKUP_DIR"
+(
+  export HOME="$SANDBOX_HOME"
+  export XDG_DATA_HOME="$SANDBOX_HOME/.local/share"
+  export XDG_STATE_HOME="$SANDBOX_HOME/.local/state"
+  bash "$ROLLBACK_SCRIPT" backup --force 2>&1
+) >/dev/null 2>&1 || true
+meta="$(find "$SANDBOX_BACKUP_DIR" -name ".backup_meta" 2>/dev/null | head -1)"
+assert_equals "git_commit=$expected_commit" "$(grep '^git_commit=' "$meta" 2>/dev/null)" "the source commit is recorded"
+assert_equals "0" "$(grep -cx 'unknown' "$meta" 2>/dev/null)" "no stray fallback line"
+rm -rf "$SANDBOX_HOME/.dotfiles"
+
 # ── Dry-run mode ────────────────────────────────────────────────
 
 test_start "rollback_dryrun_no_changes"

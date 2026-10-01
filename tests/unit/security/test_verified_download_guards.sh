@@ -117,6 +117,18 @@ call download_verified_script https://example.com/other.sh "$DEST"
 assert_equals 2 "$RC" "rc"
 err_has "not checksum-pinned" "error"
 
+# The pin must be exactly 64 lowercase hex characters. A manifest entry with
+# anything in front of a hash-shaped tail is malformed, not pinned, and must
+# be refused before any fetch.
+test_start "a_pin_with_a_prefix_is_refused"
+printf 'x%s  https://example.com/prefixed.sh\n' "$GOOD_SHA" >>"$MANIFEST"
+rm -f "$DEST"
+call download_verified_script https://example.com/prefixed.sh "$DEST"
+assert_equals 2 "$RC" "rc"
+err_has "not checksum-pinned" "error"
+if [[ -e "$DEST" ]]; then _vd_fail="downloaded"; else _vd_fail=""; fi
+assert_equals "" "$_vd_fail" "nothing was fetched"
+
 test_start "a_transport_failure_removes_the_partial_file"
 printf 'partial' >"$DEST"
 CURL_RC=7 call download_verified_script https://example.com/install.sh "$DEST"

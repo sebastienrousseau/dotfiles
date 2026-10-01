@@ -425,6 +425,18 @@ else
   _fail "/bin/bash not found"
 fi
 
+test_start "a_listed_theme_takes_its_family_from_themes_toml"
+# The family comes from the theme's own [themes.<name>] table, even when it
+# differs from the name: aurora-dark belongs to maui. Suffix-stripping
+# would say "aurora", and reading another table would say "bloom".
+cp "$THEMES_FILE" "$WORK/themes.toml.orig"
+printf '\n[themes.aurora-dark]\nfamily = "maui"\nmode = "dark"\n' >>"$THEMES_FILE"
+set_theme_to aurora-dark
+rc="$(switch current)"
+assert_equals "0" "$rc" "a listed theme reports"
+assert_file_contains "$OUT" "aurora-dark (maui, dark" "the family is read from its own table"
+cp "$WORK/themes.toml.orig" "$THEMES_FILE"
+
 test_start "a_theme_absent_from_themes_toml_falls_back_to_suffix_stripping"
 # get_theme_family cannot read a family for an unlisted theme, so it strips
 # the -dark/-light suffix instead.
