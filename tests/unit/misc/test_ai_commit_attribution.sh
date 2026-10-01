@@ -32,4 +32,26 @@ env -i PATH="$PATH" HOME="$SANDBOX/home" GEMINI_SESSION_ID=test \
 assert_file_contains "$gemini_message" "Assisted-by: Gemini:gemini-test" \
   "Gemini session receives exact attribution"
 
+test_start "commit_hook_joins_the_existing_trailer_block"
+signed_message="$SANDBOX/signed-message"
+printf 'feat: test\n\nBody.\n\nSigned-off-by: A U Thor <a@example.com>\n' >"$signed_message"
+env -i PATH="$PATH" HOME="$SANDBOX/home" CLAUDECODE=1 \
+  ANTHROPIC_MODEL=claude-test bash "$HOOK" "$signed_message"
+# git reads trailers from the last paragraph only, so Assisted-by must land
+# in the same block as Signed-off-by, not in a paragraph of its own.
+signed_trailers="$(git interpret-trailers --parse <"$signed_message")"
+assert_contains "Signed-off-by: A U Thor <a@example.com>" "$signed_trailers" \
+  "the sign-off stays a parsed trailer"
+assert_contains "Assisted-by: Claude:" "$signed_trailers" \
+  "Assisted-by joins the sign-off's trailer block"
+
+test_start "commit_hook_starts_a_trailer_block_when_none_exists"
+plain_message="$SANDBOX/plain-message"
+printf 'feat: test\n\nBody text only.\n' >"$plain_message"
+env -i PATH="$PATH" HOME="$SANDBOX/home" CLAUDECODE=1 \
+  ANTHROPIC_MODEL=claude-test bash "$HOOK" "$plain_message"
+assert_contains "Assisted-by: Claude:" "$(git interpret-trailers --parse <"$plain_message")" \
+  "Assisted-by is a parsed trailer on a message without one"
+assert_file_contains "$plain_message" "Body text only." "the body is kept"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
