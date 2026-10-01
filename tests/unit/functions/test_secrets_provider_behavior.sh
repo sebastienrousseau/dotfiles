@@ -275,6 +275,43 @@ _fail_rc=$?
 assert_not_equals "0" "$_fail_rc" "a failing age must not report success"
 assert_output_not_contains "FAIL_KEY" "cat '$_PLAIN_TMP/secrets/index.txt'"
 
+# plain-enc needs age-keygen to derive the recipient. Missing, or failing,
+# it must fail the store: success here would mean a secret the caller
+# thinks is saved, with no encrypted file behind it.
+_keygen_case() {
+  local label="$1" keygen_body="$2" bin="$_PLAIN_TMP/kg-$1"
+  rm -rf "$bin" "$_PLAIN_TMP/kg-secrets"
+  mkdir -p "$bin"
+  printf '#!/usr/bin/env bash\ncat >/dev/null; exit 0\n' >"$bin/age"
+  [[ -n "$keygen_body" ]] && printf '#!/usr/bin/env bash\n%s\n' "$keygen_body" >"$bin/age-keygen"
+  chmod +x "$bin"/*
+  ln -sf "$(command -v bash)" "$bin/bash"
+  for util in mktemp rm mkdir cat printf grep sort uniq mv chmod touch dirname; do
+    p="$(command -v "$util" 2>/dev/null)" && ln -sf "$p" "$bin/$util"
+  done
+  _kg_out="$(
+    PATH="$bin" TMPDIR="$_PLAIN_TMP/tmp" DOTFILES_SECRETS_PROVIDER=plain-enc \
+      DOT_SECRETS_HOME="$_PLAIN_TMP/kg-secrets" \
+      DOT_SECRETS_STORE_DIR="$_PLAIN_TMP/kg-secrets/store" \
+      DOT_SECRETS_INDEX_FILE="$_PLAIN_TMP/kg-secrets/index.txt" \
+      DOT_SECRETS_AGE_KEY="$_PLAIN_TMP/key.txt" \
+      "$bin/bash" -c 'set -euo pipefail; source "$1"; dot_secrets_set KG_KEY v' _ "$SECRETS_FILE" 2>&1
+  )"
+  _kg_rc=$?
+}
+
+test_start "secrets_set_plain_enc_fails_without_age_keygen"
+_keygen_case missing ""
+assert_not_equals "0" "$_kg_rc" "no age-keygen: the store fails"
+assert_contains "age-keygen not installed" "$_kg_out" "and says why"
+assert_file_not_exists "$_PLAIN_TMP/kg-secrets/store/KG_KEY.age" "no encrypted file"
+
+test_start "secrets_set_plain_enc_fails_when_age_keygen_fails"
+_keygen_case failing "exit 1"
+assert_not_equals "0" "$_kg_rc" "a failing age-keygen fails the store"
+assert_contains "failed to derive the age recipient" "$_kg_out" "and says why"
+assert_file_not_exists "$_PLAIN_TMP/kg-secrets/store/KG_KEY.age" "no encrypted file"
+
 test_start "secrets_set_plain_enc_leaves_no_recipient_file_behind"
 # The recipient file the store writes is a temporary; dropping the RETURN
 # trap must not mean dropping the cleanup. TMPDIR was private to the child,
