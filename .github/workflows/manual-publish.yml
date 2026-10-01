@@ -83,6 +83,13 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      # The archive dir is root-owned and apt leaves a root-only lock file and
+      # partial/ dir in it, so actions/cache (running as the runner user) could
+      # neither restore into it nor save it: every save failed with "tar:
+      # Permission denied" and every run downloaded TeX Live from scratch.
+      - name: Make the apt archive cacheable
+        run: sudo chown -R "$(id -u):$(id -g)" /var/cache/apt/archives
+
       # Cache the apt archives directory so the ~1GB TeX Live download
       # is reused across runs. Key is tied to the workflow file so that
       # package changes invalidate the cache cleanly.
@@ -96,6 +103,13 @@ jobs:
 
       - name: Install pandoc + TeX Live (for PDF)
         run: |
+          # Time out and retry a dropped mirror connection rather than wait on
+          # it. texlive-fonts-extra (629 MB) is not installed: the PDF embeds
+          # only Latin Modern (lmodern) and the AMS fonts from texlive-base, and
+          # on a slow mirror that one package pushed this step past the job's
+          # 20-minute limit (twice on main, 2026-10-01).
+          printf '%s\n' 'Acquire::Retries "5";' 'Acquire::http::Timeout "30";' 'Acquire::https::Timeout "30";' |
+            sudo tee /etc/apt/apt.conf.d/80-retries >/dev/null
           sudo apt-get update
           # Retain downloaded .debs so the cache above stays populated.
           sudo rm -f /etc/apt/apt.conf.d/docker-clean
@@ -104,12 +118,14 @@ jobs:
             pandoc \
             texlive-xetex \
             texlive-fonts-recommended \
-            texlive-fonts-extra \
             texlive-latex-recommended \
             texlive-latex-extra \
             lmodern \
             librsvg2-bin \
             codespell
+          # Leave only the .debs, readable by the cache step that saves them.
+          sudo rm -rf /var/cache/apt/archives/lock /var/cache/apt/archives/partial
+          sudo chown -R "$(id -u):$(id -g)" /var/cache/apt/archives
 
       - name: Build manual (all formats)
         run: bash tools/docs/build-manual.sh --clean
