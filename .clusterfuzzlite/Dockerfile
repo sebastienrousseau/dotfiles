@@ -7,7 +7,7 @@
 # hadolint ignore=DL3006
 FROM gcr.io/oss-fuzz-base/base-builder-go
 
-LABEL maintainer="Sebastien Rousseau <sebastian.rousseau@gmail.com>"
+LABEL maintainer="Sebastien Rousseau <sebastienrousseau@users.noreply.github.com>"
 
 COPY . "$SRC/dotfiles"
 WORKDIR "$SRC/dotfiles/fuzz"

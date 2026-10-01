@@ -56,8 +56,8 @@ an individual is officially representing the community in public spaces.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the maintainers responsible for enforcement at
-**sebastian.rousseau@gmail.com**. All complaints will be reviewed and
+reported to the maintainers responsible for enforcement through
+<https://sebastienrousseau.com/contact/>. All complaints will be reviewed and
 investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the

@@ -258,7 +258,7 @@ hardcoded.
 
 `KEYS.asc` was verified rather than assumed: with the file,
 `git -c gpg.ssh.allowedSignersFile=KEYS.asc tag -v v0.2.519` prints
-`Good "git" signature for sebastian.rousseau@gmail.com`; without it,
+`Good "git" signature for sebastienrousseau@users.noreply.github.com`; without it,
 `No principal matched`. Every command in its guide was run before it
 was committed.
 

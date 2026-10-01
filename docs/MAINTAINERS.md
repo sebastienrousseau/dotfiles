@@ -5,7 +5,7 @@ explicit, documented governance model (see [`GOVERNANCE.md`](GOVERNANCE.md)).
 
 ## Primary maintainer
 
-- **Sebastien Rousseau** — <sebastian.rousseau@gmail.com>
+- **Sebastien Rousseau** — <https://sebastienrousseau.com/contact/>
   - GitHub: [@sebastienrousseau](https://github.com/sebastienrousseau)
   - Role: project owner, release manager, security disclosure contact
   - Commit signing: SSH ED25519 (`SHA256:kIOPAavp1TCEauTr1tTIN3cv+tSs6F9m/4lZjuM9tqk`)

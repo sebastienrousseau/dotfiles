@@ -118,7 +118,7 @@ cd dotfiles
 git -c gpg.ssh.allowedSignersFile=KEYS.asc tag -v "$TAG"
 ```
 
-Expected: `Good "git" signature for sebastian.rousseau@gmail.com with
+Expected: `Good "git" signature for sebastienrousseau@users.noreply.github.com with
 ED25519 key SHA256:f6FG+guRNtT3R36oQFS4oWCx1d10nm+BoaIL3Tkh1r4`.
 
 Without the allowed-signers file you get `No principal matched` — the

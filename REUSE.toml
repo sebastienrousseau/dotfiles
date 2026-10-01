@@ -10,7 +10,7 @@
 # Lint with:  reuse lint     (or `make lint-reuse`)
 version = 1
 SPDX-PackageName = "dotfiles"
-SPDX-PackageSupplier = "Sebastien Rousseau <sebastian.rousseau@gmail.com>"
+SPDX-PackageSupplier = "Sebastien Rousseau <sebastienrousseau@users.noreply.github.com>"
 SPDX-PackageDownloadLocation = "https://github.com/sebastienrousseau/dotfiles"
 
 # Default for the whole tree: the project's own work, dual-licensed.
