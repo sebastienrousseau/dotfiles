@@ -83,6 +83,13 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      # The archive dir is root-owned and apt leaves a root-only lock file and
+      # partial/ dir in it, so actions/cache (running as the runner user) could
+      # neither restore into it nor save it: every save failed with "tar:
+      # Permission denied" and every run downloaded TeX Live from scratch.
+      - name: Make the apt archive cacheable
+        run: sudo chown -R "$(id -u):$(id -g)" /var/cache/apt/archives
+
       # Cache the apt archives directory so the ~1GB TeX Live download
       # is reused across runs. Key is tied to the workflow file so that
       # package changes invalidate the cache cleanly.
@@ -116,6 +123,9 @@ jobs:
             lmodern \
             librsvg2-bin \
             codespell
+          # Leave only the .debs, readable by the cache step that saves them.
+          sudo rm -rf /var/cache/apt/archives/lock /var/cache/apt/archives/partial
+          sudo chown -R "$(id -u):$(id -g)" /var/cache/apt/archives
 
       - name: Build manual (all formats)
         run: bash tools/docs/build-manual.sh --clean
