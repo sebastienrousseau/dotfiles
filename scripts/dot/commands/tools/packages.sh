@@ -6,40 +6,13 @@
 # `dot packages`: one line per installed package manager, each query bounded
 # so a manager that never answers cannot hang the command.
 
-## _pkg_probe <cmd…> — run a package-manager query with stdin closed and a
-## wall-clock limit of DOTFILES_PACKAGES_TIMEOUT seconds (default 10). A manager
-## that never answers (rustup's cargo proxy waiting on a toolchain, a locked
-## npm cache) used to hang `dot packages` for good. The whole process group
-## is killed, not just the child: a grandchild that inherited stdout would
-## otherwise keep the caller's $( ) open. Exits 124 on expiry. perl gives
-## fork + setsid + group kill on macOS and Linux; without it there is no limit.
+# shellcheck source=../../../../lib/dot/probe.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../../../lib/dot/probe.sh"
+
+## _pkg_probe <cmd…> — a package-manager query under dot_probe, limited to
+## DOTFILES_PACKAGES_TIMEOUT seconds (default 10). Exits 124 on expiry.
 _pkg_probe() {
-  local secs="${DOTFILES_PACKAGES_TIMEOUT:-10}"
-  if ! command -v perl >/dev/null 2>&1; then
-    "$@" </dev/null 2>/dev/null
-    return
-  fi
-  perl -e '
-    use POSIX qw(setsid);
-    my $secs = shift @ARGV;
-    my $pid  = fork();
-    die "dot: fork failed: $!\n" unless defined $pid;
-    if ($pid == 0) {
-      setsid();
-      exec { $ARGV[0] } @ARGV;
-      exit 127;
-    }
-    my $timed_out = 0;
-    $SIG{ALRM} = sub { $timed_out = 1; kill("KILL", -$pid); };
-    alarm($secs);
-    my $reaped;
-    do { $reaped = waitpid($pid, 0); } while ($reaped == -1 && $!{EINTR});
-    my $status = $?;
-    alarm(0);
-    kill("KILL", -$pid);
-    exit(124) if $timed_out;
-    exit($status & 127 ? 128 + ($status & 127) : $status >> 8);
-  ' "$secs" "$@" </dev/null 2>/dev/null
+  dot_probe "${DOTFILES_PACKAGES_TIMEOUT:-10}" "$@"
 }
 
 ## _pkg_count <pattern> <cmd…> — lines of the command's output matching the

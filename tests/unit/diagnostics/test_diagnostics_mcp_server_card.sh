@@ -86,7 +86,8 @@ mkdir -p "$MCP_STUB"
 printf '#!/usr/bin/env bash\necho "argv=$* root=$DOT_MCP_REPO_ROOT"\n' >"$MCP_STUB/dot-mcp"
 chmod +x "$MCP_STUB/dot-mcp"
 test_start "mcp_serve_execs_the_server"
-assert_output_contains "argv=serve root=$REPO_ROOT" "PATH='$MCP_STUB':\"\$PATH\" bash '$REPO_ROOT/bin/dot' mcp serve </dev/null"
+# The root is resolved physically (/var is /private/var on macOS).
+assert_output_contains "argv=serve root=$(cd "$REPO_ROOT" && pwd -P)" "PATH='$MCP_STUB':\"\$PATH\" bash '$REPO_ROOT/bin/dot' mcp serve </dev/null"
 
 test_start "mcp_server_card_declares_no_prompts"
 if [[ "$(jq -r '.capabilities.prompts' "$SERVER_CARD")" == "false" ]]; then

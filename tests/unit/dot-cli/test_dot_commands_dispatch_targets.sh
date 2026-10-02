@@ -39,11 +39,17 @@ assert_file_exists "$SECURITY" "scripts/dot/commands/security.sh must exist"
 # The hand-off shim: anything under scripts/ is recorded rather than run,
 # everything else (the command file itself, helper subshells) reaches the
 # real interpreter.
+# The CLI resolves its source dir physically, so the path it hands over can
+# be spelled differently from REPO_ROOT (/var is /private/var on macOS);
+# strip either spelling.
+REPO_PHYSICAL="$(cd "$REPO_ROOT" && pwd -P)"
 cat >"$BIN/bash" <<EOF
 #!$REAL_BASH
 case "\${1:-}" in
   */scripts/theme/*|*/scripts/fonts/*|*/scripts/tuning/*|*/scripts/security/*)
-    printf 'dispatched %s %s\n' "\${1#$REPO_ROOT/}" "\${*:2}"
+    rel="\${1#$REPO_ROOT/}"
+    rel="\${rel#$REPO_PHYSICAL/}"
+    printf 'dispatched %s %s\n' "\$rel" "\${*:2}"
     exit "\${DISPATCH_RC:-0}"
     ;;
 esac
@@ -184,7 +190,7 @@ test_start "security_reports_a_missing_target_script"
 # resolver at a tree that has neither.
 EMPTY_TREE="$WORK/empty-tree/lib/dot"
 mkdir -p "$EMPTY_TREE"
-for lib in ui.sh utils.sh platform.sh ai-install.sh preflight.sh upgrade.sh ai-provision.sh log.sh verified-download.sh; do
+for lib in ui.sh utils.sh platform.sh ai-install.sh preflight.sh upgrade.sh ai-provision.sh probe.sh log.sh verified-download.sh; do
   ln -sf "$REPO_ROOT/lib/dot/$lib" "$EMPTY_TREE/$lib"
 done
 mkdir -p "$WORK/empty-tree/scripts/dot/commands"

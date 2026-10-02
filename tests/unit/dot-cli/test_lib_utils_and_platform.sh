@@ -80,7 +80,7 @@ _fixture_base="${TMPDIR:-/tmp}"
 FIXTURE_ROOT="${_fixture_base%/}/dotfiles-cov-fixtures-$(id -u)/lib-utils"
 rm -rf "$FIXTURE_ROOT"
 mkdir -p "$FIXTURE_ROOT/detached"
-for lib in ui.sh utils.sh platform.sh ai-install.sh preflight.sh upgrade.sh ai-provision.sh log.sh verified-download.sh; do
+for lib in ui.sh utils.sh platform.sh ai-install.sh preflight.sh upgrade.sh ai-provision.sh probe.sh log.sh verified-download.sh; do
   ln -sf "$REPO_ROOT/lib/dot/$lib" "$FIXTURE_ROOT/detached/$lib"
 done
 
