@@ -655,7 +655,9 @@ show_help_all() {
       current_section="$section"
     fi
     ui_cmd "$command_name" "$description"
-  done < <(_dot_help_specs)
+    # The registry lists commands by topic, not by section; group them so each
+    # section header prints once, sections in first-seen order (awk: bash 3.2).
+  done < <(_dot_help_specs | awk -F'|' '!($1 in s) { s[$1]; o[++n] = $1 } { l[$1] = l[$1] $0 "\n" } END { for (i = 1; i <= n; i++) printf "%s", l[o[i]] }')
 }
 
 show_help_command() {
@@ -867,17 +869,17 @@ case "$route" in
       (source "$_user_cmd" "$@")
       exit $?
     else
-    # Try bin/dot-<name> in the same dir as this script, then $PATH.
-    _self_dir="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || echo "$0")")" && pwd)"
-    if [[ -x "$_self_dir/dot-${COMMAND}" ]]; then
-      exec "$_self_dir/dot-${COMMAND}" "$@"
-    fi
-    if command -v "dot-${COMMAND}" >/dev/null 2>&1; then
-      exec "dot-${COMMAND}" "$@"
-    fi
-    echo "Unknown command: ${COMMAND:-}" >&2
-    echo "Run 'dot help' for available commands." >&2
-    exit 1
+      # Try bin/dot-<name> in the same dir as this script, then $PATH.
+      _self_dir="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || echo "$0")")" && pwd)"
+      if [[ -x "$_self_dir/dot-${COMMAND}" ]]; then
+        exec "$_self_dir/dot-${COMMAND}" "$@"
+      fi
+      if command -v "dot-${COMMAND}" >/dev/null 2>&1; then
+        exec "dot-${COMMAND}" "$@"
+      fi
+      echo "Unknown command: ${COMMAND:-}" >&2
+      echo "Run 'dot help' for available commands." >&2
+      exit 1
     fi
     ;;
 esac
