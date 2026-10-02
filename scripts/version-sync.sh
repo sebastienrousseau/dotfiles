@@ -19,7 +19,7 @@ BACKUP_DIR="$PROJECT_ROOT/.version-sync-backup"
 EXCLUDE_FILES=(
   # Deployed into $HOME, with other projects' versions on purpose: the ~/Code
   # standards quote v0.0.1, v0.0.45 and a GitHub release tag, and the sync
-  # once stamped v0.2.530 over all of them.
+  # once stamped the 0.2.530 release number over all of them.
   "defaults/Code/*"
 
   # Historical / referential docs — version refs inside are intentional
