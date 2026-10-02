@@ -24,7 +24,9 @@ trap cov_teardown_sandbox EXIT
 test_start "health_json_mode_emits_a_document"
 HJ_RC=0
 HJ_OUT="$(NO_COLOR=1 "${BASH:-bash}" "$HEALTH" --json 2>/dev/null </dev/null)" || HJ_RC=$?
-assert_equals "0" "$HJ_RC" "--json should exit 0"
+# 1 when a check failed, as the document's failure count says; else 0.
+hj_failures="$(printf '%s\n' "$HJ_OUT" | sed -n 's/.*"failures": *\([0-9][0-9]*\).*/\1/p' | head -1)"
+assert_equals "$([[ "${hj_failures:-0}" -gt 0 ]] && echo 1 || echo 0)" "$HJ_RC" "--json exits by its failure count (${hj_failures:-none})"
 assert_contains '"check"' "$HJ_OUT" "the document should carry per-check records"
 
 test_start "health_json_mode_prints_no_prose"
