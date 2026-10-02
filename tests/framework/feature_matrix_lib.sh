@@ -75,6 +75,10 @@ FM_TIMEOUT="${FM_TIMEOUT:-120}"
 # fm_sandbox_setup — build the sandboxed HOME and export the environment.
 # Call once near the top of a test file, with `trap fm_sandbox_teardown EXIT`.
 fm_sandbox_setup() {
+  # The HOME and checkout the sandbox must never reach; fm_assert_isolated
+  # compares against these.
+  FM_REAL_HOME="${FM_REAL_HOME:-$HOME}"
+  FM_REAL_REPO="$(cd "$REPO_ROOT" && pwd -P)"
   FM_SANDBOX="$(mktemp -d -t dot-fm.XXXXXX)"
   export FM_SANDBOX
 
@@ -133,6 +137,59 @@ fm_sandbox_setup() {
   export PATH="$FM_SANDBOX/bin:$PATH"
 
   cd "$FM_SANDBOX/work" || return 1
+}
+
+# fm_sandbox_isolate — give the sandbox its own copy of the checkout, for
+# rows that delete or rewrite the source dir (uninstall, chaos, rollback).
+# By default $HOME/.dotfiles symlinks to the real repo, and the 2026-09-24
+# incident showed what a destructive command does through that: uninstall
+# purged the real ~/.dotfiles. Here the working tree (tracked and untracked,
+# never ignored) is copied and committed into a fresh git repo, so tests see
+# uncommitted changes and rollback still has history. `dot`, CHEZMOI_SOURCE_DIR
+# and $HOME/.dotfiles all point at the copy. Call after fm_sandbox_setup.
+fm_sandbox_isolate() {
+  local copy="$FM_SANDBOX/.dotfiles"
+  rm -f "$copy"
+  mkdir -p "$copy"
+  (cd "$REPO_ROOT" && git ls-files -z --cached --others --exclude-standard) |
+    (cd "$REPO_ROOT" && tar --null -T - -cf -) | (cd "$copy" && tar -xf -) || return 1
+  git -C "$copy" init -q &&
+    git -C "$copy" add -A &&
+    git -C "$copy" -c user.name=fm -c user.email=fm@example.invalid \
+      -c commit.gpgsign=false -c core.hooksPath=/dev/null commit -q -m "fm snapshot" || return 1
+  export CHEZMOI_SOURCE_DIR="$copy"
+  FM_DOT="$copy/bin/dot"
+  fm_assert_isolated
+}
+
+# fm_assert_isolated — fail closed unless every path a destructive command
+# can resolve is inside the sandbox: HOME, the XDG dirs, $HOME/.dotfiles,
+# CHEZMOI_SOURCE_DIR and the dot binary. Exits the test file, so a broken
+# setup can never fall through to running the command.
+fm_assert_isolated() {
+  local p real why=""
+  for p in "$HOME" "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME" \
+    "$XDG_CACHE_HOME" "$HOME/.dotfiles" "$CHEZMOI_SOURCE_DIR" "$(dirname "$FM_DOT")"; do
+    real="$(cd "$p" 2>/dev/null && pwd -P)" || {
+      why="$p does not exist"
+      break
+    }
+    case "$real/" in
+      "$(cd "$FM_SANDBOX" && pwd -P)"/*) ;;
+      *)
+        why="$p resolves outside the sandbox ($real)"
+        break
+        ;;
+    esac
+    if [[ "$real" == "$FM_REAL_REPO" || "$real" == "$FM_REAL_HOME" ]]; then
+      why="$p resolves to the real checkout or HOME ($real)"
+      break
+    fi
+  done
+  if [[ -n "$why" ]]; then
+    printf 'fm_assert_isolated: refusing to continue: %s\n' "$why" >&2
+    exit 97
+  fi
 }
 
 fm_sandbox_teardown() {
@@ -233,15 +290,22 @@ fm_run() {
 fm_run_bin() {
   local bin="$1"
   shift
-  local out_file err_file
+  local out_file err_file in_file=/dev/null
   out_file="$(mktemp)"
   err_file="$(mktemp)"
+  # FM_STDIN, when set, is what the command reads (answers to a prompt);
+  # otherwise stdin is /dev/null so nothing can block on a read.
+  if [[ -n "${FM_STDIN:-}" ]]; then
+    in_file="$(mktemp)"
+    printf '%s\n' "$FM_STDIN" >"$in_file"
+  fi
   FM_RC=0
   run_with_timeout "$FM_TIMEOUT" bash "$bin" "$@" \
-    >"$out_file" 2>"$err_file" </dev/null || FM_RC=$?
+    >"$out_file" 2>"$err_file" <"$in_file" || FM_RC=$?
   FM_OUT="$(cat "$out_file")"
   FM_ERR="$(cat "$err_file")"
   rm -f "$out_file" "$err_file"
+  [[ "$in_file" == /dev/null ]] || rm -f "$in_file"
   return 0
 }
 

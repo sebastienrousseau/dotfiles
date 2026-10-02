@@ -385,19 +385,7 @@ test_fm_commit() {
   rm -f "$FM_SANDBOX/bin/claude"
 }
 
-test_fm_smoke_uninstall() {
-  fm_smoke uninstall
-}
 
-test_fm_smoke_uninstall_force() {
-  # --force takes the same intercepted help path; the real flag would purge
-  # the managed environment, so only the intercept is exercised.
-  test_start "fm_smoke_uninstall_force"
-  fm_run uninstall --force --help
-  fm_expect_rc 0
-  test_start "fm_smoke_uninstall_force_renders_help"
-  fm_expect_out "dot uninstall"
-}
 
 # ── run ────────────────────────────────────────────────────────────────────
 
@@ -435,7 +423,5 @@ test_fm_cd
 test_fm_edit
 test_fm_env_editor
 test_fm_commit
-test_fm_smoke_uninstall
-test_fm_smoke_uninstall_force
 
 fm_finish

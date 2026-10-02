@@ -462,10 +462,6 @@ test_fm_chaos() {
   fi
 }
 
-test_fm_smoke_chaos_force() {
-  # --force deliberately deletes ~/.zshrc and the terminal configs.
-  fm_smoke chaos
-}
 
 test_fm_teleport_usage() {
   test_start "fm_teleport_usage"
@@ -711,7 +707,6 @@ test_fm_benchmark
 test_fm_load_bench
 test_fm_smoke_load_bench_pty
 test_fm_chaos
-test_fm_smoke_chaos_force
 test_fm_teleport_usage
 test_fm_smoke_teleport
 test_fm_smoke_bundle
