@@ -54,8 +54,13 @@ test_fm_doctor() {
   fm_run doctor
   # doctor.sh exits 1 when any probe errors, and its probes read the host:
   # which tools resolve on PATH, whether the pueue daemon is up, which shells
-  # are installed. The sandbox owns HOME, not the runner's toolbox.
-  fm_expect_rc_in 0 1
+  # are installed. The sandbox owns HOME, not the runner's toolbox, so the
+  # exit is checked against the error count the verdict line prints.
+  if [[ "$FM_OUT" =~ ([0-9]+)\ error\(s\) && "${BASH_REMATCH[1]}" -gt 0 ]]; then
+    fm_expect_rc 1
+  else
+    fm_expect_rc 0
+  fi
   test_start "fm_doctor_reports_sections"
   fm_expect_out "--- Dotfiles Doctor ---"
   test_start "fm_doctor_probes_core_shells"
@@ -67,9 +72,19 @@ test_fm_doctor() {
 test_fm_doctor_score() {
   test_start "fm_doctor_score"
   fm_run doctor --score
-  # scorecard.sh exits 1 unless health and security both reach 100, and both
-  # scores come from the host's installed tools and key material.
-  fm_expect_rc_in 0 1
+  # scorecard.sh exits 1 unless security and performance both reach 100,
+  # and both scores come from the host. The exit is checked against the
+  # scores the scorecard prints.
+  local sec perf
+  sec="$(printf '%s\n' "$FM_OUT" | sed -n 's/.*Security[^0-9]*\([0-9][0-9]*\)\/100.*/\1/p' | head -1)"
+  perf="$(printf '%s\n' "$FM_OUT" | sed -n 's/.*Performance[^0-9]*\([0-9][0-9]*\)\/100.*/\1/p' | head -1)"
+  if [[ -z "$sec" || -z "$perf" ]]; then
+    fm_fail "the scorecard printed no Security or Performance score"
+  elif ((sec < 100 || perf < 100)); then
+    fm_expect_rc 1
+  else
+    fm_expect_rc 0
+  fi
   test_start "fm_doctor_score_renders_scorecard"
   fm_expect_out "--- Dotfiles Scorecard ---"
   test_start "fm_doctor_score_reports_health_out_of_100"
@@ -154,7 +169,9 @@ test_fm_doctor_json() {
   # in the shape of `dot health --json` (total/passed/warnings/failures/
   # results) plus status and verdict. The exit code is the same signal as
   # the text dashboard's, so status must agree with it.
-  fm_expect_rc_in 0 1
+  # The exit follows the verdict, which follows the host: healthy is 0,
+  # unhealthy is 1, and the status field below must agree.
+  if [[ "$FM_OUT" == *'"status": "unhealthy"'* ]]; then fm_expect_rc 1; else fm_expect_rc 0; fi
   test_start "fm_doctor_json_is_json"
   fm_expect_json
   test_start "fm_doctor_json_has_status"
