@@ -29,33 +29,37 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
-# Test: defines restore function
-test_start "restore_defines_function"
-if grep -qE 'restore_from_git|restore_latest|list_backups|usage' "$RESTORE_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines restore function"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define restore"
-fi
+# dot restore, run against a sandboxed XDG_DATA_HOME holding two backups.
+RS_HOME="$(mktemp -d -t dot-restore.XXXXXX)"
+mkdir -p "$RS_HOME/data/dotfiles/backups/backup_20260101_000000_manual" \
+  "$RS_HOME/data/dotfiles/backups/backup_20260202_000000_manual"
+rs() {
+  RS_RC=0
+  RS_OUT="$(env HOME="$RS_HOME" XDG_DATA_HOME="$RS_HOME/data" XDG_STATE_HOME="$RS_HOME/state" \
+    DOTFILES_DIR="$RS_HOME/no-checkout" bash "$REPO_ROOT/bin/dot" restore "$@" 2>&1)" || RS_RC=$?
+}
 
-# Test: requires backup source
-test_start "restore_requires_backup"
-if grep -qE 'backup|archive|tar|restore' "$RESTORE_FILE" 2>/dev/null; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: works with backups"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should work with backups"
-fi
+test_start "restore_without_an_option_prints_usage"
+rs
+assert_equals "0" "$RS_RC" "no option exits 0"
+for pair in "--list, -l" "--latest, -L" "--git, -g" "--diff, -d" "--dry-run, -n"; do
+  assert_contains "$pair" "$RS_OUT" "usage documents $pair"
+done
 
-# Test: shellcheck compliance
-test_start "restore_flag_aliases"
-assert_file_contains "$RESTORE_FILE" "--list, -l" "restore supports -l"
-assert_file_contains "$RESTORE_FILE" "--latest, -L" "restore supports -L"
-assert_file_contains "$RESTORE_FILE" "--git, -g" "restore supports -g"
-assert_file_contains "$RESTORE_FILE" "--diff, -d" "restore supports -d"
-assert_file_contains "$RESTORE_FILE" "--dry-run, -n" "restore supports -n"
+test_start "restore_list_short_and_long_agree"
+rs --list
+long_out="$RS_OUT"
+assert_equals "0" "$RS_RC" "--list exits 0"
+assert_contains "backup_20260101_000000_manual" "$long_out" "lists the first backup"
+assert_contains "backup_20260202_000000_manual" "$long_out" "lists the second backup"
+rs -l
+assert_equals "$long_out" "$RS_OUT" "-l prints what --list prints"
+
+test_start "restore_rejects_an_unknown_option"
+rs --bogus
+assert_equals "1" "$RS_RC" "an unknown option exits 1"
+assert_contains "Unknown option: --bogus" "$RS_OUT" "and is named"
+rm -rf "$RS_HOME"
 
 test_start "restore_latest_preserves_hidden_paths"
 restore_sandbox="$(mktemp -d)"

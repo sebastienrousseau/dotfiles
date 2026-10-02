@@ -25,11 +25,20 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax error"
 fi
 
+# Each short flag does what its long form does. Timings differ run to run,
+# so the JSON is compared by what the flags set (runs, target_ms, keys).
+perf_json_fields() {
+  bash "$TEST_SCRIPT" "$@" 2>/dev/null |
+    python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["runs"], d["target_ms"], " ".join(sorted(d)))'
+}
 test_start "perf_flag_aliases"
-assert_file_contains "$TEST_SCRIPT" "--json | -j" "perf supports -j"
-assert_file_contains "$TEST_SCRIPT" "--profile | -p" "perf supports -p"
-assert_file_contains "$TEST_SCRIPT" "--runs | -r" "perf supports -r"
-assert_file_contains "$TEST_SCRIPT" "--target | -t" "perf supports -t"
+long_fields="$(perf_json_fields --json --runs 1 --target 999)"
+assert_contains "1 999 " "$long_fields" "--json --runs 1 --target 999 is honoured"
+assert_equals "$long_fields" "$(perf_json_fields -j -r 1 -t 999)" "-j -r -t match their long forms"
+perf_profile_marker() { bash "$TEST_SCRIPT" "$@" 2>&1 | grep -c 'Top contributors (zprof)' || true; }
+assert_equals "0" "$(perf_profile_marker -r 1)" "no profile without the flag"
+assert_equals "1" "$(perf_profile_marker --profile -r 1)" "--profile adds the zprof section"
+assert_equals "1" "$(perf_profile_marker -p -r 1)" "-p does the same"
 
 # Slice 2: drive real line coverage of the script under test
 cov_exercise_script "$TEST_SCRIPT"

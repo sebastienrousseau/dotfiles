@@ -20,25 +20,35 @@ OUTPUT_DIR="${OUTPUT_DIR:-$REPO_ROOT/dist/policy-bundles}"
 BUNDLE_VERSION="${BUNDLE_VERSION:-$(jq -r '.schemaVersion' "$CHEZMOI_ROOT/dot_config/dotfiles/policy-bundles.json")}"
 JSON_MODE=0
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --output-dir | -o)
-      OUTPUT_DIR="${2:-}"
-      shift 2
-      ;;
-    --version | -v)
-      BUNDLE_VERSION="${2:-}"
-      shift 2
-      ;;
-    --json | -j)
-      JSON_MODE=1
-      shift
-      ;;
-    *)
-      shift
-      ;;
-  esac
-done
+# _bundle_args <args…> — set OUTPUT_DIR, BUNDLE_VERSION and JSON_MODE.
+_bundle_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --output-dir | -o)
+        OUTPUT_DIR="${2:-}"
+        shift 2
+        ;;
+      --version | -v)
+        BUNDLE_VERSION="${2:-}"
+        shift 2
+        ;;
+      --json | -j)
+        JSON_MODE=1
+        shift
+        ;;
+      --help | -h)
+        printf 'Usage: package-policy-bundles.sh [--output-dir|-o DIR] [--version|-v VERSION] [--json|-j]\n'
+        exit 0
+        ;;
+      *)
+        # An unknown argument used to be ignored, so `--help` built a bundle.
+        printf 'Unknown option: %s\n' "$1" >&2
+        exit 2
+        ;;
+    esac
+  done
+}
+_bundle_args "$@"
 
 command -v jq >/dev/null 2>&1 || {
   echo "jq is required for policy bundle packaging." >&2

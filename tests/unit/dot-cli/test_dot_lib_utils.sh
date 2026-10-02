@@ -29,16 +29,15 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: utils.sh has syntax errors"
 fi
 
-# Test: defines utility functions
+# Test: the helpers behave as documented
 test_start "utils_defines_functions"
-func_count=$(grep -cE '^[a-z_]+\(\)\s*\{' "$UTILS_FILE" 2>/dev/null || echo 0)
-if [[ "$func_count" -gt 0 ]]; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines $func_count functions"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define utility functions"
-fi
+utils_rc() { bash -c 'source "$1"; shift; "$@"' _ "$UTILS_FILE" "$@" >/dev/null 2>&1 && echo 0 || echo $?; }
+assert_equals "0" "$(utils_rc has_command bash)" "has_command finds bash"
+assert_equals "1" "$(utils_rc has_command dot-no-such-command)" "and not a missing command"
+assert_equals "0" "$(utils_rc validate_name ok-name.1)" "validate_name accepts a safe name"
+assert_equals "1" "$(utils_rc validate_name '../x')" "and rejects a path"
+assert_equals "3" "$(utils_rc die boom 3)" "die exits with the code it is given"
+assert_contains "boom" "$(bash -c 'source "$1"; die boom' _ "$UTILS_FILE" 2>&1 >/dev/null)" "die prints to stderr"
 
 # Test: has logging functions
 test_start "utils_has_logging"

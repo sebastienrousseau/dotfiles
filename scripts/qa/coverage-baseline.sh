@@ -42,7 +42,7 @@ done
 unit_tests="$(find "$REPO_ROOT/tests/unit" -name 'test_*.sh' | wc -l | tr -d ' ')"
 integration_tests="$(find "$REPO_ROOT/tests/integration" -name 'test_*.sh' | wc -l | tr -d ' ')"
 total_tests="$(find "$REPO_ROOT/tests" -path '*/framework/*' -prune -o -name 'test_*.sh' -print | wc -l | tr -d ' ')"
-named_tests="$(rg -o '\btest_start\b' "$REPO_ROOT/tests/unit" "$REPO_ROOT/tests/integration" -g 'test_*.sh' | wc -l | tr -d ' ')"
+named_tests="$(grep -rhow --include='test_*.sh' 'test_start' "$REPO_ROOT/tests/unit" "$REPO_ROOT/tests/integration" | wc -l | tr -d ' ')"
 docs_files="$(find "$REPO_ROOT/docs" -type f \( -name '*.md' -o -name '*.md.tmpl' \) | wc -l | tr -d ' ')"
 shell_surfaces="$(find "$REPO_ROOT/scripts" "$REPO_ROOT/defaults/dot_local/bin" "$REPO_ROOT/defaults/.chezmoitemplates/functions" -type f \( -name '*.sh' -o -name 'executable_*' \) | wc -l | tr -d ' ')"
 

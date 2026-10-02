@@ -16,13 +16,15 @@ echo "Testing logging library..."
 test_start "logging_file_exists"
 assert_file_exists "$LOGGING_FILE" "logging.sh should exist"
 
-# Test: logging.sh has valid syntax
-test_start "logging_shebang"
-assert_file_contains "$LOGGING_FILE" "#!/usr/bin/env bash" "should have bash shebang"
-
-# Test: logging.sh has double-source guard
+# Test: a second source returns early, so it keeps what the caller redefined
 test_start "logging_guard"
-assert_file_contains "$LOGGING_FILE" "_DOTFILES_LOGGING_LOADED" "should have double-source guard"
+output=$(bash -c '
+  source "'"$LOGGING_FILE"'"
+  log_info() { echo "caller override"; }
+  source "'"$LOGGING_FILE"'"
+  log_info "x"
+' 2>&1)
+assert_equals "caller override" "$output" "the second source does not redefine log_info"
 
 # Test: log_info outputs to stdout with INFO prefix
 test_start "log_info_output"

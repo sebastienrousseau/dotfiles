@@ -16,23 +16,15 @@
    1 tests/unit/ci/test_docs_link_tracking.sh
    2 tests/unit/ci/test_mutation_engine.sh
    1 tests/unit/ci/test_validate_chezmoidata.sh
-   4 tests/unit/diagnostics/test_diagnostics_perf.sh
-   3 tests/unit/diagnostics/test_diagnostics_security_score.sh
    2 tests/unit/diagnostics/test_diagnostics_snapshot.sh
-   4 tests/unit/diagnostics/test_drift_dashboard.sh
    2 tests/unit/docs/test_build_manual.sh
    2 tests/unit/docs/test_check_manual.sh
    1 tests/unit/dot-cli/test_dot_cli.sh
    1 tests/unit/dot-cli/test_dot_commands_core.sh
    1 tests/unit/dot-cli/test_dot_commands_manual.sh
-   2 tests/unit/dot-cli/test_dot_commands_meta.sh
-   5 tests/unit/dot-cli/test_dot_commands_restore.sh
    1 tests/unit/dot-cli/test_dot_fleet_enforcement.sh
-   2 tests/unit/dot-cli/test_dot_lib_ui.sh
-   1 tests/unit/dot-cli/test_dot_lib_utils.sh
    3 tests/unit/fish/test_fish_conf_aliases.sh
    1 tests/unit/fish/test_fish_conf_modern_core.sh
-   1 tests/unit/functions/test_prependpath_refactored.sh
    2 tests/unit/install/test_install_chezmoi_verified.sh
    7 tests/unit/install/test_install_edge_cases.sh
    3 tests/unit/install/test_install_idempotency.sh
@@ -44,20 +36,9 @@
    1 tests/unit/misc/test_coverage_ui_cli_exercise.sh
    3 tests/unit/misc/test_fonts_scripts.sh
    1 tests/unit/misc/test_git_hooks.sh
-   2 tests/unit/misc/test_logging.sh
    2 tests/unit/misc/test_macos_icloud_symlinks.sh
-   7 tests/unit/misc/test_qa_coverage_baseline.sh
-   2 tests/unit/misc/test_qa_docs_coverage.sh
    1 tests/unit/misc/test_qa_docs_repo_coverage.sh
-   2 tests/unit/misc/test_qa_traceability_coverage.sh
-   2 tests/unit/misc/test_tuning_scripts.sh
    3 tests/unit/misc/test_wave1_heal_fixes.sh
-   1 tests/unit/nushell/test_nushell_aliases.sh
-   1 tests/unit/ops/test_ops_ai_setup.sh
-   1 tests/unit/ops/test_ops_bundle.sh
-   1 tests/unit/ops/test_ops_prewarm.sh
-   6 tests/unit/ops/test_ops_sbom_policy_bundle.sh
-   5 tests/unit/ops/test_uninstall.sh
    3 tests/unit/secrets/test_atuin_history_filter.sh
    1 tests/unit/secrets/test_secrets_governance.sh
    4 tests/unit/security/test_check_deps_dev.sh
@@ -66,9 +47,6 @@
    6 tests/unit/shell/test_powershell_profile.sh
    5 tests/unit/shell/test_private_build_cache.sh
    1 tests/unit/shell/test_zsh_dot_completion.sh
-   1 tests/unit/theme/test_theme_merge_wallpaper.sh
-   1 tests/unit/theme/test_theme_switch_dispatch.sh
-   1 tests/unit/theme/test_themes_toml.sh
    2 tests/unit/tools/test_ai_core_download_verify.sh
    2 tests/unit/tools/test_dot_bootstrap_nix_verify.sh
    1 tests/unit/tools/test_public_entrypoints.sh

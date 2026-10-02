@@ -55,25 +55,41 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: macos.sh syntax errors"
 fi
 
-# Test: linux.sh requires sudo for system changes
-test_start "tuning_linux_sudo"
-if [[ -f "$TUNING_DIR/linux.sh" ]] && grep -qE 'sudo|EUID|root' "$TUNING_DIR/linux.sh" 2>/dev/null; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: checks for root/sudo"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should check for root"
-fi
+# Recording stubs: sudo, defaults and killall log their arguments and never
+# reach the host.
+TUNE_WORK="$(mktemp -d -t dot-tuning.XXXXXX)"
+trap 'rm -rf "$TUNE_WORK"' EXIT
+mkdir -p "$TUNE_WORK/bin"
+for stub in sudo defaults killall; do
+  printf '#!/usr/bin/env bash\necho "%s $*" >>"%s/calls.log"\ncat >/dev/null 2>&1 || true\n' \
+    "$stub" "$TUNE_WORK" >"$TUNE_WORK/bin/$stub"
+  chmod +x "$TUNE_WORK/bin/$stub"
+done
+tune_run() {
+  rm -f "$TUNE_WORK/calls.log"
+  tune_rc=0
+  PATH="$TUNE_WORK/bin:/usr/bin:/bin" DOTFILES_TUNING=1 "$@" </dev/null >/dev/null 2>&1 || tune_rc=$?
+  tune_calls="$(cat "$TUNE_WORK/calls.log" 2>/dev/null || true)"
+}
 
-# Test: macos uses defaults command
+# Test: linux.sh applies and persists sysctl settings through sudo
+test_start "tuning_linux_sudo"
+tune_run env DOTFILES_PROFILE=server bash "$TUNING_DIR/linux.sh"
+assert_equals "0" "$tune_rc" "linux.sh exits 0"
+assert_contains "sudo sysctl -w fs.inotify.max_user_watches=524288" "$tune_calls" "sysctl goes through sudo"
+assert_contains "sudo tee /etc/sysctl.d/99-dotfiles.conf" "$tune_calls" "settings are persisted"
+tune_run env DOTFILES_PROFILE=bogus bash "$TUNING_DIR/linux.sh"
+assert_equals "1 " "$tune_rc $tune_calls" "an unknown profile exits 1 before any sudo"
+
+# Test: macos.sh writes defaults and restarts Finder and the Dock
 test_start "tuning_macos_defaults"
-if [[ -f "$TUNING_DIR/macos.sh" ]] && grep -q 'defaults' "$TUNING_DIR/macos.sh" 2>/dev/null; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: uses defaults command"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should use defaults command"
-fi
+tune_run env DOTFILES_PROFILE=laptop bash "$TUNING_DIR/macos.sh"
+assert_equals "0" "$tune_rc" "macos.sh exits 0"
+assert_equals "defaults write -g InitialKeyRepeat -int 15" "$(printf '%s\n' "$tune_calls" | head -1)" "defaults is called"
+assert_equals "killall Finder|killall Dock" "$(printf '%s\n' "$tune_calls" | grep '^killall' | paste -sd'|' -)" \
+  "Finder and the Dock restart"
+tune_run env DOTFILES_PROFILE= bash "$TUNING_DIR/macos.sh"
+assert_equals "1 " "$tune_rc $tune_calls" "no profile exits 1 before any defaults write"
 
 echo ""
 echo "Tuning scripts tests completed."

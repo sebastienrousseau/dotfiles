@@ -34,10 +34,6 @@ mkdir -p "$WORK"
 test_start "script_exists"
 assert_file_exists "$SCRIPT_FILE" "scripts/theme/switch.sh must exist"
 
-test_start "launchd_can_resolve_theme_sync"
-assert_file_contains "$SCRIPT_FILE" '$HOME/.local/bin/dot-theme-sync' \
-  "switcher must fall back to the deployed helper under launchd's sparse PATH"
-
 _pass() {
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
@@ -537,5 +533,15 @@ HOME="$LEGACY_HOME" CHEZMOI_SOURCE_DIR="" DOTFILES_WALLPAPER_DIR="$WALLPAPERS" \
 cat "$ERR" >&2
 assert_equals "0" "$rc" "the legacy chezmoi source location is found when the dotfiles dir is absent"
 assert_file_contains "$OUT" "bloom-dark" "the legacy tree's theme is reported"
+
+# launchd runs the switcher with a sparse PATH: with dot-theme-sync off PATH,
+# the deployed helper in ~/.local/bin is used.
+test_start "launchd_can_resolve_theme_sync"
+mkdir -p "$HOME/.local/bin"
+mv "$BIN/dot-theme-sync" "$HOME/.local/bin/dot-theme-sync"
+: >"$SYNC_CALLS"
+rc="$(switch maui-dark)"
+mv "$HOME/.local/bin/dot-theme-sync" "$BIN/dot-theme-sync"
+assert_equals "0 maui-dark" "$rc $(last_sync)" "the helper under ~/.local/bin applies the theme"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

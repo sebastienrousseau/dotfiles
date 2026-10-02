@@ -12,10 +12,6 @@ FUNC_FILE="$REPO_ROOT/defaults/.chezmoitemplates/functions/misc/prependpath.sh"
 
 echo "Testing refactored prependpath function..."
 
-# Test: prependpath.sh has valid syntax
-test_start "prependpath_uses_string_match"
-assert_file_contains "$FUNC_FILE" '":${PATH}:"' "should use string match pattern"
-
 # Test: prependpath adds new directory
 test_start "prependpath_adds_new"
 result=$(bash -c '
