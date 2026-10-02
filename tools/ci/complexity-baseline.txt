@@ -123,7 +123,6 @@
   22   32   40.2   53     0 scripts/diagnostics/security-score.sh::check_system
   11   11    5.6   26     0 scripts/diagnostics/security-score.sh::get_grade
   11   16   24.0   62     0 scripts/diagnostics/security-score.sh::print_summary
-  12   12   27.3   61    70 scripts/diagnostics/snapshot.sh::<top>
   13   14   21.3   54    69 scripts/diagnostics/version-locks.sh::<top>
   34   32   49.2  184   193 scripts/diagnostics/workstation-attestation.sh::<top>
    1    0    1.0    1   522 scripts/dot/commands/agent.sh::<top>

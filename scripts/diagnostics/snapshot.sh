@@ -10,24 +10,24 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../../lib/dot/ui.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../../lib/dot/ui.sh"
+# shellcheck source=../../lib/dot/probe.sh
+source "$SCRIPT_DIR/../../lib/dot/probe.sh"
 
 ui_init
 
-BASELINE=false
-FORCE=false
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --baseline | -b)
-      BASELINE=true
-      shift
-      ;;
-    --force | -f)
-      FORCE=true
-      shift
-      ;;
-    *) shift ;;
-  esac
-done
+# _snapshot_args <args…> — set BASELINE and FORCE; anything else is ignored.
+_snapshot_args() {
+  BASELINE=false
+  FORCE=false
+  local arg
+  for arg in "$@"; do
+    case "$arg" in
+      --baseline | -b) BASELINE=true ;;
+      --force | -f) FORCE=true ;;
+    esac
+  done
+}
+_snapshot_args "$@"
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/snapshots"
 mkdir -p "$STATE_DIR"
@@ -45,13 +45,15 @@ fi
 
 safe() { printf '%s' "$1" | sed 's/"/\\"/g'; }
 
+# first_line <command…> — the first line of a tool's output, or nothing if
+# the tool is missing, fails or does not answer within 5 seconds (rustc's
+# rustup proxy waits forever when HOME has no toolchain).
+first_line() {
+  dot_probe 5 "$@" | head -1 || true
+}
+
 get_version() {
-  local cmd="$1"
-  if command -v "$cmd" >/dev/null 2>&1; then
-    "$cmd" --version 2>/dev/null | head -1 | awk '{print $NF}'
-  else
-    echo ""
-  fi
+  first_line "$1" --version | awk '{print $NF}'
 }
 
 os_name=$(uname -s 2>/dev/null || echo "unknown")
@@ -75,11 +77,11 @@ cat >"$output" <<JSON
     "git": "$(safe "$(get_version git)")",
     "zsh": "$(safe "$(get_version zsh)")",
     "node": "$(safe "$(get_version node)")",
-    "python": "$(safe "$(python3 --version 2>/dev/null | awk '{print $2}')")",
-    "rustc": "$(safe "$(rustc --version 2>/dev/null | awk '{print $2}')")",
-    "go": "$(safe "$(go version 2>/dev/null | awk '{print $3}')")",
-    "nvim": "$(safe "$(nvim --version 2>/dev/null | head -1 | awk '{print $2}')")",
-    "tmux": "$(safe "$(tmux -V 2>/dev/null | awk '{print $2}')")",
+    "python": "$(safe "$(first_line python3 --version | awk '{print $2}')")",
+    "rustc": "$(safe "$(first_line rustc --version | awk '{print $2}')")",
+    "go": "$(safe "$(first_line go version | awk '{print $3}')")",
+    "nvim": "$(safe "$(first_line nvim --version | awk '{print $2}')")",
+    "tmux": "$(safe "$(first_line tmux -V | awk '{print $2}')")",
     "starship": "$(safe "$(get_version starship)")",
     "mise": "$(safe "$(get_version mise)")"
   }
