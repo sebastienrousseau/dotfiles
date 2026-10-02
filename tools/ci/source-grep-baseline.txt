@@ -42,7 +42,6 @@
    1 tests/unit/misc/test_git_hooks.sh
    2 tests/unit/misc/test_logging.sh
    2 tests/unit/misc/test_macos_icloud_symlinks.sh
-   7 tests/unit/misc/test_qa_coverage_baseline.sh
    1 tests/unit/misc/test_qa_docs_repo_coverage.sh
    2 tests/unit/misc/test_tuning_scripts.sh
    3 tests/unit/misc/test_wave1_heal_fixes.sh
@@ -50,7 +49,6 @@
    1 tests/unit/ops/test_ops_ai_setup.sh
    1 tests/unit/ops/test_ops_bundle.sh
    1 tests/unit/ops/test_ops_prewarm.sh
-   6 tests/unit/ops/test_ops_sbom_policy_bundle.sh
    3 tests/unit/secrets/test_atuin_history_filter.sh
    1 tests/unit/secrets/test_secrets_governance.sh
    4 tests/unit/security/test_check_deps_dev.sh

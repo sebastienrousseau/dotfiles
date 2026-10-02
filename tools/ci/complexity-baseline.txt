@@ -212,5 +212,5 @@
    9    9   31.5   68   113 tools/docs/generate-command-index.sh::<top>
   19   21   48.0   79    83 tools/docs/generate-completions.sh::<top>
   29   31   49.3  123   140 tools/docs/generate-manpage.sh::<top>
-  14   14   38.6  111   111 tools/release/package-policy-bundles.sh::<top>
+  10   11   35.1   93   119 tools/release/package-policy-bundles.sh::<top>
   17   11   33.6   47    50 tools/release/stage-dot.sh::<top>
