@@ -14,12 +14,10 @@ t = "test"
 tr = "test --release"
 w = "watch -x check -x test"
 
-# Cargo extensions
-audit = "audit"
-outdated = "outdated"
-expand = "expand"
-tree = "tree"
-bloat = "bloat --release --crates"
+# Cargo extensions (cargo-audit, cargo-outdated, cargo-expand and
+# cargo tree) run under their own names; an alias that names itself
+# is a recursive definition cargo rejects.
+bl = "bloat --release --crates"
 
 [build]
 # Use all available CPU cores
