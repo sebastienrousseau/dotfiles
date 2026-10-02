@@ -143,7 +143,9 @@ test_start "bare_environment_reports_failures_and_low_score"
 new_home bare
 run_health "$BASE_BIN"
 rc=$?
-assert_equals "0" "$rc" "health still exits 0 when the environment is bare"
+# A failed check is a failure: exit 1, as `dot doctor` does, so scripts
+# and CI can act on it instead of matching text.
+assert_equals "1" "$rc" "health exits 1 when any check fails"
 assert_file_contains "$OUT" "Chezmoi installed" "chezmoi check reported"
 assert_file_contains "$OUT" "Not installed" "missing tools reported as not installed"
 assert_file_contains "$OUT" "None found" "no config directories found"
@@ -171,6 +173,8 @@ touch "$SANDBOX_HOME/.config/chezmoi/key.txt" \
 : >"$SANDBOX_HOME/.ssh/id_ed25519"
 chmod 600 "$SANDBOX_HOME/.ssh/id_ed25519"
 SHELL=/bin/zsh run_health "$FULL_BIN"
+rc=$?
+assert_equals "0" "$rc" "health exits 0 when no check fails"
 assert_file_contains "$OUT" "Chezmoi source directory" "source dir check reported"
 assert_file_contains "$OUT" "Zinit plugin manager" "zinit check reported"
 assert_file_contains "$OUT" "Neovim plugins (lazy.nvim)" "lazy.nvim detected"
@@ -312,9 +316,11 @@ assert_file_contains "$OUT" '"score":' "-j emits the same JSON document"
 # ===========================================================================
 test_start "verbose_and_unknown_flags_are_accepted"
 new_home flags
+run_health "$BASE_BIN"
+plain_rc=$?
 run_health "$BASE_BIN" --verbose --definitely-not-a-flag
 rc=$?
-assert_equals "0" "$rc" "unknown flags are skipped rather than fatal"
+assert_equals "$plain_rc" "$rc" "unknown flags are skipped rather than fatal (same exit as without them)"
 assert_file_contains "$OUT" "Health Score" "the report still renders"
 
 test_start "short_verbose_flag_accepted"
@@ -500,8 +506,10 @@ EOF
 test_start "tty_run_uses_colour_and_gum"
 new_home tty
 if command -v script >/dev/null 2>&1; then
+  run_health "$FULL_BIN"
+  plain_rc=$?
   tty_health "$FULL_BIN"
-  assert_file_contains "$WORK/tty.rc" "health-rc=0" "health exits 0 on a terminal"
+  assert_file_contains "$WORK/tty.rc" "health-rc=$plain_rc" "health exits the same on a terminal as off one"
   assert_file_contains "$OUT" "Health Score" "the score bar renders on a terminal"
 else
   _fail "script(1) not found — the TTY renderer cannot be exercised"

@@ -148,8 +148,18 @@ test_fm_doctor_audit() {
   # the health dashboard — the audit-shaped diagnostic the name meant.
   test_start "fm_doctor_audit"
   fm_run doctor --audit
-  # health.sh reports failures in its summary, never through its exit code.
-  fm_expect_rc 0
+  # health.sh exits 1 when any check fails and 0 otherwise; the sandbox's
+  # failures depend on the host's tools, so check the exit code against the
+  # failure count the summary prints.
+  local failures
+  failures="$(printf '%s\n' "$FM_OUT" | sed -n 's/.*Failures:[^0-9]*\([0-9][0-9]*\).*/\1/p' | tail -1)"
+  if [[ -z "$failures" ]]; then
+    fm_fail "the summary has no Failures count"
+  elif [[ "$failures" -gt 0 ]]; then
+    fm_expect_rc 1
+  else
+    fm_expect_rc 0
+  fi
   test_start "fm_doctor_audit_is_routed"
   fm_expect_out "Dotfiles Health Dashboard"
   test_start "fm_doctor_audit_target_exists"
@@ -243,10 +253,25 @@ test_fm_heal_dry_run() {
   fm_expect_config_unchanged "$before"
 }
 
+# health exits 1 when any check fails, and which checks fail depends on the
+# host's tools. Expect the exit the reported failure count implies (JSON
+# "failures": N, or the summary's Failures: N).
+fm_expect_health_rc() {
+  local failures
+  failures="$(printf '%s\n' "$FM_OUT" | sed -n 's/.*"failures": *\([0-9][0-9]*\).*/\1/p; s/.*Failures:[^0-9]*\([0-9][0-9]*\).*/\1/p' | head -1)"
+  if [[ -z "$failures" ]]; then
+    fm_fail "no failure count in the output"
+  elif ((failures > 0)); then
+    fm_expect_rc 1
+  else
+    fm_expect_rc 0
+  fi
+}
+
 test_fm_health() {
   test_start "fm_health"
   fm_run health
-  fm_expect_rc 0
+  fm_expect_health_rc
   test_start "fm_health_renders_dashboard"
   fm_expect_out "Dotfiles Health Dashboard"
   test_start "fm_health_prints_summary"
@@ -258,7 +283,7 @@ test_fm_health() {
 test_fm_health_json() {
   test_start "fm_health_json"
   fm_run health -j
-  fm_expect_rc 0
+  fm_expect_health_rc
   test_start "fm_health_json_is_json"
   fm_expect_json
   test_start "fm_health_json_has_score"
@@ -270,7 +295,7 @@ test_fm_health_json() {
 test_fm_health_verbose() {
   test_start "fm_health_verbose"
   fm_run health -v
-  fm_expect_rc 0
+  fm_expect_health_rc
   test_start "fm_health_verbose_renders_dashboard"
   fm_expect_out "Dotfiles Health Dashboard"
   test_start "fm_health_verbose_prints_summary"
@@ -280,7 +305,7 @@ test_fm_health_verbose() {
 test_fm_health_check_alias() {
   test_start "fm_health_check_alias"
   fm_run health-check -j
-  fm_expect_rc 0
+  fm_expect_health_rc
   test_start "fm_health_check_alias_is_json"
   fm_expect_json
   test_start "fm_health_check_alias_matches_health"

@@ -33,9 +33,16 @@ extract_json() {
   awk 'BEGIN{p=0} /^[[:space:]]*[{]/{p=1} p{print}'
 }
 
-health_json=$(env -u SHELLOPTS bash "$SCRIPT_DIR/health.sh" --json 2>/dev/null | extract_json)
-security_json=$(env -u SHELLOPTS bash "$SCRIPT_DIR/security-score.sh" --json 2>/dev/null | extract_json)
-perf_json=$(env -u SHELLOPTS bash "$SCRIPT_DIR/perf.sh" --json 2>/dev/null | extract_json)
+# collect_json <script> — the script's --json document. A probe's exit code
+# reports its verdict (health.sh exits 1 when a check fails), not whether the
+# JSON is usable, so it is ignored here; an empty document is caught below.
+collect_json() {
+  env -u SHELLOPTS bash "$SCRIPT_DIR/$1" --json 2>/dev/null | extract_json || true
+}
+
+health_json=$(collect_json health.sh)
+security_json=$(collect_json security-score.sh)
+perf_json=$(collect_json perf.sh)
 
 if [[ -z "$health_json" || -z "$security_json" || -z "$perf_json" ]]; then
   ui_err "scorecard" "failed to collect JSON metrics"
