@@ -238,6 +238,10 @@ ALLOW_W=1 run_vs --force
 assert_equals "0:1:1" \
   "$VS_RC:$(find "$SANDBOX/.version-sync-backup" -maxdepth 1 -name 'README.md.*.backup' | wc -l | tr -d ' '):$(find "$SANDBOX/.version-sync-backup/docs" -maxdepth 1 -name 'README.md.*.backup' 2>/dev/null | wc -l | tr -d ' ')" \
   "root and docs/ README.md each get their own backup"
+test_start "version_sync_exec_backup_reports_the_count_it_wrote"
+backups_written="$(find "$SANDBOX/.version-sync-backup" -name '*.backup' -type f | wc -l | tr -d ' ')"
+assert_contains "Backed up $backups_written files" "$VS_OUT" "the summary counts every backup"
+assert_not_equals "0" "$backups_written" "and there is something to count"
 
 # 11. Write path with neither rg nor jq on PATH: package.json is rewritten by
 # sed instead of jq, and the markdown scan uses find+grep.

@@ -370,4 +370,49 @@ assert_contains "Installed: timed out" "$stuck_out" "the stuck cargo count is re
 assert_contains "npm: 9.9.9" "$stuck_out" "the other package managers are still reported"
 rm -rf "$stuck_tmp"
 
+# `dot tools install` checks every tool name before entering the Nix shell
+# and passes flags through: a name with shell metacharacters must never
+# reach nix, and a flag must not be rejected as a name.
+test_start "tools_install_validates_names_and_passes_flags"
+nix_tmp="$(mktemp -d)"
+mkdir -p "$nix_tmp/bin" "$nix_tmp/home"
+printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >>"%s/nix.calls"\n' "$nix_tmp" >"$nix_tmp/bin/nix"
+chmod +x "$nix_tmp/bin/nix"
+nix_run() {
+  env PATH="$nix_tmp/bin:$PATH" HOME="$nix_tmp/home" CHEZMOI_SOURCE_DIR="$REPO_ROOT" \
+    bash "$TOOLS_FILE" tools install "$@" >"$nix_tmp/out" 2>&1
+}
+nix_run 'bad;name'
+bad_rc=$?
+assert_not_equals "0" "$bad_rc" "an invalid tool name fails"
+assert_file_contains "$nix_tmp/out" "Invalid tool name: bad;name" "and is named"
+assert_equals "0" "$(cat "$nix_tmp/nix.calls" 2>/dev/null | wc -l | tr -d ' ')" "nix is never run for it"
+nix_run --impure node
+assert_equals "0" "$?" "a flag and a valid name are accepted"
+# The source dir is resolved physically (/var is /private/var on macOS),
+# so match the shape of the call, not REPO_ROOT's spelling.
+assert_output_matches '^develop .*/nix --impure node$' "cat '$nix_tmp/nix.calls'"
+rm -rf "$nix_tmp"
+
+# `dot env install|use` check every tool spec before mise runs, and pass
+# flags through.
+test_start "env_install_and_use_validate_specs_and_pass_flags"
+mise_tmp="$(mktemp -d)"
+mkdir -p "$mise_tmp/bin" "$mise_tmp/home"
+printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >>"%s/mise.calls"\n' "$mise_tmp" >"$mise_tmp/bin/mise"
+chmod +x "$mise_tmp/bin/mise"
+for sub in install use; do
+  : >"$mise_tmp/mise.calls"
+  env PATH="$mise_tmp/bin:$PATH" HOME="$mise_tmp/home" \
+    bash "$TOOLS_FILE" env "$sub" 'bad;spec' >"$mise_tmp/out" 2>&1
+  assert_not_equals "0" "$?" "env $sub rejects an invalid spec"
+  assert_file_contains "$mise_tmp/out" "Invalid tool spec: bad;spec" "env $sub names it"
+  assert_equals "0" "$(wc -l <"$mise_tmp/mise.calls" | tr -d ' ')" "mise never runs for it ($sub)"
+  env PATH="$mise_tmp/bin:$PATH" HOME="$mise_tmp/home" \
+    bash "$TOOLS_FILE" env "$sub" --global node@24 >"$mise_tmp/out" 2>&1
+  assert_equals "0" "$?" "env $sub accepts a flag and a valid spec"
+  assert_contains "$sub --global node@24" "$(cat "$mise_tmp/mise.calls")" "mise gets both ($sub)"
+done
+rm -rf "$mise_tmp"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

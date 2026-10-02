@@ -66,6 +66,8 @@ EOF
 cat >"$BIN/chezmoi" <<EOF
 #!$REAL_BASH
 printf 'chezmoi %s\n' "\$*"
+# What the secrets policy exported to the commands dot runs.
+printf 'inherited auto_load=%s\n' "\${DOTFILES_SECRETS_AUTO_LOAD:-unset}"
 exit 0
 EOF
 # Belt and braces: `security` is the macOS keychain CLI the provider would
@@ -106,14 +108,14 @@ OUT="$WORK/out.txt"
 ERR="$WORK/err.txt"
 # _run <script> <args…> — shared runner. The provider is pinned to the
 # file-backed `pass` stub so nothing reaches a keychain, GPG agent or age
-# key. Stdout is captured; stderr is replayed so the coverage runner keeps
+# key; FORCE_PROVIDER="" (set but empty) leaves it to the data file's policy. Stdout is captured; stderr is replayed so the coverage runner keeps
 # its xtrace records. Echoes the exit status.
 _run() {
   local script="$1" rc=0
   shift
   PATH="$BIN:/usr/bin:/bin" \
     DOTFILES_SHOW_LOGO=0 \
-    DOTFILES_SECRETS_PROVIDER="${FORCE_PROVIDER:-pass}" \
+    DOTFILES_SECRETS_PROVIDER="${FORCE_PROVIDER-pass}" \
     DOT_SECRETS_HOME="$WORK/secrets-home" \
     DOT_SECRETS_STORE_DIR="$WORK/secrets-home/store" \
     DOT_SECRETS_INDEX_FILE="$WORK/secrets-home/index.txt" \
@@ -173,6 +175,33 @@ mkdir -p "$HOME/.config/chezmoi"
 rc="$(secrets secrets edit)"
 assert_equals "0" "$rc" "edit exits 0 once a key exists"
 assert_file_contains "$OUT" "chezmoi edit --apply" "chezmoi is asked to edit the encrypted file"
+rm -f "$HOME/.config/chezmoi/key.txt"
+
+# [secrets.policy] auto_load reaches the commands dot runs as
+# DOTFILES_SECRETS_AUTO_LOAD: true -> 1, false -> 0, and only the policy
+# table counts, not an auto_load key elsewhere in the data file.
+test_start "the_policy_auto_load_is_exported_to_child_commands"
+mkdir -p "$HOME/.config/chezmoi"
+: >"$HOME/.config/chezmoi/key.txt"
+cp "$SRC/.chezmoidata.toml" "$WORK/data.orig"
+auto_load_seen() {
+  printf '%s\n' "$1" >"$SRC/.chezmoidata.toml"
+  secrets_fixture secrets edit >/dev/null
+  sed -n 's/^inherited auto_load=//p' "$OUT"
+}
+assert_equals "1" "$(auto_load_seen $'[secrets.policy]\nprovider = "pass"\nauto_load = true')" "true exports 1"
+assert_equals "0" "$(auto_load_seen $'[secrets.policy]\nprovider = "pass"\nauto_load = false')" "false exports 0"
+assert_equals "0" "$(auto_load_seen $'[features]\nauto_load = true\n[secrets.policy]\nprovider = "pass"\nauto_load = false\n[other]\nauto_load = true')" \
+  "an auto_load outside [secrets.policy] is ignored"
+
+test_start "only_the_policy_table_sets_the_provider"
+printf '%s\n' '[features]' 'provider = "keychain"' '[secrets.policy]' 'provider = "pass"' '[other]' 'provider = "keychain"' \
+  >"$SRC/.chezmoidata.toml"
+rc="$(FORCE_PROVIDER="" secrets_fixture secrets provider)"
+assert_equals "0" "$rc" "provider exits 0"
+assert_file_contains "$OUT" "pass" "the provider comes from [secrets.policy] only"
+assert_equals "0" "$(grep -c keychain "$OUT")" "a provider key in another table is ignored"
+cp "$WORK/data.orig" "$SRC/.chezmoidata.toml"
 rm -f "$HOME/.config/chezmoi/key.txt"
 
 test_start "an_unknown_secrets_subcommand_is_rejected"
@@ -268,6 +297,17 @@ test_start "env_load_is_an_alias_for_secrets_load"
 rc="$(secrets_fixture env load ai)"
 assert_equals "0" "$rc" "env load exits 0"
 assert_file_contains "$OUT" "export ANTHROPIC_API_KEY=" "env load emits the same exports"
+
+test_start "env_alone_defaults_to_load"
+# `dot env` with nothing after it means `dot env load`, whose bucket
+# defaults to ai: the same exports, not a crash on shifting an empty
+# argument list.
+rc_load="$(secrets_fixture env load)"
+out_load="$(cat "$OUT")"
+rc_bare="$(secrets_fixture env)"
+assert_equals "0|0" "$rc_load|$rc_bare" "both exit 0"
+assert_contains "export ANTHROPIC_API_KEY=" "$out_load" "env load defaults to the ai bucket"
+assert_equals "$out_load" "$(cat "$OUT")" "env alone emits what env load does"
 
 test_start "env_rejects_an_unknown_subcommand"
 rc="$(secrets env dump)"

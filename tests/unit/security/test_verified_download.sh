@@ -127,6 +127,24 @@ else
   ((TESTS_PASSED++)) || true
 fi
 
+# A manifest that lists the asset twice, or with junk before its hash, is
+# ambiguous: it must be refused before the asset is fetched, not left to the
+# checksum comparison after the download.
+test_start "verified_asset_rejects_an_ambiguous_manifest_before_fetching"
+for manifest_line in "$(printf '%s  Font.zip\n%s  ./Font.zip' "$asset_hash" "$asset_hash")" "x$asset_hash  Font.zip"; do
+  printf '%s\n' "$manifest_line" >"$FAKE_CHECKSUM_PAYLOAD"
+  ambiguous_err="$(download_verified_asset \
+    https://example.test/Font.zip \
+    https://example.test/checksums.txt \
+    Font.zip "$tmp/ambiguous.zip" 1024 2>&1 >/dev/null)"
+  if [[ "$ambiguous_err" == *"absent or ambiguous"* && ! -e "$tmp/ambiguous.zip" ]]; then
+    ((TESTS_PASSED++)) || true
+  else
+    ((TESTS_FAILED++)) || true
+    printf '  ✗ %s: not refused as ambiguous: %s\n' "$CURRENT_TEST" "$ambiguous_err"
+  fi
+done
+
 test_start "verified_asset_rejects_checksum_mismatch"
 printf '%064d  Font.zip\n' 0 >"$FAKE_CHECKSUM_PAYLOAD"
 if download_verified_asset \

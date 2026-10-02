@@ -181,6 +181,27 @@ assert_equals "2" "$?" "dot_secrets_get with no provider should return exit code
 # Run in a child shell with `set -euo pipefail` — this file runs with `set +e`,
 # which is exactly the condition that hides the bug.
 # ──────────────────────────────────────────────────────────────────────────────
+# A pass lookup that fails is a provider failure, not "not found": callers
+# fall back differently for the two. dot runs under pipefail, so this does.
+test_start "secrets_get_reports_a_failing_pass_as_a_provider_failure"
+mock_command "pass" "" 1
+pass_err="$( (
+  set -o pipefail
+  DOTFILES_SECRETS_PROVIDER=pass dot_secrets_get "some-key"
+) 2>&1 >/dev/null)"
+pass_rc=$?
+assert_equals "1" "$pass_rc" "the failing provider's exit code is returned"
+assert_contains "provider pass failed (rc=1)" "$pass_err" "reported as a provider failure"
+
+test_start "secrets_get_returns_a_pass_value"
+mock_command "pass" "s3cret" 0
+assert_equals "s3cret" "$( (
+  set -o pipefail
+  DOTFILES_SECRETS_PROVIDER=pass dot_secrets_get "some-key"
+) 2>/dev/null)" \
+  "the first line of pass show"
+rm -f "$MOCK_BIN_DIR/pass"
+
 test_start "secrets_set_plain_enc_reports_a_successful_write"
 _PLAIN_TMP="$(portable_mktemp_dir)"
 mkdir -p "$_PLAIN_TMP/bin"
@@ -253,6 +274,43 @@ _fail_out="$(
 _fail_rc=$?
 assert_not_equals "0" "$_fail_rc" "a failing age must not report success"
 assert_output_not_contains "FAIL_KEY" "cat '$_PLAIN_TMP/secrets/index.txt'"
+
+# plain-enc needs age-keygen to derive the recipient. Missing, or failing,
+# it must fail the store: success here would mean a secret the caller
+# thinks is saved, with no encrypted file behind it.
+_keygen_case() {
+  local label="$1" keygen_body="$2" bin="$_PLAIN_TMP/kg-$1"
+  rm -rf "$bin" "$_PLAIN_TMP/kg-secrets"
+  mkdir -p "$bin"
+  printf '#!/usr/bin/env bash\ncat >/dev/null; exit 0\n' >"$bin/age"
+  [[ -n "$keygen_body" ]] && printf '#!/usr/bin/env bash\n%s\n' "$keygen_body" >"$bin/age-keygen"
+  chmod +x "$bin"/*
+  ln -sf "$(command -v bash)" "$bin/bash"
+  for util in mktemp rm mkdir cat printf grep sort uniq mv chmod touch dirname; do
+    p="$(command -v "$util" 2>/dev/null)" && ln -sf "$p" "$bin/$util"
+  done
+  _kg_out="$(
+    PATH="$bin" TMPDIR="$_PLAIN_TMP/tmp" DOTFILES_SECRETS_PROVIDER=plain-enc \
+      DOT_SECRETS_HOME="$_PLAIN_TMP/kg-secrets" \
+      DOT_SECRETS_STORE_DIR="$_PLAIN_TMP/kg-secrets/store" \
+      DOT_SECRETS_INDEX_FILE="$_PLAIN_TMP/kg-secrets/index.txt" \
+      DOT_SECRETS_AGE_KEY="$_PLAIN_TMP/key.txt" \
+      "$bin/bash" -c 'set -euo pipefail; source "$1"; dot_secrets_set KG_KEY v' _ "$SECRETS_FILE" 2>&1
+  )"
+  _kg_rc=$?
+}
+
+test_start "secrets_set_plain_enc_fails_without_age_keygen"
+_keygen_case missing ""
+assert_not_equals "0" "$_kg_rc" "no age-keygen: the store fails"
+assert_contains "age-keygen not installed" "$_kg_out" "and says why"
+assert_file_not_exists "$_PLAIN_TMP/kg-secrets/store/KG_KEY.age" "no encrypted file"
+
+test_start "secrets_set_plain_enc_fails_when_age_keygen_fails"
+_keygen_case failing "exit 1"
+assert_not_equals "0" "$_kg_rc" "a failing age-keygen fails the store"
+assert_contains "failed to derive the age recipient" "$_kg_out" "and says why"
+assert_file_not_exists "$_PLAIN_TMP/kg-secrets/store/KG_KEY.age" "no encrypted file"
 
 test_start "secrets_set_plain_enc_leaves_no_recipient_file_behind"
 # The recipient file the store writes is a temporary; dropping the RETURN

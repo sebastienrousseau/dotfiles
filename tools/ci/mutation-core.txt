@@ -1,0 +1,18 @@
+# Core scripts for the nightly mutation run (.github/workflows/mutation-nightly.yml).
+# The plan's 10/10 bar is a behavioural mutation score of 90% or more on these.
+# One repo-relative path per line; lines starting with # are ignored.
+scripts/ops/rollback.sh
+install.sh
+lib/dot/utils.sh
+bin/dot
+scripts/diagnostics/health.sh
+lib/dot/log.sh
+scripts/dot/commands/registry.sh
+scripts/version-sync.sh
+scripts/lib/secrets_provider.sh
+lib/dot/verified-download.sh
+scripts/diagnostics/doctor.sh
+scripts/theme/switch.sh
+scripts/dot/commands/fleet.sh
+scripts/dot/commands/tools.sh
+scripts/dot/commands/secrets.sh

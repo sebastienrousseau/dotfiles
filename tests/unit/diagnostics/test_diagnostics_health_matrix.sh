@@ -208,6 +208,19 @@ assert_file_contains "$OUT" "1/3 present" "partial config directories reported a
 # ===========================================================================
 # 4. Weak SSH key permissions.
 # ===========================================================================
+# A font directory that holds only other fonts is not a Nerd Font: the
+# check must warn, not pass because the directory exists. (No fc-list on
+# the base PATH, and no ~/Library/Fonts, so the XDG dir decides.)
+test_start "a_fonts_dir_without_a_nerd_font_warns"
+new_home plainfonts
+mkdir -p "$SANDBOX_HOME/.local/share/fonts"
+touch "$SANDBOX_HOME/.local/share/fonts/DejaVuSans.ttf"
+run_health "$BASE_BIN" --json
+assert_file_contains "$OUT" '"check":"Nerd Font available","status":"warn"' "no Nerd Font, a warning"
+touch "$SANDBOX_HOME/.local/share/fonts/HackNerdFont-Regular.ttf"
+run_health "$BASE_BIN" --json
+assert_file_contains "$OUT" '"check":"Nerd Font available","status":"pass"' "a Nerd Font in the XDG dir passes"
+
 test_start "loose_ssh_key_mode_warns"
 new_home sshperm
 mkdir -p "$SANDBOX_HOME/.ssh"

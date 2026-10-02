@@ -88,6 +88,9 @@ test_fm_help_all() {
   fm_expect_rc 0
   test_start "fm_help_all_lists_full_reference"
   fm_expect_out "Command Reference"
+  # Commands are grouped under section headers.
+  test_start "fm_help_all_groups_commands_under_sections"
+  fm_expect_out "== Core =="
   # `help all` is the source the command index is generated from, so it has to
   # stay substantially larger than the overview.
   test_start "fm_help_all_is_larger_than_overview"

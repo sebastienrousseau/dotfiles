@@ -50,6 +50,15 @@ printf 'git %s\n' "$*" >>"$TMP_LOG"
 if [[ "${1:-}" == "clone" ]]; then
   mkdir -p "${@: -1}/.git"
 fi
+# `git config --global user.X` answers from STUB_GIT_<X> (unset = no value).
+if [[ "${1:-} ${2:-}" == "config --global" ]]; then
+  case "${3:-}" in
+    user.name) [[ -n "${STUB_GIT_NAME:-}" ]] && printf '%s\n' "$STUB_GIT_NAME" && exit 0 ;;
+    user.email) [[ -n "${STUB_GIT_EMAIL:-}" ]] && printf '%s\n' "$STUB_GIT_EMAIL" && exit 0 ;;
+    user.signingkey) [[ -n "${STUB_GIT_KEY:-}" ]] && printf '%s\n' "$STUB_GIT_KEY" && exit 0 ;;
+  esac
+  exit 1
+fi
 exit 0
 STUB
 printf '#!/usr/bin/env bash\nexit 1\n' >"$WORK/bin/curl"
@@ -135,6 +144,28 @@ assert_equals 0 "$RC" "install exits 0"
 assert_contains "No existing dotfiles to back up." "$OUT" "zero backups reported as none"
 backups=("$H"/.dotfiles.bak.*)
 assert_equals 0 "${#backups[@]}" "the empty backup directory is removed"
+
+# ── seed_git_identity: the global git identity reaches chezmoi's [data] ──
+# The installer configures chezmoi with sourceDir, so the template's prompts
+# never run; without the seed a fresh ~/.gitconfig has no identity. The
+# signing key is written only when one is set.
+test_start "install_seeds_name_email_and_signing_key"
+H="$(new_home seedkey local)"
+STUB_GIT_NAME="Ada Lovelace" STUB_GIT_EMAIL="ada@example.com" STUB_GIT_KEY="~/.ssh/id_ed25519.pub" \
+  run_install "$H"
+assert_equals 0 "$RC" "install exits 0"
+cfg="$H/.config/chezmoi/chezmoi.toml"
+assert_file_contains "$cfg" 'name = "Ada Lovelace"' "name seeded"
+assert_file_contains "$cfg" 'email = "ada@example.com"' "email seeded"
+assert_file_contains "$cfg" 'signingkey = "~/.ssh/id_ed25519.pub"' "signing key seeded"
+
+test_start "install_seeds_no_signing_key_when_none_is_set"
+H="$(new_home seednokey local)"
+STUB_GIT_NAME="Ada Lovelace" STUB_GIT_EMAIL="ada@example.com" run_install "$H"
+assert_equals 0 "$RC" "install exits 0 without a signing key"
+cfg="$H/.config/chezmoi/chezmoi.toml"
+assert_file_contains "$cfg" 'email = "ada@example.com"' "identity still seeded"
+assert_equals "0" "$(grep -c signingkey "$cfg" 2>/dev/null)" "no empty signingkey entry"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
