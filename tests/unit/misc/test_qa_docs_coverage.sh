@@ -31,5 +31,24 @@ test_start "docs_coverage_contract_passes"
 assert_exit_code 0 "bash '$SCRIPT_FILE'"
 
 test_start "docs_coverage_contract_reports_100_percent_floor"
-assert_file_contains "$SCRIPT_FILE" "MIN_DOCS_COVERAGE=\"\${MIN_DOCS_COVERAGE:-100}\"" "docs coverage contract should default to a 100% floor"
-assert_file_contains "$SCRIPT_FILE" "Docs coverage:" "docs coverage contract should report a percentage"
+docs_out="$(bash "$SCRIPT_FILE" 2>&1)"
+docs_counts="$(printf '%s\n' "$docs_out" | sed -n 's|^Docs coverage: \([0-9]*\)/\([0-9]*\) (100\.00%)$|\1 \2|p')"
+assert_equals "true" "$([[ -n "$docs_counts" && "${docs_counts% *}" == "${docs_counts#* }" ]] && echo true || echo false)" \
+  "every check is covered: ${docs_counts:-no report line}"
+assert_contains "Threshold: 100%" "$docs_out" "the floor defaults to 100%"
+
+# A minimal copy of the inputs with one documented command removed: the gap
+# is named and the 100% floor fails the run.
+test_start "docs_coverage_names_a_gap_and_fails_the_floor"
+DOCS_WORK="$(mktemp -d -t dot-docs-cov.XXXXXX)"
+trap 'rm -rf "$DOCS_WORK"' EXIT
+for f in scripts/qa/docs-coverage.sh bin/dot docs/reference/UTILS.md docs/AI.md \
+  docs/reference/SCRIPTS.md docs/ARCHITECTURE.md defaults/.chezmoitemplates/functions/groups.json; do
+  mkdir -p "$DOCS_WORK/$(dirname "$f")"
+  cp "$REPO_ROOT/$f" "$DOCS_WORK/$f"
+done
+sed -i.bak 's/`dot fleet/`dot FLEET/g' "$DOCS_WORK/docs/reference/UTILS.md"
+gap_rc=0
+gap_out="$(bash "$DOCS_WORK/scripts/qa/docs-coverage.sh" 2>&1)" || gap_rc=$?
+assert_not_equals "0" "$gap_rc" "a documentation gap fails the run"
+assert_contains "Missing documentation: dot fleet in UTILS.md" "$gap_out" "and names it"
