@@ -62,9 +62,15 @@ fi
 
 AGENT_MODULE="$REPO_ROOT/scripts/dot/commands/agent.sh"
 
+# Both subcommands reach their own handler, not the dot mode usage error.
 test_start "meta_agent_enterprise_subcommands"
-assert_file_contains "$AGENT_MODULE" "checkpoint)" "agent module defines checkpoint handling"
-assert_file_contains "$AGENT_MODULE" "conformance)" "agent module defines conformance handling"
+mode_rc=0
+mode_out="$(bash "$REPO_ROOT/bin/dot" mode checkpoint bogus 2>&1)" || mode_rc=$?
+assert_equals "1 Usage: dot agent checkpoint [save|list|show|replay]" "$mode_rc $mode_out" \
+  "checkpoint dispatches to its own action parser"
+mode_status="$(bash "$REPO_ROOT/bin/dot" mode conformance --json 2>/dev/null |
+  python3 -c 'import json,sys; print(json.load(sys.stdin)["status"])' 2>&1)"
+assert_equals "healthy" "$mode_status" "conformance runs the A2A check"
 
 # Test: version uses semantic versioning
 test_start "meta_semver_version"

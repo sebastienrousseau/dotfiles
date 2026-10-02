@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Theme SSOT validation — verifies wallpaper-backed themes stay paired and valid
+# test-kind: structural
+# themes.toml is data: its shape is what is checked, there is no code to run.
 # shellcheck disable=SC1090,SC1091,SC2034
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"

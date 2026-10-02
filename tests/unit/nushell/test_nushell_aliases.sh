@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
+# test-kind: structural
+# aliases.nu is Nushell config, and CI has no nu to load it with.
 # shellcheck disable=SC1090,SC1091,SC2034
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

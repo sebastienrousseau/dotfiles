@@ -49,9 +49,12 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define rich UI helpers"
 fi
 
+# Uncoloured output so the bar is compared glyph for glyph; accessibility
+# mode swaps in ASCII.
 test_start "ui_progress_glyphs"
-assert_file_contains "$UI_FILE" '_GL_BAR_FILL="￭"' "uses halfwidth black square for filled bars"
-assert_file_contains "$UI_FILE" '_GL_BAR_EMPTY="･"' "uses a lightweight empty progress glyph"
+ui_bar() { bash -c 'source "$1"; UI_COLOR=0; ui_progress 1 4 4' _ "$UI_FILE" 2>&1; }
+assert_equals "￭･･･" "$(NO_COLOR=1 ui_bar)" "halfwidth square fills, a light dot is empty"
+assert_equals "#---" "$(NO_COLOR=1 DOTFILES_ACCESSIBILITY=1 ui_bar)" "accessibility mode uses ASCII"
 
 # Test: uses ANSI colors
 test_start "ui_uses_colors"
