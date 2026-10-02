@@ -4,12 +4,77 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+## v0.2.531 — 2026-10-01
+
+### Added
+
+- `dot upgrade` and `dot ai` ask before they change the machine, and
+  ask everything up front. `dot upgrade` offers to install mise (through
+  Homebrew, or the pinned release verified against its checksums) and
+  asks whether to upgrade system packages too (Homebrew, apt, dnf or
+  pacman). `--yes` or `DOTFILES_YES=1` answers yes; with no terminal to
+  ask, the answer is no and nothing extra is installed.
+- `prefix T` opens the theme picker in a tmux popup and `prefix C-t`
+  switches to a random theme. `~/.config/tmux/local.conf`, when present,
+  is sourced last for your own overrides.
+- Neovim follows the active theme through a generated `dotfiles`
+  colourscheme and lualine theme.
+- `DOTFILES_PACKAGES_TIMEOUT` (default 10 seconds) limits each
+  `dot packages` query.
+
 ### Changed
 
+- Every theme meets WCAG AAA contrast (7:1 for text) in light and dark,
+  including kitty's 256-colour grey ramp.
+- The tmux bars use Apple's system colours: the session badge is unique
+  per session, and the top bar carries the window list and the CPU,
+  memory and battery indicators, with the same elements at any width.
+  kitty cells are 30% taller.
 - The doc.dotfiles.io footer links the author's name to
   https://sebastienrousseau.com/ (`rel="author"`), and the shared Lucid
   footer matches dotfiles.io's byte for byte. The feeds keep the plain
   copyright line.
+- The manual and README describe the mise and build-cache setup as it
+  is. They no longer show a `GITHUB_TOKEN` exported from mise `[env]`
+  (the config forbids that), `/tmp/builds` caches (now
+  `~/.cache/dot/builds`), a shared Cargo `target-dir` (deliberately
+  unset) or a chezmoi-managed `~/.config/mise/config.toml` (the managed
+  file is `conf.d/00-dotfiles.toml`).
+- The repository no longer carries the maintainer's personal address.
+  Identity lines use the GitHub noreply address, and `KEYS.asc` lists
+  the signing key under it (`git tag -v` reports that principal). The
+  Code of Conduct and MAINTAINERS point to
+  https://sebastienrousseau.com/contact/; OSS-Fuzz keeps the personal
+  address, which it needs as a Google account.
+- CI: the tmux screenshot contract waits for the status bar and for
+  tmux to leave the prefix table, and the manual build caches its apt
+  archives (the cache never saved before) and no longer installs the
+  unused 629 MB `texlive-fonts-extra`.
+
+### Fixed
+
+- mise authenticates its own GitHub API calls through
+  `github.credential_command = "gh auth token"`. Without it, one
+  `mise install` lockfile refresh could use up the anonymous
+  60-requests-per-hour budget, and later installs and `self-update`
+  failed with 403. The token stays inside mise: `[env]` still exports
+  none, and the test that guards this now checks `[env]` specifically.
+- `dot theme` no longer times out on chezmoi's state lock, and its
+  picker no longer lists rows twice.
+- A `chezmoi apply` into a temporary HOME no longer replaces the real
+  macOS auto-theme agent, so light/dark switches keep re-theming.
+- lazy.nvim can update plugins whose upstream files use CRLF: the
+  global `eol=lf` policy no longer applies inside
+  `~/.local/share/nvim/lazy/`, where it made them look modified.
+- A package manager that never answers no longer hangs `dot packages`;
+  it shows `timed out` and the rest are still listed.
+- `dot upgrade` asks for sudo before Homebrew cask upgrades that need
+  it, or names those casks when there is no terminal, and says which
+  casks are left if `brew upgrade` fails.
+- `allowed_signers` trusts the owner's keys under the GitHub noreply
+  address, so commits made with it verify as `G`.
+- The commit-msg hook adds `Assisted-by` to the existing trailer block,
+  so git still parses the `Signed-off-by` before it.
 
 ## v0.2.530 — 2026-09-29
 

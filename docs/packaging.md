@@ -166,7 +166,7 @@ and [`security/VERIFY_RELEASE.md`](security/VERIFY_RELEASE.md).
 Minimum a packager should do:
 
 ```sh
-TAG=v0.2.530
+TAG=v0.2.531
 REPO=sebastienrousseau/dotfiles
 
 # SLSA build provenance on the tarball itself
@@ -188,7 +188,7 @@ Tags are signed with an SSH ed25519 key published in
 which is itself a `git allowed_signers` file:
 
 ```sh
-git -c gpg.ssh.allowedSignersFile=KEYS.asc tag -v v0.2.530
+git -c gpg.ssh.allowedSignersFile=KEYS.asc tag -v v0.2.531
 ```
 
 An SBOM ships with every release in both CycloneDX and SPDX JSON.

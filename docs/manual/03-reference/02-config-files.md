@@ -25,7 +25,8 @@ Every config file read or written by `.dotfiles`, with its schema and purpose.
 |:---|:---|:---:|
 | `~/.config/chezmoi/chezmoi.toml` | Per-host overrides (machine, theme, shell) | No |
 | `~/.config/age/keys.txt` | Age private key for decryption | No |
-| `~/.config/mise/config.toml` | User runtime preferences (managed by this repo) | Via chezmoi |
+| `~/.config/mise/config.toml` | Your own tool pins (`mise use -g`, `mise upgrade`) | No |
+| `~/.config/mise/conf.d/00-dotfiles.toml` | Base tool list and settings (managed by this repo) | Via chezmoi |
 | `~/.config/dotfiles/fleet.toml` | Fleet host list (optional) | No |
 | `~/.ssh/allowed_signers` | SSH public keys trusted for commit verification | Via chezmoi (template) |
 
@@ -33,7 +34,7 @@ Every config file read or written by `.dotfiles`, with its schema and purpose.
 
 ```toml
 # Version — bumped by version-sync.sh at release time
-dotfiles_version = "0.2.530"
+dotfiles_version = "0.2.531"
 
 # Machine preset — override in ~/.config/chezmoi/chezmoi.toml per host
 machine = ""
@@ -147,31 +148,39 @@ shfmt = "3.8.0"
 # Repo-level env vars
 ```
 
-## `~/.config/mise/config.toml` (User)
+## `~/.config/mise/conf.d/00-dotfiles.toml` (Managed)
 
-Managed by this repo via chezmoi. Lists all CLI tools + language runtimes:
+The base layer, deployed by chezmoi and loaded first, so it has the lowest
+precedence. `~/.config/mise/config.toml` is deliberately not managed:
+`mise use -g` and `mise upgrade` write their version pins there, and those
+pins override this file.
 
 ```toml
 [settings]
+minimum_release_age = "7d"
 auto_install = true
 activate_aggressive = true
+# mise's own GitHub API calls; the token is never exported
+github.credential_command = "gh auth token"
 
 [tools]
-node = ["lts", "24", "25"]
-python = ["3.12", "3.11"]
+node = "24"
+python = ["3.12", "3.11", "3.14"]
 go = "latest"
-rust = "latest"
 # ... 60+ tools
 
 [env]
 MISE_EXPERIMENTAL = "1"
-GITHUB_TOKEN = "{{exec(command='gh auth token')}}"
-GOCACHE = "/tmp/builds/go-cache"
-PIP_CACHE_DIR = "/tmp/builds/pip-cache"
-UV_CACHE_DIR = "/tmp/builds/uv-cache"
-ZIG_LOCAL_CACHE_DIR = "/tmp/builds/zig-cache"
-ZIG_GLOBAL_CACHE_DIR = "/tmp/builds/zig-global-cache"
+DOT_BUILD_ROOT = "{{ xdg_cache_home }}/dot/builds"
+GOCACHE = "{{ env.DOT_BUILD_ROOT }}/go-cache"
+PIP_CACHE_DIR = "{{ env.DOT_BUILD_ROOT }}/pip-cache"
+UV_CACHE_DIR = "{{ env.DOT_BUILD_ROOT }}/uv-cache"
+ZIG_LOCAL_CACHE_DIR = "{{ env.DOT_BUILD_ROOT }}/zig-cache"
+ZIG_GLOBAL_CACHE_DIR = "{{ env.DOT_BUILD_ROOT }}/zig-global-cache"
 ```
+
+`[env]` never holds a GitHub token: every process mise launches inherits
+it, including untrusted build and test commands.
 
 ## `~/.cargo/config.toml` (Managed)
 
@@ -179,7 +188,9 @@ ZIG_GLOBAL_CACHE_DIR = "/tmp/builds/zig-global-cache"
 [build]
 jobs = -1
 incremental = true
-target-dir = "/tmp/builds/cargo"
+# target-dir is deliberately not set: one shared target directory makes
+# concurrent builds across projects wait on Cargo's lock
+rustc-wrapper = "sccache"   # only when sccache is installed
 ```
 
 ## `~/.ssh/allowed_signers`
@@ -219,7 +230,7 @@ Agent Card (MCP A2A spec):
 ```json
 {
   "name": "dotfiles-agent",
-  "version": "0.2.530",
+  "version": "0.2.531",
   "capabilities": ["chezmoi.apply", "theme.switch", "secrets.decrypt"],
   "policy_hash": "0x7f2a..."
 }

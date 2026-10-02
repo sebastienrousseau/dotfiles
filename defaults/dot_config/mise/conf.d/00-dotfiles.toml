@@ -25,6 +25,12 @@ verbose = false
 ruby.compile = false
 # Tolerate slow crates.io/index responses (default 20s is too tight)
 fetch_remote_versions_timeout = "60s"
+# Authenticate mise's own GitHub API calls through gh. mise runs the command
+# only when it needs a token and keeps the result in-process; nothing is
+# exported, so child processes never inherit it (see the [env] note below).
+# Without it, anonymous calls share a 60-requests-per-hour budget that one
+# `mise install` lockfile refresh can exhaust, and later calls fail with 403.
+github.credential_command = "gh auth token"
 
 [tools]
 # Node.js
@@ -165,7 +171,8 @@ MISE_EXPERIMENTAL = "1"
 # from this global workstation config: every process launched under mise would
 # inherit it, including untrusted build and test commands. GitHub-aware tools
 # should invoke `gh` directly so its credential helper retains ownership of
-# the token and only supplies it to the requested operation.
+# the token and only supplies it to the requested operation. mise itself gets
+# its token the same way, through `github.credential_command` in [settings].
 # Build caches live below a per-user XDG root. Environment values are ordered:
 # later entries safely reference DOT_BUILD_ROOT through mise's template context.
 DOT_BUILD_ROOT = "{{ xdg_cache_home }}/dot/builds"

@@ -40,18 +40,25 @@ Variables the dotfiles set in your shell for tool consumption.
 | `BUN_INSTALL` | `~/.bun` | `env.fish.tmpl` |
 | `PIPX_HOME` | `~/.local/share/pipx` | ditto |
 | `PIPX_BIN_DIR` | `~/.local/bin` | ditto |
-| `BUILDS_TMPDIR` | `/tmp/builds` | `dot_zshenv` (created on shell init) |
-| `CARGO_TARGET_DIR` | (from `~/.cargo/config.toml`) | `target-dir = "/tmp/builds/cargo"` |
-| `GOCACHE` | `/tmp/builds/go-cache` | `mise [env]` |
-| `GOTMPDIR` | `/tmp/builds/go-tmp` | `mise [env]` |
-| `PIP_CACHE_DIR` | `/tmp/builds/pip-cache` | `mise [env]` |
-| `UV_CACHE_DIR` | `/tmp/builds/uv-cache` | `mise [env]` |
-| `ZIG_LOCAL_CACHE_DIR` | `/tmp/builds/zig-cache` | `mise [env]` |
-| `ZIG_GLOBAL_CACHE_DIR` | `/tmp/builds/zig-global-cache` | `mise [env]` |
+| `DOT_BUILD_ROOT` | `~/.cache/dot/builds` (under `XDG_CACHE_HOME`) | `mise [env]`, `rc.d/35-rust-target.zsh.tmpl`, `env.fish.tmpl` |
+| `GOCACHE` | `$DOT_BUILD_ROOT/go-cache` | `mise [env]` |
+| `PIP_CACHE_DIR` | `$DOT_BUILD_ROOT/pip-cache` | `mise [env]` |
+| `UV_CACHE_DIR` | `$DOT_BUILD_ROOT/uv-cache` | `mise [env]` |
+| `ZIG_LOCAL_CACHE_DIR` | `$DOT_BUILD_ROOT/zig-cache` | `mise [env]` |
+| `ZIG_GLOBAL_CACHE_DIR` | `$DOT_BUILD_ROOT/zig-global-cache` | `mise [env]` |
 | `HOMEBREW_PREFIX` | `/opt/homebrew` or `/usr/local` | `dot_zshenv` (macOS) |
 | `MANPATH` | homebrew-adjusted | ditto |
-| `MISE_EXPERIMENTAL` | `1` | `~/.config/mise/config.toml` |
-| `GITHUB_TOKEN` | from `gh auth token` | `~/.config/mise/config.toml` |
+| `MISE_EXPERIMENTAL` | `1` | `~/.config/mise/conf.d/00-dotfiles.toml` |
+
+`mise [env]` is `~/.config/mise/conf.d/00-dotfiles.toml`. The dotfiles set
+no `CARGO_TARGET_DIR` (each project keeps its own `./target`) and no
+`GOTMPDIR` (Go uses the system temporary directory).
+
+No GitHub token is exported. Every process mise launches inherits its
+`[env]`, so a token there would reach untrusted build and test commands.
+mise authenticates its own GitHub API calls with
+`github.credential_command = "gh auth token"` under `[settings]`, and
+other tools call `gh` themselves.
 
 ## Read by Tools
 

@@ -244,28 +244,32 @@ dot doctor                    # confirm
 
 ## Build Artifacts
 
-### Symptom: Cargo builds to `target/` instead of `/tmp/builds/cargo`
+### Symptom: Cargo builds into the project's `./target`
 
-**Cause**: `~/.cargo/config.toml` not managed or was overridden.
+**Cause**: This is the default. `~/.cargo/config.toml` deliberately sets
+no shared `target-dir`, because Cargo locks the target directory and one
+shared path makes builds in different projects wait on each other.
+sccache (when installed) still shares compiled dependencies across projects.
 
-**Fix**:
+**Fix** (optional, zsh): keep the output out of the repository by pointing
+`./target` at the private build cache:
 
 ```sh
-chezmoi apply ~/.cargo/config.toml
-cat ~/.cargo/config.toml | grep target-dir
-# Should be: target-dir = "/tmp/builds/cargo"
+rust-target-tmp          # target -> $DOT_BUILD_ROOT/<repo-name>
 ```
 
-### Symptom: `/tmp/builds/` doesn't exist
+### Symptom: `$DOT_BUILD_ROOT` is unset or missing
 
-**Cause**: Created by shell init, but shell wasn't restarted.
+**Cause**: The shell predates the change, or mise is not activated.
+`DOT_BUILD_ROOT` is `~/.cache/dot/builds` (under `XDG_CACHE_HOME`). mise
+exports it, and zsh and fish set it on start; the Go, pip, uv and Zig
+caches live below it.
 
 **Fix**:
 
 ```sh
-mkdir -p /tmp/builds
-# Or restart shell
 exec $SHELL -l
+mise env | grep DOT_BUILD_ROOT
 ```
 
 ## Fleet

@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/sebastienrousseau/dotfiles/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=githubactions&logoColor=white" alt="Build" /></a>
-  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.530-blue?style=for-the-badge&logo=semanticrelease&logoColor=white" alt="Version" /></a>
+  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.531-blue?style=for-the-badge&logo=semanticrelease&logoColor=white" alt="Version" /></a>
   <a href="https://www.npmjs.com/package/@sebastienrousseau/dotfiles"><img src="https://img.shields.io/npm/v/@sebastienrousseau/dotfiles?style=for-the-badge&logo=npm&logoColor=white&label=npm" alt="npm" /></a>
   <a href="https://doc.dotfiles.io/"><img src="https://img.shields.io/badge/Manual-doc.dotfiles.io-66c2a5?style=for-the-badge&labelColor=555555" alt="Manual" /></a>
   <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge&logo=github&logoColor=white" alt="Downloads" /></a>
@@ -83,11 +83,11 @@ release process are documented in
 
 ```bash
 curl -fsSL -o /tmp/dotfiles-install.sh \
-  https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.530/dotfiles-install-0.2.530.sh
+  https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.531/dotfiles-install-0.2.531.sh
 if command -v sha256sum >/dev/null 2>&1; then
-  echo "77b55b5f4a5a5f6a3f56e74590fd90f8454f8e85245cfe0c9b4ca385319d790b  /tmp/dotfiles-install.sh" | sha256sum -c -
+  echo "6dc835968e80912dcd8e7e9ea4aeb5b05702ef8c211b2e3c4cb59f6b66fb9696  /tmp/dotfiles-install.sh" | sha256sum -c -
 else
-  echo "77b55b5f4a5a5f6a3f56e74590fd90f8454f8e85245cfe0c9b4ca385319d790b  /tmp/dotfiles-install.sh" | shasum -a 256 -c -
+  echo "6dc835968e80912dcd8e7e9ea4aeb5b05702ef8c211b2e3c4cb59f6b66fb9696  /tmp/dotfiles-install.sh" | shasum -a 256 -c -
 fi
 bash /tmp/dotfiles-install.sh
 ```
@@ -106,10 +106,10 @@ directory. The archive
 carries SLSA build provenance (keyless, via Fulcio + Rekor):
 
 ```bash
-gh release download v0.2.530 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
-gh attestation verify dot-0.2.530.tar.gz --repo sebastienrousseau/dotfiles
-tar -xzf dot-0.2.530.tar.gz
-make -C dot-0.2.530 install PREFIX=/usr/local
+gh release download v0.2.531 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
+gh attestation verify dot-0.2.531.tar.gz --repo sebastienrousseau/dotfiles
+tar -xzf dot-0.2.531.tar.gz
+make -C dot-0.2.531 install PREFIX=/usr/local
 ```
 
 [`release-install-smoke.yml`](.github/workflows/release-install-smoke.yml)
@@ -305,7 +305,7 @@ every push.
 bash /tmp/dotfiles-install.sh  # after the verified download above
 
 # Only the dot CLI, from the attested release archive
-gh release download v0.2.530 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
+gh release download v0.2.531 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
 
 # The Go satellites are (re)built on apply by
 #   defaults/run_onchange_24-build-dot-ui.sh.tmpl
@@ -467,7 +467,7 @@ via taplo on every PR).
 | Self-healing | `dot heal`, `dot chaos`, `dot rollback`, `dot bundle`; chezmoi drift, broken symlinks, missing files, checksum-verified tool recovery |
 | Sub-second startup | Lazy loading, `_cached_eval`, mtime-based cache invalidation, realpath sidecar pins; `dot perf`, `dot benchmark`, `dot health` |
 | Multi-shell parity | Tier 1 (full): zsh, bash. Tier 2 (bridged): fish. Tier 3 (compatible): nushell. PowerShell as a contract-tested parity target ([`tests/integration/test_shell_parity.sh`](tests/integration/test_shell_parity.sh)) |
-| Build artifacts to `/tmp` | Cargo, Go, pip, uv, and Zig caches redirect to `/tmp/builds/` via `~/.config/mise/config.toml` and `~/.cargo/config.toml`; project directories stay clean |
+| Private build caches | Go, pip, uv, and Zig caches live under `~/.cache/dot/builds` via `mise [env]`; Cargo keeps a per-project `./target` (no shared lock), with sccache sharing dependencies and `rust-target-tmp` moving `./target` out of the repository |
 | Encrypted secrets | age and SOPS at rest; macOS Keychain, `pass`, or age-encrypted store selected by policy; `dot secrets`, `dot secret-audit`, `dot ssh-key`, `dot ssh-cert` |
 | Portable runtimes | mise for managed toolchains with a cross-platform `mise.lock`; Nix flake for strict reproducibility; `dot env`, `dot tools`, `dot upgrade` |
 | Schema-validated config | `.chezmoidata.toml` checked against a JSON Schema in CI; `dot env emit` writes a v1-schema environment manifest; the registry index has its own schema |
@@ -606,7 +606,7 @@ and [`benches/`](benches/).
 | | |
 | :--- | :--- |
 | **Shells and navigation** | Zsh loads in stages through small `rc.d` modules, not one startup script. Fish uses `_cached_eval` and deferred loading. Bash ships full parity with zsh for tooling and aliases. Nushell handles structured workflows (Tier 3). PowerShell keeps cross-platform and WSL sessions on the same baseline with a `pwsh` parity contract in CI. Starship, Zoxide, Atuin, and fzf for navigation and recall. Starship Transient Prompt collapses past prompts to a single glyph on fish; the zsh hook is in place for when upstream lands the matching function ([ADR-010](docs/adr/ADR-010-starship-transient-prompt.md)). |
-| **Development and runtimes** | mise manages language versions in user space with a cross-platform `mise.lock` (Linux, macOS, Windows, exact URLs and SHA-256s). Nix Flakes for strict reproducibility when speed is not the priority. Pueue queues long-running tasks instead of extra tabs. Neovim ships as a full Lua editor, not a starter template. Lazygit for terminal git. Build caches (Cargo, Go, pip, uv, Zig) redirect to `/tmp/builds/` and clear on reboot. `_cached_eval` caches expensive `tool init` output with mtime and realpath invalidation; `EVALCACHE_DISABLE=true` bypasses it. |
+| **Development and runtimes** | mise manages language versions in user space with a cross-platform `mise.lock` (Linux, macOS, Windows, exact URLs and SHA-256s). Nix Flakes for strict reproducibility when speed is not the priority. Pueue queues long-running tasks instead of extra tabs. Neovim ships as a full Lua editor, not a starter template. Lazygit for terminal git. Build caches (Go, pip, uv, Zig) live under a private `~/.cache/dot/builds`; Cargo keeps a per-project `./target`. `_cached_eval` caches expensive `tool init` output with mtime and realpath invalidation; `EVALCACHE_DISABLE=true` bypasses it. |
 | **AI, agents, and MCP** | Agent profiles (`dot mode`): ask, plan, apply, audit. Pattern library (`dot patterns`): architect, hardener, refactor, bundled in `dot_config/ai/patterns/`. MCP policy enforcement (`dot mcp`). AI commit messages (`dot commit`). The `dot ai` cockpit installs and runs Codex, Copilot, Antigravity, Aider, OpenCode and friends from one Bubble Tea TUI; `dot ai serve` exposes your Claude subscription locally to any Anthropic- or OpenAI-protocol tool ([ADR-012](docs/adr/ADR-012-ai-fleet-local-proxy.md), [`docs/AI.md`](docs/AI.md)). Every agent session is logged with a policy hash and an outcome. |
 | **Security, trust, governance** | age and SOPS keep secrets encrypted at rest and out of history. SSH ed25519 signing plus trust metadata back every commit. Gitleaks, detect-secrets, TruffleHog, policy checks, and compliance workflows. `dot attest` records machine state, policy, prompt, and model metadata in tracked JSON. Telemetry controls and local-first defaults (`dot telemetry`, `dot dns-doh`, `dot firewall`, `dot usb-safety`, `dot lock-screen`, `dot encrypt-check`). SPDX SBOM and Grype CVE scanning in CI. npm releases authenticate through OIDC trusted publishing with provenance, never a long-lived token. |
 | **Themes** | 228 wallpaper-derived themes, dark and light paired; `dot theme`, `dot theme toggle`, `dot theme family`, `dot theme sync` with the OS appearance; `dot wallpaper rotate` and `dot wallpaper sync`. See [Wallpaper-driven themes](#wallpaper-driven-themes). |
@@ -867,7 +867,7 @@ design is
 
 ```toml
 # defaults/.chezmoidata.toml — repo-wide defaults, schema-checked in CI
-dotfiles_version = "0.2.530"
+dotfiles_version = "0.2.531"
 
 [features]
 alias_wrapper = false   # confirm destructive aliases
