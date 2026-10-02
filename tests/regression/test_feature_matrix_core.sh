@@ -91,6 +91,16 @@ test_fm_help_all() {
   # Commands are grouped under section headers.
   test_start "fm_help_all_groups_commands_under_sections"
   fm_expect_out "== Core =="
+  # Each section is one block: the registry lists commands by topic, and
+  # printing it unsorted repeated headers (== AI == four times).
+  test_start "fm_help_all_prints_each_section_once"
+  local repeated
+  repeated="$(printf '%s\n' "$FM_OUT" | grep -E '^== .* ==$' | sort | uniq -d)"
+  if [[ -n "$(printf '%s\n' "$FM_OUT" | grep -E '^== .* ==$')" && -z "$repeated" ]]; then
+    fm_pass "every section header appears once"
+  else
+    fm_fail "no headers, or repeated: ${repeated:-none found}"
+  fi
   # `help all` is the source the command index is generated from, so it has to
   # stay substantially larger than the overview.
   test_start "fm_help_all_is_larger_than_overview"
@@ -387,8 +397,6 @@ test_fm_commit() {
   fi
   rm -f "$FM_SANDBOX/bin/claude"
 }
-
-
 
 # ── run ────────────────────────────────────────────────────────────────────
 
