@@ -26,15 +26,7 @@ DASH="$REPO_ROOT/scripts/diagnostics/drift-dashboard.sh"
 test_start "dashboard_exists"
 assert_file_exists "$DASH" "drift-dashboard.sh should exist"
 
-test_start "dashboard_supports_json"
-assert_file_contains "$DASH" -- "--json" "dashboard must accept --json"
-
-test_start "dashboard_covers_four_classes"
-# Each class name must appear at least once in the source so the report
-# layout stays consistent with the JSON keys.
-for token in "managed_drift" "untracked_source" "orphan_deployed" "stale_source"; do
-  assert_file_contains "$DASH" "$token" "dashboard must reference $token"
-done
+# --json and the four classes are checked by running it, below.
 
 # -----------------------------------------------------------------------------
 # JSON contract: keys, types, and exit code semantics
@@ -54,13 +46,12 @@ if command -v chezmoi >/dev/null 2>&1 && command -v python3 >/dev/null 2>&1; the
   assert_exit_code 0 "true"
 
   test_start "json_values_are_integers"
-  if python3 <<PY
+  if python3 <<PY; then
 import json, sys
 d = json.loads('''$json''')
 ok = all(isinstance(d[k], int) for k in ("managed_drift", "untracked_source", "orphan_deployed", "stale_source", "total"))
 sys.exit(0 if ok else 1)
 PY
-  then
     assert_exit_code 0 "true"
   else
     echo "Non-integer field in $json" >&2
@@ -68,13 +59,12 @@ PY
   fi
 
   test_start "total_equals_sum_of_classes"
-  if python3 <<PY
+  if python3 <<PY; then
 import json, sys
 d = json.loads('''$json''')
 expected = d["managed_drift"] + d["untracked_source"] + d["orphan_deployed"] + d["stale_source"]
 sys.exit(0 if expected == d["total"] else 1)
 PY
-  then
     assert_exit_code 0 "true"
   else
     echo "Total mismatch in $json" >&2
@@ -86,20 +76,14 @@ fi
 # `dot drift` wiring: command must dispatch to this dashboard
 # -----------------------------------------------------------------------------
 
+# `dot drift --json` must reach this dashboard: the same document, with the
+# same four classes and their total.
 DOT_BIN="$REPO_ROOT/bin/dot"
-test_start "dot_drift_dispatches_to_dashboard"
-if [[ -f "$DOT_BIN" ]] && grep -Fq 'drift|diagnostics' "$DOT_BIN"; then
-  assert_exit_code 0 "true"
-else
-  assert_exit_code 0 "false  # dot CLI must route 'drift' to the diagnostics command group"
-fi
-
-DIAG="$REPO_ROOT/scripts/dot/commands/diagnostics.sh"
-test_start "diagnostics_invokes_drift_dashboard"
-if [[ -f "$DIAG" ]] && grep -Fq "drift-dashboard.sh" "$DIAG"; then
-  assert_exit_code 0 "true"
-else
-  assert_exit_code 0 "false  # diagnostics command group must call drift-dashboard.sh"
+if command -v chezmoi >/dev/null 2>&1 && command -v python3 >/dev/null 2>&1; then
+  test_start "dot_drift_runs_the_dashboard"
+  drift_json="$(bash "$DOT_BIN" drift --json 2>/dev/null || true)"
+  assert_equals "ok" "$(python3 -c 'import json,sys; d=json.loads(sys.stdin.read()); print("ok" if {"managed_drift","untracked_source","orphan_deployed","stale_source","total"} <= set(d) else "missing keys")' <<<"$drift_json" 2>&1)" \
+    "dot drift --json returns the dashboard's document"
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

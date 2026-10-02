@@ -25,10 +25,19 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax error"
 fi
 
+# Each short flag produces exactly what its long form does, and the modes
+# differ: quiet prints less than the default, JSON is a document.
 test_start "security_score_flag_aliases"
-assert_file_contains "$TEST_SCRIPT" "--verbose | -v" "security-score supports -v"
-assert_file_contains "$TEST_SCRIPT" "--quiet | -q" "security-score supports -q"
-assert_file_contains "$TEST_SCRIPT" "--json | -j" "security-score supports -j"
+for pair in "-v --verbose" "-q --quiet" "-j --json"; do
+  assert_equals "$(bash "$TEST_SCRIPT" "${pair#* }" 2>&1)" "$(bash "$TEST_SCRIPT" "${pair% *}" 2>&1)" \
+    "${pair% *} matches ${pair#* }"
+done
+full_lines="$(bash "$TEST_SCRIPT" 2>&1 | wc -l | tr -d ' ')"
+quiet_lines="$(bash "$TEST_SCRIPT" --quiet 2>&1 | wc -l | tr -d ' ')"
+assert_equals "true" "$([[ $quiet_lines -lt $full_lines ]] && echo true || echo false)" \
+  "--quiet prints less than the default ($quiet_lines < $full_lines lines)"
+assert_equals "ok" "$(bash "$TEST_SCRIPT" --json 2>/dev/null | python3 -c 'import json,sys; d=json.load(sys.stdin); print("ok" if "grade" in d else "no grade")' 2>&1)" \
+  "--json is a document with a grade"
 
 # Slice 2: drive real line coverage of the script under test
 cov_exercise_script "$TEST_SCRIPT"

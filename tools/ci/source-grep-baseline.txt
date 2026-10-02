@@ -16,17 +16,13 @@
    1 tests/unit/ci/test_docs_link_tracking.sh
    2 tests/unit/ci/test_mutation_engine.sh
    1 tests/unit/ci/test_validate_chezmoidata.sh
-   4 tests/unit/diagnostics/test_diagnostics_perf.sh
-   3 tests/unit/diagnostics/test_diagnostics_security_score.sh
    2 tests/unit/diagnostics/test_diagnostics_snapshot.sh
-   4 tests/unit/diagnostics/test_drift_dashboard.sh
    2 tests/unit/docs/test_build_manual.sh
    2 tests/unit/docs/test_check_manual.sh
    1 tests/unit/dot-cli/test_dot_cli.sh
    1 tests/unit/dot-cli/test_dot_commands_core.sh
    1 tests/unit/dot-cli/test_dot_commands_manual.sh
    2 tests/unit/dot-cli/test_dot_commands_meta.sh
-   5 tests/unit/dot-cli/test_dot_commands_restore.sh
    1 tests/unit/dot-cli/test_dot_fleet_enforcement.sh
    2 tests/unit/dot-cli/test_dot_lib_ui.sh
    1 tests/unit/dot-cli/test_dot_lib_utils.sh
