@@ -112,4 +112,14 @@ echo "Core commands tests completed."
 # Slice 3 (#883): exercise the script under sandbox for line coverage
 cov_exercise_script "$CORE_FILE"
 
+# No command is a usage error, and an unknown command is named.
+test_start "core_without_a_command_prints_usage_and_fails"
+core_out="$(bash "$CORE_FILE" 2>&1)"
+assert_equals "1" "$?" "no command exits 1"
+assert_contains "Usage: core.sh <command>" "$core_out" "and prints the usage"
+test_start "core_rejects_an_unknown_command"
+core_out="$(bash "$CORE_FILE" frobnicate 2>&1)"
+assert_equals "1" "$?" "an unknown command exits 1"
+assert_contains "Unknown core command: frobnicate" "$core_out" "and is named"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
