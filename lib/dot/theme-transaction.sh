@@ -188,6 +188,78 @@ _theme_txn_snapshot_targets() {
   done
 }
 
+# chezmoi records what it last wrote to each target and, on a later apply,
+# asks before overwriting a target that no longer matches its record. The
+# theme apply rewrites those records, so restoring the file snapshots alone
+# leaves every restored target looking hand-edited, and the next apply with
+# no terminal to ask on (dot upgrade) dies on the question. The transaction
+# therefore snapshots the records for its targets with the files and puts
+# them back on rollback.
+
+# _theme_txn_chezmoi_records: chezmoi's records, one "<target>\t<JSON>"
+# line each; nothing when chezmoi is not installed.
+_theme_txn_chezmoi_records() {
+  command -v chezmoi >/dev/null 2>&1 || return 0
+  chezmoi state get-bucket --bucket=entryState 2>/dev/null | awk '
+    /^  "/ { target = $0; sub(/^  "/, "", target); sub(/": \{$/, "", target); body = ""; next }
+    /^  \},?$/ { if (target != "") print target "\t{" body "}"; target = ""; next }
+    target != "" { sub(/^[ \t]+/, ""); sub(/,$/, ""); body = body (body == "" ? "" : ",") $0 }
+  '
+}
+
+# _theme_txn_snapshot_chezmoi_records: the records for the manifest's
+# targets, saved beside the file snapshots. Left absent when they could not
+# be read, so the rollback leaves chezmoi's records alone rather than guess.
+_theme_txn_snapshot_chezmoi_records() {
+  local table="$THEME_TXN_OPERATION_DIR/chezmoi-records.tsv"
+  command -v chezmoi >/dev/null 2>&1 || return 0
+  if ! _theme_txn_chezmoi_records | awk -F'\t' '
+    FILENAME == ARGV[1] { want[$4] = 1; next }
+    ($1 in want)
+  ' "$THEME_TXN_MANIFEST" - >"$table"; then
+    rm -f "$table"
+  fi
+}
+
+# _theme_txn_chezmoi_record_changes: "set\t<target>\t<saved record>" for
+# each manifest target whose record the apply changed, "delete\t<target>"
+# for one the apply recorded that had no record before.
+_theme_txn_chezmoi_record_changes() {
+  local table="$THEME_TXN_OPERATION_DIR/chezmoi-records.tsv"
+  _theme_txn_chezmoi_records | awk -F'\t' -v OFS='\t' '
+    FILENAME == ARGV[1] { want[$4] = 1; next }
+    FILENAME == ARGV[2] { before[$1] = $2; next }
+    ($1 in want) { after[$1] = $2 }
+    END {
+      for (target in want) {
+        if (target in before) {
+          if (before[target] != after[target]) print "set", target, before[target]
+        } else if (target in after) {
+          print "delete", target
+        }
+      }
+    }
+  ' "$THEME_TXN_MANIFEST" "$table" -
+}
+
+# _theme_txn_restore_chezmoi_records: put the saved records back, naming
+# each target still recorded as the failed apply wrote it. Fails when any.
+_theme_txn_restore_chezmoi_records() {
+  local table="$THEME_TXN_OPERATION_DIR/chezmoi-records.tsv" action target record failed=0
+  [[ -f "$table" ]] && command -v chezmoi >/dev/null 2>&1 || return 0
+  while IFS=$'\t' read -r action target record; do
+    [[ -n "$target" ]] || continue
+    if [[ "$action" == set ]]; then
+      chezmoi state set --bucket=entryState --key="$target" --value="$record" 2>/dev/null && continue
+    else
+      chezmoi state delete --bucket=entryState --key="$target" 2>/dev/null && continue
+    fi
+    failed=$((failed + 1))
+    printf 'dot-theme-sync: chezmoi still records the failed apply for %s\n' "$target" >&2
+  done < <(_theme_txn_chezmoi_record_changes)
+  [[ "$failed" -eq 0 ]]
+}
+
 _theme_txn_begin() {
   local previous="$1" desired="$2" preference="$3" timeout="$4"
   shift 4
@@ -228,6 +300,7 @@ _theme_txn_begin() {
     _theme_txn_release_lock
     return 1
   fi
+  _theme_txn_snapshot_chezmoi_records
   THEME_TXN_ACTIVE=1
 }
 
@@ -318,6 +391,8 @@ _theme_txn_rollback() {
   local rollback_status="rolled_back"
   if ! _theme_txn_restore_files; then
     rollback_status="rollback_failed"
+  elif ! _theme_txn_restore_chezmoi_records; then
+    reason="$reason; chezmoi records not restored, run chezmoi apply to review"
   fi
   _theme_txn_write_journal "$rollback_status" "$reason" || true
   THEME_TXN_FINALIZED=1

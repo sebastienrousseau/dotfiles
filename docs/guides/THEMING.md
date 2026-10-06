@@ -76,12 +76,12 @@ Discovers wallpapers from system + custom paths, runs K-Means extraction in para
 `dot-theme-sync` handles the switching pipeline as a per-user transaction:
 
 1. Acquires an exclusive, portable user lock and records its PID and operation ID.
-2. Snapshots installed file targets, including symlink identity, into a private operation directory.
+2. Snapshots installed file targets, including symlink identity, and chezmoi's records of what it last wrote to them, into a private operation directory.
 3. Writes machine-local runtime state to `~/.config/chezmoi/chezmoi.toml`; the tracked `.chezmoidata.toml` remains the fresh-install default.
 4. Runs a targeted `chezmoi apply` and treats renderer failures as required transaction failures.
 5. Updates optional AI-provider fragments and reloads installed applications.
 6. Reads back the active theme identity, writes a versioned JSON journal, and releases the lock.
-7. On a required failure or signal, restores files in reverse order and records `rolled_back` or `rollback_failed`.
+7. On a required failure or signal, restores files in reverse order, puts chezmoi's records back so the next `chezmoi apply` does not stop to ask about them, and records `rolled_back` or `rollback_failed`.
 
 ```bash
 dot-theme-sync                    # Reload current theme
