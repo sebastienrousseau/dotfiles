@@ -4,7 +4,8 @@
 # The niri target of dot-theme-sync, which sources this file: a config.kdl
 # that chezmoi manages goes through chezmoi; the usual unmanaged one is
 # rendered from the template, or skipped. Uses _skip and CHEZMOI_SRC from
-# dot-theme-sync. Inherits set -euo pipefail.
+# dot-theme-sync.
+# Sourced by dot-theme-sync; inherits set -euo pipefail
 #
 # Bash 3.2 compatible (macOS /bin/bash).
 
