@@ -413,6 +413,7 @@ EXTRA_ENV=()
 assert_equals 0 "$rc" "managed niri config applies"
 assert_equals 1 "$(calls chezmoi | grep -c "^apply --force $XDG_CONFIG_HOME/niri/config.kdl$")" "niri is applied by chezmoi on its own"
 assert_equals no "$(has "execute-template" "$(calls chezmoi)")" "no direct render when chezmoi manages it"
+assert_contains "regenerated 6 configs" "$(cat "$OUT")" "niri counts as a regenerated config"
 
 test_start "unmanaged_niri_config_is_rendered_from_the_template"
 reset_calls
@@ -421,6 +422,7 @@ run_sync Linux fixture-light
 assert_equals 0 $? "unmanaged niri config does not fail the switch"
 assert_file_contains "$XDG_CONFIG_HOME/niri/config.kdl" "# rendered by the stub" "config.kdl is rendered from the template"
 assert_equals no "$(has "apply --force $XDG_CONFIG_HOME/niri" "$(calls chezmoi)")" "chezmoi apply is not attempted on it"
+assert_contains "regenerated 6 configs" "$(cat "$OUT")" "the rendered niri config is counted"
 assert_contains '"status": "succeeded"' "$(cat "$XDG_STATE_HOME"/dot/theme-transactions/*/journal.json | tail -14)" "the switch succeeds"
 
 test_start "unmanaged_niri_config_without_a_template_is_skipped_not_fatal"
@@ -431,6 +433,7 @@ run_sync Linux fixture-dark
 assert_equals 0 $? "nothing to render is not a failure"
 assert_contains "no template to render" "$(cat "$OUT")" "the skip says why"
 assert_equals "hand kept" "$(cat "$XDG_CONFIG_HOME/niri/config.kdl")" "the hand-kept config is untouched"
+assert_contains "regenerated 5 configs" "$(cat "$OUT")" "the skipped niri config is not counted"
 rm -rf "$XDG_CONFIG_HOME/niri" "$SRC/dot_config/niri"
 run_sync Linux fixture-light
 

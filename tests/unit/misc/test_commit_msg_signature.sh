@@ -46,6 +46,7 @@ sob="$(printf '%s\n' "$got" | line_of 'Signed-off-by:')"
 cmt="$(printf '%s\n' "$got" | line_of '# Please enter')"
 assert_true "[[ $sig -lt $sob && $sob -lt $cmt ]]" "order is signature ($sig), trailers ($sob), comments ($cmt)"
 assert_equals 2 "$(printf '%s\n' "$got" | grep -c '^#')" "both comment lines survive"
+assert_equals '# Lines starting with # are ignored' "$(printf '%s\n' "$got" | sed -n "$((cmt + 1))p")" "the comment block stays contiguous"
 
 test_start "signature_is_added_once"
 first="$(hook 'feat: thing\n\nBody.\n\nSigned-off-by: Dev <dev@example.com>\n')"
