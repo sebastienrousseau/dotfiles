@@ -31,6 +31,16 @@ test_start "uses_heif_enc"
 mw_bin="$DOTFILES_COV_TMPDIR/mw-bin"
 mw_walls="$DOTFILES_COV_TMPDIR/mw-walls"
 mkdir -p "$mw_bin" "$mw_walls"
+# sysbin <dir> <tool...>: /usr/bin and /bin as links in <dir>, minus the
+# named tools, so a "without <tool>" case holds on machines that have it.
+sysbin() {
+  local dir="$1" args=() t
+  shift
+  for t in "$@"; do args+=(! -name "$t"); done
+  mkdir -p "$dir"
+  find /usr/bin/ /bin/ -maxdepth 1 \( -type f -o -type l \) "${args[@]}" -exec sh -c 'ln -sf "$@" "$0"' "$dir" {} + 2>/dev/null
+}
+sysbin "$DOTFILES_COV_TMPDIR/mw-sysbin" magick heif-enc
 cat >"$mw_bin/magick" <<'STUB'
 #!/usr/bin/env bash
 cp "$1" "${*: -1}"
@@ -51,7 +61,7 @@ chmod +x "$mw_bin/magick" "$mw_bin/heif-enc"
 echo light >"$mw_walls/sea-light.heic"
 echo dark >"$mw_walls/sea-dark.heic"
 mw_rc=0
-DOTFILES_WALLPAPER_DIR="$mw_walls" PATH="$mw_bin:$DOTFILES_COV_TMPDIR/bin:/usr/bin:/bin" \
+DOTFILES_WALLPAPER_DIR="$mw_walls" PATH="$mw_bin:$DOTFILES_COV_TMPDIR/bin:$DOTFILES_COV_TMPDIR/mw-sysbin" \
   bash "$SCRIPT_FILE" sea >/dev/null 2>&1 || mw_rc=$?
 assert_equals "0" "$mw_rc" "the merge exits 0"
 assert_equals "light dark" "$(tr '\n' ' ' <"$mw_walls/sea.heic" 2>&1 | sed 's/ $//')" "light is image 0, dark image 1"
@@ -59,7 +69,7 @@ assert_equals "sea.heic" "$(ls "$mw_walls")" "the merged file replaces the pair"
 rm "$mw_bin/heif-enc"
 echo light >"$mw_walls/sun-light.heic"
 mw_rc=0
-mw_out="$(DOTFILES_WALLPAPER_DIR="$mw_walls" PATH="$mw_bin:$DOTFILES_COV_TMPDIR/bin:/usr/bin:/bin" \
+mw_out="$(DOTFILES_WALLPAPER_DIR="$mw_walls" PATH="$mw_bin:$DOTFILES_COV_TMPDIR/bin:$DOTFILES_COV_TMPDIR/mw-sysbin" \
   bash "$SCRIPT_FILE" sun 2>&1)" || mw_rc=$?
 assert_equals "1 Error: heif-enc required (brew install libheif)" "$mw_rc $mw_out" "no heif-enc, no merge"
 
