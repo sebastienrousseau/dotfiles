@@ -74,6 +74,10 @@ echo Linux
 EOF
 mkstub common chezmoi <<'EOF'
 printf '%s\n' "$*" >>"$CALLS/chezmoi"
+case "${1:-}" in
+  managed) printf '%s\n' "${FAKE_CHEZMOI_MANAGED:-}" ;;
+  execute-template) cat; printf '# rendered by the stub\n' ;;
+esac
 exit "${FAKE_CHEZMOI_RC:-0}"
 EOF
 mkstub common pgrep <<'EOF'
@@ -394,6 +398,41 @@ assert_contains "$HOME/.codex/themes/dotfiles.tmTheme" "$apply_call" "Codex synt
 assert_equals no "$(has "alacritty" "$apply_call")" "absent targets are not rendered"
 assert_equals no "$(has "iterm2" "$(calls chezmoi)")" "iTerm2 profile is Darwin-only"
 assert_contains "regenerated 5 configs" "$(cat "$OUT")" "summary counts the rendered targets"
+
+# ~/.config/niri/config.kdl is ignored by chezmoi unless the niri feature is
+# on, so on most machines the file exists unmanaged. Applying it through
+# chezmoi failed with "not managed" and rolled back the whole switch.
+test_start "managed_niri_config_goes_through_chezmoi"
+reset_calls
+mkdir -p "$XDG_CONFIG_HOME/niri" "$SRC/dot_config/niri"
+printf 'old niri\n' >"$XDG_CONFIG_HOME/niri/config.kdl"
+EXTRA_ENV=(FAKE_CHEZMOI_MANAGED="$XDG_CONFIG_HOME/niri/config.kdl")
+run_sync Linux fixture-dark
+rc=$?
+EXTRA_ENV=()
+assert_equals 0 "$rc" "managed niri config applies"
+assert_equals 1 "$(calls chezmoi | grep -c "^apply --force $XDG_CONFIG_HOME/niri/config.kdl$")" "niri is applied by chezmoi on its own"
+assert_equals no "$(has "execute-template" "$(calls chezmoi)")" "no direct render when chezmoi manages it"
+
+test_start "unmanaged_niri_config_is_rendered_from_the_template"
+reset_calls
+printf 'theme {{ .theme }}\n' >"$SRC/dot_config/niri/config.kdl.tmpl"
+run_sync Linux fixture-light
+assert_equals 0 $? "unmanaged niri config does not fail the switch"
+assert_file_contains "$XDG_CONFIG_HOME/niri/config.kdl" "# rendered by the stub" "config.kdl is rendered from the template"
+assert_equals no "$(has "apply --force $XDG_CONFIG_HOME/niri" "$(calls chezmoi)")" "chezmoi apply is not attempted on it"
+assert_contains '"status": "succeeded"' "$(cat "$XDG_STATE_HOME"/dot/theme-transactions/*/journal.json | tail -14)" "the switch succeeds"
+
+test_start "unmanaged_niri_config_without_a_template_is_skipped_not_fatal"
+reset_calls
+rm "$SRC/dot_config/niri/config.kdl.tmpl"
+printf 'hand kept\n' >"$XDG_CONFIG_HOME/niri/config.kdl"
+run_sync Linux fixture-dark
+assert_equals 0 $? "nothing to render is not a failure"
+assert_contains "no template to render" "$(cat "$OUT")" "the skip says why"
+assert_equals "hand kept" "$(cat "$XDG_CONFIG_HOME/niri/config.kdl")" "the hand-kept config is untouched"
+rm -rf "$XDG_CONFIG_HOME/niri" "$SRC/dot_config/niri"
+run_sync Linux fixture-light
 
 test_start "apply_is_idempotent_for_the_active_theme"
 reset_calls
