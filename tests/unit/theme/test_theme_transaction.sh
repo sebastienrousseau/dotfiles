@@ -71,6 +71,8 @@ exec "$REAL_PYTHON" "\$@"
 EOF
 cat >"$WORK/bin/chezmoi" <<EOF
 #!$REAL_BASH
+# The transaction reads and restores chezmoi's records; the stub has none.
+[[ "\${1:-}" == state ]] && exit 0
 for arg in "\$@"; do
   if [[ "\$arg" == "--dry-run" ]]; then
     exit "\${FAKE_CHEZMOI_RC:-0}"

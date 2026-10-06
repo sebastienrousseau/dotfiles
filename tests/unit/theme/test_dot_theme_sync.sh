@@ -382,8 +382,10 @@ assert_contains '"status": "succeeded"' "$journal" "transaction journal records 
 assert_equals "" "$(ls "$WORK/lock" 2>/dev/null)" "theme lock is released"
 
 test_start "apply_regenerates_only_installed_theme_targets"
-first_call="$(calls chezmoi | head -1)"
-apply_call="$(calls chezmoi | grep -v -- '--dry-run' | head -1)"
+# The transaction reads chezmoi's records (state get-bucket) before it
+# renders; the renderer calls are the apply ones.
+first_call="$(calls chezmoi | grep '^apply' | head -1)"
+apply_call="$(calls chezmoi | grep '^apply' | grep -v -- '--dry-run' | head -1)"
 assert_contains "apply --dry-run --force" "$first_call" "validation dry run precedes the apply"
 assert_contains "$HOME/.config/starship.toml" "$apply_call" "Starship prompt is regenerated"
 assert_contains "$HOME/.config/kitty/kitty.conf" "$apply_call" "Kitty palette is regenerated"

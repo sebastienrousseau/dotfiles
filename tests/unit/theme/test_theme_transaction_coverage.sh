@@ -342,4 +342,102 @@ got="$(
 )"
 assert_equals "released" "$got" "finished transaction just drops the lock"
 
+# ---------------------------------------------------------------------------
+# chezmoi's records of its targets are part of the transaction. A rollback
+# puts them back, so the next apply does not take the restored files for
+# hand edits and stop on a question nobody can answer (the `dot upgrade`
+# "has changed since chezmoi last wrote it ... EOF" failure).
+if command -v chezmoi >/dev/null 2>&1; then
+  CZ="$WORK/chezmoi"
+  # Everything chezmoi touches lives in the sandbox; the user's real state
+  # must never be read or written by this test.
+  export XDG_CONFIG_HOME="$HOME/.config" XDG_DATA_HOME="$HOME/.local/share" XDG_CACHE_HOME="$HOME/.cache"
+  mkdir -p "$CZ/src" "$CZ/dest" "$XDG_CONFIG_HOME/chezmoi"
+  cat >"$XDG_CONFIG_HOME/chezmoi/chezmoi.toml" <<EOF
+sourceDir = "$CZ/src"
+destDir = "$CZ/dest"
+persistentState = "$CZ/state.boltdb"
+cacheDir = "$CZ/cache"
+EOF
+  cz() { chezmoi --no-tty "$@"; }
+  # chezmoi stores a record as the bytes it was given and compares records
+  # by field, so a restored one is the same record in another key order.
+  record() {
+    cz state get --bucket=entryState --key="$1" |
+      python3 -c 'import json, sys; raw = sys.stdin.read().strip(); print(json.dumps(json.loads(raw), sort_keys=True) if raw else "")'
+  }
+
+  test_start "txn_rollback_restores_chezmoi_record_of_a_rewritten_target"
+  reset_state
+  printf 'v1\n' >"$CZ/src/dot_target"
+  cz apply >/dev/null
+  saved="$(record "$CZ/dest/.target")"
+  printf 'theme\n' >"$CZ/src/dot_target"
+  got="$(
+    DOT_THEME_OPERATION_ID=op-record _theme_txn_begin a b c 0 "$CZ/dest/.target" || exit 9
+    cz apply --force >/dev/null || exit 8
+    _theme_txn_rollback "renderer failed"
+    printf '%s|%s' "$(cat "$CZ/dest/.target")" "$(record "$CZ/dest/.target")"
+  )"
+  assert_equals "v1|$saved" "$got" "file and record are back as before the apply"
+
+  test_start "txn_rollback_leaves_no_question_for_the_next_apply"
+  printf 'v3\n' >"$CZ/src/dot_target"
+  out="$(cz apply </dev/null 2>&1)"
+  rc=$?
+  assert_equals "0|v3" "$rc|$(cat "$CZ/dest/.target")" "a non-interactive apply after rollback just applies: $out"
+
+  test_start "txn_rollback_drops_chezmoi_record_of_a_created_target"
+  reset_state
+  got="$(
+    DOT_THEME_OPERATION_ID=op-fresh _theme_txn_begin a b c 0 "$CZ/dest/.fresh" || exit 9
+    printf 'new\n' >"$CZ/src/dot_fresh"
+    cz apply --force >/dev/null || exit 8
+    noise="$(_theme_txn_rollback "renderer failed" 2>&1)"
+    printf '%s|%s|%s|%s' "$([[ -e "$CZ/dest/.fresh" ]] && echo present || echo absent)" "$(record "$CZ/dest/.fresh")" \
+      "$noise" "$(grep -c 'not restored' "$DOT_THEME_STATE_DIR/op-fresh/journal.json")"
+  )"
+  rm -f "$CZ/src/dot_fresh"
+  assert_equals "absent|||0" "$got" "the created target and its record are both gone, quietly"
+
+  test_start "txn_rollback_leaves_records_alone_when_they_could_not_be_read"
+  reset_state
+  printf 'v4\n' >"$CZ/src/dot_target"
+  cz apply --force >/dev/null
+  printf 'theme\n' >"$CZ/src/dot_target"
+  got="$(
+    chezmoi() {
+      [[ "${2:-}" == get-bucket ]] && return 1
+      command chezmoi "$@"
+    }
+    DOT_THEME_OPERATION_ID=op-blind _theme_txn_begin a b c 0 "$CZ/dest/.target" || exit 9
+    cz apply --force >/dev/null || exit 8
+    after="$(record "$CZ/dest/.target")"
+    _theme_txn_rollback "renderer failed"
+    printf '%s|%s|%s' "$([[ -e "$DOT_THEME_STATE_DIR/op-blind/chezmoi-records.tsv" ]] && echo table || echo no-table)" \
+      "$([[ "$(record "$CZ/dest/.target")" == "$after" ]] && echo kept || echo changed)" \
+      "$(grep -o '"status": "[a-z_]*"' "$DOT_THEME_STATE_DIR/op-blind/journal.json")"
+  )"
+  assert_equals 'no-table|kept|"status": "rolled_back"' "$got" "no snapshot of the records means no guess at them"
+
+  test_start "txn_rollback_names_records_it_could_not_restore"
+  reset_state
+  printf 'v5\n' >"$CZ/src/dot_target"
+  cz apply --force >/dev/null
+  printf 'theme\n' >"$CZ/src/dot_target"
+  got="$(
+    DOT_THEME_OPERATION_ID=op-stuck _theme_txn_begin a b c 0 "$CZ/dest/.target" || exit 9
+    cz apply --force >/dev/null || exit 8
+    chezmoi() {
+      [[ "${2:-}" == set ]] && return 1
+      command chezmoi "$@"
+    }
+    _theme_txn_rollback "renderer failed" 2>&1
+    grep -o 'chezmoi records not restored' "$DOT_THEME_STATE_DIR/op-stuck/journal.json"
+  )"
+  assert_contains "still records the failed apply for $CZ/dest/.target" "$got" "the stuck target is named"
+  assert_contains "chezmoi records not restored" "$got" "the journal reason carries the note"
+  unset -f cz record
+fi
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

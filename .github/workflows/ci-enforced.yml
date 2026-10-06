@@ -275,6 +275,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      # The tests that prove the chezmoi-facing code skip without chezmoi,
+      # which left every mutant in such code alive here while the same run
+      # killed them locally (#1238).
+      - name: Setup chezmoi
+        uses: ./.github/actions/setup-chezmoi
+
       - name: Mutation score on changed lines (>= 80%)
         run: |
           set -euo pipefail
