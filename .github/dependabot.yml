@@ -57,6 +57,7 @@ updates:
     # recurse from `directory: "/"`; that stale scope fails with
     # dependency_file_not_found instead of checking any image dependency.
     directories:
+      - "/.clusterfuzzlite"
       - "/.devcontainer"
       - "/fuzz/oss-fuzz"
       - "/tests"

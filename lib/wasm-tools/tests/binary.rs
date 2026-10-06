@@ -95,7 +95,7 @@ fn output_is_byte_identical_to_historic_format() {
 fn help_and_version_are_available() {
     for flag in ["--help", "-h"] {
         let out = dot_sys().arg(flag).assert().success().get_output().clone();
-        assert!(out.stderr.is_empty());
+        assert_eq!(String::from_utf8_lossy(&out.stderr), "");
         assert_eq!(String::from_utf8(out.stdout).unwrap(), cli::USAGE);
     }
     let out = dot_sys()
@@ -118,7 +118,7 @@ fn an_unknown_argument_is_a_usage_error() {
         .code(i32::from(cli::EXIT_USAGE))
         .get_output()
         .clone();
-    assert!(out.stdout.is_empty());
+    assert_eq!(String::from_utf8_lossy(&out.stdout), "");
     let err = String::from_utf8(out.stderr).unwrap();
     assert!(
         err.starts_with("dot-sys: unknown argument \"--anything\""),
@@ -136,7 +136,7 @@ fn verify_reads_stdin_and_passes_a_compliant_record() {
         .code(i32::from(cli::EXIT_SUCCESS))
         .get_output()
         .clone();
-    assert!(out.stderr.is_empty());
+    assert_eq!(String::from_utf8_lossy(&out.stderr), "");
     let text = String::from_utf8(out.stdout).unwrap();
     assert!(text.starts_with("pass  generated_at"), "{text}");
     assert!(
@@ -177,7 +177,7 @@ fn verify_fails_loudly_on_a_non_compliant_record() {
         .code(i32::from(cli::EXIT_FAILURE))
         .get_output()
         .clone();
-    assert!(out.stderr.is_empty());
+    assert_eq!(String::from_utf8_lossy(&out.stderr), "");
     let text = String::from_utf8(out.stdout).unwrap();
     assert!(
         text.contains("fail  git_signing.merge_verify_signatures"),
@@ -194,7 +194,7 @@ fn verify_rejects_input_that_is_not_json() {
         .code(i32::from(cli::EXIT_USAGE))
         .get_output()
         .clone();
-    assert!(out.stdout.is_empty());
+    assert_eq!(String::from_utf8_lossy(&out.stdout), "");
     assert_eq!(
         String::from_utf8(out.stderr).unwrap(),
         "dot-sys: expected a JSON value at byte 0\n"

@@ -214,7 +214,7 @@ fn the_module_rejects_input_that_is_not_json() {
         return;
     };
     assert_eq!(run.code, 2);
-    assert!(run.stdout.is_empty());
+    assert_eq!(run.stdout, "");
     assert_eq!(run.stderr, "dot-sys: expected a JSON value at byte 0\n");
 }
 

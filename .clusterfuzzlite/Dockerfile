@@ -5,7 +5,7 @@
 # repository into the image and runs .clusterfuzzlite/build.sh.
 
 # hadolint ignore=DL3006
-FROM gcr.io/oss-fuzz-base/base-builder-go
+FROM gcr.io/oss-fuzz-base/base-builder-go@sha256:1fd52de184d67413e027f2534dc0dde8fec60f17c70dac7ce793a526a9e24275
 
 LABEL maintainer="Sebastien Rousseau <sebastienrousseau@users.noreply.github.com>"
 
