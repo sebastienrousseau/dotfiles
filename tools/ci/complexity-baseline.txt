@@ -9,7 +9,7 @@
    1    0    0.0  158     0 benches/dot_command_bench.sh::bench_run_cases
   26   32   45.4   82    82 benches/test_help_gates_wall_clock.sh::<top>
   11   13   27.7   37     0 benches/test_perf_budgets.sh::_gate_max_rc
-   9    9   21.2   36  1624 bin/dot-theme-sync::<top>
+   9    9   21.4   37  1617 bin/dot-theme-sync::<top>
   25   18   28.6   37     0 bin/dot-theme-sync::_apply_gnome_family_desktop
   42   37   46.0   65     0 bin/dot-theme-sync::_apply_kde_desktop
   25   19   31.6   32     0 bin/dot-theme-sync::_apply_wlroots_desktop
@@ -17,7 +17,7 @@
   20    9   15.3   83     0 bin/dot-theme-sync::_detect_linux_de
   12   12   12.8   21     0 bin/dot-theme-sync::_resolve_theme_wallpapers
   20   26   38.2   48     0 bin/dot-theme-sync::_run_reloads_parallel
-  22   36   47.4   68     0 bin/dot-theme-sync::apply_theme_configs
+  20   29   44.5   60     0 bin/dot-theme-sync::apply_theme_configs
   46   41   67.7  201     0 bin/dot-theme-sync::main
   39   38   41.3   78     0 bin/dot-theme-sync::reload_browsers
   33   39   35.4  149     0 bin/dot-theme-sync::reload_desktop

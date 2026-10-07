@@ -165,9 +165,35 @@ if grep -Fqx -- "$first_sig_line" "$msg_file"; then
   exit 0
 fi
 
-if [[ -s "$msg_file" ]]; then
-  printf '\n' >>"$msg_file"
-fi
-
-cat "$sig_file" >>"$msg_file"
+# Git reads trailers (Signed-off-by, Assisted-by, …) from the LAST
+# paragraph only. Appending the signature after them used to push the
+# trailer block into the body, so DCO checks and `%(trailers:...)` no
+# longer saw the sign-off. Insert the signature BEFORE a trailing
+# trailer block when there is one; otherwise append as before. Comment
+# lines at the end (an editor's template) are kept, after everything.
+tmp_msg="$(mktemp)"
+EUXIS_SIG="$(cat "$sig_file")" awk '
+  { lines[NR] = $0 }
+  END {
+    n = NR
+    while (n > 0 && (lines[n] ~ /^[[:space:]]*$/ || lines[n] ~ /^#/)) n--
+    start = n
+    while (start > 0 && lines[start] !~ /^[[:space:]]*$/) start--
+    start++
+    trailers = (n >= start)
+    for (i = start; i <= n; i++) if (lines[i] !~ /^[A-Za-z][A-Za-z-]*: /) trailers = 0
+    if (trailers && start > 1) {
+      for (i = 1; i < start - 1; i++) print lines[i]
+      print ""; print ENVIRON["EUXIS_SIG"]; print ""
+      for (i = start; i <= n; i++) print lines[i]
+    } else {
+      for (i = 1; i <= n; i++) print lines[i]
+      if (n > 0) print ""
+      print ENVIRON["EUXIS_SIG"]
+    }
+    tail = 0
+    for (i = n + 1; i <= NR; i++) if (lines[i] ~ /^#/) { if (!tail) print ""; tail = 1; print lines[i] }
+  }' "$msg_file" >"$tmp_msg"
+cat "$tmp_msg" >"$msg_file"
+rm -f "$tmp_msg"
 printf '\n' >>"$msg_file"

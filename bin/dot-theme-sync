@@ -25,6 +25,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/dot/theme-transaction.sh
 source "$SCRIPT_DIR/../lib/dot/theme-transaction.sh"
+source "$SCRIPT_DIR/../lib/dot/theme-niri.sh"
 
 # =============================================================================
 # Constants & Colors
@@ -529,28 +530,21 @@ apply_theme_configs() {
     fi
   fi
 
-  # Niri: some setups keep config.kdl outside chezmoi management; fall back
-  # to rendering the template directly.
+  # Niri: a managed config.kdl goes through chezmoi like the others; an
+  # unmanaged one (the usual case, see _theme_niri_managed) is rendered
+  # from the template, or skipped.
   local niri_target="$HOME/.config/niri/config.kdl"
-  local tmp_file
   if [[ -f "$niri_target" ]]; then
-    if ! _theme_chezmoi_apply --dry-run --force "$niri_target"; then
-      required_failed=1
-    elif _theme_chezmoi_apply --force "$niri_target"; then
-      applied_count=$((applied_count + 1))
-    else
-      local niri_template="$SRC_DIR/dot_config/niri/config.kdl.tmpl"
-      if [[ -f "$niri_template" ]]; then
-        tmp_file="$(umask 077 && mktemp)"
-        if chezmoi execute-template <"$niri_template" >"$tmp_file" 2>/dev/null && mv "$tmp_file" "$niri_target"; then
-          applied_count=$((applied_count + 1))
-        else
-          rm -f "$tmp_file"
-          required_failed=1
-        fi
+    if _theme_niri_managed "$niri_target"; then
+      if ! _theme_chezmoi_apply --dry-run --force "$niri_target"; then
+        required_failed=1
+      elif _theme_chezmoi_apply --force "$niri_target"; then
+        applied_count=$((applied_count + 1))
       else
         required_failed=1
       fi
+    elif _theme_render_niri_template "$niri_target"; then
+      applied_count=$((applied_count + 1))
     fi
   fi
 

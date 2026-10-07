@@ -26,6 +26,16 @@ if [[ -z "$REAL_BASH" ]]; then
 fi
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
+# sysbin <dir> <tool...>: /usr/bin and /bin as links in <dir>, minus the
+# named tools, so a "without <tool>" case holds on machines that have it.
+sysbin() {
+  local dir="$1" args=() t
+  shift
+  for t in "$@"; do args+=(! -name "$t"); done
+  mkdir -p "$dir"
+  find /usr/bin/ /bin/ -maxdepth 1 \( -type f -o -type l \) "${args[@]}" -exec sh -c 'ln -sf "$@" "$0"' "$dir" {} + 2>/dev/null
+}
+sysbin "$WORK/sysbin" magick
 
 # setup [wallpaper...]: fresh sandbox; W is its root.
 setup() {
@@ -51,7 +61,7 @@ N=0
 
 # rt [args...]: run the sandboxed script; sets OUT and RC.
 rt() {
-  OUT="$(env -i HOME="$W/home" XDG_CACHE_HOME="$W/home/.cache" PATH="$W/stubs:/usr/bin:/bin" \
+  OUT="$(env -i HOME="$W/home" XDG_CACHE_HOME="$W/home/.cache" PATH="$W/stubs:$WORK/sysbin" \
     TERM=dumb LANG=C.UTF-8 DOTFILES_THEME_SYSTEM=1 DOTFILES_THEME_SYSTEM_ROOT="$W/sys" "$REAL_BASH" "$W/s/rebuild-themes.sh" "$@" </dev/null 2>&1)"
   RC=$?
 }
