@@ -191,7 +191,7 @@
   12   13   28.8   40     0 scripts/theme/merge-wallpaper.sh::merge_pair
   11   10   19.9   47   120 scripts/theme/wallpaper-rotate.sh::<top>
   11    7   21.3   91    99 scripts/tuning/linux.sh::<top>
-   4    3    7.9   52   508 scripts/version-sync.sh::<top>
+   4    3    7.9   53   506 scripts/version-sync.sh::<top>
   27   34   35.0   93    93 tools/ci/check-copyright-headers.sh::<top>
    9    9   27.8   61   159 tools/ci/check-deps-dev.sh::<top>
   16   18   35.6   52    52 tools/ci/check-fuzz-harness-self-contained.sh::<top>

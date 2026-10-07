@@ -376,7 +376,7 @@ mod tests {
                 "{{\"status\": \"ok\", \"timestamp\": 1700000000, \"engine\": \"{ENGINE}\"}}\n"
             )
         );
-        assert!(err.is_empty());
+        assert_eq!(String::from_utf8_lossy(&err), "");
     }
 
     #[test]
@@ -384,7 +384,7 @@ mod tests {
         let (mut out, mut err) = (Vec::new(), Vec::new());
         let code = run(&mut out, &mut err, UNIX_EPOCH - Duration::from_secs(1));
         assert_eq!(code, EXIT_FAILURE);
-        assert!(out.is_empty());
+        assert_eq!(String::from_utf8_lossy(&out), "");
         assert_eq!(err, b"dot-sys: system clock is before the Unix epoch\n");
     }
 
@@ -419,7 +419,7 @@ mod tests {
             out,
             format!("{{\"status\": \"ok\", \"timestamp\": 9, \"engine\": \"{ENGINE}\"}}\n")
         );
-        assert!(err.is_empty());
+        assert_eq!(err, "");
     }
 
     #[test]
@@ -428,7 +428,7 @@ mod tests {
             let (code, out, err) = cli(&[flag], "", UNIX_EPOCH);
             assert_eq!(code, EXIT_SUCCESS);
             assert_eq!(out, USAGE);
-            assert!(err.is_empty());
+            assert_eq!(err, "");
         }
         for flag in ["--version", "-V"] {
             let (code, out, err) = cli(&[flag], "", UNIX_EPOCH);
@@ -437,7 +437,7 @@ mod tests {
                 out,
                 format!("dot-sys {} ({ENGINE})\n", env!("CARGO_PKG_VERSION"))
             );
-            assert!(err.is_empty());
+            assert_eq!(err, "");
         }
     }
 
@@ -445,7 +445,7 @@ mod tests {
     fn unknown_arguments_are_a_usage_error() {
         let (code, out, err) = cli(&["woof"], "", UNIX_EPOCH);
         assert_eq!(code, EXIT_USAGE);
-        assert!(out.is_empty());
+        assert_eq!(out, "");
         assert!(err.starts_with("dot-sys: unknown argument \"woof\"\n"));
         assert!(err.ends_with(USAGE));
 
@@ -487,7 +487,7 @@ mod tests {
             out.ends_with(&format!("checks passed on {ENGINE}\n")),
             "{out}"
         );
-        assert!(err.is_empty());
+        assert_eq!(err, "");
     }
 
     #[test]
@@ -498,7 +498,7 @@ mod tests {
             UNIX_EPOCH,
         );
         assert_eq!(code, EXIT_SUCCESS);
-        assert!(err.is_empty());
+        assert_eq!(err, "");
         let line = out.strip_suffix('\n').expect("one trailing newline");
         assert!(!line.contains('\n'), "one line: {line:?}");
         crate::json::validate(line).expect("well-formed JSON");
@@ -528,14 +528,14 @@ mod tests {
             "{out}"
         );
         assert!(out.ends_with("1 of 11 checks failed\n"), "{out}");
-        assert!(err.is_empty());
+        assert_eq!(err, "");
     }
 
     #[test]
     fn verify_rejects_input_that_is_not_json() {
         let (code, out, err) = cli(&["verify"], "definitely not json", UNIX_EPOCH);
         assert_eq!(code, EXIT_USAGE);
-        assert!(out.is_empty());
+        assert_eq!(out, "");
         assert_eq!(err, "dot-sys: expected a JSON value at byte 0\n");
     }
 
@@ -585,7 +585,7 @@ mod tests {
             UNIX_EPOCH - Duration::from_secs(1),
         );
         assert_eq!(code, EXIT_FAILURE);
-        assert!(out.is_empty());
+        assert_eq!(String::from_utf8_lossy(&out), "");
         assert_eq!(err, b"dot-sys: system clock is before the Unix epoch\n");
     }
 
@@ -600,7 +600,7 @@ mod tests {
             UNIX_EPOCH,
         );
         assert_eq!(code, EXIT_USAGE);
-        assert!(out.is_empty());
+        assert_eq!(String::from_utf8_lossy(&out), "");
         assert_eq!(err, b"dot-sys: no stdin\n");
     }
 
