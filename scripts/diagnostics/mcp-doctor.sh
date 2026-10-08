@@ -134,8 +134,11 @@ _mcp_policy_flag() {
 }
 
 _mcp_load_policy() {
+  # Lock manifests are named relative to the chezmoi source root
+  MCP_LOCK_ROOT="${MCP_LOCK_ROOT:-$REPO_ROOT/defaults}"
   if _mcp_json_ok "$MCP_POLICY_CONFIG"; then
     ALLOWED_LAUNCHERS="$(jq -c '.profiles[.defaultProfile].allowedLaunchers // ["npx","node","uvx"]' "$MCP_POLICY_CONFIG")"
+    ALLOWED_LAUNCHER_PREFIXES="$(jq -c '.profiles[.defaultProfile].allowedLauncherPrefixes // []' "$MCP_POLICY_CONFIG")"
     BLOCKED_PATHS="$(jq -c '.profiles[.defaultProfile].blockedFilesystemRoots // ["/","/home","/Users"]' "$MCP_POLICY_CONFIG")"
     BLOCKED_ARG_PATTERNS="$(jq -c '.profiles[.defaultProfile].blockedArgPatterns // ["^--allow-.*","^--unsafe$","^\\\\*$"]' "$MCP_POLICY_CONFIG")"
     FORBIDDEN_DEFAULT_SERVERS="$(jq -c '.profiles[.defaultProfile].forbidNetworkServersByDefault // []' "$MCP_POLICY_CONFIG")"

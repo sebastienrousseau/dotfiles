@@ -1,31 +1,40 @@
 {
-  "lockVersion": "2026.03",
+  "lockVersion": "2026.10",
   "profile": "strict-local",
   "packages": {
     "git": {
-      "command": "npx",
-      "package": "mcp-server-git@2026.3.0",
-      "source": "https://github.com/modelcontextprotocol/servers/releases/tag/2025.1.14",
+      "command": "${HOME}/.local/share/dot-mcp/python/git/venv/bin/mcp-server-git",
+      "ecosystem": "pypi",
+      "package": "mcp-server-git==2026.8.18",
+      "integrity": "sha256:6c32a8e771564122a9bafac373cf871fb3ab540ddc1ba0ee8e9c8c6e9878aef7",
+      "manifest": "dot_local/share/dot-mcp/python/git/requirements.txt",
+      "source": "https://pypi.org/project/mcp-server-git/2026.8.18/",
       "verification": {
-        "method": "tracked version pin",
+        "method": "uv pip install --require-hashes",
         "status": "approved"
       }
     },
     "memory": {
-      "command": "npx",
-      "package": "@modelcontextprotocol/server-memory@2026.3.0",
-      "source": "https://www.npmjs.com/package/@modelcontextprotocol/server-memory",
+      "command": "${HOME}/.local/share/dot-mcp/node/node_modules/.bin/mcp-server-memory",
+      "ecosystem": "npm",
+      "package": "@modelcontextprotocol/server-memory@2026.8.31",
+      "integrity": "sha512-ljj/3S4aGjxdNSQWw6gucKKGnTLdBPWxzapyY/MT2tOVyZwvxChvevXSLPwx59nKJAlVpUVW+cOlnVRXRwiqMQ==",
+      "manifest": "dot_local/share/dot-mcp/node/package-lock.json",
+      "source": "https://www.npmjs.com/package/@modelcontextprotocol/server-memory/v/2026.8.31",
       "verification": {
-        "method": "tracked version pin",
+        "method": "npm ci --ignore-scripts (package-lock integrity)",
         "status": "approved"
       }
     },
     "sqlite": {
-      "command": "npx",
-      "package": "mcp-server-sqlite@2026.3.0",
-      "source": "https://github.com/modelcontextprotocol/servers/releases/tag/2025.1.14",
+      "command": "${HOME}/.local/share/dot-mcp/python/sqlite/venv/bin/mcp-server-sqlite",
+      "ecosystem": "pypi",
+      "package": "mcp-server-sqlite==2025.4.25",
+      "integrity": "sha256:5ba5706aa29d249a3cde8226577e021c07792d3198e9db40fd005578d2a0801d",
+      "manifest": "dot_local/share/dot-mcp/python/sqlite/requirements.txt",
+      "source": "https://pypi.org/project/mcp-server-sqlite/2025.4.25/",
       "verification": {
-        "method": "tracked version pin",
+        "method": "uv pip install --require-hashes",
         "status": "approved"
       }
     }

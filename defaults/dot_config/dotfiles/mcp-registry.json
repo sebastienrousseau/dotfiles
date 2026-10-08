@@ -3,30 +3,30 @@
   "servers": {
     "git": {
       "transport": "stdio",
-      "launcher": "npx",
-      "package": "mcp-server-git@2026.3.0",
+      "launcher": "${HOME}/.local/share/dot-mcp/python/git/venv/bin/mcp-server-git",
+      "package": "mcp-server-git==2026.8.18",
       "auth": "env",
       "authProfile": "env-token",
       "scope": "repo-local",
-      "verification": "pinned-package"
+      "verification": "hash-pinned-package"
     },
     "memory": {
       "transport": "stdio",
-      "launcher": "npx",
-      "package": "@modelcontextprotocol/server-memory@2026.3.0",
+      "launcher": "${HOME}/.local/share/dot-mcp/node/node_modules/.bin/mcp-server-memory",
+      "package": "@modelcontextprotocol/server-memory@2026.8.31",
       "auth": "env",
       "authProfile": "none",
       "scope": "workspace-local",
-      "verification": "pinned-package"
+      "verification": "hash-pinned-package"
     },
     "sqlite": {
       "transport": "stdio",
-      "launcher": "npx",
-      "package": "mcp-server-sqlite@2026.3.0",
+      "launcher": "${HOME}/.local/share/dot-mcp/python/sqlite/venv/bin/mcp-server-sqlite",
+      "package": "mcp-server-sqlite==2025.4.25",
       "auth": "env",
       "authProfile": "none",
       "scope": "workspace-local",
-      "verification": "pinned-package"
+      "verification": "hash-pinned-package"
     },
     "example-remote": {
       "transport": "streamable-http",

@@ -60,13 +60,17 @@ for server in filesystem github brave-search fetch puppeteer; do
 done
 
 test_start "mcp_config_uses_pinned_package_refs"
-for package_ref in "mcp-server-git@2026.3.0" "@modelcontextprotocol/server-memory@2026.3.0" "mcp-server-sqlite@2026.3.0"; do
-  if grep -q "$package_ref" "$MCP_CONFIG_FILE"; then
+# Each shipped server runs the binary its hash-pinned lock entry approves.
+MCP_LOCK_FILE="$REPO_ROOT/defaults/dot_config/dotfiles/mcp-lock.json"
+for server in git memory sqlite; do
+  cmd="$(jq -r --arg s "$server" '.mcpServers[$s].command' "$MCP_CONFIG_FILE")"
+  if [[ "$cmd" == "$(jq -r --arg s "$server" '.packages[$s].command' "$MCP_LOCK_FILE")" ]] &&
+    [[ -n "$(jq -r --arg s "$server" '.packages[$s].integrity // empty' "$MCP_LOCK_FILE")" ]]; then
     ((TESTS_PASSED++))
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: pinned ref present for $package_ref"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: $server runs its locked, integrity-pinned binary"
   else
     ((TESTS_FAILED++))
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: missing pinned ref $package_ref"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $server command $cmd is not the locked one"
   fi
 done
 
@@ -135,7 +139,7 @@ assert_true '[[ $S_OUT == *"HTTP transports are HTTPS"* && $S_OUT == *"HTTP tran
   "an HTTPS, OAuth2-registered remote server passes the HTTPS and OAuth rules"
 
 test_start "mcp_meta_registry_subcommand"
-assert_true '[[ "$(meta mcp registry)" == *"git"*"mcp-server-git@2026.3.0"* ]]' "dot mcp registry lists the tracked servers"
+assert_true '[[ "$(meta mcp registry)" == *"git"*"mcp-server-git==2026.8.18"* ]]' "dot mcp registry lists the tracked servers"
 
 test_start "mcp_meta_unknown_subcommand_shows_usage"
 rc=0

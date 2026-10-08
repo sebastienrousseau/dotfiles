@@ -19,6 +19,12 @@ set -euo pipefail
 # resources.go: {{ include "dot_local/share/dot-mcp/resources.go" | sha256sum }}
 # paths.go:     {{ include "dot_local/share/dot-mcp/paths.go" | sha256sum }}
 # go.mod:       {{ include "dot_local/share/dot-mcp/go.mod" | sha256sum }}
+# Third-party MCP servers run by mcp_servers.json, installed from these
+# committed, hash-pinned manifests (see install-servers.sh):
+# installer:    {{ include "dot_local/share/dot-mcp/executable_install-servers.sh" | sha256sum }}
+# npm lock:     {{ include "dot_local/share/dot-mcp/node/package-lock.json" | sha256sum }}
+# git reqs:     {{ include "dot_local/share/dot-mcp/python/git/requirements.txt" | sha256sum }}
+# sqlite reqs:  {{ include "dot_local/share/dot-mcp/python/sqlite/requirements.txt" | sha256sum }}
 
 SRC="$HOME/.local/share/dot-mcp"
 OUT="$HOME/.local/bin/dot-mcp"
@@ -27,6 +33,15 @@ OUT="$HOME/.local/bin/dot-mcp"
   echo "dot-mcp: source not deployed yet — skipping."
   exit 0
 }
+
+# npm ci --ignore-scripts and uv pip install --require-hashes; nothing is
+# fetched unverified when Claude starts a server. A failure is reported but
+# does not block the dot-mcp build; re-run "$SRC/install-servers.sh".
+if [[ -x "$SRC/install-servers.sh" ]]; then
+  echo "Installing pinned MCP servers…"
+  "$SRC/install-servers.sh" ||
+    echo "dot-mcp: MCP server install incomplete; re-run $SRC/install-servers.sh" >&2
+fi
 
 # Resolve a Go toolchain (mise shims put `go` on PATH when activated).
 if ! command -v go >/dev/null 2>&1; then

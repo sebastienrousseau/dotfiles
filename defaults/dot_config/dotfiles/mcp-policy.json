@@ -5,6 +5,7 @@
     "strict-local": {
       "description": "Local-first MCP policy for regulated and high-trust environments.",
       "allowedLaunchers": ["npx", "node", "uvx"],
+      "allowedLauncherPrefixes": ["${HOME}/.local/share/dot-mcp/"],
       "trustedTransports": ["stdio", "http"],
       "authProfiles": ["none", "env-token"],
       "blockedFilesystemRoots": ["/", "/home", "/Users"],
@@ -29,6 +30,7 @@
     "enterprise-remote": {
       "description": "Enterprise-ready MCP policy with registry-backed remote transports.",
       "allowedLaunchers": ["npx", "node", "uvx"],
+      "allowedLauncherPrefixes": ["${HOME}/.local/share/dot-mcp/"],
       "trustedTransports": ["stdio", "http", "streamable-http"],
       "authProfiles": ["none", "env-token", "oauth2", "sso"],
       "streamableHttpConfig": {

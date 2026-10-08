@@ -10,6 +10,8 @@
 # jq definitions shared by the checks. Claude Code names a server's
 # transport with `type`; `transport` is the older key some configs use.
 MCP_JQ_DEFS='def mcp_transport: (.type // .transport // "stdio");'
+# Installed-binary prefixes the policy allows besides allowedLaunchers
+ALLOWED_LAUNCHER_PREFIXES='[]'
 
 # Configured MCP server count
 _mcp_check_servers() {
@@ -80,8 +82,17 @@ _mcp_check_inline_launchers() {
 }
 
 _mcp_check_launchers() {
-  # MCP operational policy: allow known launchers only.
-  unknown_launchers="$(jq -r --argjson allowed "$ALLOWED_LAUNCHERS" '.mcpServers | to_entries[]? | select((.value.command as $cmd | [$allowed[] | select(. == $cmd)] | length) == 0) | "\(.key):\(.value.command)"' "$MCP_CONFIG" 2>/dev/null || true)"
+  # MCP operational policy: allow known launchers only, plus binaries that
+  # install-servers.sh put under an allowlisted prefix (no . or .. segment,
+  # so a prefix match cannot climb out of it).
+  unknown_launchers="$(jq -r --argjson allowed "$ALLOWED_LAUNCHERS" --argjson prefixes "$ALLOWED_LAUNCHER_PREFIXES" '
+      .mcpServers
+      | to_entries[]?
+      | (.value.command // "") as $cmd
+      | select(([$allowed[] | select(. == $cmd)] | length) == 0)
+      | select(any($prefixes[]; . as $p | $cmd | startswith($p) and (split("/") | any(. == ".." or . == ".") | not)) | not)
+      | "\(.key):\(.value.command)"
+    ' "$MCP_CONFIG" 2>/dev/null || true)"
   if [[ -n "$unknown_launchers" ]]; then
     while IFS= read -r item; do
       [[ -z "$item" ]] && continue
@@ -309,28 +320,75 @@ _mcp_check_unpinned_npx() {
   fi
 }
 
-# Servers must match the approved package lock
-_mcp_check_package_lock() {
-  if [[ "$REQUIRE_APPROVED_PACKAGE_LOCK" -eq 1 ]]; then
-    approved_package_mismatches="$(jq -r --argjson approved "$APPROVED_PACKAGE_LOCK" '
-        .mcpServers
-        | to_entries[]?
-        | .key as $server
-        | .value.command as $command
-        | ((.value.args // []) | map(select(test("^[A-Za-z0-9@._/-]+@[A-Za-z0-9._-]+$"))) | .[0] // "") as $pkg
-        | select($command == "npx")
-        | select(($approved[$server].package // "") != $pkg)
-        | "\($server)\t\($pkg)\t\($approved[$server].package // "untracked")"
-      ' "$MCP_CONFIG" 2>/dev/null || true)"
-    if [[ -n "$approved_package_mismatches" ]]; then
-      while IFS=$'\t' read -r server actual expected; do
-        [[ -z "${server:-}" ]] && continue
-        log_warn "Package lock" "$server uses $actual (approved: $expected)"
-      done <<<"$approved_package_mismatches"
-    else
-      log_success "Package lock" "all active servers match approved package refs"
+# _mcp_manifest_has <ecosystem> <manifest> <package> <integrity>: the
+# committed manifest pins exactly <package> with <integrity>.
+_mcp_manifest_has() {
+  case "$1" in
+    npm)
+      jq -e --arg n "${3%@*}" --arg v "${3##*@}" --arg i "$4" \
+        '.packages["node_modules/" + $n] | .version == $v and .integrity == $i' "$2" >/dev/null 2>&1
+      ;;
+    pypi)
+      # A requirement starts in column 0; its --hash lines follow, indented.
+      [[ -f "$2" ]] && awk -v req="$3" -v hash="--hash=$4" '
+        /^[^ #]/ { cur = ($1 == req) }
+        cur && index($0, hash) { found = 1 }
+        END { exit !found }' "$2"
+      ;;
+    *) return 1 ;;
+  esac
+}
+
+# Lock entries with an integrity hash: the server must run the approved
+# command, and the manifest the lock names must pin that package with that
+# hash. Prints "server<TAB>detail" per mismatch.
+_mcp_lock_integrity_mismatches() {
+  local server cmd eco manifest pkg integ actual
+  while IFS=$'\x1f' read -r server cmd eco manifest pkg integ actual; do
+    [[ -n "$server" ]] || continue
+    if [[ "$actual" != "$cmd" ]]; then
+      printf '%s\t%s\n' "$server" "runs $actual (approved: $cmd)"
+    elif ! _mcp_manifest_has "$eco" "$MCP_LOCK_ROOT/$manifest" "$pkg" "$integ"; then
+      printf '%s\t%s\n' "$server" "$pkg integrity $integ is not in $manifest"
     fi
-  fi
+  done < <(jq -r --argjson approved "$APPROVED_PACKAGE_LOCK" '
+      .mcpServers
+      | to_entries[]?
+      | .key as $s
+      | (.value.command // "") as $actual
+      | $approved[$s]
+      | select(type == "object" and (.integrity // "") != "")
+      | [$s, .command // "", .ecosystem // "", .manifest // "", .package // "", .integrity, $actual]
+      | join("\u001f")
+    ' "$MCP_CONFIG" 2>/dev/null || true)
+}
+
+# Servers must match the approved package lock: npx refs by package@version,
+# installed servers by command and manifest integrity
+_mcp_check_package_lock() {
+  [[ "$REQUIRE_APPROVED_PACKAGE_LOCK" -eq 1 ]] || return 0
+  local server actual expected detail found=0
+  approved_package_mismatches="$(jq -r --argjson approved "$APPROVED_PACKAGE_LOCK" '
+      .mcpServers
+      | to_entries[]?
+      | .key as $server
+      | .value.command as $command
+      | ((.value.args // []) | map(select(test("^[A-Za-z0-9@._/-]+@[A-Za-z0-9._-]+$"))) | .[0] // "") as $pkg
+      | select($command == "npx")
+      | select(($approved[$server].package // "") != $pkg)
+      | "\($server)\t\($pkg)\t\($approved[$server].package // "untracked")"
+    ' "$MCP_CONFIG" 2>/dev/null || true)"
+  while IFS=$'\t' read -r server actual expected; do
+    [[ -z "${server:-}" ]] && continue
+    log_warn "Package lock" "$server uses $actual (approved: $expected)"
+    found=1
+  done <<<"$approved_package_mismatches"
+  while IFS=$'\t' read -r server detail; do
+    [[ -z "${server:-}" ]] && continue
+    log_warn "Package lock" "$server: $detail"
+    found=1
+  done < <(_mcp_lock_integrity_mismatches)
+  [[ "$found" -eq 1 ]] || log_success "Package lock" "all active servers match approved package refs"
 }
 
 # Servers must have a registry entry

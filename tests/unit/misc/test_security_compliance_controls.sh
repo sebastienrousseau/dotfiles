@@ -289,18 +289,18 @@ assert_contains "all active servers match approved package refs" "$(cat "$OUT")"
 assert_contains "no unpinned npx packages found" "$(cat "$OUT")" "every shipped server uses a pinned release"
 
 test_start "mcp_policy_requires_the_approved_package_lock"
-jq '.mcpServers.memory.args[1] = "@modelcontextprotocol/server-memory@2026.2.0"' \
+jq '.mcpServers.memory = {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory@2026.2.0"]}' \
   "$MCP_CONFIG_SHIPPED" >"$WORK/mcp-drifted.json"
 mcp_doctor "$WORK/mcp-drifted.json"
 assert_not_equals "0" "$?" "a server pinned off the lock fails --strict"
-assert_contains "memory uses @modelcontextprotocol/server-memory@2026.2.0 (approved: @modelcontextprotocol/server-memory@2026.3.0)" \
+assert_contains "memory uses @modelcontextprotocol/server-memory@2026.2.0 (approved: @modelcontextprotocol/server-memory@2026.8.31)" \
   "$(cat "$OUT")" "the lock mismatch is reported against the approved ref"
 jq '.profiles[.defaultProfile].requireApprovedPackageLock = false' "$MCP_POLICY_SHIPPED" >"$WORK/mcp-policy-lax.json"
 mcp_doctor "$WORK/mcp-drifted.json" "$WORK/mcp-policy-lax.json"
 refute_contains "(approved:" "$(cat "$OUT")" "the lock check is driven by the shipped policy's requireApprovedPackageLock"
 
 test_start "mcp_policy_flags_unpinned_packages"
-jq '.mcpServers.memory.args[1] = "@modelcontextprotocol/server-memory"' \
+jq '.mcpServers.memory = {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-memory"]}' \
   "$MCP_CONFIG_SHIPPED" >"$WORK/mcp-unpinned.json"
 mcp_doctor "$WORK/mcp-unpinned.json"
 assert_not_equals "0" "$?" "an unpinned server fails --strict"
