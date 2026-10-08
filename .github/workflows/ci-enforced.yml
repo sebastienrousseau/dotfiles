@@ -125,6 +125,12 @@ jobs:
             echo "::error::Found potentially unsafe wget pattern"
             exit 1
           fi
+      # `${{ }}` expanded inside run: scripts (tags, refs, inputs, step
+      # outputs, secrets) and read-only checkouts that keep the token in
+      # git config. Legacy findings are held by
+      # tools/ci/workflow-injection-baseline.txt.
+      - name: Workflow injection and checkout credentials
+        run: python3 tools/ci/check-workflow-hardening.py
       - name: Check for hardcoded secrets patterns
         run: |
           echo "::notice::Scanning for hardcoded secrets patterns"
