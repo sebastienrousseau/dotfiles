@@ -68,7 +68,7 @@ _mcp_check_inline_launchers() {
       | ((.value.command // "") | split("/") | last) as $cmd
       | [(.value.args // [])[]? | strings] as $args
       | if ($cmd | test("^node(js)?$")) and any($args[]; test("^-[A-Za-z]*[ep][A-Za-z]*$|^--(eval|print)(=|$)")) then "\($name)\tnode -e"
-        elif ($cmd | test("^(ba|da|z|k|fi)?sh$|^python[0-9.]*$")) and any($args[]; test("^-[A-Za-z]*c[A-Za-z]*$")) then "\($name)\t\($cmd) -c"
+        elif ($cmd | test("^(bash|dash|zsh|ksh|fish|sh)$|^python[0-9.]*$")) and any($args[]; test("^-[A-Za-z]*c[A-Za-z]*$")) then "\($name)\t\($cmd) -c"
         else empty end
     ' "$MCP_CONFIG" 2>/dev/null || true)"
   if [[ -n "$inline" ]]; then
