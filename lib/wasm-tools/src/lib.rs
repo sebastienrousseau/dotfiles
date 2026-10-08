@@ -44,6 +44,8 @@
 //! `serde_json`. Both halves are exhaustively unit-tested, fuzzed for
 //! round-trip equality, and checked under Miri.
 
+#![forbid(unsafe_code)]
+
 use std::fmt::{self, Write as _};
 use std::str::FromStr;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -402,6 +404,15 @@ pub enum Error {
         /// The whole dotted path that was looked up.
         path: &'static str,
     },
+    /// An object on a [`json::get`] path names the member `name` twice; the
+    /// second occurrence starts at `offset`. Parsers disagree on which copy
+    /// wins, so neither is trusted.
+    DuplicateMember {
+        /// The path segment that is repeated.
+        name: &'static str,
+        /// Byte offset of the second occurrence's opening quote.
+        offset: usize,
+    },
     /// Objects or arrays nest deeper than [`json::MAX_DEPTH`] at `offset`.
     TooDeep {
         /// Byte offset of the bracket that would have gone too deep.
@@ -434,6 +445,9 @@ impl fmt::Display for Error {
                 write!(f, "unexpected trailing input at byte {offset}")
             }
             Self::MissingMember { path } => write!(f, "no member \"{path}\" in the document"),
+            Self::DuplicateMember { name, offset } => {
+                write!(f, "duplicate member \"{name}\" at byte {offset}")
+            }
             Self::TooDeep { offset } => write!(
                 f,
                 "nesting deeper than {} at byte {offset}",
@@ -836,7 +850,7 @@ mod tests {
 
     #[test]
     fn error_display_messages() {
-        let cases: [(Error, &str); 10] = [
+        let cases: [(Error, &str); 11] = [
             (
                 Error::ClockBeforeEpoch,
                 "system clock is before the Unix epoch",
@@ -868,6 +882,13 @@ mod tests {
             (
                 Error::MissingMember { path: "a.b" },
                 "no member \"a.b\" in the document",
+            ),
+            (
+                Error::DuplicateMember {
+                    name: "mcp",
+                    offset: 10,
+                },
+                "duplicate member \"mcp\" at byte 10",
             ),
             (
                 Error::TooDeep { offset: 8 },

@@ -251,14 +251,19 @@ pub fn validate(input: &str) -> Result<(), Error> {
 /// literal dot is not addressable, which the records this crate reads never
 /// need.
 ///
-/// `get` stops as soon as it has the value it was asked for, so it only
-/// proves that the *path* is well-formed — call [`validate`] first if the
-/// whole document has to be sound, which is what
+/// Every object on the path is scanned to its end, and a member name that
+/// appears twice in one of them is an error rather than a first-wins
+/// lookup: other parsers (`jq`, Python, Go) keep the last copy, and a
+/// verifier that reads a different value from the one everyone else reads
+/// is no verifier. Beyond those objects `get` only proves that the *path*
+/// is well-formed — call [`validate`] first if the whole document has to
+/// be sound, which is what
 /// [`attest::Report::verify`](crate::attest::Report::verify) does.
 ///
 /// # Errors
 ///
 /// Returns [`Error::MissingMember`] if a segment is absent,
+/// [`Error::DuplicateMember`] if a segment appears twice in its object,
 /// [`Error::Unexpected`] if a segment names a member of something that is
 /// not an object, and any other [`Error`] variant if the document is
 /// malformed along the way.
@@ -532,10 +537,10 @@ impl<'a> Scanner<'a> {
     /// Positions the scanner on the value of the member called `name`.
     ///
     /// Returns `false` — with the scanner left somewhere inside the object
-    /// — when there is no such member. Values of other members are scanned
-    /// and discarded on the way past, so a malformed sibling before the
-    /// wanted key is still reported.
-    fn seek_member(&mut self, name: &str) -> Result<bool, Error> {
+    /// — when there is no such member. The whole object is scanned, values
+    /// of other members included, so a malformed sibling is still reported
+    /// and a second member called `name` is [`Error::DuplicateMember`].
+    fn seek_member(&mut self, name: &'static str) -> Result<bool, Error> {
         self.skip_ws();
         match self.peek() {
             None => return Err(Error::UnexpectedEnd),
@@ -547,30 +552,48 @@ impl<'a> Scanner<'a> {
                 })
             }
         }
+        let mut found = None;
         loop {
             self.skip_ws();
             if self.peek() == Some(b'}') {
-                return Ok(false);
+                break;
             }
+            let key_at = self.pos;
             let key = self.parse_string()?;
             self.skip_ws();
             self.expect(b':', "':'")?;
             if key == name {
-                return Ok(true);
+                if found.is_some() {
+                    return Err(Error::DuplicateMember {
+                        name,
+                        offset: key_at,
+                    });
+                }
+                found = Some(self.pos);
             }
             self.scan_value()?;
-            self.skip_ws();
-            match self.peek() {
-                Some(b',') => self.pos += 1,
-                Some(b'}') => return Ok(false),
-                None => return Err(Error::UnexpectedEnd),
-                Some(_) => {
-                    return Err(Error::Unexpected {
-                        offset: self.pos,
-                        expected: "',' or '}'",
-                    })
-                }
+            if !self.member_follows()? {
+                break;
             }
+        }
+        Ok(found.map(|value_at| self.pos = value_at).is_some())
+    }
+
+    /// After a member's value: consumes a `,` and returns `true`, or
+    /// returns `false` at the object's closing `}`.
+    fn member_follows(&mut self) -> Result<bool, Error> {
+        self.skip_ws();
+        match self.peek() {
+            Some(b',') => {
+                self.pos += 1;
+                Ok(true)
+            }
+            Some(b'}') => Ok(false),
+            None => Err(Error::UnexpectedEnd),
+            Some(_) => Err(Error::Unexpected {
+                offset: self.pos,
+                expected: "',' or '}'",
+            }),
         }
     }
 
@@ -1103,5 +1126,62 @@ mod tests {
         assert_eq!(Kind::Bool, Kind::Bool);
         assert_ne!(Kind::Bool, Kind::Null);
         assert!(format!("{:?}", Kind::Array).contains("Array"));
+    }
+
+    #[test]
+    fn get_rejects_a_member_named_twice_on_the_path() {
+        assert_eq!(
+            get(r#"{"a": 1, "a": 2}"#, "a"),
+            Err(Error::DuplicateMember {
+                name: "a",
+                offset: 9
+            })
+        );
+        // Escapes are decoded before names are compared.
+        assert_eq!(
+            get(r#"{"a": 1, "b": 0, "\u0061": 2}"#, "a"),
+            Err(Error::DuplicateMember {
+                name: "a",
+                offset: 17
+            })
+        );
+        // A duplicate parent is caught before its children are looked at.
+        assert_eq!(
+            get(r#"{"m": {"s": "ok"}, "m": {"s": "bad"}}"#, "m.s"),
+            Err(Error::DuplicateMember {
+                name: "m",
+                offset: 19
+            })
+        );
+        // A duplicate inside the selected object.
+        assert_eq!(
+            get(r#"{"m": {"s": "ok", "s": "bad"}}"#, "m.s"),
+            Err(Error::DuplicateMember {
+                name: "s",
+                offset: 18
+            })
+        );
+        // Repeats of names off the path are not this lookup's business.
+        assert_eq!(get(r#"{"x": 1, "x": 2, "a": 3}"#, "a").unwrap().text(), "3");
+        // The value returned is the one after the single match, even when
+        // the match is not the last member.
+        assert_eq!(
+            get(r#"{"a": [1], "b": 2, "c": 3}"#, "a").unwrap().text(),
+            "[1]"
+        );
+        assert_eq!(get(r#"{"a" : 1}"#, "a").unwrap().text(), "1");
+    }
+
+    #[test]
+    fn get_scans_past_the_match_to_the_end_of_the_object() {
+        assert_eq!(get(r#"{"a": 1, "b": 2"#, "a"), Err(Error::UnexpectedEnd));
+        assert_eq!(
+            get(r#"{"a": 1 "b": 2}"#, "a"),
+            Err(Error::Unexpected {
+                offset: 8,
+                expected: "',' or '}'"
+            })
+        );
+        assert_eq!(get(r#"{"a": 1,}"#, "a").unwrap().text(), "1");
     }
 }

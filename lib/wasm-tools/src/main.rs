@@ -10,6 +10,8 @@
 //! in, which under WASI means the runtime's stdin, stdout and
 //! `clock_time_get`.
 
+#![forbid(unsafe_code)]
+
 use std::io;
 use std::process::ExitCode;
 use std::time::SystemTime;

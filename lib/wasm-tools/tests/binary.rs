@@ -200,3 +200,22 @@ fn verify_rejects_input_that_is_not_json() {
         "dot-sys: expected a JSON value at byte 0\n"
     );
 }
+
+#[test]
+fn verify_rejects_a_record_that_repeats_a_checked_member() {
+    // The audit's record: a second "mcp" member that a last-wins parser
+    // (jq, Python, Go) reads as degraded while a first-wins reader saw
+    // healthy. Both readings cannot be right, so the verifier must fail.
+    let body = GOOD.trim_end().strip_suffix('}').expect("object");
+    let doubled = format!("{body},\n  \"mcp\": {{\"doctor\": {{\"status\": \"degraded\"}}}}\n}}\n");
+    let out = dot_sys()
+        .args(["verify", "--now", STAMPED])
+        .write_stdin(doubled)
+        .assert()
+        .code(i32::from(cli::EXIT_FAILURE))
+        .get_output()
+        .clone();
+    let text = String::from_utf8(out.stdout).unwrap();
+    assert!(text.contains("fail  mcp.doctor.status"), "{text}");
+    assert!(text.contains("duplicate member \"mcp\""), "{text}");
+}

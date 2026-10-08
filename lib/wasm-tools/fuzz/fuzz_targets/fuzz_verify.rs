@@ -81,5 +81,13 @@ fuzz_target!(|data: &[u8]| {
             !line.chars().any(char::is_control),
             "control character reached the rendered line {line:?}"
         );
+        // Bidi embeddings, overrides and isolates would let the document
+        // reorder the row the reviewer reads.
+        assert!(
+            !line
+                .chars()
+                .any(|c| matches!(c, '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}')),
+            "bidi control reached the rendered line {line:?}"
+        );
     }
 });

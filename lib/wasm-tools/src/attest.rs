@@ -369,7 +369,9 @@ impl fmt::Display for Report {
 ///   is a verdict someone reads, forging that verdict is the whole attack.
 ///
 /// So every [`char::is_control`] character is escaped, not just the ones
-/// that break the line count. Doing it at the single render site rather
+/// that break the line count, and so are the bidi embeddings, overrides
+/// (U+202A–U+202E) and isolates (U+2066–U+2069): they are not controls to
+/// Unicode, but they reorder what the reviewer reads (CWE-451). Doing it at the single render site rather
 /// than at each call site means a check added later cannot reintroduce
 /// either problem by forgetting to.
 ///
@@ -386,7 +388,9 @@ fn flatten(detail: &str) -> String {
             '\r' => out.push_str("\\r"),
             '\t' => out.push_str("\\t"),
             // Writing into a String cannot fail.
-            c if c.is_control() => {
+            c if c.is_control()
+                || matches!(c, '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}') =>
+            {
                 let _ = write!(out, "\\u{:04x}", u32::from(c));
             }
             c => out.push(c),
@@ -827,6 +831,18 @@ mod tests {
         assert_eq!(flatten("a\u{7f}b"), "a\\u007fb");
         // C1 controls are `Cc` too, and some terminals act on them.
         assert_eq!(flatten("a\u{85}b"), "a\\u0085b");
+        // Bidi embeddings, overrides and isolates are not `Cc`, but they
+        // reorder what the reviewer reads, so they are escaped as well.
+        for c in ('\u{202a}'..='\u{202e}').chain('\u{2066}'..='\u{2069}') {
+            assert_eq!(
+                flatten(&format!("a{c}b")),
+                format!("a\\u{:04x}b", u32::from(c))
+            );
+        }
+        // Their neighbours are ordinary text.
+        for c in ['\u{2029}', '\u{202f}', '\u{2065}', '\u{206a}'] {
+            assert_eq!(flatten(&format!("a{c}b")), format!("a{c}b"));
+        }
         // Quotes, backslashes and non-ASCII text are left alone: they are
         // safe on a line, and the JSON form is where exactness matters.
         assert_eq!(flatten(r#"C:\Users "x" é🦀"#), r#"C:\Users "x" é🦀"#);
