@@ -224,7 +224,7 @@ else
   # its path and the self-deleting stub really is gone for the install loop.
   DOTFILES_ACCESSIBILITY=1 GUM_MISSING="Install all" GUM_VANISH=1 MISE_RC=1 tty_ai
   cp "$WORK/gum.bak" "$BIN/gum"
-  assert_file_contains "$TTY_OUT" "via mise (npm:crush)" "plain mise install announced"
+  assert_file_contains "$TTY_OUT" "via mise (npm:crush@9.9.9)" "plain mise install announces the pinned version"
   assert_file_contains "$CALLS" "mise use -g npm:crush@9.9.9" "mise invoked directly"
   assert_file_contains "$TTY_OUT" "Install gum for interactive launcher" "no-gum launcher tip"
 
