@@ -4,11 +4,13 @@
 
 set -euo pipefail
 
-# ripgrep does the scanning; without it every check would silently pass.
-command -v rg >/dev/null 2>&1 || {
+# require_rg: ripgrep does the scanning; without it every check would pass.
+require_rg() {
+  command -v rg >/dev/null 2>&1 && return 0
   printf 'check-remote-installers: ripgrep (rg) is required\n' >&2
   exit 2
 }
+require_rg
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 manifest="$repo_root/security/remote-installers.sha256"
