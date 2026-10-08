@@ -151,7 +151,7 @@ result=$(bash -c '
   export PATH="'"$MOCK_BIN_DIR"':$PATH"
   source "'"$LOGGING_FILE"'"
   source "'"$INSTALLERS_FILE"'"
-  download_and_verify_sha256 "'"$tmp_dir/test.bin"'" "'"$tmp_dir/test.bin.sha256"'" "'"$tmp_dir/downloaded.bin"'"
+  download_and_verify_sha256 "'"$tmp_dir/test.bin"'" "'"$tmp_dir/test.bin.sha256"'" "'"$tmp_dir/downloaded.bin"'" "'"$expected_hash"'"
   echo "OK"
 ' 2>&1) || true
 if [[ "$result" == *"OK"* ]]; then

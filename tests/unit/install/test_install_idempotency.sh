@@ -56,34 +56,39 @@ fi
 mkdir -p "$FONT_DIR"
 
 # Case 1: First run (should install)
-# We'll mock curl/unzip to avoid network/large files
+# curl serves one small, regular zip for both fonts (no network, no large
+# files); the installer checks it with archive_paths_are_safe and unzips it.
 MOCK_BIN=$(mktemp -d)
 export PATH="$MOCK_BIN:$PATH"
+MOCK_ZIP="$MOCK_BIN/font.zip"
+python3 -c 'import sys, zipfile
+info = zipfile.ZipInfo("Mock-Regular.ttf")
+info.create_system = 3
+info.external_attr = 0o100644 << 16
+z = zipfile.ZipFile(sys.argv[1], "w")
+z.writestr(info, "font")
+z.close()' "$MOCK_ZIP"
 
-cat >"$MOCK_BIN/curl" <<'EOF'
+cat >"$MOCK_BIN/curl" <<EOF
 #!/bin/sh
 set -eu
 destination=""
 url=""
-while [ "$#" -gt 0 ]; do
-  case "$1" in
-    -o) destination="$2"; shift 2 ;;
-    http*) url="$1"; shift ;;
+while [ "\$#" -gt 0 ]; do
+  case "\$1" in
+    -o) destination="\$2"; shift 2 ;;
+    http*) url="\$1"; shift ;;
     *) shift ;;
   esac
 done
-if [ "${url##*/}" = "SHA-256.txt" ]; then
-  digest="$(printf 'fake archive' | shasum -a 256 | awk '{print $1}')"
-  printf '%s  JetBrainsMono.zip\n%s  NerdFontsSymbolsOnly.zip\n' "$digest" "$digest" >"$destination"
+if [ "\${url##*/}" = "SHA-256.txt" ]; then
+  digest="\$(shasum -a 256 "$MOCK_ZIP" | awk '{print \$1}')"
+  printf '%s  JetBrainsMono.zip\n%s  NerdFontsSymbolsOnly.zip\n' "\$digest" "\$digest" >"\$destination"
 else
-  printf 'fake archive' >"$destination"
+  cp "$MOCK_ZIP" "\$destination"
 fi
 EOF
 chmod +x "$MOCK_BIN/curl"
-
-echo "#!/bin/sh" >"$MOCK_BIN/unzip"
-echo "exit 0" >>"$MOCK_BIN/unzip"
-chmod +x "$MOCK_BIN/unzip"
 
 echo "#!/bin/sh" >"$MOCK_BIN/fc-cache"
 echo "exit 0" >>"$MOCK_BIN/fc-cache"

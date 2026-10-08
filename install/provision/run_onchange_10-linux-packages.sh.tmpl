@@ -201,19 +201,17 @@ arch="$(resolve_arch)"
 # Starship
 if ! command -v starship >/dev/null; then
   log_info "Installing Starship..."
-  target="${arch}-unknown-linux-gnu"
-  url="$(github_asset_url "starship/starship" "${target}.tar.gz" "$STARSHIP_TAG")"
-  sha_url="$(github_asset_url "starship/starship" "${target}.tar.gz.sha256" "$STARSHIP_TAG")"
-  install_from_tarball "$url" "$sha_url" "starship" "$HOME/.local/bin"
+  asset="starship-${arch}-unknown-linux-musl.tar.gz" # no aarch64 gnu build is published
+  url="$(github_asset_url "starship/starship" "$asset" "$STARSHIP_TAG")"
+  install_from_tarball "$url" "${url}.sha256" "starship" "$HOME/.local/bin" "$(pinned_sha256 STARSHIP)"
 fi
 
 # Zoxide
 if ! command -v zoxide >/dev/null; then
   log_info "Installing Zoxide..."
-  target="${arch}-unknown-linux-musl"
-  url="$(github_asset_url "ajeetdsouza/zoxide" "${target}.tar.gz" "$ZOXIDE_TAG")"
-  sha_url="$(github_asset_url "ajeetdsouza/zoxide" "${target}.tar.gz.sha256" "$ZOXIDE_TAG")"
-  install_from_tarball "$url" "$sha_url" "zoxide" "$HOME/.local/bin"
+  asset="zoxide-${ZOXIDE_TAG#v}-${arch}-unknown-linux-musl.tar.gz"
+  url="$(github_asset_url "ajeetdsouza/zoxide" "$asset" "v${ZOXIDE_TAG#v}")"
+  install_from_tarball "$url" "" "zoxide" "$HOME/.local/bin" "$(pinned_sha256 ZOXIDE)"
 fi
 
 # FZF is installed from the signed distro repository above. Never execute a
@@ -231,11 +229,9 @@ if ! command -v nvim >/dev/null; then
     x86_64) nvim_asset="nvim-linux-x86_64" ;;
     aarch64) nvim_asset="nvim-linux-arm64" ;;
   esac
-  neovim_sha_suffix="${NEOVIM_NIGHTLY_SHA_SUFFIX:-sha256sum}"
   url="$(github_asset_url "neovim/neovim" "${nvim_asset}.tar.gz" "$NEOVIM_TAG")"
-  sha_url="$(github_asset_url "neovim/neovim" "${nvim_asset}.tar.gz.${neovim_sha_suffix}" "$NEOVIM_TAG")"
   tmp_dir="$(umask 077 && mktemp -d)"
-  download_and_verify_sha256 "$url" "$sha_url" "$tmp_dir/${nvim_asset}.tar.gz"
+  download_and_verify_sha256 "$url" "" "$tmp_dir/${nvim_asset}.tar.gz" "$(pinned_sha256 NEOVIM)"
   archive_paths_are_safe tar "$tmp_dir/${nvim_asset}.tar.gz"
   tar -xzf "$tmp_dir/${nvim_asset}.tar.gz" -C "$tmp_dir"
   $sudo_cmd rm -rf "/opt/${nvim_asset}" /opt/nvim-linux64
@@ -248,31 +244,28 @@ fi
 if ! command -v lazygit >/dev/null; then
   log_info "Installing Lazygit..."
   case "$arch" in
-    x86_64)  target="Linux_x86_64" ;;
-    aarch64) target="Linux_arm64" ;;
+    x86_64)  target="linux_x86_64" ;;
+    aarch64) target="linux_arm64" ;;
   esac
-  url="$(github_asset_url "jesseduffield/lazygit" "lazygit_${target}.tar.gz" "$LAZYGIT_TAG")"
-  sha_url="$(github_asset_url "jesseduffield/lazygit" "checksums.txt" "$LAZYGIT_TAG")"
-  install_from_tarball_checksums "$url" "$sha_url" "lazygit" "$HOME/.local/bin"
+  url="$(github_asset_url "jesseduffield/lazygit" "lazygit_${LAZYGIT_TAG#v}_${target}.tar.gz" "$LAZYGIT_TAG")"
+  sha_url="https://github.com/jesseduffield/lazygit/releases/download/${LAZYGIT_TAG}/checksums.txt"
+  install_from_tarball_checksums "$url" "$sha_url" "lazygit" "$HOME/.local/bin" "$(pinned_sha256 LAZYGIT)"
 fi
 
 # Atuin
 if ! command -v atuin >/dev/null; then
   log_info "Installing Atuin..."
-  target="${arch}-unknown-linux-gnu"
-  url="$(github_asset_url "atuinsh/atuin" "${target}.tar.gz" "$ATUIN_TAG")"
-  sha_url="$(github_asset_url "atuinsh/atuin" "${target}.tar.gz.sha256" "$ATUIN_TAG")"
-  install_from_tarball "$url" "$sha_url" "atuin" "$HOME/.local/bin"
+  url="$(github_asset_url "atuinsh/atuin" "atuin-${arch}-unknown-linux-gnu.tar.gz" "$ATUIN_TAG")"
+  install_from_tarball "$url" "${url}.sha256" "atuin" "$HOME/.local/bin" "$(pinned_sha256 ATUIN)"
 fi
 
 {{ if .features.zellij -}}
 # Zellij
 if ! command -v zellij >/dev/null; then
   log_info "Installing Zellij..."
-  target="${arch}-unknown-linux-musl"
-  url="$(github_asset_url "zellij-org/zellij" "${target}.tar.gz" "$ZELLIJ_TAG")"
-  sha_url="$(github_asset_url "zellij-org/zellij" "${target}.tar.gz.sha256" "$ZELLIJ_TAG")"
-  install_from_tarball "$url" "$sha_url" "zellij" "$HOME/.local/bin"
+  url="$(github_asset_url "zellij-org/zellij" "zellij-${arch}-unknown-linux-musl.tar.gz" "$ZELLIJ_TAG")"
+  # Its .sha256sum files hash the binary, not the archive: pin only.
+  install_from_tarball "$url" "" "zellij" "$HOME/.local/bin" "$(pinned_sha256 ZELLIJ)"
 fi
 {{- end }}
 
@@ -330,11 +323,9 @@ fi
 # UV
 if ! command -v uv >/dev/null; then
   log_info "Installing UV..."
-  target="${arch}-unknown-linux-gnu"
-  url="$(github_asset_url "astral-sh/uv" "${target}.tar.gz" "$UV_TAG")"
-  sha_url="$(github_asset_url "astral-sh/uv" "${target}.tar.gz.sha256" "$UV_TAG")"
+  url="$(github_asset_url "astral-sh/uv" "uv-${arch}-unknown-linux-gnu.tar.gz" "$UV_TAG")"
   tmp_dir="$(umask 077 && mktemp -d)"
-  download_and_verify_sha256 "$url" "$sha_url" "$tmp_dir/uv.tar.gz"
+  download_and_verify_sha256 "$url" "${url}.sha256" "$tmp_dir/uv.tar.gz" "$(pinned_sha256 UV)"
   archive_paths_are_safe tar "$tmp_dir/uv.tar.gz"
   tar -xzf "$tmp_dir/uv.tar.gz" -C "$tmp_dir"
   mkdir -p "$HOME/.local/bin"
@@ -345,11 +336,8 @@ fi
 # Topgrade
 if ! command -v topgrade >/dev/null; then
   log_info "Installing Topgrade..."
-  target="${arch}-unknown-linux-gnu"
-  tag_num="${TOPGRADE_TAG#v}"
-  url="$(github_asset_url "topgrade-rs/topgrade" "topgrade-${tag_num}-${target}.tar.gz" "$TOPGRADE_TAG")"
-  sha_url="$(github_asset_url "topgrade-rs/topgrade" "topgrade-${tag_num}-${target}.tar.gz.sha256" "$TOPGRADE_TAG")"
-  install_from_tarball "$url" "$sha_url" "topgrade" "$HOME/.local/bin"
+  url="$(github_asset_url "topgrade-rs/topgrade" "topgrade-${TOPGRADE_TAG}-${arch}-unknown-linux-gnu.tar.gz" "$TOPGRADE_TAG")"
+  install_from_tarball "$url" "" "topgrade" "$HOME/.local/bin" "$(pinned_sha256 TOPGRADE)"
 fi
 
 # Mise
@@ -360,17 +348,15 @@ if ! command -v mise >/dev/null; then
     aarch64) target="arm64" ;;
   esac
   url="$(github_asset_url "jdx/mise" "mise-${MISE_TAG}-linux-${target}.tar.gz" "$MISE_TAG")"
-  sha_url="$(github_asset_url "jdx/mise" "SHASUMS256.txt" "$MISE_TAG")"
-  install_from_tarball_checksums "$url" "$sha_url" "mise" "$HOME/.local/bin"
+  sha_url="https://github.com/jdx/mise/releases/download/${MISE_TAG}/SHASUMS256.txt"
+  install_from_tarball_checksums "$url" "$sha_url" "mise" "$HOME/.local/bin" "$(pinned_sha256 MISE)"
 fi
 
 # Yazi (zip archive with two binaries)
 if ! command -v yazi >/dev/null; then
   log_info "Installing Yazi..."
-  target="${arch}-unknown-linux-gnu"
-  url="$(github_asset_url "sxyazi/yazi" "yazi-${target}.zip" "$YAZI_TAG")"
-  sha_url="$(github_asset_url "sxyazi/yazi" "yazi-${target}.zip.sha256" "$YAZI_TAG")"
-  install_from_zip "$url" "$sha_url" "$HOME/.local/bin" "yazi" "ya"
+  url="$(github_asset_url "sxyazi/yazi" "yazi-${arch}-unknown-linux-gnu.zip" "$YAZI_TAG")"
+  install_from_zip "$url" "" "$HOME/.local/bin" "$(pinned_sha256 YAZI)" "yazi" "ya"
 fi
 
 # AIChat
@@ -378,8 +364,7 @@ if ! command -v aichat >/dev/null; then
   log_info "Installing AIChat..."
   target="${arch}-unknown-linux-musl"
   url="$(github_asset_url "sigoden/aichat" "aichat-${AICHAT_TAG}-${target}.tar.gz" "$AICHAT_TAG")"
-  sha_url="${url}.sha256"
-  install_from_tarball "$url" "$sha_url" "aichat" "$HOME/.local/bin"
+  install_from_tarball "$url" "" "aichat" "$HOME/.local/bin" "$(pinned_sha256 AICHAT)"
 fi
 
 # Mods (uses checksums.txt)
@@ -389,9 +374,9 @@ if ! command -v mods >/dev/null; then
     x86_64)  target="Linux_x86_64" ;;
     aarch64) target="Linux_arm64" ;;
   esac
-  url="$(github_asset_url "charmbracelet/mods" "mods_${MODS_TAG}_${target}.tar.gz" "$MODS_TAG")"
-  sha_url="$(github_asset_url "charmbracelet/mods" "checksums.txt" "$MODS_TAG")"
-  install_from_tarball_checksums "$url" "$sha_url" "mods" "$HOME/.local/bin"
+  url="$(github_asset_url "charmbracelet/mods" "mods_${MODS_TAG#v}_${target}.tar.gz" "$MODS_TAG")"
+  sha_url="https://github.com/charmbracelet/mods/releases/download/${MODS_TAG}/checksums.txt"
+  install_from_tarball_checksums "$url" "$sha_url" "mods" "$HOME/.local/bin" "$(pinned_sha256 MODS)"
 fi
 
 # Aider (Python-based)

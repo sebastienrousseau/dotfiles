@@ -79,8 +79,6 @@ the endpoints that particular job actually touches.
 
 | Endpoint | Used by | Why |
 |---|---|---|
-| `get.chezmoi.io:443` | `setup-chezmoi` composite (fallback path) | chezmoi installer |
-| `mise.run:443` | `setup-mise` composite | mise installer |
 | `releases.starship.rs:443` | mise-managed install of starship | starship binary |
 
 ### Security / SBOM / scanning

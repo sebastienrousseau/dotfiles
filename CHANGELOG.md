@@ -4,6 +4,71 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+## v0.2.532 — 2026-10-08
+
+### Security
+
+- A wallpaper file name could run as shell code at the next theme switch:
+  theme fields were assigned with `eval`. They are now assigned as data,
+  `themes.toml` values are written as real TOML strings, and wallpapers
+  whose names contain `"`, `$`, a backtick or a control character are
+  skipped. AppleScript receives wallpaper paths as arguments, not text.
+- Theme switching reloaded any Neovim server whose socket it found under
+  `/tmp`, including one another local user had planted. It now only talks
+  to sockets you own, in a directory you own (Neovim 0.10+ locations,
+  including `$TMPDIR/nvim.$USER` on macOS).
+- `dot registry install` no longer runs module code: archives with
+  templates, scripts or chezmoi special files are refused before chezmoi
+  sees them, the preview is a file listing, and the apply uses neither your
+  chezmoi config nor its state. The index must carry a valid minisign
+  signature from `security/registry.pub`, cannot roll back to an older
+  `updated`, and is fetched from `https://doc.dotfiles.io/registry.json`.
+- Release downloads are checked against SHA-256 values kept in the repo
+  (`versions.env`, the chezmoi pins), not only against the checksum file
+  published beside them. The Charm apt keyring must hold exactly the pinned
+  key; the pin is corrected to `ED927B38…`, as the old value matched no key
+  Charm serves.
+- Apply-time installs are pinned: `go install` and `cargo install
+  --locked` use exact versions, tmux plugins a verified commit, and the AI
+  CLIs the newest release at least 7 days old. `mistral-vibe` is removed.
+- The default MCP servers install from hash-pinned PyPI wheels and a
+  committed npm lockfile; the previous npm pins named versions that do not
+  exist. `dot doctor`'s MCP checks read `type` as Claude does, check every
+  server's paths, and scan `~/.claude.json` and project `.mcp.json` files.
+- The local Claude proxy limits request size, time and concurrency, starts
+  `claude` without other MCP servers or the proxy's own key, and replaces a
+  token file that others can read.
+- Keychain secrets go to `security` on stdin rather than in its arguments,
+  and shell start-up loads secret buckets without a temp file.
+- Terminal output from the registry, the model and the TUIs is stripped of
+  control and bidi characters, and `dot-sys verify` refuses repeated keys.
+- Release workflows treat tags and inputs as data, read-only checkouts no
+  longer keep the job token, and the release jobs block outbound network
+  access except to the hosts they use.
+
+### Fixed
+
+- Repository hooks run again under the global `core.hooksPath`, including
+  the pre-commit framework's gitleaks and shellcheck hooks: each global
+  hook first runs the repository's own hook of the same name.
+- A rolled-back theme switch left chezmoi recording the failed apply, so
+  the next `dot upgrade` stopped on "has changed since chezmoi last wrote
+  it". The rollback now restores those records, and an unmanaged niri
+  config no longer fails a switch.
+- The secrets auto-loader called `dot env load`, which the mise handler
+  intercepts, so no bucket ever loaded; it now calls `dot secrets load`.
+- `dot restore --git REF --dry-run` is a dry run, and refs that look like
+  options are refused.
+- `dot init` without a terminal requires `--yes`; `dot-bootstrap` checks
+  out only a release tag signed by a pinned key.
+- The cargo aliases that called themselves are gone.
+
+### Changed
+
+- CI checks for download-to-shell patterns in YAML and Dockerfiles too,
+  installs ripgrep where it scans (several checks had silently passed
+  without it), and lints workflows for script injection.
+
 ## v0.2.531 — 2026-10-01
 
 ### Added

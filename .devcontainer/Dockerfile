@@ -34,19 +34,36 @@ COPY tools/ci/install-chezmoi-verified.sh /tmp/install-chezmoi-verified.sh
 RUN bash /tmp/install-chezmoi-verified.sh "${CHEZMOI_VERSION}" /usr/local/bin \
     && rm -f /tmp/install-chezmoi-verified.sh
 
-# Install starship prompt
-RUN sh -c "$(curl -fsSL https://starship.rs/install.sh)" -- -y
+# Install starship prompt — pinned release tarball with SHA256
+# verification, the same release and hash as STARSHIP_TAG /
+# STARSHIP_SHA256_X86_64 in defaults/dot_config/dotfiles/versions.env.
+# Source: https://github.com/starship/starship/releases/download/v1.24.2/starship-x86_64-unknown-linux-musl.tar.gz.sha256
+ARG STARSHIP_VERSION=1.24.2
+ARG STARSHIP_SHA256=00ff3c1f8ffb59b5c15d4b44c076bcca04d92cf0055c86b916248c14f3ae714a
+RUN set -eu \
+    && url="https://github.com/starship/starship/releases/download/v${STARSHIP_VERSION}/starship-x86_64-unknown-linux-musl.tar.gz" \
+    && curl -fsSL "$url" -o /tmp/starship.tar.gz \
+    && echo "${STARSHIP_SHA256}  /tmp/starship.tar.gz" | sha256sum -c - \
+    && tar -xzf /tmp/starship.tar.gz -C /tmp starship \
+    && install -m 0755 /tmp/starship /usr/local/bin/starship \
+    && rm -f /tmp/starship /tmp/starship.tar.gz
 
-# Install eza (modern ls)
-RUN mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
-        | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg \
-    && gpg --no-default-keyring --keyring /etc/apt/keyrings/gierens.gpg \
-        --list-keys --with-colons 2>/dev/null | grep -q "pub:" \
-    && echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" \
+# Install eza (modern ls). apt's signed-by trusts every primary key in the
+# keyring, so it must hold exactly the pinned one. Fingerprint read from
+# https://raw.githubusercontent.com/eza-community/eza/main/deb.asc on
+# 2026-10-08 (Sandro-Alessio Gierens, aptly key).
+ARG EZA_GPG_FPR=1548BC8A4B4D2688F9B0DAF7EC29E2090CE3FD43
+RUN set -eu \
+    && mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc -o /tmp/eza.asc \
+    && gpg --batch --dearmor -o /etc/apt/keyrings/gierens.gpg /tmp/eza.asc \
+    && keys="$(gpg --no-default-keyring --keyring /etc/apt/keyrings/gierens.gpg --list-keys --with-colons)" \
+    && test "$(printf '%s\n' "$keys" | grep -c '^pub:')" = 1 \
+    && test "$(printf '%s\n' "$keys" | awk -F: '/^pub:/ { p = 1; next } p && /^fpr:/ { print $10; exit }')" = "$EZA_GPG_FPR" \
+    && echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] https://deb.gierens.de stable main" \
         | tee /etc/apt/sources.list.d/gierens.list >/dev/null \
     && apt-get update -qq && apt-get install -y --no-install-recommends eza \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* /tmp/eza.asc
 
 # Install zoxide — pinned release tarball with SHA256 verification.
 # The previous `curl … | sh` pattern fetched a moving `main`-branch

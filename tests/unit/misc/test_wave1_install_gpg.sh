@@ -134,12 +134,13 @@ assert_equals "1|github.com/twpayne/chezmoi|no|yes" \
   "$rc|$(grep -o 'github.com/twpayne/chezmoi' "$SANDBOX/calls.log" | sort -u)|$(grep -q 'get.chezmoi.io' "$SANDBOX/calls.log" && echo yes || echo no)|$(grep -q 'Refusing to fall back' "$SANDBOX/out.txt" && echo yes || echo no)" \
   "a failed release download fails; get.chezmoi.io is never fetched"
 
-# A fake release: curl serves a tarball holding a `chezmoi` script and a
-# checksums file, both built here.
+# A fake release 9.9.9: curl serves a tarball holding a `chezmoi` script and
+# a checksums file, both built here. 9.9.9 has no pin in install.sh, so each
+# run supplies one through CHEZMOI_SHA256, as a user would after review.
 os="$(uname -s | tr '[:upper:]' '[:lower:]')"
 arch="$(uname -m)"
 case "$arch" in x86_64 | amd64) arch=amd64 ;; arm64 | aarch64) arch=arm64 ;; esac
-asset="chezmoi_2.72.2_${os}_${arch}.tar.gz"
+asset="chezmoi_9.9.9_${os}_${arch}.tar.gz"
 REL="$SANDBOX/release"
 mkdir -p "$REL/pkg"
 printf '#!/bin/sh\necho fake-chezmoi\n' >"$REL/pkg/chezmoi"
@@ -155,26 +156,59 @@ stub "$SANDBOX/has-curl" curl "out=''; url=''
 while [ \$# -gt 0 ]; do case \"\$1\" in -o) out=\"\$2\"; shift ;; https://*) url=\"\$1\" ;; esac; shift; done
 cp \"$REL/\${url##*/}\" \"\$out\""
 
-printf '%s  %s\n' "$sum" "$asset" >"$REL/chezmoi_2.72.2_checksums.txt"
+printf '%s  %s\n' "$sum" "$asset" >"$REL/chezmoi_9.9.9_checksums.txt"
 : >"$SANDBOX/calls.log"
-rc="$(run_install "$SANDBOX/h7" "$SANDBOX/has-curl:$SYS")"
+rc="$(run_install "$SANDBOX/h7" "$SANDBOX/has-curl:$SYS" CHEZMOI_VERSION=9.9.9 CHEZMOI_SHA256="$sum")"
 test_start "install_embedded_verified_install"
 assert_equals "0|fake-chezmoi" "$rc|$("$SANDBOX/h7/.local/bin/chezmoi" 2>/dev/null)" \
   "a release whose checksum matches is installed to ~/.local/bin"
 
 printf '%s  %s\n' "0000000000000000000000000000000000000000000000000000000000000000" "$asset" \
-  >"$REL/chezmoi_2.72.2_checksums.txt"
+  >"$REL/chezmoi_9.9.9_checksums.txt"
 : >"$SANDBOX/calls.log"
-rc="$(run_install "$SANDBOX/h8" "$SANDBOX/has-curl:$SYS")"
+rc="$(run_install "$SANDBOX/h8" "$SANDBOX/has-curl:$SYS" CHEZMOI_VERSION=9.9.9 CHEZMOI_SHA256="$sum")"
 test_start "install_embedded_checksum_mismatch"
 assert_equals "1|absent" "$rc|$([[ -e "$SANDBOX/h8/.local/bin/chezmoi" ]] && echo present || echo absent)" \
-  "a release whose checksum does not match is rejected and not installed"
+  "a release checksums file that disagrees with the pin is rejected and not installed"
+
+# The pinned 2.72.2, replaced by a tampered archive whose release checksums
+# file agrees with it: the in-repo pin refuses it.
+cp "$REL/$asset" "$REL/chezmoi_2.72.2_${os}_${arch}.tar.gz"
+printf '%s  %s\n' "$sum" "chezmoi_2.72.2_${os}_${arch}.tar.gz" >"$REL/chezmoi_2.72.2_checksums.txt"
+: >"$SANDBOX/calls.log"
+rc="$(run_install "$SANDBOX/h12" "$SANDBOX/has-curl:$SYS")"
+test_start "install_embedded_tampered_release_refused"
+assert_equals "1|absent" "$rc|$([[ -e "$SANDBOX/h12/.local/bin/chezmoi" ]] && echo present || echo absent)" \
+  "an archive matching only its own release checksums file is not installed"
+
+# No pin for the version asked for: refused before anything is fetched.
+: >"$SANDBOX/calls.log"
+rc="$(run_install "$SANDBOX/h13" "$SANDBOX/has-curl:$SYS" CHEZMOI_VERSION=9.9.9)"
+test_start "install_embedded_unpinned_version_refused"
+assert_equals "1||absent" "$rc|$(cat "$SANDBOX/calls.log")|$([[ -e "$SANDBOX/h13/.local/bin/chezmoi" ]] && echo present || echo absent)" \
+  "a version without a pinned hash is refused and never downloaded"
+
+test_start "install_embedded_malformed_pin_refused"
+: >"$SANDBOX/calls.log"
+rc="$(run_install "$SANDBOX/h14" "$SANDBOX/has-curl:$SYS" CHEZMOI_VERSION=9.9.9 CHEZMOI_SHA256="x$sum")"
+assert_equals "1|" "$rc|$(cat "$SANDBOX/calls.log")" \
+  "a CHEZMOI_SHA256 that is not exactly 64 hex digits is refused before any download"
+
+# A wrong pin with no checksums file to cross-check: the pin check alone
+# must refuse the archive.
+mv "$REL/chezmoi_9.9.9_checksums.txt" "$REL/chezmoi_9.9.9_checksums.held"
+: >"$SANDBOX/calls.log"
+rc="$(run_install "$SANDBOX/h15" "$SANDBOX/has-curl:$SYS" CHEZMOI_VERSION=9.9.9 CHEZMOI_SHA256="$(printf '%064d' 5)")"
+mv "$REL/chezmoi_9.9.9_checksums.held" "$REL/chezmoi_9.9.9_checksums.txt"
+test_start "install_embedded_pin_mismatch_without_checksums_refused"
+assert_equals "1|absent" "$rc|$([[ -e "$SANDBOX/h15/.local/bin/chezmoi" ]] && echo present || echo absent)" \
+  "an archive that does not match the pin is refused even with no checksums file"
 
 # The checksum list downloads but the release archive does not: refused.
-printf '%s  %s\n' "$sum" "$asset" >"$REL/chezmoi_2.72.2_checksums.txt"
+printf '%s  %s\n' "$sum" "$asset" >"$REL/chezmoi_9.9.9_checksums.txt"
 mv "$REL/$asset" "$REL/$asset.held"
 : >"$SANDBOX/calls.log"
-rc="$(run_install "$SANDBOX/h9" "$SANDBOX/has-curl:$SYS")"
+rc="$(run_install "$SANDBOX/h9" "$SANDBOX/has-curl:$SYS" CHEZMOI_VERSION=9.9.9 CHEZMOI_SHA256="$sum")"
 mv "$REL/$asset.held" "$REL/$asset"
 test_start "install_embedded_asset_download_failure"
 assert_equals "1|absent" "$rc|$([[ -e "$SANDBOX/h9/.local/bin/chezmoi" ]] && echo present || echo absent)" \
@@ -188,9 +222,9 @@ if command -v sha256sum >/dev/null 2>&1; then
 else
   bad="$(shasum -a 256 "$REL/$asset" | awk '{print $1}')"
 fi
-printf '%s  %s\n' "$bad" "$asset" >"$REL/chezmoi_2.72.2_checksums.txt"
+printf '%s  %s\n' "$bad" "$asset" >"$REL/chezmoi_9.9.9_checksums.txt"
 : >"$SANDBOX/calls.log"
-rc="$(run_install "$SANDBOX/h10" "$SANDBOX/has-curl:$SYS")"
+rc="$(run_install "$SANDBOX/h10" "$SANDBOX/has-curl:$SYS" CHEZMOI_VERSION=9.9.9 CHEZMOI_SHA256="$bad")"
 mv "$REL/$asset.good" "$REL/$asset"
 test_start "install_embedded_extract_failure"
 assert_equals "1|absent" "$rc|$([[ -e "$SANDBOX/h10/.local/bin/chezmoi" ]] && echo present || echo absent)" \
@@ -198,11 +232,11 @@ assert_equals "1|absent" "$rc|$([[ -e "$SANDBOX/h10/.local/bin/chezmoi" ]] && ec
 
 # A verified archive whose install step fails (read-only ~/.local/bin):
 # refused, not reported as installed. Skipped as root, which ignores modes.
-printf '%s  %s\n' "$sum" "$asset" >"$REL/chezmoi_2.72.2_checksums.txt"
+printf '%s  %s\n' "$sum" "$asset" >"$REL/chezmoi_9.9.9_checksums.txt"
 mkdir -p "$SANDBOX/h11/.local/bin"
 chmod 555 "$SANDBOX/h11/.local/bin"
 : >"$SANDBOX/calls.log"
-rc="$(run_install "$SANDBOX/h11" "$SANDBOX/has-curl:$SYS")"
+rc="$(run_install "$SANDBOX/h11" "$SANDBOX/has-curl:$SYS" CHEZMOI_VERSION=9.9.9 CHEZMOI_SHA256="$sum")"
 chmod 755 "$SANDBOX/h11/.local/bin"
 test_start "install_embedded_install_step_failure"
 if [[ "$(id -u)" == 0 ]]; then

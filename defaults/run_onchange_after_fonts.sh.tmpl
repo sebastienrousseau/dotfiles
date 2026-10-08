@@ -8,12 +8,18 @@ set -euo pipefail
 SOURCE_ROOT={{ .chezmoi.sourceDir | quote }}
 [[ -n "${DOTFILES_SOURCE_DIR:-}" ]] && SOURCE_ROOT="$DOTFILES_SOURCE_DIR"
 [[ "$(basename "$SOURCE_ROOT")" == "defaults" ]] && SOURCE_ROOT="$(dirname "$SOURCE_ROOT")"
-if [[ -z "$SOURCE_ROOT" || ! -r "$SOURCE_ROOT/lib/dot/verified-download.sh" ]]; then
+if [[ -z "$SOURCE_ROOT" || ! -r "$SOURCE_ROOT/lib/dot/verified-download.sh" ||
+  ! -r "$SOURCE_ROOT/install/lib/installers.sh" ]]; then
   printf 'Font Check: verified-download.sh unavailable; refusing unverified install\n' >&2
   exit 1
 fi
 # shellcheck source=../lib/dot/verified-download.sh disable=SC1091
 source "$SOURCE_ROOT/lib/dot/verified-download.sh"
+# archive_paths_are_safe: no links, no paths leaving the font directory.
+# shellcheck source=../install/lib/logging.sh disable=SC1091
+source "$SOURCE_ROOT/install/lib/logging.sh"
+# shellcheck source=../install/lib/installers.sh disable=SC1091
+source "$SOURCE_ROOT/install/lib/installers.sh"
 
 if [ -t 1 ] && command -v gum >/dev/null 2>&1; then
   gum style --foreground 212 --border double --align center --width 50 "Font Check"
@@ -25,6 +31,7 @@ if [ -t 1 ] && command -v gum >/dev/null 2>&1; then
       download_verified_asset \
         "$base_url/FiraCode.zip" "$base_url/SHA-256.txt" \
         FiraCode.zip "$tmp_dir/FiraCode.zip" 104857600
+      archive_paths_are_safe zip "$tmp_dir/FiraCode.zip"
       mkdir -p "$HOME/.local/share/fonts"
       unzip -o "$tmp_dir/FiraCode.zip" -d "$HOME/.local/share/fonts" >/dev/null
       fc-cache -f

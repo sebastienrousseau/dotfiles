@@ -5,11 +5,8 @@
 # Usage: gh repo clone sebastienrousseau/dotfiles && cd dotfiles && ./install.sh
 # (or ./install.sh locally)
 
-# This installer uses bash features (set -o pipefail, arrays, [[ ]]). If it is
-# run under a POSIX/other shell — e.g. `sh install.sh` or piped to `sh` where
-# /bin/sh is dash — fail fast with a clear message instead of the cryptic
-# "set: Illegal option -o pipefail" from the next line. Kept strictly POSIX so
-# it parses in any shell before bash takes over.
+# Needs bash (pipefail, arrays, [[ ]]). Under sh/dash, fail with a clear message
+# instead of "set: Illegal option -o pipefail"; this guard is strictly POSIX.
 if [ -z "${BASH_VERSION:-}" ]; then
   echo "install.sh requires bash. Run:  bash install.sh" >&2
   echo "  clone: gh repo clone sebastienrousseau/dotfiles && cd dotfiles && ./install.sh" >&2
@@ -18,11 +15,8 @@ fi
 
 set -euo pipefail
 
-# Restrict the permissions of any file/dir we create during bootstrap.
-# The installer writes secret-adjacent artifacts (chezmoi config, age
-# keys, ssh tooling, downloaded archives) under $HOME — 077 prevents
-# other local accounts from reading them. Individual call sites can
-# still relax with `chmod` when a file is meant to be world-readable.
+# Bootstrap writes secret-adjacent files (chezmoi config, age keys, ssh tooling,
+# archives) under $HOME: 077 keeps other accounts out; call sites chmod to relax.
 umask 077
 
 # ANSI Colors
@@ -120,6 +114,56 @@ apply_minimal_profile_overrides() {
     }'
 }
 
+# Charm apt key, pinned against a swapped gpg.key: primary fingerprint read from
+# https://repo.charm.sh/apt/gpg.key on 2026-10-08 (the old C026D31B... pin
+# matched no served key). If Charm rotates, update it and note it in CHANGELOG.md.
+CHARM_GPG_EXPECTED_FPR="ED927B38BE981E53CA09153D03BBF595D4DFD35C"
+
+# charm_keyring_verify <keyring>: apt trusts every primary key in a signed-by
+# file, so it must hold exactly the pinned one; else remove it and return 1.
+charm_keyring_verify() {
+  local keyring="$1" keys pub_count primary_fpr
+  keys="$(gpg --no-default-keyring --keyring "$keyring" \
+    --with-colons --list-keys 2>/dev/null || true)"
+  pub_count="$(grep -c '^pub:' <<<"$keys" || true)"
+  primary_fpr="$(awk -F: '/^pub:/ { pub = 1; next } pub && /^fpr:/ { print $10; exit }' <<<"$keys")"
+  if [[ "$pub_count" == 1 && "$primary_fpr" == "$CHARM_GPG_EXPECTED_FPR" ]]; then
+    return 0
+  fi
+  echo "Error: Charm keyring must hold only $CHARM_GPG_EXPECTED_FPR (found ${pub_count:-0} key(s), first ${primary_fpr:-none})" >&2
+  sudo rm -f "$keyring"
+  return 1
+}
+
+# chezmoi_release_sha256 <asset>: reviewed SHA-256 (else $CHEZMOI_SHA256), in step
+# with tools/ci/install-chezmoi-verified.sh; from the v0.2.532 checksums.txt.
+chezmoi_release_sha256() {
+  local sha
+  case "$1" in
+    chezmoi_2.72.2_linux_amd64.tar.gz) sha=a2be1b8bcdf06c6f173e070bb3ddbcc52c50478fe9b57f6e6c63d15c7cff4f03 ;;
+    chezmoi_2.72.2_linux_arm64.tar.gz) sha=499925fd10804b7c1a5dc4b4a275c8935261d02a4be0c18bbd41b7747810de67 ;;
+    chezmoi_2.72.2_darwin_amd64.tar.gz) sha=08ad1ba33a73e68f7657ee226f72b5d800b5a947954b06e185e8591bd32b0063 ;;
+    chezmoi_2.72.2_darwin_arm64.tar.gz) sha=2b0c7e57f3f2da44628fa9f6863b9bd41f0935cfd2416228aa9df6daab6690f5 ;;
+    *) sha="${CHEZMOI_SHA256:-}" ;;
+  esac
+  if [[ "$sha" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "$sha"
+    return 0
+  fi
+  echo "No pinned SHA-256 for $1; export CHEZMOI_SHA256 after reviewing the release" >&2
+  return 1
+}
+
+# chezmoi_checksums_agree <file> <asset> <pin>: the release's checksums are only a
+# cross-check (a replaced release matches its own), but a mismatch stops us.
+chezmoi_checksums_agree() {
+  local published
+  published="$(awk -v f="$2" '$2 == f { print $1; exit }' "$1")"
+  [[ -z "$published" || "$published" == "$3" ]] && return 0
+  echo "Release checksums file disagrees with the pinned SHA-256 for $2" >&2
+  return 1
+}
+
 # Print macos, wsl2, debian, fedora, arch, linux or unknown. $1: fixture root.
 detect_target_os() {
   local root="${1:-}" os="linux"
@@ -146,7 +190,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.531)
+  version       The version (tag or branch) to install (default: v0.2.532)
 
 Options:
   --help        Show this help message
@@ -162,7 +206,7 @@ EOF
 }
 
 main() {
-  local version="v0.2.531"
+  local version="v0.2.532"
   local version_set=0
   local minimal=0
   local provision="${DOTFILES_PROVISION:-0}"
@@ -192,7 +236,7 @@ main() {
         # like `foobar` doesn't trigger a 30s+ network download attempt.
         # Caught by the install.sh fuzz harness (#881).
         if [[ ! "$arg" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-+][a-zA-Z0-9.-]+)?$ ]]; then
-          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.531)."
+          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.532)."
         fi
         version="$arg"
         version_set=1
@@ -225,30 +269,7 @@ main() {
       sudo gpg --batch --yes --dearmor \
         -o /etc/apt/keyrings/charm.gpg "$charm_key_tmp"
       rm -f "$charm_key_tmp"
-      # Pin the Charm GPG key fingerprint — a DNS attacker swapping
-      # repo.charm.sh/apt/gpg.key for a forged key with the same uid
-      # would otherwise pass the prior "any fid: present" check.
-      # Pinned value taken from https://repo.charm.sh/apt/gpg.key on
-      # 2026-05-16. If Charm rotates, update this and call it out in
-      # CHANGELOG.md.
-      CHARM_GPG_EXPECTED_FPR="C026D31B92F9BBE91D5DB75AB07AE17C9E0A6585"
-      charm_actual_fpr="$(gpg --no-default-keyring \
-        --keyring /etc/apt/keyrings/charm.gpg \
-        --with-colons --fingerprint 2>/dev/null |
-        awk -F: '/^fpr:/{print $10; exit}')"
-      if [[ -z "$charm_actual_fpr" ]]; then
-        echo "Error: Could not extract Charm GPG fingerprint — aborting" >&2
-        sudo rm -f /etc/apt/keyrings/charm.gpg
-        return 1
-      fi
-      if [[ "$charm_actual_fpr" != "$CHARM_GPG_EXPECTED_FPR" ]]; then
-        echo "Error: Charm GPG fingerprint mismatch" >&2
-        echo "  expected: $CHARM_GPG_EXPECTED_FPR" >&2
-        echo "  got:      $charm_actual_fpr" >&2
-        echo "  aborting (possible DNS / keyserver hijack)" >&2
-        sudo rm -f /etc/apt/keyrings/charm.gpg
-        return 1
-      fi
+      charm_keyring_verify /etc/apt/keyrings/charm.gpg || return 1
       echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
       sudo apt-get update && sudo apt-get install gum -y >/dev/null 2>&1
     fi
@@ -258,7 +279,7 @@ main() {
   # install.sh stays self-contained (repo and npm installs use the helper script).
   install_chezmoi_verified_embedded() {
     local chezmoi_version="$1" destination="$2"
-    local os arch asset checksums_asset base_url temp_dir checksum_line
+    local os arch asset checksums_asset base_url temp_dir pinned
 
     os="$(uname -s | tr '[:upper:]' '[:lower:]')"
     arch="$(uname -m)"
@@ -281,29 +302,24 @@ main() {
     asset="chezmoi_${chezmoi_version}_${os}_${arch}.tar.gz"
     checksums_asset="chezmoi_${chezmoi_version}_checksums.txt"
     base_url="https://github.com/twpayne/chezmoi/releases/download/v${chezmoi_version}"
+    pinned="$(chezmoi_release_sha256 "$asset")" || return 1
     temp_dir="$(umask 077 && mktemp -d)"
 
     # `set -e` does not apply here: this subshell (and this function) run as `if !`
     # conditions, where bash ignores errexit, so every step exits on failure itself;
     # before this, a checksum mismatch fell through to the install.
     if ! (
-      if ! curl --proto '=https' --tlsv1.2 -fsSL \
-        -o "$temp_dir/checksums.txt" "$base_url/$checksums_asset"; then
-        curl --proto '=https' --tlsv1.2 -fsSL \
-          -o "$temp_dir/checksums.txt" "$base_url/checksums.txt" || exit 1
-      fi
       curl --proto '=https' --tlsv1.2 -fsSL \
         -o "$temp_dir/$asset" "$base_url/$asset" || exit 1
-      checksum_line="$(grep -E "[[:space:]]${asset}$" "$temp_dir/checksums.txt" | head -n 1 || true)"
-      [[ -n "$checksum_line" ]] || {
-        echo "Checksum entry not found for $asset" >&2
-        exit 1
-      }
+      if curl --proto '=https' --tlsv1.2 -fsSL \
+        -o "$temp_dir/checksums.txt" "$base_url/$checksums_asset"; then
+        chezmoi_checksums_agree "$temp_dir/checksums.txt" "$asset" "$pinned" || exit 1
+      fi
       # cd/mkdir: a failure there fails the checksum check or install below.
       cd "$temp_dir"
       sha_check=(shasum -a 256 -c -)
       command -v sha256sum >/dev/null 2>&1 && sha_check=(sha256sum -c -)
-      printf '%s\n' "$checksum_line" | "${sha_check[@]}" || exit 1
+      printf '%s  %s\n' "$pinned" "$asset" | "${sha_check[@]}" || exit 1
       tar -xzf "$asset" chezmoi || exit 1
       mkdir -p "$destination"
       install -m 755 chezmoi "$destination/chezmoi" || exit 1
@@ -330,11 +346,8 @@ main() {
       mkdir -p "$bin_dir"
       echo "   Installing chezmoi via binary download..."
 
-      # Prefer verified installer with SHA256 checksum when available.
-      # When verification fails or the verified installer isn't present
-      # we refuse to bootstrap rather than silently downloading and
-      # executing an unverified script (the previous fall-back to
-      # `get.chezmoi.io` was an unsigned bootstrap and a security hole).
+      # Only the SHA-256-verified installer; without it, refuse rather than run
+      # an unverified script (the old get.chezmoi.io fallback was a hole).
       local verified_installer
       verified_installer="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/tools/ci/install-chezmoi-verified.sh"
       if [[ -x "$verified_installer" ]] || [[ -f "$verified_installer" ]]; then
@@ -383,16 +396,9 @@ main() {
   # VERSION pinning for supply-chain security
   VERSION="$version"
 
-  # Carry the user's existing global git identity into chezmoi's data.
-  #
-  # This installer sets up chezmoi via sourceDir rather than `chezmoi init`,
-  # so the config template's prompts for git_name / git_email never run. The
-  # gitconfig template coalesces git_name->name->"" (likewise email,
-  # signingkey) and only emits a [user] block when non-empty — so without
-  # this, a fresh install produces a ~/.gitconfig with no identity at all,
-  # and commits fail with "Author identity unknown". Seed name/email/
-  # signingkey from `git config --global` when present. Idempotent: skips if
-  # the config already carries a [data] block.
+  # Seed git name/email/signingkey from `git config --global` into chezmoi data:
+  # sourceDir setup skips chezmoi init's prompts, and an empty identity would
+  # yield a ~/.gitconfig with no [user] ("Author identity unknown"). Idempotent.
   seed_git_identity() {
     local cfg="$CHEZMOI_CONFIG_FILE"
     [[ -f "$cfg" ]] || return 0
@@ -427,14 +433,9 @@ main() {
   if command -v chezmoi >/dev/null && [[ -f "$CHEZMOI_CONFIG_FILE" ]]; then
     while IFS= read -r file; do
       [[ -z "$file" ]] && continue
-      # Skip managed *directories*: chezmoi apply never clobbers a
-      # directory's existing contents, so they don't need backing up, and
-      # `cp -a` on one recurses into things it can't copy — e.g. the live
-      # ssh-agent sockets under ~/.ssh/agent, which spew
-      # "is a socket (not copied)" warnings. The managed files chezmoi
-      # would actually overwrite are listed (and backed up) individually.
-      # `-d` without `-L` excludes only real dirs; symlinks are copied as
-      # links by `cp -a`, so they never recurse.
+      # Skip real directories (not symlinks): apply never clobbers their contents,
+      # their files are backed up one by one, and `cp -a` would hit uncopyable
+      # things such as ssh-agent sockets ("is a socket (not copied)").
       if [[ -d "$file" && ! -L "$file" ]]; then
         continue
       fi
@@ -472,11 +473,8 @@ main() {
   step "Applying Configuration..."
 
   # ── Auto-migration for the 0.2.503 reorg ──────────────────────────────
-  # If the user is upgrading from a pre-0.2.503 install, run the
-  # migration script BEFORE `chezmoi apply` so the reorg's source-
-  # path moves don't cause chezmoi to delete deployed files.
-  # The script is idempotent + silent-by-default; safe to run on
-  # every install (fresh installs detect "no prior state" and exit 0).
+  # Before apply, so the source-path moves don't delete deployed files. The
+  # script is idempotent and silent; fresh installs find no prior state.
   for migrate_src in "$SOURCE_DIR" "$LEGACY_SOURCE_DIR"; do
     migrate_script="$migrate_src/install/migrate/migrate-v0_2-to-v0_2_503.sh"
     if [[ -x "$migrate_script" ]]; then
@@ -546,13 +544,9 @@ main() {
     chezmoi apply "${APPLY_FLAGS[@]}"
   fi
 
-  # Toolchain provisioning (opt-in). The install/provision/ scripts (package
-  # managers, fonts, language + AI tools) are chezmoi run_ scripts, but they
-  # live OUTSIDE the .chezmoiroot source dir (defaults/), so `chezmoi apply`
-  # never runs them — a fresh install otherwise ships configs but zero tools.
-  # Run them here only when explicitly requested: they install packages and
-  # can change OS defaults, so we never do it implicitly (CI / Docker /
-  # unattended automation must opt in via --provision or DOTFILES_PROVISION=1).
+  # Toolchain provisioning, opt-in only (--provision or DOTFILES_PROVISION=1):
+  # install/provision/ sits outside .chezmoiroot, so apply never runs it, and it
+  # installs packages and may change OS defaults, so it is never implicit.
   if [[ "$provision" = "1" && $minimal -eq 0 ]]; then
     step "Provisioning toolchain (packages, fonts, tools)..."
     local prov_dir="$SOURCE_DIR/install/provision"

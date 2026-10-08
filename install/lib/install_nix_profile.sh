@@ -15,8 +15,8 @@ if ! command -v nix &>/dev/null; then
   echo "Error: Nix is not installed."
   echo "Install Nix first: https://nixos.org/download.html"
   echo ""
-  echo "Quick install (multi-user):"
-  echo "  sh <(curl -L https://nixos.org/nix/install) --daemon"
+  echo "Checksum-pinned install (multi-user): bin/dot-bootstrap"
+  echo "  (downloads the Nix installer, checks its pinned SHA-256, then runs it)"
   exit 1
 fi
 

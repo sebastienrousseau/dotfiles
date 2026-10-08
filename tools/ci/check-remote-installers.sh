@@ -4,9 +4,26 @@
 
 set -euo pipefail
 
+# require_rg: ripgrep does the scanning; without it every check would pass.
+require_rg() {
+  command -v rg >/dev/null 2>&1 && return 0
+  printf 'check-remote-installers: ripgrep (rg) is required\n' >&2
+  exit 2
+}
+require_rg
+
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 manifest="$repo_root/security/remote-installers.sha256"
+# Globs below are relative to the search root, so search from the repo root.
+cd "$repo_root"
 failed=0
+
+# Files that can run a download: shell, templates, CI YAML and Dockerfiles.
+# --hidden reaches .github/ and .devcontainer/. Tests and docs only describe,
+# except the Dockerfiles under tests/, which CI builds.
+scan_globs=(--hidden --glob '*.sh' --glob '*.tmpl' --glob '*.yml' --glob '*.yaml'
+  --glob 'Dockerfile*' --glob '!.git/**' --glob '!tests/**' --glob '!docs/**'
+  --glob 'tests/**/Dockerfile*' --glob '!**/tools/ci/check-remote-installers.sh')
 
 while read -r checksum url extra; do
   [[ -n "${checksum:-}" && "${checksum:0:1}" != "#" ]] || continue
@@ -24,11 +41,17 @@ while read -r checksum url extra; do
         failed=1
         ;;
     esac
-  done < <(rg --no-config -n -F "$url" "$repo_root" --glob '*.sh' --glob '*.tmpl' --glob '!tests/**' --glob '!docs/**' || true)
+  done < <(rg --no-config -n -F "$url" . "${scan_globs[@]}" || true)
 done <"$manifest"
 
-# No executable shell path may stream downloaded bytes into an interpreter.
-if rg --no-config -n '^[[:space:]]*(curl|wget)[^#|]*\|[[:space:]]*(ba)?sh' "$repo_root" --glob '*.sh' --glob '*.tmpl' --glob '!tests/**' --glob '!docs/**' --glob '!tools/ci/check-remote-installers.sh'; then
+# No executable path may hand downloaded bytes to an interpreter: piped
+# (`curl | sh`, also after a YAML `run:` or Dockerfile `RUN`), command
+# substitution (`sh -c "$(curl`) or process substitution (`bash <(curl`).
+lead='^[[:space:]]*((-[[:space:]]*)?run:[[:space:]]*[|>]?[[:space:]]*|RUN[[:space:]]+)?'
+pipe="${lead}(curl|wget)[^#|]*\\|[[:space:]]*(sudo[[:space:]]+)?(bash|zsh|sh)([[:space:]]|\$)"
+subst='(bash|zsh|sh)[[:space:]]+-c[[:space:]]+["'"'"']?\$\([[:space:]]*(curl|wget)'
+procsub='(bash|zsh|sh)[[:space:]]+<\([[:space:]]*(curl|wget)'
+if rg --no-config -n -e "$pipe" -e "$subst" -e "$procsub" . "${scan_globs[@]}"; then
   printf 'Direct download-to-shell execution is forbidden.\n' >&2
   failed=1
 fi

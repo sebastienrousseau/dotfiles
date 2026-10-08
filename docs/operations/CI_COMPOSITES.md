@@ -51,35 +51,6 @@ Cache key shape: `<prefix>-<runner.os>-<runner.arch>-<version>`.
 Intel (x64) macOS runners don't share a cache entry — that previously
 caused subtle binary-mismatch failures.
 
-### `setup-mise`
-
-Path: `.github/actions/setup-mise/action.yml`
-
-Installs `mise` (jdx/mise) and optionally runs `mise install` against
-`mise.toml` to materialise the managed toolchain. Caches both the
-mise binary and `~/.local/share/mise` (the tool install root, keyed
-by lockfile hash).
-
-```yaml
-- name: Setup mise
-  uses: ./.github/actions/setup-mise
-  with:
-    install-tools: 'true'
-```
-
-Inputs:
-
-| Name | Default | Purpose |
-|---|---|---|
-| `version` | `latest` | mise version to install. Specify a pinned version to enable bin caching. |
-| `cache` | `true` | Cache the mise binary + tool root. |
-| `cache-key-prefix` | `mise` | Override the cache scope. |
-| `install-tools` | `false` | When `true`, run `mise install` after setup. |
-| `bin-dir` | `~/.local/bin` | Install location for the mise binary. |
-
-Outputs: `version` (installed mise version) and `path` (absolute path
-to the mise binary).
-
 ## Why composite actions (vs reusable workflows)
 
 The repo already uses reusable workflows for big-grain CI steps
@@ -111,15 +82,13 @@ Total: 8 call sites converted. The net workflow LOC delta is
 ~−34 lines (52 deletions, 18 additions); ongoing additions to either
 workflow set will widen the gap.
 
-`setup-mise` ships ready for use but has zero current callers because
-no workflow currently installs mise (the maintainer relies on it
-locally only). When a future workflow needs `cargo`, `bun`, `go`, or
-`rust` toolchains via the canonical version manager, this composite
-is the canonical entry point.
+`setup-mise` was removed: it had no callers and installed mise by piping
+`mise.run` into `sh`. A workflow that needs mise should install a pinned
+release checked against a committed SHA-256, as `setup-chezmoi` does.
 
 ## Pinning policy
 
-Both composite actions internally pin every external action they use
+The composite action internally pins every external action they use
 to a 40-char commit SHA (e.g.
 `actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5`).
 Dependabot picks these up via the standard `github-actions` ecosystem
@@ -150,7 +119,6 @@ bump on a weekly schedule.
 ## References
 
 - `.github/actions/setup-chezmoi/action.yml`
-- `.github/actions/setup-mise/action.yml`
 - `tools/ci/install-chezmoi-verified.sh` — the SHA-pinned installer
   the chezmoi composite prefers when available.
 - Issue [#879](https://github.com/sebastienrousseau/dotfiles/issues/879).

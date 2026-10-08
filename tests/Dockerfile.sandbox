@@ -18,8 +18,11 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p "$HOME/.local/bin" && \
-    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+# SHA-256 pinned chezmoi release (tools/ci/install-chezmoi-verified.sh),
+# not the get.chezmoi.io script.
+COPY tools/ci/install-chezmoi-verified.sh /tmp/install-chezmoi-verified.sh
+RUN bash /tmp/install-chezmoi-verified.sh 2.72.2 "$HOME/.local/bin" && \
+    rm -f /tmp/install-chezmoi-verified.sh
 ENV PATH="$HOME/.local/bin:$PATH"
 
 COPY . "$HOME/.dotfiles"

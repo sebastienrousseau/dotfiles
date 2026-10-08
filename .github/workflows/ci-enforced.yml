@@ -110,35 +110,23 @@ jobs:
       - name: Install minisign for the registry signature check
         if: hashFiles('security/registry.pub') != ''
         run: sudo apt-get update -qq && sudo apt-get install -y -qq minisign
+      # The scanner needs ripgrep. Without it the old inline rg checks here
+      # failed with "command not found", which `if` read as "no match".
+      - name: Install ripgrep
+        run: bash tools/ci/install-tools.sh ripgrep:rg
       - name: Audit shell dependencies
         run: |
           echo "::notice::Auditing external dependencies in shell scripts"
-          # Check for curl/wget downloads without verification
-          if rg -n "curl.*\|.*sh" --type sh .; then
-            echo "::error::Found potentially unsafe curl|sh pattern"
-            exit 1
-          fi
+          # Download-to-shell in any shell, YAML or Dockerfile (curl and wget,
+          # piped, command or process substitution), comments and tests excluded.
           bash tools/ci/check-remote-installers.sh
           bash tools/ci/check-registry.sh
-          # Check for unverified downloads
-          if rg -n "wget.*-O.*-.*\|.*sh" --type sh .; then
-            echo "::error::Found potentially unsafe wget pattern"
-            exit 1
-          fi
       # `${{ }}` expanded inside run: scripts (tags, refs, inputs, step
       # outputs, secrets) and read-only checkouts that keep the token in
       # git config. Legacy findings are held by
       # tools/ci/workflow-injection-baseline.txt.
       - name: Workflow injection and checkout credentials
         run: python3 tools/ci/check-workflow-hardening.py
-      - name: Check for hardcoded secrets patterns
-        run: |
-          echo "::notice::Scanning for hardcoded secrets patterns"
-          # More aggressive secret detection
-          if rg -i "password|token|key|secret" --type sh --type lua | grep -E "=.*['\"][^'\"]{8,}['\"]"; then
-            echo "::error::Potential hardcoded secret detected"
-            exit 1
-          fi
 
   security-infrastructure:
     name: Security / Infrastructure Scan

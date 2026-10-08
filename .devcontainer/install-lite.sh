@@ -47,62 +47,64 @@ apt_install fd-find
 # bat
 apt_install bat
 
-# zoxide
-# SECURITY: Download to temp file, validate shebang, then execute
+# zoxide and starship: pinned release archives, verified against the
+# SHA-256 values in versions.env by the provisioner's own installers (no
+# remote install scripts run). Each runs in a subshell so a failed check
+# warns instead of ending the bootstrap.
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=../install/lib/logging.sh
+. "$REPO_DIR/install/lib/logging.sh"
+# shellcheck source=../install/lib/installers.sh
+. "$REPO_DIR/install/lib/installers.sh"
+# shellcheck source=../defaults/dot_config/dotfiles/versions.env
+. "$REPO_DIR/defaults/dot_config/dotfiles/versions.env"
+lite_arch="$(resolve_arch)"
+
 if command_exists zoxide; then
   info "zoxide is already installed"
 else
   info "Installing zoxide ..."
-  installer=$(umask 077 && mktemp)
-  if curl -fsSL -o "$installer" "https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh"; then # gitleaks:allow
-    if head -1 "$installer" | grep -q '^#!/'; then
-      sh "$installer"
-    else
-      info "Warning: zoxide installer validation failed, skipping"
-    fi
-    rm -f "$installer"
-  else
-    rm -f "$installer"
-    info "Warning: Failed to download zoxide installer"
-  fi
+  (install_from_tarball \
+    "https://github.com/ajeetdsouza/zoxide/releases/download/v${ZOXIDE_TAG#v}/zoxide-${ZOXIDE_TAG#v}-${lite_arch}-unknown-linux-musl.tar.gz" \
+    "" zoxide "$HOME/.local/bin" "$(pinned_sha256 ZOXIDE)") ||
+    info "Warning: zoxide failed verification or download, skipping"
 fi
 
-# eza
+# eza: apt's signed-by trusts every primary key in the keyring, so it must
+# hold exactly the pinned one. Fingerprint read from
+# https://raw.githubusercontent.com/eza-community/eza/main/deb.asc on 2026-10-08.
+EZA_GPG_FPR="1548BC8A4B4D2688F9B0DAF7EC29E2090CE3FD43"
 if command_exists eza; then
   info "eza is already installed"
 else
   info "Installing eza ..."
   sudo mkdir -p /etc/apt/keyrings
   if [[ ! -f /etc/apt/keyrings/gierens.gpg ]]; then
-    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc |
-      sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+    curl --proto '=https' --tlsv1.2 -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc |
+      sudo gpg --batch --dearmor -o /etc/apt/keyrings/gierens.gpg
   fi
-  if [[ ! -f /etc/apt/sources.list.d/gierens.list ]]; then
-    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" |
-      sudo tee /etc/apt/sources.list.d/gierens.list >/dev/null
-    sudo apt-get update -qq
+  if apt_keyring_holds_only /etc/apt/keyrings/gierens.gpg "$EZA_GPG_FPR"; then
+    if [[ ! -f /etc/apt/sources.list.d/gierens.list ]]; then # mutation: ignore devcontainer-only apt setup, needs root and apt
+      echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] https://deb.gierens.de stable main" |
+        sudo tee /etc/apt/sources.list.d/gierens.list >/dev/null
+      sudo apt-get update -qq
+    fi
+    sudo apt-get install -y eza
+  else
+    sudo rm -f /etc/apt/keyrings/gierens.gpg
+    info "Warning: eza signing key is not the pinned $EZA_GPG_FPR, skipping"
   fi
-  sudo apt-get install -y eza
 fi
 
-# starship prompt
-# SECURITY: Download to temp file, validate shebang, then execute
 if command_exists starship; then
   info "starship is already installed"
 else
   info "Installing starship ..."
-  installer=$(umask 077 && mktemp)
-  if curl -fsSL -o "$installer" "https://starship.rs/install.sh"; then # gitleaks:allow
-    if head -1 "$installer" | grep -q '^#!/'; then
-      sh "$installer" -y
-    else
-      info "Warning: starship installer validation failed, skipping"
-    fi
-    rm -f "$installer"
-  else
-    rm -f "$installer"
-    info "Warning: Failed to download starship installer"
-  fi
+  (install_from_tarball \
+    "https://github.com/starship/starship/releases/download/${STARSHIP_TAG}/starship-${lite_arch}-unknown-linux-musl.tar.gz" \
+    "https://github.com/starship/starship/releases/download/${STARSHIP_TAG}/starship-${lite_arch}-unknown-linux-musl.tar.gz.sha256" \
+    starship "$HOME/.local/bin" "$(pinned_sha256 STARSHIP)") ||
+    info "Warning: starship failed verification or download, skipping"
 fi
 
 # ---------- minimal zshrc --------------------------------------------------- #
