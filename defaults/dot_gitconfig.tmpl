@@ -107,7 +107,9 @@
 	# `commit-msg` hook tracked under `dot_config/git/hooks/`. Per
 	# this repo's CLAUDE.md, do NOT point this at a repo-local
 	# `.git/hooks` or similar — only at this user-global dir, which
-	# is curated and shared across all repos.
+	# is curated and shared across all repos. Every hook there chains
+	# to the repo's own .git/hooks/<name> via `_chain`, so per-repo
+	# hooks (pre-commit, gitleaks) still run.
 	hooksPath = {{ .chezmoi.homeDir }}/.config/git/hooks
 
 [fetch]

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+# _chain <hook-name> [args...]: run the repository's own hook, if any.
+#
+# The global core.hooksPath points every repository at this directory, so
+# git no longer looks in .git/hooks and per-repo hooks (pre-commit,
+# gitleaks, conventional commits) never run. Each wrapper here calls this
+# helper to run the repository's hook of the same name, passing its
+# arguments and stdin through and exiting with its status. Git never runs
+# `_chain` itself: it is not a hook name.
+set -euo pipefail
+
+name="${1:?usage: _chain <hook-name> [args...]}"
+shift
+
+global_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+common_dir="$(git rev-parse --git-common-dir 2>/dev/null)" || exit 0
+local_dir="$(cd "$common_dir/hooks" 2>/dev/null && pwd -P)" || exit 0
+
+# A repository whose hooks dir resolves to this directory would call the
+# wrapper that called us, forever.
+[[ "$local_dir" != "$global_dir" ]] || exit 0
+[[ -x "$local_dir/$name" ]] || exit 0
+
+exec "$local_dir/$name" "$@"
