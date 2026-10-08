@@ -27,6 +27,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"unicode"
 )
 
 // ── port of defaults/dot_local/share/dot-ai-tui/main.go ─────────────────────
@@ -43,12 +44,30 @@ const aiDangerousChars = ";&|`$\\<>\"' \t\n\r"
 // AISessLine mirrors the cockpit's sessLine — one persisted chat turn.
 type AISessLine struct{ Who, Text string }
 
+// AIClean mirrors the cockpit's clean (sanitise.go): C0/C1 controls other
+// than tab and newline, and bidi embeddings/overrides/isolates, become U+FFFD.
+func AIClean(s string) string {
+	return strings.Map(func(r rune) rune {
+		if r == '\t' || r == '\n' {
+			return r
+		}
+		if unicode.IsControl(r) || (r >= 0x202A && r <= 0x202E) || (r >= 0x2066 && r <= 0x2069) {
+			return unicode.ReplacementChar
+		}
+		return r
+	}, s)
+}
+
 // ParseAISession mirrors the cockpit's parseSession: a corrupt session file
-// must load as nothing rather than as a partial transcript.
+// must load as nothing rather than as a partial transcript, and every field
+// is cleaned before it can reach the screen.
 func ParseAISession(b []byte) []AISessLine {
 	var s []AISessLine
 	if json.Unmarshal(b, &s) != nil {
 		return nil
+	}
+	for i := range s {
+		s[i] = AISessLine{AIClean(s[i].Who), AIClean(s[i].Text)}
 	}
 	return s
 }
@@ -62,6 +81,7 @@ func FuzzAISessionFile(f *testing.F) {
 		`[]`, `{}`, `garbage`, ``, `[{"Who":1}]`, `null`,
 		"[{\"Who\":\"you\",\"Text\":\"\\u0000\\u001b[0m\"}]",
 		`[` + strings.Repeat(`{"Who":"a","Text":"b"},`, 64) + `{"Who":"z","Text":"z"}]`,
+		`[{"Who":"claude\u202e","Text":"\u001b]52;c;ZXZpbA==\u0007\u009b2J"}]`,
 	} {
 		f.Add([]byte(s))
 	}
@@ -69,6 +89,11 @@ func FuzzAISessionFile(f *testing.F) {
 		got := ParseAISession(data)
 		if got == nil {
 			return
+		}
+		for _, l := range got {
+			if strings.ContainsAny(l.Who+l.Text, "\x1b\x07\u009b\u009d\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069") {
+				t.Fatalf("terminal control survived: %+v", l)
+			}
 		}
 		b, err := json.Marshal(got)
 		if err != nil {

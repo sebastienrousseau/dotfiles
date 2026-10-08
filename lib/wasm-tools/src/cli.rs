@@ -210,6 +210,12 @@ pub fn main(
     }
 }
 
+/// Largest evidence document, in bytes, that `verify` reads from stdin.
+///
+/// A real record is a few KiB; the cap keeps a hostile or runaway producer
+/// from making the verifier buffer without bound.
+pub const MAX_INPUT: usize = 1 << 20;
+
 /// Reads the whole document from `input` and hands it to [`verify`].
 fn verify_stream(
     options: &Options,
@@ -219,8 +225,15 @@ fn verify_stream(
     clock: SystemTime,
 ) -> u8 {
     let mut document = String::new();
-    if let Err(e) = input.read_to_string(&mut document) {
+    if let Err(e) = input
+        .take(MAX_INPUT as u64 + 1)
+        .read_to_string(&mut document)
+    {
         let _ = writeln!(err, "dot-sys: {e}");
+        return EXIT_USAGE;
+    }
+    if document.len() > MAX_INPUT {
+        let _ = writeln!(err, "dot-sys: evidence is larger than {MAX_INPUT} bytes");
         return EXIT_USAGE;
     }
     let now = match options.now {
@@ -643,5 +656,42 @@ mod tests {
                 now: Some(5),
             })
         );
+    }
+
+    #[test]
+    fn verify_refuses_stdin_past_the_size_cap() {
+        const CAP: usize = 1 << 20;
+        let shell = "{\"pad\": \"\"}";
+        let at = format!("{{\"pad\": \"{}\"}}", "x".repeat(CAP - shell.len()));
+        assert_eq!(at.len(), CAP);
+
+        // One byte over the cap is refused before any parsing.
+        let over = format!("{at} ");
+        let (mut out, mut err) = (Vec::new(), Vec::new());
+        let code = main(
+            &args(&["verify", "--now", "0"]),
+            &mut over.as_bytes(),
+            &mut out,
+            &mut err,
+            UNIX_EPOCH,
+        );
+        assert_eq!(code, EXIT_USAGE);
+        assert_eq!(String::from_utf8_lossy(&out), "");
+        assert_eq!(
+            String::from_utf8_lossy(&err),
+            "dot-sys: evidence is larger than 1048576 bytes\n"
+        );
+
+        // Exactly at the cap is read in full and judged on its content.
+        let (mut out, mut err) = (Vec::new(), Vec::new());
+        let code = main(
+            &args(&["verify", "--now", "0"]),
+            &mut at.as_bytes(),
+            &mut out,
+            &mut err,
+            UNIX_EPOCH,
+        );
+        assert_eq!(code, EXIT_FAILURE);
+        assert_eq!(String::from_utf8_lossy(&err), "");
     }
 }

@@ -270,7 +270,8 @@ func refresh() tea.Msg {
 	client := http.Client{Timeout: 1500 * time.Millisecond}
 	if resp, err := client.Get(gatewayBase() + "/health"); err == nil {
 		defer func() { _ = resp.Body.Close() }()
-		body, _ := io.ReadAll(resp.Body)
+		// A healthy reply is a few bytes; never buffer more than 4 KiB.
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
 		out.gatewayUp = resp.StatusCode == 200 && strings.Contains(string(body), "healthy")
 		out.gatewayMsg = map[bool]string{true: gatewayBase(), false: "unhealthy"}[out.gatewayUp]
 	} else {
@@ -299,7 +300,7 @@ func sqlite(db, query string) string {
 	if err != nil {
 		return ""
 	}
-	return filterSqliteOutput(b)
+	return clean(filterSqliteOutput(b))
 }
 
 // filterSqliteOutput trims sqlite3 CLI output and drops any stray
@@ -367,16 +368,7 @@ func startStream(toolName, style, aiModel string, history []line, prompt string)
 			ch <- streamMsg{err: err, done: true}
 			return
 		}
-		buf := make([]byte, 512)
-		for {
-			n, rerr := stdout.Read(buf)
-			if n > 0 {
-				ch <- streamMsg{chunk: string(buf[:n])}
-			}
-			if rerr != nil {
-				break
-			}
-		}
+		pumpChunks(stdout, ch)
 		_ = cmd.Wait()
 		ch <- streamMsg{done: true}
 	}()
@@ -458,7 +450,7 @@ func parseSession(b []byte) []line {
 	}
 	out := make([]line, 0, len(s))
 	for _, x := range s {
-		out = append(out, line{who: x.Who, text: x.Text})
+		out = append(out, line{who: clean(x.Who), text: clean(x.Text)})
 	}
 	return out
 }
@@ -617,7 +609,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		if msg.chunk != "" {
-			m.transcript[last].text += msg.chunk
+			m.transcript[last].text += clean(msg.chunk)
 		}
 		if msg.done {
 			m.transcript[last].text = strings.TrimSpace(m.transcript[last].text)

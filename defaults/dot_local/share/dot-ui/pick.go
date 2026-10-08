@@ -183,7 +183,7 @@ func readItems(in io.Reader) []string {
 	sc.Buffer(make([]byte, 0, 64*1024), 1024*1024)
 	for sc.Scan() {
 		if strings.TrimSpace(sc.Text()) != "" {
-			items = append(items, sc.Text())
+			items = append(items, clean(sc.Text()))
 		}
 	}
 	return items

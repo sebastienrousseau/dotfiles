@@ -31,6 +31,7 @@ fn offset_of(error: Error) -> Option<usize> {
         | Error::InvalidEscape { offset }
         | Error::InvalidUnicodeEscape { offset }
         | Error::TrailingInput { offset }
+        | Error::DuplicateMember { offset, .. }
         | Error::TooDeep { offset } => Some(offset),
         _ => None,
     }
@@ -69,6 +70,12 @@ fuzz_target!(|input: &str| {
                 if let Some(offset) = offset_of(e) {
                     assert!(offset <= input.len());
                     assert!(input.is_char_boundary(offset));
+                }
+                // A repeated member is reported at the second copy's
+                // opening quote, and only for a segment of this path.
+                if let Error::DuplicateMember { name, offset } = e {
+                    assert_eq!(input.as_bytes().get(offset), Some(&b'"'));
+                    assert!(path.split('.').any(|segment| segment == name));
                 }
             }
         }

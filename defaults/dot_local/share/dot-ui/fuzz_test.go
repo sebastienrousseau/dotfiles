@@ -16,6 +16,15 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+// assertNoTerminalControl fails if s holds an OSC/CSI introducer, a BEL or a
+// bidi embedding/override/isolate: input text must reach the screen inert.
+func assertNoTerminalControl(t *testing.T, s string) {
+	t.Helper()
+	if strings.ContainsAny(s, "\x1b\x07\u009b\u009d\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069") {
+		t.Fatalf("terminal control survived: %q", s)
+	}
+}
+
 // FuzzParseEvent: any line either parses to a valid JSON event or is
 // rejected; blank lines are always rejected; a parsed event round-trips.
 func FuzzParseEvent(f *testing.F) {
@@ -25,6 +34,7 @@ func FuzzParseEvent(f *testing.F) {
 		`{"t":"progress","cur":3,"total":12}`, `{"t":"wait","label":"w"}`,
 		`{"t":"done","elapsed_ms":1618,"summary":"s"}`, `{"t":"step","cur":"notanint"}`,
 		"{\"t\":\"\u0000\"}", "\t{\"t\":\"done\"}\t",
+		`{"t":"step","label":"\u001b]52;c;ZXZpbA==\u0007\u202eevil","detail":"\u009b2J"}`,
 	} {
 		f.Add(s)
 	}
@@ -44,6 +54,9 @@ func FuzzParseEvent(f *testing.F) {
 		}
 		if !json.Valid([]byte(strings.TrimSpace(line))) {
 			t.Fatalf("parsed invalid JSON: %q", line)
+		}
+		for _, v := range []string{e.T, e.Title, e.Subtitle, e.ID, e.Label, e.State, e.Detail, e.Summary} {
+			assertNoTerminalControl(t, v)
 		}
 		b, err := json.Marshal(e)
 		if err != nil {
@@ -223,11 +236,13 @@ func FuzzRunTable(f *testing.F) {
 	f.Add([]byte("a\x1fb\nc\nd\x1fe\x1ff\x1fg\n"))
 	f.Add([]byte("\x1f\x1f\n\x1f\n"))
 	f.Add([]byte("h\n" + strings.Repeat("x\x1fy\n", 200)))
+	f.Add([]byte("H\x1fV\n\x1b]52;c;ZXZpbA==\x07\x1b[2J\x1f\u202eevil\u2066\n"))
 	f.Fuzz(func(t *testing.T, data []byte) {
 		var b strings.Builder
 		if err := runTable(LoadPalette(), strings.NewReader(string(data)), &b); err != nil {
 			t.Fatal(err)
 		}
+		assertNoTerminalControl(t, b.String())
 		hasHeader := len(strings.SplitN(string(data), "\n", 2)[0]) > 0 || strings.Contains(string(data), "\n")
 		if hasHeader && b.Len() > 0 && !strings.Contains(b.String(), "╭") {
 			t.Fatalf("table without a border:\n%s", b.String())
@@ -246,8 +261,12 @@ func FuzzReadItems(f *testing.F) {
 	f.Add("\n\n\n")
 	f.Add("no newline")
 	f.Add(" leading\ntrailing \n")
+	f.Add("ok\n\x1b]52;c;ZXZpbA==\x07\u009b2J\u202eevil\u2069\n")
 	f.Fuzz(func(t *testing.T, in string) {
 		items := readItems(strings.NewReader(in))
+		for _, it := range items {
+			assertNoTerminalControl(t, it)
+		}
 		if len(items) > strings.Count(in, "\n")+1 {
 			t.Fatalf("more items (%d) than lines", len(items))
 		}

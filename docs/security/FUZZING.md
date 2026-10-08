@@ -55,12 +55,12 @@ is a bug in one of them.
 |---------|---------|----------------|
 | `FuzzValidateName` | `scripts/dot/lib/utils.sh:101` (`validate_name`) | Every accepted name contains only `[a-zA-Z0-9._-]`; no shell metacharacter slips through; empty input refused. |
 | `FuzzInitURLResolver` | `scripts/dot/commands/init.sh` (URL construction in `dot init <user\|owner/repo\|url>`) | Accepted URLs use `https://` / `git@` / `ssh://` only; plain HTTP refused; no shell metacharacters in constructed URLs; one input shape per acceptable form. |
-| `FuzzUIEventLine` | dot-ui `run.go` (`parseEvent`, `renderBar`) | A line either decodes to valid JSON or is refused; an accepted event round-trips; the derived progress width is always a legal repeat count. |
+| `FuzzUIEventLine` | dot-ui `run.go` (`parseEvent`, `renderBar`) | A line either decodes to valid JSON or is refused; an accepted event round-trips with every string field free of control and bidi characters; the derived progress width is always a legal repeat count. |
 | `FuzzUIHexColor` | dot-ui `theme.go` (`parseColor`) | An accepted `DOT_UI_*` value is a literal `#rgb`/`#rrggbb` with no metacharacter or escape sequence — these are interpolated into terminal escapes. |
-| `FuzzUIPickFilter` | dot-ui `pick.go` (`fuzzyMatch`, `readItems`) | No blank candidate survives; every candidate matches itself in any script; a query longer than the candidate never matches. |
+| `FuzzUIPickFilter` | dot-ui `pick.go` (`fuzzyMatch`, `readItems`) | No blank candidate survives and none carries a control or bidi character; every candidate matches itself in any script; a query longer than the candidate never matches. |
 | `FuzzUIPickArgs` | dot-ui `main.go` (`parsePickArgs`) | The parser never invents a value; every prefix of the argument list is safe. |
-| `FuzzUITableRows` | dot-ui `table.go` (`runTable` input) | The `\x1f` split is reversible, so no cell can merge into or leak across a neighbouring column. |
-| `FuzzAISessionFile` | dot-ai-tui `main.go` (`parseSession`) | A malformed session file decodes to nothing, never to a partial or mutated transcript; a valid one round-trips. |
+| `FuzzUITableRows` | dot-ui `table.go` (`runTable` input) | The `\x1f` split is reversible, so no cell can merge into or leak across a neighbouring column; no cell carries a control or bidi character. |
+| `FuzzAISessionFile` | dot-ai-tui `main.go` (`parseSession`) | A malformed session file decodes to nothing, never to a partial or mutated transcript; a valid one round-trips with no control or bidi character left in it. |
 | `FuzzAISqliteOutput` | dot-ai-tui `main.go` (`filterSqliteOutput`) | No `~/.sqliterc` meta line (`.timer`, `Run Time:`) survives into the cost/run data the cockpit renders. |
 | `FuzzAIFenceTag` | dot-ai-tui `main.go` (`langRe`, `highlight`) | Every fence info string taken from model output is refused or a short identifier, so an unbounded chroma lexer lookup cannot stall rendering; prose segments survive segmentation. |
 | `FuzzAIGatewayURL` | dot-ai-tui `main.go` (`gatewayURL`) | The health-check URL always keeps the `http` scheme and the configured host and port verbatim. |

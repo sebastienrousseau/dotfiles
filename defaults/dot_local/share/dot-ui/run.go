@@ -58,6 +58,9 @@ func parseEvent(line string) (Event, bool) {
 	if err := json.Unmarshal([]byte(line), &e); err != nil {
 		return Event{}, false
 	}
+	for _, f := range []*string{&e.T, &e.Title, &e.Subtitle, &e.ID, &e.Label, &e.State, &e.Detail, &e.Summary} {
+		*f = clean(*f)
+	}
 	return e, true
 }
 

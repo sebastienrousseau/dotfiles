@@ -27,7 +27,33 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"unicode"
 )
+
+// ── port of defaults/dot_local/share/dot-ui/sanitise.go ─────────────────────
+
+// UIClean mirrors dot-ui's clean: C0/C1 controls other than tab and newline,
+// and bidi embeddings/overrides/isolates, become U+FFFD.
+func UIClean(s string) string {
+	return strings.Map(func(r rune) rune {
+		if r == '\t' || r == '\n' {
+			return r
+		}
+		if unicode.IsControl(r) || (r >= 0x202A && r <= 0x202E) || (r >= 0x2066 && r <= 0x2069) {
+			return unicode.ReplacementChar
+		}
+		return r
+	}, s)
+}
+
+// uiAssertInert fails if s holds an ESC/BEL/C1 introducer or a bidi
+// embedding/override/isolate. Self-contained per harness file (see below).
+func uiAssertInert(t *testing.T, s string) {
+	t.Helper()
+	if strings.ContainsAny(s, "\x1b\x07\u009b\u009d\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069") {
+		t.Fatalf("terminal control survived: %q", s)
+	}
+}
 
 // ── port of defaults/dot_local/share/dot-ui/run.go ──────────────────────────
 
@@ -66,6 +92,9 @@ func ParseUIEvent(line string) (UIEvent, bool) {
 	if err := json.Unmarshal([]byte(line), &e); err != nil {
 		return UIEvent{}, false
 	}
+	for _, f := range []*string{&e.T, &e.Title, &e.Subtitle, &e.ID, &e.Label, &e.State, &e.Detail, &e.Summary} {
+		*f = UIClean(*f)
+	}
 	return e, true
 }
 
@@ -94,11 +123,15 @@ func FuzzUIEventLine(f *testing.F) {
 		`{"t":"done","elapsed_ms":1618,"summary":"s"}`,
 		`{"t":"step","cur":"notanint"}`,
 		"\t{\"t\":\"done\"}\t",
+		`{"t":"step","label":"\u001b]52;c;ZXZpbA==\u0007\u202eevil","detail":"\u009b2J"}`,
 	} {
 		f.Add(s)
 	}
 	f.Fuzz(func(t *testing.T, line string) {
 		e, ok := ParseUIEvent(line)
+		for _, v := range []string{e.T, e.Title, e.Subtitle, e.ID, e.Label, e.State, e.Detail, e.Summary} {
+			uiAssertInert(t, v)
+		}
 		if strings.TrimSpace(line) == "" {
 			if ok {
 				t.Fatalf("blank line accepted: %q", line)
@@ -196,7 +229,7 @@ func UIReadItems(in string) []string {
 	var items []string
 	for _, ln := range strings.Split(in, "\n") {
 		if strings.TrimSpace(ln) != "" {
-			items = append(items, ln)
+			items = append(items, UIClean(ln))
 		}
 	}
 	return items
@@ -213,6 +246,7 @@ func FuzzUIPickFilter(f *testing.F) {
 		{"日本語\n", "本"},
 		{"İstanbul\n", "i"},
 		{"no newline", "n"},
+		{"ok\n\x1b]52;c;ZXZpbA==\x07\u009b2J\u202eevil\u2069\n", "evil"},
 	} {
 		f.Add(c[0], c[1])
 	}
@@ -228,6 +262,7 @@ func FuzzUIPickFilter(f *testing.F) {
 			if strings.Contains(it, "\n") {
 				t.Fatalf("candidate spans lines: %q", it)
 			}
+			uiAssertInert(t, it)
 			if !UIFuzzyMatch(it, "") {
 				t.Fatalf("empty query must match %q", it)
 			}
@@ -308,6 +343,9 @@ func SplitUITable(in string) (headers []string, rows [][]string) {
 			continue
 		}
 		fields := strings.Split(ln, unitSep)
+		for i := range fields {
+			fields[i] = UIClean(fields[i])
+		}
 		if headers == nil {
 			headers = fields
 			continue
@@ -326,8 +364,12 @@ func FuzzUITableRows(f *testing.F) {
 	f.Add("only\x1fheaders")
 	f.Add("a\x1fb\nc\nd\x1fe\x1ff\x1fg\n")
 	f.Add("\x1f\x1f\n\x1f\n")
+	f.Add("H\x1fV\n\x1b]52;c;ZXZpbA==\x07\x1b[2J\x1f\u202eevil\u2066\n")
 	f.Fuzz(func(t *testing.T, in string) {
 		headers, rows := SplitUITable(in)
+		for _, c := range headers {
+			uiAssertInert(t, c)
+		}
 		if headers == nil {
 			if len(rows) != 0 {
 				t.Fatalf("rows without a header: %v", rows)
@@ -336,6 +378,7 @@ func FuzzUITableRows(f *testing.F) {
 		}
 		for _, r := range rows {
 			for _, cell := range r {
+				uiAssertInert(t, cell)
 				if strings.Contains(cell, unitSep) || strings.Contains(cell, "\n") {
 					t.Fatalf("cell still contains a delimiter: %q", cell)
 				}

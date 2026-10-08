@@ -40,6 +40,7 @@ list of backticked function names.
 | Area | Feature | Trigger | Tests |
 | :--- | :--- | :--- | :--- |
 | run | NDJSON event parsing (blank/invalid lines skipped) | stdin lines | `TestParseEvent` `FuzzParseEvent` `BenchmarkParseEvent` |
+| run | Control characters and bidi overrides in event strings become U+FFFD | crafted event | `TestParseEventStripsTerminalEscapes` `TestCleanReplacesControlAndBidi` `FuzzParseEvent` |
 | run | `header` event sets title + subtitle | `{"t":"header"}` | `TestApplyHeaderAndSteps` `TestViewRendersStates` |
 | run | `step` event adds a step (default state `run`) | `{"t":"step","state":""}` | `TestApplyHeaderAndSteps` `BenchmarkStepApply` |
 | run | `step` event updates an existing step in place (state, detail, label) | repeated `id` | `TestApplyHeaderAndSteps` `TestApplyRelabel` |
@@ -63,6 +64,7 @@ list of backticked function names.
 | Area | Feature | Trigger | Tests |
 | :--- | :--- | :--- | :--- |
 | pick | Candidate rows read from stdin (blank lines dropped) | stdin | `TestReadItems` `FuzzReadItems` `BenchmarkReadItems` |
+| pick | Control characters and bidi overrides in candidates become U+FFFD | crafted row | `TestReadItemsStripsTerminalEscapes` `FuzzReadItems` |
 | pick | Case-insensitive subsequence matching (any script) | typed query | `TestFuzzyMatch` `TestFuzzyMatchNonASCII` `FuzzFuzzyMatch` `BenchmarkFuzzyMatch` |
 | pick | Typing narrows the list; cursor resets | rune keys | `TestPickRefilter` `TestPickFilterThenSelect` `BenchmarkPickRefilter` |
 | pick | Key binding `backspace` widens the query | keyboard | `TestPickFilterThenSelect` `TestPickUpAndCtrlKeys` |
@@ -88,6 +90,7 @@ list of backticked function names.
 | Area | Feature | Trigger | Tests |
 | :--- | :--- | :--- | :--- |
 | table | `\x1f`-delimited header + rows render with a rounded border | stdin | `TestRunTable` `FuzzRunTable` `BenchmarkRunTable` |
+| table | Control characters and bidi overrides in cells become U+FFFD | crafted cell | `TestRunTableStripsTerminalEscapes` `FuzzRunTable` |
 | table | Empty input renders nothing | empty stdin | `TestRunTableEmpty` |
 | table | Header-only input still renders | one line | `TestRunTableHeaderOnly` |
 | table | Ragged rows (fewer/more cells) render | uneven rows | `TestRunTableRaggedRows` |
