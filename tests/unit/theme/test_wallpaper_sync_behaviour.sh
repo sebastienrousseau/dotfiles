@@ -29,7 +29,11 @@ mkstub() {
 mkstub uname 'echo "$STUB_OS"'
 mkstub sleep 'exit 0'
 mkstub killall 'exit 0'
-mkstub osascript 'exit 0'
+# osascript also keeps each argument on its own line and the script text
+# it read on stdin, so a case can tell code from data.
+mkstub osascript 'for a in "$@"; do printf "%s\\n" "$a"; done >>"$CALLS.osa-argv"
+[ "${1:-}" = - ] && cat >>"$CALLS.osa-script"
+exit 0'
 mkstub shuf 'head -1'
 # The store patcher has its own test (test_macos_wallpaper_patcher.sh);
 # here it is only recorded. The real /usr/bin/python3 on macOS is an Xcode
@@ -233,8 +237,18 @@ assert_equals "yes:yes" "$(applied q-dark.png):$(called 'feh --bg-fill')" "dark,
 test_start "wallpaper_macos_restarts_the_agent_and_reasserts"
 setup Darwin ocean-dark ocean-dark.png
 ws
-assert_equals "yes:yes:yes" "$(called 'macos-wallpaper-store.py '"$W"'/h/Pictures/Wallpapers/ocean-dark.png'):$(called 'killall WallpaperAgent'):$(called 'osascript -e')" \
+assert_equals "yes:yes:yes" "$(called 'macos-wallpaper-store.py '"$W"'/h/Pictures/Wallpapers/ocean-dark.png'):$(called 'killall WallpaperAgent'):$(called 'osascript -')" \
   "store patch, agent restart and AppleScript"
+
+test_start "wallpaper_macos_passes_the_path_to_applescript_as_data"
+# A " in a file name used to end the AppleScript string literal.
+setup Darwin nomatch-dark 'a"b&c-dark.png'
+ws
+wp="$W/h/Pictures/Wallpapers/a\"b&c-dark.png"
+assert_equals "-"$'\n'"$wp" "$(cat "$W/calls.osa-argv" 2>/dev/null)" "script from stdin, the path as the one argument"
+assert_contains "on run argv" "$(cat "$W/calls.osa-script" 2>/dev/null)" "the script reads its argument"
+assert_contains "set picture of d to theFile" "$(cat "$W/calls.osa-script" 2>/dev/null)" "and sets every desktop"
+assert_equals "no" "$(grep -qF 'a"b&c' "$W/calls.osa-script" 2>/dev/null && echo yes || echo no)" "the file name never appears in the script text"
 
 test_start "wallpaper_macos_skip_agent_uses_the_wallpaper_cli"
 setup Darwin ocean-dark ocean-dark.png

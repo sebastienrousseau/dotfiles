@@ -81,7 +81,13 @@ apply_wallpaper() {
 
   case "$(uname -s)" in
     Darwin)
-      osascript -e "tell application \"System Events\" to set picture of every desktop to POSIX file \"$wp\"" || true
+      # The path is an argument, not script text: a " in it stays data.
+      osascript - "$wp" <<'APPLESCRIPT' || true
+on run argv
+  set theFile to POSIX file (item 1 of argv)
+  tell application "System Events" to set picture of every desktop to theFile
+end run
+APPLESCRIPT
       ;;
     Linux)
       if command -v gsettings &>/dev/null; then
