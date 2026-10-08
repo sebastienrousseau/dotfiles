@@ -180,9 +180,12 @@ assert_equals "bbb" "$(head -n 1 <<<"$r")" "arm64 reads <TOOL>_SHA256_AARCH64"
 
 # apt_keyring_holds_only: exactly one primary key, the pinned one.
 if command -v gpg >/dev/null 2>&1; then
-  export GNUPGHOME="$WORK/gnupg"
-  mkdir -p "$GNUPGHOME"
+  # A short home: macOS's long $TMPDIR pushes gpg-agent's socket path past the
+  # Unix socket limit, and key generation then fails without saying why.
+  GNUPGHOME="$(mktemp -d /tmp/ip-gpg.XXXXXX)"
+  export GNUPGHOME
   chmod 700 "$GNUPGHOME"
+  trap 'gpgconf --kill gpg-agent >/dev/null 2>&1 || true; rm -rf "$GNUPGHOME" "$WORK"' EXIT
   gen_key() {
     gpg --batch --quiet --passphrase '' --quick-gen-key "$1" ed25519 sign never 2>/dev/null
     gpg --with-colons --list-keys "$1" | awk -F: '/^fpr:/ { print $10; exit }'
@@ -197,7 +200,11 @@ if command -v gpg >/dev/null 2>&1; then
     r="$(lib 'apt_keyring_holds_only "$K" "$F"' K="$1" F="$PIN_FPR" GNUPGHOME="$GNUPGHOME")"
     rc_of "$r"
   }
-
+fi
+if command -v gpg >/dev/null 2>&1 && [[ -z "${PIN_FPR:-}" || -z "${EVIL_FPR:-}" ]]; then
+  test_start "apt_keyring_fixture_keys"
+  printf '  %s (skipped: gpg could not generate the fixture keys here)\n' "$CURRENT_TEST"
+elif command -v gpg >/dev/null 2>&1; then
   test_start "apt_keyring_pinned_key_alone_trusted"
   assert_equals "0" "$(keyring_rc "$WORK/pinned.gpg")" "a keyring with only the pinned key passes"
 
