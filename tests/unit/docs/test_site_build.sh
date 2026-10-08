@@ -41,6 +41,10 @@ bash "$REPO_ROOT/tools/docs/build-site.sh" --out "$SITE" >"$WORK/build.log" 2>&1
 test_start "site_builds_and_every_link_resolves"
 assert_equals "0" "$rc" "build-site.sh succeeds, including the whole-site link check ($(tail -1 "$WORK/build.log"))"
 
+test_start "site_publishes_the_registry_index"
+# `dot registry` fetches https://doc.dotfiles.io/registry.json; the site must ship it.
+assert_equals "$(cat "$REPO_ROOT/docs/registry.json")" "$(cat "$SITE/registry.json" 2>/dev/null)" "registry.json at the site root"
+
 test_start "site_has_one_page_per_toc_entry"
 toc_n="$(grep -cE '^      - ' "$REPO_ROOT/docs/_toc.yml")"
 manual_n="$(find "$SITE/manual" -name index.html | wc -l | tr -d ' ')"

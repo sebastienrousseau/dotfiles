@@ -101,6 +101,12 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # tools/ci/check-registry.sh verifies docs/registry.json.minisig once
+      # security/registry.pub is committed; until then it skips, and so does
+      # this install.
+      - name: Install minisign for the registry signature check
+        if: hashFiles('security/registry.pub') != ''
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq minisign
       - name: Audit shell dependencies
         run: |
           echo "::notice::Auditing external dependencies in shell scripts"

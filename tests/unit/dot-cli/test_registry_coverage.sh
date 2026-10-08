@@ -34,6 +34,10 @@ export XDG_DATA_HOME="$HOME/.local/share" XDG_STATE_HOME="$HOME/.local/state"
 mkdir -p "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
 unset DOTFILES_REGISTRY_URL
 export DOTFILES_NO_TUI=1 NO_COLOR=1
+# The file:// fixture indexes are unsigned on purpose; the https one below is
+# "signed" for a minisign stub that accepts any signature file. Signature
+# checking itself is pinned by test_registry_index_trust.sh.
+export DOTFILES_REGISTRY_UNSIGNED=1
 
 BIN="$WORK/bin"
 mkdir -p "$BIN"
@@ -58,8 +62,21 @@ cat >"$BIN/chezmoi" <<EOF
 #!$REAL_BASH
 printf 'chezmoi %s\n' "\$*" >>"$CALLS"
 EOF
+cat >"$BIN/minisign" <<EOF
+#!$REAL_BASH
+exit 0
+EOF
 chmod +x "$BIN"/*
 export PATH="$BIN:$PATH"
+export DOTFILES_REGISTRY_PUBKEY="$WORK/registry.pub"
+printf 'untrusted comment: stub\nRWSTUB\n' >"$DOTFILES_REGISTRY_PUBKEY"
+
+# age_file <file> <seconds ago> — portable mtime rewind (BSD and GNU date).
+age_file() {
+  local when
+  when=$(($(date +%s) - $2))
+  touch -t "$(date -r "$when" +%Y%m%d%H%M.%S 2>/dev/null || date -d "@$when" +%Y%m%d%H%M.%S)" "$1"
+}
 
 sha256_of() {
   if command -v sha256sum >/dev/null 2>&1; then
@@ -217,10 +234,13 @@ assert_equals "good" "$(jq -r '.modules[0].name' "$cf")" "cache refreshed"
 touch -t 200001010000 "$cf"
 export DOTFILES_REGISTRY_URL="file://$F/absent.json"
 cp "$F/good.json" "$(_registry_cache_file)"
-touch -t 200001010000 "$(_registry_cache_file)"
+age_file "$(_registry_cache_file)" 86400
 rc="$(run list)"
 assert_equals "0" "$rc" "stale cache used when fetch fails"
 assert_file_contains "$OUT" "using stale cache" "stale warning"
+touch -t 200001010000 "$(_registry_cache_file)"
+rc="$(run list)"
+assert_equals "1" "$rc" "a cache older than seven days is not used"
 export DOTFILES_REGISTRY_URL="http://insecure.test/r.json"
 rc="$(run list)"
 assert_equals "1" "$rc" "http registry refused at fetch"
@@ -259,7 +279,8 @@ use "$F/good.json"
 rc="$(run install good)"
 assert_equals "0" "$rc" "preview ok"
 assert_file_contains "$OUT" "Preview only" "preview message"
-assert_file_contains "$CALLS" "--dry-run" "chezmoi dry-run"
+assert_file_contains "$OUT" "Module contents" "the preview lists the archive"
+assert_equals "" "$(cat "$CALLS")" "the preview does not run chezmoi"
 rc="$(run install good --yes)"
 assert_equals "0" "$rc" "apply ok"
 assert_file_exists "$XDG_DATA_HOME/dotfiles/modules/good/installed.json" "installed.json written"
@@ -270,6 +291,7 @@ rc="$(run install good -n)"
 assert_equals "0" "$rc" "-n preview ok"
 index "$F/https.json" good "$F/good.tgz"
 jq '.modules[0].archive_url = "https://local.test'"$F"'/good.tgz"' "$F/https.json" >"$F/https2.json"
+printf 'stub signature\n' >"$F/https2.json.minisig"
 export DOTFILES_REGISTRY_URL="https://local.test$F/https2.json"
 rm -rf "$(_registry_cache_dir)"
 rc="$(run install good)"

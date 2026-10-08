@@ -139,9 +139,8 @@
   19   25   27.4   53     0 scripts/dot/commands/meta.sh::cmd_mcp
   14   14   23.5   28     0 scripts/dot/commands/meta.sh::cmd_mcp_serve
    9   14   25.7   82     0 scripts/dot/commands/meta.sh::cmd_upgrade
-  12   15   30.9   50     0 scripts/dot/commands/registry.sh::_registry_fetch
-  17   16   45.7   73     0 scripts/dot/commands/registry.sh::_registry_install
-  35   38   51.0  152     0 scripts/dot/commands/registry.sh::cmd_registry
+  11   10   33.7   42     0 scripts/dot/commands/registry.sh::_registry_install
+  33   34   43.5  123     0 scripts/dot/commands/registry.sh::cmd_registry
   21   12   31.5   69   248 scripts/dot/commands/secrets.sh::<top>
   16   16   23.8   61     0 scripts/dot/commands/secrets.sh::cmd_env_load
   12    2   18.2   49    81 scripts/dot/commands/security.sh::<top>
