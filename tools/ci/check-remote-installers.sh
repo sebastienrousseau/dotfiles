@@ -4,6 +4,12 @@
 
 set -euo pipefail
 
+# ripgrep does the scanning; without it every check would silently pass.
+command -v rg >/dev/null 2>&1 || {
+  printf 'check-remote-installers: ripgrep (rg) is required\n' >&2
+  exit 2
+}
+
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 manifest="$repo_root/security/remote-installers.sha256"
 # Globs below are relative to the search root, so search from the repo root.
@@ -40,9 +46,9 @@ done <"$manifest"
 # (`curl | sh`, also after a YAML `run:` or Dockerfile `RUN`), command
 # substitution (`sh -c "$(curl`) or process substitution (`bash <(curl`).
 lead='^[[:space:]]*((-[[:space:]]*)?run:[[:space:]]*[|>]?[[:space:]]*|RUN[[:space:]]+)?'
-pipe="${lead}(curl|wget)[^#|]*\\|[[:space:]]*(sudo[[:space:]]+)?(ba|z)?sh([[:space:]]|\$)"
-subst='(ba|z)?sh[[:space:]]+-c[[:space:]]+["'"'"']?\$\([[:space:]]*(curl|wget)'
-procsub='(ba|z)?sh[[:space:]]+<\([[:space:]]*(curl|wget)'
+pipe="${lead}(curl|wget)[^#|]*\\|[[:space:]]*(sudo[[:space:]]+)?(bash|zsh|sh)([[:space:]]|\$)"
+subst='(bash|zsh|sh)[[:space:]]+-c[[:space:]]+["'"'"']?\$\([[:space:]]*(curl|wget)'
+procsub='(bash|zsh|sh)[[:space:]]+<\([[:space:]]*(curl|wget)'
 if rg --no-config -n -e "$pipe" -e "$subst" -e "$procsub" . "${scan_globs[@]}"; then
   printf 'Direct download-to-shell execution is forbidden.\n' >&2
   failed=1

@@ -10,6 +10,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
+# The scanner needs ripgrep; without it the behaviour cannot be exercised here
+# (the CI lint job that runs the scanner has it).
+if ! command -v rg >/dev/null 2>&1; then
+  test_start "remote_installer_scan_needs_rg"
+  printf '  %s (skipped: ripgrep not installed)\n' "$CURRENT_TEST"
+  printf 'RESULTS:%s:%s:%s\n' "$TESTS_RUN" "$TESTS_PASSED" "$TESTS_FAILED"
+  exit 0
+fi
+
 checker="$REPO_ROOT/tools/ci/check-remote-installers.sh"
 
 WORK="$(mktemp -d -t remote-installers.XXXXXX)"
