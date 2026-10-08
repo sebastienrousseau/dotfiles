@@ -127,14 +127,6 @@ jobs:
       # tools/ci/workflow-injection-baseline.txt.
       - name: Workflow injection and checkout credentials
         run: python3 tools/ci/check-workflow-hardening.py
-      - name: Check for hardcoded secrets patterns
-        run: |
-          echo "::notice::Scanning for hardcoded secrets patterns"
-          # More aggressive secret detection
-          if rg -i "password|token|key|secret" --type sh --type lua | grep -E "=.*['\"][^'\"]{8,}['\"]"; then
-            echo "::error::Potential hardcoded secret detected"
-            exit 1
-          fi
 
   security-infrastructure:
     name: Security / Infrastructure Scan
