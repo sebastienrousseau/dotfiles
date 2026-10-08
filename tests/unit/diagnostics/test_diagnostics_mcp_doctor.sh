@@ -214,12 +214,12 @@ JSON
       MCP_REGISTRY_CONFIG="$fixture_dir/registry.json" \
       bash "$TEST_SCRIPT" --json
   )" || true
-  if [[ "$output" == *'"status": "warning"'* ]] && [[ "$output" == *'"warnings":'* ]]; then
+  if [[ "$output" == *'"status": "failed"'* ]] && [[ "$output" == *'"warnings":'* ]]; then
     ((TESTS_PASSED++)) || true
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: policy warnings summarized"
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: a blocked root and plain-http transports fail even without --strict"
   else
     ((TESTS_FAILED++)) || true
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected warning JSON summary"
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected failed JSON summary"
     printf '%b\n' "    Output: $output"
   fi
 else
