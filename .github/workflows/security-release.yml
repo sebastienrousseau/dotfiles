@@ -42,6 +42,7 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           ref: ${{ inputs.release_tag || github.ref }}
 
       - name: Generate SBOM (SPDX)
@@ -140,6 +141,7 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           ref: ${{ inputs.release_tag || github.ref }}
 
       - name: Wait for complete release asset set and download
@@ -300,6 +302,7 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           ref: ${{ inputs.release_tag || github.ref }}
 
       - name: Download SBOM artifact

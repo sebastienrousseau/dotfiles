@@ -29,16 +29,25 @@ jobs:
       contents: write           # push bump branch to homebrew-tap
       pull-requests: write      # open PR to homebrew-tap
     steps:
-      - name: Harden runner (audit mode)
+      # Endpoints observed by harden-runner in audit mode on the v0.2.529,
+      # v0.2.530 and v0.2.531 release runs (the GitHub Actions service
+      # endpoints the runner itself uses are allowed by harden-runner).
+      - name: Harden runner (block mode)
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            release-assets.githubusercontent.com:443
 
       - name: Checkout dotfiles
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # The bump is pushed from a separate clone of the tap/bucket with
+          # its own credential helper; this checkout never writes back.
+          persist-credentials: false
 
       - name: Setup Git
         run: |
@@ -63,12 +72,19 @@ jobs:
 
       - name: Resolve release tag
         id: resolve-tag
+        env:
+          # Release tag from the event or the workflow_dispatch input. It
+          # reaches the shell as data and must look like a release tag
+          # before any later step builds a path, URL or branch from it.
+          TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
         run: |
           set -euo pipefail
-          # Use release tag from event or workflow_dispatch input
-          TAG="${{ github.event.release.tag_name || inputs.release_tag }}"
           if [[ -z "$TAG" ]]; then
             echo "::error::No release tag provided"
+            exit 1
+          fi
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "::error::Release tag '${TAG}' is not vMAJOR.MINOR.PATCH[-pre]"
             exit 1
           fi
           # Remove leading 'v' for VERSION
@@ -80,10 +96,10 @@ jobs:
         id: download-asset
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.resolve-tag.outputs.tag }}
+          VERSION: ${{ steps.resolve-tag.outputs.version }}
         run: |
           set -euo pipefail
-          TAG="${{ steps.resolve-tag.outputs.tag }}"
-          VERSION="${{ steps.resolve-tag.outputs.version }}"
           ASSET_NAME="dot-${VERSION}.tar.gz"
           echo "Downloading ${ASSET_NAME} from release ${TAG}..."
           mkdir -p assets
@@ -107,20 +123,22 @@ jobs:
 
       - name: Compute SHA256 of tarball
         id: compute-sha256
+        env:
+          ASSET_PATH: ${{ steps.download-asset.outputs.asset_path }}
         run: |
           set -euo pipefail
-          ASSET_PATH="${{ steps.download-asset.outputs.asset_path }}"
           SHA256=$(sha256sum "$ASSET_PATH" | awk '{print $1}')
           echo "sha256=${SHA256}" >> "$GITHUB_OUTPUT"
           echo "SHA256: ${SHA256}"
 
       - name: Update Homebrew formula
         id: update-formula
+        env:
+          VERSION: ${{ steps.resolve-tag.outputs.version }}
+          SHA256: ${{ steps.compute-sha256.outputs.sha256 }}
+          TAG: ${{ steps.resolve-tag.outputs.tag }}
         run: |
           set -euo pipefail
-          VERSION="${{ steps.resolve-tag.outputs.version }}"
-          SHA256="${{ steps.compute-sha256.outputs.sha256 }}"
-          TAG="${{ steps.resolve-tag.outputs.tag }}"
 
           # Read the template formula
           TEMPLATE_PATH="pkg/brew/dot.rb"
@@ -163,10 +181,17 @@ jobs:
 
       - name: Clone homebrew-tap repository
         id: clone-tap
+        env:
+          # gh authenticates the clone from GH_TOKEN; the token never lands
+          # in the remote URL, .git/config or the expanded script text.
+          GH_TOKEN: ${{ secrets.TAP_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
+          TAP_REPO: sebastienrousseau/homebrew-tap
         run: |
           set -euo pipefail
-          TAP_REPO="sebastienrousseau/homebrew-tap"
-          git clone "https://${{ secrets.TAP_PUSH_TOKEN || secrets.GITHUB_TOKEN }}@github.com/${TAP_REPO}.git" homebrew-tap
+          gh repo clone "${TAP_REPO}" homebrew-tap
+          # Later pushes ask gh for the token, which it reads from the
+          # GH_TOKEN of the step doing the push.
+          git -C homebrew-tap config --local credential.https://github.com.helper '!gh auth git-credential'
           # Detect the default branch (main) so the PR targets
           # the right base regardless of how the tap is initialised.
           cd homebrew-tap
@@ -178,11 +203,12 @@ jobs:
         id: prepare-bump
         env:
           ACTIONS_BOT_SIGNING_KEY: ${{ secrets.ACTIONS_BOT_SIGNING_KEY }}
+          GH_TOKEN: ${{ secrets.TAP_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.resolve-tag.outputs.version }}
+          FORMULA_PATH: ${{ steps.update-formula.outputs.formula_path }}
         run: |
           set -euo pipefail
-          VERSION="${{ steps.resolve-tag.outputs.version }}"
           BRANCH_NAME="bump/dot-${VERSION}"
-          FORMULA_PATH="${{ steps.update-formula.outputs.formula_path }}"
 
           cd homebrew-tap
 
@@ -224,11 +250,12 @@ jobs:
       - name: Open Pull Request to homebrew-tap
         env:
           GH_TOKEN: ${{ secrets.TAP_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.resolve-tag.outputs.version }}
+          BRANCH_NAME: ${{ steps.prepare-bump.outputs.branch_name }}
+          BASE_BRANCH: ${{ steps.clone-tap.outputs.default_branch }}
+          CHANGED: ${{ steps.prepare-bump.outputs.changed }}
         run: |
           set -euo pipefail
-          VERSION="${{ steps.resolve-tag.outputs.version }}"
-          BRANCH_NAME="${{ steps.prepare-bump.outputs.branch_name }}"
-          BASE_BRANCH="${{ steps.clone-tap.outputs.default_branch }}"
           cd homebrew-tap
 
           # A newer release makes all earlier dot bump PRs obsolete. Close
@@ -243,7 +270,7 @@ jobs:
                 '.[] | select((.headRefName | startswith("bump/dot-")) and .headRefName != $branch) | .number'
           )
 
-          if [[ "${{ steps.prepare-bump.outputs.changed }}" != "true" ]]; then
+          if [[ "$CHANGED" != "true" ]]; then
             echo "Homebrew formula is already current for dot ${VERSION}."
             exit 0
           fi

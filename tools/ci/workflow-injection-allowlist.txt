@@ -1,0 +1,4 @@
+# Step outputs tools/ci/check-workflow-injection.py lets through inside a
+# run: block, because the step itself computes them as a number.
+# <file> <step-id>.<output>   # where the number comes from
+.github/workflows/compliance-guard.yml verify.unsigned   # $((unsigned_count + 1)) arithmetic, or 0

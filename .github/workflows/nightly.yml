@@ -9,10 +9,10 @@ on:
     - cron: '0 2 * * 0'
   workflow_dispatch:
 
+# Read-only: no job opens issues or PRs (the dependency report is an
+# artifact), so the token gets no write scope.
 permissions:
   contents: read
-  issues: write  # For creating issues on dependency updates
-  pull-requests: write  # For creating dependency update PRs
 
 # Allow only one nightly run at a time
 concurrency:
@@ -37,6 +37,8 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Check Chezmoi updates
         id: chezmoi
@@ -62,6 +64,11 @@ jobs:
           fi
 
       - name: Check tool updates
+        env:
+          # latest_version is the upstream chezmoi release tag: data, not code.
+          CHEZMOI_UPDATE: ${{ steps.chezmoi.outputs.update_available }}
+          CHEZMOI_CURRENT: ${{ steps.chezmoi.outputs.current_version }}
+          CHEZMOI_LATEST: ${{ steps.chezmoi.outputs.latest_version }}
         run: |
           echo "Checking for tool updates..."
 
@@ -84,14 +91,14 @@ jobs:
           # Create issues for outdated dependencies
           if [[ "$SHELLCHECK_CURRENT" != "$SHELLCHECK_LATEST" ]] || \
              [[ "$SHFMT_CURRENT" != "$SHFMT_LATEST" ]] || \
-             [[ "${{ steps.chezmoi.outputs.update_available }}" == "true" ]]; then
+             [[ "$CHEZMOI_UPDATE" == "true" ]]; then
             echo "Creating dependency update issue..."
 
             # Note: This would create an issue in a real implementation
             # For demo purposes, just log the updates needed
             echo "📦 Dependency updates available:" > dependency_updates.md
             echo "" >> dependency_updates.md
-            echo "- Chezmoi: ${{ steps.chezmoi.outputs.current_version }} → ${{ steps.chezmoi.outputs.latest_version }}" >> dependency_updates.md
+            echo "- Chezmoi: ${CHEZMOI_CURRENT} → ${CHEZMOI_LATEST}" >> dependency_updates.md
             echo "- Shellcheck: $SHELLCHECK_CURRENT → $SHELLCHECK_LATEST" >> dependency_updates.md
             echo "- Shfmt: $SHFMT_CURRENT → $SHFMT_LATEST" >> dependency_updates.md
 
@@ -136,6 +143,8 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Chezmoi
         uses: ./.github/actions/setup-chezmoi
@@ -179,6 +188,8 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Test with latest shellcheck
         run: |
@@ -235,6 +246,7 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0  # Full history for comprehensive scan
 
       - name: Advanced secret scanning
@@ -301,6 +313,8 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install dependencies
         run: |
@@ -316,6 +330,8 @@ jobs:
           chezmoi apply --exclude=scripts
 
       - name: Extended performance benchmarking
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
           mkdir -p benchmark-history
 
@@ -343,7 +359,7 @@ jobs:
           {
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "commit": "${{ github.sha }}",
-            "branch": "${{ github.ref_name }}",
+            "branch": "${REF_NAME}",
             "performance": {
               "shell_startup_ms": $STARTUP_TIME,
               "chezmoi_apply_ms": $CHEZMOI_TIME,
