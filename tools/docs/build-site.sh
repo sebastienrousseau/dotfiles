@@ -72,13 +72,9 @@ bash "$REPO_ROOT/tools/docs/build-manual-site.sh" --out "$work/out/manual"
 # Heading ids, then one link check across the whole site: docs pages,
 # the landing page and the manual.
 python3 "$builder" finalize "$work/out" "/"
-cp "$REPO_ROOT/docs/CNAME" "$work/out/CNAME"
-# The module registry index is served from the site root, where
-# `dot registry` fetches it, with its minisign signature once one exists.
-cp "$REPO_ROOT/docs/registry.json" "$work/out/registry.json"
-if [[ -f "$REPO_ROOT/docs/registry.json.minisig" ]]; then
-  cp "$REPO_ROOT/docs/registry.json.minisig" "$work/out/registry.json.minisig"
-fi
+# The custom-domain CNAME, and the module registry index `dot registry`
+# fetches from the site root (with its minisign signature once one exists).
+cp "$REPO_ROOT"/docs/{CNAME,registry.json*} "$work/out/"
 
 rm -rf "$OUT"
 mkdir -p "$(dirname "$OUT")"
