@@ -61,25 +61,42 @@ list_backups() {
   fi
 }
 
-restore_from_git() {
+# Set GIT_SRC to the repository and GIT_COMMIT to the commit REF names, or
+# log why not and return 1. A ref starting with '-' would reach git as an
+# option (--output=FILE writes anywhere), so it is refused, and
+# --end-of-options keeps rev-parse from reading it as one either. Only the
+# resolved commit id is ever passed on to git.
+resolve_git_target() {
   local ref="$1"
-  local dry_run="${2:-false}"
-  local source_dir
-
   if [[ -d "$DOTFILES_DIR/.git" ]]; then
-    source_dir="$DOTFILES_DIR"
+    GIT_SRC="$DOTFILES_DIR"
   elif [[ -d "$CHEZMOI_SOURCE/.git" ]]; then
-    source_dir="$CHEZMOI_SOURCE"
+    GIT_SRC="$CHEZMOI_SOURCE"
   else
     log_error "No git repository found"
     return 1
   fi
+  if [[ -z "$ref" || "$ref" == -* ]]; then
+    log_error "Invalid git ref: '$ref'"
+    return 1
+  fi
+  GIT_COMMIT="$(git -C "$GIT_SRC" rev-parse --verify --quiet --end-of-options "${ref}^{commit}")" || {
+    log_error "Unknown git ref: $ref"
+    return 1
+  }
+}
+
+restore_from_git() {
+  local ref="$1"
+  local dry_run="${2:-false}"
+
+  resolve_git_target "$ref" || return 1
 
   log_info "Restoring from git ref: $ref"
 
   if $dry_run; then
     log_info "Dry run - showing changes:"
-    git -C "$source_dir" diff "$ref" --stat
+    git -C "$GIT_SRC" diff "$GIT_COMMIT" --stat --
     return 0
   fi
 
@@ -87,7 +104,7 @@ restore_from_git() {
   create_backup
 
   # Restore
-  git -C "$source_dir" checkout "$ref" -- .
+  git -C "$GIT_SRC" checkout "$GIT_COMMIT" -- .
   log_success "Restored from $ref"
 
   # Re-apply chezmoi
@@ -98,19 +115,8 @@ restore_from_git() {
 }
 
 show_diff() {
-  local ref="$1"
-  local source_dir
-
-  if [[ -d "$DOTFILES_DIR/.git" ]]; then
-    source_dir="$DOTFILES_DIR"
-  elif [[ -d "$CHEZMOI_SOURCE/.git" ]]; then
-    source_dir="$CHEZMOI_SOURCE"
-  else
-    log_error "No git repository found"
-    return 1
-  fi
-
-  git -C "$source_dir" diff "$ref"
+  resolve_git_target "$1" || return 1
+  git -C "$GIT_SRC" diff "$GIT_COMMIT" --
 }
 
 create_backup() {
@@ -196,42 +202,52 @@ portable_mtime() {
   fi
 }
 
-# Parse arguments
+# Parse every flag before acting, so `--git REF --dry-run` is a dry run.
 DRY_RUN=false
+ACTION=""
+REF=""
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    -l | --list)
-      list_backups
-      exit 0
-      ;;
-    --latest | -L)
-      restore_latest
-      exit 0
-      ;;
-    --git | -g)
-      restore_from_git "$2" "$DRY_RUN"
-      exit 0
-      ;;
-    --diff | -d)
-      show_diff "$2"
-      exit 0
-      ;;
-    --dry-run | -n)
-      DRY_RUN=true
-      shift
-      ;;
-    -h | --help)
-      usage
-      exit 0
-      ;;
-    *)
-      log_error "Unknown option: $1"
-      usage
-      exit 1
-      ;;
+need_ref() {
+  if [[ $# -lt 2 ]]; then
+    log_error "$1 needs a git ref"
+    usage
+    exit 1
+  fi
+}
+
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -l | --list) ACTION=list ;;
+      --latest | -L) ACTION=latest ;;
+      --git | -g | --diff | -d)
+        need_ref "$@"
+        ACTION="$1"
+        REF="$2"
+        shift
+        ;;
+      --dry-run | -n) DRY_RUN=true ;;
+      -h | --help) ACTION=help ;;
+      *)
+        log_error "Unknown option: $1"
+        usage
+        exit 1
+        ;;
+    esac
+    shift
+  done
+}
+
+# No action: show usage.
+run_action() {
+  case "$ACTION" in
+    list) list_backups ;;
+    latest) restore_latest ;;
+    --git | -g) restore_from_git "$REF" "$DRY_RUN" ;;
+    --diff | -d) show_diff "$REF" ;;
+    *) usage ;;
   esac
-done
+}
 
-# Default: show usage
-usage
+parse_args "$@"
+run_action

@@ -54,6 +54,8 @@ cat >"$BIN/git" <<EOF
 printf 'git %s\n' "\$*" >>"$CALLS"
 case "\$*" in
   *log*) printf 'abc1234 a commit\n' ;;
+  # Resolve "REF^{commit}" to REF so the calls below stay readable.
+  *rev-parse*) last="\${*: -1}"; printf '%s\n' "\${last%^\{commit\}}" ;;
   *"diff --stat"*) printf ' file.txt | 2 +-\n' ;;
   *diff*) printf 'diff --git a/file b/file\n' ;;
 esac

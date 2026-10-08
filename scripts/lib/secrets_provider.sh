@@ -67,11 +67,36 @@ dot_secrets_index_list() {
   awk 'NF > 0' "$DOT_SECRETS_INDEX_FILE" | sort -u
 }
 
+# security(1) -i reads one command per line and splits it like a shell:
+# wrap each word in double quotes and escape the two characters that are
+# special inside them.
+dot_secrets_keychain_quote() {
+  local s="${1//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  printf '"%s"' "$s"
+}
+
 dot_secrets_store_macos() {
-  local key="$1"
-  local value="$2"
+  local key="$1" value="$2" account="${USER:-dotfiles}"
   local service="${DOT_SECRETS_SERVICE_PREFIX}.${key}"
-  security add-generic-password -U -a "${USER:-dotfiles}" -s "$service" -w "$value" >/dev/null
+  case "$value" in
+    *$'\n'* | *$'\r'*)
+      echo "keychain values cannot contain a newline: $key" >&2
+      return 1
+      ;;
+  esac
+  # The value goes to security on stdin, never in argv where ps shows it.
+  # printf is a builtin, so no process carries the value on its command line.
+  printf 'add-generic-password -U -a %s -s %s -w %s\n' \
+    "$(dot_secrets_keychain_quote "$account")" \
+    "$(dot_secrets_keychain_quote "$service")" \
+    "$(dot_secrets_keychain_quote "$value")" | security -i >/dev/null || return 1
+  # security -i does not reliably report a failed command in its exit
+  # status, so confirm the item exists before indexing the key.
+  security find-generic-password -a "$account" -s "$service" >/dev/null 2>&1 || {
+    echo "failed to store secret in the keychain: $key" >&2
+    return 1
+  }
 }
 
 dot_secrets_get_macos() {
