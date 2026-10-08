@@ -23,6 +23,22 @@ complete. Switching one job at a time keeps blast radius small:
 a missing endpoint on a `block`-mode job fails the run loud and the
 list below gets updated.
 
+### Release and version-sync jobs in `block` mode
+
+These jobs hold signing keys or push tokens, so they block egress. Each
+list is the set harden-runner recorded in audit mode on the three most
+recent runs of the job (October 2026); the runner's own GitHub Actions
+service endpoints are allowed by harden-runner and not listed.
+
+| Workflow | Allowed endpoints |
+|---|---|
+| `release-distribute-scoop.yml`, `release-distribute-homebrew.yml` | `api.github.com:443`, `github.com:443`, `release-assets.githubusercontent.com:443` |
+| `release-distribute-aur.yml` | the three above, plus `aur.archlinux.org:22`, `auth.docker.io:443`, `registry-1.docker.io:443`, `production.cloudfront.docker.com:443` (archlinux image for `.SRCINFO`) |
+| `sync-versions.yml` (all three jobs) | `github.com:443`, `azure.archive.ubuntu.com:80`, `esm.ubuntu.com:443`, `motd.ubuntu.com:443`, `packages.microsoft.com:443` (apt via `tools/ci/install-tools.sh`) |
+
+If Docker Hub moves its layer CDN, the AUR job fails at the image pull:
+add the host the failed run's harden-runner summary names.
+
 ## Allowlist (by domain)
 
 This is the union of endpoints the entire workflow surface needs.

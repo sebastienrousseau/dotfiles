@@ -20,9 +20,10 @@ on:
       - 'fuzz/**'
       - '.github/workflows/install-fuzz.yml'
 
+# The fuzz matrix (which runs PR code) gets a read-only token; only the
+# scheduled failure reporter below may write issues.
 permissions:
   contents: read
-  issues: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -44,6 +45,8 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install coreutils (for gtimeout on macOS)
         if: runner.os == 'macOS'
@@ -52,17 +55,32 @@ jobs:
       - name: Run install.sh fuzz harness
         run: bash fuzz/install/fuzz_install.sh
 
-      - name: Open tracking issue on schedule failure
-        if: failure() && github.event_name == 'schedule'
+  report-failure:
+    name: Open tracking issue on schedule failure
+    needs: fuzz
+    if: failure() && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - name: Open or update the tracking issue
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
-          title="install.sh fuzz regression on ${{ runner.os }} ($(date -u +%Y-%m-%d))"
+          title="install.sh fuzz regression ($(date -u +%Y-%m-%d))"
           body=$(cat <<EOF
-          The weekly install.sh fuzz harness failed on **${{ runner.os }}**.
+          The weekly install.sh fuzz harness failed: ${RUN_URL}
 
-          Re-run the failing job + check the per-fixture output to identify which adversarial input regressed.
+          Open the failing matrix leg (ubuntu-latest or macos-latest) and check the per-fixture output to identify which adversarial input regressed.
 
           Tracked under #881.
           EOF

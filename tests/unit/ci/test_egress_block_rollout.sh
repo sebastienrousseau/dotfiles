@@ -33,7 +33,11 @@ BLOCKED_WORKFLOWS=(
   ".github/workflows/dco.yml"
   ".github/workflows/doc-drift.yml"
   ".github/workflows/pr-signature.yml"
+  ".github/workflows/release-distribute-aur.yml"
+  ".github/workflows/release-distribute-homebrew.yml"
+  ".github/workflows/release-distribute-scoop.yml"
   ".github/workflows/reusable-security-baseline.yml"
+  ".github/workflows/sync-versions.yml"
   ".github/workflows/verify-tag-signature.yml"
 )
 CHECKOUT_WORKFLOWS=(

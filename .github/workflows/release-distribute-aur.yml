@@ -25,24 +25,47 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Harden runner (audit mode)
+      # Endpoints observed by harden-runner in audit mode on the v0.2.529,
+      # v0.2.530 and v0.2.531 release runs: GitHub for the checkout and the
+      # release asset, Docker Hub for the archlinux image that renders
+      # .SRCINFO, and the AUR over SSH (the GitHub Actions service endpoints
+      # the runner itself uses are allowed by harden-runner).
+      - name: Harden runner (block mode)
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            release-assets.githubusercontent.com:443
+            aur.archlinux.org:22
+            auth.docker.io:443
+            registry-1.docker.io:443
+            production.cloudfront.docker.com:443
 
       - name: Checkout dotfiles
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # The package is pushed to the AUR over SSH from its own clone;
+          # this checkout never writes back.
+          persist-credentials: false
 
       - name: Resolve release tag
         id: resolve-tag
+        env:
+          # Release tag from the event or the workflow_dispatch input. It
+          # reaches the shell as data and must look like a release tag
+          # before it is written into the PKGBUILD or a commit message.
+          TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
         run: |
           set -euo pipefail
-          TAG="${{ github.event.release.tag_name || inputs.release_tag }}"
           if [[ -z "$TAG" ]]; then
             echo "::error::No release tag provided"
+            exit 1
+          fi
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "::error::Release tag '${TAG}' is not vMAJOR.MINOR.PATCH[-pre]"
             exit 1
           fi
           VERSION="${TAG#v}"
@@ -53,10 +76,10 @@ jobs:
         id: download-asset
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.resolve-tag.outputs.tag }}
+          VERSION: ${{ steps.resolve-tag.outputs.version }}
         run: |
           set -euo pipefail
-          TAG="${{ steps.resolve-tag.outputs.tag }}"
-          VERSION="${{ steps.resolve-tag.outputs.version }}"
           ASSET_NAME="dot-${VERSION}.tar.gz"
           echo "Downloading ${ASSET_NAME} from release ${TAG}..."
           mkdir -p assets
@@ -80,9 +103,10 @@ jobs:
 
       - name: Compute SHA256 of tarball
         id: compute-sha256
+        env:
+          ASSET_PATH: ${{ steps.download-asset.outputs.asset_path }}
         run: |
           set -euo pipefail
-          ASSET_PATH="${{ steps.download-asset.outputs.asset_path }}"
           SHA256=$(sha256sum "$ASSET_PATH" | awk '{print $1}')
           echo "sha256=${SHA256}" >> "$GITHUB_OUTPUT"
           echo "SHA256: ${SHA256}"
@@ -135,10 +159,11 @@ jobs:
           exit 1
 
       - name: Update PKGBUILD
+        env:
+          VERSION: ${{ steps.resolve-tag.outputs.version }}
+          SHA256: ${{ steps.compute-sha256.outputs.sha256 }}
         run: |
           set -euo pipefail
-          VERSION="${{ steps.resolve-tag.outputs.version }}"
-          SHA256="${{ steps.compute-sha256.outputs.sha256 }}"
           cp pkg/aur/PKGBUILD aur-pkg/PKGBUILD
           sed -i "s/^pkgver=.*/pkgver=${VERSION}/" aur-pkg/PKGBUILD
           sed -i "s/^sha256sums=(.*)$/sha256sums=('${SHA256}')/" aur-pkg/PKGBUILD
@@ -159,9 +184,10 @@ jobs:
           sudo chown -R "$(id -u):$(id -g)" aur-pkg
 
       - name: Commit and push to AUR
+        env:
+          VERSION: ${{ steps.resolve-tag.outputs.version }}
         run: |
           set -euo pipefail
-          VERSION="${{ steps.resolve-tag.outputs.version }}"
 
           cd aur-pkg
           git config user.name "Sebastien Rousseau"

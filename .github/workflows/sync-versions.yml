@@ -40,6 +40,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Egress: every harden-runner step below blocks all but the endpoints
+# harden-runner saw in audit mode on the last three runs of each job:
+# apt mirrors for tools/ci/install-tools.sh, and github.com for checkout
+# and the sync job's push (verify runs 37544071128, 37511455725,
+# 37506722432; sync runs 37001757289, 36983982516, 36705857691).
+
 jobs:
   verify:
     name: Verify Version Sync
@@ -47,12 +53,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Harden runner (audit mode)
+      - name: Harden runner (block mode)
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            azure.archive.ubuntu.com:80
+            esm.ubuntu.com:443
+            motd.ubuntu.com:443
+            packages.microsoft.com:443
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install dependencies
         run: |
@@ -67,12 +81,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Harden runner (audit mode)
+      - name: Harden runner (block mode)
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            azure.archive.ubuntu.com:80
+            esm.ubuntu.com:443
+            motd.ubuntu.com:443
+            packages.microsoft.com:443
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install dependencies
         run: |
@@ -89,10 +111,16 @@ jobs:
     permissions:
       contents: write   # commit + push version-bump diff
     steps:
-      - name: Harden runner (audit mode)
+      - name: Harden runner (block mode)
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            azure.archive.ubuntu.com:80
+            esm.ubuntu.com:443
+            motd.ubuntu.com:443
+            packages.microsoft.com:443
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -104,11 +132,20 @@ jobs:
 
       - name: Determine target version
         id: version
+        env:
+          # The dispatch input reaches the shell as data and must be a
+          # plain MAJOR.MINOR.PATCH before it names a commit or a file edit.
+          INPUT_VERSION: ${{ inputs.target_version }}
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ github.event.inputs.target_version }}" ]]; then
-            TARGET_VERSION="${{ github.event.inputs.target_version }}"
+          set -euo pipefail
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" && -n "$INPUT_VERSION" ]]; then
+            TARGET_VERSION="$INPUT_VERSION"
           else
             TARGET_VERSION="$(sed -nE 's/^[[:space:]]*dotfiles_version[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' defaults/.chezmoidata.toml)"
+          fi
+          if [[ ! "$TARGET_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Target version '${TARGET_VERSION}' is not MAJOR.MINOR.PATCH"
+            exit 1
           fi
           echo "target_version=$TARGET_VERSION" >> "$GITHUB_OUTPUT"
           echo "Target version: $TARGET_VERSION"
@@ -130,8 +167,9 @@ jobs:
           git config --local commit.gpgsign true
 
       - name: Sync versions
+        env:
+          TARGET_VERSION: ${{ steps.version.outputs.target_version }}
         run: |
-          TARGET_VERSION="${{ steps.version.outputs.target_version }}"
           if [[ -n "$TARGET_VERSION" ]]; then
             ./scripts/version-sync.sh "$TARGET_VERSION"
           else
@@ -139,13 +177,15 @@ jobs:
           fi
 
       - name: Commit changes
+        env:
+          TARGET_VERSION: ${{ steps.version.outputs.target_version }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           if git diff --quiet; then
             echo "No version changes to commit."
             exit 0
           fi
 
-          TARGET_VERSION="${{ steps.version.outputs.target_version }}"
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
@@ -155,4 +195,4 @@ jobs:
           # without it this bot's auto-commit fails DCO on the PR it pushes
           # to). -S keeps the existing SSH signature.
           git commit -S -s -m "chore: sync version references to v${TARGET_VERSION}"
-          git push origin "${{ github.ref_name }}"
+          git push origin "$REF_NAME"
