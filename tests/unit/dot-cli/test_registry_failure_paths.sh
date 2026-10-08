@@ -143,6 +143,9 @@ printf '{"version":2,"modules":[{"name":"x","version":"nope","description":"d","
 # abort the run. Relax errexit for the rest of the file.
 source "$REGISTRY_SCRIPT"
 set +e
+# The file:// fixture indexes are unsigned; signature checks are pinned by
+# test_registry_index_trust.sh.
+export DOTFILES_REGISTRY_UNSIGNED=1
 
 OUT="$WORK/out.txt"
 ERR="$WORK/err.txt"
@@ -201,7 +204,8 @@ assert_not_equals "0" "$rc" "an unreachable index with no cache fails"
 assert_file_contains "$ERR" "could not fetch" "the error names the fetch"
 
 test_start "stale_cache_is_used_when_the_fetch_fails"
-# Prime the cache from a good index, age it past the 6h TTL, then make THAT
+# Prime the cache from a good index, age it past the 6h TTL (but inside the
+# seven-day stale limit), then make THAT
 # URL unfetchable. Same URL throughout: the cache is keyed by URL, so the
 # fallback is "the registry you asked for is unreachable, here is the copy we
 # have of it" — never another registry's index.
@@ -211,7 +215,8 @@ clear_cache
 run list >/dev/null
 cache_file="$(_registry_cache_file)"
 assert_file_exists "$cache_file" "the index was cached"
-touch -t 202001010000 "$cache_file"
+stale_when=$(($(date +%s) - 86400))
+touch -t "$(date -r "$stale_when" +%Y%m%d%H%M.%S 2>/dev/null || date -d "@$stale_when" +%Y%m%d%H%M.%S)" "$cache_file"
 rm -f "$WORK/vanishing.json"
 rc="$(run list)"
 assert_equals "0" "$rc" "a stale cache still serves the listing"

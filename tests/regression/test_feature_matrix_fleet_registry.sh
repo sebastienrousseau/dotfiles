@@ -622,6 +622,11 @@ fm_registry_clear_cache() {
   rm -f "$XDG_CACHE_HOME"/dotfiles/registry/index-*.json
 }
 
+# The file:// fixture indexes are unsigned; a local index is only accepted
+# that way with this override. Signature checks are pinned by
+# tests/unit/dot-cli/test_registry_index_trust.sh.
+export DOTFILES_REGISTRY_UNSIGNED=1
+
 fm_registry_url() {
   local index
   index="$(fm_registry_fixture)"

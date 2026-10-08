@@ -164,6 +164,9 @@ fi
 _clear_cache() { rm -rf "$(_registry_cache_dir)"; }
 
 export DOTFILES_REGISTRY_URL="file://$FIXTURE"
+# Local fixture indexes are unsigned; signature checks have their own test
+# (test_registry_index_trust.sh).
+export DOTFILES_REGISTRY_UNSIGNED=1
 _clear_cache
 
 ex list_default
@@ -180,8 +183,10 @@ ex info_noarg info
 ex install_noarg install
 ex install_preview install starship-preset
 test_start "registry_install_preview_is_non_mutating"
+# The preview is a listing and a diff: it writes nothing and never runs
+# chezmoi (templates render even under --dry-run).
 if [[ ! -e "$XDG_DATA_HOME/dotfiles/modules/starship-preset" ]] &&
-  grep -q -- '--dry-run' "$DOTFILES_COV_TMPDIR/chezmoi.calls"; then
+  [[ ! -s "$DOTFILES_COV_TMPDIR/chezmoi.calls" ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
@@ -194,7 +199,7 @@ test_start "registry_install_apply_persists_verified_source"
 installed="$XDG_DATA_HOME/dotfiles/modules/starship-preset/1.2.0"
 if [[ -f "$installed/dot_profile" ]] &&
   [[ -f "$XDG_DATA_HOME/dotfiles/modules/starship-preset/installed.json" ]] &&
-  [[ "$(grep -c -- '--dry-run' "$DOTFILES_COV_TMPDIR/chezmoi.calls")" -eq 2 ]]; then
+  [[ "$(grep -c -- '--config /dev/null' "$DOTFILES_COV_TMPDIR/chezmoi.calls")" -eq 1 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else

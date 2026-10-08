@@ -34,4 +34,35 @@ if ! diff -u \
   exit 1
 fi
 
+# The published index must verify against the committed registry key, which
+# is what `dot registry` checks on every fetch. Until the maintainer has
+# generated the key and committed security/registry.pub together with
+# docs/registry.json.minisig, there is nothing to verify: say so and pass.
+# Once either exists, both are required and the signature must verify.
+# REGISTRY_PUBKEY / REGISTRY_SIGNATURE point the check at other files (tests).
+check_signature() {
+  local pubkey="$1" signature="$2" pub_rel sig_rel
+  pub_rel="${pubkey#"$repo_root"/}"
+  sig_rel="${signature#"$repo_root"/}"
+  if [[ ! -e "$pubkey" && ! -e "$signature" ]]; then
+    printf 'registry check: index not signed yet (no %s, no %s); signature check skipped\n' "$pub_rel" "$sig_rel"
+    return 0
+  fi
+  if [[ ! -s "$pubkey" || ! -s "$signature" ]]; then
+    printf 'registry check: %s and %s must be committed together\n' "$pub_rel" "$sig_rel" >&2
+    return 1
+  fi
+  command -v minisign >/dev/null 2>&1 || {
+    printf 'registry check: minisign is required to verify %s\n' "$sig_rel" >&2
+    return 127
+  }
+  minisign -V -q -m "$index" -x "$signature" -p "$pubkey" >/dev/null || {
+    printf 'registry check: docs/registry.json does not match its signature; re-sign it\n' >&2
+    return 1
+  }
+  printf 'registry check: signature verified against %s\n' "$pub_rel"
+}
+check_signature "${REGISTRY_PUBKEY:-$repo_root/security/registry.pub}" \
+  "${REGISTRY_SIGNATURE:-$index.minisig}" || exit $?
+
 printf 'registry check: valid v1 index (%s modules)\n' "$(jq '.modules | length' "$index")"

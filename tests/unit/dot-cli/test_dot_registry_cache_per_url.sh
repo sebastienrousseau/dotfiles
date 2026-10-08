@@ -94,15 +94,28 @@ printf '%s\n' "\$url" >>"$CURL_LOG"
 [[ -n "\$out" ]] && cp "\$FAKE_CURL_SOURCE" "\$out"
 exit 0
 SHIM
-chmod +x "$BIN/curl"
+# These are https URLs, so the index must verify: a minisign stub that
+# accepts any signature stands in (signature checking is pinned by
+# test_registry_index_trust.sh), and the shim above serves <url>.minisig too.
+cat >"$BIN/minisign" <<'SHIM'
+#!/usr/bin/env bash
+exit 0
+SHIM
+chmod +x "$BIN/curl" "$BIN/minisign"
+printf 'untrusted comment: stub\nRWSTUB\n' >"$WORK/registry.pub"
 : >"$CURL_LOG"
+
+# index_fetches — how many index downloads (not signature downloads) ran.
+index_fetches() {
+  grep -vc '\.minisig$' "$CURL_LOG" | tr -d ' '
+}
 
 # fetch <url> <fixture> — run _registry_fetch for a URL and print the module
 # name the returned index contains.
 fetch() {
   local url="$1" source_file="$2"
   DOTFILES_REGISTRY_URL="$url" FAKE_CURL_SOURCE="$source_file" \
-    PATH="$BIN:$PATH" \
+    DOTFILES_REGISTRY_PUBKEY="$WORK/registry.pub" PATH="$BIN:$PATH" \
     bash -c '
       source "$1"
       index="$(_registry_fetch)" || exit $?
@@ -116,22 +129,22 @@ URL_B="https://beta.example/registry.json"
 test_start "the_first_fetch_populates_the_cache"
 got="$(fetch "$URL_A" "$WORK/alpha.json")"
 assert_equals "alpha-module" "$got" "the first registry's index is served"
-assert_equals "1" "$(wc -l <"$CURL_LOG" | tr -d ' ')" "one fetch so far"
+assert_equals "1" "$(index_fetches)" "one fetch so far"
 
 test_start "a_second_fetch_of_the_same_url_is_served_from_the_cache"
 got="$(fetch "$URL_A" "$WORK/alpha.json")"
 assert_equals "alpha-module" "$got" "the cached index is reused"
-assert_equals "1" "$(wc -l <"$CURL_LOG" | tr -d ' ')" "no second fetch inside the TTL"
+assert_equals "1" "$(index_fetches)" "no second fetch inside the TTL"
 
 test_start "changing_the_registry_url_does_not_serve_the_previous_index"
 got="$(fetch "$URL_B" "$WORK/beta.json")"
 assert_equals "beta-module" "$got" "the new registry's index is served, not the cached one"
-assert_equals "2" "$(wc -l <"$CURL_LOG" | tr -d ' ')" "the new URL is actually fetched"
+assert_equals "2" "$(index_fetches)" "the new URL is actually fetched"
 
 test_start "switching_back_reuses_the_first_registrys_cache"
 got="$(fetch "$URL_A" "$WORK/beta.json")"
 assert_equals "alpha-module" "$got" "each URL keeps its own cached index"
-assert_equals "2" "$(wc -l <"$CURL_LOG" | tr -d ' ')" "no refetch when switching back inside the TTL"
+assert_equals "2" "$(index_fetches)" "no refetch when switching back inside the TTL"
 
 test_start "each_url_has_its_own_cache_file"
 paths="$(DOTFILES_REGISTRY_URL="" PATH="$BIN:$PATH" bash -c '
