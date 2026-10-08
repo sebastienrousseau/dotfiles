@@ -72,6 +72,7 @@ class Token(unittest.TestCase):
         def racing_open(p, flags, *a):
             if str(p) == str(path) and flags & os.O_EXCL:
                 path.write_text("winner-token\n", encoding="utf-8")
+                path.chmod(0o600)  # as the winning starter creates it
                 raise FileExistsError(p)
             return real_open(p, flags, *a)
 
@@ -228,6 +229,178 @@ class Http(unittest.TestCase):
     def test_no_key_configured_fails_closed(self):
         self.srv.API_KEY = ""
         self.assertEqual(401, self.req("POST", "/v1/messages", body="{}", key="")[0])
+
+
+class TokenHardening(unittest.TestCase):
+    """A token file that is not ours or not private is replaced, and the
+    state directory is made private even when it already existed."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.srv = load()
+
+    def test_group_readable_token_is_replaced(self):
+        path = self.tmp / "gateway.token"
+        path.write_text("leaked-token\n", encoding="utf-8")
+        path.chmod(0o640)
+        tok = self.srv.load_or_create_token(str(path))
+        self.assertNotEqual("leaked-token", tok)
+        self.assertEqual(43, len(tok))
+        self.assertEqual(0o600, path.stat().st_mode & 0o777)
+        self.assertEqual(tok, path.read_text(encoding="utf-8").strip())
+
+    def test_foreign_owned_token_is_replaced(self):
+        path = self.tmp / "gateway.token"
+        path.write_text("planted-token\n", encoding="utf-8")
+        path.chmod(0o600)
+        real_getuid = os.getuid
+        with mock.patch.object(self.srv.os, "getuid", return_value=real_getuid() + 1):
+            tok = self.srv.load_or_create_token(str(path))
+        self.assertNotEqual("planted-token", tok)
+
+    def test_private_token_is_kept(self):
+        path = self.tmp / "gateway.token"
+        path.write_text("mine\n", encoding="utf-8")
+        path.chmod(0o600)
+        self.assertEqual("mine", self.srv.load_or_create_token(str(path)))
+
+    def test_existing_state_dir_is_made_private(self):
+        state = self.tmp / "state"
+        state.mkdir(mode=0o755)
+        state.chmod(0o755)
+        self.srv.load_or_create_token(str(state / "gateway.token"))
+        self.assertEqual(0o700, state.stat().st_mode & 0o777)
+
+
+class EngineHardening(unittest.TestCase):
+    """The headless claude gets no MCP servers and no gateway key, and its
+    stderr cannot stall it."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+
+    def test_argv_disables_mcp_and_env_drops_the_gateway_key(self):
+        argv, envf = self.tmp / "argv", self.tmp / "env"
+        body = (
+            f"printf '%s\\n' \"$@\" >'{argv}'; env >'{envf}'; cat >/dev/null; "
+            "echo '{\"type\":\"result\",\"is_error\":false,\"result\":\"ok\",\"usage\":{}}'"
+        )
+        env = {"DOT_AI_CLAUDE_BIN": mock_engine(self.tmp, body), "DOT_AI_API_KEY": "secret-gw-key"}
+        srv = load(env)
+        with mock.patch.dict(os.environ, env):
+            events = list(srv.stream_claude("sonnet", "", "hi"))
+        self.assertEqual(("done", {}, None), events[-1])
+        args = argv.read_text(encoding="utf-8").splitlines()
+        self.assertIn("--strict-mcp-config", args)
+        self.assertEqual('{"mcpServers":{}}', args[args.index("--mcp-config") + 1])
+        self.assertNotIn("secret-gw-key", envf.read_text(encoding="utf-8"))
+
+    def test_large_stderr_does_not_stall_the_engine(self):
+        # 256 KiB of stderr before any stdout: an undrained stderr pipe
+        # (64 KiB buffer) blocks the child until the timeout kills it.
+        body = (
+            "cat >/dev/null; head -c 262144 /dev/zero | tr '\\0' x >&2; "
+            "echo '{\"type\":\"result\",\"is_error\":false,\"result\":\"ok\",\"usage\":{}}'"
+        )
+        env = {"DOT_AI_CLAUDE_BIN": mock_engine(self.tmp, body), "DOT_AI_TIMEOUT": "5"}
+        srv = load(env)
+        with mock.patch.dict(os.environ, env):
+            text, _, err = srv.run_claude("sonnet", "", "hi")
+        self.assertIsNone(err)
+        self.assertEqual("ok", text)
+
+    def test_stderr_tail_is_still_reported(self):
+        body = "cat >/dev/null; head -c 100000 /dev/zero | tr '\\0' x >&2; echo >&2; echo 'last line' >&2"
+        env = {"DOT_AI_CLAUDE_BIN": mock_engine(self.tmp, body), "DOT_AI_TIMEOUT": "5"}
+        srv = load(env)
+        with mock.patch.dict(os.environ, env):
+            events = list(srv.stream_claude("sonnet", "", "hi"))
+        self.assertEqual(("done", {}, "last line"), events[-1])
+
+
+class HttpHardening(unittest.TestCase):
+    """Request bounds: body size, Content-Length sanity, header timeout and
+    the number of concurrent claude processes."""
+
+    def start(self, engine_body, env=None):
+        self.tmp = Path(tempfile.mkdtemp())
+        engine = mock_engine(self.tmp, engine_body)
+        self.srv = load({"DOT_AI_CLAUDE_BIN": engine, **(env or {})})
+        self.srv.API_KEY = "k"
+        self.httpd = self.srv.ThreadingHTTPServer(("127.0.0.1", 0), self.srv.Handler)
+        self.srv.PORT = self.httpd.server_address[1]
+        threading.Thread(target=self.httpd.serve_forever, daemon=True).start()
+
+    def tearDown(self):
+        self.httpd.shutdown()
+        self.httpd.server_close()
+
+    def raw(self, head: bytes, timeout=10) -> bytes:
+        import socket
+
+        with socket.create_connection(("127.0.0.1", self.srv.PORT), timeout=timeout) as sock:
+            sock.sendall(head)
+            return sock.recv(4096)
+
+    def post_head(self, length: str) -> bytes:
+        return (
+            f"POST /v1/messages HTTP/1.1\r\nHost: 127.0.0.1:{self.srv.PORT}\r\n"
+            f"x-api-key: k\r\nContent-Type: application/json\r\nContent-Length: {length}\r\n\r\n"
+        ).encode()
+
+    def test_negative_content_length_is_rejected(self):
+        self.start("cat >/dev/null")
+        self.assertTrue(self.raw(self.post_head("-1")).startswith(b"HTTP/1.1 400"))
+
+    def test_non_numeric_content_length_is_rejected(self):
+        self.start("cat >/dev/null")
+        self.assertTrue(self.raw(self.post_head("abc")).startswith(b"HTTP/1.1 400"))
+
+    def test_oversized_body_is_rejected_before_reading(self):
+        self.start("cat >/dev/null")
+        self.assertTrue(self.raw(self.post_head(str(11 * 1024 * 1024))).startswith(b"HTTP/1.1 413"))
+
+    def test_body_limit_is_10_mib(self):
+        self.start("cat >/dev/null")
+        self.assertEqual(10 * 1024 * 1024, self.srv.MAX_BODY)
+
+    def test_slow_headers_are_cut_off(self):
+        self.start("cat >/dev/null", {"DOT_AI_REQUEST_TIMEOUT": "1"})
+        start = time.monotonic()
+        # Half a request line, then silence: the server closes the socket.
+        self.assertEqual(b"", self.raw(b"POST /v1/mess", timeout=10))
+        self.assertLess(time.monotonic() - start, 8)
+
+    def test_default_request_timeout_is_30s(self):
+        self.start("cat >/dev/null")
+        self.assertEqual(30, self.srv.Handler.timeout)
+
+    def test_concurrent_engines_are_bounded(self):
+        live, peak = self.tmp_paths = (Path(tempfile.mkdtemp()), Path(tempfile.mkdtemp()) / "peak")
+        body = (
+            f"cat >/dev/null; touch '{live}'/$$; n=$(ls '{live}' | wc -l); "
+            f"echo $n >>'{peak}'; sleep 0.4; rm -f '{live}'/$$; "
+            "echo '{\"type\":\"result\",\"is_error\":false,\"result\":\"ok\",\"usage\":{}}'"
+        )
+        self.start(body)
+        self.srv.SPAWN = threading.BoundedSemaphore(2)
+        codes = []
+
+        def one():
+            conn = http.client.HTTPConnection("127.0.0.1", self.srv.PORT, timeout=20)
+            conn.request(
+                "POST", "/v1/messages", body='{"messages":[{"role":"user","content":"hi"}]}',
+                headers={"Host": f"127.0.0.1:{self.srv.PORT}", "x-api-key": "k"},
+            )
+            codes.append(conn.getresponse().status)
+
+        threads = [threading.Thread(target=one) for _ in range(6)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        self.assertEqual([200] * 6, codes)
+        self.assertLessEqual(max(int(x) for x in peak.read_text().split()), 2)
 
 
 class Main(unittest.TestCase):

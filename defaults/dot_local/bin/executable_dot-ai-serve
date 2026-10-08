@@ -50,25 +50,36 @@ TOKEN_FILE = os.path.join(STATE_DIR, "gateway.token")
 EXTRA_HOSTS = [h.strip() for h in os.environ.get("DOT_AI_ALLOWED_HOSTS", "").split(",") if h.strip()]
 
 
-def load_or_create_token(path=TOKEN_FILE):
-    """Return the gateway token, creating a random 0600 token file once."""
+def _private_token(path):
+    """The token in `path`, or None when the file is missing, empty, not
+    owned by us, or readable by group/other (its token may have leaked)."""
     try:
         with open(path, encoding="utf-8") as fh:
-            token = fh.read().strip()
-        if token:
-            return token
+            st = os.fstat(fh.fileno())
+            if st.st_uid != os.getuid() or st.st_mode & 0o077:
+                return None
+            return fh.read().strip() or None
     except FileNotFoundError:
-        pass
-    os.makedirs(os.path.dirname(path), mode=0o700, exist_ok=True)
+        return None
+
+
+def load_or_create_token(path=TOKEN_FILE):
+    """Return the gateway token, creating a random 0600 token file once. A
+    token file that is not private to us is replaced with a fresh token."""
+    directory = os.path.dirname(path)
+    os.makedirs(directory, mode=0o700, exist_ok=True)
+    os.chmod(directory, 0o700)  # makedirs leaves an existing directory's mode alone
+    token = _private_token(path)
+    if token:
+        return token
     token = secrets.token_urlsafe(32)
     try:
         fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     except FileExistsError:
         # Either another starter won the race (use its token) or the file
-        # exists but is empty (replace it atomically). Re-reading once is
-        # enough: an empty file would otherwise loop here forever.
-        with open(path, encoding="utf-8") as fh:
-            existing = fh.read().strip()
+        # exists but is empty or not private (replace it atomically).
+        # Re-reading once is enough: such a file would otherwise loop here.
+        existing = _private_token(path)
         if existing:
             return existing
         tmp = f"{path}.{os.getpid()}.tmp"
@@ -83,6 +94,18 @@ def load_or_create_token(path=TOKEN_FILE):
 
 
 API_KEY = os.environ.get("DOT_AI_API_KEY", "")  # resolved in main(); never empty while serving
+
+# Request bounds: the largest body read, how long a socket may sit idle
+# (slow headers or body), and how many claude processes run at once.
+MAX_BODY = 10 * 1024 * 1024
+try:
+    REQUEST_TIMEOUT = float(os.environ.get("DOT_AI_REQUEST_TIMEOUT", "30"))
+except ValueError:
+    REQUEST_TIMEOUT = 30.0
+SPAWN = threading.BoundedSemaphore(4)
+# The headless engine runs with no MCP servers at all, whatever the user's
+# or project's config declares.
+EMPTY_MCP_CONFIG = '{"mcpServers":{}}'
 
 # Advertised models (also accepts any id/alias the claude CLI understands).
 MODELS = [
@@ -310,11 +333,39 @@ def stream_claude(run_model, system_prompt, prompt):
         # A text bridge: no Read/Bash/etc., so a request cannot reach files.
         "--tools",
         "",
+        # No MCP servers either: user, project and plugin configs are ignored.
+        "--strict-mcp-config",
+        "--mcp-config",
+        EMPTY_MCP_CONFIG,
     ]
     stdin_text = prompt
     if system_prompt:
         stdin_text = system_prompt + "\n\n" + prompt
+    # At most SPAWN engines at once; the slot is released when the
+    # generator finishes or is closed (a client that disconnects).
+    with SPAWN:
+        yield from _engine_events(cmd, stdin_text)
 
+
+def _stderr_tail(fh, limit=4096):
+    """The last line of what the engine wrote to stderr (a temp file)."""
+    fh.seek(0, os.SEEK_END)
+    fh.seek(max(0, fh.tell() - limit))
+    lines = fh.read().decode("utf-8", "replace").strip().splitlines()
+    return lines[-1] if lines else ""
+
+
+def _engine_events(cmd, stdin_text):
+    """Run one headless claude and yield its events (see stream_claude).
+    stderr goes to a temp file: an undrained pipe fills at 64 KiB and
+    stalls the engine."""
+    with tempfile.TemporaryFile() as errfile:
+        yield from _run_engine(cmd, stdin_text, errfile)
+
+
+def _run_engine(cmd, stdin_text, errfile):
+    # The engine never sees the gateway's own key.
+    env = {k: v for k, v in os.environ.items() if k != "DOT_AI_API_KEY"}
     # Run in an empty private directory, never the server's cwd.
     workdir = tempfile.mkdtemp(prefix="dot-ai-serve-")
     try:
@@ -322,14 +373,15 @@ def stream_claude(run_model, system_prompt, prompt):
             cmd,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=errfile,
             text=True,
             bufsize=1,
             cwd=workdir,
+            env=env,
         )
     except FileNotFoundError:
         shutil.rmtree(workdir, ignore_errors=True)
-        yield ("done", {}, f"claude CLI not found ({CLAUDE_BIN})")
+        yield ("done", {}, f"claude CLI not found ({cmd[0]})")
         return
 
     expired = threading.Event()
@@ -378,14 +430,16 @@ def stream_claude(run_model, system_prompt, prompt):
     finally:
         timed_out = expired.is_set()
         timer.cancel()
+        if proc.poll() is None:  # the consumer went away mid-stream
+            proc.kill()
+            proc.wait()
         shutil.rmtree(workdir, ignore_errors=True)
 
     if err is None and (not prev):
         if timed_out:
             err = "claude CLI timed out"
         else:
-            tail = (proc.stderr.read() if proc.stderr else "").strip().splitlines()
-            err = tail[-1] if tail else "no output from claude"
+            err = _stderr_tail(errfile) or "no output from claude"
     return_usage = usage
     yield ("done", return_usage, err)
 
@@ -584,6 +638,9 @@ def metrics_text():
 # ---------------------------------------------------------------------------
 class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
+    # Socket timeout per read/write: a client that trickles its headers or
+    # body (or never sends them) is dropped instead of holding a thread.
+    timeout = REQUEST_TIMEOUT
 
     def log_message(self, fmt, *args):  # quieter default logging
         log(fmt % args)
@@ -643,6 +700,9 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.flush()
 
     def _error(self, code, message):
+        # An error may leave a request body unread; never parse it as the
+        # next request on this connection.
+        self.close_connection = True
         self._send_json(code, {"type": "error", "error": {"type": "proxy_error", "message": message}})
 
     def do_GET(self):
@@ -701,7 +761,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._error(
                 429, f"daily budget of ${DAILY_BUDGET:.2f} reached — set DOT_AI_DAILY_BUDGET to adjust"
             )
-        length = int(self.headers.get("Content-Length", "0") or "0")
+        try:
+            length = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            length = -1
+        if length < 0:
+            return self._error(400, "invalid Content-Length")
+        if length > MAX_BODY:
+            return self._error(413, "request too large")
         try:
             body = json.loads(self.rfile.read(length) or b"{}")
         except json.JSONDecodeError:
