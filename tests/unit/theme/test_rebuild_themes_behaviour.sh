@@ -196,6 +196,75 @@ printf img >"$W/home/Pictures/Wallpapers/Ubuntu Default.png"
 rt --list
 assert_contains "custom" "$(printf '%s\n' "$OUT" | grep '^ubuntu-default-dark ')" "the custom file wins"
 
+# ── File names that would break out of TOML or shell ───────────────────────
+test_start "rebuild_skips_wallpapers_with_dangerous_names"
+setup 'x$(y).png' 'tick`t`.png' 'q"uote.png' "$(printf 'ctl\tx.png')" plain.png
+rt
+assert_equals "0" "$RC" "the rebuild still succeeds"
+assert_contains 'skipping x$(y).png' "$OUT" "the \$ name is named as skipped"
+assert_contains 'skipping tick`t`.png' "$OUT" "the backtick name is named as skipped"
+assert_contains 'skipping q"uote.png' "$OUT" "the quote name is named as skipped"
+assert_contains "$(printf 'skipping ctl\tx.png')" "$OUT" "the control-character name is named as skipped"
+assert_contains 'unsafe character' "$OUT" "the reason is given"
+assert_equals "yes:no:no:no:no" "$(has "$(themes)" '[themes.plain-dark]'):$(has "$(themes)" 'xy-'):$(has "$(themes)" 'tickt-'):$(has "$(themes)" 'quote-'):$(has "$(themes)" 'ctlx-')" \
+  "only the safe wallpaper is themed"
+
+test_start "rebuild_skips_dangerous_linux_system_names"
+setup
+sys_os Linux
+mkdir -p "$W/sys/usr/share/backgrounds"
+for f in 'sys$(y).png' 'fine.png'; do printf i >"$W/sys/usr/share/backgrounds/$f"; done
+rt --list
+assert_equals "fine-dark fine-light " "$(printf '%s\n' "$OUT" | awk '$2 == "system" {print $1}' | tr '\n' ' ')" "the \$ name is not listed"
+assert_contains 'skipping sys$(y).png' "$OUT" "and is named as skipped"
+
+test_start "extractor_writes_valid_toml_for_any_value"
+# Called directly (not through rebuild), a quote in the path must stay data.
+got="$(
+  python3 - "$REPO_ROOT/scripts/theme" <<'PY'
+import importlib.util, sys, tomllib
+spec = importlib.util.spec_from_file_location("et", sys.argv[1] + "/extract-theme.py")
+et = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(et)
+clusters = [((22.0, 18.0, 20.0), 500), ((55.0, 45.0, 50.0), 300), ((60.0, -20.0, -40.0), 200), ((70.0, -40.0, 30.0), 100)]
+theme = et.generate_theme(clusters, "q-dark", True)
+wp = '/w/a"b\\c\n$(id).png'
+theme["wallpaper"] = wp
+theme["source"] = 'cu"stom'
+theme["app"]["nvim"] = 'x")vim.fn.system("id'
+doc = tomllib.loads(et.theme_to_toml(theme))["themes"]["q-dark"]
+print(doc["wallpaper"] == wp, doc["source"] == 'cu"stom', doc["app"]["nvim"] == theme["app"]["nvim"],
+      doc["mode"], doc["family"], doc["term"]["bg"] == theme["term"]["bg"], doc["ui"]["accent"] == theme["ui"]["accent"],
+      sorted(doc) == sorted(["mode", "family", "macos_accent", "wallpaper", "source", "term", "ui", "app"]))
+for bad in ("Bad", "a.b", "a]x", "-a", "", "a b"):
+    theme["name"] = bad
+    try:
+        et.theme_to_toml(theme)
+        print("accepted", repr(bad))
+    except ValueError:
+        pass
+PY
+)"
+assert_equals "True True True dark q True True True" "$got" "values round-trip through tomllib; bad names are refused"
+
+test_start "extractor_cli_refuses_a_bad_theme_name"
+out="$(
+  python3 - "$REPO_ROOT/scripts/theme" <<'PY' 2>&1
+import importlib.util, sys
+spec = importlib.util.spec_from_file_location("et", sys.argv[1] + "/extract-theme.py")
+et = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(et)
+et.extract_pixels = lambda path: [(10, 20, 30)] * 50 + [(200, 100, 50)] * 50
+sys.argv = ["extract-theme.py", "img.png", "--name", "evil]\n[x"]
+try:
+    et.main()
+except SystemExit as e:
+    print("exit", e.code)
+PY
+)"
+assert_contains "exit 1" "$out" "exits 1"
+assert_contains "invalid theme name" "$out" "and says why"
+
 # ── Dependencies, the cache, and the job limit ─────────────────────────────
 test_start "rebuild_without_the_extractor_is_an_error"
 setup ok.png

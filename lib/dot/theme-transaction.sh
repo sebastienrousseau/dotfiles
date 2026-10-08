@@ -105,6 +105,47 @@ _theme_txn_lock_owner_pid() {
   sed -n 's/^pid=//p' "$owner_file" | head -1
 }
 
+_theme_txn_owner_dead() {
+  [[ -n "$1" ]] && ! kill -0 "$1" 2>/dev/null
+}
+
+# _theme_txn_reclaim_stale <lock dir> <dead pid>: clear a lock whose owner
+# died. Several waiters can see the same dead owner, so one at a time: only
+# the waiter whose mkdir of the .reclaim token succeeds goes on, and only
+# while the dead PID still owns the lock (another waiter may have reclaimed
+# it, and a new owner taken it, since this one read the PID). Nothing else
+# removes a non-empty lock, so the checked lock is the one that is moved.
+_theme_txn_reclaim_stale() {
+  local lock_dir="$1" stale="$1.stale.$$"
+  mkdir "$lock_dir/.reclaim" 2>/dev/null || return 1
+  if [[ "$(_theme_txn_lock_owner_pid "$lock_dir")" != "$2" ]]; then
+    rmdir "$lock_dir/.reclaim"
+    return 1
+  fi
+  mv "$lock_dir" "$stale" && rm -rf "$stale"
+}
+
+# _theme_txn_reclaim_expired <lock dir> <owner pid>: once the wait is over,
+# clear what no live process holds. A process can die in the tiny window
+# between mkdir and writing owner: reclaim only an ownerless, empty
+# directory (rmdir fails safely if a live contender has populated it in the
+# meantime). A waiter killed mid-reclaim leaves its token behind under a
+# dead owner: remove the token so the next pass can reclaim.
+_theme_txn_reclaim_expired() {
+  if [[ -z "$2" ]]; then
+    rmdir "$1" 2>/dev/null
+  else
+    _theme_txn_owner_dead "$2" && rmdir "$1/.reclaim" 2>/dev/null
+  fi
+}
+
+# _theme_txn_mkdir_private <mkdir args...>: mkdir under umask 077, in a
+# subshell. A bare `umask 077` made every file the rest of dot-theme-sync
+# wrote 0600.
+_theme_txn_mkdir_private() {
+  (umask 077 && mkdir "$@")
+}
+
 _theme_txn_acquire_lock() {
   local timeout="${1:-${DOT_THEME_LOCK_TIMEOUT:-10}}"
   local lock_root lock_dir started now owner_pid
@@ -116,24 +157,18 @@ _theme_txn_acquire_lock() {
   esac
 
   lock_root="$(_theme_txn_lock_root)"
-  umask 077
-  mkdir -p "$lock_root"
+  _theme_txn_mkdir_private -p "$lock_root"
   lock_dir="$lock_root/dot-theme-${UID:-$(id -u)}.lock.d"
   started="$(date +%s)"
 
-  while ! mkdir "$lock_dir" 2>/dev/null; do
+  while ! _theme_txn_mkdir_private "$lock_dir" 2>/dev/null; do
     owner_pid="$(_theme_txn_lock_owner_pid "$lock_dir")"
-    if [[ -n "$owner_pid" ]] && ! kill -0 "$owner_pid" 2>/dev/null; then
-      rm -f "$lock_dir/owner"
-      rmdir "$lock_dir" 2>/dev/null || true
+    if _theme_txn_owner_dead "$owner_pid" && _theme_txn_reclaim_stale "$lock_dir" "$owner_pid"; then
       continue
     fi
     now="$(date +%s)"
     if ((now - started >= timeout)); then
-      # A process can die in the tiny window between mkdir and writing owner.
-      # Reclaim only an ownerless, empty directory; rmdir fails safely if a
-      # live contender has populated it in the meantime.
-      if [[ -z "$owner_pid" ]] && rmdir "$lock_dir" 2>/dev/null; then
+      if _theme_txn_reclaim_expired "$lock_dir" "$owner_pid"; then
         continue
       fi
       printf 'dot-theme-sync: theme operation is locked' >&2
@@ -145,11 +180,14 @@ _theme_txn_acquire_lock() {
   done
 
   THEME_TXN_LOCK_DIR="$lock_dir"
-  {
-    printf 'pid=%s\n' "$$"
-    printf 'operation_id=%s\n' "$THEME_TXN_OPERATION_ID"
-    printf 'started_at=%s\n' "$THEME_TXN_STARTED_AT"
-  } >"$lock_dir/owner"
+  (
+    umask 077
+    {
+      printf 'pid=%s\n' "$$"
+      printf 'operation_id=%s\n' "$THEME_TXN_OPERATION_ID"
+      printf 'started_at=%s\n' "$THEME_TXN_STARTED_AT"
+    } >"$lock_dir/owner"
+  )
 }
 
 _theme_txn_release_lock() {
@@ -278,18 +316,18 @@ _theme_txn_begin() {
 
   local root
   root="$(_theme_txn_state_root)"
-  umask 077
-  if ! mkdir -p "$root"; then
+  # Private dirs: everything the transaction writes lives inside them.
+  if ! _theme_txn_mkdir_private -p "$root"; then
     _theme_txn_release_lock
     return 1
   fi
   THEME_TXN_OPERATION_DIR="$root/$THEME_TXN_OPERATION_ID"
-  if ! mkdir "$THEME_TXN_OPERATION_DIR" 2>/dev/null; then
+  if ! _theme_txn_mkdir_private "$THEME_TXN_OPERATION_DIR" 2>/dev/null; then
     printf 'dot-theme-sync: operation directory already exists: %s\n' "$THEME_TXN_OPERATION_DIR" >&2
     _theme_txn_release_lock
     return 1
   fi
-  if ! mkdir "$THEME_TXN_OPERATION_DIR/snapshots"; then
+  if ! _theme_txn_mkdir_private "$THEME_TXN_OPERATION_DIR/snapshots"; then
     rmdir "$THEME_TXN_OPERATION_DIR" 2>/dev/null || true
     _theme_txn_release_lock
     return 1

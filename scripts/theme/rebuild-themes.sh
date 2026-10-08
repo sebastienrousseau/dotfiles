@@ -85,6 +85,14 @@ _rt_register_new() {
   fi
 }
 
+# _rt_unsafe <file>: true, with a note naming the file, when its path holds
+# a control character, ", $ or a backtick. Such a name would end a TOML
+# string or reach a shell or AppleScript as code further down the line.
+_rt_unsafe() {
+  [[ "$1" == *[[:cntrl:]\"\$\`]* ]] || return 1
+  printf 'Warning: skipping %s: unsafe character in the file name\n' "${1##*/}" >&2
+}
+
 _rt_forget() {
   unset "WALLPAPERS[$1]"
   unset "WP_SOURCE[$1]"
@@ -148,6 +156,7 @@ discover_macos_system() {
 # -dark/-light).
 _rt_linux_file() {
   local file="$1" name base variant
+  ! _rt_unsafe "$file" || return 0
   base="$(basename "$file")"
   name="$(_rt_normalize_name "${base%.*}")"
   [[ -n "$name" ]] || return 0
@@ -194,6 +203,7 @@ _rt_custom_dynamic() {
 _rt_custom_file() {
   local file="$1" base name
   [[ -f "$file" ]] || return 0
+  ! _rt_unsafe "$file" || return 0
   base="$(basename "$file")"
   name="$(_rt_normalize_name "${base%.*}")"
   [[ -n "$name" ]] || return 0

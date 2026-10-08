@@ -735,6 +735,46 @@ EOF
 done
 rm -f "$nvim_sock2"
 
+# A Neovim 0.9 socket path (/tmp/nvimXXXXXX/0) can be created by any user,
+# and a planted server can answer with an rpcnotify the client runs. Only
+# this user's 0.10+ sockets are addressed.
+legacy_dir="$(mktemp -d /tmp/nvimXXXXXX)"
+python3 - "$legacy_dir/0" <<'PY'
+import socket, sys
+socket.socket(socket.AF_UNIX).bind(sys.argv[1])
+PY
+test_start "nvim_ignores_a_legacy_tmp_socket"
+reset_calls
+run_fn Linux <<'EOF'
+nvim() { printf '%s\n' "$*" >>"$CALLS/nvim"; }
+reload_nvim fixture-dark
+EOF
+assert_equals 0 "$(calls nvim | grep -c -- "--server $legacy_dir/0" || true)" "the /tmp/nvimXXXXXX/0 socket is not addressed"
+assert_equals 1 "$(calls nvim | grep -c -- "--server $nvim_sock --remote-expr" || true)" "our runtime-dir server still is"
+rm -rf "$legacy_dir"
+
+# A theme's app.nvim value is spliced into Lua; one that is not a plain
+# name must skip the reload rather than run as code inside every Neovim.
+for bad in "x')vim.fn.system('id" "tokyonight-night|night')os.exit('"; do
+  test_start "nvim_refuses_a_value_that_breaks_out_of_lua (${bad%%|*})"
+  reset_calls
+  BAD_SCHEME="${bad%%|*}"
+  BAD_STYLE=""
+  [[ "$bad" == *"|"* ]] && BAD_STYLE="${bad#*|}"
+  EXTRA_ENV=(BAD_SCHEME="$BAD_SCHEME" BAD_STYLE="$BAD_STYLE")
+  run_fn Linux <<'EOF'
+nvim() { printf '%s\n' "$*" >>"$CALLS/nvim"; }
+_theme_nvim_scheme() { printf '%s\n' "$BAD_SCHEME"; }
+theme_app_value() { [[ "$2" == nvim_style ]] && printf '%s\n' "$BAD_STYLE"; }
+reload_nvim fixture-dark
+printf 'SKIPPED=%s\n' "${SKIPPED[*]:-}"
+EOF
+  EXTRA_ENV=()
+  assert_equals "" "$(calls nvim)" "no Neovim is contacted"
+  assert_contains "SKIPPED=nvim" "$(cat "$OUT")" "the reload is skipped"
+  assert_contains "not a plain name" "$(cat "$OUT" "$ERR")" "and the note says why"
+done
+
 # With the palette colourscheme rendered for the active theme, running
 # Neovims switch to it rather than the theme's app.nvim family.
 mkdir -p "$HOME/.config/nvim/colors"

@@ -26,6 +26,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/dot/theme-transaction.sh
 source "$SCRIPT_DIR/../lib/dot/theme-transaction.sh"
 source "$SCRIPT_DIR/../lib/dot/theme-niri.sh"
+# shellcheck source=../lib/dot/theme-nvim.sh
+source "$SCRIPT_DIR/../lib/dot/theme-nvim.sh"
 
 # =============================================================================
 # Constants & Colors
@@ -892,7 +894,7 @@ _load_theme_fields() {
   TH_UI_FONT=""
   TH_DOC_FONT=""
   [[ -f "$THEMES_FILE" ]] || return 0
-  # awk emits KEY=VALUE lines; eval into shell.
+  # awk emits KEY=VALUE lines; the loop below assigns the known keys.
   local kv
   kv="$(awk -v s="[themes.${theme}]" -v sa="[themes.${theme}.app]" '
     BEGIN { in_root=0; in_app=0 }
@@ -916,18 +918,19 @@ _load_theme_fields() {
     in_app  && /^ui_font /       { print "TH_UI_FONT=" value($0) }
     in_app  && /^document_font / { print "TH_DOC_FONT=" value($0) }
   ' "$THEMES_FILE" 2>/dev/null)"
-  # Safe eval: only KEY= form emitted, keys are hard-coded above.
-  if [[ -n "$kv" ]]; then
-    while IFS= read -r line; do
-      [[ -z "$line" ]] && continue
-      # Not `declare -g`: that flag is bash 4+, and macOS ships bash 3.2 as
-      # /bin/bash, where it fails with "declare: -g: invalid option" and takes
-      # the whole script down. eval assigns at global scope here because none
-      # of the TH_* names are declared local in this function, and the value
-      # is safe for the reason given above.
-      eval "$line"
-    done <<<"$kv"
-  fi
+  # Values come from wallpaper file names, so they are data: never eval them.
+  local line key
+  while IFS= read -r line; do
+    key="${line%%=*}"
+    case "$key" in
+      TH_WALLPAPER | TH_MODE | TH_FAMILY | TH_MACOS_ACCENT | TH_GTK_THEME | TH_GTK_ICON | \
+        TH_GNOME_SHELL | TH_UI_FONT | TH_MONO_FONT | TH_DOC_FONT)
+        # printf -v assigns without evaluating (bash 3.1+, so macOS /bin/bash
+        # is fine). No TH_* name is local in a caller, so this sets globals.
+        printf -v "$key" '%s' "${line#*=}"
+        ;;
+    esac
+  done <<<"$kv"
   return 0
 }
 
@@ -1556,7 +1559,7 @@ reload_browsers() {
 
 reload_nvim() {
   local theme="$1"
-  local nvim_colorscheme nvim_style
+  local nvim_colorscheme nvim_style lua_cmd
   nvim_colorscheme="$(_theme_nvim_scheme "$theme")"
   nvim_style="$(theme_app_value "$theme" "nvim_style" 2>/dev/null || true)"
 
@@ -1565,65 +1568,21 @@ reload_nvim() {
     _skip "Neovim" "no nvim colorscheme for theme '$theme'"
     return
   fi
+  # Both values end up inside a Lua string literal.
+  if ! _theme_nvim_safe "$nvim_colorscheme" "$nvim_style"; then
+    SKIPPED+=("nvim")
+    _skip "Neovim" "colorscheme or style for theme '$theme' is not a plain name"
+    return
+  fi
+  lua_cmd="$(_theme_nvim_lua_cmd "$nvim_colorscheme" "$nvim_style")"
 
-  # Build the Lua expression for runtime colorscheme switching.
-  # This mirrors the logic in dot_config/nvim/lua/plugins/ui.lua.
-  local lua_cmd
-  case "$nvim_colorscheme" in
-    catppuccin)
-      local flavour="${nvim_style:-mocha}"
-      lua_cmd="require('catppuccin').setup({flavour='${flavour}'}) vim.cmd.colorscheme('catppuccin')"
-      ;;
-    tokyonight-*)
-      lua_cmd="require('tokyonight').setup({style='${nvim_style:-night}'}) vim.cmd.colorscheme('${nvim_colorscheme}')"
-      ;;
-    kanagawa)
-      local variant="${nvim_style:-wave}"
-      lua_cmd="require('kanagawa').setup({theme='${variant}'}) vim.cmd.colorscheme('kanagawa')"
-      ;;
-    gruvbox)
-      local bg="dark"
-      [[ "$nvim_style" == "light" ]] && bg="light"
-      lua_cmd="vim.o.background='${bg}' require('gruvbox').setup({contrast='hard'}) vim.cmd.colorscheme('gruvbox')"
-      ;;
-    everforest)
-      local bg="dark"
-      [[ "$nvim_style" == "light" ]] && bg="light"
-      lua_cmd="vim.o.background='${bg}' vim.cmd.colorscheme('everforest')"
-      ;;
-    solarized)
-      local bg="dark"
-      [[ "$nvim_style" == "light" ]] && bg="light"
-      lua_cmd="vim.o.background='${bg}' require('solarized').setup({}) vim.cmd.colorscheme('solarized')"
-      ;;
-    onedark)
-      local style="dark"
-      [[ "$nvim_style" == "light" ]] && style="light"
-      lua_cmd="require('onedark').setup({style='${style}'}) vim.cmd.colorscheme('onedark')"
-      ;;
-    nord)
-      lua_cmd="require('nord').set()"
-      ;;
-    *)
-      lua_cmd="vim.cmd.colorscheme('${nvim_colorscheme}')"
-      ;;
-  esac
-
-  # Find all running nvim server sockets.
-  # Neovim versions use different socket paths:
-  #   0.9-:  /tmp/nvimXXXXXX/0  (random suffix, no dot)
-  #   0.10+: $XDG_RUNTIME_DIR/nvim.PID.0
+  # This user's own Neovim 0.10+ servers (lib/dot/theme-nvim.sh). Not
+  # `local -A` for a dedupe: macOS /bin/bash 3.2 rejects it.
   local sockets=() sock
   local runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-
-  # Collect candidate sockets from known locations; a glob that matches
-  # nothing stays literal and fails -S. awk drops duplicates (the runtime
-  # dir is often /run/user/UID as well) without `local -A`, which macOS
-  # /bin/bash 3.2 rejects ("local: -A: invalid option") and which under
-  # set -e silently dropped the Neovim reload.
   while IFS= read -r sock; do
-    [[ -S "$sock" ]] && sockets+=("$sock")
-  done < <(printf '%s\n' /tmp/nvim*/0 /run/user/*/nvim.*.0 "$runtime_dir"/nvim.*.0 | awk '!seen[$0]++')
+    sockets+=("$sock")
+  done < <(_theme_own_nvim_sockets "$runtime_dir")
 
   if [[ ${#sockets[@]} -eq 0 ]]; then
     SKIPPED+=("nvim")

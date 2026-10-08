@@ -119,6 +119,90 @@ got="$(
 )"
 assert_equals "$$" "$got" "stale lock from a dead PID is taken over"
 
+# Two waiters that both saw the dead owner: B reads the dead PID, then is
+# held (inside its `kill -0` probe) until A has reclaimed the lock and taken
+# it. B must not then clear A's live lock and take it as well.
+test_start "txn_lock_two_waiters_on_a_dead_owner_one_wins"
+reset_state
+rm -f "$WORK/b_waiting" "$WORK/a_acquired" "$WORK/race"
+mkdir -p "$LOCK_DIR"
+printf 'pid=%s\n' "$DEAD_PID" >"$LOCK_DIR/owner"
+(
+  kill() {
+    if [[ "$1" == -0 && ! -e "$WORK/b_waiting" ]]; then
+      : >"$WORK/b_waiting"
+      until [[ -e "$WORK/a_acquired" ]]; do command sleep 0.05; done
+      return 1
+    fi
+    command kill "$@"
+  }
+  _theme_txn_acquire_lock 0 2>/dev/null && printf 'B\n' >>"$WORK/race"
+) &
+b_job=$!
+until [[ -e "$WORK/b_waiting" ]]; do sleep 0.05; done
+(
+  _theme_txn_acquire_lock 0 && printf 'A\n' >>"$WORK/race"
+  : >"$WORK/a_acquired"
+)
+wait "$b_job"
+assert_equals "A" "$(cat "$WORK/race")" "exactly one waiter holds the lock"
+assert_equals "pid=" "$(sed -n '1s/[0-9]*$//p' "$LOCK_DIR/owner" 2>/dev/null)" "the winner's owner file survives"
+assert_equals "$(ls -A "$DOT_THEME_LOCK_ROOT")" "$(basename "$LOCK_DIR")" "no stale or token left beside the lock"
+assert_equals "owner" "$(ls -A "$LOCK_DIR")" "no reclaim token left inside the live lock"
+
+test_start "txn_reclaim_stale_only_clears_the_dead_owners_lock"
+reset_state
+mkdir -p "$LOCK_DIR"
+printf 'pid=%s\n' "$$" >"$LOCK_DIR/owner"
+_theme_txn_reclaim_stale "$LOCK_DIR" "$DEAD_PID"
+assert_equals "1|owner" "$?|$(ls -A "$LOCK_DIR")" "a lock someone else now owns is refused and left as it was"
+mkdir "$LOCK_DIR/.reclaim"
+printf 'pid=%s\n' "$DEAD_PID" >"$LOCK_DIR/owner"
+_theme_txn_reclaim_stale "$LOCK_DIR" "$DEAD_PID"
+assert_equals "1|yes" "$?|$([[ -d "$LOCK_DIR" ]] && echo yes)" "another waiter's token means hands off"
+rmdir "$LOCK_DIR/.reclaim"
+_theme_txn_reclaim_stale "$LOCK_DIR" "$DEAD_PID"
+assert_equals "0|no" "$?|$([[ -e "$LOCK_DIR" ]] && echo yes || echo no)" "the dead owner's lock is cleared"
+
+test_start "txn_lock_clears_a_token_left_by_a_dead_reclaimer"
+reset_state
+mkdir -p "$LOCK_DIR/.reclaim"
+printf 'pid=%s\n' "$DEAD_PID" >"$LOCK_DIR/owner"
+got="$(_theme_txn_acquire_lock 0 2>&1 && sed -n 's/^pid=//p' "$THEME_TXN_LOCK_DIR/owner")"
+assert_equals "$$" "$got" "once the wait is over, a stuck token does not block forever"
+
+test_start "txn_lock_reclaim_cleans_up_the_stale_dir"
+reset_state
+mkdir -p "$LOCK_DIR"
+printf 'pid=%s\n' "$DEAD_PID" >"$LOCK_DIR/owner"
+: >"$LOCK_DIR/leftover"
+(_theme_txn_acquire_lock 0) >/dev/null 2>&1
+assert_equals "$(basename "$LOCK_DIR")" "$(ls -A "$DOT_THEME_LOCK_ROOT")" "the dead lock is gone, not parked beside the new one"
+assert_equals "owner" "$(ls -A "$LOCK_DIR")" "the new lock holds only its owner file"
+
+test_start "txn_lock_leaves_the_callers_umask_alone"
+reset_state
+got="$(
+  umask 022
+  _theme_txn_acquire_lock 0 && umask
+)"
+assert_equals "0022" "$got" "umask is unchanged after acquiring"
+assert_equals "drwx------" "$(ls -ld "$DOT_THEME_LOCK_ROOT" | cut -c1-10)" "the lock root is still private"
+assert_equals "drwx------" "$(ls -ld "$LOCK_DIR" | cut -c1-10)" "the lock dir is private"
+assert_equals "-rw-------" "$(ls -l "$LOCK_DIR/owner" | cut -c1-10)" "the owner file is private"
+
+test_start "txn_begin_leaves_the_callers_umask_alone"
+reset_state
+got="$(
+  umask 022
+  DOT_THEME_OPERATION_ID=op-umask _theme_txn_begin a b c 0 >/dev/null 2>&1
+  printf '%s|%s' "$?" "$(umask)"
+)"
+assert_equals "0|0022" "$got" "umask is unchanged after begin"
+assert_equals "drwx------" "$(ls -ld "$DOT_THEME_STATE_DIR" | cut -c1-10)" "the state root is private"
+assert_equals "drwx------" "$(ls -ld "$DOT_THEME_STATE_DIR/op-umask" | cut -c1-10)" "the operation dir is private"
+assert_equals "drwx------" "$(ls -ld "$DOT_THEME_STATE_DIR/op-umask/snapshots" | cut -c1-10)" "the snapshot dir is private"
+
 test_start "txn_lock_reclaims_ownerless_dir_after_timeout"
 reset_state
 got="$(

@@ -466,13 +466,17 @@ _ws_apply_macos() {
   if command -v wallpaper &>/dev/null; then
     wallpaper set "$wp" --screen all 2>/dev/null || true
   else
-    osascript -e "
-tell application \"System Events\"
-    set theFile to POSIX file \"${wp}\"
+    # The path is an argument, not script text: a " in it stays data.
+    osascript - "$wp" 2>/dev/null <<'APPLESCRIPT' || true
+on run argv
+  set theFile to POSIX file (item 1 of argv)
+  tell application "System Events"
     repeat with d in (get every desktop)
-        set picture of d to theFile
+      set picture of d to theFile
     end repeat
-end tell" 2>/dev/null || true
+  end tell
+end run
+APPLESCRIPT
   fi
   sleep 0.5
 }
