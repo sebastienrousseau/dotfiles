@@ -28,6 +28,7 @@ Keep the last column a list of backticked function names.
 | refresh | Today's spend from sqlite (`$0.00` when absent) | `runs` table | `TestRefresh` `TestCoverageGaps` `TestSqlite` `BenchmarkSqliteMissingDB` |
 | refresh | Last 8 runs listed for the splash | `runs` table | `TestRefresh` `TestSplash` |
 | refresh | sqlite3 output scrubbed of `~/.sqliterc` meta lines | `.timer`, `Run Time:` | `TestCoverageGaps` `TestFilterSqliteOutput` `FuzzFilterSqliteOutput` `BenchmarkFilterSqliteOutput` |
+| refresh | Recent-run rows from the db are sanitised; the `/health` body is read through a 4 KiB cap | crafted db row, oversized body | `TestRefreshCleansRecentRows` `TestRefreshHealthBodyIsBounded` |
 | refresh | Missing DB or invalid SQL yields empty | error paths | `TestSqlite` `TestCoverageGaps2` |
 
 ## Fleet pane (focus `fleet`)
@@ -56,6 +57,7 @@ Keep the last column a list of backticked function names.
 | input | Key binding `esc` returns to the fleet (closes the palette first) | keyboard | `TestUpdateInput` |
 | input | Key binding `tab` returns to the fleet, or completes the open palette | keyboard | `TestUpdateMsgs` `TestUpdateInput` |
 | input | Streaming: chunks append live, `done` trims and persists the turn | `streamMsg` | `TestUpdateMsgs` `BenchmarkModelUpdateStream` |
+| input | Streaming: control characters and bidi overrides in a reply become U+FFFD before highlighting; a rune split across reads stays whole | `streamMsg` | `TestStreamChunkStripsTerminalEscapes` `TestStartStreamStripsTerminalEscapes` `TestPumpChunksKeepsRunesWhole` `TestPumpChunksFlushesTruncatedRune` `TestCleanReplacesControlAndBidi` `FuzzRenderTranscript` |
 | input | Streaming: empty reply shows an install/auth hint | `streamMsg` | `TestUpdateMsgs` |
 | input | Streaming: a failed turn is surfaced as an `error:` line in the error colour, not highlighted as a reply | `streamMsg` err | `TestUpdateMsgs` `TestErrorLineStyled` |
 | input | Streaming: pipe/start failures surface as errors | `startStream` | `TestStartStreamAndExec` `TestStartStreamPipeError` |
@@ -113,6 +115,7 @@ Keep the last column a list of backticked function names.
 | Area | Feature | Trigger | Tests |
 | :--- | :--- | :--- | :--- |
 | session | Session JSON round-trips; corrupt files load as empty | `/save`, `/resume` | `TestSessionPersistence` `TestParseSessionMalformed` `FuzzParseSession` `BenchmarkParseSession` |
+| session | A resumed session cannot inject terminal escapes or bidi overrides | `/resume` of a crafted session.json | `TestParseSessionStripsTerminalEscapes` `FuzzParseSession` |
 | session | Unwritable state dir is a silent no-op | `/save` | `TestSaveSessionUnwritable` |
 | session | A failed encode leaves the saved session untouched | `/save` | `TestSaveSessionMarshalFailure` |
 | helpers | `clampi`, `windowRows`, `nowUnix`, `execDone` | internal | `TestPureHelpers` `TestCoverageGaps3` `TestCoverageGaps4` `BenchmarkClampi` `BenchmarkNowUnix` |

@@ -28,7 +28,11 @@ func runTable(p Palette, in io.Reader, out io.Writer) error {
 	var headers []string
 	var rows [][]string
 	for sc.Scan() {
+		// Split first: the \x1f separator is itself a control character.
 		fields := strings.Split(sc.Text(), unitSep)
+		for i := range fields {
+			fields[i] = clean(fields[i])
+		}
 		if headers == nil {
 			headers = fields
 			continue

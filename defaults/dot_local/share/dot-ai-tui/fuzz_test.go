@@ -200,6 +200,8 @@ func FuzzRenderTranscript(f *testing.F) {
 	f.Add("", "", 60, 24, 5)
 	f.Add("you", strings.Repeat("word ", 100), 20, 2, 0)
 	f.Add("", "", 40, 1, 3) // empty transcript, tiny height, recent present
+	f.Add("claude", "\x1b]52;c;ZXZpbA==\x07\x1b[2J\u009b31m\u202eevil\u2066", 40, 8, 0)
+	f.Add("claude", "```go\nx := \"\x1b]0;title\x07\u202d\"\n```", 40, 8, 0)
 	f.Fuzz(func(t *testing.T, who, text string, w, h, nrecent int) {
 		w = clampi(w, 1, 200)
 		h = clampi(h, -5, 60)
@@ -214,7 +216,23 @@ func FuzzRenderTranscript(f *testing.F) {
 		if got := strings.Count(out, "\n") + 1; got != max(h, 1) {
 			t.Fatalf("renderTranscript(w=%d,h=%d) → %d lines, want %d", w, h, got, max(h, 1))
 		}
+		// The same text arriving as a streamed reply reaches the screen
+		// inert: no OSC/BEL/C1 introducer and no bidi control survives
+		// (chroma's own SGR colour codes are the only escapes allowed).
+		s := sized()
+		s.transcript = []line{{who: "claude", text: ""}}
+		s = upd(s, streamMsg{chunk: text})
+		assertNoTerminalControl(t, s.renderTranscript(w, h))
 	})
+}
+
+// assertNoTerminalControl fails if s holds an OSC introducer, BEL, a C1
+// control or a bidi embedding/override/isolate.
+func assertNoTerminalControl(t *testing.T, s string) {
+	t.Helper()
+	if strings.Contains(s, "\x1b]") || strings.ContainsAny(s, "\x07\u009b\u009d\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069") {
+		t.Fatalf("terminal control survived: %q", s)
+	}
 }
 
 // FuzzParseSession: arbitrary bytes never panic; a decoded session
@@ -226,10 +244,15 @@ func FuzzParseSession(f *testing.F) {
 	f.Add([]byte(`garbage`))
 	f.Add([]byte(`[{"Who":1}]`))
 	f.Add([]byte(""))
+	f.Add([]byte(`[{"Who":"claude\u202e","Text":"\u001b]52;c;ZXZpbA==\u0007\u009b2J"}]`))
 	f.Fuzz(func(t *testing.T, data []byte) {
 		got := parseSession(data)
 		if got == nil {
 			return
+		}
+		for _, l := range got {
+			assertNoTerminalControl(t, l.who)
+			assertNoTerminalControl(t, l.text)
 		}
 		s := make([]sessLine, 0, len(got))
 		for _, l := range got {
