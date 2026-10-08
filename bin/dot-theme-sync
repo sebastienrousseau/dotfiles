@@ -892,7 +892,7 @@ _load_theme_fields() {
   TH_UI_FONT=""
   TH_DOC_FONT=""
   [[ -f "$THEMES_FILE" ]] || return 0
-  # awk emits KEY=VALUE lines; eval into shell.
+  # awk emits KEY=VALUE lines; the loop below assigns the known keys.
   local kv
   kv="$(awk -v s="[themes.${theme}]" -v sa="[themes.${theme}.app]" '
     BEGIN { in_root=0; in_app=0 }
@@ -916,18 +916,19 @@ _load_theme_fields() {
     in_app  && /^ui_font /       { print "TH_UI_FONT=" value($0) }
     in_app  && /^document_font / { print "TH_DOC_FONT=" value($0) }
   ' "$THEMES_FILE" 2>/dev/null)"
-  # Safe eval: only KEY= form emitted, keys are hard-coded above.
-  if [[ -n "$kv" ]]; then
-    while IFS= read -r line; do
-      [[ -z "$line" ]] && continue
-      # Not `declare -g`: that flag is bash 4+, and macOS ships bash 3.2 as
-      # /bin/bash, where it fails with "declare: -g: invalid option" and takes
-      # the whole script down. eval assigns at global scope here because none
-      # of the TH_* names are declared local in this function, and the value
-      # is safe for the reason given above.
-      eval "$line"
-    done <<<"$kv"
-  fi
+  # Values come from wallpaper file names, so they are data: never eval them.
+  local line key
+  while IFS= read -r line; do
+    key="${line%%=*}"
+    case "$key" in
+      TH_WALLPAPER | TH_MODE | TH_FAMILY | TH_MACOS_ACCENT | TH_GTK_THEME | TH_GTK_ICON | \
+        TH_GNOME_SHELL | TH_UI_FONT | TH_MONO_FONT | TH_DOC_FONT)
+        # printf -v assigns without evaluating (bash 3.1+, so macOS /bin/bash
+        # is fine). No TH_* name is local in a caller, so this sets globals.
+        printf -v "$key" '%s' "${line#*=}"
+        ;;
+    esac
+  done <<<"$kv"
   return 0
 }
 
