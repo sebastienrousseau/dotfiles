@@ -323,7 +323,7 @@ func (s *Server) handleResourcesRead(raw json.RawMessage) (any, *rpcError) {
 		if r.URI != p.URI {
 			continue
 		}
-		contents, rerr := readResource(r, s.env, s.readFile)
+		contents, rerr := readResource(r, s.env, s.readFile, s.logf)
 		if rerr != nil {
 			return nil, rerr
 		}

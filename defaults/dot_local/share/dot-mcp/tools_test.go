@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -332,6 +333,48 @@ func TestExecRunner(t *testing.T) {
 
 	if _, err := execRunner(ctx, "dot-mcp-no-such-binary", nil, nil); err == nil {
 		t.Fatal("expected an error for a missing binary")
+	}
+}
+
+// TestExecRunnerCapsChildOutput: a tool that prints without end cannot grow
+// the server's memory; each stream keeps maxToolOutputBytes and says so.
+func TestExecRunnerCapsChildOutput(t *testing.T) {
+	script := fmt.Sprintf("head -c %d /dev/zero; head -c %d /dev/zero >&2", 3*maxToolOutputBytes, 2*maxToolOutputBytes)
+	res, err := execRunner(context.Background(), "sh", []string{"-c", script}, nil)
+	if err != nil {
+		t.Fatalf("execRunner: %v", err)
+	}
+	for name, out := range map[string]string{"stdout": res.Stdout, "stderr": res.Stderr} {
+		if len(out) > maxToolOutputBytes+len(truncatedMarker) {
+			t.Fatalf("%s kept %d bytes, cap is %d", name, len(out), maxToolOutputBytes)
+		}
+		if !strings.HasSuffix(out, truncatedMarker) {
+			t.Fatalf("%s does not say it was truncated", name)
+		}
+	}
+	if res.ExitCode != 0 {
+		t.Fatalf("exit code = %d: the child must not see a short write", res.ExitCode)
+	}
+}
+
+// TestLimitedBuffer covers the writer below, at and past its limit.
+func TestLimitedBuffer(t *testing.T) {
+	b := &limitedBuffer{max: 4}
+	if n, err := b.Write([]byte("ab")); n != 2 || err != nil {
+		t.Fatalf("write = %d, %v", n, err)
+	}
+	if got := b.String(); got != "ab" {
+		t.Fatalf("below the limit: %q", got)
+	}
+	if n, _ := b.Write([]byte("cd")); n != 2 || b.String() != "abcd" {
+		t.Fatalf("at the limit: %q", b.String())
+	}
+	if n, _ := b.Write([]byte("ef")); n != 2 || b.String() != "abcd"+truncatedMarker {
+		t.Fatalf("past the limit: %q", b.String())
+	}
+	c := &limitedBuffer{max: 3}
+	if n, _ := c.Write([]byte("abcdef")); n != 6 || c.String() != "abc"+truncatedMarker {
+		t.Fatalf("a write straddling the limit: %q", c.String())
 	}
 }
 

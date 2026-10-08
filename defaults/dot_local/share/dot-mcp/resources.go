@@ -9,6 +9,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -84,8 +85,12 @@ func defaultResources() []resource {
 // anything larger is a symptom, not a payload worth streaming to a model.
 const maxResourceBytes = 1 << 20
 
-// readResource loads the document behind one resource entry.
-func readResource(r resource, e environment, readFile func(string) ([]byte, error)) (resourceContents, *rpcError) {
+// readResource loads the document behind one resource entry. A read error
+// carries the host path, so the client gets only the URI and logf (stderr)
+// gets the detail.
+func readResource(r resource, e environment, readFile func(string) ([]byte, error),
+	logf func(string, ...any),
+) (resourceContents, *rpcError) {
 	path := r.resolve(e)
 	if path == "" {
 		return resourceContents{}, newRPCError(codeResourceNotOK, "resource unavailable",
@@ -93,8 +98,11 @@ func readResource(r resource, e environment, readFile func(string) ([]byte, erro
 	}
 	b, err := readFile(path)
 	if err != nil {
+		if logf != nil {
+			logf("resources/read %s: %v", r.URI, err)
+		}
 		return resourceContents{}, newRPCError(codeResourceNotOK, "resource unavailable",
-			fmt.Sprintf("%s: %v", r.URI, err))
+			r.URI+": could not be read")
 	}
 	if len(b) > maxResourceBytes {
 		return resourceContents{}, newRPCError(codeResourceNotOK, "resource too large",
@@ -103,5 +111,14 @@ func readResource(r resource, e environment, readFile func(string) ([]byte, erro
 	return resourceContents{URI: r.URI, Name: r.Name, MIMEType: r.MIMEType, Text: string(b)}, nil
 }
 
-// osReadFile is the production file reader seam.
-var osReadFile = os.ReadFile
+// osReadFile is the production file reader seam. It reads at most one byte
+// past maxResourceBytes, enough for readResource to refuse an oversized file
+// without loading it into memory.
+var osReadFile = func(path string) ([]byte, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	return io.ReadAll(io.LimitReader(f, maxResourceBytes+1))
+}

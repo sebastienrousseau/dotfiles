@@ -17,14 +17,10 @@ import (
 // never mistaken for a root.
 const rootMarker = "scripts/diagnostics/mcp-doctor.sh"
 
-// maxRootWalk bounds the upward search for rootMarker.
-const maxRootWalk = 12
-
 // environment is the process environment as this server sees it, injected so
 // tests need not mutate the real one.
 type environment struct {
 	lookup func(string) (string, bool)
-	getwd  func() (string, error)
 	home   func() (string, error)
 	stat   func(string) (os.FileInfo, error)
 }
@@ -33,7 +29,6 @@ type environment struct {
 func osEnvironment() environment {
 	return environment{
 		lookup: os.LookupEnv,
-		getwd:  os.Getwd,
 		home:   os.UserHomeDir,
 		stat:   os.Stat,
 	}
@@ -55,37 +50,15 @@ func (e environment) exists(path string) bool {
 	return err == nil
 }
 
-// repoRoot resolves the dotfiles tree:
-//
-//  1. DOT_MCP_REPO_ROOT — exported by `dot mcp serve`, which already knows;
-//  2. the nearest ancestor of the working directory holding rootMarker;
-//  3. the chezmoi default source directory, ~/.local/share/chezmoi.
-//
-// It returns "" when none is found; callers degrade to an explicit error
-// rather than guessing, because a wrong root silently serves another tree's
-// configuration.
+// repoRoot is the dotfiles tree named by DOT_MCP_REPO_ROOT, which `dot mcp
+// serve` exports, when it holds rootMarker. Nothing else is searched: walking
+// up from the working directory let any directory carrying the marker (a
+// cloned repository, say) choose the tree this server reads and serves.
+// It returns "" when unset; callers degrade to an explicit error rather than
+// guessing, because a wrong root silently serves another tree's configuration.
 func (e environment) repoRoot() string {
 	if v := e.get("DOT_MCP_REPO_ROOT"); e.exists(filepath.Join(v, rootMarker)) {
 		return v
-	}
-	if wd, err := e.getwd(); err == nil {
-		dir := wd
-		for i := 0; i < maxRootWalk; i++ {
-			if e.exists(filepath.Join(dir, rootMarker)) {
-				return dir
-			}
-			parent := filepath.Dir(dir)
-			if parent == dir {
-				break
-			}
-			dir = parent
-		}
-	}
-	if home, err := e.home(); err == nil {
-		cand := filepath.Join(home, ".local", "share", "chezmoi")
-		if e.exists(cand) {
-			return cand
-		}
 	}
 	return ""
 }

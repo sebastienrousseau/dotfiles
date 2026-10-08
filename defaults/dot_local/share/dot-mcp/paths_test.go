@@ -20,7 +20,6 @@ func fakeEnv(vars map[string]string, files ...string) environment {
 	}
 	return environment{
 		lookup: func(k string) (string, bool) { v, ok := vars[k]; return v, ok },
-		getwd:  func() (string, error) { return vars["__wd"], nil },
 		home:   func() (string, error) { return vars["__home"], nil },
 		stat: func(p string) (os.FileInfo, error) {
 			if present[p] {
@@ -52,7 +51,10 @@ func TestEnvironmentGetAndExists(t *testing.T) {
 	}
 }
 
-// TestRepoRoot covers each resolution strategy in precedence order.
+// TestRepoRoot covers the only resolution strategy: DOT_MCP_REPO_ROOT, and
+// only when it holds rootMarker. The working directory is never searched (a
+// cloned repo carrying the marker would otherwise choose the tree served),
+// and neither is the chezmoi source directory.
 func TestRepoRoot(t *testing.T) {
 	marker := func(root string) string { return filepath.Join(root, rootMarker) }
 	tests := []struct {
@@ -62,7 +64,7 @@ func TestRepoRoot(t *testing.T) {
 		want  string
 	}{
 		{
-			name:  "explicit env wins",
+			name:  "explicit env is used",
 			vars:  map[string]string{"DOT_MCP_REPO_ROOT": "/repo", "__wd": "/other", "__home": "/home/u"},
 			files: []string{marker("/repo"), marker("/other")},
 			want:  "/repo",
@@ -71,19 +73,19 @@ func TestRepoRoot(t *testing.T) {
 			name:  "env without the marker is ignored",
 			vars:  map[string]string{"DOT_MCP_REPO_ROOT": "/bogus", "__wd": "/repo/sub/dir", "__home": "/home/u"},
 			files: []string{marker("/repo")},
-			want:  "/repo",
+			want:  "",
 		},
 		{
-			name:  "walks up from the working directory",
+			name:  "the working directory is never searched",
 			vars:  map[string]string{"__wd": "/repo/a/b/c", "__home": "/home/u"},
-			files: []string{marker("/repo")},
-			want:  "/repo",
+			files: []string{marker("/repo"), marker("/repo/a/b/c")},
+			want:  "",
 		},
 		{
-			name:  "chezmoi source directory as a last resort",
+			name:  "the chezmoi source directory is not a fallback",
 			vars:  map[string]string{"__wd": "/nowhere", "__home": "/home/u"},
-			files: []string{"/home/u/.local/share/chezmoi"},
-			want:  "/home/u/.local/share/chezmoi",
+			files: []string{"/home/u/.local/share/chezmoi", marker("/home/u/.local/share/chezmoi")},
+			want:  "",
 		},
 		{
 			name: "nothing resolvable",
@@ -100,27 +102,16 @@ func TestRepoRoot(t *testing.T) {
 	}
 }
 
-// TestRepoRootSurvivesBrokenSeams covers the error branches of getwd and home,
-// which a real process hits when its working directory has been unlinked or
-// when HOME is unset in a daemon environment.
+// TestRepoRootSurvivesBrokenSeams covers the error branch of home, which a
+// real process hits when HOME is unset in a daemon environment.
 func TestRepoRootSurvivesBrokenSeams(t *testing.T) {
 	e := fakeEnv(nil)
-	e.getwd = func() (string, error) { return "", errors.New("no cwd") }
 	e.home = func() (string, error) { return "", errors.New("no home") }
 	if got := e.repoRoot(); got != "" {
 		t.Fatalf("repoRoot = %q, want empty", got)
 	}
 	if got := e.configPath("NOPE", "x.json"); got != "" {
 		t.Fatalf("configPath = %q, want empty", got)
-	}
-}
-
-// TestRepoRootStopsWalkingAtTheFilesystemRoot pins the loop's termination when
-// no marker exists anywhere above the working directory.
-func TestRepoRootStopsWalkingAtTheFilesystemRoot(t *testing.T) {
-	e := fakeEnv(map[string]string{"__wd": "/a/b", "__home": "/home/u"})
-	if got := e.repoRoot(); got != "" {
-		t.Fatalf("repoRoot = %q, want empty", got)
 	}
 }
 
@@ -204,18 +195,15 @@ func TestOSEnvironmentSeams(t *testing.T) {
 	if got := e.get("DOT_MCP_PROBE"); got != "probe-value" {
 		t.Fatalf("get = %q", got)
 	}
-	if _, err := e.getwd(); err != nil {
-		t.Fatalf("getwd: %v", err)
-	}
 	if _, err := e.home(); err != nil {
 		t.Fatalf("home: %v", err)
 	}
 	if !e.exists(t.TempDir()) {
 		t.Fatal("temp dir reported missing")
 	}
-	// The production repoRoot walks the real tree: this module lives inside
-	// the dotfiles checkout, so it must find the marker while tests run.
-	if root := e.repoRoot(); root != "" && !e.exists(filepath.Join(root, rootMarker)) {
-		t.Fatalf("repoRoot %q does not hold %s", root, rootMarker)
+	// The production repoRoot reads only DOT_MCP_REPO_ROOT.
+	t.Setenv("DOT_MCP_REPO_ROOT", "")
+	if root := e.repoRoot(); root != "" {
+		t.Fatalf("repoRoot = %q with DOT_MCP_REPO_ROOT empty", root)
 	}
 }
