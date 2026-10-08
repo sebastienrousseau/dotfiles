@@ -121,6 +121,32 @@ apply_minimal_profile_overrides() {
 }
 
 # Print macos, wsl2, debian, fedora, arch, linux or unknown. $1: fixture root.
+# The Charm apt signing key, pinned by fingerprint: a DNS attacker swapping
+# repo.charm.sh/apt/gpg.key for a forged key with the same uid would otherwise
+# be trusted. Read from https://repo.charm.sh/apt/gpg.key on 2026-10-08
+# (primary ED927B38..., encryption subkey 94FD1D5E...); the earlier pin,
+# C026D31B..., matched no key that URL serves. If Charm rotates, update this
+# and call it out in CHANGELOG.md.
+CHARM_GPG_EXPECTED_FPR="ED927B38BE981E53CA09153D03BBF595D4DFD35C"
+
+# charm_keyring_verify <keyring>: apt's signed-by trusts every primary key in
+# the file, so it must hold exactly one, the pinned one (subkeys are fine).
+# Otherwise the keyring is removed and 1 returned.
+charm_keyring_verify() {
+  local keyring="$1" keys pub_count primary_fpr
+  keys="$(gpg --no-default-keyring --keyring "$keyring" \
+    --with-colons --list-keys 2>/dev/null || true)"
+  pub_count="$(grep -c '^pub:' <<<"$keys" || true)"
+  primary_fpr="$(awk -F: '/^pub:/ { pub = 1; next } pub && /^fpr:/ { print $10; exit }' <<<"$keys")"
+  if [[ "$pub_count" == 1 && "$primary_fpr" == "$CHARM_GPG_EXPECTED_FPR" ]]; then
+    return 0
+  fi
+  echo "Error: Charm keyring must hold exactly one key, $CHARM_GPG_EXPECTED_FPR" >&2
+  echo "  found ${pub_count:-0} primary key(s), first ${primary_fpr:-none}; aborting" >&2
+  sudo rm -f "$keyring"
+  return 1
+}
+
 detect_target_os() {
   local root="${1:-}" os="linux"
   case "$(uname -s)" in
@@ -225,30 +251,7 @@ main() {
       sudo gpg --batch --yes --dearmor \
         -o /etc/apt/keyrings/charm.gpg "$charm_key_tmp"
       rm -f "$charm_key_tmp"
-      # Pin the Charm GPG key fingerprint — a DNS attacker swapping
-      # repo.charm.sh/apt/gpg.key for a forged key with the same uid
-      # would otherwise pass the prior "any fid: present" check.
-      # Pinned value taken from https://repo.charm.sh/apt/gpg.key on
-      # 2026-05-16. If Charm rotates, update this and call it out in
-      # CHANGELOG.md.
-      CHARM_GPG_EXPECTED_FPR="C026D31B92F9BBE91D5DB75AB07AE17C9E0A6585"
-      charm_actual_fpr="$(gpg --no-default-keyring \
-        --keyring /etc/apt/keyrings/charm.gpg \
-        --with-colons --fingerprint 2>/dev/null |
-        awk -F: '/^fpr:/{print $10; exit}')"
-      if [[ -z "$charm_actual_fpr" ]]; then
-        echo "Error: Could not extract Charm GPG fingerprint — aborting" >&2
-        sudo rm -f /etc/apt/keyrings/charm.gpg
-        return 1
-      fi
-      if [[ "$charm_actual_fpr" != "$CHARM_GPG_EXPECTED_FPR" ]]; then
-        echo "Error: Charm GPG fingerprint mismatch" >&2
-        echo "  expected: $CHARM_GPG_EXPECTED_FPR" >&2
-        echo "  got:      $charm_actual_fpr" >&2
-        echo "  aborting (possible DNS / keyserver hijack)" >&2
-        sudo rm -f /etc/apt/keyrings/charm.gpg
-        return 1
-      fi
+      charm_keyring_verify /etc/apt/keyrings/charm.gpg || return 1
       echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
       sudo apt-get update && sudo apt-get install gum -y >/dev/null 2>&1
     fi
