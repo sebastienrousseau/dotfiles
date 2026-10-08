@@ -314,9 +314,10 @@ func execRunner(ctx context.Context, name string, args []string, env []string) (
 	cmd := exec.CommandContext(ctx, name, args...)
 	cmd.Env = env
 	cmd.Stdin = nil
-	var stdout, stderr strings.Builder
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	stdout := &limitedBuffer{max: maxToolOutputBytes}
+	stderr := &limitedBuffer{max: maxToolOutputBytes}
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
 	err := cmd.Run()
 	res := commandResult{Stdout: stdout.String(), Stderr: stderr.String()}
 	if err != nil {
@@ -328,6 +329,39 @@ func execRunner(ctx context.Context, name string, args []string, env []string) (
 		return res, err
 	}
 	return res, nil
+}
+
+// maxToolOutputBytes caps what one tool call keeps of each of the child's
+// stdout and stderr; a tool that prints without end cannot grow the server.
+const maxToolOutputBytes = 1 << 20
+
+// truncatedMarker ends a capped stream so the model knows it is partial.
+const truncatedMarker = "\n[output truncated]"
+
+// limitedBuffer keeps the first max bytes written to it and drops the rest.
+// Write always reports the full length: a short write would fail the child's
+// own write and change its exit status.
+type limitedBuffer struct {
+	buf       strings.Builder
+	max       int
+	truncated bool
+}
+
+func (l *limitedBuffer) Write(p []byte) (int, error) {
+	n := len(p)
+	if room := l.max - l.buf.Len(); n > room {
+		l.truncated = true
+		p = p[:max(room, 0)]
+	}
+	l.buf.Write(p)
+	return n, nil
+}
+
+func (l *limitedBuffer) String() string {
+	if l.truncated {
+		return l.buf.String() + truncatedMarker
+	}
+	return l.buf.String()
 }
 
 // textContent is one MCP content block.

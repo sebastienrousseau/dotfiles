@@ -112,11 +112,14 @@ list of backticked function names.
 
 | Area | Feature | Trigger | Tests |
 | :--- | :--- | :--- | :--- |
-| paths | `DOT_MCP_REPO_ROOT`, then a marker walk, then the chezmoi source dir | server start | `TestRepoRoot` `TestRepoRootStopsWalkingAtTheFilesystemRoot` |
-| paths | Broken `getwd`/`home` seams degrade to "unresolved" | daemon environment | `TestRepoRootSurvivesBrokenSeams` `TestEnvironmentGetAndExists` |
+| paths | `DOT_MCP_REPO_ROOT` only, when it holds the marker; the working directory is never searched | server start | `TestRepoRoot` |
+| paths | A broken `home` seam degrades to "unresolved" | daemon environment | `TestRepoRootSurvivesBrokenSeams` `TestEnvironmentGetAndExists` |
 | paths | Checkout, chezmoi-source and deployed layouts all probed | `configPath` | `TestConfigPath` `TestWellKnownPath` |
 | paths | `DOT_MCP_DOT_BIN` selects the CLI, else `dot` from PATH | `tools/call` | `TestDotBinary` `TestToolsCallRunsTheTool` |
-| paths | Production seams (env, cwd, home, stat, ReadFile) exercised | real process | `TestOSEnvironmentSeams` `TestOSReadFileSeam` |
+| paths | Production seams (env, home, stat, ReadFile) exercised | real process | `TestOSEnvironmentSeams` `TestOSReadFileSeam` |
+| limits | A resource read stops one byte past the 1 MiB limit | oversized file | `TestOSReadFileIsBounded` `TestReadResource` |
+| limits | A read error reaches the client as the URI only; the detail goes to stderr | unreadable file | `TestReadResourceKeepsTheReadErrorOffTheWire` |
+| limits | Each tool stream keeps 1 MiB and is marked truncated | chatty child | `TestExecRunnerCapsChildOutput` `TestLimitedBuffer` |
 
 ## Card truth
 

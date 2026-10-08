@@ -1,0 +1,9 @@
+{
+  "name": "dot-mcp-node-servers",
+  "private": true,
+  "description": "Pinned npm MCP servers for mcp_servers.json, installed with npm ci --ignore-scripts by install-servers.sh",
+  "license": "Apache-2.0 OR MIT",
+  "dependencies": {
+    "@modelcontextprotocol/server-memory": "2026.8.31"
+  }
+}

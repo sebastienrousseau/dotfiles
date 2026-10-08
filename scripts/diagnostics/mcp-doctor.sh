@@ -19,8 +19,9 @@
 ## # Checks Performed
 ## | Check | Description |
 ## |-------|-------------|
-## | Launcher policy | Only npx/node/uvx allowed |
-## | Filesystem scope | No broad access (/, /home, /Users) |
+## | Launcher policy | Only npx/node/uvx allowed; no node -e / sh -c |
+## | Filesystem scope | No server gets a blocked root (/, /home, /Users) |
+## | Transport security | http/sse/streamable-http use https:// URLs |
 ## | Arg policy | No wildcards or --unsafe flags |
 ## | Token check | Required tokens set (GITHUB_TOKEN, BRAVE_API_KEY) |
 ## | Env placeholders | All ${VAR} references resolved |
@@ -37,6 +38,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../../lib/dot/ui.sh"
 # shellcheck source-path=SCRIPTDIR source=mcp-doctor/checks.sh
 source "$SCRIPT_DIR/mcp-doctor/checks.sh"
+# shellcheck source-path=SCRIPTDIR source=mcp-doctor/sources.sh
+source "$SCRIPT_DIR/mcp-doctor/sources.sh"
 
 # Parse arguments
 STRICT_MODE=0
@@ -131,8 +134,11 @@ _mcp_policy_flag() {
 }
 
 _mcp_load_policy() {
+  # Lock manifests are named relative to the chezmoi source root
+  MCP_LOCK_ROOT="${MCP_LOCK_ROOT:-$REPO_ROOT/defaults}"
   if _mcp_json_ok "$MCP_POLICY_CONFIG"; then
     ALLOWED_LAUNCHERS="$(jq -c '.profiles[.defaultProfile].allowedLaunchers // ["npx","node","uvx"]' "$MCP_POLICY_CONFIG")"
+    ALLOWED_LAUNCHER_PREFIXES="$(jq -c '.profiles[.defaultProfile].allowedLauncherPrefixes // []' "$MCP_POLICY_CONFIG")"
     BLOCKED_PATHS="$(jq -c '.profiles[.defaultProfile].blockedFilesystemRoots // ["/","/home","/Users"]' "$MCP_POLICY_CONFIG")"
     BLOCKED_ARG_PATTERNS="$(jq -c '.profiles[.defaultProfile].blockedArgPatterns // ["^--allow-.*","^--unsafe$","^\\\\*$"]' "$MCP_POLICY_CONFIG")"
     FORBIDDEN_DEFAULT_SERVERS="$(jq -c '.profiles[.defaultProfile].forbidNetworkServersByDefault // []' "$MCP_POLICY_CONFIG")"
@@ -225,6 +231,43 @@ _mcp_check_server_card() {
   _mcp_card_expect "Card transport" 'if .transport then "present" else empty end' "missing transport block"
 }
 
+# Every per-config policy check, on $MCP_CONFIG
+_mcp_run_policy_checks() {
+  _mcp_check_servers
+  _mcp_check_blocked_paths
+  _mcp_check_launchers
+  _mcp_check_inline_launchers
+  _mcp_check_risky_args
+  _mcp_check_default_servers
+  _mcp_check_transports
+  _mcp_check_https
+  _mcp_check_auth_profiles
+  _mcp_check_oauth
+  _mcp_check_env_placeholders
+  _mcp_check_tokens
+  _mcp_check_unpinned_npx
+  _mcp_check_package_lock
+  _mcp_check_registry
+}
+
+# The same checks on every other config Claude reads. The summary keeps
+# the primary config's path and server count.
+_mcp_check_extra_sources() {
+  command -v jq >/dev/null 2>&1 || return 0
+  local dir i=0 primary="$MCP_CONFIG" count="$SERVER_COUNT"
+  dir="$(mktemp -d "${TMPDIR:-/tmp}/mcp-doctor.XXXXXX")"
+  _mcp_collect_sources "$dir"
+  while ((i < ${#MCP_SOURCE_FILES[@]})); do
+    _mcp_section "Validation: ${MCP_SOURCE_LABELS[$i]}"
+    MCP_CONFIG="${MCP_SOURCE_FILES[$i]}"
+    _mcp_run_policy_checks
+    i=$((i + 1))
+  done
+  MCP_CONFIG="$primary"
+  SERVER_COUNT="$count"
+  rm -rf "$dir"
+}
+
 # Server Checks section: the policy checks when the config parses
 _mcp_check_config() {
   _mcp_section "Validation"
@@ -237,20 +280,7 @@ _mcp_check_config() {
     fi
 
     if [[ "$JSON_VALID" -eq 1 ]]; then
-      _mcp_check_servers
-      _mcp_check_blocked_paths
-      _mcp_check_launchers
-      _mcp_check_risky_args
-      _mcp_check_default_servers
-      _mcp_check_transports
-      _mcp_check_https
-      _mcp_check_auth_profiles
-      _mcp_check_oauth
-      _mcp_check_env_placeholders
-      _mcp_check_tokens
-      _mcp_check_unpinned_npx
-      _mcp_check_package_lock
-      _mcp_check_registry
+      _mcp_run_policy_checks
     fi
   else
     log_warn "jq" "not installed, running limited checks"
@@ -347,6 +377,8 @@ _mcp_show_config_files
 _mcp_check_server_card
 
 _mcp_check_config
+
+_mcp_check_extra_sources
 
 _mcp_summary_status
 

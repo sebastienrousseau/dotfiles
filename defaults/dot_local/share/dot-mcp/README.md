@@ -22,9 +22,10 @@ frame reader for the rest of the session.
 
 `dot mcp serve` resolves the dotfiles checkout and the `dot` binary and
 execs this server with both exported (`DOT_MCP_REPO_ROOT`,
-`DOT_MCP_DOT_BIN`). Running `dot-mcp serve` directly works too: it walks
-up from the working directory to find the checkout and takes `dot` from
-`PATH`.
+`DOT_MCP_DOT_BIN`). Running `dot-mcp serve` directly needs
+`DOT_MCP_REPO_ROOT` set to the checkout (the working directory is never
+searched, so a cloned repository cannot pick the tree served); `dot` is
+taken from `PATH`.
 
 ## What it serves
 

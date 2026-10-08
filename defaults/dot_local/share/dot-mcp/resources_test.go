@@ -4,6 +4,8 @@ package main
 
 import (
 	"errors"
+	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -78,7 +80,7 @@ func TestReadResource(t *testing.T) {
 	}
 	unresolvable := resource{URI: "dotfiles://x", resolve: func(environment) string { return "" }}
 
-	got, rerr := readResource(policy, e, func(string) ([]byte, error) { return []byte("{}"), nil })
+	got, rerr := readResource(policy, e, func(string) ([]byte, error) { return []byte("{}"), nil }, nil)
 	if rerr != nil {
 		t.Fatalf("unexpected error: %v", rerr)
 	}
@@ -86,16 +88,16 @@ func TestReadResource(t *testing.T) {
 		t.Fatalf("contents = %+v", got)
 	}
 
-	if _, rerr = readResource(unresolvable, e, nil); rerr == nil || !strings.Contains(rerr.Message, "unavailable") {
+	if _, rerr = readResource(unresolvable, e, nil, nil); rerr == nil || !strings.Contains(rerr.Message, "unavailable") {
 		t.Fatalf("rerr = %v, want an unavailable error", rerr)
 	}
 
-	_, rerr = readResource(policy, e, func(string) ([]byte, error) { return nil, errors.New("permission denied") })
+	_, rerr = readResource(policy, e, func(string) ([]byte, error) { return nil, errors.New("permission denied") }, nil)
 	if rerr == nil || rerr.Code != codeResourceNotOK {
 		t.Fatalf("rerr = %v, want %d", rerr, codeResourceNotOK)
 	}
 
-	_, rerr = readResource(policy, e, func(string) ([]byte, error) { return make([]byte, maxResourceBytes+1), nil })
+	_, rerr = readResource(policy, e, func(string) ([]byte, error) { return make([]byte, maxResourceBytes+1), nil }, nil)
 	if rerr == nil || !strings.Contains(rerr.Message, "too large") {
 		t.Fatalf("rerr = %v, want a size error", rerr)
 	}
@@ -105,5 +107,53 @@ func TestReadResource(t *testing.T) {
 func TestOSReadFileSeam(t *testing.T) {
 	if _, err := osReadFile(filepath.Join(t.TempDir(), "absent.json")); err == nil {
 		t.Fatal("expected an error reading a missing file")
+	}
+}
+
+// TestReadResourceKeepsTheReadErrorOffTheWire: a read failure names only the
+// URI to the client; the OS error, which carries the host path, goes to the
+// server log on stderr.
+func TestReadResourceKeepsTheReadErrorOffTheWire(t *testing.T) {
+	e := fakeEnv(map[string]string{"MCP_POLICY_CONFIG": "/home/secret/policy.json", "__home": "/h"})
+	policy := resource{
+		URI:     "dotfiles://mcp/policy",
+		resolve: func(e environment) string { return e.configPath("MCP_POLICY_CONFIG", "mcp-policy.json") },
+	}
+	var logged []string
+	logf := func(format string, args ...any) { logged = append(logged, fmt.Sprintf(format, args...)) }
+	_, rerr := readResource(policy, e, func(p string) ([]byte, error) {
+		return nil, &os.PathError{Op: "open", Path: p, Err: os.ErrPermission}
+	}, logf)
+	if rerr == nil {
+		t.Fatal("expected an error")
+	}
+	if wire := fmt.Sprint(rerr.Message, rerr.Data); strings.Contains(wire, "/home/secret") {
+		t.Fatalf("the client sees the host path: %q", wire)
+	}
+	if len(logged) != 1 || !strings.Contains(logged[0], "/home/secret/policy.json") {
+		t.Fatalf("logged = %q, want the detail on stderr", logged)
+	}
+}
+
+// TestOSReadFileIsBounded: the production reader stops one byte past the
+// limit, so an oversized file is refused without being read into memory.
+func TestOSReadFileIsBounded(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "big.json")
+	if err := os.WriteFile(path, make([]byte, 3*maxResourceBytes), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	b, err := osReadFile(path)
+	if err != nil {
+		t.Fatalf("osReadFile: %v", err)
+	}
+	if len(b) != maxResourceBytes+1 {
+		t.Fatalf("read %d bytes, want %d", len(b), maxResourceBytes+1)
+	}
+	small := filepath.Join(t.TempDir(), "small.json")
+	if err := os.WriteFile(small, []byte("{}"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if b, err := osReadFile(small); err != nil || string(b) != "{}" {
+		t.Fatalf("small read = %q, %v", b, err)
 	}
 }
