@@ -56,7 +56,6 @@
   13   13   31.3   60     0 defaults/.chezmoitemplates/functions/security/genpass.sh::genpass
   25   32   38.5  127     0 defaults/.chezmoitemplates/functions/security/keygen.sh::keygen
   13   22   37.8   84   100 defaults/.chezmoitemplates/functions/system/sysinfo.sh::<top>
-  13   14   25.8   27    27 defaults/dot_config/shell/10-secrets.sh::<top>
   14   19   22.0   53    67 defaults/dot_local/bin/executable_b64::<top>
   16   18   25.9   68    78 defaults/dot_local/bin/executable_bm::<top>
   20   38   28.6   36    43 defaults/dot_local/bin/executable_cb::<top>

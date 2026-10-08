@@ -222,32 +222,39 @@ need_ref() {
   fi
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    -l | --list) ACTION=list ;;
-    --latest | -L) ACTION=latest ;;
-    --git | -g | --diff | -d)
-      need_ref "$@"
-      ACTION="$1"
-      REF="$2"
-      shift
-      ;;
-    --dry-run | -n) DRY_RUN=true ;;
-    -h | --help) ACTION=help ;;
-    *)
-      log_error "Unknown option: $1"
-      usage
-      exit 1
-      ;;
-  esac
-  shift
-done
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -l | --list) ACTION=list ;;
+      --latest | -L) ACTION=latest ;;
+      --git | -g | --diff | -d)
+        need_ref "$@"
+        ACTION="$1"
+        REF="$2"
+        shift
+        ;;
+      --dry-run | -n) DRY_RUN=true ;;
+      -h | --help) ACTION=help ;;
+      *)
+        log_error "Unknown option: $1"
+        usage
+        exit 1
+        ;;
+    esac
+    shift
+  done
+}
 
 # No action: show usage.
-case "$ACTION" in
-  list) list_backups ;;
-  latest) restore_latest ;;
-  --git | -g) restore_from_git "$REF" "$DRY_RUN" ;;
-  --diff | -d) show_diff "$REF" ;;
-  *) usage ;;
-esac
+run_action() {
+  case "$ACTION" in
+    list) list_backups ;;
+    latest) restore_latest ;;
+    --git | -g) restore_from_git "$REF" "$DRY_RUN" ;;
+    --diff | -d) show_diff "$REF" ;;
+    *) usage ;;
+  esac
+}
+
+parse_args "$@"
+run_action
