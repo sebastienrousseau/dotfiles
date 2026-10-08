@@ -51,6 +51,24 @@ test_start "flags_in_defaults_run_scripts"
 assert_equals "1" "$(fixture defaults defaults/run_onchange_after_x.sh.tmpl 'npm install -g foo@latest')" \
   "run_* scripts under defaults/ are scanned too"
 
+test_start "flags_last_line_without_newline"
+mkdir -p "$WORK/nonl/tools/ci" "$WORK/nonl/install/provision"
+cp "$checker" "$WORK/nonl/tools/ci/check-unpinned-installs.sh"
+printf '#!/usr/bin/env bash\ngo install x@latest' >"$WORK/nonl/install/provision/run_onchange_97-n.sh"
+rc=0
+bash "$WORK/nonl/tools/ci/check-unpinned-installs.sh" >"$WORK/nonl.out" 2>&1 || rc=$?
+assert_equals "1" "$rc" "a final line with no newline is still checked"
+
+test_start "report_names_file_line_and_summary"
+fixture report install/provision/run_onchange_96-r.sh.tmpl 'go install x@latest' >/dev/null
+assert_contains "install/provision/run_onchange_96-r.sh.tmpl:2:" "$(cat "$WORK/report.out")" \
+  "the finding points at the file and line"
+assert_contains "Unpinned installs in run_* scripts" "$(cat "$WORK/report.out")" "a summary line closes the report"
+
+test_start "flags_install_followed_by_comment"
+assert_equals "1" "$(fixture trailing install/provision/run_onchange_95-t.sh.tmpl 'go install x@latest # TODO pin')" \
+  "a trailing comment does not hide the install before it"
+
 test_start "allows_pinned_forms"
 assert_equals "0" "$(fixture pinned install/provision/run_onchange_99-ok.sh.tmpl 'go install golang.org/x/tools/gopls@v0.23.0
 cargo install --locked --version 0.13.13 cargo-edit

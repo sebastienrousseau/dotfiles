@@ -37,6 +37,7 @@ lib() {
   : >"$CALLS"
   out="$(env -i HOME="$WORK" PATH="$WORK/bin:/usr/bin:/bin" NO_COLOR=1 MISE_SAME="${MISE_SAME:-}" \
     bash -c 'source "$1/lib/dot/ui.sh"; source "$1/lib/dot/utils.sh"
+      source "$1/lib/dot/ai-install.sh"; source "$1/lib/dot/ai-provision.sh"
       '"$1" _ "$REPO_ROOT" 2>&1)" || rc=$?
   printf '%s\nrc=%s\n' "$out" "$rc"
 }
@@ -71,6 +72,11 @@ test_start "unpinned_package_refused"
 r="$(lib 'ai_pinned_spec npm:not-pinned')"
 assert_equals "1|" "$(rc_of "$r")|$(head -n 1 <<<"$r" | grep -o '@.*' || true)" \
   "a package without a pin yields no install spec"
+
+test_start "install_of_unpinned_package_refused"
+r="$(lib '_ai_mise_pkg() { echo npm:not-pinned; }; ai_install_tool something Something')"
+assert_equals "1|" "$(rc_of "$r")|$(cat "$CALLS")" \
+  "dot ai install fails for a package with no pin and never runs mise"
 
 test_start "upgrade_proposes_bumps"
 r="$(lib 'ai_pin_bumps')"
