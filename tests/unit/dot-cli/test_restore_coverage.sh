@@ -32,6 +32,8 @@ cat >"$BIN/git" <<EOF
 printf 'git %s\n' "\$*" >>"$CALLS"
 case "\$*" in
   *log*) printf 'def5678 chezmoi-source commit\n' ;;
+  # Resolve "REF^{commit}" to REF so the calls below stay readable.
+  *rev-parse*) last="\${*: -1}"; printf '%s\n' "\${last%^\{commit\}}" ;;
 esac
 exit 0
 EOF

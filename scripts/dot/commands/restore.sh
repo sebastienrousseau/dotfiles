@@ -61,28 +61,27 @@ list_backups() {
   fi
 }
 
-git_source_dir() {
+# Set GIT_SRC to the repository and GIT_COMMIT to the commit REF names, or
+# log why not and return 1. A ref starting with '-' would reach git as an
+# option (--output=FILE writes anywhere), so it is refused, and
+# --end-of-options keeps rev-parse from reading it as one either. Only the
+# resolved commit id is ever passed on to git.
+resolve_git_target() {
+  local ref="$1"
   if [[ -d "$DOTFILES_DIR/.git" ]]; then
-    printf '%s\n' "$DOTFILES_DIR"
+    GIT_SRC="$DOTFILES_DIR"
   elif [[ -d "$CHEZMOI_SOURCE/.git" ]]; then
-    printf '%s\n' "$CHEZMOI_SOURCE"
+    GIT_SRC="$CHEZMOI_SOURCE"
   else
-    log_error "No git repository found" >&2
+    log_error "No git repository found"
     return 1
   fi
-}
-
-# Resolve a user-supplied ref to a commit id. A ref starting with '-' would
-# reach git as an option (--output=FILE writes anywhere), so it is refused,
-# and --end-of-options keeps rev-parse from reading it as one either.
-resolve_commit() {
-  local source_dir="$1" ref="$2"
   if [[ -z "$ref" || "$ref" == -* ]]; then
-    log_error "Invalid git ref: '$ref'" >&2
+    log_error "Invalid git ref: '$ref'"
     return 1
   fi
-  git -C "$source_dir" rev-parse --verify --quiet --end-of-options "${ref}^{commit}" || {
-    log_error "Unknown git ref: $ref" >&2
+  GIT_COMMIT="$(git -C "$GIT_SRC" rev-parse --verify --quiet --end-of-options "${ref}^{commit}")" || {
+    log_error "Unknown git ref: $ref"
     return 1
   }
 }
@@ -90,16 +89,14 @@ resolve_commit() {
 restore_from_git() {
   local ref="$1"
   local dry_run="${2:-false}"
-  local source_dir commit
 
-  source_dir="$(git_source_dir)" || return 1
-  commit="$(resolve_commit "$source_dir" "$ref")" || return 1
+  resolve_git_target "$ref" || return 1
 
   log_info "Restoring from git ref: $ref"
 
   if $dry_run; then
     log_info "Dry run - showing changes:"
-    git -C "$source_dir" diff --stat "$commit" --
+    git -C "$GIT_SRC" diff "$GIT_COMMIT" --stat --
     return 0
   fi
 
@@ -107,7 +104,7 @@ restore_from_git() {
   create_backup
 
   # Restore
-  git -C "$source_dir" checkout "$commit" -- .
+  git -C "$GIT_SRC" checkout "$GIT_COMMIT" -- .
   log_success "Restored from $ref"
 
   # Re-apply chezmoi
@@ -118,12 +115,8 @@ restore_from_git() {
 }
 
 show_diff() {
-  local ref="$1"
-  local source_dir commit
-
-  source_dir="$(git_source_dir)" || return 1
-  commit="$(resolve_commit "$source_dir" "$ref")" || return 1
-  git -C "$source_dir" diff "$commit" --
+  resolve_git_target "$1" || return 1
+  git -C "$GIT_SRC" diff "$GIT_COMMIT" --
 }
 
 create_backup() {

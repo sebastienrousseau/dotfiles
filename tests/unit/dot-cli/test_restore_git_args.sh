@@ -37,8 +37,8 @@ reset_state() { # a local edit on top of HEAD, no backups, no side effects
 
 restore() {
   RC=0
-  OUT="$(cd "$WORK" && env HOME="$WORK/home" XDG_DATA_HOME="$WORK/data" \
-    DOTFILES_DIR="$REPO" PATH="$WORK/bin:$PATH" \
+  OUT="$(cd "${RUN_CWD:-$WORK}" && env HOME="$WORK/home" XDG_DATA_HOME="$WORK/data" \
+    DOTFILES_DIR="${RUN_DOTFILES_DIR:-$REPO}" PATH="$WORK/bin:$PATH" \
     GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1 \
     bash "$RESTORE_FILE" "$@" </dev/null 2>&1)" || RC=$?
 }
@@ -68,6 +68,8 @@ for bad in "--output=$WORK/pwned" -p; do
   assert_not_equals "0" "$RC" "--git $bad without --dry-run is refused"
   assert_false '[[ -e "$WORK/pwned" ]]' "and creates nothing"
   assert_equals "local edit" "$(cat "$REPO/file.txt")" "and restores nothing"
+  assert_false '[[ -d "$WORK/data/dotfiles/backups" ]]' "and takes no backup"
+  assert_contains "Invalid git ref: '$bad'" "$OUT" "and says why"
   reset_state
   restore --diff "$bad"
   assert_not_equals "0" "$RC" "--diff $bad is refused"
@@ -78,7 +80,24 @@ test_start "restore_git_refuses_unknown_ref"
 reset_state
 restore --git no-such-ref --dry-run
 assert_not_equals "0" "$RC" "an unknown ref is refused"
-assert_contains "no-such-ref" "$OUT" "and named"
+assert_contains "Unknown git ref: no-such-ref" "$OUT" "and named"
+restore --git no-such-ref
+assert_not_equals "0" "$RC" "an unknown ref is refused without --dry-run"
+assert_false '[[ -d "$WORK/data/dotfiles/backups" ]]' "and takes no backup"
+assert_equals "local edit" "$(cat "$REPO/file.txt")" "and restores nothing"
+
+# With no repository configured, the current directory must never stand in
+# for one, even when it is itself a git checkout.
+test_start "restore_without_repository_ignores_cwd_repo"
+reset_state
+RUN_CWD="$REPO" RUN_DOTFILES_DIR="$WORK/no-repo" restore --git HEAD~1
+assert_not_equals "0" "$RC" "--git with no repository fails"
+assert_contains "No git repository found" "$OUT" "and says why"
+assert_equals "local edit" "$(cat "$REPO/file.txt")" "and leaves the cwd checkout alone"
+assert_false '[[ -d "$WORK/data/dotfiles/backups" ]]' "and takes no backup"
+RUN_CWD="$REPO" RUN_DOTFILES_DIR="$WORK/no-repo" restore --diff HEAD~1
+assert_not_equals "0" "$RC" "--diff with no repository fails"
+assert_false '[[ "$OUT" == *"local edit"* ]]' "and diffs nothing"
 
 test_start "restore_git_requires_a_ref"
 reset_state
