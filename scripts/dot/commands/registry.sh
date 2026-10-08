@@ -51,7 +51,7 @@ source "$SCRIPT_DIR/../../../lib/dot/registry-trust.sh"
 source "$SCRIPT_DIR/../../../lib/dot/registry-module.sh"
 
 _registry_default_url() {
-  printf '%s\n' "https://sebastienrousseau.github.io/dotfiles/registry.json"
+  printf '%s\n' "https://doc.dotfiles.io/registry.json"
 }
 
 _registry_config_file() {

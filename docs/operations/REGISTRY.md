@@ -9,7 +9,7 @@ description: "How to publish and consume reusable dotfile modules."
 The `dot registry` command discovers reusable dotfile modules from a JSON index published over HTTPS. The default registry is hosted by this repo at:
 
 ```
-https://sebastienrousseau.github.io/dotfiles/registry.json
+https://doc.dotfiles.io/registry.json
 ```
 
 This page documents the JSON contract and the contribution flow. It is the §3 / Months 12-18 deliverable from [HARD_AUDIT_2026.md](./HARD_AUDIT_2026.md) — the registry is the network-effect feature that turns the framework into a category, not just one person's setup.
