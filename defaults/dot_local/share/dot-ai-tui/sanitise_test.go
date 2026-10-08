@@ -16,14 +16,14 @@ import (
 // hostile carries an OSC 52 clipboard write, a screen clear, a C1 CSI and
 // bidi overrides/isolates: model output or a crafted db row could use any of
 // them to act on the terminal or disguise what it shows.
-const hostile = "\x1b]52;c;ZXZpbA==\x07\x1b[2J\u009b31m‮evil⁦x⁩"
+const hostile = "\x1b]52;c;ZXZpbA==\x07\x1b[2J\u009b31m\u202eevil\u2066x\u2069"
 
 // assertInert fails if s still holds a sequence the terminal would act on.
 // chroma's own SGR colour codes ("\x1b[...m") are allowed through, so this
 // checks for the OSC/BEL/clear/C1 and bidi parts of hostile specifically.
 func assertInert(t *testing.T, what, s string) {
 	t.Helper()
-	for _, bad := range []string{"\x1b]", "\x07", "\x1b[2J", "\u009b", "‪", "‮", "⁦", "⁩"} {
+	for _, bad := range []string{"\x1b]", "\x07", "\x1b[2J", "\u009b", "\u202a", "\u202e", "\u2066", "\u2069"} {
 		if strings.Contains(s, bad) {
 			t.Errorf("%s still contains %q: %q", what, bad, s)
 		}
@@ -36,9 +36,9 @@ func TestCleanReplacesControlAndBidi(t *testing.T) {
 		{"tab\tand\nnewline", "tab\tand\nnewline"},
 		{"\x1b[2J", "�[2J"},
 		{"\x00\x7f\u0085\u009b", "����"},
-		{"a‪b‮c", "a�b�c"},
-		{"⁦⁧⁨⁩", "����"},
-		{"  ⁥⁪", "  ⁥⁪"},
+		{"a\u202ab\u202ec", "a�b�c"},
+		{"\u2066\u2067\u2068\u2069", "����"},
+		{"  ⁥\u206a", "  ⁥\u206a"},
 		{"héllo ✓ 日本", "héllo ✓ 日本"},
 	}
 	for _, c := range cases {

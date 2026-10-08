@@ -676,7 +676,7 @@ mod tests {
             UNIX_EPOCH,
         );
         assert_eq!(code, EXIT_USAGE);
-        assert!(out.is_empty());
+        assert_eq!(String::from_utf8_lossy(&out), "");
         assert_eq!(
             String::from_utf8_lossy(&err),
             "dot-sys: evidence is larger than 1048576 bytes\n"
