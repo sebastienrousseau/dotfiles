@@ -12,6 +12,7 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -33,7 +34,24 @@ type Message struct {
 	Result  json.RawMessage `json:"result,omitempty"`
 }
 
-// Strict rejects duplicate keys, unknown fields, trailing values and invalid UTF-8.
+// foldKey maps a member name to the form encoding/json uses to match it to a
+// struct field: every rune becomes the smallest rune of its simple case-fold
+// orbit. Two names with the same foldKey land in the same field, so Strict
+// must treat them as duplicates. strings.ToLower is not enough: it leaves
+// U+017F (long s) alone although encoding/json matches it to 's'.
+func foldKey(s string) string {
+	return strings.Map(func(r rune) rune {
+		low := r
+		for f := unicode.SimpleFold(r); f != r; f = unicode.SimpleFold(f) {
+			low = min(low, f)
+		}
+		return low
+	}, s)
+}
+
+// Strict rejects duplicate keys (compared the way encoding/json matches
+// field names, so "names" and "Names" collide), unknown fields, trailing
+// values and invalid UTF-8.
 func Strict(data []byte, dst any) error {
 	if !utf8.Valid(data) || len(data) > MaxFrame {
 		return fmt.Errorf("DOT_E_PROTOCOL: encoding or size")
@@ -58,10 +76,10 @@ func Strict(data []byte, dst any) error {
 						return err
 					}
 					key, ok := k.(string)
-					if !ok || seen[key] {
+					if !ok || seen[foldKey(key)] {
 						return fmt.Errorf("DOT_E_PROTOCOL: duplicate key")
 					}
-					seen[key] = true
+					seen[foldKey(key)] = true
 					if err := walk(depth + 1); err != nil {
 						return err
 					}

@@ -46,3 +46,38 @@ func FuzzFrames(f *testing.F) {
 		Read(bufio.NewReaderSize(bytes.NewReader(b), 128))
 	})
 }
+
+// TestStrictRejectsCaseFoldedDuplicates: encoding/json matches field names
+// case-insensitively (with Unicode simple folding), so two keys that fold
+// alike set the same field and the last one silently wins. Strict must
+// treat them as the duplicate they are.
+func TestStrictRejectsCaseFoldedDuplicates(t *testing.T) {
+	type names struct {
+		Names []string `json:"names"`
+		Stage string   `json:"stage"`
+		Kind  string   `json:"kind"`
+	}
+	for _, s := range []string{
+		`{"names":["a"],"Names":["b"]}`,
+		`{"NAMES":["a"],"names":["b"]}`,
+		`{"stage":"a","ſtage":"b"}`, // U+017F folds to s; ToLower would miss it
+		`{"kind":"a","Kind":"b"}`,   // KELVIN SIGN folds to k
+	} {
+		var dst names
+		if err := Strict([]byte(s), &dst); err == nil {
+			t.Errorf("accepted %s as %+v", s, dst)
+		}
+	}
+	for _, s := range []string{`{"names":["a"],"stage":"s","kind":"k"}`, `{"Names":["a"]}`, `{"a":{"x":1},"b":{"x":2}}`} {
+		var dst struct {
+			Names []string       `json:"names"`
+			Stage string         `json:"stage"`
+			Kind  string         `json:"kind"`
+			A     map[string]int `json:"a"`
+			B     map[string]int `json:"b"`
+		}
+		if err := Strict([]byte(s), &dst); err != nil {
+			t.Errorf("rejected %s: %v", s, err)
+		}
+	}
+}
