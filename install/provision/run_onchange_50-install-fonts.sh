@@ -22,6 +22,11 @@ if [[ -z "$SOURCE_ROOT" || ! -r "$SOURCE_ROOT/lib/dot/verified-download.sh" ]]; 
 fi
 # shellcheck source=../../lib/dot/verified-download.sh disable=SC1091
 source "$SOURCE_ROOT/lib/dot/verified-download.sh"
+# archive_paths_are_safe: no links, no paths leaving the font directory.
+# shellcheck source=../lib/logging.sh disable=SC1091
+source "$SOURCE_ROOT/install/lib/logging.sh"
+# shellcheck source=../lib/installers.sh disable=SC1091
+source "$SOURCE_ROOT/install/lib/installers.sh"
 
 # Support for DOTFILES_SILENT
 log_info() { if [[ "${DOTFILES_SILENT:-0}" != "1" ]]; then printf '\n[INFO] %s\n' "$*"; fi; }
@@ -60,25 +65,43 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 
 log_info "Installing Nerd Fonts ($FONT_VERSION) for $OS_TYPE..."
 
-# Parallel download and extraction
-for font in "${FONTS[@]}"; do
-  (
-    if [[ "${DOTFILES_SILENT:-0}" != "1" ]]; then
-      echo "   -> Processing $font..."
-    fi
-    download_verified_asset \
-      "${NERD_FONT_URL}/${font}.zip" \
-      "$NERD_FONT_CHECKSUM_URL" \
-      "${font}.zip" \
-      "$TMP_DIR/${font}.zip" \
-      104857600
-    unzip -o -q "$TMP_DIR/${font}.zip" -d "$FONT_DIR"
-    rm -f "$TMP_DIR/${font}.zip"
-  ) &
-done
+# install_font <font>: download and verify one font zip, then check every
+# entry (no links, no paths leaving the directory) before unzip -o writes
+# into the font directory. Run in a subshell: a refusal exits it.
+install_font() {
+  local font="$1"
+  [[ "${DOTFILES_SILENT:-0}" == "1" ]] || echo "   -> Processing $font..."
+  download_verified_asset \
+    "${NERD_FONT_URL}/${font}.zip" \
+    "$NERD_FONT_CHECKSUM_URL" \
+    "${font}.zip" \
+    "$TMP_DIR/${font}.zip" \
+    104857600
+  archive_paths_are_safe zip "$TMP_DIR/${font}.zip"
+  unzip -o -q "$TMP_DIR/${font}.zip" -d "$FONT_DIR"
+  rm -f "$TMP_DIR/${font}.zip"
+}
 
-# Wait for all background processes
-wait
+# wait_all <pid>...: 0 only when every background install succeeded.
+wait_all() {
+  local pid failed=0
+  for pid in "$@"; do
+    wait "$pid" || failed=1
+  done
+  return "$failed"
+}
+
+# Parallel download and extraction; a refused or failed font fails the run
+# before the version marker is written.
+pids=()
+for font in "${FONTS[@]}"; do
+  (install_font "$font") &
+  pids+=("$!")
+done
+if ! wait_all "${pids[@]}"; then
+  printf '[ERROR] Nerd Fonts install failed; nothing recorded\n' >&2
+  exit 1
+fi
 
 # Save version marker
 echo "$FONT_VERSION" >"$MARKER_FILE"

@@ -37,7 +37,7 @@ dot_fixture_stub "$WORK/stubs" chezmoi 0
   export PATH="$WORK/stubs:$WORK/base"
   export DOTFILES_NONINTERACTIVE=1
   source "$INIT_MODULE"
-  cmd_init alice -- --dry-run
+  cmd_init alice --yes -- --dry-run
 ) >"$WORK/endopts.out" 2>&1
 IN_RC=$?
 
@@ -46,7 +46,42 @@ assert_equals "0" "$IN_RC" "a trailing -- should be accepted, not rejected"
 assert_contains "github.com/alice/dotfiles.git" "$(cat "$WORK/endopts.out")" \
   "the user argument before -- should still be resolved"
 
-# ── 2. The trust prompt, on a real terminal ────────────────────────────────
+# ── 2. No terminal: no prompt can be shown, so consent must be explicit ────
+#
+# Without a TTY (CI, a pipe, an agent) cmd_init used to skip the prompt and
+# clone and apply the foreign repository. It now requires --yes.
+: >"$WORK/chezmoi-calls.log"
+printf '#!/bin/sh\necho "chezmoi $*"\necho "chezmoi $*" >>"%s"\n' "$WORK/chezmoi-calls.log" >"$WORK/stubs/chezmoi"
+# init_no_tty <args...>: cmd_init with stdin from /dev/null; prints the status.
+init_no_tty() {
+  local rc=0
+  (
+    export CHEZMOI_SOURCE_DIR="$WORK/headless-src"
+    export PATH="$WORK/stubs:$WORK/base"
+    unset DOTFILES_NONINTERACTIVE
+    source "$INIT_MODULE"
+    cmd_init "$@"
+  ) </dev/null >"$WORK/headless.out" 2>&1 || rc=$?
+  printf '%s' "$rc"
+}
+
+test_start "init_without_tty_refuses_without_yes"
+rc="$(init_no_tty alice)"
+assert_equals "1|" "$rc|$(cat "$WORK/chezmoi-calls.log")" \
+  "with no terminal and no --yes, nothing is cloned or applied"
+assert_contains "--yes" "$(cat "$WORK/headless.out")" "the refusal says how to consent"
+
+test_start "init_noninteractive_refuses_without_yes"
+rc="$(DOTFILES_NONINTERACTIVE=1 init_no_tty alice --no-apply)"
+assert_equals "1|" "$rc|$(cat "$WORK/chezmoi-calls.log")" \
+  "DOTFILES_NONINTERACTIVE is not consent either, even for a clone only"
+
+test_start "init_without_tty_proceeds_with_yes"
+rc="$(init_no_tty alice --yes)"
+assert_equals "0" "$rc" "--yes is explicit consent"
+assert_contains "init" "$(cat "$WORK/chezmoi-calls.log")" "and chezmoi is run"
+
+# ── 3. The trust prompt, on a real terminal ────────────────────────────────
 TTY_FORM=""
 printf '#!/bin/sh\n[ -t 0 ] && echo TTY_PROBE_OK\n' >"$WORK/tty-probe.sh"
 chmod +x "$WORK/tty-probe.sh"

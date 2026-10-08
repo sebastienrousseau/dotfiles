@@ -64,12 +64,32 @@ _init_resolve_url() {
   esac
 }
 
+# _init_confirm <yes>: consent to run a foreign repository. --yes is explicit
+# consent; otherwise the user is asked on a terminal. With no terminal (CI, a
+# pipe, an agent) nobody can be asked, so the run is refused, not assumed.
+_init_confirm() {
+  local resp
+  [[ "$1" -eq 1 ]] && return 0
+  if [[ -t 0 ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]]; then
+    read -r -p "  Continue? [y/N] " resp
+    case "$resp" in [yY] | [yY][eE][sS]) return 0 ;; esac
+    ui_info "Init" "aborted by user"
+    return 1
+  fi
+  ui_err "Refusing" "no terminal to confirm on; pass --yes to trust this repository"
+  return 1
+}
+
 cmd_init() {
-  local user_arg="" dry_run=0 apply=1 force=0
+  local user_arg="" dry_run=0 apply=1 force=0 yes=0
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --dry-run | -n)
         dry_run=1
+        shift
+        ;;
+      --yes | -y)
+        yes=1
         shift
         ;;
       --no-apply)
@@ -82,7 +102,7 @@ cmd_init() {
         ;;
       --help | -h)
         cat <<EOF
-Usage: dot init <github-user|owner/repo|url> [--dry-run] [--no-apply] [--force]
+Usage: dot init <github-user|owner/repo|url> [--dry-run] [--no-apply] [--force] [--yes]
 
 Bootstrap a foreign dotfiles repo through chezmoi + the dot harness.
 
@@ -97,6 +117,8 @@ Flags:
   --dry-run, -n   Show resolved URL + target dir without cloning.
   --no-apply      Clone the source but skip 'chezmoi apply'.
   --force,   -f   Overwrite an existing chezmoi source dir.
+  --yes,     -y   Trust the repository without the prompt. Required with
+                  no terminal (CI, pipes, agents).
 EOF
         return 0
         ;;
@@ -154,16 +176,7 @@ EOF
 
   ui_warn "Trust" "The target repo's scripts will run with your user privileges."
   ui_warn "Trust" "Inspect $url before proceeding if you don't know the author."
-  if [[ -t 0 ]] && [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]]; then
-    read -r -p "  Continue? [y/N] " resp
-    case "$resp" in
-      [yY] | [yY][eE][sS]) ;;
-      *)
-        ui_info "Init" "aborted by user"
-        return 1
-        ;;
-    esac
-  fi
+  _init_confirm "$yes" || return 1
 
   local chezmoi_args=(init --source "$source_dir")
   [[ "$apply" -eq 1 ]] && chezmoi_args+=(--apply)

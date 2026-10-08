@@ -37,8 +37,10 @@ When invoked, it:
 3. **Reads** the user's current agent profile from `$DOT_AGENT_PROFILE` (defaults to `ask`):
    - `ask` → run `dot init <user> --dry-run` (read-only preview)
    - `plan` → run `dot init <user> --dry-run` and explain the plan
-   - `apply` → run `dot init <user>` (full apply with `chezmoi apply`)
-   - `audit` → run `dot init <user> --no-apply` (clone only, no chezmoi apply)
+   - `apply` → run `dot init <user> --yes` (full apply with `chezmoi apply`), only after the user has confirmed they trust the repository
+   - `audit` → run `dot init <user> --no-apply --yes` (clone only, no chezmoi apply), after the same confirmation
+
+   An agent has no terminal, so `dot init` refuses to clone without `--yes`. Pass it only once the user has said yes to this repository.
 4. **Surfaces** the trust prompt warnings before any clone runs — the target repo's scripts execute with the user's privileges.
 5. **Reports** the outcome (success / failed / aborted-by-trust-prompt) so the user can decide next steps.
 
@@ -54,6 +56,7 @@ dot init <https-or-ssh-url>           # explicit URL
 dot init <user> --dry-run             # preview only
 dot init <user> --no-apply            # clone, skip chezmoi apply
 dot init <user> --force               # overwrite existing chezmoi source dir
+dot init <user> --yes                 # consent without a terminal (required by agents)
 ```
 
 ## Profile-aware defaults

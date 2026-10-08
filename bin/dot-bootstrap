@@ -75,6 +75,34 @@ if ! grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null; then
   echo "experimental-features = nix-command flakes" >>~/.config/nix/nix.conf
 fi
 
+# Release tags are SSH-signed. Only these keys may sign the release that gets
+# applied (the same keys as defaults/dot_config/git/allowed_signers.tmpl).
+release_signers() {
+  cat <<'SIGNERS'
+sebastienrousseau@users.noreply.github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDjGRQyeM79nAb4GHcpGzXMKq7HE3xyEOev4gVsnBN1e
+sebastienrousseau@users.noreply.github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKY+QFE+TjJyo1txN/p+THGR2nWYmSjojdKmYWEvD4dh
+sebastienrousseau@users.noreply.github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII32YuD6LxBOeFb5kG4Fqbm62kn9OkcHNPJtktO8iYVF
+SIGNERS
+}
+
+# checkout_signed_release <dir>: check out the newest v* tag, refusing it
+# unless its signature verifies against release_signers. The default branch
+# is never applied: it carries commits no release has covered.
+checkout_signed_release() {
+  local dir="$1" tag signers rc=0
+  git -C "$dir" fetch --quiet --tags origin || error "Could not fetch release tags"
+  tag="$(git -C "$dir" tag --list 'v*' --sort=-v:refname | head -n 1)"
+  [[ -n "$tag" ]] || error "No release tag found in $dir"
+  signers="$(umask 077 && mktemp)"
+  release_signers >"$signers"
+  git -C "$dir" -c gpg.ssh.allowedSignersFile="$signers" verify-tag "$tag" >/dev/null 2>&1 || rc=$?
+  rm -f "$signers"
+  [[ "$rc" -eq 0 ]] || error "Release tag $tag is not signed by a pinned release key"
+  git -C "$dir" -c advice.detachedHead=false checkout --quiet "$tag" ||
+    error "Could not check out $tag"
+  step "Using signed release $tag"
+}
+
 # 3. Clone Repository
 DOTFILES_DIR="$HOME/.dotfiles"
 if [ ! -d "$DOTFILES_DIR" ]; then
@@ -82,13 +110,14 @@ if [ ! -d "$DOTFILES_DIR" ]; then
   git clone https://github.com/sebastienrousseau/dotfiles.git "$DOTFILES_DIR"
 else
   step "Dotfiles repository already exists at $DOTFILES_DIR"
-  (cd "$DOTFILES_DIR" && git pull)
 fi
+checkout_signed_release "$DOTFILES_DIR"
 
-# 4. Bootstrap Chezmoi via Nix & Apply
+# 4. Bootstrap Chezmoi via Nix & Apply. chezmoi comes from the nixpkgs commit
+# locked in the release's flake.lock, not the moving registry entry.
 step "Applying Configurations (Isolated)"
 cd "$DOTFILES_DIR"
-nix shell nixpkgs#chezmoi -c chezmoi apply --force
+nix shell --inputs-from . nixpkgs#chezmoi -c chezmoi apply --force
 
 # 5. Drop into the Environment
 step "Bootstrapping Complete. Entering Deterministic Shell."
