@@ -22,7 +22,6 @@
   39   38   41.3   78     0 bin/dot-theme-sync::reload_browsers
   33   39   35.4  149     0 bin/dot-theme-sync::reload_desktop
   17   19   28.7   43     0 bin/dot-theme-sync::reload_ghostty
-  21   16   33.5   76     0 bin/dot-theme-sync::reload_nvim
   11   11   20.7   33     0 bin/dot-theme-sync::reload_tmux
   37   44   46.3  126   762 bin/dot::<top>
    1    0    0.0  111     0 bin/dot::_dot_command_routes
