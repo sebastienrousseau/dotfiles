@@ -266,6 +266,7 @@ clear_cache
 rc="$(run install good-module)"
 assert_equals "1" "$rc" "a missing archive fails the install"
 assert_file_contains "$OUT" "could not download" "the error names the download"
+assert_output_not_contains "SHA-256" "cat '$OUT'"
 
 test_start "install_refuses_a_checksum_mismatch"
 export DOTFILES_REGISTRY_URL="file://$MISMATCH_INDEX"
@@ -292,6 +293,7 @@ clear_cache
 rc="$(run install empty-module)"
 assert_equals "1" "$rc" "an archive with no files is refused"
 assert_file_contains "$OUT" "empty" "the error says the module is empty"
+assert_output_not_contains "Module contents" "cat '$OUT'"
 
 test_start "install_refuses_an_oversized_archive"
 # The 50 MiB guard is checked from the downloaded file's size, so a sparse
@@ -311,6 +313,7 @@ clear_cache
 rc="$(run install big-module)"
 assert_equals "1" "$rc" "an archive over the size limit is refused"
 assert_file_contains "$OUT" "50 MiB" "the error quotes the limit"
+assert_output_not_contains "SHA-256" "cat '$OUT'"
 rm -f "$BIG_ARCHIVE"
 
 # ===========================================================================

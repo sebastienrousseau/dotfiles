@@ -41,19 +41,17 @@ _registry_target_name() {
     case "$c" in
       private_* | readonly_* | empty_* | executable_*) c="${c#*_}" ;;
       literal_*)
-        printf '%s\n' "${c#literal_}"
-        return 0
+        c="${c#literal_}"
+        break
         ;;
       dot_*)
-        printf '.%s\n' "${c#dot_}"
-        return 0
+        c=".${c#dot_}"
+        break
         ;;
-      *)
-        printf '%s\n' "$c"
-        return 0
-        ;;
+      *) break ;;
     esac
   done
+  printf '%s\n' "$c"
 }
 
 ## _registry_target_path <relative source path> — target path under $HOME.

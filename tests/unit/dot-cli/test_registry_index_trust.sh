@@ -343,6 +343,46 @@ rc="$(run list)"
 assert_not_equals "0" "$rc" "updated must be an RFC 3339 UTC timestamp"
 assert_file_contains "$ERR" "validation" "it is a validation failure"
 
+test_start "an_unsigned_cache_is_not_served_to_a_verifying_run"
+reset_state
+write_index "$WORK/local.json" ""
+export DOTFILES_REGISTRY_URL="file://$WORK/local.json" DOTFILES_REGISTRY_UNSIGNED=1
+run list >/dev/null
+unset DOTFILES_REGISTRY_UNSIGNED
+rc="$(run list)"
+assert_not_equals "0" "$rc" "an index accepted unsigned is not reused once verification is back on"
+assert_file_contains "$ERR" "signature missing" "it is re-fetched and refused"
+
+test_start "without_stat_the_cache_is_neither_fresh_nor_a_fallback"
+# Ages cannot be read, so the cache must not be trusted either way.
+reset_state
+export DOTFILES_REGISTRY_URL="$https_url"
+write_index "$WWW/registry.json" "2026-05-02T00:00:00Z" "" "first copy"
+sign_stub "$WWW/registry.json"
+run list >/dev/null
+write_index "$WWW/registry.json" "2026-05-02T00:00:00Z" "" "second copy"
+sign_stub "$WWW/registry.json"
+NOSTAT_BIN="$WORK/nostat-bin"
+mkdir -p "$NOSTAT_BIN"
+for tool in bash sh jq tar awk sed grep cat mkdir rm mv cp date wc find printf mktemp dirname tr sha256sum shasum cksum head; do
+  p="$(command -v "$tool" 2>/dev/null || true)"
+  [[ -n "$p" ]] && ln -sf "$p" "$NOSTAT_BIN/$tool"
+done
+ln -sf "$BIN/curl" "$NOSTAT_BIN/curl"
+ln -sf "$BIN/minisign" "$NOSTAT_BIN/minisign"
+saved_path="$PATH"
+PATH="$NOSTAT_BIN"
+rc="$(run list)"
+PATH="$saved_path"
+assert_equals "0" "$rc" "the index is re-fetched"
+assert_file_contains "$OUT" "second copy" "the cache was not treated as fresh"
+mv "$WWW/registry.json" "$WWW/registry.json.away"
+PATH="$NOSTAT_BIN"
+rc="$(run list)"
+PATH="$saved_path"
+mv "$WWW/registry.json.away" "$WWW/registry.json"
+assert_not_equals "0" "$rc" "a cache of unknown age is not a fallback"
+
 # ===========================================================================
 # 3.4 Control characters in registry text
 # ===========================================================================
