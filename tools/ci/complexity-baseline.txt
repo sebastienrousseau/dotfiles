@@ -95,7 +95,7 @@
   21   23   41.8   64    65 install/provision/run_onchange_50-install-fonts.sh::<top>
   39   20   35.3   29     0 lib/dot/ai-commands.sh::_ai_invoke_provider
   12   11   23.7   24     0 lib/dot/ai-commands.sh::cmd_ai_install
-  19    1    2.1   23     0 lib/dot/ai-install.sh::_ai_mise_pkg
+  18    1    2.1   22     0 lib/dot/ai-install.sh::_ai_mise_pkg
   12   12   24.7   29     0 lib/dot/theme-transaction.sh::_theme_txn_restore_files
    2    1    4.2   35   756 lib/dot/ui.sh::<top>
   13   16   47.8   47     0 lib/dot/ui.sh::_ui_table_printf_fallback

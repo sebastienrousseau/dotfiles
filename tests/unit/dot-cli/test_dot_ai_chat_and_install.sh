@@ -81,7 +81,7 @@ chmod +x "$FX/stubs/brew"
 export BREW_LOG="$FX/brew.log" MISE_LOG="$FX/mise.log" MISE_STUB="$FX/mise-stub" STUB_DIR="$FX/stubs"
 ai_run ai install codex --yes
 assert_contains "brew install mise" "$(cat "$FX/brew.log" 2>/dev/null)" "mise is installed with consent"
-assert_contains "mise use -g npm:@openai/codex@latest" "$(cat "$FX/mise.log" 2>/dev/null)" \
+assert_contains "mise use -g npm:@openai/codex@0.159.3" "$(cat "$FX/mise.log" 2>/dev/null)" \
   "then the tool installs through it"
 assert_equals "0" "$DOT_FIXTURE_RC" "the install succeeds"
 rm -f "$FX/stubs/brew" "$FX/stubs/mise"

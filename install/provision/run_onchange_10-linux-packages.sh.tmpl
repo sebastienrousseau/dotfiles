@@ -303,14 +303,14 @@ fi
 if command -v cargo >/dev/null; then
   if ! cargo install --list 2>/dev/null | grep -q "^cargo-update "; then
     log_info "Installing cargo-install-update..."
-    cargo install cargo-update || true
+    cargo install --locked --version {{ index .rust_tools "cargo-update" | quote }} cargo-update || true
   fi
 fi
 
 if ! command -v stylua >/dev/null; then
   if command -v cargo >/dev/null; then
     log_info "Installing Stylua via cargo..."
-    cargo install stylua || true
+    cargo install --locked --version {{ index .rust_tools "stylua" | quote }} stylua || true
   else
     log_warn "Stylua not found and cargo is missing. Install stylua manually."
   fi
@@ -319,7 +319,7 @@ fi
 if ! command -v delta >/dev/null; then
   if command -v cargo >/dev/null; then
     log_info "Installing Delta via cargo..."
-    cargo install git-delta
+    cargo install --locked --version {{ index .rust_tools "git-delta" | quote }} git-delta
   else
     log_info "Skipping Delta install: cargo not found."
   fi

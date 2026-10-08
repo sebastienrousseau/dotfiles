@@ -175,7 +175,7 @@ if command -v script >/dev/null 2>&1; then
   with_gum
   apply_tty GUM_CHOICE="Install all"
   assert_equals "0:yes:yes:yes" \
-    "$RC:$(yes_no called 'gum choose --header'):$(yes_no called 'mise use -g npm:@openai/codex@latest'):$(yes_no called 'mise use -g npm:@guizmo-ai/zai-cli@latest')" \
+    "$RC:$(yes_no called 'gum choose --header'):$(yes_no called 'mise use -g npm:@openai/codex@0.159.3'):$(yes_no called 'mise use -g npm:@guizmo-ai/zai-cli@0.3.5')" \
     "mise installs each one, and the run completes"
 
   test_start "apply_tty_install_all_tries_native_installers"
@@ -187,7 +187,7 @@ if command -v script >/dev/null 2>&1; then
   with_gum
   apply_tty GUM_CHOICE="Choose which to install" GUM_PICK="Codex CLI,,Qwen Code"
   assert_equals "0:yes:yes:no" \
-    "$RC:$(yes_no called 'mise use -g npm:@openai/codex@latest'):$(yes_no called 'mise use -g npm:@qwen-code/qwen-code@latest'):$(yes_no called 'npm:@github/copilot')" \
+    "$RC:$(yes_no called 'mise use -g npm:@openai/codex@0.159.3'):$(yes_no called 'mise use -g npm:@qwen-code/qwen-code@0.24.7'):$(yes_no called 'npm:@github/copilot')" \
     "codex and qwen, not copilot; blank picks are ignored"
 
   test_start "apply_tty_skip_installs_nothing"

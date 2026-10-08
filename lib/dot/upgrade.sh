@@ -124,6 +124,8 @@ dot_upgrade_nix_steps() {
 dot_upgrade_toolchain_steps() {
   if has_command mise; then
     _upgrade_step mise "Mise tools" "installing + upgrading…" -- _dot_upgrade_mise
+    # AI CLIs stay at their [ai_tools] pins; list the bumps to review.
+    ai_pin_bumps
   else
     ui_step mise "Mise tools" skip "mise not installed — dot upgrade --yes installs it"
   fi

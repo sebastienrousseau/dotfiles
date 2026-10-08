@@ -66,14 +66,13 @@ sgpt=pipx:shell-gpt
 ollama=aqua:ollama/ollama
 kiro-cli=kiro-cli
 autohand=npm:autohand-cli
-vibe=pipx:mistral-vibe
 qwen=npm:@qwen-code/qwen-code
 zai=npm:@guizmo-ai/zai-cli
 MAP
 
 test_start "ai_install_leaves_native_installer_providers_unmapped"
-for _bin in goose amp cursor-agent grok agy kimi claude; do
-  assert_equals "" "$(_pkg "$_bin")" "$_bin has no mise package (native installer or n/a)"
+for _bin in goose amp cursor-agent grok agy kimi claude vibe; do
+  assert_equals "" "$(_pkg "$_bin")" "$_bin has no mise package (native installer, or not installed)"
 done
 
 test_start "ai_install_returns_nothing_for_an_unknown_binary"

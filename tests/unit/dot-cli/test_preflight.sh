@@ -44,6 +44,8 @@ lib() {
     source "$1/lib/dot/upgrade.sh"
     _ai_mise_pkg() { case "$1" in codex) echo npm:@openai/codex ;; esac; }
     _ai_in_scratch_dir() { "$@"; }
+    ai_pinned_spec() { printf "%s@1.0.0\n" "$1"; }
+    ai_pin_bumps() { :; }
     source "$1/lib/dot/ai-provision.sh"
     eval "$2"' _ "$REPO_ROOT" "$1" 2>&1)"
   RC=$?

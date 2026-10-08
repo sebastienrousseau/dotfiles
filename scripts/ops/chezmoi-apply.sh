@@ -179,7 +179,6 @@ _AI_PROVIDERS=(
   "aider|pipx:aider-chat[uvx_args=--python 3.12]|Aider"
   "kiro-cli|kiro-cli|Kiro CLI"
   "autohand|npm:autohand-cli|Autohand Code"
-  "vibe|pipx:mistral-vibe|Mistral Vibe"
   "qwen|npm:@qwen-code/qwen-code|Qwen Code"
   "zai|npm:@guizmo-ai/zai-cli|ZAI"
 )
@@ -228,7 +227,7 @@ _apply_ai_choose() {
   _ai_to_install=()
   if ! command -v gum &>/dev/null; then
     ui_info "Tip" "Install all missing AI providers with: mise install"
-    ui_info "Tip" "Or individually: mise use -g <package>@latest"
+    ui_info "Tip" "Or individually: dot ai install <tool> (pinned versions)"
     return 0
   fi
   action=$(printf '%s\n' "Install all" "Choose which to install" "Skip" |
@@ -242,13 +241,17 @@ _apply_ai_choose() {
 # _apply_ai_install <entry>: native installer for "native" packages, else
 # mise (under a gum spinner when gum is still there).
 _apply_ai_install() {
-  local bin pkg label
+  local bin pkg label spec
   IFS='|' read -r bin pkg label <<<"$1"
   if [[ "$pkg" == "native" ]]; then
     "install_${bin}_native" "$label"
-  elif command -v gum &>/dev/null; then
+    return 0
+  fi
+  # The version pinned in [ai_tools]; none means no install, not @latest.
+  spec="$(ai_pinned_spec "$pkg")" || return 0
+  if command -v gum &>/dev/null; then
     if _ai_in_scratch_dir gum spin --spinner dot --title "Installing $label ($pkg)" -- \
-      mise use -g "$pkg@latest" 2>&1; then
+      mise use -g "$spec" 2>&1; then
       ui_ok "$label" "installed"
     else
       ui_warn "$label" "install failed (continuing)"
@@ -258,7 +261,7 @@ _apply_ai_install() {
     # and bash's command hash keeps `command -v gum` true for the rest of
     # the run even if gum is removed.
     ui_info "Installing" "$label via mise ($pkg)"
-    _ai_in_scratch_dir mise use -g "$pkg@latest" 2>&1 || ui_warn "$label" "install failed (continuing)" # mutation: ignore unreachable: see above
+    _ai_in_scratch_dir mise use -g "$spec" 2>&1 || ui_warn "$label" "install failed (continuing)" # mutation: ignore unreachable: see above
   fi
 }
 

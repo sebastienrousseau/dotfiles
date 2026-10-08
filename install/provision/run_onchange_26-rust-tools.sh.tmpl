@@ -44,56 +44,64 @@ for component in "${COMPONENTS[@]}"; do
   fi
 done
 
-# Install cargo tools via cargo install
+# install_cargo_tool <binary> <crate> <version>: cargo install of the exact
+# version pinned in [rust_tools] in .chezmoidata.toml, always with the
+# crate's own Cargo.lock (--locked). No unlocked retry: a crate that only
+# builds unlocked pulls dependency versions nobody reviewed.
 install_cargo_tool() {
   local tool="$1"
-  local package="${2:-$1}"
+  local package="$2"
+  local version="${3:-}"
 
   if command -v "$tool" >/dev/null 2>&1; then
     log_info "${tool} already installed"
     return 0
   fi
+  if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    log_warn "Skipping ${tool}: no pinned version for ${package}"
+    return 0
+  fi
 
-  log_info "Installing ${tool}..."
-  cargo install "$package" --locked 2>/dev/null || cargo install "$package" || log_warn "Failed to install ${tool}"
+  log_info "Installing ${tool} ${version}..."
+  cargo install --locked --version "$version" "$package" || log_warn "Failed to install ${tool}"
 }
 
 # Essential cargo tools
 log_info "Installing cargo tools..."
 
 # cargo-edit: Add/remove/upgrade dependencies from CLI
-install_cargo_tool "cargo-add" "cargo-edit"
+install_cargo_tool "cargo-add" "cargo-edit" {{ index .rust_tools "cargo-edit" | quote }}
 
 # cargo-watch: Watch for changes and run commands
-install_cargo_tool "cargo-watch" "cargo-watch"
+install_cargo_tool "cargo-watch" "cargo-watch" {{ index .rust_tools "cargo-watch" | quote }}
 
 # cargo-audit: Security vulnerability scanner
-install_cargo_tool "cargo-audit" "cargo-audit"
+install_cargo_tool "cargo-audit" "cargo-audit" {{ index .rust_tools "cargo-audit" | quote }}
 
 # cargo-outdated: Check for outdated dependencies
-install_cargo_tool "cargo-outdated" "cargo-outdated"
+install_cargo_tool "cargo-outdated" "cargo-outdated" {{ index .rust_tools "cargo-outdated" | quote }}
 
 # cargo-update: Enables Topgrade Cargo package upgrades
-install_cargo_tool "cargo-install-update" "cargo-update"
+install_cargo_tool "cargo-install-update" "cargo-update" {{ index .rust_tools "cargo-update" | quote }}
 
 # cargo-expand: Expand macros for debugging
-install_cargo_tool "cargo-expand" "cargo-expand"
+install_cargo_tool "cargo-expand" "cargo-expand" {{ index .rust_tools "cargo-expand" | quote }}
 
 # cargo-nextest: Faster test runner
-install_cargo_tool "cargo-nextest" "cargo-nextest"
+install_cargo_tool "cargo-nextest" "cargo-nextest" {{ index .rust_tools "cargo-nextest" | quote }}
 
 # cargo-deny: Lint dependencies for licenses, security, etc
-install_cargo_tool "cargo-deny" "cargo-deny"
+install_cargo_tool "cargo-deny" "cargo-deny" {{ index .rust_tools "cargo-deny" | quote }}
 
 # Optional: sccache for distributed caching (large download)
 if [[ "${DOTFILES_RUST_SCCACHE:-0}" = "1" ]]; then
-  install_cargo_tool "sccache" "sccache"
+  install_cargo_tool "sccache" "sccache" {{ index .rust_tools "sccache" | quote }}
 fi
 
 # Optional: cross-compilation tools
 if [[ "${DOTFILES_RUST_CROSS:-0}" = "1" ]]; then
-  install_cargo_tool "cross" "cross"
-  install_cargo_tool "cargo-zigbuild" "cargo-zigbuild"
+  install_cargo_tool "cross" "cross" {{ index .rust_tools "cross" | quote }}
+  install_cargo_tool "cargo-zigbuild" "cargo-zigbuild" {{ index .rust_tools "cargo-zigbuild" | quote }}
 fi
 
 log_info "Rust tools setup complete!"

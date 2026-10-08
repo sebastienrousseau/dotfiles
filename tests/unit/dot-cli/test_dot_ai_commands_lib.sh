@@ -257,7 +257,7 @@ test_start "a_missing_tool_is_installed_through_mise"
 rm -f "$BIN/opencode"
 ai_min cmd_ai_install opencode
 assert_equals 0 "$RC" "rc"
-called "mise use -g opencode@latest"
+called "mise use -g opencode@1.18.34"
 out_has "installed" "success line"
 stub opencode
 
