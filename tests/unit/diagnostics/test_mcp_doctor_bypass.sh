@@ -242,6 +242,13 @@ check "$WORKDIR/.mcp.json"
 assert_equals 1 "$(grep -c 'Validation' "$OUTF")" "one validation section"
 rm -f "$WORKDIR/.mcp.json"
 
+test_start "a_project_mcp_json_reached_twice_is_checked_once"
+printf '{"mcpServers":{"fs":{"command":"npx","args":["pkg@1.0.0","/tmp/p"]}}}' >"$WORKDIR/.mcp.json"
+printf '{"projects":{"%s":{},"%s/.":{}}}' "$WORKDIR" "$WORKDIR" >"$FIX/claude-twice.json"
+check "$SAFE" "CLAUDE_USER_CONFIG=$FIX/claude-twice.json"
+assert_equals 2 "$(grep -c 'Validation' "$OUTF")" "primary plus one section for the shared .mcp.json"
+rm -f "$WORKDIR/.mcp.json"
+
 test_start "summary_keeps_the_primary_server_count"
 check "$SAFE" "CLAUDE_USER_CONFIG=$FIX/claude.json" -- --json
 assert_equals "1" "$(jq -r .server_count "$OUTF")" "server_count is the primary config's"

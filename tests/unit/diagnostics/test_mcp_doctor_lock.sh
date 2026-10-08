@@ -93,6 +93,12 @@ shipped "MCP_LOCK_ROOT=$FIX/nowhere"
 assert_equals 1 "$RC" "rc"
 out_has "is not in" "reported as missing integrity"
 
+test_start "an_unknown_ecosystem_is_never_verified"
+jq '.packages.git.ecosystem = "cargo"' "$LOCK" >"$FIX/lock-eco.json"
+shipped "MCP_LOCK_CONFIG=$FIX/lock-eco.json"
+assert_equals 1 "$RC" "rc"
+out_has "git: mcp-server-git==" "an ecosystem the doctor cannot check fails closed"
+
 test_start "a_server_command_off_the_lock_fails"
 jq '.mcpServers.git.command = "${HOME}/.local/share/dot-mcp/python/git/venv/bin/other"' "$CONFIG" >"$FIX/cmd.json"
 shipped "MCP_CONFIG=$FIX/cmd.json"
