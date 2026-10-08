@@ -44,6 +44,7 @@ _ai_invoke_provider() {
   return "${INVOKE_RC:-0}"
 }
 _ai_in_scratch_dir() { "$@"; }
+ai_pinned_spec() { printf '%s@9.9.9\n' "$1"; }
 _ai_mise_pkg() {
   case "$1" in
     claude | goose | amp | cursor-agent | grok | agy | kimi | ollama) echo "" ;;
@@ -61,7 +62,7 @@ cmd_ai_query() { _ai_stub query "$@"; }
 cmd_ai_install() { _ai_stub install "$@"; }
 cmd_ai_delegate() { _ai_stub delegate "$@"; }
 cmd_ai_cost() { _ai_stub cost "$@"; }
-export -f _ai_deprecated _ai_invoke_provider _ai_in_scratch_dir _ai_mise_pkg \
+export -f _ai_deprecated _ai_invoke_provider _ai_in_scratch_dir _ai_mise_pkg ai_pinned_spec \
   _ai_stub _ai_cockpit _ai_oneshot _ai_serve cmd_ai_chat cmd_ai_doctor \
   cmd_ai_setup cmd_ai_query cmd_ai_install cmd_ai_delegate cmd_ai_cost
 for n in claude goose agy amp cursor grok kimi; do
@@ -223,8 +224,8 @@ else
   # its path and the self-deleting stub really is gone for the install loop.
   DOTFILES_ACCESSIBILITY=1 GUM_MISSING="Install all" GUM_VANISH=1 MISE_RC=1 tty_ai
   cp "$WORK/gum.bak" "$BIN/gum"
-  assert_file_contains "$TTY_OUT" "via mise (npm:crush)" "plain mise install announced"
-  assert_file_contains "$CALLS" "mise use -g npm:crush@latest" "mise invoked directly"
+  assert_file_contains "$TTY_OUT" "via mise (npm:crush@9.9.9)" "plain mise install announces the pinned version"
+  assert_file_contains "$CALLS" "mise use -g npm:crush@9.9.9" "mise invoked directly"
   assert_file_contains "$TTY_OUT" "Install gum for interactive launcher" "no-gum launcher tip"
 
   test_start "tty_no_gum_tips"

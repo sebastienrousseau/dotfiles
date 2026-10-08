@@ -76,6 +76,71 @@ opencode = true
 node_manager = "mise"  # mise, fnm, or nvm
 
 # ============================================================================
+# Install pins for what runs at `chezmoi apply` time (decision D3, option A)
+# ============================================================================
+#
+# Everything a provisioning run_* script installs is pinned here; tools that
+# `dot upgrade` refreshes through mise float in conf.d/00-dotfiles.toml with
+# minimum_release_age = "7d" instead. tools/ci/check-unpinned-installs.sh
+# fails on @latest, on cargo install without --locked and on a git clone of
+# a moving branch. Versions read 2026-10-08.
+
+# go install targets, binary = "module/path@version"
+# (https://proxy.golang.org/<module>/@latest)
+[go_tools]
+gopls = "golang.org/x/tools/gopls@v0.23.0"
+dlv = "github.com/go-delve/delve/cmd/dlv@v1.27.2"
+gofumpt = "mvdan.cc/gofumpt@v0.12.0"
+# v1 module: the shipped golangci.yml is the v1 format.
+golangci-lint = "github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8"
+goimports = "golang.org/x/tools/cmd/goimports@v0.51.0"
+gomodifytags = "github.com/fatih/gomodifytags@v1.17.0"
+impl = "github.com/josharian/impl@v1.5.0"
+gotests = "github.com/cweill/gotests/gotests@v1.9.0"
+goplay = "github.com/haya14busa/goplay/cmd/goplay@v1.0.0"
+
+# cargo install --locked --version, crate = "version"
+# (https://crates.io/api/v1/crates/<crate>, max_stable_version)
+[rust_tools]
+cargo-edit = "0.13.13"
+cargo-watch = "8.5.3"
+cargo-audit = "0.22.2"
+cargo-outdated = "0.19.0"
+cargo-update = "22.1.1"
+cargo-expand = "1.0.126"
+cargo-nextest = "0.9.148"
+cargo-deny = "0.20.2"
+sccache = "0.18.0"
+cross = "0.2.5"
+cargo-zigbuild = "0.23.4"
+stylua = "2.5.2"
+git-delta = "0.20.1"
+
+# Tmux Plugin Manager: the commit of tag v3.1.0
+# (https://api.github.com/repos/tmux-plugins/tpm/tags)
+[tmux_plugins]
+tpm_commit = "7bdb7ca33c9cc6440a600202b50142f401b6fe21"
+
+# AI CLIs, mise package = "version": the newest release at least seven days
+# old (npm registry `time`, PyPI upload time, GitHub release date). Read by
+# install/provision/run_onchange_15-ai-cli-tools.sh.tmpl and, at run time,
+# by lib/dot/ai-install.sh; `dot upgrade` lists newer releases to bump to.
+[ai_tools]
+"npm:@openai/codex" = "0.159.3"
+"npm:@github/copilot" = "1.0.90"
+"npm:opencode-ai" = "1.18.34"
+"npm:autohand-cli" = "0.9.8"
+"npm:@qwen-code/qwen-code" = "0.24.7"
+"npm:@guizmo-ai/zai-cli" = "0.3.5"
+"npm:@charmland/crush" = "0.97.1"
+"pipx:aider-chat" = "0.86.2"
+"pipx:shell-gpt" = "1.5.1"
+"aqua:ollama/ollama" = "0.40.0"
+"opencode" = "1.18.34"
+# mise's kiro-cli backend publishes no release dates; 1.27.1 is its newest.
+"kiro-cli" = "1.27.1"
+
+# ============================================================================
 # Alias Buckets (per-machine toggle support)
 # ============================================================================
 #

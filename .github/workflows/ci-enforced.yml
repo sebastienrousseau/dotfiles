@@ -245,6 +245,25 @@ jobs:
       - name: Source-grep ratchet
         run: python3 tools/ci/check-source-grep-tests.py
 
+  # chezmoi run_* scripts install with the user's privileges on every apply,
+  # so each install must be pinned: no @latest, cargo install --locked, no
+  # git clone of a moving branch. Versions live in .chezmoidata.toml.
+  lint-install-pins:
+    name: Lint / Install pins
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Unpinned installs in run_* scripts
+        run: bash tools/ci/check-unpinned-installs.sh
+
   # Per-function cyclomatic, cognitive, Halstead and NLOC measures for the
   # shell code; tools/ci/complexity.py fails when a unit crosses a limit
   # without being in tools/ci/complexity-baseline.txt, or a baselined unit
@@ -428,6 +447,7 @@ jobs:
       test-matrix,
       test-unit,
       lint-tests,
+      lint-install-pins,
       lint-complexity,
       test-mutation,
     ]

@@ -71,7 +71,7 @@ ai_prepare() {
 # ai_install_tool <bin> [label]: install one tool. 0 installed, 1 failed,
 # 2 no installer (or its prerequisite is missing).
 ai_install_tool() {
-  local bin="$1" label="${2:-$1}" method
+  local bin="$1" label="${2:-$1}" method spec
   method="$(ai_install_method "$bin")" || return 2
   case "$method" in
     native:*)
@@ -83,10 +83,11 @@ ai_install_tool() {
       ;;
     mise:*)
       command -v mise >/dev/null 2>&1 || return 2
-      ui_info "Installing" "$label via mise (${method#mise:})"
+      spec="$(ai_pinned_spec "${method#mise:}")" || return 1
+      ui_info "Installing" "$label via mise ($spec)"
       # mise's own status is reliable; the new shim may not be on this
       # shell's PATH yet, so a presence check would misreport success.
-      _ai_in_scratch_dir mise use -g "${method#mise:}@latest" 2>&1
+      _ai_in_scratch_dir mise use -g "$spec" 2>&1
       ;;
     *) return 2 ;;
   esac

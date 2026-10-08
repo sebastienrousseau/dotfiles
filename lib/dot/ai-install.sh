@@ -18,6 +18,50 @@ _AI_INSTALL_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=verified-download.sh disable=SC1091
 source "$_AI_INSTALL_LIB_DIR/verified-download.sh"
 
+# AI CLIs are pinned (decision D3): [ai_tools] in .chezmoidata.toml maps each
+# mise package to an exact version. The provisioning template reads it
+# through chezmoi; these helpers read the same table at run time.
+_AI_PINS_FILE="${_AI_INSTALL_LIB_DIR}/../../defaults/.chezmoidata.toml"
+
+# _ai_pinned_version <package>: the version pinned for a mise package (its
+# [uvx_args=...] options ignored); prints nothing when there is none.
+_ai_pinned_version() {
+  local key="${1%%\[*}"
+  [[ -r "$_AI_PINS_FILE" ]] || return 0
+  awk -v k="\"$key\"" '
+    /^\[/ { in_table = ($0 == "[ai_tools]"); next }
+    in_table && $1 == k && $2 == "=" { v = $3; gsub(/"/, "", v); print v; exit }
+  ' "$_AI_PINS_FILE"
+}
+
+# ai_pinned_spec <package>: "<package>@<version>" for mise use; 1 (with a
+# warning) when the package has no pin, so nothing installs at @latest.
+ai_pinned_spec() {
+  local version
+  version="$(_ai_pinned_version "$1")"
+  if [[ -z "$version" ]]; then
+    ui_warn "$1" "no pinned version in [ai_tools] (defaults/.chezmoidata.toml)"
+    return 1
+  fi
+  printf '%s@%s\n' "$1" "$version"
+}
+
+# ai_pin_bumps: for `dot upgrade`, each pinned AI CLI with a newer release
+# (as mise resolves it, honouring minimum_release_age). Pins move only when
+# [ai_tools] is edited, so this proposes bumps rather than applying them.
+ai_pin_bumps() {
+  local pkg pinned latest
+  command -v mise >/dev/null 2>&1 || return 0
+  while IFS= read -r pkg; do
+    pinned="$(_ai_pinned_version "$pkg")"
+    latest="$(mise latest "$pkg" 2>/dev/null || true)"
+    if [[ -n "$latest" && "$latest" != "$pinned" ]]; then
+      ui_info "Pin bump" "$pkg $pinned -> $latest (edit [ai_tools] in defaults/.chezmoidata.toml)"
+    fi
+  done < <(awk '/^\[/ { in_table = ($0 == "[ai_tools]"); next }
+    in_table && $2 == "=" { k = $1; gsub(/"/, "", k); print k }' "$_AI_PINS_FILE" 2>/dev/null)
+}
+
 # _ai_in_scratch_dir <cmd...> — run a command from a private scratch
 # directory, then remove it. npm install scripts (e.g. @charmland/crush)
 # unpack downloads into archive-XXXXXX dirs in the current directory, which
@@ -50,7 +94,6 @@ _ai_mise_pkg() {
     ollama) echo "aqua:ollama/ollama" ;;
     kiro-cli) echo "kiro-cli" ;;
     autohand) echo "npm:autohand-cli" ;;
-    vibe) echo "pipx:mistral-vibe" ;;
     qwen) echo "npm:@qwen-code/qwen-code" ;;
     zai) echo "npm:@guizmo-ai/zai-cli" ;;
     *) echo "" ;;

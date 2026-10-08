@@ -173,8 +173,8 @@ MISE_FAIL_PKG="pipx:aider-chat" GUM_MISSING="Install all" \
 assert_equals 0 "$RC" "install-all flow exits 0"
 assert_contains "Run 'dot ai' again to see updated status" "$OUT" "install-all completes"
 assert_contains "Codex CLI" "$OUT" "codex listed"
-assert_file_contains "$CALLS" "mise use -g npm:@openai/codex@latest" "codex installed through mise"
-assert_file_contains "$CALLS" "mise use -g pipx:aider-chat[uvx_args=--python 3.12]@latest" "aider attempted through mise"
+assert_file_contains "$CALLS" "mise use -g npm:@openai/codex@0.159.3" "codex installed through mise"
+assert_file_contains "$CALLS" "mise use -g pipx:aider-chat[uvx_args=--python 3.12]@0.86.2" "aider attempted through mise"
 assert_contains "mise: install failed" "$OUT" "the failed mise install is reported"
 assert_contains "Ollama" "$OUT" "and the run continues past it"
 assert_contains "No AI CLIs installed" "$OUT" "nothing installed warning"
@@ -185,8 +185,8 @@ test_start "ai_tools_choose_which_via_gum"
 GUM_MISSING="Choose which to install" GUM_PICK='Codex CLI\nOpenCode' \
   run_ai "$GUM:$MISE:$BASE_PATH" ai tools
 assert_equals 0 "$RC" "choose-which flow exits 0"
-assert_file_contains "$CALLS" "npm:@openai/codex@latest" "picked codex installed"
-assert_file_contains "$CALLS" "opencode@latest" "picked opencode installed"
+assert_file_contains "$CALLS" "npm:@openai/codex@0.159.3" "picked codex installed"
+assert_file_contains "$CALLS" "opencode@1.18.34" "picked opencode installed"
 if grep -q 'aider' "$CALLS"; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: unpicked provider must not be installed"
@@ -218,7 +218,7 @@ assert_false "grep -q 'mise use' '$CALLS'" "no means nothing installs"
 test_start "ai_tools_missing_without_gum_yes_installs"
 AI_TTY_INPUT=$'y\n' run_ai "$MISE:$BASE_PATH" ai tools
 assert_equals 0 "$RC" "consenting exits 0"
-assert_file_contains "$CALLS" "mise use -g npm:@openai/codex@latest" "yes installs the missing tools"
+assert_file_contains "$CALLS" "mise use -g npm:@openai/codex@0.159.3" "yes installs the missing tools"
 
 # ── `dot ai tools`: something installed, no gum → launcher tip ─────
 mk_tool claude
@@ -244,7 +244,7 @@ assert_false "[[ \"\$OUT\" == *'claude-ran'* ]]" "no agent is launched"
 # ── `dot ai tools install <tool>` verb ─────────────────────────────
 test_start "ai_tools_install_verb"
 run_ai "$TOOLS:$MISE:$BASE_PATH" ai tools install codex
-assert_file_contains "$CALLS" "npm:@openai/codex@latest" "tools install routes to cmd_ai_install"
+assert_file_contains "$CALLS" "npm:@openai/codex@0.159.3" "tools install routes to cmd_ai_install"
 
 # ── Bridge: run log hook fires after a one-shot ────────────────────
 test_start "ai_bridge_logs_run"
@@ -288,7 +288,7 @@ assert_false "grep -q 'mise use' '$CALLS'" "nothing installs unattended"
 
 test_start "ai_bridge_missing_tool_consent_installs"
 DOTFILES_YES=1 run_ai "$GUM:$MISE:$BASE_PATH" ai codex "hi"
-assert_file_contains "$CALLS" "mise use -g npm:@openai/codex@latest" "consent triggers the mise install"
+assert_file_contains "$CALLS" "mise use -g npm:@openai/codex@0.159.3" "consent triggers the mise install"
 
 test_start "ai_bridge_missing_tool_install_fails"
 DOTFILES_YES=1 MISE_FAIL_PKG="npm:@openai/codex" run_ai "$GUM:$MISE:$BASE_PATH" ai codex "hi"

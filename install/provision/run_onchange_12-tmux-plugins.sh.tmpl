@@ -5,9 +5,19 @@
 
 set -euo pipefail
 
+# TPM runs inside every tmux server, so it is checked out at the commit
+# pinned in [tmux_plugins] in .chezmoidata.toml, never the default branch,
+# and the checkout is verified before it is kept.
 TPM_DIR="${HOME}/.tmux/plugins/tpm"
+TPM_COMMIT={{ .tmux_plugins.tpm_commit | quote }}
 if [ ! -d "${TPM_DIR}" ]; then
-  echo "[INFO] Installing Tmux Plugin Manager (tpm)..."
-  git clone https://github.com/tmux-plugins/tpm "${TPM_DIR}"
+  echo "[INFO] Installing Tmux Plugin Manager (tpm) at ${TPM_COMMIT}..."
+  git clone --quiet --no-checkout https://github.com/tmux-plugins/tpm "${TPM_DIR}"
+  if ! git -C "${TPM_DIR}" -c advice.detachedHead=false checkout --quiet --detach "${TPM_COMMIT}" ||
+    [ "$(git -C "${TPM_DIR}" rev-parse HEAD)" != "${TPM_COMMIT}" ]; then
+    echo "[ERROR] tpm checkout is not the pinned commit ${TPM_COMMIT}; removing it" >&2
+    rm -rf "${TPM_DIR}"
+    exit 1
+  fi
 fi
 {{- end }}

@@ -21,6 +21,10 @@ log_info "Go tools: starting setup..."
 install_go_tool() {
   local tool="$1"
   local package="$2"
+  if [[ ! "$package" =~ @v[0-9] ]]; then
+    log_warn "Skipping $tool: $package names no exact version"
+    return 0
+  fi
   if ! command -v "$tool" >/dev/null 2>&1; then
     log_info "Installing $tool..."
     go install "$package" || log_warn "Failed to install $tool"
@@ -29,27 +33,13 @@ install_go_tool() {
   fi
 }
 
-# Essential Go tools
+# Go development tools (gopls, dlv, gofumpt, golangci-lint, goimports,
+# gomodifytags, impl, gotests, goplay), each at the exact version pinned in
+# [go_tools] in .chezmoidata.toml.
 log_info "Installing Go development tools..."
-
-# gopls - Go language server
-install_go_tool "gopls" "golang.org/x/tools/gopls@latest"
-
-# delve - Go debugger
-install_go_tool "dlv" "github.com/go-delve/delve/cmd/dlv@latest"
-
-# gofumpt - Stricter gofmt
-install_go_tool "gofumpt" "mvdan.cc/gofumpt@latest"
-
-# golangci-lint - Meta linter
-install_go_tool "golangci-lint" "github.com/golangci/golangci-lint/cmd/golangci-lint@latest"
-
-# Additional useful tools
-install_go_tool "goimports" "golang.org/x/tools/cmd/goimports@latest"
-install_go_tool "gomodifytags" "github.com/fatih/gomodifytags@latest"
-install_go_tool "impl" "github.com/josharian/impl@latest"
-install_go_tool "gotests" "github.com/cweill/gotests/gotests@latest"
-install_go_tool "goplay" "github.com/haya14busa/goplay/cmd/goplay@latest"
+{{ range $bin, $package := .go_tools }}
+install_go_tool {{ $bin | quote }} {{ $package | quote }}
+{{- end }}
 
 # Copy golangci-lint config to home if not exists
 GOLANGCI_CONFIG="${HOME}/.golangci.yml"
