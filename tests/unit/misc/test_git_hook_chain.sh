@@ -124,7 +124,7 @@ assert_equals 1 "$(last_msg "$repo" | grep -c 'SIG LINE ONE')" "signature added 
 
 test_start "wrappers_chain_their_own_name_args_and_stdin"
 repo="$(new_repo wrappers)"
-for name in pre-commit prepare-commit-msg pre-push post-checkout post-merge pre-rebase; do
+for name in pre-commit prepare-commit-msg pre-push post-checkout post-merge pre-rebase pre-merge-commit post-commit post-rewrite; do
   local_hook "$repo" "$name" 7
   : >"$repo/hook.log"
   printf 'refs/heads/main abc\n' |
