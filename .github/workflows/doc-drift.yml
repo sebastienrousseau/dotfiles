@@ -81,6 +81,8 @@ jobs:
             objects.githubusercontent.com:443
             release-assets.githubusercontent.com:443
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Verify docs/manual/command-index.md is in sync
         run: bash tools/docs/generate-command-index.sh --check
 
@@ -105,6 +107,7 @@ jobs:
             release-assets.githubusercontent.com:443
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
       - name: Verify version-bearing files match defaults/.chezmoidata.toml
         run: |
@@ -133,6 +136,8 @@ jobs:
             objects.githubusercontent.com:443
             release-assets.githubusercontent.com:443
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Verify share/man/man1/dot.1 matches the command registry
         run: bash tools/docs/generate-manpage.sh --check
 
@@ -156,5 +161,7 @@ jobs:
             objects.githubusercontent.com:443
             release-assets.githubusercontent.com:443
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Verify committed shell completions match the command registry
         run: bash tools/docs/generate-completions.sh --check

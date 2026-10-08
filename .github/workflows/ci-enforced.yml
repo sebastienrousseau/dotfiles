@@ -84,6 +84,7 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
       - name: Gitleaks (No bypass)
         uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
@@ -101,6 +102,8 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       # tools/ci/check-registry.sh verifies docs/registry.json.minisig once
       # security/registry.pub is committed; until then it skips, and so does
       # this install.
@@ -145,6 +148,8 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Checkov Infrastructure Security
         uses: bridgecrewio/checkov-action@cc0e17d456ef1713bbfd963ebac19dc776775cb2 # v12.3128.0
         with:
@@ -183,6 +188,8 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Setup Chezmoi
         uses: ./.github/actions/setup-chezmoi
       - name: Chezmoi Apply Test
@@ -227,6 +234,8 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Source-grep ratchet
         run: python3 tools/ci/check-source-grep-tests.py
 
@@ -248,6 +257,8 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Install pinned shfmt
         run: |
           set -euo pipefail
@@ -279,6 +290,7 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       # The tests that prove the chezmoi-facing code skip without chezmoi,
@@ -337,6 +349,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           # Full history: the script runs gitleaks in git mode, and
           # .gitleaksignore entries are fingerprinted
           # `<commit>:<file>:<rule>:<line>`. On a shallow checkout those commits
@@ -455,6 +468,8 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Dependency Update Check
         if: matrix.check == 'dependency-updates'
         run: |

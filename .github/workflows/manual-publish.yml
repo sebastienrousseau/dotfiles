@@ -45,6 +45,8 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install pandoc
         run: bash tools/ci/install-tools.sh pandoc codespell
@@ -82,6 +84,8 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       # The archive dir is root-owned and apt leaves a root-only lock file and
       # partial/ dir in it, so actions/cache (running as the runner user) could
