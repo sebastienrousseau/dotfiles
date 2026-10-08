@@ -147,6 +147,38 @@ charm_keyring_verify() {
   return 1
 }
 
+# chezmoi_release_sha256 <asset>: the reviewed SHA-256 of a chezmoi release
+# archive, or $CHEZMOI_SHA256 for a version not listed. Kept in step with
+# tools/ci/install-chezmoi-verified.sh. Source:
+# https://github.com/twpayne/chezmoi/releases/download/v2.72.2/chezmoi_2.72.2_checksums.txt
+chezmoi_release_sha256() {
+  local sha
+  case "$1" in
+    chezmoi_2.72.2_linux_amd64.tar.gz) sha=a2be1b8bcdf06c6f173e070bb3ddbcc52c50478fe9b57f6e6c63d15c7cff4f03 ;;
+    chezmoi_2.72.2_linux_arm64.tar.gz) sha=499925fd10804b7c1a5dc4b4a275c8935261d02a4be0c18bbd41b7747810de67 ;;
+    chezmoi_2.72.2_darwin_amd64.tar.gz) sha=08ad1ba33a73e68f7657ee226f72b5d800b5a947954b06e185e8591bd32b0063 ;;
+    chezmoi_2.72.2_darwin_arm64.tar.gz) sha=2b0c7e57f3f2da44628fa9f6863b9bd41f0935cfd2416228aa9df6daab6690f5 ;;
+    *) sha="${CHEZMOI_SHA256:-}" ;;
+  esac
+  if [[ "$sha" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "$sha"
+    return 0
+  fi
+  echo "No pinned SHA-256 for $1; export CHEZMOI_SHA256 after reviewing the release" >&2
+  return 1
+}
+
+# chezmoi_checksums_agree <checksums-file> <asset> <pin>: the release's own
+# checksums file is only a cross-check (a replaced release carries one that
+# matches its archive), but a different hash listed there stops the install.
+chezmoi_checksums_agree() {
+  local published
+  published="$(awk -v f="$2" '$2 == f { print $1; exit }' "$1")"
+  [[ -z "$published" || "$published" == "$3" ]] && return 0
+  echo "Release checksums file disagrees with the pinned SHA-256 for $2" >&2
+  return 1
+}
+
 detect_target_os() {
   local root="${1:-}" os="linux"
   case "$(uname -s)" in
@@ -261,7 +293,7 @@ main() {
   # install.sh stays self-contained (repo and npm installs use the helper script).
   install_chezmoi_verified_embedded() {
     local chezmoi_version="$1" destination="$2"
-    local os arch asset checksums_asset base_url temp_dir checksum_line
+    local os arch asset checksums_asset base_url temp_dir pinned
 
     os="$(uname -s | tr '[:upper:]' '[:lower:]')"
     arch="$(uname -m)"
@@ -284,29 +316,24 @@ main() {
     asset="chezmoi_${chezmoi_version}_${os}_${arch}.tar.gz"
     checksums_asset="chezmoi_${chezmoi_version}_checksums.txt"
     base_url="https://github.com/twpayne/chezmoi/releases/download/v${chezmoi_version}"
+    pinned="$(chezmoi_release_sha256 "$asset")" || return 1
     temp_dir="$(umask 077 && mktemp -d)"
 
     # `set -e` does not apply here: this subshell (and this function) run as `if !`
     # conditions, where bash ignores errexit, so every step exits on failure itself;
     # before this, a checksum mismatch fell through to the install.
     if ! (
-      if ! curl --proto '=https' --tlsv1.2 -fsSL \
-        -o "$temp_dir/checksums.txt" "$base_url/$checksums_asset"; then
-        curl --proto '=https' --tlsv1.2 -fsSL \
-          -o "$temp_dir/checksums.txt" "$base_url/checksums.txt" || exit 1
-      fi
       curl --proto '=https' --tlsv1.2 -fsSL \
         -o "$temp_dir/$asset" "$base_url/$asset" || exit 1
-      checksum_line="$(grep -E "[[:space:]]${asset}$" "$temp_dir/checksums.txt" | head -n 1 || true)"
-      [[ -n "$checksum_line" ]] || {
-        echo "Checksum entry not found for $asset" >&2
-        exit 1
-      }
+      if curl --proto '=https' --tlsv1.2 -fsSL \
+        -o "$temp_dir/checksums.txt" "$base_url/$checksums_asset"; then
+        chezmoi_checksums_agree "$temp_dir/checksums.txt" "$asset" "$pinned" || exit 1
+      fi
       # cd/mkdir: a failure there fails the checksum check or install below.
       cd "$temp_dir"
       sha_check=(shasum -a 256 -c -)
       command -v sha256sum >/dev/null 2>&1 && sha_check=(sha256sum -c -)
-      printf '%s\n' "$checksum_line" | "${sha_check[@]}" || exit 1
+      printf '%s  %s\n' "$pinned" "$asset" | "${sha_check[@]}" || exit 1
       tar -xzf "$asset" chezmoi || exit 1
       mkdir -p "$destination"
       install -m 755 chezmoi "$destination/chezmoi" || exit 1

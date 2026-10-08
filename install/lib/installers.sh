@@ -36,21 +36,48 @@ sha256_file() {
   fi
 }
 
-# Download a file and verify its SHA256 checksum against a checksum file
+# pinned_sha256 <TOOL>: the SHA-256 versions.env pins for this machine's
+# architecture, from <TOOL>_SHA256_X86_64 or <TOOL>_SHA256_AARCH64.
+pinned_sha256() {
+  local var
+  var="${1}_SHA256_$(resolve_arch | tr '[:lower:]' '[:upper:]')"
+  printf '%s\n' "${!var:-}"
+}
+
+# verify_pinned_sha256 <file> <pin> <asset-name> [checksum-file]: the file
+# must match the pin from the repo. The release's checksum file, when there
+# is one, is only a cross-check: it ships beside the archive, so a replaced
+# release carries one that matches. A different hash for the asset there
+# still stops the install.
+verify_pinned_sha256() {
+  local file="$1" pin="$2" name="$3" sums="${4:-}" actual published
+  actual="$(sha256_file "$file")"
+  [[ "$actual" == "$pin" ]] || die "Checksum verification failed for $name (pinned $pin, got $actual)."
+  [[ -n "$sums" && -s "$sums" ]] || return 0
+  published="$(awk -v f="$name" '{ n = $2; sub(/^\*/, "", n); sub(/.*\//, "", n) }
+    NF == 1 || n == f { print $1; exit }' "$sums")"
+  if [[ -n "$published" && "$published" != "$pin" ]]; then
+    die "Release checksum for $name ($published) disagrees with the pinned SHA-256."
+  fi
+}
+
+# Download a file and verify it against its pinned SHA-256; <checksum_url>
+# (may be empty) names the release's checksum file for the cross-check.
 download_and_verify_sha256() {
   local url="$1"
   local checksum_url="$2"
   local dest="$3"
+  local pin="${4:-}"
+  local name="${url##*/}"
 
+  [[ "$pin" =~ ^[0-9a-f]{64}$ ]] || die "No pinned SHA-256 for $name; add it to versions.env."
   curl --proto '=https' --tlsv1.2 -fsSL -o "$dest" "$url"
-  curl --proto '=https' --tlsv1.2 -fsSL -o "${dest}.sha256" "$checksum_url"
-
-  local expected actual
-  expected="$(awk '{print $1}' "${dest}.sha256")"
-  actual="$(sha256_file "$dest")"
-  if [[ -z "$expected" ]] || [[ "$expected" != "$actual" ]]; then
-    die "Checksum verification failed for $dest."
+  rm -f "${dest}.sha256"
+  if [[ -n "$checksum_url" ]]; then
+    curl --proto '=https' --tlsv1.2 -fsSL -o "${dest}.sha256" "$checksum_url" 2>/dev/null ||
+      rm -f "${dest}.sha256"
   fi
+  verify_pinned_sha256 "$dest" "$pin" "$name" "${dest}.sha256"
 }
 
 archive_paths_are_safe() {
@@ -107,13 +134,19 @@ github_release_json() {
   fi
 }
 
-# Resolve the download URL for a GitHub release asset
+# Resolve the download URL for a GitHub release asset by its exact name. The
+# release JSON also holds the release notes, so a regex over the whole
+# document could pick a link from them, or a longer asset name.
 github_asset_url() {
   local repo="$1"
   local suffix="$2"
   local tag="${3:-latest}"
-  local url
-  url="$(github_release_json "$repo" "$tag" 2>/dev/null | grep -oE "https://[^\"]+${suffix}" | head -n1 || true)"
+  local url=""
+  if command -v jq >/dev/null 2>&1; then
+    url="$(github_release_json "$repo" "$tag" 2>/dev/null |
+      jq -r --arg n "$suffix" '.assets[]? | select(.name == $n) | .browser_download_url' 2>/dev/null |
+      head -n1 || true)"
+  fi
   if [[ -n "$url" ]]; then
     echo "$url"
     return 0
@@ -135,16 +168,18 @@ warn_unpinned() {
   fi
 }
 
-# Download, verify, extract a tarball and install one binary
+# Download, verify against <pin>, extract a tarball and install one binary.
+# <checksum_url> may be empty: it is only the cross-check.
 install_from_tarball() {
   local url="$1"
   local checksum_url="$2"
   local bin_name="$3"
   local install_dir="$4"
+  local pin="${5:-}"
 
   local tmp_dir
   tmp_dir="$(umask 077 && mktemp -d)"
-  download_and_verify_sha256 "$url" "$checksum_url" "$tmp_dir/archive.tar.gz"
+  download_and_verify_sha256 "$url" "$checksum_url" "$tmp_dir/archive.tar.gz" "$pin"
   archive_paths_are_safe tar "$tmp_dir/archive.tar.gz"
   tar -xzf "$tmp_dir/archive.tar.gz" -C "$tmp_dir"
 
@@ -162,62 +197,24 @@ install_from_tarball() {
   rm -rf "$tmp_dir"
 }
 
-# Download, verify, extract a tarball using a multi-file checksums.txt
+# Same, for releases that publish one multi-file checksums.txt: the archive's
+# line in it is the cross-check, the pin is what is trusted.
 install_from_tarball_checksums() {
-  local url="$1"
-  local checksums_url="$2"
-  local bin_name="$3"
-  local install_dir="$4"
-
-  local tmp_dir
-  tmp_dir="$(umask 077 && mktemp -d)"
-  curl --proto '=https' --tlsv1.2 -fsSL -o "$tmp_dir/archive.tar.gz" "$url"
-  curl --proto '=https' --tlsv1.2 -fsSL -o "$tmp_dir/checksums.txt" "$checksums_url"
-
-  local expected actual
-  expected="$(awk -v f="$(basename "$url")" '$2==f {print $1}' "$tmp_dir/checksums.txt")"
-  actual="$(sha256_file "$tmp_dir/archive.tar.gz")"
-  if [[ -z "$expected" ]] || [[ "$expected" != "$actual" ]]; then
-    rm -rf "$tmp_dir"
-    die "Checksum verification failed for $bin_name."
-  fi
-  archive_paths_are_safe tar "$tmp_dir/archive.tar.gz"
-  tar xf "$tmp_dir/archive.tar.gz" -C "$tmp_dir"
-
-  local bin_path
-  bin_path="$(find "$tmp_dir" -type f -name "$bin_name" -perm -u+x 2>/dev/null | head -n1)"
-  if [[ -z "$bin_path" ]]; then
-    bin_path="$tmp_dir/$bin_name"
-  fi
-  if [[ ! -f "$bin_path" ]]; then
-    rm -rf "$tmp_dir"
-    die "Expected binary $bin_name not found in archive."
-  fi
-  mkdir -p "$install_dir"
-  install -m 0755 "$bin_path" "$install_dir/$bin_name"
-  rm -rf "$tmp_dir"
+  install_from_tarball "$@"
 }
 
-# Download and verify a zip archive, extract and install binaries
+# Download, verify against <pin>, extract a zip archive and install binaries
 install_from_zip() {
   local url="$1"
   local checksum_url="$2"
   local install_dir="$3"
-  shift 3
+  local pin="$4"
+  shift 4
   local bin_names=("$@")
 
   local tmp_dir
   tmp_dir="$(umask 077 && mktemp -d)"
-  curl --proto '=https' --tlsv1.2 -fsSL -o "$tmp_dir/archive.zip" "$url"
-  curl --proto '=https' --tlsv1.2 -fsSL -o "$tmp_dir/archive.zip.sha256" "$checksum_url"
-
-  local expected actual
-  expected="$(awk '{print $1}' "$tmp_dir/archive.zip.sha256")"
-  actual="$(sha256_file "$tmp_dir/archive.zip")"
-  if [[ -z "$expected" ]] || [[ "$expected" != "$actual" ]]; then
-    rm -rf "$tmp_dir"
-    die "Checksum verification failed for zip archive."
-  fi
+  download_and_verify_sha256 "$url" "$checksum_url" "$tmp_dir/archive.zip" "$pin"
   archive_paths_are_safe zip "$tmp_dir/archive.zip"
   unzip -o "$tmp_dir/archive.zip" -d "$tmp_dir"
   mkdir -p "$install_dir"

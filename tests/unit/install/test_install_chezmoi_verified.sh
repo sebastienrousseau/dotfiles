@@ -38,10 +38,6 @@ else
   assert_exit_code 0 "false  # installer must use SHA256 verification"
 fi
 
-test_start "installer_aborts_on_missing_entry"
-assert_file_contains "$INSTALLER" "Checksum entry not found" \
-  "installer must abort with a clear error if the checksum line is missing"
-
 # -----------------------------------------------------------------------------
 # Negative behavioural test: simulate a tampered tarball and confirm
 # the verification step aborts. We mock the network by intercepting
@@ -68,7 +64,7 @@ trap 'rm -rf "$tmp"' EXIT
 
 # 1. Fake tarball + checksum.
 fake_asset="$tmp/chezmoi_999.999.999_linux_amd64.tar.gz"
-echo "this is not really chezmoi" > "$fake_asset"
+echo "this is not really chezmoi" >"$fake_asset"
 real_sha=$(sha256_of "$fake_asset")
 
 # 2. Build a fake mirror server. Use Python http.server in a subshell.
@@ -79,12 +75,12 @@ cp "$fake_asset" "$mirror_dir/"
 # Negative case: checksum file with the WRONG hash.
 wrong_sha="0000000000000000000000000000000000000000000000000000000000000000"
 printf '%s  chezmoi_999.999.999_linux_amd64.tar.gz\n' "$wrong_sha" \
-  > "$mirror_dir/chezmoi_999.999.999_checksums.txt"
+  >"$mirror_dir/chezmoi_999.999.999_checksums.txt"
 
 # Stub `uname` so the installer always resolves to linux/amd64 regardless
 # of the host. Lets the same fixture asset work on macOS dev boxes and CI.
 uname_shim="$tmp/uname"
-cat > "$uname_shim" <<'SH'
+cat >"$uname_shim" <<'SH'
 #!/usr/bin/env bash
 case "${1:-}" in
   -s) echo "Linux" ;;
@@ -96,7 +92,7 @@ chmod +x "$uname_shim"
 
 # Curl-shim that serves files from the mirror directory.
 curl_shim="$tmp/curl"
-cat > "$curl_shim" <<'SH'
+cat >"$curl_shim" <<'SH'
 #!/usr/bin/env bash
 set -euo pipefail
 # Minimal curl-compat: -fsSL -o <dst> <url> — extract the basename
@@ -128,9 +124,9 @@ chmod +x "$curl_shim"
 #    of the host OS.
 test_start "verification_rejects_wrong_hash"
 set +e
-MIRROR_DIR="$mirror_dir" \
+MIRROR_DIR="$mirror_dir" CHEZMOI_SHA256="$wrong_sha" \
   PATH="$tmp:$PATH" \
-  bash "$INSTALLER" "999.999.999" "$tmp/install-target" >"$tmp/log.out" 2>&1 < /dev/null
+  bash "$INSTALLER" "999.999.999" "$tmp/install-target" >"$tmp/log.out" 2>&1 </dev/null
 rc=$?
 set -e
 
@@ -144,20 +140,20 @@ fi
 
 # 4. Positive case: same fixture but with the CORRECT hash.
 printf '%s  chezmoi_999.999.999_linux_amd64.tar.gz\n' "$real_sha" \
-  > "$mirror_dir/chezmoi_999.999.999_checksums.txt"
+  >"$mirror_dir/chezmoi_999.999.999_checksums.txt"
 
 test_start "verification_accepts_correct_hash"
 set +e
-MIRROR_DIR="$mirror_dir" \
+MIRROR_DIR="$mirror_dir" CHEZMOI_SHA256="$real_sha" \
   PATH="$tmp:$PATH" \
-  bash "$INSTALLER" "999.999.999" "$tmp/install-target" >"$tmp/log_ok.out" 2>&1 < /dev/null
+  bash "$INSTALLER" "999.999.999" "$tmp/install-target" >"$tmp/log_ok.out" 2>&1 </dev/null
 rc=$?
 set -e
 
 # The installer will fail later (tar extract on a non-tarball), but
 # the checksum step itself should have passed. We grep the log for
 # evidence we got past the checksum gate.
-if grep -qi "checksum entry not found\|FAILED open\|computed.*does not match" "$tmp/log_ok.out"; then
+if grep -qi "no pinned\|checksum verification failed\|disagrees" "$tmp/log_ok.out"; then
   echo "Checksum step rejected a correct hash. rc=$rc, log:" >&2
   cat "$tmp/log_ok.out" >&2 || true
   assert_exit_code 0 "false"
