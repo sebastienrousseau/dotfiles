@@ -150,6 +150,20 @@ assert_equals "pid=" "$(sed -n '1s/[0-9]*$//p' "$LOCK_DIR/owner" 2>/dev/null)" "
 assert_equals "$(ls -A "$DOT_THEME_LOCK_ROOT")" "$(basename "$LOCK_DIR")" "no stale or token left beside the lock"
 assert_equals "owner" "$(ls -A "$LOCK_DIR")" "no reclaim token left inside the live lock"
 
+test_start "txn_reclaim_stale_only_clears_the_dead_owners_lock"
+reset_state
+mkdir -p "$LOCK_DIR"
+printf 'pid=%s\n' "$$" >"$LOCK_DIR/owner"
+_theme_txn_reclaim_stale "$LOCK_DIR" "$DEAD_PID"
+assert_equals "1|owner" "$?|$(ls -A "$LOCK_DIR")" "a lock someone else now owns is refused and left as it was"
+mkdir "$LOCK_DIR/.reclaim"
+printf 'pid=%s\n' "$DEAD_PID" >"$LOCK_DIR/owner"
+_theme_txn_reclaim_stale "$LOCK_DIR" "$DEAD_PID"
+assert_equals "1|yes" "$?|$([[ -d "$LOCK_DIR" ]] && echo yes)" "another waiter's token means hands off"
+rmdir "$LOCK_DIR/.reclaim"
+_theme_txn_reclaim_stale "$LOCK_DIR" "$DEAD_PID"
+assert_equals "0|no" "$?|$([[ -e "$LOCK_DIR" ]] && echo yes || echo no)" "the dead owner's lock is cleared"
+
 test_start "txn_lock_clears_a_token_left_by_a_dead_reclaimer"
 reset_state
 mkdir -p "$LOCK_DIR/.reclaim"

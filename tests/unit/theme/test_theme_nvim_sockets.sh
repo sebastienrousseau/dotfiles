@@ -92,6 +92,7 @@ assert_equals "vim.o.background='dark' require('solarized').setup({}) vim.cmd.co
 assert_equals "require('onedark').setup({style='light'}) vim.cmd.colorscheme('onedark')" "$(lua onedark light)" "onedark light"
 assert_equals "require('onedark').setup({style='dark'}) vim.cmd.colorscheme('onedark')" "$(lua onedark warm)" "onedark dark"
 assert_equals "require('nord').set()" "$(lua nord '')" "nord"
+assert_true "_theme_nvim_lua_cmd nord '' >/dev/null" "nord succeeds"
 assert_equals "vim.cmd.colorscheme('dotfiles')" "$(lua dotfiles night)" "any other scheme"
 
 test_summary
