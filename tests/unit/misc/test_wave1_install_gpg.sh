@@ -188,6 +188,22 @@ test_start "install_embedded_unpinned_version_refused"
 assert_equals "1||absent" "$rc|$(cat "$SANDBOX/calls.log")|$([[ -e "$SANDBOX/h13/.local/bin/chezmoi" ]] && echo present || echo absent)" \
   "a version without a pinned hash is refused and never downloaded"
 
+test_start "install_embedded_malformed_pin_refused"
+: >"$SANDBOX/calls.log"
+rc="$(run_install "$SANDBOX/h14" "$SANDBOX/has-curl:$SYS" CHEZMOI_VERSION=9.9.9 CHEZMOI_SHA256="x$sum")"
+assert_equals "1|" "$rc|$(cat "$SANDBOX/calls.log")" \
+  "a CHEZMOI_SHA256 that is not exactly 64 hex digits is refused before any download"
+
+# A wrong pin with no checksums file to cross-check: the pin check alone
+# must refuse the archive.
+mv "$REL/chezmoi_9.9.9_checksums.txt" "$REL/chezmoi_9.9.9_checksums.held"
+: >"$SANDBOX/calls.log"
+rc="$(run_install "$SANDBOX/h15" "$SANDBOX/has-curl:$SYS" CHEZMOI_VERSION=9.9.9 CHEZMOI_SHA256="$(printf '%064d' 5)")"
+mv "$REL/chezmoi_9.9.9_checksums.held" "$REL/chezmoi_9.9.9_checksums.txt"
+test_start "install_embedded_pin_mismatch_without_checksums_refused"
+assert_equals "1|absent" "$rc|$([[ -e "$SANDBOX/h15/.local/bin/chezmoi" ]] && echo present || echo absent)" \
+  "an archive that does not match the pin is refused even with no checksums file"
+
 # The checksum list downloads but the release archive does not: refused.
 printf '%s  %s\n' "$sum" "$asset" >"$REL/chezmoi_9.9.9_checksums.txt"
 mv "$REL/$asset" "$REL/$asset.held"

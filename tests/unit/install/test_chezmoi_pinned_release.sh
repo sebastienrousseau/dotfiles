@@ -89,6 +89,26 @@ rc="$(run_installer 9.9.9 "$WORK/bin3" CHEZMOI_SHA256="$GOOD_SHA")"
 assert_equals "0|tampered-chezmoi" "$rc|$("$WORK/bin3/chezmoi" 2>/dev/null)" \
   "an archive matching the pin is installed"
 
+test_start "malformed_explicit_pin_refused"
+rc="$(run_installer 9.9.9 "$WORK/bin8" CHEZMOI_SHA256="x$GOOD_SHA")"
+assert_equals "1|" "$rc|$(cat "$WORK/urls.log")" \
+  "a CHEZMOI_SHA256 that is not exactly 64 hex digits is refused before any download"
+
+test_start "missing_version_refused"
+rc="$(run_installer "" "$WORK/bin9")"
+assert_equals "1|" "$rc|$(cat "$WORK/urls.log")" "without a version the installer stops with its usage"
+
+test_start "unsupported_os_refused"
+set_uname FreeBSD x86_64
+rc="$(run_installer 9.9.9 "$WORK/bin10" CHEZMOI_SHA256="$GOOD_SHA")"
+assert_equals "1|" "$rc|$(cat "$WORK/urls.log")" "an OS chezmoi ships no build for is refused"
+
+test_start "unsupported_arch_refused"
+set_uname Linux riscv64
+rc="$(run_installer 9.9.9 "$WORK/bin11" CHEZMOI_SHA256="$GOOD_SHA")"
+assert_equals "1|" "$rc|$(cat "$WORK/urls.log")" "a CPU chezmoi ships no build for is refused"
+set_uname Linux x86_64
+
 test_start "checksums_file_disagreeing_with_pin_refused"
 printf '%s  chezmoi_9.9.9_linux_amd64.tar.gz\n' "$(printf '%064d' 7)" >"$REL/chezmoi_9.9.9_checksums.txt"
 rc="$(run_installer 9.9.9 "$WORK/bin4" CHEZMOI_SHA256="$GOOD_SHA")"

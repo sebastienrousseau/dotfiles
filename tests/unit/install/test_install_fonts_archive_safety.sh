@@ -97,6 +97,15 @@ assert_equals "0|yes|v3.4.0" \
   "$rc|$([[ -f "$WORK/h1/$FONTS/Font-Regular.ttf" ]] && echo yes || echo no)|$(cat "$WORK/h1/$FONTS/.nerd-fonts-version" 2>/dev/null)" \
   "a verified, regular archive is extracted and the version recorded"
 
+test_start "fonts_silent_run_prints_no_progress"
+assert_equals "" "$(grep 'Processing' "$WORK/out.txt")" "DOTFILES_SILENT=1 hides per-font progress"
+
+test_start "fonts_verbose_run_reports_each_font"
+mkdir -p "$WORK/h5"
+env -i HOME="$WORK/h5" PATH="$STUBS:/usr/bin:/bin" DOTFILES_SOURCE_DIR="$REPO_ROOT" DOTFILES_SILENT=0 \
+  bash "$FONTS_SCRIPT" >"$WORK/out5.txt" 2>&1 </dev/null
+assert_contains "Processing JetBrainsMono" "$(cat "$WORK/out5.txt")" "without DOTFILES_SILENT each font is reported"
+
 release symlink
 test_start "fonts_symlink_entry_refused"
 rc="$(run_fonts "$WORK/h2")"

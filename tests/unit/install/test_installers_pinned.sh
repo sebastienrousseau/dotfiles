@@ -83,6 +83,24 @@ r="$(lib 'download_and_verify_sha256 https://x.invalid/tool-x86_64.tar.gz https:
   D="$WORK" PIN="$TAMPERED_SHA")"
 assert_equals "1" "$(rc_of "$r")" "a release checksum file disagreeing with the pin stops the install"
 
+test_start "bare_hash_checksum_file_disagreeing_refused"
+printf '%s\n' "$PINNED_SHA" >"$REL/tool-x86_64.tar.gz.sha256"
+r="$(lib 'download_and_verify_sha256 https://x.invalid/tool-x86_64.tar.gz https://x.invalid/tool-x86_64.tar.gz.sha256 "$D/out6" "$PIN"' \
+  D="$WORK" PIN="$TAMPERED_SHA")"
+assert_equals "1" "$(rc_of "$r")" "a single-hash checksum file that disagrees with the pin stops the install"
+
+test_start "checksum_line_for_other_asset_ignored"
+printf '%s  other-asset.tar.gz\n' "$PINNED_SHA" >"$REL/tool-x86_64.tar.gz.sha256"
+r="$(lib 'download_and_verify_sha256 https://x.invalid/tool-x86_64.tar.gz https://x.invalid/tool-x86_64.tar.gz.sha256 "$D/out7" "$PIN"' \
+  D="$WORK" PIN="$TAMPERED_SHA")"
+assert_equals "0" "$(rc_of "$r")" "a checksum line naming another asset is not a cross-check of this one"
+
+test_start "malformed_pin_refused"
+r="$(lib 'download_and_verify_sha256 https://x.invalid/tool-x86_64.tar.gz "" "$D/out8" "$PIN"' \
+  D="$WORK" PIN="x$TAMPERED_SHA")"
+assert_equals "1|no" "$(rc_of "$r")|$([[ -e "$WORK/out8" ]] && echo yes || echo no)" \
+  "a pin that is not exactly 64 hex digits is refused before any download"
+
 test_start "missing_pin_refused"
 r="$(lib 'download_and_verify_sha256 https://x.invalid/tool-x86_64.tar.gz "" "$D/out5" ""' D="$WORK")"
 assert_equals "1|no" "$(rc_of "$r")|$([[ -e "$WORK/out5" ]] && echo yes || echo no)" \
@@ -159,6 +177,36 @@ assert_equals "aaa" "$(head -n 1 <<<"$r")" "x86_64 reads <TOOL>_SHA256_X86_64"
 test_start "pinned_sha256_aarch64"
 r="$(lib 'pinned_sha256 TOOL' TOOL_SHA256_X86_64=aaa TOOL_SHA256_AARCH64=bbb FAKE_ARCH=arm64)"
 assert_equals "bbb" "$(head -n 1 <<<"$r")" "arm64 reads <TOOL>_SHA256_AARCH64"
+
+# apt_keyring_holds_only: exactly one primary key, the pinned one.
+if command -v gpg >/dev/null 2>&1; then
+  export GNUPGHOME="$WORK/gnupg"
+  mkdir -p "$GNUPGHOME"
+  chmod 700 "$GNUPGHOME"
+  gen_key() {
+    gpg --batch --quiet --passphrase '' --quick-gen-key "$1" ed25519 sign never 2>/dev/null
+    gpg --with-colons --list-keys "$1" | awk -F: '/^fpr:/ { print $10; exit }'
+  }
+  PIN_FPR="$(gen_key 'Pinned <pinned@example.invalid>')"
+  EVIL_FPR="$(gen_key 'Evil <evil@example.invalid>')"
+  gpg --export "$PIN_FPR" >"$WORK/pinned.gpg"
+  gpg --export "$PIN_FPR" "$EVIL_FPR" >"$WORK/both.gpg"
+  gpg --export "$EVIL_FPR" >"$WORK/evil.gpg"
+  keyring_rc() {
+    local r
+    r="$(lib 'apt_keyring_holds_only "$K" "$F"' K="$1" F="$PIN_FPR" GNUPGHOME="$GNUPGHOME")"
+    rc_of "$r"
+  }
+
+  test_start "apt_keyring_pinned_key_alone_trusted"
+  assert_equals "0" "$(keyring_rc "$WORK/pinned.gpg")" "a keyring with only the pinned key passes"
+
+  test_start "apt_keyring_with_extra_key_refused"
+  assert_equals "1" "$(keyring_rc "$WORK/both.gpg")" "a second primary key after the pinned one is refused"
+
+  test_start "apt_keyring_with_other_key_refused"
+  assert_equals "1" "$(keyring_rc "$WORK/evil.gpg")" "a keyring holding another key is refused"
+fi
 
 # The shipped versions.env pins every tool for both architectures.
 test_start "versions_env_pins_complete"

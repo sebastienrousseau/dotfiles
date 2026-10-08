@@ -36,6 +36,16 @@ sha256_file() {
   fi
 }
 
+# apt_keyring_holds_only <keyring> <fingerprint>: apt's signed-by trusts
+# every primary key in a keyring, so it must hold exactly one, the pinned one
+# (subkeys are fine).
+apt_keyring_holds_only() {
+  local keys
+  keys="$(gpg --no-default-keyring --keyring "$1" --list-keys --with-colons 2>/dev/null || true)"
+  [[ "$(grep -c '^pub:' <<<"$keys" || true)" == 1 ]] &&
+    [[ "$(awk -F: '/^pub:/ { p = 1; next } p && /^fpr:/ { print $10; exit }' <<<"$keys")" == "$2" ]]
+}
+
 # pinned_sha256 <TOOL>: the SHA-256 versions.env pins for this machine's
 # architecture, from <TOOL>_SHA256_X86_64 or <TOOL>_SHA256_AARCH64.
 pinned_sha256() {

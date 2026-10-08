@@ -4,7 +4,7 @@
 # <top> only). A unit may only go down;
 # refactor it, then rewrite this file. New units must stay under LIMITS.
    4    3    7.4   62    62 .clusterfuzzlite/build.sh::<top>
-  12   19   21.7   83   100 .devcontainer/install-lite.sh::<top>
+  12   19   21.7   83    94 .devcontainer/install-lite.sh::<top>
   32   27   57.7  154   374 benches/dot_command_bench.sh::<top>
    1    0    0.0  158     0 benches/dot_command_bench.sh::bench_run_cases
   26   32   45.4   82    82 benches/test_help_gates_wall_clock.sh::<top>

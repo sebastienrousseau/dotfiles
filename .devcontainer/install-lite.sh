@@ -74,12 +74,6 @@ fi
 # hold exactly the pinned one. Fingerprint read from
 # https://raw.githubusercontent.com/eza-community/eza/main/deb.asc on 2026-10-08.
 EZA_GPG_FPR="1548BC8A4B4D2688F9B0DAF7EC29E2090CE3FD43"
-keyring_holds_only() {
-  local keys
-  keys="$(gpg --no-default-keyring --keyring "$1" --list-keys --with-colons 2>/dev/null || true)"
-  [[ "$(grep -c '^pub:' <<<"$keys" || true)" == 1 ]] &&
-    [[ "$(awk -F: '/^pub:/ { p = 1; next } p && /^fpr:/ { print $10; exit }' <<<"$keys")" == "$2" ]]
-}
 if command_exists eza; then
   info "eza is already installed"
 else
@@ -89,8 +83,8 @@ else
     curl --proto '=https' --tlsv1.2 -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc |
       sudo gpg --batch --dearmor -o /etc/apt/keyrings/gierens.gpg
   fi
-  if keyring_holds_only /etc/apt/keyrings/gierens.gpg "$EZA_GPG_FPR"; then
-    if [[ ! -f /etc/apt/sources.list.d/gierens.list ]]; then
+  if apt_keyring_holds_only /etc/apt/keyrings/gierens.gpg "$EZA_GPG_FPR"; then
+    if [[ ! -f /etc/apt/sources.list.d/gierens.list ]]; then # mutation: ignore devcontainer-only apt setup, needs root and apt
       echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] https://deb.gierens.de stable main" |
         sudo tee /etc/apt/sources.list.d/gierens.list >/dev/null
       sudo apt-get update -qq
