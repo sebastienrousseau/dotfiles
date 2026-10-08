@@ -87,7 +87,7 @@ version-sync.sh             # Syncs dotfiles_version across non-template files
 
 ## Do Not
 
-- Add `core.hooksPath` to gitconfig (would apply repo-specific hooks to all git repos).
+- Point `core.hooksPath` at a repo-specific directory (it would apply one repo's hooks to every repo). The global `core.hooksPath = ~/.config/git/hooks` stays: it carries the AI-attribution and branding `commit-msg` to every repo. Because it hides each repo's own `.git/hooks`, every global hook (`pre-commit`, `prepare-commit-msg`, `commit-msg`, `pre-push`, `post-checkout`, `post-merge`, `pre-rebase`) chains through `defaults/dot_config/git/hooks/executable__chain` to the repo's hook of the same name and exits with its status; `commit-msg` adds branding and attribution only after the repo's hook passed. A repo hook type with no global wrapper does not run. `pre-commit install` refuses to install while any `core.hooksPath` is set (a local `git config --local core.hooksPath .git/hooks` still counts, and `git -c core.hooksPath=` never reaches it), so install once per clone with the global config hidden: `GIT_CONFIG_GLOBAL=/dev/null pre-commit install --hook-type pre-commit --hook-type commit-msg --hook-type pre-push -f`.
 - Rename `executable_*` scripts to `.tmpl` unless the test framework is also updated (tests run `bash` on source files).
 - Remove shellcheck disable directives without verifying CI still passes.
 - Commit secrets, API keys, or tokens. Atuin `history_filter` and gitleaks are in place.

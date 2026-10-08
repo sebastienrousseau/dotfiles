@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# ── Repository hook first ─────────────────────────────────────────────
+# The global core.hooksPath hides the repository's own .git/hooks, so run
+# its commit-msg (conventional commits, …) first. A rejection aborts the
+# commit before the branding and attribution below touch the message.
+chain="$(dirname "${BASH_SOURCE[0]}")/_chain"
+if [[ -x "$chain" ]]; then
+  "$chain" commit-msg "$@"
+fi
+
 # ── AI Attribution (Linux kernel coding-assistants standard) ──────────
 # Appends "Assisted-by:" trailer to commit messages when authored during
 # an AI coding assistant session. Detects the active tool automatically.
