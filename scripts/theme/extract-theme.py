@@ -17,6 +17,7 @@ import subprocess  # nosec B404 — used only with fixed magick command, no shel
 import math
 import random  # nosec B311 — used for K-Means seeding, not security
 import json
+import re
 import os
 from typing import List, Tuple, Dict
 
@@ -987,30 +988,41 @@ def generate_theme(
 # TOML output
 # ---------------------------------------------------------------------------
 
+THEME_NAME_RE = re.compile(r"[a-z0-9][a-z0-9-]*")
+
+
+def toml_str(value) -> str:
+    """A TOML basic string; JSON string escaping is a valid subset."""
+    return json.dumps(str(value), ensure_ascii=False)
+
+
 def theme_to_toml(theme: Dict) -> str:
-    """Render a theme dict as TOML sections."""
+    """Render a theme dict as TOML sections. Every value is written as an
+    escaped string, so a file name cannot end the string or add keys."""
     name = theme["name"]
+    if not THEME_NAME_RE.fullmatch(name):
+        raise ValueError(f"invalid theme name {name!r}: use [a-z0-9-], starting with a letter or digit")
     lines = []
     lines.append(f'[themes.{name}]')
-    lines.append(f'mode = "{theme["mode"]}"')
-    lines.append(f'family = "{theme["family"]}"')
-    lines.append(f'macos_accent = {theme["macos_accent"]}')
-    lines.append(f'wallpaper = "{theme["wallpaper"]}"')
-    lines.append(f'source = "{theme["source"]}"')
+    lines.append(f'mode = {toml_str(theme["mode"])}')
+    lines.append(f'family = {toml_str(theme["family"])}')
+    lines.append(f'macos_accent = {int(theme["macos_accent"])}')
+    lines.append(f'wallpaper = {toml_str(theme["wallpaper"])}')
+    lines.append(f'source = {toml_str(theme["source"])}')
     lines.append("")
 
     lines.append(f"[themes.{name}.term]")
     for key in ["bg", "fg", "cursor", "cursor_text", "sel_bg", "sel_fg"]:
-        lines.append(f'{key} = "{theme["term"][key]}"')
+        lines.append(f'{key} = {toml_str(theme["term"][key])}')
     for i in range(16):
         key = f"c{i}"
         pad = " " * (4 - len(key))
-        lines.append(f'{key}{pad}= "{theme["term"][key]}"')
+        lines.append(f'{key}{pad}= {toml_str(theme["term"][key])}')
     # Then every derived slot (the AAA extended-palette greys, ...).
     listed = {"bg", "fg", "cursor", "cursor_text", "sel_bg", "sel_fg", *(f"c{i}" for i in range(16))}
     for key, value in theme["term"].items():
         if key not in listed:
-            lines.append(f'{key} = "{value}"')
+            lines.append(f'{key} = {toml_str(value)}')
     lines.append("")
 
     lines.append(f"[themes.{name}.ui]")
@@ -1021,12 +1033,12 @@ def theme_to_toml(theme: Dict) -> str:
     # secondary_container pair, ...): a fixed list silently dropped them.
     ordered += [key for key in theme["ui"] if key not in ordered]
     for key in ordered:
-        lines.append(f'{key} = "{theme["ui"][key]}"')
+        lines.append(f'{key} = {toml_str(theme["ui"][key])}')
     lines.append("")
 
     lines.append(f"[themes.{name}.app]")
     for key, val in theme["app"].items():
-        lines.append(f'{key} = "{val}"')
+        lines.append(f'{key} = {toml_str(val)}')
 
     return "\n".join(lines)
 
@@ -1124,7 +1136,11 @@ def main():
     if args.format == "json":
         print(json.dumps(theme, indent=2))
     else:
-        print(theme_to_toml(theme))
+        try:
+            print(theme_to_toml(theme))
+        except ValueError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            sys.exit(1)
 
 
 if __name__ == "__main__":
