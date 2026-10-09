@@ -8,15 +8,23 @@ render_with_liquid: false
 
 | Secret | Scope | Purpose |
 | :--- | :--- | :--- |
-| `ACTIONS_BOT_SIGNING_KEY` | GitHub Actions | SSH private key used for signed automation commits |
-| `GITHUB_TOKEN` | GitHub Actions | GitHub API access for PRs, attestations, and scans |
+| `ACTIONS_BOT_SIGNING_KEY` | GitHub Actions | SSH private key used for signed automation commits (version sync, dependency updates, Homebrew and Scoop distribution) |
+| `TAP_PUSH_TOKEN` | GitHub Actions | Pushes the release formula and manifest to the Homebrew tap and Scoop bucket repositories |
+| `AUR_SSH_KEY` | GitHub Actions | SSH key for pushing the `dot-cli-git` package to the AUR |
+| `GITHUB_TOKEN` | GitHub Actions | GitHub API access for PRs, attestations, and scans (provided per run) |
 
-## Required local variables
+npm publishing needs no secret: `npm-publish.yml` uses npm trusted
+publishing (GitHub OIDC), so no long-lived npm token is stored.
 
-| Variable | Scope | Purpose |
+## Installer checksums
+
+These are pinned in the repository, not stored as secrets or set by hand.
+
+| Pin | Where | Purpose |
 | :--- | :--- | :--- |
-| `HOMEBREW_INSTALLER_SHA256` | macOS bootstrap | Verifies the Homebrew installer before execution |
-| `CHEZMOI_INSTALLER_SHA256` | Installer | Verifies the Chezmoi installer before execution |
+| Remote installer scripts (`get.chezmoi.io`, Homebrew's `install.sh` at a fixed commit) | [`security/remote-installers.sha256`](https://github.com/sebastienrousseau/dotfiles/blob/main/security/remote-installers.sha256) | `download_verified_script` refuses a script whose SHA-256 does not match |
+| Release archives (chezmoi and the provisioned tools) | `versions.env`, `install.sh` and `tools/ci/install-chezmoi-verified.sh` | Each archive is checked against its pinned SHA-256; the release's own checksum file is only a cross-check |
+| `CHEZMOI_SHA256` (optional override) | Environment | Supplies the reviewed SHA-256 for a chezmoi version that has no pin yet |
 
 ## Provisioning notes
 

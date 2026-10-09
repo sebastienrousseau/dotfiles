@@ -12,8 +12,8 @@ Controlled inventory for software of unknown pedigree used by the dotfiles platf
 
 | Component | Source | Version control | Verification path | Owner | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| Homebrew installer | `raw.githubusercontent.com/Homebrew/install` | Moving upstream script, gated by `HOMEBREW_INSTALLER_SHA256` | SHA-256 in [package_managers.sh](https://github.com/sebastienrousseau/dotfiles/blob/main/install/lib/package_managers.sh) | Repo maintainer | Conditional |
-| Chezmoi installer | `get.chezmoi.io` | Pinned by `CHEZMOI_INSTALLER_SHA256` when used | SHA-256 in `install/lib/chezmoi.sh` | Repo maintainer | Controlled |
+| Homebrew installer | `raw.githubusercontent.com/Homebrew/install` | Fixed upstream commit, SHA-256 pinned | SHA-256 in [remote-installers.sha256](https://github.com/sebastienrousseau/dotfiles/blob/main/security/remote-installers.sha256) and [package_managers.sh](https://github.com/sebastienrousseau/dotfiles/blob/main/install/lib/package_managers.sh) | Repo maintainer | Conditional |
+| Chezmoi installer | `get.chezmoi.io` | SHA-256 pinned, checked by `download_verified_script` | SHA-256 in [remote-installers.sha256](https://github.com/sebastienrousseau/dotfiles/blob/main/security/remote-installers.sha256) | Repo maintainer | Controlled |
 | GitHub Actions marketplace actions | GitHub Marketplace | Full commit SHA pinning | Workflow `uses:` pins | Repo maintainer | Controlled |
 | Grype container | `anchore/grype` | Pinned tag in workflow | Container tag in [security-enhanced.yml](https://github.com/sebastienrousseau/dotfiles/blob/main/.github/workflows/security-enhanced.yml) | Repo maintainer | Controlled |
 | Trivy container | `aquasec/trivy` | Pinned tag in workflow | Container tag in [security-enhanced.yml](https://github.com/sebastienrousseau/dotfiles/blob/main/.github/workflows/security-enhanced.yml) | Repo maintainer | Controlled |
