@@ -8,7 +8,7 @@ module github.com/sebastienrousseau/dotfiles/fuzz
 
 go 1.23
 
-toolchain go1.26.8
+toolchain go1.26.9
 
 require (
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230811130428-ced1acdcaa24 // indirect
