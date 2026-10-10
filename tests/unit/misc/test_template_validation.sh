@@ -64,6 +64,42 @@ test_start "template_data_dotfiles_version"
 assert_equals "$(sed -n 's/^dotfiles_version = "\(.*\)"$/\1/p' "$REPO_ROOT/defaults/.chezmoidata.toml")" \
   "$(field dotfiles_version)" ".dotfiles_version comes from .chezmoidata.toml"
 
+# --- Config template without a TTY -------------------------------------------
+# Container builds, CI and drift detection run `chezmoi init` with no TTY.
+# The config template must not prompt then, must keep values already
+# stored (a re-init used to reset a configured git identity to "Your
+# Name <you@example.com>"), must take CHEZMOI_<KEY> from the environment,
+# and must not invent placeholder identities.
+render_cfg() { # render_cfg <config-file> [VAR=value...]
+  local cfg="$1"
+  shift
+  env -i HOME="$SANDBOX/home" PATH="/usr/bin:/bin" "$@" "$CHEZMOI_BIN" \
+    --config "$cfg" --source "$REPO_ROOT" --destination "$SANDBOX/home" \
+    --cache "$SANDBOX/cache" --persistent-state "$SANDBOX/state.boltdb" \
+    execute-template --init <"$REPO_ROOT/defaults/.chezmoi.toml.tmpl" 2>/dev/null
+}
+cfgval() { sed -n "s/^$1 *= \"\(.*\)\"\$/\1/p"; }
+
+test_start "config_tmpl_no_tty_no_placeholder_identity"
+out="$(render_cfg "$SANDBOX/chezmoi.toml")"
+assert_equals "|" "$(cfgval git_name <<<"$out")|$(cfgval git_email <<<"$out")" "no TTY, nothing stored: identity left empty"
+
+printf '[data]\ngit_name = "Ann Example"\ngit_email = "ann@example.org"\nprofile = "server"\n' >"$SANDBOX/stored.toml"
+test_start "config_tmpl_no_tty_keeps_stored_values"
+out="$(render_cfg "$SANDBOX/stored.toml")"
+assert_equals "Ann Example|ann@example.org|server" \
+  "$(cfgval git_name <<<"$out")|$(cfgval git_email <<<"$out")|$(cfgval profile <<<"$out")" "a re-init keeps the stored identity and profile"
+
+printf '[data]\ngit_name = "Your Name"\ngit_email = "you@example.com"\n' >"$SANDBOX/placeholder.toml"
+test_start "config_tmpl_no_tty_drops_stored_placeholders"
+out="$(render_cfg "$SANDBOX/placeholder.toml")"
+assert_equals "|" "$(cfgval git_name <<<"$out")|$(cfgval git_email <<<"$out")" "stored placeholders are not carried forward"
+
+test_start "config_tmpl_no_tty_env_overrides"
+out="$(render_cfg "$SANDBOX/stored.toml" CHEZMOI_GIT_NAME="Env Name" CHEZMOI_PROFILE=container)"
+assert_equals "Env Name|ann@example.org|container" \
+  "$(cfgval git_name <<<"$out")|$(cfgval git_email <<<"$out")|$(cfgval profile <<<"$out")" "CHEZMOI_<KEY> wins over the stored value"
+
 # --- Helper templates document themselves ------------------------------------
 shopt -s nullglob
 for helper in "$REPO_ROOT"/defaults/.chezmoitemplates/functions/helpers/*.tmpl; do
