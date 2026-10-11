@@ -26,64 +26,158 @@ STANDARD_FILES = (
 )
 
 
-def get_repo_root() -> Path:
-    """Return repository root path."""
-    return Path(__file__).resolve().parent.parent
+def find_canonical_source() -> Path | None:
+    """Locate the canonical source directory containing the standard files."""
+    if "STANDARDS_REPO" in os.environ:
+        try:
+            custom = Path(os.environ["STANDARDS_REPO"])
+            if custom.is_dir() and (custom / "AGENTS.md").is_file():
+                return custom
+        except (OSError, PermissionError):
+            pass
 
+    # First check if invoked from within a dotfiles or standards git checkout
+    curr = Path(__file__).resolve()
+    for p in curr.parents:
+        for sub in ("defaults/Code", ""):
+            candidate = p / sub if sub else p
+            try:
+                if candidate.is_dir() and (candidate / "AGENTS.md").is_file():
+                    with (candidate / "AGENTS.md").open("rb") as f:
+                        f.read(1)
+                    return candidate
+            except (OSError, PermissionError):
+                continue
 
-def get_target_dirs(repo_root: Path) -> list[tuple[str, Path]]:
-    """Return configured sync target directories with descriptive labels."""
     home = Path.home()
-    code_dir = repo_root.parent.parent.parent
+    candidates = [
+        home / "Code" / "Public" / "Other" / "standards",
+        home / "Code",
+        home / ".dotfiles" / "defaults" / "Code",
+        home / ".local" / "share" / "chezmoi" / "defaults" / "Code",
+    ]
+    for c in candidates:
+        try:
+            if c.is_dir() and (c / "AGENTS.md").is_file():
+                with (c / "AGENTS.md").open("rb") as f:
+                    f.read(1)
+                return c
+        except (OSError, PermissionError):
+            continue
 
-    targets: list[tuple[str, Path]] = [
+    return None
+
+
+def get_target_dirs(src_dir: Path) -> list[tuple[str, Path]]:
+    """Return configured sync target directories with descriptive labels."""
+    if "STANDARDS_TARGETS" in os.environ:
+        custom_targets: list[tuple[str, Path]] = []
+        for item in os.environ["STANDARDS_TARGETS"].split(os.pathsep):
+            if item.strip():
+                p = Path(item.strip())
+                custom_targets.append((p.name or "Custom Target", p))
+        return custom_targets
+
+    home = Path.home()
+    code_dir = home / "Code"
+
+    all_targets: list[tuple[str, Path]] = [
         ("Workspace Root", code_dir),
         ("Chezmoi Dotfiles", home / ".dotfiles" / "defaults" / "Code"),
         ("Dotfiles Workspace", code_dir / "Public" / "Shell" / "dotfiles" / "defaults" / "Code"),
+        ("Chezmoi Local Share", home / ".local" / "share" / "chezmoi" / "defaults" / "Code"),
     ]
-    return [(label, p) for label, p in targets if p.parent.exists()]
+
+    try:
+        src_resolved = src_dir.resolve()
+    except Exception:
+        src_resolved = src_dir
+
+    targets: list[tuple[str, Path]] = []
+    seen: set[Path] = {src_resolved}
+
+    for label, p in all_targets:
+        try:
+            p_resolved = p.resolve()
+        except Exception:
+            p_resolved = p
+        if p_resolved in seen:
+            continue
+        try:
+            if p.exists() or (p.parent.exists() and p.name == "Code"):
+                seen.add(p_resolved)
+                targets.append((label, p))
+        except (OSError, PermissionError):
+            continue
+    return targets
 
 
 def compute_hash(path: Path) -> str:
     """Compute SHA-256 digest of a file."""
-    if not path.is_file():
+    try:
+        if not path.is_file():
+            return ""
+        h = hashlib.sha256()
+        with path.open("rb") as f:
+            while chunk := f.read(65536):
+                h.update(chunk)
+        return h.hexdigest()
+    except (OSError, PermissionError):
         return ""
-    h = hashlib.sha256()
-    with path.open("rb") as f:
-        while chunk := f.read(65536):
-            h.update(chunk)
-    return h.hexdigest()
 
 
 def check_target_file(src: Path, dst: Path, fname: str, label: str, quiet: bool) -> bool:
     """Check a single target file against source. Return True if drifted."""
-    src_hash = compute_hash(src)
-    dst_hash = compute_hash(dst)
+    try:
+        if not src.is_file():
+            return False
+    except (OSError, PermissionError):
+        return False
 
-    if not dst.exists():
-        if not quiet:
-            print(f"  [MISSING] {fname}")
-        return True
+    src_hash = compute_hash(src)
+    if not src_hash:
+        return False
+
+    try:
+        if not dst.exists():
+            if not quiet:
+                print(f"  [MISSING] {fname}")
+            return True
+    except (OSError, PermissionError):
+        return False
+
+    dst_hash = compute_hash(dst)
+    if not dst_hash:
+        return False
+
     if src_hash != dst_hash:
         if not quiet:
             print(f"  [DRIFTED] {fname}")
-            src_lines = src.read_text(encoding="utf-8", errors="replace").splitlines(keepends=True)
-            dst_lines = dst.read_text(encoding="utf-8", errors="replace").splitlines(keepends=True)
-            diff = difflib.unified_diff(
-                src_lines, dst_lines,
-                fromfile=f"standards/{fname}",
-                tofile=f"{label}/{fname}",
-                n=2,
-            )
-            print("".join(list(diff)[:15]))
+            try:
+                src_lines = src.read_text(encoding="utf-8", errors="replace").splitlines(keepends=True)
+                dst_lines = dst.read_text(encoding="utf-8", errors="replace").splitlines(keepends=True)
+                diff = difflib.unified_diff(
+                    src_lines, dst_lines,
+                    fromfile=f"standards/{fname}",
+                    tofile=f"{label}/{fname}",
+                    n=2,
+                )
+                print("".join(list(diff)[:15]))
+            except Exception:
+                pass
         return True
     if not quiet:
         print(f"  [OK]      {fname}")
     return False
 
 
-def check_sync(repo_root: Path, targets: list[tuple[str, Path]], quiet: bool = False) -> int:
-    """Verify all targets match repo files byte-for-byte. Return 0 if in sync, 1 if drifted."""
+def check_sync(src_dir: Path | None, targets: list[tuple[str, Path]], quiet: bool = False) -> int:
+    """Verify all targets match source files byte-for-byte. Return 0 if in sync, 1 if drifted."""
+    if src_dir is None:
+        if not quiet:
+            print("No standards source directory located.")
+        return 0
+
     drift_count = 0
     if not quiet:
         print(f"Checking synchronization for {len(STANDARD_FILES)} standard files across {len(targets)} targets...\n")
@@ -91,14 +185,17 @@ def check_sync(repo_root: Path, targets: list[tuple[str, Path]], quiet: bool = F
     for label, target_dir in targets:
         if not quiet:
             print(f"Target: {label} ({target_dir})")
-        if not target_dir.exists():
-            if not quiet:
-                print(f"  [MISSING] Target directory does not exist: {target_dir}\n")
-            drift_count += 1
+        try:
+            if not target_dir.exists():
+                if not quiet:
+                    print(f"  [MISSING] Target directory does not exist: {target_dir}\n")
+                drift_count += 1
+                continue
+        except (OSError, PermissionError):
             continue
 
         for fname in STANDARD_FILES:
-            if check_target_file(repo_root / fname, target_dir / fname, fname, label, quiet):
+            if check_target_file(src_dir / fname, target_dir / fname, fname, label, quiet):
                 drift_count += 1
         if not quiet:
             print()
@@ -116,43 +213,70 @@ def check_sync(repo_root: Path, targets: list[tuple[str, Path]], quiet: bool = F
     return 1
 
 
-def push_sync(repo_root: Path, targets: list[tuple[str, Path]]) -> int:
+def push_sync(src_dir: Path | None, targets: list[tuple[str, Path]]) -> int:
     """Propagate canonical repo files to all target destinations."""
+    if src_dir is None:
+        print("Cannot push: no standards source directory located.")
+        return 1
+
     print(f"Synchronizing {len(STANDARD_FILES)} standard files to {len(targets)} targets...\n")
     for label, target_dir in targets:
-        target_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            target_dir.mkdir(parents=True, exist_ok=True)
+        except (OSError, PermissionError) as e:
+            print(f"Cannot update {label} ({target_dir}): {e}")
+            continue
+
         print(f"Updating: {label} ({target_dir})")
         for fname in STANDARD_FILES:
-            src = repo_root / fname
+            src = src_dir / fname
             dst = target_dir / fname
-            if not src.is_file():
-                continue
-            shutil.copy2(src, dst)
-            print(f"  [COPIED] {fname}")
+            try:
+                if not src.is_file():
+                    continue
+                shutil.copy2(src, dst)
+                print(f"  [COPIED] {fname}")
+            except (OSError, PermissionError) as e:
+                print(f"  [ERROR] {fname}: {e}")
         print()
     print("Push synchronization complete.")
     return 0
 
 
-def pull_sync(repo_root: Path) -> int:
+def pull_sync(src_dir: Path | None) -> int:
     """Pull edited files from workspace root (~/Code) into canonical repo."""
-    code_dir = repo_root.parent.parent.parent
+    if src_dir is None:
+        print("Cannot pull: no standards destination directory located.")
+        return 1
+
+    code_dir = Path.home() / "Code"
+    if not code_dir.exists():
+        print(f"Workspace root not found: {code_dir}")
+        return 1
+
     print(f"Pulling standards from workspace root ({code_dir}) into repo...\n")
     for fname in STANDARD_FILES:
         src = code_dir / fname
-        dst = repo_root / fname
-        if not src.is_file():
-            continue
-        shutil.copy2(src, dst)
-        print(f"  [PULLED] {fname}")
+        dst = src_dir / fname
+        try:
+            if not src.is_file():
+                continue
+            shutil.copy2(src, dst)
+            print(f"  [PULLED] {fname}")
+        except (OSError, PermissionError) as e:
+            print(f"  [ERROR] {fname}: {e}")
     print("\nPull complete. Running push to update dotfiles mirrors...")
-    targets = [t for t in get_target_dirs(repo_root) if t[0] != "Workspace Root"]
-    return push_sync(repo_root, targets)
+    targets = [t for t in get_target_dirs(src_dir) if t[0] != "Workspace Root"]
+    return push_sync(src_dir, targets)
 
 
-def install_hooks(repo_root: Path) -> int:
+def install_hooks(src_dir: Path | None) -> int:
     """Install git post-commit and post-merge hooks to auto-sync on commit/pull."""
-    hooks_dir = repo_root / ".git" / "hooks"
+    if src_dir is None:
+        print("Cannot install hooks: no standards directory located.")
+        return 1
+
+    hooks_dir = src_dir / ".git" / "hooks"
     if not hooks_dir.exists():
         print(f"Git hooks directory not found at {hooks_dir}")
         return 1
@@ -160,14 +284,18 @@ def install_hooks(repo_root: Path) -> int:
     hook_content = (
         "#!/bin/sh\n"
         "# Auto-sync standards to workspace root and dotfiles\n"
-        "python3 scripts/sync.py --push\n"
+        "standards-sync --push\n"
     )
 
     for hook_name in ("post-commit", "post-merge"):
         hook_path = hooks_dir / hook_name
-        hook_path.write_text(hook_content, encoding="utf-8")
-        hook_path.chmod(0o755)
-        print(f"Installed hook: {hook_path}")
+        try:
+            hook_path.write_text(hook_content, encoding="utf-8")
+            hook_path.chmod(0o755)
+            print(f"Installed hook: {hook_path}")
+        except (OSError, PermissionError) as e:
+            print(f"Cannot install hook {hook_name}: {e}")
+            return 1
 
     return 0
 
@@ -181,17 +309,17 @@ def main() -> int:
     parser.add_argument("--install-hooks", action="store_true", help="Install git post-commit and post-merge hooks")
     args = parser.parse_args()
 
-    repo_root = get_repo_root()
-    targets = get_target_dirs(repo_root)
+    src_dir = find_canonical_source()
+    targets = get_target_dirs(src_dir) if src_dir else []
 
     if args.install_hooks:
-        return install_hooks(repo_root)
+        return install_hooks(src_dir)
     if args.pull:
-        return pull_sync(repo_root)
+        return pull_sync(src_dir)
     if args.check:
-        return check_sync(repo_root, targets, quiet=args.quiet)
+        return check_sync(src_dir, targets, quiet=args.quiet)
 
-    return push_sync(repo_root, targets)
+    return push_sync(src_dir, targets)
 
 
 if __name__ == "__main__":
