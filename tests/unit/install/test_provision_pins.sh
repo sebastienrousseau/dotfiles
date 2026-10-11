@@ -116,7 +116,7 @@ assert_equals "0|10|0" \
   "ten AI CLIs through mise, each at an exact version"
 
 test_start "ai_clis_use_the_data_versions"
-assert_contains "mise use -g npm:@openai/codex@0.159.3" "$(cat "$CALLS")" "codex comes from [ai_tools]"
+assert_contains "mise use -g npm:@openai/codex@0.160.0" "$(cat "$CALLS")" "codex comes from [ai_tools]"
 
 test_start "ai_clis_skip_quarantined_vibe"
 assert_equals "0" "$(grep -c 'mistral-vibe' "$CALLS")" "mistral-vibe is not installed"
