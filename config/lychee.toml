@@ -57,6 +57,8 @@ exclude = [
   '^https://github\.com/.*/settings',
   '^https://github\.com/.*/security/advisories',
   '^https://github\.com/.*/security/code-scanning',
+  # Keyservers actively reset or block automated bot crawlers.
+  '^https?://keys\.openpgp\.org',
 ]
 
 # Rate limits and transient 403s from bot-hostile hosts are not

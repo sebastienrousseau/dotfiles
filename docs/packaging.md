@@ -184,7 +184,7 @@ sha256sum -c ALL_SHA256SUMS
 ```
 
 Tags are signed with an SSH ed25519 key published in
-[`KEYS.asc`](https://github.com/sebastienrousseau/dotfiles/blob/main/KEYS.asc),
+[`KEYS.asc`](../KEYS.asc),
 which is itself a `git allowed_signers` file:
 
 ```sh
