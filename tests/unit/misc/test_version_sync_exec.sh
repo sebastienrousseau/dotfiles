@@ -76,14 +76,16 @@ build_sandbox() {
     "$SANDBOX/docs/manual" "$SANDBOX/.well-known/mcp" "$SANDBOX/share/man/man1"
   ln -s "$VERSION_FILE" "$SANDBOX/scripts/version-sync.sh"
   cp -R "$REPO_ROOT/lib" "$SANDBOX/lib"
+  cp "$REPO_ROOT/install.sh" "$SANDBOX/install.sh"
   printf '{\n  "version": "%s"\n}\n' "$pkg" >"$SANDBOX/package.json"
-  printf 'dotfiles_version = "%s"\n' "$cmd" >"$CHEZMOIDATA"
+  printf 'dotfiles_version = "%s"\nprevious_dotfiles_version = "0.0.0"\n' "$cmd" >"$CHEZMOIDATA"
   cat >"$SANDBOX/README.md" <<EOF
 # Demo
 
 ![Version](https://img.shields.io/badge/Version-v$readme-blue)
 [release](https://github.com/example/dotfiles/releases/tag/v$readme)
 [site](https://example.invalid/dotfiles/v$readme/)
+echo "0000000000000000000000000000000000000000000000000000000000000000  /tmp/dotfiles-install.sh" | sha256sum -c -
 EOF
   cat >"$SANDBOX/docs/reference/FEATURES.md" <<EOF
 # Features
@@ -195,16 +197,22 @@ test_start "version_sync_exec_branch_visible_write"
 live_bento_before="$(shasum -a 256 "$REPO_ROOT/lib/dot/bento.sh" | awk '{print $1}')"
 (
   cd "$SANDBOX" || exit 1
-  DOTFILES_ALLOW_COVERAGE_WRITES=1 bash scripts/version-sync.sh --force --no-backup >/dev/null
+  DOTFILES_ALLOW_COVERAGE_WRITES=1 bash scripts/version-sync.sh --force --no-backup 9.9.9 >/dev/null
 )
-assert_file_contains "$SANDBOX/README.md" "Version-v8.8.8" \
+assert_file_contains "$SANDBOX/README.md" "Version-v9.9.9" \
   "write path updates README badge"
-assert_file_contains "$SANDBOX/docs/reference/FEATURES.md" "dotfiles:8.8.8" \
+expected_ihash="$(sha256sum "$SANDBOX/install.sh" 2>/dev/null | awk '{print $1}')"
+[[ -n "$expected_ihash" ]] || expected_ihash="$(shasum -a 256 "$SANDBOX/install.sh" 2>/dev/null | awk '{print $1}')"
+assert_file_contains "$SANDBOX/README.md" "$expected_ihash" \
+  "write path updates installer sha256 in README"
+assert_file_contains "$CHEZMOIDATA" 'previous_dotfiles_version = "8.8.8"' \
+  "write path advances previous_dotfiles_version"
+assert_file_contains "$SANDBOX/docs/reference/FEATURES.md" "dotfiles:9.9.9" \
   "write path updates generic docs"
 live_bento_after="$(shasum -a 256 "$REPO_ROOT/lib/dot/bento.sh" | awk '{print $1}')"
 assert_equals "$live_bento_before" "$live_bento_after" \
   "sandboxed version sync must not mutate the live checkout"
-assert_file_contains "$SANDBOX/scripts/git-hooks/pre-commit-audit.sh" "v8.8.8 standards maintained" \
+assert_file_contains "$SANDBOX/scripts/git-hooks/pre-commit-audit.sh" "v9.9.9 standards maintained" \
   "write path updates pre-commit audit banner"
 
 # 9. Coverage-visible fallback discovery: remove rg/jq from PATH so
