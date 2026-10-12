@@ -4,6 +4,21 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+## v0.2.534 (2026-10-12)
+
+### Changed
+
+- Initialize release iteration v0.2.534 across all 17 canonical surfaces.
+- Harden version-sync to synchronize all surfaces including installer checksum.
+
+## v0.2.533 (2026-10-12)
+
+### Changed
+
+- Version bump to v0.2.533 across all 17 live surfaces.
+- Fix README download URLs, tarballs, sample configs, and installer SHA-256 in version-sync.
+- Synchronize previous_dotfiles_version, llms.txt, and CITATION.cff in release flow.
+
 ## v0.2.532 — 2026-10-08
 
 ### Security

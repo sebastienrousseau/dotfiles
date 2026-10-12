@@ -25,17 +25,13 @@ EXCLUDE_FILES=(
   "docs/articles/*"
   "docs/archive/*"
   "CHANGELOG.md"
+  "CONTRIBUTING.md"
   "docs/security/COMPLIANCE.md"
   "docs/reference/FONTS.md"
   "ROADMAP.md"
 
-  # Roadmap + audit narratives — describe per-version work; refs to
-  # prior versions are intentional and historical.
-  "docs/operations/ROADMAP_V0_2_503.md"
-  "docs/operations/VERSION_SYNC.md"
-  "docs/operations/RFC_v0_2_503_reorganization.md"
-  "docs/operations/HARD_AUDIT_2026.md"
-  "docs/operations/COVERAGE.md"
+  # Operations narratives and historical specs
+  "docs/operations/*"
   "docs/reference/ALIASES_DEPRECATIONS.md"
 
   # Security docs — INSTALL_VERIFICATION + CI_PINNING + SCORECARD
@@ -58,50 +54,22 @@ EXCLUDE_FILES=(
   # Example bundles — version refs in README'd examples are illustrative.
   "examples/mise-plugin-dot/README.md"
 
-  # MANIFEST + MIGRATION docs — describe per-version manifests &
-  # cross-version migration paths; intentional references to other tags.
-  "docs/operations/MANIFEST.md"
-  "docs/operations/MIGRATION.md"
-
-  # ADR + architecture + manual + operations narratives — every
-  # version reference inside is dated context, not a "current version"
-  # claim. The single source of truth is .chezmoidata.toml; README and
-  # package.json are generated surfaces that version-sync rewrites.
+  # ADR + architecture + manual narratives — every version reference
+  # inside is dated context, not a "current version" claim.
   "docs/adr/ADR-007-multi-shell-parity.md"
   "docs/architecture/REPO_LAYOUT.md"
   "docs/manual/01-concepts/04-fleet.md"
   "docs/manual/01-concepts/05-self-healing.md"
   "docs/manual/02-tutorials/05-deploy-fleet.md"
   "docs/manual/05-appendices/D-bibliography.md"
-  "docs/operations/MAINTENANCE.md"
 
-  # Release-process / structural docs that reference *historical* dotfiles
-  # versions (the repo reorg, past release tags, migration scenarios).
-  # Bumping these each release would corrupt accurate history.
-  "docs/operations/RELEASE_PIPELINE.md"
-  "docs/operations/TESTING.md"
+  # Release-process / structural docs that reference historical dotfiles
+  # versions. Bumping these each release would corrupt accurate history.
   "docs/STRUCTURE.md"
   "install/migrate/README.md"
   "install/README.md"
   "tools/README.md"
   "defaults/README.md"
-
-  # CI_COMPOSITES.md cites third-party action versions (e.g. v5.0.5),
-  # not dotfiles_version. False-positive pattern match.
-  "docs/operations/CI_COMPOSITES.md"
-
-  # Living roadmap: references branch names / target versions
-  # (e.g. feature-branch names like feat/v0.2.X, phase milestones)
-  # that are NOT the current dotfiles_version. Auto-syncing
-  # rewrites them incorrectly.
-  "docs/operations/ARCHITECTURE_ROADMAP.md"
-
-  # Dated release write-ups: each article records the release it
-  # shipped in (e.g. "shipped in vX.Y.Z" + a link to that release
-  # tag). Those refs are historical fact, not current-version claims —
-  # bumping them would falsify the history.
-  "docs/articles/2026-07-05-fish-startup-abbr.md"
-  "docs/articles/2026-07-05-master-to-main-rename-runbook.md"
 )
 
 # shellcheck source=../lib/dot/ui.sh
@@ -117,36 +85,15 @@ log_error() { ui_err "$@" >&2; }
 
 show_help() {
   cat <<EOF
-Version Synchronization Script
-
 USAGE:
   $0 [OPTIONS] [VERSION]
-
 OPTIONS:
-  -h, --help        Show this help message
-  -d, --dry-run     Show what would be changed without making changes
-  -v, --verify      Verify version consistency without updating
-  -b, --backup      Create backup before changes (default: true)
-  --no-backup       Skip creating backup
-  -f, --force       Force sync even if no changes detected
-
-ARGUMENTS:
-  VERSION          Target version to sync to (defaults to dotfiles_version in
-                   defaults/.chezmoidata.toml)
-
-EXAMPLES:
-  $0                    # Sync to the canonical dotfiles_version
-  $0 1.2.3             # Sync all files to version 1.2.3
-  $0 --dry-run         # Preview changes without applying
-  $0 --verify          # Check current version consistency
-
-DESCRIPTION:
-  This script synchronizes version numbers across all markdown files in the
-  repository with the canonical dotfiles_version in
-  defaults/.chezmoidata.toml. A supplied VERSION updates that manifest first,
-  then regenerates package metadata, badges, documentation headers, and
-  feature version stamps.
-
+  -h, --help    Show this help message
+  -d, --dry-run Preview changes without applying
+  -v, --verify  Verify version consistency
+  -b, --backup  Create backup before changes (default: true)
+  --no-backup   Skip creating backup
+  -f, --force   Force sync even if no changes detected
 EOF
 }
 
@@ -206,7 +153,7 @@ find_version_files() {
         if grep -Eq "v?$VERSION_PATTERN" "$file" 2>/dev/null; then
           printf '%s\n' "${file#./}"
         fi
-      done < <(find . -type f -name '*.md' -print) # LCOV_EXCL_LINE — procsub traced at enclosing header
+      done < <(find . -path './.*' -prune -o -type f -name '*.md' -print) # LCOV_EXCL_LINE — procsub traced at enclosing header
     } >"$temp_file"
   fi
 
@@ -227,12 +174,8 @@ find_version_files() {
 
   # Remove duplicates and filter existing files
   sort -u "$temp_file" | while IFS= read -r file; do
-    if [[ -f "$file" ]]; then
-      if is_excluded_file "$file"; then
-        continue
-      fi
-      echo "$file"
-    fi
+    [[ -f "$file" ]] || continue
+    is_excluded_file "$file" || echo "$file"
   done
 
   rm -f "$temp_file"
@@ -289,11 +232,23 @@ _vs_rewrite() {
   # which carry a `(vX.Y.Z)` stamp handled by the generic case below.
   case "$file" in
     "README.md")
-      # Update badge and release link versions.
+      # Update badge, download URLs, tarball names, config examples, and hash.
       sed_in_place "$temp_file" \
         -e "s|Version-v$SED_VERSION_PATTERN|Version-v$target_version|g" \
         -e "s|/releases/tag/v$SED_VERSION_PATTERN|/releases/tag/v$target_version|g" \
-        -e "s|/dotfiles/v$SED_VERSION_PATTERN/|/dotfiles/v$target_version/|g"
+        -e "s|/dotfiles/v$SED_VERSION_PATTERN/|/dotfiles/v$target_version/|g" \
+        -e "s|/releases/download/v$SED_VERSION_PATTERN/|/releases/download/v$target_version/|g" \
+        -e "s|dotfiles-install-$SED_VERSION_PATTERN\.sh|dotfiles-install-$target_version.sh|g" \
+        -e "s|download v$SED_VERSION_PATTERN|download v$target_version|g" \
+        -e "s|dot-$SED_VERSION_PATTERN|dot-$target_version|g" \
+        -e "s|dotfiles_version = \"$SED_VERSION_PATTERN\"|dotfiles_version = \"$target_version\"|g"
+      if [[ -f "$PROJECT_ROOT/install.sh" ]]; then
+        local ihash
+        ihash="$(shasum -a 256 "$PROJECT_ROOT/install.sh" 2>/dev/null | awk '{print $1}')"
+        [[ -n "$ihash" ]] || ihash="$(sha256sum "$PROJECT_ROOT/install.sh" 2>/dev/null | awk '{print $1}')"
+        [[ -z "$ihash" ]] || sed_in_place "$temp_file" \
+          -e "s|[0-9a-f]{64}(  /tmp/dotfiles-install\.sh)|${ihash}\\1|g"
+      fi
       ;;
     "docs/manual/00-introduction.md")
       sed_in_place "$temp_file" \
@@ -521,6 +476,12 @@ _vs_sync_manifest() {
   if [[ "$dry_run" == "true" ]]; then
     log_info "Would update ${chezmoidata#"$PROJECT_ROOT/"}: dotfiles_version = \"$target_version\""
   else
+    local cur_version
+    cur_version="$(sed -nE 's/^[[:space:]]*dotfiles_version[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' "$chezmoidata" | head -n 1)"
+    if [[ -n "$cur_version" && "$cur_version" != "$target_version" ]]; then
+      sed_in_place "$chezmoidata" \
+        "s|^previous_dotfiles_version = \"$SED_VERSION_PATTERN\"|previous_dotfiles_version = \"$cur_version\"|"
+    fi
     sed_in_place "$chezmoidata" \
       "s|^dotfiles_version = \"$SED_VERSION_PATTERN\"|dotfiles_version = \"$target_version\"|"
     log_success "Updated ${chezmoidata#"$PROJECT_ROOT/"}"
@@ -582,6 +543,9 @@ _vs_sync_scripts() {
     # .well-known/mcp/server-card.json — a client compares them.
     # TestVersionMatchesServerCard fails the build if this drifts.
     "defaults/dot_local/share/dot-mcp/main.go"
+    "defaults/dot_local/share/dot-mcp/example_test.go"
+    "llms.txt"
+    "CITATION.cff"
   )
   for script_file in "${script_files[@]}"; do
     [[ -f "$PROJECT_ROOT/$script_file" ]] || continue
@@ -589,6 +553,7 @@ _vs_sync_scripts() {
     cp "$PROJECT_ROOT/$script_file" "$temp_file"
     sed_in_place "$temp_file" "s|v$SED_VERSION_PATTERN|v$target_version|g"
     sed_in_place "$temp_file" "s|\"$SED_VERSION_PATTERN\"|\"$target_version\"|g"
+    sed_in_place "$temp_file" "s|^version: $SED_VERSION_PATTERN|version: $target_version|g"
     _vs_commit "$script_file" "$temp_file" "$dry_run"
     # An unchanged copy is removed; a written one is left, as it always was.
     [[ "$_vs_changed" == 1 ]] || rm -f "$temp_file"
