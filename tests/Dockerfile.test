@@ -9,7 +9,7 @@
 # Base images pinned by sha256 digest per Scorecard's Pinned-
 # Dependencies check. Refresh with `docker pull <image> && docker
 # inspect --format '{{index .RepoDigests 0}}' <image>`.
-FROM ubuntu:26.04@sha256:da6fc2be547864451aa253836dd926da33623312df4a9a243e35dc877c378a78 AS ubuntu-test
+FROM ubuntu:26.04@sha256:f144425ff09be612d6d9ad965196e9cdc23dae1f42110a8a11a3e9a8198759f7 AS ubuntu-test
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
@@ -189,7 +189,7 @@ USER testuser
 # =============================================================================
 # Ubuntu 26.04 + eza - Tests modern aliases with eza installed
 # =============================================================================
-FROM ubuntu:26.04@sha256:da6fc2be547864451aa253836dd926da33623312df4a9a243e35dc877c378a78 AS ubuntu-eza-test
+FROM ubuntu:26.04@sha256:f144425ff09be612d6d9ad965196e9cdc23dae1f42110a8a11a3e9a8198759f7 AS ubuntu-eza-test
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
