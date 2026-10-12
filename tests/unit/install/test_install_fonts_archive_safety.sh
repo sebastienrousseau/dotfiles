@@ -126,9 +126,9 @@ assert_equals "1|no|no" \
 CHECKER_TMPL="$REPO_ROOT/defaults/run_onchange_after_fonts.sh.tmpl"
 pty_run() {
   if script -qec true /dev/null </dev/null >/dev/null 2>&1; then
-    script -qec "$1" /dev/null </dev/null
+    script -qec "$*" /dev/null </dev/null
   else
-    script -q /dev/null "$1" </dev/null
+    script -q /dev/null /bin/sh -c "$*" </dev/null
   fi
 }
 if command -v chezmoi >/dev/null 2>&1 && command -v script >/dev/null 2>&1; then
