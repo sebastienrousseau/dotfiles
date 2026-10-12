@@ -24,6 +24,7 @@ EXCLUDE_FILES=(
 
   # Historical / referential docs — version refs inside are intentional
   # pointers at prior versions, not "this is the current version" claims.
+  "docs/articles/*"
   "CHANGELOG.md"
   "docs/security/COMPLIANCE.md"
   "docs/reference/FONTS.md"

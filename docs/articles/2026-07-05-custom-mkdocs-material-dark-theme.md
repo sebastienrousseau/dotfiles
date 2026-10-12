@@ -213,4 +213,4 @@ Cloudflare CDN cache invalidation after Pages deploy: ~10 minutes on `max-age=60
 
 5. **Measure contrast, not just aesthetics.** WCAG AAA on body text is achievable with the right palette; it's not a tradeoff against distinctiveness.
 
-The reference implementation landed as [PR #960](https://github.com/sebastienrousseau/dotfiles/pull/960) and is live at [doc.dotfiles.io](https://doc.dotfiles.io); the theme source lives at [`docs/stylesheets/extra.css`](https://github.com/sebastienrousseau/dotfiles/blob/v0.2.532/docs/stylesheets/extra.css).
+The reference implementation landed as [PR #960](https://github.com/sebastienrousseau/dotfiles/pull/960) and is live at [doc.dotfiles.io](https://doc.dotfiles.io); the theme source lives at [`docs/stylesheets/extra.css`](https://github.com/sebastienrousseau/dotfiles/blob/v0.2.510/docs/stylesheets/extra.css).
