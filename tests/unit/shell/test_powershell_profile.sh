@@ -25,6 +25,6 @@ assert_file_contains "$PROFILE_FILE" "function la" "PowerShell profile defines l
 assert_file_contains "$PROFILE_FILE" "function cat" "PowerShell profile defines cat"
 
 test_start "support_matrix_mentions_powershell"
-assert_file_contains "$SUPPORT_FILE" "| PowerShell | 7.4 LTS or 7.5 and later | Supported |" "support matrix documents PowerShell"
+assert_file_contains "$SUPPORT_FILE" "| PowerShell | 7.5 or later | Supported |" "support matrix documents PowerShell"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -216,34 +216,27 @@ found, what was fixed, and what remains, before starting the requested work.
   source, nested package manifest, lockfile root package, generated packaging
   manifest, README install example, CI/action reference, and pre-commit revision.
   Inspect the package produced by the registry dry run, not only the worktree.
-- **Release Notes and Tags**: Signed annotated tag messages MUST use
-  `<PROJECT_NAME> v<VERSION>`. GitHub release notes MUST summarize user-visible
-  changes and include artifact checksums in the established repository format.
-  A commit list alone is not a release summary.
-- **Release Page Format**: Every tag MUST have a published GitHub release, and
-  every release in a repository MUST follow one naming convention, style, tone
-  and layout. The one exception is a floating major tag such as a GitHub
-  Action's `v0`, which is a pointer moved to each release, not a version, so
-  it gets no release of its own. A nested module's tag
-  (`<path>/v<VERSION>`) does get one, titled after the module and marked
-  not-latest. The layout is modelled on
-  <https://github.com/github/github-mcp-server/releases/tag/v1.6.0>:
-  - Title: `<PROJECT_NAME> <VERSION>`, the version without the `v`
-    (e.g. `pain001.com 0.0.8`, like `GitHub MCP Server 1.6.0`).
-  - `## Highlights ⭐️`: two to four bullets, each `* **<Feature>**: <one or
-    two plain sentences on what changed for the user>`. Direct, concrete,
-    friendly; no marketing adjectives.
-  - `## What's Changed`: one line per merged pull request,
-    `* <PR title> by @<author> in <PR URL>`, as GitHub's generate-release-notes
-    API produces it. Generate it; never hand-write it. A tag with no pull
-    requests before it (usually the first) lists its commits in the same
-    shape, `* <subject> by @<author> in <commit URL>`.
-  - `## New Contributors`: only when there are any, in the same generated form.
-  - `## Checksums`: the SHA-256 of every release asset in a fenced block (this
-    satisfies the checksum rule above).
-  - Last line: `**Full Changelog**: <compare URL from the previous tag>`.
-  Only the Highlights are written by hand; keep them in the repository (for
-  example `docs/releases/v<VERSION>.md`) and compose the rest at release time.
+- **Key Release Invariants (MANDATORY & NON-NEGOTIABLE across ALL Repositories)**:
+  Every tag and release MUST strictly comply with these five invariants, modelled on <https://github.com/sebastienrousseau/passmcp/releases/tag/v0.0.5>:
+  1. **Mandatory Naming Disambiguation**:
+     - **Git Tag**: `v<VERSION>` (with leading `v`, e.g. `v0.0.50`, `v0.1.0`).
+     - **Signed Annotated Tag Message**: `<PROJECT_NAME> v<VERSION>` (e.g. `corralctl v0.0.50`, `passmcp v0.0.5`).
+     - **GitHub Release Title (NON-NEGOTIABLE GLOBAL INVARIANT)**: MUST ALWAYS be `<PROJECT_NAME> <VERSION>` without leading `v` (e.g. `corralctl 0.0.50`, `passmcp 0.0.5`, `oxml 0.0.9`, `pain001.com 0.0.8`). Titles starting with `v` (e.g. `v0.0.50`) or omitting the project name are strictly prohibited and constitute an immediate release gate failure.
+  2. **Tooling & GoReleaser Configuration**:
+     - In `.goreleaser.yaml`, `release.name_template` must be explicitly defined as `"{{ .ProjectName }} {{ .Version }}"` so default tag templates (`v<VERSION>`) are never produced by automation.
+  3. **Tone of Voice & Character Prohibitions**:
+     - Direct, human, concrete, friendly, explaining WHAT and WHY without marketing fluff, adjectives, or AI filler.
+     - Zero em dashes (`—`) anywhere in release titles or bodies; use commas, colons, parentheses, or spaced hyphens.
+  4. **Exact Section Hierarchy**:
+     1. `## Highlights ⭐️`: 2 to 4 bullets (`* **<Headline>**: <one or two plain sentences>`). May include a family alignment note (e.g. `* **In lockstep with <project> <version>**, the family's Nth release.`).
+     2. `## What's Changed`: `* <PR title> by @<author> in <PR URL>` (generated via GitHub API). A tag with no pull requests before it lists its commits in the same shape: `* <subject> by @<author> in <commit URL>`.
+     3. `## New Contributors`: (only when present, formatted identically).
+     4. `## Checksums`: Introduced by `SHA-256 of every asset attached to this release:`, followed by a fenced ````text```` block listing every asset's 64-char hash and filename.
+     5. `**Full Changelog**: https://github.com/<owner>/<repo>/compare/<prev_tag>...<curr_tag>`.
+     Only the Highlights are written by hand; compose the rest from release artifacts and PR metadata.
+  5. **Mandatory Post-Publish Audit & Immediate Remediation**:
+     - After any release is published (or completion of the release workflow), the agent MUST inspect the live GitHub release (`gh release view <tag> --json title,body`).
+     - If the title or notes deviate in ANY way, the agent MUST immediately correct it using `gh release edit <tag> --title "<PROJECT_NAME> <VERSION>" --notes-file <path>` before considering the task complete.
 - **Release Preflight Is Blocking**: A release or tag MUST NOT be pushed until
   an automated preflight proves that the tag target is the intended release
   commit, the annotated tag is cryptographically signed, its first message line
@@ -251,10 +244,6 @@ found, what was fixed, and what remains, before starting the requested work.
   current, the registry dry-run archive contains current documentation and
   manifests, and the prepared release notes contain both a user-visible summary
   and artifact checksums. Treat any mismatch as a release-blocking failure.
-- **Published Release Audit**: Immediately after publishing, independently read
-  the remote tag object, GitHub release body, registry package contents, and
-  checksums back from their published locations. Do not infer success from the
-  workflow result. A release is incomplete until this audit passes.
 - **Published Tag Repair**: Published tags are immutable during normal work.
   Rewriting a published tag requires the user's explicit authorization for the
   exact tag or release series, must preserve the target commit, must replace the
@@ -291,24 +280,29 @@ found, what was fixed, and what remains, before starting the requested work.
   specific pull request. Approval to commit, push, open a PR, fix checks, or
   continue a roadmap is not merge authorization.
 - **Handover Commands**: When an action is left to the user (a merge, a
-  tag, a push, anything the session may not run), give it as ONE complete
-  command that works from any directory: start with
-  `cd /absolute/path/to/repo &&`, name the exact PR, tag or branch, and
-  include every flag. Never assume the user's shell is in the repository,
-  and never split the handover across several snippets.
+  tag, a push, anything the session may not run directly), all commands MUST
+  be written to a self-contained executable script located at `/tmp/<repo-name>/<script-name>.sh`
+  (for example, for a repo named `pain001`, the script will be created at
+  `/tmp/pain001/<script-name>.sh`). Never output raw or multiline terminal command
+  blocks directly for the user to copy/paste into their shell. The handover
+  command provided to the user MUST ALWAYS be a single execution command working
+  from any directory: `zsh /tmp/<repo-name>/<script-name>.sh`. Never assume
+  the user's shell is in the repository, and never split the handover across
+  several snippets.
 - **PR Descriptions**: Follow `~/Code/PR-TEMPLATE.md` exactly, including the
   section order, the `## Highlights ⭐️`, the fenced Checksums block, and the
-  `**Full Changelog**` line. After the greeting, a two-line BLUF (bottom line up
+  `**Full Changelog**` line. Open with a two-line BLUF (bottom line up
   front) that announces the PR: line one begins `This PR ` and says what it does,
-  line two says why it matters or the outcome. Separate the greeting and each BLUF
-  line with a blank line (a single newline soft-wraps into one paragraph in
+  line two says why it matters or the outcome. Separate line 1 and line 2
+  with a blank line (a single newline soft-wraps into one paragraph in
   Markdown, so the blank line is what puts each on its own line). Not a
   descriptive paragraph above the Highlights. Write like a person: direct, concrete, no filler, no AI tells.
   Never use the em dash character (`—`) anywhere in a PR body; use a comma, a
-  colon, parentheses, or a spaced hyphen instead. Every PR, fork or upstream,
-  opens with a bare-name greeting to the upstream maintainer on its own line,
-  exactly `Hi <name>,` with no thanks or trailing clause; it is never dropped,
-  even on a PR into the user's own fork. Never add a "Generated with
+  colon, parentheses, or a spaced hyphen instead. When opening a PR to an external
+  upstream repository maintained by someone else, open with a bare-name greeting
+  to the upstream maintainer on its own line, exactly `Hi <name>,` with no thanks
+  or trailing clause; when the repository belongs to the user (Sebastien), omit
+  the greeting entirely and start directly with the BLUF. Never add a "Generated with
   Claude Code" or any other tool-attribution footer to a PR description; commit
   attribution stays in the commit trailer (`Assisted-by:`), not the PR body.
 - **Fork-and-upstream flow**: For a repository the user maintains as a fork,

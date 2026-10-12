@@ -214,7 +214,7 @@ EP_GITCONFIG=""
 if ep_render "$REPO_ROOT/defaults/dot_gitconfig.tmpl" "$EP_WORK/gitconfig"; then
   EP_GITCONFIG="$EP_WORK/gitconfig"
 fi
-ep_git() { git config -f "$EP_GITCONFIG" --get "$1" 2>/dev/null || true; }
+ep_git() { GIT_CONFIG_GLOBAL=/dev/null git config -f "$EP_GITCONFIG" --get "$1" 2>/dev/null || true; }
 
 test_start "gitconfig_commit_signing"
 if [[ -z "$EP_GITCONFIG" ]]; then ep_skip "chezmoi not installed"; else

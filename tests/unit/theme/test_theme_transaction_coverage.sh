@@ -13,7 +13,8 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 LIB="$REPO_ROOT/lib/dot/theme-transaction.sh"
-WORK="$(mktemp -d "${TMPDIR:-/tmp}/theme-txn-cov.XXXXXX")"
+TMP_BASE="${TMPDIR:-/tmp}"
+WORK="$(mktemp -d "${TMP_BASE%/}/theme-txn-cov.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 
 export HOME="$WORK/home"

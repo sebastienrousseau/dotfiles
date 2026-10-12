@@ -93,7 +93,7 @@ fi
 
 SF_TMP="$(mktemp -d)"
 trap 'rm -rf "$SF_TMP"' EXIT
-mkdir -p "$SF_TMP/bin" "$SF_TMP/home"
+mkdir -p "$SF_TMP/bin" "$SF_TMP/home" "$SF_TMP/run"
 
 # A stub chezmoi that reports one pending change and logs every argv token
 # on its own line, so the flags the scripts really pass can be inspected.
@@ -110,7 +110,7 @@ INJECT='--dry-run $(touch sf-pwned) ;touch sf-pwned2'
 # flags_run <script> <env var>: run with hostile flags; prints "tokens|pwned"
 flags_run() {
   rm -f "$SF_TMP/argv" "$SF_TMP"/sf-pwned*
-  (cd "$SF_TMP" && env HOME="$SF_TMP/home" PATH="$SF_TMP/bin:$PATH" SF_ARGV="$SF_TMP/argv" \
+  (cd "$SF_TMP" && env HOME="$SF_TMP/home" XDG_RUNTIME_DIR="$SF_TMP/run" TMPDIR="$SF_TMP" PATH="$SF_TMP/bin:$PATH" SF_ARGV="$SF_TMP/argv" \
     "$2=$INJECT" bash "$1" >/dev/null 2>&1) || true
   # shellcheck disable=SC2016
   printf '%s|%s' "$(grep -cxF -e '$(touch' -e 'sf-pwned)' -e ';touch' -e 'sf-pwned2' "$SF_TMP/argv" 2>/dev/null)" \
@@ -167,7 +167,7 @@ for _ in 1 2; do
   env HOME="$AGE_HOME" PATH="$SF_TMP/bin:$PATH" bash "$REPO_ROOT/scripts/secrets/age-init.sh" >/dev/null 2>&1 || true
 done
 age_parsed="$(
-  python3 - "$AGE_HOME/.config/chezmoi/chezmoi.toml" "$AGE_HOME/.config/chezmoi/key.txt" 2>&1 <<'TOMLCHECK'
+  PATH="/usr/bin:/bin:$PATH" python3 - "$AGE_HOME/.config/chezmoi/chezmoi.toml" "$AGE_HOME/.config/chezmoi/key.txt" 2>&1 <<'TOMLCHECK'
 import sys
 try:
     import tomllib

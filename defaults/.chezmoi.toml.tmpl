@@ -44,15 +44,26 @@ sourceDir = "{{ .chezmoi.homeDir }}/.dotfiles"
 [data]
 # User profile data with promptString fallback chains.
 # Interactive path: prompt with the shown default; stored for next run.
-# Non-interactive path (CI, drift detection): fall through to the same
-# default silently so `chezmoi init --apply=false` succeeds without a TTY.
+# Non-interactive path (CI, drift detection, container builds): never
+# prompt. Take CHEZMOI_<KEY> from the environment, else the value already
+# stored in this config, else the default, so a re-init without a TTY no
+# longer resets a configured identity to placeholders. git_name and
+# git_email default to empty, not "Your Name"/"you@example.com": the
+# gitconfig template then falls back to name/email (seeded by install.sh)
+# or omits [user], and git refuses to commit rather than committing as a
+# placeholder.
 {{- $tty := stdinIsATTY }}
-profile           = "{{ if $tty }}{{ promptString "profile" "laptop" }}{{ else }}laptop{{ end }}"
-theme             = "{{ if $tty }}{{ promptString "theme" "tokyonight-night" }}{{ else }}tokyonight-night{{ end }}"
-git_name          = "{{ if $tty }}{{ promptString "git_name" "Your Name" }}{{ else }}Your Name{{ end }}"
-git_email         = "{{ if $tty }}{{ promptString "git_email" "you@example.com" }}{{ else }}you@example.com{{ end }}"
-git_signingkey    = "{{ if $tty }}{{ promptString "git_signingkey" "~/.ssh/id_ed25519" }}{{ else }}~/.ssh/id_ed25519{{ end }}"
-git_signingformat = "{{ if $tty }}{{ promptString "git_signingformat" "ssh" }}{{ else }}ssh{{ end }}"
+{{- $stored := dict }}
+{{- range $k := list "profile" "theme" "git_name" "git_email" "git_signingkey" "git_signingformat" }}
+{{-   $v := get $ $k | toString }}
+{{-   if and (ne $v "<nil>") (ne $v "Your Name") (ne $v "you@example.com") }}{{ $_ := set $stored $k $v }}{{ end }}
+{{- end }}
+profile           = "{{ if $tty }}{{ promptString "profile" "laptop" }}{{ else }}{{ coalesce (env "CHEZMOI_PROFILE") (get $stored "profile") "laptop" }}{{ end }}"
+theme             = "{{ if $tty }}{{ promptString "theme" "tokyonight-night" }}{{ else }}{{ coalesce (env "CHEZMOI_THEME") (get $stored "theme") "tokyonight-night" }}{{ end }}"
+git_name          = "{{ if $tty }}{{ promptString "git_name" "Your Name" }}{{ else }}{{ coalesce (env "CHEZMOI_GIT_NAME") (get $stored "git_name") | default "" }}{{ end }}"
+git_email         = "{{ if $tty }}{{ promptString "git_email" "you@example.com" }}{{ else }}{{ coalesce (env "CHEZMOI_GIT_EMAIL") (get $stored "git_email") | default "" }}{{ end }}"
+git_signingkey    = "{{ if $tty }}{{ promptString "git_signingkey" "~/.ssh/id_ed25519" }}{{ else }}{{ coalesce (env "CHEZMOI_GIT_SIGNINGKEY") (get $stored "git_signingkey") "~/.ssh/id_ed25519" }}{{ end }}"
+git_signingformat = "{{ if $tty }}{{ promptString "git_signingformat" "ssh" }}{{ else }}{{ coalesce (env "CHEZMOI_GIT_SIGNINGFORMAT") (get $stored "git_signingformat") "ssh" }}{{ end }}"
 
 # Expose age variables in data section for use in other templates
 # Variable scope: $age_identity and $age_recipient defined at file top are accessible here

@@ -102,6 +102,25 @@ Every repo in a family shares one README shape, in this order:
 - [ ] SBOM (CycloneDX) attached to every release
 - [ ] Publish to {{REGISTRY}} via trusted publishing / OIDC, not
       long-lived tokens
+- [ ] **GitHub Releases format, tone, and layout (NON-NEGOTIABLE GLOBAL INVARIANT)**: strictly uniform across all repositories, modelled on <https://github.com/sebastienrousseau/passmcp/releases/tag/v0.0.5>:
+      1. **Mandatory Naming Disambiguation**:
+         - **Git Tag**: `v<VERSION>` (with leading `v`, e.g. `v0.0.50`, `v0.1.0`).
+         - **Signed Annotated Tag Message**: `<PROJECT_NAME> v<VERSION>` (e.g. `corralctl v0.0.50`).
+         - **GitHub Release Title**: MUST ALWAYS be `<PROJECT_NAME> <VERSION>` without leading `v` (e.g. `corralctl 0.0.50`, `passmcp 0.0.5`, `oxml 0.0.9`). Titles starting with `v` (e.g. `v0.0.50`) or omitting the project name are strictly prohibited and constitute an immediate release gate failure.
+      2. **Tooling & GoReleaser Configuration**:
+         - In `.goreleaser.yaml`, `release.name_template` must be explicitly defined as `"{{ .ProjectName }} {{ .Version }}"` so default tag templates (`v<VERSION>`) are never produced by automation.
+      3. **Tone of Voice & Character Prohibitions**:
+         - Direct, human, concrete, friendly.
+         - Zero em dashes (`—`) anywhere in release titles or bodies; use commas, colons, parentheses, or spaced hyphens.
+      4. **Exact Section Hierarchy**:
+         - `## Highlights ⭐️`: 2 to 4 bullets (`* **<Headline>**: <plain sentence>`).
+         - `## What's Changed`: `* <PR title> by @<author> in <PR URL>` (generated via GitHub API).
+         - `## New Contributors`: (only when present).
+         - `## Checksums`: Introduced by `SHA-256 of every asset attached to this release:`, followed by a fenced ````text```` block listing every asset's 64-char hash and filename.
+         - `**Full Changelog**: https://github.com/<owner>/<repo>/compare/<prev_tag>...<curr_tag>`.
+      5. **Mandatory Post-Publish Audit & Immediate Remediation**:
+         - After any release is published, the agent MUST inspect the live GitHub release (`gh release view <tag> --json title,body`).
+         - If the title or notes deviate in any way, the agent MUST immediately correct it using `gh release edit <tag> --title "<PROJECT_NAME> <VERSION>" --notes-file <path>` before considering the task complete.
 
 ### 5. Packaging and distribution
 

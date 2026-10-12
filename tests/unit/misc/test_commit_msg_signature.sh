@@ -13,14 +13,16 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 HOOK="${COMMIT_MSG_HOOK:-$REPO_ROOT/defaults/dot_config/git/hooks/executable_commit-msg}"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/commit-msg-sig.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
-mkdir -p "$WORK/home/.euxis/data/config/branding"
+mkdir -p "$WORK/home/.euxis/data/config/branding" "$WORK/bin"
 printf 'SIG LINE ONE\nSIG LINE TWO\n' >"$WORK/home/.euxis/data/config/branding/signature.txt"
+printf '#!/bin/sh\nexit 1\n' >"$WORK/bin/pgrep"
+chmod +x "$WORK/bin/pgrep"
 
 # hook <message...>: run the hook on that message in a clean environment (no
 # AI-session variables, so no Assisted-by injection) and print the result.
 hook() {
   printf '%b' "$1" >"$WORK/msg"
-  env -i HOME="$WORK/home" PATH="$PATH" bash "$HOOK" "$WORK/msg" >/dev/null 2>&1 || return $?
+  env -i HOME="$WORK/home" PATH="$WORK/bin:$PATH" bash "$HOOK" "$WORK/msg" >/dev/null 2>&1 || return $?
   cat "$WORK/msg"
 }
 line_of() { grep -n -F -- "$1" | head -1 | cut -d: -f1; }
@@ -51,7 +53,7 @@ assert_equals '# Lines starting with # are ignored' "$(printf '%s\n' "$got" | se
 test_start "signature_is_added_once"
 first="$(hook 'feat: thing\n\nBody.\n\nSigned-off-by: Dev <dev@example.com>\n')"
 printf '%s\n' "$first" >"$WORK/msg"
-env -i HOME="$WORK/home" PATH="$PATH" bash "$HOOK" "$WORK/msg" >/dev/null 2>&1
+env -i HOME="$WORK/home" PATH="$WORK/bin:$PATH" bash "$HOOK" "$WORK/msg" >/dev/null 2>&1
 assert_equals 1 "$(grep -c 'SIG LINE ONE' "$WORK/msg")" "a second run does not duplicate the signature"
 
 test_start "merge_commits_are_left_alone"

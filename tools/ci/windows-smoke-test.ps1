@@ -3,13 +3,12 @@
   Windows smoke test for the dotfiles framework.
 
 .DESCRIPTION
-  Runs under PowerShell 7.4 LTS or 7.5+; verifies that the `dot` dispatcher
+  Runs under PowerShell 7.5 or later; verifies that the `dot` dispatcher
   starts, that key read-only commands work, and that chezmoi can be
   invoked from PowerShell. Designed to run inside `windows-latest`
   GitHub Actions runners (B1 of ROADMAP_2026).
 
-  Closes the audit gap "PowerShell 7.5+ claim unverified" (the floor is
-  7.4 LTS until it retires on 2026-11-10).
+  Closes the audit gap "PowerShell 7.5+ claim unverified".
 
 .NOTES
   Exit codes:
@@ -47,13 +46,12 @@ function Assert-Step {
 }
 
 # ─── PowerShell version contract ─────────────────────────────────────────────
-# The documented floor is 7.4 LTS until it retires on 2026-11-10, then 7.5.
-# windows-latest ships PowerShell 7.6 (7.6.6 on 2026-09-25), so this gate
-# runs on 7.6; 7.4 itself is not exercised in CI.
-Assert-Step 'PowerShell >= 7.4 (LTS or current)' {
+# The floor is 7.5 since PowerShell 7.4 LTS retired on 2026-11-10.
+# windows-latest ships PowerShell 7.6 (7.6.6 on 2026-09-25).
+Assert-Step 'PowerShell >= 7.5' {
   if ($PSVersionTable.PSVersion.Major -lt 7 -or
-      ($PSVersionTable.PSVersion.Major -eq 7 -and $PSVersionTable.PSVersion.Minor -lt 4)) {
-    throw "PowerShell $($PSVersionTable.PSVersion) — need 7.4+ (LTS) or 7.5+ (current)"
+      ($PSVersionTable.PSVersion.Major -eq 7 -and $PSVersionTable.PSVersion.Minor -lt 5)) {
+    throw "PowerShell $($PSVersionTable.PSVersion) — need 7.5 or later"
   }
 }
 

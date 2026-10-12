@@ -1,4 +1,8 @@
 <!-- SPDX-License-Identifier: {{LICENSE_SPDX}} -->
+<!--
+README template. Global rules: see ~/Code/AGENTS.md and ~/Code/REPO-STANDARD.md.
+Releases adhere strictly to https://github.com/sebastienrousseau/passmcp/releases/tag/v0.0.5
+-->
 
 <p align="center">
   <img src="{{LOGO_URL}}" alt="{{PROJECT_NAME}} logo" width="128" />
@@ -11,12 +15,12 @@
 </p>
 
 <p align="center">
-  <a href="{{REPO_URL}}/actions"><img src="{{REPO_URL}}/workflows/ci/badge.svg?style=for-the-badge&logo=github" alt="Build" /></a>
-  <a href="{{REGISTRY_URL}}"><img src="{{REGISTRY_BADGE_IMAGE}}?style=for-the-badge&color=fc8d62&logo={{ECOSYSTEM_LOGO}}" alt="Registry" /></a>
-  <a href="{{API_DOCS_URL}}"><img src="{{API_DOCS_BADGE_IMAGE}}?style=for-the-badge&labelColor=555555&logo={{DOCS_LOGO}}" alt="Docs" /></a>
-  <a href="https://scorecard.dev/viewer/?uri={{REPO_DOMAIN_AND_PATH}}"><img src="https://img.shields.io/ossf-scorecard/{{REPO_DOMAIN_AND_PATH}}?style=for-the-badge&label=OpenSSF%20Scorecard&logo=openssf" alt="OpenSSF Scorecard" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-{{LICENSE_URL_ENCODED}}-blue.svg?style=for-the-badge" alt="License: {{LICENSE_SPDX}}" /></a>
-  <a href="{{REPO_URL}}/blob/main/docs/POLICIES.md"><img src="https://img.shields.io/badge/{{MIN_TOOLCHAIN_BADGE_LABEL}}-93450a.svg?style=for-the-badge&logo={{ECOSYSTEM_LOGO}}" alt="{{MIN_TOOLCHAIN_TEXT}}" /></a>
+  <a href="{{REPO_URL}}/actions"><img src="https://img.shields.io/github/actions/workflow/status/{{REPO_DOMAIN_AND_PATH}}/ci.yml?style=for-the-badge&logo=github" alt="Build" height="28" /></a>
+  <a href="{{REGISTRY_URL}}"><img src="{{REGISTRY_BADGE_IMAGE}}?style=for-the-badge&color=fc8d62&logo={{ECOSYSTEM_LOGO}}" alt="Registry" height="28" /></a>
+  <a href="{{API_DOCS_URL}}"><img src="{{API_DOCS_BADGE_IMAGE}}?style=for-the-badge&labelColor=555555&logo={{DOCS_LOGO}}" alt="Docs" height="28" /></a>
+  <a href="https://scorecard.dev/viewer/?uri={{REPO_DOMAIN_AND_PATH}}"><img src="https://img.shields.io/ossf-scorecard/{{REPO_DOMAIN_AND_PATH}}?style=for-the-badge&label=OpenSSF%20Scorecard&logo=openssf" alt="OpenSSF Scorecard" height="28" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-{{LICENSE_URL_ENCODED}}-blue.svg?style=for-the-badge" alt="License: {{LICENSE_SPDX}}" height="28" /></a>
+  <a href="{{REPO_URL}}/blob/main/docs/POLICIES.md"><img src="https://img.shields.io/badge/{{MIN_TOOLCHAIN_BADGE_LABEL}}-93450a.svg?style=for-the-badge&logo={{ECOSYSTEM_LOGO}}" alt="{{MIN_TOOLCHAIN_TEXT}}" height="28" /></a>
 </p>
 
 <p align="center">
