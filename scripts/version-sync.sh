@@ -22,14 +22,11 @@ EXCLUDE_FILES=(
   # once stamped the 0.2.530 release number over all of them.
   "defaults/Code/*"
 
-  # Historical / referential docs — version refs inside are intentional
-  # pointers at prior versions, not "this is the current version" claims.
   "docs/articles/*"
+  "docs/archive/*"
   "CHANGELOG.md"
   "docs/security/COMPLIANCE.md"
   "docs/reference/FONTS.md"
-  "docs/archive/LEGACY_ROADMAP.md"
-  "docs/archive/PLAN.md"
   "ROADMAP.md"
 
   # Roadmap + audit narratives — describe per-version work; refs to
