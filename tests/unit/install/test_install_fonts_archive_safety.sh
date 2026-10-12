@@ -44,17 +44,18 @@ chmod +x "$STUBS/curl" "$STUBS/uname" "$STUBS/fc-cache"
 # link to ~/.bashrc), or traversal (an entry named ../escaped.ttf).
 make_zip() {
   python3 - "$1" "$2" <<'PY'
-import sys, zipfile
+import os, sys, zipfile
 path, kind = sys.argv[1], sys.argv[2]
+base = os.path.splitext(os.path.basename(path))[0]
 def entry(name, mode):
     info = zipfile.ZipInfo(name)
     info.create_system = 3
     info.external_attr = mode << 16
     return info
 with zipfile.ZipFile(path, "w") as z:
-    z.writestr(entry("Font-Regular.ttf", 0o100644), "font")
+    z.writestr(entry(f"{base}-Regular.ttf", 0o100644), "font")
     if kind == "symlink":
-        z.writestr(entry("Font-Bold.ttf", 0o120777), "../../../.bashrc")
+        z.writestr(entry(f"{base}-Bold.ttf", 0o120777), "../../../.bashrc")
     elif kind == "traversal":
         z.writestr(entry("../escaped.ttf", 0o100644), "font")
 PY
@@ -94,7 +95,7 @@ release regular
 test_start "fonts_regular_archive_installed"
 rc="$(run_fonts "$WORK/h1")"
 assert_equals "0|yes|v3.4.0" \
-  "$rc|$([[ -f "$WORK/h1/$FONTS/Font-Regular.ttf" ]] && echo yes || echo no)|$(cat "$WORK/h1/$FONTS/.nerd-fonts-version" 2>/dev/null)" \
+  "$rc|$([[ -f "$WORK/h1/$FONTS/JetBrainsMono-Regular.ttf" ]] && echo yes || echo no)|$(cat "$WORK/h1/$FONTS/.nerd-fonts-version" 2>/dev/null)" \
   "a verified, regular archive is extracted and the version recorded"
 
 test_start "fonts_silent_run_prints_no_progress"
@@ -110,7 +111,7 @@ release symlink
 test_start "fonts_symlink_entry_refused"
 rc="$(run_fonts "$WORK/h2")"
 assert_equals "1|no|no" \
-  "$rc|$([[ -L "$WORK/h2/$FONTS/Font-Bold.ttf" ]] && echo yes || echo no)|$([[ -e "$WORK/h2/$FONTS/.nerd-fonts-version" ]] && echo yes || echo no)" \
+  "$rc|$([[ -L "$WORK/h2/$FONTS/JetBrainsMono-Bold.ttf" ]] && echo yes || echo no)|$([[ -e "$WORK/h2/$FONTS/.nerd-fonts-version" ]] && echo yes || echo no)" \
   "an archive holding a symlink is not extracted, and the run fails unrecorded"
 
 release traversal
@@ -155,13 +156,13 @@ if command -v chezmoi >/dev/null 2>&1 && command -v script >/dev/null 2>&1; then
 
   test_start "checker_regular_archive_installed"
   run_checker regular "$WORK/c1" >/dev/null
-  assert_equals "yes" "$([[ -f "$WORK/c1/$FONTS/Font-Regular.ttf" ]] && echo yes || echo no)" \
+  assert_equals "yes" "$([[ -f "$WORK/c1/$FONTS/FiraCode-Regular.ttf" ]] && echo yes || echo no)" \
     "an accepted, regular FiraCode archive is extracted"
 
   test_start "checker_symlink_entry_refused"
   run_checker symlink "$WORK/c2" >/dev/null
   assert_equals "no|no" \
-    "$([[ -L "$WORK/c2/$FONTS/Font-Bold.ttf" ]] && echo yes || echo no)|$([[ -e "$WORK/c2/$FONTS/Font-Regular.ttf" ]] && echo yes || echo no)" \
+    "$([[ -L "$WORK/c2/$FONTS/FiraCode-Bold.ttf" ]] && echo yes || echo no)|$([[ -e "$WORK/c2/$FONTS/FiraCode-Regular.ttf" ]] && echo yes || echo no)" \
     "an archive holding a symlink is refused before anything is extracted"
 else
   echo "SKIP: chezmoi or script(1) unavailable; interactive checker not run"
