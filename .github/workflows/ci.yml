@@ -667,10 +667,10 @@ jobs:
             --export-markdown benchmark-results/shell-startup.md
 
           # Extract metrics
-          time_ms=$(jq '.results[0].mean * 1000 | floor' benchmark-results/shell-startup.json)
-          time_min=$(jq '.results[0].min * 1000 | floor' benchmark-results/shell-startup.json)
-          time_max=$(jq '.results[0].max * 1000 | floor' benchmark-results/shell-startup.json)
-          time_stddev=$(jq '.results[0].stddev * 1000 | floor' benchmark-results/shell-startup.json)
+          time_ms=$(jq '((.results[0].summary.time_wall_clock.mean // .results[0].mean) * 1000) | floor' benchmark-results/shell-startup.json)
+          time_min=$(jq '((.results[0].summary.time_wall_clock.min // .results[0].min) * 1000) | floor' benchmark-results/shell-startup.json)
+          time_max=$(jq '((.results[0].summary.time_wall_clock.max // .results[0].max) * 1000) | floor' benchmark-results/shell-startup.json)
+          time_stddev=$(jq '((.results[0].summary.time_wall_clock.stddev // .results[0].stddev) * 1000) | floor' benchmark-results/shell-startup.json)
 
           {
             echo "time_ms=$time_ms"

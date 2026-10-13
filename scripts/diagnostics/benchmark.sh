@@ -289,18 +289,18 @@ run_hyperfine() {
   echo ""
   ui_header "Running hyperfine benchmark"
   echo ""
-  hyperfine --warmup 3 --runs 10 --shell=none \
+  hyperfine --warmup 3 --runs 10 --shell=none --ignore-failure \
     --export-json "$BENCHMARK_DIR/latest.json" \
     'zsh -i -c exit'
 
   # Extract and display results
   if [[ -f "$BENCHMARK_DIR/latest.json" ]]; then
     local mean_ms
-    mean_ms=$(jq '.results[0].mean * 1000 | floor' "$BENCHMARK_DIR/latest.json")
+    mean_ms=$(jq '((.results[0].summary.time_wall_clock.mean // .results[0].mean) * 1000) | floor' "$BENCHMARK_DIR/latest.json")
     local min_ms
-    min_ms=$(jq '.results[0].min * 1000 | floor' "$BENCHMARK_DIR/latest.json")
+    min_ms=$(jq '((.results[0].summary.time_wall_clock.min // .results[0].min) * 1000) | floor' "$BENCHMARK_DIR/latest.json")
     local max_ms
-    max_ms=$(jq '.results[0].max * 1000 | floor' "$BENCHMARK_DIR/latest.json")
+    max_ms=$(jq '((.results[0].summary.time_wall_clock.max // .results[0].max) * 1000) | floor' "$BENCHMARK_DIR/latest.json")
 
     echo ""
     ui_header "Results"
@@ -370,9 +370,9 @@ compare_benchmarks() {
     if [[ "$basename" == "latest" ]]; then continue; fi
 
     local mean min max
-    mean=$(jq '.results[0].mean * 1000 | floor' "$f" 2>/dev/null || echo "N/A")
-    min=$(jq '.results[0].min * 1000 | floor' "$f" 2>/dev/null || echo "N/A")
-    max=$(jq '.results[0].max * 1000 | floor' "$f" 2>/dev/null || echo "N/A")
+    mean=$(jq '((.results[0].summary.time_wall_clock.mean // .results[0].mean) * 1000) | floor' "$f" 2>/dev/null || echo "N/A")
+    min=$(jq '((.results[0].summary.time_wall_clock.min // .results[0].min) * 1000) | floor' "$f" 2>/dev/null || echo "N/A")
+    max=$(jq '((.results[0].summary.time_wall_clock.max // .results[0].max) * 1000) | floor' "$f" 2>/dev/null || echo "N/A")
 
     printf "%-20s %10sms %10sms %10sms\n" "$basename" "$mean" "$min" "$max"
   done
