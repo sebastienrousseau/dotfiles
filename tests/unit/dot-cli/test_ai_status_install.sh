@@ -186,7 +186,7 @@ GUM_MISSING="Choose which to install" GUM_PICK='Codex CLI\nOpenCode' \
   run_ai "$GUM:$MISE:$BASE_PATH" ai tools
 assert_equals 0 "$RC" "choose-which flow exits 0"
 assert_file_contains "$CALLS" "npm:@openai/codex@0.159.3" "picked codex installed"
-assert_file_contains "$CALLS" "opencode@1.18.34" "picked opencode installed"
+assert_file_contains "$CALLS" "opencode@1.19.0" "picked opencode installed"
 if grep -q 'aider' "$CALLS"; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: unpicked provider must not be installed"

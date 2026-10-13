@@ -726,7 +726,7 @@ _dispatch() {
     # shellcheck disable=SC1090
     exec bash "$cmd_file" "$COMMAND" "$@"
   else
-    ui_fail "Command module not found: $cmd_file"
+    ui_fail "${module}.sh not found ($cmd_file)"
     exit 1
   fi
 }
