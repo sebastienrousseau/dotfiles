@@ -289,4 +289,31 @@ test_start "json_runs_differ_only_by_status"
 assert_equals "$(_jq '.total')" "$(_jq '.passed + .warnings + .failures')" \
   "the third run's counts still reconcile after two more probes flipped to fail"
 
+# ── R4: doctor starts the pueue daemon — the daemon must not hold the
+# parked stdout. --json keeps the caller's stdout on fd 3; a daemon that
+# inherits it keeps `$(doctor --json)` open until the daemon exits. ────
+# shellcheck disable=SC2086
+_fixture r4 $FULL_TOOLS
+R4_SLEEP="$(command -v sleep)"
+_shim pueue <<EOF
+#!/usr/bin/env bash
+[[ -f "$S_HOME/pueued.pid" ]]
+EOF
+_shim pueued <<EOF
+#!/usr/bin/env bash
+"$R4_SLEEP" 20 >/dev/null 2>&1 &
+echo "\$!" >"$S_HOME/pueued.pid"
+EOF
+_run_json
+r4_daemon="$(cat "$S_HOME/pueued.pid" 2>/dev/null || true)"
+test_start "json_daemon_started"
+assert_equals "pass" "$(_jq '.results[] | select(.check == "pueue daemon") | .status')" \
+  "the stopped daemon is started and reported"
+test_start "json_daemon_does_not_hold_stdout"
+r4_alive="exited"
+[[ -n "$r4_daemon" ]] && kill -0 "$r4_daemon" 2>/dev/null && r4_alive="running"
+assert_equals "running" "$r4_alive" \
+  "doctor --json returns while the daemon it started is still running"
+[[ -n "$r4_daemon" ]] && kill "$r4_daemon" 2>/dev/null || true
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

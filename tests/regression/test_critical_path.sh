@@ -25,6 +25,9 @@ trap 'rm -rf "$CP_WORK"' EXIT
 mkdir -p "$CP_WORK/home" "$CP_WORK/bin" "$CP_WORK/only"
 printf '#!/bin/sh\necho "$@" >>"%s/chezmoi.spy"\nexit 0\n' "$CP_WORK" >"$CP_WORK/bin/chezmoi"
 printf '#!/bin/sh\n[ "$1" = init ] && echo "# starship-init-for-$2"\n' >"$CP_WORK/bin/starship"
+# doctor starts a missing pueue daemon; the host's pueued would outlive
+# the sandbox, so the sandbox's one never starts.
+printf '#!/bin/sh\nexit 1\n' >"$CP_WORK/bin/pueued"
 for t in rm chezmoi mv; do
   printf '#!/bin/sh\necho "%s $*" >>"%s/destructive.spy"\n' "$t" "$CP_WORK" >"$CP_WORK/only/$t"
 done
