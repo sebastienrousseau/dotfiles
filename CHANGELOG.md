@@ -4,6 +4,12 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+## v0.2.535 (2026-10-13)
+
+### Changed
+
+- Initialize release iteration v0.2.535 across all 17 canonical surfaces.
+
 ## v0.2.534 (2026-10-12)
 
 ### Changed
