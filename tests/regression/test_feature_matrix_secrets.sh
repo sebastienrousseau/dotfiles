@@ -79,8 +79,9 @@ test_fm_secrets_init() {
   fm_expect_file "$FM_SANDBOX/.config/chezmoi/key.txt"
   test_start "fm_secrets_init_key_is_not_world_readable"
   local mode
-  mode="$(stat -f '%Lp' "$FM_SANDBOX/.config/chezmoi/key.txt" 2>/dev/null ||
-    stat -c '%a' "$FM_SANDBOX/.config/chezmoi/key.txt" 2>/dev/null)"
+  # GNU first: GNU `stat -f` prints filesystem info before failing on '%Lp'.
+  mode="$(stat -c '%a' "$FM_SANDBOX/.config/chezmoi/key.txt" 2>/dev/null ||
+    stat -f '%Lp' "$FM_SANDBOX/.config/chezmoi/key.txt" 2>/dev/null)"
   if [[ "$mode" == "600" ]]; then
     fm_pass "mode $mode"
   else
