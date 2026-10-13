@@ -780,44 +780,8 @@ if [[ -n "$route" ]] && [[ "$route" != "help" ]] && [[ "$route" != "search" ]] &
 fi
 
 case "$route" in
-  core | diagnostics | ai | tools | appearance | secrets | security | meta | fleet | completion)
+  core | diagnostics | ai | tools | appearance | secrets | security | meta | fleet | completion | agents | init | registry)
     _dispatch "$route" "$@"
-    ;;
-
-  agents)
-    if [[ -n "$_SOURCE_DIR" ]] && [[ -f "$_SOURCE_DIR/scripts/dot/commands/agents.sh" ]]; then
-      # shellcheck disable=SC1091
-      source "$_SOURCE_DIR/scripts/dot/commands/agents.sh"
-      cmd_agents "$@"
-      exit $?
-    else
-      ui_fail "agents.sh not found"
-      exit 1
-    fi
-    ;;
-
-  init)
-    if [[ -n "$_SOURCE_DIR" ]] && [[ -f "$_SOURCE_DIR/scripts/dot/commands/init.sh" ]]; then
-      # shellcheck disable=SC1091
-      source "$_SOURCE_DIR/scripts/dot/commands/init.sh"
-      cmd_init "$@"
-      exit $?
-    else
-      ui_fail "init.sh not found"
-      exit 1
-    fi
-    ;;
-
-  registry)
-    if [[ -n "$_SOURCE_DIR" ]] && [[ -f "$_SOURCE_DIR/scripts/dot/commands/registry.sh" ]]; then
-      # shellcheck disable=SC1091
-      source "$_SOURCE_DIR/scripts/dot/commands/registry.sh"
-      cmd_registry "$@"
-      exit $?
-    else
-      ui_fail "registry.sh not found"
-      exit 1
-    fi
     ;;
 
   manual)

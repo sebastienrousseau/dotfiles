@@ -350,3 +350,10 @@ EOF
       ;;
   esac
 }
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  if [[ "${1:-}" == "agents" ]]; then
+    shift
+  fi
+  cmd_agents "$@"
+fi

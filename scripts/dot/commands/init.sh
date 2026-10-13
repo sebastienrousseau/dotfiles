@@ -196,3 +196,10 @@ EOF
     return "$rc"
   fi
 }
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  if [[ "${1:-}" == "init" ]]; then
+    shift
+  fi
+  cmd_init "$@"
+fi
