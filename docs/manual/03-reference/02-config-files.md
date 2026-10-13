@@ -34,7 +34,7 @@ Every config file read or written by `.dotfiles`, with its schema and purpose.
 
 ```toml
 # Version — bumped by version-sync.sh at release time
-dotfiles_version = "0.2.534"
+dotfiles_version = "0.2.535"
 
 # Machine preset — override in ~/.config/chezmoi/chezmoi.toml per host
 machine = ""
@@ -119,7 +119,7 @@ See [Theme Engine concept](../01-concepts/03-theme-engine.md) for how values are
 ## `~/.config/chezmoi/chezmoi.toml` (Per-Host)
 
 ```toml
-sourceDir = "/Users/you/.dotfiles"
+sourceDir = "~/.dotfiles"
 
 [data]
 machine = "surface-pro"      # selects preset from hardware.toml
@@ -230,7 +230,7 @@ Agent Card (MCP A2A spec):
 ```json
 {
   "name": "dotfiles-agent",
-  "version": "0.2.534",
+  "version": "0.2.535",
   "capabilities": ["chezmoi.apply", "theme.switch", "secrets.decrypt"],
   "policy_hash": "0x7f2a..."
 }
