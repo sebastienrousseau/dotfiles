@@ -322,7 +322,7 @@ jobs:
   miri:
     name: Miri / nightly
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
