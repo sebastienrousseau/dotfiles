@@ -148,8 +148,8 @@ func restrictPaths(plugin, stage string) error {
 		unix.LANDLOCK_ACCESS_FS_MAKE_FIFO | unix.LANDLOCK_ACCESS_FS_MAKE_BLOCK |
 		unix.LANDLOCK_ACCESS_FS_MAKE_SYM | unix.LANDLOCK_ACCESS_FS_REFER |
 		unix.LANDLOCK_ACCESS_FS_TRUNCATE)
-	attr := unix.LandlockRulesetAttr{Access_fs: handled}
-	fd, err := landlock(unix.SYS_LANDLOCK_CREATE_RULESET, uintptr(unsafe.Pointer(&attr)), unsafe.Sizeof(attr.Access_fs), 0)
+	attr := unix.LandlockRulesetAttr{Handled_access_fs: handled}
+	fd, err := landlock(unix.SYS_LANDLOCK_CREATE_RULESET, uintptr(unsafe.Pointer(&attr)), unsafe.Sizeof(attr.Handled_access_fs), 0)
 	if err != nil {
 		return fmt.Errorf("DOT_E_SANDBOX_UNAVAILABLE: Landlock ruleset: %w", err)
 	}
