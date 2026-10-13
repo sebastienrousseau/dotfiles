@@ -147,7 +147,7 @@ uv = "latest"
 # opencode: native pin below (folded in from the retired ~/mise.toml).
 # `npm:opencode-ai` is a redundant duplicate using the broken npm optional-dep
 # wrapper pattern — do not reintroduce it.
-opencode = "latest"
+opencode = "1.19.0"
 kiro-cli = "latest"
 "npm:autohand-cli" = "latest"
 "npm:@qwen-code/qwen-code" = "latest"
