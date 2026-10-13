@@ -392,7 +392,7 @@ measure_ms() {
     if hyperfine --style none -N -i --warmup 1 --runs "$RUNS" \
       --export-json "$json" \
       -- "bash $DOT_BIN $argv" >/dev/null 2>&1; then
-      jq -r '((.results[0].summary.time_wall_clock.median // .results[0].median) * 1000) | floor' "$json" 2>/dev/null || echo -1
+      jq -r '((.results[0].summary.time_wall_clock.median // .results[0].median) * 1000) | floor' "$json" 2>/dev/null || echo -1 # mutation: ignore fallback when json parsing fails
     else
       echo -1
     fi

@@ -221,6 +221,8 @@ run_bench "$PATH_NO_HF" --compare
 assert_equals 0 "$RC" "--compare exits 0 with history"
 assert_contains "20260101_120000" "$OUT" "history row printed"
 assert_contains "123ms" "$OUT" "mean converted to ms"
+assert_contains "100ms" "$OUT" "min converted to ms"
+assert_contains "200ms" "$OUT" "max converted to ms"
 if [[ "$OUT" == *"latest "*"ms"* ]]; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: latest.json must be skipped in history"

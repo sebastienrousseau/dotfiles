@@ -349,7 +349,7 @@ jobs:
           MIRIFLAGS: -Zmiri-disable-isolation
         run: |
           cargo miri setup
-          cargo miri test --locked --all-features
+          cargo miri test --lib --bins --locked --all-features
 
   fuzz:
     name: Fuzz / ${{ matrix.target }}
