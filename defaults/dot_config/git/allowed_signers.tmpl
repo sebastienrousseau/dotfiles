@@ -26,3 +26,9 @@ sebastienrousseau@users.noreply.github.com sk-ssh-ed25519@openssh.com AAAAGnNrLX
 sebastienrousseau@users.noreply.github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDpyzi+T8b2k/LF5b5F4LpczG41nhKAa+DksbII8NDEq
 {{- end }}
 sebastienrousseau@users.noreply.github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDufGNQmTsJlQrxiOFzbSXT8fRAT7h/6wwBM4ppmVPfX rousseau-mba-m1
+{{- if eq .chezmoi.hostname "cachyos-geekom-a9" }}
+# rousseau-agent container on this host signs with its own key
+# (~/.local/share/rousseau/keys/ssh); trust it so merge.verifySignatures
+# accepts commits the agent makes in the shared workspace.
+sebastienrousseau@users.noreply.github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINihg1lvRlwynjDnurfy4aAYCB/dkgm04tDPCUt3kC+x rousseau-container@cachyos-geekom-a9
+{{- end }}
