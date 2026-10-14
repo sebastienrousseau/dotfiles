@@ -24,6 +24,9 @@ CURRENT_TEST=""
 # made every rollback test call the real `dot ai claude`. A test that
 # exercises one of these sets it explicitly after sourcing this file.
 unset DOTFILES_AI
+# A test run from a hook in a linked worktree must not write into the real
+# repository; see git_env.sh.
+source "$(dirname "${BASH_SOURCE[0]}")/git_env.sh"
 
 # Run a command with a time limit on GNU and BSD/macOS hosts. macOS does not
 # ship GNU timeout, so use gtimeout when available and Perl's alarm otherwise.

@@ -19,6 +19,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TESTS_DIR="$(dirname "$SCRIPT_DIR")"
 REPO_ROOT="$(dirname "$TESTS_DIR")"
+# Every suite inherits this environment; see git_env.sh.
+source "$SCRIPT_DIR/git_env.sh"
 
 if [[ ! -d "$REPO_ROOT" ]]; then
   echo "Error: REPO_ROOT is not a valid directory: $REPO_ROOT" >&2
