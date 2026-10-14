@@ -216,15 +216,24 @@ fm_stub() {
 # lookup does — the named tools are removed from it, and the sandbox stub
 # directory stays in front so fm_stub shims still apply. Dropping whole
 # PATH entries would not do: on the Ubuntu runners rg lives in /usr/bin
-# next to everything else.
+# next to everything else. Only executable files are mirrored, as PATH lookup
+# skips anything else: a directory named like a command (a .NET tool dir's
+# `tr/` resource folder) must not shadow the real one further down.
 fm_path_without() {
-  local shadow="$FM_SANDBOX/path-without-$1" dir tool
+  local shadow="$FM_SANDBOX/path-without-$1" dir tool f
+  local -a files
   rm -rf "$shadow"
   mkdir -p "$shadow"
   local IFS=:
   for dir in $PATH; do
     [[ -d "$dir" && "$dir" != "$FM_SANDBOX/bin" ]] || continue
-    ln -s "$dir"/* "$shadow/" 2>/dev/null || true
+    files=()
+    for f in "$dir"/*; do
+      # First hit wins: an earlier directory's link is already in the shadow.
+      [[ -f "$f" && -x "$f" && ! -L "$shadow/${f##*/}" ]] || continue
+      files+=("$f")
+    done
+    ((${#files[@]})) && { ln -s "${files[@]}" "$shadow/" 2>/dev/null || true; }
   done
   for tool in "$@"; do
     rm -f "$shadow/$tool"

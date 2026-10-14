@@ -72,8 +72,11 @@ called() { assert_file_contains "$AI_CALLS" "$1" "invoked $1"; }
 # ai_min — same, but with PATH cut down to the sandbox stubs plus the system
 # directories. The host running this suite really does have some of the fleet
 # installed, so the "not installed" branches need everything else hidden.
+# bash is linked into the sandbox rather than adding its directory: on macOS
+# that is /opt/homebrew/bin, which also holds real fleet tools.
+ln -sf "$REAL_BASH" "$BIN/bash"
 ai_min() {
-  PATH="$BIN:${REAL_BASH%/*}:/usr/bin:/bin:/usr/sbin:/sbin" ai "$@"
+  PATH="$BIN:/usr/bin:/bin:/usr/sbin:/sbin" ai "$@"
 }
 
 test_start "library_exists_and_parses"
