@@ -89,6 +89,13 @@ if [ "${DOTFILES_ALLOW_UNSKIPPED_PUSH:-}" = "1" ]; then
   exit 0
 fi
 
+# Git exports GIT_DIR to hooks. From a linked worktree it is an absolute
+# path into the shared repository, so every scratch repo a test creates
+# would write into this one (refs, core.bare, user.*). Clear git's
+# per-repository variables; the audit finds the repo from its cwd instead.
+while IFS= read -r _var; do unset "$_var"; done < <(git rev-parse --local-env-vars)
+cd "$repo_root"
+
 bash "$repo_root/scripts/qa/reliability-audit.sh" --quick
 
 # Step 4 — version-string consistency. Catches the case where the
