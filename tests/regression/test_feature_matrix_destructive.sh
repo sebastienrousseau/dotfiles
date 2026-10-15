@@ -100,6 +100,58 @@ test_fm_uninstall_force() {
   real_checkout_intact fm_uninstall_force
 }
 
+# On macOS another process (Finder, a sync client) can drop a .DS_Store into
+# ~/.dotfiles while rm -rf is deleting it; rm then fails "Directory not
+# empty". The stub rm plays that writer once, after the real removal.
+test_fm_uninstall_force_outlasts_a_concurrent_writer() {
+  fresh_isolated_sandbox
+  plant "${UNINSTALL_TARGETS[@]/#/$HOME/}"
+  fm_stub chezmoi 'true'
+  fm_stub rm '
+target="${*: -1}"
+/bin/rm "$@" || exit
+if [[ "$target" == */.dotfiles && ! -e "$FM_SANDBOX/rm.raced" ]]; then
+  : >"$FM_SANDBOX/rm.raced"
+  mkdir -p "$target" && : >"$target/.DS_Store"
+  printf "rm: %s: Directory not empty\n" "$target" >&2
+  exit 1
+fi'
+  test_start "fm_uninstall_force_outlasts_a_concurrent_writer"
+  fm_run uninstall --force
+  fm_expect_rc 0
+  test_start "fm_uninstall_force_outlasts_a_concurrent_writer_removes_the_checkout"
+  if [[ -f "$FM_SANDBOX/rm.raced" && ! -e "$HOME/.dotfiles" ]]; then
+    fm_pass "~/.dotfiles removed despite the late .DS_Store"
+  else
+    fm_fail "~/.dotfiles survived (raced: $([[ -f "$FM_SANDBOX/rm.raced" ]] && echo yes || echo no))"
+  fi
+  real_checkout_intact fm_uninstall_force_outlasts_a_concurrent_writer
+}
+
+# A writer that never stops: the retries run out and uninstall must fail,
+# not report a completed uninstall over a checkout that is still there.
+test_fm_uninstall_force_reports_a_persistent_writer() {
+  fresh_isolated_sandbox
+  plant "${UNINSTALL_TARGETS[@]/#/$HOME/}"
+  fm_stub chezmoi 'true'
+  fm_stub rm '
+target="${*: -1}"
+/bin/rm "$@" || exit
+if [[ "$target" == */.dotfiles ]]; then
+  mkdir -p "$target" && : >"$target/.DS_Store"
+  printf "rm: %s: Directory not empty\n" "$target" >&2
+  exit 1
+fi'
+  test_start "fm_uninstall_force_reports_a_persistent_writer"
+  fm_run uninstall --force
+  if [[ "$FM_RC" -ne 0 && "$FM_OUT" != *"Uninstall complete."* ]]; then
+    fm_pass "uninstall failed (rc=$FM_RC) instead of claiming success"
+  else
+    fm_fail "rc=$FM_RC with ~/.dotfiles still present"
+  fi
+  real_checkout_intact fm_uninstall_force_reports_a_persistent_writer
+}
+
 test_fm_chaos_force() {
   fresh_isolated_sandbox
   plant "$HOME/.config/starship.toml" "$HOME/.zshrc" "$HOME/.config/alacritty/alacritty.toml" \
@@ -132,6 +184,8 @@ test_fm_chaos_force() {
 
 test_fm_uninstall_declined
 test_fm_uninstall_force
+test_fm_uninstall_force_outlasts_a_concurrent_writer
+test_fm_uninstall_force_reports_a_persistent_writer
 test_fm_chaos_force
 
 echo ""

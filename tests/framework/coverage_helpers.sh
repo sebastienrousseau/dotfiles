@@ -383,7 +383,12 @@ cov_exercise_script() {
       myip | pre-push | rebuild-themes | \
       lint | reliability-audit | record | \
       executable_myip | executable_tmux-sessionizer | \
-      executable_update | update)
+      executable_update | update | executable_open)
+      # `executable_open` with no args opens "." through /usr/bin/open,
+      # which PATH cannot shadow: every suite run left a Finder window
+      # on the sandbox, and Finder's .DS_Store writes then broke other
+      # tests' rm -rf. test_open_coverage.sh covers it with the opener
+      # stubbed.
       # `executable_update` runs brew/apt/pacman update + upgrade.
       # Even with PATH shims, --help and invalid-flag modes can spawn
       # subprocesses that the shims don't intercept, blowing the 60s
@@ -639,7 +644,7 @@ cov_exercise_functions_file() {
       executable_myip | executable_tmux-sessionizer | \
       version-sync | release | bump | sync-version | \
       build-manual | install | install-chezmoi-verified | uninstall | \
-      manage-secrets | executable_update | wallpaper-rotate | \
+      manage-secrets | executable_update | executable_open | wallpaper-rotate | \
       heal | heal-tools | rollback | restore | apply-gnome-theme | \
       install-catppuccin-themes | switch | \
       executable_ai_core | executable_dot-bootstrap | dot-bootstrap | ai-update | \

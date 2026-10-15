@@ -83,9 +83,12 @@ if stat -c '%s' . >/dev/null 2>&1; then
 else
   _STAT_FMT=(stat -f '%N %z') # BSD / macOS
 fi
+#   3. macOS (Finder, sync clients) can drop a .DS_Store into a fresh
+#      directory at any moment. It is not a side effect of `dot`, so the
+#      snapshot leaves it out.
 sandbox_snapshot() {
   local root="$1"
-  find "$root" -type f -exec "${_STAT_FMT[@]}" {} + 2>/dev/null | sort || true
+  find "$root" -type f ! -name .DS_Store -exec "${_STAT_FMT[@]}" {} + 2>/dev/null | sort || true
 }
 
 # ═══════════════════════════════════════════════════════════════
@@ -277,7 +280,9 @@ check_help_flag_safe() {
   # ── Assertion 5: sandbox filesystem unchanged.
   if [[ "$before_snap" != "$after_snap" ]]; then
     local diff_lines
-    diff_lines="$(diff <(printf '%s' "$before_snap") <(printf '%s' "$after_snap") | head -5)"
+    # diff exits 1 on any difference; under pipefail + set -e that aborted
+    # the whole file before RESULTS: instead of reporting this case.
+    diff_lines="$(diff <(printf '%s' "$before_snap") <(printf '%s' "$after_snap") | head -5 || true)"
     failure_reasons+=("sandbox filesystem mutated (--help should be side-effect free):")
     failure_reasons+=("$diff_lines")
   fi

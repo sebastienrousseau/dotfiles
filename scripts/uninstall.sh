@@ -14,6 +14,16 @@ log_info() { printf "${GREEN}[INFO]${NC} %s\n" "$*"; }
 log_warn() { printf "${YELLOW}[WARN]${NC} %s\n" "$*"; }
 log_error() { printf "${RED}[ERROR]${NC} %s\n" "$*" >&2; }
 
+# remove_tree <dir>: rm -rf, retried once. On macOS Finder or a sync client
+# can drop a .DS_Store into a directory while rm -rf empties it, failing
+# "Directory not empty".
+remove_tree() {
+  rm -rf "$1" 2>/dev/null || {
+    sleep 0.2
+    rm -rf "$1"
+  }
+}
+
 echo ""
 echo "Dotfiles Uninstall"
 echo "=================="
@@ -42,7 +52,7 @@ fi
 # 2. Remove dotfiles repo
 if [[ -d "$HOME/.dotfiles" ]]; then
   log_info "Removing ~/.dotfiles repository..."
-  rm -rf "$HOME/.dotfiles"
+  remove_tree "$HOME/.dotfiles"
 fi
 
 # 3. Remove chezmoi config and state

@@ -24,6 +24,11 @@ CURRENT_TEST=""
 # made every rollback test call the real `dot ai claude`. A test that
 # exercises one of these sets it explicitly after sourcing this file.
 unset DOTFILES_AI
+# Nothing a test runs may open a window: `dot manual` reached /usr/bin/open
+# and left browser tabs and Finder windows on $TMPDIR, whose .DS_Store
+# writes then broke other tests' rm -rf. A test that checks what gets
+# opened points DOT_OPENER at a recorder.
+export DOT_OPENER=true
 
 # Run a command with a time limit on GNU and BSD/macOS hosts. macOS does not
 # ship GNU timeout, so use gtimeout when available and Perl's alarm otherwise.
