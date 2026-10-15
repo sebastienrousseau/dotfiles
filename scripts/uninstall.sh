@@ -42,7 +42,12 @@ fi
 # 2. Remove dotfiles repo
 if [[ -d "$HOME/.dotfiles" ]]; then
   log_info "Removing ~/.dotfiles repository..."
-  rm -rf "$HOME/.dotfiles"
+  # macOS: Finder or a sync client can drop a .DS_Store into a directory
+  # while rm -rf empties it, failing "Directory not empty". Retry once.
+  rm -rf "$HOME/.dotfiles" 2>/dev/null || {
+    sleep 0.2
+    rm -rf "$HOME/.dotfiles"
+  }
 fi
 
 # 3. Remove chezmoi config and state
