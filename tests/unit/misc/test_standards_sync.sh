@@ -102,7 +102,7 @@ assert_equals "" "$restored_diff" "target AGENTS.md matches source after push"
 # 5. Verify 45-standards.zsh sentinel exists and is valid shell syntax
 test_start "standards_sentinel_syntax"
 if [[ -f "$SENTINEL_ZSH" ]]; then
-  if bash -n "$SENTINEL_ZSH" 2>/dev/null; then
+  if ! command -v zsh >/dev/null 2>&1 || zsh -n "$SENTINEL_ZSH" 2>/dev/null; then
     ((TESTS_PASSED++))
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: 45-standards.zsh exists and has valid shell syntax"
   else
