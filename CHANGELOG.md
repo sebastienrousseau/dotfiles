@@ -4,6 +4,20 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+## v0.2.536 (2026-10-17)
+
+### Added
+
+- Upgrade `dot ai` cockpit into a `btop`-grade terminal observability and control plane with a 2x2 Bento layout, ISO/IEC 21031:2024 Software Carbon Intensity (SCI) and Joule energy telemetry, Shannon entropy loop detection, and signal controls (`t`/`k`/`p`/`r`).
+- Integrate `corralctl`, `passmcp` (`+ graph, lsp, server`), and `draft` via `mise` (`github:sebastienrousseau/*`) and add `dot ai corral`, `dot ai passmcp`, and `dot ai draft` subcommands.
+- Throttle `45-standards.zsh` drift sentinel check to once per 24 hours on interactive shell startup.
+
+### Fixed
+
+- Disable `save_config_on_exit` in `btop.conf` to prevent local chezmoi drift and clear `GOROOT` during `dot-ai-tui` compilation under `mise`.
+- Make the macOS developer test suite headless and chromeless, survive `.DS_Store` writes, and clear git worktree variables in the `pre-push` hook.
+- Unblock the `pre-push` gate on Linux, pin `topgrade` `17.11.0` in `mise.toml`, bump AI CLI pins past the 7-day gate, and trust the `rousseau-agent` container signing key on `geekom-a9`.
+
 ## v0.2.535 (2026-10-13)
 
 ### Changed
