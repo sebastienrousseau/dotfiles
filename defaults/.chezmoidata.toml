@@ -136,7 +136,7 @@ tpm_commit = "7bdb7ca33c9cc6440a600202b50142f401b6fe21"
 "pipx:aider-chat" = "0.86.2"
 "pipx:shell-gpt" = "1.5.1"
 "aqua:ollama/ollama" = "0.40.0"
-"opencode" = "1.18.34"
+"opencode" = "1.19.0"
 # mise's kiro-cli backend publishes no release dates; 1.27.1 is its newest.
 "kiro-cli" = "1.27.1"
 

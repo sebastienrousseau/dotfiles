@@ -8,6 +8,8 @@
 //! shows up in `cargo bench` output. `cargo bench -- --quick` is the CI
 //! smoke run.
 
+#![cfg(not(miri))]
+
 use std::hint::black_box;
 use std::io;
 

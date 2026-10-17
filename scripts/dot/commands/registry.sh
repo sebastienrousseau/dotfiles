@@ -526,3 +526,10 @@ cmd_registry() {
       ;;
   esac
 }
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  if [[ "${1:-}" == "registry" ]]; then
+    shift
+  fi
+  cmd_registry "$@"
+fi

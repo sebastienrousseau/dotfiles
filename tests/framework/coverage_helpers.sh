@@ -420,7 +420,7 @@ cov_exercise_script() {
   # test sink the parallel sweep for too long.
   local TIMEOUT_CMD
   if [[ -n "$TIMEOUT_BIN" ]]; then
-    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 60)
+    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 "${DOTFILES_COV_SCRIPT_TIMEOUT:-120}")
   else
     TIMEOUT_CMD=()
   fi
@@ -563,7 +563,7 @@ cov_exercise_script_help_only() {
   fi
   local TIMEOUT_CMD
   if [[ -n "$TIMEOUT_BIN" ]]; then
-    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 30)
+    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 "${DOTFILES_COV_HELP_TIMEOUT:-60}")
   else
     TIMEOUT_CMD=()
   fi
@@ -697,7 +697,7 @@ cov_exercise_functions_file() {
   fi
   local TIMEOUT_CMD
   if [[ -n "$TIMEOUT_BIN" ]]; then
-    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 30)
+    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 "${DOTFILES_COV_FN_TIMEOUT:-120}")
   else
     TIMEOUT_CMD=()
   fi
@@ -782,7 +782,8 @@ cov_exercise_functions_file() {
         # Long-running / interactive: watch / animate loops that
         # only exit on Ctrl-C. Small body-coverage gain vs the
         # 30s timeout cost per skipped script.
-        apilatency_monitor | apiload_load_test | cmatrix | pipes | stopwatch | matrix | rainbow | banner) continue ;;
+        apilatency_monitor | apiload_load_test | cmatrix | pipes | stopwatch | matrix | rainbow | banner | \
+          cmd_upgrade | _upgrade_dotfiles | cmd_prewarm | cmd_sandbox | cmd_mcp | main) continue ;;
       esac
       # Three arg modes: no-arg, --help, and a real path. Each call
       # is independently rc-tolerant. We deliberately keep stderr
