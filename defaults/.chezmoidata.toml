@@ -126,19 +126,20 @@ tpm_commit = "7bdb7ca33c9cc6440a600202b50142f401b6fe21"
 # install/provision/run_onchange_15-ai-cli-tools.sh.tmpl and, at run time,
 # by lib/dot/ai-install.sh; `dot upgrade` lists newer releases to bump to.
 [ai_tools]
-"npm:@openai/codex" = "0.159.3"
-"npm:@github/copilot" = "1.0.90"
-"npm:opencode-ai" = "1.18.34"
+"npm:@openai/codex" = "0.162.1"
+"npm:@github/copilot" = "1.0.95"
+"npm:opencode-ai" = "1.18.35"
 "npm:autohand-cli" = "0.9.8"
-"npm:@qwen-code/qwen-code" = "0.24.7"
+"npm:@qwen-code/qwen-code" = "0.25.0"
 "npm:@guizmo-ai/zai-cli" = "0.3.5"
-"npm:@charmland/crush" = "0.97.1"
+"npm:@charmland/crush" = "0.98.1"
 "pipx:aider-chat" = "0.86.2"
 "pipx:shell-gpt" = "1.5.1"
-"aqua:ollama/ollama" = "0.40.0"
-"opencode" = "1.18.34"
-# mise's kiro-cli backend publishes no release dates; 1.27.1 is its newest.
-"kiro-cli" = "1.27.1"
+"aqua:ollama/ollama" = "0.40.2"
+"opencode" = "1.18.35"
+# kiro-cli publishes no release dates; 2.29.0 (Homebrew cask, 2026-10-09) was the
+# newest past the 7-day age gate. On macOS the mise plugin copies the cask build.
+"kiro-cli" = "2.29.0"
 
 # ============================================================================
 # Alias Buckets (per-machine toggle support)
