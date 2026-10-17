@@ -69,7 +69,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 mean="${BENCH_MEAN_S:-0.05}"
-printf '{"results":[{"mean":%s,"min":%s,"max":%s}]}\n' "$mean" "$mean" "$mean" >"$out"
+# BENCH_HF_SCHEMA=2: hyperfine 2.x nests the stats under summary.time_wall_clock.
+if [[ "${BENCH_HF_SCHEMA:-1}" == "2" ]]; then
+  printf '{"results":[{"command":"zsh -i -c exit","summary":{"time_wall_clock":{"unit":"second","mean":%s,"min":%s,"max":%s}}}]}\n' "$mean" "$mean" "$mean" >"$out"
+else
+  printf '{"results":[{"mean":%s,"min":%s,"max":%s}]}\n' "$mean" "$mean" "$mean" >"$out"
+fi
 echo "hyperfine-shim ran"
 exit 0
 SHIM
@@ -161,6 +166,12 @@ assert_file_exists "$BENCH_DIR/latest.json" "latest.json written"
 hist_count=$(find "$BENCH_DIR" -name '[0-9]*_[0-9]*.json' | wc -l | tr -d ' ')
 assert_equals 1 "$hist_count" "one timestamped history file saved"
 
+test_start "benchmark_hyperfine2_summary_schema"
+BENCH_HF_SCHEMA=2 BENCH_MEAN_S=0.15 run_bench "$PATH_HF"
+assert_equals 0 "$RC" "hyperfine 2.x export exits 0"
+assert_contains "Mean: 150ms" "$OUT" "mean read from summary.time_wall_clock"
+assert_contains "Good (<200ms)" "$OUT" "rating from the 2.x mean"
+
 test_start "benchmark_hyperfine_good"
 BENCH_MEAN_S=0.15 run_bench "$PATH_HF"
 assert_contains "Good (<200ms)" "$OUT" "rating good"
@@ -221,6 +232,8 @@ run_bench "$PATH_NO_HF" --compare
 assert_equals 0 "$RC" "--compare exits 0 with history"
 assert_contains "20260101_120000" "$OUT" "history row printed"
 assert_contains "123ms" "$OUT" "mean converted to ms"
+assert_contains "100ms" "$OUT" "min converted to ms"
+assert_contains "200ms" "$OUT" "max converted to ms"
 if [[ "$OUT" == *"latest "*"ms"* ]]; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: latest.json must be skipped in history"
@@ -228,6 +241,14 @@ else
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: latest.json skipped in history"
 fi
+
+test_start "benchmark_compare_hyperfine2_history"
+printf '{"results":[{"summary":{"time_wall_clock":{"mean":0.234,"min":0.211,"max":0.307}}}]}\n' >"$BENCH_DIR/20260102_120000.json"
+run_bench "$PATH_NO_HF" --compare
+assert_equals 0 "$RC" "--compare exits 0 with 2.x history"
+assert_contains "234ms" "$OUT" "2.x mean converted to ms"
+assert_contains "211ms" "$OUT" "2.x min converted to ms"
+assert_contains "307ms" "$OUT" "2.x max converted to ms"
 
 # ── TTY / gum branches (UI_ENABLED=1, UI_COLOR=1) ────────────────────
 if "$REAL_PY" -c 'import pty, os; os.waitstatus_to_exitcode' 2>/dev/null; then

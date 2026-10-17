@@ -417,3 +417,16 @@ func BenchmarkResolveLang(b *testing.B) {
 		_ = resolveLang("no-such-lang")
 	}
 }
+
+func BenchmarkRenderBrailleSparkline(b *testing.B) {
+	samples := []float64{10, 25, 40, 60, 80, 50, 30, 90}
+	for i := 0; i < b.N; i++ {
+		_ = renderBrailleSparkline(samples, 8)
+	}
+}
+
+func BenchmarkComputeSCI(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_ = computeSCI(1000, 500, 300, 100, 5.0, 380.0)
+	}
+}

@@ -23,6 +23,8 @@ from importlib.machinery import SourceFileLoader
 from pathlib import Path
 from unittest import mock
 
+sys.dont_write_bytecode = True
+
 REPO = Path(__file__).resolve().parents[3]
 GATEWAY = REPO / "defaults" / "dot_local" / "bin" / "executable_dot-ai-serve"
 

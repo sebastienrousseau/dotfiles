@@ -26,7 +26,47 @@ CURRENT_TEST=""
 unset DOTFILES_AI
 # A test run from a hook in a linked worktree must not write into the real
 # repository; see git_env.sh.
+# shellcheck source=git_env.sh disable=SC1091
 source "$(dirname "${BASH_SOURCE[0]}")/git_env.sh"
+# Hermetic mise: mise shims (e.g. python3) executed in isolated test sandboxes
+# where HOME is redirected must not prompt or fail on untrusted host configs.
+export MISE_YES=1
+# Headless test execution: no test may open browser windows, GUI editors,
+# terminal sessions, Finder windows, or desktop notifications.
+export DOT_OPENER=true
+export BROWSER=true
+export EDITOR=true
+export VISUAL=true
+export GIT_EDITOR=true
+
+# Hermetic shims directory: prevent tests from spawning GUI apps on the host.
+_hermetic_bin_dir="${TMPDIR:-/tmp}/dotfiles-hermetic-bin"
+mkdir -p "$_hermetic_bin_dir"
+
+for _shim_name in open xdg-open osascript; do
+  if [[ ! -x "$_hermetic_bin_dir/$_shim_name" ]]; then
+    printf '#!/bin/sh\nexit 0\n' >"$_hermetic_bin_dir/$_shim_name"
+    chmod +x "$_hermetic_bin_dir/$_shim_name"
+  fi
+done
+unset _shim_name
+
+case ":$PATH:" in
+  *":$_hermetic_bin_dir:"*) ;;
+  *) export PATH="$_hermetic_bin_dir:$PATH" ;;
+esac
+
+# Hermetic python: when python3 on PATH is inaccessible or broken (e.g. mise shim
+# executed in a sandboxed subshell), prepend a working python3 interpreter to PATH.
+if ! python3 -c "pass" >/dev/null 2>&1; then
+  for _hermetic_py in /opt/homebrew/bin/python3 /usr/bin/python3; do
+    if "$_hermetic_py" -c "pass" >/dev/null 2>&1; then
+      ln -sfn "$_hermetic_py" "$_hermetic_bin_dir/python3"
+      break
+    fi
+  done
+  unset _hermetic_py
+fi
 
 # Run a command with a time limit on GNU and BSD/macOS hosts. macOS does not
 # ship GNU timeout, so use gtimeout when available and Perl's alarm otherwise.

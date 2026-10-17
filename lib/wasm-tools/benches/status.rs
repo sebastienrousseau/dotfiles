@@ -6,6 +6,8 @@
 //! One benchmark per entry point, so a regression in any of them shows up
 //! in `cargo bench` output. `cargo bench -- --quick` is the CI smoke run.
 
+#![cfg(not(miri))]
+
 use std::io;
 use std::time::{Duration, UNIX_EPOCH};
 

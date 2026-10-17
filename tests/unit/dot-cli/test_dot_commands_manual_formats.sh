@@ -18,6 +18,9 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+# The opener is a PATH shim here (uname reports Linux, xdg-open records),
+# so drop the framework's DOT_OPENER no-op to reach the platform branches.
+unset DOT_OPENER
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 # Hand children a copy of the real stderr so their xtrace still reaches

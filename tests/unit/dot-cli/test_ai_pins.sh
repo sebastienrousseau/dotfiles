@@ -44,7 +44,7 @@ lib() {
 rc_of() { sed -n 's/^rc=//p' <<<"$1" | tail -n 1; }
 
 test_start "pinned_version_read_from_data"
-assert_equals "0.159.3" "$(lib '_ai_pinned_version npm:@openai/codex' | head -n 1)" \
+assert_equals "0.162.1" "$(lib '_ai_pinned_version npm:@openai/codex' | head -n 1)" \
   "the [ai_tools] pin for codex is read at run time"
 
 test_start "pinned_version_ignores_package_options"
@@ -56,7 +56,7 @@ assert_equals "" "$(lib '_ai_pinned_version gopls' | head -n 1)" \
   "keys of other tables are not AI pins"
 
 test_start "every_mapped_provider_is_pinned"
-r="$(lib 'for b in codex copilot crush aider opencode sgpt ollama kiro-cli autohand qwen zai; do
+r="$(lib 'for b in codex copilot crush aider opencode sgpt ollama kiro-cli autohand qwen zai corralctl passmcp passmcp-graph passmcp-lsp passmcp-server draft; do
   p="$(_ai_mise_pkg "$b")"; [[ -n "$(_ai_pinned_version "$p")" ]] || printf "%s " "$b"; done')"
 assert_equals "" "$(head -n 1 <<<"$r")" "every provider dot ai can install has a pin"
 
@@ -65,7 +65,7 @@ assert_equals "" "$(lib '_ai_mise_pkg vibe' | head -n 1)" "mistral-vibe is no lo
 
 test_start "install_uses_the_pin"
 r="$(lib 'ai_install_tool codex Codex')"
-assert_equals "0|mise use -g npm:@openai/codex@0.159.3" "$(rc_of "$r")|$(cat "$CALLS")" \
+assert_equals "0|mise use -g npm:@openai/codex@0.162.1" "$(rc_of "$r")|$(cat "$CALLS")" \
   "dot ai install runs mise use at the pinned version"
 
 test_start "unpinned_package_refused"
@@ -80,7 +80,7 @@ assert_equals "1|" "$(rc_of "$r")|$(cat "$CALLS")" \
 
 test_start "upgrade_proposes_bumps"
 r="$(lib 'ai_pin_bumps')"
-assert_contains "npm:@openai/codex 0.159.3 -> 9.9.9" "$r" "a newer release is listed as a bump"
+assert_contains "npm:@openai/codex 0.162.1 -> 9.9.9" "$r" "a newer release is listed as a bump"
 
 test_start "upgrade_bumps_leave_pins_alone"
 assert_equals "0" "$(grep -c '^mise use' "$CALLS")" "listing bumps installs nothing"

@@ -94,10 +94,12 @@ main() {
     esac
   done <"$TRACE_DOC"
 
+  local known_impls
+  known_impls="$(extract_impl_paths)"
   while IFS= read -r required; do
     [ -n "$required" ] || continue
     TOTAL_TRACE_CHECKS=$((TOTAL_TRACE_CHECKS + 1))
-    if extract_impl_paths | grep -Fxq "$required"; then
+    if printf '%s\n' "$known_impls" | grep -Fxq "$required"; then
       COVERED_TRACE_CHECKS=$((COVERED_TRACE_CHECKS + 1))
     else
       printf 'Missing traceability row for implementation: %s\n' "$required" >&2

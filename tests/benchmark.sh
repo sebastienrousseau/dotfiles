@@ -26,7 +26,9 @@ import json, sys
 path, max_ms = sys.argv[1], float(sys.argv[2])
 with open(path, "r", encoding="utf-8") as f:
     data = json.load(f)
-mean_s = data["results"][0]["mean"]
+# hyperfine 2.x nests the wall-clock stats under summary.time_wall_clock.
+result = data["results"][0]
+mean_s = result.get("summary", {}).get("time_wall_clock", result)["mean"]
 mean_ms = mean_s * 1000.0
 print(f"[INFO] Mean startup: {mean_ms:.1f} ms (limit: {max_ms:.1f} ms)")
 if mean_ms > max_ms:

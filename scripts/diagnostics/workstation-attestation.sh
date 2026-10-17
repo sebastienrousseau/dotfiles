@@ -43,42 +43,45 @@ require_value() {
   fi
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --json | -j)
-      JSON_MODE=1
-      shift
-      ;;
-    --verify | -V)
-      VERIFY=1
-      shift
-      ;;
-    --max-age | -a)
-      require_value "$1" $#
-      VERIFY_MAX_AGE="$2"
-      VERIFY=1
-      shift 2
-      ;;
-    --write | -w)
-      require_value "$1" $#
-      WRITE_PATH="$2"
-      shift 2
-      ;;
-    --fleet-store | -F)
-      require_value "$1" $#
-      FLEET_STORE="$2"
-      shift 2
-      ;;
-    --fleet-id | -I)
-      require_value "$1" $#
-      FLEET_ID="$2"
-      shift 2
-      ;;
-    *)
-      shift
-      ;;
-  esac
-done
+_parse_attest_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --json | -j)
+        JSON_MODE=1
+        shift
+        ;;
+      --verify | -V)
+        VERIFY=1
+        shift
+        ;;
+      --max-age | -a)
+        require_value "$1" $#
+        VERIFY_MAX_AGE="$2"
+        VERIFY=1
+        shift 2
+        ;;
+      --write | -w)
+        require_value "$1" $#
+        WRITE_PATH="$2"
+        shift 2
+        ;;
+      --fleet-store | -F)
+        require_value "$1" $#
+        FLEET_STORE="$2"
+        shift 2
+        ;;
+      --fleet-id | -I)
+        require_value "$1" $#
+        FLEET_ID="$2"
+        shift 2
+        ;;
+      *)
+        shift
+        ;;
+    esac
+  done
+}
+_parse_attest_args "$@"
 
 command -v jq >/dev/null 2>&1 || {
   echo "jq is required for workstation attestation." >&2
@@ -128,7 +131,7 @@ fi
 
 MCP_CONFIG="$REPO_ROOT/defaults/dot_config/claude/mcp_servers.json"
 export MCP_CONFIG
-mcp_summary="$(bash "$REPO_ROOT/scripts/diagnostics/mcp-doctor.sh" --strict --json)"
+mcp_summary="$(bash "$REPO_ROOT/scripts/diagnostics/mcp-doctor.sh" --strict --json || true)"
 
 attestation_json="$(
   jq -n \
@@ -190,30 +193,31 @@ if [[ -n "$WRITE_PATH" ]]; then
   printf '%s\n' "$attestation_json" >"$WRITE_PATH"
 fi
 
-if [[ -n "$FLEET_STORE" ]]; then
-  fleet_root="${FLEET_STORE%/}"
-  fleet_id="${FLEET_ID:-${DOTFILES_FLEET_ID:-default}}"
-  fleet_host="${hostname_value:-unknown-host}"
-  fleet_dir="$fleet_root/$fleet_id/$fleet_host"
-  fleet_file="$fleet_dir/workstation-attestation.json"
-  fleet_timestamp_file="$fleet_dir/workstation-attestation-$(date -u +%Y%m%dT%H%M%SZ).json"
+_write_fleet_attestation() {
+  local fleet_root="${FLEET_STORE%/}"
+  local fleet_id="${FLEET_ID:-${DOTFILES_FLEET_ID:-default}}"
+  local fleet_host="${hostname_value:-unknown-host}"
+  local fleet_dir="$fleet_root/$fleet_id/$fleet_host"
   mkdir -p "$fleet_dir"
-  printf '%s\n' "$attestation_json" >"$fleet_file"
-  printf '%s\n' "$attestation_json" >"$fleet_timestamp_file"
+  printf '%s\n' "$1" >"$fleet_dir/workstation-attestation.json"
+  printf '%s\n' "$1" >"$fleet_dir/workstation-attestation-$(date -u +%Y%m%dT%H%M%SZ).json"
+}
+
+if [[ -n "$FLEET_STORE" ]]; then
+  _write_fleet_attestation "$attestation_json"
 fi
 
-# Hand the evidence to the WebAssembly verifier rather than printing it.
-# The module has no access to this machine beyond the bytes on its stdin, so
-# the verdict does not depend on the tools the machine under review happens
-# to have installed.
-if [[ "$VERIFY" -eq 1 ]]; then
-  verify_args=(--verify)
+_verify_attestation() {
+  local verify_args=(--verify) verify_status=0
   [[ "$JSON_MODE" -eq 1 ]] && verify_args+=(--json)
   [[ -n "$VERIFY_MAX_AGE" ]] && verify_args+=(--max-age "$VERIFY_MAX_AGE")
-  verify_status=0
-  printf '%s\n' "$attestation_json" |
+  printf '%s\n' "$1" |
     bash "$SCRIPT_DIR/attest-verify.sh" "${verify_args[@]}" || verify_status=$?
   exit "$verify_status"
+}
+
+if [[ "$VERIFY" -eq 1 ]]; then
+  _verify_attestation "$attestation_json"
 fi
 
 if [[ "$JSON_MODE" -eq 1 ]]; then
@@ -227,6 +231,6 @@ else
   ui_ok "MCP status" "$(printf '%s' "$mcp_summary" | jq -r '.status')"
   ui_ok "Output" "$WRITE_PATH"
   if [[ -n "$FLEET_STORE" ]]; then
-    ui_ok "Fleet store" "$fleet_root/$fleet_id/$fleet_host"
+    ui_ok "Fleet store" "${FLEET_STORE%/}/${FLEET_ID:-${DOTFILES_FLEET_ID:-default}}/${hostname_value:-unknown-host}"
   fi
 fi

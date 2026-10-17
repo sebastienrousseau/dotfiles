@@ -31,12 +31,18 @@ printf '#!/bin/sh\nexit 1\n' >"$CP_WORK/bin/pueued"
 for t in rm chezmoi mv; do
   printf '#!/bin/sh\necho "%s $*" >>"%s/destructive.spy"\n' "$t" "$CP_WORK" >"$CP_WORK/only/$t"
 done
+for t in open xdg-open osascript; do
+  printf '#!/bin/sh\nexit 0\n' >"$CP_WORK/bin/$t"
+done
 chmod +x "$CP_WORK"/bin/* "$CP_WORK"/only/*
 # jq is a read-only dependency of the agent and mode commands. Older macOS
 # (the macos-14 runners) has no /usr/bin/jq, so link the host's copy in.
 if cp_jq="$(command -v jq 2>/dev/null)"; then ln -s "$cp_jq" "$CP_WORK/bin/jq"; fi
 printf '{}' >"$CP_WORK/chezmoi.json"
 CP_CHEZMOI="$(command -v chezmoi 2>/dev/null || true)"
+if [[ -n "$CP_CHEZMOI" ]] && ! "$CP_CHEZMOI" --version >/dev/null 2>&1; then
+  CP_CHEZMOI=""
+fi
 
 # cp_env <cmd...>: run with the sandbox HOME/XDG dirs and stub-first PATH.
 cp_env() {
@@ -44,6 +50,7 @@ cp_env() {
     XDG_STATE_HOME="$CP_WORK/home/.local/state" XDG_DATA_HOME="$CP_WORK/home/.local/share" \
     XDG_CACHE_HOME="$CP_WORK/home/.cache" PATH="$CP_WORK/bin:/usr/bin:/bin" \
     TERM=dumb NO_COLOR=1 DOTFILES_NO_TUI=1 DOTFILES_NONINTERACTIVE=1 CI=1 \
+    DOT_OPENER=true BROWSER=true EDITOR=true VISUAL=true GIT_EDITOR=true \
     CHEZMOI_SOURCE_DIR="$REPO_ROOT/defaults" "$@" </dev/null
 }
 # cp_dot <args...>: run bin/dot in the sandbox; sets CP_RC and CP_OUT.

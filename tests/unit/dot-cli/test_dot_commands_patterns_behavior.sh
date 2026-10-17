@@ -104,6 +104,17 @@ assert_equals 0 "$_rc" "view via glow exits 0"
 assert_contains "rendered-by-glow" "$_out" "glow rendered the file"
 assert_file_contains "$LOG" "$PATTERN_DIR/architect.md" "glow received the pattern path"
 
+test_start "patterns_view_falls_back_to_cat_when_glow_version_fails"
+cat >"$_glow/glow" <<EOF
+#!/usr/bin/env bash
+exit 1
+EOF
+chmod +x "$_glow/glow"
+_out="$(PATH="$_glow:$NOGLOW" "$BASH_BIN" "$PATTERNS" view architect 2>&1)"
+_rc=$?
+assert_equals 0 "$_rc" "view falls back to cat when glow --version fails"
+assert_contains "Think in systems." "$_out" "body printed via cat fallback"
+
 test_start "patterns_view_reports_an_unknown_pattern"
 _out="$(_run view nope)"
 _rc=$?

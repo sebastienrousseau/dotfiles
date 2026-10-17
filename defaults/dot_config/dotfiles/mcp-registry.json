@@ -42,6 +42,26 @@
       "scope": "enterprise",
       "verification": "registry-approved",
       "enabled": false
+    },
+    "corralctl": {
+      "transport": "stdio",
+      "launcher": "${HOME}/.local/share/mise/shims/corralctl",
+      "args": ["mcp"],
+      "package": "github.com/sebastienrousseau/corralctl@v0.0.18",
+      "auth": "env",
+      "authProfile": "none",
+      "scope": "workspace-local",
+      "verification": "registry-approved"
+    },
+    "passmcp": {
+      "transport": "stdio",
+      "launcher": "${HOME}/.local/bin/passmcp-server",
+      "args": [],
+      "package": "github.com/sebastienrousseau/passmcp-server@v0.0.7",
+      "auth": "env",
+      "authProfile": "none",
+      "scope": "workspace-local",
+      "verification": "registry-approved"
     }
   }
 }

@@ -8,16 +8,28 @@ Usage: dot-ai-log <provider> <project> <exit_code> <duration_secs> <prompt_words
 Migrates existing JSONL data on first write. Called by dot ai and vibe-delegate.
 """
 
-import json, sqlite3, sys
+import json, os, shutil, sqlite3, sys
 from pathlib import Path
+
+sys.dont_write_bytecode = True
 
 if len(sys.argv) < 7:
     print(__doc__)
     sys.exit(1)
 
 provider, project, ec, dur, pw, ts = sys.argv[1:7]
-DB    = Path.home() / '.local' / 'share' / 'dotfiles-ai.db'
-JSONL = Path.home() / '.local' / 'share' / 'delegate-runs.jsonl'
+
+# Fast native Go path (<1.5ms, zero Python SQLite/JSONL overhead) when dot-ai-tui is built.
+if os.environ.get("DOT_AI_LOG_FORCE_PYTHON") != "1":
+    tui_bin = shutil.which("dot-ai-tui") or str(Path.home() / ".local" / "bin" / "dot-ai-tui")
+    if os.path.isfile(tui_bin) and os.access(tui_bin, os.X_OK):
+        try:
+            os.execv(tui_bin, [tui_bin, "--log-event", provider, project, ec, dur, pw, ts])
+        except OSError:
+            pass
+
+DB    = Path(os.environ.get('XDG_DATA_HOME') or (Path.home() / '.local' / 'share')) / 'dotfiles-ai.db'
+JSONL = DB.parent / 'delegate-runs.jsonl'
 DB.parent.mkdir(parents=True, exist_ok=True)
 
 db = sqlite3.connect(str(DB), timeout=10, isolation_level=None)
@@ -47,8 +59,15 @@ db.execute('''CREATE TABLE IF NOT EXISTS runs (
     tokens_out           INTEGER          DEFAULT 0,
     tokens_total         INTEGER          DEFAULT 0,
     cost_usd             REAL             DEFAULT 0,
-    cost_claude_eq       REAL             DEFAULT 0
+    cost_claude_eq       REAL             DEFAULT 0,
+    joules               REAL             DEFAULT 0,
+    gco2eq               REAL             DEFAULT 0
 )''')
+for col in ('joules REAL DEFAULT 0', 'gco2eq REAL DEFAULT 0'):
+    try:
+        db.execute(f'ALTER TABLE runs ADD COLUMN {col}')
+    except sqlite3.OperationalError:
+        pass
 db.execute('CREATE TABLE IF NOT EXISTS _meta (key TEXT PRIMARY KEY, value TEXT)')
 
 if not db.execute("SELECT 1 FROM _meta WHERE key='jsonl_migrated'").fetchone():
@@ -80,8 +99,14 @@ if not db.execute("SELECT 1 FROM _meta WHERE key='jsonl_migrated'").fetchone():
                 pass
     db.execute("INSERT OR REPLACE INTO _meta VALUES ('jsonl_migrated','1')")
 
+# Estimate baseline energy (Joules) & ISO/IEC 21031:2024 SCI (gCO2eq) from runtime & prompt words.
+dur_f = float(dur)
+pw_i = int(pw)
+est_joules = round(max(dur_f * 9.5, pw_i * 0.015), 4)
+est_gco2eq = round((est_joules / 3600000.0) * 380.0, 6)
+
 db.execute(
-    'INSERT INTO runs (ts,delegate,model,project,exit_code,duration_secs,prompt_words) VALUES (?,?,?,?,?,?,?)',
-    (ts, provider, provider, project, int(ec), float(dur), int(pw)),
+    'INSERT INTO runs (ts,delegate,model,project,exit_code,duration_secs,prompt_words,joules,gco2eq) VALUES (?,?,?,?,?,?,?,?,?)',
+    (ts, provider, provider, project, int(ec), dur_f, pw_i, est_joules, est_gco2eq),
 )
 db.close()

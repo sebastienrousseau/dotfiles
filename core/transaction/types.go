@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
-	"strings"
 )
 
 const MaxFile = 65536
@@ -63,67 +62,80 @@ func Canonical(v any) ([]byte, error) {
 	if err := d.Decode(&value); err != nil {
 		return nil, err
 	}
-	var emit func(any) (string, error)
-	emit = func(v any) (string, error) {
+	var out bytes.Buffer
+	var emit func(any) error
+	emit = func(v any) error {
 		switch x := v.(type) {
 		case nil:
-			return "null", nil
+			out.WriteString("null")
+			return nil
 		case bool:
-			return strconv.FormatBool(x), nil
+			out.WriteString(strconv.FormatBool(x))
+			return nil
 		case string:
 			for _, c := range x {
 				if c < 32 || c > 126 {
-					return "", fmt.Errorf("DOT_E_VALIDATION: hello profile requires printable ASCII")
+					return fmt.Errorf("DOT_E_VALIDATION: hello profile requires printable ASCII")
 				}
 			}
-			var out bytes.Buffer
 			e := json.NewEncoder(&out)
 			e.SetEscapeHTML(false)
 			if err := e.Encode(x); err != nil {
-				return "", err
+				return err
 			}
-			return strings.TrimSuffix(out.String(), "\n"), nil
+			bs := out.Bytes()
+			if len(bs) > 0 && bs[len(bs)-1] == '\n' {
+				out.Truncate(len(bs) - 1)
+			}
+			return nil
 		case json.Number:
 			n, err := strconv.ParseUint(string(x), 10, 53)
 			if err != nil {
-				return "", fmt.Errorf("DOT_E_VALIDATION: integer profile")
+				return fmt.Errorf("DOT_E_VALIDATION: integer profile")
 			}
-			return strconv.FormatUint(n, 10), nil
+			out.WriteString(strconv.FormatUint(n, 10))
+			return nil
 		case []any:
-			a := []string{}
-			for _, item := range x {
-				s, err := emit(item)
-				if err != nil {
-					return "", err
+			out.WriteByte('[')
+			for i, item := range x {
+				if i > 0 {
+					out.WriteByte(',')
 				}
-				a = append(a, s)
+				if err := emit(item); err != nil {
+					return err
+				}
 			}
-			return "[" + strings.Join(a, ",") + "]", nil
+			out.WriteByte(']')
+			return nil
 		case map[string]any:
-			keys := []string{}
+			keys := make([]string, 0, len(x))
 			for k := range x {
 				keys = append(keys, k)
 			}
 			sort.Strings(keys)
-			a := []string{}
-			for _, k := range keys {
-				key, err := emit(k)
-				if err != nil {
-					return "", err
+			out.WriteByte('{')
+			for i, k := range keys {
+				if i > 0 {
+					out.WriteByte(',')
 				}
-				val, err := emit(x[k])
-				if err != nil {
-					return "", err
+				if err := emit(k); err != nil {
+					return err
 				}
-				a = append(a, key+":"+val)
+				out.WriteByte(':')
+				if err := emit(x[k]); err != nil {
+					return err
+				}
 			}
-			return "{" + strings.Join(a, ",") + "}", nil
+			out.WriteByte('}')
+			return nil
 		default:
-			return "", fmt.Errorf("DOT_E_VALIDATION: unsupported canonical value")
+			return fmt.Errorf("DOT_E_VALIDATION: unsupported canonical value")
 		}
 	}
-	s, err := emit(value)
-	return []byte(s), err
+	if err := emit(value); err != nil {
+		return nil, err
+	}
+	return out.Bytes(), nil
 }
 
 func Seal(p Plan) (Sealed, error) { b, err := Canonical(p); return Sealed{Plan: p, ID: Digest(b)}, err }

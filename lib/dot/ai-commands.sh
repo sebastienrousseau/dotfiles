@@ -144,12 +144,16 @@ cmd_ai_doctor() {
   has_command dot-ai-proxy && dot-ai-proxy status
   ui_section "Prerequisites"
   ai_prereq_rows
-  local installed=0 total=0 b
+  local installed=0 total=0 eco_installed=0 b
   for b in claude codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider kiro-cli autohand vibe qwen zai; do
     total=$((total + 1))
     has_command "$b" && installed=$((installed + 1))
   done
   ui_info "Fleet" "$installed/$total tools installed — 'dot ai tools' to manage"
+  for b in corralctl passmcp draft; do
+    has_command "$b" && eco_installed=$((eco_installed + 1))
+  done
+  ui_info "Ecosystem" "$eco_installed/3 suite tools (corralctl, passmcp, draft) — 'dot ai eco' to inspect"
 }
 
 # cmd_ai_setup [tool…] — authenticate / initialize AI CLIs (dot ai login).
@@ -252,4 +256,94 @@ cmd_ai_cost() {
   local tool
   tool="$(_ai_delegate_tool delegate-report)" || return 1
   "$tool" "$@"
+}
+
+# cmd_ai_corral [status|sync|doctor|mcp|args…] — workspace & multi-forge repo plane.
+cmd_ai_corral() {
+  if ! has_command corralctl; then
+    ui_warn "corralctl" "not installed — run: dot ai install corralctl (or mise use -g github:sebastienrousseau/corralctl)"
+    return 1
+  fi
+  case "${1:-status}" in
+    status)
+      shift || true
+      corralctl status "${1:-$HOME/Code}"
+      ;;
+    doctor)
+      shift
+      corralctl doctor "${1:-$HOME/Code}" --refresh-tags
+      ;;
+    sync)
+      shift
+      corralctl "${1:-sebastienrousseau}" -c 8
+      ;;
+    mcp)
+      shift
+      corralctl mcp "$@"
+      ;;
+    *)
+      corralctl "$@"
+      ;;
+  esac
+}
+
+# cmd_ai_mcp [check|graph|watch|attest|verify|doctor] — passmcp 9-repo governance plane.
+cmd_ai_mcp() {
+  local sub="${1:-doctor}"
+  shift || true
+  case "$sub" in
+    doctor)
+      run_script "scripts/diagnostics/mcp-doctor.sh" "MCP doctor" "$@"
+      ;;
+    graph)
+      if has_command passmcp-graph; then
+        passmcp-graph "$@"
+      else
+        ui_warn "passmcp-graph" "not installed — run: dot ai install passmcp-graph (or mise use -g github:sebastienrousseau/passmcp-graph)"
+        return 1
+      fi
+      ;;
+    check | watch | attest | verify | sbom | tui | serve)
+      if has_command passmcp; then
+        passmcp "$sub" "$@"
+      else
+        ui_warn "passmcp" "not installed — run: dot ai install passmcp (or mise use -g github:sebastienrousseau/passmcp)"
+        return 1
+      fi
+      ;;
+    *)
+      ui_err "Usage" "dot ai mcp [doctor|check|graph|watch|attest|verify|sbom|tui|serve]"
+      return 1
+      ;;
+  esac
+}
+
+# cmd_ai_draft [--green] <args…> — grounded 5-phase research & C2PA synthesis via draft.
+cmd_ai_draft() {
+  if ! has_command draft; then
+    ui_warn "draft" "not installed — run: dot ai install draft (or mise use -g github:sebastienrousseau/draft)"
+    return 1
+  fi
+  if [[ $# -eq 0 ]]; then
+    ui_err "Usage" "dot ai draft [--green] <topic-or-sources...>"
+    return 1
+  fi
+  if [[ "${1:-}" == "--green" ]]; then
+    shift
+    if has_command ollama; then
+      draft --extract-engine ollama --write-engine claude --second-gate "$@"
+      return $?
+    fi
+  fi
+  draft "$@"
+}
+
+# cmd_ai_eco [args…] — btop-style sustainability, ecosystem & live process snapshot.
+cmd_ai_eco() {
+  if has_command dot-ai-tui; then
+    DOT_AI_SNAPSHOT=1 dot-ai-tui
+    return $?
+  fi
+  ui_header "AI Ecosystem & Green Compute"
+  cmd_ai_doctor
 }

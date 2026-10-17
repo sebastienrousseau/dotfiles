@@ -145,12 +145,24 @@ assert_equals "yes|yes" "$([[ "$out" == *"building the verifier for wasm32-wasip
 # workstation-attestation.sh. Give it a real terminal on stdin through a
 # Python pty; skip where python3 is unavailable.
 test_start "av_tty_stdin_generates_fresh_evidence"
-if command -v python3 >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
-  out="$(env PATH="$BASE_PATH" WASMTIME="$WORK/bin/wasmtime" DOT_SYS_WASM="$MODULE" REPO_ROOT="$REAL_REPO" \
-    python3 -c 'import os, pty, sys
-status = pty.spawn(sys.argv[1:])
-sys.exit(os.waitstatus_to_exitcode(status) if hasattr(os, "waitstatus_to_exitcode") else status >> 8)' \
-    "$REAL_BASH" "$TEST_SCRIPT" --json 2>&1 </dev/null)"
+REAL_PY=""
+for p in python3 /usr/bin/python3; do
+  if "$p" -c 'import os, pty, sys' >/dev/null 2>&1; then
+    REAL_PY="$p"
+    break
+  fi
+done
+if [[ -n "$REAL_PY" ]] && command -v jq >/dev/null 2>&1; then
+  out="$(env PATH="$BASE_PATH" WASMTIME="$WORK/bin/wasmtime" DOT_SYS_WASM="$MODULE" REPO_ROOT="$REAL_REPO" MISE_YES=1 \
+    "$REAL_PY" -c 'import os, pty, subprocess, sys
+master, slave = pty.openpty()
+proc = subprocess.Popen(sys.argv[1:], stdin=slave, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+os.close(slave)
+out, _ = proc.communicate(timeout=15)
+os.close(master)
+sys.stdout.buffer.write(out)
+sys.exit(proc.returncode)' \
+    "$REAL_BASH" "$TEST_SCRIPT" --json)"
   assert_contains '"dotfiles_version"' "$out" "fresh attestation evidence is fed to the module"
 else
   ((TESTS_PASSED++)) || true

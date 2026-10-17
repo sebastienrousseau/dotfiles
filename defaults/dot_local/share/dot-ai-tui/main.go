@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 // Copyright (c) 2015-2026 Sebastien Rousseau
 //
-// dot-ai — the `dot ai` cockpit. A glamorous, chat-centric Bubble Tea TUI for
-// the AI fleet, modelled on Charm's aesthetic. Pick a tool on the left, chat
-// with it on the right (prompts run through `dot ai <tool>`), and watch the
-// gateway + cost in the header. Actions shell out to the `dot ai` verbs so
-// behaviour has a single source of truth. Deployed to ~/.local/bin/dot-ai-tui.
+// dot-ai — the `dot ai` cockpit & btop-grade agentic control plane. Unifies
+// the AI fleet with corralctl (multi-forge workspace manager), passmcp (9-repo
+// MCP security & risk-graph family), and draft (grounded research & C2PA
+// synthesis), plus ISO/IEC 21031:2024 SCI carbon/Joule telemetry.
 package main
 
 import (
@@ -16,15 +15,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"strings"
-	"sync"
-	"sync/atomic"
 	"time"
 
-	"github.com/alecthomas/chroma/v2/lexers"
-	"github.com/alecthomas/chroma/v2/quick"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -37,7 +31,7 @@ type tool struct {
 	installed        bool
 }
 
-// The fleet, in display order, grouped by role.
+// The fleet, in display order, grouped by role (including ecosystem tools).
 var fleet = []tool{
 	{name: "claude", bin: "claude", group: "agents"},
 	{name: "codex", bin: "codex", group: "agents"},
@@ -57,6 +51,9 @@ var fleet = []tool{
 	{name: "sgpt", bin: "sgpt", group: "general"},
 	{name: "ollama", bin: "ollama", group: "local"},
 	{name: "kiro-cli", bin: "kiro-cli", group: "cloud"},
+	{name: "corralctl", bin: "corralctl", group: "ecosystem"},
+	{name: "passmcp", bin: "passmcp", group: "ecosystem"},
+	{name: "draft", bin: "draft", group: "ecosystem"},
 }
 
 // ── theme (Charm-flavoured) ─────────────────────────────────────────────────
@@ -93,24 +90,24 @@ var (
 	keyDesc  = lipgloss.NewStyle().Foreground(faint)
 )
 
-// errPrefix marks a transcript line that carries a failed turn; the
-// renderer styles those lines with the error colour.
 const errPrefix = "error: "
 
 type line struct {
-	who  string // "you" | tool name | "sys"
+	who  string
 	text string
 }
 
-// paletteItem is one entry in the `/` command palette. kind "cockpit" runs in
-// the chat; kind "session" opens the tool's native REPL where it applies.
 type paletteItem struct {
 	label, desc, kind string
 }
 
-// Cockpit commands work in the in-chat one-shot mode.
 var cockpitCmds = []paletteItem{
 	{"/help", "list commands", "cockpit"},
+	{"/eco", "btop telemetry & SCI", "cockpit"},
+	{"/green", "toggle green UMA mode", "cockpit"},
+	{"/corral", "corralctl workspace", "cockpit"},
+	{"/mcp", "passmcp security audit", "cockpit"},
+	{"/draft", "grounded C2PA synthesis", "cockpit"},
 	{"/model", "switch model", "cockpit"},
 	{"/style", "set steering style", "cockpit"},
 	{"/tool", "switch tool", "cockpit"},
@@ -122,8 +119,6 @@ var cockpitCmds = []paletteItem{
 	{"/exit", "quit the cockpit", "cockpit"},
 }
 
-// Common native REPL commands per provider — for familiarity. Selecting one
-// opens the tool's session (overlapping cockpit labels are filtered out).
 var toolCmds = map[string][]paletteItem{
 	"claude":       {{"/compact", "summarise context", "session"}, {"/model", "switch model", "session"}, {"/resume", "resume a session", "session"}, {"/agents", "manage subagents", "session"}, {"/mcp", "MCP servers", "session"}, {"/usage", "usage & limits", "session"}, {"/init", "generate CLAUDE.md", "session"}},
 	"codex":        {{"/model", "switch model", "session"}, {"/approvals", "approval mode", "session"}, {"/status", "session status", "session"}, {"/mcp", "MCP servers", "session"}},
@@ -136,6 +131,9 @@ var toolCmds = map[string][]paletteItem{
 	"grok":         {{"/model", "switch model", "session"}, {"/plan", "plan-first mode", "session"}, {"/mcp", "MCP servers", "session"}},
 	"copilot":      {{"/model", "switch model", "session"}, {"/clear", "clear context", "session"}},
 	"qwen":         {{"/model", "switch model", "session"}, {"/clear", "clear", "session"}},
+	"corralctl":    {{"/sync", "sync forge repos", "session"}, {"/doctor", "refresh Finder tags", "session"}},
+	"passmcp":      {{"/check", "9-phase MCP audit", "session"}, {"/graph", "capability risk graph", "session"}},
+	"draft":        {{"/verify", "verify C2PA provenance", "session"}},
 }
 
 func clampi(v, lo, hi int) int {
@@ -148,7 +146,6 @@ func clampi(v, lo, hi int) int {
 	return v
 }
 
-// execCommand is indirected so tests can substitute a harmless command.
 var execCommand = exec.Command
 
 type refreshMsg struct {
@@ -179,14 +176,14 @@ type model struct {
 	transcript    []line
 	running       bool
 	status        string
-	style         string // active steering style (--style)
+	style         string
 	streamCh      chan streamMsg
-	palSel        int    // selected index in the `/` command palette
-	aiModel       string // model override ("" = tool default)
-	runStart      int64  // unix start of the in-flight turn (for notify)
+	palSel        int
+	aiModel       string
+	runStart      int64
+	greenMode     bool
 }
 
-// palette returns the filtered command list when the input begins with "/".
 func (m model) palette() []paletteItem {
 	if m.focus != "input" {
 		return nil
@@ -200,7 +197,7 @@ func (m model) palette() []paletteItem {
 	add := func(items []paletteItem) {
 		for _, it := range items {
 			if seen[it.label] {
-				continue // cockpit label wins over a duplicate tool label
+				continue
 			}
 			if v == "/" || strings.HasPrefix(it.label, v) {
 				seen[it.label] = true
@@ -233,13 +230,10 @@ func (m model) renderPalette(pal []paletteItem, w int) string {
 	return strings.TrimRight(b.String(), "\n")
 }
 
-// gatewayURL builds the gateway base URL from a host and port.
 func gatewayURL(host, port string) string {
 	return fmt.Sprintf("http://%s:%s", host, port)
 }
 
-// gatewayBase resolves the gateway base URL from DOT_AI_HOST / DOT_AI_PORT
-// (defaults 127.0.0.1:3456).
 func gatewayBase() string {
 	return gatewayURL(envOr("DOT_AI_HOST", "127.0.0.1"), envOr("DOT_AI_PORT", "3456"))
 }
@@ -259,7 +253,6 @@ func dbPath() string {
 	return filepath.Join(home, ".local", "share", "dotfiles-ai.db")
 }
 
-// ── data gathering (off the UI thread) ──────────────────────────────────────
 func refresh() tea.Msg {
 	out := refreshMsg{tools: make([]tool, len(fleet))}
 	copy(out.tools, fleet)
@@ -270,7 +263,6 @@ func refresh() tea.Msg {
 	client := http.Client{Timeout: 1500 * time.Millisecond}
 	if resp, err := client.Get(gatewayBase() + "/health"); err == nil {
 		defer func() { _ = resp.Body.Close() }()
-		// A healthy reply is a few bytes; never buffer more than 4 KiB.
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
 		out.gatewayUp = resp.StatusCode == 200 && strings.Contains(string(body), "healthy")
 		out.gatewayMsg = map[bool]string{true: gatewayBase(), false: "unhealthy"}[out.gatewayUp]
@@ -294,8 +286,6 @@ func sqlite(db, query string) string {
 	if _, err := os.Stat(db); err != nil {
 		return ""
 	}
-	// -init /dev/null skips ~/.sqliterc (which may enable .timer/.headers and
-	// pollute output); -batch -noheader keep it machine-readable.
 	b, err := exec.Command("sqlite3", "-batch", "-init", "/dev/null", "-noheader", db, query).Output()
 	if err != nil {
 		return ""
@@ -303,13 +293,9 @@ func sqlite(db, query string) string {
 	return clean(filterSqliteOutput(b))
 }
 
-// filterSqliteOutput trims sqlite3 CLI output and drops any stray
-// "Run Time:" / dot-prefixed meta lines a user's ~/.sqliterc could inject.
 func filterSqliteOutput(b []byte) string {
 	var keep []string
 	for _, ln := range strings.Split(strings.TrimSpace(string(b)), "\n") {
-		// Match on the trimmed line: the final TrimSpace would otherwise
-		// turn an indented meta line into a leading one.
 		if t := strings.TrimSpace(ln); strings.HasPrefix(t, "Run Time:") || strings.HasPrefix(t, ".") {
 			continue
 		}
@@ -318,8 +304,6 @@ func filterSqliteOutput(b []byte) string {
 	return strings.TrimSpace(strings.Join(keep, "\n"))
 }
 
-// buildPrompt flattens prior turns into the prompt so the conversation has
-// context (multi-turn) for a fresh one-shot.
 func buildPrompt(history []line, prompt string) string {
 	if len(history) == 0 {
 		return prompt
@@ -340,9 +324,6 @@ func buildPrompt(history []line, prompt string) string {
 	return b.String()
 }
 
-// startStream runs `dot ai [tool] [--style s] "<prompt>"` in raw mode and
-// feeds its stdout to the channel chunk-by-chunk, so the reply streams into
-// the transcript live (no screen takeover, no banner pollution).
 func startStream(toolName, style, aiModel string, history []line, prompt string) (chan streamMsg, tea.Cmd) {
 	ch := make(chan streamMsg, 64)
 	go func() {
@@ -379,8 +360,6 @@ func waitForChunk(ch chan streamMsg) tea.Cmd {
 	return func() tea.Msg { return <-ch }
 }
 
-// models — the model overrides offered by the picker. "" means the tool's
-// default (no override). Applied to the Claude engine via ANTHROPIC_MODEL.
 var models = []string{"", "opus", "sonnet", "haiku"}
 
 func modelLabel(m string) string {
@@ -390,7 +369,6 @@ func modelLabel(m string) string {
 	return m
 }
 
-// nextModel returns the model after the given one in the cycle.
 func nextModel(cur string) string {
 	for i, m := range models {
 		if m == cur {
@@ -402,7 +380,6 @@ func nextModel(cur string) string {
 
 func nowUnix() int64 { return time.Now().Unix() }
 
-// ── session persistence ─────────────────────────────────────────────────────
 type sessLine struct{ Who, Text string }
 
 func sessionPath() string {
@@ -410,8 +387,6 @@ func sessionPath() string {
 	return filepath.Join(base, "dot-ai-tui", "session.json")
 }
 
-// marshalSession encodes the persisted session. Indirected so the
-// otherwise-unreachable encode-failure branch in saveSession is testable.
 var marshalSession = func(s []sessLine) ([]byte, error) { return json.Marshal(s) }
 
 func saveSession(lines []line) {
@@ -421,10 +396,6 @@ func saveSession(lines []line) {
 	}
 	b, err := marshalSession(s)
 	if err != nil {
-		// Unreachable for a slice of plain strings, so it is behind a seam
-		// rather than excluded: TestSaveSessionMarshalFailure substitutes a
-		// failing marshaller to prove a failure is a silent no-op and never
-		// truncates the file on disk.
 		return
 	}
 	p := sessionPath()
@@ -442,7 +413,6 @@ func loadSession() []line {
 	return parseSession(b)
 }
 
-// parseSession decodes a saved session file; malformed JSON yields nil.
 func parseSession(b []byte) []line {
 	var s []sessLine
 	if json.Unmarshal(b, &s) != nil {
@@ -455,13 +425,10 @@ func parseSession(b []byte) []line {
 	return out
 }
 
-// notify fires a best-effort desktop notification (macOS osascript / Linux
-// notify-send); failures are silent.
 func notify(title, body string) {
 	_ = notifyCmd(runtime.GOOS, title, body).Start()
 }
 
-// notifyCmd builds the platform notification command for goos.
 func notifyCmd(goos, title, body string) *exec.Cmd {
 	switch goos {
 	case "darwin":
@@ -472,89 +439,8 @@ func notifyCmd(goos, title, body string) *exec.Cmd {
 	}
 }
 
-// highlightCode is the chroma entry point, indirected so the (otherwise
-// unreachable) formatter-failure fallback in highlight can be tested.
-var highlightCode = quick.Highlight
-
-// maxHighlightFences bounds Chroma invocations per render. A run of backticks
-// can encode hundreds of empty fenced blocks in a tiny payload; highlighting
-// each one independently lets untrusted provider output stall the TUI.
-const maxHighlightFences = 64
-
-// langRe bounds a fence info string to a short identifier. chroma resolves
-// an unknown name by glob-matching it against every lexer's filename
-// patterns, which is linear in the name's length with a ~2.5ms/char
-// constant: a 5 000-character "language" stalled View for 13s (regression
-// corpus: testdata/fuzz/FuzzHighlight).
-var langRe = regexp.MustCompile(`^[A-Za-z0-9_+#.-]{1,32}$`)
-
-// langCache memoises fence-info → lexer-name lookups so a transcript that
-// is re-rendered on every tick does not pay the registry scan each frame.
-// It is capped so hostile output cannot grow it without bound.
-var (
-	langCache    sync.Map
-	langCacheN   atomic.Int32
-	langCacheMax = int32(64)
-)
-
-// resolveLang maps a fence info string to a chroma lexer name, or "" when
-// the tag is malformed/unknown (chroma then uses its plaintext fallback).
-func resolveLang(lang string) string {
-	if !langRe.MatchString(lang) {
-		return ""
-	}
-	if v, ok := langCache.Load(lang); ok {
-		return v.(string)
-	}
-	name := ""
-	if l := lexers.Get(lang); l != nil {
-		name = l.Config().Name
-	}
-	if langCacheN.Load() < langCacheMax {
-		if _, loaded := langCache.LoadOrStore(lang, name); !loaded {
-			langCacheN.Add(1)
-		}
-	}
-	return name
-}
-
-// highlight syntax-colours fenced ``` code blocks (and inline diffs) with
-// chroma, leaving prose untouched.
-func highlight(text string) string {
-	if !strings.Contains(text, "```") {
-		return text
-	}
-	if strings.Count(text, "```") > maxHighlightFences {
-		return text
-	}
-	parts := strings.Split(text, "```")
-	var b strings.Builder
-	for i, p := range parts {
-		if i%2 == 0 {
-			b.WriteString(p)
-			continue
-		}
-		lang, code := "", p
-		if nl := strings.IndexByte(p, '\n'); nl >= 0 {
-			lang, code = strings.TrimSpace(p[:nl]), p[nl+1:]
-		}
-		var hb strings.Builder
-		if err := highlightCode(&hb, code, resolveLang(lang), "terminal256", "github-dark"); err == nil {
-			b.WriteString(hb.String())
-		} else {
-			b.WriteString(code)
-		}
-	}
-	return b.String()
-}
-
-// execDone is the post-exec callback — refresh after an interactive command.
 func execDone(error) tea.Msg { return refresh() }
 
-// dotExec suspends the TUI for an interactive `dot ai <args…>` then refreshes.
-// DOT_AI_RAW=1 suppresses the command banner: the cockpit is already the UI,
-// and shelling out per tool (e.g. install) would otherwise reprint the full
-// Version/Command/Summary block on every invocation.
 func dotExec(args ...string) tea.Cmd {
 	c := execCommand("dot", append([]string{"ai"}, args...)...)
 	c.Env = append(os.Environ(), "DOT_AI_RAW=1")
@@ -564,7 +450,6 @@ func dotExec(args ...string) tea.Cmd {
 func newModel() model {
 	t := make([]tool, len(fleet))
 	copy(t, fleet)
-
 	ti := textinput.New()
 	ti.Placeholder = "ask the selected tool…  (/help · Tab to browse)"
 	ti.Prompt = "❯ "
@@ -572,84 +457,86 @@ func newModel() model {
 	ti.TextStyle = bodySt
 	ti.PlaceholderStyle = lipgloss.NewStyle().Foreground(faint)
 	ti.CharLimit = 2000
-
 	sp := spinner.New()
 	sp.Spinner = spinner.Dot
 	sp.Style = lipgloss.NewStyle().Foreground(pink)
-
 	return model{tools: t, focus: "fleet", input: ti, spin: sp}
 }
 
 func (m model) Init() tea.Cmd { return tea.Batch(refresh, textinput.Blink) }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width, m.height = msg.Width, msg.Height
 		m.input.Width = m.rightWidth() - 4
 	case refreshMsg:
 		m.tools, m.gatewayUp, m.gatewayMsg = msg.tools, msg.gatewayUp, msg.gatewayMsg
-		m.costToday, m.recent = msg.costToday, msg.recent
-		m.status = ""
+		m.costToday, m.recent, m.status = msg.costToday, msg.recent, ""
 	case spinner.TickMsg:
 		if m.running {
 			var c tea.Cmd
 			m.spin, c = m.spin.Update(msg)
-			cmds = append(cmds, c)
+			return m, c
 		}
 	case streamMsg:
-		if len(m.transcript) == 0 {
-			return m, nil
-		}
-		last := len(m.transcript) - 1
-		if msg.err != nil {
-			m.transcript[last].text = errPrefix + msg.err.Error()
-			m.running, m.streamCh = false, nil
-			return m, nil
-		}
-		if msg.chunk != "" {
-			m.transcript[last].text += clean(msg.chunk)
-		}
-		if msg.done {
-			m.transcript[last].text = strings.TrimSpace(m.transcript[last].text)
-			if m.transcript[last].text == "" {
-				m.transcript[last].text = "(no output — is the tool installed and authenticated?)"
-			}
-			m.running, m.streamCh = false, nil
-			saveSession(m.transcript) // persist for /resume
-			// Desktop notification for replies that took a while (≥8s).
-			if m.runStart > 0 && nowUnix()-m.runStart >= 8 {
-				notify("dot ai · "+m.transcript[last].who, "reply ready")
-			}
-			m.runStart = 0
-			return m, nil
-		}
-		return m, waitForChunk(m.streamCh)
+		return m.handleStreamMsg(msg)
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c":
-			return m, tea.Quit
-		case "tab":
-			if m.focus == "fleet" {
-				m.focus = "input"
-				m.input.Focus()
-				return m, textinput.Blink
-			}
-			// In chat: tab completes the open palette instead of toggling.
-			if len(m.palette()) > 0 {
-				return m.updateInput(msg)
-			}
-			m.focus = "fleet"
-			m.input.Blur()
-			return m, nil
+		return m.handleKeyMsg(msg)
+	}
+	return m, nil
+}
+
+func (m model) handleStreamMsg(msg streamMsg) (tea.Model, tea.Cmd) {
+	if len(m.transcript) == 0 {
+		return m, nil
+	}
+	last := len(m.transcript) - 1
+	if msg.err != nil {
+		m.transcript[last].text = errPrefix + msg.err.Error()
+		m.running, m.streamCh = false, nil
+		return m, nil
+	}
+	if msg.chunk != "" {
+		m.transcript[last].text += clean(msg.chunk)
+	}
+	if msg.done {
+		m.transcript[last].text = strings.TrimSpace(m.transcript[last].text)
+		if m.transcript[last].text == "" {
+			m.transcript[last].text = "(no output — is the tool installed and authenticated?)"
 		}
-		if m.focus == "input" {
+		m.running, m.streamCh = false, nil
+		saveSession(m.transcript)
+		if m.runStart > 0 && nowUnix()-m.runStart >= 8 {
+			notify("dot ai · "+m.transcript[last].who, "reply ready")
+		}
+		m.runStart = 0
+		return m, nil
+	}
+	return m, waitForChunk(m.streamCh)
+}
+
+func (m model) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "ctrl+c":
+		return m, tea.Quit
+	case "tab":
+		if m.focus == "fleet" {
+			m.focus = "input"
+			m.input.Focus()
+			return m, textinput.Blink
+		}
+		if len(m.palette()) > 0 {
 			return m.updateInput(msg)
 		}
-		return m.updateFleet(msg)
+		m.focus = "fleet"
+		m.input.Blur()
+		return m, nil
 	}
-	return m, tea.Batch(cmds...)
+	if m.focus == "input" {
+		return m.updateInput(msg)
+	}
+	return m.updateFleet(msg)
 }
 
 func (m model) updateFleet(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
@@ -665,11 +552,8 @@ func (m model) updateFleet(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.cursor++
 		}
 	case "enter":
-		// Open the tool's full native session (all its own commands —
-		// /exit, /clear, /model, … — work there). Suspends the TUI.
 		return m, dotExec("chat", m.tools[m.cursor].name)
 	case "/", "p":
-		// Jump into the quick in-cockpit chat input.
 		m.focus = "input"
 		m.input.Focus()
 		if msg.String() == "/" {
@@ -684,6 +568,9 @@ func (m model) updateFleet(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "m":
 		m.aiModel = nextModel(m.aiModel)
 		m.status = "model → " + modelLabel(m.aiModel)
+	case "g":
+		m.greenMode = !m.greenMode
+		m.status = map[bool]string{true: "green mode → on (UMA split-stage)", false: "green mode → off"}[m.greenMode]
 	case "s":
 		if m.gatewayUp {
 			return m, dotExec("serve", "stop")
@@ -697,7 +584,7 @@ func (m model) updateInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	pal := m.palette()
 	switch msg.String() {
 	case "esc":
-		if len(pal) > 0 { // close the palette first
+		if len(pal) > 0 {
 			m.input.SetValue("")
 			m.palSel = 0
 			return m, nil
@@ -715,44 +602,14 @@ func (m model) updateInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.palSel = clampi(m.palSel+1, 0, len(pal)-1)
 			return m, nil
 		}
-	case "tab": // complete the input to the selected command
+	case "tab":
 		if len(pal) > 0 {
 			m.input.SetValue(pal[clampi(m.palSel, 0, len(pal)-1)].label + " ")
 			m.palSel = 0
 			return m, nil
 		}
 	case "enter":
-		if len(pal) > 0 { // run the selected palette command
-			it := pal[clampi(m.palSel, 0, len(pal)-1)]
-			m.input.SetValue("")
-			m.palSel = 0
-			if it.kind == "cockpit" {
-				return m.handleSlash(it.label)
-			}
-			m.transcript = append(m.transcript, line{who: "sys",
-				text: "opening " + m.tools[m.cursor].name + " session — " + it.label + " works there"})
-			return m, dotExec("chat", m.tools[m.cursor].name)
-		}
-		q := strings.TrimSpace(m.input.Value())
-		if q == "" {
-			return m, nil
-		}
-		m.input.SetValue("")
-		if strings.HasPrefix(q, "/") {
-			return m.handleSlash(q)
-		}
-		if m.running {
-			return m, nil
-		}
-		t := m.tools[m.cursor]
-		history := append([]line(nil), m.transcript...)
-		m.transcript = append(m.transcript, line{who: "you", text: q})
-		m.transcript = append(m.transcript, line{who: t.name, text: ""})
-		m.running = true
-		m.runStart = nowUnix()
-		ch, cmd := startStream(t.name, m.style, m.aiModel, history, q)
-		m.streamCh = ch
-		return m, tea.Batch(cmd, m.spin.Tick)
+		return m.submitInput(pal)
 	}
 	var c tea.Cmd
 	m.input, c = m.input.Update(msg)
@@ -760,7 +617,38 @@ func (m model) updateInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, c
 }
 
-// handleSlash interprets in-chat slash commands.
+func (m model) submitInput(pal []paletteItem) (tea.Model, tea.Cmd) {
+	if len(pal) > 0 {
+		it := pal[clampi(m.palSel, 0, len(pal)-1)]
+		m.input.SetValue("")
+		m.palSel = 0
+		if it.kind == "cockpit" {
+			return m.handleSlash(it.label)
+		}
+		m.transcript = append(m.transcript, line{who: "sys",
+			text: "opening " + m.tools[m.cursor].name + " session — " + it.label + " works there"})
+		return m, dotExec("chat", m.tools[m.cursor].name)
+	}
+	q := strings.TrimSpace(m.input.Value())
+	if q == "" {
+		return m, nil
+	}
+	m.input.SetValue("")
+	if strings.HasPrefix(q, "/") {
+		return m.handleSlash(q)
+	}
+	if m.running {
+		return m, nil
+	}
+	t := m.tools[m.cursor]
+	history := append([]line(nil), m.transcript...)
+	m.transcript = append(m.transcript, line{who: "you", text: q}, line{who: t.name, text: ""})
+	m.running, m.runStart = true, nowUnix()
+	ch, cmd := startStream(t.name, m.style, m.aiModel, history, q)
+	m.streamCh = ch
+	return m, tea.Batch(cmd, m.spin.Tick)
+}
+
 func (m model) handleSlash(cmd string) (tea.Model, tea.Cmd) {
 	f := strings.Fields(cmd)
 	name := f[0]
@@ -768,24 +656,28 @@ func (m model) handleSlash(cmd string) (tea.Model, tea.Cmd) {
 	sys := func(s string) { m.transcript = append(m.transcript, line{who: "sys", text: s}) }
 	switch name {
 	case "/help", "/?":
-		sys("cockpit: /model <name> · /style <name|off> · /tool <name> · /resume · /save · /serve · /cost · /clear · /exit")
+		sys("cockpit: /eco · /green · /corral · /mcp · /draft · /model <name> · /style <name|off> · /tool <name> · /resume · /save · /serve · /cost · /clear · /exit")
 		sys("for a tool's own commands (/exit, /compact, …) press Enter on the fleet to open its session")
 	case "/clear":
 		m.transcript = nil
+	case "/eco", "/top":
+		snap := sampleEcosystem()
+		sci := computeSCI(1000, 600, 400, 0, 8.5, 380.0)
+		spark := renderBrailleSparkline([]float64{12, 28, 45, 30, 62, 40, 22, 18}, 4)
+		sys(spark + " " + formatBtopBar(snap, sci, m.greenMode))
+	case "/green":
+		m.greenMode = !m.greenMode
+		sys(map[bool]string{true: "green mode → on (Apple Silicon UMA split-stage + GreenCache)", false: "green mode → off"}[m.greenMode])
+	case "/corral":
+		return m, dotExec("corral", arg)
+	case "/mcp":
+		return m, dotExec("mcp", arg)
+	case "/draft":
+		return m, dotExec("draft", arg)
 	case "/model":
-		switch arg {
-		case "":
-			sys("models: " + strings.TrimSpace(strings.Join(models, " ")+" (blank = default)") + " — current: " + modelLabel(m.aiModel))
-		case "default", "off":
-			m.aiModel = ""
-			sys("model → default")
-		default:
-			m.aiModel = arg
-			sys("model → " + arg)
-		}
+		m.handleSlashModel(arg, sys)
 	case "/resume":
-		s := loadSession()
-		if len(s) == 0 {
+		if s := loadSession(); len(s) == 0 {
 			sys("no saved session to resume")
 		} else {
 			m.transcript = s
@@ -797,11 +689,10 @@ func (m model) handleSlash(cmd string) (tea.Model, tea.Cmd) {
 	case "/quit", "/q", "/exit":
 		return m, tea.Quit
 	case "/style":
-		switch arg {
-		case "", "off":
+		if arg == "" || arg == "off" {
 			m.style = ""
 			sys("style cleared")
-		default:
+		} else {
 			m.style = arg
 			sys("style → " + arg)
 		}
@@ -824,332 +715,23 @@ func (m model) handleSlash(cmd string) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-// ── layout helpers ──────────────────────────────────────────────────────────
-func (m model) leftWidth() int {
-	w := m.width / 4
-	if w < 18 {
-		w = 18
+func (m *model) handleSlashModel(arg string, sys func(string)) {
+	switch arg {
+	case "":
+		sys("models: " + strings.TrimSpace(strings.Join(models, " ")+" (blank = default)") + " — current: " + modelLabel(m.aiModel))
+	case "default", "off":
+		m.aiModel = ""
+		sys("model → default")
+	default:
+		m.aiModel = arg
+		sys("model → " + arg)
 	}
-	if w > 26 {
-		w = 26
-	}
-	return w
-}
-func (m model) rightWidth() int { return m.width - m.leftWidth() - 5 }
-
-func (m model) View() string {
-	if m.width < 40 || m.height < 12 || len(m.tools) == 0 {
-		return "  loading dot ai…"
-	}
-
-	// Header: logo + tagline + gateway/cost chips.
-	gw := chipOff.Render("○ gateway off")
-	if m.gatewayUp {
-		gw = chipOK.Render("● " + m.gatewayMsg)
-	}
-	left := logoSt.Render("◆ dot ai") + "  " + tagSt.Render("AI fleet cockpit")
-	if m.aiModel != "" {
-		left += dimSt.Render("  · model ") + selSt.Render(m.aiModel)
-	}
-	if m.style != "" {
-		left += dimSt.Render("  · style ") + selSt.Render(m.style)
-	}
-	right := gw + " " + chipCost.Render("today "+m.costToday)
-	gap := m.width - lipgloss.Width(left) - lipgloss.Width(right) - 2
-	if gap < 1 {
-		gap = 1
-	}
-	header := " " + left + strings.Repeat(" ", gap) + right
-
-	bodyH := m.height - 5 // height >= 12 is guaranteed above, so bodyH >= 7
-
-	// Left: the fleet, as lines, then windowed so it never overflows the
-	// panel height and the cursor stays visible.
-	var rows []string
-	cursorRow := 0
-	lastGroup := ""
-	for i, t := range m.tools {
-		if t.group != lastGroup {
-			rows = append(rows, groupSt.Render(strings.ToUpper(t.group)))
-			lastGroup = t.group
-		}
-		dot := offSt.Render("○")
-		if t.installed {
-			dot = okSt.Render("●")
-		}
-		if i == m.cursor {
-			cursorRow = len(rows)
-			rows = append(rows, selSt.Render("▌")+dot+" "+selSt.Render(t.name))
-		} else {
-			rows = append(rows, " "+dot+" "+bodySt.Render(t.name))
-		}
-	}
-	rows = windowRows(rows, cursorRow, bodyH)
-	leftStyle := panel
-	if m.focus == "fleet" {
-		leftStyle = panelHot
-	}
-	leftPane := leftStyle.Width(m.leftWidth()).Height(bodyH).Render(strings.Join(rows, "\n"))
-
-	// Right: chat transcript + input.
-	t := m.tools[m.cursor]
-	rw := m.rightWidth()
-	var cb strings.Builder
-	cb.WriteString(titleSt.Render(strings.ToUpper(t.name)))
-	state := offSt.Render(" not installed — i to install")
-	if t.installed {
-		state = dimSt.Render(" · ready")
-	}
-	cb.WriteString(state + "\n\n")
-	pal := m.palette()
-	if len(pal) > 8 {
-		pal = pal[:8]
-	}
-	cb.WriteString(m.renderTranscript(rw-2, bodyH-5-len(pal)))
-	cb.WriteString("\n")
-	if len(pal) > 0 {
-		cb.WriteString(m.renderPalette(pal, rw-2) + "\n")
-	}
-	if m.running {
-		cb.WriteString(m.spin.View() + dimSt.Render(" "+t.name+" is thinking…"))
-	} else {
-		cb.WriteString(m.input.View())
-	}
-	rightStyle := panel
-	if m.focus == "input" {
-		rightStyle = panelHot
-	}
-	rightPane := rightStyle.Width(rw).Height(bodyH).Render(cb.String())
-
-	body := lipgloss.JoinHorizontal(lipgloss.Top, leftPane, rightPane)
-
-	// Footer keybar.
-	var keys []struct{ k, d string }
-	if m.focus == "input" {
-		keys = []struct{ k, d string }{
-			{"⏎", "send"}, {"/help", "cmds"}, {"esc", "fleet"}, {"/exit", "quit"},
-		}
-	} else {
-		keys = []struct{ k, d string }{
-			{"↑↓", "move"}, {"⏎", "open session"}, {"tab", "quick chat"},
-			{"m", "model"}, {"s", "serve"}, {"i", "install"}, {"q", "quit"},
-		}
-	}
-	var fbar strings.Builder
-	for i, kv := range keys {
-		if i > 0 {
-			fbar.WriteString(keyDesc.Render("  ·  "))
-		}
-		fbar.WriteString(keySt.Render(kv.k) + " " + keyDesc.Render(kv.d))
-	}
-	footer := " " + fbar.String()
-	if m.status != "" {
-		footer = " " + dimSt.Render(m.status) + footer
-	}
-
-	return strings.Join([]string{header, body, footer}, "\n")
-}
-
-// windowRows returns at most h rows from rows, scrolled so that the row at
-// `cursor` stays visible.
-func windowRows(rows []string, cursor, h int) []string {
-	if h < 1 {
-		h = 1
-	}
-	if len(rows) <= h {
-		return rows
-	}
-	start := cursor - h/2
-	if start < 0 {
-		start = 0
-	}
-	if start+h > len(rows) {
-		start = len(rows) - h
-	}
-	return rows[start : start+h]
-}
-
-// logoArt is the "dot ai" wordmark (half-block font), rendered with a
-// violet→mauve→pink gradient in the splash.
-var logoArt = []string{
-	"█▀▄ █▀█ ▀█▀   █▀█ █",
-	"█░█ █░█  █    █▀█ █",
-	"▀▀░ ▀▀▀  ▀    ▀░▀ ▀",
-}
-
-// splash renders the gorgeous empty-state: the wordmark, a one-line pitch,
-// and the quick-start keys, centred in a w×h box.
-func (m model) splash(w, h int) string {
-	if h < 0 {
-		h = 0
-	}
-	c := func(s string) string { return lipgloss.PlaceHorizontal(w, lipgloss.Center, s) }
-	grad := []lipgloss.Color{violet, mauve, pink}
-	var b []string
-	b = append(b, "", c(selSt.Render("◆")), "")
-	for i, ln := range logoArt {
-		b = append(b, c(lipgloss.NewStyle().Foreground(grad[i]).Bold(true).Render(ln)))
-	}
-	b = append(b,
-		"",
-		c(tagSt.Render("the cockpit for your AI fleet")),
-		c(dimSt.Render("one subscription · every agent · zero keys")),
-		"",
-		c(keySt.Render("⏎")+dimSt.Render(" open session    ")+
-			keySt.Render("type")+dimSt.Render(" to chat    ")+
-			keySt.Render("/")+dimSt.Render(" commands")),
-	)
-	// Centre vertically: pad evenly until the box is full.
-	for i := 0; len(b) < h; i++ {
-		if i%2 == 0 {
-			b = append([]string{""}, b...)
-		} else {
-			b = append(b, "")
-		}
-	}
-	if len(b) > h {
-		b = b[:h]
-	}
-	return strings.Join(b, "\n")
-}
-
-// renderTranscript renders the chat panel body at exactly max(h, 1) physical
-// rows, padded at the top so the input box pins to the bottom — a proper chat
-// feel. View sizes the surrounding panel from the same h, so returning any
-// other number of rows overflows the panel and pushes the input box and
-// footer off the frame.
-//
-// That row count is a hard contract on every path and for every transcript,
-// including content the cockpit did not author: /resume replays session.json
-// from disk, whose Who and Text fields are arbitrary. A non-positive h is a
-// nonsensical request rather than an error, and is answered with one row.
-//
-// FuzzRenderTranscript asserts the contract directly.
-func (m model) renderTranscript(w, h int) string {
-	if h < 1 {
-		h = 1
-	}
-	var lines []string
-	if len(m.transcript) == 0 {
-		// Gorgeous splash; tuck up to 3 recent runs along the bottom.
-		var rec []string
-		if len(m.recent) > 0 {
-			rec = append(rec, dimSt.Render("recent"))
-			for i, r := range m.recent {
-				if i >= 3 {
-					break
-				}
-				rec = append(rec, dimSt.Render("  "+r))
-			}
-		}
-		// The recent block only fits when at least one splash row remains;
-		// a very short panel (tiny terminal + open palette) drops it rather
-		// than asking splash for a negative height (regression corpus:
-		// testdata/fuzz/FuzzRenderTranscript).
-		if len(rec) >= h {
-			rec = nil
-		}
-		sp := m.splash(w, h-len(rec))
-		if len(rec) > 0 {
-			return sp + "\n" + strings.Join(rec, "\n")
-		}
-		return sp
-	}
-	{
-		for _, l := range m.transcript {
-			var tag, content string
-			hasCode := false
-			switch l.who {
-			case "you":
-				tag, content = youSt.Render("you ▸ "), bodySt.Render(l.text)
-			case "sys":
-				tag, content = dimSt.Render("· "), dimSt.Render(l.text)
-			default:
-				tag, content = botSt.Render(l.who+" ▸ "), highlight(l.text)
-				if strings.HasPrefix(l.text, errPrefix) {
-					// A failed turn reads as an error, not as a reply.
-					tag, content = errSt.Render(l.who+" ▸ "), errSt.Render(l.text)
-				}
-				hasCode = strings.Contains(l.text, "```")
-			}
-			if hasCode {
-				// Code carries chroma ANSI — truncate (don't lipgloss-wrap,
-				// which would strip the colours).
-				for i, ln := range strings.Split(content, "\n") {
-					if i == 0 {
-						ln = tag + ln
-					}
-					lines = append(lines, ansi.Truncate(ln, w, "…"))
-				}
-			} else {
-				wrapped := lipgloss.NewStyle().Width(w).Render(tag + content)
-				lines = append(lines, strings.Split(wrapped, "\n")...)
-			}
-		}
-	}
-	// One slice element must be one physical row before the height clamp
-	// below can mean anything. The fenced-code branch appends `tag + <body
-	// line>` and only ever splits the body, but `tag` embeds the line's
-	// author — and the author is not always ours: /resume replays
-	// session.json from disk, whose Who field is arbitrary. A newline in
-	// there used to smuggle extra rows past the clamp and push the input
-	// box out of the fixed-height chat panel. Flatten first, so the "exactly
-	// h rows" contract holds no matter which branch produced the row.
-	// Regression corpus: testdata/fuzz/FuzzRenderTranscript.
-	if anyMultiline(lines) {
-		flat := make([]string, 0, len(lines)+1)
-		for _, ln := range lines {
-			flat = append(flat, strings.Split(ln, "\n")...)
-		}
-		lines = flat
-	}
-	// Keep the tail; pad the top so content sits at the bottom.
-	if len(lines) > h {
-		lines = lines[len(lines)-h:]
-	}
-	for len(lines) < h {
-		lines = append([]string{""}, lines...)
-	}
-	return strings.Join(lines, "\n")
-}
-
-// anyMultiline reports whether any element spans more than one row. It keeps
-// the common case allocation-free: only a transcript that actually carries an
-// embedded newline pays for the re-split.
-func anyMultiline(lines []string) bool {
-	for _, ln := range lines {
-		if strings.Contains(ln, "\n") {
-			return true
-		}
-	}
-	return false
-}
-
-// renderSnapshot prints one frame at a fixed size — for previews and
-// non-TTY/CI rendering. Enabled with DOT_AI_SNAPSHOT=1.
-func renderSnapshot() {
-	m := newModel()
-	mm, _ := m.Update(tea.WindowSizeMsg{Width: 94, Height: 26})
-	m = mm.(model)
-	if r, ok := refresh().(refreshMsg); ok {
-		mm, _ = m.Update(r)
-		m = mm.(model)
-	}
-	m.transcript = []line{
-		{who: "you", text: "show me a typed fetch wrapper"},
-		{who: "claude", text: "Here's a small typed wrapper:\n```ts\nexport async function getJSON<T>(url: string): Promise<T> {\n  const r = await fetch(url);\n  if (!r.ok) throw new Error(r.statusText);\n  return r.json();\n}\n```\nCall it with `getJSON<User>(\"/api/me\")`."},
-	}
-	m.style = "architect"
-	m.focus = "input"
-	if os.Getenv("DOT_AI_SPLASH") != "" {
-		m.transcript = nil // preview the empty-state splash
-	} else {
-		m.input.SetValue("/") // show the command palette in the preview
-	}
-	fmt.Println(m.View())
 }
 
 func run() error {
+	if len(os.Args) > 1 && os.Args[1] == "--log-event" {
+		return logEventCLI(os.Args[2:])
+	}
 	if os.Getenv("DOT_AI_SNAPSHOT") != "" {
 		renderSnapshot()
 		return nil
@@ -1158,12 +740,8 @@ func run() error {
 	return err
 }
 
-// Process-boundary seams: os.Exit terminates the test binary and run()
-// takes over the terminal, so main is exercised through these two hooks.
 var (
-	// exit terminates the process with a status code.
-	exit = os.Exit
-	// runProgram starts the cockpit (or the snapshot renderer).
+	exit       = os.Exit
 	runProgram = run
 )
 

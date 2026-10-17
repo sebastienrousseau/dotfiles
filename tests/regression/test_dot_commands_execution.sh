@@ -54,7 +54,10 @@ mkdir -p "$sandbox/.config" "$sandbox/.local/share" "$sandbox/.cache" \
   "$sandbox/.local/state" "$sandbox/bin" "$sandbox/.cache/dotfiles/registry"
 ln -s "$REPO_ROOT" "$sandbox/.dotfiles"
 printf '#!/usr/bin/env bash\nexit 0\n' >"$sandbox/bin/chezmoi"
-chmod +x "$sandbox/bin/chezmoi"
+for _t in open xdg-open osascript; do
+  printf '#!/bin/sh\nexit 0\n' >"$sandbox/bin/$_t"
+done
+chmod +x "$sandbox/bin"/*
 # Seed the registry index cache so `dot registry …` stays offline. The cache
 # is keyed by the URL it came from, so ask registry.sh where the active URL's
 # index belongs instead of hard-coding a file name.
@@ -70,6 +73,13 @@ export HOME="$sandbox" \
   XDG_CACHE_HOME="$sandbox/.cache" \
   XDG_STATE_HOME="$sandbox/.local/state" \
   CHEZMOI_SOURCE_DIR="$REPO_ROOT" \
+  DOT_OPENER=true \
+  BROWSER=true \
+  EDITOR=true \
+  VISUAL=true \
+  GIT_EDITOR=true \
+  DOTFILES_NONINTERACTIVE=1 \
+  DOTFILES_NO_TUI=1 \
   PATH="$sandbox/bin:$PATH"
 
 # Patterns that MUST NOT appear in stderr for any command. These

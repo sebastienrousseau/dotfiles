@@ -74,6 +74,15 @@ _ai_in_scratch_dir() {
   return "$rc"
 }
 
+_ai_mise_eco_pkg() {
+  case "$1" in
+    corralctl | passmcp | passmcp-graph | passmcp-lsp | passmcp-server | draft)
+      printf 'github:sebastienrousseau/%s\n' "$1"
+      ;;
+    *) echo "" ;;
+  esac
+}
+
 # _ai_mise_pkg <binary> — map an AI provider binary to its mise package.
 # claude is intentionally absent (native installer, not mise/npm: npm 11
 # drops the platform-native optionalDependency on global installs).
@@ -81,22 +90,15 @@ _ai_mise_pkg() {
   case "$1" in
     codex) echo "npm:@openai/codex" ;;
     copilot) echo "npm:@github/copilot" ;;
-    goose) echo "" ;;
     crush) echo "npm:@charmland/crush" ;;
-    amp) echo "" ;; # native installer (npm versions are prerelease-only; mise filters them out)
-    cursor-agent) echo "" ;;
-    grok) echo "" ;;
     aider) echo "pipx:aider-chat[uvx_args=--python 3.12]" ;; # 3.13+ lacks audioop, which aider needs
-    opencode) echo "opencode" ;;
+    opencode | kiro-cli) echo "$1" ;;
     sgpt) echo "pipx:shell-gpt" ;;
-    agy) echo "" ;;
-    kimi) echo "" ;;
     ollama) echo "aqua:ollama/ollama" ;;
-    kiro-cli) echo "kiro-cli" ;;
     autohand) echo "npm:autohand-cli" ;;
     qwen) echo "npm:@qwen-code/qwen-code" ;;
     zai) echo "npm:@guizmo-ai/zai-cli" ;;
-    *) echo "" ;;
+    *) _ai_mise_eco_pkg "$1" ;;
   esac
 }
 

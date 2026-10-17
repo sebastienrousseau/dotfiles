@@ -27,11 +27,13 @@ _ai_version_line() {
 # Some shims unpack downloads into the current directory (archive-XXXXXX),
 # which littered whatever directory `dot ai tools` ran from.
 _ai_probe_version() {
-  local bin="$1" to="${2:-}" dir
+  local bin="$1" to="${2:-}" dir out=""
   dir="$(mktemp -d "${TMPDIR:-/tmp}/dot-ai-probe.XXXXXX")" || return 0
   # shellcheck disable=SC2086 # $to is an optional "timeout 8" prefix
-  (cd "$dir" && $to "$bin" --version </dev/null 2>/dev/null | _ai_version_line) || true
+  out="$(cd "$dir" && $to "$bin" --version </dev/null 2>/dev/null | _ai_version_line)" || true
   rm -rf "$dir"
+  [[ -n "$out" ]] && printf '%s\n' "$out"
+  return 0
 }
 
 _ai_extract_version() {

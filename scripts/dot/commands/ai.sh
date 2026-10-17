@@ -78,8 +78,6 @@ _ai_refresh_status_cache() {
   mkdir -p "$AI_CACHE_DIR"
 
   local total=${#ai_entries[@]}
-
-  # Cold-cache refresh can take 15-30s across node-based tools; show progress.
   ui_spinner_start "Probing $total AI tools (cached for ${AI_STATUS_TTL}s)"
 
   local jobs="${DOTFILES_AI_PROBE_JOBS:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}"
@@ -87,48 +85,40 @@ _ai_refresh_status_cache() {
   probe_dir="$(mktemp -d)"
 
   local i=0
-  local entry
+  local entry category role name bin desc
   local indexed=()
   for entry in "${ai_entries[@]}"; do
-    indexed+=("$i|$entry")
+    IFS="|" read -r category role name bin desc <<<"$entry"
+    indexed+=("$i|$bin")
     i=$((i + 1))
   done
-  # Probe is non-interactive: </dev/null is a clean EOF for tools that
-  # prompt for an API key on first run; `timeout 8` caps the wait.
-  # Node-based tools (codex, copilot, opencode) need 5-8s on cold start;
-  # 3s caused false "not installed" results in the status cache.
-  # shellcheck disable=SC2016
+
   local _TO=""
   command -v timeout >/dev/null 2>&1 && _TO="timeout 8 "
-  # Variables expand inside the child Bash probe.
   # shellcheck disable=SC2016
   local probe_script='
     payload="$1"; out_dir="$2"; to="$3"
-    i="${payload%%|*}"; entry="${payload#*|}"
-    IFS="|" read -r category role name bin desc <<<"$entry"
-    if command -v "$bin" >/dev/null 2>&1; then
+    i="${payload%%|*}"; bin="${payload#*|}"
+    if ! command -v "$bin" >/dev/null 2>&1; then
+      printf "%s\t0\t\n" "$bin" >"$out_dir/$i"
+    else
       output=$(_ai_probe_version "$bin" "$to")
       version=$(printf "%s" "$output" | sed "s/^[^0-9]*//;s/[[:space:]]*$//;s/\.$//")
       printf "%s\t1\t%s\n" "$bin" "$version" >"$out_dir/$i"
-    else
-      printf "%s\t0\t\n" "$bin" >"$out_dir/$i"
     fi
   '
-  # Use only `-I{}` and null records for BSD xargs and quote-safe descriptions.
   printf '%s\0' "${indexed[@]}" |
     AI_VERSION_RE="$AI_VERSION_RE" xargs -0 -I{} -P"$jobs" \
       bash -c "$(declare -f _ai_version_line _ai_probe_version)$probe_script" \
       _ {} "$probe_dir" "$_TO" \
       2>/dev/null || true
 
-  # Re-assemble in original entry order.
   local n
   for ((n = 0; n < i; n++)); do
     [[ -f "$probe_dir/$n" ]] && cat "$probe_dir/$n" >>"$tmp_file"
   done
   rm -rf "$probe_dir"
 
-  # Guard against older ui_spinner_stop implementations returning 1 on a TTY.
   ui_spinner_stop || true
 
   mv "$tmp_file" "$AI_STATUS_CACHE_FILE"
@@ -343,7 +333,8 @@ EOF
 
 # `dot ai <verb> …` → the function that takes the remaining arguments.
 _AI_VERBS="chat:cmd_ai_chat install:cmd_ai_install serve:_ai_serve cost:cmd_ai_cost
-login:cmd_ai_setup doctor:cmd_ai_doctor ask:cmd_ai_query run:_ai_oneshot delegate:cmd_ai_delegate"
+login:cmd_ai_setup doctor:cmd_ai_doctor ask:cmd_ai_query run:_ai_oneshot delegate:cmd_ai_delegate
+corral:cmd_ai_corral mcp:cmd_ai_mcp draft:cmd_ai_draft eco:cmd_ai_eco top:cmd_ai_eco"
 
 # Deprecated `dot ai` verbs and the bare / unknown forms. `status` and
 # `local` keep their verb in "$@", as they always have.

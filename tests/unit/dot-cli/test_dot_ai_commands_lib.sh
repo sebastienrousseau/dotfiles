@@ -72,8 +72,11 @@ called() { assert_file_contains "$AI_CALLS" "$1" "invoked $1"; }
 # ai_min — same, but with PATH cut down to the sandbox stubs plus the system
 # directories. The host running this suite really does have some of the fleet
 # installed, so the "not installed" branches need everything else hidden.
+# bash is linked into the sandbox rather than adding its directory: on macOS
+# that is /opt/homebrew/bin, which also holds real fleet tools.
+ln -sf "$REAL_BASH" "$BIN/bash"
 ai_min() {
-  PATH="$BIN:${REAL_BASH%/*}:/usr/bin:/bin:/usr/sbin:/sbin" ai "$@"
+  PATH="$BIN:/usr/bin:/bin:/usr/sbin:/sbin" ai "$@"
 }
 
 test_start "library_exists_and_parses"
@@ -241,6 +244,7 @@ assert_equals 0 "$RC" "rc"
 out_has "not installed (the gateway engine needs it)" "engine missing"
 out_has "dot-ai-serve not deployed" "gateway missing"
 out_has "0/19 tools installed" "empty fleet"
+out_has "0/3 suite tools" "empty ecosystem"
 
 # ── install ─────────────────────────────────────────────────────────────
 test_start "install_reports_a_complete_fleet"
@@ -257,7 +261,7 @@ test_start "a_missing_tool_is_installed_through_mise"
 rm -f "$BIN/opencode"
 ai_min cmd_ai_install opencode
 assert_equals 0 "$RC" "rc"
-called "mise use -g opencode@1.18.34"
+called "mise use -g opencode@1.19.0"
 out_has "installed" "success line"
 stub opencode
 
@@ -345,5 +349,73 @@ test_start "deprecation_notice_names_the_new_command"
 ai _ai_deprecated "dot ai chat"
 assert_equals 0 "$RC" "rc"
 err_has "use: dot ai chat" "hint"
+
+# ── corral / mcp / draft / eco ecosystem commands ────────────────────────
+stub corralctl
+stub passmcp
+stub passmcp-graph
+stub draft
+stub dot-ai-tui
+
+test_start "corral_dispatches_status_doctor_sync_mcp_and_custom"
+ai cmd_ai_corral
+assert_equals 0 "$RC" "rc"
+called "corralctl status $HOME/Code"
+ai cmd_ai_corral doctor /tmp/code
+called "corralctl doctor /tmp/code --refresh-tags"
+ai cmd_ai_corral sync myorg
+called "corralctl myorg -c 8"
+ai cmd_ai_corral mcp --stdio
+called "corralctl mcp --stdio"
+ai cmd_ai_corral list
+called "corralctl list"
+rm -f "$BIN/corralctl"
+ai_min cmd_ai_corral
+assert_equals 1 "$RC" "missing corralctl exits 1"
+out_has "not installed" "missing corralctl warning"
+stub corralctl
+
+test_start "mcp_dispatches_check_graph_and_rejects_unknown"
+ai cmd_ai_mcp check https://mcp.example.com
+assert_equals 0 "$RC" "rc"
+called "passmcp check https://mcp.example.com"
+ai cmd_ai_mcp graph --json
+assert_equals 0 "$RC" "rc"
+called "passmcp-graph --json"
+ai cmd_ai_mcp bogus
+assert_equals 1 "$RC" "unknown mcp subcommand exits 1"
+out_has "dot ai mcp" "mcp usage shown"
+rm -f "$BIN/passmcp" "$BIN/passmcp-graph"
+ai_min cmd_ai_mcp check
+assert_equals 1 "$RC" "missing passmcp exits 1"
+ai_min cmd_ai_mcp graph
+assert_equals 1 "$RC" "missing passmcp-graph exits 1"
+stub passmcp
+stub passmcp-graph
+
+test_start "draft_dispatches_standard_and_green_split_stage"
+ai cmd_ai_draft
+assert_equals 1 "$RC" "empty draft args exits 1"
+out_has "dot ai draft [--green]" "draft usage"
+ai cmd_ai_draft "topic.md"
+assert_equals 0 "$RC" "rc"
+called "draft topic.md"
+ai cmd_ai_draft --green "green-topic.md"
+assert_equals 0 "$RC" "rc"
+called "draft --extract-engine ollama --write-engine claude --second-gate green-topic.md"
+rm -f "$BIN/draft"
+ai_min cmd_ai_draft "topic.md"
+assert_equals 1 "$RC" "missing draft exits 1"
+stub draft
+
+test_start "eco_runs_snapshot_or_falls_back_to_doctor"
+ai cmd_ai_eco --snapshot
+assert_equals 0 "$RC" "rc"
+called "dot-ai-tui"
+rm -f "$BIN/dot-ai-tui"
+ai_min cmd_ai_eco
+assert_equals 0 "$RC" "fallback to doctor exits 0"
+out_has "AI Ecosystem & Green Compute" "eco fallback header"
+stub dot-ai-tui
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
