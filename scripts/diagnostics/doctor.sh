@@ -243,7 +243,9 @@ _doctor_infrastructure() {
   if check_cmd pueue; then
     if "$(get_cmd_path pueue)" status >/dev/null 2>&1; then
       _ok "pueue daemon" "running"
-    elif command -v pueued >/dev/null 2>&1 && pueued -d >/dev/null 2>&1 && "$(get_cmd_path pueue)" status >/dev/null 2>&1; then
+    # 3>&-: in --json mode fd 3 is the caller's stdout; a daemon that
+    # inherits it holds `$(doctor --json)` open for its whole lifetime.
+    elif command -v pueued >/dev/null 2>&1 && pueued -d >/dev/null 2>&1 3>&- && "$(get_cmd_path pueue)" status >/dev/null 2>&1; then
       _ok "pueue daemon" "started"
     else
       _warn "pueue daemon" "not running (pueued -d)"
