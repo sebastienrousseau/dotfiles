@@ -32,6 +32,28 @@ export TESTS_DIR
 export REPO_ROOT
 export FRAMEWORK_DIR="$SCRIPT_DIR"
 
+# Headless test execution: prevent tests or subprocesses from
+# opening GUI windows (browser, text editor, terminal, Finder, notifications) on the host.
+export DOT_OPENER=true
+export BROWSER=true
+export EDITOR=true
+export VISUAL=true
+export GIT_EDITOR=true
+
+_runner_hermetic_bin="${TMPDIR:-/tmp}/dotfiles-hermetic-bin"
+mkdir -p "$_runner_hermetic_bin"
+for _shim in open xdg-open osascript; do
+  if [[ ! -x "$_runner_hermetic_bin/$_shim" ]]; then
+    printf '#!/bin/sh\nexit 0\n' >"$_runner_hermetic_bin/$_shim"
+    chmod +x "$_runner_hermetic_bin/$_shim"
+  fi
+done
+unset _shim
+case ":$PATH:" in
+  *":$_runner_hermetic_bin:"*) ;;
+  *) export PATH="$_runner_hermetic_bin:$PATH" ;;
+esac
+
 # -----------------------------------------------------------------------------
 # Helpers
 # -----------------------------------------------------------------------------
@@ -208,9 +230,26 @@ run_test_list() {
 
     export -f run_test_file_worker run_bounded describe_exit
     export TEST_FILE_TIMEOUT
-    # shellcheck disable=SC2016  # $0 inside xargs invocation
-    printf '%s\n' "$@" | xargs -I{} -P "$JOBS" \
-      bash -c 'run_test_file_worker "$@"' _ {} "$out_dir"
+    local -a primary_files=() deferred_inv=()
+    local f
+    for f in "$@"; do
+      if [[ "$(basename "$f")" == "test_test_framework_invariants.sh" ]]; then
+        deferred_inv+=("$f")
+      else
+        primary_files+=("$f")
+      fi
+    done
+
+    if [[ ${#primary_files[@]} -gt 0 ]]; then
+      # shellcheck disable=SC2016  # $0 inside xargs invocation
+      printf '%s\n' "${primary_files[@]}" | xargs -I{} -P "$JOBS" \
+        bash -c 'run_test_file_worker "$@"' _ {} "$out_dir"
+    fi
+    if [[ ${#deferred_inv[@]} -gt 0 ]]; then
+      for f in "${deferred_inv[@]}"; do
+        INVARIANT_RESULTS_DIR="$out_dir" run_test_file_worker "$f" "$out_dir"
+      done
+    fi
 
     aggregate_parallel_results "$out_dir"
   fi

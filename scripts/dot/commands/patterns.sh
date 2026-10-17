@@ -16,6 +16,25 @@ mkdir -p "$PATTERN_DIR"
 command="${1:-list}"
 name="${2:-}"
 
+_view_pattern() {
+  local pat_name="$1" pattern_file
+  if [[ -z "$pat_name" ]]; then
+    ui_err "Missing pattern name" "Usage: dot patterns view <name>"
+    exit 1
+  fi
+  pattern_file="$PATTERN_DIR/${pat_name}.md"
+  if [[ ! -f "$pattern_file" ]]; then
+    ui_err "Pattern not found" "$pat_name"
+    exit 1
+  fi
+  ui_header "Pattern: $pat_name"
+  if has_command glow && glow --version >/dev/null 2>&1; then
+    glow "$pattern_file"
+  else
+    cat "$pattern_file"
+  fi
+}
+
 case "$command" in
   list)
     ui_header "AI Steering Patterns"
@@ -24,22 +43,7 @@ case "$command" in
     done
     ;;
   view)
-    if [[ -z "$name" ]]; then
-      ui_err "Missing pattern name" "Usage: dot patterns view <name>"
-      exit 1
-    fi
-    pattern_file="$PATTERN_DIR/${name}.md"
-    if [[ -f "$pattern_file" ]]; then
-      ui_header "Pattern: $name"
-      if has_command glow; then
-        glow "$pattern_file"
-      else
-        cat "$pattern_file"
-      fi
-    else
-      ui_err "Pattern not found" "$name"
-      exit 1
-    fi
+    _view_pattern "$name"
     ;;
   edit)
     if [[ -z "$name" ]]; then

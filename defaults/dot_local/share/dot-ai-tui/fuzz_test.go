@@ -104,7 +104,8 @@ func FuzzHandleSlash(f *testing.F) {
 		}
 		name := strings.Fields(cmd)[0]
 		known := map[string]bool{"/help": true, "/?": true, "/clear": true, "/model": true, "/resume": true, "/save": true,
-			"/quit": true, "/q": true, "/exit": true, "/style": true, "/tool": true, "/serve": true, "/cost": true}
+			"/quit": true, "/q": true, "/exit": true, "/style": true, "/tool": true, "/serve": true, "/cost": true,
+			"/eco": true, "/top": true, "/green": true, "/corral": true, "/mcp": true, "/draft": true}
 		if !known[name] {
 			if len(nm.transcript) == 0 || !strings.Contains(nm.transcript[len(nm.transcript)-1].text, "unknown command") {
 				t.Fatalf("unknown %q gave no hint: %+v", name, nm.transcript)

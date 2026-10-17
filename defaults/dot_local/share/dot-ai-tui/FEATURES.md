@@ -125,3 +125,12 @@ Keep the last column a list of backticked function names.
 | Area | Feature | Trigger | Tests |
 | :--- | :--- | :--- | :--- |
 | docs | Runnable examples for the helper surface | `go test` | `Example_buildPrompt` `Example_highlight` `Example_resolveLang` `Example_windowRows` `Example_nextModel` `Example_filterSqliteOutput` `Example_parseSession` `Example_gatewayURL` `Example_clampi` |
+
+## Ecosystem & btop Green Telemetry
+
+| Area | Feature | Trigger | Tests |
+| :--- | :--- | :--- | :--- |
+| telemetry | 2×4 Braille (`U+2800..U+28FF`) sparklines and meter bars for CPU/UMA/Tok/s | `renderBrailleSparkline`, `renderMeterBar` | `TestBrailleSparkline` `TestMeterBar` `BenchmarkRenderBrailleSparkline` |
+| telemetry | ISO/IEC 21031:2024 SCI (`J`, `gCO2eq`, `mgCO2eq/1k tok`) and Shannon action-entropy loop circuit-breaker | `computeSCI`, `computeActionEntropy`, `--log-event` | `TestComputeSCI` `TestComputeActionEntropy` `TestLogEventCLI` `BenchmarkComputeSCI` |
+| ecosystem | `corralctl`, `passmcp` 9-phase security posture, and `draft` provenance/green split-stage routing (`g`, `/eco`, `/top`, `/green`, `/corral`, `/mcp`, `/draft`) | `sampleEcosystem`, `formatBtopBar`, slash commands | `TestParseCorralState` `TestParsePassMCPReport` `TestParseDraftProvenance` `TestSampleEcosystemAndFormatBtopBar` |
+

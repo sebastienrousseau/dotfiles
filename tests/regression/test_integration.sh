@@ -25,6 +25,9 @@ DOT_CLI="$REPO_ROOT/bin/dot"
 IT_WORK="$(mktemp -d "${TMPDIR:-/tmp}/integration.XXXXXX")"
 trap 'rm -rf "$IT_WORK"' EXIT
 IT_CHEZMOI="$(command -v chezmoi 2>/dev/null || true)"
+if [[ -n "$IT_CHEZMOI" ]] && ! "$IT_CHEZMOI" --version >/dev/null 2>&1; then
+  IT_CHEZMOI=""
+fi
 IT_PY="$(command -v python3 2>/dev/null || true)"
 # The TOML cases need tomllib (3.11+); older pythons count as absent.
 [[ -n "$IT_PY" ]] && ! "$IT_PY" -c 'import tomllib' 2>/dev/null && IT_PY=""
@@ -38,6 +41,9 @@ it_sandbox() {
   local t
   for t in sudo apt-get dnf pacman brew curl wget chezmoi mise; do
     it_stub "$t" "echo \"$t \$*\" >>\"$IT_S/danger.spy\"; exit 1"
+  done
+  for t in open xdg-open osascript; do
+    it_stub "$t" "exit 0"
   done
 }
 
@@ -53,6 +59,7 @@ it_env() {
     XDG_DATA_HOME="$IT_S/home/.local/share" XDG_CACHE_HOME="$IT_S/home/.cache" \
     XDG_STATE_HOME="$IT_S/home/.local/state" XDG_RUNTIME_DIR="$IT_S/run" \
     TMPDIR="$IT_S/tmp" PATH="$IT_S/bin:/usr/bin:/bin" TERM=dumb NO_COLOR=1 \
+    DOT_OPENER=true BROWSER=true EDITOR=true VISUAL=true GIT_EDITOR=true \
     DOTFILES_NO_TUI=1 DOTFILES_NONINTERACTIVE=1 CI=1 "$@" </dev/null
 }
 

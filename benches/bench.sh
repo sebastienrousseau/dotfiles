@@ -95,7 +95,7 @@ run_bench() {
   # thing a regression gate is actually asking about. It cannot mask a real
   # regression: work added to an rc file raises the floor too.
   result=$(hyperfine -N -i --warmup 3 --runs 10 "$shell_cmd" --export-json "$bench_json" >/dev/null 2>&1 &&
-    jq -r '.results[0].min * 1000' "$bench_json")
+    jq -r '(.results[0] | .summary.time_wall_clock // .).min * 1000' "$bench_json")
   rm -f "$bench_json"
 
   local min_ms

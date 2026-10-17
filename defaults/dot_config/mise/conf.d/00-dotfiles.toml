@@ -73,19 +73,14 @@ zig = "latest"
 atuin = "latest"
 bat = "latest"
 codex = "latest"
-# corralctl (bulk clone/organise GitHub repos). Not in mise's tool registry,
-# so the backend is explicit. Must be `github:` and not `ubi:`: the repo is
-# named `corral` but the binary inside the archive is `corralctl`, and ubi
-# names the extracted binary after the *repo*, so it installs a `corral`
-# binary and `corralctl` is never on PATH. The github: backend unpacks the
-# release tarball as-is and yields the real `corralctl`. Verified against
-# v0.0.18 assets (corralctl_Darwin_arm64.tar.gz et al).
-# The repository is now sebastienrousseau/corralctl, and `corralctl sync`
-# (which replaces corral-sync) is not in a tagged release yet. Until v0.0.37
-# ships, ~/.config/mise/config.toml pins a go: build of the branch; switch
-# this back on afterwards as:
-#   "github:sebastienrousseau/corralctl" = "latest"
-# "github:sebastienrousseau/corral" = "latest"
+# corralctl, passmcp, and draft — the AI Ecosystem & Governance Suite,
+# managed and updated globally via mise (`github:sebastienrousseau/...`).
+"github:sebastienrousseau/corralctl" = "latest"
+"github:sebastienrousseau/passmcp" = "latest"
+"github:sebastienrousseau/passmcp-graph" = "latest"
+"github:sebastienrousseau/passmcp-lsp" = "latest"
+"github:sebastienrousseau/passmcp-server" = "latest"
+"github:sebastienrousseau/draft" = "latest"
 eza = "latest"
 gping = "latest"
 # pandoc builds the HTML/PDF/EPUB manual. Without it tools/docs/build-manual.sh
@@ -147,7 +142,7 @@ uv = "latest"
 # opencode: native pin below (folded in from the retired ~/mise.toml).
 # `npm:opencode-ai` is a redundant duplicate using the broken npm optional-dep
 # wrapper pattern — do not reintroduce it.
-opencode = "latest"
+opencode = "1.19.0"
 kiro-cli = "latest"
 "npm:autohand-cli" = "latest"
 "npm:@qwen-code/qwen-code" = "latest"

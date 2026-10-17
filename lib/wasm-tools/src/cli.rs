@@ -322,7 +322,7 @@ mod tests {
       "git_signing": {
         "format": "ssh",
         "signing_key": "ssh-ed25519 AAAAC3Nz",
-        "allowed_signers_file": "/home/u/.config/git/allowed_signers",
+        "allowed_signers_file": "/var/empty/.config/git/allowed_signers",
         "merge_verify_signatures": true
       },
       "agent": {"current_profile": "ask"},
@@ -659,6 +659,10 @@ mod tests {
     }
 
     #[test]
+    #[cfg_attr(
+        miri,
+        ignore = "1MB buffer allocation and iteration is too slow under Miri"
+    )]
     fn verify_refuses_stdin_past_the_size_cap() {
         const CAP: usize = 1 << 20;
         let shell = "{\"pad\": \"\"}";

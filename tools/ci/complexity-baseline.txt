@@ -130,7 +130,6 @@
   29    2   34.9  117   223 scripts/dot/commands/diagnostics.sh::<top>
   23   19   31.2  148     0 scripts/dot/commands/env-emit.sh::dot_env_emit
   22   21   28.7  103     0 scripts/dot/commands/init.sh::cmd_init
-  11    5   12.3   27   136 scripts/dot/commands/manual.sh::<top>
   11   11   15.2   34     0 scripts/dot/commands/manual.sh::cmd_open
   14    4   24.5   61   349 scripts/dot/commands/meta.sh::<top>
   17   38   24.9   54     0 scripts/dot/commands/meta.sh::cmd_keys
@@ -187,7 +186,6 @@
   12   13   28.8   40     0 scripts/theme/merge-wallpaper.sh::merge_pair
   11   10   19.9   47   120 scripts/theme/wallpaper-rotate.sh::<top>
   11    7   21.3   91    99 scripts/tuning/linux.sh::<top>
-   4    3    7.9   53   506 scripts/version-sync.sh::<top>
   27   34   35.0   93    93 tools/ci/check-copyright-headers.sh::<top>
    9    9   27.8   61   159 tools/ci/check-deps-dev.sh::<top>
   16   18   35.6   52    52 tools/ci/check-fuzz-harness-self-contained.sh::<top>

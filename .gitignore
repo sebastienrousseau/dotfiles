@@ -40,6 +40,9 @@ dist/
 build/
 debug/
 lib/wasm-tools/target/
+__pycache__/
+*.pyc
+
 
 # Node (Partial support for scripts)
 node_modules/

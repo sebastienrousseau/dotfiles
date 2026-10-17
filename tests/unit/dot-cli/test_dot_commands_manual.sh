@@ -45,6 +45,35 @@ assert_exit_code 1 "XDG_DATA_HOME='$MAN_TMP/empty' bash '$SCRIPT_FILE' download 
 test_start "text_format_goes_to_pager"
 assert_output_contains "fixture dotfiles.txt" "XDG_DATA_HOME='$MAN_TMP/data' PAGER=cat bash '$SCRIPT_FILE' text --offline"
 
+# A recording opener: every path or URL dot hands to DOT_OPENER lands here.
+OPENED="$MAN_TMP/opened.log"
+printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >>"%s"\n' "$OPENED" >"$MAN_TMP/opener"
+chmod +x "$MAN_TMP/opener"
+
+test_start "html_opens_the_online_manual_through_dot_opener"
+: >"$OPENED"
+DOT_OPENER="$MAN_TMP/opener" DOTFILES_MANUAL_URL=https://example.invalid/manual \
+  bash "$SCRIPT_FILE" >/dev/null 2>&1
+assert_equals "https://example.invalid/manual/" "$(cat "$OPENED")" "the URL goes to DOT_OPENER"
+
+test_start "dot_opener_keeps_its_own_arguments"
+: >"$OPENED"
+DOT_OPENER="$MAN_TMP/opener -a Browser" DOTFILES_MANUAL_URL=https://example.invalid/manual \
+  bash "$SCRIPT_FILE" >/dev/null 2>&1
+assert_equals "-a Browser https://example.invalid/manual/" "$(cat "$OPENED")" "DOT_OPENER may carry flags"
+
+test_start "unknown_option_is_rejected_and_opens_nothing"
+: >"$OPENED"
+err="$(DOT_OPENER="$MAN_TMP/opener" bash "$SCRIPT_FILE" --definitely-not-a-real-flag 2>&1 >/dev/null)"
+rc=$?
+assert_equals "1|" "$rc|$(cat "$OPENED")" "an unknown option exits 1 before opening anything"
+assert_contains "unknown argument: --definitely-not-a-real-flag" "$err" "stderr names the argument"
+
+test_start "unknown_format_is_rejected_and_opens_nothing"
+: >"$OPENED"
+DOT_OPENER="$MAN_TMP/opener" bash "$SCRIPT_FILE" mobi >/dev/null 2>&1
+assert_equals "1|" "$?|$(cat "$OPENED")" "an unknown format exits 1 before opening anything"
+
 test_start "uses_system_open_on_darwin"
 assert_file_contains "$SCRIPT_FILE" "/usr/bin/open" "must use /usr/bin/open explicitly to avoid recursion"
 

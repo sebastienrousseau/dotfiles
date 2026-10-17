@@ -13,6 +13,7 @@
 #   dot manual download <fmt>    # save to current directory
 #   dot manual --offline         # use bundled offline copy
 #   dot manual --local           # use locally-built _build/manual/
+#   DOT_OPENER='open -a Firefox' dot manual   # open with another command
 
 set -euo pipefail
 
@@ -29,20 +30,30 @@ FORMAT="html"
 USE_LOCAL=false
 USE_OFFLINE=false
 
-for arg in "$@"; do
-  case "$arg" in
-    html | html-multi | pdf | epub | text | markdown) FORMAT="$arg" ;;
-    download) MODE="download" ;;
-    --offline) USE_OFFLINE=true ;;
-    --local) USE_LOCAL=true ;;
-    --url=*) MANUAL_URL="${arg#*=}" ;;
-    --help | -h)
-      # The usage block, not the SPDX/copyright header above it.
-      sed -n '/^# dot manual/,/^[^#]/{/^#/{s/^# \{0,1\}//;p;};}' "$0"
-      exit 0
-      ;;
-  esac
-done
+# parse_args <args...>: set MODE, FORMAT, USE_LOCAL, USE_OFFLINE, MANUAL_URL.
+parse_args() {
+  local arg
+  for arg in "$@"; do
+    case "$arg" in
+      html | html-multi | pdf | epub | text | markdown) FORMAT="$arg" ;;
+      download) MODE="download" ;;
+      --offline) USE_OFFLINE=true ;;
+      --local) USE_LOCAL=true ;;
+      --url=*) MANUAL_URL="${arg#*=}" ;;
+      --help | -h)
+        # The usage block, not the SPDX/copyright header above it.
+        sed -n '/^# dot manual/,/^[^#]/{/^#/{s/^# \{0,1\}//;p;};}' "$0"
+        exit 0
+        ;;
+      *)
+        # Ignoring a typo would open the manual instead of saying so.
+        ui_err "manual" "unknown argument: $arg (see: dot manual --help)" >&2
+        exit 1
+        ;;
+    esac
+  done
+}
+parse_args "$@"
 
 format_file() {
   case "$1" in
@@ -96,6 +107,14 @@ resolve_source() {
 
 open_file() {
   local path="$1"
+  # DOT_OPENER replaces the system opener, flags included ("open -a
+  # Firefox"); the test framework sets it so no run opens a window.
+  if [[ -n "${DOT_OPENER:-}" ]]; then
+    local -a opener
+    read -r -a opener <<<"$DOT_OPENER"
+    "${opener[@]}" "$path"
+    return
+  fi
   case "$(uname -s)" in
     Darwin)
       # Use the system open explicitly — ~/.local/bin/open is a wrapper

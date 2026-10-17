@@ -48,11 +48,39 @@ export HOME="$sandbox" \
   XDG_DATA_HOME="$sandbox/.local/share" \
   XDG_CACHE_HOME="$sandbox/.cache" \
   XDG_STATE_HOME="$sandbox/.local/state" \
-  CHEZMOI_SOURCE_DIR="$REPO_ROOT"
+  CHEZMOI_SOURCE_DIR="$REPO_ROOT" \
+  DOT_OPENER=true \
+  BROWSER=true \
+  EDITOR=true \
+  VISUAL=true \
+  GIT_EDITOR=true
 
 # ═══════════════════════════════════════════════════════════════
 # Runner: run one suite, extract RESULTS, assert invariant.
 # ═══════════════════════════════════════════════════════════════
+
+mkdir -p "$sandbox/out" "$sandbox/homes"
+
+run_suite_worker() {
+  local suite_path="$1"
+  local suite_name suite_home rc=0
+  suite_name="$(basename "$suite_path")"
+  suite_home="$sandbox/homes/${suite_name%.sh}"
+  mkdir -p "$suite_home/.config" "$suite_home/.local/share" \
+    "$suite_home/.cache" "$suite_home/.local/state"
+  ln -s "$REPO_ROOT" "$suite_home/.dotfiles"
+
+  HOME="$suite_home" \
+    XDG_CONFIG_HOME="$suite_home/.config" \
+    XDG_DATA_HOME="$suite_home/.local/share" \
+    XDG_CACHE_HOME="$suite_home/.cache" \
+    XDG_STATE_HOME="$suite_home/.local/state" \
+    run_with_timeout "${INVARIANT_SUITE_TIMEOUT:-360}" bash "$suite_path" \
+    >"$sandbox/out/$suite_name.out" 2>&1 || rc=$?
+  printf '%d\n' "$rc" >"$sandbox/out/$suite_name.rc"
+}
+export -f run_suite_worker run_with_timeout
+export sandbox REPO_ROOT INVARIANT_SUITE_TIMEOUT
 
 check_suite_invariant() {
   local suite_path="$1"
@@ -61,10 +89,8 @@ check_suite_invariant() {
   test_start "framework_invariant_${suite_name%.sh}"
 
   local out results run passed failed rc=0
-  # The slowest suite (feature-matrix diagnostics state) takes about 142s on
-  # an idle machine; 180s left too little headroom and it timed out under
-  # load. INVARIANT_SUITE_TIMEOUT overrides the budget.
-  out="$(run_with_timeout "${INVARIANT_SUITE_TIMEOUT:-360}" bash "$suite_path" 2>&1)" || rc=$?
+  out="$(cat "$sandbox/out/$suite_name.out" 2>/dev/null || true)"
+  rc="$(cat "$sandbox/out/$suite_name.rc" 2>/dev/null || echo 1)"
 
   # The RESULTS: line is emitted by every well-formed suite.
   results="$(printf '%s\n' "$out" | grep -oE 'RESULTS:[0-9]+:[0-9]+:[0-9]+' | tail -1)"
@@ -100,10 +126,30 @@ echo
 echo "── Test framework invariant regression ──"
 echo
 
-# Enumerate every regression suite, skipping ourselves.
+suites=()
 for suite in "$REPO_ROOT/tests/regression/"test_*.sh; do
-  # Skip self to avoid infinite recursion.
   [[ "$(basename "$suite")" == "$SELF_NAME" ]] && continue
+  suites+=("$suite")
+done
+
+if [[ -n "${INVARIANT_RESULTS_DIR:-}" && -d "$INVARIANT_RESULTS_DIR" ]]; then
+  for suite in "${suites[@]}"; do
+    suite_name="$(basename "$suite")"
+    if [[ -f "$INVARIANT_RESULTS_DIR/$suite_name.out" ]]; then
+      cp "$INVARIANT_RESULTS_DIR/$suite_name.out" "$sandbox/out/$suite_name.out"
+      rc_line="$(grep '^EXIT_STATUS:' "$INVARIANT_RESULTS_DIR/$suite_name.out" | tail -1 || true)"
+      printf '%s\n' "${rc_line#EXIT_STATUS:}" >"$sandbox/out/$suite_name.rc"
+    else
+      run_suite_worker "$suite"
+    fi
+  done
+else
+  # shellcheck disable=SC2016
+  printf '%s\n' "${suites[@]}" | xargs -I{} -P "${INVARIANT_JOBS:-4}" \
+    bash -c 'run_suite_worker "$@"' _ {}
+fi
+
+for suite in "${suites[@]}"; do
   check_suite_invariant "$suite"
 done
 

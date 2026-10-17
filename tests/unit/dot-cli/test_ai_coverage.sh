@@ -62,9 +62,14 @@ cmd_ai_query() { _ai_stub query "$@"; }
 cmd_ai_install() { _ai_stub install "$@"; }
 cmd_ai_delegate() { _ai_stub delegate "$@"; }
 cmd_ai_cost() { _ai_stub cost "$@"; }
+cmd_ai_corral() { _ai_stub corral "$@"; }
+cmd_ai_mcp() { _ai_stub mcp "$@"; }
+cmd_ai_draft() { _ai_stub draft "$@"; }
+cmd_ai_eco() { _ai_stub eco "$@"; }
 export -f _ai_deprecated _ai_invoke_provider _ai_in_scratch_dir _ai_mise_pkg ai_pinned_spec \
   _ai_stub _ai_cockpit _ai_oneshot _ai_serve cmd_ai_chat cmd_ai_doctor \
-  cmd_ai_setup cmd_ai_query cmd_ai_install cmd_ai_delegate cmd_ai_cost
+  cmd_ai_setup cmd_ai_query cmd_ai_install cmd_ai_delegate cmd_ai_cost \
+  cmd_ai_corral cmd_ai_mcp cmd_ai_draft cmd_ai_eco
 for n in claude goose agy amp cursor grok kimi; do
   eval "install_${n}_native() { echo \"native ${n} \$1\" >>\"\$CALLS\"; }"
   export -f "install_${n}_native"

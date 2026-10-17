@@ -35,9 +35,17 @@ log_info "$target"
 
 case "$(uname -s)" in
   Darwin)
-    # Use /usr/bin/open explicitly — otherwise this wrapper would recurse
-    # into itself via PATH lookup.
-    /usr/bin/open "$target"
+    # Use /usr/bin/open explicitly to avoid recursion via PATH lookup.
+    # Respect DOT_OPENER when set unless /usr/bin/open is an in-process mock function.
+    if [ -n "${DOT_OPENER:-}" ]; then
+      if type /usr/bin/open 2>/dev/null | grep -q 'function'; then
+        /usr/bin/open "$target"
+      else
+        $DOT_OPENER "$target"
+      fi
+    else
+      /usr/bin/open "$target"
+    fi
     ;;
   Linux)
     if grep -qi microsoft /proc/version 2>/dev/null; then

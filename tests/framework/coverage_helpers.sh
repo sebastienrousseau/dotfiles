@@ -26,6 +26,7 @@ cov_setup_sandbox() {
   export XDG_DATA_HOME="$HOME/.local/share"
   export XDG_CACHE_HOME="$HOME/.cache"
   export XDG_STATE_HOME="$HOME/.local/state"
+  export MISE_YES=1
   mkdir -p "$HOME/.config" "$HOME/.local/share" "$HOME/.cache" \
     "$HOME/.local/state" "$tmp/bin"
 
@@ -383,12 +384,21 @@ cov_exercise_script() {
       myip | pre-push | rebuild-themes | \
       lint | reliability-audit | record | \
       executable_myip | executable_tmux-sessionizer | \
-      executable_update | update)
+      executable_update | update | executable_open | \
+      manual | executable_manual | monitor | executable_monitor | \
+      tmux-ai | executable_tmux-ai)
+      # `executable_open` with no args opens "." through /usr/bin/open,
+      # which PATH cannot shadow: every suite run left a Finder window
+      # on the sandbox, and Finder's .DS_Store writes then broke other
+      # tests' rm -rf. test_open_coverage.sh covers it with the opener
+      # stubbed.
       # `executable_update` runs brew/apt/pacman update + upgrade.
       # Even with PATH shims, --help and invalid-flag modes can spawn
       # subprocesses that the shims don't intercept, blowing the 60s
       # timeout. Skip the script-mode exercise; functions-mode is
       # already skipped via the separate skip-list around line 624.
+      # `manual` opens the documentation website in a browser with no args.
+      # `monitor` and `tmux-ai` spawn tmux sessions/windows.
       return 0
       ;;
   esac
@@ -420,7 +430,7 @@ cov_exercise_script() {
   # test sink the parallel sweep for too long.
   local TIMEOUT_CMD
   if [[ -n "$TIMEOUT_BIN" ]]; then
-    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 60)
+    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 "${DOTFILES_COV_SCRIPT_TIMEOUT:-120}")
   else
     TIMEOUT_CMD=()
   fi
@@ -563,7 +573,7 @@ cov_exercise_script_help_only() {
   fi
   local TIMEOUT_CMD
   if [[ -n "$TIMEOUT_BIN" ]]; then
-    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 30)
+    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 "${DOTFILES_COV_HELP_TIMEOUT:-60}")
   else
     TIMEOUT_CMD=()
   fi
@@ -639,7 +649,9 @@ cov_exercise_functions_file() {
       executable_myip | executable_tmux-sessionizer | \
       version-sync | release | bump | sync-version | \
       build-manual | install | install-chezmoi-verified | uninstall | \
-      manage-secrets | executable_update | wallpaper-rotate | \
+      manage-secrets | executable_update | executable_open | \
+      manual | executable_manual | monitor | executable_monitor | tmux-ai | executable_tmux-ai | \
+      wallpaper-rotate | \
       heal | heal-tools | rollback | restore | apply-gnome-theme | \
       install-catppuccin-themes | switch | \
       executable_ai_core | executable_dot-bootstrap | dot-bootstrap | ai-update | \
@@ -697,7 +709,7 @@ cov_exercise_functions_file() {
   fi
   local TIMEOUT_CMD
   if [[ -n "$TIMEOUT_BIN" ]]; then
-    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 30)
+    TIMEOUT_CMD=("$TIMEOUT_BIN" --kill-after=5 "${DOTFILES_COV_FN_TIMEOUT:-120}")
   else
     TIMEOUT_CMD=()
   fi
@@ -782,7 +794,8 @@ cov_exercise_functions_file() {
         # Long-running / interactive: watch / animate loops that
         # only exit on Ctrl-C. Small body-coverage gain vs the
         # 30s timeout cost per skipped script.
-        apilatency_monitor | apiload_load_test | cmatrix | pipes | stopwatch | matrix | rainbow | banner) continue ;;
+        apilatency_monitor | apiload_load_test | cmatrix | pipes | stopwatch | matrix | rainbow | banner | \
+          cmd_upgrade | _upgrade_dotfiles | cmd_prewarm | cmd_sandbox | cmd_mcp | main) continue ;;
       esac
       # Three arg modes: no-arg, --help, and a real path. Each call
       # is independently rc-tolerant. We deliberately keep stderr

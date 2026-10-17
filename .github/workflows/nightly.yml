@@ -347,8 +347,8 @@ jobs:
             --export-json benchmark-history/chezmoi-apply.json
 
           # Extract metrics and check thresholds
-          STARTUP_TIME=$(jq '.results[0].mean * 1000 | floor' benchmark-history/shell-startup.json)
-          CHEZMOI_TIME=$(jq '.results[0].mean * 1000 | floor' benchmark-history/chezmoi-apply.json)
+          STARTUP_TIME=$(jq '(.results[0] | .summary.time_wall_clock // .).mean * 1000 | floor' benchmark-history/shell-startup.json)
+          CHEZMOI_TIME=$(jq '(.results[0] | .summary.time_wall_clock // .).mean * 1000 | floor' benchmark-history/chezmoi-apply.json)
 
           echo "Performance Results:"
           echo "- Shell startup: ${STARTUP_TIME}ms"
