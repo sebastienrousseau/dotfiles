@@ -472,6 +472,26 @@ EOF
   rc=$?
   assert_equals "0|v3" "$rc|$(cat "$CZ/dest/.target")" "a non-interactive apply after rollback just applies: $out"
 
+  # chezmoi keys its records by the cleaned path, so a target named through a
+  # directory with a trailing slash ($TMPDIR on macOS, an XDG dir) must still
+  # find its record.
+  test_start "txn_rollback_restores_the_record_of_a_target_named_with_a_double_slash"
+  reset_state
+  printf 'v2\n' >"$CZ/src/dot_target"
+  cz apply --force >/dev/null
+  saved="$(record "$CZ/dest/.target")"
+  printf 'theme\n' >"$CZ/src/dot_target"
+  got="$(
+    DOT_THEME_OPERATION_ID=op-slash _theme_txn_begin a b c 0 "$CZ/dest//.target" || exit 9
+    cz apply --force >/dev/null || exit 8
+    _theme_txn_rollback "renderer failed"
+    printf '%s|' "$(record "$CZ/dest/.target")"
+    printf 'v6\n' >"$CZ/src/dot_target"
+    cz apply </dev/null >/dev/null 2>&1
+    printf '%s|%s' "$?" "$(cat "$CZ/dest/.target")"
+  )"
+  assert_equals "$saved|0|v6" "$got" "the record is restored and the next non-interactive apply just applies"
+
   test_start "txn_rollback_drops_chezmoi_record_of_a_created_target"
   reset_state
   got="$(
