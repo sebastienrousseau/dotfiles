@@ -110,6 +110,13 @@ assert_file_contains "$WORK/out" "dot version" "help topic rendered"
 assert_file_contains "$WORK/out" "Summary" "help topic body rendered"
 assert_output_not_contains "Dotfiles Version" "cat '$WORK/out'" "command itself did not run"
 
+# A table whose last line has no trailing newline still prints that line.
+test_start "data_prints_a_last_line_without_newline"
+mkdir -p "$WORK/src/lib/dot/data"
+printf 'first|a\nlast|b' >"$WORK/src/lib/dot/data/t.txt"
+"$BASH_BIN" -c "source '$WORK/route.sh'; _DOT_SRC='$WORK/src' _dot_data t.txt" >"$WORK/out" 2>&1
+assert_equals "$(printf 'first|a\nlast|b')" "$(cat "$WORK/out")" "unterminated last line kept"
+
 # With SIGPIPE ignored (CI runners, the pre-push hook) a reader that exits
 # first used to get one "printf: write error" per remaining table line.
 test_start "data_reader_exiting_early_is_silent_when_sigpipe_ignored"

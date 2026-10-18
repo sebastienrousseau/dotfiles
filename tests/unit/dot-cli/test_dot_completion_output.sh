@@ -85,6 +85,14 @@ out_has "complete -c dot -f" "reset line"
 out_has "__fish_use_subcommand" "top-level completions"
 out_has "__fish_seen_subcommand_from" "subcommand completions"
 out_has "-a doctor" "a real command"
+# Only multi-word registry names ("theme list") become subcommands; a
+# single-word command must never get a __fish_seen_subcommand_from line.
+want_subs=0
+while IFS="|" read -r _group _name _rest; do
+  if [[ "$_name" == *" "* ]]; then want_subs=$((want_subs + 1)); fi
+done <"$REPO_ROOT/lib/dot/data/help-specs.txt"
+got_subs="$(grep -c '__fish_seen_subcommand_from' "$OUTF")"
+assert_equals "$want_subs" "$got_subs" "one subcommand line per multi-word registry entry"
 
 test_start "nu_completion_declares_an_extern"
 completion nu
