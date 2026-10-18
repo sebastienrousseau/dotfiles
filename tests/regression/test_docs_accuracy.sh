@@ -120,11 +120,11 @@ assert_output_not_contains "Cline" "grep -F 'Cline' '$REPO_ROOT/docs/reference/T
 # ═══════════════════════════════════════════════════════════════
 
 test_start "utils_doc_commands_exist"
-dot_cli="$REPO_ROOT/bin/dot"
+routes="$REPO_ROOT/lib/dot/data/routes.txt"
 failures=0
 for cmd in apply doctor heal rollback bundle secrets; do
   if grep -q "dot $cmd" "$REPO_ROOT/docs/reference/UTILS.md" 2>/dev/null; then
-    if ! grep -q "$cmd" "$dot_cli" 2>/dev/null; then
+    if ! grep -q "^$cmd|" "$routes" 2>/dev/null; then
       failures=$((failures + 1))
     fi
   fi

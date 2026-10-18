@@ -42,7 +42,7 @@ assert_contains "Threshold: 100%" "$docs_out" "the floor defaults to 100%"
 test_start "docs_coverage_names_a_gap_and_fails_the_floor"
 DOCS_WORK="$(mktemp -d -t dot-docs-cov.XXXXXX)"
 trap 'rm -rf "$DOCS_WORK"' EXIT
-for f in scripts/qa/docs-coverage.sh bin/dot docs/reference/UTILS.md docs/AI.md \
+for f in scripts/qa/docs-coverage.sh bin/dot lib/dot/data/help-specs.txt docs/reference/UTILS.md docs/AI.md \
   docs/reference/SCRIPTS.md docs/ARCHITECTURE.md defaults/.chezmoitemplates/functions/groups.json; do
   mkdir -p "$DOCS_WORK/$(dirname "$f")"
   cp "$REPO_ROOT/$f" "$DOCS_WORK/$f"
