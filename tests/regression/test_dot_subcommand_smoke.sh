@@ -44,7 +44,7 @@ while IFS= read -r _route_line; do
   routes+=("$_route_line")
 done < <(
   while IFS= read -r _row; do
-    case "$_row" in [a-z]*\|*) printf '%s\n' "$_row" ;; esac
+    if [[ "$_row" == [a-z]*\|* ]]; then printf '%s\n' "$_row"; fi
   done <"$REPO_ROOT/lib/dot/data/routes.txt"
 )
 
