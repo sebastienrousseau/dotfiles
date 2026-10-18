@@ -110,5 +110,14 @@ assert_file_contains "$WORK/out" "dot version" "help topic rendered"
 assert_file_contains "$WORK/out" "Summary" "help topic body rendered"
 assert_output_not_contains "Dotfiles Version" "cat '$WORK/out'" "command itself did not run"
 
+# With SIGPIPE ignored (CI runners, the pre-push hook) a reader that exits
+# first used to get one "printf: write error" per remaining table line.
+test_start "data_reader_exiting_early_is_silent_when_sigpipe_ignored"
+(
+  trap '' PIPE
+  "$BASH_BIN" -c "source '$WORK/route.sh'; { sleep 0.2; _dot_data help-specs.txt; } | true"
+) >"$WORK/out" 2>&1
+assert_equals "" "$(cat "$WORK/out")" "no write errors after the reader exits"
+
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

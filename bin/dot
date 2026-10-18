@@ -215,11 +215,13 @@ EOF
 
 # The route and help tables are data, kept in lib/dot/data so the
 # dispatcher, the doc generators, the QA gates and the tests read one
-# source. _dot_data prints a table without forking.
+# source. _dot_data prints a table without forking, and stops at the first
+# failed write: where SIGPIPE is ignored (CI, git hooks) a reader that exits
+# early would otherwise get one "write error" per remaining line.
 _dot_data() {
   local line
   while IFS= read -r line || [[ -n "$line" ]]; do
-    printf '%s\n' "$line"
+    printf '%s\n' "$line" 2>/dev/null || return 0
   done <"${_DOT_SRC:-.}/lib/dot/data/$1"
 }
 
