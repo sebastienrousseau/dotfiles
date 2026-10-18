@@ -10,10 +10,12 @@ set -euo pipefail
 
 # Source hashes baked in at render time so this script's content changes
 # when the cockpit source changes, retriggering chezmoi onchange.
-# main.go:      {{ include "dot_local/share/dot-ai-tui/main.go" | sha256sum }}
-# render.go:    {{ include "dot_local/share/dot-ai-tui/render.go" | sha256sum }}
-# telemetry.go: {{ include "dot_local/share/dot-ai-tui/telemetry.go" | sha256sum }}
-# ecosystem.go: {{ include "dot_local/share/dot-ai-tui/ecosystem.go" | sha256sum }}
+# Every non-test .go file is hashed, so a new source file cannot be missed.
+{{- range glob (joinPath .chezmoi.sourceDir "dot_local/share/dot-ai-tui/*.go") }}
+{{-   if not (hasSuffix "_test.go" .) }}
+# {{ base . }}: {{ include . | sha256sum }}
+{{-   end }}
+{{- end }}
 # go.mod:       {{ include "dot_local/share/dot-ai-tui/go.mod" | sha256sum }}
 # go.sum:       {{ include "dot_local/share/dot-ai-tui/go.sum" | sha256sum }}
 
