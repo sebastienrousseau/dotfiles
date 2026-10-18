@@ -56,18 +56,23 @@ fi
 mkdir -p "$FONT_DIR"
 
 # Case 1: First run (should install)
-# curl serves one small, regular zip for both fonts (no network, no large
-# files); the installer checks it with archive_paths_are_safe and unzips it.
+# curl serves one small, regular zip per font (no network, no large files);
+# the installer checks each with archive_paths_are_safe and unzips it. The
+# two archives hold different file names, as the real ones do: the installer
+# unzips both at once into one directory, and two unzips writing the same
+# name race (one fails with "cannot create").
 MOCK_BIN=$(mktemp -d)
 export PATH="$MOCK_BIN:$PATH"
-MOCK_ZIP="$MOCK_BIN/font.zip"
 python3 -c 'import sys, zipfile
-info = zipfile.ZipInfo("Mock-Regular.ttf")
-info.create_system = 3
-info.external_attr = 0o100644 << 16
-z = zipfile.ZipFile(sys.argv[1], "w")
-z.writestr(info, "font")
-z.close()' "$MOCK_ZIP"
+for path, member in zip(sys.argv[1::2], sys.argv[2::2]):
+    info = zipfile.ZipInfo(member)
+    info.create_system = 3
+    info.external_attr = 0o100644 << 16
+    z = zipfile.ZipFile(path, "w")
+    z.writestr(info, "font")
+    z.close()' \
+  "$MOCK_BIN/JetBrainsMono.zip" "Mock-Regular.ttf" \
+  "$MOCK_BIN/NerdFontsSymbolsOnly.zip" "Mock-Symbols.ttf"
 
 cat >"$MOCK_BIN/curl" <<EOF
 #!/bin/sh
@@ -82,10 +87,9 @@ while [ "\$#" -gt 0 ]; do
   esac
 done
 if [ "\${url##*/}" = "SHA-256.txt" ]; then
-  digest="\$(shasum -a 256 "$MOCK_ZIP" | awk '{print \$1}')"
-  printf '%s  JetBrainsMono.zip\n%s  NerdFontsSymbolsOnly.zip\n' "\$digest" "\$digest" >"\$destination"
+  (cd "$MOCK_BIN" && shasum -a 256 JetBrainsMono.zip NerdFontsSymbolsOnly.zip) >"\$destination"
 else
-  cp "$MOCK_ZIP" "\$destination"
+  cp "$MOCK_BIN/\${url##*/}" "\$destination"
 fi
 EOF
 chmod +x "$MOCK_BIN/curl"
