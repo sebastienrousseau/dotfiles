@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 ## `dot completion <bash|zsh|fish|nu>` — emit shell completion for `dot`,
-## generated from the canonical _dot_help_specs registry in bin/dot. Using one
+## generated from the canonical help-specs registry (lib/dot/data). Using one
 ## source of truth keeps all four shells in sync (the previously hand-maintained
 ## fish/nushell lists drifted and referenced non-existent commands).
 ##
@@ -18,23 +18,20 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../../../lib/dot/utils.sh
 source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 
-_completion_dot_cli() {
+_completion_specs() {
   local src
   src="$(resolve_source_dir)"
-  printf '%s/bin/dot\n' "$src"
+  printf '%s/lib/dot/data/help-specs.txt\n' "$src"
 }
 
-# Emit "name<TAB>description" for every top-level command (a _dot_help_specs
+# Emit "name<TAB>description" for every top-level command (a help-specs
 # field-2 entry with no space; entries containing a space are subcommands).
 # Strip ": ' from descriptions so they can't break any shell's quoting.
 _completion_commands() {
-  local cli
-  cli="$(_completion_dot_cli)"
+  local specs
+  specs="$(_completion_specs)"
   awk -F'|' '
-    /_dot_help_specs\(\)/ { in_func = 1; next }
-    in_func && /cat <<'\''EOF'\''/ { in_block = 1; next }
-    in_block && /^EOF$/ { exit }
-    in_block && NF >= 3 && $2 !~ / / {
+    NF >= 3 && $2 !~ / / {
       name = $2
       # Description = fields 3..NF-1 rejoined: registry descriptions can
       # contain "|" (e.g. "--ai|-A") and the last field is the hint.
@@ -45,19 +42,16 @@ _completion_commands() {
       gsub(/[":\047]/, "", desc)
       if (name != "") print name "\t" desc
     }
-  ' "$cli"
+  ' "$specs"
 }
 
 # Emit "parent<TAB>child<TAB>description" for every subcommand (a field-2
 # entry that contains a space, e.g. "theme list" -> parent=theme child=list).
 _completion_subcommands() {
-  local cli
-  cli="$(_completion_dot_cli)"
+  local specs
+  specs="$(_completion_specs)"
   awk -F'|' '
-    /_dot_help_specs\(\)/ { in_func = 1; next }
-    in_func && /cat <<'\''EOF'\''/ { in_block = 1; next }
-    in_block && /^EOF$/ { exit }
-    in_block && NF >= 3 && $2 ~ / / {
+    NF >= 3 && $2 ~ / / {
       full = $2
       desc = $3
       for (i = 4; i < NF; i++) desc = desc "|" $i
@@ -68,7 +62,7 @@ _completion_subcommands() {
       child = full; sub(/^[^ ]+ /, "", child)
       if (parent != "" && child != "") print parent "\t" child "\t" desc
     }
-  ' "$cli"
+  ' "$specs"
 }
 
 # LCOV_EXCL_LINE on the `done < <(…)` lines below: inside a function, bash

@@ -4,6 +4,7 @@ name: Doc Drift / Generators
 # its source. Two generators today, both shipped in v0.2.503:
 #
 #   - tools/docs/generate-command-index.sh --check
+#   - tools/docs/generate-command-reference.sh --check
 #       Verifies docs/manual/command-index.md matches `dot help all`.
 #
 #   - scripts/verify-release-versions
@@ -29,6 +30,9 @@ on:
       - 'bin/dot'
       - 'scripts/dot/commands/**'
       - 'tools/docs/generate-command-index.sh'
+      - 'tools/docs/generate-command-reference.sh'
+      - 'lib/dot/data/**'
+      - 'examples/command-reference.txt'
       - 'scripts/verify-release-versions'
       - 'scripts/release-preflight'
       - 'tests/unit/qa/test_release_preflight.sh'
@@ -85,6 +89,8 @@ jobs:
           persist-credentials: false
       - name: Verify docs/manual/command-index.md is in sync
         run: bash tools/docs/generate-command-index.sh --check
+      - name: Verify examples/command-reference.txt is in sync
+        run: bash tools/docs/generate-command-reference.sh --check
 
   version-consistency:
     name: Generators / version-consistency

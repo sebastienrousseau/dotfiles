@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 # Behavioural coverage for scripts/dot/commands/completion.sh: the generated
 # completion for each supported shell is asserted against the canonical
-# `_dot_help_specs` registry in bin/dot — commands appear, subcommands are
+# help-specs registry (lib/dot/data/help-specs.txt) — commands appear, subcommands are
 # split parent/child, and the quoting-hostile characters are stripped.
 set -uo pipefail
 

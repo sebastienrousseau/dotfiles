@@ -38,6 +38,7 @@ cd "$REPO_ROOT"
 
 MATRIX="docs/reference/FEATURE-MATRIX.md"
 DOT_BIN="bin/dot"
+ROUTES="lib/dot/data/routes.txt"
 COMMAND_INDEX="docs/manual/command-index.md"
 BENCH="benches/dot_command_bench.sh"
 TEST_GLOB="tests/regression/test_feature_matrix_*.sh"
@@ -62,7 +63,7 @@ say() { [[ "$QUIET" -eq 1 ]] || printf '%s\n' "$*"; }
 
 _fm_require_files() {
   local required
-  for required in "$MATRIX" "$DOT_BIN" "$COMMAND_INDEX" "$BENCH"; do
+  for required in "$MATRIX" "$DOT_BIN" "$ROUTES" "$COMMAND_INDEX" "$BENCH"; do
     if [[ ! -f "$required" ]]; then
       printf '::error::required file missing: %s\n' "$required" >&2
       exit 2
@@ -145,10 +146,9 @@ _fm_parse_matrix() {
 # ---------------------------------------------------------------------------
 _fm_check_commands() {
   local missing_routed missing_indexed phantom
-  # bin/dot's route table is the authority on what the dispatcher can reach.
-  # Flag aliases (--help/-h/--version/-v) are not commands and are excluded.
-  awk '/^_dot_command_routes\(\)/,/^EOF$/' "$DOT_BIN" |
-    awk -F'|' '/^[a-z][a-z0-9-]*\|[a-z]+$/ { print $1 }' |
+  # The route table (lib/dot/data/routes.txt) is the authority on what the
+  # dispatcher can reach. Flag aliases (--help/-h/--version/-v) are excluded.
+  awk -F'|' '/^[a-z][a-z0-9-]*\|[a-z]+$/ { print $1 }' "$ROUTES" |
     sort -u >"$work/routed.txt"
 
   # The generated command index is the documented surface.

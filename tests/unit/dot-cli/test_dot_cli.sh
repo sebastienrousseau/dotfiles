@@ -85,21 +85,13 @@ while IFS= read -r line; do
   fi
 done <<<"$help_output"
 
-# Extract routed commands from the CLI registry
+# Extract routed commands from the route table (lib/dot/data/routes.txt)
 route_handlers=()
-in_routes=0
 while IFS= read -r line; do
-  if [[ "$line" == "_dot_command_routes() {" ]]; then
-    in_routes=1
-    continue
-  fi
-  if [[ "$in_routes" -eq 1 ]] && [[ "$line" == "}" ]]; then
-    break
-  fi
-  if [[ "$in_routes" -eq 1 ]] && [[ "$line" =~ ^([-[:alnum:]_]+)\|([[:alnum:]_-]+)$ ]]; then
+  if [[ "$line" =~ ^([-[:alnum:]_]+)\|([[:alnum:]_-]+)$ ]]; then
     route_handlers+=("${BASH_REMATCH[1]}")
   fi
-done <"$DOT_CLI"
+done <"$REPO_ROOT/lib/dot/data/routes.txt"
 
 missing_handlers=0
 set +u

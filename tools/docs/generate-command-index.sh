@@ -98,24 +98,21 @@ overview_rows() {
 # therefore answer `dot help <cmd>` but never appear in `dot help all` — and
 # so used to be missing from this index even though they are fully routable
 # and documented (init, health, security-score, heal, manual, …). Read the
-# two static registries straight out of bin/dot: no extra subprocess per
-# command, and the same parse the help-registry symmetry regression test uses.
+# two static registries straight from lib/dot/data: no extra subprocess per
+# command, and the same tables the help-registry symmetry regression test reads.
 detail_only_rows() {
   awk '
-    /^_dot_command_routes\(\)/  { in_routes  = 1; next }
-    /^_dot_help_details\(\)/    { in_details = 1; next }
-    in_routes  && /^EOF$/ { in_routes  = 0; next }
-    in_details && /^EOF$/ { in_details = 0; next }
-
-    # Route table lines are "<command>|<module>"; keep the command.
-    in_routes && /^[a-z][a-z0-9-]*\|[a-z]+$/ {
-      split($0, r, "|")
-      routed[r[1]] = 1
+    # First file, the route table: "<command>|<module>"; keep the command.
+    FNR == NR {
+      if ($0 ~ /^[a-z][a-z0-9-]*\|[a-z]+$/) {
+        split($0, r, "|")
+        routed[r[1]] = 1
+      }
       next
     }
 
-    # Detail lines are "<command>|<summary>|<examples>".
-    in_details {
+    # Second file, the detail table: "<command>|<summary>|<examples>".
+    {
       n = split($0, d, "|")
       if (n >= 2 && d[1] ~ /^[a-z][a-z0-9-]*$/ && d[2] != "") {
         summary[d[1]] = d[2]
@@ -131,7 +128,7 @@ detail_only_rows() {
         printf "%s\t%s\n", cmd, desc
       }
     }
-  ' "$dot_bin"
+  ' lib/dot/data/routes.txt lib/dot/data/help-details.txt
 }
 
 # Merge both sources. The overview is authoritative: it emits SEVERAL rows per

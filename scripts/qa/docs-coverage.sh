@@ -32,14 +32,11 @@ record_doc_check() {
 
 extract_public_commands() {
   awk '
-    /_dot_help_specs\(\)/ { in_func=1; next }
-    in_func && /cat <<'\''EOF'\''/ { in_block=1; next }
-    in_block && /^EOF$/ { exit }
-    in_block && /\|/ {
+    /\|/ {
       split($0, parts, /\|/)
       print parts[2]
     }
-  ' "$DOT_CLI"
+  ' "$REPO_ROOT/lib/dot/data/help-specs.txt"
 }
 
 check_dot_command_docs() {

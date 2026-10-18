@@ -37,7 +37,8 @@ fm_build() {
   local d="$1" n i cmd
   n="${2:-55}"
   mkdir -p "$d/docs/reference" "$d/docs/manual" "$d/bin" "$d/benches" \
-    "$d/tests/regression" "$d/examples" "$d/scripts/dot/commands"
+    "$d/tests/regression" "$d/examples" "$d/scripts/dot/commands" \
+    "$d/lib/dot/data"
 
   {
     printf '# Feature matrix\n\n'
@@ -47,11 +48,8 @@ fm_build() {
 
   printf '# Command index\n\n' >"$d/docs/manual/command-index.md"
 
-  {
-    printf '#!/usr/bin/env bash\n'
-    printf '_dot_command_routes() {\n'
-    printf '  cat <<EOF\n'
-  } >"$d/bin/dot"
+  printf '#!/usr/bin/env bash\n' >"$d/bin/dot"
+  : >"$d/lib/dot/data/routes.txt"
 
   {
     printf '#!/usr/bin/env bash\n'
@@ -72,7 +70,7 @@ fm_build() {
     printf '| `dot %s` | — | `test_fm_%s` | `run:%s` | `examples/example-%s.sh` | docs/x.md | regression |\n' \
       "$cmd" "$cmd" "$cmd" "$cmd" >>"$d/docs/reference/FEATURE-MATRIX.md"
     printf '| `dot %s` | fake command |\n' "$cmd" >>"$d/docs/manual/command-index.md"
-    printf '%s|core\n' "$cmd" >>"$d/bin/dot"
+    printf '%s|core\n' "$cmd" >>"$d/lib/dot/data/routes.txt"
     printf 'run:%s\nhelp:%s\n' "$cmd" "$cmd" >>"$d/benches/dot_command_bench.sh"
     printf 'test_fm_%s() { :; }\ntest_fm_%s\n' "$cmd" "$cmd" \
       >>"$d/tests/regression/test_feature_matrix_fake.sh"
@@ -80,7 +78,6 @@ fm_build() {
     i=$((i + 1))
   done
 
-  printf 'EOF\n}\n' >>"$d/bin/dot"
   printf 'EOF\n  exit 0\nfi\nexit 0\n' >>"$d/benches/dot_command_bench.sh"
 
   # A defined-but-unreferenced test function. Not an error — the gate reports

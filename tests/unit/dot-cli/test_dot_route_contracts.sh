@@ -27,12 +27,19 @@ trap 'rm -rf "$WORK"' EXIT
 # Pull one top-level function out of bin/dot, by name.
 _extract_fn() {
   awk -v fn="$1" '
-    $0 ~ "^" fn "\\(\\) \\{" { inside = 1 }
+    $0 ~ "^" fn "\\(\\) \\{" {
+      print
+      if ($0 ~ /\}[ \t]*$/) exit # a one-line function
+      inside = 1
+      next
+    }
     inside { print }
     inside && /^\}/ { exit }
   ' "$DOT_CLI"
 }
 {
+  printf '_DOT_SRC=%q\n' "$REPO_ROOT"
+  _extract_fn _dot_data
   _extract_fn _dot_command_routes
   _extract_fn _dot_command_route
 } >"$WORK/route.sh"

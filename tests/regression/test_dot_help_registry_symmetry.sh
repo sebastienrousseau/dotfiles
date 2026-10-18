@@ -52,8 +52,7 @@ routes=()
 while IFS= read -r line; do
   routes[${#routes[@]}]="$line"
 done < <(
-  awk '/^_dot_command_routes\(\)/,/^\}/' "$DOT_CLI" |
-    awk -F'|' '/^[a-z][a-z0-9-]*\|[a-z]+$/ { print $1 }' |
+  awk -F'|' '/^[a-z][a-z0-9-]*\|[a-z]+$/ { print $1 }' "$REPO_ROOT/lib/dot/data/routes.txt" |
     sort -u
 )
 
@@ -61,8 +60,7 @@ specs=()
 while IFS= read -r line; do
   specs[${#specs[@]}]="$line"
 done < <(
-  awk '/^_dot_help_specs\(\)/,/^\}/' "$DOT_CLI" |
-    awk -F'|' 'NF >= 2 && $2 ~ /^[a-z][a-z0-9-]*$/ { print $2 }' |
+  awk -F'|' 'NF >= 2 && $2 ~ /^[a-z][a-z0-9-]*$/ { print $2 }' "$REPO_ROOT/lib/dot/data/help-specs.txt" |
     sort -u
 )
 
@@ -70,8 +68,7 @@ details=()
 while IFS= read -r line; do
   details[${#details[@]}]="$line"
 done < <(
-  awk '/^_dot_help_details\(\)/,/^\}/' "$DOT_CLI" |
-    awk -F'|' '$1 ~ /^[a-z][a-z0-9-]*$/ { print $1 }' |
+  awk -F'|' '$1 ~ /^[a-z][a-z0-9-]*$/ { print $1 }' "$REPO_ROOT/lib/dot/data/help-details.txt" |
     sort -u
 )
 

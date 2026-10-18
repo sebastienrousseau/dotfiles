@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 #
-# Generate share/man/man1/dot.1 from the command registry in bin/dot.
+# Generate share/man/man1/dot.1 from the command registry in lib/dot/data.
 #
 # The COMMANDS section is rendered from `_dot_help_specs()` (the same
 # registry that drives `dot help all` and `dot completion`); the
@@ -52,10 +52,10 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-dot_bin="bin/dot"
+data_dir="lib/dot/data"
 template="tools/docs/man/dot.1.in"
-[[ -r "$dot_bin" ]] || {
-  echo "registry not found: $dot_bin" >&2
+[[ -r "$data_dir/help-specs.txt" ]] || {
+  echo "registry not found: $data_dir" >&2
   exit 2
 }
 [[ -r "$template" ]] || {
@@ -81,14 +81,9 @@ iso_date="$(grep -m1 -E '^## v[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md |
 man_date="$iso_date"
 
 # ── Registry extraction ────────────────────────────────────────────────
-# Emit the heredoc body of one registry function from bin/dot.
+# Emit one registry table from lib/dot/data.
 _registry() {
-  awk -v fn="$1" '
-    index($0, fn "()") { in_func = 1; next }
-    in_func && /cat <<'\''EOF'\''/ { in_block = 1; next }
-    in_block && /^EOF$/ { exit }
-    in_block { print }
-  ' "$dot_bin"
+  cat "$data_dir/$1"
 }
 
 # Escape a string for roff: backslashes, leading control characters,
@@ -116,9 +111,9 @@ trap 'rm -f "$tmp" "$commands_tmp" "$aliases_tmp" "$specs_tmp" "$details_tmp" "$
 # Extract each registry exactly once; the loops below only grep/awk
 # these files, keeping the fork count low enough for constrained
 # sandboxes (test runners with a process ulimit).
-_registry _dot_help_specs >"$specs_tmp"
-_registry _dot_help_details >"$details_tmp"
-_registry _dot_command_routes | LC_ALL=C sort -u >"$routes_tmp"
+_registry help-specs.txt >"$specs_tmp"
+_registry help-details.txt >"$details_tmp"
+_registry routes.txt | LC_ALL=C sort -u >"$routes_tmp"
 
 # COMMANDS: group by category in first-appearance order. Fields are
 # Category|name|description|note; descriptions may themselves contain
@@ -169,7 +164,7 @@ while IFS='|' read -r route module; do
 done <"$routes_tmp"
 
 [[ -s "$commands_tmp" ]] || {
-  echo "no commands extracted from $dot_bin — registry format changed?" >&2
+  echo "no commands extracted from $data_dir — registry format changed?" >&2
   exit 2
 }
 
