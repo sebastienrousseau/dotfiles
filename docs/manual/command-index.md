@@ -58,6 +58,7 @@ adding or renaming a subcommand, run
 | `dot chaos` | Simulate config corruption to test self-healing |
 | `dot cl` | Claude CLI with context patterns |
 | `dot claude` | Run the Claude CLI bridge (alias for cl). |
+| `dot clean-cache` | Clear shell initialization caches |
 | `dot codex` | Run the OpenAI Codex CLI with dotfiles context patterns. |
 | `dot commit` | AI-powered conventional commit |
 | `dot completion` | Generate shell completions (bash/zsh/fish/nu) from the command registry |

@@ -66,6 +66,16 @@ test_fm_cache_refresh() {
   fm_expect_out "Cache Pre-warming Complete"
 }
 
+test_fm_clean_cache() {
+  # The weekly dotfiles-maintenance systemd timer runs this command; it was
+  # implemented in core.sh but missing from the route table until v0.2.537.
+  test_start "fm_clean_cache"
+  fm_run clean-cache
+  fm_expect_rc 0
+  test_start "fm_clean_cache_reports_cleared"
+  fm_expect_out "Cleared"
+}
+
 test_fm_prewarm() {
   test_start "fm_prewarm"
   fm_run prewarm
@@ -1015,6 +1025,7 @@ test_fm_smoke_upgrade
 test_fm_smoke_env_dotfiles_fonts
 test_fm_smoke_upgrade_yes
 test_fm_cache_refresh
+test_fm_clean_cache
 test_fm_prewarm
 test_fm_env_xdg_cache_home
 test_fm_docs

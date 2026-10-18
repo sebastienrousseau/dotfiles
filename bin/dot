@@ -221,6 +221,7 @@ Core|diff|Show chezmoi diff with exclusions|Preview pending changes before apply
 Core|status|Show configuration drift (chezmoi status)|Inspect the current managed state.
 Core|edit|Open chezmoi source in $EDITOR|Jump into the source tree quickly.
 Core|uninstall|Remove the managed dotfiles environment (prompts unless --force)|Guided teardown, counterpart to init.
+Core|clean-cache|Clear shell initialization caches|Run by the weekly dotfiles-maintenance timer; caches regenerate on the next shell start.
 Core|cd|Print source directory path (use: cd $(dot cd))|Useful in shell scripts and jump helpers.
 Core|commit|AI-powered conventional commit|Wraps the commit helper flow.
 Diagnostics|doctor|Deep audit: tools, paths, portability, AI analysis (--ai|-A)|Main health and repair entrypoint.
@@ -407,6 +408,7 @@ version|Show the installed dotfiles version.|dot --version\ndot version
 teleport|Deploy the dotfiles environment to a remote host over SSH.|dot teleport user@host
 init|Bootstrap a foreign dotfiles repo through chezmoi + dot.|dot init <github-user>\ndot init owner/repo --dry-run\ndot init https://example.com/repo.git
 uninstall|Remove the managed dotfiles environment (prompts unless --force).|dot uninstall\ndot uninstall --force
+clean-cache|Clear shell initialization caches; they regenerate on the next shell start.|dot clean-cache
 policy|Check and enforce security policies across the environment.|dot policy
 secret-audit|Audit secret hygiene and leakage surface.|dot secret-audit
 completion|Generate shell completions from the command registry.|dot completion fish > ~/.config/fish/completions/dot.fish
@@ -490,6 +492,7 @@ cd|core
 edit|core
 commit|core
 uninstall|core
+clean-cache|core
 doctor|diagnostics
 scorecard|diagnostics
 score|diagnostics
