@@ -104,7 +104,9 @@ while IFS='|' read -r cmd _; do
   esac
   routes+=("$cmd")
 done < <(
-  awk '/^[a-z][a-z_-]+\|/' "$REPO_ROOT/lib/dot/data/routes.txt"
+  while IFS= read -r _row; do
+    case "$_row" in [a-z]*\|*) printf '%s\n' "$_row" ;; esac
+  done <"$REPO_ROOT/lib/dot/data/routes.txt"
 )
 
 test_start "route_table_has_commands"
