@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 // Copyright (c) 2015-2026 Sebastien Rousseau
 //
-// ecosystem.go — Unifies corralctl (workspace & Finder-tag telemetry),
-// passmcp (9-repo MCP security & risk-graph family), and draft (5-phase
-// grounded research & C2PA synthesis) into the dot-ai-tui control plane.
+// ecosystem.go — Unifies live OS process telemetry (AI agents, MCP servers,
+// local LLMs), corralctl (workspace & Finder-tag telemetry), passmcp (9-repo
+// MCP security & risk-graph family), and draft (5-phase grounded research &
+// C2PA synthesis) into the dot-ai-tui btop control plane.
 package main
 
 import (
@@ -13,8 +14,23 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
+	"strconv"
 	"strings"
+	"sync"
+	"time"
 )
+
+// AIProcess represents a live OS process belonging to the AI fleet, local LLM
+// runtimes, gateway, or MCP / ecosystem toolchains.
+type AIProcess struct {
+	PID     int
+	Name    string
+	Role    string
+	CPUPct  float64
+	MemMB   float64
+	Elapsed string
+}
 
 // CorralSummary holds workspace repository health from corralctl.
 type CorralSummary struct {
@@ -44,7 +60,7 @@ type DraftSummary struct {
 	GreenSplit     bool
 }
 
-// EcosystemSnapshot aggregates live ecosystem & runtime telemetry for btop mode.
+// EcosystemSnapshot aggregates live ecosystem, OS process, and runtime telemetry.
 type EcosystemSnapshot struct {
 	Corral       CorralSummary
 	MCPServers   int
@@ -53,6 +69,10 @@ type EcosystemSnapshot struct {
 	MemAllocMB   float64
 	NumGoroutine int
 	NumCPU       int
+	ActiveProcs  []AIProcess
+	ToolProcs    map[string]int
+	TotalAICPU   float64
+	TotalAIMemMB float64
 }
 
 // passmcpFamily lists the 6 core binaries of the passmcp 9-repo ecosystem.
@@ -63,6 +83,127 @@ var passmcpFamily = []string{
 	"passmcp-lsp",
 	"passmcp-reporting",
 	"passmcp-registry",
+}
+
+// aiRoleMap maps watched binary basenames to their btop process table role.
+var aiRoleMap = map[string]string{
+	"claude": "agent", "codex": "agent", "copilot": "agent", "goose": "agent",
+	"crush": "agent", "amp": "agent", "cursor-agent": "agent", "grok": "agent",
+	"opencode": "coding", "aider": "coding", "autohand": "coding", "vibe": "coding",
+	"qwen": "coding", "zai": "coding", "agy": "agent", "sgpt": "agent",
+	"kiro-cli": "cloud", "ollama": "local-llm", "llama-server": "local-llm",
+	"corralctl": "ecosystem", "draft": "ecosystem",
+	"passmcp": "mcp", "passmcp-server": "mcp", "passmcp-graph": "mcp",
+	"passmcp-lsp": "mcp", "passmcp-reporting": "mcp", "passmcp-registry": "mcp",
+	"dot-mcp": "mcp", "dot-ai-proxy": "gateway",
+}
+
+// aiProcessRole returns the btop role category for a process command name, or "".
+func aiProcessRole(comm string) string {
+	base := strings.TrimSpace(filepath.Base(comm))
+	return aiRoleMap[base]
+}
+
+// parsePsProcesses parses `ps -axo pid=,pcpu=,rss=,etime=,comm=` output into
+// a CPU-sorted slice of active AI, LLM, gateway, and MCP processes.
+func parsePsProcesses(data []byte) []AIProcess {
+	if len(data) == 0 {
+		return nil
+	}
+	var out []AIProcess
+	for _, ln := range strings.Split(string(data), "\n") {
+		f := strings.Fields(ln)
+		if len(f) < 5 {
+			continue
+		}
+		comm := strings.Join(f[4:], " ")
+		role := aiProcessRole(comm)
+		if role == "" {
+			continue
+		}
+		pid, err := strconv.Atoi(f[0])
+		if err != nil || pid <= 0 {
+			continue
+		}
+		cpu, _ := strconv.ParseFloat(f[1], 64)
+		rssKB, _ := strconv.ParseFloat(f[2], 64)
+		out = append(out, AIProcess{
+			PID:     pid,
+			Name:    filepath.Base(comm),
+			Role:    role,
+			CPUPct:  max(cpu, 0),
+			MemMB:   max(rssKB/1024.0, 0),
+			Elapsed: clean(f[3]),
+		})
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].CPUPct != out[j].CPUPct {
+			return out[i].CPUPct > out[j].CPUPct
+		}
+		return out[i].MemMB > out[j].MemMB
+	})
+	return out
+}
+
+var (
+	psCacheMu   sync.Mutex
+	psCacheTime time.Time
+	psCacheData []byte
+	psRunner    = defaultPsRunner
+)
+
+func defaultPsRunner() []byte {
+	psCacheMu.Lock()
+	defer psCacheMu.Unlock()
+	if time.Since(psCacheTime) < 1500*time.Millisecond && psCacheData != nil {
+		return psCacheData
+	}
+	out, err := exec.Command("ps", "-axo", "pid=,pcpu=,rss=,etime=,comm=").Output()
+	if err != nil {
+		return nil
+	}
+	psCacheData = out
+	psCacheTime = time.Now()
+	return out
+}
+
+// scanCodeDirs scans ~/Code and its standard portfolio subdirectories
+// (Public, Private, Work, Forks) for git repositories when .corral-state.json
+// is not present.
+func scanCodeDirs(codeDir string) CorralSummary {
+	var out CorralSummary
+	roots := []string{
+		codeDir,
+		filepath.Join(codeDir, "Public"),
+		filepath.Join(codeDir, "Private"),
+		filepath.Join(codeDir, "Work"),
+		filepath.Join(codeDir, "Forks"),
+	}
+	for _, root := range roots {
+		entries, err := os.ReadDir(root)
+		if err != nil {
+			continue
+		}
+		for _, e := range entries {
+			if e.IsDir() {
+				inspectGitEntry(filepath.Join(root, e.Name()), &out)
+			}
+		}
+	}
+	return out
+}
+
+func inspectGitEntry(dir string, out *CorralSummary) {
+	fi, err := os.Stat(filepath.Join(dir, ".git"))
+	if err != nil {
+		return
+	}
+	out.TotalRepos++
+	if fi.IsDir() {
+		out.Pristine++
+	} else {
+		out.Worktree++
+	}
 }
 
 // parseCorralState parses a corralctl .corral-state.json payload and tallies
@@ -170,15 +311,27 @@ func parseDraftProvenance(data []byte) DraftSummary {
 	}
 }
 
-// sampleEcosystem gathers a fast, zero-subprocess snapshot of corralctl,
+// sampleEcosystem gathers a snapshot of active AI/MCP OS processes, corralctl,
 // passmcp, draft, and Go runtime memory telemetry.
 func sampleEcosystem() EcosystemSnapshot {
 	var ms runtime.MemStats
 	runtime.ReadMemStats(&ms)
+	procs := parsePsProcesses(psRunner())
+	toolProcs := make(map[string]int, len(procs))
+	var totCPU, totMem float64
+	for _, p := range procs {
+		toolProcs[p.Name]++
+		totCPU += p.CPUPct
+		totMem += p.MemMB
+	}
 	snap := EcosystemSnapshot{
 		MemAllocMB:   float64(ms.Alloc) / (1024.0 * 1024.0),
 		NumGoroutine: runtime.NumGoroutine(),
 		NumCPU:       runtime.NumCPU(),
+		ActiveProcs:  procs,
+		ToolProcs:    toolProcs,
+		TotalAICPU:   totCPU,
+		TotalAIMemMB: totMem,
 	}
 	for _, bin := range passmcpFamily {
 		if _, err := exec.LookPath(bin); err == nil {
@@ -186,8 +339,11 @@ func sampleEcosystem() EcosystemSnapshot {
 		}
 	}
 	home, _ := os.UserHomeDir()
-	if b, err := os.ReadFile(filepath.Join(home, "Code", ".corral-state.json")); err == nil {
+	codeDir := filepath.Join(home, "Code")
+	if b, err := os.ReadFile(filepath.Join(codeDir, ".corral-state.json")); err == nil {
 		snap.Corral = parseCorralState(b)
+	} else {
+		snap.Corral = scanCodeDirs(codeDir)
 	}
 	mcpCfg := filepath.Join(envOr("XDG_CONFIG_HOME", filepath.Join(home, ".config")), "claude", "mcp_servers.json")
 	if b, err := os.ReadFile(mcpCfg); err == nil {
@@ -210,7 +366,8 @@ func formatBtopBar(snap EcosystemSnapshot, sci SCIMetrics, greenMode bool) strin
 	if greenMode {
 		mode = "GREEN-UMA"
 	}
-	return fmt.Sprintf("CPU:%dc · RAM:%.1fMB · MCP:%d · passmcp:%d/%d · Corral:%d · SCI:%.2fgCO2eq [%s]",
-		snap.NumCPU, snap.MemAllocMB, snap.MCPServers, snap.PassMCPReady, len(passmcpFamily),
+	return fmt.Sprintf("CPU:%dc(%.1f%%) · AI-RAM:%.1fMB · Procs:%d · MCP:%d · passmcp:%d/%d · Corral:%d · SCI:%.2fgCO2eq [%s]",
+		snap.NumCPU, snap.TotalAICPU, snap.TotalAIMemMB, len(snap.ActiveProcs),
+		snap.MCPServers, snap.PassMCPReady, len(passmcpFamily),
 		snap.Corral.TotalRepos, sci.GCO2eq, mode)
 }

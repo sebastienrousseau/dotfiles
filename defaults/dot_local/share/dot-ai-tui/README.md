@@ -10,15 +10,25 @@ so behaviour has a single source of truth. Deployed to
 
 | Pane | Keys |
 | :--- | :--- |
-| fleet | `↑`/`k` `↓`/`j` move · `⏎` open the tool's native session · `tab` / `p` quick chat · `/` command palette · `m` cycle model · `s` serve / stop · `i` install · `c`/`r` refresh · `q`/`esc` quit |
+| fleet | `↑`/`k` `↓`/`j` move · `⏎` open the tool's native session · `tab` / `p` quick chat · `/` command palette · `m` cycle model · `s` serve / stop · `i` install · `r` refresh · `x` then `x` again within 5s: SIGTERM the selected tool's busiest process (any other key cancels; refused if the PID's start time or program changed) · `q`/`esc` quit |
 | chat | type and `⏎` to send · `/` opens the palette (`↑`/`↓`, `tab` completes, `⏎` runs) · `esc` back to the fleet |
 | slash | `/help` `/model [name\|default]` `/style [name\|off]` `/tool <name>` `/save` `/resume` `/clear` `/serve` `/cost` `/exit` |
 
 Configuration is by environment: `DOT_AI_HOST` / `DOT_AI_PORT` (gateway,
 default `127.0.0.1:3456`), `XDG_DATA_HOME` (`dotfiles-ai.db` for cost and
-recent runs), `XDG_STATE_HOME` (saved session). `DOT_AI_SNAPSHOT=1`
-prints one static 94×26 frame (add `DOT_AI_SPLASH=1` for the empty state)
-— used by previews and by CI, where there is no terminal.
+recent runs), `XDG_STATE_HOME` (saved session), `CLAUDE_CONFIG_DIR` /
+`CODEX_HOME` (session transcripts, default `~/.claude` and `~/.codex`).
+`DOT_AI_SNAPSHOT=1` prints one static frame sized from `COLUMNS` × `LINES`
+(default 100×28; add `DOT_AI_SPLASH=1` for the empty state) — used by
+previews and by CI, where there is no terminal.
+
+With `claude` or `codex` selected, the ⁵sessions table lists that agent's
+sessions written in the last 24h, read from the transcripts each CLI keeps
+on disk: state (`working`, `tool:<name>`, `idle`), project, branch, model,
+context size (and fill, where Codex reports its window) and output tokens.
+Only metadata is read — never prompts, replies or tool output. Transcripts
+are tailed every 2s off the UI goroutine; `≥` marks a Claude total from a
+file too large to read whole (first read is capped at 4 MiB).
 
 See [FEATURES.md](FEATURES.md) for the full feature → test matrix.
 

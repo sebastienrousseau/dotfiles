@@ -303,7 +303,7 @@ cmd_ai_mcp() {
         return 1
       fi
       ;;
-    check | watch | attest | verify | sbom | tui | serve)
+    check | watch | attest | verify | sbom | tui | serve | --version | version | --help | help)
       if has_command passmcp; then
         passmcp "$sub" "$@"
       else
@@ -312,7 +312,7 @@ cmd_ai_mcp() {
       fi
       ;;
     *)
-      ui_err "Usage" "dot ai mcp [doctor|check|graph|watch|attest|verify|sbom|tui|serve]"
+      ui_err "Usage" "dot ai mcp [doctor|check|graph|watch|attest|verify|sbom|tui|serve|--version]"
       return 1
       ;;
   esac

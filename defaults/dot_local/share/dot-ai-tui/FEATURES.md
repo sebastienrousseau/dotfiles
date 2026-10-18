@@ -13,11 +13,15 @@ Keep the last column a list of backticked function names.
 | :--- | :--- | :--- | :--- |
 | process | Full-screen cockpit starts (alt-screen) and returns on a headless terminal | `dot-ai-tui` | `TestRunNoTTY` |
 | process | Run errors print `dot-ai-tui: <err>` and exit 1 | `main()` via the `exit` seam | `TestMainErrorExit` `BenchmarkMainSnapshot` |
-| env | `DOT_AI_SNAPSHOT=1` prints one 94×26 frame with a sample transcript and open palette | CI / previews | `TestRunSnapshot` `TestCoverageGaps3` `BenchmarkRunSnapshot` `BenchmarkRenderSnapshot` |
+| env | `DOT_AI_SNAPSHOT=1` prints one frame (`COLUMNS`×`LINES`, default 100×28) with a sample transcript and open palette | CI / previews | `TestRunSnapshot` `TestCoverageGaps3` `BenchmarkRunSnapshot` `BenchmarkRenderSnapshot` |
 | env | `DOT_AI_SPLASH=1` previews the empty-state splash instead | with `DOT_AI_SNAPSHOT` | `TestRenderSnapshotSplash` |
 | env | `DOT_AI_HOST` / `DOT_AI_PORT` locate the gateway (default `127.0.0.1:3456`) | health check | `TestPureHelpers` `TestGatewayURL` `FuzzGatewayURL` `BenchmarkGatewayURL` `BenchmarkGatewayBase` `BenchmarkEnvOr` |
 | env | `XDG_DATA_HOME` (else `~/.local/share`) locates `dotfiles-ai.db` | cost + recent runs | `TestPureHelpers` `BenchmarkDbPath` |
 | env | `XDG_STATE_HOME` (else `~/.local/state`) locates the saved session | `/save`, `/resume` | `TestSessionPersistence` `TestSessionPathDefault` `BenchmarkSessionPath` |
+| env | `CLAUDE_CONFIG_DIR` / `CODEX_HOME` (else `~/.claude`, `~/.codex`) locate session transcripts | ⁵sessions | `TestNewSessionScannerHonoursConfigDirs` |
+| sessions | Claude and Codex transcripts folded into one row each: state, project, branch, model, context, tokens | 2s tick, off the UI goroutine | `TestScanClaudeSessionFoldsMetadataAndTokens` `TestScanClaudeStateFollowsTheTurn` `TestScanCodexSessionTailsAppendedLines` |
+| sessions | Files are tailed: partial lines held, truncation re-read, large files tail-read, stale files dropped, directories re-listed every 10s | each scan | `TestScanHoldsAnUnterminatedLineUntilItCompletes` `TestScanRereadsATruncatedFile` `TestScanTailReadsLargeFiles` `TestScanDropsFilesThatLeaveTheWindow` `TestScanListsDirectoriesOnlyEveryRelist` `TestScanSkipsOldFilesSubagentsAndMissingRoots` |
+| sessions | ⁵sessions table filtered to the selected agent, fields sanitised | View | `TestRenderSessionRowsFiltersAndSanitises` `TestSessionsMsgStoresAndRearmsTheTick` |
 
 ## Data gathering
 
@@ -37,6 +41,7 @@ Keep the last column a list of backticked function names.
 | :--- | :--- | :--- | :--- |
 | fleet | Key bindings `up`/`k` and `down`/`j` move the cursor (clamped) | keyboard | `TestCursorBounds` `TestUpdateFleet` `FuzzModelKeys` `BenchmarkUpdateFleet` `BenchmarkModelUpdateKeyFleet` |
 | fleet | Key binding `enter` opens the tool's native session (`dot ai chat <tool>`) | keyboard | `TestUpdateFleet` `BenchmarkDotExec` |
+| fleet | `x` arms a SIGTERM for the selected tool's own busiest process; a second `x` within 5s sends it after re-checking the PID's start time and program; other keys cancel; never falls back to another tool | keyboard | `TestKillNeedsASecondPressAndTargetsTheSelectedTool` `TestKillNeverFallsBackToAnotherTool` `TestKillIsCancelledByAnyOtherKey` `TestKillArmExpires` `TestKillRefusesAReusedOrVanishedPID` `TestKillReportsSignalErrors` |
 | fleet | Key binding `tab` jumps to the chat input | keyboard | `TestUpdateMsgs` |
 | fleet | Key binding `/` opens the input pre-filled with `/`; `p` opens it empty | keyboard | `TestUpdateFleet` |
 | fleet | Key bindings `c`/`r` refresh (status `refreshing…`) | keyboard | `TestUpdateFleet` |
@@ -132,5 +137,5 @@ Keep the last column a list of backticked function names.
 | :--- | :--- | :--- | :--- |
 | telemetry | 2×4 Braille (`U+2800..U+28FF`) sparklines and meter bars for CPU/UMA/Tok/s | `renderBrailleSparkline`, `renderMeterBar` | `TestBrailleSparkline` `TestMeterBar` `BenchmarkRenderBrailleSparkline` |
 | telemetry | ISO/IEC 21031:2024 SCI (`J`, `gCO2eq`, `mgCO2eq/1k tok`) and Shannon action-entropy loop circuit-breaker | `computeSCI`, `computeActionEntropy`, `--log-event` | `TestComputeSCI` `TestComputeActionEntropy` `TestLogEventCLI` `BenchmarkComputeSCI` |
-| ecosystem | `corralctl`, `passmcp` 9-phase security posture, and `draft` provenance/green split-stage routing (`g`, `/eco`, `/top`, `/green`, `/corral`, `/mcp`, `/draft`) | `sampleEcosystem`, `formatBtopBar`, slash commands | `TestParseCorralState` `TestParsePassMCPReport` `TestParseDraftProvenance` `TestSampleEcosystemAndFormatBtopBar` |
+| ecosystem | `corralctl`, `passmcp` 9-phase security posture, and `draft` provenance/green split-stage Control Centres (`c`, `v`, `d`, `b`, `g`, `1-6`, `/eco`, `/top`, `/green`, `/corral`, `/mcp`, `/draft`) | `sampleEcosystem`, `formatBtopBar`, `renderBtopDeck`, `renderEcosystemControlCentre` | `TestParseCorralState` `TestParsePassMCPReport` `TestParseDraftProvenance` `TestSampleEcosystemAndFormatBtopBar` `TestBtopDeckAndControlCentre` |
 
