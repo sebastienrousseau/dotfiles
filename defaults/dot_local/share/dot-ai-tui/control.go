@@ -109,7 +109,7 @@ func toolActions(t tool) []controlAction {
 	case "draft":
 		return []controlAction{
 			{key: "1", label: "Pipeline Help", desc: "draft --help — 5-phase grounded research & C2PA synthesis", bin: "draft", args: []string{"--help"}},
-			{key: "2", label: "Verify C2PA", desc: "draft verify --help — Ed25519 COSE_Sign1 & citation check", bin: "draft", args: []string{"verify", "--help"}},
+			{key: "2", label: "Verify C2PA", desc: "draft verify --help — Ed25519 signature & citation check", bin: "draft", args: []string{"verify", "--help"}},
 			{key: "3", label: "Green SCI", desc: "dot ai doctor — inspect green split-stage & fleet readiness", bin: "dot", args: []string{"ai", "doctor"}},
 			{key: "4", label: "MCP Doctor", desc: "dot ai mcp doctor — inspect MCP retrieval servers", bin: "dot", args: []string{"ai", "mcp", "doctor"}},
 			{key: "5", label: "Spend & SCI", desc: "dot ai cost — token spend & ISO/IEC 21031 carbon report", bin: "dot", args: []string{"ai", "cost"}},
@@ -453,7 +453,7 @@ func (m model) renderDraftCentre(snap EcosystemSnapshot) []string {
 	return []string{
 		titleSt.Render("╭─ ²draft · 5-phase grounded research & C2PA control centre ────────╮"),
 		bodySt.Render("  Pipeline:  [1.Decompose] → [2.Retrieve] → [3.Extract] → [4.Synthesize] → [5.Verify]"),
-		okSt.Render("  ● C2PA Provenance     ") + bodySt.Render("Ed25519 COSE_Sign1 Content Credentials · ≥95% Claim Gate"),
+		okSt.Render("  ● C2PA Provenance     ") + bodySt.Render("Ed25519-signed Content Credentials · ≥95% Claim Gate"),
 		okSt.Render("  ● Green Split-Stage   ") + greenBadge,
 		okSt.Render("  ● ISO 21031:2024 SCI  ") + bodySt.Render(fmt.Sprintf("%.3f gCO2eq · Prefill %.2fJ · Decode %.2fJ · Saved %.4fWh",
 			sci.GCO2eq, sci.PrefillJoules, sci.DecodeJoules, sci.CacheSavedWh)),

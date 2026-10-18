@@ -92,7 +92,7 @@ func (sc *sessionScanner) Scan() []AgentSession {
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 	now := sc.now()
-	cands := sc.restat(now)
+	cands := sc.statTracked(now)
 	if now.Sub(sc.listed) >= sessionRelist {
 		cands, sc.listed = sc.candidates(now), now
 	}
@@ -123,9 +123,9 @@ type candidate struct {
 	info        fs.FileInfo
 }
 
-// restat re-checks only the files already tracked; listing every Claude
+// statTracked re-checks only the files already tracked; listing every Claude
 // project directory costs tens of milliseconds.
-func (sc *sessionScanner) restat(now time.Time) []candidate {
+func (sc *sessionScanner) statTracked(now time.Time) []candidate {
 	var out []candidate
 	for p, tf := range sc.files {
 		if info, err := os.Stat(p); err == nil && now.Sub(info.ModTime()) <= sessionWindow {
