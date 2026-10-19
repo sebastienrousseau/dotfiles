@@ -1,0 +1,70 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Example manifest v1 for the secret domain, showing the naming fields from
+# ADR-020. Validated by tests/unit/dot-cli/test_naming_registry.py.
+schema = "cli/manifest.v1"
+name = "secret"
+domain = "secret"
+version = "0.2.536"
+dot_api = ">=1.0, <2.0"
+license = "Apache-2.0 OR MIT"
+summary = "secrets, keys and SSH certificates"
+default = "status"
+
+[[objects]]
+name = "key"
+summary = "SSH signing and authentication keys"
+default = "list"
+
+[[objects]]
+name = "cert"
+summary = "short-lived SSH certificates"
+default = "list"
+
+[[commands]]
+verb = "status"
+effect = "read"
+summary = "Provider, vault state and key counts"
+output = "secret/status.v1"
+
+[[commands]]
+verb = "init"
+effect = "write"
+summary = "Set up the secret provider"
+
+[[commands]]
+verb = "edit"
+effect = "write"
+summary = "Edit the encrypted secrets file"
+
+[[commands]]
+object = "key"
+verb = "list"
+effect = "read"
+summary = "Keys without their values"
+output = "secret/key-list.v1"
+
+[[commands]]
+object = "key"
+verb = "new"
+effect = "write"
+summary = "Create an ED25519 key"
+
+[[commands]]
+object = "cert"
+verb = "new"
+effect = "write"
+summary = "Issue a short-lived SSH certificate"
+
+[[aliases]]
+name = "ssh-key"
+target = "secret key new"
+kind = "deprecated"
+until = "0.2.537"
+
+[[aliases]]
+name = "secrets-init"
+target = "secret init"
+kind = "deprecated"
+until = "0.2.537"

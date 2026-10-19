@@ -29,6 +29,9 @@ significant architectural decisions made in this project.
 | [ADR-016](ADR-016-plugin-trust-sandbox.md) | Plugin trust and sandbox levels | Accepted; audit plus experimental Linux process proof |
 | [ADR-017](ADR-017-sensitive-data-boundary.md) | Sensitive data boundary | Accepted; secret broker pending |
 | [ADR-018](ADR-018-read-only-mcp-isolation.md) | Read-only MCP isolation | Accepted; separate service pending |
+| [ADR-020](ADR-020-command-naming-system.md) | One command grammar for the dot family | Accepted; lint and generators pending |
+| [ADR-021](ADR-021-family-lockstep-version.md) | One version for the whole dot family | Accepted; release driver pending |
+| [ADR-022](ADR-022-family-language-go.md) | Go for the dot family's compiled code | Accepted |
 
 ## ADR Format
 
