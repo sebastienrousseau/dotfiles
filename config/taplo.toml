@@ -4,6 +4,7 @@
 include = [
   "defaults/.chezmoidata.toml",
   "defaults/.chezmoidata/*.toml",
+  "defaults/.theme-manifest/*.toml",
 ]
 
 [formatting]

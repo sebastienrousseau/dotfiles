@@ -14,7 +14,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 APPLE="$REPO_ROOT/scripts/theme/apple.py"
 WORK="$(mktemp -d -t dot-theme-apple.XXXXXX)"
 trap 'rm -rf "$WORK"' EXIT
-CATALOG="$REPO_ROOT/defaults/.chezmoidata/themes.toml"
+CATALOG="$REPO_ROOT/defaults/.theme-manifest/themes.toml"
 
 py() {
   PYTHONPATH="$REPO_ROOT/scripts/theme" python3 -c "import aaa, apple

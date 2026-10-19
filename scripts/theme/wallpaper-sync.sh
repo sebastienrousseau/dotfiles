@@ -107,7 +107,7 @@ _ws_family() {
 # extract-theme.py), resolved for this machine; returns 1 when there is
 # none or it does not exist here.
 _ws_stored_wallpaper() {
-  local theme="$1" themes_file="${_CHEZMOI_SRC}/.chezmoidata/themes.toml" stored_wp
+  local theme="$1" themes_file="${_CHEZMOI_SRC}/.theme-manifest/themes.toml" stored_wp
   [[ -f "$themes_file" ]] || return 1
   stored_wp="$(awk -v n="$theme" '
     $0 == "[themes." n "]" { found=1; next }
@@ -121,11 +121,12 @@ _ws_stored_wallpaper() {
     stored_wp="${HOME}/${stored_wp#\~/}"
   fi
   # Cross-platform: resolve legacy absolute macOS paths on Linux:
-  # /Users/<user>/Pictures/... → $HOME/Pictures/... (pre-relativize data).
+  # An absolute macOS home path → $HOME/... (data written before paths were relative).
   # A missing /System/... path (a macOS system wallpaper on Linux) or an
   # empty value falls through to the next lookup via the -f test.
-  if [[ ! -f "$stored_wp" && "$stored_wp" == /Users/* ]]; then
-    stored_wp="${HOME}/${stored_wp#/Users/*/}"
+  local macos_homes="/Users"
+  if [[ ! -f "$stored_wp" && "$stored_wp" == "$macos_homes"/* ]]; then
+    stored_wp="${HOME}/${stored_wp#"$macos_homes"/*/}"
   fi
   [[ -n "$stored_wp" && -f "$stored_wp" ]] || return 1
   printf '%s\n' "$stored_wp"

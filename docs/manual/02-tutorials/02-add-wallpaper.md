@@ -37,7 +37,7 @@ Generating themes...
 Results: 2 processed, 150 cached, 0 failed
 
 Assembling themes.toml...
-  Written: ~/.dotfiles/.chezmoidata/themes.toml (608 theme sections)
+  Written: ~/.dotfiles/.theme-manifest/themes.toml (608 theme sections)
 
 Done. Run 'dot theme list' to see available themes.
 ```
@@ -149,7 +149,7 @@ After a switch, check the applied colors:
 
 ```sh
 # See the current theme's palette
-grep -A30 "^\[themes.mytheme-dark\]" ~/.dotfiles/.chezmoidata/themes.toml
+grep -A30 "^\[themes.mytheme-dark\]" ~/.dotfiles/.theme-manifest/themes.toml
 ```
 
 Check WCAG compliance (always passes for generated themes):

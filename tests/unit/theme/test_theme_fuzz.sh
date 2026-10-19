@@ -25,13 +25,13 @@ export XDG_STATE_HOME="$TMPHOME/state"
 export XDG_CONFIG_HOME="$TMPHOME/.config"
 export XDG_DATA_HOME="$TMPHOME/.local/share"
 mkdir -p "$XDG_STATE_HOME/dot" "$XDG_CONFIG_HOME" "$XDG_DATA_HOME"
-mkdir -p "$TMPHOME/dotfiles/.chezmoidata"
+mkdir -p "$TMPHOME/dotfiles/.chezmoidata" "$TMPHOME/dotfiles/.theme-manifest"
 export CHEZMOI_SOURCE_DIR="$TMPHOME/dotfiles"
 
 cat >"$TMPHOME/dotfiles/.chezmoidata.toml" <<'EOF'
 theme = "Baseline-dark"
 EOF
-cat >"$TMPHOME/dotfiles/.chezmoidata/themes.toml" <<'EOF'
+cat >"$TMPHOME/dotfiles/.theme-manifest/themes.toml" <<'EOF'
 [themes.Baseline-dark]
 mode = "dark"
 family = "Baseline"

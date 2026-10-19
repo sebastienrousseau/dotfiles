@@ -48,7 +48,7 @@ if [[ -f "$DOTFILES_DIR/.chezmoiroot" ]]; then
   _sub="$(head -1 "$DOTFILES_DIR/.chezmoiroot" | tr -d '[:space:]')"
   [[ -n "$_sub" && -d "$DOTFILES_DIR/$_sub" ]] && CHEZMOI_SRC="$DOTFILES_DIR/$_sub"
 fi
-THEMES_FILE="$CHEZMOI_SRC/.chezmoidata/themes.toml"
+THEMES_FILE="$CHEZMOI_SRC/.theme-manifest/themes.toml"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/themes"
 CUSTOM_DIR="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
 
@@ -308,7 +308,7 @@ _rt_check_deps() {
 #
 # That is not hypothetical: catalina and sonoma shipped in themes.toml with
 # blocks generated in June/July, months after the rest. They carried an
-# absolute /Users/<name>/ wallpaper path (predating the `~/` normalisation)
+# absolute macOS home-directory wallpaper path (predating the `~/` normalisation)
 # and a c15 of #181818 in a *light* theme (predating the structural-ramp fix),
 # which failed the WCAG AAA gate in CI. Two real defects, both invisible here
 # because those two wallpapers had simply not been touched since.

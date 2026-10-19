@@ -5,8 +5,9 @@
 # Raise timeout to avoid spurious prompt warnings.
 command_timeout = 5000
 add_newline = true
-{{ $themeName := includeTemplate "theme-name" . -}}
-{{- $t := index .themes $themeName -}}
+{{ $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
+{{- $themeName := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}
+{{- $t := index $themes $themeName -}}
 # Palette driven directly by the active wallpaper-derived terminal colours.
 palette = "wallpaper"
 

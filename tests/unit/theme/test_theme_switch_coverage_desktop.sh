@@ -44,9 +44,9 @@ done
 # Synthetic chezmoi source tree.
 # ---------------------------------------------------------------------------
 SRC="$WORK/src"
-mkdir -p "$SRC/.chezmoidata"
+mkdir -p "$SRC/.chezmoidata" "$SRC/.theme-manifest"
 DATA_FILE="$SRC/.chezmoidata.toml"
-THEMES_FILE="$SRC/.chezmoidata/themes.toml"
+THEMES_FILE="$SRC/.theme-manifest/themes.toml"
 cat >"$THEMES_FILE" <<'TOML'
 [themes.bloom-dark]
 family = "bloom"
@@ -577,10 +577,10 @@ assert_equals "0:maui-dark --auto" "$rc:$(last_sync)" "the picked family follows
 
 test_start "a_family_with_one_variant_is_not_a_quick_switch"
 SOLO_SRC="$WORK/solo-src"
-mkdir -p "$SOLO_SRC/.chezmoidata"
+mkdir -p "$SOLO_SRC/.chezmoidata" "$SOLO_SRC/.theme-manifest"
 printf 'theme = "maui-dark"\ntheme_mode = "dark"\n' >"$SOLO_SRC/.chezmoidata.toml"
 printf '[themes.solo-dark]\nmode = "dark"\n[themes.maui-dark]\nmode = "dark"\n[themes.maui-light]\nmode = "light"\n' \
-  >"$SOLO_SRC/.chezmoidata/themes.toml"
+  >"$SOLO_SRC/.theme-manifest/themes.toml"
 reset_calls
 rc="$(SRC_OVERRIDE="$SOLO_SRC" sw solo)"
 assert_equals "1:" "$rc:$(last_sync)" "solo has no light variant: unknown, nothing applied"

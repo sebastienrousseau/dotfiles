@@ -158,13 +158,13 @@ _cmd_reset_log() { : > "${MOCK_LOG:-/dev/null}"; }
 # ---------------------------------------------------------------------------
 _cmd_seed_dotfiles_source() {
   local themes_toml="${1:-}"
-  mkdir -p "$TMPHOME/dotfiles/.chezmoidata"
+  mkdir -p "$TMPHOME/dotfiles/.chezmoidata" "$TMPHOME/dotfiles/.theme-manifest"
   export CHEZMOI_SOURCE_DIR="$TMPHOME/dotfiles"
   touch "$TMPHOME/dotfiles/.chezmoidata.toml"
   if [[ -n "$themes_toml" && -f "$themes_toml" ]]; then
-    cp "$themes_toml" "$TMPHOME/dotfiles/.chezmoidata/themes.toml"
+    cp "$themes_toml" "$TMPHOME/dotfiles/.theme-manifest/themes.toml"
   else
-    touch "$TMPHOME/dotfiles/.chezmoidata/themes.toml"
+    touch "$TMPHOME/dotfiles/.theme-manifest/themes.toml"
   fi
 }
 

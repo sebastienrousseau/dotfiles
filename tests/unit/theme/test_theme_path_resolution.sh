@@ -29,7 +29,7 @@ THEME_SYNC="$REPO_ROOT/bin/dot-theme-sync"
 sandbox="$(mktemp -d -t theme-paths.XXXXXX)"
 trap 'rm -rf "$sandbox"' EXIT
 
-mkdir -p "$sandbox/defaults/.chezmoidata"
+mkdir -p "$sandbox/defaults/.chezmoidata" "$sandbox/defaults/.theme-manifest"
 printf 'defaults\n' >"$sandbox/.chezmoiroot"
 
 # Theme set to a unique sentinel so we can prove the scripts read THIS
@@ -47,7 +47,7 @@ test = true
 name = "minimal"
 EOF
 
-cat >"$sandbox/defaults/.chezmoidata/themes.toml" <<EOF
+cat >"$sandbox/defaults/.theme-manifest/themes.toml" <<EOF
 [themes.${SENTINEL_THEME}]
 family = "sandbox-theme"
 mode = "dark"

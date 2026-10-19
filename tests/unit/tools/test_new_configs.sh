@@ -128,9 +128,9 @@ fi
 # ===========================================================================
 CHEZMOI_BIN="$(command -v chezmoi 2>/dev/null || true)"
 SRC="$WORK/src"
-mkdir -p "$SRC/.chezmoidata" "$SRC/.chezmoitemplates"
+mkdir -p "$SRC/.chezmoidata" "$SRC/.theme-manifest" "$SRC/.chezmoitemplates"
 cp "$DEFAULTS/.chezmoidata.toml" "$SRC/"
-cp "$DEFAULTS/.chezmoidata/themes.toml" "$SRC/.chezmoidata/"
+cp "$DEFAULTS/.theme-manifest/themes.toml" "$SRC/.theme-manifest/"
 cp "$DEFAULTS/.chezmoitemplates/theme-name" "$SRC/.chezmoitemplates/"
 
 render() { # <template> <theme> <out>
@@ -143,7 +143,7 @@ render() { # <template> <theme> <out>
 }
 # theme_value <theme> <dotted.key> — the value from the repository's themes.toml
 theme_value() {
-  python3 - "$SRC/.chezmoidata/themes.toml" "$1" "$2" <<'PY'
+  python3 - "$SRC/.theme-manifest/themes.toml" "$1" "$2" <<'PY'
 import sys, tomllib
 node = tomllib.load(open(sys.argv[1], "rb"))["themes"][sys.argv[2]]
 for part in sys.argv[3].split("."):
@@ -235,7 +235,7 @@ PY
     COMP="$WORK/dot-theme-sync.fish"
     render "$CFG/fish/completions/dot-theme-sync.fish.tmpl" fallback-dark "$COMP"
     themes_n="$(python3 -c 'import sys, tomllib; print(len(tomllib.load(open(sys.argv[1], "rb"))["themes"]))' \
-      "$SRC/.chezmoidata/themes.toml")"
+      "$SRC/.theme-manifest/themes.toml")"
     cands="$(fish --no-config -c "source '$COMP'; complete -C 'dot-theme-sync '")"
     assert_contains $'\nfallback-light\n' $'\n'"$cands"$'\n' "a theme name is offered"
     assert_equals "$themes_n" "$(printf '%s\n' "$cands" | awk 'NF' | wc -l | tr -d ' ')" \

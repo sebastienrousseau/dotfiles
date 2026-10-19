@@ -19,8 +19,9 @@
 {{- $git_signingformat := coalesce (index . "git_signingformat") "ssh" -}}
 
 {{- /* Resolve active theme for delta syntax highlighting */ -}}
-{{- $themeName := includeTemplate "theme-name" . -}}
-{{- $t := index .themes $themeName -}}
+{{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
+{{- $themeName := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}
+{{- $t := index $themes $themeName -}}
 {{- $is_dark := eq $t.mode "dark" -}}
 
 [user]

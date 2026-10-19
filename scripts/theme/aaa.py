@@ -330,7 +330,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--write", action="store_true", help="rewrite in place")
     args = parser.parse_args(argv)
     paths = args.catalogs or [
-        repo / "defaults/.chezmoidata/themes.toml",
+        repo / "defaults/.theme-manifest/themes.toml",
         repo / "scripts/theme/fallback-themes.toml",
     ]
     pending = 0

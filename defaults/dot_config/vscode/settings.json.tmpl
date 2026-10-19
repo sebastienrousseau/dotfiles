@@ -1,6 +1,7 @@
 {
-{{- $themeName := includeTemplate "theme-name" . }}
-{{- $t := index .themes $themeName }}
+{{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
+{{- $themeName := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) }}
+{{- $t := index $themes $themeName }}
   // Theme Configuration - set from the chezmoi theme variable.
   // The two assignments above must NOT use a right-hand `-}}`: that chomps
   // the following newline and welds this comment onto the colorTheme line

@@ -44,9 +44,9 @@ done
 # Synthetic chezmoi source tree.
 # ---------------------------------------------------------------------------
 SRC="$WORK/src"
-mkdir -p "$SRC/.chezmoidata"
+mkdir -p "$SRC/.chezmoidata" "$SRC/.theme-manifest"
 DATA_FILE="$SRC/.chezmoidata.toml"
-THEMES_FILE="$SRC/.chezmoidata/themes.toml"
+THEMES_FILE="$SRC/.theme-manifest/themes.toml"
 cat >"$THEMES_FILE" <<'TOML'
 [themes.bloom-dark]
 family = "bloom"
@@ -372,10 +372,10 @@ assert_equals "maui-dark" "$(last_sync)" "--mode=dark applies a manual dark vari
 
 test_start "random_with_one_family_reuses_it"
 ONE_SRC="$WORK/one-src"
-mkdir -p "$ONE_SRC/.chezmoidata"
+mkdir -p "$ONE_SRC/.chezmoidata" "$ONE_SRC/.theme-manifest"
 printf 'theme = "maui-dark"\ntheme_mode = "dark"\n' >"$ONE_SRC/.chezmoidata.toml"
 printf '[themes.maui-dark]\nmode = "dark"\n[themes.maui-light]\nmode = "light"\n' \
-  >"$ONE_SRC/.chezmoidata/themes.toml"
+  >"$ONE_SRC/.theme-manifest/themes.toml"
 reset_calls
 rc="$(SRC_OVERRIDE="$ONE_SRC" sw random)"
 assert_equals "0" "$rc" "random exits 0 with a single family"
@@ -383,9 +383,9 @@ assert_equals "maui-dark" "$(last_sync)" "the only family is re-applied"
 
 test_start "random_fails_without_paired_families"
 NONE_SRC="$WORK/none-src"
-mkdir -p "$NONE_SRC/.chezmoidata"
+mkdir -p "$NONE_SRC/.chezmoidata" "$NONE_SRC/.theme-manifest"
 printf 'theme = "solo-dark"\n' >"$NONE_SRC/.chezmoidata.toml"
-printf '[themes.solo-dark]\nmode = "dark"\n' >"$NONE_SRC/.chezmoidata/themes.toml"
+printf '[themes.solo-dark]\nmode = "dark"\n' >"$NONE_SRC/.theme-manifest/themes.toml"
 reset_calls
 rc="$(SRC_OVERRIDE="$NONE_SRC" sw random)"
 assert_equals "1" "$rc" "random fails with nothing to pick"

@@ -373,7 +373,7 @@ def main() -> int:
         "catalog",
         nargs="?",
         type=Path,
-        default=repo_root / "defaults/.chezmoidata/themes.toml",
+        default=repo_root / "defaults/.theme-manifest/themes.toml",
     )
     parser.add_argument("--theme", help="audit one named theme")
     parser.add_argument(

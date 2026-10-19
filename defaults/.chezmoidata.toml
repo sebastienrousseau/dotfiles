@@ -37,7 +37,7 @@ alias_wrapper = false
 
 # DMS (Dank Material Shell) — dot-theme-sync feeds accent colors to
 # matugen for desktop chrome (niri borders, GTK). Terminal emulators
-# use exact theme colors from .chezmoidata/themes.toml.
+# use exact theme colors from .theme-manifest/themes.toml.
 dms = true
 
 # Terminal multiplexers

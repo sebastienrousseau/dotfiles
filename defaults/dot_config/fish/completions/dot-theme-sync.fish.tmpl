@@ -2,7 +2,7 @@
 # Completions for dot-theme-sync
 
 # Complete with theme names from themes.toml
-complete -c dot-theme-sync -f -a "{{- range $name, $_ := .themes }}{{ $name }} {{ end }}"
+complete -c dot-theme-sync -f -a "{{- range $name, $_ := (include ".theme-manifest/themes.toml" | fromToml).themes }}{{ $name }} {{ end }}"
 
 # Complete with flags
 complete -c dot-theme-sync -l help -s h -d "Show help"

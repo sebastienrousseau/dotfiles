@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-THEMES_FILE="$REPO_ROOT/defaults/.chezmoidata/themes.toml"
+THEMES_FILE="$REPO_ROOT/defaults/.theme-manifest/themes.toml"
 
 # --- File existence ---
 test_start "themes_toml_exists"

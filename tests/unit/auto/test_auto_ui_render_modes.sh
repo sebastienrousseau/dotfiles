@@ -89,10 +89,10 @@ export STUB_CALLS_DIR="$WORK"
 # Theme fixture: a chezmoi source tree with a `.chezmoiroot` indirection so
 # the descend-into-subdir branch of _ui_theme_files is exercised.
 THEME_SRC="$WORK/src"
-mkdir -p "$THEME_SRC/defaults/.chezmoidata"
+mkdir -p "$THEME_SRC/defaults/.chezmoidata" "$THEME_SRC/defaults/.theme-manifest"
 echo "defaults" >"$THEME_SRC/.chezmoiroot"
 printf 'theme = "bloom"\n' >"$THEME_SRC/defaults/.chezmoidata.toml"
-cat >"$THEME_SRC/defaults/.chezmoidata/themes.toml" <<'TOML'
+cat >"$THEME_SRC/defaults/.theme-manifest/themes.toml" <<'TOML'
 [themes.bloom-dark]
 family = "bloom"
 mode = "dark"
@@ -210,11 +210,11 @@ _has_pty() { command -v script >/dev/null 2>&1; }
 
 test_start "theme_files_follow_chezmoiroot_indirection"
 out="$(in_ui '_ui_theme_files && printf "%s\n" "$_UI_THEMES_FILE"')"
-assert_equals "$THEME_SRC/defaults/.chezmoidata/themes.toml" "$out" "themes.toml resolved under the .chezmoiroot subdir"
+assert_equals "$THEME_SRC/defaults/.theme-manifest/themes.toml" "$out" "themes.toml resolved under the .chezmoiroot subdir"
 
 test_start "theme_files_fall_back_to_home_dotfiles_when_chezmoi_silent"
 out="$(FAKE_CHEZMOI_SRC="" in_ui '_ui_theme_files; echo "rc=$? file=$_UI_THEMES_FILE"')"
-assert_equals "rc=0 file=$HOME/.dotfiles/defaults/.chezmoidata/themes.toml" "$out" "falls back to ~/.dotfiles (+ .chezmoiroot) when chezmoi prints nothing"
+assert_equals "rc=0 file=$HOME/.dotfiles/defaults/.theme-manifest/themes.toml" "$out" "falls back to ~/.dotfiles (+ .chezmoiroot) when chezmoi prints nothing"
 
 test_start "theme_files_fail_without_any_source"
 out="$(FAKE_CHEZMOI_SRC="" HOME="$WORK/nohome" in_ui '_ui_theme_files; echo "rc=$?"')"
@@ -223,7 +223,7 @@ assert_equals "rc=1" "$out" "no chezmoi source-path, no ~/.dotfiles, no ~/.local
 test_start "theme_files_fail_when_themes_toml_missing"
 mkdir -p "$WORK/empty-src"
 out="$(FAKE_CHEZMOI_SRC="$WORK/empty-src" in_ui '_ui_theme_files; echo "rc=$?"')"
-assert_equals "rc=1" "$out" "source dir without .chezmoidata/themes.toml → rc=1"
+assert_equals "rc=1" "$out" "source dir without .theme-manifest/themes.toml → rc=1"
 
 test_start "active_mode_darwin_dark"
 out="$(FAKE_UNAME=Darwin FAKE_APPLE_STYLE=Dark in_ui '_ui_active_mode')"
@@ -247,8 +247,8 @@ assert_equals "bloom-dark" "$out" "family bloom + dark mode → bloom-dark"
 
 test_start "active_theme_section_fails_without_family"
 printf '# no theme key\n' >"$WORK/empty-src/.chezmoidata.toml"
-mkdir -p "$WORK/empty-src/.chezmoidata"
-printf '[themes.x-dark]\n' >"$WORK/empty-src/.chezmoidata/themes.toml"
+mkdir -p "$WORK/empty-src/.chezmoidata" "$WORK/empty-src/.theme-manifest"
+printf '[themes.x-dark]\n' >"$WORK/empty-src/.theme-manifest/themes.toml"
 out="$(FAKE_CHEZMOI_SRC="$WORK/empty-src" in_ui '_ui_active_theme_section; echo "rc=$?"')"
 assert_equals "rc=1" "$out" "a data file with no theme key → rc=1"
 

@@ -4,8 +4,9 @@
 
 /* global user_pref */
 
-{{- $themeName := includeTemplate "theme-name" . -}}
-{{- $t := index .themes $themeName -}}
+{{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
+{{- $themeName := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}
+{{- $t := index $themes $themeName -}}
 
 // Disable telemetry
 user_pref("toolkit.telemetry.enabled", false);

@@ -41,7 +41,7 @@ This file is curated for LLM agents indexing the repository. The links below are
 - [Theming overview](docs/themes/)
 - [Theme reference](docs/reference/THEMES.md)
 - [`dot theme rebuild`](scripts/theme/): wallpaper → K-Means CIELAB → WCAG AAA palette
-- [Theme data](.chezmoidata/themes.toml)
+- [Theme data](.theme-manifest/themes.toml)
 
 ## Agent / AI integration
 

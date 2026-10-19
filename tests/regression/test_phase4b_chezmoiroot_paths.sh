@@ -6,7 +6,7 @@
 # Regression: Phase-4b chezmoiroot path drift guard.
 #
 # Phase 4b (v0.2.503) moved chezmoi-tracked content into defaults/.
-# Scripts that still read ".chezmoidata.toml" / ".chezmoidata/themes.toml"
+# Scripts that still read ".chezmoidata.toml" / ".theme-manifest/themes.toml"
 # from the repo root silently break — they find an empty/missing file
 # and fall through to defaults. This caught us twice (theme switch +
 # wallpaper sync); this guard makes a third miss noisy.

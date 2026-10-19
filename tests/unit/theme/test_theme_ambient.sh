@@ -22,12 +22,12 @@ mkdir -p "$XDG_STATE_HOME/dot" "$XDG_CONFIG_HOME"
 
 # Fake dotfiles source with two paired families so ambient has something
 # to apply.
-mkdir -p "$TMPHOME/dotfiles/.chezmoidata"
+mkdir -p "$TMPHOME/dotfiles/.chezmoidata" "$TMPHOME/dotfiles/.theme-manifest"
 export CHEZMOI_SOURCE_DIR="$TMPHOME/dotfiles"
 cat > "$TMPHOME/dotfiles/.chezmoidata.toml" <<'EOF'
 theme = "Solar-dark"
 EOF
-cat > "$TMPHOME/dotfiles/.chezmoidata/themes.toml" <<'EOF'
+cat > "$TMPHOME/dotfiles/.theme-manifest/themes.toml" <<'EOF'
 [themes.Solar-dark]
 mode = "dark"
 family = "Solar"

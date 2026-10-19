@@ -67,7 +67,7 @@ if [[ -f "$SRC_DIR/.chezmoiroot" ]]; then
 fi
 
 DATA_FILE="$CHEZMOI_SRC/.chezmoidata.toml"
-THEMES_FILE="$CHEZMOI_SRC/.chezmoidata/themes.toml"
+THEMES_FILE="$CHEZMOI_SRC/.theme-manifest/themes.toml"
 WALLPAPER_DIR="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
 if [ ! -f "$DATA_FILE" ]; then
   ui_err "Missing" "$DATA_FILE"

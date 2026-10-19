@@ -81,7 +81,7 @@ implemented in `scripts/theme/` with the following pipeline:
    alter the tested sRGB values or their contrast.
 
 4. **Format generation** — emit one canonical TOML palette to
-   `.chezmoidata/themes.toml`, then run `chezmoi apply` so every
+   `.theme-manifest/themes.toml`, then run `chezmoi apply` so every
    theme-aware template (terminals, editors, status bars, browsers)
    regenerates from a single declarative source.
 
@@ -134,7 +134,7 @@ changed), repeatable, and tested under `tests/unit/theme/`.
 - Wallpapers with extreme dynamic range (pure-white backgrounds, deep
   monochrome) may fail to produce an aesthetically pleasing 16-color
   palette even when WCAG AAA is satisfied. Mitigation: maintainer
-  curation of a fallback theme set in `.chezmoidata/themes.toml`.
+  curation of a fallback theme set in `.theme-manifest/themes.toml`.
 - Future Wayland compositors may not expose a stable wallpaper-detection
   API. The engine isolates source detection in a single module so the
   blast radius of compositor churn is one file.
@@ -154,5 +154,5 @@ changed), repeatable, and tested under `tests/unit/theme/`.
 - Apple Human Interface Guidelines — Color: <https://developer.apple.com/design/human-interface-guidelines/color>
 - CIELAB color space: <https://en.wikipedia.org/wiki/CIELAB_color_space>
 - `scripts/theme/` — engine source
-- `.chezmoidata/themes.toml` — output palette schema
+- `.theme-manifest/themes.toml` — output palette schema
 - Issue #873 — captures this ADR alongside `llms.txt`

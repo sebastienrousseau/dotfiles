@@ -26,7 +26,7 @@ windows are opaque so translucency cannot invalidate the generated sRGB
 contrast. This applies consistently to Ghostty, Kitty, Alacritty, WezTerm,
 Foot, iTerm2, Warp, tmux, and provider TUIs.
 
-`rebuild-themes.sh` orchestrates discovery → extraction → assembly into `.chezmoidata/themes.toml`. Themes are cached in `~/.cache/dotfiles/themes/` and only regenerated when wallpapers change.
+`rebuild-themes.sh` orchestrates discovery → extraction → assembly into `.theme-manifest/themes.toml`. Themes are cached in `~/.cache/dotfiles/themes/` and only regenerated when wallpapers change.
 
 The `theme` key in `.chezmoidata.toml` controls the active theme. Every template references the active theme's data through `{{ $t := index .themes .theme }}`.
 
@@ -69,7 +69,7 @@ dot theme rebuild --force   # full regeneration
 dot theme rebuild --list    # discover wallpapers without rebuilding
 ```
 
-Discovers wallpapers from system + custom paths, runs K-Means extraction in parallel (4 jobs), caches generated themes in `~/.cache/dotfiles/themes/`, and writes `.chezmoidata/themes.toml`. Custom wallpapers override system wallpapers on name collision.
+Discovers wallpapers from system + custom paths, runs K-Means extraction in parallel (4 jobs), caches generated themes in `~/.cache/dotfiles/themes/`, and writes `.theme-manifest/themes.toml`. Custom wallpapers override system wallpapers on name collision.
 
 ### Under the Hood: dot-theme-sync
 

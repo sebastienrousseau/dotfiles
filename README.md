@@ -627,7 +627,7 @@ in `~/Pictures/Wallpapers/` (`DOTFILES_WALLPAPER_DIR` overrides).
 K-Means clustering in CIELAB colour space extracts the dominant
 colours; the engine generates a 16-colour terminal palette, enforces
 WCAG AAA contrast (7:1 for fg/bg, accent text on accent, and c15 on
-bg), and assembles `defaults/.chezmoidata/themes.toml` on its own.
+bg), and assembles `defaults/.theme-manifest/themes.toml` on its own.
 Extraction runs four jobs in parallel, results are cached in
 `~/.cache/dotfiles/themes/`, and only changed wallpapers are
 regenerated.

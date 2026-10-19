@@ -24,11 +24,11 @@ SCRIPT_FILE="$REPO_ROOT/bin/dot-theme-sync"
 TMPHOME="$(mktemp -d)"
 trap 'rm -rf "$TMPHOME"' EXIT
 export HOME="$TMPHOME"
-mkdir -p "$TMPHOME/Pictures/Wallpapers" "$TMPHOME/dotfiles/.chezmoidata"
+mkdir -p "$TMPHOME/Pictures/Wallpapers" "$TMPHOME/dotfiles/.chezmoidata" "$TMPHOME/dotfiles/.theme-manifest"
 # Point resolve_source_dir at our fake tree so the script loads cleanly.
 export CHEZMOI_SOURCE_DIR="$TMPHOME/dotfiles"
 # Seed the readonly THEMES_FILE with a real file the resolver tests can use.
-cat > "$TMPHOME/dotfiles/.chezmoidata/themes.toml" <<'EOF'
+cat > "$TMPHOME/dotfiles/.theme-manifest/themes.toml" <<'EOF'
 [themes.Solar-dark]
 mode = "dark"
 family = "Solar"

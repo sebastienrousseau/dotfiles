@@ -40,7 +40,7 @@ sysbin "$WORK/sysbin" magick
 # setup [wallpaper...]: fresh sandbox; W is its root.
 setup() {
   W="$WORK/c$((++N))"
-  mkdir -p "$W/home/.dotfiles/defaults/.chezmoidata" "$W/home/Pictures/Wallpapers" "$W/s" "$W/stubs"
+  mkdir -p "$W/home/.dotfiles/defaults/.chezmoidata" "$W/home/.dotfiles/defaults/.theme-manifest" "$W/home/Pictures/Wallpapers" "$W/s" "$W/stubs"
   echo defaults >"$W/home/.dotfiles/.chezmoiroot"
   cp "$REPO_ROOT/scripts/theme/rebuild-themes.sh" "$REPO_ROOT/scripts/theme/fallback-themes.toml" "$W/s/"
   cat >"$W/s/extract-theme.py" <<'PY'
@@ -65,7 +65,7 @@ rt() {
     TERM=dumb LANG=C.UTF-8 DOTFILES_THEME_SYSTEM=1 DOTFILES_THEME_SYSTEM_ROOT="$W/sys" "$REAL_BASH" "$W/s/rebuild-themes.sh" "$@" </dev/null 2>&1)"
   RC=$?
 }
-themes() { cat "$W/home/.dotfiles/defaults/.chezmoidata/themes.toml" 2>/dev/null; }
+themes() { cat "$W/home/.dotfiles/defaults/.theme-manifest/themes.toml" 2>/dev/null; }
 has() { if [[ "$1" == *"$2"* ]]; then echo yes; else echo no; fi; }
 
 test_start "rebuild_static_image_gets_a_light_and_dark_theme"

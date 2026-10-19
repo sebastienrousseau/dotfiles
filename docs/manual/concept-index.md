@@ -55,7 +55,7 @@ Alphabetical list of concepts covered in the manual.
 - Fleet Trust Propagation
 - From `.chezmoidata.toml`
 - From `.chezmoidata/hardware.toml`
-- From `.chezmoidata/themes.toml`
+- From `.theme-manifest/themes.toml`
 - From Feature Flags
 - Gates Enforced by CI
 - General
