@@ -1,0 +1,25 @@
+{
+  "schema": "cli/flags.v1",
+  "flags": [
+    { "long": "help", "short": "h", "meaning": "Show help for the command and exit 0", "scope": "all" },
+    { "long": "version", "short": "V", "meaning": "Print the version and exit 0", "scope": "all" },
+    { "long": "verbose", "short": "v", "meaning": "Raise the log level; repeatable", "scope": "all" },
+    { "long": "quiet", "short": "q", "meaning": "Print results only, no progress or logs", "scope": "all" },
+    { "long": "yes", "short": "y", "meaning": "Answer yes to every confirmation", "scope": "write" },
+    { "long": "dry-run", "short": "n", "meaning": "Show what would change and change nothing", "scope": "write" },
+    { "long": "json", "meaning": "Print the result as JSON with a versioned schema", "scope": "read" },
+    { "long": "plain", "meaning": "Print plain text without tables, colour or boxes", "scope": "all" },
+    { "long": "no-color", "meaning": "Never print colour", "scope": "all" },
+    { "long": "force", "meaning": "Proceed past a safety check that would stop the command", "scope": "write" },
+    { "long": "no-motion", "meaning": "Disable animation in a TUI", "scope": "tui" }
+  ],
+  "exit_codes": [
+    { "code": 0, "name": "ok", "meaning": "Success" },
+    { "code": 1, "name": "warning", "meaning": "Warning, or a check failed" },
+    { "code": 2, "name": "critical", "meaning": "Critical failure" },
+    { "code": 64, "name": "usage", "meaning": "Usage error (EX_USAGE)" },
+    { "code": 75, "name": "tempfail", "meaning": "Temporary failure such as a held lock; retry (EX_TEMPFAIL)" },
+    { "code": 127, "name": "not-found", "meaning": "Unknown command, removed name or missing plugin" },
+    { "code": 130, "name": "interrupted", "meaning": "Interrupted by SIGINT" }
+  ]
+}

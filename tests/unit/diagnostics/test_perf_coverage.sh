@@ -40,7 +40,11 @@ perf_run() {
 }
 
 test_start "perf_measures_nushell_in_the_good_band"
-perf_run env NO_COLOR=1 DOTFILES_PERF_MAX_MS=4000 \
+# With --target 0 the score is 100 - mean*100/MAX_MS: the 0.2 s stub scores
+# 99 (good, not excellent), and the band holds up to a 3 s mean. A 4 s
+# ceiling left 600 ms of headroom, which a loaded macOS runner used up
+# (1141 ms measured, score 71).
+perf_run env NO_COLOR=1 DOTFILES_PERF_MAX_MS=15000 \
   "${BASH:-bash}" "$PERF" --shell nu --runs 1 --target 0 --no-baseline-check
 assert_equals 0 "$RC" "perf exits 0"
 assert_contains " nu " "$OUT" "nushell row printed"

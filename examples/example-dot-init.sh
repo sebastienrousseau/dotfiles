@@ -42,7 +42,7 @@ printf '=== Bootstrapping a foreign dotfiles repo ===\n\n'
 group_commands=(init)
 for cmd in "${group_commands[@]}"; do
   summary="$( (bash "$dot" help "$cmd" 2>/dev/null || true) |
-    sed -n 's/.*Summary *//p' | head -1 || true)"
+    sed -n 's/.*Summary *//p' | sed -n '1,1p' || true)"
   printf '  dot %-22s %s\n' "$cmd" "${summary:-(see dot help all)}"
 done
 

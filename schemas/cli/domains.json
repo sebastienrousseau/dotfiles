@@ -1,0 +1,31 @@
+{
+  "schema": "cli/domains.v1",
+  "groups": [
+    { "id": "configuration", "title": "Configuration" },
+    { "id": "sessions", "title": "Sessions" },
+    { "id": "agents", "title": "Agents" },
+    { "id": "system", "title": "System" },
+    { "id": "trust", "title": "Trust & hosts" },
+    { "id": "platform", "title": "Platform" }
+  ],
+  "domains": [
+    { "name": "config", "group": "configuration", "repo": "dot-config", "summary": "apply, diff and sync the dotfiles", "shortcuts": [{ "name": "apply", "target": "config apply" }, { "name": "sync", "target": "config sync" }, { "name": "diff", "target": "config diff" }, { "name": "status", "target": "config status" }, { "name": "edit", "target": "config edit" }] },
+    { "name": "shell", "group": "configuration", "repo": "dot-shell", "summary": "aliases, history, startup caches", "shortcuts": [{ "name": "cd", "target": "config path" }] },
+    { "name": "theme", "group": "configuration", "repo": "dot-theme", "summary": "one palette for every app", "shortcuts": [] },
+    { "name": "tool", "group": "configuration", "repo": "dot-tool", "summary": "toolchains, packages, project templates", "shortcuts": [] },
+    { "name": "session", "group": "sessions", "repo": "dot-session", "summary": "find, open and restore terminal sessions", "shortcuts": [] },
+    { "name": "top", "group": "sessions", "repo": "dot-top", "summary": "what the machine and its agents are doing", "shortcuts": [] },
+    { "name": "ai", "group": "agents", "repo": "dot-ai", "summary": "install, route and run coding agents", "shortcuts": [] },
+    { "name": "agent", "group": "agents", "repo": "dot-agent", "summary": "modes, policy, sandbox, budgets", "shortcuts": [] },
+    { "name": "mcp", "group": "agents", "repo": "dot-mcp", "summary": "MCP servers as supply chain", "shortcuts": [] },
+    { "name": "system", "group": "system", "repo": "dot-system", "summary": "updates, cleanup, scheduled maintenance", "shortcuts": [{ "name": "update", "target": "system update" }] },
+    { "name": "doctor", "group": "system", "repo": "dot-doctor", "summary": "health, repair, backup and rollback", "shortcuts": [] },
+    { "name": "secret", "group": "trust", "repo": "dot-secret", "summary": "secrets, keys and SSH certificates", "shortcuts": [] },
+    { "name": "security", "group": "trust", "repo": "dot-security", "summary": "OS hardening", "shortcuts": [] },
+    { "name": "attest", "group": "trust", "repo": "dot-attest", "summary": "attestation and verification", "shortcuts": [] },
+    { "name": "fleet", "group": "trust", "repo": "dot-fleet", "summary": "many hosts", "shortcuts": [] },
+    { "name": "cli", "group": "platform", "repo": "dot-cli", "summary": "plugins, updates, completions", "shortcuts": [] },
+    { "name": "ui", "group": "platform", "repo": "dot-ui", "summary": "primitives for scripts", "shortcuts": [] }
+  ],
+  "builtins": ["help", "version"]
+}

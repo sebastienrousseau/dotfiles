@@ -42,11 +42,11 @@ printf '=== Opt-in host hardening ===\n\n'
 group_commands=(backup policy encrypt-check firewall telemetry dns-doh lock-screen usb-safety)
 for cmd in "${group_commands[@]}"; do
   summary="$( (bash "$dot" help "$cmd" 2>/dev/null || true) |
-    sed -n 's/.*Summary *//p' | head -1 || true)"
+    sed -n 's/.*Summary *//p' | sed -n '1,1p' || true)"
   printf '  dot %-22s %s\n' "$cmd" "${summary:-(see dot help all)}"
 done
 
 printf '\n--- live output ---\n\n'
-bash "$dot" encrypt-check 2>&1 | head -5 || true
+bash "$dot" encrypt-check 2>&1 | sed -n '1,5p' || true
 
 printf '\nOpt-in host hardening example complete.\n'

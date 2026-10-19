@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.io/schemas/cli/registry.v1.schema.json",
+  "title": "dot naming registries (ADR-020): domains, verbs, flags and exit codes",
+  "oneOf": [
+    { "$ref": "#/$defs/domainsFile" },
+    { "$ref": "#/$defs/verbsFile" },
+    { "$ref": "#/$defs/flagsFile" }
+  ],
+  "$defs": {
+    "word": { "type": "string", "pattern": "^[a-z]+$" },
+    "domainName": { "type": "string", "pattern": "^[a-z]{2,8}$" },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 60, "pattern": "^[^\\n]+$" },
+    "domainsFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "groups", "domains", "builtins"],
+      "properties": {
+        "schema": { "const": "cli/domains.v1" },
+        "groups": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "title"],
+            "properties": {
+              "id": { "$ref": "#/$defs/word" },
+              "title": { "$ref": "#/$defs/summary" }
+            }
+          }
+        },
+        "domains": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "group", "repo", "summary", "shortcuts"],
+            "properties": {
+              "name": { "$ref": "#/$defs/domainName" },
+              "group": { "$ref": "#/$defs/word" },
+              "repo": { "type": "string", "pattern": "^dot-[a-z]{2,8}$" },
+              "summary": { "$ref": "#/$defs/summary" },
+              "shortcuts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["name", "target"],
+                  "properties": {
+                    "name": { "$ref": "#/$defs/word" },
+                    "target": { "type": "string", "pattern": "^[a-z]{2,8}( [a-z]+){1,2}$" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "builtins": { "type": "array", "items": { "$ref": "#/$defs/word" } }
+      }
+    },
+    "verbsFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "verbs", "ps_shared"],
+      "properties": {
+        "schema": { "const": "cli/verbs.v1" },
+        "verbs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "effect", "powershell", "meaning", "replaces"],
+            "properties": {
+              "name": { "$ref": "#/$defs/word" },
+              "effect": { "enum": ["read", "change", "any"] },
+              "powershell": { "type": "string", "pattern": "^[A-Z][a-z]+$" },
+              "ps_suffix": { "type": "string", "pattern": "^[A-Z][a-z]+$" },
+              "confirms": { "type": "boolean" },
+              "meaning": { "$ref": "#/$defs/summary" },
+              "replaces": { "type": "array", "items": { "type": "string", "pattern": "^[a-z][a-z-]*$" } }
+            }
+          }
+        },
+        "ps_shared": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["powershell", "verbs", "rule"],
+            "properties": {
+              "powershell": { "type": "string", "pattern": "^[A-Z][a-z]+$" },
+              "verbs": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/word" } },
+              "rule": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "flagsFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "flags", "exit_codes"],
+      "properties": {
+        "schema": { "const": "cli/flags.v1" },
+        "flags": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["long", "meaning", "scope"],
+            "properties": {
+              "long": { "type": "string", "pattern": "^[a-z][a-z-]*[a-z]$" },
+              "short": { "type": "string", "pattern": "^[A-Za-z]$" },
+              "meaning": { "$ref": "#/$defs/summary" },
+              "scope": { "enum": ["all", "read", "write", "tui"] }
+            }
+          }
+        },
+        "exit_codes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "name", "meaning"],
+            "properties": {
+              "code": { "type": "integer", "minimum": 0, "maximum": 255 },
+              "name": { "type": "string", "pattern": "^[a-z][a-z-]*$" },
+              "meaning": { "$ref": "#/$defs/summary" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
