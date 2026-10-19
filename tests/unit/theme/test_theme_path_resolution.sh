@@ -142,7 +142,7 @@ else
 fi
 
 # --- Test: switch.sh `list` enumerates themes from defaults/ ---------------
-# `list` walks themes.toml under .chezmoidata/. If the descent is wrong
+# `list` walks themes.toml under .theme-manifest/. If the descent is wrong
 # it'd find an empty list (no themes defined at the sandbox root).
 # The sentinel theme is unpaired (no -light counterpart in our fixture),
 # so `list` will report 0 paired families — that's fine; the assertion
