@@ -25,7 +25,7 @@
    1 tests/unit/dot-cli/test_dot_fleet_enforcement.sh
    3 tests/unit/fish/test_fish_conf_aliases.sh
    1 tests/unit/fish/test_fish_conf_modern_core.sh
-   2 tests/unit/install/test_install_chezmoi_verified.sh
+   1 tests/unit/install/test_install_chezmoi_verified.sh
    7 tests/unit/install/test_install_edge_cases.sh
    3 tests/unit/install/test_install_idempotency.sh
    1 tests/unit/install/test_installers.sh

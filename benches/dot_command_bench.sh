@@ -101,8 +101,7 @@ done
 # timing). One `help:<command>` case each — the cold-start cost a user pays
 # on every invocation of that command.
 bench_help_ids() {
-  awk '/^_dot_command_routes\(\)/,/^EOF$/' "$DOT_BIN" |
-    awk -F'|' '/^[a-z][a-z0-9-]*\|[a-z]+$/ { print $1 }' |
+  awk -F'|' '/^[a-z][a-z0-9-]*\|[a-z]+$/ { print $1 }' "$REPO_ROOT/lib/dot/data/routes.txt" |
     sort -u
 }
 

@@ -43,9 +43,9 @@ routes=()
 while IFS= read -r _route_line; do
   routes+=("$_route_line")
 done < <(
-  awk '/^_dot_command_routes\(\)/{flag=1; next}
-       flag && /^EOF$/{exit}
-       flag && /^[a-z][a-z_-]+\|/{print}' "$DOT_CLI"
+  while IFS= read -r _row; do
+    if [[ "$_row" == [a-z]*\|* ]]; then printf '%s\n' "$_row"; fi
+  done <"$REPO_ROOT/lib/dot/data/routes.txt"
 )
 
 test_start "route_table_parsed"

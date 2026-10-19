@@ -1,0 +1,190 @@
+dot — declarative dotfiles CLI. Public commands:
+
+
+[Core]
+  dot sync — Apply dotfiles (alias for apply; --pull to fetch, --check to preview)
+  dot add — Add a file to chezmoi source
+  dot diff — Show chezmoi diff with exclusions
+  dot status — Show configuration drift (chezmoi status)
+  dot edit — Open chezmoi source in $EDITOR
+  dot uninstall — Remove the managed dotfiles environment (prompts unless --force)
+  dot clean-cache — Clear shell initialization caches
+  dot cd — Print source directory path (use: cd $(dot cd))
+  dot commit — AI-powered conventional commit
+
+[Diagnostics]
+  dot doctor — Deep audit: tools, paths, portability, AI analysis (--ai
+  dot attest — Export workstation attestation evidence (--json
+  dot secret-audit — Audit secret hygiene and leakage surface
+  dot score — System health and security scorecard
+  dot snapshot — Capture baseline system snapshot
+  dot chaos — Simulate config corruption to test self-healing
+  dot bundle — Create offline archive of dotfiles environment
+  dot rollback — Rollback dotfiles to a previous state
+  dot history — Shell history analysis
+  dot perf — Show performance mode and quick timing
+  dot benchmark — Benchmark shell startup with per-component profiling
+  dot metrics — Show recent observability metrics (JSONL)
+  dot load-bench — Measure time to heavy-layer readiness
+
+[AI]
+  dot ai — AI fleet cockpit, gateway, and cost
+  dot ai-setup — Interactive setup for all AI CLI tools
+  dot ai-query — Context-aware RAG query over your dotfiles
+  dot mcp — Inspect MCP policy, supply chain, and registry; serve MCP over stdio
+  dot mode — Set or inspect agent operating profiles (ask/plan/apply/audit)
+  dot agent — Profile-aware execution, agent card, a2a-card, session log, checkpoints, and conformance
+  dot agents — Render and check AGENTS.md and per-harness agent config from CLAUDE.md
+  dot patterns — List, view, and edit AI steering patterns
+  dot cl — Claude CLI with context patterns
+  dot copilot — GitHub Copilot CLI with context patterns
+  dot kimi — Kimi CLI with context patterns
+  dot agy — Antigravity CLI with context patterns
+  dot kiro — Kiro CLI with context patterns
+  dot sgpt — Shell-GPT with context patterns
+  dot ollama — Ollama with context patterns
+  dot opencode — OpenCode with context patterns
+  dot aider — Aider with context patterns
+
+[Tools]
+  dot env — Tool versions (mise)
+  dot profile — Show/switch configuration profile
+  dot keys — Keybindings (sign-check: verify git signing)
+  dot tools — Show or install nix packages
+  dot new — Create a new project from a template
+  dot sandbox — Launch a safe sandbox preview (Docker/Podman)
+  dot lint — Lint shell scripts (--fix
+  dot learn — Start the interactive tour of your new tools
+  dot docs — Show repo README
+  dot aliases — List, search, and explain the shipped shell aliases
+  dot registry — Browse and install modules from the dot module registry
+
+[Appearance]
+  dot theme — Switch terminal theme (dark/light)
+  dot wallpaper — Apply a wallpaper from your library [macOS,Linux]
+  dot fonts — Install (default) or patch Nerd Fonts (JetBrainsMono by default)
+  dot tune — Apply OS tuning (opt-in) [macOS,Linux]
+
+[Secrets]
+  dot secrets-init — Initialize age key for secrets
+  dot secrets — Edit encrypted secrets (age)
+  dot secrets-create — Create an encrypted secrets file
+  dot ssh-key — Encrypt an SSH key locally with age
+  dot ssh-cert — Manage short-lived SSH certificates
+
+[Security (opt-in)]
+  dot backup — Create a compressed backup of your home
+  dot policy — Check and enforce security policies across the environment
+  dot encrypt-check — Check disk encryption status
+  dot firewall — Apply firewall hardening [macOS,Linux]
+  dot telemetry — Disable OS telemetry [macOS,Linux]
+  dot dns-doh — Enable DNS-over-HTTPS [macOS,Linux]
+  dot lock-screen — Enforce lock screen idle settings [Linux]
+  dot usb-safety — Disable automount for removable media [Linux]
+
+[Fleet]
+  dot fleet — Show fleet node status, drift, and namespace (--json for machine output)
+  dot fleet drift — Check for configuration drift across managed files
+  dot fleet namespace — Show or set the active namespace for multi-tenant isolation
+  dot fleet events — Show recent fleet events from local event log
+  dot teleport — Deploy the dotfiles environment to a remote host over SSH
+
+[Meta]
+  dot upgrade — Update dotfiles, mise tools and (with consent) system packages
+  dot packages — List installed packages and package managers
+  dot cache-refresh — Regenerate shell caches for ultra-fast startup
+  dot completion — Generate shell completions (bash/zsh/fish/nu) from the command registry
+  dot search — Find commands by keyword
+  dot version — Show version information.
+  dot help — Show this help message
+
+[Fleet]
+  dot fleet status — Show this node's fleet status: id, namespace, version, OS, drift, last apply
+  dot fleet enforce — Show or set RBAC enforcement mode (advisory/strict) for agent profiles
+  dot fleet apply — SSH to every host in fleet.toml and run dot sync (or a custom --cmd)
+
+[AI]
+  dot ai chat — Start an interactive AI session with a chosen tool
+  dot ai tools — Show installed AI CLI tools and their versions
+  dot ai install — Install AI CLI tools via mise/native installers
+  dot ai serve — Run the local AI gateway/proxy that routes non-Claude providers
+  dot ai cost — Report AI spend across every provider from the unified run log
+  dot ai login — Interactive setup/authentication for installed AI CLI tools
+  dot ai doctor — Diagnose AI tooling configuration and connectivity
+  dot ai ask — Context-aware RAG query over your dotfiles
+  dot ai run — Run a one-shot prompt with an AI tool
+  dot ai delegate — Delegate a coding task to a cheaper AI model under agent policy
+  dot mode list — List available agent operating profiles (ask/plan/apply/audit)
+  dot mode current — Show the active agent profile and its policy
+  dot mode show — Show details of a specific agent profile
+  dot mode set — Switch the active agent profile
+  dot mode run — Run a command under a given agent profile with a checkpoint
+  dot mode doctor — Validate the agent-profiles.json config and default profile
+  dot agent card — Show the local agent card metadata
+  dot agent log — Tail the agent session audit log
+  dot agent checkpoint — Manage agent run checkpoints (save/list/show/replay)
+  dot agent delegate — Delegate execution to an allowed sub-agent
+  dot agent a2a-card — Show or validate the A2A v0.3 agent card
+  dot agent conformance — Run the A2A conformance test suite
+  dot mcp doctor — Run the MCP policy/supply-chain/config audit
+  dot mcp registry — Show the configured MCP server registry
+  dot mcp serve — Run the stdio MCP server (JSON-RPC 2.0 on stdin/stdout)
+
+[Secrets]
+  dot secrets edit — Edit the encrypted secrets file (age)
+  dot secrets set — Store a secret value under a key
+  dot secrets get — Retrieve a secret value (--raw for plaintext)
+  dot secrets list — List indexed secret keys
+  dot secrets load — Emit export lines for a secrets bucket (use with eval)
+  dot secrets provider — Show the active secrets provider
+
+[Tools]
+  dot env list — List managed tool versions via mise
+  dot env emit — Emit a portable workstation environment manifest (SBOM; --format json)
+  dot env prune — Show or remove orphan tool installs (--yes to commit)
+  dot env install — Install requested tool versions via mise
+  dot env use — Pin a tool version globally/locally via mise
+  dot registry list — List modules in the configured module registry
+  dot registry search — Filter registry modules by keyword
+  dot registry info — Print full metadata for a registry module
+  dot registry install — Install a registry module (scaffold)
+  dot registry url — Show the active registry URL
+  dot registry set-url — Override the registry URL (https only; persists)
+
+[Appearance]
+  dot theme list — Show all available terminal/wallpaper themes
+  dot theme set — Set a theme by name (interactive picker if omitted)
+  dot theme toggle — Toggle light/dark within the current theme family
+  dot theme sync — Sync the dotfiles theme with system dark/light mode
+  dot theme family — Cycle between theme families
+  dot theme current — Show the current theme info
+  dot theme rebuild — Regenerate themes from system and custom wallpapers
+  dot wallpaper sync — Sync wallpaper from your library
+  dot wallpaper rotate — Rotate to the next wallpaper in your library
+
+[Tools]
+  dot tools install — Enter the Nix development shell with all managed tools
+  dot tools docs — Show the full tools markdown documentation
+  dot profile show — Show the active configuration profile and feature flags
+  dot profile set — Set the active configuration profile (run dot sync to apply)
+
+[AI]
+  dot agents list — Show recognised AI agent harnesses and their config paths
+  dot agents check — Verify AGENTS.md tracks CLAUDE.md (exit 1 if drifted)
+  dot agents render — Regenerate AGENTS.md and per-harness config from CLAUDE.md
+
+[Tools]
+  dot aliases list — List all shell aliases shipped by the dotfiles
+  dot aliases search — Search aliases by term
+  dot aliases why — Show details and deprecation status for a single alias
+  dot aliases stats — Show alias usage counts from shell history
+  dot aliases cheatsheet — Generate the alias cheatsheet markdown
+  dot aliases tiers — Show which alias tiers/ecosystems are enabled
+
+[AI]
+  dot patterns list — List AI steering patterns
+  dot patterns view — View an AI steering pattern
+  dot patterns edit — Edit an AI steering pattern in $EDITOR
+
+[Tools]
+  dot keys sign-check — Verify git commit-signing configuration and key availability

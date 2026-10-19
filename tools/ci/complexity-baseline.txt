@@ -5,11 +5,11 @@
 # refactor it, then rewrite this file. New units must stay under LIMITS.
    4    3    7.4   62    62 .clusterfuzzlite/build.sh::<top>
   12   19   21.7   83    94 .devcontainer/install-lite.sh::<top>
-  32   27   57.7  154   374 benches/dot_command_bench.sh::<top>
+  32   27   57.7  154   373 benches/dot_command_bench.sh::<top>
    1    0    0.0  158     0 benches/dot_command_bench.sh::bench_run_cases
   26   32   45.4   82    82 benches/test_help_gates_wall_clock.sh::<top>
   11   13   27.7   37     0 benches/test_perf_budgets.sh::_gate_max_rc
-   9    9   21.4   37  1617 bin/dot-theme-sync::<top>
+   9    9   21.6   38  1588 bin/dot-theme-sync::<top>
   25   18   28.6   37     0 bin/dot-theme-sync::_apply_gnome_family_desktop
   42   37   46.0   65     0 bin/dot-theme-sync::_apply_kde_desktop
   25   19   31.6   32     0 bin/dot-theme-sync::_apply_wlroots_desktop
@@ -23,10 +23,7 @@
   33   39   35.4  149     0 bin/dot-theme-sync::reload_desktop
   17   19   28.7   43     0 bin/dot-theme-sync::reload_ghostty
   11   11   20.7   33     0 bin/dot-theme-sync::reload_tmux
-  37   44   46.3  126   762 bin/dot::<top>
-   1    0    0.0  111     0 bin/dot::_dot_command_routes
-   1    0    0.0   94     0 bin/dot::_dot_help_details
-   1    0    0.0  153     0 bin/dot::_dot_help_specs
+  28   32   39.6   96   383 bin/dot::<top>
   20   24   31.1   39     0 bin/dot::_resolve_source_dir
   21   21    4.2  111   111 defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh::<top>
   19   27   29.6   53     0 defaults/.chezmoitemplates/aliases/cd/cd-core.aliases.sh::cd_with_history
@@ -79,7 +76,6 @@
   13   21   27.2   38     0 defaults/dot_local/bin/executable_tmux-sessionizer::build_list
   13   16   26.2   41     0 defaults/dot_local/bin/executable_tmux-status::system_linux
   18   17   21.1  142   142 defaults/dot_local/bin/executable_tour::<top>
-   1    0    1.0  167   167 examples/example-command-reference.sh::<top>
    8   17   21.6   38     0 install.sh::install_chezmoi
   14   16   28.6   45     0 install.sh::install_chezmoi_verified_embedded
   57   79   70.3  297     0 install.sh::main
@@ -94,7 +90,7 @@
   21   22   36.0   59    80 install/provision/run_onchange_50-install-fonts.sh::<top>
   39   20   35.3   29     0 lib/dot/ai-commands.sh::_ai_invoke_provider
   12   11   23.7   24     0 lib/dot/ai-commands.sh::cmd_ai_install
-  18    1    2.1   22     0 lib/dot/ai-install.sh::_ai_mise_pkg
+  11    1    2.7   15     0 lib/dot/ai-install.sh::_ai_mise_pkg
   12   12   24.7   29     0 lib/dot/theme-transaction.sh::_theme_txn_restore_files
    2    1    4.2   35   756 lib/dot/ui.sh::<top>
   13   16   47.8   47     0 lib/dot/ui.sh::_ui_table_printf_fallback
@@ -110,7 +106,7 @@
   22   22   36.8  109   109 scripts/diagnostics/attest-verify.sh::<top>
   13   11   27.4   73   292 scripts/diagnostics/benchmark.sh::<top>
   15   17   31.0   60     0 scripts/diagnostics/benchmark.sh::render_waterfall
-  15   36   31.8   74     0 scripts/diagnostics/benchmark.sh::run_hyperfine
+  15   36   31.5   74     0 scripts/diagnostics/benchmark.sh::run_hyperfine
   12    6   13.7   27    27 scripts/diagnostics/doctor-unified.sh::<top>
    4    4   14.4   20   536 scripts/diagnostics/health.sh::<top>
    5    5   17.0   65    65 scripts/diagnostics/history-analysis.sh::<top>
@@ -121,7 +117,7 @@
   11   11    5.6   26     0 scripts/diagnostics/security-score.sh::get_grade
   11   16   24.0   62     0 scripts/diagnostics/security-score.sh::print_summary
   13   14   21.3   54    69 scripts/diagnostics/version-locks.sh::<top>
-  34   32   49.2  184   193 scripts/diagnostics/workstation-attestation.sh::<top>
+  25   27   43.1  135   199 scripts/diagnostics/workstation-attestation.sh::<top>
    1    0    1.0    1   522 scripts/dot/commands/agent.sh::<top>
   16    5   25.7   51     0 scripts/dot/commands/agent.sh::cmd_mode
   12   12   25.8   22     0 scripts/dot/commands/agents.sh::_agents_repo_root
@@ -184,12 +180,12 @@
   11   19   18.3   35     0 scripts/theme/install-catppuccin-themes.sh::install_wallpapers
   12   17   20.3   49   103 scripts/theme/merge-wallpaper.sh::<top>
   12   13   28.8   40     0 scripts/theme/merge-wallpaper.sh::merge_pair
-  11   10   19.9   47   120 scripts/theme/wallpaper-rotate.sh::<top>
+  11   10   19.9   47   125 scripts/theme/wallpaper-rotate.sh::<top>
   11    7   21.3   91    99 scripts/tuning/linux.sh::<top>
   27   34   35.0   93    93 tools/ci/check-copyright-headers.sh::<top>
    9    9   27.8   61   159 tools/ci/check-deps-dev.sh::<top>
   16   18   35.6   52    52 tools/ci/check-fuzz-harness-self-contained.sh::<top>
-  13   15   24.1   35    35 tools/ci/check-remote-installers.sh::<top>
+  13   15   25.8   36    41 tools/ci/check-remote-installers.sh::<top>
   18    7   15.4   38     0 tools/ci/check-shell-preamble.sh::check_one
   14   11   37.0   67    79 tools/ci/dot-cli-startup-bench.sh::<top>
   12   15   28.1   42    42 tools/ci/lint-reusable-pins.sh::<top>
@@ -203,8 +199,8 @@
    8    7   30.9   57    57 tools/docs/build-site.sh::<top>
   11   15   27.0   27     0 tools/docs/check-manual.sh::check_links
   11   11   20.8   30    30 tools/docs/checksum-manual.sh::<top>
-   9    9   31.5   68   113 tools/docs/generate-command-index.sh::<top>
+   9    9   31.5   68   111 tools/docs/generate-command-index.sh::<top>
   19   21   48.0   79    83 tools/docs/generate-completions.sh::<top>
-  29   31   49.3  123   140 tools/docs/generate-manpage.sh::<top>
+  29   31   49.1  123   135 tools/docs/generate-manpage.sh::<top>
   10   11   35.1   93   119 tools/release/package-policy-bundles.sh::<top>
   17   11   33.6   47    50 tools/release/stage-dot.sh::<top>

@@ -106,9 +106,11 @@ completions: ## Regenerate committed zsh/bash completions from the registry
 
 generate: man completions ## Regenerate every registry-derived artefact
 	bash ./tools/docs/generate-command-index.sh
+	bash ./tools/docs/generate-command-reference.sh
 
 check-drift: ## Fail if any generated artefact is stale (what doc-drift.yml runs)
 	bash ./tools/docs/generate-command-index.sh --check
+	bash ./tools/docs/generate-command-reference.sh --check
 	bash ./tools/docs/generate-manpage.sh --check
 	bash ./tools/docs/generate-completions.sh --check
 	bash ./scripts/verify-release-versions

@@ -27,12 +27,19 @@ trap 'rm -rf "$WORK"' EXIT
 # Pull one top-level function out of bin/dot, by name.
 _extract_fn() {
   awk -v fn="$1" '
-    $0 ~ "^" fn "\\(\\) \\{" { inside = 1 }
+    $0 ~ "^" fn "\\(\\) \\{" {
+      print
+      if ($0 ~ /\}[ \t]*$/) exit # a one-line function
+      inside = 1
+      next
+    }
     inside { print }
     inside && /^\}/ { exit }
   ' "$DOT_CLI"
 }
 {
+  printf '_DOT_SRC=%q\n' "$REPO_ROOT"
+  _extract_fn _dot_data
   _extract_fn _dot_command_routes
   _extract_fn _dot_command_route
 } >"$WORK/route.sh"
@@ -69,6 +76,24 @@ route no-such-command-xyz || rc=$?
 assert_equals "1" "$rc" "unknown name exits 1"
 assert_equals "" "$(cat "$WORK/out")" "nothing printed for an unknown name"
 
+test_start "clean_cache_routes_to_core"
+# The weekly dotfiles-maintenance systemd timer runs `dot clean-cache`;
+# core.sh implements it, so the route table must send it there.
+rc=0
+route clean-cache || rc=$?
+assert_equals "0" "$rc" "clean-cache is a known route"
+assert_equals "core" "$(cat "$WORK/out")" "clean-cache routes to the core module"
+
+test_start "clean_cache_runs_end_to_end"
+mkdir -p "$WORK/home/.cache/zsh"
+touch "$WORK/home/.cache/zsh/stale-init.zsh"
+rc=0
+dot clean-cache || rc=$?
+assert_equals "0" "$rc" "dot clean-cache exits 0 (the maintenance timer's command)"
+assert_output_not_contains "Unknown command" "cat '$WORK/out'" "not rejected as unknown"
+if [[ -e "$WORK/home/.cache/zsh/stale-init.zsh" ]]; then stale=present; else stale=removed; fi
+assert_equals "removed" "$stale" "the stale zsh init cache was cleared"
+
 test_start "double_dash_alone_does_not_trigger_help_intercept"
 dot version -- literal || true
 assert_file_contains "$WORK/out" "Dotfiles Version" "command ran (mutant B3: -- routed to help)"
@@ -84,6 +109,22 @@ dot version --help -- || true
 assert_file_contains "$WORK/out" "dot version" "help topic rendered"
 assert_file_contains "$WORK/out" "Summary" "help topic body rendered"
 assert_output_not_contains "Dotfiles Version" "cat '$WORK/out'" "command itself did not run"
+
+# A table whose last line has no trailing newline still prints that line.
+test_start "data_prints_a_last_line_without_newline"
+mkdir -p "$WORK/src/lib/dot/data"
+printf 'first|a\nlast|b' >"$WORK/src/lib/dot/data/t.txt"
+"$BASH_BIN" -c "source '$WORK/route.sh'; _DOT_SRC='$WORK/src' _dot_data t.txt" >"$WORK/out" 2>&1
+assert_equals "$(printf 'first|a\nlast|b')" "$(cat "$WORK/out")" "unterminated last line kept"
+
+# With SIGPIPE ignored (CI runners, the pre-push hook) a reader that exits
+# first used to get one "printf: write error" per remaining table line.
+test_start "data_reader_exiting_early_is_silent_when_sigpipe_ignored"
+(
+  trap '' PIPE
+  "$BASH_BIN" -c "source '$WORK/route.sh'; { sleep 0.2; _dot_data help-specs.txt; } | true"
+) >"$WORK/out" 2>&1
+assert_equals "" "$(cat "$WORK/out")" "no write errors after the reader exits"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

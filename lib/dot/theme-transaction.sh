@@ -232,7 +232,9 @@ _theme_txn_snapshot_targets() {
 # leaves every restored target looking hand-edited, and the next apply with
 # no terminal to ask on (dot upgrade) dies on the question. The transaction
 # therefore snapshots the records for its targets with the files and puts
-# them back on rollback.
+# them back on rollback. chezmoi keys records by the cleaned path, so the
+# manifest's targets are matched with repeated slashes collapsed (a TMPDIR
+# or XDG dir with a trailing slash yields "T//dir").
 
 # _theme_txn_chezmoi_records: chezmoi's records, one "<target>\t<JSON>"
 # line each; nothing when chezmoi is not installed.
@@ -252,7 +254,7 @@ _theme_txn_snapshot_chezmoi_records() {
   local table="$THEME_TXN_OPERATION_DIR/chezmoi-records.tsv"
   command -v chezmoi >/dev/null 2>&1 || return 0
   if ! _theme_txn_chezmoi_records | awk -F'\t' '
-    FILENAME == ARGV[1] { want[$4] = 1; next }
+    FILENAME == ARGV[1] { t = $4; gsub(/\/\/+/, "/", t); want[t] = 1; next }
     ($1 in want)
   ' "$THEME_TXN_MANIFEST" - >"$table"; then
     rm -f "$table"
@@ -265,7 +267,7 @@ _theme_txn_snapshot_chezmoi_records() {
 _theme_txn_chezmoi_record_changes() {
   local table="$THEME_TXN_OPERATION_DIR/chezmoi-records.tsv"
   _theme_txn_chezmoi_records | awk -F'\t' -v OFS='\t' '
-    FILENAME == ARGV[1] { want[$4] = 1; next }
+    FILENAME == ARGV[1] { t = $4; gsub(/\/\/+/, "/", t); want[t] = 1; next }
     FILENAME == ARGV[2] { before[$1] = $2; next }
     ($1 in want) { after[$1] = $2 }
     END {

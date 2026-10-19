@@ -354,8 +354,7 @@ test_fm_ai_bridge_every_routed_provider_refuses() {
   # Belt and braces: the route table is the source of truth, so assert the
   # list above still covers every provider routed to ai.sh.
   local routed missing=""
-  routed="$(awk '/^_dot_command_routes\(\)/,/^EOF$/' "$REPO_ROOT/bin/dot" |
-    awk -F'|' '$2 == "ai" && $1 !~ /^ai/ { print $1 }')"
+  routed="$(awk -F'|' '$2 == "ai" && $1 !~ /^ai/ { print $1 }' "$REPO_ROOT/lib/dot/data/routes.txt")"
   local tool
   for tool in $routed; do
     case " $FM_AI_BRIDGES " in

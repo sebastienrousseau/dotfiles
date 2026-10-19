@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -109,23 +110,45 @@ func (m model) renderHeader() string {
 	return " " + left + strings.Repeat(" ", gap) + right
 }
 
+func (m model) toolShortcutBadge(t tool) string {
+	var b string
+	if n := m.ecoSnap.ToolProcs[t.bin]; n > 0 {
+		b += " " + okSt.Render(fmt.Sprintf("(%d)", n))
+	}
+	switch t.name {
+	case "corralctl":
+		return b + " " + keySt.Render("[c]")
+	case "passmcp":
+		return b + " " + keySt.Render("[v]")
+	case "draft":
+		return b + " " + keySt.Render("[d]")
+	default:
+		return b
+	}
+}
+
 func (m model) renderLeftPane(bodyH int) string {
 	var rows []string
 	cursorRow, lastGroup := 0, ""
 	for i, t := range m.tools {
 		if t.group != lastGroup {
-			rows = append(rows, groupSt.Render(strings.ToUpper(t.group)))
+			hdr := strings.ToUpper(t.group)
+			if t.group == "ecosystem" {
+				hdr += " [c/v/d]"
+			}
+			rows = append(rows, groupSt.Render(hdr))
 			lastGroup = t.group
 		}
 		dot := offSt.Render("○")
 		if t.installed {
 			dot = okSt.Render("●")
 		}
+		badge := m.toolShortcutBadge(t)
 		if i == m.cursor {
 			cursorRow = len(rows)
-			rows = append(rows, selSt.Render("▌")+dot+" "+selSt.Render(t.name))
+			rows = append(rows, selSt.Render("▌")+dot+" "+selSt.Render(t.name)+badge)
 		} else {
-			rows = append(rows, " "+dot+" "+bodySt.Render(t.name))
+			rows = append(rows, " "+dot+" "+bodySt.Render(t.name)+badge)
 		}
 	}
 	rows = windowRows(rows, cursorRow, bodyH)
@@ -140,17 +163,22 @@ func (m model) renderRightPane(bodyH int) string {
 	t := m.tools[m.cursor]
 	rw := m.rightWidth()
 	var cb strings.Builder
-	cb.WriteString(titleSt.Render(strings.ToUpper(t.name)))
-	state := offSt.Render(" not installed — i to install")
-	if t.installed {
-		state = dimSt.Render(" · ready")
-	}
-	cb.WriteString(state + "\n\n")
 	pal := m.palette()
 	if len(pal) > 8 {
 		pal = pal[:8]
 	}
-	cb.WriteString(m.renderTranscript(rw-2, bodyH-5-len(pal)) + "\n")
+	if bodyH >= 12 && os.Getenv("DOT_AI_SPLASH") == "" {
+		cb.WriteString(m.renderControlHeader(rw-2) + "\n")
+		cb.WriteString(m.renderTranscript(rw-2, bodyH-6-len(pal)) + "\n")
+	} else {
+		cb.WriteString(titleSt.Render(strings.ToUpper(t.name)))
+		state := offSt.Render(" not installed — i to install")
+		if t.installed {
+			state = dimSt.Render(" · ready")
+		}
+		cb.WriteString(state + "\n\n")
+		cb.WriteString(m.renderTranscript(rw-2, bodyH-5-len(pal)) + "\n")
+	}
 	if len(pal) > 0 {
 		cb.WriteString(m.renderPalette(pal, rw-2) + "\n")
 	}
@@ -171,7 +199,11 @@ func (m model) View() string {
 		return "  loading dot ai…"
 	}
 	header := m.renderHeader()
+	showBtop := m.height >= 20 && !m.hideBtop && os.Getenv("DOT_AI_SPLASH") == ""
 	bodyH := m.height - 5
+	if showBtop {
+		bodyH = m.height - 8
+	}
 	body := lipgloss.JoinHorizontal(lipgloss.Top, m.renderLeftPane(bodyH), m.renderRightPane(bodyH))
 
 	var keys []struct{ k, d string }
@@ -181,20 +213,25 @@ func (m model) View() string {
 		}
 	} else {
 		keys = []struct{ k, d string }{
-			{"↑↓", "move"}, {"⏎", "open session"}, {"tab", "quick chat"},
-			{"m", "model"}, {"g", "green"}, {"s", "serve"}, {"i", "install"}, {"q", "quit"},
+			{"↑↓", "tool"}, {"←→", "action"}, {"1-6/⏎", "start/run"}, {"x", "kill"},
+			{"c/v/d", "eco"}, {"b", "btop"}, {"g", "green"}, {"m", "model"},
+			{"s", "serve"}, {"r", "refresh"}, {"i", "install"}, {"tab", "chat"}, {"q", "quit"},
 		}
 	}
 	var fbar strings.Builder
 	for i, kv := range keys {
 		if i > 0 {
-			fbar.WriteString(keyDesc.Render("  ·  "))
+			fbar.WriteString(keyDesc.Render(" · "))
 		}
 		fbar.WriteString(keySt.Render(kv.k) + " " + keyDesc.Render(kv.d))
 	}
 	footer := " " + fbar.String()
 	if m.status != "" {
 		footer = " " + dimSt.Render(m.status) + footer
+	}
+	footer = ansi.Truncate(footer, m.width, "…")
+	if showBtop {
+		return strings.Join([]string{header, m.renderBtopDeck(), body, footer}, "\n")
 	}
 	return strings.Join([]string{header, body, footer}, "\n")
 }
@@ -278,6 +315,10 @@ func (m model) renderTranscript(w, h int) string {
 }
 
 func (m model) renderEmptyTranscript(w, h int) string {
+	isEco := m.cursor >= 0 && m.cursor < len(m.tools) && m.tools[m.cursor].group == "ecosystem"
+	if (m.refreshed || isEco) && os.Getenv("DOT_AI_SPLASH") == "" {
+		return m.renderEcosystemControlCentre(w, h)
+	}
 	var rec []string
 	if len(m.recent) > 0 {
 		rec = append(rec, dimSt.Render("recent"))
@@ -336,14 +377,30 @@ func anyMultiline(lines []string) bool {
 	return false
 }
 
-// renderSnapshot prints one frame at a fixed size (DOT_AI_SNAPSHOT=1).
+// envInt reads a positive integer from the environment, else def.
+func envInt(name string, def int) int {
+	if n, err := strconv.Atoi(os.Getenv(name)); err == nil && n > 0 {
+		return n
+	}
+	return def
+}
+
+// renderSnapshot prints one frame (DOT_AI_SNAPSHOT=1), sized from COLUMNS and
+// LINES when set, else 100x28.
 func renderSnapshot() {
 	m := newModel()
-	mm, _ := m.Update(tea.WindowSizeMsg{Width: 94, Height: 26})
+	mm, _ := m.Update(tea.WindowSizeMsg{Width: envInt("COLUMNS", 100), Height: envInt("LINES", 28)})
 	m = mm.(model)
+	m.sessions = m.scanner.Scan()
 	if r, ok := refresh().(refreshMsg); ok {
 		mm, _ = m.Update(r)
 		m = mm.(model)
+	}
+	if want := os.Getenv("DOT_AI_TOOL"); want != "" {
+		mm, _ = m.jumpToTool(want)
+		m = mm.(model)
+		fmt.Println(m.View())
+		return
 	}
 	m.transcript = []line{
 		{who: "you", text: "show me a typed fetch wrapper"},

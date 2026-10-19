@@ -75,7 +75,8 @@ and [`docs/STRUCTURE.md`](docs/STRUCTURE.md). The parts you touch most:
 
 | Path | What |
 |---|---|
-| `bin/dot` | CLI dispatcher **and the command registry** — `_dot_help_specs`, `_dot_help_details`, `_dot_command_routes`. Adding a command means editing these. |
+| `bin/dot` | CLI dispatcher. |
+| `lib/dot/data/` | **The command registry**: `routes.txt` (command → module), `help-specs.txt` (overview rows), `help-details.txt` (detailed help). `bin/dot` reads them through `_dot_command_routes`, `_dot_help_specs` and `_dot_help_details`; the generators, QA gates and tests read the same files. Adding a command means editing these. |
 | `scripts/dot/commands/` | One file per subcommand. |
 | `lib/dot/` | Shared bash library sourced by every subcommand. |
 | `defaults/` | The chezmoi source tree (everything that lands in `$HOME`), rebased via `.chezmoiroot`. |
@@ -90,9 +91,9 @@ Adding a `dot` subcommand touches four places; the drift gates will
 tell you if you miss one:
 
 1. `scripts/dot/commands/<name>.sh` — the implementation
-2. `bin/dot` — a `_dot_command_routes` row and a `_dot_help_specs` row
+2. `lib/dot/data/` — a `routes.txt` row and a `help-specs.txt` row (and a `help-details.txt` row for detailed help)
 3. `docs/manual/03-reference/01-dot-cli.md` — reference prose
-4. `make generate` — regenerates the command index, man page, completions
+4. `make generate` — regenerates the command index, command reference, man page, completions
 
 ---
 

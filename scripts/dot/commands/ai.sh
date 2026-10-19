@@ -334,7 +334,7 @@ EOF
 # `dot ai <verb> …` → the function that takes the remaining arguments.
 _AI_VERBS="chat:cmd_ai_chat install:cmd_ai_install serve:_ai_serve cost:cmd_ai_cost
 login:cmd_ai_setup doctor:cmd_ai_doctor ask:cmd_ai_query run:_ai_oneshot delegate:cmd_ai_delegate
-corral:cmd_ai_corral mcp:cmd_ai_mcp draft:cmd_ai_draft eco:cmd_ai_eco top:cmd_ai_eco"
+corral:cmd_ai_corral corralctl:cmd_ai_corral mcp:cmd_ai_mcp passmcp:cmd_ai_mcp draft:cmd_ai_draft eco:cmd_ai_eco top:cmd_ai_eco"
 
 # Deprecated `dot ai` verbs and the bare / unknown forms. `status` and
 # `local` keep their verb in "$@", as they always have.

@@ -18,16 +18,15 @@ EXAMPLES_DIR="$REPO_ROOT/examples"
 DOT_CLI="$REPO_ROOT/bin/dot"
 MIN_EXAMPLES_COVERAGE="${MIN_EXAMPLES_COVERAGE:-100}"
 
-# Public commands/subcommands, extracted from bin/dot's _dot_help_specs — the
+# Public commands/subcommands, read from lib/dot/data/help-specs.txt — the
 # same source scripts/qa/docs-coverage.sh uses, so docs and examples stay in
 # lockstep at the command granularity.
 extract_public_commands() {
+  local specs="$REPO_ROOT/lib/dot/data/help-specs.txt"
+  [[ -f "$specs" ]] || return 0
   awk -F'|' '
-    /_dot_help_specs\(\)/ { in_func=1; next }
-    in_func && /cat <<'\''EOF'\''/ { in_block=1; next }
-    in_block && /^EOF$/ { exit }
-    in_block && NF>=2 { print $2 }
-  ' "$DOT_CLI"
+    NF>=2 { print $2 }
+  ' "$specs"
 }
 
 # Core feature domains that must each have examples/example-<area>.sh.

@@ -359,6 +359,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot upgrade` | --yes / DOTFILES_YES=1 answers yes to installing mise and upgrading system packages | `test_fm_smoke_upgrade_yes` | `help:upgrade` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/03-environment.md` | **smoke** — the consented phases install and upgrade software (network, mutates the system) |
 | `dot upgrade` | DOTFILES_FONTS=1 adds the Nerd Font step to upgrade | `test_fm_smoke_env_dotfiles_fonts` | `help:upgrade` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/03-environment.md` | **smoke** — only observable inside the real upgrade run (network) |
 | `dot cache-refresh` | (default) | `test_fm_cache_refresh` | `run:cache-refresh` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot clean-cache` | (default) | `test_fm_clean_cache` | `help:clean-cache` | `examples/example-command-reference.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot prewarm` | alias of cache-refresh | `test_fm_prewarm` | `help:prewarm` | `examples/example-dot-meta.sh` | `docs/manual/command-index.md` | regression |
 | `dot cache-refresh` | XDG_CACHE_HOME receives the regenerated shell caches | `test_fm_env_xdg_cache_home` | `help:cache-refresh` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 | `dot docs` | (default) | `test_fm_docs` | `run:docs` | `examples/example-dot-meta.sh` | `docs/manual/command-index.md` | regression |
