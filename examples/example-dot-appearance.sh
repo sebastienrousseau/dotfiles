@@ -42,12 +42,12 @@ printf '=== Themes, wallpapers and fonts ===\n\n'
 group_commands=(theme wallpaper fonts tune)
 for cmd in "${group_commands[@]}"; do
   summary="$( (bash "$dot" help "$cmd" 2>/dev/null || true) |
-    sed -n 's/.*Summary *//p' | head -1 || true)"
+    sed -n 's/.*Summary *//p' | sed -n '1,1p' || true)"
   printf '  dot %-22s %s\n' "$cmd" "${summary:-(see dot help all)}"
 done
 
 printf '\n--- live output ---\n\n'
 bash "$dot" theme current || true
-bash "$dot" theme list | head -8 || true
+bash "$dot" theme list | sed -n '1,8p' || true
 
 printf '\nThemes, wallpapers and fonts example complete.\n'

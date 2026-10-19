@@ -42,12 +42,12 @@ printf '=== Agent modes and checkpoints ===\n\n'
 group_commands=(mode agent)
 for cmd in "${group_commands[@]}"; do
   summary="$( (bash "$dot" help "$cmd" 2>/dev/null || true) |
-    sed -n 's/.*Summary *//p' | head -1 || true)"
+    sed -n 's/.*Summary *//p' | sed -n '1,1p' || true)"
   printf '  dot %-22s %s\n' "$cmd" "${summary:-(see dot help all)}"
 done
 
 printf '\n--- live output ---\n\n'
 bash "$dot" mode list || true
-bash "$dot" agent card 2>&1 | head -6 || true
+bash "$dot" agent card 2>&1 | sed -n '1,6p' || true
 
 printf '\nAgent modes and checkpoints example complete.\n'

@@ -42,11 +42,11 @@ printf '=== Backup and restore ===\n\n'
 group_commands=(restore rollback)
 for cmd in "${group_commands[@]}"; do
   summary="$( (bash "$dot" help "$cmd" 2>/dev/null || true) |
-    sed -n 's/.*Summary *//p' | head -1 || true)"
+    sed -n 's/.*Summary *//p' | sed -n '1,1p' || true)"
   printf '  dot %-22s %s\n' "$cmd" "${summary:-(see dot help all)}"
 done
 
 printf '\n--- live output ---\n\n'
-bash "$dot" restore --list 2>&1 | head -5 || true
+bash "$dot" restore --list 2>&1 | sed -n '1,5p' || true
 
 printf '\nBackup and restore example complete.\n'
