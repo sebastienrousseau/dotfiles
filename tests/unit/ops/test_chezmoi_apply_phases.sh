@@ -187,7 +187,7 @@ if command -v script >/dev/null 2>&1; then
   with_gum
   apply_tty GUM_CHOICE="Choose which to install" GUM_PICK="Codex CLI,,Qwen Code"
   assert_equals "0:yes:yes:no" \
-    "$RC:$(yes_no called 'mise use -g npm:@openai/codex@0.162.1'):$(yes_no called 'mise use -g npm:@qwen-code/qwen-code@0.25.0'):$(yes_no called 'npm:@github/copilot')" \
+    "$RC:$(yes_no called 'mise use -g npm:@openai/codex@0.162.1'):$(yes_no called 'mise use -g npm:@qwen-code/qwen-code@0.25.1'):$(yes_no called 'npm:@github/copilot')" \
     "codex and qwen, not copilot; blank picks are ignored"
 
   test_start "apply_tty_skip_installs_nothing"
