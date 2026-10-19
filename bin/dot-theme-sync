@@ -95,7 +95,7 @@ if [[ -f "$SRC_DIR/.chezmoiroot" ]]; then
 fi
 
 readonly DATA_FILE="$CHEZMOI_SRC/.chezmoidata.toml"
-readonly THEMES_FILE="$CHEZMOI_SRC/.chezmoidata/themes.toml"
+readonly THEMES_FILE="$CHEZMOI_SRC/.theme-manifest/themes.toml"
 readonly CHEZMOI_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
 
 # =============================================================================
@@ -1300,7 +1300,7 @@ reload_desktop() {
     fi
 
     # Read macos_accent from themes.toml (set by extract-theme.py from wallpaper hue)
-    local themes_file="$CHEZMOI_SRC/.chezmoidata/themes.toml"
+    local themes_file="$CHEZMOI_SRC/.theme-manifest/themes.toml"
     if [[ -f "$themes_file" ]]; then
       local toml_accent
       toml_accent="$(awk -v n="$theme" '

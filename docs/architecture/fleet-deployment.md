@@ -15,7 +15,7 @@ flowchart TD
         data[".chezmoidata.toml<br/>theme, profile, machine, features"]
         wallpapers["~/Pictures/Wallpapers/ + System<br/>wallpapers (source of truth)"]
         engine_k["K-Means CIELAB engine<br/>extract-theme.py + rebuild-themes.sh"]
-        themes[".chezmoidata/themes.toml<br/>auto-generated, WCAG AAA"]
+        themes[".theme-manifest/themes.toml<br/>auto-generated, WCAG AAA"]
         hw[".chezmoidata/hardware.toml<br/>machine presets: T2, Surface, Geekom"]
         keys[".chezmoidata/keybinds.toml<br/>modifier hierarchy matrix"]
         tpl[".chezmoitemplates/<br/>reusable partials"]

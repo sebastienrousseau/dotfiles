@@ -37,6 +37,7 @@ trap 'rm -rf "$sandbox"' EXIT
 home="$sandbox/home"
 mkdir -p "$home/.config" "$home/.local/state" "$home/.cache" \
   "$sandbox/defaults/.chezmoidata" \
+  "$sandbox/defaults/.theme-manifest" \
   "$home/Library/Application Support/com.apple.wallpaper/Store" \
   "$home/Pictures/Wallpapers" \
   "$sandbox/mock-bin"
@@ -47,7 +48,7 @@ THEME="testroom-dark"
 cat >"$sandbox/defaults/.chezmoidata.toml" <<EOF
 theme = "${THEME}"
 EOF
-cat >"$sandbox/defaults/.chezmoidata/themes.toml" <<EOF
+cat >"$sandbox/defaults/.theme-manifest/themes.toml" <<EOF
 [themes.${THEME}]
 family = "testroom"
 mode = "dark"

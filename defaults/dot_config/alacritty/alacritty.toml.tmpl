@@ -1,7 +1,8 @@
 {{- $fontFamily := default "JetBrainsMono Nerd Font" .terminal_font_family -}}
 {{- $fontSize := default 20 .terminal_font_size -}}
-{{- $themeName := includeTemplate "theme-name" . -}}
-{{- $t := index .themes $themeName -}}
+{{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
+{{- $themeName := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}
+{{- $t := index $themes $themeName -}}
 [window]
 padding = { x = 16, y = 12 }
 # Preserve the generated sRGB palette and its tested contrast ratios.

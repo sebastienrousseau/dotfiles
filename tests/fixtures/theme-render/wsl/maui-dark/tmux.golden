@@ -156,7 +156,7 @@ bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  THEME — Session Block Bars                                              ║
-# ║  Colors from .chezmoidata/themes.toml (maui-dark)  ║
+# ║  Colors from .theme-manifest/themes.toml (maui-dark)  ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 #
 # A fixed frame with one per-session colour, every label white: the top bar

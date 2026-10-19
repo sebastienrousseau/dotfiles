@@ -67,12 +67,16 @@ def render_all(chezmoi: str) -> dict[str, str]:
         # Copy only trusted render inputs. No user's config, hooks, externals,
         # secrets, or source checkout mutation participates in the fixture.
         (source / ".chezmoidata").mkdir()
+        (source / ".theme-manifest").mkdir()
         (source / ".chezmoitemplates").mkdir()
-        for data in ("themes.toml", "apple.toml"):
-            shutil.copyfile(
-                REPO / "defaults/.chezmoidata" / data,
-                source / ".chezmoidata" / data,
-            )
+        shutil.copyfile(
+            REPO / "defaults/.chezmoidata/apple.toml",
+            source / ".chezmoidata/apple.toml",
+        )
+        shutil.copyfile(
+            REPO / "defaults/.theme-manifest/themes.toml",
+            source / ".theme-manifest/themes.toml",
+        )
         shutil.copyfile(
             REPO / "defaults/.chezmoitemplates/theme-name",
             source / ".chezmoitemplates/theme-name",

@@ -23,7 +23,7 @@ Flat top-level keys:
 | `.name` | string | `"Your Name"` |
 | `.email` | string | `"you@example.com"` |
 
-## From `.chezmoidata/themes.toml`
+## From `.theme-manifest/themes.toml`
 
 ```go
 {{- $t := index .themes .theme }}

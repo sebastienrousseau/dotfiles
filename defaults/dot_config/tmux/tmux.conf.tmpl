@@ -4,8 +4,9 @@
        bar; the clock sits on a tint of the wallpaper's secondary hue. The
        palette audit and apple.py hold every label here at 7:1 (WCAG AAA) in
        both the -light and -dark theme. */ -}}
-{{- $themeName := includeTemplate "theme-name" . -}}
-{{- $t := index .themes $themeName -}}
+{{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
+{{- $themeName := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}
+{{- $t := index $themes $themeName -}}
 {{- $accent := $t.ui.accent -}}
 {{- $accent_text := $t.ui.accent_text -}}
 {{- $border := $t.ui.border -}}
@@ -207,7 +208,7 @@ bind K confirm-before -p "kill all sessions? (y/n)" kill-server
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  THEME — Session Block Bars                                              ║
-# ║  Colors from .chezmoidata/themes.toml ({{ $themeName }})  ║
+# ║  Colors from .theme-manifest/themes.toml ({{ $themeName }})  ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
 #
 # A fixed frame with one per-session colour, every label white: the top bar

@@ -29,7 +29,7 @@
     "theme": {
       "type": "string",
       "minLength": 1,
-      "description": "Visual theme key from .chezmoidata/themes.toml."
+      "description": "Visual theme key from .theme-manifest/themes.toml."
     },
     "terminal_font_family": {
       "type": "string"

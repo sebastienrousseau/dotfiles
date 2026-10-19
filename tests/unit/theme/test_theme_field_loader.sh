@@ -11,13 +11,13 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 TMPHOME="$(mktemp -d)"
 trap 'rm -rf "$TMPHOME"' EXIT
 export HOME="$TMPHOME"
-mkdir -p "$TMPHOME/dotfiles/.chezmoidata"
+mkdir -p "$TMPHOME/dotfiles/.chezmoidata" "$TMPHOME/dotfiles/.theme-manifest"
 export CHEZMOI_SOURCE_DIR="$TMPHOME/dotfiles"
 touch "$TMPHOME/dotfiles/.chezmoidata.toml"
 MARK="$TMPHOME/MARK"
 MARK2="$TMPHOME/MARK2"
 MARK3="$TMPHOME/MARK3"
-cat >"$TMPHOME/dotfiles/.chezmoidata/themes.toml" <<TOML
+cat >"$TMPHOME/dotfiles/.theme-manifest/themes.toml" <<TOML
 [themes.Evil-dark]
 mode = "dark\$(touch $MARK)"
 family = "Evil; touch $MARK2"

@@ -84,7 +84,7 @@ done
 # the tool set to the always-present stubs.
 setup() {
   W="$WORK/c$((++N))"
-  mkdir -p "$W/h/.dotfiles/defaults/.chezmoidata" "$W/h/Pictures/Wallpapers"
+  mkdir -p "$W/h/.dotfiles/defaults/.chezmoidata" "$W/h/.dotfiles/defaults/.theme-manifest" "$W/h/Pictures/Wallpapers"
   echo defaults >"$W/h/.dotfiles/.chezmoiroot"
   if [[ -n "$2" ]]; then
     printf 'theme = "%s"\n' "$2" >"$W/h/.dotfiles/defaults/.chezmoidata.toml"
@@ -124,7 +124,7 @@ assert_equals "0:yes:yes" \
 
 # applied <name>: yes when the run reports that wallpaper file as applied.
 applied() { if [[ "$OUT" == *"Applied wallpaper ("*") "*"$1"* ]]; then echo yes; else echo no; fi; }
-toml() { printf '[themes.%s]\nwallpaper = "%s"\n\n' "$1" "$2" >>"$W/h/.dotfiles/defaults/.chezmoidata/themes.toml"; }
+toml() { printf '[themes.%s]\nwallpaper = "%s"\n\n' "$1" "$2" >>"$W/h/.dotfiles/defaults/.theme-manifest/themes.toml"; }
 
 # ── lookup order ─────────────────────────────────────────────────────────
 test_start "wallpaper_prefers_extracted_frames"

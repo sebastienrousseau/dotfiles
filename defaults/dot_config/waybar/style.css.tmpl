@@ -1,5 +1,6 @@
-{{- $themeName := includeTemplate "theme-name" . -}}
-{{- $t := index .themes $themeName -}}
+{{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
+{{- $themeName := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}
+{{- $t := index $themes $themeName -}}
 {{- /* Copyright (c) 2015-2026 Dotfiles. All rights reserved. */ -}}
 {{- $bg := $t.term.bg -}}
 {{- $fg := $t.term.fg -}}

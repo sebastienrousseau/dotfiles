@@ -19,10 +19,10 @@ SCRIPT_FILE="$REPO_ROOT/bin/dot-theme-sync"
 TMPHOME="$(mktemp -d)"
 trap 'rm -rf "$TMPHOME"' EXIT
 export HOME="$TMPHOME"
-mkdir -p "$TMPHOME/dotfiles/.chezmoidata" "$TMPHOME/Pictures/Wallpapers"
+mkdir -p "$TMPHOME/dotfiles/.chezmoidata" "$TMPHOME/dotfiles/.theme-manifest" "$TMPHOME/Pictures/Wallpapers"
 export CHEZMOI_SOURCE_DIR="$TMPHOME/dotfiles"
 touch "$TMPHOME/dotfiles/.chezmoidata.toml"
-cat > "$TMPHOME/dotfiles/.chezmoidata/themes.toml" <<'EOF'
+cat > "$TMPHOME/dotfiles/.theme-manifest/themes.toml" <<'EOF'
 [themes.Solar-dark]
 mode = "dark"
 family = "Solar"

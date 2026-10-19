@@ -6,8 +6,9 @@
 
   Schema reference: https://docs.warp.dev/appearance/custom-themes
 */ -}}
-{{- $themeName := includeTemplate "theme-name" . -}}
-{{- $t := index .themes $themeName -}}
+{{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
+{{- $themeName := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}
+{{- $t := index $themes $themeName -}}
 {{- $details := "darker" -}}
 {{- if eq $t.mode "light" -}}{{- $details = "lighter" -}}{{- end }}
 # Active dotfiles theme: {{ $themeName }}

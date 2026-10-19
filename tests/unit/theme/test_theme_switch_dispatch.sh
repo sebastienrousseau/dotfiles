@@ -49,10 +49,10 @@ _fail() {
 # synthetic `fallback` family the switcher must always hide.
 # ---------------------------------------------------------------------------
 SRC="$WORK/src"
-mkdir -p "$SRC/defaults/.chezmoidata"
+mkdir -p "$SRC/defaults/.chezmoidata" "$SRC/defaults/.theme-manifest"
 echo "defaults" >"$SRC/.chezmoiroot"
 DATA_FILE="$SRC/defaults/.chezmoidata.toml"
-THEMES_FILE="$SRC/defaults/.chezmoidata/themes.toml"
+THEMES_FILE="$SRC/defaults/.theme-manifest/themes.toml"
 cat >"$DATA_FILE" <<'TOML'
 theme = "bloom-dark"
 theme_family = "bloom"
@@ -449,10 +449,10 @@ assert_file_contains "$OUT" "ghost-light (ghost, light; auto)" "the family is de
 
 test_start "family_falls_back_to_the_default_when_nothing_is_paired"
 UNPAIRED_SRC="$WORK/unpaired-src"
-mkdir -p "$UNPAIRED_SRC/.chezmoidata"
+mkdir -p "$UNPAIRED_SRC/.chezmoidata" "$UNPAIRED_SRC/.theme-manifest"
 printf 'theme = "solo-dark"\n' >"$UNPAIRED_SRC/.chezmoidata.toml"
 printf '[themes.solo-dark]\nfamily = "solo"\nmode = "dark"\n' \
-  >"$UNPAIRED_SRC/.chezmoidata/themes.toml"
+  >"$UNPAIRED_SRC/.theme-manifest/themes.toml"
 : >"$SYNC_CALLS"
 rc=0
 CHEZMOI_SOURCE_DIR="$UNPAIRED_SRC" DOTFILES_WALLPAPER_DIR="$WALLPAPERS" \
@@ -523,9 +523,9 @@ assert_file_contains "$OUT" "not found" "the error says the source was not found
 
 test_start "the_legacy_chezmoi_source_location_is_honoured"
 LEGACY_HOME="$WORK/legacy-home"
-mkdir -p "$LEGACY_HOME/.local/share/chezmoi/.chezmoidata"
+mkdir -p "$LEGACY_HOME/.local/share/chezmoi/.chezmoidata" "$LEGACY_HOME/.local/share/chezmoi/.theme-manifest"
 printf 'theme = "bloom-dark"\n' >"$LEGACY_HOME/.local/share/chezmoi/.chezmoidata.toml"
-cp "$THEMES_FILE" "$LEGACY_HOME/.local/share/chezmoi/.chezmoidata/themes.toml"
+cp "$THEMES_FILE" "$LEGACY_HOME/.local/share/chezmoi/.theme-manifest/themes.toml"
 rc=0
 HOME="$LEGACY_HOME" CHEZMOI_SOURCE_DIR="" DOTFILES_WALLPAPER_DIR="$WALLPAPERS" \
   PATH="$BIN:/usr/bin:/bin" \

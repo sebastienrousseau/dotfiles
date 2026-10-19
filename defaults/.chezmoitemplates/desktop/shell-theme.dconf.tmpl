@@ -1,6 +1,7 @@
 {{- /* GNOME Shell theme configuration via dconf */ -}}
-{{- $t := index .themes (default "catppuccin-mocha" .theme) -}}
-{{- if not $t -}}{{- $t = index .themes "catppuccin-mocha" -}}{{- end -}}
+{{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
+{{- $t := index $themes (default "catppuccin-mocha" .theme) -}}
+{{- if not $t -}}{{- $t = index $themes "catppuccin-mocha" -}}{{- end -}}
 {{- $is_dark := eq $t.mode "dark" -}}
 {{- $shell_theme := $t.app.gnome_shell -}}
 {{- $background_color := $t.term.bg -}}

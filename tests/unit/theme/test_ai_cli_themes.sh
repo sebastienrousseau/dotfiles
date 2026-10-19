@@ -9,7 +9,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 ADAPTER="$REPO_ROOT/scripts/theme/sync-ai-cli-themes.py"
-THEMES="$REPO_ROOT/defaults/.chezmoidata/themes.toml"
+THEMES="$REPO_ROOT/defaults/.theme-manifest/themes.toml"
 SANDBOX="$(mktemp -d)"
 trap 'rm -rf "$SANDBOX"' EXIT
 

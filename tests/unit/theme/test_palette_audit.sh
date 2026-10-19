@@ -11,7 +11,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 AUDIT="$REPO_ROOT/scripts/theme/audit-palettes.py"
-CATALOG="$REPO_ROOT/defaults/.chezmoidata/themes.toml"
+CATALOG="$REPO_ROOT/defaults/.theme-manifest/themes.toml"
 WORK="$(mktemp -d -t dot-palette-audit.XXXXXX)"
 trap 'rm -rf "$WORK"' EXIT
 

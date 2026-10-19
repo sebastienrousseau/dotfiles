@@ -28,6 +28,7 @@ mkdir -p \
   "$HOME/.config/kitty" \
   "$HOME/.config/firefox" \
   "$CHEZMOI_SOURCE_DIR/.chezmoidata" \
+  "$CHEZMOI_SOURCE_DIR/.theme-manifest" \
   "$CHEZMOI_SOURCE_DIR/scripts/theme" \
   "$WORK/bin" "$DOT_THEME_LOCK_ROOT"
 cp "$REPO_ROOT/scripts/theme/sync-ai-cli-themes.py" \
@@ -38,7 +39,7 @@ theme = "baseline-dark"
 theme_family = "baseline"
 theme_mode = "dark"
 TOML
-cat >"$CHEZMOI_SOURCE_DIR/.chezmoidata/themes.toml" <<'TOML'
+cat >"$CHEZMOI_SOURCE_DIR/.theme-manifest/themes.toml" <<'TOML'
 [themes.baseline-dark]
 family = "baseline"
 mode = "dark"

@@ -16,9 +16,15 @@
             whose stack trace names the caller's line rather than the
             missing theme.
 
+       The manifest lives outside .chezmoidata (chezmoi hands all of
+       .chezmoidata to every template it renders, so a 350 KB manifest there
+       slowed every apply by over a second); callers load it once and pass
+       `.theme` and the parsed `.themes` in a dict.
+
        Usage:
-         {{`{{- $themeName := includeTemplate "theme-name" . -}}`}}
-         {{`{{- $t := index .themes $themeName -}}`}}
+         {{`{{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}`}}
+         {{`{{- $themeName := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}`}}
+         {{`{{- $t := index $themes $themeName -}}`}}
 
        Callers use the returned variant directly so terminal and application
        colours stay aligned with the active light or dark wallpaper frame.
@@ -30,6 +36,6 @@
   {{- $t = index .themes $requested -}}
 {{- end -}}
 {{- if or (not $t) (not (hasKey $t "term")) -}}
-  {{- fail (printf "theme %q not found or missing .term in .chezmoidata/themes.toml, and canonical fallback %q is also missing. Run `dot theme rebuild` to regenerate the theme manifest, or set `theme = \"<valid-key>\"` in ~/.config/chezmoi/chezmoi.toml under [data]." (default "" .theme) "fallback-dark") -}}
+  {{- fail (printf "theme %q not found or missing .term in .theme-manifest/themes.toml, and canonical fallback %q is also missing. Run `dot theme rebuild` to regenerate the theme manifest, or set `theme = \"<valid-key>\"` in ~/.config/chezmoi/chezmoi.toml under [data]." (default "" .theme) "fallback-dark") -}}
 {{- end -}}
 {{- $requested -}}

@@ -97,12 +97,12 @@ EOF
 # Synthetic chezmoi source tree with fixture theme data.
 # ---------------------------------------------------------------------------
 SRC="$WORK/src"
-mkdir -p "$SRC/.chezmoidata" "$SRC/.chezmoitemplates" "$SRC/private_Library/LaunchAgents"
+mkdir -p "$SRC/.chezmoidata" "$SRC/.theme-manifest" "$SRC/.chezmoitemplates" "$SRC/private_Library/LaunchAgents"
 cp "$DEFAULTS/.chezmoitemplates/theme-name" "$SRC/.chezmoitemplates/theme-name"
 cp "$PLIST_TEMPLATE" "$SRC/private_Library/LaunchAgents/"
 : >"$SRC/run_onchange_22-iterm2-profile.sh.tmpl"
 DATA_FILE="$SRC/.chezmoidata.toml"
-THEMES_FILE="$SRC/.chezmoidata/themes.toml"
+THEMES_FILE="$SRC/.theme-manifest/themes.toml"
 cat >"$DATA_FILE" <<'TOML'
 dotfiles_version = "0.0.0-fixture"
 theme = "fixture-dark"

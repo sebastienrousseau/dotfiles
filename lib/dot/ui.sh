@@ -407,7 +407,7 @@ _ui_theme_files() {
     [[ -n "$sub" && -d "$src/$sub" ]] && src="$src/$sub"
   fi
   _UI_DATA_FILE="$src/.chezmoidata.toml"
-  _UI_THEMES_FILE="$src/.chezmoidata/themes.toml"
+  _UI_THEMES_FILE="$src/.theme-manifest/themes.toml"
   [[ -f "$_UI_THEMES_FILE" ]] || return 1
   return 0
 }

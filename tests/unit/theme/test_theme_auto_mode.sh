@@ -16,7 +16,7 @@ export HOME="$sandbox/home"
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_STATE_HOME="$HOME/.local/state"
 export CHEZMOI_SOURCE_DIR="$sandbox/source"
-mkdir -p "$CHEZMOI_SOURCE_DIR/.chezmoidata" "$XDG_CONFIG_HOME/chezmoi"
+mkdir -p "$CHEZMOI_SOURCE_DIR/.chezmoidata" "$CHEZMOI_SOURCE_DIR/.theme-manifest" "$XDG_CONFIG_HOME/chezmoi"
 
 data_file="$CHEZMOI_SOURCE_DIR/.chezmoidata.toml"
 cat >"$data_file" <<'TOML'
@@ -24,7 +24,7 @@ theme = "maui-dark"
 theme_family = "maui"
 theme_mode = "auto"
 TOML
-cat >"$CHEZMOI_SOURCE_DIR/.chezmoidata/themes.toml" <<'TOML'
+cat >"$CHEZMOI_SOURCE_DIR/.theme-manifest/themes.toml" <<'TOML'
 [themes.maui-dark]
 family = "maui"
 mode = "dark"

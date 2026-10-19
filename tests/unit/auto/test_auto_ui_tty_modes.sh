@@ -85,10 +85,10 @@ export STUB_CALLS_DIR="$WORK"
 # Theme fixture: a chezmoi source tree with a `.chezmoiroot` indirection so
 # the descend-into-subdir branch of _ui_theme_files is exercised.
 THEME_SRC="$WORK/src"
-mkdir -p "$THEME_SRC/defaults/.chezmoidata"
+mkdir -p "$THEME_SRC/defaults/.chezmoidata" "$THEME_SRC/defaults/.theme-manifest"
 echo "defaults" >"$THEME_SRC/.chezmoiroot"
 printf 'theme = "bloom"\n' >"$THEME_SRC/defaults/.chezmoidata.toml"
-cat >"$THEME_SRC/defaults/.chezmoidata/themes.toml" <<'TOML'
+cat >"$THEME_SRC/defaults/.theme-manifest/themes.toml" <<'TOML'
 [themes.bloom-dark]
 family = "bloom"
 mode = "dark"

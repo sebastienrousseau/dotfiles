@@ -29,7 +29,7 @@ THEME_SYNC="$REPO_ROOT/bin/dot-theme-sync"
 sandbox="$(mktemp -d -t theme-paths.XXXXXX)"
 trap 'rm -rf "$sandbox"' EXIT
 
-mkdir -p "$sandbox/defaults/.chezmoidata"
+mkdir -p "$sandbox/defaults/.chezmoidata" "$sandbox/defaults/.theme-manifest"
 printf 'defaults\n' >"$sandbox/.chezmoiroot"
 
 # Theme set to a unique sentinel so we can prove the scripts read THIS
@@ -47,7 +47,7 @@ test = true
 name = "minimal"
 EOF
 
-cat >"$sandbox/defaults/.chezmoidata/themes.toml" <<EOF
+cat >"$sandbox/defaults/.theme-manifest/themes.toml" <<EOF
 [themes.${SENTINEL_THEME}]
 family = "sandbox-theme"
 mode = "dark"
@@ -142,7 +142,7 @@ else
 fi
 
 # --- Test: switch.sh `list` enumerates themes from defaults/ ---------------
-# `list` walks themes.toml under .chezmoidata/. If the descent is wrong
+# `list` walks themes.toml under .theme-manifest/. If the descent is wrong
 # it'd find an empty list (no themes defined at the sandbox root).
 # The sentinel theme is unpaired (no -light counterpart in our fixture),
 # so `list` will report 0 paired families — that's fine; the assertion
