@@ -77,8 +77,15 @@ them. Report what the check found and fixed before starting the task.
 
 ## Accountability
 
-- Never add `Signed-off-by:` or any other certification on my behalf; I
-  review and certify. Record your part with an `Assisted-by:` trailer.
+- Never add `Signed-off-by:` or any other certification on my behalf on
+  your own initiative; I review and certify. Record your part with an
+  `Assisted-by:` trailer.
+- Exception: when I tell you in chat to run a sign-off handover script
+  (e.g. `/tmp/<repo>/signoff-*.sh`), you may run it. That instruction is
+  my certification, and it covers only the commits the script lists at
+  that moment. Before running it, show me those commits; never add a
+  sign-off any other way, and never carry one instruction over to later
+  commits.
 - Never send anything to other people or projects yourself (emails, issues
   or security reports elsewhere, publishes, posts): prepare it for me.
 - For a bug: reproduce it first, keep only a fix seen to work, and say what
