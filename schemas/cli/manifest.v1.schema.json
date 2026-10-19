@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.io/schemas/cli/manifest.v1.schema.json",
+  "title": "dot plugin manifest v1 (dot-plugin.toml), naming fields from ADR-020",
+  "description": "Structure only. Cross-file rules (verb in the closed list, domain in the family table, alias uniqueness, effect against the verb's class) belong to the CLI-contract lint.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "name", "domain", "version", "summary", "default", "commands"],
+  "properties": {
+    "schema": { "const": "cli/manifest.v1" },
+    "name": { "$ref": "#/$defs/domain", "description": "Plugin name; equals domain and the repo suffix (N2)" },
+    "domain": { "$ref": "#/$defs/domain" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "dot_api": { "type": "string", "minLength": 1 },
+    "license": { "type": "string", "minLength": 1 },
+    "summary": { "$ref": "#/$defs/summary" },
+    "ps_noun": { "$ref": "#/$defs/psNoun", "description": "Defaults to the domain in title case" },
+    "default": { "$ref": "#/$defs/default" },
+    "objects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "summary", "default"],
+        "properties": {
+          "name": { "$ref": "#/$defs/word" },
+          "summary": { "$ref": "#/$defs/summary" },
+          "ps_noun": { "$ref": "#/$defs/psNoun" },
+          "default": { "$ref": "#/$defs/default" }
+        }
+      }
+    },
+    "commands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["verb", "effect", "summary"],
+        "properties": {
+          "object": { "$ref": "#/$defs/word" },
+          "verb": { "$ref": "#/$defs/word" },
+          "effect": { "enum": ["read", "write", "destructive"] },
+          "summary": { "$ref": "#/$defs/summary" },
+          "output": { "type": "string", "pattern": "^[a-z]{2,8}/[a-z][a-z0-9-]*\\.v[0-9]+$", "description": "Schema id of the --json output (N13, N14)" }
+        }
+      }
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "target", "kind"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "target": { "type": "string", "pattern": "^[a-z]{2,8}( [a-z]+){0,2}( --[a-z][a-z-]*)*$" },
+          "kind": { "enum": ["shortcut", "deprecated", "removed"] },
+          "until": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$", "description": "Last family release that accepts a deprecated name" }
+        },
+        "allOf": [
+          { "if": { "properties": { "kind": { "const": "deprecated" } } }, "then": { "required": ["until"] } }
+        ]
+      }
+    },
+    "platforms": { "type": "array", "items": { "type": "string", "pattern": "^(darwin|linux|windows)-(arm64|amd64)$" } },
+    "entry": { "type": "object", "description": "Reserved for P2.1 (plugin host)" },
+    "capabilities": { "type": "object", "description": "Reserved for P2.3 (ADR-016 trust path)" },
+    "hooks": { "type": "array", "description": "Reserved for P2.2" },
+    "completions": { "type": "object", "description": "Reserved for P2.1" },
+    "config": { "type": "object", "description": "Reserved for P2.2" },
+    "provenance": { "type": "object", "description": "Reserved for P2.3" }
+  },
+  "$defs": {
+    "word": { "type": "string", "pattern": "^[a-z]+$" },
+    "domain": { "type": "string", "pattern": "^[a-z]{2,8}$" },
+    "psNoun": { "type": "string", "pattern": "^[A-Z][A-Za-z]*$" },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 60, "pattern": "^[^\\n]+$" },
+    "default": {
+      "description": "What the word alone does (N5): a read-only verb, or tui",
+      "enum": ["show", "list", "status", "select", "tui"]
+    }
+  }
+}
