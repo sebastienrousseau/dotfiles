@@ -42,11 +42,11 @@ printf '=== AI providers and the ai cockpit ===\n\n'
 group_commands=(ai ai-setup ai-query cl copilot kimi agy kiro sgpt ollama opencode aider)
 for cmd in "${group_commands[@]}"; do
   summary="$( (bash "$dot" help "$cmd" 2>/dev/null || true) |
-    sed -n 's/.*Summary *//p' | head -1 || true)"
+    sed -n 's/.*Summary *//p' | sed -n '1,1p' || true)"
   printf '  dot %-22s %s\n' "$cmd" "${summary:-(see dot help all)}"
 done
 
 printf '\n--- live output ---\n\n'
-bash "$dot" ai doctor 2>&1 | head -8 || true
+bash "$dot" ai doctor 2>&1 | sed -n '1,8p' || true
 
 printf '\nAI providers and the ai cockpit example complete.\n'

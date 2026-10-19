@@ -406,7 +406,9 @@ fm_expect_err() {
 
 # fm_expect_out_matches <ere> — assert stdout matches an extended regex.
 fm_expect_out_matches() {
-  if printf '%s' "$FM_OUT" | grep -Eq "$1"; then
+  # grep without -q reads all of its input, so printf never writes into a
+  # closed pipe (where SIGPIPE is ignored that prints "write error").
+  if printf '%s' "$FM_OUT" | grep -E "$1" >/dev/null; then
     fm_pass
   else
     fm_fail "stdout does not match /$1/"

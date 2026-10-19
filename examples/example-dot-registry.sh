@@ -42,12 +42,12 @@ printf '=== Reusable module registry ===\n\n'
 group_commands=(registry)
 for cmd in "${group_commands[@]}"; do
   summary="$( (bash "$dot" help "$cmd" 2>/dev/null || true) |
-    sed -n 's/.*Summary *//p' | head -1 || true)"
+    sed -n 's/.*Summary *//p' | sed -n '1,1p' || true)"
   printf '  dot %-22s %s\n' "$cmd" "${summary:-(see dot help all)}"
 done
 
 printf '\n--- live output ---\n\n'
 bash "$dot" registry url || true
-bash "$dot" registry --help | head -8 || true
+bash "$dot" registry --help | sed -n '1,8p' || true
 
 printf '\nReusable module registry example complete.\n'

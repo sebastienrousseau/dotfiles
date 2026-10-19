@@ -42,12 +42,12 @@ printf '=== Diagnostics and health ===\n\n'
 group_commands=(doctor health score attest snapshot drift metrics locks conflicts rollback restore chaos bundle teleport benchmark load-bench secret-audit history perf)
 for cmd in "${group_commands[@]}"; do
   summary="$( (bash "$dot" help "$cmd" 2>/dev/null || true) |
-    sed -n 's/.*Summary *//p' | head -1 || true)"
+    sed -n 's/.*Summary *//p' | sed -n '1,1p' || true)"
   printf '  dot %-22s %s\n' "$cmd" "${summary:-(see dot help all)}"
 done
 
 printf '\n--- live output ---\n\n'
-bash "$dot" locks | head -12 || true
+bash "$dot" locks | sed -n '1,12p' || true
 bash "$dot" drift --json || true
 
 printf '\nDiagnostics and health example complete.\n'

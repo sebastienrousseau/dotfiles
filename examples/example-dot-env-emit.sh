@@ -42,7 +42,7 @@ printf '=== Workstation environment manifest ===\n\n'
 group_commands=(env)
 for cmd in "${group_commands[@]}"; do
   summary="$( (bash "$dot" help "$cmd" 2>/dev/null || true) |
-    sed -n 's/.*Summary *//p' | head -1 || true)"
+    sed -n 's/.*Summary *//p' | sed -n '1,1p' || true)"
   printf '  dot %-22s %s\n' "$cmd" "${summary:-(see dot help all)}"
 done
 
@@ -50,6 +50,6 @@ printf '\n--- live output ---\n\n'
 printf "  dot env emit                  # canonical JSON\n"
 printf "  dot env emit --format ndjson  # one object per tool\n"
 printf "  dot env emit --output env.json\n"
-bash "$dot" env emit --compact 2>&1 | head -3 || true
+bash "$dot" env emit --compact 2>&1 | sed -n '1,3p' || true
 
 printf '\nWorkstation environment manifest example complete.\n'

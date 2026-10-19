@@ -42,12 +42,12 @@ printf '=== Encrypted secrets and SSH material ===\n\n'
 group_commands=(secrets secrets-init secrets-create ssh-key ssh-cert)
 for cmd in "${group_commands[@]}"; do
   summary="$( (bash "$dot" help "$cmd" 2>/dev/null || true) |
-    sed -n 's/.*Summary *//p' | head -1 || true)"
+    sed -n 's/.*Summary *//p' | sed -n '1,1p' || true)"
   printf '  dot %-22s %s\n' "$cmd" "${summary:-(see dot help all)}"
 done
 
 printf '\n--- live output ---\n\n'
 bash "$dot" secrets provider || true
-bash "$dot" secrets list 2>&1 | head -3 || true
+bash "$dot" secrets list 2>&1 | sed -n '1,3p' || true
 
 printf '\nEncrypted secrets and SSH material example complete.\n'

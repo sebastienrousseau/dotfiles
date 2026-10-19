@@ -42,11 +42,11 @@ printf '=== Multi-harness agent context ===\n\n'
 group_commands=(agents)
 for cmd in "${group_commands[@]}"; do
   summary="$( (bash "$dot" help "$cmd" 2>/dev/null || true) |
-    sed -n 's/.*Summary *//p' | head -1 || true)"
+    sed -n 's/.*Summary *//p' | sed -n '1,1p' || true)"
   printf '  dot %-22s %s\n' "$cmd" "${summary:-(see dot help all)}"
 done
 
 printf '\n--- live output ---\n\n'
-bash "$dot" agents --help | head -8 || true
+bash "$dot" agents --help | sed -n '1,8p' || true
 
 printf '\nMulti-harness agent context example complete.\n'

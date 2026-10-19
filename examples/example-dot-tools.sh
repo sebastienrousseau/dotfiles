@@ -42,11 +42,11 @@ printf '=== Toolchain, profiles and project scaffolding ===\n\n'
 group_commands=(env profile tools new packages)
 for cmd in "${group_commands[@]}"; do
   summary="$( (bash "$dot" help "$cmd" 2>/dev/null || true) |
-    sed -n 's/.*Summary *//p' | head -1 || true)"
+    sed -n 's/.*Summary *//p' | sed -n '1,1p' || true)"
   printf '  dot %-22s %s\n' "$cmd" "${summary:-(see dot help all)}"
 done
 
 printf '\n--- live output ---\n\n'
-bash "$dot" profile show | head -8 || true
+bash "$dot" profile show | sed -n '1,8p' || true
 
 printf '\nToolchain, profiles and project scaffolding example complete.\n'
