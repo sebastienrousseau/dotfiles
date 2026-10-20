@@ -46,6 +46,11 @@ name = "budget"
 summary = "spend budgets"
 default = "show"
 
+[[objects]]
+name = "delegate"
+summary = "agents a profile may hand work to"
+default = "list"
+
 [[commands]]
 verb = "status"
 effect = "read"
@@ -146,6 +151,20 @@ object = "budget"
 verb = "show"
 effect = "read"
 summary = "Budgets and spend"
+
+[[commands]]
+object = "delegate"
+verb = "list"
+effect = "read"
+legacy = "agent delegate list"
+summary = "Configured delegates"
+
+[[commands]]
+object = "delegate"
+verb = "run"
+effect = "write"
+legacy = "agent delegate run"
+summary = "Run a command as a delegate"
 
 [[aliases]]
 name = "mode"

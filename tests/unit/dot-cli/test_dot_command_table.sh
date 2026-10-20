@@ -61,6 +61,8 @@ assert_equals "secrets set|2" "$(resolve secret set KEY)" "an object-less verb k
 assert_equals "tools|3" "$(resolve tool list --nix)" "a flagged alias target runs its old route"
 assert_equals "env list|2" "$(resolve tool list)" "without the flag the plain verb runs"
 assert_equals "ssh-key|3" "$(resolve secret key new)" "domain, object and verb"
+assert_equals "agent delegate run|3" "$(resolve agent delegate run test-runner true)" "delegate run keeps the name and command"
+assert_equals "agent delegate list|2" "$(resolve agent delegate)" "a delegate object alone lists them"
 
 test_start "shortcuts_and_flags_rewrite_the_command_line"
 assert_equals "upgrade --yes" "$(names update --yes)" "dot update is dot system update (N7)"

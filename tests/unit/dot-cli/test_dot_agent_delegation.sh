@@ -111,6 +111,26 @@ test_start "audit_profile_can_delegate"
 cd="$(jq -r '.profiles.audit.canDelegate' "$PROFILES_FILE")"
 assert_equals "true" "$cd" "audit profile should have canDelegate: true"
 
+# ADR-020 spells delegation as an object: `dot agent delegate list` and
+# `dot agent delegate run <name> <command>`.
+test_start "delegate_list_names_each_delegate"
+profiles '.'
+state DOT_AGENT_PROFILE=apply
+rc=0
+out=$(bash "$DOT_CLI" agent delegate list 2>&1) || rc=$?
+assert_equals "0" "$rc" "listing is read-only and succeeds while delegation is off"
+assert_contains "lint-checker" "$out" "each configured delegate is listed"
+assert_contains "profile audit, timeout 120s" "$out" "with its profile and timeout"
+assert_contains "disabled" "$out" "and says delegation is off"
+assert_output_not_contains "Unknown delegate" "printf '%s' \"\$out\"" "list is not taken for a delegate name"
+
+test_start "delegate_run_is_the_new_spelling"
+profiles '.delegation.enabled = true'
+rc=0
+out=$(bash "$DOT_CLI" agent delegate run test-runner sh -c 'echo "ran:$DOT_AGENT_DELEGATE"' 2>&1) || rc=$?
+assert_equals "0" "$rc" "dot agent delegate run exits with the command's status"
+assert_contains "ran:test-runner" "$out" "the command runs as the delegate"
+
 # Slice 3 (#883): exercise the script under sandbox for line coverage
 cov_exercise_script "$AGENT_SCRIPT"
 

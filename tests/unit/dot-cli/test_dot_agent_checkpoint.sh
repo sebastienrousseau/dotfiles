@@ -135,8 +135,9 @@ assert_equals 1 "$RC" "rc"
 assert_contains "Usage: dot agent checkpoint" "$ERR" "usage"
 
 # ── delegate ────────────────────────────────────────────────────────────
+# Bare `dot agent delegate` lists (ADR-020); `run` needs a name.
 test_start "delegate_requires_name"
-meta agent delegate
+meta agent delegate run
 assert_equals 1 "$RC" "rc"
 assert_contains "Usage: dot agent delegate" "$ERR" "usage"
 

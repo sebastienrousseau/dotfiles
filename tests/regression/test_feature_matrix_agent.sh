@@ -818,12 +818,17 @@ test_fm_agent_delegate_disabled() {
   fm_expect_any "Delegation is not enabled" "cannot delegate"
 }
 
+# `dot agent delegate` alone lists the delegates (ADR-020 N5: read-only);
+# `run` with no name is the usage error.
 test_fm_agent_delegate_usage() {
   test_start "fm_agent_delegate_usage"
-  fm_run agent delegate
+  fm_run agent delegate run
   fm_expect_rc 1
   test_start "fm_agent_delegate_usage_message"
-  fm_expect_any "Usage: dot agent delegate" "delegate"
+  fm_expect_any "Usage: dot agent delegate run" "delegate"
+  test_start "fm_agent_delegate_lists_by_default"
+  fm_run agent delegate
+  fm_expect_rc 0
   test_start "fm_agent_delegate_missing_command"
   fm_run agent delegate fm-reviewer
   fm_expect_rc 1

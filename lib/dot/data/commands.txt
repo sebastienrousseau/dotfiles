@@ -11,6 +11,7 @@ obj|agent log|show||the agent log
 obj|agent checkpoint|list||saved checkpoints
 obj|agent policy|show||sandbox policy
 obj|agent budget|show||spend budgets
+obj|agent delegate|list||agents a profile may hand work to
 cmd|agent status|mode current|read|Mode, policy and budgets
 cmd|agent check|mode doctor|read|Check modes and policy
 cmd|agent run|agent run|write|Run an agent task
@@ -27,6 +28,8 @@ cmd|agent checkpoint list|agent checkpoint list|read|Saved checkpoints
 cmd|agent checkpoint save|agent checkpoint save|write|Save a checkpoint
 cmd|agent policy show||read|The sandbox policy
 cmd|agent budget show||read|Budgets and spend
+cmd|agent delegate list|agent delegate list|read|Configured delegates
+cmd|agent delegate run|agent delegate run|write|Run a command as a delegate
 dom|ai|tui|ai|install, route and run coding agents
 obj|ai pattern|list||prompt patterns
 obj|ai cost|show||spend by agent and model
@@ -254,6 +257,8 @@ leg|agent card|agent card show||
 leg|agent log|agent log show||
 leg|agent checkpoint list|agent checkpoint list||
 leg|agent checkpoint save|agent checkpoint save||
+leg|agent delegate list|agent delegate list||
+leg|agent delegate run|agent delegate run||
 leg|ai tools|ai list||
 leg|ai install|ai install||
 leg|ai run|ai run||

@@ -118,8 +118,8 @@
   11   16   24.0   62     0 scripts/diagnostics/security-score.sh::print_summary
   13   14   21.3   54    69 scripts/diagnostics/version-locks.sh::<top>
   25   27   43.1  135   199 scripts/diagnostics/workstation-attestation.sh::<top>
-   1    0    1.0    1   522 scripts/dot/commands/agent.sh::<top>
-  16    5   25.7   51     0 scripts/dot/commands/agent.sh::cmd_mode
+   1    0    1.0    1   518 scripts/dot/commands/agent.sh::<top>
+  16    5   25.7   27     0 scripts/dot/commands/agent.sh::cmd_mode
   12   12   25.8   22     0 scripts/dot/commands/agents.sh::_agents_repo_root
   18   21   43.4  163     0 scripts/dot/commands/agents.sh::cmd_agents
   17    3   25.6   67   184 scripts/dot/commands/core.sh::<top>

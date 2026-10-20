@@ -158,9 +158,10 @@ corrected spellings in the plan's command map that broke N3, N4 or N5:
 `dot secret show`, `dot shell refresh` is `dot shell update` (a bare
 object may not regenerate anything), `dot cli search` is
 `dot cli list --available` beside `dot help <term>`, and the objects
-`conflicts` and `metrics` are singular. `dot agent delegate` has no
-approved verb and is left out until one is chosen; `dot agent delegate`
-still reaches today's route through the domain's own route.
+`conflicts` and `metrics` are singular. `dot agent delegate` had no
+approved verb; a delegate is a noun, so it is an object of `dot agent`:
+`dot agent delegate list` (the default) and
+`dot agent delegate run <name> <command>`.
 
 Until each domain is extracted, a manifest says which of today's routes
 runs each command (`legacy`, on the domain and on each command).
