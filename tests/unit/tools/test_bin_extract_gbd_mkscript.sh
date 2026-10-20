@@ -307,7 +307,7 @@ rc="$(run "$DOT_AI" "how do I extract an archive?")"
 assert_equals "0" "$rc" "a question exits 0"
 assert_file_contains "$OUT" "Searching dotfiles context" "the retrieval step is announced"
 assert_file_contains "$OUT" "Generating context-aware answer" "the generation step is announced"
-assert_file_contains "$CALLS" "dot ai start claude --pattern architect" "the question is sent through the architect pattern"
+assert_file_contains "$CALLS" "dot ai run claude --pattern architect" "the question is sent through the architect pattern"
 assert_file_contains "$CALLS" "the extract function unpacks archives" "the retrieved context is included"
 
 test_start "dot_ai_handles_an_empty_retrieval"

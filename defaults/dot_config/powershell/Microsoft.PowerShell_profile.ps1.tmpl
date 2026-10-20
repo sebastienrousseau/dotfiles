@@ -67,10 +67,16 @@ function Invoke-DotfilesCli {
 
 function dot { Invoke-DotfilesCli @args }
 function d { Invoke-DotfilesCli @args }
-function dm { Invoke-DotfilesCli mode list }
+function dm { Invoke-DotfilesCli agent mode list }
 function da { Invoke-DotfilesCli agent list }
 function dmc { Invoke-DotfilesCli mcp registry }
 function datt { Invoke-DotfilesCli attest --json }
+
+# Tab completion for dot, generated from the plugin manifests.
+if ($DotfilesRoot) {
+    $DotCompletion = Join-Path $DotfilesRoot "share/completions/powershell/dot.ps1"
+    if (Test-Path $DotCompletion) { . $DotCompletion }
+}
 
 function ll {
     if (Get-Command eza -ErrorAction SilentlyContinue) {

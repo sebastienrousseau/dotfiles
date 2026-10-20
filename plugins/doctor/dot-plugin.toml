@@ -52,11 +52,51 @@ effect = "read"
 legacy = "health"
 summary = "Health summary"
 
+[[commands.flags]]
+long = "verbose"
+short = "v"
+summary = "Show detailed checks"
+
+[[commands.flags]]
+long = "json"
+short = "j"
+summary = "Print a JSON summary"
+
+[[commands.flags]]
+long = "fix"
+short = "f"
+summary = "Apply common fixes"
+
+[[commands.flags]]
+long = "force"
+short = "F"
+summary = "Apply fixes without prompts"
+
 [[commands]]
 verb = "check"
 effect = "read"
 legacy = "doctor"
 summary = "Run every health check"
+
+[[commands.flags]]
+long = "heal"
+short = "H"
+summary = "Repair common issues"
+
+[[commands.flags]]
+long = "score"
+short = "s"
+summary = "Show the score"
+
+[[commands.flags]]
+long = "json"
+short = "j"
+summary = "Print a JSON summary"
+
+[[commands.flags]]
+long = "ai"
+short = "A"
+summary = "Include AI diagnostics"
 
 [[commands]]
 verb = "fix"
@@ -75,6 +115,33 @@ verb = "restore"
 effect = "write"
 legacy = "restore"
 summary = "Restore from a backup"
+
+[[commands.flags]]
+long = "list"
+short = "l"
+summary = "List available backups"
+
+[[commands.flags]]
+long = "latest"
+short = "L"
+summary = "Restore the latest backup"
+
+[[commands.flags]]
+long = "git"
+short = "g"
+value = "ref"
+summary = "Restore from a git ref"
+
+[[commands.flags]]
+long = "diff"
+short = "d"
+value = "ref"
+summary = "Show a diff for a git ref"
+
+[[commands.flags]]
+long = "dry-run"
+short = "n"
+summary = "Preview the restore"
 
 [[commands]]
 verb = "rollback"
@@ -102,12 +169,44 @@ effect = "write"
 legacy = "snapshot"
 summary = "Take a snapshot"
 
+[[commands.flags]]
+long = "baseline"
+short = "b"
+summary = "Capture the baseline snapshot"
+
+[[commands.flags]]
+long = "force"
+short = "f"
+summary = "Overwrite an existing snapshot"
+
 [[commands]]
 object = "perf"
 verb = "show"
 effect = "read"
 legacy = "perf"
 summary = "Startup timings"
+
+[[commands.flags]]
+long = "json"
+short = "j"
+summary = "Print JSON"
+
+[[commands.flags]]
+long = "profile"
+short = "p"
+summary = "Include profile output"
+
+[[commands.flags]]
+long = "runs"
+short = "r"
+value = "count"
+summary = "Number of runs"
+
+[[commands.flags]]
+long = "target"
+short = "t"
+value = "ms"
+summary = "Timing target in milliseconds"
 
 [[commands]]
 object = "perf"

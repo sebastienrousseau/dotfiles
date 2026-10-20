@@ -52,7 +52,9 @@ def load_registries(root: pathlib.Path) -> dict:
     cli = root / "schemas" / "cli"
     domains = json.loads((cli / "domains.json").read_text())
     verbs = json.loads((cli / "verbs.json").read_text())
+    flags = json.loads((cli / "flags.json").read_text())["flags"]
     return {
+        "flags": {f["long"]: f.get("short") for f in flags},
         "domains": {d["name"]: d for d in domains["domains"]},
         "builtins": set(domains.get("builtins", [])),
         "verbs": {v["name"]: v for v in verbs["verbs"]},
@@ -119,7 +121,24 @@ def check_command(name: str, cmd: dict, objects: set[str], reg: dict) -> list[st
     output = cmd.get("output", "")
     if output and not output.startswith(f"{name}/"):
         errors.append(f"{label}: output id '{output}' must start with '{name}/' (N13)")
-    return errors
+    return errors + check_flags(label, cmd.get("flags", []), reg["flags"])
+
+
+def check_flags(label: str, flags: list[dict], family: dict) -> list[str]:
+    """A command's flags are unique, and a family letter or name keeps its family meaning (N9)."""
+    spellings = [s for f in flags for s in (f"--{f['long']}", f.get("short") and f"-{f['short']}") if s]
+    errors = [f"{label}: flag {s} is declared twice" for s in sorted(set(spellings)) if spellings.count(s) > 1]
+    return errors + [e for f in flags for e in family_meaning(label, f, family)]
+
+
+def family_meaning(label: str, flag: dict, family: dict) -> list[str]:
+    long, short = flag["long"], flag.get("short")
+    by_short = {s: name for name, s in family.items() if s}
+    if short in by_short and by_short[short] != long:
+        return [f"{label}: -{short} means --{by_short[short]} family-wide, not --{long} (N9)"]
+    if family.get(long) and short and family[long] != short:
+        return [f"{label}: --{long} is a family flag; its short form is -{family[long]}, not -{short} (N9)"]
+    return []
 
 
 def check_deprecations(name: str, manifest: dict, version: str) -> list[str]:

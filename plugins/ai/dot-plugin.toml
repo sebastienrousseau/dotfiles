@@ -51,13 +51,26 @@ summary = "Upgrade agent CLIs"
 [[commands]]
 verb = "start"
 effect = "write"
+legacy = "ai chat"
 summary = "Start an agent"
+
+[commands.args]
+values = ["claude", "codex", "copilot", "goose", "crush", "amp", "cursor-agent", "grok", "kimi", "agy", "kiro", "sgpt", "ollama", "opencode", "aider", "autohand", "vibe", "qwen", "zai"]
 
 [[commands]]
 verb = "run"
 effect = "write"
 legacy = "ai run"
 summary = "Run an agent once"
+
+[[commands.flags]]
+long = "pattern"
+short = "p"
+value = "pattern"
+summary = "Steering pattern"
+
+[commands.args]
+values = ["claude", "codex", "copilot", "goose", "crush", "amp", "cursor-agent", "grok", "kimi", "agy", "kiro", "sgpt", "ollama", "opencode", "aider", "autohand", "vibe", "qwen", "zai"]
 
 [[commands]]
 verb = "serve"
@@ -129,96 +142,96 @@ until = "0.2.538"
 
 [[aliases]]
 name = "cl"
-target = "ai start claude"
+target = "ai run claude"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "claude"
-target = "ai start claude"
+target = "ai run claude"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "codex"
-target = "ai start codex"
+target = "ai run codex"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "copilot"
-target = "ai start copilot"
+target = "ai run copilot"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "kimi"
-target = "ai start kimi"
+target = "ai run kimi"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "agy"
-target = "ai start agy"
+target = "ai run agy"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "goose"
-target = "ai start goose"
+target = "ai run goose"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "kiro"
-target = "ai start kiro"
+target = "ai run kiro"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "sgpt"
-target = "ai start sgpt"
+target = "ai run sgpt"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "ollama"
-target = "ai start ollama"
+target = "ai run ollama"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "opencode"
-target = "ai start opencode"
+target = "ai run opencode"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "aider"
-target = "ai start aider"
+target = "ai run aider"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "autohand"
-target = "ai start autohand"
+target = "ai run autohand"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "vibe"
-target = "ai start vibe"
+target = "ai run vibe"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "qwen"
-target = "ai start qwen"
+target = "ai run qwen"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "zai"
-target = "ai start zai"
+target = "ai run zai"
 kind = "deprecated"
 until = "0.2.538"

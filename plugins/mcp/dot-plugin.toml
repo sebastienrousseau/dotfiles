@@ -23,6 +23,16 @@ effect = "read"
 legacy = "mcp doctor"
 summary = "Check servers and pins"
 
+[[commands.flags]]
+long = "strict"
+short = "s"
+summary = "Treat policy warnings as errors"
+
+[[commands.flags]]
+long = "json"
+short = "j"
+summary = "Print a JSON summary"
+
 [[commands]]
 verb = "serve"
 effect = "read"

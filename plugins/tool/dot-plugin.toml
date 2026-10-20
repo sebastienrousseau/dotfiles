@@ -50,6 +50,9 @@ effect = "write"
 legacy = "new"
 summary = "Create a project from a template"
 
+[commands.args]
+values = ["python", "go", "node", "packer", "molecule"]
+
 [[aliases]]
 name = "env"
 target = "tool"

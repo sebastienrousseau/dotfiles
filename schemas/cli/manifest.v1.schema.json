@@ -44,7 +44,31 @@
           "effect": { "enum": ["read", "write", "destructive"] },
           "legacy": { "$ref": "#/$defs/legacy" },
           "summary": { "$ref": "#/$defs/summary" },
-          "output": { "type": "string", "pattern": "^[a-z]{2,8}/[a-z][a-z0-9-]*\\.v[0-9]+$", "description": "Schema id of the --json output (N13, N14)" }
+          "output": { "type": "string", "pattern": "^[a-z]{2,8}/[a-z][a-z0-9-]*\\.v[0-9]+$", "description": "Schema id of the --json output (N13, N14)" },
+          "flags": {
+            "type": "array",
+            "description": "Flags this command takes beyond the family ones (N9), for help and completions",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["long", "summary"],
+              "properties": {
+                "long": { "type": "string", "pattern": "^[a-z][a-z-]*$" },
+                "short": { "type": "string", "pattern": "^[A-Za-z]$" },
+                "value": { "type": "string", "pattern": "^[a-z][a-z-]*$", "description": "Name of the value the flag takes, if any" },
+                "summary": { "$ref": "#/$defs/summary" }
+              }
+            }
+          },
+          "args": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "What the first argument completes to",
+            "properties": {
+              "values": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" } },
+              "complete": { "enum": ["files", "ai-patterns"] }
+            }
+          }
         }
       }
     },

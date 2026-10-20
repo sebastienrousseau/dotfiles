@@ -17,6 +17,16 @@ effect = "read"
 legacy = "attest"
 summary = "The workstation attestation"
 
+[[commands.flags]]
+long = "json"
+short = "j"
+summary = "Print JSON"
+
+[[commands.flags]]
+long = "write"
+short = "w"
+summary = "Write the attestation to a file"
+
 [[commands]]
 verb = "export"
 effect = "read"

@@ -64,7 +64,10 @@ path = [
   "docs/manual/command-index.md",
   "share/man/man1/dot.1",
   "share/completions/zsh/_dot",
+  "share/completions/powershell/dot.ps1",
   "defaults/dot_local/share/bash-completion/completions/dot",
+  "defaults/dot_config/fish/completions/dot.fish",
+  "defaults/dot_config/nushell/completions.nu",
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "2015-2026 Sebastien Rousseau"

@@ -38,7 +38,7 @@ obj|ai inventory|show||installed agents and versions
 cmd|ai list|ai tools|read|Installed agents
 cmd|ai install|ai install|write|Install agents
 cmd|ai update||write|Upgrade agent CLIs
-cmd|ai start||write|Start an agent
+cmd|ai start|ai chat|write|Start an agent
 cmd|ai run|ai run|write|Run an agent once
 cmd|ai serve|ai serve|read|Run the gateway in the foreground
 cmd|ai login|ai login|write|Authenticate an agent
@@ -218,21 +218,6 @@ cmd|ui select||read|Interactive picker for scripts
 cmd|ui run||write|Run a command with progress
 cmd|ui table show||read|Render rows as a table
 run|ai install --interactive|ai-setup||
-run|ai start claude|cl||
-run|ai start codex|codex||
-run|ai start copilot|copilot||
-run|ai start kimi|kimi||
-run|ai start agy|agy||
-run|ai start goose|goose||
-run|ai start kiro|kiro||
-run|ai start sgpt|sgpt||
-run|ai start ollama|ollama||
-run|ai start opencode|opencode||
-run|ai start aider|aider||
-run|ai start autohand|autohand||
-run|ai start vibe|vibe||
-run|ai start qwen|qwen||
-run|ai start zai|zai||
 run|cli list --available|registry||
 run|help --manual|manual||
 run|help --readme|docs||
@@ -261,6 +246,7 @@ leg|agent delegate list|agent delegate list||
 leg|agent delegate run|agent delegate run||
 leg|ai tools|ai list||
 leg|ai install|ai install||
+leg|ai chat|ai start||
 leg|ai run|ai run||
 leg|ai serve|ai serve||
 leg|ai login|ai login||
@@ -350,21 +336,6 @@ leg|env install|tool install||
 leg|env use|tool set||
 leg|new|tool new||
 leg|ai-setup|ai install --interactive||
-leg|cl|ai start claude||
-leg|codex|ai start codex||
-leg|copilot|ai start copilot||
-leg|kimi|ai start kimi||
-leg|agy|ai start agy||
-leg|goose|ai start goose||
-leg|kiro|ai start kiro||
-leg|sgpt|ai start sgpt||
-leg|ollama|ai start ollama||
-leg|opencode|ai start opencode||
-leg|aider|ai start aider||
-leg|autohand|ai start autohand||
-leg|vibe|ai start vibe||
-leg|qwen|ai start qwen||
-leg|zai|ai start zai||
 leg|registry|cli list --available||
 leg|manual|help --manual||
 leg|docs|help --readme||
@@ -377,27 +348,60 @@ leg|log-rotate|system clean --logs||
 leg|tools|tool list --nix||
 leg|packages|tool list --packages||
 leg|locks|tool list --locked||
+arg|ai start|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
+flag|ai run|pattern|p|pattern|Steering pattern
+arg|ai run|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
+flag|attest show|json|j||Print JSON
+flag|attest show|write|w||Write the attestation to a file
+arg|config add||files|
+flag|config check|check|c||Check only
+flag|config check|fix|f||Apply safe fixes
+flag|doctor status|verbose|v||Show detailed checks
+flag|doctor status|json|j||Print a JSON summary
+flag|doctor status|fix|f||Apply common fixes
+flag|doctor status|force|F||Apply fixes without prompts
+flag|doctor check|heal|H||Repair common issues
+flag|doctor check|score|s||Show the score
+flag|doctor check|json|j||Print a JSON summary
+flag|doctor check|ai|A||Include AI diagnostics
+flag|doctor restore|list|l||List available backups
+flag|doctor restore|latest|L||Restore the latest backup
+flag|doctor restore|git|g|ref|Restore from a git ref
+flag|doctor restore|diff|d|ref|Show a diff for a git ref
+flag|doctor restore|dry-run|n||Preview the restore
+flag|doctor snapshot new|baseline|b||Capture the baseline snapshot
+flag|doctor snapshot new|force|f||Overwrite an existing snapshot
+flag|doctor perf show|json|j||Print JSON
+flag|doctor perf show|profile|p||Include profile output
+flag|doctor perf show|runs|r|count|Number of runs
+flag|doctor perf show|target|t|ms|Timing target in milliseconds
+flag|mcp check|strict|s||Treat policy warnings as errors
+flag|mcp check|json|j||Print a JSON summary
+flag|security score show|verbose|v||Show detailed scoring
+flag|security score show|quiet|q||Reduce output
+flag|security score show|json|j||Print a JSON summary
+arg|tool new|python go node packer molecule||
 alias|mode|deprecated|agent mode|0.2.538
 alias|agents|deprecated|agent context|0.2.538
 alias|ai-setup|deprecated|ai install --interactive|0.2.538
 alias|ai-query|deprecated|ai ask|0.2.538
 alias|patterns|deprecated|ai pattern|0.2.538
-alias|cl|deprecated|ai start claude|0.2.538
-alias|claude|deprecated|ai start claude|0.2.538
-alias|codex|deprecated|ai start codex|0.2.538
-alias|copilot|deprecated|ai start copilot|0.2.538
-alias|kimi|deprecated|ai start kimi|0.2.538
-alias|agy|deprecated|ai start agy|0.2.538
-alias|goose|deprecated|ai start goose|0.2.538
-alias|kiro|deprecated|ai start kiro|0.2.538
-alias|sgpt|deprecated|ai start sgpt|0.2.538
-alias|ollama|deprecated|ai start ollama|0.2.538
-alias|opencode|deprecated|ai start opencode|0.2.538
-alias|aider|deprecated|ai start aider|0.2.538
-alias|autohand|deprecated|ai start autohand|0.2.538
-alias|vibe|deprecated|ai start vibe|0.2.538
-alias|qwen|deprecated|ai start qwen|0.2.538
-alias|zai|deprecated|ai start zai|0.2.538
+alias|cl|deprecated|ai run claude|0.2.538
+alias|claude|deprecated|ai run claude|0.2.538
+alias|codex|deprecated|ai run codex|0.2.538
+alias|copilot|deprecated|ai run copilot|0.2.538
+alias|kimi|deprecated|ai run kimi|0.2.538
+alias|agy|deprecated|ai run agy|0.2.538
+alias|goose|deprecated|ai run goose|0.2.538
+alias|kiro|deprecated|ai run kiro|0.2.538
+alias|sgpt|deprecated|ai run sgpt|0.2.538
+alias|ollama|deprecated|ai run ollama|0.2.538
+alias|opencode|deprecated|ai run opencode|0.2.538
+alias|aider|deprecated|ai run aider|0.2.538
+alias|autohand|deprecated|ai run autohand|0.2.538
+alias|vibe|deprecated|ai run vibe|0.2.538
+alias|qwen|deprecated|ai run qwen|0.2.538
+alias|zai|deprecated|ai run zai|0.2.538
 alias|attestation|deprecated|attest|0.2.538
 alias|completion|deprecated|cli completion|0.2.538
 alias|registry|deprecated|cli list --available|0.2.538

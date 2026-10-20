@@ -11,13 +11,15 @@ the dispatcher resolves ADR-020 spellings without parsing TOML:
   cmd|<domain [object] verb>|<legacy route or empty>|<effect>|<summary>
   run|<invocation with flags>|<legacy route>||
   leg|<legacy route>|<spelling>||   (the first spelling a route runs)
+  flag|<spelling>|<long>|<short>|<value>|<summary>
+  arg|<spelling>|<words, space-separated>|<files or ai-patterns>|
   alias|<name>|<shortcut, deprecated or removed>|<target>|<until or empty>
 
 `cmd` records with an empty legacy are declared but not built yet. `run`
 records come from deprecated aliases whose target says more than a declared
-spelling (`dot tool list --nix` runs `tools`, `dot ai start claude` runs
-`claude`, `dot help tour` runs `learn`), so every hint bin/dot prints runs
-what it names.
+spelling or one of its declared values (`dot tool list --nix` runs `tools`,
+`dot help tour` runs `learn`), so every hint bin/dot prints runs what it
+names.
 
     tools/ci/cli_command_table.py            # rewrite the table
     tools/ci/cli_command_table.py --check    # exit 1 when it is stale
@@ -55,6 +57,20 @@ def domain_records(domain: str, manifest: dict) -> list[str]:
     return rows
 
 
+def completion_records(manifests: dict) -> list[str]:
+    """Flags and first-argument hints, for help and completions."""
+    rows = []
+    for domain, manifest in sorted(manifests.items()):
+        for command in manifest["commands"]:
+            key = spelling(domain, command)
+            rows += [f"flag|{key}|{f['long']}|{f.get('short', '')}|{f.get('value', '')}|{f['summary']}"
+                     for f in command.get("flags", [])]
+            args = command.get("args", {})
+            if args:
+                rows.append(f"arg|{key}|{' '.join(args.get('values', []))}|{args.get('complete', '')}|")
+    return rows
+
+
 def alias_records(manifest: dict) -> list[str]:
     return [f"alias|{a['name']}|{a['kind']}|{a['target']}|{a.get('until', '')}"
             for a in manifest.get("aliases", [])]
@@ -69,8 +85,15 @@ def declared(manifests: dict) -> set[str]:
     return names
 
 
+def declared_values(manifests: dict) -> set[str]:
+    """`<command> <value>` for every value a command's args declare."""
+    return {f"{spelling(d, c)} {v}" for d, m in manifests.items() for c in m["commands"]
+            for v in c.get("args", {}).get("values", [])}
+
+
 def run_records(manifests: dict) -> list[str]:
-    seen, rows, names = set(), [], declared(manifests)
+    seen, rows = set(), []
+    names = declared(manifests) | declared_values(manifests)
     for manifest in manifests.values():
         for alias in manifest.get("aliases", []):
             target = alias["target"]
@@ -101,6 +124,7 @@ def build(manifests: dict) -> str:
         rows += domain_records(domain, manifest)
     rows += run_records(manifests)
     rows += legacy_records(rows)
+    rows += completion_records(manifests)
     for _, manifest in sorted(manifests.items()):
         rows += alias_records(manifest)
     return HEADER + "\n".join(rows) + "\n"

@@ -46,11 +46,11 @@ cp -R "$repo_root/defaults/.chezmoitemplates" "$dest/defaults/"
 cp -R "$repo_root/defaults/dot_config/dotfiles" "$dest/defaults/dot_config/"
 cp -R "$repo_root/defaults/dot_claude" "$dest/defaults/"
 
-# Man page and completions are BUILD PRODUCTS of the command registry
-# in bin/dot — generated here rather than copied, so a staged tree can
-# never ship a page or completion that drifted from the CLI it wraps.
-# (The committed copies under share/ exist for chezmoi-deployed users
-# and are drift-checked against these same generators in CI.)
+# The man page is a BUILD PRODUCT of the command registry in bin/dot,
+# generated here so a staged tree never ships a page that drifted from
+# the CLI it wraps. The completions are generated from the plugin
+# manifests and committed (CI fails when one is stale), so the staged
+# tree takes the committed files through `dot cli completion show`.
 bash "$repo_root/tools/docs/generate-manpage.sh" --output "$dest/share/man/man1/dot.1" >/dev/null
 for shell in zsh bash fish; do
   case "$shell" in
@@ -59,7 +59,7 @@ for shell in zsh bash fish; do
     fish) target="$dest/share/fish/vendor_completions.d/dot.fish" ;;
   esac
   CHEZMOI_SOURCE_DIR="$repo_root" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 \
-    bash "$repo_root/bin/dot" completion "$shell" >"$target"
+    bash "$repo_root/bin/dot" cli completion show "$shell" >"$target"
 done
 
 chmod 0755 "$dest/bin/dot" "$dest"/bin/dot-* "$dest/scripts/uninstall.sh"

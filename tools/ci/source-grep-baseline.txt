@@ -46,7 +46,6 @@
    4 tests/unit/shell/test_powershell_cli.sh
    6 tests/unit/shell/test_powershell_profile.sh
    5 tests/unit/shell/test_private_build_cache.sh
-   1 tests/unit/shell/test_zsh_dot_completion.sh
    2 tests/unit/tools/test_ai_core_download_verify.sh
    2 tests/unit/tools/test_dot_bootstrap_nix_verify.sh
    1 tests/unit/tools/test_public_entrypoints.sh

@@ -16,7 +16,7 @@ name: Doc Drift / Generators
 #       Verifies share/man/man1/dot.1 matches the command registry.
 #
 #   - tools/docs/generate-completions.sh --check
-#       Verifies the committed zsh/bash completions match it too.
+#       Verifies the five committed completions match the manifests.
 #
 # Adding a third generator is just adding a new step below — keep
 # this workflow flat and easy to extend.
@@ -40,9 +40,13 @@ on:
       - 'tools/docs/generate-manpage.sh'
       - 'tools/docs/man/dot.1.in'
       - 'tools/docs/generate-completions.sh'
-      - 'scripts/dot/commands/completion.sh'
-      - 'share/completions/zsh/_dot'
+      - 'tools/docs/gen_completions.py'
+      - 'lib/dot/data/commands.txt'
+      - 'plugins/**'
+      - 'share/completions/**'
       - 'defaults/dot_local/share/bash-completion/completions/dot'
+      - 'defaults/dot_config/fish/completions/dot.fish'
+      - 'defaults/dot_config/nushell/completions.nu'
       - 'llms.txt'
       - 'CHANGELOG.md'
       - '.well-known/**'
