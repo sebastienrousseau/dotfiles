@@ -1,0 +1,82 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Command names of dot fleet (ADR-020), checked by tools/ci/check-cli-contract.py.
+# Repository at extraction: dot-fleet.
+schema = "cli/manifest.v1"
+name = "fleet"
+domain = "fleet"
+version = "0.2.536"
+summary = "many hosts"
+default = "status"
+
+[[objects]]
+name = "drift"
+summary = "drift across hosts"
+default = "show"
+
+[[objects]]
+name = "namespace"
+summary = "fleet namespaces"
+default = "list"
+
+[[objects]]
+name = "log"
+summary = "fleet events"
+default = "show"
+
+[[objects]]
+name = "policy"
+summary = "fleet policy"
+default = "show"
+
+[[commands]]
+verb = "status"
+effect = "read"
+summary = "Posture across hosts"
+
+[[commands]]
+verb = "apply"
+effect = "write"
+summary = "Apply the fleet configuration"
+
+[[commands]]
+verb = "push"
+effect = "write"
+summary = "Send configuration to a host"
+
+[[commands]]
+object = "drift"
+verb = "show"
+effect = "read"
+summary = "Drift across hosts"
+
+[[commands]]
+object = "namespace"
+verb = "list"
+effect = "read"
+summary = "Namespaces"
+
+[[commands]]
+object = "log"
+verb = "show"
+effect = "read"
+summary = "Fleet events"
+
+[[commands]]
+object = "policy"
+verb = "show"
+effect = "read"
+summary = "Fleet policy"
+
+[[commands]]
+object = "policy"
+verb = "set"
+effect = "write"
+summary = "Enforce a fleet policy"
+
+[[aliases]]
+name = "teleport"
+target = "fleet push"
+kind = "deprecated"
+until = "0.2.538"

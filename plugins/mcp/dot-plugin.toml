@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Command names of dot mcp (ADR-020), checked by tools/ci/check-cli-contract.py.
+# Repository at extraction: dot-mcp.
+schema = "cli/manifest.v1"
+name = "mcp"
+domain = "mcp"
+version = "0.2.536"
+summary = "MCP servers as supply chain"
+default = "list"
+
+[[commands]]
+verb = "list"
+effect = "read"
+summary = "Configured MCP servers"
+
+[[commands]]
+verb = "check"
+effect = "read"
+summary = "Check servers and pins"
+
+[[commands]]
+verb = "serve"
+effect = "read"
+summary = "Run dot's read-only MCP server"

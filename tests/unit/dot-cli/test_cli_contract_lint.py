@@ -1,0 +1,172 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+"""tools/ci/check-cli-contract.py passes the repository and fails each planted violation."""
+import importlib.util
+import os
+from pathlib import Path
+import shutil
+import tempfile
+import textwrap
+import unittest
+
+ROOT = Path(__file__).resolve().parents[3]
+SPEC = importlib.util.spec_from_file_location("cli_contract", ROOT / "tools/ci/check-cli-contract.py")
+lint_mod = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(lint_mod)
+
+# Behaves like today's bin/dot on the three runtime rules in the baseline.
+TODAY_DOT = """#!/bin/sh
+case "$1" in
+  -v|--version) echo "dot 0.2.536" ;;
+  *) echo "Unknown command: $1" >&2; exit 1 ;;
+esac
+"""
+FIXED_V_DOT = TODAY_DOT.replace("*)", "-V) echo 'dot 0.2.536' ;;\n  *)")
+
+
+class Fixture(unittest.TestCase):
+    """A copy of the inputs the lint reads, edited per test."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmp)
+        for rel in ("schemas/cli", "plugins"):
+            shutil.copytree(ROOT / rel, self.tmp / rel)
+        for rel in ("lib/dot/data/routes.txt", "defaults/.chezmoidata.toml", "tools/ci/cli-contract-baseline.txt"):
+            (self.tmp / rel).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(ROOT / rel, self.tmp / rel)
+        self.dot = self.fake_dot(TODAY_DOT)
+
+    def fake_dot(self, body):
+        path = self.tmp / "dot"
+        path.write_text(body)
+        os.chmod(path, 0o755)
+        return path
+
+    def manifest(self, domain):
+        return self.tmp / "plugins" / domain / "dot-plugin.toml"
+
+    def edit(self, domain, old, new):
+        path = self.manifest(domain)
+        text = path.read_text()
+        self.assertIn(old, text, f"fixture text not found in {domain}")
+        path.write_text(text.replace(old, new, 1))
+
+    def append(self, domain, toml):
+        path = self.manifest(domain)
+        path.write_text(path.read_text() + "\n" + textwrap.dedent(toml))
+
+    def errors(self):
+        return lint_mod.lint(self.tmp, self.dot)
+
+    def assertFails(self, fragment):
+        errors = self.errors()
+        self.assertTrue(any(fragment in e for e in errors), f"no error containing {fragment!r}: {errors}")
+
+
+class Passes(Fixture):
+    def test_repository_passes_with_the_real_binary(self):
+        self.assertEqual(lint_mod.lint(ROOT, ROOT / "bin/dot"), [])
+
+    def test_fixture_passes(self):
+        self.assertEqual(self.errors(), [])
+
+    def test_seventeen_manifests_one_per_domain(self):
+        manifests, errors = lint_mod.load_manifests(ROOT)
+        self.assertEqual(errors, [])
+        self.assertEqual(set(manifests), set(lint_mod.load_registries(ROOT)["domains"]))
+
+
+class Manifests(Fixture):
+    def test_schema_violation(self):
+        self.edit("mcp", 'default = "list"', 'default = "serve"')
+        self.assertFails("mcp: schema: default")
+
+    def test_directory_must_match_domain(self):
+        self.edit("mcp", 'domain = "mcp"', 'domain = "fleet"')
+        self.assertFails("must equal the directory name")
+
+    def test_unknown_domain(self):
+        shutil.copytree(self.tmp / "plugins/mcp", self.tmp / "plugins/proxy")
+        self.edit("proxy", 'name = "mcp"\ndomain = "mcp"', 'name = "proxy"\ndomain = "proxy"')
+        self.assertFails("proxy: not a domain")
+
+    def test_unapproved_verb(self):
+        self.edit("mcp", 'verb = "check"', 'verb = "doctor"')
+        self.assertFails("'doctor' is not an approved verb")
+
+    def test_object_must_be_declared(self):
+        self.append("mcp", '[[commands]]\nobject = "server"\nverb = "list"\neffect = "read"\nsummary = "x"\n')
+        self.assertFails("object 'server' is not declared")
+
+    def test_object_must_not_be_a_verb(self):
+        self.append("mcp", '[[objects]]\nname = "check"\nsummary = "x"\ndefault = "show"\n')
+        self.assertFails("object 'check' is a verb")
+
+    def test_effect_must_match_the_verb_class(self):
+        self.edit("mcp", 'verb = "check"\neffect = "read"', 'verb = "check"\neffect = "write"')
+        self.assertFails("does not match the verb's class 'read'")
+
+    def test_uninstall_is_destructive(self):
+        self.edit("config", 'verb = "uninstall"\neffect = "destructive"', 'verb = "uninstall"\neffect = "write"')
+        self.assertFails("always confirms")
+
+    def test_output_id_carries_the_domain(self):
+        self.edit("mcp", 'summary = "Configured MCP servers"', 'summary = "x"\noutput = "fleet/list.v1"')
+        self.assertFails("must start with 'mcp/'")
+
+    def test_expired_deprecation(self):
+        self.edit("fleet", 'until = "0.2.538"', 'until = "0.2.536"')
+        self.assertFails("deprecated alias 'teleport' expired")
+
+
+class Aliases(Fixture):
+    def test_duplicate_alias(self):
+        self.append("mcp", '[[aliases]]\nname = "teleport"\ntarget = "mcp list"\nkind = "deprecated"\nuntil = "0.2.538"\n')
+        self.assertFails("alias 'teleport' is declared by both")
+
+    def test_alias_shadowing_a_domain(self):
+        self.append("mcp", '[[aliases]]\nname = "fleet"\ntarget = "mcp list"\nkind = "deprecated"\nuntil = "0.2.538"\n')
+        self.assertFails("alias 'fleet' shadows a domain")
+
+    def test_target_with_unknown_command(self):
+        self.edit("fleet", 'target = "fleet push"', 'target = "fleet deploy"')
+        self.assertFails("'deploy' is neither an object nor a command of 'fleet'")
+
+    def test_target_with_unknown_object_verb(self):
+        self.edit("secret", 'target = "secret key new"', 'target = "secret key remove"')
+        self.assertFails("'secret key' has no verb 'remove'")
+
+    def test_target_with_unknown_domain(self):
+        self.edit("fleet", 'target = "fleet push"', 'target = "host push"')
+        self.assertFails("'host' is neither a domain")
+
+    def test_missing_shortcut(self):
+        self.edit("system", 'name = "update"\ntarget = "system update"\nkind = "shortcut"',
+                  'name = "up"\ntarget = "system update"\nkind = "deprecated"\nuntil = "0.2.538"')
+        self.assertFails("shortcut 'update' -> 'system update' is in domains.json but not in the manifest")
+
+    def test_undeclared_shortcut(self):
+        self.edit("fleet", 'kind = "deprecated"\nuntil = "0.2.538"', 'kind = "shortcut"')
+        self.assertFails("shortcut 'teleport' -> 'fleet push' is not declared in domains.json")
+
+    def test_route_without_a_new_spelling(self):
+        routes = self.tmp / "lib/dot/data/routes.txt"
+        routes.write_text(routes.read_text() + "frobnicate|meta\n")
+        self.assertFails("route 'frobnicate' has no new spelling")
+
+
+class Runtime(Fixture):
+    def test_new_runtime_violation_fails(self):
+        baseline = self.tmp / "tools/ci/cli-contract-baseline.txt"
+        baseline.write_text(baseline.read_text().replace("N10-unknown-127", ""))
+        self.assertFails("runtime N10-unknown-127: an unknown command exits 1")
+
+    def test_fixed_violation_must_leave_the_baseline(self):
+        self.dot = self.fake_dot(FIXED_V_DOT)
+        self.assertFails("runtime N9-short-version: fixed; remove it")
+
+
+if __name__ == "__main__":
+    unittest.main()

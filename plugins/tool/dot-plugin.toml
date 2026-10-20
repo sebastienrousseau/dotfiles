@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Command names of dot tool (ADR-020), checked by tools/ci/check-cli-contract.py.
+# Repository at extraction: dot-tool.
+schema = "cli/manifest.v1"
+name = "tool"
+domain = "tool"
+version = "0.2.536"
+summary = "toolchains, packages, project templates"
+default = "list"
+
+[[commands]]
+verb = "list"
+effect = "read"
+summary = "Toolchains and their versions"
+
+[[commands]]
+verb = "install"
+effect = "write"
+summary = "Install the configured toolchains"
+
+[[commands]]
+verb = "update"
+effect = "write"
+summary = "Upgrade toolchains"
+
+[[commands]]
+verb = "remove"
+effect = "write"
+summary = "Remove a toolchain or orphans"
+
+[[commands]]
+verb = "set"
+effect = "write"
+summary = "Pin a toolchain version"
+
+[[commands]]
+verb = "export"
+effect = "read"
+summary = "Print the tool environment"
+
+[[commands]]
+verb = "new"
+effect = "write"
+summary = "Create a project from a template"
+
+[[aliases]]
+name = "env"
+target = "tool"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "tools"
+target = "tool list --nix"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "packages"
+target = "tool list --packages"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "locks"
+target = "tool list --locked"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "new"
+target = "tool new"
+kind = "deprecated"
+until = "0.2.538"

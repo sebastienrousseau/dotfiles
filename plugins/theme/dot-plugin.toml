@@ -1,0 +1,66 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Command names of dot theme (ADR-020), checked by tools/ci/check-cli-contract.py.
+# Repository at extraction: dot-theme.
+schema = "cli/manifest.v1"
+name = "theme"
+domain = "theme"
+version = "0.2.536"
+summary = "one palette for every app"
+default = "show"
+
+[[objects]]
+name = "wallpaper"
+summary = "the current wallpaper"
+default = "show"
+
+[[objects]]
+name = "font"
+summary = "installed fonts"
+default = "list"
+
+[[commands]]
+verb = "show"
+effect = "read"
+summary = "Current theme and palette"
+
+[[commands]]
+verb = "list"
+effect = "read"
+summary = "Available themes"
+
+[[commands]]
+verb = "set"
+effect = "write"
+summary = "Switch theme everywhere"
+
+[[commands]]
+object = "wallpaper"
+verb = "set"
+effect = "write"
+summary = "Set the wallpaper and derive a palette"
+
+[[commands]]
+object = "font"
+verb = "list"
+effect = "read"
+summary = "Installed terminal fonts"
+
+[[commands]]
+object = "font"
+verb = "install"
+effect = "write"
+summary = "Install the configured fonts"
+
+[[aliases]]
+name = "wallpaper"
+target = "theme wallpaper set"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "fonts"
+target = "theme font install"
+kind = "deprecated"
+until = "0.2.538"

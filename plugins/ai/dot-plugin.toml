@@ -1,0 +1,214 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Command names of dot ai (ADR-020), checked by tools/ci/check-cli-contract.py.
+# Repository at extraction: dot-ai.
+schema = "cli/manifest.v1"
+name = "ai"
+domain = "ai"
+version = "0.2.536"
+summary = "install, route and run coding agents"
+default = "tui"
+
+[[objects]]
+name = "pattern"
+summary = "prompt patterns"
+default = "list"
+
+[[objects]]
+name = "cost"
+summary = "spend by agent and model"
+default = "show"
+
+[[objects]]
+name = "gateway"
+summary = "the keyless gateway"
+default = "show"
+
+[[objects]]
+name = "inventory"
+summary = "installed agents and versions"
+default = "show"
+
+[[commands]]
+verb = "list"
+effect = "read"
+summary = "Installed agents"
+
+[[commands]]
+verb = "install"
+effect = "write"
+summary = "Install agents"
+
+[[commands]]
+verb = "update"
+effect = "write"
+summary = "Upgrade agent CLIs"
+
+[[commands]]
+verb = "start"
+effect = "write"
+summary = "Start an agent"
+
+[[commands]]
+verb = "run"
+effect = "write"
+summary = "Run an agent once"
+
+[[commands]]
+verb = "serve"
+effect = "read"
+summary = "Run the gateway in the foreground"
+
+[[commands]]
+verb = "login"
+effect = "write"
+summary = "Authenticate an agent"
+
+[[commands]]
+verb = "check"
+effect = "read"
+summary = "Check agent installs and auth"
+
+[[commands]]
+verb = "ask"
+effect = "read"
+summary = "Ask about the local context"
+
+[[commands]]
+object = "pattern"
+verb = "list"
+effect = "read"
+summary = "Prompt patterns"
+
+[[commands]]
+object = "cost"
+verb = "show"
+effect = "read"
+summary = "Spend by agent and model"
+
+[[commands]]
+object = "gateway"
+verb = "show"
+effect = "read"
+summary = "Gateway statistics"
+
+[[commands]]
+object = "inventory"
+verb = "show"
+effect = "read"
+summary = "Agents, versions and config"
+
+[[aliases]]
+name = "ai-setup"
+target = "ai install --interactive"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "ai-query"
+target = "ai ask"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "patterns"
+target = "ai pattern"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "cl"
+target = "ai start claude"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "claude"
+target = "ai start claude"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "codex"
+target = "ai start codex"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "copilot"
+target = "ai start copilot"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "kimi"
+target = "ai start kimi"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "agy"
+target = "ai start agy"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "goose"
+target = "ai start goose"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "kiro"
+target = "ai start kiro"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "sgpt"
+target = "ai start sgpt"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "ollama"
+target = "ai start ollama"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "opencode"
+target = "ai start opencode"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "aider"
+target = "ai start aider"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "autohand"
+target = "ai start autohand"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "vibe"
+target = "ai start vibe"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "qwen"
+target = "ai start qwen"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "zai"
+target = "ai start zai"
+kind = "deprecated"
+until = "0.2.538"

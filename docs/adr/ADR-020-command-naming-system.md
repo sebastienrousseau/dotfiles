@@ -1,7 +1,8 @@
 # ADR-020: One command grammar for the dot family
 
-Status: Accepted 2026-10-18; registries and manifest schema implemented,
-lint and generators pending (see Enforcement).
+Status: Accepted 2026-10-18; registries, manifest schema, plugin manifests
+and the CLI-contract lint implemented; alias table and generators pending
+(see Enforcement).
 
 ## Context
 
@@ -145,10 +146,22 @@ is documented as an alternative entry point.
 | Step | Gate | State |
 |------|------|-------|
 | Registries and manifest schema | `tests/unit/dot-cli/test_naming_registry.py` in Core and delivery contracts | done |
-| CLI-contract lint over manifests, help output and exit codes (N1 to N17) | lint job; fails on a planted violation | pending |
+| CLI-contract lint over manifests, routes, flags and exit codes | `tools/ci/check-cli-contract.py` in Core and delivery contracts; `tests/unit/dot-cli/test_cli_contract_lint.py` plants each violation | done; three runtime violations baselined until the alias table |
 | Alias table from the command map | every route resolves; deprecated names warn; removed names exit 127 | pending |
 | Help, man pages, completions and cmdlets generated from manifests | no hand-written completion list remains | pending |
 | One update path, `dot system update` | a scheduled run exits 0 on macOS and Linux | pending |
+
+Each domain declares its names in `plugins/<domain>/dot-plugin.toml`, and
+every route in `lib/dot/data/routes.txt` has an alias there. Writing them
+corrected spellings in the plan's command map that broke N3, N4 or N5:
+`dot secret audit` is `dot secret check`, `dot secret get` is
+`dot secret show`, `dot shell refresh` is `dot shell update` (a bare
+object may not regenerate anything), `dot cli search` is
+`dot cli list --available` beside `dot help <term>`, and the objects
+`conflicts` and `metrics` are singular. `dot agent delegate` has no
+approved verb and is left out until one is chosen. The runtime checks
+(`-V`, `-v`, exit 127) fail today and are listed in
+`tools/ci/cli-contract-baseline.txt`, which may only shrink.
 
 Related: [ADR-004](ADR-004-cli-architecture.md) (CLI wrapper),
 [ADR-016](ADR-016-plugin-trust-sandbox.md) (plugin trust),

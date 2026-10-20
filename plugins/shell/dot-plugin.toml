@@ -1,0 +1,95 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Command names of dot shell (ADR-020), checked by tools/ci/check-cli-contract.py.
+# Repository at extraction: dot-shell.
+schema = "cli/manifest.v1"
+name = "shell"
+domain = "shell"
+version = "0.2.536"
+summary = "aliases, history, startup caches"
+default = "status"
+
+[[objects]]
+name = "history"
+summary = "shell history"
+default = "list"
+
+[[objects]]
+name = "alias"
+summary = "aliases and their sources"
+default = "list"
+
+[[commands]]
+verb = "status"
+effect = "read"
+summary = "Shell, startup time and cache state"
+
+[[commands]]
+verb = "update"
+effect = "write"
+summary = "Regenerate the startup caches"
+
+[[commands]]
+verb = "clean"
+effect = "write"
+summary = "Clear the startup caches"
+
+[[commands]]
+object = "history"
+verb = "list"
+effect = "read"
+summary = "Recent history"
+
+[[commands]]
+object = "alias"
+verb = "list"
+effect = "read"
+summary = "Aliases and where each is defined"
+
+[[commands]]
+object = "alias"
+verb = "check"
+effect = "read"
+summary = "Find shadowed or broken aliases"
+
+[[aliases]]
+name = "cd"
+target = "config path"
+kind = "shortcut"
+
+[[aliases]]
+name = "history"
+target = "shell history"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "aliases"
+target = "shell alias"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "alias-check"
+target = "shell alias check"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "cache-refresh"
+target = "shell update"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "prewarm"
+target = "shell update --prewarm"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "clean-cache"
+target = "shell clean"
+kind = "deprecated"
+until = "0.2.538"
