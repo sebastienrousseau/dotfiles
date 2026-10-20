@@ -1,0 +1,241 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Command names of dot doctor (ADR-020), checked by tools/ci/check-cli-contract.py.
+# Repository at extraction: dot-doctor.
+schema = "cli/manifest.v1"
+name = "doctor"
+domain = "doctor"
+version = "0.2.536"
+summary = "health, repair, backup and rollback"
+default = "status"
+
+[[objects]]
+name = "score"
+summary = "the setup score"
+default = "show"
+
+[[objects]]
+name = "snapshot"
+summary = "setup snapshots"
+default = "list"
+
+[[objects]]
+name = "perf"
+summary = "startup performance"
+default = "show"
+
+[[objects]]
+name = "drift"
+summary = "drift from the source"
+default = "show"
+
+[[objects]]
+name = "conflict"
+summary = "conflicting files"
+default = "list"
+
+[[objects]]
+name = "metric"
+summary = "recorded metrics"
+default = "list"
+
+[[objects]]
+name = "report"
+summary = "the weekly posture report"
+default = "show"
+
+[[commands]]
+verb = "status"
+effect = "read"
+summary = "Health summary"
+
+[[commands]]
+verb = "check"
+effect = "read"
+summary = "Run every health check"
+
+[[commands]]
+verb = "fix"
+effect = "write"
+summary = "Repair what check found"
+
+[[commands]]
+verb = "backup"
+effect = "write"
+summary = "Back up the setup"
+
+[[commands]]
+verb = "restore"
+effect = "write"
+summary = "Restore from a backup"
+
+[[commands]]
+verb = "rollback"
+effect = "write"
+summary = "Return to a previous generation"
+
+[[commands]]
+object = "score"
+verb = "show"
+effect = "read"
+summary = "The setup score"
+
+[[commands]]
+object = "snapshot"
+verb = "list"
+effect = "read"
+summary = "Snapshots"
+
+[[commands]]
+object = "snapshot"
+verb = "new"
+effect = "write"
+summary = "Take a snapshot"
+
+[[commands]]
+object = "perf"
+verb = "show"
+effect = "read"
+summary = "Startup timings"
+
+[[commands]]
+object = "perf"
+verb = "measure"
+effect = "read"
+summary = "Benchmark startup"
+
+[[commands]]
+object = "drift"
+verb = "show"
+effect = "read"
+summary = "Drift from the source"
+
+[[commands]]
+object = "conflict"
+verb = "list"
+effect = "read"
+summary = "Conflicting files"
+
+[[commands]]
+object = "metric"
+verb = "list"
+effect = "read"
+summary = "Recorded metrics"
+
+[[commands]]
+object = "report"
+verb = "show"
+effect = "read"
+summary = "Weekly posture report"
+
+[[aliases]]
+name = "health"
+target = "doctor"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "health-check"
+target = "doctor"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "scorecard"
+target = "doctor score"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "score"
+target = "doctor score"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "snapshot"
+target = "doctor snapshot"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "perf"
+target = "doctor perf"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "benchmark"
+target = "doctor perf --profile"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "load-bench"
+target = "doctor perf --ready"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "load-bench-pty"
+target = "doctor perf --ready --pty"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "rollback"
+target = "doctor rollback"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "heal"
+target = "doctor fix"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "drift"
+target = "doctor drift"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "conflicts"
+target = "doctor conflict"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "restore"
+target = "doctor restore"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "metrics"
+target = "doctor metric"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "backup"
+target = "doctor backup"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "chaos"
+target = "doctor"
+kind = "removed"
+
+[[aliases]]
+name = "smoke-test"
+target = "doctor"
+kind = "removed"
+
+[[aliases]]
+name = "keys"
+target = "doctor"
+kind = "removed"

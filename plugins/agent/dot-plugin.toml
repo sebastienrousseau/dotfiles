@@ -1,0 +1,148 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Command names of dot agent (ADR-020), checked by tools/ci/check-cli-contract.py.
+# Repository at extraction: dot-agent.
+schema = "cli/manifest.v1"
+name = "agent"
+domain = "agent"
+version = "0.2.536"
+summary = "modes, policy, sandbox, budgets"
+default = "status"
+
+[[objects]]
+name = "mode"
+summary = "agent modes"
+default = "list"
+
+[[objects]]
+name = "context"
+summary = "context files"
+default = "show"
+
+[[objects]]
+name = "card"
+summary = "the agent card"
+default = "show"
+
+[[objects]]
+name = "log"
+summary = "the agent log"
+default = "show"
+
+[[objects]]
+name = "checkpoint"
+summary = "saved checkpoints"
+default = "list"
+
+[[objects]]
+name = "policy"
+summary = "sandbox policy"
+default = "show"
+
+[[objects]]
+name = "budget"
+summary = "spend budgets"
+default = "show"
+
+[[commands]]
+verb = "status"
+effect = "read"
+summary = "Mode, policy and budgets"
+
+[[commands]]
+verb = "check"
+effect = "read"
+summary = "Check modes and policy"
+
+[[commands]]
+verb = "run"
+effect = "write"
+summary = "Run an agent task"
+
+[[commands]]
+verb = "suspend"
+effect = "write"
+summary = "Pause running agents"
+
+[[commands]]
+verb = "resume"
+effect = "write"
+summary = "Resume paused agents"
+
+[[commands]]
+verb = "export"
+effect = "read"
+summary = "Export the AI bill of materials"
+
+[[commands]]
+object = "mode"
+verb = "list"
+effect = "read"
+summary = "Available modes"
+
+[[commands]]
+object = "mode"
+verb = "show"
+effect = "read"
+summary = "One mode in detail"
+
+[[commands]]
+object = "mode"
+verb = "set"
+effect = "write"
+summary = "Switch mode"
+
+[[commands]]
+object = "context"
+verb = "show"
+effect = "read"
+summary = "Context files in effect"
+
+[[commands]]
+object = "card"
+verb = "show"
+effect = "read"
+summary = "The agent card"
+
+[[commands]]
+object = "log"
+verb = "show"
+effect = "read"
+summary = "The agent log"
+
+[[commands]]
+object = "checkpoint"
+verb = "list"
+effect = "read"
+summary = "Saved checkpoints"
+
+[[commands]]
+object = "checkpoint"
+verb = "save"
+effect = "write"
+summary = "Save a checkpoint"
+
+[[commands]]
+object = "policy"
+verb = "show"
+effect = "read"
+summary = "The sandbox policy"
+
+[[commands]]
+object = "budget"
+verb = "show"
+effect = "read"
+summary = "Budgets and spend"
+
+[[aliases]]
+name = "mode"
+target = "agent mode"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "agents"
+target = "agent context"
+kind = "deprecated"
+until = "0.2.538"

@@ -1,0 +1,178 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Command names of dot config (ADR-020), checked by tools/ci/check-cli-contract.py.
+# Repository at extraction: dot-config.
+schema = "cli/manifest.v1"
+name = "config"
+domain = "config"
+version = "0.2.536"
+summary = "apply, diff and sync the dotfiles"
+default = "status"
+
+[[objects]]
+name = "path"
+summary = "where the dotfiles source lives"
+default = "show"
+
+[[objects]]
+name = "profile"
+summary = "the active profile and its features"
+default = "show"
+
+[[commands]]
+verb = "status"
+effect = "read"
+summary = "Pending changes and last apply"
+
+[[commands]]
+verb = "diff"
+effect = "read"
+summary = "What apply would change"
+
+[[commands]]
+verb = "apply"
+effect = "write"
+summary = "Write the dotfiles to this machine"
+
+[[commands]]
+verb = "sync"
+effect = "write"
+summary = "Pull the source, then apply"
+
+[[commands]]
+verb = "update"
+effect = "write"
+summary = "Pull and apply the dotfiles only"
+
+[[commands]]
+verb = "edit"
+effect = "write"
+summary = "Open a managed file in $EDITOR"
+
+[[commands]]
+verb = "add"
+effect = "write"
+summary = "Start managing an existing file"
+
+[[commands]]
+verb = "save"
+effect = "write"
+summary = "Commit source changes"
+
+[[commands]]
+verb = "init"
+effect = "write"
+summary = "First-time setup of the dotfiles"
+
+[[commands]]
+verb = "check"
+effect = "read"
+summary = "Lint the source and templates"
+
+[[commands]]
+verb = "export"
+effect = "read"
+summary = "Write a portable bundle"
+
+[[commands]]
+verb = "uninstall"
+effect = "destructive"
+summary = "Remove the setup, keeping the source"
+
+[[commands]]
+object = "path"
+verb = "show"
+effect = "read"
+summary = "Print the source directory"
+
+[[commands]]
+object = "profile"
+verb = "show"
+effect = "read"
+summary = "Show the active profile"
+
+[[commands]]
+object = "profile"
+verb = "set"
+effect = "write"
+summary = "Switch profile"
+
+[[aliases]]
+name = "apply"
+target = "config apply"
+kind = "shortcut"
+
+[[aliases]]
+name = "sync"
+target = "config sync"
+kind = "shortcut"
+
+[[aliases]]
+name = "diff"
+target = "config diff"
+kind = "shortcut"
+
+[[aliases]]
+name = "status"
+target = "config status"
+kind = "shortcut"
+
+[[aliases]]
+name = "edit"
+target = "config edit"
+kind = "shortcut"
+
+[[aliases]]
+name = "add"
+target = "config add"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "commit"
+target = "config save"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "uninstall"
+target = "config uninstall"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "init"
+target = "config init"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "setup"
+target = "config init"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "profile"
+target = "config profile"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "sandbox"
+target = "config apply --sandbox"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "bundle"
+target = "config export"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "lint"
+target = "config check"
+kind = "deprecated"
+until = "0.2.538"

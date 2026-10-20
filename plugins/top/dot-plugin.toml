@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Command names of dot top (ADR-020), checked by tools/ci/check-cli-contract.py.
+# Repository at extraction: dot-top.
+schema = "cli/manifest.v1"
+name = "top"
+domain = "top"
+version = "0.2.536"
+summary = "what the machine and its agents are doing"
+default = "tui"
+
+[[objects]]
+name = "report"
+summary = "usage by model, agent or project"
+default = "show"
+
+[[commands]]
+verb = "measure"
+effect = "read"
+summary = "Sample once and print the result"
+
+[[commands]]
+object = "report"
+verb = "show"
+effect = "read"
+summary = "Usage report"
+
+[[aliases]]
+name = "intelligence"
+target = "top"
+kind = "deprecated"
+until = "0.2.538"

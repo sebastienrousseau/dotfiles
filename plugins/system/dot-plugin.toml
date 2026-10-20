@@ -1,0 +1,94 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Command names of dot system (ADR-020), checked by tools/ci/check-cli-contract.py.
+# Repository at extraction: dot-system.
+schema = "cli/manifest.v1"
+name = "system"
+domain = "system"
+version = "0.2.536"
+summary = "updates, cleanup, scheduled maintenance"
+default = "status"
+
+[[objects]]
+name = "schedule"
+summary = "scheduled maintenance jobs"
+default = "list"
+
+[[objects]]
+name = "settings"
+summary = "OS settings dot manages"
+default = "show"
+
+[[commands]]
+verb = "status"
+effect = "read"
+summary = "OS, disk, outdated counts, last run"
+
+[[commands]]
+verb = "update"
+effect = "write"
+summary = "Update everything, asking first"
+
+[[commands]]
+verb = "clean"
+effect = "write"
+summary = "Reclaim space, asking first"
+
+[[commands]]
+verb = "show"
+effect = "read"
+summary = "Hardware and host details"
+
+[[commands]]
+object = "schedule"
+verb = "list"
+effect = "read"
+summary = "Scheduled jobs"
+
+[[commands]]
+object = "schedule"
+verb = "set"
+effect = "write"
+summary = "Set the maintenance schedule"
+
+[[commands]]
+object = "schedule"
+verb = "run"
+effect = "write"
+summary = "Run scheduled maintenance now"
+
+[[commands]]
+object = "settings"
+verb = "show"
+effect = "read"
+summary = "Current OS settings"
+
+[[commands]]
+object = "settings"
+verb = "apply"
+effect = "write"
+summary = "Apply the managed OS settings"
+
+[[aliases]]
+name = "update"
+target = "system update"
+kind = "shortcut"
+
+[[aliases]]
+name = "upgrade"
+target = "system update"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "tune"
+target = "system settings apply"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "log-rotate"
+target = "system clean --logs"
+kind = "deprecated"
+until = "0.2.538"

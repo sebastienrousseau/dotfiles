@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Command names of dot attest (ADR-020), checked by tools/ci/check-cli-contract.py.
+# Repository at extraction: dot-attest.
+schema = "cli/manifest.v1"
+name = "attest"
+domain = "attest"
+version = "0.2.536"
+summary = "attestation and verification"
+default = "show"
+
+[[commands]]
+verb = "show"
+effect = "read"
+summary = "The workstation attestation"
+
+[[commands]]
+verb = "export"
+effect = "read"
+summary = "Write attestation evidence"
+
+[[commands]]
+verb = "verify"
+effect = "read"
+summary = "Verify evidence"
+
+[[aliases]]
+name = "attestation"
+target = "attest"
+kind = "deprecated"
+until = "0.2.538"

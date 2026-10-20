@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Command names of dot ui (ADR-020), checked by tools/ci/check-cli-contract.py.
+# Repository at extraction: dot-ui.
+schema = "cli/manifest.v1"
+name = "ui"
+domain = "ui"
+version = "0.2.536"
+summary = "primitives for scripts"
+default = "show"
+
+[[objects]]
+name = "table"
+summary = "render a table"
+default = "show"
+
+[[commands]]
+verb = "show"
+effect = "read"
+summary = "The primitives on offer"
+
+[[commands]]
+verb = "select"
+effect = "read"
+summary = "Interactive picker for scripts"
+
+[[commands]]
+verb = "run"
+effect = "write"
+summary = "Run a command with progress"
+
+[[commands]]
+object = "table"
+verb = "show"
+effect = "read"
+summary = "Render rows as a table"

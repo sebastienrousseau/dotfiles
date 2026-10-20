@@ -1,0 +1,182 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Command names of dot security (ADR-020), checked by tools/ci/check-cli-contract.py.
+# Repository at extraction: dot-security.
+schema = "cli/manifest.v1"
+name = "security"
+domain = "security"
+version = "0.2.536"
+summary = "OS hardening"
+default = "status"
+
+[[objects]]
+name = "policy"
+summary = "the security policy"
+default = "show"
+
+[[objects]]
+name = "disk"
+summary = "disk encryption"
+default = "show"
+
+[[objects]]
+name = "firewall"
+summary = "the firewall"
+default = "show"
+
+[[objects]]
+name = "telemetry"
+summary = "OS telemetry"
+default = "show"
+
+[[objects]]
+name = "dns"
+summary = "encrypted DNS"
+default = "show"
+
+[[objects]]
+name = "lock"
+summary = "the lock screen"
+default = "show"
+
+[[objects]]
+name = "usb"
+summary = "removable media"
+default = "show"
+
+[[objects]]
+name = "score"
+summary = "the security score"
+default = "show"
+
+[[commands]]
+verb = "status"
+effect = "read"
+summary = "Hardening summary"
+
+[[commands]]
+object = "policy"
+verb = "show"
+effect = "read"
+summary = "The security policy"
+
+[[commands]]
+object = "disk"
+verb = "show"
+effect = "read"
+summary = "Disk encryption state"
+
+[[commands]]
+object = "score"
+verb = "show"
+effect = "read"
+summary = "The security score"
+
+[[commands]]
+object = "firewall"
+verb = "show"
+effect = "read"
+summary = "Current firewall setting"
+
+[[commands]]
+object = "firewall"
+verb = "apply"
+effect = "write"
+summary = "Harden the firewall setting"
+
+[[commands]]
+object = "telemetry"
+verb = "show"
+effect = "read"
+summary = "Current telemetry setting"
+
+[[commands]]
+object = "telemetry"
+verb = "apply"
+effect = "write"
+summary = "Harden the telemetry setting"
+
+[[commands]]
+object = "dns"
+verb = "show"
+effect = "read"
+summary = "Current dns setting"
+
+[[commands]]
+object = "dns"
+verb = "apply"
+effect = "write"
+summary = "Harden the dns setting"
+
+[[commands]]
+object = "lock"
+verb = "show"
+effect = "read"
+summary = "Current lock setting"
+
+[[commands]]
+object = "lock"
+verb = "apply"
+effect = "write"
+summary = "Harden the lock setting"
+
+[[commands]]
+object = "usb"
+verb = "show"
+effect = "read"
+summary = "Current usb setting"
+
+[[commands]]
+object = "usb"
+verb = "apply"
+effect = "write"
+summary = "Harden the usb setting"
+
+[[aliases]]
+name = "policy"
+target = "security policy"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "encrypt-check"
+target = "security disk"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "firewall"
+target = "security firewall"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "telemetry"
+target = "security telemetry"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "dns-doh"
+target = "security dns"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "lock-screen"
+target = "security lock"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "usb-safety"
+target = "security usb"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "security-score"
+target = "security score"
+kind = "deprecated"
+until = "0.2.538"

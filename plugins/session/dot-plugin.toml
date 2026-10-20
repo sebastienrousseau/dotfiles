@@ -1,0 +1,41 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Command names of dot session (ADR-020), checked by tools/ci/check-cli-contract.py.
+# Repository at extraction: dot-session.
+schema = "cli/manifest.v1"
+name = "session"
+domain = "session"
+version = "0.2.536"
+summary = "find, open and restore terminal sessions"
+default = "select"
+
+[[commands]]
+verb = "select"
+effect = "read"
+summary = "Pick a session to open"
+
+[[commands]]
+verb = "list"
+effect = "read"
+summary = "Sessions on this machine"
+
+[[commands]]
+verb = "new"
+effect = "write"
+summary = "Start a named session"
+
+[[commands]]
+verb = "open"
+effect = "read"
+summary = "Attach to a session"
+
+[[commands]]
+verb = "stop"
+effect = "write"
+summary = "End a session"
+
+[[commands]]
+verb = "restore"
+effect = "write"
+summary = "Restore saved sessions"

@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Runtime CLI-contract violations bin/dot has today, by id. Read by
+# tools/ci/check-cli-contract.py: a violation not listed here fails, and an
+# entry that no longer fails must be removed, so this list only shrinks.
+# N0.3 (the alias table) fixes all three.
+N9-short-version   # dot -V is an unknown command
+N9-v-is-verbose    # dot -v prints the version
+N10-unknown-127    # an unknown command exits 1

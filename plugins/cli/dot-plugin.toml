@@ -1,0 +1,93 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Command names of dot cli (ADR-020), checked by tools/ci/check-cli-contract.py.
+# Repository at extraction: dot-cli.
+schema = "cli/manifest.v1"
+name = "cli"
+domain = "cli"
+version = "0.2.536"
+summary = "plugins, updates, completions"
+default = "list"
+
+[[objects]]
+name = "completion"
+summary = "shell completion scripts"
+default = "show"
+
+[[commands]]
+verb = "list"
+effect = "read"
+summary = "Installed plugins"
+
+[[commands]]
+verb = "show"
+effect = "read"
+summary = "One plugin in detail"
+
+[[commands]]
+verb = "install"
+effect = "write"
+summary = "Install a plugin"
+
+[[commands]]
+verb = "update"
+effect = "write"
+summary = "Update dot and its plugins"
+
+[[commands]]
+verb = "remove"
+effect = "write"
+summary = "Remove a plugin"
+
+[[commands]]
+verb = "verify"
+effect = "read"
+summary = "Verify plugin provenance"
+
+[[commands]]
+verb = "new"
+effect = "write"
+summary = "Create a plugin from the template"
+
+[[commands]]
+object = "completion"
+verb = "show"
+effect = "read"
+summary = "Print a completion script"
+
+[[aliases]]
+name = "completion"
+target = "cli completion"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "registry"
+target = "cli list --available"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "search"
+target = "help"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "manual"
+target = "help --manual"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "docs"
+target = "help --readme"
+kind = "deprecated"
+until = "0.2.538"
+
+[[aliases]]
+name = "learn"
+target = "help tour"
+kind = "deprecated"
+until = "0.2.538"
