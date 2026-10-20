@@ -45,3 +45,23 @@ gap_rc=0
 gap_out="$(bash "$TRACE_WORK/scripts/qa/traceability-coverage.sh" 2>&1)" || gap_rc=$?
 assert_not_equals "0" "$gap_rc" "missing targets fail the run"
 assert_contains "Missing traceability target: BT-01" "$gap_out" "and each is named"
+
+# The row lookup must not report a missing row when its reader stops early.
+# A matcher that exits on the first hit (grep -q) leaves the writer feeding
+# it to die of SIGPIPE, and under pipefail that read as "not found": on a
+# loaded machine the real 1138-byte list lost its second 1024-byte write
+# this way and the gate reported 173/174. Here the list is larger than a
+# pipe buffer and the row sorts first, so the writer is always still
+# writing when the match lands.
+test_start "traceability_row_lookup_survives_an_early_matcher_exit"
+PIPE_WORK="$TRACE_WORK/pipe"
+mkdir -p "$PIPE_WORK/scripts/qa" "$PIPE_WORK/scripts/dot/commands" "$PIPE_WORK/docs/operations"
+cp "$TRACE_SCRIPT" "$PIPE_WORK/scripts/qa/traceability-coverage.sh"
+pad="$(printf 'p%.0s' $(seq 1 240))"
+impls="scripts/qa/traceability-coverage.sh"
+for i in $(seq 1 400); do impls="$impls, zz/$pad/$i-$pad.sh"; done
+printf '| BT-01 | early exit | %s | t | d |\n' "$impls" >"$PIPE_WORK/docs/operations/TRACEABILITY.md"
+pipe_out="$(bash "$PIPE_WORK/scripts/qa/traceability-coverage.sh" 2>&1)"
+pipe_miss="found"
+[[ "$pipe_out" == *"Missing traceability row for implementation: scripts/qa/traceability-coverage.sh"* ]] && pipe_miss="reported missing"
+assert_equals "found" "$pipe_miss" "a row the matcher found early is counted as present"

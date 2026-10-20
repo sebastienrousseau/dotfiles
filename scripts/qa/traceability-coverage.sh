@@ -99,7 +99,10 @@ main() {
   while IFS= read -r required; do
     [ -n "$required" ] || continue
     TOTAL_TRACE_CHECKS=$((TOTAL_TRACE_CHECKS + 1))
-    if printf '%s\n' "$known_impls" | grep -Fxq "$required"; then
+    # Match in the shell, not through `printf | grep -q`: grep exits on the
+    # first hit, the writer dies of SIGPIPE, and pipefail turned a found row
+    # into a missing one whenever the machine was loaded.
+    if [[ $'\n'"$known_impls"$'\n' == *$'\n'"$required"$'\n'* ]]; then
       COVERED_TRACE_CHECKS=$((COVERED_TRACE_CHECKS + 1))
     else
       printf 'Missing traceability row for implementation: %s\n' "$required" >&2
