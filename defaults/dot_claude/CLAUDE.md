@@ -63,16 +63,19 @@ The first step in any repository, before the task I asked for: check its
 health and clear what the check finds. This is a hard gate, not a quota.
 
 - Open Dependabot PRs and alerts, code-scanning and secret-scanning alerts,
-  the native vulnerability audit, and a red default-branch CI: fix each, or
-  open the PR that fixes it. A disabled scanner is a finding.
+  open issues, the native vulnerability audit, and a red default-branch CI:
+  each MUST be fully fixed, merged and closed (fold into the release branch,
+  merge once CI is green, close what it supersedes). Constrain an advised
+  dependency so no affected version resolves. A disabled scanner is a finding.
 - Lint and format clean, with no new suppressions.
 - Complexity per function: cyclomatic ≤ 10, cognitive ≤ 15, Halstead
   difficulty ≤ 30, ≤ 60 lines (≤ 500 per file). Code you write or touch
   meets them; existing offenders never get worse and shrink worst-first
   against a committed, CI-enforced baseline.
 
-Merge authority is unchanged: this authorises preparing fixes, not merging
-them. Report what the check found and fixed before starting the task.
+This is my standing instruction to merge the PR carrying these fixes once
+CI is green, and the only exception to merge authority. Report what the
+check found and fixed before starting the task.
 `~/Code/AGENTS.md` §0 has the commands and per-ecosystem tools.
 
 ## Accountability

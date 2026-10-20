@@ -39,8 +39,15 @@ check without first fixing it, or reporting why it cannot.
    (`gh pr list --author app/dependabot`, `gh api
    repos/<owner>/<repo>/{dependabot,code-scanning,secret-scanning}/alerts?state=open`),
    and the native audit (`cargo audit`/`cargo deny`, `pip-audit`,
-   `npm audit`, `govulncheck`). Fix each one, or open the pull request
-   that fixes it. A scanner that is switched off counts as a finding.
+   `npm audit`, `govulncheck`), and open issues (`gh issue list`). Every
+   one MUST be fully fixed, merged and closed: fold Dependabot updates and
+   alert fixes into the active `feat/v<next-version>` branch, merge it once
+   CI is green, and close each Dependabot PR and issue it supersedes with a
+   comment naming the merged PR. A dependency with a published advisory is
+   constrained in the manifest so no affected version can resolve, forcing
+   users onto a patched release. A finding that cannot be fixed in code (an
+   external registration, a second reviewer) is reported with the exact
+   action that clears it. A scanner that is switched off counts as a finding.
 2. **CI on the default branch.** It must be green. A red default branch is
    fixed before anything is built on top of it.
 3. **Code quality.** The linter and formatter pass with no new
@@ -63,9 +70,13 @@ check without first fixing it, or reporting why it cannot.
    time.
 
 Fixing a finding still follows every other rule: its own branch and pull
-request, the Definition of Done (§2), and **Merge Authority (§4)**; this
-section authorises preparing fixes, not merging them. Report what the check
-found, what was fixed, and what remains, before starting the requested work.
+request and the Definition of Done (§2). This section is the user's
+standing instruction to merge the pull request that carries these fixes once
+its CI is green, and to close the Dependabot PRs and issues it supersedes; it
+is the one exception to **Merge Authority (§4)**, and it covers nothing else
+on that PR's branch beyond hygiene fixes and the release it rides with.
+Report what the check found, what was fixed, and what remains, before
+starting the requested work.
 
 ---
 
