@@ -20,9 +20,23 @@ CALLS="$WORK/calls.log"
 cat >"$WORK/bin/mise" <<EOF
 #!/bin/sh
 echo "mise \$*" >>"$CALLS"
+if [ "\$1" = tool ] && [ "\$2" = --backend ]; then
+  case "\$3" in
+    opencode) echo aqua:anomalyco/opencode ;;
+    kiro-cli) echo asdf:kiro-cli ;;
+  esac
+fi
 if [ "\$1" = latest ]; then
   case "\$2" in
     npm:@openai/codex) echo 9.9.9 ;;
+    # The registry's first backend for "opencode" is npm:@opencode/cli, a
+    # separate 2.x line; the pin is for the aqua build that is installed.
+    opencode) echo 99.0.0 ;;
+    # A gated latest older than the pin (pin set inside the age gate).
+    github:sebastienrousseau/passmcp) echo 0.0.0 ;;
+    # mise cannot look up an asdf plugin by its backend name.
+    asdf:kiro-cli) exit 1 ;;
+    kiro-cli) echo 99.0.0 ;;
     *) echo "\${MISE_SAME:-}" ;;
   esac
 fi
@@ -84,6 +98,27 @@ assert_contains "npm:@openai/codex 0.162.1 -> 9.9.9" "$r" "a newer release is li
 
 test_start "upgrade_bumps_leave_pins_alone"
 assert_equals "0" "$(grep -c '^mise use' "$CALLS")" "listing bumps installs nothing"
+
+test_start "upgrade_resolves_latest_through_the_backend_in_use"
+r="$(lib 'ai_pin_bumps')"
+assert_equals "0|1" "$(grep -c ' opencode ' <<<"$r")|$(grep -cx 'mise latest aqua:anomalyco/opencode' "$CALLS")" \
+  "a short name is looked up through its installed backend, not the registry default"
+
+test_start "upgrade_falls_back_to_the_short_name"
+r="$(lib 'ai_pin_bumps')"
+assert_contains "kiro-cli $(lib '_ai_pinned_version kiro-cli' | head -n 1) -> 99.0.0" "$r" \
+  "a backend mise cannot look up falls back to the short name"
+
+test_start "upgrade_never_proposes_an_older_release"
+r="$(lib 'ai_pin_bumps')"
+assert_equals "0" "$(grep -c 'github:sebastienrousseau/passmcp ' <<<"$r")" \
+  "a latest older than the pin is not a bump"
+
+test_start "version_newer_compares_numerically"
+r="$(lib 'for p in 1.10.0:1.9.9 2.29.1:2.29.0 v1.0.1:1.0 0.0.6:0.0.7 1.0.0:1.0.0 1.0:1.0.0 0.9.10:0.10.0; do
+  _ai_version_newer "${p%%:*}" "${p#*:}" && printf "%s " "$p"; done')"
+assert_equals "1.10.0:1.9.9 2.29.1:2.29.0 v1.0.1:1.0 " "$(head -n 1 <<<"$r")" \
+  "only strictly newer versions count, field by field as numbers"
 
 test_start "upgrade_no_bump_when_current"
 r="$(MISE_SAME=0.86.2 lib 'ai_pin_bumps')"

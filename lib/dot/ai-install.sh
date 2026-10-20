@@ -46,16 +46,44 @@ ai_pinned_spec() {
   printf '%s@%s\n' "$1" "$version"
 }
 
-# ai_pin_bumps: for `dot upgrade`, each pinned AI CLI with a newer release
-# (as mise resolves it, honouring minimum_release_age). Pins move only when
-# [ai_tools] is edited, so this proposes bumps rather than applying them.
+# _ai_version_newer <a> <b>: 0 when version a is strictly newer than b,
+# comparing dot-separated fields as numbers (a leading "v" and any
+# -prerelease suffix ignored; a missing field counts as 0).
+_ai_version_newer() {
+  awk -v a="$1" -v b="$2" 'BEGIN {
+    sub(/^v/, "", a); sub(/^v/, "", b); sub(/-.*/, "", a); sub(/-.*/, "", b)
+    na = split(a, x, "."); nb = split(b, y, ".")
+    for (i = 1; i <= (na > nb ? na : nb); i++) {
+      if (x[i] + 0 != y[i] + 0) exit !(x[i] + 0 > y[i] + 0)
+    }
+    exit 1
+  }'
+}
+
+# _ai_latest <package>: the newest release as mise resolves it, honouring
+# minimum_release_age. A short name is resolved through the backend mise
+# installs it with: `mise latest opencode` follows the registry's first
+# backend (npm:@opencode/cli, a separate 2.x line), not the aqua build pinned.
+# Plugin backends (asdf:kiro-cli) are looked up by the short name: mise
+# reports "plugin not installed" for their backend name.
+_ai_latest() {
+  local backend=""
+  [[ "$1" == *:* ]] || backend="$(mise tool --backend "$1" 2>/dev/null || true)"
+  case "$backend" in asdf:* | vfox:* | "") backend="$1" ;; esac
+  mise latest "$backend" 2>/dev/null || true
+}
+
+# ai_pin_bumps: for `dot upgrade`, each pinned AI CLI with a newer release.
+# A gated latest older than the pin (a pin set inside the age gate) is not a
+# bump. Pins move only when [ai_tools] is edited, so this proposes bumps
+# rather than applying them.
 ai_pin_bumps() {
   local pkg pinned latest
   command -v mise >/dev/null 2>&1 || return 0
   while IFS= read -r pkg; do
     pinned="$(_ai_pinned_version "$pkg")"
-    latest="$(mise latest "$pkg" 2>/dev/null || true)"
-    if [[ -n "$latest" && "$latest" != "$pinned" ]]; then
+    latest="$(_ai_latest "$pkg")"
+    if [[ -n "$latest" ]] && _ai_version_newer "$latest" "$pinned"; then
       ui_info "Pin bump" "$pkg $pinned -> $latest (edit [ai_tools] in defaults/.chezmoidata.toml)"
     fi
   done < <(awk '/^\[/ { in_table = ($0 == "[ai_tools]"); next }
