@@ -66,7 +66,7 @@ fi
 check_snapshot help --help
 check_snapshot version version
 check_snapshot doctor doctor
-check_snapshot perf perf
-check_snapshot health health
+check_snapshot perf doctor perf
+check_snapshot health doctor status
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -9,20 +9,24 @@ domain = "attest"
 version = "0.2.536"
 summary = "attestation and verification"
 default = "show"
+legacy = "attest"
 
 [[commands]]
 verb = "show"
 effect = "read"
+legacy = "attest"
 summary = "The workstation attestation"
 
 [[commands]]
 verb = "export"
 effect = "read"
+legacy = "attest --write"
 summary = "Write attestation evidence"
 
 [[commands]]
 verb = "verify"
 effect = "read"
+legacy = "attest --verify"
 summary = "Verify evidence"
 
 [[aliases]]

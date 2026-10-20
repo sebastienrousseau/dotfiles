@@ -90,7 +90,20 @@ if [ -n "$_DOT_SRC" ] && [ -f "$_DOT_SRC/lib/dot/ui.sh" ]; then
   # shellcheck disable=SC1091
   source "$_DOT_SRC/lib/dot/ui.sh"
   ui_init
+  # ADR-020 names (N0.3): new spellings, deprecated, removed and shortcut
+  # names, and the GNU -V/-v flags, resolved into today's routes.
+  # shellcheck source-path=SCRIPTDIR source=../lib/dot/names.sh
+  source "$_DOT_SRC/lib/dot/names.sh"
 else
+  _dot_names() {
+    [[ -n "$1" ]] || show_help
+    [[ -n "$1" ]] || exit 0
+    _ARGV=("$@")
+  }
+  _dot_unknown() {
+    echo "Unknown command: ${1:-}" >&2
+    exit 127
+  }
   # Minimal fallback when source dir is not available (e.g. first install)
   # shellcheck disable=SC2034
   UI_COLOR=0
@@ -181,37 +194,7 @@ show_version() {
   fi
 }
 
-_dot_help_overview_specs() {
-  cat <<'EOF'
-Start Here|sync|Apply dotfiles to this machine.|Use after clone or after changes.
-Start Here|doctor|Check the environment and surface issues.|Use when something feels off.
-Start Here|learn|Open the guided tour.|Best first stop for new users.
-Start Here|help|Show the overview or help for one command.|Use `dot help <command>` for detail.
-Daily Use|init|Bootstrap a foreign dotfiles repo through chezmoi + dot.|Usage: `dot init <github-user>`.
-Daily Use|status|Show local drift.|See what changed since the last apply.
-Daily Use|diff|Preview pending changes.|Safe way to inspect before applying.
-Daily Use|edit|Open the source directory.|Use the configured editor.
-Daily Use|upgrade|Update dotfiles, mise tools and system packages.|Asks before installing or upgrading anything beyond the dotfiles.
-Inspect and Repair|doctor|Run the main health check.|Supports deeper audit flags.
-Inspect and Repair|attest|Export workstation evidence, or verify it in WebAssembly.|Use `--verify|-V`, `--json|-j`, `--write|-w`, or `--fleet-store|-F`.
-Inspect and Repair|rollback|Return to a previous state.|Use after a broken change.
-Inspect and Repair|lint|Check shell script quality.|Supports `--check|-c` and `--fix|-f`.
-AI and Agents|ai|Show installed AI tools.|Launches the AI status view.
-AI and Agents|mcp|Inspect MCP policy and registry.|Supports `--strict|-s` and `--json|-j`.
-AI and Agents|mode|Show or set the agent profile.|Profiles: ask, plan, apply, audit.
-AI and Agents|agent|Show agent metadata, logs, checkpoints, and conformance.|Use for card, log, checkpoint, and conformance.
-AI and Agents|agents|Multi-harness agent context (AGENTS.md sync, Cursor/Codex stubs).|Subcommands: list, check, render.
-Fleet|registry|Browse reusable dotfile modules from the dot registry.|Subcommands: list, search, info, install, url, set-url.
-Fleet|fleet|Show fleet node status, drift, and namespace.|Enterprise fleet management.
-Configuration|env|Show managed tool versions.|Backed by mise.
-Configuration|profile|Show or switch the active profile.|Use for machine-specific behavior.
-Configuration|secrets|Edit or manage encrypted secrets.|Subcommands cover set, get, list, load.
-Configuration|theme|Switch the terminal theme.|Light or dark.
-Reference|search|Find commands by keyword.|Example: `dot search security`.
-Reference|help all|Show the full command reference.|Lists every public command.
-Reference|version|Show version information.|Matches `dot --version`.
-EOF
-}
+_dot_help_overview_specs() { _dot_data help-overview.txt; }
 
 # The route and help tables are data, kept in lib/dot/data so the
 # dispatcher, the doc generators, the QA gates and the tests read one
@@ -322,7 +305,7 @@ show_help_command() {
   local normalized summary examples
 
   normalized="$command_name"
-  if [[ "$command_name" == "version" || "$command_name" == "-v" ]]; then
+  if [[ "$command_name" == "version" || "$command_name" == "-V" ]]; then
     normalized="--version"
   fi
 
@@ -330,8 +313,12 @@ show_help_command() {
   examples="$(_dot_help_examples "$normalized")"
 
   if [[ -z "$summary" ]]; then
+    # Not a command name: search for it (N8, `dot help <term>`).
+    if show_help_all | grep -i -F -- "$command_name"; then
+      exit 0
+    fi
     ui_fail "Unknown help topic: $command_name"
-    ui_info "Hint" "Try 'dot help all' or 'dot search <keyword>'"
+    ui_info "Hint" "Try 'dot help all'"
     exit 1
   fi
 
@@ -388,10 +375,21 @@ _dispatch() {
   fi
 }
 
-if [[ -z "$COMMAND" ]]; then
-  show_help
-  exit 0
-fi
+_dot_names "$COMMAND" "$@"
+set -- "${_ARGV[@]}"
+COMMAND="$1"
+shift
+
+# _dispatch_args MODULE ARGS...: run a module that takes only the user's args.
+_dispatch_args() {
+  local cmd_file="${_CMD_DIR}/${1}.sh"
+  shift
+  if [[ -f "$cmd_file" ]]; then
+    exec bash "$cmd_file" "$@"
+  fi
+  ui_fail "${cmd_file##*/} not found" >&2
+  exit 1
+}
 
 # `|| true` is intentional: an unknown command yields an empty route, which falls
 # through the case below into the user-command path that emits the proper error.
@@ -441,22 +439,8 @@ case "$route" in
     _dispatch "$route" "$@"
     ;;
 
-  manual)
-    if [[ -n "$_SOURCE_DIR" ]] && [[ -f "$_SOURCE_DIR/scripts/dot/commands/manual.sh" ]]; then
-      exec bash "$_SOURCE_DIR/scripts/dot/commands/manual.sh" "$@"
-    else
-      ui_fail "manual.sh not found"
-      exit 1
-    fi
-    ;;
-
-  patterns)
-    if [[ -n "$_SOURCE_DIR" ]] && [[ -f "$_SOURCE_DIR/scripts/dot/commands/patterns.sh" ]]; then
-      exec bash "$_SOURCE_DIR/scripts/dot/commands/patterns.sh" "$@"
-    else
-      ui_fail "patterns.sh not found"
-      exit 1
-    fi
+  manual | patterns)
+    _dispatch_args "$route" "$@"
     ;;
 
   search)
@@ -498,9 +482,7 @@ case "$route" in
       if command -v "dot-${COMMAND}" >/dev/null 2>&1; then
         exec "dot-${COMMAND}" "$@"
       fi
-      echo "Unknown command: ${COMMAND:-}" >&2
-      echo "Run 'dot help' for available commands." >&2
-      exit 1
+      _dot_unknown "$COMMAND" "$@"
     fi
     ;;
 esac

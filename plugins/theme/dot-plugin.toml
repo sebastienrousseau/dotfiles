@@ -9,6 +9,7 @@ domain = "theme"
 version = "0.2.536"
 summary = "one palette for every app"
 default = "show"
+legacy = "theme"
 
 [[objects]]
 name = "wallpaper"
@@ -23,22 +24,26 @@ default = "list"
 [[commands]]
 verb = "show"
 effect = "read"
+legacy = "theme current"
 summary = "Current theme and palette"
 
 [[commands]]
 verb = "list"
 effect = "read"
+legacy = "theme list"
 summary = "Available themes"
 
 [[commands]]
 verb = "set"
 effect = "write"
+legacy = "theme set"
 summary = "Switch theme everywhere"
 
 [[commands]]
 object = "wallpaper"
 verb = "set"
 effect = "write"
+legacy = "wallpaper"
 summary = "Set the wallpaper and derive a palette"
 
 [[commands]]
@@ -51,6 +56,7 @@ summary = "Installed terminal fonts"
 object = "font"
 verb = "install"
 effect = "write"
+legacy = "fonts"
 summary = "Install the configured fonts"
 
 [[aliases]]

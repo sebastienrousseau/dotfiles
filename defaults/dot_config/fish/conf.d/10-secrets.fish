@@ -7,7 +7,7 @@ if test "$DOTFILES_SECRETS_AUTO_LOAD" = 1
     if type -q dot; and set -q DOTFILES_SECRETS_BUCKET_NAMES
         for bucket in (string split ',' -- "$DOTFILES_SECRETS_BUCKET_NAMES")
             set -l bucket (string trim -- "$bucket")
-            test -n "$bucket"; and dot secrets load "$bucket" --shell fish 2>/dev/null | source
+            test -n "$bucket"; and dot secret export "$bucket" --shell fish 2>/dev/null | source
         end
     end
 end

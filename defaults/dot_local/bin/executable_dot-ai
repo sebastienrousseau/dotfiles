@@ -30,7 +30,7 @@ fi
 # 2. Augmented Generation: Pipe to the Dotfiles AI Bridge
 # We use the 'architect' pattern to ensure the AI knows how to interpret dotfiles
 ui_info "Generating context-aware answer..."
-dot cl --pattern architect "Answer the following question based on this local dotfiles context:
+dot ai start claude --pattern architect "Answer the following question based on this local dotfiles context:
 ---
 $CONTEXT
 ---

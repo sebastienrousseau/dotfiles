@@ -20,10 +20,10 @@ if command -v chezmoi &>/dev/null; then
 
   # Chezmoi workflow helpers
   alias capply='dot apply'
-  alias cupdate='dot update'
+  alias cupdate='dot config update'
   alias cdiff='dot diff'
   alias crem='dot remove'
-  alias cdrift='dot drift'
+  alias cdrift='dot doctor drift'
   alias ca='chezmoi apply'
   alias ce='chezmoi edit'
   cdot() {

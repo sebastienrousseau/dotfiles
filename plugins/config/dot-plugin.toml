@@ -23,79 +23,94 @@ default = "show"
 [[commands]]
 verb = "status"
 effect = "read"
+legacy = "status"
 summary = "Pending changes and last apply"
 
 [[commands]]
 verb = "diff"
 effect = "read"
+legacy = "diff"
 summary = "What apply would change"
 
 [[commands]]
 verb = "apply"
 effect = "write"
+legacy = "apply"
 summary = "Write the dotfiles to this machine"
 
 [[commands]]
 verb = "sync"
 effect = "write"
+legacy = "sync"
 summary = "Pull the source, then apply"
 
 [[commands]]
 verb = "update"
 effect = "write"
+legacy = "update"
 summary = "Pull and apply the dotfiles only"
 
 [[commands]]
 verb = "edit"
 effect = "write"
+legacy = "edit"
 summary = "Open a managed file in $EDITOR"
 
 [[commands]]
 verb = "add"
 effect = "write"
+legacy = "add"
 summary = "Start managing an existing file"
 
 [[commands]]
 verb = "save"
 effect = "write"
+legacy = "commit"
 summary = "Commit source changes"
 
 [[commands]]
 verb = "init"
 effect = "write"
+legacy = "init"
 summary = "First-time setup of the dotfiles"
 
 [[commands]]
 verb = "check"
 effect = "read"
+legacy = "lint"
 summary = "Lint the source and templates"
 
 [[commands]]
 verb = "export"
 effect = "read"
+legacy = "bundle"
 summary = "Write a portable bundle"
 
 [[commands]]
 verb = "uninstall"
 effect = "destructive"
+legacy = "uninstall"
 summary = "Remove the setup, keeping the source"
 
 [[commands]]
 object = "path"
 verb = "show"
 effect = "read"
+legacy = "cd"
 summary = "Print the source directory"
 
 [[commands]]
 object = "profile"
 verb = "show"
 effect = "read"
+legacy = "profile show"
 summary = "Show the active profile"
 
 [[commands]]
 object = "profile"
 verb = "set"
 effect = "write"
+legacy = "profile set"
 summary = "Switch profile"
 
 [[aliases]]

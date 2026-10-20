@@ -18,7 +18,7 @@ function dot --description 'dotfiles manager'
 end
 
 function dm --description 'List dot agent modes'
-    dot mode list
+    dot agent mode list
 end
 
 function da --description 'List dot agent profiles'

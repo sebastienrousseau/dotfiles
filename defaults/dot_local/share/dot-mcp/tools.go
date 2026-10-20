@@ -143,7 +143,7 @@ func defaultTools() []tool {
 		{
 			Name:        "agent-mode",
 			Title:       "Agent Mode",
-			Description: "Inspect the agent operating profiles (ask/plan/apply/audit): the active profile with its approval, filesystem, network and MCP posture, the full list, or one profile in detail. Inspection only — this server never switches the profile; the only write is the audit-log line `dot mode` appends for every invocation.",
+			Description: "Inspect the agent operating profiles (ask/plan/apply/audit): the active profile with its approval, filesystem, network and MCP posture, the full list, or one profile in detail. Inspection only — this server never switches the profile; the only write is the audit-log line `dot agent mode` appends for every invocation.",
 			Schema: inputSchema{
 				Type: "object",
 				Properties: map[string]property{
@@ -168,7 +168,11 @@ func defaultTools() []tool {
 				if action == "" {
 					action = "current"
 				}
-				argv := []string{"mode", action}
+				// ADR-020 spellings: the active profile is `dot agent status`.
+				argv := []string{"agent", "mode", action}
+				if action == "current" {
+					argv = []string{"agent", "status"}
+				}
 				if action == "show" {
 					if p, ok := args["profile"].(string); ok {
 						argv = append(argv, p)

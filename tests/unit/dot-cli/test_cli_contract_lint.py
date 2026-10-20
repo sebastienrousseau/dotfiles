@@ -4,25 +4,33 @@
 """tools/ci/check-cli-contract.py passes the repository and fails each planted violation."""
 import importlib.util
 import os
-from pathlib import Path
 import shutil
 import tempfile
 import textwrap
 import unittest
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = importlib.util.spec_from_file_location("cli_contract", ROOT / "tools/ci/check-cli-contract.py")
 lint_mod = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(lint_mod)
 
-# Behaves like today's bin/dot on the three runtime rules in the baseline.
-TODAY_DOT = """#!/bin/sh
+# Keeps the runtime rules: -V and --version print the version, -v alone warns
+# and prints it, -v before a command passes on, an unknown command exits 127.
+GOOD_DOT = """#!/bin/sh
+case "$1" in
+  -V|--version) echo "dot 0.2.537" ;;
+  -v) [ -n "$2" ] && shift && exec "$0" "$@"; echo "use -V" >&2; echo "dot 0.2.537" ;;
+  *) echo "Unknown command: $1" >&2; exit 127 ;;
+esac
+"""
+# Behaves like bin/dot before N0.3: no -V, -v is the version, unknown exits 1.
+OLD_DOT = """#!/bin/sh
 case "$1" in
   -v|--version) echo "dot 0.2.536" ;;
   *) echo "Unknown command: $1" >&2; exit 1 ;;
 esac
 """
-FIXED_V_DOT = TODAY_DOT.replace("*)", "-V) echo 'dot 0.2.536' ;;\n  *)")
 
 
 class Fixture(unittest.TestCase):
@@ -33,10 +41,10 @@ class Fixture(unittest.TestCase):
         self.addCleanup(shutil.rmtree, self.tmp)
         for rel in ("schemas/cli", "plugins"):
             shutil.copytree(ROOT / rel, self.tmp / rel)
-        for rel in ("lib/dot/data/routes.txt", "defaults/.chezmoidata.toml", "tools/ci/cli-contract-baseline.txt"):
+        for rel in ("lib/dot/data/routes.txt", "lib/dot/data/commands.txt", "defaults/.chezmoidata.toml", "tools/ci/cli-contract-baseline.txt"):
             (self.tmp / rel).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(ROOT / rel, self.tmp / rel)
-        self.dot = self.fake_dot(TODAY_DOT)
+        self.dot = self.fake_dot(GOOD_DOT)
 
     def fake_dot(self, body):
         path = self.tmp / "dot"
@@ -157,14 +165,31 @@ class Aliases(Fixture):
         self.assertFails("route 'frobnicate' has no new spelling")
 
 
+class Table(Fixture):
+    def test_stale_table_fails(self):
+        self.edit("system", 'summary = "Update everything, asking first"', 'summary = "Update all"')
+        self.assertFails("lib/dot/data/commands.txt is stale")
+
+
 class Runtime(Fixture):
-    def test_new_runtime_violation_fails(self):
-        baseline = self.tmp / "tools/ci/cli-contract-baseline.txt"
-        baseline.write_text(baseline.read_text().replace("N10-unknown-127", ""))
-        self.assertFails("runtime N10-unknown-127: an unknown command exits 1")
+    def test_each_old_behaviour_fails(self):
+        self.dot = self.fake_dot(OLD_DOT)
+        for fragment in ("runtime N10-unknown-127: an unknown command exits 1",
+                         "runtime N9-short-version: 'dot -V' exits",
+                         "runtime N9-v-is-verbose"):
+            self.assertFails(fragment)
+
+    def test_bare_v_must_warn(self):
+        self.dot = self.fake_dot(GOOD_DOT.replace('echo "use -V" >&2; ', ""))
+        self.assertFails("'dot -v' prints the version without the -V warning")
+
+    def test_v_must_pass_on_to_the_command(self):
+        self.dot = self.fake_dot(GOOD_DOT.replace('[ -n "$2" ] && shift && exec "$0" "$@"; ', ""))
+        self.assertFails("-v must pass on to the command")
 
     def test_fixed_violation_must_leave_the_baseline(self):
-        self.dot = self.fake_dot(FIXED_V_DOT)
+        baseline = self.tmp / "tools/ci/cli-contract-baseline.txt"
+        baseline.write_text(baseline.read_text() + "N9-short-version\n")
         self.assertFails("runtime N9-short-version: fixed; remove it")
 
 

@@ -9,6 +9,7 @@ domain = "agent"
 version = "0.2.536"
 summary = "modes, policy, sandbox, budgets"
 default = "status"
+legacy = "agent"
 
 [[objects]]
 name = "mode"
@@ -45,19 +46,27 @@ name = "budget"
 summary = "spend budgets"
 default = "show"
 
+[[objects]]
+name = "delegate"
+summary = "agents a profile may hand work to"
+default = "list"
+
 [[commands]]
 verb = "status"
 effect = "read"
+legacy = "mode current"
 summary = "Mode, policy and budgets"
 
 [[commands]]
 verb = "check"
 effect = "read"
+legacy = "mode doctor"
 summary = "Check modes and policy"
 
 [[commands]]
 verb = "run"
 effect = "write"
+legacy = "agent run"
 summary = "Run an agent task"
 
 [[commands]]
@@ -79,48 +88,56 @@ summary = "Export the AI bill of materials"
 object = "mode"
 verb = "list"
 effect = "read"
+legacy = "mode list"
 summary = "Available modes"
 
 [[commands]]
 object = "mode"
 verb = "show"
 effect = "read"
+legacy = "mode show"
 summary = "One mode in detail"
 
 [[commands]]
 object = "mode"
 verb = "set"
 effect = "write"
+legacy = "mode set"
 summary = "Switch mode"
 
 [[commands]]
 object = "context"
 verb = "show"
 effect = "read"
+legacy = "agents list"
 summary = "Context files in effect"
 
 [[commands]]
 object = "card"
 verb = "show"
 effect = "read"
+legacy = "agent card"
 summary = "The agent card"
 
 [[commands]]
 object = "log"
 verb = "show"
 effect = "read"
+legacy = "agent log"
 summary = "The agent log"
 
 [[commands]]
 object = "checkpoint"
 verb = "list"
 effect = "read"
+legacy = "agent checkpoint list"
 summary = "Saved checkpoints"
 
 [[commands]]
 object = "checkpoint"
 verb = "save"
 effect = "write"
+legacy = "agent checkpoint save"
 summary = "Save a checkpoint"
 
 [[commands]]
@@ -134,6 +151,20 @@ object = "budget"
 verb = "show"
 effect = "read"
 summary = "Budgets and spend"
+
+[[commands]]
+object = "delegate"
+verb = "list"
+effect = "read"
+legacy = "agent delegate list"
+summary = "Configured delegates"
+
+[[commands]]
+object = "delegate"
+verb = "run"
+effect = "write"
+legacy = "agent delegate run"
+summary = "Run a command as a delegate"
 
 [[aliases]]
 name = "mode"

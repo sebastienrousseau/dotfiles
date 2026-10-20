@@ -16,7 +16,7 @@ NU_HOME="$(mktemp -d)"
 trap 'rm -rf "$NU_HOME"' EXIT
 mkdir -p "$NU_HOME/.cache/nushell"
 : >"$NU_HOME/.cache/nushell/bash-aliases.nu"
-for pair in "dm:dot mode list" "da:dot agent list" "dmc:dot mcp registry" "datt:dot attest --json"; do
+for pair in "dm:dot agent mode list" "da:dot agent list" "dmc:dot mcp registry" "datt:dot attest --json"; do
   name="${pair%%:*}" want="${pair#*:}"
   test_start "nushell_alias_${name}"
   if NU_BIN="$(command -v nu)"; then

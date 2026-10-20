@@ -59,18 +59,21 @@ summary = "Hardening summary"
 object = "policy"
 verb = "show"
 effect = "read"
+legacy = "policy"
 summary = "The security policy"
 
 [[commands]]
 object = "disk"
 verb = "show"
 effect = "read"
+legacy = "encrypt-check"
 summary = "Disk encryption state"
 
 [[commands]]
 object = "score"
 verb = "show"
 effect = "read"
+legacy = "security-score"
 summary = "The security score"
 
 [[commands]]
@@ -83,6 +86,7 @@ summary = "Current firewall setting"
 object = "firewall"
 verb = "apply"
 effect = "write"
+legacy = "firewall"
 summary = "Harden the firewall setting"
 
 [[commands]]
@@ -95,6 +99,7 @@ summary = "Current telemetry setting"
 object = "telemetry"
 verb = "apply"
 effect = "write"
+legacy = "telemetry"
 summary = "Harden the telemetry setting"
 
 [[commands]]
@@ -107,6 +112,7 @@ summary = "Current dns setting"
 object = "dns"
 verb = "apply"
 effect = "write"
+legacy = "dns-doh"
 summary = "Harden the dns setting"
 
 [[commands]]
@@ -119,6 +125,7 @@ summary = "Current lock setting"
 object = "lock"
 verb = "apply"
 effect = "write"
+legacy = "lock-screen"
 summary = "Harden the lock setting"
 
 [[commands]]
@@ -131,6 +138,7 @@ summary = "Current usb setting"
 object = "usb"
 verb = "apply"
 effect = "write"
+legacy = "usb-safety"
 summary = "Harden the usb setting"
 
 [[aliases]]
@@ -147,31 +155,31 @@ until = "0.2.538"
 
 [[aliases]]
 name = "firewall"
-target = "security firewall"
+target = "security firewall apply"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "telemetry"
-target = "security telemetry"
+target = "security telemetry apply"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "dns-doh"
-target = "security dns"
+target = "security dns apply"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "lock-screen"
-target = "security lock"
+target = "security lock apply"
 kind = "deprecated"
 until = "0.2.538"
 
 [[aliases]]
 name = "usb-safety"
-target = "security usb"
+target = "security usb apply"
 kind = "deprecated"
 until = "0.2.538"
 

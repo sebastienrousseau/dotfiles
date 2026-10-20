@@ -439,12 +439,38 @@ _agent_mode_checkpoint() {
   esac
 }
 
-# dot mode delegate
+# dot agent delegate list: the configured delegates. Read-only, so it works
+# while delegation is disabled.
+_agent_delegate_list() {
+  local file
+  file="$(_agent_profiles_file)"
+  ui_header "Agent Delegates"
+  if [[ "$(jq -r '.delegation.enabled // false' "$file")" != true ]]; then
+    ui_warn "Delegation" "disabled (delegation.enabled is false)"
+  fi
+  jq -r '.delegation.allowedDelegates // {} | to_entries[]
+    | "\(.key)\t\(.value.profile)\t\(.value.timeout // 300)"' "$file" |
+    while IFS=$'\t' read -r name profile timeout; do
+      ui_info "$name" "profile $profile, timeout ${timeout}s"
+    done
+}
+
+# dot agent delegate [list | run <name> <command>]: ADR-020 spells it as an
+# object; the old `dot agent delegate <name> <command>` still runs.
+_agent_delegate() {
+  case "${1:-}" in
+    "" | list) _agent_delegate_list ;;
+    run) _agent_mode_delegate "${@:2}" ;;
+    *) _agent_mode_delegate "$@" ;;
+  esac
+}
+
+# dot agent delegate run <name> <command>
 _agent_mode_delegate() {
   local delegate_name="${1:-}"
-  [[ -n "$delegate_name" ]] || die "Usage: dot agent delegate <name> <command> [args...]"
+  [[ -n "$delegate_name" ]] || die "Usage: dot agent delegate run <name> <command> [args...]"
   shift || true
-  [[ $# -gt 0 ]] || die "Usage: dot agent delegate <name> <command> [args...]"
+  [[ $# -gt 0 ]] || die "Usage: dot agent delegate run <name> <command> [args...]"
   local profiles_file current_profile
   profiles_file="$(_agent_profiles_file)"
   current_profile="$(_agent_current_profile)"
@@ -582,42 +608,18 @@ cmd_mode() {
   fi
 
   case "$subcommand" in
-    list)
-      _agent_mode_list "$@"
-      ;;
-    current)
-      _agent_mode_current "$@"
-      ;;
-    show)
-      _agent_mode_show "$@"
-      ;;
-    set)
-      _agent_mode_set "$@"
-      ;;
-    run)
-      _agent_mode_run "$@"
-      ;;
-    doctor)
-      _agent_mode_doctor "$@"
-      ;;
-    card)
-      _agent_mode_card "$@"
-      ;;
-    log)
-      _agent_mode_log "$@"
-      ;;
-    checkpoint)
-      _agent_mode_checkpoint "$@"
-      ;;
-    delegate)
-      _agent_mode_delegate "$@"
-      ;;
-    a2a-card)
-      _agent_mode_a2a_card "$@"
-      ;;
-    conformance)
-      _agent_mode_conformance "$@"
-      ;;
+    list) _agent_mode_list "$@" ;;
+    current) _agent_mode_current "$@" ;;
+    show) _agent_mode_show "$@" ;;
+    set) _agent_mode_set "$@" ;;
+    run) _agent_mode_run "$@" ;;
+    doctor) _agent_mode_doctor "$@" ;;
+    card) _agent_mode_card "$@" ;;
+    log) _agent_mode_log "$@" ;;
+    checkpoint) _agent_mode_checkpoint "$@" ;;
+    delegate) _agent_delegate "$@" ;;
+    a2a-card) _agent_mode_a2a_card "$@" ;;
+    conformance) _agent_mode_conformance "$@" ;;
     *)
       echo "Usage: dot mode [list|current|show|set|run|doctor|card|log|checkpoint|conformance|a2a-card]" >&2
       exit 1

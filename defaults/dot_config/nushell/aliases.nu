@@ -12,7 +12,7 @@ source ~/.cache/nushell/bash-aliases.nu
 alias d = dot
 alias dv = dot --version
 alias dd = dot doctor
-alias dm = dot mode list
+alias dm = dot agent mode list
 alias da = dot agent list
 alias dmc = dot mcp registry
 alias datt = dot attest --json

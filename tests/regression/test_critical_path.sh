@@ -125,7 +125,7 @@ test_start "critical_dot_help_runs"
 assert_exit_code 0 "bash '$DOT_CLI' help"
 
 test_start "critical_dot_unknown_cmd_fails"
-assert_exit_code 1 "bash '$DOT_CLI' __nonexistent_command_xyzzy__"
+assert_exit_code 127 "bash '$DOT_CLI' __nonexistent_command_xyzzy__" # N10
 
 test_start "critical_dot_help_lists_sync"
 assert_output_contains "sync" "bash '$DOT_CLI' help"

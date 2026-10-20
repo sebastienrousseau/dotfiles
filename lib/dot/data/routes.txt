@@ -104,5 +104,5 @@ help|help
 --help|help
 -h|help
 --version|version
--v|version
+-V|version
 version|version

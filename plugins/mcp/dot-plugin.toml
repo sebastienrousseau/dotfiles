@@ -9,18 +9,22 @@ domain = "mcp"
 version = "0.2.536"
 summary = "MCP servers as supply chain"
 default = "list"
+legacy = "mcp"
 
 [[commands]]
 verb = "list"
 effect = "read"
+legacy = "mcp registry"
 summary = "Configured MCP servers"
 
 [[commands]]
 verb = "check"
 effect = "read"
+legacy = "mcp doctor"
 summary = "Check servers and pins"
 
 [[commands]]
 verb = "serve"
 effect = "read"
+legacy = "mcp serve"
 summary = "Run dot's read-only MCP server"

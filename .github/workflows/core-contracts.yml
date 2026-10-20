@@ -7,10 +7,14 @@ on:
       - 'schemas/dpp-hello-v1.schema.json'
       - 'schemas/cli/**'
       - 'tests/unit/dot-cli/test_naming_registry.py'
-      # CLI-contract lint (ADR-020): manifests, routes, the binary it runs,
-      # and the version that expires deprecated names.
+      # CLI-contract lint (ADR-020): manifests, routes, the command table
+      # and its generator, the binary it runs, and the version that expires
+      # deprecated names.
       - 'plugins/**'
       - 'tools/ci/check-cli-contract.py'
+      - 'tools/ci/cli_command_table.py'
+      - 'lib/dot/data/commands.txt'
+      - 'tests/unit/dot-cli/test_dot_command_table.sh'
       - 'tools/ci/cli-contract-baseline.txt'
       - 'tests/unit/dot-cli/test_cli_contract_lint.py'
       - 'lib/dot/data/routes.txt'
@@ -117,6 +121,7 @@ jobs:
       - run: python tests/unit/dot-cli/test_naming_registry.py
       - run: python tools/ci/check-cli-contract.py
       - run: python tests/unit/dot-cli/test_cli_contract_lint.py
+      - run: bash tests/unit/dot-cli/test_dot_command_table.sh
       - run: python tests/unit/install/test_archive_adversarial.py
   visual:
     runs-on: ubuntu-latest
