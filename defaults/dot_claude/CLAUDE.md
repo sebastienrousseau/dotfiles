@@ -80,15 +80,12 @@ check found and fixed before starting the task.
 
 ## Accountability
 
-- Never add `Signed-off-by:` or any other certification on my behalf on
-  your own initiative; I review and certify. Record your part with an
-  `Assisted-by:` trailer.
-- Exception: when I tell you in chat to run a sign-off handover script
-  (e.g. `/tmp/<repo>/signoff-*.sh`), you may run it. That instruction is
-  my certification, and it covers only the commits the script lists at
-  that moment. Before running it, show me those commits; never add a
-  sign-off any other way, and never carry one instruction over to later
-  commits.
+- Always commit with my sign-off (`git commit -s`); amend an unpushed
+  commit that lacks it. The `Signed-off-by:` names only me, from my git
+  identity: never you, a bot or a co-author, and never a second line.
+  That standing instruction is my certification. Record your part with an
+  `Assisted-by:` trailer, and make no other certification (CLA, licence,
+  terms) on my behalf.
 - Never send anything to other people or projects yourself (emails, issues
   or security reports elsewhere, publishes, posts): prepare it for me.
 - For a bug: reproduce it first, keep only a fix seen to work, and say what
