@@ -21,12 +21,11 @@ _dot_table_load() {
 # _dot_record TYPE KEY: the fields after `TYPE|KEY|` in _REC; false if none.
 # A regex, not ${var#*pat}: bash removes a pattern prefix in quadratic time.
 # Keys are lowercase words and flags only, so user input never reaches the
-# regex unescaped.
+# regex unescaped (a `|` would split the pattern into alternatives).
 _dot_record() {
   _REC=""
   [[ "$2" =~ ^[a-z][a-z\ -]*$ ]] || return 1
   _dot_table_load
-  [[ "$_DOT_TABLE" == *$'\n'"$1|$2|"* ]] || return 1 # a cheap miss first
   local re=$'\n'"$1\\|$2\\|([^"$'\n'"]*)"
   [[ "$_DOT_TABLE" =~ $re ]] || return 1
   _REC="${BASH_REMATCH[1]}"
@@ -54,8 +53,6 @@ _dot_lookup() {
     _NAME_KIND="${_REC%%|*}"
     _REC="${_REC#*|}"
     _NAME_TARGET="${_REC%%|*}" _NAME_UNTIL="${_REC#*|}"
-  else
-    return 1
   fi
 }
 
@@ -115,20 +112,19 @@ _dot_resolve() {
 _dot_resolve_bare() {
   if [[ -n "$2" ]]; then
     _RUN="$2" _RUN_USED=1
-    return 0
+  else
+    _dot_built "$1" "$3"
+    ((_BEST_LEN == 0)) || _RUN="$_BEST" _RUN_USED=1
   fi
-  _dot_built "$1" "$3"
-  ((_BEST_LEN == 0)) || _RUN="$_BEST" _RUN_USED=1
-  return 0
 }
 
 # _dot_resolve_object DOMAIN OBJECT [WORD...]: an object with no verb runs
 # its default verb; _REC holds the object's record.
 _dot_resolve_object() {
-  [[ -z "${3:-}" || "${3:-}" == -* ]] || return 0
-  _dot_built "$1" "$2" "${_REC%%|*}"
-  ((_BEST_LEN == 0)) || _RUN="$_BEST" _RUN_USED=2
-  return 0
+  if [[ -z "${3:-}" || "${3:-}" == -* ]]; then
+    _dot_built "$1" "$2" "${_REC%%|*}"
+    ((_BEST_LEN == 0)) || _RUN="$_BEST" _RUN_USED=2
+  fi
 }
 
 # _dot_warn_deprecated NAME NEW ARGS: tell the user once per shell session.
@@ -191,7 +187,7 @@ _dot_gnu_flags() {
 # _ARGV, and _NAME_KIND to dom when the words now start with a domain.
 _dot_old_name() {
   _ARGV=("$@")
-  _dot_lookup "$1" || return 0
+  _dot_lookup "$1"
   case "$_NAME_KIND" in
     deprecated | removed)
       if [[ "$_NAME_KIND" == removed ]] || _dot_version_ge "$VERSION" "$_NAME_UNTIL"; then

@@ -75,6 +75,7 @@ test_start "defaults_and_old_subcommands"
 assert_equals "doctor|1" "$(resolve doctor)" "a domain with its own route keeps its bare behaviour"
 assert_equals "doctor|1" "$(resolve doctor --fix)" "a flag after the domain is still bare"
 assert_equals "scorecard|2" "$(resolve doctor score)" "an object alone runs its default verb"
+assert_equals "scorecard|2" "$(resolve doctor score --json)" "an object and a flag runs its default verb too"
 assert_equals "env|1" "$(resolve tool)" "a domain alone runs its own route first"
 assert_equals "ai|1" "$(resolve ai tools)" "an old subcommand goes to the domain's own route"
 assert_equals "cl|3" "$(resolve ai start claude)" "ai start <agent> launches that agent, not a one-shot prompt"
@@ -101,6 +102,11 @@ spell() { "$BASH_BIN" -c "source '$WORK/names.sh'; _dot_longest leg \"\$@\"; ech
 assert_equals "secret set" "$(spell secrets set KEY)" "the subcommand picks the spelling"
 assert_equals "system update" "$(spell upgrade --yes)" "a renamed route"
 assert_equals "ai start claude" "$(spell cl)" "an alias with arguments gets its full spelling"
+
+test_start "record_keys_are_words_only"
+rec() { "$BASH_BIN" -c "source '$WORK/names.sh'; _dot_record \"\$1\" \"\$2\"" _ "$1" "$2"; }
+assert_true "rec cmd 'secret set'" "a known key"
+assert_false "rec cmd 'secret set|secrets set'" "a | never splits the lookup into alternatives"
 
 test_start "version_compare"
 ge() { "$BASH_BIN" -c "source '$WORK/names.sh'; _dot_version_ge \"\$1\" \"\$2\"" _ "$1" "$2"; }
@@ -139,16 +145,39 @@ test_start "domain_alone_lists_its_commands"
 rc=0
 dot system || rc=$?
 assert_equals "0" "$rc" "read-only, exits 0 (N5)"
-assert_file_contains "$WORK/out" "dot system update" "lists a built command"
-assert_file_contains "$WORK/out" "(planned)" "marks a planned one"
+assert_equals "dot system · updates, cleanup, scheduled maintenance" "$(head -1 "$WORK/out")" "its own header"
+assert_output_not_contains "dot config ·" "cat '$WORK/out'" "and no other domain's"
+assert_equals "" "$(grep 'dot system update ' "$WORK/out" | grep -F '(planned)')" "a built command is not marked planned"
+assert_not_empty "$(grep 'dot system status ' "$WORK/out" | grep -F '(planned)')" "a planned one is"
+
+test_start "help_topics_still_resolve"
+rc=0
+dot help sync || rc=$?
+assert_equals "0" "$rc" "dot help <command> is not taken for a planned spelling"
+assert_file_contains "$WORK/out" "dot sync" "and shows that command"
+rc=0
+dot help zz-no-such-topic || rc=$?
+assert_equals "1" "$rc" "an unknown topic that matches nothing fails"
+
+test_start "arguments_are_not_echoed"
+dot system schedule S3cret-x || true
+assert_output_not_contains "S3cret" "cat '$WORK/err'" "a value-like word is left out of the error"
 
 test_start "deprecated_name_warns_once_per_session"
 rm -rf "$WORK/home/.local/state/dot"
 dot search zz-no-match || true
 assert_file_contains "$WORK/err" "'dot search' is deprecated; use 'dot help'" "first use warns"
 assert_file_contains "$WORK/err" "stops working in 0.2.538" "with the release it stops in"
+assert_file_contains "$WORK/out" "No commands matching" "and the command still runs"
 dot search zz-no-match || true
 assert_output_not_contains "deprecated" "cat '$WORK/err'" "second use in the same session is quiet"
+assert_file_contains "$WORK/out" "No commands matching" "and still runs"
+rm -rf "$WORK/home/.local/state/dot"
+rc=0
+dot search --help || rc=$?
+assert_equals "0" "$rc" "help on a deprecated name still shows help"
+assert_file_contains "$WORK/err" "deprecated" "help warns too"
+assert_dir_not_exists "$WORK/home/.local/state/dot" "but records nothing: help writes no file"
 
 test_start "markers_of_old_sessions_are_pruned"
 marks="$WORK/home/.local/state/dot/cli/deprecated"
@@ -165,6 +194,25 @@ rc=0
 DOT_BIN="$WORK/src/bin/dot" dot frob-old || rc=$?
 assert_equals "127" "$rc" "past its release a deprecated name exits 127"
 assert_file_contains "$WORK/err" "'dot frob-old' was removed; use 'dot doctor'" "with the hint"
+
+test_start "without_its_library_dot_still_answers"
+# A dispatcher with no lib/ beside it and no source dir to find.
+mkdir -p "$WORK/bare/bin" "$WORK/bare/home"
+cp "$DOT_CLI" "$WORK/bare/bin/dot"
+bare() { (cd "$WORK/bare" && HOME="$WORK/bare/home" NO_COLOR=1 "$BASH_BIN" bin/dot "$@" >"$WORK/out" 2>"$WORK/err" </dev/null); }
+rc=0
+bare || rc=$?
+assert_equals "0" "$rc" "no command shows the overview"
+assert_file_contains "$WORK/out" "dot help all" "and the overview is printed"
+rc=0
+bare no-such-command-n03 || rc=$?
+assert_equals "127" "$rc" "an unknown command still exits 127"
+
+test_start "a_missing_module_fails_cleanly"
+rc=0
+DOT_BIN="$WORK/src/bin/dot" dot manual || rc=$?
+assert_equals "1" "$rc" "the source tree has no scripts/: the route's module is missing"
+assert_file_contains "$WORK/err" "manual.sh not found" "says which"
 
 test_start "gnu_version_and_verbose_flags"
 dot --version

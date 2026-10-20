@@ -387,7 +387,7 @@ _dispatch_args() {
   if [[ -f "$cmd_file" ]]; then
     exec bash "$cmd_file" "$@"
   fi
-  ui_fail "${cmd_file##*/} not found"
+  ui_fail "${cmd_file##*/} not found" >&2
   exit 1
 }
 
