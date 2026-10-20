@@ -23,7 +23,7 @@
   33   39   35.4  149     0 bin/dot-theme-sync::reload_desktop
   17   19   28.7   43     0 bin/dot-theme-sync::reload_ghostty
   11   11   20.7   33     0 bin/dot-theme-sync::reload_tmux
-  28   32   39.6   96   383 bin/dot::<top>
+  22   23   39.3   82   360 bin/dot::<top>
   20   24   31.1   39     0 bin/dot::_resolve_source_dir
   21   21    4.2  111   111 defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh::<top>
   19   27   29.6   53     0 defaults/.chezmoitemplates/aliases/cd/cd-core.aliases.sh::cd_with_history

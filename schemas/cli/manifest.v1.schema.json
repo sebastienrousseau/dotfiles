@@ -16,6 +16,7 @@
     "summary": { "$ref": "#/$defs/summary" },
     "ps_noun": { "$ref": "#/$defs/psNoun", "description": "Defaults to the domain in title case" },
     "default": { "$ref": "#/$defs/default" },
+    "legacy": { "$ref": "#/$defs/legacy", "description": "What the domain word alone runs today, and where words that are not its verbs or objects go" },
     "objects": {
       "type": "array",
       "items": {
@@ -41,6 +42,7 @@
           "object": { "$ref": "#/$defs/word" },
           "verb": { "$ref": "#/$defs/word" },
           "effect": { "enum": ["read", "write", "destructive"] },
+          "legacy": { "$ref": "#/$defs/legacy" },
           "summary": { "$ref": "#/$defs/summary" },
           "output": { "type": "string", "pattern": "^[a-z]{2,8}/[a-z][a-z0-9-]*\\.v[0-9]+$", "description": "Schema id of the --json output (N13, N14)" }
         }
@@ -73,6 +75,7 @@
   },
   "$defs": {
     "word": { "type": "string", "pattern": "^[a-z]+$" },
+    "legacy": { "type": "string", "pattern": "^[a-z][a-z-]*( [a-z-]+)*$", "description": "Today's monorepo route and arguments that run this (N0.3); dropped when the domain is extracted" },
     "domain": { "type": "string", "pattern": "^[a-z]{2,8}$" },
     "psNoun": { "type": "string", "pattern": "^[A-Z][A-Za-z]*$" },
     "summary": { "type": "string", "minLength": 1, "maxLength": 60, "pattern": "^[^\\n]+$" },

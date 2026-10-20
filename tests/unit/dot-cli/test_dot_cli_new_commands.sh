@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2016,SC2034
 # Behavioural tests for the restructured dot CLI commands (Waves 1-4):
-# hidden aliases (verify, scorecard/score, snapshot, heal, update), the
+# hidden aliases (verify, scorecard/score, snapshot, heal), config update, the
 # dot_require_platform guard, doctor -> doctor-unified.sh, sync --pull /
 # --check, env, profile and keys sign-check.
 #
@@ -125,10 +125,12 @@ dot heal --dry-run
 assert_equals "0" "$?" "dot heal exits 0"
 assert_contains "ran scripts/ops/heal.sh --dry-run" "$(out)" "heal runs heal.sh"
 
-test_start "dot_cli_routes_update_alias"
-dot update
-assert_equals "0" "$?" "dot update exits 0"
-assert_contains "ran scripts/ops/chezmoi-update.sh" "$(out)" "update pulls through chezmoi-update.sh"
+# `dot update` is the shortcut for `dot system update` (ADR-020); the
+# dotfiles-only update it used to be is `dot config update`.
+test_start "dot_cli_routes_config_update"
+dot config update
+assert_equals "0" "$?" "dot config update exits 0"
+assert_contains "ran scripts/ops/chezmoi-update.sh" "$(out)" "config update pulls through chezmoi-update.sh"
 
 # --- Wave 1: dot_require_platform -------------------------------------------
 

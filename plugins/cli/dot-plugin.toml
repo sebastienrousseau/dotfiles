@@ -18,16 +18,19 @@ default = "show"
 [[commands]]
 verb = "list"
 effect = "read"
+legacy = "registry installed"
 summary = "Installed plugins"
 
 [[commands]]
 verb = "show"
 effect = "read"
+legacy = "registry info"
 summary = "One plugin in detail"
 
 [[commands]]
 verb = "install"
 effect = "write"
+legacy = "registry install"
 summary = "Install a plugin"
 
 [[commands]]
@@ -54,6 +57,7 @@ summary = "Create a plugin from the template"
 object = "completion"
 verb = "show"
 effect = "read"
+legacy = "completion"
 summary = "Print a completion script"
 
 [[aliases]]

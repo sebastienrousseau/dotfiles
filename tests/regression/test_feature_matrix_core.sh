@@ -201,7 +201,7 @@ test_fm_search_no_match() {
 test_fm_unknown_command() {
   test_start "fm_unknown_command"
   fm_run zzz-not-a-command
-  fm_expect_rc 1
+  fm_expect_rc 127 # N10: unknown command
   test_start "fm_unknown_command_message"
   fm_expect_err "Unknown command"
 }
@@ -276,9 +276,10 @@ test_fm_apply() {
   fm_expect_any "Applying dotfiles" "Chezmoi apply"
 }
 
+# The dotfiles-only update; `dot update` is now `dot system update` (ADR-020).
 test_fm_update() {
   test_start "fm_update"
-  fm_run update
+  fm_run config update
   fm_expect_rc 0
   test_start "fm_update_announces_update"
   fm_expect_any "Updating" "update"

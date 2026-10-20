@@ -9,6 +9,7 @@ domain = "doctor"
 version = "0.2.536"
 summary = "health, repair, backup and rollback"
 default = "status"
+legacy = "doctor"
 
 [[objects]]
 name = "score"
@@ -48,37 +49,44 @@ default = "show"
 [[commands]]
 verb = "status"
 effect = "read"
+legacy = "health"
 summary = "Health summary"
 
 [[commands]]
 verb = "check"
 effect = "read"
+legacy = "doctor"
 summary = "Run every health check"
 
 [[commands]]
 verb = "fix"
 effect = "write"
+legacy = "heal"
 summary = "Repair what check found"
 
 [[commands]]
 verb = "backup"
 effect = "write"
+legacy = "backup"
 summary = "Back up the setup"
 
 [[commands]]
 verb = "restore"
 effect = "write"
+legacy = "restore"
 summary = "Restore from a backup"
 
 [[commands]]
 verb = "rollback"
 effect = "write"
+legacy = "rollback"
 summary = "Return to a previous generation"
 
 [[commands]]
 object = "score"
 verb = "show"
 effect = "read"
+legacy = "scorecard"
 summary = "The setup score"
 
 [[commands]]
@@ -91,36 +99,42 @@ summary = "Snapshots"
 object = "snapshot"
 verb = "new"
 effect = "write"
+legacy = "snapshot"
 summary = "Take a snapshot"
 
 [[commands]]
 object = "perf"
 verb = "show"
 effect = "read"
+legacy = "perf"
 summary = "Startup timings"
 
 [[commands]]
 object = "perf"
 verb = "measure"
 effect = "read"
+legacy = "benchmark"
 summary = "Benchmark startup"
 
 [[commands]]
 object = "drift"
 verb = "show"
 effect = "read"
+legacy = "drift"
 summary = "Drift from the source"
 
 [[commands]]
 object = "conflict"
 verb = "list"
 effect = "read"
+legacy = "conflicts"
 summary = "Conflicting files"
 
 [[commands]]
 object = "metric"
 verb = "list"
 effect = "read"
+legacy = "metrics"
 summary = "Recorded metrics"
 
 [[commands]]
@@ -155,7 +169,7 @@ until = "0.2.538"
 
 [[aliases]]
 name = "snapshot"
-target = "doctor snapshot"
+target = "doctor snapshot new"
 kind = "deprecated"
 until = "0.2.538"
 
@@ -228,14 +242,17 @@ until = "0.2.538"
 [[aliases]]
 name = "chaos"
 target = "doctor"
-kind = "removed"
+kind = "deprecated"
+until = "0.2.538"
 
 [[aliases]]
 name = "smoke-test"
 target = "doctor"
-kind = "removed"
+kind = "deprecated"
+until = "0.2.538"
 
 [[aliases]]
 name = "keys"
 target = "doctor"
-kind = "removed"
+kind = "deprecated"
+until = "0.2.538"

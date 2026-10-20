@@ -28,6 +28,7 @@ summary = "OS, disk, outdated counts, last run"
 [[commands]]
 verb = "update"
 effect = "write"
+legacy = "upgrade"
 summary = "Update everything, asking first"
 
 [[commands]]
@@ -68,6 +69,7 @@ summary = "Current OS settings"
 object = "settings"
 verb = "apply"
 effect = "write"
+legacy = "tune"
 summary = "Apply the managed OS settings"
 
 [[aliases]]

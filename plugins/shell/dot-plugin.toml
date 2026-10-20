@@ -28,29 +28,34 @@ summary = "Shell, startup time and cache state"
 [[commands]]
 verb = "update"
 effect = "write"
+legacy = "cache-refresh"
 summary = "Regenerate the startup caches"
 
 [[commands]]
 verb = "clean"
 effect = "write"
+legacy = "clean-cache"
 summary = "Clear the startup caches"
 
 [[commands]]
 object = "history"
 verb = "list"
 effect = "read"
+legacy = "history"
 summary = "Recent history"
 
 [[commands]]
 object = "alias"
 verb = "list"
 effect = "read"
+legacy = "aliases"
 summary = "Aliases and where each is defined"
 
 [[commands]]
 object = "alias"
 verb = "check"
 effect = "read"
+legacy = "alias-check"
 summary = "Find shadowed or broken aliases"
 
 [[aliases]]

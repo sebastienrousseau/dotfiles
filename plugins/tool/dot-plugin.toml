@@ -9,15 +9,18 @@ domain = "tool"
 version = "0.2.536"
 summary = "toolchains, packages, project templates"
 default = "list"
+legacy = "env"
 
 [[commands]]
 verb = "list"
 effect = "read"
+legacy = "env list"
 summary = "Toolchains and their versions"
 
 [[commands]]
 verb = "install"
 effect = "write"
+legacy = "env install"
 summary = "Install the configured toolchains"
 
 [[commands]]
@@ -33,6 +36,7 @@ summary = "Remove a toolchain or orphans"
 [[commands]]
 verb = "set"
 effect = "write"
+legacy = "env use"
 summary = "Pin a toolchain version"
 
 [[commands]]
@@ -43,6 +47,7 @@ summary = "Print the tool environment"
 [[commands]]
 verb = "new"
 effect = "write"
+legacy = "new"
 summary = "Create a project from a template"
 
 [[aliases]]

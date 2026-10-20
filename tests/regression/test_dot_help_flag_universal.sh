@@ -253,13 +253,19 @@ check_help_flag_safe() {
   local failure_reasons=()
   local first_word
   first_word="${cmd%% *}"
+  # A removed name (ADR-020) exits 127 with its replacement before any help;
+  # the side-effect checks below still apply.
+  local removed=0
+  if [[ $exit_code -eq 127 ]] && grep -q "was removed; use" "$stderr_file"; then
+    removed=1
+  fi
 
   # ── Assertion 1: rc=0 (help is always successful).
   # Hidden aliases delegate to `dot help <alias>` which returns
   # "Unknown help topic" with rc=1 — that's legitimate because the
   # alias's real help is under a different command. We still assert
   # NO side effect happened, just relax the rc check.
-  if [[ $exit_code -ne 0 ]] && ! is_hidden_alias "$first_word"; then
+  if [[ $exit_code -ne 0 ]] && ((removed == 0)) && ! is_hidden_alias "$first_word"; then
     failure_reasons+=("exit code=$exit_code (expected 0 for public commands)")
   fi
 
@@ -271,7 +277,7 @@ check_help_flag_safe() {
 
   # ── Assertion 3: stdout contains the command name (skip for
   # hidden aliases whose delegated help is an "Unknown topic" error).
-  if ! is_hidden_alias "$first_word" \
+  if ! is_hidden_alias "$first_word" && ((removed == 0)) \
       && ! grep -q -w -F "$first_word" "$stdout_file"; then
     failure_reasons+=("stdout does not mention '$first_word' — wrong command's help emitted")
   fi

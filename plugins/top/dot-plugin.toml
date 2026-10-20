@@ -9,6 +9,7 @@ domain = "top"
 version = "0.2.536"
 summary = "what the machine and its agents are doing"
 default = "tui"
+legacy = "intelligence"
 
 [[objects]]
 name = "report"

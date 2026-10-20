@@ -9,6 +9,7 @@ domain = "ai"
 version = "0.2.536"
 summary = "install, route and run coding agents"
 default = "tui"
+legacy = "ai"
 
 [[objects]]
 name = "pattern"
@@ -33,11 +34,13 @@ default = "show"
 [[commands]]
 verb = "list"
 effect = "read"
+legacy = "ai tools"
 summary = "Installed agents"
 
 [[commands]]
 verb = "install"
 effect = "write"
+legacy = "ai install"
 summary = "Install agents"
 
 [[commands]]
@@ -53,38 +56,45 @@ summary = "Start an agent"
 [[commands]]
 verb = "run"
 effect = "write"
+legacy = "ai run"
 summary = "Run an agent once"
 
 [[commands]]
 verb = "serve"
 effect = "read"
+legacy = "ai serve"
 summary = "Run the gateway in the foreground"
 
 [[commands]]
 verb = "login"
 effect = "write"
+legacy = "ai login"
 summary = "Authenticate an agent"
 
 [[commands]]
 verb = "check"
 effect = "read"
+legacy = "ai doctor"
 summary = "Check agent installs and auth"
 
 [[commands]]
 verb = "ask"
 effect = "read"
+legacy = "ai ask"
 summary = "Ask about the local context"
 
 [[commands]]
 object = "pattern"
 verb = "list"
 effect = "read"
+legacy = "patterns list"
 summary = "Prompt patterns"
 
 [[commands]]
 object = "cost"
 verb = "show"
 effect = "read"
+legacy = "ai cost"
 summary = "Spend by agent and model"
 
 [[commands]]

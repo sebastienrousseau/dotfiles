@@ -16,7 +16,9 @@ grammar (N1 to N7, N13, N16):
   - alias names are unique, shadow no domain or built-in, the shortcuts
     are exactly the ones domains.json declares, and every alias target
     resolves to a declared command;
-  - every route in lib/dot/data/routes.txt has a new spelling.
+  - every route in lib/dot/data/routes.txt has a new spelling;
+  - lib/dot/data/commands.txt, the table bin/dot resolves names from, is
+    what tools/ci/cli_command_table.py generates from the manifests.
 
 It also runs bin/dot against the runtime rules (N9 flags, N10 exit codes).
 Today's binary breaks some of them; tools/ci/cli-contract-baseline.txt lists
@@ -36,7 +38,11 @@ import pathlib
 import subprocess
 import sys
 import tempfile
+
 import tomllib
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import cli_command_table
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 ALLOWED_EFFECTS = {"read": {"read"}, "change": {"write", "destructive"}, "any": {"read", "write", "destructive"}}
@@ -199,12 +205,25 @@ def check_routes(root: pathlib.Path, manifests: dict, reg: dict) -> list[str]:
     return errors
 
 
-def run_dot(dot: pathlib.Path, *args: str) -> tuple[int, str]:
+def run_dot_err(dot: pathlib.Path, *args: str) -> tuple[int, str, str]:
     with tempfile.TemporaryDirectory() as home:
         env = {"HOME": home, "PATH": os.environ.get("PATH", "/usr/bin:/bin"), "NO_COLOR": "1", "TERM": "dumb"}
         proc = subprocess.run([str(dot), *args], env=env, capture_output=True, text=True,
                               stdin=subprocess.DEVNULL, timeout=60, check=False)
-    return proc.returncode, proc.stdout
+    return proc.returncode, proc.stdout, proc.stderr
+
+
+def run_dot(dot: pathlib.Path, *args: str) -> tuple[int, str]:
+    rc, out, _ = run_dot_err(dot, *args)
+    return rc, out
+
+
+def check_table(root: pathlib.Path) -> list[str]:
+    path = root / cli_command_table.TABLE
+    want = cli_command_table.build(cli_command_table.load(root))
+    if not path.is_file() or path.read_text() != want:
+        return [f"{cli_command_table.TABLE} is stale: run tools/ci/cli_command_table.py"]
+    return []
 
 
 def runtime_violations(dot: pathlib.Path) -> dict[str, str]:
@@ -214,9 +233,12 @@ def runtime_violations(dot: pathlib.Path) -> dict[str, str]:
     if rc != 0:
         found["N9-short-version"] = f"'dot -V' exits {rc}; -V is the version flag"
     _, long_out = run_dot(dot, "--version")
-    _, short_out = run_dot(dot, "-v")
-    if short_out.strip() and short_out == long_out:
-        found["N9-v-is-verbose"] = "'dot -v' prints the version; -v means --verbose"
+    _, short_out, short_err = run_dot_err(dot, "-v")
+    if short_out.strip() and short_out == long_out and "-V" not in short_err:
+        found["N9-v-is-verbose"] = "'dot -v' prints the version without the -V warning; -v means --verbose"
+    rc, _ = run_dot(dot, "-v", "no-such-command-n10")
+    if rc != 127:
+        found["N9-v-is-verbose"] = f"'dot -v <unknown>' exits {rc}, not 127; -v must pass on to the command"
     rc, _ = run_dot(dot, "no-such-command-n10")
     if rc != 127:
         found["N10-unknown-127"] = f"an unknown command exits {rc}, not 127"
@@ -248,6 +270,7 @@ def lint(root: pathlib.Path, dot: pathlib.Path) -> list[str]:
     errors += check_aliases(manifests, reg)
     errors += check_shortcuts(manifests, reg)
     errors += check_routes(root, manifests, reg)
+    errors += check_table(root)
     return errors + check_runtime(dot, read_baseline(root / "tools" / "ci" / "cli-contract-baseline.txt"))
 
 

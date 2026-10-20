@@ -177,16 +177,16 @@ else
   printf '%b\n' "    Output: $output"
 fi
 
-# Test: dot -v is alias for --version
+# Test: dot -V is the GNU short form of --version (ADR-020 N9; -v is --verbose)
 test_start "dot_cli_v_flag"
-output=$(bash "$DOT_CLI" -v 2>&1) || true
+output=$(bash "$DOT_CLI" -V 2>&1) || true
 reference_output=$(bash "$DOT_CLI" --version 2>&1) || true
 if [[ "$output" == "$reference_output" ]]; then
   ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: -v matches --version output"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: -V matches --version output"
 else
   ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: -v should match --version output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: -V should match --version output"
 fi
 
 # Test: dot version is alias for --version

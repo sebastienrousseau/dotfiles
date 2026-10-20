@@ -14,8 +14,8 @@
 #   help.snap         from `dot --help`
 #   version.snap      from `dot version`
 #   doctor.snap       from `dot doctor`
-#   perf.snap         from `dot perf`
-#   health.snap       from `dot health`
+#   perf.snap         from `dot doctor perf`
+#   health.snap       from `dot doctor status`
 #
 # Closes part of #881.
 # =============================================================================
@@ -45,8 +45,8 @@ capture() {
 capture help --help
 capture version version
 capture doctor doctor
-capture perf perf
-capture health health
+capture perf doctor perf
+capture health doctor status
 
 echo ""
 echo "Snapshots updated. Review with:"

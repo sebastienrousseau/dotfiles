@@ -115,9 +115,9 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no hardcoded paths"
 fi
 
-# Test: lint is registered in dot CLI dispatch
+# Test: lint is registered in dot CLI dispatch: its help topic resolves.
 test_start "lint_cmd_registered_in_dispatch"
-if grep -q 'lint' "$REPO_ROOT/bin/dot" 2>/dev/null; then
+if NO_COLOR=1 HOME="$(mktemp -d)" bash "$REPO_ROOT/bin/dot" help lint 2>/dev/null | grep -q 'dot lint'; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: lint registered in dot CLI dispatch"
 else
