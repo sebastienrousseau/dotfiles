@@ -73,7 +73,7 @@ done
 
 gen() {
   CHEZMOI_SOURCE_DIR="$REPO_ROOT" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 \
-    bash bin/dot completion "$1"
+    bash bin/dot cli completion show "$1"
 }
 
 # Build-dir mode: every shell, FHS-style basenames, nothing committed.

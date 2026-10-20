@@ -11,7 +11,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 TARGET="$REPO_ROOT/defaults/dot_config/fish/functions/dot.fish"
 
-for pair in "dm:mode list" "da:agent list" "dmc:mcp registry" "datt:attest --json"; do
+for pair in "dm:agent mode list" "da:agent list" "dmc:mcp registry" "datt:attest --json"; do
   fn="${pair%%:*}" want="${pair#*:}"
   test_start "fish_${fn}_runs_dot_${want// /_}"
   if ! command -v fish >/dev/null 2>&1; then

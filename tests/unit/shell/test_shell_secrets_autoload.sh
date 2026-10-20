@@ -17,14 +17,14 @@ WORK="$(mktemp -d -t secrets-autoload.XXXXXX)"
 trap 'rm -rf "$WORK"' EXIT
 mkdir -p "$WORK/bin" "$WORK/tmp"
 
-# A dot stub that records its argv. `dot secrets load <bucket>` answers the
+# A dot stub that records its argv. `dot secret export <bucket>` answers the
 # way the real command does: one `export KEY=%q-quoted-value` line per key.
 # Any other command (such as `dot env load`, which is the mise handler)
 # prints nothing useful.
 cat >"$WORK/bin/dot" <<STUB
 #!/usr/bin/env bash
 printf '%s\n' "\$*" >>"$WORK/dot.log"
-if [ "\$1" = secrets ] && [ "\$2" = load ]; then
+if [ "\$1" = secret ] && [ "\$2" = export ]; then
   case "\$3" in
     ai) printf 'export %s=%q\n' DOT_TEST_AI "it's a \"secret\" \\\$HOME" ;;
     work) printf 'export %s=%q\n' DOT_TEST_WORK 'w1' ;;
@@ -56,10 +56,10 @@ check_shell() { # shell
   assert_equals "DOT_TEST_AI=it's a \"secret\" \$HOME
 DOT_TEST_WORK=w1" "$OUT" "every bucket's values are exported verbatim"
 
-  test_start "secrets_autoload_${sh}_calls_dot_secrets_load"
-  assert_equals "secrets load ai
-secrets load missing
-secrets load work" "$(cat "$WORK/dot.log" 2>/dev/null)" "each named bucket goes to dot secrets load"
+  test_start "secrets_autoload_${sh}_calls_dot_secret_export"
+  assert_equals "secret export ai
+secret export missing
+secret export work" "$(cat "$WORK/dot.log" 2>/dev/null)" "each named bucket goes to dot secret export"
 
   test_start "secrets_autoload_${sh}_writes_no_temp_files"
   assert_equals "" "$(ls -A "$WORK/tmp")" "TMPDIR stays empty"

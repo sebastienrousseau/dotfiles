@@ -173,7 +173,7 @@ echo ""
 choice=$(gum choose "Run dot doctor" "Run dot benchmark" "Open docs" "Exit")
 case "$choice" in
   "Run dot doctor") exec dot doctor ;;
-  "Run dot benchmark") exec dot benchmark ;;
-  "Open docs") exec dot docs ;;
+  "Run dot benchmark") exec dot doctor perf measure ;;
+  "Open docs") exec dot help --readme ;;
   "Exit") exit 0 ;;
 esac

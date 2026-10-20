@@ -40,15 +40,15 @@ taken from `PATH`.
 
 Every tool is read-only, runs a fixed argument vector through `dot`
 without a shell, and is annotated `readOnlyHint: true`. Mutating paths
-(`dot mode set`, `dot attest --write`, anything under `dot apply`) are
+(`dot agent mode set`, `dot attest --write`, anything under `dot apply`) are
 deliberately not exposed — an MCP client cannot change this workstation
 through this server. The one write any tool causes is the audit-log line
-`dot mode` appends for every invocation, human or otherwise.
+`dot agent mode` appends for every invocation, human or otherwise.
 
 | Tool | Runs | Arguments |
 | :--- | :--- | :--- |
 | `mcp-doctor` | `dot mcp doctor --json [--strict]` | `strict` (boolean) |
-| `agent-mode` | `dot mode current\|list\|show <profile>` | `action` (enum), `profile` (pattern-checked, required for `show`) |
+| `agent-mode` | `dot agent status`, `dot agent mode list\|show <profile>` | `action` (enum), `profile` (pattern-checked, required for `show`) |
 | `workstation-attestation` | `dot attest --json` | none |
 | `fleet-status` | `dot fleet status --json` | none |
 

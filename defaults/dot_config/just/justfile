@@ -75,7 +75,7 @@ dots-bench:
 
 # Run dotfiles health check
 dots-health:
-    dot health
+    dot doctor status
 
 # === Quality ===
 
