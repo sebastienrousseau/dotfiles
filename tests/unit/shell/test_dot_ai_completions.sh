@@ -28,7 +28,7 @@ bash_complete() {
     source "$1"; shift
     COMP_WORDS=("$@"); COMP_CWORD=$((${#COMP_WORDS[@]} - 1))
     _dot
-    printf "%s\n" "${COMPREPLY[@]}"' _ "$BASH" "$@" | LC_ALL=C sort | xargs
+    printf "%s\n" "${COMPREPLY[@]}"' _ "$BASH" "$@" | LC_ALL=C sort | paste -sd " " -
 }
 
 test_start "completions_bash_ai_verbs"
@@ -39,7 +39,7 @@ test_start "completions_zsh_ai_verbs"
 if command -v zsh >/dev/null 2>&1; then
   got="$(zsh -f -c 'source "$1"
     _describe() { local -a a; a=("${(@P)4}"); print -rl -- ${a%%:*}; }
-    words=(dot ai ""); CURRENT=3; PREFIX=""; _dot' _ "$ZSH" | LC_ALL=C sort | xargs)"
+    words=(dot ai ""); CURRENT=3; PREFIX=""; _dot' _ "$ZSH" | LC_ALL=C sort | paste -sd " " -)"
   assert_equals "$WANT" "$got" "zsh offers the same"
 else
   assert_true "true" "zsh not installed; skipped"
@@ -47,7 +47,7 @@ fi
 
 test_start "completions_fish_ai_verbs"
 if command -v fish >/dev/null 2>&1; then
-  got="$(fish --no-config -c 'source $argv[1]; complete -C "dot ai "' "$FISH" | cut -f1 | grep -v '^-' | LC_ALL=C sort | xargs)"
+  got="$(fish --no-config -c 'source $argv[1]; complete -C "dot ai "' "$FISH" | cut -f1 | grep -v '^-' | LC_ALL=C sort | paste -sd " " -)"
   assert_equals "$WANT" "$got" "fish offers the same"
 else
   assert_true "true" "fish not installed; skipped"

@@ -33,7 +33,7 @@ touch "$XDG_CONFIG_HOME/ai/patterns/architect.md"
 # space-separated; the last argument is the word being completed.
 bash_q() {
   "$BASH_BIN" -c 'source "$1"; shift; COMP_WORDS=(dot "$@"); COMP_CWORD=$((${#COMP_WORDS[@]} - 1))
-    _dot; printf "%s\n" "${COMPREPLY[@]}"' _ "$BASH_FILE" "$@" | LC_ALL=C sort | xargs
+    _dot; printf "%s\n" "${COMPREPLY[@]}"' _ "$BASH_FILE" "$@" | LC_ALL=C sort | paste -sd " " -
 }
 zsh_q() {
   zsh -f -c 'source "$1"; shift
@@ -42,10 +42,10 @@ zsh_q() {
     _files() { print FILES; }
     _message() { :; }
     words=(dot "$@"); CURRENT=${#words}; PREFIX="${words[CURRENT]}"; _dot' _ "$ZSH_FILE" "$@" |
-    LC_ALL=C sort | xargs
+    LC_ALL=C sort | paste -sd " " -
 }
 fish_q() {
-  fish --no-config -c 'source $argv[1]; complete -C "dot $argv[2]"' "$FISH_FILE" "$*" | cut -f1 | LC_ALL=C sort | xargs
+  fish --no-config -c 'source $argv[1]; complete -C "dot $argv[2]"' "$FISH_FILE" "$*" | cut -f1 | LC_ALL=C sort | paste -sd " " -
 }
 cat >"$WORK/q.ps1" <<'PS'
 param([string]$File, [string]$Line)
@@ -54,7 +54,7 @@ $l = "dot $Line"
 (TabExpansion2 -inputScript $l -cursorColumn $l.Length).CompletionMatches.CompletionText
 PS
 ps_q() {
-  pwsh -NoProfile -File "$WORK/q.ps1" -File "$PS_FILE" -Line "$*" | LC_ALL=C sort | xargs
+  pwsh -NoProfile -File "$WORK/q.ps1" -File "$PS_FILE" -Line "$*" | LC_ALL=C sort | paste -sd " " -
 }
 # missing LIST WORD...: the WORDs LIST lacks (empty when it has them all).
 missing() {
@@ -103,7 +103,7 @@ assert_equals "2" "$rc" "an unknown flag exits 2"
 rc=0
 "$BASH_BIN" "$GEN" --outdir "$WORK/gen" >/dev/null 2>&1 || rc=$?
 assert_equals "0" "$rc" "--outdir writes"
-assert_equals "_dot completions.nu dot dot.fish dot.ps1" "$(ls "$WORK/gen" | LC_ALL=C sort | xargs)" "all five scripts"
+assert_equals "_dot completions.nu dot dot.fish dot.ps1" "$(ls "$WORK/gen" | LC_ALL=C sort | paste -sd " " -)" "all five scripts"
 rc=0
 "$BASH_BIN" "$GEN" --check >"$WORK/out" 2>&1 || rc=$?
 assert_equals "0" "$rc" "--check passes on the repository"
@@ -153,7 +153,7 @@ for shell in zsh fish nu pwsh; do
       assert_equals "architect" "$(zsh_q ai run claude --pattern '')" "the AI patterns"
       ;;
     fish)
-      assert_equals "$top" "$(fish_q '' | xargs -n1 | grep -v '^-' | xargs)" "the same top level"
+      assert_equals "$top" "$(fish_q '' | tr " " "\n" | grep -v "^-" | paste -sd " " -)" "the same top level"
       assert_equals "$(bash_q system schedule '')" "$(fish_q system schedule '')" "the same object verbs"
       assert_equals "" "$(missing "$(fish_q doctor perf show -)" --json -j --runs -r)" "the flags"
       assert_equals "architect" "$(fish_q ai run claude --pattern '')" "the AI patterns"

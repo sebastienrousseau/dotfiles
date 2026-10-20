@@ -83,7 +83,7 @@ echo -n "   🧹 Checking formatting... "
 # A space or tab before the line end (or before the CR of a CRLF line):
 # .gitattributes checks *.ps1, *.bat and *.cmd out with CRLF, and the CR
 # itself is not trailing whitespace.
-OFFENDING_WHITESPACE=$(echo "$STAGED_FILES" | grep -vE '\.(svg|md)$' | xargs grep -lE $'[ \t]\r?$' /dev/null || true)
+OFFENDING_WHITESPACE=$(echo "$STAGED_FILES" | grep -vE '\.(svg|md)$' | xargs grep -l '[[:blank:]][[:cntrl:]]\{0,1\}$' /dev/null || true)
 # Use defused patterns to avoid self-detection
 MERGE_START="^<<<<<<< "
 MERGE_END="^>>>>>>> "

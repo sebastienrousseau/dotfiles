@@ -202,4 +202,4 @@
    9    9   31.5   68   111 tools/docs/generate-command-index.sh::<top>
   29   31   49.1  123   135 tools/docs/generate-manpage.sh::<top>
   10   11   35.1   93   119 tools/release/package-policy-bundles.sh::<top>
-  17   11   33.6   47    50 tools/release/stage-dot.sh::<top>
+  17   11   33.1   47    50 tools/release/stage-dot.sh::<top>
