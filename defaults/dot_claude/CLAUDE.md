@@ -63,29 +63,29 @@ The first step in any repository, before the task I asked for: check its
 health and clear what the check finds. This is a hard gate, not a quota.
 
 - Open Dependabot PRs and alerts, code-scanning and secret-scanning alerts,
-  the native vulnerability audit, and a red default-branch CI: fix each, or
-  open the PR that fixes it. A disabled scanner is a finding.
+  open issues, the native vulnerability audit, and a red default-branch CI:
+  each MUST be fully fixed, merged and closed (fold into the release branch,
+  merge once CI is green, close what it supersedes). Constrain an advised
+  dependency so no affected version resolves. A disabled scanner is a finding.
 - Lint and format clean, with no new suppressions.
 - Complexity per function: cyclomatic ≤ 10, cognitive ≤ 15, Halstead
   difficulty ≤ 30, ≤ 60 lines (≤ 500 per file). Code you write or touch
   meets them; existing offenders never get worse and shrink worst-first
   against a committed, CI-enforced baseline.
 
-Merge authority is unchanged: this authorises preparing fixes, not merging
-them. Report what the check found and fixed before starting the task.
+This is my standing instruction to merge the PR carrying these fixes once
+CI is green, and the only exception to merge authority. Report what the
+check found and fixed before starting the task.
 `~/Code/AGENTS.md` §0 has the commands and per-ecosystem tools.
 
 ## Accountability
 
-- Never add `Signed-off-by:` or any other certification on my behalf on
-  your own initiative; I review and certify. Record your part with an
-  `Assisted-by:` trailer.
-- Exception: when I tell you in chat to run a sign-off handover script
-  (e.g. `/tmp/<repo>/signoff-*.sh`), you may run it. That instruction is
-  my certification, and it covers only the commits the script lists at
-  that moment. Before running it, show me those commits; never add a
-  sign-off any other way, and never carry one instruction over to later
-  commits.
+- Always commit with my sign-off (`git commit -s`); amend an unpushed
+  commit that lacks it. The `Signed-off-by:` names only me, from my git
+  identity: never you, a bot or a co-author, and never a second line.
+  That standing instruction is my certification. Record your part with an
+  `Assisted-by:` trailer, and make no other certification (CLA, licence,
+  terms) on my behalf.
 - Never send anything to other people or projects yourself (emails, issues
   or security reports elsewhere, publishes, posts): prepare it for me.
 - For a bug: reproduce it first, keep only a fix seen to work, and say what
