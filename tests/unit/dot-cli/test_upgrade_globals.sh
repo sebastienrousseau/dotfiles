@@ -24,11 +24,13 @@ done
 
 # upgrade WORDS...: source the upgrade library with its prompts stubbed and
 # run WORDS in that shell; _upgrade_step records the phase ids it is given.
+# has_command sees only the fakes, so a runner's own /usr/bin/snap or npm
+# never counts as installed.
 upgrade() {
-  PATH="$WORK/bin:/usr/bin:/bin" bash -c '
+  FAKES="$WORK/bin" PATH="$WORK/bin:/usr/bin:/bin" bash -c '
     set -euo pipefail
     source "$1/lib/dot/upgrade.sh"
-    has_command() { command -v "$1" >/dev/null 2>&1; }
+    has_command() { [[ -x "$FAKES/$1" ]]; }
     dot_apply_yes_flag() { :; }
     dot_ensure_mise() { :; }
     _dot_upgrade_consent_system() { :; }
