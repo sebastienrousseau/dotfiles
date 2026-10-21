@@ -4,7 +4,8 @@
 #
 # Example: Shell completions
 #
-# Generate bash, zsh, fish and nushell completions from the command registry.
+# Print the bash, zsh, fish, nushell and PowerShell completions, generated
+# from the plugin manifests.
 #
 # Backing module: scripts/dot/commands/completion.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
@@ -47,8 +48,8 @@ for cmd in "${group_commands[@]}"; do
 done
 
 printf '\n--- live output ---\n\n'
-for shell in bash zsh fish nu; do
-  printf "  %-5s %s lines\n" "$shell" "$(bash "$dot" completion "$shell" | wc -l | tr -d " ")"
+for shell in bash zsh fish nu pwsh; do
+  printf "  %-5s %s lines\n" "$shell" "$(bash "$dot" cli completion show "$shell" | wc -l | tr -d " ")"
 done
 
 printf '\nShell completions example complete.\n'

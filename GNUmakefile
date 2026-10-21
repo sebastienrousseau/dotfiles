@@ -54,7 +54,7 @@ build-completions: $(BUILDDIR)/completions/_dot
 $(BUILDDIR)/man/man1/dot.1: bin/dot tools/docs/man/dot.1.in tools/docs/generate-manpage.sh defaults/.chezmoidata.toml CHANGELOG.md
 	bash ./tools/docs/generate-manpage.sh --output "$@"
 
-$(BUILDDIR)/completions/_dot: bin/dot scripts/dot/commands/completion.sh tools/docs/generate-completions.sh
+$(BUILDDIR)/completions/_dot: lib/dot/data/commands.txt tools/docs/gen_completions.py tools/docs/generate-completions.sh
 	bash ./tools/docs/generate-completions.sh --outdir "$(BUILDDIR)/completions"
 
 install: all ## Install into $(DESTDIR)$(PREFIX) (FHS layout)

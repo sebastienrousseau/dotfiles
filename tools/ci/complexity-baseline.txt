@@ -200,7 +200,6 @@
   11   15   27.0   27     0 tools/docs/check-manual.sh::check_links
   11   11   20.8   30    30 tools/docs/checksum-manual.sh::<top>
    9    9   31.5   68   111 tools/docs/generate-command-index.sh::<top>
-  19   21   48.0   79    83 tools/docs/generate-completions.sh::<top>
   29   31   49.1  123   135 tools/docs/generate-manpage.sh::<top>
   10   11   35.1   93   119 tools/release/package-policy-bundles.sh::<top>
-  17   11   33.6   47    50 tools/release/stage-dot.sh::<top>
+  17   11   33.1   47    50 tools/release/stage-dot.sh::<top>

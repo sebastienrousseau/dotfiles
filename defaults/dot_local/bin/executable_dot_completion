@@ -1,69 +1,20 @@
 #!/usr/bin/env zsh
-# shellcheck shell=bash disable=SC2034
+# shellcheck shell=bash
 #compdef dot
 
-# Zsh completion for the dot CLI
-# Source this file or place in a directory in $fpath
+# Zsh completion for the dot CLI, generated from the plugin manifests
+# (tools/docs/gen_completions.py). Sourced into zsh it loads the script that
+# `dot cli completion show zsh` prints; run from another shell it prints it.
 
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   printf '%s\n' "Usage: dot_completion"
-  printf '%s\n' "Generate zsh completions for the dot CLI."
+  printf '%s\n' "Load (in zsh) or print the zsh completion for the dot CLI."
   exit 0
 fi
 
-_dot() {
-  local -a commands
-  commands=(
-    'apply:Apply dotfiles (chezmoi apply)'
-    'sync:Apply dotfiles (alias of apply)'
-    'update:Pull latest changes and apply'
-    'add:Add a file to chezmoi source'
-    'diff:Show chezmoi diff with exclusions'
-    'status:Show configuration drift'
-    'remove:Safely remove a managed file'
-    'cd:Print source directory path'
-    'drift:Drift dashboard (detailed chezmoi status)'
-    'history:Shell history analysis'
-    'doctor:Check system health and configuration'
-    'heal:Auto-repair common dotfiles issues'
-    'health:Run comprehensive health check'
-    'rollback:Rollback dotfiles to a previous state'
-    'keys:Show keybindings catalog'
-    'tools:Show or install nix packages'
-    'sandbox:Launch a safe sandbox preview'
-    'benchmark:Run shell startup benchmark'
-    'tune:Apply OS tuning (opt-in)'
-    'secrets:Edit encrypted secrets (age)'
-    'secrets-init:Initialize age key for secrets'
-    'secrets-create:Create an encrypted secrets file'
-    'ssh-key:Encrypt an SSH key locally with age'
-    'firewall:Apply firewall hardening (opt-in)'
-    'telemetry:Disable OS telemetry (opt-in)'
-    'dns-doh:Enable DNS-over-HTTPS (opt-in)'
-    'encrypt-check:Check disk encryption status'
-    'backup:Create a compressed backup of your home'
-    'lock-screen:Enforce lock screen idle settings'
-    'usb-safety:Disable automount for removable media'
-    'fonts:Install Nerd Fonts'
-    'wallpaper:Apply a wallpaper from your library'
-    'theme:Switch terminal theme (dark/light)'
-    'packages:List installed packages and package managers'
-    'upgrade:Update flake, plugins, and dotfiles'
-    'edit:Open chezmoi source in editor'
-    'docs:Show repo README'
-    'new:Create a new project from a template'
-    'log-rotate:Rotate ~/.local/share/dotfiles.log'
-    'learn:Start the interactive tour'
-    '--version:Show version information'
-    'help:Show this help message'
-  )
-
-  if ! whence -w _describe >/dev/null 2>&1; then
-    printf '%s\n' "${commands[@]}"
-    return 0
-  fi
-
-  _describe 'command' commands
-}
-
-_dot "$@"
+if [[ -n "${ZSH_VERSION:-}" ]]; then
+  # shellcheck disable=SC1090 # generated at build time
+  source <(dot cli completion show zsh)
+else
+  dot cli completion show zsh
+fi

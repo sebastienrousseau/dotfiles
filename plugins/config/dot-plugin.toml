@@ -62,6 +62,9 @@ effect = "write"
 legacy = "add"
 summary = "Start managing an existing file"
 
+[commands.args]
+complete = "files"
+
 [[commands]]
 verb = "save"
 effect = "write"
@@ -79,6 +82,16 @@ verb = "check"
 effect = "read"
 legacy = "lint"
 summary = "Lint the source and templates"
+
+[[commands.flags]]
+long = "check"
+short = "c"
+summary = "Check only"
+
+[[commands.flags]]
+long = "fix"
+short = "f"
+summary = "Apply safe fixes"
 
 [[commands]]
 verb = "export"

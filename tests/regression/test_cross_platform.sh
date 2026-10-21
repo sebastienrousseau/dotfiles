@@ -434,7 +434,7 @@ test_start "platform_fish_config_exists"
 assert_file_exists "$REPO_ROOT/defaults/dot_config/fish/conf.d/init.fish.tmpl" "fish config must exist"
 
 test_start "platform_nushell_config_exists"
-assert_file_exists "$REPO_ROOT/defaults/dot_config/nushell/completions.nu.tmpl" "nushell completions must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/nushell/completions.nu" "nushell completions must exist"
 
 test_start "platform_bash_config_exists"
 assert_file_exists "$REPO_ROOT/defaults/dot_bashrc" "bash config must exist"

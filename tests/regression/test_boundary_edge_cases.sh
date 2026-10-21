@@ -407,10 +407,10 @@ assert_file_exists "$REPO_ROOT/defaults/dot_config/fish/functions/_cached_eval.f
 # ═══════════════════════════════════════════════════════════════
 
 test_start "edge_nushell_completions_exist"
-assert_file_exists "$REPO_ROOT/defaults/dot_config/nushell/completions.nu.tmpl" "nushell completions must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/nushell/completions.nu" "nushell completions must exist"
 
 test_start "edge_nushell_completions_has_commands"
-assert_file_contains "$REPO_ROOT/defaults/dot_config/nushell/completions.nu.tmpl" "dot_commands" "nushell completions must define commands"
+assert_file_contains "$REPO_ROOT/defaults/dot_config/nushell/completions.nu" "export extern \"dot\"" "nushell completions must declare dot"
 
 test_start "edge_nushell_config_exists"
 assert_file_exists "$REPO_ROOT/defaults/dot_config/nushell/config.nu.tmpl" "nushell config must exist"
@@ -428,7 +428,7 @@ bash -n "$REPO_ROOT/defaults/dot_local/share/bash-completion/completions/dot" >/
 assert_equals "0" "$bash_comp_result" "bash completion must pass syntax check"
 
 test_start "edge_bash_completion_has_function"
-assert_file_contains "$REPO_ROOT/defaults/dot_local/share/bash-completion/completions/dot" "_dot_completions" "bash completion must define _dot_completions"
+assert_file_contains "$REPO_ROOT/defaults/dot_local/share/bash-completion/completions/dot" "complete -F _dot dot" "bash completion must register _dot for dot"
 
 # ═══════════════════════════════════════════════════════════════
 # 21. PROVISION SCRIPTS — OS-gated

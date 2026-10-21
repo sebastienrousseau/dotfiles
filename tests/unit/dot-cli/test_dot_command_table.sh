@@ -78,7 +78,8 @@ assert_equals "scorecard|2" "$(resolve doctor score)" "an object alone runs its 
 assert_equals "scorecard|2" "$(resolve doctor score --json)" "an object and a flag runs its default verb too"
 assert_equals "env|1" "$(resolve tool)" "a domain alone runs its own route first"
 assert_equals "ai|1" "$(resolve ai tools)" "an old subcommand goes to the domain's own route"
-assert_equals "cl|3" "$(resolve ai start claude)" "ai start <agent> launches that agent, not a one-shot prompt"
+assert_equals "ai chat|2" "$(resolve ai start claude)" "ai start <agent> opens an interactive session, not a one-shot prompt"
+assert_equals "ai run|2" "$(resolve ai run claude --pattern p q)" "ai run <agent> is the one-shot, with its flags"
 
 test_start "declared_but_not_built_resolves_to_nothing"
 assert_equals "|0" "$(resolve system schedule set)" "a planned command is not run"
@@ -101,7 +102,7 @@ test_start "old_invocations_get_their_new_spelling"
 spell() { "$BASH_BIN" -c "source '$WORK/names.sh'; _dot_longest leg \"\$@\"; echo \"\$_BEST\"" _ "$@"; }
 assert_equals "secret set" "$(spell secrets set KEY)" "the subcommand picks the spelling"
 assert_equals "system update" "$(spell upgrade --yes)" "a renamed route"
-assert_equals "ai start claude" "$(spell cl)" "an alias with arguments gets its full spelling"
+assert_equals "" "$(spell cl)" "a name with no route of its own falls back to its alias target"
 
 test_start "record_keys_are_words_only"
 rec() { "$BASH_BIN" -c "source '$WORK/names.sh'; _dot_record \"\$1\" \"\$2\"" _ "$1" "$2"; }

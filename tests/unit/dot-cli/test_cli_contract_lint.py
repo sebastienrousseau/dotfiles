@@ -124,6 +124,28 @@ class Manifests(Fixture):
         self.edit("mcp", 'summary = "Configured MCP servers"', 'summary = "x"\noutput = "fleet/list.v1"')
         self.assertFails("must start with 'mcp/'")
 
+    def flagged(self, *flags):
+        body = '[[commands]]\nverb = "show"\neffect = "read"\nsummary = "x"\n'
+        for long, short in flags:
+            body += f'\n[[commands.flags]]\nlong = "{long}"\n' + (f'short = "{short}"\n' if short else "") + 'summary = "x"\n'
+        self.append("mcp", body)
+
+    def test_flag_declared_twice(self):
+        self.flagged(("all", "a"), ("every", "a"))
+        self.assertFails("mcp show: flag -a is declared twice")
+
+    def test_family_letter_keeps_its_meaning(self):
+        self.flagged(("vendor", "v"))
+        self.assertFails("-v means --verbose family-wide, not --vendor (N9)")
+
+    def test_family_flag_keeps_its_letter(self):
+        self.flagged(("yes", "Y"))
+        self.assertFails("--yes is a family flag; its short form is -y, not -Y (N9)")
+
+    def test_local_letter_for_a_family_flag_without_one(self):
+        self.flagged(("json", "j"))
+        self.assertEqual([e for e in self.errors() if "mcp show" in e], [])
+
     def test_expired_deprecation(self):
         self.edit("fleet", 'until = "0.2.538"', 'until = "0.2.536"')
         self.assertFails("deprecated alias 'teleport' expired")

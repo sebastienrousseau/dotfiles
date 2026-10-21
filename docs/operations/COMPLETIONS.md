@@ -8,6 +8,28 @@ This page documents how zsh completion compilation works in this repo
 and how to force a rebuild. Managed under
 [#864](https://github.com/sebastienrousseau/dotfiles/issues/864).
 
+## Where the Scripts Come From
+
+Every completion script is generated from the plugin manifests
+(`plugins/<domain>/dot-plugin.toml`, ADR-020) by
+`tools/docs/gen_completions.py`, through the command table
+`lib/dot/data/commands.txt`. None is written by hand.
+
+| Shell | Committed file |
+|---|---|
+| bash | `defaults/dot_local/share/bash-completion/completions/dot` |
+| zsh | `share/completions/zsh/_dot` |
+| fish | `defaults/dot_config/fish/completions/dot.fish` |
+| nushell | `defaults/dot_config/nushell/completions.nu` |
+| PowerShell | `share/completions/powershell/dot.ps1` |
+
+Each completes the domains, shortcuts and built-ins, then a domain's
+objects and verbs, then a command's flags (`[[commands.flags]]` in its
+manifest) and first-argument values (`[commands.args]`). Deprecated names
+are not offered. To change what completes, change the manifest and run
+`tools/docs/generate-completions.sh`; CI fails when a committed file is
+stale. `dot cli completion show <shell>` prints the committed file.
+
 ## The Pieces
 
 Three caches cooperate to keep `compinit` fast without compromising

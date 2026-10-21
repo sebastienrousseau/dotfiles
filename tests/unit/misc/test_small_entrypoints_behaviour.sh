@@ -29,13 +29,13 @@ run bash "$COMPLETION" --help
 assert_equals "0" "$RC" "--help exits 0"
 assert_contains "Usage: dot_completion" "$OUT" "prints its usage"
 
-test_start "completion_lists_commands_without_compsys"
-# Outside zsh's completion system there is no _describe: the script prints
-# the command table instead.
-run bash "$COMPLETION"
+test_start "completion_prints_the_zsh_script_outside_zsh"
+# Outside zsh it prints what `dot cli completion show zsh` prints: the
+# script generated from the manifests.
+run env PATH="$REPO_ROOT/bin:$PATH" HOME="$(mktemp -d)" bash "$COMPLETION"
 assert_equals "0" "$RC" "exits 0"
-assert_contains "apply:Apply dotfiles (chezmoi apply)" "$OUT" "lists apply"
-assert_contains "help:Show this help message" "$OUT" "lists help"
+assert_contains "#compdef dot" "$OUT" "prints the zsh completion"
+assert_contains "'system:updates, cleanup, scheduled maintenance'" "$OUT" "with each domain and its summary"
 
 # ── dot-load-benchmark options ────────────────────────────────────────────
 BENCH="$REPO_ROOT/defaults/dot_local/bin/executable_dot-load-benchmark"

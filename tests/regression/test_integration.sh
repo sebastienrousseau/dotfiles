@@ -322,15 +322,16 @@ test_start "integration_zsh_completion_exists"
 assert_file_exists "$REPO_ROOT/share/completions/zsh/_dot" "zsh completion must exist"
 
 test_start "integration_fish_completion_exists"
-assert_file_exists "$REPO_ROOT/defaults/dot_config/fish/completions/dot.fish.tmpl" "fish completion must exist"
+assert_file_exists "$REPO_ROOT/defaults/dot_config/fish/completions/dot.fish" "fish completion must exist"
 
 # Run _dot at the command position with compsys stubbed: _describe prints
 # the candidates it was given.
 test_start "integration_completions_include_ai"
 if ! command -v zsh >/dev/null 2>&1; then it_skip "zsh not installed"; else
-  it_out="$(zsh -f -c '_arguments() { state=cmds; }; _describe() { print -rl -- "${(@P)4}"; }
-    _default() { :; }; source "$1"' _ "$REPO_ROOT/share/completions/zsh/_dot" 2>&1)"
-  assert_contains $'\nagy:' $'\n'"$it_out" "zsh completion offers the AI commands"
+  it_out="$(zsh -f -c 'source "$1"; _describe() { print -rl -- "${(@P)4}"; }
+    words=(dot ai run ""); CURRENT=4; PREFIX=""; compadd() { shift; print -rl -- "$@"; }; _dot' \
+    _ "$REPO_ROOT/share/completions/zsh/_dot" 2>&1)"
+  assert_contains $'\nagy\n' $'\n'"$it_out"$'\n' "zsh completion offers the AI agents for dot ai run"
 fi
 
 # ═══════════════════════════════════════════════════════════════

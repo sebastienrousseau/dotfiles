@@ -1017,9 +1017,9 @@ fm_assert_completion() {
   local shell="$1"
   shift
   test_start "fm_completion_${shell}"
-  fm_run completion "$shell"
+  fm_run cli completion show "$shell"
   if [[ "$FM_RC" -ne 0 ]]; then
-    fm_fail "dot completion $shell exited $FM_RC"
+    fm_fail "dot cli completion show $shell exited $FM_RC"
     return 0
   fi
   local needle
@@ -1032,26 +1032,27 @@ fm_assert_completion() {
   fm_pass "generated"
 }
 
-test_fm_completion_bash() { fm_assert_completion bash "complete -F _dot_completions" "dot"; }
+test_fm_completion_bash() { fm_assert_completion bash "complete -F _dot dot"; }
 test_fm_completion_zsh() { fm_assert_completion zsh "#compdef dot" "_describe"; }
+test_fm_completion_pwsh() { fm_assert_completion pwsh "Register-ArgumentCompleter"; }
 test_fm_completion_fish() { fm_assert_completion fish "complete -c dot"; }
 
 test_fm_completion_nu() {
-  fm_assert_completion nu "export extern dot" "dot_commands"
+  fm_assert_completion nu 'export extern "dot"' 'nu-complete dot'
   test_start "fm_completion_nushell_alias"
-  fm_run completion nushell
+  fm_run cli completion show nushell
   fm_expect_rc 0
   test_start "fm_completion_nushell_alias_matches_nu"
-  fm_expect_out "export extern dot"
+  fm_expect_out 'export extern "dot"'
 }
 
 test_fm_completion_covers_the_registry() {
-  # Completions are generated from _dot_help_specs, so a command in the
-  # overview must appear in every dialect. `doctor` is the canary.
+  # Completions are generated from the plugin manifests, so every domain
+  # appears in every dialect. `doctor` is the canary.
   local shell
-  for shell in bash zsh fish nu; do
+  for shell in bash zsh fish nu pwsh; do
     test_start "fm_completion_covers_the_registry_${shell}"
-    fm_run completion "$shell"
+    fm_run cli completion show "$shell"
     if [[ "$FM_OUT" == *"doctor"* ]]; then
       fm_pass
     else
@@ -1062,18 +1063,18 @@ test_fm_completion_covers_the_registry() {
 
 test_fm_completion_usage() {
   test_start "fm_completion_usage"
-  fm_run completion
+  fm_run cli completion show
   fm_expect_rc 0
   test_start "fm_completion_usage_lists_the_shells"
-  fm_expect_any "bash|zsh|fish|nu" "Usage: dot completion"
+  fm_expect_any "bash|zsh|fish|nu|pwsh" "Usage: dot cli completion show"
 }
 
 test_fm_completion_unknown() {
   test_start "fm_completion_unknown"
-  fm_run completion zzz-not-a-shell
+  fm_run cli completion show zzz-not-a-shell
   fm_expect_rc 1
   test_start "fm_completion_unknown_message"
-  fm_expect_any "unknown shell" "bash|zsh|fish|nu"
+  fm_expect_any "unknown shell" "bash|zsh|fish|nu|pwsh"
 }
 
 # ── init ───────────────────────────────────────────────────────────────────
@@ -1304,6 +1305,7 @@ test_fm_env_xdg_config_home
 test_fm_completion_bash
 test_fm_completion_zsh
 test_fm_completion_fish
+test_fm_completion_pwsh
 test_fm_completion_nu
 test_fm_completion_covers_the_registry
 test_fm_completion_usage

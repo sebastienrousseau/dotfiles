@@ -76,6 +76,21 @@ effect = "read"
 legacy = "security-score"
 summary = "The security score"
 
+[[commands.flags]]
+long = "verbose"
+short = "v"
+summary = "Show detailed scoring"
+
+[[commands.flags]]
+long = "quiet"
+short = "q"
+summary = "Reduce output"
+
+[[commands.flags]]
+long = "json"
+short = "j"
+summary = "Print a JSON summary"
+
 [[commands]]
 object = "firewall"
 verb = "show"
