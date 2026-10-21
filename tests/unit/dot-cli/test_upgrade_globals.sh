@@ -74,6 +74,9 @@ assert_equals "mas flatpak" "$(upgrade _dot_upgrade_app_managers)" "the installe
 
 test_start "apps_run_each_store_and_fail_on_a_failure"
 cp "$WORK/bin/sudo" "$WORK/bin/snap"
+rc=0
+upgrade _dot_upgrade_apps >/dev/null 2>&1 || rc=$?
+assert_equals "0" "$rc" "every store succeeding passes the phase"
 : >"$WORK/calls"
 rc=0
 FAIL_flatpak=1 upgrade _dot_upgrade_apps >/dev/null 2>&1 || rc=$?
