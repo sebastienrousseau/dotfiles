@@ -19,7 +19,7 @@ _DOT_UPGRADE_LOADED=1
 # The system package manager `dot upgrade` would drive, if any.
 dot_upgrade_system_pm() {
   local pm
-  for pm in brew apt-get dnf pacman; do
+  for pm in brew apt-get dnf pacman zypper; do
     if command -v "$pm" >/dev/null 2>&1; then
       printf '%s' "$pm"
       return 0
@@ -80,8 +80,12 @@ _dot_upgrade_brew_left() {
 # dot_upgrade_prepare <args...>: every question `dot upgrade` will ask,
 # before any phase runs. -y/--yes answers yes to all of them.
 dot_upgrade_prepare() {
-  DOT_UPGRADE_SYSTEM=""
+  local arg
+  DOT_UPGRADE_SYSTEM="" DOT_UPGRADE_GLOBALS=0
   dot_apply_yes_flag "$@"
+  for arg in "$@"; do
+    [[ "$arg" != --globals ]] || DOT_UPGRADE_GLOBALS=1
+  done
   dot_ensure_mise "dot upgrade keeps your CLI tools and runtimes current with it" || true
   _dot_upgrade_consent_system
 }
@@ -107,8 +111,40 @@ _dot_upgrade_system() {
     apt-get) sudo -n apt-get update && sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y upgrade ;;
     dnf) sudo -n dnf -y upgrade ;;
     pacman) sudo -n pacman -Syu --noconfirm ;;
+    zypper) sudo -n zypper --non-interactive refresh && sudo -n zypper --non-interactive update ;;
     *) return 1 ;;
   esac
+}
+
+# _dot_upgrade_app_managers: the installed app stores the consented system
+# phase also updates (App Store, Flatpak, Snap).
+_dot_upgrade_app_managers() {
+  local m out=""
+  for m in mas flatpak snap; do
+    ! has_command "$m" || out="$out $m"
+  done
+  printf '%s' "${out# }"
+}
+
+# _dot_upgrade_apps: each installed app store updated; a failure in one
+# fails the phase but the others still run.
+_dot_upgrade_apps() {
+  local rc=0
+  if has_command mas; then mas upgrade || rc=1; fi
+  if has_command flatpak; then flatpak update -y --noninteractive || rc=1; fi
+  if has_command snap; then sudo -n snap refresh || rc=1; fi
+  return "$rc"
+}
+
+# _dot_upgrade_globals: npm, cargo and pipx globals, asked for with
+# --globals (what the old `update` script did, minus per-package pip3
+# upgrades, which PEP 668 refuses). A missing manager is skipped.
+_dot_upgrade_globals() {
+  local rc=0
+  if has_command npm; then npm update -g --audit=false || rc=1; fi
+  if has_command cargo && has_command cargo-install-update; then cargo install-update -a || rc=1; fi
+  if has_command pipx; then pipx upgrade-all || rc=1; fi
+  return "$rc"
 }
 
 # dot_upgrade_nix_steps <src_dir>: the Nix phases, when a flake is present.
@@ -116,6 +152,14 @@ dot_upgrade_nix_steps() {
   [[ -f "$1/nix/flake.nix" ]] && has_command nix || return 0
   _upgrade_step nix-flake "Nix flake" "updating…" -- sh -c 'cd "$1" && nix flake update' _ "$1"
   _upgrade_step nix-gc "Nix GC" "collecting…" -- nix-collect-garbage -d
+}
+
+# dot_upgrade_app_steps: the app-store phase, when any store is installed.
+dot_upgrade_app_steps() {
+  local apps
+  apps="$(_dot_upgrade_app_managers)"
+  [[ -n "$apps" ]] || return 0
+  _upgrade_step apps "App stores" "${apps}…" -- _dot_upgrade_apps
 }
 
 # dot_upgrade_toolchain_steps: mise and system-package phases, per the
@@ -127,11 +171,15 @@ dot_upgrade_toolchain_steps() {
     # AI CLIs stay at their [ai_tools] pins; list the bumps to review.
     ai_pin_bumps
   else
-    ui_step mise "Mise tools" skip "mise not installed — dot upgrade --yes installs it"
+    ui_step mise "Mise tools" skip "mise not installed — dot update --yes installs it"
   fi
   if [[ -n "${DOT_UPGRADE_SYSTEM:-}" ]]; then
     _upgrade_step system "System packages" "$DOT_UPGRADE_SYSTEM upgrade…" -- _dot_upgrade_system "$DOT_UPGRADE_SYSTEM"
+    dot_upgrade_app_steps
   elif dot_upgrade_system_pm >/dev/null; then
-    ui_step system "System packages" skip "not requested — answer yes, or dot upgrade --yes"
+    ui_step system "System packages" skip "not requested — answer yes, or dot update --yes"
+  fi
+  if [[ "${DOT_UPGRADE_GLOBALS:-0}" == 1 ]]; then
+    _upgrade_step globals "Language globals" "npm, cargo, pipx…" -- _dot_upgrade_globals
   fi
 }

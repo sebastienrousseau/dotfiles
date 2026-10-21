@@ -404,7 +404,7 @@ case "$route" in
     _dispatch "$route" "$@"
     ;;
 
-  manual | patterns)
+  manual | patterns | system)
     _dispatch_args "$route" "$@"
     ;;
 

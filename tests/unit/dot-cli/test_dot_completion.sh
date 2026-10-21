@@ -135,7 +135,7 @@ assert_equals "" "$(bash_q doctor perf show --runs '')" "a flag that takes a num
 assert_equals "architect" "$(bash_q ai run claude --pattern '')" "a pattern flag offers the AI patterns"
 assert_equals "" "$(missing "$(bash_q ai run '')" claude codex)" "ai run offers the agents"
 assert_equals "go molecule node packer python" "$(bash_q tool new '')" "tool new offers its templates"
-assert_equals "--help" "$(bash_q update -)" "a shortcut completes as its target"
+assert_equals "--globals --help --yes -y" "$(bash_q update -)" "a shortcut completes as its target"
 mkdir -p "$WORK/cwd/somedir"
 assert_equals "somedir" "$(cd "$WORK/cwd" && bash_q config add so)" "config add completes files"
 
@@ -167,7 +167,7 @@ for shell in zsh fish nu pwsh; do
     pwsh)
       assert_equals "$top" "$(ps_q '')" "the same top level"
       assert_equals "$(bash_q system schedule '')" "$(ps_q system schedule '')" "the same object verbs"
-      assert_equals "--help" "$(ps_q update -)" "a single flag is not split into characters"
+      assert_equals "--help" "$(ps_q doctor -)" "a single flag is not split into characters"
       assert_equals "architect" "$(ps_q ai run claude --pattern '')" "the AI patterns"
       ;;
   esac

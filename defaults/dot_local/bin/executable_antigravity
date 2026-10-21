@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Wrapper for Antigravity extension updates under Topgrade.
+# Wrapper for Antigravity, used by its extension updater.
 # Clears Node/Electron env that can inject custom loaders and crash updater.
-# No-ops when upstream binary is missing so Topgrade does not fail.
+# No-ops when the upstream binary is missing, so callers do not fail.
 set -euo pipefail
 
 unset NODE_OPTIONS

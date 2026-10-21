@@ -46,6 +46,7 @@ summary = "Install agents"
 [[commands]]
 verb = "update"
 effect = "write"
+legacy = "ai update"
 summary = "Upgrade agent CLIs"
 
 [[commands]]

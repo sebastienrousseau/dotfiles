@@ -125,7 +125,6 @@ if OS.mac?
   # macOS Specific CLI Tools
   brew "mas"                   # Mac App Store CLI
   brew "duti"                  # Default app handler
-  brew "topgrade"              # Universal updater
   brew "pinentry-mac"          # GPG pinentry for macOS
 
   # -------------------------------------------------------------------------
@@ -199,7 +198,6 @@ end
 # =============================================================================
 if OS.linux?
   # Universal updater (also useful on Linux/WSL)
-  brew "topgrade"
 
   # Linux-specific GPG pinentry
   brew "pinentry"

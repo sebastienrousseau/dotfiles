@@ -137,7 +137,7 @@ _ai_mise_pkg() {
 # Validates the installer's size and shebang before executing it.
 install_agy_native() {
   # LCOV_EXCL_START — network installer; can't run in the unit
-  # sandbox (the repo SKIPs install.sh / executable_update for the same reason).
+  # sandbox (the repo SKIPs install.sh and `dot update` for the same reason).
   local label="${1:-Antigravity CLI}"
   local installer
   installer=$(umask 077 && mktemp)

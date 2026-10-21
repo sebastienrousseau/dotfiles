@@ -384,7 +384,7 @@ cov_exercise_script() {
       myip | pre-push | rebuild-themes | \
       lint | reliability-audit | record | \
       executable_myip | executable_tmux-sessionizer | \
-      executable_update | update | executable_open | \
+      update | executable_open | \
       manual | executable_manual | monitor | executable_monitor | \
       tmux-ai | executable_tmux-ai)
       # `executable_open` with no args opens "." through /usr/bin/open,
@@ -392,11 +392,7 @@ cov_exercise_script() {
       # on the sandbox, and Finder's .DS_Store writes then broke other
       # tests' rm -rf. test_open_coverage.sh covers it with the opener
       # stubbed.
-      # `executable_update` runs brew/apt/pacman update + upgrade.
-      # Even with PATH shims, --help and invalid-flag modes can spawn
-      # subprocesses that the shims don't intercept, blowing the 60s
-      # timeout. Skip the script-mode exercise; functions-mode is
-      # already skipped via the separate skip-list around line 624.
+      # `update` forwards to `dot update`, which upgrades the system.
       # `manual` opens the documentation website in a browser with no args.
       # `monitor` and `tmux-ai` spawn tmux sessions/windows.
       return 0
@@ -649,7 +645,7 @@ cov_exercise_functions_file() {
       executable_myip | executable_tmux-sessionizer | \
       version-sync | release | bump | sync-version | \
       build-manual | install | install-chezmoi-verified | uninstall | \
-      manage-secrets | executable_update | executable_open | \
+      manage-secrets | executable_open | \
       manual | executable_manual | monitor | executable_monitor | tmux-ai | executable_tmux-ai | \
       wallpaper-rotate | \
       heal | heal-tools | rollback | restore | apply-gnome-theme | \

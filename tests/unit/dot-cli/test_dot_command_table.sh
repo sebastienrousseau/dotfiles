@@ -82,10 +82,11 @@ assert_equals "ai chat|2" "$(resolve ai start claude)" "ai start <agent> opens a
 assert_equals "ai run|2" "$(resolve ai run claude --pattern p q)" "ai run <agent> is the one-shot, with its flags"
 
 test_start "declared_but_not_built_resolves_to_nothing"
-assert_equals "|0" "$(resolve system schedule set)" "a planned command is not run"
-assert_equals "|0" "$(resolve system)" "a domain whose default is planned"
+assert_equals "|0" "$(resolve secret key list)" "a planned command is not run"
+assert_equals "|0" "$(resolve secret)" "a domain whose default is planned"
+assert_equals "system schedule set|3" "$(resolve system schedule set weekly)" "a built command runs its route, its value left as an argument"
 assert_equals "mode doctor|2" "$(resolve agent check)" "a domain with its own route runs the default verb's route only when bare has none"
-assert_equals "|0" "$(resolve ai update)" "a planned verb never falls through to the old route"
+assert_equals "|0" "$(resolve ai gateway show)" "a planned verb never falls through to the old route"
 
 test_start "every_alias_target_runs"
 unresolved=""
@@ -127,9 +128,9 @@ DOT_BIN="$WORK/src/bin/dot" dot frob || rc=$?
 assert_equals "127" "$rc" "removed name"
 assert_file_contains "$WORK/err" "'dot frob' was removed; use 'dot doctor'" "with its replacement"
 rc=0
-dot system schedule set weekly || rc=$?
+dot secret key list || rc=$?
 assert_equals "127" "$rc" "planned command"
-assert_file_contains "$WORK/err" "'dot system schedule set' is not available yet" "names the spelling"
+assert_file_contains "$WORK/err" "'dot secret key list' is not available yet" "names the spelling"
 rc=0
 dot 'doc.*' || rc=$?
 assert_equals "127" "$rc" "a pattern in a name is not a regex"
@@ -138,18 +139,18 @@ test_start "planned_command_never_reaches_the_old_route"
 # `dot ai <word>` sends <word> to a model as a prompt: a planned verb must
 # stop at 127, not fall through to the domain's own route.
 rc=0
-dot ai update || rc=$?
+dot ai gateway show || rc=$?
 assert_equals "127" "$rc" "planned verb of a domain with its own route"
-assert_file_contains "$WORK/err" "'dot ai update' is not available yet" "names the spelling"
+assert_file_contains "$WORK/err" "'dot ai gateway show' is not available yet" "names the spelling"
 
 test_start "domain_alone_lists_its_commands"
 rc=0
-dot system || rc=$?
+dot secret || rc=$?
 assert_equals "0" "$rc" "read-only, exits 0 (N5)"
-assert_equals "dot system · updates, cleanup, scheduled maintenance" "$(head -1 "$WORK/out")" "its own header"
+assert_equals "dot secret · secrets, keys and SSH certificates" "$(head -1 "$WORK/out")" "its own header"
 assert_output_not_contains "dot config ·" "cat '$WORK/out'" "and no other domain's"
-assert_equals "" "$(grep 'dot system update ' "$WORK/out" | grep -F '(planned)')" "a built command is not marked planned"
-assert_not_empty "$(grep 'dot system status ' "$WORK/out" | grep -F '(planned)')" "a planned one is"
+assert_equals "" "$(grep 'dot secret list ' "$WORK/out" | grep -F '(planned)')" "a built command is not marked planned"
+assert_not_empty "$(grep 'dot secret status ' "$WORK/out" | grep -F '(planned)')" "a planned one is"
 
 test_start "help_topics_still_resolve"
 rc=0

@@ -60,7 +60,7 @@ install_kimi_native
 
 log_info "Installing AI CLI and dev tools via mise..."
 
-# Prefer mise for all AI tool installations (ensures topgrade can update them)
+# Prefer mise for all AI tool installations (so dot update can update them)
 if command -v mise >/dev/null 2>&1; then
   # AI tools — installed globally via mise for consistent updates
   AI_MISE_TOOLS=(
@@ -90,7 +90,7 @@ if command -v mise >/dev/null 2>&1; then
   done
   rm -rf "$mise_scratch"
 
-  log_info "AI tools installed via mise. Topgrade will keep them updated."
+  log_info "AI tools installed via mise. dot update keeps them updated."
 
   # Goose (Block) — no mise/npm package; native installer only.
   if command -v goose >/dev/null 2>&1 || [ -x "$HOME/.local/bin/goose" ]; then
@@ -262,6 +262,6 @@ log_info "    - eslint_d   (ESLint daemon for fast linting)"
 log_info "    - prettier_d (Prettier daemon for fast formatting)"
 log_info "    - tsserver   (TypeScript language server)"
 log_info ""
-log_info "Note: Use 'mise install' or 'topgrade' to update all tools."
+log_info "Note: Use 'dot update' to update all tools."
 
 {{- end -}}

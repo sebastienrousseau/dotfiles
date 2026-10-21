@@ -19,6 +19,7 @@ on:
       - 'scripts/dot/**'
       - 'tools/ci/dot-cli-startup-bench.sh'
       - 'benches/dot_command_bench.sh'
+      - 'benches/run-cases.txt'
       - 'docs/reference/FEATURE-MATRIX.md'
       - '.github/workflows/dot-cli-bench.yml'
   pull_request:
@@ -27,6 +28,7 @@ on:
       - 'scripts/dot/**'
       - 'tools/ci/dot-cli-startup-bench.sh'
       - 'benches/dot_command_bench.sh'
+      - 'benches/run-cases.txt'
       - 'docs/reference/FEATURE-MATRIX.md'
       - '.github/workflows/dot-cli-bench.yml'
 

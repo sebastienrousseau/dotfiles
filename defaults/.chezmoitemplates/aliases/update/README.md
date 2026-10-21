@@ -1,25 +1,8 @@
 # Update Aliases
 
-Manage Update aliases. Part of the **Universal Dotfiles** configuration.
+`update` and `upd` are deprecated. Both forward to `dot update` with a
+warning until 0.2.538, when they are removed.
 
-![Dotfiles banner][banner]
-
-## Description
-
-These aliases are defined in `update.aliases.sh` and are automatically loaded by `chezmoi`.
-
-## Aliases
-
-This code provides a set of aliases for updating various software on
-macOS and Linux.
-
-### macOS / Linux / Windows
-
-- `update` runs Topgrade when installed; otherwise it falls back to `upd`.
-- `upd` performs a cross-platform system + dev tool update routine.
-
-[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
-
----
-
-Made with ❤️ by [Sebastien Rousseau](https://github.com/sebastienrousseau)
+`dot update` (short for `dot system update`) is the one update path: the
+dotfiles, mise tools, system packages and app stores (asking first), and
+npm, cargo and pipx globals with `--globals`. Topgrade is no longer used.

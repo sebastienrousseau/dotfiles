@@ -81,7 +81,7 @@ install_cargo_tool "cargo-audit" "cargo-audit" {{ index .rust_tools "cargo-audit
 # cargo-outdated: Check for outdated dependencies
 install_cargo_tool "cargo-outdated" "cargo-outdated" {{ index .rust_tools "cargo-outdated" | quote }}
 
-# cargo-update: Enables Topgrade Cargo package upgrades
+# cargo-update: lets `dot update --globals` upgrade Cargo packages
 install_cargo_tool "cargo-install-update" "cargo-update" {{ index .rust_tools "cargo-update" | quote }}
 
 # cargo-expand: Expand macros for debugging

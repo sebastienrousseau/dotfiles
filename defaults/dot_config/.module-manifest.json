@@ -31,7 +31,7 @@
     },
     "system": {
       "description": "System monitoring and management",
-      "modules": ["btop", "htop", "fastfetch", "topgrade", "systemd", "ncdu", "duf"]
+      "modules": ["btop", "htop", "fastfetch", "systemd", "ncdu", "duf"]
     },
     "security": {
       "description": "Security and secrets",

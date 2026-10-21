@@ -71,7 +71,7 @@ _dot() {
     'shell') kids_=('history:shell history' 'alias:aliases and their sources' 'status:Shell, startup time and cache state' 'update:Regenerate the startup caches' 'clean:Clear the startup caches') ;;
     'shell alias') kids_=('list:Aliases and where each is defined' 'check:Find shadowed or broken aliases') ;;
     'shell history') kids_=('list:Recent history') ;;
-    'system') kids_=('schedule:scheduled maintenance jobs' 'settings:OS settings dot manages' 'status:OS, disk, outdated counts, last run' 'update:Update everything, asking first' 'clean:Reclaim space, asking first' 'show:Hardware and host details') ;;
+    'system') kids_=('schedule:scheduled maintenance jobs' 'settings:OS settings dot manages' 'status:OS, disk, schedule and last run' 'update:Update everything, asking first' 'clean:Reclaim space, asking first' 'show:Hardware and host details') ;;
     'system schedule') kids_=('list:Scheduled jobs' 'set:Set the maintenance schedule' 'run:Run scheduled maintenance now') ;;
     'system settings') kids_=('show:Current OS settings' 'apply:Apply the managed OS settings') ;;
     'theme') kids_=('wallpaper:the current wallpaper' 'font:installed fonts' 'show:Current theme and palette' 'list:Available themes' 'set:Switch theme everywhere') ;;
@@ -474,6 +474,7 @@ _dot() {
       ;;
     'system schedule set' | 'system schedule set'\ *)
       flags_=('--help:Show help')
+      [[ "$path_" != 'system schedule set' ]] || values_=(weekly daily off)
       ;;
     'system settings apply' | 'system settings apply'\ *)
       flags_=('--help:Show help')
@@ -488,7 +489,7 @@ _dot() {
       flags_=('--help:Show help')
       ;;
     'system update' | 'system update'\ *)
-      flags_=('--help:Show help')
+      flags_=('--help:Show help' '--yes:Answer yes to every question' '-y:Answer yes to every question' '--globals:Also update npm, cargo and pipx globals')
       ;;
     'theme font install' | 'theme font install'\ *)
       flags_=('--help:Show help')

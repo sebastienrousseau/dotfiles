@@ -84,6 +84,7 @@ dns-doh|security
 lock-screen|security
 usb-safety|security
 upgrade|meta
+system|system
 cache-refresh|meta
 completion|completion
 prewarm|meta

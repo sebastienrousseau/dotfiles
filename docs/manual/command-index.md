@@ -32,7 +32,7 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot agent delegate run` | Run a command as a delegate |
 | `dot ai list` | Installed agents |
 | `dot ai install` | Install agents |
-| `dot ai update` | Upgrade agent CLIs *(planned)* |
+| `dot ai update` | Upgrade agent CLIs |
 | `dot ai start` | Start an agent |
 | `dot ai run` | Run an agent once |
 | `dot ai gateway serve` | Run the gateway in the foreground |
@@ -136,13 +136,13 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot shell history list` | Recent history |
 | `dot shell alias list` | Aliases and where each is defined |
 | `dot shell alias check` | Find shadowed or broken aliases |
-| `dot system status` | OS, disk, outdated counts, last run *(planned)* |
+| `dot system status` | OS, disk, schedule and last run |
 | `dot system update` | Update everything, asking first |
 | `dot system clean` | Reclaim space, asking first *(planned)* |
 | `dot system show` | Hardware and host details *(planned)* |
-| `dot system schedule list` | Scheduled jobs *(planned)* |
-| `dot system schedule set` | Set the maintenance schedule *(planned)* |
-| `dot system schedule run` | Run scheduled maintenance now *(planned)* |
+| `dot system schedule list` | Scheduled jobs |
+| `dot system schedule set` | Set the maintenance schedule |
+| `dot system schedule run` | Run scheduled maintenance now |
 | `dot system settings show` | Current OS settings *(planned)* |
 | `dot system settings apply` | Apply the managed OS settings |
 | `dot theme show` | Current theme and palette |

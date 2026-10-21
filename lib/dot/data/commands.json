@@ -247,7 +247,7 @@
      "spelling": "ai update",
      "effect": "write",
      "summary": "Upgrade agent CLIs",
-     "built": false
+     "built": true
     },
     {
      "spelling": "ai start",
@@ -1841,14 +1841,25 @@
     {
      "spelling": "system status",
      "effect": "read",
-     "summary": "OS, disk, outdated counts, last run",
-     "built": false
+     "summary": "OS, disk, schedule and last run",
+     "built": true
     },
     {
      "spelling": "system update",
      "effect": "write",
      "summary": "Update everything, asking first",
-     "built": true
+     "built": true,
+     "flags": [
+      {
+       "long": "yes",
+       "short": "y",
+       "summary": "Answer yes to every question"
+      },
+      {
+       "long": "globals",
+       "summary": "Also update npm, cargo and pipx globals"
+      }
+     ]
     },
     {
      "spelling": "system clean",
@@ -1866,19 +1877,26 @@
      "spelling": "system schedule list",
      "effect": "read",
      "summary": "Scheduled jobs",
-     "built": false
+     "built": true
     },
     {
      "spelling": "system schedule set",
      "effect": "write",
      "summary": "Set the maintenance schedule",
-     "built": false
+     "built": true,
+     "args": {
+      "values": [
+       "weekly",
+       "daily",
+       "off"
+      ]
+     }
     },
     {
      "spelling": "system schedule run",
      "effect": "write",
      "summary": "Run scheduled maintenance now",
-     "built": false
+     "built": true
     },
     {
      "spelling": "system settings show",

@@ -23,13 +23,23 @@ default = "show"
 [[commands]]
 verb = "status"
 effect = "read"
-summary = "OS, disk, outdated counts, last run"
+legacy = "system status"
+summary = "OS, disk, schedule and last run"
 
 [[commands]]
 verb = "update"
 effect = "write"
 legacy = "upgrade"
 summary = "Update everything, asking first"
+
+[[commands.flags]]
+long = "yes"
+short = "y"
+summary = "Answer yes to every question"
+
+[[commands.flags]]
+long = "globals"
+summary = "Also update npm, cargo and pipx globals"
 
 [[commands]]
 verb = "clean"
@@ -45,18 +55,24 @@ summary = "Hardware and host details"
 object = "schedule"
 verb = "list"
 effect = "read"
+legacy = "system schedule list"
 summary = "Scheduled jobs"
 
 [[commands]]
 object = "schedule"
 verb = "set"
 effect = "write"
+legacy = "system schedule set"
 summary = "Set the maintenance schedule"
+
+[commands.args]
+values = ["weekly", "daily", "off"]
 
 [[commands]]
 object = "schedule"
 verb = "run"
 effect = "write"
+legacy = "system schedule run"
 summary = "Run scheduled maintenance now"
 
 [[commands]]

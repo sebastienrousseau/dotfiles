@@ -32,13 +32,11 @@ ATUIN_TAG="${ATUIN_TAG:-latest}"
 ZELLIJ_TAG="${ZELLIJ_TAG:-latest}"
 {{- end }}
 UV_TAG="${UV_TAG:-latest}"
-TOPGRADE_TAG="${TOPGRADE_TAG:-latest}"
 MISE_TAG="${MISE_TAG:-latest}"
 YAZI_TAG="${YAZI_TAG:-latest}"
 AICHAT_TAG="${AICHAT_TAG:-latest}"
 MODS_TAG="${MODS_TAG:-latest}"
 
-warn_unpinned "Topgrade" "$TOPGRADE_TAG" "TOPGRADE_TAG"
 warn_unpinned "Mise" "$MISE_TAG" "MISE_TAG"
 warn_unpinned "Yazi" "$YAZI_TAG" "YAZI_TAG"
 warn_unpinned "Starship" "$STARSHIP_TAG" "STARSHIP_TAG"
@@ -331,13 +329,6 @@ if ! command -v uv >/dev/null; then
   mkdir -p "$HOME/.local/bin"
   find "$tmp_dir" -type f \( -name "uv" -o -name "uvx" \) -perm -u+x -exec install -m 0755 {} "$HOME/.local/bin/" \;
   rm -rf "$tmp_dir"
-fi
-
-# Topgrade
-if ! command -v topgrade >/dev/null; then
-  log_info "Installing Topgrade..."
-  url="$(github_asset_url "topgrade-rs/topgrade" "topgrade-${TOPGRADE_TAG}-${arch}-unknown-linux-gnu.tar.gz" "$TOPGRADE_TAG")"
-  install_from_tarball "$url" "" "topgrade" "$HOME/.local/bin" "$(pinned_sha256 TOPGRADE)"
 fi
 
 # Mise

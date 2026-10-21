@@ -38,7 +38,7 @@ _dotfiles_zinit_init() {
 : ${DOTFILES_DEFER_ZINIT_MODE:=preexec}
 
 if [[ "${DOTFILES_DEFER_ZINIT}" == "1" ]]; then
-  # Stub to auto-load zinit on first call (e.g. by topgrade)
+  # Stub to auto-load zinit on first call (e.g. by a script that runs zinit)
   zinit() {
     unfunction zinit
     _dotfiles_zinit_init
