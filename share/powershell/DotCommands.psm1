@@ -553,6 +553,30 @@ function Get-DotShellHistory {
     dot shell history list @Arguments
 }
 
+function Get-DotSystemSchedule {
+    <#
+    .SYNOPSIS
+    Scheduled jobs
+    .DESCRIPTION
+    Runs `dot system schedule list`: Scheduled jobs. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot system schedule list @Arguments
+}
+
+function Get-DotSystemStatus {
+    <#
+    .SYNOPSIS
+    OS, disk, schedule and last run
+    .DESCRIPTION
+    Runs `dot system status`: OS, disk, schedule and last run. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot system status @Arguments
+}
+
 function Get-DotTheme {
     <#
     .SYNOPSIS
@@ -683,6 +707,18 @@ function Invoke-DotAi {
     [CmdletBinding()]
     param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
     dot ai run @Arguments
+}
+
+function Invoke-DotSystemSchedule {
+    <#
+    .SYNOPSIS
+    Run scheduled maintenance now
+    .DESCRIPTION
+    Runs `dot system schedule run`: Run scheduled maintenance now. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot system schedule run @Arguments
 }
 
 function Measure-DotDoctorPerf {
@@ -961,6 +997,18 @@ function Set-DotSecurityUsb {
     dot security usb apply @Arguments
 }
 
+function Set-DotSystemSchedule {
+    <#
+    .SYNOPSIS
+    Set the maintenance schedule
+    .DESCRIPTION
+    Runs `dot system schedule set`: Set the maintenance schedule. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot system schedule set @Arguments
+}
+
 function Set-DotSystemSettings {
     <#
     .SYNOPSIS
@@ -1165,6 +1213,18 @@ function Uninstall-DotConfig {
     if ($PSCmdlet.ShouldProcess('config', 'dot')) { dot config uninstall @Arguments }
 }
 
+function Update-DotAi {
+    <#
+    .SYNOPSIS
+    Upgrade agent CLIs
+    .DESCRIPTION
+    Runs `dot ai update`: Upgrade agent CLIs. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot ai update @Arguments
+}
+
 function Update-DotConfig {
     <#
     .SYNOPSIS
@@ -1248,6 +1308,8 @@ Export-ModuleMember -Function @(
     'Get-DotSecurityScore'
     'Get-DotShellAlias'
     'Get-DotShellHistory'
+    'Get-DotSystemSchedule'
+    'Get-DotSystemStatus'
     'Get-DotTheme'
     'Get-DotTool'
     'Initialize-DotConfig'
@@ -1259,6 +1321,7 @@ Export-ModuleMember -Function @(
     'Invoke-DotAgent'
     'Invoke-DotAgentDelegate'
     'Invoke-DotAi'
+    'Invoke-DotSystemSchedule'
     'Measure-DotDoctorPerf'
     'New-DotDoctorSnapshot'
     'New-DotSecret'
@@ -1282,6 +1345,7 @@ Export-ModuleMember -Function @(
     'Set-DotSecurityLock'
     'Set-DotSecurityTelemetry'
     'Set-DotSecurityUsb'
+    'Set-DotSystemSchedule'
     'Set-DotSystemSettings'
     'Set-DotTheme'
     'Set-DotThemeWallpaper'
@@ -1299,6 +1363,7 @@ Export-ModuleMember -Function @(
     'Test-DotShellAlias'
     'Undo-DotDoctor'
     'Uninstall-DotConfig'
+    'Update-DotAi'
     'Update-DotConfig'
     'Update-DotShell'
     'Update-DotSystem'

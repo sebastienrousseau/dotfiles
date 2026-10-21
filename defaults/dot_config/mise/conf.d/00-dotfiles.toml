@@ -120,7 +120,6 @@ fd = "latest"
 "aqua:charmbracelet/gum" = "latest"
 "aqua:charmbracelet/glow" = "latest"
 "aqua:charmbracelet/mods" = "latest"
-"aqua:topgrade-rs/topgrade" = "17.11.0"
 starship = "latest"
 
 # Python tools

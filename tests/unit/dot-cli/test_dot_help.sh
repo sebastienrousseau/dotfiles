@@ -51,7 +51,7 @@ got="$(grep -cE '^  dot ' "$WORK/out")"
 assert_equals "$want" "$got" "one line per command"
 assert_equals "" "$(grep -E '^  dot ' "$WORK/out" | awk '{print $2, $3, $4}' | sort | uniq -d)" "none twice"
 assert_equals "$(field dom 2 | wc -l | tr -d ' ')" "$(grep -cE '^dot [a-z]+$' "$WORK/out")" "one heading per domain"
-assert_not_empty "$(grep -E 'dot system schedule set .*\(planned\)' "$WORK/out")" "a planned command is marked"
+assert_not_empty "$(grep -E 'dot secret key list .*\(planned\)' "$WORK/out")" "a planned command is marked"
 
 test_start "command_help_shows_effect_route_and_flags"
 rc=0
@@ -61,7 +61,7 @@ assert_file_contains "$WORK/out" "dot doctor perf show · Startup timings" "its 
 assert_file_contains "$WORK/out" "effect     read" "its effect"
 assert_file_contains "$WORK/out" "runs       dot perf" "the route that runs it today"
 assert_not_empty "$(grep -E -- '--runs, -r <count> +Number of runs' "$WORK/out")" "its flags, with the value they take"
-dot help system schedule set
+dot help secret key list
 assert_file_contains "$WORK/out" "planned, not built yet" "a planned command says so"
 
 test_start "domain_help_lists_only_its_commands"
@@ -70,11 +70,11 @@ dot help system || rc=$?
 assert_equals "0" "$rc" "dot help <domain> exits 0"
 assert_output_not_contains "dot config apply" "cat '$WORK/out'" "no other domain's commands"
 assert_equals "" "$(grep 'dot system update ' "$WORK/out" | grep -F '(planned)')" "a built command is not marked planned"
-assert_not_empty "$(grep 'dot system status ' "$WORK/out" | grep -F '(planned)')" "a planned one is"
+assert_not_empty "$(grep 'dot system clean ' "$WORK/out" | grep -F '(planned)')" "a planned one is"
 rc=0
-dot system || rc=$?
+dot secret || rc=$?
 assert_equals "0" "$rc" "a domain alone whose default is planned lists its commands"
-assert_file_contains "$WORK/out" "dot system · updates" "under its heading"
+assert_file_contains "$WORK/out" "dot secret · secrets" "under its heading"
 rc=0
 dot help system schedule || rc=$?
 assert_equals "0" "$rc" "dot help <object> exits 0"

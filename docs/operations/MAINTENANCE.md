@@ -6,6 +6,39 @@ render_with_liquid: false
 
 This runbook captures recovery and release maintenance operations for this repository.
 
+## Updates and scheduled maintenance
+
+`dot update` (short for `dot system update`) is the one update path. It
+updates the dotfiles, the mise tools and, after asking, the system
+packages (Homebrew, apt, dnf, pacman or zypper) and the app stores (mas,
+Flatpak, Snap). `--globals` adds npm, cargo and pipx globals, and `--yes`
+answers every question. The AI CLIs stay at their `[ai_tools]` pins;
+`dot ai update` moves them past the pins. Topgrade, the
+`~/.local/bin/update` script and the `update`/`upd` functions are gone;
+`chezmoi apply` deletes the script and the topgrade config, and `update`
+and `upd` forward to `dot update` with a warning until 0.2.538.
+
+The maintenance job clears the shell startup caches and rotates the dot
+log. Nothing is scheduled until you ask:
+
+```bash
+dot system schedule set weekly   # or daily; Sundays (or daily) at 10:00
+dot system schedule              # the job, its schedule, whether it is loaded
+dot system schedule run          # run it now
+dot system                       # OS, disk, schedule and the last run
+dot system schedule set off      # unload and delete it
+```
+
+On macOS `set` writes and loads
+`~/Library/LaunchAgents/com.sebastienrousseau.dot-maintenance.plist`; a
+run missed while the Mac slept happens at the next wake. On Linux it
+writes `dot-maintenance.service` and `.timer` under
+`~/.config/systemd/user` and enables the timer (`Persistent=true`). Each
+run records its time and exit code in
+`$XDG_STATE_HOME/dot/system/last-run`, and its output in `last-run.log`
+beside it. The old `dotfiles-maintenance` units, deployed but never
+enabled, are deleted by `chezmoi apply`.
+
 ## Signed History Recovery (February 19, 2026)
 
 **Purpose:** Recover from strict signature enforcement failures caused by legacy/non-compliant commit history.

@@ -53,7 +53,7 @@ $script:DotChildren = @{
     'shell' = @(@('history', 'shell history'), @('alias', 'aliases and their sources'), @('status', 'Shell, startup time and cache state'), @('update', 'Regenerate the startup caches'), @('clean', 'Clear the startup caches'))
     'shell alias' = @(@('list', 'Aliases and where each is defined'), @('check', 'Find shadowed or broken aliases'))
     'shell history' = @(, @('list', 'Recent history'))
-    'system' = @(@('schedule', 'scheduled maintenance jobs'), @('settings', 'OS settings dot manages'), @('status', 'OS, disk, outdated counts, last run'), @('update', 'Update everything, asking first'), @('clean', 'Reclaim space, asking first'), @('show', 'Hardware and host details'))
+    'system' = @(@('schedule', 'scheduled maintenance jobs'), @('settings', 'OS settings dot manages'), @('status', 'OS, disk, schedule and last run'), @('update', 'Update everything, asking first'), @('clean', 'Reclaim space, asking first'), @('show', 'Hardware and host details'))
     'system schedule' = @(@('list', 'Scheduled jobs'), @('set', 'Set the maintenance schedule'), @('run', 'Run scheduled maintenance now'))
     'system settings' = @(@('show', 'Current OS settings'), @('apply', 'Apply the managed OS settings'))
     'theme' = @(@('wallpaper', 'the current wallpaper'), @('font', 'installed fonts'), @('show', 'Current theme and palette'), @('list', 'Available themes'), @('set', 'Switch theme everywhere'))
@@ -193,12 +193,12 @@ $script:DotCommands = @{
     'system clean' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'system schedule list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'system schedule run' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'system schedule set' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'system schedule set' = @{ Flags = @(, @('--help', 'Show help')); Values = @('weekly', 'daily', 'off'); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'system settings apply' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'system settings show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'system show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'system status' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'system update' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'system update' = @{ Flags = @(@('--help', 'Show help'), @('--yes', 'Answer yes to every question'), @('-y', 'Answer yes to every question'), @('--globals', 'Also update npm, cargo and pipx globals')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'theme font install' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'theme font list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'theme list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }

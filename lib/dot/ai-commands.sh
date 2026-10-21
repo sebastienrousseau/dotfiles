@@ -73,6 +73,14 @@ _ai_oneshot() {
   run_ai_with_context "$tool" "$@"
 }
 
+# cmd_ai_update: `dot ai update` — update every AI tool past its pin
+# (mise core, npm and pipx globals, native agents, Ollama, LM Studio) with
+# the ai-update script. `dot update` keeps the AI CLIs at their pins and
+# lists the bumps instead; this is the explicit request to go beyond them.
+cmd_ai_update() {
+  exec bash "$(resolve_source_dir)/defaults/dot_local/bin/executable_ai-update" "$@"
+}
+
 # _ai_serve [stop|status|logs|setup] — the local Claude gateway. `serve`
 # does both: start also routes the non-Claude fleet through it; stop also
 # un-routes. Thin wrapper over the dot-ai-proxy lifecycle helper.

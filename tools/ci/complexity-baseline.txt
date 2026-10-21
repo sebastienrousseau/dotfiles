@@ -5,8 +5,7 @@
 # refactor it, then rewrite this file. New units must stay under LIMITS.
    4    3    7.4   62    62 .clusterfuzzlite/build.sh::<top>
   12   19   21.7   83    94 .devcontainer/install-lite.sh::<top>
-  32   27   57.7  154   373 benches/dot_command_bench.sh::<top>
-   1    0    0.0  158     0 benches/dot_command_bench.sh::bench_run_cases
+  32   27   57.7  154   218 benches/dot_command_bench.sh::<top>
   26   32   45.4   82    82 benches/test_help_gates_wall_clock.sh::<top>
   11   13   27.7   37     0 benches/test_perf_budgets.sh::_gate_max_rc
    9    9   21.6   38  1588 bin/dot-theme-sync::<top>
@@ -23,7 +22,7 @@
   33   39   35.4  149     0 bin/dot-theme-sync::reload_desktop
   17   19   28.7   43     0 bin/dot-theme-sync::reload_ghostty
   11   11   20.7   33     0 bin/dot-theme-sync::reload_tmux
-  22   23   38.0   82   330 bin/dot::<top>
+  22   23   37.8   82   330 bin/dot::<top>
   20   24   31.1   39     0 bin/dot::_resolve_source_dir
   21   21    4.2  111   111 defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh::<top>
   19   27   29.6   53     0 defaults/.chezmoitemplates/aliases/cd/cd-core.aliases.sh::cd_with_history

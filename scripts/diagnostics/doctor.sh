@@ -367,9 +367,9 @@ _doctor_atuin_history_filter() {
   fi
 }
 
-# --- Topgrade Integration ---
-_doctor_topgrade_integration() {
-  _section "Topgrade Integration"
+# --- Update Tooling ---
+_doctor_update_tooling() {
+  _section "Update Tooling"
 
   if command -v antigravity >/dev/null 2>&1; then
     ag_path="$(command -v antigravity)"
@@ -392,7 +392,7 @@ _doctor_topgrade_integration() {
     _fail "fish_plugins" "missing (~/.config/fish/fish_plugins)"
   fi
 
-  # Only meaningful when there is a cargo for topgrade to run it through; a
+  # Only meaningful when there is a cargo for `dot update --globals`; a
   # machine without a Rust toolchain has nothing to update, so warning about
   # the missing helper there is noise that never goes away.
   if command -v cargo-install-update >/dev/null 2>&1; then
@@ -529,7 +529,7 @@ _doctor_main() {
   _doctor_state
   _doctor_pre_push_audit_bypass_log
   _doctor_atuin_history_filter
-  _doctor_topgrade_integration
+  _doctor_update_tooling
   _doctor_symlinks
   _doctor_portability
   _doctor_performance

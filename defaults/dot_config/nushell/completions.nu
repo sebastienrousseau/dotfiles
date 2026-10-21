@@ -1417,7 +1417,7 @@ def "nu-complete dot system" [] {
     [
         { value: "schedule", description: "scheduled maintenance jobs" }
         { value: "settings", description: "OS settings dot manages" }
-        { value: "status", description: "OS, disk, outdated counts, last run" }
+        { value: "status", description: "OS, disk, schedule and last run" }
         { value: "update", description: "Update everything, asking first" }
         { value: "clean", description: "Reclaim space, asking first" }
         { value: "show", description: "Hardware and host details" }
@@ -1457,7 +1457,15 @@ export extern "dot system schedule run" [
     ...rest: string
 ]
 
+def "nu-complete dot system schedule set" [] {
+    [
+        { value: "weekly", description: "" }
+        { value: "daily", description: "" }
+        { value: "off", description: "" }
+    ]
+}
 export extern "dot system schedule set" [
+    value?: string@"nu-complete dot system schedule set"
     --help(-h) # Show help
     ...rest: string
 ]
@@ -1495,6 +1503,8 @@ export extern "dot system status" [
 ]
 
 export extern "dot system update" [
+    --yes(-y) # Answer yes to every question
+    --globals # Also update npm, cargo and pipx globals
     --help(-h) # Show help
     ...rest: string
 ]
@@ -1739,6 +1749,8 @@ export extern "dot sync" [
 ]
 
 export extern "dot update" [
+    --yes(-y) # Answer yes to every question
+    --globals # Also update npm, cargo and pipx globals
     --help(-h) # Show help
     ...rest: string
 ]

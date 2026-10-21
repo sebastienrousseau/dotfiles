@@ -21,10 +21,18 @@ OS settings dot manages; alone it runs \fBshow\fR.
 .SH COMMANDS
 .TP
 .B dot system status
-OS, disk, outdated counts, last run. Effect: read. Planned; not built yet.
+OS, disk, schedule and last run. Effect: read. Runs \fBdot system status\fR until the domain is extracted.
 .TP
 .B dot system update
 Update everything, asking first. Effect: write. Runs \fBdot upgrade\fR until the domain is extracted.
+.RS
+.TP
+.B \-\-yes, \-y
+Answer yes to every question
+.TP
+.B \-\-globals
+Also update npm, cargo and pipx globals
+.RE
 .TP
 .B dot system clean
 Reclaim space, asking first. Effect: write. Planned; not built yet.
@@ -33,13 +41,13 @@ Reclaim space, asking first. Effect: write. Planned; not built yet.
 Hardware and host details. Effect: read. Planned; not built yet.
 .TP
 .B dot system schedule list
-Scheduled jobs. Effect: read. Planned; not built yet.
+Scheduled jobs. Effect: read. Runs \fBdot system schedule list\fR until the domain is extracted.
 .TP
 .B dot system schedule set
-Set the maintenance schedule. Effect: write. Planned; not built yet.
+Set the maintenance schedule. Effect: write. Runs \fBdot system schedule set\fR until the domain is extracted.
 .TP
 .B dot system schedule run
-Run scheduled maintenance now. Effect: write. Planned; not built yet.
+Run scheduled maintenance now. Effect: write. Runs \fBdot system schedule run\fR until the domain is extracted.
 .TP
 .B dot system settings show
 Current OS settings. Effect: read. Planned; not built yet.

@@ -184,7 +184,7 @@ assert_contains "brew upgrade" "$(calls)" "brew upgrade"
 assert_contains "sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y upgrade" "$(calls)" "apt, non-interactive"
 assert_contains "sudo -n dnf -y upgrade" "$(calls)" "dnf"
 assert_contains "sudo -n pacman -Syu --noconfirm" "$(calls)" "pacman"
-lib '_dot_upgrade_system zypper || echo REFUSED'
+lib '_dot_upgrade_system emerge || echo REFUSED'
 assert_contains "REFUSED" "$OUT" "an unknown manager is refused"
 rm -f "$STUBS/brew" "$STUBS/sudo"
 

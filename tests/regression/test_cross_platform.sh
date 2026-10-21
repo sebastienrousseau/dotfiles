@@ -486,7 +486,7 @@ done < <(find "$REPO_ROOT/scripts/dot/commands" "$REPO_ROOT/scripts/ops" -name "
 assert_equals "0" "$failures" "macOS-only commands must be guarded by platform check"
 
 # ═══════════════════════════════════════════════════════════════
-# 11. FISH / NUSHELL / TOPGRADE — templates for cross-platform
+# 11. FISH / NUSHELL — templates for cross-platform
 # ═══════════════════════════════════════════════════════════════
 
 test_start "platform_fish_config_is_template"
@@ -504,9 +504,6 @@ assert_file_exists "$REPO_ROOT/defaults/dot_config/nushell/config.nu.tmpl" "nush
 
 test_start "platform_nushell_env_is_template"
 assert_file_exists "$REPO_ROOT/defaults/dot_config/nushell/env.nu.tmpl" "nushell env must be a chezmoi template"
-
-test_start "platform_topgrade_config_is_template"
-assert_file_exists "$REPO_ROOT/defaults/dot_config/topgrade.toml.tmpl" "topgrade config must be a chezmoi template"
 
 test_start "platform_ghostty_config_exists"
 ghostty_count=$(find "$REPO_ROOT/defaults/dot_config/ghostty" -type f 2>/dev/null | wc -l | tr -d ' ')

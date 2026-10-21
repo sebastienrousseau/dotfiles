@@ -335,6 +335,48 @@ jobs:
   # ============================================================================
   # BSD vs GNU Compatibility Report
   # ============================================================================
+  # ============================================================================
+  # Scheduled maintenance against the real scheduler (N0.5): launchd on
+  # macOS, the systemd user manager on Linux. Only runners, never a laptop.
+  # ============================================================================
+  schedule-live:
+    name: Scheduled maintenance on ${{ matrix.os }}
+    needs: changes
+    if: >-
+      needs.changes.outputs.relevant == 'true' ||
+      github.event_name != 'pull_request'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Start the systemd user manager
+        if: runner.os == 'Linux'
+        run: |
+          sudo loginctl enable-linger "$USER"
+          echo "XDG_RUNTIME_DIR=/run/user/$(id -u)" >>"$GITHUB_ENV"
+          for _ in $(seq 1 20); do
+            [[ -S "/run/user/$(id -u)/bus" ]] && break
+            sleep 1
+          done
+
+      - name: Install, run and remove the schedule
+        env:
+          DOT_SCHEDULE_LIVE: "1"
+        run: bash tests/integration/test_system_schedule_live.sh
+
   compatibility-report:
     name: Compatibility Report
     runs-on: ubuntu-latest
@@ -380,7 +422,7 @@ jobs:
   # ============================================================================
   gate:
     name: Cross-Platform Tests
-    needs: [changes, cross-platform-test]
+    needs: [changes, cross-platform-test, schedule-live]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 2
@@ -394,6 +436,7 @@ jobs:
         run: |
           detect='${{ needs.changes.result }}'
           tests='${{ needs.cross-platform-test.result }}'
+          schedule='${{ needs.schedule-live.result }}'
           echo "detect-changes=$detect  cross-platform-test=$tests"
           if [[ "$detect" == "failure" || "$detect" == "cancelled" ]]; then
             echo "::error::change detection did not complete ($detect)"
@@ -401,6 +444,10 @@ jobs:
           fi
           if [[ "$tests" == "failure" || "$tests" == "cancelled" ]]; then
             echo "::error::cross-platform tests failed ($tests)"
+            exit 1
+          fi
+          if [[ "$schedule" == "failure" || "$schedule" == "cancelled" ]]; then
+            echo "::error::scheduled maintenance failed ($schedule)"
             exit 1
           fi
           # 'success' (matrix ran and passed) or 'skipped' (no relevant

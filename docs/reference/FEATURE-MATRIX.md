@@ -545,6 +545,15 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot manual` | XDG_DATA_HOME/dotfiles/manual holds the offline copy | `test_fm_env_xdg_data_home` | `help:manual` | `examples/example-dot-manual.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 | `dot manual` | PAGER receives the text manual | `test_fm_env_pager` | `help:manual` | `examples/example-dot-manual.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 
+## system.sh
+
+| Command | Variant | Regression test | Benchmark | Example | Manual | Coverage |
+|---------|---------|-----------------|-----------|---------|--------|----------|
+| `dot system` | (default) status: OS, disk, schedule, last run | `test_fm_system_status` | `run:system-status` | `examples/example-dot-system.sh` | `docs/operations/MAINTENANCE.md` | regression |
+| `dot system schedule` | (default) list | `test_fm_system_schedule_list` | `run:system-schedule-list` | `examples/example-dot-system.sh` | `docs/operations/MAINTENANCE.md` | regression |
+| `dot system schedule set` | weekly / daily / off (bad word exits 1) | `test_fm_system_schedule_set` | `help:system` | `examples/example-dot-system.sh` | `docs/operations/MAINTENANCE.md` | regression |
+| `dot system schedule run` | clears caches, rotates logs, records the exit code | `test_fm_system_schedule_run` | `help:system` | `examples/example-dot-system.sh` | `docs/operations/MAINTENANCE.md` | regression |
+
 ## cross-cutting invariants
 
 | Command | Variant | Regression test | Benchmark | Example | Manual | Coverage |

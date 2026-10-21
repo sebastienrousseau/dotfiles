@@ -482,6 +482,7 @@ _dot() {
       ;;
     'system schedule set' | 'system schedule set'\ *)
       flags='--help'
+      [[ "$path" != 'system schedule set' ]] || values='weekly daily off'
       ;;
     'system settings apply' | 'system settings apply'\ *)
       flags='--help'
@@ -496,7 +497,7 @@ _dot() {
       flags='--help'
       ;;
     'system update' | 'system update'\ *)
-      flags='--help'
+      flags='--help --yes -y --globals'
       ;;
     'theme font install' | 'theme font install'\ *)
       flags='--help'

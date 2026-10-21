@@ -218,7 +218,7 @@ fi
 # The shipped versions.env pins every tool for both architectures.
 test_start "versions_env_pins_complete"
 missing="$(env -i PATH="$PATH" bash -c '. "$1"
-  for t in STARSHIP ZOXIDE NEOVIM LAZYGIT ATUIN ZELLIJ UV TOPGRADE MISE YAZI AICHAT MODS; do
+  for t in STARSHIP ZOXIDE NEOVIM LAZYGIT ATUIN ZELLIJ UV MISE YAZI AICHAT MODS; do
     for a in X86_64 AARCH64; do
       v="${t}_SHA256_$a"
       [[ "${!v:-}" =~ ^[0-9a-f]{64}$ ]] || printf "%s " "$v"

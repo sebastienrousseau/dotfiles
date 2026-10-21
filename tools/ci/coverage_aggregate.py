@@ -87,7 +87,6 @@ SKIP_PATHS = {
     "scripts/git-hooks/pre-commit-audit.sh",          # full hook flow needs real index
     "bin/dot-theme-sync",        # signals live apps
     "bin/dot-bootstrap",
-    "defaults/dot_local/bin/executable_update",
     "defaults/dot_local/bin/executable_ai_core",
     "defaults/dot_local/bin/executable_ai-update",
 }
