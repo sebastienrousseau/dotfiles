@@ -17,7 +17,7 @@
 # Layout installed (FHS, relocatable via the variables below):
 #   $(BINDIR)/dot                       -> $(LIBEXECDIR)/bin/dot (symlink)
 #   $(LIBEXECDIR)/                      bin/ lib/ scripts/ share/ defaults/ ...
-#   $(MANDIR)/man1/dot.1
+#   $(MANDIR)/man1/dot.1, dot-<domain>.1
 #   $(BASHCOMPDIR)/dot
 #   $(ZSHCOMPDIR)/_dot
 #   $(FISHCOMPDIR)/dot.fish
@@ -51,7 +51,7 @@ include Makefile
 build-man: $(BUILDDIR)/man/man1/dot.1
 build-completions: $(BUILDDIR)/completions/_dot
 
-$(BUILDDIR)/man/man1/dot.1: bin/dot tools/docs/man/dot.1.in tools/docs/generate-manpage.sh defaults/.chezmoidata.toml CHANGELOG.md
+$(BUILDDIR)/man/man1/dot.1: lib/dot/data/commands.txt schemas/cli/flags.json tools/docs/man/dot.1.in tools/docs/gen_manpages.py tools/docs/generate-manpage.sh defaults/.chezmoidata.toml CHANGELOG.md
 	bash ./tools/docs/generate-manpage.sh --output "$@"
 
 $(BUILDDIR)/completions/_dot: lib/dot/data/commands.txt tools/docs/gen_completions.py tools/docs/generate-completions.sh
@@ -63,7 +63,7 @@ install: all ## Install into $(DESTDIR)$(PREFIX) (FHS layout)
 	  "$(DESTDIR)$(BASHCOMPDIR)" "$(DESTDIR)$(ZSHCOMPDIR)" "$(DESTDIR)$(FISHCOMPDIR)"
 	ln -sfn "$(DOT_LINK)" "$(DESTDIR)$(BINDIR)/dot"
 	@test -x "$(DESTDIR)$(BINDIR)/dot" || { echo "error: $(DESTDIR)$(BINDIR)/dot -> $(DOT_LINK) does not resolve; set DOT_LINK" >&2; exit 1; }
-	$(INSTALL_DATA) "$(BUILDDIR)/man/man1/dot.1" "$(DESTDIR)$(MANDIR)/man1/dot.1"
+	$(INSTALL_DATA) "$(BUILDDIR)"/man/man1/dot*.1 "$(DESTDIR)$(MANDIR)/man1/"
 	$(INSTALL_DATA) "$(BUILDDIR)/completions/dot" "$(DESTDIR)$(BASHCOMPDIR)/dot"
 	$(INSTALL_DATA) "$(BUILDDIR)/completions/_dot" "$(DESTDIR)$(ZSHCOMPDIR)/_dot"
 	$(INSTALL_DATA) "$(BUILDDIR)/completions/dot.fish" "$(DESTDIR)$(FISHCOMPDIR)/dot.fish"
@@ -71,7 +71,7 @@ install: all ## Install into $(DESTDIR)$(PREFIX) (FHS layout)
 
 uninstall: ## Remove everything `make install` placed
 	rm -f "$(DESTDIR)$(BINDIR)/dot"
-	rm -f "$(DESTDIR)$(MANDIR)/man1/dot.1"
+	rm -f "$(DESTDIR)$(MANDIR)/man1/dot.1" "$(DESTDIR)$(MANDIR)"/man1/dot-*.1
 	rm -f "$(DESTDIR)$(BASHCOMPDIR)/dot" "$(DESTDIR)$(ZSHCOMPDIR)/_dot" "$(DESTDIR)$(FISHCOMPDIR)/dot.fish"
 	rm -rf "$(DESTDIR)$(DOCDIR)" "$(DESTDIR)$(LIBEXECDIR)"
 
@@ -81,6 +81,7 @@ installcheck: ## Prove the installed tree works with no source checkout
 	trap 'rm -rf "$$sandbox"' EXIT; \
 	test -L "$(DESTDIR)$(BINDIR)/dot"; \
 	test -f "$(DESTDIR)$(MANDIR)/man1/dot.1"; \
+	test -f "$(DESTDIR)$(MANDIR)/man1/dot-system.1"; \
 	test -f "$(DESTDIR)$(BASHCOMPDIR)/dot"; \
 	test -f "$(DESTDIR)$(ZSHCOMPDIR)/_dot"; \
 	test -f "$(DESTDIR)$(FISHCOMPDIR)/dot.fish"; \

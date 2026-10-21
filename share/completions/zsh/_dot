@@ -29,9 +29,9 @@ _dot() {
     'agent log') kids_=('show:The agent log') ;;
     'agent mode') kids_=('list:Available modes' 'show:One mode in detail' 'set:Switch mode') ;;
     'agent policy') kids_=('show:The sandbox policy') ;;
-    'ai') kids_=('pattern:prompt patterns' 'cost:spend by agent and model' 'gateway:the keyless gateway' 'inventory:installed agents and versions' 'list:Installed agents' 'install:Install agents' 'update:Upgrade agent CLIs' 'start:Start an agent' 'run:Run an agent once' 'serve:Run the gateway in the foreground' 'login:Authenticate an agent' 'check:Check agent installs and auth' 'ask:Ask about the local context') ;;
+    'ai') kids_=('pattern:prompt patterns' 'cost:spend by agent and model' 'gateway:the keyless gateway' 'inventory:installed agents and versions' 'list:Installed agents' 'install:Install agents' 'update:Upgrade agent CLIs' 'start:Start an agent' 'run:Run an agent once' 'login:Authenticate an agent' 'check:Check agent installs and auth' 'ask:Ask about the local context') ;;
     'ai cost') kids_=('show:Spend by agent and model') ;;
-    'ai gateway') kids_=('show:Gateway statistics') ;;
+    'ai gateway') kids_=('serve:Run the gateway in the foreground' 'show:Gateway statistics') ;;
     'ai inventory') kids_=('show:Agents, versions and config') ;;
     'ai pattern') kids_=('list:Prompt patterns') ;;
     'attest') kids_=('show:The workstation attestation' 'export:Write attestation evidence' 'verify:Verify evidence') ;;
@@ -148,6 +148,9 @@ _dot() {
     'ai cost show' | 'ai cost show'\ *)
       flags_=('--help:Show help')
       ;;
+    'ai gateway serve' | 'ai gateway serve'\ *)
+      flags_=('--help:Show help')
+      ;;
     'ai gateway show' | 'ai gateway show'\ *)
       flags_=('--help:Show help')
       ;;
@@ -170,9 +173,6 @@ _dot() {
       flags_=('--help:Show help' '--pattern:Steering pattern' '-p:Steering pattern')
       patflags_=(--pattern -p)
       [[ "$path_" != 'ai run' ]] || values_=(claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai)
-      ;;
-    'ai serve' | 'ai serve'\ *)
-      flags_=('--help:Show help')
       ;;
     'ai start' | 'ai start'\ *)
       flags_=('--help:Show help')

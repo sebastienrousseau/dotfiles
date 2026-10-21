@@ -143,24 +143,6 @@ _dot_warn_deprecated() {
   return 0
 }
 
-# _dot_domain_help DOMAIN: the domain's commands, from its manifest.
-_dot_domain_help() {
-  local rec key a b c note
-  _dot_table_load
-  while IFS='|' read -r rec key a b c; do
-    case "$rec" in
-      dom) [[ "$key" == "$1" ]] && printf 'dot %s · %s\n\n' "$key" "$c" ;;
-      cmd)
-        [[ "$key" == "$1 "* ]] || continue
-        note=""
-        [[ -n "$a" ]] || note="  (planned)"
-        printf '  dot %-28s %s%s\n' "$key" "$c" "$note"
-        ;;
-    esac
-  done <<<"$_DOT_TABLE"
-  return 0
-}
-
 # _dot_gnu_flags WORD...: GNU flags (N9). -V is the version and -v is
 # --verbose; `dot -v` alone still prints the version, with a warning, for
 # one release. Sets _ARGV.
@@ -200,7 +182,7 @@ _dot_old_name() {
     shortcut)
       # shellcheck disable=SC2206 # the target is words
       _ARGV=($_NAME_TARGET "${@:2}")
-      _NAME_KIND=dom
+      _NAME_KIND=dom _NAME_WAS="$1"
       ;;
   esac
   return 0
@@ -213,20 +195,46 @@ _dot_planned() {
   _dot_record cmd "$1 $2 ${3:-}" || _dot_record cmd "$1 $2"
 }
 
+# _dot_help_asked DOMAIN WORD...: `dot <spelling> --help` (or -h, before any
+# `--`) shows that spelling's help and exits.
+_dot_help_asked() {
+  local w asked=0
+  local -a spelled=()
+  [[ "$_NAME_KIND" == dom ]] || return 0
+  for w in "$@"; do
+    case "$w" in
+      --) break ;;
+      --help | -h) asked=1 ;;
+      -*) ;;
+      *) spelled+=("$w") ;;
+    esac
+  done
+  ((asked)) || return 0
+  [[ -z "$_NAME_WAS" ]] || printf 'dot %s is short for dot %s\n\n' "$_NAME_WAS" "$_NAME_TARGET"
+  _dot_help_spelling "${spelled[@]}" && exit 0
+  return 0
+}
+
+# _dot_names_spelling WORD: WORD starts an ADR-020 spelling (a domain or a
+# shortcut); old names skip loading help.sh and keep their own help.
+_dot_names_spelling() {
+  _dot_record dom "$1" && return 0
+  _dot_record alias "$1" && [[ "${_REC%%|*}" == shortcut ]]
+}
+
 # _dot_spelled WORD...: `dot <domain> ...` and `dot help <term>` become the
 # route that runs them today. Sets _ARGV.
 _dot_spelled() {
   _ARGV=("$@")
   [[ "$_NAME_KIND" == dom || ("$1" == help && $# -gt 1) ]] || return 0
+  _dot_help_asked "$@"
   _dot_resolve "$@"
   if [[ -n "$_RUN" ]]; then
     # shellcheck disable=SC2206 # a route and its leading arguments
     _ARGV=($_RUN "${@:$((_RUN_USED + 1))}")
   elif _dot_planned "$@"; then
     _dot_unknown "$@" # never let the domain's own route take a planned verb
-  elif [[ "$1" == help ]] && _dot_lookup "$2" && [[ "$_NAME_KIND" == dom ]] &&
-    [[ -z "$(_dot_help_summary "$2")" ]]; then
-    _dot_domain_help "$2"
+  elif [[ "$1" == help ]] && _dot_names_spelling "$2" && _dot_help_spelling "${@:2}"; then
     exit 0
   fi
   return 0
@@ -235,7 +243,7 @@ _dot_spelled() {
 # _dot_names WORD...: the command line bin/dot should route; no command
 # at all shows the overview. Sets _ARGV.
 _dot_names() {
-  _NAME_KIND=""
+  _NAME_KIND="" _NAME_WAS=""
   _dot_gnu_flags "$@"
   set -- "${_ARGV[@]}"
   if [[ -z "$1" ]]; then
@@ -264,3 +272,17 @@ _dot_unknown() {
   echo "Run 'dot help' for available commands." >&2
   exit 127
 }
+
+# Help from the same table (N0.4), loaded on first use: most invocations
+# never print help, and parsing help.sh on each one cost the startup budget.
+# Each stand-in sources help.sh, which replaces it, then calls the real one.
+_DOT_HELP_SH="${BASH_SOURCE[0]%/*}/help.sh"
+for _dot_fn in _dot_help_overview _dot_help_all _dot_domain_help _dot_command_help _dot_help_spelling \
+  _dot_help_search; do
+  eval "$_dot_fn() {
+    # shellcheck source=help.sh
+    source \"\$_DOT_HELP_SH\"
+    $_dot_fn \"\$@\"
+  }"
+done
+unset _dot_fn

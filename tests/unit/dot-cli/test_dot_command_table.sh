@@ -204,7 +204,7 @@ bare() { (cd "$WORK/bare" && HOME="$WORK/bare/home" NO_COLOR=1 "$BASH_BIN" bin/d
 rc=0
 bare || rc=$?
 assert_equals "0" "$rc" "no command shows the overview"
-assert_file_contains "$WORK/out" "dot help all" "and the overview is printed"
+assert_file_contains "$WORK/out" "Usage: dot <domain> [object] <verb>" "and the usage is printed"
 rc=0
 bare no-such-command-n03 || rc=$?
 assert_equals "127" "$rc" "an unknown command still exits 127"

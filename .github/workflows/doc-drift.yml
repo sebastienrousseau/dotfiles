@@ -5,7 +5,7 @@ name: Doc Drift / Generators
 #
 #   - tools/docs/generate-command-index.sh --check
 #   - tools/docs/generate-command-reference.sh --check
-#       Verifies docs/manual/command-index.md matches `dot help all`.
+#       Verifies docs/manual/command-index.md matches the plugin manifests.
 #
 #   - scripts/verify-release-versions
 #       Verifies every human-visible version surface (install
@@ -13,7 +13,7 @@ name: Doc Drift / Generators
 #       CHANGELOG heading) matches defaults/.chezmoidata.toml.
 #
 #   - tools/docs/generate-manpage.sh --check
-#       Verifies share/man/man1/dot.1 matches the command registry.
+#       Verifies the share/man/man1 pages match the plugin manifests.
 #
 #   - tools/docs/generate-completions.sh --check
 #       Verifies the five committed completions match the manifests.
@@ -39,8 +39,13 @@ on:
       - '.github/workflows/doc-drift.yml'
       - 'tools/docs/generate-manpage.sh'
       - 'tools/docs/man/dot.1.in'
+      - 'tools/docs/gen_manpages.py'
+      - 'schemas/cli/flags.json'
       - 'tools/docs/generate-completions.sh'
       - 'tools/docs/gen_completions.py'
+      - 'tools/docs/gen_cmdlets.py'
+      - 'schemas/cli/verbs.json'
+      - 'share/powershell/**'
       - 'lib/dot/data/commands.txt'
       - 'plugins/**'
       - 'share/completions/**'
@@ -57,7 +62,7 @@ on:
       - 'CLAUDE.md'
       - 'AGENTS.md'
       - 'package.json'
-      - 'share/man/man1/dot.1'
+      - 'share/man/man1/**'
       - 'lib/dot/bento.sh'
   workflow_dispatch:
 
@@ -148,7 +153,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Verify share/man/man1/dot.1 matches the command registry
+      - name: Verify the share/man/man1 pages match the plugin manifests
         run: bash tools/docs/generate-manpage.sh --check
 
   completions:
@@ -175,3 +180,5 @@ jobs:
           persist-credentials: false
       - name: Verify committed shell completions match the command registry
         run: bash tools/docs/generate-completions.sh --check
+      - name: Verify the PowerShell cmdlets match the plugin manifests
+        run: python3 tools/docs/gen_cmdlets.py --check

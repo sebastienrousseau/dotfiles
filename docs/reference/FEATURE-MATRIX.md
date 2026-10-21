@@ -121,6 +121,16 @@ bash scripts/qa/check-feature-matrix.sh
 
 | Command | Variant | Regression test | Benchmark | Example | Manual | Coverage |
 |---------|---------|-----------------|-----------|---------|--------|----------|
+| `dot cli` | --help (domain commands) | `test_fm_domain_cli` | `help:cli` | `examples/example-dot-meta.sh` | `docs/manual/command-index.md` | regression |
+| `dot config` | --help (domain commands) | `test_fm_domain_config` | `help:config` | `examples/example-dot-meta.sh` | `docs/manual/command-index.md` | regression |
+| `dot secret` | --help (domain commands) | `test_fm_domain_secret` | `help:secret` | `examples/example-dot-meta.sh` | `docs/manual/command-index.md` | regression |
+| `dot security` | --help (domain commands) | `test_fm_domain_security` | `help:security` | `examples/example-dot-meta.sh` | `docs/manual/command-index.md` | regression |
+| `dot session` | --help (domain commands) | `test_fm_domain_session` | `help:session` | `examples/example-dot-meta.sh` | `docs/manual/command-index.md` | regression |
+| `dot shell` | --help (domain commands) | `test_fm_domain_shell` | `help:shell` | `examples/example-dot-meta.sh` | `docs/manual/command-index.md` | regression |
+| `dot system` | --help (domain commands) | `test_fm_domain_system` | `help:system` | `examples/example-dot-meta.sh` | `docs/manual/command-index.md` | regression |
+| `dot tool` | --help (domain commands) | `test_fm_domain_tool` | `help:tool` | `examples/example-dot-meta.sh` | `docs/manual/command-index.md` | regression |
+| `dot top` | --help (domain commands) | `test_fm_domain_top` | `help:top` | `examples/example-dot-meta.sh` | `docs/manual/command-index.md` | regression |
+| `dot ui` | --help (domain commands) | `test_fm_domain_ui` | `help:ui` | `examples/example-dot-meta.sh` | `docs/manual/command-index.md` | regression |
 | `dot doctor` | (default) | `test_fm_doctor` | `run:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot doctor` | --score / -s | `test_fm_doctor_score` | `run:doctor-score` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot doctor` | --smoke / -m | `test_fm_doctor_smoke` | `run:doctor-smoke` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |

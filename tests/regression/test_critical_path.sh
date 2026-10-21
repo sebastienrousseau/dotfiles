@@ -134,7 +134,7 @@ test_start "critical_dot_help_lists_doctor"
 assert_output_contains "doctor" "bash '$DOT_CLI' help"
 
 test_start "critical_dot_help_lists_ai"
-assert_output_contains "AI" "bash '$DOT_CLI' help"
+assert_output_contains "AGENTS" "bash '$DOT_CLI' help"
 
 # ═══════════════════════════════════════════════════════════════
 # 3. SHELL STARTUP CHAIN (must not break interactive shells)

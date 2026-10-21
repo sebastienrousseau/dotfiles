@@ -234,13 +234,13 @@ repos:
         stages: [pre-commit]
 
       - id: manpage-drift
-        name: share/man/man1/dot.1 matches the command registry
+        name: share/man/man1 pages match the plugin manifests
         entry: tools/docs/generate-manpage.sh
         args: ['--check']
         language: script
         pass_filenames: false
         stages: [pre-commit]
-        files: '^(bin/dot|tools/docs/man/dot\.1\.in|tools/docs/generate-manpage\.sh|share/man/man1/dot\.1)$'
+        files: '^(plugins/.*|lib/dot/data/commands\.txt|schemas/cli/flags\.json|tools/docs/man/dot\.1\.in|tools/docs/gen_manpages\.py|tools/docs/generate-manpage\.sh|share/man/man1/dot.*\.1)$'
 
       - id: completions-drift
         name: Committed completions match the plugin manifests
@@ -250,3 +250,12 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
         files: '^(plugins/.*|lib/dot/data/commands\.txt|tools/docs/gen_completions\.py|tools/docs/generate-completions\.sh|share/completions/.*|defaults/dot_local/share/bash-completion/completions/dot|defaults/dot_config/fish/completions/dot\.fish|defaults/dot_config/nushell/completions\.nu)$'
+
+      - id: cmdlets-drift
+        name: PowerShell cmdlets match the plugin manifests
+        entry: tools/docs/gen_cmdlets.py
+        args: ['--check']
+        language: script
+        pass_filenames: false
+        stages: [pre-commit]
+        files: '^(plugins/.*|schemas/cli/verbs\.json|tools/docs/gen_cmdlets\.py|share/powershell/.*)$'

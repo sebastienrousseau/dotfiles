@@ -49,7 +49,7 @@ fm_gate_scratch() {
   cp "$MATRIX" "$dest/docs/reference/"
   cp "$REPO_ROOT/docs/manual/command-index.md" "$dest/docs/manual/"
   cp "$REPO_ROOT/bin/dot" "$dest/bin/"
-  cp "$REPO_ROOT/lib/dot/data/routes.txt" "$dest/lib/dot/data/"
+  cp "$REPO_ROOT/lib/dot/data/routes.txt" "$REPO_ROOT/lib/dot/data/commands.txt" "$dest/lib/dot/data/"
   cp "$REPO_ROOT/benches/dot_command_bench.sh" "$dest/benches/"
   cp "$REPO_ROOT"/tests/regression/test_feature_matrix_*.sh "$dest/tests/regression/" 2>/dev/null
   cp "$REPO_ROOT"/scripts/dot/commands/*.sh "$dest/scripts/dot/commands/" 2>/dev/null

@@ -41,7 +41,7 @@ class Fixture(unittest.TestCase):
         self.addCleanup(shutil.rmtree, self.tmp)
         for rel in ("schemas/cli", "plugins"):
             shutil.copytree(ROOT / rel, self.tmp / rel)
-        for rel in ("lib/dot/data/routes.txt", "lib/dot/data/commands.txt", "defaults/.chezmoidata.toml", "tools/ci/cli-contract-baseline.txt"):
+        for rel in ("lib/dot/data/routes.txt", "lib/dot/data/commands.txt", "lib/dot/data/commands.json", "defaults/.chezmoidata.toml", "tools/ci/cli-contract-baseline.txt"):
             (self.tmp / rel).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(ROOT / rel, self.tmp / rel)
         self.dot = self.fake_dot(GOOD_DOT)
@@ -145,6 +145,13 @@ class Manifests(Fixture):
     def test_local_letter_for_a_family_flag_without_one(self):
         self.flagged(("json", "j"))
         self.assertEqual([e for e in self.errors() if "mcp show" in e], [])
+
+    def test_two_verbs_sharing_a_cmdlet(self):
+        self.append("secret", '[[commands]]\nverb = "apply"\neffect = "write"\nsummary = "x"\n')
+        self.assertFails("secret: apply, set would share the Set cmdlet (N11)")
+
+    def test_list_and_show_may_share_get(self):
+        self.assertEqual([e for e in self.errors() if "Get cmdlet" in e], [])
 
     def test_expired_deprecation(self):
         self.edit("fleet", 'until = "0.2.538"', 'until = "0.2.536"')

@@ -25,7 +25,7 @@ assert_file_contains "$DOT_CLI" "set -e" "should use set -e for error handling"
 # Test: dot --help shows onboarding overview
 test_start "dot_cli_help"
 output=$(bash "$DOT_CLI" help 2>&1) || true
-if [[ "$output" == *"What it is"* ]] && [[ "$output" == *"Platforms"* ]] && [[ "$output" == *"Start"* ]]; then
+if [[ "$output" == *"Usage: dot <domain> [object] <verb>"* ]] && [[ "$output" == *"CONFIGURATION"* ]] && [[ "$output" == *"SHORTCUTS"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: help shows onboarding overview"
 else
@@ -49,7 +49,7 @@ fi
 # Test: dot (no args) shows help
 test_start "dot_cli_no_args"
 output=$(bash "$DOT_CLI" 2>&1) || true
-if [[ "$output" == *"What it is"* ]]; then
+if [[ "$output" == *"Usage: dot <domain> [object] <verb>"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no args shows help"
 else
@@ -75,47 +75,29 @@ fi
 
 # Test: every subcommand in full help has a case handler
 test_start "dot_cli_help_handler_parity"
-# Extract subcommands from help text
+# Every built command `dot help all` lists runs a route the dispatcher has
+# (lib/dot/data/routes.txt); a planned one is marked as such.
 help_output=$(bash "$DOT_CLI" help all 2>&1)
 help_cmds=()
 while IFS= read -r line; do
-  # Match lines like "  apply       Description..."
-  if [[ "$line" =~ ^[[:space:]]+((--[a-z-]+)|([a-z][-a-z0-9]+))[[:space:]] ]]; then
-    help_cmds+=("${BASH_REMATCH[1]}")
-  fi
+  [[ "$line" =~ ^\ \ dot\ ([a-z][a-z\ -]*[a-z])\ \ + ]] && help_cmds+=("${BASH_REMATCH[1]}")
 done <<<"$help_output"
-
-# Extract routed commands from the route table (lib/dot/data/routes.txt)
-route_handlers=()
-while IFS= read -r line; do
-  if [[ "$line" =~ ^([-[:alnum:]_]+)\|([[:alnum:]_-]+)$ ]]; then
-    route_handlers+=("${BASH_REMATCH[1]}")
-  fi
-done <"$REPO_ROOT/lib/dot/data/routes.txt"
-
 missing_handlers=0
-set +u
 for cmd in "${help_cmds[@]}"; do
-  found=false
-  for handler in "${route_handlers[@]}"; do
-    if [[ "$cmd" == "$handler" ]]; then
-      found=true
-      break
-    fi
-  done
-  if [[ "$found" == false ]]; then
-    echo "    WARNING: help lists '$cmd' but no case handler found"
+  legacy="$(awk -F'|' -v k="$cmd" '$1 == "cmd" && $2 == k { print $3; exit }' "$REPO_ROOT/lib/dot/data/commands.txt")"
+  [[ -n "$legacy" ]] || continue
+  if ! grep -q "^${legacy%% *}|" "$REPO_ROOT/lib/dot/data/routes.txt"; then
+    echo "    WARNING: help lists '$cmd' but its route '${legacy%% *}' has no handler"
     missing_handlers=$((missing_handlers + 1))
   fi
 done
-set -u
 
-if [[ $missing_handlers -eq 0 ]]; then
+if [[ ${#help_cmds[@]} -gt 100 && $missing_handlers -eq 0 ]]; then
   ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: all help subcommands have handlers"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: all ${#help_cmds[@]} help commands have handlers"
 else
   ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $missing_handlers help entries lack case handlers"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: $missing_handlers of ${#help_cmds[@]} help entries lack handlers"
 fi
 
 # Test: help surface has no duplicate visible commands
@@ -143,8 +125,8 @@ fi
 
 # Test: dot help <command> shows focused help
 test_start "dot_cli_help_command"
-output=$(bash "$DOT_CLI" help doctor 2>&1) || true
-if [[ "$output" == *"dot doctor"* ]] && [[ "$output" == *"Examples"* ]] && [[ "$output" == *"dot doctor -H"* ]]; then
+output=$(bash "$DOT_CLI" help doctor check 2>&1) || true
+if [[ "$output" == *"dot doctor check ·"* ]] && [[ "$output" == *"effect"* ]] && [[ "$output" == *"--heal, -H"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: help doctor shows focused command help"
 else
@@ -156,7 +138,7 @@ fi
 # Test: dot help all shows full reference
 test_start "dot_cli_help_all"
 output=$(bash "$DOT_CLI" help all 2>&1) || true
-if [[ "$output" == *"Dotfiles Command Reference"* ]] && [[ "$output" == *"sync"* ]] && [[ "$output" == *"version"* ]]; then
+if [[ "$output" == *"dot config sync"* ]] && [[ "$output" == *"dot system update"* ]] && [[ "$output" == *"(planned)"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: help all shows full reference"
 else
@@ -214,7 +196,7 @@ fi
 # Test: dot -h shows help
 test_start "dot_cli_h_flag"
 output=$(bash "$DOT_CLI" -h 2>&1) || true
-if [[ "$output" == *"What it is"* ]]; then
+if [[ "$output" == *"Usage: dot <domain> [object] <verb>"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: -h shows help"
 else
