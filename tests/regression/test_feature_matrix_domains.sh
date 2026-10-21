@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1091
+# Regression for: GH-881
 # Feature matrix: the ADR-020 domains that have no route of their own.
 # `dot <domain> --help` lists the domain's commands from its manifest and
 # exits 0 without running any of them (docs/reference/FEATURE-MATRIX.md).

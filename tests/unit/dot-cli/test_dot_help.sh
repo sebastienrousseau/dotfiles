@@ -116,6 +116,16 @@ assert_equals "0" "$rc" "exits 0"
 assert_true "cmp -s '$WORK/out' '$REPO_ROOT/lib/dot/data/commands.json'" "prints lib/dot/data/commands.json"
 assert_equals "cli/catalog.v1 17" "$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d["schema"], len(d["domains"]))' "$WORK/out")" "a versioned catalog of the 17 domains"
 
+test_start "search_finds_new_and_old_names"
+rc=0
+dot help SECURITY || rc=$?
+assert_equals "0" "$rc" "a term that matches exits 0"
+assert_file_contains "$WORK/out" "dot security score show" "a command whose spelling matches, case-insensitively"
+dot help scorecard
+assert_file_contains "$WORK/out" "dot scorecard                    now dot doctor score, until" "an old name, with its new spelling"
+dot help sync
+assert_file_contains "$WORK/out" "dot config sync" "a shortcut shows its target"
+
 test_start "an_unknown_term_finds_nothing"
 rc=0
 dot help zz-no-such-term || rc=$?

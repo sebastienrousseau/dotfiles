@@ -107,3 +107,27 @@ _dot_help_spelling() {
   done
   return 1
 }
+
+# _dot_help_search TERM: commands whose spelling or summary contains TERM,
+# and old names that do, with their new spelling (they still run until
+# their release); false when nothing matches.
+_dot_help_search() {
+  local rec key a b c found=1 restore
+  restore="$(shopt -p nocasematch)"
+  shopt -s nocasematch
+  _dot_table_load
+  while IFS='|' read -r rec key a b c; do
+    if [[ "$rec" == cmd && "$key $c" == *"$1"* ]]; then
+      printf '  dot %-28s %s\n' "$key" "$c"
+    elif [[ "$rec" == alias && "$key" == *"$1"* && "$a" == shortcut ]]; then
+      printf '  dot %-28s short for dot %s\n' "$key" "$b"
+    elif [[ "$rec" == alias && "$key" == *"$1"* ]]; then
+      printf '  dot %-28s now dot %s%s\n' "$key" "$b" "${c:+, until $c}"
+    else
+      continue
+    fi
+    found=0
+  done <<<"$_DOT_TABLE"
+  eval "$restore"
+  return "$found"
+}

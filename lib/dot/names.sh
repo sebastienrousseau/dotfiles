@@ -215,6 +215,13 @@ _dot_help_asked() {
   return 0
 }
 
+# _dot_names_spelling WORD: WORD starts an ADR-020 spelling (a domain or a
+# shortcut); old names skip loading help.sh and keep their own help.
+_dot_names_spelling() {
+  _dot_record dom "$1" && return 0
+  _dot_record alias "$1" && [[ "${_REC%%|*}" == shortcut ]]
+}
+
 # _dot_spelled WORD...: `dot <domain> ...` and `dot help <term>` become the
 # route that runs them today. Sets _ARGV.
 _dot_spelled() {
@@ -227,7 +234,7 @@ _dot_spelled() {
     _ARGV=($_RUN "${@:$((_RUN_USED + 1))}")
   elif _dot_planned "$@"; then
     _dot_unknown "$@" # never let the domain's own route take a planned verb
-  elif [[ "$1" == help ]] && _dot_help_spelling "${@:2}"; then
+  elif [[ "$1" == help ]] && _dot_names_spelling "$2" && _dot_help_spelling "${@:2}"; then
     exit 0
   fi
   return 0
@@ -266,6 +273,16 @@ _dot_unknown() {
   exit 127
 }
 
-# Help from the same table (N0.4).
-# shellcheck source-path=SCRIPTDIR source=help.sh
-source "${BASH_SOURCE[0]%/*}/help.sh"
+# Help from the same table (N0.4), loaded on first use: most invocations
+# never print help, and parsing help.sh on each one cost the startup budget.
+# Each stand-in sources help.sh, which replaces it, then calls the real one.
+_DOT_HELP_SH="${BASH_SOURCE[0]%/*}/help.sh"
+for _dot_fn in _dot_help_overview _dot_help_all _dot_domain_help _dot_command_help _dot_help_spelling \
+  _dot_help_search; do
+  eval "$_dot_fn() {
+    # shellcheck source=help.sh
+    source \"\$_DOT_HELP_SH\"
+    $_dot_fn \"\$@\"
+  }"
+done
+unset _dot_fn

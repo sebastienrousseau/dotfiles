@@ -276,7 +276,7 @@ show_help_command() {
 
   if [[ -z "$summary" ]]; then
     # Not a command name: search for it (N8, `dot help <term>`).
-    if show_help_all | grep -i -F -- "$command_name"; then
+    if _dot_help_search "$command_name"; then
       exit 0
     fi
     ui_fail "Unknown help topic: $command_name"
@@ -414,7 +414,7 @@ case "$route" in
       echo "Usage: dot search <keyword>"
       exit 1
     fi
-    show_help_all | grep -i --color=auto "$keyword" || echo "No commands matching '$keyword'"
+    _dot_help_search "$keyword" || echo "No commands matching '$keyword'"
     exit 0
     ;;
 
