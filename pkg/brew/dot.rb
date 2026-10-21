@@ -30,7 +30,7 @@ class Dot < Formula
     bin.install "bin/dot"
     bin.install Dir["bin/dot-*"]
     lib.install Dir["lib/*"]
-    man1.install "share/man/man1/dot.1"
+    man1.install Dir["share/man/man1/dot*.1"]
     zsh_completion.install "share/zsh/site-functions/_dot"
     bash_completion.install "share/bash-completion/completions/dot"
     fish_completion.install "share/fish/vendor_completions.d/dot.fish"

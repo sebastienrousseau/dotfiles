@@ -1,29 +1,35 @@
 .\" SPDX-License-Identifier: Apache-2.0 OR MIT
 .\" Copyright (c) 2015-2026 Sebastien Rousseau
 .\"
-.\" Prose template for share/man/man1/dot.1. The COMMANDS and ALIASES
-.\" sections are generated from the command registry in lib/dot/data by
-.\" tools/docs/generate-manpage.sh — edit THIS file for prose, edit
-.\" lib/dot/data (help-specs.txt / help-details.txt) for command text,
-.\" then run `make man`. CI fails when share/man/man1/dot.1 is stale.
+.\" Prose template for share/man/man1/dot.1. The DOMAINS, FLAGS, SHORTCUTS,
+.\" OLD NAMES, EXIT STATUS and SEE ALSO lists are generated from the plugin
+.\" manifests (lib/dot/data/commands.txt) and schemas/cli/flags.json by
+.\" tools/docs/gen_manpages.py: edit THIS file for prose, the manifests for
+.\" commands, then run `make man`. CI fails when a page is stale.
 .TH DOT 1 "2026-10-17" "dotfiles v0.2.536" "User Commands"
 .SH NAME
-dot \- dotfiles management CLI
+dot \- manage this machine, its shell, its agents and its configuration
 .SH SYNOPSIS
 .B dot
-.RI [ command ]
-.RI [ subcommand ]
-.RI [ options ]
+.I domain
+.RI [ object ]
+.I verb
+.RI [ args ]
 .br
 .B dot help
-.RI [ command ]
+.RI [ domain
+.RI [ object ]
+.IR verb ]
 .br
 .B dot help all
+.br
+.B dot help \-\-json
 .SH DESCRIPTION
 .B dot
-is the control plane for a chezmoi-managed dotfiles system. It provides
-commands for applying configuration, diagnostics, repair, security, and
-AI-assisted development workflows.
+is the control plane for a chezmoi-managed dotfiles system. Its commands
+are grouped into one-word domains, each a plugin with its own page,
+.BR dot\-<domain> (1).
+A domain or an object alone does its read-only default.
 .PP
 Every command accepts
 .B \-\-help
@@ -31,564 +37,397 @@ and
 .BR \-h .
 Run
 .B dot help all
-for the complete reference,
-.B dot search
-.I keyword
-to find a command, and
-.B dot completion
-.I shell
-to generate shell completions from the same registry that produced this
-page.
-.SH COMMANDS
-.SS Core
-.TP
-.B sync
-Apply dotfiles (alias for apply; \-\-pull to fetch, \-\-check to preview)
-.TP
-.B add
-Add a file to chezmoi source
-.TP
-.B diff
-Show chezmoi diff with exclusions
-.TP
-.B status
-Show configuration drift (chezmoi status)
-.TP
-.B edit
-Open chezmoi source in $EDITOR
-.TP
-.B uninstall
-Remove the managed dotfiles environment (prompts unless \-\-force)
-.TP
-.B clean\-cache
-Clear shell initialization caches
-.TP
-.B cd
-Print source directory path (use: cd $(dot cd))
-.TP
-.B commit
-AI\-powered conventional commit
-.SS Diagnostics
-.TP
-.B doctor
-Deep audit: tools, paths, portability, AI analysis (\-\-ai|\-A)
-.TP
-.B attest
-Export workstation attestation evidence (\-\-json|\-j, \-\-write|\-w, \-\-fleet\-store|\-F) or check it against policy (\-\-verify|\-V, \-\-max\-age|\-a)
-.TP
-.B secret\-audit
-Audit secret hygiene and leakage surface
-.TP
-.B score
-System health and security scorecard
-.TP
-.B snapshot
-Capture baseline system snapshot
-.TP
-.B chaos
-Simulate config corruption to test self\-healing
-.TP
-.B bundle
-Create offline archive of dotfiles environment
-.TP
-.B rollback
-Rollback dotfiles to a previous state
-.TP
-.B history
-Shell history analysis
-.TP
-.B perf
-Show performance mode and quick timing
-.TP
-.B benchmark
-Benchmark shell startup with per\-component profiling
-.TP
-.B metrics
-Show recent observability metrics (JSONL)
-.TP
-.B load\-bench
-Measure time to heavy\-layer readiness
-.SS AI
-.TP
-.B ai
-AI fleet cockpit, gateway, and cost
-.TP
-.B ai\-setup
-Interactive setup for all AI CLI tools
-.TP
-.B ai\-query
-Context\-aware RAG query over your dotfiles
-.TP
-.B mcp
-Inspect MCP policy, supply chain, and registry; serve MCP over stdio
-.TP
-.B mode
-Set or inspect agent operating profiles (ask/plan/apply/audit)
-.TP
-.B agent
-Profile\-aware execution, agent card, a2a\-card, session log, checkpoints, and conformance
-.TP
-.B agents
-Render and check AGENTS.md and per\-harness agent config from CLAUDE.md
-.TP
-.B patterns
-List, view, and edit AI steering patterns
-.TP
-.B cl
-Claude CLI with context patterns
-.TP
-.B copilot
-GitHub Copilot CLI with context patterns
-.TP
-.B kimi
-Kimi CLI with context patterns
-.TP
-.B agy
-Antigravity CLI with context patterns
-.TP
-.B kiro
-Kiro CLI with context patterns
-.TP
-.B sgpt
-Shell\-GPT with context patterns
-.TP
-.B ollama
-Ollama with context patterns
-.TP
-.B opencode
-OpenCode with context patterns
-.TP
-.B aider
-Aider with context patterns
-.TP
-.B ai chat
-Start an interactive AI session with a chosen tool
-.TP
-.B ai tools
-Show installed AI CLI tools and their versions
-.TP
-.B ai install
-Install AI CLI tools via mise/native installers
-.TP
-.B ai serve
-Run the local AI gateway/proxy that routes non\-Claude providers
-.TP
-.B ai cost
-Report AI spend across every provider from the unified run log
-.TP
-.B ai login
-Interactive setup/authentication for installed AI CLI tools
-.TP
-.B ai doctor
-Diagnose AI tooling configuration and connectivity
-.TP
-.B ai ask
-Context\-aware RAG query over your dotfiles
-.TP
-.B ai run
-Run a one\-shot prompt with an AI tool
-.TP
-.B ai delegate
-Delegate a coding task to a cheaper AI model under agent policy
-.TP
-.B mode list
-List available agent operating profiles (ask/plan/apply/audit)
-.TP
-.B mode current
-Show the active agent profile and its policy
-.TP
-.B mode show
-Show details of a specific agent profile
-.TP
-.B mode set
-Switch the active agent profile
-.TP
-.B mode run
-Run a command under a given agent profile with a checkpoint
-.TP
-.B mode doctor
-Validate the agent\-profiles.json config and default profile
-.TP
-.B agent card
-Show the local agent card metadata
-.TP
-.B agent log
-Tail the agent session audit log
-.TP
-.B agent checkpoint
-Manage agent run checkpoints (save/list/show/replay)
-.TP
-.B agent delegate
-Delegate execution to an allowed sub\-agent
-.TP
-.B agent a2a\-card
-Show or validate the A2A v0.3 agent card
-.TP
-.B agent conformance
-Run the A2A conformance test suite
-.TP
-.B mcp doctor
-Run the MCP policy/supply\-chain/config audit
-.TP
-.B mcp registry
-Show the configured MCP server registry
-.TP
-.B mcp serve
-Run the stdio MCP server (JSON\-RPC 2.0 on stdin/stdout)
-.TP
-.B agents list
-Show recognised AI agent harnesses and their config paths
-.TP
-.B agents check
-Verify AGENTS.md tracks CLAUDE.md (exit 1 if drifted)
-.TP
-.B agents render
-Regenerate AGENTS.md and per\-harness config from CLAUDE.md
-.TP
-.B patterns list
-List AI steering patterns
-.TP
-.B patterns view
-View an AI steering pattern
-.TP
-.B patterns edit
-Edit an AI steering pattern in $EDITOR
-.SS Tools
-.TP
-.B env
-Tool versions (mise)
-.TP
-.B profile
-Show/switch configuration profile
-.TP
-.B keys
-Keybindings (sign\-check: verify git signing)
-.TP
-.B tools
-Show or install nix packages
-.TP
-.B new
-Create a new project from a template
-.TP
-.B sandbox
-Launch a safe sandbox preview (Docker/Podman)
-.TP
-.B lint
-Lint shell scripts (\-\-fix|\-f to auto\-format, \-\-check|\-c for CI)
-.TP
-.B learn
-Start the interactive tour of your new tools
-.TP
-.B docs
-Show repo README
-.TP
-.B aliases
-List, search, and explain the shipped shell aliases
-.TP
-.B registry
-Browse and install modules from the dot module registry
-.TP
-.B env list
-List managed tool versions via mise
-.TP
-.B env emit
-Emit a portable workstation environment manifest (SBOM; \-\-format json)
-.TP
-.B env prune
-Show or remove orphan tool installs (\-\-yes to commit)
-.TP
-.B env install
-Install requested tool versions via mise
-.TP
-.B env use
-Pin a tool version globally/locally via mise
-.TP
-.B registry list
-List modules in the configured module registry
-.TP
-.B registry search
-Filter registry modules by keyword
-.TP
-.B registry info
-Print full metadata for a registry module
-.TP
-.B registry install
-Install a registry module (scaffold)
-.TP
-.B registry url
-Show the active registry URL
-.TP
-.B registry set\-url
-Override the registry URL (https only; persists)
-.TP
-.B tools install
-Enter the Nix development shell with all managed tools
-.TP
-.B tools docs
-Show the full tools markdown documentation
-.TP
-.B profile show
-Show the active configuration profile and feature flags
-.TP
-.B profile set
-Set the active configuration profile (run dot sync to apply)
-.TP
-.B aliases list
-List all shell aliases shipped by the dotfiles
-.TP
-.B aliases search
-Search aliases by term
-.TP
-.B aliases why
-Show details and deprecation status for a single alias
-.TP
-.B aliases stats
-Show alias usage counts from shell history
-.TP
-.B aliases cheatsheet
-Generate the alias cheatsheet markdown
-.TP
-.B aliases tiers
-Show which alias tiers/ecosystems are enabled
-.TP
-.B keys sign\-check
-Verify git commit\-signing configuration and key availability
-.SS Appearance
-.TP
-.B theme
-Switch terminal theme (dark/light)
-.TP
-.B wallpaper
-Apply a wallpaper from your library [macOS,Linux]
-.TP
-.B fonts
-Install (default) or patch Nerd Fonts (JetBrainsMono by default)
-.TP
-.B tune
-Apply OS tuning (opt\-in) [macOS,Linux]
-.TP
-.B theme list
-Show all available terminal/wallpaper themes
-.TP
-.B theme set
-Set a theme by name (interactive picker if omitted)
-.TP
-.B theme toggle
-Toggle light/dark within the current theme family
-.TP
-.B theme sync
-Sync the dotfiles theme with system dark/light mode
-.TP
-.B theme family
-Cycle between theme families
-.TP
-.B theme current
-Show the current theme info
-.TP
-.B theme rebuild
-Regenerate themes from system and custom wallpapers
-.TP
-.B wallpaper sync
-Sync wallpaper from your library
-.TP
-.B wallpaper rotate
-Rotate to the next wallpaper in your library
-.SS Secrets
-.TP
-.B secrets\-init
-Initialize age key for secrets
-.TP
-.B secrets
-Edit encrypted secrets (age)
-.TP
-.B secrets\-create
-Create an encrypted secrets file
-.TP
-.B ssh\-key
-Encrypt an SSH key locally with age
-.TP
-.B ssh\-cert
-Manage short\-lived SSH certificates
-.TP
-.B secrets edit
-Edit the encrypted secrets file (age)
-.TP
-.B secrets set
-Store a secret value under a key
-.TP
-.B secrets get
-Retrieve a secret value (\-\-raw for plaintext)
-.TP
-.B secrets list
-List indexed secret keys
-.TP
-.B secrets load
-Emit export lines for a secrets bucket (use with eval)
-.TP
-.B secrets provider
-Show the active secrets provider
-.SS Security (opt\-in)
-.TP
-.B backup
-Create a compressed backup of your home
-.TP
-.B policy
-Check and enforce security policies across the environment
-.TP
-.B encrypt\-check
-Check disk encryption status
-.TP
-.B firewall
-Apply firewall hardening [macOS,Linux]
-.TP
-.B telemetry
-Disable OS telemetry [macOS,Linux]
-.TP
-.B dns\-doh
-Enable DNS\-over\-HTTPS [macOS,Linux]
-.TP
-.B lock\-screen
-Enforce lock screen idle settings [Linux]
-.TP
-.B usb\-safety
-Disable automount for removable media [Linux]
-.SS Fleet
-.TP
-.B fleet
-Show fleet node status, drift, and namespace (\-\-json for machine output)
-.TP
-.B fleet drift
-Check for configuration drift across managed files
-.TP
-.B fleet namespace
-Show or set the active namespace for multi\-tenant isolation
-.TP
-.B fleet events
-Show recent fleet events from local event log
-.TP
-.B teleport
-Deploy the dotfiles environment to a remote host over SSH
-.TP
-.B fleet status
-Show this node's fleet status: id, namespace, version, OS, drift, last apply
-.TP
-.B fleet enforce
-Show or set RBAC enforcement mode (advisory/strict) for agent profiles
-.TP
-.B fleet apply
-SSH to every host in fleet.toml and run dot sync (or a custom \-\-cmd)
-.SS Meta
-.TP
-.B upgrade
-Update dotfiles, mise tools and (with consent) system packages
-.TP
-.B packages
-List installed packages and package managers
-.TP
-.B cache\-refresh
-Regenerate shell caches for ultra\-fast startup
-.TP
-.B completion
-Generate shell completions (bash/zsh/fish/nu) from the command registry
-.TP
-.B search
-Find commands by keyword
-.TP
-.B version
-Show version information.
-.TP
-.B help
-Show this help message
-.SH ALIASES AND HIDDEN COMMANDS
-The dispatcher also routes the following names. They are aliases,
-deprecated bridges, or advanced entry points that are kept out of
+for every command,
 .B dot help
-to reduce noise; each still works and documents itself with
-.BR \-\-help .
+.I term
+to search, and
+.B dot cli completion show
+.I shell
+for the completion script, generated from the same manifests as this page.
+.SH DOMAINS
+.SS Configuration
 .TP
-.B alias\-check
-Routed to the tools module; run dot alias\-check \-\-help.
+.BR dot\-config (1)
+apply, diff and sync the dotfiles
 .TP
-.B apply
-Apply the current dotfiles to this machine.
+.BR dot\-shell (1)
+aliases, history, startup caches
 .TP
-.B attestation
-Routed to the diagnostics module; run dot attestation \-\-help.
+.BR dot\-theme (1)
+one palette for every app
 .TP
-.B autohand
-Run the Autohand CLI with dotfiles context patterns.
+.BR dot\-tool (1)
+toolchains, packages, project templates
+.SS Sessions
 .TP
-.B claude
-Run the Claude CLI bridge (alias for cl).
+.BR dot\-session (1)
+find, open and restore terminal sessions
 .TP
-.B codex
-Run the OpenAI Codex CLI with dotfiles context patterns.
+.BR dot\-top (1)
+what the machine and its agents are doing
+.SS Agents
 .TP
-.B conflicts
-Routed to the diagnostics module; run dot conflicts \-\-help.
+.BR dot\-ai (1)
+install, route and run coding agents
 .TP
-.B drift
-Routed to the diagnostics module; run dot drift \-\-help.
+.BR dot\-agent (1)
+modes, policy, sandbox, budgets
 .TP
-.B goose
-Run the Goose CLI with dotfiles context patterns.
+.BR dot\-mcp (1)
+MCP servers as supply chain
+.SS System
 .TP
-.B health\-check
-Routed to the diagnostics module; run dot health\-check \-\-help.
+.BR dot\-system (1)
+updates, cleanup, scheduled maintenance
 .TP
-.B health
-Run the health dashboard with optional fixes.
+.BR dot\-doctor (1)
+health, repair, backup and rollback
+.SS Trust & hosts
 .TP
-.B heal
-Auto\-repair common dotfiles problems (missing files, broken links).
+.BR dot\-secret (1)
+secrets, keys and SSH certificates
 .TP
-.B init
-Bootstrap a dotfiles repository through chezmoi.
+.BR dot\-security (1)
+OS hardening
 .TP
-.B intelligence
-Routed to the diagnostics module; run dot intelligence \-\-help.
+.BR dot\-attest (1)
+attestation and verification
 .TP
-.B load\-bench\-pty
-Routed to the diagnostics module; run dot load\-bench\-pty \-\-help.
+.BR dot\-fleet (1)
+many hosts
+.SS Platform
 .TP
-.B locks
-Routed to the diagnostics module; run dot locks \-\-help.
+.BR dot\-cli (1)
+plugins, updates, completions
 .TP
-.B log\-rotate
-Routed to the tools module; run dot log\-rotate \-\-help.
+.BR dot\-ui (1)
+primitives for scripts
+.SH FLAGS
+These flags mean the same thing in every command that takes them.
 .TP
-.B manual
-Open or download the dotfiles manual in HTML, PDF, EPUB, or text.
+.B \-\-help, \-h
+Show help for the command and exit 0
 .TP
-.B prewarm
-Alias of cache\-refresh — regenerate shell init caches.
+.B \-\-version, \-V
+Print the version and exit 0
 .TP
-.B qwen
-Run the Qwen Coder CLI with dotfiles context patterns.
+.B \-\-verbose, \-v
+Raise the log level; repeatable
 .TP
-.B restore
-Restore from a backup or git ref.
+.B \-\-quiet, \-q
+Print results only, no progress or logs
 .TP
-.B scorecard
-Routed to the diagnostics module; run dot scorecard \-\-help.
+.B \-\-yes, \-y
+Answer yes to every confirmation
 .TP
-.B security\-score
-Assess workstation security posture.
+.B \-\-dry\-run, \-n
+Show what would change and change nothing
 .TP
-.B setup
-Routed to the tools module; run dot setup \-\-help.
+.B \-\-json
+Print the result as JSON with a versioned schema
 .TP
-.B smoke\-test
-Routed to the diagnostics module; run dot smoke\-test \-\-help.
+.B \-\-plain
+Print plain text without tables, colour or boxes
 .TP
-.B update
-Routed to the core module; run dot update \-\-help.
+.B \-\-no\-color
+Never print colour
 .TP
-.B vibe
-Run the Vibe AI CLI with dotfiles context patterns.
+.B \-\-force
+Proceed past a safety check that would stop the command
 .TP
-.B zai
-Run the ZAI CLI with dotfiles context patterns.
+.B \-\-no\-motion
+Disable animation in a TUI
+.SH SHORTCUTS
+.TP
+.B dot apply
+Shortcut for \fBdot config apply\fR.
+.TP
+.B dot sync
+Shortcut for \fBdot config sync\fR.
+.TP
+.B dot diff
+Shortcut for \fBdot config diff\fR.
+.TP
+.B dot status
+Shortcut for \fBdot config status\fR.
+.TP
+.B dot edit
+Shortcut for \fBdot config edit\fR.
+.TP
+.B dot cd
+Shortcut for \fBdot config path\fR.
+.TP
+.B dot update
+Shortcut for \fBdot system update\fR.
+.SH OLD NAMES
+Names from before the domains. A deprecated name still runs and prints its
+new spelling until the release shown; after it, and for a removed name,
+.B dot
+exits 127 with the new spelling.
+.TP
+.B dot mode
+Deprecated until 0.2.538; use \fBdot agent mode\fR.
+.TP
+.B dot agents
+Deprecated until 0.2.538; use \fBdot agent context\fR.
+.TP
+.B dot ai\-setup
+Deprecated until 0.2.538; use \fBdot ai install \-\-interactive\fR.
+.TP
+.B dot ai\-query
+Deprecated until 0.2.538; use \fBdot ai ask\fR.
+.TP
+.B dot patterns
+Deprecated until 0.2.538; use \fBdot ai pattern\fR.
+.TP
+.B dot cl
+Deprecated until 0.2.538; use \fBdot ai run claude\fR.
+.TP
+.B dot claude
+Deprecated until 0.2.538; use \fBdot ai run claude\fR.
+.TP
+.B dot codex
+Deprecated until 0.2.538; use \fBdot ai run codex\fR.
+.TP
+.B dot copilot
+Deprecated until 0.2.538; use \fBdot ai run copilot\fR.
+.TP
+.B dot kimi
+Deprecated until 0.2.538; use \fBdot ai run kimi\fR.
+.TP
+.B dot agy
+Deprecated until 0.2.538; use \fBdot ai run agy\fR.
+.TP
+.B dot goose
+Deprecated until 0.2.538; use \fBdot ai run goose\fR.
+.TP
+.B dot kiro
+Deprecated until 0.2.538; use \fBdot ai run kiro\fR.
+.TP
+.B dot sgpt
+Deprecated until 0.2.538; use \fBdot ai run sgpt\fR.
+.TP
+.B dot ollama
+Deprecated until 0.2.538; use \fBdot ai run ollama\fR.
+.TP
+.B dot opencode
+Deprecated until 0.2.538; use \fBdot ai run opencode\fR.
+.TP
+.B dot aider
+Deprecated until 0.2.538; use \fBdot ai run aider\fR.
+.TP
+.B dot autohand
+Deprecated until 0.2.538; use \fBdot ai run autohand\fR.
+.TP
+.B dot vibe
+Deprecated until 0.2.538; use \fBdot ai run vibe\fR.
+.TP
+.B dot qwen
+Deprecated until 0.2.538; use \fBdot ai run qwen\fR.
+.TP
+.B dot zai
+Deprecated until 0.2.538; use \fBdot ai run zai\fR.
+.TP
+.B dot attestation
+Deprecated until 0.2.538; use \fBdot attest\fR.
+.TP
+.B dot completion
+Deprecated until 0.2.538; use \fBdot cli completion\fR.
+.TP
+.B dot registry
+Deprecated until 0.2.538; use \fBdot cli list \-\-available\fR.
+.TP
+.B dot search
+Deprecated until 0.2.538; use \fBdot help\fR.
+.TP
+.B dot manual
+Deprecated until 0.2.538; use \fBdot help \-\-manual\fR.
+.TP
+.B dot docs
+Deprecated until 0.2.538; use \fBdot help \-\-readme\fR.
+.TP
+.B dot learn
+Deprecated until 0.2.538; use \fBdot help tour\fR.
+.TP
+.B dot add
+Deprecated until 0.2.538; use \fBdot config add\fR.
+.TP
+.B dot commit
+Deprecated until 0.2.538; use \fBdot config save\fR.
+.TP
+.B dot uninstall
+Deprecated until 0.2.538; use \fBdot config uninstall\fR.
+.TP
+.B dot init
+Deprecated until 0.2.538; use \fBdot config init\fR.
+.TP
+.B dot setup
+Deprecated until 0.2.538; use \fBdot config init\fR.
+.TP
+.B dot profile
+Deprecated until 0.2.538; use \fBdot config profile\fR.
+.TP
+.B dot sandbox
+Deprecated until 0.2.538; use \fBdot config apply \-\-sandbox\fR.
+.TP
+.B dot bundle
+Deprecated until 0.2.538; use \fBdot config export\fR.
+.TP
+.B dot lint
+Deprecated until 0.2.538; use \fBdot config check\fR.
+.TP
+.B dot health
+Deprecated until 0.2.538; use \fBdot doctor\fR.
+.TP
+.B dot health\-check
+Deprecated until 0.2.538; use \fBdot doctor\fR.
+.TP
+.B dot scorecard
+Deprecated until 0.2.538; use \fBdot doctor score\fR.
+.TP
+.B dot score
+Deprecated until 0.2.538; use \fBdot doctor score\fR.
+.TP
+.B dot snapshot
+Deprecated until 0.2.538; use \fBdot doctor snapshot new\fR.
+.TP
+.B dot perf
+Deprecated until 0.2.538; use \fBdot doctor perf\fR.
+.TP
+.B dot benchmark
+Deprecated until 0.2.538; use \fBdot doctor perf \-\-profile\fR.
+.TP
+.B dot load\-bench
+Deprecated until 0.2.538; use \fBdot doctor perf \-\-ready\fR.
+.TP
+.B dot load\-bench\-pty
+Deprecated until 0.2.538; use \fBdot doctor perf \-\-ready \-\-pty\fR.
+.TP
+.B dot rollback
+Deprecated until 0.2.538; use \fBdot doctor rollback\fR.
+.TP
+.B dot heal
+Deprecated until 0.2.538; use \fBdot doctor fix\fR.
+.TP
+.B dot drift
+Deprecated until 0.2.538; use \fBdot doctor drift\fR.
+.TP
+.B dot conflicts
+Deprecated until 0.2.538; use \fBdot doctor conflict\fR.
+.TP
+.B dot restore
+Deprecated until 0.2.538; use \fBdot doctor restore\fR.
+.TP
+.B dot metrics
+Deprecated until 0.2.538; use \fBdot doctor metric\fR.
+.TP
+.B dot backup
+Deprecated until 0.2.538; use \fBdot doctor backup\fR.
+.TP
+.B dot chaos
+Deprecated until 0.2.538; use \fBdot doctor\fR.
+.TP
+.B dot smoke\-test
+Deprecated until 0.2.538; use \fBdot doctor\fR.
+.TP
+.B dot keys
+Deprecated until 0.2.538; use \fBdot doctor\fR.
+.TP
+.B dot teleport
+Deprecated until 0.2.538; use \fBdot fleet push\fR.
+.TP
+.B dot secrets\-init
+Deprecated until 0.2.538; use \fBdot secret init\fR.
+.TP
+.B dot secrets
+Deprecated until 0.2.538; use \fBdot secret edit\fR.
+.TP
+.B dot secrets\-create
+Deprecated until 0.2.538; use \fBdot secret new\fR.
+.TP
+.B dot ssh\-key
+Deprecated until 0.2.538; use \fBdot secret key new\fR.
+.TP
+.B dot ssh\-cert
+Deprecated until 0.2.538; use \fBdot secret cert new\fR.
+.TP
+.B dot secret\-audit
+Deprecated until 0.2.538; use \fBdot secret check\fR.
+.TP
+.B dot policy
+Deprecated until 0.2.538; use \fBdot security policy\fR.
+.TP
+.B dot encrypt\-check
+Deprecated until 0.2.538; use \fBdot security disk\fR.
+.TP
+.B dot firewall
+Deprecated until 0.2.538; use \fBdot security firewall apply\fR.
+.TP
+.B dot telemetry
+Deprecated until 0.2.538; use \fBdot security telemetry apply\fR.
+.TP
+.B dot dns\-doh
+Deprecated until 0.2.538; use \fBdot security dns apply\fR.
+.TP
+.B dot lock\-screen
+Deprecated until 0.2.538; use \fBdot security lock apply\fR.
+.TP
+.B dot usb\-safety
+Deprecated until 0.2.538; use \fBdot security usb apply\fR.
+.TP
+.B dot security\-score
+Deprecated until 0.2.538; use \fBdot security score\fR.
+.TP
+.B dot history
+Deprecated until 0.2.538; use \fBdot shell history\fR.
+.TP
+.B dot aliases
+Deprecated until 0.2.538; use \fBdot shell alias\fR.
+.TP
+.B dot alias\-check
+Deprecated until 0.2.538; use \fBdot shell alias check\fR.
+.TP
+.B dot cache\-refresh
+Deprecated until 0.2.538; use \fBdot shell update\fR.
+.TP
+.B dot prewarm
+Deprecated until 0.2.538; use \fBdot shell update \-\-prewarm\fR.
+.TP
+.B dot clean\-cache
+Deprecated until 0.2.538; use \fBdot shell clean\fR.
+.TP
+.B dot upgrade
+Deprecated until 0.2.538; use \fBdot system update\fR.
+.TP
+.B dot tune
+Deprecated until 0.2.538; use \fBdot system settings apply\fR.
+.TP
+.B dot log\-rotate
+Deprecated until 0.2.538; use \fBdot system clean \-\-logs\fR.
+.TP
+.B dot wallpaper
+Deprecated until 0.2.538; use \fBdot theme wallpaper set\fR.
+.TP
+.B dot fonts
+Deprecated until 0.2.538; use \fBdot theme font install\fR.
+.TP
+.B dot env
+Deprecated until 0.2.538; use \fBdot tool\fR.
+.TP
+.B dot tools
+Deprecated until 0.2.538; use \fBdot tool list \-\-nix\fR.
+.TP
+.B dot packages
+Deprecated until 0.2.538; use \fBdot tool list \-\-packages\fR.
+.TP
+.B dot locks
+Deprecated until 0.2.538; use \fBdot tool list \-\-locked\fR.
+.TP
+.B dot new
+Deprecated until 0.2.538; use \fBdot tool new\fR.
+.TP
+.B dot intelligence
+Deprecated until 0.2.538; use \fBdot top\fR.
 .SH ENVIRONMENT
 .TP
 .B DOTFILES_FAST=1
@@ -633,13 +472,45 @@ User-provided zsh initialization scripts.
 .I ~/.local/share/dotfiles.log
 Local action log. No telemetry leaves the machine.
 .SH EXIT STATUS
+.TP
 .B 0
-on success,
+Success
+.TP
 .B 1
-on a command failure,
+Warning, or a check failed
+.TP
 .B 2
-on usage errors (unknown command, bad flags).
+Critical failure
+.TP
+.B 64
+Usage error (EX_USAGE)
+.TP
+.B 75
+Temporary failure such as a held lock; retry (EX_TEMPFAIL)
+.TP
+.B 127
+Unknown command, removed name or missing plugin
+.TP
+.B 130
+Interrupted by SIGINT
 .SH SEE ALSO
+.BR dot\-agent (1),
+.BR dot\-ai (1),
+.BR dot\-attest (1),
+.BR dot\-cli (1),
+.BR dot\-config (1),
+.BR dot\-doctor (1),
+.BR dot\-fleet (1),
+.BR dot\-mcp (1),
+.BR dot\-secret (1),
+.BR dot\-security (1),
+.BR dot\-session (1),
+.BR dot\-shell (1),
+.BR dot\-system (1),
+.BR dot\-theme (1),
+.BR dot\-tool (1),
+.BR dot\-top (1),
+.BR dot\-ui (1),
 .BR chezmoi (1),
 .BR mise (1),
 .BR zsh (1)

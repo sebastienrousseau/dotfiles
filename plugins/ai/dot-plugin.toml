@@ -73,6 +73,7 @@ summary = "Steering pattern"
 values = ["claude", "codex", "copilot", "goose", "crush", "amp", "cursor-agent", "grok", "kimi", "agy", "kiro", "sgpt", "ollama", "opencode", "aider", "autohand", "vibe", "qwen", "zai"]
 
 [[commands]]
+object = "gateway"
 verb = "serve"
 effect = "read"
 legacy = "ai serve"

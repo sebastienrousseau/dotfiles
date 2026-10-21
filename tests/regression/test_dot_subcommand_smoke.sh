@@ -138,7 +138,7 @@ for line in "${routes[@]}"; do
   out="$(help_text "$cmd")"
   if [[ "$out" == *"Unknown help topic"* ]]; then
     unknown_topic+=("$cmd")
-  elif [[ "$out" != *"Summary"* ]]; then
+  elif [[ "$out" != *"Summary"* && "$out" != *"dot "*" · "* ]]; then
     no_summary+=("$cmd")
   fi
 done
@@ -170,7 +170,7 @@ fi
 # 3) Top-level CLI invariants: `dot`, `dot help`, `dot help all`, `dot --version`.
 test_start "dot_no_args_shows_help"
 out="$(bash "$DOT_CLI" 2>&1 || true)"
-if [[ "$out" == *"What it is"* ]] || [[ "$out" == *"USAGE"* ]] || [[ "$out" == *"Reference"* ]] || [[ "$out" == *"Start"* ]]; then
+if [[ "$out" == *"Usage: dot <domain>"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else

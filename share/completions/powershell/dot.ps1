@@ -11,9 +11,9 @@ $script:DotChildren = @{
     'agent log' = @(, @('show', 'The agent log'))
     'agent mode' = @(@('list', 'Available modes'), @('show', 'One mode in detail'), @('set', 'Switch mode'))
     'agent policy' = @(, @('show', 'The sandbox policy'))
-    'ai' = @(@('pattern', 'prompt patterns'), @('cost', 'spend by agent and model'), @('gateway', 'the keyless gateway'), @('inventory', 'installed agents and versions'), @('list', 'Installed agents'), @('install', 'Install agents'), @('update', 'Upgrade agent CLIs'), @('start', 'Start an agent'), @('run', 'Run an agent once'), @('serve', 'Run the gateway in the foreground'), @('login', 'Authenticate an agent'), @('check', 'Check agent installs and auth'), @('ask', 'Ask about the local context'))
+    'ai' = @(@('pattern', 'prompt patterns'), @('cost', 'spend by agent and model'), @('gateway', 'the keyless gateway'), @('inventory', 'installed agents and versions'), @('list', 'Installed agents'), @('install', 'Install agents'), @('update', 'Upgrade agent CLIs'), @('start', 'Start an agent'), @('run', 'Run an agent once'), @('login', 'Authenticate an agent'), @('check', 'Check agent installs and auth'), @('ask', 'Ask about the local context'))
     'ai cost' = @(, @('show', 'Spend by agent and model'))
-    'ai gateway' = @(, @('show', 'Gateway statistics'))
+    'ai gateway' = @(@('serve', 'Run the gateway in the foreground'), @('show', 'Gateway statistics'))
     'ai inventory' = @(, @('show', 'Agents, versions and config'))
     'ai pattern' = @(, @('list', 'Prompt patterns'))
     'attest' = @(@('show', 'The workstation attestation'), @('export', 'Write attestation evidence'), @('verify', 'Verify evidence'))
@@ -87,6 +87,7 @@ $script:DotCommands = @{
     'ai ask' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai check' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai cost show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai gateway serve' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai gateway show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai install' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai inventory show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
@@ -94,7 +95,6 @@ $script:DotCommands = @{
     'ai login' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai pattern list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai run' = @{ Flags = @(@('--help', 'Show help'), @('--pattern', 'Steering pattern'), @('-p', 'Steering pattern')); Values = @('claude', 'codex', 'copilot', 'goose', 'crush', 'amp', 'cursor-agent', 'grok', 'kimi', 'agy', 'kiro', 'sgpt', 'ollama', 'opencode', 'aider', 'autohand', 'vibe', 'qwen', 'zai'); Files = $false; PatternFlags = @('--pattern', '-p'); ValueFlags = @() }
-    'ai serve' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai start' = @{ Flags = @(, @('--help', 'Show help')); Values = @('claude', 'codex', 'copilot', 'goose', 'crush', 'amp', 'cursor-agent', 'grok', 'kimi', 'agy', 'kiro', 'sgpt', 'ollama', 'opencode', 'aider', 'autohand', 'vibe', 'qwen', 'zai'); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai update' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'attest export' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }

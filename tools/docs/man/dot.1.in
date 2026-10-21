@@ -1,29 +1,35 @@
 .\" SPDX-License-Identifier: Apache-2.0 OR MIT
 .\" Copyright (c) 2015-2026 Sebastien Rousseau
 .\"
-.\" Prose template for share/man/man1/dot.1. The COMMANDS and ALIASES
-.\" sections are generated from the command registry in lib/dot/data by
-.\" tools/docs/generate-manpage.sh — edit THIS file for prose, edit
-.\" lib/dot/data (help-specs.txt / help-details.txt) for command text,
-.\" then run `make man`. CI fails when share/man/man1/dot.1 is stale.
+.\" Prose template for share/man/man1/dot.1. The DOMAINS, FLAGS, SHORTCUTS,
+.\" OLD NAMES, EXIT STATUS and SEE ALSO lists are generated from the plugin
+.\" manifests (lib/dot/data/commands.txt) and schemas/cli/flags.json by
+.\" tools/docs/gen_manpages.py: edit THIS file for prose, the manifests for
+.\" commands, then run `make man`. CI fails when a page is stale.
 .TH DOT 1 "@DATE@" "dotfiles v@VERSION@" "User Commands"
 .SH NAME
-dot \- dotfiles management CLI
+dot \- manage this machine, its shell, its agents and its configuration
 .SH SYNOPSIS
 .B dot
-.RI [ command ]
-.RI [ subcommand ]
-.RI [ options ]
+.I domain
+.RI [ object ]
+.I verb
+.RI [ args ]
 .br
 .B dot help
-.RI [ command ]
+.RI [ domain
+.RI [ object ]
+.IR verb ]
 .br
 .B dot help all
+.br
+.B dot help \-\-json
 .SH DESCRIPTION
 .B dot
-is the control plane for a chezmoi-managed dotfiles system. It provides
-commands for applying configuration, diagnostics, repair, security, and
-AI-assisted development workflows.
+is the control plane for a chezmoi-managed dotfiles system. Its commands
+are grouped into one-word domains, each a plugin with its own page,
+.BR dot\-<domain> (1).
+A domain or an object alone does its read-only default.
 .PP
 Every command accepts
 .B \-\-help
@@ -31,22 +37,25 @@ and
 .BR \-h .
 Run
 .B dot help all
-for the complete reference,
-.B dot search
-.I keyword
-to find a command, and
-.B dot completion
-.I shell
-to generate shell completions from the same registry that produced this
-page.
-.SH COMMANDS
-@COMMANDS@
-.SH ALIASES AND HIDDEN COMMANDS
-The dispatcher also routes the following names. They are aliases,
-deprecated bridges, or advanced entry points that are kept out of
+for every command,
 .B dot help
-to reduce noise; each still works and documents itself with
-.BR \-\-help .
+.I term
+to search, and
+.B dot cli completion show
+.I shell
+for the completion script, generated from the same manifests as this page.
+.SH DOMAINS
+@DOMAINS@
+.SH FLAGS
+These flags mean the same thing in every command that takes them.
+@FLAGS@
+.SH SHORTCUTS
+@SHORTCUTS@
+.SH OLD NAMES
+Names from before the domains. A deprecated name still runs and prints its
+new spelling until the release shown; after it, and for a removed name,
+.B dot
+exits 127 with the new spelling.
 @ALIASES@
 .SH ENVIRONMENT
 .TP
@@ -92,13 +101,9 @@ User-provided zsh initialization scripts.
 .I ~/.local/share/dotfiles.log
 Local action log. No telemetry leaves the machine.
 .SH EXIT STATUS
-.B 0
-on success,
-.B 1
-on a command failure,
-.B 2
-on usage errors (unknown command, bad flags).
+@EXIT@
 .SH SEE ALSO
+@PAGES@,
 .BR chezmoi (1),
 .BR mise (1),
 .BR zsh (1)

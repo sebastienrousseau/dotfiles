@@ -98,11 +98,12 @@ done
 
 # Every command the dispatcher can route, straight out of bin/dot's route
 # table, minus the flag aliases (`dot --help --help` is not a case worth
-# timing). One `help:<command>` case each — the cold-start cost a user pays
-# on every invocation of that command.
+# timing), plus every ADR-020 domain. One `help:<command>` case each — the
+# cold-start cost a user pays on every invocation of that command.
 bench_help_ids() {
-  awk -F'|' '/^[a-z][a-z0-9-]*\|[a-z]+$/ { print $1 }' "$REPO_ROOT/lib/dot/data/routes.txt" |
-    sort -u
+  # Routes (`<name>|<module>`) and ADR-020 domains (`dom|<name>|...`).
+  awk -F'|' '/^[a-z][a-z0-9-]*\|[a-z]+$/ { print $1 } $1 == "dom" { print $2 }' \
+    "$REPO_ROOT/lib/dot/data/routes.txt" "$REPO_ROOT/lib/dot/data/commands.txt" | sort -u
 }
 
 # Read-only invocations: the command doing its real work, not just rendering

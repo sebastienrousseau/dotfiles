@@ -194,8 +194,6 @@ show_version() {
   fi
 }
 
-_dot_help_overview_specs() { _dot_data help-overview.txt; }
-
 # The route and help tables are data, kept in lib/dot/data so the
 # dispatcher, the doc generators, the QA gates and the tests read one
 # source. _dot_data prints a table without forking, and stops at the first
@@ -247,57 +245,21 @@ _dot_command_route() {
   return 1
 }
 
+# Help comes from lib/dot/help.sh; without it (first install) only the usage.
 show_help_overview() {
-  ui_dot_banner "Reference"
-  ui_header "Dotfiles"
-  ui_meta "Usage" "dot [command]"
-  ui_meta "Version" "v$VERSION"
-  echo ""
-
-  ui_info "What it is" "A single command for setting up, checking, and maintaining this shell environment."
-  ui_info "Platforms" "macOS, Linux, and WSL"
-  ui_info "Start" "Run 'dot sync', then 'dot doctor', then 'dot learn'"
-  echo ""
-
-  local current_section="" section="" command_name="" description="" detail=""
-  while IFS='|' read -r section command_name description detail; do
-    if [[ "$section" != "$current_section" ]]; then
-      if [[ -n "$current_section" ]]; then
-        echo ""
-      fi
-      ui_section "$section"
-      current_section="$section"
-    fi
-    ui_cmd "$command_name" "$description"
-  done < <(_dot_help_overview_specs)
-  echo ""
-  ui_info "Next" "Run 'dot help all' for the full command list"
-  ui_info "Detail" "Run 'dot help <command>' for one command"
+  if declare -F _dot_help_overview >/dev/null; then
+    _dot_help_overview
+  else
+    printf 'Usage: dot <domain> [object] <verb> [args]\n'
+  fi
 }
 
 show_help_all() {
-  ui_dot_banner "Reference"
-  ui_header "Dotfiles Command Reference"
-  ui_meta "Usage" "dot [command]"
-  ui_meta "Version" "v$VERSION"
-  echo ""
-
-  local current_section="" section="" command_name="" description="" detail=""
-  while IFS='|' read -r section command_name description detail; do
-    if [[ "$command_name" == "help all" ]]; then
-      continue
-    fi
-    if [[ "$section" != "$current_section" ]]; then
-      if [[ -n "$current_section" ]]; then
-        echo ""
-      fi
-      ui_section "$section"
-      current_section="$section"
-    fi
-    ui_cmd "$command_name" "$description"
-    # The registry lists commands by topic, not by section; group them so each
-    # section header prints once, sections in first-seen order (awk: bash 3.2).
-  done < <(_dot_help_specs | awk -F'|' '!($1 in s) { s[$1]; o[++n] = $1 } { l[$1] = l[$1] $0 "\n" } END { for (i = 1; i <= n; i++) printf "%s", l[o[i]] }')
+  if declare -F _dot_help_all >/dev/null; then
+    _dot_help_all
+  else
+    show_help_overview
+  fi
 }
 
 show_help_command() {
@@ -344,6 +306,9 @@ show_help() {
       ;;
     all)
       show_help_all
+      ;;
+    --json)
+      cat "$_DOT_SRC/lib/dot/data/commands.json"
       ;;
     *)
       show_help_command "$topic"

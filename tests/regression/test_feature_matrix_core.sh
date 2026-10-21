@@ -55,7 +55,7 @@ test_fm_help_overview() {
   fm_run help
   fm_expect_rc 0
   test_start "fm_help_overview_has_start_here"
-  fm_expect_out "Start Here"
+  fm_expect_out "Usage: dot <domain> [object] <verb>"
 }
 
 test_fm_help_no_args() {
@@ -63,7 +63,7 @@ test_fm_help_no_args() {
   fm_run
   fm_expect_rc 0
   test_start "fm_help_no_args_shows_overview"
-  fm_expect_out "Start Here"
+  fm_expect_out "Usage: dot <domain> [object] <verb>"
 }
 
 test_fm_help_long_flag() {
@@ -71,7 +71,7 @@ test_fm_help_long_flag() {
   fm_run --help
   fm_expect_rc 0
   test_start "fm_help_long_flag_shows_overview"
-  fm_expect_out "Start Here"
+  fm_expect_out "Usage: dot <domain> [object] <verb>"
 }
 
 test_fm_help_short_flag() {
@@ -79,7 +79,7 @@ test_fm_help_short_flag() {
   fm_run -h
   fm_expect_rc 0
   test_start "fm_help_short_flag_shows_overview"
-  fm_expect_out "Start Here"
+  fm_expect_out "Usage: dot <domain> [object] <verb>"
 }
 
 test_fm_help_all() {
@@ -87,19 +87,17 @@ test_fm_help_all() {
   fm_run help all
   fm_expect_rc 0
   test_start "fm_help_all_lists_full_reference"
-  fm_expect_out "Command Reference"
-  # Commands are grouped under section headers.
+  fm_expect_out "dot system update"
+  # Commands are grouped under one heading per domain.
   test_start "fm_help_all_groups_commands_under_sections"
-  fm_expect_out "== Core =="
-  # Each section is one block: the registry lists commands by topic, and
-  # printing it unsorted repeated headers (== AI == four times).
+  fm_expect_out "dot doctor"
   test_start "fm_help_all_prints_each_section_once"
   local repeated
-  repeated="$(printf '%s\n' "$FM_OUT" | grep -E '^== .* ==$' | sort | uniq -d)"
-  if [[ -n "$(printf '%s\n' "$FM_OUT" | grep -E '^== .* ==$')" && -z "$repeated" ]]; then
-    fm_pass "every section header appears once"
+  repeated="$(printf '%s\n' "$FM_OUT" | grep -E '^dot [a-z]+$' | sort | uniq -d)"
+  if [[ -n "$(printf '%s\n' "$FM_OUT" | grep -E '^dot [a-z]+$')" && -z "$repeated" ]]; then
+    fm_pass "every domain heading appears once"
   else
-    fm_fail "no headers, or repeated: ${repeated:-none found}"
+    fm_fail "no headings, or repeated: ${repeated:-none found}"
   fi
   # `help all` is the source the command index is generated from, so it has to
   # stay substantially larger than the overview.
@@ -118,12 +116,12 @@ test_fm_help_all() {
 
 test_fm_help_topic() {
   test_start "fm_help_topic"
-  fm_run help doctor
+  fm_run help doctor check
   fm_expect_rc 0
   test_start "fm_help_topic_names_the_command"
-  fm_expect_out "dot doctor"
+  fm_expect_out "dot doctor check"
   test_start "fm_help_topic_has_summary"
-  fm_expect_out "Summary"
+  fm_expect_out "Run every health check"
 }
 
 test_fm_help_unknown_topic() {

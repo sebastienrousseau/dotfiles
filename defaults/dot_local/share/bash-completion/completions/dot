@@ -37,9 +37,9 @@ _dot() {
     'agent log') words='show' ;;
     'agent mode') words='list show set' ;;
     'agent policy') words='show' ;;
-    'ai') words='pattern cost gateway inventory list install update start run serve login check ask' ;;
+    'ai') words='pattern cost gateway inventory list install update start run login check ask' ;;
     'ai cost') words='show' ;;
-    'ai gateway') words='show' ;;
+    'ai gateway') words='serve show' ;;
     'ai inventory') words='show' ;;
     'ai pattern') words='list' ;;
     'attest') words='show export verify' ;;
@@ -156,6 +156,9 @@ _dot() {
     'ai cost show' | 'ai cost show'\ *)
       flags='--help'
       ;;
+    'ai gateway serve' | 'ai gateway serve'\ *)
+      flags='--help'
+      ;;
     'ai gateway show' | 'ai gateway show'\ *)
       flags='--help'
       ;;
@@ -178,9 +181,6 @@ _dot() {
       flags='--help --pattern -p'
       patflags='--pattern -p'
       [[ "$path" != 'ai run' ]] || values='claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai'
-      ;;
-    'ai serve' | 'ai serve'\ *)
-      flags='--help'
       ;;
     'ai start' | 'ai start'\ *)
       flags='--help'

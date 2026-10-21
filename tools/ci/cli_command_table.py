@@ -11,6 +11,7 @@ the dispatcher resolves ADR-020 spellings without parsing TOML:
   cmd|<domain [object] verb>|<legacy route or empty>|<effect>|<summary>
   run|<invocation with flags>|<legacy route>||
   leg|<legacy route>|<spelling>||   (the first spelling a route runs)
+  grp|<group id>|<title>|<domains, space-separated>|  (help order)
   flag|<spelling>|<long>|<short>|<value>|<summary>
   arg|<spelling>|<words, space-separated>|<files or ai-patterns>|
   alias|<name>|<shortcut, deprecated or removed>|<target>|<until or empty>
@@ -21,13 +22,17 @@ spelling or one of its declared values (`dot tool list --nix` runs `tools`,
 `dot help tour` runs `learn`), so every hint bin/dot prints runs what it
 names.
 
-    tools/ci/cli_command_table.py            # rewrite the table
-    tools/ci/cli_command_table.py --check    # exit 1 when it is stale
+It also writes lib/dot/data/commands.json, the same names as one JSON
+catalog for agents and tools (`dot help --json`).
+
+    tools/ci/cli_command_table.py            # rewrite the table and catalog
+    tools/ci/cli_command_table.py --check    # exit 1 when either is stale
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import pathlib
 import sys
 
@@ -35,6 +40,7 @@ import tomllib
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 TABLE = pathlib.Path("lib") / "dot" / "data" / "commands.txt"
+CATALOG = pathlib.Path("lib") / "dot" / "data" / "commands.json"
 HEADER = """\
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
@@ -118,8 +124,42 @@ def load(root: pathlib.Path) -> dict:
             for p in sorted((root / "plugins").glob("*/dot-plugin.toml"))}
 
 
-def build(manifests: dict) -> str:
-    rows = []
+def load_family(root: pathlib.Path) -> dict:
+    return json.loads((root / "schemas" / "cli" / "domains.json").read_text())
+
+
+def group_records(family: dict) -> list[str]:
+    members: dict[str, list[str]] = {}
+    for domain in family["domains"]:
+        members.setdefault(domain["group"], []).append(domain["name"])
+    return [f"grp|{g['id']}|{g['title']}|{' '.join(members.get(g['id'], []))}|" for g in family["groups"]]
+
+
+def catalog_command(domain: str, command: dict) -> dict:
+    entry = {"spelling": spelling(domain, command), "effect": command["effect"],
+             "summary": command["summary"], "built": "legacy" in command}
+    for key in ("flags", "args", "output"):
+        if key in command:
+            entry[key] = command[key]
+    return entry
+
+
+def build_catalog(manifests: dict, family: dict) -> str:
+    """The names as one JSON document (`dot help --json`); no version, so a
+    release bump does not make it stale."""
+    groups = {d["name"]: d["group"] for d in family["domains"]}
+    domains = [{"name": name, "group": groups.get(name, ""), "summary": m["summary"], "default": m["default"],
+                "objects": [{k: o[k] for k in ("name", "summary", "default")} for o in m.get("objects", [])],
+                "commands": [catalog_command(name, c) for c in m["commands"]],
+                "aliases": m.get("aliases", [])}
+               for name, m in sorted(manifests.items())]
+    doc = {"schema": "cli/catalog.v1", "builtins": family.get("builtins", []),
+           "groups": family["groups"], "domains": domains}
+    return json.dumps(doc, indent=1, ensure_ascii=False) + "\n"
+
+
+def build(manifests: dict, family: dict | None = None) -> str:
+    rows = group_records(family) if family else []
     for domain, manifest in sorted(manifests.items()):
         rows += domain_records(domain, manifest)
     rows += run_records(manifests)
@@ -135,15 +175,22 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--root", type=pathlib.Path, default=ROOT)
     parser.add_argument("--check", action="store_true", help="fail when the table is stale")
     args = parser.parse_args(argv)
-    want = build(load(args.root))
-    path = args.root / TABLE
+    outputs = expected(args.root)
+    stale = [rel for rel, text in outputs.items()
+             if not (args.root / rel).is_file() or (args.root / rel).read_text() != text]
     if args.check:
-        if not path.is_file() or path.read_text() != want:
-            print(f"FAIL: {TABLE} is stale; run tools/ci/cli_command_table.py", file=sys.stderr)
-            return 1
-        return 0
-    path.write_text(want)
+        for rel in stale:
+            print(f"FAIL: {rel} is stale; run tools/ci/cli_command_table.py", file=sys.stderr)
+        return 1 if stale else 0
+    for rel, text in outputs.items():
+        (args.root / rel).write_text(text)
     return 0
+
+
+def expected(root: pathlib.Path) -> dict[pathlib.Path, str]:
+    """What the table and the catalog should hold, from the manifests."""
+    manifests, family = load(root), load_family(root)
+    return {TABLE: build(manifests, family), CATALOG: build_catalog(manifests, family)}
 
 
 if __name__ == "__main__":

@@ -260,7 +260,6 @@ def "nu-complete dot ai" [] {
         { value: "update", description: "Upgrade agent CLIs" }
         { value: "start", description: "Start an agent" }
         { value: "run", description: "Run an agent once" }
-        { value: "serve", description: "Run the gateway in the foreground" }
         { value: "login", description: "Authenticate an agent" }
         { value: "check", description: "Check agent installs and auth" }
         { value: "ask", description: "Ask about the local context" }
@@ -300,11 +299,17 @@ export extern "dot ai cost show" [
 
 def "nu-complete dot ai gateway" [] {
     [
+        { value: "serve", description: "Run the gateway in the foreground" }
         { value: "show", description: "Gateway statistics" }
     ]
 }
 export extern "dot ai gateway" [
     command?: string@"nu-complete dot ai gateway"
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot ai gateway serve" [
     --help(-h) # Show help
     ...rest: string
 ]
@@ -387,11 +392,6 @@ def "nu-complete dot ai run" [] {
 export extern "dot ai run" [
     value?: string@"nu-complete dot ai run"
     --pattern(-p): string@"nu-complete dot patterns" # Steering pattern
-    --help(-h) # Show help
-    ...rest: string
-]
-
-export extern "dot ai serve" [
     --help(-h) # Show help
     ...rest: string
 ]

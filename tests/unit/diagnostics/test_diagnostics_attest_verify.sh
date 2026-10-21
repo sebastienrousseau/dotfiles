@@ -74,7 +74,7 @@ assert_contains '"generated_at"' "$(cat "$STUB_STDIN")" "and pipes it fresh evid
 stub_verify bash "$ATTEST_SCRIPT" -a 30
 assert_equals "run $STUB_DIR/dot-sys.wasm verify --max-age 30" "$(cat "$STUB_ARGS")" \
   "-a alone implies --verify and forwards the window"
-assert_output_contains "--verify" "bash '$DOT_CLI' help attest"
+assert_output_contains "--verify" "bash '$DOT_CLI' help attest verify"
 
 test_start "attest_verify_rejects_unknown_options"
 assert_exit_code 2 "bash '$TEST_SCRIPT' --nonsense </dev/null"

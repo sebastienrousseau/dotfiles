@@ -1,55 +1,44 @@
+dot · manage this machine, its shell, its agents and its configuration
 
-◈ DOTFILES
-Dot • Reference
+Usage: dot <domain> [object] <verb> [args]
 
---- Dotfiles ---
-  •    Usage          dot [command]
-  •    Version        v0.0.0
+CONFIGURATION
+  config     apply, diff and sync the dotfiles
+  shell      aliases, history, startup caches
+  theme      one palette for every app
+  tool       toolchains, packages, project templates
 
-  •    What it is                          A single command for setting up, checking, and maintaining this shell environment.
-  •    Platforms                           macOS, Linux, and WSL
-  •    Start                               Run 'dot sync', then 'dot doctor', then 'dot learn'
+SESSIONS
+  session    find, open and restore terminal sessions
+  top        what the machine and its agents are doing
 
-== Start Here ==
-  •  sync             Apply dotfiles to this machine.
-  •  doctor           Check the environment and surface issues.
-  •  learn            Open the guided tour.
-  •  help             Show the overview or help for one command.
+AGENTS
+  ai         install, route and run coding agents
+  agent      modes, policy, sandbox, budgets
+  mcp        MCP servers as supply chain
 
-== Daily Use ==
-  •  init             Bootstrap a foreign dotfiles repo through chezmoi + dot.
-  •  status           Show local drift.
-  •  diff             Preview pending changes.
-  •  edit             Open the source directory.
-  •  upgrade          Update dotfiles, mise tools and system packages.
+SYSTEM
+  system     updates, cleanup, scheduled maintenance
+  doctor     health, repair, backup and rollback
 
-== Inspect and Repair ==
-  •  doctor           Run the main health check.
-  •  attest           Export workstation evidence, or verify it in WebAssembly.
-  •  rollback         Return to a previous state.
-  •  lint             Check shell script quality.
+TRUST & HOSTS
+  secret     secrets, keys and SSH certificates
+  security   OS hardening
+  attest     attestation and verification
+  fleet      many hosts
 
-== AI and Agents ==
-  •  ai               Show installed AI tools.
-  •  mcp              Inspect MCP policy and registry.
-  •  mode             Show or set the agent profile.
-  •  agent            Show agent metadata, logs, checkpoints, and conformance.
-  •  agents           Multi-harness agent context (AGENTS.md sync, Cursor/Codex stubs).
+PLATFORM
+  cli        plugins, updates, completions
+  ui         primitives for scripts
 
-== Fleet ==
-  •  registry         Browse reusable dotfile modules from the dot registry.
-  •  fleet            Show fleet node status, drift, and namespace.
+SHORTCUTS
+  apply      dot config apply
+  sync       dot config sync
+  diff       dot config diff
+  status     dot config status
+  edit       dot config edit
+  cd         dot config path
+  update     dot system update
 
-== Configuration ==
-  •  env              Show managed tool versions.
-  •  profile          Show or switch the active profile.
-  •  secrets          Edit or manage encrypted secrets.
-  •  theme            Switch the terminal theme.
-
-== Reference ==
-  •  search           Find commands by keyword.
-  •  help all         Show the full command reference.
-  •  version          Show version information.
-
-  •    Next                                Run 'dot help all' for the full command list
-  •    Detail                              Run 'dot help <command>' for one command
+Run 'dot help <domain>' for its commands, 'dot help all' for every command,
+'dot help <term>' to search, 'dot help --json' for the catalog. Version 0.2.536.

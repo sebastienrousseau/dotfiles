@@ -1,0 +1,2160 @@
+{
+ "schema": "cli/catalog.v1",
+ "builtins": [
+  "help",
+  "version"
+ ],
+ "groups": [
+  {
+   "id": "configuration",
+   "title": "Configuration"
+  },
+  {
+   "id": "sessions",
+   "title": "Sessions"
+  },
+  {
+   "id": "agents",
+   "title": "Agents"
+  },
+  {
+   "id": "system",
+   "title": "System"
+  },
+  {
+   "id": "trust",
+   "title": "Trust & hosts"
+  },
+  {
+   "id": "platform",
+   "title": "Platform"
+  }
+ ],
+ "domains": [
+  {
+   "name": "agent",
+   "group": "agents",
+   "summary": "modes, policy, sandbox, budgets",
+   "default": "status",
+   "objects": [
+    {
+     "name": "mode",
+     "summary": "agent modes",
+     "default": "list"
+    },
+    {
+     "name": "context",
+     "summary": "context files",
+     "default": "show"
+    },
+    {
+     "name": "card",
+     "summary": "the agent card",
+     "default": "show"
+    },
+    {
+     "name": "log",
+     "summary": "the agent log",
+     "default": "show"
+    },
+    {
+     "name": "checkpoint",
+     "summary": "saved checkpoints",
+     "default": "list"
+    },
+    {
+     "name": "policy",
+     "summary": "sandbox policy",
+     "default": "show"
+    },
+    {
+     "name": "budget",
+     "summary": "spend budgets",
+     "default": "show"
+    },
+    {
+     "name": "delegate",
+     "summary": "agents a profile may hand work to",
+     "default": "list"
+    }
+   ],
+   "commands": [
+    {
+     "spelling": "agent status",
+     "effect": "read",
+     "summary": "Mode, policy and budgets",
+     "built": true
+    },
+    {
+     "spelling": "agent check",
+     "effect": "read",
+     "summary": "Check modes and policy",
+     "built": true
+    },
+    {
+     "spelling": "agent run",
+     "effect": "write",
+     "summary": "Run an agent task",
+     "built": true
+    },
+    {
+     "spelling": "agent suspend",
+     "effect": "write",
+     "summary": "Pause running agents",
+     "built": false
+    },
+    {
+     "spelling": "agent resume",
+     "effect": "write",
+     "summary": "Resume paused agents",
+     "built": false
+    },
+    {
+     "spelling": "agent export",
+     "effect": "read",
+     "summary": "Export the AI bill of materials",
+     "built": false
+    },
+    {
+     "spelling": "agent mode list",
+     "effect": "read",
+     "summary": "Available modes",
+     "built": true
+    },
+    {
+     "spelling": "agent mode show",
+     "effect": "read",
+     "summary": "One mode in detail",
+     "built": true
+    },
+    {
+     "spelling": "agent mode set",
+     "effect": "write",
+     "summary": "Switch mode",
+     "built": true
+    },
+    {
+     "spelling": "agent context show",
+     "effect": "read",
+     "summary": "Context files in effect",
+     "built": true
+    },
+    {
+     "spelling": "agent card show",
+     "effect": "read",
+     "summary": "The agent card",
+     "built": true
+    },
+    {
+     "spelling": "agent log show",
+     "effect": "read",
+     "summary": "The agent log",
+     "built": true
+    },
+    {
+     "spelling": "agent checkpoint list",
+     "effect": "read",
+     "summary": "Saved checkpoints",
+     "built": true
+    },
+    {
+     "spelling": "agent checkpoint save",
+     "effect": "write",
+     "summary": "Save a checkpoint",
+     "built": true
+    },
+    {
+     "spelling": "agent policy show",
+     "effect": "read",
+     "summary": "The sandbox policy",
+     "built": false
+    },
+    {
+     "spelling": "agent budget show",
+     "effect": "read",
+     "summary": "Budgets and spend",
+     "built": false
+    },
+    {
+     "spelling": "agent delegate list",
+     "effect": "read",
+     "summary": "Configured delegates",
+     "built": true
+    },
+    {
+     "spelling": "agent delegate run",
+     "effect": "write",
+     "summary": "Run a command as a delegate",
+     "built": true
+    }
+   ],
+   "aliases": [
+    {
+     "name": "mode",
+     "target": "agent mode",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "agents",
+     "target": "agent context",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    }
+   ]
+  },
+  {
+   "name": "ai",
+   "group": "agents",
+   "summary": "install, route and run coding agents",
+   "default": "tui",
+   "objects": [
+    {
+     "name": "pattern",
+     "summary": "prompt patterns",
+     "default": "list"
+    },
+    {
+     "name": "cost",
+     "summary": "spend by agent and model",
+     "default": "show"
+    },
+    {
+     "name": "gateway",
+     "summary": "the keyless gateway",
+     "default": "show"
+    },
+    {
+     "name": "inventory",
+     "summary": "installed agents and versions",
+     "default": "show"
+    }
+   ],
+   "commands": [
+    {
+     "spelling": "ai list",
+     "effect": "read",
+     "summary": "Installed agents",
+     "built": true
+    },
+    {
+     "spelling": "ai install",
+     "effect": "write",
+     "summary": "Install agents",
+     "built": true
+    },
+    {
+     "spelling": "ai update",
+     "effect": "write",
+     "summary": "Upgrade agent CLIs",
+     "built": false
+    },
+    {
+     "spelling": "ai start",
+     "effect": "write",
+     "summary": "Start an agent",
+     "built": true,
+     "args": {
+      "values": [
+       "claude",
+       "codex",
+       "copilot",
+       "goose",
+       "crush",
+       "amp",
+       "cursor-agent",
+       "grok",
+       "kimi",
+       "agy",
+       "kiro",
+       "sgpt",
+       "ollama",
+       "opencode",
+       "aider",
+       "autohand",
+       "vibe",
+       "qwen",
+       "zai"
+      ]
+     }
+    },
+    {
+     "spelling": "ai run",
+     "effect": "write",
+     "summary": "Run an agent once",
+     "built": true,
+     "flags": [
+      {
+       "long": "pattern",
+       "short": "p",
+       "value": "pattern",
+       "summary": "Steering pattern"
+      }
+     ],
+     "args": {
+      "values": [
+       "claude",
+       "codex",
+       "copilot",
+       "goose",
+       "crush",
+       "amp",
+       "cursor-agent",
+       "grok",
+       "kimi",
+       "agy",
+       "kiro",
+       "sgpt",
+       "ollama",
+       "opencode",
+       "aider",
+       "autohand",
+       "vibe",
+       "qwen",
+       "zai"
+      ]
+     }
+    },
+    {
+     "spelling": "ai gateway serve",
+     "effect": "read",
+     "summary": "Run the gateway in the foreground",
+     "built": true
+    },
+    {
+     "spelling": "ai login",
+     "effect": "write",
+     "summary": "Authenticate an agent",
+     "built": true
+    },
+    {
+     "spelling": "ai check",
+     "effect": "read",
+     "summary": "Check agent installs and auth",
+     "built": true
+    },
+    {
+     "spelling": "ai ask",
+     "effect": "read",
+     "summary": "Ask about the local context",
+     "built": true
+    },
+    {
+     "spelling": "ai pattern list",
+     "effect": "read",
+     "summary": "Prompt patterns",
+     "built": true
+    },
+    {
+     "spelling": "ai cost show",
+     "effect": "read",
+     "summary": "Spend by agent and model",
+     "built": true
+    },
+    {
+     "spelling": "ai gateway show",
+     "effect": "read",
+     "summary": "Gateway statistics",
+     "built": false
+    },
+    {
+     "spelling": "ai inventory show",
+     "effect": "read",
+     "summary": "Agents, versions and config",
+     "built": false
+    }
+   ],
+   "aliases": [
+    {
+     "name": "ai-setup",
+     "target": "ai install --interactive",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "ai-query",
+     "target": "ai ask",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "patterns",
+     "target": "ai pattern",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "cl",
+     "target": "ai run claude",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "claude",
+     "target": "ai run claude",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "codex",
+     "target": "ai run codex",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "copilot",
+     "target": "ai run copilot",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "kimi",
+     "target": "ai run kimi",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "agy",
+     "target": "ai run agy",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "goose",
+     "target": "ai run goose",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "kiro",
+     "target": "ai run kiro",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "sgpt",
+     "target": "ai run sgpt",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "ollama",
+     "target": "ai run ollama",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "opencode",
+     "target": "ai run opencode",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "aider",
+     "target": "ai run aider",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "autohand",
+     "target": "ai run autohand",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "vibe",
+     "target": "ai run vibe",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "qwen",
+     "target": "ai run qwen",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "zai",
+     "target": "ai run zai",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    }
+   ]
+  },
+  {
+   "name": "attest",
+   "group": "trust",
+   "summary": "attestation and verification",
+   "default": "show",
+   "objects": [],
+   "commands": [
+    {
+     "spelling": "attest show",
+     "effect": "read",
+     "summary": "The workstation attestation",
+     "built": true,
+     "flags": [
+      {
+       "long": "json",
+       "short": "j",
+       "summary": "Print JSON"
+      },
+      {
+       "long": "write",
+       "short": "w",
+       "summary": "Write the attestation to a file"
+      }
+     ]
+    },
+    {
+     "spelling": "attest export",
+     "effect": "read",
+     "summary": "Write attestation evidence",
+     "built": true
+    },
+    {
+     "spelling": "attest verify",
+     "effect": "read",
+     "summary": "Verify evidence",
+     "built": true
+    }
+   ],
+   "aliases": [
+    {
+     "name": "attestation",
+     "target": "attest",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    }
+   ]
+  },
+  {
+   "name": "cli",
+   "group": "platform",
+   "summary": "plugins, updates, completions",
+   "default": "list",
+   "objects": [
+    {
+     "name": "completion",
+     "summary": "shell completion scripts",
+     "default": "show"
+    }
+   ],
+   "commands": [
+    {
+     "spelling": "cli list",
+     "effect": "read",
+     "summary": "Installed plugins",
+     "built": true
+    },
+    {
+     "spelling": "cli show",
+     "effect": "read",
+     "summary": "One plugin in detail",
+     "built": true
+    },
+    {
+     "spelling": "cli install",
+     "effect": "write",
+     "summary": "Install a plugin",
+     "built": true
+    },
+    {
+     "spelling": "cli update",
+     "effect": "write",
+     "summary": "Update dot and its plugins",
+     "built": false
+    },
+    {
+     "spelling": "cli remove",
+     "effect": "write",
+     "summary": "Remove a plugin",
+     "built": false
+    },
+    {
+     "spelling": "cli verify",
+     "effect": "read",
+     "summary": "Verify plugin provenance",
+     "built": false
+    },
+    {
+     "spelling": "cli new",
+     "effect": "write",
+     "summary": "Create a plugin from the template",
+     "built": false
+    },
+    {
+     "spelling": "cli completion show",
+     "effect": "read",
+     "summary": "Print a completion script",
+     "built": true
+    }
+   ],
+   "aliases": [
+    {
+     "name": "completion",
+     "target": "cli completion",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "registry",
+     "target": "cli list --available",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "search",
+     "target": "help",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "manual",
+     "target": "help --manual",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "docs",
+     "target": "help --readme",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "learn",
+     "target": "help tour",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    }
+   ]
+  },
+  {
+   "name": "config",
+   "group": "configuration",
+   "summary": "apply, diff and sync the dotfiles",
+   "default": "status",
+   "objects": [
+    {
+     "name": "path",
+     "summary": "where the dotfiles source lives",
+     "default": "show"
+    },
+    {
+     "name": "profile",
+     "summary": "the active profile and its features",
+     "default": "show"
+    }
+   ],
+   "commands": [
+    {
+     "spelling": "config status",
+     "effect": "read",
+     "summary": "Pending changes and last apply",
+     "built": true
+    },
+    {
+     "spelling": "config diff",
+     "effect": "read",
+     "summary": "What apply would change",
+     "built": true
+    },
+    {
+     "spelling": "config apply",
+     "effect": "write",
+     "summary": "Write the dotfiles to this machine",
+     "built": true
+    },
+    {
+     "spelling": "config sync",
+     "effect": "write",
+     "summary": "Pull the source, then apply",
+     "built": true
+    },
+    {
+     "spelling": "config update",
+     "effect": "write",
+     "summary": "Pull and apply the dotfiles only",
+     "built": true
+    },
+    {
+     "spelling": "config edit",
+     "effect": "write",
+     "summary": "Open a managed file in $EDITOR",
+     "built": true
+    },
+    {
+     "spelling": "config add",
+     "effect": "write",
+     "summary": "Start managing an existing file",
+     "built": true,
+     "args": {
+      "complete": "files"
+     }
+    },
+    {
+     "spelling": "config save",
+     "effect": "write",
+     "summary": "Commit source changes",
+     "built": true
+    },
+    {
+     "spelling": "config init",
+     "effect": "write",
+     "summary": "First-time setup of the dotfiles",
+     "built": true
+    },
+    {
+     "spelling": "config check",
+     "effect": "read",
+     "summary": "Lint the source and templates",
+     "built": true,
+     "flags": [
+      {
+       "long": "check",
+       "short": "c",
+       "summary": "Check only"
+      },
+      {
+       "long": "fix",
+       "short": "f",
+       "summary": "Apply safe fixes"
+      }
+     ]
+    },
+    {
+     "spelling": "config export",
+     "effect": "read",
+     "summary": "Write a portable bundle",
+     "built": true
+    },
+    {
+     "spelling": "config uninstall",
+     "effect": "destructive",
+     "summary": "Remove the setup, keeping the source",
+     "built": true
+    },
+    {
+     "spelling": "config path show",
+     "effect": "read",
+     "summary": "Print the source directory",
+     "built": true
+    },
+    {
+     "spelling": "config profile show",
+     "effect": "read",
+     "summary": "Show the active profile",
+     "built": true
+    },
+    {
+     "spelling": "config profile set",
+     "effect": "write",
+     "summary": "Switch profile",
+     "built": true
+    }
+   ],
+   "aliases": [
+    {
+     "name": "apply",
+     "target": "config apply",
+     "kind": "shortcut"
+    },
+    {
+     "name": "sync",
+     "target": "config sync",
+     "kind": "shortcut"
+    },
+    {
+     "name": "diff",
+     "target": "config diff",
+     "kind": "shortcut"
+    },
+    {
+     "name": "status",
+     "target": "config status",
+     "kind": "shortcut"
+    },
+    {
+     "name": "edit",
+     "target": "config edit",
+     "kind": "shortcut"
+    },
+    {
+     "name": "add",
+     "target": "config add",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "commit",
+     "target": "config save",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "uninstall",
+     "target": "config uninstall",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "init",
+     "target": "config init",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "setup",
+     "target": "config init",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "profile",
+     "target": "config profile",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "sandbox",
+     "target": "config apply --sandbox",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "bundle",
+     "target": "config export",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "lint",
+     "target": "config check",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    }
+   ]
+  },
+  {
+   "name": "doctor",
+   "group": "system",
+   "summary": "health, repair, backup and rollback",
+   "default": "status",
+   "objects": [
+    {
+     "name": "score",
+     "summary": "the setup score",
+     "default": "show"
+    },
+    {
+     "name": "snapshot",
+     "summary": "setup snapshots",
+     "default": "list"
+    },
+    {
+     "name": "perf",
+     "summary": "startup performance",
+     "default": "show"
+    },
+    {
+     "name": "drift",
+     "summary": "drift from the source",
+     "default": "show"
+    },
+    {
+     "name": "conflict",
+     "summary": "conflicting files",
+     "default": "list"
+    },
+    {
+     "name": "metric",
+     "summary": "recorded metrics",
+     "default": "list"
+    },
+    {
+     "name": "report",
+     "summary": "the weekly posture report",
+     "default": "show"
+    }
+   ],
+   "commands": [
+    {
+     "spelling": "doctor status",
+     "effect": "read",
+     "summary": "Health summary",
+     "built": true,
+     "flags": [
+      {
+       "long": "verbose",
+       "short": "v",
+       "summary": "Show detailed checks"
+      },
+      {
+       "long": "json",
+       "short": "j",
+       "summary": "Print a JSON summary"
+      },
+      {
+       "long": "fix",
+       "short": "f",
+       "summary": "Apply common fixes"
+      },
+      {
+       "long": "force",
+       "short": "F",
+       "summary": "Apply fixes without prompts"
+      }
+     ]
+    },
+    {
+     "spelling": "doctor check",
+     "effect": "read",
+     "summary": "Run every health check",
+     "built": true,
+     "flags": [
+      {
+       "long": "heal",
+       "short": "H",
+       "summary": "Repair common issues"
+      },
+      {
+       "long": "score",
+       "short": "s",
+       "summary": "Show the score"
+      },
+      {
+       "long": "json",
+       "short": "j",
+       "summary": "Print a JSON summary"
+      },
+      {
+       "long": "ai",
+       "short": "A",
+       "summary": "Include AI diagnostics"
+      }
+     ]
+    },
+    {
+     "spelling": "doctor fix",
+     "effect": "write",
+     "summary": "Repair what check found",
+     "built": true
+    },
+    {
+     "spelling": "doctor backup",
+     "effect": "write",
+     "summary": "Back up the setup",
+     "built": true
+    },
+    {
+     "spelling": "doctor restore",
+     "effect": "write",
+     "summary": "Restore from a backup",
+     "built": true,
+     "flags": [
+      {
+       "long": "list",
+       "short": "l",
+       "summary": "List available backups"
+      },
+      {
+       "long": "latest",
+       "short": "L",
+       "summary": "Restore the latest backup"
+      },
+      {
+       "long": "git",
+       "short": "g",
+       "value": "ref",
+       "summary": "Restore from a git ref"
+      },
+      {
+       "long": "diff",
+       "short": "d",
+       "value": "ref",
+       "summary": "Show a diff for a git ref"
+      },
+      {
+       "long": "dry-run",
+       "short": "n",
+       "summary": "Preview the restore"
+      }
+     ]
+    },
+    {
+     "spelling": "doctor rollback",
+     "effect": "write",
+     "summary": "Return to a previous generation",
+     "built": true
+    },
+    {
+     "spelling": "doctor score show",
+     "effect": "read",
+     "summary": "The setup score",
+     "built": true
+    },
+    {
+     "spelling": "doctor snapshot list",
+     "effect": "read",
+     "summary": "Snapshots",
+     "built": false
+    },
+    {
+     "spelling": "doctor snapshot new",
+     "effect": "write",
+     "summary": "Take a snapshot",
+     "built": true,
+     "flags": [
+      {
+       "long": "baseline",
+       "short": "b",
+       "summary": "Capture the baseline snapshot"
+      },
+      {
+       "long": "force",
+       "short": "f",
+       "summary": "Overwrite an existing snapshot"
+      }
+     ]
+    },
+    {
+     "spelling": "doctor perf show",
+     "effect": "read",
+     "summary": "Startup timings",
+     "built": true,
+     "flags": [
+      {
+       "long": "json",
+       "short": "j",
+       "summary": "Print JSON"
+      },
+      {
+       "long": "profile",
+       "short": "p",
+       "summary": "Include profile output"
+      },
+      {
+       "long": "runs",
+       "short": "r",
+       "value": "count",
+       "summary": "Number of runs"
+      },
+      {
+       "long": "target",
+       "short": "t",
+       "value": "ms",
+       "summary": "Timing target in milliseconds"
+      }
+     ]
+    },
+    {
+     "spelling": "doctor perf measure",
+     "effect": "read",
+     "summary": "Benchmark startup",
+     "built": true
+    },
+    {
+     "spelling": "doctor drift show",
+     "effect": "read",
+     "summary": "Drift from the source",
+     "built": true
+    },
+    {
+     "spelling": "doctor conflict list",
+     "effect": "read",
+     "summary": "Conflicting files",
+     "built": true
+    },
+    {
+     "spelling": "doctor metric list",
+     "effect": "read",
+     "summary": "Recorded metrics",
+     "built": true
+    },
+    {
+     "spelling": "doctor report show",
+     "effect": "read",
+     "summary": "Weekly posture report",
+     "built": false
+    }
+   ],
+   "aliases": [
+    {
+     "name": "health",
+     "target": "doctor",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "health-check",
+     "target": "doctor",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "scorecard",
+     "target": "doctor score",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "score",
+     "target": "doctor score",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "snapshot",
+     "target": "doctor snapshot new",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "perf",
+     "target": "doctor perf",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "benchmark",
+     "target": "doctor perf --profile",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "load-bench",
+     "target": "doctor perf --ready",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "load-bench-pty",
+     "target": "doctor perf --ready --pty",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "rollback",
+     "target": "doctor rollback",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "heal",
+     "target": "doctor fix",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "drift",
+     "target": "doctor drift",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "conflicts",
+     "target": "doctor conflict",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "restore",
+     "target": "doctor restore",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "metrics",
+     "target": "doctor metric",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "backup",
+     "target": "doctor backup",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "chaos",
+     "target": "doctor",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "smoke-test",
+     "target": "doctor",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "keys",
+     "target": "doctor",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    }
+   ]
+  },
+  {
+   "name": "fleet",
+   "group": "trust",
+   "summary": "many hosts",
+   "default": "status",
+   "objects": [
+    {
+     "name": "drift",
+     "summary": "drift across hosts",
+     "default": "show"
+    },
+    {
+     "name": "namespace",
+     "summary": "fleet namespaces",
+     "default": "list"
+    },
+    {
+     "name": "log",
+     "summary": "fleet events",
+     "default": "show"
+    },
+    {
+     "name": "policy",
+     "summary": "fleet policy",
+     "default": "show"
+    }
+   ],
+   "commands": [
+    {
+     "spelling": "fleet status",
+     "effect": "read",
+     "summary": "Posture across hosts",
+     "built": true
+    },
+    {
+     "spelling": "fleet apply",
+     "effect": "write",
+     "summary": "Apply the fleet configuration",
+     "built": true
+    },
+    {
+     "spelling": "fleet push",
+     "effect": "write",
+     "summary": "Send configuration to a host",
+     "built": true
+    },
+    {
+     "spelling": "fleet drift show",
+     "effect": "read",
+     "summary": "Drift across hosts",
+     "built": true
+    },
+    {
+     "spelling": "fleet namespace list",
+     "effect": "read",
+     "summary": "Namespaces",
+     "built": true
+    },
+    {
+     "spelling": "fleet log show",
+     "effect": "read",
+     "summary": "Fleet events",
+     "built": true
+    },
+    {
+     "spelling": "fleet policy show",
+     "effect": "read",
+     "summary": "Fleet policy",
+     "built": true
+    },
+    {
+     "spelling": "fleet policy set",
+     "effect": "write",
+     "summary": "Enforce a fleet policy",
+     "built": true
+    }
+   ],
+   "aliases": [
+    {
+     "name": "teleport",
+     "target": "fleet push",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    }
+   ]
+  },
+  {
+   "name": "mcp",
+   "group": "agents",
+   "summary": "MCP servers as supply chain",
+   "default": "list",
+   "objects": [],
+   "commands": [
+    {
+     "spelling": "mcp list",
+     "effect": "read",
+     "summary": "Configured MCP servers",
+     "built": true
+    },
+    {
+     "spelling": "mcp check",
+     "effect": "read",
+     "summary": "Check servers and pins",
+     "built": true,
+     "flags": [
+      {
+       "long": "strict",
+       "short": "s",
+       "summary": "Treat policy warnings as errors"
+      },
+      {
+       "long": "json",
+       "short": "j",
+       "summary": "Print a JSON summary"
+      }
+     ]
+    },
+    {
+     "spelling": "mcp serve",
+     "effect": "read",
+     "summary": "Run dot's read-only MCP server",
+     "built": true
+    }
+   ],
+   "aliases": []
+  },
+  {
+   "name": "secret",
+   "group": "trust",
+   "summary": "secrets, keys and SSH certificates",
+   "default": "status",
+   "objects": [
+    {
+     "name": "key",
+     "summary": "SSH signing and authentication keys",
+     "default": "list"
+    },
+    {
+     "name": "cert",
+     "summary": "short-lived SSH certificates",
+     "default": "list"
+    },
+    {
+     "name": "provider",
+     "summary": "the secret provider",
+     "default": "show"
+    }
+   ],
+   "commands": [
+    {
+     "spelling": "secret status",
+     "effect": "read",
+     "summary": "Provider, vault state and key counts",
+     "built": false
+    },
+    {
+     "spelling": "secret init",
+     "effect": "write",
+     "summary": "Set up the secret provider",
+     "built": true
+    },
+    {
+     "spelling": "secret edit",
+     "effect": "write",
+     "summary": "Edit the encrypted secrets file",
+     "built": true
+    },
+    {
+     "spelling": "secret new",
+     "effect": "write",
+     "summary": "Create the secrets file",
+     "built": true
+    },
+    {
+     "spelling": "secret list",
+     "effect": "read",
+     "summary": "Secret names without values",
+     "built": true
+    },
+    {
+     "spelling": "secret show",
+     "effect": "read",
+     "summary": "One secret",
+     "built": true
+    },
+    {
+     "spelling": "secret set",
+     "effect": "write",
+     "summary": "Store one secret",
+     "built": true
+    },
+    {
+     "spelling": "secret export",
+     "effect": "read",
+     "summary": "Print secrets as environment",
+     "built": true
+    },
+    {
+     "spelling": "secret check",
+     "effect": "read",
+     "summary": "Audit secret hygiene",
+     "built": true
+    },
+    {
+     "spelling": "secret key list",
+     "effect": "read",
+     "summary": "Keys without their values",
+     "built": false
+    },
+    {
+     "spelling": "secret key new",
+     "effect": "write",
+     "summary": "Create an ED25519 key",
+     "built": true
+    },
+    {
+     "spelling": "secret cert list",
+     "effect": "read",
+     "summary": "Certificates and expiry",
+     "built": false
+    },
+    {
+     "spelling": "secret cert new",
+     "effect": "write",
+     "summary": "Issue a short-lived SSH certificate",
+     "built": true
+    },
+    {
+     "spelling": "secret provider show",
+     "effect": "read",
+     "summary": "The active provider",
+     "built": true
+    },
+    {
+     "spelling": "secret provider set",
+     "effect": "write",
+     "summary": "Switch provider",
+     "built": false
+    }
+   ],
+   "aliases": [
+    {
+     "name": "secrets-init",
+     "target": "secret init",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "secrets",
+     "target": "secret edit",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "secrets-create",
+     "target": "secret new",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "ssh-key",
+     "target": "secret key new",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "ssh-cert",
+     "target": "secret cert new",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "secret-audit",
+     "target": "secret check",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    }
+   ]
+  },
+  {
+   "name": "security",
+   "group": "trust",
+   "summary": "OS hardening",
+   "default": "status",
+   "objects": [
+    {
+     "name": "policy",
+     "summary": "the security policy",
+     "default": "show"
+    },
+    {
+     "name": "disk",
+     "summary": "disk encryption",
+     "default": "show"
+    },
+    {
+     "name": "firewall",
+     "summary": "the firewall",
+     "default": "show"
+    },
+    {
+     "name": "telemetry",
+     "summary": "OS telemetry",
+     "default": "show"
+    },
+    {
+     "name": "dns",
+     "summary": "encrypted DNS",
+     "default": "show"
+    },
+    {
+     "name": "lock",
+     "summary": "the lock screen",
+     "default": "show"
+    },
+    {
+     "name": "usb",
+     "summary": "removable media",
+     "default": "show"
+    },
+    {
+     "name": "score",
+     "summary": "the security score",
+     "default": "show"
+    }
+   ],
+   "commands": [
+    {
+     "spelling": "security status",
+     "effect": "read",
+     "summary": "Hardening summary",
+     "built": false
+    },
+    {
+     "spelling": "security policy show",
+     "effect": "read",
+     "summary": "The security policy",
+     "built": true
+    },
+    {
+     "spelling": "security disk show",
+     "effect": "read",
+     "summary": "Disk encryption state",
+     "built": true
+    },
+    {
+     "spelling": "security score show",
+     "effect": "read",
+     "summary": "The security score",
+     "built": true,
+     "flags": [
+      {
+       "long": "verbose",
+       "short": "v",
+       "summary": "Show detailed scoring"
+      },
+      {
+       "long": "quiet",
+       "short": "q",
+       "summary": "Reduce output"
+      },
+      {
+       "long": "json",
+       "short": "j",
+       "summary": "Print a JSON summary"
+      }
+     ]
+    },
+    {
+     "spelling": "security firewall show",
+     "effect": "read",
+     "summary": "Current firewall setting",
+     "built": false
+    },
+    {
+     "spelling": "security firewall apply",
+     "effect": "write",
+     "summary": "Harden the firewall setting",
+     "built": true
+    },
+    {
+     "spelling": "security telemetry show",
+     "effect": "read",
+     "summary": "Current telemetry setting",
+     "built": false
+    },
+    {
+     "spelling": "security telemetry apply",
+     "effect": "write",
+     "summary": "Harden the telemetry setting",
+     "built": true
+    },
+    {
+     "spelling": "security dns show",
+     "effect": "read",
+     "summary": "Current dns setting",
+     "built": false
+    },
+    {
+     "spelling": "security dns apply",
+     "effect": "write",
+     "summary": "Harden the dns setting",
+     "built": true
+    },
+    {
+     "spelling": "security lock show",
+     "effect": "read",
+     "summary": "Current lock setting",
+     "built": false
+    },
+    {
+     "spelling": "security lock apply",
+     "effect": "write",
+     "summary": "Harden the lock setting",
+     "built": true
+    },
+    {
+     "spelling": "security usb show",
+     "effect": "read",
+     "summary": "Current usb setting",
+     "built": false
+    },
+    {
+     "spelling": "security usb apply",
+     "effect": "write",
+     "summary": "Harden the usb setting",
+     "built": true
+    }
+   ],
+   "aliases": [
+    {
+     "name": "policy",
+     "target": "security policy",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "encrypt-check",
+     "target": "security disk",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "firewall",
+     "target": "security firewall apply",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "telemetry",
+     "target": "security telemetry apply",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "dns-doh",
+     "target": "security dns apply",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "lock-screen",
+     "target": "security lock apply",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "usb-safety",
+     "target": "security usb apply",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "security-score",
+     "target": "security score",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    }
+   ]
+  },
+  {
+   "name": "session",
+   "group": "sessions",
+   "summary": "find, open and restore terminal sessions",
+   "default": "select",
+   "objects": [],
+   "commands": [
+    {
+     "spelling": "session select",
+     "effect": "read",
+     "summary": "Pick a session to open",
+     "built": false
+    },
+    {
+     "spelling": "session list",
+     "effect": "read",
+     "summary": "Sessions on this machine",
+     "built": false
+    },
+    {
+     "spelling": "session new",
+     "effect": "write",
+     "summary": "Start a named session",
+     "built": false
+    },
+    {
+     "spelling": "session open",
+     "effect": "read",
+     "summary": "Attach to a session",
+     "built": false
+    },
+    {
+     "spelling": "session stop",
+     "effect": "write",
+     "summary": "End a session",
+     "built": false
+    },
+    {
+     "spelling": "session restore",
+     "effect": "write",
+     "summary": "Restore saved sessions",
+     "built": false
+    }
+   ],
+   "aliases": []
+  },
+  {
+   "name": "shell",
+   "group": "configuration",
+   "summary": "aliases, history, startup caches",
+   "default": "status",
+   "objects": [
+    {
+     "name": "history",
+     "summary": "shell history",
+     "default": "list"
+    },
+    {
+     "name": "alias",
+     "summary": "aliases and their sources",
+     "default": "list"
+    }
+   ],
+   "commands": [
+    {
+     "spelling": "shell status",
+     "effect": "read",
+     "summary": "Shell, startup time and cache state",
+     "built": false
+    },
+    {
+     "spelling": "shell update",
+     "effect": "write",
+     "summary": "Regenerate the startup caches",
+     "built": true
+    },
+    {
+     "spelling": "shell clean",
+     "effect": "write",
+     "summary": "Clear the startup caches",
+     "built": true
+    },
+    {
+     "spelling": "shell history list",
+     "effect": "read",
+     "summary": "Recent history",
+     "built": true
+    },
+    {
+     "spelling": "shell alias list",
+     "effect": "read",
+     "summary": "Aliases and where each is defined",
+     "built": true
+    },
+    {
+     "spelling": "shell alias check",
+     "effect": "read",
+     "summary": "Find shadowed or broken aliases",
+     "built": true
+    }
+   ],
+   "aliases": [
+    {
+     "name": "cd",
+     "target": "config path",
+     "kind": "shortcut"
+    },
+    {
+     "name": "history",
+     "target": "shell history",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "aliases",
+     "target": "shell alias",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "alias-check",
+     "target": "shell alias check",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "cache-refresh",
+     "target": "shell update",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "prewarm",
+     "target": "shell update --prewarm",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "clean-cache",
+     "target": "shell clean",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    }
+   ]
+  },
+  {
+   "name": "system",
+   "group": "system",
+   "summary": "updates, cleanup, scheduled maintenance",
+   "default": "status",
+   "objects": [
+    {
+     "name": "schedule",
+     "summary": "scheduled maintenance jobs",
+     "default": "list"
+    },
+    {
+     "name": "settings",
+     "summary": "OS settings dot manages",
+     "default": "show"
+    }
+   ],
+   "commands": [
+    {
+     "spelling": "system status",
+     "effect": "read",
+     "summary": "OS, disk, outdated counts, last run",
+     "built": false
+    },
+    {
+     "spelling": "system update",
+     "effect": "write",
+     "summary": "Update everything, asking first",
+     "built": true
+    },
+    {
+     "spelling": "system clean",
+     "effect": "write",
+     "summary": "Reclaim space, asking first",
+     "built": false
+    },
+    {
+     "spelling": "system show",
+     "effect": "read",
+     "summary": "Hardware and host details",
+     "built": false
+    },
+    {
+     "spelling": "system schedule list",
+     "effect": "read",
+     "summary": "Scheduled jobs",
+     "built": false
+    },
+    {
+     "spelling": "system schedule set",
+     "effect": "write",
+     "summary": "Set the maintenance schedule",
+     "built": false
+    },
+    {
+     "spelling": "system schedule run",
+     "effect": "write",
+     "summary": "Run scheduled maintenance now",
+     "built": false
+    },
+    {
+     "spelling": "system settings show",
+     "effect": "read",
+     "summary": "Current OS settings",
+     "built": false
+    },
+    {
+     "spelling": "system settings apply",
+     "effect": "write",
+     "summary": "Apply the managed OS settings",
+     "built": true
+    }
+   ],
+   "aliases": [
+    {
+     "name": "update",
+     "target": "system update",
+     "kind": "shortcut"
+    },
+    {
+     "name": "upgrade",
+     "target": "system update",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "tune",
+     "target": "system settings apply",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "log-rotate",
+     "target": "system clean --logs",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    }
+   ]
+  },
+  {
+   "name": "theme",
+   "group": "configuration",
+   "summary": "one palette for every app",
+   "default": "show",
+   "objects": [
+    {
+     "name": "wallpaper",
+     "summary": "the current wallpaper",
+     "default": "show"
+    },
+    {
+     "name": "font",
+     "summary": "installed fonts",
+     "default": "list"
+    }
+   ],
+   "commands": [
+    {
+     "spelling": "theme show",
+     "effect": "read",
+     "summary": "Current theme and palette",
+     "built": true
+    },
+    {
+     "spelling": "theme list",
+     "effect": "read",
+     "summary": "Available themes",
+     "built": true
+    },
+    {
+     "spelling": "theme set",
+     "effect": "write",
+     "summary": "Switch theme everywhere",
+     "built": true
+    },
+    {
+     "spelling": "theme wallpaper set",
+     "effect": "write",
+     "summary": "Set the wallpaper and derive a palette",
+     "built": true
+    },
+    {
+     "spelling": "theme font list",
+     "effect": "read",
+     "summary": "Installed terminal fonts",
+     "built": false
+    },
+    {
+     "spelling": "theme font install",
+     "effect": "write",
+     "summary": "Install the configured fonts",
+     "built": true
+    }
+   ],
+   "aliases": [
+    {
+     "name": "wallpaper",
+     "target": "theme wallpaper set",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "fonts",
+     "target": "theme font install",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    }
+   ]
+  },
+  {
+   "name": "tool",
+   "group": "configuration",
+   "summary": "toolchains, packages, project templates",
+   "default": "list",
+   "objects": [],
+   "commands": [
+    {
+     "spelling": "tool list",
+     "effect": "read",
+     "summary": "Toolchains and their versions",
+     "built": true
+    },
+    {
+     "spelling": "tool install",
+     "effect": "write",
+     "summary": "Install the configured toolchains",
+     "built": true
+    },
+    {
+     "spelling": "tool update",
+     "effect": "write",
+     "summary": "Upgrade toolchains",
+     "built": false
+    },
+    {
+     "spelling": "tool remove",
+     "effect": "write",
+     "summary": "Remove a toolchain or orphans",
+     "built": false
+    },
+    {
+     "spelling": "tool set",
+     "effect": "write",
+     "summary": "Pin a toolchain version",
+     "built": true
+    },
+    {
+     "spelling": "tool export",
+     "effect": "read",
+     "summary": "Print the tool environment",
+     "built": false
+    },
+    {
+     "spelling": "tool new",
+     "effect": "write",
+     "summary": "Create a project from a template",
+     "built": true,
+     "args": {
+      "values": [
+       "python",
+       "go",
+       "node",
+       "packer",
+       "molecule"
+      ]
+     }
+    }
+   ],
+   "aliases": [
+    {
+     "name": "env",
+     "target": "tool",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "tools",
+     "target": "tool list --nix",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "packages",
+     "target": "tool list --packages",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "locks",
+     "target": "tool list --locked",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    },
+    {
+     "name": "new",
+     "target": "tool new",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    }
+   ]
+  },
+  {
+   "name": "top",
+   "group": "sessions",
+   "summary": "what the machine and its agents are doing",
+   "default": "tui",
+   "objects": [
+    {
+     "name": "report",
+     "summary": "usage by model, agent or project",
+     "default": "show"
+    }
+   ],
+   "commands": [
+    {
+     "spelling": "top measure",
+     "effect": "read",
+     "summary": "Sample once and print the result",
+     "built": false
+    },
+    {
+     "spelling": "top report show",
+     "effect": "read",
+     "summary": "Usage report",
+     "built": false
+    }
+   ],
+   "aliases": [
+    {
+     "name": "intelligence",
+     "target": "top",
+     "kind": "deprecated",
+     "until": "0.2.538"
+    }
+   ]
+  },
+  {
+   "name": "ui",
+   "group": "platform",
+   "summary": "primitives for scripts",
+   "default": "show",
+   "objects": [
+    {
+     "name": "table",
+     "summary": "render a table",
+     "default": "show"
+    }
+   ],
+   "commands": [
+    {
+     "spelling": "ui show",
+     "effect": "read",
+     "summary": "The primitives on offer",
+     "built": false
+    },
+    {
+     "spelling": "ui select",
+     "effect": "read",
+     "summary": "Interactive picker for scripts",
+     "built": false
+    },
+    {
+     "spelling": "ui run",
+     "effect": "write",
+     "summary": "Run a command with progress",
+     "built": false
+    },
+    {
+     "spelling": "ui table show",
+     "effect": "read",
+     "summary": "Render rows as a table",
+     "built": false
+    }
+   ],
+   "aliases": []
+  }
+ ]
+}

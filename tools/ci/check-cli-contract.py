@@ -141,6 +141,18 @@ def family_meaning(label: str, flag: dict, family: dict) -> list[str]:
     return []
 
 
+def check_cmdlets(name: str, manifest: dict, reg: dict) -> list[str]:
+    """Two commands of one noun may share a PowerShell verb only as list and
+    show (one Get cmdlet); status has its own noun (N11)."""
+    groups: dict[tuple, set] = {}
+    for cmd in manifest["commands"]:
+        if cmd["verb"] != "status" and cmd["verb"] in reg["verbs"]:
+            ps = reg["verbs"][cmd["verb"]]["powershell"]
+            groups.setdefault((cmd.get("object"), ps), set()).add(cmd["verb"])
+    return [f"{' '.join(filter(None, (name, obj)))}: {', '.join(sorted(verbs))} would share the {ps} cmdlet (N11)"
+            for (obj, ps), verbs in sorted(groups.items(), key=str) if len(verbs) > 1 and verbs != {"list", "show"}]
+
+
 def check_deprecations(name: str, manifest: dict, version: str) -> list[str]:
     return [f"{name}: deprecated alias '{a['name']}' expired at {a['until']} (current {version}) (N7)"
             for a in manifest.get("aliases", [])
@@ -156,7 +168,7 @@ def check_manifest(name: str, manifest: dict, reg: dict, version: str) -> list[s
     objects = {o["name"] for o in manifest.get("objects", [])}
     for cmd in manifest["commands"]:
         errors += check_command(name, cmd, objects, reg)
-    return errors + check_deprecations(name, manifest, version)
+    return errors + check_cmdlets(name, manifest, reg) + check_deprecations(name, manifest, version)
 
 
 def resolve_target(target: str, manifests: dict, reg: dict) -> str | None:
@@ -238,11 +250,9 @@ def run_dot(dot: pathlib.Path, *args: str) -> tuple[int, str]:
 
 
 def check_table(root: pathlib.Path) -> list[str]:
-    path = root / cli_command_table.TABLE
-    want = cli_command_table.build(cli_command_table.load(root))
-    if not path.is_file() or path.read_text() != want:
-        return [f"{cli_command_table.TABLE} is stale: run tools/ci/cli_command_table.py"]
-    return []
+    return [f"{rel} is stale: run tools/ci/cli_command_table.py"
+            for rel, text in cli_command_table.expected(root).items()
+            if not (root / rel).is_file() or (root / rel).read_text() != text]
 
 
 def runtime_violations(dot: pathlib.Path) -> dict[str, str]:

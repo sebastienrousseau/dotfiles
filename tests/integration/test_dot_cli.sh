@@ -41,12 +41,12 @@ fi
 
 test_start "dot_help_output"
 help_output=$(bash "$DOT_CLI" help 2>&1)
-if echo "$help_output" | grep -q "Start Here"; then
+if echo "$help_output" | grep -q "Usage: dot <domain>"; then
   ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot help shows Start Here section"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot help shows the usage and domains"
 else
   ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot help should show Start Here"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot help should show the usage and domains"
 fi
 
 test_start "dot_help_lists_health"

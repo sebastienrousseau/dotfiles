@@ -422,26 +422,11 @@ fi
 # 9. DOT CLI HELP — key command categories
 # ═══════════════════════════════════════════════════════════════
 
-test_start "integration_help_start_here"
-assert_output_contains "Start Here" "bash '$REPO_ROOT/bin/dot' help"
-
-test_start "integration_help_daily_use"
-assert_output_contains "Daily Use" "bash '$REPO_ROOT/bin/dot' help"
-
-test_start "integration_help_inspect"
-assert_output_contains "Inspect" "bash '$REPO_ROOT/bin/dot' help"
-
-test_start "integration_help_ai_section"
-assert_output_contains "AI" "bash '$REPO_ROOT/bin/dot' help"
-
-test_start "integration_help_fleet_section"
-assert_output_contains "Fleet" "bash '$REPO_ROOT/bin/dot' help"
-
-test_start "integration_help_configuration"
-assert_output_contains "Configuration" "bash '$REPO_ROOT/bin/dot' help"
-
-test_start "integration_help_reference"
-assert_output_contains "Reference" "bash '$REPO_ROOT/bin/dot' help"
+# The overview groups the domains as schemas/cli/domains.json does.
+for section in CONFIGURATION SESSIONS AGENTS SYSTEM "TRUST & HOSTS" PLATFORM SHORTCUTS; do
+  test_start "integration_help_${section%% *}"
+  assert_output_contains "$section" "bash '$REPO_ROOT/bin/dot' help"
+done
 
 # ═══════════════════════════════════════════════════════════════
 # 10. CHEZMOI DATA FLOW — template variables reach the output
