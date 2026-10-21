@@ -2,7 +2,7 @@ module dotfiles.local/dot-ui
 
 go 1.26.0
 
-toolchain go1.26.9
+toolchain go1.26.10
 
 require (
 	github.com/charmbracelet/bubbles v1.0.0
