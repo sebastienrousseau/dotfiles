@@ -42,3 +42,4 @@ It is enforced by `bash ./scripts/qa/traceability-coverage.sh`.
 | BT-30 | Shell completion generator (`dot completion <shell>`) | `scripts/dot/commands/completion.sh` | `tests/unit/dot-cli/test_dot_completion.sh` | `docs/reference/UTILS.md` |
 | BT-31 | Examples coverage contract (feature/command → example) | `scripts/qa/examples-coverage.sh` | `tests/unit/misc/test_qa_examples_coverage.sh` | `docs/reference/UTILS.md` |
 | BT-32 | Feature matrix drift gate (command → test, benchmark, example) | `scripts/qa/check-feature-matrix.sh` | `tests/unit/misc/test_qa_check_feature_matrix.sh` | `docs/reference/FEATURE-MATRIX.md`, `docs/operations/TESTING.md` |
+| BT-33 | One update path and scheduled maintenance | `lib/dot/upgrade.sh`, `lib/dot/system.sh`, `scripts/dot/commands/system.sh` | `tests/unit/dot-cli/test_upgrade_globals.sh`, `tests/unit/dot-cli/test_system_schedule.sh`, `tests/integration/test_system_schedule_live.sh` | `docs/operations/MAINTENANCE.md` |

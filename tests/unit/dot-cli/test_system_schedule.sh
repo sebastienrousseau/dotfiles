@@ -78,15 +78,15 @@ assert_file_not_exists "$UNITS/dot-maintenance.service" "and the service"
 test_start "set_refuses_a_bad_word_or_no_scheduler"
 rc=0
 sys Darwin schedule set hourly 2>"$WORK/err" || rc=$?
-assert_equals "2" "$rc" "an unknown schedule"
+assert_equals "1" "$rc" "an unknown schedule"
 assert_file_contains "$WORK/err" "Usage: dot system schedule set weekly|daily|off" "shows the words"
 rc=0
 sys FreeBSD schedule set weekly 2>"$WORK/err" || rc=$?
-assert_equals "2" "$rc" "no launchd or systemd"
+assert_equals "1" "$rc" "no launchd or systemd"
 assert_file_contains "$WORK/err" "scheduling needs launchd (macOS) or systemd (Linux)" "says what it needs"
 rc=0
 DOT_SYSTEMCTL=/nonexistent sys Linux schedule set weekly 2>/dev/null || rc=$?
-assert_equals "2" "$rc" "Linux without systemd"
+assert_equals "1" "$rc" "Linux without systemd"
 assert_contains "maintenance    off      none" "$(sys FreeBSD schedule list)" "list still works there"
 
 test_start "run_does_the_maintenance_and_records_it"
@@ -111,7 +111,7 @@ assert_contains ", exit 1" "$(sys Linux status)" "and shown"
 test_start "unknown_words_exit_2"
 rc=0
 sys Darwin schedule nope 2>"$WORK/err" || rc=$?
-assert_equals "2" "$rc" "an unknown schedule verb"
+assert_equals "1" "$rc" "an unknown schedule verb"
 assert_file_contains "$WORK/err" "unknown 'dot system' command; see 'dot help system'" "points to help"
 
 echo ""

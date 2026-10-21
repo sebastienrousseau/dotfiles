@@ -152,19 +152,19 @@ _dot_system_uninstall() {
 }
 
 # dot_system_schedule_set weekly|daily|off: install, replace or remove the
-# job and record the schedule. 2 for a bad word or no scheduler.
+# job and record the schedule. 1 for a bad word or no scheduler.
 dot_system_schedule_set() {
   local when="${1:-}" backend dir
   case "$when" in
     weekly | daily | off) ;;
     *)
       printf 'Usage: dot system schedule set weekly|daily|off\n' >&2
-      return 2
+      return 1
       ;;
   esac
   if ! backend="$(_dot_system_backend)"; then
     printf 'dot: scheduling needs launchd (macOS) or systemd (Linux)\n' >&2
-    return 2
+    return 1
   fi
   if [[ "$when" == off ]]; then
     _dot_system_uninstall "$backend"

@@ -16,7 +16,7 @@ source "$SCRIPT_DIR/../../../lib/dot/system.sh"
 # _system_unknown: the words are left out, since one may be a secret.
 _system_unknown() {
   printf "dot: unknown 'dot system' command; see 'dot help system'\n" >&2
-  exit 2
+  exit 1
 }
 
 _system_schedule() {

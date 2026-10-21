@@ -551,7 +551,7 @@ bash scripts/qa/check-feature-matrix.sh
 |---------|---------|-----------------|-----------|---------|--------|----------|
 | `dot system` | (default) status: OS, disk, schedule, last run | `test_fm_system_status` | `run:system-status` | `examples/example-dot-system.sh` | `docs/operations/MAINTENANCE.md` | regression |
 | `dot system schedule` | (default) list | `test_fm_system_schedule_list` | `run:system-schedule-list` | `examples/example-dot-system.sh` | `docs/operations/MAINTENANCE.md` | regression |
-| `dot system schedule set` | weekly / daily / off (bad word exits 2) | `test_fm_system_schedule_set` | `help:system` | `examples/example-dot-system.sh` | `docs/operations/MAINTENANCE.md` | regression |
+| `dot system schedule set` | weekly / daily / off (bad word exits 1) | `test_fm_system_schedule_set` | `help:system` | `examples/example-dot-system.sh` | `docs/operations/MAINTENANCE.md` | regression |
 | `dot system schedule run` | clears caches, rotates logs, records the exit code | `test_fm_system_schedule_run` | `help:system` | `examples/example-dot-system.sh` | `docs/operations/MAINTENANCE.md` | regression |
 
 ## cross-cutting invariants
