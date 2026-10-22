@@ -17,15 +17,15 @@ test_start "docs_coverage_script_exists"
 assert_file_exists "$SCRIPT_FILE" "docs coverage script should exist"
 
 test_start "docs_coverage_utils_reference_has_public_ai_commands"
-assert_file_contains "$UTILS_DOC" "\`dot ai-setup\`" "UTILS should document dot ai-setup"
-assert_file_contains "$UTILS_DOC" "\`dot ai-query\`" "UTILS should document dot ai-query"
-assert_file_contains "$UTILS_DOC" "\`dot fleet\`" "UTILS should document dot fleet"
+assert_file_contains "$UTILS_DOC" "\`dot ai install\`" "UTILS should document dot ai install"
+assert_file_contains "$UTILS_DOC" "\`dot ai ask\`" "UTILS should document dot ai ask"
+assert_file_contains "$UTILS_DOC" "\`dot fleet status\`" "UTILS should document dot fleet status"
 assert_file_contains "$UTILS_DOC" "\`dot help\`" "UTILS should document dot help"
 
 test_start "docs_coverage_ai_reference_has_provider_bridges"
-assert_file_contains "$AI_DOC" "\`dot cl\`" "AI doc should document dot cl"
-assert_file_contains "$AI_DOC" "\`dot copilot\`" "AI doc should document dot copilot"
-assert_file_contains "$AI_DOC" "\`dot aider\`" "AI doc should document dot aider"
+assert_file_contains "$AI_DOC" "\`dot ai run claude\`" "AI doc should document dot ai run claude"
+assert_file_contains "$AI_DOC" "\`dot ai run copilot\`" "AI doc should document dot ai run copilot"
+assert_file_contains "$AI_DOC" "\`dot ai run aider\`" "AI doc should document dot ai run aider"
 
 test_start "docs_coverage_contract_passes"
 assert_exit_code 0 "bash '$SCRIPT_FILE'"
@@ -42,7 +42,7 @@ assert_contains "Threshold: 100%" "$docs_out" "the floor defaults to 100%"
 test_start "docs_coverage_names_a_gap_and_fails_the_floor"
 DOCS_WORK="$(mktemp -d -t dot-docs-cov.XXXXXX)"
 trap 'rm -rf "$DOCS_WORK"' EXIT
-for f in scripts/qa/docs-coverage.sh bin/dot lib/dot/data/help-specs.txt docs/reference/UTILS.md docs/AI.md \
+for f in scripts/qa/docs-coverage.sh bin/dot lib/dot/data/commands.txt docs/reference/UTILS.md docs/AI.md \
   docs/reference/SCRIPTS.md docs/ARCHITECTURE.md defaults/.chezmoitemplates/functions/groups.json; do
   mkdir -p "$DOCS_WORK/$(dirname "$f")"
   cp "$REPO_ROOT/$f" "$DOCS_WORK/$f"
@@ -51,4 +51,4 @@ sed -i.bak 's/`dot fleet/`dot FLEET/g' "$DOCS_WORK/docs/reference/UTILS.md"
 gap_rc=0
 gap_out="$(bash "$DOCS_WORK/scripts/qa/docs-coverage.sh" 2>&1)" || gap_rc=$?
 assert_not_equals "0" "$gap_rc" "a documentation gap fails the run"
-assert_contains "Missing documentation: dot fleet in UTILS.md" "$gap_out" "and names it"
+assert_contains "Missing documentation: dot fleet status in UTILS.md" "$gap_out" "and names it"

@@ -54,8 +54,8 @@ tar -czf ~/dotfiles-backup-$(date +%F).tar.gz -C "$HOME" \
 bash /tmp/dotfiles-install.sh
 
 # 3. Bring your own files under management, one at a time.
-dot add ~/.gitconfig
-dot add ~/.config/nvim
+dot config add ~/.gitconfig
+dot config add ~/.config/nvim
 
 # 4. Preview, then apply.
 dot diff

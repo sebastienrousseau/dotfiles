@@ -18,7 +18,7 @@ bash /tmp/dotfiles-install.sh
 ### 2. Update everything
 
 ```sh
-dot upgrade
+dot system update
 ```
 
 ### 3. Update dotfiles only (no tools)
@@ -86,7 +86,7 @@ dot edit
 ### 12. Add a new config file to chezmoi
 
 ```sh
-dot add ~/.some-config-file
+dot config add ~/.some-config-file
 ```
 
 ### 13. Remove a managed file
@@ -150,25 +150,25 @@ dot doctor
 ### 21. Auto-fix common issues
 
 ```sh
-dot heal
+dot doctor fix
 ```
 
 ### 22. Check startup performance
 
 ```sh
-dot benchmark
+dot doctor perf measure
 ```
 
 ### 23. See the health score
 
 ```sh
-dot score
+dot doctor score
 ```
 
 ### 24. Recent metrics
 
 ```sh
-dot metrics
+dot doctor metric list
 ```
 
 ## Fleet
@@ -202,7 +202,7 @@ dot ai
 ### 29. Switch agent profile
 
 ```sh
-dot mode architect   # or hardener, refactor
+dot agent mode set architect   # or hardener, refactor
 ```
 
 ### 30. Verify MCP policy
@@ -216,19 +216,19 @@ dot mcp --strict
 ### 31. Rollback the last apply
 
 ```sh
-dot rollback
+dot doctor rollback
 ```
 
 ### 32. Create an offline bundle
 
 ```sh
-dot bundle
+dot config export
 ```
 
 ### 33. Restore from a bundle
 
 ```sh
-dot bundle restore ~/Downloads/dotfiles-bundle-*.tar.zst
+dot config import ~/Downloads/dotfiles-bundle-*.tar.zst
 ```
 
 ## Development
@@ -248,14 +248,14 @@ bash tests/unit/theme/test_themes_toml.sh
 ### 36. Lint shell scripts
 
 ```sh
-dot lint
+dot config check
 ```
 
 ### 37. Simulate chaos to test self-healing
 
 ```sh
-dot chaos symlink   # in an ephemeral container only
-dot heal
+bash scripts/ops/chaos.sh symlink   # from the repo, in an ephemeral container only
+dot doctor fix
 dot doctor
 ```
 
@@ -264,19 +264,19 @@ dot doctor
 ### 38. Open the manual in a browser
 
 ```sh
-dot manual
+dot help --manual
 ```
 
 ### 39. Download the PDF
 
 ```sh
-dot manual pdf
+dot help --manual pdf
 ```
 
 ### 40. Read the manual in a terminal
 
 ```sh
-dot manual text | less
+dot help --manual text | less
 ```
 
 ## See Also

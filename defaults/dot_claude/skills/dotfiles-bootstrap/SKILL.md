@@ -2,7 +2,7 @@
 name: dotfiles-bootstrap
 description: |
   Bootstrap a workstation with the dotfiles framework. Takes a GitHub
-  user / owner+repo / explicit clone URL and runs `dot init` (which
+  user / owner+repo / explicit clone URL and runs `dot config init` (which
   shells out to chezmoi) with the right safety prompts. Honors the
   active agent profile (`ask` / `plan` / `apply` / `audit`) so it
   defaults to dry-run in safer modes and full apply in `apply`.
@@ -23,7 +23,7 @@ docs: https://doc.dotfiles.io/manual/
 Provision a new workstation from a public dotfiles repository through
 the [`sebastienrousseau/dotfiles`](https://github.com/sebastienrousseau/dotfiles) harness.
 
-This skill is for Claude Code to invoke `dot init <user>` on the user's behalf — most useful when the user says "set me up like Alice" or "bootstrap a fresh laptop using my GitHub dotfiles."
+This skill is for Claude Code to invoke `dot config init <user>` on the user's behalf — most useful when the user says "set me up like Alice" or "bootstrap a fresh laptop using my GitHub dotfiles."
 
 ## What this skill does
 
@@ -35,12 +35,12 @@ When invoked, it:
    - a full HTTPS or `git@host:path` clone URL
 2. **Refuses** plain `http://` URLs (no transit integrity).
 3. **Reads** the user's current agent profile from `$DOT_AGENT_PROFILE` (defaults to `ask`):
-   - `ask` → run `dot init <user> --dry-run` (read-only preview)
-   - `plan` → run `dot init <user> --dry-run` and explain the plan
-   - `apply` → run `dot init <user> --yes` (full apply with `chezmoi apply`), only after the user has confirmed they trust the repository
-   - `audit` → run `dot init <user> --no-apply --yes` (clone only, no chezmoi apply), after the same confirmation
+   - `ask` → run `dot config init <user> --dry-run` (read-only preview)
+   - `plan` → run `dot config init <user> --dry-run` and explain the plan
+   - `apply` → run `dot config init <user> --yes` (full apply with `chezmoi apply`), only after the user has confirmed they trust the repository
+   - `audit` → run `dot config init <user> --no-apply --yes` (clone only, no chezmoi apply), after the same confirmation
 
-   An agent has no terminal, so `dot init` refuses to clone without `--yes`. Pass it only once the user has said yes to this repository.
+   An agent has no terminal, so `dot config init` refuses to clone without `--yes`. Pass it only once the user has said yes to this repository.
 4. **Surfaces** the trust prompt warnings before any clone runs — the target repo's scripts execute with the user's privileges.
 5. **Reports** the outcome (success / failed / aborted-by-trust-prompt) so the user can decide next steps.
 
@@ -48,15 +48,15 @@ When invoked, it:
 
 ```bash
 # canonical
-dot init <user>                       # github.com/<user>/dotfiles
-dot init <owner>/<repo>               # github.com/<owner>/<repo>
-dot init <https-or-ssh-url>           # explicit URL
+dot config init <user>                       # github.com/<user>/dotfiles
+dot config init <owner>/<repo>               # github.com/<owner>/<repo>
+dot config init <https-or-ssh-url>           # explicit URL
 
 # safety flags
-dot init <user> --dry-run             # preview only
-dot init <user> --no-apply            # clone, skip chezmoi apply
-dot init <user> --force               # overwrite existing chezmoi source dir
-dot init <user> --yes                 # consent without a terminal (required by agents)
+dot config init <user> --dry-run             # preview only
+dot config init <user> --no-apply            # clone, skip chezmoi apply
+dot config init <user> --force               # overwrite existing chezmoi source dir
+dot config init <user> --yes                 # consent without a terminal (required by agents)
 ```
 
 ## Profile-aware defaults
@@ -82,6 +82,6 @@ Closes the round-1 audit's adoption gap "bootstrap a foreign dotfiles repo throu
 
 ## References
 
-- `dot init` source: [`scripts/dot/commands/init.sh`](https://github.com/sebastienrousseau/dotfiles/blob/main/scripts/dot/commands/init.sh)
+- `dot config init` source: [`scripts/dot/commands/init.sh`](https://github.com/sebastienrousseau/dotfiles/blob/main/scripts/dot/commands/init.sh)
 - Roadmap entry: [ROADMAP_2026 §B2](https://github.com/sebastienrousseau/dotfiles/blob/main/docs/operations/ROADMAP_2026.md)
-- AGENTS.md / CLAUDE.md sync: `dot agents render`
+- AGENTS.md / CLAUDE.md sync: `dot agent context apply`

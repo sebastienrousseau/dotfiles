@@ -11,7 +11,7 @@ Start here. Then go deeper.
 The complete reference is the `.dotfiles` Manual — a multi-format book covering every concept, tutorial, reference, and recipe.
 
 - Online: <https://doc.dotfiles.io/manual/> (single-page HTML, PDF, EPUB and ASCII editions are attached to each release)
-- Locally: `dot manual` opens the HTML in your browser
+- Locally: `dot help --manual` opens the HTML in your browser
 - Sources: [`docs/manual/`](https://github.com/sebastienrousseau/dotfiles/tree/main/docs/manual) (published at [/manual/](https://doc.dotfiles.io/manual/))
 
 Quick jumps into the Manual:

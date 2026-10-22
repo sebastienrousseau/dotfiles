@@ -14,7 +14,7 @@ The trust model combines cryptographic signing, local-first secrets, policy-gate
 | Secret leakage into Git history | Age/SOPS encryption, gitleaks in CI, `detect-secrets` baseline |
 | Tampered upstream tool | SHA256-pinned chezmoi installer, SBOM + Grype CVE scan |
 | Malicious agent behavior | MCP policy enforcement, agent profile allowlists, attestation logs |
-| Compromised fleet host | Per-host signing keys, attestation comparison, `dot chaos` self-tests |
+| Compromised fleet host | Per-host signing keys, attestation comparison, chaos self-tests (`scripts/ops/chaos.sh`) |
 | Downgrade attacks | Version-sync enforcement, signed release tags |
 
 ## Identity and Signing
@@ -173,7 +173,7 @@ See [Fleet Architecture](04-fleet.md) for the full model.
 - **Local-first** — nothing leaves the workstation unless the user opts in
 - **Zero trust in transit** — every network-fetched artifact is checksum-verified
 - **Machine-readable evidence** — human-readable summaries are backed by signed JSON
-- **Reversible** — `dot rollback` undoes any change with a single command
+- **Reversible** — `dot doctor rollback` undoes any change with a single command
 
 ## See Also
 

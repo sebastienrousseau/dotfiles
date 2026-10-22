@@ -11,22 +11,22 @@ the report, and how to remediate. Managed under
 
 ## What "drift" means here
 
-Four distinct classes are tracked. The same `dot drift` command (and
+Four distinct classes are tracked. The same `dot doctor drift show` command (and
 the nightly CI workflow) surfaces all four.
 
 | Class | Meaning | How to detect | Typical fix |
 |---|---|---|---|
 | **Managed drift** | A chezmoi-managed file's deployed copy differs from what a fresh `chezmoi apply` would produce. The standard case. | `chezmoi status` (M / MM / A / R rows) | Either update the source so apply is idempotent, or accept the deployed change and re-add. |
 | **Untracked source** | The chezmoi source tree contains files git doesn't know about — usually in-progress local edits that haven't been committed. | `git -C <source-dir> ls-files --others --exclude-standard` | Commit, stash, or `.gitignore` the file. |
-| **Orphan deployed** | A file under `$HOME` was previously chezmoi-managed but the source has since been deleted. Chezmoi no longer claims it, so a fresh apply leaves it behind silently. | Inventoried in `${XDG_STATE_HOME}/dotfiles/orphans` (populated by `dot heal` / `dot drift`) | `chezmoi remove --force` the path, or re-add the source if the file is still wanted. |
+| **Orphan deployed** | A file under `$HOME` was previously chezmoi-managed but the source has since been deleted. Chezmoi no longer claims it, so a fresh apply leaves it behind silently. | Inventoried in `${XDG_STATE_HOME}/dotfiles/orphans` (populated by `dot doctor fix` / `dot doctor drift show`) | `chezmoi remove --force` the path, or re-add the source if the file is still wanted. |
 | **Stale source** | The deployed file is *newer* than its source. The next `chezmoi apply` would silently revert the user's hand-edit. Reverse-drift trap. | Compare mtimes for each managed target vs the resolved source-path | Promote the deployed change into the source (`chezmoi re-add`) or revert the deployed file. |
 
 ## Reading the report
 
 ```bash
-dot drift          # human-readable (uses the ui.sh formatting)
-dot drift --json   # single JSON object — used by the nightly workflow
-dot drift --diff   # also print `chezmoi diff` for managed drift
+dot doctor drift show          # human-readable (uses the ui.sh formatting)
+dot doctor drift show --json   # single JSON object — used by the nightly workflow
+dot doctor drift show --diff   # also print `chezmoi diff` for managed drift
 ```
 
 JSON shape:
@@ -46,7 +46,7 @@ Exit code: `0` if every class is clean; `1` if any drift is found;
 
 ## How the nightly check works
 
-`.github/workflows/drift-detection.yml` runs `dot drift --json` against
+`.github/workflows/drift-detection.yml` runs `dot doctor drift show --json` against
 a fresh checkout of `main` every day at 04:00 UTC. If `total != 0`
 it opens (or updates) a tracking issue labelled
 `type:chore + priority:medium` with the JSON summary, full
@@ -59,15 +59,15 @@ indicator.
 ## Force a local drift check
 
 ```bash
-dot drift            # default — what you'd run before opening a PR
-dot drift --json | jq '.'   # for scripting / dashboards
+dot doctor drift show            # default — what you'd run before opening a PR
+dot doctor drift show --json | jq '.'   # for scripting / dashboards
 ```
 
 To force a full re-comparison after a tool upgrade or a force-apply:
 
 ```bash
 chezmoi apply --refresh-externals   # refetch external sources
-dot drift                            # re-scan
+dot doctor drift show                            # re-scan
 ```
 
 ## Historical incidents
@@ -103,5 +103,5 @@ report exists rather than just `chezmoi status`.
 - `scripts/diagnostics/drift-dashboard.sh` — the dashboard itself.
 - `.github/workflows/drift-detection.yml` — the nightly scanner.
 - `tests/unit/diagnostics/test_drift_dashboard.sh` — JSON contract test.
-- `dot heal` / `dot rollback` — drift remediation commands.
+- `dot doctor fix` / `dot doctor rollback` — drift remediation commands.
 - Issue [#875](https://github.com/sebastienrousseau/dotfiles/issues/875).

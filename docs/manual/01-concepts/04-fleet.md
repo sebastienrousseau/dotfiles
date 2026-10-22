@@ -48,7 +48,7 @@ Add a new preset by appending to `hardware.toml` — no code changes needed.
 
 ## Drift Detection
 
-`dot drift` compares the current machine state against the rendered template output and reports:
+`dot doctor drift show` compares the current machine state against the rendered template output and reports:
 
 | Drift Type | Example |
 |:---|:---|
@@ -58,7 +58,7 @@ Add a new preset by appending to `hardware.toml` — no code changes needed.
 | **Permission** | Chmod/chown changes |
 | **Symlink target** | Link retargeted |
 
-Drift is normal during development. `dot heal` reconciles the source → local direction. `dot apply` overwrites drift; `dot diff` previews the change without applying.
+Drift is normal during development. `dot doctor fix` reconciles the source → local direction. `dot apply` overwrites drift; `dot diff` previews the change without applying.
 
 ## Fleet Attestation
 
@@ -95,7 +95,7 @@ Recommended rollout procedure for fleet-wide changes:
 4. **Per-host pull** — on each fleet host: `dot update` (git pull + apply)
 5. **Verify alignment** — run `dot fleet attest` from any host
 
-For urgent rollback: every host can independently run `dot rollback` to return to the previous known-good state (stored in `~/.local/state/dotfiles/snapshots/`).
+For urgent rollback: every host can independently run `dot doctor rollback` to return to the previous known-good state (stored in `~/.local/state/dotfiles/snapshots/`).
 
 ## Cross-Host Trust
 

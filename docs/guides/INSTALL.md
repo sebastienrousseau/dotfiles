@@ -67,7 +67,7 @@ dot update
 
 ## Next steps
 
-1. Run `dot learn` to take a guided tour.
+1. Run `dot help tour` to take a guided tour.
 2. Add your own tweaks in `~/.config/shell/custom/`.
 3. Read the [Utilities and `dot` CLI](../reference/UTILS.md) reference.
 
@@ -117,7 +117,7 @@ nix profile install ~/.dotfiles/nix#dot-utils
 On a machine with internet access, create a bundle:
 
 ```bash
-dot bundle ~/Downloads
+dot config export ~/Downloads
 ```
 
 Copy the archive to the target machine. Then unpack and install:

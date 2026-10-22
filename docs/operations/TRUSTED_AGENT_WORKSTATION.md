@@ -57,7 +57,7 @@ Run:
 ```bash
 dot doctor
 dot mcp --strict
-dot mode list
+dot agent mode list
 dot agent card --json
 dot attest --json
 ```

@@ -92,7 +92,7 @@ for pkg in */; do
     rel="${rel#./}"
     mkdir -p "$(dirname "$HOME/$rel")"
     cp "$pkg/$rel" "$HOME/$rel"
-    dot add "$HOME/$rel"
+    dot config add "$HOME/$rel"
   done
 done
 ```
@@ -161,6 +161,6 @@ parity; secrets management; signed releases.
 
 **Lose:** the elegance of the symlink model — editing `~/.bashrc` no
 longer edits your repo directly, so you edit the source and run
-`dot sync` (or `dot add` after the fact). Stow is ~5k lines of Perl
+`dot sync` (or `dot config add` after the fact). Stow is ~5k lines of Perl
 with essentially no runtime dependencies; this pulls in chezmoi. And
 Stow's mental model fits in a paragraph, which has real value.

@@ -147,34 +147,34 @@ dot sync       # Alias of apply
 dot update     # Pull latest changes and apply
 dot diff       # Show diff (excludes scripts/install/tests)
 dot remove     # Safely remove a managed file
-dot drift      # Drift dashboard (chezmoi status)
-dot history    # Shell history analysis
-dot tools      # Show dot utils
-dot keys       # Show keybindings
-dot tune       # Apply OS tuning (opt-in)
-dot secrets    # Edit encrypted secrets (age)
-dot upgrade    # Update flake, plugins, and dotfiles
-dot new        # Scaffold a project template (python/go/node)
-dot log-rotate # Rotate ~/.local/share/dotfiles.log
+dot doctor drift show      # Drift dashboard (chezmoi status)
+dot shell history list    # Shell history analysis
+dot tool      # Show dot utils
+# Keybindings: docs/security/KEYS.md
+dot system settings apply       # Apply OS tuning (opt-in)
+dot secret    # Edit encrypted secrets (age)
+dot system update    # Update flake, plugins, and dotfiles
+dot tool new        # Scaffold a project template (python/go/node)
+dot system clean --logs # Rotate ~/.local/share/dotfiles.log
 dot doctor
-dot sandbox
-dot benchmark
+dot config apply --sandbox
+dot doctor perf measure
 dot theme
-dot wallpaper
-dot ssh-key
-dot secrets-create
-dot fonts
-dot firewall
-dot telemetry
-dot dns-doh
-dot encrypt-check
-dot backup
-dot lock-screen
-dot usb-safety
-dot secrets-init
+dot theme wallpaper set
+dot secret key new
+dot secret new
+dot theme font install
+dot security firewall apply
+dot security telemetry apply
+dot security dns apply
+dot security disk show
+dot doctor backup
+dot security lock apply
+dot security usb apply
+dot secret init
 dot edit
-dot docs
-dot learn     # Interactive tour (requires gum)
+dot help --readme
+dot help tour     # Interactive tour (requires gum)
 dot help
 ```
 
@@ -188,8 +188,8 @@ nix develop
 ### Secrets
 
 ```bash
-dot secrets-init
-dot secrets
+dot secret init
+dot secret
 ```
 
 ### Git identity
@@ -277,7 +277,7 @@ Available themes:
 - **Zcompile**: Your `.zshrc` and generated config files are automatically compiled to `.zwc` bytecode for faster parsing.
 - **Fast Mode**: Set `DOTFILES_FAST=1` to skip heavy startup work (plugins, completions, prompt tooling, AI helpers) for the quickest possible first prompt.
 - **Ultra-Fast Mode**: Set `DOTFILES_ULTRA_FAST=1` for minimal init (no rc.d, plugins, completions, or prompt tooling).
-- **Perf Mode**: `dot perf --precmd` measures first-prompt work (precmd hooks).
+- **Perf Mode**: `dot doctor perf show --precmd` measures first-prompt work (precmd hooks).
 - **Deferred Hooks**: Use `DOTFILES_DEFER_COMPINIT=1`, `DOTFILES_DEFER_TOOLS=1`, and `DOTFILES_DEFER_ZINIT_MODE=preexec` to move work after the first command.
 
 ## Test

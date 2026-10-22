@@ -24,7 +24,7 @@ Run this checklist after a fresh install and quarterly afterwards.
 
 ## Ongoing (monthly)
 
-- [ ] `dot upgrade` — pick up security patches
+- [ ] `dot system update` — pick up security patches
 - [ ] `dot verify --security` — confirm no new leaks
 - [ ] Review `~/.local/state/dotfiles/mcp-violations.log` — any unexpected entries?
 - [ ] Review recent attestations — `ls ~/.local/state/dotfiles/attestation/ | tail -10`
@@ -35,7 +35,7 @@ Run this checklist after a fresh install and quarterly afterwards.
 - [ ] Rotate SSH signing key
 - [ ] Audit `~/.ssh/allowed_signers` — remove former team members
 - [ ] Review SOPS recipient list in `.sops.yaml`
-- [ ] Run `dot chaos` in a test container — verify heal works
+- [ ] Run the chaos test (`bash scripts/ops/chaos.sh`) in a test container — verify heal works
 - [ ] Update pinned tool versions in `mise.toml`
 - [ ] Run fleet attestation — confirm all hosts aligned
 

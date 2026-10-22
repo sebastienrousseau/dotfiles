@@ -12,7 +12,7 @@ mise install dot@alice/cfg                       # any user's dotfiles
 mise use -g dot@v0.2.502                         # set globally
 ```
 
-Under the hood the plugin invokes `dot init <owner/repo>` so every install runs through the framework's signed-bootstrap pipeline (see [HARD_AUDIT_2026 §H6](https://github.com/sebastienrousseau/dotfiles/blob/main/docs/operations/HARD_AUDIT_2026.md)). No unverified `curl | sh`.
+Under the hood the plugin invokes `dot config init <owner/repo>` so every install runs through the framework's signed-bootstrap pipeline (see [HARD_AUDIT_2026 §H6](https://github.com/sebastienrousseau/dotfiles/blob/main/docs/operations/HARD_AUDIT_2026.md)). No unverified `curl | sh`.
 
 ## Status
 
@@ -31,7 +31,7 @@ This vendored copy exists so:
 `bin/install` — install a given version to `$ASDF_INSTALL_PATH` / `$MISE_INSTALL_PATH`. Two paths:
 
 - **Tagged release** (`mise install dot@v0.2.502`) — downloads the SHA256-verified release tarball + cosign signature.
-- **owner/repo shorthand** (`mise install dot@alice/cfg`) — runs `dot init alice/cfg --no-apply` and copies the resulting `dot` binary into the install path. Skips the framework's `chezmoi apply` so mise installs are isolated from user state.
+- **owner/repo shorthand** (`mise install dot@alice/cfg`) — runs `dot config init alice/cfg --no-apply` and copies the resulting `dot` binary into the install path. Skips the framework's `chezmoi apply` so mise installs are isolated from user state.
 
 `bin/exec-env` — export `DOT_PROFILE`, `DOT_AGENT_PROFILE`, `DOTFILES_FLEET_HOSTS` if a per-project `.dot.toml` declares them. Lets mise users keep agent/fleet config per-project the same way they keep node/python versions per-project.
 

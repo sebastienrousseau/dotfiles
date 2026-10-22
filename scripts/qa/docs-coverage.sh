@@ -30,13 +30,13 @@ record_doc_check() {
   fi
 }
 
+# Public commands: every built ADR-020 spelling and every shortcut, from the
+# command table generated from the plugin manifests (planned ones left out).
 extract_public_commands() {
-  awk '
-    /\|/ {
-      split($0, parts, /\|/)
-      print parts[2]
-    }
-  ' "$REPO_ROOT/lib/dot/data/help-specs.txt"
+  awk -F'|' '
+    $1 == "cmd" && $3 != "" { print $2 }
+    $1 == "alias" && $3 == "shortcut" { print $2 }
+  ' "$REPO_ROOT/lib/dot/data/commands.txt"
 }
 
 check_dot_command_docs() {
@@ -51,8 +51,8 @@ check_dot_command_docs() {
 check_ai_provider_docs() {
   local provider=""
 
-  for provider in cl copilot kimi agy kiro sgpt ollama opencode aider; do
-    record_doc_check "dot $provider in AI.md" "\`dot $provider\`" "$AI_DOC"
+  for provider in claude copilot kimi agy kiro sgpt ollama opencode aider; do
+    record_doc_check "dot ai run $provider in AI.md" "\`dot ai run $provider" "$AI_DOC"
   done
 }
 

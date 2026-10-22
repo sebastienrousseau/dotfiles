@@ -245,8 +245,8 @@ mkdir -p "$fx_docs/scripts/qa" "$fx_docs/bin" "$fx_docs/docs/reference" \
   "$fx_docs/defaults/.chezmoitemplates/functions" "$fx_docs/lib/dot/data"
 cp "$docs_coverage_script" "$fx_docs/scripts/qa/docs-coverage.sh"
 printf '#!/usr/bin/env bash\n' >"$fx_docs/bin/dot"
-printf 'core|alpha|Alpha command\ncore|beta|Beta command\n' \
-  >"$fx_docs/lib/dot/data/help-specs.txt"
+printf 'cmd|alpha|alpha|read|Alpha command\ncmd|beta|beta|read|Beta command\n' \
+  >"$fx_docs/lib/dot/data/commands.txt"
 printf '{"netgroup": {}}\n' >"$fx_docs/defaults/.chezmoitemplates/functions/groups.json"
 : >"$fx_docs/docs/reference/UTILS.md"
 : >"$fx_docs/docs/AI.md"

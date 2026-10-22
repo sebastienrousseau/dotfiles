@@ -104,11 +104,16 @@ man: ## Generate share/man/man1/dot.1 from the command registry
 completions: ## Regenerate committed zsh/bash completions from the registry
 	bash ./tools/docs/generate-completions.sh
 
-generate: man completions ## Regenerate every registry-derived artefact
+generate: ## Regenerate every manifest-derived artefact
+	python3 ./tools/ci/cli_command_table.py
+	$(MAKE) man completions
+	python3 ./tools/docs/gen_cmdlets.py
 	bash ./tools/docs/generate-command-index.sh
 	bash ./tools/docs/generate-command-reference.sh
 
 check-drift: ## Fail if any generated artefact is stale (what doc-drift.yml runs)
+	python3 ./tools/ci/check-cli-contract.py
+	python3 ./tools/docs/gen_cmdlets.py --check
 	bash ./tools/docs/generate-command-index.sh --check
 	bash ./tools/docs/generate-command-reference.sh --check
 	bash ./tools/docs/generate-manpage.sh --check

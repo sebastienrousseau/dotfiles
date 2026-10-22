@@ -82,8 +82,8 @@ Styles in `~/.dotfiles/dot_config/ai/patterns/` add focused context to any promp
 - **refactor** — POSIX compatibility, performance, and linting
 
 ```bash
-dot ai claude --style architect "optimize my zshrc"
-dot ai agy --style hardener "audit my ssh config"
+dot ai run claude --style architect "optimize my zshrc"
+dot ai run agy --style hardener "audit my ssh config"
 ```
 
 The bridge also injects system details (OS, architecture, date) so the model has the context it needs. Quick aliases ship for the common combinations: `dcla` (Claude + architect), `dagyh` (Antigravity + hardener), `dkir` (Kiro + refactor).
@@ -91,8 +91,8 @@ The bridge also injects system details (OS, architecture, date) so the model has
 ## Running tools
 
 ```bash
-dot ai "explain this stack trace"     # one-shot on Claude
-dot ai codex "add a test for parse()" # one-shot on a specific tool
+dot ai "explain this stack trace"            # one-shot on Claude
+dot ai run codex "add a test for parse()"    # one-shot on a specific tool
 dot ai chat                            # pick a tool and open its session
 dot ai chat aider                      # open aider directly
 ```
@@ -163,15 +163,15 @@ The old command shapes still work, but print a one-line hint pointing at the new
 
 | Deprecated | Use instead |
 |------------|-------------|
-| `dot cl` | `dot ai claude` |
-| `dot codex` / `dot copilot` / `dot kimi` / `dot agy` / `dot goose` | `dot ai codex` / `dot ai copilot` / `dot ai kimi` / `dot ai agy` / `dot ai goose` |
-| `dot kiro` / `dot sgpt` / `dot ollama` / `dot opencode` | `dot ai kiro` / `dot ai sgpt` / `dot ai ollama` / `dot ai opencode` |
-| `dot aider` / `dot autohand` / `dot vibe` / `dot qwen` / `dot zai` | `dot ai aider` / `dot ai autohand` / `dot ai vibe` / `dot ai qwen` / `dot ai zai` |
+| `dot ai run claude` / `dot ai run claude` | `dot ai run claude` |
+| `dot ai run codex` / `dot ai run copilot` / `dot ai run kimi` / `dot ai run agy` / `dot ai run goose` | `dot ai run codex` / `dot ai run copilot` / `dot ai run kimi` / `dot ai run agy` / `dot ai run goose` |
+| `dot ai run kiro` / `dot ai run sgpt` / `dot ai run ollama` / `dot ai run opencode` | `dot ai run kiro` / `dot ai run sgpt` / `dot ai run ollama` / `dot ai run opencode` |
+| `dot ai run aider` / `dot ai run autohand` / `dot ai run vibe` / `dot ai run qwen` / `dot ai run zai` | `dot ai run aider` / `dot ai run autohand` / `dot ai run vibe` / `dot ai run qwen` / `dot ai run zai` |
 | `dot ai status` | `dot ai tools` |
 | `dot ai dashboard` / `dot ai dash` | `dot ai` (the cockpit) |
 | `dot ai proxy …` / `dot ai local on\|off` | `dot ai serve` |
-| `dot ai-setup` | `dot ai login` |
-| `dot ai-query` | `dot ai ask` |
+| `dot ai install --interactive` | `dot ai login` |
+| `dot ai ask` | `dot ai ask` |
 | `--pattern <name>` | `--style <name>` |
 
 ## Agentic terminal workflows

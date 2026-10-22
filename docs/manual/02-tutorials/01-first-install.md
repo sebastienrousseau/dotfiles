@@ -74,7 +74,7 @@ Any warnings will be accompanied by a suggested fix.
 ## Step 3: Take the Tour
 
 ```sh
-dot learn
+dot help tour
 ```
 
 An interactive walkthrough covering:
@@ -158,14 +158,14 @@ A picker opens showing all paired wallpaper themes on your system. Select one an
 If `dot doctor` shows failures:
 
 ```sh
-dot heal      # auto-fix common issues
-dot heal -n   # dry-run first to see what would change
+dot doctor fix      # auto-fix common issues
+dot doctor fix -n   # dry-run first to see what would change
 ```
 
 If the installation is broken beyond repair:
 
 ```sh
-dot rollback  # restore the previous known-good state
+dot doctor rollback  # restore the previous known-good state
 ```
 
 If `dot doctor` still fails after heal + rollback, check:
@@ -187,7 +187,7 @@ After `dot doctor` reports a healthy score, you have:
 | **Terminal** | Ghostty/Alacritty/Kitty/WezTerm configs (pick whichever is installed) |
 | **Git** | Signed commits, delta diff, conventional commit template |
 | **AI tooling** | Codex, Copilot CLI, Antigravity CLI (`agy`) via native installer; Claude Code via Anthropic's native installer |
-| **Secret store** | Age key, SOPS config, `dot secrets` command ready |
+| **Secret store** | Age key, SOPS config, `dot secret` command ready |
 | **Security** | Gitleaks, detect-secrets baseline, signed attestation log |
 | **Theme engine** | K-Means wallpaper extractor, system + custom wallpaper discovery |
 

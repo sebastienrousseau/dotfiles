@@ -95,7 +95,7 @@ The [Model Context Protocol](https://modelcontextprotocol.io/) is a standard for
 
 ### Can I add my own agent profile?
 
-Yes. Drop a Markdown file in `dot_config/ai/patterns/`. Each file describes a profile (architect, hardener, etc.). `dot mode <name>` switches between them.
+Yes. Drop a Markdown file in `dot_config/ai/patterns/`. Each file describes a profile (architect, hardener, etc.). `dot agent mode <name>` switches between them.
 
 ## Fleet
 
@@ -127,11 +127,11 @@ Common culprits:
 - `mise activate` with aggressive hook-env (set `activate_aggressive = false`)
 - Plugin manager scanning for updates
 
-Run `dot benchmark --detailed` to attribute cost.
+Run `dot doctor perf measure --detailed` to attribute cost.
 
 ### Can I disable prewarming?
 
-Yes — but your cold shell startup will be slow. Remove the prewarm invocation from your shell profile or skip `dot prewarm` after apply.
+Yes — but your cold shell startup will be slow. Remove the prewarm invocation from your shell profile or skip `dot shell update --prewarm` after apply.
 
 ## Troubleshooting Community
 

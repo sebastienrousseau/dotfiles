@@ -14,7 +14,7 @@ This manual is generated from the Markdown sources in [`docs/manual/`](https://g
 
 - **Web (multi-page)** — browse the chapters below
 - **Single-page HTML, PDF, EPUB, ASCII text** — attached to every [GitHub Release](https://github.com/sebastienrousseau/dotfiles/releases/latest)
-- **CLI** — `dot manual` opens the manual locally; `dot manual pdf` downloads the PDF; `dot manual text` pipes the ASCII edition to your pager
+- **CLI** — `dot help --manual` opens the manual locally; `dot help --manual pdf` downloads the PDF; `dot help --manual text` pipes the ASCII edition to your pager
 
 ## Contents
 

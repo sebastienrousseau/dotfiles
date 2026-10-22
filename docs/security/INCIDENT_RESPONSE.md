@@ -104,7 +104,7 @@ Stop the incident from spreading. Actions depend on severity.
 dot secrets rotate --all-exposed
 
 # Revoke SSH certificates
-dot ssh-cert revoke
+dot secret cert remove
 
 # Lock configuration files to prevent further modification
 lock-configs
@@ -162,7 +162,7 @@ chezmoi verify
 pre-commit run --all-files
 
 # Validate system health
-dot health
+dot doctor status
 dot doctor
 
 # Confirm audit log captures recovery
@@ -249,7 +249,7 @@ chezmoi apply --force
 
 ### Runbook 3: Configuration Drift
 
-**Detection:** `chezmoi diff` shows unexpected changes, `chezmoi verify` fails, or `dot health` reports drift.
+**Detection:** `chezmoi diff` shows unexpected changes, `chezmoi verify` fails, or `dot doctor status` reports drift.
 
 ```bash
 # Step 1: Identify drift scope
@@ -309,7 +309,7 @@ rm -rf ~/.cache/shell/
 
 # Step 7: Restart shell and verify clean startup
 exec "$SHELL" -l
-dot health
+dot doctor status
 ```
 
 ### Runbook 5: CI Pipeline Compromise
@@ -442,16 +442,16 @@ log_incident "critical" "secrets-exposure" "API key found in commit abc1234"
 
 ```bash
 # Roll back to a known-good dotfiles state
-dot rollback
+dot doctor rollback
 
 # Restore specific configuration files
-dot restore <target>
+dot doctor restore <target>
 
 # Full re-apply from source of truth
 chezmoi init --apply --force
 
 # Verify system health
-dot health
+dot doctor status
 dot doctor
 ```
 
@@ -483,7 +483,7 @@ dot secrets import /tmp/secrets-backup.age
 
 # Step 7: Verify
 chezmoi verify
-dot health
+dot doctor status
 ./tests/framework/test_runner.sh
 ```
 
@@ -494,7 +494,7 @@ dot health
 | Chezmoi state clean | `chezmoi diff` | No output |
 | All managed files present | `chezmoi verify` | Exit code 0 |
 | Test suite passes | `./tests/framework/test_runner.sh` | All assertions pass |
-| Health dashboard green | `dot health` | No errors |
+| Health dashboard green | `dot doctor status` | No errors |
 | Signatures valid | `git log --show-signature -5` | All commits signed |
 | Pre-commit hooks active | `pre-commit run --all-files` | All hooks pass |
 

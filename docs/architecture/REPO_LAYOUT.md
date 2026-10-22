@@ -129,7 +129,7 @@ find this workstation's agent capabilities:
 | `Makefile`, `Justfile.tmpl`, `treefmt.toml` | Convenience runners                                                            |
 | `mise.toml`, `mise-versions.lock.json`  | Mise toolchain versions (locked)                                               |
 | `flake.nix`, `flake.lock` (root)        | Root Nix flake for `direnv` + repo dev shell                                   |
-| `nix/flake.nix`, `nix/home.nix`         | Separate flake for Home Manager activation (used by `dot upgrade` and `ci-enforced.yml → lint-nix`) |
+| `nix/flake.nix`, `nix/home.nix`         | Separate flake for Home Manager activation (used by `dot system update` and `ci-enforced.yml → lint-nix`) |
 | `lib/wasm-tools/`                       | `dot-sys` Rust crate (lib + bin), built for `wasm32-wasip1`: the health-probe record and the sandboxed verifier behind `dot attest --verify`; gated by `rust.yml` |
 | `.envrc`                                | `direnv` hook into the root flake                                              |
 

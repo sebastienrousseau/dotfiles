@@ -18,7 +18,7 @@ cp -r /tmp/dotfiles-main/dot_claude/skills/dotfiles-bootstrap \
       ~/.claude/skills/
 ```
 
-You then need `chezmoi` on PATH (the skill calls `dot init`, which calls `chezmoi init`). Install via:
+You then need `chezmoi` on PATH (the skill calls `dot config init`, which calls `chezmoi init`). Install via:
 
 ```bash
 brew install chezmoi          # macOS, Linuxbrew
@@ -27,7 +27,7 @@ scoop install chezmoi         # Windows (Scoop)
 sh -c "$(curl -fsLS get.chezmoi.io)"  # everywhere else (verify the script first)
 ```
 
-You also need the `dot` dispatcher binary on PATH. The minimum set is `bin/dot` from this repo plus the `scripts/dot/` directory; for the cleanest install run `dot init sebastienrousseau` once, which sets everything up.
+You also need the `dot` dispatcher binary on PATH. The minimum set is `bin/dot` from this repo plus the `scripts/dot/` directory; for the cleanest install run `dot config init sebastienrousseau` once, which sets everything up.
 
 ## Verifying the skill loaded
 
@@ -49,7 +49,7 @@ The skill is stateless — nothing else needs to be cleaned up. The repos and do
 
 ## Permissions surface
 
-This skill calls `dot init`, which calls `chezmoi init`, which runs the target repo's `run_onchange_*` scripts with your user's privileges. Treat the target dotfiles repo as untrusted code until you have read it. The `ask` and `audit` profiles default to dry-run / no-apply so you can review before any state mutation.
+This skill calls `dot config init`, which calls `chezmoi init`, which runs the target repo's `run_onchange_*` scripts with your user's privileges. Treat the target dotfiles repo as untrusted code until you have read it. The `ask` and `audit` profiles default to dry-run / no-apply so you can review before any state mutation.
 
 ## Reporting issues
 

@@ -6,7 +6,7 @@ description: "How to publish and consume reusable dotfile modules."
 
 # Dot Module Registry
 
-The `dot registry` command discovers reusable dotfile modules from a JSON index published over HTTPS. The default registry is hosted by this repo at:
+The `dot cli` command discovers reusable dotfile modules from a JSON index published over HTTPS. The default registry is hosted by this repo at:
 
 ```
 https://doc.dotfiles.io/registry.json
@@ -17,17 +17,17 @@ This page documents the JSON contract and the contribution flow. It is the §3 /
 ## Quick start (consumer side)
 
 ```sh
-dot registry list                   # list every published module
-dot registry search rust            # filter by keyword
-dot registry info rust-dev-setup    # full metadata for one module
-dot registry install rust-dev-setup # verify and preview changes
-dot registry install rust-dev-setup --yes # verify, persist, and apply
-dot registry installed              # list locally installed modules
-dot registry url                    # show active registry URL
-dot registry set-url <url>          # point at a different registry
+dot cli list --available                   # list every published module
+dot cli list --available rust            # filter by keyword
+dot cli show rust-dev-setup    # full metadata for one module
+dot cli install rust-dev-setup # verify and preview changes
+dot cli install rust-dev-setup --yes # verify, persist, and apply
+dot cli list              # list locally installed modules
+dot cli registry show                    # show active registry URL
+dot cli registry set <url>          # point at a different registry
 ```
 
-The registry index is cached locally under `${XDG_CACHE_HOME:-~/.cache}/dotfiles/registry/` with a 6 hour TTL, in a file named for the URL it was fetched from (`index-v2-<digest>.json`) so changing the registry URL never serves the previous registry's index. When a fetch fails, a cached index is used only while it is younger than 7 days. Override the URL one-off via `DOTFILES_REGISTRY_URL=<url> dot registry list`.
+The registry index is cached locally under `${XDG_CACHE_HOME:-~/.cache}/dotfiles/registry/` with a 6 hour TTL, in a file named for the URL it was fetched from (`index-v2-<digest>.json`) so changing the registry URL never serves the previous registry's index. When a fetch fails, a cached index is used only while it is younger than 7 days. Override the URL one-off via `DOTFILES_REGISTRY_URL=<url> dot cli list --available`.
 
 Every fetched index must carry a minisign signature at `<url>.minisig` that verifies against `security/registry.pub` in this repository; an index without one is refused. `DOTFILES_REGISTRY_PUBKEY=<file>` verifies against another key (a private registry). For local development only, `DOTFILES_REGISTRY_UNSIGNED=1` lets a `file://` index skip verification, with a warning; it never applies to `https://`.
 
@@ -69,11 +69,11 @@ Optional keys: `repo` (HTTPS project URL), `tags` (lower-case array), `maintaine
    - Valid JSON for both the index and its published JSON Schema.
    - A pinned SHA-256 digest for every archive.
 4. The maintainer re-signs the index offline (`minisign -Sm docs/registry.json -s <offline key>`) and commits `docs/registry.json.minisig`. CI (`tools/ci/check-registry.sh`) fails when the committed signature does not match the index.
-5. Once merged, the GitHub Pages workflow re-deploys the registry; `dot registry list` picks it up within 6 hours (or immediately if the consumer purges the cache).
+5. Once merged, the GitHub Pages workflow re-deploys the registry; `dot cli list --available` picks it up within 6 hours (or immediately if the consumer purges the cache).
 
 ## Install pipeline
 
-`dot registry install <name>` is preview-first and does not mutate the workstation. Pass `--yes` only after reviewing the preview. The installer:
+`dot cli install <name>` is preview-first and does not mutate the workstation. Pass `--yes` only after reviewing the preview. The installer:
 
 1. Verify the index signature, schema and freshness, then resolve the module entry.
 2. Download the versioned archive using HTTPS and TLS 1.2 or newer (an `https://` index may only name `https://` archives).

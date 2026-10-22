@@ -61,7 +61,7 @@ deployed to `~/.local/bin/dot-mcp` alongside `dot-ui` and `dot-ai-tui`.
 
 Four tools are served, all read-only, each a fixed `dot` argument vector
 run without a shell: `mcp-doctor`, `agent-mode`, `workstation-attestation`
-and `fleet-status`. Mutating paths (`dot mode set`, `dot attest --write`)
+and `fleet-status`. Mutating paths (`dot agent mode set`, `dot attest --write`)
 are deliberately not exposed, so a client cannot change this workstation
 through the server. Five resources expose the MCP policy, the MCP
 registry, the agent profiles and both discovery cards.
@@ -112,7 +112,7 @@ An LSP satellite serves a language. This project's "language" surfaces
 are shell scripts, Go templates and TOML, all three of which already
 have mature servers. Writing another would mean competing with them
 for the sake of completions this repo already generates natively from
-the command registry via `dot completion` — a shell-completion
+the command registry via `dot cli completion show` — a shell-completion
 problem, not a language-server one.
 
 **When that would change:** if `.chezmoidata.toml` grew a schema

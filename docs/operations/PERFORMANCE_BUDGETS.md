@@ -27,7 +27,7 @@ All medians in milliseconds. Budget = 2× median (or the tier ceiling, whichever
 | `dot version` | 10 | 500 | 50× |
 | `dot help` | 13 | 500 | 38× |
 | `dot help <cmd>` | 15 | 500 | 33× |
-| `dot search <keyword>` | 15 | 500 | 33× |
+| `dot help <keyword>` | 15 | 500 | 33× |
 | iCloud script single-run | 15 | 500 | 33× |
 
 
@@ -118,7 +118,7 @@ constraint.
 |---|---|
 | `chezmoi apply` | Fresh macOS: minutes. Depends on iCloud sync + package installs. Gated at suite level only. |
 | `install.sh` full | Downloads + installs packages. Network-bound. |
-| `dot upgrade` | Runs `chezmoi update`, `mise install` + `mise upgrade`, the Neovim plugin sync, and (with consent) a system-package upgrade. |
+| `dot system update` | Runs `chezmoi update`, `mise install` + `mise upgrade`, the Neovim plugin sync, and (with consent) a system-package upgrade. |
 | Full test suite | 15+ minutes on CI. Gated by workflow timeout, not per-run assertion. |
 
 ## Ratchet vs aspiration

@@ -32,7 +32,7 @@ test_start "readme_dot_doctor_exists"
 assert_file_contains "$REPO_ROOT/README.md" "dot doctor" "README must reference dot doctor"
 
 test_start "readme_dot_learn_exists"
-assert_file_contains "$REPO_ROOT/README.md" "dot learn" "README must reference dot learn"
+assert_file_contains "$REPO_ROOT/README.md" "dot help tour" "README must reference dot help tour"
 
 test_start "readme_version_badge_present"
 assert_file_contains "$REPO_ROOT/README.md" "Version-v" "README must have version badge"
@@ -319,7 +319,7 @@ test_start "claudemd_lists_chezmoi_apply"
 assert_file_contains "$REPO_ROOT/CLAUDE.md" "chezmoi apply" "CLAUDE.md must list chezmoi apply command"
 
 test_start "claudemd_lists_dot_health"
-assert_file_contains "$REPO_ROOT/CLAUDE.md" "dot health" "CLAUDE.md must list dot health command"
+assert_file_contains "$REPO_ROOT/CLAUDE.md" "dot doctor status" "CLAUDE.md must list dot doctor status"
 
 test_start "claudemd_lists_dot_doctor"
 assert_file_contains "$REPO_ROOT/CLAUDE.md" "dot doctor" "CLAUDE.md must list dot doctor command"

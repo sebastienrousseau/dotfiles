@@ -81,11 +81,11 @@ If something goes wrong after an upgrade:
 
 ```bash
 # Quick rollback to previous state
-dot rollback
+dot doctor rollback
 
 # Rollback to specific backup
-dot rollback status       # List available backups
-dot rollback rollback-to 3  # Restore backup #3
+dot doctor rollback status       # List available backups
+dot doctor rollback rollback-to 3  # Restore backup #3
 
 # Git-based rollback
 cd ~/.dotfiles
@@ -98,12 +98,12 @@ dot apply                 # Re-apply
 
 - [ ] Run `dot doctor` — make sure everything is healthy
 - [ ] Run `dot diff` — review any pending changes
-- [ ] Back up custom configs: `dot rollback backup`
+- [ ] Back up custom configs: `dot doctor rollback backup`
 - [ ] Read CHANGELOG.md for breaking changes
 
 ## After You Upgrade
 
 - [ ] Run `dot doctor` — make sure the upgrade worked
-- [ ] Run `dot prewarm` — rebuild shell caches
+- [ ] Run `dot shell update --prewarm` — rebuild shell caches
 - [ ] Restart your shell: `exec zsh`
 - [ ] Test AI tools: `dot ai`

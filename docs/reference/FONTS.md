@@ -31,7 +31,7 @@ brew tap homebrew/cask-fonts
 brew install --cask font-jetbrains-mono-nerd-font
 
 # Or use the dot CLI
-dot fonts install
+dot theme font install
 ```
 
 ### Linux (manual)

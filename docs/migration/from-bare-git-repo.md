@@ -15,14 +15,14 @@ and `$HOME` is the work tree, which is the part that has to change.
 
 | Bare repo | Here |
 |---|---|
-| `config add ~/.bashrc` | `dot add ~/.bashrc` |
+| `config add ~/.bashrc` | `dot config add ~/.bashrc` |
 | `config commit` / `config push` | ordinary `git` inside `$(dot cd)` |
 | `config status` | `dot status` |
-| `config checkout` on a new machine | `dot init <user>` |
+| `config checkout` on a new machine | `dot config init <user>` |
 | `.gitignore` with `*` at `$HOME` | not needed — `$HOME` is not a work tree |
 | `showUntrackedFiles = no` | not needed, same reason |
 | Per-host: branches | `.tmpl` files with `{{ if }}` |
-| Nothing | `dot doctor`, `dot heal`, `dot rollback`, secrets, provisioning |
+| Nothing | `dot doctor`, `dot doctor fix`, `dot doctor rollback`, secrets, provisioning |
 
 ## 1. Inventory and back up
 
@@ -79,7 +79,7 @@ metadata directory changed name.
 
 ```sh
 while read -r f; do
-  [ -e "$HOME/$f" ] && dot add "$HOME/$f"
+  [ -e "$HOME/$f" ] && dot config add "$HOME/$f"
 done < ~/bare-inventory.txt
 
 dot status
