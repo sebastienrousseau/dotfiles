@@ -58,7 +58,7 @@ dot doctor [--score|-s] [--heal|-H] [--json|-j] [--verbose|-v]
 
 Exit codes: 0 (healthy), 1 (warnings), 2 (critical failures).
 
-### `dot learn`
+### `dot help tour`
 
 Interactive guided tour of the environment. Takes ~5-10 minutes, covers shells, secrets, themes, performance, security. Press `q` to exit at any time.
 
@@ -81,17 +81,17 @@ dot diff [<path>]     # show unified diff (all or one path)
 
 Open the source directory in `$EDITOR`. Shorthand for `cd ~/.dotfiles && $EDITOR`.
 
-### `dot upgrade`
+### `dot system update`
 
 Update the dotfiles, your mise tools and, if you agree, your system packages.
 
 ```
-dot upgrade [--yes]
+dot system update [--yes]
 ```
 
 Every question is asked before anything runs:
 
-1. If mise is missing, `dot upgrade` offers to install it (through Homebrew
+1. If mise is missing, `dot system update` offers to install it (through Homebrew
    when present, otherwise the pinned mise release, verified against its
    published checksums, into `~/.local/bin`).
 2. If a system package manager is found (Homebrew, apt, dnf or pacman), it
@@ -108,56 +108,56 @@ agreed to. A step that cannot run is shown as skipped with the reason.
 
 The answer to every question is **no** unless you say yes. `--yes` (or
 `DOTFILES_YES=1`) answers yes to all of them; with no terminal to ask (a pipe,
-cron, CI) and no `--yes`, `dot upgrade` installs nothing extra and says so.
+cron, CI) and no `--yes`, `dot system update` installs nothing extra and says so.
 
-### `dot commit`
+### `dot config save`
 
 Create an AI-assisted conventional commit from staged changes.
 
 ```
-dot commit
+dot config save
 ```
 
-Uses the configured AI provider (via `dot mode`) to generate a commit message matching the Conventional Commits spec.
+Uses the configured AI provider (via `dot agent mode`) to generate a commit message matching the Conventional Commits spec.
 
-### `dot search <term>`
+### `dot help <term>`
 
 Find commands by keyword.
 
 ```
-dot search theme      # lists all theme-related commands
-dot search secret     # lists all secret-related commands
+dot help theme      # lists all theme-related commands
+dot help secret     # lists all secret-related commands
 ```
 
 ## Inspect & Repair
 
-### `dot heal`
+### `dot doctor fix`
 
 Auto-repair missing tools, chezmoi drift, broken symlinks, and critical files.
 
 ```
-dot heal [--dry-run|-n] [--force|-f] [--tool <name>]
+dot doctor fix [--dry-run|-n] [--force|-f] [--tool <name>]
 ```
 
 See [Self-Healing concept](../01-concepts/05-self-healing.md).
 
-### `dot rollback`
+### `dot doctor rollback`
 
 Return to a previous snapshot.
 
 ```
-dot rollback              # restore most recent snapshot
-dot rollback status       # list snapshots
-dot rollback restore <n>  # restore snapshot #n
-dot rollback clean        # delete snapshots older than 30 days
+dot doctor rollback              # restore most recent snapshot
+dot doctor rollback status       # list snapshots
+dot doctor rollback restore <n>  # restore snapshot #n
+dot doctor rollback clean        # delete snapshots older than 30 days
 ```
 
-### `dot chaos`
+### Chaos test
 
-Simulate corruption to test self-healing. **Destructive.** Use only in ephemeral environments.
+Simulate corruption to test self-healing. **Destructive.** Use only in ephemeral environments. It is a test, not a `dot` command (`dot chaos` stops working in 0.2.538):
 
 ```
-dot chaos [symlink|config|tool|permission|all]
+bash scripts/ops/chaos.sh [symlink|config|tool|permission|all]
 ```
 
 ### `dot attest`
@@ -170,37 +170,37 @@ dot attest [--output|-o <file>] [--sign|-s]
 
 Default output: `~/.local/state/dotfiles/attestation/YYYY-MM-DD-HHMMSS.json`. With `--sign`, the JSON is signed with the user's SSH ED25519 key.
 
-### `dot lint`
+### `dot config check`
 
 Lint shell scripts (shellcheck, shfmt).
 
 ```
-dot lint [--path <glob>] [--strict]
+dot config check [--path <glob>] [--strict]
 ```
 
 ## Performance
 
-### `dot perf`
+### `dot doctor perf show`
 
 Quick performance snapshot.
 
 ```
-dot perf [--json|-j] [--profile|-p] [--runs|-r <n>] [--target|-t <ms>]
+dot doctor perf show [--json|-j] [--profile|-p] [--runs|-r <n>] [--target|-t <ms>]
 ```
 
-### `dot cache-refresh`
+### `dot shell update`
 
 Regenerate shell caches for ultra-fast startup.
 
-### `dot score`
+### `dot doctor score`
 
 Show system health + security score.
 
-### `dot metrics`
+### `dot doctor metric list`
 
 Show recent observability metrics (startup times, heal events, score history).
 
-### `dot load-bench`
+### `dot doctor perf --ready`
 
 Measure heavy-layer (nvm, rbenv, direnv) readiness time.
 
@@ -256,7 +256,7 @@ It serves four read-only tools — `mcp-doctor`, `agent-mode`,
 `workstation-attestation` and `fleet-status`, each a fixed `dot` argument
 vector run without a shell — and five resources (the MCP policy, the MCP
 registry, the agent profiles and both discovery cards). Mutating paths
-(`dot mode set`, `dot attest --write`) are deliberately not exposed: a
+(`dot agent mode set`, `dot attest --write`) are deliberately not exposed: a
 client cannot change this workstation through the server.
 
 The binary is `~/.local/bin/dot-mcp`, built by chezmoi from
@@ -264,14 +264,14 @@ The binary is `~/.local/bin/dot-mcp`, built by chezmoi from
 when it is missing and a Go toolchain is present, `dot mcp serve` builds
 it on demand into the user cache.
 
-### `dot mode [<profile>]`
+### `dot agent mode [<profile>]`
 
 Show or set the agent profile.
 
 ```
-dot mode              # show current profile
-dot mode architect    # switch to architect profile
-dot mode list         # list all profiles
+dot agent status            # show current profile
+dot agent mode set architect    # switch to architect profile
+dot agent mode list         # list all profiles
 ```
 
 Available profiles (see `dot_config/ai/patterns/`): `architect`, `hardener`, `refactor`. Custom profiles can be added by dropping `<name>.md` in the patterns directory.
@@ -300,34 +300,34 @@ dot theme list         # show paired themes with System/Custom source
 dot theme rebuild [--force|--list]  # regenerate from wallpapers
 ```
 
-### `dot env`
+### `dot tool`
 
 Show managed tool versions.
 
 ```
-dot env               # all managed tools
-dot env <tool>        # single tool
+dot tool               # all managed tools
+dot tool <tool>        # single tool
 ```
 
-### `dot profile [<name>]`
+### `dot config profile [<name>]`
 
 Show or switch the active profile.
 
 ```
-dot profile           # show active profile
-dot profile list      # all profiles
-dot profile laptop    # switch to 'laptop' profile
+dot config profile           # show active profile
+dot config profile show      # all profiles
+dot config profile set laptop    # switch to 'laptop' profile
 ```
 
 Profiles live in `.chezmoidata.toml` under `[profiles.<name>]`.
 
-### `dot secrets`
+### `dot secret`
 
 Edit or manage encrypted secrets.
 
 ```
-dot secrets list              # all encrypted files
-dot secrets edit <path>       # open in $EDITOR (decrypted)
+dot secret list              # all encrypted files
+dot secret edit <path>       # open in $EDITOR (decrypted)
 dot secrets rotate            # re-encrypt with current recipients
 dot secrets verify            # integrity check (no decryption)
 ```
@@ -342,7 +342,7 @@ Multi-node status, drift, and namespace.
 dot fleet              # show all known hosts
 dot fleet attest       # collect signed attestations
 dot fleet diff         # compare rendered config across hosts
-dot fleet sync         # run `dot upgrade` on every host
+dot fleet sync         # run `dot system update` on every host
 dot fleet apply        # SSH out to every host in fleet.toml and run 'dot sync'
 ```
 
@@ -375,36 +375,36 @@ profile = "workstation"
 
 ## Agents
 
-### `dot agents`
+### `dot agent context`
 
-Multi-harness AI agent configuration manager. `CLAUDE.md` is canonical; `dot agents render` keeps `AGENTS.md` (the cross-harness standard read by Codex / Copilot / Cursor / Windsurf / Amp / Devin) plus `.cursor/rules/dotfiles.mdc` and `.codex/config.toml` in sync.
+Multi-harness AI agent configuration manager. `CLAUDE.md` is canonical; `dot agent context apply` keeps `AGENTS.md` (the cross-harness standard read by Codex / Copilot / Cursor / Windsurf / Amp / Devin) plus `.cursor/rules/dotfiles.mdc` and `.codex/config.toml` in sync.
 
 ```
-dot agents list       # show which harnesses are recognised + their target paths
-dot agents check      # exit 0 if AGENTS.md tracks CLAUDE.md; 1 if drifted
-dot agents render     # regenerate AGENTS.md + 10 harness-specific files
+dot agent context show       # show which harnesses are recognised + their target paths
+dot agent context check      # exit 0 if AGENTS.md tracks CLAUDE.md; 1 if drifted
+dot agent context apply     # regenerate AGENTS.md + 10 harness-specific files
 ```
 
 Harnesses covered: `AGENTS.md` (canonical cross-harness), Cursor (`.cursor/rules/dotfiles.mdc`), Codex (`.codex/config.toml`), Windsurf (`.windsurf/rules.md`), Zed (`.zed/agent-config.toml`), Roo (`.roo/rules.md`), Cline (`.clinerules`), Aider (`.aider.conf.yml`), Continue (`.continuerc.json`), Jules (`.jules/system.md`), Antigravity (`.agy/AGY.md`).
 
-Edit `CLAUDE.md` first, then run `dot agents render`; do not hand-edit `AGENTS.md` or any of the per-harness files. The check subcommand is suitable for pre-commit hooks.
+Edit `CLAUDE.md` first, then run `dot agent context apply`; do not hand-edit `AGENTS.md` or any of the per-harness files. The check subcommand is suitable for pre-commit hooks.
 
 ## Registry
 
-### `dot registry`
+### `dot cli`
 
 JSON-indexed module registry. Discover and install reusable dotfile modules from a registry hosted via GitHub Pages (or any HTTPS URL via `set-url`).
 
 ```
-dot registry list                 # list modules in the configured registry
-dot registry search <query>       # filter modules by keyword
-dot registry info <name>          # full metadata for one module
-dot registry install <name>       # apply a module (scaffold today)
-dot registry url                  # show the active registry URL
-dot registry set-url <url>        # override the registry URL (HTTPS-only)
+dot cli list --available                 # list modules in the configured registry
+dot cli list --available <query>       # filter modules by keyword
+dot cli show <name>          # full metadata for one module
+dot cli install <name>       # apply a module (scaffold today)
+dot cli registry show                  # show the active registry URL
+dot cli registry set <url>        # override the registry URL (HTTPS-only)
 ```
 
-Default registry: `https://doc.dotfiles.io/registry.json`. Cache lives under `${XDG_CACHE_HOME:-~/.cache}/dotfiles/registry/`, one `index-<digest>.json` per registry URL, with a 6h TTL. One-off override: `DOTFILES_REGISTRY_URL=<url> dot registry list`.
+Default registry: `https://doc.dotfiles.io/registry.json`. Cache lives under `${XDG_CACHE_HOME:-~/.cache}/dotfiles/registry/`, one `index-<digest>.json` per registry URL, with a 6h TTL. One-off override: `DOTFILES_REGISTRY_URL=<url> dot cli list --available`.
 
 The JSON contract + module-contribution flow live in [`docs/operations/REGISTRY.md`](../../operations/REGISTRY.md).
 
@@ -418,52 +418,52 @@ Show the installed version.
 dot version [--json]
 ```
 
-### `dot manual`
+### `dot help --manual`
 
 Open or download the manual in multiple formats.
 
 ```
-dot manual            # open latest HTML manual in browser
-dot manual pdf        # download + open PDF
-dot manual text       # pipe ASCII text to pager
-dot manual download <format>  # save to current directory
-dot manual --offline  # use bundled offline copy (from `dot bundle`)
+dot help --manual            # open latest HTML manual in browser
+dot help --manual pdf        # download + open PDF
+dot help --manual text       # pipe ASCII text to pager
+dot help --manual download <format>  # save to current directory
+dot help --manual --offline  # use bundled offline copy (from `dot config export`)
 ```
 
 Formats: `html`, `html-multi`, `pdf`, `epub`, `text`, `markdown`.
 
-### `dot add <path>`
+### `dot config add <path>`
 
 Import a file into chezmoi's source directory.
 
 ```
-dot add ~/.somefile                    # plaintext
-dot add --encrypt ~/.somefile          # encrypted with Age
-dot add --template ~/.somefile         # templatize
+dot config add ~/.somefile                    # plaintext
+dot config add --encrypt ~/.somefile          # encrypted with Age
+dot config add --template ~/.somefile         # templatize
 ```
 
 ### `dot cd`
 
 Print the source directory path. Useful for `cd $(dot cd)`.
 
-### `dot bundle`
+### `dot config export`
 
 Create an offline portable archive.
 
 ```
-dot bundle                        # default output ~/Downloads/
-dot bundle --to <dir|file>        # custom location
-dot bundle --manual               # include offline manual
-dot bundle restore <bundle.tar.zst>  # restore from bundle
+dot config export                        # default output ~/Downloads/
+dot config export --to <dir|file>        # custom location
+dot config export --manual               # include offline manual
+dot config import <bundle.tar.zst>  # restore from bundle
 ```
 
-### `dot packages`
+### `dot tool list --packages`
 
 Show installed packages and package managers.
 
 ```
-dot packages
-dot packages --manager mise|nix|brew|apt
+dot tool list --packages
+dot tool list --packages --manager mise|nix|brew|apt
 ```
 
 Each query has a time limit (`DOTFILES_PACKAGES_TIMEOUT`, 10 seconds by

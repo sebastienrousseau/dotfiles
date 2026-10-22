@@ -5,7 +5,7 @@ date: 2026-05-17
 
 # Workstation Environment Manifest
 
-`dot env emit` produces a portable, schema-validated record of
+`dot tool export` produces a portable, schema-validated record of
 "what is installed on this machine" — the canonical input that
 downstream tooling consumes.
 
@@ -15,9 +15,9 @@ downstream tooling consumes.
 JSON Schema 2020-12 file. Validate any manifest against it with:
 
 ```sh
-dot env emit | jsonschema -i /dev/stdin docs/schema/dot-env-v1.json
+dot tool export | jsonschema -i /dev/stdin docs/schema/dot-env-v1.json
 # or
-dot env emit | check-jsonschema --schemafile docs/schema/dot-env-v1.json /dev/stdin
+dot tool export | check-jsonschema --schemafile docs/schema/dot-env-v1.json /dev/stdin
 ```
 
 (`jsonschema` from the `jsonschema` PyPI package; `check-jsonschema`
@@ -26,11 +26,11 @@ from `python-jsonschema/check-jsonschema`. Either works.)
 ## Quick reference
 
 ```sh
-dot env emit                              # canonical JSON to stdout
-dot env emit --format ndjson              # one tool per line, greppable
-dot env emit --output /tmp/env.json       # atomic file write
-dot env emit --compact                    # one-line JSON
-dot env emit --help                       # flags + examples
+dot tool export                              # canonical JSON to stdout
+dot tool export --format ndjson              # one tool per line, greppable
+dot tool export --output /tmp/env.json       # atomic file write
+dot tool export --compact                    # one-line JSON
+dot tool export --help                       # flags + examples
 ```
 
 Example output (truncated):
@@ -41,7 +41,7 @@ Example output (truncated):
   "manifest_version": "1.0.0",
   "emitted_at": "2026-05-17T10:22:46Z",
   "emitter": {
-    "name": "dot env emit",
+    "name": "dot tool export",
     "version": "0.2.503",
     "repo": "github.com/sebastienrousseau/dotfiles"
   },
@@ -54,10 +54,10 @@ Example output (truncated):
     {
       "name": "node",
       "version": "24.14.0",
-      "source": "/Users/seb/.dotfiles/mise.toml",
+      "source": "<home>/.dotfiles/mise.toml",
       "source_type": "mise.toml",
       "requested_version": "24.14.0",
-      "install_path": "/Users/seb/.local/share/mise/installs/node/24.14.0",
+      "install_path": "<home>/.local/share/mise/installs/node/24.14.0",
       "active": true
     },
     ...
@@ -67,7 +67,7 @@ Example output (truncated):
 
 ## Why this exists
 
-R3 §7.4 strategic-reversal call: **ship `dot env emit` BEFORE
+R3 §7.4 strategic-reversal call: **ship `dot tool export` BEFORE
 `dot fleet apply --attest`**. Three independent forces converge on
 a 2026-09-17 / 2026-09-11 window:
 
@@ -91,7 +91,7 @@ shape:
 
 | Target format | Use case | Status |
 |---|---|---|
-| `AGENTS.md` | Cross-harness AI agent context | shipped (`dot agents render`); will be re-pointed at the v1 manifest in v0.2.504 |
+| `AGENTS.md` | Cross-harness AI agent context | shipped (`dot agent context apply`); will be re-pointed at the v1 manifest in v0.2.504 |
 | `devcontainer-feature.json` | Reproducible cloud-IDE setup | planned (v0.2.504) |
 | `mise.toml` | Round-trip: re-create the same install set on a fresh host | planned |
 | `Brewfile` | Hand off to a Homebrew-managed Mac | planned |
@@ -99,7 +99,7 @@ shape:
 | `in-toto subject list` | SLSA attestation subject array | planned (`dot fleet apply --attest`) |
 | `CycloneDX SBOM` | Compliance reporting (EU CRA) | planned (v0.2.504; per-artifact attestation closes R3-N7) |
 
-The schema is intentionally minimal — `dot env emit` records *what
+The schema is intentionally minimal — `dot tool export` records *what
 is installed*, not *what is desired* or *what is approved*. Downstream
 emitters add policy / approval / risk-score columns as they need
 them.
@@ -109,7 +109,7 @@ them.
 ```yaml
 - name: Snapshot environment manifest
   run: |
-    dot env emit --output env.json
+    dot tool export --output env.json
     # Attest the manifest as part of the next release
     cosign sign-blob --yes --output-signature env.json.sig \
       --output-certificate env.json.pem env.json

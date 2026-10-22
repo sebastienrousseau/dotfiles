@@ -5,7 +5,7 @@ render_with_liquid: false
 
 # Secrets Management
 
-Provider-agnostic secrets via `dot secrets`. Supports macOS Keychain, `pass`, and age-encrypted local storage.
+Provider-agnostic secrets via `dot secret`. Supports macOS Keychain, `pass`, and age-encrypted local storage.
 
 ## Providers
 
@@ -31,28 +31,28 @@ infra = ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "GITHUB_TOKEN"]
 
 ```bash
 # Bootstrap age key for chezmoi encrypted files
-dot secrets-init
+dot secret init
 
 # Optional: create encrypted secrets file for chezmoi
-dot secrets-create
-dot secrets edit
+dot secret new
+dot secret edit
 
 # Managed secret store
-dot secrets set GEMINI_API_KEY
-dot secrets get GEMINI_API_KEY --raw
-dot secrets list
-dot secrets provider
+dot secret set GEMINI_API_KEY
+dot secret show GEMINI_API_KEY --raw
+dot secret list
+dot secret provider show
 
 # Emit export lines for a bucket
-dot secrets load ai
+dot secret export ai
 
 # Load into current shell session
-eval "$(dot env load ai)"
+eval "$(dot secret export ai)"
 ```
 
 ## Shell Auto-Load
 
-When `auto_load = true`, shell startup can load configured buckets automatically via `dot env load <bucket>`.
+When `auto_load = true`, shell startup can load configured buckets automatically via `dot secret export <bucket>`.
 
 Environment toggles:
 
@@ -73,7 +73,7 @@ It blocks staged commits when likely secret patterns are found. In strict mode i
 ## SSH Key Encryption
 
 ```bash
-dot ssh-key ~/.ssh/id_ed25519
+dot secret key new ~/.ssh/id_ed25519
 ```
 
 This creates a local encrypted file, which you can add to chezmoi with `chezmoi add --encrypt` if needed.
@@ -153,6 +153,6 @@ See the [chezmoi documentation](https://www.chezmoi.io/user-guide/password-manag
 ## Security Notes
 
 - **Never commit** `~/.config/chezmoi/key.txt` to version control.
-- **Avoid shell history exposure** — use `dot secrets set` which prompts securely.
+- **Avoid shell history exposure** — use `dot secret set` which prompts securely.
 - **Rotate credentials** on a regular schedule.
 {% endraw %}

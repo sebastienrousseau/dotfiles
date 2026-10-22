@@ -10,7 +10,7 @@ two rows than by opening an issue.
 |---|---|
 | Understand a command | `dot help <command>`, `man dot`, or the [command index](docs/manual/command-index.md) |
 | Read the manual | <https://doc.dotfiles.io/> (source in [`docs/manual/`](docs/manual/)) |
-| Diagnose a broken environment | `dot doctor`, then `dot health` |
+| Diagnose a broken environment | `dot doctor`, then `dot doctor status` |
 | Fix something myself | [`docs/guides/TROUBLESHOOTING.md`](docs/guides/TROUBLESHOOTING.md) |
 | Ask a question | [GitHub Discussions](https://github.com/sebastienrousseau/dotfiles/discussions) |
 | Report a bug | [Open an issue](https://github.com/sebastienrousseau/dotfiles/issues/new/choose) |

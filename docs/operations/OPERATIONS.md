@@ -97,7 +97,7 @@ chezmoi apply
 
 ```bash
 # 1. On a connected machine, bundle your setup:
-dot bundle ~/Downloads
+dot config export ~/Downloads
 
 # 2. Transfer the archive to the offline machine, then:
 tar --zstd -xf dotfiles_offline_bundle_*.tar.zst -P
@@ -110,7 +110,7 @@ cd ~/.dotfiles
 Regenerate all tool caches to eliminate shell startup latency:
 
 ```bash
-dot prewarm
+dot shell update --prewarm
 ```
 
 ### Debug
@@ -121,32 +121,32 @@ If something's slow or broken:
 
    ```bash
    dot doctor
-   dot health --fix
+   dot doctor status --fix
    ```
 
 2. **Smoke test**:
 
    ```bash
-   dot smoke-test
+   bash scripts/diagnostics/smoke-test.sh
    ```
 
 3. **Scorecard**:
 
    ```bash
-   dot scorecard
+   dot doctor score show
    ```
 
 4. **Chaos testing (self-healing)**:
 
    ```bash
-   dot chaos --force
-   dot heal --force
+   bash scripts/ops/chaos.sh --force
+   dot doctor fix --force
    ```
 
 5. **Startup profiling**:
 
    ```bash
-   dot perf --profile
+   dot doctor perf show --profile
    ```
 
 6. **Post-merge verification**:
@@ -158,8 +158,8 @@ If something's slow or broken:
 7. **Inspect alias behavior**:
 
    ```bash
-   dot aliases list
-   dot aliases why dprune
+   dot shell alias list
+   dot shell alias show dprune
    DOTFILES_ALIAS_POLICY=strict bash ~/.dotfiles/scripts/diagnostics/alias-governance.sh
    ```
 

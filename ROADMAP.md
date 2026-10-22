@@ -36,7 +36,7 @@ reliable cross-platform shell distribution.
 
 ### Observability
 
-- Keep `dot doctor`, `dot health`, `dot drift`, `dot perf`, and reliability
+- Keep `dot doctor`, `dot doctor status`, `dot doctor drift show`, `dot doctor perf show`, and reliability
   dashboards as first-class diagnostic surfaces.
 - Ratchet measured bash coverage as tests move from source-text assertions to
   branch-driving sandbox execution.

@@ -41,5 +41,5 @@ proof_2_href: "operations/OPERATIONS/"
 proof_2_d: "Ubuntu, macOS on Apple Silicon and Windows PowerShell run in CI for changes to code and configuration."
 proof_3_t: "Reversible"
 proof_3_href: "reference/UTILS/"
-proof_3_d: "dot rollback restores the previous state, and nothing is applied from a dirty checkout."
+proof_3_d: "dot doctor rollback restores the previous state, and nothing is applied from a dirty checkout."
 ---

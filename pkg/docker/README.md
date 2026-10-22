@@ -24,7 +24,7 @@ To try the framework disposably, use the sandbox the CLI already
 provides, which is what `tests/Dockerfile.sandbox` backs:
 
 ```sh
-dot sandbox
+dot config apply --sandbox
 ```
 
 If a published image is ever added, it belongs here, with a

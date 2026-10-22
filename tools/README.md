@@ -19,7 +19,7 @@ scripts a downstream distro packager needs to ship (`scripts/` +
 | `tools/ci/` | CI-only helpers. `dot-cli-startup-bench.sh`, `install-chezmoi-verified.sh`, `windows-smoke-test.ps1`, `run-coverage.sh`, etc. | `.github/workflows/*` |
 | `tools/release/` | Release-time tasks. | Release workflow + `gh release create` flow |
 | `tools/maintenance/` | Recurring upkeep: `check-updates.sh`, etc. | Cron, manual |
-| `tools/docs/` | Documentation-generation helpers: `generate-command-index.sh`, manual builds, screenshot capture. | `manual-publish.yml`, `dot manual`, doc-drift |
+| `tools/docs/` | Documentation-generation helpers: `generate-command-index.sh`, manual builds, screenshot capture. | `manual-publish.yml`, `dot help --manual`, doc-drift |
 
 ## Why this directory exists
 

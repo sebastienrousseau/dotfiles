@@ -31,7 +31,7 @@ Quick checks for common issues.
 
 **Problem:** Shell is slow to start
 
-- Run `dot benchmark` to measure startup time
+- Run `dot doctor perf measure` to measure startup time
 - Profile with `zsh -x` to trace startup
 - Check for slow plugins or large history files
 
@@ -68,7 +68,7 @@ Quick checks for common issues.
 
 - Confirm `~/.config/chezmoi/key.txt` exists.
 - Verify the key matches the one used for encryption.
-- Re-initialize with `dot secrets-init` if needed.
+- Re-initialize with `dot secret init` if needed.
 
 **Problem:** Age encryption not working
 

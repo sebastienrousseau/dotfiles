@@ -4,8 +4,8 @@
 # shellcheck disable=SC1090,SC1091
 # Behavioural coverage for the generators that read lib/dot/data:
 #   tools/docs/generate-command-reference.sh — run in a scratch tree with a
-#     two-group fixture registry: write, --check in sync, --check on drift,
-#     an unknown flag and a missing registry;
+#     two-domain fixture command table: write (planned commands left out),
+#     --check in sync, --check on drift, an unknown flag and a missing table;
 #   tools/docs/generate-command-index.sh and tools/docs/generate-manpage.sh —
 #     --check against the committed outputs, so any change to what they
 #     generate shows up as drift.
@@ -21,10 +21,16 @@ trap 'rm -rf "$WORK"' EXIT
 REF_GEN="$WORK/tools/docs/generate-command-reference.sh"
 mkdir -p "$WORK/tools/docs" "$WORK/lib/dot/data" "$WORK/examples"
 cp "$REPO_ROOT/tools/docs/generate-command-reference.sh" "$REF_GEN"
-cat >"$WORK/lib/dot/data/help-specs.txt" <<'EOF'
-Core|sync|Apply dotfiles|Use after clone.
-Core|status|Show status|Quick look.
-Tools|theme list|List themes|Pick one.
+cat >"$WORK/lib/dot/data/commands.txt" <<'EOF'
+# a comment line is skipped
+dom|config|status||apply, diff and sync the dotfiles
+dom|theme|show|theme|one palette for every app
+cmd|config sync|sync|write|Pull the source, then apply
+cmd|config status|status|read|Pending changes
+cmd|config export||read|Export the setup
+cmd|theme list|theme list|read|Available themes
+alias|sync|shortcut|config sync|
+alias|search|deprecated|help|0.2.538
 EOF
 
 # ref <args...> — run the reference generator; stdout+stderr to $WORK/out.
@@ -38,17 +44,19 @@ ref
 assert_equals "0" "$rc" "write exits 0"
 assert_equals "$(
   cat <<'EOF'
-dot — declarative dotfiles CLI. Public commands:
+dot — one command for this machine. Built commands, by domain:
 
+[config] apply, diff and sync the dotfiles
+  dot config sync — Pull the source, then apply
+  dot config status — Pending changes
 
-[Core]
-  dot sync — Apply dotfiles
-  dot status — Show status
+[theme] one palette for every app
+  dot theme list — Available themes
 
-[Tools]
-  dot theme list — List themes
+[shortcuts]
+  dot sync — short for dot config sync
 EOF
-)" "$(cat "$WORK/examples/command-reference.txt")" "grouped reference written"
+)" "$(cat "$WORK/examples/command-reference.txt")" "built commands by domain, then the shortcuts"
 
 test_start "reference_check_passes_when_in_sync"
 ref --check
@@ -56,7 +64,7 @@ assert_equals "0" "$rc" "--check in sync exits 0"
 assert_file_contains "$WORK/out" "command-reference.txt is in sync" "reports in sync"
 
 test_start "reference_check_fails_on_drift"
-printf 'Tools|theme set|Set a theme|Then reload.\n' >>"$WORK/lib/dot/data/help-specs.txt"
+printf 'cmd|theme set|theme set|write|Switch theme\n' >>"$WORK/lib/dot/data/commands.txt"
 ref --check
 assert_equals "1" "$rc" "--check on drift exits 1"
 assert_file_contains "$WORK/out" "is stale" "names the stale file"
@@ -66,11 +74,11 @@ ref --bogus
 assert_equals "2" "$rc" "unknown flag exits 2"
 assert_file_contains "$WORK/out" "unknown flag: --bogus" "names the flag"
 
-test_start "reference_needs_the_registry"
-rm "$WORK/lib/dot/data/help-specs.txt"
+test_start "reference_needs_the_command_table"
+rm "$WORK/lib/dot/data/commands.txt"
 ref
-assert_equals "2" "$rc" "missing registry exits 2"
-assert_file_contains "$WORK/out" "registry not found" "says what is missing"
+assert_equals "2" "$rc" "missing table exits 2"
+assert_file_contains "$WORK/out" "command table not found" "says what is missing"
 
 test_start "command_index_matches_the_registry"
 rc=0

@@ -7,7 +7,7 @@
   Cursor, Windsurf, Amp, Devin, and a growing list of other agents.
 
   Canonical source: CLAUDE.md (Claude Code uses CLAUDE.md natively).
-  This file is kept in sync via `dot agents render`. Edit CLAUDE.md
+  This file is kept in sync via `dot agent context apply`. Edit CLAUDE.md
   first; do not hand-edit AGENTS.md.
 -->
 
@@ -22,7 +22,7 @@ Chezmoi-managed dotfiles for macOS, Linux, WSL, and PowerShell 7.5+. Version `0.
 ```bash
 chezmoi apply --dry-run     # Preview changes
 chezmoi diff                # Show pending diffs
-dot health                  # Run health dashboard
+dot doctor status           # Run health dashboard
 dot doctor                  # Run system diagnostics
 ./tests/framework/test_runner.sh  # Run unit tests
 python3 tools/ci/mutation-test.py --base origin/main  # Mutation score on changed lines (CI gate: 80%)
@@ -90,4 +90,4 @@ version-sync.sh             # Syncs dotfiles_version across non-template files
 
 ---
 
-**Need richer context?** This file is the cross-harness summary. Claude Code reads the full canonical version from [`CLAUDE.md`](./CLAUDE.md). Both files are kept in sync via `dot agents render`.
+**Need richer context?** This file is the cross-harness summary. Claude Code reads the full canonical version from [`CLAUDE.md`](./CLAUDE.md). Both files are kept in sync via `dot agent context apply`.

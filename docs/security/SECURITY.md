@@ -25,7 +25,7 @@ How dotfiles handles security and system modifications.
 
 The dotfiles use **age** for encryption.
 
-- **Initialization**: `dot secrets-init` creates a key at `~/.config/chezmoi/key.txt`.
+- **Initialization**: `dot secret init` creates a key at `~/.config/chezmoi/key.txt`.
 - **Storage**: Secrets are stored as `.age` encrypted files.
 - **Protection**: Private keys aren't committed to the repo.
 
@@ -33,9 +33,9 @@ The dotfiles use **age** for encryption.
 
 Short-lived SSH certificates reduce the blast radius of key compromise.
 
-- **Issue**: `dot ssh-cert issue [--ttl 16h] [--principal user]`
-- **Status**: `dot ssh-cert status` — checks certificate validity and expiry
-- **Revoke**: `dot ssh-cert revoke` — revokes active certificates
+- **Issue**: `dot secret cert new [--ttl 16h] [--principal user]`
+- **Status**: `dot secret cert list` — checks certificate validity and expiry
+- **Revoke**: `dot secret cert remove` — revokes active certificates
 - **Backends**: `step-ca` (Smallstep) and local CA key (`ssh-keygen`)
 - **Default TTL**: 16 hours (override via `SSH_CERT_TTL` environment variable)
 - **CA URL**: Set `SSH_CERT_CA_URL` for `step-ca` integration

@@ -10,4 +10,4 @@ This file tracks aliases that we've kept temporarily for backwards compatibility
 |-------|-------------|-----------|------|
 | `dlogsf` | `dklf` | `v0.2.501` | Removed duplicate logs-follow alias |
 
-Use `dot aliases why <alias>` to check deprecation status from the CLI.
+Use `dot shell alias show <alias>` to check deprecation status from the CLI.

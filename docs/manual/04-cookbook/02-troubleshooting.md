@@ -57,7 +57,7 @@ apt install chezmoi             # Debian 13+
 dot diff                    # see what differs
 dot apply --force           # overwrite local
 # OR
-dot add <path>              # import local change to source
+dot config add <path>              # import local change to source
 ```
 
 ### Symptom: "template: error calling index"
@@ -84,8 +84,8 @@ machine = "macbook-t2"
 **Fix**:
 
 ```sh
-dot clean-cache
-dot prewarm
+dot shell clean
+dot shell update --prewarm
 exec $SHELL -l
 ```
 
@@ -209,11 +209,11 @@ git filter-repo --path <file> --invert-paths
 **Fix**:
 
 ```sh
-dot benchmark --detailed
+dot doctor perf measure --detailed
 # Identify which module is slow
 
 # Rebuild caches
-dot prewarm
+dot shell update --prewarm
 
 # Disable heavy modules temporarily
 # Edit ~/.config/zsh/.zshrc.local (or equivalent) to skip them
@@ -227,7 +227,7 @@ dot prewarm
 
 ```sh
 dot doctor --verbose    # see every failure
-dot heal                # auto-fix what's possible
+dot doctor fix                # auto-fix what's possible
 dot doctor              # recheck
 ```
 

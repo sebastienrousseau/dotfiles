@@ -135,7 +135,7 @@ dot fleet diff
 
 # SSH into the affected host and fix
 ssh surface-pro
-dot doctor && dot heal
+dot doctor && dot doctor fix
 dot update
 ```
 
@@ -176,7 +176,7 @@ dot update
 
 1. `git pull --rebase --autostash` in `~/.dotfiles`
 2. `chezmoi apply` with progress output
-3. `dot heal` if apply detected drift
+3. `dot doctor fix` if apply detected drift
 4. Reports changes applied
 
 For simultaneous update across the fleet (requires SSH):
@@ -242,10 +242,10 @@ ssh surface-pro 'dot version'
 
 ### Drift on One Host
 
-Run `dot heal` on that host:
+Run `dot doctor fix` on that host:
 
 ```sh
-ssh surface-pro 'dot heal'
+ssh surface-pro 'dot doctor fix'
 ```
 
 If drift persists:

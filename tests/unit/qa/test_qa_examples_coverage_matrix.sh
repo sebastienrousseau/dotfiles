@@ -7,7 +7,7 @@
 # example.
 #
 # The script takes REPO_ROOT from the environment, so each case points it at
-# a synthetic tree: a lib/dot/data/help-specs.txt table and an
+# a synthetic tree: a lib/dot/data/commands.txt table and an
 # examples/ directory the test fills in. Nothing reads the real repository.
 
 set -uo pipefail
@@ -44,8 +44,8 @@ REQUIRED_AREAS=(
   test-suite testing-framework theme
 )
 
-# make_tree <name> <public-command…> — a synthetic repo whose help-specs table
-# names the given commands, and an empty examples/ directory.
+# make_tree <name> <public-command…> — a synthetic repo whose command table
+# has the given commands built, and an empty examples/ directory.
 make_tree() {
   local name="$1"
   shift
@@ -55,8 +55,8 @@ make_tree() {
   printf '#!/usr/bin/env bash\n' >"$TREE/bin/dot"
   chmod +x "$TREE/bin/dot"
   local cmd
-  for cmd in "$@"; do printf 'Group|%s|Description|Notes\n' "$cmd"; done \
-    >"$TREE/lib/dot/data/help-specs.txt"
+  for cmd in "$@"; do printf 'cmd|%s|%s|read|Description\n' "$cmd" "$cmd"; done \
+    >"$TREE/lib/dot/data/commands.txt"
 }
 add_domain_examples() {
   local area
@@ -131,7 +131,7 @@ assert_file_contains "$OUT" "Threshold: 50%" "the configured threshold is report
 
 test_start "a_tree_without_help_specs_only_checks_domains"
 make_tree nospecs
-rm -f "$TREE/lib/dot/data/help-specs.txt"
+rm -f "$TREE/lib/dot/data/commands.txt"
 add_domain_examples
 rc="$(coverage)"
 assert_equals "0" "$rc" "domains alone can satisfy the contract"

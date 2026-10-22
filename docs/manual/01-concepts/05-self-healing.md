@@ -15,12 +15,12 @@ render_with_liquid: false
                            │
                            ▼
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  dot heal   │ ──► │   repair    │ ──► │   verify    │
+│  dot doctor fix   │ ──► │   repair    │ ──► │   verify    │
 └─────────────┘     └─────────────┘     └─────────────┘
                            │
                            ▼ (on failure)
 ┌─────────────┐     ┌─────────────┐
-│dot rollback │ ──► │   revert    │
+│dot doctor rollback │ ──► │   revert    │
 └─────────────┘     └─────────────┘
 ```
 
@@ -48,20 +48,20 @@ Exit codes:
 Flags:
 
 - `--score` / `-s` — numeric health score (0-100)
-- `--heal` / `-H` — auto-fix detected issues (equivalent to `dot doctor && dot heal`)
+- `--heal` / `-H` — auto-fix detected issues (equivalent to `dot doctor && dot doctor fix`)
 - `--json` / `-j` — machine-readable output for CI/monitoring
 - `--verbose` / `-v` — show every check (default shows only failures)
 
-## `dot heal` — Repair
+## `dot doctor fix` — Repair
 
-`dot heal` addresses three common failure modes:
+`dot doctor fix` addresses three common failure modes:
 
 ### 1. Missing Tools
 
 Reinstalls tools listed in `.chezmoidata.toml` that aren't on PATH:
 
 ```sh
-dot heal
+dot doctor fix
 # [heal] jq not found, installing via mise
 # [heal] age not found, installing via homebrew
 # [heal] ✓ 2 tools installed
@@ -88,9 +88,9 @@ Detects dangling symlinks (target doesn't exist) and re-applies chezmoi to recre
 - 0 — nothing to heal or all fixes succeeded
 - 1 — some repairs failed, manual intervention required
 
-## `dot chaos` — Self-Test
+## Chaos self-test
 
-`dot chaos` intentionally corrupts the local installation to verify `dot heal` can recover it. This is **destructive** — run only in ephemeral environments (containers, VMs, fresh installs).
+The chaos test (`scripts/ops/chaos.sh`, run from the repository) intentionally corrupts the local installation to verify `dot doctor fix` can recover it. It is a test rather than a `dot` command (ADR-020; `dot chaos` stops working in 0.2.538). This is **destructive** — run only in ephemeral environments (containers, VMs, fresh installs).
 
 Corruption scenarios:
 
@@ -109,22 +109,22 @@ docker run --rm -it ubuntu bash
 # inside container:
 bash -c "$(curl -fsSL https://.../install.sh)"
 dot doctor    # baseline
-dot chaos all # break things
-dot heal      # fix
+bash ~/.dotfiles/scripts/ops/chaos.sh all   # break things
+dot doctor fix      # fix
 dot doctor    # verify
 ```
 
-This is part of CI: every PR runs `dot chaos` in a Docker container and validates `dot heal` restores a healthy state.
+This is part of CI: every PR runs the chaos test in a Docker container and validates `dot doctor fix` restores a healthy state.
 
-## `dot rollback` — Revert
+## `dot doctor rollback` — Revert
 
-Before every `dot apply`, chezmoi writes a snapshot to `~/.local/state/dotfiles/snapshots/YYYY-MM-DD-HHMMSS/`. `dot rollback` restores the most recent snapshot:
+Before every `dot apply`, chezmoi writes a snapshot to `~/.local/state/dotfiles/snapshots/YYYY-MM-DD-HHMMSS/`. `dot doctor rollback` restores the most recent snapshot:
 
 ```sh
-dot rollback              # revert to the most recent snapshot
-dot rollback status       # list available snapshots
-dot rollback restore 3    # restore snapshot #3
-dot rollback clean        # delete snapshots older than 30 days
+dot doctor rollback              # revert to the most recent snapshot
+dot doctor rollback status       # list available snapshots
+dot doctor rollback restore 3    # restore snapshot #3
+dot doctor rollback clean        # delete snapshots older than 30 days
 ```
 
 Snapshots include:
@@ -139,9 +139,9 @@ They do **not** include:
 - Tool binaries (Mise-managed)
 - External state (databases, remote repos)
 
-## `dot bundle` — Offline Recovery
+## `dot config export` — Offline Recovery
 
-`dot bundle` creates a self-contained archive that can restore the workstation without network access:
+`dot config export` creates a self-contained archive that can restore the workstation without network access:
 
 ```
 dotfiles-bundle-v0.2.501-20260416.tar.zst
@@ -157,9 +157,9 @@ dotfiles-bundle-v0.2.501-20260416.tar.zst
 Usage:
 
 ```sh
-dot bundle                        # create bundle in ~/Downloads/
-dot bundle --to /path/to/usb.img  # write to external storage
-dot bundle restore bundle.tar.zst # restore from bundle
+dot config export                        # create bundle in ~/Downloads/
+dot config export --to /path/to/usb.img  # write to external storage
+dot config import bundle.tar.zst # restore from bundle
 ```
 
 Recovery use case: you're stranded on a new machine with no internet. Copy the bundle over (USB, phone tether, Bluetooth). Run `bash install-offline.sh`. You have a working dotfiles environment in <60 seconds, no network required.
@@ -168,7 +168,7 @@ Recovery use case: you're stranded on a new machine with no internet. Copy the b
 
 ### Health Score
 
-`dot score` returns a 0-100 score combining:
+`dot doctor score` returns a 0-100 score combining:
 
 | Dimension | Weight |
 |:---|---:|
@@ -183,15 +183,15 @@ Scores:
 - 90-100 — healthy
 - 70-89 — minor issues
 - 50-69 — needs attention
-- <50 — run `dot heal` immediately
+- <50 — run `dot doctor fix` immediately
 
 ### Metrics
 
-`dot metrics` shows recent observations: shell startup time, last-apply duration, heal events, chaos self-tests, CVE counts from SBOM scan. Metrics are stored locally in `~/.local/state/dotfiles/metrics.jsonl` (append-only, one line per event).
+`dot doctor metric list` shows recent observations: shell startup time, last-apply duration, heal events, chaos self-tests, CVE counts from SBOM scan. Metrics are stored locally in `~/.local/state/dotfiles/metrics.jsonl` (append-only, one line per event).
 
 ## Design Principles
 
-1. **Idempotent** — running `dot apply` or `dot heal` twice has the same effect as once
+1. **Idempotent** — running `dot apply` or `dot doctor fix` twice has the same effect as once
 2. **Reversible** — every mutation creates a rollback point
 3. **Observable** — failures produce actionable error messages with exit codes
 4. **Offline-capable** — core flows (detect, heal, rollback) work without network

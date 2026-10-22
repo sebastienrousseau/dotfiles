@@ -53,7 +53,7 @@
 
 - [Wallpaper-driven themes](#wallpaper-driven-themes) — K-Means in CIELAB, WCAG AAA, 228 generated themes
 - [Agent governance (ask / plan / apply / audit)](#agent-governance-ask--plan--apply--audit) — bounded profiles, MCP policy, attestation
-- [Self-healing and rollback](#self-healing-and-rollback) — `dot doctor`, `dot heal`, `dot chaos`, `dot rollback`
+- [Self-healing and rollback](#self-healing-and-rollback) — `dot doctor`, `dot doctor fix`, `dot doctor rollback`
 - [Fleet apply](#fleet-apply) — every host in `fleet.toml` over SSH
 - [The `dot` CLI](#the-dot-cli) — 75 indexed subcommands grouped by intent
 - [Configuration](#configuration) — `.chezmoidata.toml`, profiles, session flags
@@ -161,7 +161,7 @@ make install PREFIX=~/.local  # or: stage only the dot CLI
 ```
 
 `./install.sh --minimal` installs shells and core tools only.
-`dot bundle ~/Downloads` builds an offline `.tar.zst` for an
+`dot config export ~/Downloads` builds an offline `.tar.zst` for an
 air-gapped host; unpack it and run `./install.sh --force`.
 
 <details>
@@ -186,7 +186,7 @@ docker run --rm -e DOTFILES_NONINTERACTIVE=1 ubuntu:24.04 bash -c \
   && dot doctor'
 ```
 
-`dot sandbox` launches the same preview through Docker or Podman
+`dot config apply --sandbox` launches the same preview through Docker or Podman
 from an installed machine.
 
 </details>
@@ -254,7 +254,7 @@ back.
 # First download and verify /tmp/dotfiles-install.sh as shown in Install.
 bash /tmp/dotfiles-install.sh
 dot doctor            # audit tools, paths, portability, security
-dot learn             # interactive tour of shells, secrets, themes, performance
+dot help tour             # interactive tour of shells, secrets, themes, performance
 dot theme rebuild     # generate themes from the wallpapers on this machine
 dot theme toggle      # swap dark and light within the current family
 dot sync              # apply the source tree; the next shell hydrates its caches
@@ -263,7 +263,7 @@ dot sync              # apply the source tree; the next shell hydrates its cache
 ### First 5 Minutes
 
 1. **Check** — `dot doctor` validates tools, paths, and security.
-2. **Explore** — `dot learn` walks through shells, secrets, themes,
+2. **Explore** — `dot help tour` walks through shells, secrets, themes,
    and performance.
 3. **Customize** — edit `~/.config/chezmoi/chezmoi.toml` for
    per-machine settings
@@ -296,7 +296,7 @@ every push.
 | **`dot mcp`** ([`docs/security/MCP_POLICY.md`](docs/security/MCP_POLICY.md)) | MCP policy, supply-chain, and registry audit over `mcp-policy.json` / `mcp-registry.json` | Keep Model Context Protocol servers inside an allowlist before an agent touches them. |
 | **`dot-mcp`** ([`defaults/dot_local/share/dot-mcp`](defaults/dot_local/share/dot-mcp)) | Go stdio MCP server behind `dot mcp serve` — JSON-RPC 2.0, four read-only tools, five resources | Let an MCP client audit this workstation's policy, agent mode, attestation and drift without being able to change it. |
 | **`dot-sys`** ([`lib/wasm-tools`](lib/wasm-tools/README.md)) | Rust crate built for `wasm32-wasip1` and run under `wasmtime` | `dot attest --verify`: check a workstation evidence record in a sandbox with no filesystem, network or environment, so the verdict does not depend on the machine being reviewed. |
-| **Module registry** ([`docs/operations/REGISTRY.md`](docs/operations/REGISTRY.md)) | JSON index of reusable dotfile modules, schema at [`docs/schema/dot-registry-v1.json`](docs/schema/dot-registry-v1.json) | `dot registry list / search / install` with SHA-256-verified archives and a chezmoi preview before apply. |
+| **Module registry** ([`docs/operations/REGISTRY.md`](docs/operations/REGISTRY.md)) | JSON index of reusable dotfile modules, schema at [`docs/schema/dot-registry-v1.json`](docs/schema/dot-registry-v1.json) | `dot cli list --available [term]` and `dot cli install` with SHA-256-verified archives and a chezmoi preview before apply. |
 
 ### Install the pieces
 
@@ -313,15 +313,15 @@ gh release download v0.2.536 --repo sebastienrousseau/dotfiles --pattern 'dot-*.
 #   defaults/run_onchange_26-build-dot-mcp.sh.tmpl
 
 # A registry module
-dot registry search fonts && dot registry install <module> --yes
+dot cli list --available fonts && dot cli install <module> --yes
 ```
 
 ### Per-host quick links
 
 | If you use… | Drop-in config |
 |---|---|
-| **Claude Code** | the shipped [`dotfiles-bootstrap` skill](defaults/dot_claude/skills/dotfiles-bootstrap/SKILL.md) — `/skills` discovers it and runs `dot init` with profile-aware safety defaults |
-| **Cursor / Codex / Windsurf / Zed / Roo / Aider / Continue / Jules** | `dot agents render` regenerates every harness stub from [`CLAUDE.md`](CLAUDE.md); `dot agents check` fails when they drift |
+| **Claude Code** | the shipped [`dotfiles-bootstrap` skill](defaults/dot_claude/skills/dotfiles-bootstrap/SKILL.md) — `/skills` discovers it and runs `dot config init` with profile-aware safety defaults |
+| **Cursor / Codex / Windsurf / Zed / Roo / Aider / Continue / Jules** | `dot agent context apply` regenerates every harness stub from [`CLAUDE.md`](CLAUDE.md); `dot agent context check` fails when they drift |
 | **A2A-capable agents** | the agent card at [`.well-known/agent.json`](.well-known/agent.json), validated by `dot agent a2a-card` and `dot agent conformance` ([`docs/interop/A2A.md`](docs/interop/A2A.md)) |
 | **Ghostty / Alacritty / Kitty / WezTerm / Warp / iTerm2 / tmux / Neovim / VS Code** | themed on every `dot theme` switch — see [Wallpaper-driven themes](#wallpaper-driven-themes) |
 
@@ -331,8 +331,8 @@ The rating is a set of programs, and each one prints the command
 next to the number.
 
 ```sh
-dot score                 # system health and security scorecard
-dot security-score -j     # workstation security posture, JSON
+dot doctor score                 # system health and security scorecard
+dot security score show -j     # workstation security posture, JSON
 dot doctor --score        # tools, paths, portability, AI analysis
 make test                 # the reliability audit CI runs
 ```
@@ -380,24 +380,24 @@ to the component that owns it. The rest of this README covers the
 
 ## One-minute migration from another dotfiles manager
 
-The one-minute version is `dot init`. It clones any GitHub user's
+The one-minute version is `dot config init`. It clones any GitHub user's
 dotfiles repository through this harness, refuses to clobber an
 existing chezmoi source without `--force`, insists on HTTPS, and
 previews with `--dry-run`:
 
 ```bash
-dot init alice --dry-run     # preview: what github.com/alice/dotfiles would do
-dot init alice               # clone + apply through the dot harness
-dot init https://... --no-apply
+dot config init alice --dry-run     # preview: what github.com/alice/dotfiles would do
+dot config init alice               # clone + apply through the dot harness
+dot config init https://... --no-apply
 ```
 
 Coming from a specific tool? The headline mapping is below, and
-`dot init --dry-run` shows what the move would produce on this
+`dot config init --dry-run` shows what the move would produce on this
 machine before anything is written.
 
 | Coming from | What changes |
 |---|---|
-| **yadm** | bare-repo tracking → a chezmoi source tree; `yadm alt` → `.tmpl` files driven by `.chezmoidata.toml`; `yadm encrypt` → age / SOPS through `dot secrets` |
+| **yadm** | bare-repo tracking → a chezmoi source tree; `yadm alt` → `.tmpl` files driven by `.chezmoidata.toml`; `yadm encrypt` → age / SOPS through `dot secret` |
 | **GNU Stow** | one package directory per tool → one `dot_config/<tool>/` tree, deployed by `chezmoi apply` instead of a symlink farm |
 | **bare git repository** (`config` alias) | `$HOME` as work tree → `~/.dotfiles` as source; `config status` → `dot status` / `dot diff` |
 | **plain chezmoi** | keep your source tree as it is; gain `dot doctor` / `heal` / `theme` / `secrets` / `fleet` on top; `chezmoi apply` → `dot sync` |
@@ -443,9 +443,10 @@ Two architectural choices make the rest cheap:
   resolve asynchronously after the first prompt
   ([ADR-002](docs/adr/ADR-002-shell-performance.md)).
 - **Idempotent, verifiable apply.** `dot sync` is chezmoi apply plus
-  drift detection; `dot heal` repairs tools, symlinks, and missing
-  files; `dot rollback` returns to a known-good state; `dot chaos`
-  breaks things on purpose to prove the loop closes.
+  drift detection; `dot doctor fix` repairs tools, symlinks, and missing
+  files; `dot doctor rollback` returns to a known-good state; a chaos
+  test (`scripts/ops/chaos.sh`) breaks things on purpose to prove the
+  loop closes.
 
 The default install is signed (SSH ed25519 commits enforced on
 `main`), attested (SLSA provenance and Cosign-signed SBOM per
@@ -461,16 +462,16 @@ via taplo on every PR).
 | Theme | Headline deliverables |
 | :--- | :--- |
 | Wallpaper-driven themes | K-Means clustering in CIELAB extracts terminal palettes from any wallpaper; WCAG AAA enforced; Apple-compatible dynamic HEIC dark/light; 228 generated themes; `dot theme rebuild` |
-| AI and MCP native | Agent profiles (`dot mode`), MCP policy and registry audit (`dot mcp`), agent card, checkpoints and conformance (`dot agent`), AI commit messages (`dot commit`), the `dot ai` cockpit and local gateway |
-| Cryptographic attestation | Signed commits and tags, machine-readable workstation evidence (`dot attest`), policy-bundle releases, `dot keys sign-check`, `dot secret-audit` |
-| Fleet management | Multi-node status, drift, events, namespaces and RBAC enforcement mode (`dot fleet`); `dot fleet apply` over SSH; `dot teleport` to bring up a remote host |
-| Self-healing | `dot heal`, `dot chaos`, `dot rollback`, `dot bundle`; chezmoi drift, broken symlinks, missing files, checksum-verified tool recovery |
-| Sub-second startup | Lazy loading, `_cached_eval`, mtime-based cache invalidation, realpath sidecar pins; `dot perf`, `dot benchmark`, `dot health` |
+| AI and MCP native | Agent profiles (`dot agent mode`), MCP policy and registry audit (`dot mcp`), agent card, checkpoints and conformance (`dot agent`), AI commit messages (`dot config save`), the `dot ai` cockpit and local gateway |
+| Cryptographic attestation | Signed commits and tags, machine-readable workstation evidence (`dot attest`), policy-bundle releases, the signing check in `dot doctor`, `dot secret check` |
+| Fleet management | Multi-node status, drift, events, namespaces and RBAC enforcement mode (`dot fleet`); `dot fleet apply` over SSH; `dot fleet push` to bring up a remote host |
+| Self-healing | `dot doctor fix`, `dot doctor rollback`, `dot config export`; chezmoi drift, broken symlinks, missing files, checksum-verified tool recovery |
+| Sub-second startup | Lazy loading, `_cached_eval`, mtime-based cache invalidation, realpath sidecar pins; `dot doctor perf show`, `dot doctor perf measure`, `dot doctor status` |
 | Multi-shell parity | Tier 1 (full): zsh, bash. Tier 2 (bridged): fish. Tier 3 (compatible): nushell. PowerShell as a contract-tested parity target ([`tests/integration/test_shell_parity.sh`](tests/integration/test_shell_parity.sh)) |
 | Private build caches | Go, pip, uv, and Zig caches live under `~/.cache/dot/builds` via `mise [env]`; Cargo keeps a per-project `./target` (no shared lock), with sccache sharing dependencies and `rust-target-tmp` moving `./target` out of the repository |
-| Encrypted secrets | age and SOPS at rest; macOS Keychain, `pass`, or age-encrypted store selected by policy; `dot secrets`, `dot secret-audit`, `dot ssh-key`, `dot ssh-cert` |
-| Portable runtimes | mise for managed toolchains with a cross-platform `mise.lock`; Nix flake for strict reproducibility; `dot env`, `dot tools`, `dot upgrade` |
-| Schema-validated config | `.chezmoidata.toml` checked against a JSON Schema in CI; `dot env emit` writes a v1-schema environment manifest; the registry index has its own schema |
+| Encrypted secrets | age and SOPS at rest; macOS Keychain, `pass`, or age-encrypted store selected by policy; `dot secret`, `dot secret check`, `dot secret key new`, `dot secret cert` |
+| Portable runtimes | mise for managed toolchains with a cross-platform `mise.lock`; Nix flake for strict reproducibility; `dot tool`, `dot tool`, `dot system update` |
+| Schema-validated config | `.chezmoidata.toml` checked against a JSON Schema in CI; `dot tool export` writes a v1-schema environment manifest; the registry index has its own schema |
 | Supply chain | SHA-pinned actions, Harden Runner, SLSA L3 provenance, Cosign keyless signing, SPDX SBOM, OpenSSF Scorecard and Best Practices, gitleaks + detect-secrets + TruffleHog, dependency review, CodeQL, Checkov |
 
 ---
@@ -504,10 +505,10 @@ shell present on the runner; the `Reliability Gate` workflow adds
 WSL and PowerShell contract jobs.
 
 ```bash
-dot completion zsh     # completions are generated from the command registry,
-dot completion fish    # never hand-maintained — bash, zsh, fish, and nu
-dot aliases tiers      # which alias tiers and ecosystems are enabled here
-dot aliases why gco    # provenance and deprecation status of one alias
+dot cli completion show zsh     # completions are generated from the command registry,
+dot cli completion show fish    # never hand-maintained — bash, zsh, fish, and nu
+dot shell alias status --tiers      # which alias tiers and ecosystems are enabled here
+dot shell alias show gco    # provenance and deprecation status of one alias
 ```
 
 ---
@@ -556,7 +557,7 @@ baseline is a warning.
 | Windows (PowerShell) | 300 ms | within budget on every green run |
 | Local macOS, bash 5.x | — | **~47 ms** (recorded in the workflow header and `CHANGELOG.md`) |
 
-**Interactive shell startup** — `dot perf` (backed by
+**Interactive shell startup** — `dot doctor perf show` (backed by
 `scripts/diagnostics/perf.sh`, `hyperfine`-style warm-up plus three
 runs, mean) measures every installed shell against a per-shell
 target, compares with a recorded baseline in
@@ -586,10 +587,10 @@ The original threshold and the `hyperfine --warmup 3 --runs 10
 Numbers on your own machine:
 
 ```bash
-dot perf                  # every installed shell vs its target
-dot perf --baseline       # record this machine's known-good point
-dot benchmark             # per-component startup profile
-dot load-bench            # time to heavy-layer readiness
+dot doctor perf show                  # every installed shell vs its target
+dot doctor perf show --baseline       # record this machine's known-good point
+dot doctor perf measure             # per-component startup profile
+dot doctor perf --ready            # time to heavy-layer readiness
 ```
 
 Budgets, baseline lifecycle, and the regression-issue pipeline are
@@ -607,12 +608,12 @@ and [`benches/`](benches/).
 | :--- | :--- |
 | **Shells and navigation** | Zsh loads in stages through small `rc.d` modules, not one startup script. Fish uses `_cached_eval` and deferred loading. Bash ships full parity with zsh for tooling and aliases. Nushell handles structured workflows (Tier 3). PowerShell keeps cross-platform and WSL sessions on the same baseline with a `pwsh` parity contract in CI. Starship, Zoxide, Atuin, and fzf for navigation and recall. Starship Transient Prompt collapses past prompts to a single glyph on fish; the zsh hook is in place for when upstream lands the matching function ([ADR-010](docs/adr/ADR-010-starship-transient-prompt.md)). |
 | **Development and runtimes** | mise manages language versions in user space with a cross-platform `mise.lock` (Linux, macOS, Windows, exact URLs and SHA-256s). Nix Flakes for strict reproducibility when speed is not the priority. Pueue queues long-running tasks instead of extra tabs. Neovim ships as a full Lua editor, not a starter template. Lazygit for terminal git. Build caches (Go, pip, uv, Zig) live under a private `~/.cache/dot/builds`; Cargo keeps a per-project `./target`. `_cached_eval` caches expensive `tool init` output with mtime and realpath invalidation; `EVALCACHE_DISABLE=true` bypasses it. |
-| **AI, agents, and MCP** | Agent profiles (`dot mode`): ask, plan, apply, audit. Pattern library (`dot patterns`): architect, hardener, refactor, bundled in `dot_config/ai/patterns/`. MCP policy enforcement (`dot mcp`). AI commit messages (`dot commit`). The `dot ai` cockpit installs and runs Codex, Copilot, Antigravity, Aider, OpenCode and friends from one Bubble Tea TUI; `dot ai serve` exposes your Claude subscription locally to any Anthropic- or OpenAI-protocol tool ([ADR-012](docs/adr/ADR-012-ai-fleet-local-proxy.md), [`docs/AI.md`](docs/AI.md)). Every agent session is logged with a policy hash and an outcome. |
-| **Security, trust, governance** | age and SOPS keep secrets encrypted at rest and out of history. SSH ed25519 signing plus trust metadata back every commit. Gitleaks, detect-secrets, TruffleHog, policy checks, and compliance workflows. `dot attest` records machine state, policy, prompt, and model metadata in tracked JSON. Telemetry controls and local-first defaults (`dot telemetry`, `dot dns-doh`, `dot firewall`, `dot usb-safety`, `dot lock-screen`, `dot encrypt-check`). SPDX SBOM and Grype CVE scanning in CI. npm releases authenticate through OIDC trusted publishing with provenance, never a long-lived token. |
-| **Themes** | 228 wallpaper-derived themes, dark and light paired; `dot theme`, `dot theme toggle`, `dot theme family`, `dot theme sync` with the OS appearance; `dot wallpaper rotate` and `dot wallpaper sync`. See [Wallpaper-driven themes](#wallpaper-driven-themes). |
-| **Fleet and remote** | `dot fleet` status, drift, events, namespace, RBAC enforce mode; `dot fleet apply` runs `dot sync` (or a custom `--cmd`) on every host in `fleet.toml`; `dot teleport` deploys the environment to a fresh host over SSH; `dot bundle` builds an offline archive. |
-| **Diagnostics** | `dot doctor` (deep audit, `--ai` analysis), `dot health` dashboard, `dot score`, `dot security-score`, `dot fleet drift`, `dot snapshot`, `dot metrics` (JSONL observability), `dot history`, `dot packages`. |
-| **Distribution** | Release archives with a `PREFIX` / `DESTDIR` Makefile, man page (`share/man/man1/dot.1`), generated completions, Homebrew tap, Scoop bucket, AUR, npm, Nix; `dot uninstall` removes the managed environment. |
+| **AI, agents, and MCP** | Agent profiles (`dot agent mode`): ask, plan, apply, audit. Pattern library (`dot ai pattern`): architect, hardener, refactor, bundled in `dot_config/ai/patterns/`. MCP policy enforcement (`dot mcp`). AI commit messages (`dot config save`). The `dot ai` cockpit installs and runs Codex, Copilot, Antigravity, Aider, OpenCode and friends from one Bubble Tea TUI; `dot ai serve` exposes your Claude subscription locally to any Anthropic- or OpenAI-protocol tool ([ADR-012](docs/adr/ADR-012-ai-fleet-local-proxy.md), [`docs/AI.md`](docs/AI.md)). Every agent session is logged with a policy hash and an outcome. |
+| **Security, trust, governance** | age and SOPS keep secrets encrypted at rest and out of history. SSH ed25519 signing plus trust metadata back every commit. Gitleaks, detect-secrets, TruffleHog, policy checks, and compliance workflows. `dot attest` records machine state, policy, prompt, and model metadata in tracked JSON. Telemetry controls and local-first defaults (`dot security telemetry apply`, `dot security dns apply`, `dot security firewall apply`, `dot security usb apply`, `dot security lock apply`, `dot security disk show`). SPDX SBOM and Grype CVE scanning in CI. npm releases authenticate through OIDC trusted publishing with provenance, never a long-lived token. |
+| **Themes** | 228 wallpaper-derived themes, dark and light paired; `dot theme`, `dot theme toggle`, `dot theme family`, `dot theme sync` with the OS appearance; `dot theme wallpaper set rotate` and `dot theme wallpaper set sync`. See [Wallpaper-driven themes](#wallpaper-driven-themes). |
+| **Fleet and remote** | `dot fleet` status, drift, events, namespace, RBAC enforce mode; `dot fleet apply` runs `dot sync` (or a custom `--cmd`) on every host in `fleet.toml`; `dot fleet push` deploys the environment to a fresh host over SSH; `dot config export` builds an offline archive. |
+| **Diagnostics** | `dot doctor` (deep audit, `--ai` analysis), `dot doctor status` dashboard, `dot doctor score`, `dot security score show`, `dot fleet drift`, `dot doctor snapshot new`, `dot doctor metric list` (JSONL observability), `dot shell history list`, `dot tool list --packages`. |
+| **Distribution** | Release archives with a `PREFIX` / `DESTDIR` Makefile, man page (`share/man/man1/dot.1`), generated completions, Homebrew tap, Scoop bucket, AUR, npm, Nix; `dot config uninstall` removes the managed environment. |
 
 ---
 
@@ -675,10 +676,10 @@ Agents run under a named profile that bounds what they may do, and
 every run leaves evidence:
 
 ```bash
-dot mode list                      # ask / plan / apply / audit
-dot mode set plan                  # switch the active profile
-dot mode run plan git status       # run one command under a profile, with a checkpoint
-dot mode doctor                    # validate agent-profiles.json and the default
+dot agent mode list                      # ask / plan / apply / audit
+dot agent mode set plan                  # switch the active profile
+dot agent mode run plan git status       # run one command under a profile, with a checkpoint
+dot agent check                    # validate agent-profiles.json and the default
 dot agent log                      # tail the session audit log
 dot agent checkpoint list          # saved run checkpoints (save / list / show / replay)
 dot fleet enforce strict           # advisory → strict RBAC for agent profiles
@@ -704,15 +705,14 @@ The CLI is idempotent, and it checks its own work.
 
 ```bash
 dot doctor             # deep audit: tools, paths, portability, AI analysis
-dot heal               # auto-fix tools, chezmoi drift, broken symlinks, missing files
-dot chaos --dry-run    # simulate config corruption, then prove heal closes the loop
-dot rollback           # return to a previous known-good state
-dot snapshot           # capture a baseline to compare against later
+dot doctor fix               # auto-fix tools, chezmoi drift, broken symlinks, missing files
+dot doctor rollback           # return to a previous known-good state
+dot doctor snapshot new           # capture a baseline to compare against later
 ```
 
 Tool recovery is checksum-verified: Nushell, Pueue, Wasmtime, SOPS,
 Yazi, and Zellij are restored from exact mise / aqua pins, never
-from a mutable release URL. `dot health` renders the cache and tool
+from a mutable release URL. `dot doctor status` renders the cache and tool
 state as a live dashboard (`-j` for JSON); its output, like
 `doctor`, `perf`, `version`, and `--help`, is pinned by golden
 snapshots in [`tests/snapshots/`](tests/snapshots/).
@@ -740,7 +740,7 @@ dot fleet events              # recent fleet events from the local log
 Hostnames are validated against `[A-Za-z0-9._@:+/-]+` before any SSH
 fan-out; first connections use `StrictHostKeyChecking=accept-new`,
 so pre-populate `~/.ssh/known_hosts` if your threat model allows no
-TOFU window. `dot teleport` brings a fresh machine up over SSH
+TOFU window. `dot fleet push` brings a fresh machine up over SSH
 before it joins the fleet. The concept chapter is
 [`docs/manual/01-concepts/04-fleet.md`](docs/manual/01-concepts/04-fleet.md).
 
@@ -749,7 +749,7 @@ before it joins the fleet. The concept chapter is
 ## The `dot` CLI
 
 75 subcommands, 144 indexed entries, grouped by intent. `dot help`
-shows the overview, `dot help all` the full reference, `dot search
+shows the overview, `dot help all` the full reference, `dot help
 <keyword>` filters it. The generated
 [command index](docs/manual/command-index.md) is checked against
 `dot help all` on every PR.
@@ -758,33 +758,32 @@ shows the overview, `dot help all` the full reference, `dot search
 
 | | |
 |:---|:---|
-| `dot init <user>` | Bootstrap any GitHub user's dotfiles repository through this harness |
+| `dot config init <user>` | Bootstrap any GitHub user's dotfiles repository through this harness |
 | `dot sync` | Apply dotfiles to this machine (`--pull` to fetch first, `--check` to preview) |
 | `dot doctor` | Check the environment and surface issues |
-| `dot learn` | Open the guided tour |
-| `dot agents render` | Sync `CLAUDE.md` → `AGENTS.md` + Cursor + Codex stubs |
+| `dot help tour` | Open the guided tour |
+| `dot agent context apply` | Sync `CLAUDE.md` → `AGENTS.md` + Cursor + Codex stubs |
 | `dot fleet apply` | SSH out to every host in `~/.config/dotfiles/fleet.toml` |
-| `dot registry list` | Browse reusable dotfile modules from the registry |
+| `dot cli list --available` | Browse reusable dotfile modules from the registry |
 
 ### Daily use
 
 | | |
 |:---|:---|
 | `dot status` / `dot diff` | Show local drift; preview pending changes |
-| `dot edit` / `dot add` | Open the source directory; add a file to the source |
-| `dot upgrade` | Update toolchains, plugins, and dotfiles |
-| `dot commit` | Generate an AI commit message from the staged diff |
-| `dot search` | Find commands by keyword |
+| `dot edit` / `dot config add` | Open the source directory; add a file to the source |
+| `dot system update` | Update toolchains, plugins, and dotfiles |
+| `dot config save` | Generate an AI commit message from the staged diff |
+| `dot help` | Find commands by keyword |
 
 ### Inspect and repair
 
 | | |
 |:---|:---|
-| `dot heal` | Auto-fix tools, chezmoi drift, and broken symlinks |
-| `dot rollback` | Return to a previous known-good state |
+| `dot doctor fix` | Auto-fix tools, chezmoi drift, and broken symlinks |
+| `dot doctor rollback` | Return to a previous known-good state |
 | `dot attest` | Export workstation evidence |
-| `dot chaos` | Simulate corruption to test self-healing |
-| `dot bundle` | Create an offline tarball of the dotfiles environment |
+| `dot config export` | Create an offline tarball of the dotfiles environment |
 
 ### AI and agents
 
@@ -792,28 +791,28 @@ shows the overview, `dot help all` the full reference, `dot search
 |:---|:---|
 | `dot ai` | AI fleet cockpit — run, chat, install, serve a local gateway, cost |
 | `dot mcp` | Inspect MCP policy and registry |
-| `dot mode` | Show or set the agent profile (ask / plan / apply / audit) |
+| `dot agent mode` | Show or set the agent profile (ask / plan / apply / audit) |
 | `dot agent` | Agent metadata, logs, checkpoints, conformance |
-| `dot patterns` | List bundled AI patterns (architect, hardener, refactor) |
+| `dot ai pattern` | List bundled AI patterns (architect, hardener, refactor) |
 
 ### Configuration commands
 
 | | |
 |:---|:---|
 | `dot theme` / `dot theme rebuild` | Switch theme or regenerate from wallpapers |
-| `dot env` | Managed tool versions (list, install, use, prune, emit) |
-| `dot profile` | Show or switch the active profile |
-| `dot secrets` | Edit, get, set, list, load encrypted secrets |
-| `dot fonts` | Install or patch Nerd Fonts |
+| `dot tool` | Managed tool versions (list, install, use, prune, emit) |
+| `dot config profile` | Show or switch the active profile |
+| `dot secret` | Edit, get, set, list, load encrypted secrets |
+| `dot theme font install` | Install or patch Nerd Fonts |
 
 ### Fleet and performance
 
 | | |
 |:---|:---|
 | `dot fleet` | Multi-node status, drift, events, namespace |
-| `dot perf` | Measure shell startup |
-| `dot score` / `dot security-score` | Health and security scorecards |
-| `dot health` | Live dashboard for caches and tool state |
+| `dot doctor perf show` | Measure shell startup |
+| `dot doctor score` / `dot security score show` | Health and security scorecards |
+| `dot doctor status` | Live dashboard for caches and tool state |
 
 Full reference: [`docs/reference/UTILS.md`](docs/reference/UTILS.md)
 · manual chapter:
@@ -1047,7 +1046,7 @@ Two native Go fuzz harnesses ship under
 user-input surfaces that were ported out of the shell so they could
 be fuzzed at all: `FuzzValidateName` (the name validator behind
 `lib/dot/utils.sh`) and `FuzzInitURLResolver` (the URL resolver
-behind `dot init`). A third harness,
+behind `dot config init`). A third harness,
 [`fuzz/install/fuzz_install.sh`](fuzz/install/fuzz_install.sh), drives
 `install.sh` itself with unknown flags, garbage positionals, symlink
 loops in `$HOME`, an empty `PATH`, 4 KB arguments, and NUL bytes in
@@ -1108,10 +1107,10 @@ corpus lives beside the harnesses under
   (`package.json`, `bin/dot` twice, the man page, `lib/dot/bento.sh`,
   this README's badge, `CLAUDE.md`, [`AGENTS.md`](AGENTS.md)) are checked against
   `.chezmoidata.toml`; `.chezmoidata.toml` itself is validated
-  against its JSON Schema. `dot agents check` does the same for the
+  against its JSON Schema. `dot agent context check` does the same for the
   AI-harness stubs locally.
 - **Golden snapshots** pin the user-facing text of `dot --help`,
-  `dot version`, `dot doctor`, `dot perf`, and `dot health` after
+  `dot version`, `dot doctor`, `dot doctor perf show`, and `dot doctor status` after
   scrubbing paths, timings, and colours.
 
 ### CI
@@ -1177,7 +1176,7 @@ architectural level, not behind opt-in flags. The full analysis is
   registry archives are rejected when they contain path traversal
   or link entries. Fonts, distro signing keys, and binary archives
   go through the same path.
-- **`dot init` is HTTPS-only**, refuses to overwrite an existing
+- **`dot config init` is HTTPS-only**, refuses to overwrite an existing
   source directory without `--force`, and prints the source URL it
   is about to run scripts from.
 - **Self-healing never fetches mutable URLs.** Tool recovery uses
@@ -1185,14 +1184,14 @@ architectural level, not behind opt-in flags. The full analysis is
 
 ### Secrets
 
-- `dot secrets` selects a provider by policy — macOS Keychain,
+- `dot secret` selects a provider by policy — macOS Keychain,
   `pass`, or an age-encrypted local store — and loads buckets into
-  the environment on demand (`eval "$(dot secrets load ai)"`), so
+  the environment on demand (`eval "$(dot secret export ai)"`), so
   keys are never in plaintext files or shell history.
 - age and SOPS encrypt chezmoi-managed secret files at rest;
-  `dot secrets-init` bootstraps the key, `dot ssh-key` encrypts an
-  SSH key locally, `dot ssh-cert` manages short-lived certificates.
-- `dot secret-audit` audits hygiene and leakage surface on the
+  `dot secret init` bootstraps the key, `dot secret key new` encrypts an
+  SSH key locally, `dot secret cert` manages short-lived certificates.
+- `dot secret check` audits hygiene and leakage surface on the
   workstation; gitleaks, detect-secrets, and TruffleHog run on every
   push and in pre-commit; the history-filtering procedure is written
   down in
@@ -1255,8 +1254,8 @@ The four entry points, identical across every repo in the family:
 
 - **[User Manual](https://doc.dotfiles.io/)** — the rendered book:
   concepts, tutorials, reference, cookbook, appendices; also
-  `dot manual`, `dot manual pdf`, `dot manual text | less`, and
-  `dot manual --offline` from the bundled snapshot
+  `dot help --manual`, `dot help --manual pdf`, `dot help --manual text | less`, and
+  `dot help --manual --offline` from the bundled snapshot
 - **[Command reference](docs/manual/command-index.md)** — every
   `dot` subcommand, generated from `dot help all`; `man dot` after
   install
@@ -1318,7 +1317,7 @@ every one of them stays fixed.
 
 - **Output stability.** For a tool that generates files, output *is*
   API. Machine-readable outputs carry a schema version —
-  `dot env emit` conforms to
+  `dot tool export` conforms to
   [`docs/schema/dot-env-v1.json`](docs/schema/dot-env-v1.json), the
   registry index to
   [`docs/schema/dot-registry-v1.json`](docs/schema/dot-registry-v1.json) —
@@ -1342,7 +1341,7 @@ every one of them stays fixed.
   release named up front:
   [`docs/reference/ALIASES_DEPRECATIONS.md`](docs/reference/ALIASES_DEPRECATIONS.md)
   records each deprecated alias, its replacement, and its `Remove In`
-  version, and `dot aliases why <alias>` reports the same from the
+  version, and `dot shell alias show <alias>` reports the same from the
   CLI. The deprecation window is the span between the release that
   adds the row and the release named in `Remove In`.
 

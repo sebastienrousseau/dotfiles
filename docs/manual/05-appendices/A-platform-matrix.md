@@ -83,4 +83,4 @@ fzf, atuin, delta, lazygit, neovim, shellcheck and age). `pandoc` and
 | Niri (WM) | ✗ | ✓ | ✗ |
 | GNOME gsettings | ✗ | ✓ | ⚠ |
 | Build artifact redirect (`DOT_BUILD_ROOT`) | ✓ | ✓ | ✓ |
-| Self-healing (`dot heal`) | ✓ | ✓ | ✓ |
+| Self-healing (`dot doctor fix`) | ✓ | ✓ | ✓ |

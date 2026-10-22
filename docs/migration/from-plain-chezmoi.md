@@ -23,8 +23,8 @@ directly forever. Nothing here replaces chezmoi; `dot` shells out to it.
 | Everything at the source root | `defaults/` = your files; `bin/`, `lib/`, `scripts/`, `docs/`, `tests/` = the framework |
 | `chezmoi apply` | `dot sync` (which runs `chezmoi apply` with sensible exclusions) |
 | `chezmoi diff` / `status` | `dot diff` / `dot status` — same thing, prettier |
-| — | `dot doctor`, `dot health`, `dot heal`, `dot rollback`, `dot attest` |
-| `chezmoi secret` | `dot secrets` (age + sops) |
+| — | `dot doctor`, `dot doctor status`, `dot doctor fix`, `dot doctor rollback`, `dot attest` |
+| `chezmoi secret` | `dot secret` (age + sops) |
 | `run_onchange_` scripts | same, plus `install/provision/` |
 
 **`.chezmoiroot` is the key idea.** It contains `defaults`, so chezmoi
@@ -113,10 +113,10 @@ done < ~/chezmoi-managed.txt
 None of these are required; adopt them when you want them.
 
 ```sh
-dot secrets-init      # age-based secrets
+dot secret init      # age-based secrets
 dot theme list        # wallpaper-driven theming
-dot profile show      # profiles and feature flags
-dot completion fish > ~/.config/fish/completions/dot.fish
+dot config profile show      # profiles and feature flags
+dot cli completion show fish > ~/.config/fish/completions/dot.fish
 ```
 
 ## Rolling back

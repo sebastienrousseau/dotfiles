@@ -44,9 +44,9 @@ Published at: `https://sebastienrousseau.github.io/dotfiles/manual/`
 Fetch from the CLI:
 
 ```sh
-dot manual           # open in browser
-dot manual pdf       # download and open PDF
-dot manual text      # pipe plain text to pager
+dot help --manual           # open in browser
+dot help --manual pdf       # download and open PDF
+dot help --manual text      # pipe plain text to pager
 ```
 
 ## Quick Install

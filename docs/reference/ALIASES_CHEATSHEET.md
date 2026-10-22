@@ -28,5 +28,5 @@ Auto-generated from the alias manifest.
 
 ## Notes
 
-- Regenerate with `dot aliases cheatsheet`.
+- Regenerate with `dot shell alias export`.
 - Apply changes with `chezmoi apply`.

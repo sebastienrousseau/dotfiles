@@ -8,81 +8,245 @@ Aliases, functions, and the `dot` CLI provide day-to-day tooling across macOS, L
 
 ## Dot CLI
 
-The `dot` command is the main interface for managing dotfiles. Run `dot version` or `dot --version` to check the installed version.
+The `dot` command is the main interface: `dot <domain> [object] <verb>` (ADR-020). Run `dot help` for the overview, `dot help <term>` to search, and `dot -V` for the version. Old names keep working, with a warning, until 0.2.538; the **Was** column names them.
 
-### Core commands
+### Shortcuts
 
-| Command | Description |
-|---------|-------------|
-| `dot commit` | Create an AI-assisted conventional commit |
-| `dot apply` | Apply dotfiles (`chezmoi apply`) |
-| `dot sync` | Alias of apply |
-| `dot update` | Pull latest changes and apply |
-| `dot add <file>` | Add a file to chezmoi source |
-| `dot diff` | Show local changes (excludes scripts) |
-| `dot status` | Show configuration drift |
-| `dot remove <path>` | Safely remove a managed file |
-| `dot uninstall` | Remove the managed dotfiles environment (prompts unless `--force`) |
-| `dot cd` | Print source directory path |
-| `dot edit` | Open source in your editor |
-| `dot clean-cache` | Clear generated shell initialization caches |
-| `dot prewarm` | Regenerate shell caches for fast startup |
-| `dot bundle` | Create an offline portable archive |
-| `dot upgrade` | Update toolchains, plugins, and dotfiles |
-| `dot packages` | Show installed packages and package managers |
-| `dot cache-refresh` | Rebuild generated shell state |
-| `dot search <term>` | Find commands by keyword |
-| `dot help` | Show command help and the public reference |
-| `dot version` | Show the installed dotfiles version |
+| Command | Short for |
+|---------|-----------|
+| `dot apply` | `dot config apply` |
+| `dot sync` | `dot config sync` |
+| `dot diff` | `dot config diff` |
+| `dot status` | `dot config status` |
+| `dot edit` | `dot config edit` |
+| `dot cd` | `dot config path` |
+| `dot update` | `dot system update` |
 
-### Diagnostics
+### dot agent
 
-| Command | Description |
-|---------|-------------|
-| `dot doctor` | Run system health checks (`--score/-s`,`--heal/-H`) |
-| `dot secret-audit` | Audit secret hygiene and leakage surface |
-| `dot health` | Run the health dashboard (`--verbose/-v`,`--json/-j`,`--fix/-f`,`--force/-F`) |
-| `dot heal` | Auto-repair missing tools, chezmoi drift, broken symlinks, and critical files (`--dry-run/-n`,`--force/-f`) |
-| `dot smoke-test` | Verify toolchains (Rust, Go, AI CLIs) |
-| `dot verify` | Run security and integrity verification (`--security/-s`) |
-| `dot chaos` | Simulate config corruption to test self-healing |
-| `dot rollback` | Roll back dotfiles to the previous known-good state |
-| `dot drift` | Detailed configuration drift dashboard |
-| `dot benchmark` | Measure shell startup time (`--detailed/-d`,`--profile/-p`,`--compare/-c`,`--waterfall/-w`) |
-| `dot perf` | Show performance mode + quick timing (`--json/-j`,`--profile/-p`,`--runs/-r`,`--target/-t`) |
-| `dot score` | Show the high-level system health and security scorecard |
-| `dot metrics` | Show recent observability metrics |
-| `dot load-bench` | Measure heavy-layer readiness |
-| `dot mcp` | Validate MCP policy and registry (`--strict/-s`,`--json/-j`) |
-| `dot attest` | Export workstation evidence (`--json/-j`,`--write/-w`,`--fleet-store/-F`) |
-| `dot history` | Analyse shell history |
-| `dot security-score` | Score workstation security (`--verbose/-v`,`--quiet/-q`,`--json/-j`) |
-| `dot snapshot` | Capture workstation state (`--baseline/-b`,`--force/-f`) |
-| `dot ai` | Open the AI fleet cockpit; run prompts, serve a local Claude gateway, install, cost |
-| `dot ai-setup` | Bootstrap AI CLIs interactively (deprecated alias for `dot ai login`) |
-| `dot ai-query` | Context-aware RAG query over the repo (deprecated alias for `dot ai ask`) |
-| `dot mode` | Show or switch the active agent profile |
-| `dot agent` | Inspect agent metadata, logs, checkpoints, and conformance |
-| `dot agent checkpoint` | Save, list, show, and replay bounded agent checkpoints |
-| `dot agent conformance` | Validate A2A discovery and agent card conformance (`--strict/-s`,`--json/-j`) |
+Modes, policy, sandbox, budgets.
 
-### Tools
+| Command | Description | Was |
+|---------|-------------|-----|
+| `dot agent status` | Mode, policy and budgets | `dot mode current` |
+| `dot agent check` | Check modes and policy | `dot mode doctor` |
+| `dot agent run` | Run an agent task |  |
+| `dot agent mode list` | Available modes | `dot mode list` |
+| `dot agent mode show` | One mode in detail | `dot mode show` |
+| `dot agent mode set` | Switch mode | `dot mode set` |
+| `dot agent context show` | Context files in effect | `dot agents list` |
+| `dot agent card show` | The agent card | `dot agent card` |
+| `dot agent log show` | The agent log | `dot agent log` |
+| `dot agent checkpoint list` | Saved checkpoints |  |
+| `dot agent checkpoint save` | Save a checkpoint |  |
+| `dot agent delegate list` | Configured delegates |  |
+| `dot agent delegate run` | Run a command as a delegate |  |
+| `dot agent context check` | Check the rendered context files are current | `dot agents check` |
+| `dot agent context apply` | Render the context file for every harness | `dot agents render` |
+| `dot agent mode run` | Run a command under a mode | `dot mode run` |
+| `dot agent card check` | Check the card against the A2A spec | `dot mode conformance` |
 
-| Command | Description |
-|---------|-------------|
-| `dot env` | Show managed runtime and tool versions |
-| `dot env emit` | Emit a portable workstation environment manifest (SBOM) |
-| `dot profile` | Show or switch the active configuration profile |
-| `dot keys` | Show the keybindings and signing reference |
-| `dot tools` | Show tools documentation |
-| `dot tools install` | Enter Nix development shell |
-| `dot new <lang> <name>` | Scaffold a project (`python`/`go`/`node`) |
-| `dot sandbox` | Launch Docker sandbox preview |
-| `dot learn` | Start the guided onboarding tour |
-| `dot docs` | Show the main repository documentation |
-| `dot log-rotate` | Rotate `~/.local/share/dotfiles.log` |
-| `dot completion <bash\|zsh\|fish\|nu>` | Generate shell completions from the command registry |
-| `dot lint` | Lint shell scripts (`--check/-c`,`--fix/-f`) |
+### dot ai
+
+Install, route and run coding agents.
+
+| Command | Description | Was |
+|---------|-------------|-----|
+| `dot ai list` | Installed agents | `dot ai tools` |
+| `dot ai install` | Install agents |  |
+| `dot ai update` | Upgrade agent CLIs |  |
+| `dot ai start` | Start an agent | `dot ai chat` |
+| `dot ai run` | Run an agent once |  |
+| `dot ai gateway serve` | Run the gateway in the foreground | `dot ai serve` |
+| `dot ai login` | Authenticate an agent |  |
+| `dot ai check` | Check agent installs and auth | `dot ai doctor` |
+| `dot ai ask` | Ask about the local context | `dot ai-query` |
+| `dot ai pattern list` | Prompt patterns | `dot patterns list` |
+| `dot ai cost show` | Spend by agent and model | `dot ai cost` |
+| `dot ai pattern show` | One prompt pattern | `dot patterns view` |
+| `dot ai pattern edit` | Edit a prompt pattern | `dot patterns edit` |
+
+### dot attest
+
+Attestation and verification.
+
+| Command | Description | Was |
+|---------|-------------|-----|
+| `dot attest show` | The workstation attestation | `dot attest` |
+| `dot attest export` | Write attestation evidence | `dot attest --write` |
+| `dot attest verify` | Verify evidence | `dot attest --verify` |
+
+### dot cli
+
+Plugins, updates, completions.
+
+| Command | Description | Was |
+|---------|-------------|-----|
+| `dot cli list` | Installed plugins | `dot registry installed` |
+| `dot cli show` | One plugin in detail | `dot registry info` |
+| `dot cli install` | Install a plugin | `dot registry install` |
+| `dot cli completion show` | Print a completion script | `dot completion` |
+| `dot cli registry show` | The plugin registry URL | `dot registry url` |
+| `dot cli registry set` | Point at another plugin registry | `dot registry set-url` |
+
+### dot config
+
+Apply, diff and sync the dotfiles.
+
+| Command | Description | Was |
+|---------|-------------|-----|
+| `dot config status` | Pending changes and last apply | `dot status` |
+| `dot config diff` | What apply would change | `dot diff` |
+| `dot config apply` | Write the dotfiles to this machine | `dot apply` |
+| `dot config sync` | Pull the source, then apply | `dot sync` |
+| `dot config update` | Pull and apply the dotfiles only | `dot update` |
+| `dot config edit` | Open a managed file in $EDITOR | `dot edit` |
+| `dot config add` | Start managing an existing file | `dot add` |
+| `dot config save` | Commit source changes | `dot commit` |
+| `dot config init` | First-time setup of the dotfiles | `dot init`, `dot setup` |
+| `dot config check` | Lint the source and templates | `dot lint` |
+| `dot config export` | Write a portable bundle | `dot bundle` |
+| `dot config uninstall` | Remove the setup, keeping the source | `dot uninstall` |
+| `dot config path show` | Print the source directory | `dot cd` |
+| `dot config profile show` | Show the active profile | `dot profile show` |
+| `dot config profile set` | Switch profile | `dot profile set` |
+| `dot config import` | Restore from an exported bundle | `dot bundle restore` |
+
+### dot doctor
+
+Health, repair, backup and rollback.
+
+| Command | Description | Was |
+|---------|-------------|-----|
+| `dot doctor status` | Health summary | `dot health` |
+| `dot doctor check` | Run every health check | `dot doctor` |
+| `dot doctor fix` | Repair what check found | `dot heal` |
+| `dot doctor backup` | Back up the setup | `dot backup` |
+| `dot doctor restore` | Restore from a backup | `dot restore` |
+| `dot doctor rollback` | Return to a previous generation | `dot rollback` |
+| `dot doctor score show` | The setup score | `dot scorecard` |
+| `dot doctor snapshot new` | Take a snapshot | `dot snapshot` |
+| `dot doctor perf show` | Startup timings | `dot perf` |
+| `dot doctor perf measure` | Benchmark startup | `dot benchmark` |
+| `dot doctor drift show` | Drift from the source | `dot drift` |
+| `dot doctor conflict list` | Conflicting files | `dot conflicts` |
+| `dot doctor metric list` | Recorded metrics | `dot metrics` |
+
+### dot fleet
+
+Many hosts.
+
+| Command | Description | Was |
+|---------|-------------|-----|
+| `dot fleet status` | Posture across hosts |  |
+| `dot fleet apply` | Apply the fleet configuration |  |
+| `dot fleet push` | Send configuration to a host | `dot teleport` |
+| `dot fleet drift show` | Drift across hosts | `dot fleet drift` |
+| `dot fleet namespace list` | Namespaces | `dot fleet namespace show` |
+| `dot fleet log show` | Fleet events | `dot fleet events` |
+| `dot fleet policy show` | Fleet policy | `dot fleet enforce status` |
+| `dot fleet policy set` | Enforce a fleet policy | `dot fleet enforce set` |
+
+### dot mcp
+
+MCP servers as supply chain.
+
+| Command | Description | Was |
+|---------|-------------|-----|
+| `dot mcp list` | Configured MCP servers | `dot mcp registry` |
+| `dot mcp check` | Check servers and pins | `dot mcp doctor` |
+| `dot mcp serve` | Run dot's read-only MCP server |  |
+
+### dot secret
+
+Secrets, keys and SSH certificates.
+
+| Command | Description | Was |
+|---------|-------------|-----|
+| `dot secret init` | Set up the secret provider | `dot secrets-init` |
+| `dot secret edit` | Edit the encrypted secrets file | `dot secrets`, `dot secrets edit` |
+| `dot secret new` | Create the secrets file | `dot secrets-create` |
+| `dot secret list` | Secret names without values | `dot secrets list` |
+| `dot secret show` | One secret | `dot secrets get` |
+| `dot secret set` | Store one secret | `dot secrets set` |
+| `dot secret export` | Print secrets as environment | `dot secrets load` |
+| `dot secret check` | Audit secret hygiene | `dot secret-audit` |
+| `dot secret key new` | Create an ED25519 key | `dot ssh-key` |
+| `dot secret cert list` | Certificates and expiry | `dot ssh-cert status` |
+| `dot secret cert new` | Issue a short-lived SSH certificate | `dot ssh-cert`, `dot ssh-cert issue` |
+| `dot secret provider show` | The active provider | `dot secrets provider` |
+| `dot secret cert remove` | Revoke the current SSH certificate | `dot ssh-cert revoke` |
+
+### dot security
+
+OS hardening.
+
+| Command | Description | Was |
+|---------|-------------|-----|
+| `dot security policy show` | The security policy | `dot policy` |
+| `dot security disk show` | Disk encryption state | `dot encrypt-check` |
+| `dot security score show` | The security score | `dot security-score` |
+| `dot security firewall apply` | Harden the firewall setting | `dot firewall` |
+| `dot security telemetry apply` | Harden the telemetry setting | `dot telemetry` |
+| `dot security dns apply` | Harden the dns setting | `dot dns-doh` |
+| `dot security lock apply` | Harden the lock setting | `dot lock-screen` |
+| `dot security usb apply` | Harden the usb setting | `dot usb-safety` |
+
+### dot shell
+
+Aliases, history, startup caches.
+
+| Command | Description | Was |
+|---------|-------------|-----|
+| `dot shell update` | Regenerate the startup caches | `dot cache-refresh` |
+| `dot shell clean` | Clear the startup caches | `dot clean-cache` |
+| `dot shell history list` | Recent history | `dot history` |
+| `dot shell alias list` | Aliases and where each is defined; a term searches them | `dot aliases list` |
+| `dot shell alias check` | Find shadowed or broken aliases | `dot alias-check` |
+| `dot shell alias show` | Where one alias comes from | `dot aliases why` |
+| `dot shell alias status` | Alias counts; --tiers for the ecosystem tiers | `dot aliases stats` |
+| `dot shell alias export` | Write the alias cheatsheet | `dot aliases cheatsheet` |
+
+### dot system
+
+Updates, cleanup, scheduled maintenance.
+
+| Command | Description | Was |
+|---------|-------------|-----|
+| `dot system status` | OS, disk, schedule and last run |  |
+| `dot system update` | Update everything, asking first | `dot upgrade` |
+| `dot system schedule list` | Scheduled jobs |  |
+| `dot system schedule set` | Set the maintenance schedule |  |
+| `dot system schedule run` | Run scheduled maintenance now |  |
+| `dot system settings apply` | Apply the managed OS settings | `dot tune` |
+
+### dot theme
+
+One palette for every app.
+
+| Command | Description | Was |
+|---------|-------------|-----|
+| `dot theme show` | Current theme and palette | `dot theme current` |
+| `dot theme list` | Available themes |  |
+| `dot theme set` | Switch theme everywhere |  |
+| `dot theme wallpaper set` | Set the wallpaper and derive a palette | `dot wallpaper` |
+| `dot theme font install` | Install the configured fonts | `dot fonts` |
+
+Themes are auto-generated from wallpapers — `themes.toml` is not hand-edited. See [Theming Guide](../guides/THEMING.md) for the K-Means CIELAB extraction model and Apple-compatible dynamic HEIC support.
+
+### dot tool
+
+Toolchains, packages, project templates.
+
+| Command | Description | Was |
+|---------|-------------|-----|
+| `dot tool list` | Toolchains and their versions | `dot env list` |
+| `dot tool install` | Install the configured toolchains | `dot env install` |
+| `dot tool update` | Upgrade toolchains | `dot env upgrade` |
+| `dot tool remove` | Remove orphaned toolchains (a dry run without --yes) | `dot env prune` |
+| `dot tool set` | Pin a toolchain version | `dot env use` |
+| `dot tool export` | Print the tool environment | `dot env emit` |
+| `dot tool new` | Create a project from a template | `dot new` |
 
 ## Universal Scripts
 
@@ -98,148 +262,3 @@ POSIX scripts in `~/.local/bin/` that work across macOS, Linux, and WSL.
 | `up <n>` | Navigate up `n` directory levels |
 | `bm` | Directory bookmarking tool (`add`, `goto`, `list`, `remove`, `update`) |
 | `win` | WSL-specific shim for running Windows binaries with translated paths |
-
-## Appearance
-
-| Command | Description |
-|---------|-------------|
-| `dot theme` | Interactive picker (paired wallpaper themes only) |
-| `dot theme <name>` | Switch directly (e.g. `dot theme tahoe-dark`) |
-| `dot theme toggle` | Swap dark↔light within current family |
-| `dot theme rebuild` | Regenerate themes from system + custom wallpapers via K-Means in CIELAB (`--force`, `--list`) |
-| `dot theme list` | Show paired wallpaper themes with System/Custom source |
-| `dot wallpaper` | Apply a wallpaper independently of theme |
-| `dot fonts` | Install Nerd Fonts |
-| `dot tune` | Apply supported host tuning changes |
-
-Themes are auto-generated from wallpapers — `themes.toml` is not hand-edited. See [Theming Guide](../guides/THEMING.md) for the K-Means CIELAB extraction model and Apple-compatible dynamic HEIC support.
-
-## AI Bridges (deprecated aliases)
-
-These run a tool with dotfiles context injection. They still work but are
-**deprecated** in favour of `dot ai <tool>` (e.g. `dot ai claude "…"`); each
-prints a one-line hint. See [AI.md](../AI.md) for the full surface.
-
-| Command | Description |
-|---------|-------------|
-| `dot cl` | Claude Code with context injection — use `dot ai claude` |
-| `dot copilot` | GitHub Copilot CLI — use `dot ai copilot` |
-| `dot kimi` | Kimi CLI — use `dot ai kimi` |
-| `dot agy` | Antigravity CLI — use `dot ai agy` |
-| `dot kiro` | Kiro CLI — use `dot ai kiro` |
-| `dot sgpt` | Shell-GPT — use `dot ai sgpt` |
-| `dot ollama` | Ollama — use `dot ai ollama` |
-| `dot opencode` | OpenCode — use `dot ai opencode` |
-| `dot aider` | Aider — use `dot ai aider` |
-
-## Secrets
-
-| Command | Description |
-|---------|-------------|
-| `dot secrets-init` | Initialize the local age identity for secrets |
-| `dot secrets` | Manage encrypted secrets and environment buckets |
-| `dot secrets-create` | Create a new encrypted secrets file |
-| `dot ssh-key` | Encrypt a local SSH key with age |
-| `dot ssh-cert` | Manage short-lived SSH certificates (`issue`/`status`/`revoke`) |
-
-## Security (opt-in)
-
-| Command | Description |
-|---------|-------------|
-| `dot backup` | Create a compressed backup |
-| `dot policy` | Check and enforce security policies across the environment |
-| `dot encrypt-check` | Check disk encryption status |
-| `dot firewall` | Apply firewall hardening |
-| `dot telemetry` | Disable telemetry |
-| `dot dns-doh` | Enable DNS-over-HTTPS |
-| `dot lock-screen` | Enforce lock screen idle settings |
-| `dot usb-safety` | Disable automount for removable media |
-
-## Fleet
-
-| Command | Description |
-|---------|-------------|
-| `dot fleet` | Show fleet node status, namespace, and drift |
-| `dot fleet drift` | Check configuration drift across managed files |
-| `dot fleet namespace` | Show or set the active fleet namespace |
-| `dot fleet events` | Show recent local fleet events |
-| `dot teleport <user@host>` | Deploy the dotfiles environment to a remote host over SSH |
-
-## Subcommands
-
-Every `dot` command's individually-enforced subcommands (see `dot help`).
-
-| Command | Description |
-|---|---|
-| `dot fleet status` | Show this node's fleet status: id, namespace, version, OS, drift, last apply |
-| `dot fleet enforce` | Show or set RBAC enforcement mode (advisory/strict) for agent profiles |
-| `dot fleet apply` | SSH to every host in fleet.toml and run dot sync (or a custom --cmd) |
-| `dot ai chat` | Start an interactive AI session with a chosen tool |
-| `dot ai tools` | Show installed AI CLI tools and their versions |
-| `dot ai install` | Install AI CLI tools via mise/native installers |
-| `dot ai serve` | Run the local AI gateway/proxy that routes non-Claude providers |
-| `dot ai cost` | Report AI spend across every provider from the unified run log |
-| `dot ai login` | Interactive setup/authentication for installed AI CLI tools |
-| `dot ai doctor` | Diagnose AI tooling configuration and connectivity |
-| `dot ai ask` | Context-aware RAG query over your dotfiles |
-| `dot ai run` | Run a one-shot prompt with an AI tool |
-| `dot ai delegate` | Delegate a coding task to a cheaper AI model under agent policy |
-| `dot mode list` | List available agent operating profiles (ask/plan/apply/audit) |
-| `dot mode current` | Show the active agent profile and its policy |
-| `dot mode show` | Show details of a specific agent profile |
-| `dot mode set` | Switch the active agent profile |
-| `dot mode run` | Run a command under a given agent profile with a checkpoint |
-| `dot mode doctor` | Validate the agent-profiles.json config and default profile |
-| `dot agent card` | Show the local agent card metadata |
-| `dot agent log` | Tail the agent session audit log |
-| `dot agent checkpoint` | Manage agent run checkpoints (save/list/show/replay) |
-| `dot agent delegate` | Delegate execution to an allowed sub-agent |
-| `dot agent a2a-card` | Show or validate the A2A v0.3 agent card |
-| `dot agent conformance` | Run the A2A conformance test suite |
-| `dot mcp doctor` | Run the MCP policy/supply-chain/config audit |
-| `dot mcp registry` | Show the configured MCP server registry |
-| `dot mcp serve` | Run the stdio MCP server (JSON-RPC 2.0 on stdin/stdout) |
-| `dot secrets edit` | Edit the encrypted secrets file (age) |
-| `dot secrets set` | Store a secret value under a key |
-| `dot secrets get` | Retrieve a secret value (--raw for plaintext) |
-| `dot secrets list` | List indexed secret keys |
-| `dot secrets load` | Emit export lines for a secrets bucket (use with eval) |
-| `dot secrets provider` | Show the active secrets provider |
-| `dot env list` | List managed tool versions via mise |
-| `dot env prune` | Show or remove orphan tool installs (--yes to commit) |
-| `dot env install` | Install requested tool versions via mise |
-| `dot env use` | Pin a tool version globally/locally via mise |
-| `dot registry list` | List modules in the configured module registry |
-| `dot registry search` | Filter registry modules by keyword |
-| `dot registry info` | Print full metadata for a registry module |
-| `dot registry install` | Install a registry module (scaffold) |
-| `dot registry url` | Show the active registry URL |
-| `dot registry set-url` | Override the registry URL (https only; persists) |
-| `dot theme list` | Show all available terminal/wallpaper themes |
-| `dot theme set` | Set a family to auto mode or an explicit light/dark variant (interactive picker if omitted) |
-| `dot theme toggle` | Toggle light/dark within the current theme family |
-| `dot theme mode` | Select `dark`, `light`, or OS-following `auto` mode |
-| `dot theme plan` | Produce a pure human or JSON transaction plan without writes or reloads |
-| `dot theme sync` | Enable auto mode and sync immediately with system appearance |
-| `dot theme family` | Cycle between theme families |
-| `dot theme current` | Show the current theme info |
-| `dot theme rebuild` | Regenerate themes from system and custom wallpapers |
-| `dot wallpaper sync` | Sync wallpaper from your library |
-| `dot wallpaper rotate` | Rotate to the next wallpaper in your library |
-| `dot tools install` | Enter the Nix development shell with all managed tools |
-| `dot tools docs` | Show the full tools markdown documentation |
-| `dot profile show` | Show the active configuration profile and feature flags |
-| `dot profile set` | Set the active configuration profile (run dot sync to apply) |
-| `dot agents list` | Show recognised AI agent harnesses and their config paths |
-| `dot agents check` | Verify AGENTS.md tracks CLAUDE.md (exit 1 if drifted) |
-| `dot agents render` | Regenerate AGENTS.md and per-harness config from CLAUDE.md |
-| `dot aliases list` | List all shell aliases shipped by the dotfiles |
-| `dot aliases search` | Search aliases by term |
-| `dot aliases why` | Show details and deprecation status for a single alias |
-| `dot aliases stats` | Show alias usage counts from shell history |
-| `dot aliases cheatsheet` | Generate the alias cheatsheet markdown |
-| `dot aliases tiers` | Show which alias tiers/ecosystems are enabled |
-| `dot patterns list` | List AI steering patterns |
-| `dot patterns view` | View an AI steering pattern |
-| `dot patterns edit` | Edit an AI steering pattern in $EDITOR |
-| `dot keys sign-check` | Verify git commit-signing configuration and key availability |

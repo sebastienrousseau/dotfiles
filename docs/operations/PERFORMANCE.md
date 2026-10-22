@@ -18,7 +18,7 @@ lifecycle, and the regression-alert pipeline. Managed under
 | **nu** | 500 | `DOTFILES_PERF_TARGET_NU_MS` |
 | **pwsh** | 600 | `DOTFILES_PERF_TARGET_PWSH_MS` |
 
-`dot perf` measures every installed shell and flags any whose mean
+`dot doctor perf show` measures every installed shell and flags any whose mean
 exceeds its target. The numbers come from
 [`scripts/diagnostics/perf.sh`](https://github.com/sebastienrousseau/dotfiles/blob/main/scripts/diagnostics/perf.sh) —
 warm-up + 3 runs by default.
@@ -43,8 +43,8 @@ means at a known-good point in time. The file is a JSON object:
 ### Recording a baseline
 
 ```bash
-dot perf --baseline                 # all installed shells
-dot perf --baseline --shell zsh     # just one shell
+dot doctor perf show --baseline                 # all installed shells
+dot doctor perf show --baseline --shell zsh     # just one shell
 ```
 
 Do this after:
@@ -55,7 +55,7 @@ Do this after:
 
 ### Regression detection
 
-Every subsequent `dot perf` invocation compares the current
+Every subsequent `dot doctor perf show` invocation compares the current
 measurement against the baseline. When any shell exceeds the
 baseline by more than `DOTFILES_PERF_REGRESSION_PCT` (default 10%),
 the run reports under a "Baseline regressions" section. JSON output
@@ -63,9 +63,9 @@ includes a `regressions: [...]` array and a `regression_count`
 counter so dashboards can alert.
 
 ```bash
-dot perf                            # warns on regression
-dot perf --no-baseline-check        # skip the comparison entirely
-DOTFILES_PERF_REGRESSION_PCT=5 dot perf   # tighter threshold
+dot doctor perf show                            # warns on regression
+dot doctor perf show --no-baseline-check        # skip the comparison entirely
+DOTFILES_PERF_REGRESSION_PCT=5 dot doctor perf show   # tighter threshold
 ```
 
 ## Per-tool timings
@@ -78,8 +78,8 @@ gives a per-tool breakdown of where startup time goes.
 
 ```bash
 EVALCACHE_TIMING=1 zsh -i -c exit    # generate data
-dot perf --by-tool                   # see the aggregation
-dot perf --reset                     # clear the log
+dot doctor perf show --by-tool                   # see the aggregation
+dot doctor perf show --reset                     # clear the log
 ```
 
 The aggregator reports `count / total / mean / p50 / p95 / p99`
@@ -104,7 +104,7 @@ spiking from 5ms steady-state to 200ms once).
 runs weekly on Sunday at 03:00 UTC on `ubuntu-latest`. It:
 
 1. Restores the previous week's baseline from a workflow artifact.
-2. Runs `dot perf --json` against the freshly-applied dotfiles.
+2. Runs `dot doctor perf show --json` against the freshly-applied dotfiles.
 3. Compares current vs restored baseline; opens (or comments on) a
    tracking issue if any shell regressed by >10%.
 4. Uploads the new measurement as the next week's restore source.
@@ -121,7 +121,7 @@ under `shell_target_for()`. Bumping a target should always come with:
 
 - A commit-message rationale explaining why slower is acceptable
   (e.g. "added a required Carapace completion at startup").
-- A new baseline recording (`dot perf --baseline`).
+- A new baseline recording (`dot doctor perf show --baseline`).
 - A note here under "Targets" with the new value.
 
 ## References

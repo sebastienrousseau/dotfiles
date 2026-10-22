@@ -2,9 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 #
-# Regenerate examples/command-reference.txt from lib/dot/data/help-specs.txt:
-# one usage line per public command and subcommand, grouped as in
-# `dot help all`. examples/example-command-reference.sh prints it, and
+# Regenerate examples/command-reference.txt from lib/dot/data/commands.txt
+# (generated from the plugin manifests): one line per built command, by
+# domain as in `dot help all`, then the shortcuts. Planned commands are left
+# out. examples/example-command-reference.sh prints it, and
 # scripts/qa/examples-coverage.sh finds every command referenced there.
 #
 # Usage:
@@ -36,22 +37,34 @@ for arg in "$@"; do
   esac
 done
 
-specs="lib/dot/data/help-specs.txt"
+table="lib/dot/data/commands.txt"
 target="examples/command-reference.txt"
-[[ -r "$specs" ]] || {
-  echo "registry not found: $specs" >&2
+[[ -r "$table" ]] || {
+  echo "command table not found: $table" >&2
   exit 2
 }
 
 tmp="$(mktemp)"
 trap 'rm -f "$tmp"' EXIT
 
-# Fields: group|name|summary|hint. A new group opens a "[Group]" heading.
+# Records: dom|name|default|route|summary, cmd|spelling|route|effect|summary
+# (an empty route is planned), alias|name|kind|target|until.
 awk -F'|' '
-  BEGIN { print "dot — declarative dotfiles CLI. Public commands:"; print "" }
-  $1 != group { printf "\n[%s]\n", $1; group = $1 }
-  { printf "  dot %s — %s\n", $2, $3 }
-' "$specs" >"$tmp"
+  $1 == "dom" { order[++n] = $2; about[$2] = $5 }
+  $1 == "cmd" && $3 != "" {
+    split($2, w, " ")
+    lines[w[1]] = lines[w[1]] sprintf("  dot %s — %s\n", $2, $5)
+  }
+  $1 == "alias" && $3 == "shortcut" { short = short sprintf("  dot %s — short for dot %s\n", $2, $4) }
+  END {
+    print "dot — one command for this machine. Built commands, by domain:"
+    for (i = 1; i <= n; i++) {
+      d = order[i]
+      if (lines[d] != "") printf "\n[%s] %s\n%s", d, about[d], lines[d]
+    }
+    printf "\n[shortcuts]\n%s", short
+  }
+' "$table" >"$tmp"
 
 if [[ "$mode" == "check" ]]; then
   if cmp -s "$tmp" "$target"; then

@@ -76,7 +76,8 @@ and [`docs/STRUCTURE.md`](docs/STRUCTURE.md). The parts you touch most:
 | Path | What |
 |---|---|
 | `bin/dot` | CLI dispatcher. |
-| `lib/dot/data/` | **The command registry**: `routes.txt` (command → module), `help-specs.txt` (overview rows), `help-details.txt` (detailed help). `bin/dot` reads them through `_dot_command_routes`, `_dot_help_specs` and `_dot_help_details`; the generators, QA gates and tests read the same files. Adding a command means editing these. |
+| `plugins/<domain>/dot-plugin.toml` | **The command names** (ADR-020): each domain's objects, commands, flags, aliases, and the route that runs each command today (`legacy`). |
+| `lib/dot/data/` | `commands.txt` and `commands.json`, generated from the manifests by `tools/ci/cli_command_table.py`; `routes.txt` (route → module). `help-specs.txt` and `help-details.txt` still back `dot help <old-name>` until the old names are removed. Help, man pages, completions, cmdlets, the command index and reference, and the QA gates all read `commands.txt`. |
 | `scripts/dot/commands/` | One file per subcommand. |
 | `lib/dot/` | Shared bash library sourced by every subcommand. |
 | `defaults/` | The chezmoi source tree (everything that lands in `$HOME`), rebased via `.chezmoiroot`. |
@@ -87,13 +88,18 @@ and [`docs/STRUCTURE.md`](docs/STRUCTURE.md). The parts you touch most:
 | `tools/` | Repo-only ops: CI helpers, doc generators, release staging. Never ships to users. |
 | `supply-chain/` | Provenance policy and the allowlists CI enforces. |
 
-Adding a `dot` subcommand touches four places; the drift gates will
-tell you if you miss one:
+Adding a `dot` command touches four places; the drift gates will tell
+you if you miss one:
 
-1. `scripts/dot/commands/<name>.sh` — the implementation
-2. `lib/dot/data/` — a `routes.txt` row and a `help-specs.txt` row (and a `help-details.txt` row for detailed help)
-3. `docs/manual/03-reference/01-dot-cli.md` — reference prose
-4. `make generate` — regenerates the command index, command reference, man page, completions
+1. The implementation: a route in an existing module under
+   `scripts/dot/commands/`, or a new module plus its `routes.txt` row
+2. `plugins/<domain>/dot-plugin.toml` — a `[[commands]]` entry with an
+   approved verb, its effect, its summary and `legacy` (the route), checked
+   by `tools/ci/check-cli-contract.py`
+3. `docs/reference/UTILS.md` (the docs coverage gate) and
+   `docs/manual/03-reference/01-dot-cli.md` — reference prose
+4. `make generate` — regenerates the command table, command index, command
+   reference, man pages, completions and PowerShell cmdlets
 
 ---
 
@@ -271,8 +277,8 @@ gated against drift. Never hand-edit the outputs:
 |---|---|---|
 | `docs/manual/command-index.md` | `tools/docs/generate-command-index.sh` | `doc-drift.yml` |
 | `share/man/man1/dot.1` | `tools/docs/generate-manpage.sh` (prose in `tools/docs/man/dot.1.in`) | `doc-drift.yml` |
-| `share/completions/zsh/_dot`, `defaults/dot_local/share/bash-completion/completions/dot` | `tools/docs/generate-completions.sh` → `dot completion <shell>` | `doc-drift.yml` |
-| `AGENTS.md` and the per-harness stubs | `dot agents render` (from `CLAUDE.md`) | `dot agents check` |
+| `share/completions/zsh/_dot`, `defaults/dot_local/share/bash-completion/completions/dot` | `tools/docs/generate-completions.sh` → `dot cli completion show <shell>` | `doc-drift.yml` |
+| `AGENTS.md` and the per-harness stubs | `dot agent context apply` (from `CLAUDE.md`) | `dot agent context check` |
 
 ```bash
 make generate     # regenerate everything

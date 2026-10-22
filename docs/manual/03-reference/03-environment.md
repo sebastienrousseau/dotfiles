@@ -14,17 +14,17 @@ Variables you can set in your shell to change behaviour.
 |:---|:---|:---|
 | `DOTFILES_VERBOSE` | unset | Verbose output from `dot` commands |
 | `DOTFILES_NONINTERACTIVE` | unset | Skip interactive prompts (for CI) |
-| `DOTFILES_YES` | unset | `1` answers yes to `dot upgrade` and `dot ai install` questions (installing mise, AI tools, upgrading system packages); same as `--yes`. Without it and without a terminal, those commands install nothing extra |
+| `DOTFILES_YES` | unset | `1` answers yes to `dot system update` and `dot ai install` questions (installing mise, AI tools, upgrading system packages); same as `--yes`. Without it and without a terminal, those commands install nothing extra |
 | `DOTFILES_SILENT` | unset | Suppress non-error output |
-| `DOTFILES_PACKAGES_TIMEOUT` | `10` | Seconds each `dot packages` query may take before it is reported as `timed out` |
+| `DOTFILES_PACKAGES_TIMEOUT` | `10` | Seconds each `dot tool list --packages` query may take before it is reported as `timed out` |
 | `DOTFILES_DEBUG` | unset | Print shell-init timing to stderr |
 | `DOTFILES_SOURCE_DIR` | `~/.dotfiles` | Override the source directory |
 | `DOTFILES_WALLPAPER_DIR` | `~/Pictures/Wallpapers` | Custom wallpaper directory |
 | `DOTFILES_CACHE_DIR` | `~/.cache/dotfiles` | Override cache location |
 | `DOTFILES_STATE_DIR` | `~/.local/state/dotfiles` | Override state directory |
-| `DOTFILES_TUNING` | `0` | Enable OS tuning (`dot tune`) |
+| `DOTFILES_TUNING` | `0` | Enable OS tuning (`dot system settings apply`) |
 | `EDITOR` | `nvim` | Editor used by `dot edit` and `sops` |
-| `PAGER` | `less` | Pager used by `dot manual text` |
+| `PAGER` | `less` | Pager used by `dot help --manual text` |
 
 ## Auto-Populated
 

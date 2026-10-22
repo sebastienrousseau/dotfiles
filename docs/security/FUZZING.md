@@ -54,7 +54,7 @@ is a bug in one of them.
 | Harness | Mirrors | What it proves |
 |---------|---------|----------------|
 | `FuzzValidateName` | `scripts/dot/lib/utils.sh:101` (`validate_name`) | Every accepted name contains only `[a-zA-Z0-9._-]`; no shell metacharacter slips through; empty input refused. |
-| `FuzzInitURLResolver` | `scripts/dot/commands/init.sh` (URL construction in `dot init <user\|owner/repo\|url>`) | Accepted URLs use `https://` / `git@` / `ssh://` only; plain HTTP refused; no shell metacharacters in constructed URLs; one input shape per acceptable form. |
+| `FuzzInitURLResolver` | `scripts/dot/commands/init.sh` (URL construction in `dot config init <user\|owner/repo\|url>`) | Accepted URLs use `https://` / `git@` / `ssh://` only; plain HTTP refused; no shell metacharacters in constructed URLs; one input shape per acceptable form. |
 | `FuzzUIEventLine` | dot-ui `run.go` (`parseEvent`, `renderBar`) | A line either decodes to valid JSON or is refused; an accepted event round-trips with every string field free of control and bidi characters; the derived progress width is always a legal repeat count. |
 | `FuzzUIHexColor` | dot-ui `theme.go` (`parseColor`) | An accepted `DOT_UI_*` value is a literal `#rgb`/`#rrggbb` with no metacharacter or escape sequence — these are interpolated into terminal escapes. |
 | `FuzzUIPickFilter` | dot-ui `pick.go` (`fuzzyMatch`, `readItems`) | No blank candidate survives and none carries a control or bidi character; every candidate matches itself in any script; a query longer than the candidate never matches. |

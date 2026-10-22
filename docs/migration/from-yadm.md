@@ -16,11 +16,11 @@ alternate-file suffixes into chezmoi templates.
 
 | yadm | Here | Note |
 |---|---|---|
-| `yadm add` / `yadm commit` | `dot add` then a normal `git commit` in the source dir | Source tree is a plain git repo |
+| `yadm add` / `yadm commit` | `dot config add` then a normal `git commit` in the source dir | Source tree is a plain git repo |
 | `$HOME` **is** the work tree | Files live in `defaults/` and are *rendered* into `$HOME` | The big conceptual change |
 | `##os.Linux`, `##hostname.foo` suffixes | `{{ if eq .chezmoi.os "linux" }}` in a `.tmpl` | One file with branches, not N files |
 | `yadm alt` | `chezmoi apply` | Automatic; no separate step |
-| `yadm encrypt` (GPG) | `dot secrets` (age + sops) | Different crypto; see below |
+| `yadm encrypt` (GPG) | `dot secret` (age + sops) | Different crypto; see below |
 | `yadm bootstrap` | `install/provision/run_onchange_*` | Runs on apply, idempotent |
 | `yadm status` / `diff` | `dot status` / `dot diff` | Same intent |
 
@@ -47,11 +47,11 @@ dot version
 ```
 
 If you want to bring your *own* dotfiles repo rather than the
-maintainer's defaults, use `dot init` instead:
+maintainer's defaults, use `dot config init` instead:
 
 ```sh
-dot init yourusername --dry-run    # prints the resolved URL and target dir
-dot init yourusername
+dot config init yourusername --dry-run    # prints the resolved URL and target dir
+dot config init yourusername
 ```
 
 ## 3. Move files across
@@ -63,11 +63,11 @@ while read -r f; do
   case "$f" in
     *##*) continue ;;            # alternates handled in step 4
   esac
-  dot add "$f"
+  dot config add "$f"
 done < ~/yadm-inventory.txt
 ```
 
-`dot add` wraps `chezmoi add`, so a file in `~/.config/foo/bar` lands
+`dot config add` wraps `chezmoi add`, so a file in `~/.config/foo/bar` lands
 at `defaults/dot_config/foo/bar`, and `~/.gitconfig` at
 `defaults/dot_gitconfig`.
 
@@ -127,10 +127,10 @@ mkdir -p /tmp/secrets-migration && cd /tmp/secrets-migration
 yadm decrypt
 
 # Set up age and re-encrypt.
-dot secrets-init                    # generates the age key
-dot secrets-create                  # creates the encrypted store
-dot secrets set GITHUB_TOKEN        # one per secret, prompts for the value
-dot secrets list
+dot secret init                    # generates the age key
+dot secret new                  # creates the encrypted store
+dot secret set GITHUB_TOKEN        # one per secret, prompts for the value
+dot secret list
 
 cd - && rm -rf /tmp/secrets-migration
 ```

@@ -65,7 +65,7 @@ The primary trust boundary is the **local machine**. Dotfiles are deployed to an
 - [Gitleaks](https://github.com/gitleaks/gitleaks) pre-commit hook blocks secrets in commits
 - Atuin `history_filter` excludes sensitive patterns
 - Age encryption for local secret storage
-- `dot secrets set` uses secure prompts (no shell history)
+- `dot secret set` uses secure prompts (no shell history)
 - `.gitignore` excludes `key.txt`, `.env`, credential files
 
 ### 3. Supply Chain Dependencies

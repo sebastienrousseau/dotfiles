@@ -103,7 +103,7 @@ find ~/.local/share/zsh/completions -name '*.zwc' -delete
 chezmoi apply ~  # re-runs the run_onchange hook
 ```
 
-Or, equivalently, `dot heal` (which calls both in sequence).
+Or, equivalently, `dot doctor fix` (which calls both in sequence).
 
 ## Measured Cost
 

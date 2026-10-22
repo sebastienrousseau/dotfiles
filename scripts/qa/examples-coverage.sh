@@ -18,15 +18,16 @@ EXAMPLES_DIR="$REPO_ROOT/examples"
 DOT_CLI="$REPO_ROOT/bin/dot"
 MIN_EXAMPLES_COVERAGE="${MIN_EXAMPLES_COVERAGE:-100}"
 
-# Public commands/subcommands, read from lib/dot/data/help-specs.txt — the
-# same source scripts/qa/docs-coverage.sh uses, so docs and examples stay in
-# lockstep at the command granularity.
+# Public commands: every built ADR-020 spelling and every shortcut, from
+# lib/dot/data/commands.txt — the same source scripts/qa/docs-coverage.sh
+# uses, so docs and examples stay in lockstep at the command granularity.
 extract_public_commands() {
-  local specs="$REPO_ROOT/lib/dot/data/help-specs.txt"
-  [[ -f "$specs" ]] || return 0
+  local table="$REPO_ROOT/lib/dot/data/commands.txt"
+  [[ -f "$table" ]] || return 0
   awk -F'|' '
-    NF>=2 { print $2 }
-  ' "$specs"
+    $1 == "cmd" && $3 != "" { print $2 }
+    $1 == "alias" && $3 == "shortcut" { print $2 }
+  ' "$table"
 }
 
 # Core feature domains that must each have examples/example-<area>.sh.
