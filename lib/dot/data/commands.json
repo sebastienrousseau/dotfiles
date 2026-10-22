@@ -309,10 +309,10 @@
      "built": true,
      "flags": [
       {
-       "long": "pattern",
+       "long": "style",
        "short": "p",
        "value": "pattern",
-       "summary": "Steering pattern"
+       "summary": "Steering pattern (--pattern is the old name)"
       }
      ],
      "args": {

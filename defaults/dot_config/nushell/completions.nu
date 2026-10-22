@@ -427,7 +427,7 @@ def "nu-complete dot ai run" [] {
 }
 export extern "dot ai run" [
     value?: string@"nu-complete dot ai run"
-    --pattern(-p): string@"nu-complete dot patterns" # Steering pattern
+    --style(-p): string@"nu-complete dot patterns" # Steering pattern (--pattern is the old name)
     --help(-h) # Show help
     ...rest: string
 ]

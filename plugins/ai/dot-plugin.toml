@@ -65,10 +65,10 @@ legacy = "ai run"
 summary = "Run an agent once"
 
 [[commands.flags]]
-long = "pattern"
+long = "style"
 short = "p"
 value = "pattern"
-summary = "Steering pattern"
+summary = "Steering pattern (--pattern is the old name)"
 
 [commands.args]
 values = ["claude", "codex", "copilot", "goose", "crush", "amp", "cursor-agent", "grok", "kimi", "agy", "kiro", "sgpt", "ollama", "opencode", "aider", "autohand", "vibe", "qwen", "zai"]
