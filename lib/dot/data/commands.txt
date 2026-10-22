@@ -36,6 +36,10 @@ cmd|agent policy show||read|The sandbox policy
 cmd|agent budget show||read|Budgets and spend
 cmd|agent delegate list|agent delegate list|read|Configured delegates
 cmd|agent delegate run|agent delegate run|write|Run a command as a delegate
+cmd|agent context check|agents check|read|Check the rendered context files are current
+cmd|agent context apply|agents render|write|Render the context file for every harness
+cmd|agent mode run|mode run|write|Run a command under a mode
+cmd|agent card check|mode conformance|read|Check the card against the A2A spec
 dom|ai|tui|ai|install, route and run coding agents
 obj|ai pattern|list||prompt patterns
 obj|ai cost|show||spend by agent and model
@@ -54,12 +58,15 @@ cmd|ai pattern list|patterns list|read|Prompt patterns
 cmd|ai cost show|ai cost|read|Spend by agent and model
 cmd|ai gateway show||read|Gateway statistics
 cmd|ai inventory show||read|Agents, versions and config
+cmd|ai pattern show|patterns view|read|One prompt pattern
+cmd|ai pattern edit|patterns edit|write|Edit a prompt pattern
 dom|attest|show|attest|attestation and verification
 cmd|attest show|attest|read|The workstation attestation
 cmd|attest export|attest --write|read|Write attestation evidence
 cmd|attest verify|attest --verify|read|Verify evidence
 dom|cli|list||plugins, updates, completions
 obj|cli completion|show||shell completion scripts
+obj|cli registry|show||the plugin registry
 cmd|cli list|registry installed|read|Installed plugins
 cmd|cli show|registry info|read|One plugin in detail
 cmd|cli install|registry install|write|Install a plugin
@@ -68,6 +75,8 @@ cmd|cli remove||write|Remove a plugin
 cmd|cli verify||read|Verify plugin provenance
 cmd|cli new||write|Create a plugin from the template
 cmd|cli completion show|completion|read|Print a completion script
+cmd|cli registry show|registry url|read|The plugin registry URL
+cmd|cli registry set|registry set-url|write|Point at another plugin registry
 dom|config|status||apply, diff and sync the dotfiles
 obj|config path|show||where the dotfiles source lives
 obj|config profile|show||the active profile and its features
@@ -86,6 +95,7 @@ cmd|config uninstall|uninstall|destructive|Remove the setup, keeping the source
 cmd|config path show|cd|read|Print the source directory
 cmd|config profile show|profile show|read|Show the active profile
 cmd|config profile set|profile set|write|Switch profile
+cmd|config import|bundle restore|write|Restore from an exported bundle
 dom|doctor|status|doctor|health, repair, backup and rollback
 obj|doctor score|show||the setup score
 obj|doctor snapshot|list||setup snapshots
@@ -141,10 +151,11 @@ cmd|secret export|secrets load|read|Print secrets as environment
 cmd|secret check|secret-audit|read|Audit secret hygiene
 cmd|secret key list||read|Keys without their values
 cmd|secret key new|ssh-key|write|Create an ED25519 key
-cmd|secret cert list||read|Certificates and expiry
-cmd|secret cert new|ssh-cert|write|Issue a short-lived SSH certificate
+cmd|secret cert list|ssh-cert status|read|Certificates and expiry
+cmd|secret cert new|ssh-cert issue|write|Issue a short-lived SSH certificate
 cmd|secret provider show|secrets provider|read|The active provider
 cmd|secret provider set||write|Switch provider
+cmd|secret cert remove|ssh-cert revoke|write|Revoke the current SSH certificate
 dom|security|status||OS hardening
 obj|security policy|show||the security policy
 obj|security disk|show||disk encryption
@@ -182,8 +193,11 @@ cmd|shell status||read|Shell, startup time and cache state
 cmd|shell update|cache-refresh|write|Regenerate the startup caches
 cmd|shell clean|clean-cache|write|Clear the startup caches
 cmd|shell history list|history|read|Recent history
-cmd|shell alias list|aliases|read|Aliases and where each is defined
+cmd|shell alias list|aliases list|read|Aliases and where each is defined; a term searches them
 cmd|shell alias check|alias-check|read|Find shadowed or broken aliases
+cmd|shell alias show|aliases why|read|Where one alias comes from
+cmd|shell alias status|aliases stats|read|Alias counts; --tiers for the ecosystem tiers
+cmd|shell alias export|aliases cheatsheet|read|Write the alias cheatsheet
 dom|system|status||updates, cleanup, scheduled maintenance
 obj|system schedule|list||scheduled maintenance jobs
 obj|system settings|show||OS settings dot manages
@@ -208,10 +222,10 @@ cmd|theme font install|fonts|write|Install the configured fonts
 dom|tool|list|env|toolchains, packages, project templates
 cmd|tool list|env list|read|Toolchains and their versions
 cmd|tool install|env install|write|Install the configured toolchains
-cmd|tool update||write|Upgrade toolchains
-cmd|tool remove||write|Remove a toolchain or orphans
+cmd|tool update|env upgrade|write|Upgrade toolchains
+cmd|tool remove|env prune|write|Remove orphaned toolchains (a dry run without --yes)
 cmd|tool set|env use|write|Pin a toolchain version
-cmd|tool export||read|Print the tool environment
+cmd|tool export|env emit|read|Print the tool environment
 cmd|tool new|new|write|Create a project from a template
 dom|top|tui|intelligence|what the machine and its agents are doing
 obj|top report|show||usage by model, agent or project
@@ -224,7 +238,7 @@ cmd|ui select||read|Interactive picker for scripts
 cmd|ui run||write|Run a command with progress
 cmd|ui table show||read|Render rows as a table
 run|ai install --interactive|ai-setup||
-run|cli list --available|registry||
+run|cli list --available|registry list||
 run|help --manual|manual||
 run|help --readme|docs||
 run|help tour|learn||
@@ -250,6 +264,10 @@ leg|agent checkpoint list|agent checkpoint list||
 leg|agent checkpoint save|agent checkpoint save||
 leg|agent delegate list|agent delegate list||
 leg|agent delegate run|agent delegate run||
+leg|agents check|agent context check||
+leg|agents render|agent context apply||
+leg|mode run|agent mode run||
+leg|mode conformance|agent card check||
 leg|ai tools|ai list||
 leg|ai install|ai install||
 leg|ai update|ai update||
@@ -261,6 +279,8 @@ leg|ai doctor|ai check||
 leg|ai ask|ai ask||
 leg|patterns list|ai pattern list||
 leg|ai cost|ai cost show||
+leg|patterns view|ai pattern show||
+leg|patterns edit|ai pattern edit||
 leg|attest|attest show||
 leg|attest --write|attest export||
 leg|attest --verify|attest verify||
@@ -268,6 +288,8 @@ leg|registry installed|cli list||
 leg|registry info|cli show||
 leg|registry install|cli install||
 leg|completion|cli completion show||
+leg|registry url|cli registry show||
+leg|registry set-url|cli registry set||
 leg|status|config status||
 leg|diff|config diff||
 leg|apply|config apply||
@@ -283,6 +305,7 @@ leg|uninstall|config uninstall||
 leg|cd|config path show||
 leg|profile show|config profile show||
 leg|profile set|config profile set||
+leg|bundle restore|config import||
 leg|health|doctor status||
 leg|doctor|doctor check||
 leg|heal|doctor fix||
@@ -316,8 +339,10 @@ leg|secrets set|secret set||
 leg|secrets load|secret export||
 leg|secret-audit|secret check||
 leg|ssh-key|secret key new||
-leg|ssh-cert|secret cert new||
+leg|ssh-cert status|secret cert list||
+leg|ssh-cert issue|secret cert new||
 leg|secrets provider|secret provider show||
+leg|ssh-cert revoke|secret cert remove||
 leg|policy|security policy show||
 leg|encrypt-check|security disk show||
 leg|security-score|security score show||
@@ -329,8 +354,11 @@ leg|usb-safety|security usb apply||
 leg|cache-refresh|shell update||
 leg|clean-cache|shell clean||
 leg|history|shell history list||
-leg|aliases|shell alias list||
+leg|aliases list|shell alias list||
 leg|alias-check|shell alias check||
+leg|aliases why|shell alias show||
+leg|aliases stats|shell alias status||
+leg|aliases cheatsheet|shell alias export||
 leg|system status|system status||
 leg|upgrade|system update||
 leg|system schedule list|system schedule list||
@@ -344,10 +372,13 @@ leg|wallpaper|theme wallpaper set||
 leg|fonts|theme font install||
 leg|env list|tool list||
 leg|env install|tool install||
+leg|env upgrade|tool update||
+leg|env prune|tool remove||
 leg|env use|tool set||
+leg|env emit|tool export||
 leg|new|tool new||
 leg|ai-setup|ai install --interactive||
-leg|registry|cli list --available||
+leg|registry list|cli list --available||
 leg|manual|help --manual||
 leg|docs|help --readme||
 leg|learn|help tour||
@@ -391,6 +422,7 @@ flag|mcp check|json|j||Print a JSON summary
 flag|security score show|verbose|v||Show detailed scoring
 flag|security score show|quiet|q||Reduce output
 flag|security score show|json|j||Print a JSON summary
+flag|shell alias status|tiers|||Show which ecosystem tiers are enabled
 flag|system update|yes|y||Answer yes to every question
 flag|system update|globals|||Also update npm, cargo and pipx globals
 arg|system schedule set|weekly daily off||

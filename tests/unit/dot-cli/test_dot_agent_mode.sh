@@ -21,23 +21,23 @@ assert_file_exists "$PROFILE_FILE" "agent-profiles.json should exist"
 
 for profile in ask plan apply audit; do
   test_start "agent_profile_${profile}_resolves"
-  assert_output_contains "Profile                             $profile" "bash '$DOT_CLI' mode show $profile"
+  assert_output_contains "Profile                             $profile" "bash '$DOT_CLI' agent mode show $profile"
 done
 
 test_start "unknown_profile_rejected"
-assert_exit_code 1 "bash '$DOT_CLI' mode show no-such-profile"
+assert_exit_code 1 "bash '$DOT_CLI' agent mode show no-such-profile"
 
 test_start "unknown_mode_subcommand_prints_usage"
-assert_output_contains "Usage: dot mode [list|current|show|set|run|doctor|card|log|checkpoint|conformance|a2a-card]" "bash '$DOT_CLI' mode bogus 2>&1 || true"
+assert_output_contains "'dot agent mode bogus' is not a command; run 'dot help agent mode'" "bash '$DOT_CLI' agent mode bogus 2>&1 || true"
 
 test_start "unknown_mode_subcommand_fails"
-assert_exit_code 1 "bash '$DOT_CLI' mode bogus"
+assert_exit_code 127 "bash '$DOT_CLI' agent mode bogus"
 
 test_start "dot_mode_list_runs"
-assert_output_contains "Agent Modes" "bash '$DOT_CLI' mode list"
+assert_output_contains "Agent Modes" "bash '$DOT_CLI' agent mode list"
 
 test_start "dot_mode_show_runs"
-assert_output_contains "Read-only guidance with no unattended changes." "bash '$DOT_CLI' mode show ask"
+assert_output_contains "Read-only guidance with no unattended changes." "bash '$DOT_CLI' agent mode show ask"
 
 test_start "dot_agent_alias_runs"
 assert_output_contains "Agent Modes" "bash '$DOT_CLI' agent list"

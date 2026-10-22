@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-"""Per-tool startup timing report for `dot perf --by-tool`.
+"""Per-tool startup timing report for `dot doctor perf show --by-tool`.
 
 Aggregates eval-timings.jsonl (written by _cached_eval when
 EVALCACHE_TIMING=1) and prints which tools dominate shell startup.

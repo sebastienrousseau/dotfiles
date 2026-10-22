@@ -166,6 +166,34 @@ effect = "write"
 legacy = "agent delegate run"
 summary = "Run a command as a delegate"
 
+[[commands]]
+object = "context"
+verb = "check"
+effect = "read"
+legacy = "agents check"
+summary = "Check the rendered context files are current"
+
+[[commands]]
+object = "context"
+verb = "apply"
+effect = "write"
+legacy = "agents render"
+summary = "Render the context file for every harness"
+
+[[commands]]
+object = "mode"
+verb = "run"
+effect = "write"
+legacy = "mode run"
+summary = "Run a command under a mode"
+
+[[commands]]
+object = "card"
+verb = "check"
+effect = "read"
+legacy = "mode conformance"
+summary = "Check the card against the A2A spec"
+
 [[aliases]]
 name = "mode"
 target = "agent mode"

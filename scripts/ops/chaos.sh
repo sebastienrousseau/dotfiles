@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# Chaos Engineering: Randomly corrupt config files to test self-healing (dot heal)
+# Chaos Engineering: Randomly corrupt config files to test self-healing (dot doctor fix)
 # USE WITH CAUTION: This intentionally breaks your environment.
 
 set -euo pipefail
@@ -14,7 +14,7 @@ ui_init
 
 if [[ "${1:-}" != "--force" ]]; then
   ui_err "WARNING" "This script will intentionally break your dotfiles configuration."
-  ui_info "Purpose" "Tests 'dot heal' auto-repair capabilities."
+  ui_info "Purpose" "Tests 'dot doctor fix' auto-repair capabilities."
   echo ""
   ui_info "To run, execute" "${0} --force"
   exit 1
@@ -47,4 +47,4 @@ export PATH="/bin"
 
 echo ""
 ui_ok "Chaos injected" "State is drifted and broken."
-ui_info "Recover" "dot heal"
+ui_info "Recover" "dot doctor fix"

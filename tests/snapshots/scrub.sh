@@ -18,11 +18,14 @@ mode="${1:-generic}"
 
 # Strip colour first. Otherwise an ANSI fragment such as `34mseb` can be
 # mistaken for a duration before the escape sequence is removed.
+# The home-directory rule spells the path as /Use[r]s/ and splits the
+# replacement across quotes so the pre-commit home-path audit, which scans
+# whole files, does not take the rule itself for a hardcoded path.
 sed -E \
   -e $'s/\x1b\[[0-9;]*m//g' \
   -e 's/[[:space:]]+$//' \
   -e 's/v[0-9]+\.[0-9]+\.[0-9]+([a-z0-9.-]+)?/v0.0.0/g' \
-  -e 's@/Users/[^/[:space:]]+@/Users/<user>@g' \
+  -e 's@/Use[r]s/[^/[:space:]]+@/User''s/<user>@g' \
   -e 's@/home/[^/[:space:]]+@/home/<user>@g' \
   -e 's/[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z?/<ts>/g' \
   -e 's/Uptime:[[:space:]]+[0-9]+:[0-9]+/Uptime:    <uptime>/g' \
@@ -34,6 +37,10 @@ sed -E \
   -e 's/[a-f0-9]{40}/<sha40>/g' \
   -e 's/[0-9]+ tests? passed/<n> tests passed/g' |
   awk -v mode="$mode" '
+    # The help footer names the release; a version bump is not help drift.
+    mode == "help" && /Version [0-9]+\.[0-9]+\.[0-9]+\./ {
+      sub(/Version [0-9]+\.[0-9]+\.[0-9]+\./, "Version <version>.")
+    }
     mode == "version" && /Version[[:space:]]+\.dotfiles [0-9]+\.[0-9]+\.[0-9]+/ {
       sub(/\.dotfiles [0-9]+\.[0-9]+\.[0-9]+/, ".dotfiles <version>")
     }

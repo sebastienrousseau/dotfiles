@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# dot restore - Restore dotfiles from backup or previous state
-# Usage: dot restore [--list|-l|--latest|-L|<backup-id>]
+# dot doctor restore - Restore dotfiles from backup or previous state
+# Usage: dot doctor restore [--list|-l|--latest|-L|<backup-id>]
 
 set -euo pipefail
 
@@ -19,7 +19,7 @@ CHEZMOI_SOURCE="${HOME}/.local/share/chezmoi"
 ui_init
 
 usage() {
-  echo "Usage: dot restore [OPTIONS]"
+  echo "Usage: dot doctor restore [OPTIONS]"
   echo ""
   echo "Options:"
   echo "  --list, -l       List available backups"
@@ -30,10 +30,10 @@ usage() {
   echo "  -h, --help       Show this help"
   echo ""
   echo "Examples:"
-  echo "  dot restore --list"
-  echo "  dot restore --latest"
-  echo "  dot restore --git HEAD~1"
-  echo "  dot restore --git v0.2.470"
+  echo "  dot doctor restore --list"
+  echo "  dot doctor restore --latest"
+  echo "  dot doctor restore --git HEAD~1"
+  echo "  dot doctor restore --git v0.2.470"
 }
 
 list_backups() {

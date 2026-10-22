@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091
 # Regression: the global eol=lf attributes made CRLF files in lazy.nvim
-# plugin checkouts look modified, so `dot upgrade` failed with "You have
+# plugin checkouts look modified, so `dot system update` failed with "You have
 # local changes" (nvim-lint, copilot.lua).
 # Regression for: da89db44
 # Why: third-party checkouts must keep upstream line endings untouched.

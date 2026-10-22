@@ -4,7 +4,7 @@
 
 # 10-secrets.sh: Optional secret bucket auto-loader
 # Loads configured secret buckets into the current shell via
-# `dot secret export` (`dot env load` is the mise environment command).
+# `dot secret export` (`dot env load` was the old spelling of this loader).
 
 if [[ "${DOTFILES_SECRETS_AUTO_LOAD:-0}" != "1" ]]; then
   return 0 2>/dev/null || exit 0

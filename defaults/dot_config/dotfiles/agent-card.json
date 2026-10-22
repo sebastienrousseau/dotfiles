@@ -8,7 +8,7 @@
   "platforms": ["macOS", "Linux", "WSL", "PowerShell"],
   "entrypoints": {
     "cli": "dot",
-    "mode": "dot mode",
+    "mode": "dot agent mode",
     "attestation": "dot attest --json",
     "mcp": "dot mcp --strict --json",
     "conformance": "dot agent conformance --strict --json",

@@ -89,7 +89,7 @@ cmd_secrets_edit() {
   local key_file="$secrets_dir/key.txt"
 
   if [ ! -f "$key_file" ]; then
-    die "No age key found. Run: dot secrets-init"
+    die "No age key found. Run: dot secret init"
   fi
 
   exec chezmoi edit --apply "$HOME/.config/chezmoi/encrypted_secrets.age"
@@ -115,7 +115,7 @@ cmd_secrets_provider() {
 
 cmd_secrets_set() {
   local key="${1:-}" value="${2:-}"
-  [[ -n "$key" ]] || die "Usage: dot secrets set <KEY> [VALUE]"
+  [[ -n "$key" ]] || die "Usage: dot secret set <KEY> [VALUE]"
   if [[ -n "$value" ]]; then
     ui_warn "Value on the command line" "it may be saved in shell history; omit it to be prompted"
   fi
@@ -132,7 +132,7 @@ cmd_secrets_set() {
 
 cmd_secrets_get() {
   local key="${1:-}" raw="${2:-}"
-  [[ -n "$key" ]] || die "Usage: dot secrets get <KEY> [--raw]"
+  [[ -n "$key" ]] || die "Usage: dot secret show <KEY> [--raw]"
   local value
   value="$(dot_secrets_get "$key" || true)"
   [[ -n "$value" ]] || die "Secret not found: $key"
@@ -150,17 +150,17 @@ cmd_secrets_list() {
     printf "%s\n" "$key"
   done < <(dot_secrets_index_list)
   if [[ "$any" -eq 0 ]]; then
-    ui_warn "No secrets indexed" "use: dot secrets set <KEY> <VALUE>"
+    ui_warn "No secrets indexed" "use: dot secret set <KEY> <VALUE>"
   fi
 }
 
 cmd_env_load() {
-  # Usage: dot secrets load [<bucket>] [--shell posix|fish|nu]
+  # Usage: dot secret export [<bucket>] [--shell posix|fish|nu]
   # Emits shell code to set the bucket's secrets as env vars, in the target
   # shell's dialect so it works beyond POSIX:
-  #   posix (default):  eval "$(dot secrets load ai)"
-  #   fish:             dot secrets load ai --shell fish | source
-  #   nu:               load-env (dot secrets load ai --shell nu | from nuon)
+  #   posix (default):  eval "$(dot secret export ai)"
+  #   fish:             dot secret export ai --shell fish | source
+  #   nu:               load-env (dot secret export ai --shell nu | from nuon)
   local bucket="ai" dialect="posix" data_file key value count=0
   local -a keys=() values=()
   while [[ $# -gt 0 ]]; do
@@ -173,7 +173,7 @@ cmd_env_load() {
         dialect="${1#*=}"
         shift
         ;;
-      -*) die "Unknown flag: $1 (usage: dot secrets load [<bucket>] [--shell posix|fish|nu])" ;;
+      -*) die "Unknown flag: $1 (usage: dot secret export [<bucket>] [--shell posix|fish|nu])" ;;
       *)
         bucket="$1"
         shift
@@ -211,7 +211,7 @@ cmd_env_load() {
       done
       ;;
     nu | nushell)
-      # Emit a NUON record for: load-env (dot secrets load <bucket> --shell nu | from nuon)
+      # Emit a NUON record for: load-env (dot secret export <bucket> --shell nu | from nuon)
       printf '{\n'
       for i in "${!keys[@]}"; do
         v="${values[$i]}"
@@ -267,7 +267,7 @@ EOF
       load) cmd_secrets_load "$@" ;;
       provider) cmd_secrets_provider "$@" ;;
       *)
-        die "Usage: dot secrets [edit|set|get|list|load|provider]"
+        die "Usage: dot secret list|show|set|edit|export|provider show"
         ;;
     esac
     ;;
@@ -289,7 +289,7 @@ EOF
     if [[ $# -gt 0 ]]; then shift; fi
     case "$sub" in
       load) cmd_env_load "$@" ;;
-      *) die "Usage: dot env load <bucket>" ;;
+      *) die "Usage: dot secret export <bucket>" ;;
     esac
     ;;
   *)

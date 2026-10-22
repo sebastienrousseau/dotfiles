@@ -8,11 +8,11 @@
 ## for regression detection.
 ##
 ## # Usage
-## dot benchmark                    # Basic startup timing
-## dot benchmark --detailed         # Per-component breakdown
-## dot benchmark --profile          # zprof analysis
-## dot benchmark --compare          # Compare with history
-## dot benchmark --waterfall        # ASCII waterfall chart of component timings
+## dot doctor perf measure                    # Basic startup timing
+## dot doctor perf measure --detailed         # Per-component breakdown
+## dot doctor perf measure --profile          # zprof analysis
+## dot doctor perf measure --compare          # Compare with history
+## dot doctor perf measure --waterfall        # ASCII waterfall chart of component timings
 ##
 ## # Dependencies
 ## - python3: Millisecond timing (required)
@@ -58,7 +58,7 @@ mkdir -p "$BENCHMARK_DIR"
 
 usage() {
   cat <<'EOF'
-Usage: dot benchmark [--detailed] [--profile] [--compare] [--waterfall]
+Usage: dot doctor perf measure [--detailed] [--profile] [--compare] [--waterfall]
 
 Options:
   -d, --detailed    Show per-component timing before the benchmark
@@ -398,12 +398,12 @@ fi
 
 if [[ "$UI_ENABLED" = "1" ]]; then
   echo ""
-  ui_info "Tip" "dot benchmark --detailed"
-  ui_info "Tip" "dot benchmark --profile"
-  ui_info "Tip" "dot benchmark --waterfall"
+  ui_info "Tip" "dot doctor perf measure --detailed"
+  ui_info "Tip" "dot doctor perf measure --profile"
+  ui_info "Tip" "dot doctor perf measure --waterfall"
 else
-  printf '%b\n' "\n${CYAN}Tip: Run 'dot benchmark --detailed' for per-component timing${NC}"
-  printf '%b\n' "${CYAN}     Run 'dot benchmark --profile' for zprof analysis${NC}"
-  printf '%b\n' "${CYAN}     Run 'dot benchmark --waterfall' for ASCII waterfall chart${NC}"
+  printf '%b\n' "\n${CYAN}Tip: Run 'dot doctor perf measure --detailed' for per-component timing${NC}"
+  printf '%b\n' "${CYAN}     Run 'dot doctor perf measure --profile' for zprof analysis${NC}"
+  printf '%b\n' "${CYAN}     Run 'dot doctor perf measure --waterfall' for ASCII waterfall chart${NC}"
 fi
-printf '%b\n' "${CYAN}     Run 'dot benchmark --compare' for history${NC}\n"
+printf '%b\n' "${CYAN}     Run 'dot doctor perf measure --compare' for history${NC}\n"

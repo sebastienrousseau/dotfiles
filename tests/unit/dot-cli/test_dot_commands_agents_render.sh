@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 #
-# Behaviour tests for `dot agents` (scripts/dot/commands/agents.sh):
+# Behaviour tests for `dot agent context` (scripts/dot/commands/agents.sh):
 # list, check (missing CLAUDE.md, missing AGENTS.md, in sync, drifted),
 # render (all eleven harness targets, and that a render makes check
 # pass), help and the unknown-subcommand error.
@@ -75,10 +75,17 @@ EOF
   printf '%s\n' "$dir"
 }
 
-_agents() { # <bin-dir> [args…]
-  local dir="$1"
+# _agents <bin-dir> [list|check|render] [args…]: the old `dot agent context` verb,
+# run by its ADR-020 spelling (`dot agent context show|check|apply`).
+_agents() {
+  local dir="$1" verb="${2:-list}"
   shift
-  PATH="$dir:$PATH" "$BASH_BIN" "$DOT_BIN" agents "$@" 2>&1
+  shift || true
+  case "$verb" in
+    list) verb=show ;;
+    render) verb=apply ;;
+  esac
+  PATH="$dir:$PATH" "$BASH_BIN" "$DOT_BIN" agent context "$verb" "$@" 2>&1
 }
 
 # ── list ─────────────────────────────────────────────────────────────
@@ -115,7 +122,7 @@ _bin="$(_shim_root "$_root")"
 _out="$(_agents "$_bin" check)"
 _rc=$?
 assert_equals 1 "$_rc" "missing AGENTS.md exits 1"
-assert_contains "run 'dot agents render'" "$_out" "the fix is suggested"
+assert_contains "run 'dot agent context apply'" "$_out" "the fix is suggested"
 
 # ── render ───────────────────────────────────────────────────────────
 test_start "agents_render_writes_every_harness_file"
@@ -195,7 +202,7 @@ assert_contains "rendered" "$_out" "rendered state is shown after a render"
 test_start "agents_refuses_a_root_without_chezmoidata"
 _root="$(_repo foreign --no-data)"
 _bin="$(_shim_root "$_root")"
-_out="$(cd "$_root" && PATH="$_bin:$PATH" "$BASH_BIN" "$DOT_BIN" agents check 2>&1)"
+_out="$(cd "$_root" && PATH="$_bin:$PATH" "$BASH_BIN" "$DOT_BIN" agent context check 2>&1)"
 _rc=$?
 assert_not_equals 0 "$_rc" "a checkout that is not the dotfiles repo is refused"
 assert_file_not_exists "$_root/AGENTS.md" "and nothing is written into it"
@@ -203,19 +210,21 @@ assert_file_not_exists "$_root/AGENTS.md" "and nothing is written into it"
 test_start "agents_help"
 _root="$(_repo helpdir)"
 _bin="$(_shim_root "$_root")"
-# `dot agents -h`/`--help` is intercepted by the CLI's own help
-# registry; `dot agents help` reaches the command's usage text.
-_out="$(_agents "$_bin" help)"
+# `dot agent context --help` is the generated help for the object: its
+# commands come from the agent manifest.
+_out="$(_agents "$_bin" --help)"
 _rc=$?
 assert_equals 0 "$_rc" "help exits 0"
-assert_contains "Usage: dot agents <subcommand>" "$_out" "usage printed"
-assert_contains "render   Regenerate AGENTS.md" "$_out" "render documented"
+assert_contains "dot agent context" "$_out" "the object's help"
+assert_contains "dot agent context apply" "$_out" "render is documented as apply"
+assert_contains "dot agent context check" "$_out" "check is documented"
 
 test_start "agents_unknown_subcommand_fails"
+# A word that is not a verb of `agent context` stops at 127 instead of
+# reaching the domain's own route.
 _out="$(_agents "$_bin" bogus)"
 _rc=$?
-assert_equals 1 "$_rc" "unknown subcommand exits 1"
-assert_contains "Unknown subcommand" "$_out" "the error names the problem"
-assert_contains "dot agents --help" "$_out" "and points at the help"
+assert_equals 127 "$_rc" "unknown subcommand exits 127"
+assert_contains "'dot agent context bogus' is not a command" "$_out" "and names it"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

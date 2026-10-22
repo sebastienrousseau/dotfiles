@@ -100,7 +100,7 @@ new_home create-nokey
 rc="$(run "$CREATE")"
 assert_equals "1" "$rc" "no identity is fatal"
 assert_file_contains "$OUT" "Age identity not found" "the error names the missing key"
-assert_file_contains "$OUT" "dot secrets-init" "the error says how to create one"
+assert_file_contains "$OUT" "dot secret init" "the error says how to create one"
 
 test_start "create_requires_age_on_path"
 new_home create-noage

@@ -36,7 +36,7 @@ test_fm_security_score() {
   # scorecard's job): it exits 0 whenever the assessment completes. The score
   # itself depends on the host, so the contract is the report's shape.
   test_start "fm_security_score"
-  fm_run security-score
+  fm_run security score show
   fm_expect_rc 0
   test_start "fm_security_score_reports_per_check_points"
   fm_expect_out_matches '\([0-9]+/[0-9]+ pts\)'
@@ -48,7 +48,7 @@ test_fm_security_score() {
 
 test_fm_security_score_json() {
   test_start "fm_security_score_json"
-  fm_run security-score -j
+  fm_run security score show -j
   # --json reports its verdict in the document and exits 0 once written.
   fm_expect_rc 0
   test_start "fm_security_score_json_is_json"
@@ -59,7 +59,7 @@ test_fm_security_score_json() {
 
 test_fm_security_score_quiet() {
   test_start "fm_security_score_quiet"
-  fm_run security-score -q
+  fm_run security score show -q
   fm_expect_rc 0
   test_start "fm_security_score_quiet_keeps_the_summary"
   fm_expect_out_matches 'Points: [0-9]+/100'
@@ -80,7 +80,7 @@ test_fm_score() {
   # only reachable outcome: HOME has no SSH key, so the security score can
   # never reach 100 — and the row ties the rc to the reason the report gives.
   test_start "fm_score"
-  fm_run score
+  fm_run doctor score
   fm_expect_rc 1
   test_start "fm_score_renders_scorecard"
   fm_expect_out "Dotfiles Scorecard"
@@ -89,12 +89,12 @@ test_fm_score() {
   test_start "fm_score_reports_security"
   fm_expect_out_matches 'Security +[0-9]+/100'
   test_start "fm_score_explains_the_nonzero_exit"
-  fm_expect_out "Run 'dot security-score' to reach 100/100"
+  fm_expect_out "Run 'dot security score show' to reach 100/100"
 }
 
 test_fm_score_json() {
   test_start "fm_score_json"
-  fm_run score --json
+  fm_run doctor score --json
   # --json reports its verdict in the document and exits 0 once written.
   fm_expect_rc 0
   test_start "fm_score_json_is_json"
@@ -105,7 +105,7 @@ test_fm_score_json() {
 
 test_fm_scorecard() {
   test_start "fm_scorecard"
-  fm_run scorecard --json
+  fm_run doctor score show --json
   # --json reports its verdict in the document and exits 0 once written.
   fm_expect_rc 0
   test_start "fm_scorecard_is_alias_of_score"
@@ -114,7 +114,7 @@ test_fm_scorecard() {
 
 test_fm_perf_json() {
   test_start "fm_perf_json"
-  fm_run perf -j -r 1
+  fm_run doctor perf show -j -r 1
   # --json reports its verdict in the document and exits 0 once written.
   fm_expect_rc 0
   test_start "fm_perf_json_is_json"
@@ -127,7 +127,7 @@ test_fm_perf_profile() {
   # --target changes the pass/fail threshold the JSON reports back, which is
   # the cheapest way to prove the flag is parsed rather than ignored.
   test_start "fm_perf_profile"
-  fm_run perf -j -r 1 -t 999
+  fm_run doctor perf show -j -r 1 -t 999
   # --json reports its verdict in the document and exits 0 once written.
   fm_expect_rc 0
   test_start "fm_perf_profile_honours_target"
@@ -136,7 +136,7 @@ test_fm_perf_profile() {
 
 test_fm_conflicts() {
   test_start "fm_conflicts"
-  fm_run conflicts
+  fm_run doctor conflict list
   # A report, not a gate: conflicts are listed, never turned into an exit
   # code, so a completed run is rc=0 regardless of what it found.
   fm_expect_rc 0
@@ -152,7 +152,7 @@ test_fm_conflicts() {
 
 test_fm_locks() {
   test_start "fm_locks"
-  fm_run locks
+  fm_run tool list --locked
   fm_expect_rc 0
   test_start "fm_locks_reports_toolchain"
   fm_expect_out "Version Locks"
@@ -188,7 +188,7 @@ node = "24"
 ruby = "3.3"
 EOF
   test_start "fm_locks_skips_comments"
-  CHEZMOI_SOURCE_DIR="$src" fm_run locks
+  CHEZMOI_SOURCE_DIR="$src" fm_run tool list --locked
   fm_expect_rc 0
   test_start "fm_locks_skips_comments_renders_node"
   fm_expect_out_matches '^  node +24$'

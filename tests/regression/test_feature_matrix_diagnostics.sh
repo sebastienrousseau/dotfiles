@@ -176,7 +176,7 @@ test_fm_doctor_json() {
   test_start "fm_doctor_json"
   fm_run doctor --json
   # Same host verdict as the bare doctor row, rendered as one JSON document
-  # in the shape of `dot health --json` (total/passed/warnings/failures/
+  # in the shape of `dot doctor status --json` (total/passed/warnings/failures/
   # results) plus status and verdict. The exit code is the same signal as
   # the text dashboard's, so status must agree with it.
   # The exit follows the verdict, which follows the host: healthy is 0,
@@ -223,7 +223,7 @@ test_fm_smoke_doctor_benchmark() {
 
 test_fm_heal() {
   test_start "fm_heal"
-  fm_run heal
+  fm_run doctor fix
   # heal.sh guards every repair with `|| true` and exits 0 whether or not it
   # could fix anything; the summary line is what carries the result.
   fm_expect_rc 0
@@ -243,7 +243,7 @@ test_fm_heal_dry_run() {
   local before
   before="$(ls -A "$HOME/.config" 2>/dev/null | sort)"
   test_start "fm_heal_dry_run"
-  fm_run heal --dry-run
+  fm_run doctor fix --dry-run
   fm_expect_rc 0
   test_start "fm_heal_dry_run_announces_dry_run"
   fm_expect_out "Dry-run mode (no changes will be made)"
@@ -270,7 +270,7 @@ fm_expect_health_rc() {
 
 test_fm_health() {
   test_start "fm_health"
-  fm_run health
+  fm_run doctor status
   fm_expect_health_rc
   test_start "fm_health_renders_dashboard"
   fm_expect_out "Dotfiles Health Dashboard"
@@ -282,7 +282,7 @@ test_fm_health() {
 
 test_fm_health_json() {
   test_start "fm_health_json"
-  fm_run health -j
+  fm_run doctor status -j
   fm_expect_health_rc
   test_start "fm_health_json_is_json"
   fm_expect_json
@@ -294,7 +294,7 @@ test_fm_health_json() {
 
 test_fm_health_verbose() {
   test_start "fm_health_verbose"
-  fm_run health -v
+  fm_run doctor status -v
   fm_expect_health_rc
   test_start "fm_health_verbose_renders_dashboard"
   fm_expect_out "Dotfiles Health Dashboard"
@@ -304,7 +304,7 @@ test_fm_health_verbose() {
 
 test_fm_health_check_alias() {
   test_start "fm_health_check_alias"
-  fm_run health-check -j
+  fm_run_route diagnostics health-check -j
   fm_expect_health_rc
   test_start "fm_health_check_alias_is_json"
   fm_expect_json

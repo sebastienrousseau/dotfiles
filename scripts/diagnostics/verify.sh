@@ -106,5 +106,5 @@ if [[ $failures -eq 0 ]]; then
 fi
 
 ui_err "Verification" "$failures check(s) failed"
-ui_info "Hint" "Run 'dot heal' then re-run 'dot verify'"
+ui_info "Hint" "Run 'dot doctor fix' then re-run 'dot verify'"
 exit 1

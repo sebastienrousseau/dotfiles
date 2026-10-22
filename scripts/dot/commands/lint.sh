@@ -186,7 +186,7 @@ cmd_lint() {
     fix) _lint_fix "$src_dir" ;;
     *)
       ui_err "Unknown lint mode: $mode"
-      echo "Usage: dot lint [--fix|-f | --check|-c]"
+      echo "Usage: dot config check [--fix|-f | --check|-c]"
       exit 1 # mutation: ignore unreachable from the CLI: the dispatcher only passes all/check/fix
       ;;
   esac
@@ -199,7 +199,7 @@ cmd_lint() {
 }
 
 # ── Dispatch ─────────────────────────────────────────────────────────────────
-# `dot lint …` or direct invocation.
+# `dot config check …` or direct invocation.
 if [[ "${1:-}" == lint ]]; then
   shift
 fi

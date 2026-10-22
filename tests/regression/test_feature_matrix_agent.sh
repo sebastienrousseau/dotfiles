@@ -8,7 +8,7 @@
 # mode, agent and agents — plus the config files and environment overrides
 # that drive the agent surface.
 #
-# The agent rows matter disproportionately: `dot mode set` and
+# The agent rows matter disproportionately: `dot agent mode set` and
 # `dot agent delegate` are the enforcement points for the bounded-autonomy
 # policy, so RBAC refusal, delegation refusal and checkpoint replay each get
 # an explicit row rather than riding on a happy-path smoke test. Those rows
@@ -50,7 +50,7 @@ test_fm_smoke_env_dotfiles_fonts() { fm_smoke upgrade; }
 test_fm_smoke_upgrade_yes() {
   fm_smoke upgrade
   test_start "fm_smoke_upgrade_help_documents_yes"
-  fm_run upgrade --help
+  fm_run system update --help
   fm_expect_any "--yes" "DOTFILES_YES"
 }
 
@@ -58,7 +58,7 @@ test_fm_cache_refresh() {
   # prewarm.sh skips every backing tool that is not installed, so it runs to
   # its closing header on a bare runner as well as a developer host.
   test_start "fm_cache_refresh"
-  fm_run cache-refresh
+  fm_run shell update
   fm_expect_rc 0
   test_start "fm_cache_refresh_reports_regeneration"
   fm_expect_any "Cache" "Pre-warming" "Cached"
@@ -70,7 +70,7 @@ test_fm_clean_cache() {
   # The weekly dotfiles-maintenance systemd timer runs this command; it was
   # implemented in core.sh but missing from the route table until v0.2.537.
   test_start "fm_clean_cache"
-  fm_run clean-cache
+  fm_run shell clean
   fm_expect_rc 0
   test_start "fm_clean_cache_reports_cleared"
   fm_expect_out "Cleared"
@@ -78,7 +78,7 @@ test_fm_clean_cache() {
 
 test_fm_prewarm() {
   test_start "fm_prewarm"
-  fm_run prewarm
+  fm_run shell update --prewarm
   fm_expect_rc 0
   test_start "fm_prewarm_is_alias_of_cache_refresh"
   fm_expect_any "Cache" "Pre-warming" "Cached"
@@ -95,7 +95,7 @@ test_fm_env_xdg_cache_home() {
   rm -rf "$XDG_CACHE_HOME/zsh" "$XDG_CACHE_HOME/bash" \
     "$XDG_CACHE_HOME/fish" "$XDG_CACHE_HOME/nushell"
   test_start "fm_env_xdg_cache_home"
-  fm_run cache-refresh
+  fm_run shell update
   fm_expect_rc 0
   test_start "fm_env_xdg_cache_home_receives_the_caches"
   local missing="" d
@@ -113,7 +113,7 @@ test_fm_docs() {
   # Rendered through glow when it is installed, plain cat otherwise; the
   # README's tagline survives both.
   test_start "fm_docs"
-  fm_run docs
+  fm_run help --readme
   fm_expect_rc 0
   test_start "fm_docs_renders_the_readme"
   fm_expect_out "Declarative dotfiles"
@@ -124,7 +124,7 @@ test_fm_learn() {
   # The sandbox stubs gum, so the TTY gate is the one that fires (stdout is a
   # file under fm_run) and the refusal is rc 1 on every host.
   test_start "fm_learn"
-  fm_run learn
+  fm_run help tour
   fm_expect_rc 1
   test_start "fm_learn_refuses_without_a_tty"
   fm_expect_out "This interactive tour requires a TTY"
@@ -139,7 +139,7 @@ test_fm_keys() {
   # scripts/diagnostics/keys.sh; neither is in the tree, so a bare `dot keys`
   # could only report "Keys script not found". It reads docs/security/KEYS.md.
   test_start "fm_keys"
-  fm_run keys
+  fm_run_route meta keys
   fm_expect_rc 0
   test_start "fm_keys_is_routed"
   fm_expect_out "Keybindings"
@@ -147,7 +147,7 @@ test_fm_keys() {
 
 test_fm_keys_sign_check() {
   test_start "fm_keys_sign_check"
-  fm_run keys sign-check
+  fm_run_route meta keys sign-check
   fm_expect_rc 0
   test_start "fm_keys_sign_check_reports_status"
   fm_expect_any "Git Signing Status" "signing key"
@@ -161,7 +161,7 @@ test_fm_keys_sign_check_ssh() {
   git config --global user.signingkey "$keyfile"
   git config --global gpg.format ssh
   test_start "fm_keys_sign_check_ssh"
-  fm_run keys sign-check
+  fm_run_route meta keys sign-check
   fm_expect_rc 0
   test_start "fm_keys_sign_check_ssh_names_the_key"
   fm_expect_out "$keyfile"
@@ -316,7 +316,7 @@ test_fm_mcp_unknown() {
 
 test_fm_mode() {
   test_start "fm_mode"
-  fm_run mode
+  fm_run agent mode
   fm_expect_rc 0
   test_start "fm_mode_defaults_to_current"
   fm_expect_any "Agent Mode" "Profile"
@@ -324,7 +324,7 @@ test_fm_mode() {
 
 test_fm_mode_list() {
   test_start "fm_mode_list"
-  fm_run mode list
+  fm_run agent mode list
   fm_expect_rc 0
   test_start "fm_mode_list_names_every_profile"
   local missing="" p
@@ -340,7 +340,7 @@ test_fm_mode_list() {
 
 test_fm_mode_current() {
   test_start "fm_mode_current"
-  fm_run mode current
+  fm_run agent status
   fm_expect_rc 0
   test_start "fm_mode_current_reports_the_policy"
   fm_expect_any "Approval" "Filesystem" "Network"
@@ -348,7 +348,7 @@ test_fm_mode_current() {
 
 test_fm_mode_show() {
   test_start "fm_mode_show"
-  fm_run mode show audit
+  fm_run agent mode show audit
   fm_expect_rc 0
   test_start "fm_mode_show_describes_that_profile"
   fm_expect_any "audit" "Max steps" "Description"
@@ -356,27 +356,27 @@ test_fm_mode_show() {
 
 test_fm_mode_show_unknown() {
   test_start "fm_mode_show_unknown"
-  fm_run mode show zzz-not-a-profile
+  fm_run agent mode show zzz-not-a-profile
   fm_expect_rc 1
   test_start "fm_mode_show_unknown_message"
   fm_expect_any "Unknown agent profile" "zzz-not-a-profile"
   test_start "fm_mode_show_missing_name"
-  fm_run mode show
+  fm_run agent mode show
   fm_expect_rc 1
   test_start "fm_mode_show_missing_name_message"
-  fm_expect_any "Usage: dot mode show" "mode show"
+  fm_expect_any "Usage: dot agent mode show" "mode show"
 }
 
 test_fm_mode_set() {
   if ! fm_have_jq; then
     test_start "fm_mode_set"
-    fm_pass "skipped — jq not installed (dot mode requires it)"
+    fm_pass "skipped — jq not installed (dot agent mode requires it)"
     return 0
   fi
   local profiles
   profiles="$(fm_profiles_copy)"
   test_start "fm_mode_set"
-  AGENT_PROFILE_CONFIG="$profiles" fm_run mode set plan
+  AGENT_PROFILE_CONFIG="$profiles" fm_run agent mode set plan
   fm_expect_rc 0
   test_start "fm_mode_set_persists_the_state_file"
   fm_expect_file "$AGENT_STATE_FILE"
@@ -387,15 +387,15 @@ test_fm_mode_set() {
     fm_fail "state file does not record the new profile"
   fi
   test_start "fm_mode_set_is_visible_to_current"
-  AGENT_PROFILE_CONFIG="$profiles" fm_run mode current
+  AGENT_PROFILE_CONFIG="$profiles" fm_run agent status
   fm_expect_out "plan"
   # Leave the sandbox on the default profile for the rows that follow.
-  AGENT_PROFILE_CONFIG="$profiles" fm_run mode set ask
+  AGENT_PROFILE_CONFIG="$profiles" fm_run agent mode set ask
 }
 
 test_fm_mode_set_unknown() {
   test_start "fm_mode_set_unknown"
-  fm_run mode set zzz-not-a-profile
+  fm_run agent mode set zzz-not-a-profile
   fm_expect_rc 1
   test_start "fm_mode_set_unknown_message"
   fm_expect_any "Unknown agent profile" "zzz-not-a-profile"
@@ -413,7 +413,7 @@ test_fm_mode_set_rbac_strict() {
   local profiles
   profiles="$(fm_profiles_copy '.rbac.enforcement = "strict"')"
   test_start "fm_mode_set_rbac_strict"
-  AGENT_PROFILE_CONFIG="$profiles" fm_run mode set audit
+  AGENT_PROFILE_CONFIG="$profiles" fm_run agent mode set audit
   fm_expect_rc 1
   test_start "fm_mode_set_rbac_strict_explains_the_refusal"
   fm_expect_any "RBAC" "not allowed" "strict"
@@ -422,9 +422,9 @@ test_fm_mode_set_rbac_strict() {
   local advisory
   advisory="$(fm_profiles_copy '.rbac.enforcement = "advisory"')"
   test_start "fm_mode_set_rbac_advisory_allows"
-  AGENT_PROFILE_CONFIG="$advisory" fm_run mode set audit
+  AGENT_PROFILE_CONFIG="$advisory" fm_run agent mode set audit
   fm_expect_rc 0
-  AGENT_PROFILE_CONFIG="$advisory" fm_run mode set ask
+  AGENT_PROFILE_CONFIG="$advisory" fm_run agent mode set ask
 }
 
 test_fm_mode_run() {
@@ -434,7 +434,7 @@ test_fm_mode_run() {
     return 0
   fi
   test_start "fm_mode_run"
-  fm_run mode run plan echo fm-mode-run-ok
+  fm_run agent mode run plan echo fm-mode-run-ok
   fm_expect_rc 0
   test_start "fm_mode_run_executes_the_command"
   fm_expect_out "fm-mode-run-ok"
@@ -442,10 +442,10 @@ test_fm_mode_run() {
 
 test_fm_mode_run_usage() {
   test_start "fm_mode_run_usage"
-  fm_run mode run
+  fm_run agent mode run
   fm_expect_rc 1
   test_start "fm_mode_run_usage_message"
-  fm_expect_any "Usage: dot mode run" "mode run"
+  fm_expect_any "Usage: dot agent mode run" "mode run"
 }
 
 test_fm_mode_run_exit_code() {
@@ -454,7 +454,7 @@ test_fm_mode_run_exit_code() {
     fm_pass "skipped — jq not installed"
     return 0
   fi
-  # The wrapped command's exit code SHOULD reach the caller, or `dot mode run`
+  # The wrapped command's exit code SHOULD reach the caller, or `dot agent mode run`
   # cannot be used as a CI wrapper at all.
   #
   # This row was written while all three wrappers used
@@ -465,16 +465,16 @@ test_fm_mode_run_exit_code() {
   # failure code was lost. They now run the command as the `if` condition and
   # read `$?` in the else branch, so the real status reaches the caller.
   test_start "fm_mode_run_exit_code"
-  fm_run mode run plan sh -c "exit 42"
+  fm_run agent mode run plan sh -c "exit 42"
   fm_expect_rc 42
   test_start "fm_mode_run_exit_code_command_was_executed"
-  fm_run mode run plan sh -c "printf fm-exit-marker; exit 42"
+  fm_run agent mode run plan sh -c "printf fm-exit-marker; exit 42"
   fm_expect_out "fm-exit-marker"
 }
 
 test_fm_mode_doctor() {
   test_start "fm_mode_doctor"
-  fm_run mode doctor
+  fm_run agent check
   fm_expect_rc 0
   test_start "fm_mode_doctor_validates_the_config"
   fm_expect_any "Agent Mode Doctor" "Profile config" "Default profile"
@@ -484,10 +484,10 @@ test_fm_mode_doctor() {
 
 test_fm_mode_unknown() {
   test_start "fm_mode_unknown"
-  fm_run mode zzz-not-a-subcommand
-  fm_expect_rc 1
+  fm_run agent mode zzz-not-a-subcommand
+  fm_expect_rc 127
   test_start "fm_mode_unknown_prints_usage"
-  fm_expect_any "Usage: dot mode" "list|current"
+  fm_expect_any "is not a command"
 }
 
 test_fm_env_agent_profile_config() {
@@ -501,13 +501,13 @@ test_fm_env_agent_profile_config() {
   local profiles
   profiles="$(fm_profiles_copy '.profiles["fm-only"] = {description:"fixture",approval:"manual",filesystem:"read-only",network:"off",mcpProfile:"strict-local",maxSteps:1}')"
   test_start "fm_env_agent_profile_config"
-  AGENT_PROFILE_CONFIG="$profiles" fm_run mode show fm-only
+  AGENT_PROFILE_CONFIG="$profiles" fm_run agent mode show fm-only
   fm_expect_rc 0
   test_start "fm_env_agent_profile_config_reads_the_override"
   fm_expect_out "fixture"
   test_start "fm_env_agent_state_file_is_honoured"
   AGENT_PROFILE_CONFIG="$profiles" AGENT_STATE_FILE="$FM_SANDBOX/alt-state.env" \
-    fm_run mode set plan
+    fm_run agent mode set plan
   fm_expect_file "$FM_SANDBOX/alt-state.env"
 }
 
@@ -518,7 +518,7 @@ test_fm_config_agent_profiles_json() {
     return 0
   fi
   # The shipped registry must declare a default profile that exists, and an
-  # rbac block — `dot mode doctor` and `dot fleet enforce` both depend on it.
+  # rbac block — `dot agent check` and `dot fleet enforce` both depend on it.
   if jq -e '.profiles[.defaultProfile] != null and .rbac != null' \
     "$FM_PROFILES_SRC" >/dev/null 2>&1; then
     fm_pass "defaultProfile resolves and rbac is present"
@@ -535,7 +535,7 @@ test_fm_config_agent_mode_env() {
   fi
   local profiles
   profiles="$(fm_profiles_copy)"
-  AGENT_PROFILE_CONFIG="$profiles" fm_run mode set plan
+  AGENT_PROFILE_CONFIG="$profiles" fm_run agent mode set plan
   test_start "fm_config_agent_mode_env"
   fm_expect_file "$AGENT_STATE_FILE"
   test_start "fm_config_agent_mode_env_records_the_whole_policy"
@@ -549,7 +549,7 @@ test_fm_config_agent_mode_env() {
   else
     fm_fail "state file missing:$missing"
   fi
-  AGENT_PROFILE_CONFIG="$profiles" fm_run mode set ask
+  AGENT_PROFILE_CONFIG="$profiles" fm_run agent mode set ask
 }
 
 # ── agent ──────────────────────────────────────────────────────────────────
@@ -615,7 +615,7 @@ test_fm_agent_log() {
   # show them.
   local i
   for i in 1 2 3 4 5 6; do
-    fm_run mode current
+    fm_run agent status
   done
   test_start "fm_agent_log"
   fm_run agent log
@@ -902,7 +902,7 @@ test_fm_agent_unknown() {
   fm_run agent zzz-not-a-subcommand
   fm_expect_rc 1
   test_start "fm_agent_unknown_prints_usage"
-  fm_expect_any "Usage: dot mode" "card|log|checkpoint" "list|current"
+  fm_expect_any "Usage: dot agent mode" "card|log|checkpoint" "list|current"
 }
 
 # ── agents (multi-harness context) ─────────────────────────────────────────
@@ -928,7 +928,7 @@ test_fm_agents_list() {
   # With AGENTS.md absent the status column must say so for that target.
   rm -f "$repo/AGENTS.md"
   test_start "fm_agents_list"
-  fm_run_bin "$repo/bin/dot" agents list
+  fm_run_bin "$repo/bin/dot" agent context show
   fm_expect_rc 0
   test_start "fm_agents_list_names_the_harnesses"
   fm_expect_any "Harness" "AGENTS.md" "cursor"
@@ -944,10 +944,10 @@ test_fm_agents_check_drift() {
   cd "$repo" || return 0
   rm -f "$repo/AGENTS.md"
   test_start "fm_agents_check_drift"
-  fm_run_bin "$repo/bin/dot" agents check
+  fm_run_bin "$repo/bin/dot" agent context check
   fm_expect_rc 1
   test_start "fm_agents_check_drift_points_at_render"
-  fm_expect_any "missing" "drifted" "dot agents render"
+  fm_expect_any "missing" "drifted" "dot agent context apply"
   cd "$prev" || return 0
 }
 
@@ -962,7 +962,7 @@ test_fm_agents_render() {
   local checkout_before
   checkout_before="$(git -C "$REPO_ROOT" status --porcelain -- AGENTS.md .cursor .codex 2>/dev/null)"
   test_start "fm_agents_render"
-  fm_run_bin "$repo/bin/dot" agents render
+  fm_run_bin "$repo/bin/dot" agent context apply
   fm_expect_rc 0
   test_start "fm_agents_render_writes_agents_md"
   fm_expect_file "$repo/AGENTS.md"
@@ -993,9 +993,9 @@ test_fm_agents_check() {
   local prev="$PWD"
   cd "$repo" || return 0
   # Rendered above, so check must now report in-sync.
-  fm_run_bin "$repo/bin/dot" agents render
+  fm_run_bin "$repo/bin/dot" agent context apply
   test_start "fm_agents_check"
-  fm_run_bin "$repo/bin/dot" agents check
+  fm_run_bin "$repo/bin/dot" agent context check
   fm_expect_rc 0
   test_start "fm_agents_check_reports_in_sync"
   fm_expect_any "in sync" "AGENTS.md"
@@ -1004,7 +1004,7 @@ test_fm_agents_check() {
 
 test_fm_agents_help() {
   test_start "fm_agents_help"
-  fm_run agents --help
+  fm_run agent context --help
   fm_expect_rc 0
   test_start "fm_agents_help_lists_subcommands"
   fm_expect_any "list" "check" "render"
@@ -1014,10 +1014,12 @@ test_fm_agents_unknown() {
   local repo
   repo="$(fm_agents_repo)"
   test_start "fm_agents_unknown"
-  fm_run_bin "$repo/bin/dot" agents zzz-not-a-subcommand
-  fm_expect_rc 1
+  # A word that is not a verb of `agent context` stops at 127 instead of
+  # reaching the domain's own route.
+  fm_run_bin "$repo/bin/dot" agent context zzz-not-a-subcommand
+  fm_expect_rc 127
   test_start "fm_agents_unknown_message"
-  fm_expect_any "Unknown subcommand" "zzz-not-a-subcommand"
+  fm_expect_any "is not a command"
 }
 
 # ── run ────────────────────────────────────────────────────────────────────

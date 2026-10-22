@@ -5,13 +5,13 @@
 # Regression for: GH-881
 # Regression: FEATURE-MATRIX coverage for the tools.sh, aliases.sh, lint.sh
 # and env-emit.sh command groups — env, profile, tools, new, packages,
-# aliases, alias-check, setup, log-rotate, lint, and `dot env emit`.
+# aliases, alias-check, setup, log-rotate, lint, and `dot tool export`.
 #
-# `dot profile set`, `dot aliases cheatsheet` (with no --output) and
-# `dot lint` all resolve their target from the location of the sourced
+# `dot config profile set`, `dot shell alias export` (with no --output) and
+# `dot config check` all resolve their target from the location of the sourced
 # library rather than from $HOME, so those rows drive a writable repo copy
 # inside the sandbox (fm_repo_copy) instead of the checkout. Linting the copy
-# is also what keeps this file fast: `dot lint --check` over the real tree
+# is also what keeps this file fast: `dot config check --check` over the real tree
 # takes minutes, over the copy about ten seconds.
 
 set -u
@@ -31,7 +31,7 @@ FM_TIMEOUT=180
 # the host's tool inventory. Both rows therefore drive a stub that answers
 # exactly the mise calls tools.sh makes, so what is pinned is dot's own
 # behaviour: the table it renders from `mise ls`, the orphan warning it
-# derives from `mise prune --dry-run-code`, and that a bare `dot env prune`
+# derives from `mise prune --dry-run-code`, and that a bare `dot tool remove`
 # only ever runs the dry-run form. Any other argv (a real `mise prune`, say)
 # exits 99, which no row accepts. The stub is removed afterwards so the
 # `env emit` rows still see the real tool, or its absence.
@@ -54,7 +54,7 @@ fm_unstub_mise() { rm -f "$FM_SANDBOX/bin/mise"; }
 test_fm_env_list() {
   fm_stub_mise
   test_start "fm_env_list"
-  fm_run env list
+  fm_run tool list
   fm_expect_rc 0
   test_start "fm_env_list_renders_the_mise_inventory"
   fm_expect_out_matches "node +22\.0\.0-fixture"
@@ -66,7 +66,7 @@ test_fm_env_list() {
 test_fm_env_prune() {
   fm_stub_mise
   test_start "fm_env_prune"
-  fm_run env prune
+  fm_run tool remove
   fm_expect_rc 0
   test_start "fm_env_prune_defaults_to_dry_run"
   fm_expect_out "pass --yes to commit"
@@ -86,7 +86,7 @@ test_fm_smoke_env_use() { fm_smoke env; }
 
 test_fm_env_emit() {
   test_start "fm_env_emit"
-  fm_run env emit
+  fm_run tool export
   # 2 = jq or mise missing; 3 = mise call failed. Both are environment, not
   # regressions — but a *parse* failure would be rc 1, which is not allowed.
   fm_expect_rc_in 0 2 3
@@ -102,7 +102,7 @@ test_fm_env_emit() {
 
 test_fm_env_emit_compact() {
   test_start "fm_env_emit_compact"
-  fm_run env emit --compact
+  fm_run tool export --compact
   fm_expect_rc_in 0 2 3
   if [[ "$FM_RC" -eq 0 ]]; then
     test_start "fm_env_emit_compact_is_one_line"
@@ -116,21 +116,21 @@ test_fm_env_emit_compact() {
 
 test_fm_env_emit_ndjson() {
   test_start "fm_env_emit_ndjson"
-  fm_run env emit --format ndjson
+  fm_run tool export --format ndjson
   fm_expect_rc_in 0 2 3
   if [[ "$FM_RC" -eq 0 ]]; then
     test_start "fm_env_emit_ndjson_header_is_json"
     fm_expect_out "schema_version"
   fi
   test_start "fm_env_emit_ndjson_equals_form"
-  fm_run env emit --format=ndjson
+  fm_run tool export --format=ndjson
   fm_expect_rc_in 0 2 3
 }
 
 test_fm_env_emit_output() {
   local out="$FM_SANDBOX/work/env-manifest.json"
   test_start "fm_env_emit_output"
-  fm_run env emit --output "$out"
+  fm_run tool export --output "$out"
   fm_expect_rc_in 0 2 3
   if [[ "$FM_RC" -eq 0 ]]; then
     test_start "fm_env_emit_output_wrote_the_file"
@@ -140,7 +140,7 @@ test_fm_env_emit_output() {
 
 test_fm_env_emit_bad_format() {
   test_start "fm_env_emit_bad_format"
-  fm_run env emit --format xml
+  fm_run tool export --format xml
   fm_expect_rc 1
   test_start "fm_env_emit_bad_format_message"
   fm_expect_any "unsupported format" "json, ndjson"
@@ -148,7 +148,7 @@ test_fm_env_emit_bad_format() {
 
 test_fm_env_emit_bad_flag() {
   test_start "fm_env_emit_bad_flag"
-  fm_run env emit --zzz-not-a-flag
+  fm_run tool export --zzz-not-a-flag
   fm_expect_rc 1
   test_start "fm_env_emit_bad_flag_message"
   fm_expect_any "unknown flag" "zzz-not-a-flag"
@@ -156,22 +156,22 @@ test_fm_env_emit_bad_flag() {
 
 test_fm_env_emit_help() {
   # NOTE: the dispatcher's universal --help intercept fires before routing,
-  # so `dot env emit --help` renders `dot help env` rather than env-emit.sh's
+  # so `dot tool export --help` renders `dot help env` rather than env-emit.sh's
   # own usage text — the `-h | --help` arm inside dot_env_emit is unreachable
   # through the CLI. That is the intercept working as designed (it is what
   # stops `--help` being treated as data), so what is pinned here is that
-  # asking for help exits 0 and describes `dot env`.
+  # asking for help exits 0 and describes `dot tool`.
   test_start "fm_env_emit_help"
-  fm_run env emit --help
+  fm_run tool export --help
   fm_expect_rc 0
   test_start "fm_env_emit_help_renders_env_help"
-  fm_expect_any "dot env" "Summary"
+  fm_expect_any "dot tool" "Summary"
 
   # The usage text itself is still reachable by calling the sub-handler the
   # way tools.sh does, which is what documents --format/--output/--compact.
   test_start "fm_env_emit_help_usage_documents_formats"
   local usage
-  usage="$(awk '/Usage: dot env emit/,/^\t*EOF$/' \
+  usage="$(awk '/Usage: dot tool export/,/^\t*EOF$/' \
     "$REPO_ROOT/scripts/dot/commands/env-emit.sh")"
   if [[ "$usage" == *"ndjson"* && "$usage" == *"--output"* ]]; then
     fm_pass "usage documents ndjson and --output"
@@ -184,7 +184,7 @@ test_fm_env_emit_help() {
 
 test_fm_profile_show() {
   test_start "fm_profile_show"
-  fm_run profile show
+  fm_run config profile show
   fm_expect_rc 0
   # The value is the bare TOML string, not the `profile = "x"` line it came
   # from: the CLI's sed once used `\s`, which BSD sed reads literally, so on
@@ -200,9 +200,9 @@ test_fm_profile_show() {
   # on the sandbox copy through the CLI and require exactly it back.
   local repo
   repo="$(fm_repo_copy)"
-  fm_run_bin "$repo/bin/dot" profile set fm-show-profile
+  fm_run_bin "$repo/bin/dot" config profile set fm-show-profile
   test_start "fm_profile_show_reports_the_active_profile"
-  fm_run_bin "$repo/bin/dot" profile show
+  fm_run_bin "$repo/bin/dot" config profile show
   fm_expect_out_matches "Profile +fm-show-profile$"
 }
 
@@ -211,7 +211,7 @@ test_fm_profile_set() {
   local repo
   repo="$(fm_repo_copy)"
   test_start "fm_profile_set"
-  fm_run_bin "$repo/bin/dot" profile set fm-test-profile
+  fm_run_bin "$repo/bin/dot" config profile set fm-test-profile
   fm_expect_rc 0
   test_start "fm_profile_set_persists_to_chezmoidata"
   if grep -q 'profile = "fm-test-profile"' "$repo/defaults/.chezmoidata.toml"; then
@@ -220,7 +220,7 @@ test_fm_profile_set() {
     fm_fail "profile not persisted"
   fi
   test_start "fm_profile_set_is_visible_to_show"
-  fm_run_bin "$repo/bin/dot" profile show
+  fm_run_bin "$repo/bin/dot" config profile show
   fm_expect_out "fm-test-profile"
   test_start "fm_profile_set_did_not_touch_the_checkout"
   if grep -q 'fm-test-profile' "$REPO_ROOT/defaults/.chezmoidata.toml" 2>/dev/null; then
@@ -234,25 +234,25 @@ test_fm_profile_set_usage() {
   local repo
   repo="$(fm_repo_copy)"
   test_start "fm_profile_set_usage"
-  fm_run_bin "$repo/bin/dot" profile set
+  fm_run_bin "$repo/bin/dot" config profile set
   fm_expect_rc 1
   test_start "fm_profile_set_usage_message"
-  fm_expect_any "Usage: dot profile set" "profile set"
+  fm_expect_any "Usage: dot config profile set" "profile set"
 }
 
 test_fm_profile_unknown() {
   test_start "fm_profile_unknown"
-  fm_run profile zzz-not-a-subcommand
-  fm_expect_rc 1
+  fm_run config profile zzz-not-a-subcommand
+  fm_expect_rc 127
   test_start "fm_profile_unknown_message"
-  fm_expect_any "Unknown profile subcommand" "show" "set"
+  fm_expect_any "is not a command"
 }
 
 test_fm_config_chezmoidata_profile() {
   # The `profile` key and the `[features]` table are the two things
-  # `dot profile show` contracts to surface out of .chezmoidata.toml.
+  # `dot config profile show` contracts to surface out of .chezmoidata.toml.
   test_start "fm_config_chezmoidata_profile"
-  fm_run profile show
+  fm_run config profile show
   fm_expect_rc 0
   test_start "fm_config_chezmoidata_profile_reads_the_features_table"
   local key
@@ -271,7 +271,7 @@ test_fm_config_chezmoidata_profile() {
 
 test_fm_tools() {
   test_start "fm_tools"
-  fm_run tools
+  fm_run tool list --nix
   fm_expect_rc 0
   test_start "fm_tools_shows_the_overview"
   fm_expect_out "Dot Tools"
@@ -283,10 +283,10 @@ test_fm_tools() {
 
 test_fm_tools_docs() {
   # cmd_tools used to look only in <src>/docs/; both documents live under
-  # docs/reference/, so `dot tools docs` reported "TOOLS.md not found" on a
+  # docs/reference/, so `dot tool list --nix docs` reported "TOOLS.md not found" on a
   # complete checkout. The reference location is probed first now.
   test_start "fm_tools_docs"
-  fm_run tools docs
+  fm_run tool list --nix docs
   fm_expect_rc 0
   test_start "fm_tools_docs_names_the_document"
   fm_expect_out "Integrated tools organized by role"
@@ -306,7 +306,7 @@ test_fm_new() {
   cd "$FM_SANDBOX/work" || return 0
   rm -rf "$FM_SANDBOX/work/fm-new-project"
   test_start "fm_new"
-  fm_run new python fm-new-project
+  fm_run tool new python fm-new-project
   fm_expect_rc 0
   test_start "fm_new_scaffolds_the_project"
   fm_expect_file "$FM_SANDBOX/work/fm-new-project"
@@ -323,12 +323,12 @@ test_fm_new() {
 
 test_fm_new_usage() {
   test_start "fm_new_usage"
-  fm_run new
+  fm_run tool new
   fm_expect_rc 1
   test_start "fm_new_usage_lists_templates"
-  fm_expect_any "Usage: dot new" "Available templates"
+  fm_expect_any "Usage: dot tool new" "Available templates"
   test_start "fm_new_usage_rejects_unknown_template"
-  fm_run new zzz-not-a-template demo
+  fm_run tool new zzz-not-a-template demo
   fm_expect_rc 1
   test_start "fm_new_usage_unknown_template_message"
   fm_expect_any "Unknown template" "Available templates"
@@ -341,7 +341,7 @@ test_fm_packages() {
   # is what proves the report is built by querying what is on PATH.
   fm_stub gem 'printf "9.9.9-fixture\n"'
   test_start "fm_packages"
-  fm_run packages
+  fm_run tool list --packages
   fm_expect_rc 0
   test_start "fm_packages_reports_system_managers"
   fm_expect_out_matches "^--- Package Managers ---$"
@@ -359,7 +359,7 @@ test_fm_packages() {
 test_fm_smoke_setup() {
   # An interactive gum wizard; there is no non-interactive entry point.
   test_start "fm_smoke_setup_is_routed"
-  fm_run setup
+  fm_run config init
   if [[ "$FM_OUT$FM_ERR" == *"Unknown command"* ]]; then
     fm_fail "setup is not routed by the dispatcher"
   else
@@ -369,7 +369,7 @@ test_fm_smoke_setup() {
 
 test_fm_log_rotate() {
   test_start "fm_log_rotate_noop_below_threshold"
-  fm_run log-rotate
+  fm_run system clean --logs
   fm_expect_rc 0
 
   # Above the 1 MiB threshold the log must actually be rotated.
@@ -381,7 +381,7 @@ test_fm_log_rotate() {
     printf 'fm log line padding padding padding padding padding padding %s\n' "$i"
   done >"$log"
   test_start "fm_log_rotate"
-  fm_run log-rotate
+  fm_run system clean --logs
   fm_expect_rc 0
   test_start "fm_log_rotate_rotates_a_large_log"
   if [[ -f "$log.1.gz" ]]; then
@@ -412,7 +412,7 @@ test_fm_lint() {
   local repo
   repo="$(fm_repo_copy)"
   test_start "fm_lint"
-  fm_run_bin "$repo/bin/dot" lint
+  fm_run_bin "$repo/bin/dot" config check
   # Default mode reports; only --check turns findings into a non-zero exit.
   fm_expect_rc 0
   test_start "fm_lint_reports_a_summary"
@@ -432,7 +432,7 @@ test_fm_lint_check() {
   # A deliberately misformatted file must make --check fail.
   printf '#!/usr/bin/env bash\necho     "over-spaced"\n' >"$repo/scripts/dot/fm-ugly.sh"
   test_start "fm_lint_check"
-  fm_run_bin "$repo/bin/dot" lint --check
+  fm_run_bin "$repo/bin/dot" config check --check
   if [[ "$FM_RC" -ne 0 ]]; then
     fm_pass "check mode failed on a misformatted file (rc=$FM_RC)"
   else
@@ -452,7 +452,7 @@ test_fm_lint_fix() {
   repo="$(fm_repo_copy)"
   printf '#!/usr/bin/env bash\necho     "over-spaced"\n' >"$repo/scripts/dot/fm-ugly.sh"
   test_start "fm_lint_fix"
-  fm_run_bin "$repo/bin/dot" lint --fix
+  fm_run_bin "$repo/bin/dot" config check --fix
   fm_expect_rc 0
   test_start "fm_lint_fix_names_the_file"
   fm_expect_out_matches "fixed +scripts/dot/fm-ugly\.sh"
@@ -466,7 +466,7 @@ test_fm_lint_fix() {
   # the checkout's bin/, lib/ and scripts/dot/, which CI keeps clean under
   # the same shellcheck flags lint.sh uses — so --check must now pass.
   test_start "fm_lint_fix_then_check_is_clean"
-  fm_run_bin "$repo/bin/dot" lint --check
+  fm_run_bin "$repo/bin/dot" config check --check
   fm_expect_rc 0
   test_start "fm_lint_fix_then_check_reports_all_passed"
   fm_expect_out "All checks passed"

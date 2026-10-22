@@ -13,7 +13,7 @@
 #     are validated before any connection, and --dry-run must open none. The
 #     rows drive a fixture fleet.toml through DOTFILES_FLEET_HOSTS and assert
 #     an injection-shaped hostname is refused.
-#   * `dot registry install` downloads and applies a third-party module. The
+#   * `dot cli install` downloads and applies a third-party module. The
 #     rows serve a registry over file:// from the sandbox and assert that a
 #     sha256 mismatch is refused, that a non-HTTPS registry URL is refused,
 #     and that install without --yes only previews.
@@ -207,7 +207,7 @@ test_fm_fleet_namespace_set() {
   # The case a fresh checkout is actually in: no top-level `namespace` key.
   # cmd_fleet_namespace used to rewrite only when the key was already there
   # while reporting success either way, so `dot fleet namespace set X` was a
-  # silent no-op on the shipped file. It now inserts the key, as `dot profile
+  # silent no-op on the shipped file. It now inserts the key, as `dot config profile
   # set` does for `profile`.
   test_start "fm_fleet_namespace_set_reports_success_without_the_key"
   grep -q '^namespace = ' "$data" && sed -i.bak '/^namespace = /d' "$data"
@@ -635,7 +635,7 @@ fm_registry_url() {
 
 test_fm_registry_url() {
   test_start "fm_registry_url"
-  fm_run registry url
+  fm_run cli registry show
   fm_expect_rc 0
   test_start "fm_registry_url_prints_a_url"
   fm_expect_any "https://" "file://"
@@ -651,7 +651,7 @@ test_fm_registry_list() {
   local url
   url="$(fm_registry_url)"
   test_start "fm_registry_list"
-  DOTFILES_REGISTRY_URL="$url" fm_run registry list
+  DOTFILES_REGISTRY_URL="$url" fm_run cli list --available
   fm_expect_rc 0
   test_start "fm_registry_list_shows_the_module"
   fm_expect_out "fm-demo-mod"
@@ -667,7 +667,7 @@ test_fm_registry_list_empty() {
   local empty="$FM_SANDBOX/work/registry-empty.json"
   printf '{"version":1,"updated":"2026-01-01T00:00:00Z","modules":[]}\n' >"$empty"
   test_start "fm_registry_list_empty"
-  DOTFILES_REGISTRY_URL="file://$empty" fm_run registry list
+  DOTFILES_REGISTRY_URL="file://$empty" fm_run cli list --available
   fm_expect_rc 0
   test_start "fm_registry_list_empty_says_so"
   fm_expect_any "no modules published" "REGISTRY.md"
@@ -683,12 +683,12 @@ test_fm_registry_search() {
   local url
   url="$(fm_registry_url)"
   test_start "fm_registry_search"
-  DOTFILES_REGISTRY_URL="$url" fm_run registry search rust
+  DOTFILES_REGISTRY_URL="$url" fm_run cli list --available rust
   fm_expect_rc 0
   test_start "fm_registry_search_matches_on_tag"
   fm_expect_out "fm-demo-mod"
   test_start "fm_registry_search_no_match_is_empty"
-  DOTFILES_REGISTRY_URL="$url" fm_run registry search zzz-no-such-module
+  DOTFILES_REGISTRY_URL="$url" fm_run cli list --available zzz-no-such-module
   fm_expect_rc 0
   if [[ "$FM_OUT" == *"fm-demo-mod"* ]]; then
     fm_fail "a non-matching query still returned the module"
@@ -698,8 +698,10 @@ test_fm_registry_search() {
 }
 
 test_fm_registry_search_usage() {
+  # `dot cli list --available` with no term lists, so the route's search
+  # usage is reached directly.
   test_start "fm_registry_search_usage"
-  fm_run registry search
+  fm_run_route registry registry search
   fm_expect_rc 1
   test_start "fm_registry_search_usage_message"
   fm_expect_any "missing query" "search"
@@ -715,7 +717,7 @@ test_fm_registry_info() {
   local url
   url="$(fm_registry_url)"
   test_start "fm_registry_info"
-  DOTFILES_REGISTRY_URL="$url" fm_run registry info fm-demo-mod
+  DOTFILES_REGISTRY_URL="$url" fm_run cli show fm-demo-mod
   fm_expect_rc 0
   test_start "fm_registry_info_prints_the_metadata"
   if [[ "$FM_OUT" == *"1.0.0"* && "$FM_OUT" == *"sha256"* ]]; then
@@ -735,12 +737,12 @@ test_fm_registry_info_unknown() {
   local url
   url="$(fm_registry_url)"
   test_start "fm_registry_info_unknown"
-  DOTFILES_REGISTRY_URL="$url" fm_run registry info zzz-no-such-module
+  DOTFILES_REGISTRY_URL="$url" fm_run cli show zzz-no-such-module
   fm_expect_rc 1
   test_start "fm_registry_info_unknown_message"
   fm_expect_any "module not found" "zzz-no-such-module"
   test_start "fm_registry_info_missing_name"
-  DOTFILES_REGISTRY_URL="$url" fm_run registry info
+  DOTFILES_REGISTRY_URL="$url" fm_run cli show
   fm_expect_rc 1
 }
 
@@ -754,7 +756,7 @@ test_fm_registry_install_dry_run() {
   local url
   url="$(fm_registry_url)"
   test_start "fm_registry_install_dry_run"
-  DOTFILES_REGISTRY_URL="$url" fm_run registry install fm-demo-mod --dry-run
+  DOTFILES_REGISTRY_URL="$url" fm_run cli install fm-demo-mod --dry-run
   fm_expect_rc 0
   test_start "fm_registry_install_dry_run_verifies_the_digest"
   fm_expect_any "Verified" "fm-demo-mod"
@@ -778,7 +780,7 @@ test_fm_registry_install_yes() {
   local url
   url="$(fm_registry_url)"
   test_start "fm_registry_install_yes"
-  DOTFILES_REGISTRY_URL="$url" fm_run registry install fm-demo-mod --yes
+  DOTFILES_REGISTRY_URL="$url" fm_run cli install fm-demo-mod --yes
   fm_expect_rc 0
   test_start "fm_registry_install_yes_reports_installed"
   fm_expect_any "Installed" "fm-demo-mod"
@@ -805,7 +807,7 @@ test_fm_registry_install_sha_mismatch() {
   sed 's/"sha256": "[0-9a-f]*"/"sha256": "0000000000000000000000000000000000000000000000000000000000000000"/' \
     "$dir/index.json" >"$bad"
   test_start "fm_registry_install_sha_mismatch"
-  DOTFILES_REGISTRY_URL="file://$bad" fm_run registry install fm-demo-mod --yes
+  DOTFILES_REGISTRY_URL="file://$bad" fm_run cli install fm-demo-mod --yes
   fm_expect_rc 1
   test_start "fm_registry_install_sha_mismatch_message"
   fm_expect_any "SHA-256 mismatch" "integrity" "validation"
@@ -814,7 +816,7 @@ test_fm_registry_install_sha_mismatch() {
 test_fm_registry_install_errors() {
   fm_registry_clear_cache
   test_start "fm_registry_install_errors_missing_name"
-  fm_run registry install
+  fm_run cli install
   fm_expect_rc 1
   test_start "fm_registry_install_errors_missing_name_message"
   fm_expect_any "missing module name" "install"
@@ -822,10 +824,10 @@ test_fm_registry_install_errors() {
     local url
     url="$(fm_registry_url)"
     test_start "fm_registry_install_errors_unknown_module"
-    DOTFILES_REGISTRY_URL="$url" fm_run registry install zzz-no-such-module
+    DOTFILES_REGISTRY_URL="$url" fm_run cli install zzz-no-such-module
     fm_expect_rc 1
     test_start "fm_registry_install_errors_unknown_option"
-    DOTFILES_REGISTRY_URL="$url" fm_run registry install fm-demo-mod --zzz-not-an-option
+    DOTFILES_REGISTRY_URL="$url" fm_run cli install fm-demo-mod --zzz-not-an-option
     fm_expect_rc 2
   fi
 }
@@ -843,7 +845,7 @@ test_fm_registry_installed() {
   printf '{"name":"fm-installed-fixture","version":"2.3.4","description":"planted by the matrix"}\n' \
     >"$mod/installed.json"
   test_start "fm_registry_installed"
-  fm_run registry installed
+  fm_run cli list
   fm_expect_rc 0
   test_start "fm_registry_installed_no_breakage"
   fm_expect_no_forbidden
@@ -858,12 +860,12 @@ test_fm_registry_set_url() {
   local url
   url="$(fm_registry_url)"
   test_start "fm_registry_set_url"
-  fm_run registry set-url "$url"
+  fm_run cli registry set "$url"
   fm_expect_rc 0
   test_start "fm_registry_set_url_persists_to_registry_toml"
   fm_expect_file "$XDG_CONFIG_HOME/dotfiles/registry.toml"
   test_start "fm_registry_set_url_is_read_back"
-  fm_run registry url
+  fm_run cli registry show
   fm_expect_out "$url"
 }
 
@@ -871,12 +873,12 @@ test_fm_registry_set_url_invalid() {
   # The index is unsigned, so HTTPS (or file:// for local testing) is the
   # only transport that gives integrity. Plain HTTP must be refused.
   test_start "fm_registry_set_url_invalid"
-  fm_run registry set-url http://insecure.example/registry.json
+  fm_run cli registry set http://insecure.example/registry.json
   fm_expect_rc 1
   test_start "fm_registry_set_url_invalid_message"
   fm_expect_any "must use https" "https://"
   test_start "fm_registry_set_url_missing_url"
-  fm_run registry set-url
+  fm_run cli registry set
   fm_expect_rc 1
 }
 
@@ -886,7 +888,7 @@ test_fm_config_registry_toml() {
   mkdir -p "$XDG_CONFIG_HOME/dotfiles"
   printf 'url = "%s"\n' "$url" >"$XDG_CONFIG_HOME/dotfiles/registry.toml"
   test_start "fm_config_registry_toml"
-  fm_run registry url
+  fm_run cli registry show
   fm_expect_rc 0
   test_start "fm_config_registry_toml_url_key_is_honoured"
   fm_expect_out "$url"
@@ -900,7 +902,7 @@ test_fm_env_dotfiles_registry_url() {
   printf 'url = "https://config-file.example/registry.json"\n' \
     >"$XDG_CONFIG_HOME/dotfiles/registry.toml"
   test_start "fm_env_dotfiles_registry_url"
-  DOTFILES_REGISTRY_URL="$url" fm_run registry url
+  DOTFILES_REGISTRY_URL="$url" fm_run cli registry show
   fm_expect_rc 0
   test_start "fm_env_dotfiles_registry_url_overrides_the_config_file"
   fm_expect_out "$url"
@@ -909,15 +911,17 @@ test_fm_env_dotfiles_registry_url() {
 
 test_fm_registry_help() {
   test_start "fm_registry_help"
-  fm_run registry --help
+  fm_run cli list --available --help
   fm_expect_rc 0
   test_start "fm_registry_help_lists_subcommands"
   fm_expect_any "list" "search" "install"
 }
 
 test_fm_registry_unknown() {
+  # `dot cli list --available <word>` searches for the word, so the route's
+  # unknown-subcommand error is reached directly.
   test_start "fm_registry_unknown"
-  fm_run registry zzz-not-a-subcommand
+  fm_run_route registry registry zzz-not-a-subcommand
   fm_expect_rc 1
   test_start "fm_registry_unknown_message"
   fm_expect_any "Unknown subcommand" "zzz-not-a-subcommand"
@@ -934,19 +938,19 @@ fm_pattern_fixture() {
 test_fm_patterns_list() {
   fm_pattern_fixture
   test_start "fm_patterns_list"
-  fm_run patterns list
+  fm_run ai pattern list
   fm_expect_rc 0
   test_start "fm_patterns_list_shows_the_pattern"
   fm_expect_out "fm-demo"
   test_start "fm_patterns_defaults_to_list"
-  fm_run patterns
+  fm_run ai pattern
   fm_expect_out "fm-demo"
 }
 
 test_fm_patterns_view() {
   fm_pattern_fixture
   test_start "fm_patterns_view"
-  fm_run patterns view fm-demo
+  fm_run ai pattern show fm-demo
   fm_expect_rc 0
   test_start "fm_patterns_view_renders_the_body"
   fm_expect_any "Steer like a fixture" "FM demo pattern"
@@ -954,12 +958,12 @@ test_fm_patterns_view() {
 
 test_fm_patterns_view_missing() {
   test_start "fm_patterns_view_missing"
-  fm_run patterns view
+  fm_run ai pattern show
   fm_expect_rc 1
   test_start "fm_patterns_view_missing_message"
-  fm_expect_any "Missing pattern name" "Usage: dot patterns view"
+  fm_expect_any "Missing pattern name" "Usage: dot ai pattern show"
   test_start "fm_patterns_view_unknown_pattern"
-  fm_run patterns view zzz-no-such-pattern
+  fm_run ai pattern show zzz-no-such-pattern
   fm_expect_rc 1
   test_start "fm_patterns_view_unknown_pattern_message"
   fm_expect_any "Pattern not found" "zzz-no-such-pattern"
@@ -969,7 +973,7 @@ test_fm_patterns_edit() {
   fm_pattern_fixture
   fm_stub fm-pattern-editor "printf '%s\\n' \"\$1\" >'$FM_SANDBOX/pattern-edited'"
   test_start "fm_patterns_edit"
-  EDITOR="$FM_SANDBOX/bin/fm-pattern-editor" fm_run patterns edit fm-demo
+  EDITOR="$FM_SANDBOX/bin/fm-pattern-editor" fm_run ai pattern edit fm-demo
   # The stub editor exits 0 and `patterns edit` returns its status.
   fm_expect_rc 0
   test_start "fm_patterns_edit_opens_the_pattern_file"
@@ -984,18 +988,20 @@ test_fm_patterns_edit() {
 
 test_fm_patterns_edit_missing() {
   test_start "fm_patterns_edit_missing"
-  fm_run patterns edit
+  fm_run ai pattern edit
   fm_expect_rc 1
   test_start "fm_patterns_edit_missing_message"
-  fm_expect_any "Missing pattern name" "Usage: dot patterns edit"
+  fm_expect_any "Missing pattern name" "Usage: dot ai pattern edit"
 }
 
 test_fm_patterns_unknown() {
   test_start "fm_patterns_unknown"
-  fm_run patterns zzz-not-a-subcommand
-  fm_expect_rc 1
+  # Not a verb of `ai pattern`: it must stop at 127, never reach `dot ai`,
+  # which would send the words to a model as a prompt.
+  fm_run ai pattern zzz-not-a-subcommand
+  fm_expect_rc 127
   test_start "fm_patterns_unknown_prints_usage"
-  fm_expect_any "Usage: dot patterns" "list|view|edit"
+  fm_expect_any "is not a command" "dot help ai pattern"
 }
 
 test_fm_env_xdg_config_home() {
@@ -1005,7 +1011,7 @@ test_fm_env_xdg_config_home() {
   mkdir -p "$alt/ai/patterns"
   printf '# alt\n' >"$alt/ai/patterns/fm-alt-pattern.md"
   test_start "fm_env_xdg_config_home"
-  XDG_CONFIG_HOME="$alt" fm_run patterns list
+  XDG_CONFIG_HOME="$alt" fm_run ai pattern list
   fm_expect_rc 0
   test_start "fm_env_xdg_config_home_relocates_the_pattern_dir"
   fm_expect_out "fm-alt-pattern"
@@ -1084,7 +1090,7 @@ test_fm_completion_unknown() {
 
 test_fm_init_dry_run() {
   test_start "fm_init_dry_run"
-  fm_run init alice --dry-run
+  fm_run config init alice --dry-run
   fm_expect_rc 0
   test_start "fm_init_dry_run_resolves_the_github_url"
   fm_expect_out "https://github.com/alice/dotfiles.git"
@@ -1094,7 +1100,7 @@ test_fm_init_dry_run() {
 
 test_fm_init_owner_repo() {
   test_start "fm_init_owner_repo"
-  fm_run init alice/configs -n
+  fm_run config init alice/configs -n
   fm_expect_rc 0
   test_start "fm_init_owner_repo_resolves_the_url"
   fm_expect_out "https://github.com/alice/configs.git"
@@ -1102,7 +1108,7 @@ test_fm_init_owner_repo() {
 
 test_fm_init_url_no_apply() {
   test_start "fm_init_url_no_apply"
-  fm_run init https://example.com/repo.git --dry-run --no-apply
+  fm_run config init https://example.com/repo.git --dry-run --no-apply
   fm_expect_rc 0
   test_start "fm_init_url_no_apply_passes_the_url_through"
   fm_expect_out "https://example.com/repo.git"
@@ -1114,31 +1120,31 @@ test_fm_init_reject_http() {
   # Plain HTTP would let a MITM choose the code that then runs with the
   # user's privileges.
   test_start "fm_init_reject_http"
-  fm_run init http://insecure.example/repo.git
+  fm_run config init http://insecure.example/repo.git
   fm_expect_rc 2
   test_start "fm_init_reject_http_message"
   fm_expect_any "refusing plain HTTP" "HTTPS"
   test_start "fm_init_reject_metacharacters"
-  fm_run init 'bad;name'
+  fm_run config init 'bad;name'
   fm_expect_rc 2
   test_start "fm_init_reject_metacharacters_message"
   fm_expect_any "invalid user" "only [A-Za-z0-9._-]"
   test_start "fm_init_reject_bad_owner_repo"
-  fm_run init 'owner/repo;rm'
+  fm_run config init 'owner/repo;rm'
   fm_expect_rc 2
 }
 
 test_fm_init_usage() {
   test_start "fm_init_usage"
-  fm_run init
+  fm_run config init
   fm_expect_rc 1
   test_start "fm_init_usage_message"
   fm_expect_any "missing <user|repo|url>" "init"
   test_start "fm_init_usage_unknown_flag"
-  fm_run init --zzz-not-a-flag
+  fm_run config init --zzz-not-a-flag
   fm_expect_rc 1
   test_start "fm_init_usage_too_many_args"
-  fm_run init alice bob
+  fm_run config init alice bob
   fm_expect_rc 1
   test_start "fm_init_usage_too_many_args_message"
   fm_expect_any "Too many arguments" "bob"
@@ -1146,10 +1152,10 @@ test_fm_init_usage() {
 
 test_fm_init_help() {
   test_start "fm_init_help"
-  fm_run init --help
+  fm_run config init --help
   fm_expect_rc 0
   test_start "fm_init_help_is_rendered"
-  fm_expect_any "dot init" "Summary"
+  fm_expect_any "dot config init" "Summary"
 }
 
 test_fm_smoke_init_apply() { fm_smoke init; }
@@ -1167,7 +1173,7 @@ fm_manual_offline_fixture() {
 test_fm_manual_text_offline() {
   fm_manual_offline_fixture >/dev/null
   test_start "fm_manual_text_offline"
-  fm_run manual text --offline
+  fm_run help --manual text --offline
   fm_expect_rc 0
   test_start "fm_manual_text_offline_pipes_the_body"
   fm_expect_out "FM MANUAL OFFLINE BODY"
@@ -1179,7 +1185,7 @@ test_fm_manual_download_offline() {
   mkdir -p "$FM_SANDBOX/work/manual-dl"
   cd "$FM_SANDBOX/work/manual-dl" || return 0
   test_start "fm_manual_download_offline"
-  fm_run manual download text --offline
+  fm_run help --manual download text --offline
   fm_expect_rc 0
   test_start "fm_manual_download_offline_saves_the_file"
   fm_expect_file "$FM_SANDBOX/work/manual-dl/dotfiles.txt"
@@ -1188,7 +1194,7 @@ test_fm_manual_download_offline() {
 
 test_fm_manual_offline_missing() {
   test_start "fm_manual_offline_missing"
-  fm_run manual pdf --offline
+  fm_run help --manual pdf --offline
   fm_expect_rc 1
   test_start "fm_manual_offline_missing_names_the_path"
   fm_expect_any "offline copy not found" "dotfiles.pdf"
@@ -1199,7 +1205,7 @@ test_fm_manual_offline_missing() {
   # carries no _build/, so the "missing" case is the one under test.
   local repo
   repo="$(fm_repo_copy)"
-  fm_run_bin "$repo/bin/dot" manual text --local
+  fm_run_bin "$repo/bin/dot" help --manual text --local
   fm_expect_rc 1
   test_start "fm_manual_local_missing_points_at_the_builder"
   fm_expect_any "local build not found" "build-manual.sh"
@@ -1207,10 +1213,10 @@ test_fm_manual_offline_missing() {
 
 test_fm_manual_help() {
   test_start "fm_manual_help"
-  fm_run manual --help
+  fm_run help --manual --help
   fm_expect_rc 0
   test_start "fm_manual_help_is_rendered"
-  fm_expect_any "dot manual" "manual" "Summary"
+  fm_expect_any "dot help --manual" "manual" "Summary"
 }
 
 test_fm_env_xdg_data_home() {
@@ -1219,7 +1225,7 @@ test_fm_env_xdg_data_home() {
   mkdir -p "$alt/dotfiles/manual"
   printf 'FM ALT DATA MANUAL\n' >"$alt/dotfiles/manual/dotfiles.txt"
   test_start "fm_env_xdg_data_home"
-  XDG_DATA_HOME="$alt" fm_run manual text --offline
+  XDG_DATA_HOME="$alt" fm_run help --manual text --offline
   fm_expect_rc 0
   test_start "fm_env_xdg_data_home_relocates_the_offline_copy"
   fm_expect_out "FM ALT DATA MANUAL"
@@ -1230,7 +1236,7 @@ test_fm_env_pager() {
   fm_manual_offline_fixture >/dev/null
   fm_stub fm-pager "printf 'PAGED:'; cat \"\$@\""
   test_start "fm_env_pager"
-  PAGER="$FM_SANDBOX/bin/fm-pager" fm_run manual text --offline
+  PAGER="$FM_SANDBOX/bin/fm-pager" fm_run help --manual text --offline
   fm_expect_rc 0
   test_start "fm_env_pager_receives_the_manual"
   fm_expect_out "PAGED:"

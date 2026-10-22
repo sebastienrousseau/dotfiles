@@ -45,13 +45,13 @@ assert_file_contains "$AI_FILE" 'dot_ui_command_banner "AI and Agents"' "ai comm
 assert_file_contains "$DOT_CLI" 'ui_dot_banner "Reference"' "top-level reference views use the shared banner"
 
 test_start "health_runtime_banner"
-health_output=$(XDG_STATE_HOME=/tmp bash "$DOT_CLI" health 2>/dev/null || true)
+health_output=$(XDG_STATE_HOME=/tmp bash "$DOT_CLI" doctor status 2>/dev/null || true)
 if [[ "$health_output" == *"DOTFILES"* ]] && [[ "$health_output" == *"Dot • Diagnostics"* ]]; then
   ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot health prints the standard banner"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot doctor status prints the standard banner"
 else
   ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot health should print the standard banner"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot doctor status should print the standard banner"
   printf '%b\n' "    Output: ${health_output:0:200}"
 fi
 

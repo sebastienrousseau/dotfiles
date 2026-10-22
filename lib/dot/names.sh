@@ -232,9 +232,10 @@ _dot_spelled() {
   if [[ -n "$_RUN" ]]; then
     # shellcheck disable=SC2206 # a route and its leading arguments
     _ARGV=($_RUN "${@:$((_RUN_USED + 1))}")
-  elif _dot_planned "$@"; then
-    _dot_unknown "$@" # never let the domain's own route take a planned verb
-  elif [[ "$1" == help ]] && _dot_names_spelling "$2" && _dot_help_spelling "${@:2}"; then
+    return 0
+  fi
+  _dot_stop_unbuilt "$@"
+  if [[ "$1" == help ]] && _dot_names_spelling "$2" && _dot_help_spelling "${@:2}"; then
     exit 0
   fi
   return 0
@@ -270,6 +271,28 @@ _dot_unknown() {
   fi
   echo "Unknown command: ${1:-}" >&2
   echo "Run 'dot help' for available commands." >&2
+  exit 127
+}
+
+# _dot_stop_unbuilt WORD...: exit before the domain's own route can take a
+# planned verb, or a typo after an object that is not also one of that
+# route's old subcommands (`dot ai pattern x` would prompt a model).
+_dot_stop_unbuilt() {
+  if _dot_planned "$@"; then
+    _dot_unknown "$@"
+  elif [[ -n "${3:-}" && "$3" != -* && "$_DOT_TABLE" != *$'\n'"leg|$1 $2"[\ \|]* ]] &&
+    _dot_record obj "$1 $2"; then
+    _dot_not_a_verb "$@"
+  fi
+  return 0
+}
+
+# _dot_not_a_verb DOMAIN OBJECT WORD...: WORD is not a verb of the object.
+# The word is named only when it is plain lowercase (never a value).
+_dot_not_a_verb() {
+  local word=""
+  [[ ! "$3" =~ ^[a-z]+$ ]] || word=" $3"
+  echo "dot: 'dot $1 $2$word' is not a command; run 'dot help $1 $2'" >&2
   exit 127
 }
 

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Dotfiles Health Check Dashboard
-# Usage: dot health [--verbose|-v] [--json|-j] [--fix|-f] [--force|-F]
+# Usage: dot doctor status [--verbose|-v] [--json|-j] [--fix|-f] [--force|-F]
 
 set -euo pipefail
 
@@ -612,7 +612,7 @@ _health_verdict() {
   fi
   echo ""
   if [[ $WARNINGS -gt 0 || $FAILURES -gt 0 ]]; then
-    printf '%b\n' "  ${CYAN}Tip:${NC} Run 'dot health --fix' to auto-repair common issues."
+    printf '%b\n' "  ${CYAN}Tip:${NC} Run 'dot doctor status --fix' to auto-repair common issues."
     echo ""
   fi
 }

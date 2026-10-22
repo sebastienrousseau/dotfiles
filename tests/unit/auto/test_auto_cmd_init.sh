@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 # Auto-generated function-exercise test for scripts/dot/commands/init.sh
-# (the `dot init <github-user>` bootstrap). Covers existence, syntax,
+# (the `dot config init <github-user>` bootstrap). Covers existence, syntax,
 # the URL-resolution helper across all five input shapes, and the
 # safety guard (refuses plain HTTP, refuses invalid usernames).
 # AUTO-GENERATED: true
@@ -32,7 +32,7 @@ else
 fi
 
 test_start "dot_init_help"
-if bash "$DOT_BIN" init --help >/dev/null 2>&1; then
+if bash "$DOT_BIN" config init --help >/dev/null 2>&1; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
@@ -45,7 +45,7 @@ fi
 # all exercise different case arms in _init_resolve_url.
 for arg in "alice" "alice/cfg" "https://example.com/repo.git" "git@github.com:alice/cfg.git"; do
   test_start "dot_init_dry_run_$(echo "$arg" | tr -dc 'a-z0-9' | cut -c1-12)"
-  if bash "$DOT_BIN" init "$arg" --dry-run >/dev/null 2>&1; then
+  if bash "$DOT_BIN" config init "$arg" --dry-run >/dev/null 2>&1; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
   else
@@ -56,7 +56,7 @@ done
 
 # Negative cases — these exercise the safety-rejection branches.
 test_start "dot_init_rejects_http"
-if bash "$DOT_BIN" init "http://example.com/repo.git" --dry-run >/dev/null 2>&1; then
+if bash "$DOT_BIN" config init "http://example.com/repo.git" --dry-run >/dev/null 2>&1; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have refused plain HTTP"
 else
@@ -65,7 +65,7 @@ else
 fi
 
 test_start "dot_init_rejects_shell_metachars"
-if bash "$DOT_BIN" init "alice; rm -rf /" --dry-run >/dev/null 2>&1; then
+if bash "$DOT_BIN" config init "alice; rm -rf /" --dry-run >/dev/null 2>&1; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have refused metacharacters"
 else
@@ -74,7 +74,7 @@ else
 fi
 
 test_start "dot_init_rejects_missing_arg"
-if bash "$DOT_BIN" init --dry-run >/dev/null 2>&1; then
+if bash "$DOT_BIN" config init --dry-run >/dev/null 2>&1; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have refused missing arg"
 else

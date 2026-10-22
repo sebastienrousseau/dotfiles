@@ -7,7 +7,7 @@
 # dot_probe <seconds> <command…> — run a query of another tool (a version,
 # a list) with stdin closed, stderr dropped and a wall-clock limit. Some
 # tools never answer: rustup's proxies (cargo, rustc) wait on a toolchain
-# when HOME has none, and hung `dot packages` and `dot snapshot` for good.
+# when HOME has none, and hung `dot tool list --packages` and `dot doctor snapshot new` for good.
 # The whole process group is killed on expiry, not just the child: a
 # grandchild that inherited stdout would otherwise keep the caller's $( )
 # open. Exits 124 on expiry, else the command's status. perl gives fork +

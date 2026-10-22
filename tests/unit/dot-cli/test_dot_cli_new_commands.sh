@@ -74,6 +74,8 @@ chmod +x "$STUBS/mise"
 
 # dot <args…> — run the sandbox bin/dot with a clean environment. Stdout
 # and stderr are captured; the exit status is returned.
+# dot ARGS...: the CLI in the sandbox. DOT_ENTRY runs a route's command
+# module instead, the way bin/dot dispatches it (route name first).
 dot() {
   : >"$CALLS"
   command env -i HOME="$SANDBOX_HOME" PATH="$STUBS:/usr/bin:/bin" \
@@ -81,7 +83,7 @@ dot() {
     XDG_DATA_HOME="$SANDBOX_HOME/.local/share" XDG_STATE_HOME="$SANDBOX_HOME/.local/state" \
     GIT_CONFIG_NOSYSTEM=1 NO_COLOR=1 TERM=dumb DOTFILES_SHOW_LOGO=0 LANG=C \
     STUB_RC="${STUB_RC:-0}" \
-    "$REAL_BASH" "$SRC/bin/dot" "$@" </dev/null >"$OUT" 2>"$ERR"
+    "$REAL_BASH" "${DOT_ENTRY:-$SRC/bin/dot}" "$@" </dev/null >"$OUT" 2>"$ERR"
 }
 out() { cat "$OUT" "$ERR"; }
 refute_contains() { # <needle> <actual> <msg>
@@ -107,22 +109,22 @@ assert_equals "0" "$?" "diagnostics verify exits 0"
 assert_contains "ran scripts/diagnostics/verify.sh -s" "$(out)" "verify hands off to verify.sh with its flags"
 
 test_start "dot_cli_routes_scorecard_and_score"
-dot scorecard --json
-assert_equals "0" "$?" "dot scorecard exits 0"
+dot doctor score show --json
+assert_equals "0" "$?" "dot doctor score show exits 0"
 assert_contains "ran scripts/diagnostics/scorecard.sh --json" "$(out)" "scorecard runs scorecard.sh"
-dot score -q
+dot doctor score -q
 assert_contains "ran scripts/diagnostics/scorecard.sh -q" "$(out)" "score is an alias of scorecard"
-STUB_RC=3 dot score
+STUB_RC=3 dot doctor score
 assert_equals "3" "$?" "the scorecard exit status is dot's exit status"
 
 test_start "dot_cli_routes_snapshot"
-dot snapshot -b
-assert_equals "0" "$?" "dot snapshot exits 0"
+dot doctor snapshot new -b
+assert_equals "0" "$?" "dot doctor snapshot new exits 0"
 assert_contains "ran scripts/diagnostics/snapshot.sh -b" "$(out)" "snapshot runs snapshot.sh"
 
 test_start "dot_cli_routes_heal"
-dot heal --dry-run
-assert_equals "0" "$?" "dot heal exits 0"
+dot doctor fix --dry-run
+assert_equals "0" "$?" "dot doctor fix exits 0"
 assert_contains "ran scripts/ops/heal.sh --dry-run" "$(out)" "heal runs heal.sh"
 
 # `dot update` is the shortcut for `dot system update` (ADR-020); the
@@ -194,54 +196,56 @@ refute_contains "chezmoi-apply.sh" "$(out)" "sync --check applies nothing"
 # --- Wave 3: env ------------------------------------------------------------
 
 test_start "dot_cli_env_lists_mise_tools"
-dot env
-assert_equals "0" "$?" "dot env exits 0"
+dot tool
+assert_equals "0" "$?" "dot tool exits 0"
 assert_contains "node" "$(out)" "the managed tool is listed"
 assert_contains "22.1.0" "$(out)" "its version is listed"
 
 test_start "dot_cli_env_use_forwards_to_mise"
-dot env use node@22
-assert_equals "0" "$?" "dot env use exits 0"
+dot tool set node@22
+assert_equals "0" "$?" "dot tool set exits 0"
 assert_file_contains "$CALLS" "mise use node@22" "env use pins through mise"
-dot env install --yes aqua:nushell/nushell@0.114.1 npm:@openai/codex@latest
+dot tool install --yes aqua:nushell/nushell@0.114.1 npm:@openai/codex@latest
 assert_equals "0" "$?" "backend-prefixed specs are accepted"
 assert_file_contains "$CALLS" "mise install --yes aqua:nushell/nushell@0.114.1 npm:@openai/codex@latest" \
   "env install forwards flags and specs to mise"
 
 test_start "dot_cli_env_rejects_unsafe_tool_names"
-dot env install 'node;touch pwned'
+dot tool install 'node;touch pwned'
 assert_not_equals "0" "$?" "an unsafe tool name is refused"
 refute_contains "mise install" "$(cat "$CALLS")" "mise is never called with the unsafe name"
 
 # --- Wave 4: profile --------------------------------------------------------
 
 test_start "dot_cli_profile_show"
-dot profile
-assert_equals "0" "$?" "dot profile exits 0"
+dot config profile
+assert_equals "0" "$?" "dot config profile exits 0"
 assert_contains "laptop" "$(out)" "the active profile is shown"
 assert_contains "alias_wrapper" "$(out)" "feature flags are listed"
 
 test_start "dot_cli_profile_set"
-dot profile set work
-assert_equals "0" "$?" "dot profile set exits 0"
-dot profile show
+dot config profile set work
+assert_equals "0" "$?" "dot config profile set exits 0"
+dot config profile show
 assert_contains "work" "$(out)" "the new profile is persisted and shown"
 refute_contains "laptop" "$(out)" "the old profile is replaced"
-dot profile bogus
+dot config profile bogus
 assert_not_equals "0" "$?" "an unknown profile subcommand fails"
 
 # --- Wave 4: keys sign-check ------------------------------------------------
+# `dot keys` is retired with no new spelling (ADR-020; the check is also in
+# `dot doctor`), so the route's module is called directly until extraction.
 
 test_start "dot_cli_keys_sign_check"
-dot keys sign-check
+DOT_ENTRY="$SRC/scripts/dot/commands/meta.sh" dot keys sign-check
 assert_equals "0" "$?" "sign-check exits 0 with no key"
 assert_contains "No signing key configured" "$(out)" "a missing signing key is reported"
 mkdir -p "$SANDBOX_HOME/.ssh"
 printf '[user]\n\tsigningkey = ~/.ssh/signing.pub\n[gpg]\n\tformat = ssh\n' >"$SANDBOX_HOME/.gitconfig"
-dot keys sign-check
+DOT_ENTRY="$SRC/scripts/dot/commands/meta.sh" dot keys sign-check
 assert_contains "SSH key file not found" "$(out)" "an absent SSH key file is reported"
 : >"$SANDBOX_HOME/.ssh/signing.pub"
-dot keys sign-check
+DOT_ENTRY="$SRC/scripts/dot/commands/meta.sh" dot keys sign-check
 assert_contains "SSH key file exists: $SANDBOX_HOME/.ssh/signing.pub" "$(out)" "a present SSH key is found with ~ expanded"
 
 echo ""

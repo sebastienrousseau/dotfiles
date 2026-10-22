@@ -70,7 +70,7 @@ if [[ "$patch" -gt 5 ]]; then
     | grep -v 'archive/' \
     | grep -v 'example' \
     | grep -v 'Usage:' \
-    | grep -v 'dot restore' \
+    | grep -v 'dot doctor restore' \
     | wc -l)"
   if [[ "$stale_count" -eq 0 ]]; then
     ((TESTS_PASSED++))

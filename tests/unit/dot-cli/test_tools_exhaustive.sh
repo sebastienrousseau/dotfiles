@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Exhaustive runtime exercise of the `dot tools` surface — drives line
+# Exhaustive runtime exercise of the `dot tool list --nix` surface — drives line
 # coverage across scripts/dot/commands/tools.sh and the two modules it
 # sources for dispatch: aliases.sh (`aliases`, `alias-check`) and
 # env-emit.sh (`env emit`).
@@ -31,7 +31,7 @@ cov_setup_sandbox
 
 MB="$DOTFILES_COV_TMPDIR/bin"
 
-# ── mise: the source of truth `dot env` reads ────────────────────────
+# ── mise: the source of truth `dot tool` reads ────────────────────────
 # `mise ls --json` output shaped like the real thing so the jq filter
 # in env-emit.sh has something to walk. `prune --dry-run-code` exits 1
 # (nothing to prune) so the orphan-install arm executes too.
@@ -96,7 +96,7 @@ SHIM
 
 chmod +x "$MB/mise" "$MB/nix" "$MB/curl"
 
-# Language package managers probed by `dot packages`. Without these the
+# Language package managers probed by `dot tool list --packages`. Without these the
 # probes fall through to whatever the host has installed and shell out
 # to the real cargo / go / npm — slow, and it reaches outside the
 # sandbox. Each shim answers the one query tools.sh makes of it.

@@ -67,6 +67,8 @@ chmod 0755 "$dest/bin/dot" "$dest"/bin/dot-* "$dest/scripts/uninstall.sh"
 # A staged archive must be operational without a source checkout.
 DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 "$dest/bin/dot" version >/dev/null
 DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 "$dest/bin/dot" help >/dev/null
-for command in apply doctor health perf tools theme fleet registry agents env; do
-  DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 "$dest/bin/dot" "$command" --help >/dev/null
+# One spelling per domain (ADR-020), so a retired name cannot fail the stage.
+for command in apply doctor "doctor status" "doctor perf show" "tool list" theme fleet "cli list" "agent context" tool; do
+  # shellcheck disable=SC2086 # a spelling is words
+  DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 "$dest/bin/dot" $command --help >/dev/null
 done

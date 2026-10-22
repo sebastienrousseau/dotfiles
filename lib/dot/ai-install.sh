@@ -73,7 +73,7 @@ _ai_latest() {
   mise latest "$backend" 2>/dev/null || true
 }
 
-# ai_pin_bumps: for `dot upgrade`, each pinned AI CLI with a newer release.
+# ai_pin_bumps: for `dot system update`, each pinned AI CLI with a newer release.
 # A gated latest older than the pin (a pin set inside the age gate) is not a
 # bump. Pins move only when [ai_tools] is edited, so this proposes bumps
 # rather than applying them.

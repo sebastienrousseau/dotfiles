@@ -32,10 +32,10 @@
 # $CHEZMOI_SOURCE_DIR and $HOME. A sandboxed HOME does not protect the
 # checkout from those:
 #
-#     dot profile set              -> <repo>/defaults/.chezmoidata.toml
+#     dot config profile set              -> <repo>/defaults/.chezmoidata.toml
 #     dot fleet namespace set      -> <repo>/defaults/.chezmoidata.toml
 #     dot fleet enforce set        -> <repo>/defaults/dot_config/.../agent-profiles.json
-#     dot aliases cheatsheet       -> <repo>/docs/ALIASES_CHEATSHEET.md
+#     dot shell alias export       -> <repo>/docs/ALIASES_CHEATSHEET.md
 #
 # `fm_repo_copy` exists for those: it materialises a ~1 MB subset of the repo
 # in the sandbox so the write lands there.
@@ -275,7 +275,7 @@ fm_repo_copy() {
 # fm_repo_copy_aliases — a second, heavier copy that also carries
 # scripts/diagnostics (the alias manifest and cheatsheet generators) and the
 # chezmoi-tracked alias templates they read. Kept separate from fm_repo_copy
-# because `dot lint` walks whatever is in the tree it is pointed at, and
+# because `dot config check` walks whatever is in the tree it is pointed at, and
 # dragging .chezmoitemplates into the lint copy tripled that row's runtime.
 fm_repo_copy_aliases() {
   local dest="$FM_SANDBOX/repo-aliases"
@@ -298,6 +298,16 @@ fm_repo_copy_aliases() {
 # assert on a non-zero exit code.
 fm_run() {
   fm_run_bin "$FM_DOT" "$@"
+}
+
+# fm_run_route <module> <route> <args…> — run a route's command module the
+# way bin/dot dispatches it, past the names layer. For routes whose old name
+# is retired with no new spelling (ADR-020: chaos, smoke-test, keys,
+# health-check), which stay in routes.txt until extraction.
+fm_run_route() {
+  local module="$1"
+  shift
+  fm_run_bin "$(dirname "$FM_DOT")/../scripts/dot/commands/$module.sh" "$@"
 }
 
 # fm_run_bin <dot-path> <args…> — same, against a specific dispatcher (used
@@ -419,7 +429,7 @@ fm_expect_out_matches() {
 # NOTE on the test below: it looks like a job for "${FM_OUT// /}", and that is
 # what it used to be. Do not go back. bash 3.2 — which is /bin/bash on the
 # macOS runners — implements pattern substitution over a large string
-# quadratically: on the 176 KB `dot aliases list` output it had not finished
+# quadratically: on the 176 KB `dot shell alias list` output it had not finished
 # after two minutes, where bash 5.3 takes 11s. That ran inside the test shell,
 # not inside a `dot` invocation, so FM_TIMEOUT never applied to it, and the
 # whole macOS regression tier sat silent until the job's six-hour ceiling
@@ -492,16 +502,41 @@ fm_expect_no_forbidden() {
 # Smoke coverage for rows the matrix records as unmeasurable
 # ---------------------------------------------------------------------------
 
+# fm_spelling <words…> — the ADR-020 spelling of a deprecated name, from
+# lib/dot/data/commands.txt: the longest old route (leg record) the words
+# start with, else the alias target; anything else unchanged. Deprecated
+# names exit 127 from their release, so the matrix calls the new spelling.
+fm_spelling() {
+  awk -F'|' -v words="$*" '
+    $1 == "alias" && $3 == "deprecated" { dep[$2] = $4 }
+    $1 == "leg" && $2 != $3 { leg[$2] = $3 }
+    END {
+      n = split(words, w, " ")
+      if (!(w[1] in dep)) { print words; exit }
+      for (k = n; k >= 1; k--) {
+        key = w[1]
+        for (i = 2; i <= k; i++) key = key " " w[i]
+        if (key in leg) { out = leg[key]; break }
+      }
+      if (out == "") { out = dep[w[1]]; k = 1 }
+      for (i = k + 1; i <= n; i++) out = out " " w[i]
+      print out
+    }' "$REPO_ROOT/lib/dot/data/commands.txt"
+}
+
 # fm_smoke <cmd…> — the integration-smoke contract every "unmeasurable" row
 # still has to satisfy: `dot <cmd> --help` exits 0 and prints usage for the
 # right command, WITHOUT performing the command's real (destructive, network,
 # or interactive) work. This is the universal --help intercept in bin/dot, so
-# it is safe for every command including `dot uninstall` and `dot chaos`.
+# it is safe for every command including `dot config uninstall` and `dot chaos`.
 fm_smoke() {
   local label
   label="$(printf '%s' "$*" | tr ' /-' '___')"
   test_start "fm_smoke_help_${label}"
-  fm_run "$@" --help
+  local spelling
+  spelling="$(fm_spelling "$@")"
+  # shellcheck disable=SC2086 # the spelling is words
+  fm_run $spelling --help
   if [[ "$FM_RC" -ne 0 ]]; then
     fm_fail "dot $* --help exited $FM_RC"
     return 0
@@ -512,10 +547,15 @@ fm_smoke() {
     fm_fail "dot $* --help printed nothing"
     return 0
   fi
-  # The help renderer prints "dot <command>" as its heading; the first word of
-  # the argv is the command whose help must come back.
-  if [[ "$FM_OUT" != *"$1"* ]]; then
-    fm_fail "help output does not mention '$1'"
+  # The help renderer prints "dot <command>" as its heading: the old name's
+  # first word, or the words of its new spelling before any flag.
+  # Trailing argument words (`ai run claude`) are not in the heading.
+  spelling="${spelling%% -*}"
+  while [[ "$FM_OUT" != *"dot $spelling"* && "$spelling" == *" "*" "* ]]; do
+    spelling="${spelling% *}"
+  done
+  if [[ "$FM_OUT" != *"$1"* && "$FM_OUT" != *"dot $spelling"* ]]; then
+    fm_fail "help output does not mention '$1' or 'dot $spelling'"
     return 0
   fi
   fm_pass "help ok"

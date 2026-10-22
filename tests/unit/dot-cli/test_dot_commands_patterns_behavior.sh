@@ -126,7 +126,7 @@ test_start "patterns_view_without_a_name_fails_with_usage"
 _out="$(_run view)"
 _rc=$?
 assert_equals 1 "$_rc" "view without a name exits 1"
-assert_contains "Usage: dot patterns view <name>" "$_out" "usage printed"
+assert_contains "Usage: dot ai pattern show <name>" "$_out" "usage printed"
 
 test_start "patterns_edit_opens_the_file_in_EDITOR"
 _editor="$DOTFILES_COV_TMPDIR/editor-bin"
@@ -146,12 +146,12 @@ test_start "patterns_edit_without_a_name_fails_with_usage"
 _out="$(EDITOR="$_editor/fake-editor" _run edit)"
 _rc=$?
 assert_equals 1 "$_rc" "edit without a name exits 1"
-assert_contains "Usage: dot patterns edit <name>" "$_out" "usage printed"
+assert_contains "Usage: dot ai pattern edit <name>" "$_out" "usage printed"
 
 test_start "patterns_unknown_subcommand_prints_usage_and_fails"
 _out="$(_run bogus)"
 _rc=$?
 assert_equals 1 "$_rc" "unknown subcommand exits 1"
-assert_contains "Usage: dot patterns [list|view|edit] [name]" "$_out" "usage printed"
+assert_contains "Usage: dot ai pattern list|show|edit [name]" "$_out" "usage printed"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

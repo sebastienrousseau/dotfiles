@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1091
-# Feature-matrix rows for the commands that delete things: dot uninstall
+# Feature-matrix rows for the commands that delete things: dot config uninstall
 # and dot chaos --force. They used to be --help smoke rows because the
 # sandbox symlinked $HOME/.dotfiles to the real checkout, and on 2026-09-24
 # an uninstall run that way purged the real ~/.dotfiles. Here every test
@@ -60,7 +60,7 @@ test_fm_uninstall_declined() {
   fresh_isolated_sandbox
   plant "${UNINSTALL_TARGETS[@]/#/$HOME/}"
   test_start "fm_uninstall_declined"
-  FM_STDIN="n" fm_run uninstall
+  FM_STDIN="n" fm_run config uninstall
   fm_expect_rc 0
   test_start "fm_uninstall_declined_says_aborted"
   fm_expect_out "Aborted."
@@ -77,7 +77,7 @@ test_fm_uninstall_force() {
   plant "${UNINSTALL_TARGETS[@]/#/$HOME/}" "$HOME/.config/keep/me.conf" "$HOME/.local/bin/not-ours"
   fm_stub chezmoi 'printf "%s\n" "$*" >>"$FM_SANDBOX/chezmoi.calls"'
   test_start "fm_uninstall_force"
-  fm_run uninstall --force
+  fm_run config uninstall --force
   fm_expect_rc 0
   test_start "fm_uninstall_force_reports_completion"
   fm_expect_out "Uninstall complete."
@@ -117,7 +117,7 @@ if [[ "$target" == */.dotfiles && ! -e "$FM_SANDBOX/rm.raced" ]]; then
   exit 1
 fi'
   test_start "fm_uninstall_force_outlasts_a_concurrent_writer"
-  fm_run uninstall --force
+  fm_run config uninstall --force
   fm_expect_rc 0
   test_start "fm_uninstall_force_outlasts_a_concurrent_writer_removes_the_checkout"
   if [[ -f "$FM_SANDBOX/rm.raced" && ! -e "$HOME/.dotfiles" ]]; then
@@ -143,7 +143,7 @@ if [[ "$target" == */.dotfiles ]]; then
   exit 1
 fi'
   test_start "fm_uninstall_force_reports_a_persistent_writer"
-  fm_run uninstall --force
+  fm_run config uninstall --force
   if [[ "$FM_RC" -ne 0 && "$FM_OUT" != *"Uninstall complete."* ]]; then
     fm_pass "uninstall failed (rc=$FM_RC) instead of claiming success"
   else
@@ -157,7 +157,7 @@ test_fm_chaos_force() {
   plant "$HOME/.config/starship.toml" "$HOME/.zshrc" "$HOME/.config/alacritty/alacritty.toml" \
     "$HOME/.config/keep/me.conf"
   test_start "fm_chaos_force"
-  fm_run chaos --force
+  fm_run_route diagnostics chaos --force
   fm_expect_rc 0
   test_start "fm_chaos_force_reports_the_injection"
   fm_expect_out "Chaos injected"

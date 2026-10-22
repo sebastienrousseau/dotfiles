@@ -46,7 +46,7 @@ cp "$REPO_ROOT/docs/registry.json" "$REGISTRY_CACHE_FILE"
 
 for sub in "--help" "url" "list"; do
   test_start "dot_registry_$(echo "$sub" | tr -d -- '-')"
-  if bash "$DOT_BIN" registry "$sub" >/dev/null 2>&1; then
+  if bash "$DOT_BIN" cli list --available "$sub" >/dev/null 2>&1; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=0)"
   else
@@ -58,7 +58,7 @@ done
 
 # search + info — both require jq; skipped cleanly when absent.
 test_start "dot_registry_search"
-if bash "$DOT_BIN" registry search anything >/dev/null 2>&1; then
+if bash "$DOT_BIN" cli list --available anything >/dev/null 2>&1; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
@@ -70,7 +70,7 @@ fi
 test_start "dot_registry_info_missing_module"
 # Empty registry → info on any name should exit non-zero (module not found),
 # which still counts as exercising the info branch.
-if ! bash "$DOT_BIN" registry info nonexistent-module >/dev/null 2>&1; then
+if ! bash "$DOT_BIN" cli show nonexistent-module >/dev/null 2>&1; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
@@ -80,7 +80,7 @@ fi
 
 test_start "dot_registry_install_missing_module"
 # The installer must fail closed when a requested module is absent.
-if bash "$DOT_BIN" registry install some-module >/dev/null 2>&1; then
+if bash "$DOT_BIN" cli install some-module >/dev/null 2>&1; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: missing module accepted"
 else
@@ -90,7 +90,7 @@ fi
 
 # Safety guards on set-url.
 test_start "dot_registry_set_url_refuses_http"
-if bash "$DOT_BIN" registry set-url "http://evil.example.com/r" >/dev/null 2>&1; then
+if bash "$DOT_BIN" cli registry set "http://evil.example.com/r" >/dev/null 2>&1; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have refused HTTP"
 else
@@ -99,7 +99,7 @@ else
 fi
 
 test_start "dot_registry_set_url_missing_arg"
-if bash "$DOT_BIN" registry set-url >/dev/null 2>&1; then
+if bash "$DOT_BIN" cli registry set >/dev/null 2>&1; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have refused missing URL"
 else
@@ -108,7 +108,9 @@ else
 fi
 
 test_start "dot_registry_unknown_subcommand"
-if bash "$DOT_BIN" registry not-a-real-subcommand >/dev/null 2>&1; then
+# `dot cli list --available <word>` searches, so the route rejects an
+# unknown subcommand only when called directly.
+if bash "$REPO_ROOT/scripts/dot/commands/registry.sh" registry not-a-real-subcommand >/dev/null 2>&1; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have rejected"
 else

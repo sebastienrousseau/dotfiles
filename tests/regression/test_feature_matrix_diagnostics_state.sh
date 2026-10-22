@@ -57,7 +57,7 @@ fm_expect_file_under() {
 
 test_fm_snapshot() {
   test_start "fm_snapshot"
-  fm_run snapshot
+  fm_run doctor snapshot new
   fm_expect_rc 0
   test_start "fm_snapshot_writes_a_snapshot"
   fm_expect_out "Snapshot"
@@ -65,13 +65,13 @@ test_fm_snapshot() {
 
 test_fm_snapshot_baseline() {
   test_start "fm_snapshot_baseline"
-  fm_run snapshot -b
+  fm_run doctor snapshot new -b
   fm_expect_rc 0
   test_start "fm_snapshot_baseline_writes_baseline_json"
   fm_expect_file "$XDG_STATE_HOME/dotfiles/snapshots/baseline.json"
   # -f overwrites an existing baseline rather than refusing.
   test_start "fm_snapshot_baseline_force"
-  fm_run snapshot -b -f
+  fm_run doctor snapshot new -b -f
   fm_expect_rc 0
 }
 
@@ -79,7 +79,7 @@ test_fm_env_xdg_state_home() {
   # Every snapshot/attestation/log write must land under XDG_STATE_HOME, which
   # is what keeps this whole suite off the developer's machine.
   test_start "fm_env_xdg_state_home"
-  fm_run snapshot
+  fm_run doctor snapshot new
   fm_expect_rc 0
   test_start "fm_env_xdg_state_home_receives_the_write"
   if find "$XDG_STATE_HOME/dotfiles/snapshots" -name 'snapshot_*.json' 2>/dev/null |
@@ -167,7 +167,7 @@ test_fm_attest_fleet_store() {
 
 test_fm_attestation() {
   test_start "fm_attestation"
-  fm_run attestation
+  fm_run attest
   fm_expect_attest_rc
   test_start "fm_attestation_is_alias_of_attest"
   fm_expect_out "--- Workstation Attestation ---"
@@ -179,7 +179,7 @@ test_fm_attestation() {
 
 test_fm_rollback_status() {
   test_start "fm_rollback_status"
-  fm_run rollback status
+  fm_run doctor rollback status
   fm_expect_rc 0
   test_start "fm_rollback_status_reports"
   fm_expect_out "== Dotfiles Rollback Status =="
@@ -191,7 +191,7 @@ test_fm_rollback_status() {
 
 test_fm_rollback_backup() {
   test_start "fm_rollback_backup"
-  fm_run rollback backup
+  fm_run doctor rollback backup
   fm_expect_rc 0
   test_start "fm_rollback_backup_creates_a_backup"
   fm_expect_out_matches 'Backup created: .*/backup_[0-9]{8}_[0-9]{6}_manual'
@@ -205,7 +205,7 @@ test_fm_rollback_backup() {
 
 test_fm_rollback_clean() {
   test_start "fm_rollback_clean"
-  fm_run rollback clean
+  fm_run doctor rollback clean
   fm_expect_rc 0
   test_start "fm_rollback_clean_reports"
   fm_expect_out_matches 'Cleaning old backups \(keeping last [0-9]+\)'
@@ -215,7 +215,7 @@ test_fm_rollback_clean() {
 
 test_fm_rollback_unknown() {
   test_start "fm_rollback_unknown"
-  fm_run rollback zzz-not-a-subcommand
+  fm_run doctor rollback zzz-not-a-subcommand
   fm_expect_rc 1
   test_start "fm_rollback_unknown_prints_usage"
   fm_expect_any "Unknown command" "Usage"
@@ -233,13 +233,13 @@ test_fm_rollback_restore_paths() {
   # `rollback rollback` / `rollback-to N` / `restore FILE` rewrite $HOME from
   # a backup. $HOME is the sandbox here, so the real paths run for real.
   printf 'v1\n' >"$HOME/.bashrc"
-  fm_run rollback backup
+  fm_run doctor rollback backup
   test_start "fm_rollback_restore_paths_backup"
   fm_expect_rc 0
 
   printf 'v2\n' >"$HOME/.bashrc"
   test_start "fm_rollback_rollback_force"
-  fm_run rollback rollback --force
+  fm_run doctor rollback rollback --force
   fm_expect_rc 0
   test_start "fm_rollback_rollback_restores_backup"
   if [[ "$(cat "$HOME/.bashrc")" == "v1" ]]; then fm_pass "restored v1"; else fm_fail "got $(cat "$HOME/.bashrc")"; fi
@@ -248,7 +248,7 @@ test_fm_rollback_restore_paths() {
   local want
   want="$(fm_backup_content 1 .bashrc)"
   test_start "fm_rollback_rollback_to_index"
-  fm_run rollback rollback-to 1 --force
+  fm_run doctor rollback rollback-to 1 --force
   fm_expect_rc 0
   test_start "fm_rollback_rollback_to_restores_that_backup"
   if [[ -n "$want" && "$(cat "$HOME/.bashrc")" == "$want" ]]; then fm_pass "restored backup #1"; else fm_fail "got $(cat "$HOME/.bashrc"), want $want"; fi
@@ -256,13 +256,13 @@ test_fm_rollback_restore_paths() {
   printf 'v4\n' >"$HOME/.bashrc"
   want="$(fm_backup_content 1 .bashrc)"
   test_start "fm_rollback_restore_file"
-  fm_run rollback restore .bashrc
+  fm_run doctor rollback restore .bashrc
   fm_expect_rc 0
   test_start "fm_rollback_restore_file_content"
   if [[ "$(cat "$HOME/.bashrc")" == "$want" ]]; then fm_pass "file restored"; else fm_fail "got $(cat "$HOME/.bashrc"), want $want"; fi
 
   test_start "fm_rollback_restore_rejects_traversal"
-  fm_run rollback restore ../../etc/passwd
+  fm_run doctor rollback restore ../../etc/passwd
   fm_expect_rc 1
 }
 
@@ -290,7 +290,7 @@ test_fm_rollback_git_reset_keeps_work() {
   )
   head="$(git -C "$repo" rev-parse HEAD)"
   test_start "fm_rollback_git_reset_force"
-  HOME="$home" fm_run rollback git-reset --force
+  HOME="$home" fm_run doctor rollback git-reset --force
   fm_expect_rc 0
   test_start "fm_rollback_git_reset_resets_to_tag"
   if [[ "$(git -C "$repo" rev-parse HEAD)" == "$(git -C "$repo" rev-parse 'v1^{commit}')" ]]; then fm_pass "HEAD at v1"; else fm_fail "HEAD not at v1"; fi
@@ -304,7 +304,7 @@ test_fm_rollback_git_reset_keeps_work() {
 
 test_fm_drift() {
   test_start "fm_drift"
-  fm_run drift
+  fm_run doctor drift show
   # The chezmoi shim reports no status and no source path, and the orphan
   # list lives under the sandboxed XDG_STATE_HOME, so every drift class is
   # empty and the dashboard exits 0.
@@ -317,7 +317,7 @@ test_fm_drift() {
 
 test_fm_drift_json() {
   test_start "fm_drift_json"
-  fm_run drift --json
+  fm_run doctor drift show --json
   fm_expect_rc 0
   test_start "fm_drift_json_is_json"
   fm_expect_json
@@ -333,7 +333,7 @@ test_fm_history() {
   printf ': 1700000000:0;ls\n: 1700000001:0;git status\n: 1700000002:0;ls\n' \
     >"$FM_SANDBOX/.zsh_history"
   test_start "fm_history"
-  fm_run history
+  fm_run shell history list
   fm_expect_rc 0
   test_start "fm_history_renders_analysis"
   fm_expect_out "--- History Analysis ---"
@@ -348,7 +348,7 @@ test_fm_history_missing() {
   local saved="$FM_SANDBOX/.zsh_history.saved"
   [[ -f "$hist" ]] && mv "$hist" "$saved"
   test_start "fm_history_missing"
-  HISTFILE="$FM_SANDBOX/definitely-no-history" fm_run history
+  HISTFILE="$FM_SANDBOX/definitely-no-history" fm_run shell history list
   fm_expect_rc 1
   test_start "fm_history_missing_says_so"
   fm_expect_err "not found"
@@ -363,7 +363,7 @@ test_fm_env_histfile() {
   local alt="$FM_SANDBOX/work/alt_history"
   printf ': 1700000000:0;kubectl\n: 1700000001:0;kubectl\n' >"$alt"
   test_start "fm_env_histfile"
-  HISTFILE="$alt" fm_run history
+  HISTFILE="$alt" fm_run shell history list
   fm_expect_rc 0
   test_start "fm_env_histfile_analyses_the_named_file"
   fm_expect_out_matches '^ +2 +kubectl$'
@@ -379,7 +379,7 @@ test_fm_env_histfile() {
 
 test_fm_benchmark() {
   test_start "fm_benchmark"
-  fm_run benchmark
+  fm_run doctor perf measure
   # benchmark.sh times `zsh -i -c exit` (through hyperfine when installed,
   # otherwise with its own loop). Without zsh there is nothing to time, so
   # the row skips — zsh is absent from the Linux CI runner.
@@ -402,13 +402,13 @@ test_fm_benchmark() {
 }
 
 test_fm_load_bench() {
-  # `dot load-bench` execs the deployed dot-load-benchmark helper. In the
+  # `dot doctor perf --ready` execs the deployed dot-load-benchmark helper. In the
   # sandbox it is not on PATH, so shim it to the in-repo source rather than
   # skipping the row.
   fm_stub dot-load-benchmark \
     "exec bash '$REPO_ROOT/defaults/dot_local/bin/executable_dot-load-benchmark' \"\$@\""
   test_start "fm_load_bench"
-  fm_run load-bench
+  fm_run doctor perf --ready
   # The helper times zsh's heavy-layer readiness with `zsh -i -c`, so without
   # zsh on the host it prints its header and then exits 127. That is the
   # runner's toolbox, not a regression — the same environment-gap skip
@@ -433,7 +433,7 @@ test_fm_load_bench() {
 test_fm_smoke_load_bench_pty() {
   # Needs the chezmoi-rendered .tmpl helper and a real pseudo-terminal.
   test_start "fm_smoke_load_bench_pty_is_routed"
-  fm_run load-bench-pty
+  fm_run doctor perf --ready --pty
   # Without the rendered helper this exits non-zero; what matters is that the
   # dispatcher routes it rather than reporting an unknown command.
   if [[ "$FM_OUT$FM_ERR" == *"Unknown command"* ]]; then
@@ -448,7 +448,7 @@ test_fm_smoke_load_bench_pty() {
 test_fm_chaos() {
   # Without --force chaos must refuse: it deletes real config files.
   test_start "fm_chaos"
-  fm_run chaos --dry-run
+  fm_run_route diagnostics chaos --dry-run
   fm_expect_rc 1
   test_start "fm_chaos_refuses_without_force"
   fm_expect_out "WARNING"
@@ -464,8 +464,10 @@ test_fm_chaos() {
 
 
 test_fm_teleport_usage() {
+  # `dot fleet push` with no user@host pushes to the fleet, so the teleport
+  # route's own usage is reached directly.
   test_start "fm_teleport_usage"
-  fm_run teleport
+  fm_run_route diagnostics teleport
   fm_expect_rc 1
   test_start "fm_teleport_usage_message"
   fm_expect_any "Usage" "user@host"
@@ -484,7 +486,7 @@ test_fm_smoke_bundle() {
 
 test_fm_secret_audit() {
   test_start "fm_secret_audit"
-  fm_run secret-audit
+  fm_run secret check
   # secret-governance.sh scans the checkout's git index, which the sandbox
   # does not stage into. It exits 1 only when a staged file matches a
   # plaintext-secret pattern — a real finding to act on, not host variance.
@@ -499,19 +501,19 @@ test_fm_metrics() {
   printf '{"time":"2026-01-01T00:00:00Z","metric":"fm_demo","value":1,"unit":"count"}\n' \
     >"$XDG_STATE_HOME/dotfiles/metrics.jsonl"
   test_start "fm_metrics"
-  fm_run metrics
+  fm_run doctor metric list
   fm_expect_rc 0
   test_start "fm_metrics_shows_recorded_events"
   fm_expect_out "fm_demo"
   test_start "fm_metrics_count_argument"
-  fm_run metrics 5
+  fm_run doctor metric list 5
   fm_expect_rc 0
 }
 
 test_fm_metrics_empty() {
   rm -f "$XDG_STATE_HOME/dotfiles/metrics.jsonl"
   test_start "fm_metrics_empty"
-  fm_run metrics
+  fm_run doctor metric list
   fm_expect_rc 0
   test_start "fm_metrics_empty_says_so"
   fm_expect_any "No metrics" "metrics.jsonl"
@@ -519,7 +521,7 @@ test_fm_metrics_empty() {
 
 test_fm_smoke_test() {
   test_start "fm_smoke_test"
-  fm_run smoke-test
+  fm_run_route diagnostics smoke-test
   # Deterministic in the sandbox: the chezmoi shim prints nothing for
   # --version, so smoke-test.sh must flag it as "output mismatch" and exit
   # 1. That is the property worth pinning — the smoke test checks what a
@@ -535,7 +537,7 @@ test_fm_smoke_test() {
 
 test_fm_intelligence() {
   test_start "fm_intelligence"
-  fm_run intelligence
+  fm_run top
   fm_expect_rc 0
   test_start "fm_intelligence_renders_surface"
   fm_expect_out "D O T F I L E S"
@@ -566,13 +568,13 @@ test_fm_restore_list() {
   # Two writers share $XDG_DATA_HOME/dotfiles/backups: restore's own
   # create_backup names its directories backup-<stamp>, rollback.sh names
   # its backup_<stamp>_<reason>. --list must show both — it used to glob only
-  # the first shape, so `dot rollback backup` output was invisible to it.
+  # the first shape, so `dot doctor rollback backup` output was invisible to it.
   mkdir -p "$XDG_DATA_HOME/dotfiles/backups/backup-19990101_000000"
   test_start "fm_restore_list_rollback_backup"
-  fm_run rollback backup
+  fm_run doctor rollback backup
   fm_expect_rc 0
   test_start "fm_restore_list"
-  fm_run restore --list
+  fm_run doctor restore --list
   fm_expect_rc 0
   test_start "fm_restore_list_reports"
   fm_expect_out "--- Available Backups ---"
@@ -588,7 +590,7 @@ test_fm_restore_git_dry_run() {
   local repo
   repo="$(fm_restore_git_fixture)"
   test_start "fm_restore_git_dry_run"
-  DOTFILES_DIR="$repo" fm_run restore -n -g HEAD
+  DOTFILES_DIR="$repo" fm_run doctor restore -n -g HEAD
   fm_expect_rc 0
   test_start "fm_restore_git_dry_run_makes_no_changes"
   fm_expect_any "Dry run" "dry run"
@@ -604,7 +606,7 @@ test_fm_restore_diff() {
   local repo
   repo="$(fm_restore_git_fixture)"
   test_start "fm_restore_diff"
-  DOTFILES_DIR="$repo" fm_run restore -d HEAD~1
+  DOTFILES_DIR="$repo" fm_run doctor restore -d HEAD~1
   fm_expect_rc 0
   test_start "fm_restore_diff_shows_the_diff"
   fm_expect_any "diff --git" "file.txt"
@@ -612,16 +614,16 @@ test_fm_restore_diff() {
 
 test_fm_restore_latest() {
   # --latest restores the newest backup by mtime, whichever writer made it.
-  # A `dot rollback backup` taken here is that backup: mtimes have
+  # A `dot doctor rollback backup` taken here is that backup: mtimes have
   # one-second resolution, so wait one out to make it strictly the newest.
   printf 'fm-restore-v1\n' >"$HOME/.bashrc"
   sleep 1
-  fm_run rollback backup
+  fm_run doctor rollback backup
   test_start "fm_restore_latest_rollback_backup"
   fm_expect_rc 0
   printf 'fm-restore-v2\n' >"$HOME/.bashrc"
   test_start "fm_restore_latest"
-  fm_run restore --latest
+  fm_run doctor restore --latest
   fm_expect_rc 0
   test_start "fm_restore_latest_restores_the_rollback_backup"
   fm_expect_out_matches 'Restoring from: backup_[0-9]{8}_[0-9]{6}_manual'
@@ -643,7 +645,7 @@ test_fm_restore_latest_none() {
   # With nothing to restore it must fail cleanly rather than restore
   # something arbitrary.
   test_start "fm_restore_latest_none"
-  XDG_DATA_HOME="$FM_SANDBOX/work/no-backups-data" fm_run restore --latest
+  XDG_DATA_HOME="$FM_SANDBOX/work/no-backups-data" fm_run doctor restore --latest
   fm_expect_rc 1
   test_start "fm_restore_latest_none_handles_no_backups"
   fm_expect_out "No backups found"
@@ -651,12 +653,12 @@ test_fm_restore_latest_none() {
 
 test_fm_restore_usage() {
   test_start "fm_restore_usage"
-  fm_run restore
+  fm_run doctor restore
   fm_expect_rc 0
   test_start "fm_restore_usage_prints_options"
   fm_expect_out "--latest"
   test_start "fm_restore_usage_rejects_unknown_option"
-  fm_run restore --zzz-not-an-option
+  fm_run doctor restore --zzz-not-an-option
   fm_expect_rc 1
   test_start "fm_restore_usage_unknown_message"
   fm_expect_any "Unknown option" "Usage"
@@ -669,7 +671,7 @@ test_fm_env_dotfiles_dir() {
   repo="$(fm_restore_git_fixture)"
   mkdir -p "$XDG_DATA_HOME/dotfiles/backups"
   test_start "fm_env_dotfiles_dir"
-  DOTFILES_DIR="$repo" fm_run restore --list
+  DOTFILES_DIR="$repo" fm_run doctor restore --list
   fm_expect_rc 0
   test_start "fm_env_dotfiles_dir_reads_that_checkout"
   fm_expect_out_matches '^[0-9a-f]{7,} add file$'

@@ -218,32 +218,32 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot cd handled (ec=$ec)"
 fi
 
-# Test: dot add with no args shows usage
+# Test: dot config add with no args shows usage
 test_start "dot_cli_add_no_args"
 set +e
-output=$(CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" add 2>&1)
+output=$(CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" config add 2>&1)
 ec=$?
 set -e
-if [[ "$output" == *"Usage: dot add"* ]] && [[ $ec -ne 0 ]]; then
+if [[ "$output" == *"Usage: dot config add"* ]] && [[ $ec -ne 0 ]]; then
   ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot add with no args shows usage"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot config add with no args shows usage"
 else
   ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot add with no args should show usage (ec=$ec, output=$output)"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot config add with no args should show usage (ec=$ec, output=$output)"
 fi
 
-# Test: dot new with no args shows usage
+# Test: dot tool new with no args shows usage
 test_start "dot_cli_new_no_args"
 set +e
-output=$(CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" new 2>&1)
+output=$(CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" tool new 2>&1)
 ec=$?
 set -e
-if [[ "$output" == *"Usage: dot new <lang> <name>"* ]] && [[ $ec -ne 0 ]]; then
+if [[ "$output" == *"Usage: dot tool new <lang> <name>"* ]] && [[ $ec -ne 0 ]]; then
   ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot new with no args shows usage"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot tool new with no args shows usage"
 else
   ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot new with no args should show usage (ec=$ec, output=$output)"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot tool new with no args should show usage (ec=$ec, output=$output)"
 fi
 
 echo ""

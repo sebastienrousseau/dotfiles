@@ -202,7 +202,7 @@ _fleet_namespace_render() {
   # checkout while still reporting success. Insert it after the first
   # line: appending at the end would land the key inside whatever
   # [table] the file happens to end with, which TOML reads as a
-  # different key entirely. `dot profile set` does the same for
+  # different key entirely. `dot config profile set` does the same for
   # `profile`.
   awk -v ns="$new_ns" '
     NR == 1 { print; printf "namespace = \"%s\"\n", ns; inserted = 1; next }
@@ -251,7 +251,7 @@ cmd_fleet_enforce() {
   local repo_root
   repo_root="$(resolve_chezmoi_source_dir)"
   [[ -z "$repo_root" ]] && repo_root="$(resolve_source_dir)"
-  # Same file `dot mode` enforces against (agent.sh _agent_profiles_file).
+  # Same file `dot agent mode` enforces against (agent.sh _agent_profiles_file).
   local profiles_file="${AGENT_PROFILE_CONFIG:-$repo_root/dot_config/dotfiles/agent-profiles.json}"
 
   case "$subcommand" in
@@ -289,10 +289,20 @@ cmd_fleet_enforce() {
   esac
 }
 
+# cmd_fleet_push [user@host] [args…]: one host named on the command line
+# gets the old `dot teleport` push; otherwise every fleet host (apply).
+cmd_fleet_push() {
+  if [[ "${1:-}" == *@* ]]; then
+    run_script "scripts/ops/teleport.sh" "Teleport script" "$@"
+    return
+  fi
+  cmd_fleet_apply "$@"
+}
+
 # `dot fleet <subcommand>` → the function that takes the remaining args.
 _FLEET_SUBCOMMANDS="status:cmd_fleet_status drift:cmd_fleet_drift events:cmd_fleet_events
 namespace:cmd_fleet_namespace ns:cmd_fleet_namespace enforce:cmd_fleet_enforce
-apply:cmd_fleet_apply push:cmd_fleet_apply help:_fleet_print_commands
+apply:cmd_fleet_apply push:cmd_fleet_push help:_fleet_print_commands
 --help:_fleet_print_commands -h:_fleet_print_commands"
 
 cmd_fleet() {

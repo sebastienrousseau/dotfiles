@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091
-# `dot lint` end to end on a small copy of the tree (--fix rewrites it),
+# `dot config check` end to end on a small copy of the tree (--fix rewrites it),
 # with stub shellcheck/shfmt: shellcheck reports files containing BADSC,
 # shfmt -l lists files containing BADFMT and -w deletes those lines.
 set -uo pipefail

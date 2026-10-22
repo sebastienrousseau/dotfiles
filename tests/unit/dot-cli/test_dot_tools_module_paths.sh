@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 # Failure and fall-back paths of scripts/dot/commands/tools.sh.
 #
-# `dot tools`, `dot env` and `dot profile` all branch on what the source tree
+# `dot tool list --nix`, `dot tool` and `dot config profile` all branch on what the source tree
 # and the PATH happen to contain, and from the checkout those answers are
 # fixed: nix/flake.nix and docs/ are always present, mise and python3 are
 # always installed on a developer machine. This suite runs the module against
@@ -50,7 +50,7 @@ tools_run tools docs
 assert_contains "Fixture tools" "$DOT_FIXTURE_OUT" \
   "TOOLS.md should win when both exist"
 
-# ── 3. dot new pre-flights its Python dependency ───────────────────────────
+# ── 3. dot tool new pre-flights its Python dependency ───────────────────────────
 #
 # The check happens before any files are created, so a machine without
 # python3 gets a clean error rather than a half-written project.
@@ -79,7 +79,7 @@ DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" \
   dot_fixture_run "$FX" tools new node ../escape
 assert_equals "1" "$DOT_FIXTURE_RC" "a traversal-shaped project name should be refused"
 
-# ── 4. dot env needs mise ──────────────────────────────────────────────────
+# ── 4. dot tool needs mise ──────────────────────────────────────────────────
 test_start "tools_env_requires_mise"
 tools_run env
 assert_equals "1" "$DOT_FIXTURE_RC" "env without mise should exit 1"
@@ -93,7 +93,7 @@ assert_equals "0" "$DOT_FIXTURE_RC" "env list should exit 0"
 assert_contains "mise ls" "$DOT_FIXTURE_OUT" \
   "with no jq on PATH the plain mise listing should be used"
 
-# ── 5. dot profile ─────────────────────────────────────────────────────────
+# ── 5. dot config profile ─────────────────────────────────────────────────────────
 test_start "tools_profile_requires_chezmoidata"
 tools_run profile
 assert_equals "1" "$DOT_FIXTURE_RC" "profile without the data file should exit 1"
@@ -105,7 +105,7 @@ printf 'dotfiles_version = "0.0.1"\n\n[features]\nai = true\n' \
   >"$FX/.chezmoidata.toml"
 tools_run profile set
 assert_equals "1" "$DOT_FIXTURE_RC" "profile set with no name should exit 1"
-assert_contains "Usage: dot profile set" "$DOT_FIXTURE_OUT" "it should print usage"
+assert_contains "Usage: dot config profile set" "$DOT_FIXTURE_OUT" "it should print usage"
 
 test_start "tools_profile_rejects_an_unknown_subcommand"
 tools_run profile nonsense

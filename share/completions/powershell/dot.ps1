@@ -4,22 +4,23 @@ $script:DotChildren = @{
     '' = @(@('agent', 'modes, policy, sandbox, budgets'), @('ai', 'install, route and run coding agents'), @('attest', 'attestation and verification'), @('cli', 'plugins, updates, completions'), @('config', 'apply, diff and sync the dotfiles'), @('doctor', 'health, repair, backup and rollback'), @('fleet', 'many hosts'), @('mcp', 'MCP servers as supply chain'), @('secret', 'secrets, keys and SSH certificates'), @('security', 'OS hardening'), @('session', 'find, open and restore terminal sessions'), @('shell', 'aliases, history, startup caches'), @('system', 'updates, cleanup, scheduled maintenance'), @('theme', 'one palette for every app'), @('tool', 'toolchains, packages, project templates'), @('top', 'what the machine and its agents are doing'), @('ui', 'primitives for scripts'), @('apply', 'Write the dotfiles to this machine'), @('sync', 'Pull the source, then apply'), @('diff', 'What apply would change'), @('status', 'Pending changes and last apply'), @('edit', 'Open a managed file in $EDITOR'), @('cd', 'where the dotfiles source lives'), @('update', 'Update everything, asking first'), @('help', 'Built-in: help'), @('version', 'Built-in: version'))
     'agent' = @(@('mode', 'agent modes'), @('context', 'context files'), @('card', 'the agent card'), @('log', 'the agent log'), @('checkpoint', 'saved checkpoints'), @('policy', 'sandbox policy'), @('budget', 'spend budgets'), @('delegate', 'agents a profile may hand work to'), @('status', 'Mode, policy and budgets'), @('check', 'Check modes and policy'), @('run', 'Run an agent task'), @('suspend', 'Pause running agents'), @('resume', 'Resume paused agents'), @('export', 'Export the AI bill of materials'))
     'agent budget' = @(, @('show', 'Budgets and spend'))
-    'agent card' = @(, @('show', 'The agent card'))
+    'agent card' = @(@('show', 'The agent card'), @('check', 'Check the card against the A2A spec'))
     'agent checkpoint' = @(@('list', 'Saved checkpoints'), @('save', 'Save a checkpoint'))
-    'agent context' = @(, @('show', 'Context files in effect'))
+    'agent context' = @(@('show', 'Context files in effect'), @('check', 'Check the rendered context files are current'), @('apply', 'Render the context file for every harness'))
     'agent delegate' = @(@('list', 'Configured delegates'), @('run', 'Run a command as a delegate'))
     'agent log' = @(, @('show', 'The agent log'))
-    'agent mode' = @(@('list', 'Available modes'), @('show', 'One mode in detail'), @('set', 'Switch mode'))
+    'agent mode' = @(@('list', 'Available modes'), @('show', 'One mode in detail'), @('set', 'Switch mode'), @('run', 'Run a command under a mode'))
     'agent policy' = @(, @('show', 'The sandbox policy'))
     'ai' = @(@('pattern', 'prompt patterns'), @('cost', 'spend by agent and model'), @('gateway', 'the keyless gateway'), @('inventory', 'installed agents and versions'), @('list', 'Installed agents'), @('install', 'Install agents'), @('update', 'Upgrade agent CLIs'), @('start', 'Start an agent'), @('run', 'Run an agent once'), @('login', 'Authenticate an agent'), @('check', 'Check agent installs and auth'), @('ask', 'Ask about the local context'))
     'ai cost' = @(, @('show', 'Spend by agent and model'))
     'ai gateway' = @(@('serve', 'Run the gateway in the foreground'), @('show', 'Gateway statistics'))
     'ai inventory' = @(, @('show', 'Agents, versions and config'))
-    'ai pattern' = @(, @('list', 'Prompt patterns'))
+    'ai pattern' = @(@('list', 'Prompt patterns'), @('show', 'One prompt pattern'), @('edit', 'Edit a prompt pattern'))
     'attest' = @(@('show', 'The workstation attestation'), @('export', 'Write attestation evidence'), @('verify', 'Verify evidence'))
-    'cli' = @(@('completion', 'shell completion scripts'), @('list', 'Installed plugins'), @('show', 'One plugin in detail'), @('install', 'Install a plugin'), @('update', 'Update dot and its plugins'), @('remove', 'Remove a plugin'), @('verify', 'Verify plugin provenance'), @('new', 'Create a plugin from the template'))
+    'cli' = @(@('completion', 'shell completion scripts'), @('registry', 'the plugin registry'), @('list', 'Installed plugins'), @('show', 'One plugin in detail'), @('install', 'Install a plugin'), @('update', 'Update dot and its plugins'), @('remove', 'Remove a plugin'), @('verify', 'Verify plugin provenance'), @('new', 'Create a plugin from the template'))
     'cli completion' = @(, @('show', 'Print a completion script'))
-    'config' = @(@('path', 'where the dotfiles source lives'), @('profile', 'the active profile and its features'), @('status', 'Pending changes and last apply'), @('diff', 'What apply would change'), @('apply', 'Write the dotfiles to this machine'), @('sync', 'Pull the source, then apply'), @('update', 'Pull and apply the dotfiles only'), @('edit', 'Open a managed file in $EDITOR'), @('add', 'Start managing an existing file'), @('save', 'Commit source changes'), @('init', 'First-time setup of the dotfiles'), @('check', 'Lint the source and templates'), @('export', 'Write a portable bundle'), @('uninstall', 'Remove the setup, keeping the source'))
+    'cli registry' = @(@('show', 'The plugin registry URL'), @('set', 'Point at another plugin registry'))
+    'config' = @(@('path', 'where the dotfiles source lives'), @('profile', 'the active profile and its features'), @('status', 'Pending changes and last apply'), @('diff', 'What apply would change'), @('apply', 'Write the dotfiles to this machine'), @('sync', 'Pull the source, then apply'), @('update', 'Pull and apply the dotfiles only'), @('edit', 'Open a managed file in $EDITOR'), @('add', 'Start managing an existing file'), @('save', 'Commit source changes'), @('init', 'First-time setup of the dotfiles'), @('check', 'Lint the source and templates'), @('export', 'Write a portable bundle'), @('uninstall', 'Remove the setup, keeping the source'), @('import', 'Restore from an exported bundle'))
     'config path' = @(, @('show', 'Print the source directory'))
     'config profile' = @(@('show', 'Show the active profile'), @('set', 'Switch profile'))
     'doctor' = @(@('score', 'the setup score'), @('snapshot', 'setup snapshots'), @('perf', 'startup performance'), @('drift', 'drift from the source'), @('conflict', 'conflicting files'), @('metric', 'recorded metrics'), @('report', 'the weekly posture report'), @('status', 'Health summary'), @('check', 'Run every health check'), @('fix', 'Repair what check found'), @('backup', 'Back up the setup'), @('restore', 'Restore from a backup'), @('rollback', 'Return to a previous generation'))
@@ -37,7 +38,7 @@ $script:DotChildren = @{
     'fleet policy' = @(@('show', 'Fleet policy'), @('set', 'Enforce a fleet policy'))
     'mcp' = @(@('list', 'Configured MCP servers'), @('check', 'Check servers and pins'), @('serve', 'Run dot''s read-only MCP server'))
     'secret' = @(@('key', 'SSH signing and authentication keys'), @('cert', 'short-lived SSH certificates'), @('provider', 'the secret provider'), @('status', 'Provider, vault state and key counts'), @('init', 'Set up the secret provider'), @('edit', 'Edit the encrypted secrets file'), @('new', 'Create the secrets file'), @('list', 'Secret names without values'), @('show', 'One secret'), @('set', 'Store one secret'), @('export', 'Print secrets as environment'), @('check', 'Audit secret hygiene'))
-    'secret cert' = @(@('list', 'Certificates and expiry'), @('new', 'Issue a short-lived SSH certificate'))
+    'secret cert' = @(@('list', 'Certificates and expiry'), @('new', 'Issue a short-lived SSH certificate'), @('remove', 'Revoke the current SSH certificate'))
     'secret key' = @(@('list', 'Keys without their values'), @('new', 'Create an ED25519 key'))
     'secret provider' = @(@('show', 'The active provider'), @('set', 'Switch provider'))
     'security' = @(@('policy', 'the security policy'), @('disk', 'disk encryption'), @('firewall', 'the firewall'), @('telemetry', 'OS telemetry'), @('dns', 'encrypted DNS'), @('lock', 'the lock screen'), @('usb', 'removable media'), @('score', 'the security score'), @('status', 'Hardening summary'))
@@ -51,7 +52,7 @@ $script:DotChildren = @{
     'security usb' = @(@('show', 'Current usb setting'), @('apply', 'Harden the usb setting'))
     'session' = @(@('select', 'Pick a session to open'), @('list', 'Sessions on this machine'), @('new', 'Start a named session'), @('open', 'Attach to a session'), @('stop', 'End a session'), @('restore', 'Restore saved sessions'))
     'shell' = @(@('history', 'shell history'), @('alias', 'aliases and their sources'), @('status', 'Shell, startup time and cache state'), @('update', 'Regenerate the startup caches'), @('clean', 'Clear the startup caches'))
-    'shell alias' = @(@('list', 'Aliases and where each is defined'), @('check', 'Find shadowed or broken aliases'))
+    'shell alias' = @(@('list', 'Aliases and where each is defined; a term searches them'), @('check', 'Find shadowed or broken aliases'), @('show', 'Where one alias comes from'), @('status', 'Alias counts; --tiers for the ecosystem tiers'), @('export', 'Write the alias cheatsheet'))
     'shell history' = @(, @('list', 'Recent history'))
     'system' = @(@('schedule', 'scheduled maintenance jobs'), @('settings', 'OS settings dot manages'), @('status', 'OS, disk, schedule and last run'), @('update', 'Update everything, asking first'), @('clean', 'Reclaim space, asking first'), @('show', 'Hardware and host details'))
     'system schedule' = @(@('list', 'Scheduled jobs'), @('set', 'Set the maintenance schedule'), @('run', 'Run scheduled maintenance now'))
@@ -59,7 +60,7 @@ $script:DotChildren = @{
     'theme' = @(@('wallpaper', 'the current wallpaper'), @('font', 'installed fonts'), @('show', 'Current theme and palette'), @('list', 'Available themes'), @('set', 'Switch theme everywhere'))
     'theme font' = @(@('list', 'Installed terminal fonts'), @('install', 'Install the configured fonts'))
     'theme wallpaper' = @(, @('set', 'Set the wallpaper and derive a palette'))
-    'tool' = @(@('list', 'Toolchains and their versions'), @('install', 'Install the configured toolchains'), @('update', 'Upgrade toolchains'), @('remove', 'Remove a toolchain or orphans'), @('set', 'Pin a toolchain version'), @('export', 'Print the tool environment'), @('new', 'Create a project from a template'))
+    'tool' = @(@('list', 'Toolchains and their versions'), @('install', 'Install the configured toolchains'), @('update', 'Upgrade toolchains'), @('remove', 'Remove orphaned toolchains (a dry run without --yes)'), @('set', 'Pin a toolchain version'), @('export', 'Print the tool environment'), @('new', 'Create a project from a template'))
     'top' = @(@('report', 'usage by model, agent or project'), @('measure', 'Sample once and print the result'))
     'top report' = @(, @('show', 'Usage report'))
     'ui' = @(@('table', 'render a table'), @('show', 'The primitives on offer'), @('select', 'Interactive picker for scripts'), @('run', 'Run a command with progress'))
@@ -67,16 +68,20 @@ $script:DotChildren = @{
 }
 $script:DotCommands = @{
     'agent budget show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'agent card check' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'agent card show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'agent check' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'agent checkpoint list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'agent checkpoint save' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'agent context apply' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'agent context check' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'agent context show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'agent delegate list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'agent delegate run' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'agent export' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'agent log show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'agent mode list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'agent mode run' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'agent mode set' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'agent mode show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'agent policy show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
@@ -93,7 +98,9 @@ $script:DotCommands = @{
     'ai inventory show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai login' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai pattern edit' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai pattern list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai pattern show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai run' = @{ Flags = @(@('--help', 'Show help'), @('--pattern', 'Steering pattern'), @('-p', 'Steering pattern')); Values = @('claude', 'codex', 'copilot', 'goose', 'crush', 'amp', 'cursor-agent', 'grok', 'kimi', 'agy', 'kiro', 'sgpt', 'ollama', 'opencode', 'aider', 'autohand', 'vibe', 'qwen', 'zai'); Files = $false; PatternFlags = @('--pattern', '-p'); ValueFlags = @() }
     'ai start' = @{ Flags = @(, @('--help', 'Show help')); Values = @('claude', 'codex', 'copilot', 'goose', 'crush', 'amp', 'cursor-agent', 'grok', 'kimi', 'agy', 'kiro', 'sgpt', 'ollama', 'opencode', 'aider', 'autohand', 'vibe', 'qwen', 'zai'); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai update' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
@@ -104,6 +111,8 @@ $script:DotCommands = @{
     'cli install' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'cli list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'cli new' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'cli registry set' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'cli registry show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'cli remove' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'cli show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'cli update' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
@@ -114,6 +123,7 @@ $script:DotCommands = @{
     'config diff' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'config edit' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'config export' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'config import' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'config init' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'config path show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'config profile set' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
@@ -151,6 +161,7 @@ $script:DotCommands = @{
     'mcp serve' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'secret cert list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'secret cert new' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'secret cert remove' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'secret check' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'secret edit' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'secret export' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
@@ -185,7 +196,10 @@ $script:DotCommands = @{
     'session select' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'session stop' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'shell alias check' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'shell alias export' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'shell alias list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'shell alias show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'shell alias status' = @{ Flags = @(@('--help', 'Show help'), @('--tiers', 'Show which ecosystem tiers are enabled')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'shell clean' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'shell history list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'shell status' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }

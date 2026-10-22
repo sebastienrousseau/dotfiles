@@ -110,7 +110,7 @@ _SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
 [[ -d "$_SHELL_CACHE" ]] || mkdir -p "$_SHELL_CACHE"
 
 # Append a timing event to ${XDG_STATE_HOME:-~/.local/state}/dotfiles/eval-timings.jsonl.
-# Read by `dot perf --by-tool` to attribute startup time per tool.
+# Read by `dot doctor perf show --by-tool` to attribute startup time per tool.
 _cached_eval_log_timing() {
   emulate -L zsh
   setopt no_clobber 2>/dev/null && unsetopt no_clobber
@@ -139,7 +139,7 @@ _cached_eval_log_timing() {
 # @arg $1 string Cache label (cache file: $_SHELL_CACHE/<label>.zsh)
 # @arg $2..N string Command and args to run on cache miss
 # @env EVALCACHE_DISABLE Set to "true" to bypass cache read AND write
-# @env EVALCACHE_TIMING  Set to "1" to log per-call timing for `dot perf --by-tool`
+# @env EVALCACHE_TIMING  Set to "1" to log per-call timing for `dot doctor perf show --by-tool`
 # @stdout Sourced cache content
 # @stderr Warning on init failure or suspicious-output rejection
 # @exitcode 0 Cache hit, successful regeneration, or successful bypass

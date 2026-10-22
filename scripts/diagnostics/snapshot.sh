@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Snapshot current system/tooling state
-# Usage: dot snapshot [--baseline|-b] [--force|-f]
+# Usage: dot doctor snapshot new [--baseline|-b] [--force|-f]
 
 set -euo pipefail
 

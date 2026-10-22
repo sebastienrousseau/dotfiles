@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # AI Steering Patterns Management.
-# Usage: dot patterns [list|view|edit] [name]
+# Usage: dot ai pattern list|show|edit [name]
 
 set -euo pipefail
 
@@ -19,7 +19,7 @@ name="${2:-}"
 _view_pattern() {
   local pat_name="$1" pattern_file
   if [[ -z "$pat_name" ]]; then
-    ui_err "Missing pattern name" "Usage: dot patterns view <name>"
+    ui_err "Missing pattern name" "Usage: dot ai pattern show <name>"
     exit 1
   fi
   pattern_file="$PATTERN_DIR/${pat_name}.md"
@@ -47,14 +47,14 @@ case "$command" in
     ;;
   edit)
     if [[ -z "$name" ]]; then
-      ui_err "Missing pattern name" "Usage: dot patterns edit <name>"
+      ui_err "Missing pattern name" "Usage: dot ai pattern edit <name>"
       exit 1
     fi
     pattern_file="$PATTERN_DIR/${name}.md"
     ${EDITOR:-nvim} "$pattern_file"
     ;;
   *)
-    echo "Usage: dot patterns [list|view|edit] [name]"
+    echo "Usage: dot ai pattern list|show|edit [name]"
     exit 1
     ;;
 esac

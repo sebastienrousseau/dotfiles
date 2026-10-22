@@ -80,7 +80,7 @@ node_manager = "mise"  # mise, fnm, or nvm
 # ============================================================================
 #
 # Everything a provisioning run_* script installs is pinned here; tools that
-# `dot upgrade` refreshes through mise float in conf.d/00-dotfiles.toml with
+# `dot system update` refreshes through mise float in conf.d/00-dotfiles.toml with
 # minimum_release_age = "7d" instead. tools/ci/check-unpinned-installs.sh
 # fails on @latest, on cargo install without --locked and on a git clone of
 # a moving branch. Versions read 2026-10-08.
@@ -124,7 +124,7 @@ tpm_commit = "7bdb7ca33c9cc6440a600202b50142f401b6fe21"
 # AI CLIs, mise package = "version": the newest release at least seven days
 # old (npm registry `time`, PyPI upload time, GitHub release date). Read by
 # install/provision/run_onchange_15-ai-cli-tools.sh.tmpl and, at run time,
-# by lib/dot/ai-install.sh; `dot upgrade` lists newer releases to bump to.
+# by lib/dot/ai-install.sh; `dot system update` lists newer releases to bump to.
 [ai_tools]
 "npm:@openai/codex" = "0.162.1"
 "npm:@github/copilot" = "1.0.95"

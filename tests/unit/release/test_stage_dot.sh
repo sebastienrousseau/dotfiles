@@ -30,7 +30,7 @@ if make -C "$tmp/bundle" install PREFIX=/usr/local DESTDIR="$install_root" >/dev
     "$install_root/usr/local/bin/dot" version >/dev/null &&
   CHEZMOI_SOURCE_DIR="$install_root/usr/local/lib/dotfiles" \
     DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 \
-    "$install_root/usr/local/bin/dot" registry --help >/dev/null &&
+    "$install_root/usr/local/bin/dot" cli list --available --help >/dev/null &&
   make -C "$tmp/bundle" uninstall PREFIX=/usr/local DESTDIR="$install_root" >/dev/null &&
   [[ ! -e "$install_root/usr/local/bin/dot" ]]; then
   ((TESTS_PASSED++)) || true

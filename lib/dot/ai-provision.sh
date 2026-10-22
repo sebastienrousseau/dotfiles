@@ -104,7 +104,7 @@ ai_install_report() {
 
 # ai_prereq_rows: prerequisite health for `dot ai doctor`.
 ai_prereq_rows() {
-  _ai_prereq_row mise "installs most AI tools" "dot upgrade --yes (or dot ai install --yes)"
+  _ai_prereq_row mise "installs most AI tools" "dot system update --yes (or dot ai install --yes)"
   _ai_prereq_row node "npm-based tools (codex, copilot, qwen, …)" "mise install node"
   _ai_prereq_row uv "Python tools (aider, sgpt)" "mise install uv"
   _ai_prereq_row curl "native installers (claude, goose, …)" "your system package manager"

@@ -33,10 +33,24 @@ Clear the startup caches. Effect: write. Runs \fBdot clean\-cache\fR until the d
 Recent history. Effect: read. Runs \fBdot history\fR until the domain is extracted.
 .TP
 .B dot shell alias list
-Aliases and where each is defined. Effect: read. Runs \fBdot aliases\fR until the domain is extracted.
+Aliases and where each is defined; a term searches them. Effect: read. Runs \fBdot aliases list\fR until the domain is extracted.
 .TP
 .B dot shell alias check
 Find shadowed or broken aliases. Effect: read. Runs \fBdot alias\-check\fR until the domain is extracted.
+.TP
+.B dot shell alias show
+Where one alias comes from. Effect: read. Runs \fBdot aliases why\fR until the domain is extracted.
+.TP
+.B dot shell alias status
+Alias counts; \-\-tiers for the ecosystem tiers. Effect: read. Runs \fBdot aliases stats\fR until the domain is extracted.
+.RS
+.TP
+.B \-\-tiers
+Show which ecosystem tiers are enabled
+.RE
+.TP
+.B dot shell alias export
+Write the alias cheatsheet. Effect: read. Runs \fBdot aliases cheatsheet\fR until the domain is extracted.
 .SH OTHER NAMES
 .TP
 .B dot history

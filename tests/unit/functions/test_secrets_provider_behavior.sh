@@ -175,7 +175,7 @@ assert_equals "2" "$?" "dot_secrets_get with no provider should return exit code
 # again when its CALLER returns — dot_secrets_set — by which point tmp_rec is
 # out of scope, so under `set -u` the whole call aborted with
 # "tmp_rec: unbound variable" AFTER the encrypted file had been written.
-# `dot secrets set` exited non-zero on a write that had in fact succeeded, and
+# `dot secret set` exited non-zero on a write that had in fact succeeded, and
 # the key never reached the index because index_add came after the store.
 #
 # Run in a child shell with `set -euo pipefail` — this file runs with `set +e`,

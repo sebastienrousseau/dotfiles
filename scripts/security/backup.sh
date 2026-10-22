@@ -9,8 +9,8 @@
 ## environment variables.
 ##
 ## # Usage
-## dot backup
-## DOTFILES_BACKUP_DIR=/mnt/backup dot backup
+## dot doctor backup
+## DOTFILES_BACKUP_DIR=/mnt/backup dot doctor backup
 ##
 ## # Dependencies
 ## - tar: Archive creation

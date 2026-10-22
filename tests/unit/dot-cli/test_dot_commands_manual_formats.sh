@@ -83,8 +83,8 @@ test_start "manual_help_lists_the_usage_block"
 _out="$(_manual --help)"
 _rc=$?
 assert_equals 0 "$_rc" "--help exits 0"
-assert_contains "dot manual pdf" "$_out" "the pdf form is documented"
-assert_contains "dot manual download <fmt>" "$_out" "the download form is documented"
+assert_contains "dot help --manual pdf" "$_out" "the pdf form is documented"
+assert_contains "dot help --manual download <fmt>" "$_out" "the download form is documented"
 
 test_start "manual_fetches_a_format_once_and_then_serves_it_from_cache"
 : >"$LOG"

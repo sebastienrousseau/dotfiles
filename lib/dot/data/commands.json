@@ -186,6 +186,30 @@
      "effect": "write",
      "summary": "Run a command as a delegate",
      "built": true
+    },
+    {
+     "spelling": "agent context check",
+     "effect": "read",
+     "summary": "Check the rendered context files are current",
+     "built": true
+    },
+    {
+     "spelling": "agent context apply",
+     "effect": "write",
+     "summary": "Render the context file for every harness",
+     "built": true
+    },
+    {
+     "spelling": "agent mode run",
+     "effect": "write",
+     "summary": "Run a command under a mode",
+     "built": true
+    },
+    {
+     "spelling": "agent card check",
+     "effect": "read",
+     "summary": "Check the card against the A2A spec",
+     "built": true
     }
    ],
    "aliases": [
@@ -362,6 +386,18 @@
      "effect": "read",
      "summary": "Agents, versions and config",
      "built": false
+    },
+    {
+     "spelling": "ai pattern show",
+     "effect": "read",
+     "summary": "One prompt pattern",
+     "built": true
+    },
+    {
+     "spelling": "ai pattern edit",
+     "effect": "write",
+     "summary": "Edit a prompt pattern",
+     "built": true
     }
    ],
    "aliases": [
@@ -538,6 +574,11 @@
      "name": "completion",
      "summary": "shell completion scripts",
      "default": "show"
+    },
+    {
+     "name": "registry",
+     "summary": "the plugin registry",
+     "default": "show"
     }
    ],
    "commands": [
@@ -588,6 +629,18 @@
      "effect": "read",
      "summary": "Print a completion script",
      "built": true
+    },
+    {
+     "spelling": "cli registry show",
+     "effect": "read",
+     "summary": "The plugin registry URL",
+     "built": true
+    },
+    {
+     "spelling": "cli registry set",
+     "effect": "write",
+     "summary": "Point at another plugin registry",
+     "built": true
     }
    ],
    "aliases": [
@@ -601,7 +654,8 @@
      "name": "registry",
      "target": "cli list --available",
      "kind": "deprecated",
-     "until": "0.2.538"
+     "until": "0.2.538",
+     "legacy": "registry list"
     },
     {
      "name": "search",
@@ -750,6 +804,12 @@
      "spelling": "config profile set",
      "effect": "write",
      "summary": "Switch profile",
+     "built": true
+    },
+    {
+     "spelling": "config import",
+     "effect": "write",
+     "summary": "Restore from an exported bundle",
      "built": true
     }
    ],
@@ -1414,7 +1474,7 @@
      "spelling": "secret cert list",
      "effect": "read",
      "summary": "Certificates and expiry",
-     "built": false
+     "built": true
     },
     {
      "spelling": "secret cert new",
@@ -1433,6 +1493,12 @@
      "effect": "write",
      "summary": "Switch provider",
      "built": false
+    },
+    {
+     "spelling": "secret cert remove",
+     "effect": "write",
+     "summary": "Revoke the current SSH certificate",
+     "built": true
     }
    ],
    "aliases": [
@@ -1766,13 +1832,37 @@
     {
      "spelling": "shell alias list",
      "effect": "read",
-     "summary": "Aliases and where each is defined",
+     "summary": "Aliases and where each is defined; a term searches them",
      "built": true
     },
     {
      "spelling": "shell alias check",
      "effect": "read",
      "summary": "Find shadowed or broken aliases",
+     "built": true
+    },
+    {
+     "spelling": "shell alias show",
+     "effect": "read",
+     "summary": "Where one alias comes from",
+     "built": true
+    },
+    {
+     "spelling": "shell alias status",
+     "effect": "read",
+     "summary": "Alias counts; --tiers for the ecosystem tiers",
+     "built": true,
+     "flags": [
+      {
+       "long": "tiers",
+       "summary": "Show which ecosystem tiers are enabled"
+      }
+     ]
+    },
+    {
+     "spelling": "shell alias export",
+     "effect": "read",
+     "summary": "Write the alias cheatsheet",
      "built": true
     }
    ],
@@ -2030,13 +2120,13 @@
      "spelling": "tool update",
      "effect": "write",
      "summary": "Upgrade toolchains",
-     "built": false
+     "built": true
     },
     {
      "spelling": "tool remove",
      "effect": "write",
-     "summary": "Remove a toolchain or orphans",
-     "built": false
+     "summary": "Remove orphaned toolchains (a dry run without --yes)",
+     "built": true
     },
     {
      "spelling": "tool set",
@@ -2048,7 +2138,7 @@
      "spelling": "tool export",
      "effect": "read",
      "summary": "Print the tool environment",
-     "built": false
+     "built": true
     },
     {
      "spelling": "tool new",

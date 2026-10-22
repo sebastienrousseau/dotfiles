@@ -195,12 +195,10 @@ test_fm_ai_ask_usage() {
 
 test_fm_ai_query_usage() {
   test_start "fm_ai_query_usage"
-  fm_run ai-query
+  fm_run ai ask
   fm_expect_rc 1
   test_start "fm_ai_query_usage_prints_usage"
   fm_expect_any "Usage" "question"
-  test_start "fm_ai_query_usage_is_deprecated"
-  fm_expect_any "deprecated" "dot ai ask"
 }
 
 test_fm_ai_proxy_deprecated() {
@@ -321,7 +319,8 @@ FM_AI_BRIDGES="cl claude codex copilot kimi agy goose kiro sgpt ollama opencode 
 fm_assert_bridge_usage() {
   local tool="$1"
   test_start "fm_ai_bridge_${tool//-/_}"
-  fm_run "$tool"
+  # shellcheck disable=SC2046 # the spelling is words
+  fm_run $(fm_spelling "$tool")
   if [[ "$FM_RC" -eq 0 ]]; then
     fm_fail "dot $tool with no prompt exited 0 — it must refuse"
     return 0
@@ -374,7 +373,7 @@ test_fm_ai_bridge_style() {
   # --style names a steering pattern; an unknown one must fail fast rather
   # than silently sending an unsteered prompt to a paid model.
   test_start "fm_ai_bridge_style_rejects_unknown_pattern"
-  fm_run cl --style zzz-no-such-pattern "hello"
+  fm_run ai run claude --style zzz-no-such-pattern "hello"
   fm_expect_rc 1
   test_start "fm_ai_bridge_style_names_the_pattern"
   fm_expect_any "Pattern not found" "zzz-no-such-pattern"

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# `dot rollback restore` and `rollback-to` take user input that ends up in
+# `dot doctor rollback restore` and `rollback-to` take user input that ends up in
 # file paths and a sed script. Each guard is pinned by the exact outcome it
 # prevents: an exit status, the refusal message, and no file written
 # outside the sandbox. Found by mutation testing (R1, R4, R5): the guards

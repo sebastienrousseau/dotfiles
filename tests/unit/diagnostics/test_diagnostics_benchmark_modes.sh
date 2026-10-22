@@ -134,7 +134,7 @@ sys.exit(os.waitstatus_to_exitcode(pty.spawn(sys.argv[1:])))
 test_start "benchmark_help"
 run_bench "$PATH_NO_HF" --help
 assert_equals 0 "$RC" "--help exits 0"
-assert_contains "Usage: dot benchmark" "$OUT" "--help prints usage"
+assert_contains "Usage: dot doctor perf measure" "$OUT" "--help prints usage"
 
 test_start "benchmark_short_help"
 run_bench "$PATH_NO_HF" -h
@@ -152,7 +152,7 @@ assert_equals 0 "$RC" "basic timing exits 0"
 assert_contains "hyperfine not installed" "$OUT" "falls back to basic timing"
 # 5 runs × 7ms step → average 7ms.
 assert_contains "Average startup time: 7ms" "$OUT" "average from deterministic clock"
-assert_contains "dot benchmark --compare" "$OUT" "prints history tip"
+assert_contains "dot doctor perf measure --compare" "$OUT" "prints history tip"
 
 # ── hyperfine timing + every performance rating ─────────────────────
 test_start "benchmark_hyperfine_excellent"
@@ -256,7 +256,7 @@ if "$REAL_PY" -c 'import pty, os; os.waitstatus_to_exitcode' 2>/dev/null; then
   run_bench_pty "$PATH_NO_HF"
   assert_equals 0 "$RC" "tty basic timing exits 0"
   assert_contains "Average startup time" "$OUT" "ui_ok average line"
-  assert_contains "dot benchmark --waterfall" "$OUT" "ui_info tips"
+  assert_contains "dot doctor perf measure --waterfall" "$OUT" "ui_info tips"
 
   test_start "benchmark_tty_hyperfine_ratings"
   run_bench_pty "$PATH_HF"

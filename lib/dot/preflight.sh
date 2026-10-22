@@ -4,7 +4,7 @@
 # Consent and prerequisites for commands that change the machine.
 # Sourced by utils.sh; inherits set -euo pipefail.
 #
-# `dot upgrade` and `dot ai` bring a machine up to what they need, but only
+# `dot system update` and `dot ai` bring a machine up to what they need, but only
 # with the user's consent. The answer is NO unless someone says yes:
 #
 #   - DOTFILES_YES=1 (or a command's --yes)  → yes, without asking;

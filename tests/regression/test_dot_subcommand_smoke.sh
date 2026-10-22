@@ -65,7 +65,7 @@ fi
 HIDDEN_FROM_HELP=(
   # Aliases / alternate names for already-documented commands
   apply update scorecard attestation security-score
-  # Health subroutines reachable through `dot doctor` or `dot health`
+  # Health subroutines reachable through `dot doctor` or `dot doctor status`
   health health-check smoke-test heal drift intelligence
   # Internal command-routing topics
   conflicts locks log-rotate alias-check setup setup-mode

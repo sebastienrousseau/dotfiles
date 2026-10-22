@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Version Locks Summary
-# Usage: dot locks
+# Usage: dot tool list --locked
 
 set -euo pipefail
 

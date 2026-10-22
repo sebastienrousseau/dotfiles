@@ -33,7 +33,7 @@ end
 # Cache flatpak --installations (saves ~11ms per startup).
 # The vendor /usr/share/fish/vendor_conf.d/flatpak.fish calls this on every
 # shell start. We wrap it so only the first call after cache expiry is slow.
-# Cache is refreshed by `dot prewarm` or manually:
+# Cache is refreshed by `dot shell update --prewarm` or manually:
 #   command flatpak --installations > ~/.cache/fish/flatpak-installations
 if type -q flatpak
     function flatpak --wraps flatpak

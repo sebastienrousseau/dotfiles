@@ -69,6 +69,6 @@ cat <<'FOOTER'
 
 ## Notes
 
-- Regenerate: `dot aliases cheatsheet`
+- Regenerate: `dot shell alias export`
 - Apply changes: `chezmoi apply`
 FOOTER

@@ -35,7 +35,7 @@ cert() {
 test_start "usage_without_USER"
 cert --help
 assert_equals "0" "$?" "--help runs with USER unset"
-assert_file_contains "$WORK/out" "Usage: dot ssh-cert" "and prints the usage"
+assert_file_contains "$WORK/out" "Usage: dot secret cert new" "and prints the usage"
 
 test_start "issue_defaults_the_principal_to_the_account_name"
 : >"$WORK/step.calls"

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Alias/Command Conflicts Report
-# Usage: dot conflicts
+# Usage: dot doctor conflict list
 
 set -euo pipefail
 
@@ -69,5 +69,5 @@ if ! $shadow_found; then
 fi
 
 ui_section "Quick actions"
-ui_info "List aliases" "dot aliases list"
-ui_info "Regenerate cheatsheet" "dot aliases cheatsheet"
+ui_info "List aliases" "dot shell alias list"
+ui_info "Regenerate cheatsheet" "dot shell alias export"

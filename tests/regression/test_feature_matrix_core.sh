@@ -42,7 +42,7 @@ test_fm_version_long_flag() {
 
 test_fm_version_short_flag() {
   test_start "fm_version_short_flag"
-  fm_run -v
+  fm_run -V
   fm_expect_rc 0
   test_start "fm_version_short_flag_matches_subcommand"
   fm_expect_out_matches '\.dotfiles [0-9]+\.[0-9]+\.[0-9]+'
@@ -137,9 +137,10 @@ test_fm_help_universal_intercept() {
   # dispatcher now intercepts before routing. `edit` is the sharpest probe —
   # unintercepted it would exec $EDITOR — and `upgrade` the most expensive.
   local cmd
-  for cmd in edit upgrade sandbox backup; do
-    test_start "fm_help_universal_intercept_${cmd}"
-    fm_run "$cmd" --help
+  for cmd in edit "system update" "config apply" "doctor backup"; do
+    test_start "fm_help_universal_intercept_${cmd// /_}"
+    # shellcheck disable=SC2086 # a spelling is words
+    fm_run $cmd --help
     if [[ "$FM_RC" -ne 0 ]]; then
       fm_fail "dot $cmd --help exited $FM_RC"
       continue
@@ -172,26 +173,27 @@ test_fm_help_universal_intercept() {
 
 test_fm_search() {
   test_start "fm_search"
-  fm_run search theme
+  fm_run help theme
   fm_expect_rc 0
   test_start "fm_search_finds_matching_command"
   fm_expect_out "theme"
 }
 
 test_fm_search_missing_keyword() {
+  # `dot search` became `dot help`: with no term it is the overview.
   test_start "fm_search_missing_keyword"
-  fm_run search
-  fm_expect_rc 1
+  fm_run help
+  fm_expect_rc 0
   test_start "fm_search_missing_keyword_prints_usage"
-  fm_expect_out "Usage: dot search"
+  fm_expect_out "dot help <term>"
 }
 
 test_fm_search_no_match() {
   test_start "fm_search_no_match"
-  fm_run search zzz-no-such-command-zzz
-  fm_expect_rc 0
+  fm_run help zzz-no-such-command-zzz
+  fm_expect_rc 1
   test_start "fm_search_no_match_says_so"
-  fm_expect_out "No commands matching"
+  fm_expect_out "Unknown help topic"
 }
 
 # ── dispatcher: unknown + user commands ────────────────────────────────────
@@ -286,7 +288,7 @@ test_fm_update() {
 test_fm_add() {
   printf 'demo\n' >"$FM_SANDBOX/work/added.txt"
   test_start "fm_add"
-  fm_run add "$FM_SANDBOX/work/added.txt"
+  fm_run config add "$FM_SANDBOX/work/added.txt"
   fm_expect_rc 0
   test_start "fm_add_no_breakage"
   fm_expect_no_forbidden
@@ -294,10 +296,10 @@ test_fm_add() {
 
 test_fm_add_usage() {
   test_start "fm_add_usage"
-  fm_run add
+  fm_run config add
   fm_expect_rc 1
   test_start "fm_add_usage_message"
-  fm_expect_out "Usage: dot add"
+  fm_expect_out "Usage: dot config add"
 }
 
 test_fm_diff() {
@@ -383,7 +385,7 @@ test_fm_commit() {
   # survive it, and the assertions below would silently read a stale run.
   local prev_pwd="$PWD"
   cd "$repo" || return 0
-  GIT_AI_PROVIDER=claude fm_run commit
+  GIT_AI_PROVIDER=claude fm_run config save
   cd "$prev_pwd" || return 0
   fm_expect_rc 1
   test_start "fm_commit_refuses_without_staged_changes"

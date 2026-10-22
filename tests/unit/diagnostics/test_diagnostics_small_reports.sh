@@ -85,7 +85,7 @@ rc="$(SANDBOX_HOME="$CONF_HOME" run "$CONFLICTS")"
 assert_equals "0" "$rc" "a clean alias set exits 0"
 assert_file_contains "$OUT" "No duplicate alias names" "no duplicates are reported"
 assert_file_contains "$OUT" "No alias shadows detected" "no shadowing is reported"
-assert_file_contains "$OUT" "dot aliases list" "the quick actions are printed"
+assert_file_contains "$OUT" "dot shell alias list" "the quick actions are printed"
 
 test_start "conflicts_reports_duplicates_and_shadowing"
 write_manifest "$(printf 'dup\tls -la\taliases.sh\t12\ndup\tls -l\tother.sh\t34\nbash\techo hi\taliases.sh\t56')"

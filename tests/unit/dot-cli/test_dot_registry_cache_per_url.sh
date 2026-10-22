@@ -7,7 +7,7 @@
 #
 # It used to live at <cache>/index.json for every registry and be treated as
 # fresh for six hours, so pointing DOTFILES_REGISTRY_URL at a different index
-# (or running `dot registry set-url`) kept serving the previous registry's
+# (or running `dot cli registry set`) kept serving the previous registry's
 # modules until the TTL expired. Nothing about the six-hour window says which
 # registry produced the file.
 #

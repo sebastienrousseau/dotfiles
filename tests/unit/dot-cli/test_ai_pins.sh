@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091,SC2016,SC2034
 # AI CLIs install at the versions pinned in [ai_tools] in .chezmoidata.toml,
 # never @latest: `dot ai install` (ai_install_tool) reads the pin at run
-# time, a package with no pin is refused, and `dot upgrade` lists newer
+# time, a package with no pin is refused, and `dot system update` lists newer
 # releases as bumps to review instead of moving the pins itself.
 #
 # mise is a stub that records its calls and answers `mise latest`.

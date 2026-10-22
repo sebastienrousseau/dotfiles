@@ -422,7 +422,7 @@ _expect "s2_performance_warnings" \
   "[WARN] uncached slow-init tools" "pyenv" "[WARN] .zcompdump" "refresh:" \
   "[WARN] .zcompdump.zwc" "[FAIL] PATH length" "likely slowing" \
   "[WARN] shell coverage" "pwsh installed" "[WARN] zsh hooks" "precmd=9 preexec=9" \
-  "[WARN] startup latency" "run dot prewarm"
+  "[WARN] startup latency" "run dot shell update --prewarm"
 _expect "s2_ai_analysis_fires" \
   "error(s)" "AI Problem Analysis" "ai-called: ai claude --style hardener"
 
@@ -578,7 +578,7 @@ _expect "s5_unknown_os_fallback" \
   "[FAIL] chezmoi" "[FAIL] .zshrc" "[FAIL] dot" "[WARN] antigravity" \
   "[FAIL] fish_plugins" "[OK] cargo-install-update" "not needed (cargo not installed)" \
   "[OK] symlinks" "[WARN] portability" "[OK] shell caches" "[OK] PATH length" \
-  "[WARN] hyperfine" "Run 'dot heal' to repair."
+  "[WARN] hyperfine" "Run 'dot doctor fix' to repair."
 
 # =======================================================================
 # S6 — Linux with no hardware/resolution/package tooling at all.

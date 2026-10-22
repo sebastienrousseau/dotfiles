@@ -52,26 +52,26 @@ assert_equals "1" "$(dot_rc fleet enforce set lenient)" "only advisory|strict ar
 
 test_start "strict_denies_profile_outside_role"
 role viewer
-assert_equals "1" "$(dot_rc mode set plan)" "viewer cannot switch to plan under strict"
+assert_equals "1" "$(dot_rc agent mode set plan)" "viewer cannot switch to plan under strict"
 
 test_start "strict_allows_profile_inside_role"
 role viewer
-assert_equals "0" "$(dot_rc mode set ask)" "viewer can switch to ask under strict"
+assert_equals "0" "$(dot_rc agent mode set ask)" "viewer can switch to ask under strict"
 
 test_start "mode_set_keeps_role"
 assert_equals "viewer" "$(sed -n 's/^DOT_AGENT_ROLE=//p' "$AGENT_STATE_FILE")" "switching mode keeps DOT_AGENT_ROLE"
 
 test_start "role_survives_mode_switch_under_strict"
-assert_equals "1" "$(dot_rc mode set apply)" "viewer stays denied after a permitted switch"
+assert_equals "1" "$(dot_rc agent mode set apply)" "viewer stays denied after a permitted switch"
 
 test_start "strict_default_role_is_developer"
 rm -f "$AGENT_STATE_FILE"
-assert_equals "1" "$(dot_rc mode set audit)" "with no role set, developer cannot use audit"
+assert_equals "1" "$(dot_rc agent mode set audit)" "with no role set, developer cannot use audit"
 
 test_start "advisory_warns_but_allows"
 bash "$DOT_CLI" fleet enforce set advisory >/dev/null 2>&1 || true
 role viewer
-assert_output_contains "not recommended for profile 'plan'" "bash '$DOT_CLI' mode set plan 2>&1"
+assert_output_contains "not recommended for profile 'plan'" "bash '$DOT_CLI' agent mode set plan 2>&1"
 
 # Slice 3 (#883): exercise the script under sandbox for line coverage
 cov_exercise_script "$AGENT_SCRIPT"

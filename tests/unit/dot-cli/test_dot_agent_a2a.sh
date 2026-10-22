@@ -132,6 +132,6 @@ assert_contains "stub-conformance --json" "$OUT" "args forwarded"
 test_start "mode_unknown_subcommand"
 meta mode bogus
 assert_equals 1 "$RC" "rc"
-assert_contains "Usage: dot mode [list|current" "$ERR" "usage"
+assert_contains "Usage: dot agent mode list|show|set|run" "$ERR" "usage"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

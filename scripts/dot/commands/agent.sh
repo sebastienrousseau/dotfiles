@@ -116,7 +116,7 @@ _agent_assert_dependencies() {
     die "Agent profile config not found: $file"
   fi
   if ! command -v jq >/dev/null 2>&1; then
-    die "jq is required for dot mode"
+    die "jq is required for dot agent mode"
   fi
 }
 
@@ -194,7 +194,7 @@ _agent_enforce_rbac() {
   fi
 }
 
-# dot mode list
+# dot agent mode list
 _agent_mode_list() {
   local current
   current="$(_agent_current_profile)"
@@ -210,7 +210,7 @@ _agent_mode_list() {
     done
 }
 
-# dot mode current
+# dot agent status
 _agent_mode_current() {
   local current
   current="$(_agent_current_profile)"
@@ -223,10 +223,10 @@ _agent_mode_current() {
   ui_ok "MCP" "$(_agent_profile_field "$current" "mcpProfile")"
 }
 
-# dot mode show
+# dot agent mode show
 _agent_mode_show() {
   local name="${1:-}"
-  [[ -n "$name" ]] || die "Usage: dot mode show <profile>"
+  [[ -n "$name" ]] || die "Usage: dot agent mode show <profile>"
   _agent_profile_exists "$name" || die "Unknown agent profile: $name"
   dot_agent_session_log "show" "$name" "ok"
   ui_header "Agent Mode"
@@ -239,10 +239,10 @@ _agent_mode_show() {
   ui_ok "MCP" "$(_agent_profile_field "$name" "mcpProfile")"
 }
 
-# dot mode set
+# dot agent mode set
 _agent_mode_set() {
   local name="${1:-}" state_file role=""
-  [[ -n "$name" ]] || die "Usage: dot mode set <profile>"
+  [[ -n "$name" ]] || die "Usage: dot agent mode set <profile>"
   _agent_profile_exists "$name" || die "Unknown agent profile: $name"
   _agent_enforce_rbac "$name"
   state_file="$(_agent_state_file)"
@@ -264,7 +264,7 @@ EOF
   ui_info "State file" "$state_file"
 }
 
-# dot mode run
+# dot agent mode run
 _agent_mode_run() {
   local name="${1:-}" current
   if [[ -n "$name" ]] && _agent_profile_exists "$name"; then
@@ -272,7 +272,7 @@ _agent_mode_run() {
   else
     name="$(_agent_current_profile)"
   fi
-  [[ $# -gt 0 ]] || die "Usage: dot mode run [profile] <command> [args...]"
+  [[ $# -gt 0 ]] || die "Usage: dot agent mode run [profile] <command> [args...]"
   _agent_apply_profile_env "$name"
   local checkpoint_file checkpoint_id
   checkpoint_file="$(dot_agent_checkpoint_create "$name" "ready" "$@")"
@@ -293,7 +293,7 @@ _agent_mode_run() {
   return "$exit_code"
 }
 
-# dot mode doctor
+# dot agent check
 _agent_mode_doctor() {
   local file
   file="$(_agent_profiles_file)"
@@ -308,7 +308,7 @@ _agent_mode_doctor() {
   ui_ok "Default profile" "$(_agent_default_profile)"
 }
 
-# dot mode card
+# dot agent mode card
 _agent_mode_card() {
   local card_file json_mode=0
   card_file="$(_agent_card_file)"
@@ -332,13 +332,13 @@ _agent_mode_card() {
   done
 }
 
-# dot mode log
+# dot agent mode log
 _agent_mode_log() {
   dot_agent_session_log "log" "$(_agent_current_profile)" "ok"
   dot_agent_session_tail "${1:-20}"
 }
 
-# dot mode checkpoint save
+# dot agent mode checkpoint save
 _agent_checkpoint_save() {
   local name="${1:-}" checkpoint_file checkpoint_id
   if [[ -n "$name" ]] && _agent_profile_exists "$name"; then
@@ -358,7 +358,7 @@ _agent_checkpoint_save() {
   ui_ok "File" "$checkpoint_file"
 }
 
-# dot mode checkpoint list
+# dot agent mode checkpoint list
 _agent_checkpoint_list() {
   local count="${1:-20}"
   dot_agent_session_log "checkpoint_list" "$(_agent_current_profile)" "ok"
@@ -369,7 +369,7 @@ _agent_checkpoint_list() {
   done
 }
 
-# dot mode checkpoint show
+# dot agent mode checkpoint show
 _agent_checkpoint_show() {
   local checkpoint_id="${1:-}" checkpoint_file json_mode=0
   [[ -n "$checkpoint_id" ]] || die "Usage: dot agent checkpoint show <id> [--json]"
@@ -391,7 +391,7 @@ _agent_checkpoint_show() {
   done
 }
 
-# dot mode checkpoint replay
+# dot agent mode checkpoint replay
 _agent_checkpoint_replay() {
   local checkpoint_id="${1:-}" checkpoint_file replay_profile
   local -a replay_argv=()
@@ -415,7 +415,7 @@ _agent_checkpoint_replay() {
   return "$exit_code"
 }
 
-# dot mode checkpoint
+# dot agent mode checkpoint
 _agent_mode_checkpoint() {
   local action="${1:-list}"
   shift || true
@@ -544,7 +544,7 @@ _agent_a2a_validate() {
   [[ "$issues" -eq 0 ]]
 }
 
-# dot mode a2a-card
+# dot agent mode a2a-card
 _agent_mode_a2a_card() {
   local a2a_card_file json_mode=0 validate_mode=0 strict_mode=0
   local repo_root
@@ -591,7 +591,7 @@ _agent_mode_a2a_card() {
   done
 }
 
-# dot mode conformance
+# dot agent card check
 _agent_mode_conformance() {
   dot_agent_session_log "conformance" "$(_agent_current_profile)" "ok"
   run_script "scripts/diagnostics/a2a-conformance.sh" "A2A conformance script" "$@"
@@ -621,7 +621,7 @@ cmd_mode() {
     a2a-card) _agent_mode_a2a_card "$@" ;;
     conformance) _agent_mode_conformance "$@" ;;
     *)
-      echo "Usage: dot mode [list|current|show|set|run|doctor|card|log|checkpoint|conformance|a2a-card]" >&2
+      echo "Usage: dot agent mode list|show|set|run; see 'dot help agent'" >&2
       exit 1
       ;;
   esac

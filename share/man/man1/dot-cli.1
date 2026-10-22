@@ -15,6 +15,9 @@ Every command takes \fB\-\-help\fR; \fBdot help\fR lists every domain.
 .TP
 .B completion
 shell completion scripts; alone it runs \fBshow\fR.
+.TP
+.B registry
+the plugin registry; alone it runs \fBshow\fR.
 .SH COMMANDS
 .TP
 .B dot cli list
@@ -40,6 +43,12 @@ Create a plugin from the template. Effect: write. Planned; not built yet.
 .TP
 .B dot cli completion show
 Print a completion script. Effect: read. Runs \fBdot completion\fR until the domain is extracted.
+.TP
+.B dot cli registry show
+The plugin registry URL. Effect: read. Runs \fBdot registry url\fR until the domain is extracted.
+.TP
+.B dot cli registry set
+Point at another plugin registry. Effect: write. Runs \fBdot registry set\-url\fR until the domain is extracted.
 .SH OTHER NAMES
 .TP
 .B dot completion

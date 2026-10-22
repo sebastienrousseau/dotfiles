@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091
-# dot perf's scoring and reporting at exact boundaries. Time is a counter:
+# dot doctor perf show's scoring and reporting at exact boundaries. Time is a counter:
 # python3's `import time` one-liners print it and each stub shell advances
 # it by its configured startup cost (ZSH_MS, BASH_MS), so every measured
 # mean is exact. Other python3 calls go to the real interpreter.

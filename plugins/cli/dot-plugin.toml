@@ -15,6 +15,11 @@ name = "completion"
 summary = "shell completion scripts"
 default = "show"
 
+[[objects]]
+name = "registry"
+summary = "the plugin registry"
+default = "show"
+
 [[commands]]
 verb = "list"
 effect = "read"
@@ -60,6 +65,20 @@ effect = "read"
 legacy = "completion"
 summary = "Print a completion script"
 
+[[commands]]
+object = "registry"
+verb = "show"
+effect = "read"
+legacy = "registry url"
+summary = "The plugin registry URL"
+
+[[commands]]
+object = "registry"
+verb = "set"
+effect = "write"
+legacy = "registry set-url"
+summary = "Point at another plugin registry"
+
 [[aliases]]
 name = "completion"
 target = "cli completion"
@@ -71,6 +90,7 @@ name = "registry"
 target = "cli list --available"
 kind = "deprecated"
 until = "0.2.538"
+legacy = "registry list"
 
 [[aliases]]
 name = "search"

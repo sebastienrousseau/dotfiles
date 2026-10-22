@@ -15,11 +15,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-DOT_CLI="$REPO_ROOT/bin/dot"
 TABLE="$REPO_ROOT/lib/dot/data/commands.txt"
 BASH_BIN="$(command -v bash)"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/dot-names.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
+
+# The dispatcher pinned to 0.2.537, inside the deprecation window of the
+# names that stop working in 0.2.538, so these cases do not depend on the
+# release being tested.
+source "$SCRIPT_DIR/../../framework/pinned_dot.sh"
+DOT_CLI="$(pinned_dot "$WORK/pinned" 0.2.537)"
 
 printf '_DOT_SRC=%q\nVERSION=0.2.537\nsource %q\n' "$REPO_ROOT" \
   "$REPO_ROOT/lib/dot/names.sh" >"$WORK/names.sh"
@@ -45,7 +50,8 @@ dot() {
 # beside it.
 mkdir -p "$WORK/src/bin"
 cp -R "$REPO_ROOT/lib" "$WORK/src/lib"
-cp "$DOT_CLI" "$WORK/src/bin/dot"
+cp "$REPO_ROOT/bin/dot" "$WORK/src/bin/dot"
+pin_names "$WORK/src/lib/dot" 0.2.537 # inside the window, as above
 printf 'alias|frob|removed|doctor|\nalias|frob-old|deprecated|doctor|0.2.500\n' \
   >>"$WORK/src/lib/dot/data/commands.txt"
 
@@ -160,6 +166,19 @@ assert_file_contains "$WORK/out" "dot sync" "and shows that command"
 rc=0
 dot help zz-no-such-topic || rc=$?
 assert_equals "1" "$rc" "an unknown topic that matches nothing fails"
+
+test_start "a_typo_after_an_object_stops"
+# `dot ai <words>` sends the words to a model: a word that is not a verb of
+# an object must stop at 127, not fall through to the domain's own route.
+rc=0
+dot ai pattern zzz || rc=$?
+assert_equals "127" "$rc" "not a verb of ai pattern"
+assert_file_contains "$WORK/err" "'dot ai pattern zzz' is not a command; run 'dot help ai pattern'" "names it and the help"
+rc=0
+dot ai pattern list >/dev/null 2>&1 || rc=$?
+assert_equals "0" "$rc" "a real verb still runs"
+dot ai pattern S3cret-x || true
+assert_output_not_contains "S3cret" "cat '$WORK/err'" "a value-like word is left out of that error"
 
 test_start "arguments_are_not_echoed"
 dot system schedule S3cret-x || true

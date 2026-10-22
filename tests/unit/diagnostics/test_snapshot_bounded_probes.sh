@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1091
-# `dot snapshot` asks each tool for its version. rustc behind rustup's
+# `dot doctor snapshot new` asks each tool for its version. rustc behind rustup's
 # proxy never answers when HOME has no toolchain, and the snapshot hung
 # until whatever ran it gave up. Each probe is now bounded (lib/dot/probe.sh):
 # a tool that does not answer is recorded as unknown and the rest are kept.

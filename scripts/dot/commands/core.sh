@@ -14,7 +14,7 @@
 ## dot apply                   # Apply dotfiles
 ## dot sync                    # Alias for apply
 ## dot update                  # Pull and apply updates
-## dot add <file>              # Add file to chezmoi
+## dot config add <file>              # Add file to chezmoi
 ## dot diff                    # Show pending changes
 ## dot status                  # Show configuration drift
 ## dot remove <file>           # Remove managed file
@@ -86,7 +86,7 @@ cmd_update() {
 
 cmd_add() {
   if [ -z "${1:-}" ]; then
-    echo "Usage: dot add <file>"
+    echo "Usage: dot config add <file>"
     echo ""
     echo "Add a file to the chezmoi source directory."
     echo "The file will be managed by chezmoi from now on."

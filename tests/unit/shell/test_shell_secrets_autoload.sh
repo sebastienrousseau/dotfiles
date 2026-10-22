@@ -19,7 +19,7 @@ mkdir -p "$WORK/bin" "$WORK/tmp"
 
 # A dot stub that records its argv. `dot secret export <bucket>` answers the
 # way the real command does: one `export KEY=%q-quoted-value` line per key.
-# Any other command (such as `dot env load`, which is the mise handler)
+# Any other command (such as `dot secret export`, which is the mise handler)
 # prints nothing useful.
 cat >"$WORK/bin/dot" <<STUB
 #!/usr/bin/env bash

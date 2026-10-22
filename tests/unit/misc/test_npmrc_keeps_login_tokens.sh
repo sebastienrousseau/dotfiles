@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091
 # ~/.npmrc (defaults/modify_private_dot_npmrc) keeps the registry auth lines
 # `npm login` writes. As a plain template it dropped them on every apply, so
-# a non-interactive `dot upgrade` stopped at chezmoi's "has changed since
+# a non-interactive `dot system update` stopped at chezmoi's "has changed since
 # chezmoi last wrote it" prompt (EOF, exit 1). Runs the real chezmoi on a
 # sandbox source holding only this file; tokens here are fake.
 set -uo pipefail
@@ -32,7 +32,7 @@ cat >"$SB/old/defaults/private_dot_npmrc.tmpl" <<'OLD'
 save-exact=true
 OLD
 
-# cz <home> <config> <source> <args...>: non-interactive, like dot upgrade.
+# cz <home> <config> <source> <args...>: non-interactive, like dot system update.
 cz() {
   local home="$1" config="$2" src="$3"
   shift 3

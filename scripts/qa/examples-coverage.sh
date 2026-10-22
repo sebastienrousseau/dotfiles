@@ -69,7 +69,7 @@ while IFS= read -r cmd; do
   [ -n "$cmd" ] || continue
   total=$((total + 1))
   # "dot <cmd>" followed by a non-identifier char (or EOL) — avoids matching
-  # `dot ai` against `dot ai-query`, and matches printf '...\n'-terminated refs.
+  # `dot ai` against `dot ai ask`, and matches printf '...\n'-terminated refs.
   if grep -rqE "dot ${cmd}([^A-Za-z0-9_-]|\$)" "$EXAMPLES_DIR" 2>/dev/null; then
     covered=$((covered + 1))
   else

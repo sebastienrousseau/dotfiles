@@ -5,17 +5,17 @@
 #
 # scripts/dot/commands/init.sh
 #
-# `dot init <github-user>` — bootstrap a foreign dotfiles repo through
+# `dot config init <github-user>` — bootstrap a foreign dotfiles repo through
 # this framework's harness. The §3 audit roadmap calls for an analogue
 # to `chezmoi init <user>` that turns this tool from "one person's
 # config" into a runtime for any dotfiles user.
 #
 # Behavior:
-#   dot init alice                # clones github.com/alice/dotfiles via chezmoi,
+#   dot config init alice                # clones github.com/alice/dotfiles via chezmoi,
 #                                 # applies through the dot harness
-#   dot init https://...          # explicit URL
-#   dot init alice --dry-run      # preview without writing
-#   dot init alice --no-apply     # clone only; don't run chezmoi apply
+#   dot config init https://...          # explicit URL
+#   dot config init alice --dry-run      # preview without writing
+#   dot config init alice --no-apply     # clone only; don't run chezmoi apply
 #
 # Safety:
 #   - Refuses to clobber an existing chezmoi source dir without --force.
@@ -35,7 +35,7 @@ _init_resolve_url() {
   local arg="$1"
   case "$arg" in
     http://*)
-      printf "dot init: refusing plain HTTP (use HTTPS or git+ssh)\n" >&2
+      printf "dot config init: refusing plain HTTP (use HTTPS or git+ssh)\n" >&2
       return 2
       ;;
     https://* | git@*:*)
@@ -47,7 +47,7 @@ _init_resolve_url() {
       # a crafted argument can't smuggle shell metacharacters into
       # downstream tooling (chezmoi init, git clone).
       if [[ ! "$arg" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]]; then
-        printf "dot init: invalid owner/repo (only [A-Za-z0-9._-]+/[A-Za-z0-9._-]+ allowed): %s\n" "$arg" >&2
+        printf "dot config init: invalid owner/repo (only [A-Za-z0-9._-]+/[A-Za-z0-9._-]+ allowed): %s\n" "$arg" >&2
         return 2
       fi
       printf "https://github.com/%s.git\n" "$arg"
@@ -56,7 +56,7 @@ _init_resolve_url() {
       # Bare user shorthand: same character whitelist as the path
       # segment of a GitHub URL.
       if [[ ! "$arg" =~ ^[A-Za-z0-9._-]+$ ]]; then
-        printf "dot init: invalid user (only [A-Za-z0-9._-] allowed): %s\n" "$arg" >&2
+        printf "dot config init: invalid user (only [A-Za-z0-9._-] allowed): %s\n" "$arg" >&2
         return 2
       fi
       printf "https://github.com/%s/dotfiles.git\n" "$arg"
@@ -102,16 +102,16 @@ cmd_init() {
         ;;
       --help | -h)
         cat <<EOF
-Usage: dot init <github-user|owner/repo|url> [--dry-run] [--no-apply] [--force] [--yes]
+Usage: dot config init <github-user|owner/repo|url> [--dry-run] [--no-apply] [--force] [--yes]
 
 Bootstrap a foreign dotfiles repo through chezmoi + the dot harness.
 
 Examples:
-  dot init alice                # github.com/alice/dotfiles
-  dot init alice/configs        # github.com/alice/configs
-  dot init https://example.com/repo.git
-  dot init alice --dry-run      # preview only
-  dot init alice --no-apply     # clone but don't apply
+  dot config init alice                # github.com/alice/dotfiles
+  dot config init alice/configs        # github.com/alice/configs
+  dot config init https://example.com/repo.git
+  dot config init alice --dry-run      # preview only
+  dot config init alice --no-apply     # clone but don't apply
 
 Flags:
   --dry-run, -n   Show resolved URL + target dir without cloning.

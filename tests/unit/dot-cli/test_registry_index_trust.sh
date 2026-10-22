@@ -47,7 +47,7 @@ export NO_COLOR=1
 if ! command -v jq >/dev/null 2>&1; then
   test_start "jq_available"
   ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: jq is required by dot registry"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: jq is required by dot cli list --available"
   echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
   exit 1
 fi
