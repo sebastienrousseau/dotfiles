@@ -391,7 +391,7 @@ leg|tools|tool list --nix||
 leg|packages|tool list --packages||
 leg|locks|tool list --locked||
 arg|ai start|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
-flag|ai run|pattern|p|pattern|Steering pattern
+flag|ai run|style|p|pattern|Steering pattern (--pattern is the old name)
 arg|ai run|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
 flag|attest show|json|j||Print JSON
 flag|attest show|write|w||Write the attestation to a file

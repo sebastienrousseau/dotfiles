@@ -9,12 +9,16 @@
 # windows-smoke-test.ps1 behaviour).
 #
 # Subcommand routing
-#   version | -v | --version  →  Get-DotVersion        (native)
+#   version | -V | --version  →  Get-DotVersion        (native)
 #   help    | -h | --help     →  Invoke-DotHelp        (native)
 #   status/diff/apply/sync    →  native chezmoi calls
-#   doctor/env/fleet          →  native PowerShell views
-#   agents check/list         →  native PowerShell checks
+#   doctor, tool list, fleet  →  native PowerShell views
+#   agent context check/show  →  native PowerShell checks
 #   <anything else>           →  bash executable_dot   (fallback)
+#
+# Only ADR-020 spellings are native. Old names (agents, env, add, init,
+# -v, …) and `dot update` (dot system update) go to the bash dispatcher,
+# so they warn, expire and behave exactly as they do on macOS and Linux.
 #
 # Exit codes
 #   0   command succeeded
@@ -60,11 +64,10 @@ The bash fallback requires 'bash' on PATH (Git for Windows or WSL).
 Native PowerShell commands currently supported:
   dot version
   dot help
-  dot status | diff | apply | sync | update
-  dot add | remove | cd | init
+  dot status | diff | apply | sync | cd
   dot doctor
-  dot env list
-  dot agents check | list
+  dot tool list
+  dot agent context check | show
   dot fleet status
 
 For everything else, install:
@@ -91,7 +94,7 @@ $cmd = $args[0]
 $rest = @(if ($args.Count -gt 1) { $args[1..($args.Count - 1)] } else { @() })
 
 switch ($cmd) {
-    { $_ -in 'version', '-v', '--version' } {
+    { $_ -in 'version', '-V', '--version' } {
         Get-DotVersion
         exit 0
     }
@@ -103,8 +106,11 @@ switch ($cmd) {
         # `dot help all` and `dot help <cmd>` still need bash for now.
         Invoke-BashFallback help @rest
     }
-    'agents' {
-        if ($rest.Count -ge 1 -and $rest[0] -eq 'check') {
+    'agent' {
+        if ($rest.Count -lt 1 -or $rest[0] -ne 'context') {
+            Invoke-BashFallback agent @rest
+        }
+        if ($rest.Count -ge 2 -and $rest[1] -eq 'check') {
             $ok = Test-DotAgentsSync -Verbose:$VerbosePreference
             if ($ok) {
                 Write-Host '[OK] AGENTS.md in sync with CLAUDE.md'
@@ -115,11 +121,11 @@ switch ($cmd) {
                 exit 1
             }
         }
-        if ($rest.Count -eq 0 -or $rest[0] -eq 'list') {
+        if ($rest.Count -eq 1 -or $rest[1] -eq 'show') {
             Get-DotAgents | Format-Table -AutoSize
             exit 0
         }
-        Invoke-BashFallback agents @rest
+        Invoke-BashFallback agent @rest
     }
     'status' {
         Get-DotStatus
@@ -133,14 +139,6 @@ switch ($cmd) {
         Invoke-DotChezmoi -Operation apply -Arguments $rest
         exit 0
     }
-    'update' {
-        Invoke-DotChezmoi -Operation update -Arguments $rest
-        exit 0
-    }
-    { $_ -in 'add', 'remove', 'init' } {
-        Invoke-DotChezmoi -Operation $cmd -Arguments $rest
-        exit 0
-    }
     'cd' {
         Get-DotSourcePath
         exit 0
@@ -149,13 +147,13 @@ switch ($cmd) {
         if (Invoke-DotDoctor) { exit 0 }
         exit 1
     }
-    'env' {
+    'tool' {
         if ($rest.Count -eq 0 -or $rest[0] -eq 'list') {
             $json = $rest -contains '--json'
             Get-DotEnvironment -AsJson:$json
             exit 0
         }
-        Invoke-BashFallback env @rest
+        Invoke-BashFallback tool @rest
     }
     'fleet' {
         if ($rest.Count -eq 0 -or $rest[0] -eq 'status') {

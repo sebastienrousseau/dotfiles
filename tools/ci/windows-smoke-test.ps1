@@ -131,9 +131,9 @@ Assert-Step 'dot.ps1 dispatcher: version subcommand' {
   if ($out -notmatch '^\d+\.\d+\.\d+$') { throw "unexpected: $out" }
 }
 
-Assert-Step 'dot.ps1 dispatcher: agents check subcommand' {
+Assert-Step 'dot.ps1 dispatcher: agent context check' {
   $ps1 = Join-Path $RepoRoot 'bin/dot.ps1'
-  $out = & pwsh -NoProfile -File $ps1 'agents' 'check' 2>&1
+  $out = & pwsh -NoProfile -File $ps1 'agent' 'context' 'check' 2>&1
   if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
 }
 

@@ -12,33 +12,34 @@ This document tracks what is supported on Windows-native PowerShell 7.5+ compare
 
 | Tier | Meaning | Examples |
 |---|---|---|
-| **Full** | Native PowerShell path; tested in CI on `windows-latest`. | `dot version`, `dot help`, `dot agents check`. |
+| **Full** | Native PowerShell path; tested in CI on `windows-latest`. | `dot version`, `dot help`, `dot agent context check`. |
 | **WSL-bridged** | Runs under WSL2 bash with the same UX as Linux. | All `dot` subcommands, the test suite, the cold-start bench. |
-| **Bash-bridged** | The PowerShell dispatcher delegates to Git Bash or WSL bash and fails clearly when bash is unavailable. | `dot registry`, `dot fleet apply`, Unix-specific diagnostics. |
+| **Bash-bridged** | The PowerShell dispatcher delegates to Git Bash or WSL bash and fails clearly when bash is unavailable. Old command names are always bridged, so they warn and expire exactly as on macOS and Linux. | `dot cli list --available`, `dot fleet apply`, Unix-specific diagnostics. |
 | **N/A** | The command targets a Unix-only surface and is not exposed on PowerShell. | Wallpaper-driven theming via macOS `defaults`; Linux-only `lock-configs.sh`. |
 
 ## Command-by-command matrix
 
 | Command | Windows-native | WSL2 | macOS | Linux |
 |---|---|---|---|---|
-| `dot version` | **Full (native)** — `Get-DotVersion` cmdlet in `scripts/dot/powershell/Dot.psm1`; reads `.chezmoidata.toml` directly, no bash | Full | Full | Full |
+| `dot version` / `dot -V` | **Full (native)** — `Get-DotVersion` cmdlet in `scripts/dot/powershell/Dot.psm1`; reads `.chezmoidata.toml` directly, no bash | Full | Full | Full |
 | `dot help` | **Full (native)** — `Invoke-DotHelp`; detailed Unix command help remains bash-bridged | Full | Full | Full |
 | `dot status` | **Full (native)** — structured clean/drifted result from chezmoi | Full | Full | Full |
-| `dot diff` / `apply` / `sync` / `update` | **Full (native)** — direct, exit-code-checked chezmoi operations | Full | Full | Full |
-| `dot add` / `remove` / `init` / `cd` | **Full (native)** — direct chezmoi operations and source-path lookup | Full | Full | Full |
+| `dot diff` / `apply` / `sync` | **Full (native)** — direct, exit-code-checked chezmoi operations | Full | Full | Full |
+| `dot cd` | **Full (native)** — source-path lookup | Full | Full | Full |
+| `dot update` (`dot system update`), `dot config add` / `init` | Bash-bridged | Full | Full | Full |
 | `dot doctor` | **Full (native baseline)** — PowerShell, chezmoi, git, repo data, and module checks; Unix-only diagnostics are bash-bridged | Full | Full | Full |
-| `dot agents check` | **Full (native)** — `Test-DotAgentsSync` cmdlet; CI smoke test runs the cmdlet directly | Full | Full | Full |
-| `dot agents list` | **Full (native)** — structured harness/path/rendered records | Full | Full | Full |
-| `dot agents render` | Bash-bridged | Full | Full | Full |
-| `dot env list` | **Full (native)** — mise text or JSON inventory | Full | Full | Full |
-| `dot env emit` | Bash-bridged | Full | Full | Full |
+| `dot agent context check` | **Full (native)** — `Test-DotAgentsSync` cmdlet; CI smoke test runs the cmdlet directly | Full | Full | Full |
+| `dot agent context show` | **Full (native)** — structured harness/path/rendered records | Full | Full | Full |
+| `dot agent context apply` | Bash-bridged | Full | Full | Full |
+| `dot tool list` | **Full (native)** — mise text or JSON inventory | Full | Full | Full |
+| `dot tool export` | Bash-bridged | Full | Full | Full |
 | `dot fleet status` | **Full (native)** — node, version, OS, architecture, and drift | Full | Full | Full |
 | `dot fleet drift` / `events` / `apply` / `namespace` | Bash-bridged | Full | Full | Full |
-| `dot registry list` / `search` / `info` / `install` | Bash-bridged; Unix path is verified, checksum-pinned, and preview-first | Full | Full | Full |
-| `dot agent` / `mode` / AI commands | Bash-bridged | Full | Full | Full |
-| `dot lint` | WSL-bridged (shellcheck/shfmt are Unix-native) | Full | Full | Full |
-| `dot perf` / `health` / `tools` | Bash-bridged | Full | Full | Full |
-| `dot theme` / `wallpaper` | N/A on native Windows | Limited | Full | Full (desktop-dependent) |
+| `dot cli list --available` / `show` / `install` | Bash-bridged; Unix path is verified, checksum-pinned, and preview-first | Full | Full | Full |
+| `dot agent` (other than `context`) / AI commands | Bash-bridged | Full | Full | Full |
+| `dot config check` | WSL-bridged (shellcheck/shfmt are Unix-native) | Full | Full | Full |
+| `dot doctor perf show` / `doctor status` / `tool list --nix` | Bash-bridged | Full | Full | Full |
+| `dot theme` / `theme wallpaper set` | N/A on native Windows | Limited | Full | Full (desktop-dependent) |
 | `dot security firewall` | Bash-bridged; no native Defender mutation | N/A | Full (pf) | Full (ufw/firewalld) |
 | `dot security lock-configs` | N/A (Windows ACL model differs; tracked) | N/A | Full (`chflags uchg`) | Full (`chattr +i`) |
 | Shell startup integration | Full (`Microsoft.PowerShell_profile.ps1` ships) | Full (zsh, bash, fish) | Full (zsh, bash, fish, nu) | Full (zsh, bash, fish, nu) |
@@ -49,9 +50,9 @@ This document tracks what is supported on Windows-native PowerShell 7.5+ compare
 |---|---|
 | `dot version` exits 0 | windows-latest, ubuntu-latest, macos-latest, macos-14 |
 | `dot help` exits 0 | windows-latest, ubuntu-latest, macos-latest, macos-14 |
-| `dot agents check` exits 0 | windows-latest (native), ubuntu-latest, macos-latest, macos-14 |
+| `dot agent context check` exits 0 | windows-latest (native), ubuntu-latest, macos-latest, macos-14 |
 | Native module import, agent-body sync, harness inventory, doctor baseline, and chezmoi diff | windows-latest |
-| Native dispatcher version, help, and agents check | windows-latest |
+| Native dispatcher version, help, and agent context check | windows-latest |
 | PowerShell ≥ 7.5 | windows-latest (smoke test at `tools/ci/windows-smoke-test.ps1`) |
 | PSScriptAnalyzer Error-level findings | windows-latest |
 | `chezmoi --version` exits 0 | windows-latest (via scoop), all Unix matrices |

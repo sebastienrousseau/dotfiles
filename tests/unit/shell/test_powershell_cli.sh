@@ -26,7 +26,7 @@ for function in Get-DotVersion Invoke-DotHelp Test-DotAgentsSync \
   assert_file_contains "$MODULE" "$function" "module exposes $function"
 done
 
-for command in status diff apply sync update add remove init cd doctor env fleet agents; do
+for command in status diff apply sync cd doctor tool fleet agent; do
   test_start "powershell_dispatches_${command}"
   assert_file_contains "$DISPATCHER" "'$command'" "dispatcher handles $command"
 done
@@ -55,6 +55,21 @@ if [[ "$pwsh_version" =~ ^[0-9]+$ ]]; then
       printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
     fi
   done
+fi
+
+# Routing, run for real: only ADR-020 spellings are native; old names and
+# `dot update` go to bin/dot, so they behave as on macOS and Linux.
+if [[ "$pwsh_version" =~ ^[0-9]+$ ]]; then
+  ps1() { CHEZMOI_SOURCE_DIR="$REPO_ROOT" pwsh -NoProfile -File "$DISPATCHER" "$@" 2>&1; }
+  test_start "powershell_routes_new_spellings_natively"
+  assert_equals "$(bash "$REPO_ROOT/bin/dot" version 2>/dev/null | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | head -1)" \
+    "$(ps1 -V | tr -d '[:space:]')" "-V prints the version"
+  assert_contains "[OK] AGENTS.md in sync with CLAUDE.md" "$(ps1 agent context check)" "agent context check is native"
+  test_start "powershell_sends_old_names_to_bin_dot"
+  assert_contains "'dot agents' is deprecated; use 'dot agent context check'" "$(ps1 agents check)" \
+    "an old name warns, as bin/dot does"
+  assert_contains "dot update is short for dot system update" "$(ps1 update --help)" \
+    "dot update is dot system update, not chezmoi update"
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

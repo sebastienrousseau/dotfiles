@@ -24,7 +24,7 @@ BASH_BIN="$(command -v bash)"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/dot-completion.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 
-# One AI pattern, so `--pattern` has something to offer.
+# One AI pattern, so `--style` has something to offer.
 export XDG_CONFIG_HOME="$WORK/config"
 mkdir -p "$XDG_CONFIG_HOME/ai/patterns"
 touch "$XDG_CONFIG_HOME/ai/patterns/architect.md"
@@ -132,7 +132,7 @@ assert_equals "list run set" "$(bash_q system schedule '')" "an object's verbs"
 test_start "bash_completes_flags_and_values"
 assert_equals "" "$(missing "$(bash_q doctor perf show -)" --json -j --runs -r --help)" "a command's flags"
 assert_equals "" "$(bash_q doctor perf show --runs '')" "a flag that takes a number offers nothing"
-assert_equals "architect" "$(bash_q ai run claude --pattern '')" "a pattern flag offers the AI patterns"
+assert_equals "architect" "$(bash_q ai run claude --style '')" "a pattern flag offers the AI patterns"
 assert_equals "" "$(missing "$(bash_q ai run '')" claude codex)" "ai run offers the agents"
 assert_equals "go molecule node packer python" "$(bash_q tool new '')" "tool new offers its templates"
 assert_equals "--globals --help --yes -y" "$(bash_q update -)" "a shortcut completes as its target"
@@ -150,13 +150,13 @@ for shell in zsh fish nu pwsh; do
       assert_equals "$top" "$(zsh_q '')" "the same top level"
       assert_equals "$(bash_q system schedule '')" "$(zsh_q system schedule '')" "the same object verbs"
       assert_equals "$(bash_q doctor perf show -)" "$(zsh_q doctor perf show -)" "the same flags"
-      assert_equals "architect" "$(zsh_q ai run claude --pattern '')" "the AI patterns"
+      assert_equals "architect" "$(zsh_q ai run claude --style '')" "the AI patterns"
       ;;
     fish)
       assert_equals "$top" "$(fish_q '' | tr " " "\n" | grep -v "^-" | paste -sd " " -)" "the same top level"
       assert_equals "$(bash_q system schedule '')" "$(fish_q system schedule '')" "the same object verbs"
       assert_equals "" "$(missing "$(fish_q doctor perf show -)" --json -j --runs -r)" "the flags"
-      assert_equals "architect" "$(fish_q ai run claude --pattern '')" "the AI patterns"
+      assert_equals "architect" "$(fish_q ai run claude --style '')" "the AI patterns"
       ;;
     nu)
       nu --no-config-file -c "source $NU_FILE; nu-complete dot system schedule | get value | str join ' '" >"$WORK/nu" 2>&1
@@ -168,7 +168,7 @@ for shell in zsh fish nu pwsh; do
       assert_equals "$top" "$(ps_q '')" "the same top level"
       assert_equals "$(bash_q system schedule '')" "$(ps_q system schedule '')" "the same object verbs"
       assert_equals "--help" "$(ps_q doctor -)" "a single flag is not split into characters"
-      assert_equals "architect" "$(ps_q ai run claude --pattern '')" "the AI patterns"
+      assert_equals "architect" "$(ps_q ai run claude --style '')" "the AI patterns"
       ;;
   esac
 done

@@ -189,8 +189,8 @@ _dot() {
       flags_=('--help:Show help')
       ;;
     'ai run' | 'ai run'\ *)
-      flags_=('--help:Show help' '--pattern:Steering pattern' '-p:Steering pattern')
-      patflags_=(--pattern -p)
+      flags_=('--help:Show help' '--style:Steering pattern (--pattern is the old name)' '-p:Steering pattern (--pattern is the old name)')
+      patflags_=(--style -p)
       [[ "$path_" != 'ai run' ]] || values_=(claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai)
       ;;
     'ai start' | 'ai start'\ *)
