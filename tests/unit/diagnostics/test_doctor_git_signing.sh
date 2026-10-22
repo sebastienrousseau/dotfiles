@@ -20,6 +20,12 @@ mkdir -p "$WORK/home/.ssh" "$WORK/bin"
 printf '#!/bin/sh\n[ "$2" = KNOWN ]\n' >"$WORK/bin/gpg"
 chmod +x "$WORK/bin/gpg"
 
+# The section's two functions, read once here: BSD sed (the macOS runners)
+# rejects a multi-range script passed through the inner shell's quotes.
+SIGNING_FUNCS="$(sed -n -e '/^_doctor_signing_key() {/,/^}/p' \
+  -e '/^_doctor_git_signing() {/,/^}/p' "$DOCTOR")"
+export SIGNING_FUNCS
+
 # signing KEY=VALUE...: the section's report lines for a global git config
 # holding the given settings.
 signing() {
@@ -31,9 +37,10 @@ signing() {
     _ok() { echo "ok $1: $2"; }
     _warn() { echo "warn $1: $2"; }
     _fail() { echo "fail $1: $2"; }
-    pretty_path() { printf "%s" "${1/#$HOME/\~}"; }
-    eval "$(sed -n "/^_doctor_signing_key() {/,/^}/p;/^_doctor_git_signing() {/,/^}/p" "$1")"
-    _doctor_git_signing' _ "$DOCTOR" | paste -sd '|' -
+    # A tilde from a variable: bash 3.2 keeps the backslash of ${x/#a/\~}.
+    pretty_path() { local t="~"; printf "%s" "${1/#$HOME/$t}"; }
+    eval "$SIGNING_FUNCS"
+    _doctor_git_signing' | paste -sd '|' -
 }
 
 test_start "no_key_is_not_a_problem"
