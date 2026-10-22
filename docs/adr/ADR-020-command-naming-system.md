@@ -1,9 +1,9 @@
 # ADR-020: One command grammar for the dot family
 
-Status: Accepted 2026-10-18; registries, manifest schema, plugin manifests,
-the CLI-contract lint, the runtime alias table and the generated help, man
-pages, completions and cmdlets implemented; the single update path pending
-(see Enforcement).
+Status: Accepted 2026-10-18; implemented in the monorepo (N0): registries,
+manifest schema, plugin manifests, the CLI-contract lint, the runtime alias
+table, the generated help, man pages, completions and cmdlets, and the
+single update path (see Enforcement). The old names stop working in 0.2.538.
 
 ## Context
 
