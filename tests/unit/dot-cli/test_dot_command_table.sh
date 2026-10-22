@@ -177,6 +177,8 @@ assert_file_contains "$WORK/err" "'dot ai pattern zzz' is not a command; run 'do
 rc=0
 dot ai pattern list >/dev/null 2>&1 || rc=$?
 assert_equals "0" "$rc" "a real verb still runs"
+dot ai pattern S3cret-x || true
+assert_output_not_contains "S3cret" "cat '$WORK/err'" "a value-like word is left out of that error"
 
 test_start "arguments_are_not_echoed"
 dot system schedule S3cret-x || true
