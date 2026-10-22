@@ -361,13 +361,10 @@ func sampleEcosystem() EcosystemSnapshot {
 }
 
 // formatBtopBar formats a one-line btop telemetry summary bar for the header/splash.
-func formatBtopBar(snap EcosystemSnapshot, sci SCIMetrics, greenMode bool) string {
-	mode := "STD"
-	if greenMode {
-		mode = "GREEN-UMA"
-	}
-	return fmt.Sprintf("CPU:%dc(%.1f%%) · AI-RAM:%.1fMB · Procs:%d · MCP:%d · passmcp:%d/%d · Corral:%d · SCI:%.2fgCO2eq [%s]",
+// Energy is not measured, so SCI reads n/a.
+func formatBtopBar(snap EcosystemSnapshot) string {
+	return fmt.Sprintf("CPU:%dc(%.1f%%) · AI-RAM:%.1fMB · Procs:%d · MCP:%d · passmcp:%d/%d · Corral:%d · SCI:n/a",
 		snap.NumCPU, snap.TotalAICPU, snap.TotalAIMemMB, len(snap.ActiveProcs),
 		snap.MCPServers, snap.PassMCPReady, len(passmcpFamily),
-		snap.Corral.TotalRepos, sci.GCO2eq, mode)
+		snap.Corral.TotalRepos)
 }

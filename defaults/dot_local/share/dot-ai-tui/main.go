@@ -4,7 +4,7 @@
 // dot-ai — the `dot ai` cockpit & btop-grade agentic control plane. Unifies
 // the AI fleet with corralctl (multi-forge workspace manager), passmcp (9-repo
 // MCP security & risk-graph family), and draft (grounded research & C2PA
-// synthesis), plus ISO/IEC 21031:2024 SCI carbon/Joule telemetry.
+// synthesis). Every figure is sampled; energy and carbon read n/a.
 package main
 
 import (
@@ -137,7 +137,6 @@ type model struct {
 	palSel        int
 	aiModel       string
 	runStart      int64
-	greenMode     bool
 	hideBtop      bool
 	refreshed     bool
 	ecoSnap       EcosystemSnapshot
@@ -351,9 +350,6 @@ func (m model) updateFleetHotkey(k string) (tea.Model, tea.Cmd) {
 	case "m":
 		m.aiModel = nextModel(m.aiModel)
 		m.status = "model → " + modelLabel(m.aiModel)
-	case "g":
-		m.greenMode = !m.greenMode
-		m.status = map[bool]string{true: "green mode → on (UMA split-stage)", false: "green mode → off"}[m.greenMode]
 	case "s":
 		if m.gatewayUp {
 			return m, dotExec("serve", "stop")

@@ -99,14 +99,12 @@ if not db.execute("SELECT 1 FROM _meta WHERE key='jsonl_migrated'").fetchone():
                 pass
     db.execute("INSERT OR REPLACE INTO _meta VALUES ('jsonl_migrated','1')")
 
-# Estimate baseline energy (Joules) & ISO/IEC 21031:2024 SCI (gCO2eq) from runtime & prompt words.
+# Energy is not measured, so joules and gco2eq stay NULL (n/a).
 dur_f = float(dur)
 pw_i = int(pw)
-est_joules = round(max(dur_f * 9.5, pw_i * 0.015), 4)
-est_gco2eq = round((est_joules / 3600000.0) * 380.0, 6)
 
 db.execute(
     'INSERT INTO runs (ts,delegate,model,project,exit_code,duration_secs,prompt_words,joules,gco2eq) VALUES (?,?,?,?,?,?,?,?,?)',
-    (ts, provider, provider, project, int(ec), dur_f, pw_i, est_joules, est_gco2eq),
+    (ts, provider, provider, project, int(ec), dur_f, pw_i, None, None),
 )
 db.close()

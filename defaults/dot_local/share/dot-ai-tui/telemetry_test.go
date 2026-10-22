@@ -57,17 +57,6 @@ func TestMeterBar(t *testing.T) {
 	}
 }
 
-func TestComputeSCI(t *testing.T) {
-	m := computeSCI(1000, 500, 500, 100, 10.0, 380.0)
-	if m.PrefillJoules <= 0 || m.DecodeJoules <= 0 || m.CacheSavedWh <= 0 || m.TotalJoules <= 10.0 || m.GCO2eq <= 0 || m.SCIPer1kTok <= 0 {
-		t.Fatalf("unexpected SCI metrics: %+v", m)
-	}
-	zero := computeSCI(0, 0, 0, 0, math.NaN(), -5.0)
-	if zero.TotalJoules != 0 || zero.GCO2eq != 0 || zero.SCIPer1kTok != 0 {
-		t.Fatalf("zero tokens SCI: %+v", zero)
-	}
-}
-
 func TestComputeActionEntropy(t *testing.T) {
 	if h, loop := computeActionEntropy(nil); h != 0 || loop {
 		t.Fatalf("empty actions: h=%v loop=%v", h, loop)
@@ -91,9 +80,19 @@ func TestLogEventCLI(t *testing.T) {
 	if err := logEventCLI([]string{"only-one"}); err == nil {
 		t.Fatal("short args must return error")
 	}
+	var stmt string
+	execCommand = func(_ string, args ...string) *exec.Cmd {
+		stmt = args[len(args)-1]
+		return exec.Command("true")
+	}
 	if err := logEventCLI([]string{"claude", "dotfiles", "0", "1.5", "42", "2026-10-17T18:00:00Z"}); err != nil {
 		t.Fatalf("logEventCLI failed: %v", err)
 	}
+	// Energy is not measured: the run is stored with NULL joules and gco2eq.
+	if !strings.Contains(stmt, ",42,NULL,NULL);") {
+		t.Fatalf("energy must be stored as NULL, got: %s", stmt)
+	}
+	execCommand = func(string, ...string) *exec.Cmd { return exec.Command("true") }
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
 	os.Args = []string{"dot-ai-tui", "--log-event", "claude", "dotfiles", "0", "1.2", "10", "2026-10-17T18:00:00Z"}
@@ -188,11 +187,8 @@ func TestSampleEcosystemAndFormatBtopBar(t *testing.T) {
 	if snapScan.Corral.TotalRepos != 2 || snapScan.Corral.Pristine != 1 || snapScan.Corral.Worktree != 1 {
 		t.Fatalf("scanCodeDirs mismatch: %+v", snapScan.Corral)
 	}
-	sci := computeSCI(1000, 500, 200, 0, 5.0, 380.0)
-	barStd := formatBtopBar(snap, sci, false)
-	barGreen := formatBtopBar(snap, sci, true)
-	if !strings.Contains(barStd, "[STD]") || !strings.Contains(barGreen, "[GREEN-UMA]") {
-		t.Fatalf("formatBtopBar modes: std=%q green=%q", barStd, barGreen)
+	if bar := formatBtopBar(snap); !strings.Contains(bar, "CPU:") || !strings.Contains(bar, "SCI:n/a") {
+		t.Fatalf("formatBtopBar: %q", bar)
 	}
 
 	orig := execCommand
@@ -200,11 +196,7 @@ func TestSampleEcosystemAndFormatBtopBar(t *testing.T) {
 	execCommand = func(string, ...string) *exec.Cmd { return exec.Command("true") }
 
 	m := sized()
-	m = upd(m, key("g"))
-	if !m.greenMode || !strings.Contains(m.View(), "green") {
-		t.Fatal("g key should enable greenMode and render green indicator in header")
-	}
-	for _, cmd := range []string{"/eco", "/top", "/green", "/corral status", "/mcp check", "/draft topic.md"} {
+	for _, cmd := range []string{"/eco", "/top", "/corral status", "/mcp check", "/draft topic.md"} {
 		mm, _ := m.handleSlash(cmd)
 		m = mm.(model)
 	}
@@ -220,7 +212,7 @@ func TestBtopDeckAndControlCentre(t *testing.T) {
 	m.ecoSnap = EcosystemSnapshot{}
 	m.cpuHist = nil
 	deck := m.renderBtopDeck()
-	if !strings.Contains(deck, "CPU") || !strings.Contains(deck, "SCI") {
+	if !strings.Contains(deck, "CPU") || !strings.Contains(deck, "SCI n/a") {
 		t.Fatalf("btop deck missing gauges: %q", deck)
 	}
 	m = upd(m, btopTickMsg{})
@@ -243,12 +235,6 @@ func TestBtopDeckAndControlCentre(t *testing.T) {
 		}
 		// Also test squeezed height truncation on ecosystem control centre
 		_ = m.renderEcosystemControlCentre(60, 3)
-	}
-
-	// Draft with greenMode enabled
-	m.greenMode = true
-	if !strings.Contains(m.View(), "GREEN-UMA") {
-		t.Fatal("draft greenMode view missing GREEN-UMA")
 	}
 
 	// Action navigation (h/l/left/right), btop toggle (b), and console clear (0)

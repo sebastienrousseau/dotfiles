@@ -72,7 +72,7 @@ func (m model) withEco(snap EcosystemSnapshot) model {
 		return m
 	}
 	m.ecoSnap = snap
-	m.cpuHist = append(m.cpuHist, max(snap.TotalAICPU, 5))
+	m.cpuHist = append(m.cpuHist, snap.TotalAICPU)
 	if n := len(m.cpuHist); n > cpuHistMax {
 		m.cpuHist = append([]float64(nil), m.cpuHist[n-cpuHistMax:]...)
 	}
@@ -110,16 +110,16 @@ func toolActions(t tool) []controlAction {
 		return []controlAction{
 			{key: "1", label: "Pipeline Help", desc: "draft --help — 5-phase grounded research & C2PA synthesis", bin: "draft", args: []string{"--help"}},
 			{key: "2", label: "Verify C2PA", desc: "draft verify --help — Ed25519 signature & citation check", bin: "draft", args: []string{"verify", "--help"}},
-			{key: "3", label: "Green SCI", desc: "dot ai doctor — inspect green split-stage & fleet readiness", bin: "dot", args: []string{"ai", "doctor"}},
+			{key: "3", label: "AI Doctor", desc: "dot ai doctor — fleet & provider health check", bin: "dot", args: []string{"ai", "doctor"}},
 			{key: "4", label: "MCP Doctor", desc: "dot ai mcp doctor — inspect MCP retrieval servers", bin: "dot", args: []string{"ai", "mcp", "doctor"}},
-			{key: "5", label: "Spend & SCI", desc: "dot ai cost — token spend & ISO/IEC 21031 carbon report", bin: "dot", args: []string{"ai", "cost"}},
+			{key: "5", label: "Spend", desc: "dot ai cost — token spend by provider", bin: "dot", args: []string{"ai", "cost"}},
 			{key: "6", label: "Version", desc: "draft --version — binary version & provenance support", bin: "draft", args: []string{"--version"}},
 		}
 	default:
 		return []controlAction{
 			{key: "1", label: "Version", desc: t.bin + " --version — inspect agent CLI version", bin: t.bin, args: []string{"--version"}},
 			{key: "2", label: "AI Doctor", desc: "dot ai doctor — fleet & provider health check", bin: "dot", args: []string{"ai", "doctor"}},
-			{key: "3", label: "Spend & SCI", desc: "dot ai cost — spend & ISO 21031 carbon report", bin: "dot", args: []string{"ai", "cost"}},
+			{key: "3", label: "Spend", desc: "dot ai cost — token spend by provider", bin: "dot", args: []string{"ai", "cost"}},
 			{key: "4", label: "MCP Audit", desc: "dot ai mcp doctor — audit MCP servers & passmcp family", bin: "dot", args: []string{"ai", "mcp", "doctor"}},
 			{key: "5", label: "Start Agent", desc: "dot ai chat " + t.name + " — launch interactive agent session", bin: "dot", args: []string{"ai", "chat", t.name}, interactive: true},
 			{key: "6", label: "Inline Chat", desc: "Tab — focus inline prompt input in cockpit", focusInput: true},
@@ -229,29 +229,19 @@ func (m model) confirmKill() (model, tea.Cmd) {
 	return m, refresh
 }
 
-// renderBtopDeck renders a 3-line btop-style telemetry header box with Braille
-// sparklines, percentage meter bars, CPU/MEM/SCI gauges, and shortcut keycaps.
+// renderBtopDeck renders a 3-line btop-style telemetry header box with a CPU
+// sparkline, meter bars, CPU/MEM/PROC gauges and shortcut keycaps. Energy is
+// not measured, so SCI reads n/a; the CPU sparkline is blank until sampled.
 func (m model) renderBtopDeck() string {
 	w := max(m.width-2, 38)
 	snap := m.ecoSnap
 	if snap.NumCPU == 0 {
 		snap = sampleEcosystem()
 	}
-	sci := computeSCI(1200, 700, 400, 0, 6.4, 380.0)
-	cpuSamples := m.cpuHist
-	if len(cpuSamples) == 0 {
-		cpuSamples = []float64{18, 32, 48, 35, 64, 42, 28, max(snap.TotalAICPU, 12)}
-	}
-	cpuSpark := renderBrailleSparkline(cpuSamples, 4)
-	sciSpark := renderBrailleSparkline([]float64{10, 15, 12, 22, 18, 14, 11, 9}, 3)
-	cpuBar := renderMeterBar(min(max(snap.TotalAICPU, 15), 100), 5)
+	cpuSpark := renderBrailleSparkline(m.cpuHist, 4)
+	cpuBar := renderMeterBar(cpuBarPct(snap.TotalAICPU), 5)
 	memMB := snap.TotalAIMemMB + snap.MemAllocMB
 	memBar := renderMeterBar(min((memMB/1024.0)*100.0, 100.0), 5)
-
-	modeBadge := dimSt.Render("[STD]")
-	if m.greenMode {
-		modeBadge = okSt.Render("[GREEN-UMA]")
-	}
 
 	topTitle := "─ " + keySt.Render("¹") + titleSt.Render("cpu/uma") +
 		" ─ " + keySt.Render("²") + titleSt.Render("mem/rss") +
@@ -261,16 +251,15 @@ func (m model) renderBtopDeck() string {
 		keySt.Render("[v]") + dimSt.Render("passmcp ") +
 		keySt.Render("[d]") + dimSt.Render("raft ") +
 		keySt.Render("[x]") + dimSt.Render("kill ") +
-		keySt.Render("[b]") + dimSt.Render("top ") +
-		keySt.Render("[g]") + dimSt.Render("reen ")
+		keySt.Render("[b]") + dimSt.Render("top ")
 	topFill := max(w-lipgloss.Width(topTitle)-2, 1)
 	line1 := " ╭" + ansi.Truncate(topTitle+strings.Repeat("─", topFill), w-2, "─") + "╮"
 
-	row := fmt.Sprintf(" %s %s %s %.1f%% %dc │ %s %s %.0fMB │ %s %d │ %s %s %.2fg %.1fJ %s │ Repo:%d MCP:%d ",
+	row := fmt.Sprintf(" %s %s %s %.1f%% %dc │ %s %s %.0fMB │ %s %d │ %s %s │ Repo:%d MCP:%d ",
 		keySt.Render("CPU"), okSt.Render(cpuSpark), okSt.Render(cpuBar), snap.TotalAICPU, snap.NumCPU,
 		keySt.Render("MEM"), selSt.Render(memBar), memMB,
 		keySt.Render("PROC"), len(snap.ActiveProcs),
-		keySt.Render("SCI"), okSt.Render(sciSpark), sci.GCO2eq, sci.TotalJoules, modeBadge,
+		keySt.Render("SCI"), dimSt.Render("n/a"),
 		snap.Corral.TotalRepos, snap.MCPServers)
 	rowTrunc := ansi.Truncate(row, w-2, "…")
 	rowPad := max((w-2)-lipgloss.Width(rowTrunc), 0)
@@ -445,18 +434,16 @@ func (m model) renderPassMCPCentre(snap EcosystemSnapshot) []string {
 }
 
 func (m model) renderDraftCentre(snap EcosystemSnapshot) []string {
-	sci := computeSCI(1000, 750, 350, 0, 4.2, 380.0)
-	greenBadge := offSt.Render("OFF (press [g] to enable Apple Silicon UMA split-stage)")
-	if m.greenMode || snap.Draft.GreenSplit {
-		greenBadge = okSt.Render("ON · Ollama Apple Silicon UMA + Frontier Synthesis")
+	greenBadge := offSt.Render("not available (needs ollama and draft)")
+	if snap.Draft.GreenSplit {
+		greenBadge = okSt.Render("available · dot ai draft --green")
 	}
 	return []string{
 		titleSt.Render("╭─ ²draft · 5-phase grounded research & C2PA control centre ────────╮"),
 		bodySt.Render("  Pipeline:  [1.Decompose] → [2.Retrieve] → [3.Extract] → [4.Synthesize] → [5.Verify]"),
 		okSt.Render("  ● C2PA Provenance     ") + bodySt.Render("Ed25519-signed Content Credentials · ≥95% Claim Gate"),
 		okSt.Render("  ● Green Split-Stage   ") + greenBadge,
-		okSt.Render("  ● ISO 21031:2024 SCI  ") + bodySt.Render(fmt.Sprintf("%.3f gCO2eq · Prefill %.2fJ · Decode %.2fJ · Saved %.4fWh",
-			sci.GCO2eq, sci.PrefillJoules, sci.DecodeJoules, sci.CacheSavedWh)),
-		keySt.Render("  [1] Pipeline Help  [2] Verify C2PA  [3] Green SCI  [4] MCP Doctor  [5] Spend & SCI  [6] Version"),
+		dimSt.Render("  ● Energy & carbon     n/a — not measured"),
+		keySt.Render("  [1] Pipeline Help  [2] Verify C2PA  [3] AI Doctor  [4] MCP Doctor  [5] Spend  [6] Version"),
 	}
 }
