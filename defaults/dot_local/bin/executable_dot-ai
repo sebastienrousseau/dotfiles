@@ -2,7 +2,7 @@
 # shellcheck disable=SC2034,SC1091
 # Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 # Dotfiles AI RAG (Retrieval-Augmented Generation)
-# Usage: dot ai-query "how do I list files?"
+# Usage: dot ai ask "how do I list files?"
 
 set -euo pipefail
 
@@ -12,7 +12,7 @@ source "$HOME/.dotfiles/lib/dot/ui.sh"
 
 QUERY="${1:-}"
 if [[ -z "$QUERY" ]]; then
-  echo "Usage: dot ai-query 'your question'"
+  echo "Usage: dot ai ask 'your question'"
   exit 1
 fi
 

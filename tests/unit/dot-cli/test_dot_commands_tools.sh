@@ -247,7 +247,7 @@ assert_dir_exists "$tools_tmp/work/demo_project" "tools deep branches created sa
 
 # ── tools docs ───────────────────────────────────────────────────────
 # Regression: cmd_tools looked for <src>/docs/TOOLS.md and <src>/docs/UTILS.md.
-# Both documents live under docs/reference/, so `dot tools docs` answered
+# Both documents live under docs/reference/, so `dot tool list --nix docs` answered
 # "TOOLS.md not found" on a complete checkout — the subcommand could not work
 # for anyone. The reference location is probed first, the legacy one after,
 # so a pre-reorg checkout still resolves.
@@ -335,7 +335,7 @@ assert_contains "word-field=[8.8.8]" "$pk_out" "field selection"
 assert_contains "word-timeout=[timed out]" "$pk_out" "a version probe past its limit reads timed out"
 rm -rf "$pk_tmp"
 
-# A package manager that never answers must not hang `dot packages`. The
+# A package manager that never answers must not hang `dot tool list --packages`. The
 # stuck cargo leaves a grandchild holding stdout, as rustup's proxy does, so
 # only killing the whole process group lets the $( ) capture return.
 test_start "packages_bounds_a_stuck_package_manager"
@@ -363,14 +363,14 @@ stuck_out="$(
 )"
 stuck_rc=$?
 stuck_elapsed=$((SECONDS - stuck_start))
-assert_equals "0" "$stuck_rc" "dot packages finishes with a stuck package manager (took ${stuck_elapsed}s)"
+assert_equals "0" "$stuck_rc" "dot tool list --packages finishes with a stuck package manager (took ${stuck_elapsed}s)"
 assert_equals "true" "$([[ $stuck_elapsed -lt 15 ]] && echo true || echo false)" \
   "the stuck probe is cut off at its limit, not the 60s it would take (${stuck_elapsed}s)"
 assert_contains "Installed: timed out" "$stuck_out" "the stuck cargo count is reported as timed out"
 assert_contains "npm: 9.9.9" "$stuck_out" "the other package managers are still reported"
 rm -rf "$stuck_tmp"
 
-# `dot tools install` checks every tool name before entering the Nix shell
+# `dot tool list --nix install` checks every tool name before entering the Nix shell
 # and passes flags through: a name with shell metacharacters must never
 # reach nix, and a flag must not be rejected as a name.
 test_start "tools_install_validates_names_and_passes_flags"
@@ -394,7 +394,7 @@ assert_equals "0" "$?" "a flag and a valid name are accepted"
 assert_output_matches '^develop .*/nix --impure node$' "cat '$nix_tmp/nix.calls'"
 rm -rf "$nix_tmp"
 
-# `dot env install|use` check every tool spec before mise runs, and pass
+# `dot tool install|use` check every tool spec before mise runs, and pass
 # flags through.
 test_start "env_install_and_use_validate_specs_and_pass_flags"
 mise_tmp="$(mktemp -d)"

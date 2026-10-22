@@ -34,7 +34,7 @@ cov_setup_sandbox
 _init_accepts() {
   local label="$1" arg="$2"
   test_start "init_accepts_${label}"
-  if bash "$DOT_BIN" init "$arg" --dry-run >/dev/null 2>&1; then
+  if bash "$DOT_BIN" config init "$arg" --dry-run >/dev/null 2>&1; then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
   else
@@ -46,7 +46,7 @@ _init_accepts() {
 _init_refuses() {
   local label="$1" arg="$2"
   test_start "init_refuses_${label}"
-  if bash "$DOT_BIN" init "$arg" --dry-run >/dev/null 2>&1; then
+  if bash "$DOT_BIN" config init "$arg" --dry-run >/dev/null 2>&1; then
     ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: accepted adversarial input '$arg'"
   else

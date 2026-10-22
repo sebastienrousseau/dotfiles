@@ -91,6 +91,18 @@ Configured delegates. Effect: read. Runs \fBdot agent delegate list\fR until the
 .TP
 .B dot agent delegate run
 Run a command as a delegate. Effect: write. Runs \fBdot agent delegate run\fR until the domain is extracted.
+.TP
+.B dot agent context check
+Check the rendered context files are current. Effect: read. Runs \fBdot agents check\fR until the domain is extracted.
+.TP
+.B dot agent context apply
+Render the context file for every harness. Effect: write. Runs \fBdot agents render\fR until the domain is extracted.
+.TP
+.B dot agent mode run
+Run a command under a mode. Effect: write. Runs \fBdot mode run\fR until the domain is extracted.
+.TP
+.B dot agent card check
+Check the card against the A2A spec. Effect: read. Runs \fBdot mode conformance\fR until the domain is extracted.
 .SH OTHER NAMES
 .TP
 .B dot mode

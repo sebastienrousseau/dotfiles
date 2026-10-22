@@ -41,4 +41,4 @@ SHORTCUTS
   update     dot system update
 
 Run 'dot help <domain>' for its commands, 'dot help all' for every command,
-'dot help <term>' to search, 'dot help --json' for the catalog. Version 0.2.536.
+'dot help <term>' to search, 'dot help --json' for the catalog. Version <version>.

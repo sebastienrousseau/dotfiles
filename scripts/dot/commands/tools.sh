@@ -163,7 +163,7 @@ cmd_tools() {
     fi
   elif [ "$subcommand" = "docs" ]; then
     # docs/reference/ first: both documents were moved there, and looking
-    # only in docs/ meant `dot tools docs` answered "TOOLS.md not found" on a
+    # only in docs/ meant `dot tool list --nix docs` answered "TOOLS.md not found" on a
     # complete checkout. The legacy paths stay in the list so a pre-reorg
     # tree still resolves.
     local doc
@@ -178,7 +178,7 @@ cmd_tools() {
   else
     ui_header "Dot Tools"
     echo ""
-    ui_info "Usage" "dot tools [command]"
+    ui_info "Usage" "dot tool list --nix [command]"
     echo ""
     ui_header "Commands"
     ui_ok "(none)" "Show tools documentation"
@@ -191,7 +191,7 @@ cmd_tools() {
     ui_ok "dot doctor" "Run health checks"
     ui_ok "dot verify" "Run post-merge verification checks"
     ui_ok "dot keys" "Show keybindings catalog"
-    ui_ok "dot learn" "Interactive tour"
+    ui_ok "dot help tour" "Interactive tour"
   fi
 }
 
@@ -200,7 +200,7 @@ cmd_new() {
   local project_name="${2:-}"
 
   if [ -z "$template_lang" ] || [ -z "$project_name" ]; then
-    echo "Usage: dot new <lang> <name>"
+    echo "Usage: dot tool new <lang> <name>"
     echo "Available templates: python, go, node, packer, molecule"
     exit 1
   fi
@@ -284,7 +284,7 @@ cmd_log_rotate() {
 
 ## _validate_tool_spec <spec> — die unless <spec> is a mise tool spec.
 ## validate_name's [a-zA-Z0-9._-] rejected every versioned spec, so the
-## documented `dot env use node@22` could never run. A spec may carry a
+## documented `dot tool set node@22` could never run. A spec may carry a
 ## backend prefix and a version (node@22, aqua:nushell/nushell@0.114.1,
 ## npm:@openai/codex@latest); shell metacharacters and spaces stay out.
 _validate_tool_spec() {
@@ -294,7 +294,7 @@ _validate_tool_spec() {
 }
 
 cmd_env_mise() {
-  # `dot env emit` is a separate sub-handler — it doesn't need mise
+  # `dot tool export` is a separate sub-handler — it doesn't need mise
   # at command-time, only when actually invoked (the script checks).
   if [[ "${1:-}" == "emit" ]]; then
     shift
@@ -305,7 +305,7 @@ cmd_env_mise() {
   fi
 
   if ! has_command mise; then
-    ui_err "mise not installed (required for dot env)"
+    ui_err "mise not installed (required for dot tool)"
     exit 1
   fi
   case "${1:-list}" in
@@ -337,7 +337,7 @@ cmd_env_mise() {
       else
         echo ""
         ui_warn "orphan installs" "tool versions on disk are not requested by any config"
-        ui_info "to clean" "run 'dot env prune' (dry-run) or 'dot env prune --yes' to commit"
+        ui_info "to clean" "run 'dot tool remove' (dry-run) or 'dot tool remove --yes' to commit"
       fi
       ;;
     prune)
@@ -355,7 +355,7 @@ cmd_env_mise() {
         echo ""
         mise prune --dry-run
         echo ""
-        ui_info "next" "re-run with 'dot env prune --yes' to actually uninstall"
+        ui_info "next" "re-run with 'dot tool remove --yes' to actually uninstall"
       fi
       ;;
     install)
@@ -408,7 +408,7 @@ cmd_profile() {
       shift
       local new_profile="${1:-}"
       if [[ -z "$new_profile" ]]; then
-        die "Usage: dot profile set <name>"
+        die "Usage: dot config profile set <name>"
       fi
       if grep -q '^profile' "$data_file"; then
         sed_in_place "s/^profile = \".*\"/profile = \"$new_profile\"/" "$data_file"

@@ -414,7 +414,7 @@ if HOME="$sandbox" \
     XDG_CACHE_HOME="$sandbox/.cache" \
     XDG_STATE_HOME="$sandbox/.local/state" \
     CHEZMOI_SOURCE_DIR="$REPO_ROOT" \
-    run_with_timeout 5 bash "$DOT_CLI" upgrade -h >/dev/null 2>&1; then
+    run_with_timeout 5 bash "$DOT_CLI" system update -h >/dev/null 2>&1; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
@@ -433,7 +433,7 @@ if HOME="$sandbox" \
     XDG_CACHE_HOME="$sandbox/.cache" \
     XDG_STATE_HOME="$sandbox/.local/state" \
     CHEZMOI_SOURCE_DIR="$REPO_ROOT" \
-    run_with_timeout 5 bash "$DOT_CLI" backup -h >/dev/null 2>&1; then
+    run_with_timeout 5 bash "$DOT_CLI" doctor backup -h >/dev/null 2>&1; then
   # Additional check: no .tar files created anywhere in the sandbox.
   if find "$sandbox" -name '*.tar*' -type f 2>/dev/null | grep -q .; then
     ((TESTS_FAILED++)) || true
@@ -459,7 +459,7 @@ if HOME="$sandbox" \
     XDG_CACHE_HOME="$sandbox/.cache" \
     XDG_STATE_HOME="$sandbox/.local/state" \
     CHEZMOI_SOURCE_DIR="$REPO_ROOT" \
-    run_with_timeout 5 bash "$DOT_CLI" sandbox -h >/dev/null 2>&1; then
+    run_with_timeout 5 bash "$DOT_CLI" config apply --sandbox -h >/dev/null 2>&1; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else

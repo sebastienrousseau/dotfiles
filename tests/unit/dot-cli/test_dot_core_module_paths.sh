@@ -70,7 +70,7 @@ dot_fixture_stub "$FX/stubs" chezmoi 0
 test_start "core_add_requires_a_file"
 core_run add
 assert_equals "1" "$DOT_FIXTURE_RC" "add with no argument should exit 1"
-assert_contains "Usage: dot add" "$DOT_FIXTURE_OUT" "it should print usage"
+assert_contains "Usage: dot config add" "$DOT_FIXTURE_OUT" "it should print usage"
 
 # ── 4. edit walks its editor preference list ───────────────────────────────
 #

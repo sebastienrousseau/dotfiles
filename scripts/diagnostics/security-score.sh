@@ -8,7 +8,7 @@
 ## actionable recommendations.
 ##
 ## # Usage
-## dot security-score [--verbose|-v] [--json|-j] [--quiet|-q]
+## dot security score show [--verbose|-v] [--json|-j] [--quiet|-q]
 ##
 ## # Dependencies
 ## - age: Encryption tool check

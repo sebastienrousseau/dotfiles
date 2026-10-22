@@ -17,7 +17,7 @@ mkdir -p "$RUN_STATE_DIR" "$REPLAY_STATE_DIR"
 trap 'rm -rf "$STATE_ROOT"' EXIT
 
 test_start "agent_mode_run_logs_session"
-assert_exit_code 0 "XDG_STATE_HOME='$RUN_STATE_DIR' bash '$DOT_CLI' mode run ask bash -lc 'exit 0'"
+assert_exit_code 0 "XDG_STATE_HOME='$RUN_STATE_DIR' bash '$DOT_CLI' agent mode run ask bash -lc 'exit 0'"
 
 test_start "agent_log_outputs_jsonl"
 output=$(XDG_STATE_HOME="$RUN_STATE_DIR" bash "$DOT_CLI" agent log 5 2>/dev/null) || true

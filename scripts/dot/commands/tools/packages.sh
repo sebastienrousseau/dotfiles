@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck shell=bash
 # Sourced by tools.sh; inherits set -euo pipefail
-# `dot packages`: one line per installed package manager, each query bounded
+# `dot tool list --packages`: one line per installed package manager, each query bounded
 # so a manager that never answers cannot hang the command.
 
 # shellcheck source=../../../../lib/dot/probe.sh

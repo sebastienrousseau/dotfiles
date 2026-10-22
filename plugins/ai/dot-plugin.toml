@@ -124,6 +124,20 @@ verb = "show"
 effect = "read"
 summary = "Agents, versions and config"
 
+[[commands]]
+object = "pattern"
+verb = "show"
+effect = "read"
+legacy = "patterns view"
+summary = "One prompt pattern"
+
+[[commands]]
+object = "pattern"
+verb = "edit"
+effect = "write"
+legacy = "patterns edit"
+summary = "Edit a prompt pattern"
+
 [[aliases]]
 name = "ai-setup"
 target = "ai install --interactive"

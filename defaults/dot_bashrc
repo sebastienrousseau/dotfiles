@@ -83,7 +83,7 @@ _deferred_hydration() {
   _SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/bash"
   [[ -d "$_SHELL_CACHE" ]] || mkdir -p "$_SHELL_CACHE"
 
-  # Append a timing event for `dot perf --by-tool`. Bash 5+ has
+  # Append a timing event for `dot doctor perf show --by-tool`. Bash 5+ has
   # EPOCHREALTIME (float "secs.usecs"); split into a 16-digit microsecond
   # int via string ops so $((...)) integer math handles the delta.
   _cached_eval_log_timing() {
@@ -111,7 +111,7 @@ _deferred_hydration() {
   # @arg $1 string Cache label (cache file: $_SHELL_CACHE/<label>.bash)
   # @arg $2..N string Command and args to run on cache miss
   # @env EVALCACHE_DISABLE Set to "true" to bypass cache read AND write
-  # @env EVALCACHE_TIMING  Set to "1" to log per-call timing for `dot perf --by-tool`
+  # @env EVALCACHE_TIMING  Set to "1" to log per-call timing for `dot doctor perf show --by-tool`
   # @stdout Sourced cache content
   # @stderr Warning on init failure or suspicious-output rejection
   # @exitcode 0 Cache hit, successful regeneration, or successful bypass

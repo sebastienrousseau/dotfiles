@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# Test: scripts/dot/commands/env-emit.sh (the `dot env emit` handler).
+# Test: scripts/dot/commands/env-emit.sh (the `dot tool export` handler).
 #
 # Verifies the v1 manifest emitter is syntactically valid, that the
 # dispatch arm in tools.sh wires it up, and that the env-emit module
@@ -93,15 +93,15 @@ JSON
 EOF_MISE
 chmod +x "$tmp/bin/mise"
 
-# `dot env emit` goes through tools.sh's dispatch; the manifest it prints
+# `dot tool export` goes through tools.sh's dispatch; the manifest it prints
 # must name the v1 schema (mise is the stub above; CI has no real mise).
 EMIT_HOME="$(mktemp -d)"
-emit_schema="$(HOME="$EMIT_HOME" PATH="$tmp/bin:$PATH" bash "$REPO_ROOT/bin/dot" env emit 2>/dev/null | jq -r .schema_version 2>/dev/null || true)"
+emit_schema="$(HOME="$EMIT_HOME" PATH="$tmp/bin:$PATH" bash "$REPO_ROOT/bin/dot" tool export 2>/dev/null | jq -r .schema_version 2>/dev/null || true)"
 rm -rf "$EMIT_HOME"
 if [[ "$emit_schema" == */schema/dot-env-v1.json ]]; then
   _pass "dispatched_via_tools_sh"
 else
-  _fail "dispatched_via_tools_sh" "dot env emit did not print a v1 manifest (schema_version='$emit_schema')"
+  _fail "dispatched_via_tools_sh" "dot tool export did not print a v1 manifest (schema_version='$emit_schema')"
 fi
 
 deep_out="$(
@@ -125,7 +125,7 @@ deep_out="$(
   DOTFILES_FAKE_MISE_FAIL=1 dot_env_emit
   true
 )"
-if [[ "$deep_out" == *"dot env emit"* ]] && [[ -f "$tmp/env.json" ]] && [[ -f "$tmp/env-compact.json" ]]; then
+if [[ "$deep_out" == *"dot tool export"* ]] && [[ -f "$tmp/env.json" ]] && [[ -f "$tmp/env-compact.json" ]]; then
   _pass "env_emit_deep_branches"
 else
   _fail "env_emit_deep_branches" "expected help output and sandbox manifest files"

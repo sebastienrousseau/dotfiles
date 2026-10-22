@@ -30,6 +30,10 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot agent budget show` | Budgets and spend *(planned)* |
 | `dot agent delegate list` | Configured delegates |
 | `dot agent delegate run` | Run a command as a delegate |
+| `dot agent context check` | Check the rendered context files are current |
+| `dot agent context apply` | Render the context file for every harness |
+| `dot agent mode run` | Run a command under a mode |
+| `dot agent card check` | Check the card against the A2A spec |
 | `dot ai list` | Installed agents |
 | `dot ai install` | Install agents |
 | `dot ai update` | Upgrade agent CLIs |
@@ -43,6 +47,8 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot ai cost show` | Spend by agent and model |
 | `dot ai gateway show` | Gateway statistics *(planned)* |
 | `dot ai inventory show` | Agents, versions and config *(planned)* |
+| `dot ai pattern show` | One prompt pattern |
+| `dot ai pattern edit` | Edit a prompt pattern |
 | `dot attest show` | The workstation attestation |
 | `dot attest export` | Write attestation evidence |
 | `dot attest verify` | Verify evidence |
@@ -54,6 +60,8 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot cli verify` | Verify plugin provenance *(planned)* |
 | `dot cli new` | Create a plugin from the template *(planned)* |
 | `dot cli completion show` | Print a completion script |
+| `dot cli registry show` | The plugin registry URL |
+| `dot cli registry set` | Point at another plugin registry |
 | `dot config status` | Pending changes and last apply |
 | `dot config diff` | What apply would change |
 | `dot config apply` | Write the dotfiles to this machine |
@@ -69,6 +77,7 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot config path show` | Print the source directory |
 | `dot config profile show` | Show the active profile |
 | `dot config profile set` | Switch profile |
+| `dot config import` | Restore from an exported bundle |
 | `dot doctor status` | Health summary |
 | `dot doctor check` | Run every health check |
 | `dot doctor fix` | Repair what check found |
@@ -106,10 +115,11 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot secret check` | Audit secret hygiene |
 | `dot secret key list` | Keys without their values *(planned)* |
 | `dot secret key new` | Create an ED25519 key |
-| `dot secret cert list` | Certificates and expiry *(planned)* |
+| `dot secret cert list` | Certificates and expiry |
 | `dot secret cert new` | Issue a short-lived SSH certificate |
 | `dot secret provider show` | The active provider |
 | `dot secret provider set` | Switch provider *(planned)* |
+| `dot secret cert remove` | Revoke the current SSH certificate |
 | `dot security status` | Hardening summary *(planned)* |
 | `dot security policy show` | The security policy |
 | `dot security disk show` | Disk encryption state |
@@ -134,8 +144,11 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot shell update` | Regenerate the startup caches |
 | `dot shell clean` | Clear the startup caches |
 | `dot shell history list` | Recent history |
-| `dot shell alias list` | Aliases and where each is defined |
+| `dot shell alias list` | Aliases and where each is defined; a term searches them |
 | `dot shell alias check` | Find shadowed or broken aliases |
+| `dot shell alias show` | Where one alias comes from |
+| `dot shell alias status` | Alias counts; --tiers for the ecosystem tiers |
+| `dot shell alias export` | Write the alias cheatsheet |
 | `dot system status` | OS, disk, schedule and last run |
 | `dot system update` | Update everything, asking first |
 | `dot system clean` | Reclaim space, asking first *(planned)* |
@@ -153,10 +166,10 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot theme font install` | Install the configured fonts |
 | `dot tool list` | Toolchains and their versions |
 | `dot tool install` | Install the configured toolchains |
-| `dot tool update` | Upgrade toolchains *(planned)* |
-| `dot tool remove` | Remove a toolchain or orphans *(planned)* |
+| `dot tool update` | Upgrade toolchains |
+| `dot tool remove` | Remove orphaned toolchains (a dry run without --yes) |
 | `dot tool set` | Pin a toolchain version |
-| `dot tool export` | Print the tool environment *(planned)* |
+| `dot tool export` | Print the tool environment |
 | `dot tool new` | Create a project from a template |
 | `dot top measure` | Sample once and print the result *(planned)* |
 | `dot top report show` | Usage report *(planned)* |

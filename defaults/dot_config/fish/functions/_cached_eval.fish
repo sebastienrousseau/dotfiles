@@ -11,9 +11,9 @@
 #
 # Env knobs:
 #   EVALCACHE_DISABLE=true  bypass cache read AND write (debug aid)
-#   EVALCACHE_TIMING=1      log per-call timing for `dot perf --by-tool`
+#   EVALCACHE_TIMING=1      log per-call timing for `dot doctor perf show --by-tool`
 
-function _cached_eval_log_timing --description 'Append a timing event for dot perf --by-tool'
+function _cached_eval_log_timing --description 'Append a timing event for dot doctor perf show --by-tool'
     set -l label $argv[1]
     set -l t0 $argv[2]
     set -l t1 $argv[3]

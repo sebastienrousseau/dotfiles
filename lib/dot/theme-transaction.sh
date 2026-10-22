@@ -230,7 +230,7 @@ _theme_txn_snapshot_targets() {
 # asks before overwriting a target that no longer matches its record. The
 # theme apply rewrites those records, so restoring the file snapshots alone
 # leaves every restored target looking hand-edited, and the next apply with
-# no terminal to ask on (dot upgrade) dies on the question. The transaction
+# no terminal to ask on (dot system update) dies on the question. The transaction
 # therefore snapshots the records for its targets with the files and puts
 # them back on rollback. chezmoi keys records by the cleaned path, so the
 # manifest's targets are matched with repeated slashes collapsed (a TMPDIR

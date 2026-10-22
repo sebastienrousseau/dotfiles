@@ -22,22 +22,23 @@ _dot() {
     '') kids_=('agent:modes, policy, sandbox, budgets' 'ai:install, route and run coding agents' 'attest:attestation and verification' 'cli:plugins, updates, completions' 'config:apply, diff and sync the dotfiles' 'doctor:health, repair, backup and rollback' 'fleet:many hosts' 'mcp:MCP servers as supply chain' 'secret:secrets, keys and SSH certificates' 'security:OS hardening' 'session:find, open and restore terminal sessions' 'shell:aliases, history, startup caches' 'system:updates, cleanup, scheduled maintenance' 'theme:one palette for every app' 'tool:toolchains, packages, project templates' 'top:what the machine and its agents are doing' 'ui:primitives for scripts' 'apply:Write the dotfiles to this machine' 'sync:Pull the source, then apply' 'diff:What apply would change' 'status:Pending changes and last apply' 'edit:Open a managed file in $EDITOR' 'cd:where the dotfiles source lives' 'update:Update everything, asking first' 'help:Built-in: help' 'version:Built-in: version') ;;
     'agent') kids_=('mode:agent modes' 'context:context files' 'card:the agent card' 'log:the agent log' 'checkpoint:saved checkpoints' 'policy:sandbox policy' 'budget:spend budgets' 'delegate:agents a profile may hand work to' 'status:Mode, policy and budgets' 'check:Check modes and policy' 'run:Run an agent task' 'suspend:Pause running agents' 'resume:Resume paused agents' 'export:Export the AI bill of materials') ;;
     'agent budget') kids_=('show:Budgets and spend') ;;
-    'agent card') kids_=('show:The agent card') ;;
+    'agent card') kids_=('show:The agent card' 'check:Check the card against the A2A spec') ;;
     'agent checkpoint') kids_=('list:Saved checkpoints' 'save:Save a checkpoint') ;;
-    'agent context') kids_=('show:Context files in effect') ;;
+    'agent context') kids_=('show:Context files in effect' 'check:Check the rendered context files are current' 'apply:Render the context file for every harness') ;;
     'agent delegate') kids_=('list:Configured delegates' 'run:Run a command as a delegate') ;;
     'agent log') kids_=('show:The agent log') ;;
-    'agent mode') kids_=('list:Available modes' 'show:One mode in detail' 'set:Switch mode') ;;
+    'agent mode') kids_=('list:Available modes' 'show:One mode in detail' 'set:Switch mode' 'run:Run a command under a mode') ;;
     'agent policy') kids_=('show:The sandbox policy') ;;
     'ai') kids_=('pattern:prompt patterns' 'cost:spend by agent and model' 'gateway:the keyless gateway' 'inventory:installed agents and versions' 'list:Installed agents' 'install:Install agents' 'update:Upgrade agent CLIs' 'start:Start an agent' 'run:Run an agent once' 'login:Authenticate an agent' 'check:Check agent installs and auth' 'ask:Ask about the local context') ;;
     'ai cost') kids_=('show:Spend by agent and model') ;;
     'ai gateway') kids_=('serve:Run the gateway in the foreground' 'show:Gateway statistics') ;;
     'ai inventory') kids_=('show:Agents, versions and config') ;;
-    'ai pattern') kids_=('list:Prompt patterns') ;;
+    'ai pattern') kids_=('list:Prompt patterns' 'show:One prompt pattern' 'edit:Edit a prompt pattern') ;;
     'attest') kids_=('show:The workstation attestation' 'export:Write attestation evidence' 'verify:Verify evidence') ;;
-    'cli') kids_=('completion:shell completion scripts' 'list:Installed plugins' 'show:One plugin in detail' 'install:Install a plugin' 'update:Update dot and its plugins' 'remove:Remove a plugin' 'verify:Verify plugin provenance' 'new:Create a plugin from the template') ;;
+    'cli') kids_=('completion:shell completion scripts' 'registry:the plugin registry' 'list:Installed plugins' 'show:One plugin in detail' 'install:Install a plugin' 'update:Update dot and its plugins' 'remove:Remove a plugin' 'verify:Verify plugin provenance' 'new:Create a plugin from the template') ;;
     'cli completion') kids_=('show:Print a completion script') ;;
-    'config') kids_=('path:where the dotfiles source lives' 'profile:the active profile and its features' 'status:Pending changes and last apply' 'diff:What apply would change' 'apply:Write the dotfiles to this machine' 'sync:Pull the source, then apply' 'update:Pull and apply the dotfiles only' 'edit:Open a managed file in $EDITOR' 'add:Start managing an existing file' 'save:Commit source changes' 'init:First-time setup of the dotfiles' 'check:Lint the source and templates' 'export:Write a portable bundle' 'uninstall:Remove the setup, keeping the source') ;;
+    'cli registry') kids_=('show:The plugin registry URL' 'set:Point at another plugin registry') ;;
+    'config') kids_=('path:where the dotfiles source lives' 'profile:the active profile and its features' 'status:Pending changes and last apply' 'diff:What apply would change' 'apply:Write the dotfiles to this machine' 'sync:Pull the source, then apply' 'update:Pull and apply the dotfiles only' 'edit:Open a managed file in $EDITOR' 'add:Start managing an existing file' 'save:Commit source changes' 'init:First-time setup of the dotfiles' 'check:Lint the source and templates' 'export:Write a portable bundle' 'uninstall:Remove the setup, keeping the source' 'import:Restore from an exported bundle') ;;
     'config path') kids_=('show:Print the source directory') ;;
     'config profile') kids_=('show:Show the active profile' 'set:Switch profile') ;;
     'doctor') kids_=('score:the setup score' 'snapshot:setup snapshots' 'perf:startup performance' 'drift:drift from the source' 'conflict:conflicting files' 'metric:recorded metrics' 'report:the weekly posture report' 'status:Health summary' 'check:Run every health check' 'fix:Repair what check found' 'backup:Back up the setup' 'restore:Restore from a backup' 'rollback:Return to a previous generation') ;;
@@ -55,7 +56,7 @@ _dot() {
     'fleet policy') kids_=('show:Fleet policy' 'set:Enforce a fleet policy') ;;
     'mcp') kids_=('list:Configured MCP servers' 'check:Check servers and pins' 'serve:Run dot'\''s read-only MCP server') ;;
     'secret') kids_=('key:SSH signing and authentication keys' 'cert:short-lived SSH certificates' 'provider:the secret provider' 'status:Provider, vault state and key counts' 'init:Set up the secret provider' 'edit:Edit the encrypted secrets file' 'new:Create the secrets file' 'list:Secret names without values' 'show:One secret' 'set:Store one secret' 'export:Print secrets as environment' 'check:Audit secret hygiene') ;;
-    'secret cert') kids_=('list:Certificates and expiry' 'new:Issue a short-lived SSH certificate') ;;
+    'secret cert') kids_=('list:Certificates and expiry' 'new:Issue a short-lived SSH certificate' 'remove:Revoke the current SSH certificate') ;;
     'secret key') kids_=('list:Keys without their values' 'new:Create an ED25519 key') ;;
     'secret provider') kids_=('show:The active provider' 'set:Switch provider') ;;
     'security') kids_=('policy:the security policy' 'disk:disk encryption' 'firewall:the firewall' 'telemetry:OS telemetry' 'dns:encrypted DNS' 'lock:the lock screen' 'usb:removable media' 'score:the security score' 'status:Hardening summary') ;;
@@ -69,7 +70,7 @@ _dot() {
     'security usb') kids_=('show:Current usb setting' 'apply:Harden the usb setting') ;;
     'session') kids_=('select:Pick a session to open' 'list:Sessions on this machine' 'new:Start a named session' 'open:Attach to a session' 'stop:End a session' 'restore:Restore saved sessions') ;;
     'shell') kids_=('history:shell history' 'alias:aliases and their sources' 'status:Shell, startup time and cache state' 'update:Regenerate the startup caches' 'clean:Clear the startup caches') ;;
-    'shell alias') kids_=('list:Aliases and where each is defined' 'check:Find shadowed or broken aliases') ;;
+    'shell alias') kids_=('list:Aliases and where each is defined; a term searches them' 'check:Find shadowed or broken aliases' 'show:Where one alias comes from' 'status:Alias counts; --tiers for the ecosystem tiers' 'export:Write the alias cheatsheet') ;;
     'shell history') kids_=('list:Recent history') ;;
     'system') kids_=('schedule:scheduled maintenance jobs' 'settings:OS settings dot manages' 'status:OS, disk, schedule and last run' 'update:Update everything, asking first' 'clean:Reclaim space, asking first' 'show:Hardware and host details') ;;
     'system schedule') kids_=('list:Scheduled jobs' 'set:Set the maintenance schedule' 'run:Run scheduled maintenance now') ;;
@@ -77,7 +78,7 @@ _dot() {
     'theme') kids_=('wallpaper:the current wallpaper' 'font:installed fonts' 'show:Current theme and palette' 'list:Available themes' 'set:Switch theme everywhere') ;;
     'theme font') kids_=('list:Installed terminal fonts' 'install:Install the configured fonts') ;;
     'theme wallpaper') kids_=('set:Set the wallpaper and derive a palette') ;;
-    'tool') kids_=('list:Toolchains and their versions' 'install:Install the configured toolchains' 'update:Upgrade toolchains' 'remove:Remove a toolchain or orphans' 'set:Pin a toolchain version' 'export:Print the tool environment' 'new:Create a project from a template') ;;
+    'tool') kids_=('list:Toolchains and their versions' 'install:Install the configured toolchains' 'update:Upgrade toolchains' 'remove:Remove orphaned toolchains (a dry run without --yes)' 'set:Pin a toolchain version' 'export:Print the tool environment' 'new:Create a project from a template') ;;
     'top') kids_=('report:usage by model, agent or project' 'measure:Sample once and print the result') ;;
     'top report') kids_=('show:Usage report') ;;
     'ui') kids_=('table:render a table' 'show:The primitives on offer' 'select:Interactive picker for scripts' 'run:Run a command with progress') ;;
@@ -86,6 +87,9 @@ _dot() {
   [[ -n "$path_" ]] || flags_=('--help:Show help' '--version:Print the version' '--verbose:Verbose output' '-h:Show help' '-V:Print the version' '-v:Verbose output')
   case "$path_" in
     'agent budget show' | 'agent budget show'\ *)
+      flags_=('--help:Show help')
+      ;;
+    'agent card check' | 'agent card check'\ *)
       flags_=('--help:Show help')
       ;;
     'agent card show' | 'agent card show'\ *)
@@ -98,6 +102,12 @@ _dot() {
       flags_=('--help:Show help')
       ;;
     'agent checkpoint save' | 'agent checkpoint save'\ *)
+      flags_=('--help:Show help')
+      ;;
+    'agent context apply' | 'agent context apply'\ *)
+      flags_=('--help:Show help')
+      ;;
+    'agent context check' | 'agent context check'\ *)
       flags_=('--help:Show help')
       ;;
     'agent context show' | 'agent context show'\ *)
@@ -116,6 +126,9 @@ _dot() {
       flags_=('--help:Show help')
       ;;
     'agent mode list' | 'agent mode list'\ *)
+      flags_=('--help:Show help')
+      ;;
+    'agent mode run' | 'agent mode run'\ *)
       flags_=('--help:Show help')
       ;;
     'agent mode set' | 'agent mode set'\ *)
@@ -166,7 +179,13 @@ _dot() {
     'ai login' | 'ai login'\ *)
       flags_=('--help:Show help')
       ;;
+    'ai pattern edit' | 'ai pattern edit'\ *)
+      flags_=('--help:Show help')
+      ;;
     'ai pattern list' | 'ai pattern list'\ *)
+      flags_=('--help:Show help')
+      ;;
+    'ai pattern show' | 'ai pattern show'\ *)
       flags_=('--help:Show help')
       ;;
     'ai run' | 'ai run'\ *)
@@ -202,6 +221,12 @@ _dot() {
     'cli new' | 'cli new'\ *)
       flags_=('--help:Show help')
       ;;
+    'cli registry set' | 'cli registry set'\ *)
+      flags_=('--help:Show help')
+      ;;
+    'cli registry show' | 'cli registry show'\ *)
+      flags_=('--help:Show help')
+      ;;
     'cli remove' | 'cli remove'\ *)
       flags_=('--help:Show help')
       ;;
@@ -231,6 +256,9 @@ _dot() {
       flags_=('--help:Show help')
       ;;
     'config export' | 'config export'\ *)
+      flags_=('--help:Show help')
+      ;;
+    'config import' | 'config import'\ *)
       flags_=('--help:Show help')
       ;;
     'config init' | 'config init'\ *)
@@ -346,6 +374,9 @@ _dot() {
     'secret cert new' | 'secret cert new'\ *)
       flags_=('--help:Show help')
       ;;
+    'secret cert remove' | 'secret cert remove'\ *)
+      flags_=('--help:Show help')
+      ;;
     'secret check' | 'secret check'\ *)
       flags_=('--help:Show help')
       ;;
@@ -448,8 +479,17 @@ _dot() {
     'shell alias check' | 'shell alias check'\ *)
       flags_=('--help:Show help')
       ;;
+    'shell alias export' | 'shell alias export'\ *)
+      flags_=('--help:Show help')
+      ;;
     'shell alias list' | 'shell alias list'\ *)
       flags_=('--help:Show help')
+      ;;
+    'shell alias show' | 'shell alias show'\ *)
+      flags_=('--help:Show help')
+      ;;
+    'shell alias status' | 'shell alias status'\ *)
+      flags_=('--help:Show help' '--tiers:Show which ecosystem tiers are enabled')
       ;;
     'shell clean' | 'shell clean'\ *)
       flags_=('--help:Show help')

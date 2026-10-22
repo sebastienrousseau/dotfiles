@@ -4,7 +4,7 @@
 # shellcheck disable=SC2016,SC2034
 # Unit tests for dot CLI agent commands (scripts/dot/commands/agent.sh).
 #
-# Every case runs the module: `dot mode|agent <sub>` through meta.sh (which
+# Every case runs the module: `dot agent mode|agent <sub>` through meta.sh (which
 # sources agent.sh for cmd_mode), against fixture profile and card JSON
 # passed via AGENT_PROFILE_CONFIG / AGENT_CARD_CONFIG. State, session log
 # and checkpoints live in a mktemp HOME/XDG tree; nothing outside it is
@@ -64,7 +64,7 @@ cat >"$AGENT_CARD_CONFIG" <<'JSON'
 JSON
 
 OUT="$WORK/out"
-# mode <args…> — run `dot mode <args…>` via meta.sh; prints the exit code.
+# mode <args…> — run `dot agent mode <args…>` via meta.sh; prints the exit code.
 mode() {
   local rc=0
   "$REAL_BASH" "$META_FILE" mode "$@" >"$OUT" 2>&1 </dev/null || rc=$?
@@ -199,6 +199,6 @@ assert_equals "0.3 strict=true healthy" "$report" "flags reach the A2A conforman
 test_start "agent_cmd_unknown_subcommand"
 rc="$(mode frob)"
 assert_equals "1" "$rc" "unknown subcommand exits 1"
-assert_file_contains "$OUT" "Usage: dot mode [list|current|show|set|run|doctor|card|log|checkpoint|conformance|a2a-card]" "usage printed"
+assert_file_contains "$OUT" "Usage: dot agent mode list|show|set|run" "usage printed"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

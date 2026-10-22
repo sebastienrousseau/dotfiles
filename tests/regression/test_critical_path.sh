@@ -307,17 +307,17 @@ cp_module() { # <name> <want rc> <want output> <args...>
   assert_contains "$want" "$CP_OUT" "dot $* reports '$want'"
 }
 cp_module core 0 "Dotfiles Status" status
-cp_module diagnostics 0 "mise toolchain" locks
-cp_module aliases 0 "Aliases" aliases list
-cp_module tools 0 "Dot Tools" tools
-cp_module meta 0 "Declarative dotfiles" docs
-cp_module secrets 1 "No age key found" secrets
-cp_module security 1 "Telemetry" telemetry
+cp_module diagnostics 0 "mise toolchain" tool list --locked
+cp_module aliases 0 "Aliases" shell alias list
+cp_module tools 0 "Dot Tools" tool list --nix
+cp_module meta 0 "Declarative dotfiles" help --readme
+cp_module secrets 1 "No age key found" secret edit
+cp_module security 1 "Telemetry" security telemetry apply
 cp_module agent 0 "Agent Card" agent card
 cp_module appearance 0 "Current" theme current
 cp_module fleet 0 "Fleet Commands" fleet help
-cp_module patterns 0 "AI Steering Patterns" patterns list
-cp_module restore 1 "No backups found" restore --list
+cp_module patterns 0 "AI Steering Patterns" ai pattern list
+cp_module restore 1 "No backups found" doctor restore --list
 
 # ═══════════════════════════════════════════════════════════════
 # 10. KEY DOT_LOCAL/BIN EXECUTABLES

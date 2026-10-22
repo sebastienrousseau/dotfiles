@@ -133,7 +133,7 @@ test_start "verify_names_the_failing_step_exit_code"
 assert_contains "exit 3" "$VFY_OUT" "the step's exit code should be surfaced"
 
 test_start "verify_prints_the_remediation_hint"
-assert_contains "dot heal" "$VFY_OUT" "the failure verdict should suggest dot heal"
+assert_contains "dot doctor fix" "$VFY_OUT" "the failure verdict should suggest dot doctor fix"
 
 # ── 4. chezmoi diff reporting drift ────────────────────────────────────────
 root="$(vfy_case diff_drift)"

@@ -9,7 +9,7 @@ AGE_KEY="$KEYRING_DIR/key.txt"
 
 if [ ! -f "$AGE_KEY" ]; then
   echo "Age identity not found: $AGE_KEY"
-  echo "Run: dot secrets-init"
+  echo "Run: dot secret init"
   exit 1
 fi
 
@@ -42,5 +42,5 @@ Created encrypted secrets file:
   $OUT_FILE
 
 Edit it with:
-  dot secrets
+  dot secret edit
 MSG

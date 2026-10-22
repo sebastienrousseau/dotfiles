@@ -126,6 +126,12 @@ effect = "write"
 legacy = "profile set"
 summary = "Switch profile"
 
+[[commands]]
+verb = "import"
+effect = "write"
+legacy = "bundle restore"
+summary = "Restore from an exported bundle"
+
 [[aliases]]
 name = "apply"
 target = "config apply"

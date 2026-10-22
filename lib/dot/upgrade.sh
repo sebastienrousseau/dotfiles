@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# The toolchain side of `dot upgrade`: prerequisites and consent up front,
+# The toolchain side of `dot system update`: prerequisites and consent up front,
 # then mise, system-package and Nix phases, used by cmd_upgrade in
 # scripts/dot/commands/meta.sh.
 # Sourced by utils.sh; inherits set -euo pipefail
@@ -16,7 +16,7 @@
 [[ -n "${_DOT_UPGRADE_LOADED:-}" ]] && return 0
 _DOT_UPGRADE_LOADED=1
 
-# The system package manager `dot upgrade` would drive, if any.
+# The system package manager `dot system update` would drive, if any.
 dot_upgrade_system_pm() {
   local pm
   for pm in brew apt-get dnf pacman zypper; do
@@ -63,7 +63,7 @@ _dot_upgrade_brew_sudo() {
   casks="${casks% }"
   [[ -n "$casks" ]] || return 0
   _dot_upgrade_sudo_ready && return 0
-  ui_warn "Casks" "$casks may need sudo — run dot upgrade in a terminal to upgrade them"
+  ui_warn "Casks" "$casks may need sudo — run dot system update in a terminal to upgrade them"
 }
 
 # _dot_upgrade_brew_left: after a failed `brew upgrade`, name the casks still
@@ -77,7 +77,7 @@ _dot_upgrade_brew_left() {
   return 1
 }
 
-# dot_upgrade_prepare <args...>: every question `dot upgrade` will ask,
+# dot_upgrade_prepare <args...>: every question `dot system update` will ask,
 # before any phase runs. -y/--yes answers yes to all of them.
 dot_upgrade_prepare() {
   local arg
@@ -86,7 +86,7 @@ dot_upgrade_prepare() {
   for arg in "$@"; do
     [[ "$arg" != --globals ]] || DOT_UPGRADE_GLOBALS=1
   done
-  dot_ensure_mise "dot upgrade keeps your CLI tools and runtimes current with it" || true
+  dot_ensure_mise "dot system update keeps your CLI tools and runtimes current with it" || true
   _dot_upgrade_consent_system
 }
 

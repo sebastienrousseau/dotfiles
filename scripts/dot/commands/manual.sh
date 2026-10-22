@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# dot manual — open or download the dotfiles manual in multiple formats.
+# dot help --manual — open or download the dotfiles manual in multiple formats.
 #
 # Usage:
-#   dot manual                   # open HTML manual in browser
-#   dot manual html              # alias of no-arg
-#   dot manual pdf               # download + open PDF
-#   dot manual epub              # download + open EPUB
-#   dot manual text              # pipe ASCII text to pager
-#   dot manual markdown          # pipe Markdown source to pager
-#   dot manual download <fmt>    # save to current directory
-#   dot manual --offline         # use bundled offline copy
-#   dot manual --local           # use locally-built _build/manual/
-#   DOT_OPENER='open -a Firefox' dot manual   # open with another command
+#   dot help --manual                   # open HTML manual in browser
+#   dot help --manual html              # alias of no-arg
+#   dot help --manual pdf               # download + open PDF
+#   dot help --manual epub              # download + open EPUB
+#   dot help --manual text              # pipe ASCII text to pager
+#   dot help --manual markdown          # pipe Markdown source to pager
+#   dot help --manual download <fmt>    # save to current directory
+#   dot help --manual --offline         # use bundled offline copy
+#   dot help --manual --local           # use locally-built _build/manual/
+#   DOT_OPENER='open -a Firefox' dot help --manual   # open with another command
 
 set -euo pipefail
 
@@ -42,12 +42,12 @@ parse_args() {
       --url=*) MANUAL_URL="${arg#*=}" ;;
       --help | -h)
         # The usage block, not the SPDX/copyright header above it.
-        sed -n '/^# dot manual/,/^[^#]/{/^#/{s/^# \{0,1\}//;p;};}' "$0"
+        sed -n '/^# dot help --manual/,/^[^#]/{/^#/{s/^# \{0,1\}//;p;};}' "$0"
         exit 0
         ;;
       *)
         # Ignoring a typo would open the manual instead of saying so.
-        ui_err "manual" "unknown argument: $arg (see: dot manual --help)" >&2
+        ui_err "manual" "unknown argument: $arg (see: dot help --manual --help)" >&2
         exit 1
         ;;
     esac

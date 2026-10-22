@@ -105,7 +105,7 @@ def run_records(manifests: dict) -> list[str]:
             target = alias["target"]
             if alias["kind"] == "deprecated" and " " in target and target not in names | seen:
                 seen.add(target)
-                rows.append(f"run|{target}|{alias['name']}||")
+                rows.append(f"run|{target}|{alias.get('legacy', alias['name'])}||")
     return rows
 
 

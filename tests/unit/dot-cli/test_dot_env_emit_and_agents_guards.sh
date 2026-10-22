@@ -4,8 +4,8 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 # Two argument/precondition guards that a healthy checkout hides.
 #
-# `dot env emit --output` with nothing after it must be rejected, and
-# `dot agents render` must refuse when CLAUDE.md is not where it expects. The
+# `dot tool export --output` with nothing after it must be rejected, and
+# `dot agent context apply` must refuse when CLAUDE.md is not where it expects. The
 # second is unreachable from the checkout, which always has that file — so it
 # runs against a fixture source tree that does not.
 

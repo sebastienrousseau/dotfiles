@@ -223,7 +223,7 @@ rmdir "${LOCK}.d"
 test_start "teleport_requires_a_target"
 run bash "$TELEPORT"
 assert_equals 1 "$RC" "rc"
-out_has "Usage: dot teleport user@host" "usage"
+out_has "Usage: dot fleet push user@host" "usage"
 
 test_start "teleport_rejects_an_unsafe_target"
 run bash "$TELEPORT" 'user@host; rm -rf /'

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Behavioural contracts for `dot rollback` that the mutation run showed
+# Behavioural contracts for `dot doctor rollback` that the mutation run showed
 # unprotected: every refusal has an exact exit status and message, a
 # confirmation prompt treats anything but y/Y as "no", pruning keeps
 # exactly the newest ten backups, and the AI hand-off runs only when

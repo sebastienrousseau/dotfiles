@@ -74,7 +74,7 @@ assert_equals "1:1" "$rc:$(grep -c 'failed (exit 3)' <<<"$out")" "a failing dot 
 for flag in --security -s; do
   test_start "verify_security_mode_${flag//-/}"
   STUB_DIFF="" verify "$flag"
-  assert_equals "security-score " "$calls" "$flag runs only dot security-score"
+  assert_equals "security-score " "$calls" "$flag runs only dot security score show"
 done
 
 # Slice 2: drive real line coverage of the script under test

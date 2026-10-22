@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Dotfiles Scorecard
-# Usage: dot scorecard [--json|-j]
+# Usage: dot doctor score show [--json|-j]
 
 set -euo pipefail
 
@@ -92,7 +92,7 @@ ui_kv "Performance" "${perf_score}/100 (avg ${perf_mean}ms, target ${perf_target
 ui_kv "Drift" "${drift_count} file(s)"
 
 if [[ "$security_score" -lt 100 ]]; then
-  ui_warn "Security" "Run 'dot security-score' to reach 100/100"
+  ui_warn "Security" "Run 'dot security score show' to reach 100/100"
 else
   ui_ok "Security" "100/100"
 fi
@@ -104,18 +104,18 @@ else
 fi
 
 if [[ "$health_failures" -gt 0 ]]; then
-  ui_err "Health" "Failures detected (run 'dot heal')"
+  ui_err "Health" "Failures detected (run 'dot doctor fix')"
 elif [[ "$health_warnings" -gt 0 ]]; then
-  ui_warn "Health" "Warnings detected (run 'dot heal')"
+  ui_warn "Health" "Warnings detected (run 'dot doctor fix')"
 else
   ui_ok "Health" "All checks passing"
 fi
 
 ui_section "Tips"
-ui_info "Fix" "dot heal"
-ui_info "Profile" "dot perf --profile"
-ui_info "Security" "dot security-score"
-ui_info "Drift" "dot drift"
+ui_info "Fix" "dot doctor fix"
+ui_info "Profile" "dot doctor perf show --profile"
+ui_info "Security" "dot security score show"
+ui_info "Drift" "dot doctor drift show"
 
 exit_code=0
 if [[ "$security_score" -lt 100 ]]; then

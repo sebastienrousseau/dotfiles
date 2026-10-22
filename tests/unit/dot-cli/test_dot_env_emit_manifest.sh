@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Behavioural coverage for scripts/dot/commands/env-emit.sh (`dot env emit`):
+# Behavioural coverage for scripts/dot/commands/env-emit.sh (`dot tool export`):
 # flag parsing, format validation, dependency checks, the v1 JSON manifest,
 # the NDJSON variant and atomic --output writing.
 #
@@ -70,13 +70,13 @@ assert_true "bash -n '$EMIT'" "valid bash syntax"
 test_start "help_documents_the_formats_and_returns_0"
 emit --help
 assert_equals 0 "$RC" "rc"
-out_has "Usage: dot env emit" "usage"
+out_has "Usage: dot tool export" "usage"
 out_has "ndjson" "ndjson documented"
 
 test_start "short_help_flag_works_too"
 emit -h
 assert_equals 0 "$RC" "rc"
-out_has "Usage: dot env emit" "usage"
+out_has "Usage: dot tool export" "usage"
 
 test_start "unknown_flag_is_rejected"
 emit --nope
@@ -92,7 +92,7 @@ test_start "default_manifest_matches_the_v1_schema_shape"
 emit
 assert_equals 0 "$RC" "rc"
 assert_equals "1.0.0" "$(jq -r .manifest_version <"$OUTF")" "manifest_version"
-assert_equals "dot env emit" "$(jq -r .emitter.name <"$OUTF")" "emitter name"
+assert_equals "dot tool export" "$(jq -r .emitter.name <"$OUTF")" "emitter name"
 assert_equals "2" "$(jq -r '.tools | length' <"$OUTF")" "one record per installed version"
 assert_equals "node" "$(jq -r '.tools[0].name' <"$OUTF")" "tool name"
 assert_equals "24.15.0" "$(jq -r '.tools[0].version' <"$OUTF")" "tool version"

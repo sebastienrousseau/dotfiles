@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Shell Performance Profiling
-# Usage: dot perf [--json|-j] [--profile|-p] [--runs|-r N] [--target|-t MS]
+# Usage: dot doctor perf show [--json|-j] [--profile|-p] [--runs|-r N] [--target|-t MS]
 
 set -euo pipefail
 

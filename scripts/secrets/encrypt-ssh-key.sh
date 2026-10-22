@@ -15,7 +15,7 @@ fi
 
 if [ ! -f "$AGE_KEY" ]; then
   echo "Age identity not found: $AGE_KEY"
-  echo "Run: dot secrets-init"
+  echo "Run: dot secret init"
   exit 1
 fi
 

@@ -11,9 +11,9 @@ set -euo pipefail
 # by expiring automatically (default: 16 hours).
 #
 # Usage:
-#   dot ssh-cert issue [--ttl 16h] [--principal user]
-#   dot ssh-cert status
-#   dot ssh-cert revoke
+#   dot secret cert new [--ttl 16h] [--principal user]
+#   dot secret cert list
+#   dot secret cert remove
 
 # ---------- configuration -------------------------------------------------- #
 
@@ -98,11 +98,11 @@ cmd_issue() {
     echo "    2. Initialize CA: step ca init --name 'My CA' --provisioner admin"
     echo "    3. Start CA: step-ca \$(step path)/config/ca.json"
     echo "    4. Configure: export SSH_CERT_CA_URL=https://ca.example.com"
-    echo "    5. Run: dot ssh-cert issue"
+    echo "    5. Run: dot secret cert new"
     echo ""
     echo "  Option B: Local CA key (for development/testing)"
     echo "    1. Generate CA: ssh-keygen -t ed25519 -f ~/.ssh/ca_key -C 'local-ca'"
-    echo "    2. Run: dot ssh-cert issue"
+    echo "    2. Run: dot secret cert new"
     echo ""
     echo "  Environment variables:"
     echo "    SSH_CERT_CA_URL         step-ca server URL"
@@ -188,7 +188,7 @@ case "$subcommand" in
   status) cmd_status ;;
   revoke) cmd_revoke ;;
   *)
-    echo "Usage: dot ssh-cert <command>"
+    echo "Usage: dot secret cert new|list|remove"
     echo ""
     echo "Commands:"
     echo "  issue   [--ttl 16h] [--principal user]  Request a short-lived certificate"

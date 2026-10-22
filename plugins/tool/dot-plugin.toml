@@ -26,12 +26,14 @@ summary = "Install the configured toolchains"
 [[commands]]
 verb = "update"
 effect = "write"
+legacy = "env upgrade"
 summary = "Upgrade toolchains"
 
 [[commands]]
 verb = "remove"
 effect = "write"
-summary = "Remove a toolchain or orphans"
+legacy = "env prune"
+summary = "Remove orphaned toolchains (a dry run without --yes)"
 
 [[commands]]
 verb = "set"
@@ -42,6 +44,7 @@ summary = "Pin a toolchain version"
 [[commands]]
 verb = "export"
 effect = "read"
+legacy = "env emit"
 summary = "Print the tool environment"
 
 [[commands]]

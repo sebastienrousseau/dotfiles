@@ -90,7 +90,7 @@ dot_metric() {
   } 2>/dev/null >>"$metrics_file" || true
 }
 
-# Print recent metrics (for `dot metrics` command)
+# Print recent metrics (for `dot doctor metric list` command)
 dot_metrics_summary() {
   local metrics_file="$_DOT_LOG_STATE_DIR/metrics.jsonl"
   local count="${1:-20}"

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091
-# dot restore --git / --diff run against a real sandboxed git repository:
+# dot doctor restore --git / --diff run against a real sandboxed git repository:
 # every flag is parsed before anything runs, so `--git REF --dry-run` is a
 # dry run, and a ref that looks like an option never reaches git.
 

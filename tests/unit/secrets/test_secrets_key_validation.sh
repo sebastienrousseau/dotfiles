@@ -56,7 +56,7 @@ test_start "secrets_get_rejects_path_key"
 sec dot_secrets_get '../escape' >/dev/null
 assert_not_equals "0" "$?" "a path-like key is not looked up"
 
-# `dot secrets load` turns bucket keys into `export KEY=value` lines that
+# `dot secret export` turns bucket keys into `export KEY=value` lines that
 # shells source; a crafted key in the data file must never be listed.
 test_start "secrets_bucket_keys_keep_valid"
 cat >"$WORK/data.toml" <<'TOML'

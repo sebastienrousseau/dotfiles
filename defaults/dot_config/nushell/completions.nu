@@ -86,10 +86,16 @@ export extern "dot agent budget show" [
 def "nu-complete dot agent card" [] {
     [
         { value: "show", description: "The agent card" }
+        { value: "check", description: "Check the card against the A2A spec" }
     ]
 }
 export extern "dot agent card" [
     command?: string@"nu-complete dot agent card"
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot agent card check" [
     --help(-h) # Show help
     ...rest: string
 ]
@@ -129,10 +135,22 @@ export extern "dot agent checkpoint save" [
 def "nu-complete dot agent context" [] {
     [
         { value: "show", description: "Context files in effect" }
+        { value: "check", description: "Check the rendered context files are current" }
+        { value: "apply", description: "Render the context file for every harness" }
     ]
 }
 export extern "dot agent context" [
     command?: string@"nu-complete dot agent context"
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot agent context apply" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot agent context check" [
     --help(-h) # Show help
     ...rest: string
 ]
@@ -190,6 +208,7 @@ def "nu-complete dot agent mode" [] {
         { value: "list", description: "Available modes" }
         { value: "show", description: "One mode in detail" }
         { value: "set", description: "Switch mode" }
+        { value: "run", description: "Run a command under a mode" }
     ]
 }
 export extern "dot agent mode" [
@@ -199,6 +218,11 @@ export extern "dot agent mode" [
 ]
 
 export extern "dot agent mode list" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot agent mode run" [
     --help(-h) # Show help
     ...rest: string
 ]
@@ -353,6 +377,8 @@ export extern "dot ai login" [
 def "nu-complete dot ai pattern" [] {
     [
         { value: "list", description: "Prompt patterns" }
+        { value: "show", description: "One prompt pattern" }
+        { value: "edit", description: "Edit a prompt pattern" }
     ]
 }
 export extern "dot ai pattern" [
@@ -361,7 +387,17 @@ export extern "dot ai pattern" [
     ...rest: string
 ]
 
+export extern "dot ai pattern edit" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
 export extern "dot ai pattern list" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot ai pattern show" [
     --help(-h) # Show help
     ...rest: string
 ]
@@ -463,6 +499,7 @@ export extern "dot attest verify" [
 def "nu-complete dot cli" [] {
     [
         { value: "completion", description: "shell completion scripts" }
+        { value: "registry", description: "the plugin registry" }
         { value: "list", description: "Installed plugins" }
         { value: "show", description: "One plugin in detail" }
         { value: "install", description: "Install a plugin" }
@@ -509,6 +546,28 @@ export extern "dot cli new" [
     ...rest: string
 ]
 
+def "nu-complete dot cli registry" [] {
+    [
+        { value: "show", description: "The plugin registry URL" }
+        { value: "set", description: "Point at another plugin registry" }
+    ]
+}
+export extern "dot cli registry" [
+    command?: string@"nu-complete dot cli registry"
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot cli registry set" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot cli registry show" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
 export extern "dot cli remove" [
     --help(-h) # Show help
     ...rest: string
@@ -545,6 +604,7 @@ def "nu-complete dot config" [] {
         { value: "check", description: "Lint the source and templates" }
         { value: "export", description: "Write a portable bundle" }
         { value: "uninstall", description: "Remove the setup, keeping the source" }
+        { value: "import", description: "Restore from an exported bundle" }
     ]
 }
 export extern "dot config" [
@@ -581,6 +641,11 @@ export extern "dot config edit" [
 ]
 
 export extern "dot config export" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot config import" [
     --help(-h) # Show help
     ...rest: string
 ]
@@ -1007,6 +1072,7 @@ def "nu-complete dot secret cert" [] {
     [
         { value: "list", description: "Certificates and expiry" }
         { value: "new", description: "Issue a short-lived SSH certificate" }
+        { value: "remove", description: "Revoke the current SSH certificate" }
     ]
 }
 export extern "dot secret cert" [
@@ -1021,6 +1087,11 @@ export extern "dot secret cert list" [
 ]
 
 export extern "dot secret cert new" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot secret cert remove" [
     --help(-h) # Show help
     ...rest: string
 ]
@@ -1362,8 +1433,11 @@ export extern "dot shell" [
 
 def "nu-complete dot shell alias" [] {
     [
-        { value: "list", description: "Aliases and where each is defined" }
+        { value: "list", description: "Aliases and where each is defined; a term searches them" }
         { value: "check", description: "Find shadowed or broken aliases" }
+        { value: "show", description: "Where one alias comes from" }
+        { value: "status", description: "Alias counts; --tiers for the ecosystem tiers" }
+        { value: "export", description: "Write the alias cheatsheet" }
     ]
 }
 export extern "dot shell alias" [
@@ -1377,7 +1451,23 @@ export extern "dot shell alias check" [
     ...rest: string
 ]
 
+export extern "dot shell alias export" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
 export extern "dot shell alias list" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot shell alias show" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot shell alias status" [
+    --tiers # Show which ecosystem tiers are enabled
     --help(-h) # Show help
     ...rest: string
 ]
@@ -1582,7 +1672,7 @@ def "nu-complete dot tool" [] {
         { value: "list", description: "Toolchains and their versions" }
         { value: "install", description: "Install the configured toolchains" }
         { value: "update", description: "Upgrade toolchains" }
-        { value: "remove", description: "Remove a toolchain or orphans" }
+        { value: "remove", description: "Remove orphaned toolchains (a dry run without --yes)" }
         { value: "set", description: "Pin a toolchain version" }
         { value: "export", description: "Print the tool environment" }
         { value: "new", description: "Create a project from a template" }

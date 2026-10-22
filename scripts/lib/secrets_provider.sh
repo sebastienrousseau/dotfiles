@@ -138,7 +138,7 @@ dot_secrets_store_plain_enc() {
   # its CALLER returns, and by then `tmp_rec` — local to this function — is
   # out of scope: under `set -u` the trap aborted dot_secrets_set with
   # "tmp_rec: unbound variable" AFTER the encrypted file had been written, so
-  # `dot secrets set` reported failure on a write that had succeeded. Clean up
+  # `dot secret set` reported failure on a write that had succeeded. Clean up
   # explicitly on both paths instead.
   if ! age-keygen -y "$DOT_SECRETS_AGE_KEY" >"$tmp_rec"; then
     rm -f "$tmp_rec"
@@ -147,7 +147,7 @@ dot_secrets_store_plain_enc() {
   fi
   if ! printf "%s" "$value" | age -R "$tmp_rec" -o "$file"; then
     rm -f "$tmp_rec"
-    echo "failed to encrypt secret: $key" >&2
+    echo "could not encrypt the value of $key" >&2
     return 1
   fi
   rm -f "$tmp_rec"
@@ -240,7 +240,7 @@ dot_secrets_bucket_keys() {
     if dot_secrets_valid_env_key "$key"; then
       printf '%s\n' "$key"
     else
-      printf 'dot secrets: skipping invalid key %q in bucket %s\n' "$key" "$bucket" >&2
+      printf 'dot secret export: skipping invalid key %q in bucket %s\n' "$key" "$bucket" >&2
     fi
   done
 }

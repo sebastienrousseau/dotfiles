@@ -160,9 +160,9 @@ function Invoke-DotHelp {
     Write-Host ''
     Write-Host 'Bash-bridged subcommands (require bash on PATH):'
     Write-Host ''
-    Write-Host '  dot env emit                Emit v1 environment manifest'
-    Write-Host '  dot agents render           Re-render every AGENTS.md harness'
-    Write-Host '  dot registry ...            Verified module registry operations'
+    Write-Host '  dot tool export                Emit v1 environment manifest'
+    Write-Host '  dot agent context apply           Re-render every AGENTS.md harness'
+    Write-Host '  dot cli list --available ...            Verified module registry operations'
     Write-Host ''
     Write-Host 'See: dot help all (via bash) — full command index'
 }
@@ -172,10 +172,10 @@ function Invoke-DotHelp {
     Verify that AGENTS.md is in sync with CLAUDE.md.
 
 .DESCRIPTION
-    Native PowerShell implementation of `dot agents check`. Both
+    Native PowerShell implementation of `dot agent context check`. Both
     files share a "Project Overview" paragraph that is the canonical
     sync surface. If they diverge, AGENTS.md needs re-rendering
-    (run `dot agents render` via bash; native PowerShell render is
+    (run `dot agent context apply` via bash; native PowerShell render is
     a separate ticket).
 
 .OUTPUTS

@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 # The trust prompt and end-of-options handling in cmd_init.
 #
-# `dot init` clones a stranger's repository and runs its scripts, so it asks
+# `dot config init` clones a stranger's repository and runs its scripts, so it asks
 # for confirmation first — but only when stdin is a terminal. Under any test
 # harness it is not, so neither the prompt nor the abort had ever run. Both
 # are driven here through script(1), which gives the command a real pty.

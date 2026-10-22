@@ -128,7 +128,7 @@ _json_field() {
 
 EXCELLENT="Excellent! Your dotfiles are in great shape."
 GOOD="Good! Minor improvements possible."
-FIX_TIP="Run 'dot health --fix' to auto-repair common issues."
+FIX_TIP="Run 'dot doctor status --fix' to auto-repair common issues."
 
 # ── H2: score exactly 90 is the bottom of the "Excellent" band ─────────
 test_start "score_90_is_excellent"

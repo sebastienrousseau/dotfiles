@@ -47,7 +47,7 @@ _aliases_list() {
 _aliases_search() {
   local query="${1:-}" results name value file line
   if [[ -z "$query" ]]; then
-    die "Usage: dot aliases search <term>"
+    die "Usage: dot shell alias list <term>"
   fi
   ui_header "Alias Search"
   ui_info "Query" "$query"
@@ -91,7 +91,7 @@ _aliases_why_deprecation() {
 _aliases_why() {
   local alias_name="${1:-}" rows deprecation="" name value file line
   if [[ -z "$alias_name" ]]; then
-    die "Usage: dot aliases why <alias>"
+    die "Usage: dot shell alias show <alias>"
   fi
   ui_header "Alias Details"
   ui_info "Alias" "$alias_name"
@@ -157,7 +157,7 @@ _aliases_cheatsheet() {
       --output | -o)
         out="${2:-}"
         if [[ -z "$out" ]]; then
-          die "Usage: dot aliases cheatsheet [--output PATH|-]"
+          die "Usage: dot shell alias export [--output PATH|-]"
           return 1 # die exits; this keeps the loop finite if it is stubbed
         fi
         shift 2
@@ -221,11 +221,13 @@ cmd_aliases() {
   local subcommand="${1:-list}"
   shift || true
 
+  # `list <term>` and `stats --tiers` are how `dot shell alias list` and
+  # `dot shell alias status` reach search and tiers (ADR-020).
   case "$subcommand" in
-    list) _aliases_list ;;
+    list) if [[ $# -gt 0 ]]; then _aliases_search "$@"; else _aliases_list; fi ;;
     search) _aliases_search "$@" ;;
     why) _aliases_why "$@" ;;
-    stats) _aliases_stats ;;
+    stats) if [[ "${1:-}" == --tiers ]]; then _aliases_tiers; else _aliases_stats; fi ;;
     cheatsheet) _aliases_cheatsheet "$@" ;;
     tiers) _aliases_tiers ;;
     *) die "Unknown aliases subcommand: $subcommand" ;;

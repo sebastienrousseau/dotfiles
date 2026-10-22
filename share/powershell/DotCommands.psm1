@@ -73,6 +73,18 @@ function Connect-DotAi {
     dot ai login @Arguments
 }
 
+function Edit-DotAiPattern {
+    <#
+    .SYNOPSIS
+    Edit a prompt pattern
+    .DESCRIPTION
+    Runs `dot ai pattern edit`: Edit a prompt pattern. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot ai pattern edit @Arguments
+}
+
 function Edit-DotConfig {
     <#
     .SYNOPSIS
@@ -131,6 +143,30 @@ function Export-DotSecret {
     [CmdletBinding()]
     param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
     dot secret export @Arguments
+}
+
+function Export-DotShellAlias {
+    <#
+    .SYNOPSIS
+    Write the alias cheatsheet
+    .DESCRIPTION
+    Runs `dot shell alias export`: Write the alias cheatsheet. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot shell alias export @Arguments
+}
+
+function Export-DotTool {
+    <#
+    .SYNOPSIS
+    Print the tool environment
+    .DESCRIPTION
+    Runs `dot tool export`: Print the tool environment. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot tool export @Arguments
 }
 
 function Get-DotAgentCard {
@@ -246,11 +282,11 @@ function Get-DotAiPattern {
     .SYNOPSIS
     Prompt patterns
     .DESCRIPTION
-    Runs `dot ai pattern list`: Prompt patterns. Effect: read; arguments pass through.
+    Runs `dot ai pattern list`: Prompt patterns; `dot ai pattern show`: One prompt pattern. Effect: read; arguments pass through.
     #>
-    [CmdletBinding()]
-    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
-    dot ai pattern list @Arguments
+    [CmdletBinding(PositionalBinding = $false)]
+    param([string] $Name, [Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    if ($Name) { dot ai pattern show $Name @Arguments } else { dot ai pattern list @Arguments }
 }
 
 function Get-DotAttest {
@@ -287,6 +323,18 @@ function Get-DotCliCompletion {
     [CmdletBinding()]
     param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
     dot cli completion show @Arguments
+}
+
+function Get-DotCliRegistry {
+    <#
+    .SYNOPSIS
+    The plugin registry URL
+    .DESCRIPTION
+    Runs `dot cli registry show`: The plugin registry URL. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot cli registry show @Arguments
 }
 
 function Get-DotConfigPath {
@@ -481,6 +529,18 @@ function Get-DotSecret {
     if ($Name) { dot secret show $Name @Arguments } else { dot secret list @Arguments }
 }
 
+function Get-DotSecretCert {
+    <#
+    .SYNOPSIS
+    Certificates and expiry
+    .DESCRIPTION
+    Runs `dot secret cert list`: Certificates and expiry. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot secret cert list @Arguments
+}
+
 function Get-DotSecretProvider {
     <#
     .SYNOPSIS
@@ -532,13 +592,25 @@ function Get-DotSecurityScore {
 function Get-DotShellAlias {
     <#
     .SYNOPSIS
-    Aliases and where each is defined
+    Aliases and where each is defined; a term searches them
     .DESCRIPTION
-    Runs `dot shell alias list`: Aliases and where each is defined. Effect: read; arguments pass through.
+    Runs `dot shell alias list`: Aliases and where each is defined; a term searches them; `dot shell alias show`: Where one alias comes from. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding(PositionalBinding = $false)]
+    param([string] $Name, [Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    if ($Name) { dot shell alias show $Name @Arguments } else { dot shell alias list @Arguments }
+}
+
+function Get-DotShellAliasStatus {
+    <#
+    .SYNOPSIS
+    Alias counts; --tiers for the ecosystem tiers
+    .DESCRIPTION
+    Runs `dot shell alias status`: Alias counts; --tiers for the ecosystem tiers. Effect: read; arguments pass through.
     #>
     [CmdletBinding()]
     param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
-    dot shell alias list @Arguments
+    dot shell alias status @Arguments
 }
 
 function Get-DotShellHistory {
@@ -599,6 +671,18 @@ function Get-DotTool {
     [CmdletBinding()]
     param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
     dot tool list @Arguments
+}
+
+function Import-DotConfig {
+    <#
+    .SYNOPSIS
+    Restore from an exported bundle
+    .DESCRIPTION
+    Runs `dot config import`: Restore from an exported bundle. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot config import @Arguments
 }
 
 function Initialize-DotConfig {
@@ -695,6 +779,18 @@ function Invoke-DotAgentDelegate {
     [CmdletBinding()]
     param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
     dot agent delegate run @Arguments
+}
+
+function Invoke-DotAgentMode {
+    <#
+    .SYNOPSIS
+    Run a command under a mode
+    .DESCRIPTION
+    Runs `dot agent mode run`: Run a command under a mode. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot agent mode run @Arguments
 }
 
 function Invoke-DotAi {
@@ -805,6 +901,30 @@ function Push-DotFleet {
     dot fleet push @Arguments
 }
 
+function Remove-DotSecretCert {
+    <#
+    .SYNOPSIS
+    Revoke the current SSH certificate
+    .DESCRIPTION
+    Runs `dot secret cert remove`: Revoke the current SSH certificate. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot secret cert remove @Arguments
+}
+
+function Remove-DotTool {
+    <#
+    .SYNOPSIS
+    Remove orphaned toolchains (a dry run without --yes)
+    .DESCRIPTION
+    Runs `dot tool remove`: Remove orphaned toolchains (a dry run without --yes). Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot tool remove @Arguments
+}
+
 function Repair-DotDoctor {
     <#
     .SYNOPSIS
@@ -865,6 +985,18 @@ function Save-DotConfig {
     dot config save @Arguments
 }
 
+function Set-DotAgentContext {
+    <#
+    .SYNOPSIS
+    Render the context file for every harness
+    .DESCRIPTION
+    Runs `dot agent context apply`: Render the context file for every harness. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot agent context apply @Arguments
+}
+
 function Set-DotAgentMode {
     <#
     .SYNOPSIS
@@ -875,6 +1007,18 @@ function Set-DotAgentMode {
     [CmdletBinding()]
     param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
     dot agent mode set @Arguments
+}
+
+function Set-DotCliRegistry {
+    <#
+    .SYNOPSIS
+    Point at another plugin registry
+    .DESCRIPTION
+    Runs `dot cli registry set`: Point at another plugin registry. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot cli registry set @Arguments
 }
 
 function Set-DotConfig {
@@ -1117,6 +1261,30 @@ function Test-DotAgent {
     dot agent check @Arguments
 }
 
+function Test-DotAgentCard {
+    <#
+    .SYNOPSIS
+    Check the card against the A2A spec
+    .DESCRIPTION
+    Runs `dot agent card check`: Check the card against the A2A spec. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot agent card check @Arguments
+}
+
+function Test-DotAgentContext {
+    <#
+    .SYNOPSIS
+    Check the rendered context files are current
+    .DESCRIPTION
+    Runs `dot agent context check`: Check the rendered context files are current. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot agent context check @Arguments
+}
+
 function Test-DotAi {
     <#
     .SYNOPSIS
@@ -1261,6 +1429,18 @@ function Update-DotSystem {
     dot system update @Arguments
 }
 
+function Update-DotTool {
+    <#
+    .SYNOPSIS
+    Upgrade toolchains
+    .DESCRIPTION
+    Runs `dot tool update`: Upgrade toolchains. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot tool update @Arguments
+}
+
 Export-ModuleMember -Function @(
     'Add-DotConfig'
     'Backup-DotDoctor'
@@ -1268,11 +1448,14 @@ Export-ModuleMember -Function @(
     'Compare-DotConfig'
     'Confirm-DotAttest'
     'Connect-DotAi'
+    'Edit-DotAiPattern'
     'Edit-DotConfig'
     'Edit-DotSecret'
     'Export-DotAttest'
     'Export-DotConfig'
     'Export-DotSecret'
+    'Export-DotShellAlias'
+    'Export-DotTool'
     'Get-DotAgentCard'
     'Get-DotAgentCheckpoint'
     'Get-DotAgentContext'
@@ -1286,6 +1469,7 @@ Export-ModuleMember -Function @(
     'Get-DotAttest'
     'Get-DotCli'
     'Get-DotCliCompletion'
+    'Get-DotCliRegistry'
     'Get-DotConfigPath'
     'Get-DotConfigProfile'
     'Get-DotConfigStatus'
@@ -1302,16 +1486,19 @@ Export-ModuleMember -Function @(
     'Get-DotFleetStatus'
     'Get-DotMcp'
     'Get-DotSecret'
+    'Get-DotSecretCert'
     'Get-DotSecretProvider'
     'Get-DotSecurityDisk'
     'Get-DotSecurityPolicy'
     'Get-DotSecurityScore'
     'Get-DotShellAlias'
+    'Get-DotShellAliasStatus'
     'Get-DotShellHistory'
     'Get-DotSystemSchedule'
     'Get-DotSystemStatus'
     'Get-DotTheme'
     'Get-DotTool'
+    'Import-DotConfig'
     'Initialize-DotConfig'
     'Initialize-DotSecret'
     'Install-DotAi'
@@ -1320,6 +1507,7 @@ Export-ModuleMember -Function @(
     'Install-DotTool'
     'Invoke-DotAgent'
     'Invoke-DotAgentDelegate'
+    'Invoke-DotAgentMode'
     'Invoke-DotAi'
     'Invoke-DotSystemSchedule'
     'Measure-DotDoctorPerf'
@@ -1329,12 +1517,16 @@ Export-ModuleMember -Function @(
     'New-DotSecretKey'
     'New-DotTool'
     'Push-DotFleet'
+    'Remove-DotSecretCert'
+    'Remove-DotTool'
     'Repair-DotDoctor'
     'Request-DotAi'
     'Restore-DotDoctor'
     'Save-DotAgentCheckpoint'
     'Save-DotConfig'
+    'Set-DotAgentContext'
     'Set-DotAgentMode'
+    'Set-DotCliRegistry'
     'Set-DotConfig'
     'Set-DotConfigProfile'
     'Set-DotFleet'
@@ -1355,6 +1547,8 @@ Export-ModuleMember -Function @(
     'Start-DotMcp'
     'Sync-DotConfig'
     'Test-DotAgent'
+    'Test-DotAgentCard'
+    'Test-DotAgentContext'
     'Test-DotAi'
     'Test-DotConfig'
     'Test-DotDoctor'
@@ -1367,4 +1561,5 @@ Export-ModuleMember -Function @(
     'Update-DotConfig'
     'Update-DotShell'
     'Update-DotSystem'
+    'Update-DotTool'
 )

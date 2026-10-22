@@ -80,11 +80,11 @@ assert_file_contains "$SCRIPT_FILE" "/usr/bin/open" "must use /usr/bin/open expl
 test_start "registered_in_dot_cli"
 DOT_BIN="$REPO_ROOT/bin/dot"
 rm -rf "$MAN_TMP/cwd" && mkdir -p "$MAN_TMP/cwd"
-(cd "$MAN_TMP/cwd" && XDG_DATA_HOME="$MAN_TMP/data" bash "$DOT_BIN" manual download epub --offline >/dev/null 2>&1) || true
-assert_equals "fixture dotfiles.epub" "$(cat "$MAN_TMP/cwd/dotfiles.epub" 2>/dev/null)" "dot manual routes to manual.sh"
+(cd "$MAN_TMP/cwd" && XDG_DATA_HOME="$MAN_TMP/data" bash "$DOT_BIN" help --manual download epub --offline >/dev/null 2>&1) || true
+assert_equals "fixture dotfiles.epub" "$(cat "$MAN_TMP/cwd/dotfiles.epub" 2>/dev/null)" "dot help --manual routes to manual.sh"
 
 test_start "help_shows_usage_without_license_header"
-assert_equals "dot manual — open or download the dotfiles manual in multiple formats.|0" \
+assert_equals "dot help --manual — open or download the dotfiles manual in multiple formats.|0" \
   "$(bash "$SCRIPT_FILE" --help | head -1)|$(bash "$SCRIPT_FILE" --help | grep -c SPDX)" "help starts at the usage block"
 
 # Slice 2: drive real line coverage of the script under test

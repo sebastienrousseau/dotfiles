@@ -430,7 +430,7 @@ assert_equals "released" "$got" "finished transaction just drops the lock"
 # ---------------------------------------------------------------------------
 # chezmoi's records of its targets are part of the transaction. A rollback
 # puts them back, so the next apply does not take the restored files for
-# hand edits and stop on a question nobody can answer (the `dot upgrade`
+# hand edits and stop on a question nobody can answer (the `dot system update`
 # "has changed since chezmoi last wrote it ... EOF" failure).
 if command -v chezmoi >/dev/null 2>&1; then
   CZ="$WORK/chezmoi"

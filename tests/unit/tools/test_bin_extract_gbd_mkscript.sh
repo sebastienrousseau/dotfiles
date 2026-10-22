@@ -296,7 +296,7 @@ assert_file_contains "$CALLS" "figlet -f big x" "DOTFILES_FIGLET_FONT selects th
 test_start "dot_ai_requires_a_question"
 rc="$(run "$DOT_AI")"
 assert_equals "1" "$rc" "no question is a usage error"
-assert_file_contains "$OUT" "Usage: dot ai-query" "usage is printed"
+assert_file_contains "$OUT" "Usage: dot ai ask" "usage is printed"
 
 test_start "dot_ai_retrieves_context_and_asks_the_model"
 # dot-ai reads ~/.dotfiles; the sandbox already links that to the repo.

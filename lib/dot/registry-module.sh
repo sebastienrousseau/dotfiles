@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Sourced by scripts/dot/commands/registry.sh; inherits set -euo pipefail
 #
-# Module content rules for `dot registry install`: a module is third-party
+# Module content rules for `dot cli install`: a module is third-party
 # data, so it may only ship plain files, and nothing about it is executed.
 #   * Archive entries are refused when any path component is a name chezmoi
 #     acts on: templates render (and `output` runs commands) even during a

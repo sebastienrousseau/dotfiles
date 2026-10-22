@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Sourced by scripts/dot/commands/registry.sh; inherits set -euo pipefail
 #
-# Trust checks for the `dot registry` index, before any module is read:
+# Trust checks for the `dot cli list --available` index, before any module is read:
 #   * minisign signature (<url>.minisig) against security/registry.pub;
 #   * rollback floor: the newest `updated` ever accepted per registry URL;
 #   * stale-cache limit when a fetch fails;

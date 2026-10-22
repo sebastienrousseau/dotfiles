@@ -54,4 +54,4 @@ uninstall:
 
 smoke:
 	CHEZMOI_SOURCE_DIR="$(CURDIR)" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 ./bin/dot version
-	CHEZMOI_SOURCE_DIR="$(CURDIR)" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 ./bin/dot registry --help >/dev/null
+	CHEZMOI_SOURCE_DIR="$(CURDIR)" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 ./bin/dot cli list --available --help >/dev/null

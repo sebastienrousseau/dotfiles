@@ -53,7 +53,7 @@ out="$(PATH="$NOJQ" "$REAL_BASH" -c '
   source "$1/scripts/dot/commands/agent.sh"
   cmd_mode checkpoint list 5
 ' _ "$REPO_ROOT" 2>&1)" && rc=0 || rc=$?
-assert_equals "1:yes" "$rc:$([[ "$out" == *"jq is required for dot mode"* ]] && echo yes)" "a clear refusal, not a partial listing"
+assert_equals "1:yes" "$rc:$([[ "$out" == *"jq is required for dot agent mode"* ]] && echo yes)" "a clear refusal, not a partial listing"
 
 test_start "checkpoint_replay_refuses_an_empty_argv"
 if command -v jq >/dev/null 2>&1; then

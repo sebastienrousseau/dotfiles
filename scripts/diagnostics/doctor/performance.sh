@@ -69,7 +69,7 @@ _doctor_perf_cache_freshness() {
     _ok "shell caches" "fresh"
   else
     caches_fresh="stale"
-    _warn "shell caches" "stale ($stale_tools) — run dot prewarm"
+    _warn "shell caches" "stale ($stale_tools) — run dot shell update --prewarm"
   fi
 }
 
@@ -221,9 +221,9 @@ _doctor_perf_startup_latency() {
       # re-run a no-op sends them in a circle — as it did on 2026-08-20, where
       # prewarm changed nothing because nothing was cold.
       if [[ "${caches_fresh:-unknown}" == "fresh" ]]; then
-        _warn "startup latency" "threshold exceeded (caches already fresh — profile with 'dot benchmark')"
+        _warn "startup latency" "threshold exceeded (caches already fresh — profile with 'dot doctor perf measure')"
       else
-        _warn "startup latency" "threshold exceeded (run dot prewarm)"
+        _warn "startup latency" "threshold exceeded (run dot shell update --prewarm)"
       fi
     fi
   else
@@ -232,7 +232,7 @@ _doctor_perf_startup_latency() {
 }
 
 # 7. Baseline check + top-3 slowest tools from EVALCACHE_TIMING.
-# Closes part of #863. Reads the same baseline file `dot perf` writes,
+# Closes part of #863. Reads the same baseline file `dot doctor perf show` writes,
 # and the same eval-timings.jsonl _cached_eval populates. Skipped
 # silently when either file is absent (first-run state).
 _doctor_perf_baseline() {

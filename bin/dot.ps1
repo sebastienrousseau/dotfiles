@@ -111,7 +111,7 @@ switch ($cmd) {
                 exit 0
             }
             else {
-                Write-Error 'AGENTS.md is stale. Run: bash bin/dot agents render'
+                Write-Error 'AGENTS.md is stale. Run: bash bin/dot agent context apply'
                 exit 1
             }
         }

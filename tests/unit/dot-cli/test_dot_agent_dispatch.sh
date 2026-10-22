@@ -85,7 +85,7 @@ assert_contains "Agent Modes" "$OUT" "alias works"
 test_start "mode_show_requires_name"
 meta mode show
 assert_equals 1 "$RC" "rc"
-assert_contains "Usage: dot mode show" "$ERR" "usage on stderr"
+assert_contains "Usage: dot agent mode show" "$ERR" "usage on stderr"
 
 test_start "mode_show_rejects_unknown_profile"
 meta mode show nope
@@ -102,7 +102,7 @@ assert_contains "Description" "$OUT" "description row"
 test_start "mode_set_requires_name"
 meta mode set
 assert_equals 1 "$RC" "rc"
-assert_contains "Usage: dot mode set" "$ERR" "usage"
+assert_contains "Usage: dot agent mode set" "$ERR" "usage"
 
 test_start "mode_set_rejects_unknown_profile"
 meta mode set nope
@@ -140,7 +140,7 @@ printf 'DOT_AGENT_PROFILE=ask\n' >"$STATE"
 test_start "mode_run_requires_command"
 meta mode run
 assert_equals 1 "$RC" "rc"
-assert_contains "Usage: dot mode run" "$ERR" "usage"
+assert_contains "Usage: dot agent mode run" "$ERR" "usage"
 
 test_start "mode_run_uses_current_profile_and_exports_env"
 meta mode run bash -c 'echo "p=$DOT_AGENT_PROFILE fs=$DOT_AGENT_FILESYSTEM"'

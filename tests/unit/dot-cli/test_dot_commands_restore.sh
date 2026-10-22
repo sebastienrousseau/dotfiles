@@ -29,14 +29,14 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax errors"
 fi
 
-# dot restore, run against a sandboxed XDG_DATA_HOME holding two backups.
+# dot doctor restore, run against a sandboxed XDG_DATA_HOME holding two backups.
 RS_HOME="$(mktemp -d -t dot-restore.XXXXXX)"
 mkdir -p "$RS_HOME/data/dotfiles/backups/backup_20260101_000000_manual" \
   "$RS_HOME/data/dotfiles/backups/backup_20260202_000000_manual"
 rs() {
   RS_RC=0
   RS_OUT="$(env HOME="$RS_HOME" XDG_DATA_HOME="$RS_HOME/data" XDG_STATE_HOME="$RS_HOME/state" \
-    DOTFILES_DIR="$RS_HOME/no-checkout" bash "$REPO_ROOT/bin/dot" restore "$@" 2>&1)" || RS_RC=$?
+    DOTFILES_DIR="$RS_HOME/no-checkout" bash "$REPO_ROOT/bin/dot" doctor restore "$@" 2>&1)" || RS_RC=$?
 }
 
 test_start "restore_without_an_option_prints_usage"

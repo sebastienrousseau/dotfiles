@@ -177,7 +177,7 @@ test_start "fleet_namespace_set_without_existing_key"
 # Regression: the `set` arm only rewrote the file when a `namespace = ` key
 # was already there, yet reported success either way — and the shipped
 # defaults/.chezmoidata.toml has no such key, so on a fresh checkout the
-# command was a silent no-op. It must append the key, as `dot profile set`
+# command was a silent no-op. It must append the key, as `dot config profile set`
 # does for `profile`.
 write_data <<'TOML'
 node_id = "node-a"

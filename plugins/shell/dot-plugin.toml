@@ -48,8 +48,8 @@ summary = "Recent history"
 object = "alias"
 verb = "list"
 effect = "read"
-legacy = "aliases"
-summary = "Aliases and where each is defined"
+legacy = "aliases list"
+summary = "Aliases and where each is defined; a term searches them"
 
 [[commands]]
 object = "alias"
@@ -57,6 +57,31 @@ verb = "check"
 effect = "read"
 legacy = "alias-check"
 summary = "Find shadowed or broken aliases"
+
+[[commands]]
+object = "alias"
+verb = "show"
+effect = "read"
+legacy = "aliases why"
+summary = "Where one alias comes from"
+
+[[commands]]
+object = "alias"
+verb = "status"
+effect = "read"
+legacy = "aliases stats"
+summary = "Alias counts; --tiers for the ecosystem tiers"
+
+[[commands.flags]]
+long = "tiers"
+summary = "Show which ecosystem tiers are enabled"
+
+[[commands]]
+object = "alias"
+verb = "export"
+effect = "read"
+legacy = "aliases cheatsheet"
+summary = "Write the alias cheatsheet"
 
 [[aliases]]
 name = "cd"

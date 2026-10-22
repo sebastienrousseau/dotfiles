@@ -5,7 +5,7 @@
 #
 # scripts/dot/commands/registry.sh
 #
-# `dot registry` — verified module registry for reusable chezmoi sources.
+# `dot cli list --available` — verified module registry for reusable chezmoi sources.
 #
 # §3 audit roadmap: ship a registry of reusable dotfile modules
 # ("rust-dev-setup", "k8s-operator-laptop") to seed network effects.
@@ -85,7 +85,7 @@ _registry_cache_dir() {
 ## It used to live at <cache>/index.json for every registry, and be treated as
 ## fresh for six hours: a freshness window says nothing about WHICH registry
 ## produced the file, so changing DOTFILES_REGISTRY_URL — or running
-## `dot registry set-url` — kept serving the previous registry's index for up
+## `dot cli registry set` — kept serving the previous registry's index for up
 ## to six hours. Keying by URL also means switching back and forth does not
 ## re-download.
 ##
@@ -370,16 +370,16 @@ _registry_info_rows() {
 
 _registry_help() {
   cat <<EOF
-Usage: dot registry <subcommand>
+Usage: dot cli <command>
 
-Subcommands:
-  list             List modules in the configured registry
-  search <q>       Filter modules by keyword (name, description, tags)
-  info <name>      Print metadata for a single module
-  install <name>   Verify and preview a module; pass --yes to apply
-  installed        List locally installed modules
-  url              Show the active registry URL
-  set-url <url>    Override the registry URL (persists to user config)
+Commands:
+  list --available [<q>]  List modules in the configured registry, or those
+                          matching a keyword (name, description, tags)
+  show <name>             Print metadata for a single module
+  install <name>          Verify and preview a module; pass --yes to apply
+  list                    List locally installed modules
+  registry show           Show the active registry URL
+  registry set <url>      Override the registry URL (persists to user config)
 
 The index must carry a valid minisign signature (<url>.minisig) from the
 key in security/registry.pub. Modules may only ship plain files: templates,
@@ -521,7 +521,7 @@ cmd_registry() {
       ;;
     *)
       ui_err "Unknown subcommand" "$subcommand"
-      echo "Run 'dot registry --help' for usage." >&2
+      echo "Run 'dot help cli' for usage." >&2
       return 1
       ;;
   esac
@@ -530,6 +530,10 @@ cmd_registry() {
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   if [[ "${1:-}" == "registry" ]]; then
     shift
+  fi
+  # `list <term>` searches: `dot cli list --available <term>` arrives here.
+  if [[ "${1:-}" == list && $# -gt 1 ]]; then
+    set -- search "${@:2}"
   fi
   cmd_registry "$@"
 fi

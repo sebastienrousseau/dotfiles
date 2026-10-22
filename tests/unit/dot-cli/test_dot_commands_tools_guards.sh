@@ -59,12 +59,12 @@ assert_contains "not installed" "$_out" "the missing prerequisite is named"
 assert_contains "https://nixos.org/download/" "$_out" "the verified installer is linked"
 assert_contains "use Homebrew/apt for individual tools" "$_out" "an alternative is suggested"
 
-# ── dot new guards ───────────────────────────────────────────────────
+# ── dot tool new guards ───────────────────────────────────────────────────
 test_start "new_without_arguments_prints_usage"
 _out="$(_tools new)"
 _rc=$?
 assert_equals 1 "$_rc" "no arguments exits 1"
-assert_contains "Usage: dot new <lang> <name>" "$_out" "usage printed"
+assert_contains "Usage: dot tool new <lang> <name>" "$_out" "usage printed"
 assert_contains "Available templates:" "$_out" "templates listed"
 
 _out="$(_tools new python)"

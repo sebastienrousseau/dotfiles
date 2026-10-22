@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 #
-# `dot env emit` — render a portable workstation-environment
+# `dot tool export` — render a portable workstation-environment
 # manifest. The output is the canonical "what is installed on this
 # machine + at what version + from which source" record that
 # downstream tooling (CycloneDX SBOM aggregators, AgentSpec /
@@ -14,10 +14,10 @@
 # a single source of truth — see docs/operations/MANIFEST.md.
 #
 # Usage:
-#   dot env emit                       # default: json
-#   dot env emit --format json
-#   dot env emit --output env.json
-#   dot env emit --pretty              # default; --compact for one-line
+#   dot tool export                       # default: json
+#   dot tool export --format json
+#   dot tool export --output env.json
+#   dot tool export --pretty              # default; --compact for one-line
 #
 # Exit codes:
 #   0  manifest written / printed
@@ -70,7 +70,7 @@ dot_env_emit() {
         ;;
       -h | --help)
         cat <<-EOF
-	Usage: dot env emit [--format <fmt>] [--output <path>] [--pretty|--compact]
+	Usage: dot tool export [--format <fmt>] [--output <path>] [--pretty|--compact]
 
 	  Render the workstation-environment manifest (v1 schema).
 
@@ -83,9 +83,9 @@ dot_env_emit() {
 	  default         stdout
 
 	Examples:
-	  dot env emit                     # print to stdout
-	  dot env emit --output env.json   # write atomically
-	  dot env emit --format ndjson | grep '^{"name":"node"'
+	  dot tool export                     # print to stdout
+	  dot tool export --output env.json   # write atomically
+	  dot tool export --format ndjson | grep '^{"name":"node"'
 	EOF
         return 0
         ;;
@@ -151,7 +151,7 @@ dot_env_emit() {
         manifest_version: "1.0.0",
         emitted_at: $ts,
         emitter: {
-          name: "dot env emit",
+          name: "dot tool export",
           version: $ev,
           repo: "github.com/sebastienrousseau/dotfiles"
         },

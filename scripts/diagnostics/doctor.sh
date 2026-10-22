@@ -11,7 +11,7 @@
 ## dot doctor [--json|-j] [--ai]
 ##
 ## --json renders the same probes as one JSON document (the shape and key
-## names of `dot health --json`, plus `status` and `verdict`) instead of the
+## names of `dot doctor status --json`, plus `status` and `verdict`) instead of the
 ## text dashboard.
 ##
 ## # Exit Codes
@@ -106,7 +106,7 @@ _warn() {
   Warnings=$((Warnings + 1))
 }
 
-# _json_summary — the --json document. Keys follow `dot health --json`
+# _json_summary — the --json document. Keys follow `dot doctor status --json`
 # (total/passed/warnings/failures/results); status and verdict carry what
 # the text dashboard says on its last line.
 _json_summary() {
@@ -120,7 +120,7 @@ _json_summary() {
     fi
   else
     status="unhealthy"
-    verdict="$Errors error(s), $Warnings warning(s). Run 'dot heal' to repair."
+    verdict="$Errors error(s), $Warnings warning(s). Run 'dot doctor fix' to repair."
   fi
   printf '{\n'
   printf '  "status": "%s",\n' "$status"
@@ -299,7 +299,7 @@ _doctor_state() {
   if chezmoi verify --exclude=always &>/dev/null; then
     _ok "chezmoi state" "synchronized"
   else
-    _fail "chezmoi state" "drifted (run dot drift)"
+    _fail "chezmoi state" "drifted (run dot doctor drift show)"
   fi
 
   if [[ -f "$HOME/.zshrc" ]]; then
@@ -364,6 +364,40 @@ _doctor_atuin_history_filter() {
     else
       _fail "history_filter" "no history_filter block in $(pretty_path "$atuin_cfg") — secrets may leak into shell history"
     fi
+  fi
+}
+
+# --- Git commit signing (was `dot keys sign-check`) ---
+# _doctor_signing_key KEY FORMAT: the configured key can be used.
+_doctor_signing_key() {
+  local file="${1/#\~/$HOME}"
+  if [[ "$2" == ssh ]]; then
+    if [[ "$1" == ssh-* || "$1" == key::* || -f "$file" ]]; then
+      _ok "signing key" "ssh $(pretty_path "$file")"
+    else
+      _fail "signing key" "ssh key file not found: $(pretty_path "$file")"
+    fi
+  elif command -v gpg >/dev/null 2>&1 && gpg --list-keys "$1" >/dev/null 2>&1; then
+    _ok "signing key" "gpg $1"
+  else
+    _warn "signing key" "gpg key not in the keyring: $1"
+  fi
+}
+
+_doctor_git_signing() {
+  _section "Git Signing"
+  local key
+  key="$(git config --global user.signingkey 2>/dev/null || true)"
+  # Signing is opt-in: with no key there is nothing to check.
+  if [[ -z "$key" ]]; then
+    _ok "signing key" "none configured (optional)"
+    return 0
+  fi
+  _doctor_signing_key "$key" "$(git config --global gpg.format 2>/dev/null || true)"
+  if [[ "$(git config --global commit.gpgsign 2>/dev/null || true)" == true ]]; then
+    _ok "commit.gpgsign" "every commit is signed"
+  else
+    _warn "commit.gpgsign" "off (git config --global commit.gpgsign true)"
   fi
 }
 
@@ -499,7 +533,7 @@ _doctor_summary() {
       ui_ok "Healthy" "$Warnings warning(s)."
     fi
   else
-    ui_err "$Errors error(s)" "$Warnings warning(s). Run 'dot heal' to repair."
+    ui_err "$Errors error(s)" "$Warnings warning(s). Run 'dot doctor fix' to repair."
 
     if [[ $AI_DEBUG -eq 1 ]]; then
       _section "AI Problem Analysis"
@@ -529,6 +563,7 @@ _doctor_main() {
   _doctor_state
   _doctor_pre_push_audit_bypass_log
   _doctor_atuin_history_filter
+  _doctor_git_signing
   _doctor_update_tooling
   _doctor_symlinks
   _doctor_portability

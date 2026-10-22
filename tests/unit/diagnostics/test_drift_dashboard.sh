@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 # Unit tests for scripts/diagnostics/drift-dashboard.sh — the
-# consolidated drift surface that powers `dot drift` and the nightly
+# consolidated drift surface that powers `dot doctor drift show` and the nightly
 # drift-detection workflow.
 #
 # Regression for: GH-875
@@ -73,17 +73,17 @@ PY
 fi
 
 # -----------------------------------------------------------------------------
-# `dot drift` wiring: command must dispatch to this dashboard
+# `dot doctor drift show` wiring: command must dispatch to this dashboard
 # -----------------------------------------------------------------------------
 
-# `dot drift --json` must reach this dashboard: the same document, with the
+# `dot doctor drift show --json` must reach this dashboard: the same document, with the
 # same four classes and their total.
 DOT_BIN="$REPO_ROOT/bin/dot"
 if command -v chezmoi >/dev/null 2>&1 && command -v python3 >/dev/null 2>&1; then
   test_start "dot_drift_runs_the_dashboard"
-  drift_json="$(bash "$DOT_BIN" drift --json 2>/dev/null || true)"
+  drift_json="$(bash "$DOT_BIN" doctor drift show --json 2>/dev/null || true)"
   assert_equals "ok" "$(python3 -c 'import json,sys; d=json.loads(sys.stdin.read()); print("ok" if {"managed_drift","untracked_source","orphan_deployed","stale_source","total"} <= set(d) else "missing keys")' <<<"$drift_json" 2>&1)" \
-    "dot drift --json returns the dashboard's document"
+    "dot doctor drift show --json returns the dashboard's document"
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

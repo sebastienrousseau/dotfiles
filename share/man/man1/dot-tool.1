@@ -20,16 +20,16 @@ Toolchains and their versions. Effect: read. Runs \fBdot env list\fR until the d
 Install the configured toolchains. Effect: write. Runs \fBdot env install\fR until the domain is extracted.
 .TP
 .B dot tool update
-Upgrade toolchains. Effect: write. Planned; not built yet.
+Upgrade toolchains. Effect: write. Runs \fBdot env upgrade\fR until the domain is extracted.
 .TP
 .B dot tool remove
-Remove a toolchain or orphans. Effect: write. Planned; not built yet.
+Remove orphaned toolchains (a dry run without \-\-yes). Effect: write. Runs \fBdot env prune\fR until the domain is extracted.
 .TP
 .B dot tool set
 Pin a toolchain version. Effect: write. Runs \fBdot env use\fR until the domain is extracted.
 .TP
 .B dot tool export
-Print the tool environment. Effect: read. Planned; not built yet.
+Print the tool environment. Effect: read. Runs \fBdot env emit\fR until the domain is extracted.
 .TP
 .B dot tool new
 Create a project from a template. Effect: write. Runs \fBdot new\fR until the domain is extracted.

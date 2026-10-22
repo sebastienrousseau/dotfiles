@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Unit tests for dot lint command
+# Unit tests for dot config check command
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
@@ -117,7 +117,7 @@ fi
 
 # Test: lint is registered in dot CLI dispatch: its help topic resolves.
 test_start "lint_cmd_registered_in_dispatch"
-if NO_COLOR=1 HOME="$(mktemp -d)" bash "$REPO_ROOT/bin/dot" help lint 2>/dev/null | grep -q 'dot lint'; then
+if NO_COLOR=1 HOME="$(mktemp -d)" bash "$REPO_ROOT/bin/dot" help config check 2>/dev/null | grep -q 'dot config check'; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: lint registered in dot CLI dispatch"
 else

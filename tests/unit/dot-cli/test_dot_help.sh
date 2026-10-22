@@ -22,7 +22,7 @@ trap 'rm -rf "$WORK"' EXIT
 # dot ARGS...: run the CLI in a sandboxed HOME; stdout to out, stderr to err.
 dot() {
   HOME="$WORK" XDG_STATE_HOME="$WORK/state" NO_COLOR=1 TERM=dumb \
-    "$BASH_BIN" "$REPO_ROOT/bin/dot" "$@" >"$WORK/out" 2>"$WORK/err" </dev/null
+    "$BASH_BIN" "${DOT_BIN:-$REPO_ROOT/bin/dot}" "$@" >"$WORK/out" 2>"$WORK/err" </dev/null
 }
 # field TYPE N: field N of every TYPE record in the table.
 field() { awk -F'|' -v t="$1" -v n="$2" '$1 == t { print $n }' "$TABLE"; }
@@ -104,8 +104,11 @@ assert_file_contains "$WORK/out" "dot system update ·" "and update --help, syst
 assert_file_contains "$WORK/out" "dot update is short for dot system update" "naming the shortcut"
 dot doctor check --help
 assert_output_not_contains "short for" "cat '$WORK/out'" "a spelling that is not a shortcut says nothing of the kind"
+# An old name inside its deprecation window: the dispatcher pinned to
+# 0.2.537, so the case does not depend on the release under test.
+source "$SCRIPT_DIR/../../framework/pinned_dot.sh"
 rc=0
-dot upgrade --help || rc=$?
+DOT_BIN="$(pinned_dot "$WORK/pinned" 0.2.537)" dot upgrade --help || rc=$?
 assert_equals "0" "$rc" "an old name's --help still shows its help"
 assert_output_not_contains "dot system update ·" "cat '$WORK/out'" "its old help, not the domain help"
 

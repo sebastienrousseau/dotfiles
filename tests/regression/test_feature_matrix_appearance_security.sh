@@ -138,7 +138,7 @@ test_fm_fonts_patch_usage() {
   # `fonts patch` with no font file must print its usage rather than
   # patching something implicit — the one fonts path reachable offline.
   test_start "fm_fonts_patch_usage"
-  fm_run fonts patch
+  fm_run theme font install patch
   fm_expect_rc 1
   test_start "fm_fonts_patch_usage_message"
   fm_expect_any "Usage" "font-file"
@@ -154,7 +154,7 @@ test_fm_backup() {
   mkdir -p "$src/nested" "$dest"
   printf 'payload\n' >"$src/nested/file.txt"
   test_start "fm_backup"
-  DOTFILES_BACKUP_SRC="$src" DOTFILES_BACKUP_DIR="$dest" fm_run backup
+  DOTFILES_BACKUP_SRC="$src" DOTFILES_BACKUP_DIR="$dest" fm_run doctor backup
   fm_expect_rc 0
   test_start "fm_backup_reports_the_archive_path"
   fm_expect_out "Backup written"
@@ -183,7 +183,7 @@ test_fm_encrypt_check() {
   fm_stub fdesetup "printf 'FileVault is On.\\n'"
   fm_stub lsblk "printf 'NAME FSTYPE\\nsda1 crypto_LUKS\\n'"
   test_start "fm_encrypt_check"
-  fm_run encrypt-check
+  fm_run security disk show
   fm_expect_rc 0
   test_start "fm_encrypt_check_reports_an_encrypted_verdict"
   fm_expect_out_matches 'FileVault +On|LUKS +encrypted block device detected'
@@ -192,7 +192,7 @@ test_fm_encrypt_check() {
   fm_stub fdesetup "printf 'FileVault is Off.\\n'"
   fm_stub lsblk "printf 'NAME FSTYPE\\nsda1 ext4\\n'"
   test_start "fm_encrypt_check_unencrypted"
-  fm_run encrypt-check
+  fm_run security disk show
   fm_expect_rc 1
   test_start "fm_encrypt_check_unencrypted_says_so"
   fm_expect_out_matches 'FileVault +appears to be off|LUKS +no crypto volume detected'
@@ -210,7 +210,7 @@ test_fm_encrypt_check_undetermined() {
   no_lsblk="$(fm_path_without lsblk)"
   fm_stub uname "echo Linux"
   test_start "fm_encrypt_check_undetermined"
-  PATH="$no_lsblk" fm_run encrypt-check
+  PATH="$no_lsblk" fm_run security disk show
   fm_expect_rc 2
   test_start "fm_encrypt_check_undetermined_says_so"
   fm_expect_out_matches 'lsblk +not found; cannot determine encryption status'
@@ -232,7 +232,7 @@ test_fm_telemetry() {
   fm_stub sudo "printf 'SUDO %s\\n' \"\$*\" >>'$FM_SANDBOX/telemetry-sudo.log'"
   rm -f "$FM_SANDBOX/telemetry-sudo.log"
   test_start "fm_telemetry"
-  DOTFILES_TELEMETRY= fm_run telemetry
+  DOTFILES_TELEMETRY= fm_run security telemetry apply
   fm_expect_rc 1
   test_start "fm_telemetry_is_opt_in"
   fm_expect_out "disabled by default"
@@ -263,7 +263,7 @@ test_fm_policy() {
   # and with DEPS_ONLY the scan that could fail never runs — so rc=0 is the
   # deterministic outcome. DOTFILES_POLICY_STRICT is cleared because it would
   # turn a skipped optional tool into a hard error on a developer shell.
-  DOTFILES_POLICY_STRICT= DOTFILES_POLICY_DEPS_ONLY=1 fm_run policy
+  DOTFILES_POLICY_STRICT= DOTFILES_POLICY_DEPS_ONLY=1 fm_run security policy show
   fm_expect_rc 0
   test_start "fm_policy_runs_the_dependency_check"
   fm_expect_out "Dependency check complete"
@@ -285,7 +285,7 @@ test_fm_policy_audit_log_location() {
   log="$XDG_STATE_HOME/dotfiles/security-audit.log"
   rm -f "$log"
   test_start "fm_policy_audit_log_location"
-  DOTFILES_POLICY_STRICT= DOTFILES_POLICY_DEPS_ONLY=1 fm_run_bin "$repo/bin/dot" policy
+  DOTFILES_POLICY_STRICT= DOTFILES_POLICY_DEPS_ONLY=1 fm_run_bin "$repo/bin/dot" security policy show
   fm_expect_rc 0
   test_start "fm_policy_audit_log_is_under_xdg_state"
   fm_expect_file "$log"
@@ -310,7 +310,7 @@ test_fm_smoke_lock_screen() { fm_smoke lock-screen; }
 test_fm_smoke_usb_safety() { fm_smoke usb-safety; }
 
 # The whole point of the smoke rows above is that asking for help must not
-# perform the command. Prove it once, on the sharpest case: `dot firewall
+# perform the command. Prove it once, on the sharpest case: `dot security firewall apply
 # --help` must not have invoked sudo.
 test_fm_security_help_does_not_mutate() {
   fm_stub sudo "printf 'SUDO %s\\n' \"\$*\" >>'$FM_SANDBOX/sudo-calls.log'"

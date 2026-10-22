@@ -58,7 +58,7 @@ for _t in open xdg-open osascript; do
   printf '#!/bin/sh\nexit 0\n' >"$sandbox/bin/$_t"
 done
 chmod +x "$sandbox/bin"/*
-# Seed the registry index cache so `dot registry …` stays offline. The cache
+# Seed the registry index cache so `dot cli list --available …` stays offline. The cache
 # is keyed by the URL it came from, so ask registry.sh where the active URL's
 # index belongs instead of hard-coding a file name.
 registry_cache_file="$(
@@ -212,7 +212,7 @@ run_dot_and_assert_clean() {
   local failure_reasons=()
 
   # ── Assertion 1: exit code should be 0 (or 1 for known-signal
-  # commands like `dot score` which signals via rc).
+  # commands like `dot doctor score` which signals via rc).
   if [[ $exit_code -ne 0 && $exit_code -ne 1 ]]; then
     failure_reasons+=("exit code=$exit_code (expected 0 or 1)")
   fi

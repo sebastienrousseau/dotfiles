@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 # Regression for: GH-881
 # Regression: FEATURE-MATRIX coverage for the aliases.sh command group —
-# `dot aliases {list,search,why,stats,cheatsheet,tiers}` and `dot alias-check`.
+# `dot shell alias {list,search,why,stats,cheatsheet,tiers}` and `dot shell alias check`.
 #
 # Split out of test_feature_matrix_tools.sh: every one of these rows shells
 # out to the alias manifest, which walks the whole chezmoi alias template
@@ -23,7 +23,7 @@ fm_sandbox_setup
 
 test_fm_aliases_list() {
   test_start "fm_aliases_list"
-  fm_run aliases list
+  fm_run shell alias list
   fm_expect_rc 0
   test_start "fm_aliases_list_is_populated"
   fm_expect_nonempty
@@ -35,7 +35,7 @@ test_fm_aliases_list() {
 
 test_fm_aliases_search() {
   test_start "fm_aliases_search"
-  fm_run aliases search git
+  fm_run shell alias list git
   fm_expect_rc 0
   test_start "fm_aliases_search_reports_the_query"
   fm_expect_out_matches "Query +git$"
@@ -57,12 +57,12 @@ test_fm_aliases_search_without_rg() {
     fm_pass "rg hidden"
   fi
   test_start "fm_aliases_search_without_rg"
-  PATH="$no_rg" fm_run aliases search git
+  PATH="$no_rg" fm_run shell alias list git
   fm_expect_rc 0
   test_start "fm_aliases_search_without_rg_lists_matching_aliases"
   fm_expect_out_matches "^ +[A-Za-z0-9_.:-]+ +'git[^']*'"
   test_start "fm_aliases_search_without_rg_nomatch"
-  PATH="$no_rg" fm_run aliases search zzz-no-such-alias-zzz
+  PATH="$no_rg" fm_run shell alias list zzz-no-such-alias-zzz
   fm_expect_rc 1
   test_start "fm_aliases_search_without_rg_nomatch_says_so"
   fm_expect_any "No matches" "zzz-no-such-alias-zzz"
@@ -70,20 +70,15 @@ test_fm_aliases_search_without_rg() {
 
 test_fm_aliases_search_nomatch() {
   test_start "fm_aliases_search_nomatch"
-  fm_run aliases search zzz-no-such-alias-zzz
+  fm_run shell alias list zzz-no-such-alias-zzz
   fm_expect_rc 1
   test_start "fm_aliases_search_nomatch_says_so"
   fm_expect_any "No matches" "zzz-no-such-alias-zzz"
-  test_start "fm_aliases_search_missing_term"
-  fm_run aliases search
-  fm_expect_rc 1
-  test_start "fm_aliases_search_missing_term_message"
-  fm_expect_any "Usage: dot aliases search" "search"
 }
 
 test_fm_aliases_why() {
   test_start "fm_aliases_why"
-  fm_run aliases why ll
+  fm_run shell alias show ll
   fm_expect_rc 0
   test_start "fm_aliases_why_names_the_alias"
   fm_expect_out_matches "Alias +ll$"
@@ -95,7 +90,7 @@ test_fm_aliases_why() {
 
 test_fm_aliases_why_unknown() {
   test_start "fm_aliases_why_unknown"
-  fm_run aliases why zzz-no-such-alias-zzz
+  fm_run shell alias show zzz-no-such-alias-zzz
   fm_expect_rc 1
   test_start "fm_aliases_why_unknown_says_so"
   fm_expect_any "not found" "zzz-no-such-alias-zzz"
@@ -105,7 +100,7 @@ test_fm_aliases_stats() {
   printf ': 1700000000:0;ll\n: 1700000001:0;ll\n: 1700000002:0;gs\n' \
     >"$FM_SANDBOX/.zsh_history"
   test_start "fm_aliases_stats"
-  HISTFILE="$FM_SANDBOX/.zsh_history" fm_run aliases stats
+  HISTFILE="$FM_SANDBOX/.zsh_history" fm_run shell alias status
   fm_expect_rc 0
   test_start "fm_aliases_stats_names_the_history_file"
   fm_expect_out "History file"
@@ -118,7 +113,7 @@ test_fm_aliases_stats() {
 test_fm_aliases_stats_missing() {
   rm -f "$FM_SANDBOX/.zsh_history"
   test_start "fm_aliases_stats_missing"
-  HISTFILE="$FM_SANDBOX/definitely-no-history" fm_run aliases stats
+  HISTFILE="$FM_SANDBOX/definitely-no-history" fm_run shell alias status
   fm_expect_rc 1
   test_start "fm_aliases_stats_missing_says_so"
   fm_expect_err "not found"
@@ -126,7 +121,7 @@ test_fm_aliases_stats_missing() {
 
 test_fm_aliases_cheatsheet_stdout() {
   test_start "fm_aliases_cheatsheet_stdout"
-  fm_run aliases cheatsheet --output -
+  fm_run shell alias export --output -
   fm_expect_rc 0
   test_start "fm_aliases_cheatsheet_stdout_is_markdown"
   fm_expect_out "# Alias Cheatsheet"
@@ -137,7 +132,7 @@ test_fm_aliases_cheatsheet_stdout() {
 test_fm_aliases_cheatsheet() {
   local out="$FM_SANDBOX/work/cheatsheet.md"
   test_start "fm_aliases_cheatsheet"
-  fm_run aliases cheatsheet --output "$out"
+  fm_run shell alias export --output "$out"
   fm_expect_rc 0
   test_start "fm_aliases_cheatsheet_reports_the_target"
   fm_expect_out_matches "Generated +$out$"
@@ -150,7 +145,7 @@ test_fm_aliases_cheatsheet() {
     fm_fail "written file lacks the cheatsheet heading"
   fi
   test_start "fm_aliases_cheatsheet_rejects_unknown_option"
-  fm_run aliases cheatsheet --zzz-not-an-option
+  fm_run shell alias export --zzz-not-an-option
   fm_expect_rc 1
 }
 
@@ -161,7 +156,7 @@ test_fm_aliases_cheatsheet_default() {
   before="$(git -C "$REPO_ROOT" status --porcelain -- docs 2>/dev/null)"
   repo="$(fm_repo_copy_aliases)"
   test_start "fm_aliases_cheatsheet_default"
-  fm_run_bin "$repo/bin/dot" aliases cheatsheet
+  fm_run_bin "$repo/bin/dot" shell alias export
   fm_expect_rc 0
   test_start "fm_aliases_cheatsheet_default_writes_into_the_source_tree"
   fm_expect_file "$repo/docs/ALIASES_CHEATSHEET.md"
@@ -176,7 +171,7 @@ test_fm_aliases_cheatsheet_default() {
 
 test_fm_aliases_tiers() {
   test_start "fm_aliases_tiers"
-  fm_run aliases tiers
+  fm_run shell alias status --tiers
   fm_expect_rc 0
   test_start "fm_aliases_tiers_reports_the_defaults"
   fm_expect_out_matches "Ecosystems +all$"
@@ -188,28 +183,28 @@ test_fm_env_dotfiles_alias_tiers() {
   # Each of the five knobs must be reflected in the report rather than
   # ignored: pass a distinctive value and require it back.
   test_start "fm_env_dotfiles_alias_tiers_profile"
-  DOTFILES_ALIAS_PROFILE=fm-profile fm_run aliases tiers
+  DOTFILES_ALIAS_PROFILE=fm-profile fm_run shell alias status --tiers
   fm_expect_out "fm-profile"
 
   test_start "fm_env_dotfiles_alias_tiers_ecosystems"
-  DOTFILES_ALIAS_ECOSYSTEMS=python fm_run aliases tiers
+  DOTFILES_ALIAS_ECOSYSTEMS=python fm_run shell alias status --tiers
   fm_expect_out "python"
 
   test_start "fm_env_dotfiles_alias_tiers_buckets"
-  DOTFILES_ALIAS_BUCKETS=fm-bucket fm_run aliases tiers
+  DOTFILES_ALIAS_BUCKETS=fm-bucket fm_run shell alias status --tiers
   fm_expect_out "fm-bucket"
 
   test_start "fm_env_dotfiles_alias_tiers_security_mode"
-  DOTFILES_SECURITY_MODE=fm-strict fm_run aliases tiers
+  DOTFILES_SECURITY_MODE=fm-strict fm_run shell alias status --tiers
   fm_expect_out "fm-strict"
 
   test_start "fm_env_dotfiles_alias_tiers_dangerous"
-  DOTFILES_ENABLE_DANGEROUS_ALIASES=1 fm_run aliases tiers
+  DOTFILES_ENABLE_DANGEROUS_ALIASES=1 fm_run shell alias status --tiers
   fm_expect_out "Dangerous Aliases"
 
   # Disabling an ecosystem must actually mark it disabled.
   test_start "fm_env_dotfiles_alias_tiers_disables_an_ecosystem"
-  DOTFILES_ALIAS_ECOSYSTEMS=python fm_run aliases tiers
+  DOTFILES_ALIAS_ECOSYSTEMS=python fm_run shell alias status --tiers
   if printf '%s' "$FM_OUT" | grep -Eq 'node.*disabled|disabled.*node'; then
     fm_pass "node reported disabled"
   else
@@ -219,15 +214,15 @@ test_fm_env_dotfiles_alias_tiers() {
 
 test_fm_aliases_unknown() {
   test_start "fm_aliases_unknown"
-  fm_run aliases zzz-not-a-subcommand
-  fm_expect_rc 1
+  fm_run shell alias zzz-not-a-subcommand
+  fm_expect_rc 127
   test_start "fm_aliases_unknown_message"
-  fm_expect_any "Unknown aliases subcommand" "zzz-not-a-subcommand"
+  fm_expect_any "is not a command"
 }
 
 test_fm_alias_check() {
   test_start "fm_alias_check"
-  fm_run alias-check
+  fm_run shell alias check
   # In a sandboxed HOME the deployed alias file is absent, so the "some
   # aliases missing" verdict, and its exit 1, is the correct answer.
   fm_expect_rc 1

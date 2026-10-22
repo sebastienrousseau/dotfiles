@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091
 # The plain-enc provider must refuse to "store" a secret it cannot
 # encrypt. Found by mutation testing (S5): with the missing-key check
-# returning 0, `dot secrets set` reported success, indexed the key and
+# returning 0, `dot secret set` reported success, indexed the key and
 # stored nothing, and no test noticed.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

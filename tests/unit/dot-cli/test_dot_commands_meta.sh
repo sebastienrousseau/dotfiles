@@ -62,13 +62,13 @@ fi
 
 AGENT_MODULE="$REPO_ROOT/scripts/dot/commands/agent.sh"
 
-# Both subcommands reach their own handler, not the dot mode usage error.
+# Both subcommands reach their own handler, not the dot agent mode usage error.
 test_start "meta_agent_enterprise_subcommands"
 mode_rc=0
 mode_out="$(bash "$REPO_ROOT/bin/dot" agent checkpoint bogus 2>&1)" || mode_rc=$?
 assert_equals "1 Usage: dot agent checkpoint [save|list|show|replay]" "$mode_rc $mode_out" \
   "checkpoint dispatches to its own action parser"
-mode_status="$(bash "$REPO_ROOT/bin/dot" mode conformance --json 2>/dev/null |
+mode_status="$(bash "$REPO_ROOT/bin/dot" agent card check --json 2>/dev/null |
   python3 -c 'import json,sys; print(json.load(sys.stdin)["status"])' 2>&1)"
 assert_equals "healthy" "$mode_status" "conformance runs the A2A check"
 
@@ -84,7 +84,7 @@ fi
 
 # Test: shellcheck compliance
 # ── cmd_upgrade renders through the step runner ──────────────────────
-# Regression for the "dot upgrade dumps raw subprocess output" report.
+# Regression for the "dot system update dumps raw subprocess output" report.
 # Each phase must run as a tracked step with its stdout+stderr captured
 # to a log, not streamed to the terminal — otherwise the noisy git/nvim
 # progress floods the screen and corrupts the dot-ui renderer. Drive

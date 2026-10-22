@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2016,SC2034
-# `dot registry install` must never execute module content.
+# `dot cli install` must never execute module content.
 #
 # A module is third-party data. Its archive used to be previewed with
 # `chezmoi apply --dry-run` (templates render during a dry run, so
@@ -40,7 +40,7 @@ mkdir -p "$WORK"
 if ! command -v jq >/dev/null 2>&1; then
   test_start "jq_available"
   ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: jq is required by dot registry"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: jq is required by dot cli list --available"
   echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
   exit 1
 fi

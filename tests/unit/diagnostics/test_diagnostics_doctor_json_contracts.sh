@@ -278,7 +278,7 @@ assert_equals "fish nu" \
 # shellcheck disable=SC2086
 _fixture r3 $(printf '%s\n' $FULL_TOOLS | grep -vx -e fish -e nu -e rg -e sops)
 _run_json
-_assert_contract "json_failed" 1 2 2 "unhealthy" "2 error(s), 2 warning(s). Run 'dot heal' to repair."
+_assert_contract "json_failed" 1 2 2 "unhealthy" "2 error(s), 2 warning(s). Run 'dot doctor fix' to repair."
 test_start "json_failed_rows_named"
 assert_equals "rg sops" \
   "$(_jq '[.results[] | select(.status == "fail") | .check] | sort | join(" ")')" \

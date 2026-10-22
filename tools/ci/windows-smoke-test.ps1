@@ -182,14 +182,14 @@ if ($bash) {
     $out = & bash $dot 'help' 2>&1
     if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
   }
-  Assert-Step 'dot agents check (AGENTS.md ↔ CLAUDE.md sync)' {
+  Assert-Step 'dot agent context check (AGENTS.md ↔ CLAUDE.md sync)' {
     # `Push-Location` so the bash subprocess's $PWD points at the
     # repo root — the bash dispatcher uses `git rev-parse` against
     # $PWD when no usable chezmoi source-path is on disk.
     Push-Location $RepoRoot
     try {
       $dot = Join-Path $RepoRoot 'bin/dot'
-      $out = & bash $dot 'agents' 'check' 2>&1
+      $out = & bash $dot 'agent' 'context' 'check' 2>&1
       if ($LASTEXITCODE -ne 0) { throw "rc=$LASTEXITCODE :: $out" }
     }
     finally {

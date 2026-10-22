@@ -5,7 +5,7 @@
 #
 # scripts/dot/commands/agents.sh
 #
-# `dot agents` — multi-harness AI agent configuration manager.
+# `dot agent context` — multi-harness AI agent configuration manager.
 #
 # Closes the #1 competitive gap identified in HARD_AUDIT_2026:
 # every other dotfiles framework either targets one AI tool or
@@ -32,7 +32,7 @@ source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 _agents_repo_root() {
   # Resolve the chezmoi source dir (where CLAUDE.md/AGENTS.md live).
   # We REQUIRE the resolved dir to contain `.chezmoidata.toml` so a
-  # user running `dot agents render` from inside some other git
+  # user running `dot agent context apply` from inside some other git
   # checkout doesn't accidentally write CLAUDE.md/AGENTS.md/.cursor/
   # /.codex/ into that repo. Round-2 audit C-finding.
   #
@@ -145,7 +145,7 @@ cmd_agents() {
         return 2
       fi
       if [[ ! -f "$agents_md" ]]; then
-        ui_warn "AGENTS.md" "missing — run 'dot agents render'"
+        ui_warn "AGENTS.md" "missing — run 'dot agent context apply'"
         return 1
       fi
       # Compare the bodies (header comments differ by design), ignoring
@@ -163,7 +163,7 @@ cmd_agents() {
         ui_ok "AGENTS.md" "in sync with CLAUDE.md"
         return 0
       fi
-      ui_warn "AGENTS.md" "drifted from CLAUDE.md — run 'dot agents render'"
+      ui_warn "AGENTS.md" "drifted from CLAUDE.md — run 'dot agent context apply'"
       return 1
       ;;
     render)
@@ -188,7 +188,7 @@ cmd_agents() {
   Cursor, Windsurf, Amp, Devin, and a growing list of other agents.
 
   Canonical source: CLAUDE.md (Claude Code uses CLAUDE.md natively).
-  This file is kept in sync via `dot agents render`. Edit CLAUDE.md
+  This file is kept in sync via `dot agent context apply`. Edit CLAUDE.md
   first; do not hand-edit AGENTS.md.
 -->
 
@@ -208,7 +208,7 @@ HEADER
 
 ---
 
-**Need richer context?** This file is the cross-harness summary. Claude Code reads the full canonical version from [`CLAUDE.md`](./CLAUDE.md). Both files are kept in sync via `dot agents render`.
+**Need richer context?** This file is the cross-harness summary. Claude Code reads the full canonical version from [`CLAUDE.md`](./CLAUDE.md). Both files are kept in sync via `dot agent context apply`.
 FOOTER
       } >"$agents_md"
       chmod 0644 "$agents_md" 2>/dev/null || true
@@ -262,7 +262,7 @@ TOML
 
 ---
 
-**Canonical source:** [`CLAUDE.md`](./CLAUDE.md) — keep in sync via `dot agents render`.
+**Canonical source:** [`CLAUDE.md`](./CLAUDE.md) — keep in sync via `dot agent context apply`.
 FOOTER
         } >"$_path"
         chmod 0644 "$_path" 2>/dev/null || true
@@ -297,7 +297,7 @@ These rules govern Cascade and the Windsurf agent inside this repository."
       cat >"$zed_dir/agent-config.toml" <<'TOML'
 # Zed agent config — points at AGENTS.md for the cross-harness body.
 # Zed reads this file when its agent mode is enabled; the actual rule
-# body lives in AGENTS.md (which `dot agents render` keeps current).
+# body lives in AGENTS.md (which `dot agent context apply` keeps current).
 agent_context = "AGENTS.md"
 TOML
       chmod 0644 "$zed_dir/agent-config.toml" 2>/dev/null || true
@@ -318,7 +318,7 @@ YML
       cat >"$root/.continuerc.json" <<'JSON'
 {
   "_comment": "Continue config pointer — see AGENTS.md for the full body.",
-  "systemMessage": "Apply the rules in AGENTS.md (canonical source: CLAUDE.md). Run `dot agents render` if the two drift."
+  "systemMessage": "Apply the rules in AGENTS.md (canonical source: CLAUDE.md). Run `dot agent context apply` if the two drift."
 }
 JSON
       chmod 0644 "$root/.continuerc.json" 2>/dev/null || true
@@ -328,7 +328,7 @@ JSON
       ;;
     --help | -h | help)
       cat <<EOF
-Usage: dot agents <subcommand>
+Usage: dot agent context <subcommand>
 
 Subcommands:
   list     Show which agent harnesses are recognised and their target paths
@@ -345,7 +345,7 @@ EOF
       ;;
     *)
       ui_err "Unknown subcommand" "$subcommand"
-      echo "Run 'dot agents --help' for usage." >&2
+      echo "Run 'dot agent context --help' for usage." >&2
       return 1
       ;;
   esac

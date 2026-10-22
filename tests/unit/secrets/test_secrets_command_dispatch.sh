@@ -207,7 +207,7 @@ rm -f "$HOME/.config/chezmoi/key.txt"
 test_start "an_unknown_secrets_subcommand_is_rejected"
 rc="$(secrets secrets not-a-verb)"
 assert_equals "1" "$rc" "an unknown verb fails"
-assert_file_contains "$ERR" "edit|set|get|list|load|provider" "the error lists the valid verbs"
+assert_file_contains "$ERR" "list|show|set|edit|export|provider show" "the error lists the valid verbs"
 
 # ===========================================================================
 # set / get / list / provider
@@ -234,7 +234,7 @@ assert_output_not_contains "s3cret" "cat '$OUT'"
 test_start "set_and_get_require_a_key"
 rc="$(secrets secrets set)"
 assert_equals "1" "$rc" "set without a key fails"
-assert_file_contains "$ERR" "Usage: dot secrets set" "the usage line is shown"
+assert_file_contains "$ERR" "Usage: dot secret set" "the usage line is shown"
 rc="$(secrets secrets get)"
 assert_equals "1" "$rc" "get without a key fails"
 
@@ -299,7 +299,7 @@ assert_equals "0" "$rc" "env load exits 0"
 assert_file_contains "$OUT" "export ANTHROPIC_API_KEY=" "env load emits the same exports"
 
 test_start "env_alone_defaults_to_load"
-# `dot env` with nothing after it means `dot env load`, whose bucket
+# `dot tool` with nothing after it means `dot secret export`, whose bucket
 # defaults to ai: the same exports, not a crash on shifting an empty
 # argument list.
 rc_load="$(secrets_fixture env load)"
@@ -312,7 +312,7 @@ assert_equals "$out_load" "$(cat "$OUT")" "env alone emits what env load does"
 test_start "env_rejects_an_unknown_subcommand"
 rc="$(secrets env dump)"
 assert_equals "1" "$rc" "an unknown env subcommand fails"
-assert_file_contains "$ERR" "Usage: dot env load" "the usage line is shown"
+assert_file_contains "$ERR" "Usage: dot secret export" "the usage line is shown"
 
 # ===========================================================================
 # Policy defaults

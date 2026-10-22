@@ -37,7 +37,7 @@ fi
 # find `.chezmoidata.toml`.
 for sub in "--help" "list" "check"; do
   test_start "dot_agents_$(echo "$sub" | tr -- - _)"
-  if (cd "$REPO_ROOT" && bash "$DOT_BIN" agents "$sub" >/dev/null 2>&1); then
+  if (cd "$REPO_ROOT" && bash "$DOT_BIN" agent context "$sub" >/dev/null 2>&1); then
     ((TESTS_PASSED++)) || true
     printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST (rc=0)"
   else
@@ -58,7 +58,7 @@ for sub in "--help" "list" "check"; do
 done
 
 test_start "dot_agents_unknown_subcommand"
-if (cd "$REPO_ROOT" && bash "$DOT_BIN" agents this-does-not-exist >/dev/null 2>&1); then
+if (cd "$REPO_ROOT" && bash "$DOT_BIN" agent context this-does-not-exist >/dev/null 2>&1); then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have rejected"
 else

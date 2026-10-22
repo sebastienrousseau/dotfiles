@@ -155,7 +155,7 @@ assert_file_contains "$OUT" "Needs attention" "score band for a bare environment
 # rendered as 35 blanks and the dashboard never said what was wrong.
 assert_output_matches "Chezmoi installed +FAILED" "cat '$OUT'"
 assert_output_matches "Starship prompt +WARNING" "cat '$OUT'"
-assert_file_contains "$OUT" "dot health --fix" "remediation tip shown when there are warnings"
+assert_file_contains "$OUT" "dot doctor status --fix" "remediation tip shown when there are warnings"
 
 # ===========================================================================
 # 2. Everything installed — the pass branches, including chezmoi/git present.

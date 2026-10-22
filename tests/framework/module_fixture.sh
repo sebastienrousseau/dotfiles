@@ -12,8 +12,8 @@
 # Every command module locates the checkout through lib/dot/utils.sh's
 # resolve_source_dir, whose first probe is `<lib dir>/../..`. Run a module
 # from the checkout and that probe always answers "the checkout", so the
-# not-installed / not-present / fall-back arms of `dot apply`, `dot docs`,
-# `dot learn`, `dot mcp` and friends can never be reached: the real
+# not-installed / not-present / fall-back arms of `dot apply`, `dot help --readme`,
+# `dot help tour`, `dot mcp` and friends can never be reached: the real
 # scripts/ops/chezmoi-apply.sh, README.md and docs/KEYS.md are always there.
 #
 # A fixture whose lib/ is a symlink to the real one moves that probe's answer

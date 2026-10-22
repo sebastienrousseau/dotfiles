@@ -30,22 +30,23 @@ _dot() {
     '') words='agent ai attest cli config doctor fleet mcp secret security session shell system theme tool top ui apply sync diff status edit cd update help version' ;;
     'agent') words='mode context card log checkpoint policy budget delegate status check run suspend resume export' ;;
     'agent budget') words='show' ;;
-    'agent card') words='show' ;;
+    'agent card') words='show check' ;;
     'agent checkpoint') words='list save' ;;
-    'agent context') words='show' ;;
+    'agent context') words='show check apply' ;;
     'agent delegate') words='list run' ;;
     'agent log') words='show' ;;
-    'agent mode') words='list show set' ;;
+    'agent mode') words='list show set run' ;;
     'agent policy') words='show' ;;
     'ai') words='pattern cost gateway inventory list install update start run login check ask' ;;
     'ai cost') words='show' ;;
     'ai gateway') words='serve show' ;;
     'ai inventory') words='show' ;;
-    'ai pattern') words='list' ;;
+    'ai pattern') words='list show edit' ;;
     'attest') words='show export verify' ;;
-    'cli') words='completion list show install update remove verify new' ;;
+    'cli') words='completion registry list show install update remove verify new' ;;
     'cli completion') words='show' ;;
-    'config') words='path profile status diff apply sync update edit add save init check export uninstall' ;;
+    'cli registry') words='show set' ;;
+    'config') words='path profile status diff apply sync update edit add save init check export uninstall import' ;;
     'config path') words='show' ;;
     'config profile') words='show set' ;;
     'doctor') words='score snapshot perf drift conflict metric report status check fix backup restore rollback' ;;
@@ -63,7 +64,7 @@ _dot() {
     'fleet policy') words='show set' ;;
     'mcp') words='list check serve' ;;
     'secret') words='key cert provider status init edit new list show set export check' ;;
-    'secret cert') words='list new' ;;
+    'secret cert') words='list new remove' ;;
     'secret key') words='list new' ;;
     'secret provider') words='show set' ;;
     'security') words='policy disk firewall telemetry dns lock usb score status' ;;
@@ -77,7 +78,7 @@ _dot() {
     'security usb') words='show apply' ;;
     'session') words='select list new open stop restore' ;;
     'shell') words='history alias status update clean' ;;
-    'shell alias') words='list check' ;;
+    'shell alias') words='list check show status export' ;;
     'shell history') words='list' ;;
     'system') words='schedule settings status update clean show' ;;
     'system schedule') words='list set run' ;;
@@ -96,6 +97,9 @@ _dot() {
     'agent budget show' | 'agent budget show'\ *)
       flags='--help'
       ;;
+    'agent card check' | 'agent card check'\ *)
+      flags='--help'
+      ;;
     'agent card show' | 'agent card show'\ *)
       flags='--help'
       ;;
@@ -106,6 +110,12 @@ _dot() {
       flags='--help'
       ;;
     'agent checkpoint save' | 'agent checkpoint save'\ *)
+      flags='--help'
+      ;;
+    'agent context apply' | 'agent context apply'\ *)
+      flags='--help'
+      ;;
+    'agent context check' | 'agent context check'\ *)
       flags='--help'
       ;;
     'agent context show' | 'agent context show'\ *)
@@ -124,6 +134,9 @@ _dot() {
       flags='--help'
       ;;
     'agent mode list' | 'agent mode list'\ *)
+      flags='--help'
+      ;;
+    'agent mode run' | 'agent mode run'\ *)
       flags='--help'
       ;;
     'agent mode set' | 'agent mode set'\ *)
@@ -174,7 +187,13 @@ _dot() {
     'ai login' | 'ai login'\ *)
       flags='--help'
       ;;
+    'ai pattern edit' | 'ai pattern edit'\ *)
+      flags='--help'
+      ;;
     'ai pattern list' | 'ai pattern list'\ *)
+      flags='--help'
+      ;;
+    'ai pattern show' | 'ai pattern show'\ *)
       flags='--help'
       ;;
     'ai run' | 'ai run'\ *)
@@ -210,6 +229,12 @@ _dot() {
     'cli new' | 'cli new'\ *)
       flags='--help'
       ;;
+    'cli registry set' | 'cli registry set'\ *)
+      flags='--help'
+      ;;
+    'cli registry show' | 'cli registry show'\ *)
+      flags='--help'
+      ;;
     'cli remove' | 'cli remove'\ *)
       flags='--help'
       ;;
@@ -239,6 +264,9 @@ _dot() {
       flags='--help'
       ;;
     'config export' | 'config export'\ *)
+      flags='--help'
+      ;;
+    'config import' | 'config import'\ *)
       flags='--help'
       ;;
     'config init' | 'config init'\ *)
@@ -354,6 +382,9 @@ _dot() {
     'secret cert new' | 'secret cert new'\ *)
       flags='--help'
       ;;
+    'secret cert remove' | 'secret cert remove'\ *)
+      flags='--help'
+      ;;
     'secret check' | 'secret check'\ *)
       flags='--help'
       ;;
@@ -456,8 +487,17 @@ _dot() {
     'shell alias check' | 'shell alias check'\ *)
       flags='--help'
       ;;
+    'shell alias export' | 'shell alias export'\ *)
+      flags='--help'
+      ;;
     'shell alias list' | 'shell alias list'\ *)
       flags='--help'
+      ;;
+    'shell alias show' | 'shell alias show'\ *)
+      flags='--help'
+      ;;
+    'shell alias status' | 'shell alias status'\ *)
+      flags='--help --tiers'
       ;;
     'shell clean' | 'shell clean'\ *)
       flags='--help'

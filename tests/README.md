@@ -104,8 +104,8 @@ configure the default without touching the command line.
 ### Golden snapshot tests (dot CLI output)
 
 `tests/snapshots/` holds blessed outputs for the user-facing `dot`
-commands (`dot --help`, `dot version`, `dot doctor`, `dot perf`,
-`dot health`). Closes part of [#881](https://github.com/sebastienrousseau/dotfiles/issues/881).
+commands (`dot --help`, `dot version`, `dot doctor`, `dot doctor perf show`,
+`dot doctor status`). Closes part of [#881](https://github.com/sebastienrousseau/dotfiles/issues/881).
 
 ```bash
 # Run the snapshot tests:

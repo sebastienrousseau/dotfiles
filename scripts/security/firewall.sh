@@ -8,7 +8,7 @@
 ## lockouts.
 ##
 ## # Usage
-## DOTFILES_FIREWALL=1 dot firewall
+## DOTFILES_FIREWALL=1 dot security firewall apply
 ##
 ## # Dependencies
 ## - macOS: socketfilterfw (built-in)

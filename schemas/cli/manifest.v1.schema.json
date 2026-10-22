@@ -82,7 +82,8 @@
           "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
           "target": { "type": "string", "pattern": "^[a-z]{2,8}( [a-z]+){0,2}( --[a-z][a-z-]*)*$" },
           "kind": { "enum": ["shortcut", "deprecated", "removed"] },
-          "until": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$", "description": "Last family release that accepts a deprecated name" }
+          "until": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$", "description": "Last family release that accepts a deprecated name" },
+          "legacy": { "type": "string", "pattern": "^[a-z][a-z0-9-]*( [a-z][a-z0-9-]*)*$", "description": "Route a deprecated alias's flagged target runs today, when it is not the alias name alone" }
         },
         "allOf": [
           { "if": { "properties": { "kind": { "const": "deprecated" } } }, "then": { "required": ["until"] } }
