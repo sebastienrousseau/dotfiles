@@ -218,36 +218,12 @@ Fields:
 Set the theme in `.chezmoidata.toml`:
 
 ```toml
-theme = "tokyonight-night"
+theme = "maui-dark"
 terminal_font_family = "JetBrains Mono"
 terminal_font_size = 20
 ```
 
-Available themes:
-
-- `tokyonight-night` (best dark default)
-- `tokyonight-day` (best light default)
-- `tokyonight-storm`
-- `tokyonight-moon`
-- `catppuccin-mocha`
-- `dracula`
-- `gruvbox-dark`
-- `gruvbox-light`
-- `nord`
-- `onedark`
-- `onelight`
-- `solarized-dark`
-- `solarized-light`
-- `catppuccin-mocha`
-- `catppuccin-latte`
-- `rose-pine`
-- `rose-pine-moon`
-- `rose-pine-dawn`
-- `everforest-dark`
-- `everforest-light`
-- `kanagawa-wave`
-- `kanagawa-dragon`
-- `kanagawa-lotus`
+Run `dot theme list` for the available themes.
 
 ### DevContainer and Codespaces
 

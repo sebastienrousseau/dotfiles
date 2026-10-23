@@ -7,7 +7,7 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # --- dot theme commands (cross-shell; wallpaper-driven) ---
 printf 'List available themes:            dot theme list\n'
-printf 'Switch to a named theme:          dot theme tokyonight-night\n'
+printf 'Switch to a named theme:          dot theme maui-light\n'
 printf 'Toggle light/dark:                dot theme toggle\n'
 printf 'Rebuild generated theme assets:   dot theme rebuild\n'
 printf 'Set the desktop wallpaper:        dot wallpaper ~/Pictures/wall.jpg\n'

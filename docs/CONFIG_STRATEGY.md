@@ -50,7 +50,7 @@ Chezmoi handles:
 
 ```toml
 profile = "laptop"           # Machine profile
-theme = "tokyonight-night"   # Color scheme
+theme = "maui-dark"          # Color scheme
 terminal_font_family = "JetBrains Mono"
 terminal_font_size = 12
 
