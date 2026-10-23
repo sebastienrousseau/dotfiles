@@ -10,11 +10,15 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/host_path.sh"
 
 APPLY="$REPO_ROOT/scripts/ops/chezmoi-apply.sh"
 REAL_BASH="$(command -v bash)"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
+# The pickers would block on a real terminal prompt, and the tools these
+# cases stub as present or missing must not come from the host instead.
+SYS="$(host_path_without "$WORK/sys" gum fzf dot-ui mise agy aider amp claude codex copilot crush cursor-agent gemini goose ollama opencode qwen sgpt)"
 N=0
 
 # stub <name> <body>: a command that logs "name args" to calls, then runs body.
@@ -58,7 +62,7 @@ exit 0'
 _env() {
   env -i HOME="$D/home" XDG_CONFIG_HOME="$D/home/.config" XDG_STATE_HOME="$D/home/.local/state" \
     XDG_CACHE_HOME="$D/home/.cache" XDG_RUNTIME_DIR="$D/run" TMPDIR="$D/run" \
-    PATH="$D/stubs:/usr/bin:/bin" TERM=dumb NO_COLOR=1 LANG=C.UTF-8 "$@"
+    PATH="$D/stubs:$SYS" TERM=dumb NO_COLOR=1 LANG=C.UTF-8 "$@"
 }
 
 # apply [VAR=value...]: run without a terminal; sets OUT and RC.
@@ -76,7 +80,7 @@ apply_tty() {
     printf '#!%s\n' "$REAL_BASH"
     printf 'cd %q\n' "$D"
     printf 'env -i HOME=%q XDG_CONFIG_HOME=%q XDG_STATE_HOME=%q XDG_CACHE_HOME=%q XDG_RUNTIME_DIR=%q TMPDIR=%q PATH=%q TERM=dumb NO_COLOR=1 LANG=C.UTF-8' \
-      "$D/home" "$D/home/.config" "$D/home/.local/state" "$D/home/.cache" "$D/run" "$D/run" "$D/stubs:/usr/bin:/bin"
+      "$D/home" "$D/home/.config" "$D/home/.local/state" "$D/home/.cache" "$D/run" "$D/run" "$D/stubs:$SYS"
     printf ' %q' "$@" "$REAL_BASH" "$APPLY"
     printf '\necho $? >%q\n' "$D/tty.rc"
   } >"$inner"

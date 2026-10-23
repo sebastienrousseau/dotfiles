@@ -1,1 +1,3 @@
 mcp-server-git==2026.8.18
+# GHSA-83vg-56qc-22m7: GitPython <= 3.2.0 checks a submodule's .git path only after cloning (RCE).
+gitpython>=3.2.1

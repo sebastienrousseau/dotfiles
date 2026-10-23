@@ -10,6 +10,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
+source "$SCRIPT_DIR/../../framework/host_path.sh"
 
 LAZY_TEMPLATE="$REPO_ROOT/defaults/dot_config/shell/91-ux-aliases-lazy.sh.tmpl"
 INTERACTIVE_ALIASES="$REPO_ROOT/defaults/.chezmoitemplates/aliases/interactive/interactive.aliases.sh"
@@ -36,6 +37,7 @@ fi
 AH_TMP="$(mktemp -d)"
 trap 'rm -rf "$AH_TMP"' EXIT
 mkdir -p "$AH_TMP/none" "$AH_TMP/tools"
+SYS="$(host_path_without "$AH_TMP/sys" ufw)"
 for tool in nmap ufw; do
   printf '#!/bin/sh\nexit 0\n' >"$AH_TMP/tools/$tool"
   chmod +x "$AH_TMP/tools/$tool"
@@ -50,7 +52,7 @@ alias_probe() {
   done
   shift
   # shellcheck disable=SC2016
-  env -i HOME="$AH_TMP" PATH="$pathdir:/usr/bin:/bin" ${envs[@]+"${envs[@]}"} bash --norc --noprofile -c '
+  env -i HOME="$AH_TMP" PATH="$pathdir:$SYS" ${envs[@]+"${envs[@]}"} bash --norc --noprofile -c '
     shopt -s expand_aliases
     dot_confirm_destructive() { :; }
     source "$1" >/dev/null 2>&1

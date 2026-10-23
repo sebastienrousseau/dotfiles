@@ -63,7 +63,7 @@ cov_setup_sandbox() {
     docker podman kubectl gh \
     defaults open osascript \
     gnome-extensions gsettings dconf \
-    killall pkill open xdg-open \
+    killall pkill open xdg-open niri \
     fzf tmux less more man htop top nvim vim nano emacs; do
     cat >"$tmp/bin/$cmd" <<EOF
 #!/usr/bin/env bash

@@ -9,11 +9,13 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/host_path.sh"
 
 ARCHIVES="$REPO_ROOT/defaults/.chezmoitemplates/aliases/archives/archives.aliases.sh"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 mkdir -p "$WORK/bin"
+SYS="$(host_path_without "$WORK/sys" pv)"
 for t in tar zip gzip; do
   printf '#!/bin/sh\necho "%s $*" >>"$CALLS"\n' "$t" >"$WORK/bin/$t"
   chmod +x "$WORK/bin/$t"
@@ -24,7 +26,7 @@ run_compress() {
   local sh="$1" d="$WORK/$1.$RANDOM"
   shift
   mkdir -p "$d" && : >"$d/a.txt" && : >"$d/b.txt"
-  (cd "$d" && env -i HOME="$d" PATH="$WORK/bin:/usr/bin:/bin" CALLS="$d/calls" ARCHIVE_LOG_FILE=/dev/null \
+  (cd "$d" && env -i HOME="$d" PATH="$WORK/bin:$SYS" CALLS="$d/calls" ARCHIVE_LOG_FILE=/dev/null \
     "$sh" -c 'source "$0"; compress "$@"' "$ARCHIVES" "$@" >/dev/null 2>&1)
   cat "$d/calls" 2>/dev/null
 }

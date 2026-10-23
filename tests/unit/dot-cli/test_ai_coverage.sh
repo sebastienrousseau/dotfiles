@@ -19,6 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 # shellcheck source=../../framework/assertions.sh
 source "$REPO_ROOT/tests/framework/assertions.sh"
+source "$REPO_ROOT/tests/framework/host_path.sh"
 
 AI="$REPO_ROOT/scripts/dot/commands/ai.sh"
 REAL_BASH="${BASH:-$(command -v bash)}"
@@ -106,7 +107,9 @@ stub "$BIN/codex" '[[ "$*" == --version ]] || echo "launched codex $*" >>"$CALLS
 stub "$BIN/dot-ai-proxy" 'echo "proxy $*"'
 for f in mise claude codex; do cp "$BIN/$f" "$NOGUM/$f"; done
 # System dirs only: a developer machine's real provider CLIs must not leak in.
-BASE_PATH="/usr/bin:/bin:/usr/sbin:/sbin"
+# The pickers would block on a real terminal prompt, and the tools these
+# cases stub as present or missing must not come from the host instead.
+BASE_PATH="$(host_path_without "$WORK/sys" gum fzf dot-ui mise agy aider amp claude codex copilot crush cursor-agent gemini goose ollama opencode qwen sgpt)"
 export PATH="$BIN:$BASE_PATH"
 NOGUM_PATH="$NOGUM:$BASE_PATH"
 NOMISE_PATH="$WORK/empty:$BASE_PATH"
