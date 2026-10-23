@@ -87,12 +87,13 @@ ICLOUD_TMPL="$REPO_ROOT/defaults/run_before_macos-icloud-symlinks.sh.tmpl"
 # TIMEFORMAT renders the decimal separator per locale.
 # ---------------------------------------------------------------------------
 _measure() {
-  local runs="$1"; shift
+  local runs="$1"
+  shift
   local times=() worst_rc=0 rc=0
   local i elapsed secs ms rc_file
   local TIMEFORMAT='%3R'
   rc_file="$(mktemp)"
-  for ((i=0; i<runs; i++)); do
+  for ((i = 0; i < runs; i++)); do
     # F2: capture the exit status instead of discarding it. A command that
     # crashes instantly is FAST, and the old `|| true` let it sail through
     # its budget — a broken `dot` reported excellent performance. The status
@@ -100,7 +101,10 @@ _measure() {
     # group, whose exit status the substitution below does not carry out.
     elapsed="$(
       LC_ALL=C
-      { time { "$@" >/dev/null 2>&1; printf '%s' "$?" >"$rc_file"; }; } 2>&1
+      { time {
+        "$@" >/dev/null 2>&1
+        printf '%s' "$?" >"$rc_file"
+      }; } 2>&1
     )"
     rc="$(cat "$rc_file")"
     [[ "$rc" -gt "$worst_rc" ]] && worst_rc="$rc"
@@ -266,21 +270,14 @@ _gate "instant_dot_search" 500 5 bash "$DOT_CLI" search theme
 # Render darwin-guarded template to a plain script
 _rendered="$(mktemp)"
 sed -e '/^{{- if eq \.chezmoi\.os "darwin" -}}$/d' \
-    -e '/^{{- end -}}$/d' \
-    "$ICLOUD_TMPL" > "$_rendered"
+  -e '/^{{- end -}}$/d' \
+  "$ICLOUD_TMPL" >"$_rendered"
 _gate "instant_icloud_script_single_run" 500 5 bash "$_rendered"
 rm -f "$_rendered"
-
-
-
 
 # =============================================================================
 # TIER 2: FAST (≤2000ms)
 # =============================================================================
-
-
-
-
 
 # =============================================================================
 # TIER 3: MEDIUM (≤5000ms)
@@ -312,7 +309,6 @@ else
   # TESTS_RUN == TESTS_PASSED + TESTS_FAILED.
   printf '  \033[0;33m~\033[0m medium_bench_quick_mode (bench.sh absent — not measured)\n'
 fi
-
 
 # =============================================================================
 # TIER 4: GATES — CI quality gates and test suites
