@@ -142,8 +142,8 @@ When you add a new script that runs at a shell prompt:
 - **Per-op budget test**: `benches/test_perf_budgets.sh`
 - **Suite-level wall-clock ratchet**: `benches/test_help_gates_wall_clock.sh`
 - **CI wiring**: `.github/workflows/ci.yml`, job `quality-performance` — runs on
-  ubuntu-latest and macos-latest for every PR, with no `|| true` and no budget
-  scaling. On the gates the hosted macOS runner is comparable to or faster than
+  ubuntu-latest and macos-latest for every PR, with no `|| true` and no
+  budget scaling beyond the runner factor below. On the gates the hosted macOS runner is comparable to or faster than
   the reference machine — docs-coverage 679 ms vs 969, traceability 1775 vs
   2389, help-registry 3318 vs 4449, `dot doctor` 1746 vs 4423. The exception is
   anything that drives chezmoi over the whole source tree: `dot status` and
@@ -171,12 +171,64 @@ Two consequences worth keeping:
   `PATH` and requires the same verdicts. A future timing rewrite that
   reintroduces the dependency fails there rather than going quiet.
 
+### Runner calibration
+
+Every gate is fork/exec-heavy shell, so its wall clock tracks the runner's
+process-spawn speed as much as the code. On shared `macos-latest` runners the
+same code measured 3109–10149 ms (`test_dot_subcommand_smoke.sh`) and
+3433–10293 ms (`test_dot_help_registry_symmetry.sh`) over 2026-10-22/23, and
+taking five samples instead of three did not stop them failing `main`.
+
+So each sample of each gate is paired with a sample of a fixed reference
+workload, timed just before it: 30 starts of the `bash` the gates resolve from
+`PATH`, each running one command substitution. The median per-spawn cost of
+those samples, divided by the committed reference (`CALIBRATION_REF_US`, the
+same workload on the reference machine), is the gate's **runner factor**, and
+its budget is multiplied by `max(1, factor)`:
+
+- **Paired per sample**, not measured once: the red runs had one gate over
+  budget while its neighbour passed, so the runner slowed down mid-run.
+- **Never below 1×**: a runner faster than the reference gets the budgets in
+  the tables above, no tighter. Linux spawns cost a fraction of the macOS
+  reference, so Linux runs at exactly those budgets.
+- **Capped at 4×**: beyond it the gate fails with
+  `runner=…x … exceeds the 4.00x cap — this runner is too slow to gate on`,
+  rather than scaling every budget until nothing can fail.
+- **All wall-clock gates** use it: they share the runner and are all
+  spawn-heavy. The factor moves only when the reference workload slows down,
+  so a change that slows one gated command past its headroom still fails.
+
+Every gate line prints the factor it used:
+
+```
+✓ gate_dot_subcommand_smoke: median=4012ms budget=7500ms (runner=1.00x per_spawn=5400us reference=5800us)
+```
+
+The reference (`5800` µs per spawn) is the median of 7 runs of
+`PERF_GATE_FILTER=instant_dot_version` on an Apple A18 Pro MacBook (8 GB,
+macOS 26.6, Homebrew bash 5.3.20 first on `PATH`), 2026-10-23. Refresh it on
+the machine the budgets are measured on, in the same PR as any budget change:
+
+```bash
+for i in 1 2 3 4 5 6 7; do
+  PERF_GATE_FILTER=instant_dot_version bash benches/test_perf_budgets.sh |
+    grep -o 'per_spawn=[0-9]*'
+done   # take the median
+```
+
+`tests/regression/test_perf_gate_calibration.sh` proves the three properties
+against the real gate: a simulated slow runner (a `bash` on `PATH` that pays
+for an extra bash start every time) breaks the unscaled budget but passes the
+calibrated one; a gated command made 3× costlier on that runner still fails;
+and a runner 16× slower than the reference fails on the cap.
+
 ## Environment knobs
 
 | Variable | Default | Effect |
 |---|---|---|
-| `PERF_BUDGET_PERCENT` | `100` | Scales every budget. `0` makes them all impossible — that is how `test_gate_integrity.sh` proves the gate actually fires. |
+| `PERF_BUDGET_PERCENT` | `100` | Scales every budget, on top of the runner factor. `0` makes them all impossible — that is how `test_gate_integrity.sh` proves the gate actually fires. |
 | `PERF_GATE_FILTER` | *(unset)* | Runs only gates whose label contains this substring. Skipped gates never call `test_start`, so `TESTS_RUN == PASSED + FAILED` still holds. |
+| `PERF_CALIBRATION_REF_US` | `5800` | Overrides the reference per-spawn cost for one run. Used by `test_perf_gate_calibration.sh` to measure against the machine it runs on. Must be a positive integer. |
 | `DOT_CLI` | `bin/dot` | Points the `dot` gates at another binary, so breakage detection can be exercised against a deliberately corrupted CLI. |
 
 ## When a budget fires
@@ -184,13 +236,15 @@ Two consequences worth keeping:
 The error looks like:
 
 ```
-✗ instant_dot_help: median=612ms EXCEEDS budget=500ms
+✗ instant_dot_help: median=612ms EXCEEDS budget=500ms (runner=1.00x per_spawn=5400us reference=5800us)
 ```
 
 Steps:
 
-1. Bisect the change that pushed it over.
-2. Fix the regression, or
-3. If the increase is legitimate (real new work), move the operation to the next tier + update this doc + `test_perf_budgets.sh` in the same PR.
+1. Read the `runner=` factor. A cap failure means the runner, not the code, was
+   too slow; re-run. Otherwise the budget was already scaled for the runner.
+2. Bisect the change that pushed it over.
+3. Fix the regression, or
+4. If the increase is legitimate (real new work), move the operation to the next tier + update this doc + `test_perf_budgets.sh` in the same PR.
 
 **Never silently bump the budget.** The tier a thing lives in is a promise to users.

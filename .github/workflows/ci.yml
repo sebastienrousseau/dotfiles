@@ -531,6 +531,12 @@ jobs:
     # runner/local ratio observed was 1.25x (dot search), so budgets set at
     # 2x the local median keep >= 1.6x headroom here. Scaling them further
     # would only have blunted the gate.
+    #
+    # What does scale them is a runner factor the gate measures itself, per
+    # sample, against a reference workload (benches/test_perf_budgets.sh,
+    # "Runner calibration"): slow shared macOS runners swung the spawn-heavy
+    # gates 3x on unchanged code. It never goes below 1x and fails the gate
+    # past 4x.
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1

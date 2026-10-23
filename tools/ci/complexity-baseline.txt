@@ -7,7 +7,6 @@
   12   19   21.7   83    94 .devcontainer/install-lite.sh::<top>
   32   27   57.7  154   218 benches/dot_command_bench.sh::<top>
   26   32   45.4   82    82 benches/test_help_gates_wall_clock.sh::<top>
-  11   13   27.7   37     0 benches/test_perf_budgets.sh::_gate_max_rc
    9    9   21.6   38  1588 bin/dot-theme-sync::<top>
   25   18   28.6   37     0 bin/dot-theme-sync::_apply_gnome_family_desktop
   42   37   46.0   65     0 bin/dot-theme-sync::_apply_kde_desktop
