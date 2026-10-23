@@ -27,8 +27,7 @@ type paletteItem struct {
 
 var cockpitCmds = []paletteItem{
 	{"/help", "list commands", "cockpit"},
-	{"/eco", "btop telemetry & SCI", "cockpit"},
-	{"/green", "toggle green UMA mode", "cockpit"},
+	{"/eco", "btop telemetry", "cockpit"},
 	{"/corral", "corralctl workspace", "cockpit"},
 	{"/mcp", "passmcp security audit", "cockpit"},
 	{"/draft", "grounded C2PA synthesis", "cockpit"},
@@ -113,18 +112,13 @@ func (m model) handleSlash(cmd string) (tea.Model, tea.Cmd) {
 	sys := func(s string) { m.transcript = append(m.transcript, line{who: "sys", text: s}) }
 	switch name {
 	case "/help", "/?":
-		sys("cockpit: /eco · /green · /corral · /mcp · /draft · /model <name> · /style <name|off> · /tool <name> · /resume · /save · /serve · /cost · /clear · /exit")
-		sys("keys: [1-6] run action · [←→/hl] select action · [c] corralctl · [v] passmcp · [d] draft · [b] btop deck · [g] green mode")
+		sys("cockpit: /eco · /corral · /mcp · /draft · /model <name> · /style <name|off> · /tool <name> · /resume · /save · /serve · /cost · /clear · /exit")
+		sys("keys: [1-6] run action · [←→/hl] select action · [c] corralctl · [v] passmcp · [d] draft · [b] btop deck")
 	case "/clear":
 		m.transcript = nil
 	case "/eco", "/top":
 		snap := sampleEcosystem()
-		sci := computeSCI(1000, 600, 400, 0, 8.5, 380.0)
-		spark := renderBrailleSparkline([]float64{12, 28, 45, 30, 62, 40, 22, 18}, 4)
-		sys(spark + " " + formatBtopBar(snap, sci, m.greenMode))
-	case "/green":
-		m.greenMode = !m.greenMode
-		sys(map[bool]string{true: "green mode → on (Apple Silicon UMA split-stage + GreenCache)", false: "green mode → off"}[m.greenMode])
+		sys(renderBrailleSparkline(m.cpuHist, 4) + " " + formatBtopBar(snap))
 	case "/corral", "/mcp", "/draft":
 		return m, dotExec(strings.TrimPrefix(name, "/"), arg)
 	case "/model":

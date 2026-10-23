@@ -131,11 +131,12 @@ Keep the last column a list of backticked function names.
 | :--- | :--- | :--- | :--- |
 | docs | Runnable examples for the helper surface | `go test` | `Example_buildPrompt` `Example_highlight` `Example_resolveLang` `Example_windowRows` `Example_nextModel` `Example_filterSqliteOutput` `Example_parseSession` `Example_gatewayURL` `Example_clampi` |
 
-## Ecosystem & btop Green Telemetry
+## Ecosystem & btop Telemetry
 
 | Area | Feature | Trigger | Tests |
 | :--- | :--- | :--- | :--- |
-| telemetry | 2×4 Braille (`U+2800..U+28FF`) sparklines and meter bars for CPU/UMA/Tok/s | `renderBrailleSparkline`, `renderMeterBar` | `TestBrailleSparkline` `TestMeterBar` `BenchmarkRenderBrailleSparkline` |
-| telemetry | ISO/IEC 21031:2024 SCI (`J`, `gCO2eq`, `mgCO2eq/1k tok`) and Shannon action-entropy loop circuit-breaker | `computeSCI`, `computeActionEntropy`, `--log-event` | `TestComputeSCI` `TestComputeActionEntropy` `TestLogEventCLI` `BenchmarkComputeSCI` |
-| ecosystem | `corralctl`, `passmcp` 9-phase security posture, and `draft` provenance/green split-stage Control Centres (`c`, `v`, `d`, `b`, `g`, `1-6`, `/eco`, `/top`, `/green`, `/corral`, `/mcp`, `/draft`) | `sampleEcosystem`, `formatBtopBar`, `renderBtopDeck`, `renderEcosystemControlCentre` | `TestParseCorralState` `TestParsePassMCPReport` `TestParseDraftProvenance` `TestSampleEcosystemAndFormatBtopBar` `TestBtopDeckAndControlCentre` |
+| telemetry | 2×4 Braille (`U+2800..U+28FF`) sparklines and meter bars from sampled CPU and memory, blank until the first sample | `renderBrailleSparkline`, `renderMeterBar` | `TestBrailleSparkline` `TestMeterBar` `BenchmarkRenderBrailleSparkline` |
+| telemetry | Every figure is sampled; energy and carbon (SCI) read `n/a` and are stored as NULL until something measures them | `renderBtopDeck`, `formatBtopBar`, `--log-event` | `TestDeckShowsNoInventedEnergy` `TestCPUFiguresAreTheSampledValues` `TestLogEventCLI` `BenchmarkFormatBtopBar` |
+| telemetry | Shannon action-entropy loop circuit-breaker | `computeActionEntropy` | `TestComputeActionEntropy` |
+| ecosystem | `corralctl`, `passmcp` 9-phase security posture, and `draft` provenance Control Centres, with green split-stage shown as detected (ollama and draft installed) (`c`, `v`, `d`, `b`, `1-6`, `/eco`, `/top`, `/corral`, `/mcp`, `/draft`) | `sampleEcosystem`, `formatBtopBar`, `renderBtopDeck`, `renderEcosystemControlCentre` | `TestParseCorralState` `TestParsePassMCPReport` `TestParseDraftProvenance` `TestSampleEcosystemAndFormatBtopBar` `TestBtopDeckAndControlCentre` `TestGreenSplitStageIsDetectedNotToggled` `TestActionLabelsMatchTheirCommands` |
 

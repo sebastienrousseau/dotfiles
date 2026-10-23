@@ -425,8 +425,9 @@ func BenchmarkRenderBrailleSparkline(b *testing.B) {
 	}
 }
 
-func BenchmarkComputeSCI(b *testing.B) {
+func BenchmarkFormatBtopBar(b *testing.B) {
+	snap := EcosystemSnapshot{NumCPU: 8, TotalAICPU: 12.5}
 	for i := 0; i < b.N; i++ {
-		_ = computeSCI(1000, 500, 300, 100, 5.0, 380.0)
+		_ = formatBtopBar(snap)
 	}
 }

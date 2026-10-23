@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 // Copyright (c) 2015-2026 Sebastien Rousseau
 //
-// telemetry.go — btop-grade Braille sparklines, ISO/IEC 21031:2024 Software
-// Carbon Intensity (SCI) & Zeus prefill/decode Joule modeling, IAL-Scan
+// telemetry.go — btop-grade Braille sparklines and meter bars, IAL-Scan
 // runaway agent loop entropy detection, and the native --log-event fast path.
+// Energy and carbon are not measured here, so the cockpit shows them as n/a.
 package main
 
 import (
@@ -12,18 +12,6 @@ import (
 	"strconv"
 	"strings"
 )
-
-// SCIMetrics holds phase-disaggregated energy (Zeus, arXiv:2601.22076),
-// prompt-cache energy savings (GreenCache, arXiv:2505.23970), and ISO/IEC
-// 21031:2024 Software Carbon Intensity (SCI) metrics.
-type SCIMetrics struct {
-	PrefillJoules float64
-	DecodeJoules  float64
-	CacheSavedWh  float64
-	TotalJoules   float64
-	GCO2eq        float64
-	SCIPer1kTok   float64
-}
 
 // brailleLeft and brailleRight map 0..4 vertical fill levels in a 2x4
 // Unicode Braille cell (U+2800..U+28FF) from bottom to top.
@@ -101,45 +89,8 @@ func renderMeterBar(pct float64, width int) string {
 	return strings.Repeat("█", filled) + strings.Repeat("░", width-filled)
 }
 
-// computeSCI calculates phase-separated prefill/decode Joules and ISO/IEC
-// 21031:2024 Software Carbon Intensity: SCI = ((E * I) + M) / R.
-func computeSCI(inputTokens, cachedTokens, outputTokens, reasoningTokens int, localJoules, gridIntensity float64) SCIMetrics {
-	inTok := max(inputTokens, 0)
-	cacheTok := clampi(cachedTokens, 0, inTok)
-	uncachedIn := inTok - cacheTok
-	outTok := max(outputTokens, 0) + max(reasoningTokens, 0)
-	if math.IsNaN(localJoules) || math.IsInf(localJoules, 0) || localJoules < 0 {
-		localJoules = 0
-	}
-	if math.IsNaN(gridIntensity) || math.IsInf(gridIntensity, 0) || gridIntensity <= 0 {
-		gridIntensity = 380.0
-	}
-
-	// Compute-bound prefill vs memory-bandwidth-bound decode (Zeus model).
-	prefillJ := float64(uncachedIn)*0.00018 + float64(cacheTok)*0.000018
-	decodeJ := float64(outTok) * 0.00142
-	savedJ := float64(cacheTok) * (0.00018 - 0.000018)
-	totalJ := prefillJ + decodeJ + localJoules
-
-	// Convert Joules to kWh (1 kWh = 3.6e6 J) and add amortized embodied M.
-	kwh := totalJ / 3600000.0
-	embodiedG := float64(inTok+outTok) * 0.0000025
-	gco2 := (kwh * gridIntensity) + embodiedG
-
-	totalTok := inTok + outTok
-	sciPer1k := gco2
-	if totalTok > 0 {
-		sciPer1k = (gco2 / float64(totalTok)) * 1000.0
-	}
-	return SCIMetrics{
-		PrefillJoules: prefillJ,
-		DecodeJoules:  decodeJ,
-		CacheSavedWh:  savedJ / 3600.0,
-		TotalJoules:   totalJ,
-		GCO2eq:        gco2,
-		SCIPer1kTok:   sciPer1k,
-	}
-}
+// cpuBarPct is the CPU meter's fill: the sampled percentage, capped at 100.
+func cpuBarPct(cpu float64) float64 { return min(max(cpu, 0), 100) }
 
 // computeActionEntropy implements IAL-Scan (arXiv:2607.01641) trajectory
 // Shannon entropy and consecutive duplicate detection for agent tool calls.
@@ -169,6 +120,7 @@ func computeActionEntropy(actions []string) (float64, bool) {
 }
 
 // logEventCLI records a CLI run directly to dotfiles-ai.db (--log-event).
+// Energy is not measured, so joules and gco2eq are stored as NULL.
 func logEventCLI(args []string) error {
 	if len(args) < 6 {
 		return fmt.Errorf("usage: --log-event <provider> <project> <exit_code> <dur> <pw> <ts>")
@@ -178,10 +130,9 @@ func logEventCLI(args []string) error {
 	dur, _ := strconv.ParseFloat(args[3], 64)
 	pw, _ := strconv.Atoi(args[4])
 	ts := sanitizeSQLString(args[5])
-	sci := computeSCI(pw*2, 0, pw*4, 0, dur*9.5, 380.0)
 	sqlStmt := fmt.Sprintf(
-		"PRAGMA journal_mode=WAL; CREATE TABLE IF NOT EXISTS runs (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT NOT NULL DEFAULT '', delegate TEXT NOT NULL DEFAULT '', model TEXT NOT NULL DEFAULT '', project TEXT NOT NULL DEFAULT '', exit_code INTEGER DEFAULT 0, duration_secs REAL DEFAULT 0, prompt_words INTEGER DEFAULT 0, cost_usd REAL DEFAULT 0, joules REAL DEFAULT 0, gco2eq REAL DEFAULT 0); INSERT INTO runs (ts,delegate,model,project,exit_code,duration_secs,prompt_words,joules,gco2eq) VALUES ('%s','%s','%s','%s',%d,%.4f,%d,%.4f,%.6f);",
-		ts, provider, provider, project, ec, dur, pw, sci.TotalJoules, sci.GCO2eq,
+		"PRAGMA journal_mode=WAL; CREATE TABLE IF NOT EXISTS runs (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT NOT NULL DEFAULT '', delegate TEXT NOT NULL DEFAULT '', model TEXT NOT NULL DEFAULT '', project TEXT NOT NULL DEFAULT '', exit_code INTEGER DEFAULT 0, duration_secs REAL DEFAULT 0, prompt_words INTEGER DEFAULT 0, cost_usd REAL DEFAULT 0, joules REAL DEFAULT 0, gco2eq REAL DEFAULT 0); INSERT INTO runs (ts,delegate,model,project,exit_code,duration_secs,prompt_words,joules,gco2eq) VALUES ('%s','%s','%s','%s',%d,%.4f,%d,NULL,NULL);",
+		ts, provider, provider, project, ec, dur, pw,
 	)
 	return execCommand("sqlite3", "-batch", "-init", "/dev/null", dbPath(), sqlStmt).Run()
 }

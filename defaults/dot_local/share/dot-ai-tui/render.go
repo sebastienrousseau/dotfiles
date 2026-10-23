@@ -102,9 +102,6 @@ func (m model) renderHeader() string {
 	if m.style != "" {
 		left += dimSt.Render("  · style ") + selSt.Render(m.style)
 	}
-	if m.greenMode {
-		left += " " + okSt.Render("● green")
-	}
 	right := gw + " " + chipCost.Render("today "+m.costToday)
 	gap := max(m.width-lipgloss.Width(left)-lipgloss.Width(right)-2, 1)
 	return " " + left + strings.Repeat(" ", gap) + right
