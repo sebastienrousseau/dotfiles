@@ -117,6 +117,9 @@ EOF
   # change here" arm of that loop is exercised alongside the rewriting one.
   printf '.TH DOT 1\n.SH NAME\ndot \\- dotfiles manager\n' \
     >"$SANDBOX/share/man/man1/dot.1"
+  # A per-domain page carries the same "dotfiles vX.Y.Z" header as dot.1.
+  printf '.TH DOT-UI 1 "2026-10-17" "dotfiles v%s" "User Commands"\n' "$cmd" \
+    >"$SANDBOX/share/man/man1/dot-ui.1"
   mkdir -p "$SANDBOX/scripts/git-hooks" "$SANDBOX/bin" "$SANDBOX/dot_local/bin"
   printf 'echo "v%s standards maintained"\n' "$cmd" >"$SANDBOX/scripts/git-hooks/pre-commit-audit.sh"
   printf 'VERSION="v%s"\n' "$cmd" >"$SANDBOX/bin/dot"
@@ -207,6 +210,8 @@ assert_file_contains "$SANDBOX/README.md" "$expected_ihash" \
   "write path updates installer sha256 in README"
 assert_file_contains "$CHEZMOIDATA" 'previous_dotfiles_version = "8.8.8"' \
   "write path advances previous_dotfiles_version"
+assert_file_contains "$SANDBOX/share/man/man1/dot-ui.1" '"dotfiles v9.9.9"' \
+  "write path updates every per-domain man page, not only dot.1"
 assert_file_contains "$SANDBOX/docs/reference/FEATURES.md" "dotfiles:9.9.9" \
   "write path updates generic docs"
 live_bento_after="$(shasum -a 256 "$REPO_ROOT/lib/dot/bento.sh" | awk '{print $1}')"
