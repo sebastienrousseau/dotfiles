@@ -60,7 +60,7 @@ sourceDir = "{{ .chezmoi.homeDir }}/.dotfiles"
 {{-   if and (ne $v "<nil>") (ne $v "Your Name") (ne $v "you@example.com") }}{{ $_ := set $stored $k $v }}{{ end }}
 {{- end }}
 profile           = "{{ if $tty }}{{ promptString "profile" "laptop" }}{{ else }}{{ coalesce (env "CHEZMOI_PROFILE") (get $stored "profile") "laptop" }}{{ end }}"
-theme             = "{{ if $tty }}{{ promptString "theme" "tokyonight-night" }}{{ else }}{{ coalesce (env "CHEZMOI_THEME") (get $stored "theme") "tokyonight-night" }}{{ end }}"
+theme             = "{{ if $tty }}{{ promptString "theme" "maui-dark" }}{{ else }}{{ coalesce (env "CHEZMOI_THEME") (get $stored "theme") "maui-dark" }}{{ end }}"
 git_name          = "{{ if $tty }}{{ promptString "git_name" "Your Name" }}{{ else }}{{ coalesce (env "CHEZMOI_GIT_NAME") (get $stored "git_name") | default "" }}{{ end }}"
 git_email         = "{{ if $tty }}{{ promptString "git_email" "you@example.com" }}{{ else }}{{ coalesce (env "CHEZMOI_GIT_EMAIL") (get $stored "git_email") | default "" }}{{ end }}"
 git_signingkey    = "{{ if $tty }}{{ promptString "git_signingkey" "~/.ssh/id_ed25519" }}{{ else }}{{ coalesce (env "CHEZMOI_GIT_SIGNINGKEY") (get $stored "git_signingkey") "~/.ssh/id_ed25519" }}{{ end }}"

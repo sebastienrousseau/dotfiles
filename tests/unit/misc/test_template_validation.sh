@@ -129,6 +129,17 @@ assert_equals "~/.config/chezmoi/key.txt|" \
   "$(agekey identity <<<"$out")|$(agekey recipient <<<"$out")" "default identity, no recipient"
 assert_equals "" "$(grep -E '^theme_(family|mode) *=' <<<"$out")" "no theme family or mode is invented"
 
+# A fresh install (CI, a piped install, or accepting the prompt) takes the
+# template's default theme; it used to be tokyonight-night, which is not a
+# theme, so `dot theme` rejected the new install's own setting.
+test_start "config_tmpl_fresh_theme_is_a_real_theme"
+out="$(render_cfg "$SANDBOX/chezmoi.toml")"
+theme="$(cfgval theme <<<"$out")"
+assert_true "grep -qxF '[themes.$theme]' '$REPO_ROOT/defaults/.theme-manifest/themes.toml'" \
+  "the default theme '$theme' is in the theme manifest"
+assert_equals "$(sed -n 's/^theme *= *"\(.*\)"$/\1/p' "$REPO_ROOT/defaults/.chezmoidata.toml")" "$theme" \
+  "and matches the .chezmoidata.toml default"
+
 # --- Helper templates document themselves ------------------------------------
 shopt -s nullglob
 for helper in "$REPO_ROOT"/defaults/.chezmoitemplates/functions/helpers/*.tmpl; do
