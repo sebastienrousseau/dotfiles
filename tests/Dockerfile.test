@@ -35,7 +35,7 @@ COPY . $HOME/.dotfiles
 
 # Configure chezmoi source and apply (skip provisioning script to isolate alias testing)
 RUN mkdir -p "$HOME/.config/chezmoi" && \
-    printf 'sourceDir = \"%s\"\\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
+    printf 'sourceDir = "%s"\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
     chezmoi apply --exclude=scripts
 
 # Verify aliases file was generated
@@ -103,7 +103,7 @@ COPY . $HOME/.dotfiles
 
 # Configure chezmoi source and apply (skip provisioning script)
 RUN mkdir -p "$HOME/.config/chezmoi" && \
-    printf 'sourceDir = \"%s\"\\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
+    printf 'sourceDir = "%s"\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
     chezmoi apply --exclude=scripts
 
 # Verify aliases file was generated
@@ -152,7 +152,7 @@ COPY . $HOME/.dotfiles
 
 # Configure chezmoi source and apply (skip provisioning script)
 RUN mkdir -p "$HOME/.config/chezmoi" && \
-    printf 'sourceDir = \"%s\"\\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
+    printf 'sourceDir = "%s"\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
     chezmoi apply --exclude=scripts
 
 # Verify aliases file was generated
@@ -227,7 +227,7 @@ COPY . $HOME/.dotfiles
 
 # Configure chezmoi source and apply (skip provisioning script)
 RUN mkdir -p "$HOME/.config/chezmoi" && \
-    printf 'sourceDir = \"%s\"\\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
+    printf 'sourceDir = "%s"\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
     chezmoi apply --exclude=scripts
 
 # Verify eza aliases are active (not fallback)
