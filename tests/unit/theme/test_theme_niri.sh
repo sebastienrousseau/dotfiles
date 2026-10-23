@@ -32,6 +32,11 @@ chezmoi() {
     *) return 2 ;;
   esac
 }
+# niri stand-in: FAKE_VALIDATE_RC is the `niri validate -c` exit status.
+niri() {
+  [[ "$1 $2" == "validate -c" && -f "$3" ]] || return 2
+  return "${FAKE_VALIDATE_RC:-0}"
+}
 source "$REPO_ROOT/lib/dot/theme-niri.sh"
 
 test_start "niri_managed_only_when_chezmoi_lists_the_target"
@@ -50,7 +55,7 @@ _theme_render_niri_template "$TARGET"
 assert_equals 0 $? "render succeeds"
 assert_equals $'theme {{ .theme }}\n# rendered' "$(cat "$TARGET")" "the rendered template replaces the file"
 assert_equals "" "$(cat "$NOTES")" "nothing to note"
-assert_equals "" "$(ls -A "$TMPDIR")" "no temp file left behind"
+assert_equals "config.kdl" "$(ls -A "${TARGET%/*}")" "no temp file left behind"
 
 test_start "niri_without_a_template_is_declined_with_a_note"
 : >"$NOTES"
@@ -69,7 +74,28 @@ FAKE_RENDER_RC=1 _theme_render_niri_template "$TARGET"
 assert_equals 1 $? "declined"
 assert_equals "hand kept" "$(cat "$TARGET")" "a failed render does not touch the file"
 assert_contains "did not render" "$(cat "$NOTES")" "the note says why"
-assert_equals "" "$(ls -A "$TMPDIR")" "the temp file is removed"
+assert_equals "config.kdl" "$(ls -A "${TARGET%/*}")" "the temp file is removed"
+
+test_start "niri_render_that_fails_validate_leaves_the_file"
+: >"$NOTES"
+printf 'theme\n' >"$TEMPLATE"
+printf 'hand kept\n' >"$TARGET"
+FAKE_VALIDATE_RC=1 _theme_render_niri_template "$TARGET"
+assert_equals 1 $? "declined"
+assert_equals "hand kept" "$(cat "$TARGET")" "an invalid render does not touch the file"
+assert_contains "failed niri validate" "$(cat "$NOTES")" "the note says why"
+assert_equals "config.kdl" "$(ls -A "${TARGET%/*}")" "the temp file is removed"
+
+test_start "niri_absent_renders_without_validating"
+: >"$NOTES"
+printf 'theme\n' >"$TEMPLATE"
+printf 'old\n' >"$TARGET"
+unset -f niri
+mkdir -p "$WORK/bin"
+for tool in dirname mktemp mv rm cat; do ln -s "$(command -v "$tool")" "$WORK/bin/$tool"; done
+PATH="$WORK/bin" _theme_render_niri_template "$TARGET"
+assert_equals 0 $? "render succeeds without niri"
+assert_equals $'theme\n# rendered' "$(cat "$TARGET")" "the rendered template replaces the file"
 
 printf 'RESULTS:%s:%s:%s\n' "$TESTS_RUN" "$TESTS_PASSED" "$TESTS_FAILED"
 [[ "$TESTS_FAILED" -eq 0 ]]

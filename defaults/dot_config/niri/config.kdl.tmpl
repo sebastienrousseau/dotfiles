@@ -1,7 +1,7 @@
 // Niri Configuration (v{{ .dotfiles_version }})
 // Machine: {{ .chezmoi.hostname }} | Profile: {{ .profile }}
 // KDL format: https://kdl.dev
-{{- $hw := .hardware -}}
+{{ $hw := .hardware -}}
 {{- $machine := .machine -}}
 {{- if and $machine (ne $machine "") -}}
   {{- $m := index .machines $machine -}}
