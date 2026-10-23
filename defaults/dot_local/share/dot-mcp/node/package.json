@@ -5,5 +5,8 @@
   "license": "Apache-2.0 OR MIT",
   "dependencies": {
     "@modelcontextprotocol/server-memory": "2026.8.31"
+  },
+  "overrides": {
+    "ip-address": "10.7.4"
   }
 }
