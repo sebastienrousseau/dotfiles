@@ -7,18 +7,19 @@ sourceDir = "{{ .chezmoi.homeDir }}/.dotfiles"
 # promptString function behavior:
 # - If value exists in chezmoi data: use stored value
 # - If value doesn't exist AND stdin is a TTY: prompt user
-# - Non-interactive (CI, drift detection): silently use the default so
+# - Non-interactive (CI, drift detection): never prompt, so
 #   `chezmoi init --apply=false` doesn't die on "could not open a new TTY".
-#   Override in CI via CHEZMOI_AGE_IDENTITY / CHEZMOI_AGE_RECIPIENT env vars.
+#   Take CHEZMOI_AGE_IDENTITY / CHEZMOI_AGE_RECIPIENT from the environment,
+#   else the [age] table already in this config, else the default identity
+#   and no recipient. A re-init used to drop the stored recipient.
 {{- $age_identity := "" }}
 {{- $age_recipient := "" }}
 {{- if stdinIsATTY }}
 {{-   $age_identity = promptString "age_identity" "~/.config/chezmoi/key.txt" }}
 {{-   $age_recipient = promptString "age_recipient" "" }}
 {{- else }}
-{{-   $age_identity = env "CHEZMOI_AGE_IDENTITY" }}
-{{-   if eq $age_identity "" }}{{ $age_identity = "~/.config/chezmoi/key.txt" }}{{ end }}
-{{-   $age_recipient = env "CHEZMOI_AGE_RECIPIENT" }}
+{{-   $age_identity = coalesce (env "CHEZMOI_AGE_IDENTITY") (dig "age" "identity" "" .chezmoi.config | toString) "~/.config/chezmoi/key.txt" }}
+{{-   $age_recipient = coalesce (env "CHEZMOI_AGE_RECIPIENT") (dig "age" "recipient" "" .chezmoi.config | toString) | default "" }}
 {{- end }}
 
 # Conditional encryption block - only enable if age_identity is provided
@@ -64,6 +65,12 @@ git_name          = "{{ if $tty }}{{ promptString "git_name" "Your Name" }}{{ el
 git_email         = "{{ if $tty }}{{ promptString "git_email" "you@example.com" }}{{ else }}{{ coalesce (env "CHEZMOI_GIT_EMAIL") (get $stored "git_email") | default "" }}{{ end }}"
 git_signingkey    = "{{ if $tty }}{{ promptString "git_signingkey" "~/.ssh/id_ed25519" }}{{ else }}{{ coalesce (env "CHEZMOI_GIT_SIGNINGKEY") (get $stored "git_signingkey") "~/.ssh/id_ed25519" }}{{ end }}"
 git_signingformat = "{{ if $tty }}{{ promptString "git_signingformat" "ssh" }}{{ else }}{{ coalesce (env "CHEZMOI_GIT_SIGNINGFORMAT") (get $stored "git_signingformat") "ssh" }}{{ end }}"
+{{- /* Written by `dot theme`, never prompted for: carry them over as stored. */}}
+{{- range $k := list "theme_family" "theme_mode" }}
+{{-   with get $ $k }}
+{{ $k }} = {{ . | toString | quote }}
+{{-   end }}
+{{- end }}
 
 # Expose age variables in data section for use in other templates
 # Variable scope: $age_identity and $age_recipient defined at file top are accessible here

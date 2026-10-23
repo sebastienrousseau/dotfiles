@@ -100,6 +100,35 @@ out="$(render_cfg "$SANDBOX/stored.toml" CHEZMOI_GIT_NAME="Env Name" CHEZMOI_PRO
 assert_equals "Env Name|ann@example.org|container" \
   "$(cfgval git_name <<<"$out")|$(cfgval git_email <<<"$out")|$(cfgval profile <<<"$out")" "CHEZMOI_<KEY> wins over the stored value"
 
+# The [age] table and the theme family/mode written by `dot theme` are also
+# stored state: a re-init without a TTY used to reset the identity to the
+# default path and drop the recipient and both theme keys.
+agekey() { awk -v k="$1" '/^\[/ { s = ($0 == "[age]") } s && $1 == k { sub(/^[^"]*"/, ""); sub(/"$/, ""); print }'; }
+
+printf '[age]\nidentity = "/keys/age.txt"\nrecipient = "age1storedrecipient"\n[data]\ntheme = "maui-dark"\ntheme_family = "maui"\ntheme_mode = "auto"\n' >"$SANDBOX/stored-age.toml"
+test_start "config_tmpl_no_tty_keeps_stored_age"
+out="$(render_cfg "$SANDBOX/stored-age.toml")"
+assert_equals "/keys/age.txt|age1storedrecipient" \
+  "$(agekey identity <<<"$out")|$(agekey recipient <<<"$out")" "a re-init keeps the stored age identity and recipient"
+assert_equals "/keys/age.txt|age1storedrecipient" \
+  "$(cfgval age_identity <<<"$out")|$(cfgval age_recipient <<<"$out")" "and exposes the same values as data"
+
+test_start "config_tmpl_no_tty_age_env_overrides"
+out="$(render_cfg "$SANDBOX/stored-age.toml" CHEZMOI_AGE_RECIPIENT=age1envrecipient)"
+assert_equals "/keys/age.txt|age1envrecipient" \
+  "$(agekey identity <<<"$out")|$(agekey recipient <<<"$out")" "CHEZMOI_AGE_RECIPIENT wins over the stored recipient"
+
+test_start "config_tmpl_no_tty_keeps_theme_family_and_mode"
+out="$(render_cfg "$SANDBOX/stored-age.toml")"
+assert_equals "maui|auto" "$(cfgval theme_family <<<"$out")|$(cfgval theme_mode <<<"$out")" "a re-init keeps the stored theme family and mode"
+
+test_start "config_tmpl_no_tty_nothing_stored_uses_age_defaults"
+out="$(render_cfg "$SANDBOX/chezmoi.toml")"
+# shellcheck disable=SC2088 # the template writes this literal ~ path
+assert_equals "~/.config/chezmoi/key.txt|" \
+  "$(agekey identity <<<"$out")|$(agekey recipient <<<"$out")" "default identity, no recipient"
+assert_equals "" "$(grep -E '^theme_(family|mode) *=' <<<"$out")" "no theme family or mode is invented"
+
 # --- Helper templates document themselves ------------------------------------
 shopt -s nullglob
 for helper in "$REPO_ROOT"/defaults/.chezmoitemplates/functions/helpers/*.tmpl; do
