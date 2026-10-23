@@ -230,16 +230,21 @@ RUN mkdir -p "$HOME/.config/chezmoi" && \
     printf 'sourceDir = "%s"\n' "$HOME/.dotfiles" > "$HOME/.config/chezmoi/chezmoi.toml" && \
     chezmoi apply --exclude=scripts
 
-# Verify eza aliases are active (not fallback)
-RUN grep -q 'alias ls="eza --icons --group-directories-first"' "$HOME/.config/shell/90-ux-aliases.sh" || \
-    (echo "FAIL: eza alias not found in generated file" && exit 1)
+# Verify the generated aliases route listing through dot_ls / dot_ll
+RUN grep -q "alias ls='dot_ls'" "$HOME/.config/shell/90-ux-aliases.sh" || \
+    (echo "FAIL: ls alias not found in generated file" && exit 1)
 
-# Verify aliases can be sourced and eza alias resolves
-RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type ls' | grep -q eza || \
+# Verify ls runs eza: output must match eza with the same options
+RUN expected="$(eza --sort Name --icons --group-directories-first -1 /etc)" && \
+    actual="$(bash -c '. "$HOME/.config/shell/90-ux-aliases.sh"; eval "ls -1 /etc"')" && \
+    [ -n "$expected" ] && [ "$actual" = "$expected" ] || \
     (echo "FAIL: ls does not resolve to eza" && exit 1)
 
-# Verify ll alias
-RUN bash -c 'source "$HOME/.config/shell/90-ux-aliases.sh" && type ll' | grep -q eza || \
+# Verify ll runs eza, not the ls -lA fallback (which prints a "total" line)
+RUN expected="$(eza -alF --sort Name --icons --group-directories-first /etc)" && \
+    actual="$(bash -c '. "$HOME/.config/shell/90-ux-aliases.sh"; eval "ll /etc"')" && \
+    [ -n "$expected" ] && [ "$actual" = "$expected" ] && \
+    ! printf '%s\n' "$actual" | grep -q '^total ' || \
     (echo "FAIL: ll does not resolve to eza" && exit 1)
 
 # Create non-root user for container security (CKV_DOCKER_3)
