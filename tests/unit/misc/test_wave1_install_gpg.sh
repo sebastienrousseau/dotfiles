@@ -101,7 +101,7 @@ stub "$INST/tools/ci" install-chezmoi-verified.sh 'exit 0'
 rc="$(run_install "$SANDBOX/h3" "$SANDBOX/has-curl:$SYS")"
 
 test_start "install_local_bin_path"
-assert_equals "0|install-chezmoi-verified.sh 2.72.2 $SANDBOX/h3/.local/bin" "$rc|$(cat "$SANDBOX/calls.log")" \
+assert_equals "0|install-chezmoi-verified.sh 2.73.3 $SANDBOX/h3/.local/bin" "$rc|$(cat "$SANDBOX/calls.log")" \
   "without Homebrew, the verified installer targets ~/.local/bin (curl unused)"
 
 test_start "install_local_bin_created"
@@ -119,7 +119,7 @@ stub "$INST/tools/ci" install-chezmoi-verified.sh 'exit 1'
 rc="$(run_install "$SANDBOX/h5" "$SANDBOX/has-curl:$SYS")"
 
 test_start "install_verified_failure_refuses_fallback"
-assert_equals "1|install-chezmoi-verified.sh 2.72.2 $SANDBOX/h5/.local/bin|yes" \
+assert_equals "1|install-chezmoi-verified.sh 2.73.3 $SANDBOX/h5/.local/bin|yes" \
   "$rc|$(cat "$SANDBOX/calls.log")|$(grep -q 'Refusing to fall back' "$SANDBOX/out.txt" && echo yes || echo no)" \
   "a failed verified install fails without trying another source"
 
@@ -171,10 +171,10 @@ test_start "install_embedded_checksum_mismatch"
 assert_equals "1|absent" "$rc|$([[ -e "$SANDBOX/h8/.local/bin/chezmoi" ]] && echo present || echo absent)" \
   "a release checksums file that disagrees with the pin is rejected and not installed"
 
-# The pinned 2.72.2, replaced by a tampered archive whose release checksums
+# The pinned 2.73.3, replaced by a tampered archive whose release checksums
 # file agrees with it: the in-repo pin refuses it.
-cp "$REL/$asset" "$REL/chezmoi_2.72.2_${os}_${arch}.tar.gz"
-printf '%s  %s\n' "$sum" "chezmoi_2.72.2_${os}_${arch}.tar.gz" >"$REL/chezmoi_2.72.2_checksums.txt"
+cp "$REL/$asset" "$REL/chezmoi_2.73.3_${os}_${arch}.tar.gz"
+printf '%s  %s\n' "$sum" "chezmoi_2.73.3_${os}_${arch}.tar.gz" >"$REL/chezmoi_2.73.3_checksums.txt"
 : >"$SANDBOX/calls.log"
 rc="$(run_install "$SANDBOX/h12" "$SANDBOX/has-curl:$SYS")"
 test_start "install_embedded_tampered_release_refused"

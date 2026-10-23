@@ -1,6 +1,6 @@
 # Active profile - change this to switch configurations
-dotfiles_version = "0.2.536"
-previous_dotfiles_version = "0.2.535"
+dotfiles_version = "0.2.537"
+previous_dotfiles_version = "0.2.536"
 profile = "laptop"
 
 # Machine preset — set per-host in ~/.config/chezmoi/chezmoi.toml:
@@ -58,6 +58,12 @@ kanshi = false
 touch = false
 t2 = false
 surface = false
+
+# Nightly GitHub -> NAS Gitea mirror (corralctl.timer + its scripts). One
+# machine runs it; enable per-host in ~/.config/chezmoi/chezmoi.toml:
+#   [data.features]
+#   corral_gitea_mirror = true
+corral_gitea_mirror = false
 
 [features.ai_theme_providers]
 codex = true

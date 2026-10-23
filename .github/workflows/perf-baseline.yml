@@ -44,7 +44,7 @@ permissions:
 
 # Shared with ci.yml — keep these in sync via scripts/version-sync.sh.
 env:
-  CHEZMOI_VERSION: "2.72.2"
+  CHEZMOI_VERSION: "2.73.3"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

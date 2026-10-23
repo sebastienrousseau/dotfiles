@@ -136,14 +136,14 @@ charm_keyring_verify() {
 }
 
 # chezmoi_release_sha256 <asset>: reviewed SHA-256 (else $CHEZMOI_SHA256), in step
-# with tools/ci/install-chezmoi-verified.sh; from the v0.2.536 checksums.txt.
+# with tools/ci/install-chezmoi-verified.sh; from the v0.2.537 checksums.txt.
 chezmoi_release_sha256() {
   local sha
   case "$1" in
-    chezmoi_2.72.2_linux_amd64.tar.gz) sha=a2be1b8bcdf06c6f173e070bb3ddbcc52c50478fe9b57f6e6c63d15c7cff4f03 ;;
-    chezmoi_2.72.2_linux_arm64.tar.gz) sha=499925fd10804b7c1a5dc4b4a275c8935261d02a4be0c18bbd41b7747810de67 ;;
-    chezmoi_2.72.2_darwin_amd64.tar.gz) sha=08ad1ba33a73e68f7657ee226f72b5d800b5a947954b06e185e8591bd32b0063 ;;
-    chezmoi_2.72.2_darwin_arm64.tar.gz) sha=2b0c7e57f3f2da44628fa9f6863b9bd41f0935cfd2416228aa9df6daab6690f5 ;;
+    chezmoi_2.73.3_linux_amd64.tar.gz) sha=6e5827598cbfc02d132b04f95b5ea10efb5b79230e2a4a0e52df4af144a8ee9f ;;
+    chezmoi_2.73.3_linux_arm64.tar.gz) sha=c9e6a6e71eb5291018e161a8426d7c313cd2e8553c2ca4029511fec2a33bc28c ;;
+    chezmoi_2.73.3_darwin_amd64.tar.gz) sha=d865487d6669243c948ee5542087bd95f4ad4ecb5a1311b85cf19f557694fe03 ;;
+    chezmoi_2.73.3_darwin_arm64.tar.gz) sha=ec2d0005f369c912ee9891a26c30d65dc0eda51708f06948e5f7a43db69e1aa7 ;;
     *) sha="${CHEZMOI_SHA256:-}" ;;
   esac
   if [[ "$sha" =~ ^[0-9a-f]{64}$ ]]; then
@@ -190,7 +190,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.536)
+  version       The version (tag or branch) to install (default: v0.2.537)
 
 Options:
   --help        Show this help message
@@ -206,7 +206,7 @@ EOF
 }
 
 main() {
-  local version="v0.2.536"
+  local version="v0.2.537"
   local version_set=0
   local minimal=0
   local provision="${DOTFILES_PROVISION:-0}"
@@ -236,7 +236,7 @@ main() {
         # like `foobar` doesn't trigger a 30s+ network download attempt.
         # Caught by the install.sh fuzz harness (#881).
         if [[ ! "$arg" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-+][a-zA-Z0-9.-]+)?$ ]]; then
-          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.536)."
+          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.537)."
         fi
         version="$arg"
         version_set=1
@@ -352,7 +352,7 @@ main() {
       verified_installer="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/tools/ci/install-chezmoi-verified.sh"
       if [[ -x "$verified_installer" ]] || [[ -f "$verified_installer" ]]; then
         echo "   Using checksum-verified installer..."
-        if ! bash "$verified_installer" "${CHEZMOI_VERSION:-2.72.2}" "$bin_dir"; then
+        if ! bash "$verified_installer" "${CHEZMOI_VERSION:-2.73.3}" "$bin_dir"; then
           echo "" >&2
           echo "   The verified chezmoi installer failed." >&2
           echo "   Refusing to fall back to an unverified bootstrap path." >&2
@@ -364,7 +364,7 @@ main() {
         return 0
       fi
       echo "   Using embedded checksum verifier..."
-      if ! install_chezmoi_verified_embedded "${CHEZMOI_VERSION:-2.72.2}" "$bin_dir"; then
+      if ! install_chezmoi_verified_embedded "${CHEZMOI_VERSION:-2.73.3}" "$bin_dir"; then
         echo "" >&2
         echo "   The embedded checksum-verified chezmoi bootstrap failed." >&2
         echo "   Refusing to fall back to an unverified remote script." >&2

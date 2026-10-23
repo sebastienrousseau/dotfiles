@@ -10,3 +10,8 @@ docs/
 *.tar.gz
 .version-sync-backup/
 .claude/
+# Build files for other images (devcontainer, ClusterFuzzLite, OSS-Fuzz).
+# The test and sandbox images never use them; Checkov scans them in place.
+.devcontainer/
+.clusterfuzzlite/
+fuzz/

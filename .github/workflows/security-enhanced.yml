@@ -204,6 +204,9 @@ jobs:
         if: hashFiles('**/Dockerfile*') != ''
         run: docker build -f tests/Dockerfile.test -t dotfiles-test:latest .
 
+      # The image is a throwaway test container on an Ubuntu base. Report
+      # what can be acted on: HIGH and CRITICAL findings that have a fixed
+      # version. Unfixed base-OS CVEs clear when the pinned base digest moves.
       - name: Scan container with Trivy
         if: hashFiles('**/Dockerfile*') != ''
         run: |
@@ -212,7 +215,9 @@ jobs:
             -v "$PWD:/work" \
             -w /work \
             "aquasec/trivy:${{ env.TRIVY_VERSION }}" \
-            image --security-checks vuln,config,secret --format sarif --output /work/container-scan.sarif dotfiles-test:latest
+            image --scanners vuln,misconfig,secret \
+              --severity HIGH,CRITICAL --ignore-unfixed \
+              --format sarif --output /work/container-scan.sarif dotfiles-test:latest
 
       - name: Upload container scan results
         if: always() && hashFiles('**/Dockerfile*') != ''

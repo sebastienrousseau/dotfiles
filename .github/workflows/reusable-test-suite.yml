@@ -30,7 +30,7 @@ permissions:
 env:
   # The minimum chezmoi the dotfiles support (MINIMUM-TOOLCHAIN.md), as in
   # ci.yml and the reliability gate.
-  CHEZMOI_VERSION: "2.72.2"
+  CHEZMOI_VERSION: "2.73.3"
 
 jobs:
   test-suite:

@@ -109,8 +109,8 @@ grype "sbom:dot-${VERSION}.cyclonedx.json"
 
 ## 6. The git tag itself
 
-Tags are signed with an SSH ed25519 key, published in
-[`../KEYS.asc`](../KEYS.asc) in `git allowed_signers` format:
+Tags are signed with SSH ed25519 keys, one per maintainer machine, all
+published in [`../KEYS.asc`](../KEYS.asc) in `git allowed_signers` format:
 
 ```sh
 git clone https://github.com/sebastienrousseau/dotfiles
@@ -119,7 +119,10 @@ git -c gpg.ssh.allowedSignersFile=KEYS.asc tag -v "$TAG"
 ```
 
 Expected: `Good "git" signature for sebastienrousseau@users.noreply.github.com with
-ED25519 key SHA256:f6FG+guRNtT3R36oQFS4oWCx1d10nm+BoaIL3Tkh1r4`.
+ED25519 key SHA256:<fingerprint>`, where `<fingerprint>` is one of:
+
+- `SHA256:f6FG+guRNtT3R36oQFS4oWCx1d10nm+BoaIL3Tkh1r4` (rousseau-mb-neo)
+- `SHA256:kIOPAavp1TCEauTr1tTIN3cv+tSs6F9m/4lZjuM9tqk` (rousseau-mbp-m1)
 
 Without the allowed-signers file you get `No principal matched` — the
 signature is still cryptographically valid, but nothing binds it to a

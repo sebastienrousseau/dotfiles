@@ -26,7 +26,7 @@ RUN apt-get update && \
 # SHA-256 pinned chezmoi release (tools/ci/install-chezmoi-verified.sh),
 # not the get.chezmoi.io script.
 COPY tools/ci/install-chezmoi-verified.sh /tmp/install-chezmoi-verified.sh
-RUN bash /tmp/install-chezmoi-verified.sh 2.72.2 "$HOME/.local/bin" && \
+RUN bash /tmp/install-chezmoi-verified.sh 2.73.3 "$HOME/.local/bin" && \
     rm -f /tmp/install-chezmoi-verified.sh
 ENV PATH="$HOME/.local/bin:$PATH"
 
@@ -94,7 +94,7 @@ RUN apt-get update && \
 # SHA-256 pinned chezmoi release (tools/ci/install-chezmoi-verified.sh),
 # not the get.chezmoi.io script.
 COPY tools/ci/install-chezmoi-verified.sh /tmp/install-chezmoi-verified.sh
-RUN bash /tmp/install-chezmoi-verified.sh 2.72.2 "$HOME/.local/bin" && \
+RUN bash /tmp/install-chezmoi-verified.sh 2.73.3 "$HOME/.local/bin" && \
     rm -f /tmp/install-chezmoi-verified.sh
 ENV PATH="$HOME/.local/bin:$PATH"
 
@@ -143,7 +143,7 @@ RUN pacman -Syu --noconfirm git curl zsh ripgrep fd bat jq
 # SHA-256 pinned chezmoi release (tools/ci/install-chezmoi-verified.sh),
 # not the get.chezmoi.io script.
 COPY tools/ci/install-chezmoi-verified.sh /tmp/install-chezmoi-verified.sh
-RUN bash /tmp/install-chezmoi-verified.sh 2.72.2 "$HOME/.local/bin" && \
+RUN bash /tmp/install-chezmoi-verified.sh 2.73.3 "$HOME/.local/bin" && \
     rm -f /tmp/install-chezmoi-verified.sh
 ENV PATH="$HOME/.local/bin:$PATH"
 
@@ -194,6 +194,14 @@ FROM ubuntu:26.04@sha256:f144425ff09be612d6d9ad965196e9cdc23dae1f42110a8a11a3e9a
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME=/root
 
+# The base image ships Canonical's pebble service manager, a Go binary the
+# tests never run; the container scan reports its Go stdlib CVEs. Remove the
+# package that owns it.
+RUN if [ -e /usr/bin/pebble ]; then \
+      apt-get purge -y "$(dpkg -S /usr/bin/pebble | cut -d: -f1)"; \
+    fi && \
+    test ! -e /usr/bin/pebble
+
 # hadolint ignore=DL3008
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -218,7 +226,7 @@ RUN mkdir -p /etc/apt/keyrings && \
 # SHA-256 pinned chezmoi release (tools/ci/install-chezmoi-verified.sh),
 # not the get.chezmoi.io script.
 COPY tools/ci/install-chezmoi-verified.sh /tmp/install-chezmoi-verified.sh
-RUN bash /tmp/install-chezmoi-verified.sh 2.72.2 "$HOME/.local/bin" && \
+RUN bash /tmp/install-chezmoi-verified.sh 2.73.3 "$HOME/.local/bin" && \
     rm -f /tmp/install-chezmoi-verified.sh
 ENV PATH="$HOME/.local/bin:$PATH"
 

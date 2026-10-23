@@ -87,12 +87,13 @@ ICLOUD_TMPL="$REPO_ROOT/defaults/run_before_macos-icloud-symlinks.sh.tmpl"
 # TIMEFORMAT renders the decimal separator per locale.
 # ---------------------------------------------------------------------------
 _measure() {
-  local runs="$1"; shift
+  local runs="$1"
+  shift
   local times=() worst_rc=0 rc=0
   local i elapsed secs ms rc_file
   local TIMEFORMAT='%3R'
   rc_file="$(mktemp)"
-  for ((i=0; i<runs; i++)); do
+  for ((i = 0; i < runs; i++)); do
     # F2: capture the exit status instead of discarding it. A command that
     # crashes instantly is FAST, and the old `|| true` let it sail through
     # its budget — a broken `dot` reported excellent performance. The status
@@ -100,7 +101,10 @@ _measure() {
     # group, whose exit status the substitution below does not carry out.
     elapsed="$(
       LC_ALL=C
-      { time { "$@" >/dev/null 2>&1; printf '%s' "$?" >"$rc_file"; }; } 2>&1
+      { time {
+        "$@" >/dev/null 2>&1
+        printf '%s' "$?" >"$rc_file"
+      }; } 2>&1
     )"
     rc="$(cat "$rc_file")"
     [[ "$rc" -gt "$worst_rc" ]] && worst_rc="$rc"
@@ -266,21 +270,14 @@ _gate "instant_dot_search" 500 5 bash "$DOT_CLI" search theme
 # Render darwin-guarded template to a plain script
 _rendered="$(mktemp)"
 sed -e '/^{{- if eq \.chezmoi\.os "darwin" -}}$/d' \
-    -e '/^{{- end -}}$/d' \
-    "$ICLOUD_TMPL" > "$_rendered"
+  -e '/^{{- end -}}$/d' \
+  "$ICLOUD_TMPL" >"$_rendered"
 _gate "instant_icloud_script_single_run" 500 5 bash "$_rendered"
 rm -f "$_rendered"
-
-
-
 
 # =============================================================================
 # TIER 2: FAST (≤2000ms)
 # =============================================================================
-
-
-
-
 
 # =============================================================================
 # TIER 3: MEDIUM (≤5000ms)
@@ -312,7 +309,6 @@ else
   # TESTS_RUN == TESTS_PASSED + TESTS_FAILED.
   printf '  \033[0;33m~\033[0m medium_bench_quick_mode (bench.sh absent — not measured)\n'
 fi
-
 
 # =============================================================================
 # TIER 4: GATES — CI quality gates and test suites
@@ -363,9 +359,15 @@ _gate "gate_icloud_unit_test" 3500 5 bash "$REPO_ROOT/tests/unit/misc/test_macos
 
 _gate "gate_traceability_coverage" 5000 5 bash "$REPO_ROOT/scripts/qa/traceability-coverage.sh"
 
-_gate "gate_dot_subcommand_smoke" 7500 3 bash "$REPO_ROOT/tests/regression/test_dot_subcommand_smoke.sh"
+# Both took 3 runs until they failed main the same way: on 2026-10-23 their
+# macos-latest medians ranged 3109-10149ms (smoke) and 3433-10293ms
+# (symmetry) on near-identical code, and each of three red main runs had
+# one gate over budget while the other passed. A slow burst inside a run,
+# not a slow runner, so a median of 5 absorbs it as it did for the gates
+# above; the budgets stay at 2x the local median.
+_gate "gate_dot_subcommand_smoke" 7500 5 bash "$REPO_ROOT/tests/regression/test_dot_subcommand_smoke.sh"
 
-_gate "gate_dot_help_registry_symmetry" 9000 3 bash "$REPO_ROOT/tests/regression/test_dot_help_registry_symmetry.sh"
+_gate "gate_dot_help_registry_symmetry" 9000 5 bash "$REPO_ROOT/tests/regression/test_dot_help_registry_symmetry.sh"
 
 # =============================================================================
 # Summary

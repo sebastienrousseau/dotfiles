@@ -57,22 +57,22 @@ run_installer() {
   printf '%s' "$rc"
 }
 
-# A tampered linux/amd64 archive for the pinned 2.72.2, with a checksums
+# A tampered linux/amd64 archive for the pinned 2.73.3, with a checksums
 # file that agrees with it.
 set_uname Linux x86_64
 printf '#!/bin/sh\necho tampered-chezmoi\n' >"$REL/pkg/chezmoi"
 chmod +x "$REL/pkg/chezmoi"
-tar -czf "$REL/chezmoi_2.72.2_linux_amd64.tar.gz" -C "$REL/pkg" chezmoi
-printf '%s  chezmoi_2.72.2_linux_amd64.tar.gz\n' "$(sha_of "$REL/chezmoi_2.72.2_linux_amd64.tar.gz")" \
-  >"$REL/chezmoi_2.72.2_checksums.txt"
+tar -czf "$REL/chezmoi_2.73.3_linux_amd64.tar.gz" -C "$REL/pkg" chezmoi
+printf '%s  chezmoi_2.73.3_linux_amd64.tar.gz\n' "$(sha_of "$REL/chezmoi_2.73.3_linux_amd64.tar.gz")" \
+  >"$REL/chezmoi_2.73.3_checksums.txt"
 
 test_start "tampered_release_with_matching_checksums_refused"
-rc="$(run_installer 2.72.2 "$WORK/bin1")"
+rc="$(run_installer 2.73.3 "$WORK/bin1")"
 assert_equals "1|absent" "$rc|$([[ -e "$WORK/bin1/chezmoi" ]] && echo present || echo absent)" \
   "an archive matching only its own release checksums file is not installed"
 
 # An unlisted version needs an explicit pin.
-cp "$REL/chezmoi_2.72.2_linux_amd64.tar.gz" "$REL/chezmoi_9.9.9_linux_amd64.tar.gz"
+cp "$REL/chezmoi_2.73.3_linux_amd64.tar.gz" "$REL/chezmoi_9.9.9_linux_amd64.tar.gz"
 GOOD_SHA="$(sha_of "$REL/chezmoi_9.9.9_linux_amd64.tar.gz")"
 printf '%s  chezmoi_9.9.9_linux_amd64.tar.gz\n' "$GOOD_SHA" >"$REL/chezmoi_9.9.9_checksums.txt"
 
