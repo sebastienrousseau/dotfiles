@@ -19,6 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
+source "$SCRIPT_DIR/../../framework/host_path.sh"
 
 # Keep bash xtrace flowing to the coverage runner's trace stream even
 # when a probe below captures `2>&1`.
@@ -114,7 +115,10 @@ SHIM
 chmod +x "$HOME/.local/bin/dot-ai-log"
 
 export AI_TEST_CALLS="$CALLS"
-BASE_PATH="$MB:/usr/bin:/bin"
+# The pickers would block on a real terminal prompt, and the tools these
+# cases stub as present or missing must not come from the host instead.
+SYS="$(host_path_without "$DOTFILES_COV_TMPDIR/sys" gum fzf dot-ui mise agy aider amp claude codex copilot crush cursor-agent gemini goose ollama opencode qwen sgpt)"
+BASE_PATH="$MB:$SYS"
 CACHE="$HOME/.cache/dotfiles/ai/status.tsv"
 
 # run_ai <PATH> <args…> — sets OUT / RC; status cache is cleared first so
@@ -296,7 +300,7 @@ assert_equals 1 "$RC" "failed install exits 1"
 assert_contains "install failed" "$OUT" "failure reported"
 
 test_start "ai_bridge_missing_tool_no_mise"
-run_ai "$NOMISE:/usr/bin:/bin" ai codex "hi"
+run_ai "$NOMISE:$SYS" ai codex "hi"
 assert_equals 1 "$RC" "no mise exits 1"
 assert_contains "dot ai install codex" "$OUT" "install hint"
 

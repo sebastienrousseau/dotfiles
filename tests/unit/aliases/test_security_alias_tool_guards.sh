@@ -15,6 +15,7 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/host_path.sh"
 
 UFW_ALIASES="$REPO_ROOT/defaults/.chezmoitemplates/aliases/security/ufw-rules.aliases.sh"
 NMAP_ALIASES="$REPO_ROOT/defaults/.chezmoitemplates/aliases/security/nmap-scanning.aliases.sh"
@@ -24,6 +25,7 @@ echo "Testing security alias tool guards..."
 SANDBOX="$(mktemp -d)"
 trap 'rm -rf "$SANDBOX"' EXIT
 mkdir -p "$SANDBOX/home" "$SANDBOX/bare" "$SANDBOX/tools"
+SYS="$(host_path_without "$SANDBOX/sys" ufw nmap)"
 
 # Stubs: ufw, nmap and sudo only record how they were called.
 for tool in ufw nmap sudo; do
@@ -43,7 +45,7 @@ done
 # run_in <tools-dir> <layer> <script>: source the layer in a clean bash
 # whose PATH holds only <tools-dir> and the system dirs, then run <script>.
 run_in() {
-  env -i HOME="$SANDBOX/home" PATH="$1:/usr/bin:/bin" CALL_LOG="$SANDBOX/calls.log" \
+  env -i HOME="$SANDBOX/home" PATH="$1:$SYS" CALL_LOG="$SANDBOX/calls.log" \
     "$BASH" --norc --noprofile -c 'shopt -s expand_aliases; source "$1"; eval "$2"' _ "$2" "$3"
 }
 

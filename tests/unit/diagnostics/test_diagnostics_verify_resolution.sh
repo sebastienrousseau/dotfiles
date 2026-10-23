@@ -18,12 +18,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
+source "$SCRIPT_DIR/../../framework/host_path.sh"
 
 VERIFY_FILE="$REPO_ROOT/scripts/diagnostics/verify.sh"
 
 WORK="$(mktemp -d -t vfy.XXXXXX)"
 cov_setup_sandbox
 trap 'rm -rf "$WORK"; cov_teardown_sandbox' EXIT
+# A host `dot` (graphviz, or an installed copy) would shadow every fallback.
+SYS="$(host_path_without "$WORK/sys" dot)"
 
 # vfy_case <name> — a fresh, empty fake HOME plus an empty stub bin dir.
 # Prints the case root; $root/home and $root/bin are the two interesting
@@ -78,7 +81,7 @@ vfy_run() {
   VFY_RC=0
   VFY_OUT="$(
     HOME="$root/home" \
-      PATH="$root/bin:/usr/bin:/bin:/usr/sbin:/sbin" \
+      PATH="$root/bin:$SYS" \
       CHEZMOI_SOURCE_DIR="${VFY_CHEZMOI_SRC:-}" \
       NO_COLOR=1 \
       "${BASH:-bash}" "$VERIFY_FILE" "$@" 2>&1

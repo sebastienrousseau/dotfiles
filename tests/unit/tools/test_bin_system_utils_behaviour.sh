@@ -16,6 +16,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
+source "$SCRIPT_DIR/../../framework/host_path.sh"
 
 BIN_DIR="$REPO_ROOT/defaults/dot_local/bin"
 REAL_BASH="$(command -v bash)"
@@ -294,7 +295,11 @@ out_has "Unknown option: --unknown-flag" "error"
 
 test_start "launch_or_focus_falls_back_to_a_direct_launch_without_niri"
 record_stub ghostty
-util dot-launch-or-focus com.mitchellh.ghostty --extra
+# Neither the sandbox's niri shim nor a host niri (on a niri desktop) may
+# be reachable here.
+rm -f "$BIN/niri"
+PATH="$BIN:$(host_path_without "$DOTFILES_COV_TMPDIR/noniri" niri)" \
+  util dot-launch-or-focus com.mitchellh.ghostty --extra
 assert_equals 0 "$RC" "rc"
 out_has "requires niri" "explanation"
 called "ghostty --extra"
