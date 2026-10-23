@@ -48,6 +48,7 @@ _mk_gitea() { # name default
   printf '%s\n' "$2" >"$DEFAULTS/$1"
   cat >"$GITEA/$1.git/hooks/pre-receive" <<EOF
 #!/usr/bin/env bash
+[[ ! -f "$WORK/reject-push" ]] || { echo "rejected by test" >&2; exit 1; }
 def="\$(cat "$DEFAULTS/$1")"
 while read -r old new ref; do
   if [[ "\$new" == 0000000000000000000000000000000000000000 && "\$ref" == "refs/heads/\$def" ]]; then
@@ -79,6 +80,7 @@ done
 name="\${url##*/}"
 echo "\$method \$name \$data" >>"$WORK/api.log"
 [[ -f "$DEFAULTS/\$name" ]] || exit 22
+[[ "\$method" != PATCH || ! -f "$WORK/patch-fails" ]] || exit 22
 case "\$method" in
 GET) printf '{"name":"%s","default_branch":"%s"}\n' "\$name" "\$(cat "$DEFAULTS/\$name")" ;;
 PATCH) sed -E 's/.*"default_branch":"([^"]*)".*/\1/' <<<"\$data" >"$DEFAULTS/\$name" ;;
@@ -131,6 +133,24 @@ _run refresh >/dev/null
 assert_equals "1" "$?" "an empty listing fails"
 assert_dir_exists "$MIRROR/public/go/alpha/.git" "and deletes nothing"
 
+test_start "mirror_refresh_reports_clone_failure"
+_list "alpha|public|go|main" "ghost|public|go|main"
+out="$(_run refresh)"
+assert_equals "0" "$?" "one unclonable repo does not fail the refresh"
+assert_contains "FAIL  ghost (clone)" "$out" "the failed clone is named"
+assert_dir_not_exists "$MIRROR/public/go/ghost" "and leaves no mirror entry"
+
+test_start "mirror_refresh_reports_fetch_failure"
+_list "alpha|public|go|main"
+alpha_before="$(_refs "$MIRROR/public/go/alpha")"
+mv "$SRC/alpha.git" "$WORK/alpha-away.git"
+out="$(_run refresh)"
+rc=$?
+mv "$WORK/alpha-away.git" "$SRC/alpha.git"
+assert_equals "0" "$rc" "an unreachable source does not fail the refresh"
+assert_contains "FAIL  alpha (fetch)" "$out" "the failed fetch is named"
+assert_equals "$alpha_before" "$(_refs "$MIRROR/public/go/alpha")" "and the mirror keeps its refs"
+
 # ── sync ──────────────────────────────────────────────────────────────────
 
 # Gitea's alpha has drifted the way the NAS copies had: its default is a
@@ -163,6 +183,44 @@ test_start "mirror_sync_is_idempotent"
 out="$(_run sync)"
 assert_equals "0" "$?" "a second sync succeeds"
 assert_false 'grep -q "^FORCE\|^DEFAULT" <<<"$out"' "and changes nothing"
+
+test_start "mirror_verify_reports_parity"
+: >"$WORK/api.log"
+out="$(_run verify)"
+assert_equals "0" "$?" "verify succeeds on parity"
+assert_contains "verify: 1 identical, 0 different" "$out" "and counts the identical repository"
+assert_equals "" "$(cat "$WORK/api.log")" "without calling the Gitea API"
+
+test_start "mirror_sync_reports_rejected_default_change"
+printf 'stale\n' >"$DEFAULTS/alpha"
+touch "$WORK/patch-fails"
+out="$(_run sync)"
+rm -f "$WORK/patch-fails"
+assert_contains "FAIL  alpha (default branch stale -> main)" "$out" "the refused API change is named"
+assert_false 'grep -q "^DEFAULT alpha" <<<"$out"' "and not reported as done"
+assert_equals "stale" "$(cat "$DEFAULTS/alpha")" "gitea default branch is unchanged"
+printf 'main\n' >"$DEFAULTS/alpha"
+
+test_start "mirror_sync_reports_rejected_force_push"
+git -C "$GITEA/alpha.git" update-ref refs/tags/gitea-extra "$old_main"
+touch "$WORK/reject-push"
+out="$(_run sync)"
+rc=$?
+rm -f "$WORK/reject-push"
+assert_equals "1" "$rc" "sync fails when gitea refuses the forced push"
+assert_contains "FAIL  alpha: " "$out" "the refused push is named"
+assert_contains "rejected by test" "$out" "with gitea's reason"
+assert_true 'git -C "$GITEA/alpha.git" rev-parse -q --verify refs/tags/gitea-extra >/dev/null' \
+  "gitea keeps its refs"
+_run sync >/dev/null
+
+test_start "mirror_verify_requires_refresh_first"
+mv "$MIRROR/.github-repos.tsv" "$WORK/list-away.tsv"
+out="$(_run verify)"
+rc=$?
+mv "$WORK/list-away.tsv" "$MIRROR/.github-repos.tsv"
+assert_equals "1" "$rc" "verify fails without a repository list"
+assert_contains "no repository list; run refresh first" "$out" "and says what to run"
 
 test_start "mirror_sync_fails_when_gitea_cannot_converge"
 _list "alpha|public|go|main" "beta|private|rust|main"
