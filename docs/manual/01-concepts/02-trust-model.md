@@ -114,7 +114,7 @@ Violations are logged to `~/.local/state/dotfiles/mcp-violations.log` and report
     "agent_profile": "architect"
   },
   "tools": {
-    "chezmoi": "2.72.2",
+    "chezmoi": "2.73.3",
     "mise": "2026.4.0"
   },
   "git": {

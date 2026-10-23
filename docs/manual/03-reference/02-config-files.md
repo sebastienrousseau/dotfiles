@@ -138,7 +138,7 @@ Strict versions for testing the repo itself (separate from the user's own mise c
 
 ```toml
 [tools]
-chezmoi = "2.72.2"
+chezmoi = "2.73.3"
 pandoc = "3.1.8"
 shellcheck = "0.10.0"
 shfmt = "3.8.0"

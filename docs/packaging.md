@@ -60,13 +60,13 @@ for a packaging recipe:
 | `bash` | 3.2 | **required at runtime** |
 | `git` | 2.34 | required at runtime |
 | `curl` | any | required by the bootstrap path only |
-| `chezmoi` | 2.72.2 | **required at runtime** — the CLI is a control plane over chezmoi |
+| `chezmoi` | 2.73.3 | **required at runtime** — the CLI is a control plane over chezmoi |
 | `zsh` / `fish` / `nushell` | 5.8 / 4.0 / 0.98 | optional; only if the user wants that shell's integration |
 | `jq`, `gum`, `starship`, `fzf` | any | optional; enable JSON output, rich prompts, and interactive pickers |
 | `go` | 1.23 | **build/test only** — fuzz harnesses and the two Go TUIs. Not needed to build or run the package. |
 
 Suggested dependency split for a distro package: `Depends: bash (>= 3.2),
-git (>= 2.34), chezmoi (>= 2.72.2)`; `Recommends: jq, zsh`;
+git (>= 2.34), chezmoi (>= 2.73.3)`; `Recommends: jq, zsh`;
 `Suggests: fish, nushell, gum, starship, fzf`.
 
 ## Dependency pin model

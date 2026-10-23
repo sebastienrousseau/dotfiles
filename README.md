@@ -222,7 +222,7 @@ profile per machine and flip session flags when you need less.
   but 3.2 is not a supported interactive shell.
 
 - **chezmoi 2.40 or newer, git 2.35 or newer, curl.** CI pins
-  chezmoi `2.72.2` and installs it through a checksum-verified
+  chezmoi `2.73.3` and installs it through a checksum-verified
   fetch; `install.sh` does the same on your machine.
 
 - **A supported platform.** macOS 14+ (Apple Silicon and Intel),
