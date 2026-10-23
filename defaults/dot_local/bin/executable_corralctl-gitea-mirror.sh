@@ -32,6 +32,7 @@ SOURCE_URL="${CORRAL_SOURCE_URL:-https://github.com}"
 GITEA_GIT_BASE="${CORRAL_GITEA_GIT_BASE:-git@git.hub:}"
 RETRY_SLEEP="${CORRAL_RETRY_SLEEP:-300}"
 LIST="$MIRROR/.github-repos.tsv"
+SELF="${BASH_SOURCE[0]}"
 export OWNER GITEA_OWNER MIRROR SOURCE_URL GITEA_GIT_BASE LIST
 
 # name<TAB>visibility<TAB>language<TAB>default-branch, one per GitHub repo.
@@ -48,7 +49,6 @@ repo_dir() { # name -> its mirror clone, if any
   return 0
 }
 gitea_url() { printf '%s%s/%s.git\n' "$GITEA_GIT_BASE" "$GITEA_OWNER" "$1"; }
-export -f repo_dir gitea_url
 
 mirror_one() {
   local name="$1" vis="$2" lang="$3" dest old
@@ -73,7 +73,6 @@ mirror_one() {
     }
   echo "OK    $name"
 }
-export -f mirror_one
 
 cmd_refresh() {
   local list
@@ -84,9 +83,8 @@ cmd_refresh() {
     return 1
   }
   printf '%s\n' "$list" >"$LIST"
-  # shellcheck disable=SC2016 # $1..$3 expand in the child bash, not here
   cut -f1-3 "$LIST" | tr '\t\n' '\0\0' |
-    xargs -0 -r -n3 -P "$JOBS" bash -c 'mirror_one "$1" "$2" "$3"' _ |
+    xargs -0 -r -n3 -P "$JOBS" bash "$SELF" __mirror_one |
     grep -v '^OK ' || true
   prune_gone
   echo "refresh: $(wc -l <"$LIST") GitHub repositories"
@@ -112,7 +110,6 @@ gitea_api() { # method path [json-body]
     -H @<(printf 'Authorization: token %s\n' "$GITEA_TOKEN") \
     "$GITEA_URL/api/v1/repos/$GITEA_OWNER/$2"
 }
-export -f gitea_api
 
 # Point the Gitea default branch at GitHub's, pushing it first if Gitea lacks
 # it: Gitea will not delete a default branch, so a stale one blocks parity.
@@ -130,7 +127,6 @@ align_one() {
     echo "FAIL  $name (default branch $cur -> $want)"
   fi
 }
-export -f align_one
 
 mirror_refs() { git -C "$1" for-each-ref --format='%(objectname) %(refname)' refs/heads refs/tags | sort; }
 
@@ -142,7 +138,6 @@ gitea_refs() {
   raw="$(git ls-remote --refs --heads --tags "$(gitea_url "$1")" 2>/dev/null)" || return 1
   [[ -z "$raw" ]] || tr '\t' ' ' <<<"$raw" | sort
 }
-export -f mirror_refs gitea_refs
 
 # Force the Gitea copy to the mirror's refs. Every overwritten or removed
 # ref is logged with its old hash, so the journal is the recovery record.
@@ -162,7 +157,6 @@ force_one() {
     '+refs/heads/*:refs/heads/*' '+refs/tags/*:refs/tags/*' 2>&1)" ||
     printf 'FAIL  %s: %s\n' "$name" "${out//$'\n'/ | }"
 }
-export -f force_one
 
 verify_one() {
   local name="$1" dir mine theirs
@@ -173,16 +167,14 @@ verify_one() {
   theirs="$(gitea_refs "$name")" || theirs="(unreadable)"
   if [[ "$mine" == "$theirs" ]]; then echo "SAME  $name"; else echo "DIFF  $name"; fi
 }
-export -f verify_one
 
 # The NAS sshd resets connections under load, so gitea-facing steps run with
 # less parallelism than the GitHub refresh.
 each_repo() { # fn [with-default-branch]
   local fn="$1" cols=1 n=1
   [[ "${2:-}" == default ]] && cols=1,4 && n=2
-  # shellcheck disable=SC2016 # $1/$2 expand in the child bash, not here
   cut -f"$cols" "$LIST" | tr '\t\n' '\0\0' |
-    xargs -0 -r -n"$n" -P "$GITEA_JOBS" bash -c "$fn"' "$@"' _
+    xargs -0 -r -n"$n" -P "$GITEA_JOBS" bash "$SELF" "__$fn"
 }
 
 # corralctl creates missing repositories and pushes what it can; a stale
@@ -222,11 +214,18 @@ cmd_verify() {
 }
 
 case "${1:-}" in
-refresh) cmd_refresh ;;
-sync) cmd_sync ;;
-verify) cmd_verify ;;
-*)
-  echo "usage: $0 refresh|sync|verify" >&2
-  exit 2
-  ;;
+  refresh) cmd_refresh ;;
+  sync) cmd_sync ;;
+  verify) cmd_verify ;;
+  # A parallel worker: xargs re-enters this file rather than calling exported
+  # functions, which run with no source file, so no error or coverage trace
+  # could name their lines. Options are reset to what a `bash -c` child had.
+  __mirror_one | __align_one | __force_one | __verify_one)
+    set +eu +o pipefail
+    "${1#__}" "${@:2}"
+    ;;
+  *)
+    echo "usage: $0 refresh|sync|verify" >&2
+    exit 2
+    ;;
 esac
