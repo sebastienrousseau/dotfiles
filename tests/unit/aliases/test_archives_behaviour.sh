@@ -8,11 +8,13 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/host_path.sh"
 
 ARCHIVES="$REPO_ROOT/defaults/.chezmoitemplates/aliases/archives/archives.aliases.sh"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 mkdir -p "$WORK/bin" "$WORK/pv"
+SYS="$(host_path_without "$WORK/sys" pv)"
 for t in tar zip 7z gzip bzip2 xz zstd lz4 rar unrar unzip unzstd unxz bunzip2 gunzip; do
   printf '#!/bin/sh\necho "%s $*" >>"$CALLS"\n[ "${FAIL_TOOL:-}" = "%s" ] && exit 3\nexit 0\n' "$t" "$t" >"$WORK/bin/$t"
   chmod +x "$WORK/bin/$t"
@@ -25,7 +27,7 @@ N=0
 # arc [PV=1] [FAIL_TOOL=x] -- <shell code>: run it in a fresh directory
 # holding a.txt, b.txt and dir/; sets OUT, RC, D (the directory).
 arc() {
-  local path="$WORK/bin:/usr/bin:/bin" fail=""
+  local path="$WORK/bin:$SYS" fail=""
   while [[ $# -gt 0 && "$1" != "--" ]]; do
     case "$1" in PV=1) path="$WORK/pv:$path" ;; FAIL_TOOL=*) fail="${1#*=}" ;; esac
     shift

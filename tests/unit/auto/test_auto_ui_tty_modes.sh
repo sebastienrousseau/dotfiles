@@ -11,6 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
+source "$SCRIPT_DIR/../../framework/host_path.sh"
 
 SCRIPT_FILE="$REPO_ROOT/lib/dot/ui.sh"
 REAL_UNAME="$(command -v uname)"
@@ -118,11 +119,13 @@ STUB
 chmod +x "$STUB_BIN/chezmoi"
 
 # The host may have real gum / dot-ui / fzf installed. Pin PATH to the stub
-# dir plus system dirs so no test can reach a real interactive binary. Two
+# dir plus the system dirs without them, so no test can reach a real
+# interactive binary. Two
 # reduced variants drop the selector binaries so the fallback chains in
 # ui_pick / ui_confirm can be reached.
 ln -sf "$REAL_BASH" "$STUB_BIN/bash"
-export PATH="$STUB_BIN:/usr/bin:/bin"
+SYS="$(host_path_without "$WORK/sys" gum dot-ui fzf)"
+export PATH="$STUB_BIN:$SYS"
 NOFZF_BIN="$WORK/nofzf-bin"
 NOGUM_BIN="$WORK/nogum-bin"
 mkdir -p "$NOFZF_BIN" "$NOGUM_BIN"
@@ -242,7 +245,7 @@ else
 fi
 
 test_start "tty_no_color_env_disables_palette"
-if NO_COLOR=1 PATH="$NOGUM_BIN:/usr/bin:/bin" tty_run 'ui_header "Head"; echo "color=$UI_COLOR"'; then
+if NO_COLOR=1 PATH="$NOGUM_BIN:$SYS" tty_run 'ui_header "Head"; echo "color=$UI_COLOR"'; then
   assert_file_contains "$TTY_OUT" "color=0" "NO_COLOR keeps UI_COLOR=0"
   assert_file_contains "$TTY_OUT" "--- Head ---" "plain header fallback"
 else
@@ -300,13 +303,13 @@ if GUM_CONFIRM_RC=0 tty_run 'ui_confirm "Go?"; echo "gum_rc=$?"'; then
 else
   _fail "pty run (gum) failed"
 fi
-if PATH="$NOGUM_BIN:/usr/bin:/bin" tty_run 'ui_confirm "Go?" n; echo "ans_rc=$?"' "y"; then
+if PATH="$NOGUM_BIN:$SYS" tty_run 'ui_confirm "Go?" n; echo "ans_rc=$?"' "y"; then
   assert_file_contains "$TTY_OUT" "[y/N]" "default-no hint shown"
   assert_file_contains "$TTY_OUT" "ans_rc=0" "typed y → rc 0"
 else
   _fail "pty run (read) failed"
 fi
-if PATH="$NOGUM_BIN:/usr/bin:/bin" tty_run 'ui_confirm "Go?"; echo "ans_rc=$?"' "n"; then
+if PATH="$NOGUM_BIN:$SYS" tty_run 'ui_confirm "Go?"; echo "ans_rc=$?"' "n"; then
   assert_file_contains "$TTY_OUT" "[Y/n]" "default-yes hint shown"
   assert_file_contains "$TTY_OUT" "ans_rc=1" "typed n → rc 1"
 else

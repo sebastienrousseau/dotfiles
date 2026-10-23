@@ -9,11 +9,14 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/host_path.sh"
 
 AIU="$REPO_ROOT/defaults/dot_local/bin/executable_ai-update"
 REAL_BASH="$(command -v bash)"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
+# The tools each case stubs as present are missing from the base system.
+SYS="$(host_path_without "$WORK/sys" brew claude goose lms mise node npm ollama pipx)"
 
 # aiu <os> "<present tools>" "<failing tools>": run ai-update; sets rc/out.
 aiu() {
@@ -47,7 +50,7 @@ aiu() {
     esac
   done
   rc=0
-  out="$(env -i HOME="$d/home" PATH="$d/stubs:$d/tools:/usr/bin:/bin" TERM=dumb TMPDIR="$d" \
+  out="$(env -i HOME="$d/home" PATH="$d/stubs:$d/tools:$SYS" TERM=dumb TMPDIR="$d" \
     "$REAL_BASH" "$AIU" </dev/null 2>&1)" || rc=$?
 }
 

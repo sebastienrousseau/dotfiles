@@ -16,6 +16,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
+source "$SCRIPT_DIR/../../framework/host_path.sh"
 
 # Keep bash xtrace flowing to the coverage runner's trace stream even
 # when a probe below captures `2>&1`.
@@ -95,7 +96,7 @@ export BENCH_PY_CLOCK="$DOTFILES_COV_TMPDIR/pyclock"
 BENCH_DIR="$XDG_DATA_HOME/dotfiles/benchmarks"
 
 # PATH without hyperfine (and without the host's real tools).
-PATH_NO_HF="$MB:/usr/bin:/bin"
+PATH_NO_HF="$MB:$(host_path_without "$DOTFILES_COV_TMPDIR/sys" hyperfine)"
 # PATH with a hyperfine shim.
 HF_DIR="$DOTFILES_COV_TMPDIR/hfbin"
 mkdir -p "$HF_DIR"

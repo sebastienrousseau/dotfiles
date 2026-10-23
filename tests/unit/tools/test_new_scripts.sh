@@ -21,12 +21,15 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
+source "$SCRIPT_DIR/../../framework/host_path.sh"
 
 BIN_DIR="$REPO_ROOT/defaults/dot_local/bin"
 REAL_BASH="${BASH:-$(command -v bash)}"
 
 WORK="$(mktemp -d -t dot-new-scripts.XXXXXX)"
 trap 'rm -rf "$WORK"' EXIT
+# The tools the cases unstub must then be missing, not found on the host.
+SYS="$(host_path_without "$WORK/sys" delta fzf niri nvidia-smi nvtop)"
 export HOME="$WORK/home"
 export XDG_CONFIG_HOME="$HOME/.config" XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache" XDG_STATE_HOME="$HOME/.local/state"
@@ -102,7 +105,7 @@ run() {
   shift 2
   : >"$CALLS"
   RC=0
-  (cd "$dir" && command env -i HOME="$HOME" PATH="$STUBS:$TOOLS:/usr/bin:/bin" \
+  (cd "$dir" && command env -i HOME="$HOME" PATH="$STUBS:$TOOLS:$SYS" \
     XDG_CONFIG_HOME="$XDG_CONFIG_HOME" XDG_DATA_HOME="$XDG_DATA_HOME" \
     GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL="$GIT_CONFIG_GLOBAL" \
     GIT_CEILING_DIRECTORIES="$GIT_CEILING_DIRECTORIES" CALLS="$CALLS" LC_ALL=C \
@@ -213,7 +216,7 @@ stub fzf "$FZF_STUB"
 fzf_bind() { awk -v p="$1" 'index($0, p) == 1 { print substr($0, length(p) + 1); exit }' "$FZF_ARGS"; }
 fzf_after() { awk -v f="$1" 'hit { print; exit } $0 == f { hit = 1 }' "$FZF_ARGS"; }
 # shell_in_repo <command> — run a command line fzf would run, inside $REPO
-shell_in_repo() { (cd "$REPO" && PATH="$STUBS:$TOOLS:/usr/bin:/bin" CALLS="$CALLS" bash -c "$1") 2>&1; }
+shell_in_repo() { (cd "$REPO" && PATH="$STUBS:$TOOLS:$SYS" CALLS="$CALLS" bash -c "$1") 2>&1; }
 head_sha="$(git -C "$REPO" rev-parse --short HEAD)"
 
 test_start "gl_uses_fzf"

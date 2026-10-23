@@ -12,6 +12,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
+source "$SCRIPT_DIR/../../framework/host_path.sh"
 
 SCRIPT_FILE="$REPO_ROOT/lib/dot/ui.sh"
 REAL_UNAME="$(command -v uname)"
@@ -119,11 +120,13 @@ STUB
 chmod +x "$STUB_BIN/chezmoi"
 
 # The host may have real gum / dot-ui / fzf installed. Pin PATH to the stub
-# dir plus system dirs so no test can reach a real interactive binary. Two
+# dir plus the system dirs without them, so no test can reach a real
+# interactive binary. Two
 # reduced variants drop the selector binaries so the fallback chains in
 # ui_pick / ui_confirm can be reached.
 ln -sf "$REAL_BASH" "$STUB_BIN/bash"
-export PATH="$STUB_BIN:/usr/bin:/bin"
+SYS="$(host_path_without "$WORK/sys" gum dot-ui fzf)"
+export PATH="$STUB_BIN:$SYS"
 NOFZF_BIN="$WORK/nofzf-bin"
 NOGUM_BIN="$WORK/nogum-bin"
 mkdir -p "$NOFZF_BIN" "$NOGUM_BIN"
@@ -311,7 +314,7 @@ if DOT_UI_PICK_RC=2 tty_run 'printf "one\ntwo\n" | ui_pick --header H --prompt P
 else
   _fail "pty run (fzf) failed"
 fi
-if DOT_UI_PICK_RC=2 PATH="$NOFZF_BIN:/usr/bin:/bin" tty_run 'printf "one\ntwo\n" | ui_pick'; then
+if DOT_UI_PICK_RC=2 PATH="$NOFZF_BIN:$SYS" tty_run 'printf "one\ntwo\n" | ui_pick'; then
   assert_file_contains "$WORK/gum.calls" "choose" "no fzf → gum choose"
   assert_file_contains "$TTY_OUT" "one" "gum choose stub selection printed"
 else

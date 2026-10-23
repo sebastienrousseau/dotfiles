@@ -353,6 +353,15 @@ assert_equals 0 "$RC" "rc"
 out_has "Pattern matches" "verdict"
 
 # ── yamlv ───────────────────────────────────────────────────────────────
+# yamlv's verdicts are under test, not the validator, and a host may have no
+# validator that works (no yq; a python3 without PyYAML). A yq stand-in in
+# the sandbox bin rejects the one malformed input these cases use.
+cat >"$DOTFILES_COV_TMPDIR/bin/yq" <<'YQ'
+#!/usr/bin/env bash
+! grep -q '\[unclosed'
+YQ
+chmod +x "$DOTFILES_COV_TMPDIR/bin/yq"
+
 test_start "yamlv_accepts_a_valid_file"
 printf 'key: value\nlist:\n  - one\n' >"$WORK/good.yaml"
 util yamlv "$WORK/good.yaml"
