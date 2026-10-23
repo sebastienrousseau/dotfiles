@@ -33,6 +33,11 @@ source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 REGISTRY_SCRIPT="$REPO_ROOT/scripts/dot/commands/registry.sh"
 REAL_MINISIGN="${MINISIGN_BIN:-$(command -v minisign 2>/dev/null || true)}"
+# A mise shim stops working once HOME is sandboxed below (mise no longer finds
+# that the user trusted their config), so use the binary the shim points at.
+if [[ "$REAL_MINISIGN" == */mise/shims/* ]] && command -v mise >/dev/null 2>&1; then
+  REAL_MINISIGN="$(mise which minisign 2>/dev/null || true)"
+fi
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
