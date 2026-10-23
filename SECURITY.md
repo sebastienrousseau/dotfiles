@@ -82,10 +82,11 @@ Key rotation policy and history are in
 
 ## Signing keys
 
-Commits and tags are signed with an SSH ed25519 key published in
-[`KEYS.asc`](KEYS.asc), which doubles as a `git allowed_signers` file
-and carries a verification guide. The GPG key described above is used
-**only** for encrypted vulnerability reports and never signs releases.
+Commits and tags are signed with SSH ed25519 keys, one per maintainer
+machine, published in [`KEYS.asc`](KEYS.asc), which doubles as a
+`git allowed_signers` file and carries a verification guide. The GPG
+key described above is used **only** for encrypted vulnerability
+reports and never signs releases.
 
 Release artefacts carry stronger, CI-generated provenance — sigstore
 keyless signatures, SLSA attestations, SHA256SUMS and a CycloneDX
