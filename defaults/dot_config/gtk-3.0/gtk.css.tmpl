@@ -111,11 +111,10 @@ scrollbar slider:active {
 {{- end }}
 
 /* General improvements */
-.titlebar:not(headerbar) {
-  window.background > & {
-    /* Fix for applications that still use .titlebar instead of headerbar */
-    box-shadow: inset 0 1px rgba(255, 255, 255, 0.1);
-  }
+/* Fix for applications that still use .titlebar instead of headerbar.
+   GTK3 has no CSS nesting, so the selector is spelled out. */
+window.background > .titlebar:not(headerbar) {
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.1);
 }
 
 /* Rounded corners for modern look */
@@ -134,7 +133,6 @@ button {
 }
 
 button:hover {
-  transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -146,7 +144,6 @@ entry {
 
 entry:focus {
   box-shadow: 0 0 0 2px {{ $t.ui.accent }};
-  transform: scale(1.02);
 }
 
 /* Switch improvements */
