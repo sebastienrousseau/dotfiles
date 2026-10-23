@@ -221,9 +221,30 @@ test_fm_smoke_doctor_benchmark() {
 
 # ── heal / health ──────────────────────────────────────────────────────────
 
+# fm_run_offline <args…> — fm_run with every installer heal can reach
+# (package managers, mise, curl, wget, sudo) shadowed by a stub that fails at
+# once. On a runner without starship, atuin and the rest, a real heal installs
+# them over the network: minutes of wall clock, and a timeout that kills heal
+# mid-run leaves its lock behind for the next case. A failed install is a
+# path heal already handles, so the run stays offline and the repairs that
+# need no download still land.
+fm_run_offline() {
+  local stubs="$FM_SANDBOX/offline-installers" tool saved_path="$PATH"
+  if [[ ! -d "$stubs" ]]; then
+    mkdir -p "$stubs"
+    for tool in brew apt-get dnf pacman zypper apk pkg nix-env mise curl wget sudo; do
+      printf '#!/bin/sh\nexit 1\n' >"$stubs/$tool"
+      chmod +x "$stubs/$tool"
+    done
+  fi
+  PATH="$stubs:$PATH"
+  fm_run "$@"
+  PATH="$saved_path"
+}
+
 test_fm_heal() {
   test_start "fm_heal"
-  fm_run doctor fix
+  fm_run_offline doctor fix
   # heal.sh guards every repair with `|| true` and exits 0 whether or not it
   # could fix anything; the summary line is what carries the result.
   fm_expect_rc 0
@@ -243,7 +264,7 @@ test_fm_heal_dry_run() {
   local before
   before="$(ls -A "$HOME/.config" 2>/dev/null | sort)"
   test_start "fm_heal_dry_run"
-  fm_run doctor fix --dry-run
+  fm_run_offline doctor fix --dry-run
   fm_expect_rc 0
   test_start "fm_heal_dry_run_announces_dry_run"
   fm_expect_out "Dry-run mode (no changes will be made)"
