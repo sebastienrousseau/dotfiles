@@ -1,0 +1,12 @@
+[Unit]
+Description=Daily run of corralctl locally and in the rousseau-agent container
+Documentation=https://github.com/sebastienrousseau/corralctl
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/corralctl-daily-run.sh
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

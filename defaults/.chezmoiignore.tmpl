@@ -187,8 +187,23 @@ Library/**
 {{- if not .features.linux_desktop }}
 .config/environment.d
 .config/environment.d/**
+{{- if and (eq .chezmoi.os "linux") .features.corral_gitea_mirror }}
+# Every user unit stays out except the Gitea mirror's own pair.
+.config/systemd/user/*
+!.config/systemd/user/corralctl.service
+!.config/systemd/user/corralctl.timer
+{{- else }}
 .config/systemd
 .config/systemd/**
+{{- end }}
 .config/mako
 .config/mako/**
+{{- end }}
+
+# GitHub -> NAS Gitea mirror: per-host, see features.corral_gitea_mirror.
+{{- if not (and (eq .chezmoi.os "linux") .features.corral_gitea_mirror) }}
+.config/systemd/user/corralctl.service
+.config/systemd/user/corralctl.timer
+.local/bin/corralctl-daily-run.sh
+.local/bin/corralctl-gitea-mirror.sh
 {{- end }}

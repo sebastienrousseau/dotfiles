@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+# GitHub -> Gitea mirror timer: {{ include "dot_config/systemd/user/corralctl.service" | sha256sum }} {{ include "dot_config/systemd/user/corralctl.timer" | sha256sum }}
+{{- if and (eq .chezmoi.os "linux") .features.corral_gitea_mirror }}
+
+set -euo pipefail
+
+# No user manager (container, CI, chroot): the units are deployed but there
+# is nothing to enable them in. Say so rather than fail the apply.
+if ! systemctl --user show-environment >/dev/null 2>&1; then
+  printf 'note: no systemd user manager; corralctl.timer not enabled\n' >&2
+  exit 0
+fi
+
+systemctl --user daemon-reload
+systemctl --user enable --now corralctl.timer
+{{- end }}

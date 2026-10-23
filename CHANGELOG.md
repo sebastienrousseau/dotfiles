@@ -4,6 +4,10 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+### Added
+
+- Manage the nightly GitHub → NAS Gitea mirror (`corralctl.timer`, `corralctl-daily-run.sh`, `corralctl-gitea-mirror.sh`) per host behind `features.corral_gitea_mirror` (Linux only, off by default). The mirror syncs a dedicated tree holding a forced, pruned copy of every GitHub branch and tag, not the working clones; it then points each Gitea default branch at GitHub's and force-pushes whatever still differs (logging every overwritten ref), succeeds only on exact parity, and retries three times.
+
 ## v0.2.536 (2026-10-17)
 
 ### Added
