@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily corralctl run at 04:00
+Documentation=https://github.com/sebastienrousseau/corralctl
+
+[Timer]
+OnCalendar=*-*-* 04:00:00
+Persistent=true
+Unit=corralctl.service
+
+[Install]
+WantedBy=timers.target

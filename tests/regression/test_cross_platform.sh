@@ -248,6 +248,27 @@ if [[ $_xp_cz_ok -eq 1 ]]; then
     "linux_desktop=true deploys ~/.config/systemd (other flags still apply)"
 else _xp_skip "$_xp_cz_skip"; fi
 
+test_start "platform_corral_mirror_off_keeps_units_and_scripts_out"
+if [[ $_xp_cz_ok -eq 1 ]]; then
+  xp_ignore="$(_xp_render linux .chezmoiignore.tmpl)"
+  assert_true '_xp_has_line "$xp_ignore" ".config/systemd" && _xp_has_line "$xp_ignore" ".local/bin/corralctl-gitea-mirror.sh" && _xp_has_line "$xp_ignore" ".config/systemd/user/corralctl.timer"' \
+    "corral_gitea_mirror=false deploys neither the mirror units nor its scripts"
+else _xp_skip "$_xp_cz_skip"; fi
+
+test_start "platform_corral_mirror_on_deploys_only_its_units"
+if [[ $_xp_cz_ok -eq 1 ]]; then
+  xp_ignore="$(_xp_render linux .chezmoiignore.tmpl '"features":{"corral_gitea_mirror":true}')"
+  assert_true '! _xp_has_line "$xp_ignore" ".config/systemd" && _xp_has_line "$xp_ignore" ".config/systemd/user/*" && _xp_has_line "$xp_ignore" "!.config/systemd/user/corralctl.timer" && ! _xp_has_line "$xp_ignore" ".local/bin/corralctl-gitea-mirror.sh"' \
+    "corral_gitea_mirror=true on a non-desktop host deploys the mirror pair and no other user unit"
+else _xp_skip "$_xp_cz_skip"; fi
+
+test_start "platform_corral_mirror_never_on_macos"
+if [[ $_xp_cz_ok -eq 1 ]]; then
+  xp_ignore="$(_xp_render darwin .chezmoiignore.tmpl '"features":{"corral_gitea_mirror":true}')"
+  assert_true '_xp_has_line "$xp_ignore" ".config/systemd/**" && _xp_has_line "$xp_ignore" ".local/bin/corralctl-daily-run.sh"' \
+    "the systemd mirror stays off macOS even with the flag set"
+else _xp_skip "$_xp_cz_skip"; fi
+
 test_start "platform_wsl_detection_function"
 assert_equals "0" "$(_xp_is_wsl "$_xp_tmp/proc-version-wsl")" "is_wsl succeeds on a Microsoft kernel"
 
