@@ -6,6 +6,11 @@
 **/.DS_Store
 *.swp
 **/*.swp
+# Python bytecode caches (a test or an import of a deployed script can leave
+# them in the source tree; they are build output, never configuration).
+**/__pycache__
+**/__pycache__/**
+**/*.pyc
 # Runtime state (XDG_STATE_HOME) — pre-push bypass audit log etc. must
 # never be tracked or applied from chezmoi source. See #871.
 .local/state/dotfiles/audit-bypass.log

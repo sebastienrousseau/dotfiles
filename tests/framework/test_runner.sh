@@ -16,6 +16,10 @@
 
 set -euo pipefail
 
+# Tests import deployed Python scripts from the chezmoi source tree; bytecode
+# written there would be deployed by the next chezmoi apply.
+export PYTHONDONTWRITEBYTECODE=1
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TESTS_DIR="$(dirname "$SCRIPT_DIR")"
 REPO_ROOT="$(dirname "$TESTS_DIR")"
