@@ -45,12 +45,16 @@ new_case() {
 }
 
 # with_gum: gum spin runs its command; choose answers GUM_CHOICE (or, with
-# --no-limit, the comma-separated GUM_PICK).
+# --no-limit, the comma-separated GUM_PICK). choose reads its whole menu
+# first, as real gum does: the script pipes the menu in under pipefail, so
+# a stub that exits before the writer runs fails that pipeline with EPIPE
+# and the script discards the answer.
 with_gum() {
   stub gum '
 case "$1" in
   spin) while [ "$#" -gt 0 ] && [ "$1" != "--" ]; do shift; done; shift; "$@"; exit $? ;;
   choose)
+    cat >/dev/null
     case "$*" in
       *--no-limit*) printf "%s\n" "${GUM_PICK:-}" | tr "," "\n" ;;
       *) printf "%s\n" "${GUM_CHOICE:-Skip}" ;;
@@ -165,6 +169,21 @@ new_case
 with_gum
 apply GUM_CHOICE="Install all"
 assert_equals "0:no" "$RC:$(yes_no called 'gum choose')" "no TTY, no menu"
+
+# The menu writer can lose the race to a stub that never reads it (seen
+# on loaded CI runners); delaying the writer makes that order certain.
+test_start "gum_stub_choose_waits_for_its_whole_menu"
+new_case
+with_gum
+GUM_RC=0
+GUM_ANSWER="$(
+  trap '' PIPE
+  {
+    sleep 0.3
+    printf '%s\n' a b c
+  } | GUM_CHOICE=a "$D/stubs/gum" choose --header h
+)" || GUM_RC=$?
+assert_equals "0:a" "$GUM_RC:$GUM_ANSWER" "a late menu writer still gets its pipeline's answer back"
 
 if command -v script >/dev/null 2>&1; then
   test_start "apply_tty_failure_under_gum_exits_1"
