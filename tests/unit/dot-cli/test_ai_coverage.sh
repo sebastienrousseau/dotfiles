@@ -127,6 +127,8 @@ seed_cache() {
 }
 
 # ── pty runner (script(1)); xtrace records replayed on stderr ─────────────
+# TTY_ANSWER, when set, is typed into the terminal first: a plain [y/N]
+# prompt reads it from /dev/tty instead of waiting out the cap below.
 TTY_OUT="$WORK/tty.out"
 tty_ai() {
   local inner="$WORK/tty_inner.sh" rcfile="$WORK/tty.rc" rc
@@ -136,6 +138,7 @@ tty_ai() {
   printf 'env -u CI %s %q ai tools\necho $? >%q\n' "$REAL_BASH" "$AI" "$rcfile" >"$inner"
   {
     local _i=0
+    [[ -z "${TTY_ANSWER:-}" ]] || printf '%s\n' "$TTY_ANSWER"
     # script(1) hangs up the child once its stdin hits EOF, so stdin stays
     # open until the flow reports back (generous cap for a loaded CI box).
     while [[ ! -f "$rcfile" && $_i -lt 1800 ]]; do
@@ -238,8 +241,10 @@ else
 
   test_start "tty_no_gum_tips"
   seed_cache
-  PATH="$NOGUM_PATH" tty_ai
+  : >"$CALLS"
+  TTY_ANSWER=n PATH="$NOGUM_PATH" tty_ai
   assert_file_contains "$TTY_OUT" "missing AI tool(s)? [y/N]" "without gum a plain yes/no is asked"
+  assert_true "! grep -q '^mise ' '$CALLS'" "answering no installs nothing"
 fi
 
 # ===========================================================================
