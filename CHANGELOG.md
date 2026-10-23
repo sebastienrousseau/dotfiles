@@ -4,9 +4,41 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+## v0.2.537 (2026-10-23)
+
 ### Added
 
 - Manage the nightly GitHub → NAS Gitea mirror (`corralctl.timer`, `corralctl-daily-run.sh`, `corralctl-gitea-mirror.sh`) per host behind `features.corral_gitea_mirror` (Linux only, off by default). The mirror syncs a dedicated tree holding a forced, pruned copy of every GitHub branch and tag, not the working clones; it then points each Gitea default branch at GitHub's and force-pushes whatever still differs (logging every overwritten ref), succeeds only on exact parity, and retries three times.
+- Name every command under the ADR-020 grammar `dot <domain> [object] <verb>`: one manifest per domain in `plugins/<domain>/dot-plugin.toml`, a generated command table, a lint against ADR-020, and runtime resolution of the new spellings (N0.1 to N0.3).
+- Generate help, man pages, PowerShell cmdlets and the completions for every shell from the manifests (N0.4).
+- One update path, `dot system update` (shortcut `dot update`), with scheduled maintenance from `dot system schedule`; topgrade, the `update` script and the `update`/`upd` functions are gone (N0.5).
+- Give every old subcommand a new spelling. Old names still work and print the new one; they stop in v0.2.538 with exit 127 and a hint.
+- `dot fleet push user@host` replaces `dot teleport`; `dot doctor` reports Git commit signing.
+- ADR-021 (one family version), ADR-022 (Go) and ADR-023 (the personal account owns the dot family).
+
+### Changed
+
+- The `dot ai` cockpit shows only measured figures: SCI and the energy estimate are removed, CPU history records raw samples, and the run log stores no joules or gCO2eq (T0).
+- Documentation, examples and help teach the new spellings; history keeps the old ones.
+- chezmoi 2.73.3 (built with Go 1.27.3) is the pinned, checksum-verified version for `install.sh`, CI and the test images.
+- The container scan reports HIGH and CRITICAL findings that have a fix; other images' build files stay out of the test image.
+
+### Fixed
+
+- `dot clean-cache` routes again, so the weekly maintenance timer succeeds.
+- `--style` for `dot ai run`, and old names through `bin/dot` on Windows.
+- The test container writes valid TOML for chezmoi and checks the eza listing aliases by what they run.
+- Tests keep host tools out of the unit suite and run the heal feature-matrix cases offline; the traceability gate no longer loses rows to SIGPIPE.
+- `chezmoi init` keeps the stored age and theme settings on re-init.
+- The niri config parses again, theme sync is validated, and the GTK CSS is GTK3-safe.
+- chezmoi defaults to a theme that exists, and the deployed tree never contains Python bytecode.
+- The registry test runs the real minisign round trip under a mise shim.
+- The two flaky macOS performance gates take the median of five samples, and the test `gum` stub reads its whole menu like real gum, so the apply-phase install cases no longer lose their answer to a broken pipe.
+
+### Security
+
+- `KEYS.asc` trusts the rousseau-mbp-m1 signing key alongside rousseau-mb-neo, and the verification docs name both fingerprints.
+- GitPython 3.2.1 for GHSA-83vg-56qc-22m7, `ip-address` 10.7.4 for GHSA-rxp7-6hxx-x8q5, Go 1.26.10 for GO-2026-6809, and a newer CA bundle for the dot-mcp git server.
 
 ## v0.2.536 (2026-10-17)
 
