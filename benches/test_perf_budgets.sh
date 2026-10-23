@@ -359,9 +359,15 @@ _gate "gate_icloud_unit_test" 3500 5 bash "$REPO_ROOT/tests/unit/misc/test_macos
 
 _gate "gate_traceability_coverage" 5000 5 bash "$REPO_ROOT/scripts/qa/traceability-coverage.sh"
 
-_gate "gate_dot_subcommand_smoke" 7500 3 bash "$REPO_ROOT/tests/regression/test_dot_subcommand_smoke.sh"
+# Both took 3 runs until they failed main the same way: on 2026-10-23 their
+# macos-latest medians ranged 3109-10149ms (smoke) and 3433-10293ms
+# (symmetry) on near-identical code, and each of three red main runs had
+# one gate over budget while the other passed. A slow burst inside a run,
+# not a slow runner, so a median of 5 absorbs it as it did for the gates
+# above; the budgets stay at 2x the local median.
+_gate "gate_dot_subcommand_smoke" 7500 5 bash "$REPO_ROOT/tests/regression/test_dot_subcommand_smoke.sh"
 
-_gate "gate_dot_help_registry_symmetry" 9000 3 bash "$REPO_ROOT/tests/regression/test_dot_help_registry_symmetry.sh"
+_gate "gate_dot_help_registry_symmetry" 9000 5 bash "$REPO_ROOT/tests/regression/test_dot_help_registry_symmetry.sh"
 
 # =============================================================================
 # Summary
