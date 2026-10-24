@@ -308,12 +308,13 @@ _ws_cached_png() {
   [[ "$fsize" -gt 1000000 ]]
 }
 
-# _ws_magick_heic <heic> <tmp.png> <png>: convert with ImageMagick.
+# _ws_magick_heic <heic> <tmp.png> <png> [frame]: convert with ImageMagick.
 # Multi-frame HEIC: magick creates {name}-0.png, {name}-1.png etc.; move
 # each extracted frame to its final location atomically and print the
-# light frame (-0 = light, -1 = dark). Returns 1 when magick fails.
+# requested frame (default 0; -0 = light, -1 = dark). Returns 1 when magick
+# fails.
 _ws_magick_heic() {
-  local wp="$1" tmp_png="$2" png="$3" f suffix
+  local wp="$1" tmp_png="$2" png="$3" frame="${4:-0}" f suffix
   magick "$wp" -quality 95 "$tmp_png" 2>/dev/null || return 1
   local tmp_base="${tmp_png%.png}"
   local final_base="${png%.png}"
@@ -327,15 +328,16 @@ _ws_magick_heic() {
     mv -f "$f" "${final_base}${suffix}" 2>/dev/null
   done
   rm -f "$tmp_png" 2>/dev/null
-  if [[ -f "${final_base}-0.png" ]]; then
-    printf '%s\n' "${final_base}-0.png"
+  if [[ -f "${final_base}-${frame}.png" ]]; then
+    printf '%s\n' "${final_base}-${frame}.png"
   else
     printf '%s\n' "$png"
   fi
 }
 
-# _ws_convert_heic <heic> <tmp.png> <png>: the first available converter;
-# returns 1 when none is installed or the one found fails.
+# _ws_convert_heic <heic> <tmp.png> <png> [frame]: the first available
+# converter; returns 1 when none is installed or the one found fails. Only
+# ImageMagick splits a multi-frame HEIC, so only it uses the frame.
 _ws_convert_heic() {
   local wp="$1" tmp_png="$2" png="$3" tool
   if command -v magick &>/dev/null; then
@@ -352,24 +354,31 @@ _ws_convert_heic() {
   return 1
 }
 
-# Convert .heic to .png on Linux (HEIC not universally supported)
+# Convert .heic to .png on Linux (HEIC not universally supported).
+# ensure_linux_compatible <wallpaper> [light|dark]: a multi-frame HEIC
+# yields the mode's frame (<name>-0.png light, <name>-1.png dark).
 ensure_linux_compatible() {
-  local wp="$1" png tmp_png
+  local wp="$1" frame=0 png tmp_png cached
   if [[ "$(uname -s)" != "Linux" || "${wp##*.}" != "heic" ]]; then
     printf '%s\n' "$wp"
     return
   fi
 
+  [[ "${2:-}" == "dark" ]] && frame=1
   png="${wp%.heic}.png"
-  if _ws_cached_png "$wp" "$png"; then
-    printf '%s\n' "$png"
-    return
-  fi
+  # A multi-frame HEIC never produces <name>.png, only its frames, so the
+  # mode's frame is the cache entry to look for first.
+  for cached in "${wp%.heic}-${frame}.png" "$png"; do
+    if _ws_cached_png "$wp" "$cached"; then
+      printf '%s\n' "$cached"
+      return
+    fi
+  done
 
   # Write to temp file then atomic move — prevents DMS/matugen from
   # reading a partially-written PNG during multi-frame HEIC extraction.
   tmp_png="$(mktemp "${png%.png}.XXXXXX.png")"
-  _ws_convert_heic "$wp" "$tmp_png" "$png" && return
+  _ws_convert_heic "$wp" "$tmp_png" "$png" "$frame" && return
 
   rm -f "$tmp_png" 2>/dev/null
   # Fallback: use original and hope the DE supports it
@@ -537,8 +546,8 @@ _ws_apply_gsettings() {
   local wp="$1" mode="$2" wp_uri="file://${1}" light_wp="" dark_wp=""
   _ws_gsettings_pair "$wp" "$mode"
   if [[ -n "$light_wp" ]] && [[ -n "$dark_wp" ]]; then
-    light_wp="$(ensure_linux_compatible "$light_wp")"
-    dark_wp="$(ensure_linux_compatible "$dark_wp")"
+    light_wp="$(ensure_linux_compatible "$light_wp" light)"
+    dark_wp="$(ensure_linux_compatible "$dark_wp" dark)"
     gsettings set org.gnome.desktop.background picture-uri "file://${light_wp}"
     gsettings set org.gnome.desktop.background picture-uri-dark "file://${dark_wp}"
     # Screensaver schema has no dark variant — pick by active mode
@@ -581,7 +590,7 @@ apply_wallpaper() {
   local mode="$2"
 
   # Convert HEIC to PNG on Linux if needed
-  wp="$(ensure_linux_compatible "$wp")"
+  wp="$(ensure_linux_compatible "$wp" "$mode")"
   case "$(uname -s)" in
     Darwin) _ws_apply_macos "$wp" "$mode" ;;
     Linux) _ws_apply_linux "$wp" "$mode" ;;
