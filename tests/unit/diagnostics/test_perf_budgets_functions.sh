@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 #
 # benches/test_perf_budgets.sh: the paths a real run rarely takes. An
-# unparseable clock, a failed calibration sample, non-numeric measurements
+# unparsable clock, a failed calibration sample, non-numeric measurements
 # and a runner exactly at the factor cap each decide whether a gate passes,
 # and none of them can be produced by timing real commands on demand.
 # The bench is sourced for its functions (it stops before the first gate)
@@ -17,9 +17,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 GATE="$REPO_ROOT/benches/test_perf_budgets.sh"
 
-# The bench sources the assertions framework itself.
-if ! source "$GATE"; then
-  printf 'sourcing %s failed\n' "$GATE"
+# Everything above the bench's end-of-definitions marker: its functions and
+# settings, which source the assertions framework, and none of its gates.
+DEFS="$(mktemp)"
+trap 'rm -f "$DEFS"' EXIT
+sed '/^# --- end of definitions: /,$d' "$GATE" >"$DEFS"
+if ! grep -q '^_budget_verdict() {' "$DEFS" || ! source "$DEFS"; then
+  printf 'could not source the definitions of %s\n' "$GATE"
   exit 1
 fi
 
@@ -36,9 +40,9 @@ done
 # local TIMEFORMAT and can make the clock print something that is not a time.
 _garble_clock() { TIMEFORMAT='x%3R'; }
 
-test_start "time_once_refuses_an_unparseable_clock"
+test_start "time_once_refuses_an_unparsable_clock"
 out="$(_time_once _garble_clock)"
-assert_equals 1 "$?" "an unparseable reading returns 1"
+assert_equals 1 "$?" "an unparsable reading returns 1"
 assert_contains "CLOCK_UNUSABLE x" "$out" "and reports the raw reading"
 
 test_start "time_once_reports_status_and_ms"

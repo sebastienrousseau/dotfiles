@@ -356,9 +356,8 @@ _sandbox() {
   printf '%s\n' "$sb"
 }
 
-# Sourced (tests/unit/diagnostics/test_perf_budgets_functions.sh): stop with
-# the functions defined, before any gate runs.
-[[ "${BASH_SOURCE[0]}" == "$0" ]] || return 0
+# --- end of definitions: tests/unit/diagnostics/test_perf_budgets_functions.sh
+# sources everything above this line, so no gate runs there.
 
 # =============================================================================
 # TIER 1: INSTANT (≤500ms)
