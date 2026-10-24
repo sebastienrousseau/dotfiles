@@ -537,7 +537,6 @@ _vs_sync_scripts() {
     "dot_local/bin/executable_tour"
     "install.sh"
     "lib/dot/bento.sh"
-    "share/man/man1/dot.1"
     # The MCP server reports this string as serverInfo.version in the
     # `initialize` handshake, and it must equal the version in
     # .well-known/mcp/server-card.json — a client compares them.
@@ -547,6 +546,12 @@ _vs_sync_scripts() {
     "llms.txt"
     "CITATION.cff"
   )
+  # Every generated page carries "dotfiles vX.Y.Z": dot.1 and one
+  # dot-<domain>.1 per manifest. Listing only dot.1 left the other 17 stale.
+  local page
+  for page in "$PROJECT_ROOT"/share/man/man1/*.1; do
+    [[ -f "$page" ]] && script_files+=("${page#"$PROJECT_ROOT"/}")
+  done
   for script_file in "${script_files[@]}"; do
     [[ -f "$PROJECT_ROOT/$script_file" ]] || continue
     temp_file=$(umask 077 && mktemp)

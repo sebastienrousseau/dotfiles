@@ -49,8 +49,10 @@
 #     * Full test suite
 #
 # All thresholds carry ≥2× headroom over the reference-machine
-# median so CI-runner variance doesn't cause flakes. When a real
-# regression happens, the median jumps outside the headroom band.
+# median, and are scaled by a runner factor measured in the same run
+# (see "Runner calibration" below), so a slow CI runner doesn't cause
+# flakes. When a real regression happens, the median jumps outside
+# the headroom band whatever the factor.
 #
 # Baseline captured on 2026-08-30, rousseau-cachyos-geekom-a9,
 # Ryzen AI 9 HX 370. CI runners are usually 1.5-2× slower.
@@ -70,7 +72,7 @@ DOT_CLI="${DOT_CLI:-$REPO_ROOT/bin/dot}"
 ICLOUD_TMPL="$REPO_ROOT/defaults/run_before_macos-icloud-symlinks.sh.tmpl"
 
 # ---------------------------------------------------------------------------
-# _measure — run a command N times, return "<worst exit status> <median ms>".
+# _time_once <command...> — run once; print "<exit status> <ms>".
 #
 # Timing comes from the `time` keyword with TIMEFORMAT, not from
 # `date +%s%N`. %N is a GNU extension: BSD date, which is what macOS 14 and
@@ -84,57 +86,146 @@ ICLOUD_TMPL="$REPO_ROOT/defaults/run_before_macos-icloud-symlinks.sh.tmpl"
 #
 # The `time` keyword is a shell builtin, present and millisecond-accurate in
 # bash 3.2, and needs no external clock at all. LC_ALL is pinned because
-# TIMEFORMAT renders the decimal separator per locale.
+# TIMEFORMAT renders the decimal separator per locale. Prints
+# "CLOCK_UNUSABLE <raw>" and returns 1 when the reading does not parse.
+# ---------------------------------------------------------------------------
+_time_once() {
+  local elapsed secs ms rc_file rc
+  local TIMEFORMAT='%3R'
+  rc_file="$(mktemp)"
+  # F2: capture the exit status instead of discarding it. A command that
+  # crashes instantly is FAST, and the old `|| true` let it sail through
+  # its budget — a broken `dot` reported excellent performance. The status
+  # is written to a file because `time` needs the command inside its own
+  # group, whose exit status the substitution below does not carry out.
+  elapsed="$(
+    LC_ALL=C
+    { time {
+      "$@" >/dev/null 2>&1
+      printf '%s' "$?" >"$rc_file"
+    }; } 2>&1
+  )"
+  rc="$(cat "$rc_file")"
+  rm -f "$rc_file"
+  # "1.234" -> 1234. Split on the decimal point rather than using floating
+  # point, which the shell has none of.
+  secs="${elapsed%%.*}"
+  ms="${elapsed##*.}"
+  if [[ ! "$secs" =~ ^[0-9]+$ ]] || [[ ! "$ms" =~ ^[0-9]{3}$ ]]; then
+    printf 'CLOCK_UNUSABLE %s' "$elapsed"
+    return 1
+  fi
+  printf '%s %s' "$rc" "$((10#$secs * 1000 + 10#$ms))"
+}
+
+# _median <n...> — read the sorted list line by line rather than
+# word-splitting a command substitution: mapfile is bash 4, and macOS ships
+# bash 3.2.
+_median() {
+  local sorted=() _t
+  while IFS= read -r _t; do
+    sorted+=("$_t")
+  done < <(printf '%s\n' "$@" | sort -n)
+  printf '%s' "${sorted[$(($# / 2))]}"
+}
+
+# ---------------------------------------------------------------------------
+# Runner calibration (docs/operations/PERFORMANCE_BUDGETS.md has the detail).
+#
+# Every gate is fork/exec-heavy shell, so its wall clock tracks the runner's
+# spawn speed as much as our code: on shared macos-latest runners unchanged
+# code measured 3109-10149ms (smoke) and 3433-10293ms (help-registry
+# symmetry), and five samples did not stop them failing main.
+#
+# So each sample of each gate is paired with a sample of a fixed workload,
+# timed just before it: CALIBRATION_SPAWNS starts of the `bash` the gates
+# resolve from PATH, each running one command substitution. Its median
+# per-spawn cost over CALIBRATION_REF_US is the gate's runner factor, and the
+# budget is multiplied by max(1, factor):
+#
+#   * Per sample, not once up front: the red runs had one gate over budget
+#     while its neighbour passed, so the runner slowed down mid-run.
+#   * Never below 1: a faster runner gets no tighter budget than the doc's,
+#     and Linux, where a spawn costs a fraction of the macOS reference, runs
+#     at exactly its old budgets.
+#   * Past CALIBRATION_CAP_PCT the gate fails and says the runner is too slow
+#     to gate on, instead of scaling the budget until nothing can fail.
+#   * Every wall-clock gate uses it, not only the two that flaked: they share
+#     the runner and are all spawn-heavy (docs and traceability flaked the
+#     same way, see the sample counts below). The factor moves only when the
+#     reference workload slows down, so a change that slows one gated command
+#     past its budget's headroom still fails at any factor.
+#
+# Reference: median of 7 runs of PERF_GATE_FILTER=instant_dot_version on an
+# Apple A18 Pro MacBook (8 GB, macOS 26.6, Homebrew bash 5.3.20 first on
+# PATH), 2026-10-23. Refresh it with the same command on the machine the
+# budgets are measured on, in the same PR as any budget change:
+#   for i in 1 2 3 4 5 6 7; do PERF_GATE_FILTER=instant_dot_version \
+#     bash benches/test_perf_budgets.sh | grep -o 'per_spawn=[0-9]*'; done
+# PERF_CALIBRATION_REF_US overrides it for one run.
+# ---------------------------------------------------------------------------
+CALIBRATION_SPAWNS=30
+CALIBRATION_REF_US="${PERF_CALIBRATION_REF_US:-5800}"
+CALIBRATION_CAP_PCT=400
+if [[ ! "$CALIBRATION_REF_US" =~ ^[1-9][0-9]*$ ]]; then
+  printf 'PERF_CALIBRATION_REF_US must be a positive integer (got %s)\n' "$CALIBRATION_REF_US" >&2
+  exit 2
+fi
+
+# The workload is a file rather than a function so that it runs in a `bash`
+# resolved from PATH, exactly like the gated commands; it is written after
+# _sandbox, into the sandbox HOME.
+_write_calibration_workload() {
+  CALIBRATION_WORKLOAD="$HOME/perf-calibration-workload.sh"
+  cat >"$CALIBRATION_WORKLOAD" <<'WORKLOAD'
+i=0
+while [ "$i" -lt "$1" ]; do
+  bash --noprofile --norc -c 'x=$(printf ok)' || exit 1
+  i=$((i + 1))
+done
+WORKLOAD
+}
+
+# _pct_text 250 -> "2.50x"
+_pct_text() { printf '%d.%02dx' "$(($1 / 100))" "$(($1 % 100))"; }
+
+# ---------------------------------------------------------------------------
+# _measure <runs> <command...> — print
+# "<worst exit status> <median ms> <median calibration ms>", each run timing
+# the calibration workload and then the command. Anything unmeasurable comes
+# back as a non-numeric first field, which every caller treats as a failure.
 # ---------------------------------------------------------------------------
 _measure() {
   local runs="$1"
   shift
-  local times=() worst_rc=0 rc=0
-  local i elapsed secs ms rc_file
-  local TIMEFORMAT='%3R'
-  rc_file="$(mktemp)"
+  local times=() cals=() worst_rc=0 i out
   for ((i = 0; i < runs; i++)); do
-    # F2: capture the exit status instead of discarding it. A command that
-    # crashes instantly is FAST, and the old `|| true` let it sail through
-    # its budget — a broken `dot` reported excellent performance. The status
-    # is written to a file because `time` needs the command inside its own
-    # group, whose exit status the substitution below does not carry out.
-    elapsed="$(
-      LC_ALL=C
-      { time {
-        "$@" >/dev/null 2>&1
-        printf '%s' "$?" >"$rc_file"
-      }; } 2>&1
-    )"
-    rc="$(cat "$rc_file")"
-    [[ "$rc" -gt "$worst_rc" ]] && worst_rc="$rc"
-    # "1.234" -> 1234. Split on the decimal point rather than using floating
-    # point, which the shell has none of.
-    secs="${elapsed%%.*}"
-    ms="${elapsed##*.}"
-    if [[ ! "$secs" =~ ^[0-9]+$ ]] || [[ ! "$ms" =~ ^[0-9]{3}$ ]]; then
-      rm -f "$rc_file"
-      printf 'CLOCK_UNUSABLE %s' "$elapsed"
+    out="$(_time_once bash "$CALIBRATION_WORKLOAD" "$CALIBRATION_SPAWNS")" || {
+      printf '%s' "$out"
+      return 0
+    }
+    if [[ "${out%% *}" != 0 ]]; then
+      printf 'CALIBRATION_FAILED exit=%s' "${out%% *}"
       return 0
     fi
-    times+=("$((10#$secs * 1000 + 10#$ms))")
+    cals+=("${out##* }")
+    out="$(_time_once "$@")" || {
+      printf '%s' "$out"
+      return 0
+    }
+    [[ "${out%% *}" -gt "$worst_rc" ]] && worst_rc="${out%% *}" # mutation: ignore equivalent: -ge only adds the equal case, which assigns the same value
+    times+=("${out##* }")
   done
-  rm -f "$rc_file"
-  # median. Read the sorted list line by line rather than word-splitting a
-  # command substitution: mapfile is bash 4, and macOS ships bash 3.2.
-  local sorted=() _t
-  while IFS= read -r _t; do
-    sorted+=("$_t")
-  done < <(printf '%s\n' "${times[@]}" | sort -n)
-  local mid=$((runs / 2))
-  printf '%s %s' "$worst_rc" "${sorted[$mid]}"
+  printf '%s %s %s' "$worst_rc" "$(_median "${times[@]}")" "$(_median "${cals[@]}")"
 }
 
-# Budgets can be scaled for meta-testing: PERF_BUDGET_PERCENT=0 makes every
-# budget impossible, which is how tests/regression/test_gate_integrity.sh
-# proves this gate actually fails rather than merely existing.
+# _scaled_budget <budget_ms> <runner_pct> — budget x runner factor x
+# PERF_BUDGET_PERCENT. The last is for meta-testing: PERF_BUDGET_PERCENT=0
+# makes every budget impossible at any factor, which is how
+# tests/regression/test_gate_integrity.sh proves this gate actually fails
+# rather than merely existing.
 _scaled_budget() {
-  printf '%s' "$(($1 * ${PERF_BUDGET_PERCENT:-100} / 100))"
+  printf '%s' "$(($1 * $2 * ${PERF_BUDGET_PERCENT:-100} / 10000))"
 }
 
 # PERF_GATE_FILTER runs only gates whose label contains the given substring.
@@ -161,46 +252,63 @@ _gate() { _gate_max_rc 0 "$@"; }
 _gate_diag() { _gate_max_rc 1 "$@"; }
 
 _gate_max_rc() {
-  local max_rc="$1" label="$2" budget_ms="$3" runs="$4"
+  local max_rc="$1" label="$2" base_ms="$3" runs="$4" out failed median cal
   shift 4
   _gate_selected "$label" || return 0
   test_start "$label"
-  budget_ms="$(_scaled_budget "$budget_ms")"
-  local out failed median
   out="$(_measure "$runs" "$@")"
-  failed="${out%% *}"
-  median="${out##* }"
-  # A gate that could not measure must fail, not pass. Both fields go through
+  read -r failed median cal <<<"$out"
+  # A gate that could not measure must fail, not pass. These fields go through
   # `-gt` / `-le`, and bash reads a non-numeric operand there as 0 — so
   # without this an unusable clock would have silently satisfied every budget,
   # which is exactly how the BSD-date breakage stayed invisible.
-  if [[ ! "$failed" =~ ^[0-9]+$ ]] || [[ ! "$median" =~ ^[0-9]+$ ]]; then
-    ((TESTS_FAILED++)) || true
-    printf '  \033[0;31m✗\033[0m %s: could not measure (got %s) — refusing to report a pass\n' \
-      "$label" "$out"
+  if [[ ! "$failed" =~ ^[0-9]+$ ]] || [[ ! "$median" =~ ^[0-9]+$ ]] ||
+    [[ ! "$cal" =~ ^[0-9]+$ ]]; then
+    _gate_fail "$label" "could not measure (got $out) — refusing to report a pass"
+  elif [[ "$failed" -gt "$max_rc" ]]; then
+    _gate_fail "$label" "exited $failed (max allowed $max_rc) — timing is meaningless"
+    _show_failure_output "$@"
+  else
+    _budget_verdict "$label" "$base_ms" "$median" "$cal"
+  fi
+}
+
+_gate_fail() {
+  ((TESTS_FAILED++)) || true
+  printf '  \033[0;31m✗\033[0m %s: %s\n' "$1" "$2"
+}
+
+# _budget_verdict <label> <budget_ms> <median_ms> <calibration_ms>
+_budget_verdict() {
+  local label="$1" base_ms="$2" median="$3" per_spawn_us pct budget_ms runner
+  per_spawn_us=$(($4 * 1000 / CALIBRATION_SPAWNS))
+  pct=$((per_spawn_us * 100 / CALIBRATION_REF_US))
+  [[ "$pct" -lt 100 ]] && pct=100 # mutation: ignore equivalent: -le only adds pct=100, which it sets to 100
+  runner="runner=$(_pct_text "$pct") per_spawn=${per_spawn_us}us reference=${CALIBRATION_REF_US}us"
+  if [[ "$pct" -gt "$CALIBRATION_CAP_PCT" ]]; then
+    _gate_fail "$label" "median=${median}ms; $runner exceeds the $(_pct_text "$CALIBRATION_CAP_PCT") cap — this runner is too slow to gate on"
     return 0
   fi
-  if [[ "$failed" -gt "$max_rc" ]]; then
-    ((TESTS_FAILED++)) || true
-    printf '  \033[0;31m✗\033[0m %s: exited %s (max allowed %s) — timing is meaningless\n' \
-      "$label" "$failed" "$max_rc"
-    # Re-run once with output captured. An exit code with no context is
-    # undebuggable in CI, where you cannot reproduce the environment by hand.
-    local diag
-    diag="$("$@" 2>&1 | tail -25)"
-    if [[ -n "$diag" ]]; then
-      printf '%s\n' "$diag" | sed 's/^/        | /'
-    else
-      printf '        | (command produced no output)\n'
-    fi
-  elif [[ "$median" -le "$budget_ms" ]]; then
+  budget_ms="$(_scaled_budget "$base_ms" "$pct")"
+  if [[ "$median" -le "$budget_ms" ]]; then
     ((TESTS_PASSED++)) || true
-    printf '  \033[0;32m✓\033[0m %s: median=%sms budget=%sms\n' \
-      "$label" "$median" "$budget_ms"
+    printf '  \033[0;32m✓\033[0m %s: median=%sms budget=%sms (%s)\n' \
+      "$label" "$median" "$budget_ms" "$runner"
   else
-    ((TESTS_FAILED++)) || true
-    printf '  \033[0;31m✗\033[0m %s: median=%sms EXCEEDS budget=%sms\n' \
-      "$label" "$median" "$budget_ms"
+    _gate_fail "$label" "median=${median}ms EXCEEDS budget=${budget_ms}ms ($runner)"
+  fi
+}
+
+# Re-run a failed command once with output captured. An exit code with no
+# context is undebuggable in CI, where you cannot reproduce the environment
+# by hand.
+_show_failure_output() {
+  local diag
+  diag="$("$@" 2>&1 | tail -25)"
+  if [[ -n "$diag" ]]; then
+    printf '%s\n' "$diag" | sed 's/^/        | /'
+  else
+    printf '        | (command produced no output)\n'
   fi
 }
 
@@ -248,10 +356,14 @@ _sandbox() {
   printf '%s\n' "$sb"
 }
 
+# --- end of definitions: tests/unit/diagnostics/test_perf_budgets_functions.sh
+# sources everything above this line, so no gate runs there.
+
 # =============================================================================
 # TIER 1: INSTANT (≤500ms)
 # =============================================================================
 _sandbox >/dev/null
+_write_calibration_workload
 
 _selftest_rejects_broken
 
@@ -362,9 +474,10 @@ _gate "gate_traceability_coverage" 5000 5 bash "$REPO_ROOT/scripts/qa/traceabili
 # Both took 3 runs until they failed main the same way: on 2026-10-23 their
 # macos-latest medians ranged 3109-10149ms (smoke) and 3433-10293ms
 # (symmetry) on near-identical code, and each of three red main runs had
-# one gate over budget while the other passed. A slow burst inside a run,
-# not a slow runner, so a median of 5 absorbs it as it did for the gates
-# above; the budgets stay at 2x the local median.
+# one gate over budget while the other passed. Five samples did not fix it
+# (smoke measured 8064ms on 2026-10-23 at 18:08): the runner itself was slow,
+# which is what the calibration factor above now absorbs. The budgets stay at
+# 2x the reference-machine median.
 _gate "gate_dot_subcommand_smoke" 7500 5 bash "$REPO_ROOT/tests/regression/test_dot_subcommand_smoke.sh"
 
 _gate "gate_dot_help_registry_symmetry" 9000 5 bash "$REPO_ROOT/tests/regression/test_dot_help_registry_symmetry.sh"
