@@ -88,27 +88,48 @@ _probe_median() {
   sed -n "s/.*$PROBE: median=\([0-9][0-9]*\)ms.*/\1/p" "$work/$1.out" | head -1
 }
 
+# _min_num <a> <b> — the smaller of two numbers; an empty or non-numeric
+# side never wins.
+_min_num() {
+  if [[ ! "$2" =~ ^[0-9]+$ ]]; then
+    printf '%s' "$1"
+  elif [[ ! "$1" =~ ^[0-9]+$ ]] || [[ "$2" -lt "$1" ]]; then
+    printf '%s' "$2"
+  else
+    printf '%s' "$1"
+  fi
+}
+
 # ---------------------------------------------------------------------------
 # Baseline on this machine, unslowed: the gated command's median (base_ms)
-# and the calibration's per-spawn cost (base_us).
+# and the calibration's per-spawn cost (base_us), each the minimum of three
+# runs. Every scenario below is scaled from them, and a load spike during a
+# single baseline run (the parallel test runner of a pre-push audit) inflated
+# both: the regression budget then absorbed a 3x slower command, and the cap
+# scenario's reference left the runner under the cap. Load only adds time,
+# so the minimum is the reading it cannot inflate.
 # ---------------------------------------------------------------------------
 _check_baseline() {
-  _bench base
-  base_ms="$(_probe_median base)"
-  base_us="$(sed -n 's/.*per_spawn=\([0-9][0-9]*\)us.*/\1/p' "$work/base.out" | head -1)"
+  local i
+  for i in 1 2 3; do
+    _bench "base$i"
+    base_ms="$(_min_num "$base_ms" "$(_probe_median "base$i")")"
+    base_us="$(_min_num "$base_us" \
+      "$(sed -n 's/.*per_spawn=\([0-9][0-9]*\)us.*/\1/p' "$work/base$i.out" | head -1)")"
+  done
 
   test_start "bench_reports_runner_factor"
-  if [[ -n "$base_us" ]] && grep -q 'runner=[0-9]*\.[0-9][0-9]x' "$work/base.out"; then
-    _pass base
+  if [[ -n "$base_us" ]] && grep -q 'runner=[0-9]*\.[0-9][0-9]x' "$work/base1.out"; then
+    _pass base1
   else
-    _fail "no runner factor in the gate's output" "$work/base.out"
+    _fail "no runner factor in the gate's output" "$work/base1.out"
   fi
 
   test_start "baseline_measured"
   if [[ "$base_ms" =~ ^[0-9]+$ ]] && [[ "$base_ms" -ge 4 ]]; then
     _pass
   else
-    _fail "no usable probe median (got '${base_ms}')" "$work/base.out"
+    _fail "no usable probe median (got '${base_ms}')" "$work/base1.out"
     return 1
   fi
 }
