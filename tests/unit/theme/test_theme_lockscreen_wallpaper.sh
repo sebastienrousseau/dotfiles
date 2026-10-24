@@ -36,6 +36,18 @@ printf '%s\n' "$*" >> "$GS_LOG"
 STUB
 chmod +x "$WORK/bin/gsettings"
 
+# And a `dms`: wallpaper-sync.sh sets the wallpaper through `dms ipc` when
+# the command exists, and the real one is the running shell of whoever runs
+# the suite. Without this stub every run set the live session's wallpaper
+# to a file under $WORK, which the EXIT trap then deletes.
+cat >"$WORK/bin/dms" <<'STUB'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "${DMS_LOG:-/dev/null}"
+[[ "$1 $2 $3" == "ipc wallpaper set" ]] && echo "SUCCESS: stub"
+exit 0
+STUB
+chmod +x "$WORK/bin/dms"
+
 # Pull one top-level function out of a script, by name.
 _extract_fn() {
   awk -v fn="$1" '
@@ -123,6 +135,7 @@ _run_sync() {
   : >"$wpdir/sample-light.png"
   : >"$wpdir/sample-dark.png"
   GS_LOG="$WORK/sync-$mode.log" \
+    DMS_LOG="$WORK/sync-dms-$mode.log" \
     PATH="$WORK/bin:$PATH" \
     /bin/bash -c '
       set -uo pipefail
@@ -148,6 +161,16 @@ for want in dark light; do
   else
     ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: screensaver got ${got:-<nothing>}"
+  fi
+
+  test_start "wallpaper-sync.sh: ${want} mode sets the wallpaper through the dms stub"
+  got="$(cat "$WORK/sync-dms-$want.log" 2>/dev/null)"
+  if [[ "$got" == "ipc wallpaper set $WORK/sync-wp/sample-${want}.png" ]]; then
+    ((TESTS_PASSED++)) || true
+    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+  else
+    ((TESTS_FAILED++)) || true
+    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dms got ${got:-<nothing>}"
   fi
 done
 

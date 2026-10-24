@@ -295,6 +295,39 @@ ws
 assert_equals "1" "$RC" "only Darwin and Linux"
 
 # ── HEIC handling ────────────────────────────────────────────────────────
+# A theme whose stored wallpaper is a two-frame HEIC (themes.toml names
+# Maui.heic for maui-dark and maui-light) reaches apply_wallpaper as the HEIC
+# itself. Converting it on Linux must hand dms the frame for the mode: it
+# handed over -0, the light frame, in dark mode too.
+for pair in "dark:1" "light:0"; do
+  mode="${pair%%:*}"
+  test_start "wallpaper_linux_stored_dynamic_heic_sets_the_${mode}_frame"
+  setup Linux "maui-${mode}" Maui.heic
+  use gsettings dms magick
+  # shellcheck disable=SC2088 # a literal ~/ path, as themes.toml stores it
+  toml "maui-${mode}" "~/Pictures/Wallpapers/Maui.heic"
+  ENVS=(DMS_SET="SUCCESS: stub")
+  ws
+  assert_equals "yes" "$(called "dms ipc wallpaper set $W/h/Pictures/Wallpapers/Maui-${pair##*:}.png")" \
+    "${mode} mode hands dms Maui-${pair##*:}.png"
+done
+
+# The frames are the cache: Reef.png is never written for a two-frame HEIC,
+# so checking only that name reconverted ~60 MB on every sync. The HEIC is
+# not named after the theme's family: the lookup's first step takes a
+# <family>-1.png directly, and on a case-insensitive filesystem (macOS)
+# maui-1.png would find Maui-1.png and skip the HEIC route under test.
+test_start "wallpaper_linux_dynamic_heic_reuses_a_fresh_frame"
+setup Linux maui-dark Reef.heic
+use gsettings dms magick
+# shellcheck disable=SC2088 # a literal ~/ path, as themes.toml stores it
+toml maui-dark "~/Pictures/Wallpapers/Reef.heic"
+touch -t 202001010000 "$W/h/Pictures/Wallpapers/Reef.heic"
+head -c 1100000 /dev/zero >"$W/h/Pictures/Wallpapers/Reef-1.png"
+ws
+assert_equals "no:yes" "$(called 'magick '):$(called "dms ipc wallpaper set $W/h/Pictures/Wallpapers/Reef-1.png")" \
+  "the cached dark frame is used, nothing converted"
+
 # The cache is only consulted for a HEIC the lookup picked, e.g. through the
 # mode fallback, where the sorted listing puts x-dark.heic before x-dark.png.
 test_start "wallpaper_linux_heic_uses_a_fresh_large_cached_png"
