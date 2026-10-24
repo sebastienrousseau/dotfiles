@@ -213,7 +213,7 @@ _measure() {
       printf '%s' "$out"
       return 0
     }
-    [[ "${out%% *}" -gt "$worst_rc" ]] && worst_rc="${out%% *}"
+    [[ "${out%% *}" -gt "$worst_rc" ]] && worst_rc="${out%% *}" # mutation: ignore equivalent: -ge only adds the equal case, which assigns the same value
     times+=("${out##* }")
   done
   printf '%s %s %s' "$worst_rc" "$(_median "${times[@]}")" "$(_median "${cals[@]}")"
@@ -283,7 +283,7 @@ _budget_verdict() {
   local label="$1" base_ms="$2" median="$3" per_spawn_us pct budget_ms runner
   per_spawn_us=$(($4 * 1000 / CALIBRATION_SPAWNS))
   pct=$((per_spawn_us * 100 / CALIBRATION_REF_US))
-  [[ "$pct" -lt 100 ]] && pct=100
+  [[ "$pct" -lt 100 ]] && pct=100 # mutation: ignore equivalent: -le only adds pct=100, which it sets to 100
   runner="runner=$(_pct_text "$pct") per_spawn=${per_spawn_us}us reference=${CALIBRATION_REF_US}us"
   if [[ "$pct" -gt "$CALIBRATION_CAP_PCT" ]]; then
     _gate_fail "$label" "median=${median}ms; $runner exceeds the $(_pct_text "$CALIBRATION_CAP_PCT") cap — this runner is too slow to gate on"
@@ -355,6 +355,10 @@ _sandbox() {
   export DOTFILES_NO_BANNER=1
   printf '%s\n' "$sb"
 }
+
+# Sourced (tests/unit/diagnostics/test_perf_budgets_functions.sh): stop with
+# the functions defined, before any gate runs.
+[[ "${BASH_SOURCE[0]}" == "$0" ]] || return 0
 
 # =============================================================================
 # TIER 1: INSTANT (≤500ms)
