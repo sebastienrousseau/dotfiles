@@ -589,7 +589,35 @@ else _xp_skip "$_xp_cz_skip"; fi
 
 test_start "platform_gitconfig_credential_linux"
 if [[ $_xp_cz_ok -eq 1 ]]; then
-  assert_contains "git-credential-libsecret" "$xp_git_linux" "Linux gitconfig uses the libsecret credential helper"
+  # Candidates come from data so the result does not depend on this host.
+  mkdir -p "$_xp_tmp/libsecret"
+  : >"$_xp_tmp/libsecret/git-credential-libsecret"
+  xp_git_ls="$(_xp_render linux dot_gitconfig.tmpl \
+    "\"git\":{\"libsecret_candidates\":[\"$_xp_tmp/missing\",\"$_xp_tmp/libsecret\",\"$_xp_tmp/libsecret/git-credential-libsecret\"]}")"
+  assert_contains $'[credential]\n\thelper = cache --timeout=3600\n\thelper = '"$_xp_tmp/libsecret/git-credential-libsecret" \
+    "$xp_git_ls" "Linux gitconfig uses the first libsecret helper that exists, skipping missing paths and directories"
+else _xp_skip "$_xp_cz_skip"; fi
+
+test_start "platform_gitconfig_credential_linux_without_libsecret"
+if [[ $_xp_cz_ok -eq 1 ]]; then
+  xp_git_ls="$(_xp_render linux dot_gitconfig.tmpl "\"git\":{\"libsecret_candidates\":[\"$_xp_tmp/missing\"]}")"
+  assert_contains $'[credential]\n\thelper = cache --timeout=3600\n\n' "$xp_git_ls" \
+    "without a libsecret helper only the cache helper is configured"
+else _xp_skip "$_xp_cz_skip"; fi
+
+test_start "platform_gitconfig_credential_linux_no_missing_path"
+if [[ $_xp_cz_ok -eq 1 ]]; then
+  assert_true '[[ "$xp_git_ls" != *libsecret* ]]' "no missing libsecret helper path is written"
+else _xp_skip "$_xp_cz_skip"; fi
+
+test_start "platform_gitconfig_credential_linux_default_paths_exist"
+if [[ $_xp_cz_ok -eq 1 ]]; then
+  # On this host, any helper path the default render writes must exist.
+  xp_git_missing=0
+  while IFS= read -r p; do
+    [[ -z "$p" || -f "$p" ]] || xp_git_missing=$((xp_git_missing + 1))
+  done < <(sed -n 's/^\thelper = \(\/[^ ]*\)$/\1/p' <<<"$xp_git_linux")
+  assert_equals "0" "$xp_git_missing" "every credential helper path in the Linux gitconfig exists"
 else _xp_skip "$_xp_cz_skip"; fi
 
 test_start "platform_gitconfig_credential_macos_no_libsecret"
