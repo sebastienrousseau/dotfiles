@@ -171,10 +171,20 @@
 [credential]
 	helper = osxkeychain
 {{- else if eq .chezmoi.os "linux" }}
+{{- /* The libsecret helper lives where the distro builds it (Arch, Fedora,
+       Debian's contrib build); a path that does not exist makes every
+       credential lookup print an error, so only an existing one is used. */ -}}
+{{- $libsecret := "" }}
+{{- range (dig "git" "libsecret_candidates" (list "/usr/lib/git-core/git-credential-libsecret" "/usr/libexec/git-core/git-credential-libsecret" "/usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret") .) }}
+{{-   $st := stat . }}
+{{-   if and (not $libsecret) $st (not $st.isDir) }}{{ $libsecret = . }}{{ end }}
+{{- end }}
 
 [credential]
 	helper = cache --timeout=3600
-	helper = /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
+{{- if $libsecret }}
+	helper = {{ $libsecret }}
+{{- end }}
 {{- end }}
 
 [credential "https://github.com"]
