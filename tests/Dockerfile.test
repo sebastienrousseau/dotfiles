@@ -196,9 +196,11 @@ ENV HOME=/root
 
 # The base image ships Canonical's pebble service manager, a Go binary the
 # tests never run; the container scan reports its Go stdlib CVEs. Remove the
-# package that owns it.
+# package that owns it, or the file itself: ubuntu:26.04 adds it outside
+# dpkg, so no package owns it there.
 RUN if [ -e /usr/bin/pebble ]; then \
-      apt-get purge -y "$(dpkg -S /usr/bin/pebble | cut -d: -f1)"; \
+      pkg="$(dpkg -S /usr/bin/pebble 2>/dev/null | cut -d: -f1)"; \
+      if [ -n "$pkg" ]; then apt-get purge -y "$pkg"; else rm -f /usr/bin/pebble; fi; \
     fi && \
     test ! -e /usr/bin/pebble
 
