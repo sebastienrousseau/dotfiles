@@ -26,6 +26,7 @@ This file documents all notable changes to this project.
 
 ### Security
 
+- `KEYS.asc` trusts the rousseau-cachyos-geekom-a9 signing key, which signs this release; `pkg/VERIFY.md` and `docs/MAINTAINERS.md` list its fingerprint. GitHub already lists it as a signing key on the account.
 - zod 4.6.6 for GHSA-mrhx-c7xc-m3w5 in the dot-mcp node servers; fast-uri 3.1.9 and body-parser 2.4.0.
 
 ## v0.2.537 (2026-10-23)
