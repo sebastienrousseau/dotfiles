@@ -216,13 +216,13 @@
     {
      "name": "mode",
      "target": "agent mode",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "agents",
      "target": "agent context",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     }
    ]
@@ -404,115 +404,115 @@
     {
      "name": "ai-setup",
      "target": "ai install --interactive",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "ai-query",
      "target": "ai ask",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "patterns",
      "target": "ai pattern",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "cl",
      "target": "ai run claude",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "claude",
      "target": "ai run claude",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "codex",
      "target": "ai run codex",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "copilot",
      "target": "ai run copilot",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "kimi",
      "target": "ai run kimi",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "agy",
      "target": "ai run agy",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "goose",
      "target": "ai run goose",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "kiro",
      "target": "ai run kiro",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "sgpt",
      "target": "ai run sgpt",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "ollama",
      "target": "ai run ollama",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "opencode",
      "target": "ai run opencode",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "aider",
      "target": "ai run aider",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "autohand",
      "target": "ai run autohand",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "vibe",
      "target": "ai run vibe",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "qwen",
      "target": "ai run qwen",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "zai",
      "target": "ai run zai",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     }
    ]
@@ -559,7 +559,7 @@
     {
      "name": "attestation",
      "target": "attest",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     }
    ]
@@ -647,38 +647,38 @@
     {
      "name": "completion",
      "target": "cli completion",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "registry",
      "target": "cli list --available",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538",
      "legacy": "registry list"
     },
     {
      "name": "search",
      "target": "help",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "manual",
      "target": "help --manual",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "docs",
      "target": "help --readme",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "learn",
      "target": "help tour",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     }
    ]
@@ -842,55 +842,55 @@
     {
      "name": "add",
      "target": "config add",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "commit",
      "target": "config save",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "uninstall",
      "target": "config uninstall",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "init",
      "target": "config init",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "setup",
      "target": "config init",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "profile",
      "target": "config profile",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "sandbox",
      "target": "config apply --sandbox",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "bundle",
      "target": "config export",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "lint",
      "target": "config check",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     }
    ]
@@ -1142,115 +1142,115 @@
     {
      "name": "health",
      "target": "doctor",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "health-check",
      "target": "doctor",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "scorecard",
      "target": "doctor score",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "score",
      "target": "doctor score",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "snapshot",
      "target": "doctor snapshot new",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "perf",
      "target": "doctor perf",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "benchmark",
      "target": "doctor perf --profile",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "load-bench",
      "target": "doctor perf --ready",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "load-bench-pty",
      "target": "doctor perf --ready --pty",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "rollback",
      "target": "doctor rollback",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "heal",
      "target": "doctor fix",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "drift",
      "target": "doctor drift",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "conflicts",
      "target": "doctor conflict",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "restore",
      "target": "doctor restore",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "metrics",
      "target": "doctor metric",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "backup",
      "target": "doctor backup",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "chaos",
      "target": "doctor",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "smoke-test",
      "target": "doctor",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "keys",
      "target": "doctor",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     }
    ]
@@ -1336,7 +1336,7 @@
     {
      "name": "teleport",
      "target": "fleet push",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     }
    ]
@@ -1505,37 +1505,37 @@
     {
      "name": "secrets-init",
      "target": "secret init",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "secrets",
      "target": "secret edit",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "secrets-create",
      "target": "secret new",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "ssh-key",
      "target": "secret key new",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "ssh-cert",
      "target": "secret cert new",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "secret-audit",
      "target": "secret check",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     }
    ]
@@ -1694,49 +1694,49 @@
     {
      "name": "policy",
      "target": "security policy",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "encrypt-check",
      "target": "security disk",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "firewall",
      "target": "security firewall apply",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "telemetry",
      "target": "security telemetry apply",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "dns-doh",
      "target": "security dns apply",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "lock-screen",
      "target": "security lock apply",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "usb-safety",
      "target": "security usb apply",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "security-score",
      "target": "security score",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     }
    ]
@@ -1875,37 +1875,37 @@
     {
      "name": "history",
      "target": "shell history",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "aliases",
      "target": "shell alias",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "alias-check",
      "target": "shell alias check",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "cache-refresh",
      "target": "shell update",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "prewarm",
      "target": "shell update --prewarm",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "clean-cache",
      "target": "shell clean",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     }
    ]
@@ -2010,19 +2010,19 @@
     {
      "name": "upgrade",
      "target": "system update",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "tune",
      "target": "system settings apply",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "log-rotate",
      "target": "system clean --logs",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     }
    ]
@@ -2086,13 +2086,13 @@
     {
      "name": "wallpaper",
      "target": "theme wallpaper set",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "fonts",
      "target": "theme font install",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     }
    ]
@@ -2160,31 +2160,31 @@
     {
      "name": "env",
      "target": "tool",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "tools",
      "target": "tool list --nix",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "packages",
      "target": "tool list --packages",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "locks",
      "target": "tool list --locked",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     },
     {
      "name": "new",
      "target": "tool new",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     }
    ]
@@ -2219,7 +2219,7 @@
     {
      "name": "intelligence",
      "target": "top",
-     "kind": "deprecated",
+     "kind": "removed",
      "until": "0.2.538"
     }
    ]

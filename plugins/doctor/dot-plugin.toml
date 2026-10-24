@@ -245,113 +245,113 @@ summary = "Weekly posture report"
 [[aliases]]
 name = "health"
 target = "doctor"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "health-check"
 target = "doctor"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "scorecard"
 target = "doctor score"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "score"
 target = "doctor score"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "snapshot"
 target = "doctor snapshot new"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "perf"
 target = "doctor perf"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "benchmark"
 target = "doctor perf --profile"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "load-bench"
 target = "doctor perf --ready"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "load-bench-pty"
 target = "doctor perf --ready --pty"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "rollback"
 target = "doctor rollback"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "heal"
 target = "doctor fix"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "drift"
 target = "doctor drift"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "conflicts"
 target = "doctor conflict"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "restore"
 target = "doctor restore"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "metrics"
 target = "doctor metric"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "backup"
 target = "doctor backup"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "chaos"
 target = "doctor"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "smoke-test"
 target = "doctor"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "keys"
 target = "doctor"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"

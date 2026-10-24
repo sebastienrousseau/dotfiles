@@ -2,13 +2,31 @@
 
 This file documents all notable changes to this project.
 
-## Unreleased
+## v0.2.538 (2026-10-24)
+
+### Removed
+
+- The old command names (ADR-020) stop working, as announced in v0.2.537: each of the 88 exits 127 and names its new spelling, so `dot upgrade` prints `use 'dot system update'`. `docs/manual/command-index.md` lists them all.
+- The `update` and `upd` shell functions; run `dot update`.
+- `dot -v` no longer prints the version: `-v` is `--verbose`, and `dot -V` prints the version (N9).
+- `dot keys` and its keybindings catalog: Git commit signing is reported by `dot doctor`, and the keybindings stay in `docs/security/KEYS.md`.
+
+### Changed
+
+- The CLI-contract lint checks that a removed name's target resolves, since the hint prints it, and the man pages and command index say when each old name started to exit 127.
+- Install, the tour, `dot doctor` and the manual name `dot help tour`, `dot doctor perf` and `dot help` instead of the old names.
+- The macOS performance gates scale their budgets by the runner's measured spawn cost, capped at 4x, and version-sync rewrites every man page, not only `dot.1`.
 
 ### Fixed
 
 - On Linux, git's libsecret credential helper is configured only where the distro installed it (`/usr/lib/git-core` on Arch, `/usr/libexec/git-core` on Fedora, Debian's contrib build); a missing path no longer prints an error on every HTTPS credential lookup.
 - On Linux, a dynamic HEIC wallpaper (such as `Maui.heic`) now applies the frame for the current mode: dark mode set DMS's dark wallpaper to the light frame, and every sync re-extracted both frames (about 60 MB) instead of reusing them.
 - fish now puts the system directories in the same order as bash and zsh (`/usr/bin`, `/bin`, `/usr/sbin`, `/sbin`). It left `/sbin` first, so on a merged-`/usr` distro fish ran mise as `/sbin/mise` while zsh ran `/usr/bin/mise`, and each shell's reshim made `mise doctor` report every shim missing in the other.
+- The container scan runs again: the test image deletes the `pebble` binary that no Ubuntu 26.04 package owns, so Trivy is reached.
+
+### Security
+
+- zod 4.6.6 for GHSA-mrhx-c7xc-m3w5 in the dot-mcp node servers; fast-uri 3.1.9 and body-parser 2.4.0.
 
 ## v0.2.537 (2026-10-23)
 

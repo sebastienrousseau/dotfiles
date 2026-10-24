@@ -141,113 +141,113 @@ summary = "Edit a prompt pattern"
 [[aliases]]
 name = "ai-setup"
 target = "ai install --interactive"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "ai-query"
 target = "ai ask"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "patterns"
 target = "ai pattern"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "cl"
 target = "ai run claude"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "claude"
 target = "ai run claude"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "codex"
 target = "ai run codex"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "copilot"
 target = "ai run copilot"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "kimi"
 target = "ai run kimi"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "agy"
 target = "ai run agy"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "goose"
 target = "ai run goose"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "kiro"
 target = "ai run kiro"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "sgpt"
 target = "ai run sgpt"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "ollama"
 target = "ai run ollama"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "opencode"
 target = "ai run opencode"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "aider"
 target = "ai run aider"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "autohand"
 target = "ai run autohand"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "vibe"
 target = "ai run vibe"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "qwen"
 target = "ai run qwen"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "zai"
 target = "ai run zai"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"

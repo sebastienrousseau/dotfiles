@@ -207,10 +207,10 @@ def check_aliases(manifests: dict, reg: dict) -> list[str]:
             owners.setdefault(alias_name, domain)
             if alias_name in reg["domains"] or alias_name in reg["builtins"]:
                 errors.append(f"{domain}: alias '{alias_name}' shadows a domain or built-in (N7)")
-            if alias["kind"] != "removed":
-                why = resolve_target(alias["target"], manifests, reg)
-                if why:
-                    errors.append(f"{domain}: alias '{alias_name}' -> '{alias['target']}': {why}")
+            # A removed name still prints its target as the hint, so it must resolve.
+            why = resolve_target(alias["target"], manifests, reg)
+            if why:
+                errors.append(f"{domain}: alias '{alias_name}' -> '{alias['target']}': {why}")
     return errors
 
 

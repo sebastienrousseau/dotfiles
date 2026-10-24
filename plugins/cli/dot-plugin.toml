@@ -82,36 +82,36 @@ summary = "Point at another plugin registry"
 [[aliases]]
 name = "completion"
 target = "cli completion"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "registry"
 target = "cli list --available"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 legacy = "registry list"
 
 [[aliases]]
 name = "search"
 target = "help"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "manual"
 target = "help --manual"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "docs"
 target = "help --readme"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "learn"
 target = "help tour"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"

@@ -502,13 +502,13 @@ fm_expect_no_forbidden() {
 # Smoke coverage for rows the matrix records as unmeasurable
 # ---------------------------------------------------------------------------
 
-# fm_spelling <words…> — the ADR-020 spelling of a deprecated name, from
+# fm_spelling <words…> — the ADR-020 spelling of an old name, from
 # lib/dot/data/commands.txt: the longest old route (leg record) the words
-# start with, else the alias target; anything else unchanged. Deprecated
+# start with, else the alias target; anything else unchanged. Old
 # names exit 127 from their release, so the matrix calls the new spelling.
 fm_spelling() {
   awk -F'|' -v words="$*" '
-    $1 == "alias" && $3 == "deprecated" { dep[$2] = $4 }
+    $1 == "alias" && $3 != "shortcut" { dep[$2] = $4 }
     $1 == "leg" && $2 != $3 { leg[$2] = $3 }
     END {
       n = split(words, w, " ")

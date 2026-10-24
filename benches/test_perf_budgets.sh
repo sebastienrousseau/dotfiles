@@ -377,7 +377,7 @@ _gate "instant_dot_help_theme" 500 5 bash "$DOT_CLI" help theme
 
 _gate "instant_dot_help_apply" 500 5 bash "$DOT_CLI" help apply
 
-_gate "instant_dot_search" 500 5 bash "$DOT_CLI" search theme
+_gate "instant_dot_search" 500 5 bash "$DOT_CLI" help palette # a term, not a topic: the search
 
 # Render darwin-guarded template to a plain script
 _rendered="$(mktemp)"

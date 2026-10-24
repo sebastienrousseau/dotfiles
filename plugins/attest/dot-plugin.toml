@@ -42,5 +42,5 @@ summary = "Verify evidence"
 [[aliases]]
 name = "attestation"
 target = "attest"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"

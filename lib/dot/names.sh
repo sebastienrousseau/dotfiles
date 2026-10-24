@@ -9,7 +9,6 @@
 # spelling to the route that runs it today, and lists the shortcuts and the
 # deprecated and removed names. The table is read once into a string and
 # searched with pattern matching: no fork and no per-line loop (bash 3.2).
-_DOT_V_UNTIL="0.2.538" # `dot -v` prints the version, with a warning, until then
 _DOT_TABLE=""
 
 _dot_table_load() {
@@ -144,18 +143,12 @@ _dot_warn_deprecated() {
 }
 
 # _dot_gnu_flags WORD...: GNU flags (N9). -V is the version and -v is
-# --verbose; `dot -v` alone still prints the version, with a warning, for
-# one release. Sets _ARGV.
+# --verbose. Sets _ARGV.
 _dot_gnu_flags() {
   _ARGV=("$@")
   case "${1:-}" in
     -V) _ARGV=(version "${@:2}") ;;
     -v)
-      if [[ $# -eq 1 ]] && ! _dot_version_ge "$VERSION" "$_DOT_V_UNTIL"; then
-        printf "dot: '-v' means --verbose from %s; use 'dot -V' for the version\n" "$_DOT_V_UNTIL" >&2
-        _ARGV=(version)
-        return 0
-      fi
       export DOT_VERBOSE=1
       _ARGV=("" "${@:2}")
       [[ $# -eq 1 ]] || _ARGV=("${@:2}")

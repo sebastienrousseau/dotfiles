@@ -91,35 +91,35 @@ kind = "shortcut"
 [[aliases]]
 name = "history"
 target = "shell history"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "aliases"
 target = "shell alias"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "alias-check"
 target = "shell alias check"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "cache-refresh"
 target = "shell update"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "prewarm"
 target = "shell update --prewarm"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "clean-cache"
 target = "shell clean"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"

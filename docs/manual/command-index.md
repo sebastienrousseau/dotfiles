@@ -192,7 +192,7 @@ file is stale. `dot help <command>` shows one command and its flags.
 
 ## Old names
 
-They still run, and print the new name, until the release shown.
+Each one runs, and prints its new name, until the release shown; from that release it exits 127 with the new name.
 
 | Old name | New name | Until |
 |----------|----------|-------|

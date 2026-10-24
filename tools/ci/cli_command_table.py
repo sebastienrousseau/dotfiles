@@ -17,7 +17,7 @@ the dispatcher resolves ADR-020 spellings without parsing TOML:
   alias|<name>|<shortcut, deprecated or removed>|<target>|<until or empty>
 
 `cmd` records with an empty legacy are declared but not built yet. `run`
-records come from deprecated aliases whose target says more than a declared
+records come from old-name aliases whose target says more than a declared
 spelling or one of its declared values (`dot tool list --nix` runs `tools`,
 `dot help tour` runs `learn`), so every hint bin/dot prints runs what it
 names.
@@ -103,7 +103,7 @@ def run_records(manifests: dict) -> list[str]:
     for manifest in manifests.values():
         for alias in manifest.get("aliases", []):
             target = alias["target"]
-            if alias["kind"] == "deprecated" and " " in target and target not in names | seen:
+            if alias["kind"] != "shortcut" and " " in target and target not in names | seen:
                 seen.add(target)
                 rows.append(f"run|{target}|{alias.get('legacy', alias['name'])}||")
     return rows

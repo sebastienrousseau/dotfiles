@@ -136,7 +136,7 @@ charm_keyring_verify() {
 }
 
 # chezmoi_release_sha256 <asset>: reviewed SHA-256 (else $CHEZMOI_SHA256), in step
-# with tools/ci/install-chezmoi-verified.sh; from the v0.2.537 checksums.txt.
+# with tools/ci/install-chezmoi-verified.sh; from the v0.2.538 checksums.txt.
 chezmoi_release_sha256() {
   local sha
   case "$1" in
@@ -190,7 +190,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.537)
+  version       The version (tag or branch) to install (default: v0.2.538)
 
 Options:
   --help        Show this help message
@@ -206,7 +206,7 @@ EOF
 }
 
 main() {
-  local version="v0.2.537"
+  local version="v0.2.538"
   local version_set=0
   local minimal=0
   local provision="${DOTFILES_PROVISION:-0}"
@@ -236,7 +236,7 @@ main() {
         # like `foobar` doesn't trigger a 30s+ network download attempt.
         # Caught by the install.sh fuzz harness (#881).
         if [[ ! "$arg" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-+][a-zA-Z0-9.-]+)?$ ]]; then
-          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.537)."
+          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.538)."
         fi
         version="$arg"
         version_set=1
@@ -585,7 +585,7 @@ main() {
     echo "   then re-run: chezmoi apply"
   fi
 
-  step "Run 'dot learn' for an interactive tour of your new dotfiles."
+  step "Run 'dot help tour' for an interactive tour of your new dotfiles."
 }
 
 # Run main if executed directly (or via bash -c where BASH_SOURCE is unset)

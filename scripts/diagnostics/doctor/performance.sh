@@ -251,7 +251,7 @@ except Exception:
     print(-1)
 ' "$baseline_file" 2>/dev/null)
     if [[ "$baseline_age_days" -ge 0 ]]; then
-      _ok "perf baseline" "recorded ${baseline_age_days}d ago — run \`dot perf\` to compare"
+      _ok "perf baseline" "recorded ${baseline_age_days}d ago — run \`dot doctor perf\` to compare"
     fi
   fi
 

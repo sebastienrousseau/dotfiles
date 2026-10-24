@@ -3,7 +3,8 @@
 Status: Accepted 2026-10-18; implemented in the monorepo (N0): registries,
 manifest schema, plugin manifests, the CLI-contract lint, the runtime alias
 table, the generated help, man pages, completions and cmdlets, and the
-single update path (see Enforcement). The old names stop working in 0.2.538.
+single update path (see Enforcement). The old names stopped working in
+0.2.538: each exits 127 with its new spelling.
 
 ## Context
 
@@ -184,16 +185,19 @@ runs each command (`legacy`, on the domain and on each command).
   removed name does.
 - `dot update` now runs `dot system update` (the old `dot upgrade`); the
   dotfiles-only update is `dot config update`.
-- `-V` prints the version. `-v` before a command sets `DOT_VERBOSE=1`;
-  `dot -v` alone still prints the version, with a warning, until 0.2.538.
+- `-V` prints the version and `-v` sets `DOT_VERBOSE=1`. Until 0.2.538,
+  `dot -v` alone printed the version with a warning; from 0.2.538 it is
+  `--verbose` with no command, which prints the overview.
 
 Some security aliases were corrected because the old command applies a
 change: `dot firewall` is `dot security firewall apply`, and so on for
 telemetry, DNS, lock screen and USB, and `dot snapshot` is
 `dot doctor snapshot new`. `dot chaos`, `dot smoke-test` and `dot keys` were marked
 removed, which would have made them exit 127 with no release of warning;
-they are deprecated until 0.2.538 like every other old name, and
-`dot keys sign-check` needs a home under `dot doctor` before then.
+they were deprecated until 0.2.538 like every other old name.
+`dot keys sign-check` moved into `dot doctor`, which reports Git commit
+signing (0.2.537); the keybindings catalog `dot keys` showed has no
+command; the keybindings stay in `docs/security/KEYS.md`.
 
 Related: [ADR-004](ADR-004-cli-architecture.md) (CLI wrapper),
 [ADR-016](ADR-016-plugin-trust-sandbox.md) (plugin trust),

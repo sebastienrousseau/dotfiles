@@ -96,17 +96,17 @@ kind = "shortcut"
 [[aliases]]
 name = "upgrade"
 target = "system update"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "tune"
 target = "system settings apply"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "log-rotate"
 target = "system clean --logs"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"

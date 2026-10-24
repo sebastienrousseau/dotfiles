@@ -1270,7 +1270,7 @@ HTML
     <pre><code># Download and SHA256-verify the release installer per the install guide.
 bash /tmp/dotfiles-install.sh
 dot doctor
-dot learn</code></pre>
+dot help tour</code></pre>
 
     <h2>Source</h2>
     <p>Repository: <a href="$REPO_URL">sebastienrousseau/dotfiles</a> · License: <a href="$REPO_URL/blob/main/LICENSE-MIT">MIT</a> OR <a href="$REPO_URL/blob/main/LICENSE-APACHE">Apache-2.0</a></p>

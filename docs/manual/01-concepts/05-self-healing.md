@@ -90,7 +90,7 @@ Detects dangling symlinks (target doesn't exist) and re-applies chezmoi to recre
 
 ## Chaos self-test
 
-The chaos test (`scripts/ops/chaos.sh`, run from the repository) intentionally corrupts the local installation to verify `dot doctor fix` can recover it. It is a test rather than a `dot` command (ADR-020; `dot chaos` stops working in 0.2.538). This is **destructive** — run only in ephemeral environments (containers, VMs, fresh installs).
+The chaos test (`scripts/ops/chaos.sh`, run from the repository) intentionally corrupts the local installation to verify `dot doctor fix` can recover it. It is a test rather than a `dot` command (ADR-020; `dot chaos` exits 127 from 0.2.538). This is **destructive** — run only in ephemeral environments (containers, VMs, fresh installs).
 
 Corruption scenarios:
 

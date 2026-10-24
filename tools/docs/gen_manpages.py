@@ -112,7 +112,7 @@ def domain_page(domain: str, table: list[list[str]], version: str, date: str) ->
 
 def alias_lines(row: list[str]) -> list[str]:
     name, kind, target, until = row[1], row[2], row[3], row[4]
-    what = {"shortcut": "Shortcut for", "deprecated": f"Deprecated until {until}; use",
+    what = {"shortcut": "Shortcut for", "deprecated": f"Exits 127 from {until}; use",
             "removed": "Removed; use"}[kind]
     return [".TP", f".B dot {roff(name)}", f"{what} \\fBdot {roff(target)}\\fR."]
 

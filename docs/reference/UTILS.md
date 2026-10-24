@@ -8,7 +8,7 @@ Aliases, functions, and the `dot` CLI provide day-to-day tooling across macOS, L
 
 ## Dot CLI
 
-The `dot` command is the main interface: `dot <domain> [object] <verb>` (ADR-020). Run `dot help` for the overview, `dot help <term>` to search, and `dot -V` for the version. Old names keep working, with a warning, until 0.2.538; the **Was** column names them.
+The `dot` command is the main interface: `dot <domain> [object] <verb>` (ADR-020). Run `dot help` for the overview, `dot help <term>` to search, and `dot -V` for the version. Old names stopped working in 0.2.538 and exit 127 with the new spelling; the **Was** column names them.
 
 ### Shortcuts
 
