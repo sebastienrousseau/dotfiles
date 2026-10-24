@@ -4,6 +4,10 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+### Fixed
+
+- On Linux, git's libsecret credential helper is configured only where the distro installed it (`/usr/lib/git-core` on Arch, `/usr/libexec/git-core` on Fedora, Debian's contrib build); a missing path no longer prints an error on every HTTPS credential lookup.
+
 ## v0.2.537 (2026-10-23)
 
 ### Added
