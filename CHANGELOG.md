@@ -8,6 +8,7 @@ This file documents all notable changes to this project.
 
 - On Linux, git's libsecret credential helper is configured only where the distro installed it (`/usr/lib/git-core` on Arch, `/usr/libexec/git-core` on Fedora, Debian's contrib build); a missing path no longer prints an error on every HTTPS credential lookup.
 - On Linux, a dynamic HEIC wallpaper (such as `Maui.heic`) now applies the frame for the current mode: dark mode set DMS's dark wallpaper to the light frame, and every sync re-extracted both frames (about 60 MB) instead of reusing them.
+- fish now puts the system directories in the same order as bash and zsh (`/usr/bin`, `/bin`, `/usr/sbin`, `/sbin`). It left `/sbin` first, so on a merged-`/usr` distro fish ran mise as `/sbin/mise` while zsh ran `/usr/bin/mise`, and each shell's reshim made `mise doctor` report every shim missing in the other.
 
 ## v0.2.537 (2026-10-23)
 
