@@ -61,7 +61,7 @@ HEAD
   awk -F'|' '$1 == "cmd" { printf "| `dot %s` | %s%s |\n", $2, $5, ($3 == "" ? " *(planned)*" : "") }' "$table"
   printf '\n## Shortcuts\n\n| Shortcut | Runs |\n|----------|------|\n'
   awk -F'|' '$1 == "alias" && $3 == "shortcut" { printf "| `dot %s` | `dot %s` |\n", $2, $4 }' "$table"
-  printf '\n## Old names\n\nThey still run, and print the new name, until the release shown.\n\n'
+  printf '\n## Old names\n\nEach one runs, and prints its new name, until the release shown; from that release it exits 127 with the new name.\n\n'
   printf '| Old name | New name | Until |\n|----------|----------|-------|\n'
   awk -F'|' '$1 == "alias" && $3 != "shortcut" { printf "| `dot %s` | `dot %s` | %s |\n", $2, $4, ($5 == "" ? "removed" : $5) }' "$table"
 } >"$tmp"

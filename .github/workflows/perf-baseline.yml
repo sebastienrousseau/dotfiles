@@ -146,7 +146,7 @@ jobs:
 
           Triage:
           - Identify which commit since the last baseline introduced the regression.
-          - Either revert / fix the cause, OR if the new baseline is intentional, run \`dot perf --baseline\` locally and commit the result, then dismiss this issue.
+          - Either revert / fix the cause, OR if the new baseline is intentional, run \`dot doctor perf --baseline\` locally and commit the result, then dismiss this issue.
 
           See \`docs/operations/PERFORMANCE.md\` for the budget + lifecycle.
 

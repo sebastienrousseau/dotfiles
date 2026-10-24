@@ -59,29 +59,29 @@ values = ["python", "go", "node", "packer", "molecule"]
 [[aliases]]
 name = "env"
 target = "tool"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "tools"
 target = "tool list --nix"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "packages"
 target = "tool list --packages"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "locks"
 target = "tool list --locked"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "new"
 target = "tool new"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"

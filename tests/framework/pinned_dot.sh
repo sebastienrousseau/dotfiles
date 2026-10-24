@@ -28,9 +28,24 @@ pinned_dot() {
 
 # pin_names LIBDOT VERSION: replace LIBDOT/names.sh with a shim that sets
 # VERSION and sources the real names.sh, which reads the command table
-# from the tree bin/dot runs in ($_DOT_SRC).
+# from the tree bin/dot runs in ($_DOT_SRC), and pin that table too.
 pin_names() {
   rm -f "$1/names.sh"
   printf 'VERSION=%q\n# shellcheck disable=SC1090\nsource %q\n' \
     "$2" "${REPO_ROOT:?}/lib/dot/names.sh" >"$1/names.sh"
+  pin_table "$1/data" "$2"
+}
+
+# pin_table DATA VERSION: make DATA a copy of the command table as release
+# VERSION had it. A name removed at a later release (its `until`) was still
+# deprecated then.
+pin_table() {
+  local src="${REPO_ROOT:?}/lib/dot/data"
+  rm -rf "$1"
+  mkdir -p "$1"
+  cp "$src"/* "$1/"
+  awk -F'|' -v OFS='|' -v pin="$2" '
+    function key(v, p) { split(v, p, "."); return sprintf("%06d%06d%06d", p[1], p[2], p[3]) }
+    $1 == "alias" && $3 == "removed" && $5 != "" && key($5) > key(pin) { $3 = "deprecated" }
+    { print }' "$src/commands.txt" >"$1/commands.txt"
 }

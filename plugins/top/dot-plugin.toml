@@ -30,5 +30,5 @@ summary = "Usage report"
 [[aliases]]
 name = "intelligence"
 target = "top"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"

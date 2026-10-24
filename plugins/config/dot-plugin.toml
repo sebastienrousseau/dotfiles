@@ -160,53 +160,53 @@ kind = "shortcut"
 [[aliases]]
 name = "add"
 target = "config add"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "commit"
 target = "config save"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "uninstall"
 target = "config uninstall"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "init"
 target = "config init"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "setup"
 target = "config init"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "profile"
 target = "config profile"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "sandbox"
 target = "config apply --sandbox"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "bundle"
 target = "config export"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "lint"
 target = "config check"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"

@@ -154,7 +154,7 @@ dot doctor rollback clean        # delete snapshots older than 30 days
 
 ### Chaos test
 
-Simulate corruption to test self-healing. **Destructive.** Use only in ephemeral environments. It is a test, not a `dot` command (`dot chaos` stops working in 0.2.538):
+Simulate corruption to test self-healing. **Destructive.** Use only in ephemeral environments. It is a test, not a `dot` command (`dot chaos` exits 127 from 0.2.538):
 
 ```
 bash scripts/ops/chaos.sh [symlink|config|tool|permission|all]

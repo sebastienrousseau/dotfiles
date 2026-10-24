@@ -123,6 +123,7 @@ ED25519 key SHA256:<fingerprint>`, where `<fingerprint>` is one of:
 
 - `SHA256:f6FG+guRNtT3R36oQFS4oWCx1d10nm+BoaIL3Tkh1r4` (rousseau-mb-neo)
 - `SHA256:kIOPAavp1TCEauTr1tTIN3cv+tSs6F9m/4lZjuM9tqk` (rousseau-mbp-m1)
+- `SHA256:6ikFVl77+EMgfPWWJIlHX5RFh3JMONgPABu/dT6nir8` (rousseau-cachyos-geekom-a9)
 
 Without the allowed-signers file you get `No principal matched` — the
 signature is still cryptographically valid, but nothing binds it to a

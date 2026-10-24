@@ -73,7 +73,7 @@
   21    1    5.5   27     0 defaults/dot_local/bin/executable_tmux-ai::provider_label
   13   21   27.2   38     0 defaults/dot_local/bin/executable_tmux-sessionizer::build_list
   13   16   26.2   41     0 defaults/dot_local/bin/executable_tmux-status::system_linux
-  18   17   21.1  142   142 defaults/dot_local/bin/executable_tour::<top>
+  18   17   21.1  141   141 defaults/dot_local/bin/executable_tour::<top>
    8   17   21.6   38     0 install.sh::install_chezmoi
   14   16   28.6   45     0 install.sh::install_chezmoi_verified_embedded
   57   79   70.3  297     0 install.sh::main
@@ -135,11 +135,11 @@
   21   12   31.5   69   248 scripts/dot/commands/secrets.sh::<top>
   16   16   23.8   61     0 scripts/dot/commands/secrets.sh::cmd_env_load
   12    2   18.2   49    81 scripts/dot/commands/security.sh::<top>
-  14    2   22.0   68   412 scripts/dot/commands/tools.sh::<top>
+  14    2   22.0   68   411 scripts/dot/commands/tools.sh::<top>
   23   21   25.3   84     0 scripts/dot/commands/tools.sh::apply_template_security_baseline
   17   26   30.0   77     0 scripts/dot/commands/tools.sh::cmd_env_mise
   11   11   24.9   56     0 scripts/dot/commands/tools.sh::cmd_new
-  11   18   17.2   56     0 scripts/dot/commands/tools.sh::cmd_tools
+  11   18   17.4   55     0 scripts/dot/commands/tools.sh::cmd_tools
   18   31   39.3  112   112 scripts/git-hooks/pre-commit-audit.sh::<top>
   11    7   24.4   32     0 scripts/lib/secrets_provider.sh::dot_secrets_get
   17   16   33.2   69    75 scripts/ops/bundle.sh::<top>

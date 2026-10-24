@@ -159,47 +159,47 @@ summary = "Harden the usb setting"
 [[aliases]]
 name = "policy"
 target = "security policy"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "encrypt-check"
 target = "security disk"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "firewall"
 target = "security firewall apply"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "telemetry"
 target = "security telemetry apply"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "dns-doh"
 target = "security dns apply"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "lock-screen"
 target = "security lock apply"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "usb-safety"
 target = "security usb apply"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "security-score"
 target = "security score"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"

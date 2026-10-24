@@ -6,7 +6,7 @@
 .\" manifests (lib/dot/data/commands.txt) and schemas/cli/flags.json by
 .\" tools/docs/gen_manpages.py: edit THIS file for prose, the manifests for
 .\" commands, then run `make man`. CI fails when a page is stale.
-.TH DOT 1 "2026-10-23" "dotfiles v0.2.537" "User Commands"
+.TH DOT 1 "2026-10-24" "dotfiles v0.2.538" "User Commands"
 .SH NAME
 dot \- manage this machine, its shell, its agents and its configuration
 .SH SYNOPSIS
@@ -166,268 +166,268 @@ new spelling until the release shown; after it, and for a removed name,
 exits 127 with the new spelling.
 .TP
 .B dot mode
-Deprecated until 0.2.538; use \fBdot agent mode\fR.
+Removed; use \fBdot agent mode\fR.
 .TP
 .B dot agents
-Deprecated until 0.2.538; use \fBdot agent context\fR.
+Removed; use \fBdot agent context\fR.
 .TP
 .B dot ai\-setup
-Deprecated until 0.2.538; use \fBdot ai install \-\-interactive\fR.
+Removed; use \fBdot ai install \-\-interactive\fR.
 .TP
 .B dot ai\-query
-Deprecated until 0.2.538; use \fBdot ai ask\fR.
+Removed; use \fBdot ai ask\fR.
 .TP
 .B dot patterns
-Deprecated until 0.2.538; use \fBdot ai pattern\fR.
+Removed; use \fBdot ai pattern\fR.
 .TP
 .B dot cl
-Deprecated until 0.2.538; use \fBdot ai run claude\fR.
+Removed; use \fBdot ai run claude\fR.
 .TP
 .B dot claude
-Deprecated until 0.2.538; use \fBdot ai run claude\fR.
+Removed; use \fBdot ai run claude\fR.
 .TP
 .B dot codex
-Deprecated until 0.2.538; use \fBdot ai run codex\fR.
+Removed; use \fBdot ai run codex\fR.
 .TP
 .B dot copilot
-Deprecated until 0.2.538; use \fBdot ai run copilot\fR.
+Removed; use \fBdot ai run copilot\fR.
 .TP
 .B dot kimi
-Deprecated until 0.2.538; use \fBdot ai run kimi\fR.
+Removed; use \fBdot ai run kimi\fR.
 .TP
 .B dot agy
-Deprecated until 0.2.538; use \fBdot ai run agy\fR.
+Removed; use \fBdot ai run agy\fR.
 .TP
 .B dot goose
-Deprecated until 0.2.538; use \fBdot ai run goose\fR.
+Removed; use \fBdot ai run goose\fR.
 .TP
 .B dot kiro
-Deprecated until 0.2.538; use \fBdot ai run kiro\fR.
+Removed; use \fBdot ai run kiro\fR.
 .TP
 .B dot sgpt
-Deprecated until 0.2.538; use \fBdot ai run sgpt\fR.
+Removed; use \fBdot ai run sgpt\fR.
 .TP
 .B dot ollama
-Deprecated until 0.2.538; use \fBdot ai run ollama\fR.
+Removed; use \fBdot ai run ollama\fR.
 .TP
 .B dot opencode
-Deprecated until 0.2.538; use \fBdot ai run opencode\fR.
+Removed; use \fBdot ai run opencode\fR.
 .TP
 .B dot aider
-Deprecated until 0.2.538; use \fBdot ai run aider\fR.
+Removed; use \fBdot ai run aider\fR.
 .TP
 .B dot autohand
-Deprecated until 0.2.538; use \fBdot ai run autohand\fR.
+Removed; use \fBdot ai run autohand\fR.
 .TP
 .B dot vibe
-Deprecated until 0.2.538; use \fBdot ai run vibe\fR.
+Removed; use \fBdot ai run vibe\fR.
 .TP
 .B dot qwen
-Deprecated until 0.2.538; use \fBdot ai run qwen\fR.
+Removed; use \fBdot ai run qwen\fR.
 .TP
 .B dot zai
-Deprecated until 0.2.538; use \fBdot ai run zai\fR.
+Removed; use \fBdot ai run zai\fR.
 .TP
 .B dot attestation
-Deprecated until 0.2.538; use \fBdot attest\fR.
+Removed; use \fBdot attest\fR.
 .TP
 .B dot completion
-Deprecated until 0.2.538; use \fBdot cli completion\fR.
+Removed; use \fBdot cli completion\fR.
 .TP
 .B dot registry
-Deprecated until 0.2.538; use \fBdot cli list \-\-available\fR.
+Removed; use \fBdot cli list \-\-available\fR.
 .TP
 .B dot search
-Deprecated until 0.2.538; use \fBdot help\fR.
+Removed; use \fBdot help\fR.
 .TP
 .B dot manual
-Deprecated until 0.2.538; use \fBdot help \-\-manual\fR.
+Removed; use \fBdot help \-\-manual\fR.
 .TP
 .B dot docs
-Deprecated until 0.2.538; use \fBdot help \-\-readme\fR.
+Removed; use \fBdot help \-\-readme\fR.
 .TP
 .B dot learn
-Deprecated until 0.2.538; use \fBdot help tour\fR.
+Removed; use \fBdot help tour\fR.
 .TP
 .B dot add
-Deprecated until 0.2.538; use \fBdot config add\fR.
+Removed; use \fBdot config add\fR.
 .TP
 .B dot commit
-Deprecated until 0.2.538; use \fBdot config save\fR.
+Removed; use \fBdot config save\fR.
 .TP
 .B dot uninstall
-Deprecated until 0.2.538; use \fBdot config uninstall\fR.
+Removed; use \fBdot config uninstall\fR.
 .TP
 .B dot init
-Deprecated until 0.2.538; use \fBdot config init\fR.
+Removed; use \fBdot config init\fR.
 .TP
 .B dot setup
-Deprecated until 0.2.538; use \fBdot config init\fR.
+Removed; use \fBdot config init\fR.
 .TP
 .B dot profile
-Deprecated until 0.2.538; use \fBdot config profile\fR.
+Removed; use \fBdot config profile\fR.
 .TP
 .B dot sandbox
-Deprecated until 0.2.538; use \fBdot config apply \-\-sandbox\fR.
+Removed; use \fBdot config apply \-\-sandbox\fR.
 .TP
 .B dot bundle
-Deprecated until 0.2.538; use \fBdot config export\fR.
+Removed; use \fBdot config export\fR.
 .TP
 .B dot lint
-Deprecated until 0.2.538; use \fBdot config check\fR.
+Removed; use \fBdot config check\fR.
 .TP
 .B dot health
-Deprecated until 0.2.538; use \fBdot doctor\fR.
+Removed; use \fBdot doctor\fR.
 .TP
 .B dot health\-check
-Deprecated until 0.2.538; use \fBdot doctor\fR.
+Removed; use \fBdot doctor\fR.
 .TP
 .B dot scorecard
-Deprecated until 0.2.538; use \fBdot doctor score\fR.
+Removed; use \fBdot doctor score\fR.
 .TP
 .B dot score
-Deprecated until 0.2.538; use \fBdot doctor score\fR.
+Removed; use \fBdot doctor score\fR.
 .TP
 .B dot snapshot
-Deprecated until 0.2.538; use \fBdot doctor snapshot new\fR.
+Removed; use \fBdot doctor snapshot new\fR.
 .TP
 .B dot perf
-Deprecated until 0.2.538; use \fBdot doctor perf\fR.
+Removed; use \fBdot doctor perf\fR.
 .TP
 .B dot benchmark
-Deprecated until 0.2.538; use \fBdot doctor perf \-\-profile\fR.
+Removed; use \fBdot doctor perf \-\-profile\fR.
 .TP
 .B dot load\-bench
-Deprecated until 0.2.538; use \fBdot doctor perf \-\-ready\fR.
+Removed; use \fBdot doctor perf \-\-ready\fR.
 .TP
 .B dot load\-bench\-pty
-Deprecated until 0.2.538; use \fBdot doctor perf \-\-ready \-\-pty\fR.
+Removed; use \fBdot doctor perf \-\-ready \-\-pty\fR.
 .TP
 .B dot rollback
-Deprecated until 0.2.538; use \fBdot doctor rollback\fR.
+Removed; use \fBdot doctor rollback\fR.
 .TP
 .B dot heal
-Deprecated until 0.2.538; use \fBdot doctor fix\fR.
+Removed; use \fBdot doctor fix\fR.
 .TP
 .B dot drift
-Deprecated until 0.2.538; use \fBdot doctor drift\fR.
+Removed; use \fBdot doctor drift\fR.
 .TP
 .B dot conflicts
-Deprecated until 0.2.538; use \fBdot doctor conflict\fR.
+Removed; use \fBdot doctor conflict\fR.
 .TP
 .B dot restore
-Deprecated until 0.2.538; use \fBdot doctor restore\fR.
+Removed; use \fBdot doctor restore\fR.
 .TP
 .B dot metrics
-Deprecated until 0.2.538; use \fBdot doctor metric\fR.
+Removed; use \fBdot doctor metric\fR.
 .TP
 .B dot backup
-Deprecated until 0.2.538; use \fBdot doctor backup\fR.
+Removed; use \fBdot doctor backup\fR.
 .TP
 .B dot chaos
-Deprecated until 0.2.538; use \fBdot doctor\fR.
+Removed; use \fBdot doctor\fR.
 .TP
 .B dot smoke\-test
-Deprecated until 0.2.538; use \fBdot doctor\fR.
+Removed; use \fBdot doctor\fR.
 .TP
 .B dot keys
-Deprecated until 0.2.538; use \fBdot doctor\fR.
+Removed; use \fBdot doctor\fR.
 .TP
 .B dot teleport
-Deprecated until 0.2.538; use \fBdot fleet push\fR.
+Removed; use \fBdot fleet push\fR.
 .TP
 .B dot secrets\-init
-Deprecated until 0.2.538; use \fBdot secret init\fR.
+Removed; use \fBdot secret init\fR.
 .TP
 .B dot secrets
-Deprecated until 0.2.538; use \fBdot secret edit\fR.
+Removed; use \fBdot secret edit\fR.
 .TP
 .B dot secrets\-create
-Deprecated until 0.2.538; use \fBdot secret new\fR.
+Removed; use \fBdot secret new\fR.
 .TP
 .B dot ssh\-key
-Deprecated until 0.2.538; use \fBdot secret key new\fR.
+Removed; use \fBdot secret key new\fR.
 .TP
 .B dot ssh\-cert
-Deprecated until 0.2.538; use \fBdot secret cert new\fR.
+Removed; use \fBdot secret cert new\fR.
 .TP
 .B dot secret\-audit
-Deprecated until 0.2.538; use \fBdot secret check\fR.
+Removed; use \fBdot secret check\fR.
 .TP
 .B dot policy
-Deprecated until 0.2.538; use \fBdot security policy\fR.
+Removed; use \fBdot security policy\fR.
 .TP
 .B dot encrypt\-check
-Deprecated until 0.2.538; use \fBdot security disk\fR.
+Removed; use \fBdot security disk\fR.
 .TP
 .B dot firewall
-Deprecated until 0.2.538; use \fBdot security firewall apply\fR.
+Removed; use \fBdot security firewall apply\fR.
 .TP
 .B dot telemetry
-Deprecated until 0.2.538; use \fBdot security telemetry apply\fR.
+Removed; use \fBdot security telemetry apply\fR.
 .TP
 .B dot dns\-doh
-Deprecated until 0.2.538; use \fBdot security dns apply\fR.
+Removed; use \fBdot security dns apply\fR.
 .TP
 .B dot lock\-screen
-Deprecated until 0.2.538; use \fBdot security lock apply\fR.
+Removed; use \fBdot security lock apply\fR.
 .TP
 .B dot usb\-safety
-Deprecated until 0.2.538; use \fBdot security usb apply\fR.
+Removed; use \fBdot security usb apply\fR.
 .TP
 .B dot security\-score
-Deprecated until 0.2.538; use \fBdot security score\fR.
+Removed; use \fBdot security score\fR.
 .TP
 .B dot history
-Deprecated until 0.2.538; use \fBdot shell history\fR.
+Removed; use \fBdot shell history\fR.
 .TP
 .B dot aliases
-Deprecated until 0.2.538; use \fBdot shell alias\fR.
+Removed; use \fBdot shell alias\fR.
 .TP
 .B dot alias\-check
-Deprecated until 0.2.538; use \fBdot shell alias check\fR.
+Removed; use \fBdot shell alias check\fR.
 .TP
 .B dot cache\-refresh
-Deprecated until 0.2.538; use \fBdot shell update\fR.
+Removed; use \fBdot shell update\fR.
 .TP
 .B dot prewarm
-Deprecated until 0.2.538; use \fBdot shell update \-\-prewarm\fR.
+Removed; use \fBdot shell update \-\-prewarm\fR.
 .TP
 .B dot clean\-cache
-Deprecated until 0.2.538; use \fBdot shell clean\fR.
+Removed; use \fBdot shell clean\fR.
 .TP
 .B dot upgrade
-Deprecated until 0.2.538; use \fBdot system update\fR.
+Removed; use \fBdot system update\fR.
 .TP
 .B dot tune
-Deprecated until 0.2.538; use \fBdot system settings apply\fR.
+Removed; use \fBdot system settings apply\fR.
 .TP
 .B dot log\-rotate
-Deprecated until 0.2.538; use \fBdot system clean \-\-logs\fR.
+Removed; use \fBdot system clean \-\-logs\fR.
 .TP
 .B dot wallpaper
-Deprecated until 0.2.538; use \fBdot theme wallpaper set\fR.
+Removed; use \fBdot theme wallpaper set\fR.
 .TP
 .B dot fonts
-Deprecated until 0.2.538; use \fBdot theme font install\fR.
+Removed; use \fBdot theme font install\fR.
 .TP
 .B dot env
-Deprecated until 0.2.538; use \fBdot tool\fR.
+Removed; use \fBdot tool\fR.
 .TP
 .B dot tools
-Deprecated until 0.2.538; use \fBdot tool list \-\-nix\fR.
+Removed; use \fBdot tool list \-\-nix\fR.
 .TP
 .B dot packages
-Deprecated until 0.2.538; use \fBdot tool list \-\-packages\fR.
+Removed; use \fBdot tool list \-\-packages\fR.
 .TP
 .B dot locks
-Deprecated until 0.2.538; use \fBdot tool list \-\-locked\fR.
+Removed; use \fBdot tool list \-\-locked\fR.
 .TP
 .B dot new
-Deprecated until 0.2.538; use \fBdot tool new\fR.
+Removed; use \fBdot tool new\fR.
 .TP
 .B dot intelligence
-Deprecated until 0.2.538; use \fBdot top\fR.
+Removed; use \fBdot top\fR.
 .SH ENVIRONMENT
 .TP
 .B DOTFILES_FAST=1

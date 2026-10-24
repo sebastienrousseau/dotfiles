@@ -18,10 +18,13 @@ fm_sandbox_setup
 COPY="$(fm_repo_copy "$FM_SANDBOX/partial")"
 export CHEZMOI_SOURCE_DIR="$COPY"
 
-for module in agents init registry; do
+# module|the spelling that routes to it
+for pair in "agents|agent context" "init|config init" "registry|cli list --available"; do
+  module="${pair%%|*}"
+  read -r -a spelling <<<"${pair#*|}"
   rm -f "$COPY/scripts/dot/commands/$module.sh"
   test_start "missing_${module}_module_fails"
-  fm_run_bin "$COPY/bin/dot" "$module"
+  fm_run_bin "$COPY/bin/dot" "${spelling[@]}"
   fm_expect_rc 1
   test_start "missing_${module}_module_is_named"
   if [[ "$FM_OUT$FM_ERR" == *"$module.sh not found"* ]]; then

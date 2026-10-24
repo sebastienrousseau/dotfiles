@@ -8,7 +8,7 @@ explicit, documented governance model (see [`GOVERNANCE.md`](GOVERNANCE.md)).
 - **Sebastien Rousseau** — <https://sebastienrousseau.com/contact/>
   - GitHub: [@sebastienrousseau](https://github.com/sebastienrousseau)
   - Role: project owner, release manager, security disclosure contact
-  - Commit signing: SSH ED25519 (`SHA256:kIOPAavp1TCEauTr1tTIN3cv+tSs6F9m/4lZjuM9tqk`)
+  - Commit signing: SSH ED25519, one key per machine, all in `KEYS.asc` (`SHA256:f6FG+guRNtT3R36oQFS4oWCx1d10nm+BoaIL3Tkh1r4`, `SHA256:kIOPAavp1TCEauTr1tTIN3cv+tSs6F9m/4lZjuM9tqk`, `SHA256:6ikFVl77+EMgfPWWJIlHX5RFh3JMONgPABu/dT6nir8`)
   - GPG disclosure key fingerprint: `55AFAD364FD9DB3819E61F0C8D688FAFA9144693` (ed25519 + cv25519, expires 2029-05-15, published via WKD at `security@sebastienrousseau.com`)
 
 ## Active contributors

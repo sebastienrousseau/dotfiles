@@ -15,8 +15,8 @@ Flatpak, Snap). `--globals` adds npm, cargo and pipx globals, and `--yes`
 answers every question. The AI CLIs stay at their `[ai_tools]` pins;
 `dot ai update` moves them past the pins. Topgrade, the
 `~/.local/bin/update` script and the `update`/`upd` functions are gone;
-`chezmoi apply` deletes the script and the topgrade config, and `update`
-and `upd` forward to `dot update` with a warning until 0.2.538.
+`chezmoi apply` deletes the script and the topgrade config. The `update`
+and `upd` forwarders were removed in 0.2.538: run `dot update`.
 
 The maintenance job clears the shell startup caches and rotates the dot
 log. Nothing is scheduled until you ask:

@@ -197,11 +197,11 @@ summary = "Check the card against the A2A spec"
 [[aliases]]
 name = "mode"
 target = "agent mode"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "agents"
 target = "agent context"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"

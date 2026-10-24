@@ -154,17 +154,17 @@ class Manifests(Fixture):
         self.assertEqual([e for e in self.errors() if "Get cmdlet" in e], [])
 
     def test_expired_deprecation(self):
-        self.edit("fleet", 'until = "0.2.538"', 'until = "0.2.536"')
+        self.edit("fleet", 'kind = "removed"\nuntil = "0.2.538"', 'kind = "deprecated"\nuntil = "0.2.536"')
         self.assertFails("deprecated alias 'teleport' expired")
 
 
 class Aliases(Fixture):
     def test_duplicate_alias(self):
-        self.append("mcp", '[[aliases]]\nname = "teleport"\ntarget = "mcp list"\nkind = "deprecated"\nuntil = "0.2.538"\n')
+        self.append("mcp", '[[aliases]]\nname = "teleport"\ntarget = "mcp list"\nkind = "removed"\n')
         self.assertFails("alias 'teleport' is declared by both")
 
     def test_alias_shadowing_a_domain(self):
-        self.append("mcp", '[[aliases]]\nname = "fleet"\ntarget = "mcp list"\nkind = "deprecated"\nuntil = "0.2.538"\n')
+        self.append("mcp", '[[aliases]]\nname = "fleet"\ntarget = "mcp list"\nkind = "removed"\n')
         self.assertFails("alias 'fleet' shadows a domain")
 
     def test_target_with_unknown_command(self):
@@ -181,11 +181,11 @@ class Aliases(Fixture):
 
     def test_missing_shortcut(self):
         self.edit("system", 'name = "update"\ntarget = "system update"\nkind = "shortcut"',
-                  'name = "up"\ntarget = "system update"\nkind = "deprecated"\nuntil = "0.2.538"')
+                  'name = "up"\ntarget = "system update"\nkind = "removed"')
         self.assertFails("shortcut 'update' -> 'system update' is in domains.json but not in the manifest")
 
     def test_undeclared_shortcut(self):
-        self.edit("fleet", 'kind = "deprecated"\nuntil = "0.2.538"', 'kind = "shortcut"')
+        self.edit("fleet", 'kind = "removed"\nuntil = "0.2.538"', 'kind = "shortcut"')
         self.assertFails("shortcut 'teleport' -> 'fleet push' is not declared in domains.json")
 
     def test_route_without_a_new_spelling(self):

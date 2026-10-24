@@ -66,8 +66,8 @@ if [[ "$pwsh_version" =~ ^[0-9]+$ ]]; then
     "$(ps1 -V | tr -d '[:space:]')" "-V prints the version"
   assert_contains "[OK] AGENTS.md in sync with CLAUDE.md" "$(ps1 agent context check)" "agent context check is native"
   test_start "powershell_sends_old_names_to_bin_dot"
-  assert_contains "'dot agents' is deprecated; use 'dot agent context check'" "$(ps1 agents check)" \
-    "an old name warns, as bin/dot does"
+  assert_contains "'dot agents' was removed; use 'dot agent context'" "$(ps1 agents check)" \
+    "an old name is refused, as bin/dot refuses it"
   assert_contains "dot update is short for dot system update" "$(ps1 update --help)" \
     "dot update is dot system update, not chezmoi update"
 fi

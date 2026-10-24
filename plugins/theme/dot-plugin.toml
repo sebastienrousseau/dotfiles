@@ -62,11 +62,11 @@ summary = "Install the configured fonts"
 [[aliases]]
 name = "wallpaper"
 target = "theme wallpaper set"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"
 
 [[aliases]]
 name = "fonts"
 target = "theme font install"
-kind = "deprecated"
+kind = "removed"
 until = "0.2.538"

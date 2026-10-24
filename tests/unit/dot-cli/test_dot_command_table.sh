@@ -20,13 +20,13 @@ BASH_BIN="$(command -v bash)"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/dot-names.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 
-# The dispatcher pinned to 0.2.537, inside the deprecation window of the
-# names that stop working in 0.2.538, so these cases do not depend on the
-# release being tested.
+# The dispatcher pinned to 0.2.537 with the table as it was then, inside the
+# deprecation window of the names removed in 0.2.538, so these cases test the
+# deprecation path whatever the release under test.
 source "$SCRIPT_DIR/../../framework/pinned_dot.sh"
 DOT_CLI="$(pinned_dot "$WORK/pinned" 0.2.537)"
 
-printf '_DOT_SRC=%q\nVERSION=0.2.537\nsource %q\n' "$REPO_ROOT" \
+printf '_DOT_SRC=%q\nVERSION=0.2.537\nsource %q\n' "$WORK/pinned" \
   "$REPO_ROOT/lib/dot/names.sh" >"$WORK/names.sh"
 
 # resolve <words...> — print "<route words>|<words replaced>".
@@ -96,14 +96,15 @@ assert_equals "|0" "$(resolve ai gateway show)" "a planned verb never falls thro
 
 test_start "every_alias_target_runs"
 unresolved=""
-while IFS='|' read -r rec name kind target _; do
-  [[ "$rec" == alias && "$kind" != removed ]] || continue
+# A removed name's hint names its target, so that must run too.
+while IFS='|' read -r rec name _ target _; do
+  [[ "$rec" == alias ]] || continue
   [[ "$target" == help || "$target" == version ]] && continue # built-ins
   # shellcheck disable=SC2086 # the target is words
   got="$(resolve $target)"
   [[ -n "${got%%|*}" ]] || unresolved="$unresolved $name"
 done <"$TABLE"
-assert_equals "" "$unresolved" "each deprecated name and shortcut points at a command that runs"
+assert_equals "" "$unresolved" "each old name and shortcut points at a command that runs"
 
 test_start "old_invocations_get_their_new_spelling"
 spell() { "$BASH_BIN" -c "source '$WORK/names.sh'; _dot_longest leg \"\$@\"; echo \"\$_BEST\"" _ "$@"; }
@@ -216,6 +217,14 @@ DOT_BIN="$WORK/src/bin/dot" dot frob-old || rc=$?
 assert_equals "127" "$rc" "past its release a deprecated name exits 127"
 assert_file_contains "$WORK/err" "'dot frob-old' was removed; use 'dot doctor'" "with the hint"
 
+test_start "this_release_rejects_the_old_names"
+# The real dispatcher, not the pinned one: from 0.2.538 an old name exits
+# 127 with its new spelling and runs nothing.
+rc=0
+DOT_BIN="$REPO_ROOT/bin/dot" dot upgrade --yes || rc=$?
+assert_equals "127" "$rc" "dot upgrade is gone"
+assert_file_contains "$WORK/err" "'dot upgrade' was removed; use 'dot system update'" "with the new spelling"
+
 test_start "without_its_library_dot_still_answers"
 # A dispatcher with no lib/ beside it and no source dir to find.
 mkdir -p "$WORK/bare/bin" "$WORK/bare/home"
@@ -240,14 +249,11 @@ dot --version
 long="$(cat "$WORK/out")"
 dot -V
 assert_equals "$long" "$(cat "$WORK/out")" "-V prints the version (N9)"
-dot -v
-assert_equals "$long" "$(cat "$WORK/out")" "-v alone still prints it in this release"
-assert_file_contains "$WORK/err" "use 'dot -V'" "with a warning"
 rc=0
 dot -v no-such-command-n03 || rc=$?
 assert_equals "127" "$rc" "-v before a command passes on to it"
-later="$("$BASH_BIN" -c "source '$WORK/names.sh'; VERSION=0.2.538; show_help() { echo overview; }; _dot_names -v" 2>&1)"
-assert_equals "overview" "$later" "after the window -v alone is --verbose with no command: the overview"
+bare="$("$BASH_BIN" -c "source '$WORK/names.sh'; show_help() { echo overview; }; _dot_names -v" 2>&1)"
+assert_equals "overview" "$bare" "-v alone is --verbose with no command: the overview, no warning"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

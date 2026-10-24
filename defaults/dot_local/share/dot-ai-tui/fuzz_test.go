@@ -326,6 +326,12 @@ func FuzzModelKeys(f *testing.F) {
 	execCommand = func(string, ...string) *exec.Cmd { return exec.Command("true") }
 	f.Cleanup(func() { execCommand = orig })
 	f.Fuzz(func(t *testing.T, keys []byte, w, h int) {
+		// Each key renders a full frame (about 0.5 ms). A 10 kB input ran
+		// for seconds and tripped the fuzzer's hang limit on a shared CI
+		// runner; 256 keys reach every state the seeds do.
+		if len(keys) > 256 {
+			keys = keys[:256]
+		}
 		m := newModel()
 		m = upd(m, tea.WindowSizeMsg{Width: clampi(w, 0, 300), Height: clampi(h, 0, 100)})
 		m = upd(m, refreshMsg{tools: fleet, costToday: "$0.00", recent: []string{"18:00  claude  dotfiles"}})

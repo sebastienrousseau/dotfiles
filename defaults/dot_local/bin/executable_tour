@@ -123,7 +123,6 @@ gum style \
   "dot theme      # Switch theme" \
   "dot theme wallpaper set  # Apply wallpaper" \
   "dot theme font install      # Install Nerd Fonts" \
-  "dot keys       # Keybindings" \
   "dot tool list --nix      # Curated utilities" \
   " " \
   "Edit ~/.dotfiles/.chezmoidata.toml for shell, features, and profiles."

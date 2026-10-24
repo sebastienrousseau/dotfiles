@@ -427,98 +427,98 @@ flag|system update|yes|y||Answer yes to every question
 flag|system update|globals|||Also update npm, cargo and pipx globals
 arg|system schedule set|weekly daily off||
 arg|tool new|python go node packer molecule||
-alias|mode|deprecated|agent mode|0.2.538
-alias|agents|deprecated|agent context|0.2.538
-alias|ai-setup|deprecated|ai install --interactive|0.2.538
-alias|ai-query|deprecated|ai ask|0.2.538
-alias|patterns|deprecated|ai pattern|0.2.538
-alias|cl|deprecated|ai run claude|0.2.538
-alias|claude|deprecated|ai run claude|0.2.538
-alias|codex|deprecated|ai run codex|0.2.538
-alias|copilot|deprecated|ai run copilot|0.2.538
-alias|kimi|deprecated|ai run kimi|0.2.538
-alias|agy|deprecated|ai run agy|0.2.538
-alias|goose|deprecated|ai run goose|0.2.538
-alias|kiro|deprecated|ai run kiro|0.2.538
-alias|sgpt|deprecated|ai run sgpt|0.2.538
-alias|ollama|deprecated|ai run ollama|0.2.538
-alias|opencode|deprecated|ai run opencode|0.2.538
-alias|aider|deprecated|ai run aider|0.2.538
-alias|autohand|deprecated|ai run autohand|0.2.538
-alias|vibe|deprecated|ai run vibe|0.2.538
-alias|qwen|deprecated|ai run qwen|0.2.538
-alias|zai|deprecated|ai run zai|0.2.538
-alias|attestation|deprecated|attest|0.2.538
-alias|completion|deprecated|cli completion|0.2.538
-alias|registry|deprecated|cli list --available|0.2.538
-alias|search|deprecated|help|0.2.538
-alias|manual|deprecated|help --manual|0.2.538
-alias|docs|deprecated|help --readme|0.2.538
-alias|learn|deprecated|help tour|0.2.538
+alias|mode|removed|agent mode|0.2.538
+alias|agents|removed|agent context|0.2.538
+alias|ai-setup|removed|ai install --interactive|0.2.538
+alias|ai-query|removed|ai ask|0.2.538
+alias|patterns|removed|ai pattern|0.2.538
+alias|cl|removed|ai run claude|0.2.538
+alias|claude|removed|ai run claude|0.2.538
+alias|codex|removed|ai run codex|0.2.538
+alias|copilot|removed|ai run copilot|0.2.538
+alias|kimi|removed|ai run kimi|0.2.538
+alias|agy|removed|ai run agy|0.2.538
+alias|goose|removed|ai run goose|0.2.538
+alias|kiro|removed|ai run kiro|0.2.538
+alias|sgpt|removed|ai run sgpt|0.2.538
+alias|ollama|removed|ai run ollama|0.2.538
+alias|opencode|removed|ai run opencode|0.2.538
+alias|aider|removed|ai run aider|0.2.538
+alias|autohand|removed|ai run autohand|0.2.538
+alias|vibe|removed|ai run vibe|0.2.538
+alias|qwen|removed|ai run qwen|0.2.538
+alias|zai|removed|ai run zai|0.2.538
+alias|attestation|removed|attest|0.2.538
+alias|completion|removed|cli completion|0.2.538
+alias|registry|removed|cli list --available|0.2.538
+alias|search|removed|help|0.2.538
+alias|manual|removed|help --manual|0.2.538
+alias|docs|removed|help --readme|0.2.538
+alias|learn|removed|help tour|0.2.538
 alias|apply|shortcut|config apply|
 alias|sync|shortcut|config sync|
 alias|diff|shortcut|config diff|
 alias|status|shortcut|config status|
 alias|edit|shortcut|config edit|
-alias|add|deprecated|config add|0.2.538
-alias|commit|deprecated|config save|0.2.538
-alias|uninstall|deprecated|config uninstall|0.2.538
-alias|init|deprecated|config init|0.2.538
-alias|setup|deprecated|config init|0.2.538
-alias|profile|deprecated|config profile|0.2.538
-alias|sandbox|deprecated|config apply --sandbox|0.2.538
-alias|bundle|deprecated|config export|0.2.538
-alias|lint|deprecated|config check|0.2.538
-alias|health|deprecated|doctor|0.2.538
-alias|health-check|deprecated|doctor|0.2.538
-alias|scorecard|deprecated|doctor score|0.2.538
-alias|score|deprecated|doctor score|0.2.538
-alias|snapshot|deprecated|doctor snapshot new|0.2.538
-alias|perf|deprecated|doctor perf|0.2.538
-alias|benchmark|deprecated|doctor perf --profile|0.2.538
-alias|load-bench|deprecated|doctor perf --ready|0.2.538
-alias|load-bench-pty|deprecated|doctor perf --ready --pty|0.2.538
-alias|rollback|deprecated|doctor rollback|0.2.538
-alias|heal|deprecated|doctor fix|0.2.538
-alias|drift|deprecated|doctor drift|0.2.538
-alias|conflicts|deprecated|doctor conflict|0.2.538
-alias|restore|deprecated|doctor restore|0.2.538
-alias|metrics|deprecated|doctor metric|0.2.538
-alias|backup|deprecated|doctor backup|0.2.538
-alias|chaos|deprecated|doctor|0.2.538
-alias|smoke-test|deprecated|doctor|0.2.538
-alias|keys|deprecated|doctor|0.2.538
-alias|teleport|deprecated|fleet push|0.2.538
-alias|secrets-init|deprecated|secret init|0.2.538
-alias|secrets|deprecated|secret edit|0.2.538
-alias|secrets-create|deprecated|secret new|0.2.538
-alias|ssh-key|deprecated|secret key new|0.2.538
-alias|ssh-cert|deprecated|secret cert new|0.2.538
-alias|secret-audit|deprecated|secret check|0.2.538
-alias|policy|deprecated|security policy|0.2.538
-alias|encrypt-check|deprecated|security disk|0.2.538
-alias|firewall|deprecated|security firewall apply|0.2.538
-alias|telemetry|deprecated|security telemetry apply|0.2.538
-alias|dns-doh|deprecated|security dns apply|0.2.538
-alias|lock-screen|deprecated|security lock apply|0.2.538
-alias|usb-safety|deprecated|security usb apply|0.2.538
-alias|security-score|deprecated|security score|0.2.538
+alias|add|removed|config add|0.2.538
+alias|commit|removed|config save|0.2.538
+alias|uninstall|removed|config uninstall|0.2.538
+alias|init|removed|config init|0.2.538
+alias|setup|removed|config init|0.2.538
+alias|profile|removed|config profile|0.2.538
+alias|sandbox|removed|config apply --sandbox|0.2.538
+alias|bundle|removed|config export|0.2.538
+alias|lint|removed|config check|0.2.538
+alias|health|removed|doctor|0.2.538
+alias|health-check|removed|doctor|0.2.538
+alias|scorecard|removed|doctor score|0.2.538
+alias|score|removed|doctor score|0.2.538
+alias|snapshot|removed|doctor snapshot new|0.2.538
+alias|perf|removed|doctor perf|0.2.538
+alias|benchmark|removed|doctor perf --profile|0.2.538
+alias|load-bench|removed|doctor perf --ready|0.2.538
+alias|load-bench-pty|removed|doctor perf --ready --pty|0.2.538
+alias|rollback|removed|doctor rollback|0.2.538
+alias|heal|removed|doctor fix|0.2.538
+alias|drift|removed|doctor drift|0.2.538
+alias|conflicts|removed|doctor conflict|0.2.538
+alias|restore|removed|doctor restore|0.2.538
+alias|metrics|removed|doctor metric|0.2.538
+alias|backup|removed|doctor backup|0.2.538
+alias|chaos|removed|doctor|0.2.538
+alias|smoke-test|removed|doctor|0.2.538
+alias|keys|removed|doctor|0.2.538
+alias|teleport|removed|fleet push|0.2.538
+alias|secrets-init|removed|secret init|0.2.538
+alias|secrets|removed|secret edit|0.2.538
+alias|secrets-create|removed|secret new|0.2.538
+alias|ssh-key|removed|secret key new|0.2.538
+alias|ssh-cert|removed|secret cert new|0.2.538
+alias|secret-audit|removed|secret check|0.2.538
+alias|policy|removed|security policy|0.2.538
+alias|encrypt-check|removed|security disk|0.2.538
+alias|firewall|removed|security firewall apply|0.2.538
+alias|telemetry|removed|security telemetry apply|0.2.538
+alias|dns-doh|removed|security dns apply|0.2.538
+alias|lock-screen|removed|security lock apply|0.2.538
+alias|usb-safety|removed|security usb apply|0.2.538
+alias|security-score|removed|security score|0.2.538
 alias|cd|shortcut|config path|
-alias|history|deprecated|shell history|0.2.538
-alias|aliases|deprecated|shell alias|0.2.538
-alias|alias-check|deprecated|shell alias check|0.2.538
-alias|cache-refresh|deprecated|shell update|0.2.538
-alias|prewarm|deprecated|shell update --prewarm|0.2.538
-alias|clean-cache|deprecated|shell clean|0.2.538
+alias|history|removed|shell history|0.2.538
+alias|aliases|removed|shell alias|0.2.538
+alias|alias-check|removed|shell alias check|0.2.538
+alias|cache-refresh|removed|shell update|0.2.538
+alias|prewarm|removed|shell update --prewarm|0.2.538
+alias|clean-cache|removed|shell clean|0.2.538
 alias|update|shortcut|system update|
-alias|upgrade|deprecated|system update|0.2.538
-alias|tune|deprecated|system settings apply|0.2.538
-alias|log-rotate|deprecated|system clean --logs|0.2.538
-alias|wallpaper|deprecated|theme wallpaper set|0.2.538
-alias|fonts|deprecated|theme font install|0.2.538
-alias|env|deprecated|tool|0.2.538
-alias|tools|deprecated|tool list --nix|0.2.538
-alias|packages|deprecated|tool list --packages|0.2.538
-alias|locks|deprecated|tool list --locked|0.2.538
-alias|new|deprecated|tool new|0.2.538
-alias|intelligence|deprecated|top|0.2.538
+alias|upgrade|removed|system update|0.2.538
+alias|tune|removed|system settings apply|0.2.538
+alias|log-rotate|removed|system clean --logs|0.2.538
+alias|wallpaper|removed|theme wallpaper set|0.2.538
+alias|fonts|removed|theme font install|0.2.538
+alias|env|removed|tool|0.2.538
+alias|tools|removed|tool list --nix|0.2.538
+alias|packages|removed|tool list --packages|0.2.538
+alias|locks|removed|tool list --locked|0.2.538
+alias|new|removed|tool new|0.2.538
+alias|intelligence|removed|top|0.2.538
