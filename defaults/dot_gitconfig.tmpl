@@ -112,6 +112,9 @@
 	# to the repo's own .git/hooks/<name> via `_chain`, so per-repo
 	# hooks (pre-commit, gitleaks) still run.
 	hooksPath = {{ .chezmoi.homeDir }}/.config/git/hooks
+	# GitHub closes an idle SSH session, and a pre-push hook that runs for
+	# minutes left `git push` to die with SIGPIPE once the hook passed.
+	sshCommand = ssh -o ServerAliveInterval=30
 
 [fetch]
 	prune = true
