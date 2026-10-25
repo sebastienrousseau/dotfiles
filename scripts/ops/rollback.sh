@@ -102,7 +102,7 @@ list_backups() {
 
   if [[ ! -d "$BACKUP_DIR" ]]; then
     log_warn "No backup directory found"
-    return 1
+    return 1 # mutation: ignore unobservable: the only caller runs `list_backups || true`
   fi
 
   log_step "Available Backups"

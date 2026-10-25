@@ -633,7 +633,7 @@ _vs_finish() {
   # numeric count on stdout, and any failure inside it aborts under set -e.
   if [[ ! "$changes_made" =~ ^[0-9]+$ ]]; then
     log_error "Version synchronization failed"
-    exit 1
+    exit 1 # mutation: ignore unreachable: update_version_references prints only its count, and set -e aborts on any failure inside it
   fi
   # LCOV_EXCL_STOP
   if [[ $changes_made -eq 0 && "$force_sync" != "true" ]]; then

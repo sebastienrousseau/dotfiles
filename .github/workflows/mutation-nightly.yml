@@ -3,8 +3,9 @@ name: Mutation (core, nightly)
 # The PR gate (ci-enforced.yml, Test / Mutation) scores only the lines a PR
 # changes. This scores the core scripts themselves, every night, so the
 # suite's ability to catch a regression in them is measured, not assumed.
-# The plan's bar is 90%; the floor starts at the measured baseline and is
-# raised as survivors are killed. Survivors are annotated on the run.
+# The floor is the plan's bar, 90%. Survivors are annotated on the run; a
+# line that cannot be killed is opted out in place with
+# `# mutation: ignore <reason>`.
 
 on:
   schedule:
@@ -37,7 +38,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Mutation score on the core scripts (floor 80%)
+      - name: Mutation score on the core scripts (floor 90%)
         env:
           MAX_MUTANTS: ${{ inputs.max_mutants || '120' }}
         run: |
@@ -46,7 +47,7 @@ jobs:
           mapfile -t core < <(grep -vE '^\s*(#|$)' tools/ci/mutation-core.txt)
           python3 tools/ci/mutation-test.py \
             --full \
-            --min-score 80 \
+            --min-score 90 \
             --max-mutants "$MAX_MUTANTS" \
             --jobs 4 \
             --timeout 240 \
