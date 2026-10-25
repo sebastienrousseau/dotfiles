@@ -103,7 +103,7 @@ jobs:
             "$installed" version | grep -F ".dotfiles ${VERSION}"
           CHEZMOI_SOURCE_DIR="$root/usr/local/lib/dotfiles" \
             DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 \
-            "$installed" registry --help >/dev/null
+            "$installed" cli list --available --help >/dev/null
 
           make -C "$package" uninstall PREFIX=/usr/local DESTDIR="$root"
           [[ ! -e "$installed" ]]

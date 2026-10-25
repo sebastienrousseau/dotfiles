@@ -14,7 +14,7 @@ name: Perf Baseline
 #
 # Flow:
 #   1. Restore the previous baseline from the most recent successful run.
-#   2. Apply the dotfiles + record current means via `dot perf --json`.
+#   2. Apply the dotfiles + record current means via `dot doctor perf --json`.
 #   3. Compare; emit ::warning:: (push) or open/comment issue (cron).
 #   4. Upload current measurement as the next baseline (cron only).
 
