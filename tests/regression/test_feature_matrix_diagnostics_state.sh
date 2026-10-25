@@ -462,7 +462,6 @@ test_fm_chaos() {
   fi
 }
 
-
 test_fm_teleport_usage() {
   # `dot fleet push` with no user@host pushes to the fleet, so the teleport
   # route's own usage is reached directly.
@@ -584,6 +583,20 @@ test_fm_restore_list() {
   fm_expect_out "  backup-19990101_000000"
   test_start "fm_restore_list_shows_git_history"
   fm_expect_out "--- Git History (last 10) ---"
+}
+
+test_fm_restore_list_no_commits() {
+  # A checkout with no commits yet (a fresh `git init`) has no history to
+  # show. `git log` exits 128 there, and --list used to exit with it after
+  # printing the backups.
+  local repo="$FM_SANDBOX/work/emptyrepo"
+  mkdir -p "$repo"
+  git -C "$repo" init -q
+  test_start "fm_restore_list_no_commits"
+  DOTFILES_DIR="$repo" fm_run doctor restore --list
+  fm_expect_rc 0
+  test_start "fm_restore_list_no_commits_says_so"
+  fm_expect_out "no commits yet"
 }
 
 test_fm_restore_git_dry_run() {
@@ -718,6 +731,7 @@ test_fm_metrics_empty
 test_fm_smoke_test
 test_fm_intelligence
 test_fm_restore_list
+test_fm_restore_list_no_commits
 test_fm_restore_git_dry_run
 test_fm_restore_diff
 test_fm_restore_latest

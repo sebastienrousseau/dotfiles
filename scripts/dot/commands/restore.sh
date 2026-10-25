@@ -55,9 +55,18 @@ list_backups() {
   echo "─────────────────────────────────────────"
 
   if [[ -d "$DOTFILES_DIR/.git" ]]; then
-    git -C "$DOTFILES_DIR" log --oneline -10
+    git_history "$DOTFILES_DIR"
   elif [[ -d "$CHEZMOI_SOURCE/.git" ]]; then
-    git -C "$CHEZMOI_SOURCE" log --oneline -10
+    git_history "$CHEZMOI_SOURCE"
+  fi
+}
+
+# A fresh `git init` has no history: git log exits 128 there.
+git_history() {
+  if git -C "$1" rev-parse -q --verify HEAD >/dev/null; then
+    git -C "$1" log --oneline -10
+  else
+    echo "  (no commits yet)"
   fi
 }
 
