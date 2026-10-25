@@ -6,7 +6,7 @@
 # (about nine minutes), so `git push` died with SIGPIPE (exit 141) after
 # the hook passed and nothing reached the remote. ~/.ssh/config is not
 # managed, so git itself must ask ssh for keepalives.
-# Regression for: v0.2.538 tag push
+# Regression for: GH-1320 (the v0.2.538 tag push)
 # Why: a long pre-push hook must not silently cancel the push.
 
 set -uo pipefail
