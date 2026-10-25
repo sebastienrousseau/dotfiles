@@ -1,13 +1,13 @@
 name: Drift Detection
 
-# Nightly chezmoi drift detection (closes #875). Runs `dot drift --json`
+# Nightly chezmoi drift detection (closes #875). Runs `dot doctor drift --json`
 # in a clean container against the main branch and opens (or updates)
 # a tracking issue if anything has drifted between the chezmoi source
 # and what a fresh apply would produce.
 #
 # Catches the class of drift this session uncovered (deployed `.gitconfig`
 # had a `hooksPath` line not in the chezmoi template) by exercising the
-# same source-vs-deployed comparison `dot drift` runs locally.
+# same source-vs-deployed comparison `dot doctor drift` runs locally.
 
 on:
   schedule:
