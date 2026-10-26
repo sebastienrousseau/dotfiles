@@ -9,7 +9,7 @@ Cited works and recommended reading.
 ## Algorithms
 
 - **MacQueen, J. (1967).** *Some methods for classification and analysis of multivariate observations.* Proceedings of the Fifth Berkeley Symposium on Mathematical Statistics and Probability. — The original K-Means paper.
-- **Arthur, D. & Vassilvitskii, S. (2007).** *K-Means++: The advantages of careful seeding.* ACM-SIAM Symposium on Discrete Algorithms. <https://theory.stanford.edu/~sergei/papers/kMeansPP-soda.pdf>
+- **Arthur, D. & Vassilvitskii, S. (2007).** *K-Means++: The advantages of careful seeding.* ACM-SIAM Symposium on Discrete Algorithms. <https://web.archive.org/web/20241231032956/https://theory.stanford.edu/~sergei/papers/kMeansPP-soda.pdf> (archived; the original host is unreachable)
 - **Heckbert, P. (1982).** *Color image quantization for frame buffer display.* Computer Graphics 16(3). — Median cut algorithm, the alternative to K-Means.
 
 ## Color Science
