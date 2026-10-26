@@ -351,7 +351,7 @@ jobs:
       - name: Check for Dockerfiles
         id: check-dockerfiles
         run: |
-          if find . -name "Dockerfile*" -type f | grep -q .; then
+          if find . -name "Dockerfile*" ! -name "*.dockerignore" -type f | grep -q .; then
             echo "found=true" >> "$GITHUB_OUTPUT"
           else
             echo "found=false" >> "$GITHUB_OUTPUT"
@@ -362,7 +362,7 @@ jobs:
         run: |
           set -euo pipefail
           dockerfiles=()
-          while IFS= read -r f; do dockerfiles+=("$f"); done < <(find . -type f -name "Dockerfile*" ! -path "./.git/*" | sort)
+          while IFS= read -r f; do dockerfiles+=("$f"); done < <(find . -type f -name "Dockerfile*" ! -name "*.dockerignore" ! -path "./.git/*" | sort)
 
           for dockerfile in "${dockerfiles[@]}"; do
             echo "Linting $dockerfile"
