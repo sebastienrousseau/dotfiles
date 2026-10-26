@@ -36,6 +36,9 @@ source "$SCRIPT_DIR/../../lib/dot/log.sh"
 # shellcheck source=../../lib/dot/utils.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../../lib/dot/utils.sh" # check_cmd
+# shellcheck source=../../lib/dot/ai-roster.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../../lib/dot/ai-roster.sh" # AI_ROSTER_BINS
 # shellcheck source-path=SCRIPTDIR source=doctor/platform.sh
 source "$SCRIPT_DIR/doctor/platform.sh"
 # shellcheck source-path=SCRIPTDIR source=doctor/performance.sh
@@ -256,7 +259,7 @@ _doctor_infrastructure() {
 # --- AI CLIs ---
 _doctor_ai_clis() {
   _section "AI CLIs"
-  for cmd in codex claude copilot kimi agy sgpt ollama opencode aider kiro-cli; do
+  for cmd in "${AI_ROSTER_BINS[@]}"; do
     if check_cmd "$cmd"; then
       _ok "$cmd" "$(pretty_path "$(get_cmd_path "$cmd")")"
     else

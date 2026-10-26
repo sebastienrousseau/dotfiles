@@ -85,23 +85,19 @@ var passmcpFamily = []string{
 	"passmcp-registry",
 }
 
-// aiRoleMap maps watched binary basenames to their btop process table role.
-var aiRoleMap = map[string]string{
-	"claude": "agent", "codex": "agent", "copilot": "agent", "goose": "agent",
-	"crush": "agent", "amp": "agent", "cursor-agent": "agent", "grok": "agent",
-	"opencode": "coding", "aider": "coding", "autohand": "coding", "vibe": "coding",
-	"qwen": "coding", "zai": "coding", "agy": "agent", "sgpt": "agent",
-	"kiro-cli": "cloud", "ollama": "local-llm", "llama-server": "local-llm",
-	"corralctl": "ecosystem", "draft": "ecosystem",
-	"passmcp": "mcp", "passmcp-server": "mcp", "passmcp-graph": "mcp",
-	"passmcp-lsp": "mcp", "passmcp-reporting": "mcp", "passmcp-registry": "mcp",
+// ownRoles maps dot's own processes to their btop process table role. Every
+// AI tool's processes come from the roster (rosterRoles, roster_gen.go).
+var ownRoles = map[string]string{
 	"dot-mcp": "mcp", "dot-ai-proxy": "gateway",
 }
 
 // aiProcessRole returns the btop role category for a process command name, or "".
 func aiProcessRole(comm string) string {
 	base := strings.TrimSpace(filepath.Base(comm))
-	return aiRoleMap[base]
+	if role, ok := rosterRoles[base]; ok {
+		return role
+	}
+	return ownRoles[base]
 }
 
 // parsePsProcesses parses `ps -axo pid=,pcpu=,rss=,etime=,comm=` output into

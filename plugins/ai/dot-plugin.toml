@@ -56,6 +56,7 @@ legacy = "ai chat"
 summary = "Start an agent"
 
 [commands.args]
+# roster: values
 values = ["claude", "codex", "copilot", "goose", "crush", "amp", "cursor-agent", "grok", "kimi", "agy", "kiro", "sgpt", "ollama", "opencode", "aider", "autohand", "vibe", "qwen", "zai"]
 
 [[commands]]
@@ -71,6 +72,7 @@ value = "pattern"
 summary = "Steering pattern (--pattern is the old name)"
 
 [commands.args]
+# roster: values
 values = ["claude", "codex", "copilot", "goose", "crush", "amp", "cursor-agent", "grok", "kimi", "agy", "kiro", "sgpt", "ollama", "opencode", "aider", "autohand", "vibe", "qwen", "zai"]
 
 [[commands]]
