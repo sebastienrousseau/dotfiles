@@ -1,0 +1,17 @@
+# Build context for .clusterfuzzlite/Dockerfile. BuildKit reads this
+# file instead of the root .dockerignore, which drops .clusterfuzzlite/
+# and fuzz/ to keep them out of the test and sandbox images; this image
+# needs both (build.sh and the Go harnesses).
+.git
+node_modules
+all_aliases.sh
+dist/
+build/
+tests/
+docs/
+*.log
+*.tgz
+*.tar.gz
+.version-sync-backup/
+.claude/
+.devcontainer/
