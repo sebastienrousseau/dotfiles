@@ -117,8 +117,9 @@ def render_shell(tools: list[dict]) -> str:
     status = ["|".join([*GROUPS[t["group"]], t["title"], t["bin"], t["summary"]])
               for t in by_group(chat)]
     lines = [
-        "# shellcheck shell=bash disable=SC2034",
+        "#!/usr/bin/env bash",
         *(f"# {line}" for line in LICENSE),
+        "# shellcheck disable=SC2034 # read by lib/dot/ai-roster.sh's callers",
         f"# {NOTICE}",
         "# Sourced by lib/dot/ai-roster.sh, which holds the lookups.",
         "",
