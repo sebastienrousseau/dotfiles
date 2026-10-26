@@ -334,6 +334,9 @@ printf 'profile = "demo"\n' >"$CHEZMOIDATA"
 run_vs
 assert_equals "1" "$VS_RC" "a canonical manifest with no version should exit 1"
 assert_contains "Could not extract dotfiles_version" "$VS_OUT" "the failure should say so"
+# The run stops there: an empty version reaching validate_version would add a
+# second, misleading "Invalid version format" error.
+assert_output_not_contains "Invalid version format" 'printf "%s" "$VS_OUT"'
 
 # 17. --backup is also spelled -b, and asking for it explicitly is a
 # different arm of the option parser from letting it default.
@@ -352,5 +355,18 @@ test_start "version_sync_exec_requires_generated_package_surface"
 ALLOW_W=1 run_vs --force --no-backup
 assert_equals "1" "$VS_RC" "a missing package.json should exit 1"
 assert_contains "package.json not found" "$VS_OUT" "the failure should say so"
+
+# 19. The summaries count what was scanned: --verify's "checked N files" and
+# the sync's "out of N processed" both equal the files the scan found.
+build_sandbox "5.5.5" "5.5.5" "5.5.5"
+test_start "version_sync_exec_summaries_count_the_scanned_files"
+run_vs --dry-run
+found="$(sed -nE 's/.*Found ([0-9]+) files with version references.*/\1/p' <<<"$VS_OUT")"
+assert_not_empty "$found" "the scan should report how many files it found"
+assert_contains "out of $found processed" "$VS_OUT" \
+  "the sync summary should count every scanned file"
+run_vs --verify
+assert_contains "(checked $found files)" "$VS_OUT" \
+  "--verify should count every scanned file"
 
 printf 'RESULTS:%s:%s:%s\n' "$TESTS_RUN" "$TESTS_PASSED" "$TESTS_FAILED"

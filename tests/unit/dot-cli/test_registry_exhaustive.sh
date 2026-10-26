@@ -177,6 +177,15 @@ ex search_description search neovim
 ex search_tag search editor
 ex search_miss search zzzznomatch
 ex search_noarg search
+# The ex sweep above only records the exit code; a search must also filter.
+test_start "registry_search_lists_only_matches"
+search_out="$(NO_COLOR=1 cmd_registry search starship </dev/null 2>/dev/null)"
+assert_contains "starship-preset" "$search_out" "the matching module is listed"
+assert_output_not_contains "nvim-minimal" 'printf "%s" "$search_out"'
+test_start "registry_search_matches_tags"
+search_out="$(NO_COLOR=1 cmd_registry search editor </dev/null 2>/dev/null)"
+assert_contains "nvim-minimal" "$search_out" "a tag match is listed"
+assert_output_not_contains "starship-preset" 'printf "%s" "$search_out"'
 ex info_hit info starship-preset
 ex info_miss info not-a-module
 ex info_noarg info
