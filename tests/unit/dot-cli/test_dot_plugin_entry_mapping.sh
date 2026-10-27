@@ -189,7 +189,7 @@ delegate list|delegate list
 MAP
 # The log grows with every call, so only its oldest entry is compared.
 run "$REPO_ROOT/plugins/agent/dot-agent" log show
-assert_equals "$(cmd_mode_out log | head -1)" "$(head -1 "$WORK/out")" "dot agent log show runs cmd_mode log"
+assert_equals "$(cmd_mode_out log | head -1)" "$(cat "$WORK/out" "$WORK/err" | head -1)" "dot agent log show runs cmd_mode log"
 
 # Through bin/dot: fleet has a fallback, secret and security do not.
 test_start "fallback_decides_where_other_words_go"
