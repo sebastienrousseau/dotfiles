@@ -35,16 +35,20 @@ for file in "$repo_root"/bin/dot-*; do
 done
 cp "$repo_root/bin/dot.ps1" "$dest/bin/"
 cp "$repo_root/tools/release/Makefile.dist" "$dest/Makefile"
-cp -R "$repo_root/lib/dot" "$dest/lib/"
-cp -R "$repo_root/scripts" "$dest/"
-cp -R "$repo_root/security" "$dest/"
-cp -R "$repo_root/docs" "$dest/"
-mkdir -p "$dest/defaults"
-cp "$repo_root/defaults/.chezmoidata.toml" "$dest/defaults/"
-cp -R "$repo_root/defaults/.chezmoidata" "$dest/defaults/"
-cp -R "$repo_root/defaults/.chezmoitemplates" "$dest/defaults/"
-cp -R "$repo_root/defaults/dot_config/dotfiles" "$dest/defaults/dot_config/"
-cp -R "$repo_root/defaults/dot_claude" "$dest/defaults/"
+# stage_tree SRC DEST: the libraries, scripts, bundled plugins (P2.1),
+# security data, docs and the defaults the CLI reads at run time;
+# .chezmoiroot points the readers at defaults/, as in a checkout, and
+# defaults/dot_config/dotfiles keeps its name, which every reader expects.
+stage_tree() {
+  cp -R "$1/lib/dot" "$2/lib/"
+  cp -R "$1/scripts" "$1/plugins" "$1/security" "$1/docs" "$2/"
+  mkdir -p "$2/defaults/dot_config"
+  cp "$1/.chezmoiroot" "$2/"
+  cp "$1/defaults/.chezmoidata.toml" "$2/defaults/"
+  cp -R "$1/defaults/.chezmoidata" "$1/defaults/.chezmoitemplates" "$1/defaults/dot_claude" "$2/defaults/"
+  cp -R "$1/defaults/dot_config/dotfiles" "$2/defaults/dot_config/"
+}
+stage_tree "$repo_root" "$dest"
 
 # The man page is a BUILD PRODUCT of the command registry in bin/dot,
 # generated here so a staged tree never ships a page that drifted from
@@ -72,3 +76,13 @@ for command in apply doctor "doctor status" "doctor perf show" "tool list" theme
   # shellcheck disable=SC2086 # a spelling is words
   DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 "$dest/bin/dot" $command --help >/dev/null
 done
+# stage_entry_smoke DEST: --help never reaches a plugin's entry (P2.1), so
+# run one for real, in a throwaway HOME; a bundle without plugins/ fails.
+stage_entry_smoke() {
+  local home
+  home="$(mktemp -d)"
+  HOME="$home" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 DOTFILES_SHOW_LOGO=0 \
+    "$1/bin/dot" fleet status </dev/null >/dev/null
+  rm -rf "$home"
+}
+stage_entry_smoke "$dest"

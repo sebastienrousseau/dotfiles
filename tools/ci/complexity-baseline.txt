@@ -193,4 +193,4 @@
   11   15   27.0   27     0 tools/docs/check-manual.sh::check_links
   11   11   20.8   30    30 tools/docs/checksum-manual.sh::<top>
   10   11   35.1   93   119 tools/release/package-policy-bundles.sh::<top>
-  17   11   33.1   47    50 tools/release/stage-dot.sh::<top>
+  17   11   31.8   39    57 tools/release/stage-dot.sh::<top>
