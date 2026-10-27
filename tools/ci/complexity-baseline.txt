@@ -156,7 +156,7 @@
   17   14   34.9   63    63 scripts/security/check-disclosure-key-expiry.sh::<top>
   11   22   23.6   48    48 scripts/security/encryption-check.sh::<top>
   12   15   22.4   29     0 scripts/security/enforce-policies.sh::check_file_permissions
-  12   14   40.2   56     0 scripts/security/enforce-policies.sh::main
+  12   14   39.6   56     0 scripts/security/enforce-policies.sh::main
   15   23   30.5   50     0 scripts/security/enforce-policies.sh::scan_secrets
   13   21   15.2   49    49 scripts/security/lock-configs.sh::<top>
   15   16   23.5   40    43 scripts/security/lock-screen.sh::<top>
@@ -191,4 +191,4 @@
   11   15   27.0   27     0 tools/docs/check-manual.sh::check_links
   11   11   20.8   30    30 tools/docs/checksum-manual.sh::<top>
   10   11   35.1   93   119 tools/release/package-policy-bundles.sh::<top>
-  17   11   31.8   39    57 tools/release/stage-dot.sh::<top>
+  17   11   31.8   39    58 tools/release/stage-dot.sh::<top>
