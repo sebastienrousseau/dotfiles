@@ -78,7 +78,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -97,7 +97,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -137,7 +137,7 @@ jobs:
       security-events: write   # upload-sarif (Checkov)
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -145,7 +145,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Checkov Infrastructure Security
-        uses: bridgecrewio/checkov-action@6f26dc90000b74feb589a906cdfae540f5119895 # v12.3134.0
+        uses: bridgecrewio/checkov-action@c3e106d5f8f4253a6de5110efb41a080f83db294 # v12.3135.0
         with:
           framework: dockerfile,yaml,secrets
           quiet: false
@@ -158,7 +158,7 @@ jobs:
           skip_path: fuzz/oss-fuzz/
       - name: Upload Checkov results to GitHub Security
         if: always() && hashFiles('reports/checkov.sarif') != ''
-        uses: github/codeql-action/upload-sarif@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4
         with:
           sarif_file: reports/checkov.sarif
 
@@ -177,7 +177,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, macos-14]
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -223,7 +223,7 @@ jobs:
     timeout-minutes: 3
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -242,7 +242,7 @@ jobs:
     timeout-minutes: 3
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -265,7 +265,7 @@ jobs:
       SHFMT_SHA256: fb096c5d1ac6beabbdbaa2874d025badb03ee07929f0c9ff67563ce8c75398b1
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -297,7 +297,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -355,7 +355,7 @@ jobs:
       contents: read
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -446,7 +446,7 @@ jobs:
     if: always()
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -477,7 +477,7 @@ jobs:
         check: [dependency-updates, beta-testing, extended-tests]
     steps:
       - name: Harden runner (audit mode)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
