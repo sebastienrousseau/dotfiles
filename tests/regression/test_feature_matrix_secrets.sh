@@ -354,7 +354,7 @@ test_fm_secrets_env_load() {
   # is only reachable by invoking secrets.sh directly — which is what the
   # row asserts, together with the fact that the arm still exists.
   test_start "fm_secrets_env_load"
-  fm_run_bin "$REPO_ROOT/scripts/dot/commands/secrets.sh" env load fm-no-such-bucket
+  fm_run_bin "$REPO_ROOT/plugins/secret/libexec/secrets.sh" env load fm-no-such-bucket
   fm_expect_rc 1
   test_start "fm_secrets_env_load_reaches_the_loader"
   fm_expect_err "No secrets loaded for bucket: fm-no-such-bucket"

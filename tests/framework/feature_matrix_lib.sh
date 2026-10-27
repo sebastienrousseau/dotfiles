@@ -261,6 +261,7 @@ fm_repo_copy() {
   cp -R "$REPO_ROOT/bin" "$dest/bin"
   cp -R "$REPO_ROOT/lib" "$dest/lib"
   cp -R "$REPO_ROOT/scripts/dot" "$dest/scripts/dot"
+  cp -R "$REPO_ROOT/plugins" "$dest/plugins"
   cp -R "$REPO_ROOT/scripts/lib" "$dest/scripts/lib" 2>/dev/null || true
   cp -R "$REPO_ROOT/defaults/dot_config/dotfiles" "$dest/defaults/dot_config/dotfiles"
   cp "$REPO_ROOT/defaults/.chezmoidata.toml" "$dest/defaults/.chezmoidata.toml"
@@ -305,9 +306,17 @@ fm_run() {
 # is retired with no new spelling (ADR-020: chaos, smoke-test, keys,
 # health-check), which stay in routes.txt until extraction.
 fm_run_route() {
-  local module="$1"
+  local root module f
+  root="$(dirname "$FM_DOT")/.."
+  module="$root/scripts/dot/commands/$1.sh"
   shift
-  fm_run_bin "$(dirname "$FM_DOT")/../scripts/dot/commands/$module.sh" "$@"
+  # A module that moved into a plugin (P2.1) lives in its libexec/.
+  if [[ ! -e "$module" ]]; then
+    for f in "$root"/plugins/*/libexec/"${module##*/}"; do
+      [[ -e "$f" ]] && module="$f"
+    done
+  fi
+  fm_run_bin "$module" "$@"
 }
 
 # fm_run_bin <dot-path> <args…> — same, against a specific dispatcher (used

@@ -92,7 +92,9 @@ Adding a `dot` command touches four places; the drift gates will tell
 you if you miss one:
 
 1. The implementation: in a plugin with an `[entry]`, a case in
-   `plugins/<domain>/dot-<domain>`, which gets the words after the domain;
+   `plugins/<domain>/dot-<domain>`, which gets the words after the domain
+   (and, with `fallback = true`, the bare domain and any word the table does
+   not take); larger plugins keep their code in `plugins/<domain>/libexec/`;
    otherwise a route in an existing module under `scripts/dot/commands/`,
    or a new module plus its `routes.txt` row
 2. `plugins/<domain>/dot-plugin.toml` — a `[[commands]]` entry with an

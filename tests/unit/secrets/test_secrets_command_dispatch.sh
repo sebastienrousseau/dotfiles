@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Behavioural tests for scripts/dot/commands/secrets.sh: the dispatch table,
+# Behavioural tests for plugins/secret/libexec/secrets.sh: the dispatch table,
 # the secrets set/get/list/provider verbs, the policy defaults read out of
 # .chezmoidata.toml, and `secrets load` in all three shell dialects.
 #
@@ -19,7 +19,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-SCRIPT_FILE="$REPO_ROOT/scripts/dot/commands/secrets.sh"
+SCRIPT_FILE="$REPO_ROOT/plugins/secret/libexec/secrets.sh"
 REAL_BASH="${BASH:-$(command -v bash)}"
 
 trap cov_teardown_sandbox EXIT
@@ -29,7 +29,7 @@ WORK="$DOTFILES_COV_TMPDIR/work"
 mkdir -p "$WORK"
 
 test_start "script_exists"
-assert_file_exists "$SCRIPT_FILE" "scripts/dot/commands/secrets.sh must exist"
+assert_file_exists "$SCRIPT_FILE" "plugins/secret/libexec/secrets.sh must exist"
 
 # ---------------------------------------------------------------------------
 # Stubs: a file-backed `pass`, plus interception of every hand-off.
@@ -83,13 +83,13 @@ chmod +x "$BIN/pass" "$BIN/bash" "$BIN/chezmoi" "$BIN/security"
 # A source tree whose .chezmoidata.toml carries a secrets policy and an AI
 # bucket, so the policy-env and bucket-key paths have real data to read.
 SRC="$WORK/src"
-mkdir -p "$SRC/lib/dot" "$SRC/scripts/lib" "$SRC/scripts/dot/commands" \
+mkdir -p "$SRC/lib/dot" "$SRC/scripts/lib" "$SRC/plugins/secret/libexec" \
   "$SRC/scripts/secrets" "$SRC/scripts/security"
 for lib in ui.sh utils.sh platform.sh ai-install.sh ai-roster.sh data preflight.sh upgrade.sh ai-provision.sh probe.sh log.sh verified-download.sh; do
   ln -sf "$REPO_ROOT/lib/dot/$lib" "$SRC/lib/dot/$lib"
 done
 ln -sf "$REPO_ROOT/scripts/lib/secrets_provider.sh" "$SRC/scripts/lib/secrets_provider.sh"
-ln -sf "$SCRIPT_FILE" "$SRC/scripts/dot/commands/secrets.sh"
+ln -sf "$SCRIPT_FILE" "$SRC/plugins/secret/libexec/secrets.sh"
 : >"$SRC/scripts/secrets/age-init.sh"
 : >"$SRC/scripts/secrets/create-secrets-file.sh"
 : >"$SRC/scripts/secrets/encrypt-ssh-key.sh"
@@ -132,7 +132,7 @@ secrets() { _run "$SCRIPT_FILE" "$@"; }
 # secrets_fixture <args…> — the same command file reached through a
 # synthetic tree, so the source resolver lands on the fixture data file and
 # the bucket-backed `load` paths have keys to emit.
-secrets_fixture() { _run "$SRC/scripts/dot/commands/secrets.sh" "$@"; }
+secrets_fixture() { _run "$SRC/plugins/secret/libexec/secrets.sh" "$@"; }
 
 # ===========================================================================
 # Dispatch surface

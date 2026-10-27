@@ -213,6 +213,11 @@ class Entries(Fixture):
         self.edit("theme", 'verb = "list"\n', 'verb = "list"\nlegacy = "theme list"\n')
         self.assertFails("theme: a plugin with an entry runs its own commands; drop 'legacy'")
 
+    def test_object_fallback_needs_entry_fallback(self):
+        self.edit("security", 'name = "disk"\nsummary = "disk encryption"\ndefault = "show"\n',
+                  'name = "disk"\nsummary = "disk encryption"\ndefault = "show"\nfallback = true\n')
+        self.assertFails("security: object 'disk' has fallback, which needs [entry] fallback = true")
+
     def test_planned_needs_an_entry(self):
         self.edit("top", 'verb = "measure"\n', 'verb = "measure"\nplanned = true\n')
         self.assertFails("top: 'planned' needs an [entry]")

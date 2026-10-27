@@ -60,10 +60,10 @@ cmd|ai gateway show||read|Gateway statistics
 cmd|ai inventory show||read|Agents, versions and config
 cmd|ai pattern show|patterns view|read|One prompt pattern
 cmd|ai pattern edit|patterns edit|write|Edit a prompt pattern
-dom|attest|show|attest|attestation and verification
-cmd|attest show|attest|read|The workstation attestation
-cmd|attest export|attest --write|read|Write attestation evidence
-cmd|attest verify|attest --verify|read|Verify evidence
+dom|attest|show|@attest|attestation and verification
+cmd|attest show|@attest show|read|The workstation attestation
+cmd|attest export|@attest export|read|Write attestation evidence
+cmd|attest verify|@attest verify|read|Verify evidence
 dom|cli|list||plugins, updates, completions
 obj|cli completion|show||shell completion scripts
 obj|cli registry|show||the plugin registry
@@ -119,19 +119,19 @@ cmd|doctor drift show|drift|read|Drift from the source
 cmd|doctor conflict list|conflicts|read|Conflicting files
 cmd|doctor metric list|metrics|read|Recorded metrics
 cmd|doctor report show||read|Weekly posture report
-dom|fleet|status|fleet|many hosts
-obj|fleet drift|show||drift across hosts
-obj|fleet namespace|list||fleet namespaces
+dom|fleet|status|@fleet|many hosts
+obj|fleet drift|show|@fleet|drift across hosts
+obj|fleet namespace|list|@fleet|fleet namespaces
 obj|fleet log|show||fleet events
 obj|fleet policy|show||fleet policy
-cmd|fleet status|fleet status|read|Posture across hosts
-cmd|fleet apply|fleet apply|write|Apply the fleet configuration
-cmd|fleet push|fleet push|write|Send configuration to a host
-cmd|fleet drift show|fleet drift|read|Drift across hosts
-cmd|fleet namespace list|fleet namespace show|read|Namespaces
-cmd|fleet log show|fleet events|read|Fleet events
-cmd|fleet policy show|fleet enforce status|read|Fleet policy
-cmd|fleet policy set|fleet enforce set|write|Enforce a fleet policy
+cmd|fleet status|@fleet status|read|Posture across hosts
+cmd|fleet apply|@fleet apply|write|Apply the fleet configuration
+cmd|fleet push|@fleet push|write|Send configuration to a host
+cmd|fleet drift show|@fleet drift show|read|Drift across hosts
+cmd|fleet namespace list|@fleet namespace list|read|Namespaces
+cmd|fleet log show|@fleet log show|read|Fleet events
+cmd|fleet policy show|@fleet policy show|read|Fleet policy
+cmd|fleet policy set|@fleet policy set|write|Enforce a fleet policy
 dom|mcp|list|mcp|MCP servers as supply chain
 cmd|mcp list|mcp registry|read|Configured MCP servers
 cmd|mcp check|mcp doctor|read|Check servers and pins
@@ -141,21 +141,21 @@ obj|secret key|list||SSH signing and authentication keys
 obj|secret cert|list||short-lived SSH certificates
 obj|secret provider|show||the secret provider
 cmd|secret status||read|Provider, vault state and key counts
-cmd|secret init|secrets-init|write|Set up the secret provider
-cmd|secret edit|secrets edit|write|Edit the encrypted secrets file
-cmd|secret new|secrets-create|write|Create the secrets file
-cmd|secret list|secrets list|read|Secret names without values
-cmd|secret show|secrets get|read|One secret
-cmd|secret set|secrets set|write|Store one secret
-cmd|secret export|secrets load|read|Print secrets as environment
-cmd|secret check|secret-audit|read|Audit secret hygiene
+cmd|secret init|@secret init|write|Set up the secret provider
+cmd|secret edit|@secret edit|write|Edit the encrypted secrets file
+cmd|secret new|@secret new|write|Create the secrets file
+cmd|secret list|@secret list|read|Secret names without values
+cmd|secret show|@secret show|read|One secret
+cmd|secret set|@secret set|write|Store one secret
+cmd|secret export|@secret export|read|Print secrets as environment
+cmd|secret check|@secret check|read|Audit secret hygiene
 cmd|secret key list||read|Keys without their values
-cmd|secret key new|ssh-key|write|Create an ED25519 key
-cmd|secret cert list|ssh-cert status|read|Certificates and expiry
-cmd|secret cert new|ssh-cert issue|write|Issue a short-lived SSH certificate
-cmd|secret provider show|secrets provider|read|The active provider
+cmd|secret key new|@secret key new|write|Create an ED25519 key
+cmd|secret cert list|@secret cert list|read|Certificates and expiry
+cmd|secret cert new|@secret cert new|write|Issue a short-lived SSH certificate
+cmd|secret provider show|@secret provider show|read|The active provider
 cmd|secret provider set||write|Switch provider
-cmd|secret cert remove|ssh-cert revoke|write|Revoke the current SSH certificate
+cmd|secret cert remove|@secret cert remove|write|Revoke the current SSH certificate
 dom|security|status||OS hardening
 obj|security policy|show||the security policy
 obj|security disk|show||disk encryption
@@ -166,19 +166,19 @@ obj|security lock|show||the lock screen
 obj|security usb|show||removable media
 obj|security score|show||the security score
 cmd|security status||read|Hardening summary
-cmd|security policy show|policy|read|The security policy
-cmd|security disk show|encrypt-check|read|Disk encryption state
-cmd|security score show|security-score|read|The security score
+cmd|security policy show|@security policy show|read|The security policy
+cmd|security disk show|@security disk show|read|Disk encryption state
+cmd|security score show|@security score show|read|The security score
 cmd|security firewall show||read|Current firewall setting
-cmd|security firewall apply|firewall|write|Harden the firewall setting
+cmd|security firewall apply|@security firewall apply|write|Harden the firewall setting
 cmd|security telemetry show||read|Current telemetry setting
-cmd|security telemetry apply|telemetry|write|Harden the telemetry setting
+cmd|security telemetry apply|@security telemetry apply|write|Harden the telemetry setting
 cmd|security dns show||read|Current dns setting
-cmd|security dns apply|dns-doh|write|Harden the dns setting
+cmd|security dns apply|@security dns apply|write|Harden the dns setting
 cmd|security lock show||read|Current lock setting
-cmd|security lock apply|lock-screen|write|Harden the lock setting
+cmd|security lock apply|@security lock apply|write|Harden the lock setting
 cmd|security usb show||read|Current usb setting
-cmd|security usb apply|usb-safety|write|Harden the usb setting
+cmd|security usb apply|@security usb apply|write|Harden the usb setting
 dom|session|select||find, open and restore terminal sessions
 cmd|session select||read|Pick a session to open
 cmd|session list||read|Sessions on this machine
@@ -281,9 +281,6 @@ leg|patterns list|ai pattern list||
 leg|ai cost|ai cost show||
 leg|patterns view|ai pattern show||
 leg|patterns edit|ai pattern edit||
-leg|attest|attest show||
-leg|attest --write|attest export||
-leg|attest --verify|attest verify||
 leg|registry installed|cli list||
 leg|registry info|cli show||
 leg|registry install|cli install||
@@ -319,38 +316,9 @@ leg|benchmark|doctor perf measure||
 leg|drift|doctor drift show||
 leg|conflicts|doctor conflict list||
 leg|metrics|doctor metric list||
-leg|fleet status|fleet status||
-leg|fleet apply|fleet apply||
-leg|fleet push|fleet push||
-leg|fleet drift|fleet drift show||
-leg|fleet namespace show|fleet namespace list||
-leg|fleet events|fleet log show||
-leg|fleet enforce status|fleet policy show||
-leg|fleet enforce set|fleet policy set||
 leg|mcp registry|mcp list||
 leg|mcp doctor|mcp check||
 leg|mcp serve|mcp serve||
-leg|secrets-init|secret init||
-leg|secrets edit|secret edit||
-leg|secrets-create|secret new||
-leg|secrets list|secret list||
-leg|secrets get|secret show||
-leg|secrets set|secret set||
-leg|secrets load|secret export||
-leg|secret-audit|secret check||
-leg|ssh-key|secret key new||
-leg|ssh-cert status|secret cert list||
-leg|ssh-cert issue|secret cert new||
-leg|secrets provider|secret provider show||
-leg|ssh-cert revoke|secret cert remove||
-leg|policy|security policy show||
-leg|encrypt-check|security disk show||
-leg|security-score|security score show||
-leg|firewall|security firewall apply||
-leg|telemetry|security telemetry apply||
-leg|dns-doh|security dns apply||
-leg|lock-screen|security lock apply||
-leg|usb-safety|security usb apply||
 leg|cache-refresh|shell update||
 leg|clean-cache|shell clean||
 leg|history|shell history list||

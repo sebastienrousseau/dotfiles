@@ -285,7 +285,7 @@ _dot_stop_unbuilt() {
   if _dot_planned "$@"; then
     _dot_unknown "$@"
   elif [[ -n "${3:-}" && "$3" != -* && "$_DOT_TABLE" != *$'\n'"leg|$1 $2"[\ \|]* ]] &&
-    _dot_record obj "$1 $2"; then
+    _dot_record obj "$1 $2" && [[ "${_REC#*|}" != @* ]]; then
     _dot_not_a_verb "$@"
   fi
   return 0

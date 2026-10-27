@@ -6,7 +6,7 @@
 #
 # Provider-agnostic secret storage, age-encrypted files and SSH certificates.
 #
-# Backing module: scripts/dot/commands/secrets.sh
+# Backing module: plugins/secret/libexec/secrets.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: every command below is read-only or a help

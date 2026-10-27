@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Dotfiles CLI - Diagnostics Commands
 # doctor, heal, health, rollback, drift, history, benchmark, verify, perf,
-# scorecard, conflicts, locks, snapshot, load-bench, chaos, bundle, attest
+# scorecard, conflicts, locks, snapshot, load-bench, chaos, bundle
 
 set -euo pipefail
 
@@ -18,10 +18,9 @@ usage() {
 Usage: diagnostics.sh <command> [args...]
 
 Commands:
-  doctor, heal, health, security-score, scorecard, perf, conflicts, locks,
-  snapshot, attest, rollback, drift, history, benchmark, verify, restore,
-  load-bench, load-bench-pty, chaos, teleport, secret-audit, bundle, metrics,
-  smoke-test, intelligence
+  doctor, heal, health, scorecard, perf, conflicts, locks, snapshot,
+  rollback, drift, history, benchmark, verify, restore, load-bench,
+  load-bench-pty, chaos, bundle, metrics, smoke-test, intelligence
 EOF
 }
 
@@ -53,10 +52,6 @@ cmd_health() {
   run_script "scripts/diagnostics/health.sh" "Health dashboard" "$@"
 }
 
-cmd_security_score() {
-  run_script "scripts/diagnostics/security-score.sh" "Security score" "$@"
-}
-
 cmd_scorecard() {
   run_script "scripts/diagnostics/scorecard.sh" "Scorecard" "$@"
 }
@@ -75,10 +70,6 @@ cmd_locks() {
 
 cmd_snapshot() {
   run_script "scripts/diagnostics/snapshot.sh" "Snapshot" "$@"
-}
-
-cmd_attest() {
-  run_script "scripts/diagnostics/workstation-attestation.sh" "Workstation attestation" "$@"
 }
 
 cmd_rollback() {
@@ -122,14 +113,6 @@ cmd_chaos() {
   run_script "scripts/ops/chaos.sh" "Chaos engineering script" "$@"
 }
 
-cmd_teleport() {
-  run_script "scripts/ops/teleport.sh" "Teleport script" "$@"
-}
-
-cmd_secret_audit() {
-  run_script "scripts/diagnostics/secret-governance.sh" "Secret governance script" "$@"
-}
-
 cmd_bundle() {
   run_script "scripts/ops/bundle.sh" "Offline bundle script" "$@"
 }
@@ -170,10 +153,6 @@ case "${1:-}" in
     shift
     cmd_health "$@"
     ;;
-  security-score)
-    shift
-    cmd_security_score "$@"
-    ;;
   scorecard | score)
     shift
     cmd_scorecard "$@"
@@ -193,10 +172,6 @@ case "${1:-}" in
   snapshot)
     shift
     cmd_snapshot "$@"
-    ;;
-  attest | attestation)
-    shift
-    cmd_attest "$@"
     ;;
   rollback)
     shift
@@ -233,14 +208,6 @@ case "${1:-}" in
   chaos)
     shift
     cmd_chaos "$@"
-    ;;
-  teleport)
-    shift
-    cmd_teleport "$@"
-    ;;
-  secret-audit)
-    shift
-    cmd_secret_audit "$@"
     ;;
   bundle)
     shift

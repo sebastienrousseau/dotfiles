@@ -27,7 +27,7 @@ on:
     paths:
       - 'lib/dot/utils.sh'
       - 'scripts/dot/commands/init.sh'
-      - 'scripts/dot/commands/fleet.sh'
+      - 'plugins/fleet/libexec/fleet.sh'
       - 'scripts/lib/secrets_provider.sh'
       - 'defaults/dot_local/bin/executable_dot-ai-serve'
       - 'fuzz/**'

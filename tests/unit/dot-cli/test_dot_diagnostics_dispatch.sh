@@ -80,6 +80,13 @@ test_start "unknown_command_fails"
 diag definitely-not-a-command
 assert_equals 1 "$RC" "rc"
 
+# These moved to the security, attest, secret and fleet plugins (P2.1).
+test_start "moved_commands_are_not_diagnostics_commands"
+for sub in security-score attest attestation teleport secret-audit; do
+  diag "$sub"
+  assert_equals 1 "$RC" "$sub is not a diagnostics command"
+done
+
 test_start "doctor_prefers_the_unified_doctor"
 diag doctor --json
 assert_equals 0 "$RC" "rc"
@@ -103,23 +110,18 @@ run_script_case() {
 run_script_case heal scripts/ops/heal.sh
 run_script_case health scripts/diagnostics/health.sh
 run_script_case health-check scripts/diagnostics/health.sh
-run_script_case security-score scripts/diagnostics/security-score.sh
 run_script_case scorecard scripts/diagnostics/scorecard.sh
 run_script_case score scripts/diagnostics/scorecard.sh
 run_script_case perf scripts/diagnostics/perf.sh
 run_script_case conflicts scripts/diagnostics/conflicts.sh
 run_script_case locks scripts/diagnostics/version-locks.sh
 run_script_case snapshot scripts/diagnostics/snapshot.sh
-run_script_case attest scripts/diagnostics/workstation-attestation.sh
-run_script_case attestation scripts/diagnostics/workstation-attestation.sh
 run_script_case rollback scripts/ops/rollback.sh
 run_script_case history scripts/diagnostics/history-analysis.sh
 run_script_case benchmark scripts/diagnostics/benchmark.sh
 run_script_case verify scripts/diagnostics/verify.sh
 run_script_case restore scripts/dot/commands/restore.sh
 run_script_case chaos scripts/ops/chaos.sh
-run_script_case teleport scripts/ops/teleport.sh
-run_script_case secret-audit scripts/diagnostics/secret-governance.sh
 run_script_case bundle scripts/ops/bundle.sh
 run_script_case smoke-test scripts/diagnostics/smoke-test.sh
 run_script_case intelligence lib/dot/bento.sh

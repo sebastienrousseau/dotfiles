@@ -6,9 +6,10 @@
 #   plugins/theme/dot-theme             (show, wallpaper set, font install,
 #                                        and the switcher's own words)
 #   scripts/dot/commands/appearance.sh  (tune)
-#   scripts/dot/commands/security.sh    (backup, encrypt-check, firewall,
-#                                        telemetry, dns-doh, lock-screen,
-#                                        usb-safety, policy)
+#   plugins/security/dot-security       (policy, disk, score, and the
+#                                        firewall, telemetry, dns, lock and
+#                                        usb hardening)
+#   scripts/dot/commands/security.sh    (backup)
 #
 # All are pure routers: each subcommand resolves the dotfiles source tree
 # and then `exec bash <script>`. What matters is that the right target is
@@ -26,6 +27,7 @@ source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 APPEARANCE="$REPO_ROOT/scripts/dot/commands/appearance.sh"
 THEME="$REPO_ROOT/plugins/theme/dot-theme"
 SECURITY="$REPO_ROOT/scripts/dot/commands/security.sh"
+SECURITY_ENTRY="$REPO_ROOT/plugins/security/dot-security"
 REAL_BASH="${BASH:-$(command -v bash)}"
 REAL_UNAME="$(command -v uname)"
 
@@ -50,7 +52,7 @@ REPO_PHYSICAL="$(cd "$REPO_ROOT" && pwd -P)"
 cat >"$BIN/bash" <<EOF
 #!$REAL_BASH
 case "\${1:-}" in
-  */scripts/theme/*|*/scripts/fonts/*|*/scripts/tuning/*|*/scripts/security/*)
+  */scripts/theme/*|*/scripts/fonts/*|*/scripts/tuning/*|*/scripts/security/*|*/scripts/diagnostics/security-score.sh)
     rel="\${1#$REPO_ROOT/}"
     rel="\${rel#$REPO_PHYSICAL/}"
     printf 'dispatched %s %s\n' "\$rel" "\${*:2}"
@@ -175,7 +177,7 @@ assert_equals "3" "$rc" "the target script's exit status is the command's exit s
 test_start "security_usage_on_help_and_no_args"
 rc="$(dispatch "$SECURITY" --help)"
 assert_equals "0" "$rc" "--help exits 0"
-assert_file_contains "$OUT" "usb-safety, policy" "usage lists the subcommands"
+assert_file_contains "$OUT" "  backup" "usage lists the subcommands"
 for flag in -h help; do
   rc="$(dispatch "$SECURITY" "$flag")"
   assert_equals "0" "$rc" "$flag exits 0"
@@ -184,8 +186,10 @@ rc="$(dispatch "$SECURITY")"
 assert_equals "1" "$rc" "no arguments is a usage error"
 
 test_start "security_rejects_an_unknown_subcommand"
-rc="$(dispatch "$SECURITY" not-a-subcommand)"
-assert_equals "1" "$rc" "an unknown subcommand fails"
+for word in not-a-subcommand firewall policy encrypt-check; do
+  rc="$(dispatch "$SECURITY" "$word")"
+  assert_equals "1" "$rc" "'$word' is not a security.sh subcommand"
+done
 assert_file_contains "$ERR" "Unknown security command" "the error names the command"
 
 test_start "security_subcommands_route_to_their_scripts"
@@ -197,17 +201,35 @@ while IFS='|' read -r sub target; do
     "$sub routes to $target"
 done <<'ROUTES'
 backup|backup.sh
-encrypt-check|encryption-check.sh
-firewall|firewall.sh
-telemetry|telemetry-kill.sh
-dns-doh|dns-doh.sh
-lock-screen|lock-screen.sh
-usb-safety|usb-safety.sh
-policy|enforce-policies.sh
 ROUTES
 
+test_start "security_entry_spellings_route_to_their_scripts"
+while IFS='|' read -r words target; do
+  [[ -n "$words" ]] || continue
+  # shellcheck disable=SC2086 # words
+  dispatch "$SECURITY_ENTRY" $words --dry-run >/dev/null
+  assert_file_contains "$OUT" "dispatched scripts/$target --dry-run" "dot security $words runs $target"
+done <<'ROUTES'
+policy show|security/enforce-policies.sh
+disk show|security/encryption-check.sh
+score show|diagnostics/security-score.sh
+firewall apply|security/firewall.sh
+telemetry apply|security/telemetry-kill.sh
+dns apply|security/dns-doh.sh
+lock apply|security/lock-screen.sh
+usb apply|security/usb-safety.sh
+ROUTES
+
+test_start "security_entry_refuses_an_undeclared_spelling"
+for words in "" "status" "firewall show" "firewall" "bogus words"; do
+  # shellcheck disable=SC2086 # words
+  rc="$(dispatch "$SECURITY_ENTRY" $words)"
+  assert_equals "127" "$rc" "dot security $words is not built in the entry"
+done
+assert_file_contains "$ERR" "is not a command" "and says so"
+
 test_start "security_propagates_the_target_exit_status"
-rc="$(DISPATCH_RC=2 dispatch "$SECURITY" firewall)"
+rc="$(DISPATCH_RC=2 dispatch "$SECURITY_ENTRY" firewall apply)"
 assert_equals "2" "$rc" "the target script's exit status is the command's exit status"
 
 test_start "security_reports_a_missing_target_script"

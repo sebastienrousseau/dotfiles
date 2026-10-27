@@ -10,7 +10,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-FLEET_FILE="$REPO_ROOT/scripts/dot/commands/fleet.sh"
+FLEET_FILE="$REPO_ROOT/plugins/fleet/libexec/fleet.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

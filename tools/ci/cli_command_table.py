@@ -7,7 +7,7 @@ The table is the plugin manifests flattened into pipe-separated records, so
 the dispatcher resolves ADR-020 spellings without parsing TOML:
 
   dom|<domain>|<default verb>|<legacy route or empty>|<summary>
-  obj|<domain object>|<default verb>||<summary>
+  obj|<domain object>|<default verb>|<@domain or empty>|<summary>
   cmd|<domain [object] verb>|<legacy route or empty>|<effect>|<summary>
   run|<invocation with flags>|<legacy route>||
   leg|<legacy route>|<spelling>||   (the first spelling a route runs)
@@ -19,6 +19,10 @@ the dispatcher resolves ADR-020 spellings without parsing TOML:
 A plugin with an `[entry]` runs its own commands: its routes are `@<domain>`
 followed by the spelling, and bin/dot hands the words after the domain to
 plugins/<domain>/dot-<domain>. Its commands marked `planned` are not built.
+With `fallback`, the domain's own route is `@<domain>` too, so the domain
+word alone and words its table does not take reach the entry; an object
+with `fallback` names the entry too, so words after it that are not its
+verbs reach the entry as well.
 
 `cmd` records with an empty legacy are declared but not built yet. `run`
 records come from old-name aliases whose target says more than a declared
@@ -66,9 +70,10 @@ def route(domain: str, manifest: dict, command: dict) -> str:
 
 
 def domain_records(domain: str, manifest: dict) -> list[str]:
-    bare = f"@{domain}" if "entry" in manifest else manifest.get("legacy", "")
+    bare = f"@{domain}" if manifest.get("entry", {}).get("fallback") else manifest.get("legacy", "")
     rows = [f"dom|{domain}|{manifest['default']}|{bare}|{manifest['summary']}"]
-    rows += [f"obj|{domain} {o['name']}|{o['default']}||{o['summary']}" for o in manifest.get("objects", [])]
+    rows += [f"obj|{domain} {o['name']}|{o['default']}|{f'@{domain}' if o.get('fallback') else ''}|{o['summary']}"
+             for o in manifest.get("objects", [])]
     for command in manifest["commands"]:
         rows.append(f"cmd|{spelling(domain, command)}|{route(domain, manifest, command)}|"
                     f"{command['effect']}|{command['summary']}")

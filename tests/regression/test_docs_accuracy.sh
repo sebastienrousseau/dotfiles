@@ -121,10 +121,14 @@ assert_output_not_contains "Cline" "grep -F 'Cline' '$REPO_ROOT/docs/reference/T
 
 test_start "utils_doc_commands_exist"
 routes="$REPO_ROOT/lib/dot/data/routes.txt"
+table="$REPO_ROOT/lib/dot/data/commands.txt"
 failures=0
-for cmd in apply doctor heal rollback bundle secrets; do
+# A command exists when it has a route, or is a domain or a shortcut in the
+# command table (a plugin with an entry has no route of its own).
+for cmd in apply doctor heal rollback bundle secret; do
   if grep -q "dot $cmd" "$REPO_ROOT/docs/reference/UTILS.md" 2>/dev/null; then
-    if ! grep -q "^$cmd|" "$routes" 2>/dev/null; then
+    if ! grep -q "^$cmd|" "$routes" 2>/dev/null &&
+      ! grep -q -E "^(dom\|$cmd\||alias\|$cmd\|shortcut\|)" "$table" 2>/dev/null; then
       failures=$((failures + 1))
     fi
   fi

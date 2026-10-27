@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# dot-security: the entry of the security plugin (ADR-020 N2). bin/dot runs
+# it with the words after `dot security`, one of the spellings its manifest
+# declares as built.
+
+set -euo pipefail
+
+_SECURITY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source-path=SCRIPTDIR source=../../lib/dot/utils.sh
+source "$_SECURITY_DIR/../../lib/dot/utils.sh"
+
+dot_ui_command_banner "Security" "security"
+
+case "${1:-} ${2:-}" in
+  "policy show") run_script "scripts/security/enforce-policies.sh" "Policy enforcement script" "${@:3}" ;;
+  "disk show") run_script "scripts/security/encryption-check.sh" "Encryption check script" "${@:3}" ;;
+  "score show") run_script "scripts/diagnostics/security-score.sh" "Security score" "${@:3}" ;;
+  "firewall apply") run_script "scripts/security/firewall.sh" "Firewall script" "${@:3}" ;;
+  "telemetry apply") run_script "scripts/security/telemetry-kill.sh" "Telemetry script" "${@:3}" ;;
+  "dns apply") run_script "scripts/security/dns-doh.sh" "DNS DoH script" "${@:3}" ;;
+  "lock apply") run_script "scripts/security/lock-screen.sh" "Lock screen script" "${@:3}" ;;
+  "usb apply") run_script "scripts/security/usb-safety.sh" "USB safety script" "${@:3}" ;;
+  *)
+    echo "dot: 'dot security $*' is not a command; run 'dot help security'" >&2
+    exit 127
+    ;;
+esac

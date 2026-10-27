@@ -12,6 +12,8 @@ source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 DIAG_FILE="$REPO_ROOT/scripts/dot/commands/diagnostics.sh"
+# The security score moved to the security plugin's entry (P2.1).
+SECURITY_ENTRY="$REPO_ROOT/plugins/security/dot-security"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
@@ -82,7 +84,7 @@ fi
 
 # Test: defines security-score command
 test_start "diagnostics_defines_security_score"
-if grep -q "security.score\|security_score\|securityscore" "$DIAG_FILE" 2>/dev/null; then
+if grep -q "scripts/diagnostics/security-score.sh" "$SECURITY_ENTRY" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines security-score command"
 else

@@ -463,10 +463,10 @@ test_fm_chaos() {
 }
 
 test_fm_teleport_usage() {
-  # `dot fleet push` with no user@host pushes to the fleet, so the teleport
-  # route's own usage is reached directly.
+  # `dot fleet push` with no user@host pushes to the fleet, so teleport's
+  # own usage is reached directly, through the script it runs.
   test_start "fm_teleport_usage"
-  fm_run_route diagnostics teleport
+  fm_run_bin "$(dirname "$FM_DOT")/../scripts/ops/teleport.sh"
   fm_expect_rc 1
   test_start "fm_teleport_usage_message"
   fm_expect_any "Usage" "user@host"
