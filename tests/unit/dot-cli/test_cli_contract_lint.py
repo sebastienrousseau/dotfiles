@@ -229,8 +229,8 @@ class TableRoutes(Fixture):
 
     def test_a_record_naming_a_missing_route_fails(self):
         routes = self.tmp / "lib/dot/data/routes.txt"
-        routes.write_text("".join(ln for ln in routes.read_text().splitlines(True) if not ln.startswith("registry|")))
-        self.assertFails("'cli list --available' runs route 'registry', which lib/dot/data/routes.txt does not have")
+        routes.write_text("".join(ln for ln in routes.read_text().splitlines(True) if not ln.startswith("prewarm|")))
+        self.assertFails("'shell update --prewarm' runs route 'prewarm', which lib/dot/data/routes.txt does not have")
 
 
 class Table(Fixture):
