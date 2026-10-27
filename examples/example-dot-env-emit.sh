@@ -6,7 +6,7 @@
 #
 # Render the v1 environment manifest that SBOM and compliance tooling consumes.
 #
-# Backing module: scripts/dot/commands/env-emit.sh
+# Backing module: plugins/tool/libexec/env-emit.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: every command below is read-only or a help

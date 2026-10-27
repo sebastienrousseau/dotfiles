@@ -13,6 +13,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 TOOLS="$REPO_ROOT/scripts/dot/commands/tools.sh"
+TOOL="$REPO_ROOT/plugins/tool/libexec/tool.sh"
 WORK="$(mktemp -d -t dot-tools-pnu.XXXXXX)"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -43,7 +44,7 @@ assert_output_not_contains "stray" 'printf "%s" "$out"'
 
 test_start "new_project_gets_the_security_workflow"
 mkdir -p "$WORK/projects"
-(cd "$WORK/projects" && NO_COLOR=1 bash "$TOOLS" new packer demo >/dev/null 2>&1)
+(cd "$WORK/projects" && NO_COLOR=1 bash "$TOOL" new packer demo >/dev/null 2>&1)
 assert_file_contains "$WORK/projects/demo/.github/workflows/security.yml" \
   "name: Security Baseline" "dot tool new writes the security workflow"
 

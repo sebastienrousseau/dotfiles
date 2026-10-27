@@ -18,26 +18,20 @@ Diagnostics|perf|Show performance mode and quick timing|Startup and shell timing
 Diagnostics|benchmark|Benchmark shell startup with per-component profiling|Hyperfine timings per shell, plus a breakdown of what each init step costs.
 Diagnostics|metrics|Show recent observability metrics (JSONL)|Recent runtime events and counters.
 Diagnostics|load-bench|Measure time to heavy-layer readiness|Performance benchmarking helper.
-Tools|env|Tool versions (mise)|Managed runtime versions.
 Tools|profile|Show/switch configuration profile|Profile-specific behavior.
 Tools|keys|Keybindings (sign-check: verify git signing)|Keyboard and signing references.
-Tools|tools|Show or install nix packages|Package helper entrypoint.
-Tools|new|Create a new project from a template|Project scaffold helper.
 Tools|sandbox|Launch a safe sandbox preview (Docker/Podman)|Disposable environment for testing.
 Tools|lint|Lint shell scripts (--fix|-f to auto-format, --check|-c for CI)|Shell quality gate.
 Tools|learn|Start the interactive tour of your new tools|Guided onboarding.
 Tools|docs|Show repo README|Open the main documentation.
 Tools|aliases|List, search, and explain the shipped shell aliases|Alias inventory, usage, and deprecations.
-Tools|registry|Browse and install modules from the dot module registry|Module catalogue.
 Appearance|tune|Apply OS tuning (opt-in) [macOS,Linux]|Host tuning entrypoint.
 Security (opt-in)|backup|Create a compressed backup of your home|Safety copy before risky changes.
 Fleet|fleet drift|Check for configuration drift across managed files|Drift detection and reporting.
 Fleet|fleet namespace|Show or set the active namespace for multi-tenant isolation|Namespace management.
 Fleet|fleet events|Show recent fleet events from local event log|Fleet observability.
 Meta|upgrade|Update dotfiles, mise tools and (with consent) system packages|Managed upgrade flow.
-Meta|packages|List installed packages and package managers|Inventory and package surfaces.
 Meta|cache-refresh|Regenerate shell caches for ultra-fast startup|Refresh generated shell state.
-Meta|completion|Generate shell completions (bash/zsh/fish/nu) from the command registry|e.g. dot completion fish > ~/.config/fish/completions/dot.fish
 Meta|search|Find commands by keyword|Find the right command quickly.
 Meta|version|Show version information.|Matches `dot --version`.
 Meta|help|Show this help message|Overview or focused command help.

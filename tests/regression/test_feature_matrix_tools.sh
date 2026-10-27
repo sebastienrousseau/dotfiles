@@ -172,7 +172,7 @@ test_fm_env_emit_help() {
   test_start "fm_env_emit_help_usage_documents_formats"
   local usage
   usage="$(awk '/Usage: dot tool export/,/^\t*EOF$/' \
-    "$REPO_ROOT/scripts/dot/commands/env-emit.sh")"
+    "$REPO_ROOT/plugins/tool/libexec/env-emit.sh")"
   if [[ "$usage" == *"ndjson"* && "$usage" == *"--output"* ]]; then
     fm_pass "usage documents ndjson and --output"
   else

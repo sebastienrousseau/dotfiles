@@ -28,11 +28,16 @@ DOT_FIXTURE_HOME="$FX/home"
 tools_run() {
   DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" dot_fixture_run "$FX" tools "$@"
 }
+# tool_run <args…> — the tool plugin's tool.sh, which took tools, new,
+# packages and env from tools.sh (P2.1).
+tool_run() {
+  DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" dot_fixture_run "$FX" tool "$@"
+}
 
 # ── 1. tools install needs a flake in the source tree ──────────────────────
 test_start "tools_install_requires_a_nix_flake"
 dot_fixture_stub "$FX/stubs" nix 0
-tools_run tools install
+tool_run tools install
 assert_equals "1" "$DOT_FIXTURE_RC" "install without a flake should exit 1"
 assert_contains "not found in source directory" "$DOT_FIXTURE_OUT" \
   "the failure should name the flake"
@@ -40,13 +45,13 @@ assert_contains "not found in source directory" "$DOT_FIXTURE_OUT" \
 # ── 2. tools docs prefers TOOLS.md, then UTILS.md ──────────────────────────
 test_start "tools_docs_falls_back_to_utils_md"
 printf '# Fixture utils\n' >"$FX/docs/UTILS.md"
-tools_run tools docs
+tool_run tools docs
 assert_equals "0" "$DOT_FIXTURE_RC" "docs should exit 0 when UTILS.md exists"
 assert_contains "Fixture utils" "$DOT_FIXTURE_OUT" "UTILS.md should be printed"
 
 test_start "tools_docs_prefers_tools_md"
 printf '# Fixture tools\n' >"$FX/docs/TOOLS.md"
-tools_run tools docs
+tool_run tools docs
 assert_contains "Fixture tools" "$DOT_FIXTURE_OUT" \
   "TOOLS.md should win when both exist"
 
@@ -60,7 +65,7 @@ printf '{ "name": "__PROJECT_NAME__" }\n' >"$FX/templates/projects/node/package.
 test_start "tools_new_accepts_python_as_a_fallback_interpreter"
 dot_fixture_stub "$FX/stubs" python 0
 DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" \
-  dot_fixture_run "$FX" tools new node demoproject
+  dot_fixture_run "$FX" tool new node demoproject
 assert_dir_exists "$FX/demoproject" \
   "plain python should satisfy the pre-flight and the project be scaffolded"
 assert_file_exists "$FX/demoproject/package.json" \
@@ -69,26 +74,26 @@ assert_file_exists "$FX/demoproject/package.json" \
 test_start "tools_new_requires_a_python_interpreter"
 rm -f "$FX/stubs/python"
 DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" \
-  dot_fixture_run "$FX" tools new node demoproject
+  dot_fixture_run "$FX" tool new node demoproject
 assert_equals "1" "$DOT_FIXTURE_RC" "no interpreter at all should exit 1"
 assert_contains "python3 is required" "$DOT_FIXTURE_OUT" \
   "the failure should name the missing dependency"
 
 test_start "tools_new_rejects_an_unknown_template"
 DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" \
-  dot_fixture_run "$FX" tools new node ../escape
+  dot_fixture_run "$FX" tool new node ../escape
 assert_equals "1" "$DOT_FIXTURE_RC" "a traversal-shaped project name should be refused"
 
 # ── 4. dot tool needs mise ──────────────────────────────────────────────────
 test_start "tools_env_requires_mise"
-tools_run env
+tool_run env
 assert_equals "1" "$DOT_FIXTURE_RC" "env without mise should exit 1"
 assert_contains "mise not installed" "$DOT_FIXTURE_OUT" \
   "the failure should name the missing tool"
 
 test_start "tools_env_lists_without_jq"
 dot_fixture_stub "$FX/stubs" mise 0
-tools_run env list
+tool_run env list
 assert_equals "0" "$DOT_FIXTURE_RC" "env list should exit 0"
 assert_contains "mise ls" "$DOT_FIXTURE_OUT" \
   "with no jq on PATH the plain mise listing should be used"

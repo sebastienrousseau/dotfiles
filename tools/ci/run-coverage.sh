@@ -190,7 +190,7 @@ _cov_write_bash_env() {
 # `cmd 2>/dev/null`, `cmd &>/dev/null`, `cmd |& …` — takes that child's
 # xtrace records with it, because they are written to fd 2. The child
 # runs, does its work, and contributes nothing: one such line in one test
-# file was measuring scripts/dot/commands/registry.sh at 58% when it was
+# file was measuring plugins/cli/libexec/registry.sh at 58% when it was
 # really at 75%. The runner cannot police what a test redirects, but it
 # can put the records somewhere a redirection cannot reach.
 #

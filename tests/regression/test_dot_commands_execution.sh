@@ -64,7 +64,7 @@ chmod +x "$sandbox/bin"/*
 registry_cache_file="$(
   HOME="$sandbox" XDG_CACHE_HOME="$sandbox/.cache" XDG_CONFIG_HOME="$sandbox/.config" \
     bash -c 'source "$1"; _registry_cache_file' _ \
-    "$REPO_ROOT/scripts/dot/commands/registry.sh"
+    "$REPO_ROOT/plugins/cli/libexec/registry.sh"
 )"
 printf '{"version":1,"modules":[]}\n' >"$registry_cache_file"
 export HOME="$sandbox" \

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC2034
-# End-to-end coverage for scripts/dot/commands/registry.sh in one fast,
+# End-to-end coverage for plugins/cli/libexec/registry.sh in one fast,
 # self-contained sandbox: every subcommand, the cache-key hasher fallbacks,
 # cache invalidation and stale-cache reuse, the install pipeline (preview,
 # apply, and each refusal), and the set-url write failures. curl resolves
@@ -16,7 +16,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 # shellcheck source=../../framework/assertions.sh
 source "$REPO_ROOT/tests/framework/assertions.sh"
 
-REGISTRY_SCRIPT="$REPO_ROOT/scripts/dot/commands/registry.sh"
+REGISTRY_SCRIPT="$REPO_ROOT/plugins/cli/libexec/registry.sh"
 REAL_BASH="${BASH:-$(command -v bash)}"
 
 if ! command -v jq >/dev/null 2>&1; then
@@ -119,7 +119,7 @@ index "$F/no-archive.json" good "$F/missing.tgz" "$(printf '%064d' 0)"
 printf '{"version":1,"modules":[]}\n' >"$F/none.json"
 printf '{"version":2,"modules":"nope"}\n' >"$F/invalid.json"
 
-# shellcheck source=../../../scripts/dot/commands/registry.sh
+# shellcheck source=../../../plugins/cli/libexec/registry.sh
 source "$REGISTRY_SCRIPT"
 set +e
 

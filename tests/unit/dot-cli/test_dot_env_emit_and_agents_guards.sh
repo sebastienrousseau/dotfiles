@@ -30,14 +30,14 @@ fx_run() {
 
 # ── 1. --output needs a value ──────────────────────────────────────────────
 test_start "env_emit_rejects_output_without_a_value"
-fx_run tools env emit --output
+fx_run tool env emit --output
 assert_not_equals "0" "$DOT_FIXTURE_RC" \
   "--output with nothing after it must not be accepted"
 assert_contains "--output needs a value" "$DOT_FIXTURE_OUT" \
   "the failure should name the option"
 
 test_start "env_emit_rejects_format_without_a_value"
-fx_run tools env emit --format
+fx_run tool env emit --format
 assert_not_equals "0" "$DOT_FIXTURE_RC" \
   "--format with nothing after it must not be accepted"
 

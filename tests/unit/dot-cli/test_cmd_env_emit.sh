@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# Test: scripts/dot/commands/env-emit.sh (the `dot tool export` handler).
+# Test: plugins/tool/libexec/env-emit.sh (the `dot tool export` handler).
 #
 # Verifies the v1 manifest emitter is syntactically valid, that the
 # dispatch arm in tools.sh wires it up, and that the env-emit module
@@ -10,7 +10,7 @@
 set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
-ENV_EMIT="$REPO_ROOT/scripts/dot/commands/env-emit.sh"
+ENV_EMIT="$REPO_ROOT/plugins/tool/libexec/env-emit.sh"
 
 TESTS_RUN=0
 TESTS_PASSED=0

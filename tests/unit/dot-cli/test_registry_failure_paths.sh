@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2016,SC2034
-# Failure and refusal paths of scripts/dot/commands/registry.sh — the arms
+# Failure and refusal paths of plugins/cli/libexec/registry.sh — the arms
 # test_registry_exhaustive.sh does not reach because they need a hostile or
 # degraded environment: a non-HTTPS registry URL, a missing curl or jq, a
 # download that fails onto a stale cache, an index that fails validation
@@ -19,7 +19,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-REGISTRY_SCRIPT="$REPO_ROOT/scripts/dot/commands/registry.sh"
+REGISTRY_SCRIPT="$REPO_ROOT/plugins/cli/libexec/registry.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
@@ -28,7 +28,7 @@ WORK="$DOTFILES_COV_TMPDIR/work"
 mkdir -p "$WORK"
 
 test_start "script_exists"
-assert_file_exists "$REGISTRY_SCRIPT" "scripts/dot/commands/registry.sh must exist"
+assert_file_exists "$REGISTRY_SCRIPT" "plugins/cli/libexec/registry.sh must exist"
 
 _pass() {
   ((TESTS_PASSED++)) || true

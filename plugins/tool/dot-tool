@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# dot-tool: the entry of the tool plugin (ADR-020 N2). bin/dot runs it with
+# the words after `dot tool`. Its declared spellings become the subcommands
+# of libexec/tool.sh (mise through `env`); any other word, or none, goes to
+# `env` as it always has.
+
+set -euo pipefail
+
+_TOOL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# tool_module SUBCOMMAND... — run the toolchain module.
+tool_module() {
+  exec bash "$_TOOL_DIR/libexec/tool.sh" "$@"
+}
+
+# tool_list FLAG ARGS... — `list --nix|--packages|--locked`, the views that
+# are not mise's.
+tool_list() {
+  case "${1:-}" in
+    --nix) tool_module tools "${@:2}" ;;
+    --packages) tool_module packages "${@:2}" ;;
+    --locked)
+      # shellcheck source-path=SCRIPTDIR source=../../lib/dot/utils.sh
+      source "$_TOOL_DIR/../../lib/dot/utils.sh"
+      dot_ui_command_banner "Diagnostics" "locks"
+      run_script "scripts/diagnostics/version-locks.sh" "Version locks" "${@:2}"
+      ;;
+  esac
+}
+
+# tool_verb VERB ARGS... — mise's own verbs under their ADR-020 names.
+tool_verb() {
+  case "${1:-}" in
+    list) tool_module env list "${@:2}" ;;
+    install) tool_module env install "${@:2}" ;;
+    update) tool_module env upgrade "${@:2}" ;;
+    remove) tool_module env prune "${@:2}" ;;
+    set) tool_module env use "${@:2}" ;;
+    export) tool_module env emit "${@:2}" ;;
+    new) tool_module new "${@:2}" ;;
+  esac
+}
+
+[[ "${1:-}" != list ]] || tool_list "${@:2}"
+tool_verb "$@"
+tool_module env "$@"

@@ -67,16 +67,16 @@ cmd|attest verify|@attest verify|read|Verify evidence
 dom|cli|list||plugins, updates, completions
 obj|cli completion|show||shell completion scripts
 obj|cli registry|show||the plugin registry
-cmd|cli list|registry installed|read|Installed plugins
-cmd|cli show|registry info|read|One plugin in detail
-cmd|cli install|registry install|write|Install a plugin
+cmd|cli list|@cli list|read|Installed plugins
+cmd|cli show|@cli show|read|One plugin in detail
+cmd|cli install|@cli install|write|Install a plugin
 cmd|cli update||write|Update dot and its plugins
 cmd|cli remove||write|Remove a plugin
 cmd|cli verify||read|Verify plugin provenance
 cmd|cli new||write|Create a plugin from the template
-cmd|cli completion show|completion|read|Print a completion script
-cmd|cli registry show|registry url|read|The plugin registry URL
-cmd|cli registry set|registry set-url|write|Point at another plugin registry
+cmd|cli completion show|@cli completion show|read|Print a completion script
+cmd|cli registry show|@cli registry show|read|The plugin registry URL
+cmd|cli registry set|@cli registry set|write|Point at another plugin registry
 dom|config|status||apply, diff and sync the dotfiles
 obj|config path|show||where the dotfiles source lives
 obj|config profile|show||the active profile and its features
@@ -219,14 +219,14 @@ cmd|theme set|@theme set|write|Switch theme everywhere
 cmd|theme wallpaper set|@theme wallpaper set|write|Set the wallpaper and derive a palette
 cmd|theme font list||read|Installed terminal fonts
 cmd|theme font install|@theme font install|write|Install the configured fonts
-dom|tool|list|env|toolchains, packages, project templates
-cmd|tool list|env list|read|Toolchains and their versions
-cmd|tool install|env install|write|Install the configured toolchains
-cmd|tool update|env upgrade|write|Upgrade toolchains
-cmd|tool remove|env prune|write|Remove orphaned toolchains (a dry run without --yes)
-cmd|tool set|env use|write|Pin a toolchain version
-cmd|tool export|env emit|read|Print the tool environment
-cmd|tool new|new|write|Create a project from a template
+dom|tool|list|@tool|toolchains, packages, project templates
+cmd|tool list|@tool list|read|Toolchains and their versions
+cmd|tool install|@tool install|write|Install the configured toolchains
+cmd|tool update|@tool update|write|Upgrade toolchains
+cmd|tool remove|@tool remove|write|Remove orphaned toolchains (a dry run without --yes)
+cmd|tool set|@tool set|write|Pin a toolchain version
+cmd|tool export|@tool export|read|Print the tool environment
+cmd|tool new|@tool new|write|Create a project from a template
 dom|top|tui|@top|what the machine and its agents are doing
 obj|top report|show||usage by model, agent or project
 cmd|top measure||read|Sample once and print the result
@@ -238,7 +238,7 @@ cmd|ui select||read|Interactive picker for scripts
 cmd|ui run||write|Run a command with progress
 cmd|ui table show||read|Render rows as a table
 run|ai install --interactive|@ai install --interactive||
-run|cli list --available|registry list||
+run|cli list --available|@cli list --available||
 run|help --manual|manual||
 run|help --readme|docs||
 run|help tour|learn||
@@ -248,15 +248,9 @@ run|doctor perf --ready|load-bench||
 run|doctor perf --ready --pty|load-bench-pty||
 run|shell update --prewarm|prewarm||
 run|system clean --logs|log-rotate||
-run|tool list --nix|tools||
-run|tool list --packages|packages||
-run|tool list --locked|locks||
-leg|registry installed|cli list||
-leg|registry info|cli show||
-leg|registry install|cli install||
-leg|completion|cli completion show||
-leg|registry url|cli registry show||
-leg|registry set-url|cli registry set||
+run|tool list --nix|@tool list --nix||
+run|tool list --packages|@tool list --packages||
+run|tool list --locked|@tool list --locked||
 leg|status|config status||
 leg|diff|config diff||
 leg|apply|config apply||
@@ -300,14 +294,6 @@ leg|system schedule list|system schedule list||
 leg|system schedule set|system schedule set||
 leg|system schedule run|system schedule run||
 leg|tune|system settings apply||
-leg|env list|tool list||
-leg|env install|tool install||
-leg|env upgrade|tool update||
-leg|env prune|tool remove||
-leg|env use|tool set||
-leg|env emit|tool export||
-leg|new|tool new||
-leg|registry list|cli list --available||
 leg|manual|help --manual||
 leg|docs|help --readme||
 leg|learn|help tour||
@@ -316,9 +302,6 @@ leg|load-bench|doctor perf --ready||
 leg|load-bench-pty|doctor perf --ready --pty||
 leg|prewarm|shell update --prewarm||
 leg|log-rotate|system clean --logs||
-leg|tools|tool list --nix||
-leg|packages|tool list --packages||
-leg|locks|tool list --locked||
 arg|ai start|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
 flag|ai run|style|p|pattern|Steering pattern (--pattern is the old name)
 arg|ai run|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||

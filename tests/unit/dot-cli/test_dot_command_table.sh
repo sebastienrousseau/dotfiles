@@ -64,8 +64,8 @@ test_start "new_spellings_run_todays_routes"
 assert_equals "upgrade|2" "$(resolve system update)" "dot system update runs dot upgrade"
 assert_equals "update|2" "$(resolve config update)" "dot config update keeps the dotfiles-only update"
 assert_equals "@secret set|2" "$(resolve secret set KEY)" "an entry route keeps the arguments"
-assert_equals "tools|3" "$(resolve tool list --nix)" "a flagged alias target runs its old route"
-assert_equals "env list|2" "$(resolve tool list)" "without the flag the plain verb runs"
+assert_equals "@tool list --nix|3" "$(resolve tool list --nix)" "a flagged alias target runs its entry route, flag and all"
+assert_equals "@tool list|2" "$(resolve tool list)" "without the flag the plain verb runs"
 assert_equals "@secret key new|3" "$(resolve secret key new)" "domain, object and verb"
 assert_equals "@agent delegate run|3" "$(resolve agent delegate run test-runner true)" "delegate run keeps the name and command"
 assert_equals "@agent delegate list|2" "$(resolve agent delegate)" "a delegate object alone lists them"
@@ -82,7 +82,7 @@ assert_equals "doctor|1" "$(resolve doctor)" "a domain with its own route keeps 
 assert_equals "doctor|1" "$(resolve doctor --fix)" "a flag after the domain is still bare"
 assert_equals "scorecard|2" "$(resolve doctor score)" "an object alone runs its default verb"
 assert_equals "scorecard|2" "$(resolve doctor score --json)" "an object and a flag runs its default verb too"
-assert_equals "env|1" "$(resolve tool)" "a domain alone runs its own route first"
+assert_equals "@tool|1" "$(resolve tool)" "a domain alone runs its own route (its entry) first"
 assert_equals "@ai|1" "$(resolve ai tools)" "an old subcommand goes to the domain's own route (its entry)"
 assert_equals "@ai start|2" "$(resolve ai start claude)" "ai start <agent> runs the entry's start (an interactive session)"
 assert_equals "@ai run|2" "$(resolve ai run claude --pattern p q)" "ai run <agent> is the one-shot, with its flags"
@@ -108,7 +108,7 @@ assert_equals "" "$unresolved" "each old name and shortcut points at a command t
 
 test_start "old_invocations_get_their_new_spelling"
 spell() { "$BASH_BIN" -c "source '$WORK/names.sh'; _dot_longest leg \"\$@\"; echo \"\$_BEST\"" _ "$@"; }
-assert_equals "cli list" "$(spell registry installed --json)" "the subcommand picks the spelling"
+assert_equals "config profile show" "$(spell profile show --json)" "the subcommand picks the spelling"
 assert_equals "system update" "$(spell upgrade --yes)" "a renamed route"
 assert_equals "" "$(spell cl)" "a name with no route of its own falls back to its alias target"
 

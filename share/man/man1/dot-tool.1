@@ -14,25 +14,25 @@ Every command takes \fB\-\-help\fR; \fBdot help\fR lists every domain.
 .SH COMMANDS
 .TP
 .B dot tool list
-Toolchains and their versions. Effect: read. Runs \fBdot env list\fR until the domain is extracted.
+Toolchains and their versions. Effect: read. Runs \fBdot\-tool list\fR, the plugin's entry.
 .TP
 .B dot tool install
-Install the configured toolchains. Effect: write. Runs \fBdot env install\fR until the domain is extracted.
+Install the configured toolchains. Effect: write. Runs \fBdot\-tool install\fR, the plugin's entry.
 .TP
 .B dot tool update
-Upgrade toolchains. Effect: write. Runs \fBdot env upgrade\fR until the domain is extracted.
+Upgrade toolchains. Effect: write. Runs \fBdot\-tool update\fR, the plugin's entry.
 .TP
 .B dot tool remove
-Remove orphaned toolchains (a dry run without \-\-yes). Effect: write. Runs \fBdot env prune\fR until the domain is extracted.
+Remove orphaned toolchains (a dry run without \-\-yes). Effect: write. Runs \fBdot\-tool remove\fR, the plugin's entry.
 .TP
 .B dot tool set
-Pin a toolchain version. Effect: write. Runs \fBdot env use\fR until the domain is extracted.
+Pin a toolchain version. Effect: write. Runs \fBdot\-tool set\fR, the plugin's entry.
 .TP
 .B dot tool export
-Print the tool environment. Effect: read. Runs \fBdot env emit\fR until the domain is extracted.
+Print the tool environment. Effect: read. Runs \fBdot\-tool export\fR, the plugin's entry.
 .TP
 .B dot tool new
-Create a project from a template. Effect: write. Runs \fBdot new\fR until the domain is extracted.
+Create a project from a template. Effect: write. Runs \fBdot\-tool new\fR, the plugin's entry.
 .SH OTHER NAMES
 .TP
 .B dot env
