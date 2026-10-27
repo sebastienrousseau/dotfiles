@@ -16,6 +16,8 @@ source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 source "$SCRIPT_DIR/../../../lib/dot/ai-commands.sh"
 # shellcheck source=../../../lib/dot/ai-probe.sh
 source "$SCRIPT_DIR/../../../lib/dot/ai-probe.sh"
+# shellcheck source=../../../lib/dot/ai-roster.sh
+source "$SCRIPT_DIR/../../../lib/dot/ai-roster.sh"
 # shellcheck source-path=SCRIPTDIR source=ai/status.sh
 source "$SCRIPT_DIR/ai/status.sh"
 
@@ -133,28 +135,8 @@ _ai_get_cached_status() {
 cmd_ai_status() {
   ui_header "AI CLI Status"
 
-  # category|role|name|binary|description
-  local -a ai_clis=(
-    "Agents (autonomous)|agent|Claude Code|claude|Anthropic's flagship agentic coder"
-    "Agents (autonomous)|agent|Codex CLI|codex|OpenAI's autonomous coding agent"
-    "Agents (autonomous)|agent|Copilot CLI|copilot|GitHub Copilot in the terminal"
-    "Agents (autonomous)|agent|Goose|goose|Block's open-source coding agent"
-    "Agents (autonomous)|agent|Crush|crush|Charm's glamorous TUI coding agent"
-    "Agents (autonomous)|agent|Amp|amp|Sourcegraph's agentic coder"
-    "Agents (autonomous)|agent|Cursor CLI|cursor-agent|Cursor's terminal agent"
-    "Agents (autonomous)|agent|Grok Build|grok|xAI's terminal coding agent"
-    "Agents (autonomous)|agent|Kimi CLI|kimi|Moonshot AI's terminal coding agent"
-    "Coding (interactive)|coding|Aider|aider|Git-aware AI pair programmer"
-    "Coding (interactive)|coding|OpenCode|opencode|Open-source terminal coding agent"
-    "Coding (interactive)|coding|Autohand Code|autohand|Autonomous multi-file coding agent"
-    "Coding (interactive)|coding|Mistral Vibe|vibe|Mistral's coding agent"
-    "Coding (interactive)|coding|Qwen Code|qwen|Alibaba Qwen coding assistant"
-    "Coding (interactive)|coding|ZAI|zai|Zhipu GLM coding agent"
-    "General (prompt-based)|general|Shell-GPT|sgpt|ChatGPT for the shell"
-    "General (prompt-based)|general|Antigravity CLI|agy|Google's Antigravity agent"
-    "Runtime (local)|local|Ollama|ollama|Run local & cloud open models"
-    "Cloud (platform)|cloud|Kiro CLI|kiro-cli|AWS's agentic dev assistant"
-  )
+  # category|role|name|binary|description, from the roster.
+  local -a ai_clis=("${AI_ROSTER_STATUS[@]}")
 
   if ! _ai_cache_fresh "$AI_STATUS_CACHE_FILE"; then
     _ai_refresh_status_cache "${ai_clis[@]}"
@@ -325,10 +307,10 @@ _ai_usage() {
 Usage: ai.sh <command> [args...]
 
 Commands:
-  ai, ai-setup, ai-query, cl, claude, codex, copilot, goose, crush, amp,
-  cursor-agent, grok, kimi, agy, kiro, sgpt, ollama, opencode, aider, autohand,
-  vibe, qwen, zai
+  ai, ai-setup, ai-query, cl, and every agent in the roster:
 EOF
+  local names="${AI_ROSTER_NAMES[*]}"
+  printf '%s\n' "${names// /, }" | fold -s -w 76 | sed 's/^/  /;s/ *$//'
 }
 
 # `dot ai <verb> …` → the function that takes the remaining arguments.
@@ -404,15 +386,16 @@ _ai_main() {
       shift
       cmd_ai_query "$@"
       ;;
-    cl | claude | codex | copilot | goose | crush | amp | cursor-agent | grok | kimi | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
-      _ai_deprecated "dot ai $1"
-      local tool="$1"
-      shift
-      run_ai_with_context "$tool" "$@"
-      ;;
     *)
-      echo "Unknown ai command: ${1:-}" >&2
-      exit 1
+      if [[ $# -gt 0 ]] && ai_roster_bin "$1" >/dev/null; then
+        _ai_deprecated "dot ai $1"
+        local tool="$1"
+        shift
+        run_ai_with_context "$tool" "$@"
+      else
+        echo "Unknown ai command: ${1:-}" >&2
+        exit 1
+      fi
       ;;
   esac
 }

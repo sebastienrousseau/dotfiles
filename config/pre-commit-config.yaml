@@ -251,6 +251,15 @@ repos:
         stages: [pre-commit]
         files: '^(plugins/.*|lib/dot/data/commands\.txt|tools/docs/gen_completions\.py|tools/docs/generate-completions\.sh|share/completions/.*|defaults/dot_local/share/bash-completion/completions/dot|defaults/dot_config/fish/completions/dot\.fish|defaults/dot_config/nushell/completions\.nu)$'
 
+      - id: roster-drift
+        name: AI tool lists match plugins/ai/roster.toml
+        entry: tools/docs/gen_roster.py
+        args: ['--check']
+        language: script
+        pass_filenames: false
+        stages: [pre-commit]
+        files: '^(plugins/ai/.*|defaults/\.chezmoidata\.toml|tools/docs/gen_roster\.py|lib/dot/data/ai-roster\.sh|defaults/dot_local/bin/executable_tmux-ai|defaults/dot_local/share/dot-ai-tui/roster_gen\.go)$'
+
       - id: cmdlets-drift
         name: PowerShell cmdlets match the plugin manifests
         entry: tools/docs/gen_cmdlets.py

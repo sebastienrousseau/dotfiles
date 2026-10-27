@@ -1,0 +1,266 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# The AI roster: every tool `dot ai` knows, in one place (plan v3, T0).
+# tools/docs/gen_roster.py generates every other list from this file and
+# `--check` fails CI when one has drifted:
+#
+#   plugins/ai/roster.json                       roster.v1 for dot-top
+#   lib/dot/data/ai-roster.sh                    names, binaries, packages
+#   plugins/ai/dot-plugin.toml                   `dot ai start` values
+#   defaults/dot_local/bin/executable_tmux-ai    providers it launches
+#   defaults/dot_local/share/dot-ai-tui/roster_gen.go   the cockpit list
+#
+# Fields:
+#   name       what users type: `dot ai start <name>`
+#   bin        the executable on PATH
+#   aliases    other names that select the tool
+#   title      display name; summary: one line on what it is
+#   group      cockpit section: agents, coding, general, local, cloud, ecosystem
+#   role       process-table role in the cockpit
+#   processes  process names that belong to the tool (default: bin)
+#   package    mise package, a key of [ai_tools] in defaults/.chezmoidata.toml;
+#              absent when a native installer or the user installs it
+#   native     the installer function in lib/dot/ai-install.sh, when not mise
+#   chat       false for suite tools that are not agents (no start, no prompt)
+#   fleet      false to keep an installable binary out of the cockpit list
+schema = "ai/roster.v1"
+
+[[tool]]
+name = "claude"
+bin = "claude"
+title = "Claude Code"
+summary = "Anthropic's flagship agentic coder"
+native = "install_claude_native"
+aliases = ["cl"]
+group = "agents"
+role = "agent"
+
+[[tool]]
+name = "codex"
+bin = "codex"
+title = "Codex CLI"
+summary = "OpenAI's autonomous coding agent"
+group = "agents"
+role = "agent"
+package = "npm:@openai/codex"
+
+[[tool]]
+name = "copilot"
+bin = "copilot"
+title = "Copilot CLI"
+summary = "GitHub Copilot in the terminal"
+group = "agents"
+role = "agent"
+package = "npm:@github/copilot"
+
+[[tool]]
+name = "goose"
+bin = "goose"
+title = "Goose"
+summary = "Block's open-source coding agent"
+native = "install_goose_native"
+group = "agents"
+role = "agent"
+
+[[tool]]
+name = "crush"
+bin = "crush"
+title = "Crush"
+summary = "Charm's glamorous TUI coding agent"
+group = "agents"
+role = "agent"
+package = "npm:@charmland/crush"
+
+[[tool]]
+name = "amp"
+bin = "amp"
+title = "Amp"
+summary = "Sourcegraph's agentic coder"
+native = "install_amp_native"
+group = "agents"
+role = "agent"
+
+[[tool]]
+name = "cursor-agent"
+bin = "cursor-agent"
+title = "Cursor CLI"
+summary = "Cursor's terminal agent"
+native = "install_cursor_native"
+aliases = ["cursor"]
+group = "agents"
+role = "agent"
+
+[[tool]]
+name = "grok"
+bin = "grok"
+title = "Grok Build"
+summary = "xAI's terminal coding agent"
+native = "install_grok_native"
+group = "agents"
+role = "agent"
+
+[[tool]]
+name = "kimi"
+bin = "kimi"
+title = "Kimi CLI"
+summary = "Moonshot AI's terminal coding agent"
+native = "install_kimi_native"
+group = "agents"
+role = "agent"
+
+[[tool]]
+name = "agy"
+bin = "agy"
+title = "Antigravity CLI"
+summary = "Google's Antigravity agent"
+native = "install_agy_native"
+group = "general"
+role = "agent"
+
+[[tool]]
+name = "kiro"
+bin = "kiro-cli"
+title = "Kiro CLI"
+summary = "AWS's agentic dev assistant"
+aliases = ["kiro-cli"]
+group = "cloud"
+role = "cloud"
+package = "kiro-cli"
+
+[[tool]]
+name = "sgpt"
+bin = "sgpt"
+title = "Shell-GPT"
+summary = "ChatGPT for the shell"
+group = "general"
+role = "agent"
+package = "pipx:shell-gpt"
+
+[[tool]]
+name = "ollama"
+bin = "ollama"
+title = "Ollama"
+summary = "Run local & cloud open models"
+group = "local"
+role = "local-llm"
+processes = ["ollama", "llama-server"]
+package = "aqua:ollama/ollama"
+
+[[tool]]
+name = "opencode"
+bin = "opencode"
+title = "OpenCode"
+summary = "Open-source terminal coding agent"
+group = "coding"
+role = "coding"
+package = "opencode"
+
+[[tool]]
+name = "aider"
+bin = "aider"
+title = "Aider"
+summary = "Git-aware AI pair programmer"
+group = "coding"
+role = "coding"
+# 3.13+ lacks audioop, which aider needs.
+package = "pipx:aider-chat[uvx_args=--python 3.12]"
+
+[[tool]]
+name = "autohand"
+bin = "autohand"
+title = "Autohand Code"
+summary = "Autonomous multi-file coding agent"
+group = "coding"
+role = "coding"
+package = "npm:autohand-cli"
+
+[[tool]]
+name = "vibe"
+bin = "vibe"
+title = "Mistral Vibe"
+summary = "Mistral's coding agent"
+group = "coding"
+role = "coding"
+
+[[tool]]
+name = "qwen"
+bin = "qwen"
+title = "Qwen Code"
+summary = "Alibaba Qwen coding assistant"
+group = "coding"
+role = "coding"
+package = "npm:@qwen-code/qwen-code"
+
+[[tool]]
+name = "zai"
+bin = "zai"
+title = "ZAI"
+summary = "Zhipu GLM coding agent"
+group = "coding"
+role = "coding"
+package = "npm:@guizmo-ai/zai-cli"
+
+[[tool]]
+name = "corralctl"
+bin = "corralctl"
+title = "corralctl"
+summary = "Multi-forge workspace manager"
+group = "ecosystem"
+role = "ecosystem"
+package = "github:sebastienrousseau/corralctl"
+chat = false
+
+[[tool]]
+name = "passmcp"
+bin = "passmcp"
+title = "passmcp"
+summary = "MCP security and risk-graph family"
+group = "ecosystem"
+role = "mcp"
+processes = ["passmcp", "passmcp-server", "passmcp-graph", "passmcp-lsp", "passmcp-reporting", "passmcp-registry"]
+package = "github:sebastienrousseau/passmcp"
+chat = false
+
+[[tool]]
+name = "draft"
+bin = "draft"
+title = "draft"
+summary = "Grounded research and C2PA synthesis"
+group = "ecosystem"
+role = "ecosystem"
+package = "github:sebastienrousseau/draft"
+chat = false
+
+[[tool]]
+name = "passmcp-server"
+bin = "passmcp-server"
+title = "passmcp-server"
+summary = "passmcp companion binary"
+group = "ecosystem"
+role = "mcp"
+package = "github:sebastienrousseau/passmcp-server"
+chat = false
+fleet = false
+
+[[tool]]
+name = "passmcp-graph"
+bin = "passmcp-graph"
+title = "passmcp-graph"
+summary = "passmcp companion binary"
+group = "ecosystem"
+role = "mcp"
+package = "github:sebastienrousseau/passmcp-graph"
+chat = false
+fleet = false
+
+[[tool]]
+name = "passmcp-lsp"
+bin = "passmcp-lsp"
+title = "passmcp-lsp"
+summary = "passmcp companion binary"
+group = "ecosystem"
+role = "mcp"
+package = "github:sebastienrousseau/passmcp-lsp"
+chat = false
+fleet = false

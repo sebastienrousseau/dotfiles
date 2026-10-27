@@ -10,6 +10,9 @@
 [[ "${_DOT_LIB_AI_COMMANDS_LOADED:-0}" == "1" ]] && return 0
 _DOT_LIB_AI_COMMANDS_LOADED=1
 
+# shellcheck source=ai-roster.sh disable=SC1091
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ai-roster.sh"
+
 # _ai_deprecated <new-command> — one-line stderr hint; the old form still runs.
 _ai_deprecated() {
   ui_warn "deprecated" "use: $1" >&2
@@ -64,12 +67,10 @@ _ai_cockpit() {
 # the engine behind `dot ai "<prompt>"` and `dot ai <tool> "<prompt>"`.
 _ai_oneshot() {
   local tool="claude"
-  case "${1:-}" in
-    cl | claude | codex | copilot | goose | crush | amp | cursor-agent | grok | kimi | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
-      tool="$1"
-      shift
-      ;;
-  esac
+  if [[ $# -gt 0 ]] && ai_roster_bin "$1" >/dev/null; then
+    tool="$1"
+    shift
+  fi
   run_ai_with_context "$tool" "$@"
 }
 
@@ -121,11 +122,8 @@ cmd_ai_chat() {
     cmd_ai_status
     return
   fi
-  local tool="$1" bin="$1"
-  case "$tool" in
-    cl | claude) bin=claude ;;
-    kiro) bin=kiro-cli ;;
-  esac
+  local tool="$1" bin
+  bin="$(ai_roster_bin "$tool")" || bin="$tool"
   if ! has_command "$bin"; then
     ui_err "$tool" "not installed — run 'dot ai tools' to install"
     return 1
@@ -153,15 +151,16 @@ cmd_ai_doctor() {
   ui_section "Prerequisites"
   ai_prereq_rows
   local installed=0 total=0 eco_installed=0 b
-  for b in claude codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider kiro-cli autohand vibe qwen zai; do
+  for b in "${AI_ROSTER_BINS[@]}"; do
     total=$((total + 1))
     has_command "$b" && installed=$((installed + 1))
   done
   ui_info "Fleet" "$installed/$total tools installed — 'dot ai tools' to manage"
-  for b in corralctl passmcp draft; do
+  for b in "${AI_ROSTER_ECO_BINS[@]}"; do
     has_command "$b" && eco_installed=$((eco_installed + 1))
   done
-  ui_info "Ecosystem" "$eco_installed/3 suite tools (corralctl, passmcp, draft) — 'dot ai eco' to inspect"
+  local eco_list="${AI_ROSTER_ECO_BINS[*]}"
+  ui_info "Ecosystem" "$eco_installed/${#AI_ROSTER_ECO_BINS[@]} suite tools (${eco_list// /, }) — 'dot ai eco' to inspect"
 }
 
 # cmd_ai_setup [tool…] — authenticate / initialize AI CLIs (dot ai login).
@@ -214,7 +213,7 @@ _ai_install_todo() {
     todo=("$1")
     return 0
   fi
-  for b in claude codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider kiro-cli autohand vibe qwen zai; do
+  for b in "${AI_ROSTER_BINS[@]}"; do
     has_command "$b" || todo+=("$b")
   done
   [[ ${#todo[@]} -gt 0 ]] && return 0

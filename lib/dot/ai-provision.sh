@@ -16,19 +16,20 @@
 [[ -n "${_DOT_AI_PROVISION_LOADED:-}" ]] && return 0
 _DOT_AI_PROVISION_LOADED=1
 
+# shellcheck source=ai-roster.sh disable=SC1091
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ai-roster.sh"
+
 # ai_install_method <bin>: native:<function> or mise:<package>; 1 (and no
 # output) when nothing can install it.
 ai_install_method() {
-  local pkg
-  case "$1" in
-    claude | goose | agy | amp | grok | kimi) printf 'native:install_%s_native' "$1" ;;
-    cursor-agent) printf 'native:install_cursor_native' ;;
-    *)
-      pkg="$(_ai_mise_pkg "$1")"
-      [[ -n "$pkg" ]] || return 1
-      printf 'mise:%s' "$pkg"
-      ;;
-  esac
+  local found
+  if found="$(ai_roster_native "$1")"; then
+    printf 'native:%s' "$found"
+    return 0
+  fi
+  found="$(_ai_mise_pkg "$1")"
+  [[ -n "$found" ]] || return 1
+  printf 'mise:%s' "$found"
 }
 
 # _ai_tool_present <bin>: on PATH, or in the directories the native

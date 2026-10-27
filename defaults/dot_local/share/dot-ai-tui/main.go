@@ -24,30 +24,7 @@ type tool struct {
 	installed        bool
 }
 
-// The fleet, in display order, grouped by role (including ecosystem tools).
-var fleet = []tool{
-	{name: "claude", bin: "claude", group: "agents"},
-	{name: "codex", bin: "codex", group: "agents"},
-	{name: "copilot", bin: "copilot", group: "agents"},
-	{name: "goose", bin: "goose", group: "agents"},
-	{name: "crush", bin: "crush", group: "agents"},
-	{name: "amp", bin: "amp", group: "agents"},
-	{name: "cursor-agent", bin: "cursor-agent", group: "agents"},
-	{name: "grok", bin: "grok", group: "agents"},
-	{name: "opencode", bin: "opencode", group: "coding"},
-	{name: "aider", bin: "aider", group: "coding"},
-	{name: "autohand", bin: "autohand", group: "coding"},
-	{name: "vibe", bin: "vibe", group: "coding"},
-	{name: "qwen", bin: "qwen", group: "coding"},
-	{name: "zai", bin: "zai", group: "coding"},
-	{name: "agy", bin: "agy", group: "general"},
-	{name: "sgpt", bin: "sgpt", group: "general"},
-	{name: "ollama", bin: "ollama", group: "local"},
-	{name: "kiro-cli", bin: "kiro-cli", group: "cloud"},
-	{name: "corralctl", bin: "corralctl", group: "ecosystem"},
-	{name: "passmcp", bin: "passmcp", group: "ecosystem"},
-	{name: "draft", bin: "draft", group: "ecosystem"},
-}
+// The fleet, in display order, is generated from the roster: roster_gen.go.
 
 // ── theme (Charm-flavoured) ─────────────────────────────────────────────────
 var (

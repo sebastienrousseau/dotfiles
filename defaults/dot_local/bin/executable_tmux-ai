@@ -86,6 +86,7 @@ launch_provider() {
       title="ai-cockpit"
       launch_command="exec dot ai"
       ;;
+    # roster: case
     claude | codex | copilot | goose | crush | amp | cursor-agent | grok | kimi | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
       title="ai-$provider"
       launch_command="exec dot ai chat $provider"

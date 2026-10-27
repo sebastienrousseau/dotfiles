@@ -18,6 +18,9 @@ name: Doc Drift / Generators
 #   - tools/docs/generate-completions.sh --check
 #       Verifies the five committed completions match the manifests.
 #
+#   - tools/docs/gen_roster.py --check
+#       Verifies every AI tool list matches plugins/ai/roster.toml.
+#
 # Adding a third generator is just adding a new step below — keep
 # this workflow flat and easy to extend.
 
@@ -44,6 +47,9 @@ on:
       - 'tools/docs/generate-completions.sh'
       - 'tools/docs/gen_completions.py'
       - 'tools/docs/gen_cmdlets.py'
+      - 'tools/docs/gen_roster.py'
+      - 'defaults/dot_local/bin/executable_tmux-ai'
+      - 'defaults/dot_local/share/dot-ai-tui/roster_gen.go'
       - 'schemas/cli/verbs.json'
       - 'share/powershell/**'
       - 'lib/dot/data/commands.txt'
@@ -182,3 +188,5 @@ jobs:
         run: bash tools/docs/generate-completions.sh --check
       - name: Verify the PowerShell cmdlets match the plugin manifests
         run: python3 tools/docs/gen_cmdlets.py --check
+      - name: Verify every AI tool list matches the roster
+        run: python3 tools/docs/gen_roster.py --check

@@ -17,6 +17,8 @@ _DOT_LIB_AI_INSTALL_LOADED=1
 _AI_INSTALL_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=verified-download.sh disable=SC1091
 source "$_AI_INSTALL_LIB_DIR/verified-download.sh"
+# shellcheck source=ai-roster.sh disable=SC1091
+source "$_AI_INSTALL_LIB_DIR/ai-roster.sh"
 
 # AI CLIs are pinned (decision D3): [ai_tools] in .chezmoidata.toml maps each
 # mise package to an exact version. The provisioning template reads it
@@ -102,32 +104,12 @@ _ai_in_scratch_dir() {
   return "$rc"
 }
 
-_ai_mise_eco_pkg() {
-  case "$1" in
-    corralctl | passmcp | passmcp-graph | passmcp-lsp | passmcp-server | draft)
-      printf 'github:sebastienrousseau/%s\n' "$1"
-      ;;
-    *) echo "" ;;
-  esac
-}
-
-# _ai_mise_pkg <binary> — map an AI provider binary to its mise package.
+# _ai_mise_pkg <binary> — map an AI provider binary to its mise package, as
+# the roster (plugins/ai/roster.toml) records it; empty when it has none.
 # claude is intentionally absent (native installer, not mise/npm: npm 11
 # drops the platform-native optionalDependency on global installs).
 _ai_mise_pkg() {
-  case "$1" in
-    codex) echo "npm:@openai/codex" ;;
-    copilot) echo "npm:@github/copilot" ;;
-    crush) echo "npm:@charmland/crush" ;;
-    aider) echo "pipx:aider-chat[uvx_args=--python 3.12]" ;; # 3.13+ lacks audioop, which aider needs
-    opencode | kiro-cli) echo "$1" ;;
-    sgpt) echo "pipx:shell-gpt" ;;
-    ollama) echo "aqua:ollama/ollama" ;;
-    autohand) echo "npm:autohand-cli" ;;
-    qwen) echo "npm:@qwen-code/qwen-code" ;;
-    zai) echo "npm:@guizmo-ai/zai-cli" ;;
-    *) _ai_mise_eco_pkg "$1" ;;
-  esac
+  ai_roster_package "$1" || true
 }
 
 # install_claude_native [label] — download + run the native installer.
