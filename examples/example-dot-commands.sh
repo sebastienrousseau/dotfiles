@@ -5,20 +5,20 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-printf 'Core commands: %s\n' "$repo_root/scripts/dot/commands/core.sh"
+printf 'Core commands: %s\n' "$repo_root/plugins/config/libexec/config.sh"
 printf 'AI commands: %s\n' "$repo_root/plugins/ai/libexec/ai.sh"
 printf 'Agent commands: %s\n' "$repo_root/plugins/agent/libexec/agent.sh"
-printf 'Aliases commands: %s\n' "$repo_root/scripts/dot/commands/aliases.sh"
+printf 'Aliases commands: %s\n' "$repo_root/plugins/shell/libexec/aliases.sh"
 printf 'Appearance commands: %s\n' "$repo_root/plugins/system/libexec/system.sh"
 printf 'Diagnostics commands: %s\n' "$repo_root/scripts/dot/commands/diagnostics.sh"
 printf 'Fleet commands: %s\n' "$repo_root/plugins/fleet/libexec/fleet.sh"
-printf 'Lint commands: %s\n' "$repo_root/scripts/dot/commands/lint.sh"
+printf 'Lint commands: %s\n' "$repo_root/plugins/config/libexec/lint.sh"
 printf 'Meta commands: %s\n' "$repo_root/scripts/dot/commands/meta.sh"
 printf 'Patterns commands: %s\n' "$repo_root/plugins/ai/libexec/patterns.sh"
 printf 'Restore commands: %s\n' "$repo_root/plugins/doctor/libexec/restore.sh"
 printf 'Secrets commands: %s\n' "$repo_root/plugins/secret/libexec/secrets.sh"
 printf 'Security commands: %s\n' "$repo_root/plugins/doctor/libexec/doctor.sh"
-printf 'Tools commands: %s\n' "$repo_root/scripts/dot/commands/tools.sh"
+printf 'Tools commands: %s\n' "$repo_root/plugins/config/libexec/config.sh"
 
 # Validate all command modules have valid syntax
 for script in "$repo_root"/scripts/dot/commands/*.sh; do

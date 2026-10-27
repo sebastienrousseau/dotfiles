@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Failure and fall-back paths of scripts/dot/commands/tools.sh.
+# Failure and fall-back paths of plugins/config/libexec/config.sh.
 #
 # `dot tool list --nix`, `dot tool` and `dot config profile` all branch on what the source tree
 # and the PATH happen to contain, and from the checkout those answers are
@@ -26,7 +26,7 @@ dot_fixture_basebin "$FX/basebin"
 DOT_FIXTURE_HOME="$FX/home"
 
 tools_run() {
-  DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" dot_fixture_run "$FX" tools "$@"
+  DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" dot_fixture_run "$FX" config "$@"
 }
 # tool_run <args…> — the tool plugin's tool.sh, which took tools, new,
 # packages and env from tools.sh (P2.1).
@@ -151,7 +151,7 @@ assert_file_contains "$FX/.chezmoidata.toml" 'profile = "other"' \
 # The fixture deliberately has no lint.sh, so the delegation is observed
 # without running the repo-wide linter.
 test_start "tools_lint_delegates_to_the_lint_module"
-rm -f "$FX/scripts/dot/commands/lint.sh"
+rm -f "$FX/plugins/config/libexec/lint.sh"
 tools_run lint
 assert_not_equals "0" "$DOT_FIXTURE_RC" \
   "delegating to an absent lint module should not report success"
@@ -159,6 +159,6 @@ assert_not_equals "0" "$DOT_FIXTURE_RC" \
 test_start "tools_rejects_an_unknown_subcommand"
 tools_run definitely-not-a-command
 assert_equals "1" "$DOT_FIXTURE_RC" "an unknown tools command should exit 1"
-assert_contains "Unknown tools command" "$DOT_FIXTURE_OUT" "it should say so"
+assert_contains "Unknown config command" "$DOT_FIXTURE_OUT" "it should say so"
 
 print_summary

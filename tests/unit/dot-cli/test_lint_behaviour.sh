@@ -27,19 +27,25 @@ done
 # setup [SC] [FMT]: a fresh tree in $W/t and stubs in $W/stubs.
 setup() {
   W="$WORK/c$((++N))"
-  mkdir -p "$W/t/scripts/dot/commands" "$W/t/scripts/ops" "$W/t/defaults/dot_local/bin" "$W/stubs"
+  mkdir -p "$W/t/plugins/config/libexec" "$W/t/scripts/ops" "$W/t/defaults/dot_local/bin" "$W/stubs"
   cp -R "$REPO_ROOT/lib" "$W/t/lib"
-  cp "$REPO_ROOT/scripts/dot/commands/lint.sh" "$W/t/scripts/dot/commands/"
+  cp "$REPO_ROOT/plugins/config/libexec/lint.sh" "$W/t/plugins/config/libexec/"
   echo defaults >"$W/t/.chezmoiroot"
   printf '#!/usr/bin/env bash\necho a\n' >"$W/t/scripts/ops/a.sh"
   printf '#!/usr/bin/env bash\necho b\n' >"$W/t/scripts/ops/b.sh"
   printf '#!/bin/sh\necho i\n' >"$W/t/install.sh"
   printf '#!/bin/bash\n' >"$W/t/defaults/dot_local/bin/executable_one"
   printf '#!/usr/bin/env python3\n' >"$W/t/defaults/dot_local/bin/executable_py"
+  # A bundled plugin: its entry and libexec module are shell, its manifest is not.
+  mkdir -p "$W/t/plugins/x/libexec"
+  printf '#!/usr/bin/env bash\necho x\n' >"$W/t/plugins/x/dot-x"
+  printf '#!/usr/bin/env bash\necho m\n' >"$W/t/plugins/x/libexec/m.sh"
+  printf 'name = "x"\n' >"$W/t/plugins/x/dot-plugin.toml"
   local f
   for f in "$@"; do
     case "$f" in
       SC) echo BADSC >>"$W/t/scripts/ops/a.sh" ;;
+      PLUGIN) echo BADSC >>"$W/t/plugins/x/libexec/m.sh" ;;
       FMT) echo BADFMT >>"$W/t/scripts/ops/b.sh" && echo BADFMT >>"$W/t/install.sh" ;;
     esac
   done
@@ -57,7 +63,7 @@ SH
 
 lint() {
   OUT="$(cd "$W" && env -i HOME="$W" PATH="$W/stubs:$SYS" TERM=dumb NO_COLOR=1 \
-    "$REAL_BASH" t/scripts/dot/commands/lint.sh "$@" </dev/null 2>&1)"
+    "$REAL_BASH" t/plugins/config/libexec/lint.sh "$@" </dev/null 2>&1)"
   RC=$?
 }
 has() { if [[ "$OUT" == *"$1"* ]]; then echo yes; else echo no; fi; }
@@ -65,13 +71,19 @@ has() { if [[ "$OUT" == *"$1"* ]]; then echo yes; else echo no; fi; }
 test_start "lint_clean_tree_passes"
 setup
 lint --check
-assert_equals "0:yes:yes" "$RC:$(has 'All checks passed'):$(has 'Files scanned                       5')" \
-  "four scripts plus one shell executable (python skipped), all clean"
+assert_equals "0:yes:yes" "$RC:$(has 'All checks passed'):$(has 'Files scanned                       7')" \
+  "two scripts, install.sh, one shell executable (python skipped) and three plugin files (the manifest skipped), all clean"
 
 test_start "lint_check_fails_on_shellcheck_errors"
 setup SC
 lint --check
 assert_equals "1:yes" "$RC:$(has '1 file(s) with errors')" "check mode exits 1"
+
+test_start "lint_checks_the_bundled_plugins"
+# The plugins' modules left scripts/ (P2.1); they are still checked.
+setup PLUGIN
+lint --check
+assert_equals "1:yes" "$RC:$(has '1 file(s) with errors')" "a plugin module with an error fails the check"
 
 test_start "lint_default_mode_reports_but_passes"
 lint

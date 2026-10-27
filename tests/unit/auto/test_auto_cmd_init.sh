@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Auto-generated function-exercise test for scripts/dot/commands/init.sh
+# Auto-generated function-exercise test for plugins/config/libexec/init.sh
 # (the `dot config init <github-user>` bootstrap). Covers existence, syntax,
 # the URL-resolution helper across all five input shapes, and the
 # safety guard (refuses plain HTTP, refuses invalid usernames).
@@ -13,14 +13,14 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-SCRIPT_FILE="$REPO_ROOT/scripts/dot/commands/init.sh"
+SCRIPT_FILE="$REPO_ROOT/plugins/config/libexec/init.sh"
 DOT_BIN="$REPO_ROOT/bin/dot"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
 test_start "script_exists"
-assert_file_exists "$SCRIPT_FILE" "scripts/dot/commands/init.sh must exist"
+assert_file_exists "$SCRIPT_FILE" "plugins/config/libexec/init.sh must exist"
 
 test_start "script_valid_syntax"
 if bash -n "$SCRIPT_FILE" 2>/dev/null; then

@@ -157,14 +157,14 @@ else
 fi
 
 # A guard on the guard. If the resolver silently resolved nothing, the
-# check above would pass vacuously. scripts/dot/commands/tools.sh reaches
+# check above would pass vacuously. plugins/config/libexec/config.sh reaches
 # lib/dot/utils.sh through a "$_TOOLS_DIR/../../../" prefix, which is the
 # exact shape _sources_of and _norm have to get right between them.
 test_start "the source-closure resolver actually resolves"
 # Collected into a variable rather than piped into `grep -q`: under
 # `pipefail`, grep -q exits at the first match, the producer takes SIGPIPE,
 # and the pipeline reports failure on a successful match.
-resolved="$(_sources_of scripts/dot/commands/tools.sh)"
+resolved="$(_sources_of plugins/config/libexec/config.sh)"
 if printf '%s\n' "$resolved" | grep -qxF lib/dot/utils.sh; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"

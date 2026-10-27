@@ -79,7 +79,7 @@ Added `scripts/tests/unit/test_dot_lib_platform.sh`:
 
 ## File-by-file next refactors (high ROI)
 
-1. `scripts/dot/commands/tools.sh`
+1. `plugins/config/libexec/config.sh`
 
 - Split `cmd_aliases` into submodule file.
 - Replace repeated `command -v` checks with cached capability map.

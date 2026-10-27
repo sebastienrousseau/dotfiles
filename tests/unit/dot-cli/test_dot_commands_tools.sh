@@ -11,7 +11,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-TOOLS_FILE="$REPO_ROOT/scripts/dot/commands/tools.sh"
+TOOLS_FILE="$REPO_ROOT/plugins/config/libexec/config.sh"
 # tools, new, packages and env moved to the tool plugin's tool.sh (P2.1).
 TOOL_FILE="$REPO_ROOT/plugins/tool/libexec/tool.sh"
 

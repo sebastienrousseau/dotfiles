@@ -6,7 +6,7 @@
 #
 # Apply, inspect and edit the managed configuration through chezmoi.
 #
-# Backing module: scripts/dot/commands/core.sh
+# Backing module: plugins/config/libexec/config.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: every command below is read-only or a help

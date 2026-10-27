@@ -10,7 +10,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-ALIASES_FILE="$REPO_ROOT/scripts/dot/commands/aliases.sh"
+ALIASES_FILE="$REPO_ROOT/plugins/shell/libexec/aliases.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

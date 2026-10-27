@@ -1,6 +1,6 @@
 // Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 // FuzzInitURLResolver exercises the URL-construction logic in
-// `dot init` (scripts/dot/commands/init.sh). The shell flow takes
+// `dot init` (plugins/config/libexec/init.sh). The shell flow takes
 // one of three input shapes:
 //
 //   1. bare user      → constructs https://github.com/<user>/dotfiles.git
@@ -30,7 +30,7 @@ import (
 	"testing"
 )
 
-// Mirrors the shell regex at scripts/dot/commands/init.sh for the
+// Mirrors the shell regex at plugins/config/libexec/init.sh for the
 // bare-user and owner/repo cases. Shell pattern: [A-Za-z0-9._-]+
 var ghOwnerRepoRE = regexp.MustCompile(`^([a-zA-Z0-9._\-]+)(/([a-zA-Z0-9._\-]+))?$`)
 
@@ -38,7 +38,7 @@ var ghOwnerRepoRE = regexp.MustCompile(`^([a-zA-Z0-9._\-]+)(/([a-zA-Z0-9._\-]+))
 // Returns "" when the input is refused.
 //
 // IMPORTANT: no TrimSpace. The shell case statement
-// (scripts/dot/commands/init.sh) operates on the literal arg without
+// (plugins/config/libexec/init.sh) operates on the literal arg without
 // trimming. Adding TrimSpace here would make the Go port MORE
 // permissive than the shell — past fuzz runs proved this: ` git@"` and
 // ` git@:"` both passed after trim but the shell would reject them
@@ -51,7 +51,7 @@ func ResolveInitURL(in string) string {
 
 	// Full URL? Accept https://, git@<host>:<path>, ssh:// — refuse
 	// plain http:// and everything else. Mirrors the shell case in
-	// scripts/dot/commands/init.sh which uses pattern `git@*:*`
+	// plugins/config/libexec/init.sh which uses pattern `git@*:*`
 	// (requires the colon after git@; without it the SSH form is
 	// malformed and downstream tools reject it anyway).
 	if strings.HasPrefix(in, "git@") {

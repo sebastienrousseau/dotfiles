@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 # Exhaustive runtime exercise of the `dot tool list --nix` surface — drives line
-# coverage across scripts/dot/commands/tools.sh and the two modules it
+# coverage across plugins/config/libexec/config.sh and the two modules it
 # sources for dispatch: aliases.sh (`aliases`, `alias-check`) and
 # env-emit.sh (`env emit`).
 #
@@ -24,7 +24,9 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-TOOLS_SCRIPT="$REPO_ROOT/scripts/dot/commands/tools.sh"
+TOOLS_SCRIPT="$REPO_ROOT/plugins/config/libexec/config.sh"
+# aliases and alias-check moved to the shell plugin's shell.sh (P2.1).
+SHELL_SCRIPT="$REPO_ROOT/plugins/shell/libexec/shell.sh"
 TOOL_SCRIPT="$REPO_ROOT/plugins/tool/libexec/tool.sh"
 
 trap cov_teardown_sandbox EXIT
@@ -150,7 +152,10 @@ ex() {
   set +e
   # tools, env, new and packages moved to the tool plugin's tool.sh (P2.1).
   local script="$TOOLS_SCRIPT"
-  case "${1:-}" in tools | env | new | packages) script="$TOOL_SCRIPT" ;; esac
+  case "${1:-}" in
+    tools | env | new | packages) script="$TOOL_SCRIPT" ;;
+    aliases | alias-check) script="$SHELL_SCRIPT" ;;
+  esac
   bash "$script" "$@" </dev/null >/dev/null
   local rc=$?
   set -e

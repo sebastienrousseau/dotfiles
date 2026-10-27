@@ -1,26 +1,10 @@
-Core|sync|Apply dotfiles (alias for apply; --pull to fetch, --check to preview)|Use after clone or after changes.
-Core|add|Add a file to chezmoi source|Start managing a file in the source tree.
-Core|diff|Show chezmoi diff with exclusions|Preview pending changes before apply.
-Core|status|Show configuration drift (chezmoi status)|Inspect the current managed state.
-Core|edit|Open chezmoi source in $EDITOR|Jump into the source tree quickly.
-Core|uninstall|Remove the managed dotfiles environment (prompts unless --force)|Guided teardown, counterpart to init.
-Core|clean-cache|Clear shell initialization caches|Run by the weekly dotfiles-maintenance timer; caches regenerate on the next shell start.
-Core|cd|Print source directory path (use: cd $(dot cd))|Useful in shell scripts and jump helpers.
-Core|commit|AI-powered conventional commit|Wraps the commit helper flow.
 Diagnostics|chaos|Simulate config corruption to test self-healing|Advanced validation path.
-Diagnostics|bundle|Create offline archive of dotfiles environment|Portable support artifact.
-Diagnostics|history|Shell history analysis|Inspect command usage patterns.
-Tools|profile|Show/switch configuration profile|Profile-specific behavior.
 Tools|keys|Keybindings (sign-check: verify git signing)|Keyboard and signing references.
-Tools|sandbox|Launch a safe sandbox preview (Docker/Podman)|Disposable environment for testing.
-Tools|lint|Lint shell scripts (--fix|-f to auto-format, --check|-c for CI)|Shell quality gate.
 Tools|learn|Start the interactive tour of your new tools|Guided onboarding.
 Tools|docs|Show repo README|Open the main documentation.
-Tools|aliases|List, search, and explain the shipped shell aliases|Alias inventory, usage, and deprecations.
 Fleet|fleet drift|Check for configuration drift across managed files|Drift detection and reporting.
 Fleet|fleet namespace|Show or set the active namespace for multi-tenant isolation|Namespace management.
 Fleet|fleet events|Show recent fleet events from local event log|Fleet observability.
-Meta|cache-refresh|Regenerate shell caches for ultra-fast startup|Refresh generated shell state.
 Meta|search|Find commands by keyword|Find the right command quickly.
 Meta|version|Show version information.|Matches `dot --version`.
 Meta|help|Show this help message|Overview or focused command help.
@@ -80,17 +64,9 @@ Appearance|wallpaper sync|Sync wallpaper from your library|Subcommand — e.g. d
 Appearance|wallpaper rotate|Rotate to the next wallpaper in your library|Subcommand — e.g. dot wallpaper rotate
 Tools|tools install|Enter the Nix development shell with all managed tools|Subcommand — e.g. dot tools install
 Tools|tools docs|Show the full tools markdown documentation|Subcommand — e.g. dot tools docs
-Tools|profile show|Show the active configuration profile and feature flags|Subcommand — e.g. dot profile show
-Tools|profile set|Set the active configuration profile (run dot sync to apply)|Subcommand — e.g. dot profile set work
 AI|agents list|Show recognised AI agent harnesses and their config paths|Subcommand — e.g. dot agents list
 AI|agents check|Verify AGENTS.md tracks CLAUDE.md (exit 1 if drifted)|Subcommand — e.g. dot agents check
 AI|agents render|Regenerate AGENTS.md and per-harness config from CLAUDE.md|Subcommand — e.g. dot agents render
-Tools|aliases list|List all shell aliases shipped by the dotfiles|Subcommand — e.g. dot aliases list
-Tools|aliases search|Search aliases by term|Subcommand — e.g. dot aliases search git
-Tools|aliases why|Show details and deprecation status for a single alias|Subcommand — e.g. dot aliases why ll
-Tools|aliases stats|Show alias usage counts from shell history|Subcommand — e.g. dot aliases stats
-Tools|aliases cheatsheet|Generate the alias cheatsheet markdown|Subcommand — e.g. dot aliases cheatsheet
-Tools|aliases tiers|Show which alias tiers/ecosystems are enabled|Subcommand — e.g. dot aliases tiers
 AI|patterns list|List AI steering patterns|Subcommand — e.g. dot patterns list
 AI|patterns view|View an AI steering pattern|Subcommand — e.g. dot patterns view code-review
 AI|patterns edit|Edit an AI steering pattern in $EDITOR|Subcommand — e.g. dot patterns edit code-review

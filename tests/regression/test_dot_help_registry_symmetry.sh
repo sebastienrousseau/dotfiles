@@ -87,8 +87,11 @@ _in_list() {
 # ---------------------------------------------------------------------------
 # 0. Sanity: parsers found entries.
 # ---------------------------------------------------------------------------
+# routes.txt holds only the host's built-ins once every domain runs its
+# plugin's entry (P2.1); the floor only guards against an empty read. Each
+# entry's file is checked by tools/ci/check-cli-contract.py instead.
 test_start "route_table_nonempty"
-if [[ ${#routes[@]} -ge 30 ]]; then
+if [[ ${#routes[@]} -ge 5 ]]; then
   TESTS_PASSED=$((TESTS_PASSED + 1))
   printf '  \033[0;32m✓\033[0m %s: %d routes\n' "$CURRENT_TEST" "${#routes[@]}"
 else
@@ -99,7 +102,7 @@ fi
 test_start "help_tables_nonempty"
 # The tables back the old names' help, so they shrink as P2.1 moves each
 # domain to its plugin's entry; the floor only guards against an empty read.
-if [[ ${#specs[@]} -ge 15 && ${#details[@]} -ge 15 ]]; then
+if [[ ${#specs[@]} -ge 5 && ${#details[@]} -ge 5 ]]; then
   TESTS_PASSED=$((TESTS_PASSED + 1))
   printf '  \033[0;32m✓\033[0m %s: %d specs + %d details\n' "$CURRENT_TEST" "${#specs[@]}" "${#details[@]}"
 else

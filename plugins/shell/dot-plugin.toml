@@ -10,6 +10,9 @@ version = "0.2.536"
 summary = "aliases, history, startup caches"
 default = "status"
 
+[entry]
+command = "dot-shell"
+
 [[objects]]
 name = "history"
 summary = "shell history"
@@ -23,53 +26,47 @@ default = "list"
 [[commands]]
 verb = "status"
 effect = "read"
+planned = true
 summary = "Shell, startup time and cache state"
 
 [[commands]]
 verb = "update"
 effect = "write"
-legacy = "cache-refresh"
 summary = "Regenerate the startup caches"
 
 [[commands]]
 verb = "clean"
 effect = "write"
-legacy = "clean-cache"
 summary = "Clear the startup caches"
 
 [[commands]]
 object = "history"
 verb = "list"
 effect = "read"
-legacy = "history"
 summary = "Recent history"
 
 [[commands]]
 object = "alias"
 verb = "list"
 effect = "read"
-legacy = "aliases list"
 summary = "Aliases and where each is defined; a term searches them"
 
 [[commands]]
 object = "alias"
 verb = "check"
 effect = "read"
-legacy = "alias-check"
 summary = "Find shadowed or broken aliases"
 
 [[commands]]
 object = "alias"
 verb = "show"
 effect = "read"
-legacy = "aliases why"
 summary = "Where one alias comes from"
 
 [[commands]]
 object = "alias"
 verb = "status"
 effect = "read"
-legacy = "aliases stats"
 summary = "Alias counts; --tiers for the ecosystem tiers"
 
 [[commands.flags]]
@@ -80,7 +77,6 @@ summary = "Show which ecosystem tiers are enabled"
 object = "alias"
 verb = "export"
 effect = "read"
-legacy = "aliases cheatsheet"
 summary = "Write the alias cheatsheet"
 
 [[aliases]]

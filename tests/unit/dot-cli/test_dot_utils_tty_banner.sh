@@ -77,7 +77,7 @@ tty_run() {
     for assignment in "$@"; do
       printf 'export %s\n' "$assignment"
     done
-    printf 'exec "%s" scripts/dot/commands/core.sh status\n' "${BASH:-bash}"
+    printf 'exec "%s" plugins/config/libexec/config.sh status\n' "${BASH:-bash}"
   } >"$runner"
   chmod +x "$runner"
   # Retried for the same reason the probe is: pty allocation is the one part

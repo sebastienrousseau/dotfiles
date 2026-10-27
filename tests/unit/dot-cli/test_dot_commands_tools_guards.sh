@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 #
-# Guard-path tests for scripts/dot/commands/tools.sh:
+# Guard-path tests for plugins/config/libexec/config.sh:
 #
 #   tools install  — the "Nix is not installed" refusal.
 #   new            — usage, template-name and project-name validation
@@ -30,7 +30,7 @@ source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 exec 21>&2
 export BASH_XTRACEFD=21
 
-TOOLS="$REPO_ROOT/scripts/dot/commands/tools.sh"
+TOOLS="$REPO_ROOT/plugins/config/libexec/config.sh"
 # tools, new, packages and env moved to the tool plugin (P2.1).
 TOOL="$REPO_ROOT/plugins/tool/libexec/tool.sh"
 BASH_BIN="$(command -v bash)"
@@ -151,6 +151,6 @@ test_start "tools_unknown_subcommand_fails"
 _out="$(_tools totally-unknown)"
 _rc=$?
 assert_equals 1 "$_rc" "an unknown subcommand exits 1"
-assert_contains "Unknown tools command" "$_out" "the error names the problem"
+assert_contains "Unknown config command" "$_out" "the error names the problem"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -17,7 +17,7 @@ if bash -n "$stage"; then ((TESTS_PASSED++)) || true; else ((TESTS_FAILED++)) ||
 test_start "stage_bundle_executes"
 if bash "$stage" "$tmp/bundle"; then ((TESTS_PASSED++)) || true; else ((TESTS_FAILED++)) || true; fi
 
-for path in Makefile bin/dot lib/dot/ui.sh scripts/dot/commands/core.sh security/remote-installers.sha256 share/man/man1/dot.1 \
+for path in Makefile bin/dot lib/dot/ui.sh plugins/config/libexec/config.sh security/remote-installers.sha256 share/man/man1/dot.1 \
   plugins/theme/dot-theme plugins/fleet/libexec/fleet.sh defaults/dot_config/dotfiles/agent-profiles.json \
   defaults/dot_config/dotfiles/mcp-registry.json; do
   test_start "stage_contains_${path//\//_}"

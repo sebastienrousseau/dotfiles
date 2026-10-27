@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Fall-back and failure paths of scripts/dot/commands/core.sh.
+# Fall-back and failure paths of plugins/config/libexec/config.sh.
 #
 # Run from the checkout, core.sh always finds scripts/ops/chezmoi-*.sh and
 # always execs those helpers, so the "no helper, talk to chezmoi directly"
@@ -31,7 +31,7 @@ DOT_FIXTURE_HOME="$FX/home"
 dot_fixture_stub "$FX/stubs" chezmoi 0
 
 core_run() {
-  DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" dot_fixture_run "$FX" core "$@"
+  DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" dot_fixture_run "$FX" config "$@"
 }
 
 # ── 1. The direct-to-chezmoi arms ──────────────────────────────────────────
@@ -79,20 +79,20 @@ assert_contains "Usage: dot config add" "$DOT_FIXTURE_OUT" "it should print usag
 test_start "core_edit_prefers_nvim_when_editor_is_unset"
 dot_fixture_stub "$FX/stubs" nvim 0
 DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" \
-  EDITOR="" dot_fixture_run "$FX" core edit
+  EDITOR="" dot_fixture_run "$FX" config edit
 assert_contains "nvim" "$DOT_FIXTURE_OUT" "edit should fall back to nvim"
 
 test_start "core_edit_falls_back_to_vim"
 rm -f "$FX/stubs/nvim"
 dot_fixture_stub "$FX/stubs" vim 0
 DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" \
-  EDITOR="" dot_fixture_run "$FX" core edit
+  EDITOR="" dot_fixture_run "$FX" config edit
 assert_contains "vim" "$DOT_FIXTURE_OUT" "edit should fall back to vim"
 
 test_start "core_edit_reports_no_editor"
 rm -f "$FX/stubs/vim"
 DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" \
-  EDITOR="" dot_fixture_run "$FX" core edit
+  EDITOR="" dot_fixture_run "$FX" config edit
 assert_equals "1" "$DOT_FIXTURE_RC" "edit with no editor at all should exit 1"
 assert_contains "No editor found" "$DOT_FIXTURE_OUT" \
   "it should say which variable to set"
@@ -123,7 +123,7 @@ mkdir -p "$CACHE/zsh" "$CACHE/bash" "$CACHE/fish" "$CACHE/nushell"
 : >"$CACHE/fish/dot-init.fish"
 : >"$CACHE/nushell/dot.nu"
 DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" \
-  XDG_CACHE_HOME="$CACHE" dot_fixture_run "$FX" core clean-cache
+  XDG_CACHE_HOME="$CACHE" dot_fixture_run "$FX" shell clean-cache
 assert_equals "0" "$DOT_FIXTURE_RC" "clean-cache should exit 0"
 assert_file_not_exists "$CACHE/zsh/dot-init.zsh" "the zsh cache should be gone"
 assert_file_not_exists "$CACHE/nushell/dot.nu" "the nushell cache should be gone"

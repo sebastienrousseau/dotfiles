@@ -82,6 +82,6 @@ Closes the round-1 audit's adoption gap "bootstrap a foreign dotfiles repo throu
 
 ## References
 
-- `dot config init` source: [`scripts/dot/commands/init.sh`](https://github.com/sebastienrousseau/dotfiles/blob/main/scripts/dot/commands/init.sh)
+- `dot config init` source: [`plugins/config/libexec/init.sh`](https://github.com/sebastienrousseau/dotfiles/blob/main/plugins/config/libexec/init.sh)
 - Roadmap entry: [ROADMAP_2026 §B2](https://github.com/sebastienrousseau/dotfiles/blob/main/docs/operations/ROADMAP_2026.md)
 - AGENTS.md / CLAUDE.md sync: `dot agent context apply`

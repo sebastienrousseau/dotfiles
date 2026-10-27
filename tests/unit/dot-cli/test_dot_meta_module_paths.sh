@@ -138,13 +138,13 @@ assert_contains "Fixture keys" "$DOT_FIXTURE_OUT" "the catalogue should be print
 # ── 5. sandbox picks a container runtime, or says it cannot ────────────────
 test_start "meta_sandbox_falls_back_to_podman"
 dot_fixture_stub "$FX/stubs" podman 0
-meta_run sandbox
+DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" dot_fixture_run "$FX" config sandbox
 assert_equals "0" "$DOT_FIXTURE_RC" "podman should be accepted"
 assert_contains "Podman" "$DOT_FIXTURE_OUT" "the podman path should be announced"
 
 test_start "meta_sandbox_requires_a_container_runtime"
 rm -f "$FX/stubs/podman"
-meta_run sandbox
+DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" dot_fixture_run "$FX" config sandbox
 assert_equals "1" "$DOT_FIXTURE_RC" "no runtime at all should exit 1"
 assert_contains "Docker or Podman is required" "$DOT_FIXTURE_OUT" \
   "the failure should name both options"

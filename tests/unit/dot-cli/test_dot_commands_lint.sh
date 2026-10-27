@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-LINT_FILE="$REPO_ROOT/scripts/dot/commands/lint.sh"
+LINT_FILE="$REPO_ROOT/plugins/config/libexec/lint.sh"
 
 # Test: lint.sh file exists
 test_start "lint_file_exists"

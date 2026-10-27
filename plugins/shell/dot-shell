@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# dot-shell: the entry of the shell plugin (ADR-020 N2). bin/dot runs it with
+# the words after `dot shell`, one of the spellings its manifest declares as
+# built; each becomes the subcommand of libexec/shell.sh that implements it.
+
+set -euo pipefail
+
+_SHELL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# shell_module SUBCOMMAND... — run the shell module.
+shell_module() {
+  exec bash "$_SHELL_DIR/libexec/shell.sh" "$@"
+}
+
+# shell_alias VERB ARGS... — the alias object's verbs.
+shell_alias() {
+  case "${1:-}" in
+    list) shell_module aliases list "${@:2}" ;;
+    check) shell_module alias-check "${@:2}" ;;
+    show) shell_module aliases why "${@:2}" ;;
+    status) shell_module aliases stats "${@:2}" ;;
+    export) shell_module aliases cheatsheet "${@:2}" ;;
+  esac
+}
+
+case "${1:-} ${2:-}" in
+  "update --prewarm") shell_module prewarm "${@:3}" ;;
+  "history list") shell_module history "${@:3}" ;;
+  "alias "*) shell_alias "${@:2}" ;;
+esac
+case "${1:-}" in
+  update) shell_module cache-refresh "${@:2}" ;;
+  clean) shell_module clean-cache "${@:2}" ;;
+esac
+echo "dot: 'dot shell $*' is not a command; run 'dot help shell'" >&2
+exit 127

@@ -6,7 +6,7 @@
 #
 # Managed tool versions via mise, configuration profiles, and new projects.
 #
-# Backing module: scripts/dot/commands/tools.sh
+# Backing module: plugins/config/libexec/config.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: every command below is read-only or a help

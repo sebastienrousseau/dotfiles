@@ -66,7 +66,7 @@ SKIP_PATHS = {
     "scripts/git-hooks/pre-push",
     "scripts/qa/reliability-audit.sh",
     "scripts/qa/coverage-baseline.sh",
-    "scripts/dot/commands/lint.sh",
+    "plugins/config/libexec/lint.sh",
     # System mutation — drives real OS state we can't fake under xtrace.
     "scripts/theme/rebuild-themes.sh",
     "scripts/theme/apply-gnome-theme.sh",

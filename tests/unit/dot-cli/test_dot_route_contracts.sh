@@ -76,13 +76,13 @@ route no-such-command-xyz || rc=$?
 assert_equals "1" "$rc" "unknown name exits 1"
 assert_equals "" "$(cat "$WORK/out")" "nothing printed for an unknown name"
 
-test_start "clean_cache_routes_to_core"
-# The weekly dotfiles-maintenance systemd timer runs `dot shell clean`;
-# core.sh implements it, so the route table must send it there.
+test_start "clean_cache_has_no_route_of_its_own"
+# The weekly dotfiles-maintenance systemd timer runs `dot shell clean`,
+# which the shell plugin's entry runs (P2.1); the old route is gone, and the
+# next case runs the timer's command end to end.
 rc=0
 route clean-cache || rc=$?
-assert_equals "0" "$rc" "clean-cache is a known route"
-assert_equals "core" "$(cat "$WORK/out")" "clean-cache routes to the core module"
+assert_equals "1" "$rc" "clean-cache is no longer a route"
 
 test_start "clean_cache_runs_end_to_end"
 mkdir -p "$WORK/home/.cache/zsh"

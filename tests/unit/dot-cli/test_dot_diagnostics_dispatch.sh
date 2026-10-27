@@ -75,7 +75,7 @@ test_start "help_lists_the_commands"
 diag --help
 assert_equals 0 "$RC" "rc"
 out_has "Usage: diagnostics.sh" "usage"
-out_has "history, verify, chaos, bundle, smoke-test" "command list"
+out_has "verify, chaos, smoke-test" "command list"
 
 test_start "no_command_prints_usage_and_fails"
 diag
@@ -158,12 +158,10 @@ run_script_case perf scripts/diagnostics/perf.sh
 run_script_case conflicts scripts/diagnostics/conflicts.sh
 run_script_case snapshot scripts/diagnostics/snapshot.sh
 run_script_case rollback scripts/ops/rollback.sh
-run_script_case history scripts/diagnostics/history-analysis.sh
 run_script_case benchmark scripts/diagnostics/benchmark.sh
 run_script_case verify scripts/diagnostics/verify.sh
 run_script_case restore plugins/doctor/libexec/restore.sh
 run_script_case chaos scripts/ops/chaos.sh
-run_script_case bundle scripts/ops/bundle.sh
 run_script_case smoke-test scripts/diagnostics/smoke-test.sh
 
 test_start "load_bench_calls_the_deployed_binary"

@@ -219,9 +219,9 @@ class Entries(Fixture):
         self.assertFails("security: object 'disk' has fallback, which needs [entry] fallback = true")
 
     def test_planned_needs_an_entry(self):
-        self.edit("config", 'summary = "What apply would change"\n',
-                  'summary = "What apply would change"\nplanned = true\n')
-        self.assertFails("config: 'planned' needs an [entry]")
+        self.edit("ui", 'summary = "The primitives on offer"\n',
+                  'summary = "The primitives on offer"\nplanned = true\n')
+        self.assertFails("ui: 'planned' needs an [entry]")
 
 
 class TableRoutes(Fixture):
@@ -229,8 +229,8 @@ class TableRoutes(Fixture):
 
     def test_a_record_naming_a_missing_route_fails(self):
         routes = self.tmp / "lib/dot/data/routes.txt"
-        routes.write_text("".join(ln for ln in routes.read_text().splitlines(True) if not ln.startswith("prewarm|")))
-        self.assertFails("'shell update --prewarm' runs route 'prewarm', which lib/dot/data/routes.txt does not have")
+        routes.write_text("".join(ln for ln in routes.read_text().splitlines(True) if not ln.startswith("manual|")))
+        self.assertFails("'help --manual' runs route 'manual', which lib/dot/data/routes.txt does not have")
 
 
 class Table(Fixture):
