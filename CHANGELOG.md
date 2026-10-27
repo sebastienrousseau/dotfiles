@@ -19,6 +19,7 @@ This file documents all notable changes to this project.
 - A long pre-push hook no longer cancels `git push`: git sends SSH keepalives, so GitHub does not close the idle connection.
 - The shell-startup performance gate fails, or says it skipped, when nothing was measured; it had been passing without hyperfine installed.
 - `dot doctor restore --list` no longer exits 128 in a checkout with no commits.
+- `dot security policy show` works from a read-only install: its report goes beside the audit log in `XDG_STATE_HOME` when the dotfiles root is not writable, instead of failing with "Permission denied".
 - The release install smoke and the ClusterFuzzLite image build run again.
 
 ## v0.2.538 (2026-10-24)
