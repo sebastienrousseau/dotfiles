@@ -17,10 +17,36 @@ if bash -n "$stage"; then ((TESTS_PASSED++)) || true; else ((TESTS_FAILED++)) ||
 test_start "stage_bundle_executes"
 if bash "$stage" "$tmp/bundle"; then ((TESTS_PASSED++)) || true; else ((TESTS_FAILED++)) || true; fi
 
-for path in Makefile bin/dot lib/dot/ui.sh plugins/config/libexec/config.sh security/remote-installers.sha256 share/man/man1/dot.1; do
+for path in Makefile bin/dot lib/dot/ui.sh plugins/config/libexec/config.sh security/remote-installers.sha256 share/man/man1/dot.1 \
+  plugins/theme/dot-theme plugins/fleet/libexec/fleet.sh defaults/dot_config/dotfiles/agent-profiles.json \
+  defaults/dot_config/dotfiles/mcp-registry.json; do
   test_start "stage_contains_${path//\//_}"
   assert_file_exists "$tmp/bundle/$path" "staged bundle must contain $path"
 done
+
+# A bundled plugin runs its own commands (P2.1), so a staged or installed
+# tree without plugins/ fails every one of them; --help never reaches an
+# entry, so this runs one for real, from the bundle and from make install.
+test_start "stage_runs_a_plugin_entry"
+entry_home="$(mktemp -d -t dot-stage-home.XXXXXX)"
+rc=0
+HOME="$entry_home" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 DOTFILES_SHOW_LOGO=0 \
+  "$tmp/bundle/bin/dot" fleet status </dev/null >"$entry_home/out" 2>&1 || rc=$?
+assert_equals "0" "$rc" "dot fleet status runs from the staged bundle"
+entry_root="$(mktemp -d -t dot-install.XXXXXX)"
+rc=0
+make -C "$tmp/bundle" install PREFIX=/usr/local DESTDIR="$entry_root" >/dev/null &&
+  HOME="$entry_home" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 DOTFILES_SHOW_LOGO=0 \
+    "$entry_root/usr/local/bin/dot" fleet status </dev/null >"$entry_home/out" 2>&1 || rc=$?
+assert_equals "0" "$rc" "and from a make install of it"
+# The readers look under defaults/dot_config/dotfiles/, so a stage that
+# flattened that directory broke every command reading agent-profiles.json.
+test_start "stage_keeps_the_dotfiles_defaults_dir"
+rc=0
+HOME="$entry_home" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 DOTFILES_SHOW_LOGO=0 \
+  "$entry_root/usr/local/bin/dot" fleet policy show </dev/null >"$entry_home/out" 2>&1 || rc=$?
+assert_equals "0" "$rc" "dot fleet policy show finds agent-profiles.json from a make install"
+rm -rf "$entry_home" "$entry_root"
 
 test_start "stage_make_install_round_trip"
 install_root="$(mktemp -d -t dot-install.XXXXXX)"

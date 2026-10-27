@@ -212,9 +212,14 @@ _doctor_perf_zsh_hooks() {
 
 # Startup latency against benches/bench.sh thresholds (needs hyperfine).
 _doctor_perf_startup_latency() {
+  local rc=0
   if command -v hyperfine >/dev/null 2>&1; then
-    if bash "$SCRIPT_DIR/../../benches/bench.sh" 2>/dev/null; then
+    bash "$SCRIPT_DIR/../../benches/bench.sh" 2>/dev/null || rc=$?
+    if [[ "$rc" -eq 0 ]]; then
       _ok "startup latency" "within target thresholds"
+    elif [[ "$rc" -ne 1 ]]; then
+      # bench.sh exits 2 when it measured nothing; that is not a breach.
+      _warn "startup latency" "nothing measured (hyperfine or jq failed)"
     else
       # Only suggest prewarm when it could actually help. The caches were
       # already reported fresh above in the common case, and telling someone to

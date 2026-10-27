@@ -356,6 +356,27 @@ _sandbox() {
   printf '%s\n' "$sb"
 }
 
+# _gate_bench_quick <bench.sh> — bench.sh times shells with hyperfine and
+# reads its export with jq. Without them it measures nothing, so a runner
+# missing either gets a visible SKIP that counts as neither a run nor a pass
+# (TESTS_RUN == TESTS_PASSED + TESTS_FAILED still holds). bench.sh itself
+# exits 2 when it could not measure, which _gate_diag fails, so the skip is
+# only the readable form of a check the gate would enforce anyway.
+_gate_bench_quick() {
+  local bench="$1" tool
+  _gate_selected "medium_bench_quick_mode" || return 0
+  if [[ ! -f "$bench" ]]; then
+    printf '  \033[0;33m~\033[0m medium_bench_quick_mode: SKIPPED — bench.sh absent. Not a pass.\n'
+    return 0
+  fi
+  for tool in ${BENCH_TOOLS:-hyperfine jq}; do
+    command -v "$tool" >/dev/null 2>&1 && continue
+    printf '  \033[0;33m~\033[0m medium_bench_quick_mode: SKIPPED — %s not installed. Not a pass; nothing was measured.\n' "$tool"
+    return 0
+  done
+  _gate_diag "medium_bench_quick_mode" 5000 3 bash "$bench" --quick
+}
+
 # --- end of definitions: tests/unit/diagnostics/test_perf_budgets_functions.sh
 # sources everything above this line, so no gate runs there.
 
@@ -413,14 +434,7 @@ _gate "medium_dot_diff" 5000 3 bash "$DOT_CLI" diff
 _gate_diag "medium_dot_doctor" 5000 3 bash "$DOT_CLI" doctor
 
 # benches/bench.sh has been observed at ~2s; give it 5s headroom
-if [[ -f "$REPO_ROOT/benches/bench.sh" ]]; then
-  _gate_diag "medium_bench_quick_mode" 5000 3 bash "$REPO_ROOT/benches/bench.sh" --quick
-else
-  # Absent bench.sh is not a pass — skip silently rather than bump a counter
-  # without a matching test_start, which would break the framework invariant
-  # TESTS_RUN == TESTS_PASSED + TESTS_FAILED.
-  printf '  \033[0;33m~\033[0m medium_bench_quick_mode (bench.sh absent — not measured)\n'
-fi
+_gate_bench_quick "$REPO_ROOT/benches/bench.sh"
 
 # =============================================================================
 # TIER 4: GATES — CI quality gates and test suites
