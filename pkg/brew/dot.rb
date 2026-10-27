@@ -26,17 +26,29 @@ class Dot < Formula
   depends_on "jq"       => :recommended
   depends_on "starship" => :recommended
 
+  # The archive's own `make install` places the whole tree the CLI reads
+  # at run time (scripts, plugins, defaults) under libexec, and links
+  # bin/dot to it; installing bin and lib alone left every command but
+  # `dot version` unknown.
   def install
-    bin.install "bin/dot"
-    bin.install Dir["bin/dot-*"]
-    lib.install Dir["lib/*"]
-    man1.install Dir["share/man/man1/dot*.1"]
-    zsh_completion.install "share/zsh/site-functions/_dot"
-    bash_completion.install "share/bash-completion/completions/dot"
-    fish_completion.install "share/fish/vendor_completions.d/dot.fish"
+    system "make", "install",
+           "PREFIX=#{prefix}",
+           "LIBEXECDIR=#{libexec}",
+           "DOT_LINK=../libexec/bin/dot",
+           "MANDIR=#{man}",
+           "DOCDIR=#{doc}",
+           "BASHCOMPDIR=#{bash_completion}",
+           "ZSHCOMPDIR=#{zsh_completion}",
+           "FISHCOMPDIR=#{fish_completion}"
   end
 
   test do
     assert_match version.to_s, shell_output("#{bin}/dot version")
+    # A bundled plugin's entry reads its defaults, so this fails on an
+    # install that left out plugins/ or defaults/.
+    ENV["HOME"] = testpath.to_s
+    ENV["DOTFILES_NONINTERACTIVE"] = "1"
+    ENV["NO_COLOR"] = "1"
+    shell_output("#{bin}/dot fleet policy show")
   end
 end

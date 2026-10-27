@@ -20,7 +20,7 @@
       "extract_dir": "dot-0.2.503"
     }
   },
-  "bin": ["bin/dot.ps1", "bin/dot.cmd"],
+  "bin": ["bin/dot.ps1"],
   "checkver": "github",
   "autoupdate": {
     "architecture": {
