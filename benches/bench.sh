@@ -67,12 +67,19 @@ THRESHOLD_MS_FISH=200
 #     nu direct, --no-config-file        7ms
 THRESHOLD_MS_NU=60
 
-if ! command -v hyperfine >/dev/null 2>&1; then
-  echo "hyperfine not found."
-  exit 1
-fi
+# Exit status: 0 every shell within its threshold, 1 a shell breached its
+# threshold, 2 nothing could be measured. The medium_bench_quick_mode
+# performance gate tolerates 1, so a run that measured nothing must never
+# exit 1: a missing hyperfine used to, and the gate reported a 2ms pass.
+for tool in hyperfine jq; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    echo "$tool not found; nothing measured."
+    exit 2
+  fi
+done
 
 FAILED=0
+UNMEASURED=0
 
 run_bench() {
   local shell_cmd=$1
@@ -95,8 +102,15 @@ run_bench() {
   # thing a regression gate is actually asking about. It cannot mask a real
   # regression: work added to an rc file raises the floor too.
   result=$(hyperfine -N -i --warmup 3 --runs 10 "$shell_cmd" --export-json "$bench_json" >/dev/null 2>&1 &&
-    jq -r '(.results[0] | .summary.time_wall_clock // .).min * 1000' "$bench_json")
+    jq -r '(.results[0] | .summary.time_wall_clock // .).min * 1000' "$bench_json") || result=""
   rm -f "$bench_json"
+
+  # No reading is not 0ms: printf would turn an empty result into a pass.
+  if [[ ! "$result" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+    printf '  \033[38;5;196m✗\033[0m %-12s could not measure\n' "$label"
+    UNMEASURED=1
+    return 0
+  fi
 
   local min_ms
   min_ms=$(printf "%.0f" "$result")
@@ -128,8 +142,6 @@ if command -v nu >/dev/null 2>&1; then
   run_bench "nu -c exit" "nu" "$THRESHOLD_MS_NU"
 fi
 
-if [[ $FAILED -eq 0 ]]; then
-  exit 0
-else
-  exit 1
-fi
+[[ $UNMEASURED -eq 0 ]] || exit 2
+[[ $FAILED -eq 0 ]] || exit 1
+exit 0
