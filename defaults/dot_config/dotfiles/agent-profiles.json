@@ -5,49 +5,20 @@
     "roles": {
       "viewer": {
         "description": "Read-only access to configuration and status.",
-        "allowedProfiles": [
-          "ask"
-        ],
-        "permissions": [
-          "read",
-          "status",
-          "audit"
-        ]
+        "allowedProfiles": ["ask"],
+        "permissions": ["read", "status", "audit"]
       },
       "developer": {
         "description": "Standard development workflow with bounded writes.",
         "inherits": "viewer",
-        "allowedProfiles": [
-          "ask",
-          "plan",
-          "apply"
-        ],
-        "permissions": [
-          "read",
-          "write",
-          "status",
-          "audit",
-          "execute"
-        ]
+        "allowedProfiles": ["ask", "plan", "apply"],
+        "permissions": ["read", "write", "status", "audit", "execute"]
       },
       "admin": {
         "description": "Full access including fleet management and profile switching.",
         "inherits": "developer",
-        "allowedProfiles": [
-          "ask",
-          "plan",
-          "apply",
-          "audit"
-        ],
-        "permissions": [
-          "read",
-          "write",
-          "status",
-          "audit",
-          "execute",
-          "fleet",
-          "configure"
-        ]
+        "allowedProfiles": ["ask", "plan", "apply", "audit"],
+        "permissions": ["read", "write", "status", "audit", "execute", "fleet", "configure"]
       }
     },
     "defaultRole": "developer",
@@ -59,27 +30,19 @@
     "allowedDelegates": {
       "security-reviewer": {
         "profile": "audit",
-        "permissions": [
-          "read",
-          "audit"
-        ],
+        "permissions": ["read", "audit"],
         "maxSteps": 4,
         "timeout": 120
       },
       "test-runner": {
         "profile": "apply",
-        "permissions": [
-          "read",
-          "execute"
-        ],
+        "permissions": ["read", "execute"],
         "maxSteps": 6,
         "timeout": 300
       },
       "lint-checker": {
         "profile": "ask",
-        "permissions": [
-          "read"
-        ],
+        "permissions": ["read"],
         "maxSteps": 2,
         "timeout": 60
       }

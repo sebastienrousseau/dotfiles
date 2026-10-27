@@ -31,6 +31,12 @@ esac
 exec "$REAL_BASH" "\$@"
 EOF
 chmod +x "$WORK/bin/bash"
+# Several cases below would change the checkout if the shim did not catch
+# them (fleet policy set writes agent-profiles.json); stop if it does not.
+if [[ "$(PATH="$WORK/bin:/usr/bin:/bin" bash /x/plugins/p/libexec/m.sh probe 2>&1)" != "module m.sh probe" ]]; then
+  echo "the bash shim does not intercept libexec modules; refusing to run" >&2
+  exit 1
+fi
 
 # run <file> <args...> — run a file with the shim on PATH; sets RC and OUT
 # (the first module or script line it recorded).
@@ -199,8 +205,8 @@ run "$REPO_ROOT/bin/dot" fleet
 assert_equals "module fleet.sh fleet" "$OUT" "bare fleet runs the entry"
 run "$REPO_ROOT/bin/dot" fleet drift history
 assert_equals "module fleet.sh fleet drift history" "$OUT" "an object with fallback passes its old words on"
-run "$REPO_ROOT/bin/dot" fleet namespace set fm-eng
-assert_equals "module fleet.sh fleet namespace set fm-eng" "$OUT" "so does namespace"
+run "$REPO_ROOT/bin/dot" fleet namespace show
+assert_equals "module fleet.sh fleet namespace show" "$OUT" "so does namespace"
 run "$REPO_ROOT/bin/dot" fleet log bogus
 assert_equals "127" "$RC" "an object without fallback refuses a word that is not its verb"
 assert_equals "" "$OUT" "and runs nothing"

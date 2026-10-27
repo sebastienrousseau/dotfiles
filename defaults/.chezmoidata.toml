@@ -1,5 +1,4 @@
 # Active profile - change this to switch configurations
-namespace = "fm-eng"
 dotfiles_version = "0.2.538"
 previous_dotfiles_version = "0.2.537"
 profile = "laptop"
