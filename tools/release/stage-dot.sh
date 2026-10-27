@@ -37,6 +37,7 @@ cp "$repo_root/bin/dot.ps1" "$dest/bin/"
 cp "$repo_root/tools/release/Makefile.dist" "$dest/Makefile"
 cp -R "$repo_root/lib/dot" "$dest/lib/"
 cp -R "$repo_root/scripts" "$dest/"
+cp -R "$repo_root/plugins" "$dest/"
 cp -R "$repo_root/security" "$dest/"
 cp -R "$repo_root/docs" "$dest/"
 mkdir -p "$dest/defaults"
@@ -72,3 +73,9 @@ for command in apply doctor "doctor status" "doctor perf show" "tool list" theme
   # shellcheck disable=SC2086 # a spelling is words
   DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 "$dest/bin/dot" $command --help >/dev/null
 done
+# --help never reaches a plugin's entry (P2.1), so run one for real, in a
+# throwaway HOME: a bundle without plugins/ fails here.
+smoke_home="$(mktemp -d)"
+HOME="$smoke_home" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 DOTFILES_SHOW_LOGO=0 \
+  "$dest/bin/dot" fleet status </dev/null >/dev/null
+rm -rf "$smoke_home"

@@ -35,7 +35,7 @@ all: smoke
 install:
 	$(INSTALL) -d "$(DESTDIR)$(LIBEXECDIR)" "$(DESTDIR)$(BINDIR)" "$(DESTDIR)$(MANDIR)/man1" \
 	  "$(DESTDIR)$(DOCDIR)" "$(DESTDIR)$(BASHCOMPDIR)" "$(DESTDIR)$(ZSHCOMPDIR)" "$(DESTDIR)$(FISHCOMPDIR)"
-	cp -R bin lib scripts security docs defaults share "$(DESTDIR)$(LIBEXECDIR)/"
+	cp -R bin lib scripts plugins security docs defaults share "$(DESTDIR)$(LIBEXECDIR)/"
 	ln -sfn "$(DOT_LINK)" "$(DESTDIR)$(BINDIR)/dot"
 	@test -x "$(DESTDIR)$(BINDIR)/dot" || { echo "error: $(DESTDIR)$(BINDIR)/dot -> $(DOT_LINK) does not resolve; set DOT_LINK" >&2; exit 1; }
 	$(INSTALL_DATA) share/man/man1/dot.1 "$(DESTDIR)$(MANDIR)/man1/dot.1"
