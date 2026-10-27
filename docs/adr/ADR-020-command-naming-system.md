@@ -191,9 +191,10 @@ runs each command (`legacy`, on the domain and on each command).
   not built yet is marked `planned`. With `fallback = true` the domain word
   alone, and words its table does not take, go to the entry as they went
   to the domain's route (`theme`, `attest`, `fleet`, `ai`, `agent`, `mcp`,
-  `top`, `tool`); without it they get the domain's help or exit 127, as
-  before. `theme` was the first; then `security`, `attest`, `secret` and
-  `fleet`; then `ai`, `agent`, `mcp` and `top`; then `cli` and `tool`.
+  `top`, `tool`, `doctor`, `system`); without it they get the domain's
+  help or exit 127, as before. `theme` was the first; then `security`,
+  `attest`, `secret` and `fleet`; then `ai`, `agent`, `mcp` and `top`; then
+  `cli` and `tool`; then `doctor` and `system`.
 - `-V` prints the version and `-v` sets `DOT_VERBOSE=1`. Until 0.2.538,
   `dot -v` alone printed the version with a warning; from 0.2.538 it is
   `--verbose` with no command, which prints the overview.

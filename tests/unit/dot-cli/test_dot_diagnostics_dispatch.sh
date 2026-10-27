@@ -16,6 +16,9 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 DIAG="$REPO_ROOT/scripts/dot/commands/diagnostics.sh"
+# The doctor commands moved to the doctor plugin's doctor.sh (P2.1).
+DOCTOR="$REPO_ROOT/plugins/doctor/libexec/doctor.sh"
+DOCTOR_SUBS="doctor heal health health-check scorecard score perf conflicts snapshot rollback drift benchmark restore load-bench load-bench-pty metrics"
 REAL_BASH="$(command -v bash)"
 
 trap cov_teardown_sandbox EXIT
@@ -50,10 +53,13 @@ exit 0
 STUB
 chmod +x "$BIN/bash" "$BIN/dot-load-benchmark" "$BIN/dot-load-benchmark-pty" "$BIN/chezmoi"
 
-# diag <args…> — run the dispatcher via the real bash, capture stdout+status.
+# diag <args…> — run the module that owns the subcommand (doctor.sh or
+# diagnostics.sh) via the real bash, capture stdout+status.
 diag() {
+  local module="$DIAG"
+  [[ " $DOCTOR_SUBS " != *" ${1:-} "* ]] || module="$DOCTOR"
   : >"$DISPATCH_LOG"
-  "$REAL_BASH" "$DIAG" "$@" >"$OUTF" </dev/null
+  "$REAL_BASH" "$module" "$@" >"$OUTF" </dev/null
   RC=$?
   return 0
 }
@@ -69,7 +75,7 @@ test_start "help_lists_the_commands"
 diag --help
 assert_equals 0 "$RC" "rc"
 out_has "Usage: diagnostics.sh" "usage"
-out_has "doctor, heal, health" "command list"
+out_has "history, verify, chaos, bundle, smoke-test" "command list"
 
 test_start "no_command_prints_usage_and_fails"
 diag
@@ -82,15 +88,51 @@ assert_equals 1 "$RC" "rc"
 
 # These moved to the security, attest, secret, fleet, top and tool plugins (P2.1).
 test_start "moved_commands_are_not_diagnostics_commands"
-for sub in security-score attest attestation teleport secret-audit intelligence locks; do
-  diag "$sub"
-  assert_equals 1 "$RC" "$sub is not a diagnostics command"
+for sub in security-score attest attestation teleport secret-audit intelligence locks $DOCTOR_SUBS; do
+  "$REAL_BASH" "$DIAG" "$sub" >/dev/null 2>&1 </dev/null && rc=0 || rc=$?
+  assert_equals 1 "$rc" "$sub is not a diagnostics command"
 done
 
 test_start "doctor_prefers_the_unified_doctor"
 diag doctor --json
 assert_equals 0 "$RC" "rc"
 handed_to "scripts/diagnostics/doctor-unified.sh --json"
+
+# doctor_from SRC ARGS…: cmd_doctor with the source dir resolving to SRC.
+doctor_from() {
+  local src="$1"
+  shift
+  : >"$DISPATCH_LOG"
+  # shellcheck disable=SC2016 # the script expands its own positional args
+  "$REAL_BASH" -c 'source "$1"; src="$2"; shift 2
+    resolve_source_dir() { printf "%s\n" "$src"; }
+    cmd_doctor "$@"' _ "$DOCTOR" "$src" "$@" >"$OUTF" 2>&1 </dev/null
+  RC=$?
+}
+
+test_start "doctor_falls_back_to_the_legacy_doctor"
+legacy_src="$DOTFILES_COV_TMPDIR/legacy-src"
+mkdir -p "$legacy_src/scripts/diagnostics"
+: >"$legacy_src/scripts/diagnostics/doctor.sh"
+doctor_from "$legacy_src" --json
+assert_equals 0 "$RC" "rc"
+handed_to "$legacy_src/scripts/diagnostics/doctor.sh --json"
+assert_output_not_contains "doctor-unified.sh" "cat '$DISPATCH_LOG'"
+
+test_start "doctor_falls_back_to_chezmoi_doctor"
+bare_src="$DOTFILES_COV_TMPDIR/bare-src"
+mkdir -p "$bare_src"
+doctor_from "$bare_src" --json
+assert_equals 0 "$RC" "rc"
+handed_to "chezmoi doctor --json"
+assert_output_not_contains "$bare_src/scripts" "cat '$DISPATCH_LOG'"
+
+# The command must be one whole word of the list: "doctor heal" ends in a
+# listed word and sits inside the list, but is not a command.
+test_start "doctor_refuses_a_command_that_is_not_one_word"
+"$REAL_BASH" "$DOCTOR" "doctor heal" >"$OUTF" 2>&1 </dev/null && RC=0 || RC=$?
+assert_equals 1 "$RC" "rc"
+out_has "Unknown doctor command: doctor heal" "refusal"
 
 test_start "drift_hands_off_to_the_drift_dashboard"
 diag drift --json
@@ -119,7 +161,7 @@ run_script_case rollback scripts/ops/rollback.sh
 run_script_case history scripts/diagnostics/history-analysis.sh
 run_script_case benchmark scripts/diagnostics/benchmark.sh
 run_script_case verify scripts/diagnostics/verify.sh
-run_script_case restore scripts/dot/commands/restore.sh
+run_script_case restore plugins/doctor/libexec/restore.sh
 run_script_case chaos scripts/ops/chaos.sh
 run_script_case bundle scripts/ops/bundle.sh
 run_script_case smoke-test scripts/diagnostics/smoke-test.sh

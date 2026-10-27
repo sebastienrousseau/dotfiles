@@ -11,7 +11,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-SEC_FILE="$REPO_ROOT/scripts/dot/commands/security.sh"
+SEC_FILE="$REPO_ROOT/plugins/doctor/libexec/doctor.sh"
 # The hardening commands moved to the security plugin's entry (P2.1).
 SECURITY_ENTRY="$REPO_ROOT/plugins/security/dot-security"
 

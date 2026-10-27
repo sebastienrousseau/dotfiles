@@ -11,7 +11,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-APPEARANCE_FILE="$REPO_ROOT/scripts/dot/commands/appearance.sh"
+APPEARANCE_FILE="$REPO_ROOT/plugins/system/libexec/system.sh"
 # theme, wallpaper and fonts moved to the theme plugin's entry (P2.1).
 THEME_ENTRY="$REPO_ROOT/plugins/theme/dot-theme"
 

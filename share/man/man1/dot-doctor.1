@@ -36,7 +36,7 @@ the weekly posture report; alone it runs \fBshow\fR.
 .SH COMMANDS
 .TP
 .B dot doctor status
-Health summary. Effect: read. Runs \fBdot health\fR until the domain is extracted.
+Health summary. Effect: read. Runs \fBdot\-doctor status\fR, the plugin's entry.
 .RS
 .TP
 .B \-\-verbose, \-v
@@ -53,7 +53,7 @@ Apply fixes without prompts
 .RE
 .TP
 .B dot doctor check
-Run every health check. Effect: read. Runs \fBdot doctor\fR until the domain is extracted.
+Run every health check. Effect: read. Runs \fBdot\-doctor check\fR, the plugin's entry.
 .RS
 .TP
 .B \-\-heal, \-H
@@ -70,13 +70,13 @@ Include AI diagnostics
 .RE
 .TP
 .B dot doctor fix
-Repair what check found. Effect: write. Runs \fBdot heal\fR until the domain is extracted.
+Repair what check found. Effect: write. Runs \fBdot\-doctor fix\fR, the plugin's entry.
 .TP
 .B dot doctor backup
-Back up the setup. Effect: write. Runs \fBdot backup\fR until the domain is extracted.
+Back up the setup. Effect: write. Runs \fBdot\-doctor backup\fR, the plugin's entry.
 .TP
 .B dot doctor restore
-Restore from a backup. Effect: write. Runs \fBdot restore\fR until the domain is extracted.
+Restore from a backup. Effect: write. Runs \fBdot\-doctor restore\fR, the plugin's entry.
 .RS
 .TP
 .B \-\-list, \-l
@@ -96,16 +96,16 @@ Preview the restore
 .RE
 .TP
 .B dot doctor rollback
-Return to a previous generation. Effect: write. Runs \fBdot rollback\fR until the domain is extracted.
+Return to a previous generation. Effect: write. Runs \fBdot\-doctor rollback\fR, the plugin's entry.
 .TP
 .B dot doctor score show
-The setup score. Effect: read. Runs \fBdot scorecard\fR until the domain is extracted.
+The setup score. Effect: read. Runs \fBdot\-doctor score show\fR, the plugin's entry.
 .TP
 .B dot doctor snapshot list
 Snapshots. Effect: read. Planned; not built yet.
 .TP
 .B dot doctor snapshot new
-Take a snapshot. Effect: write. Runs \fBdot snapshot\fR until the domain is extracted.
+Take a snapshot. Effect: write. Runs \fBdot\-doctor snapshot new\fR, the plugin's entry.
 .RS
 .TP
 .B \-\-baseline, \-b
@@ -116,7 +116,7 @@ Overwrite an existing snapshot
 .RE
 .TP
 .B dot doctor perf show
-Startup timings. Effect: read. Runs \fBdot perf\fR until the domain is extracted.
+Startup timings. Effect: read. Runs \fBdot\-doctor perf show\fR, the plugin's entry.
 .RS
 .TP
 .B \-\-json, \-j
@@ -133,16 +133,16 @@ Timing target in milliseconds
 .RE
 .TP
 .B dot doctor perf measure
-Benchmark startup. Effect: read. Runs \fBdot benchmark\fR until the domain is extracted.
+Benchmark startup. Effect: read. Runs \fBdot\-doctor perf measure\fR, the plugin's entry.
 .TP
 .B dot doctor drift show
-Drift from the source. Effect: read. Runs \fBdot drift\fR until the domain is extracted.
+Drift from the source. Effect: read. Runs \fBdot\-doctor drift show\fR, the plugin's entry.
 .TP
 .B dot doctor conflict list
-Conflicting files. Effect: read. Runs \fBdot conflicts\fR until the domain is extracted.
+Conflicting files. Effect: read. Runs \fBdot\-doctor conflict list\fR, the plugin's entry.
 .TP
 .B dot doctor metric list
-Recorded metrics. Effect: read. Runs \fBdot metrics\fR until the domain is extracted.
+Recorded metrics. Effect: read. Runs \fBdot\-doctor metric list\fR, the plugin's entry.
 .TP
 .B dot doctor report show
 Weekly posture report. Effect: read. Planned; not built yet.

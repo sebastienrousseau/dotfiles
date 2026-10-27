@@ -21,10 +21,10 @@ OS settings dot manages; alone it runs \fBshow\fR.
 .SH COMMANDS
 .TP
 .B dot system status
-OS, disk, schedule and last run. Effect: read. Runs \fBdot system status\fR until the domain is extracted.
+OS, disk, schedule and last run. Effect: read. Runs \fBdot\-system status\fR, the plugin's entry.
 .TP
 .B dot system update
-Update everything, asking first. Effect: write. Runs \fBdot upgrade\fR until the domain is extracted.
+Update everything, asking first. Effect: write. Runs \fBdot\-system update\fR, the plugin's entry.
 .RS
 .TP
 .B \-\-yes, \-y
@@ -41,19 +41,19 @@ Reclaim space, asking first. Effect: write. Planned; not built yet.
 Hardware and host details. Effect: read. Planned; not built yet.
 .TP
 .B dot system schedule list
-Scheduled jobs. Effect: read. Runs \fBdot system schedule list\fR until the domain is extracted.
+Scheduled jobs. Effect: read. Runs \fBdot\-system schedule list\fR, the plugin's entry.
 .TP
 .B dot system schedule set
-Set the maintenance schedule. Effect: write. Runs \fBdot system schedule set\fR until the domain is extracted.
+Set the maintenance schedule. Effect: write. Runs \fBdot\-system schedule set\fR, the plugin's entry.
 .TP
 .B dot system schedule run
-Run scheduled maintenance now. Effect: write. Runs \fBdot system schedule run\fR until the domain is extracted.
+Run scheduled maintenance now. Effect: write. Runs \fBdot\-system schedule run\fR, the plugin's entry.
 .TP
 .B dot system settings show
 Current OS settings. Effect: read. Planned; not built yet.
 .TP
 .B dot system settings apply
-Apply the managed OS settings. Effect: write. Runs \fBdot tune\fR until the domain is extracted.
+Apply the managed OS settings. Effect: write. Runs \fBdot\-system settings apply\fR, the plugin's entry.
 .SH OTHER NAMES
 .TP
 .B dot update

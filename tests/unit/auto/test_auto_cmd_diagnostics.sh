@@ -60,7 +60,7 @@ for helper in \
   scripts/ops/chaos.sh \
   scripts/ops/teleport.sh \
   scripts/ops/bundle.sh \
-  scripts/dot/commands/restore.sh \
+  plugins/doctor/libexec/restore.sh \
   lib/dot/bento.sh; do
   mkdir -p "$diag_tmp/repo/$(dirname "$helper")"
   cat >"$diag_tmp/repo/$helper" <<'EOF_HELPER'

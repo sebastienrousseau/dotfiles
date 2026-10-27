@@ -10,7 +10,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-RESTORE_FILE="$REPO_ROOT/scripts/dot/commands/restore.sh"
+RESTORE_FILE="$REPO_ROOT/plugins/doctor/libexec/restore.sh"
 
 WORK="$(mktemp -d -t restore-git.XXXXXX)"
 trap 'rm -rf "$WORK"' EXIT

@@ -9,7 +9,10 @@ domain = "doctor"
 version = "0.2.536"
 summary = "health, repair, backup and rollback"
 default = "status"
-legacy = "doctor"
+
+[entry]
+command = "dot-doctor"
+fallback = true
 
 [[objects]]
 name = "score"
@@ -49,7 +52,6 @@ default = "show"
 [[commands]]
 verb = "status"
 effect = "read"
-legacy = "health"
 summary = "Health summary"
 
 [[commands.flags]]
@@ -75,7 +77,6 @@ summary = "Apply fixes without prompts"
 [[commands]]
 verb = "check"
 effect = "read"
-legacy = "doctor"
 summary = "Run every health check"
 
 [[commands.flags]]
@@ -101,19 +102,16 @@ summary = "Include AI diagnostics"
 [[commands]]
 verb = "fix"
 effect = "write"
-legacy = "heal"
 summary = "Repair what check found"
 
 [[commands]]
 verb = "backup"
 effect = "write"
-legacy = "backup"
 summary = "Back up the setup"
 
 [[commands]]
 verb = "restore"
 effect = "write"
-legacy = "restore"
 summary = "Restore from a backup"
 
 [[commands.flags]]
@@ -146,27 +144,25 @@ summary = "Preview the restore"
 [[commands]]
 verb = "rollback"
 effect = "write"
-legacy = "rollback"
 summary = "Return to a previous generation"
 
 [[commands]]
 object = "score"
 verb = "show"
 effect = "read"
-legacy = "scorecard"
 summary = "The setup score"
 
 [[commands]]
 object = "snapshot"
 verb = "list"
 effect = "read"
+planned = true
 summary = "Snapshots"
 
 [[commands]]
 object = "snapshot"
 verb = "new"
 effect = "write"
-legacy = "snapshot"
 summary = "Take a snapshot"
 
 [[commands.flags]]
@@ -183,7 +179,6 @@ summary = "Overwrite an existing snapshot"
 object = "perf"
 verb = "show"
 effect = "read"
-legacy = "perf"
 summary = "Startup timings"
 
 [[commands.flags]]
@@ -212,34 +207,31 @@ summary = "Timing target in milliseconds"
 object = "perf"
 verb = "measure"
 effect = "read"
-legacy = "benchmark"
 summary = "Benchmark startup"
 
 [[commands]]
 object = "drift"
 verb = "show"
 effect = "read"
-legacy = "drift"
 summary = "Drift from the source"
 
 [[commands]]
 object = "conflict"
 verb = "list"
 effect = "read"
-legacy = "conflicts"
 summary = "Conflicting files"
 
 [[commands]]
 object = "metric"
 verb = "list"
 effect = "read"
-legacy = "metrics"
 summary = "Recorded metrics"
 
 [[commands]]
 object = "report"
 verb = "show"
 effect = "read"
+planned = true
 summary = "Weekly posture report"
 
 [[aliases]]

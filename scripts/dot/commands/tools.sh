@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Dotfiles CLI - Tools Commands
-# log-rotate, aliases, alias-check, profile, setup, lint (tools, new, packages
-# and env are plugins/tool)
+# aliases, alias-check, profile, setup, lint (tools, new, packages, env and
+# log-rotate are plugins)
 
 set -euo pipefail
 
@@ -19,10 +19,6 @@ dot_ui_command_banner "Tools" "${1:-}"
 
 cmd_setup() {
   run_script "scripts/ops/setup.sh" "Setup script" "$@"
-}
-
-cmd_log_rotate() {
-  run_script "scripts/tools/log-rotate.sh" "Log rotation script" "$@"
 }
 
 cmd_profile() {
@@ -77,7 +73,7 @@ case "${1:-}" in
 Usage: tools.sh <command> [args...]
 
 Commands:
-  alias-check, log-rotate, setup, aliases, profile, lint
+  alias-check, setup, aliases, profile, lint
 EOF
     ;;
   "")
@@ -85,17 +81,13 @@ EOF
 Usage: tools.sh <command> [args...]
 
 Commands:
-  alias-check, log-rotate, setup, aliases, profile, lint
+  alias-check, setup, aliases, profile, lint
 EOF
     exit 1
     ;;
   alias-check)
     shift
     cmd_alias_check "$@"
-    ;;
-  log-rotate)
-    shift
-    cmd_log_rotate "$@"
     ;;
   setup)
     shift

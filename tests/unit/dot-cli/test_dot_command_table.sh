@@ -61,7 +61,7 @@ names() {
 }
 
 test_start "new_spellings_run_todays_routes"
-assert_equals "upgrade|2" "$(resolve system update)" "dot system update runs dot upgrade"
+assert_equals "@system update|2" "$(resolve system update)" "dot system update runs the system entry"
 assert_equals "update|2" "$(resolve config update)" "dot config update keeps the dotfiles-only update"
 assert_equals "@secret set|2" "$(resolve secret set KEY)" "an entry route keeps the arguments"
 assert_equals "@tool list --nix|3" "$(resolve tool list --nix)" "a flagged alias target runs its entry route, flag and all"
@@ -71,17 +71,17 @@ assert_equals "@agent delegate run|3" "$(resolve agent delegate run test-runner 
 assert_equals "@agent delegate list|2" "$(resolve agent delegate)" "a delegate object alone lists them"
 
 test_start "shortcuts_and_flags_rewrite_the_command_line"
-assert_equals "upgrade --yes" "$(names update --yes)" "dot update is dot system update (N7)"
+assert_equals "@system update --yes" "$(names update --yes)" "dot update is dot system update (N7)"
 assert_equals "status" "$(names status)" "dot status is dot config status"
 assert_equals "version" "$(names -V)" "-V is the version"
-assert_equals "upgrade" "$(names -v system update)" "-v passes the rest on"
+assert_equals "@system update" "$(names -v system update)" "-v passes the rest on"
 assert_equals "upgrade" "$(names upgrade)" "a deprecated name keeps running its route"
 
 test_start "defaults_and_old_subcommands"
-assert_equals "doctor|1" "$(resolve doctor)" "a domain with its own route keeps its bare behaviour"
-assert_equals "doctor|1" "$(resolve doctor --fix)" "a flag after the domain is still bare"
-assert_equals "scorecard|2" "$(resolve doctor score)" "an object alone runs its default verb"
-assert_equals "scorecard|2" "$(resolve doctor score --json)" "an object and a flag runs its default verb too"
+assert_equals "@doctor|1" "$(resolve doctor)" "a domain with its own route keeps its bare behaviour (its entry)"
+assert_equals "@doctor|1" "$(resolve doctor --fix)" "a flag after the domain is still bare"
+assert_equals "@doctor score show|2" "$(resolve doctor score)" "an object alone runs its default verb"
+assert_equals "@doctor score show|2" "$(resolve doctor score --json)" "an object and a flag runs its default verb too"
 assert_equals "@tool|1" "$(resolve tool)" "a domain alone runs its own route (its entry) first"
 assert_equals "@ai|1" "$(resolve ai tools)" "an old subcommand goes to the domain's own route (its entry)"
 assert_equals "@ai start|2" "$(resolve ai start claude)" "ai start <agent> runs the entry's start (an interactive session)"
@@ -90,7 +90,7 @@ assert_equals "@ai run|2" "$(resolve ai run claude --pattern p q)" "ai run <agen
 test_start "declared_but_not_built_resolves_to_nothing"
 assert_equals "|0" "$(resolve secret key list)" "a planned command is not run"
 assert_equals "|0" "$(resolve secret)" "a domain whose default is planned"
-assert_equals "system schedule set|3" "$(resolve system schedule set weekly)" "a built command runs its route, its value left as an argument"
+assert_equals "@system schedule set|3" "$(resolve system schedule set weekly)" "a built command runs its route, its value left as an argument"
 assert_equals "@agent check|2" "$(resolve agent check)" "a built verb runs its own route even when the domain has one"
 assert_equals "|0" "$(resolve ai gateway show)" "a planned verb never falls through to the old route"
 
@@ -109,7 +109,7 @@ assert_equals "" "$unresolved" "each old name and shortcut points at a command t
 test_start "old_invocations_get_their_new_spelling"
 spell() { "$BASH_BIN" -c "source '$WORK/names.sh'; _dot_longest leg \"\$@\"; echo \"\$_BEST\"" _ "$@"; }
 assert_equals "config profile show" "$(spell profile show --json)" "the subcommand picks the spelling"
-assert_equals "system update" "$(spell upgrade --yes)" "a renamed route"
+assert_equals "shell update" "$(spell cache-refresh --yes)" "a renamed route"
 assert_equals "" "$(spell cl)" "a name with no route of its own falls back to its alias target"
 
 test_start "record_keys_are_words_only"

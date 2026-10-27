@@ -5,11 +5,11 @@
 # Behavioural tests for the thin dispatch command files:
 #   plugins/theme/dot-theme             (show, wallpaper set, font install,
 #                                        and the switcher's own words)
-#   scripts/dot/commands/appearance.sh  (tune)
+#   plugins/system/libexec/system.sh  (tune)
 #   plugins/security/dot-security       (policy, disk, score, and the
 #                                        firewall, telemetry, dns, lock and
 #                                        usb hardening)
-#   scripts/dot/commands/security.sh    (backup)
+#   plugins/doctor/libexec/doctor.sh    (backup)
 #
 # All are pure routers: each subcommand resolves the dotfiles source tree
 # and then `exec bash <script>`. What matters is that the right target is
@@ -24,9 +24,11 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-APPEARANCE="$REPO_ROOT/scripts/dot/commands/appearance.sh"
+# tune left appearance.sh for the system module, backup left security.sh for
+# the doctor module (P2.1); the variable names stay.
+APPEARANCE="$REPO_ROOT/plugins/system/libexec/system.sh"
 THEME="$REPO_ROOT/plugins/theme/dot-theme"
-SECURITY="$REPO_ROOT/scripts/dot/commands/security.sh"
+SECURITY="$REPO_ROOT/plugins/doctor/libexec/doctor.sh"
 SECURITY_ENTRY="$REPO_ROOT/plugins/security/dot-security"
 REAL_BASH="${BASH:-$(command -v bash)}"
 REAL_UNAME="$(command -v uname)"
@@ -38,9 +40,9 @@ WORK="$DOTFILES_COV_TMPDIR/work"
 mkdir -p "$WORK"
 
 test_start "command_files_exist"
-assert_file_exists "$APPEARANCE" "scripts/dot/commands/appearance.sh must exist"
+assert_file_exists "$APPEARANCE" "plugins/system/libexec/system.sh must exist"
 assert_file_exists "$THEME" "plugins/theme/dot-theme must exist"
-assert_file_exists "$SECURITY" "scripts/dot/commands/security.sh must exist"
+assert_file_exists "$SECURITY" "plugins/doctor/libexec/doctor.sh must exist"
 
 # The hand-off shim: anything under scripts/ is recorded rather than run,
 # everything else (the command file itself, helper subshells) reaches the
@@ -134,27 +136,14 @@ dispatch "$THEME" font install JetBrains >/dev/null
 assert_file_contains "$OUT" "dispatched scripts/fonts/install-nerd-fonts.sh JetBrains" "an unrecognised argument is passed to the installer"
 
 # ===========================================================================
-# appearance.sh
+# plugins/system/libexec/system.sh (tune, from appearance.sh)
 # ===========================================================================
-test_start "appearance_usage_on_help_and_no_args"
-rc="$(dispatch "$APPEARANCE" --help)"
-assert_equals "0" "$rc" "--help exits 0"
-assert_file_contains "$OUT" "Commands:" "usage lists the subcommands"
-assert_file_contains "$OUT" "  tune" "usage lists tune"
-for flag in -h help; do
-  rc="$(dispatch "$APPEARANCE" "$flag")"
-  assert_equals "0" "$rc" "$flag exits 0"
-done
-rc="$(dispatch "$APPEARANCE")"
-assert_equals "1" "$rc" "no arguments is a usage error"
-assert_file_contains "$OUT" "Usage: appearance.sh" "usage is still printed"
-
-test_start "appearance_rejects_an_unknown_subcommand"
-for word in not-a-subcommand theme wallpaper fonts; do
+test_start "system_module_refuses_other_words"
+for word in not-a-subcommand theme wallpaper fonts --help; do
   rc="$(dispatch "$APPEARANCE" "$word")"
-  assert_equals "1" "$rc" "'$word' is not an appearance command"
+  assert_equals "1" "$rc" "'$word' is not a system.sh subcommand"
 done
-assert_file_contains "$ERR" "Unknown appearance command" "the error names the command"
+assert_file_contains "$ERR" "unknown 'dot system' command" "the error says so"
 
 test_start "appearance_tune_selects_the_platform_script"
 FAKE_UNAME=Darwin dispatch "$APPEARANCE" tune --dry-run >/dev/null
@@ -172,25 +161,14 @@ rc="$(DISPATCH_RC=3 FAKE_UNAME=Linux dispatch "$APPEARANCE" tune)"
 assert_equals "3" "$rc" "the target script's exit status is the command's exit status"
 
 # ===========================================================================
-# security.sh
+# plugins/doctor/libexec/doctor.sh (backup, from security.sh)
 # ===========================================================================
-test_start "security_usage_on_help_and_no_args"
-rc="$(dispatch "$SECURITY" --help)"
-assert_equals "0" "$rc" "--help exits 0"
-assert_file_contains "$OUT" "  backup" "usage lists the subcommands"
-for flag in -h help; do
-  rc="$(dispatch "$SECURITY" "$flag")"
-  assert_equals "0" "$rc" "$flag exits 0"
-done
-rc="$(dispatch "$SECURITY")"
-assert_equals "1" "$rc" "no arguments is a usage error"
-
-test_start "security_rejects_an_unknown_subcommand"
-for word in not-a-subcommand firewall policy encrypt-check; do
+test_start "doctor_module_refuses_other_words"
+for word in "" not-a-subcommand firewall policy encrypt-check --help; do
   rc="$(dispatch "$SECURITY" "$word")"
-  assert_equals "1" "$rc" "'$word' is not a security.sh subcommand"
+  assert_equals "1" "$rc" "'$word' is not a doctor.sh subcommand"
 done
-assert_file_contains "$ERR" "Unknown security command" "the error names the command"
+assert_file_contains "$ERR" "Unknown doctor command" "the error names the command"
 
 test_start "security_subcommands_route_to_their_scripts"
 # subcommand → target script, with an argument to prove forwarding.
@@ -240,12 +218,12 @@ mkdir -p "$EMPTY_TREE"
 for lib in ui.sh utils.sh platform.sh ai-install.sh ai-roster.sh data preflight.sh upgrade.sh ai-provision.sh probe.sh log.sh verified-download.sh; do
   ln -sf "$REPO_ROOT/lib/dot/$lib" "$EMPTY_TREE/$lib"
 done
-mkdir -p "$WORK/empty-tree/scripts/dot/commands"
-ln -sf "$SECURITY" "$WORK/empty-tree/scripts/dot/commands/security.sh"
+mkdir -p "$WORK/empty-tree/plugins/doctor/libexec"
+ln -sf "$SECURITY" "$WORK/empty-tree/plugins/doctor/libexec/doctor.sh"
 rc=0
 PATH="$BIN:/usr/bin:/bin" DOTFILES_SHOW_LOGO=0 HOME="$WORK/empty-home" \
   CHEZMOI_SOURCE_DIR="$WORK/empty-tree" \
-  "$REAL_BASH" "$WORK/empty-tree/scripts/dot/commands/security.sh" backup \
+  "$REAL_BASH" "$WORK/empty-tree/plugins/doctor/libexec/doctor.sh" backup \
   >"$OUT" 2>"$ERR" || rc=$?
 cat "$ERR" >&2
 assert_equals "1" "$rc" "a missing target script is an error"

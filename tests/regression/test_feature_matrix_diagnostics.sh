@@ -325,7 +325,7 @@ test_fm_health_verbose() {
 
 test_fm_health_check_alias() {
   test_start "fm_health_check_alias"
-  fm_run_route diagnostics health-check -j
+  fm_run_route doctor health-check -j
   fm_expect_health_rc
   test_start "fm_health_check_alias_is_json"
   fm_expect_json

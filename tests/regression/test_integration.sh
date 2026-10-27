@@ -103,7 +103,7 @@ it_sandbox dispatch
 test_start "dispatch_command_scripts_exist"
 it_bad=""
 it_mods=()
-for it_m in core diagnostics tools appearance security meta; do
+for it_m in core diagnostics tools meta; do
   it_mods+=("$REPO_ROOT/scripts/dot/commands/$it_m.sh")
 done
 it_mods+=("$REPO_ROOT"/scripts/dot/commands/*.sh "$REPO_ROOT"/plugins/*/libexec/*.sh)

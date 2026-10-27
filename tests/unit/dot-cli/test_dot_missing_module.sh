@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091
-# bin/dot routes tools, init and appearance to their own modules. When a
+# bin/dot routes tools, init and meta to their own modules. When a
 # module is missing from the source dir (a partial checkout, a botched
 # upgrade), the route must say which file is missing and exit 1, never 0.
 # Runs a small copy of the CLI with those modules removed.
@@ -19,7 +19,7 @@ COPY="$(fm_repo_copy "$FM_SANDBOX/partial")"
 export CHEZMOI_SOURCE_DIR="$COPY"
 
 # module|the spelling that routes to it
-for pair in "tools|shell alias list" "init|config init" "appearance|system settings apply"; do
+for pair in "tools|shell alias list" "init|config init" "meta|shell update --prewarm"; do
   module="${pair%%|*}"
   read -r -a spelling <<<"${pair#*|}"
   rm -f "$COPY/scripts/dot/commands/$module.sh"

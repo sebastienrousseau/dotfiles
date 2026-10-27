@@ -5,7 +5,7 @@
 # Behavioural tests for three dot command files:
 #
 #   scripts/dot/commands/aliases.sh   aliases list/search/why/stats/…
-#   scripts/dot/commands/restore.sh   restore from backup or a git ref
+#   plugins/doctor/libexec/restore.sh   restore from backup or a git ref
 #   scripts/dot/commands/init.sh      bootstrap a foreign dotfiles repo
 #
 # aliases.sh and init.sh only define functions (the dot driver sources them
@@ -22,7 +22,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 ALIASES="$REPO_ROOT/scripts/dot/commands/aliases.sh"
-RESTORE="$REPO_ROOT/scripts/dot/commands/restore.sh"
+RESTORE="$REPO_ROOT/plugins/doctor/libexec/restore.sh"
 INIT="$REPO_ROOT/scripts/dot/commands/init.sh"
 UTILS="$REPO_ROOT/lib/dot/utils.sh"
 REAL_BASH="${BASH:-$(command -v bash)}"

@@ -10,7 +10,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-RESTORE_FILE="$REPO_ROOT/scripts/dot/commands/restore.sh"
+RESTORE_FILE="$REPO_ROOT/plugins/doctor/libexec/restore.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

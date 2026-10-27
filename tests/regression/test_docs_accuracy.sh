@@ -123,12 +123,13 @@ test_start "utils_doc_commands_exist"
 routes="$REPO_ROOT/lib/dot/data/routes.txt"
 table="$REPO_ROOT/lib/dot/data/commands.txt"
 failures=0
-# A command exists when it has a route, or is a domain or a shortcut in the
-# command table (a plugin with an entry has no route of its own).
+# A command exists when it has a route, or is a domain or a name in the
+# command table (a plugin with an entry has no route of its own; an old name
+# UTILS.md documents is an alias).
 for cmd in apply doctor heal rollback bundle secret; do
   if grep -q "dot $cmd" "$REPO_ROOT/docs/reference/UTILS.md" 2>/dev/null; then
     if ! grep -q "^$cmd|" "$routes" 2>/dev/null &&
-      ! grep -q -E "^(dom\|$cmd\||alias\|$cmd\|shortcut\|)" "$table" 2>/dev/null; then
+      ! grep -q -E "^(dom|alias)\|$cmd\|" "$table" 2>/dev/null; then
       failures=$((failures + 1))
     fi
   fi
