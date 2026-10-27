@@ -21,7 +21,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-REGISTRY_SH="$REPO_ROOT/scripts/dot/commands/registry.sh"
+REGISTRY_SH="$REPO_ROOT/plugins/cli/libexec/registry.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
@@ -36,7 +36,7 @@ BIN="$DOTFILES_COV_TMPDIR/bin"
 mkdir -p "$WORK"
 
 test_start "registry_module_exists"
-assert_file_exists "$REGISTRY_SH" "scripts/dot/commands/registry.sh must exist"
+assert_file_exists "$REGISTRY_SH" "plugins/cli/libexec/registry.sh must exist"
 
 if ! command -v jq >/dev/null 2>&1; then
   test_start "registry_cache_per_url"

@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck shell=bash
 #
-# scripts/dot/commands/registry.sh
+# plugins/cli/libexec/registry.sh
 #
 # `dot cli list --available` — verified module registry for reusable chezmoi sources.
 #

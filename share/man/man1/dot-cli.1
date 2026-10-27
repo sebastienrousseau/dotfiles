@@ -21,13 +21,13 @@ the plugin registry; alone it runs \fBshow\fR.
 .SH COMMANDS
 .TP
 .B dot cli list
-Installed plugins. Effect: read. Runs \fBdot registry installed\fR until the domain is extracted.
+Installed plugins. Effect: read. Runs \fBdot\-cli list\fR, the plugin's entry.
 .TP
 .B dot cli show
-One plugin in detail. Effect: read. Runs \fBdot registry info\fR until the domain is extracted.
+One plugin in detail. Effect: read. Runs \fBdot\-cli show\fR, the plugin's entry.
 .TP
 .B dot cli install
-Install a plugin. Effect: write. Runs \fBdot registry install\fR until the domain is extracted.
+Install a plugin. Effect: write. Runs \fBdot\-cli install\fR, the plugin's entry.
 .TP
 .B dot cli update
 Update dot and its plugins. Effect: write. Planned; not built yet.
@@ -42,13 +42,13 @@ Verify plugin provenance. Effect: read. Planned; not built yet.
 Create a plugin from the template. Effect: write. Planned; not built yet.
 .TP
 .B dot cli completion show
-Print a completion script. Effect: read. Runs \fBdot completion\fR until the domain is extracted.
+Print a completion script. Effect: read. Runs \fBdot\-cli completion show\fR, the plugin's entry.
 .TP
 .B dot cli registry show
-The plugin registry URL. Effect: read. Runs \fBdot registry url\fR until the domain is extracted.
+The plugin registry URL. Effect: read. Runs \fBdot\-cli registry show\fR, the plugin's entry.
 .TP
 .B dot cli registry set
-Point at another plugin registry. Effect: write. Runs \fBdot registry set\-url\fR until the domain is extracted.
+Point at another plugin registry. Effect: write. Runs \fBdot\-cli registry set\fR, the plugin's entry.
 .SH OTHER NAMES
 .TP
 .B dot completion

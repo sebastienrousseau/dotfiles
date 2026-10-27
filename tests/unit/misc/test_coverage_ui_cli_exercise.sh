@@ -134,7 +134,7 @@ assert_file_exists "$REPO_ROOT/lib/dot/utils.sh" "utils.sh present and exercised
 (
   set +e
   # shellcheck disable=SC1091
-  source "$REPO_ROOT/scripts/dot/commands/env-emit.sh"
+  source "$REPO_ROOT/plugins/tool/libexec/env-emit.sh"
   if declare -f dot_env_emit >/dev/null 2>&1; then
     dot_env_emit --help
     dot_env_emit --format json --compact
@@ -143,7 +143,7 @@ assert_file_exists "$REPO_ROOT/lib/dot/utils.sh" "utils.sh present and exercised
   fi
 ) >/dev/null || true
 test_start "env_emit_exercised"
-assert_file_exists "$REPO_ROOT/scripts/dot/commands/env-emit.sh" "env-emit present and exercised"
+assert_file_exists "$REPO_ROOT/plugins/tool/libexec/env-emit.sh" "env-emit present and exercised"
 
 # 5. version-sync.sh — help + dry-run (dry-run does not write files).
 (

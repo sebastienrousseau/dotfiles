@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2016,SC2034
-# Exhaustive runtime exercise of scripts/dot/commands/registry.sh.
+# Exhaustive runtime exercise of plugins/cli/libexec/registry.sh.
 #
 # registry.sh only defines functions — the `dot` driver sources it and
 # calls cmd_registry — so this test sources it the same way and drives
@@ -23,7 +23,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-REGISTRY_SCRIPT="$REPO_ROOT/scripts/dot/commands/registry.sh"
+REGISTRY_SCRIPT="$REPO_ROOT/plugins/cli/libexec/registry.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

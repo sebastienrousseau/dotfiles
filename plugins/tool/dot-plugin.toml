@@ -9,48 +9,44 @@ domain = "tool"
 version = "0.2.536"
 summary = "toolchains, packages, project templates"
 default = "list"
-legacy = "env"
+
+[entry]
+command = "dot-tool"
+fallback = true
 
 [[commands]]
 verb = "list"
 effect = "read"
-legacy = "env list"
 summary = "Toolchains and their versions"
 
 [[commands]]
 verb = "install"
 effect = "write"
-legacy = "env install"
 summary = "Install the configured toolchains"
 
 [[commands]]
 verb = "update"
 effect = "write"
-legacy = "env upgrade"
 summary = "Upgrade toolchains"
 
 [[commands]]
 verb = "remove"
 effect = "write"
-legacy = "env prune"
 summary = "Remove orphaned toolchains (a dry run without --yes)"
 
 [[commands]]
 verb = "set"
 effect = "write"
-legacy = "env use"
 summary = "Pin a toolchain version"
 
 [[commands]]
 verb = "export"
 effect = "read"
-legacy = "env emit"
 summary = "Print the tool environment"
 
 [[commands]]
 verb = "new"
 effect = "write"
-legacy = "new"
 summary = "Create a project from a template"
 
 [commands.args]

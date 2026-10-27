@@ -17,7 +17,7 @@
 #
 # Command modules exercised: scripts/dot/commands/core.sh (sync, update),
 # commands/diagnostics.sh (verify, scorecard, snapshot, heal, doctor),
-# commands/tools.sh (env, profile), commands/meta.sh (keys sign-check).
+# commands/tools.sh (profile), plugins/tool (env), commands/meta.sh (keys sign-check).
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
@@ -43,6 +43,7 @@ echo "Testing restructured CLI commands..."
 cp "$REPO_ROOT/bin/dot" "$SRC/bin/dot"
 cp -R "$REPO_ROOT/lib/dot" "$SRC/lib/dot"
 cp -R "$REPO_ROOT/scripts/dot" "$SRC/scripts/dot"
+cp -R "$REPO_ROOT/plugins" "$SRC/plugins"
 cp "$REPO_ROOT/scripts/diagnostics/doctor-unified.sh" "$SRC/scripts/diagnostics/doctor-unified.sh"
 cp "$REPO_ROOT/.chezmoiroot" "$SRC/.chezmoiroot"
 cp "$REPO_ROOT/defaults/.chezmoidata.toml" "$SRC/defaults/.chezmoidata.toml"

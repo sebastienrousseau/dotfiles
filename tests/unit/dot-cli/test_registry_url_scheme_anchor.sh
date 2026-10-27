@@ -18,7 +18,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-REGISTRY_SCRIPT="$REPO_ROOT/scripts/dot/commands/registry.sh"
+REGISTRY_SCRIPT="$REPO_ROOT/plugins/cli/libexec/registry.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

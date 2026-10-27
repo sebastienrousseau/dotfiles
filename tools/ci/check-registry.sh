@@ -14,8 +14,8 @@ jq empty "$schema" "$index"
 
 # Use the same validation logic as the runtime consumer so CI and the
 # installed command cannot silently drift apart.
-# shellcheck source=../../scripts/dot/commands/registry.sh disable=SC1091
-source "$repo_root/scripts/dot/commands/registry.sh"
+# shellcheck source=../../plugins/cli/libexec/registry.sh disable=SC1091
+source "$repo_root/plugins/cli/libexec/registry.sh"
 _registry_validate_index "$index" || {
   printf 'registry check: docs/registry.json violates the v1 contract\n' >&2
   exit 1
