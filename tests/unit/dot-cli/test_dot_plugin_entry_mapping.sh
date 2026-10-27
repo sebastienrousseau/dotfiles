@@ -128,6 +128,28 @@ expect mcp "serve" "module mcp.sh serve"
 expect mcp "" "module mcp.sh "
 expect mcp "doctor" "module mcp.sh doctor"
 
+# The banner shows only on a terminal, so these two run under a pty. It is
+# never shown for `mcp serve`, whose stdout is the JSON-RPC stream. The
+# modules run for real here: PATH holds only a stub server, not the shim.
+pty_run() {
+  (cd "$WORK" && HOME="$WORK/home" DOTFILES_SHOW_LOGO=1 NO_COLOR=1 TERM=dumb PATH="$WORK/ptybin:/usr/bin:/bin" \
+    timeout 30 python3 -c 'import pty, sys; pty.spawn(sys.argv[1:])' "$REAL_BASH" "$@") 2>&1 </dev/null
+}
+test_start "mcp_banner_never_reaches_the_serve_stream"
+if command -v python3 >/dev/null 2>&1 && command -v timeout >/dev/null 2>&1; then
+  mkdir -p "$WORK/ptybin"
+  printf '#!%s\necho SERVER-FRAME\n' "$REAL_BASH" >"$WORK/ptybin/dot-mcp"
+  chmod +x "$WORK/ptybin/dot-mcp"
+  out="$(pty_run "$REPO_ROOT/plugins/mcp/dot-mcp" serve)"
+  rm -f "$WORK/ptybin/dot-mcp"
+  assert_contains "SERVER-FRAME" "$out" "serve reaches the server"
+  assert_equals "no" "$([[ "$out" == *"AI and Agents"* ]] && echo yes || echo no)" "serve prints no banner"
+  out="$(pty_run "$REPO_ROOT/plugins/mcp/dot-mcp" bogus)"
+  assert_contains "AI and Agents" "$out" "other spellings keep the banner"
+else
+  printf '  - SKIP mcp banner: python3 or timeout missing\n'
+fi
+
 test_start "agent_context_spellings_become_agents_subcommands"
 expect agent "context show" "module agents.sh list"
 expect agent "context check" "module agents.sh check"
@@ -167,7 +189,7 @@ delegate list|delegate list
 MAP
 # The log grows with every call, so only its oldest entry is compared.
 run "$REPO_ROOT/plugins/agent/dot-agent" log show
-assert_equals "$(cmd_mode_out log | head -1)" "$(head -1 "$WORK/out")" "dot agent log show runs cmd_mode log"
+assert_equals "$(cmd_mode_out log | head -1)" "$(cat "$WORK/out" "$WORK/err" | head -1)" "dot agent log show runs cmd_mode log"
 
 # Through bin/dot: fleet has a fallback, secret and security do not.
 test_start "fallback_decides_where_other_words_go"

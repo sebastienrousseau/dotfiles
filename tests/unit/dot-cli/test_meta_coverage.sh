@@ -234,6 +234,24 @@ assert_equals "1" "$DOT_FIXTURE_RC" "failed build exits 1"
 assert_contains "dot-mcp is not built" "$DOT_FIXTURE_OUT" "failed build falls through"
 rm -rf "$FX/defaults" "$FX/.chezmoiroot" "$STUBS/go"
 
+test_start "mcp_serve_root_without_a_chezmoiroot"
+# Without .chezmoiroot the chezmoi source is the checkout itself, and the
+# server is still told the checkout, not the directory above it.
+script_stub dot-mcp 'echo "root=$DOT_MCP_REPO_ROOT"'
+mcp_run serve
+rm -f "$STUBS/dot-mcp"
+assert_contains "root=$(cd "$FX" && pwd)" "$DOT_FIXTURE_OUT" "the served root is the checkout"
+
+test_start "mcp_serve_builds_only_from_a_source"
+# go alone, with no dot-mcp source to build, is no reason to announce a build.
+script_stub go 'echo "go $*"'
+mcp_run serve
+rm -f "$STUBS/go"
+assert_equals "1" "$DOT_FIXTURE_RC" "no binary and no source exits 1"
+announced=$([[ "$DOT_FIXTURE_OUT" == *"building dot-mcp"* ]] && echo yes || echo no)
+assert_equals "no" "$announced" "no build is announced without a source"
+assert_contains "dot-mcp is not built" "$DOT_FIXTURE_OUT" "the not-built message stands"
+
 # ── dispatcher ────────────────────────────────────────────────────────────
 test_start "dispatcher_help_empty_unknown"
 meta_run --help

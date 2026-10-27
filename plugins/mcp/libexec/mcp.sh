@@ -78,15 +78,11 @@ cmd_mcp() {
 # user cache rather than failing: a client that trusted the card must get a
 # server, not an error.
 cmd_mcp_serve() {
-  local repo_root="" source_dir bin src cache
-  # resolve_chezmoi_source_dir points at the chezmoi source (the `defaults/`
-  # directory); the server wants the repository above it. Fall back to the
-  # checkout root when chezmoi is not configured.
-  source_dir="$(resolve_chezmoi_source_dir 2>/dev/null || true)"
-  if [[ -n "$source_dir" && -d "$source_dir" ]]; then
-    repo_root="$(cd "$source_dir/.." && pwd)"
-  fi
-  [[ -n "$repo_root" ]] || repo_root="$(require_source_dir)"
+  local repo_root bin src cache
+  # The server wants the checkout, not the chezmoi source inside it
+  # (defaults/). Deriving it as the chezmoi source's parent named the
+  # directory above the checkout when there was no .chezmoiroot.
+  repo_root="$(require_source_dir)"
 
   # Tell the server which tree it is serving, and which CLI to shell out to,
   # so it never has to guess either.
