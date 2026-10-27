@@ -22,7 +22,7 @@
 # Two rules make it measurable and safe:
 #
 #   * Modules are invoked by their RELATIVE path from inside the fixture
-#     (`cd "$fixture" && bash scripts/dot/commands/core.sh …`). The coverage
+#     (`cd "$fixture" && bash plugins/config/libexec/config.sh …`). The coverage
 #     aggregator resolves a relative trace source against the repo root, so
 #     the run is attributed to the real module. An absolute fixture path
 #     would only resolve while the fixture still exists.

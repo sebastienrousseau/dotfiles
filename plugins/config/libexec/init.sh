@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck shell=bash
 #
-# scripts/dot/commands/init.sh
+# plugins/config/libexec/init.sh
 #
 # `dot config init <github-user>` — bootstrap a foreign dotfiles repo through
 # this framework's harness. The §3 audit roadmap calls for an analogue

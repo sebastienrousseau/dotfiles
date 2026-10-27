@@ -36,6 +36,14 @@ unset NVIM_APPNAME DOTFILES_FONTS MCP_REGISTRY_CONFIG DOT_MCP_DOT_BIN
 meta_run() {
   DOT_FIXTURE_PATH="$STUBS:$BASEBIN" dot_fixture_run "$FX" meta "$@"
 }
+# config_run / shell_run <args…> — the config and shell modules, which took
+# sandbox and cache-refresh from meta.sh (P2.1).
+config_run() {
+  DOT_FIXTURE_PATH="$STUBS:$BASEBIN" dot_fixture_run "$FX" config "$@"
+}
+shell_run() {
+  DOT_FIXTURE_PATH="$STUBS:$BASEBIN" dot_fixture_run "$FX" shell "$@"
+}
 # system_run <args…> — the system module, which took upgrade from meta.sh
 # (P2.1); `meta.sh upgrade` ran the same function.
 system_run() {
@@ -121,7 +129,7 @@ for d in zsh bash fish nushell; do mkdir -p "$XDG_CACHE_HOME/$d"; done
 : >"$XDG_CACHE_HOME/nushell/x.nu"
 mkdir -p "$FX/scripts/ops"
 printf 'echo prewarm-ran\n' >"$FX/scripts/ops/prewarm.sh"
-meta_run cache-refresh
+shell_run cache-refresh
 assert_equals "0" "$DOT_FIXTURE_RC" "prewarm exits 0"
 assert_contains "prewarm-ran" "$DOT_FIXTURE_OUT" "prewarm script executed"
 assert_file_not_exists "$XDG_CACHE_HOME/zsh/x-init.zsh" "zsh cache cleared"
@@ -178,7 +186,7 @@ assert_contains "Keys script not found" "$DOT_FIXTURE_OUT" "fallback script name
 # ── sandbox ───────────────────────────────────────────────────────────────
 test_start "sandbox_via_docker"
 dot_fixture_stub "$STUBS" docker 0
-meta_run sandbox
+config_run sandbox
 rm -f "$STUBS/docker"
 assert_contains "Launching sandbox via Docker" "$DOT_FIXTURE_OUT" "docker announced"
 assert_contains "docker run --rm -it dotfiles-sandbox" "$DOT_FIXTURE_OUT" "docker run exec'd"

@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 #
-# Fuzz test for scripts/dot/commands/init.sh::_init_resolve_url.
+# Fuzz test for plugins/config/libexec/init.sh::_init_resolve_url.
 #
 # Covers the URL-resolution logic that turns user input (bare name,
 # owner/repo, or full URL) into a chezmoi-init clone URL. The R2

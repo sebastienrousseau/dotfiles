@@ -4,9 +4,9 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 # Behavioural tests for three dot command files:
 #
-#   scripts/dot/commands/aliases.sh   aliases list/search/why/stats/…
+#   plugins/shell/libexec/aliases.sh   aliases list/search/why/stats/…
 #   plugins/doctor/libexec/restore.sh   restore from backup or a git ref
-#   scripts/dot/commands/init.sh      bootstrap a foreign dotfiles repo
+#   plugins/config/libexec/init.sh      bootstrap a foreign dotfiles repo
 #
 # aliases.sh and init.sh only define functions (the dot driver sources them
 # and calls cmd_aliases / cmd_init), so they are sourced the same way here.
@@ -21,9 +21,9 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-ALIASES="$REPO_ROOT/scripts/dot/commands/aliases.sh"
+ALIASES="$REPO_ROOT/plugins/shell/libexec/aliases.sh"
 RESTORE="$REPO_ROOT/plugins/doctor/libexec/restore.sh"
-INIT="$REPO_ROOT/scripts/dot/commands/init.sh"
+INIT="$REPO_ROOT/plugins/config/libexec/init.sh"
 UTILS="$REPO_ROOT/lib/dot/utils.sh"
 REAL_BASH="${BASH:-$(command -v bash)}"
 

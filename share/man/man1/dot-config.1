@@ -21,34 +21,34 @@ the active profile and its features; alone it runs \fBshow\fR.
 .SH COMMANDS
 .TP
 .B dot config status
-Pending changes and last apply. Effect: read. Runs \fBdot status\fR until the domain is extracted.
+Pending changes and last apply. Effect: read. Runs \fBdot\-config status\fR, the plugin's entry.
 .TP
 .B dot config diff
-What apply would change. Effect: read. Runs \fBdot diff\fR until the domain is extracted.
+What apply would change. Effect: read. Runs \fBdot\-config diff\fR, the plugin's entry.
 .TP
 .B dot config apply
-Write the dotfiles to this machine. Effect: write. Runs \fBdot apply\fR until the domain is extracted.
+Write the dotfiles to this machine. Effect: write. Runs \fBdot\-config apply\fR, the plugin's entry.
 .TP
 .B dot config sync
-Pull the source, then apply. Effect: write. Runs \fBdot sync\fR until the domain is extracted.
+Pull the source, then apply. Effect: write. Runs \fBdot\-config sync\fR, the plugin's entry.
 .TP
 .B dot config update
-Pull and apply the dotfiles only. Effect: write. Runs \fBdot update\fR until the domain is extracted.
+Pull and apply the dotfiles only. Effect: write. Runs \fBdot\-config update\fR, the plugin's entry.
 .TP
 .B dot config edit
-Open a managed file in $EDITOR. Effect: write. Runs \fBdot edit\fR until the domain is extracted.
+Open a managed file in $EDITOR. Effect: write. Runs \fBdot\-config edit\fR, the plugin's entry.
 .TP
 .B dot config add
-Start managing an existing file. Effect: write. Runs \fBdot add\fR until the domain is extracted.
+Start managing an existing file. Effect: write. Runs \fBdot\-config add\fR, the plugin's entry.
 .TP
 .B dot config save
-Commit source changes. Effect: write. Runs \fBdot commit\fR until the domain is extracted.
+Commit source changes. Effect: write. Runs \fBdot\-config save\fR, the plugin's entry.
 .TP
 .B dot config init
-First\-time setup of the dotfiles. Effect: write. Runs \fBdot init\fR until the domain is extracted.
+First\-time setup of the dotfiles. Effect: write. Runs \fBdot\-config init\fR, the plugin's entry.
 .TP
 .B dot config check
-Lint the source and templates. Effect: read. Runs \fBdot lint\fR until the domain is extracted.
+Lint the source and templates. Effect: read. Runs \fBdot\-config check\fR, the plugin's entry.
 .RS
 .TP
 .B \-\-check, \-c
@@ -59,22 +59,22 @@ Apply safe fixes
 .RE
 .TP
 .B dot config export
-Write a portable bundle. Effect: read. Runs \fBdot bundle\fR until the domain is extracted.
+Write a portable bundle. Effect: read. Runs \fBdot\-config export\fR, the plugin's entry.
 .TP
 .B dot config uninstall
-Remove the setup, keeping the source. Effect: destructive. Runs \fBdot uninstall\fR until the domain is extracted.
+Remove the setup, keeping the source. Effect: destructive. Runs \fBdot\-config uninstall\fR, the plugin's entry.
 .TP
 .B dot config path show
-Print the source directory. Effect: read. Runs \fBdot cd\fR until the domain is extracted.
+Print the source directory. Effect: read. Runs \fBdot\-config path show\fR, the plugin's entry.
 .TP
 .B dot config profile show
-Show the active profile. Effect: read. Runs \fBdot profile show\fR until the domain is extracted.
+Show the active profile. Effect: read. Runs \fBdot\-config profile show\fR, the plugin's entry.
 .TP
 .B dot config profile set
-Switch profile. Effect: write. Runs \fBdot profile set\fR until the domain is extracted.
+Switch profile. Effect: write. Runs \fBdot\-config profile set\fR, the plugin's entry.
 .TP
 .B dot config import
-Restore from an exported bundle. Effect: write. Runs \fBdot bundle restore\fR until the domain is extracted.
+Restore from an exported bundle. Effect: write. Runs \fBdot\-config import\fR, the plugin's entry.
 .SH OTHER NAMES
 .TP
 .B dot apply

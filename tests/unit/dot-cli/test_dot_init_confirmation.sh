@@ -18,7 +18,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 source "$SCRIPT_DIR/../../framework/module_fixture.sh"
 
-INIT_MODULE="$REPO_ROOT/scripts/dot/commands/init.sh"
+INIT_MODULE="$REPO_ROOT/plugins/config/libexec/init.sh"
 
 WORK="$(mktemp -d -t dotinit.XXXXXX)"
 cov_setup_sandbox

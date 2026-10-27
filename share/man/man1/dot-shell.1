@@ -24,25 +24,25 @@ aliases and their sources; alone it runs \fBlist\fR.
 Shell, startup time and cache state. Effect: read. Planned; not built yet.
 .TP
 .B dot shell update
-Regenerate the startup caches. Effect: write. Runs \fBdot cache\-refresh\fR until the domain is extracted.
+Regenerate the startup caches. Effect: write. Runs \fBdot\-shell update\fR, the plugin's entry.
 .TP
 .B dot shell clean
-Clear the startup caches. Effect: write. Runs \fBdot clean\-cache\fR until the domain is extracted.
+Clear the startup caches. Effect: write. Runs \fBdot\-shell clean\fR, the plugin's entry.
 .TP
 .B dot shell history list
-Recent history. Effect: read. Runs \fBdot history\fR until the domain is extracted.
+Recent history. Effect: read. Runs \fBdot\-shell history list\fR, the plugin's entry.
 .TP
 .B dot shell alias list
-Aliases and where each is defined; a term searches them. Effect: read. Runs \fBdot aliases list\fR until the domain is extracted.
+Aliases and where each is defined; a term searches them. Effect: read. Runs \fBdot\-shell alias list\fR, the plugin's entry.
 .TP
 .B dot shell alias check
-Find shadowed or broken aliases. Effect: read. Runs \fBdot alias\-check\fR until the domain is extracted.
+Find shadowed or broken aliases. Effect: read. Runs \fBdot\-shell alias check\fR, the plugin's entry.
 .TP
 .B dot shell alias show
-Where one alias comes from. Effect: read. Runs \fBdot aliases why\fR until the domain is extracted.
+Where one alias comes from. Effect: read. Runs \fBdot\-shell alias show\fR, the plugin's entry.
 .TP
 .B dot shell alias status
-Alias counts; \-\-tiers for the ecosystem tiers. Effect: read. Runs \fBdot aliases stats\fR until the domain is extracted.
+Alias counts; \-\-tiers for the ecosystem tiers. Effect: read. Runs \fBdot\-shell alias status\fR, the plugin's entry.
 .RS
 .TP
 .B \-\-tiers
@@ -50,7 +50,7 @@ Show which ecosystem tiers are enabled
 .RE
 .TP
 .B dot shell alias export
-Write the alias cheatsheet. Effect: read. Runs \fBdot aliases cheatsheet\fR until the domain is extracted.
+Write the alias cheatsheet. Effect: read. Runs \fBdot\-shell alias export\fR, the plugin's entry.
 .SH OTHER NAMES
 .TP
 .B dot history

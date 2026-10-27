@@ -46,13 +46,22 @@ _lint_is_shell() {
   esac
 }
 
-# Fills the caller's files array: scripts/**/*.sh, install.sh, the shell
-# executables under dot_local/bin, and .chezmoitemplates/**/*.sh.
+# Fills the caller's files array: scripts/**/*.sh, the bundled plugins'
+# entries and libexec/ modules, install.sh, the shell executables under
+# dot_local/bin, and .chezmoitemplates/**/*.sh.
 _lint_collect() {
   local src_dir="$1" chezmoi_src f
   while IFS= read -r -d '' f; do
     files+=("$f")
   done < <(find "$src_dir/scripts" -name '*.sh' -type f -print0 2>/dev/null)
+
+  # The bundled plugins (P2.1): each entry (by its shebang, as dot-plugin.toml
+  # matches too) and the modules in libexec/.
+  while IFS= read -r -d '' f; do
+    if [[ "$f" == */libexec/* ]] || _lint_is_shell "$f"; then
+      files+=("$f")
+    fi
+  done < <(find "$src_dir/plugins" \( -path '*/libexec/*.sh' -o -name 'dot-*' \) -type f -print0 2>/dev/null)
 
   # install.sh
   if [[ -f "$src_dir/install.sh" ]]; then
@@ -175,7 +184,7 @@ cmd_lint() {
   total=${#files[@]}
   if [[ "$total" -eq 0 ]]; then
     ui_warn "No files" "No shell scripts found to lint"
-    return 0 # mutation: ignore unreachable in a checkout: lint.sh itself is one of the scripts/*.sh it collects
+    return 0 # mutation: ignore unreachable in a checkout: lint.sh itself is one of the plugin modules it collects
   fi
 
   case "$mode" in

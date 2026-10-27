@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Auto-generated exercise test for scripts/dot/commands/core.sh.
+# Auto-generated exercise test for plugins/config/libexec/config.sh.
 # Slice 5 of #883: backfill coverage for scripts with no existing test
 # by running each through safe-mode entry points (--help / no-arg /
 # invalid flag / subcommand probes).
@@ -14,13 +14,13 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-SCRIPT_FILE="$REPO_ROOT/scripts/dot/commands/core.sh"
+SCRIPT_FILE="$REPO_ROOT/plugins/config/libexec/config.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
 test_start "script_exists"
-assert_file_exists "$SCRIPT_FILE" "scripts/dot/commands/core.sh must exist"
+assert_file_exists "$SCRIPT_FILE" "plugins/config/libexec/config.sh must exist"
 
 test_start "script_valid_syntax"
 if bash -n "$SCRIPT_FILE" 2>/dev/null; then

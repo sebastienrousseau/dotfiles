@@ -17,7 +17,7 @@ if bash -n "$stage"; then ((TESTS_PASSED++)) || true; else ((TESTS_FAILED++)) ||
 test_start "stage_bundle_executes"
 if bash "$stage" "$tmp/bundle"; then ((TESTS_PASSED++)) || true; else ((TESTS_FAILED++)) || true; fi
 
-for path in Makefile bin/dot lib/dot/ui.sh scripts/dot/commands/core.sh security/remote-installers.sha256 share/man/man1/dot.1; do
+for path in Makefile bin/dot lib/dot/ui.sh plugins/config/libexec/config.sh security/remote-installers.sha256 share/man/man1/dot.1; do
   test_start "stage_contains_${path//\//_}"
   assert_file_exists "$tmp/bundle/$path" "staged bundle must contain $path"
 done

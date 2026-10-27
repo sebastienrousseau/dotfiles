@@ -62,7 +62,7 @@ names() {
 
 test_start "new_spellings_run_todays_routes"
 assert_equals "@system update|2" "$(resolve system update)" "dot system update runs the system entry"
-assert_equals "update|2" "$(resolve config update)" "dot config update keeps the dotfiles-only update"
+assert_equals "@config update|2" "$(resolve config update)" "dot config update keeps the dotfiles-only update"
 assert_equals "@secret set|2" "$(resolve secret set KEY)" "an entry route keeps the arguments"
 assert_equals "@tool list --nix|3" "$(resolve tool list --nix)" "a flagged alias target runs its entry route, flag and all"
 assert_equals "@tool list|2" "$(resolve tool list)" "without the flag the plain verb runs"
@@ -72,7 +72,7 @@ assert_equals "@agent delegate list|2" "$(resolve agent delegate)" "a delegate o
 
 test_start "shortcuts_and_flags_rewrite_the_command_line"
 assert_equals "@system update --yes" "$(names update --yes)" "dot update is dot system update (N7)"
-assert_equals "status" "$(names status)" "dot status is dot config status"
+assert_equals "@config status" "$(names status)" "dot status is dot config status"
 assert_equals "version" "$(names -V)" "-V is the version"
 assert_equals "@system update" "$(names -v system update)" "-v passes the rest on"
 assert_equals "upgrade" "$(names upgrade)" "a deprecated name keeps running its route"
@@ -108,8 +108,8 @@ assert_equals "" "$unresolved" "each old name and shortcut points at a command t
 
 test_start "old_invocations_get_their_new_spelling"
 spell() { "$BASH_BIN" -c "source '$WORK/names.sh'; _dot_longest leg \"\$@\"; echo \"\$_BEST\"" _ "$@"; }
-assert_equals "config profile show" "$(spell profile show --json)" "the subcommand picks the spelling"
-assert_equals "shell update" "$(spell cache-refresh --yes)" "a renamed route"
+assert_equals "help --readme" "$(spell docs --section architecture)" "the old route picks the spelling; its arguments stay out"
+assert_equals "help tour" "$(spell learn --fast)" "a renamed route"
 assert_equals "" "$(spell cl)" "a name with no route of its own falls back to its alias target"
 
 test_start "record_keys_are_words_only"

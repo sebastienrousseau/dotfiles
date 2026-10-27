@@ -6,7 +6,7 @@
 #
 # Clone and apply someone else'\''s dotfiles through chezmoi and the dot harness.
 #
-# Backing module: scripts/dot/commands/init.sh
+# Backing module: plugins/config/libexec/init.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: every command below is read-only or a help

@@ -6,7 +6,7 @@
 #
 # List, search, explain and audit every alias the dotfiles ship.
 #
-# Backing module: scripts/dot/commands/aliases.sh
+# Backing module: plugins/shell/libexec/aliases.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: every command below is read-only or a help

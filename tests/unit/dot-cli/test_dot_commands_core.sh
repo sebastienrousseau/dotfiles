@@ -11,7 +11,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-CORE_FILE="$REPO_ROOT/scripts/dot/commands/core.sh"
+CORE_FILE="$REPO_ROOT/plugins/config/libexec/config.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
@@ -112,14 +112,16 @@ echo "Core commands tests completed."
 # Slice 3 (#883): exercise the script under sandbox for line coverage
 cov_exercise_script "$CORE_FILE"
 
-# No command is a usage error, and an unknown command is named.
+# No command is refused, and an unknown command is named (config.sh, which
+# took the core commands, P2.1, has no usage text of its own: the entry
+# and `dot help config` are the user's way in).
 test_start "core_without_a_command_prints_usage_and_fails"
 core_out="$(bash "$CORE_FILE" 2>&1)"
 assert_equals "1" "$?" "no command exits 1"
-assert_contains "Usage: core.sh <command>" "$core_out" "and prints the usage"
+assert_contains "Unknown config command" "$core_out" "and says so"
 test_start "core_rejects_an_unknown_command"
 core_out="$(bash "$CORE_FILE" frobnicate 2>&1)"
 assert_equals "1" "$?" "an unknown command exits 1"
-assert_contains "Unknown core command: frobnicate" "$core_out" "and is named"
+assert_contains "Unknown config command: frobnicate" "$core_out" "and is named"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

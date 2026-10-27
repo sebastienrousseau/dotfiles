@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Dotfiles CLI - Meta Commands
-# prewarm, docs, learn, keys, sandbox (upgrade, mcp, mode and agent are
+# docs, learn, keys (prewarm, sandbox, upgrade, mcp, mode and agent are
 # plugins)
 
 set -euo pipefail
@@ -25,25 +25,6 @@ meta_banner_section() {
 }
 
 dot_ui_command_banner "$(meta_banner_section "${1:-}")" "${1:-}" "$@"
-
-cmd_prewarm() {
-  local src_dir
-  # Clear caches first
-  ui_info "Cache" "Clearing shell initialization caches"
-  local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}"
-  # `find ... -delete` instead of `rm -rf $glob` so an unmatched literal
-  # pattern can't accidentally remove a real same-named directory, and
-  # so we don't pass `-r` on what should always be files.
-  [[ -d "$cache_dir/zsh" ]] && find "$cache_dir/zsh" -maxdepth 1 -type f \( -name '*-init.zsh' -o -name '*.zwc' \) -delete 2>/dev/null
-  [[ -d "$cache_dir/bash" ]] && find "$cache_dir/bash" -maxdepth 1 -type f -name '*-init.bash' -delete 2>/dev/null
-  [[ -d "$cache_dir/fish" ]] && find "$cache_dir/fish" -maxdepth 1 -type f -name '*-init.fish' -delete 2>/dev/null
-  [[ -d "$cache_dir/nushell" ]] && find "$cache_dir/nushell" -maxdepth 1 -type f -name '*.nu' -delete 2>/dev/null
-  ui_info "Cache" "Cleared. Regenerating..."
-  src_dir="$(resolve_source_dir)"
-  if [ -n "$src_dir" ] && [ -f "$src_dir/scripts/ops/prewarm.sh" ]; then
-    bash "$src_dir/scripts/ops/prewarm.sh"
-  fi
-}
 
 cmd_docs() {
   local src_dir
@@ -140,29 +121,8 @@ cmd_keys() {
   fi
 }
 
-cmd_sandbox() {
-  local src_dir
-  src_dir="$(require_source_dir)"
-
-  if has_command docker; then
-    ui_info "Launching sandbox via Docker"
-    docker build -f "$src_dir/tests/Dockerfile.sandbox" -t dotfiles-sandbox "$src_dir"
-    exec docker run --rm -it dotfiles-sandbox
-  elif has_command podman; then
-    ui_info "Launching sandbox via Podman"
-    podman build -f "$src_dir/tests/Dockerfile.sandbox" -t dotfiles-sandbox "$src_dir"
-    exec podman run --rm -it dotfiles-sandbox
-  else
-    die "Docker or Podman is required for sandbox."
-  fi
-}
-
 # Dispatch
 case "${1:-}" in
-  cache-refresh | prewarm)
-    shift
-    cmd_prewarm "$@"
-    ;;
   docs)
     shift
     cmd_docs "$@"
@@ -175,16 +135,12 @@ case "${1:-}" in
     shift
     cmd_keys "$@"
     ;;
-  sandbox)
-    shift
-    cmd_sandbox "$@"
-    ;;
   --help | -h | help)
     cat <<'EOF'
 Usage: meta.sh <command> [args...]
 
 Commands:
-  cache-refresh, prewarm, docs, learn, keys, sandbox
+  docs, learn, keys
 EOF
     ;;
   "")
@@ -192,7 +148,7 @@ EOF
 Usage: meta.sh <command> [args...]
 
 Commands:
-  cache-refresh, prewarm, docs, learn, keys, sandbox
+  docs, learn, keys
 EOF
     exit 1
     ;;

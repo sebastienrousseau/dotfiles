@@ -108,6 +108,11 @@ done < <(
     if [[ "$_row" == [a-z]*\|* ]]; then printf '%s\n' "$_row"; fi
   done <"$REPO_ROOT/lib/dot/data/routes.txt"
 )
+# The domains' commands run their plugins' entries (P2.1) and have no route
+# of their own, so every built spelling in the command table is checked too.
+while IFS='|' read -r _kind _spelling _route _; do
+  [[ "$_kind" == cmd && -n "$_route" ]] && routes+=("$_spelling")
+done <"$REPO_ROOT/lib/dot/data/commands.txt"
 
 test_start "route_table_has_commands"
 if [[ ${#routes[@]} -ge 30 ]]; then

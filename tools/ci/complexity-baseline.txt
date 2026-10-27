@@ -106,6 +106,7 @@
   18   21   43.4  163     0 plugins/agent/libexec/agents.sh::cmd_agents
   11   10   33.7   42     0 plugins/cli/libexec/registry.sh::_registry_install
   33   34   43.5  123     0 plugins/cli/libexec/registry.sh::cmd_registry
+  22   21   28.7  103     0 plugins/config/libexec/init.sh::cmd_init
   19   25   27.4   53     0 plugins/mcp/libexec/mcp.sh::cmd_mcp
   21   12   31.5   69   248 plugins/secret/libexec/secrets.sh::<top>
   16   16   23.8   61     0 plugins/secret/libexec/secrets.sh::cmd_env_load
@@ -130,8 +131,6 @@
   11   16   24.0   62     0 scripts/diagnostics/security-score.sh::print_summary
   13   14   21.3   54    69 scripts/diagnostics/version-locks.sh::<top>
   25   27   43.1  135   199 scripts/diagnostics/workstation-attestation.sh::<top>
-  17    3   25.6   67   184 scripts/dot/commands/core.sh::<top>
-  22   21   28.7  103     0 scripts/dot/commands/init.sh::cmd_init
   11   11   15.2   34     0 scripts/dot/commands/manual.sh::cmd_open
   17   38   24.9   54     0 scripts/dot/commands/meta.sh::cmd_keys
   18   31   39.3  112   112 scripts/git-hooks/pre-commit-audit.sh::<top>

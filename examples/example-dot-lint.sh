@@ -6,7 +6,7 @@
 #
 # Runs ShellCheck and shfmt over every shell script in the repository.
 #
-# Backing module: scripts/dot/commands/lint.sh
+# Backing module: plugins/config/libexec/lint.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: every command below is read-only or a help

@@ -135,6 +135,9 @@ touch "$meta_tmp/cache/zsh/tool-init.zsh" \
   set -- help
   # shellcheck disable=SC1090
   source "$SCRIPT_FILE"
+  # cmd_clean_cache and cmd_prewarm moved to the shell plugin (P2.1).
+  # shellcheck disable=SC1091
+  source "$REPO_ROOT/plugins/shell/libexec/shell.sh"
   meta_banner_section mcp
   meta_banner_section docs
   meta_banner_section upgrade

@@ -194,7 +194,9 @@ runs each command (`legacy`, on the domain and on each command).
   `top`, `tool`, `doctor`, `system`); without it they get the domain's
   help or exit 127, as before. `theme` was the first; then `security`,
   `attest`, `secret` and `fleet`; then `ai`, `agent`, `mcp` and `top`; then
-  `cli` and `tool`; then `doctor` and `system`.
+  `cli` and `tool`; then `doctor` and `system`; then `config` and `shell`,
+  after which routes.txt holds only the host's built-ins (help, version,
+  search, manual, docs, learn, keys) and two old names with no spelling.
 - `-V` prints the version and `-v` sets `DOT_VERBOSE=1`. Until 0.2.538,
   `dot -v` alone printed the version with a warning; from 0.2.538 it is
   `--verbose` with no command, which prints the overview.

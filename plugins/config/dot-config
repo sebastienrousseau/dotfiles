@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# dot-config: the entry of the config plugin (ADR-020 N2). bin/dot runs it
+# with the words after `dot config` (the shortcuts apply, sync, diff, status,
+# edit and cd arrive here too), one of the spellings its manifest declares as
+# built; each becomes the subcommand of libexec/config.sh that implements it.
+
+set -euo pipefail
+
+_CONFIG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# config_module SUBCOMMAND... — run the config module.
+config_module() {
+  exec bash "$_CONFIG_DIR/libexec/config.sh" "$@"
+}
+
+# config_object WORD WORD ARGS... — spellings told apart by a second word.
+config_object() {
+  case "${1:-} ${2:-}" in
+    "apply --sandbox") config_module sandbox "${@:3}" ;;
+    "path show") config_module cd "${@:3}" ;;
+    "profile show" | "profile set") config_module profile "${@:2}" ;;
+  esac
+}
+
+# config_verb VERB ARGS... — the domain's own verbs.
+config_verb() {
+  case "${1:-}" in
+    status | diff | apply | sync | update | edit | add | init | uninstall) config_module "$@" ;;
+    save) config_module commit "${@:2}" ;;
+    check) config_module lint "${@:2}" ;;
+    export) config_module bundle "${@:2}" ;;
+    import) config_module bundle restore "${@:2}" ;;
+  esac
+}
+
+config_object "$@"
+config_verb "$@"
+echo "dot: 'dot config $*' is not a command; run 'dot help config'" >&2
+exit 127

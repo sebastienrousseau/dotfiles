@@ -1,29 +1,9 @@
-apply|Apply the current dotfiles to this machine.|dot apply\ndot apply --dry-run
-sync|Apply the current dotfiles to this machine.|dot sync\ndot sync --check
-init|Bootstrap a dotfiles repository through chezmoi.|dot init alice\ndot init alice/configs --dry-run
-add|Start managing a file with chezmoi.|dot add ~/.gitconfig
-diff|Show pending dotfile changes before applying.|dot diff
-status|Show local drift in the managed home state.|dot status
-edit|Open the dotfiles source tree in the configured editor.|dot edit
 manual|Open or download the dotfiles manual in HTML, PDF, EPUB, or text.|dot manual\ndot manual text --offline\ndot manual download pdf
-lint|Run shell quality checks for the repo.|dot lint\ndot lint -c\ndot lint -f
-profile|Show or switch the active configuration profile.|dot profile
 learn|Open the guided tour of the toolchain.|dot learn
 search|Find commands by keyword across the public surface.|dot search ai
 help|Show the overview or a focused command reference.|dot help\ndot help doctor\ndot help all
 --version|Show the installed dotfiles version.|dot --version\ndot version
 version|Show the installed dotfiles version.|dot --version\ndot version
-init|Bootstrap a foreign dotfiles repo through chezmoi + dot.|dot init <github-user>\ndot init owner/repo --dry-run\ndot init https://example.com/repo.git
-uninstall|Remove the managed dotfiles environment (prompts unless --force).|dot uninstall\ndot uninstall --force
-clean-cache|Clear shell initialization caches; they regenerate on the next shell start.|dot clean-cache
-cd|Print the dotfiles source directory path for shell helpers.|cd $(dot cd)\ndot cd
-commit|Draft an AI-assisted Conventional Commit for staged changes.|dot commit\ngit add -p && dot commit
-history|Analyse and surface insights from your shell history.|dot history\ndot history --top 20
 chaos|Simulate config corruption to validate self-healing paths.|dot chaos --dry-run\ndot chaos --restore
-bundle|Create an offline archive of your dotfiles environment.|dot bundle\ndot bundle --output ~/dot-bundle.tar.zst
-aliases|Inspect or audit shell aliases shipped by the dotfiles.|dot aliases\ndot aliases --check
-cache-refresh|Regenerate shell init caches for fast startup.|dot cache-refresh\ndot cache-refresh --force
-prewarm|Alias of cache-refresh — regenerate shell init caches.|dot prewarm\ndot prewarm --force
 docs|Open the repository README in your pager.|dot docs\ndot docs --section architecture
 keys|Inspect keybindings and verify git signing.|dot keys\ndot keys sign-check
-sandbox|Launch a safe sandbox preview (Docker or Podman).|dot sandbox\ndot sandbox --runtime podman

@@ -15,7 +15,7 @@
 # anything. `profile set` rewrites the sandbox copy of .chezmoidata.toml,
 # never the real one. HOME and XDG_* point into the sandbox; mise is a stub.
 #
-# Command modules exercised: scripts/dot/commands/core.sh (sync, update),
+# Command modules exercised: plugins/config/libexec/config.sh (sync, update),
 # commands/diagnostics.sh (verify, scorecard, snapshot, heal, doctor),
 # commands/tools.sh (profile), plugins/tool (env), commands/meta.sh (keys sign-check).
 set -uo pipefail

@@ -14,5 +14,5 @@ lib/dot/verified-download.sh
 scripts/diagnostics/doctor.sh
 scripts/theme/switch.sh
 plugins/fleet/libexec/fleet.sh
-scripts/dot/commands/tools.sh
+plugins/config/libexec/config.sh
 plugins/secret/libexec/secrets.sh

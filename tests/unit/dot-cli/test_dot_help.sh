@@ -108,9 +108,9 @@ assert_output_not_contains "short for" "cat '$WORK/out'" "a spelling that is not
 # 0.2.537, so the case does not depend on the release under test.
 source "$SCRIPT_DIR/../../framework/pinned_dot.sh"
 rc=0
-DOT_BIN="$(pinned_dot "$WORK/pinned" 0.2.537)" dot cache-refresh --help || rc=$?
+DOT_BIN="$(pinned_dot "$WORK/pinned" 0.2.537)" dot docs --help || rc=$?
 assert_equals "0" "$rc" "an old name's --help still shows its help"
-assert_output_not_contains "dot shell update ·" "cat '$WORK/out'" "its old help, not the domain help"
+assert_output_not_contains "dot help ·" "cat '$WORK/out'" "its old help, not the domain help"
 
 test_start "json_catalog"
 rc=0

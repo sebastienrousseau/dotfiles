@@ -48,8 +48,11 @@ done < <(
   done <"$REPO_ROOT/lib/dot/data/routes.txt"
 )
 
+# routes.txt holds only the host's built-ins once every domain runs its
+# plugin's entry (P2.1); the floor only guards against an empty read. Each
+# entry's file is checked by tools/ci/check-cli-contract.py instead.
 test_start "route_table_parsed"
-if [[ ${#routes[@]} -ge 30 ]]; then
+if [[ ${#routes[@]} -ge 5 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: ${#routes[@]} commands in route table"
 else

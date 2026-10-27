@@ -80,22 +80,22 @@ cmd|cli registry set|@cli registry set|write|Point at another plugin registry
 dom|config|status||apply, diff and sync the dotfiles
 obj|config path|show||where the dotfiles source lives
 obj|config profile|show||the active profile and its features
-cmd|config status|status|read|Pending changes and last apply
-cmd|config diff|diff|read|What apply would change
-cmd|config apply|apply|write|Write the dotfiles to this machine
-cmd|config sync|sync|write|Pull the source, then apply
-cmd|config update|update|write|Pull and apply the dotfiles only
-cmd|config edit|edit|write|Open a managed file in $EDITOR
-cmd|config add|add|write|Start managing an existing file
-cmd|config save|commit|write|Commit source changes
-cmd|config init|init|write|First-time setup of the dotfiles
-cmd|config check|lint|read|Lint the source and templates
-cmd|config export|bundle|read|Write a portable bundle
-cmd|config uninstall|uninstall|destructive|Remove the setup, keeping the source
-cmd|config path show|cd|read|Print the source directory
-cmd|config profile show|profile show|read|Show the active profile
-cmd|config profile set|profile set|write|Switch profile
-cmd|config import|bundle restore|write|Restore from an exported bundle
+cmd|config status|@config status|read|Pending changes and last apply
+cmd|config diff|@config diff|read|What apply would change
+cmd|config apply|@config apply|write|Write the dotfiles to this machine
+cmd|config sync|@config sync|write|Pull the source, then apply
+cmd|config update|@config update|write|Pull and apply the dotfiles only
+cmd|config edit|@config edit|write|Open a managed file in $EDITOR
+cmd|config add|@config add|write|Start managing an existing file
+cmd|config save|@config save|write|Commit source changes
+cmd|config init|@config init|write|First-time setup of the dotfiles
+cmd|config check|@config check|read|Lint the source and templates
+cmd|config export|@config export|read|Write a portable bundle
+cmd|config uninstall|@config uninstall|destructive|Remove the setup, keeping the source
+cmd|config path show|@config path show|read|Print the source directory
+cmd|config profile show|@config profile show|read|Show the active profile
+cmd|config profile set|@config profile set|write|Switch profile
+cmd|config import|@config import|write|Restore from an exported bundle
 dom|doctor|status|@doctor|health, repair, backup and rollback
 obj|doctor score|show||the setup score
 obj|doctor snapshot|list||setup snapshots
@@ -190,14 +190,14 @@ dom|shell|status||aliases, history, startup caches
 obj|shell history|list||shell history
 obj|shell alias|list||aliases and their sources
 cmd|shell status||read|Shell, startup time and cache state
-cmd|shell update|cache-refresh|write|Regenerate the startup caches
-cmd|shell clean|clean-cache|write|Clear the startup caches
-cmd|shell history list|history|read|Recent history
-cmd|shell alias list|aliases list|read|Aliases and where each is defined; a term searches them
-cmd|shell alias check|alias-check|read|Find shadowed or broken aliases
-cmd|shell alias show|aliases why|read|Where one alias comes from
-cmd|shell alias status|aliases stats|read|Alias counts; --tiers for the ecosystem tiers
-cmd|shell alias export|aliases cheatsheet|read|Write the alias cheatsheet
+cmd|shell update|@shell update|write|Regenerate the startup caches
+cmd|shell clean|@shell clean|write|Clear the startup caches
+cmd|shell history list|@shell history list|read|Recent history
+cmd|shell alias list|@shell alias list|read|Aliases and where each is defined; a term searches them
+cmd|shell alias check|@shell alias check|read|Find shadowed or broken aliases
+cmd|shell alias show|@shell alias show|read|Where one alias comes from
+cmd|shell alias status|@shell alias status|read|Alias counts; --tiers for the ecosystem tiers
+cmd|shell alias export|@shell alias export|read|Write the alias cheatsheet
 dom|system|status|@system|updates, cleanup, scheduled maintenance
 obj|system schedule|list|@system|scheduled maintenance jobs
 obj|system settings|show||OS settings dot manages
@@ -242,44 +242,18 @@ run|cli list --available|@cli list --available||
 run|help --manual|manual||
 run|help --readme|docs||
 run|help tour|learn||
-run|config apply --sandbox|sandbox||
+run|config apply --sandbox|@config apply --sandbox||
 run|doctor perf --profile|@doctor perf --profile||
 run|doctor perf --ready|@doctor perf --ready||
 run|doctor perf --ready --pty|@doctor perf --ready --pty||
-run|shell update --prewarm|prewarm||
+run|shell update --prewarm|@shell update --prewarm||
 run|system clean --logs|@system clean --logs||
 run|tool list --nix|@tool list --nix||
 run|tool list --packages|@tool list --packages||
 run|tool list --locked|@tool list --locked||
-leg|status|config status||
-leg|diff|config diff||
-leg|apply|config apply||
-leg|sync|config sync||
-leg|update|config update||
-leg|edit|config edit||
-leg|add|config add||
-leg|commit|config save||
-leg|init|config init||
-leg|lint|config check||
-leg|bundle|config export||
-leg|uninstall|config uninstall||
-leg|cd|config path show||
-leg|profile show|config profile show||
-leg|profile set|config profile set||
-leg|bundle restore|config import||
-leg|cache-refresh|shell update||
-leg|clean-cache|shell clean||
-leg|history|shell history list||
-leg|aliases list|shell alias list||
-leg|alias-check|shell alias check||
-leg|aliases why|shell alias show||
-leg|aliases stats|shell alias status||
-leg|aliases cheatsheet|shell alias export||
 leg|manual|help --manual||
 leg|docs|help --readme||
 leg|learn|help tour||
-leg|sandbox|config apply --sandbox||
-leg|prewarm|shell update --prewarm||
 arg|ai start|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
 flag|ai run|style|p|pattern|Steering pattern (--pattern is the old name)
 arg|ai run|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
