@@ -30,20 +30,25 @@ assert_file_exists "$bundle/LICENSE-APACHE" "the archive ships LICENSE-APACHE"
 assert_file_exists "$bundle/LICENSE-MIT" "the archive ships LICENSE-MIT"
 
 # ── AUR: package() from the PKGBUILD, as makepkg runs it ─────────────────
+# makepkg runs on Arch, with GNU install (-D); BSD install on macOS has none.
 test_start "aur_package_installs_a_working_cli"
-pkgdir="$tmp/aur"
-rc=0
-(
-  set -e
-  source "$REPO_ROOT/pkg/aur/PKGBUILD"
-  srcdir="$tmp/src"
-  package
-) >/dev/null 2>&1 || rc=$?
-assert_equals "0" "$rc" "package() succeeds on the staged archive"
-assert_file_exists "$pkgdir/usr/share/licenses/dot-cli-git/LICENSE-MIT" "the package installs its licence"
-rc=0
-entry_runs "$pkgdir/usr/bin/dot" || rc=$?
-assert_equals "0" "$rc" "dot fleet policy show runs from the AUR package"
+if install --version 2>/dev/null | grep -q GNU; then
+  pkgdir="$tmp/aur"
+  rc=0
+  (
+    set -e
+    source "$REPO_ROOT/pkg/aur/PKGBUILD"
+    srcdir="$tmp/src"
+    package
+  ) >/dev/null 2>&1 || rc=$?
+  assert_equals "0" "$rc" "package() succeeds on the staged archive"
+  assert_file_exists "$pkgdir/usr/share/licenses/dot-cli-git/LICENSE-MIT" "the package installs its licence"
+  rc=0
+  entry_runs "$pkgdir/usr/bin/dot" || rc=$?
+  assert_equals "0" "$rc" "dot fleet policy show runs from the AUR package"
+else
+  printf '  - SKIP %s: %s\n' "$CURRENT_TEST" "install is not GNU install"
+fi
 
 # ── Homebrew: the formula's install and test blocks, under a minimal ─────
 # stand-in for the Formula DSL (paths and helpers the formula uses).
