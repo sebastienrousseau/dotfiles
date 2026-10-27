@@ -2,6 +2,25 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.539 (2026-10-27)
+
+### Changed
+
+- Every domain with a built command now runs its own bundled plugin: `dot <domain> …` hands the words to `plugins/<domain>/dot-<domain>`, which runs the modules in that plugin's `libexec/` (P2.1). Theme, security, attest, secret, fleet, ai, agent, mcp, top, cli, tool, doctor, system, config and shell moved; the commands, their output and their exit codes are the same, and per-command help names the entry that runs it. Only the host's built-ins (`help`, `version`, `search`, `manual`, `docs`, `learn`, `keys`) stay in `bin/dot`.
+- The AI tool lists come from one roster, `plugins/ai/roster.toml`: `dot doctor` checked 10 agents, `dot ai doctor` 19, and the cockpit left out kimi; all now read the same list (T0).
+- `dot config check` lints the plugins' entries and modules too, and the coverage and mutation gates measure them.
+- The nightly mutation floor for the core is 90%.
+- Ten GitHub Actions in the minor and patch group are updated.
+
+### Fixed
+
+- Homebrew, AUR and Scoop installs work. The Homebrew formula installed `bin/` and `lib/` only, so every command but `dot version` exited 127; the AUR package built paths that no longer exist; the Scoop manifest pointed at a `dot.cmd` that does not exist. Each now installs the release archive's whole tree, and a test installs each recipe and runs a plugin command.
+- The release archive and `make install` carry `plugins/`, `.chezmoiroot` and the licences, and keep `defaults/dot_config/dotfiles` in place: a packaged `dot agent`, `attest show`, `fleet policy show`, `config profile show` and `mcp list` could not find their data.
+- A long pre-push hook no longer cancels `git push`: git sends SSH keepalives, so GitHub does not close the idle connection.
+- The shell-startup performance gate fails, or says it skipped, when nothing was measured; it had been passing without hyperfine installed.
+- `dot doctor restore --list` no longer exits 128 in a checkout with no commits.
+- The release install smoke and the ClusterFuzzLite image build run again.
+
 ## v0.2.538 (2026-10-24)
 
 ### Removed
