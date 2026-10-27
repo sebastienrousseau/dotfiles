@@ -94,6 +94,13 @@ for words in "theme --help" "theme toggle --help" "theme wallpaper set -h" "them
   assert_equals "" "$(grep '^ran ' "$WORK/out")" "dot $words runs nothing"
 done
 
+test_start "help_names_the_entry_that_runs_a_command"
+dot help theme wallpaper set
+assert_contains "dot-theme wallpaper set, the plugin's entry" "$(cat "$WORK/out")" "help says the entry runs it"
+dot theme set --help
+assert_contains "dot-theme set, the plugin's entry" "$(cat "$WORK/out")" "so does --help"
+assert_equals "0" "$(grep -c '@theme' "$WORK/out")" "the route's @ never shows"
+
 # A source tree whose theme plugin has lost its entry: bin/dot finds its
 # lib/ beside it and fails rather than fall back to another route.
 test_start "a_missing_entry_fails"
