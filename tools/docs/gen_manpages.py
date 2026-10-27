@@ -64,7 +64,13 @@ def flag_lines(flags: list[list[str]]) -> list[str]:
 
 def command_lines(row: list[str], flags: list[list[str]]) -> list[str]:
     key, legacy, effect, summary = row[1], row[2], row[3], row[4]
-    state = f"Runs \\fBdot {roff(legacy)}\\fR until the domain is extracted." if legacy else "Planned; not built yet."
+    if legacy.startswith("@"):
+        domain, _, words = legacy[1:].partition(" ")
+        state = f"Runs \\fBdot\\-{domain} {roff(words)}\\fR, the plugin's entry."
+    elif legacy:
+        state = f"Runs \\fBdot {roff(legacy)}\\fR until the domain is extracted."
+    else:
+        state = "Planned; not built yet."
     out = [".TP", f".B dot {roff(key)}", f"{roff(summary)}. Effect: {effect}. {state}"]
     if flags:
         out += [".RS", *flag_lines(flags), ".RE"]

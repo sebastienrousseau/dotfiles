@@ -66,9 +66,6 @@ alias-check|tools
 setup|tools
 log-rotate|tools
 lint|tools
-theme|appearance
-wallpaper|appearance
-fonts|appearance
 tune|appearance
 secrets-init|secrets
 secrets|secrets

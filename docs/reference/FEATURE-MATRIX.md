@@ -308,12 +308,12 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot theme` | sync | `test_fm_smoke_theme_sync` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — rewrites terminal configs to follow the OS appearance (system mutation) |
 | `dot theme` | family | `test_fm_smoke_theme_family` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — cycles the theme family and applies it (system mutation) |
 | `dot theme` | rebuild | `test_fm_smoke_theme_rebuild` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — regenerates every theme from wallpapers (minutes of image processing) |
-| `dot wallpaper` | (default = sync) | `test_fm_smoke_wallpaper` | `help:wallpaper` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — sets the desktop wallpaper through osascript / feh (system mutation) |
-| `dot wallpaper` | sync | `test_fm_smoke_wallpaper_sync` | `help:wallpaper` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — sets the desktop wallpaper (system mutation) |
-| `dot wallpaper` | rotate (--interval, --once, --light, --dark) | `test_fm_smoke_wallpaper_rotate` | `help:wallpaper` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — sets the desktop wallpaper (system mutation) |
-| `dot fonts` | (default = install) | `test_fm_smoke_fonts` | `help:fonts` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — downloads and installs Nerd Fonts into the user font directory (network) |
-| `dot fonts` | install [font] | `test_fm_smoke_fonts_install` | `help:fonts` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — downloads and installs Nerd Fonts (network) |
-| `dot fonts` | patch <font-file> [output-dir] | `test_fm_fonts_patch_usage` | `help:fonts` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | regression |
+| `dot wallpaper` | (default = sync) | `test_fm_smoke_wallpaper` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — sets the desktop wallpaper through osascript / feh (system mutation) |
+| `dot wallpaper` | sync | `test_fm_smoke_wallpaper_sync` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — sets the desktop wallpaper (system mutation) |
+| `dot wallpaper` | rotate (--interval, --once, --light, --dark) | `test_fm_smoke_wallpaper_rotate` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — sets the desktop wallpaper (system mutation) |
+| `dot fonts` | (default = install) | `test_fm_smoke_fonts` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — downloads and installs Nerd Fonts into the user font directory (network) |
+| `dot fonts` | install [font] | `test_fm_smoke_fonts_install` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — downloads and installs Nerd Fonts (network) |
+| `dot fonts` | patch <font-file> [output-dir] | `test_fm_fonts_patch_usage` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | regression |
 | `dot tune` | (default) | `test_fm_smoke_tune` | `help:tune` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — writes OS defaults / sysctl values (system mutation, sudo) |
 
 ## secrets.sh

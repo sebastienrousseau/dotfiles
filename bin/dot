@@ -356,9 +356,32 @@ _dispatch_args() {
   exit 1
 }
 
-# `|| true` is intentional: an unknown command yields an empty route, which falls
-# through the case below into the user-command path that emits the proper error.
-route="$(_dot_command_route "$COMMAND" || true)"
+# _dispatch_entry ARGS...: a bundled plugin with an entry runs its own
+# commands (ADR-020 N2): plugins/<domain>/dot-<domain> gets the words after
+# the domain.
+_dispatch_entry() {
+  local entry="${_SOURCE_DIR}/plugins/${COMMAND}/dot-${COMMAND}"
+  if [[ -x "$entry" ]]; then
+    exec "$entry" "$@"
+  fi
+  ui_fail "dot-${COMMAND} not found ($entry)" >&2
+  exit 1
+}
+
+# _dot_set_route ARGS...: the resolver names a plugin entry as @<domain>; it
+# runs now, or shows the domain's help when asked (see below). Anything else
+# sets `route`. `|| true` is intentional: an unknown command yields an empty
+# route, which falls through the case below into the user-command path that
+# emits the proper error.
+_dot_set_route() {
+  if [[ "$COMMAND" != @* ]]; then
+    route="$(_dot_command_route "$COMMAND" || true)"
+    return 0
+  fi
+  COMMAND="${COMMAND#@}"
+  ! _has_help_flag "$@" || exec bash "$_SOURCE_DIR/bin/dot" help "$COMMAND"
+  _dispatch_entry "$@"
+}
 
 # ═════════════════════════════════════════════════════════════════
 # Universal --help / -h intercept — MUST run before any dispatch.
@@ -394,6 +417,7 @@ _has_help_flag() {
   return 1
 }
 
+_dot_set_route "$@"
 if [[ -n "$route" ]] && [[ "$route" != "help" ]] && [[ "$route" != "search" ]] &&
   _has_help_flag "$@"; then
   exec bash "$_SOURCE_DIR/bin/dot" help "$COMMAND"

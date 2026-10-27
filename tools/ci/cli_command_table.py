@@ -16,6 +16,10 @@ the dispatcher resolves ADR-020 spellings without parsing TOML:
   arg|<spelling>|<words, space-separated>|<files or ai-patterns>|
   alias|<name>|<shortcut, deprecated or removed>|<target>|<until or empty>
 
+A plugin with an `[entry]` runs its own commands: its routes are `@<domain>`
+followed by the spelling, and bin/dot hands the words after the domain to
+plugins/<domain>/dot-<domain>. Its commands marked `planned` are not built.
+
 `cmd` records with an empty legacy are declared but not built yet. `run`
 records come from old-name aliases whose target says more than a declared
 spelling or one of its declared values (`dot tool list --nix` runs `tools`,
@@ -54,11 +58,19 @@ def spelling(domain: str, command: dict) -> str:
     return " ".join(w for w in (domain, command.get("object"), command["verb"]) if w)
 
 
+def route(domain: str, manifest: dict, command: dict) -> str:
+    """What runs a command: its plugin's entry, a legacy route, or nothing yet."""
+    if "entry" in manifest:
+        return "" if command.get("planned") else f"@{spelling(domain, command)}"
+    return command.get("legacy", "")
+
+
 def domain_records(domain: str, manifest: dict) -> list[str]:
-    rows = [f"dom|{domain}|{manifest['default']}|{manifest.get('legacy', '')}|{manifest['summary']}"]
+    bare = f"@{domain}" if "entry" in manifest else manifest.get("legacy", "")
+    rows = [f"dom|{domain}|{manifest['default']}|{bare}|{manifest['summary']}"]
     rows += [f"obj|{domain} {o['name']}|{o['default']}||{o['summary']}" for o in manifest.get("objects", [])]
     for command in manifest["commands"]:
-        rows.append(f"cmd|{spelling(domain, command)}|{command.get('legacy', '')}|"
+        rows.append(f"cmd|{spelling(domain, command)}|{route(domain, manifest, command)}|"
                     f"{command['effect']}|{command['summary']}")
     return rows
 
@@ -113,7 +125,7 @@ def legacy_records(rows: list[str]) -> list[str]:
     seen, out = set(), []
     for row in rows:
         kind, key, legacy = row.split("|")[:3]
-        if kind in ("cmd", "run") and legacy and legacy not in seen:
+        if kind in ("cmd", "run") and legacy and not legacy.startswith("@") and legacy not in seen:
             seen.add(legacy)
             out.append(f"leg|{legacy}|{key}||")
     return out
@@ -135,9 +147,9 @@ def group_records(family: dict) -> list[str]:
     return [f"grp|{g['id']}|{g['title']}|{' '.join(members.get(g['id'], []))}|" for g in family["groups"]]
 
 
-def catalog_command(domain: str, command: dict) -> dict:
+def catalog_command(domain: str, manifest: dict, command: dict) -> dict:
     entry = {"spelling": spelling(domain, command), "effect": command["effect"],
-             "summary": command["summary"], "built": "legacy" in command}
+             "summary": command["summary"], "built": bool(route(domain, manifest, command))}
     for key in ("flags", "args", "output"):
         if key in command:
             entry[key] = command[key]
@@ -150,7 +162,7 @@ def build_catalog(manifests: dict, family: dict) -> str:
     groups = {d["name"]: d["group"] for d in family["domains"]}
     domains = [{"name": name, "group": groups.get(name, ""), "summary": m["summary"], "default": m["default"],
                 "objects": [{k: o[k] for k in ("name", "summary", "default")} for o in m.get("objects", [])],
-                "commands": [catalog_command(name, c) for c in m["commands"]],
+                "commands": [catalog_command(name, m, c) for c in m["commands"]],
                 "aliases": m.get("aliases", [])}
                for name, m in sorted(manifests.items())]
     doc = {"schema": "cli/catalog.v1", "builtins": family.get("builtins", []),

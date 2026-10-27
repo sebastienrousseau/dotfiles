@@ -27,7 +27,6 @@ registry|Browse and manage reusable dotfile modules.|dot registry list\ndot regi
 env|Show managed tool versions and runtime state.|dot env
 profile|Show or switch the active configuration profile.|dot profile
 secrets|Manage encrypted secrets and environment loading.|dot secrets edit\ndot secrets list\ndot secrets load ai
-theme|Switch the terminal theme.|dot theme light\ndot theme dark
 learn|Open the guided tour of the toolchain.|dot learn
 search|Find commands by keyword across the public surface.|dot search ai
 help|Show the overview or a focused command reference.|dot help\ndot help doctor\ndot help all
@@ -70,8 +69,6 @@ tools|Show or install the managed Nix package set.|dot tools\ndot tools install
 new|Scaffold a new project from a managed template.|dot new\ndot new --template rust-cli my-project
 packages|List installed packages across every package manager on this host.|dot packages\ndot packages --json
 aliases|Inspect or audit shell aliases shipped by the dotfiles.|dot aliases\ndot aliases --check
-wallpaper|Apply a wallpaper from your Pictures/Wallpapers/ library.|dot wallpaper\ndot wallpaper sync\ndot wallpaper rotate
-fonts|Install or patch Nerd Fonts (JetBrainsMono by default) for terminal glyphs.|dot fonts\ndot fonts install Hack\ndot fonts patch ~/Library/Fonts/MyFont.otf
 tune|Apply opt-in OS tuning (macOS / Linux desktop polish).|dot tune\ndot tune --dry-run
 secrets-init|Initialize the age key used for encrypted secrets.|dot secrets-init\ndot secrets-init --recipient ~/.config/sops/age/keys.txt
 secrets-create|Create a new encrypted secrets file.|dot secrets-create ai\ndot secrets-create work --recipient alice@example.com
