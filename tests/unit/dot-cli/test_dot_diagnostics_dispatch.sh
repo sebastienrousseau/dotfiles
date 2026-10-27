@@ -16,6 +16,9 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 DIAG="$REPO_ROOT/scripts/dot/commands/diagnostics.sh"
+# The doctor commands moved to the doctor plugin's doctor.sh (P2.1).
+DOCTOR="$REPO_ROOT/plugins/doctor/libexec/doctor.sh"
+DOCTOR_SUBS="doctor heal health health-check scorecard score perf conflicts snapshot rollback drift benchmark restore load-bench load-bench-pty metrics"
 REAL_BASH="$(command -v bash)"
 
 trap cov_teardown_sandbox EXIT
@@ -50,10 +53,13 @@ exit 0
 STUB
 chmod +x "$BIN/bash" "$BIN/dot-load-benchmark" "$BIN/dot-load-benchmark-pty" "$BIN/chezmoi"
 
-# diag <args…> — run the dispatcher via the real bash, capture stdout+status.
+# diag <args…> — run the module that owns the subcommand (doctor.sh or
+# diagnostics.sh) via the real bash, capture stdout+status.
 diag() {
+  local module="$DIAG"
+  [[ " $DOCTOR_SUBS " != *" ${1:-} "* ]] || module="$DOCTOR"
   : >"$DISPATCH_LOG"
-  "$REAL_BASH" "$DIAG" "$@" >"$OUTF" </dev/null
+  "$REAL_BASH" "$module" "$@" >"$OUTF" </dev/null
   RC=$?
   return 0
 }
@@ -69,7 +75,7 @@ test_start "help_lists_the_commands"
 diag --help
 assert_equals 0 "$RC" "rc"
 out_has "Usage: diagnostics.sh" "usage"
-out_has "doctor, heal, health" "command list"
+out_has "history, verify, chaos, bundle, smoke-test" "command list"
 
 test_start "no_command_prints_usage_and_fails"
 diag
@@ -82,9 +88,9 @@ assert_equals 1 "$RC" "rc"
 
 # These moved to the security, attest, secret, fleet, top and tool plugins (P2.1).
 test_start "moved_commands_are_not_diagnostics_commands"
-for sub in security-score attest attestation teleport secret-audit intelligence locks; do
-  diag "$sub"
-  assert_equals 1 "$RC" "$sub is not a diagnostics command"
+for sub in security-score attest attestation teleport secret-audit intelligence locks $DOCTOR_SUBS; do
+  "$REAL_BASH" "$DIAG" "$sub" >/dev/null 2>&1 </dev/null && rc=0 || rc=$?
+  assert_equals 1 "$rc" "$sub is not a diagnostics command"
 done
 
 test_start "doctor_prefers_the_unified_doctor"
@@ -119,7 +125,7 @@ run_script_case rollback scripts/ops/rollback.sh
 run_script_case history scripts/diagnostics/history-analysis.sh
 run_script_case benchmark scripts/diagnostics/benchmark.sh
 run_script_case verify scripts/diagnostics/verify.sh
-run_script_case restore scripts/dot/commands/restore.sh
+run_script_case restore plugins/doctor/libexec/restore.sh
 run_script_case chaos scripts/ops/chaos.sh
 run_script_case bundle scripts/ops/bundle.sh
 run_script_case smoke-test scripts/diagnostics/smoke-test.sh

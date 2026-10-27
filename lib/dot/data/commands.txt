@@ -96,7 +96,7 @@ cmd|config path show|cd|read|Print the source directory
 cmd|config profile show|profile show|read|Show the active profile
 cmd|config profile set|profile set|write|Switch profile
 cmd|config import|bundle restore|write|Restore from an exported bundle
-dom|doctor|status|doctor|health, repair, backup and rollback
+dom|doctor|status|@doctor|health, repair, backup and rollback
 obj|doctor score|show||the setup score
 obj|doctor snapshot|list||setup snapshots
 obj|doctor perf|show||startup performance
@@ -104,20 +104,20 @@ obj|doctor drift|show||drift from the source
 obj|doctor conflict|list||conflicting files
 obj|doctor metric|list||recorded metrics
 obj|doctor report|show||the weekly posture report
-cmd|doctor status|health|read|Health summary
-cmd|doctor check|doctor|read|Run every health check
-cmd|doctor fix|heal|write|Repair what check found
-cmd|doctor backup|backup|write|Back up the setup
-cmd|doctor restore|restore|write|Restore from a backup
-cmd|doctor rollback|rollback|write|Return to a previous generation
-cmd|doctor score show|scorecard|read|The setup score
+cmd|doctor status|@doctor status|read|Health summary
+cmd|doctor check|@doctor check|read|Run every health check
+cmd|doctor fix|@doctor fix|write|Repair what check found
+cmd|doctor backup|@doctor backup|write|Back up the setup
+cmd|doctor restore|@doctor restore|write|Restore from a backup
+cmd|doctor rollback|@doctor rollback|write|Return to a previous generation
+cmd|doctor score show|@doctor score show|read|The setup score
 cmd|doctor snapshot list||read|Snapshots
-cmd|doctor snapshot new|snapshot|write|Take a snapshot
-cmd|doctor perf show|perf|read|Startup timings
-cmd|doctor perf measure|benchmark|read|Benchmark startup
-cmd|doctor drift show|drift|read|Drift from the source
-cmd|doctor conflict list|conflicts|read|Conflicting files
-cmd|doctor metric list|metrics|read|Recorded metrics
+cmd|doctor snapshot new|@doctor snapshot new|write|Take a snapshot
+cmd|doctor perf show|@doctor perf show|read|Startup timings
+cmd|doctor perf measure|@doctor perf measure|read|Benchmark startup
+cmd|doctor drift show|@doctor drift show|read|Drift from the source
+cmd|doctor conflict list|@doctor conflict list|read|Conflicting files
+cmd|doctor metric list|@doctor metric list|read|Recorded metrics
 cmd|doctor report show||read|Weekly posture report
 dom|fleet|status|@fleet|many hosts
 obj|fleet drift|show|@fleet|drift across hosts
@@ -198,18 +198,18 @@ cmd|shell alias check|alias-check|read|Find shadowed or broken aliases
 cmd|shell alias show|aliases why|read|Where one alias comes from
 cmd|shell alias status|aliases stats|read|Alias counts; --tiers for the ecosystem tiers
 cmd|shell alias export|aliases cheatsheet|read|Write the alias cheatsheet
-dom|system|status||updates, cleanup, scheduled maintenance
-obj|system schedule|list||scheduled maintenance jobs
+dom|system|status|@system|updates, cleanup, scheduled maintenance
+obj|system schedule|list|@system|scheduled maintenance jobs
 obj|system settings|show||OS settings dot manages
-cmd|system status|system status|read|OS, disk, schedule and last run
-cmd|system update|upgrade|write|Update everything, asking first
+cmd|system status|@system status|read|OS, disk, schedule and last run
+cmd|system update|@system update|write|Update everything, asking first
 cmd|system clean||write|Reclaim space, asking first
 cmd|system show||read|Hardware and host details
-cmd|system schedule list|system schedule list|read|Scheduled jobs
-cmd|system schedule set|system schedule set|write|Set the maintenance schedule
-cmd|system schedule run|system schedule run|write|Run scheduled maintenance now
+cmd|system schedule list|@system schedule list|read|Scheduled jobs
+cmd|system schedule set|@system schedule set|write|Set the maintenance schedule
+cmd|system schedule run|@system schedule run|write|Run scheduled maintenance now
 cmd|system settings show||read|Current OS settings
-cmd|system settings apply|tune|write|Apply the managed OS settings
+cmd|system settings apply|@system settings apply|write|Apply the managed OS settings
 dom|theme|show|@theme|one palette for every app
 obj|theme wallpaper|show||the current wallpaper
 obj|theme font|list||installed fonts
@@ -243,11 +243,11 @@ run|help --manual|manual||
 run|help --readme|docs||
 run|help tour|learn||
 run|config apply --sandbox|sandbox||
-run|doctor perf --profile|benchmark||
-run|doctor perf --ready|load-bench||
-run|doctor perf --ready --pty|load-bench-pty||
+run|doctor perf --profile|@doctor perf --profile||
+run|doctor perf --ready|@doctor perf --ready||
+run|doctor perf --ready --pty|@doctor perf --ready --pty||
 run|shell update --prewarm|prewarm||
-run|system clean --logs|log-rotate||
+run|system clean --logs|@system clean --logs||
 run|tool list --nix|@tool list --nix||
 run|tool list --packages|@tool list --packages||
 run|tool list --locked|@tool list --locked||
@@ -267,19 +267,6 @@ leg|cd|config path show||
 leg|profile show|config profile show||
 leg|profile set|config profile set||
 leg|bundle restore|config import||
-leg|health|doctor status||
-leg|doctor|doctor check||
-leg|heal|doctor fix||
-leg|backup|doctor backup||
-leg|restore|doctor restore||
-leg|rollback|doctor rollback||
-leg|scorecard|doctor score show||
-leg|snapshot|doctor snapshot new||
-leg|perf|doctor perf show||
-leg|benchmark|doctor perf measure||
-leg|drift|doctor drift show||
-leg|conflicts|doctor conflict list||
-leg|metrics|doctor metric list||
 leg|cache-refresh|shell update||
 leg|clean-cache|shell clean||
 leg|history|shell history list||
@@ -288,20 +275,11 @@ leg|alias-check|shell alias check||
 leg|aliases why|shell alias show||
 leg|aliases stats|shell alias status||
 leg|aliases cheatsheet|shell alias export||
-leg|system status|system status||
-leg|upgrade|system update||
-leg|system schedule list|system schedule list||
-leg|system schedule set|system schedule set||
-leg|system schedule run|system schedule run||
-leg|tune|system settings apply||
 leg|manual|help --manual||
 leg|docs|help --readme||
 leg|learn|help tour||
 leg|sandbox|config apply --sandbox||
-leg|load-bench|doctor perf --ready||
-leg|load-bench-pty|doctor perf --ready --pty||
 leg|prewarm|shell update --prewarm||
-leg|log-rotate|system clean --logs||
 arg|ai start|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
 flag|ai run|style|p|pattern|Steering pattern (--pattern is the old name)
 arg|ai run|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||

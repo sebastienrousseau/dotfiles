@@ -6,7 +6,7 @@
 #
 # Backup, encryption checks and the opt-in firewall/telemetry/DNS controls.
 #
-# Backing module: scripts/dot/commands/security.sh
+# Backing module: plugins/doctor/libexec/doctor.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: every command below is read-only or a help

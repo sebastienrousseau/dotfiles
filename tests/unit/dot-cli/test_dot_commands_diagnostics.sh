@@ -14,6 +14,8 @@ source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 DIAG_FILE="$REPO_ROOT/scripts/dot/commands/diagnostics.sh"
 # The security score moved to the security plugin's entry (P2.1).
 SECURITY_ENTRY="$REPO_ROOT/plugins/security/dot-security"
+# doctor, health, heal and drift moved to the doctor plugin (P2.1).
+DOCTOR_FILE="$REPO_ROOT/plugins/doctor/libexec/doctor.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
@@ -34,7 +36,7 @@ fi
 
 # Test: defines doctor command
 test_start "diagnostics_defines_doctor"
-if grep -q "cmd_doctor\|dot_doctor\|_doctor" "$DIAG_FILE" 2>/dev/null; then
+if grep -q "cmd_doctor\|dot_doctor\|_doctor" "$DOCTOR_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines doctor command"
 else
@@ -44,7 +46,7 @@ fi
 
 # Test: defines health command
 test_start "diagnostics_defines_health"
-if grep -q "cmd_health\|dot_health\|_health" "$DIAG_FILE" 2>/dev/null; then
+if grep -q "cmd_health\|dot_health\|_health" "$DOCTOR_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines health command"
 else
@@ -54,7 +56,7 @@ fi
 
 # Test: defines heal command
 test_start "diagnostics_defines_heal"
-if grep -q "cmd_heal\|dot_heal\|_heal" "$DIAG_FILE" 2>/dev/null; then
+if grep -q "cmd_heal\|dot_heal\|_heal" "$DOCTOR_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines heal command"
 else
@@ -64,7 +66,7 @@ fi
 
 # Test: defines drift command
 test_start "diagnostics_defines_drift"
-if grep -q "cmd_drift\|dot_drift\|_drift" "$DIAG_FILE" 2>/dev/null; then
+if grep -q "cmd_drift\|dot_drift\|_drift" "$DOCTOR_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines drift command"
 else

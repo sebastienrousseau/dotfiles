@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# dot-system: the entry of the system plugin (ADR-020 N2). bin/dot runs it
+# with the words after `dot system`. Its declared spellings become the
+# subcommands of libexec/system.sh; any other word, or none, goes to it as it
+# always has (alone, it shows the status).
+
+set -euo pipefail
+
+_SYSTEM_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# system_module SUBCOMMAND... — run the system module.
+system_module() {
+  exec bash "$_SYSTEM_DIR/libexec/system.sh" "$@"
+}
+
+case "${1:-} ${2:-}" in
+  "clean --logs") system_module log-rotate "${@:3}" ;;
+  "settings apply") system_module tune "${@:3}" ;;
+esac
+[[ "${1:-}" != update ]] || system_module upgrade "${@:2}"
+system_module "$@"

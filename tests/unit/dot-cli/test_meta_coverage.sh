@@ -36,6 +36,11 @@ unset NVIM_APPNAME DOTFILES_FONTS MCP_REGISTRY_CONFIG DOT_MCP_DOT_BIN
 meta_run() {
   DOT_FIXTURE_PATH="$STUBS:$BASEBIN" dot_fixture_run "$FX" meta "$@"
 }
+# system_run <args…> — the system module, which took upgrade from meta.sh
+# (P2.1); `meta.sh upgrade` ran the same function.
+system_run() {
+  DOT_FIXTURE_PATH="$STUBS:$BASEBIN" dot_fixture_run "$FX" system "$@"
+}
 # mcp_run <args…> — the mcp module, which left meta.sh for the mcp plugin's
 # libexec/ (P2.1); `meta.sh mcp <args…>` ran the same function.
 mcp_run() {
@@ -67,20 +72,20 @@ exit 0'
 
 test_start "upgrade_refuses_detached_checkout"
 touch "$WORK/detached"
-meta_run upgrade
+system_run upgrade
 rm -f "$WORK/detached"
 assert_equals "1" "$DOT_FIXTURE_RC" "detached head fails the phase"
 assert_contains "checkout is detached" "$DOT_FIXTURE_OUT" "detached explained"
 
 test_start "upgrade_refuses_branch_without_upstream"
 touch "$WORK/noupstream"
-meta_run upgrade
+system_run upgrade
 rm -f "$WORK/noupstream"
 assert_contains "has no upstream" "$DOT_FIXTURE_OUT" "missing upstream explained"
 
 test_start "upgrade_skips_dirty_checkout"
 touch "$WORK/dirty"
-meta_run upgrade
+system_run upgrade
 rm -f "$WORK/dirty"
 assert_equals "0" "$DOT_FIXTURE_RC" "a dirty tree is a skip, not a failed run"
 assert_contains "uncommitted changes" "$DOT_FIXTURE_OUT" "dirty tree explained"
@@ -88,7 +93,7 @@ assert_false '[[ "$DOT_FIXTURE_OUT" == *"updated ok"* ]]' "update not invoked"
 
 test_start "upgrade_overwrite_prompt_hint"
 touch "$WORK/prompt"
-meta_run upgrade
+system_run upgrade
 rm -f "$WORK/prompt"
 assert_contains "a managed file was edited locally" "$DOT_FIXTURE_OUT" "hint shown"
 
@@ -99,7 +104,7 @@ mkdir -p "$FX/nix" "$XDG_CONFIG_HOME/nvim"
 dot_fixture_stub "$STUBS" nix 0
 dot_fixture_stub "$STUBS" nix-collect-garbage 0
 dot_fixture_stub "$STUBS" nvim 0
-meta_run upgrade
+system_run upgrade
 rm -rf "$FX/nix" "$STUBS/nix" "$STUBS/nix-collect-garbage" "$STUBS/nvim"
 assert_equals "0" "$DOT_FIXTURE_RC" "clean upgrade exits 0"
 assert_contains "Nix flake" "$DOT_FIXTURE_OUT" "nix flake phase ran"

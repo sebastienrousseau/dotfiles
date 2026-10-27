@@ -22,12 +22,12 @@ It is enforced by `bash ./scripts/qa/traceability-coverage.sh`.
 | BT-10 | Repository executable-surface coverage gate | `tests/framework/module_coverage.sh` | `tests/unit/tools/test_public_entrypoints.sh`, `tests/unit/misc/test_module_coverage_behaviour.sh` | `docs/operations/TESTING.md`, `docs/security/VERIFICATION_VALIDATION.md`, `docs/reference/SCRIPTS.md` |
 | BT-11 | Core apply, diff, status, edit, and commit workflows | `scripts/dot/commands/core.sh` | `tests/unit/dot-cli/test_dot_commands_core.sh`, `tests/unit/dot-cli/test_dot_cli.sh` | `docs/reference/UTILS.md` |
 | BT-12 | Alias discovery, search, and governance workflows | `scripts/dot/commands/aliases.sh` | `tests/unit/dot-cli/test_dot_commands_aliases.sh` | `docs/reference/ALIASES.md`, `docs/reference/UTILS.md` |
-| BT-13 | Appearance and theme command workflows | `scripts/dot/commands/appearance.sh` | `tests/unit/dot-cli/test_dot_commands_appearance.sh` | `docs/guides/THEMING.md`, `docs/reference/UTILS.md` |
+| BT-13 | Appearance and theme command workflows | `plugins/system/libexec/system.sh` | `tests/unit/dot-cli/test_dot_commands_appearance.sh` | `docs/guides/THEMING.md`, `docs/reference/UTILS.md` |
 | BT-14 | Diagnostics command workflows | `scripts/dot/commands/diagnostics.sh` | `tests/unit/dot-cli/test_dot_commands_diagnostics.sh` | `docs/operations/RELIABILITY.md`, `docs/reference/UTILS.md` |
 | BT-15 | Lint command workflow | `scripts/dot/commands/lint.sh` | `tests/unit/dot-cli/test_dot_commands_lint.sh`, `tests/unit/dot-cli/test_lint.sh` | `docs/operations/TESTING.md`, `docs/reference/UTILS.md` |
 | BT-16 | AI steering pattern workflows | `plugins/ai/libexec/patterns.sh` | `tests/unit/dot-cli/test_dot_commands_patterns.sh` | `docs/AI.md` |
-| BT-17 | Restore and rollback workflows | `scripts/dot/commands/restore.sh` | `tests/unit/dot-cli/test_dot_commands_restore.sh` | `docs/reference/UTILS.md` |
-| BT-18 | Security command workflows | `scripts/dot/commands/security.sh` | `tests/unit/dot-cli/test_dot_commands_security.sh` | `docs/reference/UTILS.md`, `docs/security/COMPLIANCE.md` |
+| BT-17 | Restore and rollback workflows | `plugins/doctor/libexec/restore.sh` | `tests/unit/dot-cli/test_dot_commands_restore.sh` | `docs/reference/UTILS.md` |
+| BT-18 | Security command workflows | `plugins/doctor/libexec/doctor.sh` | `tests/unit/dot-cli/test_dot_commands_security.sh` | `docs/reference/UTILS.md`, `docs/security/COMPLIANCE.md` |
 | BT-19 | Tool catalog and sandbox workflows | `scripts/dot/commands/tools.sh` | `tests/unit/dot-cli/test_dot_commands_tools.sh` | `docs/reference/TOOLS.md`, `docs/reference/UTILS.md` |
 | BT-20 | Example validation contract | `scripts/qa/validate-examples.sh` | `tests/unit/misc/test_qa_reliability.sh` | `docs/operations/RELIABILITY.md` |
 | BT-21 | WSL parity contract | `scripts/qa/wsl-contract.sh` | `tests/unit/misc/test_qa_reliability.sh` | `docs/operations/RELIABILITY.md`, `docs/reference/SUPPORT_MATRIX.md` |
@@ -42,4 +42,4 @@ It is enforced by `bash ./scripts/qa/traceability-coverage.sh`.
 | BT-30 | Shell completion generator (`dot completion <shell>`) | `plugins/cli/libexec/completion.sh` | `tests/unit/dot-cli/test_dot_completion.sh` | `docs/reference/UTILS.md` |
 | BT-31 | Examples coverage contract (feature/command → example) | `scripts/qa/examples-coverage.sh` | `tests/unit/misc/test_qa_examples_coverage.sh` | `docs/reference/UTILS.md` |
 | BT-32 | Feature matrix drift gate (command → test, benchmark, example) | `scripts/qa/check-feature-matrix.sh` | `tests/unit/misc/test_qa_check_feature_matrix.sh` | `docs/reference/FEATURE-MATRIX.md`, `docs/operations/TESTING.md` |
-| BT-33 | One update path and scheduled maintenance | `lib/dot/upgrade.sh`, `lib/dot/system.sh`, `scripts/dot/commands/system.sh` | `tests/unit/dot-cli/test_upgrade_globals.sh`, `tests/unit/dot-cli/test_system_schedule.sh`, `tests/integration/test_system_schedule_live.sh` | `docs/operations/MAINTENANCE.md` |
+| BT-33 | One update path and scheduled maintenance | `lib/dot/upgrade.sh`, `lib/dot/system.sh`, `plugins/system/libexec/system.sh` | `tests/unit/dot-cli/test_upgrade_globals.sh`, `tests/unit/dot-cli/test_system_schedule.sh`, `tests/integration/test_system_schedule_live.sh` | `docs/operations/MAINTENANCE.md` |

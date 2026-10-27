@@ -143,33 +143,33 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot heal` | --dry-run / -n | `test_fm_heal_dry_run` | `run:heal-dry-run` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot health` | (default) | `test_fm_health` | `run:health` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot health` | --json / -j | `test_fm_health_json` | `run:health-json` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
-| `dot health` | --verbose / -v | `test_fm_health_verbose` | `help:health` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
-| `dot health-check` | alias of health | `test_fm_health_check_alias` | `help:health-check` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
-| `dot health` | --fix / -f, --force / -F | `test_fm_smoke_health_fix` | `help:health` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | **smoke** — --fix re-applies chezmoi and rewrites shell configs in $HOME |
+| `dot health` | --verbose / -v | `test_fm_health_verbose` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
+| `dot health-check` | alias of health | `test_fm_health_check_alias` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
+| `dot health` | --fix / -f, --force / -F | `test_fm_smoke_health_fix` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | **smoke** — --fix re-applies chezmoi and rewrites shell configs in $HOME |
 | `dot security-score` | (default) | `test_fm_security_score` | `run:security-score` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot security-score` | --json / -j | `test_fm_security_score_json` | `run:security-score-json` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot security-score` | --quiet / -q, --verbose / -v | `test_fm_security_score_quiet` | `help:security` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot score` | (default) | `test_fm_score` | `run:score` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot score` | --json / -j | `test_fm_score_json` | `run:score-json` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot scorecard` | alias of score | `test_fm_scorecard` | `help:scorecard` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
+| `dot scorecard` | alias of score | `test_fm_scorecard` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot perf` | --json / -j, --runs / -r | `test_fm_perf_json` | `run:perf` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot perf` | --profile / -p, --target / -t, --shell / -s, --by-tool, --reset, --baseline, --no-baseline-check | `test_fm_perf_profile` | `help:perf` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot perf` | --profile / -p, --target / -t, --shell / -s, --by-tool, --reset, --baseline, --no-baseline-check | `test_fm_perf_profile` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot conflicts` | (default) | `test_fm_conflicts` | `run:conflicts` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot locks` | (default) | `test_fm_locks` | `run:locks` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot snapshot` | (default) | `test_fm_snapshot` | `run:snapshot` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
-| `dot snapshot` | --baseline / -b, --force / -f | `test_fm_snapshot_baseline` | `help:snapshot` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
-| `dot snapshot` | XDG_STATE_HOME controls where snapshots/attestations are written | `test_fm_env_xdg_state_home` | `help:snapshot` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/03-environment.md` | regression |
+| `dot snapshot` | --baseline / -b, --force / -f | `test_fm_snapshot_baseline` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
+| `dot snapshot` | XDG_STATE_HOME controls where snapshots/attestations are written | `test_fm_env_xdg_state_home` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 | `dot attest` | (default) | `test_fm_attest` | `run:attest` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot attest` | --json / -j | `test_fm_attest_json` | `run:attest-json` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot attest` | --write / -w | `test_fm_attest_write` | `help:attest` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot attest` | --fleet-store / -F <dir>, --fleet-id / -I <id> | `test_fm_attest_fleet_store` | `help:attest` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot attestation` | alias of attest | `test_fm_attestation` | `help:attest` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot rollback` | status | `test_fm_rollback_status` | `run:rollback-status` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot rollback` | backup | `test_fm_rollback_backup` | `help:rollback` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot rollback` | clean | `test_fm_rollback_clean` | `help:rollback` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot rollback` | <unknown> (usage, exit 1) | `test_fm_rollback_unknown` | `help:rollback` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot rollback` | rollback / rollback-to N / restore FILE (--force, flags before or after the argument) | `test_fm_rollback_restore_paths` | `help:rollback` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot rollback` | git-reset --force stashes all changes (untracked too) and keeps the old HEAD on rollback-backup/* | `test_fm_rollback_git_reset_keeps_work` | `help:rollback` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot rollback` | backup | `test_fm_rollback_backup` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot rollback` | clean | `test_fm_rollback_clean` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot rollback` | <unknown> (usage, exit 1) | `test_fm_rollback_unknown` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot rollback` | rollback / rollback-to N / restore FILE (--force, flags before or after the argument) | `test_fm_rollback_restore_paths` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot rollback` | git-reset --force stashes all changes (untracked too) and keeps the old HEAD on rollback-backup/* | `test_fm_rollback_git_reset_keeps_work` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot drift` | (default) | `test_fm_drift` | `run:drift` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot drift` | --json / -j, --diff / -d | `test_fm_drift_json` | `run:drift-json` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot history` | (default, reads $HISTFILE) | `test_fm_history` | `run:history` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
@@ -177,13 +177,13 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot history` | HISTFILE selects the shell history analysed | `test_fm_env_histfile` | `help:history` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 | `dot benchmark` | (default, --detailed, --profile, --compare, --waterfall) | `test_fm_benchmark` | `run:benchmark` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot restore` | --list / -l | `test_fm_restore_list` | `run:restore-list` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
-| `dot restore` | --git / -g <ref> with --dry-run / -n | `test_fm_restore_git_dry_run` | `help:restore` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
-| `dot restore` | --diff / -d <ref> | `test_fm_restore_diff` | `help:restore` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
-| `dot restore` | --latest / -L | `test_fm_restore_latest` | `help:restore` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
+| `dot restore` | --git / -g <ref> with --dry-run / -n | `test_fm_restore_git_dry_run` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
+| `dot restore` | --diff / -d <ref> | `test_fm_restore_diff` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
+| `dot restore` | --latest / -L | `test_fm_restore_latest` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot restore` | (no option prints usage), --help / -h, unknown option (exit 1) | `test_fm_restore_usage` | `run:restore-usage` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
-| `dot restore` | DOTFILES_DIR selects the git checkout restore reads | `test_fm_env_dotfiles_dir` | `help:restore` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/03-environment.md` | regression |
+| `dot restore` | DOTFILES_DIR selects the git checkout restore reads | `test_fm_env_dotfiles_dir` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 | `dot load-bench` | (default, runs count) | `test_fm_load_bench` | `run:load-bench` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot load-bench-pty` | (default) | `test_fm_smoke_load_bench_pty` | `help:load-bench-pty` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | **smoke** — needs the chezmoi-rendered dot-load-benchmark-pty template and a pseudo-terminal |
+| `dot load-bench-pty` | (default) | `test_fm_smoke_load_bench_pty` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | **smoke** — needs the chezmoi-rendered dot-load-benchmark-pty template and a pseudo-terminal |
 | `dot chaos` | (refuses without --force) | `test_fm_chaos` | `run:chaos` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot chaos` | --force (deletes its three targets, plants a broken symlink, spares the rest) | `test_fm_chaos_force` | `help:chaos` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot teleport` | user@host | `test_fm_smoke_teleport` | `help:fleet` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | **smoke** — opens an SSH session to a remote host (network) |
@@ -191,7 +191,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot bundle` | [output-dir] | `test_fm_smoke_bundle` | `help:bundle` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — archives ~/.dotfiles plus tool caches with zstd (hundreds of MB, minutes) |
 | `dot secret-audit` | (default) | `test_fm_secret_audit` | `run:secret-audit` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot metrics` | [count] | `test_fm_metrics` | `run:metrics` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot metrics` | (no metrics recorded yet) | `test_fm_metrics_empty` | `help:metrics` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot metrics` | (no metrics recorded yet) | `test_fm_metrics_empty` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot smoke-test` | (default) | `test_fm_smoke_test` | `run:smoke-test` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot intelligence` | (default) | `test_fm_intelligence` | `run:intelligence` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 
@@ -314,7 +314,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot fonts` | (default = install) | `test_fm_smoke_fonts` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — downloads and installs Nerd Fonts into the user font directory (network) |
 | `dot fonts` | install [font] | `test_fm_smoke_fonts_install` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — downloads and installs Nerd Fonts (network) |
 | `dot fonts` | patch <font-file> [output-dir] | `test_fm_fonts_patch_usage` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | regression |
-| `dot tune` | (default) | `test_fm_smoke_tune` | `help:tune` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — writes OS defaults / sysctl values (system mutation, sudo) |
+| `dot tune` | (default) | `test_fm_smoke_tune` | `help:system` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — writes OS defaults / sysctl values (system mutation, sudo) |
 
 ## secrets.sh
 
@@ -351,7 +351,7 @@ bash scripts/qa/check-feature-matrix.sh
 
 | Command | Variant | Regression test | Benchmark | Example | Manual | Coverage |
 |---------|---------|-----------------|-----------|---------|--------|----------|
-| `dot backup` | (default; DOTFILES_BACKUP_DIR / DOTFILES_BACKUP_SRC) | `test_fm_backup` | `help:backup` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | regression |
+| `dot backup` | (default; DOTFILES_BACKUP_DIR / DOTFILES_BACKUP_SRC) | `test_fm_backup` | `help:doctor` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | regression |
 | `dot encrypt-check` | (default) | `test_fm_encrypt_check` | `run:encrypt-check` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | regression |
 | `dot firewall` | (default) | `test_fm_smoke_firewall` | `help:security` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | **smoke** — enables the OS firewall with sudo (system mutation) |
 | `dot telemetry` | (refuses unless DOTFILES_TELEMETRY=1) | `test_fm_telemetry` | `run:telemetry` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | regression |
@@ -365,9 +365,9 @@ bash scripts/qa/check-feature-matrix.sh
 
 | Command | Variant | Regression test | Benchmark | Example | Manual | Coverage |
 |---------|---------|-----------------|-----------|---------|--------|----------|
-| `dot upgrade` | (default) | `test_fm_smoke_upgrade` | `help:upgrade` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — runs nix flake update, chezmoi update, mise install + upgrade, a headless Neovim plugin sync, and (asked first) a system-package upgrade (network, mutates $HOME) |
-| `dot upgrade` | --yes / DOTFILES_YES=1 answers yes to installing mise and upgrading system packages | `test_fm_smoke_upgrade_yes` | `help:upgrade` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/03-environment.md` | **smoke** — the consented phases install and upgrade software (network, mutates the system) |
-| `dot upgrade` | DOTFILES_FONTS=1 adds the Nerd Font step to upgrade | `test_fm_smoke_env_dotfiles_fonts` | `help:upgrade` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/03-environment.md` | **smoke** — only observable inside the real upgrade run (network) |
+| `dot upgrade` | (default) | `test_fm_smoke_upgrade` | `help:system` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — runs nix flake update, chezmoi update, mise install + upgrade, a headless Neovim plugin sync, and (asked first) a system-package upgrade (network, mutates $HOME) |
+| `dot upgrade` | --yes / DOTFILES_YES=1 answers yes to installing mise and upgrading system packages | `test_fm_smoke_upgrade_yes` | `help:system` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/03-environment.md` | **smoke** — the consented phases install and upgrade software (network, mutates the system) |
+| `dot upgrade` | DOTFILES_FONTS=1 adds the Nerd Font step to upgrade | `test_fm_smoke_env_dotfiles_fonts` | `help:system` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/03-environment.md` | **smoke** — only observable inside the real upgrade run (network) |
 | `dot cache-refresh` | (default) | `test_fm_cache_refresh` | `run:cache-refresh` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot clean-cache` | (default) | `test_fm_clean_cache` | `help:clean-cache` | `examples/example-command-reference.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot prewarm` | alias of cache-refresh | `test_fm_prewarm` | `help:prewarm` | `examples/example-dot-meta.sh` | `docs/manual/command-index.md` | regression |

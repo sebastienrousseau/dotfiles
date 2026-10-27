@@ -111,7 +111,7 @@ _up_out="$(
     require_source_dir() { printf "%s\n" "'"$_up_sb"'/src"; }
     has_command() { command -v "$1" >/dev/null 2>&1; }
     source "'"$REPO_ROOT"'/lib/dot/ui.sh"
-    eval "$(sed -n "/^_upgrade_last_line()/,/^}/p;/^cmd_upgrade()/,/^}\$/p" "'"$REPO_ROOT"'/scripts/dot/commands/meta.sh")"
+    eval "$(sed -n "/^_upgrade_last_line()/,/^}/p;/^cmd_upgrade()/,/^}\$/p" "'"$REPO_ROOT"'/plugins/system/libexec/system.sh")"
     cmd_upgrade
   ' 2>&1
 )"
@@ -143,7 +143,7 @@ _up_out2="$(
     require_source_dir() { printf "%s\n" "'"$_up_sb"'/src"; }
     has_command() { command -v "$1" >/dev/null 2>&1; }
     source "'"$REPO_ROOT"'/lib/dot/ui.sh"
-    eval "$(sed -n "/^_upgrade_last_line()/,/^}/p;/^cmd_upgrade()/,/^}\$/p" "'"$REPO_ROOT"'/scripts/dot/commands/meta.sh")"
+    eval "$(sed -n "/^_upgrade_last_line()/,/^}/p;/^cmd_upgrade()/,/^}\$/p" "'"$REPO_ROOT"'/plugins/system/libexec/system.sh")"
     cmd_upgrade; echo "RC=$?"
   ' 2>&1
 )"
@@ -173,7 +173,7 @@ _up_run() {
     require_source_dir() { printf "%s\n" "'"$_up_sb"'/src"; }
     has_command() { command -v "$1" >/dev/null 2>&1; }
     source "'"$REPO_ROOT"'/lib/dot/ui.sh"
-    eval "$(sed -n "/^_upgrade_last_line()/,/^}/p;/^cmd_upgrade()/,/^}\$/p" "'"$REPO_ROOT"'/scripts/dot/commands/meta.sh")"
+    eval "$(sed -n "/^_upgrade_last_line()/,/^}/p;/^cmd_upgrade()/,/^}\$/p" "'"$REPO_ROOT"'/plugins/system/libexec/system.sh")"
     cmd_upgrade
   ' 2>&1
 }

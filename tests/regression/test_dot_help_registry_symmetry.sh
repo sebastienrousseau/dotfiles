@@ -97,7 +97,9 @@ else
 fi
 
 test_start "help_tables_nonempty"
-if [[ ${#specs[@]} -ge 30 && ${#details[@]} -ge 30 ]]; then
+# The tables back the old names' help, so they shrink as P2.1 moves each
+# domain to its plugin's entry; the floor only guards against an empty read.
+if [[ ${#specs[@]} -ge 15 && ${#details[@]} -ge 15 ]]; then
   TESTS_PASSED=$((TESTS_PASSED + 1))
   printf '  \033[0;32m✓\033[0m %s: %d specs + %d details\n' "$CURRENT_TEST" "${#specs[@]}" "${#details[@]}"
 else

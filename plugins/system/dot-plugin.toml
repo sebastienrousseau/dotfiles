@@ -10,10 +10,15 @@ version = "0.2.536"
 summary = "updates, cleanup, scheduled maintenance"
 default = "status"
 
+[entry]
+command = "dot-system"
+fallback = true
+
 [[objects]]
 name = "schedule"
 summary = "scheduled maintenance jobs"
 default = "list"
+fallback = true
 
 [[objects]]
 name = "settings"
@@ -23,13 +28,11 @@ default = "show"
 [[commands]]
 verb = "status"
 effect = "read"
-legacy = "system status"
 summary = "OS, disk, schedule and last run"
 
 [[commands]]
 verb = "update"
 effect = "write"
-legacy = "upgrade"
 summary = "Update everything, asking first"
 
 [[commands.flags]]
@@ -44,25 +47,25 @@ summary = "Also update npm, cargo and pipx globals"
 [[commands]]
 verb = "clean"
 effect = "write"
+planned = true
 summary = "Reclaim space, asking first"
 
 [[commands]]
 verb = "show"
 effect = "read"
+planned = true
 summary = "Hardware and host details"
 
 [[commands]]
 object = "schedule"
 verb = "list"
 effect = "read"
-legacy = "system schedule list"
 summary = "Scheduled jobs"
 
 [[commands]]
 object = "schedule"
 verb = "set"
 effect = "write"
-legacy = "system schedule set"
 summary = "Set the maintenance schedule"
 
 [commands.args]
@@ -72,20 +75,19 @@ values = ["weekly", "daily", "off"]
 object = "schedule"
 verb = "run"
 effect = "write"
-legacy = "system schedule run"
 summary = "Run scheduled maintenance now"
 
 [[commands]]
 object = "settings"
 verb = "show"
 effect = "read"
+planned = true
 summary = "Current OS settings"
 
 [[commands]]
 object = "settings"
 verb = "apply"
 effect = "write"
-legacy = "tune"
 summary = "Apply the managed OS settings"
 
 [[aliases]]

@@ -46,7 +46,7 @@ dot_fixture_stub "$FX/stubs" nvim 0
 
 test_start "meta_upgrade_survives_a_failing_phase"
 DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" \
-  DOTFILES_FONTS=1 dot_fixture_run "$FX" meta upgrade
+  DOTFILES_FONTS=1 dot_fixture_run "$FX" system upgrade
 assert_equals "1" "$DOT_FIXTURE_RC" "a failed phase must produce a nonzero final result"
 assert_contains "step(s) failed" "$DOT_FIXTURE_OUT" \
   "the run should end with a failure tally"

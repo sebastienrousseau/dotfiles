@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC2034
-# Behavioural coverage for scripts/dot/commands/restore.sh branches the
+# Behavioural coverage for plugins/doctor/libexec/restore.sh branches the
 # other suites skip: the chezmoi-source fallback (no $DOTFILES_DIR/.git),
 # the missing-repo error of --diff, a restore without chezmoi on PATH, and
 # the BSD `stat -f %m` mtime fallback. Everything runs in a mktemp sandbox
@@ -15,7 +15,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 # shellcheck source=../../framework/assertions.sh
 source "$REPO_ROOT/tests/framework/assertions.sh"
 
-RESTORE="$REPO_ROOT/scripts/dot/commands/restore.sh"
+RESTORE="$REPO_ROOT/plugins/doctor/libexec/restore.sh"
 REAL_BASH="${BASH:-$(command -v bash)}"
 
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/restore-cov.XXXXXX")"

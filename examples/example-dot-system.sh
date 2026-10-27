@@ -6,7 +6,7 @@
 #
 # Show the host, then set, run and remove the maintenance schedule.
 #
-# Backing module: scripts/dot/commands/system.sh
+# Backing module: plugins/system/libexec/system.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: HOME is redirected into a throwaway

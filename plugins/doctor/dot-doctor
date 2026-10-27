@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# dot-doctor: the entry of the doctor plugin (ADR-020 N2). bin/dot runs it
+# with the words after `dot doctor`. Its declared spellings become the
+# subcommands of libexec/doctor.sh; any other word, or none, goes to the
+# unified doctor as it always has.
+
+set -euo pipefail
+
+_DOCTOR_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# doctor_module SUBCOMMAND... — run the doctor module.
+doctor_module() {
+  exec bash "$_DOCTOR_DIR/libexec/doctor.sh" "$@"
+}
+
+# doctor_object OBJECT VERB ARGS... — spellings with an object, and the perf
+# flags that pick a benchmark.
+doctor_object() {
+  case "${1:-} ${2:-} ${3:-}" in
+    "perf --ready --pty") doctor_module load-bench-pty "${@:4}" ;;
+  esac
+  case "${1:-} ${2:-}" in
+    "perf --ready") doctor_module load-bench "${@:3}" ;;
+    "perf --profile" | "perf measure") doctor_module benchmark "${@:3}" ;;
+    "perf show") doctor_module perf "${@:3}" ;;
+    "score show") doctor_module scorecard "${@:3}" ;;
+    "snapshot new") doctor_module snapshot "${@:3}" ;;
+    "drift show") doctor_module drift "${@:3}" ;;
+    "conflict list") doctor_module conflicts "${@:3}" ;;
+    "metric list") doctor_module metrics "${@:3}" ;;
+  esac
+}
+
+# doctor_verb VERB ARGS... — the domain's own verbs.
+doctor_verb() {
+  case "${1:-}" in
+    status) doctor_module health "${@:2}" ;;
+    check) doctor_module doctor "${@:2}" ;;
+    fix) doctor_module heal "${@:2}" ;;
+    backup | restore | rollback) doctor_module "$@" ;;
+  esac
+}
+
+doctor_object "$@"
+doctor_verb "$@"
+doctor_module doctor "$@"

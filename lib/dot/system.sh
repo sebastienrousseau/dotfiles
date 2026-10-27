@@ -11,7 +11,7 @@
 # job runs come from DOT_LAUNCHCTL, DOT_SYSTEMCTL, DOT_SYSTEM_OS,
 # DOT_LAUNCH_AGENTS, DOT_SYSTEMD_USER and DOT_SYSTEM_DOT, so tests never
 # touch the real agents.
-# Sourced by scripts/dot/commands/system.sh; inherits set -euo pipefail.
+# Sourced by plugins/system/libexec/system.sh; inherits set -euo pipefail.
 # Bash 3.2 compatible (macOS /bin/bash).
 
 [[ -n "${_DOT_SYSTEM_LOADED:-}" ]] && return 0

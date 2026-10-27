@@ -219,9 +219,9 @@ class Entries(Fixture):
         self.assertFails("security: object 'disk' has fallback, which needs [entry] fallback = true")
 
     def test_planned_needs_an_entry(self):
-        self.edit("system", 'summary = "Update everything, asking first"\n',
-                  'summary = "Update everything, asking first"\nplanned = true\n')
-        self.assertFails("system: 'planned' needs an [entry]")
+        self.edit("config", 'summary = "What apply would change"\n',
+                  'summary = "What apply would change"\nplanned = true\n')
+        self.assertFails("config: 'planned' needs an [entry]")
 
 
 class TableRoutes(Fixture):

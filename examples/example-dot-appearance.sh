@@ -6,7 +6,7 @@
 #
 # Wallpaper-derived terminal themes, Nerd Font installation, OS tuning.
 #
-# Backing module: scripts/dot/commands/appearance.sh
+# Backing module: plugins/system/libexec/system.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: every command below is read-only or a help

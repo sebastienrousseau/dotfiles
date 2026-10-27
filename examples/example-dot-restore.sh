@@ -6,7 +6,7 @@
 #
 # List backups, preview a git ref, and restore a previous configuration.
 #
-# Backing module: scripts/dot/commands/restore.sh
+# Backing module: plugins/doctor/libexec/restore.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: every command below is read-only or a help

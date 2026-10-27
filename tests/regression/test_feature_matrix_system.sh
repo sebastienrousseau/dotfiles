@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1091
 # Regression for: GH-881
-# Feature matrix: scripts/dot/commands/system.sh, `dot system status` and
+# Feature matrix: plugins/system/libexec/system.sh, `dot system status` and
 # the maintenance schedule (docs/reference/FEATURE-MATRIX.md). launchctl
 # and systemctl are `true`, so `set` writes into the sandbox and loads
 # nothing.
