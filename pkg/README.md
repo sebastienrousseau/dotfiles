@@ -16,6 +16,12 @@ and digest.
 | [`nix/`](nix/README.md) | Nix flake (pointer) | — | `nix/flake.nix` in-repo |
 | [`docker/`](docker/README.md) | Container (none published, and why) | — | — |
 
+The Homebrew formula and the PKGBUILD install through the archive's own
+`make install`, and the Scoop manifest shims `bin/dot.ps1` from the zip.
+`tests/unit/release/test_pkg_recipes.sh` runs each recipe against a
+staged archive and fails unless the installed CLI runs a bundled
+plugin's command.
+
 - **Verifying an artefact:** [`VERIFY.md`](VERIFY.md)
 - **Packaging for a new distro:** [`../docs/packaging.md`](../docs/packaging.md)
 - **Release pipeline:** [`../docs/operations/RELEASE_PIPELINE.md`](../docs/operations/RELEASE_PIPELINE.md)

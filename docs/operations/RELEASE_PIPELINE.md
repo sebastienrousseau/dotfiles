@@ -48,7 +48,7 @@ dependencies allow.
 
 | Workflow | Trigger | Owns | Outputs |
 |---|---|---|---|
-| `release-package-dot.yml` | `release.created`, dispatch | Build deterministic `dot-VERSION.{tar.gz,zip}` from `bin/`, `lib/`, `share/`, completions. | Two release assets. |
+| `release-package-dot.yml` | `release.created`, dispatch | Build deterministic `dot-VERSION.{tar.gz,zip}` from `tools/release/stage-dot.sh`: the CLI tree (`bin/`, `lib/`, `scripts/`, `plugins/`, `defaults/`), man page, completions, licences. | Two release assets. |
 | `security-release.yml` (sbom job) | `release.published`, dispatch | Generate SPDX SBOM via anchore/sbom-action. Cosign keyless sign the SBOM. | `dotfiles-sbom.spdx.json` + `.sig` + `.pem`. |
 | `security-release.yml` (provenance job) | needs sbom | SLSA L3 provenance via slsa-framework/slsa-github-generator. | `dotfiles-sbom.spdx.json.intoto.jsonl`. |
 | `security-release.yml` (manifest job) | needs provenance + complete asset set | Build `ALL_SHA256SUMS` over every release asset, Cosign-sign it, and verify its signature and digests. | `ALL_SHA256SUMS` + `.sig` + `.pem`. |
@@ -107,7 +107,8 @@ independently.
   "tracks git HEAD", but the workflow publishes tagged stable
   releases. Either rename to plain `dotfiles` in
   `pkg/aur/PKGBUILD` and register that package, or accept the
-  misnomer. Documented in the v0.2.503 PR (#895).
+  misnomer. Documented in the v0.2.503 PR (#895). Since 0.2.539 the
+  PKGBUILD builds the release archive rather than the git head.
 - **Signed-Releases retroactive**: the unified manifest landed in
   v0.2.503. Releases v0.2.500-502 carry the SBOM bundle only.
   We do not re-tag older releases (would break consumer pins). The
