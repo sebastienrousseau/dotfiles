@@ -12,7 +12,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-version="$(grep -m1 '^pkgver=' "$REPO_ROOT/pkg/aur/PKGBUILD" | cut -d= -f2)"
+# The release's version; the distribute jobs write it into each recipe.
+version="$(sed -n 's/^dotfiles_version = "\(.*\)"$/\1/p' "$REPO_ROOT/defaults/.chezmoidata.toml")"
 tmp="$(mktemp -d -t dot-pkg.XXXXXX)"
 trap 'rm -rf "$tmp"' EXIT
 bundle="$tmp/src/dot-$version"
@@ -38,6 +39,7 @@ if install --version 2>/dev/null | grep -q GNU; then
   (
     set -e
     source "$REPO_ROOT/pkg/aur/PKGBUILD"
+    pkgver="$version" # release-distribute-aur.yml sets it per tag
     srcdir="$tmp/src"
     package
   ) >/dev/null 2>&1 || rc=$?
