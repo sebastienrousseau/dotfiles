@@ -224,6 +224,15 @@ class Entries(Fixture):
         self.assertFails("system: 'planned' needs an [entry]")
 
 
+class TableRoutes(Fixture):
+    """Every route the command table names is one bin/dot can run."""
+
+    def test_a_record_naming_a_missing_route_fails(self):
+        routes = self.tmp / "lib/dot/data/routes.txt"
+        routes.write_text("".join(ln for ln in routes.read_text().splitlines(True) if not ln.startswith("registry|")))
+        self.assertFails("'cli list --available' runs route 'registry', which lib/dot/data/routes.txt does not have")
+
+
 class Table(Fixture):
     def test_stale_table_fails(self):
         self.edit("system", 'summary = "Update everything, asking first"', 'summary = "Update all"')

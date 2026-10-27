@@ -16,16 +16,28 @@ ai_module() {
   exec bash "$_AI_DIR/libexec/ai.sh" ai "$@"
 }
 
-case "${1:-} ${2:-}" in
-  "gateway serve") ai_module serve "${@:3}" ;;
-  "cost show") ai_module cost "${@:3}" ;;
-  "pattern list") exec bash "$_AI_DIR/libexec/patterns.sh" list "${@:3}" ;;
-  "pattern show") exec bash "$_AI_DIR/libexec/patterns.sh" view "${@:3}" ;;
-  "pattern edit") exec bash "$_AI_DIR/libexec/patterns.sh" edit "${@:3}" ;;
-esac
-case "${1:-}" in
-  list) ai_module tools "${@:2}" ;;
-  start) ai_module chat "${@:2}" ;;
-  check) ai_module doctor "${@:2}" ;;
-esac
+# ai_two_words WORD WORD ARGS... — spellings told apart by their second word.
+ai_two_words() {
+  case "${1:-} ${2:-}" in
+    # `--interactive` is the guided setup, which `dot ai-setup` ran.
+    "install --interactive") exec bash "$_AI_DIR/libexec/ai.sh" ai-setup "${@:3}" ;;
+    "gateway serve") ai_module serve "${@:3}" ;;
+    "cost show") ai_module cost "${@:3}" ;;
+    "pattern list") exec bash "$_AI_DIR/libexec/patterns.sh" list "${@:3}" ;;
+    "pattern show") exec bash "$_AI_DIR/libexec/patterns.sh" view "${@:3}" ;;
+    "pattern edit") exec bash "$_AI_DIR/libexec/patterns.sh" edit "${@:3}" ;;
+  esac
+}
+
+# ai_renamed VERB ARGS... — verbs whose ai.sh name differs.
+ai_renamed() {
+  case "${1:-}" in
+    list) ai_module tools "${@:2}" ;;
+    start) ai_module chat "${@:2}" ;;
+    check) ai_module doctor "${@:2}" ;;
+  esac
+}
+
+ai_two_words "$@"
+ai_renamed "$@"
 ai_module "$@"

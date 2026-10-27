@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# shellcheck disable=SC1090,SC1091
+# shellcheck disable=SC1090,SC1091,SC2016
 # The attest, secret, fleet, ai, agent, mcp and top entries (ADR-020 N2,
 # P2.1) turn each
 # spelling their manifest declares into what implements it: a script, or
@@ -117,6 +117,9 @@ expect ai "pattern show summarize" "module patterns.sh view summarize"
 expect ai "pattern edit summarize" "module patterns.sh edit summarize"
 expect ai "" "module ai.sh ai"
 expect ai "tools" "module ai.sh ai tools"
+expect ai "install --interactive claude" "module ai.sh ai-setup claude"
+run "$REPO_ROOT/bin/dot" ai install --interactive
+assert_equals "module ai.sh ai-setup" "$OUT" "dot ai install --interactive is the guided setup, through bin/dot"
 
 test_start "mcp_spellings_become_module_subcommands"
 expect mcp "list --json" "module mcp.sh registry --json"

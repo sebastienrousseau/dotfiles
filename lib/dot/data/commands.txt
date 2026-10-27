@@ -237,7 +237,7 @@ cmd|ui show||read|The primitives on offer
 cmd|ui select||read|Interactive picker for scripts
 cmd|ui run||write|Run a command with progress
 cmd|ui table show||read|Render rows as a table
-run|ai install --interactive|ai-setup||
+run|ai install --interactive|@ai install --interactive||
 run|cli list --available|registry list||
 run|help --manual|manual||
 run|help --readme|docs||
@@ -307,7 +307,6 @@ leg|env prune|tool remove||
 leg|env use|tool set||
 leg|env emit|tool export||
 leg|new|tool new||
-leg|ai-setup|ai install --interactive||
 leg|registry list|cli list --available||
 leg|manual|help --manual||
 leg|docs|help --readme||
