@@ -616,4 +616,27 @@ _run_doctor
 _expect "s7_wsl_without_wslpath" \
   "(WSL)" "[WARN] WSL bridge" "wslpath missing" "[OK] WSL filesystem" "native"
 
+# =======================================================================
+# S8 — hyperfine present but every run fails: bench.sh exits 2 (nothing
+# measured), which is not a threshold breach and must not read as one.
+# =======================================================================
+_new_scenario s8
+_uname Linux
+_linux_os_release
+mkdir -p "$S_HOME/proc" "$S_HOME/sys"
+_shim uptime <<'EOF'
+#!/usr/bin/env bash
+echo "up 3 minutes"
+EOF
+_shim hyperfine <<'EOF'
+#!/usr/bin/env bash
+exit 1
+EOF
+_tool jq
+DOC_ENV=(PIPX_HOME= TERM_PROGRAM=)
+_run_doctor
+_expect "s8_unmeasured_startup_latency" \
+  "[WARN] startup latency" "nothing measured (hyperfine or jq failed)"
+_expect_absent "s8_not_reported_as_a_breach" "threshold exceeded"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
