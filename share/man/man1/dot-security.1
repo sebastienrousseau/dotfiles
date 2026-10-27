@@ -42,13 +42,13 @@ the security score; alone it runs \fBshow\fR.
 Hardening summary. Effect: read. Planned; not built yet.
 .TP
 .B dot security policy show
-The security policy. Effect: read. Runs \fBdot policy\fR until the domain is extracted.
+The security policy. Effect: read. Runs \fBdot\-security policy show\fR, the plugin's entry.
 .TP
 .B dot security disk show
-Disk encryption state. Effect: read. Runs \fBdot encrypt\-check\fR until the domain is extracted.
+Disk encryption state. Effect: read. Runs \fBdot\-security disk show\fR, the plugin's entry.
 .TP
 .B dot security score show
-The security score. Effect: read. Runs \fBdot security\-score\fR until the domain is extracted.
+The security score. Effect: read. Runs \fBdot\-security score show\fR, the plugin's entry.
 .RS
 .TP
 .B \-\-verbose, \-v
@@ -65,31 +65,31 @@ Print a JSON summary
 Current firewall setting. Effect: read. Planned; not built yet.
 .TP
 .B dot security firewall apply
-Harden the firewall setting. Effect: write. Runs \fBdot firewall\fR until the domain is extracted.
+Harden the firewall setting. Effect: write. Runs \fBdot\-security firewall apply\fR, the plugin's entry.
 .TP
 .B dot security telemetry show
 Current telemetry setting. Effect: read. Planned; not built yet.
 .TP
 .B dot security telemetry apply
-Harden the telemetry setting. Effect: write. Runs \fBdot telemetry\fR until the domain is extracted.
+Harden the telemetry setting. Effect: write. Runs \fBdot\-security telemetry apply\fR, the plugin's entry.
 .TP
 .B dot security dns show
 Current dns setting. Effect: read. Planned; not built yet.
 .TP
 .B dot security dns apply
-Harden the dns setting. Effect: write. Runs \fBdot dns\-doh\fR until the domain is extracted.
+Harden the dns setting. Effect: write. Runs \fBdot\-security dns apply\fR, the plugin's entry.
 .TP
 .B dot security lock show
 Current lock setting. Effect: read. Planned; not built yet.
 .TP
 .B dot security lock apply
-Harden the lock setting. Effect: write. Runs \fBdot lock\-screen\fR until the domain is extracted.
+Harden the lock setting. Effect: write. Runs \fBdot\-security lock apply\fR, the plugin's entry.
 .TP
 .B dot security usb show
 Current usb setting. Effect: read. Planned; not built yet.
 .TP
 .B dot security usb apply
-Harden the usb setting. Effect: write. Runs \fBdot usb\-safety\fR until the domain is extracted.
+Harden the usb setting. Effect: write. Runs \fBdot\-security usb apply\fR, the plugin's entry.
 .SH OTHER NAMES
 .TP
 .B dot policy

@@ -6,7 +6,7 @@
 #
 # Treat a set of machines as one fleet: status, drift history, RBAC, SSH apply.
 #
-# Backing module: scripts/dot/commands/fleet.sh
+# Backing module: plugins/fleet/libexec/fleet.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: every command below is read-only or a help

@@ -231,6 +231,17 @@ _dot_spelled() {
   if [[ "$1" == help ]] && _dot_names_spelling "$2" && _dot_help_spelling "${@:2}"; then
     exit 0
   fi
+  _dot_entry_rest "$@"
+  return 0
+}
+
+# _dot_entry_rest DOMAIN WORD...: a plugin with an entry (route @DOMAIN)
+# takes the words its table does not, as a legacy route does today.
+_dot_entry_rest() {
+  [[ "$_NAME_KIND" == dom ]] && _dot_record dom "$1" || return 0
+  local bare="${_REC#*|}"
+  bare="${bare%%|*}"
+  [[ "$bare" != @* ]] || _ARGV=("$bare" "${@:2}")
   return 0
 }
 
@@ -274,7 +285,7 @@ _dot_stop_unbuilt() {
   if _dot_planned "$@"; then
     _dot_unknown "$@"
   elif [[ -n "${3:-}" && "$3" != -* && "$_DOT_TABLE" != *$'\n'"leg|$1 $2"[\ \|]* ]] &&
-    _dot_record obj "$1 $2"; then
+    _dot_record obj "$1 $2" && [[ "${_REC#*|}" != @* ]]; then
     _dot_not_a_verb "$@"
   fi
   return 0

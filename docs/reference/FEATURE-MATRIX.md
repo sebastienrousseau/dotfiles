@@ -148,7 +148,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot health` | --fix / -f, --force / -F | `test_fm_smoke_health_fix` | `help:health` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | **smoke** — --fix re-applies chezmoi and rewrites shell configs in $HOME |
 | `dot security-score` | (default) | `test_fm_security_score` | `run:security-score` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot security-score` | --json / -j | `test_fm_security_score_json` | `run:security-score-json` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
-| `dot security-score` | --quiet / -q, --verbose / -v | `test_fm_security_score_quiet` | `help:security-score` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
+| `dot security-score` | --quiet / -q, --verbose / -v | `test_fm_security_score_quiet` | `help:security` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot score` | (default) | `test_fm_score` | `run:score` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot score` | --json / -j | `test_fm_score_json` | `run:score-json` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot scorecard` | alias of score | `test_fm_scorecard` | `help:scorecard` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
@@ -163,7 +163,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot attest` | --json / -j | `test_fm_attest_json` | `run:attest-json` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot attest` | --write / -w | `test_fm_attest_write` | `help:attest` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot attest` | --fleet-store / -F <dir>, --fleet-id / -I <id> | `test_fm_attest_fleet_store` | `help:attest` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot attestation` | alias of attest | `test_fm_attestation` | `help:attestation` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
+| `dot attestation` | alias of attest | `test_fm_attestation` | `help:attest` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot rollback` | status | `test_fm_rollback_status` | `run:rollback-status` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot rollback` | backup | `test_fm_rollback_backup` | `help:rollback` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot rollback` | clean | `test_fm_rollback_clean` | `help:rollback` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
@@ -186,7 +186,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot load-bench-pty` | (default) | `test_fm_smoke_load_bench_pty` | `help:load-bench-pty` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | **smoke** — needs the chezmoi-rendered dot-load-benchmark-pty template and a pseudo-terminal |
 | `dot chaos` | (refuses without --force) | `test_fm_chaos` | `run:chaos` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot chaos` | --force (deletes its three targets, plants a broken symlink, spares the rest) | `test_fm_chaos_force` | `help:chaos` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot teleport` | user@host | `test_fm_smoke_teleport` | `help:teleport` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | **smoke** — opens an SSH session to a remote host (network) |
+| `dot teleport` | user@host | `test_fm_smoke_teleport` | `help:fleet` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | **smoke** — opens an SSH session to a remote host (network) |
 | `dot teleport` | (no host, exit 1) | `test_fm_teleport_usage` | `run:teleport-usage` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot bundle` | [output-dir] | `test_fm_smoke_bundle` | `help:bundle` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — archives ~/.dotfiles plus tool caches with zstd (hundreds of MB, minutes) |
 | `dot secret-audit` | (default) | `test_fm_secret_audit` | `run:secret-audit` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
@@ -308,44 +308,44 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot theme` | sync | `test_fm_smoke_theme_sync` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — rewrites terminal configs to follow the OS appearance (system mutation) |
 | `dot theme` | family | `test_fm_smoke_theme_family` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — cycles the theme family and applies it (system mutation) |
 | `dot theme` | rebuild | `test_fm_smoke_theme_rebuild` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — regenerates every theme from wallpapers (minutes of image processing) |
-| `dot wallpaper` | (default = sync) | `test_fm_smoke_wallpaper` | `help:wallpaper` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — sets the desktop wallpaper through osascript / feh (system mutation) |
-| `dot wallpaper` | sync | `test_fm_smoke_wallpaper_sync` | `help:wallpaper` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — sets the desktop wallpaper (system mutation) |
-| `dot wallpaper` | rotate (--interval, --once, --light, --dark) | `test_fm_smoke_wallpaper_rotate` | `help:wallpaper` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — sets the desktop wallpaper (system mutation) |
-| `dot fonts` | (default = install) | `test_fm_smoke_fonts` | `help:fonts` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — downloads and installs Nerd Fonts into the user font directory (network) |
-| `dot fonts` | install [font] | `test_fm_smoke_fonts_install` | `help:fonts` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — downloads and installs Nerd Fonts (network) |
-| `dot fonts` | patch <font-file> [output-dir] | `test_fm_fonts_patch_usage` | `help:fonts` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | regression |
+| `dot wallpaper` | (default = sync) | `test_fm_smoke_wallpaper` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — sets the desktop wallpaper through osascript / feh (system mutation) |
+| `dot wallpaper` | sync | `test_fm_smoke_wallpaper_sync` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — sets the desktop wallpaper (system mutation) |
+| `dot wallpaper` | rotate (--interval, --once, --light, --dark) | `test_fm_smoke_wallpaper_rotate` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — sets the desktop wallpaper (system mutation) |
+| `dot fonts` | (default = install) | `test_fm_smoke_fonts` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — downloads and installs Nerd Fonts into the user font directory (network) |
+| `dot fonts` | install [font] | `test_fm_smoke_fonts_install` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — downloads and installs Nerd Fonts (network) |
+| `dot fonts` | patch <font-file> [output-dir] | `test_fm_fonts_patch_usage` | `help:theme` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | regression |
 | `dot tune` | (default) | `test_fm_smoke_tune` | `help:tune` | `examples/example-dot-appearance.sh` | `docs/manual/command-index.md` | **smoke** — writes OS defaults / sysctl values (system mutation, sudo) |
 
 ## secrets.sh
 
 | Command | Variant | Regression test | Benchmark | Example | Manual | Coverage |
 |---------|---------|-----------------|-----------|---------|--------|----------|
-| `dot secrets-init` | (default; creates the age key) | `test_fm_secrets_init` | `help:secrets-init` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot secrets` | edit (default) | `test_fm_secrets_edit` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot secrets-init` | (default; creates the age key) | `test_fm_secrets_init` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot secrets` | edit (default) | `test_fm_secrets_edit` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot secrets` | edit without an age key (exit 1) | `test_fm_secrets_edit_no_key` | `run:secrets-edit-nokey` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot secrets` | set <KEY> <VALUE> | `test_fm_secrets_set` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot secrets` | set <KEY> <VALUE> | `test_fm_secrets_set` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot secrets` | set (no key, exit 1) | `test_fm_secrets_set_usage` | `run:secrets-set-usage` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot secrets` | set with an invalid key name (path separator, leading `-` or `.`) is refused (exit 1) | `test_fm_secrets_set_invalid_key` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot secrets` | set <KEY> (prompts for the value) | `test_fm_smoke_secrets_set_prompt` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — reads the secret value from an interactive silent prompt (TTY) |
-| `dot secrets` | get <KEY> (masked) | `test_fm_secrets_get` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot secrets` | get <KEY> --raw | `test_fm_secrets_get_raw` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot secrets` | set with an invalid key name (path separator, leading `-` or `.`) is refused (exit 1) | `test_fm_secrets_set_invalid_key` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot secrets` | set <KEY> (prompts for the value) | `test_fm_smoke_secrets_set_prompt` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — reads the secret value from an interactive silent prompt (TTY) |
+| `dot secrets` | get <KEY> (masked) | `test_fm_secrets_get` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot secrets` | get <KEY> --raw | `test_fm_secrets_get_raw` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot secrets` | get <unknown> (exit 1) / get without key (exit 1) | `test_fm_secrets_get_missing` | `run:secrets-get-missing` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot secrets` | list | `test_fm_secrets_list` | `run:secrets-list` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot secrets` | load [bucket] (posix export lines) | `test_fm_secrets_load` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot secrets` | load --shell fish | `test_fm_secrets_load_fish` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot secrets` | load --shell=nu / nushell | `test_fm_secrets_load_nu` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot secrets` | load [bucket] (posix export lines) | `test_fm_secrets_load` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot secrets` | load --shell fish | `test_fm_secrets_load_fish` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot secrets` | load --shell=nu / nushell | `test_fm_secrets_load_nu` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot secrets` | load <bucket> with nothing stored (exit 1) / unknown flag (exit 1) | `test_fm_secrets_load_empty` | `run:secrets-load-empty` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot secrets` | provider | `test_fm_secrets_provider` | `run:secrets-provider` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot secrets` | DOTFILES_SECRETS_PROVIDER / DOT_SECRETS_HOME select the backend and store | `test_fm_env_dotfiles_secrets_provider` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/03-environment.md` | regression |
-| `dot secrets` | .chezmoidata.toml `[secrets.policy] provider` / `auto_load` defaults | `test_fm_config_secrets_policy` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/02-config-files.md` | regression |
-| `dot secrets` | <unknown> (exit 1) | `test_fm_secrets_unknown` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot secrets` | DOTFILES_SECRETS_PROVIDER / DOT_SECRETS_HOME select the backend and store | `test_fm_env_dotfiles_secrets_provider` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/03-environment.md` | regression |
+| `dot secrets` | .chezmoidata.toml `[secrets.policy] provider` / `auto_load` defaults | `test_fm_config_secrets_policy` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/02-config-files.md` | regression |
+| `dot secrets` | <unknown> (exit 1) | `test_fm_secrets_unknown` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot env` | load [bucket] (secrets.sh alias of secrets load) | `test_fm_secrets_env_load` | `help:env` | `examples/example-dot-secrets.sh` | `docs/manual/command-index.md` | regression |
-| `dot secrets-create` | [name] (needs the age key) | `test_fm_secrets_create` | `help:secrets-create` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot secrets-create` | [name] (needs the age key) | `test_fm_secrets_create` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot secrets-create` | without an age key (exit 1) | `test_fm_secrets_create_no_key` | `run:secrets-create-nokey` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot ssh-key` | [key-path] (encrypts ~/.ssh/id_ed25519 with age) | `test_fm_ssh_key_missing` | `run:ssh-key-missing` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot ssh-cert` | (usage) / status / issue / revoke | `test_fm_ssh_cert_usage` | `run:ssh-cert-usage` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot ssh-cert` | status | `test_fm_ssh_cert_status` | `run:ssh-cert-status` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot ssh-cert` | issue [--ttl] [--principal] / revoke | `test_fm_smoke_ssh_cert_issue` | `help:ssh-cert` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — contacts a step-ca server and rewrites ~/.ssh certificates (network) |
+| `dot ssh-cert` | issue [--ttl] [--principal] / revoke | `test_fm_smoke_ssh_cert_issue` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — contacts a step-ca server and rewrites ~/.ssh certificates (network) |
 
 ## security.sh
 
@@ -353,12 +353,12 @@ bash scripts/qa/check-feature-matrix.sh
 |---------|---------|-----------------|-----------|---------|--------|----------|
 | `dot backup` | (default; DOTFILES_BACKUP_DIR / DOTFILES_BACKUP_SRC) | `test_fm_backup` | `help:backup` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | regression |
 | `dot encrypt-check` | (default) | `test_fm_encrypt_check` | `run:encrypt-check` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | regression |
-| `dot firewall` | (default) | `test_fm_smoke_firewall` | `help:firewall` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | **smoke** — enables the OS firewall with sudo (system mutation) |
+| `dot firewall` | (default) | `test_fm_smoke_firewall` | `help:security` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | **smoke** — enables the OS firewall with sudo (system mutation) |
 | `dot telemetry` | (refuses unless DOTFILES_TELEMETRY=1) | `test_fm_telemetry` | `run:telemetry` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | regression |
-| `dot telemetry` | DOTFILES_TELEMETRY=1 | `test_fm_smoke_telemetry_apply` | `help:telemetry` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | **smoke** — disables OS telemetry services with sudo (system mutation) |
-| `dot dns-doh` | (default) | `test_fm_smoke_dns_doh` | `help:dns-doh` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | **smoke** — rewrites the system resolver configuration with sudo (system mutation) |
-| `dot lock-screen` | (default) | `test_fm_smoke_lock_screen` | `help:lock-screen` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | **smoke** — writes screensaver / idle-lock OS settings (system mutation) |
-| `dot usb-safety` | (default) | `test_fm_smoke_usb_safety` | `help:usb-safety` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | **smoke** — writes udev / automount policy with sudo (system mutation) |
+| `dot telemetry` | DOTFILES_TELEMETRY=1 | `test_fm_smoke_telemetry_apply` | `help:security` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | **smoke** — disables OS telemetry services with sudo (system mutation) |
+| `dot dns-doh` | (default) | `test_fm_smoke_dns_doh` | `help:security` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | **smoke** — rewrites the system resolver configuration with sudo (system mutation) |
+| `dot lock-screen` | (default) | `test_fm_smoke_lock_screen` | `help:security` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | **smoke** — writes screensaver / idle-lock OS settings (system mutation) |
+| `dot usb-safety` | (default) | `test_fm_smoke_usb_safety` | `help:security` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | **smoke** — writes udev / automount policy with sudo (system mutation) |
 | `dot policy` | (default; needs opa + gitleaks) | `test_fm_policy` | `run:policy` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | regression |
 
 ## meta.sh / agent.sh
@@ -561,8 +561,8 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot ai` | every provider routed to ai.sh has a bridge row | `test_fm_ai_bridge_every_routed_provider_refuses` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot completion` | every dialect covers the command registry | `test_fm_completion_covers_the_registry` | `run:completion-bash` | `examples/example-dot-completion.sh` | `docs/manual/command-index.md` | regression |
 | `dot fleet apply` | an injection-shaped ssh target aborts the fan-out | `test_fm_fleet_apply_rejects_injection_hostname` | `help:fleet` | `examples/example-dot-fleet.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot secrets` | no default-mode command prints a stored value | `test_fm_secrets_never_leak_by_default` | `help:secrets` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot firewall` | no security --help invokes sudo | `test_fm_security_help_does_not_mutate` | `help:firewall` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | regression |
+| `dot secrets` | no default-mode command prints a stored value | `test_fm_secrets_never_leak_by_default` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot firewall` | no security --help invokes sudo | `test_fm_security_help_does_not_mutate` | `help:security` | `examples/example-dot-security.sh` | `docs/manual/command-index.md` | regression |
 
 ## Rows recorded as unmeasurable
 

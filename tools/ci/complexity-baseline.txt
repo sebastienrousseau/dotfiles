@@ -21,7 +21,7 @@
   33   39   35.4  149     0 bin/dot-theme-sync::reload_desktop
   17   19   28.7   43     0 bin/dot-theme-sync::reload_ghostty
   11   11   20.7   33     0 bin/dot-theme-sync::reload_tmux
-  22   23   37.8   82   330 bin/dot::<top>
+  21   22   37.2   82   347 bin/dot::<top>
   20   24   31.1   39     0 bin/dot::_resolve_source_dir
   21   21    4.2  111   111 defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh::<top>
   19   27   29.6   53     0 defaults/.chezmoitemplates/aliases/cd/cd-core.aliases.sh::cd_with_history
@@ -100,6 +100,8 @@
   17   21   34.7   36     0 lib/dot/utils.sh::resolve_source_dir
   12   11   35.2   53     0 lib/dot/verified-download.sh::download_verified_asset
    9    8   32.9   46     0 lib/dot/verified-download.sh::download_verified_script
+  21   12   31.5   69   248 plugins/secret/libexec/secrets.sh::<top>
+  16   16   23.8   61     0 plugins/secret/libexec/secrets.sh::cmd_env_load
   22   22   36.8  109   109 scripts/diagnostics/attest-verify.sh::<top>
   13   11   27.4   73   292 scripts/diagnostics/benchmark.sh::<top>
   15   17   31.0   60     0 scripts/diagnostics/benchmark.sh::render_waterfall
@@ -120,7 +122,7 @@
   12   12   25.8   22     0 scripts/dot/commands/agents.sh::_agents_repo_root
   18   21   43.4  163     0 scripts/dot/commands/agents.sh::cmd_agents
   17    3   25.6   67   184 scripts/dot/commands/core.sh::<top>
-  29    2   34.9  117   223 scripts/dot/commands/diagnostics.sh::<top>
+  25    2   31.2  101   194 scripts/dot/commands/diagnostics.sh::<top>
   23   19   31.2  148     0 scripts/dot/commands/env-emit.sh::dot_env_emit
   22   21   28.7  103     0 scripts/dot/commands/init.sh::cmd_init
   11   11   15.2   34     0 scripts/dot/commands/manual.sh::cmd_open
@@ -131,9 +133,6 @@
    9   14   25.7   82     0 scripts/dot/commands/meta.sh::cmd_upgrade
   11   10   33.7   42     0 scripts/dot/commands/registry.sh::_registry_install
   33   34   43.5  123     0 scripts/dot/commands/registry.sh::cmd_registry
-  21   12   31.5   69   248 scripts/dot/commands/secrets.sh::<top>
-  16   16   23.8   61     0 scripts/dot/commands/secrets.sh::cmd_env_load
-  12    2   18.2   49    81 scripts/dot/commands/security.sh::<top>
   14    2   22.0   68   411 scripts/dot/commands/tools.sh::<top>
   23   21   25.3   84     0 scripts/dot/commands/tools.sh::apply_template_security_baseline
   17   26   30.0   77     0 scripts/dot/commands/tools.sh::cmd_env_mise

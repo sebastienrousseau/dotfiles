@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# dot-fleet: the entry of the fleet plugin (ADR-020 N2). bin/dot runs it
+# with the words after `dot fleet`. Its declared spellings become the
+# subcommands of libexec/fleet.sh that implement them; any other word, or
+# none, goes to the module as it always has.
+
+set -euo pipefail
+
+_FLEET_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# fleet_module SUBCOMMAND... — run the module.
+fleet_module() {
+  exec bash "$_FLEET_DIR/libexec/fleet.sh" fleet "$@"
+}
+
+case "${1:-} ${2:-}" in
+  "drift show") fleet_module drift "${@:3}" ;;
+  "namespace list") fleet_module namespace show "${@:3}" ;;
+  "log show") fleet_module events "${@:3}" ;;
+  "policy show") fleet_module enforce status "${@:3}" ;;
+  "policy set") fleet_module enforce set "${@:3}" ;;
+esac
+fleet_module "$@"

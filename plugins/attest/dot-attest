@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# dot-attest: the entry of the attest plugin (ADR-020 N2). bin/dot runs it
+# with the words after `dot attest`. Its declared spellings choose the
+# attestation's mode; any other word, or none, goes to the attestation
+# script as it always has.
+
+set -euo pipefail
+
+_ATTEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source-path=SCRIPTDIR source=../../lib/dot/utils.sh
+source "$_ATTEST_DIR/../../lib/dot/utils.sh"
+
+dot_ui_command_banner "Attest" "attest"
+
+_ATTEST_SCRIPT="scripts/diagnostics/workstation-attestation.sh"
+case "${1:-}" in
+  show) run_script "$_ATTEST_SCRIPT" "Workstation attestation" "${@:2}" ;;
+  export) run_script "$_ATTEST_SCRIPT" "Workstation attestation" --write "${@:2}" ;;
+  verify) run_script "$_ATTEST_SCRIPT" "Workstation attestation" --verify "${@:2}" ;;
+  *) run_script "$_ATTEST_SCRIPT" "Workstation attestation" "$@" ;;
+esac

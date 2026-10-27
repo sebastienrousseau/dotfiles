@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 #
 # Behavioural coverage for `dot fleet status|drift|events` in
-# scripts/dot/commands/fleet.sh. Every branch is driven through inputs:
+# plugins/fleet/libexec/fleet.sh. Every branch is driven through inputs:
 # a writable fake source tree (code symlinked, .chezmoidata.toml owned
 # by the test), a scripted `chezmoi status` shim, a curl spy for the
 # event-forwarding endpoint, and PATH variants without chezmoi / jq.
@@ -44,10 +44,11 @@ fi
 mkdir -p "$FAKE/defaults"
 ln -s "$REPO_ROOT/lib" "$FAKE/lib"
 ln -s "$REPO_ROOT/scripts" "$FAKE/scripts"
+ln -s "$REPO_ROOT/plugins" "$FAKE/plugins"
 ln -s "$REPO_ROOT/bin" "$FAKE/bin"
 cp "$REPO_ROOT/package.json" "$FAKE/package.json"
 echo defaults >"$FAKE/.chezmoiroot"
-FLEET="$FAKE/scripts/dot/commands/fleet.sh"
+FLEET="$FAKE/plugins/fleet/libexec/fleet.sh"
 DATA="$FAKE/defaults/.chezmoidata.toml"
 
 STATE_DIR="$XDG_STATE_HOME/dotfiles/fleet"

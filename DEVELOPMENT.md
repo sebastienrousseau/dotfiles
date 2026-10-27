@@ -76,9 +76,9 @@ and [`docs/STRUCTURE.md`](docs/STRUCTURE.md). The parts you touch most:
 | Path | What |
 |---|---|
 | `bin/dot` | CLI dispatcher. |
-| `plugins/<domain>/dot-plugin.toml` | **The command names** (ADR-020): each domain's objects, commands, flags, aliases, and the route that runs each command today (`legacy`). |
+| `plugins/<domain>/dot-plugin.toml` | **The command names** (ADR-020): each domain's objects, commands, flags, aliases, and what runs each command: the plugin's own entry (`[entry]`, `plugins/<domain>/dot-<domain>`) or, until the domain moves to one, today's route (`legacy`). |
 | `lib/dot/data/` | `commands.txt` and `commands.json`, generated from the manifests by `tools/ci/cli_command_table.py`; `routes.txt` (route → module). `help-specs.txt` and `help-details.txt` still back `dot help <old-name>` until the old names are removed. Help, man pages, completions, cmdlets, the command index and reference, and the QA gates all read `commands.txt`. |
-| `scripts/dot/commands/` | One file per subcommand. |
+| `scripts/dot/commands/` | Today's route modules; each domain leaves for its plugin's entry (P2.1). |
 | `lib/dot/` | Shared bash library sourced by every subcommand. |
 | `defaults/` | The chezmoi source tree (everything that lands in `$HOME`), rebased via `.chezmoiroot`. |
 | `tests/` | `framework/`, `unit/`, `integration/`, `regression/`, `snapshots/`. |
@@ -91,11 +91,16 @@ and [`docs/STRUCTURE.md`](docs/STRUCTURE.md). The parts you touch most:
 Adding a `dot` command touches four places; the drift gates will tell
 you if you miss one:
 
-1. The implementation: a route in an existing module under
-   `scripts/dot/commands/`, or a new module plus its `routes.txt` row
+1. The implementation: in a plugin with an `[entry]`, a case in
+   `plugins/<domain>/dot-<domain>`, which gets the words after the domain
+   (and, with `fallback = true`, the bare domain and any word the table does
+   not take); larger plugins keep their code in `plugins/<domain>/libexec/`;
+   otherwise a route in an existing module under `scripts/dot/commands/`,
+   or a new module plus its `routes.txt` row
 2. `plugins/<domain>/dot-plugin.toml` — a `[[commands]]` entry with an
-   approved verb, its effect, its summary and `legacy` (the route), checked
-   by `tools/ci/check-cli-contract.py`
+   approved verb, its effect and its summary, plus `legacy` (the route) in
+   a plugin without an entry or `planned = true` in one with an entry
+   until it is built, checked by `tools/ci/check-cli-contract.py`
 3. `docs/reference/UTILS.md` (the docs coverage gate) and
    `docs/manual/03-reference/01-dot-cli.md` — reference prose
 4. `make generate` — regenerates the command table, command index, command

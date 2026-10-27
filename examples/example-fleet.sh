@@ -13,7 +13,7 @@ printf 'List / select a namespace:        dot fleet namespace\n'
 printf 'Inspect a node:                   dot fleet node <name>\n'
 
 # --- Underlying fleet command (repo source of truth) ---
-printf 'Fleet command:  %s\n' "$repo_root/scripts/dot/commands/fleet.sh"
+printf 'Fleet command:  %s\n' "$repo_root/plugins/fleet/libexec/fleet.sh"
 
 # Fleet reads per-node state and reports drift versus the declarative
 # chezmoi source, so a whole workstation fleet stays converged.

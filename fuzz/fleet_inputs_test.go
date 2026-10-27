@@ -2,7 +2,7 @@
 // Copyright (c) 2015-2026 Sebastien Rousseau
 //
 // FuzzFleetInputs ports the input gates of `dot fleet apply`
-// (scripts/dot/commands/fleet.sh, cmd_fleet_apply) that run before any
+// (plugins/fleet/libexec/fleet.sh, cmd_fleet_apply) that run before any
 // SSH connection:
 //
 //	host name   ^[a-zA-Z0-9._-]+$, not starting with "."

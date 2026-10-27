@@ -13,6 +13,6 @@ scripts/lib/secrets_provider.sh
 lib/dot/verified-download.sh
 scripts/diagnostics/doctor.sh
 scripts/theme/switch.sh
-scripts/dot/commands/fleet.sh
+plugins/fleet/libexec/fleet.sh
 scripts/dot/commands/tools.sh
-scripts/dot/commands/secrets.sh
+plugins/secret/libexec/secrets.sh

@@ -27,7 +27,8 @@
           "name": { "$ref": "#/$defs/word" },
           "summary": { "$ref": "#/$defs/summary" },
           "ps_noun": { "$ref": "#/$defs/psNoun" },
-          "default": { "$ref": "#/$defs/default" }
+          "default": { "$ref": "#/$defs/default" },
+          "fallback": { "type": "boolean", "description": "Words after this object that are not its verbs go to the entry too, as they went to the domain's route (needs [entry] fallback)" }
         }
       }
     },
@@ -43,6 +44,7 @@
           "verb": { "$ref": "#/$defs/word" },
           "effect": { "enum": ["read", "write", "destructive"] },
           "legacy": { "$ref": "#/$defs/legacy" },
+          "planned": { "const": true, "description": "Declared but not built yet, in a plugin with an entry" },
           "summary": { "$ref": "#/$defs/summary" },
           "output": { "type": "string", "pattern": "^[a-z]{2,8}/[a-z][a-z0-9-]*\\.v[0-9]+$", "description": "Schema id of the --json output (N13, N14)" },
           "flags": {
@@ -91,7 +93,16 @@
       }
     },
     "platforms": { "type": "array", "items": { "type": "string", "pattern": "^(darwin|linux|windows)-(arm64|amd64)$" } },
-    "entry": { "type": "object", "description": "Reserved for P2.1 (plugin host)" },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command"],
+      "description": "The plugin runs its own commands (N2): bin/dot hands the words after the domain to this executable in the plugin directory",
+      "properties": {
+        "command": { "type": "string", "pattern": "^dot-[a-z]{2,8}$" },
+        "fallback": { "type": "boolean", "description": "The domain word alone, and words that are not its verbs or objects, also go to the entry, as they went to the domain's legacy route" }
+      }
+    },
     "capabilities": { "type": "object", "description": "Reserved for P2.3 (ADR-016 trust path)" },
     "hooks": { "type": "array", "description": "Reserved for P2.2" },
     "completions": { "type": "object", "description": "Reserved for P2.1" },

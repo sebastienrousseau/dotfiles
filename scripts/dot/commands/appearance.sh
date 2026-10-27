@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Dotfiles CLI - Appearance Commands
-# theme, wallpaper, fonts, tune
+# tune (theme, wallpaper and fonts are plugins/theme/dot-theme)
 
 set -euo pipefail
 
@@ -17,45 +17,8 @@ usage() {
 Usage: appearance.sh <command> [args...]
 
 Commands:
-  theme, wallpaper, fonts, tune
+  tune
 EOF
-}
-
-cmd_theme() {
-  run_script "scripts/theme/switch.sh" "Theme switcher" "$@"
-}
-
-cmd_wallpaper() {
-  case "${1:-sync}" in
-    sync)
-      shift 2>/dev/null || true
-      run_script "scripts/theme/wallpaper-sync.sh" "Wallpaper sync script" "$@"
-      ;;
-    rotate)
-      shift
-      run_script "scripts/theme/wallpaper-rotate.sh" "Wallpaper rotate script" "$@"
-      ;;
-    *)
-      run_script "scripts/theme/wallpaper-sync.sh" "Wallpaper sync script" "$@"
-      ;;
-  esac
-}
-
-cmd_fonts() {
-  local sub="${1:-install}"
-  case "$sub" in
-    patch)
-      shift
-      run_script "scripts/fonts/patch-fonts.sh" "Font patch helper" "$@"
-      ;;
-    install | "")
-      [[ "$sub" == install ]] && shift || true
-      run_script "scripts/fonts/install-nerd-fonts.sh" "Font install script" "$@"
-      ;;
-    *)
-      run_script "scripts/fonts/install-nerd-fonts.sh" "Font install script" "$@"
-      ;;
-  esac
 }
 
 cmd_tune() {
@@ -86,18 +49,6 @@ case "${1:-}" in
   "")
     usage
     exit 1
-    ;;
-  theme)
-    shift
-    cmd_theme "$@"
-    ;;
-  wallpaper)
-    shift
-    cmd_wallpaper "$@"
-    ;;
-  fonts)
-    shift
-    cmd_fonts "$@"
     ;;
   tune)
     shift

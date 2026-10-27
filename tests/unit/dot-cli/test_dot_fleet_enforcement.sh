@@ -12,7 +12,7 @@ AGENT_SCRIPT="$REPO_ROOT/scripts/dot/commands/agent.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
-FLEET_SCRIPT="$REPO_ROOT/scripts/dot/commands/fleet.sh"
+FLEET_SCRIPT="$REPO_ROOT/plugins/fleet/libexec/fleet.sh"
 PROFILES_FILE="$REPO_ROOT/defaults/dot_config/dotfiles/agent-profiles.json"
 
 test_start "enforcement_field_exists"

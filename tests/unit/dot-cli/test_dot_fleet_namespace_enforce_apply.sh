@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 #
 # Behavioural coverage for `dot fleet namespace|enforce|apply` and the
-# top-level dispatcher in scripts/dot/commands/fleet.sh. The command's
+# top-level dispatcher in plugins/fleet/libexec/fleet.sh. The command's
 # config writes (.chezmoidata.toml, agent-profiles.json) land in a
 # private fake source tree; SSH fan-out is replaced by PATH shims for
 # ssh / ssh-keygen / mv / sed so every failure branch is reachable
@@ -43,10 +43,11 @@ fi
 mkdir -p "$FAKE/defaults/dot_config/dotfiles"
 ln -s "$REPO_ROOT/lib" "$FAKE/lib"
 ln -s "$REPO_ROOT/scripts" "$FAKE/scripts"
+ln -s "$REPO_ROOT/plugins" "$FAKE/plugins"
 ln -s "$REPO_ROOT/bin" "$FAKE/bin"
 cp "$REPO_ROOT/package.json" "$FAKE/package.json"
 echo defaults >"$FAKE/.chezmoiroot"
-FLEET="$FAKE/scripts/dot/commands/fleet.sh"
+FLEET="$FAKE/plugins/fleet/libexec/fleet.sh"
 DATA="$FAKE/defaults/.chezmoidata.toml"
 PROFILES="$FAKE/defaults/dot_config/dotfiles/agent-profiles.json"
 EVENTS="$XDG_STATE_HOME/dotfiles/fleet/events.jsonl"

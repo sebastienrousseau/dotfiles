@@ -74,7 +74,10 @@ _dot_command_help() {
   legacy="${_REC%%|*}" summary="${_REC##*|}" effect="${_REC#*|}" effect="${effect%%|*}"
   printf 'dot %s · %s\n\n' "$1" "$summary"
   printf '  %-10s %s\n' effect "$effect"
-  if [[ -n "$legacy" ]]; then
+  if [[ "$legacy" == @* ]]; then
+    legacy="${legacy#@}"
+    printf "  %-10s dot-%s %s, the plugin's entry\n" runs "${legacy%% *}" "${legacy#* }"
+  elif [[ -n "$legacy" ]]; then
     printf '  %-10s dot %s, until the domain is extracted\n' runs "$legacy"
   else
     printf '  %-10s planned, not built yet\n' state

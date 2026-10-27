@@ -76,7 +76,8 @@ fi
 # Test: every subcommand in full help has a case handler
 test_start "dot_cli_help_handler_parity"
 # Every built command `dot help all` lists runs a route the dispatcher has
-# (lib/dot/data/routes.txt); a planned one is marked as such.
+# (lib/dot/data/routes.txt) or its plugin's entry (@<domain>,
+# plugins/<domain>/dot-<domain>); a planned one is marked as such.
 help_output=$(bash "$DOT_CLI" help all 2>&1)
 help_cmds=()
 while IFS= read -r line; do
@@ -86,7 +87,14 @@ missing_handlers=0
 for cmd in "${help_cmds[@]}"; do
   legacy="$(awk -F'|' -v k="$cmd" '$1 == "cmd" && $2 == k { print $3; exit }' "$REPO_ROOT/lib/dot/data/commands.txt")"
   [[ -n "$legacy" ]] || continue
-  if ! grep -q "^${legacy%% *}|" "$REPO_ROOT/lib/dot/data/routes.txt"; then
+  if [[ "$legacy" == @* ]]; then
+    entry="${legacy%% *}"
+    entry="$REPO_ROOT/plugins/${entry#@}/dot-${entry#@}"
+    if [[ ! -x "$entry" ]]; then
+      echo "    WARNING: help lists '$cmd' but its entry $entry is missing"
+      missing_handlers=$((missing_handlers + 1))
+    fi
+  elif ! grep -q "^${legacy%% *}|" "$REPO_ROOT/lib/dot/data/routes.txt"; then
     echo "    WARNING: help lists '$cmd' but its route '${legacy%% *}' has no handler"
     missing_handlers=$((missing_handlers + 1))
   fi

@@ -12,6 +12,8 @@ source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 SEC_FILE="$REPO_ROOT/scripts/dot/commands/security.sh"
+# The hardening commands moved to the security plugin's entry (P2.1).
+SECURITY_ENTRY="$REPO_ROOT/plugins/security/dot-security"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
@@ -32,7 +34,7 @@ fi
 
 # Test: defines firewall command
 test_start "security_cmd_defines_firewall"
-if grep -q "cmd_firewall\|_firewall\|firewall" "$SEC_FILE" 2>/dev/null; then
+if grep -q "scripts/security/firewall.sh" "$SECURITY_ENTRY" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines firewall command"
 else
@@ -52,7 +54,7 @@ fi
 
 # Test: defines telemetry command
 test_start "security_cmd_defines_telemetry"
-if grep -q "cmd_telemetry\|telemetry" "$SEC_FILE" 2>/dev/null; then
+if grep -q "scripts/security/telemetry-kill.sh" "$SECURITY_ENTRY" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines telemetry command"
 else
@@ -62,7 +64,7 @@ fi
 
 # Test: defines encrypt-check command
 test_start "security_cmd_defines_encrypt_check"
-if grep -q "encrypt.check\|encrypt_check\|encryptcheck" "$SEC_FILE" 2>/dev/null; then
+if grep -q "scripts/security/encryption-check.sh" "$SECURITY_ENTRY" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines encrypt-check command"
 else
