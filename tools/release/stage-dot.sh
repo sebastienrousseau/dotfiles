@@ -36,11 +36,14 @@ done
 cp "$repo_root/bin/dot.ps1" "$dest/bin/"
 cp "$repo_root/tools/release/Makefile.dist" "$dest/Makefile"
 # stage_tree SRC DEST: the libraries, scripts, bundled plugins (P2.1),
-# security data, docs and the defaults the CLI reads at run time.
+# security data, docs and the defaults the CLI reads at run time;
+# .chezmoiroot points the readers at defaults/, as in a checkout, and
+# defaults/dot_config/dotfiles keeps its name, which every reader expects.
 stage_tree() {
   cp -R "$1/lib/dot" "$2/lib/"
   cp -R "$1/scripts" "$1/plugins" "$1/security" "$1/docs" "$2/"
-  mkdir -p "$2/defaults"
+  mkdir -p "$2/defaults/dot_config"
+  cp "$1/.chezmoiroot" "$2/"
   cp "$1/defaults/.chezmoidata.toml" "$2/defaults/"
   cp -R "$1/defaults/.chezmoidata" "$1/defaults/.chezmoitemplates" "$1/defaults/dot_claude" "$2/defaults/"
   cp -R "$1/defaults/dot_config/dotfiles" "$2/defaults/dot_config/"
