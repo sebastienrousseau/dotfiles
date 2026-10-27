@@ -18,23 +18,6 @@ Diagnostics|perf|Show performance mode and quick timing|Startup and shell timing
 Diagnostics|benchmark|Benchmark shell startup with per-component profiling|Hyperfine timings per shell, plus a breakdown of what each init step costs.
 Diagnostics|metrics|Show recent observability metrics (JSONL)|Recent runtime events and counters.
 Diagnostics|load-bench|Measure time to heavy-layer readiness|Performance benchmarking helper.
-AI|ai|AI fleet cockpit, gateway, and cost|Subcommands: dot ai (cockpit), dot ai "<prompt>", dot ai serve, dot ai install, dot ai cost, dot ai doctor.
-AI|ai-setup|Interactive setup for all AI CLI tools|Initial AI tool bootstrap.
-AI|ai-query|Context-aware RAG query over your dotfiles|Ask questions over the repo state.
-AI|mcp|Inspect MCP policy, supply chain, and registry; serve MCP over stdio|Governance surface plus the `dot mcp serve` MCP server.
-AI|mode|Set or inspect agent operating profiles (ask/plan/apply/audit)|Bounded-autonomy controls.
-AI|agent|Profile-aware execution, agent card, a2a-card, session log, checkpoints, and conformance|Agent metadata and local audit trail.
-AI|agents|Render and check AGENTS.md and per-harness agent config from CLAUDE.md|Keeps every coding agent on the same context.
-AI|patterns|List, view, and edit AI steering patterns|Reusable prompts for the AI tools.
-AI|cl|Claude CLI with context patterns|Context-aware Anthropic bridge.
-AI|copilot|GitHub Copilot CLI with context patterns|Context-aware Copilot bridge.
-AI|kimi|Kimi CLI with context patterns|Context-aware Moonshot AI bridge.
-AI|agy|Antigravity CLI with context patterns|Context-aware Antigravity bridge.
-AI|kiro|Kiro CLI with context patterns|Context-aware Kiro bridge.
-AI|sgpt|Shell-GPT with context patterns|Context-aware Shell-GPT bridge.
-AI|ollama|Ollama with context patterns|Context-aware local-model bridge.
-AI|opencode|OpenCode with context patterns|Context-aware OpenCode bridge.
-AI|aider|Aider with context patterns|Context-aware Aider bridge.
 Tools|env|Tool versions (mise)|Managed runtime versions.
 Tools|profile|Show/switch configuration profile|Profile-specific behavior.
 Tools|keys|Keybindings (sign-check: verify git signing)|Keyboard and signing references.

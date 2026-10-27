@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck shell=bash
 #
-# scripts/dot/commands/agents.sh
+# plugins/agent/libexec/agents.sh
 #
 # `dot agent context` — multi-harness AI agent configuration manager.
 #

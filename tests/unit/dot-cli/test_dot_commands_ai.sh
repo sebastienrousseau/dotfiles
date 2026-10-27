@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC2016,SC2034,SC2317
-# Unit tests for the dot AI bridge command (scripts/dot/commands/ai.sh).
+# Unit tests for the dot AI bridge command (plugins/ai/libexec/ai.sh).
 #
 # Every case runs ai.sh: the bridge prompt it builds (system metadata,
 # --pattern/--style/-p steering), the grouped provider listing of
@@ -19,7 +19,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 # shellcheck source=../../framework/assertions.sh
 source "$REPO_ROOT/tests/framework/assertions.sh"
 
-AI_SCRIPT="$REPO_ROOT/scripts/dot/commands/ai.sh"
+AI_SCRIPT="$REPO_ROOT/plugins/ai/libexec/ai.sh"
 REAL_BASH="${BASH:-$(command -v bash)}"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/ai-cmd.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
@@ -166,7 +166,7 @@ assert_contains "9.9.9 —" "$(grep -F 'Copilot CLI' "$OUT")" "expired cache is 
 assert_file_contains "$CACHE" $'copilot\t1\t9.9.9' "refresh rewrites the cache"
 cached="$(
   set -- --help
-  # shellcheck source=../../../scripts/dot/commands/ai.sh
+  # shellcheck source=../../../plugins/ai/libexec/ai.sh
   source "$AI_SCRIPT" >/dev/null 2>&1
   _ai_get_cached_status
 )"

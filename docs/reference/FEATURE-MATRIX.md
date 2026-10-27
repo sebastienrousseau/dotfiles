@@ -221,27 +221,27 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot ai login` | (default) | `test_fm_smoke_ai_login` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — interactive OAuth / API-key prompts (TTY, network) |
 | `dot ai` | dashboard / dash (deprecated cockpit alias) | `test_fm_smoke_ai_dashboard` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — launches the cockpit TUI (interactive TTY) |
 | `dot ai` | proxy / local (deprecated alias of ai serve) | `test_fm_ai_proxy_deprecated` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot ai-setup` | deprecated alias of ai login | `test_fm_smoke_ai_setup` | `help:ai-setup` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — interactive tool authentication (TTY, network) |
+| `dot ai-setup` | deprecated alias of ai login | `test_fm_smoke_ai_setup` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — interactive tool authentication (TTY, network) |
 | `dot ai-query` | deprecated alias of ai ask (usage without question) | `test_fm_ai_query_usage` | `run:ai-query-usage` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot cl` | (usage without prompt; deprecated bridge) | `test_fm_ai_bridge_cl` | `run:cl-usage` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot claude` | alias of cl | `test_fm_ai_bridge_claude` | `help:claude` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
-| `dot codex` | (usage without prompt) | `test_fm_ai_bridge_codex` | `help:codex` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
-| `dot copilot` | (usage without prompt) | `test_fm_ai_bridge_copilot` | `help:copilot` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot kimi` | (usage without prompt) | `test_fm_ai_bridge_kimi` | `help:kimi` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot agy` | (usage without prompt) | `test_fm_ai_bridge_agy` | `help:agy` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot goose` | (usage without prompt) | `test_fm_ai_bridge_goose` | `help:goose` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
-| `dot kiro` | (usage without prompt) | `test_fm_ai_bridge_kiro` | `help:kiro` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot sgpt` | (usage without prompt) | `test_fm_ai_bridge_sgpt` | `help:sgpt` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot ollama` | (usage without prompt) | `test_fm_ai_bridge_ollama` | `help:ollama` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot opencode` | (usage without prompt) | `test_fm_ai_bridge_opencode` | `help:opencode` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot aider` | (usage without prompt) | `test_fm_ai_bridge_aider` | `help:aider` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot autohand` | (usage without prompt) | `test_fm_ai_bridge_autohand` | `help:autohand` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
-| `dot vibe` | (usage without prompt) | `test_fm_ai_bridge_vibe` | `help:vibe` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
-| `dot qwen` | (usage without prompt) | `test_fm_ai_bridge_qwen` | `help:qwen` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
-| `dot zai` | (usage without prompt) | `test_fm_ai_bridge_zai` | `help:zai` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
-| `dot cl` | --style / --pattern / -p <name> (unknown pattern exits 1) | `test_fm_ai_bridge_style` | `help:cl` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot cl` | "<prompt>" with an installed tool | `test_fm_smoke_ai_bridge_prompt` | `help:cl` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — performs a paid LLM round-trip (network) |
-| `dot cl` | DOT_AI_RAW=1 suppresses the banner and metadata preamble | `test_fm_env_dot_ai_raw` | `help:cl` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/03-environment.md` | regression |
+| `dot claude` | alias of cl | `test_fm_ai_bridge_claude` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
+| `dot codex` | (usage without prompt) | `test_fm_ai_bridge_codex` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
+| `dot copilot` | (usage without prompt) | `test_fm_ai_bridge_copilot` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot kimi` | (usage without prompt) | `test_fm_ai_bridge_kimi` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot agy` | (usage without prompt) | `test_fm_ai_bridge_agy` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot goose` | (usage without prompt) | `test_fm_ai_bridge_goose` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
+| `dot kiro` | (usage without prompt) | `test_fm_ai_bridge_kiro` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot sgpt` | (usage without prompt) | `test_fm_ai_bridge_sgpt` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot ollama` | (usage without prompt) | `test_fm_ai_bridge_ollama` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot opencode` | (usage without prompt) | `test_fm_ai_bridge_opencode` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot aider` | (usage without prompt) | `test_fm_ai_bridge_aider` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot autohand` | (usage without prompt) | `test_fm_ai_bridge_autohand` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
+| `dot vibe` | (usage without prompt) | `test_fm_ai_bridge_vibe` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
+| `dot qwen` | (usage without prompt) | `test_fm_ai_bridge_qwen` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
+| `dot zai` | (usage without prompt) | `test_fm_ai_bridge_zai` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
+| `dot cl` | --style / --pattern / -p <name> (unknown pattern exits 1) | `test_fm_ai_bridge_style` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot cl` | "<prompt>" with an installed tool | `test_fm_smoke_ai_bridge_prompt` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — performs a paid LLM round-trip (network) |
+| `dot cl` | DOT_AI_RAW=1 suppresses the banner and metadata preamble | `test_fm_env_dot_ai_raw` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 
 ## tools.sh / aliases.sh
 
@@ -391,18 +391,18 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot mode list` | (default) | `test_fm_mode_list` | `run:mode-list` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot mode current` | (default) | `test_fm_mode_current` | `run:mode-current` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot mode show` | <profile> | `test_fm_mode_show` | `run:mode-show` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot mode show` | <unknown> (exit 1) / missing name (exit 1) | `test_fm_mode_show_unknown` | `help:mode` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot mode set` | <profile> (writes agent-mode.env) | `test_fm_mode_set` | `help:mode` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot mode set` | <unknown> (exit 1) | `test_fm_mode_set_unknown` | `help:mode` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot mode set` | refused by strict RBAC enforcement (exit 1) | `test_fm_mode_set_rbac_strict` | `help:mode` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot mode show` | <unknown> (exit 1) / missing name (exit 1) | `test_fm_mode_show_unknown` | `help:agent` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot mode set` | <profile> (writes agent-mode.env) | `test_fm_mode_set` | `help:agent` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot mode set` | <unknown> (exit 1) | `test_fm_mode_set_unknown` | `help:agent` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot mode set` | refused by strict RBAC enforcement (exit 1) | `test_fm_mode_set_rbac_strict` | `help:agent` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot mode run` | [profile] <command> (checkpointed) | `test_fm_mode_run` | `run:mode-run` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot mode run` | (no command, exit 1) | `test_fm_mode_run_usage` | `help:mode` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot mode run` | propagates the wrapped command's exit code | `test_fm_mode_run_exit_code` | `help:mode` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot mode run` | (no command, exit 1) | `test_fm_mode_run_usage` | `help:agent` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot mode run` | propagates the wrapped command's exit code | `test_fm_mode_run_exit_code` | `help:agent` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot mode doctor` | (default) | `test_fm_mode_doctor` | `run:mode-doctor` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot mode` | <unknown> (usage, exit 1) | `test_fm_mode_unknown` | `help:mode` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot mode` | AGENT_PROFILE_CONFIG / AGENT_STATE_FILE override the profiles file and state file | `test_fm_env_agent_profile_config` | `help:mode` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/03-environment.md` | regression |
-| `dot mode` | dot_config/dotfiles/agent-profiles.json `defaultProfile` / `profiles` / `rbac` / `delegation` | `test_fm_config_agent_profiles_json` | `help:mode` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/02-config-files.md` | regression |
-| `dot mode` | ~/.config/dotfiles/agent-mode.env state file (DOT_AGENT_PROFILE …) | `test_fm_config_agent_mode_env` | `help:mode` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/02-config-files.md` | regression |
+| `dot mode` | <unknown> (usage, exit 1) | `test_fm_mode_unknown` | `help:agent` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot mode` | AGENT_PROFILE_CONFIG / AGENT_STATE_FILE override the profiles file and state file | `test_fm_env_agent_profile_config` | `help:agent` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/03-environment.md` | regression |
+| `dot mode` | dot_config/dotfiles/agent-profiles.json `defaultProfile` / `profiles` / `rbac` / `delegation` | `test_fm_config_agent_profiles_json` | `help:agent` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/02-config-files.md` | regression |
+| `dot mode` | ~/.config/dotfiles/agent-mode.env state file (DOT_AGENT_PROFILE …) | `test_fm_config_agent_mode_env` | `help:agent` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/02-config-files.md` | regression |
 | `dot agent` | (default = current profile) | `test_fm_agent` | `run:agent` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot agent card` | (default table) | `test_fm_agent_card` | `run:agent-card` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot agent card` | --json | `test_fm_agent_card_json` | `run:agent-card-json` | `examples/example-dot-agent.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
@@ -432,10 +432,10 @@ bash scripts/qa/check-feature-matrix.sh
 |---------|---------|-----------------|-----------|---------|--------|----------|
 | `dot agents list` | (default) | `test_fm_agents_list` | `run:agents-list` | `examples/example-dot-agents.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot agents check` | (in sync, exit 0) | `test_fm_agents_check` | `run:agents-check` | `examples/example-dot-agents.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot agents check` | (AGENTS.md missing or drifted, exit 1) | `test_fm_agents_check_drift` | `help:agents` | `examples/example-dot-agents.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot agents render` | (writes AGENTS.md + harness stubs) | `test_fm_agents_render` | `help:agents` | `examples/example-dot-agents.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot agents` | --help / -h / help | `test_fm_agents_help` | `help:agents` | `examples/example-dot-agents.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot agents` | <unknown> (exit 1) | `test_fm_agents_unknown` | `help:agents` | `examples/example-dot-agents.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot agents check` | (AGENTS.md missing or drifted, exit 1) | `test_fm_agents_check_drift` | `help:agent` | `examples/example-dot-agents.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot agents render` | (writes AGENTS.md + harness stubs) | `test_fm_agents_render` | `help:agent` | `examples/example-dot-agents.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot agents` | --help / -h / help | `test_fm_agents_help` | `help:agent` | `examples/example-dot-agents.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot agents` | <unknown> (exit 1) | `test_fm_agents_unknown` | `help:agent` | `examples/example-dot-agents.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 
 ## fleet.sh
 
@@ -502,11 +502,11 @@ bash scripts/qa/check-feature-matrix.sh
 |---------|---------|-----------------|-----------|---------|--------|----------|
 | `dot patterns list` | (default) | `test_fm_patterns_list` | `run:patterns-list` | `examples/example-dot-patterns.sh` | `docs/manual/command-index.md` | regression |
 | `dot patterns view` | <name> | `test_fm_patterns_view` | `run:patterns-view` | `examples/example-dot-patterns.sh` | `docs/manual/command-index.md` | regression |
-| `dot patterns view` | (no name, exit 1) / unknown pattern | `test_fm_patterns_view_missing` | `help:patterns` | `examples/example-dot-patterns.sh` | `docs/manual/command-index.md` | regression |
-| `dot patterns edit` | <name> (opens $EDITOR) | `test_fm_patterns_edit` | `help:patterns` | `examples/example-dot-patterns.sh` | `docs/manual/command-index.md` | regression |
-| `dot patterns edit` | (no name, exit 1) | `test_fm_patterns_edit_missing` | `help:patterns` | `examples/example-dot-patterns.sh` | `docs/manual/command-index.md` | regression |
-| `dot patterns` | <unknown> (usage, exit 1) | `test_fm_patterns_unknown` | `help:patterns` | `examples/example-dot-patterns.sh` | `docs/manual/command-index.md` | regression |
-| `dot patterns list` | XDG_CONFIG_HOME/ai/patterns is the pattern directory | `test_fm_env_xdg_config_home` | `help:patterns` | `examples/example-dot-patterns.sh` | `docs/manual/03-reference/03-environment.md` | regression |
+| `dot patterns view` | (no name, exit 1) / unknown pattern | `test_fm_patterns_view_missing` | `help:ai` | `examples/example-dot-patterns.sh` | `docs/manual/command-index.md` | regression |
+| `dot patterns edit` | <name> (opens $EDITOR) | `test_fm_patterns_edit` | `help:ai` | `examples/example-dot-patterns.sh` | `docs/manual/command-index.md` | regression |
+| `dot patterns edit` | (no name, exit 1) | `test_fm_patterns_edit_missing` | `help:ai` | `examples/example-dot-patterns.sh` | `docs/manual/command-index.md` | regression |
+| `dot patterns` | <unknown> (usage, exit 1) | `test_fm_patterns_unknown` | `help:ai` | `examples/example-dot-patterns.sh` | `docs/manual/command-index.md` | regression |
+| `dot patterns list` | XDG_CONFIG_HOME/ai/patterns is the pattern directory | `test_fm_env_xdg_config_home` | `help:ai` | `examples/example-dot-patterns.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 
 ## completion.sh
 

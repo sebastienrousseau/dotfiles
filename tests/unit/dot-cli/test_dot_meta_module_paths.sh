@@ -28,6 +28,11 @@ DOT_FIXTURE_HOME="$FX/home"
 meta_run() {
   DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" dot_fixture_run "$FX" meta "$@"
 }
+# mcp_run <args…> — the mcp module, which left meta.sh for the mcp plugin's
+# libexec/ (P2.1); `meta.sh mcp <args…>` ran the same function.
+mcp_run() {
+  DOT_FIXTURE_PATH="$FX/stubs:$FX/basebin" dot_fixture_run "$FX" mcp "$@"
+}
 
 # ── 1. upgrade: continue after a failed phase, then report failure ─────────
 #
@@ -146,13 +151,13 @@ assert_contains "Docker or Podman is required" "$DOT_FIXTURE_OUT" \
 
 # ── 6. mcp ─────────────────────────────────────────────────────────────────
 test_start "meta_mcp_doctor_reports_a_missing_helper"
-meta_run mcp doctor
+mcp_run doctor
 assert_equals "1" "$DOT_FIXTURE_RC" "mcp doctor without its script should exit 1"
 assert_contains "MCP doctor script not found" "$DOT_FIXTURE_OUT" \
   "the missing helper should be named"
 
 test_start "meta_mcp_registry_reports_a_missing_registry"
-meta_run mcp registry
+mcp_run registry
 assert_equals "1" "$DOT_FIXTURE_RC" "an absent registry should exit 1"
 assert_contains "MCP registry not found" "$DOT_FIXTURE_OUT" \
   "the failure should name the path it looked for"
@@ -160,7 +165,7 @@ assert_contains "MCP registry not found" "$DOT_FIXTURE_OUT" \
 test_start "meta_mcp_registry_cats_the_registry_without_jq"
 mkdir -p "$FX/dot_config/dotfiles"
 printf '{ "servers": {} }\n' >"$FX/dot_config/dotfiles/mcp-registry.json"
-meta_run mcp registry
+mcp_run registry
 assert_equals "0" "$DOT_FIXTURE_RC" "registry should exit 0"
 assert_contains '"servers"' "$DOT_FIXTURE_OUT" \
   "with no jq on PATH the registry should be catted verbatim"
@@ -169,20 +174,20 @@ assert_contains '"servers"' "$DOT_FIXTURE_OUT" \
 # dispatcher in bin/dot can also hand the subcommand through twice; both
 # spellings must land on the same place.
 test_start "meta_mcp_tolerates_a_repeated_doctor_subcommand"
-meta_run mcp doctor doctor
+mcp_run doctor doctor
 assert_equals "1" "$DOT_FIXTURE_RC" \
   "the repeated spelling should still reach the (absent) doctor script"
 assert_contains "MCP doctor script not found" "$DOT_FIXTURE_OUT" \
   "and report the same missing helper"
 
 test_start "meta_mcp_tolerates_a_repeated_registry_subcommand"
-meta_run mcp registry registry
+mcp_run registry registry
 assert_equals "0" "$DOT_FIXTURE_RC" \
   "the repeated spelling should still print the registry"
 assert_contains '"servers"' "$DOT_FIXTURE_OUT" "and print the same content"
 
 test_start "meta_mcp_rejects_an_unknown_subcommand"
-meta_run mcp nonsense
+mcp_run nonsense
 assert_equals "1" "$DOT_FIXTURE_RC" "an unknown mcp subcommand should exit 1"
 assert_contains "Usage: dot mcp" "$DOT_FIXTURE_OUT" "it should print usage"
 

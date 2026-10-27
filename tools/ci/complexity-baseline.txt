@@ -100,6 +100,11 @@
   17   21   34.7   36     0 lib/dot/utils.sh::resolve_source_dir
   12   11   35.2   53     0 lib/dot/verified-download.sh::download_verified_asset
    9    8   32.9   46     0 lib/dot/verified-download.sh::download_verified_script
+   1    0    1.0    1   518 plugins/agent/libexec/agent.sh::<top>
+  16    5   25.7   27     0 plugins/agent/libexec/agent.sh::cmd_mode
+  12   12   25.8   22     0 plugins/agent/libexec/agents.sh::_agents_repo_root
+  18   21   43.4  163     0 plugins/agent/libexec/agents.sh::cmd_agents
+  19   25   27.4   53     0 plugins/mcp/libexec/mcp.sh::cmd_mcp
   21   12   31.5   69   248 plugins/secret/libexec/secrets.sh::<top>
   16   16   23.8   61     0 plugins/secret/libexec/secrets.sh::cmd_env_load
   22   22   36.8  109   109 scripts/diagnostics/attest-verify.sh::<top>
@@ -117,19 +122,12 @@
   11   16   24.0   62     0 scripts/diagnostics/security-score.sh::print_summary
   13   14   21.3   54    69 scripts/diagnostics/version-locks.sh::<top>
   25   27   43.1  135   199 scripts/diagnostics/workstation-attestation.sh::<top>
-   1    0    1.0    1   518 scripts/dot/commands/agent.sh::<top>
-  16    5   25.7   27     0 scripts/dot/commands/agent.sh::cmd_mode
-  12   12   25.8   22     0 scripts/dot/commands/agents.sh::_agents_repo_root
-  18   21   43.4  163     0 scripts/dot/commands/agents.sh::cmd_agents
   17    3   25.6   67   184 scripts/dot/commands/core.sh::<top>
-  25    2   31.2  101   194 scripts/dot/commands/diagnostics.sh::<top>
+  24    2   30.2   97   187 scripts/dot/commands/diagnostics.sh::<top>
   23   19   31.2  148     0 scripts/dot/commands/env-emit.sh::dot_env_emit
   22   21   28.7  103     0 scripts/dot/commands/init.sh::cmd_init
   11   11   15.2   34     0 scripts/dot/commands/manual.sh::cmd_open
-  14    4   24.5   61   349 scripts/dot/commands/meta.sh::<top>
   17   38   24.9   54     0 scripts/dot/commands/meta.sh::cmd_keys
-  19   25   27.4   53     0 scripts/dot/commands/meta.sh::cmd_mcp
-  14   14   23.5   28     0 scripts/dot/commands/meta.sh::cmd_mcp_serve
    9   14   25.7   82     0 scripts/dot/commands/meta.sh::cmd_upgrade
   11   10   33.7   42     0 scripts/dot/commands/registry.sh::_registry_install
   33   34   43.5  123     0 scripts/dot/commands/registry.sh::cmd_registry

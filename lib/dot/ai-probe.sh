@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# Sourced by scripts/dot/commands/ai.sh.
+# Sourced by plugins/ai/libexec/ai.sh.
 # Version probing for `dot ai tools`: run `<tool> --version` from a private
 # scratch directory and pick the line that carries the version.
 

@@ -67,7 +67,7 @@ fi
 
 test_start "edge_missing_pattern_dir"
 # AI bridge should handle missing pattern directory gracefully
-output=$(bash "$REPO_ROOT/scripts/dot/commands/ai.sh" cl --help 2>&1 || true)
+output=$(bash "$REPO_ROOT/plugins/ai/libexec/ai.sh" cl --help 2>&1 || true)
 if [[ -n "$output" ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: AI bridge handles missing pattern dir"
@@ -381,7 +381,7 @@ assert_file_contains "$REPO_ROOT/scripts/ops/prewarm.sh" "mkdir -p" "prewarm mus
 # ═══════════════════════════════════════════════════════════════
 
 test_start "edge_ai_script_checks_deps"
-assert_file_contains "$REPO_ROOT/scripts/dot/commands/ai.sh" "has_command" "ai.sh must check for tool availability"
+assert_file_contains "$REPO_ROOT/plugins/ai/libexec/ai.sh" "has_command" "ai.sh must check for tool availability"
 
 test_start "edge_install_checks_deps"
 assert_file_contains "$REPO_ROOT/install.sh" "command -v" "install.sh must check for dependencies"

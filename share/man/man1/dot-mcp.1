@@ -14,10 +14,10 @@ Every command takes \fB\-\-help\fR; \fBdot help\fR lists every domain.
 .SH COMMANDS
 .TP
 .B dot mcp list
-Configured MCP servers. Effect: read. Runs \fBdot mcp registry\fR until the domain is extracted.
+Configured MCP servers. Effect: read. Runs \fBdot\-mcp list\fR, the plugin's entry.
 .TP
 .B dot mcp check
-Check servers and pins. Effect: read. Runs \fBdot mcp doctor\fR until the domain is extracted.
+Check servers and pins. Effect: read. Runs \fBdot\-mcp check\fR, the plugin's entry.
 .RS
 .TP
 .B \-\-strict, \-s
@@ -28,6 +28,6 @@ Print a JSON summary
 .RE
 .TP
 .B dot mcp serve
-Run dot's read\-only MCP server. Effect: read. Runs \fBdot mcp serve\fR until the domain is extracted.
+Run dot's read\-only MCP server. Effect: read. Runs \fBdot\-mcp serve\fR, the plugin's entry.
 .SH SEE ALSO
 .BR dot (1)

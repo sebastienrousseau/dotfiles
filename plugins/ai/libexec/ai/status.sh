@@ -5,7 +5,7 @@
 # Sourced by ai.sh; inherits set -euo pipefail
 # The `dot ai` status screen: rows from the probe cache, the offer to
 # install missing CLIs (gum chooser, native installers, mise) and the
-# launcher. Sourced by scripts/dot/commands/ai.sh.
+# launcher. Sourced by plugins/ai/libexec/ai.sh.
 
 # _ai_status_rows <entries...>: one row per CLI from the status cache;
 # fills the caller's installed (name|bin|role) and missing (name|bin).

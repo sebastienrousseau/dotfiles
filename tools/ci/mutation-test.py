@@ -273,6 +273,13 @@ def needles_for(rel: str) -> list[str]:
     if len(parts) >= 2 and parts[-2] == "commands" and name.endswith(".sh"):
         cmd = name[:-3]
         out.update({f"dot {cmd}", f"cmd_{cmd}"})
+    if len(parts) >= 3 and parts[0] == "plugins":
+        # A bundled plugin (P2.1): its entry and the modules in its libexec/
+        # are driven as `dot <domain>`, `dot-<domain>` or cmd_<module>.
+        domain = parts[1]
+        out.update({f"dot {domain}", f"dot-{domain}"})
+        if parts[-2] == "libexec" and name.endswith(".sh"):
+            out.add(f"cmd_{name[:-3]}")
     if rel == "bin/dot":
         out.add("bin/dot")
     return sorted(out)

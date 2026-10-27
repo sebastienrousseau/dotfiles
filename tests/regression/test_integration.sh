@@ -103,7 +103,7 @@ it_sandbox dispatch
 test_start "dispatch_command_scripts_exist"
 it_bad=""
 it_mods=()
-for it_m in core diagnostics ai tools appearance security meta completion; do
+for it_m in core diagnostics tools appearance security meta completion; do
   it_mods+=("$REPO_ROOT/scripts/dot/commands/$it_m.sh")
 done
 it_mods+=("$REPO_ROOT"/scripts/dot/commands/*.sh "$REPO_ROOT"/plugins/*/libexec/*.sh)
@@ -114,7 +114,7 @@ for it_f in "${it_mods[@]}"; do
 done
 assert_empty "$it_bad" "every command module loads and rejects an unknown subcommand"
 
-# A bare `dot ai "<prompt>"` goes through bin/dot → commands/ai.sh and runs
+# A bare `dot ai "<prompt>"` goes through bin/dot → plugins/ai/dot-ai → libexec/ai.sh and runs
 # the prompt on Claude.
 test_start "integration_dot_cli_sources_commands"
 it_stub claude "echo \"claude \$*\" >>\"$IT_S/claude.spy\"; exit 0"

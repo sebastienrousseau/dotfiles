@@ -9,7 +9,10 @@ domain = "agent"
 version = "0.2.536"
 summary = "modes, policy, sandbox, budgets"
 default = "status"
-legacy = "agent"
+
+[entry]
+command = "dot-agent"
+fallback = true
 
 [[objects]]
 name = "mode"
@@ -25,16 +28,19 @@ default = "show"
 name = "card"
 summary = "the agent card"
 default = "show"
+fallback = true
 
 [[objects]]
 name = "log"
 summary = "the agent log"
 default = "show"
+fallback = true
 
 [[objects]]
 name = "checkpoint"
 summary = "saved checkpoints"
 default = "list"
+fallback = true
 
 [[objects]]
 name = "policy"
@@ -50,148 +56,137 @@ default = "show"
 name = "delegate"
 summary = "agents a profile may hand work to"
 default = "list"
+fallback = true
 
 [[commands]]
 verb = "status"
 effect = "read"
-legacy = "mode current"
 summary = "Mode, policy and budgets"
 
 [[commands]]
 verb = "check"
 effect = "read"
-legacy = "mode doctor"
 summary = "Check modes and policy"
 
 [[commands]]
 verb = "run"
 effect = "write"
-legacy = "agent run"
 summary = "Run an agent task"
 
 [[commands]]
 verb = "suspend"
 effect = "write"
+planned = true
 summary = "Pause running agents"
 
 [[commands]]
 verb = "resume"
 effect = "write"
+planned = true
 summary = "Resume paused agents"
 
 [[commands]]
 verb = "export"
 effect = "read"
+planned = true
 summary = "Export the AI bill of materials"
 
 [[commands]]
 object = "mode"
 verb = "list"
 effect = "read"
-legacy = "mode list"
 summary = "Available modes"
 
 [[commands]]
 object = "mode"
 verb = "show"
 effect = "read"
-legacy = "mode show"
 summary = "One mode in detail"
 
 [[commands]]
 object = "mode"
 verb = "set"
 effect = "write"
-legacy = "mode set"
 summary = "Switch mode"
 
 [[commands]]
 object = "context"
 verb = "show"
 effect = "read"
-legacy = "agents list"
 summary = "Context files in effect"
 
 [[commands]]
 object = "card"
 verb = "show"
 effect = "read"
-legacy = "agent card"
 summary = "The agent card"
 
 [[commands]]
 object = "log"
 verb = "show"
 effect = "read"
-legacy = "agent log"
 summary = "The agent log"
 
 [[commands]]
 object = "checkpoint"
 verb = "list"
 effect = "read"
-legacy = "agent checkpoint list"
 summary = "Saved checkpoints"
 
 [[commands]]
 object = "checkpoint"
 verb = "save"
 effect = "write"
-legacy = "agent checkpoint save"
 summary = "Save a checkpoint"
 
 [[commands]]
 object = "policy"
 verb = "show"
 effect = "read"
+planned = true
 summary = "The sandbox policy"
 
 [[commands]]
 object = "budget"
 verb = "show"
 effect = "read"
+planned = true
 summary = "Budgets and spend"
 
 [[commands]]
 object = "delegate"
 verb = "list"
 effect = "read"
-legacy = "agent delegate list"
 summary = "Configured delegates"
 
 [[commands]]
 object = "delegate"
 verb = "run"
 effect = "write"
-legacy = "agent delegate run"
 summary = "Run a command as a delegate"
 
 [[commands]]
 object = "context"
 verb = "check"
 effect = "read"
-legacy = "agents check"
 summary = "Check the rendered context files are current"
 
 [[commands]]
 object = "context"
 verb = "apply"
 effect = "write"
-legacy = "agents render"
 summary = "Render the context file for every harness"
 
 [[commands]]
 object = "mode"
 verb = "run"
 effect = "write"
-legacy = "mode run"
 summary = "Run a command under a mode"
 
 [[commands]]
 object = "card"
 verb = "check"
 effect = "read"
-legacy = "mode conformance"
 summary = "Check the card against the A2A spec"
 
 [[aliases]]

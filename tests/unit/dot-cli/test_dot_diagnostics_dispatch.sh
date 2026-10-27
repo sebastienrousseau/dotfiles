@@ -80,9 +80,9 @@ test_start "unknown_command_fails"
 diag definitely-not-a-command
 assert_equals 1 "$RC" "rc"
 
-# These moved to the security, attest, secret and fleet plugins (P2.1).
+# These moved to the security, attest, secret, fleet and top plugins (P2.1).
 test_start "moved_commands_are_not_diagnostics_commands"
-for sub in security-score attest attestation teleport secret-audit; do
+for sub in security-score attest attestation teleport secret-audit intelligence; do
   diag "$sub"
   assert_equals 1 "$RC" "$sub is not a diagnostics command"
 done
@@ -124,7 +124,6 @@ run_script_case restore scripts/dot/commands/restore.sh
 run_script_case chaos scripts/ops/chaos.sh
 run_script_case bundle scripts/ops/bundle.sh
 run_script_case smoke-test scripts/diagnostics/smoke-test.sh
-run_script_case intelligence lib/dot/bento.sh
 
 test_start "load_bench_calls_the_deployed_binary"
 diag load-bench --quick

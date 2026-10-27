@@ -35,9 +35,10 @@ cd "$REPO_ROOT" || exit 1
 # that is still duplicated does not fail, it just checks less.
 SHARED_HELPERS="check_cmd sed_in_place has_command"
 
-# Where callers are looked for. lib/ is included as a caller source but
+# Where callers are looked for (plugins/ holds the modules that left
+# scripts/dot/commands, P2.1). lib/ is included as a caller source but
 # never treated as an entry point.
-SCAN_DIRS="bin scripts install tools lib"
+SCAN_DIRS="bin scripts install tools lib plugins"
 
 # Bash 3.2: no associative arrays. Memo tables are newline-delimited
 # "key<TAB>value" strings searched with a fixed-string grep.

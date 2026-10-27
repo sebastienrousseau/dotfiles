@@ -19,7 +19,9 @@ grammar (N1 to N7, N13, N16):
   - a plugin with an [entry] ships plugins/<domain>/dot-<domain> as an
     executable and names no legacy route; only such a plugin marks a
     command planned;
-  - every route in lib/dot/data/routes.txt has a new spelling;
+  - every route in lib/dot/data/routes.txt has a new spelling, and every
+    route the command table names exists: in routes.txt, or as the entry of
+    the plugin an @<domain> route names;
   - lib/dot/data/commands.txt, the table bin/dot resolves names from, is
     what tools/ci/cli_command_table.py generates from the manifests.
 
@@ -257,6 +259,28 @@ def check_routes(root: pathlib.Path, manifests: dict, reg: dict) -> list[str]:
     return errors
 
 
+def check_table_routes(root: pathlib.Path) -> list[str]:
+    """Each route a cmd, run or dom record names is one bin/dot can run."""
+    routes = {ln.split("|", 1)[0] for ln in (root / "lib" / "dot" / "data" / "routes.txt").read_text().splitlines()}
+    table = cli_command_table.expected(root)[cli_command_table.TABLE]
+    errors = []
+    for row in table.splitlines():
+        kind, _, rest = row.partition("|")
+        if kind not in ("cmd", "run", "dom"):
+            continue
+        key, *rest = rest.split("|")
+        route = rest[1] if kind == "dom" else rest[0]
+        head = route.split(" ", 1)[0]
+        if not head:
+            continue
+        if head.startswith("@"):
+            if not (root / "plugins" / head[1:] / f"dot-{head[1:]}").is_file():
+                errors.append(f"'{key}' runs {head}, which has no plugins/{head[1:]}/dot-{head[1:]}")
+        elif head not in routes:
+            errors.append(f"'{key}' runs route '{head}', which lib/dot/data/routes.txt does not have")
+    return errors
+
+
 def run_dot_err(dot: pathlib.Path, *args: str) -> tuple[int, str, str]:
     with tempfile.TemporaryDirectory() as home:
         env = {"HOME": home, "PATH": os.environ.get("PATH", "/usr/bin:/bin"), "NO_COLOR": "1", "TERM": "dumb"}
@@ -321,6 +345,7 @@ def lint(root: pathlib.Path, dot: pathlib.Path) -> list[str]:
     errors += check_aliases(manifests, reg)
     errors += check_shortcuts(manifests, reg)
     errors += check_routes(root, manifests, reg)
+    errors += check_table_routes(root)
     errors += check_table(root)
     return errors + check_runtime(dot, read_baseline(root / "tools" / "ci" / "cli-contract-baseline.txt"))
 
