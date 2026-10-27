@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2030,SC2031,SC2034
-# Auto-generated function-exercise test for scripts/dot/commands/secrets.sh.
+# Auto-generated function-exercise test for plugins/secret/libexec/secrets.sh.
 # AUTO-GENERATED: true
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -10,13 +10,13 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-SCRIPT_FILE="$REPO_ROOT/scripts/dot/commands/secrets.sh"
+SCRIPT_FILE="$REPO_ROOT/plugins/secret/libexec/secrets.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
 test_start "script_exists"
-assert_file_exists "$SCRIPT_FILE" "scripts/dot/commands/secrets.sh must exist"
+assert_file_exists "$SCRIPT_FILE" "plugins/secret/libexec/secrets.sh must exist"
 
 test_start "script_valid_syntax"
 if bash -n "$SCRIPT_FILE" 2>/dev/null; then

@@ -95,18 +95,22 @@ PY
 # 1. DOT CLI → COMMAND DISPATCH CHAIN
 # ═══════════════════════════════════════════════════════════════
 
-# Every module the dispatcher routes to, and every other command module,
+# Every module the dispatcher routes to, and every other command module
+# (scripts/dot/commands, and those that moved into a plugin's libexec/),
 # must load and answer an unknown subcommand with a clean usage error
 # (rc 0 or 1). A missing module exits 127; a parse error exits 2.
 it_sandbox dispatch
 test_start "dispatch_command_scripts_exist"
 it_bad=""
-it_mods=(core diagnostics ai tools appearance secrets security meta fleet completion)
-for it_f in "$REPO_ROOT"/scripts/dot/commands/*.sh; do it_mods+=("$(basename "$it_f" .sh)"); done
-for it_m in "${it_mods[@]}"; do
+it_mods=()
+for it_m in core diagnostics ai tools appearance security meta completion; do
+  it_mods+=("$REPO_ROOT/scripts/dot/commands/$it_m.sh")
+done
+it_mods+=("$REPO_ROOT"/scripts/dot/commands/*.sh "$REPO_ROOT"/plugins/*/libexec/*.sh)
+for it_f in "${it_mods[@]}"; do
   it_rc=0
-  it_out="$(cd "$IT_S/tmp" && it_env bash "$REPO_ROOT/scripts/dot/commands/$it_m.sh" __no_such_subcommand__ 2>&1)" || it_rc=$?
-  if ((it_rc > 1)) || [[ "$it_out" == *"syntax error"* ]]; then it_bad+=" $it_m(rc=$it_rc)"; fi
+  it_out="$(cd "$IT_S/tmp" && it_env bash "$it_f" __no_such_subcommand__ 2>&1)" || it_rc=$?
+  if ((it_rc > 1)) || [[ "$it_out" == *"syntax error"* ]]; then it_bad+=" ${it_f#"$REPO_ROOT"/}(rc=$it_rc)"; fi
 done
 assert_empty "$it_bad" "every command module loads and rejects an unknown subcommand"
 

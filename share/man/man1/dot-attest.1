@@ -14,7 +14,7 @@ Every command takes \fB\-\-help\fR; \fBdot help\fR lists every domain.
 .SH COMMANDS
 .TP
 .B dot attest show
-The workstation attestation. Effect: read. Runs \fBdot attest\fR until the domain is extracted.
+The workstation attestation. Effect: read. Runs \fBdot\-attest show\fR, the plugin's entry.
 .RS
 .TP
 .B \-\-json, \-j
@@ -25,10 +25,10 @@ Write the attestation to a file
 .RE
 .TP
 .B dot attest export
-Write attestation evidence. Effect: read. Runs \fBdot attest \-\-write\fR until the domain is extracted.
+Write attestation evidence. Effect: read. Runs \fBdot\-attest export\fR, the plugin's entry.
 .TP
 .B dot attest verify
-Verify evidence. Effect: read. Runs \fBdot attest \-\-verify\fR until the domain is extracted.
+Verify evidence. Effect: read. Runs \fBdot\-attest verify\fR, the plugin's entry.
 .SH OTHER NAMES
 .TP
 .B dot attestation

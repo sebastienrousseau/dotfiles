@@ -12,6 +12,7 @@ default = "show"
 
 [entry]
 command = "dot-theme"
+fallback = true
 
 [[objects]]
 name = "wallpaper"

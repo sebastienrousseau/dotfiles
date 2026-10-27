@@ -11,7 +11,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-SECRETS_FILE="$REPO_ROOT/scripts/dot/commands/secrets.sh"
+SECRETS_FILE="$REPO_ROOT/plugins/secret/libexec/secrets.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

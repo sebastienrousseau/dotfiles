@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Policy-load and secrets-init paths of scripts/dot/commands/secrets.sh.
+# Policy-load and secrets-init paths of plugins/secret/libexec/secrets.sh.
 #
 # Two clusters of the module had never run. The policy loader at the top only
 # exports anything when .chezmoidata.toml actually carries a

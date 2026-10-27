@@ -64,6 +64,14 @@ dot_fixture_new() {
     [[ -e "$f" ]] || continue
     ln -s "$f" "$root/scripts/dot/data/${f##*/}"
   done
+  # A plugin's libexec/ holds the modules that left scripts/dot/commands
+  # (P2.1), mirrored the same way and for the same reason.
+  for f in "$REPO_ROOT"/plugins/*/libexec/*; do
+    [[ -e "$f" ]] || continue
+    f="${f#"$REPO_ROOT"/}"
+    mkdir -p "$root/${f%/*}"
+    ln -s "$REPO_ROOT/$f" "$root/$f"
+  done
   printf '%s\n' "$root"
 }
 
@@ -102,22 +110,28 @@ dot_fixture_basebin() {
 }
 
 ## dot_fixture_run <fixture> <module-basename> [args...]
-## Runs the module inside the fixture and captures stdout+stderr into
+## Runs the module (scripts/dot/commands/<name>.sh, or a plugin's
+## libexec/<name>.sh) inside the fixture and captures stdout+stderr into
 ## DOT_FIXTURE_OUT, the status into DOT_FIXTURE_RC. The caller controls the
 ## environment through DOT_FIXTURE_PATH, DOT_FIXTURE_HOME and, for commands
 ## that prompt, DOT_FIXTURE_STDIN.
 DOT_FIXTURE_OUT=""
 DOT_FIXTURE_RC=0
 dot_fixture_run() {
-  local fixture="$1" module="$2"
+  local fixture="$1" module="scripts/dot/commands/$2.sh" f
   shift 2
+  if [[ ! -e "$fixture/$module" ]]; then
+    for f in "$fixture"/plugins/*/libexec/"${module##*/}"; do
+      [[ -e "$f" ]] && module="${f#"$fixture"/}"
+    done
+  fi
   DOT_FIXTURE_RC=0
   DOT_FIXTURE_OUT="$(
     cd "$fixture" &&
       HOME="${DOT_FIXTURE_HOME:-$fixture/home}" \
         PATH="${DOT_FIXTURE_PATH:-$PATH}" \
         NO_COLOR=1 DOTFILES_SHOW_LOGO=0 \
-        "${BASH:-bash}" "scripts/dot/commands/$module.sh" "$@" \
+        "${BASH:-bash}" "$module" "$@" \
         2>&1 <<<"${DOT_FIXTURE_STDIN:-}"
   )" || DOT_FIXTURE_RC=$?
 }

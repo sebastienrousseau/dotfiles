@@ -10,6 +10,9 @@ version = "0.2.536"
 summary = "OS hardening"
 default = "status"
 
+[entry]
+command = "dot-security"
+
 [[objects]]
 name = "policy"
 summary = "the security policy"
@@ -53,27 +56,25 @@ default = "show"
 [[commands]]
 verb = "status"
 effect = "read"
+planned = true
 summary = "Hardening summary"
 
 [[commands]]
 object = "policy"
 verb = "show"
 effect = "read"
-legacy = "policy"
 summary = "The security policy"
 
 [[commands]]
 object = "disk"
 verb = "show"
 effect = "read"
-legacy = "encrypt-check"
 summary = "Disk encryption state"
 
 [[commands]]
 object = "score"
 verb = "show"
 effect = "read"
-legacy = "security-score"
 summary = "The security score"
 
 [[commands.flags]]
@@ -95,65 +96,65 @@ summary = "Print a JSON summary"
 object = "firewall"
 verb = "show"
 effect = "read"
+planned = true
 summary = "Current firewall setting"
 
 [[commands]]
 object = "firewall"
 verb = "apply"
 effect = "write"
-legacy = "firewall"
 summary = "Harden the firewall setting"
 
 [[commands]]
 object = "telemetry"
 verb = "show"
 effect = "read"
+planned = true
 summary = "Current telemetry setting"
 
 [[commands]]
 object = "telemetry"
 verb = "apply"
 effect = "write"
-legacy = "telemetry"
 summary = "Harden the telemetry setting"
 
 [[commands]]
 object = "dns"
 verb = "show"
 effect = "read"
+planned = true
 summary = "Current dns setting"
 
 [[commands]]
 object = "dns"
 verb = "apply"
 effect = "write"
-legacy = "dns-doh"
 summary = "Harden the dns setting"
 
 [[commands]]
 object = "lock"
 verb = "show"
 effect = "read"
+planned = true
 summary = "Current lock setting"
 
 [[commands]]
 object = "lock"
 verb = "apply"
 effect = "write"
-legacy = "lock-screen"
 summary = "Harden the lock setting"
 
 [[commands]]
 object = "usb"
 verb = "show"
 effect = "read"
+planned = true
 summary = "Current usb setting"
 
 [[commands]]
 object = "usb"
 verb = "apply"
 effect = "write"
-legacy = "usb-safety"
 summary = "Harden the usb setting"
 
 [[aliases]]

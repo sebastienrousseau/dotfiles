@@ -9,17 +9,22 @@ domain = "fleet"
 version = "0.2.536"
 summary = "many hosts"
 default = "status"
-legacy = "fleet"
+
+[entry]
+command = "dot-fleet"
+fallback = true
 
 [[objects]]
 name = "drift"
 summary = "drift across hosts"
 default = "show"
+fallback = true
 
 [[objects]]
 name = "namespace"
 summary = "fleet namespaces"
 default = "list"
+fallback = true
 
 [[objects]]
 name = "log"
@@ -34,54 +39,46 @@ default = "show"
 [[commands]]
 verb = "status"
 effect = "read"
-legacy = "fleet status"
 summary = "Posture across hosts"
 
 [[commands]]
 verb = "apply"
 effect = "write"
-legacy = "fleet apply"
 summary = "Apply the fleet configuration"
 
 [[commands]]
 verb = "push"
 effect = "write"
-legacy = "fleet push"
 summary = "Send configuration to a host"
 
 [[commands]]
 object = "drift"
 verb = "show"
 effect = "read"
-legacy = "fleet drift"
 summary = "Drift across hosts"
 
 [[commands]]
 object = "namespace"
 verb = "list"
 effect = "read"
-legacy = "fleet namespace show"
 summary = "Namespaces"
 
 [[commands]]
 object = "log"
 verb = "show"
 effect = "read"
-legacy = "fleet events"
 summary = "Fleet events"
 
 [[commands]]
 object = "policy"
 verb = "show"
 effect = "read"
-legacy = "fleet enforce status"
 summary = "Fleet policy"
 
 [[commands]]
 object = "policy"
 verb = "set"
 effect = "write"
-legacy = "fleet enforce set"
 summary = "Enforce a fleet policy"
 
 [[aliases]]

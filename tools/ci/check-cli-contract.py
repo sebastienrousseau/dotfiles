@@ -177,10 +177,13 @@ def check_manifest(name: str, manifest: dict, reg: dict, version: str) -> list[s
 def check_entry(root: pathlib.Path, name: str, manifest: dict) -> list[str]:
     """A plugin that runs its own commands ships its entry and no legacy routes (N2)."""
     planned = [c for c in manifest["commands"] if c.get("planned")]
+    errors = [f"{name}: object '{o['name']}' has fallback, which needs [entry] fallback = true"
+              for o in manifest.get("objects", [])
+              if o.get("fallback") and not manifest.get("entry", {}).get("fallback")]
     if "entry" not in manifest:
-        return [f"{name}: 'planned' needs an [entry]; without one, a command with no legacy is planned"] if planned else []
+        return errors + ([f"{name}: 'planned' needs an [entry]; without one, a command with no legacy is planned"] if planned else [])
     command = manifest["entry"]["command"]
-    errors = [] if command == f"dot-{name}" else [f"{name}: entry command must be 'dot-{name}' (N2)"]
+    errors += [] if command == f"dot-{name}" else [f"{name}: entry command must be 'dot-{name}' (N2)"]
     path = root / "plugins" / name / command
     if not (path.is_file() and os.access(path, os.X_OK)):
         errors.append(f"{name}: entry plugins/{name}/{command} is missing or not executable")

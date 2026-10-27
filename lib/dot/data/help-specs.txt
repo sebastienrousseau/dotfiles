@@ -8,8 +8,6 @@ Core|clean-cache|Clear shell initialization caches|Run by the weekly dotfiles-ma
 Core|cd|Print source directory path (use: cd $(dot cd))|Useful in shell scripts and jump helpers.
 Core|commit|AI-powered conventional commit|Wraps the commit helper flow.
 Diagnostics|doctor|Deep audit: tools, paths, portability, AI analysis (--ai|-A)|Main health and repair entrypoint.
-Diagnostics|attest|Export workstation attestation evidence (--json|-j, --write|-w, --fleet-store|-F) or check it against policy (--verify|-V, --max-age|-a)|Produce machine-readable evidence, and verify it with the sandboxed WebAssembly verifier.
-Diagnostics|secret-audit|Audit secret hygiene and leakage surface|Secret governance report.
 Diagnostics|score|System health and security scorecard|Quick high-level readout.
 Diagnostics|snapshot|Capture baseline system snapshot|Use before larger changes.
 Diagnostics|chaos|Simulate config corruption to test self-healing|Advanced validation path.
@@ -49,24 +47,10 @@ Tools|docs|Show repo README|Open the main documentation.
 Tools|aliases|List, search, and explain the shipped shell aliases|Alias inventory, usage, and deprecations.
 Tools|registry|Browse and install modules from the dot module registry|Module catalogue.
 Appearance|tune|Apply OS tuning (opt-in) [macOS,Linux]|Host tuning entrypoint.
-Secrets|secrets-init|Initialize age key for secrets|First-time secrets setup.
-Secrets|secrets|Edit encrypted secrets (age)|Primary secrets entrypoint.
-Secrets|secrets-create|Create an encrypted secrets file|Create a new secret payload.
-Secrets|ssh-key|Encrypt an SSH key locally with age|Protect local SSH keys.
-Secrets|ssh-cert|Manage short-lived SSH certificates|SSH certificate workflow.
 Security (opt-in)|backup|Create a compressed backup of your home|Safety copy before risky changes.
-Security (opt-in)|policy|Check and enforce security policies across the environment|Security policy audit.
-Security (opt-in)|encrypt-check|Check disk encryption status|Host security inspection.
-Security (opt-in)|firewall|Apply firewall hardening [macOS,Linux]|Opt-in host hardening.
-Security (opt-in)|telemetry|Disable OS telemetry [macOS,Linux]|Privacy-focused host control.
-Security (opt-in)|dns-doh|Enable DNS-over-HTTPS [macOS,Linux]|Secure DNS helper.
-Security (opt-in)|lock-screen|Enforce lock screen idle settings [Linux]|Linux workstation hardening.
-Security (opt-in)|usb-safety|Disable automount for removable media [Linux]|Linux removable-media hardening.
-Fleet|fleet|Show fleet node status, drift, and namespace (--json for machine output)|Fleet management surface.
 Fleet|fleet drift|Check for configuration drift across managed files|Drift detection and reporting.
 Fleet|fleet namespace|Show or set the active namespace for multi-tenant isolation|Namespace management.
 Fleet|fleet events|Show recent fleet events from local event log|Fleet observability.
-Fleet|teleport|Deploy the dotfiles environment to a remote host over SSH|Ephemeral remote provisioning.
 Meta|upgrade|Update dotfiles, mise tools and (with consent) system packages|Managed upgrade flow.
 Meta|packages|List installed packages and package managers|Inventory and package surfaces.
 Meta|cache-refresh|Regenerate shell caches for ultra-fast startup|Refresh generated shell state.
