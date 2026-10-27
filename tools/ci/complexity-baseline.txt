@@ -104,6 +104,7 @@
   16    5   25.7   27     0 plugins/agent/libexec/agent.sh::cmd_mode
   12   12   25.8   22     0 plugins/agent/libexec/agents.sh::_agents_repo_root
   18   21   43.4  163     0 plugins/agent/libexec/agents.sh::cmd_agents
+  19   25   27.4   53     0 plugins/mcp/libexec/mcp.sh::cmd_mcp
   21   12   31.5   69   248 plugins/secret/libexec/secrets.sh::<top>
   16   16   23.8   61     0 plugins/secret/libexec/secrets.sh::cmd_env_load
   22   22   36.8  109   109 scripts/diagnostics/attest-verify.sh::<top>
@@ -194,5 +195,3 @@
   11   11   20.8   30    30 tools/docs/checksum-manual.sh::<top>
   10   11   35.1   93   119 tools/release/package-policy-bundles.sh::<top>
   17   11   33.1   47    50 tools/release/stage-dot.sh::<top>
-  19   25   27.4   53     0 plugins/mcp/libexec/mcp.sh::cmd_mcp
-  14   14   23.5   28     0 plugins/mcp/libexec/mcp.sh::cmd_mcp_serve
