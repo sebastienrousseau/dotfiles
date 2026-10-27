@@ -240,7 +240,8 @@ test_start "mcp_serve_root_without_a_chezmoiroot"
 script_stub dot-mcp 'echo "root=$DOT_MCP_REPO_ROOT"'
 mcp_run serve
 rm -f "$STUBS/dot-mcp"
-assert_contains "root=$(cd "$FX" && pwd)" "$DOT_FIXTURE_OUT" "the served root is the checkout"
+# The physical path: on macOS /var is a link to /private/var.
+assert_contains "root=$(cd "$FX" && pwd -P)" "$DOT_FIXTURE_OUT" "the served root is the checkout"
 
 test_start "mcp_serve_builds_only_from_a_source"
 # go alone, with no dot-mcp source to build, is no reason to announce a build.
