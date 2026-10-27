@@ -45,7 +45,9 @@ TESTS_DIR="${TESTS_DIR:-$REPO_ROOT/tests}"
 COVERAGE_DIR="${COVERAGE_DIR:-$REPO_ROOT/coverage}"
 COVERAGE_OUT="${COVERAGE_OUT:-$COVERAGE_DIR/lcov.info}"
 MIN_COVERAGE_PCT="${MIN_COVERAGE_PCT:-0}" # initial floor; tighten per slice
-COV_INCLUDE_DIRS="${COV_INCLUDE_DIRS:-$REPO_ROOT/scripts:$REPO_ROOT/lib:$REPO_ROOT/defaults/dot_local/bin:$REPO_ROOT/defaults/.chezmoitemplates/functions}"
+# plugins/ holds the bundled plugins' entries and libexec/ modules (P2.1),
+# which were scripts/dot/commands/ before; leaving it out unmeasured them.
+COV_INCLUDE_DIRS="${COV_INCLUDE_DIRS:-$REPO_ROOT/scripts:$REPO_ROOT/lib:$REPO_ROOT/plugins:$REPO_ROOT/defaults/dot_local/bin:$REPO_ROOT/defaults/.chezmoitemplates/functions}"
 JOBS="${JOBS:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)}"
 # Per-test wall-clock budget.
 #
