@@ -74,6 +74,12 @@ when a shell breaches its own startup threshold. They are gated with
 permission, signal, syntax error). That is far narrower than the blanket
 `|| true` it replaced.
 
+Exit 1 therefore has to mean a breach and nothing else. `bench.sh` exits 2
+when it measured nothing (hyperfine or jq missing, or a hyperfine run with no
+reading); before that, a runner without hyperfine exited 1 and the gate
+reported a 2ms pass. CI installs both tools for the performance job, and a
+machine without them gets a visible `SKIPPED`, never a pass.
+
 ### GATES tier (CI quality gates and test suites)
 
 Budgets are 2× the median measured on the **slowest supported platform**,

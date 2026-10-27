@@ -116,5 +116,26 @@ out="$(_budget_verdict probe 500 100 121)"
 assert_contains "runner=4.03x per_spawn=4033us reference=1000us exceeds the 4.00x cap" "$out" \
   "4.03x fails and says why"
 
+# ---------------------------------------------------------------------------
+# medium_bench_quick_mode: a runner without bench.sh's tools measured
+# nothing, so the gate skips visibly and counts neither a pass nor a run.
+test_start "bench_gate_skips_without_its_tools"
+before="$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
+out="$(BENCH_TOOLS="hyperfine definitely-not-installed-tool" _gate_bench_quick "$REPO_ROOT/benches/bench.sh"
+  printf '|%s:%s:%s' "$TESTS_RUN" "$TESTS_PASSED" "$TESTS_FAILED")"
+assert_contains "SKIPPED — definitely-not-installed-tool not installed" "$out" "names the missing tool"
+assert_contains "|$before" "$out" "and leaves the counters alone"
+BENCH_TOOLS=definitely-not-installed-tool _gate_bench_quick "$REPO_ROOT/benches/bench.sh" >/dev/null
+assert_equals 0 "$?" "a skip returns 0 so the gate script carries on"
+
+test_start "bench_gate_skips_an_absent_bench"
+out="$(_gate_bench_quick "$REPO_ROOT/benches/no-such-bench.sh")"
+assert_equals 0 "$?" "an absent bench returns 0"
+assert_contains "SKIPPED — bench.sh absent" "$out" "and says it measured nothing"
+
+test_start "bench_gate_fails_a_bench_that_measured_nothing"
+out="$(STUB_MEASURE="2 5 100" BENCH_TOOLS=bash _gate_bench_quick "$REPO_ROOT/benches/bench.sh")"
+assert_contains "medium_bench_quick_mode: exited 2 (max allowed 1)" "$out" "exit 2 is a failure, not a pass"
+
 printf 'RESULTS:%s:%s:%s\n' "$TESTS_RUN" "$TESTS_PASSED" "$TESTS_FAILED"
 [[ "$TESTS_FAILED" -eq 0 ]]
