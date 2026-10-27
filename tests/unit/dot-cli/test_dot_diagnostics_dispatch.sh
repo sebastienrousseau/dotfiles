@@ -98,6 +98,42 @@ diag doctor --json
 assert_equals 0 "$RC" "rc"
 handed_to "scripts/diagnostics/doctor-unified.sh --json"
 
+# doctor_from SRC ARGS…: cmd_doctor with the source dir resolving to SRC.
+doctor_from() {
+  local src="$1"
+  shift
+  : >"$DISPATCH_LOG"
+  # shellcheck disable=SC2016 # the script expands its own positional args
+  "$REAL_BASH" -c 'source "$1"; src="$2"; shift 2
+    resolve_source_dir() { printf "%s\n" "$src"; }
+    cmd_doctor "$@"' _ "$DOCTOR" "$src" "$@" >"$OUTF" 2>&1 </dev/null
+  RC=$?
+}
+
+test_start "doctor_falls_back_to_the_legacy_doctor"
+legacy_src="$DOTFILES_COV_TMPDIR/legacy-src"
+mkdir -p "$legacy_src/scripts/diagnostics"
+: >"$legacy_src/scripts/diagnostics/doctor.sh"
+doctor_from "$legacy_src" --json
+assert_equals 0 "$RC" "rc"
+handed_to "$legacy_src/scripts/diagnostics/doctor.sh --json"
+assert_output_not_contains "doctor-unified.sh" "cat '$DISPATCH_LOG'"
+
+test_start "doctor_falls_back_to_chezmoi_doctor"
+bare_src="$DOTFILES_COV_TMPDIR/bare-src"
+mkdir -p "$bare_src"
+doctor_from "$bare_src" --json
+assert_equals 0 "$RC" "rc"
+handed_to "chezmoi doctor --json"
+assert_output_not_contains "$bare_src/scripts" "cat '$DISPATCH_LOG'"
+
+# The command must be one whole word of the list: "doctor heal" ends in a
+# listed word and sits inside the list, but is not a command.
+test_start "doctor_refuses_a_command_that_is_not_one_word"
+"$REAL_BASH" "$DOCTOR" "doctor heal" >"$OUTF" 2>&1 </dev/null && RC=0 || RC=$?
+assert_equals 1 "$RC" "rc"
+out_has "Unknown doctor command: doctor heal" "refusal"
+
 test_start "drift_hands_off_to_the_drift_dashboard"
 diag drift --json
 assert_equals 0 "$RC" "rc"
