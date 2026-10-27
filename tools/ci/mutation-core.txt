@@ -7,7 +7,7 @@ lib/dot/utils.sh
 bin/dot
 scripts/diagnostics/health.sh
 lib/dot/log.sh
-scripts/dot/commands/registry.sh
+plugins/cli/libexec/registry.sh
 scripts/version-sync.sh
 scripts/lib/secrets_provider.sh
 lib/dot/verified-download.sh

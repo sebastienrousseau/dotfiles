@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# Sourced by scripts/dot/commands/registry.sh; inherits set -euo pipefail
+# Sourced by plugins/cli/libexec/registry.sh; inherits set -euo pipefail
 #
 # Trust checks for the `dot cli list --available` index, before any module is read:
 #   * minisign signature (<url>.minisig) against security/registry.pub;

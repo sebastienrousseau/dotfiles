@@ -25,6 +25,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 TOOLS_SCRIPT="$REPO_ROOT/scripts/dot/commands/tools.sh"
+TOOL_SCRIPT="$REPO_ROOT/plugins/tool/libexec/tool.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
@@ -140,14 +141,17 @@ EOF
 # Scaffolding and `--output` writes land in the sandbox, never the repo.
 cd "$DOTFILES_COV_TMPDIR"
 
-# ex <label> <args…> — run tools.sh, keep stderr (xtrace) connected so
+# ex <label> <args…> — run tools.sh or tool.sh, keep stderr (xtrace) connected so
 # the coverage runner sees the traced lines, tolerate any rc.
 ex() {
   local label="$1"
   shift
   test_start "tools_ex_${label}"
   set +e
-  bash "$TOOLS_SCRIPT" "$@" </dev/null >/dev/null
+  # tools, env, new and packages moved to the tool plugin's tool.sh (P2.1).
+  local script="$TOOLS_SCRIPT"
+  case "${1:-}" in tools | env | new | packages) script="$TOOL_SCRIPT" ;; esac
+  bash "$script" "$@" </dev/null >/dev/null
   local rc=$?
   set -e
   ((TESTS_PASSED++)) || true

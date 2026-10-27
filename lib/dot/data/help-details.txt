@@ -15,8 +15,6 @@ snapshot|Capture the current workstation snapshot.|dot snapshot -b\ndot snapshot
 restore|Restore from a backup or git ref.|dot restore -l\ndot restore -L\ndot restore -g HEAD~1
 rollback|Restore a previous configuration snapshot.|dot rollback
 lint|Run shell quality checks for the repo.|dot lint\ndot lint -c\ndot lint -f
-registry|Browse and manage reusable dotfile modules.|dot registry list\ndot registry search rust\ndot registry info rust-dev-setup
-env|Show managed tool versions and runtime state.|dot env
 profile|Show or switch the active configuration profile.|dot profile
 learn|Open the guided tour of the toolchain.|dot learn
 search|Find commands by keyword across the public surface.|dot search ai
@@ -26,7 +24,6 @@ version|Show the installed dotfiles version.|dot --version\ndot version
 init|Bootstrap a foreign dotfiles repo through chezmoi + dot.|dot init <github-user>\ndot init owner/repo --dry-run\ndot init https://example.com/repo.git
 uninstall|Remove the managed dotfiles environment (prompts unless --force).|dot uninstall\ndot uninstall --force
 clean-cache|Clear shell initialization caches; they regenerate on the next shell start.|dot clean-cache
-completion|Generate shell completions from the command registry.|dot completion fish > ~/.config/fish/completions/dot.fish
 cd|Print the dotfiles source directory path for shell helpers.|cd $(dot cd)\ndot cd
 commit|Draft an AI-assisted Conventional Commit for staged changes.|dot commit\ngit add -p && dot commit
 score|Print a system health and security scorecard.|dot score\ndot score --json\ndot score -q
@@ -35,9 +32,6 @@ load-bench|Measure time to heavy-layer shell readiness.|dot load-bench\ndot load
 chaos|Simulate config corruption to validate self-healing paths.|dot chaos --dry-run\ndot chaos --restore
 bundle|Create an offline archive of your dotfiles environment.|dot bundle\ndot bundle --output ~/dot-bundle.tar.zst
 metrics|Show recent observability metrics (JSONL event log).|dot metrics\ndot metrics --since 1h
-tools|Show or install the managed Nix package set.|dot tools\ndot tools install
-new|Scaffold a new project from a managed template.|dot new\ndot new --template rust-cli my-project
-packages|List installed packages across every package manager on this host.|dot packages\ndot packages --json
 aliases|Inspect or audit shell aliases shipped by the dotfiles.|dot aliases\ndot aliases --check
 tune|Apply opt-in OS tuning (macOS / Linux desktop polish).|dot tune\ndot tune --dry-run
 backup|Create a compressed backup of $HOME before risky changes.|dot backup\ndot backup --output ~/backups

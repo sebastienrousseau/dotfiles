@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Behavioural coverage for scripts/dot/commands/env-emit.sh (`dot tool export`):
+# Behavioural coverage for plugins/tool/libexec/env-emit.sh (`dot tool export`):
 # flag parsing, format validation, dependency checks, the v1 JSON manifest,
 # the NDJSON variant and atomic --output writing.
 #
@@ -16,7 +16,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-EMIT="$REPO_ROOT/scripts/dot/commands/env-emit.sh"
+EMIT="$REPO_ROOT/plugins/tool/libexec/env-emit.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

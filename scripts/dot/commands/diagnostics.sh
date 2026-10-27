@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Dotfiles CLI - Diagnostics Commands
 # doctor, heal, health, rollback, drift, history, benchmark, verify, perf,
-# scorecard, conflicts, locks, snapshot, load-bench, chaos, bundle
+# scorecard, conflicts, snapshot, load-bench, chaos, bundle
 
 set -euo pipefail
 
@@ -18,7 +18,7 @@ usage() {
 Usage: diagnostics.sh <command> [args...]
 
 Commands:
-  doctor, heal, health, scorecard, perf, conflicts, locks, snapshot,
+  doctor, heal, health, scorecard, perf, conflicts, snapshot,
   rollback, drift, history, benchmark, verify, restore, load-bench,
   load-bench-pty, chaos, bundle, metrics, smoke-test
 EOF
@@ -58,10 +58,6 @@ cmd_perf() {
 
 cmd_conflicts() {
   run_script "scripts/diagnostics/conflicts.sh" "Conflicts report" "$@"
-}
-
-cmd_locks() {
-  run_script "scripts/diagnostics/version-locks.sh" "Version locks" "$@"
 }
 
 cmd_snapshot() {
@@ -160,10 +156,6 @@ case "${1:-}" in
   conflicts)
     shift
     cmd_conflicts "$@"
-    ;;
-  locks)
-    shift
-    cmd_locks "$@"
     ;;
   snapshot)
     shift

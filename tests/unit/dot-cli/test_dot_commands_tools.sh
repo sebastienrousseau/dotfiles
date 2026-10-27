@@ -12,6 +12,8 @@ source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 TOOLS_FILE="$REPO_ROOT/scripts/dot/commands/tools.sh"
+# tools, new, packages and env moved to the tool plugin's tool.sh (P2.1).
+TOOL_FILE="$REPO_ROOT/plugins/tool/libexec/tool.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
@@ -32,7 +34,7 @@ fi
 
 # Test: defines packages command
 test_start "tools_cmd_defines_packages"
-if grep -q "cmd_packages\|_packages\|packages" "$TOOLS_FILE" 2>/dev/null; then
+if grep -q "cmd_packages\|_packages\|packages" "$TOOL_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines packages command"
 else
@@ -42,7 +44,7 @@ fi
 
 # Test: defines tools command
 test_start "tools_cmd_defines_tools"
-if grep -q "cmd_tools\|_tools" "$TOOLS_FILE" 2>/dev/null; then
+if grep -q "cmd_tools\|_tools" "$TOOL_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines tools command"
 else
@@ -52,7 +54,7 @@ fi
 
 # Test: defines new command (project scaffolding)
 test_start "tools_cmd_defines_new"
-if grep -q "cmd_new\|_new\|dot_new" "$TOOLS_FILE" 2>/dev/null; then
+if grep -q "cmd_new\|_new\|dot_new" "$TOOL_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines new command"
 else
@@ -219,9 +221,11 @@ chmod +x "$tools_tmp/bin/"*
   export HOME="$tools_tmp/home"
   mkdir -p "$HOME"
   cd "$tools_tmp/work" || exit 1
-  set -- tools
+  set -- help
   # shellcheck disable=SC1091
   source "$TOOLS_FILE"
+  # shellcheck disable=SC1091
+  source "$TOOL_FILE"
   _DOT_SOURCE_DIR_CACHE="$tools_tmp/repo"
   cmd_packages
   cmd_tools
@@ -242,7 +246,7 @@ assert_dir_exists "$tools_tmp/work/demo_project" "tools deep branches created sa
   export PATH="$tools_tmp/bin:$PATH"
   export HOME="$tools_tmp/home"
   cd "$tools_tmp/work" || exit 1
-  bash "$TOOLS_FILE" tools install node >/dev/null
+  bash "$TOOL_FILE" tools install node >/dev/null
 ) || true
 
 # ── tools docs ───────────────────────────────────────────────────────
@@ -254,7 +258,7 @@ assert_dir_exists "$tools_tmp/work/demo_project" "tools deep branches created sa
 test_start "tools_docs_prints_the_tools_document"
 _docs_out="$DOTFILES_COV_TMPDIR/tools-docs.out"
 _docs_rc=0
-bash "$TOOLS_FILE" tools docs >"$_docs_out" 2>&1 || _docs_rc=$?
+bash "$TOOL_FILE" tools docs >"$_docs_out" 2>&1 || _docs_rc=$?
 assert_equals "0" "$_docs_rc" "tools docs exits 0 on a complete checkout"
 assert_file_contains "$_docs_out" "Integrated tools organized by role" \
   "the body of docs/reference/TOOLS.md is printed"
@@ -271,8 +275,7 @@ _docs_rc=0
   # shellcheck disable=SC1090
   source "$REPO_ROOT/lib/dot/utils.sh"
   # shellcheck disable=SC1090
-  set -- tools
-  source "$TOOLS_FILE" >/dev/null 2>&1
+  source "$TOOL_FILE" >/dev/null 2>&1
   _DOT_SOURCE_DIR_CACHE="$_legacy"
   cmd_tools docs
 ) >"$_docs_out" 2>&1 || _docs_rc=$?
@@ -286,9 +289,8 @@ _docs_rc=0
   set +e
   # shellcheck disable=SC1090
   source "$REPO_ROOT/lib/dot/utils.sh"
-  set -- tools
   # shellcheck disable=SC1090
-  source "$TOOLS_FILE" >/dev/null 2>&1
+  source "$TOOL_FILE" >/dev/null 2>&1
   _DOT_SOURCE_DIR_CACHE="$_bare"
   cmd_tools docs
 ) >"$_docs_out" 2>&1 || _docs_rc=$?
@@ -297,6 +299,7 @@ assert_file_contains "$_docs_out" "TOOLS.md not found" "the missing document is 
 
 # Slice 3 (#883): exercise the script under sandbox for line coverage
 cov_exercise_script "$TOOLS_FILE"
+cov_exercise_script "$TOOL_FILE"
 
 # Each present manager prints its exact line; the helpers' edge cases hold.
 test_start "packages_lines_and_probe_edge_cases"
@@ -321,7 +324,7 @@ pk_out="$(
     echo "word-empty=[$(_pkg_word 0 says-nothing)]"
     echo "word-field=[$(_pkg_word 2 pip3)]"
     echo "word-timeout=[$(DOTFILES_PACKAGES_TIMEOUT=1 _pkg_word 0 never-ends)]"
-  ' _ "$TOOLS_FILE" 2>&1
+  ' _ "$TOOL_FILE" 2>&1
 )"
 assert_contains "  pnpm: 9.9.9" "$pk_out" "pnpm line"
 assert_contains "  Bun: 9.9.9" "$pk_out" "Bun line"
@@ -359,7 +362,7 @@ chmod +x "$stuck_tmp/bin/"*
 stuck_start=$SECONDS
 stuck_out="$(
   run_with_timeout 30 env PATH="$stuck_tmp/bin:/usr/bin:/bin" HOME="$stuck_tmp/home" \
-    DOTFILES_PACKAGES_TIMEOUT=2 bash -c 'f="$1"; set -- tools; source "$f"; cmd_packages' _ "$TOOLS_FILE" 2>&1
+    DOTFILES_PACKAGES_TIMEOUT=2 bash -c 'f="$1"; set -- tools; source "$f"; cmd_packages' _ "$TOOL_FILE" 2>&1
 )"
 stuck_rc=$?
 stuck_elapsed=$((SECONDS - stuck_start))
@@ -380,7 +383,7 @@ printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >>"%s/nix.calls"\n' "$nix_tmp"
 chmod +x "$nix_tmp/bin/nix"
 nix_run() {
   env PATH="$nix_tmp/bin:$PATH" HOME="$nix_tmp/home" CHEZMOI_SOURCE_DIR="$REPO_ROOT" \
-    bash "$TOOLS_FILE" tools install "$@" >"$nix_tmp/out" 2>&1
+    bash "$TOOL_FILE" tools install "$@" >"$nix_tmp/out" 2>&1
 }
 nix_run 'bad;name'
 bad_rc=$?
@@ -404,12 +407,12 @@ chmod +x "$mise_tmp/bin/mise"
 for sub in install use; do
   : >"$mise_tmp/mise.calls"
   env PATH="$mise_tmp/bin:$PATH" HOME="$mise_tmp/home" \
-    bash "$TOOLS_FILE" env "$sub" 'bad;spec' >"$mise_tmp/out" 2>&1
+    bash "$TOOL_FILE" env "$sub" 'bad;spec' >"$mise_tmp/out" 2>&1
   assert_not_equals "0" "$?" "env $sub rejects an invalid spec"
   assert_file_contains "$mise_tmp/out" "Invalid tool spec: bad;spec" "env $sub names it"
   assert_equals "0" "$(wc -l <"$mise_tmp/mise.calls" | tr -d ' ')" "mise never runs for it ($sub)"
   env PATH="$mise_tmp/bin:$PATH" HOME="$mise_tmp/home" \
-    bash "$TOOLS_FILE" env "$sub" --global node@24 >"$mise_tmp/out" 2>&1
+    bash "$TOOL_FILE" env "$sub" --global node@24 >"$mise_tmp/out" 2>&1
   assert_equals "0" "$?" "env $sub accepts a flag and a valid spec"
   assert_contains "$sub --global node@24" "$(cat "$mise_tmp/mise.calls")" "mise gets both ($sub)"
 done

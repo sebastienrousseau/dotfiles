@@ -6,7 +6,7 @@
 #
 # Browse and install verified dotfile modules; every archive is sha256-checked.
 #
-# Backing module: scripts/dot/commands/registry.sh
+# Backing module: plugins/cli/libexec/registry.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: every command below is read-only or a help

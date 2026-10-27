@@ -248,17 +248,17 @@ bash scripts/qa/check-feature-matrix.sh
 | Command | Variant | Regression test | Benchmark | Example | Manual | Coverage |
 |---------|---------|-----------------|-----------|---------|--------|----------|
 | `dot env` | list / ls (default; requires mise) | `test_fm_env_list` | `run:env-list` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot env` | prune (dry-run; requires mise) | `test_fm_env_prune` | `help:env` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot env` | prune --yes / -y | `test_fm_smoke_env_prune_yes` | `help:env` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — uninstalls orphan tool versions from the real mise store |
-| `dot env` | install [tool@version] | `test_fm_smoke_env_install` | `help:env` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — downloads and installs toolchains through mise (network) |
-| `dot env` | use <tool@version> | `test_fm_smoke_env_use` | `help:env` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — rewrites the user's mise config and installs tools (network) |
+| `dot env` | prune (dry-run; requires mise) | `test_fm_env_prune` | `help:tool` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot env` | prune --yes / -y | `test_fm_smoke_env_prune_yes` | `help:tool` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — uninstalls orphan tool versions from the real mise store |
+| `dot env` | install [tool@version] | `test_fm_smoke_env_install` | `help:tool` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — downloads and installs toolchains through mise (network) |
+| `dot env` | use <tool@version> | `test_fm_smoke_env_use` | `help:tool` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — rewrites the user's mise config and installs tools (network) |
 | `dot env` | emit (default json, --pretty) | `test_fm_env_emit` | `run:env-emit` | `examples/example-dot-env-emit.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot env` | emit --compact | `test_fm_env_emit_compact` | `help:env` | `examples/example-dot-env-emit.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot env` | emit --format ndjson / --format=ndjson | `test_fm_env_emit_ndjson` | `help:env` | `examples/example-dot-env-emit.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot env` | emit --output / -o <file> (atomic write) | `test_fm_env_emit_output` | `help:env` | `examples/example-dot-env-emit.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot env` | emit --format <unsupported> (exit 1) | `test_fm_env_emit_bad_format` | `help:env` | `examples/example-dot-env-emit.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot env` | emit <unknown flag> (exit 1) | `test_fm_env_emit_bad_flag` | `help:env` | `examples/example-dot-env-emit.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot env` | emit --help / -h | `test_fm_env_emit_help` | `help:env` | `examples/example-dot-env-emit.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot env` | emit --compact | `test_fm_env_emit_compact` | `help:tool` | `examples/example-dot-env-emit.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot env` | emit --format ndjson / --format=ndjson | `test_fm_env_emit_ndjson` | `help:tool` | `examples/example-dot-env-emit.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot env` | emit --output / -o <file> (atomic write) | `test_fm_env_emit_output` | `help:tool` | `examples/example-dot-env-emit.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot env` | emit --format <unsupported> (exit 1) | `test_fm_env_emit_bad_format` | `help:tool` | `examples/example-dot-env-emit.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot env` | emit <unknown flag> (exit 1) | `test_fm_env_emit_bad_flag` | `help:tool` | `examples/example-dot-env-emit.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot env` | emit --help / -h | `test_fm_env_emit_help` | `help:tool` | `examples/example-dot-env-emit.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot profile` | show (default) | `test_fm_profile_show` | `run:profile-show` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot profile` | set <name> (writes .chezmoidata.toml) | `test_fm_profile_set` | `help:profile` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot profile` | set (no name, exit 1) | `test_fm_profile_set_usage` | `help:profile` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
@@ -266,8 +266,8 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot profile` | .chezmoidata.toml `profile` + `[features]` keys | `test_fm_config_chezmoidata_profile` | `help:profile` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/02-config-files.md` | regression |
 | `dot tools` | (default overview) | `test_fm_tools` | `run:tools` | `examples/example-dot-tools.sh` | `docs/manual/command-index.md` | regression |
 | `dot tools` | docs | `test_fm_tools_docs` | `run:tools-docs` | `examples/example-dot-tools.sh` | `docs/manual/command-index.md` | regression |
-| `dot tools` | install (Nix develop shell) | `test_fm_smoke_tools_install` | `help:tools` | `examples/example-dot-tools.sh` | `docs/manual/command-index.md` | **smoke** — enters an interactive `nix develop` shell (TTY, network) |
-| `dot new` | <lang> <name> | `test_fm_new` | `help:new` | `examples/example-dot-tools.sh` | `docs/manual/command-index.md` | regression |
+| `dot tools` | install (Nix develop shell) | `test_fm_smoke_tools_install` | `help:tool` | `examples/example-dot-tools.sh` | `docs/manual/command-index.md` | **smoke** — enters an interactive `nix develop` shell (TTY, network) |
+| `dot new` | <lang> <name> | `test_fm_new` | `help:tool` | `examples/example-dot-tools.sh` | `docs/manual/command-index.md` | regression |
 | `dot new` | (no args, exit 1) / unknown template (exit 1) | `test_fm_new_usage` | `run:new-usage` | `examples/example-dot-tools.sh` | `docs/manual/command-index.md` | regression |
 | `dot packages` | (default) | `test_fm_packages` | `run:packages` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot aliases` | list (default) | `test_fm_aliases_list` | `run:aliases-list` | `examples/example-dot-aliases.sh` | `docs/manual/command-index.md` | regression |
@@ -339,7 +339,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot secrets` | DOTFILES_SECRETS_PROVIDER / DOT_SECRETS_HOME select the backend and store | `test_fm_env_dotfiles_secrets_provider` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 | `dot secrets` | .chezmoidata.toml `[secrets.policy] provider` / `auto_load` defaults | `test_fm_config_secrets_policy` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/02-config-files.md` | regression |
 | `dot secrets` | <unknown> (exit 1) | `test_fm_secrets_unknown` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot env` | load [bucket] (secrets.sh alias of secrets load) | `test_fm_secrets_env_load` | `help:env` | `examples/example-dot-secrets.sh` | `docs/manual/command-index.md` | regression |
+| `dot env` | load [bucket] (secrets.sh alias of secrets load) | `test_fm_secrets_env_load` | `help:tool` | `examples/example-dot-secrets.sh` | `docs/manual/command-index.md` | regression |
 | `dot secrets-create` | [name] (needs the age key) | `test_fm_secrets_create` | `help:secret` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot secrets-create` | without an age key (exit 1) | `test_fm_secrets_create_no_key` | `run:secrets-create-nokey` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot ssh-key` | [key-path] (encrypts ~/.ssh/id_ed25519 with age) | `test_fm_ssh_key_missing` | `run:ssh-key-missing` | `examples/example-dot-secrets.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
@@ -478,23 +478,23 @@ bash scripts/qa/check-feature-matrix.sh
 | Command | Variant | Regression test | Benchmark | Example | Manual | Coverage |
 |---------|---------|-----------------|-----------|---------|--------|----------|
 | `dot registry list` | (default) | `test_fm_registry_list` | `run:registry-list` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot registry list` | (registry with no modules) | `test_fm_registry_list_empty` | `help:registry` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot registry list` | (registry with no modules) | `test_fm_registry_list_empty` | `help:cli` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot registry search` | <q> | `test_fm_registry_search` | `run:registry-search` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot registry search` | (no query, exit 1) | `test_fm_registry_search_usage` | `help:registry` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot registry search` | (no query, exit 1) | `test_fm_registry_search_usage` | `help:cli` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot registry info` | <name> | `test_fm_registry_info` | `run:registry-info` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot registry info` | <unknown> (exit 1) / missing name (exit 1) | `test_fm_registry_info_unknown` | `help:registry` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot registry info` | <unknown> (exit 1) / missing name (exit 1) | `test_fm_registry_info_unknown` | `help:cli` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot registry install` | <name> (preview) / --dry-run / -n | `test_fm_registry_install_dry_run` | `run:registry-install-dry-run` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot registry install` | <name> --yes / -y (verifies sha256, applies) | `test_fm_registry_install_yes` | `help:registry` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot registry install` | missing name (exit 1) / unknown module (exit 1) / unknown option (exit 2) | `test_fm_registry_install_errors` | `help:registry` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot registry install` | rejects an archive whose sha256 does not match (exit 1) | `test_fm_registry_install_sha_mismatch` | `help:registry` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot registry install` | <name> --yes / -y (verifies sha256, applies) | `test_fm_registry_install_yes` | `help:cli` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot registry install` | missing name (exit 1) / unknown module (exit 1) / unknown option (exit 2) | `test_fm_registry_install_errors` | `help:cli` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot registry install` | rejects an archive whose sha256 does not match (exit 1) | `test_fm_registry_install_sha_mismatch` | `help:cli` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot registry installed` | (default) | `test_fm_registry_installed` | `run:registry-installed` | `examples/example-dot-registry.sh` | `docs/manual/command-index.md` | regression |
 | `dot registry url` | (default) | `test_fm_registry_url` | `run:registry-url` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot registry set-url` | <https-or-file url> (writes registry.toml) | `test_fm_registry_set_url` | `help:registry` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot registry set-url` | rejects non-https (exit 1) / missing url (exit 1) | `test_fm_registry_set_url_invalid` | `help:registry` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot registry url` | DOTFILES_REGISTRY_URL one-shot override | `test_fm_env_dotfiles_registry_url` | `help:registry` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/03-environment.md` | regression |
-| `dot registry url` | ~/.config/dotfiles/registry.toml `url` key | `test_fm_config_registry_toml` | `help:registry` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/02-config-files.md` | regression |
-| `dot registry` | --help / -h / help | `test_fm_registry_help` | `help:registry` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot registry` | <unknown> (exit 1) | `test_fm_registry_unknown` | `help:registry` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot registry set-url` | <https-or-file url> (writes registry.toml) | `test_fm_registry_set_url` | `help:cli` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot registry set-url` | rejects non-https (exit 1) / missing url (exit 1) | `test_fm_registry_set_url_invalid` | `help:cli` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot registry url` | DOTFILES_REGISTRY_URL one-shot override | `test_fm_env_dotfiles_registry_url` | `help:cli` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/03-environment.md` | regression |
+| `dot registry url` | ~/.config/dotfiles/registry.toml `url` key | `test_fm_config_registry_toml` | `help:cli` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/02-config-files.md` | regression |
+| `dot registry` | --help / -h / help | `test_fm_registry_help` | `help:cli` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot registry` | <unknown> (exit 1) | `test_fm_registry_unknown` | `help:cli` | `examples/example-dot-registry.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 
 ## patterns.sh
 
@@ -517,7 +517,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot completion` | fish | `test_fm_completion_fish` | `run:completion-fish` | `examples/example-dot-completion.sh` | `docs/manual/command-index.md` | regression |
 | `dot completion` | nu / nushell | `test_fm_completion_nu` | `run:completion-nu` | `examples/example-dot-completion.sh` | `docs/manual/command-index.md` | regression |
 | `dot completion` | (no shell prints usage) / --help | `test_fm_completion_usage` | `run:completion-usage` | `examples/example-dot-completion.sh` | `docs/manual/command-index.md` | regression |
-| `dot completion` | <unknown shell> (exit 1) | `test_fm_completion_unknown` | `help:completion` | `examples/example-dot-completion.sh` | `docs/manual/command-index.md` | regression |
+| `dot completion` | <unknown shell> (exit 1) | `test_fm_completion_unknown` | `help:cli` | `examples/example-dot-completion.sh` | `docs/manual/command-index.md` | regression |
 
 ## init.sh
 
@@ -631,7 +631,7 @@ designed.
 
 | Severity | Where | What |
 |----------|-------|------|
-| Note | `scripts/dot/commands/env-emit.sh` | The `-h\|--help` arm of `dot_env_emit` is unreachable through the CLI: the dispatcher's universal `--help` intercept fires first and renders `dot help env`. Working as designed, but the sub-handler's usage text can only be read in the source. |
+| Note | `plugins/tool/libexec/env-emit.sh` | The `-h\|--help` arm of `dot_env_emit` is unreachable through the CLI: the dispatcher's universal `--help` intercept fires first and renders `dot help env`. Working as designed, but the sub-handler's usage text can only be read in the source. |
 
 ### Commands that write into the checkout
 

@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# dot-cli: the entry of the cli plugin (ADR-020 N2). bin/dot runs it with the
+# words after `dot cli`, one of the spellings its manifest declares as built;
+# each becomes the subcommand of libexec/registry.sh or libexec/completion.sh
+# that implements it.
+
+set -euo pipefail
+
+_CLI_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# cli_registry SUBCOMMAND... — run the plugin registry module.
+cli_registry() {
+  exec bash "$_CLI_DIR/libexec/registry.sh" registry "$@"
+}
+
+# cli_object OBJECT VERB ARGS... — completion and registry spellings, and
+# `list --available`, which lists the registry rather than what is installed.
+cli_object() {
+  case "${1:-} ${2:-}" in
+    "list --available") cli_registry list "${@:3}" ;;
+    "completion show") exec bash "$_CLI_DIR/libexec/completion.sh" completion "${@:3}" ;;
+    "registry show") cli_registry url "${@:3}" ;;
+    "registry set") cli_registry set-url "${@:3}" ;;
+  esac
+}
+
+cli_object "$@"
+case "${1:-}" in
+  list) cli_registry installed "${@:2}" ;;
+  show) cli_registry info "${@:2}" ;;
+  install) cli_registry install "${@:2}" ;;
+esac
+echo "dot: 'dot cli $*' is not a command; run 'dot help cli'" >&2
+exit 127

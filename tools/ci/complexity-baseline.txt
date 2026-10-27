@@ -104,8 +104,17 @@
   16    5   25.7   27     0 plugins/agent/libexec/agent.sh::cmd_mode
   12   12   25.8   22     0 plugins/agent/libexec/agents.sh::_agents_repo_root
   18   21   43.4  163     0 plugins/agent/libexec/agents.sh::cmd_agents
+  11   10   33.7   42     0 plugins/cli/libexec/registry.sh::_registry_install
+  33   34   43.5  123     0 plugins/cli/libexec/registry.sh::cmd_registry
+  19   25   27.4   53     0 plugins/mcp/libexec/mcp.sh::cmd_mcp
+  14   14   23.5   28     0 plugins/mcp/libexec/mcp.sh::cmd_mcp_serve
   21   12   31.5   69   248 plugins/secret/libexec/secrets.sh::<top>
   16   16   23.8   61     0 plugins/secret/libexec/secrets.sh::cmd_env_load
+  23   19   31.2  148     0 plugins/tool/libexec/env-emit.sh::dot_env_emit
+  23   21   25.3   84     0 plugins/tool/libexec/tool.sh::apply_template_security_baseline
+  17   26   28.3   77     0 plugins/tool/libexec/tool.sh::cmd_env_mise
+  11   11   24.9   56     0 plugins/tool/libexec/tool.sh::cmd_new
+  11   18   17.4   55     0 plugins/tool/libexec/tool.sh::cmd_tools
   22   22   36.8  109   109 scripts/diagnostics/attest-verify.sh::<top>
   13   11   27.4   73   292 scripts/diagnostics/benchmark.sh::<top>
   15   17   31.0   60     0 scripts/diagnostics/benchmark.sh::render_waterfall
@@ -122,19 +131,11 @@
   13   14   21.3   54    69 scripts/diagnostics/version-locks.sh::<top>
   25   27   43.1  135   199 scripts/diagnostics/workstation-attestation.sh::<top>
   17    3   25.6   67   184 scripts/dot/commands/core.sh::<top>
-  24    2   30.2   97   187 scripts/dot/commands/diagnostics.sh::<top>
-  23   19   31.2  148     0 scripts/dot/commands/env-emit.sh::dot_env_emit
+  23    2   29.2   93   180 scripts/dot/commands/diagnostics.sh::<top>
   22   21   28.7  103     0 scripts/dot/commands/init.sh::cmd_init
   11   11   15.2   34     0 scripts/dot/commands/manual.sh::cmd_open
   17   38   24.9   54     0 scripts/dot/commands/meta.sh::cmd_keys
    9   14   25.7   82     0 scripts/dot/commands/meta.sh::cmd_upgrade
-  11   10   33.7   42     0 scripts/dot/commands/registry.sh::_registry_install
-  33   34   43.5  123     0 scripts/dot/commands/registry.sh::cmd_registry
-  14    2   22.0   68   411 scripts/dot/commands/tools.sh::<top>
-  23   21   25.3   84     0 scripts/dot/commands/tools.sh::apply_template_security_baseline
-  17   26   30.0   77     0 scripts/dot/commands/tools.sh::cmd_env_mise
-  11   11   24.9   56     0 scripts/dot/commands/tools.sh::cmd_new
-  11   18   17.4   55     0 scripts/dot/commands/tools.sh::cmd_tools
   18   31   39.3  112   112 scripts/git-hooks/pre-commit-audit.sh::<top>
   11    7   24.4   32     0 scripts/lib/secrets_provider.sh::dot_secrets_get
   17   16   33.2   69    75 scripts/ops/bundle.sh::<top>
@@ -194,5 +195,3 @@
   11   11   20.8   30    30 tools/docs/checksum-manual.sh::<top>
   10   11   35.1   93   119 tools/release/package-policy-bundles.sh::<top>
   17   11   33.1   47    50 tools/release/stage-dot.sh::<top>
-  19   25   27.4   53     0 plugins/mcp/libexec/mcp.sh::cmd_mcp
-  14   14   23.5   28     0 plugins/mcp/libexec/mcp.sh::cmd_mcp_serve

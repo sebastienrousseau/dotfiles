@@ -80,12 +80,12 @@ assert_equals "1" "$rc" "an unknown shell fails"
 assert_file_contains "$WORK/err" "want: bash|zsh|fish|nu|pwsh" "and lists the shells"
 
 test_start "completion_module_prints_files_and_rejects_others"
-MODULE="$REPO_ROOT/scripts/dot/commands/completion.sh"
+MODULE="$REPO_ROOT/plugins/cli/libexec/completion.sh"
 HOME="$WORK" "$BASH_BIN" "$MODULE" completion nushell >"$WORK/out" 2>/dev/null
 assert_true "cmp -s '$WORK/out' '$NU_FILE'" "nushell is another name for nu"
 rc=0
 HOME="$WORK" "$BASH_BIN" "$MODULE" completion csh >"$WORK/out" 2>"$WORK/err" || rc=$?
-assert_equals "1" "$rc" "scripts/dot/commands/completion.sh: an unknown shell exits 1"
+assert_equals "1" "$rc" "plugins/cli/libexec/completion.sh: an unknown shell exits 1"
 assert_equals "" "$(cat "$WORK/out")" "and prints no script"
 rc=0
 HOME="$WORK" "$BASH_BIN" "$MODULE" completion >"$WORK/out" 2>&1 || rc=$?

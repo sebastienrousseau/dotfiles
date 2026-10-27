@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Coverage for the best-effort lockfile step of
-# scripts/dot/commands/tools.sh apply_template_security_baseline: npm for a
+# plugins/tool/libexec/tool.sh apply_template_security_baseline: npm for a
 # node template without a lockfile, uv for python, `go mod tidy` for go.
 # npm/uv/go are recording PATH stubs and every project lives in a mktemp
 # directory, so no package manager or network is touched.
@@ -26,13 +26,13 @@ for c in npm uv go; do
   chmod +x "$WORK/bin/$c"
 done
 
-# baseline <dir> <lang> — source tools.sh (help arm, output dropped), then
+# baseline <dir> <lang> — source tool.sh (only its functions), then
 # run apply_template_security_baseline on <dir>.
 baseline() {
   PATH="$WORK/bin:$PATH" "$REAL_BASH" -c '
     dest="$1" lang="$2"
     set -- --help
-    source "$0/scripts/dot/commands/tools.sh" >/dev/null 2>&1
+    source "$0/plugins/tool/libexec/tool.sh" >/dev/null 2>&1
     set +e
     apply_template_security_baseline "$dest" "$lang"
   ' "$REPO_ROOT" "$1" "$2" 2>&1

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Auto-generated function-exercise test for scripts/dot/commands/registry.sh
+# Auto-generated function-exercise test for plugins/cli/libexec/registry.sh
 # (the module-registry CLI). Covers existence, syntax, every read-only
 # subcommand (url, --help, list, search, info), and the set-url
 # safety guards (HTTPS-only, missing arg).
@@ -13,14 +13,14 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-SCRIPT_FILE="$REPO_ROOT/scripts/dot/commands/registry.sh"
+SCRIPT_FILE="$REPO_ROOT/plugins/cli/libexec/registry.sh"
 DOT_BIN="$REPO_ROOT/bin/dot"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
 test_start "script_exists"
-assert_file_exists "$SCRIPT_FILE" "scripts/dot/commands/registry.sh must exist"
+assert_file_exists "$SCRIPT_FILE" "plugins/cli/libexec/registry.sh must exist"
 
 test_start "script_valid_syntax"
 if bash -n "$SCRIPT_FILE" 2>/dev/null; then
@@ -110,7 +110,7 @@ fi
 test_start "dot_registry_unknown_subcommand"
 # `dot cli list --available <word>` searches, so the route rejects an
 # unknown subcommand only when called directly.
-if bash "$REPO_ROOT/scripts/dot/commands/registry.sh" registry not-a-real-subcommand >/dev/null 2>&1; then
+if bash "$REPO_ROOT/plugins/cli/libexec/registry.sh" registry not-a-real-subcommand >/dev/null 2>&1; then
   ((TESTS_FAILED++)) || true
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should have rejected"
 else

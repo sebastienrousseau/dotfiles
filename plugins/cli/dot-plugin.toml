@@ -10,6 +10,9 @@ version = "0.2.536"
 summary = "plugins, updates, completions"
 default = "list"
 
+[entry]
+command = "dot-cli"
+
 [[objects]]
 name = "completion"
 summary = "shell completion scripts"
@@ -23,60 +26,58 @@ default = "show"
 [[commands]]
 verb = "list"
 effect = "read"
-legacy = "registry installed"
 summary = "Installed plugins"
 
 [[commands]]
 verb = "show"
 effect = "read"
-legacy = "registry info"
 summary = "One plugin in detail"
 
 [[commands]]
 verb = "install"
 effect = "write"
-legacy = "registry install"
 summary = "Install a plugin"
 
 [[commands]]
 verb = "update"
 effect = "write"
+planned = true
 summary = "Update dot and its plugins"
 
 [[commands]]
 verb = "remove"
 effect = "write"
+planned = true
 summary = "Remove a plugin"
 
 [[commands]]
 verb = "verify"
 effect = "read"
+planned = true
 summary = "Verify plugin provenance"
 
 [[commands]]
 verb = "new"
 effect = "write"
+planned = true
 summary = "Create a plugin from the template"
 
 [[commands]]
 object = "completion"
 verb = "show"
 effect = "read"
-legacy = "completion"
 summary = "Print a completion script"
 
 [[commands]]
 object = "registry"
 verb = "show"
 effect = "read"
-legacy = "registry url"
 summary = "The plugin registry URL"
 
 [[commands]]
 object = "registry"
 verb = "set"
 effect = "write"
-legacy = "registry set-url"
 summary = "Point at another plugin registry"
 
 [[aliases]]

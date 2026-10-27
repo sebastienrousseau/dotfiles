@@ -31,7 +31,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-REGISTRY_SCRIPT="$REPO_ROOT/scripts/dot/commands/registry.sh"
+REGISTRY_SCRIPT="$REPO_ROOT/plugins/cli/libexec/registry.sh"
 REAL_MINISIGN="${MINISIGN_BIN:-$(command -v minisign 2>/dev/null || true)}"
 # A mise shim stops working once HOME is sandboxed below (mise no longer finds
 # that the user trusted their config), so use the binary the shim points at.
