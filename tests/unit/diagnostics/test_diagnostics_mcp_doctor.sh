@@ -16,7 +16,7 @@ MCP_CONFIG_FILE="$REPO_ROOT/defaults/dot_config/claude/mcp_servers.json"
 MCP_POLICY_FILE="$REPO_ROOT/defaults/dot_config/dotfiles/mcp-policy.json"
 MCP_LOCK_FILE="$REPO_ROOT/defaults/dot_config/dotfiles/mcp-lock.json"
 MCP_REGISTRY_FILE="$REPO_ROOT/defaults/dot_config/dotfiles/mcp-registry.json"
-META_COMMANDS_SCRIPT="$REPO_ROOT/scripts/dot/commands/meta.sh"
+META_COMMANDS_SCRIPT="$REPO_ROOT/plugins/mcp/libexec/mcp.sh"
 
 test_start "mcp_doctor_exists"
 assert_file_exists "$TEST_SCRIPT" "mcp-doctor.sh should exist"
@@ -30,13 +30,13 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax error"
 fi
 
-# meta <args...>: run `dot mcp` through the meta command module.
+# meta <args...>: run `dot mcp` through the mcp module (plugins/mcp/libexec).
 meta() {
   REPO_ROOT="$REPO_ROOT" MCP_CONFIG="$MCP_CONFIG_FILE" NO_COLOR=1 bash "$META_COMMANDS_SCRIPT" "$@" 2>&1
 }
 
 test_start "mcp_meta_accepts_flag_form"
-assert_equals "healthy" "$(meta mcp --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["status"])' 2>/dev/null)" \
+assert_equals "healthy" "$(meta --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["status"])' 2>/dev/null)" \
   "dot mcp --json (flag only) runs the doctor"
 
 test_start "mcp_policy_exists"
@@ -139,11 +139,11 @@ assert_true '[[ $S_OUT == *"HTTP transports are HTTPS"* && $S_OUT == *"HTTP tran
   "an HTTPS, OAuth2-registered remote server passes the HTTPS and OAuth rules"
 
 test_start "mcp_meta_registry_subcommand"
-assert_true '[[ "$(meta mcp registry)" == *"git"*"mcp-server-git==2026.8.18"* ]]' "dot mcp registry lists the tracked servers"
+assert_true '[[ "$(meta registry)" == *"git"*"mcp-server-git==2026.8.18"* ]]' "dot mcp registry lists the tracked servers"
 
 test_start "mcp_meta_unknown_subcommand_shows_usage"
 rc=0
-out="$(meta mcp bogus)" || rc=$?
+out="$(meta bogus)" || rc=$?
 assert_equals "1|Usage: dot mcp [doctor|registry|serve]" "$rc|$out" "an unknown subcommand prints the usage and exits 1"
 
 test_start "mcp_doctor_strict_local_passes"

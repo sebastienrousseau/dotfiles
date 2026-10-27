@@ -187,7 +187,7 @@ test_start "platform_no_gnu_only_flags_in_new_scripts"
 # New/changed scripts must not use GNU-only flags without guards
 PLATFORM_CHECK_FILES=(
   scripts/uninstall.sh
-  scripts/dot/commands/ai.sh
+  plugins/ai/libexec/ai.sh
   scripts/ops/chezmoi-apply.sh
   scripts/ops/prewarm.sh
 )

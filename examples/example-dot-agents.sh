@@ -6,7 +6,7 @@
 #
 # Keep AGENTS.md and ten harness config files in sync with CLAUDE.md.
 #
-# Backing module: scripts/dot/commands/agents.sh
+# Backing module: plugins/agent/libexec/agents.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: every command below is read-only or a help

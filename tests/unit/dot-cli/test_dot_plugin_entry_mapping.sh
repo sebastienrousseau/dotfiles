@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# shellcheck disable=SC1090,SC1091
-# The attest, secret and fleet entries (ADR-020 N2, P2.1) turn each
+# shellcheck disable=SC1090,SC1091,SC2016
+# The attest, secret, fleet, ai, agent, mcp and top entries (ADR-020 N2,
+# P2.1) turn each
 # spelling their manifest declares into what implements it: a script, or
 # a subcommand of the module the plugin keeps in libexec/. bash is
 # PATH-shadowed by a shim that records those hand-offs instead of running
@@ -24,11 +25,18 @@ cat >"$WORK/bin/bash" <<EOF
 case "\${1:-}" in
   */plugins/*/libexec/*.sh) printf 'module %s %s\n' "\${1##*/libexec/}" "\${*:2}"; exit "\${DISPATCH_RC:-0}" ;;
   */scripts/dot/commands/*) ;;
+  */lib/dot/bento.sh) printf 'ran bento.sh %s\n' "\${*:2}"; exit "\${DISPATCH_RC:-0}" ;;
   */scripts/*) printf 'ran %s %s\n' "\${1##*/scripts/}" "\${*:2}"; exit "\${DISPATCH_RC:-0}" ;;
 esac
 exec "$REAL_BASH" "\$@"
 EOF
 chmod +x "$WORK/bin/bash"
+# Several cases below would change the checkout if the shim did not catch
+# them (fleet policy set writes agent-profiles.json); stop if it does not.
+if [[ "$(PATH="$WORK/bin:/usr/bin:/bin" bash /x/plugins/p/libexec/m.sh probe 2>&1)" != "module m.sh probe" ]]; then
+  echo "the bash shim does not intercept libexec modules; refusing to run" >&2
+  exit 1
+fi
 
 # run <file> <args...> — run a file with the shim on PATH; sets RC and OUT
 # (the first module or script line it recorded).
@@ -101,6 +109,98 @@ assert_equals "4" "$RC" "secret"
 DISPATCH_RC=4 run "$REPO_ROOT/plugins/attest/dot-attest" verify
 assert_equals "4" "$RC" "attest"
 
+test_start "ai_spellings_become_module_verbs"
+expect ai "list --json" "module ai.sh ai tools --json"
+expect ai "start claude" "module ai.sh ai chat claude"
+expect ai "check" "module ai.sh ai doctor"
+expect ai "gateway serve" "module ai.sh ai serve"
+expect ai "cost show" "module ai.sh ai cost"
+expect ai "install claude" "module ai.sh ai install claude"
+expect ai "run claude hi" "module ai.sh ai run claude hi"
+expect ai "ask what" "module ai.sh ai ask what"
+expect ai "pattern list" "module patterns.sh list"
+expect ai "pattern show summarize" "module patterns.sh view summarize"
+expect ai "pattern edit summarize" "module patterns.sh edit summarize"
+expect ai "" "module ai.sh ai"
+expect ai "tools" "module ai.sh ai tools"
+expect ai "install --interactive claude" "module ai.sh ai-setup claude"
+run "$REPO_ROOT/bin/dot" ai install --interactive
+assert_equals "module ai.sh ai-setup" "$OUT" "dot ai install --interactive is the guided setup, through bin/dot"
+
+test_start "mcp_spellings_become_module_subcommands"
+expect mcp "list --json" "module mcp.sh registry --json"
+expect mcp "check" "module mcp.sh doctor"
+expect mcp "serve" "module mcp.sh serve"
+expect mcp "" "module mcp.sh "
+expect mcp "doctor" "module mcp.sh doctor"
+
+# The banner shows only on a terminal, so these two run under a pty. It is
+# never shown for `mcp serve`, whose stdout is the JSON-RPC stream. The
+# modules run for real here: PATH holds only a stub server, not the shim.
+pty_run() {
+  (cd "$WORK" && HOME="$WORK/home" DOTFILES_SHOW_LOGO=1 NO_COLOR=1 TERM=dumb PATH="$WORK/ptybin:/usr/bin:/bin" \
+    "$PTY_TIMEOUT" 30 "$PTY_PYTHON" -c 'import pty, sys; pty.spawn(sys.argv[1:])' "$REAL_BASH" "$@") 2>&1 </dev/null
+}
+test_start "mcp_banner_never_reaches_the_serve_stream"
+# Resolved here: the pty runs on a PATH of /usr/bin:/bin, where macOS keeps
+# neither timeout (Homebrew coreutils) nor always python3.
+PTY_TIMEOUT="$(command -v timeout || command -v gtimeout || true)"
+PTY_PYTHON="$(command -v python3 || true)"
+if [[ -n "$PTY_TIMEOUT" && -n "$PTY_PYTHON" ]]; then
+  mkdir -p "$WORK/ptybin"
+  printf '#!%s\necho SERVER-FRAME\n' "$REAL_BASH" >"$WORK/ptybin/dot-mcp"
+  chmod +x "$WORK/ptybin/dot-mcp"
+  out="$(pty_run "$REPO_ROOT/plugins/mcp/dot-mcp" serve)"
+  rm -f "$WORK/ptybin/dot-mcp"
+  assert_contains "SERVER-FRAME" "$out" "serve reaches the server"
+  assert_equals "no" "$([[ "$out" == *"AI and Agents"* ]] && echo yes || echo no)" "serve prints no banner"
+  out="$(pty_run "$REPO_ROOT/plugins/mcp/dot-mcp" bogus)"
+  assert_contains "AI and Agents" "$out" "other spellings keep the banner"
+else
+  printf '  - SKIP mcp banner: python3 or timeout missing\n'
+fi
+
+test_start "agent_context_spellings_become_agents_subcommands"
+expect agent "context show" "module agents.sh list"
+expect agent "context check" "module agents.sh check"
+expect agent "context apply --dry-run" "module agents.sh render --dry-run"
+
+test_start "top_runs_the_intelligence_surface"
+expect top "" "ran bento.sh "
+expect top "--json" "ran bento.sh --json"
+run "$REPO_ROOT/plugins/top/dot-top" report
+assert_equals "127" "$RC" "dot top report is not available yet"
+assert_equals "" "$OUT" "and runs nothing"
+
+# The agent entry sources libexec/agent.sh and calls cmd_mode in-process, so
+# each spelling is checked against calling cmd_mode with what it maps to.
+cmd_mode_out() {
+  (cd "$WORK" && HOME="$WORK/home" XDG_STATE_HOME="$WORK/home/.local/state" \
+    DOTFILES_SHOW_LOGO=0 NO_COLOR=1 TERM=dumb PATH="$WORK/bin:/usr/bin:/bin" "$REAL_BASH" -c '
+      source "$1/lib/dot/utils.sh"; source "$1/lib/dot/log.sh"
+      source "$1/plugins/agent/libexec/agent.sh"; shift; cmd_mode "$@"' _ "$REPO_ROOT" "$@") 2>&1 </dev/null
+}
+test_start "agent_spellings_become_cmd_mode_subcommands"
+while IFS='|' read -r words mode; do
+  # shellcheck disable=SC2086 # words
+  run "$REPO_ROOT/plugins/agent/dot-agent" $words
+  # shellcheck disable=SC2086 # words
+  assert_equals "$(cmd_mode_out $mode)" "$(cat "$WORK/out" "$WORK/err")" "dot agent $words runs cmd_mode $mode"
+done <<'MAP'
+status|current
+check|doctor
+mode list|list
+mode show plan|show plan
+card show|card
+card check|conformance
+checkpoint list|checkpoint list
+delegate list|delegate list
+|
+MAP
+# The log grows with every call, so only its oldest entry is compared.
+run "$REPO_ROOT/plugins/agent/dot-agent" log show
+assert_equals "$(cmd_mode_out log | head -1)" "$(cat "$WORK/out" "$WORK/err" | head -1)" "dot agent log show runs cmd_mode log"
+
 # Through bin/dot: fleet has a fallback, secret and security do not.
 test_start "fallback_decides_where_other_words_go"
 run "$REPO_ROOT/bin/dot" fleet events
@@ -109,8 +209,8 @@ run "$REPO_ROOT/bin/dot" fleet
 assert_equals "module fleet.sh fleet" "$OUT" "bare fleet runs the entry"
 run "$REPO_ROOT/bin/dot" fleet drift history
 assert_equals "module fleet.sh fleet drift history" "$OUT" "an object with fallback passes its old words on"
-run "$REPO_ROOT/bin/dot" fleet namespace set fm-eng
-assert_equals "module fleet.sh fleet namespace set fm-eng" "$OUT" "so does namespace"
+run "$REPO_ROOT/bin/dot" fleet namespace show
+assert_equals "module fleet.sh fleet namespace show" "$OUT" "so does namespace"
 run "$REPO_ROOT/bin/dot" fleet log bogus
 assert_equals "127" "$RC" "an object without fallback refuses a word that is not its verb"
 assert_equals "" "$OUT" "and runs nothing"

@@ -215,7 +215,7 @@ assert_contains "AI CLI Status" "$CP_OUT" "dot ai tools reports status with no t
 # tests/unit/dot-cli/test_ai_install_pkg_map.sh.)
 
 test_start "critical_ai_bridge_help"
-output=$(bash "$REPO_ROOT/scripts/dot/commands/ai.sh" cl --help 2>&1 || true)
+output=$(bash "$REPO_ROOT/plugins/ai/libexec/ai.sh" cl --help 2>&1 || true)
 if echo "$output" | grep -q "Available styles"; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: AI bridge help shows available styles"

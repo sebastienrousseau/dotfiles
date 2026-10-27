@@ -39,13 +39,13 @@ agents a profile may hand work to; alone it runs \fBlist\fR.
 .SH COMMANDS
 .TP
 .B dot agent status
-Mode, policy and budgets. Effect: read. Runs \fBdot mode current\fR until the domain is extracted.
+Mode, policy and budgets. Effect: read. Runs \fBdot\-agent status\fR, the plugin's entry.
 .TP
 .B dot agent check
-Check modes and policy. Effect: read. Runs \fBdot mode doctor\fR until the domain is extracted.
+Check modes and policy. Effect: read. Runs \fBdot\-agent check\fR, the plugin's entry.
 .TP
 .B dot agent run
-Run an agent task. Effect: write. Runs \fBdot agent run\fR until the domain is extracted.
+Run an agent task. Effect: write. Runs \fBdot\-agent run\fR, the plugin's entry.
 .TP
 .B dot agent suspend
 Pause running agents. Effect: write. Planned; not built yet.
@@ -57,28 +57,28 @@ Resume paused agents. Effect: write. Planned; not built yet.
 Export the AI bill of materials. Effect: read. Planned; not built yet.
 .TP
 .B dot agent mode list
-Available modes. Effect: read. Runs \fBdot mode list\fR until the domain is extracted.
+Available modes. Effect: read. Runs \fBdot\-agent mode list\fR, the plugin's entry.
 .TP
 .B dot agent mode show
-One mode in detail. Effect: read. Runs \fBdot mode show\fR until the domain is extracted.
+One mode in detail. Effect: read. Runs \fBdot\-agent mode show\fR, the plugin's entry.
 .TP
 .B dot agent mode set
-Switch mode. Effect: write. Runs \fBdot mode set\fR until the domain is extracted.
+Switch mode. Effect: write. Runs \fBdot\-agent mode set\fR, the plugin's entry.
 .TP
 .B dot agent context show
-Context files in effect. Effect: read. Runs \fBdot agents list\fR until the domain is extracted.
+Context files in effect. Effect: read. Runs \fBdot\-agent context show\fR, the plugin's entry.
 .TP
 .B dot agent card show
-The agent card. Effect: read. Runs \fBdot agent card\fR until the domain is extracted.
+The agent card. Effect: read. Runs \fBdot\-agent card show\fR, the plugin's entry.
 .TP
 .B dot agent log show
-The agent log. Effect: read. Runs \fBdot agent log\fR until the domain is extracted.
+The agent log. Effect: read. Runs \fBdot\-agent log show\fR, the plugin's entry.
 .TP
 .B dot agent checkpoint list
-Saved checkpoints. Effect: read. Runs \fBdot agent checkpoint list\fR until the domain is extracted.
+Saved checkpoints. Effect: read. Runs \fBdot\-agent checkpoint list\fR, the plugin's entry.
 .TP
 .B dot agent checkpoint save
-Save a checkpoint. Effect: write. Runs \fBdot agent checkpoint save\fR until the domain is extracted.
+Save a checkpoint. Effect: write. Runs \fBdot\-agent checkpoint save\fR, the plugin's entry.
 .TP
 .B dot agent policy show
 The sandbox policy. Effect: read. Planned; not built yet.
@@ -87,22 +87,22 @@ The sandbox policy. Effect: read. Planned; not built yet.
 Budgets and spend. Effect: read. Planned; not built yet.
 .TP
 .B dot agent delegate list
-Configured delegates. Effect: read. Runs \fBdot agent delegate list\fR until the domain is extracted.
+Configured delegates. Effect: read. Runs \fBdot\-agent delegate list\fR, the plugin's entry.
 .TP
 .B dot agent delegate run
-Run a command as a delegate. Effect: write. Runs \fBdot agent delegate run\fR until the domain is extracted.
+Run a command as a delegate. Effect: write. Runs \fBdot\-agent delegate run\fR, the plugin's entry.
 .TP
 .B dot agent context check
-Check the rendered context files are current. Effect: read. Runs \fBdot agents check\fR until the domain is extracted.
+Check the rendered context files are current. Effect: read. Runs \fBdot\-agent context check\fR, the plugin's entry.
 .TP
 .B dot agent context apply
-Render the context file for every harness. Effect: write. Runs \fBdot agents render\fR until the domain is extracted.
+Render the context file for every harness. Effect: write. Runs \fBdot\-agent context apply\fR, the plugin's entry.
 .TP
 .B dot agent mode run
-Run a command under a mode. Effect: write. Runs \fBdot mode run\fR until the domain is extracted.
+Run a command under a mode. Effect: write. Runs \fBdot\-agent mode run\fR, the plugin's entry.
 .TP
 .B dot agent card check
-Check the card against the A2A spec. Effect: read. Runs \fBdot mode conformance\fR until the domain is extracted.
+Check the card against the A2A spec. Effect: read. Runs \fBdot\-agent card check\fR, the plugin's entry.
 .SH OTHER NAMES
 .TP
 .B dot mode

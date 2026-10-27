@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC2016,SC2034
-# Unit tests for dot CLI agent commands (scripts/dot/commands/agent.sh).
+# Unit tests for dot CLI agent commands (plugins/agent/libexec/agent.sh).
 #
-# Every case runs the module: `dot agent mode|agent <sub>` through meta.sh (which
+# Every case runs the module: `dot agent <sub>` through plugins/agent/dot-agent (which
 # sources agent.sh for cmd_mode), against fixture profile and card JSON
 # passed via AGENT_PROFILE_CONFIG / AGENT_CARD_CONFIG. State, session log
 # and checkpoints live in a mktemp HOME/XDG tree; nothing outside it is
@@ -18,8 +18,8 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 # shellcheck source=../../framework/assertions.sh
 source "$REPO_ROOT/tests/framework/assertions.sh"
 
-AGENT_FILE="$REPO_ROOT/scripts/dot/commands/agent.sh"
-META_FILE="$REPO_ROOT/scripts/dot/commands/meta.sh"
+AGENT_FILE="$REPO_ROOT/plugins/agent/libexec/agent.sh"
+META_FILE="$REPO_ROOT/plugins/agent/dot-agent"
 REAL_BASH="${BASH:-$(command -v bash)}"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/agent-cmd.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
@@ -64,10 +64,10 @@ cat >"$AGENT_CARD_CONFIG" <<'JSON'
 JSON
 
 OUT="$WORK/out"
-# mode <args…> — run `dot agent mode <args…>` via meta.sh; prints the exit code.
+# mode <args…> — run cmd_mode <args…> through the agent entry; prints the exit code.
 mode() {
   local rc=0
-  "$REAL_BASH" "$META_FILE" mode "$@" >"$OUT" 2>&1 </dev/null || rc=$?
+  "$REAL_BASH" "$META_FILE" "$@" >"$OUT" 2>&1 </dev/null || rc=$?
   printf '%s' "$rc"
 }
 # line <label> — the rendered row for a ui_ok/ui_info label, spaces squeezed.
@@ -88,7 +88,7 @@ test_start "agent_cmd_defines_mode"
 rc="$(mode current)"
 assert_equals "0" "$rc" "mode current exits 0"
 assert_equals "[OK] Profile ask" "$(line Profile)" "no state: default profile from the config"
-rc="$("$REAL_BASH" "$META_FILE" agent current >"$OUT" 2>&1 </dev/null && echo 0 || echo $?)"
+rc="$("$REAL_BASH" "$META_FILE" current >"$OUT" 2>&1 </dev/null && echo 0 || echo $?)"
 assert_equals "0" "$rc" "agent is an alias of mode"
 assert_equals "[OK] Profile ask" "$(line Profile)" "agent alias reaches cmd_mode"
 rc="$(mode --verbose)"

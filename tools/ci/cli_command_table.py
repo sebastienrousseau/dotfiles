@@ -122,7 +122,10 @@ def run_records(manifests: dict) -> list[str]:
             target = alias["target"]
             if alias["kind"] != "shortcut" and " " in target and target not in names | seen:
                 seen.add(target)
-                rows.append(f"run|{target}|{alias.get('legacy', alias['name'])}||")
+                # A plugin with an entry runs the target itself, flags and all.
+                owner = manifests.get(target.split()[0], {})
+                route = f"@{target}" if "entry" in owner else alias.get("legacy", alias["name"])
+                rows.append(f"run|{target}|{route}||")
     return rows
 
 

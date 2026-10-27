@@ -20,7 +20,7 @@ Usage: diagnostics.sh <command> [args...]
 Commands:
   doctor, heal, health, scorecard, perf, conflicts, locks, snapshot,
   rollback, drift, history, benchmark, verify, restore, load-bench,
-  load-bench-pty, chaos, bundle, metrics, smoke-test, intelligence
+  load-bench-pty, chaos, bundle, metrics, smoke-test
 EOF
 }
 
@@ -38,10 +38,6 @@ cmd_doctor() {
 
 cmd_smoke_test() {
   run_script "scripts/diagnostics/smoke-test.sh" "Smoke test script" "$@"
-}
-
-cmd_intelligence() {
-  run_script "lib/dot/bento.sh" "Intelligence Surface" "$@"
 }
 
 cmd_heal() {
@@ -220,10 +216,6 @@ case "${1:-}" in
   smoke-test)
     shift
     cmd_smoke_test "$@"
-    ;;
-  intelligence)
-    shift
-    cmd_intelligence "$@"
     ;;
   *)
     echo "Unknown diagnostics command: ${1:-}" >&2

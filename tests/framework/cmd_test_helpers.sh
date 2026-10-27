@@ -177,7 +177,13 @@ _cmd_seed_dotfiles_source() {
 _cmd_run_module() {
   local module="$1"; shift
   local module_file
-  module_file="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}/scripts/dot/commands/${module}.sh"
+  local root f
+  root="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+  module_file="$root/scripts/dot/commands/${module}.sh"
+  # A module that moved into a plugin (P2.1) lives in its libexec/.
+  for f in "$root"/plugins/*/libexec/"${module}.sh"; do
+    [[ -f "$module_file" || ! -f "$f" ]] || module_file="$f"
+  done
   if [[ ! -f "$module_file" ]]; then
     printf 'module not found: %s\n' "$module_file" >&2
     return 1

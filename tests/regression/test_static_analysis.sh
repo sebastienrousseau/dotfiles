@@ -21,7 +21,7 @@ source "$SCRIPT_DIR/../framework/assertions.sh"
 
 # Files modified in this branch (v0.2.500 changes)
 CHANGED_SCRIPTS=(
-  scripts/dot/commands/ai.sh
+  plugins/ai/libexec/ai.sh
   scripts/ops/chezmoi-apply.sh
   scripts/ops/prewarm.sh
   scripts/ops/ai-setup.sh

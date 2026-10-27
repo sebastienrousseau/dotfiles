@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Behavioural coverage for the profile arms of scripts/dot/commands/agent.sh
+# Behavioural coverage for the profile arms of plugins/agent/libexec/agent.sh
 # (`cmd_mode`: current/list/show/set/run/doctor/card/log) driven through the
-# real dispatcher (`meta.sh mode|agent …`) inside the coverage sandbox. Each
+# real dispatcher (plugins/agent/dot-agent, once `meta.sh mode|agent …`) inside the coverage sandbox. Each
 # arm gets a success path and each `die` guard a failure path; results are
 # asserted on exit code, stdout, stderr and files written under $HOME.
 #
@@ -20,8 +20,8 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-META="$REPO_ROOT/scripts/dot/commands/meta.sh"
-AGENT_MODULE="$REPO_ROOT/scripts/dot/commands/agent.sh"
+META="$REPO_ROOT/plugins/agent/dot-agent"
+AGENT_MODULE="$REPO_ROOT/plugins/agent/libexec/agent.sh"
 REAL_PROFILES="$REPO_ROOT/defaults/dot_config/dotfiles/agent-profiles.json"
 
 trap cov_teardown_sandbox EXIT
@@ -51,7 +51,14 @@ run_cmd() {
   return 0
 }
 
-meta() { run_cmd bash "$META" "$@"; }
+# meta agent|mode <args…> — `dot agent <args…>`: both old words ran cmd_mode,
+# which the agent plugin's entry now runs (P2.1).
+meta() {
+  local word="$1"
+  shift
+  [[ "$word" == agent || "$word" == mode ]] || set -- "$word" "$@"
+  run_cmd bash "$META" "$@"
+}
 
 # ── current / list / show ───────────────────────────────────────────────
 test_start "mode_no_args_reports_current_profile_from_state_file"

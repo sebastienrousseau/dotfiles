@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 #
-# Behaviour tests for `dot agent context` (scripts/dot/commands/agents.sh):
+# Behaviour tests for `dot agent context` (plugins/agent/libexec/agents.sh):
 # list, check (missing CLAUDE.md, missing AGENTS.md, in sync, drifted),
 # render (all eleven harness targets, and that a render makes check
 # pass), help and the unknown-subcommand error.

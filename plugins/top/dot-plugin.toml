@@ -9,7 +9,10 @@ domain = "top"
 version = "0.2.536"
 summary = "what the machine and its agents are doing"
 default = "tui"
-legacy = "intelligence"
+
+[entry]
+command = "dot-top"
+fallback = true
 
 [[objects]]
 name = "report"
@@ -19,12 +22,14 @@ default = "show"
 [[commands]]
 verb = "measure"
 effect = "read"
+planned = true
 summary = "Sample once and print the result"
 
 [[commands]]
 object = "report"
 verb = "show"
 effect = "read"
+planned = true
 summary = "Usage report"
 
 [[aliases]]

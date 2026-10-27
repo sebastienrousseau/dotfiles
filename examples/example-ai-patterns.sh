@@ -33,7 +33,7 @@ printf '  and OpenAI (/v1/chat/completions) protocols at http://127.0.0.1:3456.\
 
 # Verify the AI command modules parse.
 for f in \
-  "scripts/dot/commands/ai.sh" \
+  "plugins/ai/libexec/ai.sh" \
   "lib/dot/ai-commands.sh" \
   "lib/dot/ai-install.sh" \
   "lib/dot/ai-probe.sh" \

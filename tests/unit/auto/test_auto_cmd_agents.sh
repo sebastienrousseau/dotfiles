@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Auto-generated function-exercise test for scripts/dot/commands/agents.sh
+# Auto-generated function-exercise test for plugins/agent/libexec/agents.sh
 # (the 11-harness AGENTS.md generator). Covers existence, syntax,
 # function-mode exercise, and the three end-to-end subcommands
 # (list / check / render).
@@ -13,14 +13,14 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-SCRIPT_FILE="$REPO_ROOT/scripts/dot/commands/agents.sh"
+SCRIPT_FILE="$REPO_ROOT/plugins/agent/libexec/agents.sh"
 DOT_BIN="$REPO_ROOT/bin/dot"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
 test_start "script_exists"
-assert_file_exists "$SCRIPT_FILE" "scripts/dot/commands/agents.sh must exist"
+assert_file_exists "$SCRIPT_FILE" "plugins/agent/libexec/agents.sh must exist"
 
 test_start "script_valid_syntax"
 if bash -n "$SCRIPT_FILE" 2>/dev/null; then

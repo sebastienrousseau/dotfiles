@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# Sourced by scripts/dot/commands/ai.sh and scripts/ops/chezmoi-apply.sh.
+# Sourced by plugins/ai/libexec/ai.sh and scripts/ops/chezmoi-apply.sh.
 # Shared AI provider install helpers (mise-package map + Claude installer).
 #
 # Claude Code is installed via Anthropic's native installer rather than

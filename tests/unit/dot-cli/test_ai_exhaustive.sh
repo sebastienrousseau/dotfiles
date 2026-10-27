@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 # Exhaustive runtime exercise of the `dot ai` surface — drives line
-# coverage across scripts/dot/commands/ai.sh and the extracted command
+# coverage across plugins/ai/libexec/ai.sh and the extracted command
 # bodies in lib/dot/ai-commands.sh + lib/dot/ai-install.sh. The fleet and
 # installers are mocked so each verb, bridge, deprecated alias, raw-mode
 # path, cold-cache probe, and install branch executes without touching the
@@ -21,7 +21,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-AI_SCRIPT="$REPO_ROOT/scripts/dot/commands/ai.sh"
+AI_SCRIPT="$REPO_ROOT/plugins/ai/libexec/ai.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

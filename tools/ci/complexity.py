@@ -327,7 +327,8 @@ def _lit(word) -> str | None:
 # -- file discovery ------------------------------------------------------
 def shell_files() -> list[str]:
     out = subprocess.run(
-        ["git", "ls-files", "-z", "--", "*.sh", "*.bash", "bin/*", "defaults/dot_local/bin/executable_*"],
+        ["git", "ls-files", "-z", "--", "*.sh", "*.bash", "bin/*", "defaults/dot_local/bin/executable_*",
+         "plugins/*/dot-*"],
         cwd=ROOT,
         capture_output=True,
         check=True,

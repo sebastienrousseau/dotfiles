@@ -3,8 +3,8 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 # Behavioural coverage for the `a2a-card`, `conformance` and unknown-command
-# arms of scripts/dot/commands/agent.sh (`cmd_mode`), driven through the real
-# dispatcher (`meta.sh agent …`) inside the coverage sandbox. Split from
+# arms of plugins/agent/libexec/agent.sh (`cmd_mode`), driven through the real
+# dispatcher (plugins/agent/dot-agent, once `meta.sh agent …`) inside the coverage sandbox. Split from
 # test_dot_agent_dispatch.sh to stay inside the coverage runner's 60s
 # per-file budget.
 #
@@ -17,8 +17,8 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-META="$REPO_ROOT/scripts/dot/commands/meta.sh"
-AGENT_MODULE="$REPO_ROOT/scripts/dot/commands/agent.sh"
+META="$REPO_ROOT/plugins/agent/dot-agent"
+AGENT_MODULE="$REPO_ROOT/plugins/agent/libexec/agent.sh"
 REAL_PROFILES="$REPO_ROOT/defaults/dot_config/dotfiles/agent-profiles.json"
 
 trap cov_teardown_sandbox EXIT
@@ -48,7 +48,14 @@ run_cmd() {
   return 0
 }
 
-meta() { run_cmd bash "$META" "$@"; }
+# meta agent|mode <args…> — `dot agent <args…>`: both old words ran cmd_mode,
+# which the agent plugin's entry now runs (P2.1).
+meta() {
+  local word="$1"
+  shift
+  [[ "$word" == agent || "$word" == mode ]] || set -- "$word" "$@"
+  run_cmd bash "$META" "$@"
+}
 
 # ── a2a-card (real card) ────────────────────────────────────────────────
 test_start "a2a_card_renders_summary"
@@ -82,13 +89,17 @@ rm -rf "$FAKE"
 mkdir -p "$FAKE/scripts/diagnostics" "$FAKE/.well-known"
 ln -s "$REPO_ROOT/lib" "$FAKE/lib"
 ln -s "$REPO_ROOT/scripts/dot" "$FAKE/scripts/dot"
+ln -s "$REPO_ROOT/plugins" "$FAKE/plugins"
 cat >"$FAKE/scripts/diagnostics/a2a-conformance.sh" <<'EOF'
 #!/usr/bin/env bash
 echo "stub-conformance $*"
 EOF
 chmod +x "$FAKE/scripts/diagnostics/a2a-conformance.sh"
-FAKE_META="$FAKE/scripts/dot/commands/meta.sh"
-fmeta() { AGENT_PROFILE_CONFIG="$REAL_PROFILES" run_cmd bash "$FAKE_META" "$@"; }
+FAKE_META="$FAKE/plugins/agent/dot-agent"
+fmeta() {
+  shift # `agent`
+  AGENT_PROFILE_CONFIG="$REAL_PROFILES" run_cmd bash "$FAKE_META" "$@"
+}
 
 test_start "a2a_card_validate_invalid_json_exits_1"
 printf '{oops' >"$FAKE/.well-known/agent-card.json"
