@@ -139,10 +139,14 @@ expect mcp "doctor" "module mcp.sh doctor"
 # modules run for real here: PATH holds only a stub server, not the shim.
 pty_run() {
   (cd "$WORK" && HOME="$WORK/home" DOTFILES_SHOW_LOGO=1 NO_COLOR=1 TERM=dumb PATH="$WORK/ptybin:/usr/bin:/bin" \
-    timeout 30 python3 -c 'import pty, sys; pty.spawn(sys.argv[1:])' "$REAL_BASH" "$@") 2>&1 </dev/null
+    "$PTY_TIMEOUT" 30 "$PTY_PYTHON" -c 'import pty, sys; pty.spawn(sys.argv[1:])' "$REAL_BASH" "$@") 2>&1 </dev/null
 }
 test_start "mcp_banner_never_reaches_the_serve_stream"
-if command -v python3 >/dev/null 2>&1 && command -v timeout >/dev/null 2>&1; then
+# Resolved here: the pty runs on a PATH of /usr/bin:/bin, where macOS keeps
+# neither timeout (Homebrew coreutils) nor always python3.
+PTY_TIMEOUT="$(command -v timeout || command -v gtimeout || true)"
+PTY_PYTHON="$(command -v python3 || true)"
+if [[ -n "$PTY_TIMEOUT" && -n "$PTY_PYTHON" ]]; then
   mkdir -p "$WORK/ptybin"
   printf '#!%s\necho SERVER-FRAME\n' "$REAL_BASH" >"$WORK/ptybin/dot-mcp"
   chmod +x "$WORK/ptybin/dot-mcp"
