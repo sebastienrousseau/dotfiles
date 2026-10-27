@@ -6,7 +6,7 @@
 #
 # One verb-first surface over eighteen AI CLIs, plus cost and doctor views.
 #
-# Backing module: scripts/dot/commands/ai.sh
+# Backing module: plugins/ai/libexec/ai.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: every command below is read-only or a help

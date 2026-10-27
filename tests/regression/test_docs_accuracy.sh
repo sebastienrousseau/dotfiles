@@ -55,7 +55,7 @@ assert_file_contains "$REPO_ROOT/README.md" "MIGRATION.md" "README must link to 
 
 test_start "ai_doc_bridge_commands_match_code"
 # Every bridge command documented in AI.md must exist in ai.sh dispatch
-ai_script="$REPO_ROOT/scripts/dot/commands/ai.sh"
+ai_script="$REPO_ROOT/plugins/ai/libexec/ai.sh"
 failures=0
 for cmd in cl copilot kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai; do
   if grep -q "dot $cmd" "$REPO_ROOT/docs/AI.md" 2>/dev/null; then

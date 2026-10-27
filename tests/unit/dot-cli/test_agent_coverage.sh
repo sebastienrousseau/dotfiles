@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# Coverage for the two scripts/dot/commands/agent.sh checkpoint arms the
+# Coverage for the two plugins/agent/libexec/agent.sh checkpoint arms the
 # meta-driven suites cannot reach: `checkpoint list` without jq (cmd_mode's
 # dependency check demands jq first, so the module is sourced and that check
 # is stubbed), and `checkpoint replay` of a checkpoint whose argv is empty.
@@ -30,7 +30,7 @@ agent() {
   PATH="$path" "$REAL_BASH" -c '
     source "$1/lib/dot/utils.sh"
     source "$1/lib/dot/log.sh"
-    source "$1/scripts/dot/commands/agent.sh"
+    source "$1/plugins/agent/libexec/agent.sh"
     _agent_assert_dependencies() { :; }
     shift
     cmd_mode "$@"
@@ -50,7 +50,7 @@ test_start "checkpoint_list_without_jq_is_refused"
 out="$(PATH="$NOJQ" "$REAL_BASH" -c '
   source "$1/lib/dot/utils.sh"
   source "$1/lib/dot/log.sh"
-  source "$1/scripts/dot/commands/agent.sh"
+  source "$1/plugins/agent/libexec/agent.sh"
   cmd_mode checkpoint list 5
 ' _ "$REPO_ROOT" 2>&1)" && rc=0 || rc=$?
 assert_equals "1:yes" "$rc:$([[ "$out" == *"jq is required for dot agent mode"* ]] && echo yes)" "a clear refusal, not a partial listing"

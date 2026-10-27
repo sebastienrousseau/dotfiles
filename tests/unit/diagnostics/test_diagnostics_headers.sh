@@ -23,7 +23,7 @@ ATTEST_FILE="$REPO_ROOT/scripts/diagnostics/workstation-attestation.sh"
 BENCHMARK_FILE="$REPO_ROOT/scripts/diagnostics/benchmark.sh"
 SNAPSHOT_FILE="$REPO_ROOT/scripts/diagnostics/snapshot.sh"
 VERIFY_FILE="$REPO_ROOT/scripts/diagnostics/verify.sh"
-AI_FILE="$REPO_ROOT/scripts/dot/commands/ai.sh"
+AI_FILE="$REPO_ROOT/plugins/ai/libexec/ai.sh"
 
 test_start "header_helpers_available"
 assert_file_contains "$REPO_ROOT/lib/dot/ui.sh" "ui_product_banner()" "ui library exposes a product banner helper"

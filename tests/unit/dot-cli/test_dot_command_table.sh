@@ -67,8 +67,8 @@ assert_equals "@secret set|2" "$(resolve secret set KEY)" "an entry route keeps 
 assert_equals "tools|3" "$(resolve tool list --nix)" "a flagged alias target runs its old route"
 assert_equals "env list|2" "$(resolve tool list)" "without the flag the plain verb runs"
 assert_equals "@secret key new|3" "$(resolve secret key new)" "domain, object and verb"
-assert_equals "agent delegate run|3" "$(resolve agent delegate run test-runner true)" "delegate run keeps the name and command"
-assert_equals "agent delegate list|2" "$(resolve agent delegate)" "a delegate object alone lists them"
+assert_equals "@agent delegate run|3" "$(resolve agent delegate run test-runner true)" "delegate run keeps the name and command"
+assert_equals "@agent delegate list|2" "$(resolve agent delegate)" "a delegate object alone lists them"
 
 test_start "shortcuts_and_flags_rewrite_the_command_line"
 assert_equals "upgrade --yes" "$(names update --yes)" "dot update is dot system update (N7)"
@@ -83,15 +83,15 @@ assert_equals "doctor|1" "$(resolve doctor --fix)" "a flag after the domain is s
 assert_equals "scorecard|2" "$(resolve doctor score)" "an object alone runs its default verb"
 assert_equals "scorecard|2" "$(resolve doctor score --json)" "an object and a flag runs its default verb too"
 assert_equals "env|1" "$(resolve tool)" "a domain alone runs its own route first"
-assert_equals "ai|1" "$(resolve ai tools)" "an old subcommand goes to the domain's own route"
-assert_equals "ai chat|2" "$(resolve ai start claude)" "ai start <agent> opens an interactive session, not a one-shot prompt"
-assert_equals "ai run|2" "$(resolve ai run claude --pattern p q)" "ai run <agent> is the one-shot, with its flags"
+assert_equals "@ai|1" "$(resolve ai tools)" "an old subcommand goes to the domain's own route (its entry)"
+assert_equals "@ai start|2" "$(resolve ai start claude)" "ai start <agent> runs the entry's start (an interactive session)"
+assert_equals "@ai run|2" "$(resolve ai run claude --pattern p q)" "ai run <agent> is the one-shot, with its flags"
 
 test_start "declared_but_not_built_resolves_to_nothing"
 assert_equals "|0" "$(resolve secret key list)" "a planned command is not run"
 assert_equals "|0" "$(resolve secret)" "a domain whose default is planned"
 assert_equals "system schedule set|3" "$(resolve system schedule set weekly)" "a built command runs its route, its value left as an argument"
-assert_equals "mode doctor|2" "$(resolve agent check)" "a domain with its own route runs the default verb's route only when bare has none"
+assert_equals "@agent check|2" "$(resolve agent check)" "a built verb runs its own route even when the domain has one"
 assert_equals "|0" "$(resolve ai gateway show)" "a planned verb never falls through to the old route"
 
 test_start "every_alias_target_runs"
@@ -108,7 +108,7 @@ assert_equals "" "$unresolved" "each old name and shortcut points at a command t
 
 test_start "old_invocations_get_their_new_spelling"
 spell() { "$BASH_BIN" -c "source '$WORK/names.sh'; _dot_longest leg \"\$@\"; echo \"\$_BEST\"" _ "$@"; }
-assert_equals "agent mode list" "$(spell mode list --json)" "the subcommand picks the spelling"
+assert_equals "cli list" "$(spell registry installed --json)" "the subcommand picks the spelling"
 assert_equals "system update" "$(spell upgrade --yes)" "a renamed route"
 assert_equals "" "$(spell cl)" "a name with no route of its own falls back to its alias target"
 

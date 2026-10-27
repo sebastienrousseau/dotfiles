@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# dot-ai: the entry of the ai plugin (ADR-020 N2). bin/dot runs it with the
+# words after `dot ai`. Its declared spellings become the verbs of
+# libexec/ai.sh, or of libexec/patterns.sh for patterns; any other word, or
+# none, goes to ai.sh as it always has.
+
+set -euo pipefail
+
+_AI_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# ai_module VERB... — run the agent CLI module.
+ai_module() {
+  exec bash "$_AI_DIR/libexec/ai.sh" ai "$@"
+}
+
+case "${1:-} ${2:-}" in
+  "gateway serve") ai_module serve "${@:3}" ;;
+  "cost show") ai_module cost "${@:3}" ;;
+  "pattern list") exec bash "$_AI_DIR/libexec/patterns.sh" list "${@:3}" ;;
+  "pattern show") exec bash "$_AI_DIR/libexec/patterns.sh" view "${@:3}" ;;
+  "pattern edit") exec bash "$_AI_DIR/libexec/patterns.sh" edit "${@:3}" ;;
+esac
+case "${1:-}" in
+  list) ai_module tools "${@:2}" ;;
+  start) ai_module chat "${@:2}" ;;
+  check) ai_module doctor "${@:2}" ;;
+esac
+ai_module "$@"

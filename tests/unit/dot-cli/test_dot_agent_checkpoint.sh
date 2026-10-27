@@ -3,8 +3,8 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 # Behavioural coverage for the `checkpoint` and `delegate` arms of
-# scripts/dot/commands/agent.sh (`cmd_mode`), driven through the real
-# dispatcher (`meta.sh agent …`) inside the coverage sandbox. Split from
+# plugins/agent/libexec/agent.sh (`cmd_mode`), driven through the real
+# dispatcher (plugins/agent/dot-agent, once `meta.sh agent …`) inside the coverage sandbox. Split from
 # test_dot_agent_dispatch.sh to stay inside the coverage runner's 60s
 # per-file budget.
 #
@@ -17,8 +17,8 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-META="$REPO_ROOT/scripts/dot/commands/meta.sh"
-AGENT_MODULE="$REPO_ROOT/scripts/dot/commands/agent.sh"
+META="$REPO_ROOT/plugins/agent/dot-agent"
+AGENT_MODULE="$REPO_ROOT/plugins/agent/libexec/agent.sh"
 REAL_PROFILES="$REPO_ROOT/defaults/dot_config/dotfiles/agent-profiles.json"
 
 trap cov_teardown_sandbox EXIT
@@ -48,7 +48,14 @@ run_cmd() {
   return 0
 }
 
-meta() { run_cmd bash "$META" "$@"; }
+# meta agent|mode <args…> — `dot agent <args…>`: both old words ran cmd_mode,
+# which the agent plugin's entry now runs (P2.1).
+meta() {
+  local word="$1"
+  shift
+  [[ "$word" == agent || "$word" == mode ]] || set -- "$word" "$@"
+  run_cmd bash "$META" "$@"
+}
 
 STRICT_PROFILES="$DOTFILES_COV_TMPDIR/strict-profiles.json"
 jq '.rbac.enforcement = "strict" | .delegation.enabled = true | .profiles.ask.canDelegate = true' \

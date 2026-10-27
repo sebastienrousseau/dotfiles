@@ -19,7 +19,7 @@ COPY="$(fm_repo_copy "$FM_SANDBOX/partial")"
 export CHEZMOI_SOURCE_DIR="$COPY"
 
 # module|the spelling that routes to it
-for pair in "agents|agent context" "init|config init" "registry|cli list --available"; do
+for pair in "tools|shell alias list" "init|config init" "registry|cli list --available"; do
   module="${pair%%|*}"
   read -r -a spelling <<<"${pair#*|}"
   rm -f "$COPY/scripts/dot/commands/$module.sh"

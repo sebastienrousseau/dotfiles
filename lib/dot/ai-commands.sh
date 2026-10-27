@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# Sourced by scripts/dot/commands/ai.sh — the `dot ai` subcommand bodies.
+# Sourced by plugins/ai/libexec/ai.sh — the `dot ai` subcommand bodies.
 # Split out of ai.sh to keep that dispatcher under the 600-line limit.
 # Requires ui_*/has_command/run_script (utils.sh) and run_ai_with_context
 # (ai.sh) to be defined by the caller before these run.

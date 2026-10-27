@@ -7,7 +7,7 @@
 # prints download progress before "crush version v0.94.2", so the probe
 # littered ~/.dotfiles and showed the download line as the version.
 # The probe lives in lib/dot/ai-probe.sh and runs through
-# scripts/dot/commands/ai.sh. Pinned here with a stub that behaves like
+# plugins/ai/libexec/ai.sh. Pinned here with a stub that behaves like
 # that shim:
 #   - the cold-cache refresh leaves nothing in the caller's directory;
 #   - the cached version is the real one, not the download noise;
@@ -19,7 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-AI="$REPO_ROOT/scripts/dot/commands/ai.sh"
+AI="$REPO_ROOT/plugins/ai/libexec/ai.sh"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/ai-probe.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 export HOME="$WORK/home" XDG_CACHE_HOME="$WORK/home/.cache" TMPDIR="$WORK/tmp"

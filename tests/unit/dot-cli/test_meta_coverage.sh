@@ -36,6 +36,11 @@ unset NVIM_APPNAME DOTFILES_FONTS MCP_REGISTRY_CONFIG DOT_MCP_DOT_BIN
 meta_run() {
   DOT_FIXTURE_PATH="$STUBS:$BASEBIN" dot_fixture_run "$FX" meta "$@"
 }
+# mcp_run <args…> — the mcp module, which left meta.sh for the mcp plugin's
+# libexec/ (P2.1); `meta.sh mcp <args…>` ran the same function.
+mcp_run() {
+  DOT_FIXTURE_PATH="$STUBS:$BASEBIN" dot_fixture_run "$FX" mcp "$@"
+}
 # script_stub <name> <body> — a bash stub in $STUBS.
 script_stub() {
   printf '#!%s\n%s\n' "${BASH:-/bin/bash}" "$2" >"$STUBS/$1"
@@ -177,18 +182,18 @@ assert_contains "docker run --rm -it dotfiles-sandbox" "$DOT_FIXTURE_OUT" "docke
 test_start "mcp_flag_first_defaults_to_doctor"
 mkdir -p "$FX/scripts/diagnostics"
 printf 'echo "doctor args: $*"\n' >"$FX/scripts/diagnostics/mcp-doctor.sh"
-meta_run mcp --json
+mcp_run --json
 assert_contains "doctor args: --json" "$DOT_FIXTURE_OUT" "flag passes to doctor"
-meta_run mcp
+mcp_run
 assert_contains "doctor args:" "$DOT_FIXTURE_OUT" "bare mcp runs doctor"
 
 test_start "mcp_registry_json_and_jq"
 REG="$WORK/mcp.json"
 printf '{"servers":{"fs":{"transport":"stdio","launcher":"npx","package":"@x/fs"},"web":{"transport":"http","launcher":"remote","url":"https://w"},"loc":{"transport":"stdio","launcher":"bin"}}}\n' >"$REG"
-MCP_REGISTRY_CONFIG="$REG" meta_run mcp registry -j
+MCP_REGISTRY_CONFIG="$REG" mcp_run registry -j
 assert_contains '"servers"' "$DOT_FIXTURE_OUT" "--json cats raw registry"
 if command -v jq >/dev/null 2>&1; then
-  MCP_REGISTRY_CONFIG="$REG" meta_run mcp registry
+  MCP_REGISTRY_CONFIG="$REG" mcp_run registry
   assert_contains "stdio via npx -> @x/fs" "$DOT_FIXTURE_OUT" "package target"
   assert_contains "http via remote -> https://w" "$DOT_FIXTURE_OUT" "url target"
   assert_contains "stdio via bin -> local" "$DOT_FIXTURE_OUT" "local target"
@@ -200,17 +205,17 @@ test_start "mcp_serve_resolution"
 printf 'defaults\n' >"$FX/.chezmoiroot"
 mkdir -p "$FX/defaults"
 script_stub dot-mcp 'echo "path dot-mcp $* root=$DOT_MCP_REPO_ROOT"'
-meta_run mcp serve --x
+mcp_run serve --x
 rm -f "$STUBS/dot-mcp"
 assert_contains "path dot-mcp serve --x root=" "$DOT_FIXTURE_OUT" "PATH binary exec'd"
 assert_contains "/dot-cov-fixtures/meta-cov-$$" "$DOT_FIXTURE_OUT" "repo root is the fixture"
 mkdir -p "$HOMEDIR/.local/bin"
 printf '#!/bin/sh\necho "home dot-mcp $*"\n' >"$HOMEDIR/.local/bin/dot-mcp"
 chmod +x "$HOMEDIR/.local/bin/dot-mcp"
-meta_run mcp serve
+mcp_run serve
 rm -f "$HOMEDIR/.local/bin/dot-mcp"
 assert_contains "home dot-mcp serve" "$DOT_FIXTURE_OUT" "~/.local/bin binary exec'd"
-meta_run mcp serve
+mcp_run serve
 assert_equals "1" "$DOT_FIXTURE_RC" "no source and no binary exits 1"
 assert_contains "dot-mcp is not built" "$DOT_FIXTURE_OUT" "not-built message"
 mkdir -p "$FX/defaults/dot_local/share/dot-mcp"
@@ -220,11 +225,11 @@ out=""
 while [[ $# -gt 0 ]]; do [[ "$1" == -o ]] && out="$2"; shift; done
 [[ -f '"$WORK"'/gofail ]] && exit 1
 printf "#!/bin/sh\necho built dot-mcp \"\$*\"\n" >"$out"; chmod +x "$out"'
-meta_run mcp serve
+mcp_run serve
 assert_contains "building dot-mcp (first run)" "$DOT_FIXTURE_OUT" "build announced"
 assert_contains "built dot-mcp serve" "$DOT_FIXTURE_OUT" "built binary exec'd"
 touch "$WORK/gofail"
-meta_run mcp serve
+mcp_run serve
 assert_equals "1" "$DOT_FIXTURE_RC" "failed build exits 1"
 assert_contains "dot-mcp is not built" "$DOT_FIXTURE_OUT" "failed build falls through"
 rm -rf "$FX/defaults" "$FX/.chezmoiroot" "$STUBS/go"
@@ -239,18 +244,20 @@ assert_equals "1" "$DOT_FIXTURE_RC" "no command exits 1"
 meta_run frobnicate
 assert_equals "1" "$DOT_FIXTURE_RC" "unknown command exits 1"
 assert_contains "Unknown meta command: frobnicate" "$DOT_FIXTURE_OUT" "unknown named"
-AGENT_PROFILE_CONFIG="$WORK/no-profiles.json" meta_run mode list
-assert_equals "1" "$DOT_FIXTURE_RC" "mode dispatches to cmd_mode"
-assert_contains "Agent profile config not found" "$DOT_FIXTURE_OUT" "cmd_mode reached"
+# mode, agent and mcp moved to their plugins' entries (P2.1).
+for word in mode agent mcp; do
+  meta_run "$word" list
+  assert_equals "1" "$DOT_FIXTURE_RC" "$word is not a meta command"
+  assert_contains "Unknown meta command: $word" "$DOT_FIXTURE_OUT" "$word named"
+done
 
 test_start "banner_section_names"
 out="$(
   source "$REPO_ROOT/lib/dot/utils.sh" >/dev/null 2>&1
   eval "$(sed -n '/^meta_banner_section()/,/^}/p' "$REPO_ROOT/scripts/dot/commands/meta.sh")"
-  meta_banner_section mcp
   meta_banner_section keys
   meta_banner_section upgrade
 )"
-assert_equals $'AI and Agents\nReference\nMeta' "$out" "sections map"
+assert_equals $'Reference\nMeta' "$out" "sections map"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

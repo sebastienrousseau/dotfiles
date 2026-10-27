@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 #
 # Behavioural coverage for the install / launcher / bridge branches of
-# scripts/dot/commands/ai.sh that test_ai_exhaustive.sh does not reach:
+# plugins/ai/libexec/ai.sh that test_ai_exhaustive.sh does not reach:
 # the "missing providers" flow behind `dot ai tools` (gum "Install all",
 # "Choose which to install", pick-nothing, no-gum tips), the launcher
 # tip without gum, the run log hook, the bridge's --help / bad --style /
@@ -26,7 +26,7 @@ source "$SCRIPT_DIR/../../framework/host_path.sh"
 exec 21>&2
 export BASH_XTRACEFD=21
 
-AI_SCRIPT="$REPO_ROOT/scripts/dot/commands/ai.sh"
+AI_SCRIPT="$REPO_ROOT/plugins/ai/libexec/ai.sh"
 REAL_PYTHON="$(command -v python3)"
 
 trap cov_teardown_sandbox EXIT

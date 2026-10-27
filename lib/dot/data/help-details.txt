@@ -15,11 +15,6 @@ snapshot|Capture the current workstation snapshot.|dot snapshot -b\ndot snapshot
 restore|Restore from a backup or git ref.|dot restore -l\ndot restore -L\ndot restore -g HEAD~1
 rollback|Restore a previous configuration snapshot.|dot rollback
 lint|Run shell quality checks for the repo.|dot lint\ndot lint -c\ndot lint -f
-ai|Show installed AI tools, install missing ones (and mise, asked first), delegate a task to a cheap model, or report spend.|dot ai\ndot ai install --yes\ndot ai delegate "rename UserService.get* to fetch*"\ndot ai cost --since 7
-mcp|Inspect MCP configuration, policy, and registry, or run the MCP server.|dot mcp\ndot mcp -s -j\ndot mcp registry\ndot mcp serve
-mode|Inspect or switch the active agent mode.|dot mode list\ndot mode show ask\ndot mode set audit
-agent|Inspect agent metadata or run profile-aware actions.|dot agent card\ndot agent a2a-card --validate\ndot agent checkpoint list\ndot agent conformance --strict --json
-agents|Synchronize and render instructions for supported AI coding harnesses.|dot agents list\ndot agents check\ndot agents render
 registry|Browse and manage reusable dotfile modules.|dot registry list\ndot registry search rust\ndot registry info rust-dev-setup
 env|Show managed tool versions and runtime state.|dot env
 profile|Show or switch the active configuration profile.|dot profile
@@ -40,24 +35,6 @@ load-bench|Measure time to heavy-layer shell readiness.|dot load-bench\ndot load
 chaos|Simulate config corruption to validate self-healing paths.|dot chaos --dry-run\ndot chaos --restore
 bundle|Create an offline archive of your dotfiles environment.|dot bundle\ndot bundle --output ~/dot-bundle.tar.zst
 metrics|Show recent observability metrics (JSONL event log).|dot metrics\ndot metrics --since 1h
-ai-setup|Interactive setup of installed AI CLI tools.|dot ai-setup\ndot ai-setup --tool claude
-ai-query|Run a context-aware RAG query over your dotfiles.|dot ai-query "where is theme switch handled"\ndot ai-query --top 5 "wallpaper sync"
-cl|Run the Claude CLI with dotfiles context patterns.|dot cl "explain this repo's theme pipeline"\ndot cl --model opus
-claude|Run the Claude CLI bridge (alias for cl).|dot claude "summarise CHANGELOG"\ndot claude --model sonnet
-codex|Run the OpenAI Codex CLI with dotfiles context patterns.|dot codex "refactor wallpaper-sync.sh"\ndot codex --review
-copilot|Run the GitHub Copilot CLI with dotfiles context patterns.|dot copilot suggest "review my latest commit"\ndot copilot explain
-kimi|Run the Kimi CLI with dotfiles context patterns.|dot kimi "review this branch"\ndot kimi --style hardener "audit scripts"
-agy|Run the Antigravity CLI with dotfiles context patterns.|dot agy "audit security/firewall.sh"\ndot agy chat
-goose|Run the Goose CLI with dotfiles context patterns.|dot goose session start\ndot goose run
-kiro|Run the Kiro CLI with dotfiles context patterns.|dot kiro "design a new dot subcommand"
-sgpt|Run the Shell-GPT CLI with dotfiles context patterns.|dot sgpt "find leftover macOS plist writes"\ndot sgpt --shell "tar gz wallpapers"
-ollama|Run a local Ollama model with dotfiles context patterns.|dot ollama "review this branch diff" --model llama3
-opencode|Run the OpenCode CLI with dotfiles context patterns.|dot opencode "patch wallpaper-sync"\ndot opencode --review
-aider|Run the Aider pair-programming CLI with dotfiles context.|dot aider scripts/theme/switch.sh\ndot aider --model gpt-4o
-autohand|Run the Autohand CLI with dotfiles context patterns.|dot autohand "stage and commit theme fixes"
-vibe|Run the Vibe AI CLI with dotfiles context patterns.|dot vibe "cheap-route this prompt"\ndot vibe --report
-qwen|Run the Qwen Coder CLI with dotfiles context patterns.|dot qwen "convert this shell script to fish"
-zai|Run the ZAI CLI with dotfiles context patterns.|dot zai "audit env-emit.sh"
 tools|Show or install the managed Nix package set.|dot tools\ndot tools install
 new|Scaffold a new project from a managed template.|dot new\ndot new --template rust-cli my-project
 packages|List installed packages across every package manager on this host.|dot packages\ndot packages --json

@@ -60,7 +60,7 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: command handlers should be present"
 fi
 
-AGENT_MODULE="$REPO_ROOT/scripts/dot/commands/agent.sh"
+AGENT_MODULE="$REPO_ROOT/plugins/agent/libexec/agent.sh"
 
 # Both subcommands reach their own handler, not the dot agent mode usage error.
 test_start "meta_agent_enterprise_subcommands"

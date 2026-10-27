@@ -16,6 +16,7 @@ pinned_dot() {
   mkdir -p "$dir/bin" "$dir/lib/dot"
   cp "$root/bin/dot" "$dir/bin/dot"
   ln -sfn "$root/scripts" "$dir/scripts"
+  ln -sfn "$root/plugins" "$dir/plugins"
   for entry in "$root"/lib/*; do
     [[ "${entry##*/}" == dot ]] || ln -sfn "$entry" "$dir/lib/${entry##*/}"
   done

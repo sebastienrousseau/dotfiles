@@ -6,7 +6,7 @@
 #
 # List, view and edit the steering patterns the AI bridges apply.
 #
-# Backing module: scripts/dot/commands/patterns.sh
+# Backing module: plugins/ai/libexec/patterns.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: every command below is read-only or a help

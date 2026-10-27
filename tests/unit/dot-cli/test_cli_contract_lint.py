@@ -219,8 +219,9 @@ class Entries(Fixture):
         self.assertFails("security: object 'disk' has fallback, which needs [entry] fallback = true")
 
     def test_planned_needs_an_entry(self):
-        self.edit("top", 'verb = "measure"\n', 'verb = "measure"\nplanned = true\n')
-        self.assertFails("top: 'planned' needs an [entry]")
+        self.edit("system", 'summary = "Update everything, asking first"\n',
+                  'summary = "Update everything, asking first"\nplanned = true\n')
+        self.assertFails("system: 'planned' needs an [entry]")
 
 
 class Table(Fixture):

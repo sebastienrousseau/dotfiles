@@ -15,7 +15,7 @@ source "$SCRIPT_DIR/../framework/assertions.sh"
 
 # Files changed in this branch
 CHANGED_SCRIPTS=(
-  scripts/dot/commands/ai.sh
+  plugins/ai/libexec/ai.sh
   scripts/ops/chezmoi-apply.sh
   scripts/ops/prewarm.sh
   scripts/ops/ai-setup.sh
@@ -148,7 +148,7 @@ fi
 test_start "duplication_ui_functions_from_library"
 # Commands should source shared UI library, not redefine ui_* functions
 failures=0
-for f in scripts/dot/commands/ai.sh scripts/ops/chezmoi-apply.sh; do
+for f in plugins/ai/libexec/ai.sh scripts/ops/chezmoi-apply.sh; do
   filepath="$REPO_ROOT/$f"
   [[ -f "$filepath" ]] || continue
   if grep -qE '^ui_(ok|err|info|warn|header)\(\)' "$filepath" 2>/dev/null; then
@@ -220,7 +220,7 @@ assert_equals "0" "$failures" "scripts must have at least 3% comment lines"
 # ═══════════════════════════════════════════════════════════════
 
 STANDALONE_SCRIPTS=(
-  scripts/dot/commands/ai.sh
+  plugins/ai/libexec/ai.sh
   scripts/ops/chezmoi-apply.sh
   scripts/ops/prewarm.sh
   scripts/ops/ai-setup.sh

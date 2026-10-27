@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 #
-# Behaviour tests for scripts/dot/commands/patterns.sh — the AI
+# Behaviour tests for plugins/ai/libexec/patterns.sh — the AI
 # steering-pattern manager: list, view (with and without `glow`), edit
 # (through a recording $EDITOR), the missing-name errors, the
 # not-found path and the usage fallback. Patterns live in the sandbox
@@ -21,7 +21,7 @@ source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 exec 21>&2
 export BASH_XTRACEFD=21
 
-PATTERNS="$REPO_ROOT/scripts/dot/commands/patterns.sh"
+PATTERNS="$REPO_ROOT/plugins/ai/libexec/patterns.sh"
 BASH_BIN="$(command -v bash)"
 
 trap cov_teardown_sandbox EXIT

@@ -57,7 +57,7 @@ AG_OUT="$(
   cd "$FX" &&
     HOME="$FX/home" PATH="$FX/stubs:$FX/basebin" NO_COLOR=1 DOTFILES_SHOW_LOGO=0 \
       "${BASH:-bash}" -c '
-        source scripts/dot/commands/agents.sh
+        source plugins/agent/libexec/agents.sh
         rc=0
         cmd_agents render || rc=$?
         printf "AGENTS_RC=%s\\n" "$rc"

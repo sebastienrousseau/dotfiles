@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# dot-mcp: the entry of the mcp plugin (ADR-020 N2). bin/dot runs it with the
+# words after `dot mcp`. Its declared spellings become the subcommands of
+# libexec/mcp.sh; any other word, or none, goes to the module as it always
+# has (alone, it runs the doctor).
+
+set -euo pipefail
+
+_MCP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+case "${1:-}" in
+  list) set -- registry "${@:2}" ;;
+  check) set -- doctor "${@:2}" ;;
+esac
+
+# `mcp serve` owns stdout from its first byte: it is a JSON-RPC frame stream,
+# not a terminal, so the banner is suppressed for it outright. (It already
+# self-suppresses off a TTY; this also covers a client that allocates a pty.)
+if [[ "${1:-}" != serve ]]; then
+  # shellcheck source-path=SCRIPTDIR source=../../lib/dot/utils.sh
+  source "$_MCP_DIR/../../lib/dot/utils.sh"
+  dot_ui_command_banner "AI and Agents" "mcp" mcp "$@"
+fi
+exec bash "$_MCP_DIR/libexec/mcp.sh" "$@"

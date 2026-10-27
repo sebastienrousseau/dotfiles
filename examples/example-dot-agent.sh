@@ -6,7 +6,7 @@
 #
 # Bounded-autonomy profiles, RBAC, run checkpoints and the A2A agent card.
 #
-# Backing module: scripts/dot/commands/agent.sh
+# Backing module: plugins/agent/libexec/agent.sh
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: every command below is read-only or a help

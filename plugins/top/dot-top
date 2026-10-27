@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# dot-top: the entry of the top plugin (ADR-020 N2). bin/dot runs it with the
+# words after `dot top`; until dot-top's own commands are built, they all go
+# to the intelligence surface, as `dot top` always has.
+
+set -euo pipefail
+
+_TOP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# `report` is a declared object whose verbs are planned: alone it is not
+# available yet, as before the entry (the old route took only other words).
+if [[ "${1:-}" == report ]]; then
+  echo "dot: 'dot top report' is not available yet; run 'dot help top'" >&2
+  exit 127
+fi
+
+# shellcheck source-path=SCRIPTDIR source=../../lib/dot/utils.sh
+source "$_TOP_DIR/../../lib/dot/utils.sh"
+
+dot_ui_command_banner "Diagnostics" "intelligence" intelligence "$@"
+run_script "lib/dot/bento.sh" "Intelligence Surface" "$@"

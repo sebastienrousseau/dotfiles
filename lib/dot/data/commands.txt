@@ -9,57 +9,57 @@ grp|agents|Agents|ai agent mcp|
 grp|system|System|system doctor|
 grp|trust|Trust & hosts|secret security attest fleet|
 grp|platform|Platform|cli ui|
-dom|agent|status|agent|modes, policy, sandbox, budgets
+dom|agent|status|@agent|modes, policy, sandbox, budgets
 obj|agent mode|list||agent modes
 obj|agent context|show||context files
-obj|agent card|show||the agent card
-obj|agent log|show||the agent log
-obj|agent checkpoint|list||saved checkpoints
+obj|agent card|show|@agent|the agent card
+obj|agent log|show|@agent|the agent log
+obj|agent checkpoint|list|@agent|saved checkpoints
 obj|agent policy|show||sandbox policy
 obj|agent budget|show||spend budgets
-obj|agent delegate|list||agents a profile may hand work to
-cmd|agent status|mode current|read|Mode, policy and budgets
-cmd|agent check|mode doctor|read|Check modes and policy
-cmd|agent run|agent run|write|Run an agent task
+obj|agent delegate|list|@agent|agents a profile may hand work to
+cmd|agent status|@agent status|read|Mode, policy and budgets
+cmd|agent check|@agent check|read|Check modes and policy
+cmd|agent run|@agent run|write|Run an agent task
 cmd|agent suspend||write|Pause running agents
 cmd|agent resume||write|Resume paused agents
 cmd|agent export||read|Export the AI bill of materials
-cmd|agent mode list|mode list|read|Available modes
-cmd|agent mode show|mode show|read|One mode in detail
-cmd|agent mode set|mode set|write|Switch mode
-cmd|agent context show|agents list|read|Context files in effect
-cmd|agent card show|agent card|read|The agent card
-cmd|agent log show|agent log|read|The agent log
-cmd|agent checkpoint list|agent checkpoint list|read|Saved checkpoints
-cmd|agent checkpoint save|agent checkpoint save|write|Save a checkpoint
+cmd|agent mode list|@agent mode list|read|Available modes
+cmd|agent mode show|@agent mode show|read|One mode in detail
+cmd|agent mode set|@agent mode set|write|Switch mode
+cmd|agent context show|@agent context show|read|Context files in effect
+cmd|agent card show|@agent card show|read|The agent card
+cmd|agent log show|@agent log show|read|The agent log
+cmd|agent checkpoint list|@agent checkpoint list|read|Saved checkpoints
+cmd|agent checkpoint save|@agent checkpoint save|write|Save a checkpoint
 cmd|agent policy show||read|The sandbox policy
 cmd|agent budget show||read|Budgets and spend
-cmd|agent delegate list|agent delegate list|read|Configured delegates
-cmd|agent delegate run|agent delegate run|write|Run a command as a delegate
-cmd|agent context check|agents check|read|Check the rendered context files are current
-cmd|agent context apply|agents render|write|Render the context file for every harness
-cmd|agent mode run|mode run|write|Run a command under a mode
-cmd|agent card check|mode conformance|read|Check the card against the A2A spec
-dom|ai|tui|ai|install, route and run coding agents
+cmd|agent delegate list|@agent delegate list|read|Configured delegates
+cmd|agent delegate run|@agent delegate run|write|Run a command as a delegate
+cmd|agent context check|@agent context check|read|Check the rendered context files are current
+cmd|agent context apply|@agent context apply|write|Render the context file for every harness
+cmd|agent mode run|@agent mode run|write|Run a command under a mode
+cmd|agent card check|@agent card check|read|Check the card against the A2A spec
+dom|ai|tui|@ai|install, route and run coding agents
 obj|ai pattern|list||prompt patterns
-obj|ai cost|show||spend by agent and model
+obj|ai cost|show|@ai|spend by agent and model
 obj|ai gateway|show||the keyless gateway
 obj|ai inventory|show||installed agents and versions
-cmd|ai list|ai tools|read|Installed agents
-cmd|ai install|ai install|write|Install agents
-cmd|ai update|ai update|write|Upgrade agent CLIs
-cmd|ai start|ai chat|write|Start an agent
-cmd|ai run|ai run|write|Run an agent once
-cmd|ai gateway serve|ai serve|read|Run the gateway in the foreground
-cmd|ai login|ai login|write|Authenticate an agent
-cmd|ai check|ai doctor|read|Check agent installs and auth
-cmd|ai ask|ai ask|read|Ask about the local context
-cmd|ai pattern list|patterns list|read|Prompt patterns
-cmd|ai cost show|ai cost|read|Spend by agent and model
+cmd|ai list|@ai list|read|Installed agents
+cmd|ai install|@ai install|write|Install agents
+cmd|ai update|@ai update|write|Upgrade agent CLIs
+cmd|ai start|@ai start|write|Start an agent
+cmd|ai run|@ai run|write|Run an agent once
+cmd|ai gateway serve|@ai gateway serve|read|Run the gateway in the foreground
+cmd|ai login|@ai login|write|Authenticate an agent
+cmd|ai check|@ai check|read|Check agent installs and auth
+cmd|ai ask|@ai ask|read|Ask about the local context
+cmd|ai pattern list|@ai pattern list|read|Prompt patterns
+cmd|ai cost show|@ai cost show|read|Spend by agent and model
 cmd|ai gateway show||read|Gateway statistics
 cmd|ai inventory show||read|Agents, versions and config
-cmd|ai pattern show|patterns view|read|One prompt pattern
-cmd|ai pattern edit|patterns edit|write|Edit a prompt pattern
+cmd|ai pattern show|@ai pattern show|read|One prompt pattern
+cmd|ai pattern edit|@ai pattern edit|write|Edit a prompt pattern
 dom|attest|show|@attest|attestation and verification
 cmd|attest show|@attest show|read|The workstation attestation
 cmd|attest export|@attest export|read|Write attestation evidence
@@ -132,10 +132,10 @@ cmd|fleet namespace list|@fleet namespace list|read|Namespaces
 cmd|fleet log show|@fleet log show|read|Fleet events
 cmd|fleet policy show|@fleet policy show|read|Fleet policy
 cmd|fleet policy set|@fleet policy set|write|Enforce a fleet policy
-dom|mcp|list|mcp|MCP servers as supply chain
-cmd|mcp list|mcp registry|read|Configured MCP servers
-cmd|mcp check|mcp doctor|read|Check servers and pins
-cmd|mcp serve|mcp serve|read|Run dot's read-only MCP server
+dom|mcp|list|@mcp|MCP servers as supply chain
+cmd|mcp list|@mcp list|read|Configured MCP servers
+cmd|mcp check|@mcp check|read|Check servers and pins
+cmd|mcp serve|@mcp serve|read|Run dot's read-only MCP server
 dom|secret|status||secrets, keys and SSH certificates
 obj|secret key|list||SSH signing and authentication keys
 obj|secret cert|list||short-lived SSH certificates
@@ -227,7 +227,7 @@ cmd|tool remove|env prune|write|Remove orphaned toolchains (a dry run without --
 cmd|tool set|env use|write|Pin a toolchain version
 cmd|tool export|env emit|read|Print the tool environment
 cmd|tool new|new|write|Create a project from a template
-dom|top|tui|intelligence|what the machine and its agents are doing
+dom|top|tui|@top|what the machine and its agents are doing
 obj|top report|show||usage by model, agent or project
 cmd|top measure||read|Sample once and print the result
 cmd|top report show||read|Usage report
@@ -251,36 +251,6 @@ run|system clean --logs|log-rotate||
 run|tool list --nix|tools||
 run|tool list --packages|packages||
 run|tool list --locked|locks||
-leg|mode current|agent status||
-leg|mode doctor|agent check||
-leg|agent run|agent run||
-leg|mode list|agent mode list||
-leg|mode show|agent mode show||
-leg|mode set|agent mode set||
-leg|agents list|agent context show||
-leg|agent card|agent card show||
-leg|agent log|agent log show||
-leg|agent checkpoint list|agent checkpoint list||
-leg|agent checkpoint save|agent checkpoint save||
-leg|agent delegate list|agent delegate list||
-leg|agent delegate run|agent delegate run||
-leg|agents check|agent context check||
-leg|agents render|agent context apply||
-leg|mode run|agent mode run||
-leg|mode conformance|agent card check||
-leg|ai tools|ai list||
-leg|ai install|ai install||
-leg|ai update|ai update||
-leg|ai chat|ai start||
-leg|ai run|ai run||
-leg|ai serve|ai gateway serve||
-leg|ai login|ai login||
-leg|ai doctor|ai check||
-leg|ai ask|ai ask||
-leg|patterns list|ai pattern list||
-leg|ai cost|ai cost show||
-leg|patterns view|ai pattern show||
-leg|patterns edit|ai pattern edit||
 leg|registry installed|cli list||
 leg|registry info|cli show||
 leg|registry install|cli install||
@@ -316,9 +286,6 @@ leg|benchmark|doctor perf measure||
 leg|drift|doctor drift show||
 leg|conflicts|doctor conflict list||
 leg|metrics|doctor metric list||
-leg|mcp registry|mcp list||
-leg|mcp doctor|mcp check||
-leg|mcp serve|mcp serve||
 leg|cache-refresh|shell update||
 leg|clean-cache|shell clean||
 leg|history|shell history list||

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC2034,SC2317
-# Behavioural coverage for scripts/dot/commands/ai.sh: the status cache
+# Behavioural coverage for plugins/ai/libexec/ai.sh: the status cache
 # (cold probe and warm read), the interactive install/launch flow of
 # `dot ai tools` on a pseudo-terminal (gum "Install all", "Choose which",
 # the no-gum mise path, the launcher), run_ai_with_context (styles, raw
@@ -21,7 +21,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$REPO_ROOT/tests/framework/assertions.sh"
 source "$REPO_ROOT/tests/framework/host_path.sh"
 
-AI="$REPO_ROOT/scripts/dot/commands/ai.sh"
+AI="$REPO_ROOT/plugins/ai/libexec/ai.sh"
 REAL_BASH="${BASH:-$(command -v bash)}"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/ai-cov.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
@@ -191,7 +191,7 @@ test_start "dead_helpers_extract_version_and_cached_status"
 seed_cache
 out="$(
   set -- --help
-  # shellcheck source=../../../scripts/dot/commands/ai.sh
+  # shellcheck source=../../../plugins/ai/libexec/ai.sh
   source "$AI" >/dev/null 2>&1
   set +e
   _ai_extract_version codex
