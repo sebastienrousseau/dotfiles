@@ -121,7 +121,7 @@ assert_contains "runner=4.03x per_spawn=4033us reference=1000us exceeds the 4.00
 # nothing, so the gate skips visibly and counts neither a pass nor a run.
 test_start "bench_gate_skips_without_its_tools"
 before="$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
-out="$(BENCH_TOOLS="hyperfine definitely-not-installed-tool" _gate_bench_quick "$REPO_ROOT/benches/bench.sh"
+out="$(BENCH_TOOLS="bash definitely-not-installed-tool" _gate_bench_quick "$REPO_ROOT/benches/bench.sh"
   printf '|%s:%s:%s' "$TESTS_RUN" "$TESTS_PASSED" "$TESTS_FAILED")"
 assert_contains "SKIPPED — definitely-not-installed-tool not installed" "$out" "names the missing tool"
 assert_contains "|$before" "$out" "and leaves the counters alone"
