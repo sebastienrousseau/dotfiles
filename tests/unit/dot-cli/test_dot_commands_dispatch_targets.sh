@@ -2,13 +2,15 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Behavioural tests for the two thin dispatch command files:
-#   scripts/dot/commands/appearance.sh  (theme, wallpaper, fonts, tune)
+# Behavioural tests for the thin dispatch command files:
+#   plugins/theme/dot-theme             (show, wallpaper set, font install,
+#                                        and the switcher's own words)
+#   scripts/dot/commands/appearance.sh  (tune)
 #   scripts/dot/commands/security.sh    (backup, encrypt-check, firewall,
 #                                        telemetry, dns-doh, lock-screen,
 #                                        usb-safety, policy)
 #
-# Both are pure routers: each subcommand resolves the dotfiles source tree
+# All are pure routers: each subcommand resolves the dotfiles source tree
 # and then `exec bash <script>`. What matters is that the right target is
 # chosen and the arguments survive, so `bash` is PATH-shadowed with a shim
 # that records the hand-off instead of performing it — none of the real
@@ -22,6 +24,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 APPEARANCE="$REPO_ROOT/scripts/dot/commands/appearance.sh"
+THEME="$REPO_ROOT/plugins/theme/dot-theme"
 SECURITY="$REPO_ROOT/scripts/dot/commands/security.sh"
 REAL_BASH="${BASH:-$(command -v bash)}"
 REAL_UNAME="$(command -v uname)"
@@ -34,6 +37,7 @@ mkdir -p "$WORK"
 
 test_start "command_files_exist"
 assert_file_exists "$APPEARANCE" "scripts/dot/commands/appearance.sh must exist"
+assert_file_exists "$THEME" "plugins/theme/dot-theme must exist"
 assert_file_exists "$SECURITY" "scripts/dot/commands/security.sh must exist"
 
 # The hand-off shim: anything under scripts/ is recorded rather than run,
@@ -77,12 +81,64 @@ dispatch() {
 }
 
 # ===========================================================================
+# plugins/theme/dot-theme
+# ===========================================================================
+test_start "theme_entry_alone_opens_the_picker"
+rc="$(dispatch "$THEME")"
+assert_equals "0" "$rc" "no words exits with the switcher's status"
+assert_file_contains "$OUT" "dispatched scripts/theme/switch.sh " "no words runs the switcher with none"
+
+test_start "theme_entry_show_is_the_current_theme"
+dispatch "$THEME" show --json >/dev/null
+assert_file_contains "$OUT" "dispatched scripts/theme/switch.sh current --json" "show runs current and keeps its flags"
+
+test_start "theme_entry_passes_other_words_to_the_switcher"
+for words in "list" "set dracula" "toggle" "dracula" "wallpaper" "font"; do
+  # shellcheck disable=SC2086 # words
+  dispatch "$THEME" $words >/dev/null
+  assert_file_contains "$OUT" "dispatched scripts/theme/switch.sh $words" "'$words' reaches the switcher unchanged"
+done
+
+test_start "theme_entry_reports_the_switcher_failure"
+rc="$(DISPATCH_RC=3 dispatch "$THEME" set nope)"
+assert_equals "3" "$rc" "the switcher's exit status comes back"
+
+test_start "theme_wallpaper_set_defaults_to_sync"
+dispatch "$THEME" wallpaper set >/dev/null
+assert_file_contains "$OUT" "dispatched scripts/theme/wallpaper-sync.sh" "a bare wallpaper set syncs"
+dispatch "$THEME" wallpaper set sync --dry-run >/dev/null
+assert_file_contains "$OUT" "dispatched scripts/theme/wallpaper-sync.sh --dry-run" "explicit sync forwards flags"
+
+test_start "theme_wallpaper_set_rotate_routes_to_the_rotator"
+dispatch "$THEME" wallpaper set rotate --next >/dev/null
+assert_file_contains "$OUT" "dispatched scripts/theme/wallpaper-rotate.sh --next" "rotate routes to wallpaper-rotate.sh"
+
+test_start "theme_wallpaper_set_unknown_argument_falls_back_to_sync"
+dispatch "$THEME" wallpaper set somefile.heic >/dev/null
+assert_file_contains "$OUT" "dispatched scripts/theme/wallpaper-sync.sh somefile.heic" "an unrecognised argument is passed to sync"
+
+test_start "theme_font_install_defaults_to_install"
+dispatch "$THEME" font install >/dev/null
+assert_file_contains "$OUT" "dispatched scripts/fonts/install-nerd-fonts.sh" "a bare font install installs"
+dispatch "$THEME" font install install --all >/dev/null
+assert_file_contains "$OUT" "dispatched scripts/fonts/install-nerd-fonts.sh --all" "explicit install forwards flags"
+
+test_start "theme_font_install_patch_routes_to_the_patcher"
+dispatch "$THEME" font install patch MyFont.ttf >/dev/null
+assert_file_contains "$OUT" "dispatched scripts/fonts/patch-fonts.sh MyFont.ttf" "patch routes to patch-fonts.sh"
+
+test_start "theme_font_install_unknown_argument_falls_back_to_install"
+dispatch "$THEME" font install JetBrains >/dev/null
+assert_file_contains "$OUT" "dispatched scripts/fonts/install-nerd-fonts.sh JetBrains" "an unrecognised argument is passed to the installer"
+
+# ===========================================================================
 # appearance.sh
 # ===========================================================================
 test_start "appearance_usage_on_help_and_no_args"
 rc="$(dispatch "$APPEARANCE" --help)"
 assert_equals "0" "$rc" "--help exits 0"
-assert_file_contains "$OUT" "theme, wallpaper, fonts, tune" "usage lists the subcommands"
+assert_file_contains "$OUT" "Commands:" "usage lists the subcommands"
+assert_file_contains "$OUT" "  tune" "usage lists tune"
 for flag in -h help; do
   rc="$(dispatch "$APPEARANCE" "$flag")"
   assert_equals "0" "$rc" "$flag exits 0"
@@ -92,42 +148,11 @@ assert_equals "1" "$rc" "no arguments is a usage error"
 assert_file_contains "$OUT" "Usage: appearance.sh" "usage is still printed"
 
 test_start "appearance_rejects_an_unknown_subcommand"
-rc="$(dispatch "$APPEARANCE" not-a-subcommand)"
-assert_equals "1" "$rc" "an unknown subcommand fails"
+for word in not-a-subcommand theme wallpaper fonts; do
+  rc="$(dispatch "$APPEARANCE" "$word")"
+  assert_equals "1" "$rc" "'$word' is not an appearance command"
+done
 assert_file_contains "$ERR" "Unknown appearance command" "the error names the command"
-
-test_start "appearance_theme_routes_to_the_switcher"
-rc="$(dispatch "$APPEARANCE" theme list)"
-assert_equals "0" "$rc" "theme exits 0"
-assert_file_contains "$OUT" "dispatched scripts/theme/switch.sh list" "theme routes to switch.sh with its arguments"
-
-test_start "appearance_wallpaper_defaults_to_sync"
-dispatch "$APPEARANCE" wallpaper >/dev/null
-assert_file_contains "$OUT" "dispatched scripts/theme/wallpaper-sync.sh" "a bare wallpaper syncs"
-dispatch "$APPEARANCE" wallpaper sync --dry-run >/dev/null
-assert_file_contains "$OUT" "dispatched scripts/theme/wallpaper-sync.sh --dry-run" "explicit sync forwards flags"
-
-test_start "appearance_wallpaper_rotate_routes_to_the_rotator"
-dispatch "$APPEARANCE" wallpaper rotate --next >/dev/null
-assert_file_contains "$OUT" "dispatched scripts/theme/wallpaper-rotate.sh --next" "rotate routes to wallpaper-rotate.sh"
-
-test_start "appearance_wallpaper_unknown_argument_falls_back_to_sync"
-dispatch "$APPEARANCE" wallpaper somefile.heic >/dev/null
-assert_file_contains "$OUT" "dispatched scripts/theme/wallpaper-sync.sh somefile.heic" "an unrecognised argument is passed to sync"
-
-test_start "appearance_fonts_defaults_to_install"
-dispatch "$APPEARANCE" fonts >/dev/null
-assert_file_contains "$OUT" "dispatched scripts/fonts/install-nerd-fonts.sh" "a bare fonts installs"
-dispatch "$APPEARANCE" fonts install --all >/dev/null
-assert_file_contains "$OUT" "dispatched scripts/fonts/install-nerd-fonts.sh --all" "explicit install forwards flags"
-
-test_start "appearance_fonts_patch_routes_to_the_patcher"
-dispatch "$APPEARANCE" fonts patch MyFont.ttf >/dev/null
-assert_file_contains "$OUT" "dispatched scripts/fonts/patch-fonts.sh MyFont.ttf" "patch routes to patch-fonts.sh"
-
-test_start "appearance_fonts_unknown_argument_falls_back_to_install"
-dispatch "$APPEARANCE" fonts JetBrains >/dev/null
-assert_file_contains "$OUT" "dispatched scripts/fonts/install-nerd-fonts.sh JetBrains" "an unrecognised argument is passed to the installer"
 
 test_start "appearance_tune_selects_the_platform_script"
 FAKE_UNAME=Darwin dispatch "$APPEARANCE" tune --dry-run >/dev/null
@@ -141,7 +166,7 @@ assert_equals "1" "$rc" "an unsupported platform fails"
 assert_file_contains "$OUT" "not supported on this platform" "the refusal explains why"
 
 test_start "appearance_propagates_the_target_exit_status"
-rc="$(DISPATCH_RC=3 dispatch "$APPEARANCE" theme list)"
+rc="$(DISPATCH_RC=3 FAKE_UNAME=Linux dispatch "$APPEARANCE" tune)"
 assert_equals "3" "$rc" "the target script's exit status is the command's exit status"
 
 # ===========================================================================

@@ -16,6 +16,9 @@ grammar (N1 to N7, N13, N16):
   - alias names are unique, shadow no domain or built-in, the shortcuts
     are exactly the ones domains.json declares, and every alias target
     resolves to a declared command;
+  - a plugin with an [entry] ships plugins/<domain>/dot-<domain> as an
+    executable and names no legacy route; only such a plugin marks a
+    command planned;
   - every route in lib/dot/data/routes.txt has a new spelling;
   - lib/dot/data/commands.txt, the table bin/dot resolves names from, is
     what tools/ci/cli_command_table.py generates from the manifests.
@@ -171,6 +174,21 @@ def check_manifest(name: str, manifest: dict, reg: dict, version: str) -> list[s
     return errors + check_cmdlets(name, manifest, reg) + check_deprecations(name, manifest, version)
 
 
+def check_entry(root: pathlib.Path, name: str, manifest: dict) -> list[str]:
+    """A plugin that runs its own commands ships its entry and no legacy routes (N2)."""
+    planned = [c for c in manifest["commands"] if c.get("planned")]
+    if "entry" not in manifest:
+        return [f"{name}: 'planned' needs an [entry]; without one, a command with no legacy is planned"] if planned else []
+    command = manifest["entry"]["command"]
+    errors = [] if command == f"dot-{name}" else [f"{name}: entry command must be 'dot-{name}' (N2)"]
+    path = root / "plugins" / name / command
+    if not (path.is_file() and os.access(path, os.X_OK)):
+        errors.append(f"{name}: entry plugins/{name}/{command} is missing or not executable")
+    if "legacy" in manifest or any("legacy" in c for c in manifest["commands"]):
+        errors.append(f"{name}: a plugin with an entry runs its own commands; drop 'legacy'")
+    return errors
+
+
 def resolve_target(target: str, manifests: dict, reg: dict) -> str | None:
     """Return why the target does not resolve, or None when it does."""
     words = [w for w in target.split() if not w.startswith("--")]
@@ -294,6 +312,7 @@ def lint(root: pathlib.Path, dot: pathlib.Path) -> list[str]:
     version = current_version(root)
     for name, manifest in manifests.items():
         errors += check_manifest(name, manifest, reg, version)
+        errors += check_entry(root, name, manifest) if "commands" in manifest else []
     if errors:
         return errors
     errors += check_aliases(manifests, reg)

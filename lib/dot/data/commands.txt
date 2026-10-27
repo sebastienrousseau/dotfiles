@@ -210,15 +210,15 @@ cmd|system schedule set|system schedule set|write|Set the maintenance schedule
 cmd|system schedule run|system schedule run|write|Run scheduled maintenance now
 cmd|system settings show||read|Current OS settings
 cmd|system settings apply|tune|write|Apply the managed OS settings
-dom|theme|show|theme|one palette for every app
+dom|theme|show|@theme|one palette for every app
 obj|theme wallpaper|show||the current wallpaper
 obj|theme font|list||installed fonts
-cmd|theme show|theme current|read|Current theme and palette
-cmd|theme list|theme list|read|Available themes
-cmd|theme set|theme set|write|Switch theme everywhere
-cmd|theme wallpaper set|wallpaper|write|Set the wallpaper and derive a palette
+cmd|theme show|@theme show|read|Current theme and palette
+cmd|theme list|@theme list|read|Available themes
+cmd|theme set|@theme set|write|Switch theme everywhere
+cmd|theme wallpaper set|@theme wallpaper set|write|Set the wallpaper and derive a palette
 cmd|theme font list||read|Installed terminal fonts
-cmd|theme font install|fonts|write|Install the configured fonts
+cmd|theme font install|@theme font install|write|Install the configured fonts
 dom|tool|list|env|toolchains, packages, project templates
 cmd|tool list|env list|read|Toolchains and their versions
 cmd|tool install|env install|write|Install the configured toolchains
@@ -365,11 +365,6 @@ leg|system schedule list|system schedule list||
 leg|system schedule set|system schedule set||
 leg|system schedule run|system schedule run||
 leg|tune|system settings apply||
-leg|theme current|theme show||
-leg|theme list|theme list||
-leg|theme set|theme set||
-leg|wallpaper|theme wallpaper set||
-leg|fonts|theme font install||
 leg|env list|tool list||
 leg|env install|tool install||
 leg|env upgrade|tool update||

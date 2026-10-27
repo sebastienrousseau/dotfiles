@@ -185,6 +185,11 @@ runs each command (`legacy`, on the domain and on each command).
   removed name does.
 - `dot update` now runs `dot system update` (the old `dot upgrade`); the
   dotfiles-only update is `dot config update`.
+- From P2.1 a plugin can run its own commands: a manifest with an
+  `[entry]` routes `dot <domain> ...` to `plugins/<domain>/dot-<domain>`
+  with the words after the domain, and names no `legacy` route. Words its
+  table does not take go to the entry, as they went to the domain's route;
+  a command not built yet is marked `planned`. `theme` was the first.
 - `-V` prints the version and `-v` sets `DOT_VERBOSE=1`. Until 0.2.538,
   `dot -v` alone printed the version with a warning; from 0.2.538 it is
   `--verbose` with no command, which prints the overview.

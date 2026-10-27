@@ -12,6 +12,8 @@ source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
 APPEARANCE_FILE="$REPO_ROOT/scripts/dot/commands/appearance.sh"
+# theme, wallpaper and fonts moved to the theme plugin's entry (P2.1).
+THEME_ENTRY="$REPO_ROOT/plugins/theme/dot-theme"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
@@ -32,7 +34,7 @@ fi
 
 # Test: defines theme command
 test_start "appearance_defines_theme"
-if grep -q "cmd_theme\|_theme\|theme" "$APPEARANCE_FILE" 2>/dev/null; then
+if grep -q "scripts/theme/switch.sh" "$THEME_ENTRY" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines theme command"
 else
@@ -42,7 +44,7 @@ fi
 
 # Test: defines wallpaper command
 test_start "appearance_defines_wallpaper"
-if grep -q "cmd_wallpaper\|_wallpaper\|wallpaper" "$APPEARANCE_FILE" 2>/dev/null; then
+if grep -q "theme_wallpaper_set()" "$THEME_ENTRY" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines wallpaper command"
 else
@@ -52,7 +54,7 @@ fi
 
 # Test: defines fonts command
 test_start "appearance_defines_fonts"
-if grep -q "cmd_fonts\|_fonts\|fonts" "$APPEARANCE_FILE" 2>/dev/null; then
+if grep -q "theme_font_install()" "$THEME_ENTRY" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: defines fonts command"
 else

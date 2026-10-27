@@ -194,6 +194,30 @@ class Aliases(Fixture):
         self.assertFails("route 'frobnicate' has no new spelling")
 
 
+class Entries(Fixture):
+    """A plugin with an [entry] (theme) ships it and keeps no legacy routes (N2)."""
+
+    def test_entry_must_be_named_after_the_domain(self):
+        self.edit("theme", 'command = "dot-theme"', 'command = "dot-themes"')
+        self.assertFails("theme: entry command must be 'dot-theme'")
+
+    def test_entry_must_be_executable(self):
+        os.chmod(self.tmp / "plugins/theme/dot-theme", 0o644)
+        self.assertFails("theme: entry plugins/theme/dot-theme is missing or not executable")
+
+    def test_entry_must_exist(self):
+        (self.tmp / "plugins/theme/dot-theme").unlink()
+        self.assertFails("theme: entry plugins/theme/dot-theme is missing or not executable")
+
+    def test_entry_plugin_names_no_legacy_route(self):
+        self.edit("theme", 'verb = "list"\n', 'verb = "list"\nlegacy = "theme list"\n')
+        self.assertFails("theme: a plugin with an entry runs its own commands; drop 'legacy'")
+
+    def test_planned_needs_an_entry(self):
+        self.edit("top", 'verb = "measure"\n', 'verb = "measure"\nplanned = true\n')
+        self.assertFails("top: 'planned' needs an [entry]")
+
+
 class Table(Fixture):
     def test_stale_table_fails(self):
         self.edit("system", 'summary = "Update everything, asking first"', 'summary = "Update all"')

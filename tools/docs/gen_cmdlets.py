@@ -42,13 +42,20 @@ def noun(manifest: dict, command: dict) -> str:
     return base + (obj.get("ps_noun") or title(obj["name"]))
 
 
+def built(manifest: dict, command: dict) -> bool:
+    """Runs today: through the plugin's entry unless planned, else a legacy route."""
+    if "entry" in manifest:
+        return not command.get("planned")
+    return "legacy" in command
+
+
 def cmdlets(root: pathlib.Path) -> list[dict]:
     """One entry per cmdlet: a built command, or a list and show merged."""
     ps = {v["name"]: v["powershell"] for v in json.loads((root / "schemas/cli/verbs.json").read_text())["verbs"]}
     entries: dict[str, dict] = {}
     for path in sorted((root / "plugins").glob("*/dot-plugin.toml")):
         manifest = tomllib.loads(path.read_text())
-        for command in (c for c in manifest["commands"] if "legacy" in c):
+        for command in (c for c in manifest["commands"] if built(manifest, c)):
             suffix = "Status" if command["verb"] == "status" else ""
             name = f"{ps[command['verb']]}-Dot{noun(manifest, command)}{suffix}"
             words = " ".join(w for w in (manifest["domain"], command.get("object")) if w)

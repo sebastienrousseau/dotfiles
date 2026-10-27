@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# dot-theme: the entry of the theme plugin (ADR-020 N2). bin/dot runs it with
+# the words after `dot theme`: the spellings its manifest declares, or any
+# other word, which goes to the theme switcher as it always has
+# (`dot theme toggle`, `dot theme dracula`). With no words it opens the
+# picker.
+
+set -euo pipefail
+
+_THEME_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source-path=SCRIPTDIR source=../../lib/dot/utils.sh
+source "$_THEME_DIR/../../lib/dot/utils.sh"
+
+dot_ui_command_banner "Theme" "theme"
+
+# theme_wallpaper_set [sync|rotate] ARGS...: set the wallpaper from the
+# library and derive a palette; anything else is passed to sync.
+theme_wallpaper_set() {
+  case "${1:-}" in
+    rotate)
+      run_script "scripts/theme/wallpaper-rotate.sh" "Wallpaper rotate script" "${@:2}"
+      ;;
+    sync)
+      run_script "scripts/theme/wallpaper-sync.sh" "Wallpaper sync script" "${@:2}"
+      ;;
+    *)
+      run_script "scripts/theme/wallpaper-sync.sh" "Wallpaper sync script" "$@"
+      ;;
+  esac
+}
+
+# theme_font_install [install|patch] ARGS...: install the configured Nerd
+# Fonts, or patch one font; anything else is passed to the installer.
+theme_font_install() {
+  case "${1:-}" in
+    patch)
+      run_script "scripts/fonts/patch-fonts.sh" "Font patch helper" "${@:2}"
+      ;;
+    install)
+      run_script "scripts/fonts/install-nerd-fonts.sh" "Font install script" "${@:2}"
+      ;;
+    *)
+      run_script "scripts/fonts/install-nerd-fonts.sh" "Font install script" "$@"
+      ;;
+  esac
+}
+
+case "${1:-} ${2:-}" in
+  "show "*)
+    run_script "scripts/theme/switch.sh" "Theme switcher" current "${@:2}"
+    ;;
+  "wallpaper set")
+    theme_wallpaper_set "${@:3}"
+    ;;
+  "font install")
+    theme_font_install "${@:3}"
+    ;;
+  *)
+    run_script "scripts/theme/switch.sh" "Theme switcher" "$@"
+    ;;
+esac
