@@ -4,7 +4,7 @@ Canonical home for everything fuzzing-related. Layout:
 
 | Path | What | Run by |
 |------|------|--------|
-| `*_test.go`, `go.mod` | Native Go fuzz harnesses. Each `Fuzz<Name>` ports one user-input parsing surface of the shell CLI (see the header of each file for the shell function it mirrors). | `.github/workflows/fuzz.yml` (per push to `main`, per PR touching the parsed surfaces), `.github/workflows/cflite_pr.yml` (ClusterFuzzLite, per PR) |
+| `*_test.go`, `go.mod` | Native Go fuzz harnesses. Each `Fuzz<Name>` ports one user-input parsing surface of the shell CLI (see the header of each file for the shell function it mirrors). | `.github/workflows/fuzz.yml` (per push to `main`, per PR touching the parsed surfaces), `.github/workflows/cflite_pr.yml` (ClusterFuzzLite build, per PR) |
 | `testdata/fuzz/<Harness>/` | **Committed regression corpus** — every crasher found and fixed, in Go's native corpus format. Replayed on every `go test` run, with or without `-fuzz`. | `fuzz.yml` job `Fuzz / corpus replay` |
 | `install/fuzz_install.sh` | Shell harness that runs `install.sh` against adversarial arguments and environments and asserts fail-fast. | `.github/workflows/install-fuzz.yml` (weekly + PRs touching `install.sh`) |
 | `oss-fuzz/` | `Dockerfile`, `build.sh`, `project.yaml` for upstream submission to `google/oss-fuzz`. Pending submission; `.clusterfuzzlite/` reuses the same harnesses today. | OSS-Fuzz (once accepted) |

@@ -1059,10 +1059,11 @@ alias; unknown positionals triggering a 30 s network fetch).
   surfaces. Go replays the committed seed corpus under
   `testdata/fuzz/` before exploring, so a fixed crash cannot
   silently return.
-- [`cflite_pr.yml`](.github/workflows/cflite_pr.yml) runs
-  ClusterFuzzLite in code-change mode (120 s, AddressSanitizer,
-  SARIF upload) on PRs touching the harnesses or
-  [`.clusterfuzzlite/`](.clusterfuzzlite/build.sh).
+- [`cflite_pr.yml`](.github/workflows/cflite_pr.yml) builds the
+  ClusterFuzzLite fuzzers (AddressSanitizer) on PRs touching the
+  harnesses or [`.clusterfuzzlite/`](.clusterfuzzlite/build.sh), so the
+  build OSS-Fuzz runs cannot break unseen; the fuzzing itself runs in
+  `fuzz.yml`.
 - [`install-fuzz.yml`](.github/workflows/install-fuzz.yml) runs the
   `install.sh` harness weekly on Ubuntu and macOS, and on every PR
   touching `install.sh`; a scheduled failure opens a tracking issue.
