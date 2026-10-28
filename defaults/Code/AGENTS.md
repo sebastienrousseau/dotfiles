@@ -48,6 +48,19 @@ check without first fixing it, or reporting why it cannot.
    users onto a patched release. A finding that cannot be fixed in code (an
    external registration, a second reviewer) is reported with the exact
    action that clears it. A scanner that is switched off counts as a finding.
+
+   **Zero open, always.** This is a standing state of every repository, not
+   only a step at the start of a task: no open Dependabot alert and no open
+   issue, at any time. A release MUST NOT be tagged while one is open
+   (§3), and the post-release audit confirms both counts are zero
+   (`gh api repos/<owner>/<repo>/dependabot/alerts?state=open --jq length`,
+   `gh issue list --state open`). One that appears after a release is fixed
+   at once on the next `feat/v<next-version>` branch, never left for the
+   next scheduled release. An alert or issue is closed by fixing it: never
+   by dismissing it as "tolerable risk" or "no bandwidth", or by closing an
+   issue unresolved. A dismissal or a "won't fix" close is allowed only for
+   a false positive or a finding that cannot be fixed in code, with the
+   reason written on it, and only by the human.
 2. **CI on the default branch.** It must be green. A red default branch is
    fixed before anything is built on top of it.
 3. **Code quality.** The linter and formatter pass with no new
@@ -255,7 +268,8 @@ starting the requested work.
      - After any release is published (or completion of the release workflow), the agent MUST inspect the live GitHub release (`gh release view <tag> --json title,body`).
      - If the title or notes deviate in ANY way, the agent MUST immediately correct it using `gh release edit <tag> --title "<PROJECT_NAME> <VERSION>" --notes-file <path>` before considering the task complete.
 - **Release Preflight Is Blocking**: A release or tag MUST NOT be pushed until
-  an automated preflight proves that the tag target is the intended release
+  an automated preflight proves that the repository has zero open Dependabot
+  alerts and zero open issues (§0), that the tag target is the intended release
   commit, the annotated tag is cryptographically signed, its first message line
   is exactly `<PROJECT_NAME> v<VERSION>`, every packaged version reference is
   current, the registry dry-run archive contains current documentation and
@@ -455,6 +469,35 @@ language has an established equivalent.
   output: every page carries it.
 - A site whose copyright line names someone else (a client's site) is
   left as it is; the rule is about the owner's own name.
+
+### 7.1.3 GitHub Pages: deployed by GitHub Actions only
+
+- Every repository that publishes to GitHub Pages sets its Pages source
+  to **GitHub Actions** (`build_type: workflow`), never "Deploy from a
+  branch" (`legacy`). This applies to all repositories, every portfolio.
+- The site is built and deployed by a workflow on the default branch
+  using the official actions: `actions/configure-pages`,
+  `actions/upload-pages-artifact` and `actions/deploy-pages`, with
+  `permissions: pages: write, id-token: write` on the deploy job and an
+  `environment: github-pages`. Never push built output to a branch: no
+  `gh-pages` branch, no `peaceiris/actions-gh-pages` or similar, and no
+  built site committed to `main` or `docs/` for Pages to serve.
+- One exception: a site whose committed output its generator can no
+  longer rebuild (for example a Shokunin site from an `ssg` release whose
+  command line has since changed) is deployed by the workflow uploading
+  that committed folder unchanged, until the site is ported to the
+  current generator. The workflow says so in a comment, and the port is
+  its own reviewed change, never folded into the migration.
+- A custom domain is kept in the Pages settings (`cname`), which a
+  workflow deployment uses; a `CNAME` file in the artifact is not
+  needed.
+- Check it with `gh api repos/<owner>/<repo>/pages --jq .build_type`:
+  anything but `workflow` is a hygiene finding (§0). Migrating one adds
+  the workflow, switches the source
+  (`gh api -X PUT repos/<owner>/<repo>/pages -f build_type=workflow`),
+  confirms the site is served from the new deployment, and only then
+  hands the old `gh-pages` branch to the human for deletion (§4,
+  destructive operations).
 
 ### 7.2 Tone invariants
 
