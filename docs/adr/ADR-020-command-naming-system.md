@@ -197,6 +197,18 @@ runs each command (`legacy`, on the domain and on each command).
   `cli` and `tool`; then `doctor` and `system`; then `config` and `shell`,
   after which routes.txt holds only the host's built-ins (help, version,
   search, manual, docs, learn, keys) and two old names with no spelling.
+- Each plugin ships its route fragment, `plugins/<domain>/commands.txt`,
+  generated from its manifest: its `dom`, `obj`, `cmd`, `flag`, `arg` and
+  `alias` records, and `run` records for its own aliases, in the
+  pipe-separated format `tools/ci/cli_command_table.py` documents. The
+  family's `grp` records are `lib/dot/data/groups.txt`.
+  `lib/dot/table-merge.awk` merges the groups and the fragments, in domain
+  order, into the command table: `grp`, every `dom`/`obj`/`cmd`, the first
+  `run` of each invocation, a `leg` record per legacy route (a route that
+  starts with `@` is an entry), `flag`/`arg`, then `alias`. The merge of
+  the bundled fragments is exactly `lib/dot/data/commands.txt`. This
+  fragment format is the contract a loader reads, the bash host's now and
+  the Go host's later.
 - `-V` prints the version and `-v` sets `DOT_VERBOSE=1`. Until 0.2.538,
   `dot -v` alone printed the version with a warning; from 0.2.538 it is
   `--verbose` with no command, which prints the overview.
