@@ -1,9 +1,15 @@
 name: ClusterFuzzLite / PR
 
-# Continuous fuzzing of the Go input-handling harnesses on pull requests
-# (code-change mode). Gives the OpenSSF Scorecard "Fuzzing" check a
-# detectable fuzzing integration and catches regressions in the
-# validate-name / URL-resolver logic ported from the shell.
+# Builds the ClusterFuzzLite fuzzers on pull requests that touch them, so
+# the .clusterfuzzlite build (the one OSS-Fuzz runs) cannot break unseen,
+# and keeps the integration the OpenSSF Scorecard "Fuzzing" check detects.
+#
+# It does not run the fuzzers. run_fuzzers looked up a saved corpus for
+# each of the 14 targets by paging through every Actions artifact in the
+# repository (9,661 when this changed), about 46 s a target and minutes
+# when the API returned 502, to find nothing: no job uploads a corpus. The
+# job timed out at 20 minutes for about 9 s of fuzzing per target. The
+# fuzzing runs in fuzz.yml instead: every harness, 60 s each, natively.
 
 on:
   pull_request:
@@ -15,10 +21,10 @@ on:
 permissions: read-all
 
 jobs:
-  fuzzing:
-    name: ClusterFuzzLite / Fuzz
+  build:
+    name: ClusterFuzzLite / Build
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
@@ -31,12 +37,3 @@ jobs:
         with:
           language: go
           sanitizer: address
-
-      - name: Run fuzzers
-        uses: google/clusterfuzzlite/actions/run_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1 # v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          fuzz-seconds: 120
-          mode: code-change
-          sanitizer: address
-          output-sarif: true

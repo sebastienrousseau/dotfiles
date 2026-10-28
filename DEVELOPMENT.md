@@ -195,7 +195,7 @@ subset (lint + drift + test + examples) in one go.
 |---|---|---|
 | `fuzz.yml` | Fuzz / corpus replay | `make fuzz` |
 | `fuzz.yml` | Fuzz / \<harness\> | `make fuzz FUZZTIME=60s` |
-| `cflite_pr.yml` | ClusterFuzzLite | `make fuzz FUZZTIME=120s` (same harnesses; the action needs Docker) |
+| `cflite_pr.yml` | ClusterFuzzLite / Build | the ClusterFuzzLite build needs Docker; `make fuzz` runs the same harnesses |
 | `install-fuzz.yml` | Fuzz / install.sh | `bash fuzz/install/fuzz_install.sh` |
 
 ### Docs and generated artefacts
