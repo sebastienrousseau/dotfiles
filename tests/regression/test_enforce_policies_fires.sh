@@ -65,9 +65,10 @@ trap 'rm -rf "$WORKDIR"; _emit_results' EXIT
 RUN_OUT=""
 RUN_RC=0
 
-# Build a minimal repository, apply $1 as a shell snippet, commit, and run.
+# Build a minimal repository, apply $1 as a shell snippet, commit, and run;
+# with $2 = ro, run it read-only, as a packaged install is.
 run_scenario() {
-  local setup="$1"
+  local setup="$1" mode="${2:-}"
   local dir="$WORKDIR/r$RANDOM$RANDOM"
 
   mkdir -p "$dir/scripts/security" "$dir/lib/dot" "$dir/config" \
@@ -93,9 +94,13 @@ run_scenario() {
     git commit -q -m scenario
   ) >/dev/null 2>&1
 
+  [[ "$mode" != ro ]] || chmod -R a-w "$dir"
   RUN_RC=0
-  RUN_OUT="$(cd "$dir" && NO_COLOR=1 "${BASH:-bash}" \
+  RUN_OUT="$(cd "$dir" && NO_COLOR=1 XDG_STATE_HOME="$WORKDIR/state" "${BASH:-bash}" \
     ./scripts/security/enforce-policies.sh 2>&1)" || RUN_RC=$?
+  RUN_REPORT_IN_ROOT=0
+  [[ ! -f "$dir/security-report.md" ]] || RUN_REPORT_IN_ROOT=1
+  chmod -R u+w "$dir"
   rm -rf "$dir"
 }
 
@@ -111,6 +116,15 @@ run_scenario "true"
 assert_equals "0" "$RUN_RC" "a clean repository should exit 0"
 assert_contains "Security policy enforcement completed successfully" "$RUN_OUT" \
   "and should say so explicitly"
+assert_equals "1" "$RUN_REPORT_IN_ROOT" "a checkout keeps its report at the root"
+
+# A packaged install's root is read-only: `dot security policy show` died
+# there writing the report. It now goes beside the audit log.
+test_start "read_only_install_writes_the_report_to_the_state_dir"
+rm -f "$WORKDIR/state/dotfiles/security-report.md"
+run_scenario "true" ro
+assert_equals "0" "$RUN_RC" "a read-only tree still passes"
+assert_file_exists "$WORKDIR/state/dotfiles/security-report.md" "the report is in the state dir"
 
 # -----------------------------------------------------------------------------
 # 2. A private key committed at a NESTED path.

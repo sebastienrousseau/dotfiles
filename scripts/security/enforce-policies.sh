@@ -17,6 +17,14 @@ readonly POLICIES_DIR="${REPO_ROOT}/.github/security-policies"
 readonly LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
 readonly LOG_FILE="${LOG_DIR}/security-audit.log"
 mkdir -p "${LOG_DIR}"
+# The report stays at the root of a checkout (gitignored there, and CI
+# uploads it from there); a packaged install's root is read-only, so there
+# it goes beside the audit log.
+if [[ -w "${REPO_ROOT}" ]]; then
+  readonly REPORT_FILE="${REPO_ROOT}/security-report.md"
+else
+  readonly REPORT_FILE="${LOG_DIR}/security-report.md"
+fi
 
 # shellcheck source=../../lib/dot/ui.sh
 # shellcheck disable=SC1091
@@ -421,7 +429,7 @@ _report_checklist() {
 # Generate security report
 generate_report() {
   local total_violations="$1"
-  local report_file="${REPO_ROOT}/security-report.md"
+  local report_file="${REPORT_FILE}"
 
   log "INFO" "Generating security report..."
 
@@ -544,7 +552,7 @@ main() {
   else
     ui_err "$total_violations violations" "Security policy enforcement failed"
     ui_warn "Details" "Check ${LOG_FILE}"
-    ui_warn "Report" "Review security-report.md"
+    ui_warn "Report" "Review ${REPORT_FILE}"
     log "ERROR" "Security policy enforcement failed with ${total_violations} violations"
     exit 1
   fi
