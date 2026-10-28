@@ -41,7 +41,7 @@ class Fixture(unittest.TestCase):
         self.addCleanup(shutil.rmtree, self.tmp)
         for rel in ("schemas/cli", "plugins"):
             shutil.copytree(ROOT / rel, self.tmp / rel)
-        for rel in ("lib/dot/data/routes.txt", "lib/dot/data/commands.txt", "lib/dot/data/commands.json", "defaults/.chezmoidata.toml", "tools/ci/cli-contract-baseline.txt"):
+        for rel in ("lib/dot/data/routes.txt", "lib/dot/data/commands.txt", "lib/dot/data/commands.json", "lib/dot/data/groups.txt", "defaults/.chezmoidata.toml", "tools/ci/cli-contract-baseline.txt"):
             (self.tmp / rel).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(ROOT / rel, self.tmp / rel)
         self.dot = self.fake_dot(GOOD_DOT)
@@ -237,6 +237,16 @@ class Table(Fixture):
     def test_stale_table_fails(self):
         self.edit("system", 'summary = "Update everything, asking first"', 'summary = "Update all"')
         self.assertFails("lib/dot/data/commands.txt is stale")
+
+    def test_stale_route_fragment_fails(self):
+        # The manifest moves on; the plugin's fragment (P2.1) must follow it.
+        self.edit("system", 'summary = "Update everything, asking first"', 'summary = "Update all"')
+        self.assertFails("plugins/system/commands.txt is stale")
+
+    def test_edited_route_fragment_fails(self):
+        fragment = self.tmp / "plugins/theme/commands.txt"
+        fragment.write_text(fragment.read_text().replace("|read|", "|write|", 1))
+        self.assertFails("plugins/theme/commands.txt is stale")
 
 
 class Runtime(Fixture):
