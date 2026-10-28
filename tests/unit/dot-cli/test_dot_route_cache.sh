@@ -33,6 +33,7 @@ probe() {
   local src="$1" cache="$2" version="$3" key="$4"
   shift 4
   env "$@" XDG_CACHE_HOME="$cache" bash -c '
+    set -euo pipefail # as bin/dot runs
     _DOT_SRC="$1" VERSION="$2"
     source "$3/lib/dot/names.sh"
     _dot_table_load
@@ -69,6 +70,8 @@ test_start "a_newer_fragment_rebuilds_it"
 plant
 touch -d '+2 minutes' "$SRC/plugins/theme/commands.txt" 2>/dev/null || touch -A 0200 "$SRC/plugins/theme/commands.txt"
 assert_equals "no" "$(probe "$SRC" "$C" 1.0.0 planted)" "an edited fragment is merged again"
+assert_equals "0" "$(grep -c '^dom|planted|' "$(CACHE_FILE "$C")")" "and the cache is rewritten without the planted record"
+assert_equals "yes" "$(probe "$SRC" "$C" 1.0.0 theme)" "with the real table"
 
 # Release archives date every file 1970; an upgrade must still rebuild.
 test_start "an_upgrade_rebuilds_it_whatever_the_mtimes"
@@ -77,6 +80,12 @@ plant
 find "$SRC" -type f -exec touch -d '@0' {} + 2>/dev/null || find "$SRC" -type f -exec touch -t 197001010000 {} +
 assert_equals "yes" "$(probe "$SRC" "$C" 1.0.0 planted)" "same version, older files: the cache stands"
 assert_equals "no" "$(probe "$SRC" "$C" 1.0.1 planted)" "a new version: rebuilt"
+assert_equals "dot-cli-table/1|1.0.1" "$(head -1 "$(CACHE_FILE "$C")" | cut -d'|' -f1-2)" "and the cache is rewritten for it"
+
+test_start "an_empty_cache_is_rebuilt"
+: >"$(CACHE_FILE "$C")"
+touch -d '+3 minutes' "$(CACHE_FILE "$C")" 2>/dev/null || touch -A 0300 "$(CACHE_FILE "$C")"
+assert_equals "yes" "$(probe "$SRC" "$C" 1.0.1 theme)" "a cache with no key is not read as an empty table"
 
 test_start "another_tree_rebuilds_it"
 OTHER="$WORK/other"
@@ -98,6 +107,16 @@ chmod a-w "$RO"
 assert_equals "yes" "$(probe "$SRC" "$RO" 1.0.0 theme)" "the table loads from the merge alone"
 assert_file_not_exists "$(CACHE_FILE "$RO")" "and nothing is written"
 chmod u+w "$RO"
+
+# A cache file that cannot be replaced (here a directory in its place): the
+# merge is used from memory and no temporary file is left behind.
+test_start "a_failed_replace_leaves_no_temporary_file"
+STUCK="$WORK/stuck-cache"
+mkdir -p "$STUCK/dot/cli/commands.txt"
+chmod a-w "$STUCK/dot/cli/commands.txt"
+assert_equals "yes" "$(probe "$SRC" "$STUCK" 1.0.0 theme)" "the table loads"
+assert_equals "" "$(find "$STUCK/dot/cli" -maxdepth 1 -name 'commands.txt.*' -print)" "no temporary file is left"
+chmod u+w "$STUCK/dot/cli/commands.txt"
 
 # A tree with no fragments, or a merge that fails, reads the generated table.
 test_start "a_tree_without_fragments_reads_the_generated_table"
