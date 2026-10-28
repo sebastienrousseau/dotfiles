@@ -4,16 +4,90 @@
 # shellcheck shell=bash
 # Sourced by bin/dot; inherits set -euo pipefail. ADR-020 names (N0.3).
 #
-# lib/dot/data/commands.txt is generated from plugins/*/dot-plugin.toml by
-# tools/ci/cli_command_table.py. It maps each `dot <domain> [object] <verb>`
-# spelling to the route that runs it today, and lists the shortcuts and the
-# deprecated and removed names. The table is read once into a string and
-# searched with pattern matching: no fork and no per-line loop (bash 3.2).
+# The command table maps each `dot <domain> [object] <verb>` spelling to the
+# route that runs it, and lists the shortcuts and the deprecated and removed
+# names. It is read once into a string and searched with pattern matching:
+# no fork and no per-line loop (bash 3.2).
+#
+# The table is built from the route fragments (P2.1, ADR-020): each plugin's
+# plugins/<domain>/commands.txt and lib/dot/data/groups.txt, merged by
+# lib/dot/table-merge.awk into a cache, $XDG_CACHE_HOME/dot/cli/commands.txt.
+# The cache's first line is its key (format, version, source tree and the
+# fragment list), and it is replaced whole, so a reader never pairs one
+# tree's key with another's table. It is rebuilt when the key differs or a
+# fragment is newer; release archives date every file 1970, so an upgrade
+# is caught by the version in the key, not by mtime. A tree with no
+# fragments reads lib/dot/data/commands.txt, the generated merge of the
+# bundled fragments, which the build tools read too.
 _DOT_TABLE=""
+_DOT_TABLE_FORMAT="dot-cli-table/1"
+
+# _dot_table_fragments SRC: set _DOT_FRAGS to SRC's fragments, groups first,
+# then the plugins in byte order; false when SRC has none.
+_dot_table_fragments() {
+  local LC_COLLATE=C f
+  _DOT_FRAGS=("$1/lib/dot/data/groups.txt")
+  for f in "$1"/plugins/*/commands.txt; do
+    [[ -f "$f" ]] && _DOT_FRAGS+=("$f")
+  done
+  [[ -f "${_DOT_FRAGS[0]}" && ${#_DOT_FRAGS[@]} -gt 1 ]]
+}
+
+# _dot_table_cached CACHE KEY: read CACHE into _DOT_TABLE when it was built
+# for KEY and no fragment is newer; false otherwise.
+_dot_table_cached() {
+  local have f
+  [[ -f "$1" ]] || return 1
+  for f in "${_DOT_FRAGS[@]}"; do
+    [[ "$f" -nt "$1" ]] && return 1
+  done
+  {
+    IFS= read -r have || return 1
+    [[ "$have" == "$2" ]] || return 1
+    IFS= read -r -d '' _DOT_TABLE || true
+  } <"$1"
+}
+
+# _dot_table_build SRC CACHE KEY: merge the fragments into _DOT_TABLE and,
+# where the cache directory is writable and the command is not --help, into
+# CACHE (a temporary file moved into place, so a concurrent reader sees the
+# old cache or the new one).
+# If the merge fails, the generated table stands in, uncached.
+_dot_table_build() {
+  local tmp
+  if ! _DOT_TABLE="$(awk -f "$1/lib/dot/table-merge.awk" "${_DOT_FRAGS[@]}" 2>/dev/null)" || [[ -z "$_DOT_TABLE" ]]; then
+    IFS= read -r -d '' _DOT_TABLE <"$1/lib/dot/data/commands.txt" || true
+    return 0
+  fi
+  _DOT_TABLE+=$'\n'
+  [[ -z "${_DOT_TABLE_READONLY:-}" ]] || return 0 # --help writes nothing
+  mkdir -p "${2%/*}" 2>/dev/null || return 0
+  tmp="$2.$$"
+  if printf '%s\n%s' "$3" "$_DOT_TABLE" >"$tmp" 2>/dev/null; then
+    mv -f "$tmp" "$2" 2>/dev/null || rm -f "$tmp"
+  fi
+}
+
+# _dot_table_help_mode ARGS...: with -h or --help among ARGS, mark the cache
+# read-only: --help is side-effect free. Exported, because some help (dot
+# version --help) re-runs bin/dot.
+_dot_table_help_mode() {
+  local a
+  for a in "$@"; do
+    [[ "$a" != -h && "$a" != --help ]] || export _DOT_TABLE_READONLY=1
+  done
+}
 
 _dot_table_load() {
   [[ -z "$_DOT_TABLE" ]] || return 0
-  IFS= read -r -d '' _DOT_TABLE <"${_DOT_SRC:-.}/lib/dot/data/commands.txt" || true
+  local src="${_DOT_SRC:-.}" cache key
+  if _dot_table_fragments "$src"; then
+    cache="${XDG_CACHE_HOME:-${HOME:-/nonexistent}/.cache}/dot/cli/commands.txt"
+    key="$_DOT_TABLE_FORMAT|${VERSION:-}|$src|${_DOT_FRAGS[*]#"$src"/}"
+    _dot_table_cached "$cache" "$key" || _dot_table_build "$src" "$cache" "$key"
+  else
+    IFS= read -r -d '' _DOT_TABLE <"$src/lib/dot/data/commands.txt" || true
+  fi
   _DOT_TABLE=$'\n'"$_DOT_TABLE"
 }
 
@@ -313,3 +387,7 @@ for _dot_fn in _dot_help_overview _dot_help_all _dot_domain_help _dot_command_he
   }"
 done
 unset _dot_fn
+
+# bin/dot sources this file without arguments, so "$@" here is its own
+# command line.
+_dot_table_help_mode "$@"

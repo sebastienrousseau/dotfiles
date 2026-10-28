@@ -209,6 +209,15 @@ runs each command (`legacy`, on the domain and on each command).
   the bundled fragments is exactly `lib/dot/data/commands.txt`. This
   fragment format is the contract a loader reads, the bash host's now and
   the Go host's later.
+- `bin/dot` builds its table from the fragments at run time
+  (`lib/dot/names.sh`), into `$XDG_CACHE_HOME/dot/cli/commands.txt`. The
+  cache's first line is its key (format, version, source tree, fragment
+  list) and it is replaced whole; it is rebuilt when the key differs or a
+  fragment is newer. Release archives date every file 1970, so the version
+  in the key, not mtime, catches an upgrade. `--help` reads the cache but
+  never writes it. A tree with no fragments, or a merge that fails, reads
+  `lib/dot/data/commands.txt`, which the build tools (completions, man
+  pages, the lint) keep reading.
 - `-V` prints the version and `-v` sets `DOT_VERBOSE=1`. Until 0.2.538,
   `dot -v` alone printed the version with a warning; from 0.2.538 it is
   `--verbose` with no command, which prints the overview.

@@ -7,16 +7,17 @@
 # it so they keep passing when the release under test reaches the names'
 # `until` release.
 #
-# bin/dot is copied (it follows symlinks back to its own tree); lib/ and
-# scripts/ are the real ones, linked, except lib/dot/names.sh, which is a
-# shim that sets VERSION and sources the real file. bin/dot sources
-# names.sh after it sets its own VERSION, so the shim wins.
+# bin/dot is copied (it follows symlinks back to its own tree); lib/,
+# scripts/ and plugins/ are the real ones, linked, except lib/dot/names.sh,
+# which is a shim that sets VERSION and sources the real file, and the
+# route fragments (plugins/*/commands.txt, P2.1), which are pinned copies.
+# bin/dot sources names.sh after it sets its own VERSION, so the shim wins.
 pinned_dot() {
   local dir="$1" version="$2" root="${REPO_ROOT:?}" entry
   mkdir -p "$dir/bin" "$dir/lib/dot"
   cp "$root/bin/dot" "$dir/bin/dot"
   ln -sfn "$root/scripts" "$dir/scripts"
-  ln -sfn "$root/plugins" "$dir/plugins"
+  pin_plugins "$dir/plugins" "$version"
   for entry in "$root"/lib/*; do
     [[ "${entry##*/}" == dot ]] || ln -sfn "$entry" "$dir/lib/${entry##*/}"
   done
@@ -37,16 +38,37 @@ pin_names() {
   pin_table "$1/data" "$2"
 }
 
-# pin_table DATA VERSION: make DATA a copy of the command table as release
-# VERSION had it. A name removed at a later release (its `until`) was still
+# pin_records FILE VERSION: print FILE's records as release VERSION had
+# them. A name removed at a later release (its `until`) was still
 # deprecated then.
+pin_records() {
+  awk -F'|' -v OFS='|' -v pin="$2" '
+    function key(v, p) { split(v, p, "."); return sprintf("%06d%06d%06d", p[1], p[2], p[3]) }
+    $1 == "alias" && $3 == "removed" && $5 != "" && key($5) > key(pin) { $3 = "deprecated" }
+    { print }' "$1"
+}
+
+# pin_table DATA VERSION: make DATA a copy of the data directory with the
+# command table as release VERSION had it.
 pin_table() {
   local src="${REPO_ROOT:?}/lib/dot/data"
   rm -rf "$1"
   mkdir -p "$1"
   cp "$src"/* "$1/"
-  awk -F'|' -v OFS='|' -v pin="$2" '
-    function key(v, p) { split(v, p, "."); return sprintf("%06d%06d%06d", p[1], p[2], p[3]) }
-    $1 == "alias" && $3 == "removed" && $5 != "" && key($5) > key(pin) { $3 = "deprecated" }
-    { print }' "$src/commands.txt" >"$1/commands.txt"
+  pin_records "$src/commands.txt" "$2" >"$1/commands.txt"
+}
+
+# pin_plugins DIR VERSION: make DIR the plugins tree, each plugin's files
+# linked, its route fragment a copy as release VERSION had it.
+pin_plugins() {
+  local plugin entry
+  rm -rf "$1"
+  for plugin in "${REPO_ROOT:?}"/plugins/*/; do
+    plugin="${plugin%/}"
+    mkdir -p "$1/${plugin##*/}"
+    for entry in "$plugin"/*; do
+      [[ "${entry##*/}" == commands.txt ]] || ln -sfn "$entry" "$1/${plugin##*/}/${entry##*/}"
+    done
+    [[ ! -f "$plugin/commands.txt" ]] || pin_records "$plugin/commands.txt" "$2" >"$1/${plugin##*/}/commands.txt"
+  done
 }
