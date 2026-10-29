@@ -6,9 +6,8 @@
 ################################################################################
 
 #-----------------------------------------------------------------------------
-# Script configuration and version
+# Script configuration (DOTFILES_VERSION comes from the shell rc)
 #-----------------------------------------------------------------------------
-export DOTFILES_VERSION="0.2.501"
 DOTFILES_LAST_UPDATED="2025-03-12"
 
 #-----------------------------------------------------------------------------
@@ -495,7 +494,7 @@ alias .....='cd_with_history ../../../..' # Go up four levels
 [[ -d "${DOCS_DIR}" ]] && alias doc='cd_with_history "${DOCS_DIR}"'   # Documents
 [[ -d "${DOTF_DIR}" ]] && alias dotd='cd_with_history "${DOTF_DIR}"'  # Dotfiles dir
 [[ -d "${DOWN_DIR}" ]] && alias dwn='cd_with_history "${DOWN_DIR}"'   # Downloads
-[[ -d "${DOWN_DIR}" ]] && alias hom='cd_with_history "${HOME_DIR}"'   # Home Directory
+[[ -d "${HOME_DIR}" ]] && alias hom='cd_with_history "${HOME_DIR}"'   # Home Directory
 [[ -d "${MUSIC_DIR}" ]] && alias mus='cd_with_history "${MUSIC_DIR}"' # Music
 [[ -d "${PICS_DIR}" ]] && alias pic='cd_with_history "${PICS_DIR}"'   # Pictures
 [[ -d "${VIDS_DIR}" ]] && alias vid='cd_with_history "${VIDS_DIR}"'   # Videos

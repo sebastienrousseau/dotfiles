@@ -3,7 +3,12 @@
 # Immutability Aliases
 # Wrappers for the lock-configs script.
 
-script_path="${HOME}/.local/share/chezmoi/scripts/security/lock-configs.sh"
+# The source checkout (~/.dotfiles by default), then the legacy chezmoi
+# source location.
+for script_path in "${HOME}/.dotfiles/scripts/security/lock-configs.sh" \
+  "${HOME}/.local/share/chezmoi/scripts/security/lock-configs.sh"; do
+  [[ -f "$script_path" ]] && break
+done
 
 if [[ -f "$script_path" ]]; then
   # shellcheck disable=SC2139 # Intentional expansion at definition time

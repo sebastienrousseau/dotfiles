@@ -76,7 +76,7 @@ if command -v chmod >/dev/null; then
     fi
 
     # Apply permissions
-    chmod "${recursive}" "${permission}" "${path}" &&
+    chmod ${recursive:+"${recursive}"} "${permission}" "${path}" &&
       echo "Permissions set to '${permission}' on '${path}'"
   }
 
@@ -113,7 +113,7 @@ if command -v chmod >/dev/null; then
     fi
 
     # Apply permissions
-    chmod "${recursive}" "${permission}" "${path}" &&
+    chmod ${recursive:+"${recursive}"} "${permission}" "${path}" &&
       echo "Applied '${permission}' on '${path}'"
   }
 

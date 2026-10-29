@@ -40,9 +40,6 @@ if command -v gcloud &>/dev/null; then
   # Update your Cloud SDK to the latest version.
   alias gccu='gcloud components update'
 
-  # Initialize, authorize, and configure the gcloud tool.
-  alias gci='gcloud init'
-
   # Display current gcloud tool environment details.
   alias gcinf='gcloud info'
 
@@ -56,12 +53,6 @@ if command -v gcloud &>/dev/null; then
 
   # Switch to an existing named configuration.
   alias gccca='gcloud config configurations activate'
-
-  # Create a new named configuration.
-  alias gcccc='gcloud config configurations create'
-
-  # Display a list of all available configurations.
-  alias gcccl='gcloud config configurations list'
 
   # Fetch value of a Cloud SDK property.
   alias gccgv='gcloud config get-value'
@@ -277,14 +268,8 @@ if command -v gcloud &>/dev/null; then
   # Manage Google Cloud Monitoring.
   alias gcma='gcloud monitoring'
 
-  # Manage Google Cloud Networks.
-  alias gcn='gcloud networks'
-
   # Manage Google Cloud projects.
   alias gcp='gcloud projects'
-
-  # Delete a Google Cloud project.
-  alias gcpd='gcloud projects delete'
 
   # Display details for a Compute Engine IP address.
   alias gcpha='gcloud compute addresses describe'

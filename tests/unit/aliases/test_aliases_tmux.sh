@@ -34,4 +34,31 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
 
+# tmux_calls <command>: run <command> in bash with the tmux aliases loaded
+# and a tmux stub that records its arguments and has no server running.
+tmux_calls() {
+  local sandbox
+  sandbox="$(mktemp -d)"
+  mkdir -p "$sandbox/bin"
+  cat >"$sandbox/bin/tmux" <<EOF
+#!/bin/sh
+echo "\$*" >>"$sandbox/calls"
+[ "\$1" != has-session ]
+EOF
+  chmod +x "$sandbox/bin/tmux"
+  env -i HOME="$sandbox" PATH="$sandbox/bin:$PATH" ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+    bash --norc --noprofile -c "shopt -s expand_aliases; . \"\$1\"; eval \"\$2\"" _ \
+    "$ALIASES_DIR/tmux.aliases.sh" "$1" >/dev/null 2>&1
+  sed "s|$sandbox|~|g" "$sandbox/calls" 2>/dev/null | tr '\n' '|'
+  rm -rf "$sandbox"
+}
+
+test_start "tmux_tmr_reloads_deployed_config"
+assert_equals "source-file ~/.config/tmux/tmux.conf|" "$(tmux_calls tmr)" \
+  "tmr reloads the deployed ~/.config/tmux/tmux.conf"
+
+test_start "tmux_tm_starts_without_missing_file"
+assert_equals "has-session|new-session -d|attach|" "$(tmux_calls tm)" \
+  "tm starts a session (tmux reads its own config) and attaches"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

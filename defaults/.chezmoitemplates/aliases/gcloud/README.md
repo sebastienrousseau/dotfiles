@@ -15,12 +15,9 @@ These aliases are defined in `gcloud.aliases.sh`. Loaded by the lazy alias layer
 | `gcci` | `gcloud components install` | Install specific components. |
 | `gccsp` | `gcloud config set project` | Set a default Google Cloud project to work on. |
 | `gccu` | `gcloud components update` | Update your Cloud SDK to the latest version. |
-| `gci` | `gcloud init` | Initialize, authorize, and configure the gcloud tool. Redefined later in this file as `gcloud compute instances`, which wins. |
 | `gcinf` | `gcloud info` | Display current gcloud tool environment details. |
 | `gcv` | `gcloud version` | Display version and installed components. |
 | `gccca` | `gcloud config configurations activate` | Switch to an existing named configuration. |
-| `gcccc` | `gcloud config configurations create` | Create a new named configuration. Redefined later in this file as `gcloud container clusters create`, which wins. |
-| `gcccl` | `gcloud config configurations list` | Display a list of all available configurations. Redefined later in this file as `gcloud container clusters list`, which wins. |
 | `gccgv` | `gcloud config get-value` | Fetch value of a Cloud SDK property. |
 | `gccl` | `gcloud config list` | Display all the properties for the current configuration. |
 | `gccs` | `gcloud config set` | Define a property (like compute/zone) for the current configuration. |
@@ -36,7 +33,7 @@ These aliases are defined in `gcloud.aliases.sh`. Loaded by the lazy alias layer
 | `gciams` | `gcloud iam service-accounts set-iam-policy` | Replace existing IAM policy binding. |
 | `gciamv` | `gcloud iam service-accounts create` | Create a service account for a project. |
 | `gcpa` | `gcloud projects add-iam-policy-binding` | Add an IAM policy binding to a specified project. |
-| `gcpd` | `gcloud projects describe` | Display metadata for a project (including its ID). Redefined later in this file as `gcloud projects delete`, which wins. |
+| `gcpd` | `gcloud projects describe` | Display metadata for a project (including its ID). |
 | `gcccc` | `gcloud container clusters create` | Create a cluster to run GKE containers. |
 | `gcccg` | `gcloud container clusters get-credentials` | Update kubeconfig to get kubectl to use a GKE cluster. |
 | `gcccl` | `gcloud container clusters list` | List clusters for running GKE containers. |
@@ -77,9 +74,7 @@ These aliases are defined in `gcloud.aliases.sh`. Loaded by the lazy alias layer
 | `gcki` | `gcloud kms` | Manage Google Cloud KMS. |
 | `gcla` | `gcloud logging` | Manage Google Cloud Logging. |
 | `gcma` | `gcloud monitoring` | Manage Google Cloud Monitoring. |
-| `gcn` | `gcloud networks` | Manage Google Cloud Networks. `gcloud networks` is not a gcloud command group; networks live under `gcloud compute networks`. |
 | `gcp` | `gcloud projects` | Manage Google Cloud projects. |
-| `gcpd` | `gcloud projects delete` | Delete a Google Cloud project. |
 | `gcpha` | `gcloud compute addresses describe` | Display details for a Compute Engine IP address. |
 | `gcps` | `gcloud pubsub` | Manage Google Cloud Pub/Sub. |
 | `gcr` | `gcloud container images delete` | Delete a container image from Google Container Registry. |

@@ -29,4 +29,26 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define aliases or functions"
 fi
 
+# DOTFILES_VERSION comes from the shell rc (zsh's 10-env renders it from
+# .chezmoidata.toml); the cd alias files must not overwrite it with a
+# hard-coded release. version_after <file> [preset]: the value after sourcing.
+version_after() {
+  local sandbox
+  sandbox="$(mktemp -d)"
+  env -i HOME="$sandbox" PATH="$PATH" ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+    ${2:+DOTFILES_VERSION="$2"} bash --norc --noprofile -c \
+    ". \"\$1\" >/dev/null 2>&1; printf %s \"\${DOTFILES_VERSION-unset}\"" _ "$1"
+  rm -rf "$sandbox"
+}
+
+for cd_file in cd-config cd; do
+  test_start "${cd_file}_keeps_dotfiles_version"
+  assert_equals "9.9.9" "$(version_after "$REPO_ROOT/defaults/.chezmoitemplates/aliases/cd/$cd_file.aliases.sh" 9.9.9)" \
+    "$cd_file.aliases.sh keeps the DOTFILES_VERSION the shell already set"
+
+  test_start "${cd_file}_sets_no_dotfiles_version"
+  assert_equals "unset" "$(version_after "$REPO_ROOT/defaults/.chezmoitemplates/aliases/cd/$cd_file.aliases.sh")" \
+    "$cd_file.aliases.sh exports no hard-coded DOTFILES_VERSION"
+done
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

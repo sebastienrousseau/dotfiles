@@ -22,7 +22,6 @@ if command -v chezmoi &>/dev/null; then
   alias capply='dot apply'
   alias cupdate='dot config update'
   alias cdiff='dot diff'
-  alias crem='dot remove'
   alias cdrift='dot doctor drift'
   alias ca='chezmoi apply'
   alias ce='chezmoi edit'

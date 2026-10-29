@@ -50,7 +50,4 @@ if command -v fd &>/dev/null; then
   # Execute a command for each search result.
   alias fdx='fd --exec'
 
-  # Use fd as a replacement for find.
-  alias find='fd'
-
 fi

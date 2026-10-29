@@ -17,6 +17,7 @@ if [[ -f "$ALIAS_FILE" ]]; then
   # Reset some variables to avoid side effects
   RESTORE_LAST_DIR=false
   AUTO_LIST_AFTER_CD=false
+  VERSION_BEFORE="${DOTFILES_VERSION-unset}"
   source "$ALIAS_FILE"
   # Source modular alias files (stack, init, help)
   for mod in "$ALIAS_DIR"/cd-{stack,init,help}.aliases.sh; do
@@ -349,15 +350,10 @@ else
   printf '%b\n' "  ${YELLOW}~${NC} $CURRENT_TEST: skipped (function not available)"
 fi
 
-# Test: DOTFILES_VERSION is set
-test_start "dotfiles_version_set"
-if [[ -n "${DOTFILES_VERSION:-}" ]]; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: DOTFILES_VERSION is set ($DOTFILES_VERSION)"
-else
-  ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: DOTFILES_VERSION should be set"
-fi
+# Test: DOTFILES_VERSION is left to the shell rc
+test_start "dotfiles_version_untouched"
+assert_equals "$VERSION_BEFORE" "${DOTFILES_VERSION-unset}" \
+  "sourcing the cd aliases leaves DOTFILES_VERSION as it was"
 
 # Test: OS detection works
 test_start "os_detection"
