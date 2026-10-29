@@ -9,6 +9,12 @@ target: v0.2.503
 
 # RFC: v0.2.503 Repository Reorganisation
 
+> **Historical snapshot (note added 2026-10-29).** This RFC records the
+> v0.2.503 plan as accepted on 2026-05-17. The current layout is
+> described in [`../architecture/REPO_LAYOUT.md`](../architecture/REPO_LAYOUT.md),
+> and the migration's current behaviour in
+> [`../../install/migrate/README.md`](../../install/migrate/README.md).
+>
 > **Status: Accepted.** This RFC was opened in this PR and
 > immediately accepted by the maintainer with explicit decision to
 > ship the reorganisation incrementally within v0.2.503 rather

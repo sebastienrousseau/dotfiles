@@ -16,18 +16,20 @@ to bump pins. Managed under
 
 Path: `.github/actions/setup-chezmoi/action.yml`
 
-Installs the pinned `chezmoi` binary (using the SHA256-verified
-installer at `tools/ci/install-chezmoi-verified.sh` when the repo is
-checked out, falling back to `get.chezmoi.io` otherwise), caches the
-result, and appends the bin-dir to `$GITHUB_PATH`.
+Installs the pinned `chezmoi` binary through the SHA256-verified
+installer at `tools/ci/install-chezmoi-verified.sh` (the repo must be
+checked out), caches the result, and appends the bin-dir to
+`$GITHUB_PATH`. There is no unverified fallback: a version with no
+SHA-256 pinned in that installer fails, unless a cached binary of that
+version is restored first.
 
 ```yaml
 - name: Setup Chezmoi
   uses: ./.github/actions/setup-chezmoi
   # `version` defaults to env.CHEZMOI_VERSION. Override explicitly when
-  # the calling workflow has no env block (e.g. drift-detection):
+  # the calling workflow has no env block (e.g. theme-contracts):
   with:
-    version: '2.70.3'
+    version: '2.73.3'
 ```
 
 Inputs:
@@ -71,16 +73,16 @@ called out.
 
 `setup-chezmoi` is wired into:
 
-| Workflow | Job(s) |
-|---|---|
-| `ci-enforced.yml` | `test-matrix` |
-| `ci.yml` | `test-linux`, `test-macos`, `quality-idempotency`, `performance` |
-| `nightly.yml` | `extended-os-matrix`, `nightly-perf-bench` |
-| `drift-detection.yml` | `drift-scan` |
-
-Total: 8 call sites converted. The net workflow LOC delta is
-~−34 lines (52 deletions, 18 additions); ongoing additions to either
-workflow set will widen the gap.
+| Workflow | Job(s) | Version from |
+|---|---|---|
+| `ci.yml` | `test-linux`, `test-macos`, `quality-performance`, `quality-idempotency`, `benchmark` | `env.CHEZMOI_VERSION` |
+| `ci-enforced.yml` | `test-matrix`, `test-mutation` | `env.CHEZMOI_VERSION` |
+| `nightly.yml` | `extended-os-matrix`, `performance-tracking` | `env.CHEZMOI_VERSION` |
+| `perf-baseline.yml` | `baseline` | `env.CHEZMOI_VERSION` |
+| `reliability-gate.yml` | `powershell-contract` | `env.CHEZMOI_VERSION` |
+| `reusable-test-suite.yml` | `test-suite` | `env.CHEZMOI_VERSION` |
+| `theme-contracts.yml` | `render` | literal `version:` input |
+| `drift-detection.yml` | `drift-scan` | literal `version:` input |
 
 `setup-mise` was removed: it had no callers and installed mise by piping
 `mise.run` into `sh`. A workflow that needs mise should install a pinned
@@ -90,31 +92,47 @@ release checked against a committed SHA-256, as `setup-chezmoi` does.
 
 The composite action internally pins every external action they use
 to a 40-char commit SHA (e.g.
-`actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5`).
+`actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0`).
 Dependabot picks these up via the standard `github-actions` ecosystem
 configuration in `.github/dependabot.yml`.
 
 ## Bumping a pin
 
-To upgrade `chezmoi` for every CI job at once:
+A chezmoi version is pinned in three kinds of place, and a bump has to
+move all of them together:
+
+1. The SHA-256 table in `tools/ci/install-chezmoi-verified.sh`
+   (one line per OS and architecture, from the release's
+   `checksums.txt`). Without it, the installer refuses the version.
+2. The same table in `install.sh` (`chezmoi_release_sha256`) and its
+   `CHEZMOI_VERSION` default, so the standalone release installer
+   stays self-contained.
+3. The workflows: `CHEZMOI_VERSION` in the `env:` block of `ci.yml`,
+   `ci-enforced.yml`, `nightly.yml`, `perf-baseline.yml`,
+   `reliability-gate.yml` and `reusable-test-suite.yml`, plus the
+   literal `version:` input in `theme-contracts.yml` and
+   `drift-detection.yml`.
 
 ```bash
 # Find the new release:
 gh api repos/twpayne/chezmoi/releases/latest --jq '.tag_name'
 
-# Update the three workflow-level env declarations:
-for f in .github/workflows/{ci.yml,ci-enforced.yml,nightly.yml}; do
+# Update the workflow-level env declarations:
+for f in .github/workflows/{ci,ci-enforced,nightly,perf-baseline,reliability-gate,reusable-test-suite}.yml; do
   sed -i.bak 's/CHEZMOI_VERSION: "[^"]*"/CHEZMOI_VERSION: "X.Y.Z"/' "$f"
   rm "$f.bak"
 done
 
-# Drift-detection has its own pin (no env block):
-sed -i.bak "s/version: '[^']*'/version: 'X.Y.Z'/" .github/workflows/drift-detection.yml
-rm .github/workflows/drift-detection.yml.bak
+# The two workflows that pass the version as an input:
+for f in .github/workflows/{theme-contracts,drift-detection}.yml; do
+  sed -i.bak "s/version: '[^']*'/version: 'X.Y.Z'/" "$f"
+  rm "$f.bak"
+done
 ```
 
-Or rely on `update-deps.yml`, which already automates the env-block
-bump on a weekly schedule.
+`update-deps.yml` does not bump any of these: a `GITHUB_TOKEN` cannot
+push workflow files. `nightly.yml` reports when a newer chezmoi
+release exists.
 
 ## References
 

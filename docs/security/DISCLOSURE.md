@@ -11,19 +11,33 @@ instead — it's faster and the GitHub-side audit trail is stronger.
 
 ## 1. Fetch the maintainer's public key
 
+The key is committed to this repository as
+[`docs/security/security-pubkey.asc`](security-pubkey.asc):
+
 ```sh
-# Web Key Directory is the modern recommendation.
+curl -fsSL \
+  https://raw.githubusercontent.com/sebastienrousseau/dotfiles/main/docs/security/security-pubkey.asc \
+  | gpg --import
+```
+
+It is also served by Web Key Directory (WKD):
+
+```sh
 gpg --auto-key-locate clear,wkd \
     --locate-keys security@sebastienrousseau.com
 ```
 
-If WKD fails (offline keyserver, corporate proxy), download directly:
+If WKD lookup fails (corporate proxy, old gpg), fetch the WKD URL
+directly:
 
 ```sh
 curl -fsSL \
-  https://sebastienrousseau.com/.well-known/openpgpkey/hu/qpzqfwauiwxnu1xrf5h47bunsho44p6f \
+  https://sebastienrousseau.com/.well-known/openpgpkey/hu/t5s8ztdbon8yzntexy6oz5y48etqsnbb \
   | gpg --import
 ```
+
+The `verify-gpg-wkd.yml` workflow checks that the in-repo key, the WKD
+key and the fingerprint pinned in `SECURITY.md` all agree.
 
 ## 2. Verify the fingerprint
 
@@ -34,12 +48,12 @@ gpg --fingerprint security@sebastienrousseau.com
 ```
 
 The fingerprint must match the one published in
-[`SECURITY.md`](https://github.com/sebastienrousseau/dotfiles/blob/main/SECURITY.md). Cross-verify
-against the SSH signing key in `dot_config/git/allowed_signers.tmpl`
-— the maintainer signs commits with the same identity, so both
-fingerprints derive from the same identity claim.
+[`SECURITY.md`](https://github.com/sebastienrousseau/dotfiles/blob/main/SECURITY.md):
+`55AF AD36 4FD9 DB38 19E6  1F0C 8D68 8FAF A914 4693`. This GPG key is
+used only for encrypted reports; commits are signed with separate SSH
+keys, so there is no SSH fingerprint to compare it with.
 
-If the two fingerprints don't match, **stop**. Open a private
+If the fingerprints don't match, **stop**. Open a private
 [Security Advisory](https://github.com/sebastienrousseau/dotfiles/security/advisories/new)
 and ask the maintainer to confirm the key out-of-band.
 

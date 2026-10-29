@@ -10,7 +10,7 @@ render_with_liquid: false
 
 Because it's not just a dotfiles manager. It's a workstation baseline with:
 
-- Cryptographic attestation
+- Workstation attestation (JSON evidence of version, signing and policy posture)
 - AI/MCP policy enforcement
 - Wallpaper-driven theme engine (WCAG AAA)
 - Self-healing + chaos testing
@@ -29,7 +29,9 @@ Yes — it's the author's daily driver across multiple hosts and receives regula
 
 ### Can I fork it and use it without attribution?
 
-Yes — MIT License. Attribution is appreciated but not required.
+Yes, under the terms of the licence you pick: the project is dual-licensed
+`Apache-2.0 OR MIT`. Both keep the copyright and licence notice with the
+code; neither requires credit beyond that.
 
 ## Themes
 
@@ -52,7 +54,7 @@ No. Apple/Microsoft/distro-vendor wallpapers are copyrighted. The repo discovers
 
 ### How do I control the accent color?
 
-You don't directly — the accent hue is extracted from the wallpaper. But `_compute_accent()` picks the most chromatic cluster, then darkens it until white text meets 7:1 contrast. If you want a specific accent, choose a wallpaper with that hue dominant.
+You don't directly: the accent hue is extracted from the wallpaper. `_compute_accent()` ranks clusters by population times chroma, so the accent follows the wallpaper's main colour, then moves it toward the far end of the terminal surface (bright on dark themes, deep on light ones) until its foreground text meets 7:1 contrast. If you want a specific accent, choose a wallpaper with that hue dominant.
 
 ### Can I use my own theme without a wallpaper?
 
@@ -87,25 +89,30 @@ You lose access to all secrets encrypted only for that key. Recovery requires an
 
 ### Does this require an API key?
 
-No. The AI tools (Claude Code, Codex, Copilot) are installed but require their own authentication. `dot ai` shows what's present without invoking any remote service.
+No. The AI tools (Claude Code, Codex, Copilot) are installed but require their own authentication. `dot ai list` shows what's present without invoking any remote service.
 
 ### What is MCP?
 
-The [Model Context Protocol](https://modelcontextprotocol.io/) is a standard for connecting AI models to tools and data sources. `.dotfiles` includes policy enforcement for MCP-aware agents: allowlists, attestation, and signed registries. See [Trust Model](../01-concepts/02-trust-model.md).
+The [Model Context Protocol](https://modelcontextprotocol.io/) is a standard for connecting AI models to tools and data sources. `.dotfiles` includes policy enforcement for MCP-aware agents: allowlists, attestation, and a registry of hash-pinned server packages. See [Trust Model](../01-concepts/02-trust-model.md).
 
 ### Can I add my own agent profile?
 
-Yes. Drop a Markdown file in `dot_config/ai/patterns/`. Each file describes a profile (architect, hardener, etc.). `dot agent mode <name>` switches between them.
+Two things share that name. Agent modes (`ask`, `plan`, `apply`, `audit`) are
+defined in `defaults/dot_config/dotfiles/agent-profiles.json`;
+`dot agent mode list` shows them and `dot agent mode set <name>` switches.
+Prompt patterns (architect, hardener and others) are Markdown files in
+`defaults/dot_config/ai/patterns/`: add one there and it appears in
+`dot ai pattern list`.
 
 ## Fleet
 
 ### How many hosts can I manage?
 
-No hard limit. The `dot fleet` commands SSH sequentially by default, so large fleets (>20 hosts) benefit from parallel invocation. For industrial scale, pair with Ansible/Nix/Puppet; `.dotfiles` handles the user-level config, not system administration.
+No hard limit. `dot fleet apply` runs four SSH sessions in parallel by default; raise it with `--jobs <n>` for large fleets. For industrial scale, pair with Ansible/Nix/Puppet; `.dotfiles` handles the user-level config, not system administration.
 
 ### Do I need a central server?
 
-No. Everything is Git-based. No central orchestration service, no daemon. Each host pulls independently.
+No. Everything is Git-based. No central orchestration service, no daemon. Each host pulls independently; `dot fleet apply` only opens SSH sessions from the machine you run it on.
 
 ### Can two hosts have different themes?
 
@@ -118,7 +125,7 @@ Yes. Each host's `~/.config/chezmoi/chezmoi.toml` can set its own `theme`. This 
 Check what's loaded:
 
 ```sh
-DOTFILES_DEBUG=1 zsh -i -c exit 2>&1 | grep -E '\[debug [0-9]+ms\]'
+DOTFILES_DEBUG=1 zsh -i -c exit 2>&1 | grep -E '\[debug +[0-9]+ms\]'
 ```
 
 Common culprits:
@@ -153,9 +160,12 @@ Not currently.
 
 Because AI agents operating on your workstation can do anything you can. Attestation is the audit trail — who ran what, when, with which policy. Without it, agent operations are black boxes.
 
-### Why MIT License?
+### Why Apache-2.0 OR MIT?
 
-To maximize adoption and contribution. MIT is compatible with commercial use; copyleft alternatives would restrict who can use the code.
+To maximize adoption and contribution. Both are permissive and allow
+commercial use; Apache-2.0 adds an explicit patent grant, and MIT stays
+available for projects that need it. Copyleft alternatives would restrict
+who can use the code.
 
 ### Why no GUI configurator?
 

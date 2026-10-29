@@ -32,8 +32,8 @@ Checkpoints are stored in `~/.local/state/dotfiles/checkpoints/`.
 Validate conformance with:
 
 ```bash
-dot agent conformance
-dot agent conformance --strict --json
+dot agent card check
+dot agent card check --strict --json
 ```
 
 The current posture is A2A-ready with tracked conformance checks. It exposes identity, governance, checkpoints, and local evidence.

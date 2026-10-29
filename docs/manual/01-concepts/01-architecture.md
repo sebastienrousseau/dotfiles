@@ -10,7 +10,7 @@ render_with_liquid: false
 
 ### 1. Templating Engine — Chezmoi
 
-[Chezmoi](https://chezmoi.io) reads the source directory (`~/.dotfiles/` or `~/.local/share/chezmoi/`), renders templates using data from `.chezmoidata.toml`, and writes the results to the target paths in `$HOME`.
+[Chezmoi](https://chezmoi.io) reads the source directory (`~/.dotfiles/`; its `.chezmoiroot` points chezmoi at the `defaults/` subdirectory), renders templates using data from `defaults/.chezmoidata.toml`, and writes the results to the target paths in `$HOME`.
 
 Every file in the source directory follows chezmoi naming conventions:
 
@@ -26,42 +26,45 @@ Every file in the source directory follows chezmoi naming conventions:
 
 ### 2. Runtime Management — Mise and Nix
 
-**Mise** ([mise.jdx.dev](https://mise.jdx.dev)) manages per-user language runtimes and CLI tools. All entries in `~/.config/mise/config.toml` are installed to `~/.local/share/mise/installs/`, activated by PATH shimming. No system-level packages are touched.
+**Mise** ([mise.jdx.dev](https://mise.jdx.dev)) manages per-user language runtimes and CLI tools. The tools pinned in `~/.config/mise/conf.d/00-dotfiles.toml` are installed to `~/.local/share/mise/installs/`, activated by PATH shimming. No system-level packages are touched.
 
 **Nix Flakes** (`nix/flake.nix`) provide strictly reproducible builds when Mise's approximate semver-pinning is insufficient — for example, for declaring an entire system via Home Manager.
 
 ### 3. The `dot` CLI
 
-`dot` is the entry point for all lifecycle operations. It is a pure Bash script (no runtime dependencies) that dispatches to command handlers in `scripts/dot/commands/`.
+`dot` is the entry point for all lifecycle operations. It is a Bash script (`bin/dot`) that resolves each command from the command table and hands it to the domain's plugin: `plugins/<domain>/dot-<domain>` receives the words after the domain (ADR-020). A few routes still run modules in `scripts/dot/commands/`.
 
-Each command is self-contained — any command can be invoked directly as a script if needed:
+A plugin entry can be run directly when needed:
 
 ```sh
-bash ~/.dotfiles/scripts/dot/commands/diagnostics.sh doctor
+~/.dotfiles/plugins/doctor/dot-doctor status
 # equivalent to:
-dot doctor
+dot doctor status
 ```
 
-The CLI follows a grouping convention (see [dot CLI Reference](../03-reference/01-dot-cli.md)):
+Commands take the form `dot <domain> [object] <verb>`. `dot help` groups the 17 domains (see [dot CLI Reference](../03-reference/01-dot-cli.md)):
 
-- **Lifecycle** — `sync`, `apply`, `rollback`, `heal`, `bundle`
-- **Diagnostics** — `doctor`, `drift`, `benchmark`, `score`, `metrics`
-- **AI & Agents** — `ai`, `mcp`, `agent`, `mode`
-- **Configuration** — `theme`, `env`, `profile`, `secrets`
-- **Fleet** — `fleet`, `attest`
-- **Reference** — `help`, `search`, `version`, `manual`
+- **Configuration**: `config`, `shell`, `theme`, `tool`
+- **Sessions**: `session`, `top`
+- **Agents**: `ai`, `agent`, `mcp`
+- **System**: `system`, `doctor`
+- **Trust & hosts**: `secret`, `security`, `attest`, `fleet`
+- **Platform**: `cli`, `ui`
+
+Shortcuts cover the daily verbs: `dot apply`, `dot sync`, `dot diff`, `dot status`, `dot edit`, `dot cd` and `dot update`.
 
 ### 4. Secrets and Attestation
 
-Secrets are encrypted at rest using **Age** (modern file encryption) with **SOPS** (YAML-aware envelope) or `chezmoi encrypt`. The private key never leaves `~/.config/age/keys.txt` (or the user's password manager).
+Secrets are encrypted at rest using **Age** (modern file encryption) with **SOPS** (YAML-aware envelope) or `chezmoi encrypt`. chezmoi's age identity lives at `~/.config/chezmoi/key.txt` (the default `chezmoi init` offers); SOPS reads its keys from `~/.config/sops/age/keys.txt`.
 
-Attestation produces signed, machine-readable JSON recording:
+Attestation (`dot attest show`) produces machine-readable, unsigned JSON recording:
 
-- Host identity (kernel, arch, hostname hash)
-- Policy hash (MCP policy, agent profiles)
-- Tool versions (mise, nix, key binaries)
-- Git HEAD and signature status
-- Timestamp and verification hash
+- Generation time and dotfiles version
+- Platform (runtime, host OS, architecture, hostname)
+- Git signing configuration (format, signing key, allowed signers file, `merge.verifySignatures`)
+- The active agent profile, the agent profiles and the agent card
+- Governance registries (policy bundles, model and prompt registries)
+- MCP posture: the `mcp-doctor` summary, the MCP policy and the MCP registry
 
 See [Trust Model](02-trust-model.md) for the full threat model.
 
@@ -96,7 +99,7 @@ graph TD
     ThemesT --> Data
 
     A --> MCP[MCP Policy + Registry]
-    F --> Attest[Signed Attestation Logs]
+    F --> Attest[Attestation Evidence]
 ```
 
 ## Startup Performance Model
@@ -104,19 +107,21 @@ graph TD
 Shell startup is optimized via a three-tier caching strategy:
 
 1. **Bake-at-apply-time** — values computed once during `chezmoi apply` (HOSTNAME, platform, OS version) are written directly into config files, avoiding subshells at startup.
-2. **`_cached_eval` pattern** — slow initializers (mise, zoxide, atuin, starship) write their output to `~/.cache/shell/<tool>-init.sh`. Subsequent shells `source` the cache. Cache is invalidated when the binary's mtime changes.
-3. **Lazy loading** — heavy layers (nvm, rbenv, direnv) are loaded on first invocation via shell function stubs.
+2. **`_cached_eval` pattern** — slow initializers (mise, zoxide, atuin, starship) write their output to `~/.cache/zsh/<label>.zsh` (Bash: `~/.cache/bash/<label>.bash`). Subsequent shells `source` the cache. Cache is invalidated when the binary is newer than the cache or its resolved path changes.
+3. **Lazy loading** — heavy layers load on first invocation via shell function stubs: `thefuck` does, and the zsh `_dot_lazy` helper wraps others (nvm, pyenv, conda) the same way.
 
-Target: ≤500ms cold shell startup, ≤100ms per component. Enforced by CI benchmark (see [Performance Reference](../03-reference/01-dot-cli.md#performance)).
+`dot doctor perf show` measures startup against a 250 ms target by default (`DOTFILES_PERF_TARGET_MS`; see [Performance Reference](../03-reference/01-dot-cli.md#performance)).
 
 ## Per-Machine Profiles
 
-The `machine` key in `.chezmoidata.toml` (or the per-host override in `~/.config/chezmoi/chezmoi.toml`) selects a hardware preset from `.chezmoidata/hardware.toml`. Presets define:
+The `machine` key (empty in `defaults/.chezmoidata.toml`, set per host in `~/.config/chezmoi/chezmoi.toml`) selects a `[machines.<name>]` preset from `defaults/.chezmoidata/hardware.toml` (`macbook-t2`, `surface-pro`, `geekom-a9`); with no machine set, the `[hardware]` defaults apply. A preset sets:
 
-- Display scale (1.0, 1.5, 2.0)
-- Keyboard modifier hierarchy
-- Performance profile (desktop, laptop, low-power)
-- Feature flags (e.g. `features.dms = true` for Niri on Wayland)
+- `profile`, `scale` and `hidpi`
+- `touchscreen`, `touchpad`, `touchpad_accel` and `touchpad_accel_profile`
+- `max_refresh`, `gpu` and `keyboard_layout`
+- `output_name` and `output_mode` (the Niri output)
+
+Feature flags such as `features.niri` are separate: they live under `[features]` in `.chezmoidata.toml` and are overridden per host under `[data.features]`.
 
 A single source tree deploys correctly to a MacBook, a Surface, a Linux desktop, and a WSL2 session — each rendering a platform-appropriate config.
 
@@ -125,11 +130,11 @@ A single source tree deploys correctly to a MacBook, a Surface, a Linux desktop,
 | Boundary | Trusted | Untrusted |
 |:---|:---|:---|
 | Source tree | Your Git history, signed commits | Unverified pull requests |
-| Secret store | `~/.config/age/keys.txt` | Environment variables, cloud storage |
-| Attestation logs | Signed by SSH ED25519 key | Unsigned JSON reports |
+| Secret store | `~/.config/chezmoi/key.txt`, `~/.config/sops/age/keys.txt` | Environment variables, cloud storage |
+| Attestation evidence | A record that passes `dot attest verify` | A record nobody has verified |
 | Template data | `.chezmoidata.toml` | User-provided template input |
 
-Every boundary is enforced: unsigned commits fail CI gates, secrets never appear in plaintext git history, attestation logs are hash-chained.
+Branch protection on `main` requires signed commits, gitleaks scans every push, and `dot attest verify` checks an attestation record in a WebAssembly sandbox. Attestation records themselves are not signed or hash-chained.
 
 ## Next
 

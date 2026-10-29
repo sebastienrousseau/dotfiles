@@ -24,11 +24,11 @@ Real example from this repo's history: `executable_dot-load-benchmark`
 shipped with only `set -e`. A failing pipeline (e.g. `cmd | grep`)
 where `grep` succeeded would still report success even when `cmd`
 crashed. The full triple catches this. The benchmark was upgraded
-in commit 970b631d under #854.
+under #854.
 
 ## Exemption categories
 
-Two kinds of files legitimately can't enforce the preamble locally:
+Four kinds of files are exempt from carrying the preamble themselves:
 
 ### 1. Sourced libraries
 
@@ -48,37 +48,37 @@ state. Current adopters:
 
 | Path | Sourced by |
 |---|---|
-| `dot_config/shell/00-core-paths.sh.tmpl` | shell init (zsh/bash/fish) |
-| `dot_config/shell/05-core-safety.sh` | shell init |
-| `dot_config/shell/10-secrets.sh` | shell init |
-| `dot_config/shell/40-fzf-defaults.sh.tmpl` | shell init |
-| `dot_config/shell/40-ls-colors.sh` | shell init |
-| `dot_config/shell/50-logic-functions-core.sh.tmpl` | shell init + fish bridge |
-| `dot_config/shell/50-logic-functions.sh.tmpl` | shell init + fish bridge |
-| `dot_config/shell/51-logic-functions-extra.sh.tmpl` | shell init (lazy) |
-| `dot_config/shell/90-ux-aliases.sh.tmpl` | shell init + fish bridge |
-| `dot_config/shell/91-ux-aliases-lazy.sh.tmpl` | shell init (lazy) |
-| `scripts/dot/lib/bento.sh` | dot CLI commands |
-| `scripts/dot/lib/log.sh` | dot CLI + diagnostics |
-| `scripts/dot/lib/platform.sh` | dot CLI commands |
-| `scripts/dot/lib/ui.sh` | dot CLI + diagnostics + ops |
-| `scripts/dot/lib/utils.sh` | dot CLI |
+| `defaults/dot_config/shell/00-core-paths.sh.tmpl` | shell init (zsh/bash/fish) |
+| `defaults/dot_config/shell/05-core-safety.sh` | shell init |
+| `defaults/dot_config/shell/10-secrets.sh` | shell init |
+| `defaults/dot_config/shell/40-fzf-defaults.sh.tmpl` | shell init |
+| `defaults/dot_config/shell/40-ls-colors.sh` | shell init |
+| `defaults/dot_config/shell/50-logic-functions-core.sh.tmpl` | shell init + fish bridge |
+| `defaults/dot_config/shell/50-logic-functions.sh.tmpl` | shell init + fish bridge |
+| `defaults/dot_config/shell/51-logic-functions-extra.sh.tmpl` | shell init (lazy) |
+| `defaults/dot_config/shell/90-ux-aliases.sh.tmpl` | shell init + fish bridge |
+| `defaults/dot_config/shell/91-ux-aliases-lazy.sh.tmpl` | shell init (lazy) |
+| `lib/dot/bento.sh` | dot CLI commands |
+| `lib/dot/log.sh` | dot CLI + diagnostics |
+| `lib/dot/platform.sh` | dot CLI commands |
+| `lib/dot/ui.sh` | dot CLI + diagnostics + ops |
+| `lib/dot/utils.sh` | dot CLI |
 | `scripts/ops/heal-chezmoi.sh` | `scripts/ops/heal.sh` |
 | `scripts/ops/heal-system.sh` | `scripts/ops/heal.sh` |
 | `scripts/ops/heal-tools.sh` | `scripts/ops/heal.sh` |
 
 ### 2. Bulk-sourced fragments (path-skipped)
 
-Three directories contain hundreds of alias / function / PATH
+Two directories contain hundreds of alias / function
 snippets that are sourced into the shell. Annotating each one
 individually would be 300+ marker comments with no extra signal.
 The lint skips them by path:
 
 | Path | Contents |
 |---|---|
-| `.chezmoitemplates/aliases/**/*.aliases.sh` | alias definitions sourced into the user's shell. |
-| `.chezmoitemplates/functions/**` | shell-function definitions sourced into the user's shell. |
-| `.chezmoitemplates/paths/**` | `PATH=…:$PATH` snippets concatenated by the shell init. |
+| `defaults/.chezmoitemplates/aliases/**/*.aliases.sh` | alias definitions sourced into the user's shell. |
+| `defaults/.chezmoitemplates/functions/**` | shell-function definitions sourced into the user's shell. |
+| `defaults/.chezmoitemplates/paths/**` | `PATH=…:$PATH` snippets (the skip rule remains; the directory does not exist today). |
 
 ### 3. Test scripts (path-skipped)
 
@@ -90,7 +90,7 @@ source the framework inherit it.
 ### 4. Explicit opt-outs
 
 Init fragments and completion scripts that must NOT carry their own
-preamble (e.g., `dot_local/bin/executable_dot_completion`, a zsh
+preamble (e.g., `defaults/dot_local/bin/executable_dot_completion`, a zsh
 completion sourced into the interactive shell) can carry an
 explicit marker:
 

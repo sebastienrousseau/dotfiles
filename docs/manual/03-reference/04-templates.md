@@ -5,65 +5,81 @@ render_with_liquid: false
 
 # Reference: Template Variables
 
-Every variable available to chezmoi templates (`.tmpl` files).
+The variables and helpers available to chezmoi templates (`.tmpl` files) under `defaults/`.
 
 ## From `.chezmoidata.toml`
 
-Flat top-level keys:
+Flat top-level keys (values as shipped, before any `chezmoi.toml` override):
 
 | Variable | Type | Example |
 |:---|:---|:---|
 | `.dotfiles_version` | string | `"0.2.539"` |
-| `.theme` | string | `"tahoe-dark"` |
-| `.machine` | string | `"macbook-t2"` |
+| `.theme` | string | `"maui-dark"` |
+| `.theme_family` | string | `"maui"` |
+| `.theme_mode` | string | `"auto"` |
+| `.machine` | string | `""` (or a preset such as `"macbook-t2"`) |
 | `.profile` | string | `"laptop"` |
 | `.default_shell` | string | `"fish"` |
 | `.terminal_font_family` | string | `"JetBrainsMono Nerd Font"` |
-| `.terminal_font_size` | int | `12` |
-| `.name` | string | `"Your Name"` |
-| `.email` | string | `"you@example.com"` |
+| `.terminal_font_size` | int | `20` |
+| `.name` | string | `""` |
+| `.email` | string | `""` |
+| `.features` | table | see [Feature Flags](05-feature-flags.md) |
+
+`chezmoi init` also writes `.git_name`, `.git_email`, `.git_signingkey`, `.git_signingformat`, `.age_identity` and `.age_recipient` into `~/.config/chezmoi/chezmoi.toml`.
 
 ## From `.theme-manifest/themes.toml`
 
+The theme manifest is not chezmoi data (it is too large to hand to every template), so a template loads it and resolves the active theme through the `theme-name` partial, which falls back to `fallback-dark` when `.theme` is missing:
+
 ```go
-{{- $t := index .themes .theme }}
+{{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
+{{- $themeName := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}
+{{- $t := index $themes $themeName -}}
 {{ $t.mode }}              // "dark" or "light"
-{{ $t.family }}            // "tahoe"
+{{ $t.family }}            // "maui"
 {{ $t.macos_accent }}      // 4 (integer)
-{{ $t.term.bg }}           // "#121430"
-{{ $t.term.fg }}           // "#d4d8ec"
+{{ $t.term.bg }}           // "#0f1f21"
+{{ $t.term.fg }}           // "#f1f6f7"
 {{ $t.term.c0 }} .. {{ $t.term.c15 }}   // ANSI 0-15
-{{ $t.ui.accent }}         // "#3951b1"
-{{ $t.ui.accent_text }}    // "#ffffff"
+{{ $t.ui.accent }}         // "#00d2e0"
+{{ $t.ui.accent_text }}    // "#000000"
 {{ $t.ui.panel }}
 {{ $t.ui.border }}
-{{ $t.app.nvim }}          // "catppuccin"
+{{ $t.app.nvim }}          // "tokyonight"
 {{ $t.app.starship_palette }}
 ```
 
+The example values are those of `maui-dark`.
+
 ## From `.chezmoidata/hardware.toml`
 
+`.hardware` holds the defaults and `.machines` the presets; a template picks the preset named by `.machine`, as `defaults/dot_config/niri/config.kdl.tmpl` does:
+
 ```go
-{{- $hw := index .hardware .machine }}
-{{ $hw.display_scale }}    // 2.0
-{{ $hw.kbd_layout }}       // "qwerty"
-{{ $hw.modifier_mode }}    // "left-cmd-control"
-{{ $hw.perf_profile }}     // "laptop"
-{{ $hw.wm }}               // "aerospace"
-{{ $hw.features.touchid }} // bool
+{{ $hw := .hardware -}}
+{{- if and .machine (ne .machine "") -}}
+  {{- $m := index .machines .machine -}}
+  {{- if $m -}}{{- $hw = $m -}}{{- end -}}
+{{- end -}}
+{{ $hw.scale }}            // 2.0 on macbook-t2
+{{ $hw.hidpi }}            // bool
+{{ $hw.max_refresh }}      // 60
+{{ $hw.keyboard_layout }}  // "us"
+{{ $hw.output_name }}      // "eDP-1"
+{{ $hw.profile }}          // "laptop" | "desktop"
 ```
 
 ## From Feature Flags
 
-```go
-{{- $f := mergeOverwrite .features $hw.features }}
-{{ if $f.dms }}
-# Dank Material Shell-specific config
-{{ end }}
+Flags are read straight from `.features`; presets carry no flags of their own:
 
-{{ if $f.niri }}
+```go
+{{ if .features.niri }}
 # Niri WM config
 {{ end }}
+
+{{- $linuxDesktop := or .features.linux_desktop .features.niri -}}
 ```
 
 ## Built-in Chezmoi Variables
@@ -71,113 +87,116 @@ Flat top-level keys:
 ```go
 {{ .chezmoi.os }}                // "darwin" | "linux" | "windows"
 {{ .chezmoi.arch }}              // "amd64" | "arm64"
-{{ .chezmoi.kernel }}            // "Darwin" | "Linux"
-{{ .chezmoi.kernel.ostype }}     // "darwin24" etc
+{{ .chezmoi.kernel.ostype }}     // "Linux" (Linux only)
+{{ .chezmoi.kernel.osrelease }}  // kernel release; contains "microsoft" on WSL (Linux only)
 {{ .chezmoi.hostname }}          // host machine hostname
 {{ .chezmoi.username }}          // current user
 {{ .chezmoi.homeDir }}           // $HOME
-{{ .chezmoi.sourceDir }}         // ~/.dotfiles
-{{ .chezmoi.workingTree }}       // git working tree root
+{{ .chezmoi.sourceDir }}         // ~/.dotfiles/defaults (the .chezmoiroot)
+{{ .chezmoi.workingTree }}       // git working tree root (~/.dotfiles)
 {{ .chezmoi.executable }}        // chezmoi binary path
 {{ .chezmoi.osRelease }}         // Linux /etc/os-release data
 ```
 
 ## Built-in Chezmoi Functions
 
+Functions the templates here use:
+
 ```go
-{{ exec "command" | trim }}
 {{ output "hostname" }}
-{{ include "path/to/file" }}
+{{ include ".theme-manifest/themes.toml" | fromToml }}
+{{ includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) }}
+{{ glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/aliases/**/*.aliases.sh") }}
 {{ decrypt "path/to/file.age" }}
-{{ sopsDecrypt "path/to/file.sops.yaml" | fromYaml }}
-{{ joinPath "a" "b" }}
 {{ stat "/path" }}
-{{ ioreg ".." ".." }}             // macOS only
 {{ lookPath "command" }}           // returns path or empty
 ```
 
+See the [chezmoi template reference](https://www.chezmoi.io/reference/templates/) for the rest.
+
 ## Helper Templates (in `.chezmoitemplates/`)
 
-Reusable partials included via:
+Named partials, included with `template` or `includeTemplate`:
 
 ```go
-{{ template "paths/00-default.paths.sh" . }}
-{{ template "aliases/cd.aliases.sh" . }}
-{{ template "functions/cdls.sh" . }}
+{{ template "go-build-command" . }}
+{{- $name := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}
 ```
 
 Available partials:
 
-- `paths/00-default.paths.sh` — canonical PATH construction
-- `paths/05-pipx.paths.sh` — pipx + ~/.local/bin
-- `paths/99-custom.paths.sh` — user-appended paths
-- `aliases/*.aliases.sh` — per-domain alias sets
-- `functions/*.sh` — reusable shell functions
+- `theme-name`: resolve the active theme name, with the `fallback-dark` fallback
+- `go-build-command`: the build step shared by the `run_onchange_24/25/26-build-*` scripts (dot-ui, dot-ai-tui, dot-mcp)
+- `desktop/shell-theme.dconf.tmpl`: GNOME Shell theme settings
+
+The same directory holds the alias and function sources: `aliases/<group>/*.aliases.sh` are gathered by `dot_config/shell/91-ux-aliases-lazy.sh.tmpl` with `glob`, and `functions/<group>/*.sh` are listed in `functions/groups.json` for the fish and nushell function files.
 
 ## Example: Using Theme in Ghostty Config
 
+An excerpt of `defaults/dot_config/ghostty/config.tmpl`:
+
 ```go
-{{- /* dot_config/ghostty/config.tmpl */ -}}
-{{- $t := index .themes .theme -}}
+{{ $fontFamily := default "JetBrains Mono" .terminal_font_family -}}
+{{- $fontSize := default 20 .terminal_font_size -}}
+{{- $linuxDesktop := or .features.linux_desktop .features.niri -}}
 
-font-family = "{{ .terminal_font_family }}"
-font-size = {{ .terminal_font_size }}
-
+{{ $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
+{{- $themeName := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}
+{{- $t := index $themes $themeName -}}
 background = {{ $t.term.bg }}
 foreground = {{ $t.term.fg }}
 cursor-color = {{ $t.term.cursor }}
-
 palette = 0={{ $t.term.c0 }}
 palette = 1={{ $t.term.c1 }}
-palette = 2={{ $t.term.c2 }}
 # ... through 15
 
-{{- if eq .chezmoi.os "darwin" }}
-macos-titlebar-style = transparent
+{{- if $linuxDesktop }}
+gtk-tabs-location = top
+copy-on-select = clipboard
 {{- end }}
 ```
 
 ## Example: Platform × Preset
 
+An excerpt of the Niri template's output block:
+
 ```go
-{{- $hw := index .hardware .machine -}}
-
-{{- if and (eq .chezmoi.os "darwin") (eq $hw.wm "aerospace") }}
-# macOS AeroSpace config
-include = ["aerospace-macos.toml"]
-{{- else if and (eq .chezmoi.os "linux") (eq $hw.wm "niri") }}
-# Linux Niri config
-include = ["niri.kdl"]
+{{- if and $hw.output_name $hw.output_mode }}
+output "{{ $hw.output_name }}" {
+    mode "{{ $hw.output_mode }}"
+    scale {{ $hw.scale }}
+{{- if gt (int $hw.max_refresh) 60 }}
+    variable-refresh-rate
 {{- end }}
-
-# DPI-aware sizing
-font-size = {{ mul 8 $hw.display_scale | int }}
+}
+{{- end }}
 ```
 
 ## Template Testing
 
-Render a template without applying:
+Render a template without applying (from `~/.dotfiles`):
 
 ```sh
-chezmoi execute-template < dot_config/ghostty/config.tmpl
+chezmoi execute-template < defaults/dot_config/ghostty/config.tmpl
 ```
 
 Or test an expression:
 
 ```sh
 chezmoi execute-template '{{ .chezmoi.os }}'
-# darwin
+# linux
 
-chezmoi execute-template '{{- $t := index .themes .theme -}}{{ $t.term.bg }}'
-# #121430
+chezmoi execute-template '{{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}{{- $n := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}{{ (index $themes $n).term.bg }}'
+# #0f1f21
 ```
 
 ## Validation in CI
 
-Every push to main runs:
+Every pull request to `main`, and every push to `main`, that touches shell scripts, templates or `dot_*` sources runs, on Linux and macOS (`ci.yml`):
 
 ```sh
-chezmoi apply --dry-run
+chezmoi init
+chezmoi apply --verbose --dry-run
 ```
 
 If any template fails to render, the build breaks before merge.

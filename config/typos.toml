@@ -29,6 +29,7 @@ oll = "oll"            # `oll` alias prefix for Ollama (oll-pull, oll-list)
 als = "als"            # `als` alias-listing function (fish/zsh/bash)
 ALS = "ALS"            # uppercase variant in data files
 sur = "sur"            # Microsoft Surface laptop product flag in chezmoidata
+fwe = "fwe"            # `fwe` alias: sudo ufw enable (security aliases)
 Sur = "Sur"
 Hashi = "Hashi"        # HashiCorp / Hashicorp brand reference
 noice = "noice"        # noice.nvim Neovim plugin

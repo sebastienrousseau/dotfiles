@@ -4,6 +4,17 @@ render_with_liquid: false
 
 # Appendix E: License
 
+`.dotfiles` is dual-licensed under the Apache License 2.0 or the MIT License,
+at your option (SPDX: `Apache-2.0 OR MIT`). The full texts are
+[`LICENSE-APACHE`](../../../LICENSE-APACHE) and
+[`LICENSE-MIT`](../../../LICENSE-MIT) in the repository root.
+
+## Apache License 2.0
+
+The Apache License 2.0 text is long and is not reproduced here; see
+[`LICENSE-APACHE`](../../../LICENSE-APACHE) or
+<https://www.apache.org/licenses/LICENSE-2.0>.
+
 ## MIT License
 
 Copyright (c) 2015-2026 Sebastien Rousseau
@@ -35,4 +46,4 @@ Wallpapers referenced from `/System/Library/Desktop Pictures/` or `/usr/share/ba
 
 ## Contributions
 
-Contributions are accepted under the MIT License. By submitting a pull request, you assert that your contribution is your own work (or properly attributed) and that it may be relicensed under MIT.
+Contributions are accepted under the same dual licence, `Apache-2.0 OR MIT`. Every commit carries a Developer Certificate of Origin `Signed-off-by` line, which CI checks; see [CONTRIBUTING.md](../../../CONTRIBUTING.md).

@@ -14,7 +14,6 @@ exclude_path = [
   "build",
   "coverage",
   "docs/archive",
-  "docs/.vitepress/reports",
   "CHANGELOG.md",
   "defaults/dot_config",
   "defaults/dot_claude",

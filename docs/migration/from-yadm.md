@@ -21,7 +21,7 @@ alternate-file suffixes into chezmoi templates.
 | `##os.Linux`, `##hostname.foo` suffixes | `{{ if eq .chezmoi.os "linux" }}` in a `.tmpl` | One file with branches, not N files |
 | `yadm alt` | `chezmoi apply` | Automatic; no separate step |
 | `yadm encrypt` (GPG) | `dot secret` (age + sops) | Different crypto; see below |
-| `yadm bootstrap` | `install/provision/run_onchange_*` | Runs on apply, idempotent |
+| `yadm bootstrap` | `install/provision/` | Opt-in: runs only with `install.sh --provision` (or `DOTFILES_PROVISION=1`), never on apply |
 | `yadm status` / `diff` | `dot status` / `dot diff` | Same intent |
 
 ## 1. Inventory and back up
@@ -38,7 +38,10 @@ against it.
 ## 2. Install alongside yadm
 
 The installer does not touch yadm's repo (`~/.local/share/yadm/repo.git`)
-or its config, so both can coexist while you migrate.
+or its config, so both can coexist while you migrate. It does apply
+this repo's defaults over the files in `$HOME`, which is yadm's work
+tree, without taking a backup: your step 1 tarball is what you restore
+from, and `yadm status` shows what changed.
 
 ```sh
 # Download and verify the release installer per docs/guides/INSTALL.md first.
@@ -56,20 +59,25 @@ dot config init yourusername
 
 ## 3. Move files across
 
-Plain (non-alternate) files first:
+Plain (non-alternate) files first. Put your own versions back over
+the defaults the installer wrote, then add them:
 
 ```sh
+tar -xzf ~/yadm-backup-<date>.tar.gz -C "$HOME"   # your copies, from step 1
 while read -r f; do
   case "$f" in
     *##*) continue ;;            # alternates handled in step 4
   esac
-  dot config add "$f"
+  dot config add "$HOME/$f"
 done < ~/yadm-inventory.txt
 ```
 
 `dot config add` wraps `chezmoi add`, so a file in `~/.config/foo/bar` lands
-at `defaults/dot_config/foo/bar`, and `~/.gitconfig` at
-`defaults/dot_gitconfig`.
+at `defaults/dot_config/foo/bar`. Where the framework already ships that
+path as a template (`~/.gitconfig` is `defaults/dot_gitconfig.tmpl`),
+chezmoi asks whether to remove the template attribute; answering yes
+replaces the framework's template with your plain file. To keep the
+template, answer no and merge your settings into it as in step 4.
 
 ## 4. Translate alternates into templates
 
@@ -82,7 +90,10 @@ yadm:
 ~/.gitconfig##os.Linux
 ```
 
-Here — `defaults/dot_gitconfig.tmpl`:
+Here, one template. The framework already ships
+`defaults/dot_gitconfig.tmpl`, with a `[user]` block and per-OS
+credential helpers of its own, so merge the branches below into that
+file rather than replacing it:
 
 ```text
 [user]
@@ -111,7 +122,7 @@ The common yadm conditions map as:
 Verify before applying — templates fail loudly, but only when rendered:
 
 ```sh
-chezmoi execute-template < defaults/dot_gitconfig.tmpl
+chezmoi execute-template < ~/.dotfiles/defaults/dot_gitconfig.tmpl
 dot diff
 ```
 
@@ -177,7 +188,8 @@ yadm status
 ## What you gain, what you lose
 
 **Gain:** one templated file instead of alternate families; the `dot`
-CLI (`doctor`, `health`, `heal`, `rollback`, `attest`); multi-shell
+CLI (`dot doctor`, `dot doctor status`, `dot doctor fix`,
+`dot doctor rollback`, `dot attest`); multi-shell
 parity including fish, nushell and PowerShell; signed and attested
 releases; fleet commands for more than one machine.
 
@@ -185,4 +197,5 @@ releases; fleet commands for more than one machine.
 home directory stops being meaningful — you use `dot status` instead.
 GPG-encrypted files become age/sops. yadm is a single ~2k-line script;
 this is a larger surface. And yadm's bootstrap is one file, whereas
-provisioning here is spread across `install/provision/`.
+provisioning here is spread across `install/provision/` and runs only
+when you ask for it with `install.sh --provision`.

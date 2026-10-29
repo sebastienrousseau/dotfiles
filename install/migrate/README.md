@@ -1,33 +1,40 @@
 # Migration
 
-The framework upgrades itself **automatically and seamlessly** when
-you pull a new release. You should never need to read this directory
-unless something goes wrong.
+This directory holds the one-time migration for the v0.2.503
+repository reorganisation. You should never need to read it unless
+something goes wrong.
 
 ## How it works
 
-When you upgrade to v0.2.503 (the first release with the v0.2.503
-repository reorganisation per
-`docs/operations/RFC_v0_2_503_reorganization.md`), three independent
-triggers attempt to run the migration:
+When you upgrade to v0.2.503 or later (the v0.2.503 repository
+reorganisation per
+`docs/operations/RFC_v0_2_503_reorganization.md`), two paths run the
+migration:
 
 1. **`install.sh` upgrade path.** If you re-run `install.sh` (the
-   standard upgrade flow), it detects pre-0.2.503 state and runs
-   `migrate-v0_2-to-v0_2_503.sh` BEFORE invoking `chezmoi apply`.
-2. **`chezmoi apply` hook.** `install/provision/run_before_00-migrate-v0_2_503.sh.tmpl`
-   is a chezmoi `run_before_*` script that fires on every apply. It
-   invokes the same migration script, which is idempotent.
-3. **Manual invocation.** If you want explicit control:
+   standard upgrade flow), it runs `migrate-v0_2-to-v0_2_503.sh`
+   from `~/.dotfiles` or `~/.local/share/chezmoi`, whichever has it
+   and is executable, BEFORE invoking `chezmoi apply`. It does no
+   version detection of its own; the script decides whether there is
+   work to do, and a non-zero exit only prints a warning.
+2. **Manual invocation.** If you want explicit control:
 
    ```sh
    bash install/migrate/migrate-v0_2-to-v0_2_503.sh --verbose
+   bash install/migrate/migrate-v0_2-to-v0_2_503.sh --dry-run
    ```
 
-All three paths converge on the same script. The script's first
+`install/provision/run_before_00-migrate-v0_2_503.sh.tmpl` was meant
+as a third trigger on every `chezmoi apply`, but it never runs:
+`install/provision/` sits outside `.chezmoiroot` (`defaults`), so
+chezmoi does not see it, and `install.sh --provision` only runs the
+`run_once_install_*` and `run_onchange_*` scripts there.
+
+Both paths converge on the same script. The script's first
 action is checking the state file
 `~/.local/state/dotfiles/v0_2_503-migration/.complete`. If that
-file exists, the script exits 0 immediately — exactly-once
-semantics.
+file exists, the script exits 0 immediately (pass `--force` to run
+it again).
 
 ## What the migration does
 
@@ -47,34 +54,47 @@ brief but real window where the user's environment is broken.
 
 The migration:
 
-1. Detects which phases are active in the new source (looks for the
-   target files like `bin/dot`).
-2. Calls `chezmoi forget --force` on the corresponding deployed
+1. Marks itself complete and exits if chezmoi is missing, has no
+   source configured, or neither `~/.local/bin/dot` nor
+   `~/.local/share/man/man1/dot.1` exists (a fresh install).
+2. Writes a snapshot log, `snapshot-<UTC timestamp>.log`, next to the
+   state file.
+3. Detects which phases are active by looking for their target files
+   (`bin/dot`, `share/man/man1/dot.1`, `.chezmoiroot`) under
+   `chezmoi source-path`.
+4. Calls `chezmoi forget --force` on the corresponding deployed
    paths. This un-tracks them from chezmoi state without deleting
-   the file on disk.
-3. `chezmoi apply` then proceeds normally. The new paths populate;
-   the old (now-untracked) deployed files remain on disk until you
-   explicitly remove them (or until the next major bump cleans up
-   the post-migration leftovers).
-4. Marks `~/.local/state/dotfiles/v0_2_503-migration/.complete` so
-   the script becomes a no-op on every subsequent apply.
+   the file on disk. `chezmoi apply` then proceeds normally; the old
+   (now-untracked) deployed files remain on disk until you remove
+   them.
+5. Writes the `.complete` state file (except under `--dry-run`).
+
+Note that once `.chezmoiroot` is in effect, `chezmoi source-path`
+prints `~/.dotfiles/defaults`, not the repo root, so the phase checks
+in step 3 do not find their target files and the script forgets
+nothing.
 
 ## Rollback
 
-If `dot doctor` reports issues you can't immediately fix:
+`rollback-v0_2_503.sh` does not work today. It looks for a
+`current ver:` line in the newest snapshot, but the migration writes
+only `target ver:`, so it stops with "snapshot missing 'current ver:'
+line". It also expects `chezmoi source-path` to be the git checkout,
+which with `.chezmoiroot` it is not.
+
+To go back to a pre-0.2.503 release by hand:
 
 ```sh
-bash install/migrate/rollback-v0_2_503.sh
+cd ~/.dotfiles
+git fetch --tags origin
+git checkout v0.2.502
+chezmoi apply
 ```
-
-This reads the snapshot in
-`~/.local/state/dotfiles/v0_2_503-migration/` and restores the
-pre-migration source version + re-applies it.
 
 ## What if the migration script isn't present?
 
-You're upgrading from a release older than v0.2.503 to a release
-≥ v0.2.503 where the script wasn't yet bundled. Two recovery paths:
+Your checkout predates v0.2.503, so it has no
+`install/migrate/` directory. Two recovery paths:
 
 1. Manually fetch + run the script:
 
@@ -84,12 +104,11 @@ You're upgrading from a release older than v0.2.503 to a release
      | bash
    ```
 
-2. Or just re-run `install.sh` from the new source — it picks up
-   the script automatically.
+2. Or update the checkout first (`git -C ~/.dotfiles pull`), then
+   re-run `install.sh`, which picks up the script automatically.
 
 ## See also
 
 - `docs/operations/RFC_v0_2_503_reorganization.md` — the full RFC.
 - `migrate-v0_2-to-v0_2_503.sh` — the migration script source.
-- `install/provision/run_before_00-migrate-v0_2_503.sh.tmpl` — the chezmoi-apply hook.
-- `install.sh` — the upgrade-path detection.
+- `install.sh`: the upgrade path that runs it.

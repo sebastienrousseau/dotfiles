@@ -16,16 +16,16 @@ table — and the argument for why the family currently has one member.
 
 | Component | Where it lives | Why not a separate repo |
 |---|---|---|
-| `dot` CLI | `bin/dot` + `scripts/dot/commands/` + `lib/dot/` | It is the product. Splitting it from the configuration it manages would create a version-skew problem between the CLI and the config schema it reads (`defaults/.chezmoidata.toml`). |
+| `dot` CLI | `bin/dot` + `plugins/<domain>/` + `lib/dot/` (plus the remaining `scripts/dot/commands/` routes) | It is the product. Splitting it from the configuration it manages would create a version-skew problem between the CLI and the config schema it reads (`defaults/.chezmoidata.toml`). |
 | Configuration tree | `defaults/` (chezmoi source, rebased via `.chezmoiroot`) | Same reason, inverted: the config depends on the CLI's template data. |
-| **MCP governance surface and server** | `scripts/dot/commands/meta.sh` → `dot mcp`, server in `defaults/dot_local/share/dot-mcp/` (Go), discovery card at `.well-known/mcp/server-card.json` | See below. |
-| **A2A agent card** | `.well-known/agent-card.json`, validated by `dot agent a2a-card --validate`, conformance suite via `dot agent conformance` | A static discovery document plus a subcommand. Nothing to host separately. |
+| **MCP governance surface and server** | `plugins/mcp/` → `dot mcp`, server in `defaults/dot_local/share/dot-mcp/` (Go), discovery card at `.well-known/mcp/server-card.json` | See below. |
+| **A2A agent card** | `.well-known/agent-card.json`, validated by `dot agent a2a-card --validate` (a plugin verb outside the ADR-020 names, still routed), conformance suite via `dot agent card check` | A static discovery document plus a subcommand. Nothing to host separately. |
 | AI fleet TUI | `defaults/dot_local/share/dot-ai-tui/` (Go) | Tested by `cockpit-test.yml`. Ships as part of the config tree; useless without it. |
 | `dot-ui` widgets | `defaults/dot_local/share/dot-ui/` (Go) | Tested by `dot-ui-test.yml`. Same reasoning. |
-| **WASM verifier** | `lib/wasm-tools/` (Rust, crate `dot-sys`), built for `wasm32-wasip1` and run under `wasmtime` by `dot attest --verify` | See below. |
+| **WASM verifier** | `lib/wasm-tools/` (Rust, crate `dot-sys`), built for `wasm32-wasip1` and run under `wasmtime` by `dot attest verify` | See below. |
 | Module registry | `docs/registry.json` + schema in `docs/schema/`, served over Pages, validated by `tools/ci/check-registry.sh` | A JSON document, not a service. |
 | Packaging recipes | `pkg/` (brew, scoop, aur, nix, docker) | The *published* taps are separate repos and have to be — see the next table. |
-| Documentation site | `docs/` → MkDocs → `doc.dotfiles.io` via `pages.yml` | Built from the same tree it documents; a docs repo would drift by construction. |
+| Documentation site | `docs/` → `tools/docs/build-site.sh` → `doc.dotfiles.io` via `pages.yml` | Built from the same tree it documents; a docs repo would drift by construction. |
 
 ## Repositories that genuinely are separate
 
@@ -46,9 +46,9 @@ and is never edited by hand.
 
 `dot mcp` has two faces, both in-repo.
 
-The **governance surface** is the older one: `dot mcp doctor` validates
+The **governance surface** is the older one: `dot mcp check` validates
 MCP policy and audits the supply chain of the MCP servers *you* have
-configured, and `dot mcp registry` prints the tracked registry.
+configured, and `dot mcp list` prints the tracked registry.
 
 The **protocol surface** is `dot mcp serve`: a stdio MCP server speaking
 JSON-RPC 2.0 over newline-delimited frames on stdin/stdout. It
@@ -61,7 +61,7 @@ deployed to `~/.local/bin/dot-mcp` alongside `dot-ui` and `dot-ai-tui`.
 
 Four tools are served, all read-only, each a fixed `dot` argument vector
 run without a shell: `mcp-doctor`, `agent-mode`, `workstation-attestation`
-and `fleet-status`. Mutating paths (`dot agent mode set`, `dot attest --write`)
+and `fleet-status`. Mutating paths (`dot agent mode set`, `dot attest export`)
 are deliberately not exposed, so a client cannot change this workstation
 through the server. Five resources expose the MCP policy, the MCP
 registry, the agent profiles and both discovery cards.
@@ -117,9 +117,8 @@ problem, not a language-server one.
 
 **When that would change:** if `.chezmoidata.toml` grew a schema
 complex enough that hover and go-to-definition over feature flags had
-real value, an LSP over that schema would be defensible. Today the
-schema is 40 lines and `docs/schema/chezmoidata.schema.json` plus
-`taplo` covers it.
+real value, an LSP over that schema would be defensible. Today
+`config/chezmoidata.schema.json` plus `taplo` covers it.
 
 ### WASM — in-repo, and now actually WebAssembly
 
@@ -133,7 +132,7 @@ That is fixed. The crate now:
 
 - builds for **`wasm32-wasip1`** (`cargo build --release --target
   wasm32-wasip1`), producing `dot-sys.wasm`;
-- has a consumer — `dot attest --verify`
+- has a consumer — `dot attest verify`
   (`scripts/diagnostics/attest-verify.sh`) runs the module under
   `wasmtime` and hands it the evidence record on stdin;
 - reports `"engine": "wasm"` **only when it really ran as
@@ -169,7 +168,7 @@ either.
 - `homebrew-tap` — both (Homebrew's cadence, Homebrew's users).
 - `dot mcp` — neither: it releases with the CLI and its only consumer
   is an agent already on this machine.
-- `lib/wasm-tools` — has a consumer (`dot attest --verify`), but not an
+- `lib/wasm-tools` — has a consumer (`dot attest verify`), but not an
   independent one: it ships and versions with the CLI.
 
 Splitting a component that fails this test moves complexity from a
@@ -204,14 +203,14 @@ The claims above are checkable rather than aspirational:
 
 | Claim | Verify with |
 |---|---|
-| `dot mcp` exists and is routed | `dot mcp --help`; route table in `bin/dot` |
+| `dot mcp` exists and is routed | `dot mcp --help`; manifest in `plugins/mcp/dot-plugin.toml` |
 | `dot mcp serve` **is** an MCP server | `printf '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}\n' \| dot mcp serve` returns an `initialize` result |
 | The card and the server agree | `cd defaults/dot_local/share/dot-mcp && go test -run TestServerCard ./...` |
 | The MCP card points at the server | `jq .transport .well-known/mcp/server-card.json` → `dot mcp serve` |
 | `lib/wasm-tools` really builds and runs as wasm | `cargo build --release --target wasm32-wasip1 --manifest-path lib/wasm-tools/Cargo.toml && wasmtime run lib/wasm-tools/target/wasm32-wasip1/release/dot-sys.wasm` → a record whose `engine` is `wasm` |
 | The host build of the same source says so | `cargo run --manifest-path lib/wasm-tools/Cargo.toml` → `"engine": "native"` |
-| The verifier has a caller | `dot attest --verify`; `rg -l attest-verify scripts/` |
-| The A2A card is valid | `dot agent a2a-card --validate` |
+| The verifier has a caller | `dot attest verify`; `rg -l attest-verify scripts/` |
+| The A2A card is valid | `dot agent a2a-card --validate`; conformance with `dot agent card check` |
 | Card versions match the manifest | `bash scripts/verify-release-versions` (both cards are checked surfaces) |
 | The three taps are generated, not authored | `pkg/README.md` and the `release-distribute-*.yml` workflows |
 | The registry document is schema-valid | `bash tools/ci/check-registry.sh` |

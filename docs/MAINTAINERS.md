@@ -27,7 +27,7 @@ email `security@sebastienrousseau.com`. Acknowledgement SLA: 72 hours.
 ## Backup / continuity
 
 In the event the primary maintainer becomes unable to maintain the
-project, the repository is published under the MIT license and may
+project, the repository is published under Apache-2.0 OR MIT and may
 be forked. The `chezmoi`-based architecture means existing user
 installs continue to work indefinitely without upstream activity.
 

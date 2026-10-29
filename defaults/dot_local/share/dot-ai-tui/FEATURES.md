@@ -44,7 +44,7 @@ Keep the last column a list of backticked function names.
 | fleet | `x` arms a SIGTERM for the selected tool's own busiest process; a second `x` within 5s sends it after re-checking the PID's start time and program; other keys cancel; never falls back to another tool | keyboard | `TestKillNeedsASecondPressAndTargetsTheSelectedTool` `TestKillNeverFallsBackToAnotherTool` `TestKillIsCancelledByAnyOtherKey` `TestKillArmExpires` `TestKillRefusesAReusedOrVanishedPID` `TestKillReportsSignalErrors` |
 | fleet | Key binding `tab` jumps to the chat input | keyboard | `TestUpdateMsgs` |
 | fleet | Key binding `/` opens the input pre-filled with `/`; `p` opens it empty | keyboard | `TestUpdateFleet` |
-| fleet | Key bindings `c`/`r` refresh (status `refreshing…`) | keyboard | `TestUpdateFleet` |
+| fleet | Key binding `r` refreshes (status `refreshing…`); `c` / `v` / `d` jump to corralctl / passmcp / draft | keyboard | `TestUpdateFleet` |
 | fleet | Key binding `i` installs the selected tool (`dot ai install <tool>`) | keyboard | `TestUpdateFleet` |
 | fleet | Key binding `m` cycles the model override (default → opus → sonnet → haiku) | keyboard | `TestModelPicker` `FuzzModelCycle` `BenchmarkNextModel` `BenchmarkModelLabel` |
 | fleet | Key binding `s` starts the gateway, or stops it when it is up | keyboard | `TestUpdateFleet` |

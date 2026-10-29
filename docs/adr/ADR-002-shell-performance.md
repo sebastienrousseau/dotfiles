@@ -94,7 +94,9 @@ Benchmark script to track startup time:
 hyperfine --warmup 3 --runs 10 "zsh -i -c exit"
 ```
 
-CI enforces 500ms threshold with warnings.
+CI enforces the 500ms threshold: `ci.yml`'s performance job fails
+when the measured startup exceeds it, and `nightly.yml` fails on a
+regression past the same budget.
 
 ## Consequences
 

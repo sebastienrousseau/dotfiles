@@ -9,8 +9,8 @@ This document defines the configuration management approach for this development
 ### Primary: Chezmoi
 
 **Role:** Source of truth for all managed dotfiles
-**Location:** `~/.dotfiles/` (chezmoi source directory)
-**Managed Files:** 209 files/directories
+**Location:** `~/.dotfiles/` (the repo; `.chezmoiroot` makes `~/.dotfiles/defaults/` the chezmoi source directory)
+**Managed Files:** run `chezmoi managed` for the current list
 
 Chezmoi handles:
 
@@ -46,31 +46,33 @@ Chezmoi handles:
 
 ## Chezmoi Configuration
 
-### Data Variables (.chezmoidata.toml)
+### Data Variables (defaults/.chezmoidata.toml)
+
+An excerpt; see [FEATURES.md](reference/FEATURES.md) for every flag:
 
 ```toml
 profile = "laptop"           # Machine profile
-theme = "maui-dark"          # Color scheme
-terminal_font_family = "JetBrains Mono"
-terminal_font_size = 12
+theme = "maui-dark"          # Resolved palette (theme_family + theme_mode pick it at runtime)
+theme_family = "maui"
+theme_mode = "auto"
+terminal_font_family = "JetBrainsMono Nerd Font"
+terminal_font_size = 20
+default_shell = "fish"
 
 [features]
-zsh = true      # Enable zsh configs
-nvim = true     # Enable neovim configs
-tmux = true     # Enable tmux configs
-gui = true      # Enable GUI app configs
-secrets = true  # Enable secret management
+zellij = false         # Zellij multiplexer config
+linux_desktop = false  # Linux desktop / Wayland configs
+ai_theme_sync = true   # Wallpaper-aware AI CLI appearance
 ```
 
 ### Template Patterns
 
-Files ending in `.tmpl` are processed with Go templates:
+Files ending in `.tmpl` are processed with Go templates, and so is a `modify_` script that starts with `chezmoi:modify-template`:
 
-- `dot_gitconfig.tmpl` - Injects name, email, signing key
-- `modify_private_dot_npmrc` - Injects registry tokens and keeps the auth lines `npm login` writes
-- `dot_noderc.tmpl` - Injects Node.js settings
+- `defaults/dot_gitconfig.tmpl` - Injects name, email, signing key
+- `defaults/modify_private_dot_npmrc` - Injects registry tokens and keeps the auth lines `npm login` writes
 
-### Ignored Patterns (.chezmoiignore.tmpl)
+### Ignored Patterns (defaults/.chezmoiignore.tmpl)
 
 Machine-specific exclusions based on profile and features.
 

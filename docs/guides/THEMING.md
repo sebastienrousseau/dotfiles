@@ -7,7 +7,7 @@ render_with_liquid: false
 
 The dotfiles ship a wallpaper-driven theme system that generates terminal color palettes directly from wallpaper images using K-Means clustering in CIELAB color space. One command changes the terminal, editor, window manager, GTK, desktop environment, wallpaper, and browser-facing color mode in under a second.
 
-Themes are not hand-crafted — they are extracted from whatever wallpapers are available on the system.
+Themes are not hand-crafted: they are extracted from wallpapers. A prebuilt set ships in `defaults/.theme-manifest/themes.toml`, and `dot theme rebuild` regenerates it from the wallpapers available on your system.
 
 ## How Themes Work
 
@@ -26,9 +26,15 @@ windows are opaque so translucency cannot invalidate the generated sRGB
 contrast. This applies consistently to Ghostty, Kitty, Alacritty, WezTerm,
 Foot, iTerm2, Warp, tmux, and provider TUIs.
 
-`rebuild-themes.sh` orchestrates discovery → extraction → assembly into `.theme-manifest/themes.toml`. Themes are cached in `~/.cache/dotfiles/themes/` and only regenerated when wallpapers change.
+`rebuild-themes.sh` orchestrates discovery → extraction → assembly into `defaults/.theme-manifest/themes.toml`. Themes are cached in `~/.cache/dotfiles/themes/` and only regenerated when wallpapers change.
 
-The `theme` key in `.chezmoidata.toml` controls the active theme. Every template references the active theme's data through `{{ $t := index .themes .theme }}`.
+The `theme`, `theme_family` and `theme_mode` keys control the active theme. `defaults/.chezmoidata.toml` holds the fresh-install defaults; a theme switch writes the machine's choice to `~/.config/chezmoi/chezmoi.toml`, which takes precedence. Templates load the manifest and resolve the active theme like this:
+
+```text
+{{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
+{{- $themeName := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}
+{{- $t := index $themes $themeName -}}
+```
 
 ## Switching Themes
 
@@ -38,7 +44,7 @@ The `theme` key in `.chezmoidata.toml` controls the active theme. Every template
 dot theme
 ```
 
-Opens an fzf picker listing every paired wallpaper theme (themes that have both `-dark` and `-light` variants). Two columns: **WALLPAPER** name and **SOURCE** (System or Custom). The current theme is marked with `✓` and `◀`. Select one and press Enter.
+Opens an fzf picker (a numbered menu without fzf) listing every paired theme family (families that have both `-dark` and `-light` variants), with its wallpaper source and a live palette preview. The current family is marked with `✓` and its mode. Select one and press Enter: a family picked here follows the system appearance (`auto` mode).
 
 ### Direct Switch
 
@@ -85,7 +91,7 @@ Discovers wallpapers from system + custom paths, runs K-Means extraction in para
 
 ```bash
 dot-theme-sync                    # Reload current theme
-dot-theme-sync macos-wave-light   # Switch to a new theme
+dot-theme-sync wave-light         # Switch to a new theme
 dot-theme-sync maui-dark --plan --json
 dot-theme-sync --full             # Full chezmoi apply instead of targeted
 ```
@@ -140,11 +146,11 @@ Each theme switch touches these applications:
 dot theme toggle
 ```
 
-Toggles between the dark and light variant of the current theme family. A theme named `macos-tahoe-dark` toggles to `macos-tahoe-light`, and vice versa.
+Toggles between the dark and light variant of the current theme family. A theme named `tahoe-dark` toggles to `tahoe-light`, and vice versa.
 
 ## Theme Families
 
-Available themes depend on your system. Run `dot theme list` to see what's discovered. On macOS Sonoma, you'll see ~150+ themes from system wallpapers. Custom wallpapers in `~/Pictures/Wallpapers/` add more.
+Run `dot theme list` to see the available themes. The shipped manifest has a fixed set of families plus a `fallback` pair; `dot theme rebuild` replaces it with what your system wallpapers and `~/Pictures/Wallpapers/` provide.
 
 ### Rebuilding themes
 
@@ -171,7 +177,7 @@ Theme switching is a two-tier system:
 **Wallpapers (optional)** — user-provided, enhances the theme:
 
 - Desktop wallpaper matched to the active theme
-- Requires `~/Pictures/Wallpapers/` with files named `macos-NAME-dark.heic`
+- Requires `~/Pictures/Wallpapers/` with files named after the theme family (see below)
 
 If no wallpapers are present, `dot theme` applies all core changes and skips the wallpaper step. No errors, no manual config.
 
@@ -179,12 +185,12 @@ If no wallpapers are present, `dot theme` applies all core changes and skips the
 
 Wallpapers are not shipped in the repo. Each user sources their own and places them in `~/Pictures/Wallpapers/`:
 
-```
-macos-tahoe-dark.heic
-macos-tahoe-light.heic
+```text
+tahoe-dark.heic
+tahoe-light.heic
 ```
 
-The naming convention is `macos-NAME-APPEARANCE.heic` (or `.jpg`/`.png`). The theme picker marks themes with matching wallpapers as `[W]`.
+The naming convention is `FAMILY-dark` and `FAMILY-light` (`.heic`, `.jpg` or `.png`), or a single dynamic `FAMILY.heic`. The theme picker shows a family with a matching file in `~/Pictures/Wallpapers/` (override with `DOTFILES_WALLPAPER_DIR`) as a Custom source.
 
 ### Wallpaper guidelines
 
@@ -274,8 +280,8 @@ AI provider TUIs receive the same mode and palette through the most native inter
 ### Checking the active theme
 
 ```bash
-grep '^theme = ' ~/.dotfiles/.chezmoidata.toml
+dot theme show
 ```
 
-This prints the current theme name. Cross-reference with `dot theme list` for available options.
+This prints the current theme, its family and mode. Cross-reference with `dot theme list` for available options.
 {% endraw %}

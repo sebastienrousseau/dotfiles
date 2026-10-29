@@ -33,17 +33,17 @@ All verification activities are executed through automated CI pipelines, pre-com
 | Req ID | Requirement | Verification Method | Test File(s) | Result |
 |--------|-------------|---------------------|--------------|--------|
 | VR-01 | Shell scripts pass ShellCheck (severity=error) | Static analysis via `shellcheck --severity=error -e SC1091 -e SC2030 -e SC2031` | `ci.yml`, `ci-enforced.yml`, pre-commit hook | Pass |
-| VR-02 | All scripts have `set -euo pipefail` | Pattern scan across all `.sh` files; CI enforcement | `ci-enforced.yml`, `compliance-guard.yml` | Pass |
+| VR-02 | All scripts have `set -euo pipefail` (exemptions in [SHELL_EXEMPTIONS.md](SHELL_EXEMPTIONS.md)) | `tools/ci/check-shell-preamble.sh` pattern scan; CI enforcement | `shell-preamble-check` pre-commit hook, `reusable-shell-lint.yml` (called by `ci-enforced.yml`) | Pass |
 | VR-03 | No secrets in source control (gitleaks clean) | Gitleaks scan with `config/gitleaks.toml` ruleset | Pre-commit hook, `security-enhanced.yml` | Pass |
-| VR-04 | Cross-platform compatibility (BSD + GNU) | Dual-platform CI matrix (ubuntu-latest, macos-latest) | `cross-platform-test.yml` | Pass |
+| VR-04 | Cross-platform compatibility (BSD + GNU) | Dual-platform CI matrix (ubuntu-latest, macos-latest, macos-14) | `cross-platform-test.yml` | Pass |
 | VR-05 | TLS enforcement (no insecure curl/wget) | Pattern blocking for `curl -k`, `--insecure`, `wget --no-check-certificate` | Pre-commit hook, `compliance-guard.yml` | Pass |
 | VR-06 | Permission controls (no chmod 777/666) | CI pattern scan blocks world-writable permissions | Pre-commit hook, `compliance-guard.yml` | Pass |
-| VR-07 | Signed commits enforced | Pre-push hook verifies `git verify-commit` for all commits in range | `scripts/git-hooks/pre-push`, `compliance-guard.yml` | Pass |
+| VR-07 | Signed commits enforced | Pre-push hook verifies `git verify-commit` for all commits in range; branch protection on `main` requires signed commits | `scripts/git-hooks/pre-push`, `compliance-guard.yml`, GitHub branch protection | Pass |
 | VR-08 | Conventional commit format | Pre-commit hook validates `feat:`, `fix:`, `docs:` prefixes | Pre-commit hook (conventional-commits) | Pass |
 | VR-09 | Template rendering correctness | `chezmoi apply --dry-run` on Linux and macOS CI runners | `ci.yml` (Linux + macOS matrix), `tests/unit/test_*.sh` | Pass |
-| VR-10 | Alias system functional | Unit tests source alias files and verify command availability | `tests/unit/aliases/test_*.sh` (104 files) | Pass |
-| VR-11 | Neovim config loads without errors | Headless Neovim launch with error detection | `tests/unit/neovim/test_*.sh` (15 files) | Pass |
-| VR-12 | Fish/Zsh/Nushell configs valid | Syntax validation and functional tests per shell | `tests/unit/fish/` (33), `tests/unit/shell/` (12), `tests/unit/nushell/` (5) | Pass |
+| VR-10 | Alias system functional | Unit tests source alias files and verify command availability | `tests/unit/aliases/test_*.sh` | Pass |
+| VR-11 | Neovim config loads without errors | Lua config tests, plus a headless Neovim launch with error detection | `tests/unit/nvim/test_*.sh` | Pass |
+| VR-12 | Fish/Zsh/Nushell configs valid | Syntax validation and functional tests per shell | `tests/unit/fish/`, `tests/unit/shell/`, `tests/unit/nushell/` | Pass |
 | VR-13 | CI pipelines execute successfully | GitHub Actions workflow status across all triggers | `ci.yml`, `ci-enforced.yml`, `compliance-guard.yml`, `cross-platform-test.yml`, `security-enhanced.yml`, `codeql.yml` | Pass |
 | VR-14 | Pre-commit hooks functional | Hook execution via `pre-commit run --all-files` | `config/pre-commit-config.yaml` | Pass |
 | VR-15 | Age encryption operational | Chezmoi age-encrypted file decryption during apply | `chezmoi apply --dry-run` (encrypted targets), integration tests | Pass |
@@ -54,34 +54,25 @@ All verification activities are executed through automated CI pipelines, pre-com
 
 ### Coverage Metrics
 
-| Metric | Value | Threshold | Status |
-|--------|-------|-----------|--------|
-| Total test files | 430 | N/A | Measured |
-| Total assertions | 2,217 | N/A | Measured |
-| Pass rate | 100% | 100% | Pass |
-| Module coverage | 100% | >= 95% | Pass |
+| Metric | Threshold | Enforced by |
+|--------|-----------|-------------|
+| Pass rate | 100% | `ci-enforced.yml` (`test-unit`) |
+| Module coverage | 100% | `ci-enforced.yml` (`test-unit`, `tests/framework/module_coverage.sh`) |
+| kcov line coverage | >= 98% | `coverage.yml` (`Coverage / kcov`) |
+| kcov line coverage, behavioural tests only | >= 96% | `coverage.yml` |
+
+Run `./tests/framework/test_runner.sh` for the current test-file and
+assertion counts; this report does not pin them, since they change with
+every PR.
 
 ### Category Breakdown
 
-| Category | Test Files | Status |
-|----------|-----------|--------|
-| Alias files | 104 | Tested |
-| Function files | 76 | Tested |
-| Fish functions + conf.d | 33 | Tested |
-| Misc / compliance | 34 | Tested |
-| Dot CLI | 30 | Tested |
-| Diagnostics | 28 | Tested |
-| Shell configs | 20 | Tested |
-| Ops | 18 | Tested |
-| Install | 17 | Tested |
-| Security | 16 | Tested |
-| Neovim Lua configs | 15 | Tested |
-| Theme | 11 | Tested |
-| Tools | 7 | Tested |
-| Nushell configs | 6 | Tested |
-| Secrets | 5 | Tested |
-| Integration tests | 10 | Tested |
-| **Total** | **430** | **All pass** |
+Unit tests live under `tests/unit/`, one directory per domain: `aliases`,
+`auto`, `ci`, `core`, `diagnostics`, `docs`, `dot-cli`, `fish`, `fleet`,
+`functions`, `init`, `install`, `misc`, `nushell`, `nvim`, `ops`, `qa`,
+`release`, `secrets`, `security`, `shell`, `theme`, `tools`. Integration
+tests live under `tests/integration/`, regression tests under
+`tests/regression/`.
 
 ### Validation Environments
 
@@ -112,11 +103,11 @@ tests/
 │   ├── fish/              # Fish function and completion tests
 │   ├── nushell/           # Nushell configuration tests
 │   ├── nvim/              # Neovim configuration tests
-│   └── test_*.sh          # 425 unit test files total
+│   └── <domain>/          # Other domains (see Category Breakdown)
 ├── integration/
-│   └── test_*.sh          # 11 integration test files
-└── performance/
-    └── benchmark_runner.sh # Performance regression benchmarks
+│   └── test_*.sh          # Integration tests
+├── regression/            # Regression and static-analysis tests
+└── benchmark.sh           # Performance benchmarks
 ```
 
 ### Execution Model
@@ -134,14 +125,14 @@ tests/
 | `assert_equals` | Exact string equality |
 | `assert_not_equals` | String inequality |
 | `assert_contains` | Substring match |
-| `assert_not_contains` | Substring absence |
-| `assert_starts_with` | Prefix match |
-| `assert_ends_with` | Suffix match |
-| `assert_matches` | Regex match |
+| `assert_output_contains` | Command output contains a substring |
+| `assert_output_not_contains` | Command output lacks a substring |
+| `assert_output_matches` | Command output matches a regex |
+| `assert_file_contains` | File contains a substring |
 | `assert_file_exists` | File presence |
 | `assert_file_not_exists` | File absence |
-| `assert_directory_exists` | Directory presence |
-| `assert_command_exists` | Command availability |
+| `assert_dir_exists` | Directory presence |
+| `assert_dir_not_exists` | Directory absence |
 | `assert_exit_code` | Process exit code |
 | `assert_empty` | Empty string |
 | `assert_not_empty` | Non-empty string |
@@ -199,7 +190,7 @@ All of the following criteria must be satisfied for this V&V report to remain va
 | Chezmoi dry-run clean | `chezmoi apply --dry-run` on Linux and macOS | Exit code 0, no errors |
 | Pre-commit hooks pass | `pre-commit run --all-files` | Exit code 0 |
 | Cross-platform CI green | `cross-platform-test.yml` on ubuntu-latest and macos-latest | All jobs pass |
-| Module coverage at threshold | Test runner coverage report | >= 95% (currently 100%) |
+| Module coverage at threshold | `tests/framework/module_coverage.sh` | 100% (the `ci-enforced.yml` gate) |
 | No world-writable permissions | `compliance-guard.yml` pattern scan | Zero `chmod 777` or `chmod 666` matches |
 | No insecure TLS patterns | `compliance-guard.yml` pattern scan | Zero `curl -k` or `wget --no-check-certificate` matches |
 | All commits signed | `git verify-commit` on HEAD~50..HEAD range | All commits verified |

@@ -12,6 +12,7 @@ Alphabetical list of concepts covered in the manual.
 - Agents
 - AI & Agents
 - Algorithms
+- Apache License 2.0
 - Apply / Sync
 - Attestation
 - Author
@@ -23,6 +24,7 @@ Alphabetical list of concepts covered in the manual.
 - Cache Files
 - Caching
 - Changing Presets on an Existing Host
+- Chaos self-test
 - Checking Active Flags
 - CI
 - CI-Level Gates
@@ -53,10 +55,10 @@ Alphabetical list of concepts covered in the manual.
 - Fleet Deployment Workflow
 - Fleet Operational Commands
 - Fleet Trust Propagation
-- From `.chezmoidata.toml`
 - From `.chezmoidata/hardware.toml`
-- From `.theme-manifest/themes.toml`
+- From `.chezmoidata.toml`
 - From Feature Flags
+- From `.theme-manifest/themes.toml`
 - Gates Enforced by CI
 - General
 - Getting More Help
@@ -65,6 +67,7 @@ Alphabetical list of concepts covered in the manual.
 - Hardware Presets
 - Helper Templates (in `.chezmoitemplates/`)
 - Identity and Signing
+- Ignored Files
 - Incident Response
 - Inspect & Repair
 - Installation
@@ -82,13 +85,13 @@ Alphabetical list of concepts covered in the manual.
 - Ongoing (quarterly)
 - Operational Rules
 - Option A: Drop a Static Image
+- Optional Binaries
 - Option B: Dynamic HEIC (Recommended)
 - Option C: Golden Ratio Brightness (Advanced)
-- Option D: Install System Wallpapers (Already-Available)
-- Optional Binaries (installed by Mise on first apply)
-- Per-Machine Profiles
-- Per-Preset Overrides (`.chezmoidata/hardware.toml`)
+- Option D: Use System Wallpapers
 - Performance
+- Per-Host Overrides (`~/.config/chezmoi/chezmoi.toml`)
+- Per-Machine Profiles
 - Philosophy
 - Post-Install
 - Pre-Install
@@ -100,6 +103,7 @@ Alphabetical list of concepts covered in the manual.
 - Reference
 - Registry
 - Required Binaries
+- Rollback
 - Scenario
 - Secret-Related
 - Secrets
@@ -118,19 +122,19 @@ Alphabetical list of concepts covered in the manual.
 - Step 2: Exchange Signing Keys
 - Step 2: Select the Preset for This Host
 - Step 2: Verify
+- Step 3A: Chezmoi-Encrypted File
+- Step 3B: SOPS-Encrypted YAML
 - Step 3: Reference the Preset in Templates
 - Step 3: Share the Age Key (for Shared Secrets)
 - Step 3: Take the Tour
-- Step 3A: Chezmoi-Encrypted File
-- Step 3B: SOPS-Encrypted YAML
 - Step 4: Add a New Preset
+- Step 4: Check Fleet Alignment
 - Step 4: Customize
 - Step 4: Reference the Secret in a Template
-- Step 4: Verify Fleet Alignment
 - Step 5: Add Your Identity
 - Step 5: Commit and Verify
 - Step 5: Per-Host Customization
-- Step 5: Per-Preset Feature Flags
+- Step 5: Per-Host Feature Flags
 - Step 6: First Theme Switch
 - Step 6: Fleet-Wide Updates
 - Step 6: Multi-Recipient (Fleet)
@@ -144,13 +148,13 @@ Alphabetical list of concepts covered in the manual.
 - Template Testing
 - Tested CI Environments
 - The Four Subsystems
+- Theme
+- Theme Application
+- Themes
 - The Pipeline
 - The Self-Healing Loop
 - The Threat Model
 - The Why
-- Theme
-- Theme Application
-- Themes
 - Third-Party Licenses
 - Threat Model Summary
 - Tools & Systems
@@ -162,9 +166,8 @@ Alphabetical list of concepts covered in the manual.
 - User-Settable
 - Using a Flag in a Template
 - Validation in CI
-- Verified Files
 - Verifying No Plaintext Leaks
 - Verifying the Result
 - Wallpaper Discovery
 - What Got Installed
-- When to Use a Profile
+- When to Use a Preset

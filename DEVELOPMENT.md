@@ -57,9 +57,14 @@ policy for raising them: [`docs/MINIMUM-TOOLCHAIN.md`](docs/MINIMUM-TOOLCHAIN.md
 ### Pre-commit hooks
 
 ```bash
-pre-commit install --config config/pre-commit-config.yaml
+GIT_CONFIG_GLOBAL=/dev/null pre-commit install --hook-type pre-commit --hook-type commit-msg --hook-type pre-push -f
 pre-commit run --all-files --config config/pre-commit-config.yaml
 ```
+
+`pre-commit install` refuses to run while any `core.hooksPath` is set,
+and these dotfiles set a global one, hence `GIT_CONFIG_GLOBAL=/dev/null`.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md#pre-commit-hooks) for what the
+`pre-push` type replaces.
 
 The hook set mirrors CI: shellcheck, shfmt, hadolint, gitleaks,
 detect-secrets, checkov, conventional-commits, typos, actionlint,
@@ -76,12 +81,13 @@ and [`docs/STRUCTURE.md`](docs/STRUCTURE.md). The parts you touch most:
 | Path | What |
 |---|---|
 | `bin/dot` | CLI dispatcher. |
-| `plugins/<domain>/dot-plugin.toml` | **The command names** (ADR-020): each domain's objects, commands, flags, aliases, and what runs each command: the plugin's own entry (`[entry]`, `plugins/<domain>/dot-<domain>`) or, until the domain moves to one, today's route (`legacy`). |
-| `lib/dot/data/` | `commands.txt` and `commands.json`, generated from the manifests by `tools/ci/cli_command_table.py`; `routes.txt` (route → module). `help-specs.txt` and `help-details.txt` still back `dot help <old-name>` until the old names are removed. Help, man pages, completions, cmdlets, the command index and reference, and the QA gates all read `commands.txt`. |
-| `scripts/dot/commands/` | Today's route modules; each domain leaves for its plugin's entry (P2.1). |
+| `plugins/<domain>/dot-plugin.toml` | **The command names** (ADR-020): each domain's objects, commands, flags and aliases. A plugin with an `[entry]` runs its own commands through `plugins/<domain>/dot-<domain>`; a plugin without one (today `ui` and `session`) only declares planned commands. |
+| `plugins/<domain>/commands.txt` | The plugin's route fragment, generated from its manifest. `bin/dot` merges the fragments (with `lib/dot/data/groups.txt`, through `lib/dot/table-merge.awk`) into its command table, cached at `$XDG_CACHE_HOME/dot/cli/commands.txt`. |
+| `lib/dot/data/` | `commands.txt` and `commands.json`, generated from the manifests by `tools/ci/cli_command_table.py` (the full table: the build tools read it, and `bin/dot` falls back to it when the fragments cannot be merged); `routes.txt` (top-level word → module). `help-specs.txt` and `help-details.txt` still back `dot help <old-name>` until the old names are removed. |
+| `scripts/dot/commands/` | The route modules behind `routes.txt` (`diagnostics.sh`, `manual.sh`, `meta.sh`); every domain runs from its plugin's entry. |
 | `lib/dot/` | Shared bash library sourced by every subcommand. |
 | `defaults/` | The chezmoi source tree (everything that lands in `$HOME`), rebased via `.chezmoiroot`. |
-| `tests/` | `framework/`, `unit/`, `integration/`, `regression/`, `snapshots/`. |
+| `tests/` | `framework/`, `unit/`, `integration/`, `regression/`, `snapshots/`, `consumer/`, `visual/`, `fixtures/`. |
 | `benches/` | Benchmarks. Smoke-run, not asserted. |
 | `fuzz/` | Go fuzz harnesses, committed regression corpus, OSS-Fuzz scaffolding. |
 | `pkg/` | One directory per packaging format, rendered per release. |
@@ -91,16 +97,13 @@ and [`docs/STRUCTURE.md`](docs/STRUCTURE.md). The parts you touch most:
 Adding a `dot` command touches four places; the drift gates will tell
 you if you miss one:
 
-1. The implementation: in a plugin with an `[entry]`, a case in
-   `plugins/<domain>/dot-<domain>`, which gets the words after the domain
-   (and, with `fallback = true`, the bare domain and any word the table does
-   not take); larger plugins keep their code in `plugins/<domain>/libexec/`;
-   otherwise a route in an existing module under `scripts/dot/commands/`,
-   or a new module plus its `routes.txt` row
+1. The implementation: a case in `plugins/<domain>/dot-<domain>`, which
+   gets the words after the domain (and, with `fallback = true`, the bare
+   domain and any word the table does not take); larger plugins keep their
+   code in `plugins/<domain>/libexec/`
 2. `plugins/<domain>/dot-plugin.toml` — a `[[commands]]` entry with an
-   approved verb, its effect and its summary, plus `legacy` (the route) in
-   a plugin without an entry or `planned = true` in one with an entry
-   until it is built, checked by `tools/ci/check-cli-contract.py`
+   approved verb, its effect and its summary, plus `planned = true` until
+   it is built, checked by `tools/ci/check-cli-contract.py`
 3. `docs/reference/UTILS.md` (the docs coverage gate) and
    `docs/manual/03-reference/01-dot-cli.md` — reference prose
 4. `make generate` — regenerates the command table, command index, command
@@ -125,7 +128,7 @@ Layout and conventions:
 | Directory | Contains | Rule |
 |---|---|---|
 | `tests/framework/` | `test_runner.sh`, `assertions.sh`, `mocks.sh` | The harness itself. |
-| `tests/unit/<domain>/` | `test_<feature>.sh` | 19 domains. Fast, no network, no `$HOME` writes. |
+| `tests/unit/<domain>/` | `test_<feature>.sh` | One directory per domain. Fast, no network, no `$HOME` writes. |
 | `tests/integration/` | End-to-end install/apply | Needs a sandbox; gated behind `RUN_INTEGRATION=1`. |
 | `tests/regression/` | Guardrails for fixed bugs | **Must** carry a `# Regression for: GH-1234` header in the first 15 lines (enforced by a pre-commit hook and audited weekly). |
 | `tests/snapshots/` | Golden CLI output | Fix the CLI, do not regenerate blindly. |
@@ -135,16 +138,17 @@ Layout and conventions:
 Tests execute shell source files directly, so **never** put Go template
 syntax in a non-`.tmpl` file — the runner chokes on the braces.
 
-Coverage is gated at **58%** (`MIN_COVERAGE_PCT` in `coverage.yml`).
-The rationale is recorded there: it is the measured floor of the
-xtrace-instrumented aggregate, chosen once and ratcheted deliberately,
-rather than an aspirational number that would be permanently red.
+Coverage is gated at **98%**, and at **96%** for the behavioural-only
+run that switches off the exercise-only probes (`MIN_COVERAGE_PCT` in
+`coverage.yml`). The floor history is recorded there: each floor is
+ratcheted deliberately from what CI measured, rather than an
+aspirational number that would be permanently red.
 
 ---
 
 ## Reproducing every CI gate locally
 
-51 workflows. Most are one of a handful of scripts; the table maps each
+Most workflows are one of a handful of scripts; the tables map each
 to the command that reproduces it. `make check` runs the everyday
 subset (lint + drift + test + examples) in one go.
 
@@ -183,7 +187,8 @@ subset (lint + drift + test + examples) in one go.
 | `reliability-gate.yml` | WSL Contract | `bash scripts/qa/wsl-contract.sh` |
 | `reliability-gate.yml` | PowerShell Contract | `pwsh scripts/qa/powershell-contract.ps1` |
 | `cross-platform-test.yml` | Test on \<os\> | `bash -n` over every `.sh`, then `bash scripts/diagnostics/health.sh` |
-| `coverage.yml` | Coverage / kcov | `MIN_COVERAGE_PCT=58 bash tools/ci/run-coverage.sh` |
+| `coverage.yml` | Coverage / kcov | `MIN_COVERAGE_PCT=98 bash tools/ci/run-coverage.sh` |
+| `coverage.yml` | Coverage / behavioural tests only | `DOTFILES_COV_EXERCISE=0 MIN_COVERAGE_PCT=96 bash tools/ci/run-coverage.sh` |
 | `cockpit-test.yml` | Cockpit / Go Tests | `cd defaults/dot_local/share/dot-ai-tui && go test ./...` |
 | `dot-ui-test.yml` | dot-ui / Go Tests | `cd defaults/dot_local/share/dot-ui && go test ./...` |
 | `mcp-server-test.yml` | MCP Server / Go Tests | `cd defaults/dot_local/share/dot-mcp && go test ./...` |
@@ -275,13 +280,17 @@ workflow is needed. External actions and reusable workflows remain SHA-pinned.
 
 ## Generated artefacts
 
-Four things are generated from the command registry in `bin/dot` and
+These are generated from the plugin manifests
+(`plugins/<domain>/dot-plugin.toml`, through the command table) and
 gated against drift. Never hand-edit the outputs:
 
 | Output | Generator | Gate |
 |---|---|---|
+| `lib/dot/data/commands.txt`, `lib/dot/data/commands.json`, `plugins/<domain>/commands.txt` | `tools/ci/cli_command_table.py` | `core-contracts.yml` (`tools/ci/check-cli-contract.py`) |
 | `docs/manual/command-index.md` | `tools/docs/generate-command-index.sh` | `doc-drift.yml` |
-| `share/man/man1/dot.1` | `tools/docs/generate-manpage.sh` (prose in `tools/docs/man/dot.1.in`) | `doc-drift.yml` |
+| `examples/command-reference.txt` | `tools/docs/generate-command-reference.sh` | `doc-drift.yml` |
+| `share/man/man1/dot.1` and one `dot-<domain>.1` per domain | `tools/docs/generate-manpage.sh` (prose in `tools/docs/man/dot.1.in`) | `doc-drift.yml` |
+| `share/powershell/DotCommands.psm1` | `tools/docs/gen_cmdlets.py` | `doc-drift.yml` |
 | `share/completions/zsh/_dot`, `defaults/dot_local/share/bash-completion/completions/dot` | `tools/docs/generate-completions.sh` → `dot cli completion show <shell>` | `doc-drift.yml` |
 | `AGENTS.md` and the per-harness stubs | `dot agent context apply` (from `CLAUDE.md`) | `dot agent context check` |
 
@@ -300,8 +309,8 @@ never ship a page that drifted from the CLI.
 
 Versioning is SemVer-shaped (`0.2.PATCH` during 0.x), with a single
 source of truth: `dotfiles_version` in `defaults/.chezmoidata.toml`.
-Sixteen human-visible surfaces are checked against it by
-`scripts/verify-release-versions` on every push.
+Every human-visible version surface is checked against it by
+`scripts/verify-release-versions` on every push to `main`.
 
 The stability axis and deprecation window are stated in the README;
 the short version is that the `dot` CLI's *output* is part of the

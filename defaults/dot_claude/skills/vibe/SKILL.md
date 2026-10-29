@@ -55,8 +55,9 @@ Claude writes the prompt → invokes `tools/vibe-delegate` → reads the
 streaming JSON output → reviews the resulting `git diff`. You see one
 compact report instead of 30 file reads.
 
-Toggle auto-delegate mode with `/vibeon` / `/vibeoff`. While ON,
-every coding task is sent through Vibe by default.
+Toggle auto-delegate mode with `/vibeon` / `/vibeoff`. While ON
+(`~/.local/share/vibe-auto.flag` exists), Claude is asked to send coding
+tasks through Vibe by default. The flag is advisory: no hook enforces it.
 
 ### From the terminal (no Claude Code)
 
@@ -65,8 +66,10 @@ dot ai delegate "rename every UserService method that starts with get to fetch"
 dot ai cost --since 7   # spend report
 ```
 
-The CLI shim wraps the same delegator. Cost log lives at
-`~/.local/share/delegate-runs.jsonl`.
+The CLI shim wraps the same delegator. Runs are logged to the SQLite
+database `~/.local/share/dotfiles-ai.db`; an older
+`~/.local/share/delegate-runs.jsonl` is imported once and kept as a
+fallback.
 
 ## Model selection
 

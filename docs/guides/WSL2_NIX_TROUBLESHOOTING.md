@@ -388,9 +388,13 @@ cp ~/.bashrc ~/.bashrc.backup.$(date +%s)
 export PATH=/usr/bin:/bin
 unset ZDOTDIR
 
-# 3. Clean chezmoi state
-rm -rf ~/.local/share/chezmoi/
-rm -rf ~/.config/chezmoi/
+# 3. Move the source checkout aside (keeps any uncommitted edits). The
+#    installer uses ~/.dotfiles; ~/.local/share/chezmoi is the legacy path.
+#    Leave ~/.config/chezmoi/ in place: it holds chezmoi.toml and the age
+#    identity (key.txt). Deleting it makes every encrypted file unreadable.
+ts=$(date +%s)
+[ -d ~/.dotfiles ] && mv ~/.dotfiles ~/.dotfiles.backup.$ts
+[ -d ~/.local/share/chezmoi ] && mv ~/.local/share/chezmoi ~/.local/share/chezmoi.backup.$ts
 
 # 4. Reinstall from scratch
 cd /tmp
@@ -478,11 +482,13 @@ ls -la ~/.config/chezmoi/key.txt
 find / -name "key.txt" -type f 2>/dev/null
 find /mnt/c/ -name "*.key" -type f 2>/dev/null
 
-# 3. Test key validity
-age -d -i ~/.config/chezmoi/key.txt ~/.local/share/chezmoi/encrypted_file.age
+# 3. Test key validity against one encrypted source file
+find ~/.dotfiles/defaults -name 'encrypted_*' -type f
+age -d -i ~/.config/chezmoi/key.txt ~/.dotfiles/defaults/<path>/encrypted_<name>.age
 
-# 4. If key is lost, regenerate encrypted files
-chezmoi execute-template --init --force
+# 4. If the key is lost, the encrypted files cannot be decrypted. Create a
+#    new key (`dot secret init`), then re-add each secret from its original
+#    with `chezmoi add --encrypt <file>`.
 ```
 
 #### Recover Git configuration
@@ -495,7 +501,7 @@ git config --list --show-origin
 cp ~/.gitconfig ~/.gitconfig.backup.$(date +%s)
 
 # 3. Restore from dotfiles
-chezmoi apply --include='**/dot_gitconfig*'
+chezmoi apply ~/.gitconfig
 
 # 4. Verify critical settings
 git config --get user.name
@@ -592,19 +598,20 @@ which nix 2>/dev/null && echo "Nix found"
 #### Migration procedure
 
 ```bash
-# 1. Export current configuration
-cd ~/.dotfiles
-chezmoi archive --format=tar | gzip > dotfiles-backup.tar.gz
+# 1. On the old machine: push any source changes, and copy the age key
+#    (~/.config/chezmoi/key.txt) to the new machine over a private channel.
+#    Do not use `chezmoi archive` for this: it exports the rendered target
+#    files, with secrets decrypted, not the source repo.
 
-# 2. Transfer to WSL2 (from Windows side)
-# Copy dotfiles-backup.tar.gz to Windows, then:
-# cp /mnt/c/Users/username/Downloads/dotfiles-backup.tar.gz ./
+# 2. On WSL2: restore the key, then clone the source
+mkdir -p ~/.config/chezmoi
+cp /mnt/c/Users/username/key.txt ~/.config/chezmoi/key.txt
+chmod 600 ~/.config/chezmoi/key.txt
+git clone https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles
 
-# 3. Import on WSL2
-tar -xzf dotfiles-backup.tar.gz
+# 3. Run the installer from the clone
 cd ~/.dotfiles
-git remote update
-git pull origin main
+./install.sh
 
 # 4. Platform-specific adjustments
 chezmoi apply --dry-run
@@ -754,10 +761,12 @@ export PATH=/usr/bin:/bin    # Minimal PATH
 
 ```bash
 # Nuclear options (use with caution)
-rm -rf ~/.local/share/chezmoi/     # Reset chezmoi
+mv ~/.dotfiles ~/.dotfiles.backup.$(date +%s)   # Reset the source (keeps a copy)
 sudo rm -rf /nix/                  # Remove Nix completely
 wsl --unregister Ubuntu            # Reset WSL2 (from PowerShell)
 ```
+
+`wsl --unregister` deletes the whole distro, including `~/.config/chezmoi/key.txt`. Copy the age key out of the distro first (step 1 of "WSL2 completely broken" exports a backup) if you still need your encrypted files.
 
 This guide covers the most common WSL2 and Nix edge cases. For issues not covered here, refer to the specific tool documentation or create a support request with the diagnostic information provided.
 

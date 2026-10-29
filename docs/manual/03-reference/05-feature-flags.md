@@ -5,136 +5,103 @@ render_with_liquid: false
 
 # Reference: Feature Flags
 
-Feature flags toggle optional subsystems. Set in `.chezmoidata.toml`, override per-preset in `.chezmoidata/hardware.toml`.
+Feature flags toggle optional subsystems. Defaults live in `defaults/.chezmoidata.toml`; override them per host under `[data.features]` in `~/.config/chezmoi/chezmoi.toml`. Hardware presets in `.chezmoidata/hardware.toml` carry no flags.
 
 ## Global Flags (`.chezmoidata.toml`)
 
 ```toml
 [features]
-alias_wrapper = false      # Wrap selected aliases with safer defaults
-dms           = true       # Dank Material Shell (Niri desktop)
-zellij        = false      # Zellij terminal multiplexer config
-linux_desktop = false      # Linux-specific desktop configs
-niri          = false      # Niri window manager
-waybar        = false      # Waybar status bar
-fuzzel        = false      # Fuzzel application launcher (Wayland)
-mako          = false      # Mako notification daemon (Wayland)
-foot          = false      # Foot terminal emulator (Wayland)
-kanshi        = false      # Kanshi monitor profile manager (Wayland)
-touch         = false      # Touchscreen-friendly tweaks (Surface, etc.)
-t2            = false      # Apple T2 hardware-specific tweaks
-surface       = false      # Microsoft Surface hardware-specific tweaks
+alias_wrapper = false
+dms = true
+zellij = false
+ai_theme_sync = true
+linux_desktop = false
+niri = false
+waybar = false
+fuzzel = false
+mako = false
+foot = false
+kanshi = false
+touch = false
+t2 = false
+surface = false
+corral_gitea_mirror = false
+
+[features.ai_theme_providers]
+codex = true
+claude = true
+gemini = true
+agy = true
+qwen = true
+opencode = true
 ```
 
-## Per-Preset Overrides (`.chezmoidata/hardware.toml`)
+## Per-Host Overrides (`~/.config/chezmoi/chezmoi.toml`)
 
 ```toml
-[hardware.surface-pro.features]
+[data.features]
 niri = true
-waybar = true
-dms = true                 # overrides .chezmoidata.toml default
+linux_desktop = true
+corral_gitea_mirror = true
 ```
 
-The effective value is `mergeOverwrite` of global + preset features.
+Values here replace the defaults for that host at render time.
 
 ## Flag Catalogue
-
-### `dms` — Dank Material Shell
-
-When `true`:
-
-- Configures DMS IPC for theme sync
-- Enables Quickshell templates
-- Sets up per-monitor wallpaper via `dms ipc wallpaper`
-
-Requires: Niri + Quickshell + DMS installed.
 
 ### `linux_desktop` — Linux Desktop Configs
 
 When `true`:
 
-- Enables GTK 3/4 theme generation from `themes.toml`
-- Configures `gsettings color-scheme` behaviour
-- Generates desktop file entries for installed tools
+- Deploys `~/.config/environment.d`, the systemd user units in `~/.config/systemd` and `~/.config/mako` (left out by `.chezmoiignore.tmpl` when `false`)
+- Ghostty uses top GTK tabs and copy-on-select; Kitty sets `linux_display_server wayland`
+- fontconfig turns off subpixel (rgb) rendering
 
-No effect on macOS.
+The Ghostty, Kitty and fontconfig changes also follow `niri`. On macOS the Linux desktop paths stay ignored whatever the flag says.
 
 ### `niri` — Niri Window Manager
 
 When `true`:
 
-- Generates `~/.config/niri/config.kdl`
-- Enables Niri keybindings from `keybinds.toml`
-- Configures workspace rules per preset
+- Deploys `~/.config/niri/config.kdl`, `~/.local/bin/start-niri` and the Wayland session files
+- The Niri config reads the hardware defaults or the `.machine` preset (output, scale, refresh rate)
+- Turns on the same Ghostty, Kitty and fontconfig changes as `linux_desktop`
 
 Requires: Niri installed.
-
-### `waybar` — Waybar Status Bar
-
-When `true`:
-
-- Generates `~/.config/waybar/config.jsonc` + `style.css`
-- Hooks into theme switching via `dot-theme-sync`
-
-Requires: Waybar installed.
-
-### `alias_wrapper` — Safer Alias Defaults
-
-When `true`, opt-in wrappers replace selected aliases with confirmation-prompt
-variants (e.g., `rm -i`, `mv -i`). Default `false` for power-user ergonomics.
 
 ### `zellij` — Zellij Terminal Multiplexer
 
 When `true`:
 
-- Generates `~/.config/zellij/config.kdl` from the active theme
-- Wires the `dot mux` alias to launch a profile-aware session
+- Deploys `~/.config/zellij/config.kdl` (its theme is set in that file, not derived from the active palette)
+- Adds Zellij to the Linux package provisioning
 
-Requires: Zellij installed.
+Requires: Zellij installed (or the Linux provisioning step).
 
-### `fuzzel` — Fuzzel Application Launcher (Wayland)
+### `fuzzel`, `foot`, `kanshi`: Wayland Tools
 
-When `true`, generates `~/.config/fuzzel/fuzzel.ini` using the active theme.
-Requires: Fuzzel installed (Wayland-only). No effect on macOS.
+When `true`, deploys `~/.config/fuzzel/`, `~/.config/foot/` or `~/.config/kanshi/` respectively. The Fuzzel and Foot configs take their colours from the active theme. No effect on macOS.
 
-### `mako` — Mako Notification Daemon (Wayland)
+### `corral_gitea_mirror`: GitHub to Gitea Mirror
 
-When `true`, generates `~/.config/mako/config` with theme-derived colors.
-Requires: Mako installed (Wayland-only). No effect on macOS.
+Linux only. When `true`, deploys `corralctl.service`, `corralctl.timer` and the `corralctl-*` scripts in `~/.local/bin`, and enables the timer with `systemctl --user enable --now corralctl.timer`. Meant for one machine; enable it per host.
 
-### `foot` — Foot Terminal Emulator (Wayland)
+### `ai_theme_sync` and `ai_theme_providers`: AI CLI Appearance
 
-When `true`, generates `~/.config/foot/foot.ini` from `themes.toml`.
-Requires: Foot installed (Wayland-only). No effect on macOS.
+When `ai_theme_sync` is `true`, a theme switch (`dot-theme-sync`) also aligns the installed AI CLIs' themes with the active palette, for each provider set to `true` under `ai_theme_providers` (`codex`, `claude`, `gemini`, `agy`, `qwen`, `opencode`). Provider configs stay user-owned: malformed or concurrently changed files are never overwritten.
 
-### `kanshi` — Kanshi Monitor Profile Manager (Wayland)
+### `alias_wrapper`
 
-When `true`, generates `~/.config/kanshi/config` with per-host monitor layouts.
-Requires: Kanshi installed (Wayland-only). No effect on macOS.
+When `true`, `.zshrc` exports `DOTFILES_ALIAS_WRAPPER=1`. Nothing reads that variable today, so the flag has no effect. The `alias` pretty-printer in `rc.d/99-alias-wrapper.zsh` is loaded whatever the flag says.
 
-### `touch` — Touchscreen-Friendly Tweaks
+### `dms`, `waybar`, `mako`, `touch`, `t2`, `surface`: Not Read
 
-When `true`, enables larger UI scaling and touch-friendly input mappings.
-Typically combined with `surface` for Microsoft Surface devices.
-
-### `t2` — Apple T2 Hardware Tweaks
-
-When `true`, enables `t2linux` kernel-module hints, audio routing fixes, and
-Touch-Bar utilities for Intel Macs with the T2 chip on Linux. Set by the
-`macbook-t2` hardware preset in `.chezmoidata/hardware.toml`.
-
-### `surface` — Microsoft Surface Hardware Tweaks
-
-When `true`, enables `linux-surface` kernel parameters, touchpad gestures, and
-pen-input mappings. Set by the `surface-pro` hardware preset.
+No template, ignore rule or script reads these flags today; setting them changes nothing. `dot-theme-sync` updates Dank Material Shell whenever the `dms` command is installed on Linux, the Waybar config is deployed regardless of `waybar`, and the Mako config follows `linux_desktop`.
 
 ## Using a Flag in a Template
 
 ```go
-{{- $hw := index .hardware .machine }}
-{{- $f := mergeOverwrite .features $hw.features }}
-
-{{ if $f.niri }}
+{{ if .features.niri }}
 # Niri-specific config
 {{ end }}
 ```
@@ -142,29 +109,59 @@ pen-input mappings. Set by the `surface-pro` hardware preset.
 ## Checking Active Flags
 
 ```sh
-chezmoi execute-template '{{- $hw := index .hardware .machine -}}{{- $f := mergeOverwrite .features $hw.features -}}{{ $f | toToml }}'
+chezmoi execute-template '{{ .features | toToml }}'
 ```
+
+On a host with no overrides this prints the defaults:
+
+```
+ai_theme_sync = true
+alias_wrapper = false
+corral_gitea_mirror = false
+dms = true
+foot = false
+fuzzel = false
+kanshi = false
+linux_desktop = false
+mako = false
+niri = false
+surface = false
+t2 = false
+touch = false
+waybar = false
+zellij = false
+
+[ai_theme_providers]
+  agy = true
+  claude = true
+  codex = true
+  gemini = true
+  opencode = true
+  qwen = true
+```
+
+`dot config profile show` lists the `[features]` defaults from the source, without per-host overrides.
 
 ## Adding a New Flag
 
-1. Add to `.chezmoidata.toml`:
+1. Add to `defaults/.chezmoidata.toml`:
 
    ```toml
    [features]
    my_new_flag = false
    ```
 
-2. (Optional) Set per preset:
+2. (Optional) Turn it on for one host in `~/.config/chezmoi/chezmoi.toml`:
 
    ```toml
-   [hardware.macbook-t2.features]
+   [data.features]
    my_new_flag = true
    ```
 
 3. Use in templates:
 
    ```go
-   {{ if $f.my_new_flag }}
+   {{ if .features.my_new_flag }}
    # conditional config
    {{ end }}
    ```

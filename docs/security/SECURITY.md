@@ -9,7 +9,7 @@ How dotfiles handles security and system modifications.
 ## Core Principles
 
 - **Opt-In Only** — No hardening applies unless `DOTFILES_*` variables are set to `1`.
-- **Local Logging** — All actions log to `~/.local/share/dotfiles.log`. No telemetry.
+- **Local Logging**: `dot` operations (apply, doctor, rollback and related commands) log to `${XDG_STATE_HOME:-~/.local/state}/dotfiles/dot.log`. No telemetry.
 - **No Hidden Sudo** — Sudo requests only for package managers. Never cached indefinitely.
 
 ## Hardening
@@ -20,6 +20,11 @@ How dotfiles handles security and system modifications.
 | Telemetry | `DOTFILES_TELEMETRY` | Disables Diagnostic plists | Disables `whoopsie`/`apport` |
 | DNS-over-HTTPS | `DOTFILES_DOH` | Browser-level settings | Configures `resolvectl` |
 | Idle Security | `DOTFILES_LOCK` | Sets screensaver idle time | Sets GNOME/KDE idle-delay |
+| USB Safety | `DOTFILES_USB_SAFETY` | No CLI toggle; points to System Settings | Disables GNOME automount for removable media |
+
+Each row has a `dot security <area> apply` command (`firewall`, `telemetry`,
+`dns`, `lock`, `usb`) that changes the system only when its variable is `1`
+(`--dry-run` previews), and a matching `show` command.
 
 ## Secrets
 

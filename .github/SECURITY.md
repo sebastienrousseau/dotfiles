@@ -4,12 +4,13 @@
 # Security policy
 
 The security policy for this repository lives at the root, in
-[`SECURITY.md`](../SECURITY.md) — the canonical location, and the one
-GitHub prefers when both exist.
+[`SECURITY.md`](../SECURITY.md), the canonical location.
 
-This file is a pointer so that links to `.github/SECURITY.md` from
-older issues, forks, and external references keep resolving. Do not
-add policy text here.
+GitHub looks for a security policy in `.github/` first, then the
+repository root, then `docs/`, so this pointer is the file GitHub's
+Security tab shows; it sends readers to the root policy. It also keeps
+links to `.github/SECURITY.md` from older issues, forks, and external
+references resolving. Do not add policy text here.
 
 - Report a vulnerability privately:
   <https://github.com/sebastienrousseau/dotfiles/security/advisories>

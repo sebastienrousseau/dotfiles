@@ -35,8 +35,13 @@ This command will:
 
 1. Install `chezmoi`.
 2. Clone this repository.
-3. Install required packages (Homebrew/Apt).
-4. Apply the configurations to your home directory.
+3. Apply the configurations to your home directory.
+
+Packages are opt-in: run the installer with `--provision` (or set
+`DOTFILES_PROVISION=1`) to also install the toolchain (Homebrew/Apt packages,
+fonts, language tools) from `install/provision/`. `chezmoi apply` never runs
+those scripts, because `install/provision/` sits outside the chezmoi source
+root (`defaults/`).
 
 ---
 
@@ -46,30 +51,29 @@ This command will:
 
 Updates are handled via [Homebrew](https://brew.sh/).
 
-1. Edit `~/.dotfiles/dot_config/shell/Brewfile.cli` and `~/.dotfiles/dot_config/shell/Brewfile.cask`.
-2. Run `chezmoi apply`.
-   - This triggers `run_onchange_darwin_install-packages.sh.tmpl`, which runs `brew bundle` for CLI and GUI packages.
-   - Optional: `mas` installs App Store apps from `~/.config/mas/masapps.txt`.
-   - Optional: `duti` applies default app bindings from `~/.config/duti/defaults.duti`.
+1. Edit `~/.dotfiles/defaults/dot_config/shell/Brewfile.cli` and `~/.dotfiles/defaults/dot_config/shell/Brewfile.cask`.
+2. Run `chezmoi apply` to deploy them, then `bash ~/.dotfiles/install.sh --provision`.
+   - Provisioning runs `install/provision/run_onchange_10-darwin-packages.sh.tmpl`, which runs `brew bundle` for CLI and GUI packages.
+   - Optional: `mas` installs App Store apps from `~/.config/mas/masapps.txt` (`run_onchange_30-darwin-mas.sh`).
+   - Optional: `duti` applies default app bindings from `~/.config/duti/defaults.duti` (`run_onchange_40-darwin-default-apps.sh`).
 
 ### VS Code extensions
 
-1. Edit `~/.config/vscode/extensions.txt`.
-2. Run `chezmoi apply` to install missing extensions (if `code` is available).
+1. Edit `~/.dotfiles/defaults/dot_config/vscode/extensions.txt` and run `chezmoi apply` to deploy it to `~/.config/vscode/extensions.txt`.
+2. Run `bash ~/.dotfiles/install.sh --provision`: `install/provision/run_onchange_30-vscode-extensions.sh` installs missing extensions (if `code` is available).
 
 ### Linux and WSL
 
 Updates are handled via `apt-get` (Ubuntu/Debian).
 
-1. Run `chezmoi apply`.
-   - This checks for package updates defined in `run_onchange_linux_install-packages.sh.tmpl`.
-   - Optional Flatpak list is read from `~/.config/flatpak/flatpak.list`.
+1. Run `bash ~/.dotfiles/install.sh --provision`.
+   - This installs the packages defined in `install/provision/run_onchange_10-linux-packages.sh.tmpl`.
+   - Optional Flatpak list is read from `~/.config/flatpak/flatpak.list` (`run_onchange_20-linux-flatpak.sh.tmpl`).
 
-### Vim plugins
+### Vim settings
 
-1. Edit `~/.dotfiles/dot_vimrc`.
-2. Run `chezmoi apply`.
-   - This automatically runs `vim +PlugInstall +PlugClean +qa`.
+1. Edit `~/.dotfiles/defaults/dot_vimrc`.
+2. Run `chezmoi apply`. The vimrc uses no plugin manager, so there is no plugin install step.
 
 ---
 
@@ -103,24 +107,29 @@ If you are migrating from an old `~/.dotfiles` setup:
 
 ## Structure
 
-The configuration is managed in `~/.dotfiles`.
+The configuration is managed in `~/.dotfiles`. The chezmoi source root is
+`defaults/` (set by `.chezmoiroot`).
 
 ```text
 ~/.dotfiles/
-├── dot_zshrc.tmpl          # Main Zsh configuration (template)
-├── dot_vimrc               # Vim configuration
-├── dot_tmux.conf           # Tmux configuration
-├── run_onchange_...sh.tmpl # Package installation scripts
-├── dot_config/
-│   ├── shell/           # Main Config Directory
-│   │   ├── aliases.sh.tmpl # Generates aliases.sh (Modular)
-│   │   ├── paths.sh.tmpl   # Generates paths.sh (Monolithic)
-│   │   └── functions.sh.tmpl # Generates functions.sh
-│   └── starship.toml.tmpl  # Starship configuration
-└── .chezmoitemplates/      # Reusable Logic
-    ├── aliases/            # Alias definitions (grouped by tool)
-    ├── functions/          # Shell functions
-    └── paths/              # (Legacy) Path definitions
+├── install/provision/          # Opt-in package scripts (install.sh --provision)
+└── defaults/                   # chezmoi source root
+    ├── dot_zshrc               # ~/.zshrc stub
+    ├── dot_vimrc               # Vim configuration
+    ├── run_onchange_...sh.tmpl # Build and refresh hooks run by chezmoi apply
+    ├── dot_config/
+    │   ├── zsh/dot_zshrc.tmpl  # Main Zsh configuration (template)
+    │   ├── tmux/tmux.conf.tmpl # Tmux configuration
+    │   ├── shell/              # Shared shell layers
+    │   │   ├── 00-core-paths.sh.tmpl          # PATH setup
+    │   │   ├── 50-logic-functions*.sh.tmpl    # Function aggregators
+    │   │   ├── 51-logic-functions-extra.sh.tmpl
+    │   │   ├── 90-ux-aliases.sh.tmpl          # Alias aggregator
+    │   │   └── 91-ux-aliases-lazy.sh.tmpl     # Lazy alias stubs
+    │   └── starship.toml.tmpl  # Starship configuration
+    └── .chezmoitemplates/      # Reusable logic
+        ├── aliases/            # Alias definitions (grouped by tool)
+        └── functions/          # Shell functions
 ```
 
 ## Use it
@@ -142,20 +151,18 @@ chezmoi diff
 ### Dot CLI
 
 ```bash
-dot apply      # Apply dotfiles (chezmoi apply)
-dot sync       # Alias of apply
-dot update     # Pull latest changes and apply
-dot diff       # Show diff (excludes scripts/install/tests)
-dot remove     # Safely remove a managed file
+dot apply      # Shortcut for dot config apply (chezmoi apply)
+dot sync       # Shortcut for dot config sync
+dot update     # Shortcut for dot system update
+dot diff       # Shortcut for dot config diff
 dot doctor drift show      # Drift dashboard (chezmoi status)
 dot shell history list    # Shell history analysis
-dot tool      # Show dot utils
+dot tool list # Toolchains and their versions
 # Keybindings: docs/security/KEYS.md
 dot system settings apply       # Apply OS tuning (opt-in)
-dot secret    # Edit encrypted secrets (age)
+dot secret edit # Edit encrypted secrets (age)
 dot system update    # Update flake, plugins, and dotfiles
-dot tool new        # Scaffold a project template (python/go/node)
-dot system clean --logs # Rotate ~/.local/share/dotfiles.log
+dot tool new        # Scaffold a project template (python/go/node/packer/molecule)
 dot doctor
 dot config apply --sandbox
 dot doctor perf measure
@@ -189,7 +196,7 @@ nix develop
 
 ```bash
 dot secret init
-dot secret
+dot secret edit
 ```
 
 ### Git identity
@@ -215,11 +222,11 @@ Fields:
 
 ### Make it yours
 
-Set the theme in `.chezmoidata.toml`:
+Set the theme in `defaults/.chezmoidata.toml`:
 
 ```toml
 theme = "maui-dark"
-terminal_font_family = "JetBrains Mono"
+terminal_font_family = "JetBrainsMono Nerd Font"
 terminal_font_size = 20
 ```
 
@@ -233,7 +240,7 @@ Run `dot theme list` for the available themes.
 
 ### Add aliases
 
-1. Navigate to `~/.dotfiles/.chezmoitemplates/aliases/`.
+1. Navigate to `~/.dotfiles/defaults/.chezmoitemplates/aliases/`.
 2. Create a new file (e.g., `mytool/mytool.aliases.sh`) or edit an existing one.
 3. Add your aliases.
 4. Run `chezmoi apply`.
@@ -242,18 +249,18 @@ Run `dot theme list` for the available themes.
 
 ### Add functions
 
-1. Navigate to `~/.dotfiles/.chezmoitemplates/functions/`.
+1. Navigate to `~/.dotfiles/defaults/.chezmoitemplates/functions/`.
 2. Create a new `.sh` file.
 3. Define your function with a usage comment.
 4. Run `chezmoi apply`.
 
 ## Performance
 
-- **Lazy Loading**: Heavy tools (like `nvm`, `rbenv`) are lazy-loaded. They only initialize when you type the command.
+- **Lazy Loading**: Heavy tools (like `nvm`) are lazy-loaded. They only initialize when you type the command. Add your own with `_dot_lazy` in `~/.config/zsh/rc.d/99-local.zsh`.
 - **Zcompile**: Your `.zshrc` and generated config files are automatically compiled to `.zwc` bytecode for faster parsing.
 - **Fast Mode**: Set `DOTFILES_FAST=1` to skip heavy startup work (plugins, completions, prompt tooling, AI helpers) for the quickest possible first prompt.
 - **Ultra-Fast Mode**: Set `DOTFILES_ULTRA_FAST=1` for minimal init (no rc.d, plugins, completions, or prompt tooling).
-- **Perf Mode**: `dot doctor perf show --precmd` measures first-prompt work (precmd hooks).
+- **Perf Mode**: `dot doctor perf show --profile` includes profile output with the startup timings.
 - **Deferred Hooks**: Use `DOTFILES_DEFER_COMPINIT=1`, `DOTFILES_DEFER_TOOLS=1`, and `DOTFILES_DEFER_ZINIT_MODE=preexec` to move work after the first command.
 
 ## Test

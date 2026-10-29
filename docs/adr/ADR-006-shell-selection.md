@@ -4,9 +4,16 @@ render_with_liquid: false
 
 # ADR-006: Zsh as Default Shell
 
-**Status**: Accepted
+**Status**: Accepted; the default shell is now fish (see the status note)
 **Date**: 2026-02-09
 **Authors**: @sebastienrousseau
+
+> **Status note (0.2.539):** the default shell has since changed.
+> `default_shell` in `defaults/.chezmoidata.toml` is `fish`, and the
+> terminal configs that read it (Ghostty, Zellij) start fish. Zsh with
+> Zinit stays fully supported (Tier 1 in
+> [ADR-007](ADR-007-multi-shell-parity.md)); the rest of this record is
+> the original decision.
 
 ## Context
 
@@ -61,11 +68,17 @@ Zinit provides:
 ### Shell Layer System
 
 ```text
-dot_config/zsh/rc.d/
-├── 00-10: Core (env, history, options)
-├── 20-49: Middleware (zinit, completions)
-├── 50-89: Toolchain (languages, tools)
-└── 90-99: UX (prompt, aliases, keybindings)
+defaults/dot_config/zsh/rc.d/
+├── 00-alias-shims.zsh      (deferred Carapace and other shims)
+├── 05-ssh-agent.zsh        (SSH agent and security key helper)
+├── 10-env.zsh.tmpl         (environment and core variables)
+├── 20-zinit.zsh            (Zinit plugin manager)
+├── 30-options.zsh.tmpl     (history and options)
+├── 35-rust-target.zsh.tmpl (per-project Rust target dirs)
+├── 40-bell.zsh             (terminal bell)
+├── 45-standards.zsh        (standards drift sentinel)
+├── 50-login-fortune.zsh    (login fortune)
+└── 99-alias-wrapper.zsh    (alias_wrapper TUI)
 ```
 
 ### Zinit Configuration

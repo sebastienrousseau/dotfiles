@@ -6,8 +6,8 @@ render_with_liquid: false
 
 This page tracks two distinct key lifecycles:
 
-1. **Disclosure key** — the GPG key reporters use to encrypt vulnerability reports to the maintainer. Single key, public, rotated annually or on compromise. Source of truth for the active fingerprint is `SECURITY.md`.
-2. **Secrets encryption keys** — the Age and SOPS keys that protect encrypted dotfiles in this repo. Multiple keys, per-machine, rotated annually or on personnel / device change.
+1. **Disclosure key**: the GPG key reporters use to encrypt vulnerability reports to the maintainer. Single key, public, valid for three years and rotated before expiry or on compromise. Source of truth for the active fingerprint is `SECURITY.md`.
+2. **Secrets encryption keys**: the Age and SOPS keys that protect the encrypted files in your chezmoi source. Multiple keys, per-machine, rotated annually or on personnel / device change.
 
 Both sections live here so a single audit can confirm the project's
 posture across encrypted-disclosure-in and encrypted-secrets-at-rest.
@@ -22,30 +22,34 @@ Closes the rotation half of [#870](https://github.com/sebastienrousseau/dotfiles
 |---|---|
 | Identity | `security@sebastienrousseau.com` |
 | Fingerprint | `55AFAD364FD9DB3819E61F0C8D688FAFA9144693` |
-| Algorithm | ED25519 signing primary + CV25519 encryption subkey |
+| Algorithm | ED25519 primary (sign, certify) + CV25519 encryption subkey |
 | Created | 2026-05-16 |
-| Expires | 2029-05-15 (3 years from creation) |
-| Keyserver | <https://keys.openpgp.org/search?q=sebastian.rousseau%40gmail.com> |
-| WKD URL | `https://sebastienrousseau.com/.well-known/openpgpkey/hu/qpzqfwauiwxnu1xrf5h47bunsho44p6f` — **not yet published**; the path returns 404, so fetch the key from the keyserver above until WKD is served. |
-| Cross-reference | matches the SSH signing key in `dot_config/git/allowed_signers.tmpl` |
+| Expires | 2029-05-15 (3 years from creation; the encryption subkey has no expiry of its own) |
+| In-repo copy | [`docs/security/security-pubkey.asc`](security-pubkey.asc) |
+| WKD URL | `https://sebastienrousseau.com/.well-known/openpgpkey/hu/t5s8ztdbon8yzntexy6oz5y48etqsnbb` |
+| Keyserver | Not published to keys.openpgp.org; use the in-repo copy or WKD. |
+| Consistency check | `.github/workflows/verify-gpg-wkd.yml` compares the in-repo key, the WKD key and the pinned fingerprint. This key does not sign commits; commit signing uses separate SSH keys (`KEYS.asc`). |
 
 ### Rotation triggers
 
 | Trigger | Response time | Action |
 |---|---|---|
-| Annual cadence | Within 30 days of expiry | Generate new key, publish, sign transition statement with the old key, archive old key below. |
+| Expiry | Within 30 days of expiry | Generate new key, publish, sign transition statement with the old key, archive old key below. |
 | Suspected compromise | Same day | Revoke immediately, publish revocation cert to WKD, replay in-flight encrypted disclosures with the new key. |
-| Algorithm deprecation | Within 90 days of advisory | Generate replacement on a stronger algorithm; follow annual-cadence steps. |
+| Algorithm deprecation | Within 90 days of advisory | Generate replacement on a stronger algorithm; follow the expiry steps. |
 | Maintainer change | Same day as handover | Old maintainer signs a transition statement; old key revoked 30 days after handover. |
 
 ### Rotation procedure
 
-1. Generate the new key (air-gapped where possible):
+1. Generate the new key (air-gapped where possible), with the same
+   shape as the active one: an ED25519 primary plus a CV25519
+   encryption subkey (reporters encrypt to the subkey):
 
    ```sh
    gpg --quick-generate-key \
-     "Sebastien Rousseau (Security) <security@sebastienrousseau.com>" \
-     ed25519 sign 1y
+     "Sebastien Rousseau (Dotfiles Security) <security@sebastienrousseau.com>" \
+     ed25519 sign,cert 3y
+   gpg --quick-add-key <new-fingerprint> cv25519 encr 3y
    ```
 
 2. Sign a transition statement with the OLD key:
@@ -63,7 +67,12 @@ Closes the rotation half of [#870](https://github.com/sebastienrousseau/dotfiles
 
 3. Publish the new key to:
    - `sebastienrousseau.com/.well-known/openpgpkey/hu/` (WKD)
+   - `docs/security/security-pubkey.asc` in this repository
    - the maintainer's keyoxide profile if applicable
+
+   Then update the fingerprint pinned in `SECURITY.md` and in
+   `.github/workflows/verify-gpg-wkd.yml`, which fails when the three
+   disagree.
 
 4. Update the "Active key" table above with the new fingerprint and
    move the previous row into the "Historical disclosure keys"
@@ -153,6 +162,12 @@ mv ~/.config/chezmoi/key.txt ~/.config/chezmoi/key-$(date +%Y%m%d)-archived.txt
 
 # Rename new key
 mv ~/.config/chezmoi/key-new.txt ~/.config/chezmoi/key.txt
+chmod 600 ~/.config/chezmoi/key.txt
+
+# Point [age] identity back at the renamed file in chezmoi.toml
+# (step 3 set it to key-new.txt, which no longer exists)
+#   identity = "~/.config/chezmoi/key.txt"
+chezmoi cat ~/.ssh/id_ed25519 >/dev/null && echo "decryption OK"
 
 # Commit changes
 cd ~/.dotfiles
@@ -240,6 +255,7 @@ sops updatekeys <file>
 ```bash
 #!/usr/bin/env bash
 # check-key-age.sh - Alert if keys are older than 365 days
+set -euo pipefail
 
 KEY_FILE="${HOME}/.config/chezmoi/key.txt"
 MAX_AGE_DAYS=365
@@ -261,20 +277,27 @@ fi
 ```bash
 #!/usr/bin/env bash
 # backup-before-rotation.sh
+set -euo pipefail
 
 BACKUP_DIR="${HOME}/.local/share/dotfiles/key-backups"
 mkdir -p "$BACKUP_DIR"
+chmod 700 "$BACKUP_DIR"
+
+# One timestamp for every step: calling date repeatedly can cross a
+# second boundary and point the later steps at a file that doesn't exist
+ts="$(date +%Y%m%d_%H%M%S)"
+plain="$BACKUP_DIR/key-${ts}.txt"
 
 # Backup current key
-cp ~/.config/chezmoi/key.txt "$BACKUP_DIR/key-$(date +%Y%m%d_%H%M%S).txt"
+cp ~/.config/chezmoi/key.txt "$plain"
 
-# Encrypt backup with passphrase
-gpg --symmetric --cipher-algo AES256 "$BACKUP_DIR/key-$(date +%Y%m%d_%H%M%S).txt"
+# Encrypt backup with passphrase (writes "$plain.gpg")
+gpg --symmetric --cipher-algo AES256 "$plain"
 
 # Remove unencrypted backup
-rm "$BACKUP_DIR/key-$(date +%Y%m%d_%H%M%S).txt"
+rm "$plain"
 
-echo "Key backed up to $BACKUP_DIR (encrypted)"
+echo "Key backed up to ${plain}.gpg (encrypted)"
 ```
 
 ---

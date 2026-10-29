@@ -6,7 +6,17 @@ render_with_liquid: false
 
 ## Status
 
-Accepted
+Accepted; command spellings superseded by [ADR-020](ADR-020-command-naming-system.md)
+
+> **Status note (0.2.539):** the gateway and cockpit decisions hold, but
+> the command surface below is the original one. Under ADR-020 the
+> gateway is `dot ai gateway serve`, agents run with `dot ai run` and
+> `dot ai start`, and `dot ai check` and `dot ai cost show` are the
+> check and cost verbs (`dot ai --help` lists them). The old top-level
+> names such as `dot cl` were removed in 0.2.538 and exit 127 with the
+> new spelling. `dot ai serve`, `dot ai dashboard` and `dot ai proxy`
+> still reach the old `plugins/ai/libexec/ai.sh` route through the
+> domain's fallback.
 
 ## Date
 

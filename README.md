@@ -22,7 +22,7 @@
   <a href="https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/dotfiles"><img src="https://img.shields.io/ossf-scorecard/github.com/sebastienrousseau/dotfiles?style=for-the-badge&logo=linuxfoundation&logoColor=white&label=OpenSSF%20Scorecard" alt="OpenSSF Scorecard" /></a>
   <a href="https://www.bestpractices.dev/projects/12840"><img src="https://img.shields.io/cii/level/12840?style=for-the-badge&logo=linuxfoundation&logoColor=white&label=OpenSSF%20Best%20Practices" alt="OpenSSF Best Practices" /></a>
   <a href="#license"><img src="https://img.shields.io/badge/License-Apache--2.0%20OR%20MIT-green?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="License: Apache-2.0 OR MIT" /></a>
-  <a href="#requirements"><img src="https://img.shields.io/badge/toolchain-bash%205.0%20%C2%B7%20chezmoi%202.40-93450a?style=for-the-badge&logo=gnubash&logoColor=white" alt="Minimum toolchain: bash 5.0, chezmoi 2.40" /></a>
+  <a href="#requirements"><img src="https://img.shields.io/badge/toolchain-bash%205.0%20%C2%B7%20chezmoi%202.73.3-93450a?style=for-the-badge&logo=gnubash&logoColor=white" alt="Minimum toolchain: bash 5.0, chezmoi 2.73.3" /></a>
 </p>
 
 ---
@@ -35,7 +35,7 @@
 - [Requirements](#requirements) — toolchain floor, platforms, shells
 - [Quick Start](#quick-start) — install, verify, switch a theme, apply in six commands
 
-**The dotfiles family** (framework + four in-repo satellites)
+**The dotfiles family** (framework + five in-repo satellites)
 
 - [The dotfiles family](#the-dotfiles-family) — `dot`, `dot-ui`, `dot-ai-tui`, `dot mcp`, `dot-mcp`, `dot-sys`, the module registry at a glance
 
@@ -55,7 +55,7 @@
 - [Agent governance (ask / plan / apply / audit)](#agent-governance-ask--plan--apply--audit) — bounded profiles, MCP policy, attestation
 - [Self-healing and rollback](#self-healing-and-rollback) — `dot doctor`, `dot doctor fix`, `dot doctor rollback`
 - [Fleet apply](#fleet-apply) — every host in `fleet.toml` over SSH
-- [The `dot` CLI](#the-dot-cli) — 75 indexed subcommands grouped by intent
+- [The `dot` CLI](#the-dot-cli) — the command surface, grouped by intent
 - [Configuration](#configuration) — `.chezmoidata.toml`, profiles, session flags
 - [Examples](#examples) — runnable example index
 
@@ -100,7 +100,8 @@ idempotent across macOS, Ubuntu, Debian, Arch, WSL2, and GitHub Codespaces.
 ### Pre-built release archive (`dot` CLI only)
 
 Every tag publishes `dot-<version>.tar.gz` and `.zip` with the
-dispatcher, `lib/dot`, the man page, zsh / bash / fish completions,
+dispatcher, `lib/dot`, the bundled plugins and runtime scripts, the
+man page, zsh / bash / fish completions,
 and a `Makefile` honouring the usual install prefix and staging
 directory. The archive
 carries SLSA build provenance (keyless, via Fulcio + Rekor):
@@ -148,8 +149,10 @@ The repository is a chezmoi source tree (`.chezmoiroot` points at
 chezmoi init --apply sebastienrousseau
 ```
 
-This is what `install.sh` runs after its preflight checks; you give
-up the verified `chezmoi` download and the `git` / `curl` checks.
+`install.sh` does the equivalent after its preflight checks: it
+clones the pinned release tag to `~/.dotfiles`, points chezmoi's
+`sourceDir` at it, and applies. Going direct, you give up the verified
+`chezmoi` download, the pinned tag, and the `git` / `curl` checks.
 
 ### Build from source
 
@@ -160,7 +163,8 @@ cd ~/.dotfiles
 make install PREFIX=~/.local  # or: stage only the dot CLI
 ```
 
-`./install.sh --minimal` installs shells and core tools only.
+`./install.sh --minimal` selects the `minimal` profile (written to this
+host's chezmoi config) and skips `--provision`.
 `dot config export ~/Downloads` builds an offline `.tar.zst` for an
 air-gapped host; unpack it and run `./install.sh --force`.
 
@@ -198,14 +202,14 @@ profile per machine and flip session flags when you need less.
 
 | Switch | Where | Effect | Documented in |
 | :--- | :--- | :--- | :--- |
-| `profile = "laptop"` *(default)* | `~/.config/chezmoi/chezmoi.toml` | All tools, AI CLIs, themes, completions | [`docs/reference/PROFILES.md`](docs/reference/PROFILES.md) |
-| `profile = "minimal"` | same | Core shell, git, basic aliases only | same |
-| `profile = "server"` | same | Shell, git, monitoring tools, no desktop | same |
-| `[features]` flags | `.chezmoidata.toml` | `alias_wrapper`, `dms`, `zellij`, `linux_desktop`, `niri`, `waybar`, `fuzzel`, `mako`, `foot`, `kanshi`, `touch`, `t2`, `surface` — schema-checked in CI | [`docs/reference/FEATURES.md`](docs/reference/FEATURES.md) |
+| `profile = "laptop"` *(default)* | `~/.config/chezmoi/chezmoi.toml` | zsh runs `compinit` by default; the OS tuning scripts use the laptop set | [`docs/reference/PROFILES.md`](docs/reference/PROFILES.md) |
+| `profile = "minimal"` | same | zsh skips `compinit` unless `DOTFILES_ENABLE_COMPINIT=1` | same |
+| `profile = "server"` | same | As `minimal` in zsh; the OS tuning scripts use the server set | same |
+| `[features]` flags | `defaults/.chezmoidata.toml` | `alias_wrapper`, `dms`, `ai_theme_sync`, `zellij`, `linux_desktop`, `niri`, `waybar`, `fuzzel`, `mako`, `foot`, `kanshi`, `touch`, `t2`, `surface`, `corral_gitea_mirror`; CI checks each is a boolean | [`docs/reference/FEATURES.md`](docs/reference/FEATURES.md) |
 | `DOTFILES_FAST=1` | environment | Skip heavy layers (zinit, completions, lazy runtime managers) | [Configuration](#configuration) |
 | `DOTFILES_ULTRA_FAST=1` | environment | Bare minimum shell: paths, aliases, prompt | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 | `DOTFILES_DEFER_TOOLS=1` *(default)* | environment | Resolve heavy binaries asynchronously after the first prompt | `defaults/dot_config/zsh/dot_zshrc.tmpl` |
-| `DOTFILES_AI=1` | environment | Enable AI helper scripts | [`docs/reference/PROFILES.md`](docs/reference/PROFILES.md) |
+| `DOTFILES_AI=1` *(default)* | environment | `1` loads the zsh AI helper scripts; while the variable is set at all, apply builds `dot-ai-tui` | [`docs/reference/PROFILES.md`](docs/reference/PROFILES.md) |
 | `DOTFILES_ARTIFACT_MODE=1` | environment | Minimal prompt plus the async Bento dashboard | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 | `DOTFILES_DEBUG=1` / `DOTFILES_TRACE=1` | environment | Per-stage startup timing / full trace to stderr | [`docs/manual/03-reference/03-environment.md`](docs/manual/03-reference/03-environment.md) |
 | `EVALCACHE_DISABLE=true` | environment | Bypass `_cached_eval` for debugging | [Features](#features) |
@@ -215,13 +219,15 @@ profile per machine and flip session flags when you need less.
 ## Requirements
 
 - **Bash 5.0 or newer, zsh 5.8 or newer.** These are the Tier-1
-  shells and the floor the test suite runs on: Ubuntu, macOS (Intel
-  and Apple Silicon), and Windows runners on every push. `install.sh`
+  shells and the floor the test suite runs on: Ubuntu and macOS
+  (Apple Silicon) runners on every push, Windows when shell code
+  changes, and an Intel macOS runner in the weekly extended run
+  (`nightly.yml`). `install.sh`
   and `lib/dot` avoid bash-4-only constructs where macOS's stock
   `/bin/bash` 3.2 has to run them (the notes are in `lib/dot/ui.sh`),
   but 3.2 is not a supported interactive shell.
 
-- **chezmoi 2.40 or newer, git 2.35 or newer, curl.** CI pins
+- **chezmoi 2.73.3 or newer, git 2.34 or newer, curl.** CI pins
   chezmoi `2.73.3` and installs it through a checksum-verified
   fetch; `install.sh` does the same on your machine.
 
@@ -234,7 +240,8 @@ profile per machine and flip session flags when you need less.
 - **Windows.** PowerShell 7.5+ runs the native
   `dot.ps1` for the daily workflow (apply, status, doctor, mise
   inventory, agent checks, fleet status); the `Test / Windows` job
-  exercises the cmdlets on `windows-latest` every push.
+  exercises the cmdlets on `windows-latest` whenever shell or
+  Windows code changes.
 
 **Minimum-toolchain policy.** The floor is the version CI
 exercises, not the oldest version that happens to work. It is
@@ -254,7 +261,7 @@ back.
 # First download and verify /tmp/dotfiles-install.sh as shown in Install.
 bash /tmp/dotfiles-install.sh
 dot doctor            # audit tools, paths, portability, security
-dot help tour             # interactive tour of shells, secrets, themes, performance
+dot help tour         # interactive tour of shells, secrets, themes, performance
 dot theme rebuild     # generate themes from the wallpapers on this machine
 dot theme toggle      # swap dark and light within the current family
 dot sync              # apply the source tree; the next shell hydrates its caches
@@ -280,13 +287,13 @@ Upgrades between versions are covered in
 
 ## The dotfiles family
 
-One repository, one release train: the `dot` framework plus four
+One repository, one release train: the `dot` framework plus five
 satellites that ship inside it and version with it. The version
-number in `.chezmoidata.toml` is the compatibility contract — CI's
-`Generators / version-consistency` job checks it against eight
-human-visible surfaces (`package.json`, `bin/dot`, the man page, the
-`bento` banner, this README's badge, `CLAUDE.md`, [`AGENTS.md`](AGENTS.md)) on
-every push.
+number in `defaults/.chezmoidata.toml` is the compatibility contract:
+CI's `Generators / version-consistency` job checks it against every
+human-visible version surface (among them `package.json`, `bin/dot`,
+the man page, the `bento` banner, this README's badge, `CLAUDE.md`
+and [`AGENTS.md`](AGENTS.md)) on every push to `main`.
 
 | Component | What it is | Use case |
 |---|---|---|
@@ -295,8 +302,8 @@ every push.
 | **`dot-ai-tui`** ([`defaults/dot_local/share/dot-ai-tui`](defaults/dot_local/share/dot-ai-tui)) | Go Bubble Tea cockpit behind `dot ai` | Install, run, chat with, and meter Claude, Codex, Copilot, Aider, OpenCode and friends from one screen. |
 | **`dot mcp`** ([`docs/security/MCP_POLICY.md`](docs/security/MCP_POLICY.md)) | MCP policy, supply-chain, and registry audit over `mcp-policy.json` / `mcp-registry.json` | Keep Model Context Protocol servers inside an allowlist before an agent touches them. |
 | **`dot-mcp`** ([`defaults/dot_local/share/dot-mcp`](defaults/dot_local/share/dot-mcp)) | Go stdio MCP server behind `dot mcp serve` — JSON-RPC 2.0, four read-only tools, five resources | Let an MCP client audit this workstation's policy, agent mode, attestation and drift without being able to change it. |
-| **`dot-sys`** ([`lib/wasm-tools`](lib/wasm-tools/README.md)) | Rust crate built for `wasm32-wasip1` and run under `wasmtime` | `dot attest --verify`: check a workstation evidence record in a sandbox with no filesystem, network or environment, so the verdict does not depend on the machine being reviewed. |
-| **Module registry** ([`docs/operations/REGISTRY.md`](docs/operations/REGISTRY.md)) | JSON index of reusable dotfile modules, schema at [`docs/schema/dot-registry-v1.json`](docs/schema/dot-registry-v1.json) | `dot cli list --available [term]` and `dot cli install` with SHA-256-verified archives and a chezmoi preview before apply. |
+| **`dot-sys`** ([`lib/wasm-tools`](lib/wasm-tools/README.md)) | Rust crate built for `wasm32-wasip1` and run under `wasmtime` | `dot attest verify`: check a workstation evidence record in a sandbox with no filesystem, network or environment, so the verdict does not depend on the machine being reviewed. |
+| **Module registry** ([`docs/operations/REGISTRY.md`](docs/operations/REGISTRY.md)) | JSON index of reusable dotfile modules, schema at [`docs/schema/dot-registry-v1.json`](docs/schema/dot-registry-v1.json) | `dot cli list --available` and `dot cli install` with SHA-256-verified archives and a chezmoi preview before apply. The published index has no modules yet, and `--available` lists the whole index (a search term is ignored). |
 
 ### Install the pieces
 
@@ -313,7 +320,7 @@ gh release download v0.2.539 --repo sebastienrousseau/dotfiles --pattern 'dot-*.
 #   defaults/run_onchange_26-build-dot-mcp.sh.tmpl
 
 # A registry module
-dot cli list --available fonts && dot cli install <module> --yes
+dot cli list --available && dot cli install <module> --yes
 ```
 
 ### Per-host quick links
@@ -321,8 +328,8 @@ dot cli list --available fonts && dot cli install <module> --yes
 | If you use… | Drop-in config |
 |---|---|
 | **Claude Code** | the shipped [`dotfiles-bootstrap` skill](defaults/dot_claude/skills/dotfiles-bootstrap/SKILL.md) — `/skills` discovers it and runs `dot config init` with profile-aware safety defaults |
-| **Cursor / Codex / Windsurf / Zed / Roo / Aider / Continue / Jules** | `dot agent context apply` regenerates every harness stub from [`CLAUDE.md`](CLAUDE.md); `dot agent context check` fails when they drift |
-| **A2A-capable agents** | the agent card at [`.well-known/agent.json`](.well-known/agent.json), validated by `dot agent a2a-card` and `dot agent conformance` ([`docs/interop/A2A.md`](docs/interop/A2A.md)) |
+| **Cursor / Codex / Windsurf / Zed / Roo / Cline / Aider / Continue / Jules / Antigravity** | `dot agent context apply` regenerates every harness stub from [`CLAUDE.md`](CLAUDE.md); `dot agent context check` fails when they drift |
+| **A2A-capable agents** | the agent card at [`.well-known/agent.json`](.well-known/agent.json), shown by `dot agent card show` and checked by `dot agent card check` ([`docs/interop/A2A.md`](docs/interop/A2A.md)) |
 | **Ghostty / Alacritty / Kitty / WezTerm / Warp / iTerm2 / tmux / Neovim / VS Code** | themed on every `dot theme` switch — see [Wallpaper-driven themes](#wallpaper-driven-themes) |
 
 ### How good is this, really?
@@ -331,29 +338,31 @@ The rating is a set of programs, and each one prints the command
 next to the number.
 
 ```sh
-dot doctor score                 # system health and security scorecard
-dot security score show -j     # workstation security posture, JSON
-dot doctor --score        # tools, paths, portability, AI analysis
-make test                 # the reliability audit CI runs
+dot doctor score             # system health and security scorecard
+dot security score show -j   # workstation security posture, JSON
+dot doctor --score           # tools, paths, portability, AI analysis
+make test                    # the reliability audit CI runs
 ```
 
 What the repository can show today:
 
-- **OpenSSF Scorecard 7.6 / 10** at the last recorded snapshot
-  (2026-05-17), regenerated weekly and written into
+- **OpenSSF Scorecard 8.3 / 10** at the last recorded snapshot
+  (2026-10-29), written into
   [`docs/security/SCORECARD.md`](docs/security/SCORECARD.md) with
-  the per-check breakdown. The badge above is live.
+  the per-check breakdown by `scripts/qa/scorecard-snapshot.sh`, run
+  by hand. `scorecard.yml` runs the analysis weekly, and the badge
+  above is live.
 - **OpenSSF Best Practices: passing (100%)**, project
   [12840](https://www.bestpractices.dev/projects/12840).
-- **652 unit test files, 14 integration suites, 18 regression
-  tests**, a golden-snapshot suite for `dot --help` / `version` /
+- **Unit, integration, and regression suites**, a golden-snapshot suite for `dot --help` / `version` /
   `doctor` / `perf` / `health`, and an `install.sh` fuzz harness —
   see [`tests/README.md`](tests/README.md).
-- **Bash line coverage floor 58%** measured by pure `xtrace`, no
-  kcov, ratcheted up slice by slice with the history recorded in
+- **Bash line coverage floor 98%** (96% for behavioural tests
+  alone) measured by pure `xtrace`, no kcov, ratcheted up slice by
+  slice with the history recorded in
   [`coverage.yml`](.github/workflows/coverage.yml).
-- **53 workflows**, every third-party action SHA-pinned, Harden
-  Runner in every one of them.
+- **Every third-party action SHA-pinned**, and Harden Runner in
+  every workflow except `branch-drift-guard.yml`.
 
 The gaps, so nobody has to find them:
 
@@ -392,15 +401,15 @@ dot config init https://... --no-apply
 ```
 
 Coming from a specific tool? The headline mapping is below, and
-`dot config init --dry-run` shows what the move would produce on this
-machine before anything is written.
+`dot config init <user> --dry-run` shows the repository URL and
+target directory it would use before anything is written.
 
 | Coming from | What changes |
 |---|---|
 | **yadm** | bare-repo tracking → a chezmoi source tree; `yadm alt` → `.tmpl` files driven by `.chezmoidata.toml`; `yadm encrypt` → age / SOPS through `dot secret` |
 | **GNU Stow** | one package directory per tool → one `dot_config/<tool>/` tree, deployed by `chezmoi apply` instead of a symlink farm |
 | **bare git repository** (`config` alias) | `$HOME` as work tree → `~/.dotfiles` as source; `config status` → `dot status` / `dot diff` |
-| **plain chezmoi** | keep your source tree as it is; gain `dot doctor` / `heal` / `theme` / `secrets` / `fleet` on top; `chezmoi apply` → `dot sync` |
+| **plain chezmoi** | keep your source tree as it is; gain `dot doctor` / `doctor fix` / `theme` / `secret` / `fleet` on top; `chezmoi apply` → `dot sync` |
 
 Upgrades between versions of this project are a different document:
 [`docs/operations/MIGRATION.md`](docs/operations/MIGRATION.md).
@@ -470,7 +479,7 @@ via taplo on every PR).
 | Multi-shell parity | Tier 1 (full): zsh, bash. Tier 2 (bridged): fish. Tier 3 (compatible): nushell. PowerShell as a contract-tested parity target ([`tests/integration/test_shell_parity.sh`](tests/integration/test_shell_parity.sh)) |
 | Private build caches | Go, pip, uv, and Zig caches live under `~/.cache/dot/builds` via `mise [env]`; Cargo keeps a per-project `./target` (no shared lock), with sccache sharing dependencies and `rust-target-tmp` moving `./target` out of the repository |
 | Encrypted secrets | age and SOPS at rest; macOS Keychain, `pass`, or age-encrypted store selected by policy; `dot secret`, `dot secret check`, `dot secret key new`, `dot secret cert` |
-| Portable runtimes | mise for managed toolchains with a cross-platform `mise.lock`; Nix flake for strict reproducibility; `dot tool`, `dot tool`, `dot system update` |
+| Portable runtimes | mise for managed toolchains with a cross-platform `mise.lock`; Nix flake for strict reproducibility; `dot tool`, `dot system update` |
 | Schema-validated config | `.chezmoidata.toml` checked against a JSON Schema in CI; `dot tool export` writes a v1-schema environment manifest; the registry index has its own schema |
 | Supply chain | SHA-pinned actions, Harden Runner, SLSA L3 provenance, Cosign keyless signing, SPDX SBOM, OpenSSF Scorecard and Best Practices, gitleaks + detect-secrets + TruffleHog, dependency review, CodeQL, Checkov |
 
@@ -505,10 +514,10 @@ shell present on the runner; the `Reliability Gate` workflow adds
 WSL and PowerShell contract jobs.
 
 ```bash
-dot cli completion show zsh     # completions are generated from the command registry,
-dot cli completion show fish    # never hand-maintained — bash, zsh, fish, and nu
-dot shell alias status --tiers      # which alias tiers and ecosystems are enabled here
-dot shell alias show gco    # provenance and deprecation status of one alias
+dot cli completion show zsh      # completions are generated from the command registry,
+dot cli completion show fish     # never hand-maintained — bash, zsh, fish, and nu
+dot shell alias status --tiers   # which alias tiers and ecosystems are enabled here
+dot shell alias show gco         # provenance and deprecation status of one alias
 ```
 
 ---
@@ -554,7 +563,6 @@ baseline is a warning.
 |---|---:|---:|
 | Linux (`ubuntu-latest`) | 150 ms | within budget on every green run |
 | macOS | 200 ms | within budget on every green run |
-| Windows (PowerShell) | 300 ms | within budget on every green run |
 | Local macOS, bash 5.x | — | **~47 ms** (recorded in the workflow header and `CHANGELOG.md`) |
 
 **Interactive shell startup** — `dot doctor perf show` (backed by
@@ -587,10 +595,10 @@ The original threshold and the `hyperfine --warmup 3 --runs 10
 Numbers on your own machine:
 
 ```bash
-dot doctor perf show                  # every installed shell vs its target
-dot doctor perf show --baseline       # record this machine's known-good point
-dot doctor perf measure             # per-component startup profile
-dot doctor perf --ready            # time to heavy-layer readiness
+dot doctor perf show              # every installed shell vs its target
+dot doctor perf show --baseline   # record this machine's known-good point
+dot doctor perf measure           # per-component startup profile
+dot doctor perf --ready           # time to heavy-layer readiness
 ```
 
 Budgets, baseline lifecycle, and the regression-issue pipeline are
@@ -608,7 +616,7 @@ and [`benches/`](benches/).
 | :--- | :--- |
 | **Shells and navigation** | Zsh loads in stages through small `rc.d` modules, not one startup script. Fish uses `_cached_eval` and deferred loading. Bash ships full parity with zsh for tooling and aliases. Nushell handles structured workflows (Tier 3). PowerShell keeps cross-platform and WSL sessions on the same baseline with a `pwsh` parity contract in CI. Starship, Zoxide, Atuin, and fzf for navigation and recall. Starship Transient Prompt collapses past prompts to a single glyph on fish; the zsh hook is in place for when upstream lands the matching function ([ADR-010](docs/adr/ADR-010-starship-transient-prompt.md)). |
 | **Development and runtimes** | mise manages language versions in user space with a cross-platform `mise.lock` (Linux, macOS, Windows, exact URLs and SHA-256s). Nix Flakes for strict reproducibility when speed is not the priority. Pueue queues long-running tasks instead of extra tabs. Neovim ships as a full Lua editor, not a starter template. Lazygit for terminal git. Build caches (Go, pip, uv, Zig) live under a private `~/.cache/dot/builds`; Cargo keeps a per-project `./target`. `_cached_eval` caches expensive `tool init` output with mtime and realpath invalidation; `EVALCACHE_DISABLE=true` bypasses it. |
-| **AI, agents, and MCP** | Agent profiles (`dot agent mode`): ask, plan, apply, audit. Pattern library (`dot ai pattern`): architect, hardener, refactor, bundled in `dot_config/ai/patterns/`. MCP policy enforcement (`dot mcp`). AI commit messages (`dot config save`). The `dot ai` cockpit installs and runs Codex, Copilot, Antigravity, Aider, OpenCode and friends from one Bubble Tea TUI; `dot ai serve` exposes your Claude subscription locally to any Anthropic- or OpenAI-protocol tool ([ADR-012](docs/adr/ADR-012-ai-fleet-local-proxy.md), [`docs/AI.md`](docs/AI.md)). Every agent session is logged with a policy hash and an outcome. |
+| **AI, agents, and MCP** | Agent profiles (`dot agent mode`): ask, plan, apply, audit. Pattern library (`dot ai pattern`): architect, hardener, refactor, bundled in `dot_config/ai/patterns/`. MCP policy enforcement (`dot mcp`). AI commit messages (`dot config save`). The `dot ai` cockpit installs and runs Codex, Copilot, Antigravity, Aider, OpenCode and friends from one Bubble Tea TUI; `dot ai gateway serve` exposes your Claude subscription locally to any Anthropic- or OpenAI-protocol tool ([ADR-012](docs/adr/ADR-012-ai-fleet-local-proxy.md), [`docs/AI.md`](docs/AI.md)). Every agent session is logged with a policy hash and an outcome. |
 | **Security, trust, governance** | age and SOPS keep secrets encrypted at rest and out of history. SSH ed25519 signing plus trust metadata back every commit. Gitleaks, detect-secrets, TruffleHog, policy checks, and compliance workflows. `dot attest` records machine state, policy, prompt, and model metadata in tracked JSON. Telemetry controls and local-first defaults (`dot security telemetry apply`, `dot security dns apply`, `dot security firewall apply`, `dot security usb apply`, `dot security lock apply`, `dot security disk show`). SPDX SBOM and Grype CVE scanning in CI. npm releases authenticate through OIDC trusted publishing with provenance, never a long-lived token. |
 | **Themes** | 228 wallpaper-derived themes, dark and light paired; `dot theme`, `dot theme toggle`, `dot theme family`, `dot theme sync` with the OS appearance; `dot theme wallpaper set rotate` and `dot theme wallpaper set sync`. See [Wallpaper-driven themes](#wallpaper-driven-themes). |
 | **Fleet and remote** | `dot fleet` status, drift, events, namespace, RBAC enforce mode; `dot fleet apply` runs `dot sync` (or a custom `--cmd`) on every host in `fleet.toml`; `dot fleet push` deploys the environment to a fresh host over SSH; `dot config export` builds an offline archive. |
@@ -676,20 +684,20 @@ Agents run under a named profile that bounds what they may do, and
 every run leaves evidence:
 
 ```bash
-dot agent mode list                      # ask / plan / apply / audit
-dot agent mode set plan                  # switch the active profile
-dot agent mode run plan git status       # run one command under a profile, with a checkpoint
-dot agent check                    # validate agent-profiles.json and the default
-dot agent log                      # tail the session audit log
-dot agent checkpoint list          # saved run checkpoints (save / list / show / replay)
-dot fleet enforce strict           # advisory → strict RBAC for agent profiles
+dot agent mode list                  # ask / plan / apply / audit
+dot agent mode set plan              # switch the active profile
+dot agent mode run plan git status   # run one command under a profile, with a checkpoint
+dot agent check                      # validate agent-profiles.json and the default
+dot agent log                        # tail the session audit log
+dot agent checkpoint list            # saved run checkpoints (save / list / show / replay)
+dot fleet policy set strict          # advisory → strict RBAC for agent profiles
 ```
 
-The MCP side is policy-first: `dot mcp doctor` audits configured
+The MCP side is policy-first: `dot mcp check` audits configured
 Model Context Protocol servers against
 `defaults/dot_config/dotfiles/mcp-policy.json` (allowlist, supply
-chain, config), and `dot mcp registry` shows the registry it was
-checked against. `dot attest` exports the workstation's version,
+chain, config), and `dot mcp list` shows the configured servers.
+`dot attest export` writes the workstation's version,
 platform, signing settings, active profile, and policy hash as
 tracked JSON ([`docs/operations/ATTESTATION.md`](docs/operations/ATTESTATION.md)).
 The A2A agent card and conformance suite are in
@@ -704,10 +712,10 @@ ties signing, secrets, profiles, and attestation together is
 The CLI is idempotent, and it checks its own work.
 
 ```bash
-dot doctor             # deep audit: tools, paths, portability, AI analysis
-dot doctor fix               # auto-fix tools, chezmoi drift, broken symlinks, missing files
-dot doctor rollback           # return to a previous known-good state
-dot doctor snapshot new           # capture a baseline to compare against later
+dot doctor                # deep audit: tools, paths, portability, AI analysis
+dot doctor fix            # auto-fix tools, chezmoi drift, broken symlinks, missing files
+dot doctor rollback       # return to a previous known-good state
+dot doctor snapshot new   # capture a baseline to compare against later
 ```
 
 Tool recovery is checksum-verified: Nushell, Pueue, Wasmtime, SOPS,
@@ -733,8 +741,8 @@ dot fleet                     # this node: id, namespace, version, OS, drift, la
 dot fleet drift               # configuration drift across managed files
 dot fleet apply               # every host runs: dot sync && dot doctor --quiet
 dot fleet apply --cmd uptime  # or an arbitrary command — this is the trust boundary
-dot fleet namespace staging   # multi-tenant isolation
-dot fleet events              # recent fleet events from the local log
+dot fleet namespace list      # the active namespace (multi-tenant isolation)
+dot fleet log show            # recent fleet events from the local log
 ```
 
 Hostnames are validated against `[A-Za-z0-9._@:+/-]+` before any SSH
@@ -748,11 +756,13 @@ before it joins the fleet. The concept chapter is
 
 ## The `dot` CLI
 
-75 subcommands, 144 indexed entries, grouped by intent. `dot help`
-shows the overview, `dot help all` the full reference, `dot help
-<keyword>` filters it. The generated
-[command index](docs/manual/command-index.md) is checked against
-`dot help all` on every PR.
+Commands are spelled `dot <domain> [object] <verb>` (ADR-020), with
+the shortcuts `dot apply`, `sync`, `diff`, `status`, `edit`, `cd` and
+`update` for the daily loop; the tables below group them by intent.
+`dot help` shows the overview, `dot help all` the full reference,
+`dot help <keyword>` filters it. The
+[command index](docs/manual/command-index.md) is generated from the
+plugin manifests (through the command table) and checked in CI.
 
 ### Start here
 
@@ -762,7 +772,7 @@ shows the overview, `dot help all` the full reference, `dot help
 | `dot sync` | Apply dotfiles to this machine (`--pull` to fetch first, `--check` to preview) |
 | `dot doctor` | Check the environment and surface issues |
 | `dot help tour` | Open the guided tour |
-| `dot agent context apply` | Sync `CLAUDE.md` → `AGENTS.md` + Cursor + Codex stubs |
+| `dot agent context apply` | Sync `CLAUDE.md` → `AGENTS.md` and every harness stub |
 | `dot fleet apply` | SSH out to every host in `~/.config/dotfiles/fleet.toml` |
 | `dot cli list --available` | Browse reusable dotfile modules from the registry |
 
@@ -782,7 +792,7 @@ shows the overview, `dot help all` the full reference, `dot help
 |:---|:---|
 | `dot doctor fix` | Auto-fix tools, chezmoi drift, and broken symlinks |
 | `dot doctor rollback` | Return to a previous known-good state |
-| `dot attest` | Export workstation evidence |
+| `dot attest export` | Export workstation evidence |
 | `dot config export` | Create an offline tarball of the dotfiles environment |
 
 ### AI and agents
@@ -800,9 +810,9 @@ shows the overview, `dot help all` the full reference, `dot help
 | | |
 |:---|:---|
 | `dot theme` / `dot theme rebuild` | Switch theme or regenerate from wallpapers |
-| `dot tool` | Managed tool versions (list, install, use, prune, emit) |
+| `dot tool` | Managed tool versions (list, install, update, remove, set, export) |
 | `dot config profile` | Show or switch the active profile |
-| `dot secret` | Edit, get, set, list, load encrypted secrets |
+| `dot secret` | Edit, show, set, list, export encrypted secrets |
 | `dot theme font install` | Install or patch Nerd Fonts |
 
 ### Fleet and performance
@@ -825,11 +835,11 @@ Full reference: [`docs/reference/UTILS.md`](docs/reference/UTILS.md)
 ```mermaid
 graph TD
     A[User Shell] --> B{dot CLI}
-    B --> C[Lifecycle: sync / apply / rollback / heal]
-    B --> D[Diagnostics: doctor / drift / benchmark / score]
-    B --> E[AI & Agents: ai / mcp / agent / mode]
+    B --> C[Lifecycle: config sync / config apply / doctor rollback / doctor fix]
+    B --> D[Diagnostics: doctor / doctor drift / doctor perf / doctor score]
+    B --> E[AI & Agents: ai / mcp / agent / agent mode]
     B --> F[Themes: theme / theme rebuild]
-    B --> G[Fleet & Attest: fleet / attest / bundle]
+    B --> G[Fleet & Attest: fleet / attest]
 
     C --> H[Chezmoi Source]
     F --> I[Wallpaper Discovery<br/>System + Custom]
@@ -846,9 +856,11 @@ graph TD
 ```
 
 Root layout: `bin/` (dispatcher), `lib/dot/`
-(shared bash library), `defaults/` (the chezmoi source tree, via
-`.chezmoiroot`), `scripts/` (runtime subcommands), `tools/`
-(repo-only ops), `install/` (bootstrap and channel templates). The
+(shared bash library), `plugins/` (one plugin per `dot` domain),
+`defaults/` (the chezmoi source tree, via `.chezmoiroot`), `scripts/`
+(runtime scripts), `tools/` (repo-only ops), `install/` (opt-in
+provisioning and migration scripts), `pkg/` (packaging channel
+templates). The
 map of every top-level path, with the history of the reorganisation
 that produced it, is [`docs/STRUCTURE.md`](docs/STRUCTURE.md); the
 contributor-facing
@@ -870,20 +882,23 @@ dotfiles_version = "0.2.539"
 
 [features]
 alias_wrapper = false   # confirm destructive aliases
-dms = true              # Dank Material Shell theming for GNOME
+dms = true              # Dank Material Shell accents (niri borders, GTK) via dot-theme-sync
+ai_theme_sync = true    # wallpaper-aware AI CLI appearance
 zellij = false
-linux_desktop = false   # niri, waybar, fuzzel, mako, foot, kanshi follow it
+linux_desktop = false   # mako, environment.d and systemd user units
 
 [tools]
 node_manager = "mise"   # mise | fnm | nvm
-
-[secrets.policy]
-provider = "auto"       # auto | macos-keychain | pass | plain-enc
-auto_load = true
 ```
 
-Typos in a flag or profile name fail the `Lint / Chezmoidata Schema`
-job before merge
+`dot secret` also reads an optional `[secrets.policy]` table
+(`provider = "auto" | "macos-keychain" | "pass" | "plain-enc"`,
+`auto_load`) from this file; `DOTFILES_SECRETS_PROVIDER` overrides it.
+
+The `Lint / Chezmoidata Schema` job fails a merge on a wrong type
+(a non-boolean flag, an unknown `default_shell` or `node_manager`).
+It does not catch a misspelt flag or profile name: unknown flags
+and custom profiles are allowed
 ([`config/chezmoidata.schema.json`](config/chezmoidata.schema.json)).
 
 </details>
@@ -901,9 +916,9 @@ default_shell = "zsh"
 linux_desktop = false
 ```
 
-Hardware presets (`macbook-t2`, `surface-pro`) live under
-`defaults/.chezmoidata/` and are selected through the `t2` /
-`surface` flags. Run `dot sync` after editing.
+Hardware presets (`macbook-t2`, `surface-pro`, `geekom-a9`) live in
+`defaults/.chezmoidata/hardware.toml` and are selected with
+`machine = "<preset>"`. Run `dot sync` after editing.
 
 </details>
 
@@ -914,12 +929,11 @@ Hardware presets (`macbook-t2`, `surface-pro`) live under
 |---|---|---|
 | `DOTFILES_FAST=1` | 0 | Skip heavy layers (zinit, completions) |
 | `DOTFILES_ULTRA_FAST=1` | 0 | Bare minimum shell (aliases + prompt) |
-| `DOTFILES_AI=1` | 0 | Enable AI helper scripts |
-| `DOTFILES_PROFILE=custom` | laptop | Override the profile for one session |
+| `DOTFILES_AI=1` | 1 (exported by the shipped zsh, bash, fish, nu and pwsh profiles) | `1` loads the zsh AI helper scripts; set at all, apply builds `dot-ai-tui` |
+| `DOTFILES_PROFILE` | the chezmoi `profile` | Read by the OS tuning scripts (`scripts/tuning/`); `.zshrc` re-exports it from the chezmoi profile on every start |
 | `DOTFILES_NONINTERACTIVE=1` | unset | Skip prompts (CI) |
 | `DOTFILES_SILENT=1` | unset | Suppress non-error output |
 | `DOTFILES_SOURCE_DIR` | `~/.dotfiles` | Override the source directory |
-| `DOTFILES_CACHE_DIR` | `~/.cache/dotfiles` | Override the cache location |
 | `DOTFILES_WALLPAPER_DIR` | `~/Pictures/Wallpapers` | Custom wallpaper directory |
 | `DOTFILES_DEBUG=1` | unset | Print shell-init timing to stderr |
 
@@ -942,7 +956,7 @@ make examples
 ```
 
 <details>
-<summary><b>All examples</b></summary>
+<summary><b>Selected examples</b></summary>
 
 | Category | Example | Purpose |
 | :--- | :--- | :--- |
@@ -966,6 +980,9 @@ make examples
 | | `example-qa` | Quality assurance and validation scripts |
 | **Packaging** | `mise-plugin-dot/` | A mise plugin that installs `dot` |
 
+The full set, including one `example-dot-*` script per `dot` area,
+is in [`examples/`](examples/).
+
 </details>
 
 ---
@@ -976,11 +993,12 @@ A few cases where another tool fits better, listed because the
 short answer is "we don't do that" rather than because of a
 disagreement on priorities.
 
-- **You want a dependency-free shell config.** The default profile
-  brings chezmoi, mise, starship, zoxide, atuin, fzf, and a Go
-  toolchain for the TUI satellites. `profile = "minimal"` and
-  `DOTFILES_ULTRA_FAST=1` cut that down, but the framework assumes
-  it may install things. A single `.zshrc` is lighter.
+- **You want a dependency-free shell config.** The full setup
+  (`install.sh --provision`) brings chezmoi, mise, starship, zoxide,
+  atuin, fzf, and a Go toolchain for the TUI satellites. Leaving out
+  `--provision` (or passing `--minimal`) and `DOTFILES_ULTRA_FAST=1`
+  cut that down, but the framework assumes it may install things. A
+  single `.zshrc` is lighter.
 
 - **You need full parity on nushell.** Nushell is Tier 3: simple
   aliases plus bash-delegated functions, under 5% of the zsh feature
@@ -989,20 +1007,23 @@ disagreement on priorities.
 
 - **You need Windows without WSL to be first-class.** The native
   `dot.ps1` covers the daily workflow (apply, status, doctor, mise,
-  agents, fleet status); themes, `heal`, and most diagnostics still
+  agents, fleet status); themes, `dot doctor fix`, and most diagnostics still
   need bash. Windows CI verifies the PowerShell surface, not the
   whole CLI.
 
 - **You are on Fedora or Arch and need CI-backed support.** Both
   are community-supported: the code is expected to work, but the
-  matrix runs Ubuntu, macOS (Intel and Apple Silicon), and Windows
+  matrix runs Ubuntu, macOS (Apple Silicon on every push, Intel in
+  the weekly extended run), and Windows
   ([`docs/reference/SUPPORT_MATRIX.md`](docs/reference/SUPPORT_MATRIX.md)).
 
-- **You do not want `apply` to run scripts.** Provisioning hooks
-  under `install/provision/` (`run_onchange_*`) install packages,
-  fonts, and tmux plugins when their source changes. They are
-  idempotent and previewable with `dot sync --check`, but they are
-  scripts running as you.
+- **You do not want `apply` to run scripts.** `chezmoi apply` runs
+  the `run_onchange_*` hooks under `defaults/` (the Go satellite
+  builds, terminal profiles, fonts, completion caches) when their
+  source changes. They are idempotent and previewable with
+  `dot sync --check`, but they are scripts running as you. Package
+  and toolchain provisioning under `install/provision/` runs only
+  with `install.sh --provision`.
 
 - **You need a second reviewer on every merge.** This is a
   single-maintainer project gated by CI, DCO, and signed commits,
@@ -1041,12 +1062,13 @@ are in [`CONTRIBUTING.md`](CONTRIBUTING.md). A
 
 ### Fuzzing
 
-Two native Go fuzz harnesses ship under
+Native Go fuzz harnesses ship under
 [`fuzz/`](fuzz/) for the
 user-input surfaces that were ported out of the shell so they could
-be fuzzed at all: `FuzzValidateName` (the name validator behind
-`lib/dot/utils.sh`) and `FuzzInitURLResolver` (the URL resolver
-behind `dot config init`). A third harness,
+be fuzzed at all, among them `FuzzValidateName` (the name validator
+behind `lib/dot/utils.sh`) and `FuzzInitURLResolver` (the URL
+resolver behind `dot config init`); the three Go satellites carry
+their own in-module harnesses. A shell harness,
 [`fuzz/install/fuzz_install.sh`](fuzz/install/fuzz_install.sh), drives
 `install.sh` itself with unknown flags, garbage positionals, symlink
 loops in `$HOME`, an empty `PATH`, 4 KB arguments, and NUL bytes in
@@ -1092,21 +1114,22 @@ corpus lives beside the harnesses under
 - **Coverage by `xtrace`, not kcov.** `tools/ci/run-coverage.sh`
   turns on `set -x` through `BASH_ENV` in every bash process the
   suite spawns and aggregates the lines that executed. The floor is
-  **58%** and rises with each slice; the measured history is in the
+  **98%** (96% for behavioural tests alone); the measured history is in the
   workflow file. A separate 100% *module-mapping* floor
   (`tests/framework/module_coverage.sh`) fails the build when an
   executable module has no test file at all.
 - **Reliability Gate** runs the audit on `ubuntu-latest`,
-  `macos-latest` (Intel), and `macos-14` (Apple Silicon), then the
+  `macos-latest`, and `macos-14` (both Apple Silicon), then the
   examples contract, the WSL contract, and the PowerShell contract
   ([`docs/operations/RELIABILITY.md`](docs/operations/RELIABILITY.md)).
 - **Cross-platform portability scan** rejects GNU-only `sed`,
   `grep`, and `date` idioms and runs the critical scripts on each OS
   ([`cross-platform-test.yml`](.github/workflows/cross-platform-test.yml)).
 - **Generators cannot drift:** the command index is regenerated
-  from `dot help all` and diffed; eight version surfaces
-  (`package.json`, `bin/dot` twice, the man page, `lib/dot/bento.sh`,
-  this README's badge, `CLAUDE.md`, [`AGENTS.md`](AGENTS.md)) are checked against
+  from the plugin manifests (through the command table) and diffed;
+  every version surface (among them `package.json`, `bin/dot`, the
+  man page, `lib/dot/bento.sh`, this README's badge, `CLAUDE.md` and
+  [`AGENTS.md`](AGENTS.md)) is checked against
   `.chezmoidata.toml`; `.chezmoidata.toml` itself is validated
   against its JSON Schema. `dot agent context check` does the same for the
   AI-harness stubs locally.
@@ -1121,19 +1144,18 @@ corpus lives beside the harnesses under
 | `ci.yml` | push, PR, schedule | Shell / Lua / Fish / Nushell / copyright lint, chezmoidata schema, secrets scan, dependency audit, TruffleHog, SBOM + Grype, link check, tests on Linux, macOS, Windows, Docker |
 | `ci-enforced.yml` | push, PR | The stricter enforced gate reusing the shared lint and test-suite workflows |
 | `reliability-gate.yml` | push, PR | Reliability audit on three runners + examples, WSL, PowerShell contracts |
-| `coverage.yml` | push, PR | xtrace line coverage with the 58% floor and delta gate |
+| `coverage.yml` | push, PR | xtrace line coverage with the 98% floor and delta gate |
 | `cross-platform-test.yml` | push, PR | Portability scan and runtime checks per OS |
 | `dot-cli-bench.yml` / `perf-baseline.yml` | push, PR / weekly + `feat/**` | Cold-start budget; shell-startup baseline and regression issues |
 | `fuzz.yml` / `cflite_pr.yml` / `install-fuzz.yml` | push, PR / PR / weekly + PR | Go harnesses; ClusterFuzzLite; `install.sh` fuzz |
 | `doc-drift.yml` | push, PR | Command index and version-consistency generators |
-| `dco.yml` / `pr-signature.yml` / `verify-tag-signature.yml` | PR / PR / tag | DCO trailer, signed PR commits, signed annotated tags |
+| `dco.yml` / `pr-signature.yml` / `verify-tag-signature.yml` | PR / PR / tag | DCO trailer, PR description signature, signed annotated tags |
 | `scorecard.yml` / `codeql.yml` / `dependency-review.yml` / `security-enhanced.yml` / `deps-dev-validation.yml` | weekly / push, PR | OpenSSF Scorecard, CodeQL, dependency review (`fail-on-severity: high`), Checkov, deps.dev validation |
 | `release-package-dot.yml` / `security-release.yml` | release | `dot-<v>.tar.gz` + `.zip` with SLSA provenance; SPDX SBOM, Cosign signature, unified `ALL_SHA256SUMS` manifest |
 | `release-install-smoke.yml` / `release-distribute-*.yml` | release | Clean-install smoke on Ubuntu + macOS; Homebrew, Scoop, AUR fan-out |
 | `npm-publish.yml` / `manual-publish.yml` / `pages.yml` | release, push | npm via OIDC trusted publishing; the manual in nine formats; the site |
 
-53 workflows in total; the cadence and the composite actions are
-documented in
+The cadence and the composite actions are documented in
 [`docs/operations/CI_CADENCE.md`](docs/operations/CI_CADENCE.md) and
 [`docs/operations/CI_COMPOSITES.md`](docs/operations/CI_COMPOSITES.md).
 
@@ -1149,7 +1171,7 @@ initial response, 48 h target; High: 72 h / 7 days; Medium: 5 / 30
 business days; Low: 10 / 90), the supported-version table, and the
 GPG key for encrypted reports
 ([`docs/security/DISCLOSURE.md`](docs/security/DISCLOSURE.md),
-[`docs/security/KEYS.md`](docs/security/KEYS.md)).
+[`docs/security/KEY_ROTATION.md`](docs/security/KEY_ROTATION.md)).
 
 A dotfiles framework is code that runs as you, on every login, on
 every machine you own. The posture below closes the vectors that
@@ -1160,12 +1182,14 @@ architectural level, not behind opt-in flags. The full analysis is
 
 ### Installer and remote-execution controls
 
-- **No unverified download runs.** `install.sh` fetches `chezmoi`
-  through `tools/ci/install-chezmoi-verified.sh`, which downloads the
-  release tarball *and* the upstream checksum file and refuses on
-  mismatch. Where that helper is unavailable, the fallback still
-  requires the installer to be under 100 KiB and to begin with
-  `#!/`.
+- **No unverified download runs.** Where `chezmoi` is missing,
+  `install.sh` installs it with Homebrew when `brew` is present;
+  otherwise it fetches the release tarball through
+  `tools/ci/install-chezmoi-verified.sh`, or, when that helper is not
+  beside it, an embedded verifier that checks the tarball against a
+  pinned SHA-256 (and the upstream checksum file when it can fetch
+  it). Either refuses on mismatch and never falls back to a remote
+  script.
 - **Every third-party installer the framework can execute is
   allowlisted by SHA-256** in
   [`security/remote-installers.sha256`](security/remote-installers.sha256)
@@ -1202,10 +1226,10 @@ architectural level, not behind opt-in flags. The full analysis is
 
 - Every agent runs under a bounded profile (`ask` / `plan` /
   `apply` / `audit`) with checkpoints and a session audit log;
-  `dot fleet enforce strict` turns the profile RBAC from advisory
+  `dot fleet policy set strict` turns the profile RBAC from advisory
   into enforced.
 - MCP servers must appear in `mcp-policy.json` and pass
-  `dot mcp doctor` (policy, supply chain, config) before use.
+  `dot mcp check` (policy, supply chain, config) before use.
 - `dot attest` records the workstation state with the policy hash so
   an audit can check what an agent was allowed to do when it ran.
 
@@ -1216,8 +1240,9 @@ architectural level, not behind opt-in flags. The full analysis is
   tag reference is the SLSA generator reusable workflow, which its
   maintainers require to be referenced by release tag
   ([`docs/security/CI_PINNING.md`](docs/security/CI_PINNING.md)).
-- **Harden Runner in all 53 workflows**, six jobs in egress-block
-  mode with an explicit endpoint list
+- **Harden Runner in every workflow** except
+  `branch-drift-guard.yml`, with the jobs proven local-only in
+  egress-block mode and an explicit endpoint list
   ([`docs/security/CI_EGRESS_ALLOWLIST.md`](docs/security/CI_EGRESS_ALLOWLIST.md)).
 - **Releases carry provenance:** SLSA L3 build attestation on the
   `dot` archive (`gh attestation verify`), an SPDX SBOM signed with
@@ -1232,8 +1257,9 @@ architectural level, not behind opt-in flags. The full analysis is
   long-lived token.
 - **Scans on every push:** dependency review (`fail-on-severity:
   high`), CodeQL, Checkov, Grype against the SBOM, Dependabot with
-  grouped updates; OpenSSF Scorecard weekly with the snapshot
-  committed to [`docs/security/SCORECARD.md`](docs/security/SCORECARD.md).
+  grouped updates; OpenSSF Scorecard weekly, with the snapshot in
+  [`docs/security/SCORECARD.md`](docs/security/SCORECARD.md)
+  refreshed by hand (`scripts/qa/scorecard-snapshot.sh`).
 - **SPDX headers** on source files, checked by the copyright lint
   job.
 
@@ -1258,7 +1284,7 @@ The four entry points, identical across every repo in the family:
   `dot help --manual`, `dot help --manual pdf`, `dot help --manual text | less`, and
   `dot help --manual --offline` from the bundled snapshot
 - **[Command reference](docs/manual/command-index.md)** — every
-  `dot` subcommand, generated from `dot help all`; `man dot` after
+  `dot` subcommand, generated from the plugin manifests; `man dot` after
   install
 - **[Developer docs](DEVELOPMENT.md)** — toolchain, task map,
   reproducing every CI gate locally
@@ -1273,7 +1299,7 @@ and rebuilds on every change from [`docs/manual/`](docs/manual/).
 |---|---|
 | [`docs/STRUCTURE.md`](docs/STRUCTURE.md) | Every top-level path, the chezmoi naming contract, where to make which change. |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Startup strategies, `_cached_eval`, lazy hydration, artifact and ultra-fast modes. |
-| [`docs/adr/`](docs/adr/README.md) | Twelve decision records: CI/CD, shell performance, security-first, CLI architecture, chezmoi, shell selection, multi-shell parity, aliases, wallpaper theming, transient prompt, nushell tier, AI local proxy. |
+| [`docs/adr/`](docs/adr/README.md) | Decision records, from CI/CD, shell performance, the CLI architecture and multi-shell parity to plugin trust, read-only MCP isolation, the command naming system and the family's version lockstep. |
 | [`docs/reference/`](docs/reference/) | Aliases, feature flags, fonts, PowerShell parity, profiles, scripts, support matrix, themes, tools, `dot` utilities. |
 | [`docs/security/`](docs/security/README.md) | Threat model, install verification, fuzzing, secrets, encryption, MCP policy, commit signing, CI pinning, egress allowlist, key rotation, release verification, Scorecard, compliance, incident response. |
 | [`docs/operations/`](docs/operations/OPERATIONS.md) | Release pipeline, version sync, performance, reliability, coverage, drift, registry, attestation, CI cadence, migration between versions. |
@@ -1307,7 +1333,8 @@ every one of them stays fixed.
 
 - **Versioning.** [SemVer](https://semver.org) with
   `defaults/.chezmoidata.toml` as the source of truth, mirrored to
-  eight surfaces by `scripts/version-sync.sh` and checked in CI.
+  the non-template version surfaces by `scripts/version-sync.sh` and
+  checked in CI.
   During the `0.2.x` series every release is a patch bump; a change
   that breaks an existing machine (a renamed command, a moved
   managed path, a changed flag default) is called out in its
