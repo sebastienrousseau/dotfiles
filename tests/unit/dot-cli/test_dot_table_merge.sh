@@ -6,8 +6,8 @@
 # lib/dot/data/groups.txt merge, through lib/dot/table-merge.awk, into
 # exactly the command table bin/dot reads (lib/dot/data/commands.txt), and
 # the generator's Python merge() agrees. Planted fragments pin each merge
-# rule: bucket order, the first run record of an invocation, and leg
-# records only for legacy routes.
+# rule: bucket order (hook records last), the first run record of an
+# invocation, and leg records only for legacy routes.
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -64,6 +64,7 @@ cmd|alpha status|@alpha status|read|built by the entry
 cmd|alpha old|oldroute|read|a legacy route
 run|alpha old --x|oldroute||
 flag|alpha status|--json|||as JSON
+hook|on-apply|alpha|libexec/hooks/a.sh|alpha's hook, read before its alias
 alias|al|shortcut|alpha status|
 EOF
 cat >"$WORK/b.txt" <<'EOF'
@@ -71,14 +72,19 @@ dom|beta|list||second
 cmd|beta list|oldroute|read|the same legacy route, later
 run|alpha old --x|@alpha old --x||
 arg|beta list|one two||
+hook|on-apply|beta|libexec/hooks/b.sh|beta's hook
 EOF
 printf 'grp|g|Group|alpha beta|\n' >"$WORK/g.txt"
 awk -f "$MERGE" "$WORK/g.txt" "$WORK/a.txt" "$WORK/b.txt" >"$WORK/rules"
 
 test_start "merge_orders_the_buckets"
-assert_equals "grp dom cmd cmd dom cmd run leg flag arg alias" \
+assert_equals "grp dom cmd cmd dom cmd run leg flag arg alias hook hook" \
   "$(cut -d'|' -f1 "$WORK/rules" | tr '\n' ' ' | sed 's/ $//')" \
-  "grp, dom/obj/cmd in fragment order, run, leg, flag/arg, alias"
+  "grp, dom/obj/cmd in fragment order, run, leg, flag/arg, alias, hook"
+
+test_start "merge_keeps_hooks_in_domain_order"
+assert_equals "alpha beta" "$(grep '^hook|' "$WORK/rules" | cut -d'|' -f3 | tr '\n' ' ' | sed 's/ $//')" \
+  "each plugin's hooks, in the order the fragments are read"
 
 test_start "merge_keeps_the_first_run_of_an_invocation"
 assert_equals "run|alpha old --x|oldroute||" "$(grep '^run|' "$WORK/rules")" "the later fragment's run is dropped"

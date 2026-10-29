@@ -10,12 +10,17 @@ source "$SCRIPT_DIR/../../lib/dot/ui.sh"
 # shellcheck source=../../lib/dot/log.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../../lib/dot/log.sh"
-# shellcheck source=../../lib/dot/ai-install.sh
-# shellcheck disable=SC1091
-source "$SCRIPT_DIR/../../lib/dot/ai-install.sh"
 # shellcheck source=../../lib/dot/utils.sh
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/../../lib/dot/utils.sh" # check_cmd
+source "$SCRIPT_DIR/../../lib/dot/utils.sh"
+# The plugins' on-apply hooks run from the command table (lib/dot/hooks.sh).
+_DOT_SRC="$(cd "$SCRIPT_DIR/../.." && pwd)"
+# shellcheck source=../../lib/dot/names.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../../lib/dot/names.sh"
+# shellcheck source=../../lib/dot/hooks.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../../lib/dot/hooks.sh"
 export DOT_COMMAND="apply"
 
 # Temp file cleanup. `set +u` guards the array expansion: on bash 3.2
@@ -42,7 +47,7 @@ Environment Variables:
   DOTFILES_CHEZMOI_APPLY_FLAGS    Extra flags for chezmoi apply
   DOTFILES_CHEZMOI_VERBOSE=1      Enable verbose output
   DOTFILES_CHEZMOI_KEEP_GOING=1   Continue on errors
-  DOTFILES_NONINTERACTIVE=1       Skip interactive menus (AI provider installer)
+  DOTFILES_NONINTERACTIVE=1       Skip interactive menus (plugin hooks, e.g. AI installs)
   DOTFILES_INTERACTIVE_APPLY=1    Re-enable chezmoi overwrite prompts
                                   (apply is unattended/--force by default)
   DOTFILES_ALIAS_STRICT_MODE=1    Run alias governance checks
@@ -163,125 +168,6 @@ _apply_snapshot() {
   fi
 }
 
-# check_cmd() is provided by lib/dot/utils.sh — sourced above.
-
-# binary|mise_package|label  (claude uses the native installer, not mise)
-_AI_PROVIDERS=(
-  "claude|native|Claude Code"
-  "codex|npm:@openai/codex|Codex CLI"
-  "copilot|npm:@github/copilot|Copilot CLI"
-  "goose|native|Goose"
-  "agy|native|Antigravity CLI"
-  "kimi|native|Kimi CLI"
-  "sgpt|pipx:shell-gpt|Shell-GPT"
-  "ollama|aqua:ollama/ollama|Ollama"
-  "opencode|npm:opencode-ai|OpenCode"
-  "aider|pipx:aider-chat[uvx_args=--python 3.12]|Aider"
-  "kiro-cli|kiro-cli|Kiro CLI"
-  "autohand|npm:autohand-cli|Autohand Code"
-  "qwen|npm:@qwen-code/qwen-code|Qwen Code"
-  "zai|npm:@guizmo-ai/zai-cli|ZAI"
-)
-
-# _apply_ai_scan: one row per provider; missing entries go to _ai_missing.
-_apply_ai_scan() {
-  local entry bin pkg label
-  _ai_missing=()
-  for entry in "${_AI_PROVIDERS[@]}"; do
-    IFS='|' read -r bin pkg label <<<"$entry"
-    if check_cmd "$bin"; then
-      ui_ok "$label"
-    else
-      ui_info "$label" "not installed"
-      _ai_missing+=("$entry")
-    fi
-  done
-}
-
-# _apply_ai_pick: the missing entries whose labels the user ticked.
-_apply_ai_pick() {
-  local entry bin pkg label picked selected
-  local -a choices=()
-  for entry in "${_ai_missing[@]}"; do
-    IFS='|' read -r bin pkg label <<<"$entry"
-    choices+=("$label")
-  done
-  picked=$(printf '%s\n' "${choices[@]}" |
-    gum choose --no-limit --header "Select providers to install (Space to toggle, Enter to confirm)") || picked=""
-  [[ -n "$picked" ]] || return 0
-  while IFS= read -r selected; do
-    [[ -z "$selected" ]] && continue
-    for entry in "${_ai_missing[@]}"; do
-      IFS='|' read -r bin pkg label <<<"$entry"
-      if [[ "$label" == "$selected" ]]; then
-        _ai_to_install+=("$entry")
-      fi
-    done
-  done <<<"$picked"
-}
-
-# _apply_ai_choose: fill _ai_to_install through gum (all, a choice, or
-# none); without gum, print how to install them instead.
-_apply_ai_choose() {
-  local action=""
-  _ai_to_install=()
-  if ! command -v gum &>/dev/null; then
-    ui_info "Tip" "Install all missing AI providers with: mise install"
-    ui_info "Tip" "Or individually: dot ai install <tool> (pinned versions)"
-    return 0
-  fi
-  action=$(printf '%s\n' "Install all" "Choose which to install" "Skip" |
-    gum choose --header "Missing AI providers — install via mise?") || action=""
-  case "$action" in
-    "Install all") _ai_to_install=("${_ai_missing[@]}") ;;
-    "Choose which to install") _apply_ai_pick ;;
-  esac
-}
-
-# _apply_ai_install <entry>: native installer for "native" packages, else
-# mise (under a gum spinner when gum is still there).
-_apply_ai_install() {
-  local bin pkg label spec
-  IFS='|' read -r bin pkg label <<<"$1"
-  if [[ "$pkg" == "native" ]]; then
-    "install_${bin}_native" "$label"
-    return 0
-  fi
-  # The version pinned in [ai_tools]; none means no install, not @latest.
-  spec="$(ai_pinned_spec "$pkg")" || return 0
-  if command -v gum &>/dev/null; then
-    if _ai_in_scratch_dir gum spin --spinner dot --title "Installing $label ($pkg)" -- \
-      mise use -g "$spec" 2>&1; then
-      ui_ok "$label" "installed"
-    else
-      ui_warn "$label" "install failed (continuing)"
-    fi
-  else
-    # Unreachable in practice: _ai_to_install is only filled by gum choose,
-    # and bash's command hash keeps `command -v gum` true for the rest of
-    # the run even if gum is removed.
-    ui_info "Installing" "$label via mise ($pkg)"
-    _ai_in_scratch_dir mise use -g "$spec" 2>&1 || ui_warn "$label" "install failed (continuing)" # mutation: ignore unreachable: see above
-  fi
-}
-
-# _apply_ai_offer: offer to install missing providers (interactive runs only).
-_apply_ai_offer() {
-  local entry
-  [[ ${#_ai_missing[@]} -gt 0 && "$INTERACTIVE" == "1" ]] || return 0
-  if ! command -v mise &>/dev/null; then
-    ui_warn "mise" "not found — install mise first to manage AI providers"
-    return 0
-  fi
-  echo ""
-  _apply_ai_choose
-  [[ ${#_ai_to_install[@]} -gt 0 ]] || return 0
-  echo ""
-  for entry in "${_ai_to_install[@]}"; do
-    _apply_ai_install "$entry"
-  done
-}
-
 _apply_status() {
   local status_out
   [[ "${DOTFILES_CHEZMOI_STATUS:-1}" = "1" ]] || return 0
@@ -329,10 +215,7 @@ _apply_governance
 run_step "Chezmoi apply" chezmoi apply "${args[@]}"
 _apply_snapshot
 
-echo ""
-ui_header "AI provider CLI checks (optional)"
-_apply_ai_scan
-_apply_ai_offer
+DOT_HOOK_INTERACTIVE="$INTERACTIVE" dot_hooks_run on-apply
 
 _apply_status
 _apply_repair

@@ -218,6 +218,16 @@ runs each command (`legacy`, on the domain and on each command).
   never writes it. A tree with no fragments, or a merge that fails, reads
   `lib/dot/data/commands.txt`, which the build tools (completions, man
   pages, the lint) keep reading.
+- A plugin declares lifecycle hooks in its manifest (`[[hooks]]`: an
+  `event`, a `run` script under its `libexec/`, and a `summary`). The
+  generator writes them to its fragment as
+  `hook|<event>|<domain>|<run>|<summary>` records, merged after the
+  aliases, and `lib/dot/hooks.sh` runs every hook for an event in domain
+  order, under its summary; one that fails is reported and the caller
+  carries on. The first event is `on-apply`, run by `dot config apply`
+  after chezmoi; the ai plugin's on-apply hook lists the roster's tools
+  and offers to install the missing ones, which `chezmoi-apply.sh` did
+  itself from its own list before P2.2.
 - Only the bundled plugins' fragments are merged. User plugin
   directories (`$XDG_DATA_HOME/dot/plugins/`) are not read: they come
   with P2.3, and only through ADR-016's trust path (an explicit, signed
