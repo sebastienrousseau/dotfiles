@@ -34,12 +34,11 @@ already know 80% of this.
 **The installer applies this repo's defaults.** `install.sh` clones
 the framework to `~/.dotfiles` and runs `chezmoi apply`, which
 overwrites every file the defaults manage (`~/.bashrc`, `~/.zshrc`,
-`~/.gitconfig`, much of `~/.config`) without asking. It copies the
-originals to `~/.dotfiles.bak.<timestamp>` only when it finds a
-chezmoi setup to compare against (an existing `~/.dotfiles` or
-`~/.local/share/chezmoi` git checkout, or an existing chezmoi config);
-a first install from the release installer takes no backup. So every guide below starts with
-your own backup. After the install, `dot diff` and `dot sync --check`
+`~/.gitconfig`, much of `~/.config`) without asking. It first copies
+each existing file it is about to overwrite to
+`~/.dotfiles.bak.<timestamp>`, keeping its path under `$HOME`. Every
+guide below still starts with your own backup, of exactly what your old
+tool manages, so you can restore it on its own terms. After the install, `dot diff` and `dot sync --check`
 preview changes without writing.
 
 **You can leave.** `dot config uninstall --force` removes the repo, the

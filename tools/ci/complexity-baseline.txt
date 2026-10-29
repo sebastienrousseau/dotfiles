@@ -76,7 +76,7 @@
   18   17   21.1  141   141 defaults/dot_local/bin/executable_tour::<top>
    8   17   21.6   38     0 install.sh::install_chezmoi
   14   16   28.6   45     0 install.sh::install_chezmoi_verified_embedded
-  57   79   70.3  297     0 install.sh::main
+  41   51   52.9  251     0 install.sh::main
   11   10   18.5   17     0 install.sh::seed_git_identity
   10   16   20.6   43    50 install/lib/hide_menu_entries.sh::<top>
   19   27   27.7   74   102 install/lib/install_neovim.sh::<top>

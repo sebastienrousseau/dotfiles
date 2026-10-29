@@ -27,17 +27,18 @@ The canonical install path is `install.sh` at the repo root —
    falls back to an unverified script. `gum` is bootstrapped in
    parallel for the UI, and its failure is ignored.
 2. Backs up every file `chezmoi managed` lists to
-   `~/.dotfiles.bak.<ts>`. This only happens when a chezmoi config
-   exists at this point: an existing `~/.dotfiles` or
-   `~/.local/share/chezmoi` git checkout gets one written for it, and
-   an earlier chezmoi setup may have one. A first install from the
-   release installer has neither, so nothing is backed up.
+   `~/.dotfiles.bak.<ts>`, when a chezmoi config exists at this point:
+   an existing `~/.dotfiles` or `~/.local/share/chezmoi` git checkout
+   gets one written for it, and an earlier chezmoi setup may have one.
+   On a first install there is no source yet, so the backup runs after
+   the clone in step 4 instead, before anything is applied.
 3. Runs `install/migrate/migrate-v0_2-to-v0_2_503.sh` from whichever
    of those two checkouts has it.
 4. Picks the source: `~/.dotfiles` if it is a git checkout; else moves
    a git checkout at `~/.local/share/chezmoi` to `~/.dotfiles`; else
    clones the requested tag (default: the release the installer
-   belongs to; `install.sh --help` names it) into `~/.dotfiles`.
+   belongs to; `install.sh --help` names it) into `~/.dotfiles` and
+   then backs up what it will overwrite, as in step 2.
 5. Writes `sourceDir` into `~/.config/chezmoi/chezmoi.toml`, keeping
    the rest of an existing config, and seeds `name`, `email` and
    `signingkey` from `git config --global` when the file has no
