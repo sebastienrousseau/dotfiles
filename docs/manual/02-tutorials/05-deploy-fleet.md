@@ -181,7 +181,7 @@ Then:
 
 ```sh
 dot fleet apply --dry-run   # print the hosts and the command, connect to none
-dot fleet apply             # run 'dot sync && dot doctor --quiet' on each host
+dot fleet apply             # run 'dot config update && dot doctor' on each host
 ```
 
 It runs up to four hosts in parallel (`--jobs <n>` changes that); `--host <name>` limits it to one host, and `--verify-hosts` refuses to connect to a host that is not already in `~/.ssh/known_hosts`.

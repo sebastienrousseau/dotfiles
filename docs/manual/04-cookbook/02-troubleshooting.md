@@ -233,7 +233,7 @@ dot shell update --prewarm
 **Fix**:
 
 ```sh
-dot doctor status --verbose   # see every check
+dot doctor status             # see every check
 dot doctor fix                # auto-fix what's possible
 dot doctor                    # recheck
 ```

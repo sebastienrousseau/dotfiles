@@ -8,7 +8,7 @@ name = "theme"
 domain = "theme"
 version = "0.2.536"
 summary = "one palette for every app"
-default = "show"
+default = "select"
 
 [entry]
 command = "dot-theme"

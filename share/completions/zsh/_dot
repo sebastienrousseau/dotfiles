@@ -19,7 +19,7 @@ _dot() {
     update) path_="system update${path_#update}" ;;
   esac
   case "$path_" in
-    '') kids_=('agent:modes, policy, sandbox, budgets' 'ai:install, route and run coding agents' 'attest:attestation and verification' 'cli:plugins, updates, completions' 'config:apply, diff and sync the dotfiles' 'doctor:health, repair, backup and rollback' 'fleet:many hosts' 'mcp:MCP servers as supply chain' 'secret:secrets, keys and SSH certificates' 'security:OS hardening' 'session:find, open and restore terminal sessions' 'shell:aliases, history, startup caches' 'system:updates, cleanup, scheduled maintenance' 'theme:one palette for every app' 'tool:toolchains, packages, project templates' 'top:what the machine and its agents are doing' 'ui:primitives for scripts' 'apply:Write the dotfiles to this machine' 'sync:Pull the source, then apply' 'diff:What apply would change' 'status:Pending changes and last apply' 'edit:Open a managed file in $EDITOR' 'cd:where the dotfiles source lives' 'update:Update everything, asking first' 'help:Built-in: help' 'version:Built-in: version') ;;
+    '') kids_=('agent:modes, policy, sandbox, budgets' 'ai:install, route and run coding agents' 'attest:attestation and verification' 'cli:plugins, updates, completions' 'config:apply, diff and sync the dotfiles' 'doctor:health, repair, backup and rollback' 'fleet:many hosts' 'mcp:MCP servers as supply chain' 'secret:secrets, keys and SSH certificates' 'security:OS hardening' 'session:find, open and restore terminal sessions' 'shell:aliases, history, startup caches' 'system:updates, cleanup, scheduled maintenance' 'theme:one palette for every app' 'tool:toolchains, packages, project templates' 'top:what the machine and its agents are doing' 'ui:primitives for scripts' 'apply:Write the dotfiles to this machine' 'sync:Apply the dotfiles; --pull pulls first' 'diff:What apply would change' 'status:Pending changes and last apply' 'edit:Open a managed file in $EDITOR' 'cd:where the dotfiles source lives' 'update:Update everything, asking first' 'help:Built-in: help' 'version:Built-in: version') ;;
     'agent') kids_=('mode:agent modes' 'context:context files' 'card:the agent card' 'log:the agent log' 'checkpoint:saved checkpoints' 'policy:sandbox policy' 'budget:spend budgets' 'delegate:agents a profile may hand work to' 'status:Mode, policy and budgets' 'check:Check modes and policy' 'run:Run an agent task' 'suspend:Pause running agents' 'resume:Resume paused agents' 'export:Export the AI bill of materials') ;;
     'agent budget') kids_=('show:Budgets and spend') ;;
     'agent card') kids_=('show:The agent card' 'check:Check the card against the A2A spec') ;;
@@ -38,7 +38,7 @@ _dot() {
     'cli') kids_=('completion:shell completion scripts' 'registry:the plugin registry' 'list:Installed plugins' 'show:One plugin in detail' 'install:Install a plugin' 'update:Update dot and its plugins' 'remove:Remove a plugin' 'verify:Verify plugin provenance' 'new:Create a plugin from the template') ;;
     'cli completion') kids_=('show:Print a completion script') ;;
     'cli registry') kids_=('show:The plugin registry URL' 'set:Point at another plugin registry') ;;
-    'config') kids_=('path:where the dotfiles source lives' 'profile:the active profile and its features' 'status:Pending changes and last apply' 'diff:What apply would change' 'apply:Write the dotfiles to this machine' 'sync:Pull the source, then apply' 'update:Pull and apply the dotfiles only' 'edit:Open a managed file in $EDITOR' 'add:Start managing an existing file' 'save:Commit source changes' 'init:First-time setup of the dotfiles' 'check:Lint the source and templates' 'export:Write a portable bundle' 'uninstall:Remove the setup, keeping the source' 'import:Restore from an exported bundle') ;;
+    'config') kids_=('path:where the dotfiles source lives' 'profile:the active profile and its features' 'status:Pending changes and last apply' 'diff:What apply would change' 'apply:Write the dotfiles to this machine' 'sync:Apply the dotfiles; --pull pulls first' 'update:Pull and apply the dotfiles only' 'edit:Open a managed file in $EDITOR' 'add:Start managing an existing file' 'save:Commit source changes' 'init:First-time setup of the dotfiles' 'check:Lint the source and templates' 'export:Write a portable bundle' 'uninstall:Remove the setup, keeping the source' 'import:Restore from an exported bundle') ;;
     'config path') kids_=('show:Print the source directory') ;;
     'config profile') kids_=('show:Show the active profile' 'set:Switch profile') ;;
     'doctor') kids_=('score:the setup score' 'snapshot:setup snapshots' 'perf:startup performance' 'drift:drift from the source' 'conflict:conflicting files' 'metric:recorded metrics' 'report:the weekly posture report' 'status:Health summary' 'check:Run every health check' 'fix:Repair what check found' 'backup:Back up the setup' 'restore:Restore from a backup' 'rollback:Return to a previous generation') ;;
@@ -57,7 +57,7 @@ _dot() {
     'mcp') kids_=('list:Configured MCP servers' 'check:Check servers and pins' 'serve:Run dot'\''s read-only MCP server') ;;
     'secret') kids_=('key:SSH signing and authentication keys' 'cert:short-lived SSH certificates' 'provider:the secret provider' 'status:Provider, vault state and key counts' 'init:Set up the secret provider' 'edit:Edit the encrypted secrets file' 'new:Create the secrets file' 'list:Secret names without values' 'show:One secret' 'set:Store one secret' 'export:Print secrets as environment' 'check:Audit secret hygiene') ;;
     'secret cert') kids_=('list:Certificates and expiry' 'new:Issue a short-lived SSH certificate' 'remove:Revoke the current SSH certificate') ;;
-    'secret key') kids_=('list:Keys without their values' 'new:Create an ED25519 key') ;;
+    'secret key') kids_=('list:Keys without their values' 'new:Encrypt an SSH key with age') ;;
     'secret provider') kids_=('show:The active provider' 'set:Switch provider') ;;
     'security') kids_=('policy:the security policy' 'disk:disk encryption' 'firewall:the firewall' 'telemetry:OS telemetry' 'dns:encrypted DNS' 'lock:the lock screen' 'usb:removable media' 'score:the security score' 'status:Hardening summary') ;;
     'security disk') kids_=('show:Disk encryption state') ;;
@@ -259,7 +259,7 @@ _dot() {
       flags_=('--help:Show help')
       ;;
     'config import' | 'config import'\ *)
-      flags_=('--help:Show help')
+      flags_=('--help:Show help' '--yes:Restore without asking' '-y:Restore without asking')
       ;;
     'config init' | 'config init'\ *)
       flags_=('--help:Show help')
@@ -333,7 +333,7 @@ _dot() {
       flags_=('--help:Show help' '--baseline:Capture the baseline snapshot' '-b:Capture the baseline snapshot' '--force:Overwrite an existing snapshot' '-f:Overwrite an existing snapshot')
       ;;
     'doctor status' | 'doctor status'\ *)
-      flags_=('--help:Show help' '--verbose:Show detailed checks' '-v:Show detailed checks' '--json:Print a JSON summary' '-j:Print a JSON summary' '--fix:Apply common fixes' '-f:Apply common fixes' '--force:Apply fixes without prompts' '-F:Apply fixes without prompts')
+      flags_=('--help:Show help' '--json:Print a JSON summary' '-j:Print a JSON summary' '--fix:Apply common fixes' '-f:Apply common fixes' '--force:Apply fixes without prompts' '-F:Apply fixes without prompts')
       ;;
     'fleet apply' | 'fleet apply'\ *)
       flags_=('--help:Show help')

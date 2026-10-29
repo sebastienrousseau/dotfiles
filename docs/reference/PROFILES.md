@@ -30,7 +30,7 @@ The profile is a free-form name, not a bundle of features. Features are switched
 | `scripts/tuning/linux.sh`, `scripts/tuning/macos.sh` | Accept `laptop`, `desktop` or `server` from `DOTFILES_PROFILE`. |
 | niri config header | Printed as a comment. |
 
-`dot config profile show` prints the profile and the `[features]` block from the source `.chezmoidata.toml`; `dot config profile set <name>` rewrites the `profile` line in that file. A `profile` set in `~/.config/chezmoi/chezmoi.toml` (which `chezmoi init` always writes) takes precedence over the source file.
+`dot config profile show` prints the profile (from `~/.config/chezmoi/chezmoi.toml`, else the source `.chezmoidata.toml`) and the `[features]` block from the source. `dot config profile set <name>` writes `profile` under `[data]` in `~/.config/chezmoi/chezmoi.toml`, which takes precedence over the source file (`chezmoi init` always writes one).
 
 ### Per-Machine Overrides
 

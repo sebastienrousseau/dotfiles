@@ -83,7 +83,7 @@ obj|config profile|show||the active profile and its features
 cmd|config status|@config status|read|Pending changes and last apply
 cmd|config diff|@config diff|read|What apply would change
 cmd|config apply|@config apply|write|Write the dotfiles to this machine
-cmd|config sync|@config sync|write|Pull the source, then apply
+cmd|config sync|@config sync|write|Apply the dotfiles; --pull pulls first
 cmd|config update|@config update|write|Pull and apply the dotfiles only
 cmd|config edit|@config edit|write|Open a managed file in $EDITOR
 cmd|config add|@config add|write|Start managing an existing file
@@ -150,7 +150,7 @@ cmd|secret set|@secret set|write|Store one secret
 cmd|secret export|@secret export|read|Print secrets as environment
 cmd|secret check|@secret check|read|Audit secret hygiene
 cmd|secret key list||read|Keys without their values
-cmd|secret key new|@secret key new|write|Create an ED25519 key
+cmd|secret key new|@secret key new|write|Encrypt an SSH key with age
 cmd|secret cert list|@secret cert list|read|Certificates and expiry
 cmd|secret cert new|@secret cert new|write|Issue a short-lived SSH certificate
 cmd|secret provider show|@secret provider show|read|The active provider
@@ -210,7 +210,7 @@ cmd|system schedule set|@system schedule set|write|Set the maintenance schedule
 cmd|system schedule run|@system schedule run|write|Run scheduled maintenance now
 cmd|system settings show||read|Current OS settings
 cmd|system settings apply|@system settings apply|write|Apply the managed OS settings
-dom|theme|show|@theme|one palette for every app
+dom|theme|select|@theme|one palette for every app
 obj|theme wallpaper|show||the current wallpaper
 obj|theme font|list||installed fonts
 cmd|theme show|@theme show|read|Current theme and palette
@@ -262,7 +262,7 @@ flag|attest show|write|w||Write the attestation to a file
 arg|config add||files|
 flag|config check|check|c||Check only
 flag|config check|fix|f||Apply safe fixes
-flag|doctor status|verbose|v||Show detailed checks
+flag|config import|yes|y||Restore without asking
 flag|doctor status|json|j||Print a JSON summary
 flag|doctor status|fix|f||Apply common fixes
 flag|doctor status|force|F||Apply fixes without prompts

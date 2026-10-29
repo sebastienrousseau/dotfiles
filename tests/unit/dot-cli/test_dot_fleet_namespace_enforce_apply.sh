@@ -366,7 +366,7 @@ test_start "fleet_apply_short_flags"
 out="$(fleet apply -n -j 1 2>&1)"
 rc=$?
 assert_equals 0 "$rc" "-n / -j accepted"
-assert_contains "dot sync && dot doctor --quiet" "$out" "default command shown"
+assert_contains "dot config update && dot doctor" "$out" "default command shown"
 
 test_start "fleet_apply_without_ssh_binary"
 out="$(PATH="$PATH_NO_SSH" fleet apply 2>&1)"
@@ -455,6 +455,33 @@ rc=$?
 assert_equals 0 "$rc" "push alias exits 0"
 assert_contains "1 ok / 0 failed / 1 total" "$out" "single host summary"
 assert_file_contains "$SSH_LOG" "user@alpha.test uptime" "only alpha contacted"
+
+# The default command, run by an ssh shim that executes it against a `dot`
+# stub recording each call: the host pulls and applies, then runs doctor
+# with no flag it would ignore.
+test_start "fleet_apply_default_command_pulls_then_checks"
+DOT_CALLS="$TMP/dot-calls.log"
+mkdir -p "$TMP/remote-bin"
+printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >>"%s"\n' "$DOT_CALLS" >"$TMP/remote-bin/dot"
+chmod +x "$TMP/remote-bin/dot"
+cp "$SHIMS/ssh" "$TMP/ssh.recording"
+cat >"$SHIMS/ssh" <<SHIM
+#!/usr/bin/env bash
+while [[ \$# -gt 0 ]]; do
+  case "\$1" in
+    -o) shift 2 ;;
+    -*) shift ;;
+    *) shift; break ;;
+  esac
+done
+PATH="$TMP/remote-bin:\$PATH" bash -c "\$*"
+SHIM
+rm -f "$DOT_CALLS"
+out="$(fleet apply --host alpha 2>&1)"
+rc=$?
+cp "$TMP/ssh.recording" "$SHIMS/ssh"
+assert_equals 0 "$rc" "default apply exits 0"
+assert_equals "config update|doctor|" "$(tr '\n' '|' <"$DOT_CALLS" 2>/dev/null)" "the host runs 'dot config update' then 'dot doctor'"
 
 # ── dispatcher ──────────────────────────────────────────────────────
 test_start "fleet_default_subcommand_with_flag"

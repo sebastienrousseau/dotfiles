@@ -12,7 +12,7 @@
 # tree, and the leaf scripts they hand off to (scripts/diagnostics/*.sh,
 # scripts/ops/*.sh) are replaced there by stubs that record how they were
 # called — so routing is observed without applying, healing or snapshotting
-# anything. `profile set` rewrites the sandbox copy of .chezmoidata.toml,
+# anything. `profile set` writes the sandbox HOME's chezmoi.toml,
 # never the real one. HOME and XDG_* point into the sandbox; mise is a stub.
 #
 # Command modules exercised: plugins/config/libexec/config.sh (sync, update),
