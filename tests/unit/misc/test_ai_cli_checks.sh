@@ -25,14 +25,12 @@ check_contains() {
   fi
 }
 
-APPLY_FILE="$REPO_ROOT/scripts/ops/chezmoi-apply.sh"
 DOC_FILE="$REPO_ROOT/docs/reference/TOOLS.md"
 PYTOOLS_FILE="$REPO_ROOT/install/provision/run_onchange_25-python-tools.sh.tmpl"
 
-# Chezmoi apply should list AI providers and offer mise installation
-check_contains "$APPLY_FILE" "AI provider CLI checks (optional)"
-check_contains "$APPLY_FILE" "copilot|npm:@github/copilot|Copilot CLI"
-check_contains "$APPLY_FILE" "kimi|native|Kimi CLI"
+# The apply-time AI provider offer is the ai plugin's on-apply hook, over
+# the roster: tests/unit/dot-cli/test_ai_on_apply_hook.sh and
+# tests/unit/ops/test_chezmoi_apply_phases.sh run it.
 check_contains "$REPO_ROOT/lib/dot/ai-install.sh" "https://code.kimi.com/kimi-code/install.sh"
 check_contains "$REPO_ROOT/install/provision/run_onchange_15-ai-cli-tools.sh.tmpl" "https://code.kimi.com/kimi-code/install.sh"
 check_contains "$REPO_ROOT/defaults/dot_config/shell/00-core-paths.sh.tmpl" '${HOME}/.kimi-code/bin'
@@ -41,13 +39,6 @@ check_contains "$REPO_ROOT/defaults/dot_config/nushell/env.nu.tmpl" '.kimi-code/
 check_contains "$REPO_ROOT/defaults/dot_config/powershell/Microsoft.PowerShell_profile.ps1.tmpl" '.kimi-code/bin'
 check_contains "$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh" "alias kiri='kiro-cli'"
 check_contains "$REPO_ROOT/defaults/dot_local/share/mise/plugins/kiro-cli/bin/executable_install" 'ln -sf "kiro-cli" "$install_path/bin/kiri"'
-check_contains "$APPLY_FILE" "sgpt|pipx:shell-gpt|Shell-GPT"
-check_contains "$APPLY_FILE" "ollama|aqua:ollama/ollama|Ollama"
-check_contains "$APPLY_FILE" "kiro-cli|kiro-cli|Kiro CLI"
-check_contains "$APPLY_FILE" "autohand|npm:autohand-cli|Autohand Code"
-check_contains "$APPLY_FILE" "qwen|npm:@qwen-code/qwen-code|Qwen Code"
-check_contains "$APPLY_FILE" "zai|npm:@guizmo-ai/zai-cli|ZAI"
-check_contains "$APPLY_FILE" "mise use -g"
 
 # Tools catalog should list Copilot, sgpt, ollama, and new AI CLIs
 check_contains "$DOC_FILE" "| **Copilot CLI** | GitHub Copilot in the terminal |"

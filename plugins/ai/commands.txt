@@ -46,3 +46,4 @@ alias|autohand|removed|ai run autohand|0.2.538
 alias|vibe|removed|ai run vibe|0.2.538
 alias|qwen|removed|ai run qwen|0.2.538
 alias|zai|removed|ai run zai|0.2.538
+hook|on-apply|ai|libexec/hooks/on-apply.sh|AI provider CLI checks (optional)
