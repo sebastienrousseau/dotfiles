@@ -17,6 +17,7 @@ Variables you can set in your shell to change behaviour.
 | `DOTFILES_SILENT` | unset | `install.sh` and its provisioning steps: suppress non-error output (same as `install.sh --silent`) |
 | `DOTFILES_INTERACTIVE_APPLY` | unset | `1` brings back chezmoi's overwrite prompts during `dot apply` (it runs with `--force` otherwise) |
 | `DOTFILES_PACKAGES_TIMEOUT` | `10` | Seconds each `dot tool list --packages` query may take before it is reported as `timed out` |
+| `DOTFILES_APP_STORES` | `1` | `0` skips the App Store (`mas`), Flatpak and Snap phase of `dot system update`, shown as a skip, on a machine whose store CLI is installed but does not work |
 | `DOTFILES_DEBUG` | unset | Print zsh-init timing to stderr |
 | `DOTFILES_TRACE` | unset | Full zsh-init trace to stderr |
 | `DOTFILES_WALLPAPER_DIR` | `~/Pictures/Wallpapers` | Custom wallpaper directory |

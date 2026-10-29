@@ -15,7 +15,7 @@ import tempfile
 
 root, bash = sys.argv[1:]
 source = (Path(root) / "plugins/system/libexec/system.sh").read_text()
-functions = "\n".join(re.findall(r"^_upgrade_last_line\(\) \{.*?^\}|^cmd_upgrade\(\) \{.*?^\}", source, re.M | re.S))
+functions = "\n".join(re.findall(r"^_upgrade_\w+\(\) \{.*?^\}|^cmd_upgrade\(\) \{.*?^\}", source, re.M | re.S))
 checks = []
 with tempfile.TemporaryDirectory(prefix="dot-upgrade-test-") as temporary:
     work = Path(temporary)

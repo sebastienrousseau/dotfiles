@@ -49,6 +49,16 @@ _upgrade_last_line() {
     cut -c1-56
 }
 
+# _upgrade_failure_tail <label> <log>: a failed phase's log tail, with a
+# hint when chezmoi stopped on a locally edited file.
+_upgrade_failure_tail() {
+  ui_err "$1" "log tail:"
+  tail -n 15 "$2" | sed 's/^/    /'
+  if grep -q 'has changed since chezmoi last wrote it' "$2"; then
+    ui_info "Hint" "a managed file was edited locally — run 'chezmoi apply' to choose per file, or 'chezmoi update --force' to overwrite"
+  fi
+}
+
 cmd_upgrade() {
   local src_dir
   src_dir="$(require_source_dir)"
@@ -128,7 +138,7 @@ cmd_upgrade() {
   # --no-tty: chezmoi otherwise opens /dev/tty directly for its
   # overwrite prompt, bypassing the closed stdin above and hanging.
   _upgrade_step dotfiles "Dotfiles" "chezmoi update…" -- _upgrade_dotfiles
-  dot_upgrade_toolchain_steps
+  dot_upgrade_toolchain_steps "$log_dir/pins.list"
 
   if has_command nvim; then
     # scripts/nvim/headless-upgrade.lua runs Lazy sync AND waits for
@@ -155,26 +165,21 @@ cmd_upgrade() {
       sh "$src_dir/scripts/fonts/install-nerd-fonts.sh"
   fi
 
-  local n=${#fail_labels[@]}
+  local n=${#fail_labels[@]} i=0
+  ui_steps_end "$([[ "$n" -eq 0 ]] && echo "requested upgrade phases completed" || echo "$n step(s) failed")"
+  # Everything below is printed after ui_steps_end, once the rich renderer
+  # has torn down: printing mid-render would garble the display.
+  dot_upgrade_pin_report "$log_dir/pins.list"
   if [[ "$n" -eq 0 ]]; then
-    ui_steps_end "requested upgrade phases completed"
     rm -rf "$log_dir"
-  else
-    ui_steps_end "$n step(s) failed"
-    # Surfaced after ui_steps_end so the rich renderer has torn down —
-    # printing mid-render would garble the display.
-    local i=0
-    while ((i < n)); do
-      ui_err "${fail_labels[$i]}" "log tail:"
-      tail -n 15 "${fail_logs[$i]}" | sed 's/^/    /'
-      if grep -q 'has changed since chezmoi last wrote it' "${fail_logs[$i]}"; then
-        ui_info "Hint" "a managed file was edited locally — run 'chezmoi apply' to choose per file, or 'chezmoi update --force' to overwrite"
-      fi
-      ((i++)) || true
-    done
-    ui_info "Logs" "$log_dir"
-    return 1
+    return 0
   fi
+  while ((i < n)); do
+    _upgrade_failure_tail "${fail_labels[$i]}" "${fail_logs[$i]}"
+    ((i++)) || true
+  done
+  ui_info "Logs" "$log_dir"
+  return 1
 }
 
 cmd_tune() {
