@@ -25,8 +25,8 @@ The installer:
 
 1. Checks prerequisites and bootstraps `gum` for nicer prompts (optional)
 2. Installs chezmoi, checking the download against a pinned SHA-256
-3. On a reinstall, backs up the files chezmoi would overwrite to `~/.dotfiles.bak.<timestamp>/`
-4. Clones the pinned release tag to `~/.dotfiles` (or reuses an existing checkout there)
+3. Clones the pinned release tag to `~/.dotfiles` (or reuses an existing checkout there)
+4. Backs up every existing file chezmoi will overwrite to `~/.dotfiles.bak.<timestamp>/`
 5. Writes `sourceDir` to `~/.config/chezmoi/chezmoi.toml`, copies your git name, email and signing key from `git config --global` into it when it has no `[data]` table yet, and runs `chezmoi apply`
 
 It does not run `chezmoi init`, so it asks no per-machine questions: set those in `~/.config/chezmoi/chezmoi.toml` (Step 4). It installs no packages or fonts unless you pass `--provision`.

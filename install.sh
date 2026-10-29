@@ -185,6 +185,53 @@ detect_container_env() {
   [[ -f "${1:-}/.dockerenv" || -n "${CODESPACES:-}" || -n "${REMOTE_CONTAINERS:-}" ]]
 }
 
+# apply_source <want_minimal>: apply the configured source, after seeding
+# the git identity and, when asked (1), the minimal profile overrides.
+apply_source() {
+  local -a flags=()
+  seed_git_identity
+  if [[ "$1" -eq 1 ]]; then
+    step "Applying minimal profile overrides..."
+    apply_minimal_profile_overrides
+  fi
+  [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]] || flags=(--force --no-tty)
+  chezmoi apply ${flags[@]+"${flags[@]}"}
+}
+
+# _backup_one <path>: copy an existing file or symlink to BACKUP_DIR under
+# its path relative to $HOME; false when there is nothing to copy. Real
+# directories are skipped: apply never clobbers their contents, their files
+# are backed up one by one, and `cp -a` would hit uncopyable things such as
+# ssh-agent sockets ("is a socket (not copied)").
+_backup_one() {
+  local rel="${1#"$HOME"/}"
+  [[ -n "$1" && -e "$1" ]] || return 1
+  [[ ! -d "$1" || -L "$1" ]] || return 1
+  mkdir -p "$BACKUP_DIR/$(dirname "$rel")"
+  cp -a "$1" "$BACKUP_DIR/$rel"
+}
+
+# backup_managed_files: copy every existing file chezmoi manages (and so
+# would overwrite) to BACKUP_DIR, keeping its path under $HOME. Until
+# chezmoi has a config there is nothing to compare against; a second run
+# copies the same files over their first copies.
+backup_managed_files() {
+  local file count=0
+  command -v chezmoi >/dev/null && [[ -f "$CHEZMOI_CONFIG_FILE" ]] || {
+    echo "   No chezmoi source yet: the backup runs once the source is in place."
+    return 0
+  }
+  while IFS= read -r file; do
+    if _backup_one "$file"; then count=$((count + 1)); fi
+  done < <(chezmoi managed --path-style=absolute 2>/dev/null || true)
+  if [[ "$count" -gt 0 ]]; then
+    echo "   Backed up $count files to $BACKUP_DIR"
+  else
+    echo "   No existing dotfiles to back up."
+    rm -rf "$BACKUP_DIR" 2>/dev/null || true
+  fi
+}
+
 show_help() {
   cat <<EOF
 Usage: install.sh [version] [options]
@@ -420,7 +467,6 @@ main() {
   # 5. Backup existing dotfiles that chezmoi will overwrite
   step "Backing up existing dotfiles..."
   BACKUP_DIR="$HOME/.dotfiles.bak.$(date +"%Y%m%d_%H%M%S")"
-  backup_count=0
 
   # Determine the source directory for chezmoi to diff against
   if [[ -d "$SOURCE_DIR/.git" ]]; then
@@ -428,32 +474,9 @@ main() {
   elif [[ -d "$LEGACY_SOURCE_DIR/.git" ]]; then
     ensure_chezmoi_source "$LEGACY_SOURCE_DIR"
   fi
-
-  # Back up any existing files that chezmoi would overwrite
-  if command -v chezmoi >/dev/null && [[ -f "$CHEZMOI_CONFIG_FILE" ]]; then
-    while IFS= read -r file; do
-      [[ -z "$file" ]] && continue
-      # Skip real directories (not symlinks): apply never clobbers their contents,
-      # their files are backed up one by one, and `cp -a` would hit uncopyable
-      # things such as ssh-agent sockets ("is a socket (not copied)").
-      if [[ -d "$file" && ! -L "$file" ]]; then
-        continue
-      fi
-      if [[ -e "$file" ]]; then
-        rel="${file#"$HOME"/}"
-        mkdir -p "$BACKUP_DIR/$(dirname "$rel")"
-        cp -a "$file" "$BACKUP_DIR/$rel"
-        backup_count=$((backup_count + 1))
-      fi
-    done < <(chezmoi managed --path-style=absolute 2>/dev/null || true)
-  fi
-
-  if [[ "$backup_count" -gt 0 ]]; then
-    echo "   Backed up $backup_count files to $BACKUP_DIR"
-  else
-    echo "   No existing dotfiles to back up."
-    rm -rf "$BACKUP_DIR" 2>/dev/null || true
-  fi
+  # On a first install there is no source yet, so nothing is listed here:
+  # the clone below backs up again once chezmoi can see what it manages.
+  backup_managed_files
 
   # Detect devcontainer/Codespaces environment
   if detect_container_env ""; then
@@ -488,30 +511,12 @@ main() {
   if [[ -d "$SOURCE_DIR/.git" ]]; then
     echo "   Applying from local source: $SOURCE_DIR"
     ensure_chezmoi_source "$SOURCE_DIR"
-    seed_git_identity
-    if [[ $want_minimal -eq 1 ]]; then
-      step "Applying minimal profile overrides..."
-      apply_minimal_profile_overrides
-    fi
-    APPLY_FLAGS=()
-    if [[ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]]; then
-      APPLY_FLAGS=(--force --no-tty)
-    fi
-    chezmoi apply "${APPLY_FLAGS[@]}"
+    apply_source "$want_minimal"
   elif [[ -d "$LEGACY_SOURCE_DIR/.git" ]]; then
     echo "   Migrating from legacy source: $LEGACY_SOURCE_DIR"
     mv "$LEGACY_SOURCE_DIR" "$SOURCE_DIR"
     ensure_chezmoi_source "$SOURCE_DIR"
-    seed_git_identity
-    if [[ $want_minimal -eq 1 ]]; then
-      step "Applying minimal profile overrides..."
-      apply_minimal_profile_overrides
-    fi
-    APPLY_FLAGS=()
-    if [[ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]]; then
-      APPLY_FLAGS=(--force --no-tty)
-    fi
-    chezmoi apply "${APPLY_FLAGS[@]}"
+    apply_source "$want_minimal"
   else
     echo "   Initializing from GitHub (Branch/Tag: $VERSION)..."
     printf '%b\n' "${CYAN}   SECURITY NOTE: Cloning pinned version $VERSION for supply-chain safety${NC}"
@@ -532,16 +537,10 @@ main() {
     fi
 
     ensure_chezmoi_source "$SOURCE_DIR"
-    seed_git_identity
-    if [[ $want_minimal -eq 1 ]]; then
-      step "Applying minimal profile overrides..."
-      apply_minimal_profile_overrides
-    fi
-    APPLY_FLAGS=()
-    if [[ "${DOTFILES_NONINTERACTIVE:-0}" = "1" ]]; then
-      APPLY_FLAGS=(--force --no-tty)
-    fi
-    chezmoi apply "${APPLY_FLAGS[@]}"
+    # The first install's backup: until now chezmoi had no source, so the
+    # backup above found nothing, and apply would overwrite these files.
+    backup_managed_files
+    apply_source "$want_minimal"
   fi
 
   # Toolchain provisioning, opt-in only (--provision or DOTFILES_PROVISION=1):

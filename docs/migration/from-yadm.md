@@ -40,8 +40,9 @@ against it.
 The installer does not touch yadm's repo (`~/.local/share/yadm/repo.git`)
 or its config, so both can coexist while you migrate. It does apply
 this repo's defaults over the files in `$HOME`, which is yadm's work
-tree, without taking a backup: your step 1 tarball is what you restore
-from, and `yadm status` shows what changed.
+tree. It copies the files it overwrites to `~/.dotfiles.bak.<timestamp>`
+first, but your step 1 tarball is what you restore from, and
+`yadm status` shows what changed.
 
 ```sh
 # Download and verify the release installer per docs/guides/INSTALL.md first.
