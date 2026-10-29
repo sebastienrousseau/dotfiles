@@ -247,13 +247,14 @@ runs each command (`legacy`, on the domain and on each command).
   registry entry). Merging a user-writable directory into dispatch before
   then would let any process running as the user change what a
   `dot ...` command runs.
-  Status note: the command table is closed, but dispatch is not yet.
-  For a word that is not in the table, `bin/dot`'s fallback (the `*)`
-  arm at the end of `bin/dot`) still sources
-  `${XDG_CONFIG_HOME:-~/.config}/dotfiles/commands/<name>.sh` and execs
-  `dot-<name>` from next to `bin/dot` or from anywhere on `PATH`, so a
-  user-writable file can still add a `dot` command today. P2.2 is
-  planned to put both behind `DOT_ALLOW_PATH_PLUGINS=1`.
+  Dispatch is closed too. For a word that is not in the table, the user
+  commands from before plugins
+  (`${XDG_CONFIG_HOME:-~/.config}/dotfiles/commands/<name>.sh`, then
+  `dot-<name>` beside `bin/dot` or on `PATH`) run only with
+  `DOT_ALLOW_PATH_PLUGINS=1`, with a deprecation warning
+  (`_dot_user_command` in `lib/dot/names.sh`). Without it, `dot` names
+  the file it found and the word is unknown (exit 127). A word that is
+  not a plain lowercase name never reaches either.
 - `-V` prints the version and `-v` sets `DOT_VERBOSE=1`. Until 0.2.538,
   `dot -v` alone printed the version with a warning; from 0.2.538 it is
   `--verbose` with no command, which prints the overview.

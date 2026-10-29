@@ -450,28 +450,10 @@ case "$route" in
     show_version
     ;;
 
-  # User-provided custom commands, then bin/dot-<name> auto-shim
-  # (git-style: `dot foo` -> `dot-foo` if a matching executable exists
-  # anywhere on PATH). Users can drop new commands next to `dot` and
-  # tab-completion will see them via the routes table extraction.
+  # A word the table does not know: the deprecated user commands
+  # (lib/dot/names.sh _dot_user_command), else unknown.
   *)
-    _user_cmd="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/commands/${COMMAND}.sh"
-    if [[ -f "$_user_cmd" ]]; then
-      # Run in a subshell so a user `exit` doesn't kill the dot CLI.
-      # This source path is intentionally user-defined.
-      # shellcheck disable=SC1090
-      (source "$_user_cmd" "$@")
-      exit $?
-    else
-      # Try bin/dot-<name> in the same dir as this script, then $PATH.
-      _self_dir="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || echo "$0")")" && pwd)"
-      if [[ -x "$_self_dir/dot-${COMMAND}" ]]; then
-        exec "$_self_dir/dot-${COMMAND}" "$@"
-      fi
-      if command -v "dot-${COMMAND}" >/dev/null 2>&1; then
-        exec "dot-${COMMAND}" "$@"
-      fi
-      _dot_unknown "$COMMAND" "$@"
-    fi
+    _dot_user_command "$COMMAND" "$@"
+    _dot_unknown "$COMMAND" "$@"
     ;;
 esac
