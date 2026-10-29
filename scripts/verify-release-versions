@@ -142,24 +142,59 @@ done
 
 # Bind the human-facing verified-install command to the exact installer bytes.
 # A version-correct URL with a stale digest is still an unusable release path.
-installer_hash="$(
-  if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum install.sh | awk '{print $1}'
+# The command downloads the installer published for the canonical version:
+# install.sh at the v<canonical> tag once it exists, so a fix to install.sh
+# between releases does not change the digest users check against. Before
+# the tag exists (a release PR), it is install.sh as it stands. A shallow
+# clone without the tag cannot tell the two apart (CI test jobs check out
+# one commit and no tags), so it leaves the digest to the full clones: the
+# version-consistency job, the version sync, and the pre-push hook.
+# installer_source: tag, tree, or unknown (a shallow clone without the tag).
+installer_source() {
+  local top
+  top="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+  if [[ "$top" == "$(pwd -P)" ]] && git rev-parse -q --verify "refs/tags/v${canonical}" >/dev/null 2>&1; then
+    echo tag
+  elif [[ "$top" == "$(pwd -P)" && "$(git rev-parse --is-shallow-repository 2>/dev/null)" == true ]]; then
+    echo unknown
   else
-    shasum -a 256 install.sh | awk '{print $1}'
+    echo tree
   fi
-)"
-documented_hashes="$(
-  grep '/tmp/dotfiles-install\.sh' README.md |
-    grep -oE '[0-9a-f]{64}' |
-    sort -u || true
-)"
-if [[ "$documented_hashes" != "$installer_hash" ]]; then
-  _err "DRIFT in README.md installer SHA256"
-  _err "  found:    ${documented_hashes:-<missing>}"
-  _err "  expected: $installer_hash"
-  drift=$((drift + 1))
-fi
+}
+
+# sha256_of_stdin: the SHA-256 of standard input.
+sha256_of_stdin() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum | awk '{print $1}'
+  else
+    shasum -a 256 | awk '{print $1}'
+  fi
+}
+
+check_installer_digest() {
+  local source installer_hash documented_hashes
+  source="$(installer_source)"
+  case "$source" in
+    unknown)
+      _log "installer digest: not checked here (a shallow clone without the v${canonical} tag)"
+      return 0
+      ;;
+    tag) installer_hash="$(git show "v${canonical}:install.sh" | sha256_of_stdin)" ;;
+    *) installer_hash="$(sha256_of_stdin <install.sh)" ;;
+  esac
+  documented_hashes="$(
+    grep '/tmp/dotfiles-install\.sh' README.md |
+      grep -oE '[0-9a-f]{64}' |
+      sort -u || true
+  )"
+  if [[ "$documented_hashes" != "$installer_hash" ]]; then
+    _err "DRIFT in README.md installer SHA256"
+    _err "  found:    ${documented_hashes:-<missing>}"
+    _err "  expected: $installer_hash (install.sh, from the $source)"
+    drift=$((drift + 1))
+  fi
+}
+check_installer_digest
 
 if ((drift > 0)); then
   if ((fix)); then

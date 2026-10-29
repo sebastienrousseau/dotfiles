@@ -76,7 +76,8 @@ bash /tmp/dotfiles-install.sh
 
 Your files in `$HOME` are untouched by the move — only the git
 metadata directory changed name. The install itself then applies this
-repo's defaults over them without a backup; step 4 puts yours back.
+repo's defaults over them, after copying the files it overwrites to
+`~/.dotfiles.bak.<timestamp>`; step 4 puts your committed versions back.
 
 ## 4. Import
 
