@@ -125,9 +125,9 @@ assert_equals "claude --print" "$(cat "$IT_S/claude.spy" 2>/dev/null)" \
 test_start "integration_custom_commands_dispatched"
 mkdir -p "$IT_S/home/.config/dotfiles/commands"
 printf 'echo "user-command ran with: $*"\n' >"$IT_S/home/.config/dotfiles/commands/zzfixture.sh"
-it_out="$(it_env bash "$DOT_CLI" zzfixture one two 2>&1)"
+it_out="$(it_env DOT_ALLOW_PATH_PLUGINS=1 bash "$DOT_CLI" zzfixture one two 2>&1)"
 assert_contains "user-command ran with: one two" "$it_out" \
-  "dot runs a user command from XDG_CONFIG_HOME/dotfiles/commands"
+  "with DOT_ALLOW_PATH_PLUGINS=1, dot runs a user command from XDG_CONFIG_HOME/dotfiles/commands"
 
 # ═══════════════════════════════════════════════════════════════
 # 2. CHEZMOI TEMPLATES → SHELL CONFIG CHAIN (rendered zshrc, real zsh)

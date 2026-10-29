@@ -93,7 +93,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot search` → `dot help` | (no keyword, exit 1) | `test_fm_search_missing_keyword` | `run:search-usage` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot search` → `dot help` | <keyword> with no match | `test_fm_search_no_match` | `run:search-nomatch` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot help` | unknown command (exit 1) | `test_fm_unknown_command` | `run:unknown-command` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot help` | ~/.config/dotfiles/commands/<name>.sh user command | `test_fm_user_custom_command` | `run:user-command` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot help` | ~/.config/dotfiles/commands/<name>.sh user command (with DOT_ALLOW_PATH_PLUGINS=1) | `test_fm_user_custom_command` | `run:user-command` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot help` | DOTFILES_SHOW_LOGO=0 suppresses the product banner | `test_fm_env_dotfiles_show_logo` | `run:version-nologo` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 | `dot help` | NO_COLOR=1 strips ANSI from non-TTY output | `test_fm_env_no_color` | `help:version` | `examples/example-dot-meta.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 

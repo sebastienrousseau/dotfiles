@@ -23,6 +23,7 @@ Variables you can set in your shell to change behaviour.
 | `DOTFILES_FLEET_HOSTS` | `~/.config/dotfiles/fleet.toml` | Host list for `dot fleet apply` |
 | `DOTFILES_REGISTRY_URL` | unset | One-off override of the `dot cli` registry URL |
 | `DOTFILES_TUNING` | `0` | Enable OS tuning (`dot system settings apply`) |
+| `DOT_ALLOW_PATH_PLUGINS` | unset | `1` lets a word `dot` does not know run `~/.config/dotfiles/commands/<word>.sh`, or `dot-<word>` beside `bin/dot` or on `PATH`, with a deprecation warning. Off, `dot` names the file and the word is unknown (exit 127). Deprecated: user plugins come with the signed trust path (ADR-016) |
 | `EDITOR` | `nvim` | Editor used by `dot edit` and `sops` |
 | `PAGER` | `less` | Pager used by `dot help --manual text` |
 

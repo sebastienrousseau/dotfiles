@@ -352,6 +352,40 @@ _dot_unknown() {
   exit 127
 }
 
+# _dot_user_command WORD ARGS...: the user commands from before plugins, for
+# a word the table does not know: ~/.config/dotfiles/commands/WORD.sh, then
+# dot-WORD beside bin/dot or on PATH. Each is user-writable, and ADR-016
+# rules out discovering what to run that way, so one runs only with
+# DOT_ALLOW_PATH_PLUGINS=1, with a deprecation warning (user plugins come
+# with P2.3's trust path). Without it, the file found is named and the
+# caller reports the word unknown. Returns when nothing runs.
+_dot_user_command() {
+  local word="$1" user cmd self
+  shift
+  [[ "$word" =~ ^[a-z0-9][a-z0-9_-]*$ ]] || return 0
+  user="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/commands/$word.sh"
+  self="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || echo "$0")")" && pwd)"
+  if [[ -f "$user" ]]; then
+    cmd="$user"
+  elif [[ -x "$self/dot-$word" ]]; then
+    cmd="$self/dot-$word"
+  else
+    cmd="$(command -v "dot-$word" 2>/dev/null)" || return 0
+  fi
+  if [[ "${DOT_ALLOW_PATH_PLUGINS:-0}" != 1 ]]; then
+    echo "dot: not running $cmd: user commands are off (DOT_ALLOW_PATH_PLUGINS=1 runs them, deprecated)" >&2
+    return 0
+  fi
+  echo "dot: running $cmd (DOT_ALLOW_PATH_PLUGINS=1; deprecated, user plugins replace it)" >&2
+  # A user command runs in a subshell, so its `exit` does not end dot early.
+  if [[ "$cmd" == "$user" ]]; then
+    # shellcheck disable=SC1090
+    (source "$cmd" "$@")
+    exit $?
+  fi
+  exec "$cmd" "$@"
+}
+
 # _dot_stop_unbuilt WORD...: exit before the domain's own route can take a
 # planned verb, or a typo after an object that is not also one of that
 # route's old subcommands (`dot ai pattern x` would prompt a model).
