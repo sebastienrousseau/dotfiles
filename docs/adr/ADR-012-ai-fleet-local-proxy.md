@@ -66,7 +66,7 @@ present it behind a flat, verb-first surface modelled on the Claude CLI.
 
 - **No new dependency for the headline feature.** The gateway leans on the
   `claude` CLI the user already has; the cockpit is the only Go artefact and is
-  opt-in (built when `DOTFILES_AI` is set or already installed).
+  opt-in (built when `DOTFILES_AI=1` or already installed).
 - **Single source of truth.** The cockpit and completions both derive from the
   `ai.sh` verb dispatch; a completion-parity test and the docs-coverage contract
   keep them from drifting.

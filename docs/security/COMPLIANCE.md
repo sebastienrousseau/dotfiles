@@ -426,9 +426,8 @@ lock-configs  # Sets chflags uchg (macOS) or chattr +i (Linux)
 tail -n 50 "${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/dot.log"
 ```
 
-The log rotates to `dot.log.1` at 1 MB. (The `dot-audit` alias reads a
-legacy `~/.local/share/dotfiles.log` that nothing writes by default, and
-falls back to `git log`.)
+The log rotates to `dot.log.1` at 1 MB. The `dot-audit` alias shows its
+last 20 lines, and falls back to `git log` when it does not exist yet.
 
 ### Supply Chain Security
 

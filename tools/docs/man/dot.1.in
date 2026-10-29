@@ -98,7 +98,7 @@ User-provided aliases and functions.
 .I ~/.config/zsh/rc.d.local/
 User-provided zsh initialization scripts.
 .TP
-.I ~/.local/share/dotfiles.log
+.I ~/.local/state/dotfiles/dot.log
 Local action log. No telemetry leaves the machine.
 .SH EXIT STATUS
 @EXIT@

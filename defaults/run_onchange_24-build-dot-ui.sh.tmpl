@@ -11,9 +11,12 @@ set -euo pipefail
 
 # Source hashes baked in at render time so this script's content changes when
 # the renderer source changes, retriggering chezmoi onchange.
-# main.go:  {{ include "dot_local/share/dot-ui/main.go" | sha256sum }}
-# theme.go: {{ include "dot_local/share/dot-ui/theme.go" | sha256sum }}
-# run.go:   {{ include "dot_local/share/dot-ui/run.go" | sha256sum }}
+# Every non-test .go file is hashed, so a new source file cannot be missed.
+{{- range glob (joinPath .chezmoi.sourceDir "dot_local/share/dot-ui/*.go") }}
+{{-   if not (hasSuffix "_test.go" .) }}
+# {{ base . }}: {{ include . | sha256sum }}
+{{-   end }}
+{{- end }}
 # go.mod:   {{ include "dot_local/share/dot-ui/go.mod" | sha256sum }}
 # go.sum:   {{ include "dot_local/share/dot-ui/go.sum" | sha256sum }}
 
