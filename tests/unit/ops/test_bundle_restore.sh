@@ -15,7 +15,10 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 BUNDLE_SH="$REPO_ROOT/scripts/ops/bundle.sh"
 ENTRY="$REPO_ROOT/plugins/config/dot-config"
-WORK="$(mktemp -d "${TMPDIR:-/tmp}/dot-bundle-restore.XXXXXX")"
+# The sandbox path with symlinks resolved: restore extracts without -P, and
+# bsdtar refuses to extract through a symlink, which macOS's TMPDIR under
+# /var (-> /private/var) would put in every member's path.
+WORK="$(cd "$(mktemp -d "${TMPDIR:-/tmp}/dot-bundle-restore.XXXXXX")" && pwd -P)"
 trap 'rm -rf "$WORK"' EXIT
 
 if ! command -v zstd >/dev/null 2>&1 || ! tar --zstd --version >/dev/null 2>&1; then
