@@ -2,7 +2,7 @@ name: Enhanced Security Pipeline
 
 on:
   push:
-    branches: [main, main]
+    branches: [main]
     # Only run security scans when security-relevant files change
     paths:
       - '**.sh'
@@ -14,7 +14,7 @@ on:
       - 'config/gitleaks.toml'
       - '.github/security-policies/**'
   pull_request:
-    branches: [main, main]
+    branches: [main]
     paths:
       - '**.sh'
       - '**.tmpl'
@@ -25,7 +25,7 @@ on:
       - 'config/gitleaks.toml'
       - '.github/security-policies/**'
   merge_group:
-    branches: [main, main]
+    branches: [main]
     # NOTE: `paths:` is ignored under merge_group; merge-queue runs
     # always execute the full security pipeline regardless of changes.
   schedule:
@@ -298,6 +298,7 @@ jobs:
   security-summary:
     name: Security Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs:
       - secrets-scan
       - dependency-scan

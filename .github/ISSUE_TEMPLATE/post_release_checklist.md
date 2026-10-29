@@ -2,7 +2,7 @@
 name: Post-release Checklist
 about: Verify release hygiene after publishing a version
 title: "Post-release: vX.Y.Z checklist"
-labels: release, maintenance
+labels: type:release, type:chore
 assignees: ''
 ---
 

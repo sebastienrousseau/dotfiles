@@ -42,7 +42,7 @@ jobs:
         with:
           # drift-detection runs on every push to main and isn't tied
           # to the CI envfile — provide a fallback version explicitly.
-          version: '2.70.3'
+          version: '2.73.3'
 
       - name: chezmoi init from this checkout
         run: |

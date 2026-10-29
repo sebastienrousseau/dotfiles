@@ -48,7 +48,7 @@ jobs:
     with:
       target: defaults/dot_config/nvim
       strict: true
-      stylua_version: "0.20.0"
+      stylua_version: "2.4.1"
 
   lint-nix:
     name: Lint / Nix (Zero Warnings)
