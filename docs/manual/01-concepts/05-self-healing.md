@@ -140,7 +140,7 @@ It does **not** include:
 `dot config export [<dir>]` (`scripts/ops/bundle.sh`) writes a `tar --zstd` archive, `dotfiles_offline_bundle_<YYYYMMDD_HHMMSS>.tar.zst`, to `<dir>` (default `~/Downloads`). It needs `tar` and `zstd`, and stores these paths as absolute paths:
 
 - `~/.dotfiles` (the source checkout)
-- `~/.config/chezmoi` (your chezmoi config, including the age identity `key.txt`, unencrypted)
+- `~/.config/chezmoi` (your chezmoi config), without the age identity: any file there with an `AGE-SECRET-KEY` line is left out and named, for you to carry to the other machine separately
 - `~/.local/share/mise` (installed toolchains)
 - With `DOTFILES_BUNDLE_NIX=1`: `/nix/store`, `/nix/var/nix` and `~/.nix-profile`
 

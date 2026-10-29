@@ -42,8 +42,9 @@ a first install from the release installer takes no backup. So every guide below
 your own backup. After the install, `dot diff` and `dot sync --check`
 preview changes without writing.
 
-**You can leave.** `scripts/uninstall.sh --force` runs `chezmoi purge`
-and removes the repo, the chezmoi config and state, caches, and logs.
+**You can leave.** `dot config uninstall --force` removes the repo, the
+chezmoi config (keeping your age key), state and cache, and the dotfiles
+caches and logs.
 Your files stay where they were applied; nothing phones home and
 nothing is left behind to reinstall itself. Each guide ends with the
 rollback for that specific migration.

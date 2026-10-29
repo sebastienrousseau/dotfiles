@@ -41,7 +41,8 @@ failures=0
 for f in "${NEW_SCRIPTS[@]}"; do
   filepath="$REPO_ROOT/$f"
   [[ -f "$filepath" ]] || continue
-  # Find function definitions and count lines until closing brace
+  # Find function definitions and count lines until the closing brace
+  # (a `}` at column 0); top-level code after it is not the function's.
   in_func=0
   func_name=""
   func_lines=0
@@ -54,6 +55,12 @@ for f in "${NEW_SCRIPTS[@]}"; do
       func_name="${line%%(*}"
       func_lines=0
       in_func=1
+    elif [[ $in_func -eq 1 && "$line" == "}" ]]; then
+      if [[ $func_lines -gt 80 ]]; then
+        printf '    %s: function %s is %d lines (max 80)\n' "$f" "$func_name" "$func_lines"
+        failures=$((failures + 1))
+      fi
+      in_func=0
     elif [[ $in_func -eq 1 ]]; then
       func_lines=$((func_lines + 1))
     fi

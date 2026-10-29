@@ -24,6 +24,23 @@ remove_tree() {
   }
 }
 
+# remove_chezmoi_config <dir>: remove chezmoi's config directory but keep
+# any age identity in it (a file with an AGE-SECRET-KEY line, whatever its
+# name): without it the secrets this setup encrypted cannot be decrypted,
+# and nothing else holds a copy.
+remove_chezmoi_config() {
+  local f
+  [[ -d "$1" ]] || return 0
+  while IFS= read -r -d '' f; do
+    if grep -q '^AGE-SECRET-KEY-' "$f" 2>/dev/null; then
+      log_warn "Kept your age key: $f (delete it once you no longer need the secrets it decrypts)"
+    else
+      rm -f "$f"
+    fi
+  done < <(find "$1" ! -type d -print0)
+  find "$1" -depth -type d -empty -delete 2>/dev/null || true
+}
+
 echo ""
 echo "Dotfiles Uninstall"
 echo "=================="
@@ -43,10 +60,14 @@ if [[ "${1:-}" != "--force" ]]; then
   esac
 fi
 
-# 1. Revert chezmoi-managed files
+# chezmoi purge is not used: it deletes chezmoi's whole config directory,
+# the age key with it. Its other removals are steps 2 and 3. Deployed
+# files stay where they are, as they would after purge. A source directory
+# configured elsewhere may be the user's own repository: it is named at the
+# end, not deleted.
+src_dir=""
 if command -v chezmoi >/dev/null 2>&1; then
-  log_info "Reverting chezmoi-managed files..."
-  chezmoi purge --force 2>/dev/null || true
+  src_dir="$(chezmoi source-path 2>/dev/null || true)"
 fi
 
 # 2. Remove dotfiles repo
@@ -55,22 +76,17 @@ if [[ -d "$HOME/.dotfiles" ]]; then
   remove_tree "$HOME/.dotfiles"
 fi
 
-# 3. Remove chezmoi config and state
+# 3. Remove chezmoi config, state and cache (the age key stays)
 log_info "Removing chezmoi configuration..."
-rm -rf "${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi"
+remove_chezmoi_config "${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi"
 rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi"
+rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}/chezmoi"
 
 # 4. Remove dotfiles artifacts
 log_info "Removing dotfiles artifacts..."
-rm -f "$HOME/.local/bin/dot"
-rm -f "$HOME/.local/bin/dot-ai"
-rm -f "$HOME/.local/bin/dot-theme-sync"
-rm -f "$HOME/.local/bin/tour"
-rm -f "$HOME/.local/bin/ai_core"
-rm -f "$HOME/.local/bin/ai-update"
-rm -f "$HOME/.local/bin/antigravity"
-rm -f "$HOME/.local/bin/git-ai-commit"
-rm -f "$HOME/.local/bin/git-ai-diff"
+for bin in dot dot-ai dot-theme-sync tour ai_core ai-update antigravity git-ai-commit git-ai-diff; do
+  rm -f "$HOME/.local/bin/$bin"
+done
 
 # 5. Remove shell caches
 log_info "Removing shell caches..."
@@ -87,6 +103,10 @@ rm -f "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles.log"
 log_info "Removing shell completions..."
 rm -f "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/completions/_dot"
 rm -f "${XDG_DATA_HOME:-$HOME/.local/share}/bash-completion/completions/dot"
+
+if [[ -n "$src_dir" && -d "$src_dir" ]]; then
+  log_warn "Left in place: $src_dir (chezmoi's source directory; delete it yourself if you no longer need it)"
+fi
 
 echo ""
 log_info "Uninstall complete."

@@ -135,7 +135,7 @@
   17   38   24.9   54     0 scripts/dot/commands/meta.sh::cmd_keys
   18   31   39.3  112   112 scripts/git-hooks/pre-commit-audit.sh::<top>
   11    7   24.4   32     0 scripts/lib/secrets_provider.sh::dot_secrets_get
-  17   16   33.2   69    75 scripts/ops/bundle.sh::<top>
+  13   12   29.1   59   102 scripts/ops/bundle.sh::<top>
   12   14   22.6   41    45 scripts/ops/chezmoi-update.sh::<top>
    8   10   31.5   42     0 scripts/ops/heal-chezmoi.sh::heal_chezmoi_drift
   19   30   32.9   48     0 scripts/ops/heal-system.sh::heal_broken_symlinks
