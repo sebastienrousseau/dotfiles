@@ -343,14 +343,20 @@ class TestIndex:
 
     def parents(self, rel: str) -> list[str]:
         """Scripts that `source` (or `.`) rel, matched by its last two path
-        parts. A module split out of a script is exercised through it, so
-        it inherits that script's tests."""
+        parts, or by its basename from a script in the same directory (the
+        `"$SCRIPT_DIR/module.sh"` form). A module split out of a script is
+        exercised through it, so it inherits that script's tests."""
         parts = Path(rel).parts
         if len(parts) < 2:
             return []
         pat = re.compile(
-            r"^\s*(?:source|\.)\s+[^\n#]*" + re.escape("/".join(parts[-2:])) + r"\b", re.M
+            r"^\s*(?:source|\.)\s+[^\n#]*" + re.escape("/".join(parts[-2:])) + r"\b",
+            re.MULTILINE,
         )
+        sibling = re.compile(
+            r"^\s*(?:source|\.)\s+[^\n#]*/" + re.escape(parts[-1]) + r"\b", re.MULTILINE
+        )
+        here = str(Path(rel).parent)
         if not hasattr(self, "_sources"):
             self._sources = sorted(
                 str(p.relative_to(self.root))
@@ -365,7 +371,9 @@ class TestIndex:
                 text = (self.root / src).read_text(encoding="utf-8", errors="replace")
             except OSError:
                 continue
-            if pat.search(text):
+            if pat.search(text) or (
+                str(Path(src).parent) == here and sibling.search(text)
+            ):
                 out.append(src)
         return out
 

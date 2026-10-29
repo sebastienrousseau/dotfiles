@@ -71,6 +71,17 @@ assert_equals "1" "$RC" "a missing file is refused"
 in_sandbox bash "$ENTRY" import
 assert_equals "2" "$RC" "no bundle is a usage error"
 
+test_start "import_help_exits_0"
+in_sandbox bash "$REPO_ROOT/scripts/ops/bundle-restore.sh" --help
+assert_equals "0" "$RC" "--help exits 0"
+assert_contains "Usage: dot config import" "$OUT" "and prints the usage"
+
+test_start "import_refuses_an_empty_bundle"
+tar --zstd -cf "$WORK/empty.tar.zst" -T /dev/null 2>/dev/null
+in_sandbox bash "$ENTRY" import "$WORK/empty.tar.zst" --yes
+assert_equals "1" "$RC" "a bundle with no members is refused"
+assert_contains "is empty" "$OUT" "the refusal says so"
+
 test_start "import_refuses_a_member_outside_export_paths"
 mkdir -p "$H/.ssh"
 printf 'planted\n' >"$H/.ssh/authorized_keys"
