@@ -142,11 +142,23 @@ done
 
 # Bind the human-facing verified-install command to the exact installer bytes.
 # A version-correct URL with a stale digest is still an unusable release path.
+# The command downloads the installer published for the canonical version:
+# install.sh at the v<canonical> tag once it exists, so a fix to install.sh
+# between releases does not change the digest users check against. Before
+# the tag exists (a release PR), it is install.sh as it stands.
+installer_bytes() {
+  if [[ "$(git rev-parse --show-toplevel 2>/dev/null)" == "$(pwd -P)" ]] &&
+    git rev-parse -q --verify "refs/tags/v${canonical}" >/dev/null 2>&1; then
+    git show "v${canonical}:install.sh"
+  else
+    cat install.sh
+  fi
+}
 installer_hash="$(
   if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum install.sh | awk '{print $1}'
+    installer_bytes | sha256sum | awk '{print $1}'
   else
-    shasum -a 256 install.sh | awk '{print $1}'
+    installer_bytes | shasum -a 256 | awk '{print $1}'
   fi
 )"
 documented_hashes="$(

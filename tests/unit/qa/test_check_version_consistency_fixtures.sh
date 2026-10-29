@@ -24,6 +24,10 @@ export BASH_XTRACEFD=21
 SCRIPT_FILE="$REPO_ROOT/scripts/qa/check-version-consistency.sh"
 BASH_BIN="$(command -v bash)"
 
+# The real git, for the tagged fixtures: the sandbox puts a git shim first
+# on PATH that answers every command with canned output.
+REAL_GIT="$(command -v git)"
+
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
@@ -179,5 +183,36 @@ _out="$(_check "$_root")"
 _rc=$?
 assert_equals 1 "$_rc" "stale installer digest exits 1"
 assert_contains "DRIFT in README.md installer SHA256" "$_out" "digest drift is named"
+
+# Once the version is tagged, the README's command downloads that release's
+# installer, so its digest is install.sh at the tag: a fix to install.sh
+# after the release is not drift, and a digest that is not the tag's is.
+_tag() { # <fixture-root> <version>: commit the fixture and tag it v<version>
+  "$REAL_GIT" -C "$1" init -q && "$REAL_GIT" -C "$1" add -A &&
+    "$REAL_GIT" -C "$1" -c core.hooksPath=/dev/null -c user.name=t -c user.email=t@t \
+      -c commit.gpgsign=false commit -qm fixture &&
+    "$REAL_GIT" -C "$1" -c tag.gpgsign=false tag "v$2"
+}
+
+_check_git() { # <fixture-root>: _check with the real git first on PATH
+  PATH="$(dirname "$REAL_GIT"):$PATH" _check "$1"
+}
+
+test_start "installer_digest_follows_the_release_tag"
+_root="$(_fixture tagged 1.2.3)"
+_tag "$_root" 1.2.3
+printf '# fixed after the release\n' >>"$_root/install.sh"
+_out="$(_check_git "$_root")"
+_rc=$?
+assert_equals 0 "$_rc" "install.sh changed after the tag: the README still names the released digest"
+
+test_start "a_digest_that_is_not_the_tagged_installers_is_drift"
+_root="$(_fixture retagged 1.2.3)"
+printf '# changed before the tag\n' >>"$_root/install.sh"
+_tag "$_root" 1.2.3
+_out="$(_check_git "$_root")"
+_rc=$?
+assert_equals 1 "$_rc" "the tagged installer is not the one the README names"
+assert_contains "DRIFT in README.md installer SHA256" "$_out" "and the drift is named"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
