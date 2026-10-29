@@ -22,13 +22,19 @@ if ! command -v zstd >/dev/null 2>&1 || ! tar --zstd --version >/dev/null 2>&1; 
   exit 0
 fi
 
+# The bundle runs with an emptied environment: PATH holds the system
+# directories and wherever tar and zstd are (Homebrew's on macOS), and the
+# coverage run's tracer (BASH_ENV, PS4) is kept when there is one.
+TOOLS_PATH="$(dirname "$(command -v zstd)"):$(dirname "$(command -v tar)"):/usr/bin:/bin"
+
 # bundle_of NAME: a bundle of the sandbox home NAME; OUT, RC, and LIST (the
 # archive's members, one per line).
 bundle_of() {
   local home="$WORK/$1"
   RC=0
-  OUT="$(env -i HOME="$home" XDG_RUNTIME_DIR="$WORK" XDG_STATE_HOME="$home/.local/state" \
-    PATH="/usr/bin:/bin" TERM=dumb NO_COLOR=1 bash "$BUNDLE" "$home/out" 2>&1)" || RC=$?
+  OUT="$(env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+    HOME="$home" XDG_RUNTIME_DIR="$WORK" XDG_STATE_HOME="$home/.local/state" \
+    PATH="$TOOLS_PATH" TERM=dumb NO_COLOR=1 bash "$BUNDLE" "$home/out" 2>&1)" || RC=$?
   LIST="$(tar --zstd -tf "$home"/out/*.tar.zst -P 2>/dev/null)"
 }
 

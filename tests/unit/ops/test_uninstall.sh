@@ -45,7 +45,10 @@ uninstall() {
   esac
   [[ "$(cd "$home" && pwd -P)" != "$(cd "$REAL_HOME" && pwd -P)" ]] || exit 97
   RC=0
-  OUT="$(printf '%s\n' "$answer" | env -i PATH="$WORK/bin:/usr/bin:/bin" HOME="$home" \
+  # The environment is emptied, except the coverage run's tracer (BASH_ENV,
+  # PS4) when there is one.
+  OUT="$(printf '%s\n' "$answer" | env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+    PATH="$WORK/bin:/usr/bin:/bin" HOME="$home" \
     XDG_CONFIG_HOME="$home/.config" XDG_DATA_HOME="$home/.local/share" \
     XDG_CACHE_HOME="$home/.cache" XDG_STATE_HOME="$home/.local/state" \
     bash "$UNINSTALL_SCRIPT" "$@" 2>&1)" || RC=$?
