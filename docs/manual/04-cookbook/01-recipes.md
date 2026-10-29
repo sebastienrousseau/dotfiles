@@ -241,8 +241,9 @@ dot config export            # writes ~/Downloads/dotfiles_offline_bundle_<times
 dot config export ~/backups  # or into another directory
 ```
 
-The bundle holds `~/.dotfiles`, `~/.config/chezmoi` (with your age key, if
-it lives there) and `~/.local/share/mise`. Store it like a secret.
+The bundle holds `~/.dotfiles`, `~/.config/chezmoi` and `~/.local/share/mise`.
+It leaves out your age key (any file there with an `AGE-SECRET-KEY` line) and
+names it: carry the key to the other machine separately.
 
 ### 33. Restore from a bundle
 

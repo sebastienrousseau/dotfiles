@@ -493,7 +493,7 @@ dot config export            # writes ~/Downloads/dotfiles_offline_bundle_<times
 dot config export <dir>      # writes the bundle into <dir>
 ```
 
-The bundle holds `~/.dotfiles`, `~/.config/chezmoi` and `~/.local/share/mise` (plus the Nix store when `DOTFILES_BUNDLE_NIX=1`). It needs `tar` and `zstd`. To restore on another machine, unpack it with `tar --zstd -xf <bundle> -P`, then run `cd ~/.dotfiles && ./install.sh --force`.
+The bundle holds `~/.dotfiles`, `~/.config/chezmoi` and `~/.local/share/mise` (plus the Nix store when `DOTFILES_BUNDLE_NIX=1`). It leaves out the age key (any file in `~/.config/chezmoi` with an `AGE-SECRET-KEY` line) and names it, for you to copy separately. It needs `tar` and `zstd`. To restore on another machine, unpack it with `tar --zstd -xf <bundle> -P`, then run `cd ~/.dotfiles && ./install.sh --force`.
 
 `dot config import` does not restore a bundle today: it creates a new bundle instead. Unpack with `tar` as above.
 

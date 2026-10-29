@@ -9,7 +9,7 @@
 #   scripts/ops/chezmoi-update.sh — flag assembly, --force default, --async
 #   scripts/uninstall.sh          — confirmation gate and artefact removal
 #
-# `chezmoi` is a sandbox stub, so nothing on the host is applied or purged.
+# `chezmoi` is a sandbox stub, so nothing on the host is applied or removed.
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -151,13 +151,13 @@ test_start "force_skips_the_prompt_and_removes_every_artefact"
 seed_artifacts
 run "$UNINSTALL" --force
 assert_equals 0 "$RC" "rc"
-out_has "Reverting chezmoi-managed files" "chezmoi step ran"
+out_has "Removing chezmoi configuration" "chezmoi step ran"
 out_has "Removing shell completions" "completions step ran"
 assert_file_not_exists "$XDG_DATA_HOME/zsh/completions/_dot" "zsh completion removed"
 assert_file_not_exists "$XDG_DATA_HOME/bash-completion/completions/dot" "bash completion removed"
 assert_file_not_exists "$XDG_DATA_HOME/dotfiles.log" "log removed"
 assert_dir_not_exists "$XDG_STATE_HOME/dotfiles" "state removed"
-assert_file_contains "$CHEZMOI_CALLS" "purge --force" "chezmoi purge invoked"
+assert_true "! grep -q purge '$CHEZMOI_CALLS'" "chezmoi purge is not run (it deletes the age key)"
 
 test_start "uninstall_skips_chezmoi_when_it_is_not_installed"
 seed_artifacts
@@ -169,7 +169,7 @@ for c in rm printf echo cat sed grep; do
 done
 PATH="$NOCM" run "$UNINSTALL" --force
 assert_equals 0 "$RC" "rc"
-assert_true "! grep -q 'Reverting chezmoi-managed' '$OUTF'" "chezmoi step skipped"
+assert_true "! grep -q 'Left in place' '$OUTF'" "no chezmoi, no source directory to name"
 out_has "Uninstall complete." "still completes"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -79,26 +79,63 @@ if [[ -d "/nix/store" ]] && [[ "${DOTFILES_BUNDLE_NIX:-0}" == "1" ]]; then
   paths_to_bundle+=("/nix/store" "/nix/var/nix" "$HOME/.nix-profile")
 fi
 
-# Filter only existing paths
-declare -a valid_paths=()
-for p in "${paths_to_bundle[@]}"; do
-  if [[ -e "$p" ]]; then
-    valid_paths+=("$p")
-    ui_bullet "Adding: $p"
-  fi
-done
+# _existing_paths: fill valid_paths with the paths_to_bundle that exist.
+_existing_paths() {
+  local p
+  valid_paths=()
+  for p in "${paths_to_bundle[@]}"; do
+    if [[ -e "$p" ]]; then
+      valid_paths+=("$p")
+      ui_bullet "Adding: $p"
+    fi
+  done
+}
 
+# _age_keys: fill keys with the age identities in chezmoi's config. They
+# stay out of the bundle: whoever holds the archive could decrypt every
+# secret in it. A file with an AGE-SECRET-KEY line is one, whatever its
+# name; the user carries it to the offline host separately.
+_age_keys() {
+  local f
+  keys=()
+  [[ -d "$HOME/.config/chezmoi" ]] || return 0
+  while IFS= read -r -d '' f; do
+    if grep -q '^AGE-SECRET-KEY-' "$f" 2>/dev/null; then keys+=("$f"); fi
+  done < <(find "$HOME/.config/chezmoi" ! -type d -print0)
+}
+
+# _bundle_tar: archive valid_paths to BUNDLE_FILE without the keys. Paths
+# are absolute and stored relative to / to preserve the structure.
+_bundle_tar() {
+  local f
+  local -a excludes=()
+  for f in ${keys[@]+"${keys[@]}"}; do excludes+=("--exclude=$f"); done
+  tar --zstd -cf "$BUNDLE_FILE" -P ${excludes[@]+"${excludes[@]}"} "${valid_paths[@]}" 2>/dev/null
+}
+
+# _bundle_report: the bundle's size and path, the keys left out of it, and
+# how to restore it.
+_bundle_report() {
+  local size key
+  size=$(stat -c '%s' "$BUNDLE_FILE" 2>/dev/null || stat -f '%z' "$BUNDLE_FILE" 2>/dev/null || echo 0)
+  dot_log info "bundle_end" "file=$BUNDLE_FILE"
+  dot_metric "bundle_size" "$size" "bytes"
+  ui_ok "Bundle created" "$BUNDLE_FILE"
+  for key in ${keys[@]+"${keys[@]}"}; do
+    ui_warn "Not in the bundle" "$key (your age key): copy it to the offline host yourself to decrypt the secrets there"
+  done
+  ui_info "To restore on an offline machine:"
+  ui_bullet "tar --zstd -xf $BUNDLE_FILE -P"
+  ui_bullet "cd ~/.dotfiles && ./install.sh --force"
+}
+
+declare -a valid_paths=() keys=()
+_existing_paths
+_age_keys
 ui_info "Compressing artifacts (this may take a while)..."
-# Use absolute paths and store them relative to / to preserve structure
-tar --zstd -cf "$BUNDLE_FILE" -P "${valid_paths[@]}" 2>/dev/null || {
+_bundle_tar || {
   ui_err "Failed to create bundle."
   exit 1
 }
 
-bundle_size=$(stat -c '%s' "$BUNDLE_FILE" 2>/dev/null || stat -f '%z' "$BUNDLE_FILE" 2>/dev/null || echo 0)
-dot_log info "bundle_end" "file=$BUNDLE_FILE"
-dot_metric "bundle_size" "$bundle_size" "bytes"
-ui_ok "Bundle created" "$BUNDLE_FILE"
-ui_info "To restore on an offline machine:"
-ui_bullet "tar --zstd -xf $BUNDLE_FILE -P"
-ui_bullet "cd ~/.dotfiles && ./install.sh --force"
+_bundle_report

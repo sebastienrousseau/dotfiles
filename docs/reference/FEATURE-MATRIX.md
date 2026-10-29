@@ -114,7 +114,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot edit` | EDITOR env selects the editor | `test_fm_env_editor` | `help:config` | `examples/example-dot-core.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 | `dot commit` → `dot config save` | (no staged changes, exit 1) | `test_fm_commit` | `run:commit` | `examples/example-dot-core.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot uninstall` → `dot config uninstall` | (prompts unless --force; declining deletes nothing) | `test_fm_uninstall_declined` | `help:config` | `examples/example-dot-core.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot uninstall` → `dot config uninstall` | --force (purges every managed path, keeps unmanaged files) | `test_fm_uninstall_force` | `help:config` | `examples/example-dot-core.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot uninstall` → `dot config uninstall` | --force (removes every managed path, keeps the age key and unmanaged files) | `test_fm_uninstall_force` | `help:config` | `examples/example-dot-core.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 
 ## diagnostics.sh
 

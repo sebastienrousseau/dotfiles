@@ -469,7 +469,9 @@ For incidents requiring complete re-provisioning:
 # secrets in plaintext.
 cp ~/.config/chezmoi/key.txt <offline-backup-location>/
 
-# Step 2: Remove the deployed setup (keeps the source)
+# Step 2: Remove the checkout, chezmoi's config and state, and the
+# dotfiles caches and logs. The age key stays in ~/.config/chezmoi, and
+# files chezmoi already deployed stay where they are.
 dot config uninstall
 
 # Step 3: Clear all caches

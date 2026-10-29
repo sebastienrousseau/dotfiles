@@ -75,17 +75,21 @@ test_fm_uninstall_declined() {
 test_fm_uninstall_force() {
   fresh_isolated_sandbox
   plant "${UNINSTALL_TARGETS[@]/#/$HOME/}" "$HOME/.config/keep/me.conf" "$HOME/.local/bin/not-ours"
+  mkdir -p "$HOME/.config/chezmoi"
+  printf 'AGE-SECRET-KEY-1PLANTED\n' >"$HOME/.config/chezmoi/key.txt"
   fm_stub chezmoi 'printf "%s\n" "$*" >>"$FM_SANDBOX/chezmoi.calls"'
   test_start "fm_uninstall_force"
   fm_run config uninstall --force
   fm_expect_rc 0
   test_start "fm_uninstall_force_reports_completion"
   fm_expect_out "Uninstall complete."
-  test_start "fm_uninstall_force_purges_through_chezmoi"
-  if grep -qx "purge --force" "$FM_SANDBOX/chezmoi.calls" 2>/dev/null; then
-    fm_pass "chezmoi purge --force called"
+  # chezmoi purge deletes chezmoi's whole config directory, the age key
+  # with it, so uninstall removes the rest itself and keeps the key.
+  test_start "fm_uninstall_force_keeps_the_age_key"
+  if [[ -f "$HOME/.config/chezmoi/key.txt" ]] && ! grep -q purge "$FM_SANDBOX/chezmoi.calls" 2>/dev/null; then
+    fm_pass "the age key is kept and chezmoi purge is not run"
   else
-    fm_fail "chezmoi purge --force was not called"
+    fm_fail "the age key was removed, or chezmoi purge ran"
   fi
   test_start "fm_uninstall_force_removes_every_managed_path"
   local f left=""

@@ -124,10 +124,12 @@ dot config export ~/Downloads
 ```
 
 The archive holds `~/.dotfiles`, `~/.config/chezmoi` and `~/.local/share/mise`
-(plus the Nix store with `DOTFILES_BUNDLE_NIX=1`). `~/.config/chezmoi` contains
-your age key (`key.txt`), so treat the archive as a secret. It stores absolute
-paths: extract it as a user with the same home directory path, and note that
-extraction overwrites files already at those paths.
+(plus the Nix store with `DOTFILES_BUNDLE_NIX=1`). It leaves out your age key:
+any file in `~/.config/chezmoi` that holds an age secret key, usually
+`key.txt`. The command names each one it left out; copy it to the target
+machine separately, since it decrypts every secret. The archive stores
+absolute paths: extract it as a user with the same home directory path, and
+note that extraction overwrites files already at those paths.
 
 Copy the archive to the target machine. Then unpack and install:
 
@@ -139,9 +141,12 @@ cd ~/.dotfiles
 
 ### Uninstall
 
-`chezmoi purge` deletes `~/.config/chezmoi`, which holds your age key
-(`key.txt`). Copy the key somewhere safe first if you still need to decrypt
-secrets encrypted to it.
+`dot config uninstall` removes the checkout, chezmoi's config, state and cache,
+and the dotfiles caches and logs, but keeps your age key in
+`~/.config/chezmoi` and names it. To remove things by hand instead, note
+that `chezmoi purge` deletes `~/.config/chezmoi`, the age key with it: copy
+the key somewhere safe first if you still need to decrypt secrets
+encrypted to it.
 
 ```bash
 cp ~/.config/chezmoi/key.txt ~/key.txt.backup   # if you use encryption

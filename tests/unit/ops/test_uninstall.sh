@@ -19,7 +19,8 @@ WORK="$(mktemp -d -t dot-uninstall.XXXXXX)"
 trap 'rm -rf "$WORK"' EXIT
 
 MANAGED=(
-  .dotfiles/README.md .config/chezmoi/chezmoi.toml .local/share/chezmoi/README.md
+  .dotfiles/README.md .config/chezmoi/chezmoi.toml .config/chezmoi/chezmoistate.boltdb
+  .local/share/chezmoi/README.md .cache/chezmoi/x
   .local/bin/dot .local/bin/dot-ai .local/bin/dot-theme-sync .local/bin/tour
   .local/bin/ai_core .local/bin/ai-update .local/bin/antigravity
   .local/bin/git-ai-commit .local/bin/git-ai-diff
@@ -44,7 +45,10 @@ uninstall() {
   esac
   [[ "$(cd "$home" && pwd -P)" != "$(cd "$REAL_HOME" && pwd -P)" ]] || exit 97
   RC=0
-  OUT="$(printf '%s\n' "$answer" | env -i PATH="$WORK/bin:/usr/bin:/bin" HOME="$home" \
+  # The environment is emptied, except the coverage run's tracer (BASH_ENV,
+  # PS4) when there is one.
+  OUT="$(printf '%s\n' "$answer" | env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+    PATH="$WORK/bin:/usr/bin:/bin" HOME="$home" \
     XDG_CONFIG_HOME="$home/.config" XDG_DATA_HOME="$home/.local/share" \
     XDG_CACHE_HOME="$home/.cache" XDG_STATE_HOME="$home/.local/state" \
     bash "$UNINSTALL_SCRIPT" "$@" 2>&1)" || RC=$?
@@ -60,8 +64,12 @@ fresh_home() {
   printf '%s\n' "$home"
 }
 
+# The chezmoi stub records its calls; `source-path` prints STUB_SOURCE.
 mkdir -p "$WORK/bin"
-printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >>"%s/chezmoi.calls"\n' "$WORK" >"$WORK/bin/chezmoi"
+{
+  printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >>"%s/chezmoi.calls"\n' "$WORK"
+  printf '%s\n' '[[ "$1" != source-path ]] || cat "${0%/*}/source" 2>/dev/null'
+} >"$WORK/bin/chezmoi"
 chmod +x "$WORK/bin/chezmoi"
 
 test_start "declining_the_prompt_removes_nothing"
@@ -72,7 +80,7 @@ assert_contains "Aborted." "$OUT" "and says so"
 left=0
 for f in "${MANAGED[@]}"; do [[ -e "$H/$f" ]] && left=$((left + 1)); done
 assert_equals "${#MANAGED[@]}" "$left" "every managed path is still there"
-assert_file_not_exists "$WORK/chezmoi.calls" "chezmoi was never asked to purge"
+assert_file_not_exists "$WORK/chezmoi.calls" "chezmoi was never called"
 
 test_start "yes_at_the_prompt_uninstalls"
 H="$(fresh_home accepted)"
@@ -87,13 +95,51 @@ rm -f "$WORK/chezmoi.calls"
 uninstall "$H" "" --force
 assert_equals "0" "$RC" "--force exits 0 without asking"
 assert_equals "0" "$(grep -c 'Continue?' <<<"$OUT")" "no prompt with --force"
-assert_equals "purge --force" "$(cat "$WORK/chezmoi.calls" 2>/dev/null)" "chezmoi purges the managed files"
+assert_equals "source-path" "$(cat "$WORK/chezmoi.calls" 2>/dev/null)" "chezmoi is asked only for its source (no purge)"
 left=""
 for f in "${MANAGED[@]}"; do [[ -e "$H/$f" ]] && left="$left $f"; done
 assert_equals "" "$left" "every managed path is removed"
 kept=0
 for f in "${KEPT[@]}"; do [[ -f "$H/$f" ]] && kept=$((kept + 1)); done
 assert_equals "${#KEPT[@]}" "$kept" "files dotfiles does not own are kept"
+
+# The age identity is the only copy of the key the secrets were encrypted
+# to: uninstall keeps it, whatever its name, and says where it is.
+test_start "the_age_key_is_kept"
+H="$(fresh_home keyed)"
+printf 'AGE-SECRET-KEY-1PLANTED\n' >"$H/.config/chezmoi/key.txt"
+mkdir -p "$H/.config/chezmoi/keys"
+printf '# created: today\nAGE-SECRET-KEY-1SECOND\n' >"$H/.config/chezmoi/keys/old-identity"
+uninstall "$H" "" --force
+assert_equals "0" "$RC" "uninstall exits 0"
+assert_file_exists "$H/.config/chezmoi/key.txt" "key.txt stays"
+assert_file_exists "$H/.config/chezmoi/keys/old-identity" "and so does an identity under another name"
+assert_file_not_exists "$H/.config/chezmoi/chezmoi.toml" "the rest of the config goes"
+assert_file_not_exists "$H/.config/chezmoi/chezmoistate.boltdb" "state included"
+assert_contains "Kept your age key: $H/.config/chezmoi/key.txt" "$OUT" "the kept key is named"
+
+test_start "without_a_key_the_config_directory_goes"
+H="$(fresh_home keyless)"
+mkdir -p "$H/.config/chezmoi/empty/nested"
+uninstall "$H" "" --force
+assert_dir_not_exists "$H/.config/chezmoi" "nothing of chezmoi's config is left"
+assert_equals "0" "$(grep -c 'Kept your age key' <<<"$OUT")" "and no key is mentioned"
+
+test_start "a_source_elsewhere_is_named_not_deleted"
+H="$(fresh_home elsewhere)"
+mkdir -p "$H/src/mine"
+printf '%s\n' "$H/src/mine" >"$WORK/bin/source"
+uninstall "$H" "" --force
+rm -f "$WORK/bin/source"
+assert_dir_exists "$H/src/mine" "a source outside ~/.dotfiles stays"
+assert_contains "Left in place: $H/src/mine" "$OUT" "and is named"
+
+test_start "the_removed_checkout_is_not_named"
+H="$(fresh_home inside)"
+printf '%s\n' "$H/.dotfiles/defaults" >"$WORK/bin/source"
+uninstall "$H" "" --force
+rm -f "$WORK/bin/source"
+assert_equals "0" "$(grep -c 'Left in place' <<<"$OUT")" "the source was ~/.dotfiles, which is gone: nothing to name"
 
 test_start "the_real_home_is_untouched"
 assert_file_exists "$REPO_ROOT/scripts/uninstall.sh" "the checkout under test is intact"
