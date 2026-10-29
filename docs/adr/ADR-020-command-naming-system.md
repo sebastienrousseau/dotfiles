@@ -218,6 +218,12 @@ runs each command (`legacy`, on the domain and on each command).
   never writes it. A tree with no fragments, or a merge that fails, reads
   `lib/dot/data/commands.txt`, which the build tools (completions, man
   pages, the lint) keep reading.
+- Only the bundled plugins' fragments are merged. User plugin
+  directories (`$XDG_DATA_HOME/dot/plugins/`) are not read: they come
+  with P2.3, and only through ADR-016's trust path (an explicit, signed
+  registry entry). Merging a user-writable directory into dispatch before
+  then would let any process running as the user change what a
+  `dot ...` command runs.
 - `-V` prints the version and `-v` sets `DOT_VERBOSE=1`. Until 0.2.538,
   `dot -v` alone printed the version with a warning; from 0.2.538 it is
   `--verbose` with no command, which prints the overview.

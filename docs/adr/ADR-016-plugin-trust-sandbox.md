@@ -88,4 +88,6 @@ macOS audit execution still has a same-UID pathname window; and macOS/Windows ne
 their native containment implementations. Production trust-root
 rotation, signature verification and read-only system registry precedence are
 separate follow-ups.
+User plugin directories join the command table (ADR-020) only through
+this path, in P2.3; until then the table merges the bundled plugins alone.
 This reconciles ADR-003 without falsely promoting declarations to enforcement.
