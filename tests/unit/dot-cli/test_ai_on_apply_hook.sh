@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# shellcheck disable=SC1090,SC1091
+# shellcheck disable=SC1090,SC1091,SC2016
 # The ai plugin's on-apply hook (P2.2) lists every roster tool and offers
 # to install the missing ones. The offer paths (install all, pick, skip, no
 # mise) run through `dot apply` in tests/unit/ops/test_chezmoi_apply_phases.sh;
@@ -31,11 +31,13 @@ stub() {
 stub claude
 stub mise
 
-# hook [VAR=value...]: run the hook; OUT, RC.
+# hook [VAR=value...]: run the hook; OUT, RC. The environment is emptied,
+# except the coverage run's tracer (BASH_ENV and PS4), when there is one.
 hook() {
   : >"$WORK/calls"
   RC=0
-  OUT="$(env -i HOME="$WORK/home" PATH="$WORK/stubs:$SYS" TERM=dumb NO_COLOR=1 LANG=C.UTF-8 "$@" \
+  OUT="$(env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+    HOME="$WORK/home" PATH="$WORK/stubs:$SYS" TERM=dumb NO_COLOR=1 LANG=C.UTF-8 "$@" \
     "$REAL_BASH" "$HOOK" </dev/null 2>&1)" || RC=$?
 }
 
