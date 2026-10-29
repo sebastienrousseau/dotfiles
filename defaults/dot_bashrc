@@ -190,11 +190,21 @@ _deferred_hydration() {
       return 1
     fi
 
-    echo "$init_output" >"${cache}.tmp.$$"
-    mv "${cache}.tmp.$$" "$cache"
+    # mktemp, as zsh's _cached_eval does: a private file (0600), not one
+    # made with the umask, and no clash between shells sharing a PID.
+    # `>|` writes the file even under `set -o noclobber`.
+    local _tmp _tmp_pin
+    _tmp="$(mktemp "${cache}.XXXXXX")" || return 1
+    if ! { echo "$init_output" >|"$_tmp" && mv "$_tmp" "$cache"; }; then
+      rm -f "$_tmp"
+      return 1
+    fi
     if [[ -n "$real_bin" ]]; then
-      echo "$real_bin" >"${pin}.tmp.$$"
-      mv "${pin}.tmp.$$" "$pin"
+      _tmp_pin="$(mktemp "${pin}.XXXXXX")" || return 1
+      if ! { echo "$real_bin" >|"$_tmp_pin" && mv "$_tmp_pin" "$pin"; }; then
+        rm -f "$_tmp_pin"
+        return 1
+      fi
     fi
     source "$cache"
   }
