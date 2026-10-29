@@ -215,4 +215,20 @@ _rc=$?
 assert_equals 1 "$_rc" "the tagged installer is not the one the README names"
 assert_contains "DRIFT in README.md installer SHA256" "$_out" "and the drift is named"
 
+# A shallow clone without the tag (how CI test jobs check out) cannot tell
+# a released version from one not yet tagged, so it leaves the digest to
+# the full clones and says so.
+test_start "a_shallow_clone_without_the_tag_leaves_the_digest_unchecked"
+_root="$(_fixture shallow-src 1.2.3)"
+"$REAL_GIT" -C "$_root" init -q && "$REAL_GIT" -C "$_root" add -A &&
+  "$REAL_GIT" -C "$_root" -c core.hooksPath=/dev/null -c user.name=t -c user.email=t@t \
+    -c commit.gpgsign=false commit -qm fixture
+_clone="$DOTFILES_COV_TMPDIR/fx-shallow"
+"$REAL_GIT" clone -q --depth 1 "file://$_root" "$_clone"
+printf '# changed in this commit\n' >>"$_clone/install.sh"
+_out="$(_check_git "$_clone")"
+_rc=$?
+assert_equals 0 "$_rc" "the digest is not compared"
+assert_contains "installer digest: not checked here" "$_out" "and the run says why"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
