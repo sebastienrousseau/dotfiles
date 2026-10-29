@@ -4,7 +4,8 @@
 # The toolchain side of `dot system update`: prerequisites and consent up front,
 # then mise, system-package and Nix phases, used by cmd_upgrade in
 # scripts/dot/commands/meta.sh.
-# Sourced by utils.sh; inherits set -euo pipefail
+# Sourced by plugins/system/libexec/system.sh after utils.sh; inherits
+# set -euo pipefail
 #
 # cmd_upgrade renders its phases with _upgrade_step, which closes stdin and
 # hands the terminal to the step renderer, so nothing here may prompt once
@@ -15,6 +16,9 @@
 
 [[ -n "${_DOT_UPGRADE_LOADED:-}" ]] && return 0
 _DOT_UPGRADE_LOADED=1
+
+# shellcheck source=ai-install.sh disable=SC1091
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ai-install.sh" # ai_pin_bumps
 
 # The system package manager `dot system update` would drive, if any.
 dot_upgrade_system_pm() {

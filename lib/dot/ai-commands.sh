@@ -10,8 +10,8 @@
 [[ "${_DOT_LIB_AI_COMMANDS_LOADED:-0}" == "1" ]] && return 0
 _DOT_LIB_AI_COMMANDS_LOADED=1
 
-# shellcheck source=ai-roster.sh disable=SC1091
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ai-roster.sh"
+# shellcheck source=ai-provision.sh disable=SC1091
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ai-provision.sh"
 
 # _ai_deprecated <new-command> — one-line stderr hint; the old form still runs.
 _ai_deprecated() {

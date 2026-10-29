@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # One consented path from "an AI tool is missing" to "it is installed", shared
 # by `dot ai install`, the `dot ai` status offer, and `dot ai <tool>`.
-# Sourced by utils.sh after ai-install.sh and preflight.sh; inherits
+# Sourced by ai-commands.sh after utils.sh (for preflight.sh); inherits
 # set -euo pipefail.
 #
 # A tool installs one of two ways: a native installer (checksum-pinned, needs
@@ -16,8 +16,8 @@
 [[ -n "${_DOT_AI_PROVISION_LOADED:-}" ]] && return 0
 _DOT_AI_PROVISION_LOADED=1
 
-# shellcheck source=ai-roster.sh disable=SC1091
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ai-roster.sh"
+# shellcheck source=ai-install.sh disable=SC1091
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ai-install.sh"
 
 # ai_install_method <bin>: native:<function> or mise:<package>; 1 (and no
 # output) when nothing can install it.
