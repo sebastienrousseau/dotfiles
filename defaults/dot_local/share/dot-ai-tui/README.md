@@ -10,7 +10,7 @@ so behaviour has a single source of truth. Deployed to
 
 | Pane | Keys |
 | :--- | :--- |
-| fleet | `↑`/`k` `↓`/`j` move · `⏎` open the tool's native session · `tab` / `p` quick chat · `/` command palette · `m` cycle model · `s` serve / stop · `i` install · `r` refresh · `x` then `x` again within 5s: SIGTERM the selected tool's busiest process (any other key cancels; refused if the PID's start time or program changed) · `q`/`esc` quit |
+| fleet | `↑`/`k` `↓`/`j` move · `⏎` open the tool's native session · `tab` / `p` quick chat · `/` command palette · `m` cycle model · `s` serve / stop · `i` install · `r` refresh · `c` / `v` / `d` jump to corralctl / passmcp / draft · `h`/`l` (or `←`/`→`) pick a control-centre action and `1`-`6` run one · `0`/`backspace` clear the console · `b` show / hide the btop deck · `x` then `x` again within 5s: SIGTERM the selected tool's busiest process (any other key cancels; refused if the PID's start time or program changed) · `q`/`esc` quit |
 | chat | type and `⏎` to send · `/` opens the palette (`↑`/`↓`, `tab` completes, `⏎` runs) · `esc` back to the fleet |
 | slash | `/help` `/model [name\|default]` `/style [name\|off]` `/tool <name>` `/save` `/resume` `/clear` `/serve` `/cost` `/exit` |
 
@@ -22,7 +22,7 @@ recent runs), `XDG_STATE_HOME` (saved session), `CLAUDE_CONFIG_DIR` /
 (default 100×28; add `DOT_AI_SPLASH=1` for the empty state) — used by
 previews and by CI, where there is no terminal.
 
-With `claude` or `codex` selected, the ⁵sessions table lists that agent's
+With `claude` or `codex` selected, the sessions table lists that agent's
 sessions written in the last 24h, read from the transcripts each CLI keeps
 on disk: state (`working`, `tool:<name>`, `idle`), project, branch, model,
 context size (and fill, where Codex reports its window) and output tokens.
@@ -57,8 +57,11 @@ parsing, the `/` palette, list windowing, transcript layout, session
 JSON, sqlite3 output scrubbing, gateway configuration, the whole key
 handler at arbitrary terminal sizes, and the model cycle. Every `go test`
 run replays the seed corpus plus the committed crashers under
-`testdata/fuzz/<Target>/`. The ClusterFuzzLite / OSS-Fuzz build in
-`fuzz/oss-fuzz/` compiles the same targets with libFuzzer.
+`testdata/fuzz/<Target>/` (today `FuzzHighlight` and
+`FuzzRenderTranscript`). The ClusterFuzzLite / OSS-Fuzz build
+(`fuzz/oss-fuzz/build.sh`) cannot import this `package main` module, so it
+compiles `FuzzAI*` ports of these parsers from the repo's `fuzz/` package
+with libFuzzer.
 
 ```bash
 go test -run '^$' -fuzz=FuzzHighlight          -fuzztime=30s ./...   # fenced-code highlighter
@@ -78,8 +81,8 @@ go test -run '^Fuzz' -v ./...                                         # replay e
 Crashers found so far and fixed (kept as regression corpus):
 `FuzzHighlight` — a 5 000-character fence language tag stalled every render
 for 13 s (chroma's registry scan is linear in the tag length; tags are now
-validated and memoised); `FuzzRenderTranscript` / `FuzzModelKeys` — a
-12-row terminal with the palette open and recent runs present asked the
+validated and memoised); `FuzzRenderTranscript` / `FuzzModelKeys` (corpus
+kept under `FuzzRenderTranscript`): a 12-row terminal with the palette open and recent runs present asked the
 splash for a negative height and panicked.
 
 ### Testing model

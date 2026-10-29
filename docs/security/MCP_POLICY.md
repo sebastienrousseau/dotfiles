@@ -27,18 +27,18 @@ Tracked server registry entries live in [mcp-registry.json](https://github.com/s
 
 Current defaults:
 
-- Allowed launchers: `npx`, `node`, `uvx`; inline code (`node -e`, `sh -c`) is flagged
+- Allowed launchers: `npx`, `node`, `uvx`, and binaries under `${HOME}/.local/share/dot-mcp/`; inline code (`node -e`, `sh -c`) is flagged
 - Trusted transports: `stdio`, `http`, read from Claude's `type` key (or the older `transport`)
 - Blocked filesystem roots: `/`, `/home`, `/Users`, checked on every server's
   arguments after normalising `..`, `//`, `~` and `${HOME}` (an error)
 - Blocked argument patterns: `^--allow-.*`, `^--unsafe$`, `^\\*$`
-- Network-facing servers disabled by default: `github`, `brave-search`, `fetch`, `puppeteer`, `filesystem`,
+- Servers disabled by default: the network-facing `github`, `brave-search`, `fetch` and `puppeteer`, plus `filesystem` (broad local file access),
   matched by server key and by the package a server runs
 - Approved packages must resolve through the tracked MCP lock manifest
 - Every active server must match the tracked MCP registry
 - `http`, `sse` and `streamable-http` transports must use `https://` (an error) and registry-declared OAuth2
 
-Besides the managed `mcp_servers.json`, `dot mcp` checks the configs Claude Code
+Besides the managed `mcp_servers.json`, `dot mcp check` checks the configs Claude Code
 reads: `~/.claude.json` (user and project scopes), the `.mcp.json` of every
 project listed there, and the working directory's `.mcp.json`.
 
@@ -47,9 +47,9 @@ project listed there, and the working directory's `.mcp.json`.
 Run:
 
 ```bash
-dot mcp --strict
-dot mcp -s -j
-dot mcp registry
+dot mcp check --strict
+dot mcp check -s -j
+dot mcp list
 ```
 
 The JSON form is the audit artifact for CI, release validation, and workstation attestation.
@@ -81,7 +81,7 @@ so the Python servers get a venv each instead. The npm names `mcp-server-git`
 and `mcp-server-sqlite` are not the official servers (one is an npm security
 placeholder, the other a third-party package); the official ones ship on PyPI.
 
-`dot mcp --strict` and `dot mcp -s` now verify that:
+`dot mcp check --strict` and `dot mcp check -s` now verify that:
 
 - package refs are version-pinned
 - the pinned refs match the tracked lock manifest

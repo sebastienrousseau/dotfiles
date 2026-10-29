@@ -5,9 +5,11 @@ a new mutation engine. The legacy theme path remains authoritative at runtime.
 
 ## Rendered configuration baselines
 
-Run `python3 scripts/theme/check-render-goldens.py` to render and compare 72
-checked-in fixtures: Ghostty, Kitty, Alacritty, WezTerm, Foot and tmux; Maui and
-Berlin; light and dark; macOS, Linux-desktop and WSL template inputs. CI runs
+Run `python3 scripts/theme/check-render-goldens.py` to render and compare the
+checked-in fixtures in `tests/fixtures/theme-render/`, one per combination of:
+Ghostty, Kitty, Alacritty, WezTerm, Foot, tmux, the Neovim colour scheme and
+the Neovim lualine theme; Maui and Berlin; light and dark; macOS,
+Linux-desktop and WSL template inputs. CI runs
 the same matrix on both a Linux and a macOS host using pinned chezmoi.
 
 The harness copies only the palette catalogue and the theme-name partial into
@@ -54,5 +56,7 @@ so it cannot be silently treated as safe for the future strict core.
 
 Other mutations—wallpaper/desktop preferences, caches, command effects,
 transaction journals and reloads—are outside this file-inventory scope. The
-next contract increment must classify those effects and define the six ADRs
-before moving authority into `dot-core`.
+next contract increment must classify those effects before moving authority
+into `dot-core`. The six ADRs it called for are now
+[ADR-013](../adr/ADR-013-single-mutation-authority.md) to
+[ADR-018](../adr/ADR-018-read-only-mcp-isolation.md).

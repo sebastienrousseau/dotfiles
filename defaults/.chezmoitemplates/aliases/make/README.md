@@ -6,21 +6,21 @@ Manage Make aliases. Part of the **Universal Dotfiles** configuration.
 
 ## Description
 
-These aliases are defined in `make.aliases.sh` and are automatically loaded by `chezmoi`.
+These aliases are defined in `make.aliases.sh`. Loaded by the lazy alias layer `~/.config/shell/91-ux-aliases-lazy.sh`. It loads after the eager layer (zsh defers it until after startup), so its definitions replace any eager alias of the same name. Every definition below exists only when `make` is on PATH.
 
 ## Aliases
 
-This code provides a set of aliases for the `make` command.
-
-- `mk` - Make.
-- `mkc` - Make clean.
-- `mkd` - Make doc.
-- `mkf` - Make format.
-- `mkh` - Make help.
-- `mki` - Make install.
-- `mka` - Make all.
-- `mkr` - Make run.
-- `mkt` - Make test.
+| Name | Definition | Notes |
+| --- | --- | --- |
+| `mk` | `make` |  |
+| `mkc` | `make clean` | Make clean. |
+| `mkd` | `make doc` | Make doc. |
+| `mkf` | `make format` | Make format. |
+| `mkh` | `make help` | Make help. |
+| `mki` | `make install` | Make install. |
+| `mka` | `make all` | Make all. |
+| `mkr` | `make run` | Make run. |
+| `mkt` | `make test` | Make test. |
 
 [banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 

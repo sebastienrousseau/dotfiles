@@ -246,3 +246,9 @@ name = "zai"
 target = "ai run zai"
 kind = "removed"
 until = "0.2.538"
+
+# Lifecycle hooks (P2.2): lib/dot/hooks.sh runs these from the command table.
+[[hooks]]
+event = "on-apply"
+run = "libexec/hooks/on-apply.sh"
+summary = "AI provider CLI checks (optional)"

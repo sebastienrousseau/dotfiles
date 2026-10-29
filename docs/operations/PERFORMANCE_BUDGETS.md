@@ -4,7 +4,7 @@ render_with_liquid: false
 
 # Performance Budgets
 
-Every operation this repo owns falls into one of four performance tiers. Each tier has a **hard budget** enforced by `benches/test_perf_budgets.sh`. If a change pushes an operation past its budget's headroom, CI fails.
+Every operation this repo owns falls into one of the tiers below. INSTANT, FAST, MEDIUM and GATES have **hard budgets** enforced by `benches/test_perf_budgets.sh`: if a change pushes an operation past its budget's headroom, CI fails. ACCEPTED-SLOW and OUT-OF-SCOPE operations are documented, not gated per run.
 
 ## The tiers
 
@@ -13,10 +13,11 @@ Every operation this repo owns falls into one of four performance tiers. Each ti
 | **INSTANT** | ≤ **500ms** | Anything a human sees at a shell prompt |
 | **FAST** | ≤ **2000ms** | Heavier gates + sandboxed CLI reads |
 | **MEDIUM** | ≤ **5000ms** | Full diagnostic runs |
+| **GATES** | 2× the slowest platform's median | CI quality gates and test suites (see below) |
 | **ACCEPTED-SLOW** | documented | Multi-second ops that are legitimately slow (see below) |
 | **OUT-OF-SCOPE** | not gated | Multi-minute ops we don't gate per-run |
 
-## Reference baselines (2026-08-30, `rousseau-cachyos-geekom-a9`, Ryzen AI 9 HX 370)
+## Reference baselines (2026-08-30, `rousseau-my-workstation`, Ryzen AI 9 HX 370)
 
 All medians in milliseconds. Budget = 2× median (or the tier ceiling, whichever is larger).
 

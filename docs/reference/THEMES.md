@@ -6,7 +6,7 @@ render_with_liquid: false
 
 Themes are auto-generated from wallpapers. K-Means clustering in CIELAB color space extracts dominant colors. Every theme is WCAG AAA compliant.
 
-There is no fixed theme catalog. The available themes depend on which wallpapers are present on your system. Run `dot theme list` to see what's discovered.
+A generated catalog ships in `defaults/.theme-manifest/themes.toml`; `dot theme rebuild` regenerates it from the wallpapers present on your system. Run `dot theme list` to see what's available.
 
 ## Source of truth
 
@@ -15,9 +15,9 @@ Wallpapers — not `themes.toml` — are the source of truth. The system discove
 1. **System wallpapers** — platform-native (macOS `/System/Library/Desktop Pictures/`, Linux `/usr/share/backgrounds/`)
 2. **Custom wallpapers** — `~/Pictures/Wallpapers/` (custom overrides system on name collision)
 
-`extract-theme.py` runs K-Means++ in CIELAB on each wallpaper, generates a 16-color terminal palette plus UI/app mappings, and enforces WCAG AAA contrast. Semantic status colors are tuned independently for light and dark appearances so error, warning, success, and info remain distinct under protan, deutan, and tritan simulation. `rebuild-themes.sh` orchestrates discovery → parallel extraction → assembly into `.theme-manifest/themes.toml` (cached in `~/.cache/dotfiles/themes/`, regenerated only when wallpapers change).
+`extract-theme.py` runs K-Means++ in CIELAB on each wallpaper, generates a 16-color terminal palette plus UI/app mappings, and enforces WCAG AAA contrast. Semantic status colors are tuned independently for light and dark appearances so error, warning, success, and info remain distinct under protan, deutan, and tritan simulation. `rebuild-themes.sh` orchestrates discovery → parallel extraction → assembly into `defaults/.theme-manifest/themes.toml` (cached in `~/.cache/dotfiles/themes/`, regenerated only when wallpapers change).
 
-`.theme-manifest/themes.toml` is a **generated artifact**. Do not edit it directly.
+`defaults/.theme-manifest/themes.toml` is a **generated artifact**. Do not edit it directly.
 
 It lives outside `.chezmoidata/` on purpose: chezmoi hands everything under `.chezmoidata/` to every template it renders, and with the manifest there `chezmoi apply --dry-run` took about 1.9 s instead of under 1 s. Theme templates load it themselves with `include ".theme-manifest/themes.toml" | fromToml` and pass the result to the `theme-name` partial.
 

@@ -7,12 +7,12 @@ Copy-paste recipes for checking that what you downloaded is what CI
 produced. Written for packagers and for anyone installing outside a
 package manager.
 
-The four attestations are orthogonal — each rules out a different
-class of attack — and you do not need all four. If you only run one
+The attestations below are orthogonal (each rules out a different
+class of attack) and you do not need all of them. If you only run one
 command, run the first.
 
 ```sh
-TAG=v0.2.519
+TAG=v0.2.539
 REPO=sebastienrousseau/dotfiles
 VERSION="${TAG#v}"
 ```
@@ -33,10 +33,12 @@ Expected: `✓ Verification succeeded!` naming
 
 ## 2. Checksums
 
-Three checksum files exist and they cover different things:
+Four checksum files exist and they cover different things:
 
 - `dot-<version>.SHA256SUMS` — the two release archives, written by
   the packaging workflow alongside them.
+- `dotfiles-install-<version>.sh.sha256`: the standalone installer
+  only, from the same workflow.
 - `SHA256SUMS` — the **documentation** bundle, written by
   `manual-publish.yml`. Different assets; do not confuse the two.
 - `ALL_SHA256SUMS` — **every** asset on the release, including both of
@@ -56,15 +58,18 @@ cosign verify-blob \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   ALL_SHA256SUMS
 
-# Then check every asset against it.
-gh release download "$TAG" --repo "$REPO" --dir .
+# Then check every asset against it. --skip-existing keeps the
+# manifest files already downloaded above from aborting the download.
+gh release download "$TAG" --repo "$REPO" --dir . --skip-existing
 sha256sum -c ALL_SHA256SUMS
 ```
 
 ## 3. Sigstore signature on the archive
 
 The packaging workflow also emits a standalone sigstore bundle for the
-tarball and zip, so you can verify without the `gh` CLI:
+tarball, the zip and the standalone installer
+(`dotfiles-install-<version>.sh.sigstore.json`), so you can verify
+without the `gh` CLI (`gh` is only used here to download):
 
 ```sh
 gh release download "$TAG" --repo "$REPO" \
@@ -157,10 +162,13 @@ report it privately per [`../SECURITY.md`](../SECURITY.md).
 | SPDX SBOM + cosign signature | v0.2.500 |
 | Signed `ALL_SHA256SUMS` manifest | v0.2.503 |
 | SLSA build provenance (`gh attestation verify`) | v0.2.503 |
-| `dot-<version>.SHA256SUMS`, CycloneDX SBOM, standalone sigstore bundles | **next release after v0.2.519** |
+| `dot-<version>.SHA256SUMS`, CycloneDX SBOM, standalone sigstore bundles for the archives | v0.2.520 |
+| Standalone installer `dotfiles-install-<version>.sh` with `.sha256` and sigstore bundle | v0.2.521 |
 
 Earlier releases carry only what the table says; the additions are
 forward-only, because re-tagging would break consumers pinned to
 existing digests. Weekly, `release-attestation-check.yml` verifies the
-latest release still carries the full bundle and opens an issue if
-not.
+latest release still carries the SPDX SBOM with its signature,
+certificate and SLSA provenance, and the signed `ALL_SHA256SUMS`
+manifest, and opens an issue if not. It does not check the archives,
+the installer or their sigstore bundles.

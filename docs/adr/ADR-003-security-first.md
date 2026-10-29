@@ -82,6 +82,14 @@ if [ "${DOTFILES_SECURITY:-0}" != "1" ]; then
 fi
 ```
 
+> **Status note (0.2.539):** there is no single `DOTFILES_SECURITY`
+> switch. Each hardening script in `scripts/security/` has its own
+> opt-in variable: `DOTFILES_FIREWALL=1` (`firewall.sh`),
+> `DOTFILES_DOH=1` (`dns-doh.sh`), `DOTFILES_LOCK=1` (`lock-screen.sh`)
+> and `DOTFILES_TELEMETRY=1` (`telemetry-kill.sh`). Separately,
+> `DOTFILES_SECURITY_MODE` (default `standard`; `strict` adds the UFW
+> aliases on Linux) selects which security aliases load.
+
 **Comprehensive logging:**
 
 ```bash

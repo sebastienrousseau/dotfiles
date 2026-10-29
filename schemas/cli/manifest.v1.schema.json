@@ -104,7 +104,20 @@
       }
     },
     "capabilities": { "type": "object", "description": "Reserved for P2.3 (ADR-016 trust path)" },
-    "hooks": { "type": "array", "description": "Reserved for P2.2" },
+    "hooks": {
+      "type": "array",
+      "description": "Lifecycle hooks (P2.2): when the event happens, the host runs the script, a path under the plugin directory, under the summary as a header",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event", "run", "summary"],
+        "properties": {
+          "event": { "enum": ["on-apply"], "description": "on-apply: after dot config apply (scripts/ops/chezmoi-apply.sh)" },
+          "run": { "type": "string", "pattern": "^libexec/[a-z0-9][a-z0-9/_-]*\\.sh$" },
+          "summary": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
     "completions": { "type": "object", "description": "Reserved for P2.1" },
     "config": { "type": "object", "description": "Reserved for P2.2" },
     "provenance": { "type": "object", "description": "Reserved for P2.3" }

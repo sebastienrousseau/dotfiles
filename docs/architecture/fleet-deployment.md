@@ -19,13 +19,13 @@ flowchart TD
         hw[".chezmoidata/hardware.toml<br/>machine presets: T2, Surface, Geekom"]
         keys[".chezmoidata/keybinds.toml<br/>modifier hierarchy matrix"]
         tpl[".chezmoitemplates/<br/>reusable partials"]
-        configs["dot_config/<br/>50+ app configs as .tmpl"]
+        configs["dot_config/<br/>app configs, many as .tmpl"]
         wallpapers --> engine_k --> themes
     end
 
     repo --> engine["Chezmoi Template Engine<br/>chezmoi apply"]
 
-    engine --> t2["MacBook T2<br/>scale 2.0 | macOS"]
+    engine --> t2["MacBook T2<br/>scale 2.0 | Linux"]
     engine --> sp["Surface Pro<br/>scale 1.5 | Linux"]
     engine --> gk["Geekom A9<br/>scale 1.0 | Linux"]
 

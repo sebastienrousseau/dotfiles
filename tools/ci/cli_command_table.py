@@ -15,6 +15,7 @@ the dispatcher resolves ADR-020 spellings without parsing TOML:
   flag|<spelling>|<long>|<short>|<value>|<summary>
   arg|<spelling>|<words, space-separated>|<files or ai-patterns>|
   alias|<name>|<shortcut, deprecated or removed>|<target>|<until or empty>
+  hook|<event>|<domain>|<script under plugins/<domain>/>|<summary>
 
 A plugin with an `[entry]` runs its own commands: its routes are `@<domain>`
 followed by the spelling, and bin/dot hands the words after the domain to
@@ -35,11 +36,11 @@ catalog for agents and tools (`dot help --json`).
 
 Route fragments (P2.1): each plugin's records are also written to
 plugins/<domain>/commands.txt, its dom, obj, cmd, run (from its own
-aliases), flag, arg and alias records, and the family's grp records to
+aliases), flag, arg, alias and hook records, and the family's grp records to
 lib/dot/data/groups.txt. lib/dot/table-merge.awk merges the fragments
 back into the table: grp, then every dom/obj/cmd in domain order, the run
 records (the first of each invocation), the leg records derived from
-them, flag and arg, then alias. `merge()` is the same merge in Python; a
+them, flag and arg, then alias, then hook. `merge()` is the same merge in Python; a
 fragment set must merge to exactly the table above. The fragment format
 is the contract a plugin's loader reads (ADR-020).
 
@@ -115,6 +116,10 @@ def completion_records(manifests: dict) -> list[str]:
 def alias_records(manifest: dict) -> list[str]:
     return [f"alias|{a['name']}|{a['kind']}|{a['target']}|{a.get('until', '')}"
             for a in manifest.get("aliases", [])]
+
+
+def hook_records(domain: str, manifest: dict) -> list[str]:
+    return [f"hook|{h['event']}|{domain}|{h['run']}|{h['summary']}" for h in manifest.get("hooks", [])]
 
 
 def declared(manifests: dict) -> set[str]:
@@ -217,6 +222,8 @@ def build(manifests: dict, family: dict | None = None) -> str:
     rows += completion_records(manifests)
     for _, manifest in sorted(manifests.items()):
         rows += alias_records(manifest)
+    for domain, manifest in sorted(manifests.items()):
+        rows += hook_records(domain, manifest)
     return HEADER + "\n".join(rows) + "\n"
 
 
@@ -237,6 +244,7 @@ def fragment(domain: str, manifests: dict) -> str:
     rows += plugin_run_records(manifest, manifests, names)
     rows += plugin_completion_records(domain, manifest)
     rows += alias_records(manifest)
+    rows += hook_records(domain, manifest)
     return FRAGMENT_HEADER.format(source=f"plugins/{domain}/dot-plugin.toml") + "\n".join(rows) + "\n"
 
 
@@ -247,7 +255,7 @@ def records(text: str) -> list[str]:
 def merge(fragments: list[str]) -> list[str]:
     """The table's records from the groups and the fragments, in that
     order; lib/dot/table-merge.awk does the same at run time."""
-    buckets: dict[str, list[str]] = {"grp": [], "body": [], "run": [], "comp": [], "alias": []}
+    buckets: dict[str, list[str]] = {"grp": [], "body": [], "run": [], "comp": [], "alias": [], "hook": []}
     runs: set[str] = set()
     for text in fragments:
         for row in records(text):
@@ -260,7 +268,7 @@ def merge(fragments: list[str]) -> list[str]:
                 bucket = {"dom": "body", "obj": "body", "cmd": "body", "flag": "comp", "arg": "comp"}.get(kind, kind)
                 buckets[bucket].append(row)
     body = buckets["body"] + buckets["run"]
-    return buckets["grp"] + body + legacy_records(body) + buckets["comp"] + buckets["alias"]
+    return buckets["grp"] + body + legacy_records(body) + buckets["comp"] + buckets["alias"] + buckets["hook"]
 
 
 def main(argv: list[str] | None = None) -> int:

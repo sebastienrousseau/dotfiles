@@ -386,3 +386,4 @@ alias|packages|removed|tool list --packages|0.2.538
 alias|locks|removed|tool list --locked|0.2.538
 alias|new|removed|tool new|0.2.538
 alias|intelligence|removed|top|0.2.538
+hook|on-apply|ai|libexec/hooks/on-apply.sh|AI provider CLI checks (optional)

@@ -1,7 +1,7 @@
 # codespell configuration — `codespell --config config/codespellrc`
 # Scope: prose and source. Generated, vendored, and lock files are skipped.
 [codespell]
-skip = .git,node_modules,*.lock,*.sum,mise.lock,requirements-docs.txt,.secrets.baseline,CHANGELOG.md,docs/archive,docs/.vitepress,site,_build,build,dist,coverage,*.png,*.jpg,*.svg,*.gif,*.heic,*.woff,*.woff2,*.ttf,*.otf,LICENSES
+skip = .git,node_modules,*.lock,*.sum,mise.lock,requirements-docs.txt,.secrets.baseline,CHANGELOG.md,docs/archive,site,_build,build,dist,coverage,*.png,*.jpg,*.svg,*.gif,*.heic,*.woff,*.woff2,*.ttf,*.otf,LICENSES
 # Words codespell flags that are correct here. Each is a real term:
 #   als/ALS  alias-listing helper       oll     Ollama alias prefix
 #   ans      Ansible/answers fixtures   nd      Neovim leader-key binding

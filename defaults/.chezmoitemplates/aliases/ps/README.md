@@ -1,23 +1,16 @@
 # ps Aliases
 
-Manage ps aliases. Part of the **Universal Dotfiles** configuration.
+Process aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
 ## Description
 
-These aliases are defined in `ps.aliases.sh` and are automatically loaded by `chezmoi`.
+These aliases are defined in `ps.aliases.sh`. Loaded by the eager alias layer `~/.config/shell/90-ux-aliases.sh` (a core category).
 
 ## Aliases
 
-This code provides a set of aliases for
-[ps](https://www.gnu.org/software/ps/).
-
-- `pid` Display the uid, pid, parent pid, recent CPU usage, process
-  start time, controlling tty, elapsed CPU usage, and the associated
-  command
-- `ps` Display all processes.
-- `psa` List all processes.
+`ps.aliases.sh` defines nothing: the process aliases (`pid`, `ps`, `psa`) moved to the [system aliases](../system/README.md).
 
 [banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 

@@ -31,10 +31,16 @@ live in a source tree, `chezmoi apply` renders them into `$HOME`, and
 `dot` is a control plane over that. If you already know chezmoi, you
 already know 80% of this.
 
-**Nothing is destroyed without asking.** `chezmoi apply` shows a diff
-first when you run `dot diff`, and `dot sync --check` previews without
-writing. Every guide below tells you to take a backup anyway, because
-"nothing is destroyed" is a claim about the tool, not about your typos.
+**The installer applies this repo's defaults.** `install.sh` clones
+the framework to `~/.dotfiles` and runs `chezmoi apply`, which
+overwrites every file the defaults manage (`~/.bashrc`, `~/.zshrc`,
+`~/.gitconfig`, much of `~/.config`) without asking. It copies the
+originals to `~/.dotfiles.bak.<timestamp>` only when it finds a
+chezmoi setup to compare against (an existing `~/.dotfiles` or
+`~/.local/share/chezmoi` git checkout, or an existing chezmoi config);
+a first install from the release installer takes no backup. So every guide below starts with
+your own backup. After the install, `dot diff` and `dot sync --check`
+preview changes without writing.
 
 **You can leave.** `scripts/uninstall.sh --force` runs `chezmoi purge`
 and removes the repo, the chezmoi config and state, caches, and logs.
@@ -50,11 +56,12 @@ tar -czf ~/dotfiles-backup-$(date +%F).tar.gz -C "$HOME" \
   .bashrc .zshrc .config .gitconfig 2>/dev/null || true
 
 # 2. After the verified release download in docs/guides/INSTALL.md,
-#    install the framework (does not touch your files yet).
+#    install the framework. This overwrites the files the defaults manage.
 bash /tmp/dotfiles-install.sh
 
-# 3. Bring your own files under management, one at a time.
-dot config add ~/.gitconfig
+# 3. Restore your own files from the backup, then bring them under
+#    management one at a time (each replaces the default for that path).
+tar -xzf ~/dotfiles-backup-<date>.tar.gz -C "$HOME" .config/nvim
 dot config add ~/.config/nvim
 
 # 4. Preview, then apply.

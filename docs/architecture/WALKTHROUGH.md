@@ -72,7 +72,7 @@ nvim .
 ```bash
 dps                 # List running containers
 dco up -d           # docker compose up
-dlogsf container    # Follow container logs
+dklf container      # Follow container logs
 lzd                 # Launch lazydocker
 ```
 

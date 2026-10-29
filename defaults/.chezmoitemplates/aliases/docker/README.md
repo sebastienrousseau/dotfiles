@@ -6,203 +6,146 @@ Manage Docker aliases. Part of the **Universal Dotfiles** configuration.
 
 ## Description
 
-These aliases are defined in `docker.aliases.sh` and are automatically loaded by `chezmoi`.
+These aliases are defined in `docker.aliases.sh`. Loaded by the lazy alias layer `~/.config/shell/91-ux-aliases-lazy.sh`. It loads after the eager layer (zsh defers it until after startup), so its definitions replace any eager alias of the same name. Skipped when `DOTFILES_ALIAS_PROFILE=minimal` at `chezmoi apply` time.
 
 ## Aliases
 
-This code provides a comprehensive set of aliases for Docker development
-using `docker`, `docker-compose`, and Docker Swarm commands.
-
-#### Basic Commands
-
-- `dk` - Docker shortcut
-- `dkv` - Show Docker version
-- `dki` - Display system-wide information
-- `dkl` - Login to Docker registry
-- `dklo` - Logout from Docker registry
-
-#### Container Operations
-
-- `dkps` - List running containers
-- `dkpsa` - List all containers
-- `dkr` - Run a command in new container
-- `dkri` - Run interactive container
-- `dkrd` - Run container in background
-- `dks` - Start container
-- `dkst` - Stop container
-- `dkrs` - Restart container
-- `dkp` - Pause container
-- `dkup` - Unpause container
-- `dkrm` - Remove container
-- `dkrma` - Remove all containers
-- `dkrmf` - Force remove container
-
-#### Container Inspection
-
-- `dkin` - Inspect container
-- `dkl` - Show container logs
-- `dklf` - Follow container logs
-- `dkt` - Show running processes in container
-- `dkst` - Show container resource usage
-- `dkdf` - Show container filesystem changes
-- `dkpl` - Pull image from registry
-- `dkex` - Execute command in container
-- `dkeit` - Execute interactive command
-
-#### Images
-
-- `dki` - List images
-- `dkia` - List all images
-- `dkb` - Build an image
-- `dkbt` - Build and tag an image
-- `dkpu` - Push image to registry
-- `dkrmi` - Remove image
-- `dkh` - Show image history
-- `dksv` - Save image to tar archive
-- `dkld` - Load image from tar archive
-- `dkprune` - Remove unused data
-- `dkprunea` - Remove all unused data
-- `dkrmi_dangling` - Remove dangling images
-
-#### Volumes
-
-- `dkv` - Volume shortcut
-- `dkvls` - List volumes
-- `dkvc` - Create volume
-- `dkvi` - Inspect volume
-- `dkvrm` - Remove volume
-- `dkvp` - Remove unused volumes
-
-#### Networks
-
-- `dkn` - Network shortcut
-- `dknls` - List networks
-- `dknc` - Create network
-- `dkni` - Inspect network
-- `dknrm` - Remove network
-- `dknp` - Remove unused networks
-- `dkncon` - Connect container to network
-- `dkndis` - Disconnect container from network
-
-#### System
-
-- `dks` - System shortcut
-- `dksdf` - Show Docker disk usage
-- `dksev` - Get real-time events from Docker
-- `dksi` - Display system-wide information
-- `dksp` - Remove unused data
-- `dkspa` - Remove all unused data
-- `dkcon` - Context management
-
-#### Miscellaneous
-
-- `dkcp` - Copy files between container and local filesystem
-- `dkw` - Block until container stops
-- `dkk` - Kill container
-- `dkatt` - Attach to container
-- `dkd` - Inspect changes on container's filesystem
-- `dkcom` - Create image from container
-- `dktag` - Tag an image
-- `dkexp` - Export container's filesystem
-- `dkimp` - Import container filesystem
-- `dkscan` - Scan image for vulnerabilities
-- `dc` - Docker Compose shortcut
-- `dcu` - Create and start containers
-- `dcud` - Create and start containers in background
-- `dcd` - Stop and remove containers
-- `dcdv` - Stop and remove containers and volumes
-- `dcr` - Restart services
-- `dcs` - Stop services
-- `dcsta` - Start services
-- `dcp` - Pause services
-- `dcup` - Unpause services
-- `dcps` - List containers
-- `dcl` - View logs
-- `dclf` - Follow logs
-- `dcex` - Execute command in container
-- `dcb` - Build services
-- `dcpull` - Pull service images
-- `dcpush` - Push service images
-- `dcrm` - Remove stopped containers
-- `dcrun` - Run one-off command
-- `dci` - List images
-- `dck` - Kill containers
-- `dccfg` - Validate and show compose config
-- `dcev` - Receive events from containers
-- `dctop` - Display running processes
-- `dcv` - Show Docker Compose version
-
-#### Swarm Management
-
-- `dksw` - Swarm shortcut
-- `dkswi` - Initialize Docker Swarm
-- `dkswj` - Join Docker Swarm
-- `dkswjt` - Manage join tokens
-- `dkswl` - Leave the Swarm
-- `dkswu` - Update Swarm
-- `dkswunl` - Unlock Swarm
-- `dkswunk` - Manage unlock keys
-
-#### Services
-
-- `dksrv` - Service shortcut
-- `dksrvls` - List services
-- `dksrvc` - Create service
-- `dksrvi` - Inspect service
-- `dksrvps` - List tasks of service
-- `dksrvl` - View service logs
-- `dksrvlf` - Follow service logs
-- `dksrvrm` - Remove service
-- `dksrvsc` - Scale service
-- `dksrvu` - Update service
-- `dksrvrl` - Rollback service
-
-#### Stacks
-
-- `dkstk` - Stack shortcut
-- `dkstkls` - List stacks
-- `dkstkd` - Deploy stack
-- `dkstkps` - List tasks in stack
-- `dkstksrv` - List services in stack
-- `dkstkrm` - Remove stack
-
-#### Nodes
-
-- `dkn` - Node shortcut
-- `dknls` - List nodes
-- `dkni` - Inspect node
-- `dknp` - Promote node to manager
-- `dknd` - Demote node to worker
-- `dknrm` - Remove node
-- `dknu` - Update node
-- `dknps` - List tasks running on node
+| Name | Definition | Notes |
+| --- | --- | --- |
+| `d` | `docker` | Only when `docker` is on PATH. Replaces `d='dot'` from `system.aliases.sh` (eager layer). |
+| `dkv` | `docker version` | Only when `docker` is on PATH. |
+| `dki` | `docker info` | Only when `docker` is on PATH. Replaces `dki='dot ai kiro'` from `ai.aliases.sh`, which loads earlier. |
+| `dkl` | `docker login` | Only when `docker` is on PATH. |
+| `dklo` | `docker logout` | Only when `docker` is on PATH. |
+| `dkps` | `docker ps` | Only when `docker` is on PATH. |
+| `dps` | `docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"` | Only when `docker` is on PATH. |
+| `dkpsa` | `docker ps -a` | Only when `docker` is on PATH. |
+| `dkr` | `docker run` | Only when `docker` is on PATH. |
+| `dkri` | `docker run -it` | Only when `docker` is on PATH. |
+| `dkrd` | `docker run -d` | Only when `docker` is on PATH. |
+| `dks` | `docker start` | Only when `docker` is on PATH. |
+| `dkstop` | `docker stop` | Only when `docker` is on PATH. |
+| `dkrs` | `docker restart` | Only when `docker` is on PATH. |
+| `dkp` | `docker pause` | Only when `docker` is on PATH. |
+| `dkup` | `docker unpause` | Only when `docker` is on PATH. |
+| `dkrm` | `docker rm` | Only when `docker` is on PATH. |
+| `dkrmf` | `docker rm -f` | Only when `docker` is on PATH. |
+| `dkin` | `docker inspect` | Only when `docker` is on PATH. |
+| `dklf` | `docker logs -f` | Only when `docker` is on PATH. |
+| `dkt` | `docker top` | Only when `docker` is on PATH. |
+| `dkst` | `docker stats` | Only when `docker` is on PATH. |
+| `dkdf` | `docker diff` | Only when `docker` is on PATH. |
+| `dkpl` | `docker pull` | Only when `docker` is on PATH. |
+| `dex` | `docker exec -it` | Only when `docker` is on PATH. |
+| `dkcp` | `docker cp` | Only when `docker` is on PATH. |
+| `dkw` | `docker wait` | Only when `docker` is on PATH. |
+| `dkk` | `docker kill` | Only when `docker` is on PATH. |
+| `dkim` | `docker images` | Only when `docker` is on PATH. |
+| `dkima` | `docker images -a` | Only when `docker` is on PATH. |
+| `dkb` | `docker build` | Only when `docker` is on PATH. |
+| `dkbt` | `docker build -t` | Only when `docker` is on PATH. |
+| `dkpu` | `docker push` | Only when `docker` is on PATH. |
+| `dkrmi` | `docker rmi` | Only when `docker` is on PATH. |
+| `dkh` | `docker history` | Only when `docker` is on PATH. |
+| `dksv` | `docker save` | Only when `docker` is on PATH. |
+| `dkld` | `docker load` | Only when `docker` is on PATH. |
+| `dksp` | `docker system prune` | Only when `docker` is on PATH. |
+| `dpruneaf` | function | Only when `docker` is on PATH. |
+| `dkvl` | `docker volume` | Only when `docker` is on PATH. |
+| `dkvls` | `docker volume ls` | Only when `docker` is on PATH. |
+| `dkvc` | `docker volume create` | Only when `docker` is on PATH. |
+| `dkvi` | `docker volume inspect` | Only when `docker` is on PATH. |
+| `dkvrm` | `docker volume rm` | Only when `docker` is on PATH. |
+| `dkvp` | `docker volume prune` | Only when `docker` is on PATH. |
+| `dvprune` | `docker volume prune -f` | Only when `docker` is on PATH. |
+| `dkn` | `docker network` | Only when `docker` is on PATH. |
+| `dknls` | `docker network ls` | Only when `docker` is on PATH. |
+| `dknc` | `docker network create` | Only when `docker` is on PATH. |
+| `dkni` | `docker network inspect` | Only when `docker` is on PATH. |
+| `dknrm` | `docker network rm` | Only when `docker` is on PATH. |
+| `dknp` | `docker network prune` | Only when `docker` is on PATH. |
+| `dkncon` | `docker network connect` | Only when `docker` is on PATH. |
+| `dkndis` | `docker network disconnect` | Only when `docker` is on PATH. |
+| `dksys` | `docker system` | Only when `docker` is on PATH. |
+| `dksdf` | `docker system df` | Only when `docker` is on PATH. |
+| `ddfv` | `docker system df -v` | Only when `docker` is on PATH. |
+| `dksev` | `docker system events` | Only when `docker` is on PATH. |
+| `dksi` | `docker system info` | Only when `docker` is on PATH. |
+| `dkcon` | `docker context` | Only when `docker` is on PATH. |
+| `dcprune` | `docker container prune -f` | Only when `docker` is on PATH. |
+| `diprune` | `docker image prune -f` | Only when `docker` is on PATH. |
+| `dbprune` | `docker builder prune -f` | Only when `docker` is on PATH. |
+| `dbx` | `docker buildx` | Only when `docker` is on PATH. |
+| `dbxb` | `docker buildx build` | Only when `docker` is on PATH. |
+| `dbxbp` | `docker buildx build --push` | Only when `docker` is on PATH. |
+| `dbxls` | `docker buildx ls` | Only when `docker` is on PATH. |
+| `dbxuse` | `docker buildx use` | Only when `docker` is on PATH. |
+| `dbxcreate` | `docker buildx create` | Only when `docker` is on PATH. |
+| `dbxinspect` | `docker buildx inspect` | Only when `docker` is on PATH. |
+| `dbxrm` | `docker buildx rm` | Only when `docker` is on PATH. |
+| `dbxstop` | `docker buildx stop` | Only when `docker` is on PATH. |
+| `dbxmulti` | `docker buildx build --platform linux/amd64,linux/arm64` | Only when `docker` is on PATH. |
+| `dstopall` | function | Stop all running containers. Only when `docker` is on PATH. |
+| `drmall` | function | Remove all containers (including running) Only when `docker` is on PATH. |
+| `drmiall` | function | Only when `docker` is on PATH. |
+| `denter` | function | Quick shell into container. Only when `docker` is on PATH. |
+| `dip` | function | Get container IP address. Only when `docker` is on PATH. |
+| `dports` | function | Only when `docker` is on PATH. |
+| `dco` | `docker compose` | Only when `docker` is on PATH. |
+| `dcb` | `docker compose build` | Only when `docker` is on PATH. |
+| `dce` | `docker compose exec` | Only when `docker` is on PATH. |
+| `dcl` | `docker compose logs` | Only when `docker` is on PATH. Replaces `dcl='dot ai claude'` from `ai.aliases.sh`, which loads earlier. |
+| `dclf` | `docker compose logs -f` | Only when `docker` is on PATH. |
+| `dcps` | `docker compose ps` | Only when `docker` is on PATH. |
+| `dcpull` | `docker compose pull` | Only when `docker` is on PATH. |
+| `dcr` | `docker compose run` | Only when `docker` is on PATH. |
+| `dcrestart` | `docker compose restart` | Only when `docker` is on PATH. |
+| `dcrm` | `docker compose rm` | Only when `docker` is on PATH. |
+| `dcstop` | `docker compose stop` | Only when `docker` is on PATH. |
+| `dcup` | `docker compose up` | Only when `docker` is on PATH. |
+| `dcupd` | `docker compose up -d` | Only when `docker` is on PATH. |
+| `dcupb` | `docker compose up -d --build` | Only when `docker` is on PATH. |
+| `dcdn` | `docker compose down` | Only when `docker` is on PATH. |
+| `dcdownv` | `docker compose down -v` | Only when `docker` is on PATH. |
+| `dksw` | `docker swarm` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dkswi` | `docker swarm init` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dkswj` | `docker swarm join` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dkswl` | `docker swarm leave` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dkswu` | `docker swarm update` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dksrv` | `docker service` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dksrvls` | `docker service ls` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dksrvc` | `docker service create` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dksrvi` | `docker service inspect` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dksrvps` | `docker service ps` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dksrvl` | `docker service logs` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dksrvu` | `docker service update` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dksrvu-force` | `docker service update --force` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dksrvrm` | `docker service rm` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dkstk` | `docker stack` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dkstkls` | `docker stack ls` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dkstkd` | `docker stack deploy` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dkstkrm` | `docker stack rm` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dkstkps` | `docker stack ps` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dknode` | `docker node` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dknodels` | `docker node ls` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `dknodei` | `docker node inspect` | Only when `docker` is on PATH, `docker swarm` succeeds. |
+| `lzd` | `lazydocker` | Only when `lazydocker` is on PATH. |
+| `ddive` | `dive` | Only when `dive` is on PATH. |
+| `dlint` | `hadolint` | Only when `hadolint` is on PATH. |
+| `dflint` | `hadolint Dockerfile` | Only when `hadolint` is on PATH. |
 
 ### Common Workflows
 
-#### Container Development Workflow
-
 ```bash
 # Start a development container
-dkri --name dev-container -v $(pwd):/app -p 3000:3000 node:latest bash
-```
+dkri --name dev-container -v "$(pwd)":/app -p 3000:3000 node:latest bash
 
-#### Docker Compose Development
+# Build and start the compose services in the background
+dcupb
 
-```bash
-# Start services, rebuild if needed, in background
-dcb && dcud
-```
+# Remove stopped containers, unused networks and dangling images
+dcprune && dknp && diprune
 
-#### Cleanup Workflow
-
-```bash
-# Remove all stopped containers, unused networks, and dangling images
-dkrm $(dk ps -aq --filter status=exited) && dknp && dkrmi_dangling
-```
-
-#### Deployment to Swarm
-
-```bash
 # Deploy or update a stack from a compose file
 dkstkd -c docker-compose.yml my-stack
 ```

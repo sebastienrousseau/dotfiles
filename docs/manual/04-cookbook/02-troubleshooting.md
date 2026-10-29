@@ -64,13 +64,18 @@ dot config add <path>              # import local change to source
 
 **Cause**: A template references a missing data field.
 
-**Fix**: Check that your `.chezmoidata.toml` has the required field. For example:
+**Fix**: Check that the field exists in `defaults/.chezmoidata.toml` or
+`defaults/.chezmoidata/*.toml`. Machine presets are `[machines.<name>]`
+tables in `defaults/.chezmoidata/hardware.toml`; a `machine` value that names
+no preset leaves `index .machines .machine` empty. For example:
 
 ```sh
-chezmoi execute-template '{{- $hw := index .hardware .machine -}}{{ $hw.wm }}'
+chezmoi execute-template '{{ (index .machines "macbook-t2").scale }}'
 ```
 
-If `machine` is not set in your `~/.config/chezmoi/chezmoi.toml`, `index` returns nil. Set:
+Set `machine` in `~/.config/chezmoi/chezmoi.toml` to a preset that exists
+(`macbook-t2`, `surface-pro`, `geekom-a9`), or leave it empty to use the
+`[hardware]` defaults:
 
 ```toml
 [data]
@@ -101,7 +106,7 @@ exec $SHELL -l
 dot theme rebuild --force
 ```
 
-### Symptom: `dot theme <name>` errors "unknown theme"
+### Symptom: `dot theme <name>` errors "Unknown command or theme"
 
 **Cause**: Theme name doesn't exist in `themes.toml`.
 
@@ -116,7 +121,7 @@ dot theme rebuild --force # regenerate if expected but missing
 
 **Cause**: System Settings UI cached the old value.
 
-**Fix**: `dot-theme-sync` now calls `killall cfprefsd SystemUIServer Dock "System Settings"`. If it still doesn't refresh:
+**Fix**: `dot-theme-sync` already runs `killall -HUP cfprefsd`, then `killall` on SystemUIServer, Dock and "System Settings". If it still doesn't refresh:
 
 ```sh
 killall -KILL Dock SystemUIServer
@@ -135,10 +140,10 @@ Or log out and back in.
 # Check the wallpaper file exists
 ls -la ~/Pictures/Wallpapers/
 
-# On Linux, verify HEIC → PNG conversion tool
+# On Linux, verify a HEIC to PNG conversion tool
 command -v magick || command -v heif-convert || command -v convert
-# Install if needed:
-sudo apt install imagemagick-7
+# Install if needed (Debian/Ubuntu):
+sudo apt install imagemagick      # or libheif-examples for heif-convert
 ```
 
 ### Symptom: Theme applies but Ghostty doesn't reload
@@ -157,14 +162,16 @@ pkill -USR2 ghostty 2>/dev/null
 
 ### Symptom: "could not decrypt: no age key"
 
-**Cause**: `~/.config/age/keys.txt` missing or unreadable.
+**Cause**: The age identity is missing or unreadable. chezmoi reads
+`~/.config/chezmoi/key.txt` (the `age.identity` in
+`~/.config/chezmoi/chezmoi.toml`); SOPS reads `~/.config/sops/age/keys.txt`.
 
 **Fix**:
 
 ```sh
-ls -la ~/.config/age/keys.txt
+ls -la ~/.config/chezmoi/key.txt ~/.config/sops/age/keys.txt
 # Should be: -rw------- 1 user user
-chmod 600 ~/.config/age/keys.txt
+chmod 600 ~/.config/chezmoi/key.txt ~/.config/sops/age/keys.txt
 
 # If missing, restore from password manager or regenerate (requires re-encrypting all secrets)
 ```
@@ -190,7 +197,7 @@ sops updatekeys path/to/file.sops.yaml
 
 ```sh
 # Immediate mitigation
-dot verify --security   # confirm which file
+dot secret check        # confirm which file
 git rm --cached <file>
 echo "<file>" >> .gitignore
 git commit -sS -m "fix(security): remove leaked file"
@@ -219,16 +226,16 @@ dot shell update --prewarm
 # Edit ~/.config/zsh/.zshrc.local (or equivalent) to skip them
 ```
 
-### Symptom: `dot doctor` score <70
+### Symptom: `dot doctor score show` reports a low score
 
 **Cause**: Multiple health issues.
 
 **Fix**:
 
 ```sh
-dot doctor --verbose    # see every failure
+dot doctor status --verbose   # see every check
 dot doctor fix                # auto-fix what's possible
-dot doctor              # recheck
+dot doctor                    # recheck
 ```
 
 ### Symptom: Mise tools not found
@@ -274,55 +281,62 @@ mise env | grep DOT_BUILD_ROOT
 
 ## Fleet
 
-### Symptom: `dot fleet attest` hangs
+### Symptom: `dot fleet apply` hangs
 
 **Cause**: A fleet host is unreachable.
 
 **Fix**:
 
 ```sh
-# Check connectivity to each host
-for host in macbook-t2 surface-pro geekom-a9; do
-  ssh -o ConnectTimeout=5 $host 'echo OK' || echo "FAIL: $host"
+dot fleet apply --dry-run   # list the resolved hosts and their SSH targets
+
+# Check connectivity to each SSH target
+for target in user@laptop.local user@desktop.local; do
+  ssh -o ConnectTimeout=5 "$target" 'echo OK' || echo "FAIL: $target"
 done
 
-# Remove unreachable hosts from ~/.config/dotfiles/fleet.toml temporarily
+# Apply to the reachable hosts one at a time, or remove the unreachable
+# ones from ~/.config/dotfiles/fleet.toml temporarily
+dot fleet apply --host laptop
 ```
 
-### Symptom: Attestation signature fails
+### Symptom: Git shows a signed commit as untrusted
 
-**Cause**: Remote host's SSH public key not in local `~/.ssh/allowed_signers`.
+**Cause**: The signer's SSH public key is not in
+`~/.config/git/allowed_signers` (git's `gpg.ssh.allowedSignersFile`).
 
-**Fix**:
+**Fix**: That file is managed by chezmoi, so add the key to the source,
+`defaults/dot_config/git/allowed_signers.tmpl`, as
+`<email> ssh-ed25519 <key>`, then:
 
 ```sh
-# On the remote host:
-ssh remote-host 'cat ~/.ssh/id_ed25519.pub'
-# Copy the output and append to your ~/.ssh/allowed_signers
+dot apply
+git log --format='%G? %h %s' -5   # G = good, trusted signature
 ```
 
 ## CI
 
-### Symptom: PR fails on "Shell Lint (Zero Warnings)"
+### Symptom: PR fails on "Lint / Shell (Zero Warnings)"
 
 **Cause**: `shfmt` formatting differs from canonical.
 
 **Fix**:
 
 ```sh
-shfmt -w -i 2 -ci scripts/**/*.sh install.sh .chezmoitemplates/**/*.sh
+shfmt -w -i 2 -ci scripts/**/*.sh install.sh defaults/.chezmoitemplates/**/*.sh
 # Commit the changes
 ```
 
-### Symptom: PR fails on "100% Coverage"
+### Symptom: PR fails at the "Enforce module coverage" step
 
-**Cause**: New code added without tests.
+**Cause**: New code added without tests. The gate runs in "Test / Unit Tests"
+(100% in `ci-enforced.yml`) and "Test / Unit" (98% in `ci.yml`).
 
 **Fix**:
 
 ```sh
-bash examples/example-coverage-gate.sh
-# Identifies uncovered modules
+MIN_COVERAGE=100 ./tests/framework/module_coverage.sh
+# Lists uncovered modules
 
 # Add a test in tests/unit/<domain>/test_<module>.sh
 ```

@@ -4,17 +4,17 @@ render_with_liquid: false
 
 # Tutorial: Add a Wallpaper → Theme
 
-Drop an image. Get a fully-WCAG-AAA terminal theme.
+Drop an image. Get a terminal theme whose text colours meet WCAG AAA (7:1) contrast.
 
 ## Prerequisites
 
 - Dotfiles installed (see [First Install](01-first-install.md))
-- `magick` (ImageMagick) and `python3` available (installed by default)
+- `magick` (ImageMagick) and `python3` available
 - Optional: `heif-enc` for creating dynamic HEIC (`brew install libheif`)
 
 ## Option A: Drop a Static Image
 
-The simplest path: place a wallpaper in `~/Pictures/Wallpapers/` and rebuild.
+The simplest path: place a wallpaper in `~/Pictures/Wallpapers/` (or `$DOTFILES_WALLPAPER_DIR`) and rebuild. A file named `<name>-dark.<ext>` or `<name>-light.<ext>` becomes that one variant; a single image without a suffix is themed in both modes, as `<name>-dark` and `<name>-light`.
 
 ```sh
 cp ~/Downloads/my-wallpaper.jpg ~/Pictures/Wallpapers/mytheme-dark.jpg
@@ -23,21 +23,21 @@ cp ~/Downloads/my-wallpaper-light.jpg ~/Pictures/Wallpapers/mytheme-light.jpg
 dot theme rebuild
 ```
 
-Expected output:
+The output has this shape (the counts depend on your library and the cache):
 
 ```
 Discovering wallpapers...
-  Found: 126 system, 26 custom (152 total)
+  Found: <system> system, <custom> custom wallpapers (<total> total → <n> light/dark themes)
 
 Generating themes...
-  Processing 2 wallpapers (4 parallel jobs)...
+  Processing <n> wallpapers (4 parallel jobs)...
   mytheme-dark                             [custom] ✓
   mytheme-light                            [custom] ✓
 
-Results: 2 processed, 150 cached, 0 failed
+Results: <n> generated, <n> cached, <n> failed
 
 Assembling themes.toml...
-  Written: ~/.dotfiles/.theme-manifest/themes.toml (608 theme sections)
+  Written: ~/.dotfiles/defaults/.theme-manifest/themes.toml (<n> themes)
 
 Done. Run 'dot theme list' to see available themes.
 ```
@@ -45,7 +45,7 @@ Done. Run 'dot theme list' to see available themes.
 Switch to the new theme:
 
 ```sh
-dot theme mytheme-dark
+dot theme set mytheme-dark
 ```
 
 ## Option B: Dynamic HEIC (Recommended)
@@ -57,40 +57,36 @@ Apple's dynamic HEIC format stores both dark and light variants in a single file
 If you have `mytheme-dark.jpg` + `mytheme-light.jpg`:
 
 ```sh
-bash scripts/theme/merge-wallpaper.sh mytheme
+bash ~/.dotfiles/scripts/theme/merge-wallpaper.sh mytheme
 ```
 
 This:
 
-1. Resizes both to 6016×6016 (preserving aspect ratio, center-cropped)
-2. Encodes both into a single `.heic` via `heif-enc`
-3. Injects `apple_desktop:apr` XMP metadata (image 0 = light, image 1 = dark)
-4. Writes to `~/Pictures/Wallpapers/mytheme.heic`
+1. Finds `mytheme-dark` and `mytheme-light` (`.heic`, `.jpg` or `.png`) in the wallpaper directory
+2. Converts both to JPEG and encodes them into one `.heic` with `heif-enc` (image 0 = light, image 1 = dark)
+3. Injects the `apple_desktop:apr` XMP appearance metadata, if `exiftool` is installed (the step is skipped silently otherwise)
+4. Writes `~/Pictures/Wallpapers/mytheme.heic`
 5. Removes the two source files
 
-Verify:
+`--dry-run` shows what would be merged without writing anything.
+
+Verify that the file holds two images:
 
 ```sh
 heif-info ~/Pictures/Wallpapers/mytheme.heic
-# image: 6016x6016 (id=1), primary    ← light
-# image: 6016x6016 (id=4)              ← dark
-# metadata:
-#   XMP: 2473 bytes                    ← appearance mapping
 ```
 
 ### Rebuild Themes
 
 ```sh
 dot theme rebuild
-# mytheme-light  [custom] ✓
-# mytheme-dark   [custom] ✓
 ```
 
-The engine extracts each frame independently and generates paired themes.
+A multi-frame HEIC is registered as `mytheme-light` (frame 0) and `mytheme-dark` (frame 1), and each frame is themed on its own.
 
 ## Option C: Golden Ratio Brightness (Advanced)
 
-For best perceived contrast between your dark and light themes, target a brightness ratio of ~1.6× (the golden ratio, approximately 1.618).
+For a clear difference between your dark and light variants, a brightness ratio of about 1.6 (close to the golden ratio, 1.618) between the two images works well. This is a rule of thumb for preparing images; the engine does not check it.
 
 Measure:
 
@@ -111,37 +107,26 @@ mod=$(python3 -c "print(int((0.485 / 0.60) * 100))")  # current mean = 0.60
 magick input.jpg -modulate ${mod},100,100 output.jpg
 ```
 
-## Option D: Install System Wallpapers (Already-Available)
+## Option D: Use System Wallpapers
 
-macOS ships dozens of wallpapers you can use directly — no download needed.
+The wallpapers that ship with the OS (`/System/Library/Desktop Pictures` on macOS, `/usr/share/backgrounds` and `/usr/share/wallpapers` on Linux) are opt-in. Set `DOTFILES_THEME_SYSTEM=1` to include them; a custom wallpaper with the same name wins.
 
-List what's available:
-
-```sh
-dot theme rebuild --list
-```
-
-Output:
-
-```
-NAME                        SOURCE     PATH
-----                        ------     ----
-monterey-dark               system     /System/Library/Desktop Pictures/.thumbnails/Monterey Dark.heic
-monterey-light              system     /System/Library/Desktop Pictures/.thumbnails/Monterey Light.heic
-tahoe-dark                  system     /System/Library/Desktop Pictures/.thumbnails/Tahoe Dark.heic
-tahoe-light                 system     /System/Library/Desktop Pictures/.thumbnails/Tahoe Light.heic
-sonoma-dark                 system     /System/Library/Desktop Pictures/.thumbnails/Sonoma Dark.heic
-...
-Total: 152 wallpapers
-```
-
-Switch to any system wallpaper:
+List what would be themed, without rebuilding:
 
 ```sh
-dot theme monterey-dark
+DOTFILES_THEME_SYSTEM=1 dot theme rebuild --list
 ```
 
-The engine extracts Monterey Dark's dominant colors, generates a palette, and applies it to every surface.
+The listing has a `NAME`, `SOURCE` (`system` or `custom`) and `PATH` column, one row per theme variant, and ends with `Total: <n> wallpapers`.
+
+Rebuild with them, then switch:
+
+```sh
+DOTFILES_THEME_SYSTEM=1 dot theme rebuild
+dot theme set monterey-dark
+```
+
+The engine extracts the wallpaper's dominant colours, generates a palette, and applies it to every surface.
 
 ## Verifying the Result
 
@@ -149,14 +134,14 @@ After a switch, check the applied colors:
 
 ```sh
 # See the current theme's palette
-grep -A30 "^\[themes.mytheme-dark\]" ~/.dotfiles/.theme-manifest/themes.toml
+grep -A30 "^\[themes.mytheme-dark\]" ~/.dotfiles/defaults/.theme-manifest/themes.toml
 ```
 
-Check WCAG compliance (always passes for generated themes):
+Check WCAG compliance. The generator forces every text colour to a 7:1 ratio, and this test checks every theme in `themes.toml`:
 
 ```sh
+cd ~/.dotfiles
 bash tests/unit/theme/test_themes_toml.sh
-# RESULTS: 11:11:0 (11 tests, 11 passed, 0 failed)
 ```
 
 Verify the applied wallpaper:
@@ -172,24 +157,23 @@ gsettings get org.gnome.desktop.background picture-uri-dark
 
 ## Troubleshooting
 
-### Low Contrast on Both Variants
+### The Theme Is Missing From the Picker
 
-Your wallpaper pair doesn't have enough brightness difference. The theme will still generate but `dot theme list` may filter it from the picker. Adjust the source images to increase separation (brighter light variant, darker dark variant).
+`dot theme list` and the picker show only families that have both a `-dark` and a `-light` theme. If you added only `mytheme-dark.jpg`, add the light image too, or use a single unsuffixed image, which is themed in both modes.
 
-### K-Means Failed to Converge
+### Muddy or Flat Palette
 
-Rare, but possible with images that are nearly solid color. The engine uses a seeded RNG and 3 runs — if all 3 fail, the output theme is skipped. Fix: use a more chromatic source image.
+The engine runs K-Means three times with fixed seeds and keeps the best clustering. Images that are nearly one solid colour give few distinct clusters, so the palette has little variety. Fix: use a more chromatic source image.
 
 ### Wallpaper Doesn't Apply on Linux
 
-Check your desktop environment:
+On Linux, `dot theme` hands the wallpaper to DMS (Dank Material Shell, `dms ipc`) when `dms` is installed, and then to the first of these it finds:
 
-- **GNOME** — uses `gsettings picture-uri` (HEIC auto-converted to PNG)
-- **KDE** — uses `plasma-apply-wallpaperimage`
-- **Niri** — uses DMS IPC or `swaybg`
-- **i3/sway (no DE)** — falls back to `feh`
+- **`gsettings`** (GNOME and similar): `picture-uri` and `picture-uri-dark` (a HEIC is converted to PNG first)
+- **`swaybg`**
+- **`feh`**
 
-If none are detected, set `$WALLPAPER_COMMAND` in `~/.config/dotfiles/config`.
+If none is found it reports `Wallpaper setter not found (gsettings/swaybg/feh)`.
 
 ### The Dark/Light Auto-Switch Isn't Working on macOS
 
@@ -199,14 +183,14 @@ The `apple_desktop:apr` metadata may be missing. Verify:
 magick ~/Pictures/Wallpapers/mytheme.heic -format '%[XMP]' info: | grep apple_desktop
 ```
 
-If empty, re-run `merge-wallpaper.sh` — the XMP injection step may have failed due to missing `exiftool`.
+If empty, `exiftool` was probably missing when you merged: install it and merge the pair again.
 
 ## Summary
 
-You've added a custom wallpaper, generated a WCAG AAA theme from it, and verified cross-surface application. You can now:
+You've added a custom wallpaper, generated a WCAG AAA theme from it, and checked that it applied. You can now:
 
 - Add more wallpapers to build a library
-- Share your wallpaper directory across fleet hosts (it's gitignored by default)
+- Share your wallpaper directory across hosts (it lives outside the repository, in `~/Pictures/Wallpapers/`)
 - Use `dot theme toggle` to swap dark↔light of your current family
 
 ## Next

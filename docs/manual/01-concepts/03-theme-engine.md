@@ -42,7 +42,7 @@ At 80×80 the image has ~6,400 pixels. For dynamic HEIC files (`image.heic[0]`, 
 
 ### Stage 2 — Subsampling
 
-2,000 pixels are sampled uniformly from the downsampled image using a seeded PRNG (`random.Random(42)`). This gives a reproducible run and keeps K-Means iteration fast.
+When the downsampled image has more than 2,000 pixels, 2,000 are sampled uniformly using a seeded PRNG (`random.Random(42)`). This gives a reproducible run and keeps K-Means iteration fast.
 
 ### Stage 3 — Color Space Conversion
 
@@ -84,24 +84,25 @@ Structural slots (`c0`/black, `c7`/white, `c8`, `c15`) are computed from the bac
 
 ### Stage 6 — WCAG AAA Contrast Enforcement
 
-Every color pair is checked and adjusted:
+`scripts/theme/aaa.py` is the single pass that enforces WCAG AAA. A colour that fails keeps its hue and chroma and moves only in CIELAB lightness, away from the surfaces it is drawn on, until every pairing reaches 7:1:
 
-| Pair | Minimum Ratio |
-|:---|---:|
-| `fg` / `bg` | 7:1 |
-| `accent_text` / `accent` | 7:1 |
-| `c15` / `bg` | 7:1 |
-| `fg` / `sel_bg` | 4.5:1 |
-| `c8` / `bg` | 2.5:1 |
-| `c0` / `bg` | 1.5:1 |
-| `panel` / `bg` | 1.03-2.0 (bounded) |
-| `border` / `bg` | 1.08-3.5 (bounded) |
+| Text slot | Surface | Minimum Ratio |
+|:---|:---|---:|
+| `c1`-`c6`, `c9`-`c14` (ANSI hues) | `bg` | 7:1 |
+| `c8` (bright black: comments, autosuggestions) | `bg` | 7:1 |
+| `c7`, `c15` on a dark theme; `c0`, `c7` on a light theme | `bg` | 7:1 |
+| `sel_fg` | `sel_bg` | 7:1 |
+| `cursor_text` | the block cursor | 7:1 |
+| `*_on_surface`, `text_muted` | `bg`, `panel`, `border` | 7:1 |
+| xterm-256 approximation of the ANSI hues | `bg` | 4.5:1 |
 
-For the accent, the engine darkens in Lab space until white text has 7:1 contrast. For fg and bright ANSI colors, lightness is adjusted until the target ratio is met. The output is guaranteed AAA on launch — the `test_themes_toml.sh` unit test verifies this for every generated theme.
+`c0` on a dark theme and `c15` on a light theme are exempt: they are background-tone fills, and the neutral ramp (`c0 < c8 < c7 <= c15` in luminance) is kept. `panel` is held between 1.08:1 and 2.0:1 against `bg`.
+
+For the accent, the engine moves lightness in Lab space until `accent_text` (black on a dark theme, white on a light one) has 7:1 contrast. The `test_themes_toml.sh` unit test checks the committed themes.
 
 ## Wallpaper Discovery
 
-`rebuild-themes.sh` scans two tiers of wallpapers:
+`scripts/theme/rebuild-themes.sh` (run by `dot theme rebuild`, a theme switcher subcommand that `dot help theme` does not list) scans two tiers of wallpapers:
 
 ### System Wallpapers
 
@@ -110,7 +111,7 @@ For the accent, the engine darkens in Lab space until white text has 7:1 contras
 
 ### Custom Wallpapers
 
-- `~/Pictures/Wallpapers/*.{heic,jpg,png}` (or `$DOTFILES_WALLPAPER_DIR`)
+- `~/Pictures/Wallpapers/` (or `$DOTFILES_WALLPAPER_DIR`), top level only: `.heic`, `.jpg`, `.jpeg`, `.png`, `.webp` and `.tiff`, any case
 
 ### Deduplication
 
@@ -141,7 +142,7 @@ Decoded:
 
 ```sh
 bash scripts/theme/merge-wallpaper.sh           # merge all pairs
-bash scripts/theme/merge-wallpaper.sh tahoe     # merge a specific family
+bash scripts/theme/merge-wallpaper.sh macos-tahoe  # merge a specific family
 bash scripts/theme/merge-wallpaper.sh --dry-run # preview
 ```
 
@@ -149,9 +150,9 @@ macOS then auto-switches the displayed image based on the current Light/Dark mod
 
 ## Caching
 
-Per-wallpaper themes are cached in `~/.cache/dotfiles/themes/<name>.toml`. The cache is invalidated when the wallpaper's mtime is newer than the cached TOML. `dot theme rebuild --force` skips the cache.
+Per-wallpaper themes are cached in `~/.cache/dotfiles/themes/<name>.toml`. A cached TOML is reused while it is newer than its wallpaper and the generator's content digest is unchanged. `dot theme rebuild --force` skips the cache, and `dot theme rebuild --list` lists the discovered wallpapers without rebuilding.
 
-Full parallel rebuild of ~150 wallpapers takes ~3-5 minutes on modern hardware (4 parallel jobs, ~4 seconds per wallpaper). Incremental rebuilds (after adding 1-2 new wallpapers) take ~10 seconds.
+Wallpapers that need regenerating are processed 4 at a time; the result is written to `defaults/.theme-manifest/themes.toml`.
 
 ## Theme Application
 
@@ -162,7 +163,7 @@ along with chezmoi's records of them. Required rendering failures restore
 files in reverse order and put those records back, while successful
 operations are read-back verified and journaled under
 `${XDG_STATE_HOME:-~/.local/state}/dot/theme-transactions/`. Use
-`dot theme plan <family> --mode auto --json` to inspect the versioned operation
+`dot theme plan <family> --mode auto --json` (also a switcher subcommand) to inspect the versioned operation
 contract without writing files or reloading applications.
 
 | Surface | Mechanism |

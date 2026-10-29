@@ -1,6 +1,6 @@
 <!--
-PR description template. Global rule: see ~/Code/AGENTS.md "PR Descriptions"
-and "Release Page Format" (aligned with https://github.com/sebastienrousseau/passmcp/releases/tag/v0.0.5).
+PR description template. Global rule: see ~/Code/AGENTS.md §4 "PR Descriptions"
+and §3 "Key Release Invariants" (aligned with https://github.com/sebastienrousseau/passmcp/releases/tag/v0.0.5).
 Rules baked into this shape:
   - A two-line BLUF (bottom line up front) that announces the PR: line 1 begins
     "This PR " and says what it does; line 2 says why it matters or the outcome.
@@ -39,16 +39,14 @@ This PR {{announces what it does, in one plain line}}.
 ## Validation
 
 * `{{COMMAND}}`: {{result, with numbers}}.
-* `npm run build`: clean; build self-checks pass.
+* `{{BUILD_COMMAND}}`: {{result, e.g. clean; build self-checks pass}}.
 
 ## Checksums
 
-SHA-256 of the artifacts produced by `npm run build` on this branch:
+SHA-256 of the artifacts produced by `{{BUILD_COMMAND}}` on this branch:
 
 ```text
-{{SHA256}}  dist/index.html
-{{SHA256}}  dist/worker.js
-{{SHA256}}  dist/worker.mjs
+{{SHA256}}  {{ARTIFACT_PATH}}
 ```
 
 **Full Changelog**: {{COMPARE_URL}}

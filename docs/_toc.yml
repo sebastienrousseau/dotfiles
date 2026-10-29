@@ -47,6 +47,7 @@ sections:
       - STRUCTURE.md
       - NAMING_CONVENTIONS.md
       - AI.md
+      - OPENCODE.md
       - ECOSYSTEM.md
 
   - group: "Themes"
@@ -137,6 +138,10 @@ sections:
       - adr/ADR-016-plugin-trust-sandbox.md
       - adr/ADR-017-sensitive-data-boundary.md
       - adr/ADR-018-read-only-mcp-isolation.md
+      - adr/ADR-020-command-naming-system.md
+      - adr/ADR-021-family-lockstep-version.md
+      - adr/ADR-022-family-language-go.md
+      - adr/ADR-023-family-owner.md
 
   - group: "Migration"
     files:

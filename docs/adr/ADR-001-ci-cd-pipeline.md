@@ -55,6 +55,10 @@ Use `dorny/paths-filter` to detect which file categories changed:
 - Full matrix (Linux + macOS) on schedule/manual trigger
 - Docker container tests for installation validation
 
+> **Status note (0.2.539):** macOS now runs on pull requests too.
+> `ci.yml`'s `Test / macOS` job runs on every PR that changes shell
+> files, and `Quality / Performance budgets` runs on Ubuntu and macOS.
+
 ### Stage 5: Quality (Schedule/Manual Only)
 
 - Idempotency verification

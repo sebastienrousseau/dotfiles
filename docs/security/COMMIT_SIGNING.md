@@ -10,33 +10,44 @@ pushing.
 ## Why
 
 Closes [#853](https://github.com/sebastienrousseau/dotfiles/issues/853).
-Local hooks alone are bypassable — `git commit --no-verify`,
-`git push --no-verify`, or unsetting `DOTFILES_ALLOW_UNSKIPPED_PUSH`
-all let an unsigned commit reach a remote if GitHub-side enforcement
-is missing. The chain below removes every escape hatch.
+Local hooks alone are bypassable: `git push --no-verify` skips the
+pre-push hook, and a clone that never ran `scripts/git-hooks/install.sh`
+has no hook at all. GitHub-side enforcement closes that gap.
+`DOTFILES_ALLOW_UNSKIPPED_PUSH=1` is not one of these escape hatches:
+it skips only the reliability audit, never the signature check (see
+[AUDIT_BYPASS.md](AUDIT_BYPASS.md)).
 
 ## Enforcement layers
 
-1. **Local commit hook** — `dot_config/git/hooks/executable_commit-msg`
-   is deployed by chezmoi. It rejects an unsigned commit at the
-   `commit-msg` stage on the developer machine.
-2. **Local pre-push hook** — `scripts/git-hooks/pre-push` runs
+1. **Local pre-push hook**: `scripts/git-hooks/pre-push` runs
    `git verify-commit` against every commit in the push range. A
-   single unverified commit aborts the push. `--no-verify` skips
-   this layer; the next two catch it.
-3. **GitHub Rulesets** — `.github/rulesets/main.json` declares
-   `required_signatures` on `refs/heads/main`. The rule is part
-   of the repo so it's reproducible across forks. Apply with
-   `gh ruleset import .github/rulesets/main.json`.
-4. **`compliance-guard.yml` workflow** — runs on every PR targeting
-   `main`. Walks the commit range with `git verify-commit` and
-   marks unsigned commits in the PR summary; fails the workflow
-   when `unsigned_count > 0`.
+   single unverified commit aborts the push. It is installed per
+   clone by `scripts/git-hooks/install.sh`, and the global
+   `~/.config/git/hooks/pre-push` chains to it. `--no-verify` skips
+   this layer, and `pre-commit install --hook-type pre-push` replaces
+   it; the next two catch it.
+2. **GitHub branch protection**: the classic branch protection on
+   `main` has **Require signed commits** enabled, with
+   `enforce_admins` on, so GitHub refuses an unsigned commit on
+   `main`, including an admin's. This is live repository
+   configuration set through the GitHub settings or API, not applied
+   from a file in this repository. Read it with
+   `gh api repos/sebastienrousseau/dotfiles/branches/main/protection`.
+3. **`compliance-guard.yml` workflow**: its `Verify Commit Signatures`
+   job runs on every PR targeting `main`. It walks the commit range
+   with `git verify-commit`, marks unsigned commits in the PR summary,
+   and fails when `unsigned_count > 0`. It is not a required status
+   check, so layer 2 is what blocks the merge.
 
-A merge to `main` therefore requires (Ruleset accepts the push) AND
-(the workflow's signed-commit check passes) AND (the maintainer's
-push key is allowed). The protection holds even if a contributor's
-local hooks are missing or skipped.
+A merge to `main` therefore requires a signature GitHub verifies
+(layer 2), whatever happened locally. The protection holds even if a
+contributor's local hooks are missing or skipped.
+
+`.github/rulesets/main.json` encodes a stricter `main` ruleset
+(including `required_signatures`), but it is **not applied**: the only
+active ruleset blocks deletion and force-push on the default branch.
+See [`.github/BRANCH_PROTECTION.md`](../../.github/BRANCH_PROTECTION.md)
+for the live settings.
 
 ## Setting up SSH signing (recommended)
 
@@ -100,7 +111,7 @@ git log "$(git merge-base @{u} HEAD)..HEAD" \
 for c in $(git rev-list "$(git merge-base @{u} HEAD)..HEAD"); do
   git verify-commit "$c" >/dev/null 2>&1 \
     && echo "✓ $c" \
-    || echo "✗ $c — unsigned, will be rejected by main ruleset"
+    || echo "✗ $c — unsigned, will be rejected by main branch protection"
 done
 ```
 
@@ -112,27 +123,15 @@ done
 | `error: Load key "/.../id_ed25519": Permission denied` | SSH key permissions too open | `chmod 600 ~/.ssh/id_ed25519` |
 | GitHub shows "Unverified" on a commit signed locally | Signing key not uploaded to GitHub | `gh ssh-key add … --type signing` (SSH) or `gh gpg-key add` (GPG) |
 | Pre-push hook rejects a merge commit you didn't author | Upstream commit lacks a signature | Either pull the rebased branch, or fast-forward instead of merging |
-| Ruleset import via `gh` complains "invalid JSON" | Rulesets API expects the `target` + `rules` envelope, not just the rules array | Use the file as-is — `gh ruleset import .github/rulesets/main.json` |
-
-## Re-applying the ruleset after a manual edit
-
-If someone edits the ruleset in the GitHub UI by mistake, the
-file-of-truth wins. Re-apply:
-
-```sh
-gh api -X POST repos/{owner}/{repo}/rulesets \
-  --input .github/rulesets/main.json
-```
-
-(or `-X PUT` against the existing ruleset's ID if it already exists).
 
 ## References
 
-- `.github/rulesets/main.json` — the enforced policy.
+- `gh api repos/sebastienrousseau/dotfiles/branches/main/protection`:
+  the live, enforced policy.
 - `.github/workflows/compliance-guard.yml` — the workflow that
   fails PRs containing unsigned commits.
 - `scripts/git-hooks/pre-push` — the local pre-push gate.
-- `dot_config/git/hooks/executable_commit-msg` — the local
-  commit-msg gate.
+- `.github/rulesets/main.json`: a ruleset draft that is not applied
+  (see [`.github/BRANCH_PROTECTION.md`](../../.github/BRANCH_PROTECTION.md)).
 - [GitHub: About commit signature verification](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification)
 - [GitHub: Telling Git about your SSH key](https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key)

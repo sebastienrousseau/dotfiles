@@ -192,10 +192,10 @@ file is stale. `dot help <command>` shows one command and its flags.
 
 ## Old names
 
-Each one runs, and prints its new name, until the release shown; from that release it exits 127 with the new name.
+An old name prints its new name. A deprecated one still runs until the release shown; a removed one, and a deprecated one from that release on, exits 127.
 
-| Old name | New name | Until |
-|----------|----------|-------|
+| Old name | New name | Release |
+|----------|----------|---------|
 | `dot mode` | `dot agent mode` | 0.2.538 |
 | `dot agents` | `dot agent context` | 0.2.538 |
 | `dot ai-setup` | `dot ai install --interactive` | 0.2.538 |

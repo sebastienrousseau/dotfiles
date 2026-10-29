@@ -78,20 +78,20 @@ Methodology: IEC 60812:2018 — Analysis techniques for system reliability.
 
 | ID | Component | Failure Mode | Effect | S | O | D | RPN | Mitigation | Status |
 |----|-----------|-------------|--------|---|---|---|-----|------------|--------|
-| FM-01 | Secrets Management | Secrets committed to git (gitleaks bypass) | API keys, tokens, or passwords exposed in public git history | 10 | 3 | 2 | 60 | Gitleaks pre-commit hook, TruffleHog CI scan, detect-secrets baseline, `.gitignore` excludes `key.txt`/`.env` | Mitigated |
+| FM-01 | Secrets Management | Secrets committed to git (gitleaks bypass) | API keys, tokens, or passwords exposed in public git history | 10 | 3 | 2 | 60 | Gitleaks pre-commit hook, TruffleHog CI scan, detect-secrets baseline, age identity kept outside the source tree (`~/.config/chezmoi/key.txt`), `.gitignore` excludes `.env` | Mitigated |
 | FM-02 | Shell Configuration | `chezmoi apply` corrupts shell config | Login shell fails to start, user locked out of interactive session | 9 | 3 | 3 | 81 | `chezmoi apply --dry-run` in CI, `chezmoi diff` pre-check, version-controlled rollback via `git checkout` | Mitigated |
-| FM-03 | Git Integrity | Unsigned commit pushed (GPG/SSH bypass) | Commit attribution unverifiable, compliance violation (SOC 2 CC6.8) | 7 | 4 | 2 | 56 | Pre-push hook verifies signatures, `compliance-guard.yml` CI check, `commit.gpgsign = true` default | Mitigated |
-| FM-04 | Tool Management | mise tool update introduces vulnerability | Compromised binary executes with user privileges on every shell start | 10 | 2 | 6 | 120 | Pinned tool versions in `.tool-versions`, Nix flake lock reproducibility, manual version audit | Monitoring |
+| FM-03 | Git Integrity | Unsigned commit pushed (GPG/SSH bypass) | Commit attribution unverifiable, compliance violation (SOC 2 CC6.8) | 7 | 4 | 2 | 56 | Pre-push hook verifies signatures, `compliance-guard.yml` CI check, branch protection "Require signed commits" on `main` (enforced for admins), `commit.gpgsign = true` default | Mitigated |
+| FM-04 | Tool Management | mise tool update introduces vulnerability | Compromised binary executes with user privileges on every shell start | 10 | 2 | 6 | 120 | Pinned tool versions in `mise.toml` (`mise.lock`), Nix flake lock reproducibility, manual version audit | Monitoring |
 | FM-05 | Shell Performance | Shell startup exceeds 500ms | Degraded developer experience, productivity loss, user disables safety features | 5 | 5 | 3 | 75 | `_cached_eval` mtime-based caching, `DOTFILES_ULTRA_FAST=1` bypass, `dot doctor status` startup benchmark | Mitigated |
 | FM-06 | Cross-Platform | BSD vs GNU incompatibility | Script fails silently or produces incorrect output on macOS or Linux | 6 | 5 | 3 | 90 | `cross-platform-test.yml` CI on macOS + Linux, `$OSTYPE` guards, portable alternatives documented in COMPLIANCE.md | Mitigated |
-| FM-07 | CI/CD Pipeline | CI workflow tampered (Actions injection) | Attacker executes arbitrary code in CI, exfiltrates secrets, modifies artifacts | 10 | 2 | 4 | 80 | Actions pinned to SHA, `permissions: contents: read` default, concurrency control, explicit job timeouts | Mitigated |
-| FM-08 | Secrets Management | Age encryption key lost | Encrypted dotfiles unrecoverable, secrets permanently inaccessible | 9 | 2 | 8 | 144 | Key backup in 1Password vault, documented recovery procedure in KEYS.md, periodic backup verification | Monitoring |
-| FM-09 | Shell Configuration | Alias conflict breaks existing command | User command produces unexpected behavior, data loss in destructive operations | 7 | 4 | 5 | 140 | Alias naming conventions (`chezmoi_` prefix for internal), unit tests for all 99 alias files, `type` command verification | Monitoring |
+| FM-07 | CI/CD Pipeline | CI workflow tampered (Actions injection) | Attacker executes arbitrary code in CI, exfiltrates secrets, modifies artifacts | 10 | 2 | 4 | 80 | Actions pinned to SHA, `permissions: contents: read` default, concurrency control, explicit timeouts on most jobs | Mitigated |
+| FM-08 | Secrets Management | Age encryption key lost | Encrypted dotfiles unrecoverable, secrets permanently inaccessible | 9 | 2 | 8 | 144 | Key backup in 1Password vault, documented recovery procedure in KEY_ROTATION.md, periodic backup verification | Monitoring |
+| FM-09 | Shell Configuration | Alias conflict breaks existing command | User command produces unexpected behavior, data loss in destructive operations | 7 | 4 | 5 | 140 | Alias naming conventions (`chezmoi_` prefix for internal), alias unit tests (`tests/unit/aliases/`), `type` command verification | Monitoring |
 | FM-10 | Tool Management | Nix flake lock stale (>30 days) | Outdated dependencies with known vulnerabilities, reproducibility drift | 6 | 6 | 4 | 144 | `nightly.yml` dependency version checks, `nix flake update` in maintenance schedule, `dot doctor status` staleness check | Monitoring |
-| FM-11 | Git Integrity | Pre-commit hook bypassed (`--no-verify`) | Secrets, lint failures, and insecure patterns reach the repository | 8 | 4 | 7 | 224 | CI re-runs all pre-commit checks (`compliance-guard.yml`), branch protection requires CI pass, audit log review | Mitigated |
+| FM-11 | Git Integrity | Pre-commit hook bypassed (`--no-verify`) | Secrets, lint failures, and insecure patterns reach the repository | 8 | 4 | 7 | 224 | CI re-runs the checks: `pre-commit.yml` runs the deterministic pre-commit hooks and the heavier gates run in dedicated workflows (`ci-enforced.yml`, `compliance-guard.yml`); branch protection requires five status checks to pass | Mitigated |
 | FM-12 | Cross-Platform | Config drift between machines | Inconsistent behavior across workstations, unreproducible environments | 5 | 5 | 6 | 150 | Chezmoi state management, `chezmoi status` diff check, feature flags in `.chezmoidata.toml`, CI dry-run on both platforms | Monitoring |
 | FM-13 | Network Security | TLS certificate validation disabled | Man-in-the-middle interception of downloads, credential theft | 10 | 2 | 2 | 40 | `curl -k` and `wget --no-check-certificate` blocked by pre-commit and CI, pattern scanning in `compliance-guard.yml` | Mitigated |
-| FM-14 | File Permissions | World-writable file permissions (chmod 777) | Any local user or process can modify configs, privilege escalation vector | 9 | 2 | 2 | 36 | `chmod 777/666` blocked by pre-commit and CI, chezmoi `private_` prefix enforces 0600, `umask 022` default | Mitigated |
+| FM-14 | File Permissions | World-writable file permissions (chmod 777) | Any local user or process can modify configs, privilege escalation vector | 9 | 2 | 2 | 36 | `chmod 777/666` blocked by pre-commit and CI, chezmoi `private_` prefix enforces 0600, `umask 022` in `~/.profile` (POSIX and bash login shells) | Mitigated |
 | FM-15 | Template Engine | Template rendering failure (`.tmpl` syntax error) | Chezmoi apply fails, partial deployment leaves inconsistent state | 7 | 4 | 2 | 56 | `chezmoi apply --dry-run` in CI on Linux + macOS, template syntax validated before merge, `chezmoi execute-template` for local testing | Mitigated |
 
 ---
@@ -102,7 +102,7 @@ Methodology: IEC 60812:2018 — Analysis techniques for system reliability.
 
 | ID | Component | Failure Mode | RPN | Action Required |
 |----|-----------|-------------|-----|-----------------|
-| FM-11 | Git Integrity | Pre-commit hook bypassed (`--no-verify`) | 224 | CI enforcement layer catches all bypassed checks; add GitHub branch protection rule requiring status checks to pass |
+| FM-11 | Git Integrity | Pre-commit hook bypassed (`--no-verify`) | 224 | CI enforcement layer catches bypassed checks; branch protection now requires five status checks (`Merge Gate` among them). Keep the required list in step with the gates |
 
 ### High (RPN 100-200)
 
@@ -146,7 +146,7 @@ Methodology: IEC 60812:2018 — Analysis techniques for system reliability.
 | Detection control audit | Quarterly | Repository maintainer | Verify automated controls function correctly |
 | Mitigation effectiveness | Semi-annually | Repository maintainer | Compare actual vs predicted occurrence rates |
 
-**Next scheduled review:** 2026-06-20
+**Next scheduled review:** 2026-06-20. That date has passed and no review is recorded here; the next review should reset it.
 
 ---
 

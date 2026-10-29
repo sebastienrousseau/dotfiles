@@ -20,7 +20,7 @@ Core workflows for keeping your dotfiles running across platforms.
   chezmoi update
   ```
 
-  This runs `brew bundle install` behind the scenes to reconcile against the declared Brewfiles.
+  This pulls and applies the configuration only; it does not run `brew bundle`. To reconcile packages against the declared Brewfiles, run `brew bundle --file ~/.config/shell/Brewfile.cli` or `bash ~/.dotfiles/install.sh --provision`.
 - **Permission issues**: `sudo chown -R $(whoami) $(brew --prefix)/*`
 - **Drift**: Run `brew bundle cleanup` to remove unmanaged packages.
 
@@ -36,14 +36,13 @@ Core workflows for keeping your dotfiles running across platforms.
   ```
 
   On Linux, `chezmoi` focuses on configuration. Package updates work best through the OS package manager to avoid `sudo` conflicts.
-- **Font issues**: If icons are missing, run `./install/provision/run_onchange_50-install-fonts.sh.tmpl` manually via `chezmoi apply` or source directly with `bash`.
+- **Font issues**: If icons are missing, run `dot theme font install`, or `bash ~/.dotfiles/install/provision/run_onchange_50-install-fonts.sh` directly (`chezmoi apply` never runs `install/provision/`).
 
 ### Windows (WSL2)
 
 **Primary manager**: `apt-get` (inside WSL)
 
 - **Update**: Same as Linux.
-- **Clipboard**: Dotfiles configures `win32yank.exe` automatically for clipboard sharing.
 - **Performance**: Keep project files inside the Linux filesystem (`~/projects`), not in `/mnt/c/`, for dramatically better IO.
 
 ---
@@ -80,7 +79,7 @@ Finish by reloading your session (`exec zsh`) or restarting the terminal.
 Run updates in the background; you'll get a status banner on the next shell launch:
 
 ```bash
-dot update --async
+dot config update --async
 ```
 
 ### Roll back
@@ -152,21 +151,23 @@ If something's slow or broken:
 6. **Post-merge verification**:
 
    ```bash
-   dot verify
+   bash scripts/diagnostics/verify.sh
    ```
+
+   Runs the doctor, status and diff checks and exits non-zero on issues.
 
 7. **Inspect alias behavior**:
 
    ```bash
    dot shell alias list
-   dot shell alias show dprune
+   dot shell alias show dps
    DOTFILES_ALIAS_POLICY=strict bash ~/.dotfiles/scripts/diagnostics/alias-governance.sh
    ```
 
 8. **Verbose mode**:
 
    ```bash
-   DOTFILES_DEBUG=1 dot apply
+   DOTFILES_DEBUG=1 zsh -i -c exit   # zsh startup timings, per stage
    ```
 
 ### Safety flags

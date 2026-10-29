@@ -9,7 +9,7 @@
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# Dotfiles (v0.2.501)
+# Dotfiles
 
 Designed to fit your shell life
 
@@ -74,7 +74,9 @@ clarified by project maintainers.
 ### Enforcement
 
 Report instances of abusive, harassing, or otherwise unacceptable
-behaviour by contacting the project team. The project team reviews and
+behaviour by contacting the project maintainer through
+<https://sebastienrousseau.com/contact/> (see
+[`docs/MAINTAINERS.md`](../docs/MAINTAINERS.md)). The project team reviews and
 investigates all complaints and responds in a way that it considers
 appropriate to the circumstances. The project team maintains
 confidentiality regarding the reporter of an incident. The project team

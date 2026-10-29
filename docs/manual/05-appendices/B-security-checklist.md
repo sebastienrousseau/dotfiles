@@ -11,33 +11,33 @@ Run this checklist after a fresh install and quarterly afterwards.
 - [ ] Download `install.sh` over HTTPS only
 - [ ] Inspect `install.sh` before running (optional, recommended for untrusted environments)
 - [ ] Ensure SSH signing key exists and is backed up (`~/.ssh/id_ed25519`)
-- [ ] Ensure Age key is backed up if reinstalling (`~/.config/age/keys.txt`)
+- [ ] Ensure the age keys are backed up if reinstalling (`~/.config/chezmoi/key.txt` for chezmoi, `~/.config/sops/age/keys.txt` for SOPS)
 
 ## Post-Install
 
-- [ ] Run `dot doctor` — expect score ≥90
-- [ ] Run `dot verify --security` — all checks pass
+- [ ] Run `dot doctor`: no failed checks
+- [ ] Run `dot doctor score show`: review the Health, Security and Performance scores (each out of 100)
+- [ ] Run `dot secret check` and `dot security score show`: all checks pass
 - [ ] Verify commit signing: `cd ~/.dotfiles && git verify-commit HEAD`
-- [ ] Confirm `~/.ssh/allowed_signers` contains your public key
-- [ ] Check that `~/.config/age/keys.txt` permissions are `0600`
-- [ ] Run `dot mcp --strict` — policy matches registry
+- [ ] Confirm `~/.config/git/allowed_signers` contains your public key
+- [ ] Check that `~/.config/chezmoi/key.txt` and `~/.config/sops/age/keys.txt` permissions are `0600`
+- [ ] Run `dot mcp check --strict`: policy matches registry
 
 ## Ongoing (monthly)
 
 - [ ] `dot system update` — pick up security patches
-- [ ] `dot verify --security` — confirm no new leaks
-- [ ] Review `~/.local/state/dotfiles/mcp-violations.log` — any unexpected entries?
-- [ ] Review recent attestations — `ls ~/.local/state/dotfiles/attestation/ | tail -10`
+- [ ] `dot secret check`: confirm no new leaks
+- [ ] `dot attest verify`: the current attestation passes the verifier (needs `wasmtime`); the last one written is `~/.local/state/dotfiles/attestations/workstation-attestation.json`
 - [ ] Rotate Age key if compromised or as part of scheduled rotation
 
 ## Ongoing (quarterly)
 
 - [ ] Rotate SSH signing key
-- [ ] Audit `~/.ssh/allowed_signers` — remove former team members
+- [ ] Audit `~/.config/git/allowed_signers` (source: `defaults/dot_config/git/allowed_signers.tmpl`): remove former team members
 - [ ] Review SOPS recipient list in `.sops.yaml`
-- [ ] Run the chaos test (`bash scripts/ops/chaos.sh`) in a test container — verify heal works
+- [ ] Run the chaos test (`bash scripts/ops/chaos.sh --force`) in a test container, then `dot doctor fix`: verify heal works
 - [ ] Update pinned tool versions in `mise.toml`
-- [ ] Run fleet attestation — confirm all hosts aligned
+- [ ] Run `dot attest show --fleet-store <store>` on every host and `dot fleet status`: confirm all hosts aligned
 
 ## Incident Response
 
@@ -56,26 +56,29 @@ If a secret leak is detected:
 
 If a host is compromised:
 
-1. **Revoke** — remove the host's public key from `~/.ssh/allowed_signers` on all other fleet hosts
+1. **Revoke**: remove the host's public key from `defaults/dot_config/git/allowed_signers.tmpl`, push the change, and run `dot fleet apply --cmd 'dot config update'` so every other host drops it from `~/.config/git/allowed_signers`
 2. **Re-encrypt** — `sops updatekeys` with the host excluded from recipients
-3. **Attest** — run `dot fleet attest` to verify revocation propagated
-4. **Wipe** — if the host is recoverable, `rm -rf ~/.config/age ~/.dotfiles` and reinstall
+3. **Attest**: run `dot attest show --fleet-store <store>` on the remaining hosts to verify revocation propagated
+4. **Wipe**: if the host is recoverable, `rm -rf ~/.config/chezmoi ~/.config/sops/age ~/.dotfiles` and reinstall
 
 ## Gates Enforced by CI
 
-Every PR to main must pass:
+The `main` branch ruleset requires these checks on every PR:
 
-- [x] SSH-signed commits
-- [x] Shellcheck zero warnings (severity=error)
-- [x] Gitleaks scan
-- [x] Detect-secrets baseline diff
-- [x] TruffleHog verified scan
-- [x] Copyright headers present
-- [x] 100% executable module mapping
+- [x] **Merge Gate** (`ci-enforced.yml`): shellcheck and shfmt, Lua and Nix lint,
+  copyright headers, Gitleaks, dependency audit, Checkov infra scan, the
+  security policy script, the macOS and Ubuntu test matrix, unit tests with
+  100% executable module mapping, the tests-run-the-code lint, install pins,
+  the complexity ratchet and mutation testing
+- [x] **Reliability Summary** (`reliability-gate.yml`): reliability tests on macOS and Ubuntu
+- [x] **Pre-Commit** (`pre-commit.yml`)
+- [x] **Check sign-off** (`dco.yml`): every commit carries `Signed-off-by`
+- [x] **Verify PR description signature** (`pr-signature.yml`)
 - [ ] 100% measured line and branch coverage (current ratchet is documented in `docs/operations/COVERAGE.md`)
-- [x] Reliability tests (macOS + Ubuntu)
-- [x] Checkov infra scan
-- [x] Version sync (bumped across all files)
+
+Other workflows (TruffleHog in `ci.yml`, version sync in `sync-versions.yml`)
+run on PRs but do not block a merge. Detect-secrets runs as a local
+pre-commit hook.
 
 ## See Also
 

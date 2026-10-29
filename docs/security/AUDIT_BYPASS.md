@@ -9,7 +9,7 @@ how to do it, and why the answer is "almost never on `main`."
 
 ## Background
 
-`scripts/git-hooks/pre-push` runs two checks on every push:
+`scripts/git-hooks/pre-push` runs three checks on every push:
 
 1. **Signed-commit verification** — every commit being pushed must have
    a valid GPG/SSH signature. No bypass is available; an unsigned
@@ -18,6 +18,11 @@ how to do it, and why the answer is "almost never on `main`."
 2. **Reliability audit** — `scripts/qa/reliability-audit.sh --quick`
    runs a fast subset of the test suite + lint checks. This is the
    step that can be bypassed.
+
+3. **Version consistency**: `scripts/qa/check-version-consistency.sh`
+   blocks the push when a human-visible version string has drifted
+   from `.chezmoidata.toml`. It runs after the audit, so a bypass skips
+   it too.
 
 Before issue #871 the audit was opt-out: `DOTFILES_SKIP_PRE_PUSH_AUDIT=1`
 in your shell rc would silently skip every push's audit. Bypass was

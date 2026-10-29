@@ -9,84 +9,107 @@ Every config file read or written by `.dotfiles`, with its schema and purpose.
 
 ## Source Repository
 
+`.chezmoiroot` is `defaults`, so chezmoi's source state (data, templates, ignore rules) lives under `~/.dotfiles/defaults/`. Repo tooling (`mise.toml`, `scripts/`, `lib/`) stays at the root.
+
 | File | Purpose |
 |:---|:---|
-| `~/.dotfiles/.chezmoidata.toml` | Global defaults: theme, profile, version, features |
-| `~/.dotfiles/.chezmoidata/hardware.toml` | Machine presets (MacBook T2, Surface Pro, etc.) |
-| `~/.dotfiles/.theme-manifest/themes.toml` | **Generated** theme palettes — do not edit |
-| `~/.dotfiles/.chezmoidata/keybinds.toml` | Modifier hierarchy matrix |
+| `~/.dotfiles/defaults/.chezmoidata.toml` | Global defaults: theme, profile, version, features, install pins |
+| `~/.dotfiles/defaults/.chezmoidata/hardware.toml` | `[hardware]` defaults and `[machines.<name>]` presets (macbook-t2, surface-pro, geekom-a9) |
+| `~/.dotfiles/defaults/.chezmoidata/keybinds.toml` | Modifier hierarchy matrix |
+| `~/.dotfiles/defaults/.chezmoidata/apple.toml` | **Generated** Apple palette data (`scripts/theme/apple.py --write-data`) |
+| `~/.dotfiles/defaults/.chezmoidata/secrets-patterns.toml` | Atuin `history_filter` patterns |
+| `~/.dotfiles/defaults/.theme-manifest/themes.toml` | **Generated** theme palettes, do not edit |
+| `~/.dotfiles/defaults/.chezmoiignore.tmpl` | Paths excluded from `chezmoi apply`, per OS and feature flag |
+| `~/.dotfiles/defaults/.chezmoitemplates/` | Reusable template partials, alias and function sources |
 | `~/.dotfiles/mise.toml` | Pinned runtime versions for the dotfiles repo |
-| `~/.dotfiles/.chezmoiignore` | Paths excluded from `chezmoi apply` |
-| `~/.dotfiles/.chezmoitemplates/` | Reusable template partials |
 
 ## User-Owned Configuration
 
 | File | Purpose | Git-tracked? |
 |:---|:---|:---:|
 | `~/.config/chezmoi/chezmoi.toml` | Per-host overrides (machine, theme, shell) | No |
-| `~/.config/age/keys.txt` | Age private key for decryption | No |
+| `~/.config/chezmoi/key.txt` | Age private key chezmoi decrypts with (the `age_identity` default) | No |
+| `~/.config/sops/age/keys.txt` | Age private key sops reads | No |
 | `~/.config/mise/config.toml` | Your own tool pins (`mise use -g`, `mise upgrade`) | No |
 | `~/.config/mise/conf.d/00-dotfiles.toml` | Base tool list and settings (managed by this repo) | Via chezmoi |
 | `~/.config/dotfiles/fleet.toml` | Fleet host list (optional) | No |
-| `~/.ssh/allowed_signers` | SSH public keys trusted for commit verification | Via chezmoi (template) |
+| `~/.config/git/allowed_signers` | SSH public keys trusted for commit verification | Via chezmoi (template) |
 
 ## `.chezmoidata.toml` Schema
 
-```toml
-# Version — bumped by version-sync.sh at release time
-dotfiles_version = "0.2.539"
+An excerpt of `defaults/.chezmoidata.toml`:
 
-# Machine preset — override in ~/.config/chezmoi/chezmoi.toml per host
+```toml
+dotfiles_version = "0.2.539"
+profile = "laptop"
+
 machine = ""
 
-# Active theme — see `dot theme list`
-theme = "tahoe-dark"
+# Visual theme: family + mode, and the resolved palette name
+theme = "maui-dark"
+theme_family = "maui"
+theme_mode = "auto" # auto, dark, or light
 
-# Terminal defaults
+# Terminal settings
 terminal_font_family = "JetBrainsMono Nerd Font"
-terminal_font_size = 12
-default_shell = "fish"     # fish | zsh | nu
+terminal_font_size = 20
+default_shell = "fish" # zsh, fish, or nu
 
-# Git identity (prompt-provided via chezmoi init)
+# Git identity (should be set via chezmoi init prompts or local overrides)
 name = ""
 email = ""
-
-# Active profile
-profile = "laptop"         # desktop | laptop | server | codespace
+signingkey = ""
 
 # Feature flags (see 05-feature-flags.md)
 [features]
-dms = false
+alias_wrapper = false
+dms = true
+zellij = false
+ai_theme_sync = true
 linux_desktop = false
 niri = false
-waybar = false
+# ... waybar, fuzzel, mako, foot, kanshi, touch, t2, surface, corral_gitea_mirror
 
-# Profiles (named collections of overrides)
-[profiles.desktop]
-# ...
-
-[profiles.laptop]
-# ...
+[features.ai_theme_providers]
+codex = true
+claude = true
+# ... gemini, agy, qwen, opencode
 ```
+
+`dotfiles_version` is bumped by `version-sync.sh` at release time. The file also carries the install pins (`[tools]`, `[go_tools]`, `[rust_tools]`, `[tmux_plugins]`, `[ai_tools]`) and the alias settings (`[aliases.buckets]`, `[aliases.policy]`). There is no `[profiles]` table: `profile` is a name that templates read as `.profile`.
 
 ## `.chezmoidata/hardware.toml` Schema
 
 ```toml
-[hardware.<preset-name>]
-display_scale = 1.0 | 1.25 | 1.5 | 1.75 | 2.0
-kbd_layout = "qwerty" | "colemak-dh" | "dvorak"
-modifier_mode = "standard" | "left-cmd-control" | "fn-swap"
-perf_profile = "desktop" | "laptop" | "low-power"
-wm = "aerospace" | "niri" | "gnome" | "kde" | "none"
+# Defaults, used when no machine preset is selected
+[hardware]
+profile = "laptop"
+scale = 1.0
+hidpi = false
+touchscreen = false
+touchpad = true
+max_refresh = 60
+gpu = "integrated"
+keyboard_layout = "us"
+touchpad_accel = 0.0
+touchpad_accel_profile = "adaptive"
+output_name = ""
+output_mode = ""
 
-[hardware.<preset-name>.features]
-# Per-preset feature overrides (merged on top of .chezmoidata.toml features)
-<flag> = <bool>
+# Presets, selected by `machine = "<name>"`, with the same keys
+[machines.macbook-t2]
+scale = 2.0
+hidpi = true
+output_name = "eDP-1"
+output_mode = "2560x1600@60"
+# ...
 ```
+
+Presets shipped: `macbook-t2`, `surface-pro`, `geekom-a9`. A preset replaces `[hardware]` as a whole (it is not merged key by key), and it carries no feature flags. Today only the Niri config template (`defaults/dot_config/niri/config.kdl.tmpl`) reads these values.
 
 ## `.theme-manifest/themes.toml` Schema
 
-**Generated by `dot theme rebuild` — do not edit manually.**
+**Generated by `dot theme rebuild` (`scripts/theme/rebuild-themes.sh`). Do not edit manually.**
 
 ```toml
 [themes.<name>]
@@ -99,53 +122,67 @@ source = "custom" | "system"
 [themes.<name>.term]
 bg, fg, cursor, cursor_text, sel_bg, sel_fg  # hex RGB
 c0 .. c15                                    # 16 ANSI colors
+grey0 .. grey11                              # grey ramp
 
 [themes.<name>.ui]
 accent, accent_text     # WCAG AAA enforced (7:1)
+secondary, tertiary, text_muted
+accent_on_surface, secondary_on_surface, tertiary_on_surface
 error, warning, success, info
-panel                   # 1.03-2.0 contrast vs bg
-border                  # 1.08-3.5 contrast vs bg
+panel                   # 1.08-2.0 contrast vs bg
+border
+secondary_container, on_secondary_container, status_text
 
 [themes.<name>.app]
 nvim, nvim_style, lualine
 gtk_theme, gtk_icon, gnome_shell, gnome_gtk
-vscode, vscode_dark, vscode_light
+vscode, vscode_dark, vscode_light, vscode_icons
 cat_wallpaper
 starship_palette
 ```
 
-See [Theme Engine concept](../01-concepts/03-theme-engine.md) for how values are derived.
+The manifest is not chezmoi data: templates load it with `include ".theme-manifest/themes.toml" | fromToml` (see [Template Variables](04-templates.md)). See [Theme Engine concept](../01-concepts/03-theme-engine.md) for how values are derived.
 
 ## `~/.config/chezmoi/chezmoi.toml` (Per-Host)
 
+Written by `chezmoi init` from `defaults/.chezmoi.toml.tmpl` (on a terminal it prompts for the age identity and recipient, profile, theme and git identity), then edited by hand or by `dot theme`. An excerpt:
+
 ```toml
+encryption = "age"
 sourceDir = "~/.dotfiles"
 
+[age]
+    identity = "~/.config/chezmoi/key.txt"
+    recipient = "age1..."
+
 [data]
-machine = "surface-pro"      # selects preset from hardware.toml
-theme = "monterey-dark"      # overrides .chezmoidata.toml default
-default_shell = "fish"
-terminal_font_size = 11
-email = "you@example.com"
-name = "Your Name"
+profile           = "laptop"
+theme             = "maui-dark"
+git_name          = "Your Name"
+git_email         = "you@example.com"
+git_signingkey    = "~/.ssh/id_ed25519"
+git_signingformat = "ssh"
+machine           = "surface-pro"   # added by hand: selects [machines.surface-pro]
 ```
 
-Fields here override same-named fields in `.chezmoidata.toml` at render time.
+Fields here override same-named fields in `.chezmoidata.toml` at render time. Per-host feature flags go under `[data.features]`.
 
 ## `~/.dotfiles/mise.toml` (Pinned Versions)
 
-Strict versions for testing the repo itself (separate from the user's own mise config):
+Strict versions for working on the repo itself (separate from the user's own mise config). An excerpt:
 
 ```toml
-[tools]
-chezmoi = "2.73.3"
-pandoc = "3.1.8"
-shellcheck = "0.10.0"
-shfmt = "3.8.0"
-# ...
+[settings]
+lockfile = true
 
-[env]
-# Repo-level env vars
+[tools]
+node = "24.14.0"
+rust = "1.95.0"
+go = "1.26.10"
+bun = "1.3.10"
+starship = "1.24.2"
+sops = "3.13.3"
+# ...
 ```
 
 ## `~/.config/mise/conf.d/00-dotfiles.toml` (Managed)
@@ -167,7 +204,7 @@ github.credential_command = "gh auth token"
 node = "24"
 python = ["3.12", "3.11", "3.14"]
 go = "latest"
-# ... 60+ tools
+# ... more tools
 
 [env]
 MISE_EXPERIMENTAL = "1"
@@ -193,78 +230,100 @@ incremental = true
 rustc-wrapper = "sccache"   # only when sccache is installed
 ```
 
-## `~/.ssh/allowed_signers`
+## `~/.config/git/allowed_signers`
 
-Template: `dot_ssh/allowed_signers.tmpl`
+Template: `defaults/dot_config/git/allowed_signers.tmpl`
 
-Lists SSH public keys authorized to sign commits in the repository:
+Lists SSH public keys git trusts for signed commits, one per line (`principal keytype key`):
 
 ```
-you@example.com ssh-ed25519 AAAAC3N...
-teammate@example.com ssh-ed25519 AAAAC3N...
+jane.doe@example.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI...
 ```
 
-## `dot_config/dotfiles/mcp.json`
+## `dot_config/dotfiles/mcp-policy.json` and `mcp-registry.json`
 
-MCP policy and registry. See [MCP Policy reference](../../security/MCP_POLICY.md).
+MCP policy and registry, both under `defaults/dot_config/dotfiles/`. See [MCP Policy reference](../../security/MCP_POLICY.md). Excerpts:
 
 ```json
 {
-  "policy_version": "2026-01",
-  "allowed_servers": ["fs", "shell", "github"],
-  "denied_tools": ["network.raw"],
-  "attestation_required": true,
-  "registry": {
-    "servers": [
-      {"name": "fs", "command": "...", "hash": "..."},
-      ...
-    ]
+  "policyVersion": "2026.03",
+  "defaultProfile": "strict-local",
+  "profiles": {
+    "strict-local": {
+      "allowedLaunchers": ["npx", "node", "uvx"],
+      "trustedTransports": ["stdio", "http"],
+      "requireRegistryEntry": true
+    },
+    "enterprise-remote": {}
   }
 }
 ```
 
+```json
+{
+  "registryVersion": "2026.03",
+  "servers": {
+    "git": {
+      "transport": "stdio",
+      "launcher": "${HOME}/.local/share/dot-mcp/python/git/venv/bin/mcp-server-git",
+      "package": "mcp-server-git==2026.8.18",
+      "verification": "hash-pinned-package"
+    }
+  }
+}
+```
+
+`dot mcp list` prints the registry; `dot mcp check` checks the setup against the policy.
+
 ## `dot_config/dotfiles/agent-card.json`
 
-Agent Card (MCP A2A spec):
+Agent Card (A2A). An excerpt of `defaults/dot_config/dotfiles/agent-card.json` as shipped:
 
 ```json
 {
+  "specVersion": "0.3",
   "name": "dotfiles-agent",
-  "version": "0.2.539",
-  "capabilities": ["chezmoi.apply", "theme.switch", "secrets.decrypt"],
-  "policy_hash": "0x7f2a..."
+  "defaultProfile": "ask",
+  "protocols": ["mcp", "a2a"],
+  "profiles": ["ask", "plan", "apply", "audit"]
 }
 ```
+
+The shipped card's `version` field lags the release (it still names 0.2.501), and several `entrypoints` (`dot agent conformance`, `dot agent a2a-card`) use pre-ADR-020 spellings; `dot agent card show` and `dot agent card check` are the declared ones.
 
 ## Log Files
 
 | Path | Content | Rotation |
 |:---|:---|:---|
-| `~/.local/state/dotfiles/install.log` | Installer output | Never rotated |
+| `~/.local/state/dotfiles/dot.log` | Every `dot` command's log lines | Moved to `dot.log.1` at 1 MB |
 | `~/.local/state/dotfiles/heal.log` | Heal attempts | Append-only |
-| `~/.local/state/dotfiles/metrics.jsonl` | Observability events | Rotated at 10MB |
-| `~/.local/state/dotfiles/mcp-violations.log` | MCP policy violations | Rotated at 10MB |
-| `~/.local/state/dotfiles/attestation/*.json` | Attestation snapshots | 90-day retention |
-| `~/.local/state/dotfiles/snapshots/*` | Rollback snapshots | 30-day retention |
+| `~/.local/state/dotfiles/rollback.log` | Rollback activity | Append-only |
+| `~/.local/state/dotfiles/metrics.jsonl` | Observability metrics (`dot doctor metric list`) | Append-only |
+| `~/.local/state/dotfiles/agent-sessions.jsonl` | Agent log (`dot agent log show`) | Append-only |
+| `~/.local/state/dotfiles/attestations/workstation-attestation.json` | Latest attestation | Overwritten each run |
+| `~/.local/state/dotfiles/snapshots/*.json` | `dot doctor snapshot new` snapshots | Kept until removed |
+| `~/.local/share/dotfiles/backups/` | `dot doctor rollback` backups | `clean` keeps the newest 10 |
 
 ## Cache Files
 
 | Path | Content | Invalidation |
 |:---|:---|:---|
-| `~/.cache/shell/*-init.sh` | Pre-generated shell init output | Binary mtime |
+| `~/.cache/zsh/<label>.zsh`, `~/.cache/bash/<label>.bash` | `_cached_eval` tool init output | Binary mtime |
 | `~/.cache/dotfiles/themes/*.toml` | Per-wallpaper theme cache | Wallpaper mtime |
-| `~/.cache/dotfiles/manual/*` | Downloaded manual files | Version change |
-| `~/.cache/gitstatus/*` | Starship gitstatus | Auto |
+| `~/.cache/dotfiles/manual/*` | Downloaded manual files | Older than 7 days |
+| `~/.cache/dotfiles/registry/index-v2-*.json` | `dot cli` registry index | 6 hours |
 
-## Verified Files
+## Ignored Files
 
-Every commit on `main` modifies tracked files only. Untracked files in the source directory (e.g. editor swap files) are ignored via `.chezmoiignore`:
+Untracked files in the source directory (e.g. editor swap files) are ignored via `defaults/.chezmoiignore.tmpl`, for example:
 
 ```
 .DS_Store
-.vscode/
+**/.DS_Store
 *.swp
-_build/
+**/*.swp
+_build
+_build/**
 ```
 
 ## See Also

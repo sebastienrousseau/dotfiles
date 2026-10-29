@@ -12,19 +12,21 @@ Variables you can set in your shell to change behaviour.
 
 | Variable | Default | Effect |
 |:---|:---|:---|
-| `DOTFILES_VERBOSE` | unset | Verbose output from `dot` commands |
 | `DOTFILES_NONINTERACTIVE` | unset | Skip interactive prompts (for CI) |
 | `DOTFILES_YES` | unset | `1` answers yes to `dot system update` and `dot ai install` questions (installing mise, AI tools, upgrading system packages); same as `--yes`. Without it and without a terminal, those commands install nothing extra |
-| `DOTFILES_SILENT` | unset | Suppress non-error output |
+| `DOTFILES_SILENT` | unset | `install.sh` and its provisioning steps: suppress non-error output (same as `install.sh --silent`) |
+| `DOTFILES_INTERACTIVE_APPLY` | unset | `1` brings back chezmoi's overwrite prompts during `dot apply` (it runs with `--force` otherwise) |
 | `DOTFILES_PACKAGES_TIMEOUT` | `10` | Seconds each `dot tool list --packages` query may take before it is reported as `timed out` |
-| `DOTFILES_DEBUG` | unset | Print shell-init timing to stderr |
-| `DOTFILES_SOURCE_DIR` | `~/.dotfiles` | Override the source directory |
+| `DOTFILES_DEBUG` | unset | Print zsh-init timing to stderr |
+| `DOTFILES_TRACE` | unset | Full zsh-init trace to stderr |
 | `DOTFILES_WALLPAPER_DIR` | `~/Pictures/Wallpapers` | Custom wallpaper directory |
-| `DOTFILES_CACHE_DIR` | `~/.cache/dotfiles` | Override cache location |
-| `DOTFILES_STATE_DIR` | `~/.local/state/dotfiles` | Override state directory |
+| `DOTFILES_FLEET_HOSTS` | `~/.config/dotfiles/fleet.toml` | Host list for `dot fleet apply` |
+| `DOTFILES_REGISTRY_URL` | unset | One-off override of the `dot cli` registry URL |
 | `DOTFILES_TUNING` | `0` | Enable OS tuning (`dot system settings apply`) |
 | `EDITOR` | `nvim` | Editor used by `dot edit` and `sops` |
 | `PAGER` | `less` | Pager used by `dot help --manual text` |
+
+`dot` finds its source directory from its own install location, then `CHEZMOI_SOURCE_DIR`, then `~/.dotfiles`, then `~/.local/share/chezmoi`; there is no `DOTFILES_SOURCE_DIR` override for it (`install.sh` sets that variable only for its own provisioning scripts). State and cache paths follow `XDG_STATE_HOME` and `XDG_CACHE_HOME`.
 
 ## Auto-Populated
 
@@ -32,7 +34,7 @@ Variables the dotfiles set in your shell for tool consumption.
 
 | Variable | Value | Source |
 |:---|:---|:---|
-| `XDG_CONFIG_HOME` | `~/.config` | `dot_zshenv` / `dot_config/fish/conf.d/env.fish.tmpl` |
+| `XDG_CONFIG_HOME` | `~/.config` | `dot_zshenv` (zsh) |
 | `XDG_CACHE_HOME` | `~/.cache` | ditto |
 | `XDG_DATA_HOME` | `~/.local/share` | ditto |
 | `XDG_STATE_HOME` | `~/.local/state` | ditto |
@@ -46,7 +48,7 @@ Variables the dotfiles set in your shell for tool consumption.
 | `UV_CACHE_DIR` | `$DOT_BUILD_ROOT/uv-cache` | `mise [env]` |
 | `ZIG_LOCAL_CACHE_DIR` | `$DOT_BUILD_ROOT/zig-cache` | `mise [env]` |
 | `ZIG_GLOBAL_CACHE_DIR` | `$DOT_BUILD_ROOT/zig-global-cache` | `mise [env]` |
-| `HOMEBREW_PREFIX` | `/opt/homebrew` or `/usr/local` | `dot_zshenv` (macOS) |
+| `HOMEBREW_PREFIX` | `/opt/homebrew`, `/usr/local` or `/home/linuxbrew/.linuxbrew` | `dot_zprofile` (when Homebrew is installed) |
 | `MANPATH` | homebrew-adjusted | ditto |
 | `MISE_EXPERIMENTAL` | `1` | `~/.config/mise/conf.d/00-dotfiles.toml` |
 
@@ -84,16 +86,16 @@ Variables relevant in GitHub Actions.
 | `CI` | Set to `true` in CI; disables prompts, and questions that would install software are answered no |
 | `GITHUB_ACTIONS` | GHA-specific; enables step summary output |
 | `CHEZMOI_VERSION` | Pinned chezmoi version for CI |
-| `COVERAGE_THRESHOLD` | Executable module-mapping threshold (100 in enforced CI; not line coverage) |
-| `DOTFILES_TEST_MODE` | Skip network-dependent tests |
+| `COVERAGE_THRESHOLD` | Module-mapping threshold for `tests/framework/coverage_analyzer.sh` (default 100; not line coverage) |
 
 ## Secret-Related
 
 | Variable | Purpose |
 |:---|:---|
-| `SOPS_AGE_KEY_FILE` | Override `~/.config/age/keys.txt` path |
+| `SOPS_AGE_KEY_FILE` | Override the `~/.config/sops/age/keys.txt` path sops reads |
 | `SOPS_AGE_RECIPIENTS` | Override recipients for new encryption |
-| `CHEZMOI_AGE_IDENTITY` | Override age identity for chezmoi decrypt |
+| `CHEZMOI_AGE_IDENTITY` | Age identity written into `chezmoi.toml` by a non-interactive `chezmoi init` (default `~/.config/chezmoi/key.txt`) |
+| `CHEZMOI_AGE_RECIPIENT` | Age recipient for a non-interactive `chezmoi init` |
 
 > Warning: never set these to values stored in plaintext config. Use a password manager or ephemeral injection.
 
@@ -117,7 +119,7 @@ To clean up environment pollution:
 
 ```sh
 # Show current dotfiles-set vars
-env | grep -E '^(DOTFILES_|XDG_|BUILDS_)'
+env | grep -E '^(DOTFILES_|XDG_|DOT_)'
 
 # Unset one
 unset DOTFILES_DEBUG

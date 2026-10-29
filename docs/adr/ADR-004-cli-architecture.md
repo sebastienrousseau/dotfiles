@@ -4,9 +4,20 @@ render_with_liquid: false
 
 # ADR-004: Chezmoi + Custom CLI Wrapper Architecture
 
-**Status**: Accepted
+**Status**: Accepted; command layout superseded by [ADR-020](ADR-020-command-naming-system.md)
 **Date**: 2026-02-09
 **Authors**: @sebastienrousseau
+
+> **Status note (0.2.539):** Chezmoi as the engine with `dot` as the
+> wrapper still holds. The command modules, the `scripts/dot/commands/`
+> layout, the delegation pattern and "Adding a New Command" below are
+> the original design. Today each domain is a plugin: it is declared in
+> `plugins/<domain>/dot-plugin.toml`, runs from
+> `plugins/<domain>/dot-<domain>` (or its `libexec/`), and `bin/dot`
+> dispatches through the command table built from the plugins' route
+> fragments. Commands are spelled `dot <domain> [object] <verb>`
+> (ADR-020). Only `diagnostics.sh`, `manual.sh` and `meta.sh` remain in
+> `scripts/dot/commands/`.
 
 ## Context
 
@@ -95,10 +106,10 @@ dispatch() {
 
 | Feature | Chezmoi | dot CLI |
 |---------|---------|---------|
-| Apply changes | `chezmoi apply` | `dot sync` |
-| View diff | `chezmoi diff` | `dot diff` |
-| Edit secrets | `chezmoi edit --encrypted` | `dot secrets` |
-| Source directory | `chezmoi source-path` | `dot cd` |
+| Apply changes | `chezmoi apply` | `dot apply` (`dot config apply`); `dot sync` pulls first |
+| View diff | `chezmoi diff` | `dot diff` (`dot config diff`) |
+| Edit secrets | `chezmoi edit --encrypted` | `dot secret edit` |
+| Source directory | `chezmoi source-path` | `dot cd` (`dot config path`) |
 | Health check | `chezmoi doctor` | `dot doctor` (extended) |
 
 ### Extension Points
@@ -135,6 +146,9 @@ Custom commands can:
 ## Implementation Notes
 
 ### Adding a New Command
+
+The steps below are the original ones. For a command today, declare it
+in the domain's `plugins/<domain>/dot-plugin.toml` and follow ADR-020.
 
 1. Identify the appropriate module (or create new one)
 2. Add function `cmd_<name>()` to module

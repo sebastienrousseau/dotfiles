@@ -49,12 +49,6 @@ For reports that contain PII, exploit chains, or details of internal
 infrastructure, encrypt your message to the maintainer's GPG key
 before sending.
 
-> **Maintainer action required:** the fingerprint placeholder below
-> needs the real value pasted in before this section is useful. The
-> scaffold (DISCLOSURE.md, KEY_ROTATION.md, the WKD URL) is in
-> place; once the key lands the placeholder gets swapped and the
-> closure of #870 is complete.
-
 **Key fingerprint** (verify before encrypting):
 
 ```text
@@ -70,10 +64,14 @@ The same fingerprint without spaces (machine-friendly form):
 gpg --auto-key-locate clear,wkd --locate-keys security@sebastienrousseau.com
 ```
 
-Cross-verify the same fingerprint against the `signingkey` field in
-`dot_config/git/allowed_signers.tmpl`. A mismatch means the key in
-your hand isn't the one used to sign releases — stop and contact the
-maintainer through GitHub.
+Cross-verify the same fingerprint against the active-key table in
+[`docs/security/KEY_ROTATION.md`](docs/security/KEY_ROTATION.md) and
+the in-repo copy of the key,
+[`docs/security/security-pubkey.asc`](docs/security/security-pubkey.asc).
+The `verify-gpg-wkd.yml` workflow checks weekly, and on every change to
+the key files, that the WKD-served key and the in-repo copy carry the
+same fingerprint. A mismatch means the key in your hand is not the
+disclosure key: stop and contact the maintainer through GitHub.
 
 Full reporter workflow (encrypt → send → verify acknowledgement) is
 in [`docs/security/DISCLOSURE.md`](docs/security/DISCLOSURE.md).
@@ -97,7 +95,8 @@ SBOM. See [`pkg/VERIFY.md`](pkg/VERIFY.md) and
 
 Architectural posture, the threat model, and the input-parsing fuzzing
 story (Go harnesses ported from the shell surfaces, a committed
-regression corpus replayed on every push, ClusterFuzzLite on PRs,
+regression corpus replayed on every push, a short fuzzing window on PRs
+that touch a parser, and the ClusterFuzzLite build checked on PRs,
 OSS-Fuzz pending) are documented in
 [`docs/security/THREAT_MODEL.md`](docs/security/THREAT_MODEL.md) and
 [`docs/security/FUZZING.md`](docs/security/FUZZING.md).

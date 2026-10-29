@@ -22,7 +22,10 @@ dot doctor
 
 ## Version History
 
-### v0.2.501 (Current)
+This history stops at v0.2.501. [`CHANGELOG.md`](../../CHANGELOG.md)
+records every later release and its breaking changes.
+
+### v0.2.501
 
 - **Wallpaper-driven theme engine** — themes auto-generated from wallpapers via K-Means in CIELAB color space (no hand-crafted themes)
 - **Dynamic HEIC support** — custom wallpapers ship as Apple-compatible single-file dynamic HEIC; macOS auto-switches dark/light
@@ -62,14 +65,14 @@ dot doctor
 
 ## Breaking Changes
 
-If you are upgrading from v0.2.501 or earlier, note these changes:
+If you are upgrading from v0.2.500 or earlier, note these changes:
 
 1. **`themes.toml` is now generated** — do not hand-edit. Run `dot theme rebuild` to regenerate from wallpapers
 2. **Theme names changed** — old hand-crafted names (e.g. `catppuccin-mocha`, `macos-tahoe-dark` with hardcoded palettes) are replaced by wallpaper-derived names. The picker only shows paired wallpaper themes.
 3. **Wallpaper format** — custom wallpapers should be dynamic HEIC (single file, both appearances). Use `bash scripts/theme/merge-wallpaper.sh` to merge separate dark/light pairs.
 4. **Build caches relocated** — Cargo/Go/pip/uv/Zig now write to `/tmp/builds/`. Restart your shell after upgrade so `mise [env]` picks up the new paths.
 
-If you are upgrading from v0.2.501 or earlier:
+If you are upgrading from v0.2.497 or earlier:
 
 1. **Cline CLI removed** — if you used `dot cline`, switch to a different AI CLI
 2. **AI tools now install through mise** — run `mise install` to set up AI providers
@@ -80,8 +83,8 @@ If you are upgrading from v0.2.501 or earlier:
 If something goes wrong after an upgrade:
 
 ```bash
-# Quick rollback to previous state
-dot doctor rollback
+# Quick rollback to the latest backup
+dot doctor rollback rollback
 
 # Rollback to specific backup
 dot doctor rollback status       # List available backups

@@ -6,50 +6,94 @@ Manage Google Cloud aliases. Part of the **Universal Dotfiles** configuration.
 
 ## Description
 
-These aliases are defined in `gcloud.aliases.sh` and are automatically loaded by `chezmoi`.
+These aliases are defined in `gcloud.aliases.sh`. Loaded by the lazy alias layer `~/.config/shell/91-ux-aliases-lazy.sh`. It loads after the eager layer (zsh defers it until after startup), so its definitions replace any eager alias of the same name. Skipped when `DOTFILES_ALIAS_PROFILE=minimal` at `chezmoi apply` time. Every definition below exists only when `gcloud` is on PATH.
 
 ## Aliases
 
-This code provides a set of command aliases for managing various Google
-Cloud services, such as Compute Engine, Identity and Access Management,
-and Cloud SQL. These aliases help streamline the process of managing
-Google Cloud resources by providing simple and memorable commands for
-common use cases.
-
-- `gclb` manages Google Cloud Build.
-- `gcca` manages Compute Engine IP addresses.
-- `gccc` creates a new virtual machine instance.
-- `gcco` connects to a virtual machine instance by using SSH.
-- `gcd` sets the default project to the current directory name.
-- `gcdb` manages Google Cloud Datastore.
-- `gcdp` manages Google Cloud Dataproc.
-- `gce` manages Google Cloud Endpoints.
-- `gcem` manages Google Cloud Eventarc.
-- `gcf` manages Google Cloud Functions.
-- `gci` manages Google Cloud Compute Engine instances.
-- `gcic` manages Google Cloud Identity and Access Management.
-- `gcir` manages Google Cloud IoT Core.
-- `gck` lists all configurations.
-- `gcki` manages Google Cloud KMS.
-- `gcla` manages Google Cloud Logging.
-- `gcma` manages Google Cloud Monitoring.
-- `gcn` manages Google Cloud Networks.
-- `gcp` manages Google Cloud projects.
-- `gcpd` deletes a Google Cloud project.
-- `gcpha` displays details for a Compute Engine IP address.
-- `gcps` manages Google Cloud Pub/Sub.
-- `gcr` deletes a container image from Google Container Registry.
-- `gcrm` manages Google Cloud resources.
-- `gcro` manages Google Cloud Run.
-- `gcs` manages Google Cloud Kubernetes Engine clusters.
-- `gcsa` sets the account for the current configuration.
-- `gcsc` manages Google Cloud Source Repositories.
-- `gcso` opens the Google Cloud Console for the current project.
-- `gcsq` manages Google Cloud SQL.
-- `gcss` manages Google Cloud Storage.
-- `gcst` enables or disables Google Cloud services.
-- `gct` manages Google Cloud Tasks.
-- `gcu` manages Google Cloud App Engine.
+| Name | Definition | Notes |
+| --- | --- | --- |
+| `gcci` | `gcloud components install` | Install specific components. |
+| `gccsp` | `gcloud config set project` | Set a default Google Cloud project to work on. |
+| `gccu` | `gcloud components update` | Update your Cloud SDK to the latest version. |
+| `gci` | `gcloud init` | Initialize, authorize, and configure the gcloud tool. Redefined later in this file as `gcloud compute instances`, which wins. |
+| `gcinf` | `gcloud info` | Display current gcloud tool environment details. |
+| `gcv` | `gcloud version` | Display version and installed components. |
+| `gccca` | `gcloud config configurations activate` | Switch to an existing named configuration. |
+| `gcccc` | `gcloud config configurations create` | Create a new named configuration. Redefined later in this file as `gcloud container clusters create`, which wins. |
+| `gcccl` | `gcloud config configurations list` | Display a list of all available configurations. Redefined later in this file as `gcloud container clusters list`, which wins. |
+| `gccgv` | `gcloud config get-value` | Fetch value of a Cloud SDK property. |
+| `gccl` | `gcloud config list` | Display all the properties for the current configuration. |
+| `gccs` | `gcloud config set` | Define a property (like compute/zone) for the current configuration. |
+| `gcaasa` | `gcloud auth activate-service-account` | Like gcloud auth login but with service account credentials. |
+| `gcacd` | `gcloud auth configure-docker` | Register the gcloud tool as a Docker credential helper. |
+| `gcal` | `gcloud auth list` | List all credentialed accounts. |
+| `gcapat` | `gcloud auth print-access-token` | Display the current account's access token. |
+| `gcar` | `gcloud auth revoke` | Remove access credentials for an account. |
+| `gciamk` | `gcloud iam service-accounts keys list` | List a service account's keys. |
+| `gciaml` | `gcloud iam list-grantable-roles` | List IAM grantable roles for a resource. |
+| `gciamp` | `gcloud iam service-accounts add-iam-policy-binding` | Add an IAM policy binding to a service account. |
+| `gciamr` | `gcloud iam roles create` | Create a custom role for a project or org. |
+| `gciams` | `gcloud iam service-accounts set-iam-policy` | Replace existing IAM policy binding. |
+| `gciamv` | `gcloud iam service-accounts create` | Create a service account for a project. |
+| `gcpa` | `gcloud projects add-iam-policy-binding` | Add an IAM policy binding to a specified project. |
+| `gcpd` | `gcloud projects describe` | Display metadata for a project (including its ID). Redefined later in this file as `gcloud projects delete`, which wins. |
+| `gcccc` | `gcloud container clusters create` | Create a cluster to run GKE containers. |
+| `gcccg` | `gcloud container clusters get-credentials` | Update kubeconfig to get kubectl to use a GKE cluster. |
+| `gcccl` | `gcloud container clusters list` | List clusters for running GKE containers. |
+| `gccil` | `gcloud container images list-tags` | List tag and digest metadata for a container image. |
+| `gcpc` | `gcloud compute copy-files` |  |
+| `gcpdown` | `gcloud compute instances stop` |  |
+| `gcpds` | `gcloud compute disks snapshot` | Create snapshot of persistent disks. |
+| `gcpid` | `gcloud compute instances describe` | Display a VM instance's details. |
+| `gcpil` | `gcloud compute instances list` | List all VM instances in a project. |
+| `gcprm` | `gcloud compute instances delete` |  |
+| `gcpsk` | `gcloud compute snapshots delete` | Delete a snapshot. |
+| `gcpssh` | `gcloud compute ssh` | Connect to a VM instance by using SSH. |
+| `gcpup` | `gcloud compute instances start` | Start instance. |
+| `gcpzl` | `gcloud compute zones list` | List Compute Engine zones. |
+| `gcapb` | `gcloud app browse` | Open the current app in a web browser. |
+| `gcapc` | `gcloud app create` | Create an App Engine app within your current project. |
+| `gcapd` | `gcloud app deploy` | Deploy your app's code and configuration to the App Engine server. |
+| `gcapl` | `gcloud app logs read` | Display the latest App Engine app logs. |
+| `gcapv` | `gcloud app versions list` | List all versions of all services deployed to the App Engine server. |
+| `gckmsd` | `gcloud kms decrypt` | Decrypt ciphertext (to a plaintext file) using a Cloud Key Management Service (Cloud KMS) key. |
+| `gclll` | `gcloud logging logs list` | List your project's logs. |
+| `gcsqlb` | `gcloud sql backups describe` | Display info about a Cloud SQL instance backup. |
+| `gcsqle` | `gcloud sql export sql` | Export data from a Cloud SQL instance to a SQL file. |
+| `gclb` | `gcloud builds` | Manage Google Cloud Build. |
+| `gcca` | `gcloud compute addresses` | Manage Compute Engine IP addresses. |
+| `gccc` | `gcloud compute instances create` | Create a new virtual machine instance. |
+| `gcco` | `gcloud compute ssh` | Connect to a virtual machine instance by using SSH. |
+| `gcd` | `gcloud config set project $(gcloud projects list --format="value(projectId)" --filter="name:${PWD##\*/}")` | Set default project to current directory name. |
+| `gcdb` | `gcloud datastore` | Manage Google Cloud Datastore. |
+| `gcdp` | `gcloud dataproc` | Manage Google Cloud Dataproc. |
+| `gce` | `gcloud endpoints` | Manage Google Cloud Endpoints. |
+| `gcem` | `gcloud eventarc` | Manage Google Cloud Eventarc. |
+| `gcf` | `gcloud functions` | Manage Google Cloud Functions. |
+| `gci` | `gcloud compute instances` | Manage Google Cloud Compute Engine instances. |
+| `gcic` | `gcloud iam` | Manage Google Cloud Identity and Access Management. |
+| `gcir` | `gcloud iot` | Manage Google Cloud IoT Core. |
+| `gck` | `gcloud config configurations list` | List all configurations. |
+| `gcki` | `gcloud kms` | Manage Google Cloud KMS. |
+| `gcla` | `gcloud logging` | Manage Google Cloud Logging. |
+| `gcma` | `gcloud monitoring` | Manage Google Cloud Monitoring. |
+| `gcn` | `gcloud networks` | Manage Google Cloud Networks. `gcloud networks` is not a gcloud command group; networks live under `gcloud compute networks`. |
+| `gcp` | `gcloud projects` | Manage Google Cloud projects. |
+| `gcpd` | `gcloud projects delete` | Delete a Google Cloud project. |
+| `gcpha` | `gcloud compute addresses describe` | Display details for a Compute Engine IP address. |
+| `gcps` | `gcloud pubsub` | Manage Google Cloud Pub/Sub. |
+| `gcr` | `gcloud container images delete` | Delete a container image from Google Container Registry. |
+| `gcrm` | `gcloud resource-manager` | Manage Google Cloud resources. |
+| `gcro` | `gcloud run` | Manage Google Cloud Run. |
+| `gcs` | `gcloud container clusters` | Manage Google Cloud Kubernetes Engine clusters. |
+| `gcsa` | `gcloud config set account` | Set the account for the current configuration. |
+| `gcsc` | `gcloud source` | Manage Google Cloud Source Repositories. |
+| `gcso` | `gcloud organizations` | The `gcloud organizations` command group. |
+| `gcsq` | `gcloud sql` | Manage Google Cloud SQL. |
+| `gcss` | `gcloud storage` | Manage Google Cloud Storage. |
+| `gcst` | `gcloud services` | Enable or disable Google Cloud services. |
+| `gct` | `gcloud tasks` | Manage Google Cloud Tasks. |
+| `gcu` | `gcloud app` | Manage Google Cloud App Engine. |
 
 [banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 

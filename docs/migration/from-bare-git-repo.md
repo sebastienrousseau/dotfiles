@@ -61,8 +61,10 @@ config diff main work-laptop -- .bashrc
 ## 3. Install
 
 The bare repo is at `$HOME/.dotfiles`, which is also this project's
-default clone location. The installer detects and refuses to clobber
-it, but move it first to avoid the confusion entirely:
+default clone location. The installer does not recognise a bare repo
+as a source: it tries to clone into `$HOME/.dotfiles`, the clone fails
+because the directory is not empty, and the install stops. Move it
+first:
 
 ```sh
 mv "$HOME/.dotfiles" "$HOME/.dotfiles.bare.bak"
@@ -73,17 +75,24 @@ bash /tmp/dotfiles-install.sh
 ```
 
 Your files in `$HOME` are untouched by the move — only the git
-metadata directory changed name.
+metadata directory changed name. The install itself then applies this
+repo's defaults over them without a backup; step 4 puts yours back.
 
 ## 4. Import
 
 ```sh
+(cd "$HOME" && config checkout -- .)   # your committed versions, over the defaults
 while read -r f; do
   [ -e "$HOME/$f" ] && dot config add "$HOME/$f"
 done < ~/bare-inventory.txt
 
 dot status
 ```
+
+Where the framework ships a path as a template (`~/.gitconfig` is
+`defaults/dot_gitconfig.tmpl`), `dot config add` asks whether to remove
+the template attribute; yes replaces the framework's template with your
+plain file, no keeps the template for you to merge into.
 
 ## 5. Collapse branches into templates
 
@@ -101,10 +110,12 @@ export HOMEBREW_NO_ANALYTICS=1
 {{ end }}
 ```
 
-Rendering is testable without applying:
+`chezmoi chattr +template ~/.bashrc` turns the added
+`defaults/dot_bashrc` into `defaults/dot_bashrc.tmpl`. Rendering is
+testable without applying:
 
 ```sh
-chezmoi execute-template < defaults/dot_bashrc.tmpl
+chezmoi execute-template < ~/.dotfiles/defaults/dot_bashrc.tmpl
 ```
 
 ## 6. Apply and verify

@@ -7,9 +7,10 @@ date: 2026-05-17
 
 The project ships native-Go fuzz harnesses for every user-input
 parsing surface in the framework. The harnesses run locally via
-`go test -fuzz`, in CI on every PR via `.github/workflows/fuzz.yml`,
-and (pending upstream submission) continuously on Google's OSS-Fuzz
-infrastructure.
+`go test -fuzz`, in CI via `.github/workflows/fuzz.yml` (corpus replay
+on every push and PR, a fuzzing window on PRs that touch an input
+surface), through ClusterFuzzLite (`.clusterfuzzlite/`), and (pending
+upstream submission) continuously on Google's OSS-Fuzz infrastructure.
 
 ## Why Go fuzzing
 
@@ -33,7 +34,7 @@ harnesses live in four modules:
 
 | Module | Harnesses | Runs against |
 |--------|-----------|--------------|
-| `fuzz` | 11 | ports of the shell helpers **and** of the two binaries' parsers — this is the package OSS-Fuzz and ClusterFuzzLite compile |
+| `fuzz` | 14 | ports of the shell helpers **and** of the two binaries' parsers — this is the package OSS-Fuzz and ClusterFuzzLite compile |
 | `defaults/dot_local/share/dot-ui` | 8 | the real dot-ui implementation, in-module |
 | `defaults/dot_local/share/dot-ai-tui` | 11 | the real dot-ai-tui implementation, in-module |
 | `defaults/dot_local/share/dot-mcp` | 5 | the real MCP server, in-module — everything a peer can put on the wire |
@@ -53,8 +54,11 @@ is a bug in one of them.
 
 | Harness | Mirrors | What it proves |
 |---------|---------|----------------|
-| `FuzzValidateName` | `scripts/dot/lib/utils.sh:101` (`validate_name`) | Every accepted name contains only `[a-zA-Z0-9._-]`; no shell metacharacter slips through; empty input refused. |
+| `FuzzValidateName` | `lib/dot/utils.sh:186` (`validate_name`) | Every accepted name contains only `[a-zA-Z0-9._-]`; no shell metacharacter slips through; empty input refused. |
 | `FuzzInitURLResolver` | `plugins/config/libexec/init.sh` (URL construction in `dot config init <user\|owner/repo\|url>`) | Accepted URLs use `https://` / `git@` / `ssh://` only; plain HTTP refused; no shell metacharacters in constructed URLs; one input shape per acceptable form. |
+| `FuzzFleetInputs` | `plugins/fleet/libexec/fleet.sh` (`cmd_fleet_apply` input gates) | An accepted host name joined as `<dir>/<name>.out` stays inside `dir`; an accepted SSH target never starts with `-` and carries no shell metacharacter; `--jobs` is a positive integer. |
+| `FuzzSecretKey` | `scripts/lib/secrets_provider.sh` (`dot_secrets_valid_key`, `dot_secrets_valid_env_key`) | An accepted storage key stays a direct child of the store and never starts with `-` or `.`; an accepted env key is a POSIX shell identifier. |
+| `FuzzGatewayGate` | `defaults/dot_local/bin/executable_dot-ai-serve` (Host and API-key gates) | Only the gateway's own loopback `Host` is allowed; a request authenticates only when a header equals the key exactly, and an empty key authenticates nothing. |
 | `FuzzUIEventLine` | dot-ui `run.go` (`parseEvent`, `renderBar`) | A line either decodes to valid JSON or is refused; an accepted event round-trips with every string field free of control and bidi characters; the derived progress width is always a legal repeat count. |
 | `FuzzUIHexColor` | dot-ui `theme.go` (`parseColor`) | An accepted `DOT_UI_*` value is a literal `#rgb`/`#rrggbb` with no metacharacter or escape sequence — these are interpolated into terminal escapes. |
 | `FuzzUIPickFilter` | dot-ui `pick.go` (`fuzzyMatch`, `readItems`) | No blank candidate survives and none carries a control or bidi character; every candidate matches itself in any script; a query longer than the candidate never matches. |
@@ -109,7 +113,7 @@ type-checking each harness alone in a scratch module; it runs in the
 Add a harness when:
 
 - a new `dot <subcommand>` accepts user input via `$1` / `--flag`,
-- a new regex appears in `scripts/dot/lib/utils.sh`,
+- a new regex appears in `lib/dot/utils.sh`,
 - a new "construct a URL / path / shell-eval string" code path lands,
 - a new function in `dot-ui`, `dot-ai-tui` or `dot-mcp` parses or transforms
   stdin, an environment variable, a key stream or model output —
@@ -144,20 +148,23 @@ guards, replayed by `go test ./...` and by the `replay` job in
 
 ## OSS-Fuzz integration (pending)
 
-The `fuzz/oss-fuzz/` directory contains everything OSS-Fuzz
-needs to onboard this project:
+The `fuzz/oss-fuzz/` directory holds the OSS-Fuzz project files; the
+harnesses it compiles are the `fuzz/` package itself:
 
 ```
-fuzz/oss-fuzz/
-├── project.yaml      # OSS-Fuzz project metadata
-├── Dockerfile        # build environment
-├── build.sh          # compiles every harness in fuzz/
-└── fuzz/             # the harnesses themselves
-    ├── go.mod
-    ├── validate_name_test.go
-    ├── init_url_resolver_test.go
-    ├── dot_ui_parsers_test.go       # ports of the dot-ui parsers
-    └── dot_ai_tui_parsers_test.go   # ports of the dot-ai-tui parsers
+fuzz/
+├── oss-fuzz/
+│   ├── project.yaml          # OSS-Fuzz project metadata
+│   ├── Dockerfile            # build environment
+│   └── build.sh              # compiles every harness in fuzz/
+├── go.mod
+├── validate_name_test.go
+├── init_url_resolver_test.go
+├── fleet_inputs_test.go
+├── secret_key_test.go
+├── gateway_gate_test.go
+├── dot_ui_parsers_test.go       # ports of the dot-ui parsers
+└── dot_ai_tui_parsers_test.go   # ports of the dot-ai-tui parsers
 ```
 
 To onboard:
@@ -175,7 +182,7 @@ To onboard:
 
 4. Open a PR to `google/oss-fuzz` per <https://google.github.io/oss-fuzz/getting-started/accepting-new-projects/>.
 5. Once merged, OSS-Fuzz schedules continuous runs on GCP; findings land as private issues in the OSS-Fuzz tracker and are mirrored to the maintainer email in `project.yaml`.
-6. Update `docs/security/SCORECARD.md` — Scorecard's `Fuzzing` check recognises OSS-Fuzz projects automatically (0 → 10).
+6. Update `docs/security/SCORECARD.md`. (Scorecard's `Fuzzing` check already scores 10 from the existing native Go fuzzing and ClusterFuzzLite setup.)
 
 The upstream PR opens the door to the **CIFuzz** GitHub Action,
 which runs OSS-Fuzz-style fuzzing on every PR in this repo
@@ -185,15 +192,18 @@ which runs OSS-Fuzz-style fuzzing on every PR in this repo
 
 `.github/workflows/fuzz.yml` has two gates:
 
-- **replay** — on every push and PR, every committed corpus (seed
-  entries plus the minimized crashers of previously-fixed findings) is
-  replayed in all three modules with `go test -run '^Fuzz'`. No
-  fuzzing, so no flakes: a fixed crash cannot silently come back.
-- **fuzz** — a 60-second window per harness (configurable via
+- **replay**: on every push to `main` and on PRs that touch a
+  watched path, every committed corpus (seed entries plus the minimized
+  crashers of previously-fixed findings) is replayed in all four
+  modules with `go test -run '^Fuzz'`. No fuzzing, so no flakes: a
+  fixed crash cannot silently come back.
+- **fuzz**: a 60-second window per harness (configurable via
   `workflow_dispatch`) on PRs touching an input-parsing surface:
-  `scripts/dot/lib/utils.sh`, `plugins/config/libexec/init.sh`,
-  `fuzz/**`, `.clusterfuzzlite/**` or either Go
-  module.
+  `lib/dot/utils.sh`, `plugins/config/libexec/init.sh`,
+  `plugins/fleet/libexec/fleet.sh`, `scripts/lib/secrets_provider.sh`,
+  `defaults/dot_local/bin/executable_dot-ai-serve`, `fuzz/**`,
+  `.clusterfuzzlite/**`, or any of the three Go modules under
+  `defaults/dot_local/share/`.
 
 This is the local equivalent of CIFuzz and catches the
 "shell-regex-change without Go-port update" drift class before

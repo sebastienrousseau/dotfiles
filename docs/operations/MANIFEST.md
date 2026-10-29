@@ -91,13 +91,13 @@ shape:
 
 | Target format | Use case | Status |
 |---|---|---|
-| `AGENTS.md` | Cross-harness AI agent context | shipped (`dot agent context apply`); will be re-pointed at the v1 manifest in v0.2.504 |
-| `devcontainer-feature.json` | Reproducible cloud-IDE setup | planned (v0.2.504) |
+| `AGENTS.md` | Cross-harness AI agent context | shipped (`dot agent context apply`); not yet rendered from the v1 manifest |
+| `devcontainer-feature.json` | Reproducible cloud-IDE setup | planned |
 | `mise.toml` | Round-trip: re-create the same install set on a fresh host | planned |
 | `Brewfile` | Hand off to a Homebrew-managed Mac | planned |
 | `flake.nix` | Nix reproducibility | planned (input to nix-shell) |
-| `in-toto subject list` | SLSA attestation subject array | planned (`dot fleet apply --attest`) |
-| `CycloneDX SBOM` | Compliance reporting (EU CRA) | planned (v0.2.504; per-artifact attestation closes R3-N7) |
+| `in-toto subject list` | SLSA attestation subject array | planned (`dot fleet apply` has no `--attest` flag yet) |
+| `CycloneDX SBOM` | Compliance reporting (EU CRA) | planned from this manifest (per-artifact attestation closes R3-N7). Releases already carry a CycloneDX SBOM of the packaged CLI tree, built by `release-package-dot.yml`, not from this manifest. |
 
 The schema is intentionally minimal — `dot tool export` records *what
 is installed*, not *what is desired* or *what is approved*. Downstream
@@ -105,6 +105,9 @@ emitters add policy / approval / risk-score columns as they need
 them.
 
 ## CI usage
+
+No workflow in this repository runs this today; it is the intended
+shape:
 
 ```yaml
 - name: Snapshot environment manifest
@@ -115,8 +118,8 @@ them.
       --output-certificate env.json.pem env.json
 ```
 
-The signed manifest goes into the release alongside the SBOM —
-together they let any consumer answer "what software was on the
+Attached to a release alongside the SBOM, the signed manifest would
+let any consumer answer "what software was on the
 runner that produced this release" and verify it cryptographically.
 
 ## See also
@@ -124,4 +127,4 @@ runner that produced this release" and verify it cryptographically.
 - `docs/schema/dot-env-v1.json` — the JSON Schema authoritative spec.
 - `docs/security/VERIFY_RELEASE.md` — three-attestation verification flow this manifest plugs into.
 - `docs/operations/HARD_AUDIT_2026.md` §7.4 — strategic-reversal record.
-- `docs/operations/ROADMAP_V0_2_503.md` — `dot env emit` was originally deferred to v0.2.504; pulled forward in this PR per user request.
+- `docs/operations/ROADMAP_V0_2_503.md`: historical. The manifest emitter, then `dot env emit` (now `dot tool export`), was originally deferred to v0.2.504 and pulled forward into v0.2.503.
