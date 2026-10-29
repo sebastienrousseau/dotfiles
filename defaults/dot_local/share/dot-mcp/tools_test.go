@@ -63,16 +63,16 @@ func TestToolArgv(t *testing.T) {
 		args map[string]any
 		want []string
 	}{
-		{tool: "mcp-doctor", args: map[string]any{"strict": false}, want: []string{"mcp", "doctor", "--json"}},
-		{tool: "mcp-doctor", args: map[string]any{"strict": true}, want: []string{"mcp", "doctor", "--json", "--strict"}},
-		{tool: "mcp-doctor", args: map[string]any{}, want: []string{"mcp", "doctor", "--json"}},
-		{tool: "mcp-doctor", args: map[string]any{"strict": "yes"}, want: []string{"mcp", "doctor", "--json"}},
+		{tool: "mcp-doctor", args: map[string]any{"strict": false}, want: []string{"mcp", "check", "--json"}},
+		{tool: "mcp-doctor", args: map[string]any{"strict": true}, want: []string{"mcp", "check", "--json", "--strict"}},
+		{tool: "mcp-doctor", args: map[string]any{}, want: []string{"mcp", "check", "--json"}},
+		{tool: "mcp-doctor", args: map[string]any{"strict": "yes"}, want: []string{"mcp", "check", "--json"}},
 		{tool: "agent-mode", args: map[string]any{"action": "current"}, want: []string{"agent", "status"}},
 		{tool: "agent-mode", args: map[string]any{"action": "list"}, want: []string{"agent", "mode", "list"}},
 		{tool: "agent-mode", args: map[string]any{"action": "show", "profile": "audit"}, want: []string{"agent", "mode", "show", "audit"}},
 		{tool: "agent-mode", args: map[string]any{"action": "show"}, want: []string{"agent", "mode", "show"}},
 		{tool: "agent-mode", args: map[string]any{}, want: []string{"agent", "status"}},
-		{tool: "workstation-attestation", args: nil, want: []string{"attest", "--json"}},
+		{tool: "workstation-attestation", args: nil, want: []string{"attest", "show", "--json"}},
 		{tool: "fleet-status", args: nil, want: []string{"fleet", "status", "--json"}},
 	}
 	byName := map[string]tool{}

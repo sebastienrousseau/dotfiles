@@ -30,11 +30,14 @@ export FORCE_COLOR_OS="Windows"
 {{- $features := default (dict "zsh" true "nvim" true "tmux" true "gui" true "secrets" true) .features -}}
 {{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
 {{- $theme := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}
-{{- $strict_mode := default false (index . "strict_mode") -}}
+{{- /* aliases.policy.strict_mode in .chezmoidata.toml; a top-level strict_mode still counts */ -}}
+{{- $strict_mode := dig "aliases" "policy" "strict_mode" (default false (index . "strict_mode")) . -}}
 {{- $enabled := list -}}
 {{- range $k, $v := $features }}{{- if $v }}{{- $enabled = append $enabled $k }}{{- end }}{{- end }}
 
-export DOTFILES_PROFILE="{{ $profile }}"
+# The profile from chezmoi data, unless this session already set one.
+: ${DOTFILES_PROFILE:={{ $profile }}}
+export DOTFILES_PROFILE
 export DOTFILES_FEATURES="{{ join "," $enabled }}"
 export DOTFILES_THEME="{{ $theme }}"
 : ${DOTFILES_STARTUP_MODE:=full}

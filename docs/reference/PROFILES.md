@@ -57,7 +57,7 @@ zellij = true
 
 When `machine` names one of these, the niri config uses that preset in place of `[hardware]`. You can also override single values with `[data.hardware]` in `chezmoi.toml`.
 
-The kanshi config matches `machine` against its own names (`surface-pro-7p`, `mac-t2-linux`, `geekom-a9`), so only `geekom-a9` is understood by both templates today.
+The kanshi config picks a display profile for each preset (`macbook-t2`, `surface-pro`, `geekom-a9`), and also accepts the older names the example files below use (`surface-pro-7p`, `mac-t2-linux`).
 
 ### Starter Feature Sets
 

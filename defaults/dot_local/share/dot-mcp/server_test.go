@@ -40,7 +40,7 @@ func newTestServer(frames []string) (*Server, *strings.Builder, *strings.Builder
 	var out, logs strings.Builder
 	srv := NewServer(strings.NewReader(in), &out, &logs)
 	srv.run = fakeRunner(commandResult{Stdout: `{"status":"healthy"}`}, nil, nil)
-	srv.env = fakeEnv(map[string]string{"__wd": "/", "__home": "/home/u"})
+	srv.env = fakeEnv(map[string]string{"__wd": "/", "__home": "/h/u"})
 	srv.readFile = func(string) ([]byte, error) { return nil, fs.ErrNotExist }
 	return srv, &out, &logs
 }
@@ -282,7 +282,7 @@ func TestToolsCallRunsTheTool(t *testing.T) {
 	if calls[0].name != "/opt/dot" {
 		t.Fatalf("ran %q, want the exported dot binary", calls[0].name)
 	}
-	want := []string{"mcp", "doctor", "--json", "--strict"}
+	want := []string{"mcp", "check", "--json", "--strict"}
 	if strings.Join(calls[0].args, " ") != strings.Join(want, " ") {
 		t.Fatalf("argv = %v, want %v", calls[0].args, want)
 	}
@@ -375,7 +375,7 @@ func TestToolsCallWithoutArguments(t *testing.T) {
 	}, func(s *Server) {
 		s.run = fakeRunner(commandResult{Stdout: `{"version":"0.0.0"}`}, nil, &calls)
 	})
-	if len(calls) != 1 || strings.Join(calls[0].args, " ") != "attest --json" {
+	if len(calls) != 1 || strings.Join(calls[0].args, " ") != "attest show --json" {
 		t.Fatalf("calls = %v", calls)
 	}
 	if result(t, msgs, 1)["isError"] != false {
