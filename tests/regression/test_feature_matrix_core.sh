@@ -212,8 +212,9 @@ test_fm_user_custom_command() {
   printf '#!/usr/bin/env bash\nprintf "custom-ran:%%s\\n" "${1:-}"\nexit 7\n' \
     >"$dir/fmdemo.sh"
 
+  # User commands are off unless DOT_ALLOW_PATH_PLUGINS=1 (ADR-016).
   test_start "fm_user_custom_command"
-  fm_run fmdemo hello
+  DOT_ALLOW_PATH_PLUGINS=1 fm_run fmdemo hello
   fm_expect_out "custom-ran:hello"
 
   # A user command's exit code must reach the caller, and its `exit` must not
