@@ -32,7 +32,7 @@ maintenance candidate:
   `starship init nu`, `mise activate nu`, `zoxide init nushell`,
   `atuin init nu` as fresh subprocesses, costing 100–200 ms aggregated.
 - 5 config files (`config.nu.tmpl`, `env.nu.tmpl`, `aliases.nu`,
-  `completions.nu.tmpl`, `functions.nu.tmpl`) totalling ~270 lines —
+  `completions.nu`, `functions.nu.tmpl`) totalling ~270 lines —
   enough to be meaningful, not enough to be self-sustaining.
 
 Three paths were proposed:
@@ -123,7 +123,7 @@ plugin system, bash bridge for aliases) await an actual user request.
 - Cache invalidation by mtime is fragile when the user installs a
   tool via a non-mtime-respecting method (e.g. unpacking a tarball
   with `--no-touch-mtimes`). The fallback is the user running
-  `dot prewarm` or deleting `~/.cache/nushell/*.nu`. Documented in
+  `dot shell update --prewarm` or deleting `~/.cache/nushell/*.nu`. Documented in
   `docs/operations/PERFORMANCE.md`.
 
 ## Alternatives Considered

@@ -8,8 +8,9 @@ under `tools/`.
 Per the v0.2.503 reorg (`docs/operations/RFC_v0_2_503_reorganization.md`
 Phase 5), this directory holds what used to live under
 `scripts/{ci,release,maintenance,docs}/`. The split clarifies which
-scripts a downstream distro packager needs to ship (`scripts/` +
-`lib/` + `bin/`) versus which only run in this repo's own CI
+scripts a downstream distro packager needs to ship (`bin/`, `lib/`,
+`plugins/`, `scripts/` and the rest `tools/release/stage-dot.sh`
+stages) versus which only run in this repo's own CI
 (`tools/`).
 
 ## Subtree map
@@ -19,7 +20,7 @@ scripts a downstream distro packager needs to ship (`scripts/` +
 | `tools/ci/` | CI-only helpers. `dot-cli-startup-bench.sh`, `install-chezmoi-verified.sh`, `windows-smoke-test.ps1`, `run-coverage.sh`, etc. | `.github/workflows/*` |
 | `tools/release/` | Release-time tasks. | Release workflow + `gh release create` flow |
 | `tools/maintenance/` | Recurring upkeep: `check-updates.sh`, etc. | Cron, manual |
-| `tools/docs/` | Documentation-generation helpers: `generate-command-index.sh`, manual builds, screenshot capture. | `manual-publish.yml`, `dot help --manual`, doc-drift |
+| `tools/docs/` | Documentation-generation helpers: `generate-command-index.sh`, manual and site builds, and the generators for man pages, completions and cmdlets (`gen_manpages.py`, `gen_completions.py`, `gen_cmdlets.py`). | `manual-publish.yml`, `dot help --manual`, doc-drift |
 
 ## Why this directory exists
 
@@ -31,8 +32,9 @@ contributor-onboarding cost. New contributors couldn't tell:
 > is it just a CI helper?"
 
 Splitting them physically answers the question without anyone
-having to grep. `scripts/` is now exclusively the runtime-invoked
-surface; `tools/` is exclusively repo-internal.
+having to grep. `scripts/` is now the runtime-invoked surface (apart
+from the `scripts/ci/` compat shims kept for pinned reusable
+workflows); `tools/` is exclusively repo-internal.
 
 ## Conventions
 

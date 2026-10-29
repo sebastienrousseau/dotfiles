@@ -4,8 +4,9 @@
 # `supply-chain/` — dependency provenance policy and state
 
 In a Rust project this directory holds `cargo-vet` audits and
-`cargo-deny` state. This project is bash, Go-template and Lua: there
-is no `cargo-vet` equivalent for shell, and inventing a tool that no
+`cargo-deny` state. This project is mostly bash, Go-template and Lua
+(with small Go and Rust components): there is no `cargo-vet`
+equivalent for shell, and inventing a tool that no
 CI job runs would be worse than having none — an unenforced policy
 file is a claim, not a control.
 
@@ -21,8 +22,8 @@ verifiable at the point of use. Five categories, five controls:
 | # | Category | Rule | Enforced by |
 |---|---|---|---|
 | 1 | Third-party GitHub Actions | Pinned to a 40-hex commit SHA, with the human-readable version in a trailing comment | OpenSSF Scorecard `Pinned-Dependencies`; reviewed on every PR that touches a workflow |
-| 2 | Reusable workflows in this repo | Pinned to a 40-hex commit SHA, never a relative path or branch | [`tools/ci/lint-reusable-pins.sh`](../tools/ci/lint-reusable-pins.sh), run by `ci.yml` job *Lint / Reusable Workflow Pins* |
-| 3 | Container base images | `FROM image:tag@sha256:<digest>` | Reviewed on PR; Checkov (`security-enhanced.yml`, `ci-enforced.yml`) |
+| 2 | Reusable workflows | Same-repository workflows use the local form (`uses: ./.github/workflows/<file>.yml`), so a PR runs the workflow code under test; external reusable workflows are pinned to a 40-hex commit SHA | [`tools/ci/lint-reusable-pins.sh`](../tools/ci/lint-reusable-pins.sh), run by `ci.yml` job *Lint / Reusable Workflow Pins* |
+| 3 | Container base images | `FROM image:tag@sha256:<digest>` | Reviewed on PR; Checkov (`security-enhanced.yml`, `ci-enforced.yml`). Not yet universal: `fuzz/oss-fuzz/Dockerfile` uses an unpinned OSS-Fuzz base, and images that workflows start with `docker run` (hadolint, Grype, the distro test matrix) are pinned by tag only |
 | 4 | Binaries fetched at build time | Downloaded then checked against a committed SHA256 | [`../security/remote-installers.sha256`](../security/remote-installers.sha256) via [`tools/ci/check-remote-installers.sh`](../tools/ci/check-remote-installers.sh) |
 | 5 | Package dependencies (npm, PyPI, Actions) | Locked, and screened against advisory data on every PR | `dependency-review.yml`, `deps-dev-validation.yml` ([`tools/ci/check-deps-dev.sh`](../tools/ci/check-deps-dev.sh)), `sbom-diff.yml` (Grype) |
 
@@ -39,11 +40,12 @@ and the verification step before any tag bump:
 
 | File | Covers | `--locked` in CI |
 |---|---|---|
-| `mise.lock`, `mise-versions.lock.json` | The whole development toolchain | Yes — `mise install` reads the lock |
-| `requirements-docs.txt` | Docs build (Python), hash-pinned, compiled from `.in` | Yes |
-| `package.json` | Node dev tooling | Yes |
+| `mise.lock`, `mise-versions.lock.json` | The local development toolchain | No: no CI job runs `mise install` |
+| `requirements-contracts.txt` | Contract tests (Python), hash-pinned, compiled from `requirements-contracts.in` | Yes: `core-contracts.yml` installs with `pip install --require-hashes` |
+| `package.json` | Node dev tooling | No: there is no lockfile, so versions are not locked |
 | `flake.lock`, `nix/flake.lock` | Nix dev shell and package outputs | Yes |
-| `fuzz/go.sum` | Fuzz harness dependencies | Yes — `go test` verifies checksums |
+| `go.sum` files (`fuzz/`, `core/`, the Go modules under `defaults/dot_local/share/`) | Go dependencies | Yes: `go test` / `go build` verify checksums |
+| `lib/wasm-tools/Cargo.lock` | Rust components | Yes: `rust.yml` runs `cargo --locked` |
 
 ## Allowlists and exception registers
 
@@ -53,7 +55,7 @@ Time-bounded exceptions live in files, not in reviewers' heads:
 |---|---|---|
 | [`../docs/security/DEPS_DEV_EXCEPTIONS.md`](../docs/security/DEPS_DEV_EXCEPTIONS.md) | One `(ecosystem, package)` advisory suppression each | Every entry carries an expiry date |
 | [`../docs/security/CI_EGRESS_ALLOWLIST.md`](../docs/security/CI_EGRESS_ALLOWLIST.md) | Network endpoints reachable under `harden-runner` block mode | Reviewed when a job moves to block mode |
-| [`../docs/security/SHELL_EXEMPTIONS.md`](../docs/security/SHELL_EXEMPTIONS.md) | Per-file shellcheck suppressions | Each needs an inline justification |
+| [`../docs/security/SHELL_EXEMPTIONS.md`](../docs/security/SHELL_EXEMPTIONS.md) | Files exempt from the `set -euo pipefail` preamble rule | Each needs a stated justification |
 | [`../.gitleaksignore`](../.gitleaksignore), [`../.secrets.baseline`](../.secrets.baseline) | Known non-secrets | Regenerated when the tree changes |
 | [`../config/trivyignore`](../config/trivyignore) | Accepted container findings | Reviewed per release |
 

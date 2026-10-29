@@ -33,11 +33,18 @@ sops secrets.sops.yaml
 
 ## Recovery
 
-If you lose your age private key, follow these steps:
+If you lose your age private key and have no backup, files encrypted to it
+cannot be decrypted, so they cannot be re-encrypted either. Recover by
+replacing the secrets themselves:
 
 1. Create a new key: `age-keygen -o ~/.config/sops/age/keys.txt`
-2. Re-encrypt all secrets with the new public key.
-3. Update `.sops.yaml` with the new public key.
+2. Update `.sops.yaml` with the new public key.
+3. Regenerate or re-fetch each secret at its source (rotate API keys and
+   tokens with their providers), then encrypt the new values with the new
+   key. Delete the old encrypted files.
+
+If any machine still holds the old key, decrypt there and re-encrypt to
+the new key instead (see [KEY_ROTATION.md](KEY_ROTATION.md)).
 
 ## Integration with Chezmoi
 
@@ -47,11 +54,13 @@ Chezmoi has built-in support for age encryption.
 chezmoi add --encrypt ~/.ssh/config
 ```
 
-This encrypts the file in the source state. It uses the age key set in `~/.config/chezmoi/chezmoi.toml`:
+This encrypts the file in the source state. It uses the age key set in `~/.config/chezmoi/chezmoi.toml`. The dotfiles config template defaults the
+identity to `~/.config/chezmoi/key.txt` (the key `dot secret init`
+creates), separate from the SOPS key above:
 
 ```toml
 encryption = "age"
 [age]
-identity = "~/.config/sops/age/keys.txt"
+identity = "~/.config/chezmoi/key.txt"
 recipient = "age1abc123..."
 ```

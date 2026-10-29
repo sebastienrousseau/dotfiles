@@ -9,192 +9,179 @@ render_with_liquid: false
 ## The Self-Healing Loop
 
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  dot doctor │ ──► │   detect    │ ──► │   report    │
-└─────────────┘     └─────────────┘     └─────────────┘
-                           │
-                           ▼
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  dot doctor fix   │ ──► │   repair    │ ──► │   verify    │
-└─────────────┘     └─────────────┘     └─────────────┘
-                           │
-                           ▼ (on failure)
-┌─────────────┐     ┌─────────────┐
-│dot doctor rollback │ ──► │   revert    │
-└─────────────┘     └─────────────┘
+┌─────────────────────┐     ┌─────────────┐     ┌─────────────┐
+│  dot doctor check   │ ──► │   detect    │ ──► │   report    │
+└─────────────────────┘     └─────────────┘     └─────────────┘
+                                   │
+                                   ▼
+┌─────────────────────┐     ┌─────────────┐     ┌─────────────┐
+│   dot doctor fix    │ ──► │   repair    │ ──► │   verify    │
+└─────────────────────┘     └─────────────┘     └─────────────┘
+                                   │
+                                   ▼ (on failure)
+┌─────────────────────┐     ┌─────────────┐
+│ dot doctor rollback │ ──► │   revert    │
+└─────────────────────┘     └─────────────┘
 ```
 
 ## `dot doctor` — Detection
 
-`dot doctor` runs ~40 health checks grouped into categories:
-
-| Category | Checks |
-|:---|:---|
-| **Paths** | `~/.local/bin`, `~/.cargo/bin`, Mise shim order, Homebrew prefix |
-| **Tools** | Required: git, chezmoi. Optional: mise, nix, age, sops, pandoc |
-| **Chezmoi** | Source dir exists, data file valid, no uncommitted drift |
-| **Shell** | Default shell matches profile, startup time <500ms |
-| **Security** | SSH keys present, Age key present, gitleaks baseline |
-| **Portability** | Git user.email set, LC_ALL sane, TERM recognized |
+`dot doctor check` (or plain `dot doctor`) runs `scripts/diagnostics/doctor.sh`, which reports its checks in these sections, in order: Core Shells, Modern CLI Tools, Infrastructure, AI CLIs, Environment, Platform, State, Pre-Push Audit Bypass, Atuin History Filter, Git Signing, Update Tooling and Performance. `dot doctor status` is the shorter health dashboard.
 
 Exit codes:
 
 | Code | Meaning |
 |:---|:---|
-| 0 | All checks passed |
-| 1 | Warnings (non-blocking) |
-| 2 | Critical failures (tool missing, config broken) |
+| 0 | No errors (there may be warnings) |
+| 1 | At least one error |
 
 Flags:
 
-- `--score` / `-s` — numeric health score (0-100)
-- `--heal` / `-H` — auto-fix detected issues (equivalent to `dot doctor && dot doctor fix`)
-- `--json` / `-j` — machine-readable output for CI/monitoring
-- `--verbose` / `-v` — show every check (default shows only failures)
+- `--score` / `-s`: run the scorecard instead (same as `dot doctor score show`)
+- `--heal` / `-H`: run the repair instead (same as `dot doctor fix`)
+- `--json` / `-j`: one JSON document instead of the text dashboard
+- `--ai` / `-A`: when there are errors, ask an AI agent to suggest fixes
 
 ## `dot doctor fix` — Repair
 
-`dot doctor fix` addresses three common failure modes:
+`dot doctor fix` (`scripts/ops/heal.sh`) asks for confirmation, backs up the core dotfiles (see [`dot doctor rollback`](#rollback)), then addresses these failure modes:
 
 ### 1. Missing Tools
 
-Reinstalls tools listed in `.chezmoidata.toml` that aren't on PATH:
-
-```sh
-dot doctor fix
-# [heal] jq not found, installing via mise
-# [heal] age not found, installing via homebrew
-# [heal] ✓ 2 tools installed
-```
-
-Priority order: mise → homebrew (macOS) → apt/dnf (Linux) → nix → manual install script.
+Installs any of a fixed list of tools that is not on PATH: zsh, starship, rg, bat, fzf, zoxide, atuin, yazi, zellij, nushell, pueue, wasmtime, sops, age and hyperfine. nushell, pueue, wasmtime, sops, yazi and zellij go through mise first; starship and atuin use their checksum-verified installers; the rest use the first package manager found (brew, apt, dnf, pacman, zypper, apk, pkg, then nix).
 
 ### 2. Chezmoi Drift
 
-Runs `chezmoi apply --force` to reconcile local files back to the source state. Skipped files (excluded via `.chezmoiignore`) are left alone.
+Runs `chezmoi apply --force` to reconcile local files back to the source state. Files changed only in the source tree are reported, not applied: commit or revert them in the source repo.
 
 ### 3. Broken Symlinks & Missing Files
 
-Detects dangling symlinks (target doesn't exist) and re-applies chezmoi to recreate them. Missing critical files (e.g. `~/.zshrc`) trigger a targeted re-render.
+Removes dangling symlinks (target doesn't exist) found up to three levels deep in `$HOME`. Missing critical files (`.zshrc`, `.bashrc`, `.profile`) are regenerated with `chezmoi apply --force`, and missing XDG config directories are created.
+
+`dot doctor fix --dry-run` output on a drifted machine (the symlink paths replaced by placeholders):
+
+```
+== Checking dependencies ==
+  ✓    All dependencies present
+  ⚠    DRY-RUN                             Would: run 'chezmoi apply --force' to re-sync (25 file(s))
+  ⚠    DRY-RUN                             Would: remove broken symlink: <link> -> <missing target>
+  ✓ shell configs
+  ✓ xdg directories
+
+  Found 2 issue(s). Run without --dry-run to apply fixes.
+```
 
 ### Flags
 
-- `--dry-run` / `-n` — show what would be fixed, don't change anything
-- `--force` / `-f` — skip confirmation prompts
-- `--tool <name>` — heal only a specific tool
+- `--dry-run` / `-n`: show what would be fixed, don't change anything
+- `--force` / `-f`: skip the confirmation prompt (as does `DOTFILES_NONINTERACTIVE=1`)
 
 ### Exit Codes
 
-- 0 — nothing to heal or all fixes succeeded
-- 1 — some repairs failed, manual intervention required
+`dot doctor fix` exits 0 whether or not every repair succeeded; read its summary line. It also exits 0 without doing anything when another instance holds its lock.
 
 ## Chaos self-test
 
 The chaos test (`scripts/ops/chaos.sh`, run from the repository) intentionally corrupts the local installation to verify `dot doctor fix` can recover it. It is a test rather than a `dot` command (ADR-020; `dot chaos` exits 127 from 0.2.538). This is **destructive** — run only in ephemeral environments (containers, VMs, fresh installs).
 
-Corruption scenarios:
+The script takes one flag, `--force`; without it, it prints a warning and exits 1. With it, it:
 
-| Scenario | What it breaks |
+| Step | What it breaks |
 |:---|:---|
-| `symlink` | Delete 3 random managed symlinks |
-| `config` | Rewrite `~/.gitconfig` with garbage |
-| `tool` | `mv` a critical binary out of PATH |
-| `permission` | `chmod 000` on a dotfile |
-| `all` | Run all scenarios sequentially |
+| Configuration deletion | Deletes `~/.config/starship.toml`, `~/.zshrc` and `~/.config/alacritty/alacritty.toml` |
+| Symlink corruption | Creates the dangling link `~/.config/broken_symlink_test` |
+| Path mutation | Sets `PATH=/bin` (inside the script's own process only) |
 
-Typical workflow:
+Typical workflow, in a disposable container or VM that already has the dotfiles installed:
 
 ```sh
-docker run --rm -it ubuntu bash
-# inside container:
-bash -c "$(curl -fsSL https://.../install.sh)"
-dot doctor    # baseline
-bash ~/.dotfiles/scripts/ops/chaos.sh all   # break things
-dot doctor fix      # fix
-dot doctor    # verify
+dot doctor check                               # baseline
+bash ~/.dotfiles/scripts/ops/chaos.sh --force  # break things
+dot doctor fix                                 # repair
+dot doctor check                               # verify
 ```
 
-This is part of CI: every PR runs the chaos test in a Docker container and validates `dot doctor fix` restores a healthy state.
+No CI workflow runs the chaos test; the unit test `tests/unit/ops/test_ops_chaos.sh` covers the script itself.
 
-## `dot doctor rollback` — Revert
+## Rollback
 
-Before every `dot apply`, chezmoi writes a snapshot to `~/.local/state/dotfiles/snapshots/YYYY-MM-DD-HHMMSS/`. `dot doctor rollback` restores the most recent snapshot:
+`dot doctor rollback` (`scripts/ops/rollback.sh`) works from backups in `~/.local/share/dotfiles/backups/backup_<YYYYMMDD_HHMMSS>_<reason>/`. `dot doctor fix` makes one before it repairs anything (`pre_heal`), a rollback makes one before it restores (`pre_rollback`), and you can make one by hand. `dot apply` does not.
 
 ```sh
-dot doctor rollback              # revert to the most recent snapshot
-dot doctor rollback status       # list available snapshots
-dot doctor rollback restore 3    # restore snapshot #3
-dot doctor rollback clean        # delete snapshots older than 30 days
+dot doctor rollback                    # same as 'status'
+dot doctor rollback status             # current state and numbered backups
+dot doctor rollback backup             # back up now
+dot doctor rollback rollback           # restore the most recent backup
+dot doctor rollback rollback-to 3      # restore backup #3 from the status list
+dot doctor rollback restore .bashrc    # restore one file from the latest backup
+dot doctor rollback git-reset          # hard-reset the source to its last tag (HEAD~1 without one)
+dot doctor rollback clean              # keep only the 10 newest backups
 ```
 
-Snapshots include:
+`git-reset` stashes uncommitted source changes first and keeps the old HEAD on a `rollback-backup/*` branch. `-f`/`--force` skips the prompts, `-n`/`--dry-run` shows what would happen and `-v`/`--verbose` lists each file.
 
-- Every file chezmoi would have overwritten
-- The previous `.chezmoidata.toml` and `chezmoi.toml`
-- A pointer to the Git SHA at apply time
+A backup includes:
 
-They do **not** include:
+- `~/.bashrc`, `~/.zshrc`, `~/.zshenv`, `~/.profile`, `~/.inputrc`, `~/.vimrc` and `~/.gitconfig`
+- `~/.config/shell`, `~/.config/nvim`, `~/.config/git`, `~/.config/tmux` and `~/.config/chezmoi`
+- A `.backup_meta` file with the chezmoi version and the source's Git commit
 
+It does **not** include:
+
+- Any other managed file
 - Generated caches (`~/.cache/`)
 - Tool binaries (Mise-managed)
 - External state (databases, remote repos)
 
+`dot doctor snapshot new` is a different thing: it records the system and tooling state as JSON in `~/.local/state/dotfiles/snapshots/` (the first `dot apply` writes `baseline.json`), and nothing restores from it.
+
 ## `dot config export` — Offline Recovery
 
-`dot config export` creates a self-contained archive that can restore the workstation without network access:
+`dot config export [<dir>]` (`scripts/ops/bundle.sh`) writes a `tar --zstd` archive, `dotfiles_offline_bundle_<YYYYMMDD_HHMMSS>.tar.zst`, to `<dir>` (default `~/Downloads`). It needs `tar` and `zstd`, and stores these paths as absolute paths:
 
-```
-dotfiles-bundle-v0.2.501-20260416.tar.zst
-├── source/              # Full git clone at current HEAD
-├── tools/               # Pre-built chezmoi binary + mise
-├── secrets/             # Age-encrypted snapshot of ~/.config/age/
-├── manual/              # Offline manual (HTML + PDF)
-├── attestation.json     # Signed state
-├── install-offline.sh   # Bootstrap script
-└── SHA256SUMS           # Integrity checksums
-```
+- `~/.dotfiles` (the source checkout)
+- `~/.config/chezmoi` (your chezmoi config, including the age identity `key.txt`, unencrypted)
+- `~/.local/share/mise` (installed toolchains)
+- With `DOTFILES_BUNDLE_NIX=1`: `/nix/store`, `/nix/var/nix` and `~/.nix-profile`
 
-Usage:
+Because the archive holds your age private key in the clear, treat it like the key itself.
+
+Restore on the offline machine with the commands the export prints:
 
 ```sh
-dot config export                        # create bundle in ~/Downloads/
-dot config export --to /path/to/usb.img  # write to external storage
-dot config import bundle.tar.zst # restore from bundle
+tar --zstd -xf dotfiles_offline_bundle_<stamp>.tar.zst -P
+cd ~/.dotfiles && ./install.sh --force
 ```
 
-Recovery use case: you're stranded on a new machine with no internet. Copy the bundle over (USB, phone tether, Bluetooth). Run `bash install-offline.sh`. You have a working dotfiles environment in <60 seconds, no network required.
+`dot config import` does not restore a bundle today: it passes `restore` to the bundler, which treats it as an output directory and writes a new bundle there.
 
 ## Observability
 
 ### Health Score
 
-`dot doctor score` returns a 0-100 score combining:
+`dot doctor score show` reports three separate scores out of 100 (health, security and performance) plus the managed drift count, then a status line for each score (`--json` for machine output):
 
-| Dimension | Weight |
-|:---|---:|
-| Tool availability | 30 |
-| Chezmoi drift | 20 |
-| Security gates (sigs, secrets, Age key) | 20 |
-| Performance (shell startup, cache health) | 15 |
-| Compliance (policy hash match) | 15 |
-
-Scores:
-
-- 90-100 — healthy
-- 70-89 — minor issues
-- 50-69 — needs attention
-- <50 — run `dot doctor fix` immediately
+```
+== Scores ==
+  Health         93/100
+  Security       92/100
+  Performance    100/100 (avg 34ms, target 250ms)
+  Drift          25 file(s)
+  ⚠    Security                            Run 'dot security score show' to reach 100/100
+  ✓    Performance                         100/100
+  ⚠    Health                              Warnings detected (run 'dot doctor fix')
+```
 
 ### Metrics
 
-`dot doctor metric list` shows recent observations: shell startup time, last-apply duration, heal events, chaos self-tests, CVE counts from SBOM scan. Metrics are stored locally in `~/.local/state/dotfiles/metrics.jsonl` (append-only, one line per event).
+`dot doctor metric list [<n>]` prints the last `n` (default 20) lines of `~/.local/state/dotfiles/metrics.jsonl`, an append-only file with one JSON object per measurement. The recorded metrics are shell startup times, `chezmoi apply` duration, doctor error and warning counts, the scorecard scores and bundle size.
 
 ## Design Principles
 
 1. **Idempotent** — running `dot apply` or `dot doctor fix` twice has the same effect as once
-2. **Reversible** — every mutation creates a rollback point
+2. **Reversible**: `dot doctor fix` and a rollback back up the core dotfiles first; before a risky `dot apply`, run `dot doctor rollback backup` yourself
 3. **Observable** — failures produce actionable error messages with exit codes
-4. **Offline-capable** — core flows (detect, heal, rollback) work without network
+4. **Offline-capable**: detection and rollback work without network; `dot doctor fix` needs it only to install missing tools
 5. **Minimally invasive** — repairs are scoped to the smallest unit that fixes the problem
 
 ## See Also

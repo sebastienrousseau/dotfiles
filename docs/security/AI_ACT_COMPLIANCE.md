@@ -29,7 +29,7 @@ This project is a workstation configuration management tool. It does not deploy,
 
 | Requirement | Status |
 |-------------|--------|
-| License type | MIT (permissive, open-source) |
+| License type | Apache-2.0 OR MIT (permissive, open-source; `LICENSE-APACHE`, `LICENSE-MIT`) |
 | Model weights distributed | No — no model training or distribution |
 | Free and open-source | Yes — publicly available source code |
 | No prohibited practices (Article 5) | Confirmed — no subliminal, exploitative, or social scoring use |
@@ -45,10 +45,10 @@ Even for minimal-risk and exempt systems, the AI Act encourages transparency. Th
 | Obligation | Implementation | Evidence |
 |-----------|----------------|----------|
 | AI interaction disclosure | Agent session logging | `agent-sessions.jsonl` via `dot_agent_session_log()` |
-| Model identification | Model registry | `dot_config/dotfiles/model-registry.json` |
-| Configuration transparency | Agent profiles | `dot_config/dotfiles/agent-profiles.json` |
-| Audit trail | Structured logging | `~/.local/share/dotfiles.log`, `~/.local/state/dotfiles/` |
-| Workstation attestation | Attestation export | `dot attest --json` |
+| Model identification | Model registry | `defaults/dot_config/dotfiles/model-registry.json` |
+| Configuration transparency | Agent profiles | `defaults/dot_config/dotfiles/agent-profiles.json` |
+| Audit trail | Structured logging | `${XDG_STATE_HOME:-~/.local/state}/dotfiles/` (`dot.log`, `agent-sessions.jsonl`) |
+| Workstation attestation | Attestation export | `dot attest show --json`, `dot attest export` |
 
 ---
 
@@ -74,7 +74,7 @@ Even for minimal-risk and exempt systems, the AI Act encourages transparency. Th
 | High-risk obligations apply | **August 2, 2026** | Not applicable (minimal risk) |
 | Full enforcement | August 2, 2027 | Maintain compliance posture |
 
-**Next review:** Before August 2026 enforcement date — reassess if project scope changes to include model hosting or high-risk use cases.
+**Next review:** The planned review before the August 2, 2026 milestone is not recorded here; that date has passed. Reassess now, and again if project scope changes to include model hosting or high-risk use cases.
 
 ---
 

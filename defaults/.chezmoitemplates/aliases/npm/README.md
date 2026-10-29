@@ -6,30 +6,29 @@ Manage npm aliases. Part of the **Universal Dotfiles** configuration.
 
 ## Description
 
-These aliases are defined in `npm.aliases.sh` and are automatically loaded by `chezmoi`.
+These aliases are defined in `npm.aliases.sh`. Loaded by the lazy alias layer `~/.config/shell/91-ux-aliases-lazy.sh`. It loads after the eager layer (zsh defers it until after startup), so its definitions replace any eager alias of the same name. When `DOTFILES_ALIAS_ECOSYSTEMS` is set to something other than `all`, it is included only if that value contains `node`. Every definition below exists only when `npm` is on PATH.
 
 ## Aliases
 
-This code provides a set of aliases for
-[npm](https://www.npmjs.com/) package manager.
-
-- `npa` Audit npm packages.
-- `npb` Build npm script.
-- `npc` Cache npm package.
-- `npd` Dev npm script.
-- `npg` Global npm package.
-- `npi` Install npm package.
-- `npl` List npm packages.
-- `npp` Publish npm package.
-- `nprm` Remove npm package.
-- `npr` Run npm script.
-- `nprw` Run npm script watch.
-- `nps` Start npm script.
-- `npsv` Serve npm script.
-- `npt` Test npm script.
-- `npu` Update npm package.
-- `npx` Exec npm package.
-- `npy` Why npm package.
+| Name | Definition | Notes |
+| --- | --- | --- |
+| `npa` | `npm audit` | Audit npm packages. |
+| `npb` | `npm build` | `npm build` is not a command in current npm (it was removed in npm 7); use `npr build`. |
+| `npc` | `npm cache` | Cache npm package. |
+| `npd` | `npm dev` | `npm dev` is not a built-in npm command; use `npr dev`. |
+| `npg` | `npm global` | `npm global` is not an npm command; global installs use `npm install --global`. |
+| `npi` | `npm install` | Install npm package. |
+| `npl` | `npm list` | List npm packages. |
+| `npp` | `npm publish` | Publish npm package. |
+| `nprm` | `npm uninstall` | Remove npm package. |
+| `npr` | `npm run` | Run npm script. |
+| `nprw` | `npm run watch` | Run npm script watch. |
+| `nps` | `npm start` | Start npm script. |
+| `npsv` | `npm serve` | `npm serve` is not a built-in npm command; use `npr serve`. |
+| `npt` | `npm test` | Test npm script. |
+| `npu` | `npm update` | Update npm package. |
+| `npexec` | `npm exec` | Exec npm package. |
+| `npy` | `npm why` | Why npm package. |
 
 [banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 

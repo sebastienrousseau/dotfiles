@@ -35,7 +35,7 @@ Integrated tools organized by role in the workflow.
 | Tool | Purpose | Description |
 | :--- | :--- | :--- |
 | **Pueue** | Task queue | Offload long-running tasks to a background daemon |
-| **Wasmtime** | Wasm runtime | Runs `lib/wasm-tools` (`dot-sys.wasm`) for `dot attest --verify` |
+| **Wasmtime** | Wasm runtime | Runs `lib/wasm-tools` (`dot-sys.wasm`) for `dot attest verify` |
 | **SOPS** | Secrets operations | Encrypted secrets with automatic en/decryption |
 
 ---
@@ -47,7 +47,7 @@ Integrated tools organized by role in the workflow.
 | **Yazi** | Terminal file manager — use `yy` to `cd` on exit |
 | **Ripgrep (rg)** | Fast recursive text search |
 | **fd** | Simpler, faster alternative to `find` |
-| **Zoxide** | Fuzzy directory jumper (replaces `cd`) |
+| **Zoxide** | Fuzzy directory jumper (`z`; replaces `cd` in Fish) |
 | **fzf** | Interactive fuzzy finder for files, history, and git |
 
 ---

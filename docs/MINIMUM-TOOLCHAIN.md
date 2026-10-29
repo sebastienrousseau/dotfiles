@@ -27,10 +27,10 @@ as expectation.
 | **zsh** | **5.8** | A fully supported interactive shell (fish is the default login shell); `rc.d` ordering and the completion system assume 5.8. | `cross-platform-test.yml` (macOS stock zsh 5.9, Ubuntu 5.9) |
 | **fish** | **4.0** | `dot`, the alias bridge, and the generated completions target the fish 4 syntax. | `ci.yml` job `Lint / Fish` |
 | **nushell** | **0.98** | Tier-3 reference shell; see [ADR-011](adr/ADR-011-nushell-tier3-keep.md). | `ci.yml` job `Lint / Nushell` |
-| **PowerShell** | **7.5** | The Windows parity surface. 7.4 LTS retired on 2026-11-10. | `reliability-gate.yml` job `PowerShell Contract` and the `ci.yml` Windows job, on `windows-latest`, which ships PowerShell 7.6 |
+| **PowerShell** | **7.5** | The Windows parity surface. 7.4 LTS reaches end of support on 2026-11-10. | `reliability-gate.yml` job `PowerShell Contract` and the `ci.yml` Windows job, on `windows-latest`, which ships PowerShell 7.6 |
 | **git** | **2.34** | The oldest release with SSH commit/tag signing (`gpg.format = ssh`), which the signing and verification flow requires. | Not version-gated in CI; the signing workflows exercise it on runner git (≥ 2.40) |
 | **chezmoi** | **2.73.3** | The pinned, checksum-verified version `install.sh` and CI install. Newer works; older is untested. | `install.sh` and `CHEZMOI_VERSION` in `ci.yml`, `ci-enforced.yml`, `perf-baseline.yml` |
-| **Go** (fuzz harnesses and the two TUIs only — not needed to *use* the framework) | **1.23** | `fuzz/go.mod`. | `fuzz.yml`, `cockpit-test.yml`, `dot-ui-test.yml` |
+| **Go** (fuzz harnesses, the Go TUIs and `dot-mcp` under `defaults/dot_local/share/`, and the experimental `core/`; not needed to *use* the framework) | **1.26** | The `dot-ui`, `dot-ai-tui`, `dot-mcp` and `core` modules declare `go 1.26`; `fuzz/go.mod` alone declares 1.23. All pin the `go1.26.10` toolchain. | `fuzz.yml`, `cockpit-test.yml`, `dot-ui-test.yml`, `mcp-server-test.yml` |
 | **Python** (pre-commit and the docs build only) | **3.12** | `pre-commit.yml`; the docs build (`tools/docs/build-site.sh`) uses the standard library only. | `pre-commit.yml`, `pages.yml` (runner python3) |
 
 `make install` additionally needs GNU make or BSD make and a POSIX
@@ -91,9 +91,9 @@ it moves.
 | Number | Source of truth |
 |---|---|
 | chezmoi version | `CHEZMOI_VERSION` in `.github/workflows/ci.yml`, mirrored into `install.sh` |
-| Go version | `fuzz/go.mod` |
+| Go version | the `go` and `toolchain` lines of each `go.mod` (`fuzz/`, `core/`, `defaults/dot_local/share/*/`) |
 | Every other pinned tool | `mise.toml` + `mise.lock` |
-| Python docs deps | `requirements-docs.txt` (hash-pinned) |
+| Python deps (core-contracts CI job) | `requirements-contracts.txt` (hash-pinned). The docs build needs no Python packages. |
 | Platform/shell support tiers | [`reference/SUPPORT_MATRIX.md`](reference/SUPPORT_MATRIX.md) |
 
 If this document and one of those files disagree, the file wins and

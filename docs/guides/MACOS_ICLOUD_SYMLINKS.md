@@ -62,11 +62,15 @@ And a **dry-run mode**:
 If one of the non-native folders (`~/Downloads`, `~/Movies`, `~/Music`, `~/Pictures`, `~/Public`) already has content and you want it in iCloud — the example uses `Documents`, which applies only if you have turned native Desktop & Documents sync **off**:
 
 ```bash
-# 1. Move your data into iCloud MANUALLY
-mv ~/Documents/* ~/Documents/.* "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/" 2>/dev/null
+dest="$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents"
 
-# 2. Verify iCloud has everything
-ls -la "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/"
+# 1. Move your data into iCloud MANUALLY (hidden files included; -n never
+#    overwrites a file already in iCloud, so any clash stays behind in ~/Documents)
+find ~/Documents -mindepth 1 -maxdepth 1 -exec mv -n {} "$dest/" \;
+
+# 2. Verify iCloud has everything, and that nothing was left behind
+ls -la "$dest/"
+ls -la ~/Documents
 
 # 3. Now the dir is empty — chezmoi's next apply will do the rmdir + symlink
 rmdir ~/Documents          # sanity check: this succeeds only if truly empty

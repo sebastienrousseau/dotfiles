@@ -9,7 +9,7 @@ The WebAssembly verifier for `dot attest` evidence, and the health-probe
 record it summarises its verdict as.
 
 ```bash
-$ dot attest --verify
+$ dot attest verify
 pass  generated_at                         2026-09-09T22:30:41Z (0s old)
 pass  dotfiles_version                     0.2.519
 ...
@@ -84,7 +84,7 @@ is the reference the WebAssembly build is compared against.
 ## Install
 
 ```bash
-# The WebAssembly module (what `dot attest --verify` runs)
+# The WebAssembly module (what `dot attest verify` runs)
 rustup target add wasm32-wasip1
 cargo build --release --target wasm32-wasip1 --manifest-path lib/wasm-tools/Cargo.toml
 wasmtime run lib/wasm-tools/target/wasm32-wasip1/release/dot-sys.wasm
@@ -101,10 +101,10 @@ tested in CI with that exact toolchain).
 ### Verifying evidence
 
 ```bash
-dot attest --verify                 # attest this machine, then verify it
-dot attest --verify --json          # machine-readable verdict
-dot attest --max-age 3600           # tighter freshness window
-dot attest --json > evidence.json   # verify a record collected elsewhere
+dot attest verify                       # attest this machine, then verify it
+dot attest verify --json                # machine-readable verdict
+dot attest verify --max-age 3600        # tighter freshness window
+dot attest show --json > evidence.json  # collect a record, then verify it elsewhere
 bash scripts/diagnostics/attest-verify.sh evidence.json
 ```
 
@@ -252,7 +252,8 @@ let the machine under review repaint the reviewer's screen and forge the
 verdict being read. `Report::to_json` deliberately keeps the raw value,
 because a parser is not at risk from bytes a terminal acts on.
 
-Every push replays the seed corpus (`fuzz/corpus/<target>/`) plus the
+Every run of `rust.yml` (pushes to `main` and pull requests that touch the
+crate) replays the seed corpus (`fuzz/corpus/<target>/`) plus the
 minimised reproducers of previously-fixed findings
 (`fuzz/regressions/<target>/`) with `-runs=0`, then fuzzes each target for
 60 seconds. A fixed crash therefore cannot silently return.
@@ -299,8 +300,8 @@ logic is exercised in-process through `cli::main`.
 
 ### CI
 
-`.github/workflows/rust.yml` runs on every push and pull request that
-touches `lib/wasm-tools/**` or the workflow itself. Every action is pinned
+`.github/workflows/rust.yml` runs on pushes to `main` and on pull requests
+that touch `lib/wasm-tools/**` or the workflow itself. Every action is pinned
 to a full commit SHA (`docs/security/CI_PINNING.md`).
 
 | Job        | Toolchain(s)                    | Purpose                                                                 |

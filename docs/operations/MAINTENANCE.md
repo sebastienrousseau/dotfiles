@@ -22,7 +22,7 @@ The maintenance job clears the shell startup caches and rotates the dot
 log. Nothing is scheduled until you ask:
 
 ```bash
-dot system schedule set weekly   # or daily; Sundays (or daily) at 10:00
+dot system schedule set weekly   # or daily; times differ per OS, see below
 dot system schedule              # the job, its schedule, whether it is loaded
 dot system schedule run          # run it now
 dot system                       # OS, disk, schedule and the last run
@@ -30,10 +30,13 @@ dot system schedule set off      # unload and delete it
 ```
 
 On macOS `set` writes and loads
-`~/Library/LaunchAgents/com.sebastienrousseau.dot-maintenance.plist`; a
-run missed while the Mac slept happens at the next wake. On Linux it
-writes `dot-maintenance.service` and `.timer` under
-`~/.config/systemd/user` and enables the timer (`Persistent=true`). Each
+`~/Library/LaunchAgents/com.sebastienrousseau.dot-maintenance.plist`,
+which runs Sundays (or daily) at 10:00; a run missed while the Mac
+slept happens at the next wake. On Linux it writes
+`dot-maintenance.service` and `.timer` under `~/.config/systemd/user`
+and enables the timer with `OnCalendar=weekly` (Mondays at 00:00) or
+`OnCalendar=daily` (00:00), a random delay of up to an hour
+(`RandomizedDelaySec=1h`), and `Persistent=true`. Each
 run records its time and exit code in
 `$XDG_STATE_HOME/dot/system/last-run`, and its output in `last-run.log`
 beside it. The old `dotfiles-maintenance` units, deployed but never

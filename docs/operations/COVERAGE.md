@@ -43,40 +43,22 @@ matches and emits standard `lcov.info` that Codecov ingests natively.
 
 | Surface | What runs |
 |---|---|
-| **PR + push to main** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `58`, ratcheted up after measured integer-floor gains). |
+| **PR + push to main** | `.github/workflows/coverage.yml` → `Coverage / kcov` job → uploads lcov.info to Codecov and fails the build below `MIN_COVERAGE_PCT` (currently `98`, ratcheted up after measured integer-floor gains). `Coverage / behavioural tests only` repeats the run with `DOTFILES_COV_EXERCISE=0` and a floor of `96`. |
 | **Local dev** | `bash tools/ci/run-coverage.sh` — works on Linux + macOS (xtrace is a bash primitive, no platform tools needed). |
 | **macOS dev** | Supported. xtrace-based instrumentation runs on macOS bash 3.2+ and Homebrew bash 5.x, with a Perl alarm fallback when GNU `timeout`/`gtimeout` is unavailable. |
 
 ## The current floor
 
-`MIN_COVERAGE_PCT=58` in `.github/workflows/coverage.yml`. Slice 1
-of [#883](https://github.com/sebastienrousseau/dotfiles/issues/883)
+`MIN_COVERAGE_PCT` is set per job in `.github/workflows/coverage.yml`:
+`98` for `Coverage / kcov` (the full run) and `96` for
+`Coverage / behavioural tests only`. `tools/ci/run-coverage.sh` itself
+defaults it to `0`, so a local run gates nothing unless you export it.
+
+Slice 1 of [#883](https://github.com/sebastienrousseau/dotfiles/issues/883)
 established the baseline at **~2.7% measured** (~613 of ~22 500 lines
-across 231 files). Successive slices raised it; the current measured
-value sits at **59.32%** (`7523/12682` lines, measured on v0.2.513; gate floored at 58 for local<->CI drift + run variance). This release now traces both mandatory unit and regression suites, replays the function exerciser's captured xtrace, and caches source-path normalization so aggregation completes in seconds instead of minutes. It builds on the earlier parser correction for nested Bash execution prefixes and deterministic branch-driving tests for Scorecard snapshots, examples coverage, and `httpdebug`. It builds on the eighth core
-coverage-ratchet slice, which added `jwt` portability coverage and
-branch-driving function coverage for `apihealth`, `apiload`, and
-`apilatency`. This builds on the prior helper slice that drove
-`scripts/dot/commands/restore.sh` to 75.17%,
-`scripts/dot/commands/meta.sh` to 66.88%, `lib/dot/log.sh` to 59.56%,
-and `scripts/dot/commands/diagnostics.sh` to 49.63%, with additional
-git AI, hashsum, regex, jsonv, gl, and hex helper branch coverage.
-This builds on the prior core slice (`scripts/dot/commands/init.sh` at 72.09%,
-`scripts/dot/commands/manual.sh` at 62.50%,
-`scripts/dot/commands/core.sh` at 55.86%, and
-`scripts/dot/commands/secrets.sh` at 54.97%), the prior
-AI command slice (`defaults/dot_local/bin/executable_dot-ai-proxy` at
-76.00%, `scripts/dot/commands/agents.sh` at 66.15%, and
-`scripts/dot/commands/completion.sh` at 45.68%), the registry slice
-(`scripts/dot/commands/registry.sh` at 65.03%) and the macOS
-coverage-runner Perl timeout fallback, the aliases slice
-(`scripts/dot/commands/aliases.sh` at 70.00%), the tools/version-sync
-slice (`scripts/dot/commands/tools.sh` at 72.85%, `lib/dot/utils.sh` at
-73.24%, and `scripts/version-sync.sh` at 36.53%), the first core slice
-for `lib/dot/ui.sh`, and the #954 deep-branch pass for
-`scripts/theme/switch.sh`,
-`scripts/diagnostics/mcp-doctor.sh`, and Linux/WSL branches in
-`scripts/diagnostics/doctor.sh`.
+across 231 files). Successive slices raised measured coverage and
+ratcheted the floor after each one; the commit history of
+`coverage.yml` records every bump.
 
 To tighten:
 
@@ -87,10 +69,10 @@ To tighten:
    per bump.
 4. Note the floor change in the commit message + this page.
 
-### Why not the 95% target from #883
+### What stays uncovered
 
-The roadmap originally targeted ≥95% measured. The current xtrace-only
-measurement is **59.32%** on this codebase. The remaining gap is largely
+The roadmap originally targeted ≥95% measured; the full run is now
+gated above that. What remains uncovered or excluded is largely
 structural:
 
 - **System-mutation surface** — large parts of the repo orchestrate
@@ -109,7 +91,7 @@ structural:
   aggregator level.
 - **Animated demo helpers** — same as interactive UIs.
 
-`tools/ci/run-coverage.sh` has a `SKIP_PATHS` set that removes
+`tools/ci/coverage_aggregate.py` has a `SKIP_PATHS` set that removes
 genuinely-untestable scripts from the lcov denominator. Within the
 files that remain, individual mutation-only function bodies are
 fenced with `# LCOV_EXCL_START` / `# LCOV_EXCL_STOP` and a one-line
@@ -117,7 +99,6 @@ rationale comment. Every exclusion line names the reason (`rm -rf
 real $HOME`, `signals live apps`, `gpg keystore`, etc.) so future
 maintainers can re-evaluate if the test infrastructure changes.
 
-The graduated approach in this doc replaces the original 95% target.
 The honest floor is the achievable one.
 
 ## The behavioural-only number
@@ -201,19 +182,22 @@ threshold to get two independent signals.
 
 ## Excluded paths
 
-`tools/ci/run-coverage.sh` excludes:
-
-- `tests/**` itself (don't measure coverage of the tests).
-- `.git/`, `node_modules/`.
-- Paths matched by `KCOV_EXCLUDE_PATTERN` (defaults reasonable).
-
-Included paths (`KCOV_INCLUDE_PATH`):
+Only files under `COV_INCLUDE_DIRS` are reported. Its default, set at
+the top of `tools/ci/run-coverage.sh` as a colon-separated list, is:
 
 - `scripts/`
-- `.chezmoitemplates/functions/`
-- `dot_local/bin/`
+- `lib/`
+- `plugins/`
+- `defaults/dot_local/bin/`
+- `defaults/.chezmoitemplates/functions/`
 
-Adjust via the env vars at the top of `run-coverage.sh`.
+Everything else (`tests/`, `tools/`, `.git/`, `node_modules/`) is
+therefore not measured. On top of that, the `SKIP_PATHS` set in
+`tools/ci/coverage_aggregate.py` drops named files from the
+denominator (interactive helpers, CI gates, system-mutation scripts),
+each with its reason.
+
+Override the include list by exporting `COV_INCLUDE_DIRS`.
 
 ## References
 

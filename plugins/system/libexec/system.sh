@@ -15,6 +15,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 # shellcheck source=../../../lib/dot/system.sh
 source "$SCRIPT_DIR/../../../lib/dot/system.sh"
+# shellcheck source=../../../lib/dot/upgrade.sh
+source "$SCRIPT_DIR/../../../lib/dot/upgrade.sh"
 # shellcheck source=../../../lib/dot/log.sh
 source "$SCRIPT_DIR/../../../lib/dot/log.sh"
 

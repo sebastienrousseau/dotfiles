@@ -3,7 +3,9 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Sourced by scripts/dot/commands/*.sh and bin/dot; inherits set -euo pipefail.
 # Dotfiles CLI Utilities
-# Shared functions for dot command modules
+# Shared functions for dot command modules. The AI installer and the
+# toolchain updater are not loaded here: the modules that use them source
+# ai-provision.sh, ai-install.sh or upgrade.sh themselves.
 
 # Re-source guard: cheap short-circuit when sourced from multiple modules.
 [[ "${_DOT_LIB_UTILS_LOADED:-0}" == "1" ]] && return 0
@@ -17,14 +19,8 @@ _DOT_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$_DOT_LIB_DIR/ui.sh"
 # shellcheck source=platform.sh
 source "$_DOT_LIB_DIR/platform.sh"
-# shellcheck source=ai-install.sh
-source "$_DOT_LIB_DIR/ai-install.sh"
 # shellcheck source=preflight.sh
 source "$_DOT_LIB_DIR/preflight.sh"
-# shellcheck source=upgrade.sh
-source "$_DOT_LIB_DIR/upgrade.sh"
-# shellcheck source=ai-provision.sh
-source "$_DOT_LIB_DIR/ai-provision.sh"
 
 _DOT_SOURCE_DIR_CACHE=""
 

@@ -6,6 +6,13 @@ date: 2026-07-05
 
 # Fish Startup in 2026: Cutting Interactive Shell Latency by Half with `abbr` on Multi-Shell Dotfiles
 
+> **Historical snapshot (note added 2026-10-29).** This article describes the
+> repository as of 5 July 2026. Since then `dot health` has become
+> `dot doctor`, and CI has no fish startup gate: the 500 ms startup budget in
+> `ci.yml` and `nightly.yml` times zsh. See
+> [ADR-002](../adr/ADR-002-shell-performance.md) for the current performance
+> gates.
+
 *Interactive shells have become the primary interface for AI-augmented development; the difference between a 120 ms and a 230 ms first prompt compounds into measurable engineering-hour loss across a global fleet.*
 
 *Sebastien Rousseau · Published 5 Jul 2026 · 10 min read*

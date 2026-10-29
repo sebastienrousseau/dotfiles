@@ -14,7 +14,7 @@ Drop the skill directory into your global Claude Code skills path:
 mkdir -p ~/.claude/skills
 curl -fsSL https://github.com/sebastienrousseau/dotfiles/archive/refs/heads/main.tar.gz \
   | tar -xz -C /tmp
-cp -r /tmp/dotfiles-main/dot_claude/skills/dotfiles-bootstrap \
+cp -r /tmp/dotfiles-main/defaults/dot_claude/skills/dotfiles-bootstrap \
       ~/.claude/skills/
 ```
 
@@ -27,17 +27,17 @@ scoop install chezmoi         # Windows (Scoop)
 sh -c "$(curl -fsLS get.chezmoi.io)"  # everywhere else (verify the script first)
 ```
 
-You also need the `dot` dispatcher binary on PATH. The minimum set is `bin/dot` from this repo plus the `scripts/dot/` directory; for the cleanest install run `dot config init sebastienrousseau` once, which sets everything up.
+You also need the `dot` dispatcher on PATH. `bin/dot` needs the rest of a repo checkout beside it (at least `bin/`, `lib/dot/`, `plugins/` and `scripts/`); the cleanest install is the repo's `install.sh`, which clones the framework and puts `dot` in `~/.local/bin`.
 
 ## Verifying the skill loaded
 
 ```bash
 $ claude --print "Run /skills and list every available skill"
 # expected output includes:
-# - dotfiles-bootstrap — Provision a workstation from a public dotfiles repo
+# - dotfiles-bootstrap: Bootstrap a workstation with the dotfiles framework ...
 ```
 
-If the skill doesn't appear: confirm `~/.claude/skills/dotfiles-bootstrap/SKILL.md` exists and that its front-matter YAML is valid (`yq eval . SKILL.md | head -5`).
+If the skill doesn't appear: confirm `~/.claude/skills/dotfiles-bootstrap/SKILL.md` exists and that its front-matter YAML is valid (`yq --front-matter=extract '.' SKILL.md | head -5`).
 
 ## Uninstalling
 

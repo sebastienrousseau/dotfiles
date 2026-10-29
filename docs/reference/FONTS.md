@@ -24,14 +24,19 @@ The default font is JetBrains Mono with Nerd Font patches. It's designed for cod
 
 ## Installation
 
+### With the dot CLI
+
+```bash
+dot theme font install                 # JetBrainsMono, FiraCode and Iosevka Nerd Fonts
+dot theme font install JetBrainsMono   # one font
+```
+
+On macOS this installs the Homebrew casks. On Linux it downloads the Nerd Fonts release archives, checks them against the release's `SHA-256.txt`, unpacks them into `~/.local/share/fonts/` and refreshes the font cache.
+
 ### macOS (Homebrew)
 
 ```bash
-brew tap homebrew/cask-fonts
 brew install --cask font-jetbrains-mono-nerd-font
-
-# Or use the dot CLI
-dot theme font install
 ```
 
 ### Linux (manual)
@@ -47,40 +52,19 @@ fc-cache -fv
 To patch a custom font with Nerd Font glyphs:
 
 ```bash
-~/.dotfiles/scripts/fonts/patch-fonts.sh /path/to/font.ttf
+dot theme font install patch /path/to/font.ttf [output-dir]
 ```
 
 ## Terminal configuration
 
-### Ghostty
+Ghostty, WezTerm, Alacritty, Kitty, Foot, Fuzzel and VS Code take their font from two keys in `defaults/.chezmoidata.toml`, so you set it once:
 
-```text
-font-family = JetBrains Mono Nerd Font
-font-size = 14
+```toml
+terminal_font_family = "JetBrainsMono Nerd Font"
+terminal_font_size = 20
 ```
 
-### WezTerm
-
-```lua
-config.font = wezterm.font("JetBrains Mono Nerd Font")
-config.font_size = 14.0
-```
-
-### Alacritty
-
-```yaml
-font:
-  normal:
-    family: JetBrains Mono Nerd Font
-  size: 14.0
-```
-
-### Kitty
-
-```text
-font_family JetBrains Mono Nerd Font
-font_size 14.0
-```
+Override them per machine in the `[data]` section of `~/.config/chezmoi/chezmoi.toml`, then run `dot apply`. Edit the generated terminal configs only through their templates in `defaults/dot_config/`, or the next apply overwrites your change.
 
 ## Font size recommendations
 

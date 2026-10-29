@@ -10,11 +10,10 @@ How dotfiles commands and shims map across macOS, Linux, and WSL2.
 
 | Alias / Command | macOS | Linux (Debian/Arch) | WSL2 (Windows Host) |
 | :--- | :--- | :--- | :--- |
-| `cb` (Clipboard) | `pbcopy` / `pbpaste` | `xclip` / `wl-copy` | `clip.exe` / `powershell.exe` |
-| `open` | `open` | `xdg-open` | `wslview` / `explorer.exe` |
-| `notify` | `osascript` (AppleScript) | `notify-send` / `gum log` | `powershell.exe` (Toast) / `gum` |
-| `win` (Paths) | N/A | N/A | `wslpath` |
-| `browser` | `open` | `xdg-open` | `powershell.exe Start-Process` |
+| `cb` (Clipboard) | `pbcopy` / `pbpaste` | `wl-copy` / `wl-paste` (Wayland), else `xclip` or `xsel` | `clip.exe` / `powershell.exe Get-Clipboard` |
+| `open` | `/usr/bin/open` | `xdg-open` | `explorer.exe` (path translated with `wslpath -w`) |
+| `notify` | `osascript` (AppleScript) | `notify-send`, else prints the message | `powershell.exe` (message box) |
+| `win` (run a Windows command) | N/A | N/A | Translates path arguments with `wslpath -w` |
 
 ## Infrastructure Parity
 
@@ -41,4 +40,4 @@ Grant your terminal "Full Disk Access" in System Settings so dotfiles can manage
 
 ### Linux GUI Fallbacks
 
-In headless environments, GUI commands like `cb` and `open` fall back to `gum log` or terminal bell instead of hanging.
+In headless environments, `cb` and `open` exit 1 with an error when no backend is found (no `wl-copy`, `xclip` or `xsel`; no `xdg-open`) instead of hanging. `notify` prints the message when `notify-send` is missing.

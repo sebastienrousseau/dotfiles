@@ -63,7 +63,7 @@ for a packaging recipe:
 | `chezmoi` | 2.73.3 | **required at runtime** — the CLI is a control plane over chezmoi |
 | `zsh` / `fish` / `nushell` | 5.8 / 4.0 / 0.98 | optional; only if the user wants that shell's integration |
 | `jq`, `gum`, `starship`, `fzf` | any | optional; enable JSON output, rich prompts, and interactive pickers |
-| `go` | 1.23 | **build/test only** — fuzz harnesses and the two Go TUIs. Not needed to build or run the package. |
+| `go` | 1.26 | **build/test only**: fuzz harnesses, the Go TUIs and `dot-mcp`. Not needed to build or run the package. |
 
 Suggested dependency split for a distro package: `Depends: bash (>= 3.2),
 git (>= 2.34), chezmoi (>= 2.73.3)`; `Recommends: jq, zsh`;
@@ -77,7 +77,7 @@ and every pin is committed:
 | Surface | Pinned by | Notes |
 |---|---|---|
 | Development toolchain (node, go, rust, and ~20 CLI tools) | `mise.toml` + `mise.lock` + `mise-versions.lock.json` | mise is the package manager; the lock carries checksums |
-| Documentation build (Python) | `requirements-docs.txt` | Hash-pinned (`--require-hashes`-compatible), compiled from `requirements-docs.in` |
+| Contract checks (Python) | `requirements-contracts.txt` | Hash-pinned (`--require-hashes`-compatible), compiled from `requirements-contracts.in`. The docs build (`tools/docs/build-site.sh`) uses the standard library only. |
 | Node tooling | `package.json` | Dev-only |
 | Nix | `flake.lock`, `nix/flake.lock` | Root flake provides the dev shell; `nix/flake.nix` provides `packages.default` |
 | GitHub Actions | Same-commit paths for local reusable workflows; 40-hex SHA for external `uses:` | Enforced by `tools/ci/lint-reusable-pins.sh` and OpenSSF Scorecard |
@@ -95,8 +95,8 @@ Full provenance policy: [`supply-chain/README.md`](https://github.com/sebastienr
 From a release tarball (recommended — it is the attested artefact):
 
 ```sh
-tar -xzf dot-0.2.530.tar.gz
-cd dot-0.2.530
+tar -xzf dot-<version>.tar.gz
+cd dot-<version>
 make install PREFIX=/usr DESTDIR="$pkgdir"
 ```
 

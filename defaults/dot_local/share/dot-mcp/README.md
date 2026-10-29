@@ -40,35 +40,38 @@ taken from `PATH`.
 
 Every tool is read-only, runs a fixed argument vector through `dot`
 without a shell, and is annotated `readOnlyHint: true`. Mutating paths
-(`dot agent mode set`, `dot attest --write`, anything under `dot apply`) are
+(`dot agent mode set`, `dot attest export`, anything under `dot config apply`) are
 deliberately not exposed — an MCP client cannot change this workstation
 through this server. The one write any tool causes is the audit-log line
 `dot agent mode` appends for every invocation, human or otherwise.
 
 | Tool | Runs | Arguments |
 | :--- | :--- | :--- |
-| `mcp-doctor` | `dot mcp doctor --json [--strict]` | `strict` (boolean) |
+| `mcp-doctor` | `dot mcp doctor --json [--strict]` (the legacy spelling of `dot mcp check`, still accepted) | `strict` (boolean) |
 | `agent-mode` | `dot agent status`, `dot agent mode list\|show <profile>` | `action` (enum), `profile` (pattern-checked, required for `show`) |
-| `workstation-attestation` | `dot attest --json` | none |
+| `workstation-attestation` | `dot attest --json` (runs the domain default, `dot attest show`) | none |
 | `fleet-status` | `dot fleet status --json` | none |
 
 A tool whose command prints a JSON object returns it as
 `structuredContent` with the exit code attached. A non-zero exit is not
-automatically a failure: `dot mcp doctor` exits 1 when it finds policy
+automatically a failure: `dot mcp check` exits 1 when it finds policy
 problems and still returns the report that was asked for. `isError` is
 set only when the command produced no usable report.
 
 | Resource | Document |
 | :--- | :--- |
-| `dotfiles://mcp/policy` | `dot_config/dotfiles/mcp-policy.json` |
-| `dotfiles://mcp/registry` | `dot_config/dotfiles/mcp-registry.json` |
+| `dotfiles://mcp/policy` | `defaults/dot_config/dotfiles/mcp-policy.json` |
+| `dotfiles://mcp/registry` | `defaults/dot_config/dotfiles/mcp-registry.json` |
 | `dotfiles://mcp/server-card` | `.well-known/mcp/server-card.json` |
-| `dotfiles://agent/profiles` | `dot_config/dotfiles/agent-profiles.json` |
+| `dotfiles://agent/profiles` | `defaults/dot_config/dotfiles/agent-profiles.json` |
 | `dotfiles://agent/card` | `.well-known/agent-card.json` |
 
 The URI table is closed: a client names a URI, never a path, so there is
 no traversal surface. `MCP_POLICY_CONFIG`, `MCP_REGISTRY_CONFIG` and
 `AGENT_PROFILE_CONFIG` are honoured, as they are by the bash commands.
+Without an override the three config documents are looked up in the
+checkout (`defaults/dot_config/dotfiles/`), then the legacy root
+`dot_config/dotfiles/`, then `~/.config/dotfiles/`.
 
 `dot-mcp tools` prints the tool and resource manifest as JSON without
 speaking the protocol, for inspecting or diffing what is served.

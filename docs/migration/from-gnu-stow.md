@@ -80,8 +80,9 @@ bash /tmp/dotfiles-install.sh
 
 ## 4. Import your files
 
-Stow packages flatten into a single tree. Copy each package's contents
-into `$HOME` and add them:
+The installer has just applied this repo's defaults in `$HOME`. Stow
+packages flatten into a single tree: copy each package's contents
+into `$HOME`, over those defaults, and add them:
 
 ```sh
 cd ~/dotfiles
@@ -96,6 +97,11 @@ for pkg in */; do
   done
 done
 ```
+
+Where the framework ships a path as a template (`~/.gitconfig` is
+`defaults/dot_gitconfig.tmpl`), `dot config add` asks whether to remove
+the template attribute; yes replaces the framework's template with your
+plain file, no keeps the template for you to merge into.
 
 Review before committing anything — this is a good moment to drop the
 files you have not opened in three years:
@@ -119,10 +125,13 @@ Available variables: `.chezmoi.os`, `.chezmoi.arch`, `.chezmoi.hostname`,
 `.chezmoi.username`, `.chezmoi.osRelease.id`, plus this project's
 `.profile` and `.features.*` from `defaults/.chezmoidata.toml`.
 
-Test a template without applying:
+To turn an added file into a template, `chezmoi chattr +template
+~/.bashrc` renames `defaults/dot_bashrc` to `defaults/dot_bashrc.tmpl`;
+then edit it with `dot config edit ~/.bashrc`. Test a template without
+applying:
 
 ```sh
-chezmoi execute-template < defaults/dot_bashrc.tmpl
+chezmoi execute-template < ~/.dotfiles/defaults/dot_bashrc.tmpl
 ```
 
 ## 6. Apply and verify

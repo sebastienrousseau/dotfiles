@@ -27,7 +27,7 @@ A clear and concise description of what you expected to happen.
 - Output of `dot doctor` (if available):
 
 **Logs**
-Include relevant output from `~/.local/share/dotfiles.log` if applicable.
+Include relevant output from `${XDG_STATE_HOME:-~/.local/state}/dotfiles/dot.log` if applicable.
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.

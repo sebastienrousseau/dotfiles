@@ -23,17 +23,17 @@ syncs).
 
 ## How it ships
 
-Patterns are sourced from `.chezmoidata/secrets-patterns.toml` and
+Patterns are sourced from `defaults/.chezmoidata/secrets-patterns.toml` and
 materialised into `~/.config/atuin/config.toml` by the chezmoi template
-at `dot_config/atuin/config.toml.tmpl`.
+at `defaults/dot_config/atuin/config.toml.tmpl`.
 
 ```
-.chezmoidata/secrets-patterns.toml
+defaults/.chezmoidata/secrets-patterns.toml
   └── [atuin.history_filter]
         defaults  = [...]      # audited baseline (this repo)
         extra     = [...]      # empty by default; populated per machine
 
-dot_config/atuin/config.toml.tmpl
+defaults/dot_config/atuin/config.toml.tmpl
   └── chezmoi apply  ─────►  ~/.config/atuin/config.toml
 ```
 
@@ -60,7 +60,7 @@ The audited baseline covers:
 - DB connection strings with inline creds
   (`postgres|mysql|mongodb|redis://user:pass@host`).
 
-See `.chezmoidata/secrets-patterns.toml` for the canonical list.
+See `defaults/.chezmoidata/secrets-patterns.toml` for the canonical list.
 
 ## Adding per-host patterns
 
@@ -87,7 +87,7 @@ config.
 
 ## Adding a pattern to the project defaults
 
-Edit `.chezmoidata/secrets-patterns.toml` and add a regex to
+Edit `defaults/.chezmoidata/secrets-patterns.toml` and add a regex to
 `[atuin.history_filter].defaults`. Then:
 
 1. Add a fixture command to `tests/unit/secrets/test_atuin_history_filter.sh`

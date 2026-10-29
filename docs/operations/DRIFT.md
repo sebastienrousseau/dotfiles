@@ -18,7 +18,7 @@ the nightly CI workflow) surfaces all four.
 |---|---|---|---|
 | **Managed drift** | A chezmoi-managed file's deployed copy differs from what a fresh `chezmoi apply` would produce. The standard case. | `chezmoi status` (M / MM / A / R rows) | Either update the source so apply is idempotent, or accept the deployed change and re-add. |
 | **Untracked source** | The chezmoi source tree contains files git doesn't know about — usually in-progress local edits that haven't been committed. | `git -C <source-dir> ls-files --others --exclude-standard` | Commit, stash, or `.gitignore` the file. |
-| **Orphan deployed** | A file under `$HOME` was previously chezmoi-managed but the source has since been deleted. Chezmoi no longer claims it, so a fresh apply leaves it behind silently. | Inventoried in `${XDG_STATE_HOME}/dotfiles/orphans` (populated by `dot doctor fix` / `dot doctor drift show`) | `chezmoi remove --force` the path, or re-add the source if the file is still wanted. |
+| **Orphan deployed** | A file under `$HOME` was previously chezmoi-managed but the source has since been deleted. Chezmoi no longer claims it, so a fresh apply leaves it behind silently. | Counted from the lines of `${XDG_STATE_HOME}/dotfiles/orphans` if that file exists. Nothing in the repo writes it today, so this class reports `0` unless you populate the file yourself. | `chezmoi remove --force` the path, or re-add the source if the file is still wanted. |
 | **Stale source** | The deployed file is *newer* than its source. The next `chezmoi apply` would silently revert the user's hand-edit. Reverse-drift trap. | Compare mtimes for each managed target vs the resolved source-path | Promote the deployed change into the source (`chezmoi re-add`) or revert the deployed file. |
 
 ## Reading the report
@@ -46,11 +46,13 @@ Exit code: `0` if every class is clean; `1` if any drift is found;
 
 ## How the nightly check works
 
-`.github/workflows/drift-detection.yml` runs `dot doctor drift show --json` against
-a fresh checkout of `main` every day at 04:00 UTC. If `total != 0`
-it opens (or updates) a tracking issue labelled
-`type:chore + priority:medium` with the JSON summary, full
-`chezmoi diff`, and `chezmoi status` attached as a workflow artifact.
+`.github/workflows/drift-detection.yml` runs
+`bash scripts/diagnostics/drift-dashboard.sh --json` (the script behind
+`dot doctor drift show`) against a fresh checkout of `main` every day
+at 04:00 UTC. If `total != 0` it opens (or updates) a tracking issue
+labelled `type:chore`, `drift` and `priority:medium` with the JSON
+summary; the full `chezmoi diff` and `chezmoi status` are attached to
+the run as the `drift-report-*` workflow artifact.
 
 The workflow itself ignores the failing exit code (`|| true`) for the
 dashboard step — the actionable signal is the issue, not a red CI
@@ -75,13 +77,13 @@ dot doctor drift show                            # re-scan
 ### 2026-05-12 — `core.hooksPath` drift
 
 The deployed `~/.gitconfig` contained a `hooksPath = ~/.git-templates/hooks`
-line that wasn't in `dot_gitconfig.tmpl`. The line had been added
+line that wasn't in `defaults/dot_gitconfig.tmpl`. The line had been added
 directly to the deployed file (manually, not via chezmoi), then sat
 silently for weeks while the global `commit-msg` hook (at
 `~/.config/git/hooks/commit-msg`) never fired — because `hooksPath`
 was pointing at an empty directory. The result: every commit
 authored on this machine silently shipped without the
-`Assisted-by:` trailer mandated by `dot_claude/CLAUDE.md`.
+`Assisted-by:` trailer mandated by `defaults/dot_claude/CLAUDE.md`.
 
 Detection failure: no nightly drift check existed at the time.
 

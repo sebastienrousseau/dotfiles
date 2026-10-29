@@ -6,14 +6,14 @@ Manage rsync aliases. Part of the **Universal Dotfiles** configuration.
 
 ## Description
 
-These aliases are defined in `rsync.aliases.sh` and are automatically loaded by `chezmoi`.
+These aliases are defined in `rsync.aliases.sh`. Loaded by the eager alias layer `~/.config/shell/90-ux-aliases.sh` (a core category). Every definition below exists only when `rsync` is on PATH.
 
 ## Aliases
 
-This code provides a set of aliases for the `rsync` command.
-
-- `rs` Rsync with verbose and progress.
-- `rs` Rsync with verbose and progress.
+| Name | Definition | Notes |
+| --- | --- | --- |
+| `rs` | `rsync -avz` | Archive mode, verbose, compressed. |
+| `rsync` | `rs` | Makes plain `rsync` run `rsync -avz`. |
 
 [banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 

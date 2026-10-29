@@ -18,9 +18,10 @@ git commit -S -s -m "fix: concise summary"
 ```
 
 `-S` adds the cryptographic signature; `-s` adds the DCO `Signed-off-by`
-line (see below). Signed commits are **enforced** at three layers (local
-commit-msg hook, local pre-push hook, GitHub Ruleset). An unsigned commit
-cannot reach `main`. Full SSH and GPG setup recipes plus verification
+line (see below). Signed commits are **enforced** at two layers: the local
+pre-push hook (`scripts/git-hooks/pre-push`, installed by
+`scripts/git-hooks/install.sh`) and `main`'s branch protection, which requires
+signed commits. An unsigned commit cannot reach `main`. Full SSH and GPG setup recipes plus verification
 commands live in [`docs/security/COMMIT_SIGNING.md`](docs/security/COMMIT_SIGNING.md).
 
 ### Developer Certificate of Origin (DCO)
@@ -39,13 +40,20 @@ legacy `DOTFILES_SKIP_PRE_PUSH_AUDIT=1` variable is no longer honored.
 
 ## Pre-commit hooks
 
-The repo ships a `pre-commit` configuration that mirrors CI. Install
-once:
+The repo ships a `pre-commit` configuration that mirrors CI
+(`config/pre-commit-config.yaml`, linked from `.pre-commit-config.yaml`).
+`pre-commit install` refuses to run while any `core.hooksPath` is set, and
+these dotfiles set a global one, so install once per clone with the global
+config hidden:
 
 ```bash
 pip install --user pre-commit          # or: brew install pre-commit
-pre-commit install --config config/pre-commit-config.yaml
+GIT_CONFIG_GLOBAL=/dev/null pre-commit install --hook-type pre-commit --hook-type commit-msg --hook-type pre-push -f
 ```
+
+Installing the `pre-push` type replaces the hand-written
+`.git/hooks/pre-push` from `scripts/git-hooks/install.sh` (signature check
+and reliability audit); see the note in `config/pre-commit-config.yaml`.
 
 Run every hook against every file (do this after fresh-cloning, after
 big merges, or when CI surfaces a hook you don't have locally):
@@ -57,9 +65,10 @@ pre-commit run --all-files --config config/pre-commit-config.yaml
 Hooks in this config (shellcheck, shfmt, hadolint, gitleaks,
 detect-secrets, checkov, conventional-commit linter, typos-cli,
 actionlint, **luacheck**, **stylua**, plus repo-local custom hooks)
-run on commit by default. The `luacheck` and `stylua` hooks are pinned
-to the same versions CI uses; if you bump one, bump the other in the
-same PR (see [`config/pre-commit-config.yaml`](config/pre-commit-config.yaml)
+run on commit by default. The `luacheck` hook is pinned to the version
+CI uses (v1.2.0). The `stylua` hook is not yet: pre-commit pins v2.4.1
+while `ci.yml` and `ci-enforced.yml` pass `stylua_version: "0.20.0"`.
+Keep the pins in step when you bump one (see [`config/pre-commit-config.yaml`](config/pre-commit-config.yaml)
 and [`.github/workflows/reusable-lua-lint.yml`](.github/workflows/reusable-lua-lint.yml)).
 
 ## Pull request checklist
@@ -91,15 +100,20 @@ did not happen. By September it was **140 behind and 225 ahead**, and merging
 whole-file add/add decisions with no consistent winner — `main`'s copy was
 larger in 48 and `feat`'s in 14, so no blanket rule could resolve them safely.
 
-The `Branch Drift Guard` workflow now fails once a tracked branch is more than
-40 commits behind `main` — roughly a fortnight here. If it fails:
+The `Branch Drift Guard` workflow fails once a tracked branch is more than
+40 commits behind `main` (roughly a fortnight here). Its weekly run still
+targets `feat/v0.2.503`, which has since been deleted, so it reports nothing
+to guard; run it by hand (`workflow_dispatch`) with the `branch` input for a
+live long-lived branch. If it fails:
 
 ```sh
 git checkout <the long-lived branch>
 git merge origin/main      # resolve, then push
 ```
 
-`rerere` is enabled repo-wide, so a conflict you resolve once is replayed
+`rerere` is enabled in the git config these dotfiles deploy
+(`defaults/dot_gitconfig.tmpl`; elsewhere, `git config rerere.enabled true`),
+so a conflict you resolve once is replayed
 automatically the next time the same hunk appears. That is what makes a weekly
 merge cheap and a four-monthly one expensive.
 

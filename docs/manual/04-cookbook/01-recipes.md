@@ -4,7 +4,7 @@ render_with_liquid: false
 
 # Cookbook: Recipes
 
-Thirty short recipes for common tasks.
+Short recipes for common tasks.
 
 ## Installation & Update
 
@@ -24,21 +24,25 @@ dot system update
 ### 3. Update dotfiles only (no tools)
 
 ```sh
-dot update
+dot config update
 ```
 
 ### 4. Preview what would change
 
 ```sh
-dot apply --dry-run
+chezmoi apply --dry-run --verbose
 ```
+
+`dot apply --dry-run` passes `--dry-run` to chezmoi but still runs the
+post-apply steps (snapshot, repair, cache pre-warm), so call chezmoi
+directly for a pure preview.
 
 ## Themes
 
 ### 5. Switch to a specific theme
 
 ```sh
-dot theme tahoe-dark
+dot theme set tahoe-dark
 ```
 
 ### 6. Toggle between dark and light
@@ -66,7 +70,7 @@ cp my-wallpaper.jpg ~/Pictures/Wallpapers/myname-dark.jpg
 cp my-wallpaper-light.jpg ~/Pictures/Wallpapers/myname-light.jpg
 bash scripts/theme/merge-wallpaper.sh myname
 dot theme rebuild
-dot theme myname-dark
+dot theme set myname-dark
 ```
 
 ### 10. Regenerate all themes from scratch
@@ -92,8 +96,10 @@ dot config add ~/.some-config-file
 ### 13. Remove a managed file
 
 ```sh
-dot remove ~/.some-config-file
+chezmoi forget ~/.some-config-file
 ```
+
+`chezmoi forget` stops managing the file and leaves it in place.
 
 ### 14. Show configuration drift
 
@@ -118,25 +124,27 @@ chezmoi add --encrypt ~/some-secret.txt
 ### 17. Edit an encrypted file
 
 ```sh
-sops dot_config/credentials.sops.yaml
-# or
-chezmoi edit ~/some-secret.txt.age
+sops path/to/file.sops.yaml
+# or, for a file added with chezmoi add --encrypt:
+chezmoi edit ~/some-secret.txt
 ```
 
 ### 18. Rotate your Age key
 
 ```sh
-age-keygen -o ~/.config/age/keys.txt.new
-# Update .sops.yaml with new public key
-# Then:
-find . -name '*.sops.yaml' -exec sops updatekeys {} \;
+# SOPS key (~/.config/sops/age/keys.txt):
+age-keygen -o ~/.config/sops/age/new-key.txt
+# Put the new public key (printed above) in .sops.yaml. Keep the old key
+# in keys.txt so sops can still decrypt, then re-encrypt:
+cat ~/.config/sops/age/new-key.txt >> ~/.config/sops/age/keys.txt
+find . -name '?*.sops.yaml' -exec sops updatekeys {} \;
 git commit -sS -am "chore(secrets): rotate age key"
 ```
 
 ### 19. Check for accidental secret leaks
 
 ```sh
-dot verify --security
+dot secret check
 ```
 
 ## Diagnostics
@@ -162,7 +170,7 @@ dot doctor perf measure
 ### 23. See the health score
 
 ```sh
-dot doctor score
+dot doctor score show
 ```
 
 ### 24. Recent metrics
@@ -173,22 +181,28 @@ dot doctor metric list
 
 ## Fleet
 
-### 25. Attest across all fleet hosts
+### 25. Publish this host's attestation to a shared fleet store
 
 ```sh
-dot fleet attest
+dot attest show --fleet-store /path/to/fleet-store
 ```
+
+Run it on each host; the evidence lands under
+`<store>/<fleet-id>/<hostname>/`.
 
 ### 26. Sync dotfiles to every fleet host
 
 ```sh
-dot fleet sync
+dot fleet apply --cmd 'dot config update'   # pull and apply on each host in fleet.toml
 ```
 
-### 27. Diff config across hosts
+Without `--cmd`, each host runs `dot sync && dot doctor --quiet`, which
+applies the checkout already on that host without pulling.
+
+### 27. Check drift on every fleet host
 
 ```sh
-dot fleet diff
+dot fleet apply --cmd 'dot status'
 ```
 
 ## AI & Agents
@@ -196,19 +210,19 @@ dot fleet diff
 ### 28. Show installed AI tools
 
 ```sh
-dot ai
+dot ai list
 ```
 
-### 29. Switch agent profile
+### 29. Switch agent mode
 
 ```sh
-dot agent mode set architect   # or hardener, refactor
+dot agent mode set plan   # or ask, apply, audit
 ```
 
 ### 30. Verify MCP policy
 
 ```sh
-dot mcp --strict
+dot mcp check --strict
 ```
 
 ## Recovery
@@ -216,20 +230,30 @@ dot mcp --strict
 ### 31. Rollback the last apply
 
 ```sh
-dot doctor rollback
+dot doctor rollback            # list the backups
+dot doctor rollback rollback   # restore the newest one (asks first)
 ```
 
 ### 32. Create an offline bundle
 
 ```sh
-dot config export
+dot config export            # writes ~/Downloads/dotfiles_offline_bundle_<timestamp>.tar.zst
+dot config export ~/backups  # or into another directory
 ```
+
+The bundle holds `~/.dotfiles`, `~/.config/chezmoi` (with your age key, if
+it lives there) and `~/.local/share/mise`. Store it like a secret.
 
 ### 33. Restore from a bundle
 
 ```sh
-dot config import ~/Downloads/dotfiles-bundle-*.tar.zst
+tar --zstd -xf ~/Downloads/dotfiles_offline_bundle_*.tar.zst -P
+cd ~/.dotfiles && ./install.sh --force
 ```
+
+The archive stores absolute paths, so restore it as the same user with the
+same home directory. `dot config import` does not restore a bundle today:
+it creates a new one instead.
 
 ## Development
 
@@ -254,7 +278,7 @@ dot config check
 ### 37. Simulate chaos to test self-healing
 
 ```sh
-bash scripts/ops/chaos.sh symlink   # from the repo, in an ephemeral container only
+bash scripts/ops/chaos.sh --force   # from the repo, in an ephemeral container only
 dot doctor fix
 dot doctor
 ```

@@ -6,91 +6,26 @@ Manage tmux aliases. Part of the **Universal Dotfiles** configuration.
 
 ## Description
 
-These aliases are defined in `tmux.aliases.sh` and are automatically loaded by `chezmoi`.
+These aliases are defined in `tmux.aliases.sh`. Loaded by the lazy alias layer `~/.config/shell/91-ux-aliases-lazy.sh`. It loads after the eager layer (zsh defers it until after startup), so its definitions replace any eager alias of the same name. Every definition below exists only when `tmux` is on PATH.
 
 ## Aliases
 
-## Configuration
+| Name | Definition | Notes |
+| --- | --- | --- |
+| `tm` | function | Run `tmux` with any arguments; with no server running, start a session and attach. |
+| `tma` | `tmux attach-session` | Attach to last session. |
+| `tmat` | `tmux attach-session -t` | Attach to specific session. |
+| `tmks` | `tmux kill-session -a` | Kill all sessions except current. |
+| `tmka` | `tmux kill-server` | Kill all sessions (server) |
+| `tml` | `tmux list-sessions` | List all sessions. |
+| `tmn` | `tmux new-session` | New unnamed session. |
+| `tms` | `tmux new-session -s` | New named session. |
+| `tmr` | `tmux source ~/.dotfiles/lib/configurations/tmux/tmux` | Meant to reload the configuration, but it sources `~/.dotfiles/lib/configurations/tmux/tmux`, which does not exist; the deployed configuration is `~/.config/tmux/tmux.conf`. |
+| `tmls` | `tmux list-windows` | List windows. |
+| `tmlp` | `tmux list-panes` | List panes. |
+| `tmi` | `tmux info` | Show tmux info. |
 
-A comprehensive tmux configuration designed for productivity and ease of use. The configuration is organized in modular files for better maintainability:
-
-- **default**: Core settings and plugin configuration
-- **display**: Visual and behaviour settings
-- **linux**: Platform-specific functionality
-- **navigation**: Comprehensive key bindings
-- **panes**: Pane-specific settings
-- **theme**: Status bar and visual styling
-
-### Key Features
-
-- Modern color scheme with OS-specific status bar styling
-- Intuitive key bindings with Ctrl+a as the prefix key
-- Comprehensive window and pane management controls
-- Session persistence with tmux-resurrect and tmux-continuum
-- Scrollable help menu (press `Ctrl+a ?` to access)
-- Mouse support for easy navigation
-
-### Navigation & Key Bindings
-
-Press `Ctrl+a ?` to see all available key bindings. Major features include:
-
-- **Window Management**: Split, create, navigate, and rename windows with ease
-- **Pane Navigation**: Move between panes with vim-style h/j/k/l keys
-- **Session Management**: Create, rename, and switch between sessions
-- **Copy Mode**: Vim-style selection, searching, and clipboard integration
-
-Convenient aliases for tmux operations:
-
-| Alias | Description |
-|-------|-------------|
-| `tm`  | Start tmux |
-| `tma` | Attach to last session |
-| `tmat` | Attach to specific session |
-| `tmks` | Kill all sessions except current |
-| `tmka` | Kill all sessions (server) |
-| `tml` | List all sessions |
-| `tmn` | New unnamed session |
-| `tms` | New named session |
-| `tmr` | Reload tmux configuration |
-| `tmls` | List windows |
-| `tmlp` | List panes |
-| `tmi` | Show tmux info |
-
-## Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/sebastienrousseau/dotfiles.git ~/.dotfiles
-   ```
-
-2. Run the installation script:
-
-   ```bash
-   cd ~/.dotfiles && ./install.sh
-   ```
-
-3. Install tmux plugin manager (if not already installed):
-
-   ```bash
-   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-   ```
-
-4. Open tmux and press `Ctrl+a I` to install plugins
-
-## Usage
-
-Start a new tmux session with:
-
-```bash
-tmux
-```
-
-Or use any of the provided aliases for common operations.
-
-## License
-
-MIT
+`tm` has the same problem as `tmr` when it starts a new server: it sources the missing `~/.dotfiles/lib/configurations/tmux/tmux`. tmux itself reads `~/.config/tmux/tmux.conf`, deployed from `defaults/dot_config/tmux/tmux.conf.tmpl`.
 
 [banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 

@@ -1,80 +1,55 @@
 # GNU Aliases
 
-Manage GNU aliases. Part of the **Universal Dotfiles** configuration.
+GNU coreutils aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
 ## Description
 
-These aliases are defined in `gnu.aliases.sh` and are automatically loaded by `chezmoi`.
+These aliases are defined in `gnucoreutils.aliases.sh`. Loaded by the lazy alias layer `~/.config/shell/91-ux-aliases-lazy.sh`. It loads after the eager layer (zsh defers it until after startup), so its definitions replace any eager alias of the same name. Every definition below exists only when `gdate` is on PATH.
+
+Each alias maps a name to itself (`alias sed=sed`), so loading the file changes nothing: it does not point the names at the `g`-prefixed GNU tools that Homebrew installs on macOS.
 
 ## Aliases
 
-This is a collection of aliases for the GNU Coreutils package, which is
-a set of standard Unix utilities often included in Linux distributions.
-These aliases allow for easier use of these utilities by providing
-shorthand commands that replace the full utility name with a shorter
-alias.
-The aliases in this collection cover a wide range of utilities, from
-basic file manipulation commands like "cp" and "rm" to more advanced
-text processing commands like "awk" and "sed". There are also aliases
-for various checksum and hash utilities like "md5sum" and "sha256sum".
-
-### Basic file management utilities
-
-- `basename` Strip directory and suffix from filenames.
-- `cp` Copy files and directories.
-- `dirname` Strip non-directory suffix from filenames.
-- `ln` Create links between files.
-- `loname` Print the name of the link.
-- `ls` List directory contents.
-- `mkdir` Create directories.
-- `mkfifo` Make named pipes (FIFOs).
-- `mknod` Make block or character special files.
-- `mv` Move or rename files or directories.
-- `pathchk` Check file name validity and portability.
-- `pwd` Print working directory name.
-- `readlink` Print resolved symbolic links or canonical file names.
-- `realpath` Print the resolved physical path of the specified path.
-- `rm` Remove files or directories.
-- `rmdir` Remove empty directories.
-- `unlink` Remove files or directories.
-
-### File content manipulation utilities
-
-- `awk` Pattern scanning and processing language.
-- `cat` Concatenate and display files.
-- `csplit` Split a file into context-determined pieces.
-- `cut` Remove sections from each line of files.
-- `diff` Compare files line by line.
-- `fold` Wrap each input line to fit in specified width.
-- `grep` Print lines matching a pattern.
-- `head` Output the first part of files.
-- `nl` Number lines of files.
-- `paste` Merge lines of files.
-- `patch` Apply a diff file to an original.
-- `ptx` Produce a permuted index of file contents.
-- `sed` Stream editor for filtering and transforming text.
-- `sort` Sort lines of text files.
-- `split` Split a file into pieces.
-- `tail` Output the last part of files.
-- `tr` Translate or delete characters.
-
-### File checksum and encryption utilities
-
-- `b2sum` Print or check BLAKE2 message digests.
-- `cksum` Print CRC checksum and byte counts.
-- `sha1sum` Print or check SHA1 message digests.
-- `sha224sum` Print or check SHA224 message digests.
-- `sha256sum` Print or check SHA256 message digests.
-- `sha384sum` Print or check SHA384 message digests.
-- `sha512sum` Print or check SHA512 message digests.
-
-### Other file utilities
-
-- `base32` Print or convert base32 data.
-- `base64` Encode or decode base64 data.
-- `basenc` Encode or decode base64, base32,
+| Name | Definition | Notes |
+| --- | --- | --- |
+| `basename` | `basename` | Strip directory and suffix from filenames. |
+| `dirname` | `dirname` | Strip non-directory suffix from filenames. |
+| `loname` | `loname` | Print the name of the link. |
+| `mkfifo` | `mkfifo` | Make named pipes (FIFOs). |
+| `mknod` | `mknod` | Make block or character special files. |
+| `pathchk` | `pathchk` | Check file name validity and portability. |
+| `pwd` | `pwd` | Print working directory name. |
+| `readlink` | `readlink` | Print resolved symbolic links or canonical file names. |
+| `realpath` | `realpath` | Print the resolved physical path of the specified path. |
+| `rmdir` | `rmdir` | Remove empty directories. |
+| `unlink` | `unlink` | Remove files or directories. |
+| `awk` | `awk` | Pattern scanning and processing language. |
+| `csplit` | `csplit` | Split a file into context-determined pieces. |
+| `cut` | `cut` | Remove sections from each line of files. |
+| `fold` | `fold` | Wrap each input line to fit in specified width. |
+| `grep` | `grep` | Print lines matching a pattern. |
+| `head` | `head` | Output the first part of files. |
+| `nl` | `nl` | Number lines of files. |
+| `paste` | `paste` | Merge lines of files. |
+| `patch` | `patch` | Apply a diff file to an original. |
+| `ptx` | `ptx` | Produce a permuted index of file contents. |
+| `sed` | `sed` | Stream editor for filtering and transforming text. |
+| `sort` | `sort` | Sort lines of text files. |
+| `split` | `split` | Split a file into pieces. |
+| `tail` | `tail` | Output the last part of files. |
+| `tr` | `tr` | Translate or delete characters. |
+| `b2sum` | `b2sum` | Print or check BLAKE2 message digests. |
+| `cksum` | `cksum` | Print CRC checksum and byte counts. |
+| `sha1sum` | `sha1sum` | Print or check SHA1 message digests. |
+| `sha224sum` | `sha224sum` | Print or check SHA224 message digests. |
+| `sha256sum` | `sha256sum` | Print or check SHA256 message digests. |
+| `sha384sum` | `sha384sum` | Print or check SHA384 message digests. |
+| `sha512sum` | `sha512sum` | Print or check SHA512 message digests. |
+| `base32` | `base32` | Print or convert base32 data. |
+| `base64` | `base64` | Encode or decode base64 data. |
+| `basenc` | `basenc` | Encode or decode data in base64, base32 and other encodings. |
 
 [banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 

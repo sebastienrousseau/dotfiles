@@ -36,3 +36,10 @@ Scope: terminal theme SSOT, shell first-paint path, font rendering, and cross-pl
 
 Add deterministic golden renders for Ghostty, Kitty, WezTerm, Alacritty, Foot,
 and tmux at widths 80/100/120/160 in light, dark, and high-contrast modes.
+
+> **Status (note added 2026-10-29):** the rendered-configuration part is
+> done. `scripts/theme/check-render-goldens.py` compares checked-in goldens
+> for Ghostty, Kitty, Alacritty, WezTerm, Foot, tmux and Neovim in light and
+> dark on macOS, Linux and WSL inputs (see
+> [Theme compatibility contracts](../architecture/THEME_COMPATIBILITY_CONTRACTS.md)).
+> The tmux widths, high-contrast mode and pixel-level renders remain open.

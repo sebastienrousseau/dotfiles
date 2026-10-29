@@ -19,42 +19,46 @@ This directory contains modular templates that are aggregated into the shell env
 
 ```text
 .chezmoitemplates/
-├── aliases/          # 97 files across 46 functional domains
+├── aliases/              # *.aliases.sh files, one subdirectory per domain
 │   ├── ai/
 │   ├── docker/
 │   ├── git/
 │   ├── kubernetes/
-│   └── ... (42 more)
-├── functions/        # 52 utility functions
-│   ├── utils/        # Common utilities (logging.sh)
-│   └── *.sh          # Individual function files
-└── paths/            # 3 priority-ordered PATH files
-    ├── 00-default.paths.sh    # Base system paths
-    ├── 05-pipx.paths.sh       # pipx paths
-    └── 99-custom.paths.sh     # User custom paths
+│   └── ...
+├── functions/            # one function per .sh file, in category subdirectories
+│   ├── api/ curl/ files/ interactive/ misc/ nav/ security/ system/ text/
+│   ├── utils/            # loaded eagerly (logging helpers, yy)
+│   ├── helpers/          # path-utils.tmpl
+│   └── groups.json       # lazy-load groups for the files outside utils/
+├── desktop/              # shell-theme.dconf.tmpl (no template includes it today)
+├── go-build-command      # shared Go build snippet for the run_onchange build scripts
+└── theme-name            # resolves the active theme name for themed templates
 ```
+
+There is no `paths/` directory: PATH setup lives in `defaults/dot_config/shell/00-core-paths.sh.tmpl`.
 
 ### Template Categories
 
-| Category | Files | Organization | Documentation |
-|----------|-------|--------------|---------------|
-| **Aliases** | 97 | Domain-specific subdirectories | [aliases/README.md](aliases/README.md) |
-| **Functions** | 52 | Flat structure + utils/ | [functions/README.md](functions/README.md) |
-| **Paths** | 3 | Priority-based numbering | [paths/README.md](paths/README.md) |
+| Category | Organization | Documentation |
+|----------|--------------|---------------|
+| **Aliases** | Domain-specific subdirectories | [aliases/README.md](aliases/README.md) |
+| **Functions** | Category subdirectories, `utils/` and `groups.json` | [functions/README.md](functions/README.md) |
 
 ## How Templates Work
 
-1. **Chezmoi Scanning**: Template aggregators scan these directories for specific patterns:
-   - Aliases: `**/*.aliases.sh`
-   - Functions: `**/*.sh`
-   - Paths: `*.paths.sh`
+1. **Chezmoi Scanning**: Templates in `defaults/dot_config/shell/` scan these directories:
+   - Aliases: `aliases/**/*.aliases.sh`
+   - Functions: `functions/utils/*.sh`, the files listed in `functions/groups.json`, and
+     `functions/**/*.sh`
 
-2. **Aggregation**: Files are combined into single shell configuration files:
-   - `~/.config/shell/aliases.sh`
-   - `~/.config/shell/functions.sh`
-   - `~/.config/shell/paths.sh`
+2. **Aggregation**: Files are combined into shell layers in `~/.config/shell/`:
+   - `90-ux-aliases.sh` (eager aliases) and `91-ux-aliases-lazy.sh` (lazy aliases)
+   - `50-logic-functions-core.sh` (`utils/`), `51-logic-functions-extra.sh` (lazy-loading
+     stubs per group) and `50-logic-functions.sh` (every function, used by the fish bridge)
 
-3. **Loading**: Shell startup (`.zshrc`) sources the aggregated files
+3. **Loading**: Bash (`dot_bashrc`) and zsh (`dot_config/zsh/dot_zshrc.tmpl`) source the layers;
+   the [aliases](aliases/README.md#how-it-works) and [functions](functions/README.md#how-it-works)
+   READMEs give the order.
 
 ## Namespace Structure Recommendations
 
@@ -62,21 +66,22 @@ This directory contains modular templates that are aggregated into the shell env
 
 **Strengths:**
 
-- Aliases use excellent domain-based organization (46 functional categories)
-- Paths use priority-based numbering system (00-, 05-, 99-)
-- Each category has comprehensive documentation
+- Aliases use domain-based organization
+- Functions are grouped into category subdirectories
+- Each alias domain has its own README
 
 **Growth Concerns:**
 
-- Functions directory is flat with 52 files (becomes unwieldy at scale)
 - No consistent versioning scheme across categories
-- Potential namespace collisions in functions
+- Potential namespace collisions between alias files, and between alias and function names
+  (today `backup`, `extract` and `goto` exist in both)
 
 ### Recommended Namespace Structure for Future Growth
 
-#### 1. Functions Reorganization (Priority: HIGH)
+#### 1. Functions Reorganization
 
-**Current Issue**: 52 functions in a flat structure becomes unmaintainable at scale.
+**Status**: Functions already live in category subdirectories (`api/`, `files/`, `nav/` and so
+on). The structure below is a possible further split.
 
 **Recommended Structure**:
 
@@ -135,12 +140,10 @@ aliases/
 
 ## Migration Strategy
 
-### Phase 1: Functions Reorganization (Immediate)
+### Phase 1: Functions Reorganization (Done)
 
-1. Create new subdirectory structure in `functions/`
-2. Move existing functions to appropriate categories
-3. Update documentation to reflect new structure
-4. Test aggregation still works correctly
+Functions moved into category subdirectories, and the function templates scan them
+(`functions/**/*.sh` and `groups.json`).
 
 ### Phase 2: Platform Abstraction (Future)
 
@@ -159,8 +162,7 @@ aliases/
 ### Naming Conventions
 
 - **Aliases**: `category/toolname.aliases.sh`
-- **Functions**: `category/subcategory/funcname.sh`
-- **Paths**: `##-purpose.paths.sh` (priority prefix)
+- **Functions**: `category/funcname.sh`, defining a function named `funcname`
 
 ### Documentation Requirements
 
@@ -178,8 +180,6 @@ aliases/
 
 **Next Actions:**
 
-1. Implement functions reorganization (Phase 1)
-2. Update aggregation templates to handle subdirectories
-3. Validate no regression in shell loading performance
+1. Validate no regression in shell loading performance
 
 Made With ❤️ in London, United Kingdom • [dotfiles.io](https://dotfiles.io)

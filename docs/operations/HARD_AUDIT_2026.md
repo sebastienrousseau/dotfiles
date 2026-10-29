@@ -6,6 +6,12 @@ description: "Operational reliability, performance parity, documentation accurac
 
 # Hard Audit 2026 + Path to De Facto
 
+> **Historical snapshot (note added 2026-10-29).** This audit describes
+> v0.2.502 as of 2026-05-15. File paths, command names and open findings
+> below are not kept current. For the current plan see
+> [`../../ROADMAP.md`](../../ROADMAP.md); for what has shipped since, see
+> [`../../CHANGELOG.md`](../../CHANGELOG.md).
+
 A consolidated audit of `sebastienrousseau/dotfiles` v0.2.502 across three internal dimensions (operational reliability + performance, documentation accuracy, cross-platform + security posture) and three external dimensions (competitor matrix, 2026 industry trends, adoption playbook). Produced 2026-05-15 by six parallel research tracks.
 
 The goal stated by the maintainer: become the de facto workstation provisioning tool for every OS. This document is the punch list to get there.

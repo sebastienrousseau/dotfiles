@@ -14,7 +14,7 @@ model for orchestration. Two ideas drive it:
    verification. The smart model sees one tool call and the final
    `git diff` instead of every intermediate read.
 2. **Account every call.** Every invocation through `dot ai <provider>`
-   appends a JSONL entry so you can see spend across all providers in
+   records a row in the run log so you can see spend across all providers in
    one report, not just per-tool dashboards.
 
 ## Quick reference
@@ -65,17 +65,18 @@ for anything beyond a one-line edit.
 |---|---|---|---|
 | `vibe` skill | `defaults/dot_claude/skills/vibe/` | `~/.claude/skills/vibe/` | Claude Code slash commands (`/vibe`, `/vibe-report`, etc.) |
 | Delegator binary | `defaults/dot_claude/skills/vibe/tools/executable_vibe-delegate` | `~/.claude/skills/vibe/tools/vibe-delegate` | Runs the cheap-model task in a pseudo-TTY, parses streaming JSON, syntax-checks changes, logs the run |
-| Reporter | `defaults/dot_claude/skills/vibe/tools/executable_delegate-report` | `~/.claude/skills/vibe/tools/delegate-report` | Reads the JSONL log, prints overview / by-model / by-project / failure tables |
-| CLI shim | `plugins/ai/libexec/ai.sh` | `bin/dot ai delegate` / `bin/dot ai cost` | Same delegator + reporter, callable from the terminal without Claude Code |
-| Unified log hook | `_ai_log_run` in `ai.sh` | runs inside `run_ai_with_context` | Appends one JSONL line per `dot ai <provider>` invocation |
-| Log file | runtime-managed | `~/.local/share/delegate-runs.jsonl` | One line per run; `dot ai cost` reads it |
+| Reporter | `defaults/dot_claude/skills/vibe/tools/executable_delegate-report` | `~/.claude/skills/vibe/tools/delegate-report` | Reads the run log, prints overview / by-model / by-project / failure tables |
+| CLI shim | `plugins/ai/libexec/ai.sh` | `bin/dot ai delegate` / `bin/dot ai cost` | Same delegator + reporter, callable from the terminal without Claude Code (`delegate` works through the domain's fallback route; it is not declared in `plugins/ai/dot-plugin.toml`) |
+| Unified log hook | `_ai_log_run` in `ai.sh` | runs inside `run_ai_with_context` | Records one run per `dot ai <provider>` invocation through `~/.local/bin/dot-ai-log` |
+| Log store | runtime-managed | `~/.local/share/dotfiles-ai.db` | SQLite, one row per run; `dot ai cost` reads it. `dot-ai-log` imports the legacy `delegate-runs.jsonl` on first write, and the reporter falls back to it |
 
 ## State files
 
 | File | Owner | Purpose |
 |---|---|---|
-| `~/.local/share/delegate-runs.jsonl` | runtime | One JSONL entry per AI invocation (vibe + every other provider) |
-| `~/.local/share/vibe-auto.flag` | `/vibeon` / `/vibeoff` | When present, Claude auto-delegates coding tasks to Vibe |
+| `~/.local/share/dotfiles-ai.db` | runtime | One row per AI invocation (vibe + every other provider) |
+| `~/.local/share/delegate-runs.jsonl` | legacy | Older JSONL log, imported into the database and kept as a fallback |
+| `~/.local/share/vibe-auto.flag` | `/vibeon` / `/vibeoff` | Advisory: the skill tells Claude to auto-delegate while it is present; no hook enforces it |
 | `~/.local/share/vibe-model.flag` | `/vibe-model-pick` | Override the Vibe model for the next runs; cleared by `/vibe-model-clear` |
 | `~/.vibe/config.toml` | user | Vibe's own provider / model configuration |
 
@@ -105,16 +106,20 @@ report still tracks: timestamp, project, exit code, duration, prompt
 word count. Token / cost fields stay zero for those providers — the
 report tolerates the gap and aggregates by `model` regardless.
 
-Providers tracked today:
+Providers tracked today (the agents in `plugins/ai/roster.toml`):
 
 | Provider | Binary | Logged | Tokens surfaced? |
 |---|---|---|---|
 | Claude Code | `claude` | yes | no (CLI doesn't expose) |
 | Codex | `codex` | yes | no |
 | Copilot CLI | `copilot` | yes | no |
-| Gemini CLI | `gemini` | yes | no |
 | Goose | `goose` | yes | no |
+| Crush | `crush` | yes | no |
+| Amp | `amp` | yes | no |
+| Cursor CLI | `cursor-agent` | yes | no |
+| Grok Build | `grok` | yes | no |
 | Kimi CLI | `kimi` | yes | no |
+| Antigravity CLI | `agy` | yes | no |
 | Aider | `aider` | yes | no |
 | OpenCode | `opencode` | yes | no |
 | Autohand | `autohand` | yes | no |

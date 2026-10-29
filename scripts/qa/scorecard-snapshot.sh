@@ -75,7 +75,7 @@ trap 'rm -f "$block"' EXIT
         | [.name, (.score|tostring), ((.reason // "") | gsub("\\|"; "\\|") | .[0:100])]
         | "| " + (. | join(" | ")) + " |"'
   # shellcheck disable=SC2016 # backticks here are markdown code-spans, not subshells
-  printf '\n_Refresh: `scripts/qa/scorecard-snapshot.sh` · Monitoring: `.github/workflows/scorecard.yml`._\n'
+  printf '\n*Refresh: `scripts/qa/scorecard-snapshot.sh` · Monitoring: `.github/workflows/scorecard.yml`.*\n'
   printf '<!-- END scorecard-snapshot -->\n'
 } >"$block"
 

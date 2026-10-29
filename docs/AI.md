@@ -4,14 +4,14 @@ render_with_liquid: false
 
 # AI Integrations (Opt-in)
 
-AI helpers are **off by default**. You choose if and when to turn them on.
+The `dot ai` commands work without any setup. `DOTFILES_AI=1` turns on two extras:
 
 ```bash
 export DOTFILES_AI=1
 exec zsh
 ```
 
-This enables the local helper scripts and the `dot ai` command surface. It does **not** install any AI tools or run any background service.
+In zsh it sources the opt-in AI shell helpers (context suggestions and error analysis), and during `chezmoi apply` it lets the cockpit binary (`dot-ai-tui`) be built. zsh and bash leave it off by default; the Fish, Nushell and PowerShell configs export `DOTFILES_AI=1`. It does **not** install any AI tools or run any background service.
 
 ## Why `dot ai`?
 
@@ -25,7 +25,7 @@ You use `claude` to talk to Claude. You use `dot ai` to run *everything else* on
 dot ai install all        # install the fleet (only what's missing)
 dot ai                    # open the cockpit (TUI)
 dot ai "fix the auth bug" # one-shot on Claude — just like `claude "…"`
-dot ai serve              # serve your Claude subscription locally to the fleet
+dot ai gateway serve      # serve your Claude subscription locally to the fleet
 ```
 
 ## Prerequisites
@@ -36,25 +36,25 @@ installers, which need `curl`. When a tool you install needs mise and it is
 missing, `dot ai` offers to install it first. Nothing installs without your
 yes: `dot ai install` asks before a bulk install, `dot ai <tool>` asks before
 installing a missing tool, and `--yes` (or `DOTFILES_YES=1`) answers yes.
-With no terminal to ask, nothing installs. `dot ai doctor` lists what is
+With no terminal to ask, nothing installs. `dot ai check` lists what is
 missing (mise, node, uv, curl, go) and how to add it.
 
 ## Command surface
 
-The interface is flat and verb-first, modelled on the Claude CLI: bare opens an interactive view, a prompt runs it, and old commands keep working as deprecated aliases.
+The interface follows ADR-020 (`dot ai <verb>`), modelled on the Claude CLI: bare opens an interactive view and a prompt runs it. The older verbs in brackets still work.
 
 | Command | What it does |
 |---------|--------------|
 | `dot ai` | Open the **cockpit** — a Bubble Tea TUI for the fleet, gateway, and cost |
 | `dot ai "<prompt>"` | One-shot prompt on Claude |
 | `dot ai <tool> "<prompt>"` | One-shot prompt on a named tool (e.g. `dot ai codex "add tests"`) |
-| `dot ai chat [tool]` | Open an interactive session (picker if no tool) |
-| `dot ai tools` | Install / manage the fleet |
+| `dot ai start [tool]` | Open an interactive session (picker if no tool) (`dot ai chat`) |
+| `dot ai list` | Install status of the fleet, with an install picker (`dot ai tools`) |
 | `dot ai install [all\|<tool>] [--yes]` | Install all missing tools, or one, with what they need (asks first) |
-| `dot ai serve [stop\|status]` | Start the local Claude gateway **and** route the fleet through it |
-| `dot ai cost` | Spend report across providers |
+| `dot ai gateway serve [stop\|status]` | Start the local Claude gateway **and** route the fleet through it (`dot ai serve`) |
+| `dot ai cost show` | Spend report across providers (`dot ai cost`) |
 | `dot ai login [tool]` | Authenticate a tool |
-| `dot ai doctor` | Health-check the fleet and the gateway |
+| `dot ai check` | Health-check the fleet and the gateway (`dot ai doctor`) |
 | `--style <name>` | Steer any prompt with a pattern (see [Steering styles](#steering-styles)) |
 
 ## The cockpit (`dot ai`)
@@ -75,7 +75,7 @@ The cockpit also offers a **model picker** (`/model <name>` or the `m` key cycle
 
 ## Steering styles
 
-Styles in `~/.dotfiles/dot_config/ai/patterns/` add focused context to any prompt with `--style <name>`:
+Styles in `~/.config/ai/patterns/` (source: `defaults/dot_config/ai/patterns/`) add focused context to any prompt with `--style <name>`:
 
 - **architect** — shell setup and stack tuning
 - **hardener** — security, encryption, and compliance
@@ -93,19 +93,19 @@ The bridge also injects system details (OS, architecture, date) so the model has
 ```bash
 dot ai "explain this stack trace"            # one-shot on Claude
 dot ai run codex "add a test for parse()"    # one-shot on a specific tool
-dot ai chat                            # pick a tool and open its session
-dot ai chat aider                      # open aider directly
+dot ai start                           # pick a tool and open its session
+dot ai start aider                     # open aider directly
 ```
 
-## The local Claude gateway (`dot ai serve`)
+## The local Claude gateway (`dot ai gateway serve`)
 
 Run one Claude subscription locally and point your whole fleet at it — with **no third-party dependency**. `dot-ai-serve` is a small, stdlib-only Python server (no pip packages) that wraps the `claude` CLI you already have and exposes the standard Anthropic (`/v1/messages`) **and** OpenAI (`/v1/chat/completions`) endpoints. Any tool that speaks either protocol — codex, aider, Open WebUI, an OpenAI SDK — connects to `http://127.0.0.1:3456` and gets Claude on your existing subscription.
 
 ```bash
 claude login              # one-time: authenticate the engine
-dot ai serve              # start the gateway AND route the non-Claude fleet
-dot ai serve status       # process + /health + routing state
-dot ai serve stop         # stop the gateway and un-route
+dot ai gateway serve          # start the gateway AND route the non-Claude fleet
+dot ai gateway serve status   # process + /health + routing state
+dot ai gateway serve stop     # stop the gateway and un-route
 ```
 
 **Native session, never a key.** The gateway authenticates through your `claude` CLI's native session — there is no API key anywhere. Routing is applied **per-invocation** to non-Claude tools (`dot ai codex "…"`); it is **not** sourced into your interactive shell. The primary `claude` is never routed — it always uses its own native session, so claude.ai connectors stay enabled. (Setting `ANTHROPIC_API_KEY` in your shell would disable those connectors, which is exactly why routing stays scoped to each tool's subprocess.)
@@ -151,27 +151,31 @@ These tools are not installed for you. Install what you want with `dot ai instal
 - **Cloud (platform)**:
   - `kiro-cli` — AWS's agentic dev assistant
 
-`dot ai tools` shows install status grouped by role and offers an interactive install picker. Status is cached in `~/.cache/dotfiles/ai/status.tsv` for 5 minutes (tune with `DOTFILES_AI_STATUS_TTL`).
+`dot ai list` shows install status grouped by role and offers an interactive install picker. Status is cached in `~/.cache/dotfiles/ai/status.tsv` for 5 minutes (tune with `DOTFILES_AI_STATUS_TTL`).
 
 ## Run cost and telemetry
 
-Every run through the bridge is logged to a local SQLite database (`~/.local/share/dotfiles-ai.db`). `dot ai cost` reports spend across providers, and the cockpit's cost panel and recent-runs list read from the same log. Token-level cost is populated for providers that surface it (and for everything routed through `dot ai serve`).
+Every run through the bridge is logged to a local SQLite database (`~/.local/share/dotfiles-ai.db`). `dot ai cost show` reports spend across providers, and the cockpit's cost panel and recent-runs list read from the same log. Token-level cost is populated for providers that surface it (and for everything routed through `dot ai gateway serve`).
 
-## Deprecated commands
+## Old command names
 
-The old command shapes still work, but print a one-line hint pointing at the new name. Update your muscle memory when convenient — the shortcut aliases (`dcl`, `dagy`, `dki`, …) already target the new surface.
+The top-level provider shortcuts were removed in 0.2.538: each now exits 127 and prints its new name.
+
+| Removed | Use instead |
+|---------|-------------|
+| `dot cl` / `dot claude` | `dot ai run claude` |
+| `dot codex`, `dot copilot`, `dot kimi`, `dot agy`, `dot goose`, `dot kiro`, `dot sgpt`, `dot ollama`, `dot opencode`, `dot aider`, `dot autohand`, `dot vibe`, `dot qwen`, `dot zai` | `dot ai run codex`, `dot ai run copilot`, `dot ai run kimi`, `dot ai run agy`, `dot ai run goose`, `dot ai run kiro`, `dot ai run sgpt`, `dot ai run ollama`, `dot ai run opencode`, `dot ai run aider`, `dot ai run autohand`, `dot ai run vibe`, `dot ai run qwen`, `dot ai run zai` |
+| `dot ai-setup` | `dot ai install --interactive` |
+| `dot ai-query` | `dot ai ask` |
+| `dot patterns` | `dot ai pattern` |
+
+These verbs inside `dot ai` still work but print a one-line hint with the new name. The shortcut aliases (`dcl`, `dagy`, `dki`, …) run `dot ai <tool>`; when Docker is installed, the Docker aliases, loaded after them, take over `dcl` and `dki`.
 
 | Deprecated | Use instead |
 |------------|-------------|
-| `dot ai run claude` / `dot ai run claude` | `dot ai run claude` |
-| `dot ai run codex` / `dot ai run copilot` / `dot ai run kimi` / `dot ai run agy` / `dot ai run goose` | `dot ai run codex` / `dot ai run copilot` / `dot ai run kimi` / `dot ai run agy` / `dot ai run goose` |
-| `dot ai run kiro` / `dot ai run sgpt` / `dot ai run ollama` / `dot ai run opencode` | `dot ai run kiro` / `dot ai run sgpt` / `dot ai run ollama` / `dot ai run opencode` |
-| `dot ai run aider` / `dot ai run autohand` / `dot ai run vibe` / `dot ai run qwen` / `dot ai run zai` | `dot ai run aider` / `dot ai run autohand` / `dot ai run vibe` / `dot ai run qwen` / `dot ai run zai` |
-| `dot ai status` | `dot ai tools` |
+| `dot ai status` | `dot ai list` |
 | `dot ai dashboard` / `dot ai dash` | `dot ai` (the cockpit) |
-| `dot ai proxy …` / `dot ai local on\|off` | `dot ai serve` |
-| `dot ai install --interactive` | `dot ai login` |
-| `dot ai ask` | `dot ai ask` |
+| `dot ai proxy …` / `dot ai local on\|off` | `dot ai gateway serve` |
 | `--pattern <name>` | `--style <name>` |
 
 ## Agentic terminal workflows
@@ -185,6 +189,6 @@ If your terminal has built-in AI agents, keep your shell lean and fast:
 ## Privacy and safety
 
 - No AI tools are installed for you.
-- No background services run by default; the gateway runs only while you keep `dot ai serve` up.
+- No background services run by default; the gateway runs only while you keep `dot ai gateway serve` up.
 - You control AI helpers with `DOTFILES_AI=1`.
 - The gateway uses your native Claude session — no API keys are stored or required.

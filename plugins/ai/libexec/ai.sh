@@ -14,6 +14,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
 # shellcheck source=../../../lib/dot/ai-commands.sh
 source "$SCRIPT_DIR/../../../lib/dot/ai-commands.sh"
+# shellcheck source=../../../lib/dot/ai-provision.sh
+source "$SCRIPT_DIR/../../../lib/dot/ai-provision.sh"
 # shellcheck source=../../../lib/dot/ai-probe.sh
 source "$SCRIPT_DIR/../../../lib/dot/ai-probe.sh"
 # shellcheck source=../../../lib/dot/ai-roster.sh

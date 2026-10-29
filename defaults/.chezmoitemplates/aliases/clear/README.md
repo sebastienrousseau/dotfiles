@@ -1,31 +1,28 @@
 # Clear Aliases
 
-Manage Clear aliases. Part of the **Universal Dotfiles** configuration.
+Manage screen-clearing aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
 ## Description
 
-These aliases are defined in `clear.aliases.sh` and are automatically loaded by `chezmoi`.
+These aliases are defined in `clear.aliases.sh`. Loaded by the eager alias layer `~/.config/shell/90-ux-aliases.sh` (a core category).
 
 ## Aliases
 
-This code provides a set of command aliases to make working with the
-terminal easier and more efficient. The following aliases are included:
+| Name | Definition | Notes |
+| --- | --- | --- |
+| `validate_dir` | function |  |
+| `cdw` | `cd_workspace` | Change to `~/workspace` (the file sets `WORKSPACE_DIR` to it). |
+| `c` | `clear_screen` | Clear the screen. |
+| `cls` | `clear_list_current` | Clear the screen and list the current directory. |
+| `cpl` | `clear_pwd_list` | Clear the screen, print the working directory and list it. |
+| `cplt` | `clear_pwd_tree` | Clear the screen, print the working directory and show its tree. |
+| `clh` | `clear_history` | Clear the screen and print the command history. |
+| `clp` | `print_working_dir` | Print the working directory (it does not clear the screen). Replaced by `clp` from `ai.aliases.sh` (lazy layer) when `claude` is on PATH. |
+| `clt` | `clear_print_tree` | Clear the screen and show the directory tree. |
 
-- `c` clears the terminal screen.
-- `cdw` changes the current directory to the workspace directory.
-- `cl` is an alias for `c`, which clears the terminal screen.
-- `clc` clears the terminal screen and lists the contents of the current
-  directory.
-- `clh` clears the terminal screen and prints the command history.
-- `clp` clears the terminal screen and prints the current working
-  directory.
-- `clt` clears the terminal screen and prints the directory tree.
-- `cpl` clears the terminal screen and prints the current working
-  directory and the contents of the current directory.
-- `cplt` clears the terminal screen and prints the current working
-  directory and the directory tree.
+`cl` and `clc` are not clear aliases: `ai.aliases.sh` defines them for Claude Code.
 
 [banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 

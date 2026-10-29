@@ -14,7 +14,7 @@ Accepted
 
 ## Context
 
-The dotfiles manage 98 alias files across 30+ categories (git, docker, kubernetes, python, security, etc.). These need to load fast, support per-machine toggling, and work across Zsh, Bash, Fish, and Nushell.
+The dotfiles manage about a hundred alias files across 30+ categories (git, docker, kubernetes, python, security, etc.). These need to load fast, support per-machine toggling, and work across Zsh, Bash, Fish, and Nushell.
 
 **Design questions:**
 
@@ -43,6 +43,12 @@ aliases/
 
 Three profiles control alias scope (set in `.chezmoidata.toml`):
 
+> **Status note (0.2.539):** the profile is read from the
+> `DOTFILES_ALIAS_PROFILE` environment variable when chezmoi renders
+> `90-ux-aliases.sh.tmpl` and `91-ux-aliases-lazy.sh.tmpl` (default
+> `standard`), not from `.chezmoidata.toml`. The bucket toggles below do
+> live in `.chezmoidata.toml`.
+
 | Profile | Scope | Use Case |
 |---------|-------|----------|
 | `minimal` | Core only, excludes interactive/sudo | Servers, containers |
@@ -61,7 +67,7 @@ svn = false    # disable on machines without SVN
 
 ### Two-Phase Loading
 
-1. **Eager (90-ux-aliases.sh):** Core categories loaded at shell startup (~40KB). Includes: archives, cd, clear, configuration, default, diagnostics, disk-usage, editor, git, interactive, installer, mkdir, modern, ps, rsync, sudo, system.
+1. **Eager (90-ux-aliases.sh):** Core categories loaded at shell startup (~40KB). Includes: archives, cd, clear, compliance, configuration, default, diagnostics, disk-usage, editor, git, interactive, installer, mkdir, modern, ps, rsync, sudo, system. Archives load last among them, so their names win.
 
 2. **Lazy (91-ux-aliases-lazy.sh):** Ecosystem aliases deferred until first prompt via `precmd` hook. Includes: docker, kubernetes, terraform, gcloud, python, npm, rust, security, etc.
 
@@ -79,7 +85,7 @@ Functions use a parallel system with `groups.json` as a registry:
 
 - Adding aliases is self-service: create a file in the right category
 - Per-machine customization without forking
-- Lazy loading keeps startup under 200ms even with 98 alias files
+- Lazy loading keeps startup under 200ms even with about a hundred alias files
 - `groups.json` enables automated bridge generation for Fish/Nushell
 
 ### Negative

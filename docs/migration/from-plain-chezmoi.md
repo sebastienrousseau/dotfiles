@@ -25,7 +25,7 @@ directly forever. Nothing here replaces chezmoi; `dot` shells out to it.
 | `chezmoi diff` / `status` | `dot diff` / `dot status` — same thing, prettier |
 | — | `dot doctor`, `dot doctor status`, `dot doctor fix`, `dot doctor rollback`, `dot attest` |
 | `chezmoi secret` | `dot secret` (age + sops) |
-| `run_onchange_` scripts | same, plus `install/provision/` |
+| `run_onchange_` scripts | same (under `defaults/`, run on apply), plus `install/provision/`, which apply never runs: only `install.sh --provision` (or `DOTFILES_PROVISION=1`) does |
 
 **`.chezmoiroot` is the key idea.** It contains `defaults`, so chezmoi
 treats `~/.dotfiles/defaults/` as the source root. Framework code sits
@@ -45,18 +45,28 @@ tar -czf ~/chezmoi-backup-$(date +%F).tar.gz -C "$HOME" -T ~/chezmoi-managed.txt
 Commit and push your existing source repo if it has a remote. That is
 the real backup.
 
-## 2. Two paths
+## 2. Know what the installer does with your source
+
+`install.sh` looks for an existing source before it clones anything:
+
+- If `~/.dotfiles` is a git checkout, it applies that.
+- Otherwise, if `~/.local/share/chezmoi` (chezmoi's default source) is
+  a git checkout, it **moves** that directory to `~/.dotfiles`, sets
+  `sourceDir` in `~/.config/chezmoi/chezmoi.toml`, and applies *your*
+  repo. It does not clone this framework at all.
+- Otherwise it clones the framework into `~/.dotfiles`, sets
+  `sourceDir` to it, and applies the framework's defaults over your
+  files.
+
+So to get the framework, move your source aside first. That leaves
+two paths:
 
 **A. Keep your own repo** (you have a dotfiles repo you want to keep
 as the source of truth): install the framework, then move your files
 into `defaults/`.
 
-**B. Adopt this repo's defaults** and layer your changes on top:
-
-```sh
-# Download and verify the release installer per docs/guides/INSTALL.md first.
-bash /tmp/dotfiles-install.sh
-```
+**B. Adopt this repo's defaults** and layer your changes on top: move
+your source aside as below, run the installer, and stop there.
 
 Path A continues below.
 
@@ -64,16 +74,22 @@ Path A continues below.
 
 ```sh
 old_source="$(chezmoi source-path)"
+mv "$old_source" ~/chezmoi-source-old
 
 # Download and verify the release installer per docs/guides/INSTALL.md first.
 bash /tmp/dotfiles-install.sh
 
 # Copy your source files under defaults/, preserving chezmoi's naming.
-rsync -av --exclude '.git' "$old_source/" ~/.dotfiles/defaults/
+# The metadata files are left out here and merged by hand below.
+rsync -av --exclude '.git' --exclude '.chezmoidata.toml' \
+  --exclude '.chezmoiignore' --exclude '.chezmoi.toml.tmpl' \
+  --exclude '.chezmoitemplates' \
+  ~/chezmoi-source-old/ ~/.dotfiles/defaults/
 ```
 
-Then reconcile the chezmoi-metadata files, which now exist in both
-places — merge yours into the framework's rather than overwriting:
+Then reconcile the chezmoi-metadata files, which exist in both
+`~/chezmoi-source-old/` and `~/.dotfiles/defaults/`: merge yours into
+the framework's rather than overwriting:
 
 | File | What to do |
 |---|---|
@@ -127,6 +143,8 @@ the engine:
 ```sh
 chezmoi --source ~/chezmoi-source-backup-<date> apply
 bash ~/.dotfiles/scripts/uninstall.sh --force
+# uninstall.sh removes ~/.local/share/chezmoi, so restore your source after it
+mv ~/chezmoi-source-old ~/.local/share/chezmoi
 ```
 
 Or simply point chezmoi back at your old source and carry on:

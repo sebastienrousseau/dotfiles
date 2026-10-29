@@ -55,9 +55,9 @@ Identify the incident through automated or manual signals.
 |--------|--------|------|
 | Pre-commit hooks | Blocked secret, insecure pattern | Gitleaks, detect-secrets, compliance-guard |
 | CI pipeline | Failed security scan, unsigned commit | `security-enhanced.yml`, `compliance-guard.yml` |
-| Nightly checks | Dependency version drift, CVE match | `nightly.yml` |
+| Weekly extended tests | Dependency version drift | `nightly.yml` (Sundays 02:00 UTC) |
 | CodeQL | Static analysis finding | `codeql.yml` |
-| Audit log | Unexpected operation | `dot audit` (`~/.local/share/dotfiles.log`) |
+| Operations log | Unexpected operation | `${XDG_STATE_HOME:-~/.local/state}/dotfiles/dot.log` (written by `dot` apply, doctor, rollback and related commands) |
 
 **Manual detection signals:**
 
@@ -72,7 +72,7 @@ Classify the incident severity and assign ownership.
 
 ```bash
 # Gather initial evidence
-dot audit | tail -50
+tail -n 50 "${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/dot.log"
 git log --oneline --show-signature -20
 chezmoi diff
 chezmoi verify
@@ -100,10 +100,11 @@ Stop the incident from spreading. Actions depend on severity.
 **Immediate containment (Critical/High):**
 
 ```bash
-# Revoke exposed credentials
-dot secrets rotate --all-exposed
+# Revoke exposed credentials at each provider (there is no
+# `dot` rotate command), then store the replacements:
+dot secret set <NAME>
 
-# Revoke SSH certificates
+# Revoke the current SSH certificate
 dot secret cert remove
 
 # Lock configuration files to prevent further modification
@@ -112,11 +113,12 @@ lock-configs
 # Disable compromised CI workflow
 gh workflow disable <workflow-name>
 
-# Force-protect the main branch
+# Confirm main is still protected (signed commits, required checks,
+# enforce_admins); see .github/BRANCH_PROTECTION.md for the expected values
 gh api repos/{owner}/{repo}/branches/main/protection \
-  --method PUT \
-  --field required_status_checks='{"strict":true,"contexts":["ci"]}' \
-  --field enforce_admins=true
+  --jq '{signatures: .required_signatures.enabled,
+         admins: .enforce_admins.enabled,
+         checks: .required_status_checks.contexts}'
 ```
 
 **Short-term containment (Medium/Low):**
@@ -128,8 +130,9 @@ gh api repos/{owner}/{repo}/branches/main/protection \
 # Re-apply known-good configuration
 chezmoi apply --force
 
-# Clear potentially tainted caches
-rm -rf ~/.cache/shell/
+# Clear potentially tainted shell startup caches
+# (~/.cache/zsh, ~/.cache/bash, ~/.cache/fish, ~/.cache/nushell)
+dot shell clean
 ```
 
 ### Phase 4: Eradication
@@ -165,8 +168,8 @@ pre-commit run --all-files
 dot doctor status
 dot doctor
 
-# Confirm audit log captures recovery
-dot audit | tail -20
+# Confirm the operations log captures recovery
+tail -n 20 "${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/dot.log"
 ```
 
 ### Phase 6: Post-Mortem
@@ -203,14 +206,11 @@ git push origin --force --all
 # Step 6: Notify GitHub to purge cached views
 # Open a support ticket at https://support.github.com for cache invalidation
 
-# Step 7: Update Gitleaks baseline
-gitleaks detect --source . --baseline-path config/gitleaks-baseline.json
-
-# Step 8: Verify clean state
-gitleaks detect --source . --verbose
+# Step 7: Verify clean state
+gitleaks detect --source . --config config/gitleaks.toml --verbose
 ```
 
-**Post-action:** Add the leaked pattern to `config/gitleaks.toml` allowlist if it was a false positive, or add a new rule if the pattern was not previously covered.
+**Post-action:** If the finding was a false positive, add its fingerprint to `.gitleaksignore` or an allowlist entry to `config/gitleaks.toml`; if the pattern was not previously covered, add a new rule to `config/gitleaks.toml`.
 
 ### Runbook 2: Supply Chain Compromise
 
@@ -227,8 +227,9 @@ gh api /advisories --jq '.[] | select(.package.name == "<package>")'
 
 # Step 3: Pin to last known-good version
 # For Nix: revert flake.lock to known-good commit
-git checkout <known-good-commit> -- flake.lock
-nix flake lock --update-input nixpkgs
+git checkout <known-good-commit> -- flake.lock nix/flake.lock
+# (or move only nixpkgs forward to a patched revision)
+nix flake update nixpkgs
 
 # For Homebrew: pin the formula
 brew pin <formula>
@@ -260,7 +261,7 @@ chezmoi managed --include=files | wc -l
 chezmoi dump --format=json > /tmp/chezmoi-state-$(date +%s).json
 
 # Step 3: Check audit log for unauthorized operations
-dot audit | grep -E "(apply|edit|add)" | tail -20
+grep -E "(apply|edit|add)" "${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/dot.log" | tail -20
 
 # Step 4: Determine root cause
 # Option A: Local manual edit (benign)
@@ -283,17 +284,18 @@ lock-configs
 **Detection:** Unexpected binary behavior, hash mismatch, or CVE disclosure for a managed tool.
 
 ```bash
-# Step 1: Quarantine the affected tool
-chmod 000 "$(which <tool>)"
-
-# Step 2: Record forensic evidence
+# Step 1: Record forensic evidence (before quarantine: a mode-000
+# file can no longer be read for hashing)
 sha256sum "$(which <tool>)" > /tmp/quarantine-evidence.txt
 ls -la "$(which <tool>)" >> /tmp/quarantine-evidence.txt
 file "$(which <tool>)" >> /tmp/quarantine-evidence.txt
 
+# Step 2: Quarantine the affected tool
+chmod 000 "$(which <tool>)"
+
 # Step 3: Check if the tool executed during shell startup
-grep "<tool>" ~/.cache/shell/*
-grep "<tool>" ~/.local/share/dotfiles.log
+grep -l "<tool>" ~/.cache/zsh/* ~/.cache/bash/* 2>/dev/null
+grep "<tool>" "${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/dot.log"
 
 # Step 4: Reinstall from verified source
 mise install <tool>@<verified-version> --force
@@ -305,7 +307,7 @@ nix profile install nixpkgs#<package>
 sha256sum "$(which <tool>)"
 
 # Step 6: Clear cached eval output that may reference the compromised tool
-rm -rf ~/.cache/shell/
+dot shell clean
 
 # Step 7: Restart shell and verify clean startup
 exec "$SHELL" -l
@@ -395,13 +397,13 @@ Preserve all forensic evidence before performing eradication or recovery actions
 
 | Evidence | Command | Storage |
 |----------|---------|---------|
-| Dotfiles audit log | `cp ~/.local/share/dotfiles.log /tmp/incident-$(date +%s)/` | Local archive |
+| Dotfiles operations log | `cp "${XDG_STATE_HOME:-$HOME/.local/state}"/dotfiles/dot.log* /tmp/incident-$(date +%s)/` | Local archive |
 | Git reflog | `git reflog > /tmp/incident-$(date +%s)/reflog.txt` | Local archive |
 | Git signatures | `git log --show-signature -50 > /tmp/incident-$(date +%s)/signatures.txt` | Local archive |
 | Chezmoi state | `chezmoi dump --format=json > /tmp/incident-$(date +%s)/chezmoi-state.json` | Local archive |
 | Binary hashes | `sha256sum ~/.local/bin/* > /tmp/incident-$(date +%s)/binary-hashes.txt` | Local archive |
 | CI run logs | `gh run view <run-id> --log > /tmp/incident-$(date +%s)/ci-log.txt` | Local archive |
-| Shell cache | `cp -r ~/.cache/shell/ /tmp/incident-$(date +%s)/shell-cache/` | Local archive |
+| Shell cache | `cp -r ~/.cache/zsh ~/.cache/bash /tmp/incident-$(date +%s)/` | Local archive |
 
 ### Structured Log Format
 
@@ -444,8 +446,10 @@ log_incident "critical" "secrets-exposure" "API key found in commit abc1234"
 # Roll back to a known-good dotfiles state
 dot doctor rollback
 
-# Restore specific configuration files
-dot doctor restore <target>
+# Restore from a backup or a git ref
+dot doctor restore --list
+dot doctor restore --latest
+dot doctor restore --git <ref>
 
 # Full re-apply from source of truth
 chezmoi init --apply --force
@@ -460,14 +464,16 @@ dot doctor
 For incidents requiring complete re-provisioning:
 
 ```bash
-# Step 1: Export current secrets (if not compromised)
-dot secrets export > /tmp/secrets-backup.age
+# Step 1: Back up the age identity (if not compromised) to offline
+# storage. Do not use `dot secret export` for this: it prints the
+# secrets in plaintext.
+cp ~/.config/chezmoi/key.txt <offline-backup-location>/
 
-# Step 2: Clear all deployed dotfiles
-chezmoi purge
+# Step 2: Remove the deployed setup (keeps the source)
+dot config uninstall
 
 # Step 3: Clear all caches
-rm -rf ~/.cache/shell/
+dot shell clean
 rm -rf ~/.cache/chezmoi/
 
 # Step 4: Re-initialize from clean clone
@@ -478,8 +484,11 @@ git verify-commit HEAD  # Verify signature chain
 # Step 5: Re-apply
 chezmoi init --apply
 
-# Step 6: Re-import secrets (if exported)
-dot secrets import /tmp/secrets-backup.age
+# Step 6: Restore the age identity (if backed up), then re-apply so
+# encrypted files decrypt (there is no `dot secret import`)
+cp <offline-backup-location>/key.txt ~/.config/chezmoi/key.txt
+chmod 600 ~/.config/chezmoi/key.txt
+chezmoi apply
 
 # Step 7: Verify
 chezmoi verify
@@ -502,7 +511,7 @@ dot doctor status
 
 ## Post-Incident Review Template
 
-Conduct a review within 5 business days of resolution. Copy the template below into a new file under `docs/security/incidents/`.
+Conduct a review within 5 business days of resolution. Copy the template below into a new file under `docs/security/incidents/` (create the directory for the first review).
 
 ````markdown
 # Post-Incident Review: [INCIDENT-YYYY-NNN]

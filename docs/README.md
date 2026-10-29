@@ -20,7 +20,7 @@ Quick jumps into the Manual:
 - [Concepts](https://doc.dotfiles.io/manual/01-concepts/01-architecture/) — architecture, trust model, theme engine, fleet, self-healing
 - [Tutorials](https://doc.dotfiles.io/manual/02-tutorials/01-first-install/) — first install, wallpaper→theme, profiles, secrets, fleet
 - [Reference](https://doc.dotfiles.io/manual/03-reference/01-dot-cli/) — CLI, config files, environment, templates, feature flags
-- [Cookbook](https://doc.dotfiles.io/manual/04-cookbook/01-recipes/) — 40+ recipes, troubleshooting, FAQ
+- [Cookbook](https://doc.dotfiles.io/manual/04-cookbook/01-recipes/) — recipes, troubleshooting, FAQ
 
 ## Start
 
@@ -63,10 +63,10 @@ Quick jumps into the Manual:
 | Path | Purpose |
 | :--- | :--- |
 | `docs/` | Guides, reference, security, and architecture |
+| `bin/`, `plugins/`, `lib/dot/` | The `dot` CLI: dispatcher, one plugin per domain, shared library |
 | `scripts/` | Repo-only scripts and `dot` command internals |
 | `install/` | Installer and provisioning helpers |
-| `dot_config/` | Managed user configuration files |
-| `dot_local/` | Managed local executables |
+| `defaults/` | chezmoi source root: `defaults/dot_config/` (managed user configuration) and `defaults/dot_local/` (managed local executables) |
 | `examples/` | Executable examples |
 | `tests/` | Unit, integration, and framework coverage |
 

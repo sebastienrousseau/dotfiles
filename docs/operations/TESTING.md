@@ -37,7 +37,7 @@ DOT_STRICT=1 ./tests/framework/test_runner.sh
 ```
 
 The runner's FINAL SUMMARY lists which test files failed (not just
-the total count) so locating a regression in a 4000+ assertion run
+the total count) so locating a regression in a run of thousands of assertions
 doesn't require grepping back through the full log. Per-file failure
 counts and crashed-file markers appear inline.
 
@@ -46,12 +46,14 @@ counts and crashed-file markers appear inline.
 ```text
 tests/
 ├── framework/           # Test framework
-│   ├── assertions.sh    # 16 assertion functions
+│   ├── assertions.sh    # Assertion functions
 │   ├── mocks.sh        # Mock utilities
 │   └── test_runner.sh  # Test executor
-├── unit/               # 425 unit test files
-├── integration/        # 11 integration test files
-└── performance/        # Benchmarks
+├── unit/               # Unit tests, one directory per domain
+├── integration/        # Integration tests (RUN_INTEGRATION=1)
+├── regression/         # Regression tests
+└── fixtures/           # Shared test data
+benches/                # Benchmarks and performance budgets (repo root)
 ```
 
 ## Writing tests
@@ -64,7 +66,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../framework/assertions.sh"
 
 # Source the function under test
-source "$HOME/.dotfiles/.chezmoitemplates/functions/myfunction.sh"
+source "$HOME/.dotfiles/defaults/.chezmoitemplates/functions/myfunction.sh"
 
 # Test cases
 test_start "function_basic_usage"
@@ -93,7 +95,7 @@ assert_exit_code 1 "myfunction"
 | `assert_empty value [msg]` | String is empty |
 | `assert_not_empty value [msg]` | String isn't empty |
 | `assert_file_contains file needle [msg]` | File contains text |
-| `assert_file_not_contains file needle [msg]` | File lacks text |
+| `assert_contains needle actual [msg]` | String contains substring |
 
 ### Mock utilities
 
@@ -126,20 +128,21 @@ Measure resource efficiency with shell startup benchmarks and load tests.
 
 ## Coverage goals
 
-| Category | Target | Current |
-|----------|--------|---------|
-| Module coverage | >=95% | 100% |
-| Unit test files | - | 425 |
-| Integration test files | - | 11 |
-| Total test files | - | 436 |
-| Named tests (`test_start`) | - | 2149 |
-| Unit test pass rate | 100% | 100% |
+| Category | Target |
+|----------|--------|
+| Module coverage | 98% (`ci.yml`, `nightly.yml`), 100% (`ci-enforced.yml`) |
+| Unit test pass rate | 100% |
 
-CI enforces module coverage via:
+CI enforces module coverage through `reusable-test-suite.yml`, which
+runs the check below with each caller's `min_coverage` input (the
+script's own default is `98`):
 
 ```bash
-MIN_COVERAGE=95 ./tests/framework/module_coverage.sh
+MIN_COVERAGE=98 ./tests/framework/module_coverage.sh
 ```
+
+For the current test counts, run the suite: its FINAL SUMMARY prints
+them.
 
 For a current local baseline, run:
 
@@ -267,7 +270,7 @@ chmod +x tests/integration/test_*.sh
 If a test reports "function not available", verify the source file exists:
 
 ```bash
-ls -la .chezmoitemplates/functions/
+ls -la defaults/.chezmoitemplates/functions/
 ```
 
 ### Mock cleanup issues

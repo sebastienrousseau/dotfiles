@@ -53,9 +53,11 @@ Eight native Go fuzz targets cover every input-parsing surface — the
 NDJSON event decoder and reducer, the hex-colour validator, the picker's
 matcher and key handling, the table row splitter, the stdin item reader
 and the `pick` flag parser. Every `go test` run replays the seed corpus
-plus the committed crashers under `testdata/fuzz/<Target>/`, so a fixed
-bug cannot silently return. The ClusterFuzzLite / OSS-Fuzz build in
-`fuzz/oss-fuzz/` compiles the same targets with libFuzzer.
+plus the committed crashers under `testdata/fuzz/<Target>/` (today only
+`FuzzStepApply`), so a fixed bug cannot silently return. The
+ClusterFuzzLite / OSS-Fuzz build (`fuzz/oss-fuzz/build.sh`) cannot import
+this `package main` module, so it compiles `FuzzUI*` ports of these
+parsers from the repo's `fuzz/` package with libFuzzer.
 
 ```bash
 go test -run '^$' -fuzz=FuzzParseEvent    -fuzztime=30s ./...   # NDJSON line decoder
@@ -69,10 +71,11 @@ go test -run '^$' -fuzz=FuzzParsePickArgs -fuzztime=30s ./...   # --header/--pro
 go test -run '^Fuzz' -v ./...                                    # replay every corpus, no fuzzing
 ```
 
-Crashers found so far and fixed (kept as regression corpus):
-`FuzzStepApply` — a negative `progress.cur` panicked `strings.Repeat` in the
-progress bar; `FuzzFuzzyMatch` — a byte-vs-rune comparison made every
-non-ASCII query unmatchable.
+Crashers found so far and fixed: `FuzzStepApply` (kept under
+`testdata/fuzz/FuzzStepApply/`): a negative `progress.cur` panicked
+`strings.Repeat` in the progress bar; `FuzzFuzzyMatch` (kept as seeds in
+`fuzz_test.go`): a byte-vs-rune comparison made every non-ASCII query
+unmatchable.
 
 ### Testing model
 

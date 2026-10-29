@@ -63,14 +63,14 @@ cosign verify-blob \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   ALL_SHA256SUMS
 
-gh release download "$TAG" --repo "$REPO" --dir .  # pull every other asset
+gh release download "$TAG" --repo "$REPO" --dir . --skip-existing  # pull every other asset
 sha256sum -c ALL_SHA256SUMS                        # one line per asset
 ```
 
 All four commands should print "Verified" / "PASSED" / "OK" and
-exit 0. If any fails, **the release was tampered with**: open
-an issue at <https://github.com/sebastienrousseau/dotfiles/issues>
-and do **not** install.
+exit 0. If any fails, **the release was tampered with**: do **not**
+install, and report it privately (see
+[If verification fails](#if-verification-fails)).
 
 ---
 
@@ -127,9 +127,9 @@ SLSA + Cosign protect the *supply chain* (you got what we shipped)
 
 For correctness review:
 
-- Code is open under MIT — read it. Start at `bin/dot`.
-- CI runs ~75 checks per PR (shellcheck, shfmt, CodeQL, Semgrep, Codacy, etc.).
-- Pre-commit hooks reject typos, unsigned commits, raw secrets.
+- Code is open under Apache-2.0 OR MIT: read it. Start at `bin/dot`.
+- CI runs shellcheck, shfmt, CodeQL, gitleaks and the test suite on every PR; branch protection requires five status checks before merge (see `.github/BRANCH_PROTECTION.md`).
+- Pre-commit hooks reject typos and raw secrets; the pre-push hook and branch protection reject unsigned commits.
 - See `docs/security/SCORECARD.md` for the OpenSSF score posture.
 
 ---
@@ -137,8 +137,8 @@ For correctness review:
 ## In-shell one-liner for ongoing verification
 
 If you intend to install or update from a release tag, add this to
-your shell startup (already in `dot_config/shell/*` for users who
-run `chezmoi apply`):
+your shell startup (the dotfiles do not ship it; `chezmoi apply` does
+not install it for you):
 
 ```sh
 verify-dot-release() {
@@ -183,11 +183,14 @@ verify-dot-release v0.2.502    # verify specific tag
    yours don't match what's on
    <https://github.com/sebastienrousseau/dotfiles/releases>, you
    downloaded from a man-in-the-middle.
-3. **Report**: open an issue and email
-   `security@sebastienrousseau.com` (encrypted to the WKD-published
-   GPG key — fingerprint
-   `55AFAD364FD9DB3819E61F0C8D688FAFA9144693`). Acknowledgement
-   SLA: 72 hours per `SECURITY.md`.
+3. **Report privately**: open a private
+   [GitHub Security Advisory](https://github.com/sebastienrousseau/dotfiles/security/advisories/new),
+   or email `security@sebastienrousseau.com` encrypted to the GPG key
+   (fingerprint `55AFAD364FD9DB3819E61F0C8D688FAFA9144693`; fetch it
+   from WKD or `docs/security/security-pubkey.asc`, see
+   [DISCLOSURE.md](DISCLOSURE.md)). Do not open a public issue.
+   Acknowledgement SLA depends on severity, from 24 hours (Critical)
+   to 10 business days (Low), per `SECURITY.md`.
 
 ---
 

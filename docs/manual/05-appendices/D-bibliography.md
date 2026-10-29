@@ -26,20 +26,20 @@ Cited works and recommended reading.
 ## Cryptography
 
 - **Valsorda, F. (2020).** *age: A simple, modern and secure encryption tool.* <https://age-encryption.org/>
-- **Mozilla.** *SOPS: Secrets OPerationS.* <https://github.com/getsops/sops>
+- **getsops (originally Mozilla).** *SOPS: Secrets OPerationS.* <https://github.com/getsops/sops>
 - **Barnes, R., et al. (2023).** *RFC 9420: The Messaging Layer Security (MLS) Protocol.* — Modern group-key agreement, relevant to multi-recipient encryption.
 
 ## Protocols
 
 - **Anthropic.** *Model Context Protocol specification.* <https://modelcontextprotocol.io/>
-- **OpenID Foundation.** *Model Context Protocol A2A (Agent-to-Agent).* — Referenced in `dot_config/dotfiles/agent-card.json`.
+- **Linux Foundation.** *Agent2Agent (A2A) Protocol.* <https://a2a-protocol.org/>: the agent card format used by `defaults/dot_config/dotfiles/agent-card.json` and checked by `dot agent card check`.
 
 ## Tools & Systems
 
-- **Twpayne, T.** *chezmoi: Manage your dotfiles across multiple machines.* <https://chezmoi.io>
+- **Payne, T.** *chezmoi: Manage your dotfiles across multiple machines.* <https://chezmoi.io>
 - **jdxcode.** *mise: Dev tools, env vars, task runner.* <https://mise.jdx.dev/>
 - **NixOS.** *Nix Flakes.* <https://nixos.wiki/wiki/Flakes>
-- **Microsoft / CycloneDX.** *CycloneDX SBOM specification.* <https://cyclonedx.org/>
+- **OWASP.** *CycloneDX SBOM specification.* <https://cyclonedx.org/>
 - **Anchore.** *Syft + Grype.* <https://github.com/anchore/syft>, <https://github.com/anchore/grype>
 
 ## Shell Performance
@@ -55,4 +55,4 @@ Cited works and recommended reading.
 
 ## Author
 
-- **Rousseau, S.** *Dotfiles v0.2.501.* <https://github.com/sebastienrousseau/dotfiles>
+- **Rousseau, S.** *Dotfiles.* <https://github.com/sebastienrousseau/dotfiles>

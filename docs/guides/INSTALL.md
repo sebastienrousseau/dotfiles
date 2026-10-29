@@ -8,7 +8,7 @@ Set up on macOS, Linux, or WSL in 3 to 5 minutes.
 
 **You will need:** `git` and `curl`.
 
-**Default shell:** Fish. You can change it after you install.
+**Default shell:** Fish, for the shell Ghostty and Zellij start. Your login shell is not changed unless you ask for it (see below).
 
 ## Install
 
@@ -31,13 +31,14 @@ dot help             # Browse available commands
 
 ## Choose a shell
 
-Fish is the default shell. To switch to Zsh or Nushell, edit `~/.dotfiles/.chezmoidata.toml`:
+Fish is the default shell. To switch to Zsh or Nushell, set `default_shell` in the `[data]` section of this host's `~/.config/chezmoi/chezmoi.toml` (the default lives in `~/.dotfiles/defaults/.chezmoidata.toml`):
 
 ```toml
+[data]
 default_shell = "zsh"
 ```
 
-Supported values: `zsh`, `fish`, `nushell`.
+Supported values: `zsh`, `fish`, `nu`.
 
 Then apply the change:
 
@@ -45,19 +46,21 @@ Then apply the change:
 dot apply
 ```
 
+`default_shell` picks the shell that Ghostty and Zellij launch. To also make Fish or Zsh your login shell, run the installer with `--provision` and `DOTFILES_SET_FISH=1` or `DOTFILES_SET_ZSH=1`, or run `chsh -s "$(command -v zsh)"` yourself.
+
 ## Feature flags
 
-Turn optional tools on or off after setup. Edit `.chezmoidata.toml`:
+Turn optional tools on or off after setup. Override the defaults from `defaults/.chezmoidata.toml` in this host's `~/.config/chezmoi/chezmoi.toml`:
 
 ```toml
-[features]
-zsh = true         # Zsh shell configuration
-fish = true        # Fish shell configuration
-nushell = true     # Nushell configuration
-nvim = true        # Neovim IDE configuration
-tmux = true        # Terminal multiplexer
-nix = true         # Nix package manager integration
+[data.features]
+zellij = true          # Zellij multiplexer config
+linux_desktop = true   # Linux desktop / Wayland configs
+niri = true            # niri compositor config
+ai_theme_sync = false  # Wallpaper-aware AI CLI appearance
 ```
+
+See [Features](../reference/FEATURES.md) for every flag. Run `dot apply` afterwards.
 
 ## Update
 
@@ -68,7 +71,7 @@ dot update
 ## Next steps
 
 1. Run `dot help tour` to take a guided tour.
-2. Add your own tweaks in `~/.config/shell/custom/`.
+2. Add your own tweaks in `~/.zshrc.local` (or files in `~/.config/zsh/rc.d.local/`), `~/.bashrc.local`, or `~/.config/fish/config.fish.local`. They are sourced if present and are not managed by chezmoi.
 3. Read the [Utilities and `dot` CLI](../reference/UTILS.md) reference.
 
 ---
@@ -87,9 +90,9 @@ cd ~/.dotfiles
 
 ### Minimal install
 
-Install only shells and core tools. This selects the `minimal` profile in
-this host's `~/.config/chezmoi/chezmoi.toml` (the tracked source is not
-edited) and skips toolchain provisioning:
+Select the `minimal` profile in this host's `~/.config/chezmoi/chezmoi.toml`
+(the tracked source is not edited) and skip toolchain provisioning, even
+when `--provision` is also given:
 
 ```bash
 ./install.sh --minimal
@@ -120,6 +123,12 @@ On a machine with internet access, create a bundle:
 dot config export ~/Downloads
 ```
 
+The archive holds `~/.dotfiles`, `~/.config/chezmoi` and `~/.local/share/mise`
+(plus the Nix store with `DOTFILES_BUNDLE_NIX=1`). `~/.config/chezmoi` contains
+your age key (`key.txt`), so treat the archive as a secret. It stores absolute
+paths: extract it as a user with the same home directory path, and note that
+extraction overwrites files already at those paths.
+
 Copy the archive to the target machine. Then unpack and install:
 
 ```bash
@@ -130,7 +139,12 @@ cd ~/.dotfiles
 
 ### Uninstall
 
+`chezmoi purge` deletes `~/.config/chezmoi`, which holds your age key
+(`key.txt`). Copy the key somewhere safe first if you still need to decrypt
+secrets encrypted to it.
+
 ```bash
+cp ~/.config/chezmoi/key.txt ~/key.txt.backup   # if you use encryption
 chezmoi purge
 rm -rf ~/.dotfiles
 rm -rf ~/.local/share/chezmoi ~/.local/share/dotfiles.log

@@ -6,24 +6,19 @@ Manage disk usage aliases. Part of the **Universal Dotfiles** configuration.
 
 ## Description
 
-These aliases are defined in `disk-usage.aliases.sh` and are automatically loaded by `chezmoi`.
+These aliases are defined in `du.aliases.sh`. Loaded by the eager alias layer `~/.config/shell/90-ux-aliases.sh` (a core category). Every definition below exists only when `du` is on PATH.
 
 ## Aliases
 
-This code provides a set of command aliases to help users manage disk
-usage on a Unix-based system.
-The following aliases are provided:
-
-- `du`: Display the disk usage of the current directory.
-- `du1`: Show the file size of files and directories in the current
-  directory.
-- `duh`: Show the file size of files and directories.
-- `ducks`: Display the top 10 largest files and directories in the
-  current directory.
-- `dus`: Show the file size in human-readable format, sorted by size.
-- `dusym`: Show the file size of files and directories in the current
-  directory, including symlinks.
-- `dut`: Show the total file size of the current directory.
+| Name | Definition | Notes |
+| --- | --- | --- |
+| `du` | `du -h` | Display the disk usage of the current directory. |
+| `du1` | `du -hxd 1 \| sort -h` | File size of files and directories in current directory. |
+| `ducks` | `du -cks * .* \| sort -rn \| head -n 10` | Top 10 largest files and directories in current directory. |
+| `duh` | `du` | Plain `du`, which the `du` alias turns into `du -h`. |
+| `dus` | `du -hs *` | File size human readable output sorted by size. |
+| `dusym` | `du * -hsLc` | File size of files and directories in current directory including symlinks. |
+| `dut` | `dus` | Same as `dus`. |
 
 [banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 

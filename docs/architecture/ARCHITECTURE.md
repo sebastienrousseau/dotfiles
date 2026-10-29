@@ -17,4 +17,4 @@ content here.
 Neighbouring architecture documents are unaffected:
 
 - [`REPO_LAYOUT.md`](REPO_LAYOUT.md) — every top-level path and why it exists
-- [`INTEROP.md`](INTEROP.md) — agent and MCP interoperability surfaces
+- [`INTEROP.md`](INTEROP.md) — cross-platform command mapping (macOS, Linux, WSL2)
