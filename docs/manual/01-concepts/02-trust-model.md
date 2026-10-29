@@ -142,11 +142,7 @@ The record is:
 
 ### Verifying an Attestation
 
-`dot attest verify` checks a fresh record of this machine; `--json` prints the verdict as JSON and `--max-age <secs>` sets the freshness window for `generated_at`. To check a record from another host, feed the file to the verifier directly:
-
-```sh
-bash ~/.dotfiles/scripts/diagnostics/attest-verify.sh <path>
-```
+`dot attest verify` checks a fresh record of this machine, and `dot attest verify <path>` checks a record from a file (from another host, say); `--json` prints the verdict as JSON and `--max-age <secs>` sets the freshness window for `generated_at`.
 
 The verifier is `lib/wasm-tools` built for `wasm32-wasip1` and run under `wasmtime`, with no filesystem, network or environment. It checks the required fields, the allowed values (`git_signing.format`, `agent.current_profile`, and `mcp.doctor.status`, which must be `healthy`), that `git_signing.merge_verify_signatures` is `true`, and the record's age. Exit codes: 0 every check passed, 1 a check failed, 2 unusable input or toolchain. The first run builds the module, which needs the Rust `wasm32-wasip1` target.
 

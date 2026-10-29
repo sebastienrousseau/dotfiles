@@ -209,7 +209,7 @@ profile per machine and flip session flags when you need less.
 | `DOTFILES_FAST=1` | environment | Skip heavy layers (zinit, completions, lazy runtime managers) | [Configuration](#configuration) |
 | `DOTFILES_ULTRA_FAST=1` | environment | Bare minimum shell: paths, aliases, prompt | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 | `DOTFILES_DEFER_TOOLS=1` *(default)* | environment | Resolve heavy binaries asynchronously after the first prompt | `defaults/dot_config/zsh/dot_zshrc.tmpl` |
-| `DOTFILES_AI=1` *(default)* | environment | `1` loads the zsh AI helper scripts; while the variable is set at all, apply builds `dot-ai-tui` | [`docs/reference/PROFILES.md`](docs/reference/PROFILES.md) |
+| `DOTFILES_AI=1` *(default)* | environment | `1` loads the zsh AI helper scripts; `1` also lets apply build `dot-ai-tui` (`0` is off) | [`docs/reference/PROFILES.md`](docs/reference/PROFILES.md) |
 | `DOTFILES_ARTIFACT_MODE=1` | environment | Minimal prompt plus the async Bento dashboard | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 | `DOTFILES_DEBUG=1` / `DOTFILES_TRACE=1` | environment | Per-stage startup timing / full trace to stderr | [`docs/manual/03-reference/03-environment.md`](docs/manual/03-reference/03-environment.md) |
 | `EVALCACHE_DISABLE=true` | environment | Bypass `_cached_eval` for debugging | [Features](#features) |
@@ -893,7 +893,7 @@ node_manager = "mise"   # mise | fnm | nvm
 
 `dot secret` also reads an optional `[secrets.policy]` table
 (`provider = "auto" | "macos-keychain" | "pass" | "plain-enc"`,
-`auto_load`) from this file; `DOTFILES_SECRETS_PROVIDER` overrides it.
+`auto_load`) from this file; a `[data.secrets.policy]` table in `~/.config/chezmoi/chezmoi.toml` (written by `scripts/ops/setup.sh`) overrides it for one host, and `DOTFILES_SECRETS_PROVIDER` overrides both.
 
 The `Lint / Chezmoidata Schema` job fails a merge on a wrong type
 (a non-boolean flag, an unknown `default_shell` or `node_manager`).
@@ -929,7 +929,7 @@ Hardware presets (`macbook-t2`, `surface-pro`, `geekom-a9`) live in
 |---|---|---|
 | `DOTFILES_FAST=1` | 0 | Skip heavy layers (zinit, completions) |
 | `DOTFILES_ULTRA_FAST=1` | 0 | Bare minimum shell (aliases + prompt) |
-| `DOTFILES_AI=1` | 1 (exported by the shipped zsh, bash, fish, nu and pwsh profiles) | `1` loads the zsh AI helper scripts; set at all, apply builds `dot-ai-tui` |
+| `DOTFILES_AI=1` | 1 (exported by the shipped zsh, bash, fish, nu and pwsh profiles) | `1` loads the zsh AI helper scripts; `1` also lets apply build `dot-ai-tui` (`0` is off) |
 | `DOTFILES_PROFILE` | the chezmoi `profile` | Read by the OS tuning scripts (`scripts/tuning/`); `.zshrc` re-exports it from the chezmoi profile on every start |
 | `DOTFILES_NONINTERACTIVE=1` | unset | Skip prompts (CI) |
 | `DOTFILES_SILENT=1` | unset | Suppress non-error output |

@@ -16,9 +16,21 @@ source "$_ATTEST_DIR/../../lib/dot/utils.sh"
 dot_ui_command_banner "Attest" "attest"
 
 _ATTEST_SCRIPT="scripts/diagnostics/workstation-attestation.sh"
+
+# _attest_export [path] [flags...] — write the record to path, or to the
+# default evidence file when no path comes first.
+_attest_export() {
+  local path="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/attestations/workstation-attestation.json"
+  if [[ $# -gt 0 && "$1" != -* ]]; then
+    path="$1"
+    shift
+  fi
+  run_script "$_ATTEST_SCRIPT" "Workstation attestation" --write "$path" ${1+"$@"}
+}
+
 case "${1:-}" in
   show) run_script "$_ATTEST_SCRIPT" "Workstation attestation" "${@:2}" ;;
-  export) run_script "$_ATTEST_SCRIPT" "Workstation attestation" --write "${@:2}" ;;
+  export) _attest_export "${@:2}" ;;
   verify) run_script "$_ATTEST_SCRIPT" "Workstation attestation" --verify "${@:2}" ;;
   *) run_script "$_ATTEST_SCRIPT" "Workstation attestation" "$@" ;;
 esac

@@ -51,7 +51,7 @@ Check the environment and surface issues. Bare `dot doctor` runs the full check,
 
 ```
 dot doctor check [--heal|-H] [--score|-s] [--json|-j] [--ai|-A]
-dot doctor status [--verbose|-v] [--json|-j] [--fix|-f] [--force|-F]
+dot doctor status [--json|-j] [--fix|-f] [--force|-F]
 ```
 
 | Flag | Effect |
@@ -151,7 +151,7 @@ Auto-repair missing tools, chezmoi drift, broken symlinks, and critical files.
 dot doctor fix [--dry-run|-n] [--force|-f]
 ```
 
-`DOTFILES_NONINTERACTIVE=1` skips the prompts, like `--force`. See [Self-Healing concept](../01-concepts/05-self-healing.md).
+`DOTFILES_NONINTERACTIVE=1` skips the prompts, like `--force`. Exit codes: 0 (nothing to repair, or every attempted repair worked), 1 (a repair failed: an install, `chezmoi apply`, or removing a broken symlink). See [Self-Healing concept](../01-concepts/05-self-healing.md).
 
 ### `dot doctor rollback`
 
@@ -188,11 +188,11 @@ Workstation attestation: an unsigned JSON record of the dotfiles version, platfo
 
 ```
 dot attest show [--json|-j]                  # print it; without --json also write the default file
-dot attest export <file>                     # write it to <file>
-dot attest verify [--max-age|-a <secs>]      # generate a fresh record and verify it
+dot attest export [<file>] [flags]           # write it to <file>, or to the default file
+dot attest verify [<file>] [--json|-j] [--max-age|-a <secs>]  # verify <file>, or a fresh record
 ```
 
-Bare `dot attest` is `dot attest show`. Default file: `~/.local/state/dotfiles/attestations/workstation-attestation.json`. `dot attest show --fleet-store|-F <dir>` (or `DOTFILES_FLEET_STORE`) also writes the record to `<dir>/<fleet-id>/<hostname>/`, with `--fleet-id|-I <id>` (default `default`). A missing option value exits 2, so `dot attest export` without a file fails.
+Bare `dot attest` is `dot attest show`. Default file: `~/.local/state/dotfiles/attestations/workstation-attestation.json`. `dot attest show --fleet-store|-F <dir>` (or `DOTFILES_FLEET_STORE`) also writes the record to `<dir>/<fleet-id>/<hostname>/`, with `--fleet-id|-I <id>` (default `default`). `dot attest export` takes the same flags after the optional file (`dot attest export --fleet-store <dir>` writes the default file and the store). A missing option value, an unknown option or a stray word exits 2.
 
 ### `dot config check`
 
@@ -351,7 +351,7 @@ dot config profile show          # active profile and the [features] flags
 dot config profile set laptop    # switch to 'laptop'
 ```
 
-The profile is the `profile` key in `defaults/.chezmoidata.toml`; `set` rewrites that line in the source, then `dot apply` renders it. There is no `[profiles.<name>]` table: a profile is a name that templates read as `.profile`.
+The profile is the `profile` key in `[data]` of `~/.config/chezmoi/chezmoi.toml` (this host), else in `defaults/.chezmoidata.toml` (the source default); `set` writes this host's value, then `dot apply` renders it. There is no `[profiles.<name>]` table: a profile is a name that templates read as `.profile`.
 
 ### `dot secret`
 
@@ -379,7 +379,7 @@ dot fleet drift show        # check for configuration drift
 dot fleet log show          # recent fleet events
 dot fleet namespace list    # the active namespace
 dot fleet push [user@host]  # push to one host, or to every host like 'apply'
-dot fleet apply             # SSH out to every host in fleet.toml and run 'dot sync'
+dot fleet apply             # SSH out to every host in fleet.toml: pull, apply, check
 ```
 
 Fleet hosts are configured in `~/.config/dotfiles/fleet.toml` (`DOTFILES_FLEET_HOSTS` overrides the path). To collect attestations into a shared store, run `dot attest show --fleet-store <dir>` on each host.
@@ -395,7 +395,7 @@ dot fleet apply [--host <name>] [--cmd <shell>] [--dry-run] [--jobs <n>] [--veri
 | Flag | Effect |
 |:---|:---|
 | `--host <name>` | Apply to a single host only (matches the `[hosts.<name>]` stanza key). |
-| `--cmd <shell>` | Run a custom command on every host instead of the default `dot sync && dot doctor --quiet`. **Warning:** this is arbitrary shell on remote hosts; the value is your trust boundary. |
+| `--cmd <shell>` | Run a custom command on every host instead of the default `dot config update && dot doctor`. **Warning:** this is arbitrary shell on remote hosts; the value is your trust boundary. |
 | `--dry-run`, `-n` | Print the resolved hosts + planned command without opening SSH. |
 | `--jobs <n>`, `-j <n>` | Parallelism (default 4). |
 | `--verify-hosts` | Refuse to connect unless every target host already has a key in `~/.ssh/known_hosts`. |
@@ -495,7 +495,7 @@ dot config export <dir>      # writes the bundle into <dir>
 
 The bundle holds `~/.dotfiles`, `~/.config/chezmoi` and `~/.local/share/mise` (plus the Nix store when `DOTFILES_BUNDLE_NIX=1`). It leaves out the age key (any file in `~/.config/chezmoi` with an `AGE-SECRET-KEY` line) and names it, for you to copy separately. It needs `tar` and `zstd`. To restore on another machine, unpack it with `tar --zstd -xf <bundle> -P`, then run `cd ~/.dotfiles && ./install.sh --force`.
 
-`dot config import` does not restore a bundle today: it creates a new bundle instead. Unpack with `tar` as above.
+`dot config import <bundle> [--yes|-y]` restores a bundle on a machine that already has `dot`: it names the paths it will overwrite and asks first (`--yes` skips the question, and without a terminal it restores nothing). It refuses a file that is not a `dot config export` bundle, or one holding anything outside `~/.dotfiles`, `~/.config/chezmoi` and `~/.local/share/mise` of the current home (so a bundle made under another home, or with the Nix store, is refused: unpack those with `tar`).
 
 ### `dot tool list --packages`
 

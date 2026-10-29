@@ -9,10 +9,9 @@ managers live in [`../pkg/`](../pkg/README.md).
 
 | Path | Status | Purpose |
 |------|--------|---------|
-| `provision/` | opt-in | Toolchain provisioning: `run_once_install_{zsh,fish}.sh.tmpl`, then the numbered `run_onchange_*` scripts (`10-darwin-packages`, `10-linux-packages`, `12-tmux-plugins`, `15-ai-cli-tools`, `20-darwin-defaults`, `20-linux-flatpak`, `25-python-tools`, `26-rust-tools`, `27-go-tools`, `30-darwin-mas`, `30-vscode-extensions`, `40-darwin-default-apps`, `50-install-fonts`), plus `run_before_00-audit.sh` and `run_before_00-migrate-v0_2_503.sh.tmpl`. The directory sits outside `.chezmoiroot` (`defaults`), so `chezmoi apply` never runs any of it. `install.sh --provision` (or `DOTFILES_PROVISION=1`) runs the `run_once_install_*` and `run_onchange_*` scripts in sorted order, rendering `.tmpl` files with `chezmoi execute-template`; the two `run_before_*` scripts are not run by anything. |
+| `provision/` | opt-in | Toolchain provisioning: `run_once_install_{zsh,fish}.sh.tmpl`, then the numbered `run_onchange_*` scripts (`10-darwin-packages`, `10-linux-packages`, `12-tmux-plugins`, `15-ai-cli-tools`, `20-darwin-defaults`, `20-linux-flatpak`, `25-python-tools`, `26-rust-tools`, `27-go-tools`, `30-darwin-mas`, `30-vscode-extensions`, `40-darwin-default-apps`, `50-install-fonts`). The directory sits outside `.chezmoiroot` (`defaults`), so `chezmoi apply` never runs any of it. `install.sh --provision` (or `DOTFILES_PROVISION=1`) runs the `run_once_install_*` and `run_onchange_*` scripts in sorted order, rendering `.tmpl` files with `chezmoi execute-template`. |
 | `lib/` | active | Shared helpers sourced by the provisioning scripts. |
-| `migrate/` | active | The 0.2.503 layout migration, run by `install.sh` before apply. See [`migrate/README.md`](migrate/README.md). |
-| `run_before_cleanup.sh` | unused | Removes a few legacy files from `$HOME`. It is outside `.chezmoiroot` and nothing calls it, so it never runs. |
+| `migrate/` | active | The 0.2.503 layout migration, run by `install.sh` before apply (inert on a current checkout; its rollback script is retired). See [`migrate/README.md`](migrate/README.md). |
 
 ## Bootstrap entrypoint
 
@@ -49,8 +48,9 @@ The canonical install path is `install.sh` at the repo root —
 
 `--minimal` writes `profile = "minimal"` into the host's chezmoi
 config and skips provisioning. A container (`/.dockerenv`,
-Codespaces, Dev Containers) gets the minimal profile too, but still
-provisions if asked. Run `install.sh --help` for every option.
+Codespaces, Dev Containers) or `DOTFILES_MINIMAL=1` gets the minimal
+profile too, and likewise skips provisioning even with `--provision`.
+Run `install.sh --help` for every option.
 
 ## Distribution templates
 

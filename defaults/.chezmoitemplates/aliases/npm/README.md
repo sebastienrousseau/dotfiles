@@ -13,10 +13,7 @@ These aliases are defined in `npm.aliases.sh`. Loaded by the lazy alias layer `~
 | Name | Definition | Notes |
 | --- | --- | --- |
 | `npa` | `npm audit` | Audit npm packages. |
-| `npb` | `npm build` | `npm build` is not a command in current npm (it was removed in npm 7); use `npr build`. |
 | `npc` | `npm cache` | Cache npm package. |
-| `npd` | `npm dev` | `npm dev` is not a built-in npm command; use `npr dev`. |
-| `npg` | `npm global` | `npm global` is not an npm command; global installs use `npm install --global`. |
 | `npi` | `npm install` | Install npm package. |
 | `npl` | `npm list` | List npm packages. |
 | `npp` | `npm publish` | Publish npm package. |
@@ -24,7 +21,6 @@ These aliases are defined in `npm.aliases.sh`. Loaded by the lazy alias layer `~
 | `npr` | `npm run` | Run npm script. |
 | `nprw` | `npm run watch` | Run npm script watch. |
 | `nps` | `npm start` | Start npm script. |
-| `npsv` | `npm serve` | `npm serve` is not a built-in npm command; use `npr serve`. |
 | `npt` | `npm test` | Test npm script. |
 | `npu` | `npm update` | Update npm package. |
 | `npexec` | `npm exec` | Exec npm package. |

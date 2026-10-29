@@ -7,13 +7,9 @@
 #
 # Two invocation modes (both safe to run repeatedly):
 #
-#   1. AUTOMATIC (seamless to the user):
-#      • install.sh detects pre-0.2.503 state and runs this script
-#        before bootstrapping the new source.
-#      • install/provision/run_before_00-migrate-v0_2_503.sh.tmpl
-#        invokes this script on every `chezmoi apply`. The state-file
-#        guard at the top of this script ensures it does real work
-#        exactly once per host.
+#   1. install.sh runs this script before `chezmoi apply`. It does no
+#      version detection of its own; the state-file guard at the top of
+#      this script makes it do its checks once per host.
 #
 #   2. MANUAL (explicit user control):
 #      bash install/migrate/migrate-v0_2-to-v0_2_503.sh
@@ -28,17 +24,17 @@
 #   dot_local/share/.../comp...    → share/completions/...    (Phase 3)
 #   dot_*, dot_config/, etc.       → defaults/...             (Phase 4)
 #
-# Without intervention, chezmoi would see the old paths as "deleted
-# from source" and REMOVE the deployed files at the user's HOME
-# before deploying the new ones. This script makes that transition
-# safe by un-tracking moved paths from chezmoi state.
+# The script un-tracks the moved paths from chezmoi state.
 #
-# CURRENT STATUS: Phases 2-4 have not yet shipped in v0.2.503. This
-# script's `do_migration()` body is a no-op stub today; it logs
-# "no migration required (Phases 2-4 not yet shipped)" and marks
-# complete. The hooks + state-file machinery are wired so the
-# automation lights up the moment Phases 2-4 land — no version
-# bump or extra commit needed.
+# CURRENT STATUS: inert on a current checkout, on purpose. Under
+# .chezmoiroot, `chezmoi source-path` prints <repo>/defaults, which has no
+# bin/dot, share/man or .chezmoiroot, so no phase fires and the script
+# only marks itself complete. Do not "fix" the phase checks to look at the
+# repo root: ~/.local/bin/dot is managed again by
+# defaults/dot_local/bin/executable_dot.tmpl, and `chezmoi forget` deletes
+# the source entry of the path it forgets, so Phase 2 would remove that
+# file from the user's checkout. The rollback script is retired (see
+# install/migrate/README.md).
 #
 # Exit codes:
 #   0  migration succeeded OR already done OR no work needed
@@ -64,7 +60,7 @@ for arg in "$@"; do
     --dry-run | -n) DRY_RUN=1 ;;
     --force) FORCE=1 ;;
     -h | --help)
-      sed -n '2,40p' "$0"
+      sed -n '2,43p' "$0"
       exit 0
       ;;
     *)

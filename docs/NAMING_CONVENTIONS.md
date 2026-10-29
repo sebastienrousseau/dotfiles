@@ -24,7 +24,7 @@ This document defines the naming conventions for all files in the dotfiles repos
 
 | Range | Category | Examples |
 |---|---|---|
-| 00-09 | Audit & pre-flight | `run_before_00-audit.sh` |
+| 00-09 | Audit & pre-flight | (none today) |
 | 10-19 | Package installation | `run_onchange_10-linux-packages.sh.tmpl` |
 | 20-24 | Config & app setup | `run_onchange_20-ghostty-config.sh.tmpl` |
 | 25-29 | Language toolchains, Go TUI builds | `run_onchange_25-python-tools.sh.tmpl`, `run_onchange_25-build-dot-ai-tui.sh.tmpl` |

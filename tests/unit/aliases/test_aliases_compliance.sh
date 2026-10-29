@@ -34,4 +34,32 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
 
+# audit_fn (dot-audit) shows the log dot actually writes,
+# $XDG_STATE_HOME/dotfiles/dot.log, and falls back to git history.
+WORK="$(mktemp -d)"
+trap 'rm -rf "$WORK"' EXIT
+mkdir -p "$WORK/state/dotfiles" "$WORK/home/.local/share"
+printf '[2026-01-02T03:04:05Z] [info] [t1] apply completed\n' >"$WORK/state/dotfiles/dot.log"
+printf 'legacy line\n' >"$WORK/home/.local/share/dotfiles.log"
+# audit_run: source the aliases and run audit_fn in the sandbox.
+audit_run() {
+  env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+    HOME="$WORK/home" XDG_STATE_HOME="$WORK/state" PATH="$PATH" \
+    bash -c 'source "$1" && audit_fn' _ "$ALIASES_DIR/compliance.aliases.sh" 2>&1
+}
+
+test_start "audit_fn_shows_the_dot_log"
+out="$(audit_run)"
+assert_contains "apply completed" "$out" "the dot.log tail is shown"
+assert_false '[[ "$out" == *"legacy line"* ]]' "the unwritten legacy log is not read"
+
+test_start "audit_fn_falls_back_to_git_history"
+rm -f "$WORK/state/dotfiles/dot.log"
+mkdir -p "$WORK/home/.dotfiles"
+git -C "$WORK/home/.dotfiles" init -q
+git -C "$WORK/home/.dotfiles" -c user.name=t -c user.email=t@example.invalid \
+  -c commit.gpgsign=false -c core.hooksPath=/dev/null commit -q --allow-empty -m "fallback commit"
+out="$(audit_run)"
+assert_contains "fallback commit" "$out" "git log is shown without dot.log"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -335,7 +335,7 @@ _fleet_print_commands() {
   ui_ok "events" "Show recent fleet events"
   ui_ok "namespace" "Show or set the active namespace"
   ui_ok "enforce" "Show or set RBAC enforcement mode (advisory|strict)"
-  ui_ok "apply" "SSH out to every host in fleet.toml and run 'dot sync'"
+  ui_ok "apply" "SSH out to every host in fleet.toml to pull, apply and check"
 }
 
 # shellcheck source-path=SCRIPTDIR source=fleet/drift.sh

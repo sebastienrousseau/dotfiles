@@ -7,8 +7,6 @@ if command -v go &>/dev/null; then
   alias gob='go build'
   alias got='go test'
   alias gota='go test ./...'
-  alias gocv='go coverage'
-  alias gofmt='go fmt'
   alias govet='go vet'
   alias gom='go mod tidy'
   alias gomod='go mod'

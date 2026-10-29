@@ -116,35 +116,44 @@ test_start "tools_profile_rejects_an_unknown_subcommand"
 tools_run profile nonsense
 assert_equals "1" "$DOT_FIXTURE_RC" "an unknown profile subcommand should exit 1"
 
-# A data file with no `profile` key takes the insert arm of `profile set`
-# rather than the substitute arm.
-#
-# That arm uses sed's `1a text` one-liner, which GNU sed accepts and BSD sed
-# rejects, so the outcome is genuinely platform-dependent. The invariant that
-# holds on both — and the one worth asserting — is that the command never
-# reports success without having written the key.
-test_start "tools_profile_set_inserts_a_missing_key"
-tools_run profile set demo
-if grep -q 'profile = "demo"' "$FX/.chezmoidata.toml"; then
-  assert_equals "0" "$DOT_FIXTURE_RC" \
-    "an insert that succeeded should exit 0"
-else
-  assert_not_equals "0" "$DOT_FIXTURE_RC" \
-    "an insert sed refused must fail loudly, not report success"
-fi
+# `profile set` writes this host's chezmoi config, whose [data] overrides the
+# source's .chezmoidata.toml: the source data file is never edited.
+CM_CFG="$XDG_CONFIG_HOME/chezmoi/chezmoi.toml"
+rm -f "$CM_CFG"
+DATA_BEFORE="$(cat "$FX/.chezmoidata.toml")"
 
-test_start "tools_profile_show_reads_the_feature_table"
+test_start "tools_profile_set_creates_the_host_config"
+tools_run profile set demo
+assert_equals "0" "$DOT_FIXTURE_RC" "profile set should exit 0"
+assert_equals "$(printf '\n[data]\nprofile = "demo"')" "$(cat "$CM_CFG" 2>/dev/null)" \
+  "a missing chezmoi.toml gets a [data] table with the profile"
+assert_equals "$DATA_BEFORE" "$(cat "$FX/.chezmoidata.toml")" "the source data is untouched"
+
+test_start "tools_profile_set_replaces_the_host_key"
+printf 'encryption = "age"\n\n[data]\nprofile = "laptop"\ntheme = "x"\n\n[data.features]\nprofile = "keep"\n' >"$CM_CFG"
+tools_run profile set other
+assert_equals "0" "$DOT_FIXTURE_RC" "profile set should exit 0"
+assert_equals "$(printf 'encryption = "age"\n\n[data]\nprofile = "other"\ntheme = "x"\n\n[data.features]\nprofile = "keep"')" \
+  "$(cat "$CM_CFG")" "only [data]'s profile is rewritten"
+
+test_start "tools_profile_set_adds_the_key_to_data"
+printf '[data]\ntheme = "x"\n[data.features]\nai = true\n' >"$CM_CFG"
+tools_run profile set work
+assert_equals "$(printf '[data]\ntheme = "x"\nprofile = "work"\n[data.features]\nai = true')" \
+  "$(cat "$CM_CFG")" "the key is added inside [data]"
+
+test_start "tools_profile_show_reads_the_host_profile"
 printf 'profile = "demo"\ndotfiles_version = "0.0.1"\n\n[features]\nai = true\n' \
   >"$FX/.chezmoidata.toml"
 tools_run profile show
 assert_equals "0" "$DOT_FIXTURE_RC" "profile show should exit 0"
+assert_contains "work" "$DOT_FIXTURE_OUT" "the host's profile wins over the source's"
 assert_contains "ai" "$DOT_FIXTURE_OUT" "the feature flags should be listed"
 
-test_start "tools_profile_set_substitutes_an_existing_key"
-tools_run profile set other
-assert_equals "0" "$DOT_FIXTURE_RC" "profile set should exit 0"
-assert_file_contains "$FX/.chezmoidata.toml" 'profile = "other"' \
-  "the existing profile key should be rewritten in place"
+test_start "tools_profile_set_refuses_an_unsafe_name"
+tools_run profile set 'a"b'
+assert_equals "1" "$DOT_FIXTURE_RC" "a name that would break the TOML is refused"
+rm -f "$CM_CFG"
 
 # ── 6. lint delegates to its own module ────────────────────────────────────
 #

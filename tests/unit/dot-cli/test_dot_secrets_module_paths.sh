@@ -49,6 +49,17 @@ assert_equals "0" "$DOT_FIXTURE_RC" "provider should exit 0"
 assert_contains "none" "$DOT_FIXTURE_OUT" \
   "the provider named in [secrets.policy] should win"
 
+# scripts/ops/setup.sh writes this host's policy as [data.secrets.policy] in
+# chezmoi.toml; it overrides the source's [secrets.policy].
+test_start "secrets_policy_host_config_wins"
+HOST_CFG="$XDG_CONFIG_HOME/chezmoi/chezmoi.toml"
+mkdir -p "${HOST_CFG%/*}"
+printf '[data]\nprofile = "x"\n\n[data.secrets]\n\n[data.secrets.policy]\nprovider = "pass"\nauto_load = true\n' >"$HOST_CFG"
+secrets_run secrets provider
+assert_equals "0" "$DOT_FIXTURE_RC" "provider should exit 0"
+assert_contains "pass" "$DOT_FIXTURE_OUT" "the host's provider wins over the source's"
+rm -f "$HOST_CFG"
+
 # ── 2. secrets-init without the age-init helper ────────────────────────────
 test_start "secrets_init_reports_an_existing_key"
 mkdir -p "$FX/home/.config/chezmoi"

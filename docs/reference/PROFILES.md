@@ -30,7 +30,7 @@ The profile is a free-form name, not a bundle of features. Features are switched
 | `scripts/tuning/linux.sh`, `scripts/tuning/macos.sh` | Accept `laptop`, `desktop` or `server` from `DOTFILES_PROFILE`. |
 | niri config header | Printed as a comment. |
 
-`dot config profile show` prints the profile and the `[features]` block from the source `.chezmoidata.toml`; `dot config profile set <name>` rewrites the `profile` line in that file. A `profile` set in `~/.config/chezmoi/chezmoi.toml` (which `chezmoi init` always writes) takes precedence over the source file.
+`dot config profile show` prints the profile (from `~/.config/chezmoi/chezmoi.toml`, else the source `.chezmoidata.toml`) and the `[features]` block from the source. `dot config profile set <name>` writes `profile` under `[data]` in `~/.config/chezmoi/chezmoi.toml`, which takes precedence over the source file (`chezmoi init` always writes one).
 
 ### Per-Machine Overrides
 
@@ -57,7 +57,7 @@ zellij = true
 
 When `machine` names one of these, the niri config uses that preset in place of `[hardware]`. You can also override single values with `[data.hardware]` in `chezmoi.toml`.
 
-The kanshi config matches `machine` against its own names (`surface-pro-7p`, `mac-t2-linux`, `geekom-a9`), so only `geekom-a9` is understood by both templates today.
+The kanshi config picks a display profile for each preset (`macbook-t2`, `surface-pro`, `geekom-a9`), and also accepts the older names the example files below use (`surface-pro-7p`, `mac-t2-linux`).
 
 ### Starter Feature Sets
 

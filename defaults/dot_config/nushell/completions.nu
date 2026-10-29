@@ -25,7 +25,7 @@ def "nu-complete dot" [] {
         { value: "top", description: "what the machine and its agents are doing" }
         { value: "ui", description: "primitives for scripts" }
         { value: "apply", description: "Write the dotfiles to this machine" }
-        { value: "sync", description: "Pull the source, then apply" }
+        { value: "sync", description: "Apply the dotfiles; --pull pulls first" }
         { value: "diff", description: "What apply would change" }
         { value: "status", description: "Pending changes and last apply" }
         { value: "edit", description: "Open a managed file in $EDITOR" }
@@ -595,7 +595,7 @@ def "nu-complete dot config" [] {
         { value: "status", description: "Pending changes and last apply" }
         { value: "diff", description: "What apply would change" }
         { value: "apply", description: "Write the dotfiles to this machine" }
-        { value: "sync", description: "Pull the source, then apply" }
+        { value: "sync", description: "Apply the dotfiles; --pull pulls first" }
         { value: "update", description: "Pull and apply the dotfiles only" }
         { value: "edit", description: "Open a managed file in $EDITOR" }
         { value: "add", description: "Start managing an existing file" }
@@ -646,6 +646,7 @@ export extern "dot config export" [
 ]
 
 export extern "dot config import" [
+    --yes(-y) # Restore without asking
     --help(-h) # Show help
     ...rest: string
 ]
@@ -906,7 +907,6 @@ export extern "dot doctor snapshot new" [
 ]
 
 export extern "dot doctor status" [
-    --verbose(-v) # Show detailed checks
     --json(-j) # Print a JSON summary
     --fix(-f) # Apply common fixes
     --force(-F) # Apply fixes without prompts
@@ -1119,7 +1119,7 @@ export extern "dot secret init" [
 def "nu-complete dot secret key" [] {
     [
         { value: "list", description: "Keys without their values" }
-        { value: "new", description: "Create an ED25519 key" }
+        { value: "new", description: "Encrypt an SSH key with age" }
     ]
 }
 export extern "dot secret key" [

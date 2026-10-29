@@ -7,8 +7,7 @@
 # and env-emit.sh command groups — env, profile, tools, new, packages,
 # aliases, alias-check, setup, log-rotate, lint, and `dot tool export`.
 #
-# `dot config profile set`, `dot shell alias export` (with no --output) and
-# `dot config check` all resolve their target from the location of the sourced
+# `dot shell alias export` (with no --output) and `dot config check` resolve their target from the location of the sourced
 # library rather than from $HOME, so those rows drive a writable repo copy
 # inside the sandbox (fm_repo_copy) instead of the checkout. Linting the copy
 # is also what keeps this file fast: `dot config check --check` over the real tree
@@ -207,17 +206,19 @@ test_fm_profile_show() {
 }
 
 test_fm_profile_set() {
-  # Writes .chezmoidata.toml — drive the sandbox copy, never the checkout.
+  # Writes the sandbox HOME's chezmoi.toml; the repo copy is a guard that
+  # the source data is left alone.
   local repo
   repo="$(fm_repo_copy)"
   test_start "fm_profile_set"
   fm_run_bin "$repo/bin/dot" config profile set fm-test-profile
   fm_expect_rc 0
-  test_start "fm_profile_set_persists_to_chezmoidata"
-  if grep -q 'profile = "fm-test-profile"' "$repo/defaults/.chezmoidata.toml"; then
-    fm_pass "written to the copy"
+  test_start "fm_profile_set_persists_to_the_host_config"
+  if grep -q 'profile = "fm-test-profile"' "$XDG_CONFIG_HOME/chezmoi/chezmoi.toml" 2>/dev/null &&
+    ! grep -q 'fm-test-profile' "$repo/defaults/.chezmoidata.toml"; then
+    fm_pass "written to chezmoi.toml, not the source"
   else
-    fm_fail "profile not persisted"
+    fm_fail "profile not persisted to chezmoi.toml"
   fi
   test_start "fm_profile_set_is_visible_to_show"
   fm_run_bin "$repo/bin/dot" config profile show

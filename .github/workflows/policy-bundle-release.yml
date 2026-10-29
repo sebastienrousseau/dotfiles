@@ -19,6 +19,7 @@ jobs:
   package-policy-bundle:
     name: Package Policy Bundle
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     outputs:
@@ -82,6 +83,7 @@ jobs:
   attest-policy-bundle:
     name: Attest Policy Bundle
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [package-policy-bundle]
     permissions:
       contents: read
@@ -126,6 +128,7 @@ jobs:
   policy-bundle-summary:
     name: Policy Bundle Release Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [package-policy-bundle, attest-policy-bundle]
     if: always()
     steps:

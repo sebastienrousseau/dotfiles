@@ -44,8 +44,19 @@ Three settings, read when `chezmoi apply` renders the templates, trim the set:
 - `aliases.buckets.system` and `aliases.buckets.svn` in the chezmoi data (both `true` by default)
   turn off `system` and `subversion`.
 
-Keep names unique across files: a later definition silently replaces an earlier one. The
-per-directory READMEs note the overrides that exist today.
+Keep names unique across files: a later definition silently replaces an earlier one. Where two
+files wanted the same name, the more common use kept it and the other definition was removed or
+made conditional:
+
+| Name | Kept | Gave way |
+| --- | --- | --- |
+| `d` | `dot` (`system`) | `dig` and `docker` define `d` only when `dot` is not installed |
+| `dcl` | `docker compose logs` (`docker`) | `dot ai claude` (`ai`; `dcla`, `dclh`, `dclr` remain) |
+| `dki` | `docker info` (`docker`) | `dot ai kiro` (`ai`; `dkia`, `dkih`, `dkir` remain) |
+| `gci` | `gcloud compute instances` | `gcloud init` |
+| `gcccc`, `gcccl` | `gcloud container clusters create`, `list` | `gcloud config configurations create`, `list` |
+| `gcpd` | `gcloud projects describe` | `gcloud projects delete` (destructive) |
+| `backup`, `extract`, `goto` | the `archives` and `cd` functions | the `functions/` files of the same name (fish still uses those) |
 
 ## Usage
 
@@ -88,7 +99,6 @@ per-directory READMEs note the overrides that exist today.
 | `fonts` | lazy | List installed fonts. | [View README](fonts/README.md) |
 | `gcloud` | lazy | Google Cloud SDK. | [View README](gcloud/README.md) |
 | `git` | eager | Git commands and commit signing helpers. | [View README](git/README.md) |
-| `gnu` | lazy | GNU coreutils names (identity aliases). | [View README](gnu/README.md) |
 | `go` | lazy | Go toolchain commands. | [View README](go/README.md) |
 | `heroku` | lazy | Heroku CLI. | [View README](heroku/README.md) |
 | `installer` | eager | Installer and remote deployment. | [View README](installer/README.md) |

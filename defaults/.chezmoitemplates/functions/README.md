@@ -29,16 +29,16 @@ templates in `defaults/dot_config/shell/` turn them into shell layers:
    `~/.config/shell/50-logic-functions.sh`, which the fish bridge
    (`defaults/dot_config/fish/conf.d/functions.fish.tmpl`) runs functions from.
 
-Bash sources the core and extra layers before the alias layers. Zsh sources the eager alias layer
-first and the function layers later, so in zsh the stubs for `backup`, `extract` and `goto`
-replace the alias-directory functions of the same name (see
-[archives](../aliases/archives/README.md) and [cd](../aliases/cd/README.md)). Today `extract`
-recurses in zsh: `files/extract.sh` skips its definition when an `extract` function already
-exists, and the stub is one.
+Bash sources the core and extra layers before the alias layers; zsh sources the eager alias layer
+first and the function layers later. So that a name resolves the same in both shells, the extra
+layer leaves out every file whose function an alias file also defines (today `backup`, `extract`
+and `goto`): it writes no stub for it and does not load it with its group, and the alias-file
+version wins in zsh and bash alike (see [archives](../aliases/archives/README.md) and
+[cd](../aliases/cd/README.md)). The fish bridge still uses the files here.
 
-A stub exists only for the function named after its file. Other functions in a file, such as
-`decode64` in `text/encode64.sh` or `lazy_nvm` in `misc/lazy_loaders.sh`, exist only after a
-stub from the same group has run once.
+A stub exists for the function named after its file, and for the extra names listed in the
+template's `$extraStubs` (today `decode64` in `text/encode64.sh`). Other functions in a file, such
+as `lazy_nvm` in `misc/lazy_loaders.sh`, exist only after a stub from the same group has run once.
 
 ## Usage
 
@@ -80,9 +80,9 @@ stub from the same group has run once.
 
 | Function | Description | Usage |
 |----------|-------------|-------|
-| `backup` | Create timestamped backups with compression | `backup [--max-size SIZE] [--keep N] <files...>` |
+| `backup` | Create timestamped backups with compression (fish only; zsh and bash use the [archives](../aliases/archives/README.md) `backup`) | `backup [--max-size SIZE] [--keep N] <files...>` |
 | `encode64`/`decode64` | Base64 encoding/decoding | `encode64 "string"` / `decode64 "base64string"` |
-| `extract` | Extract various archive formats | `extract [file]` |
+| `extract` | Extract various archive formats (fish only; zsh and bash use the [archives](../aliases/archives/README.md) `extract`) | `extract [file]` |
 | `hexdump` | Display file contents in hex format | `hexdump [file] [lines]` |
 | `ren` | Batch rename file extensions | `ren OLD_EXT NEW_EXT` |
 | `size` | Check file or directory size | `size [file/directory]` |
@@ -146,7 +146,7 @@ The `caffeine` utility prevents your system from sleeping or activating the scre
 | Function | Description | Usage |
 |----------|-------------|-------|
 | `cdls` | Change directory and list contents | `cdls [directory]` |
-| `goto` | Quickly navigate to a directory | `goto [directory]` |
+| `goto` | Quickly navigate to a directory (fish only; zsh and bash use the [cd](../aliases/cd/README.md) bookmark `goto`) | `goto [directory]` |
 | `mount_read_only` | Mount read-only disk image as read-write | `mount_read_only [image]` |
 | `rd` | Remove directory and its files | `rd [directory]` |
 | `remove_disk` | Safely eject disk | `remove_disk [disk]` |

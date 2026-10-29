@@ -152,7 +152,8 @@ bind A display-menu -T "#[align=centre] AI CLI cockpit " -x C -y C \
 # Session Management
 bind C-c new-session
 bind C-f command-prompt -p find-session 'switch-client -t %%'
-bind K confirm-before -p "kill all sessions? (y/n)" kill-server
+# Q, not K: K is resize-up in the Pane Resizing block above.
+bind Q confirm-before -p "kill all sessions? (y/n)" kill-server
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  THEME — Session Block Bars                                              ║

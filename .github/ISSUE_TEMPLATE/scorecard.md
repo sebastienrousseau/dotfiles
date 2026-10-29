@@ -2,7 +2,7 @@
 name: OpenSSF Scorecard regression / sub-10 check
 about: Track a Scorecard check below 10/10
 title: '[scorecard] <Check>: <score>/10 — <one-line summary>'
-labels: ['type:security', 'priority:medium', 'scorecard']
+labels: ['type:security', 'priority:medium']
 assignees: 'sebastienrousseau'
 ---
 

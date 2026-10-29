@@ -169,6 +169,14 @@ Library/**
 .config/raycast/**
 {{- end }}
 
+# waybar is a Wayland bar: its config stays off macOS and Windows. On Linux
+# it deploys whatever features.waybar says (the flag is reserved, and
+# hosts already rely on the config being there).
+{{- if ne .chezmoi.os "linux" }}
+.config/waybar
+.config/waybar/**
+{{- end }}
+
 # Feature-gated Linux desktop configs
 {{- if not .features.foot }}
 .config/foot

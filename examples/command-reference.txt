@@ -51,7 +51,7 @@ dot — one command for this machine. Built commands, by domain:
   dot config status — Pending changes and last apply
   dot config diff — What apply would change
   dot config apply — Write the dotfiles to this machine
-  dot config sync — Pull the source, then apply
+  dot config sync — Apply the dotfiles; --pull pulls first
   dot config update — Pull and apply the dotfiles only
   dot config edit — Open a managed file in $EDITOR
   dot config add — Start managing an existing file
@@ -104,7 +104,7 @@ dot — one command for this machine. Built commands, by domain:
   dot secret set — Store one secret
   dot secret export — Print secrets as environment
   dot secret check — Audit secret hygiene
-  dot secret key new — Create an ED25519 key
+  dot secret key new — Encrypt an SSH key with age
   dot secret cert list — Certificates and expiry
   dot secret cert new — Issue a short-lived SSH certificate
   dot secret provider show — The active provider

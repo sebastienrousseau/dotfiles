@@ -34,4 +34,28 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
 
+# chmod_run <function> <mode> <expected-octal>: run a chmod helper on a
+# fresh 644 file in bash; print its status and whether the mode matches.
+chmod_run() {
+  local sandbox
+  sandbox="$(mktemp -d)"
+  : >"$sandbox/file"
+  chmod 644 "$sandbox/file"
+  env -i HOME="$sandbox" PATH="$PATH" ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+    bash --norc --noprofile -c ". \"\$1\"; \"\$2\" \"\$3\" \"\$4\" >/dev/null 2>&1; echo \"rc=\$?\"" _ \
+    "$REPO_ROOT/defaults/.chezmoitemplates/aliases/chmod/chmod.aliases.sh" "$1" "$2" "$sandbox/file"
+  if [[ -n "$(find "$sandbox/file" -perm "$3")" ]]; then echo "mode=$3"; else echo "mode=other"; fi
+  rm -rf "$sandbox"
+}
+
+# Without -R the helpers must not hand chmod an empty argument (GNU chmod
+# then fails with "cannot access ''" after changing the mode).
+test_start "chmod_change_permission_non_recursive"
+assert_equals "rc=0 mode=600" "$(chmod_run change_permission 600 600 | tr '\n' ' ' | sed 's/ $//')" \
+  "change_permission 600 <file> succeeds"
+
+test_start "chmod_symbolic_permission_non_recursive"
+assert_equals "rc=0 mode=744" "$(chmod_run symbolic_permission u+x 744 | tr '\n' ' ' | sed 's/ $//')" \
+  "symbolic_permission u+x <file> succeeds"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

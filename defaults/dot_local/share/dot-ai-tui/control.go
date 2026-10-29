@@ -99,7 +99,7 @@ func toolActions(t tool) []controlAction {
 		}
 	case "passmcp":
 		return []controlAction{
-			{key: "1", label: "MCP Doctor", desc: "dot ai mcp doctor — audit MCP configs & 6 passmcp binaries", bin: "dot", args: []string{"ai", "mcp", "doctor"}},
+			{key: "1", label: "MCP Doctor", desc: "dot mcp check — audit MCP configs & 6 passmcp binaries", bin: "dot", args: []string{"mcp", "check"}},
 			{key: "2", label: "9-Phase Check", desc: "passmcp check --help — 9-phase security & SARIF gate", bin: "passmcp", args: []string{"check", "--help"}},
 			{key: "3", label: "Risk Graph", desc: "passmcp-graph --help — capability escalation & blast radius", bin: "passmcp-graph", args: []string{"--help"}},
 			{key: "4", label: "SBOM Audit", desc: "passmcp sbom --help — CycloneDX 1.6 & SPDX 3.0.1 export", bin: "passmcp", args: []string{"sbom", "--help"}},
@@ -110,18 +110,18 @@ func toolActions(t tool) []controlAction {
 		return []controlAction{
 			{key: "1", label: "Pipeline Help", desc: "draft --help — 5-phase grounded research & C2PA synthesis", bin: "draft", args: []string{"--help"}},
 			{key: "2", label: "Verify C2PA", desc: "draft verify --help — Ed25519 signature & citation check", bin: "draft", args: []string{"verify", "--help"}},
-			{key: "3", label: "AI Doctor", desc: "dot ai doctor — fleet & provider health check", bin: "dot", args: []string{"ai", "doctor"}},
-			{key: "4", label: "MCP Doctor", desc: "dot ai mcp doctor — inspect MCP retrieval servers", bin: "dot", args: []string{"ai", "mcp", "doctor"}},
-			{key: "5", label: "Spend", desc: "dot ai cost — token spend by provider", bin: "dot", args: []string{"ai", "cost"}},
+			{key: "3", label: "AI Doctor", desc: "dot ai check — fleet & provider health check", bin: "dot", args: []string{"ai", "check"}},
+			{key: "4", label: "MCP Doctor", desc: "dot mcp check — inspect MCP retrieval servers", bin: "dot", args: []string{"mcp", "check"}},
+			{key: "5", label: "Spend", desc: "dot ai cost show — token spend by provider", bin: "dot", args: []string{"ai", "cost", "show"}},
 			{key: "6", label: "Version", desc: "draft --version — binary version & provenance support", bin: "draft", args: []string{"--version"}},
 		}
 	default:
 		return []controlAction{
 			{key: "1", label: "Version", desc: t.bin + " --version — inspect agent CLI version", bin: t.bin, args: []string{"--version"}},
-			{key: "2", label: "AI Doctor", desc: "dot ai doctor — fleet & provider health check", bin: "dot", args: []string{"ai", "doctor"}},
-			{key: "3", label: "Spend", desc: "dot ai cost — token spend by provider", bin: "dot", args: []string{"ai", "cost"}},
-			{key: "4", label: "MCP Audit", desc: "dot ai mcp doctor — audit MCP servers & passmcp family", bin: "dot", args: []string{"ai", "mcp", "doctor"}},
-			{key: "5", label: "Start Agent", desc: "dot ai chat " + t.name + " — launch interactive agent session", bin: "dot", args: []string{"ai", "chat", t.name}, interactive: true},
+			{key: "2", label: "AI Doctor", desc: "dot ai check — fleet & provider health check", bin: "dot", args: []string{"ai", "check"}},
+			{key: "3", label: "Spend", desc: "dot ai cost show — token spend by provider", bin: "dot", args: []string{"ai", "cost", "show"}},
+			{key: "4", label: "MCP Audit", desc: "dot mcp check — audit MCP servers & passmcp family", bin: "dot", args: []string{"mcp", "check"}},
+			{key: "5", label: "Start Agent", desc: "dot ai start " + t.name + " — launch interactive agent session", bin: "dot", args: []string{"ai", "start", t.name}, interactive: true},
 			{key: "6", label: "Inline Chat", desc: "Tab — focus inline prompt input in cockpit", focusInput: true},
 		}
 	}
@@ -361,7 +361,7 @@ func (m model) renderAgentCentre(t tool, snap EcosystemSnapshot) []string {
 			nProc, modelLabel(m.aiModel), m.gatewayMsg, m.costToday)),
 		okSt.Render("  CPU Load  ["+cpuBar+"] ") + bodySt.Render(fmt.Sprintf("%.1f%%   │   ", tCPU)) +
 			selSt.Render("RSS Memory ["+memBar+"] ") + bodySt.Render(fmt.Sprintf("%.1f MB", tMem)),
-		keySt.Render("  [⏎ / 5] Start Agent  ") + dimSt.Render("→ ") + bodySt.Render("dot ai chat "+t.name+" (launch interactive agent CLI)"),
+		keySt.Render("  [⏎ / 5] Start Agent  ") + dimSt.Render("→ ") + bodySt.Render("dot ai start "+t.name+" (launch interactive agent CLI)"),
 		keySt.Render("  [1-4]   Quick Probes ") + dimSt.Render("→ ") + bodySt.Render("[1] Version · [2] AI Doctor · [3] Cost/SCI · [4] MCP Audit"),
 		keySt.Render("  [x]     Terminate    ") + dimSt.Render("→ ") + bodySt.Render("send SIGTERM to running "+t.name+" process"),
 	}

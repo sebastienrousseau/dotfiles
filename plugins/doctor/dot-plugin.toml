@@ -55,11 +55,6 @@ effect = "read"
 summary = "Health summary"
 
 [[commands.flags]]
-long = "verbose"
-short = "v"
-summary = "Show detailed checks"
-
-[[commands.flags]]
 long = "json"
 short = "j"
 summary = "Print a JSON summary"

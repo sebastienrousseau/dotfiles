@@ -15,7 +15,8 @@ name: Branch Drift Guard
 #
 # It does not merge anything. It measures the gap and fails once the gap is
 # large enough that reconciliation stops being routine — early enough that it
-# is still a small job.
+# is still a small job. The scheduled run checks every long-lived release
+# branch (origin/feat/v*); a manual run can name one branch instead.
 
 on:
   schedule:
@@ -25,9 +26,9 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Branch to check against main'
+        description: 'Branch to check against main (default: every feat/v* branch)'
         required: false
-        default: 'feat/v0.2.503'
+        default: ''
 
 permissions:
   contents: read
@@ -41,6 +42,11 @@ jobs:
       contents: read
       issues: write
     steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -51,78 +57,82 @@ jobs:
       - name: Measure the gap
         id: measure
         env:
-          BRANCH: ${{ github.event.inputs.branch || 'feat/v0.2.503' }}
+          BRANCH: ${{ github.event.inputs.branch }}
           # Behind-count at which this starts failing. 40 is about a fortnight
           # at this repository's rate; 140 was four months and 322 hunks.
           MAX_BEHIND: '40'
         run: |
           set -euo pipefail
 
-          if ! git show-ref --verify --quiet "refs/remotes/origin/${BRANCH}"; then
-            echo "Branch ${BRANCH} no longer exists — nothing to guard."
-            echo "gone=true" >> "$GITHUB_OUTPUT"
+          # The branches to guard: the one named, else every release branch.
+          if [ -n "${BRANCH}" ]; then
+            branches="${BRANCH}"
+          else
+            branches=$(git for-each-ref --format='%(refname:lstrip=3)' 'refs/remotes/origin/feat/v*')
+          fi
+          if [ -z "${branches}" ]; then
+            echo "No long-lived feat/v* branch exists: nothing to guard."
             exit 0
           fi
 
-          behind=$(git rev-list --count "origin/${BRANCH}..origin/main")
-          ahead=$(git rev-list --count "origin/main..origin/${BRANCH}")
-          base=$(git merge-base "origin/main" "origin/${BRANCH}")
-          since=$(git log -1 --format=%cs "$base")
+          failed=0
+          for branch in ${branches}; do
+            if ! git show-ref --verify --quiet "refs/remotes/origin/${branch}"; then
+              echo "Branch ${branch} no longer exists: nothing to guard."
+              continue
+            fi
+            behind=$(git rev-list --count "origin/${branch}..origin/main")
+            ahead=$(git rev-list --count "origin/main..origin/${branch}")
+            base=$(git merge-base "origin/main" "origin/${branch}")
+            since=$(git log -1 --format=%cs "$base")
 
-          {
-            echo "### Branch drift: \`${BRANCH}\`"
-            echo ""
-            echo "| | |"
-            echo "| --- | --- |"
-            echo "| behind \`main\` | ${behind} |"
-            echo "| ahead of \`main\` | ${ahead} |"
-            echo "| diverged since | ${since} |"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-          # A dry-run merge in a scratch worktree gives the number that actually
-          # matters: what reconciling costs today. It is never committed.
-          #
-          # The output is captured rather than discarded. The first version of
-          # this job sent it to /dev/null, and when the merge failed *without*
-          # producing conflicts it reported "0 conflicting files" — a confident
-          # wrong number, which is worse than no number. A dry run that cannot
-          # run now says so.
-          conflicts="unknown"
-          if git worktree add -q --detach /tmp/drift "origin/${BRANCH}" 2>/tmp/wt.err; then
-            if git -C /tmp/drift -c merge.verifySignatures=false \
-                 merge --no-commit --no-ff origin/main >/tmp/merge.out 2>&1; then
-              conflicts=0
-            else
-              unmerged=$(git -C /tmp/drift diff --name-only --diff-filter=U | wc -l | tr -d ' ')
-              if [ "$unmerged" -gt 0 ]; then
-                conflicts="$unmerged"
+            # A dry-run merge in a scratch worktree gives the number that
+            # actually matters: what reconciling costs today. It is never
+            # committed. A dry run that cannot run says so rather than
+            # reporting a confident "0 conflicting files".
+            conflicts="unknown"
+            if git worktree add -q --detach /tmp/drift "origin/${branch}" 2>/tmp/wt.err; then
+              if git -C /tmp/drift -c merge.verifySignatures=false \
+                   merge --no-commit --no-ff origin/main >/tmp/merge.out 2>&1; then
+                conflicts=0
               else
-                echo "::warning::Dry-run merge could not be completed; conflict count unavailable."
-                sed 's/^/    /' /tmp/merge.out | head -20
+                unmerged=$(git -C /tmp/drift diff --name-only --diff-filter=U | wc -l | tr -d ' ')
+                if [ "$unmerged" -gt 0 ]; then
+                  conflicts="$unmerged"
+                else
+                  echo "::warning::Dry-run merge of ${branch} could not be completed; conflict count unavailable."
+                  sed 's/^/    /' /tmp/merge.out | head -20
+                fi
+                git -C /tmp/drift merge --abort 2>/dev/null || true
               fi
-              git -C /tmp/drift merge --abort 2>/dev/null || true
-            fi
-            git worktree remove --force /tmp/drift || true
-          else
-            echo "::warning::Could not create the scratch worktree; conflict count unavailable."
-            sed 's/^/    /' /tmp/wt.err | head -10
-          fi
-
-          echo "| conflicting files if merged today | ${conflicts} |" >> "$GITHUB_STEP_SUMMARY"
-          echo "behind=${behind}" >> "$GITHUB_OUTPUT"
-          echo "conflicts=${conflicts}" >> "$GITHUB_OUTPUT"
-
-          if [ "${behind}" -gt "${MAX_BEHIND}" ]; then
-            msg="${BRANCH} is ${behind} commits behind main (limit ${MAX_BEHIND})."
-            if [ "${conflicts}" = "unknown" ]; then
-              msg="${msg} (The dry-run merge could not be measured — see the warning above.)"
+              git worktree remove --force /tmp/drift || true
             else
-              msg="${msg} Merging main into it today would conflict in ${conflicts} file(s)."
+              echo "::warning::Could not create the scratch worktree for ${branch}; conflict count unavailable."
+              sed 's/^/    /' /tmp/wt.err | head -10
             fi
-            msg="${msg} Sync it now — the cost only goes up."
-            msg="${msg} See CONTRIBUTING.md, 'Long-lived branches'."
-            echo "::error::${msg}"
-            exit 1
-          fi
 
-          echo "${BRANCH} is ${behind} commits behind main — within the ${MAX_BEHIND} limit."
+            {
+              echo "### Branch drift: \`${branch}\`"
+              echo ""
+              echo "| | |"
+              echo "| --- | --- |"
+              echo "| behind \`main\` | ${behind} |"
+              echo "| ahead of \`main\` | ${ahead} |"
+              echo "| diverged since | ${since} |"
+              echo "| conflicting files if merged today | ${conflicts} |"
+            } >> "$GITHUB_STEP_SUMMARY"
+
+            if [ "${behind}" -gt "${MAX_BEHIND}" ]; then
+              msg="${branch} is ${behind} commits behind main (limit ${MAX_BEHIND})."
+              if [ "${conflicts}" = "unknown" ]; then
+                msg="${msg} (The dry-run merge could not be measured: see the warning above.)"
+              else
+                msg="${msg} Merging main into it today would conflict in ${conflicts} file(s)."
+              fi
+              echo "::error::${msg} Sync it now: the cost only goes up. See CONTRIBUTING.md, 'Long-lived branches'."
+              failed=1
+            else
+              echo "${branch} is ${behind} commits behind main, within the ${MAX_BEHIND} limit."
+            fi
+          done
+          exit "${failed}"

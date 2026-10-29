@@ -80,6 +80,8 @@ _fixture() { # <name> <version>
     "$fixture_hash" >>"$root/README.md"
   mkdir -p "$root/.well-known/mcp"
   printf '{\n  "version": "%s"\n}\n' "$v" >"$root/.well-known/agent-card.json"
+  mkdir -p "$root/defaults/dot_config/dotfiles"
+  printf '{\n  "version": "%s"\n}\n' "$v" >"$root/defaults/dot_config/dotfiles/agent-card.json"
   printf '{\n  "version": "%s"\n}\n' "$v" >"$root/.well-known/mcp/server-card.json"
   printf 'Current version: v%s.\n' "$v" >"$root/llms.txt"
   printf '# Changelog\n\n## v%s — 2026-01-01\n' "$v" >"$root/CHANGELOG.md"
@@ -111,7 +113,7 @@ _out="$(_check "$_root")"
 _rc=$?
 assert_equals 0 "$_rc" "matching tree exits 0"
 assert_contains "canonical: 1.2.3" "$_out" "canonical version logged"
-assert_contains "all 17 live version surfaces match 1.2.3" "$_out" "success summary printed"
+assert_contains "all 18 live version surfaces match 1.2.3" "$_out" "success summary printed"
 
 test_start "quiet_suppresses_output_but_keeps_rc"
 _root="$(_fixture quiet 1.2.3)"

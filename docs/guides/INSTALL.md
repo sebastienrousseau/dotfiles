@@ -152,7 +152,7 @@ encrypted to it.
 cp ~/.config/chezmoi/key.txt ~/key.txt.backup   # if you use encryption
 chezmoi purge
 rm -rf ~/.dotfiles
-rm -rf ~/.local/share/chezmoi ~/.local/share/dotfiles.log
+rm -rf ~/.local/share/chezmoi ~/.local/state/dotfiles ~/.local/share/dotfiles.log
 ```
 
 ### Signed contributions

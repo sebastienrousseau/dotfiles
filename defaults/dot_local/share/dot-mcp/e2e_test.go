@@ -182,7 +182,7 @@ func TestEndToEndProtocolExchange(t *testing.T) {
 	if structured["status"] != "healthy" {
 		t.Fatalf("status = %v", structured["status"])
 	}
-	if got, want := structured["argv"], "mcp doctor --json --strict"; got != want {
+	if got, want := structured["argv"], "mcp check --json --strict"; got != want {
 		t.Fatalf("the server ran %q, want %q", got, want)
 	}
 	content := call["content"].([]any)[0].(map[string]any)

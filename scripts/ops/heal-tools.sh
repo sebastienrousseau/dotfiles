@@ -191,6 +191,19 @@ _do_install() {
   install_package "$pkg"
 }
 
+# _heal_install_dep CMD DONE TOTAL PKG_MGR: install one missing tool; a
+# failure (or no package manager) counts as a failed repair (heal.sh's
+# REPAIRS_FAILED).
+_heal_install_dep() {
+  if [[ -z "$4" ]]; then
+    printf '  \033[38;5;196m✗\033[0m %s (no package manager)\n' "$1"
+  elif _pkg_install "$1" "$2" "$3" _do_install "$1" "$4"; then
+    return 0
+  fi
+  REPAIRS_FAILED=$((${REPAIRS_FAILED:-0} + 1))
+  return 1
+}
+
 heal_missing_dependencies() {
   log_step "Checking dependencies"
   # All tools that dot doctor checks — unified list
@@ -230,13 +243,7 @@ heal_missing_dependencies() {
       continue
     fi
 
-    if [[ -z "$pkg_mgr" ]]; then
-      printf '  \033[38;5;196m✗\033[0m %s (no package manager)\n' "$cmd"
-      completed=$((completed + 1))
-      continue
-    fi
-
-    if _pkg_install "$cmd" "$completed" "$total" _do_install "$cmd" "$pkg_mgr"; then
+    if _heal_install_dep "$cmd" "$completed" "$total" "$pkg_mgr"; then
       FIXES_APPLIED=$((FIXES_APPLIED + 1))
       installed=$((installed + 1))
       persist_log "HEAL: installed $cmd"
@@ -274,12 +281,12 @@ heal_mise_tools() {
 
   if [[ "$DRY_RUN" == "1" ]]; then
     log_dry "run 'mise install' to ensure all tools are present"
-  else
-    if _pkg_install "mise tools" 0 1 mise install; then
-      # Start pueue daemon if it was just installed but not running
-      if command -v pueued >/dev/null && ! pueue status >/dev/null 2>&1; then
-        pueued -d 2>/dev/null || true
-      fi
+  elif _pkg_install "mise tools" 0 1 mise install; then
+    # Start pueue daemon if it was just installed but not running
+    if command -v pueued >/dev/null && ! pueue status >/dev/null 2>&1; then
+      pueued -d 2>/dev/null || true
     fi
+  else
+    return 1
   fi
 }

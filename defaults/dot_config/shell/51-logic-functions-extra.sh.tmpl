@@ -7,6 +7,16 @@
 {{ $root := . }}
 {{ $groupsPath := joinPath $root.chezmoi.sourceDir ".chezmoitemplates/functions/groups.json" }}
 {{ $groups := (fromJson (include $groupsPath)) }}
+{{/* A function an alias file also defines (archives `extract` and `backup`,
+     cd `goto`) is left to the alias layer: zsh sources this layer after
+     90-ux-aliases.sh and bash before it, so a stub or a group load here
+     would replace the alias-file version in one shell and not the other. */}}
+{{ $aliasSrc := "" }}
+{{ range glob (joinPath $root.chezmoi.sourceDir ".chezmoitemplates/aliases/**/*.aliases.sh") }}
+{{ $aliasSrc = print $aliasSrc (include .) "\n" }}
+{{ end }}
+{{/* Extra functions a file defines besides the one named after it. */}}
+{{ $extraStubs := dict "text/encode64.sh" (list "decode64") }}
 
 {{ range $group, $files := $groups }}
 _dotfiles_load_group_{{ $group }}() {
@@ -14,8 +24,11 @@ _dotfiles_load_group_{{ $group }}() {
   # shellcheck disable=SC1090
   . /dev/stdin <<'__DOTFILES_EOF__'
 {{ range $files }}
+{{ $func := trimSuffix ".sh" (base .) }}
+{{ if not (regexMatch (printf "(?m)^%s\\(\\) \\{" $func) $aliasSrc) }}
 {{ $p := joinPath $root.chezmoi.sourceDir ".chezmoitemplates/functions" . }}
 {{ include $p }}
+{{ end }}
 
 {{ end }}
 __DOTFILES_EOF__
@@ -23,7 +36,11 @@ __DOTFILES_EOF__
 
 {{ range $files }}
 {{ $func := trimSuffix ".sh" (base .) }}
-{{ $func }}() { _dotfiles_load_group_{{ $group }}; {{ $func }} "$@"; }
+{{ if not (regexMatch (printf "(?m)^%s\\(\\) \\{" $func) $aliasSrc) }}
+{{ range prepend (default (list) (get $extraStubs .)) $func }}
+{{ . }}() { _dotfiles_load_group_{{ $group }}; {{ . }} "$@"; }
+{{ end }}
+{{ end }}
 
 {{ end }}
 {{ end }}

@@ -16,7 +16,7 @@ These aliases are defined in `system.aliases.sh`. Loaded by the eager alias laye
 | `p` | `pwd` | Replaces `p='podman'` from `modern.aliases.sh`, which loads earlier. |
 | `path` | `echo ${PATH//:/\\n}` | Print each `PATH` entry on its own line. |
 | `wth` | `curl -s "wttr.in/?format=3"` | Show the weather for your location. |
-| `d` | `dot` | Only when `dot` is on PATH. Replaced by `d='docker'` from `docker.aliases.sh` (lazy layer) when `docker` is on PATH. |
+| `d` | `dot` | Only when `dot` is on PATH. The `dig` and `docker` aliases of the same name apply only without it. |
 | `i` | `epoch` | Only when `epoch` is on PATH. |
 | `pid` | `ps -f` | Only when `ps` is on PATH. |
 | `ps` | `ps -ef` | Only when `ps` is on PATH. |

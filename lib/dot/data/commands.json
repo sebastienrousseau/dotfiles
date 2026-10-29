@@ -722,7 +722,7 @@
     {
      "spelling": "config sync",
      "effect": "write",
-     "summary": "Pull the source, then apply",
+     "summary": "Apply the dotfiles; --pull pulls first",
      "built": true
     },
     {
@@ -810,7 +810,14 @@
      "spelling": "config import",
      "effect": "write",
      "summary": "Restore from an exported bundle",
-     "built": true
+     "built": true,
+     "flags": [
+      {
+       "long": "yes",
+       "short": "y",
+       "summary": "Restore without asking"
+      }
+     ]
     }
    ],
    "aliases": [
@@ -944,11 +951,6 @@
      "summary": "Health summary",
      "built": true,
      "flags": [
-      {
-       "long": "verbose",
-       "short": "v",
-       "summary": "Show detailed checks"
-      },
       {
        "long": "json",
        "short": "j",
@@ -1467,7 +1469,7 @@
     {
      "spelling": "secret key new",
      "effect": "write",
-     "summary": "Create an ED25519 key",
+     "summary": "Encrypt an SSH key with age",
      "built": true
     },
     {
@@ -2031,7 +2033,7 @@
    "name": "theme",
    "group": "configuration",
    "summary": "one palette for every app",
-   "default": "show",
+   "default": "select",
    "objects": [
     {
      "name": "wallpaper",

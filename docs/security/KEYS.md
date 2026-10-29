@@ -15,8 +15,8 @@ encryption keys see [KEY_ROTATION.md](KEY_ROTATION.md) and the repository's
 ## Zsh
 
 - `Ctrl+R`: History search with `atuin` when it is installed. Without
-  `atuin`, `Ctrl+R` runs a bare `fzf` (a file picker), not fzf's history
-  widget.
+  `atuin`, fzf's history widget when fzf's key bindings are loaded, and
+  zsh's incremental history search otherwise.
 - `Ctrl+P` / `Ctrl+N`: History prefix search (up/down)
 
 ## Tmux (prefix = `Ctrl-a`)
@@ -30,9 +30,8 @@ encryption keys see [KEY_ROTATION.md](KEY_ROTATION.md) and the repository's
 - `Prefix + \`: Split horizontal (alt)
 - `Prefix + h/j/k/l`: Move between panes (vim-style)
 - `Prefix + z`: Toggle zoom pane
-- `Prefix + H/J/L`: Resize pane (left/down/right)
-- `Prefix + K`: Kill the tmux server, all sessions (asks for confirmation).
-  This binding replaces resize-up, so there is no `Prefix + K` resize.
+- `Prefix + H/J/K/L`: Resize pane (left/down/up/right)
+- `Prefix + Q`: Kill the tmux server, all sessions (asks for confirmation)
 
 ## Neovim (leader = `Space`)
 

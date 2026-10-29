@@ -97,6 +97,9 @@ specs=(
   # Machine-readable discovery surfaces: agents fetch these, so a stale
   # version here misroutes tooling rather than merely reading wrong.
   ".well-known/agent-card.json|\"version\"|\"version\": \"${canonical}\""
+  # The card dot deploys to ~/.config/dotfiles, which `dot agent card show`
+  # prints: it sat at 0.2.501 for 38 releases before this was checked.
+  "defaults/dot_config/dotfiles/agent-card.json|\"version\"|\"version\": \"${canonical}\""
   ".well-known/mcp/server-card.json|\"version\"|\"version\": \"${canonical}\""
   # serverInfo.version returned by the MCP `initialize` handshake. A client
   # reads the card and the handshake; they must agree.
