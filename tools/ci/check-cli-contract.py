@@ -194,6 +194,12 @@ def check_entry(root: pathlib.Path, name: str, manifest: dict) -> list[str]:
     return errors
 
 
+def check_hooks(root: pathlib.Path, name: str, manifest: dict) -> list[str]:
+    """Each lifecycle hook (P2.2) ships its script in the plugin directory."""
+    return [f"{name}: {h['event']} hook plugins/{name}/{h['run']} is missing"
+            for h in manifest.get("hooks", []) if not (root / "plugins" / name / h["run"]).is_file()]
+
+
 def resolve_target(target: str, manifests: dict, reg: dict) -> str | None:
     """Return why the target does not resolve, or None when it does."""
     words = [w for w in target.split() if not w.startswith("--")]
@@ -340,6 +346,7 @@ def lint(root: pathlib.Path, dot: pathlib.Path) -> list[str]:
     for name, manifest in manifests.items():
         errors += check_manifest(name, manifest, reg, version)
         errors += check_entry(root, name, manifest) if "commands" in manifest else []
+        errors += check_hooks(root, name, manifest)
     if errors:
         return errors
     errors += check_aliases(manifests, reg)

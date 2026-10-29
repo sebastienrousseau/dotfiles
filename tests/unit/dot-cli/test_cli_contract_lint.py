@@ -209,6 +209,18 @@ class Entries(Fixture):
         (self.tmp / "plugins/theme/dot-theme").unlink()
         self.assertFails("theme: entry plugins/theme/dot-theme is missing or not executable")
 
+    def test_hook_script_must_exist(self):
+        (self.tmp / "plugins/ai/libexec/hooks/on-apply.sh").unlink()
+        self.assertFails("ai: on-apply hook plugins/ai/libexec/hooks/on-apply.sh is missing")
+
+    def test_hook_event_must_be_known(self):
+        self.edit("ai", 'event = "on-apply"', 'event = "on-boot"')
+        self.assertFails("ai: schema: hooks")
+
+    def test_hook_script_must_stay_in_libexec(self):
+        self.edit("ai", 'run = "libexec/hooks/on-apply.sh"', 'run = "../../evil.sh"')
+        self.assertFails("ai: schema: hooks")
+
     def test_entry_plugin_names_no_legacy_route(self):
         self.edit("theme", 'verb = "list"\n', 'verb = "list"\nlegacy = "theme list"\n')
         self.assertFails("theme: a plugin with an entry runs its own commands; drop 'legacy'")
