@@ -380,6 +380,7 @@ jobs:
   compatibility-report:
     name: Compatibility Report
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [cross-platform-test]
     if: always()
     steps:

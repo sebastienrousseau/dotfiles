@@ -66,12 +66,9 @@ repository admin role.
 
 `.github/rulesets/main.json` and `.github/branch-protection-config.json`
 describe a stricter target (one code-owner approval, last-push
-approval, and fifteen required checks). **Neither is applied** to the
-repository, so neither describes what GitHub enforces. Two of their
-fifteen check contexts also name no job in any workflow:
-`Type Check / Strict Mode`, and `Test / Integration` (the job is named
-`Test / Integration (Docker)`). Applying either file as it stands would
-leave those two checks pending forever and block every merge.
+approval, and fourteen required checks, each the name of a job in a
+workflow). **Neither is applied** to the repository, so neither
+describes what GitHub enforces.
 
 ## Shell lint policy
 

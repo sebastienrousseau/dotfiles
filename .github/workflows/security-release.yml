@@ -29,6 +29,7 @@ jobs:
   sbom:
     name: Release / SBOM
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: write   # upload SBOM + Cosign sig/cert as release assets
       id-token: write   # OIDC token for Cosign keyless signing (#876)
@@ -126,6 +127,7 @@ jobs:
     # Build ALL_SHA256SUMS only after provenance and every independently
     # published release asset are present.
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     # Provenance is itself a release asset, so the manifest must wait until
     # the generator uploads it. Running these jobs in parallel leaves the
     # signed manifest incomplete and creates a verification race.
@@ -291,6 +293,7 @@ jobs:
   verify-release-integrity:
     name: Release / Verify Integrity
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: [sbom, provenance, manifest]
     permissions:
       contents: read

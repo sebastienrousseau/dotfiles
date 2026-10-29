@@ -66,8 +66,8 @@ Hooks in this config (shellcheck, shfmt, hadolint, gitleaks,
 detect-secrets, checkov, conventional-commit linter, typos-cli,
 actionlint, **luacheck**, **stylua**, plus repo-local custom hooks)
 run on commit by default. The `luacheck` hook is pinned to the version
-CI uses (v1.2.0). The `stylua` hook is not yet: pre-commit pins v2.4.1
-while `ci.yml` and `ci-enforced.yml` pass `stylua_version: "0.20.0"`.
+CI uses (v1.2.0), and the `stylua` hook to the one `ci.yml` and
+`ci-enforced.yml` pass (`stylua_version`, v2.4.1).
 Keep the pins in step when you bump one (see [`config/pre-commit-config.yaml`](config/pre-commit-config.yaml)
 and [`.github/workflows/reusable-lua-lint.yml`](.github/workflows/reusable-lua-lint.yml)).
 
@@ -100,11 +100,10 @@ did not happen. By September it was **140 behind and 225 ahead**, and merging
 whole-file add/add decisions with no consistent winner — `main`'s copy was
 larger in 48 and `feat`'s in 14, so no blanket rule could resolve them safely.
 
-The `Branch Drift Guard` workflow fails once a tracked branch is more than
-40 commits behind `main` (roughly a fortnight here). Its weekly run still
-targets `feat/v0.2.503`, which has since been deleted, so it reports nothing
-to guard; run it by hand (`workflow_dispatch`) with the `branch` input for a
-live long-lived branch. If it fails:
+The `Branch Drift Guard` workflow fails once a long-lived branch is more
+than 40 commits behind `main` (roughly a fortnight here). Its weekly run
+checks every `feat/v*` release branch; a manual run (`workflow_dispatch`)
+can name one branch with the `branch` input. If it fails:
 
 ```sh
 git checkout <the long-lived branch>

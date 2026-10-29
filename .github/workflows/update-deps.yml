@@ -74,11 +74,12 @@ jobs:
           # Check Nerd Fonts version
           echo "Checking Nerd Fonts..."
           LATEST_NF=$(curl -s https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest | jq -r '.tag_name' | sed 's/^v//')
-          CURRENT_NF=$(grep -oP 'NERD_FONTS_VERSION="\K[^"]+' install/provision/run_onchange_50-install-fonts.sh 2>/dev/null || echo "unknown")
+          # The script pins FONT_VERSION="v<x.y.z>"; compare without the v.
+          CURRENT_NF=$(grep -oP '^FONT_VERSION="v\K[^"]+' install/provision/run_onchange_50-install-fonts.sh 2>/dev/null || echo "unknown")
           if [[ "$LATEST_NF" != "$CURRENT_NF" && "$LATEST_NF" != "null" ]]; then
             UPDATES="${UPDATES}nerd-fonts: ${CURRENT_NF} -> ${LATEST_NF}\n"
-            echo "nerd_fonts_update=true" >> $GITHUB_OUTPUT
-            echo "nerd_fonts_version=$LATEST_NF" >> $GITHUB_OUTPUT
+            echo "nerd_fonts_update=true" >> "$GITHUB_OUTPUT"
+            echo "nerd_fonts_version=$LATEST_NF" >> "$GITHUB_OUTPUT"
           fi
 
           # Not checked here: the chezmoi pin and the action pins live in
@@ -88,16 +89,16 @@ jobs:
           # nightly.yml reports chezmoi drift; Dependabot bumps the actions.
 
           if [[ -n "$UPDATES" ]]; then
-            echo "has_updates=true" >> $GITHUB_OUTPUT
+            echo "has_updates=true" >> "$GITHUB_OUTPUT"
             {
               echo "updates_summary<<EOF"
               printf '%b' "$UPDATES"
               echo
               echo "EOF"
-            } >> $GITHUB_OUTPUT
+            } >> "$GITHUB_OUTPUT"
             printf 'Updates found:\n%b' "$UPDATES"
           else
-            echo "has_updates=false" >> $GITHUB_OUTPUT
+            echo "has_updates=false" >> "$GITHUB_OUTPUT"
             echo "No updates found"
           fi
 
@@ -107,7 +108,7 @@ jobs:
           # Update Nerd Fonts version
           if [[ "${{ steps.updates.outputs.nerd_fonts_update }}" == "true" ]]; then
             VERSION="${{ steps.updates.outputs.nerd_fonts_version }}"
-            sed -i "s/NERD_FONTS_VERSION=\"[^\"]*\"/NERD_FONTS_VERSION=\"${VERSION}\"/" install/provision/run_onchange_50-install-fonts.sh
+            sed -i "s/^FONT_VERSION=\"v[^\"]*\"/FONT_VERSION=\"v${VERSION}\"/" install/provision/run_onchange_50-install-fonts.sh
             sed -i "s|nerd-fonts/releases/download/v[0-9.]*|nerd-fonts/releases/download/v${VERSION}|g" docs/reference/FONTS.md
           fi
 
@@ -187,9 +188,9 @@ jobs:
         id: changes
         run: |
           if git diff --quiet defaults/dot_config/nvim/lazy-lock.json 2>/dev/null; then
-            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
-            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Commit plugin updates

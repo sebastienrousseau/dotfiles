@@ -21,6 +21,7 @@ jobs:
       github.event.pull_request.user.login != 'dependabot-preview[bot]' &&
       github.event.pull_request.user.login != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Harden runner (block mode)
         uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2

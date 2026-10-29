@@ -71,10 +71,7 @@
             "context": "Coverage / kcov"
           },
           {
-            "context": "Test / Integration"
-          },
-          {
-            "context": "Type Check / Strict Mode"
+            "context": "Test / Integration (Docker)"
           },
           {
             "context": "Merge Gate"

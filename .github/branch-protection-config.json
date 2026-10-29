@@ -1,5 +1,5 @@
 {
-  "description": "Branch protection configuration for dotfiles repository v0.2.501",
+  "description": "Branch protection configuration for the dotfiles repository",
   "enforcement": "strict",
   "rules": {
     "main": {
@@ -17,8 +17,7 @@
             "Test / macos-latest",
             "Test / Unit Tests",
             "Coverage / kcov",
-            "Test / Integration",
-            "Type Check / Strict Mode",
+            "Test / Integration (Docker)",
             "Merge Gate",
             "Compliance Summary",
             "Reliability Summary"
