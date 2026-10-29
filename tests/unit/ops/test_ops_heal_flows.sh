@@ -201,4 +201,33 @@ assert_equals 0 "$_rc" "held lock dir exits 0"
 assert_contains "Already running" "$_out" "already-running warning printed"
 rmdir "$_lock_dir"
 
+# _missing_age BREW_RC MISE_RC: run heal --force with age missing, brew
+# (the package manager heal finds first) exiting BREW_RC and `mise`
+# exiting MISE_RC. Sets _out and _rc.
+_missing_age() {
+  local d="$DOTFILES_COV_TMPDIR/missing-age-$1-$2" t
+  mkdir -p "$d"
+  for t in "$_deps"/*; do
+    [[ "${t##*/}" == age || "${t##*/}" == mise ]] || ln -sf "$t" "$d/${t##*/}"
+  done
+  printf '#!/usr/bin/env bash\nexit %s\n' "$1" >"$d/brew"
+  printf '#!/usr/bin/env bash\nexit %s\n' "$2" >"$d/mise"
+  chmod +x "$d/brew" "$d/mise"
+  _healthy_home
+  _out="$(PATH="$d:$_noflock" _heal --force)"
+  _rc=$?
+}
+
+test_start "a_missing_tool_that_installs_is_a_fix"
+_missing_age 0 0
+assert_equals 0 "$_rc" "the install and mise install succeed: exits 0"
+assert_contains "Installed 1/1 packages" "$_out" "the tool counts as installed"
+_refute_contains "repair(s) failed" "$_out" "nothing is reported failed"
+
+test_start "a_failed_install_and_mise_install_are_counted"
+_missing_age 1 1
+assert_equals 1 "$_rc" "a failed install exits 1"
+assert_contains "Installed 0/1 packages" "$_out" "the tool is not counted as installed"
+assert_contains "2 repair(s) failed" "$_out" "the install and mise install both count"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
