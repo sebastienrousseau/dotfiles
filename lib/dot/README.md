@@ -40,6 +40,7 @@ or `scripts/dot/commands/`), source a helper as
 | `registry-module.sh`, `registry-trust.sh` | `dot cli install` and `dot cli list --available` (`plugins/cli/libexec/registry.sh`) |
 | `system.sh` | `dot system status` and `dot system schedule list\|set\|run` |
 | `upgrade.sh` | The toolchain side of `dot system update` |
+| `installer-digest.sh` | The README installer SHA-256 for a release: `scripts/verify-release-versions` checks it, `scripts/version-sync.sh` writes it |
 | `theme-niri.sh`, `theme-nvim.sh`, `theme-transaction.sh` | `bin/dot-theme-sync` targets and its transaction primitives |
 
 ## Why this directory exists

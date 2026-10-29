@@ -149,39 +149,20 @@ done
 # clone without the tag cannot tell the two apart (CI test jobs check out
 # one commit and no tags), so it leaves the digest to the full clones: the
 # version-consistency job, the version sync, and the pre-push hook.
-# installer_source: tag, tree, or unknown (a shallow clone without the tag).
-installer_source() {
-  local top
-  top="$(git rev-parse --show-toplevel 2>/dev/null || true)"
-  if [[ "$top" == "$(pwd -P)" ]] && git rev-parse -q --verify "refs/tags/v${canonical}" >/dev/null 2>&1; then
-    echo tag
-  elif [[ "$top" == "$(pwd -P)" && "$(git rev-parse --is-shallow-repository 2>/dev/null)" == true ]]; then
-    echo unknown
-  else
-    echo tree
-  fi
-}
-
-# sha256_of_stdin: the SHA-256 of standard input.
-sha256_of_stdin() {
-  if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum | awk '{print $1}'
-  else
-    shasum -a 256 | awk '{print $1}'
-  fi
-}
+# The rule lives in lib/dot/installer-digest.sh, which version-sync.sh uses
+# to write the digest this checks.
+# shellcheck source=../lib/dot/installer-digest.sh
+# shellcheck disable=SC1091
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/dot/installer-digest.sh"
 
 check_installer_digest() {
   local source installer_hash documented_hashes
-  source="$(installer_source)"
-  case "$source" in
-    unknown)
-      _log "installer digest: not checked here (a shallow clone without the v${canonical} tag)"
-      return 0
-      ;;
-    tag) installer_hash="$(git show "v${canonical}:install.sh" | sha256_of_stdin)" ;;
-    *) installer_hash="$(sha256_of_stdin <install.sh)" ;;
-  esac
+  source="$(dot_installer_source . "$canonical")"
+  if [[ "$source" == unknown ]]; then
+    _log "installer digest: not checked here (a shallow clone without the v${canonical} tag)"
+    return 0
+  fi
+  installer_hash="$(dot_installer_digest . "$canonical")"
   documented_hashes="$(
     grep '/tmp/dotfiles-install\.sh' README.md |
       grep -oE '[0-9a-f]{64}' |

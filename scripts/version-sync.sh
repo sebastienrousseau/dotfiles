@@ -75,6 +75,9 @@ EXCLUDE_FILES=(
 # shellcheck source=../lib/dot/ui.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../lib/dot/ui.sh"
+# shellcheck source=../lib/dot/installer-digest.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../lib/dot/installer-digest.sh" # dot_installer_digest
 ui_init
 
 # Functions — delegate to shared ui.sh (redirect to stderr for script output)
@@ -242,13 +245,10 @@ _vs_rewrite() {
         -e "s|download v$SED_VERSION_PATTERN|download v$target_version|g" \
         -e "s|dot-$SED_VERSION_PATTERN|dot-$target_version|g" \
         -e "s|dotfiles_version = \"$SED_VERSION_PATTERN\"|dotfiles_version = \"$target_version\"|g"
-      if [[ -f "$PROJECT_ROOT/install.sh" ]]; then
-        local ihash
-        ihash="$(shasum -a 256 "$PROJECT_ROOT/install.sh" 2>/dev/null | awk '{print $1}')"
-        [[ -n "$ihash" ]] || ihash="$(sha256sum "$PROJECT_ROOT/install.sh" 2>/dev/null | awk '{print $1}')"
-        [[ -z "$ihash" ]] || sed_in_place "$temp_file" \
-          -e "s|[0-9a-f]{64}(  /tmp/dotfiles-install\.sh)|${ihash}\\1|g"
-      fi
+      local ihash
+      ihash="$(dot_installer_digest "$PROJECT_ROOT" "$target_version")"
+      [[ -z "$ihash" ]] || sed_in_place "$temp_file" \
+        -e "s|[0-9a-f]{64}(  /tmp/dotfiles-install\.sh)|${ihash}\\1|g"
       ;;
     "docs/manual/00-introduction.md")
       sed_in_place "$temp_file" \

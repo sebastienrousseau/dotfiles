@@ -89,6 +89,7 @@ assert_output_not_contains "STEP apps run" "printf '%s' '$out'" "DOTFILES_APP_ST
 assert_contains "STEP apps skip" "$out" "the phase shows as a skip"
 assert_contains "DOTFILES_APP_STORES=0" "$out" "naming the setting that turned it off"
 assert_equals "" "$(inside "$out")" "and still nothing but steps inside the render"
+assert_contains "END" "$out" "and the update carries on to the end"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
