@@ -7,6 +7,14 @@
 # Sourced by heal.sh; inherits set -euo pipefail, ui.sh, and shared variables.
 # =============================================================================
 
+# _heal_rm_link LINK: remove a broken symlink; a failure counts as a failed
+# repair (heal.sh's REPAIRS_FAILED).
+_heal_rm_link() {
+  rm -f "$1" 2>/dev/null && return 0
+  REPAIRS_FAILED=$((${REPAIRS_FAILED:-0} + 1))
+  return 1
+}
+
 heal_broken_symlinks() {
   local broken=()
 
@@ -56,7 +64,7 @@ heal_broken_symlinks() {
           continue
         fi
       fi
-      if rm -f "$link" 2>/dev/null; then
+      if _heal_rm_link "$link"; then
         printf '  \033[38;5;42m✓\033[0m removed %s\n' "$link"
         FIXES_APPLIED=$((FIXES_APPLIED + 1))
         persist_log "HEAL: removed broken symlink $link"
@@ -92,12 +100,12 @@ heal_missing_critical_files() {
       CHEZMOI_APPLIED=1
       local restored=0
       for file in "${missing[@]}"; do
-        if [[ -f "$file" ]] || [[ -L "$file" ]]; then
-          restored=$((restored + 1))
-        fi
+        [[ -f "$file" || -L "$file" ]] && restored=$((restored + 1))
       done
       FIXES_APPLIED=$((FIXES_APPLIED + restored))
       persist_log "HEAL: regenerated $restored critical file(s)"
+    else
+      return 1
     fi
   fi
 }

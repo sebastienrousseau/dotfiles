@@ -44,6 +44,7 @@ require_value() {
 }
 
 _parse_attest_args() {
+  EVIDENCE_FILE=""
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --json | -j)
@@ -75,11 +76,37 @@ _parse_attest_args() {
         FLEET_ID="$2"
         shift 2
         ;;
+      -*) usage_error "unknown option '$1'" ;;
       *)
+        _take_operand "$1"
         shift
         ;;
     esac
   done
+  _verify_evidence_file
+}
+
+# _take_operand WORD — the one operand: the evidence file `--verify` checks.
+_take_operand() {
+  [[ -z "$EVIDENCE_FILE" ]] || usage_error "unexpected argument '$1'"
+  EVIDENCE_FILE="$1"
+}
+
+# _set_verify_args — VERIFY_ARGS: the flags attest-verify.sh takes from ours.
+_set_verify_args() {
+  VERIFY_ARGS=(--verify)
+  [[ "$JSON_MODE" -eq 1 ]] && VERIFY_ARGS+=(--json)
+  [[ -n "$VERIFY_MAX_AGE" ]] && VERIFY_ARGS+=(--max-age "$VERIFY_MAX_AGE")
+  return 0
+}
+
+# _verify_evidence_file — `--verify FILE` checks that record instead of a
+# fresh one; a file operand without --verify is a usage error.
+_verify_evidence_file() {
+  [[ -n "$EVIDENCE_FILE" ]] || return 0
+  [[ "$VERIFY" -eq 1 ]] || usage_error "unexpected argument '$EVIDENCE_FILE' (only verify takes a file)"
+  _set_verify_args
+  exec bash "$SCRIPT_DIR/attest-verify.sh" "${VERIFY_ARGS[@]}" -- "$EVIDENCE_FILE"
 }
 _parse_attest_args "$@"
 
@@ -208,11 +235,10 @@ if [[ -n "$FLEET_STORE" ]]; then
 fi
 
 _verify_attestation() {
-  local verify_args=(--verify) verify_status=0
-  [[ "$JSON_MODE" -eq 1 ]] && verify_args+=(--json)
-  [[ -n "$VERIFY_MAX_AGE" ]] && verify_args+=(--max-age "$VERIFY_MAX_AGE")
+  local verify_status=0
+  _set_verify_args
   printf '%s\n' "$1" |
-    bash "$SCRIPT_DIR/attest-verify.sh" "${verify_args[@]}" || verify_status=$?
+    bash "$SCRIPT_DIR/attest-verify.sh" "${VERIFY_ARGS[@]}" || verify_status=$?
   exit "$verify_status"
 }
 

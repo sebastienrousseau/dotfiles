@@ -893,7 +893,7 @@ node_manager = "mise"   # mise | fnm | nvm
 
 `dot secret` also reads an optional `[secrets.policy]` table
 (`provider = "auto" | "macos-keychain" | "pass" | "plain-enc"`,
-`auto_load`) from this file; `DOTFILES_SECRETS_PROVIDER` overrides it.
+`auto_load`) from this file; a `[data.secrets.policy]` table in `~/.config/chezmoi/chezmoi.toml` (written by `scripts/ops/setup.sh`) overrides it for one host, and `DOTFILES_SECRETS_PROVIDER` overrides both.
 
 The `Lint / Chezmoidata Schema` job fails a merge on a wrong type
 (a non-boolean flag, an unknown `default_shell` or `node_manager`).

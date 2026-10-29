@@ -41,7 +41,7 @@ summary = "Write the dotfiles to this machine"
 [[commands]]
 verb = "sync"
 effect = "write"
-summary = "Pull the source, then apply"
+summary = "Apply the dotfiles; --pull pulls first"
 
 [[commands]]
 verb = "update"
@@ -118,6 +118,11 @@ summary = "Switch profile"
 verb = "import"
 effect = "write"
 summary = "Restore from an exported bundle"
+
+[[commands.flags]]
+long = "yes"
+short = "y"
+summary = "Restore without asking"
 
 [[aliases]]
 name = "apply"

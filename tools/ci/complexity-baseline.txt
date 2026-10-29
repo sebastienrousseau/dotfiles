@@ -108,7 +108,7 @@
   33   34   43.5  123     0 plugins/cli/libexec/registry.sh::cmd_registry
   22   21   28.7  103     0 plugins/config/libexec/init.sh::cmd_init
   19   25   27.4   53     0 plugins/mcp/libexec/mcp.sh::cmd_mcp
-  21   12   31.5   69   248 plugins/secret/libexec/secrets.sh::<top>
+  21   12   31.5   69   252 plugins/secret/libexec/secrets.sh::<top>
   16   16   23.8   61     0 plugins/secret/libexec/secrets.sh::cmd_env_load
   10   11   26.1   77     0 plugins/system/libexec/system.sh::cmd_upgrade
   23   19   31.2  148     0 plugins/tool/libexec/env-emit.sh::dot_env_emit
@@ -130,7 +130,7 @@
   11   11    5.6   26     0 scripts/diagnostics/security-score.sh::get_grade
   11   16   24.0   62     0 scripts/diagnostics/security-score.sh::print_summary
   13   14   21.3   54    69 scripts/diagnostics/version-locks.sh::<top>
-  25   27   43.1  135   199 scripts/diagnostics/workstation-attestation.sh::<top>
+  25   27   43.1  135   218 scripts/diagnostics/workstation-attestation.sh::<top>
   11   11   15.2   34     0 scripts/dot/commands/manual.sh::cmd_open
   17   38   24.9   54     0 scripts/dot/commands/meta.sh::cmd_keys
   18   31   39.3  112   112 scripts/git-hooks/pre-commit-audit.sh::<top>
@@ -139,11 +139,11 @@
   12   14   22.6   41    45 scripts/ops/chezmoi-update.sh::<top>
    8   10   31.5   42     0 scripts/ops/heal-chezmoi.sh::heal_chezmoi_drift
   19   30   32.9   48     0 scripts/ops/heal-system.sh::heal_broken_symlinks
-  12   18   23.6   30     0 scripts/ops/heal-system.sh::heal_missing_critical_files
-  17   24   31.4   58     0 scripts/ops/heal-tools.sh::heal_missing_dependencies
+  12   16   25.0   30     0 scripts/ops/heal-system.sh::heal_missing_critical_files
+  16   22   29.0   53     0 scripts/ops/heal-tools.sh::heal_missing_dependencies
   15   15   31.5   55     0 scripts/ops/heal-tools.sh::install_package
-  13   15   26.2   66   156 scripts/ops/heal.sh::<top>
-  21   25   31.8   51     0 scripts/ops/heal.sh::main
+  13   15   26.2   66   166 scripts/ops/heal.sh::<top>
+  11   10   17.8   32     0 scripts/ops/heal.sh::main
   12   17   36.0   76   102 scripts/ops/prewarm.sh::<top>
   22   24   40.0  138     0 scripts/ops/release.sh::main
   13   18   22.8   58     0 scripts/ops/rollback.sh::git_reset

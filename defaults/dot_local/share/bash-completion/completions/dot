@@ -267,7 +267,7 @@ _dot() {
       flags='--help'
       ;;
     'config import' | 'config import'\ *)
-      flags='--help'
+      flags='--help --yes -y'
       ;;
     'config init' | 'config init'\ *)
       flags='--help'
@@ -341,7 +341,7 @@ _dot() {
       flags='--help --baseline -b --force -f'
       ;;
     'doctor status' | 'doctor status'\ *)
-      flags='--help --verbose -v --json -j --fix -f --force -F'
+      flags='--help --json -j --fix -f --force -F'
       ;;
     'fleet apply' | 'fleet apply'\ *)
       flags='--help'

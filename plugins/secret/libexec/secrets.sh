@@ -21,25 +21,33 @@ dot_data_file() {
   printf "%s\n" "$src_dir/.chezmoidata.toml"
 }
 
-dot_load_secrets_policy_env() {
-  local data_file provider auto_load
-  data_file="$(dot_data_file)"
-  [[ -f "$data_file" ]] || return 0
-
-  provider="$(awk -F'=' '
-    /^\[secrets\.policy\]/ {in_policy=1; next}
-    /^\[/ {if (in_policy) exit}
-    in_policy && $1 ~ /provider/ {
+# _policy_value FILE TABLE KEY: KEY's value in FILE's [TABLE], unquoted.
+_policy_value() {
+  [[ -f "$1" ]] || return 0
+  awk -F'=' -v table="[$2]" -v key="$3" '
+    { line = $0; gsub(/[[:space:]]/, "", line) }
+    line == table {in_policy=1; next}
+    /^[[:space:]]*\[/ {if (in_policy) exit}
+    in_policy { k = $1; gsub(/[[:space:]]/, "", k) }
+    in_policy && k == key {
       gsub(/["[:space:]]/, "", $2); print $2; exit
     }
-  ' "$data_file")"
-  auto_load="$(awk -F'=' '
-    /^\[secrets\.policy\]/ {in_policy=1; next}
-    /^\[/ {if (in_policy) exit}
-    in_policy && $1 ~ /auto_load/ {
-      gsub(/[[:space:]]/, "", $2); print $2; exit
-    }
-  ' "$data_file")"
+  ' "$1"
+}
+
+# _secrets_policy KEY: this host's [data.secrets.policy] in chezmoi.toml
+# (written by `scripts/ops/setup.sh`), else the source's [secrets.policy].
+_secrets_policy() {
+  local value
+  value="$(_policy_value "${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml" data.secrets.policy "$1")"
+  [[ -n "$value" ]] || value="$(_policy_value "$(dot_data_file)" secrets.policy "$1")"
+  printf '%s\n' "$value"
+}
+
+dot_load_secrets_policy_env() {
+  local provider auto_load
+  provider="$(_secrets_policy provider)"
+  auto_load="$(_secrets_policy auto_load)"
 
   if [[ -n "$provider" && -z "${DOTFILES_SECRETS_PROVIDER:-}" ]]; then
     export DOTFILES_SECRETS_PROVIDER="$provider"

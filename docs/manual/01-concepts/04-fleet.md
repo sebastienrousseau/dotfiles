@@ -134,7 +134,7 @@ Only the host with the matching Age private key can decrypt. Other hosts see the
 | `dot fleet log show` | Recent fleet events from `~/.local/state/dotfiles/fleet/events.jsonl` |
 | `dot fleet policy show` / `dot fleet policy set <advisory\|strict>` | The RBAC enforcement mode in `agent-profiles.json` |
 
-`fleet.toml` lists one `[hosts.<name>]` table per host with an `ssh` target and an optional `profile`. By default `dot fleet apply` runs `dot sync && dot doctor --quiet` on each host, four hosts at a time; `dot sync` there applies the copy of the source already on that host without pulling, so pass `--cmd "dot config update"` to pull first.
+`fleet.toml` lists one `[hosts.<name>]` table per host with an `ssh` target and an optional `profile`. By default `dot fleet apply` runs `dot config update && dot doctor` on each host (pull the source, apply it, then check the host), four hosts at a time.
 
 ## Limitations
 

@@ -193,11 +193,11 @@ Run it on each host; the evidence lands under
 ### 26. Sync dotfiles to every fleet host
 
 ```sh
-dot fleet apply --cmd 'dot config update'   # pull and apply on each host in fleet.toml
+dot fleet apply   # pull and apply on each host in fleet.toml, then run dot doctor
 ```
 
-Without `--cmd`, each host runs `dot sync && dot doctor --quiet`, which
-applies the checkout already on that host without pulling.
+Each host runs `dot config update && dot doctor`; `--cmd '<shell>'` runs
+something else instead.
 
 ### 27. Check drift on every fleet host
 
@@ -253,8 +253,9 @@ cd ~/.dotfiles && ./install.sh --force
 ```
 
 The archive stores absolute paths, so restore it as the same user with the
-same home directory. `dot config import` does not restore a bundle today:
-it creates a new one instead.
+same home directory. Where `dot` is already installed,
+`dot config import <bundle>` does the unpacking: it names what it will
+overwrite and asks first (`--yes` skips the question).
 
 ## Development
 

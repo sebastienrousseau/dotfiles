@@ -140,9 +140,27 @@ _out="$(DOTFILES_NONINTERACTIVE=1 _heal)"
 _rc=$?
 chmod 755 "$HOME/ro"
 rm -rf "$HOME/ro"
-assert_equals 0 "$_rc" "unfixable issue still exits 0"
+assert_equals 1 "$_rc" "a repair that failed exits 1"
+assert_contains "1 repair(s) failed" "$_out" "the failed repair is counted"
 assert_contains "but no fixes could be applied" "$_out" "no-fix summary printed"
 assert_contains "dot doctor" "$_out" "doctor hint printed"
+
+test_start "failed_chezmoi_apply_exits_nonzero"
+_unhealthy_home
+_failing="$DOTFILES_COV_TMPDIR/failing-chezmoi"
+mkdir -p "$_failing"
+cat >"$_failing/chezmoi" <<'STUB'
+#!/usr/bin/env bash
+# `chezmoi status` reports no drift; every apply fails.
+[[ "${1:-}" == status ]] && exit 0
+exit 1
+STUB
+chmod +x "$_failing/chezmoi"
+_out="$(PATH="$_failing:$PATH" _heal --force)"
+_rc=$?
+assert_equals 1 "$_rc" "a shell-config apply that failed exits 1"
+assert_contains "repair(s) failed" "$_out" "the failure is reported"
+_healthy_home
 
 test_start "flock_available_takes_the_lock_and_runs"
 _flock="$DOTFILES_COV_TMPDIR/flock-ok"

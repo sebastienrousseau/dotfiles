@@ -9,7 +9,7 @@ obj|config profile|show||the active profile and its features
 cmd|config status|@config status|read|Pending changes and last apply
 cmd|config diff|@config diff|read|What apply would change
 cmd|config apply|@config apply|write|Write the dotfiles to this machine
-cmd|config sync|@config sync|write|Pull the source, then apply
+cmd|config sync|@config sync|write|Apply the dotfiles; --pull pulls first
 cmd|config update|@config update|write|Pull and apply the dotfiles only
 cmd|config edit|@config edit|write|Open a managed file in $EDITOR
 cmd|config add|@config add|write|Start managing an existing file
@@ -26,6 +26,7 @@ run|config apply --sandbox|@config apply --sandbox||
 arg|config add||files|
 flag|config check|check|c||Check only
 flag|config check|fix|f||Apply safe fixes
+flag|config import|yes|y||Restore without asking
 alias|apply|shortcut|config apply|
 alias|sync|shortcut|config sync|
 alias|diff|shortcut|config diff|

@@ -32,7 +32,6 @@
 # $CHEZMOI_SOURCE_DIR and $HOME. A sandboxed HOME does not protect the
 # checkout from those:
 #
-#     dot config profile set              -> <repo>/defaults/.chezmoidata.toml
 #     dot fleet namespace set      -> <repo>/defaults/.chezmoidata.toml
 #     dot fleet enforce set        -> <repo>/defaults/dot_config/.../agent-profiles.json
 #     dot shell alias export       -> <repo>/docs/ALIASES_CHEATSHEET.md
