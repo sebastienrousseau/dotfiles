@@ -11,7 +11,7 @@ The repository is more than a personal dotfiles collection. It ships as workstat
 ## Who This Manual Is For
 
 - **Developers** who want a reproducible, signed development environment across machines
-- **Security engineers** who require cryptographic attestation, SBOM, and policy gates
+- **Security engineers** who require workstation attestation, SBOM, and policy gates
 - **AI agent operators** running Claude Code, Codex, GitHub Copilot, or MCP-aware tooling
 - **Team leads** deploying standardized workstations across a fleet
 
@@ -22,24 +22,25 @@ The content assumes basic familiarity with Git, shell environments, and chezmoi.
 - **Concepts** — the mental model behind the theme engine, trust model, fleet architecture, and self-healing
 - **Tutorials** — step-by-step walkthroughs for common tasks
 - **Reference** — every `dot` command, every config file, every template variable, every feature flag
-- **Cookbook** — 30+ specific recipes for day-to-day tasks and troubleshooting
+- **Cookbook** — short recipes for day-to-day tasks, troubleshooting and an FAQ
 - **Appendices** — platform support matrix, security checklist, glossary, bibliography
 
 ## Getting the Manual
 
-The manual is published in nine formats — all generated from the same Markdown source on every release:
+Every release attaches these formats, all generated from the same Markdown source:
 
-| Format | Size | Use case |
-|:---|---:|:---|
-| HTML (single page) | ~200K | Offline browsing |
-| HTML (multi-page) | — | Web reading |
-| HTML gzipped (single) | ~50K | Fast download |
-| EPUB | ~150K | E-readers |
-| PDF | ~400K | Printing |
-| ASCII text | ~120K | Terminal pagers |
-| Markdown source | ~80K | Re-processing |
+| Format | Release asset | Use case |
+|:---|:---|:---|
+| HTML (single page) | `dotfiles.html`, `dotfiles.html.gz` | Offline browsing |
+| HTML (multi-page) | `html.tar.gz` | Web reading |
+| EPUB | `dotfiles.epub` | E-readers |
+| PDF | `dotfiles.pdf` | Printing |
+| ASCII text | `dotfiles.txt`, `dotfiles.txt.gz` | Terminal pagers |
+| Markdown source | `dotfiles-md.tar.gz` | Re-processing |
 
-Published at: `https://sebastienrousseau.github.io/dotfiles/manual/`
+`SHA256SUMS` lists a checksum for each asset.
+
+Published at: <https://doc.dotfiles.io/manual/>
 
 Fetch from the CLI:
 
@@ -57,7 +58,7 @@ bash /tmp/dotfiles-install.sh
 dot doctor
 ```
 
-Requires `git` and `curl`. Supported on macOS 14+, Ubuntu/Debian, Arch, Fedora, openSUSE, and WSL2.
+Requires `git` and `curl`. Supported on macOS 14+, Ubuntu 22.04+, Debian 12+, WSL2 and NixOS; Fedora and Arch Linux are community-supported. See [Appendix A](05-appendices/A-platform-matrix.md).
 
 ## Conventions Used in This Manual
 
@@ -79,7 +80,7 @@ Command placeholders use `<angle-brackets>`. Optional arguments use `[brackets]`
 
 ## Licensing
 
-The `.dotfiles` repository is licensed under the MIT License. See [Appendix E](05-appendices/E-license.md) for the full text.
+The `.dotfiles` repository is dual-licensed under the Apache License 2.0 or the MIT License, at your option (`Apache-2.0 OR MIT`). See [Appendix E](05-appendices/E-license.md).
 
 Individual tools packaged, referenced, or templated by this repository retain their original licenses.
 

@@ -58,8 +58,9 @@ For breaking changes or substantial new features:
 5. Accepted RFCs are merged as-is to `docs/operations/` and become
    the implementation reference.
 
-Active and historical RFCs are linked from
-`docs/operations/README.md`.
+RFCs live in `docs/operations/` as `RFC_<short-name>.md` (for example
+`docs/operations/RFC_v0_2_503_reorganization.md`); architecture
+decisions are recorded in `docs/adr/`.
 
 ## Code of conduct
 
@@ -71,7 +72,7 @@ encrypted to the WKD-published GPG key).
 
 ## Forking
 
-The project is MIT-licensed; fork freely. If your fork diverges
+The project is dual-licensed Apache-2.0 OR MIT; fork freely. If your fork diverges
 substantially and gains its own community, please rename it to
 avoid downstream confusion ("dotfiles-X" or similar).
 
@@ -80,13 +81,13 @@ avoid downstream confusion ("dotfiles-X" or similar).
 The single-maintainer model has known weaknesses (bus factor,
 review bandwidth, perspective). The project mitigates these by:
 
-- **Comprehensive automation**: 75+ CI checks, pre-commit hooks,
+- **Comprehensive automation**: the CI workflows in `.github/workflows/`, pre-commit hooks,
   shellcheck/shfmt/typos enforcement.
 - **Documented architecture**: [`STRUCTURE.md`](STRUCTURE.md), `scripts/README.md`,
   `architecture/`, `operations/HARD_AUDIT_2026.md`.
 - **Cryptographic supply chain**: Cosign-signed SBOMs, SLSA L3
   provenance, signed commits, WKD-published disclosure key.
-- **Permissive license**: MIT — anyone can fork and continue.
+- **Permissive license**: Apache-2.0 OR MIT, so anyone can fork and continue.
 - **Active issue triage**: targeted weekly cadence.
 
 When the project gains regular contributors, this document will be

@@ -27,7 +27,7 @@ Manually keeping these synchronized is error-prone and time-consuming.
 
 This system provides automated version synchronization through:
 
-1. **CI/CD Workflow** (`.github/workflows/sync-versions.yml`) - Automated synchronization on version changes
+1. **CI/CD Workflow** (`.github/workflows/sync-versions.yml`) - Verification on `main` and PRs, automated synchronization on `feat/v*` branches
 2. **Local Script** (`scripts/version-sync.sh`) - Manual synchronization and verification
 3. **Verification System** - Ensures all references remain consistent
 
@@ -39,23 +39,20 @@ This system provides automated version synchronization through:
 
 **Triggers**:
 
-- Push to `main` or a release branch when the canonical manifest changes
-- Pull requests affecting the canonical manifest or a generated surface
+- Push to `main` or a `feat/v*` branch that touches any markdown file, `package.json`, `defaults/.chezmoidata.toml`, `install.sh`, `scripts/version-sync.sh`, `scripts/verify-release-versions`, `scripts/release-preflight` or this document
+- Pull requests to `main` touching the same paths
 - Manual dispatch with optional target version
 
-**Process**:
+**Jobs**:
 
-1. **Read Canonical Version** - Reads `dotfiles_version` from `.chezmoidata.toml`
-2. **Sync Versions** - Updates all markdown files with version references
-3. **Verify Consistency** - Ensures all references match target version
-4. **Commit & Push** - Automatically commits changes (except on PRs)
+| Event | Job | What it does |
+|---|---|---|
+| Pull request | `verify` | `./scripts/version-sync.sh --verify`; fails on any mismatch. |
+| Push to `main` (or dispatch on `main`) | `verify-protected` | The same check. It never commits to `main`. |
+| Push to `feat/v*` (or dispatch on any other ref) | `sync` | Reads the target version (the dispatch input, else `dotfiles_version` from `defaults/.chezmoidata.toml`), runs `./scripts/version-sync.sh`, and if anything changed commits it, SSH-signed with `ACTIONS_BOT_SIGNING_KEY` and DCO-signed-off, as `chore: sync version references to vX.Y.Z`, then pushes to that branch. |
 
-**Features**:
-
-- Backup creation before changes
-- Comprehensive change reporting
-- PR comment integration
-- Artifact preservation for rollback
+The workflow posts no PR comments and uploads no artifacts; the
+script's summary and any mismatches are in the job log.
 
 ### 2. Local Synchronization Script
 
@@ -105,15 +102,6 @@ version 0.2.485
 
 ## Integration Points
 
-### CI/CD Pipeline Integration
-
-The workflow integrates with the existing CI pipeline:
-
-```yaml
-# Existing CI workflow can depend on version sync
-needs: [sync-versions, lint-shell, test-linux]
-```
-
 ### Git Hooks Integration
 
 For local development, add to `.git/hooks/pre-commit`:
@@ -145,14 +133,11 @@ canonical manifest and regenerates `package.json` in the same operation:
 # Developer updates the canonical manifest and all generated surfaces
 ./scripts/version-sync.sh 0.2.522
 
-# Push to main
-git push origin main
-
-# GitHub Actions automatically:
-# 1. Detects version change
-# 2. Updates all markdown files
-# 3. Commits and pushes changes
-# 4. Verifies consistency
+# On a feat/v* branch, GitHub Actions then:
+# 1. Re-runs the sync against the canonical version
+# 2. Commits and pushes any remaining changes to the branch
+#
+# On main (and on the PR), it only verifies and fails on a mismatch.
 ```
 
 ### Scenario 2: PR Review
@@ -160,10 +145,8 @@ git push origin main
 ```bash
 # PR with version-surface changes
 # GitHub Actions automatically:
-# 1. Checks version consistency
-# 2. Reports any mismatches
-# 3. Comments on PR with sync status
-# 4. Provides diff preview
+# 1. Runs ./scripts/version-sync.sh --verify
+# 2. Fails the check and logs each mismatch
 ```
 
 ### Scenario 3: Manual Sync
@@ -187,27 +170,30 @@ rg -l "v?[0-9]+\.[0-9]+\.[0-9]+" --type md
 
 ### Known Files
 
-These files are always included even if they don't currently contain versions:
+These files are always included even if they don't currently contain versions
+(the non-markdown and hidden-directory surfaces the `rg --type md` scan cannot
+reach):
 
 - `README.md`
 - `docs/reference/FEATURES.md`
-- Any file matching version patterns
+- `docs/COPYRIGHT`
+- `scripts/git-hooks/pre-commit-audit.sh`
+- `defaults/.chezmoitemplates/README.md`, `functions/README.md` and `aliases/README.md`
+
+`package.json` is not scanned; the script sets its `version` field directly.
 
 ### Exclusions
 
-Files that are intentionally excluded:
-
-- `CHANGELOG.md` - May contain historical versions
-- `package.json` - Generated package-registry metadata
-- `docs/security/COMPLIANCE.md` - Includes external compliance spec versions
-- `docs/reference/FONTS.md` - Includes upstream font release versions
-- `docs/archive/LEGACY_ROADMAP.md` - Keeps historical release markers
-- `docs/archive/PLAN.md` - Captures multi-release planning references
-- `docs/operations/VERSION_SYNC.md` - Documentation examples and usage
-- `docs/architecture/WALKTHROUGH.md` - Contains environment-specific tag examples
-- `docs/guides/WSL2_NIX_TROUBLESHOOTING.md` - Contains IP addresses and version-like values
-- Binary files
-- Test fixtures
+The authoritative list is the `EXCLUDE_FILES` array at the top of
+`scripts/version-sync.sh`, each entry with a comment saying why. It
+covers history (`CHANGELOG.md`, `docs/archive/*`, `docs/articles/*`,
+`ROADMAP.md`), every file under `docs/operations/` (this document
+included), third-party and per-release version tables (for example
+`docs/reference/FONTS.md`, `docs/security/COMPLIANCE.md`,
+`docs/security/VERIFY_RELEASE.md`, `pkg/VERIFY.md`) and files deployed
+into `$HOME` that quote other projects' versions (`defaults/Code/*`).
+Only markdown files are scanned, so binaries and non-markdown fixtures
+never match.
 
 ## Error Handling
 
@@ -221,13 +207,11 @@ Files that are intentionally excluded:
 
 **Solution**: Run `./scripts/version-sync.sh` to fix
 
-#### Missing Dependencies
+#### Optional Dependencies
 
-```text
-❌ jq is required but not installed
-```
-
-**Solution**: Install dependencies (`jq`, `rg`)
+Neither tool is required: without `rg` the script finds markdown files
+with `find` and `grep`, and without `jq` it rewrites the `package.json`
+version with `sed`. CI installs both.
 
 #### Permission Issues
 
@@ -264,19 +248,14 @@ git checkout HEAD~1 -- README.md
 ./scripts/version-sync.sh --verify || echo "Version drift detected"
 ```
 
-### Metrics Tracking
+### Run Summary
 
-The GitHub Actions workflow provides metrics:
-
-- Files scanned
-- Files updated
-- Verification status
-- Processing time
+Each sync ends with a summary in the log: target version, files
+updated, whether a backup was made, and the verification result.
 
 ### Backup Strategy
 
-- Local backups in `.version-sync-backup/`
-- GitHub Actions artifacts (30-day retention)
+- Local backups in `.version-sync-backup/` (replaced on every run)
 - Git history for rollback
 
 ## Security Considerations
@@ -285,8 +264,9 @@ The GitHub Actions workflow provides metrics:
 
 ```yaml
 permissions:
-  contents: write      # Required for commits
-  pull-requests: write # Required for PR comments
+  contents: read       # top level, and for both verify jobs
+# sync job only:
+#   contents: write    # commit + push the version-bump diff
 ```
 
 ### Validation
@@ -342,9 +322,10 @@ permissions:
 
 ### Debug Mode
 
+The script has no debug flag of its own; trace it with bash:
+
 ```bash
-# Enable verbose output
-DEBUG=1 ./scripts/version-sync.sh --dry-run
+bash -x ./scripts/version-sync.sh --dry-run
 ```
 
 ### Common Solutions
@@ -352,10 +333,10 @@ DEBUG=1 ./scripts/version-sync.sh --dry-run
 | Issue | Solution |
 |-------|----------|
 | Script not executable | `chmod +x scripts/version-sync.sh` |
-| Missing tools | `apt install jq ripgrep` (Ubuntu) |
+| Slow file discovery | `apt install ripgrep` (Ubuntu); `jq` is optional too |
 | Permission denied | Check Git status and file permissions |
-| Workflow not triggering | Verify the canonical manifest change is in the push |
-| Changes not committed | Check branch protection rules |
+| Workflow not triggering | Check the push touches one of the trigger paths above |
+| Changes not committed | Commits are made only on `feat/v*` pushes and non-`main` dispatches, never on `main` or PRs |
 
 ### Log Analysis
 

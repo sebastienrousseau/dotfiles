@@ -110,7 +110,7 @@ Apply, diff and sync the dotfiles.
 | `dot config path show` | Print the source directory | `dot cd` |
 | `dot config profile show` | Show the active profile | `dot profile show` |
 | `dot config profile set` | Switch profile | `dot profile set` |
-| `dot config import` | Restore from an exported bundle | `dot bundle restore` |
+| `dot config import` | Meant to restore from an exported bundle. Today it creates a new bundle in a `restore/` directory and restores nothing: unpack the archive with `tar --zstd -xf <bundle> -P` instead | `dot bundle restore` |
 
 ### dot doctor
 
@@ -254,7 +254,7 @@ POSIX scripts in `~/.local/bin/` that work across macOS, Linux, and WSL.
 
 | Command | Description |
 |---------|-------------|
-| `als` | Interactive alias and script viewer (categorized) |
+| `als` | Interactive alias and script viewer (categorized). A Fish function, not a script: Fish only |
 | `cb` | Universal clipboard utility (detects `pbcopy`/`pbpaste`, `xclip`/`wl-copy`, or `clip.exe`) |
 | `open` | Universal file/URL opener (maps to `open`, `xdg-open`, or `explorer.exe`) |
 | `notify` | Universal desktop notifications (`osascript`, `notify-send`, or `powershell`) |

@@ -1,178 +1,71 @@
 # Archives Aliases
 
-Manage Archives aliases. Part of the **Universal Dotfiles** configuration.
+Manage archive and compression aliases. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
 ## Description
 
-These aliases are defined in `archives.aliases.sh` and are automatically loaded by `chezmoi`.
+These aliases are defined in `archives.aliases.sh`. Loaded by the eager alias layer `~/.config/shell/90-ux-aliases.sh` (a core category), after every other core category.
 
 ## Aliases
 
-This module provides comprehensive tools for handling various archive and
-compression formats.
+`extract` (shorthand `x`) detects the format from the file name. `list_archive` (`lar`) lists any supported archive, `compress` (`ac`) creates one from several inputs, `compress_large` (`acl`) compresses one large file, and `backup` (`bak`) writes a timestamped archive. Run any of them with no arguments for its usage. Operations are logged to `$ARCHIVE_LOG_FILE` (default `~/.archive_operations.log`).
 
-### Universal Extract Function
+| Name | Definition | Notes |
+| --- | --- | --- |
+| `extract` | function | `extract <archive>`: unpack any supported archive, detecting the format from the name. |
+| `list_archive` | function | `list_archive <archive>`: list the contents of any supported archive. |
+| `compress` | function | `compress <format> [-l <1-9>] <inputs...> [output]`: formats tar, tgz, tbz2, txz, tzst, zip, 7z, gz, bz2, xz, zst, lz4, rar. |
+| `compress_large` | function | `compress_large <format> <input> [output]`: compress one file with gz, bz2, xz, zst or lz4 (output defaults to `<input>.<format>`). |
+| `backup` | function | `backup <file-or-dir> [format]`: write `<name>-backup-<timestamp>` as tgz (default), tbz2, txz, tzst, zip or 7z. |
+| `zap` | `dot_confirm_destructive "rm -vi (zap)" && rm -vi` | Asks for confirmation, then removes interactively and verbosely. Only when `DOTFILES_SAFE_ALIASES=1`. |
+| `x` | `extract` | Extract any supported archive with `extract`. |
+| `l7z` | `7z l` | List 7z archive contents. |
+| `ltar` | `tar -tvf` | List tar archive contents. |
+| `ltgz` | `tar -tzvf` | List tar.gz archive contents. |
+| `ltbz` | `tar -tjvf` | List tar.bz2 archive contents. |
+| `ltxz` | `tar -tJvf` | List tar.xz archive contents. |
+| `ltzst` | `tar --zstd -tvf` | List tar.zst archive contents. |
+| `lzip` | `unzip -l` | List zip archive contents. |
+| `lrar` | `unrar l` | List rar archive contents. Only when `unrar` is on PATH. |
+| `lar` | `list_archive` | Generic list archive contents. |
+| `c7z` | `7z a` | Create 7z archive. |
+| `x7z` | `7z x` | Extract 7z archive. |
+| `ctar` | `tar -cvf` | Create tar archive. |
+| `xtar` | `tar -xvf` | Extract tar archive. |
+| `ctgz` | `tar -zcvf` | Create tar.gz archive. |
+| `xtgz` | `tar -zxvf` | Extract tar.gz archive. |
+| `ctbz` | `tar -jcvf` | Create tar.bz2 archive. |
+| `xtbz` | `tar -jxvf` | Extract tar.bz2 archive. |
+| `ctxz` | `tar -Jcvf` | Create tar.xz archive. |
+| `xtxz` | `tar -Jxvf` | Extract tar.xz archive. |
+| `ctzst` | `tar --zstd -cvf` | Create tar.zst archive. |
+| `xtzst` | `tar --zstd -xvf` | Extract tar.zst archive. |
+| `czip` | `zip -r` | Create zip archive. |
+| `xzip` | `unzip` | Extract zip archive. |
+| `crar` | `rar a` | Create rar archive. Only when `rar` is on PATH. |
+| `xrar` | `unrar x` | Extract rar archive. Only when `unrar` is on PATH. |
+| `cgz` | `gzip -cv` | Compress with gzip. |
+| `xgz` | `gzip -dv` | Extract gzip. |
+| `cbz` | `bzip2 -zk` | Compress with bzip2. |
+| `xbz` | `bzip2 -dk` | Extract bzip2. |
+| `cxz` | `xz -z` | Compress with xz. |
+| `xxz` | `xz -d` | Extract xz. |
+| `czst` | `zstd -z` | Compress with zstd. |
+| `xzst` | `zstd -d` | Extract zstd. |
+| `clz4` | `lz4 -zc` | Compress with lz4. |
+| `xlz4` | `lz4 -dc` | Extract lz4. |
+| `ac` | `compress` | Generic compression (Archive Create) |
+| `acl` | `compress_large` | Legacy compress_large. |
+| `bak` | `backup` | Quick backup function. |
 
-The `extract` (or shorthand `x`) command automatically handles various archive formats:
+### Shell differences
 
-```bash
-extract archive.tar.gz  # Automatically detects format and extracts
-```
+The function layer (`~/.config/shell/51-logic-functions-extra.sh`) defines loader stubs named `extract` and `backup` for the files in `.chezmoitemplates/functions/files/`. Bash sources that layer before the alias layers, so the functions above win. Zsh sources it after the alias layers, so the stubs replace them:
 
-Supported formats:
-
-- `.tar.bz2`, `.tbz2`
-- `.tar.gz`, `.tgz`
-- `.tar.xz`
-- `.tar.zst`
-- `.tar`
-- `.bz2`
-- `.gz`
-- `.rar`
-- `.zip`
-- `.Z`
-- `.7z`
-- `.zst`
-- `.xz`
-- `.lz4`
-- `.lha`, `.lzh`
-- `.arj`
-- `.arc`
-- `.dms`
-
-### Advanced Compression Function
-
-The new `compress` function (shorthand `ac`) provides a unified interface for all compression formats with support for compression levels and multiple files:
-
-```bash
-compress tgz file1 file2 directory output.tar.gz  # Create tar.gz with multiple inputs
-compress zip -l 9 important_files backup.zip      # Create zip with maximum compression level
-```
-
-Supported formats: `tar`, `tgz`, `tbz2`, `txz`, `tzst`, `zip`, `7z`, `gz`, `bz2`, `xz`, `zst`, `lz4`, `rar`
-
-### Quick Backup Function
-
-The `backup` (or shorthand `bak`) function creates timestamped backups of files or directories:
-
-```bash
-backup important_folder            # Creates important_folder-backup-20250312-123045.tar.gz
-backup database.sql zip            # Creates database.sql-backup-20250312-123045.zip
-```
-
-### Archive Content Listing
-
-The `list_archive` (or shorthand `lar`) function displays the contents of any supported archive:
-
-```bash
-list_archive backup.tar.gz         # Lists all files in the archive
-```
-
-### Large File Compression (Legacy)
-
-The `compress_large` (shorthand `acl`) function is maintained for backward compatibility:
-
-```bash
-compress_large gz largefile.dat    # Creates largefile.dat.gz
-compress_large xz data.bin output.xz  # Specific output name
-```
-
-### Archive Tools
-
-- `c7z` - Create 7z archive
-- `x7z` - Extract 7z archive
-- `l7z` - List contents
-- `ctar` - Create tar archive
-- `xtar` - Extract tar archive
-- `ltar` - List contents
-- `ctgz` - Create tar.gz archive
-- `xtgz` - Extract tar.gz archive
-- `ltgz` - List tar.gz contents
-- `ctbz` - Create tar.bz2 archive
-- `xtbz` - Extract tar.bz2 archive
-- `ltbz` - List tar.bz2 contents
-- `ctxz` - Create tar.xz archive
-- `xtxz` - Extract tar.xz archive
-- `ltxz` - List tar.xz contents
-- `ctzst` - Create tar.zst archive
-- `xtzst` - Extract tar.zst archive
-- `ltzst` - List tar.zst contents
-- `czip` - Create zip archive
-- `xzip` - Extract zip archive
-- `lzip` - List contents
-- `crar` - Create rar archive
-- `xrar` - Extract rar archive
-- `lrar` - List contents
-
-### Compression Tools
-
-#### Gzip
-
-- `cgz` - Compress with gzip
-- `xgz` - Extract gzip
-
-#### Bzip2
-
-- `cbz` - Compress with bzip2
-- `xbz` - Extract bzip2
-
-#### XZ
-
-- `cxz` - Compress with xz
-- `xxz` - Extract xz
-
-#### Zstandard
-
-- `czst` - Compress with zstd
-- `xzst` - Extract zstd
-
-#### LZ4
-
-- `clz4` - Compress with lz4
-- `xlz4` - Extract lz4
-
-### Enhanced Features
-
-- Automatic format detection
-- Tab completion for commands
-- Robust error handling with logging
-- File and directory name handling with spaces
-- Progress indicators for large files (when `pv` is available)
-- Multi-file input support
-- Compression level options
-- Archive integrity checking
-- Content listing for all formats
-- Timestamped backups
-- Cross-platform compatibility
-
-### Usage Examples
-
-```bash
-# Extract any supported archive
-extract archive.tar.gz
-# or use the shorthand
-x archive.tar.gz
-# List contents of any archive
-list_archive archive.zip
-# or use the shorthand
-lar archive.zip
-# Create a tar.gz archive with multiple files
-compress tgz file1.txt file2.txt docs/ archive.tar.gz
-# Create a zip archive with maximum compression
-compress zip -l 9 important/ backup.zip
-# Create a timestamped backup
-backup project_folder
-# or with a specific format
-backup database.sql 7z
-# Compress a large file with progress indication (requires pv)
-compress gz -l 9 largefile.dat compressed.gz
-# Legacy large file compression
-compress_large xz largefile.dat
-# Create a 7z archive with the alias
-c7z archive.7z files/  # No additional parameters needed
-```
+- `backup` becomes the version in `functions/files/backup.sh`.
+- `extract`, and so `x`, currently fails in zsh: the stub loads `functions/files/extract.sh`, whose `declare -f extract` guard sees the stub and skips its own definition, and the stub then calls itself again.
 
 [banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 

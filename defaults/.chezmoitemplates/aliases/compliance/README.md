@@ -1,17 +1,23 @@
 # Compliance Aliases
 
-Tools for regulatory compliance and privacy enforcement.
+Tools for privacy settings and the configuration audit trail. Part of the **Universal Dotfiles** configuration.
 
-## Controls
+![Dotfiles banner][banner]
 
-| Alias | Description |
-|-------|-------------|
-| `privacy-mode` | Disables telemetry for CLI tools (Homebrew, Dotnet, Azure, etc.) for the current session. |
-| `dot-audit` | Displays the recent configuration audit trail (Git history or Audit log). |
+## Description
 
-## Documentation
+These aliases are defined in `compliance.aliases.sh`. Loaded by the eager alias layer `~/.config/shell/90-ux-aliases.sh` (a core category).
 
-See [COMPLIANCE.md](../../../docs/security/COMPLIANCE.md) for full SOC2/ISO control mappings.
+## Aliases
+
+| Name | Definition | Notes |
+| --- | --- | --- |
+| `privacy-mode` | `privacy_mode_fn` | Export the telemetry opt-out variables of .NET, Homebrew, Azure, Azure Functions, AWS SAM, Stripe, Gatsby and Next.js in the current shell. |
+| `dot-audit` | `audit_fn` | Show the last 20 lines of `~/.local/share/dotfiles.log`, or the last 10 commits of `~/.dotfiles` when that log is missing. |
+
+See [COMPLIANCE.md](../../../../docs/security/COMPLIANCE.md) for the controls these support.
+
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

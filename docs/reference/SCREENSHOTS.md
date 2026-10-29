@@ -8,39 +8,41 @@ Here's how the dotfiles look across different themes and configurations.
 
 ## Theme Gallery
 
-### Catppuccin Mocha (default)
+Colors come from the wallpaper-derived themes in `defaults/.theme-manifest/themes.toml` (see the [Theming Guide](../guides/THEMING.md)). Each family has a dark and a light variant.
 
-The default theme. Catppuccin Mocha gives you a dark palette with warm, muted colors.
+### Maui Dark (default)
+
+The default theme family is `maui`, in `auto` mode: it follows the system appearance.
 
 ```text
-Terminal: Ghostty / WezTerm / Alacritty
-Font:     JetBrains Mono Nerd Font
-Theme:    Catppuccin Mocha
+Terminal: Ghostty / WezTerm / Alacritty / Kitty
+Font:     JetBrainsMono Nerd Font
+Theme:    maui-dark
 ```
 
 Key colors:
 
-- Background: `#1e1e2e`
-- Foreground: `#cdd6f4`
-- Accent Blue: `#89b4fa`
-- Accent Red: `#f38ba8`
+- Background: `#0f1f21`
+- Foreground: `#f1f6f7`
+- Accent: `#00d2e0`
+- Red: `#ff8282`
 
-### Catppuccin Latte (light)
+### Maui Light
 
-A light theme option for daytime use.
+The light variant, used when the system appearance is light.
 
 ```text
-Terminal: Ghostty / WezTerm / Alacritty
-Font:     JetBrains Mono Nerd Font
-Theme:    Catppuccin Latte
+Terminal: Ghostty / WezTerm / Alacritty / Kitty
+Font:     JetBrainsMono Nerd Font
+Theme:    maui-light
 ```
 
 Key colors:
 
-- Background: `#eff1f5`
-- Foreground: `#4c4f69`
-- Accent Blue: `#1e66f5`
-- Accent Red: `#d20f39`
+- Background: `#e9f4fa`
+- Foreground: `#1c1d1e`
+- Cursor: `#005e8b`
+- Red: `#a80000`
 
 ## Terminal Configurations
 
@@ -67,7 +69,7 @@ Cross-platform terminal with Lua configuration.
 Minimal, fast terminal.
 
 - Fast rendering
-- Simple YAML config
+- Simple TOML config
 - Vi mode
 - Cross-platform
 
@@ -94,7 +96,7 @@ The Starship prompt displays:
 
 The Neovim configuration includes:
 
-- Catppuccin theme
+- A `dotfiles` colorscheme generated from the active theme
 - Treesitter syntax highlighting
 - LSP integration
 - Telescope fuzzy finder

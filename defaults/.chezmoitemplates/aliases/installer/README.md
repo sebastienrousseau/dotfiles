@@ -1,13 +1,22 @@
 # Installer Aliases
 
-Tools for bootstrapping and remote deployment.
+Tools for bootstrapping and remote deployment. Part of the **Universal Dotfiles** configuration.
 
-## Commands
+![Dotfiles banner][banner]
 
-| Alias | Description |
-|-------|-------------|
-| `dot-install` | Run the `install.sh` bootstrap script locally. |
-| `dot-teleport` | Teleport your config to a remote server (`dot-teleport user@host`). |
+## Description
+
+These aliases are defined in `installer.aliases.sh`. Loaded by the eager alias layer `~/.config/shell/90-ux-aliases.sh` (a core category).
+
+## Aliases
+
+| Name | Definition | Notes |
+| --- | --- | --- |
+| `dot-install` | `bash $HOME/.dotfiles/install.sh` | Run `install.sh` from the source checkout. |
+| `telegram` | `bash $HOME/.dotfiles/scripts/ops/teleport.sh` | Run `scripts/ops/teleport.sh` from the source checkout to copy the configuration to a remote host: `telegram user@host`. |
+| `dot-teleport` | `telegram` | Runs `telegram`. |
+
+[banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
 ---
 

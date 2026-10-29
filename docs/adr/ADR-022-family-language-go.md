@@ -2,10 +2,18 @@
 
 Status: Accepted 2026-10-18.
 
+Status note (0.2.539): the decision governs compiled code as it is written.
+Today the host `bin/dot` is bash, and `dot top` (`plugins/top/dot-top`)
+is bash too: it runs `lib/dot/bento.sh`. The Go code in the tree is
+`core/` (`dot-core`, `dot-sandbox`, the transaction engine),
+`dot-ai-tui`, `dot-mcp` and `dot-ui` (under
+`defaults/dot_local/share/`), the fuzz harnesses in `fuzz/` and the
+`templates/projects/go` template.
+
 ## Context
 
 The family's compiled code is the `dot-cli` host, the `dot-top` monitor,
-`dot-mcp` and `dot-ui`, and it is Go today (about 16k lines). The question
+`dot-mcp` and `dot-ui` (see the status note for what is Go today). The question
 came up whether `dot-top` should move to Rust or C++, since btop is C++.
 
 Measured on the maintainer's Mac: a Go collector reading process data

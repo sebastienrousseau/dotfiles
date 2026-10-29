@@ -11,8 +11,8 @@ Core architectural decisions and system design of the dotfiles shell distributio
 ## Philosophy
 
 - **XDG-First**: Configuration lives under `~/.config/` to keep the home directory clean.
-- **Multi-Shell**: First-class support for Zsh, Fish, and Nushell with a shared logic core.
-- **Fast Startup**: Heavy features are deferred or autoloaded to keep the first prompt under 50ms.
+- **Multi-Shell**: Zsh, Fish, Bash and Nushell share a logic core, with a PowerShell profile for Windows.
+- **Fast Startup**: Heavy features are deferred or autoloaded to keep the first prompt fast (measure it with `dot doctor perf show`).
 - **Deterministic**: Nix Flakes provide bit-for-bit identical environments across machines.
 - **Non-Blocking**: Background daemons (Pueue) handle upgrades and builds without stalling the shell.
 
@@ -20,14 +20,16 @@ Core architectural decisions and system design of the dotfiles shell distributio
 
 ```text
 ~/.dotfiles/
-├── dot_config/          # Managed application configurations (~/.config/)
-│   ├── zsh/             # Modular Zsh rc.d architecture
-│   ├── fish/            # Autoloading Fish configuration
-│   ├── nushell/         # Structured data shell config
-│   ├── shell/           # Shared logic (aliases, paths, functions)
-│   └── ...              # 50+ tool configurations (nvim, tmux, ghostty, etc.)
-├── dot_local/           # Local binaries and scripts (~/.local/bin/)
-├── .chezmoitemplates/   # Unified source for aliases, functions, and paths
+├── defaults/                # chezmoi source root (named by .chezmoiroot)
+│   ├── dot_config/          # Managed application configurations (~/.config/)
+│   │   ├── zsh/             # Modular Zsh rc.d architecture
+│   │   ├── fish/            # Autoloading Fish configuration
+│   │   ├── nushell/         # Structured data shell config
+│   │   ├── shell/           # Shared logic (aliases, paths, functions)
+│   │   └── ...              # One directory per tool (nvim, tmux, ghostty, etc.)
+│   ├── dot_local/           # Local binaries and scripts (~/.local/bin/)
+│   └── .chezmoitemplates/   # Unified source for aliases, functions and template partials
+├── bin/ + plugins/ + lib/dot/  # The dot CLI: dispatcher, domain plugins, shared library
 ├── scripts/             # Internal libraries and diagnostics
 ├── nix/                 # Nix Flake for deterministic toolchains
 ├── lib/wasm-tools/      # `dot-sys` crate: health probe + WebAssembly attestation verifier
@@ -42,13 +44,13 @@ Core architectural decisions and system design of the dotfiles shell distributio
 
 Across Zsh, Fish, and Bash, an idempotent caching wrapper avoids redundant tool initialization (Starship, Zoxide, Atuin).
 
-1. **Intercept** — check if a cached version of the tool's `eval` output exists in `~/.cache/shell/`.
+1. **Intercept**: check if a cached version of the tool's `eval` output exists in the shell's cache directory (`~/.cache/zsh/`, `~/.cache/bash/` or `~/.cache/fish/`).
 2. **Validate** — compare the cache timestamp against the tool binary's mtime.
 3. **Bypass** — if valid, `source` the cached text directly, saving 20-50ms per tool.
 
 ### Lazy-Hydration Model
 
-To reach a fluid first-prompt target (< 50ms), the shell uses a three-phase startup:
+To keep the first prompt fluid, the shell uses a three-phase startup:
 
 1. **Phase 1 (Visual Paint)** — render the prompt immediately using static escape codes.
 2. **Phase 2 (Async Hydration)** — dispatch tool initializations (mise, atuin, etc.) to background workers.
@@ -90,7 +92,7 @@ Enables `set -x` tracing for the entire shell startup sequence. Output is writte
 
 ## Function Groups (groups.json)
 
-Functions are organized into groups defined in `.chezmoitemplates/functions/groups.json`:
+Functions are organized into groups defined in `defaults/.chezmoitemplates/functions/groups.json`:
 
 | Group | Functions | Description |
 |-------|-----------|-------------|
@@ -104,7 +106,7 @@ Functions are organized into groups defined in `.chezmoitemplates/functions/grou
 | `security` | genpass, keygen, mount_read_only | Security utilities |
 | `misc` | dothelp, view-source, prependpath, caffeine | Miscellaneous |
 
-Groups are lazy-loaded: stub functions are defined at startup, and the real implementation is loaded on first invocation. This keeps startup fast while providing 52+ functions on demand.
+Groups are lazy-loaded: stub functions are defined at startup, and the real implementation is loaded on first invocation. This keeps startup fast while every function listed in `groups.json` stays available on demand.
 
 The `groups.json` schema maps group names to arrays of relative paths (including subdirectory):
 

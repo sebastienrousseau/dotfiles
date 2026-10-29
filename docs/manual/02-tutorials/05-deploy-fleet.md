@@ -4,17 +4,17 @@ render_with_liquid: false
 
 # Tutorial: Deploy to a Fleet
 
-Roll out `.dotfiles` across multiple workstations and verify they're in sync.
+Roll out `.dotfiles` across multiple workstations and check that they're in sync.
 
 ## Scenario
 
 You have three hosts:
 
-- **macbook-t2** — your MacBook (current host, already installed)
-- **surface-pro** — your Linux laptop (new install)
-- **geekom-a9** — your desktop NUC (new install)
+- **macbook-t2**: your MacBook (current host, already installed)
+- **surface-pro**: your Linux laptop (new install)
+- **geekom-a9**: your desktop mini PC (new install)
 
-Goal: all three running identical `.dotfiles` with per-host customization, with auditable cross-host attestation.
+Goal: all three running the same `.dotfiles` with per-host customization, each with a workstation attestation you can collect in one place.
 
 ## Step 1: Per-Host Install
 
@@ -25,14 +25,16 @@ On each new host:
 bash /tmp/dotfiles-install.sh
 ```
 
-During `chezmoi init`, answer with the host's preset:
+The installer asks no questions. Select the host's preset afterwards in `~/.config/chezmoi/chezmoi.toml`, then run `dot apply`:
 
-- Surface Pro → `machine = "surface-pro"`
-- Geekom A9 → `machine = "geekom-a9"`
+- Surface Pro: `machine = "surface-pro"`
+- Geekom A9: `machine = "geekom-a9"`
+
+See [Create a Machine Profile](03-create-profile.md) for what a preset controls.
 
 ## Step 2: Exchange Signing Keys
 
-Each host has its own SSH ED25519 key. To verify commits and attestations across the fleet, publish each host's public key to every other host.
+Each host has its own SSH ED25519 key. To verify commits across the fleet, every host must trust every other host's public key.
 
 **On each host, copy the public key:**
 
@@ -41,7 +43,11 @@ cat ~/.ssh/id_ed25519.pub
 # ssh-ed25519 AAAAC3N...jkl5 user@macbook-t2
 ```
 
-**Collect all three keys. Append them to `~/.ssh/allowed_signers` on every host:**
+Git reads trusted keys from `~/.config/git/allowed_signers`, which chezmoi manages from `defaults/dot_config/git/allowed_signers.tmpl`. **On one host, add all three keys to that source file:**
+
+```sh
+dot config edit ~/.config/git/allowed_signers
+```
 
 ```
 user@macbook-t2 ssh-ed25519 AAAAC3N...jkl5
@@ -49,99 +55,84 @@ user@surface-pro ssh-ed25519 AAAAC3N...abc7
 user@geekom-a9 ssh-ed25519 AAAAC3N...def9
 ```
 
-Optionally commit `allowed_signers` as a template so all hosts receive updates via `dot update`:
+Commit and push it:
 
 ```sh
-# On macbook-t2
-chezmoi add ~/.ssh/allowed_signers
-git add -A && git commit -sS -m "feat(ssh): add fleet signing keys"
+cd ~/.dotfiles
+git add defaults/dot_config/git/allowed_signers.tmpl
+git commit -sS -m "feat(git): add fleet signing keys"
 git push
 ```
 
-Now every other host gets the updated list on `dot update`.
+Every other host gets the updated list on `dot config update`.
 
 ## Step 3: Share the Age Key (for Shared Secrets)
 
-If you want shared secrets decrypted on all three hosts, each host must have an Age key recipient in `.sops.yaml`.
+If you want shared secrets decrypted on all three hosts, each host's age public key must be a recipient in `.sops.yaml`.
 
 Option A: Share one key across all hosts (simpler, less granular).
 Option B: Each host has its own key; all three are listed as recipients (better operational security).
 
-For Option B:
+For Option B, on each host:
 
 ```sh
-# On macbook-t2 (already set up)
-grep "public key:" ~/.config/age/keys.txt
-
-# On surface-pro
-age-keygen -o ~/.config/age/keys.txt
-grep "public key:" ~/.config/age/keys.txt
-
-# On geekom-a9
-age-keygen -o ~/.config/age/keys.txt
-grep "public key:" ~/.config/age/keys.txt
+dot secret init                              # creates ~/.config/chezmoi/key.txt if missing
+age-keygen -y ~/.config/chezmoi/key.txt      # prints the public key
 ```
 
 Add all three public keys to `.sops.yaml`:
 
 ```yaml
 creation_rules:
-  - path_regex: \.sops\.yaml$
-    age: >-
-      age1aaa...111,    # macbook-t2
-      age1bbb...222,    # surface-pro
-      age1ccc...333     # geekom-a9
+  - path_regex: .*\.sops\.ya?ml$
+    key_groups:
+      - age:
+          - age1aaa...111   # macbook-t2
+          - age1bbb...222   # surface-pro
+          - age1ccc...333   # geekom-a9
 ```
 
 Re-encrypt existing secrets for the new recipients:
 
 ```sh
 # On macbook-t2
-find . -name '*.sops.yaml' -exec sops updatekeys {} \;
-git add .sops.yaml dot_config/*.sops.yaml
+cd ~/.dotfiles
+find defaults -name '*.sops.yaml' -exec sops updatekeys --yes {} \;
+git add .sops.yaml defaults/
 git commit -sS -m "chore(secrets): add fleet recipients"
 git push
 ```
 
-Other hosts on `dot update` decrypt with their own private key automatically.
+Each host then decrypts with its own private key (see [Encrypt a Secret](04-encrypt-secret.md) for `SOPS_AGE_KEY_FILE`).
 
-## Step 4: Verify Fleet Alignment
+## Step 4: Check Fleet Alignment
 
-From any host:
-
-```sh
-dot fleet attest
-```
-
-Expected output:
-
-```
-Fleet Attestation — v0.2.501
-
-Host           Git SHA    Policy    Tools OK   Drift   Verified
--------------- ---------- --------- ---------- ------- --------
-macbook-t2     abc123d    0x7f2a…   ✓          0       ✓
-surface-pro    abc123d    0x7f2a…   ✓          0       ✓
-geekom-a9      abc123d    0x7f2a…   ✓          0       ✓
--------------- ---------- --------- ---------- ------- --------
-FLEET STATUS: 3/3 aligned
-```
-
-If any row shows drift or missing verification:
+Each host reports its own state. On any host:
 
 ```sh
-# Check which host is out of sync
-dot fleet diff
+dot fleet status        # node ID, namespace, version, OS, shell, drift, last apply
+dot fleet drift show    # which managed files differ from the source
+```
 
-# SSH into the affected host and fix
+To collect evidence from every host in one place, write each host's attestation to a shared directory (a synced folder or a mounted share):
+
+```sh
+dot attest show --fleet-store ~/Sync/attestations --fleet-id home
+```
+
+This writes `~/Sync/attestations/home/<hostname>/workstation-attestation.json`, plus a timestamped copy. Each record is unsigned JSON with the dotfiles version, platform, git signing settings, agent mode and MCP posture, so compare `dotfiles_version` and `git_signing` across hosts.
+
+If a host shows drift:
+
+```sh
 ssh surface-pro
-dot doctor && dot doctor fix
-dot update
+dot doctor drift show
+dot config update
 ```
 
 ## Step 5: Per-Host Customization
 
-Each host has its own `~/.config/chezmoi/chezmoi.toml` — use it for things that shouldn't propagate:
+Each host has its own `~/.config/chezmoi/chezmoi.toml`: use it for things that shouldn't propagate:
 
 ```toml
 # surface-pro's chezmoi.toml
@@ -156,7 +147,7 @@ terminal_font_size = 11       # smaller for HiDPI
 # geekom-a9's chezmoi.toml
 [data]
 machine = "geekom-a9"
-theme = "valley-dark"         # different default
+theme = "sonoma-dark"         # different default
 default_shell = "zsh"
 terminal_font_size = 14       # larger for external 1440p
 ```
@@ -169,24 +160,31 @@ When you push a commit to main, each host pulls independently:
 
 ```sh
 # On each host
-dot update
+dot config update
 ```
 
-`dot update` does:
+`dot config update` runs `chezmoi update --force`: it pulls the source in `~/.dotfiles` and applies it, overwriting local edits to managed files without asking (set `DOTFILES_INTERACTIVE_APPLY=1` to be asked). `dot update` is a different command: it updates the whole system (packages and tools), asking first.
 
-1. `git pull --rebase --autostash` in `~/.dotfiles`
-2. `chezmoi apply` with progress output
-3. `dot doctor fix` if apply detected drift
-4. Reports changes applied
+To update every host from one machine over SSH, list them in `~/.config/dotfiles/fleet.toml`:
 
-For simultaneous update across the fleet (requires SSH):
+```toml
+[hosts.surface-pro]
+ssh = "user@surface-pro.local"
+profile = "laptop"
+
+[hosts.geekom-a9]
+ssh = "user@geekom-a9.local"
+profile = "desktop"
+```
+
+Then:
 
 ```sh
-dot fleet sync
-# Connects to each host in parallel
-# Runs `dot update` via SSH
-# Collects outcomes
+dot fleet apply --dry-run   # print the hosts and the command, connect to none
+dot fleet apply             # run 'dot sync && dot doctor --quiet' on each host
 ```
+
+It runs up to four hosts in parallel (`--jobs <n>` changes that); `--host <name>` limits it to one host, and `--verify-hosts` refuses to connect to a host that is not already in `~/.ssh/known_hosts`.
 
 ## Step 7: Secrets Rotation
 
@@ -194,19 +192,19 @@ When a secret is compromised (or as part of routine rotation):
 
 ```sh
 # 1. Edit the secret on any host
-sops dot_config/credentials.sops.yaml
+cd ~/.dotfiles
+sops defaults/.secrets/credentials.sops.yaml
 # Change the compromised value, save
 
 # 2. Commit and push
 git commit -sS -am "chore(secrets): rotate stripe key"
 git push
 
-# 3. All fleet hosts pick up the new value on next update
-# On each host:
-dot update
+# 3. All fleet hosts pick up the new value on their next update
+dot config update            # on each host, or `dot fleet apply` from one
 ```
 
-Since hosts all have the Age private key for themselves, decryption is automatic.
+Since every host holds its own age private key, decryption needs no extra step.
 
 ## Step 8: Decommission a Host
 
@@ -214,58 +212,55 @@ When retiring a host:
 
 ```sh
 # 1. Remove the host's public key from allowed_signers
-# Edit dot_ssh/allowed_signers.tmpl (on any host)
+dot config edit ~/.config/git/allowed_signers
 
-# 2. Remove the host's Age public key from .sops.yaml
+# 2. Remove the host's age public key from .sops.yaml
 
-# 3. Re-encrypt all SOPS files (remove the decommissioned recipient)
-find . -name '*.sops.yaml' -exec sops updatekeys {} \;
+# 3. Re-encrypt all SOPS files without the decommissioned recipient,
+#    and replace their data keys
+find defaults -name '*.sops.yaml' -exec sops updatekeys --yes {} \;
+find defaults -name '*.sops.yaml' -exec sops rotate --in-place {} \;
 
-# 4. Commit
+# 4. Remove its stanza from ~/.config/dotfiles/fleet.toml, then commit
 git commit -sS -am "chore(fleet): decommission geekom-a9"
 git push
-
-# 5. On the decommissioned host: wipe the dotfiles state
-rm -rf ~/.dotfiles ~/.local/bin/dot ~/.config/chezmoi ~/.config/age
 ```
+
+Then, on the decommissioned host, run `dot config uninstall`. After a confirmation it deletes `~/.dotfiles`, `~/.config/chezmoi` (including the age key `key.txt`), chezmoi's state and dot's scripts in `~/.local/bin`. Back up anything you still need from those first.
 
 ## Troubleshooting
 
-### "Fleet host unreachable"
+### Fleet Host Unreachable
 
-`dot fleet` couldn't SSH to a host. Check:
+`dot fleet apply` couldn't SSH to a host. Check:
 
 ```sh
-ssh surface-pro 'dot version'
+ssh surface-pro 'dot --version'
 # If this fails, fix SSH connectivity first
 ```
 
 ### Drift on One Host
 
-Run `dot doctor fix` on that host:
+See what differs:
 
 ```sh
-ssh surface-pro 'dot doctor fix'
-```
-
-If drift persists:
-
-```sh
+ssh surface-pro 'dot doctor drift show'
 ssh surface-pro 'chezmoi diff | head -50'
-# Inspect what's different
 ```
 
-### Policy Hash Mismatch
+Then apply the source again (`dot config update`), or run `dot doctor fix` for the issues `dot doctor` reports.
 
-One host has an older policy than the others. Usually means that host missed an update:
+### Version Mismatch Between Hosts
+
+One host reports an older `dotfiles_version` than the others. Usually that host missed an update:
 
 ```sh
-ssh surface-pro 'dot update'
+ssh surface-pro 'dot config update'
 ```
 
-### Attestation Signature Failed
+### Commit Signature Not Trusted
 
-The host's SSH key isn't in `~/.ssh/allowed_signers` on the verifying host. Fix by redistributing `allowed_signers`.
+`git verify-commit` reports no trusted principal: the signing host's key isn't in `~/.config/git/allowed_signers` on the verifying host. Add it (Step 2) and run `dot config update` there.
 
 ## Summary
 
@@ -274,11 +269,11 @@ A three-host fleet:
 - Installs from one repository
 - Has independent signing keys (each host verifies commits from others)
 - Can share secrets across specific hosts via SOPS recipients
-- Is auditable via `dot fleet attest`
-- Updates independently with `dot update` (or in parallel with `dot fleet sync`)
+- Records each host's state with `dot attest show --fleet-store <dir>`
+- Updates independently with `dot config update` (or from one host with `dot fleet apply`)
 
 ## Next
 
 - [Concept: Fleet Architecture](../01-concepts/04-fleet.md)
-- [Reference: Fleet Commands](../03-reference/01-dot-cli.md#fleet)
+- [Reference: Fleet Commands](../03-reference/01-dot-cli.md#dot-fleet)
 - [Operations: Fleet Deployment](../../architecture/fleet-deployment.md)

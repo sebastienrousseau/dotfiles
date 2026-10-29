@@ -6,6 +6,11 @@ date: 2026-07-05
 
 # Custom Documentation Sites in 2026: Building a Distinctive Dark-Themed Developer Reference on MkDocs Material Without Forking
 
+> **Historical snapshot (note added 2026-10-29).** This article describes the
+> MkDocs Material site as of 5 July 2026. doc.dotfiles.io is now built with
+> ssg and the vendored Lucid theme (`tools/docs/build-site.sh`,
+> `docs/site/themes/lucid/`); the MkDocs setup described here is gone.
+
 *Documentation is the public API surface of an open-source project; the difference between the default Material theme and a bespoke palette is the difference between "reads like every other project" and "reads like this specific project".*
 
 *Sebastien Rousseau · Published 5 Jul 2026 · 11 min read*

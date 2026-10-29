@@ -9,7 +9,9 @@ Provider-agnostic secrets via `dot secret`. Supports macOS Keychain, `pass`, and
 
 ## Providers
 
-Provider selection is controlled by `.chezmoidata.toml`:
+Provider selection can be set in `.chezmoidata.toml`. The shipped file has
+no `[secrets.policy]` table; without one (and without
+`DOTFILES_SECRETS_PROVIDER`), the provider is `auto`. To pin it, add:
 
 ```toml
 [secrets.policy]
@@ -25,7 +27,7 @@ infra = ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "GITHUB_TOKEN"]
 
 1. `macos-keychain` on macOS
 2. `pass` when available
-3. `plain-enc` fallback (age-encrypted local store)
+3. `plain-enc` (age-encrypted local store) when `age` is installed and the age key exists
 
 ## Commands
 
@@ -62,13 +64,15 @@ Environment toggles:
 
 ## Governance
 
-A pre-commit hook runs:
+`scripts/diagnostics/secret-governance.sh` scans for likely secret
+patterns. It runs:
 
-```bash
-scripts/diagnostics/secret-governance.sh
-```
+- on demand, as `dot secret check`
+- as a pre-commit hook in this repository, once the repository hooks are
+  installed with `scripts/git-hooks/install.sh` (it is not part of the
+  `pre-commit` framework config, so `pre-commit install` does not add it)
 
-It blocks staged commits when likely secret patterns are found. In strict mode it also blocks exact matches against managed secret values.
+As a hook it blocks staged commits when likely secret patterns are found. In strict mode it also blocks exact matches against managed secret values.
 
 ## SSH Key Encryption
 
@@ -80,20 +84,13 @@ This creates a local encrypted file, which you can add to chezmoi with `chezmoi 
 
 ## External Secrets Backends
 
-Chezmoi natively supports external secret managers as template functions. Configure the backend in `.chezmoidata.toml`:
-
-```toml
-secrets_backend = "age"  # age, 1password, bitwarden, pass, vault
-```
+Chezmoi natively supports external secret managers as template functions.
+No dotfiles setting selects a backend: install the manager's CLI, sign in,
+and call its template function from a `.tmpl` file.
 
 ### 1Password
 
 Requires the [1Password CLI](https://developer.1password.com/docs/cli/) (`op`).
-
-```toml
-# .chezmoidata.toml
-secrets_backend = "1password"
-```
 
 Use in templates:
 
@@ -106,11 +103,6 @@ Use in templates:
 
 Requires the [Bitwarden CLI](https://bitwarden.com/help/cli/) (`bw`).
 
-```toml
-# .chezmoidata.toml
-secrets_backend = "bitwarden"
-```
-
 Use in templates:
 
 ```text
@@ -122,11 +114,6 @@ Use in templates:
 
 Requires the [Vault CLI](https://developer.hashicorp.com/vault/docs/commands) (`vault`).
 
-```toml
-# .chezmoidata.toml
-secrets_backend = "vault"
-```
-
 Use in templates:
 
 ```text
@@ -136,11 +123,6 @@ Use in templates:
 ### pass (Password Store)
 
 Requires [pass](https://www.passwordstore.org/).
-
-```toml
-# .chezmoidata.toml
-secrets_backend = "pass"
-```
 
 Use in templates:
 

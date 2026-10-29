@@ -3,9 +3,9 @@
 This document maps every top-level path in the repository to its
 purpose. Skim it once and you should be able to answer:
 
-- **Where is the `dot` CLI?** → `bin/dot` (the source-of-truth file). At runtime it lives at `~/.local/bin/dot`.
-- **Why are there 20+ `dot_*` files at root?** → chezmoi convention: a `dot_X` source file deploys to `~/.X` on apply. Same for `executable_*` (gains `+x`), `private_*` (`0600`), `run_onchange_*` (re-runs when source changes).
-- **What's the framework vs. the maintainer's personal config?** → Everything under `scripts/`, `install/`, `tools/`, `lib/`, and `defaults/.chezmoitemplates/` is framework code. Everything under `defaults/dot_config/`, `defaults/dot_warp/`, `defaults/private_dot_ssh/` is user-facing default configuration (chezmoi auto-rebases via `.chezmoiroot`).
+- **Where is the `dot` CLI?** → `bin/dot` (the dispatcher) plus one plugin per domain under `plugins/<domain>/`. At runtime it lives at `~/.local/bin/dot`.
+- **Where are the `dot_*` files?** → under `defaults/`. `.chezmoiroot` points chezmoi at `defaults/`, so a `defaults/dot_X` source file deploys to `~/.X` on apply. Same for `executable_*` (gains `+x`), `private_*` (`0600`), `run_onchange_*` (re-runs when source changes).
+- **What's the framework vs. the maintainer's personal config?** → Everything under `bin/`, `plugins/`, `scripts/`, `install/`, `tools/`, `lib/`, and `defaults/.chezmoitemplates/` is framework code. Everything under `defaults/dot_config/`, `defaults/dot_warp/`, `defaults/private_dot_ssh/` is user-facing default configuration.
 
 The Debian/aws-cli-style root layout shipped in **v0.2.503**:
 `bin/` (dispatcher), `lib/` (shared bash libs), `defaults/`
@@ -20,52 +20,56 @@ See `docs/operations/ROADMAP_V0_2_503.md` for the full history.
 | Path | Kind | Purpose |
 |------|------|---------|
 | **CLI + framework** | | |
-| `dot_local/bin/` | framework | `executable_dot` (CLI entrypoint) and helper scripts. Deploys to `~/.local/bin/`. |
-| `dot_local/share/` | framework | Man pages, zsh completions. Deploys to `~/.local/share/`. |
-| `scripts/` | framework | Runtime-invoked scripts (`dot` CLI dispatch + specialised subtrees). See `scripts/README.md`. |
+| `bin/` | framework | `dot` (bash dispatcher), `dot.ps1` (PowerShell dispatcher), `dot-bootstrap`, `dot-theme-sync`, `dot-load-benchmark-pty`. |
+| `plugins/<domain>/` | framework | One plugin per `dot` domain: `dot-plugin.toml` (the ADR-020 command manifest), `commands.txt` (generated from it), the `dot-<domain>` entry script and `libexec/`. |
+| `lib/dot/` | framework | Shared bash library sourced by the dispatcher and the plugins. `lib/dot/data/` holds the generated command table (`commands.txt`) and route table (`routes.txt`). See `lib/dot/README.md`. |
+| `lib/wasm-tools/` | framework | The `dot-sys` Rust crate, built for `wasm32-wasip1` and run under `wasmtime` by `dot attest verify`. |
+| `scripts/` | framework | Runtime-invoked scripts (`scripts/dot/commands/` for the remaining non-plugin routes, plus specialised subtrees). See `scripts/README.md`. |
+| `core/` | framework | Experimental Go `dot` core (a restricted "hello" vertical slice; see `core/README.md` and ADRs 013 to 018). |
 | `tools/` | repo-ops | Repo-only ops: CI helpers, release, maintenance, docs-generation. Not distributable. See `tools/README.md`. |
-| `lib/dot/` | framework | Shared bash library sourced by every `dot` subcommand and the dispatcher. Reorganised here from `scripts/dot/lib/` per RFC Phase 1. See `lib/dot/README.md`. |
-| `lib/` | framework | Library tree (`lib/dot/` + the `dot-sys` Rust crate in `lib/wasm-tools/`, built for `wasm32-wasip1` and run under `wasmtime` by `dot attest --verify`). |
-| `install/` | framework | Bootstrap logic + distribution-channel manifests (`homebrew/`, `scoop/`, `aur/`). See `install/README.md`. `install/provision/` runs on `chezmoi apply` via `run_onchange_*` triggers. |
+| `install/` | framework | Bootstrap logic, migrations and `install/provision/` (toolchain provisioning, run by `install.sh --provision`). See `install/README.md`. |
 | `install.sh` | framework | Top-level installer. SHA256-verified chezmoi fetch + initial apply. |
-| `.chezmoitemplates/` | framework | Reusable Go-template partials (aliases, functions, paths). Sourced by `dot_*.tmpl` files. |
-| **User-facing defaults** | | |
-| `dot_bashrc`, `dot_zshrc`, `dot_zshenv`, `dot_zprofile`, `dot_profile`, `dot_vimrc`, etc. | defaults | Shell + editor rc files. Deploy to `~/.X`. |
-| `dot_config/` | defaults | XDG config (`~/.config/*`). Largest tree — 80+ tool configs. |
-| `dot_local/` (non-bin/share) | defaults | Per-user state files for tools (`dot_local/state/`, etc.). |
-| `dot_cargo/`, `dot_etc/`, `dot_warp/` | defaults | Tool-specific roots (cargo, system etc, Warp terminal). |
-| `private_dot_ssh/` | defaults | SSH config — chezmoi `private_` prefix forces 0600. Does NOT contain private keys. |
-| `dot_claude/` | defaults | Claude Code per-user skills and config. |
+| `pkg/` | release | Packaging inputs, one directory per format (`aur/`, `brew/`, `docker/`, `nix/`, `scoop/`). |
+| `share/` | framework | Generated completions (`completions/`), man pages (`man/`) and the PowerShell command module. |
+| `schemas/` | framework | JSON schemas (CLI manifests, theme plans and journals, palette audit). |
+| **User-facing defaults (chezmoi source, under `defaults/`)** | | |
+| `defaults/dot_bashrc`, `dot_zshrc`, `dot_zshenv`, `dot_zprofile`, `dot_profile`, `dot_vimrc`, etc. | defaults | Shell + editor rc files. Deploy to `~/.X`. |
+| `defaults/dot_config/` | defaults | XDG config (`~/.config/*`). Largest tree, one directory per tool. |
+| `defaults/dot_local/` | defaults | `bin/` (helper scripts deployed to `~/.local/bin/`) and `share/` (completions, man pages, the Go TUIs' sources). |
+| `defaults/dot_cargo/`, `defaults/dot_warp/` | defaults | Tool-specific roots (cargo, Warp terminal). |
+| `defaults/private_dot_ssh/` | defaults | SSH config (chezmoi `private_` prefix forces 0600). Does NOT contain private keys. |
+| `defaults/dot_claude/`, `defaults/dot_codex/` | defaults | Claude Code and Codex per-user config. |
+| `defaults/Code/` | defaults | Standards files deployed to `~/Code/`. |
 | **Templates + data** | | |
-| `templates/` | framework | Non-chezmoi templates (e.g. for `dot agent context apply`). |
-| `.chezmoidata/` | data | Hardware presets (`macbook-t2`, `surface-pro`) read by templates. |
-| `.chezmoidata.toml` | data | Feature flags + version. Single source-of-truth for `dotfiles_version`. |
-| `.chezmoi.toml.tmpl` | framework | Per-host chezmoi config generated on first apply. |
-| `.chezmoiignore` / `.chezmoiignore.tmpl` | framework | Tells chezmoi which paths NOT to deploy. |
+| `defaults/.chezmoitemplates/` | framework | Reusable Go-template partials (aliases, functions, desktop, `theme-name`, `go-build-command`), included by the `.tmpl` files. |
+| `defaults/.chezmoidata.toml` | data | Feature flags + version. Single source-of-truth for `dotfiles_version`. |
+| `defaults/.chezmoidata/` | data | `hardware.toml` (machine presets `macbook-t2`, `surface-pro`, `geekom-a9`), `apple.toml`, `keybinds.toml`, `secrets-patterns.toml`. |
+| `defaults/.theme-manifest/themes.toml` | data | Generated theme catalog, loaded by the theme templates. |
+| `defaults/.chezmoi.toml.tmpl` | framework | Per-host chezmoi config generated by `chezmoi init`. |
+| `defaults/.chezmoiignore`, `defaults/.chezmoiignore.tmpl` | framework | Tells chezmoi which paths NOT to deploy. |
+| `templates/` | framework | Non-chezmoi starters: `chezmoi-data/` (per-machine example values) and `projects/` (`dot tool new` templates). |
 | **Docs + tests** | | |
-| `docs/` | docs | All documentation: `manual/` (user guide), `operations/` (audits, roadmaps), `reference/` (lookup tables), `security/`. |
-| `tests/` | tests | Test suite: `framework/` (runner + assertions + mocks), `unit/`, `integration/`, `regression/`, `fuzz/`, `snapshots/`. |
-| `examples/` | docs | Standalone examples (mise plugin, AI patterns, ops scripts). |
+| `docs/` | docs | All documentation: `manual/` (user guide), `guides/`, `reference/` (lookup tables), `operations/` (audits, roadmaps), `security/`, `adr/`. |
+| `tests/` | tests | Test suite: `framework/` (runner + assertions + mocks), `unit/`, `integration/`, `regression/`, `snapshots/`, plus `Dockerfile.test` and `Dockerfile.sandbox`. |
+| `benches/` | tests | Benchmarks, including `dot_command_bench.sh` (named by the Feature Matrix). |
+| `fuzz/`, `.clusterfuzzlite/` | tests | Go fuzz targets and their ClusterFuzzLite build. |
+| `examples/` | docs | Runnable examples executed by `scripts/qa/validate-examples.sh`. |
 | **CI + release** | | |
-| `.github/` | ci | GitHub Actions workflows + issue/PR templates + repo-level SECURITY/CODEOWNERS. |
+| `.github/` | ci | GitHub Actions workflows + issue/PR templates + CODEOWNERS. |
 | `.devcontainer/` | ci | Dev Container spec for reproducible contributor onboarding. |
-| `Dockerfile.test` | ci | Container baseline for the CI test job. |
-| `.pre-commit-config.yaml` → `config/pre-commit-config.yaml` | ci | Pre-commit hooks (shellcheck, shfmt, luacheck, gitleaks, typos, conventional-commits). |
-| `flake.nix` / `flake.lock` | ci | Nix flake for reproducible dev shell. |
-| `mise.toml` / `mise-versions.lock.json` | ci | Pinned tool versions (mise as the package manager). |
+| `config/` | ci | Lint and tool configs; `.pre-commit-config.yaml` at the root links to `config/pre-commit-config.yaml`. |
+| `flake.nix` / `flake.lock`, `nix/` | ci | Nix flake for the reproducible dev shell, and its sources. |
+| `mise.toml` / `mise.lock` / `mise-versions.lock.json` | ci | Pinned tool versions (mise as the package manager). |
+| `security/`, `supply-chain/`, `KEYS.asc` | release | Registry public key, pinned remote-installer hashes, dependency provenance policy, release signing keys. |
 | **Misc + agents** | | |
 | `AGENTS.md` | docs | Cross-harness AI agent context (the standard read by Codex/Cursor/etc.). |
-| `.cursor/`, `.codex/`, `.windsurf/`, `.zed/`, `.roo/`, `.clinerules`, `.aider.conf.yml`, `.continuerc.json`, `.jules/`, `.agy/` | agents | Per-harness AGENTS.md renderings. Generated by `dot agent context apply`. Each one points back at `CLAUDE.md` as canonical. |
-| `CLAUDE.md` | docs | Project guidelines (the canonical source — `dot agent context apply` propagates it). |
+| `.cursor/`, `.codex/`, `.windsurf/`, `.zed/`, `.roo/`, `.clinerules`, `.aider.conf.yml`, `.continuerc.json`, `.jules/`, `.agy/`, `.gemini/` | agents | Per-harness renderings written by `dot agent context apply`. Gitignored: they are regenerated per clone from `CLAUDE.md`. |
+| `CLAUDE.md` | docs | Project guidelines (the canonical source that `dot agent context apply` propagates). |
 | `CONTRIBUTING.md` | docs | Contributor guide (must stay at root for GitHub auto-discovery). |
-| `docs/CONFIG_STRATEGY.md`, `docs/OPENCODE.md` | docs | Strategy + OpenCode-CLI guidance. Moved out of root for cleanliness in v0.2.503. |
-| `README.md` / `CHANGELOG.md` / `LICENSE` | docs | Standard project files. |
-| `Justfile.tmpl` / `Makefile` | dev | Task runners. |
-| `dist/` | build | Build artefacts directory. |
-| `coverage/`, `nightly-reports/` | build | CI output directories (gitignored). |
-| `nix/` | build | Nix flake source. |
-| `.well-known/` | misc | RFC-compliant `.well-known/` content (currently used for WKD GPG key publication). |
-| `.version-sync-backup/` | misc | Backup directory used by `scripts/version-sync.sh` during release prep. |
+| `README.md` / `CHANGELOG.md` / `LICENSE-APACHE` / `LICENSE-MIT` / `LICENSES/` | docs | Standard project files (dual licence: Apache-2.0 OR MIT). |
+| `Makefile` / `GNUmakefile` | dev | Task runners. |
+| `.well-known/` | misc | Agent and MCP discovery documents (`agent-card.json`, `agent.json`, `mcp/`). |
+| `dist/`, `coverage/`, `nightly-reports/`, `.version-sync-backup/` | build | Local build and CI output directories (gitignored). |
 
 ## Chezmoi naming contract
 
@@ -86,11 +90,11 @@ stale state in `~/.config/chezmoi/`.
 
 | Goal | File(s) to edit |
 |------|----------------|
-| Add a new `dot <subcommand>` | `scripts/dot/commands/<subcommand>.sh` + dispatch in `bin/dot` + entry in `docs/manual/03-reference/01-dot-cli.md` + entry in `docs/manual/command-index.md`. |
-| Change an alias | `.chezmoitemplates/aliases/<file>.aliases.sh` (sourced by `dot_zshrc.tmpl`, etc.). |
-| Add a feature flag | `[features]` block in `.chezmoidata.toml` + doc entry in `docs/manual/03-reference/05-feature-flags.md`. |
-| Add a new file deployed to `~/.X` | Create `dot_X` at root (or under a chezmoi-managed subtree). |
-| Add a new chezmoi template | `dot_X.tmpl` at root, then use `{{ }}` for chezmoi data. |
+| Add a new `dot` command | The domain's `plugins/<domain>/dot-plugin.toml` (manifest) and its entry script, then rerun `tools/ci/cli_command_table.py` (regenerates the plugin `commands.txt` and `lib/dot/data/commands.txt`) and `tools/docs/generate-command-index.sh`, and add rows to `docs/reference/FEATURE-MATRIX.md`. |
+| Change an alias | `defaults/.chezmoitemplates/aliases/<category>/<file>.aliases.sh` (rendered into `~/.config/shell/90-ux-aliases.sh` and `91-ux-aliases-lazy.sh`). |
+| Add a feature flag | `[features]` block in `defaults/.chezmoidata.toml` + doc entry in `docs/manual/03-reference/05-feature-flags.md` and `docs/reference/FEATURES.md`. |
+| Add a new file deployed to `~/.X` | Create `defaults/dot_X` (or put it under a chezmoi-managed subtree of `defaults/`). |
+| Add a new chezmoi template | `defaults/dot_X.tmpl`, then use `{{ }}` for chezmoi data. |
 | Add a CI workflow | `.github/workflows/<name>.yml`. |
 | Add a test | `tests/unit/<domain>/test_<name>.sh` or `tests/integration/test_<name>.sh`. |
 
@@ -99,4 +103,4 @@ stale state in `~/.config/chezmoi/`.
 - `scripts/README.md` — map of the `scripts/` subtree.
 - `CONTRIBUTING.md` — code-style + commit-message + signing requirements.
 - `CLAUDE.md` — AI-assistant guidelines (the canonical source for `dot agent context apply`).
-- `docs/operations/ROADMAP_V0_2_503.md` — current release scope, including the v0.2.503 reorganisation plan.
+- `docs/operations/ROADMAP_V0_2_503.md`: the v0.2.503 reorganisation plan (a historical record).

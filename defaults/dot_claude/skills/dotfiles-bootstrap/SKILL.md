@@ -65,8 +65,8 @@ dot config init <user> --yes                 # consent without a terminal (requi
 |----------|------------------------|------------------------------------------------------|
 | `ask`    | `--dry-run`            | Show the plan; ask the user before running for real. |
 | `plan`   | `--dry-run`            | Same plan, augmented with chezmoi diff if available. |
-| `apply`  | (no flags)             | Full apply; interactive trust prompt remains.        |
-| `audit`  | `--no-apply`           | Clone the source; let the user inspect before apply. |
+| `apply`  | `--yes`                | Full apply, after the user trusts the repository.    |
+| `audit`  | `--no-apply --yes`     | Clone the source; let the user inspect before apply. |
 
 ## Failure modes the skill surfaces
 

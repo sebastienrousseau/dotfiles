@@ -12,7 +12,10 @@ CI references use two different trust models. They must not be conflated.
 3. **Reusable workflows in this repository** use
    `./.github/workflows/file.yml`.
 4. **Container images and downloaded release binaries** use immutable digests
-   or verified SHA256 manifests.
+   or verified SHA256 manifests. Not yet met everywhere: images that
+   workflows start with `docker run` (hadolint, Grype, the distro test
+   matrix's `<distro>:latest`) are referenced by tag, and
+   `fuzz/oss-fuzz/Dockerfile` uses an unpinned OSS-Fuzz base image.
 
 The SLSA generic generator remains the documented exception: its bootstrap
 requires a release-tag reference. The corresponding commit is recorded beside

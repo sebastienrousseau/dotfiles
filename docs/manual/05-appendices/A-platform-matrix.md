@@ -62,10 +62,10 @@ fzf, atuin, delta, lazygit, neovim, shellcheck and age). `pandoc` and
 | Workflow | Platforms | Runs on |
 |:---|:---|:---|
 | `ci.yml` | `ubuntu-latest`, `macos-latest`, `windows-latest`; an Ubuntu container job | Pull requests that change code, config or workflows; pushes to `main`; scheduled |
-| `reliability-gate.yml` | `ubuntu-latest`, `macos-latest`, `macos-14` | Every pull request and push to `main` |
+| `reliability-gate.yml` | `ubuntu-latest`, `macos-latest`, `macos-14`; a `windows-latest` PowerShell contract job | Every pull request and push to `main` |
 | `cross-platform-test.yml` | `ubuntu-latest`, `macos-latest`, `macos-14` | Pull requests that change code or config; pushes to `main`; scheduled |
-| `ci-enforced.yml` | `ubuntu-latest` | Every pull request and push |
-| `devcontainer-prebuild.yml` | `ubuntu-latest` | Pre-built Codespaces images |
+| `ci-enforced.yml` | `ubuntu-latest`; a test matrix on `ubuntu-latest`, `macos-latest`, `macos-14` | Every pull request to `main`; pushes to `main` and release tags |
+| `devcontainer-prebuild.yml` | `ubuntu-latest` | Changes to `.devcontainer/`; weekly; builds the development container image |
 
 ## Feature Matrix
 

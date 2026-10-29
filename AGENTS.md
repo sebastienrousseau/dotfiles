@@ -31,15 +31,18 @@ python3 tools/ci/mutation-test.py --base origin/main  # Mutation score on change
 ## Repository Layout
 
 ```
-.chezmoidata.toml           # Feature flags, profiles, version (source of truth)
-.chezmoitemplates/          # Reusable template partials (aliases, functions, paths)
-dot_config/                 # XDG configs (~/.config/*) — largest directory
-dot_local/bin/              # User scripts deployed to ~/.local/bin
-scripts/                    # Repo-only scripts (ops, maintenance, CI)
-tests/                      # Test suite (framework, unit, integration, performance)
-docs/                       # 30+ markdown docs (architecture/, guides/, reference/, security/, operations/)
-install.sh                  # Bootstrap installer (--help for usage)
-version-sync.sh             # Syncs dotfiles_version across non-template files
+.chezmoiroot                         # Contains `defaults`: chezmoi source paths live under defaults/
+defaults/.chezmoidata.toml           # Feature flags, active profile, version (source of truth)
+defaults/.chezmoitemplates/          # Reusable template partials (aliases, functions, paths)
+defaults/dot_config/                 # XDG configs (~/.config/*) — largest directory
+defaults/dot_local/bin/              # User scripts deployed to ~/.local/bin
+bin/dot, lib/dot/, plugins/          # The `dot` CLI: entry point, shared library, per-domain plugins
+scripts/                             # Runtime scripts the `dot` CLI and chezmoi hooks invoke (not deployed)
+tools/                               # Repo-only ops (CI, release, maintenance, docs generation)
+tests/                               # Test suite (framework, unit, integration, regression, snapshots, consumer, visual)
+docs/                                # Markdown docs (architecture/, guides/, reference/, security/, operations/, adr/)
+install.sh                           # Bootstrap installer (--help for usage)
+scripts/version-sync.sh              # Syncs dotfiles_version across non-template files
 ```
 
 ## Chezmoi Naming Conventions
@@ -58,9 +61,9 @@ version-sync.sh             # Syncs dotfiles_version across non-template files
 
 - **Shell style:** 2-space indent, `set -euo pipefail`, shellcheck-clean. Format with `shfmt -i 2 -ci`.
 - **Lua style:** Format with `stylua`. Lint with `luacheck`. Globals: `vim` is allowed.
-- **Templates:** Use `{{ .variable }}` syntax. Data comes from `.chezmoidata.toml`.
-- **Version:** Single source of truth is `dotfiles_version` in `.chezmoidata.toml`. Template files use `{{ .dotfiles_version }}`. Non-template files are updated by `version-sync.sh` at release time.
-- **Feature flags:** Gated with `{{ if .features.thing }}` in templates. Profiles defined in `.chezmoidata.toml`.
+- **Templates:** Use `{{ .variable }}` syntax. Data comes from `defaults/.chezmoidata.toml`.
+- **Version:** Single source of truth is `dotfiles_version` in `defaults/.chezmoidata.toml`. Template files use `{{ .dotfiles_version }}`. Non-template files are updated by `scripts/version-sync.sh` at release time.
+- **Feature flags:** Gated with `{{ if .features.thing }}` in templates. The default `profile` is set in `defaults/.chezmoidata.toml`; `chezmoi init` stores the per-host choice in `~/.config/chezmoi/chezmoi.toml`.
 - **Zsh startup:** `.zshenv` -> `.zprofile` -> `.zshrc` -> `ZDOTDIR/.zshrc` -> `rc.d/*.zsh` (ordered by numeric prefix).
 - **Caching:** `_cached_eval` pattern caches tool init output with binary mtime invalidation.
 - **Neovim:** lazy.nvim plugin manager. Plugins in `lua/plugins/`. Use `vim.uv` (not deprecated `vim.loop`).

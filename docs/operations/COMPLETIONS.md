@@ -103,7 +103,8 @@ find ~/.local/share/zsh/completions -name '*.zwc' -delete
 chezmoi apply ~  # re-runs the run_onchange hook
 ```
 
-Or, equivalently, `dot doctor fix` (which calls both in sequence).
+`dot doctor fix` does not touch the compinit dump or the completion
+`.zwc` files, so run the commands above by hand.
 
 ## Measured Cost
 

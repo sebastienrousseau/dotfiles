@@ -7,6 +7,8 @@ render_with_liquid: false
 
 # Gold-standard audit
 
+> **Historical snapshot (2026-10-29 note).** This audit records the repository as scored on 2026-09-08 (#1058). Some of its evidence has since changed: the docs site is now built by `tools/docs/build-site.sh`, not MkDocs, and there is no `requirements-docs.txt`. For the current state see [STRUCTURE.md](STRUCTURE.md), [MINIMUM-TOOLCHAIN.md](MINIMUM-TOOLCHAIN.md) and [packaging.md](packaging.md).
+
 Scoring of this repository against the eight categories of the
 repository gold standard, before and after the `feat/gold-standard`
 work. Every row carries evidence — a file path, a workflow name, or a

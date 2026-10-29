@@ -106,7 +106,7 @@ Quick checks for common issues.
 **Problem:** kubectl context issues
 
 - List contexts: `kubectl config get-contexts`
-- Switch context: `kubectx <context-name>`
+- Switch context: `kubectl config use-context <context-name>` (alias `kuse`; `kctx` runs `kubectx` if you installed it)
 - Check kubeconfig: `echo $KUBECONFIG`
 
 **Problem:** Minikube won't start
@@ -134,7 +134,7 @@ Quick checks for common issues.
 
 **Problem:** Systemd isn't available (mostly WSL2)
 
-- Dotfiles functions that rely on systemd (like `pueue` management) will fallback to direct execution.
+- Without systemd, the systemd user units (for example the `corral_gitea_mirror` timer) do not run. Start daemons such as `pueued` by hand.
 - To enable systemd in WSL2, add this to `/etc/wsl.conf` (requires Windows 11 or latest WSL):
 
   ```ini
@@ -147,7 +147,7 @@ Quick checks for common issues.
 **Problem:** GPG or SSH signing fails
 
 - Check if your key is present: `gpg --list-secret-keys` or `ssh-add -l`
-- Ensure `GPG_TTY` is set (dotfiles does this automatically in `rc.d`).
+- Ensure `GPG_TTY` is set. The dotfiles do not set it: add `export GPG_TTY=$(tty)` to `~/.zshrc.local` or `~/.bashrc.local` (`set -gx GPG_TTY (tty)` in `~/.config/fish/config.fish.local`).
 - For hardware keys (Yubikey), ensure `pcscd` is running on Linux.
 
 ## Advanced Troubleshooting

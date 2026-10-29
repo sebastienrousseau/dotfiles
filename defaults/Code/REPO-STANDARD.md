@@ -22,7 +22,9 @@ that isn't a CI gate decays.
 
 ### 1. Identity and README
 
-Every repo in a family shares one README shape, in this order:
+Every repo in a family shares one README shape. `README-TEMPLATE.md` fixes
+the full heading order and wins on any difference; these sections appear in
+this order (the template adds optional ones between them):
 
 - [ ] Logo/name, one-sentence value proposition, badge row (build,
       registry version, API docs, license, security scorecard)
@@ -30,22 +32,22 @@ Every repo in a family shares one README shape, in this order:
 - [ ] **Install** — every method, most frictionless first: pre-built
       binary one-liner, `{{BUILD}} install`, `make install`, distro
       packages
-- [ ] **Quick start** — real, runnable code within one screen of the top
 - [ ] Requirements (minimum toolchain version, stated + CI-enforced)
-- [ ] **Documentation** — the same four links everywhere: User Manual ·
-      API reference ({{API_DOCS}}) · Developer docs (DEVELOPMENT.md) ·
-      ecosystem/family map
+- [ ] **Quick start** — real, runnable code within one screen of the top
 - [ ] When *not* to use this project (honesty section — builds trust)
-- [ ] License section (dual grants spelled out) and license + MSRV
-      badges in the badge row (SPDX comment at line 1)
-- [ ] **Stability guarantees section**: the SemVer breaking axis
-      stated explicitly; for parsers/formatters, the output-stability
-      rule (a behaviour change to what the tool produces is breaking
-      even when no API signature moves); deprecation window
 - [ ] **Security & hardening section** leading with the private
       reporting pointer, then the architectural posture (memory
       safety, resource-exhaustion limits) and the fuzzing story
       (targets, per-push regression replay, OSS-Fuzz status)
+- [ ] **Documentation** — the same four links everywhere: User Manual ·
+      API reference ({{API_DOCS}}) · Developer docs (DEVELOPMENT.md) ·
+      ecosystem/family map
+- [ ] **Stability guarantees section**: the SemVer breaking axis
+      stated explicitly; for parsers/formatters, the output-stability
+      rule (a behaviour change to what the tool produces is breaking
+      even when no API signature moves); deprecation window
+- [ ] License section (dual grants spelled out) and license + MSRV
+      badges in the badge row (SPDX comment at line 1)
 - [ ] **Minimum-toolchain POLICY**, not just the number: when it may
       raise, on which version axis, and where the reason is recorded.
       Never claim distro-LTS compatibility without a table mapping

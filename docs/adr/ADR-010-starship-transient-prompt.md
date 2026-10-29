@@ -39,7 +39,8 @@ shells we support as first-class.
 
 **Constraints:**
 
-- Must work in zsh and fish (the two Tier-1 shells per ADR-007).
+- Must work in zsh and fish (the two first-class interactive shells
+  here; ADR-007 puts zsh in Tier 1 and fish in Tier 2).
 - Must not interfere with `_cached_eval`'s startup-cost optimization
   (the transient hook fires per-prompt, not per-shell-start).
 - Must not break copy-paste of previous commands: the compact line
@@ -53,14 +54,14 @@ Call Starship's `enable_transience` shell function after the cached
 across both shells; the transient prompt content is the existing
 `[character]` block (no separate `[transient_*]` section needed).
 
-- **Fish**: `dot_config/fish/conf.d/init.fish.tmpl` calls
+- **Fish**: `defaults/dot_config/fish/conf.d/init.fish.tmpl` calls
   `enable_transience` once the function is defined. `starship init
   fish` defines it via `--print-full-init`. Result: `$fish_transient_prompt`
   flips to `1` and the Enter handler is bound to
   `__starship_transient_execute`. The compact prompt collapses past
   scrollback as soon as the next command runs.
 
-- **Zsh**: `dot_config/zsh/dot_zshrc.tmpl` carries the same
+- **Zsh**: `defaults/dot_config/zsh/dot_zshrc.tmpl` carries the same
   `enable_transience` call, guarded by
   `(( ${+functions[enable_transience]} ))`. **Upstream Starship does
   not ship a zsh-side `enable_transience` function yet** (tracked by
@@ -99,6 +100,13 @@ The toggle is exposed in `.chezmoidata.toml` as
 terminals (slow SSH, serial console) can flip it off without editing
 the canonical config.
 
+> **Status note (0.2.539):** no `features.starship_transient` flag
+> exists. Fish calls `enable_transience` unconditionally
+> (`defaults/dot_config/fish/conf.d/init.fish.tmpl`). Zsh guards the
+> call with `_DOTFILES_STARSHIP_TRANSIENT`, which only stops the lazy
+> path from binding the widgets twice
+> (`defaults/dot_config/zsh/dot_zshrc.tmpl`); it is not a user toggle.
+
 ## Consequences
 
 ### Positive (fish only, until upstream lands zsh support)
@@ -124,7 +132,8 @@ the canonical config.
 - Starship's transient API is stable since 1.16 (2023) but the exact
   config surface evolves. If Starship breaks the schema in a future
   major, the pinned version in `mise.toml` insulates us; we vet new
-  releases through `dot upgrade --dry-run` before bumping.
+  releases before bumping. (`dot upgrade` is now `dot system update`,
+  which asks before each change and has no `--dry-run`.)
 
 ## Alternatives Considered
 

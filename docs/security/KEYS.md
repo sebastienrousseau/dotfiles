@@ -7,9 +7,16 @@ render_with_liquid: false
 This is the single source of truth for navigation and muscle-memory shortcuts
 across the dotfiles stack. Keep it concise and consistent.
 
+(This page is about keyboard shortcuts, not cryptographic keys. It stays at
+this path because other pages and tools link to it. For signing and
+encryption keys see [KEY_ROTATION.md](KEY_ROTATION.md) and the repository's
+`KEYS.asc`.)
+
 ## Zsh
 
-- `Ctrl+R`: History search (`fzf`/`atuin` if enabled)
+- `Ctrl+R`: History search with `atuin` when it is installed. Without
+  `atuin`, `Ctrl+R` runs a bare `fzf` (a file picker), not fzf's history
+  widget.
 - `Ctrl+P` / `Ctrl+N`: History prefix search (up/down)
 
 ## Tmux (prefix = `Ctrl-a`)
@@ -17,13 +24,15 @@ across the dotfiles stack. Keep it concise and consistent.
 - `Prefix + r`: Reload config
 - `Prefix + N`: New window
 - `Prefix + a` / `Tab`: Last window
-- `Prefix + %`: Split vertical (current path)
-- `Prefix + "`: Split horizontal (current path)
-- `Prefix + \`: Split vertical (alt)
-- `Prefix + |`: Split horizontal (alt)
+- `Prefix + %`: Split vertical, panes side by side (current path)
+- `Prefix + "`: Split horizontal, panes stacked (current path)
+- `Prefix + |`: Split vertical (alt)
+- `Prefix + \`: Split horizontal (alt)
 - `Prefix + h/j/k/l`: Move between panes (vim-style)
 - `Prefix + z`: Toggle zoom pane
-- `Prefix + H/J/K/L`: Resize pane (left/down/up/right)
+- `Prefix + H/J/L`: Resize pane (left/down/right)
+- `Prefix + K`: Kill the tmux server, all sessions (asks for confirmation).
+  This binding replaces resize-up, so there is no `Prefix + K` resize.
 
 ## Neovim (leader = `Space`)
 
@@ -36,7 +45,8 @@ across the dotfiles stack. Keep it concise and consistent.
 ## Shell Tools
 
 - `z <dir>`: Jump to a directory (`zoxide`)
-- `lg`: Open `lazygit`
+- `lg`: `git log --graph --oneline --decorate --all`
+- `lgui`: Open `lazygit`
 
 ## Terminal
 

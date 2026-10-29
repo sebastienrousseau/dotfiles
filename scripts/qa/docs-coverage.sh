@@ -63,7 +63,7 @@ check_utility_docs() {
     ai-update ai_core antigravity b64 bm cb dot dot-ai dot-bootstrap dot-launch-or-focus \
     dot-load-benchmark dot-load-benchmark-pty dot-theme-sync dtags epoch extract gbd gd \
     git-ai-commit git-ai-diff gl hash hashsum hex jsonv jwt kill-port lorem monitor myip \
-    notify open pw rec-start rec-stop regex start-niri tmux-sessionizer tour up update uuid \
+    notify open pw rec-start rec-stop regex start-niri tmux-sessionizer tour up uuid \
     win yamlv; do
     record_doc_check "$utility in SCRIPTS.md" "\`$utility\`" "$SCRIPTS_DOC"
   done

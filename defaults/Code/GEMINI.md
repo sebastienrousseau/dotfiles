@@ -3,10 +3,10 @@
 Mandatory across all repositories from `https://github.com/sebastienrousseau` and all portfolio workspaces under `~/Code` (`Public/`, `Private/`, `Work/`, `Forks/`).
 
 The authoritative sources of truth are:
-- [`/Users/seb/Code/AGENTS.md`](/Users/seb/Code/AGENTS.md) — Code Repositories Standard
-- [`/Users/seb/Code/PR-TEMPLATE.md`](/Users/seb/Code/PR-TEMPLATE.md) — Pull Request Specification
-- [`/Users/seb/Code/README-TEMPLATE.md`](/Users/seb/Code/README-TEMPLATE.md) — Canonical README Standard
-- [`/Users/seb/Code/REPO-STANDARD.md`](/Users/seb/Code/REPO-STANDARD.md) — Repository Gold Standard
+- [`~/Code/AGENTS.md`](AGENTS.md): Code Repositories Standard
+- [`~/Code/PR-TEMPLATE.md`](PR-TEMPLATE.md): Pull Request Specification
+- [`~/Code/README-TEMPLATE.md`](README-TEMPLATE.md): Canonical README Standard
+- [`~/Code/REPO-STANDARD.md`](REPO-STANDARD.md): Repository Gold Standard
 
 Agents MUST read the nearest repository `AGENTS.md` and consult these master files before modifying any code.
 

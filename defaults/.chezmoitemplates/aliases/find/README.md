@@ -1,35 +1,32 @@
 # Find Aliases
 
-Manage Find aliases. Part of the **Universal Dotfiles** configuration.
+Manage file search aliases built on `fd`. Part of the **Universal Dotfiles** configuration.
 
 ![Dotfiles banner][banner]
 
 ## Description
 
-These aliases are defined in `find.aliases.sh` and are automatically loaded by `chezmoi`.
+These aliases are defined in `find.aliases.sh`. Loaded by the lazy alias layer `~/.config/shell/91-ux-aliases-lazy.sh`. It loads after the eager layer (zsh defers it until after startup), so its definitions replace any eager alias of the same name. Every definition below exists only when `fd` is on PATH.
 
 ## Aliases
 
-Command aliases for the `fd` utility, a fast alternative to `find`.
-`fd` searches for files and directories in a given path with colorized
-output and intuitive syntax. These aliases provide memorable shortcuts
-for common operations:
-
-- `fd` is the default alias for `fd --color always` that lists all files
-  with colorized output.
-- `fda` lists all files with absolute paths.
-- `fdc` lists all files with case-insensitive search.
-- `fdd` lists all files with details.
-- `fde` lists all files with a specified extension.
-- `fdf` lists all files while following symbolic links.
-- `fdh` shows help for `fd`.
-- `fdH` lists all files, including hidden files.
-- `fdn` lists all files that match a specified glob.
-- `fdo` lists all files with owner information.
-- `fds` lists all files with size.
-- `fdu` lists all files with exclusion rules.
-- `fdv` shows the version of `fd`.
-- `fdx` executes a command for each search result.
+| Name | Definition | Notes |
+| --- | --- | --- |
+| `fd` | `fd --color always` | A simple, fast and user-friendly alternative to find Always colorize output by default. |
+| `fda` | `fd --absolute-path` | List all files with absolute path. |
+| `fdc` | `fd --ignore-case` | List all files with case-insensitive search. |
+| `fdd` | `fd --list-details` | List all files with details. |
+| `fde` | `fd --extension` | List all files with extension. |
+| `fdf` | `fd --follow` | List all files with follow symlinks. |
+| `fdh` | `fd --help` | List all files with help. |
+| `fdH` | `fd --hidden` | List all files, including hidden files. |
+| `fdn` | `fd --glob` | List all files with glob. |
+| `fdo` | `fd --owner` | List all files with owner. |
+| `fds` | `fd --size` | List all files with size. |
+| `fdu` | `fd --exclude` | List all files with exclude. |
+| `fdv` | `fd --version` | List all files with version. |
+| `fdx` | `fd --exec` | Execute a command for each search result. |
+| `find` | `fd` | Use fd as a replacement for find. This makes `find` run `fd`, whose options differ from `find`'s. |
 
 [banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 

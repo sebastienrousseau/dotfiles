@@ -8,7 +8,7 @@ End-to-end installation and verification, from zero to a fully-working environme
 
 ## Prerequisites
 
-- macOS 14+, Ubuntu/Debian 20.04+, Arch (rolling), Fedora 39+, or WSL2 on Windows 11
+- macOS 14+, Ubuntu 22.04+, Debian 12+, NixOS 23.11+, Arch (rolling), Fedora 41+, or WSL2 with Ubuntu 22.04+ (see [Appendix A](../05-appendices/A-platform-matrix.md))
 - `git` and `curl` installed
 - Shell access (Zsh, Fish, or Bash)
 - Optional but recommended: SSH key for signing commits
@@ -23,25 +23,24 @@ bash /tmp/dotfiles-install.sh
 
 The installer:
 
-1. Verifies prerequisites (`git`, `curl`, write access to `~`)
-2. Downloads chezmoi via the SHA256-verified installer
-3. Clones the dotfiles source to `~/.dotfiles`
-4. Runs `chezmoi init` to prompt for per-machine settings
-5. Runs `chezmoi apply` with progress output
+1. Checks prerequisites and bootstraps `gum` for nicer prompts (optional)
+2. Installs chezmoi, checking the download against a pinned SHA-256
+3. On a reinstall, backs up the files chezmoi would overwrite to `~/.dotfiles.bak.<timestamp>/`
+4. Clones the pinned release tag to `~/.dotfiles` (or reuses an existing checkout there)
+5. Writes `sourceDir` to `~/.config/chezmoi/chezmoi.toml`, copies your git name, email and signing key from `git config --global` into it when it has no `[data]` table yet, and runs `chezmoi apply`
 
-Expected output:
+It does not run `chezmoi init`, so it asks no per-machine questions: set those in `~/.config/chezmoi/chezmoi.toml` (Step 4). It installs no packages or fonts unless you pass `--provision`.
+
+The step headings it prints:
 
 ```
-[install] Verifying prerequisites
-[install] Installing chezmoi (verified SHA256)
-[install] Cloning source to ~/.dotfiles
-[install] Running chezmoi init (interactive)
-  Git email: you@example.com
-  Machine preset [macbook-t2]:
-  Default theme [tahoe-dark]:
-  Default shell [fish]:
-[install] Applying configuration (180 files)
-[install] ✓ Installation complete
+==> Checking Prerequisites...
+==> Preparing source directory...
+==> Backing up existing dotfiles...
+==> Applying Configuration...
+==> Configs deployed. To also install the toolchain (packages, fonts, tools):
+Success! Configuration loaded. Please restart your shell.
+==> Run 'dot help tour' for an interactive tour of your new dotfiles.
 ```
 
 ## Step 2: Verify
@@ -52,24 +51,27 @@ Open a new shell and run:
 dot doctor
 ```
 
-Expected output:
+It prints one section per area (core shells, CLI tools, infrastructure, AI CLIs, environment, platform, state, git signing, update tooling, performance), one line per check. An excerpt:
 
 ```
-◈ DOTFILES
-Dot • Diagnostics
+--- Dotfiles Doctor ---
 
---- Health Check ---
-  ✓ Paths             ~/.local/bin, mise shims present
-  ✓ Tools             git, chezmoi, mise installed
-  ✓ Chezmoi           clean (no drift)
-  ✓ Shell             fish (500ms startup)
-  ✓ Security          SSH key present, Age key present
-  ✓ Portability       LC_ALL=en_US.UTF-8, TERM=xterm-256color
-
-Score: 98/100
+== Core Shells ==
+  ✓    zsh                                 /bin/zsh (system)
+  ✓    fish                                /bin/fish (system)
+...
+== State ==
+  ✗    chezmoi state                       drifted (run dot doctor drift show)
+  ✓    .zshrc                              present
+...
+== Git Signing ==
+  ✓    signing key                         ssh ~/.ssh/id_ed25519
+  ✓    commit.gpgsign                      every commit is signed
+...
+  ✗    1 error(s)                          1 warning(s). Run 'dot doctor fix' to repair.
 ```
 
-Any warnings will be accompanied by a suggested fix.
+A failing check names the command that fixes it.
 
 ## Step 3: Take the Tour
 
@@ -95,19 +97,19 @@ Edit `~/.config/chezmoi/chezmoi.toml`:
 
 ```toml
 [data]
-machine = "macbook-t2"       # see .chezmoidata/hardware.toml for presets
+machine = "macbook-t2"       # a preset in defaults/.chezmoidata/hardware.toml
 theme = "tahoe-dark"         # see `dot theme list`
-default_shell = "fish"       # fish, zsh, bash
+default_shell = "fish"       # zsh, fish, or nu
 terminal_font_family = "JetBrainsMono Nerd Font"
-terminal_font_size = 12
+terminal_font_size = 12      # default 20
 ```
 
 ### Feature Flags
 
-Edit `.chezmoidata.toml` in the source directory (`~/.dotfiles/.chezmoidata.toml`):
+The defaults live in `~/.dotfiles/defaults/.chezmoidata.toml` (the chezmoi source root is `defaults/`). To change a flag for one machine without touching the repository, override it in `~/.config/chezmoi/chezmoi.toml`:
 
 ```toml
-[features]
+[data.features]
 dms = false                  # Dank Material Shell (Niri)
 linux_desktop = false        # Linux-specific desktop configs
 waybar = false               # Waybar status bar
@@ -121,28 +123,29 @@ dot apply
 
 ## Step 5: Add Your Identity
 
-If you have an SSH key, configure signed commits:
+`~/.gitconfig` is managed by chezmoi, so set signing through chezmoi data rather than `git config --global` (the next apply would overwrite it). In `~/.config/chezmoi/chezmoi.toml`:
 
-```sh
-git config --global user.signingkey ~/.ssh/id_ed25519.pub
-git config --global commit.gpgsign true
-git config --global gpg.format ssh
-git config --global gpg.ssh.allowedSignersFile ~/.ssh/allowed_signers
+```toml
+[data]
+git_name = "Your Name"
+git_email = "you@example.com"
+git_signingkey = "~/.ssh/id_ed25519"
+git_signingformat = "ssh"
 ```
 
-Add your own key to `~/.ssh/allowed_signers`:
+With a signing key set, the rendered `~/.gitconfig` turns on `commit.gpgsign` and `tag.gpgSign`, sets `gpg.format`, and points `gpg.ssh.allowedSignersFile` at `~/.config/git/allowed_signers`. That file is managed too: add your own key to its source with `dot config edit ~/.config/git/allowed_signers`, one line per key:
 
 ```
 you@example.com ssh-ed25519 AAAA...
 ```
 
-Test:
+Then run `dot apply` and test:
 
 ```sh
 cd ~/.dotfiles
 git commit --allow-empty -m "test: signature"
 git verify-commit HEAD
-# Good "git" signature for you@example.com
+# Good "git" signature for you@example.com with ED25519 key SHA256:...
 ```
 
 ## Step 6: First Theme Switch
@@ -151,7 +154,7 @@ git verify-commit HEAD
 dot theme
 ```
 
-A picker opens showing all paired wallpaper themes on your system. Select one and press Enter. The terminal, editor, desktop wallpaper, and macOS accent color update in about 3 seconds.
+With no arguments, `dot theme` opens a picker of the available themes. Select one and press Enter. `dot theme set <name>` switches without the picker.
 
 ## Troubleshooting
 
@@ -168,17 +171,17 @@ If the installation is broken beyond repair:
 dot doctor rollback  # restore the previous known-good state
 ```
 
-If `dot doctor` still fails after heal + rollback, check:
+If `dot doctor` still fails after `dot doctor fix` and a rollback, check:
 
-- `~/.local/state/dotfiles/install.log` — installer log
-- `~/.local/state/dotfiles/heal.log` — heal attempts
-- `chezmoi doctor` — chezmoi-specific diagnostics
+- `~/.local/state/dotfiles/heal.log`: what `dot doctor fix` did
+- `~/.local/state/dotfiles/rollback.log`: rollback attempts
+- `chezmoi doctor`: chezmoi-specific diagnostics
 
 Still stuck? See [Cookbook: Troubleshooting](../04-cookbook/02-troubleshooting.md).
 
 ## What Got Installed
 
-After `dot doctor` reports a healthy score, you have:
+After the install (plus `--provision` for the packages themselves), you have:
 
 | Surface | What's There |
 |:---|:---|
@@ -186,9 +189,9 @@ After `dot doctor` reports a healthy score, you have:
 | **Editor** | Neovim with lazy.nvim + LSP + theme-synced colorscheme |
 | **Terminal** | Ghostty/Alacritty/Kitty/WezTerm configs (pick whichever is installed) |
 | **Git** | Signed commits, delta diff, conventional commit template |
-| **AI tooling** | Codex, Copilot CLI, Antigravity CLI (`agy`) via native installer; Claude Code via Anthropic's native installer |
-| **Secret store** | Age key, SOPS config, `dot secret` command ready |
-| **Security** | Gitleaks, detect-secrets baseline, signed attestation log |
+| **AI tooling** | Agent CLIs installed with `dot ai install`, pinned in `[ai_tools]` in `defaults/.chezmoidata.toml` |
+| **Secret store** | chezmoi age encryption and `dot secret`; `dot secret init` creates the age key at `~/.config/chezmoi/key.txt` |
+| **Security** | Gitleaks, detect-secrets baseline, workstation attestation (`dot attest show`) |
 | **Theme engine** | K-Means wallpaper extractor, system + custom wallpaper discovery |
 
 ## Next
@@ -196,4 +199,4 @@ After `dot doctor` reports a healthy score, you have:
 - [Tutorial: Add a Wallpaper → Theme](02-add-wallpaper.md)
 - [Tutorial: Create a Machine Profile](03-create-profile.md)
 - [Tutorial: Encrypt a Secret](04-encrypt-secret.md)
-- [Cookbook: 30+ recipes](../04-cookbook/01-recipes.md)
+- [Cookbook: Recipes](../04-cookbook/01-recipes.md)

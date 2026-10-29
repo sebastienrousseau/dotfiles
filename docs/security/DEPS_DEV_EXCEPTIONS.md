@@ -9,7 +9,9 @@ direct dependencies (npm + PyPI + GitHub Actions) against the
 [deps.dev Insights API](https://docs.deps.dev/) on every PR, every
 push to `main`, and every Tuesday at 04:00 UTC. When an advisory
 is reported at or above the threshold (default `HIGH`), the workflow
-fails.
+fails on a push to `main` and on the Tuesday run (which also opens a
+tracking issue). On a PR it is advisory: it reports the finding and
+passes.
 
 This page is where time-bound exceptions live. An entry here suppresses
 the check for one specific `(ecosystem, package)` pair, with an expiry

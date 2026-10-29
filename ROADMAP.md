@@ -8,7 +8,7 @@ Concrete work is tracked in
 [GitHub Issues](https://github.com/sebastienrousseau/dotfiles/issues) and
 [Milestones](https://github.com/sebastienrousseau/dotfiles/milestones). Shipped
 changes are recorded in [`CHANGELOG.md`](CHANGELOG.md). Versioning follows
-[SemVer](https://semver.org/) with `.chezmoidata.toml` as the source of truth.
+[SemVer](https://semver.org/) with `defaults/.chezmoidata.toml` as the source of truth.
 
 ## Current Series: 0.2.x
 
@@ -31,8 +31,9 @@ reliable cross-platform shell distribution.
 - Preserve chezmoi idempotency and dry-run safety for every managed surface.
 - Continue pinning external actions, reusable workflows, tool versions, and
   package references where reproducible locks are practical.
-- Keep feature flags explicit so advanced desktop, AI, and fleet behaviour stays
-  opt-in.
+- Keep feature flags explicit in `defaults/.chezmoidata.toml`: Linux desktop
+  and per-host jobs (`corral_gitea_mirror`) stay opt-in, and `dms` and
+  `ai_theme_sync` are the flags on by default.
 
 ### Observability
 
@@ -54,23 +55,31 @@ reliable cross-platform shell distribution.
 
 ## Near-Term Priorities
 
-1. **Coverage ratchet** - finish deep branch coverage for the scripts that still
-   dominate the denominator, then raise the CI floor in lockstep with measured
-   coverage.
-2. **Egress hardening** - keep expanding `egress-policy: block` from local-only
+1. **Plugin platform** - every domain runs its own plugin
+   ([ADR-020](docs/adr/ADR-020-command-naming-system.md),
+   [ADR-016](docs/adr/ADR-016-plugin-trust-sandbox.md)).
+   - P2.1, done: each plugin ships its route fragment, and the command table is
+     built from the fragments and cached.
+   - P2.2, in progress: plugin SDK v1, cutting the remaining coupling edges
+     between plugins and the core, `dot cli hook`, and agent events.
+   - P2.3, next: the fail-closed trust path, including user plugin directories.
+2. **Coverage floor** - hold the CI floor at 98% (96% for behavioural tests
+   only) and keep moving tests from exercise-only probes to behavioural
+   assertions.
+3. **Egress hardening** - keep expanding `egress-policy: block` from local-only
    jobs to package-installing jobs once each allowlist is proven by CI logs.
-3. **Docs governance** - keep this file as the only active roadmap and enforce
-   redirects for historical roadmap paths.
-4. **Platform parity** - continue closing Windows-native PowerShell and WSL gaps
+4. **Docs governance** - keep this file as the only active roadmap and the
+   historical roadmap paths below as redirect stubs.
+5. **Platform parity** - continue closing Windows-native PowerShell and WSL gaps
    without weakening macOS/Linux behaviour.
-5. **Distribution** - keep Homebrew, Scoop, AUR, devcontainer, and install
+6. **Distribution** - keep Homebrew, Scoop, AUR, devcontainer, and install
    surfaces aligned with signed release artifacts.
 
 ## Later
 
 - Add a second maintainer to improve review independence and bus factor.
-- Add containerized integration runs that can safely exercise system-mutation
-  surfaces.
+- Extend the Docker install tests to containerized integration runs that can
+  safely exercise system-mutation surfaces.
 - Add deeper enterprise fleet workflows: attested fleet apply, host inventory,
   policy bundles, and rollback evidence.
 - Add richer local observability for shell lifecycle timing and AI-agent runs.

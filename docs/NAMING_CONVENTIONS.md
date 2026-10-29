@@ -26,11 +26,13 @@ This document defines the naming conventions for all files in the dotfiles repos
 |---|---|---|
 | 00-09 | Audit & pre-flight | `run_before_00-audit.sh` |
 | 10-19 | Package installation | `run_onchange_10-linux-packages.sh.tmpl` |
-| 20-29 | Config & languages | `run_onchange_20-ghostty-config.sh.tmpl` |
-| 25-29 | Language toolchains | `run_onchange_25-python-tools.sh.tmpl` |
-| 30-39 | Applications | `run_onchange_30-vscode-extensions.sh.tmpl` |
-| 40-49 | System defaults | `run_onchange_40-darwin-default-apps.sh.tmpl` |
-| 50-59 | Assets (fonts, themes) | `run_onchange_50-install-fonts.sh.tmpl` |
+| 20-24 | Config & app setup | `run_onchange_20-ghostty-config.sh.tmpl` |
+| 25-29 | Language toolchains, Go TUI builds | `run_onchange_25-python-tools.sh.tmpl`, `run_onchange_25-build-dot-ai-tui.sh.tmpl` |
+| 30-39 | Applications | `run_onchange_30-vscode-extensions.sh` |
+| 40-49 | System defaults | `run_onchange_40-darwin-default-apps.sh` |
+| 50-59 | Assets (fonts, themes) | `run_onchange_50-install-fonts.sh` |
+
+Scripts in `defaults/` run on every `chezmoi apply`. Scripts in `install/provision/` sit outside the chezmoi source root and run only through `install.sh --provision`.
 
 ---
 
@@ -81,20 +83,23 @@ closed verb list. The registries are the source of truth:
 ## Directory Structure Overview
 
 ```text
-.chezmoitemplates/
-  aliases/        # 48 categories, auto-discovered
+defaults/.chezmoitemplates/
+  aliases/        # One directory per category, auto-discovered
   functions/      # Grouped by domain (api/, curl/, text/, system/, etc.)
-  paths/          # PATH construction templates
   desktop/        # Desktop environment templates (dconf)
+  theme-name      # Partial that resolves the active theme name
+  go-build-command  # Partial shared by the Go TUI build scripts
 
-dot_config/       # Flat — chezmoi constraint, no intermediate grouping
+defaults/dot_config/  # Flat: chezmoi constraint, no intermediate grouping
 
 install/
   lib/            # Shared helpers (os_detection, logging, installers)
   provision/      # run_onchange_* provisioning scripts
 
+plugins/          # One dot CLI plugin per domain (manifest, entry, libexec/)
+
 scripts/          # Repo-only scripts (not deployed)
-  dot/            # dot CLI subcommands
+  dot/            # Remaining dot CLI routes and the PowerShell module
   ops/            # Operations scripts
   diagnostics/    # Health checks
   security/       # Security tools
@@ -104,7 +109,7 @@ tests/            # Test suite (not deployed)
   framework/      # Test runner, assertions, mocks
   unit/           # Domain-organized unit tests
   integration/    # End-to-end tests
-  performance/    # Benchmarks
+  regression/     # Regression tests, including the Feature Matrix rows
 
 docs/             # Documentation and GitHub Pages source
   architecture/   # System design docs

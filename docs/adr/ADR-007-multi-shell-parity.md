@@ -32,7 +32,7 @@ Adopt a **hub-and-spoke bridge architecture**:
 2. **Bash/Zsh spoke:** Direct inclusion via `90-ux-aliases.sh.tmpl` and `50-logic-functions.sh.tmpl`
 3. **Fish spoke:** Runtime bash bridge with caching (`aliases.fish.tmpl`, `functions.fish.tmpl`)
 4. **Nushell spoke:** Hybrid approach:
-   - Aliases: Runtime bash extraction cached to `~/.cache/nushell/bash-aliases.nu` (in `env.nu.tmpl`), sourced by `aliases.nu.tmpl`
+   - Aliases: Runtime bash extraction cached to `~/.cache/nushell/bash-aliases.nu` (in `env.nu.tmpl`), sourced by `aliases.nu`
    - Functions: Chezmoi template-generated `def` wrappers delegating to bash (in `functions.nu.tmpl`)
 
 **Parity tiers:**

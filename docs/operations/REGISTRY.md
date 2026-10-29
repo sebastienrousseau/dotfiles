@@ -16,6 +16,10 @@ This page documents the JSON contract and the contribution flow. It is the §3 /
 
 ## Quick start (consumer side)
 
+The published index has no modules yet: `docs/registry.json` carries an
+empty `modules` array. `rust-dev-setup` below, and in the JSON contract,
+is an illustrative name, not a module you can install today.
+
 ```sh
 dot cli list --available                   # list every published module
 dot cli list --available rust            # filter by keyword

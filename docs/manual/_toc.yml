@@ -1,5 +1,6 @@
-# Master ordering for build-manual.sh
-# Determines concatenation order for single-page HTML/PDF/EPUB
+# Reading order for the web manual (tools/docs/build-manual-site.py).
+# tools/docs/build-manual.sh does not read this file: it concatenates the
+# single-page HTML/PDF/EPUB in directory order, which matches this list.
 title: "The .dotfiles Manual"
 subtitle: "A Trusted Agent Workstation for macOS, Linux, and WSL"
 

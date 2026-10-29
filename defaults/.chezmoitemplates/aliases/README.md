@@ -17,11 +17,35 @@ This directory contains modular alias definitions managed by **chezmoi**.
 
 Aliases are split into small, manageable files (e.g., `git/git.aliases.sh`, `docker/docker.aliases.sh`).
 
-During `chezmoi apply`, the main template `dot_config/shell/aliases.sh.tmpl`:
+During `chezmoi apply`, two templates in `defaults/dot_config/shell/` scan this directory for
+`**/*.aliases.sh` files and inline them, in path order:
 
-1. Scans this directory for `**/*.aliases.sh` files.
-2. Aggregates them into a single `~/.config/shell/aliases.sh` file.
-3. This aggregated file is sourced by your `.zshrc`.
+1. `90-ux-aliases.sh.tmpl` builds `~/.config/shell/90-ux-aliases.sh`, the eager layer. It holds the
+   core categories (`archives`, `cd`, `clear`, `compliance`, `configuration`, `default`,
+   `diagnostics`, `disk-usage`, `editor`, `git`, `installer`, `interactive`, `mkdir`, `modern`,
+   `ps`, `rsync`, `sudo`, `system`), with `archives` placed after the others, and, on macOS only,
+   the `macOS` files.
+2. `91-ux-aliases-lazy.sh.tmpl` builds `~/.config/shell/91-ux-aliases-lazy.sh`, the lazy layer,
+   with every other directory.
+
+Bash and zsh source both files, the eager layer first, so a later definition of a name replaces
+an earlier one (the lazy layer wins over the eager one). Zsh loads the eager layer at startup and
+defers the lazy layer. Fish converts the aliases of both files into abbreviations
+(`defaults/dot_config/fish/conf.d/aliases.fish.tmpl`), skipping values that use bash-only syntax.
+
+Three settings, read when `chezmoi apply` renders the templates, trim the set:
+
+- `DOTFILES_ALIAS_PROFILE=minimal` drops `interactive` and `sudo` from the eager layer and
+  `ai`, `benchmarks`, `docker`, `gcloud`, `kubernetes`, `security` and `terraform` from the
+  lazy layer (the default profile is `standard`).
+- `DOTFILES_ALIAS_ECOSYSTEMS` (default `all`) limits the ecosystem directories to the listed
+  ones: `python`, `node` (`npm`, `pnpm`, `yarn`), `rust`, `network` (`dig`, `security`) and
+  `legacy` (`subversion`, `vagrant`).
+- `aliases.buckets.system` and `aliases.buckets.svn` in the chezmoi data (both `true` by default)
+  turn off `system` and `subversion`.
+
+Keep names unique across files: a later definition silently replaces an earlier one. The
+per-directory READMEs note the overrides that exist today.
 
 ## Usage
 
@@ -44,48 +68,55 @@ During `chezmoi apply`, the main template `dot_config/shell/aliases.sh.tmpl`:
 
 <!-- markdownlint-disable MD013-->
 
-| Directory       | Description                                      | Link                      |
-| :-------------- | :----------------------------------------------- | :------------------------ |
-| `archives`      | Compress and extract files and directories.      | [View README](archives/README.md) |
-| `cd`            | Navigate the file system.                        | [View README](cd/README.md)       |
-| `chmod`         | Change file and directory permissions.           | [View README](chmod/README.md)    |
-| `clear`         | Clear the terminal screen.                       | [View README](clear/README.md)    |
-| `compliance`    | Regulatory compliance (SOC2) and privacy tools.  | [View README](compliance/README.md) |
-| `configuration` | Manage dotfiles and shell configurations.        | [View README](configuration/README.md) |
-| `default`       | Set up default shell aliases and configurations. | [View README](default/README.md)  |
-| `dig`           | Query DNS name servers.                          | [View README](dig/README.md)      |
-| `diagnostics`   | Self-healing and health checks (doctor, drift).  | [View README](diagnostics/README.md) |
-| `disk-usage`    | Display disk usage information.                  | [View README](disk-usage/README.md) |
-| `editor`        | Configure default text editors.                  | [View README](editor/README.md)   |
-| `find`          | Search files and directories using `find`.       | [View README](find/README.md)     |
-| `fonts`         | Font cache management.                           | [View README](fonts/README.md)    |
-| `gcloud`        | Manage Google Cloud SDK tools.                   | [View README](gcloud/README.md)   |
-| `git`           | Manage Git aliases and configurations.           | [View README](git/README.md)      |
-| `gnu`           | Manage GNU core utilities.                       | [View README](gnu/README.md)      |
-| `heroku`        | Manage Heroku CLI.                               | [View README](heroku/README.md)   |
-| `immutability`  | Lock/Unlock critical files (`chflags`/`chattr`). | [View README](immutability/README.md) |
-| `installer`     | Bootstrap and remote deployment tools.           | [View README](installer/README.md) |
-| `interactive`   | Configure interactive shell behavior.            | [View README](interactive/README.md) |
-| `kubernetes`    | Manage Kubernetes, Helm, and K9s aliases.        | [View README](kubernetes/README.md) |
-| `legal`         | License scanning and compliance tools.           | [View README](legal/README.md)      |
-| `macOS`         | Manage macOS-specific shell settings.            | [View README](macOS/README.md)    |
-| `make`          | Manage GNU Make aliases and utilities.           | [View README](make/README.md)     |
-| `mkdir`         | Create directories with custom options.          | [View README](mkdir/README.md)    |
-| `modern`        | Modern Rust-based tool replacements (ls, cat).   | [View README](modern/README.md)   |
-| `npm`           | Manage Node.js package manager aliases.          | [View README](npm/README.md)      |
-| `permission`    | Configure file and directory permissions.         | [View README](permission/README.md) |
-| `pnpm`          | Manage pnpm package manager aliases.             | [View README](pnpm/README.md)     |
-| `ps`            | Manage process status commands.                  | [View README](ps/README.md)       |
-| `python`        | Configure Python aliases and utilities.          | [View README](python/README.md)   |
-| `rsync`         | Configure rsync for efficient file transfers.    | [View README](rsync/README.md)    |
-| `rust`          | Manage Rust programming tools and configurations.| [View README](rust/README.md)     |
-| `security`      | Immutability and signing configuration.          | [View README](security/README.md) |
-| `subversion`    | Configure Subversion (SVN) version control.       | [View README](subversion/README.md) |
-| `sudo`          | Manage superuser operations.                     | [View README](sudo/README.md)     |
-| `tmux`          | Configure tmux terminal multiplexer.             | [View README](tmux/README.md)     |
-| `update`        | Update dotfiles and related configurations.       | [View README](update/README.md)   |
-| `uuid`          | Generate UUIDs for various use cases.            | [View README](uuid/README.md)     |
-| `wget`          | Manage wget command-line tool.                   | [View README](wget/README.md)     |
+| Directory | Layer | Description | Link |
+| :-- | :-- | :-- | :-- |
+| `ai` | lazy | AI agent CLIs (Claude Code, Codex, aider, Ollama and more). | [View README](ai/README.md) |
+| `archives` | eager | Create, list and extract archives. | [View README](archives/README.md) |
+| `benchmarks` | lazy | Benchmark commands with hyperfine. | [View README](benchmarks/README.md) |
+| `cd` | eager | Directory navigation, bookmarks and history. | [View README](cd/README.md) |
+| `chmod` | lazy | Permission shortcuts with validation. | [View README](chmod/README.md) |
+| `clear` | eager | Clear the screen, optionally listing the directory. | [View README](clear/README.md) |
+| `compliance` | eager | Privacy mode and the configuration audit trail. | [View README](compliance/README.md) |
+| `configuration` | eager | Open common configuration files in `$EDITOR`. | [View README](configuration/README.md) |
+| `default` | eager | General-purpose shell aliases. | [View README](default/README.md) |
+| `diagnostics` | eager | Doctor, drift and repair shortcuts. | [View README](diagnostics/README.md) |
+| `dig` | lazy | DNS lookups and public IP checks. | [View README](dig/README.md) |
+| `disk-usage` | eager | Disk usage summaries with `du`. | [View README](disk-usage/README.md) |
+| `docker` | lazy | Docker, Compose, Buildx and Swarm. | [View README](docker/README.md) |
+| `editor` | eager | Editor aliases that follow `$EDITOR`. | [View README](editor/README.md) |
+| `find` | lazy | File search with `fd`. | [View README](find/README.md) |
+| `fonts` | lazy | List installed fonts. | [View README](fonts/README.md) |
+| `gcloud` | lazy | Google Cloud SDK. | [View README](gcloud/README.md) |
+| `git` | eager | Git commands and commit signing helpers. | [View README](git/README.md) |
+| `gnu` | lazy | GNU coreutils names (identity aliases). | [View README](gnu/README.md) |
+| `go` | lazy | Go toolchain commands. | [View README](go/README.md) |
+| `heroku` | lazy | Heroku CLI. | [View README](heroku/README.md) |
+| `installer` | eager | Installer and remote deployment. | [View README](installer/README.md) |
+| `interactive` | eager | Opt-in interactive `cp`, `mv`, `rm` and friends. | [View README](interactive/README.md) |
+| `kubernetes` | lazy | kubectl, Helm, minikube, stern and k9s. | [View README](kubernetes/README.md) |
+| `legal` | lazy | License scanning, headers and attribution. | [View README](legal/README.md) |
+| `lua` | lazy | Lua REPL shortcuts. | [`lua.aliases.sh`](lua/lua.aliases.sh) |
+| `macOS` | eager (macOS only) | macOS Finder, network and maintenance helpers. | [View README](macOS/README.md) |
+| `make` | lazy | Make targets. | [View README](make/README.md) |
+| `mkdir` | eager | Create directories, including dated ones. | [View README](mkdir/README.md) |
+| `modern` | eager | eza, bat, zoxide, mise and other modern tools. | [View README](modern/README.md) |
+| `npm` | lazy | npm commands. | [View README](npm/README.md) |
+| `permission` | lazy | Numeric `chmod`, `chown` and `chgrp` shortcuts. | [View README](permission/README.md) |
+| `pnpm` | lazy | pnpm commands. | [View README](pnpm/README.md) |
+| `ps` | eager | Empty; process aliases moved to `system`. | [View README](ps/README.md) |
+| `python` | lazy | Python, pip, uv and virtual environments. | [View README](python/README.md) |
+| `rsync` | eager | rsync transfers. | [View README](rsync/README.md) |
+| `rust` | lazy | Cargo and rustup. | [View README](rust/README.md) |
+| `security` | lazy | GPG, OpenSSL, SSH, firewall rules and file locking. | [View README](security/README.md) |
+| `subversion` | lazy | Subversion (SVN). | [View README](subversion/README.md) |
+| `sudo` | eager | Superuser shortcuts. | [View README](sudo/README.md) |
+| `system` | eager | Shell, process, network and nmap helpers. | [View README](system/README.md) |
+| `terraform` | lazy | Terraform, OpenTofu and Ansible. | [View README](terraform/README.md) |
+| `tmux` | lazy | tmux sessions. | [View README](tmux/README.md) |
+| `uuid` | lazy | Generate a UUID and copy it. | [View README](uuid/README.md) |
+| `vagrant` | lazy | Vagrant. | [View README](vagrant/README.md) |
+| `wget` | lazy | wget downloads. | [View README](wget/README.md) |
+| `yarn` | lazy | Yarn commands. | [View README](yarn/README.md) |
 
 <!-- markdownlint-enable MD013-->
 

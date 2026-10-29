@@ -19,7 +19,7 @@ The primary trust boundary is the **local machine**. Dotfiles are deployed to an
 │  └─────────────────┘  └──────────────────────┘  │
 │                                                  │
 │  ┌─────────────────┐  ┌──────────────────────┐  │
-│  │ ~/.local/bin/    │  │ ~/.cache/shell/      │  │
+│  │ ~/.local/bin/    │  │ ~/.cache/{zsh,bash}/ │  │
 │  │ (user scripts)   │  │ (cached eval output) │  │
 │  └─────────────────┘  └──────────────────────┘  │
 └─────────────────────────────────────────────────┘
@@ -66,7 +66,7 @@ The primary trust boundary is the **local machine**. Dotfiles are deployed to an
 - Atuin `history_filter` excludes sensitive patterns
 - Age encryption for local secret storage
 - `dot secret set` uses secure prompts (no shell history)
-- `.gitignore` excludes `key.txt`, `.env`, credential files
+- The age identity lives outside the source tree (`~/.config/chezmoi/key.txt`, mode 0600), and `.gitignore` excludes `.env` files
 
 ### 3. Supply Chain Dependencies
 
@@ -87,9 +87,9 @@ The primary trust boundary is the **local machine**. Dotfiles are deployed to an
 **Mitigations:**
 
 - PATH construction is deterministic (template-generated)
-- `~/.local/bin` is user-controlled and checked for writability
-- No world-writable directories in PATH
-- `prependpath` function validates directory existence
+- `path_prepend` in `00-core-paths.sh` adds a directory only if it exists
+- `~/.local/bin` is user-controlled
+- Not enforced today: PATH entries are not checked for world-writability, and the user-facing `prependpath` function adds its argument without checking that the directory exists
 
 ### 5. Template Injection
 
@@ -103,14 +103,15 @@ The primary trust boundary is the **local machine**. Dotfiles are deployed to an
 
 ### 6. Cached Eval Files
 
-**Risk:** Stale or tampered cache files in `~/.cache/shell/` sourced at startup.
+**Risk:** Stale or tampered cache files in `~/.cache/zsh/` or `~/.cache/bash/` sourced at startup.
 
 **Mitigations:**
 
-- `_cached_eval` validates cache against binary mtime
-- Cache files are user-owned (0644)
+- `_cached_eval` validates cache against binary mtime and the binary's recorded realpath
+- Init output matching a suspicious pattern (`curl … | sh`, `/dev/tcp/`, `nc -e`) is rejected, not cached
+- Cache files are user-owned: 0600 in zsh (written via `mktemp`); in bash they follow the umask (0644 under the default `umask 022`)
 - Cache directory is under `$XDG_CACHE_HOME` (user-controlled)
-- Cache can be cleared with `rm -rf ~/.cache/shell/`
+- Cache can be cleared with `dot shell clean`
 
 ## Residual Risks
 

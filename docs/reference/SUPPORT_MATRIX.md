@@ -68,9 +68,9 @@ verified by CI.
 | Workflow | Platforms | Runs on |
 |----------|-----------|---------|
 | `ci.yml` | `ubuntu-latest`, `macos-latest`, `windows-latest` | Pull requests that change code, config or workflows; pushes to `main`; scheduled |
-| `reliability-gate.yml` | `ubuntu-latest`, `macos-latest`, `macos-14` | Every pull request and push to `main` |
+| `reliability-gate.yml` | `ubuntu-latest`, `macos-latest`, `macos-14`, `windows-latest` (PowerShell parity job) | Every pull request and push to `main` |
 | `cross-platform-test.yml` | `ubuntu-latest`, `macos-latest`, `macos-14` | Pull requests that change code or config; pushes to `main`; scheduled |
-| `ci-enforced.yml` | `ubuntu-latest` | Every pull request and push; stricter checks |
+| `ci-enforced.yml` | `ubuntu-latest`; one job also on `macos-latest` and `macos-14` | Every pull request and push; stricter checks |
 | `devcontainer-prebuild.yml` | `ubuntu-latest` | Pre-built development images |
 
 Both macOS labels are Apple Silicon: `macos-14` runs macOS 14 and

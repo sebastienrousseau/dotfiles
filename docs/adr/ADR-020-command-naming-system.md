@@ -60,7 +60,9 @@ changes the system needs an explicit verb.
 ### Built-ins and aliases
 
 The host builds in only `dot help`, `dot version` and `dot cli` (N8).
-`dot help <term>` searches. Aliases are of two kinds only (N7):
+`dot help <term>` searches. (Status note: today `bin/dot` handles `help`
+and `version` itself, and `dot cli` ships as the host's own plugin,
+`plugins/cli/`.) Aliases are of two kinds only (N7):
 
 - Seven daily shortcuts: `dot apply`, `sync`, `diff`, `status` and `edit`
   (to `dot config …`), `dot update` (to `dot system update`) and `dot cd`
@@ -136,6 +138,13 @@ ships. `dot doctor` warns when another `dot` comes first on `PATH`, the
 Homebrew formula `dot-cli` notes `conflicts_with "graphviz"`, and `dot-cli`
 is documented as an alternative entry point.
 
+Status note: only the first part is in place. `dot doctor` warns when
+`command -v dot` is not `~/.local/bin/dot`
+(`scripts/diagnostics/doctor.sh`). The Homebrew formula
+(`pkg/brew/dot.rb`) has no `conflicts_with "graphviz"`, and there is no
+`dot-cli` entry point (`dot-cli` is only the AUR package name). Both are
+planned.
+
 ## Consequences
 
 - Every one of today's 105 routes gets a new spelling (plan v3, command
@@ -177,7 +186,7 @@ runs each command (`legacy`, on the domain and on each command).
   but planned, and `dot <domain>` lists it as such and exits 127 when it
   is called.
 - A domain with a route of its own (`ai`, `agent`, `attest`, `doctor`,
-  `fleet`, `mcp`, `theme`, `tool`, `top`) keeps its bare behaviour, and
+  `fleet`, `mcp`, `system`, `theme`, `tool`, `top`) keeps its bare behaviour, and
   a word that is not one of its verbs or objects goes to that route, so
   today's subcommands keep working.
 - A deprecated name runs and prints its new spelling once per shell
@@ -195,8 +204,12 @@ runs each command (`legacy`, on the domain and on each command).
   help or exit 127, as before. `theme` was the first; then `security`,
   `attest`, `secret` and `fleet`; then `ai`, `agent`, `mcp` and `top`; then
   `cli` and `tool`; then `doctor` and `system`; then `config` and `shell`,
-  after which routes.txt holds only the host's built-ins (help, version,
-  search, manual, docs, learn, keys) and two old names with no spelling.
+  after which routes.txt holds only the host's built-ins (`help`,
+  `version`) and route lines for words the command table now marks
+  removed (`search`, `manual`, `docs`, `learn`, `keys`, `chaos`,
+  `smoke-test`). Each removed word exits 127 with its new spelling:
+  `dot help <term>`, `dot help --manual`, `dot help --readme`,
+  `dot help tour` or `dot doctor`.
 - Each plugin ships its route fragment, `plugins/<domain>/commands.txt`,
   generated from its manifest: its `dom`, `obj`, `cmd`, `flag`, `arg` and
   `alias` records, and `run` records for its own aliases, in the
@@ -224,6 +237,13 @@ runs each command (`legacy`, on the domain and on each command).
   registry entry). Merging a user-writable directory into dispatch before
   then would let any process running as the user change what a
   `dot ...` command runs.
+  Status note: the command table is closed, but dispatch is not yet.
+  For a word that is not in the table, `bin/dot`'s fallback (the `*)`
+  arm at the end of `bin/dot`) still sources
+  `${XDG_CONFIG_HOME:-~/.config}/dotfiles/commands/<name>.sh` and execs
+  `dot-<name>` from next to `bin/dot` or from anywhere on `PATH`, so a
+  user-writable file can still add a `dot` command today. P2.2 is
+  planned to put both behind `DOT_ALLOW_PATH_PLUGINS=1`.
 - `-V` prints the version and `-v` sets `DOT_VERBOSE=1`. Until 0.2.538,
   `dot -v` alone printed the version with a warning; from 0.2.538 it is
   `--verbose` with no command, which prints the overview.

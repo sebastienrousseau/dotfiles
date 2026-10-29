@@ -11,17 +11,35 @@ mode. Managed under
 
 ## Status
 
-All 76 jobs across the 28 workflow files in `.github/workflows/` are
-currently in **`audit` mode** — harden-runner is the first step in
-every job and records outbound network calls to the
+Most jobs in `.github/workflows/` run harden-runner in **`audit`
+mode**: it is the first step of the job and records outbound network
+calls to the
 [step-security telemetry dashboard](https://app.stepsecurity.io) but
-does not block them.
+does not block them. A few jobs do not run harden-runner at all (for
+example the drift job in `branch-drift-guard.yml`).
 
-The next iteration (tracked as a follow-up under #878) flips each
-group to `block` once the audit-mode runs confirm the allowlist is
-complete. Switching one job at a time keeps blast radius small:
-a missing endpoint on a `block`-mode job fails the run loud and the
-list below gets updated.
+The workflows below run in **`block` mode** today. The rest flip to
+`block` (tracked as a follow-up under #878) once the audit-mode runs
+confirm the allowlist is complete. Switching one job at a time keeps
+blast radius small: a missing endpoint on a `block`-mode job fails the
+run loud and the list below gets updated.
+
+### Isolated jobs in `block` mode
+
+These jobs check out the repository and run a local script, with no
+external fetches. They allow only the GitHub set the runner needs to
+pull actions and the repo (`github.com:443`, `api.github.com:443`,
+`codeload.github.com:443`, and, in most, `objects.githubusercontent.com:443`
+and `release-assets.githubusercontent.com:443`).
+
+| Workflow |
+|---|
+| `dco.yml` |
+| `doc-drift.yml` |
+| `docs-link-check.yml` |
+| `reusable-security-baseline.yml` |
+| `verify-tag-signature.yml` |
+| `pr-signature.yml` (no checkout; declares no extra endpoints) |
 
 ### Release and version-sync jobs in `block` mode
 

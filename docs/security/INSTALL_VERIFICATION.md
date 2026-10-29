@@ -32,18 +32,24 @@ the same verification algorithm embedded in `install.sh`, so the secure path
 does not depend on another unverified download. Both implementations:
 
 - Resolves the platform (`uname -s` + `uname -m`).
-- Downloads `chezmoi_<version>_<os>_<arch>.tar.gz` AND the matching
-  `chezmoi_<version>_checksums.txt` from the official
+- Looks up the archive's expected SHA-256 in a table **committed in
+  this repository** (reviewed against the upstream checksums file when
+  the chezmoi version is bumped). For a version not in the table, the
+  caller must export `CHEZMOI_SHA256` after reviewing the release;
+  otherwise the install stops.
+- Downloads `chezmoi_<version>_<os>_<arch>.tar.gz` from the official
   `twpayne/chezmoi` GitHub release.
-- Greps the checksum file for the asset's expected SHA256.
-- Verifies the downloaded tarball against that SHA256 using
+- Verifies the downloaded archive against the pinned SHA-256 using
   `shasum -a 256 -c` / `sha256sum -c`.
-- Aborts with a clear error if the asset isn't in the checksum file
-  or the verification fails.
+- If the release's `chezmoi_<version>_checksums.txt` can be downloaded,
+  cross-checks that it agrees with the pin, and aborts if it does not.
+  The checksums file is optional: it comes from the same place as the
+  archive, so it is a cross-check, not the source of trust.
 
 No path pipes `get.chezmoi.io` or another moving remote script into a shell.
-If the upstream checksum manifest is absent, the requested archive is absent,
-or the digest differs, installation fails closed.
+If there is no pin for the asset, the requested archive is absent, the
+release checksums file disagrees with the pin, or the digest differs,
+installation fails closed.
 
 ### 3. The chezmoi source tree
 
