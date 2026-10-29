@@ -19,15 +19,15 @@ privacy_mode_fn() {
 
 alias privacy-mode=privacy_mode_fn
 
-# Audit Trail: View chezmoi application logs
-# (Assuming chezmoi logs are piped or we verify git history as the audit trail)
+# Audit Trail: the dot CLI's own log (lib/dot/log.sh), else git history
 audit_fn() {
+  local log="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/dot.log"
   echo " Configuration Audit Trail (Recent Changes)"
   echo "---------------------------------------------"
-  if [[ -f "$HOME/.local/share/dotfiles.log" ]]; then
-    tail -n 20 "$HOME/.local/share/dotfiles.log"
+  if [[ -f "$log" ]]; then
+    tail -n 20 "$log"
   else
-    # Fallback to git log if custom audit log doesn't exist
+    # Fallback to git log when dot has not logged anything yet
     git -C "$HOME/.dotfiles" log --oneline -n 10 --format="%C(auto)%h %C(blue)%ad %C(reset)%s (%an)" --date=short
   fi
 }

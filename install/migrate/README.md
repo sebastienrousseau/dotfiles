@@ -24,12 +24,6 @@ migration:
    bash install/migrate/migrate-v0_2-to-v0_2_503.sh --dry-run
    ```
 
-`install/provision/run_before_00-migrate-v0_2_503.sh.tmpl` was meant
-as a third trigger on every `chezmoi apply`, but it never runs:
-`install/provision/` sits outside `.chezmoiroot` (`defaults`), so
-chezmoi does not see it, and `install.sh --provision` only runs the
-`run_once_install_*` and `run_onchange_*` scripts there.
-
 Both paths converge on the same script. The script's first
 action is checking the state file
 `~/.local/state/dotfiles/v0_2_503-migration/.complete`. If that
@@ -47,10 +41,11 @@ it again).
 | 3 | `dot_local/share/zsh/completions/_dot` | `share/completions/zsh/_dot` |
 | 4 | `dot_*`, `dot_config/`, etc. | `defaults/...` (via `.chezmoiroot`) |
 
-Without intervention, chezmoi would see the old paths as "deleted
-from source" and REMOVE the deployed files at `~/.local/bin/dot`,
-`~/.local/share/man/...`, etc. BEFORE deploying the new ones — a
-brief but real window where the user's environment is broken.
+The RFC expected chezmoi to treat the old paths as "deleted from
+source" and remove the deployed files at `~/.local/bin/dot`,
+`~/.local/share/man/...`, etc. It does not: chezmoi leaves a deployed
+file in place when its source entry disappears (unless
+`.chezmoiremove` or an `exact_` directory says otherwise).
 
 The migration:
 
@@ -63,24 +58,28 @@ The migration:
    (`bin/dot`, `share/man/man1/dot.1`, `.chezmoiroot`) under
    `chezmoi source-path`.
 4. Calls `chezmoi forget --force` on the corresponding deployed
-   paths. This un-tracks them from chezmoi state without deleting
-   the file on disk. `chezmoi apply` then proceeds normally; the old
+   paths. This deletes their entries from the chezmoi source state
+   without deleting the deployed file. `chezmoi apply` then proceeds normally; the old
    (now-untracked) deployed files remain on disk until you remove
    them.
 5. Writes the `.complete` state file (except under `--dry-run`).
 
-Note that once `.chezmoiroot` is in effect, `chezmoi source-path`
-prints `~/.dotfiles/defaults`, not the repo root, so the phase checks
-in step 3 do not find their target files and the script forgets
-nothing.
+Once `.chezmoiroot` is in effect, `chezmoi source-path` prints
+`~/.dotfiles/defaults`, not the repo root, so the phase checks in
+step 3 do not find their target files and the script forgets nothing.
+That is now the intended behaviour: `~/.local/bin/dot` is managed
+again (by `defaults/dot_local/bin/executable_dot.tmpl`), and
+`chezmoi forget` deletes the source entry of the path it forgets, so
+a Phase 2 that fired would remove that file from your checkout.
+Since chezmoi leaves deployed files in place anyway (see above),
+nothing is lost.
 
 ## Rollback
 
-`rollback-v0_2_503.sh` does not work today. It looks for a
-`current ver:` line in the newest snapshot, but the migration writes
-only `target ver:`, so it stops with "snapshot missing 'current ver:'
-line". It also expects `chezmoi source-path` to be the git checkout,
-which with `.chezmoiroot` it is not.
+`rollback-v0_2_503.sh` is retired. It never worked (it read a
+`current ver:` snapshot line the migration never writes, and expected
+`chezmoi source-path` to be the git checkout), so it now changes
+nothing, prints the steps below and exits 1.
 
 To go back to a pre-0.2.503 release by hand:
 

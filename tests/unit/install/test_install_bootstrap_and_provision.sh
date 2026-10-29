@@ -51,12 +51,16 @@ grep -q '^git clone' "$OS_CASE/log" && cloned=yes
 assert_equals "no" "$cloned" "nothing is cloned without chezmoi"
 
 # ── --provision ─────────────────────────────────────────────────────────
-PROV_CASE="$WORK/prov"
-mkdir -p "$PROV_CASE/bin" "$PROV_CASE/home"
-cp "$REPO_ROOT/install.sh" "$PROV_CASE/install.sh"
-stub "$PROV_CASE/bin" chezmoi 'exit 0'
-stub "$PROV_CASE/bin" curl 'exit 1'
-stub "$PROV_CASE/bin" git '
+# prov_case <name>: a case dir whose git stub clones a source with one
+# provisioning script that marks $HOME/provisioned.
+prov_case() {
+  PROV_CASE="$WORK/$1"
+  mkdir -p "$PROV_CASE/bin" "$PROV_CASE/home"
+  cp "$REPO_ROOT/install.sh" "$PROV_CASE/install.sh"
+  : >"$PROV_CASE/log"
+  stub "$PROV_CASE/bin" chezmoi 'exit 0'
+  stub "$PROV_CASE/bin" curl 'exit 1'
+  stub "$PROV_CASE/bin" git '
 if [[ "$1" == "clone" ]]; then
   dest="${*: -1}"
   mkdir -p "$dest/.git" "$dest/defaults" "$dest/install/provision"
@@ -67,10 +71,29 @@ fi
 [[ "$1" == "describe" ]] && exit 1
 [[ "$1" == "rev-parse" ]] && echo v0.2.500
 exit 0'
+}
 
 test_start "provision_runs_the_cloned_scripts"
+prov_case prov
 run_install "$PROV_CASE" --provision
 assert_equals "0" "$?" "install.sh --provision succeeds"
 assert_file_exists "$PROV_CASE/home/provisioned" "the provisioning script ran"
+
+# The minimal profile skips provisioning however it was selected: --minimal,
+# DOTFILES_MINIMAL=1, or a detected container (Codespaces here).
+test_start "minimal_profile_from_the_environment_skips_provisioning"
+prov_case prov-env
+DOTFILES_MINIMAL=1 run_install "$PROV_CASE" --provision
+assert_equals "0" "$?" "install.sh succeeds"
+assert_file_not_exists "$PROV_CASE/home/provisioned" "DOTFILES_MINIMAL=1 does not provision"
+
+test_start "container_minimal_profile_skips_provisioning"
+prov_case prov-container
+CODESPACES=1 run_install "$PROV_CASE"
+assert_equals "0" "$?" "install.sh succeeds"
+assert_false 'grep -q "install.sh\" --provision" "$PROV_CASE/out"' "a container is not offered the provisioning hint"
+prov_case prov-container2
+CODESPACES=1 run_install "$PROV_CASE" --provision
+assert_file_not_exists "$PROV_CASE/home/provisioned" "a container does not provision"
 
 test_summary
