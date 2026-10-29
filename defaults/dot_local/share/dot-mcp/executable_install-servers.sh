@@ -30,18 +30,31 @@ install_node() {
   fi
 }
 
-# install_python <dir>: one venv per server, every wheel hash-checked. A
-# rejected install leaves no venv behind, so a stale or partial one never runs.
+# venv_install <venv> <requirements> [uv flag…]: a fresh venv, every wheel
+# hash-checked.
+venv_install() {
+  local venv="$1" req="$2"
+  shift 2
+  rm -rf "$venv"
+  uv venv --quiet "$venv" &&
+    uv pip install --python "$venv/bin/python" --require-hashes -r "$req" "$@"
+}
+
+# install_python <dir>: one venv per server. uv reuses an unpacked wheel from
+# its cache without checking it is whole, so once an entry loses a file (an
+# OS purge of a cache under /tmp) every cached install fails the same way;
+# --refresh and --reinstall reuse it too (uv 0.13). One retry with --no-cache
+# downloads fresh, still hash-checked, and leaves the cache alone. A failed
+# install leaves no venv behind, so a stale or partial one never runs.
 install_python() {
-  local dir="$1" venv="$1/venv"
+  local dir="$1" venv="$1/venv" name
   [[ -f "$dir/requirements.txt" ]] || return 0
+  name="$(basename "$dir")"
+  venv_install "$venv" "$dir/requirements.txt" && return 0
+  echo "dot-mcp: retrying $name without the uv cache." >&2
+  venv_install "$venv" "$dir/requirements.txt" --no-cache && return 0
   rm -rf "$venv"
-  if uv venv --quiet "$venv" &&
-    uv pip install --python "$venv/bin/python" --require-hashes -r "$dir/requirements.txt"; then
-    return 0
-  fi
-  rm -rf "$venv"
-  echo "dot-mcp: install failed for $(basename "$dir") (hash-pinned requirements rejected)." >&2
+  echo "dot-mcp: install failed for $name; uv's error above says why." >&2
   return 1
 }
 
