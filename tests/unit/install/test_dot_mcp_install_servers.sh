@@ -43,7 +43,8 @@ printf 'npm %s :: %s\n' "$PWD" "$*" >>"$DOT_TEST_LOG"
 exit "${DOT_TEST_NPM_RC:-0}"
 SH
 # uv stub: `uv venv DIR` makes DIR/bin/python; `uv pip install` logs and
-# returns DOT_TEST_UV_RC.
+# returns DOT_TEST_UV_RC, or DOT_TEST_UV_NOCACHE_RC (default the same) when
+# called with --no-cache.
 cat >"$STUBS/uv" <<'SH'
 #!/usr/bin/env bash
 printf 'uv %s\n' "$*" >>"$DOT_TEST_LOG"
@@ -51,6 +52,9 @@ if [[ "$1" == "venv" ]]; then
   for a in "$@"; do last="$a"; done
   mkdir -p "$last/bin" && : >"$last/bin/python"
   exit 0
+fi
+if [[ " $* " == *" --no-cache "* ]]; then
+  exit "${DOT_TEST_UV_NOCACHE_RC:-${DOT_TEST_UV_RC:-0}}"
 fi
 exit "${DOT_TEST_UV_RC:-0}"
 SH
@@ -88,6 +92,7 @@ for s in git sqlite; do
   assert_contains "pip install --python $ROOT/python/$s/venv/bin/python --require-hashes -r $ROOT/python/$s/requirements.txt" \
     "$(cat "$LOG")" "$s installs from its hash-pinned requirements"
 done
+refute_contains "--no-cache" "$(cat "$LOG")" "a clean install uses the cache"
 
 test_start "a_rejected_python_install_leaves_no_venv_and_fails"
 run_installer DOT_TEST_UV_RC=1
@@ -95,6 +100,22 @@ assert_not_equals 0 "$RC" "rc"
 assert_dir_not_exists "$ROOT/python/git/venv" "no partial git venv"
 assert_dir_not_exists "$ROOT/python/sqlite/venv" "no partial sqlite venv"
 assert_contains "install failed" "$(cat "$WORK/out")" "the failure is reported"
+# uv's own error says why; the installer must not guess that hashes failed.
+refute_contains "hash-pinned requirements rejected" "$(cat "$WORK/out")" "no invented cause"
+
+# A cache entry missing a file fails every cached install the same way
+# (uv 0.13: --refresh and --reinstall reuse it too), so one retry runs
+# without the cache, still hash-checked.
+test_start "a_damaged_uv_cache_is_bypassed_once"
+run_installer DOT_TEST_UV_RC=1 DOT_TEST_UV_NOCACHE_RC=0
+assert_equals 0 "$RC" "rc: $(cat "$WORK/out")"
+for s in git sqlite; do
+  assert_contains "pip install --python $ROOT/python/$s/venv/bin/python --require-hashes -r $ROOT/python/$s/requirements.txt --no-cache" \
+    "$(cat "$LOG")" "$s retries hash-checked without the cache"
+  assert_file_exists "$ROOT/python/$s/venv/bin/python" "$s venv is in place"
+done
+assert_contains "without the uv cache" "$(cat "$WORK/out")" "the retry is announced"
+refute_contains "install failed" "$(cat "$WORK/out")" "a recovered install is not a failure"
 
 test_start "a_rejected_npm_install_fails"
 run_installer DOT_TEST_NPM_RC=1
