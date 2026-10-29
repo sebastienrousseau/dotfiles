@@ -84,7 +84,7 @@ These aliases are defined in `crypto-utils.aliases.sh`, `gpg-crypto.aliases.sh`,
 
 ### `immutability.aliases.sh`
 
-These wrap `scripts/security/lock-configs.sh`, but only when it exists at `~/.local/share/chezmoi/scripts/security/lock-configs.sh`, the legacy source location. With the default source at `~/.dotfiles` the file is not there, so the aliases are not defined.
+These wrap `scripts/security/lock-configs.sh` from the source checkout at `~/.dotfiles`, or from the legacy source location `~/.local/share/chezmoi`. With neither present, the aliases are not defined.
 
 Every definition in this file exists only when file `$script_path` exists.
 

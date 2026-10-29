@@ -23,16 +23,16 @@
   11   11   20.7   33     0 bin/dot-theme-sync::reload_tmux
   16   11   27.5   70   335 bin/dot::<top>
   20   24   31.1   39     0 bin/dot::_resolve_source_dir
-  21   21    4.2  111   111 defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh::<top>
+  21   21    4.2  108   108 defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh::<top>
   19   27   29.6   53     0 defaults/.chezmoitemplates/aliases/cd/cd-core.aliases.sh::cd_with_history
-  16   15    4.1   22    22 defaults/.chezmoitemplates/aliases/cd/cd-shortcuts.aliases.sh::<top>
-  23   21   12.6   77   361 defaults/.chezmoitemplates/aliases/cd/cd.aliases.sh::<top>
+  16   15    4.0   22    22 defaults/.chezmoitemplates/aliases/cd/cd-shortcuts.aliases.sh::<top>
+  23   21   11.9   76   360 defaults/.chezmoitemplates/aliases/cd/cd.aliases.sh::<top>
   19   27   29.6   53     0 defaults/.chezmoitemplates/aliases/cd/cd.aliases.sh::cd_with_history
   12   17   18.4   29     0 defaults/.chezmoitemplates/aliases/chmod/chmod.aliases.sh::show_permissions
   15   20   15.4   62     0 defaults/.chezmoitemplates/aliases/default/default.aliases.sh::set_default_aliases
-   8    7    4.4  126   187 defaults/.chezmoitemplates/aliases/docker/docker.aliases.sh::<top>
+   9    8    5.5  126   187 defaults/.chezmoitemplates/aliases/docker/docker.aliases.sh::<top>
   13   20    7.7   57    72 defaults/.chezmoitemplates/aliases/editor/editor.aliases.sh::<top>
-   2    1    2.1   84    84 defaults/.chezmoitemplates/aliases/gcloud/gcloud.aliases.sh::<top>
+   2    1    2.0   79    79 defaults/.chezmoitemplates/aliases/gcloud/gcloud.aliases.sh::<top>
    6    9    4.4   91   150 defaults/.chezmoitemplates/aliases/git/git.aliases.sh::<top>
   14   13    3.7   61   119 defaults/.chezmoitemplates/aliases/modern/modern.aliases.sh::<top>
    3    2    2.1   79    79 defaults/.chezmoitemplates/aliases/rust/rust.aliases.sh::<top>

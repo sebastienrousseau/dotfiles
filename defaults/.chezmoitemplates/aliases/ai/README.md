@@ -17,7 +17,6 @@ The `d*` aliases call `dot ai <agent>`, an older spelling that `dot ai` still pa
 | `dai` | `dot ai` | Opens the `dot ai` cockpit. |
 | `daid` | `dot ai` | Same as `dai` (it used to open the dashboard). |
 | `daish` | `dot ai` | Same as `dai`. |
-| `dcl` | `dot ai claude` | Replaced by the `docker.aliases.sh` alias of the same name, which loads later in the lazy layer, when `docker` is on PATH. |
 | `dcla` | `dot ai claude --style architect` |  |
 | `dclh` | `dot ai claude --style hardener` |  |
 | `dclr` | `dot ai claude --style refactor` |  |
@@ -29,7 +28,6 @@ The `d*` aliases call `dot ai <agent>`, an older spelling that `dot ai` still pa
 | `dkma` | `dot ai kimi --style architect` |  |
 | `dkmh` | `dot ai kimi --style hardener` |  |
 | `dkmr` | `dot ai kimi --style refactor` |  |
-| `dki` | `dot ai kiro` | Replaced by the `docker.aliases.sh` alias of the same name, which loads later in the lazy layer, when `docker` is on PATH. |
 | `dkia` | `dot ai kiro --style architect` |  |
 | `dkih` | `dot ai kiro --style hardener` |  |
 | `dkir` | `dot ai kiro --style refactor` |  |
@@ -49,7 +47,6 @@ The `d*` aliases call `dot ai <agent>`, an older spelling that `dot ai` still pa
 | `kit` | `kiro-cli term` | Only when `kiro-cli` is on PATH. |
 | `agyi` | `agy info` | Only when `agy` is on PATH. |
 | `agys` | `agy chat` | Only when `agy` is on PATH. |
-| `agy` | `agy` | Only when `agy` is on PATH. |
 | `km` | `kimi` | Only when `kimi` is on PATH. |
 | `kmc` | `kimi` | Only when `kimi` is on PATH. |
 | `kmp` | `kimi -p` | Only when `kimi` is on PATH. |

@@ -26,7 +26,6 @@ These aliases are defined in `find.aliases.sh`. Loaded by the lazy alias layer `
 | `fdu` | `fd --exclude` | List all files with exclude. |
 | `fdv` | `fd --version` | List all files with version. |
 | `fdx` | `fd --exec` | Execute a command for each search result. |
-| `find` | `fd` | Use fd as a replacement for find. This makes `find` run `fd`, whose options differ from `find`'s. |
 
 [banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 

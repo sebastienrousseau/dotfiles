@@ -74,7 +74,7 @@ There is no `paths/` directory: PATH setup lives in `defaults/dot_config/shell/0
 
 - No consistent versioning scheme across categories
 - Potential namespace collisions between alias files, and between alias and function names
-  (today `backup`, `extract` and `goto` exist in both)
+  (today `backup`, `extract` and `goto` exist in both; the alias-file version wins in zsh and bash)
 
 ### Recommended Namespace Structure for Future Growth
 

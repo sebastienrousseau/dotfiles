@@ -24,7 +24,7 @@ There are two bookmark stores. The `bm*` aliases call the `bm` script in `~/.loc
 | `bookmark` | function |  |
 | `bookmark_update` | function |  |
 | `bookmark_remove` | function |  |
-| `goto` | function | In zsh, the function layer later replaces `goto` with the directory helper from `functions/nav/goto.sh`. |
+| `goto` | function | Jump to a bookmark. Wins over the directory helper in `functions/nav/goto.sh` in zsh and bash (fish uses that helper). |
 
 ### `cd-config.aliases.sh`
 
@@ -89,7 +89,7 @@ Sets the variables listed above; defines no aliases or functions.
 | `doc` | `cd_with_history "${DOCS_DIR}"` | Documents. Only when directory `${DOCS_DIR}` exists. |
 | `dotf` | `cd_with_history "${DOTF_DIR}"` | Dotfiles. Only when directory `${DOTF_DIR}` exists. |
 | `dwn` | `cd_with_history "${DOWN_DIR}"` | Downloads. Only when directory `${DOWN_DIR}` exists. |
-| `hom` | `cd_with_history "${HOME_DIR}"` | Home Directory. Only when directory `${DOWN_DIR}` exists. The test checks `${DOWN_DIR}`, not `${HOME_DIR}`. |
+| `hom` | `cd_with_history "${HOME_DIR}"` | Home Directory. Only when directory `${HOME_DIR}` exists. |
 | `mus` | `cd_with_history "${MUSIC_DIR}"` | Music. Only when directory `${MUSIC_DIR}` exists. |
 | `pic` | `cd_with_history "${PICS_DIR}"` | Pictures. Only when directory `${PICS_DIR}` exists. |
 | `vid` | `cd_with_history "${VIDS_DIR}"` | Videos. Only when directory `${VIDS_DIR}` exists. |
@@ -125,7 +125,7 @@ Sets the variables listed above; defines no aliases or functions.
 | `bookmark` | function |  |
 | `bookmark_update` | function |  |
 | `bookmark_remove` | function |  |
-| `goto` | function | In zsh, the function layer later replaces `goto` with the directory helper from `functions/nav/goto.sh`. |
+| `goto` | function | Jump to a bookmark. Wins over the directory helper in `functions/nav/goto.sh` in zsh and bash (fish uses that helper). |
 | `dirhistory` | function |  |
 | `proj` | function | Find and navigate to project root (git, npm, etc.) |
 | `lwd` | function | Restore last working directory. |
@@ -140,7 +140,7 @@ Sets the variables listed above; defines no aliases or functions.
 | `doc` | `cd_with_history "${DOCS_DIR}"` | Documents. Only when directory `${DOCS_DIR}` exists. |
 | `dotd` | `cd_with_history "${DOTF_DIR}"` | Dotfiles dir. Only when directory `${DOTF_DIR}` exists. |
 | `dwn` | `cd_with_history "${DOWN_DIR}"` | Downloads. Only when directory `${DOWN_DIR}` exists. |
-| `hom` | `cd_with_history "${HOME_DIR}"` | Home Directory. Only when directory `${DOWN_DIR}` exists. The test checks `${DOWN_DIR}`, not `${HOME_DIR}`. |
+| `hom` | `cd_with_history "${HOME_DIR}"` | Home Directory. Only when directory `${HOME_DIR}` exists. |
 | `mus` | `cd_with_history "${MUSIC_DIR}"` | Music. Only when directory `${MUSIC_DIR}` exists. |
 | `pic` | `cd_with_history "${PICS_DIR}"` | Pictures. Only when directory `${PICS_DIR}` exists. |
 | `vid` | `cd_with_history "${VIDS_DIR}"` | Videos. Only when directory `${VIDS_DIR}` exists. |

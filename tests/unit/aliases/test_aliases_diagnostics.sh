@@ -34,4 +34,25 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
 
+# diag_alias <name>: the alias definition a bash shell gets from the
+# diagnostics aliases, with chezmoi on PATH (the helpers need it).
+diag_alias() {
+  local sandbox
+  sandbox="$(mktemp -d)"
+  mkdir -p "$sandbox/bin"
+  printf '#!/bin/sh\nexit 0\n' >"$sandbox/bin/chezmoi"
+  chmod +x "$sandbox/bin/chezmoi"
+  env -i HOME="$sandbox" PATH="$sandbox/bin:$PATH" ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+    bash --norc --noprofile -c ". \"\$1\"; alias \"\$2\" 2>/dev/null || echo none" _ \
+    "$ALIASES_DIR/diagnostics.aliases.sh" "$1"
+  rm -rf "$sandbox"
+}
+
+test_start "diagnostics_helpers_defined"
+assert_equals "alias cdiff='dot diff'" "$(diag_alias cdiff)" "the chezmoi helpers load when chezmoi is on PATH"
+
+# `dot remove` is not a dot command (it prints "Unknown command: remove").
+test_start "diagnostics_no_crem"
+assert_equals "none" "$(diag_alias crem)" "crem is not defined: it called the unknown 'dot remove'"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

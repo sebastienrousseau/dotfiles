@@ -6,8 +6,8 @@ if command -v 'tmux' >/dev/null; then
   # Basic commands
   tm() {
     if ! tmux has-session 2>/dev/null; then
-      # Start tmux and immediately source the config
-      tmux new-session -d \; source-file ~/.dotfiles/lib/configurations/tmux/tmux
+      # Start a detached session (tmux reads its own config), then attach
+      tmux new-session -d
       tmux attach
     else
       tmux "$@"
@@ -27,7 +27,7 @@ if command -v 'tmux' >/dev/null; then
   alias tms='tmux new-session -s' # New named session
 
   # Configuration
-  alias tmr='tmux source ~/.dotfiles/lib/configurations/tmux/tmux' # Reload config
+  alias tmr='tmux source-file "${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf"' # Reload config
 
   # Windows and panes
   alias tmls='tmux list-windows' # List windows

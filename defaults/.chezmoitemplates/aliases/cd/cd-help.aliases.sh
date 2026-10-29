@@ -7,7 +7,7 @@ _CD_HELP_LOADED=1
 # Display help information
 cd_aliases_help() {
   echo "┌─────────────────────────────────────────────────────────────┐"
-  echo "│  ENHANCED DIRECTORY NAVIGATION v${DOTFILES_VERSION}                     │"
+  echo "│  ENHANCED DIRECTORY NAVIGATION${DOTFILES_VERSION:+ v${DOTFILES_VERSION}}                     │"
   echo "└─────────────────────────────────────────────────────────────┘"
   echo ""
   echo "PRIMARY NAVIGATION COMMANDS:"
@@ -60,7 +60,7 @@ cd_aliases_help() {
 
 # Version information
 cd_aliases_version() {
-  echo "Enhanced Directory Navigation v${DOTFILES_VERSION}"
+  echo "Enhanced Directory Navigation${DOTFILES_VERSION:+ v${DOTFILES_VERSION}}"
   echo "Last updated: ${DOTFILES_LAST_UPDATED}"
   echo "OS detected: ${DOTFILES_OS}"
 }

@@ -62,10 +62,7 @@ These aliases are defined in `archives.aliases.sh`. Loaded by the eager alias la
 
 ### Shell differences
 
-The function layer (`~/.config/shell/51-logic-functions-extra.sh`) defines loader stubs named `extract` and `backup` for the files in `.chezmoitemplates/functions/files/`. Bash sources that layer before the alias layers, so the functions above win. Zsh sources it after the alias layers, so the stubs replace them:
-
-- `backup` becomes the version in `functions/files/backup.sh`.
-- `extract`, and so `x`, currently fails in zsh: the stub loads `functions/files/extract.sh`, whose `declare -f extract` guard sees the stub and skips its own definition, and the stub then calls itself again.
+`.chezmoitemplates/functions/files/` also has an `extract.sh` and a `backup.sh`. The function layer (`~/.config/shell/51-logic-functions-extra.sh`) leaves both out because the functions above define the same names, so `extract`, `x` and `backup` are the archives versions in zsh and bash alike. Only the fish bridge uses the `functions/files/` versions.
 
 [banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 

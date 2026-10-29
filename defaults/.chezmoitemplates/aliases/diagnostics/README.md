@@ -22,7 +22,6 @@ These aliases are defined in `diagnostics.aliases.sh`. Loaded by the eager alias
 | `capply` | `dot apply` | Only when `chezmoi` is on PATH. |
 | `cupdate` | `dot config update` | Only when `chezmoi` is on PATH. |
 | `cdiff` | `dot diff` | Only when `chezmoi` is on PATH. |
-| `crem` | `dot remove` | Calls `dot remove`, which is not a `dot` command today (it prints `Unknown command: remove`). Only when `chezmoi` is on PATH. |
 | `cdrift` | `dot doctor drift` | Only when `chezmoi` is on PATH. |
 | `ca` | `chezmoi apply` | Only when `chezmoi` is on PATH. |
 | `ce` | `chezmoi edit` | Only when `chezmoi` is on PATH. |
