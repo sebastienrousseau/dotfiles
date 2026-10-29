@@ -81,22 +81,33 @@ _check_members() {
     }' "$_LIST"
 }
 
-_parse_args "$@"
-[[ -f "$BUNDLE" && "$BUNDLE" == *.tar.zst ]] || _refuse "$BUNDLE is not a .tar.zst bundle from 'dot config export'"
-command -v zstd >/dev/null 2>&1 || _refuse "zstd is required to read the bundle"
-_LIST="$(mktemp "${TMPDIR:-/tmp}/dot-import.XXXXXX")"
-tar --zstd -tf "$BUNDLE" -P >"$_LIST" 2>/dev/null || _refuse "$BUNDLE is not a readable zstd tar archive"
-roots="$(_check_members)" || {
-  [[ -n "$roots" ]] || _refuse "$BUNDLE is empty"
-  _refuse "$BUNDLE holds $roots, outside what 'dot config export' writes for this home ($HOME)"
+# _read_bundle: ROOTS, the export paths the bundle holds, or refuse.
+_read_bundle() {
+  [[ -f "$BUNDLE" && "$BUNDLE" == *.tar.zst ]] || _refuse "$BUNDLE is not a .tar.zst bundle from 'dot config export'"
+  command -v zstd >/dev/null 2>&1 || _refuse "zstd is required to read the bundle"
+  _LIST="$(mktemp "${TMPDIR:-/tmp}/dot-import.XXXXXX")"
+  tar --zstd -tf "$BUNDLE" -P >"$_LIST" 2>/dev/null || _refuse "$BUNDLE is not a readable zstd tar archive"
+  ROOTS="$(_check_members)" || {
+    [[ -n "$ROOTS" ]] || _refuse "$BUNDLE is empty"
+    _refuse "$BUNDLE holds $ROOTS, outside what 'dot config export' writes for this home ($HOME)"
+  }
 }
 
-ui_header "Restore Offline Bundle"
-while IFS= read -r root; do ui_bullet "Overwrites: $root"; done <<<"$roots"
-if ! dot_consent "Overwrite these with the contents of $BUNDLE?"; then
-  ui_warn "Not restored" "nothing changed; run again with --yes to restore without asking"
-  exit 1
-fi
-tar --zstd -xf "$BUNDLE" -C / || _refuse "tar failed while extracting $BUNDLE"
-ui_ok "Restored" "$BUNDLE"
-ui_info "Next" "dot config apply"
+# _restore: list what is overwritten, ask, then extract.
+_restore() {
+  local root
+  ui_header "Restore Offline Bundle"
+  while IFS= read -r root; do ui_bullet "Overwrites: $root"; done <<<"$ROOTS"
+  if ! dot_consent "Overwrite these with the contents of $BUNDLE?"; then
+    ui_warn "Not restored" "nothing changed; run again with --yes to restore without asking"
+    exit 1
+  fi
+  tar --zstd -xf "$BUNDLE" -C / || _refuse "tar failed while extracting $BUNDLE"
+  ui_ok "Restored" "$BUNDLE"
+  ui_info "Next" "dot config apply"
+}
+
+ROOTS=""
+_parse_args "$@"
+_read_bundle
+_restore
