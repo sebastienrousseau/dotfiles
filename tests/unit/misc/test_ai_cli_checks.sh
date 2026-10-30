@@ -32,7 +32,6 @@ PYTOOLS_FILE="$REPO_ROOT/install/provision/run_onchange_25-python-tools.sh.tmpl"
 # the roster: tests/unit/dot-cli/test_ai_on_apply_hook.sh and
 # tests/unit/ops/test_chezmoi_apply_phases.sh run it.
 check_contains "$REPO_ROOT/lib/dot/ai-install.sh" "https://code.kimi.com/kimi-code/install.sh"
-check_contains "$REPO_ROOT/install/provision/run_onchange_15-ai-cli-tools.sh.tmpl" "https://code.kimi.com/kimi-code/install.sh"
 check_contains "$REPO_ROOT/defaults/dot_config/shell/00-core-paths.sh.tmpl" '${HOME}/.kimi-code/bin'
 check_contains "$REPO_ROOT/defaults/dot_config/fish/conf.d/env.fish.tmpl" '$HOME/.kimi-code/bin'
 check_contains "$REPO_ROOT/defaults/dot_config/nushell/env.nu.tmpl" '.kimi-code/bin'

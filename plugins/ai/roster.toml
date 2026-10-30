@@ -24,6 +24,9 @@
 #   native     the installer function in lib/dot/ai-install.sh, when not mise
 #   chat       false for suite tools that are not agents (no start, no prompt)
 #   fleet      false to keep an installable binary out of the cockpit list
+#   login      the command `dot ai login` runs to authenticate it, as words;
+#              absent when signing in happens on first use (it then runs
+#              `<bin> --version`)
 schema = "ai/roster.v1"
 
 [[tool]]
@@ -127,6 +130,7 @@ aliases = ["kiro-cli"]
 group = "cloud"
 role = "cloud"
 package = "kiro-cli"
+login = "kiro-cli login"
 
 [[tool]]
 name = "sgpt"

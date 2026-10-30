@@ -69,7 +69,9 @@ def load(root: pathlib.Path) -> list[dict]:
         if tool["group"] not in GROUPS:
             raise ValueError(f"{ROSTER}: {tool['name']} has unknown group {tool['group']}")
         tool = {"aliases": [], "processes": [tool["bin"]], "package": "", "native": "",
-                "chat": True, "fleet": True, **tool}
+                "login": "", "chat": True, "fleet": True, **tool}
+        if not isinstance(tool["login"], str):
+            raise ValueError(f"{ROSTER}: {tool['name']} login must be a string of words")
         for key in [tool["name"], *tool["aliases"]]:
             if key in seen:
                 raise ValueError(f"{ROSTER}: {key} names two tools")
@@ -107,7 +109,10 @@ def _sh_word(word: str) -> str:
 
 
 def _sh_table(pairs: list[tuple[str, str]]) -> str:
-    return "".join(f"{key}={value}\n" for key, value in pairs)
+    """One `key=value` line per pair, as a single ANSI-C quoted word ($'...',
+    which bash 3.2 reads), so a table is one line of the generated file."""
+    text = "".join(f"{key}={value}\n" for key, value in pairs)
+    return "$'" + text.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n") + "'"
 
 
 def render_shell(tools: list[dict]) -> str:
@@ -131,11 +136,13 @@ def render_shell(tools: list[dict]) -> str:
         "# `dot ai list` rows: category|role|title|binary|summary.",
         f"AI_ROSTER_STATUS={_sh_list(status)}",
         "# name or alias=binary",
-        f"AI_ROSTER_BIN_OF={_sh_word(_sh_table(bin_of))}",
+        f"AI_ROSTER_BIN_OF={_sh_table(bin_of)}",
         "# binary=mise package (a key of [ai_tools])",
-        f"AI_ROSTER_PACKAGE_OF={_sh_word(_sh_table([(t['bin'], t['package']) for t in tools if t['package']]))}",
+        f"AI_ROSTER_PACKAGE_OF={_sh_table([(t['bin'], t['package']) for t in tools if t['package']])}",
         "# binary=native installer function",
-        f"AI_ROSTER_NATIVE_OF={_sh_word(_sh_table([(t['bin'], t['native']) for t in tools if t['native']]))}",
+        f"AI_ROSTER_NATIVE_OF={_sh_table([(t['bin'], t['native']) for t in tools if t['native']])}",
+        "# binary=the command `dot ai login` runs (absent: <binary> --version)",
+        f"AI_ROSTER_LOGIN_OF={_sh_table([(t['bin'], t['login']) for t in tools if t['login']])}",
     ]
     return "\n".join(lines) + "\n"
 
