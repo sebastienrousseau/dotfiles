@@ -9,9 +9,13 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 ADAPTER="$REPO_ROOT/scripts/theme/sync-ai-cli-themes.py"
-THEMES="$REPO_ROOT/defaults/.theme-manifest/themes.toml"
 SANDBOX="$(mktemp -d)"
 trap 'rm -rf "$SANDBOX"' EXIT
+# The adapter reads the palette.v1 contract, never the theme manifest.
+LIGHT="$SANDBOX/light.env"
+DARK="$SANDBOX/dark.env"
+printf 'DOT_PALETTE=palette.v1\nTHEME=maui-light\nMODE=light\n' >"$LIGHT"
+printf 'DOT_PALETTE=palette.v1\nTHEME=maui-dark\nMODE=dark\n' >"$DARK"
 
 mkdir -p \
   "$SANDBOX/.codex/themes" \
@@ -28,7 +32,7 @@ test_start "ai_theme_adapter_exists"
 assert_file_exists "$ADAPTER" "AI CLI theme adapter must exist"
 
 test_start "ai_theme_adapter_updates_light_mode"
-output="$(python3 "$ADAPTER" --theme maui-light --themes-file "$THEMES" --home "$SANDBOX")"
+output="$(python3 "$ADAPTER" --palette "$LIGHT" --home "$SANDBOX")"
 assert_equals "codex,claude,gemini,agy,opencode" "$output" \
   "every installed provider adapter must run"
 
@@ -51,7 +55,7 @@ assert_file_contains "$SANDBOX/.config/opencode/cli.json" '"mode": "light"' \
 
 printf '%s\n' '{not-json' >"$SANDBOX/.gemini/settings.json"
 invalid_before="$(shasum -a 256 "$SANDBOX/.gemini/settings.json" | awk '{print $1}')"
-result_json="$(python3 "$ADAPTER" --theme maui-dark --themes-file "$THEMES" \
+result_json="$(python3 "$ADAPTER" --palette "$DARK" \
   --home "$SANDBOX" --json)"
 
 test_start "ai_theme_adapter_emits_typed_results"
@@ -65,7 +69,7 @@ assert_equals "$invalid_before" \
 
 printf '%s\n' 'not = [valid' >"$SANDBOX/.codex/config.toml"
 codex_before="$(shasum -a 256 "$SANDBOX/.codex/config.toml" | awk '{print $1}')"
-result_json="$(python3 "$ADAPTER" --theme maui-dark --themes-file "$THEMES" \
+result_json="$(python3 "$ADAPTER" --palette "$DARK" \
   --home "$SANDBOX" --json)"
 
 test_start "ai_theme_adapter_preserves_malformed_toml"
@@ -79,7 +83,7 @@ cat >"$policy" <<'TOML'
 ai_theme_sync = false
 TOML
 claude_before="$(shasum -a 256 "$SANDBOX/.claude/settings.json" | awk '{print $1}')"
-result_json="$(python3 "$ADAPTER" --theme maui-dark --themes-file "$THEMES" \
+result_json="$(python3 "$ADAPTER" --palette "$DARK" \
   --home "$SANDBOX" --defaults-config "$policy" --json)"
 
 test_start "ai_theme_adapter_honours_global_opt_out"
@@ -97,7 +101,7 @@ ai_theme_sync = true
 [features.ai_theme_providers]
 gemini = false
 TOML
-result_json="$(python3 "$ADAPTER" --theme maui-dark --themes-file "$THEMES" \
+result_json="$(python3 "$ADAPTER" --palette "$DARK" \
   --home "$SANDBOX" --defaults-config "$policy" --json)"
 
 test_start "ai_theme_adapter_honours_provider_opt_out"
@@ -130,5 +134,26 @@ assert_exit_code 0 "python3 '$SANDBOX/test-cas.py' '$ADAPTER' '$cas_file'"
 
 test_start "ai_theme_result_schema_is_committed"
 assert_file_exists "$REPO_ROOT/schemas/ai-theme-result.schema.json"
+
+test_start "ai_theme_adapter_refuses_a_file_that_is_not_a_palette"
+printf 'theme = "maui-dark"\n' >"$SANDBOX/not-a-palette.toml"
+rc=0
+err="$(python3 "$ADAPTER" --palette "$SANDBOX/not-a-palette.toml" --home "$SANDBOX" 2>&1)" || rc=$?
+assert_equals "2" "$rc" "a file without DOT_PALETTE=palette.v1 is a usage error"
+assert_contains "is not a palette.v1 file" "$err" "and says why"
+
+test_start "ai_theme_adapter_refuses_a_palette_without_a_theme"
+printf 'DOT_PALETTE=palette.v1\nMODE=dark\n' >"$SANDBOX/nameless.env"
+rc=0
+err="$(python3 "$ADAPTER" --palette "$SANDBOX/nameless.env" --home "$SANDBOX" 2>&1)" || rc=$?
+assert_equals "2" "$rc" "a palette that names no theme is refused"
+assert_contains "THEME must name a theme" "$err" "and says why"
+
+test_start "ai_theme_adapter_refuses_an_unknown_mode"
+printf 'DOT_PALETTE=palette.v1\nTHEME=maui-dark\nMODE=sepia\n' >"$SANDBOX/sepia.env"
+rc=0
+err="$(python3 "$ADAPTER" --palette "$SANDBOX/sepia.env" --home "$SANDBOX" 2>&1)" || rc=$?
+assert_equals "2" "$rc" "a mode other than dark or light is refused"
+assert_contains "MODE must be dark or light" "$err" "and named"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

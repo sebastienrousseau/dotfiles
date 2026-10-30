@@ -86,37 +86,23 @@ chmod +x "$STUB_BIN"/gum "$STUB_BIN"/dot-ui "$STUB_BIN"/fzf "$STUB_BIN"/uname \
   "$STUB_BIN"/gsettings "$STUB_BIN"/defaults
 export STUB_CALLS_DIR="$WORK"
 
-# Theme fixture: a chezmoi source tree with a `.chezmoiroot` indirection so
-# the descend-into-subdir branch of _ui_theme_files is exercised.
-THEME_SRC="$WORK/src"
-mkdir -p "$THEME_SRC/defaults/.chezmoidata" "$THEME_SRC/defaults/.theme-manifest"
-echo "defaults" >"$THEME_SRC/.chezmoiroot"
-printf 'theme = "bloom"\n' >"$THEME_SRC/defaults/.chezmoidata.toml"
-cat >"$THEME_SRC/defaults/.theme-manifest/themes.toml" <<'TOML'
-[themes.bloom-dark]
-family = "bloom"
-mode = "dark"
-
-[themes.bloom-dark.term]
-fg = "#f0f0f0"
-bg = "#101010"
-
-[themes.bloom-dark.ui]
-accent = "#455c67"
-error = "#997d7a"
-warning = "#8a836f"
-success = "#479174"
-info = "#5f86b7"
-panel = "#242435"
-border = "#302f38"
-
-[themes.bloom-light]
-family = "bloom"
-mode = "light"
-TOML
+# Palette fixture: the palette.v1 contract ui.sh takes dot-ui's colours from.
+export XDG_CONFIG_HOME="$WORK/xdg"
+mkdir -p "$XDG_CONFIG_HOME/dotfiles"
+cat >"$XDG_CONFIG_HOME/dotfiles/palette.env" <<'ENV'
+# palette.v1 fixture
+DOT_PALETTE=palette.v1
+THEME=bloom-dark
+MODE=dark
+ACCENT=#455c67
+ERROR=#997d7a
+WARNING=not-a-colour
+FG=#f0f0f0
+BG=#101010
+EVIL=#123456
+ENV
 cat >"$STUB_BIN/chezmoi" <<STUB
 #!/usr/bin/env bash
-[[ "\${1:-}" == source-path ]] && echo "\${FAKE_CHEZMOI_SRC-$THEME_SRC}"
 exit 0
 STUB
 chmod +x "$STUB_BIN/chezmoi"
@@ -208,66 +194,24 @@ _has_pty() { command -v script >/dev/null 2>&1; }
 # Section A — non-TTY behaviour with stubs (runs in-process, no pty needed)
 # ===========================================================================
 
-test_start "theme_files_follow_chezmoiroot_indirection"
-out="$(in_ui '_ui_theme_files && printf "%s\n" "$_UI_THEMES_FILE"')"
-assert_equals "$THEME_SRC/defaults/.theme-manifest/themes.toml" "$out" "themes.toml resolved under the .chezmoiroot subdir"
-
-test_start "theme_files_fall_back_to_home_dotfiles_when_chezmoi_silent"
-out="$(FAKE_CHEZMOI_SRC="" in_ui '_ui_theme_files; echo "rc=$? file=$_UI_THEMES_FILE"')"
-assert_equals "rc=0 file=$HOME/.dotfiles/defaults/.theme-manifest/themes.toml" "$out" "falls back to ~/.dotfiles (+ .chezmoiroot) when chezmoi prints nothing"
-
-test_start "theme_files_fail_without_any_source"
-out="$(FAKE_CHEZMOI_SRC="" HOME="$WORK/nohome" in_ui '_ui_theme_files; echo "rc=$?"')"
-assert_equals "rc=1" "$out" "no chezmoi source-path, no ~/.dotfiles, no ~/.local/share/chezmoi → rc=1"
-
-test_start "theme_files_fail_when_themes_toml_missing"
-mkdir -p "$WORK/empty-src"
-out="$(FAKE_CHEZMOI_SRC="$WORK/empty-src" in_ui '_ui_theme_files; echo "rc=$?"')"
-assert_equals "rc=1" "$out" "source dir without .theme-manifest/themes.toml → rc=1"
-
-test_start "active_mode_darwin_dark"
-out="$(FAKE_UNAME=Darwin FAKE_APPLE_STYLE=Dark in_ui '_ui_active_mode')"
-assert_equals "dark" "$out" "AppleInterfaceStyle=Dark → dark"
-
-test_start "active_mode_darwin_light"
-out="$(FAKE_UNAME=Darwin FAKE_APPLE_STYLE=Light in_ui '_ui_active_mode')"
-assert_equals "light" "$out" "no AppleInterfaceStyle → light"
-
-test_start "active_mode_linux_prefers_dark"
-out="$(FAKE_UNAME=Linux FAKE_COLOR_SCHEME=prefer-dark in_ui '_ui_active_mode')"
-assert_equals "dark" "$out" "gsettings prefer-dark → dark"
-
-test_start "active_mode_linux_default_light"
-out="$(FAKE_UNAME=Linux FAKE_COLOR_SCHEME=default in_ui '_ui_active_mode')"
-assert_equals "light" "$out" "gsettings default → light"
-
-test_start "active_theme_section_pairs_family_with_mode"
-out="$(FAKE_UNAME=Linux FAKE_COLOR_SCHEME=prefer-dark in_ui '_ui_active_theme_section')"
-assert_equals "bloom-dark" "$out" "family bloom + dark mode → bloom-dark"
-
-test_start "active_theme_section_fails_without_family"
-printf '# no theme key\n' >"$WORK/empty-src/.chezmoidata.toml"
-mkdir -p "$WORK/empty-src/.chezmoidata" "$WORK/empty-src/.theme-manifest"
-printf '[themes.x-dark]\n' >"$WORK/empty-src/.theme-manifest/themes.toml"
-out="$(FAKE_CHEZMOI_SRC="$WORK/empty-src" in_ui '_ui_active_theme_section; echo "rc=$?"')"
-assert_equals "rc=1" "$out" "a data file with no theme key → rc=1"
-
-test_start "active_theme_section_fails_when_family_absent_from_themes"
-printf 'theme = "ghost"\n' >"$WORK/empty-src/.chezmoidata.toml"
-out="$(FAKE_CHEZMOI_SRC="$WORK/empty-src" in_ui '_ui_active_theme_section; echo "rc=$?"')"
-assert_equals "rc=1" "$out" "family with no [themes.ghost*] section → rc=1"
-
-test_start "theme_ui_value_reads_hex"
-out="$(in_ui 'theme_ui_value bloom-dark ui accent; theme_ui_value bloom-dark term bg')"
-assert_equals $'#455c67\n#101010' "$out" "reads [themes.bloom-dark.ui] accent + [.term] bg"
-
 test_start "export_theme_colors_sets_dot_ui_env"
-out="$(FAKE_UNAME=Linux FAKE_COLOR_SCHEME=prefer-dark in_ui '_ui_export_theme_colors; _ui_export_theme_colors; echo "$DOT_UI_ACCENT $DOT_UI_ERROR $DOT_UI_FG $DOT_UI_BG $_UI_COLORS_EXPORTED"')"
-assert_equals "#455c67 #997d7a #f0f0f0 #101010 1" "$out" "DOT_UI_* exported from the active section (second call is a no-op)"
+out="$(in_ui '_ui_export_theme_colors; _ui_export_theme_colors; echo "$DOT_UI_ACCENT $DOT_UI_ERROR $DOT_UI_FG $DOT_UI_BG $_UI_COLORS_EXPORTED"')"
+assert_equals "#455c67 #997d7a #f0f0f0 #101010 1" "$out" "DOT_UI_* exported from palette.env (second call is a no-op)"
 
-test_start "export_theme_colors_noop_without_section"
-out="$(FAKE_CHEZMOI_SRC="$WORK/empty-src" in_ui '_ui_export_theme_colors; echo "rc=$? accent=${DOT_UI_ACCENT:-unset}"')"
-assert_equals "rc=0 accent=unset" "$out" "no active section → returns 0 without exporting"
+test_start "export_theme_colors_takes_only_known_keys_and_colours"
+out="$(in_ui '_ui_export_theme_colors; echo "warning=${DOT_UI_WARNING:-unset} evil=${DOT_UI_EVIL:-unset}"')"
+assert_equals "warning=unset evil=unset" "$out" "a value that is not #rrggbb, or a key not in the contract, is not exported"
+
+test_start "export_theme_colors_noop_without_palette"
+out="$(XDG_CONFIG_HOME="$WORK/no-xdg" in_ui '_ui_export_theme_colors; echo "rc=$? accent=${DOT_UI_ACCENT:-unset}"')"
+assert_equals "rc=0 accent=unset" "$out" "no palette.env: returns 0 without exporting"
+
+test_start "palette_file_follows_xdg_config_home"
+out="$(
+  XDG_CONFIG_HOME=/x in_ui '_ui_palette_file'
+  env -u XDG_CONFIG_HOME HOME=/h bash -c "source '$SCRIPT_FILE'; _ui_palette_file"
+)"
+assert_equals $'/x/dotfiles/palette.env\n/h/.config/dotfiles/palette.env' "$out" "XDG_CONFIG_HOME, else ~/.config"
 
 test_start "ui_pick_returns_dot_ui_selection"
 out="$(printf 'alpha\nbeta\n' | DOT_UI_PICK_RC=0 in_ui 'ui_pick --header H --prompt P --ignored')"
