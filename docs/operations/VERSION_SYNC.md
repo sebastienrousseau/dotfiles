@@ -182,6 +182,15 @@ reach):
 
 `package.json` is not scanned; the script sets its `version` field directly.
 
+The discovery cards (`.well-known/agent-card.json`,
+`.well-known/mcp/server-card.json`, `defaults/dot_config/dotfiles/agent-card.json`)
+get their top-level `version`, and each plugin manifest
+(`plugins/*/dot-plugin.toml`) its `version =` line, never an alias's
+`until`. The Go binaries (`dot-ui`, `dot-mcp`) keep no version in their
+source: the build injects `dotfiles_version` with
+`-ldflags "-X main.version=..."`, so `--version` and the MCP handshake report
+the framework version without a sync.
+
 ### Exclusions
 
 The authoritative list is the `EXCLUDE_FILES` array at the top of

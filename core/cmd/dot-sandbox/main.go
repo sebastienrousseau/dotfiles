@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"dotfiles.local/core/sandbox"
+	"github.com/sebastienrousseau/dot-core/sandbox"
 )
 
 func run(args []string) error {

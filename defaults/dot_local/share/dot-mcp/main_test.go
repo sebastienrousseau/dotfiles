@@ -4,6 +4,8 @@ package main
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
@@ -83,9 +85,20 @@ func TestMainExitsWithTheDispatchCode(t *testing.T) {
 }
 
 // TestVersionIsSemver pins the shape of the release string that reaches
-// clients through initialize.
+// clients through initialize: the build injects dotfiles_version from
+// defaults/.chezmoidata.toml, which must be a bare semver; a binary built
+// without it says "dev".
 func TestVersionIsSemver(t *testing.T) {
-	if !regexp.MustCompile(`^\d+\.\d+\.\d+$`).MatchString(version) {
-		t.Fatalf("version = %q, want a bare semver", version)
+	semver := regexp.MustCompile(`^\d+\.\d+\.\d+$`)
+	if version != "dev" && !semver.MatchString(version) {
+		t.Fatalf("version = %q, want \"dev\" or a bare semver", version)
+	}
+	data, err := os.ReadFile(filepath.Join(repoRootFromTest(t), "defaults", ".chezmoidata.toml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := regexp.MustCompile(`(?m)^dotfiles_version = "([^"]+)"`).FindSubmatch(data)
+	if m == nil || !semver.Match(m[1]) {
+		t.Fatalf("dotfiles_version, which the build injects, is not a bare semver: %q", m)
 	}
 }

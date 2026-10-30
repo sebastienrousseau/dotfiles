@@ -22,6 +22,8 @@ set -euo pipefail
 
 SRC="$HOME/.local/share/dot-ui"
 OUT="$HOME/.local/bin/dot-ui"
+# The framework version, injected as main.version (`--version`).
+VERSION={{ .dotfiles_version | quote }}
 
 # Explicit opt-out.
 if [[ "${DOTFILES_NO_DOT_UI:-0}" == "1" ]]; then

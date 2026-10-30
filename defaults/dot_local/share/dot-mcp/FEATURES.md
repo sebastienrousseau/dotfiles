@@ -129,7 +129,7 @@ list of backticked function names.
 | card | Declared resources and served resources are the same set | `server-card.json` | `TestServerCardMatchesResources` |
 | card | Every declared capability is implemented; `prompts` stays false | `server-card.json` | `TestServerCardCapabilitiesAreImplemented` |
 | card | `transport.stdio` is the command that starts this server | `server-card.json` | `TestServerCardTransportLaunchesTheServer` |
-| card | Card version and `serverInfo.version` never drift | release sync | `TestVersionMatchesServerCard` |
+| card | Card version matches the framework version the build injects as `serverInfo.version` | release sync | `TestServerCardMatchesFrameworkVersion` `TestEndToEndVersionIsInjected` |
 | card | The card names the module that implements it | `server-card.json` | `TestServerCardPointsAtThisModule` |
 | card | The A2A card's `mcp` entrypoint is the same command | `agent-card.json` | `TestAgentCardEntrypointMatchesTheTransport` |
 

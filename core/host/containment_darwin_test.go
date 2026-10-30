@@ -13,8 +13,8 @@ import (
 	"strings"
 	"testing"
 
-	"dotfiles.local/core/protocol"
-	"dotfiles.local/core/transaction"
+	"github.com/sebastienrousseau/dot-core/protocol"
+	"github.com/sebastienrousseau/dot-core/transaction"
 )
 
 func TestProcessAssuranceFailsClosedOnDarwin(t *testing.T) {

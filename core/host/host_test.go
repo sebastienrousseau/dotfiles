@@ -7,7 +7,7 @@ package host
 
 import (
 	"context"
-	"dotfiles.local/core/transaction"
+	"github.com/sebastienrousseau/dot-core/transaction"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"dotfiles.local/core/protocol"
+	"github.com/sebastienrousseau/dot-core/protocol"
 )
 
 func TestIdentityNegotiation(t *testing.T) {

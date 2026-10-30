@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"dotfiles.local/core/protocol"
+	"github.com/sebastienrousseau/dot-core/protocol"
 )
 
 func executableFixture(t *testing.T, path, output string) {

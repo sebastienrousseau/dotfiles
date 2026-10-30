@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"regexp"
 	"testing"
 )
 
@@ -185,12 +186,21 @@ func TestServerCardProtocolVersionsAreSupported(t *testing.T) {
 	}
 }
 
-// TestVersionMatchesServerCard keeps serverInfo.version and the published card
-// in step; version-sync.sh rewrites both, and this fails if it misses one.
-func TestVersionMatchesServerCard(t *testing.T) {
+// TestServerCardMatchesFrameworkVersion keeps the published card in step
+// with serverInfo.version. The build injects the framework version
+// (dotfiles_version in defaults/.chezmoidata.toml), so the card must carry it.
+func TestServerCardMatchesFrameworkVersion(t *testing.T) {
 	card := loadServerCard(t)
-	if card.Version != version {
-		t.Fatalf("card version = %q, binary version = %q", card.Version, version)
+	data, err := os.ReadFile(filepath.Join(repoRootFromTest(t), "defaults", ".chezmoidata.toml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := regexp.MustCompile(`(?m)^dotfiles_version = "([^"]+)"`).FindSubmatch(data)
+	if m == nil {
+		t.Fatal("defaults/.chezmoidata.toml has no dotfiles_version")
+	}
+	if card.Version != string(m[1]) {
+		t.Fatalf("card version = %q, framework version = %q", card.Version, m[1])
 	}
 	if card.Name != serverName {
 		t.Fatalf("card name = %q, server name = %q", card.Name, serverName)

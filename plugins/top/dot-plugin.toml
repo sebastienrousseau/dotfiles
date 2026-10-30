@@ -6,7 +6,7 @@
 schema = "cli/manifest.v1"
 name = "top"
 domain = "top"
-version = "0.2.536"
+version = "0.2.539"
 summary = "what the machine and its agents are doing"
 default = "tui"
 

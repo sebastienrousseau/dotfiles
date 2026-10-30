@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"dotfiles.local/core/protocol"
+	"github.com/sebastienrousseau/dot-core/protocol"
 )
 
 // MaxHistory bounds retained generations. This prototype never deletes evidence.

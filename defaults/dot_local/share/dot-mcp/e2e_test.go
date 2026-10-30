@@ -22,6 +22,10 @@ import (
 	"time"
 )
 
+// e2eVersion is the version the end-to-end build injects, as the real build
+// injects the framework version.
+const e2eVersion = "0.0.0-e2e"
+
 // buildBinary compiles the server once per test binary and returns its path.
 var buildBinary = sync.OnceValues(func() (string, error) {
 	if runtime.GOOS == "windows" {
@@ -32,7 +36,7 @@ var buildBinary = sync.OnceValues(func() (string, error) {
 		return "", err
 	}
 	bin := filepath.Join(dir, "dot-mcp")
-	cmd := exec.Command("go", "build", "-o", bin, ".")
+	cmd := exec.Command("go", "build", "-ldflags", "-X main.version="+e2eVersion, "-o", bin, ".")
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return "", fmt.Errorf("go build: %v\n%s", err, out)
 	}
@@ -128,6 +132,22 @@ func (s *session) receive(id float64) map[string]any {
 // TestEndToEndProtocolExchange is the acceptance test for the whole thing: a
 // real process, real pipes, a real handshake, a real tools/list and a real
 // tools/call, asserted on the wire.
+// TestEndToEndVersionIsInjected: `dot-mcp --version` prints the version the
+// build set with -ldflags, not a string kept in the source.
+func TestEndToEndVersionIsInjected(t *testing.T) {
+	bin, err := buildBinary()
+	if err != nil {
+		t.Skipf("cannot build the server here: %v", err)
+	}
+	out, err := exec.Command(bin, "--version").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.TrimSpace(string(out)); got != "dot-mcp "+e2eVersion {
+		t.Fatalf("--version = %q, want %q", got, "dot-mcp "+e2eVersion)
+	}
+}
+
 func TestEndToEndProtocolExchange(t *testing.T) {
 	dot := fakeDotScript(t)
 	s := startSession(t, "DOT_MCP_DOT_BIN="+dot)
@@ -142,7 +162,8 @@ func TestEndToEndProtocolExchange(t *testing.T) {
 		t.Fatalf("protocolVersion = %v", res["protocolVersion"])
 	}
 	info := res["serverInfo"].(map[string]any)
-	if info["name"] != serverName || info["version"] != version {
+	// The handshake reports the version the build injected.
+	if info["name"] != serverName || info["version"] != e2eVersion {
 		t.Fatalf("serverInfo = %v", info)
 	}
 	caps := res["capabilities"].(map[string]any)

@@ -1,4 +1,4 @@
-module dotfiles.local/core
+module github.com/sebastienrousseau/dot-core
 
 go 1.26.0
 

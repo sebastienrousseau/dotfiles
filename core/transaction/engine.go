@@ -15,7 +15,7 @@ import (
 	"runtime"
 	"strings"
 
-	"dotfiles.local/core/protocol"
+	"github.com/sebastienrousseau/dot-core/protocol"
 )
 
 var namePattern = regexp.MustCompile(`^[a-z][a-z0-9-]{0,30}\.txt$`)

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"dotfiles.local/core/protocol"
+	"github.com/sebastienrousseau/dot-core/protocol"
 )
 
 func TestNegotiation(t *testing.T) {

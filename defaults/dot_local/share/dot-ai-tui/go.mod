@@ -1,4 +1,4 @@
-module dotfiles.local/dot-ai-tui
+module github.com/sebastienrousseau/dot-ai-tui
 
 go 1.26.0
 

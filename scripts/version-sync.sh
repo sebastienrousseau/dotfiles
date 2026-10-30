@@ -537,12 +537,6 @@ _vs_sync_scripts() {
     "dot_local/bin/executable_tour"
     "install.sh"
     "lib/dot/bento.sh"
-    # The MCP server reports this string as serverInfo.version in the
-    # `initialize` handshake, and it must equal the version in
-    # .well-known/mcp/server-card.json — a client compares them.
-    # TestVersionMatchesServerCard fails the build if this drifts.
-    "defaults/dot_local/share/dot-mcp/main.go"
-    "defaults/dot_local/share/dot-mcp/example_test.go"
     "llms.txt"
     "CITATION.cff"
   )
@@ -572,19 +566,23 @@ _vs_sync_scripts() {
 # network, so a stale version here misroutes tooling rather than
 # merely reading wrong. Gated by scripts/verify-release-versions.
 _vs_sync_cards() {
-  local target_version="$1" dry_run="$2" card_file card_tmp
+  local target_version="$1" dry_run="$2" card_file card_tmp expr
   local card_files=(.well-known/mcp/server-card.json .well-known/agent-card.json
     defaults/dot_config/dotfiles/agent-card.json)
+  # The plugin manifests are versioned in lockstep with the framework.
+  for card_file in "$PROJECT_ROOT"/plugins/*/dot-plugin.toml; do card_files+=("${card_file#"$PROJECT_ROOT"/}"); done
   for card_file in "${card_files[@]}"; do
     [[ -f "$PROJECT_ROOT/$card_file" ]] || continue
     # Deliberately sed, not jq: jq re-serialises the whole document and
     # would reflow the hand-formatted arrays in these cards, producing a
     # large diff for a one-token change. Only the top-level "version"
-    # key is rewritten (it is the first such key in each file).
+    # key is rewritten (it is the first such key in each file); in a
+    # manifest, only `version =`, never an alias's `until = "x.y.z"`.
+    expr="1,6s|\"version\": \"$SED_VERSION_PATTERN\"|\"version\": \"$target_version\"|"
+    [[ "$card_file" != *.toml ]] || expr="s|^version = \"$SED_VERSION_PATTERN\"|version = \"$target_version\"|"
     card_tmp=$(umask 077 && mktemp)
     cp "$PROJECT_ROOT/$card_file" "$card_tmp"
-    sed_in_place "$card_tmp" \
-      "1,6s|\"version\": \"$SED_VERSION_PATTERN\"|\"version\": \"$target_version\"|"
+    sed_in_place "$card_tmp" "$expr"
     _vs_commit "$card_file" "$card_tmp" "$dry_run"
     rm -f "$card_tmp"
   done

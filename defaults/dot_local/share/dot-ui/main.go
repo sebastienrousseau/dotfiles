@@ -24,9 +24,11 @@ import (
 	"os"
 )
 
-// version is the dot-ui release string printed by `dot-ui --version`; it
-// tracks the framework version in defaults/.chezmoidata.toml.
-const version = "0.2.512"
+// version is the dot-ui release string printed by `dot-ui --version`. The
+// build sets it to the framework version in defaults/.chezmoidata.toml with
+// -ldflags "-X main.version=<version>" (.chezmoitemplates/go-build-command).
+// Unset, it is "dev".
+var version = "dev"
 
 // Process-boundary seams. Each wraps exactly one call that cannot be
 // exercised in-process by `go test`: os.Exit terminates the test binary, and
