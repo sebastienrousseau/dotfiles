@@ -103,17 +103,24 @@ assert_equals "1|no" "$rc|$([[ -d "$WORK/home/.tmux/plugins/tpm" ]] && echo yes 
   "a checkout that is not the pinned commit is removed and the run fails"
 
 # ── AI CLIs ─────────────────────────────────────────────────────────────────
-# Native installers are skipped (their tools are "present"); mise and npm
-# record what they are asked for.
+# The script hands the AI tools to `dot ai install`, which installs every
+# roster agent with a mise package through mise at its [ai_tools] pin. Native
+# installers are skipped (their tools are "present", or there is no curl);
+# mise and npm record what they are asked for.
 for t in claude kimi goose agy node npm corepack; do stub "$t"; done
 stub mise
 render "$PROV/run_onchange_15-ai-cli-tools.sh.tmpl" "$WORK/ai.sh"
 rc="$(run_rendered "$WORK/ai.sh")"
 
+roster_mise="$(bash -c 'source "$1/lib/dot/ai-roster.sh"; n=0
+  for b in "${AI_ROSTER_BINS[@]}"; do ai_roster_package "$b" >/dev/null && n=$((n + 1)); done
+  echo "$n"' _ "$REPO_ROOT")"
+
 test_start "ai_clis_installed_at_pinned_versions"
-assert_equals "0|10|0" \
+assert_equals "0|$roster_mise|0" \
   "$rc|$(grep -c '^mise use -g ' "$CALLS")|$(grep '^mise use -g ' "$CALLS" | grep -cvE '@[0-9]+\.[0-9]+\.[0-9]+$')" \
-  "ten AI CLIs through mise, each at an exact version"
+  "every roster agent with a mise package, each at an exact version"
+assert_contains "mise use -g npm:@charmland/crush@" "$(cat "$CALLS")" "crush, which the old hand-kept list missed, is one"
 
 test_start "ai_clis_use_the_data_versions"
 assert_contains "mise use -g npm:@openai/codex@0.162.1" "$(cat "$CALLS")" "codex comes from [ai_tools]"

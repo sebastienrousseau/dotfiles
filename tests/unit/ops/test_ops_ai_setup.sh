@@ -41,6 +41,29 @@ assert_equals "copilot --version" "$(cat "$ai_log" 2>&1)" "only the version prob
 assert_contains "non-interactive shell; skipping login. Run 'kiro-cli login'" "$ai_out" "the login is named, not run"
 assert_contains "Binary not found" "$ai_out" "a missing tool is reported"
 
+# The tools come from the roster: crush, which the hand-kept list never
+# had, is checked too, and naming tools runs only those.
+test_start "ai_setup_covers_every_roster_tool"
+crush_log="$DOTFILES_COV_TMPDIR/crush.log"
+printf '#!/usr/bin/env bash\necho "crush $*" >>"%s"\n' "$crush_log" >"$ai_bin/crush"
+chmod +x "$ai_bin/crush"
+PATH="$ai_bin:$DOTFILES_COV_TMPDIR/bin:/usr/bin:/bin" bash "$TEST_SCRIPT" </dev/null >/dev/null 2>&1 || true
+assert_equals "crush --version" "$(cat "$crush_log" 2>&1)" "a roster tool outside the old list is checked"
+
+test_start "ai_setup_named_tools_only"
+: >"$ai_log"
+: >"$crush_log"
+ai_out="$(PATH="$ai_bin:$DOTFILES_COV_TMPDIR/bin:/usr/bin:/bin" bash "$TEST_SCRIPT" copilot </dev/null 2>&1)"
+assert_equals "copilot --version" "$(cat "$ai_log" 2>&1)" "the named tool runs"
+assert_equals "" "$(cat "$crush_log" 2>&1)" "the others do not"
+assert_equals "no" "$([[ "$ai_out" == *"Kiro CLI"* ]] && echo yes || echo no)" "nor are they listed"
+
+test_start "ai_setup_unknown_tool_is_a_usage_error"
+ai_rc=0
+ai_out="$(PATH="$ai_bin:$DOTFILES_COV_TMPDIR/bin:/usr/bin:/bin" bash "$TEST_SCRIPT" nosuchtool </dev/null 2>&1)" || ai_rc=$?
+assert_equals "2" "$ai_rc" "an unknown tool exits 2"
+assert_contains "'nosuchtool' is not a roster tool" "$ai_out" "and is named"
+
 # Slice 3 (#883): exercise the script under sandbox for line coverage
 cov_exercise_script "$TEST_SCRIPT"
 

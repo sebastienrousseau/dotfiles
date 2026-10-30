@@ -265,7 +265,7 @@ run bash "$AI_SETUP"
 assert_equals 0 "$RC" "rc"
 out_has "Universal AI Toolchain Setup" "header"
 out_has "AI Setup Complete" "completion"
-out_has "Setting up Claude CLI" "per-tool section"
+out_has "Setting up Claude Code" "per-tool section, titled as the roster names it"
 called "claude --version"
 called "codex --version"
 

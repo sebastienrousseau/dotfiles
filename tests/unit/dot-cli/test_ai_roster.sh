@@ -76,6 +76,17 @@ assert_equals "cursor-agent" "$(ai_roster_bin cursor)" "cursor runs cursor-agent
 assert_equals "1" "$(ai_roster_bin nosuchtool >/dev/null && echo 0 || echo 1)" "an unknown name is not in the roster"
 assert_equals "pipx:aider-chat[uvx_args=--python 3.12]" "$(ai_roster_package aider)" "a package with = in it survives the lookup"
 assert_equals "install_cursor_native" "$(ai_roster_native cursor-agent)" "native installers are looked up by binary"
+assert_equals "kiro-cli login" "$(ai_roster_login kiro-cli)" "a tool's login command comes from the roster"
+assert_equals "1" "$(ai_roster_login claude >/dev/null && echo 0 || echo 1)" "a tool that signs in on first use has none"
+
+test_start "roster_rejects_a_login_that_is_not_a_string"
+root="$(fixture_root)"
+printf '\n[[tool]]\nname = "listy"\nbin = "listy"\ntitle = "Listy"\nsummary = "x"\ngroup = "coding"\nrole = "coding"\nlogin = ["listy", "login"]\n' \
+  >>"$root/plugins/ai/roster.toml"
+rc=0
+err="$(python3 "$GEN" --check --root "$root" 2>&1)" || rc=$?
+assert_equals "2" "$rc" "a login given as a list is refused"
+assert_contains "listy login must be a string" "$err" "the error names the tool"
 
 # Every agent runs once through its own one-shot form: a stub on PATH for
 # each binary records that it was called, and an arm missing from
