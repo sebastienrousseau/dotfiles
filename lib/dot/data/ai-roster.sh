@@ -13,60 +13,10 @@ AI_ROSTER_ECO_BINS=(corralctl passmcp draft)
 # `dot ai list` rows: category|role|title|binary|summary.
 AI_ROSTER_STATUS=('Agents (autonomous)|agent|Claude Code|claude|Anthropic'\''s flagship agentic coder' 'Agents (autonomous)|agent|Codex CLI|codex|OpenAI'\''s autonomous coding agent' 'Agents (autonomous)|agent|Copilot CLI|copilot|GitHub Copilot in the terminal' 'Agents (autonomous)|agent|Goose|goose|Block'\''s open-source coding agent' 'Agents (autonomous)|agent|Crush|crush|Charm'\''s glamorous TUI coding agent' 'Agents (autonomous)|agent|Amp|amp|Sourcegraph'\''s agentic coder' 'Agents (autonomous)|agent|Cursor CLI|cursor-agent|Cursor'\''s terminal agent' 'Agents (autonomous)|agent|Grok Build|grok|xAI'\''s terminal coding agent' 'Agents (autonomous)|agent|Kimi CLI|kimi|Moonshot AI'\''s terminal coding agent' 'Coding (interactive)|coding|OpenCode|opencode|Open-source terminal coding agent' 'Coding (interactive)|coding|Aider|aider|Git-aware AI pair programmer' 'Coding (interactive)|coding|Autohand Code|autohand|Autonomous multi-file coding agent' 'Coding (interactive)|coding|Mistral Vibe|vibe|Mistral'\''s coding agent' 'Coding (interactive)|coding|Qwen Code|qwen|Alibaba Qwen coding assistant' 'Coding (interactive)|coding|ZAI|zai|Zhipu GLM coding agent' 'General (prompt-based)|general|Antigravity CLI|agy|Google'\''s Antigravity agent' 'General (prompt-based)|general|Shell-GPT|sgpt|ChatGPT for the shell' 'Runtime (local)|local|Ollama|ollama|Run local & cloud open models' 'Cloud (platform)|cloud|Kiro CLI|kiro-cli|AWS'\''s agentic dev assistant')
 # name or alias=binary
-AI_ROSTER_BIN_OF='claude=claude
-cl=claude
-codex=codex
-copilot=copilot
-goose=goose
-crush=crush
-amp=amp
-cursor-agent=cursor-agent
-cursor=cursor-agent
-grok=grok
-kimi=kimi
-agy=agy
-kiro=kiro-cli
-kiro-cli=kiro-cli
-sgpt=sgpt
-ollama=ollama
-opencode=opencode
-aider=aider
-autohand=autohand
-vibe=vibe
-qwen=qwen
-zai=zai
-corralctl=corralctl
-passmcp=passmcp
-draft=draft
-passmcp-server=passmcp-server
-passmcp-graph=passmcp-graph
-passmcp-lsp=passmcp-lsp
-'
+AI_ROSTER_BIN_OF=$'claude=claude\ncl=claude\ncodex=codex\ncopilot=copilot\ngoose=goose\ncrush=crush\namp=amp\ncursor-agent=cursor-agent\ncursor=cursor-agent\ngrok=grok\nkimi=kimi\nagy=agy\nkiro=kiro-cli\nkiro-cli=kiro-cli\nsgpt=sgpt\nollama=ollama\nopencode=opencode\naider=aider\nautohand=autohand\nvibe=vibe\nqwen=qwen\nzai=zai\ncorralctl=corralctl\npassmcp=passmcp\ndraft=draft\npassmcp-server=passmcp-server\npassmcp-graph=passmcp-graph\npassmcp-lsp=passmcp-lsp\n'
 # binary=mise package (a key of [ai_tools])
-AI_ROSTER_PACKAGE_OF='codex=npm:@openai/codex
-copilot=npm:@github/copilot
-crush=npm:@charmland/crush
-kiro-cli=kiro-cli
-sgpt=pipx:shell-gpt
-ollama=aqua:ollama/ollama
-opencode=opencode
-aider=pipx:aider-chat[uvx_args=--python 3.12]
-autohand=npm:autohand-cli
-qwen=npm:@qwen-code/qwen-code
-zai=npm:@guizmo-ai/zai-cli
-corralctl=github:sebastienrousseau/corralctl
-passmcp=github:sebastienrousseau/passmcp
-draft=github:sebastienrousseau/draft
-passmcp-server=github:sebastienrousseau/passmcp-server
-passmcp-graph=github:sebastienrousseau/passmcp-graph
-passmcp-lsp=github:sebastienrousseau/passmcp-lsp
-'
+AI_ROSTER_PACKAGE_OF=$'codex=npm:@openai/codex\ncopilot=npm:@github/copilot\ncrush=npm:@charmland/crush\nkiro-cli=kiro-cli\nsgpt=pipx:shell-gpt\nollama=aqua:ollama/ollama\nopencode=opencode\naider=pipx:aider-chat[uvx_args=--python 3.12]\nautohand=npm:autohand-cli\nqwen=npm:@qwen-code/qwen-code\nzai=npm:@guizmo-ai/zai-cli\ncorralctl=github:sebastienrousseau/corralctl\npassmcp=github:sebastienrousseau/passmcp\ndraft=github:sebastienrousseau/draft\npassmcp-server=github:sebastienrousseau/passmcp-server\npassmcp-graph=github:sebastienrousseau/passmcp-graph\npassmcp-lsp=github:sebastienrousseau/passmcp-lsp\n'
 # binary=native installer function
-AI_ROSTER_NATIVE_OF='claude=install_claude_native
-goose=install_goose_native
-amp=install_amp_native
-cursor-agent=install_cursor_native
-grok=install_grok_native
-kimi=install_kimi_native
-agy=install_agy_native
-'
+AI_ROSTER_NATIVE_OF=$'claude=install_claude_native\ngoose=install_goose_native\namp=install_amp_native\ncursor-agent=install_cursor_native\ngrok=install_grok_native\nkimi=install_kimi_native\nagy=install_agy_native\n'
+# binary=the command `dot ai login` runs (absent: <binary> --version)
+AI_ROSTER_LOGIN_OF=$'kiro-cli=kiro-cli login\n'

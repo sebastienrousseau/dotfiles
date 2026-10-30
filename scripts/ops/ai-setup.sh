@@ -1,71 +1,61 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# Universal AI Toolchain Setup & Authentication.
+# `dot ai login [tool…]`: authenticate the installed AI tools, every roster
+# tool or the ones named. The tools and their login commands come from the
+# roster (plugins/ai/roster.toml, `login`); a tool that signs in on first use
+# is checked with `<bin> --version`.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../lib/dot/ui.sh"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../lib/dot/ai-roster.sh"
 
-ui_header "Universal AI Toolchain Setup"
-
+# setup_tool <title> <bin>: run the tool's login command, or its version
+# probe; a login needs a terminal.
 setup_tool() {
-  local name="$1"
-  local cmd="$2"
-  shift 2
-  # Remaining args are the auth command — passed as an array to avoid eval.
-  local -a auth_argv=("$@")
-
+  local name="$1" bin="$2" login
+  local -a argv
+  login="$(ai_roster_login "$bin" || true)"
+  read -ra argv <<<"${login:-$bin --version}"
   ui_section "Setting up $name"
-  if command -v "$cmd" >/dev/null 2>&1; then
-    if [[ ! -t 0 && "${auth_argv[*]}" != *"--version"* ]]; then
-      ui_info "$name" "non-interactive shell; skipping login. Run '${auth_argv[*]}' in a terminal."
-      return 0
-    fi
-    ui_info "Tool found, initiating authentication..."
-    "${auth_argv[@]}" || ui_warn "$name" "Setup/Auth skipped or failed."
-  else
-    ui_err "$name" "Binary not found. Run 'dot apply' or install via mise first."
+  if ! command -v "$bin" >/dev/null 2>&1; then
+    ui_err "$name" "Binary not found. Run 'dot ai install $bin' first."
+    return 0
   fi
+  if [[ -n "$login" && ! -t 0 ]]; then
+    ui_info "$name" "non-interactive shell; skipping login. Run '$login' in a terminal."
+    return 0
+  fi
+  ui_info "Tool found, initiating authentication..."
+  "${argv[@]}" || ui_warn "$name" "Setup/Auth skipped or failed."
 }
 
-# 1. Claude
-setup_tool "Claude CLI" "claude" claude --version # Claude handles auth via web flow or env
+# _wanted <bin>: true when no tool was named, or this one was.
+_wanted() {
+  local w
+  [[ ${#WANT[@]} -eq 0 ]] && return 0
+  for w in "${WANT[@]}"; do [[ "$w" != "$1" ]] || return 0; done
+  return 1
+}
 
-# 2. Antigravity CLI
-setup_tool "Antigravity CLI" "agy" agy --version
+WANT=()
+for arg in "$@"; do
+  bin="$(ai_roster_bin "$arg")" || {
+    ui_err "dot ai login" "'$arg' is not a roster tool (dot ai list)"
+    exit 2
+  }
+  WANT+=("$bin")
+done
 
-# 3. Codex
-setup_tool "Codex CLI" "codex" codex --version
-
-# 4. Copilot
-setup_tool "Copilot CLI" "copilot" copilot --version
-
-# 5. Goose
-setup_tool "Goose" "goose" goose --version
-
-# 6. Kiro
-setup_tool "Kiro CLI" "kiro-cli" kiro-cli login
-
-# 7. Kimi
-setup_tool "Kimi CLI" "kimi" kimi --version
-
-# 8. Aider
-setup_tool "Aider" "aider" aider --version
-
-# 9. Autohand Code
-setup_tool "Autohand Code" "autohand" autohand --version
-
-# 10. Mistral Vibe
-setup_tool "Mistral Vibe" "vibe" vibe --version
-
-# 11. Qwen Code
-setup_tool "Qwen Code" "qwen" qwen --version
-
-# 12. ZAI
-setup_tool "ZAI" "zai" zai --version
+ui_header "Universal AI Toolchain Setup"
+for row in "${AI_ROSTER_STATUS[@]}"; do
+  IFS='|' read -r _ _ title bin _ <<<"$row"
+  if _wanted "$bin"; then setup_tool "$title" "$bin"; fi
+done
 
 ui_header "AI Setup Complete"
 ui_info "All tools are ready. Use 'dot ai' to check status."

@@ -35,3 +35,7 @@ ai_roster_package() { _ai_roster_get "$AI_ROSTER_PACKAGE_OF" "$1"; }
 
 # ai_roster_native <binary>: its native installer function; 1 when it has none.
 ai_roster_native() { _ai_roster_get "$AI_ROSTER_NATIVE_OF" "$1"; }
+
+# ai_roster_login <binary>: the command `dot ai login` runs for it; 1 when
+# it has none (signing in happens on first use).
+ai_roster_login() { _ai_roster_get "$AI_ROSTER_LOGIN_OF" "$1"; }

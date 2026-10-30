@@ -120,7 +120,11 @@ def parse_toc(path: Path) -> list[tuple[str, str]]:
 FRONT_MATTER = re.compile(r"\A---\n.*?\n---\n", re.DOTALL)
 FENCE = re.compile(r"^(```|~~~)")
 LIQUID_RAW = re.compile(r"^[ \t]*\{%-?\s*(?:end)?raw\s*-?%\}[ \t]*\n?", re.MULTILINE)
-HIGHLIGHT_LINK = re.compile(r'\s*<link rel="stylesheet" href="/highlight\.css">')
+# ssg's code-highlighting stylesheet link: "/highlight.css" (0.0.63), or its
+# fingerprinted file name with integrity and crossorigin attributes (0.0.69).
+HIGHLIGHT_LINK = re.compile(
+    r'\s*<link rel="stylesheet" href="/highlight(?:\.[0-9a-f]+)?\.css"[^>]*>'
+)
 LEADING_COMMENTS = re.compile(r"\A(?:\s*<!--.*?-->)+\s*", re.DOTALL)
 MD_LINK = re.compile(r"(?<!!)\[([^\]]*)\]\(([^)\s]+)(\s+\"[^\"]*\")?\)")
 
@@ -540,9 +544,9 @@ def finalize(site: Path, base: str) -> int:
     for junk in ("CNAME",):
         (site / junk).unlink(missing_ok=True)
     pages = sorted(site.rglob("index.html"))
-    # ssg 0.0.63 injects a code-highlighting stylesheet as "/highlight.css"
-    # (the file it writes is fingerprinted, and the link ignores a sub-path
-    # base such as /manual/). Its colours follow prefers-color-scheme, not
+    # ssg injects a code-highlighting stylesheet: 0.0.63 links it as
+    # "/highlight.css", 0.0.69 by its fingerprinted name (either way the link
+    # ignores a sub-path base such as /manual/). Its colours follow prefers-color-scheme, not
     # Lucid's theme toggle, so with the OS dark and the page light it paints
     # a dark block under Lucid's dark text: unreadable. Lucid styles code
     # blocks itself, with AAA-checked tokens that follow the toggle, so the
