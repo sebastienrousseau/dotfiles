@@ -159,21 +159,54 @@ dot_upgrade_nix_steps() {
 }
 
 # dot_upgrade_app_steps: the app-store phase, when any store is installed.
+# DOTFILES_APP_STORES=0 shows it as a skip instead, for a machine whose store
+# CLI is installed but does not work there.
 dot_upgrade_app_steps() {
   local apps
   apps="$(_dot_upgrade_app_managers)"
   [[ -n "$apps" ]] || return 0
+  if [[ "${DOTFILES_APP_STORES:-1}" == 0 ]]; then
+    ui_step apps "App stores" skip "turned off by DOTFILES_APP_STORES=0"
+    return 0
+  fi
   _upgrade_step apps "App stores" "${apps}…" -- _dot_upgrade_apps
 }
 
-# dot_upgrade_toolchain_steps: mise and system-package phases, per the
-# answers dot_upgrade_prepare recorded. Called inside cmd_upgrade, whose
-# _upgrade_step renders each one.
+# _dot_upgrade_pins <list>: the AI CLI pin bumps into <list>, one per line;
+# the printed line counts them for the step.
+_dot_upgrade_pins() {
+  local n
+  ai_pin_bumps >"$1"
+  n="$(grep -c . "$1" || true)"
+  if [[ "$n" -eq 0 ]]; then
+    echo "every pin is current"
+  else
+    echo "$n newer release(s), listed below"
+  fi
+}
+
+# dot_upgrade_pin_report <list>: each bump _dot_upgrade_pins found. Called
+# after ui_steps_end, once the renderer has given the terminal back.
+dot_upgrade_pin_report() {
+  local line
+  [[ -s "$1" ]] || return 0
+  while IFS= read -r line; do
+    ui_info "Pin bump" "$line"
+  done <"$1"
+  ui_info "Pins" "move them by editing [ai_tools] in defaults/.chezmoidata.toml"
+}
+
+# dot_upgrade_toolchain_steps [pin-list]: mise and system-package phases,
+# per the answers dot_upgrade_prepare recorded. Called inside cmd_upgrade,
+# whose _upgrade_step renders each one. With a pin list, the AI CLI pin check
+# is a step too, writing the bumps there for dot_upgrade_pin_report.
 dot_upgrade_toolchain_steps() {
   if has_command mise; then
     _upgrade_step mise "Mise tools" "installing + upgrading…" -- _dot_upgrade_mise
-    # AI CLIs stay at their [ai_tools] pins; list the bumps to review.
-    ai_pin_bumps
+    # AI CLIs stay at their [ai_tools] pins; collect the bumps to review.
+    if [[ -n "${1:-}" ]]; then
+      _upgrade_step pins "AI tool pins" "checking for newer releases…" -- _dot_upgrade_pins "$1"
+    fi
   else
     ui_step mise "Mise tools" skip "mise not installed — dot update --yes installs it"
   fi

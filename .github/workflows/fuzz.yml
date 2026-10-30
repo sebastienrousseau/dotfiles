@@ -9,7 +9,7 @@ name: Fuzz / Native Go harnesses
 #   fuzz    — a short fuzzing window per harness on PRs that touch an input
 #             parsing surface, to catch regressions before they merge.
 #
-# Harnesses live in three places:
+# Harnesses live in four places:
 #   fuzz            ports of the shell helpers and of
 #                                        the two Go binaries' parsers
 #   defaults/dot_local/share/dot-ui      in-module, against the real code

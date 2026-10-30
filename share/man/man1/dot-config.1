@@ -30,7 +30,7 @@ What apply would change. Effect: read. Runs \fBdot\-config diff\fR, the plugin's
 Write the dotfiles to this machine. Effect: write. Runs \fBdot\-config apply\fR, the plugin's entry.
 .TP
 .B dot config sync
-Pull the source, then apply. Effect: write. Runs \fBdot\-config sync\fR, the plugin's entry.
+Apply the dotfiles; \-\-pull pulls first. Effect: write. Runs \fBdot\-config sync\fR, the plugin's entry.
 .TP
 .B dot config update
 Pull and apply the dotfiles only. Effect: write. Runs \fBdot\-config update\fR, the plugin's entry.
@@ -75,6 +75,11 @@ Switch profile. Effect: write. Runs \fBdot\-config profile set\fR, the plugin's 
 .TP
 .B dot config import
 Restore from an exported bundle. Effect: write. Runs \fBdot\-config import\fR, the plugin's entry.
+.RS
+.TP
+.B \-\-yes, \-y
+Restore without asking
+.RE
 .SH OTHER NAMES
 .TP
 .B dot apply

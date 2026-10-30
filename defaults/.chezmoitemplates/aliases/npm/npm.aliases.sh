@@ -5,17 +5,8 @@ if command -v npm &>/dev/null; then
   # Audit npm packages.
   alias npa='npm audit'
 
-  # Build npm script.
-  alias npb='npm build'
-
   # Cache npm package.
   alias npc='npm cache'
-
-  # Dev npm script.
-  alias npd='npm dev'
-
-  # Global npm package.
-  alias npg='npm global'
 
   # Install npm package.
   alias npi='npm install'
@@ -37,9 +28,6 @@ if command -v npm &>/dev/null; then
 
   # Start npm script.
   alias nps='npm start'
-
-  # Serve npm script.
-  alias npsv='npm serve'
 
   # Test npm script.
   alias npt='npm test'

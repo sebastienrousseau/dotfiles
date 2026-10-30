@@ -139,6 +139,23 @@ git -C "$d" add -A && git -C "$d" -c user.email=t@t -c user.name=t -c commit.gpg
 run_engine "$d" --min-score 100
 assert_equals "killed" "$(status_of "$d" 4)" "the module's mutant is judged by the parent's test"
 
+test_start "mutation_sibling_module_inherits_parent_tests"
+# heal.sh's way: scripts/main.sh sources its sibling as "$SCRIPT_DIR/check.sh",
+# which names only the basename. The parent's test still counts.
+d="$(fixture sibling)"
+printf '#!/usr/bin/env bash\nSCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"\nsource "$SCRIPT_DIR/check.sh"\n' >"$d/scripts/main.sh"
+cat >"$d/tests/unit/test_via_main.sh" <<'EOF'
+#!/usr/bin/env bash
+source "$REPO_ROOT/scripts/main.sh" >/dev/null
+valid_name abc || exit 1
+valid_name 'a;b' && exit 1
+valid_name 'x1' && exit 1
+exit 0
+EOF
+git -C "$d" add -A && git -C "$d" -c user.email=t@t -c user.name=t -c commit.gpgsign=false commit -qm sibling
+run_engine "$d" --min-score 100
+assert_equals "killed" "$(status_of "$d" 4)" "a sibling sourced by basename is judged by the parent's test"
+
 test_start "mutation_changed_lines_only"
 d="$(fixture changed test_strong.sh)"
 sed -i.bak 's/^  return 0$/  return 0 # touched/' "$d/scripts/check.sh" && rm "$d/scripts/check.sh.bak"

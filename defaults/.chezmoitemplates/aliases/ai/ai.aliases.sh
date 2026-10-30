@@ -7,7 +7,6 @@ alias dai='dot ai'  # the cockpit
 alias daid='dot ai' # was: dot ai dashboard
 alias daish='dot ai'
 
-alias dcl='dot ai claude'
 alias dcla='dot ai claude --style architect'
 alias dclh='dot ai claude --style hardener'
 alias dclr='dot ai claude --style refactor'
@@ -22,7 +21,6 @@ alias dkma='dot ai kimi --style architect'
 alias dkmh='dot ai kimi --style hardener'
 alias dkmr='dot ai kimi --style refactor'
 
-alias dki='dot ai kiro'
 alias dkia='dot ai kiro --style architect'
 alias dkih='dot ai kiro --style hardener'
 alias dkir='dot ai kiro --style refactor'
@@ -68,7 +66,6 @@ fi
 if command -v agy &>/dev/null; then
   alias agyi='agy info'
   alias agys='agy chat'
-  alias agy='agy'
 fi
 
 # Moonshot Kimi CLI

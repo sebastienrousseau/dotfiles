@@ -59,7 +59,7 @@ If your threat model requires no TOFU window, pre-populate
 ~/.ssh/known_hosts before running this command.
 
 Behavior:
-  By default each host runs:  dot sync && dot doctor --quiet
+  By default each host runs:  dot config update && dot doctor
   Override with --cmd "<shell>" to run an arbitrary command on every
   host (e.g. --cmd "uptime").
 
@@ -69,7 +69,7 @@ Behavior:
 
 Flags:
   --host <name>      Apply to a single host only.
-  --cmd <shell>      Run a custom command instead of 'dot sync'.
+  --cmd <shell>      Run a custom command instead of the default.
   --dry-run, -n      Print resolved hosts + planned command; don't SSH.
   --jobs <n>         Parallelism (default 4).
   --verify-hosts     Refuse to open any SSH connection unless every
@@ -273,7 +273,7 @@ cmd_fleet_apply() {
   _fleet_apply_load
   [[ -z "$_fleet_stop" ]] || return "$_fleet_stop"
 
-  effective_cmd="${cmd:-dot sync && dot doctor --quiet}"
+  effective_cmd="${cmd:-dot config update && dot doctor}"
   ui_header "Fleet apply"
   ui_info "Hosts file" "$hosts_file"
   ui_info "Command" "$effective_cmd"

@@ -75,10 +75,12 @@ _ai_latest() {
   mise latest "$backend" 2>/dev/null || true
 }
 
-# ai_pin_bumps: for `dot system update`, each pinned AI CLI with a newer release.
-# A gated latest older than the pin (a pin set inside the age gate) is not a
-# bump. Pins move only when [ai_tools] is edited, so this proposes bumps
-# rather than applying them.
+# ai_pin_bumps: for `dot system update`, each pinned AI CLI with a newer
+# release, one "<package> <pinned> -> <latest>" line each. A gated latest
+# older than the pin (a pin set inside the age gate) is not a bump. Pins move
+# only when [ai_tools] is edited, so this proposes bumps rather than applying
+# them. Plain lines, not ui_info: it runs while the step renderer owns the
+# terminal, so the caller lists them once the renderer is done.
 ai_pin_bumps() {
   local pkg pinned latest
   command -v mise >/dev/null 2>&1 || return 0
@@ -86,7 +88,7 @@ ai_pin_bumps() {
     pinned="$(_ai_pinned_version "$pkg")"
     latest="$(_ai_latest "$pkg")"
     if [[ -n "$latest" ]] && _ai_version_newer "$latest" "$pinned"; then
-      ui_info "Pin bump" "$pkg $pinned -> $latest (edit [ai_tools] in defaults/.chezmoidata.toml)"
+      printf '%s %s -> %s\n' "$pkg" "$pinned" "$latest"
     fi
   done < <(awk '/^\[/ { in_table = ($0 == "[ai_tools]"); next }
     in_table && $2 == "=" { k = $1; gsub(/"/, "", k); print k }' "$_AI_PINS_FILE" 2>/dev/null)

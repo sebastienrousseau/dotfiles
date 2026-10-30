@@ -98,7 +98,7 @@ Apply, diff and sync the dotfiles.
 | `dot config status` | Pending changes and last apply | `dot status` |
 | `dot config diff` | What apply would change | `dot diff` |
 | `dot config apply` | Write the dotfiles to this machine | `dot apply` |
-| `dot config sync` | Pull the source, then apply | `dot sync` |
+| `dot config sync` | Apply the dotfiles; --pull pulls first | `dot sync` |
 | `dot config update` | Pull and apply the dotfiles only | `dot update` |
 | `dot config edit` | Open a managed file in $EDITOR | `dot edit` |
 | `dot config add` | Start managing an existing file | `dot add` |
@@ -110,7 +110,7 @@ Apply, diff and sync the dotfiles.
 | `dot config path show` | Print the source directory | `dot cd` |
 | `dot config profile show` | Show the active profile | `dot profile show` |
 | `dot config profile set` | Switch profile | `dot profile set` |
-| `dot config import` | Meant to restore from an exported bundle. Today it creates a new bundle in a `restore/` directory and restores nothing: unpack the archive with `tar --zstd -xf <bundle> -P` instead | `dot bundle restore` |
+| `dot config import` | Restore from an exported bundle (asks first; `--yes` skips the question) | `dot bundle restore` |
 
 ### dot doctor
 
@@ -171,7 +171,7 @@ Secrets, keys and SSH certificates.
 | `dot secret set` | Store one secret | `dot secrets set` |
 | `dot secret export` | Print secrets as environment | `dot secrets load` |
 | `dot secret check` | Audit secret hygiene | `dot secret-audit` |
-| `dot secret key new` | Create an ED25519 key | `dot ssh-key` |
+| `dot secret key new` | Encrypt an SSH key with age | `dot ssh-key` |
 | `dot secret cert list` | Certificates and expiry | `dot ssh-cert status` |
 | `dot secret cert new` | Issue a short-lived SSH certificate | `dot ssh-cert`, `dot ssh-cert issue` |
 | `dot secret provider show` | The active provider | `dot secrets provider` |

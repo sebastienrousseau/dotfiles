@@ -9,7 +9,9 @@ Provider-agnostic secrets via `dot secret`. Supports macOS Keychain, `pass`, and
 
 ## Providers
 
-Provider selection can be set in `.chezmoidata.toml`. The shipped file has
+Provider selection can be set per host as `[data.secrets.policy]` in
+`~/.config/chezmoi/chezmoi.toml` (what `scripts/ops/setup.sh` writes), or in
+`.chezmoidata.toml` for every host; the host value wins. The shipped file has
 no `[secrets.policy]` table; without one (and without
 `DOTFILES_SECRETS_PROVIDER`), the provider is `auto`. To pin it, add:
 

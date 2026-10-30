@@ -61,7 +61,10 @@ expect() {
 
 test_start "attest_spellings_choose_the_mode"
 expect attest "show --json" "ran diagnostics/workstation-attestation.sh --json"
-expect attest "export" "ran diagnostics/workstation-attestation.sh --write"
+attest_default="$WORK/home/.local/state/dotfiles/attestations/workstation-attestation.json"
+expect attest "export" "ran diagnostics/workstation-attestation.sh --write $attest_default"
+expect attest "export out.json --json" "ran diagnostics/workstation-attestation.sh --write out.json --json"
+expect attest "export --fleet-store D" "ran diagnostics/workstation-attestation.sh --write $attest_default --fleet-store D"
 expect attest "verify evidence.json" "ran diagnostics/workstation-attestation.sh --verify evidence.json"
 expect attest "" "ran diagnostics/workstation-attestation.sh "
 expect attest "--json" "ran diagnostics/workstation-attestation.sh --json"

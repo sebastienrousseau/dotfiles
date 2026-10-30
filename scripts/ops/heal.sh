@@ -159,6 +159,11 @@ source "$SCRIPT_DIR/heal-chezmoi.sh"
 # Main
 # =============================================================================
 
+# _heal_run REPAIR: run one repair; count it in REPAIRS_FAILED if it fails.
+_heal_run() {
+  "$1" || REPAIRS_FAILED=$((${REPAIRS_FAILED:-0} + 1))
+}
+
 main() {
   echo ""
   printf '  \033[1mDotfiles Heal\033[0m\n'
@@ -184,15 +189,15 @@ main() {
     _pkg_install "backup" 0 1 create_pre_heal_backup 2>/dev/null || true
   fi
 
-  # Run all repairs
-  heal_missing_dependencies || true
-  heal_mise_tools || true
+  # Run all repairs; each one that fails is counted, not fatal
+  _heal_run heal_missing_dependencies
+  _heal_run heal_mise_tools
 
   # Quick checks (no animation needed)
-  heal_chezmoi_drift || true
-  heal_broken_symlinks || true
-  heal_missing_critical_files || true
-  heal_missing_xdg_dirs || true
+  _heal_run heal_chezmoi_drift
+  _heal_run heal_broken_symlinks
+  _heal_run heal_missing_critical_files
+  _heal_run heal_missing_xdg_dirs
 
   # Pre-warm shell caches for fast startup (< 50ms target)
   local prewarm_script="$SCRIPT_DIR/prewarm.sh"
@@ -201,7 +206,12 @@ main() {
     _pkg_install "shell cache pre-warm" 0 1 bash "$prewarm_script" || true
   fi
 
-  # Summary
+  _heal_summary
+}
+
+# _heal_summary: the closing summary; non-zero when a repair failed, so
+# `dot doctor fix` reports it to its caller.
+_heal_summary() {
   echo ""
   if [[ "$DRY_RUN" == "1" ]]; then
     if [[ $ISSUES_FOUND -eq 0 ]]; then
@@ -222,6 +232,10 @@ main() {
     fi
   fi
   echo ""
+  if [[ "${REPAIRS_FAILED:-0}" -gt 0 ]]; then
+    ui_err "Heal" "$REPAIRS_FAILED repair(s) failed"
+    return 1
+  fi
 }
 
 main

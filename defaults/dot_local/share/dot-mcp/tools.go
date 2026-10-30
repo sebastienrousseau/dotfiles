@@ -119,7 +119,7 @@ func defaultTools() []tool {
 		{
 			Name:        "mcp-doctor",
 			Title:       "MCP Doctor",
-			Description: "Validate MCP configuration, policy, and supply chain. Runs the same audit as `dot mcp doctor --json` and returns its machine-readable summary: launcher allowlist, filesystem scope, argument policy, required tokens, and registry agreement. Read-only.",
+			Description: "Validate MCP configuration, policy, and supply chain. Runs the same audit as `dot mcp check --json` and returns its machine-readable summary: launcher allowlist, filesystem scope, argument policy, required tokens, and registry agreement. Read-only.",
 			Schema: inputSchema{
 				Type: "object",
 				Properties: map[string]property{
@@ -133,7 +133,7 @@ func defaultTools() []tool {
 			},
 			Annotations: readOnlyAnnotations("MCP Doctor"),
 			argv: func(args map[string]any) []string {
-				argv := []string{"mcp", "doctor", "--json"}
+				argv := []string{"mcp", "check", "--json"}
 				if b, ok := args["strict"].(bool); ok && b {
 					argv = append(argv, "--strict")
 				}
@@ -184,10 +184,10 @@ func defaultTools() []tool {
 		{
 			Name:        "workstation-attestation",
 			Title:       "Workstation Attestation",
-			Description: "Export workstation attestation evidence as JSON: dotfiles version, platform, commit signing posture, MCP posture and agent mode. Runs `dot attest --json`; the mutating `--write` and fleet-store paths are deliberately not exposed. Read-only.",
+			Description: "Export workstation attestation evidence as JSON: dotfiles version, platform, commit signing posture, MCP posture and agent mode. Runs `dot attest show --json`; the mutating `--write` and fleet-store paths are deliberately not exposed. Read-only.",
 			Schema:      noArgsSchema(),
 			Annotations: readOnlyAnnotations("Workstation Attestation"),
-			argv:        func(map[string]any) []string { return []string{"attest", "--json"} },
+			argv:        func(map[string]any) []string { return []string{"attest", "show", "--json"} },
 		},
 		{
 			Name:        "fleet-status",
@@ -383,7 +383,7 @@ type callResult struct {
 
 // buildCallResult turns a command outcome into an MCP tool result.
 //
-// A non-zero exit code is not automatically an error: `dot mcp doctor --json`
+// A non-zero exit code is not automatically an error: `dot mcp check --json`
 // exits 1 when it finds policy problems and still prints the report the caller
 // asked for. The rule is therefore: if the command printed a JSON object, that
 // is the answer (with the exit code attached); otherwise a non-zero exit means

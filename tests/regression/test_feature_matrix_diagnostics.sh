@@ -245,9 +245,14 @@ fm_run_offline() {
 test_fm_heal() {
   test_start "fm_heal"
   fm_run_offline doctor fix
-  # heal.sh guards every repair with `|| true` and exits 0 whether or not it
-  # could fix anything; the summary line is what carries the result.
-  fm_expect_rc 0
+  # heal exits 1 exactly when a repair failed, and says how many; offline,
+  # a dependency install can fail, so the two must agree rather than the
+  # exit code being fixed.
+  if [[ "$FM_OUT$FM_ERR" == *"repair(s) failed"* ]]; then
+    fm_expect_rc 1
+  else
+    fm_expect_rc 0
+  fi
   test_start "fm_heal_reports"
   fm_expect_out "Dotfiles Heal"
   test_start "fm_heal_checks_dependencies"

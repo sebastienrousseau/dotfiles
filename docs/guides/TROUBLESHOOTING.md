@@ -18,7 +18,7 @@ Quick checks for common issues.
 
 - Re-run `chezmoi apply` to re-sync state.
 - Check for merge conflicts: `chezmoi diff`
-- If hooks fail, check `~/.local/share/dotfiles.log` for details.
+- If hooks fail, check the dot CLI's log, `${XDG_STATE_HOME:-~/.local/state}/dotfiles/dot.log` (`dot-audit` shows its tail).
 - For non-interactive sessions, force apply to avoid TTY prompts: `DOTFILES_NONINTERACTIVE=1 dot apply --force`
 
 **Problem:** Packages fail to install
@@ -171,6 +171,6 @@ Open an issue with:
 
 - OS + version
 - Output of `dot doctor` (if available)
-- Relevant log snippets from `~/.local/share/dotfiles.log`
+- Relevant log snippets from `${XDG_STATE_HOME:-~/.local/state}/dotfiles/dot.log`
 - Steps to reproduce the issue
 - For WSL2/Nix issues: Include diagnostic report from the advanced guide

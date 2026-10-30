@@ -220,6 +220,36 @@ assert_equals "$live_bento_before" "$live_bento_after" \
 assert_file_contains "$SANDBOX/scripts/git-hooks/pre-commit-audit.sh" "v9.9.9 standards maintained" \
   "write path updates pre-commit audit banner"
 
+# 8b. Between releases the README digest stays on the published installer.
+# Once v9.9.9 is tagged, a later fix to install.sh must not move the digest
+# users check the v9.9.9 download against: it is install.sh at the tag, as
+# scripts/verify-release-versions expects, not install.sh in the tree.
+# The coverage sandbox shadows git with a stub; this case needs real tags.
+REAL_GIT_PATH="${PATH//"$DOTFILES_COV_TMPDIR/bin:"/}"
+build_sandbox "9.9.9" "9.9.9" "9.9.9"
+test_start "version_sync_exec_installer_hash_follows_the_tag"
+(
+  cd "$SANDBOX" || exit 1
+  export PATH="$REAL_GIT_PATH"
+  git init -q -b main . &&
+    git add install.sh &&
+    git -c user.name=t -c user.email=t@example.invalid -c commit.gpgsign=false \
+      -c core.hooksPath=/dev/null commit -q -m release &&
+    git -c tag.gpgsign=false tag v9.9.9
+  printf '# a fix after the release\n' >>install.sh
+)
+tagged_ihash="$(PATH="$REAL_GIT_PATH" git -C "$SANDBOX" show v9.9.9:install.sh | shasum -a 256 | awk '{print $1}')"
+tree_ihash="$(shasum -a 256 "$SANDBOX/install.sh" | awk '{print $1}')"
+(
+  cd "$SANDBOX" || exit 1
+  PATH="$REAL_GIT_PATH" DOTFILES_ALLOW_COVERAGE_WRITES=1 bash scripts/version-sync.sh --force --no-backup 9.9.9 >/dev/null
+)
+assert_file_contains "$SANDBOX/README.md" "$tagged_ihash  /tmp/dotfiles-install.sh" \
+  "the digest is install.sh at the v9.9.9 tag"
+assert_output_not_contains "$tree_ihash" "cat '$SANDBOX/README.md'"
+rm -rf "${SANDBOX:?}/.git"
+cp "$REPO_ROOT/install.sh" "$SANDBOX/install.sh"
+
 # 9. Coverage-visible fallback discovery: remove rg/jq from PATH so
 # find_version_files takes the portable find/grep path.
 build_sandbox "7.7.7" "0.0.1" "0.0.1"

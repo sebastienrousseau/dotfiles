@@ -38,8 +38,7 @@ Repo-only material (`bin/`, `lib/`, `plugins/`, `scripts/`, `tools/`,
 The move into `defaults/` shipped in v0.2.503. Users upgrading from
 an older layout are migrated by
 `install/migrate/migrate-v0_2-to-v0_2_503.sh`, which `install.sh` runs
-before the first apply (the provision hook
-`install/provision/run_before_00-migrate-v0_2_503.sh.tmpl` also calls it).
+before the first apply.
 
 ## See also
 

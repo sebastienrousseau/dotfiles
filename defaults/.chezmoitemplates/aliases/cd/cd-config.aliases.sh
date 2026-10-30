@@ -4,8 +4,8 @@
 [[ -n "${_CD_CONFIG_LOADED:-}" ]] && :
 _CD_CONFIG_LOADED=1
 
-# Script configuration and version (exported: used by other cd-*.aliases.sh modules)
-export DOTFILES_VERSION="0.2.501"
+# Script configuration (exported: used by other cd-*.aliases.sh modules).
+# DOTFILES_VERSION comes from the shell rc, not from here.
 export DOTFILES_LAST_UPDATED="2025-03-12"
 
 # OS Detection for cross-platform compatibility

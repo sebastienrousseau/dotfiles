@@ -15,7 +15,8 @@
 if command -v 'docker' &>/dev/null; then
 
   # --- Core ---
-  alias d='docker'
+  # d is dot (system.aliases.sh) when dot is installed.
+  alias d >/dev/null 2>&1 || alias d='docker'
   alias dkv='docker version'
   alias dki='docker info'
   alias dkl='docker login'

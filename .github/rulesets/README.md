@@ -14,16 +14,13 @@ the [GitHub Rulesets REST API](https://docs.github.com/en/rest/repos/rules).
 
 - [`main.json`](main.json): a draft protection ruleset for the `main`
   branch. It encodes signed commits, linear history, the fast-forward
-  and deletion blocks, a one-reviewer code-owner PR rule, and fifteen
+  and deletion blocks, a one-reviewer code-owner PR rule, and fourteen
   required status checks, including the two summary gates added under
   [#857](https://github.com/sebastienrousseau/dotfiles/issues/857)
   (`Compliance Summary` and `Reliability Summary`).
 
-  Two of those contexts match no job in any workflow:
-  `Type Check / Strict Mode`, and `Test / Integration` (the job is
-  named `Test / Integration (Docker)`). Applying the file unchanged
-  would leave both checks pending and block every merge, so fix the
-  list before applying it.
+  Each context is the name of a job in a workflow, so applying the file
+  would not leave a check pending forever.
 
 ## Apply (once the context list is fixed)
 
@@ -49,7 +46,7 @@ gh api repos/sebastienrousseau/dotfiles/rulesets/<id> | jq '.rules[]'
 
 The sibling `../branch-protection-config.json` is the *descriptive*
 record (human-readable, narrative `additional_enforcement` section).
-It is not applied either, and it carries the same fifteen contexts.
+It is not applied either, and it carries the same fourteen contexts.
 This `main.json` is the *machine* spec, a strict subset of the GitHub
 Rulesets API contract.
 

@@ -26,7 +26,7 @@
 ## - Requires ufw package installed
 ##
 ## # Security
-## **Requires sudo.** All changes logged to dotfiles.log.
+## **Requires sudo.**
 ##
 ## # Side Effects
 ## - Modifies system firewall rules

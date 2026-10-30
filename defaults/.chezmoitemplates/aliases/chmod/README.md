@@ -12,8 +12,6 @@ These aliases are defined in `chmod.aliases.sh`. Loaded by the lazy alias layer 
 
 Each `chmod_<mode>` alias runs `change_permission <mode>`, which validates its arguments, asks before a recursive change and can back up the current permissions first; run `chmod_help` for its options. The `chmod_r_*`, `chmod_b_*` and `chmod_rb_*` functions apply 644, 755 or 775 recursively (`r`), with a backup (`b`), or both. The `chmod_<who><op><perm>` functions add (`+`) or remove (`-`) one permission (`x`, `w` or `r`) for the user, group, others or all.
 
-Today the non-recursive forms (every `chmod_<mode>` alias and `chmod_b_*`) fail: `change_permission` passes an empty recursive flag to `chmod`, which rejects it (`chmod: invalid mode: ''`).
-
 | Name | Definition | Notes |
 | --- | --- | --- |
 | `change_permission` | function | Only when `chmod` is on PATH. |

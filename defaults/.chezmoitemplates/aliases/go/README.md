@@ -16,8 +16,6 @@ These aliases are defined in `go.aliases.sh`. Loaded by the lazy alias layer `~/
 | `gob` | `go build` |  |
 | `got` | `go test` |  |
 | `gota` | `go test ./...` |  |
-| `gocv` | `go coverage` | `go coverage` is not a Go subcommand. |
-| `gofmt` | `go fmt` | This shadows the standalone `gofmt` binary. |
 | `govet` | `go vet` |  |
 | `gom` | `go mod tidy` |  |
 | `gomod` | `go mod` |  |

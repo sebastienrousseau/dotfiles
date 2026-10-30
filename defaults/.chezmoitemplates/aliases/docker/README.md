@@ -12,9 +12,9 @@ These aliases are defined in `docker.aliases.sh`. Loaded by the lazy alias layer
 
 | Name | Definition | Notes |
 | --- | --- | --- |
-| `d` | `docker` | Only when `docker` is on PATH. Replaces `d='dot'` from `system.aliases.sh` (eager layer). |
+| `d` | `docker` | Only when `docker` is on PATH and `d` is not already an alias, so `d='dot'` from `system.aliases.sh` (and `d='dig'`, which loads earlier) wins. |
 | `dkv` | `docker version` | Only when `docker` is on PATH. |
-| `dki` | `docker info` | Only when `docker` is on PATH. Replaces `dki='dot ai kiro'` from `ai.aliases.sh`, which loads earlier. |
+| `dki` | `docker info` | Only when `docker` is on PATH. |
 | `dkl` | `docker login` | Only when `docker` is on PATH. |
 | `dklo` | `docker logout` | Only when `docker` is on PATH. |
 | `dkps` | `docker ps` | Only when `docker` is on PATH. |
@@ -94,7 +94,7 @@ These aliases are defined in `docker.aliases.sh`. Loaded by the lazy alias layer
 | `dco` | `docker compose` | Only when `docker` is on PATH. |
 | `dcb` | `docker compose build` | Only when `docker` is on PATH. |
 | `dce` | `docker compose exec` | Only when `docker` is on PATH. |
-| `dcl` | `docker compose logs` | Only when `docker` is on PATH. Replaces `dcl='dot ai claude'` from `ai.aliases.sh`, which loads earlier. |
+| `dcl` | `docker compose logs` | Only when `docker` is on PATH. |
 | `dclf` | `docker compose logs -f` | Only when `docker` is on PATH. |
 | `dcps` | `docker compose ps` | Only when `docker` is on PATH. |
 | `dcpull` | `docker compose pull` | Only when `docker` is on PATH. |

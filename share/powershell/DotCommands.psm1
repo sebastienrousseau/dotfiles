@@ -868,9 +868,9 @@ function New-DotSecretCert {
 function New-DotSecretKey {
     <#
     .SYNOPSIS
-    Create an ED25519 key
+    Encrypt an SSH key with age
     .DESCRIPTION
-    Runs `dot secret key new`: Create an ED25519 key. Effect: write; arguments pass through.
+    Runs `dot secret key new`: Encrypt an SSH key with age. Effect: write; arguments pass through.
     #>
     [CmdletBinding()]
     param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
@@ -1240,9 +1240,9 @@ function Start-DotMcp {
 function Sync-DotConfig {
     <#
     .SYNOPSIS
-    Pull the source, then apply
+    Apply the dotfiles; --pull pulls first
     .DESCRIPTION
-    Runs `dot config sync`: Pull the source, then apply. Effect: write; arguments pass through.
+    Runs `dot config sync`: Apply the dotfiles; --pull pulls first. Effect: write; arguments pass through.
     #>
     [CmdletBinding()]
     param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())

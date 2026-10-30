@@ -123,7 +123,7 @@ jobs:
     with:
       target: defaults/dot_config/nvim
       strict: false
-      stylua_version: "0.20.0"
+      stylua_version: "2.4.1"
 
   lint-fish:
     name: Lint / Fish

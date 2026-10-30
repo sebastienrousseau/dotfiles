@@ -142,7 +142,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot heal` → `dot doctor fix` | --dry-run / -n | `test_fm_heal_dry_run` | `run:heal-dry-run` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot health` → `dot doctor status` | (default) | `test_fm_health` | `run:health` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot health` → `dot doctor status` | --json / -j | `test_fm_health_json` | `run:health-json` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
-| `dot health` → `dot doctor status` | --verbose / -v | `test_fm_health_verbose` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
+| `dot health` → `dot doctor status` | --verbose / -v (accepted for old scripts; every check is always shown) | `test_fm_health_verbose` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot health-check` (retired: exits 127 naming `dot doctor`) | alias of health | `test_fm_health_check_alias` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot health` → `dot doctor status` | --fix / -f, --force / -F | `test_fm_smoke_health_fix` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | **smoke** — --fix re-applies chezmoi and rewrites shell configs in $HOME |
 | `dot security-score` → `dot security score show` | (default) | `test_fm_security_score` | `run:security-score` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
@@ -259,7 +259,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot env` → `dot tool export` | emit <unknown flag> (exit 1) | `test_fm_env_emit_bad_flag` | `help:tool` | `examples/example-dot-env-emit.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot env` → `dot tool export` | emit --help / -h | `test_fm_env_emit_help` | `help:tool` | `examples/example-dot-env-emit.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot profile` → `dot config profile show` | show (default) | `test_fm_profile_show` | `run:profile-show` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
-| `dot profile` → `dot config profile set` | set <name> (writes .chezmoidata.toml) | `test_fm_profile_set` | `help:config` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot profile` → `dot config profile set` | set <name> (writes ~/.config/chezmoi/chezmoi.toml) | `test_fm_profile_set` | `help:config` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot profile` → `dot config profile set` | set (no name, exit 1) | `test_fm_profile_set_usage` | `help:config` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot profile` → `dot config profile` | <unknown> (exit 1) | `test_fm_profile_unknown` | `help:config` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot profile` → `dot config profile show` | .chezmoidata.toml `profile` + `[features]` keys | `test_fm_config_chezmoidata_profile` | `help:config` | `examples/example-dot-tools.sh` | `docs/manual/03-reference/02-config-files.md` | regression |
@@ -642,7 +642,6 @@ therefore writes into that checkout whatever `HOME` says, so a sandboxed
 these drive a throwaway copy of the repo instead, and then assert the checkout
 is still clean:
 
-- `dot config profile set` (was `dot profile set`): `defaults/.chezmoidata.toml`
 - `dot fleet namespace set`: `defaults/.chezmoidata.toml`
 - `dot fleet enforce set`: `defaults/dot_config/dotfiles/agent-profiles.json`
 - `dot shell alias export` with no `--output` (was `dot aliases cheatsheet`): `docs/ALIASES_CHEATSHEET.md`

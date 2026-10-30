@@ -545,8 +545,9 @@ main() {
 
   # Toolchain provisioning, opt-in only (--provision or DOTFILES_PROVISION=1):
   # install/provision/ sits outside .chezmoiroot, so apply never runs it, and it
-  # installs packages and may change OS defaults, so it is never implicit.
-  if [[ "$provision" = "1" && $minimal -eq 0 ]]; then
+  # installs packages and may change OS defaults, so it is never implicit. The
+  # minimal profile (--minimal, DOTFILES_MINIMAL=1 or a container) skips it.
+  if [[ "$provision" = "1" && $want_minimal -eq 0 ]]; then
     step "Provisioning toolchain (packages, fonts, tools)..."
     local prov_dir="$SOURCE_DIR/install/provision"
     if [[ -d "$prov_dir" ]]; then
@@ -565,7 +566,7 @@ main() {
         fi
       done < <(ls "$prov_dir"/run_once_install_* "$prov_dir"/run_onchange_* 2>/dev/null | sort)
     fi
-  elif [[ $minimal -eq 0 ]]; then
+  elif [[ $want_minimal -eq 0 ]]; then
     step "Configs deployed. To also install the toolchain (packages, fonts, tools):"
     echo "   bash \"$SOURCE_DIR/install.sh\" --provision    # or DOTFILES_PROVISION=1"
     echo "   (or: brew bundle --file ~/.config/shell/Brewfile.cli)"

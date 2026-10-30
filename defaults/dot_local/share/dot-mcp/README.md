@@ -47,9 +47,9 @@ through this server. The one write any tool causes is the audit-log line
 
 | Tool | Runs | Arguments |
 | :--- | :--- | :--- |
-| `mcp-doctor` | `dot mcp doctor --json [--strict]` (the legacy spelling of `dot mcp check`, still accepted) | `strict` (boolean) |
+| `mcp-doctor` | `dot mcp check --json [--strict]` | `strict` (boolean) |
 | `agent-mode` | `dot agent status`, `dot agent mode list\|show <profile>` | `action` (enum), `profile` (pattern-checked, required for `show`) |
-| `workstation-attestation` | `dot attest --json` (runs the domain default, `dot attest show`) | none |
+| `workstation-attestation` | `dot attest show --json` | none |
 | `fleet-status` | `dot fleet status --json` | none |
 
 A tool whose command prints a JSON object returns it as

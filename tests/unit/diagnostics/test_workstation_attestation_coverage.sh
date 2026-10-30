@@ -35,6 +35,7 @@ fi
 input="\$(cat)"
 printf 'ARGS=%s\n' "\$*"
 printf 'HAS_EVIDENCE=%s\n' "\$([[ "\$input" == *'"dotfiles_version"'* ]] && echo yes || echo no)"
+printf 'FROM_FILE=%s\n' "\$([[ "\$input" == *'from-file'* ]] && echo yes || echo no)"
 exit "\${FAKE_WASM_RC:-0}"
 EOF
 chmod +x "$WORK/bin/wasmtime"
@@ -54,6 +55,32 @@ for opt in -w --write -F --fleet-store -I --fleet-id -a --max-age; do
   rc=$?
   assert_equals "2|yes" "$rc|$([[ "$out" == *"option '$opt' requires a value"* ]] && echo yes)" "$opt alone is a usage error naming the option"
 done
+
+# An unknown option, or a word that is not verify's evidence file, is a usage
+# error naming it, not an argument the parser drops.
+test_start "wa_unknown_option_is_usage_error"
+out="$(run_wa --unknown-flag 2>&1)"
+rc=$?
+assert_equals "2|yes" "$rc|$([[ "$out" == *"unknown option '--unknown-flag'"* ]] && echo yes)" "unknown option exits 2 naming it"
+
+test_start "wa_operand_without_verify_is_usage_error"
+out="$(run_wa stray.json 2>&1)"
+rc=$?
+assert_equals "2|yes" "$rc|$([[ "$out" == *"unexpected argument 'stray.json'"* ]] && echo yes)" "a file without --verify exits 2"
+
+# --verify FILE hands that file to the verifier instead of a fresh record.
+printf '{"dotfiles_version":"from-file"}\n' >"$WORK/evidence.json"
+test_start "wa_verify_file_checks_that_file"
+out="$(env PATH="$WORK/bin:$PATH" WASMTIME="$WORK/bin/wasmtime" DOT_SYS_WASM="$MODULE" \
+  "$REAL_BASH" "$TEST_SCRIPT" --verify "$WORK/evidence.json" --json 2>&1)"
+rc=$?
+assert_equals "0|yes|yes" "$rc|$([[ "$out" == *"FROM_FILE=yes"* ]] && echo yes)|$([[ "$out" == *"ARGS=run $MODULE verify --json"* ]] && echo yes)" "the named file is verified with the flags"
+
+test_start "wa_verify_missing_file_fails"
+out="$(env PATH="$WORK/bin:$PATH" WASMTIME="$WORK/bin/wasmtime" DOT_SYS_WASM="$MODULE" \
+  "$REAL_BASH" "$TEST_SCRIPT" --verify "$WORK/absent.json" 2>&1)"
+rc=$?
+assert_equals "2|yes" "$rc|$([[ "$out" == *"no such evidence file"* ]] && echo yes)" "a missing evidence file is reported, not replaced by a fresh record"
 
 if ! command -v jq >/dev/null 2>&1; then
   test_start "wa_requires_jq_for_remaining_cases"
@@ -106,10 +133,9 @@ rc_b=$?
 test_start "wa_verify_json_hands_evidence_to_verifier"
 assert_equals "0|yes|yes" "$rc_b|$([[ "$out_b" == *"ARGS=run $MODULE verify --json --max-age 600"* ]] && echo yes)|$([[ "$out_b" == *"HAS_EVIDENCE=yes"* ]] && echo yes)" "--max-age implies --verify and forwards flags"
 
-# Run C: plain --verify (no --json, no --max-age) with a failing verifier;
-# unknown flags are ignored.
+# Run C: plain --verify (no --json, no --max-age) with a failing verifier.
 out_c="$(env PATH="$WORK/bin:$PATH" WASMTIME="$WORK/bin/wasmtime" DOT_SYS_WASM="$MODULE" FAKE_WASM_RC=1 \
-  "$REAL_BASH" "$TEST_SCRIPT" -V --unknown-flag-ignored 2>&1)"
+  "$REAL_BASH" "$TEST_SCRIPT" -V 2>&1)"
 rc_c=$?
 
 test_start "wa_verify_human_mode_propagates_failure"

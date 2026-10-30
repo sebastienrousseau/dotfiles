@@ -55,9 +55,9 @@ list of backticked function names.
 | :--- | :--- | :--- | :--- |
 | tools | `tools/list` returns every registered tool with a JSON Schema | `tools/list` | `TestToolsListMatchesTheRegistry` `BenchmarkToolsList` |
 | tools | Every tool is annotated read-only, non-destructive, closed-world | manifest | `TestDefaultToolsAreReadOnly` |
-| tools | `mcp-doctor` runs `dot mcp doctor --json [--strict]` | `tools/call` | `TestToolArgv` `TestToolsCallRunsTheTool` `TestEndToEndProtocolExchange` |
+| tools | `mcp-doctor` runs `dot mcp check --json [--strict]` | `tools/call` | `TestToolArgv` `TestToolsCallRunsTheTool` `TestEndToEndProtocolExchange` |
 | tools | `agent-mode` runs `dot agent status`, `dot agent mode list\|show <profile>` | `tools/call` | `TestToolArgv` `TestConditionalRequirements` |
-| tools | `workstation-attestation` runs `dot attest --json` | `tools/call` | `TestToolArgv` `TestToolsCallWithoutArguments` |
+| tools | `workstation-attestation` runs `dot attest show --json` | `tools/call` | `TestToolArgv` `TestToolsCallWithoutArguments` |
 | tools | `fleet-status` runs `dot fleet status --json` | `tools/call` | `TestToolArgv` `TestLoggingSetLevel` |
 | tools | Arguments are validated against the published schema | bad arguments | `TestValidateArgs` `TestToolsCallRejections` `FuzzValidateArgs` `BenchmarkValidateArgs` |
 | tools | Unknown arguments rejected deterministically (closed schema) | extra keys | `TestValidateArgsReportsUnknownKeysDeterministically` |

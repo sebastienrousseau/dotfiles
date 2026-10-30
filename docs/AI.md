@@ -169,7 +169,7 @@ The top-level provider shortcuts were removed in 0.2.538: each now exits 127 and
 | `dot ai-query` | `dot ai ask` |
 | `dot patterns` | `dot ai pattern` |
 
-These verbs inside `dot ai` still work but print a one-line hint with the new name. The shortcut aliases (`dcl`, `dagy`, `dki`, …) run `dot ai <tool>`; when Docker is installed, the Docker aliases, loaded after them, take over `dcl` and `dki`.
+These verbs inside `dot ai` still work but print a one-line hint with the new name. The shortcut aliases (`dagy`, `dkm`, `dcla`, `dkia`, …) run `dot ai <tool>`; `dcl` and `dki` are the Docker aliases (`docker compose logs`, `docker info`).
 
 | Deprecated | Use instead |
 |------------|-------------|

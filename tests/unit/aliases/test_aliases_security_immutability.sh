@@ -29,4 +29,32 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should define aliases"
 fi
 
+# lock_alias <relative-script-path>: the lock-configs alias a bash shell
+# gets when the script exists at that path under a sandbox HOME.
+lock_alias() {
+  local sandbox
+  sandbox="$(mktemp -d)"
+  if [[ -n "$1" ]]; then
+    mkdir -p "$sandbox/$(dirname "$1")"
+    : >"$sandbox/$1"
+  fi
+  env -i HOME="$sandbox" PATH="$PATH" ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+    bash --norc --noprofile -c ". \"\$1\"; alias lock-configs 2>/dev/null || echo none" _ "$ALIAS_FILE" |
+    sed "s|$sandbox|~|"
+  rm -rf "$sandbox"
+}
+
+test_start "security_immutability_default_source"
+assert_equals "alias lock-configs='bash ~/.dotfiles/scripts/security/lock-configs.sh lock'" \
+  "$(lock_alias .dotfiles/scripts/security/lock-configs.sh)" \
+  "lock-configs is defined from the default source checkout ~/.dotfiles"
+
+test_start "security_immutability_legacy_source"
+assert_equals "alias lock-configs='bash ~/.local/share/chezmoi/scripts/security/lock-configs.sh lock'" \
+  "$(lock_alias .local/share/chezmoi/scripts/security/lock-configs.sh)" \
+  "lock-configs still works from the legacy chezmoi source location"
+
+test_start "security_immutability_no_script"
+assert_equals "none" "$(lock_alias "")" "no script, no alias"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

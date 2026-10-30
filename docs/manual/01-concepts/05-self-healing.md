@@ -153,7 +153,7 @@ tar --zstd -xf dotfiles_offline_bundle_<stamp>.tar.zst -P
 cd ~/.dotfiles && ./install.sh --force
 ```
 
-`dot config import` does not restore a bundle today: it passes `restore` to the bundler, which treats it as an output directory and writes a new bundle there.
+On a machine that already has `dot`, `dot config import <bundle>` restores it: it lists what it will overwrite and asks first (`--yes` skips the question), and refuses a file that is not such a bundle or holds anything outside those three paths of your home.
 
 ## Observability
 

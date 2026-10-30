@@ -29,7 +29,6 @@ cmd|doctor report show||read|Weekly posture report
 run|doctor perf --profile|@doctor perf --profile||
 run|doctor perf --ready|@doctor perf --ready||
 run|doctor perf --ready --pty|@doctor perf --ready --pty||
-flag|doctor status|verbose|v||Show detailed checks
 flag|doctor status|json|j||Print a JSON summary
 flag|doctor status|fix|f||Apply common fixes
 flag|doctor status|force|F||Apply fixes without prompts

@@ -20,12 +20,12 @@ These aliases are defined in `tmux.aliases.sh`. Loaded by the lazy alias layer `
 | `tml` | `tmux list-sessions` | List all sessions. |
 | `tmn` | `tmux new-session` | New unnamed session. |
 | `tms` | `tmux new-session -s` | New named session. |
-| `tmr` | `tmux source ~/.dotfiles/lib/configurations/tmux/tmux` | Meant to reload the configuration, but it sources `~/.dotfiles/lib/configurations/tmux/tmux`, which does not exist; the deployed configuration is `~/.config/tmux/tmux.conf`. |
+| `tmr` | `tmux source-file "${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf"` | Reload the deployed configuration. |
 | `tmls` | `tmux list-windows` | List windows. |
 | `tmlp` | `tmux list-panes` | List panes. |
 | `tmi` | `tmux info` | Show tmux info. |
 
-`tm` has the same problem as `tmr` when it starts a new server: it sources the missing `~/.dotfiles/lib/configurations/tmux/tmux`. tmux itself reads `~/.config/tmux/tmux.conf`, deployed from `defaults/dot_config/tmux/tmux.conf.tmpl`.
+A new server reads `~/.config/tmux/tmux.conf` by itself; it is deployed from `defaults/dot_config/tmux/tmux.conf.tmpl`.
 
 [banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 
