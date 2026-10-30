@@ -634,7 +634,7 @@ designed.
 
 ### Commands that write into the checkout
 
-These commands resolve their write target through `lib/dot/utils.sh`'s
+These commands resolve their write target through `lib/dot/sdk.sh`'s
 `resolve_source_dir`, which probes the location of the sourced library BEFORE
 `$CHEZMOI_SOURCE_DIR` and `$HOME`. Running `./bin/dot` from a checkout
 therefore writes into that checkout whatever `HOME` says, so a sandboxed

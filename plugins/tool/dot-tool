@@ -23,8 +23,8 @@ tool_list() {
     --nix) tool_module tools "${@:2}" ;;
     --packages) tool_module packages "${@:2}" ;;
     --locked)
-      # shellcheck source-path=SCRIPTDIR source=../../lib/dot/utils.sh
-      source "$_TOOL_DIR/../../lib/dot/utils.sh"
+      # shellcheck source-path=SCRIPTDIR source=../../lib/dot/sdk.sh
+      source "${DOT_SDK:-$_TOOL_DIR/../../lib/dot}/sdk.sh"
       dot_ui_command_banner "Diagnostics" "locks"
       run_script "scripts/diagnostics/version-locks.sh" "Version locks" "${@:2}"
       ;;

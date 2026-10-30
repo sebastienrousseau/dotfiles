@@ -16,8 +16,8 @@ if [[ "${1:-}" == report ]]; then
   exit 127
 fi
 
-# shellcheck source-path=SCRIPTDIR source=../../lib/dot/utils.sh
-source "$_TOP_DIR/../../lib/dot/utils.sh"
+# shellcheck source-path=SCRIPTDIR source=../../lib/dot/sdk.sh
+source "${DOT_SDK:-$_TOP_DIR/../../lib/dot}/sdk.sh"
 
 dot_ui_command_banner "Diagnostics" "intelligence" intelligence "$@"
 run_script "lib/dot/bento.sh" "Intelligence Surface" "$@"

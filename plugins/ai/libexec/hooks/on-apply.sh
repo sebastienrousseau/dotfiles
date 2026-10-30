@@ -12,8 +12,8 @@
 set -euo pipefail
 
 _HOOK_LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../lib/dot" && pwd)"
-# shellcheck source=../../../../lib/dot/utils.sh
-source "$_HOOK_LIB/utils.sh"
+# shellcheck source=../../../../lib/dot/sdk.sh
+source "${DOT_SDK:-$_HOOK_LIB}/sdk.sh"
 # shellcheck source=../../../../lib/dot/ai-provision.sh
 source "$_HOOK_LIB/ai-provision.sh"
 

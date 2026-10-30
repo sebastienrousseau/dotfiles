@@ -20,8 +20,8 @@ esac
 # not a terminal, so the banner is suppressed for it outright. (It already
 # self-suppresses off a TTY; this also covers a client that allocates a pty.)
 if [[ "${1:-}" != serve ]]; then
-  # shellcheck source-path=SCRIPTDIR source=../../lib/dot/utils.sh
-  source "$_MCP_DIR/../../lib/dot/utils.sh"
+  # shellcheck source-path=SCRIPTDIR source=../../lib/dot/sdk.sh
+  source "${DOT_SDK:-$_MCP_DIR/../../lib/dot}/sdk.sh"
   dot_ui_command_banner "AI and Agents" "mcp" mcp "$@"
 fi
 exec bash "$_MCP_DIR/libexec/mcp.sh" "$@"

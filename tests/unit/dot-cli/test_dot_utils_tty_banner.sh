@@ -72,7 +72,9 @@ tty_run() {
     printf '#!/bin/sh\n'
     printf 'cd "%s" || exit 1\n' "$FX"
     printf 'export HOME="%s/home" PATH="%s/stubs:%s/basebin"\n' "$FX" "$FX" "$FX"
-    printf 'export NO_COLOR=1 DOTFILES_SHOW_LOGO=1\n'
+    # bin/dot tells a plugin its domain; the banner's summary is that
+    # domain's command from the command table.
+    printf 'export NO_COLOR=1 DOTFILES_SHOW_LOGO=1 DOT_DOMAIN=config\n'
     local assignment
     for assignment in "$@"; do
       printf 'export %s\n' "$assignment"
@@ -104,8 +106,8 @@ test_start "utils_banner_names_the_command"
 assert_contains "status" "$TTY_OUT" "the banner should name the command it fronts"
 
 test_start "utils_banner_prints_a_summary"
-assert_contains "drift" "$TTY_OUT" \
-  "the banner should carry the command's one-line summary"
+assert_contains "Pending changes and last apply" "$TTY_OUT" \
+  "the banner should carry the command's summary from the command table"
 
 # ── 2. The logo prints once per process, not once per banner ───────────────
 test_start "utils_logo_is_suppressed_once_printed"

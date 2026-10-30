@@ -95,14 +95,14 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should support --check flag"
 fi
 
-# Test: lint.sh sources utils.sh
-test_start "lint_sources_utils"
-if grep -q 'source.*utils\.sh' "$LINT_FILE" 2>/dev/null; then
+# Test: lint.sh loads the plugin SDK
+test_start "lint_sources_the_sdk"
+if grep -q 'source.*sdk\.sh' "$LINT_FILE" 2>/dev/null; then
   ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: sources utils.sh"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: sources sdk.sh"
 else
   ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should source utils.sh"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should source sdk.sh"
 fi
 
 echo ""

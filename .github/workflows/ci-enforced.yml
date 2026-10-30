@@ -282,6 +282,11 @@ jobs:
           shfmt --version
       - name: Complexity ratchet
         run: python3 tools/ci/complexity.py
+      # A bundled plugin reaches the host only through the SDK (lib/dot/sdk.sh,
+      # passed as $DOT_SDK); the imports left from before it are in
+      # tools/ci/plugin-imports-baseline.txt and only shrink.
+      - name: Plugin import gate
+        run: python3 tools/ci/check-plugin-imports.py
 
   # Mutation gate on the lines a PR changes (tools/ci/mutation-test.py).
   # Line coverage says a line ran; this says whether the tests would notice

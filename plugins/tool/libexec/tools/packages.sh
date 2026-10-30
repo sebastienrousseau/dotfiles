@@ -7,7 +7,8 @@
 # so a manager that never answers cannot hang the command.
 
 # shellcheck source=../../../../lib/dot/probe.sh
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../../../lib/dot/probe.sh"
+_PACKAGES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${DOT_SDK:-$_PACKAGES_DIR/../../../../lib/dot}/probe.sh"
 
 ## _pkg_probe <cmd…> — a package-manager query under dot_probe, limited to
 ## DOTFILES_PACKAGES_TIMEOUT seconds (default 10). Exits 124 on expiry.

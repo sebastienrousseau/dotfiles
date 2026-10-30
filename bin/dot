@@ -362,7 +362,9 @@ _dispatch_args() {
 _dispatch_entry() {
   local entry="${_SOURCE_DIR}/plugins/${COMMAND}/dot-${COMMAND}"
   if [[ -x "$entry" ]]; then
-    exec "$entry" "$@"
+    # The plugin SDK is this host's lib/dot, whatever the environment says,
+    # and the plugin is told its domain.
+    DOT_SDK="$_SOURCE_DIR/lib/dot" DOT_DOMAIN="$COMMAND" exec "$entry" "$@"
   fi
   ui_fail "dot-${COMMAND} not found ($entry)" >&2
   exit 1
