@@ -8,7 +8,7 @@ End-to-end installation and verification, from zero to a fully-working environme
 
 ## Prerequisites
 
-- macOS 14+, Ubuntu 22.04+, Debian 12+, NixOS 23.11+, Arch (rolling), Fedora 41+, or WSL2 with Ubuntu 22.04+ (see [Appendix A](../05-appendices/A-platform-matrix.md))
+- macOS 15+, Ubuntu 22.04+, Debian 12+, NixOS 23.11+, Arch (rolling), Fedora 41+, or WSL2 with Ubuntu 22.04+ (see [Appendix A](../05-appendices/A-platform-matrix.md))
 - `git` and `curl` installed
 - Shell access (Zsh, Fish, or Bash)
 - Optional but recommended: SSH key for signing commits
