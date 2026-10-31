@@ -6,7 +6,7 @@
 schema = "cli/manifest.v1"
 name = "ui"
 domain = "ui"
-version = "0.2.539"
+version = "0.2.540"
 summary = "primitives for scripts"
 default = "show"
 

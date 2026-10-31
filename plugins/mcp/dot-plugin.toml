@@ -6,7 +6,7 @@
 schema = "cli/manifest.v1"
 name = "mcp"
 domain = "mcp"
-version = "0.2.539"
+version = "0.2.540"
 summary = "MCP servers as supply chain"
 default = "list"
 
