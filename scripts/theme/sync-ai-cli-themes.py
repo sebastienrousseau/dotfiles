@@ -11,12 +11,11 @@ import json
 import os
 import re
 import tempfile
+import tomllib
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
-
-import tomllib
 
 MISSING_HASH = "missing"
 
@@ -230,22 +229,36 @@ def feature_policy(
     return bool(enabled), provider_policy
 
 
+def read_palette(path: Path) -> dict[str, str]:
+    """The palette.v1 contract (KEY=VALUE lines); ValueError when it is not one."""
+    palette: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        key, sep, value = line.partition("=")
+        if sep and not line.startswith("#"):
+            palette[key.strip()] = value.strip()
+    if palette.get("DOT_PALETTE") != "palette.v1":
+        raise ValueError(f"{path} is not a palette.v1 file")
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", palette.get("THEME", "")):
+        raise ValueError(f"{path}: THEME must name a theme")
+    if palette.get("MODE") not in {"dark", "light"}:
+        raise ValueError(f"{path}: MODE must be dark or light")
+    return palette
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--theme", required=True)
-    parser.add_argument("--themes-file", type=Path, required=True)
+    parser.add_argument("--palette", type=Path, required=True)
     parser.add_argument("--home", type=Path, default=Path.home())
     parser.add_argument("--defaults-config", type=Path)
     parser.add_argument("--machine-config", type=Path)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
-    with args.themes_file.open("rb") as handle:
-        themes = tomllib.load(handle).get("themes", {})
-    palette = themes.get(args.theme)
-    if not isinstance(palette, dict):
-        parser.error(f"unknown theme: {args.theme}")
-    mode = palette.get("mode", "dark")
+    try:
+        palette = read_palette(args.palette)
+    except (OSError, UnicodeError, ValueError) as error:
+        parser.error(str(error))
+    mode = palette["MODE"]
     ansi_theme = "ANSI Light" if mode == "light" else "ANSI"
     home = args.home.expanduser()
     enabled, provider_policy = feature_policy(args.defaults_config, args.machine_config)
@@ -317,7 +330,7 @@ def main() -> int:
             json.dumps(
                 {
                     "schema_version": "1.0",
-                    "theme": args.theme,
+                    "theme": palette["THEME"],
                     "mode": mode,
                     "providers": [asdict(result) for result in results],
                 },

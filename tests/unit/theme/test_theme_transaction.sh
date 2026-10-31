@@ -80,6 +80,9 @@ for arg in "\$@"; do
   fi
 done
 printf 'rendered kitty config\n' >"$HOME/.config/kitty/kitty.conf"
+# The palette contract, as defaults/dot_config/dotfiles/palette.env.tmpl renders it.
+mkdir -p "$HOME/.config/dotfiles"
+printf 'DOT_PALETTE=palette.v1\nTHEME=maui-dark\nMODE=dark\n' >"$HOME/.config/dotfiles/palette.env"
 rm -f "$HOME/.config/firefox/user.js"
 printf 'rendered firefox config\n' >"$HOME/.config/firefox/user.js"
 exit "\${FAKE_CHEZMOI_RC:-0}"

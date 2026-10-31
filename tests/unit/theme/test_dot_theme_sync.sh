@@ -395,9 +395,10 @@ assert_contains "$HOME/.config/starship.toml" "$apply_call" "Starship prompt is 
 assert_contains "$HOME/.config/kitty/kitty.conf" "$apply_call" "Kitty palette is regenerated"
 assert_contains "$HOME/.config/tmux/tmux.conf" "$apply_call" "tmux theme is regenerated"
 assert_contains "$HOME/.codex/themes/dotfiles.tmTheme" "$apply_call" "Codex syntax theme is regenerated"
+assert_contains "$HOME/.config/dotfiles/palette.env" "$apply_call" "the palette contract is rendered, even before it exists"
 assert_equals no "$(has "alacritty" "$apply_call")" "absent targets are not rendered"
 assert_equals no "$(has "iterm2" "$(calls chezmoi)")" "iTerm2 profile is Darwin-only"
-assert_contains "regenerated 5 configs" "$(cat "$OUT")" "summary counts the rendered targets"
+assert_contains "regenerated 6 configs" "$(cat "$OUT")" "summary counts the rendered targets"
 
 # ~/.config/niri/config.kdl is ignored by chezmoi unless the niri feature is
 # on, so on most machines the file exists unmanaged. Applying it through
@@ -413,7 +414,7 @@ EXTRA_ENV=()
 assert_equals 0 "$rc" "managed niri config applies"
 assert_equals 1 "$(calls chezmoi | grep -c "^apply --force $XDG_CONFIG_HOME/niri/config.kdl$")" "niri is applied by chezmoi on its own"
 assert_equals no "$(has "execute-template" "$(calls chezmoi)")" "no direct render when chezmoi manages it"
-assert_contains "regenerated 6 configs" "$(cat "$OUT")" "niri counts as a regenerated config"
+assert_contains "regenerated 7 configs" "$(cat "$OUT")" "niri counts as a regenerated config"
 
 test_start "unmanaged_niri_config_is_rendered_from_the_template"
 reset_calls
@@ -422,7 +423,7 @@ run_sync Linux fixture-light
 assert_equals 0 $? "unmanaged niri config does not fail the switch"
 assert_file_contains "$XDG_CONFIG_HOME/niri/config.kdl" "# rendered by the stub" "config.kdl is rendered from the template"
 assert_equals no "$(has "apply --force $XDG_CONFIG_HOME/niri" "$(calls chezmoi)")" "chezmoi apply is not attempted on it"
-assert_contains "regenerated 6 configs" "$(cat "$OUT")" "the rendered niri config is counted"
+assert_contains "regenerated 7 configs" "$(cat "$OUT")" "the rendered niri config is counted"
 assert_contains '"status": "succeeded"' "$(cat "$XDG_STATE_HOME"/dot/theme-transactions/*/journal.json | tail -14)" "the switch succeeds"
 
 test_start "unmanaged_niri_config_without_a_template_is_skipped_not_fatal"
@@ -433,7 +434,7 @@ run_sync Linux fixture-dark
 assert_equals 0 $? "nothing to render is not a failure"
 assert_contains "no template to render" "$(cat "$OUT")" "the skip says why"
 assert_equals "hand kept" "$(cat "$XDG_CONFIG_HOME/niri/config.kdl")" "the hand-kept config is untouched"
-assert_contains "regenerated 5 configs" "$(cat "$OUT")" "the skipped niri config is not counted"
+assert_contains "regenerated 6 configs" "$(cat "$OUT")" "the skipped niri config is not counted"
 rm -rf "$XDG_CONFIG_HOME/niri" "$SRC/dot_config/niri"
 run_sync Linux fixture-light
 
@@ -498,8 +499,8 @@ print(json.dumps({"providers": [
 PY
 run_sync Linux fixture-dark --force
 assert_equals 0 $? "apply with AI adapter exits 0"
-assert_contains "--theme fixture-dark" "$(calls ai-helper)" "adapter receives the active theme"
-assert_contains "--themes-file $THEMES_FILE" "$(calls ai-helper)" "adapter receives the theme manifest"
+assert_contains "--palette $HOME/.config/dotfiles/palette.env" "$(calls ai-helper)" "adapter receives the palette contract"
+assert_equals no "$(has "themes.toml" "$(calls ai-helper)")" "and never the theme manifest"
 assert_contains "--machine-config $CFG" "$(calls ai-helper)" "adapter receives the machine config"
 assert_contains "checked codex, claude" "$(cat "$OUT")" "applied providers are summarised"
 assert_contains "optional adapter warnings: qwen=conflict" "$(cat "$OUT")" "provider issues are surfaced as warnings"

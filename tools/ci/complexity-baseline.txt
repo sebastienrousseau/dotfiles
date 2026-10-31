@@ -7,7 +7,7 @@
   12   19   21.7   83    94 .devcontainer/install-lite.sh::<top>
   32   27   57.7  154   218 benches/dot_command_bench.sh::<top>
   26   32   45.4   82    82 benches/test_help_gates_wall_clock.sh::<top>
-   9    9   21.6   38  1588 bin/dot-theme-sync::<top>
+   9    9   22.5   39  1588 bin/dot-theme-sync::<top>
   25   18   28.6   37     0 bin/dot-theme-sync::_apply_gnome_family_desktop
   42   37   46.0   65     0 bin/dot-theme-sync::_apply_kde_desktop
   25   19   31.6   32     0 bin/dot-theme-sync::_apply_wlroots_desktop
@@ -15,8 +15,8 @@
   20    9   15.3   83     0 bin/dot-theme-sync::_detect_linux_de
   12   12   12.8   21     0 bin/dot-theme-sync::_resolve_theme_wallpapers
   20   26   38.2   48     0 bin/dot-theme-sync::_run_reloads_parallel
-  20   29   44.5   60     0 bin/dot-theme-sync::apply_theme_configs
-  46   41   67.7  201     0 bin/dot-theme-sync::main
+  18   26   39.0   55     0 bin/dot-theme-sync::apply_theme_configs
+  46   41   67.5  201     0 bin/dot-theme-sync::main
   39   38   41.3   78     0 bin/dot-theme-sync::reload_browsers
   33   39   35.4  149     0 bin/dot-theme-sync::reload_desktop
   17   19   28.7   43     0 bin/dot-theme-sync::reload_ghostty
@@ -88,9 +88,8 @@
   39   20   35.3   29     0 lib/dot/ai-commands.sh::_ai_invoke_provider
   12   11   23.7   24     0 lib/dot/ai-commands.sh::cmd_ai_install
   12   12   24.7   29     0 lib/dot/theme-transaction.sh::_theme_txn_restore_files
-   2    1    4.2   35   756 lib/dot/ui.sh::<top>
+   2    1    4.2   35   693 lib/dot/ui.sh::<top>
   13   16   47.8   47     0 lib/dot/ui.sh::_ui_table_printf_fallback
-  13   12   23.5   19     0 lib/dot/ui.sh::_ui_theme_files
   20   18   30.8   57     0 lib/dot/ui.sh::ui_pick
    7   11   40.0   50     0 lib/dot/ui.sh::ui_run_cmd
   16   19   29.6   38     0 lib/dot/ui.sh::ui_steps_begin

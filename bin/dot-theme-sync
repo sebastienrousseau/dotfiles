@@ -96,6 +96,9 @@ fi
 
 readonly DATA_FILE="$CHEZMOI_SRC/.chezmoidata.toml"
 readonly THEMES_FILE="$CHEZMOI_SRC/.theme-manifest/themes.toml"
+# The palette.v1 contract (rendered from defaults/dot_config/dotfiles/
+# palette.env.tmpl): what readers outside the theme engine take colours from.
+readonly PALETTE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/palette.env"
 readonly CHEZMOI_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
 
 # =============================================================================
@@ -347,6 +350,7 @@ theme_transaction_targets() {
     "$HOME/.config/fish/conf.d/env.fish" \
     "$HOME/.config/nushell/env.nu" \
     "$HOME/.codex/themes/dotfiles.tmTheme" \
+    "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/palette.env" \
     "$HOME/.config/wezterm/wezterm.lua" \
     "$HOME/.config/foot/foot.ini" \
     "$HOME/.config/fuzzel/fuzzel.ini" \
@@ -486,6 +490,15 @@ _theme_chezmoi_apply() {
 
 # Regenerate only theme-dependent config files via chezmoi.
 # Much faster than a full apply — just renders the templates that use $t.
+# _theme_chezmoi_target TARGET: true when the targeted apply renders it: a
+# chezmoi-owned file that exists (niri has its own step), or the palette
+# contract, applied even before it first exists because the AI theme
+# adapter reads it next.
+_theme_chezmoi_target() {
+  _theme_target_adapter "$1"
+  [[ "$THEME_TARGET_ADAPTER" == chezmoi && "$1" != "$HOME/.config/niri/config.kdl" && (-f "$1" || "$1" == "$PALETTE_FILE") ]]
+}
+
 apply_theme_configs() {
   if ! command -v chezmoi &>/dev/null; then
     _err "Chezmoi" "not installed"
@@ -498,12 +511,7 @@ apply_theme_configs() {
   local valid_targets=()
   local target
   while IFS= read -r target; do
-    _theme_target_adapter "$target"
-    case "$THEME_TARGET_ADAPTER" in
-      chezmoi)
-        [[ "$target" != "$HOME/.config/niri/config.kdl" && -f "$target" ]] && valid_targets+=("$target")
-        ;;
-    esac
+    _theme_chezmoi_target "$target" && valid_targets+=("$target")
   done < <(theme_transaction_targets | awk '!seen[$0]++')
 
   local applied_count=0
@@ -562,7 +570,6 @@ apply_theme_configs() {
 }
 
 sync_ai_cli_themes() {
-  local theme="$1"
   local helper="$SRC_DIR/scripts/theme/sync-ai-cli-themes.py"
   local result summary applied issues disabled
 
@@ -570,7 +577,7 @@ sync_ai_cli_themes() {
     _skip "AI CLIs" "theme adapter unavailable"
     return 0
   fi
-  if result="$(python3 "$helper" --theme "$theme" --themes-file "$THEMES_FILE" \
+  if result="$(python3 "$helper" --palette "$PALETTE_FILE" \
     --defaults-config "$DATA_FILE" --machine-config "$CHEZMOI_CFG" --json 2>/dev/null)"; then
     summary="$(printf '%s' "$result" | python3 -c '
 import json, sys
@@ -1943,7 +1950,7 @@ main() {
       return 1
     fi
   fi
-  sync_ai_cli_themes "$theme"
+  sync_ai_cli_themes
   sync_ghostty_macos_config
   echo ""
 

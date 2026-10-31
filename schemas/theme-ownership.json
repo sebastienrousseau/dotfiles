@@ -15,6 +15,7 @@
     {"path": "$HOME/.config/fish/conf.d/env.fish", "platform": "all", "adapter": "chezmoi", "format": "fish", "ownership": "file", "keys": []},
     {"path": "$HOME/.config/nushell/env.nu", "platform": "all", "adapter": "chezmoi", "format": "nushell", "ownership": "file", "keys": []},
     {"path": "$HOME/.codex/themes/dotfiles.tmTheme", "platform": "all", "adapter": "chezmoi", "format": "plist", "ownership": "file", "keys": []},
+    {"path": "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/palette.env", "platform": "all", "adapter": "chezmoi", "format": "shell", "ownership": "file", "keys": []},
     {"path": "$HOME/.config/wezterm/wezterm.lua", "platform": "all", "adapter": "chezmoi", "format": "lua", "ownership": "file", "keys": []},
     {"path": "$HOME/.config/foot/foot.ini", "platform": "all", "adapter": "chezmoi", "format": "ini", "ownership": "file", "keys": []},
     {"path": "$HOME/.config/fuzzel/fuzzel.ini", "platform": "all", "adapter": "chezmoi", "format": "ini", "ownership": "file", "keys": []},
