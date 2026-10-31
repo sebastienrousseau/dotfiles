@@ -6,7 +6,7 @@
 schema = "cli/manifest.v1"
 name = "fleet"
 domain = "fleet"
-version = "0.2.540"
+version = "0.2.539"
 summary = "many hosts"
 default = "status"
 

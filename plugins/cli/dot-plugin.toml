@@ -6,7 +6,7 @@
 schema = "cli/manifest.v1"
 name = "cli"
 domain = "cli"
-version = "0.2.540"
+version = "0.2.539"
 summary = "plugins, updates, completions"
 default = "list"
 

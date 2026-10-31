@@ -6,7 +6,7 @@
 schema = "cli/manifest.v1"
 name = "agent"
 domain = "agent"
-version = "0.2.540"
+version = "0.2.539"
 summary = "modes, policy, sandbox, budgets"
 default = "status"
 
