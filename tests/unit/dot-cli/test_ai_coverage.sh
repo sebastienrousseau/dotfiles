@@ -8,7 +8,7 @@
 # the no-gum mise path, the launcher), run_ai_with_context (styles, raw
 # mode, every not-installed arm, the run log), and the whole dispatcher.
 #
-# The lib/dot/ai-commands.sh bodies (installers, cockpit, gateway, …) are
+# The plugins/ai/libexec/ai/ai-commands.sh bodies (installers, cockpit, gateway, …) are
 # replaced by exported recording stubs: the lib's re-source guard is set,
 # so ai.sh uses these instead. gum, mise and every provider binary are
 # PATH stubs; HOME/XDG live in a mktemp sandbox; nothing touches the network.

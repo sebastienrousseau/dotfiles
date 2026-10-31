@@ -1,11 +1,6 @@
 # Plugin imports outside the SDK, written by
 #   tools/ci/check-plugin-imports.py --write-baseline
 # Remove a line by moving the library into the plugin that owns it.
-plugins/ai/libexec/ai.sh lib/dot/ai-commands.sh
-plugins/ai/libexec/ai.sh lib/dot/ai-probe.sh
-plugins/ai/libexec/ai.sh lib/dot/ai-provision.sh
-plugins/ai/libexec/ai.sh lib/dot/ai-roster.sh
-plugins/ai/libexec/hooks/on-apply.sh lib/dot/ai-provision.sh
 plugins/cli/libexec/registry.sh lib/dot/registry-module.sh
 plugins/cli/libexec/registry.sh lib/dot/registry-trust.sh
 plugins/secret/libexec/secrets.sh scripts/lib/secrets_provider.sh

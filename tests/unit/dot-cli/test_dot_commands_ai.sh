@@ -7,7 +7,7 @@
 # Every case runs ai.sh: the bridge prompt it builds (system metadata,
 # --pattern/--style/-p steering), the grouped provider listing of
 # `dot ai tools`, its status cache (cold probe, warm read, TTL expiry), and
-# the gum launcher's labels on a pseudo-terminal. The lib/dot/ai-commands.sh
+# the gum launcher's labels on a pseudo-terminal. The plugins/ai/libexec/ai/ai-commands.sh
 # bodies are exported recording stubs (the lib's re-source guard is set);
 # gum and every provider binary are PATH stubs; HOME/XDG live in a mktemp
 # sandbox; nothing touches the network or a real AI CLI.

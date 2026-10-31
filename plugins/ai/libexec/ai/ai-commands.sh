@@ -10,8 +10,9 @@
 [[ "${_DOT_LIB_AI_COMMANDS_LOADED:-0}" == "1" ]] && return 0
 _DOT_LIB_AI_COMMANDS_LOADED=1
 
+_AI_COMMANDS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=ai-provision.sh disable=SC1091
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ai-provision.sh"
+source "$_AI_COMMANDS_DIR/ai-provision.sh"
 
 # _ai_deprecated <new-command> — one-line stderr hint; the old form still runs.
 _ai_deprecated() {

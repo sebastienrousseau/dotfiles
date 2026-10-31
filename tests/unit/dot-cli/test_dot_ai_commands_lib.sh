@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Behavioural coverage for lib/dot/ai-commands.sh — the `dot ai` subcommand
+# Behavioural coverage for plugins/ai/libexec/ai/ai-commands.sh — the `dot ai` subcommand
 # bodies. The library is sourced the way ai.sh sources it (utils.sh first),
 # with `run_ai_with_context` supplied by the caller as ai.sh does.
 #
@@ -16,7 +16,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-AI_COMMANDS="$REPO_ROOT/lib/dot/ai-commands.sh"
+AI_COMMANDS="$REPO_ROOT/plugins/ai/libexec/ai/ai-commands.sh"
 REAL_BASH="$(command -v bash)"
 
 trap cov_teardown_sandbox EXIT

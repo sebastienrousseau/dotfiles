@@ -4,9 +4,9 @@
 # Sourced by scripts/dot/commands/*.sh and bin/dot; inherits set -euo pipefail.
 # Dotfiles CLI Utilities
 # The host's helpers, on top of the plugin SDK (sdk.sh), which it loads.
-# The AI installer and the toolchain updater are not loaded here: the
-# modules that use them source ai-provision.sh, ai-install.sh or
-# upgrade.sh themselves.
+# The AI installer and the toolchain updater are not loaded here: the ai
+# plugin keeps its own (plugins/ai/libexec/ai/), and the system plugin
+# sources upgrade.sh itself.
 
 # Re-source guard: cheap short-circuit when sourced from multiple modules.
 [[ "${_DOT_LIB_UTILS_LOADED:-0}" == "1" ]] && return 0

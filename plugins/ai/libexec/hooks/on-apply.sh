@@ -14,8 +14,9 @@ set -euo pipefail
 _HOOK_LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../lib/dot" && pwd)"
 # shellcheck source=../../../../lib/dot/sdk.sh
 source "${DOT_SDK:-$_HOOK_LIB}/sdk.sh"
-# shellcheck source=../../../../lib/dot/ai-provision.sh
-source "$_HOOK_LIB/ai-provision.sh"
+_HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=../ai/ai-provision.sh
+source "$_HOOK_DIR/ai/ai-provision.sh"
 
 # _on_apply_label <bin>: the roster's display name for a binary (every
 # binary has one: both lists are generated from the same roster).

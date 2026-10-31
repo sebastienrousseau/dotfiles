@@ -16,8 +16,9 @@
 [[ -n "${_DOT_AI_PROVISION_LOADED:-}" ]] && return 0
 _DOT_AI_PROVISION_LOADED=1
 
+_AI_PROVISION_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=ai-install.sh disable=SC1091
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ai-install.sh"
+source "$_AI_PROVISION_DIR/ai-install.sh"
 
 # ai_install_method <bin>: native:<function> or mise:<package>; 1 (and no
 # output) when nothing can install it.

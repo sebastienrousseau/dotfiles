@@ -41,7 +41,7 @@ update() {
   OUT="$(PATH="$WORK/bin:/usr/bin:/bin" bash -c '
     set -euo pipefail
     source "$1/lib/dot/utils.sh"
-    source "$1/lib/dot/ai-commands.sh"
+    source "$1/plugins/ai/libexec/ai/ai-commands.sh"
     src="$2/src"
     resolve_source_dir() { printf "%s\n" "$src"; }
     _AI_PINS_FILE="$2/pins.toml"

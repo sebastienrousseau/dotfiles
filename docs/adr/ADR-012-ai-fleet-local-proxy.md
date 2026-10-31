@@ -47,7 +47,7 @@ present it behind a flat, verb-first surface modelled on the Claude CLI.
   bare prompt runs a one-shot on Claude; `<tool> "<prompt>"` targets a tool;
   plus `chat`, `tools`, `install`, `serve`, `cost`, `login`, `doctor`, and a
   `--style` steering flag. Old forms remain as deprecated aliases that print a
-  one-line hint. (`plugins/ai/libexec/ai.sh`, `lib/dot/ai-commands.sh`.)
+  one-line hint. (`plugins/ai/libexec/ai.sh`, `plugins/ai/libexec/ai/ai-commands.sh`.)
 - **Local gateway (`dot ai serve`).** `dot-ai-serve` is a stdlib-only Python
   server that wraps the already-installed `claude` CLI in headless
   `stream-json` mode and exposes the Anthropic (`/v1/messages`) and OpenAI

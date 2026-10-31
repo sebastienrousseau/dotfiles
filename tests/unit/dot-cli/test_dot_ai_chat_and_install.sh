@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 # `dot ai chat`, `dot ai install` and `dot ai serve`.
 #
-# These three route through lib/dot/ai-commands.sh, and each ends in an exec
+# These three route through plugins/ai/libexec/ai/ai-commands.sh, and each ends in an exec
 # or an installer — so no suite had run them: chat would replace the test
 # process with a real CLI, install would reach for mise, serve would start a
 # proxy. Every one of those is a stub here, on a PATH that carries nothing

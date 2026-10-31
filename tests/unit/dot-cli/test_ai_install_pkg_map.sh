@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 #
-# Contract test for lib/dot/ai-install.sh's provider → mise package map.
+# Contract test for plugins/ai/libexec/ai/ai-install.sh's provider → mise package map.
 # `dot ai <tool>` offers a mise install only when _ai_mise_pkg returns a
 # package for that binary, so a typo in an arm silently turns into "not
 # installed and mise not available". Every arm is asserted here, along
@@ -25,7 +25,7 @@ source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 exec 21>&2
 export BASH_XTRACEFD=21
 
-AI_INSTALL="$REPO_ROOT/lib/dot/ai-install.sh"
+AI_INSTALL="$REPO_ROOT/plugins/ai/libexec/ai/ai-install.sh"
 BASH_BIN="$(command -v bash)"
 
 trap cov_teardown_sandbox EXIT

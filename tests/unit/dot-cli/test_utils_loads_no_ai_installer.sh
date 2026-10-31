@@ -4,8 +4,9 @@
 # shellcheck disable=SC1091,SC2016
 # P2.2, edge 1: lib/dot/utils.sh, which every command module sources, does
 # not load the AI installer, the AI provisioner or the toolchain updater.
-# The modules that use them load them: the ai plugin (through ai-commands.sh
-# and ai-provision.sh) and the system plugin (through upgrade.sh). Each case
+# The modules that use them load them: the ai plugin (through its own
+# ai-commands.sh and ai-provision.sh) and the system plugin (through
+# upgrade.sh). Each case
 # sources the libraries in a child bash and asks which functions exist.
 set -uo pipefail
 
@@ -38,7 +39,7 @@ assert_contains "dot_upgrade_prepare no" "$out" "the toolchain updater is not lo
 assert_contains "require_source_dir yes" "$out" "utils.sh's own functions are"
 
 test_start "ai_commands_loads_the_provisioner_and_installer"
-out="$(defined lib/dot/utils.sh lib/dot/ai-commands.sh -- ai_install_tool install_claude_native ai_pinned_spec)"
+out="$(defined lib/dot/utils.sh plugins/ai/libexec/ai/ai-commands.sh -- ai_install_tool install_claude_native ai_pinned_spec)"
 assert_contains "ai_install_tool yes" "$out" "ai-commands.sh brings the provisioner"
 assert_contains "install_claude_native yes" "$out" "which brings the installer"
 assert_contains "ai_pinned_spec yes" "$out" "and the pins"
