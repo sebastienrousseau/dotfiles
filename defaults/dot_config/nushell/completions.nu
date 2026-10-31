@@ -462,6 +462,7 @@ export extern "dot ai start" [
 ]
 
 export extern "dot ai update" [
+    --check # List the pins with a newer release; change nothing
     --help(-h) # Show help
     ...rest: string
 ]

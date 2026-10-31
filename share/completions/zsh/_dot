@@ -198,7 +198,7 @@ _dot() {
       [[ "$path_" != 'ai start' ]] || values_=(claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai)
       ;;
     'ai update' | 'ai update'\ *)
-      flags_=('--help:Show help')
+      flags_=('--help:Show help' '--check:List the pins with a newer release; change nothing')
       ;;
     'attest export' | 'attest export'\ *)
       flags_=('--help:Show help')

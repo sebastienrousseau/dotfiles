@@ -43,10 +43,12 @@ assert_contains "ai_install_tool yes" "$out" "ai-commands.sh brings the provisio
 assert_contains "install_claude_native yes" "$out" "which brings the installer"
 assert_contains "ai_pinned_spec yes" "$out" "and the pins"
 
-test_start "upgrade_loads_the_pins_it_reports"
-out="$(defined lib/dot/utils.sh lib/dot/upgrade.sh -- dot_upgrade_prepare ai_pin_bumps)"
+test_start "upgrade_loads_no_ai_code"
+# The pin report comes from `dot ai update --check` (P2.2 edge 5b).
+out="$(defined lib/dot/utils.sh lib/dot/upgrade.sh -- dot_upgrade_prepare ai_pin_bumps install_claude_native)"
 assert_contains "dot_upgrade_prepare yes" "$out" "upgrade.sh defines the updater"
-assert_contains "ai_pin_bumps yes" "$out" "and loads the AI pins it lists"
+assert_contains "ai_pin_bumps no" "$out" "without loading the AI pins"
+assert_contains "install_claude_native no" "$out" "or the AI installer"
 
 # The plugin modules that use them still get them. Each module dispatches
 # when sourced (here to its help) and may exit, so the check runs in an

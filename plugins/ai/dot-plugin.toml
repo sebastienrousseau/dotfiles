@@ -50,6 +50,10 @@ verb = "update"
 effect = "write"
 summary = "Upgrade agent CLIs"
 
+[[commands.flags]]
+long = "check"
+summary = "List the pins with a newer release; change nothing"
+
 [[commands]]
 verb = "start"
 effect = "write"

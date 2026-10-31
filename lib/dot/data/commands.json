@@ -271,7 +271,13 @@
      "spelling": "ai update",
      "effect": "write",
      "summary": "Upgrade agent CLIs",
-     "built": true
+     "built": true,
+     "flags": [
+      {
+       "long": "check",
+       "summary": "List the pins with a newer release; change nothing"
+      }
+     ]
     },
     {
      "spelling": "ai start",

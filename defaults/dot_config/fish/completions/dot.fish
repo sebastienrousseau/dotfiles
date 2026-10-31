@@ -287,6 +287,7 @@ complete -c dot -n '__dot_at '\''ui table'\''' -a show -d 'Render rows as a tabl
 complete -c dot -n '__dot_in '\''ai run'\''' -l style -s p -x -a '(__dot_patterns)' -d 'Steering pattern (--pattern is the old name)'
 complete -c dot -n '__dot_at '\''ai run'\''' -a 'claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai'
 complete -c dot -n '__dot_at '\''ai start'\''' -a 'claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai'
+complete -c dot -n '__dot_in '\''ai update'\''' -l check -d 'List the pins with a newer release; change nothing'
 complete -c dot -n '__dot_in '\''attest show'\''' -l json -s j -d 'Print JSON'
 complete -c dot -n '__dot_in '\''attest show'\''' -l write -s w -d 'Write the attestation to a file'
 complete -c dot -n '__dot_in '\''config add'\''' -F

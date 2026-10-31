@@ -78,7 +78,17 @@ _ai_oneshot() {
 # (mise core, npm and pipx globals, native agents, Ollama, LM Studio) with
 # the ai-update script. `dot update` keeps the AI CLIs at their pins and
 # lists the bumps instead; this is the explicit request to go beyond them.
+# `--check` changes nothing: it prints "<package> <pin> -> <latest>" for each
+# pin behind its latest release, which `dot system update` reports.
 cmd_ai_update() {
+  if [[ "${1:-}" == "--check" ]]; then
+    if [[ $# -gt 1 ]]; then
+      ui_err "dot ai update --check" "takes no other words: $2"
+      return 2
+    fi
+    ai_pin_bumps
+    return 0
+  fi
   exec bash "$(resolve_source_dir)/defaults/dot_local/bin/executable_ai-update" "$@"
 }
 
