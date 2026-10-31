@@ -1,4 +1,4 @@
-module dotfiles.local/dot-ui
+module github.com/sebastienrousseau/dot-ui
 
 go 1.26.0
 

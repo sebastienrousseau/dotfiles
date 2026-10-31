@@ -386,99 +386,34 @@ ui_run_cmd() {
 # ═══════════════════════════════════════════════════════════════════════
 # Theme colour export — dogfood the active wallpaper theme in dot-ui
 #
-# Exports DOT_UI_* from the active [themes.NAME.ui]/.term colours so the
-# renderer matches the current wallpaper. Missing values are fine — dot-ui
-# falls back per-field to its fixed palette.
+# Exports DOT_UI_* from the palette.v1 contract (palette.env), which chezmoi
+# renders for the theme `dot theme` applies, so the renderer matches the
+# terminal. Nothing here reads the theme manifest. Missing values are fine:
+# dot-ui falls back per field to its fixed palette.
 # ═══════════════════════════════════════════════════════════════════════
 
-# Resolve + cache the chezmoi source paths for the theme data.
-_ui_theme_files() {
-  [[ -n "${_UI_THEMES_FILE:-}" ]] && return 0
-  local src=""
-  if command -v chezmoi >/dev/null 2>&1; then
-    src="$(chezmoi source-path 2>/dev/null || true)"
-  fi
-  [[ -z "$src" && -d "$HOME/.local/share/chezmoi" ]] && src="$HOME/.local/share/chezmoi"
-  [[ -z "$src" && -d "$HOME/.dotfiles" ]] && src="$HOME/.dotfiles"
-  [[ -n "$src" ]] || return 1
-  if [[ -f "$src/.chezmoiroot" ]]; then
-    local sub
-    sub="$(head -1 "$src/.chezmoiroot" | tr -d '[:space:]')"
-    [[ -n "$sub" && -d "$src/$sub" ]] && src="$src/$sub"
-  fi
-  _UI_DATA_FILE="$src/.chezmoidata.toml"
-  _UI_THEMES_FILE="$src/.theme-manifest/themes.toml"
-  [[ -f "$_UI_THEMES_FILE" ]] || return 1
-  return 0
+# _ui_palette_file: where the palette.v1 contract is deployed.
+_ui_palette_file() {
+  printf '%s\n' "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/palette.env"
 }
 
-_ui_active_mode() {
-  case "$(uname -s)" in
-    Darwin)
-      [[ "$(defaults read -g AppleInterfaceStyle 2>/dev/null || true)" == "Dark" ]] &&
-        echo dark || echo light
-      ;;
-    *)
-      if command -v gsettings >/dev/null 2>&1 &&
-        [[ "$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null || true)" == *dark* ]]; then
-        echo dark
-      else
-        echo light
-      fi
-      ;;
-  esac
-}
-
-# The active theme section, e.g. "pulse-dark" (family from .chezmoidata.toml +
-# current mode, tolerant of unpaired themes).
-_ui_active_theme_section() {
-  _ui_theme_files || return 1
-  local family mode cand
-  family="$(awk -F'"' '/^theme *=/{print $2; exit}' "$_UI_DATA_FILE" 2>/dev/null || true)"
-  [[ -n "$family" ]] || return 1
-  mode="$(_ui_active_mode)"
-  for cand in "${family}-${mode}" "${family}-dark" "${family}-light" "$family"; do
-    if grep -q "^\[themes\.${cand}\]" "$_UI_THEMES_FILE" 2>/dev/null; then
-      echo "$cand"
-      return 0
-    fi
-  done
-  return 1
-}
-
-# theme_ui_value <section> <subsection> <key>  → hex colour (or empty).
-theme_ui_value() {
-  local section="$1" sub="$2" key="$3"
-  _ui_theme_files || return 0
-  awk -v sec="[themes.${section}.${sub}]" -v key="$key" '
-    $0 == sec { inss = 1; next }
-    /^\[/ { inss = 0 }
-    inss && $1 == key {
-      v = $3
-      gsub(/[",]/, "", v)
-      print v
-      exit
-    }
-  ' "$_UI_THEMES_FILE" 2>/dev/null || true
-}
-
+# _ui_export_theme_colors: export DOT_UI_<KEY> for each colour in the
+# palette, once per process. The file is parsed, never sourced: only the
+# known keys with a #rrggbb value are taken.
 _ui_export_theme_colors() {
   [[ "${_UI_COLORS_EXPORTED:-0}" == "1" ]] && return 0
   _UI_COLORS_EXPORTED=1
-  local sec
-  sec="$(_ui_active_theme_section 2>/dev/null || true)"
-  [[ -n "$sec" ]] || return 0
-  export DOT_UI_ACCENT DOT_UI_ERROR DOT_UI_WARNING DOT_UI_SUCCESS DOT_UI_INFO
-  export DOT_UI_PANEL DOT_UI_BORDER DOT_UI_FG DOT_UI_BG
-  DOT_UI_ACCENT="$(theme_ui_value "$sec" ui accent)"
-  DOT_UI_ERROR="$(theme_ui_value "$sec" ui error)"
-  DOT_UI_WARNING="$(theme_ui_value "$sec" ui warning)"
-  DOT_UI_SUCCESS="$(theme_ui_value "$sec" ui success)"
-  DOT_UI_INFO="$(theme_ui_value "$sec" ui info)"
-  DOT_UI_PANEL="$(theme_ui_value "$sec" ui panel)"
-  DOT_UI_BORDER="$(theme_ui_value "$sec" ui border)"
-  DOT_UI_FG="$(theme_ui_value "$sec" term fg)"
-  DOT_UI_BG="$(theme_ui_value "$sec" term bg)"
+  local file key value
+  file="$(_ui_palette_file)"
+  [[ -f "$file" ]] || return 0
+  while IFS='=' read -r key value; do
+    [[ "$value" =~ ^#[0-9A-Fa-f]{6}$ ]] || continue
+    case "$key" in
+      ACCENT | ERROR | WARNING | SUCCESS | INFO | PANEL | BORDER | FG | BG)
+        export "DOT_UI_$key=$value"
+        ;;
+    esac
+  done <"$file"
 }
 
 # ═══════════════════════════════════════════════════════════════════════

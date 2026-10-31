@@ -24,8 +24,18 @@ with tempfile.TemporaryDirectory(prefix="dot-build-test-") as temporary:
     go = fixture / "bin/go"
     go.write_text('''#!/bin/sh
 test -d "$GOTMPDIR" || exit 90
-test "$1" = build && test "$2" = -o || exit 91
-printf 'new binary\n' >"$3"
+test "$1" = build || exit 91
+shift
+out=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -o) out="$2"; shift ;;
+    -ldflags) printf '%s\n' "$2" >"$GOTMPDIR/../ldflags"; shift ;;
+  esac
+  shift
+done
+test -n "$out" || exit 92
+printf 'new binary\n' >"$out"
 exit "${BUILD_RC:-0}"
 ''')
     go.chmod(0o755)
@@ -40,6 +50,18 @@ exit "${BUILD_RC:-0}"
                        "old binary preserved on failure / replaced on success"))
         checks.append((not list(fixture.glob("output.build.*")), "private build directory cleaned"))
     checks.append((binary.stat().st_mode & 0o777 == 0o755, "successful binary is executable"))
+    # The framework version reaches main.version; unset, the binary says dev.
+    for version, want in (("1.2.3", "-X main.version=1.2.3"), (None, "-X main.version=dev")):
+        run_env = {k: v for k, v in env.items() if k != "VERSION"}
+        if version:
+            run_env["VERSION"] = version
+        subprocess.run([sys.argv[2], "-c", script, "fixture", str(helper)], env=run_env,
+                       capture_output=True, text=True)
+        ldflags = next(fixture.glob("ldflags"), None)
+        checks.append((ldflags is not None and ldflags.read_text().strip() == want,
+                       f"VERSION={version or '(unset)'} builds with {want}"))
+        if ldflags:
+            ldflags.unlink()
 for hook in root.glob("defaults/run_onchange_2[456]-build-*.sh.tmpl"):
     source = hook.read_text()
     checks.append(('{{ template "go-build-command" . }}' in source and "if dot_build_go_binary; then" in source

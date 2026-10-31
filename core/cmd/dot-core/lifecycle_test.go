@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"dotfiles.local/core/transaction"
+	"github.com/sebastienrousseau/dot-core/transaction"
 )
 
 func TestCommandLifecycle(t *testing.T) {

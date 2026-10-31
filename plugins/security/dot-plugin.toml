@@ -6,7 +6,7 @@
 schema = "cli/manifest.v1"
 name = "security"
 domain = "security"
-version = "0.2.536"
+version = "0.2.539"
 summary = "OS hardening"
 default = "status"
 

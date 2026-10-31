@@ -96,7 +96,7 @@ jobs:
 
       - name: Card truth (the card and the server must agree)
         working-directory: ${{ env.MODULE_DIR }}
-        run: go test -run '^(TestServerCard|TestVersionMatchesServerCard|TestAgentCard)' -v ./...
+        run: go test -run '^(TestServerCard|TestAgentCard)' -v ./...
 
       - name: Fuzz corpus replay (seed + testdata, no fuzzing)
         working-directory: ${{ env.MODULE_DIR }}

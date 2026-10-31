@@ -3,14 +3,16 @@
 # Build privately beside the destination so successful replacement is atomic.
 # An old shell or `go env -w` can retain a GOTMPDIR or GOROOT that no longer
 # matches the active `go` binary on PATH. Override them for this build only;
-# never rewrite the user's Go environment.
+# never rewrite the user's Go environment. VERSION, when set, becomes the
+# binary's main.version (dot-ui and dot-mcp print it); unset, it stays "dev".
 dot_build_go_binary() (
   set -euo pipefail
   umask 077
   dot_build_dir="$(mktemp -d "${OUT}.build.XXXXXX")" || exit 1
   trap 'rm -rf -- "$dot_build_dir"' EXIT
   cd "$SRC" || exit 1
-  GOROOT="" GOTOOLCHAIN=local GOTMPDIR="$dot_build_dir" go build -o "$dot_build_dir/binary" . || exit 1
+  GOROOT="" GOTOOLCHAIN=local GOTMPDIR="$dot_build_dir" go build -ldflags "-X main.version=${VERSION:-dev}" \
+    -o "$dot_build_dir/binary" . || exit 1
   chmod 755 "$dot_build_dir/binary" || exit 1
   mv -f "$dot_build_dir/binary" "$OUT" || exit 1
 )

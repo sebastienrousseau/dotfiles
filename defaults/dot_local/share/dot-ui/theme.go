@@ -4,7 +4,8 @@
 // Palette + lipgloss styles for dot-ui.
 //
 // Colors are sourced from the active wallpaper theme via DOT_UI_* environment
-// variables (exported by lib/dot/ui.sh from .theme-manifest/themes.toml). When a
+// variables (exported by lib/dot/ui.sh from the palette.v1 contract,
+// ~/.config/dotfiles/palette.env). When a
 // variable is unset or not a valid hex color, a fixed "signature" fallback is
 // used so the binary still renders correctly in CI and on first install. The
 // fallback deliberately matches dot-ai-tui's palette for cross-binary

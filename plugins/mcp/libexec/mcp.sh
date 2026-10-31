@@ -102,7 +102,7 @@ cmd_mcp_serve() {
     cache="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles"
     mkdir -p "$cache"
     echo "dot mcp serve: building dot-mcp (first run)…" >&2
-    if (cd "$src" && go build -o "$cache/dot-mcp" .) >&2; then
+    if (cd "$src" && go build -ldflags "-X main.version=$(dotfiles_version)" -o "$cache/dot-mcp" .) >&2; then
       exec "$cache/dot-mcp" serve "$@"
     fi
   fi

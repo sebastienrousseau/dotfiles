@@ -5,8 +5,9 @@
 # defaults/run_onchange_24-build-dot-ui.sh.tmpl and
 # run_onchange_25-build-dot-ai-tui.sh.tmpl, rendered with chezmoi against a
 # copy of their sources: a change to any Go source file (or go.mod/go.sum)
-# must change the rendered script, which is what makes chezmoi rerun it;
-# and the cockpit build honours DOTFILES_AI=0 as off.
+# must change the rendered script, which is what makes chezmoi rerun it; the
+# dot-ui build injects the framework version; and the cockpit build honours
+# DOTFILES_AI=0 as off.
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
@@ -29,7 +30,8 @@ for app in dot-ui dot-ai-tui; do
   cp "$REPO_ROOT/defaults/dot_local/share/$app"/*.go "$REPO_ROOT/defaults/dot_local/share/$app"/go.* \
     "$SRC/dot_local/share/$app/"
 done
-: >"$WORK/cz/chezmoi.toml"
+# The build scripts read dotfiles_version, which .chezmoidata.toml supplies.
+printf '[data]\ndotfiles_version = "7.7.7"\n' >"$WORK/cz/chezmoi.toml"
 
 # render <template>: the template rendered by chezmoi against $SRC.
 render() {
@@ -78,6 +80,21 @@ tui() {
   OUT="$(env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
     HOME="$H" PATH="$WORK/stubs:/usr/bin:/bin" "$@" bash "$WORK/tui.sh" 2>&1)"
 }
+
+# The dot-ui build sets main.version to dotfiles_version, so `dot-ui
+# --version` reports the framework version (it reported 0.2.512 from a
+# string in the source); a version bump changes the script, so it reruns.
+test_start "dot_ui_build_injects_the_framework_version"
+render "$UI" >"$WORK/ui.sh"
+printf '[data]\ndotfiles_version = "7.7.8"\n' >"$WORK/cz/chezmoi.toml"
+assert_equals "yes" "$([[ "$(render "$UI")" == "$(cat "$WORK/ui.sh")" ]] && echo no || echo yes)" "a version bump changes the rendered script"
+printf '[data]\ndotfiles_version = "7.7.7"\n' >"$WORK/cz/chezmoi.toml"
+H="$WORK/ui-home"
+mkdir -p "$H/.local/share/dot-ui"
+: >"$H/.local/share/dot-ui/main.go"
+env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+  HOME="$H" PATH="$WORK/stubs:/usr/bin:/bin" bash "$WORK/ui.sh" >/dev/null 2>&1
+assert_contains "-ldflags -X main.version=7.7.7" "$(cat "$H/go.calls" 2>/dev/null)" "go build sets main.version"
 
 test_start "dot_ai_tui_build_is_off_with_DOTFILES_AI_0"
 tui off0 DOTFILES_AI=0

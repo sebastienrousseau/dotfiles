@@ -36,6 +36,34 @@ The `theme`, `theme_family` and `theme_mode` keys control the active theme. `def
 {{- $t := index $themes $themeName -}}
 ```
 
+### The palette contract (palette.v1)
+
+Code outside the templates does not parse the manifest. Chezmoi renders the
+active theme's palette to `~/.config/dotfiles/palette.env` (from
+`defaults/dot_config/dotfiles/palette.env.tmpl`, with the same `theme-name`
+resolution), and readers take the colours from there: `lib/dot/ui.sh` exports
+them to `dot-ui`, and the AI CLI theme adapter reads the mode. Every `dot apply`
+and every theme switch rewrites it.
+
+```text
+DOT_PALETTE=palette.v1
+THEME=maui-dark
+MODE=dark
+ACCENT=#00d2e0
+ERROR=#ff8ac4
+WARNING=#ff9230
+SUCCESS=#30d158
+INFO=#5cb8ff
+PANEL=#222f31
+BORDER=#323c3d
+FG=#f1f6f7
+BG=#0f1f21
+```
+
+`DOT_PALETTE`, `THEME` and `MODE` (`dark` or `light`) are always present; a
+colour is `#rrggbb` and absent when the theme has none. Readers parse the
+lines rather than sourcing the file, and ignore keys they do not know.
+
 ## Switching Themes
 
 ### Interactive Picker
@@ -136,6 +164,7 @@ Each theme switch touches these applications:
 | **DMS** | `sed -i` on settings.json + IPC | Stock theme mapped to accent family, dark/light mode |
 | **Neovim** | `--remote-expr` Lua eval over socket | Colorscheme, style variant, background mode |
 | **VS Code** | `chezmoi apply` on `settings.json` | `workbench.colorTheme` value |
+| **dot UI** | `chezmoi apply` on `~/.config/dotfiles/palette.env` | Accent, status, panel and border colours of `dot` pickers, tables and step views |
 | **Alacritty** | `chezmoi apply` | Full color block regeneration |
 | **Kitty** | `chezmoi apply` | Full color block regeneration |
 | **WezTerm** | `chezmoi apply` | Color scheme in Lua config |
