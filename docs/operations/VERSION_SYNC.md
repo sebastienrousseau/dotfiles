@@ -49,7 +49,7 @@ This system provides automated version synchronization through:
 |---|---|---|
 | Pull request | `verify` | `./scripts/version-sync.sh --verify`; fails on any mismatch. |
 | Push to `main` (or dispatch on `main`) | `verify-protected` | The same check. It never commits to `main`. |
-| Push to `feat/v*` (or dispatch on any other ref) | `sync` | Reads the target version (the dispatch input, else `dotfiles_version` from `defaults/.chezmoidata.toml`), runs `./scripts/version-sync.sh`, and if anything changed commits it, SSH-signed with `ACTIONS_BOT_SIGNING_KEY` and DCO-signed-off, as `chore: sync version references to vX.Y.Z`, then pushes to that branch. |
+| Push to `feat/v*` (or dispatch on any other ref) | `sync` | Reads the target version (the dispatch input, else `dotfiles_version` from `defaults/.chezmoidata.toml`), runs `./scripts/version-sync.sh`, and if anything changed has `tools/ci/commit-via-api.sh` commit it to that branch as `chore: sync version references to vX.Y.Z`, DCO-signed-off by `github-actions[bot]`. The commit is made through the GraphQL `createCommitOnBranch` mutation, so GitHub signs it and shows it as verified, which the required-signatures rule on `main` needs when the release PR merges. |
 
 The workflow posts no PR comments and uploads no artifacts; the
 script's summary and any mismatches are in the job log.
@@ -135,7 +135,7 @@ canonical manifest and regenerates `package.json` in the same operation:
 
 # On a feat/v* branch, GitHub Actions then:
 # 1. Re-runs the sync against the canonical version
-# 2. Commits and pushes any remaining changes to the branch
+# 2. Commits any remaining changes to the branch (a GitHub-signed commit)
 #
 # On main (and on the PR), it only verifies and fails on a mismatch.
 ```
@@ -275,7 +275,7 @@ updated, whether a backup was made, and the verification result.
 permissions:
   contents: read       # top level, and for both verify jobs
 # sync job only:
-#   contents: write    # commit + push the version-bump diff
+#   contents: write    # createCommitOnBranch for the version-bump diff
 ```
 
 ### Validation

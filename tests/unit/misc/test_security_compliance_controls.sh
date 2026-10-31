@@ -313,10 +313,15 @@ test_start "update_deps_uses_signed_commits"
 assert_file_contains "$update_deps_workflow" "git commit -S -m" "dependency updates use signed commits"
 
 test_start "sync_versions_uses_signed_commits"
-# `git commit -S` (signed); tolerant of additional flags such as -s (DCO
-# sign-off), which the bot also needs so its auto-commit passes the
-# "Check sign-off" workflow on the PR it pushes to.
-assert_file_contains "$sync_versions_workflow" "git commit -S" "version sync uses signed commits"
+# The bot commits through createCommitOnBranch (tools/ci/commit-via-api.sh),
+# which GitHub signs and shows as verified; a runner-side `git commit -S`
+# shows as unverified_email and fails the required-signatures rule.
+assert_file_contains "$sync_versions_workflow" "tools/ci/commit-via-api.sh" "version sync commits through the API"
+if grep -qE '^[[:space:]]*git (commit|push)' "$sync_versions_workflow"; then
+  fail "version sync still commits or pushes from the runner"
+else
+  pass "version sync never commits or pushes from the runner"
+fi
 
 test_start "update_deps_avoids_unverified_yq_download"
 if ! grep -q "wget -qO /usr/local/bin/yq" "$update_deps_workflow"; then

@@ -110,7 +110,7 @@ manifest sig + cert.
 | Secret | Used by | Setup |
 |---|---|---|
 | `GITHUB_TOKEN` | every workflow (auto) | n/a |
-| `ACTIONS_BOT_SIGNING_KEY` | `release-distribute-homebrew.yml` and `release-distribute-scoop.yml` (signed commits on the tap and bucket repos), `update-deps.yml`, `sync-versions.yml` | See `docs/security/AUTOMATION_SECRETS.md`. |
+| `ACTIONS_BOT_SIGNING_KEY` | `release-distribute-homebrew.yml` and `release-distribute-scoop.yml` (signed commits on the tap and bucket repos), `update-deps.yml` | See `docs/security/AUTOMATION_SECRETS.md`. |
 | `TAP_PUSH_TOKEN` | `release-distribute-homebrew.yml`, `release-distribute-scoop.yml` (clone, push and open the PR on the tap and bucket repos; falls back to `GITHUB_TOKEN` when unset) | See `docs/security/AUTOMATION_SECRETS.md`. |
 | `AUR_SSH_KEY` | `release-distribute-aur.yml` only | SSH ED25519 keypair; public key on the `srousseau` AUR profile, private key in this secret. |
 
