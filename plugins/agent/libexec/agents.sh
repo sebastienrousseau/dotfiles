@@ -26,8 +26,8 @@ set -euo pipefail
 
 # shellcheck disable=SC1091
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../../../lib/dot/ui.sh"
-source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
+source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/ui.sh"
+source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/sdk.sh"
 
 _agents_repo_root() {
   # Resolve the chezmoi source dir (where CLAUDE.md/AGENTS.md live).

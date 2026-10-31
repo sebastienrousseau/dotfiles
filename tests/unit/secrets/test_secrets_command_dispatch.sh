@@ -85,7 +85,7 @@ chmod +x "$BIN/pass" "$BIN/bash" "$BIN/chezmoi" "$BIN/security"
 SRC="$WORK/src"
 mkdir -p "$SRC/lib/dot" "$SRC/scripts/lib" "$SRC/plugins/secret/libexec" \
   "$SRC/scripts/secrets" "$SRC/scripts/security"
-for lib in ui.sh utils.sh platform.sh ai-install.sh ai-roster.sh data preflight.sh upgrade.sh ai-provision.sh probe.sh log.sh verified-download.sh; do
+for lib in ui.sh utils.sh sdk.sh platform.sh ai-install.sh ai-roster.sh data preflight.sh upgrade.sh ai-provision.sh probe.sh log.sh verified-download.sh; do
   ln -sf "$REPO_ROOT/lib/dot/$lib" "$SRC/lib/dot/$lib"
 done
 ln -sf "$REPO_ROOT/scripts/lib/secrets_provider.sh" "$SRC/scripts/lib/secrets_provider.sh"

@@ -17,8 +17,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../../../lib/dot/utils.sh
-source "$SCRIPT_DIR/../../../lib/dot/utils.sh"
+# shellcheck source=../../../lib/dot/sdk.sh
+source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/sdk.sh"
 
 # _completion_file SHELL: the committed script for SHELL, relative to the source.
 _completion_file() {

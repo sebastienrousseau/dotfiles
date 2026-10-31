@@ -17,10 +17,10 @@ case "${1:-} ${2:-}" in
   "context apply") exec bash "$_AGENT_DIR/libexec/agents.sh" render "${@:3}" ;;
 esac
 
-# shellcheck source-path=SCRIPTDIR source=../../lib/dot/utils.sh
-source "$_AGENT_DIR/../../lib/dot/utils.sh"
+# shellcheck source-path=SCRIPTDIR source=../../lib/dot/sdk.sh
+source "${DOT_SDK:-$_AGENT_DIR/../../lib/dot}/sdk.sh"
 # shellcheck source-path=SCRIPTDIR source=../../lib/dot/log.sh
-source "$_AGENT_DIR/../../lib/dot/log.sh"
+source "${DOT_SDK:-$_AGENT_DIR/../../lib/dot}/log.sh"
 # shellcheck source-path=SCRIPTDIR source=libexec/agent.sh
 source "$_AGENT_DIR/libexec/agent.sh"
 

@@ -8,8 +8,8 @@
 set -euo pipefail
 
 _TOOLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../../../lib/dot/utils.sh
-source "$_TOOLS_DIR/../../../lib/dot/utils.sh"
+# shellcheck source=../../../lib/dot/sdk.sh
+source "${DOT_SDK:-$_TOOLS_DIR/../../../lib/dot}/sdk.sh"
 
 dot_ui_command_banner "Tools" "${1:-}"
 

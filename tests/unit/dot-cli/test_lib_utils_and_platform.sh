@@ -80,7 +80,7 @@ _fixture_base="${TMPDIR:-/tmp}"
 FIXTURE_ROOT="${_fixture_base%/}/dotfiles-cov-fixtures-$(id -u)/lib-utils"
 rm -rf "$FIXTURE_ROOT"
 mkdir -p "$FIXTURE_ROOT/detached"
-for lib in ui.sh utils.sh platform.sh ai-install.sh ai-roster.sh data preflight.sh upgrade.sh ai-provision.sh probe.sh log.sh verified-download.sh; do
+for lib in ui.sh utils.sh sdk.sh platform.sh ai-install.sh ai-roster.sh data preflight.sh upgrade.sh ai-provision.sh probe.sh log.sh verified-download.sh; do
   ln -sf "$REPO_ROOT/lib/dot/$lib" "$FIXTURE_ROOT/detached/$lib"
 done
 
@@ -245,11 +245,12 @@ assert_file_contains "$OUT" "9.9.9" "DOTFILES_VERSION is used when there is no p
 CHEZMOI_SOURCE_DIR="$VER_TREE" DOTFILES_VERSION="" in_detached 'dotfiles_version' >/dev/null
 assert_file_contains "$OUT" "unknown" "an unresolvable version reads as unknown"
 
-test_start "dot_command_summary_describes_known_and_unknown_commands"
-rc="$(in_utils 'dot_command_summary apply; dot_command_summary secrets; dot_command_summary not-a-command')"
+# Summaries come from the generated command table, not a list in the host.
+test_start "dot_command_summary_reads_the_command_table"
+rc="$(in_utils 'dot_command_summary theme; dot_command_summary "doctor fix"; dot_command_summary not-a-command')"
 assert_equals "0" "$rc" "summaries exit 0"
-assert_file_contains "$OUT" "Apply dotfiles changes" "a known command has its own summary"
-assert_file_contains "$OUT" "Manage secrets" "each command maps to its description"
+assert_file_contains "$OUT" "one palette for every app" "a domain has its manifest summary"
+assert_file_contains "$OUT" "Repair what check found" "a command spelling has its own"
 assert_file_contains "$OUT" "Run a dotfiles command" "an unknown command gets the generic summary"
 
 # ===========================================================================

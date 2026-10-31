@@ -11,8 +11,8 @@
 set -euo pipefail
 
 _THEME_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source-path=SCRIPTDIR source=../../lib/dot/utils.sh
-source "$_THEME_DIR/../../lib/dot/utils.sh"
+# shellcheck source-path=SCRIPTDIR source=../../lib/dot/sdk.sh
+source "${DOT_SDK:-$_THEME_DIR/../../lib/dot}/sdk.sh"
 
 dot_ui_command_banner "Theme" "theme"
 
