@@ -58,7 +58,7 @@ bash /tmp/dotfiles-install.sh
 dot doctor
 ```
 
-Requires `git` and `curl`. Supported on macOS 14+, Ubuntu 22.04+, Debian 12+, WSL2 and NixOS; Fedora and Arch Linux are community-supported. See [Appendix A](05-appendices/A-platform-matrix.md).
+Requires `git` and `curl`. Supported on macOS 15+, Ubuntu 22.04+, Debian 12+, WSL2 and NixOS; Fedora and Arch Linux are community-supported. See [Appendix A](05-appendices/A-platform-matrix.md).
 
 ## Conventions Used in This Manual
 

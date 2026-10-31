@@ -76,7 +76,7 @@ parallel where dependencies allow.
 | `release-distribute-homebrew.yml` | `release.published`, dispatch | Hash `dot-VERSION.tar.gz`, regenerate `pkg/brew/dot.rb`, push branch + PR to `sebastienrousseau/homebrew-tap`. | One PR on the tap repo. |
 | `release-distribute-scoop.yml` | `release.published`, dispatch | Hash `dot-VERSION.zip`, rewrite `pkg/scoop/dot.json` via jq (both 64bit + arm64 point at same zip), PR to `sebastienrousseau/scoop-bucket`. | One PR on the bucket repo. |
 | `release-distribute-aur.yml` | `release.published`, dispatch | Hash `dot-VERSION.tar.gz`, rewrite `pkgver` + `sha256sums` in `pkg/aur/PKGBUILD`, regenerate `.SRCINFO` via dockerised `makepkg`, push to `ssh://aur@aur.archlinux.org/dot-cli-git.git`. | One commit on AUR. |
-| `release-install-smoke.yml` | `release.published`, dispatch | On `ubuntu-latest` and `macos-14`: download `dot-VERSION.tar.gz`, `gh attestation verify` it, then `make smoke`, `make install` into an empty prefix, run `dot version`, and `make uninstall`. | Pass or fail. |
+| `release-install-smoke.yml` | `release.published`, dispatch | On `ubuntu-latest` and `macos-15`: download `dot-VERSION.tar.gz`, `gh attestation verify` it, then `make smoke`, `make install` into an empty prefix, run `dot version`, and `make uninstall`. | Pass or fail. |
 | `release-attestation-check.yml` | weekly cron (Monday 07:00 UTC) + dispatch | Verify the latest (or given) release carries the SBOM bundle and the signed manifest: `dotfiles-sbom.spdx.json` + `.sig` + `.pem` + `.intoto.jsonl`, `ALL_SHA256SUMS` + `.sig` + `.pem`. It does not check the package assets or their sigstore bundles. | Opens or comments on a tracking issue. |
 
 ## Event ownership and readiness

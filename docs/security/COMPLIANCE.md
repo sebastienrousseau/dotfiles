@@ -201,7 +201,7 @@ compliance-guard.yml
 ```text
 cross-platform-test.yml
 ├── changes               # Skip the OS matrix when no shell files changed
-├── cross-platform-test   # ubuntu-latest (GNU), macos-latest + macos-14 (BSD)
+├── cross-platform-test   # ubuntu-latest (GNU), macos-latest + macos-15 (BSD)
 ├── schedule-live         # Scheduled-maintenance run, ubuntu-latest + macos-latest
 ├── compatibility-report  # Summary
 └── gate                  # Single status for the PR
