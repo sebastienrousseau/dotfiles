@@ -2,6 +2,54 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.540 (2026-10-31)
+
+### Added
+
+- Plugins reach the host only through a declared SDK, plugin SDK v1: `bin/dot` runs each plugin with `DOT_SDK` pointing at its own `lib/dot` and `DOT_DOMAIN` naming the domain, and `lib/dot/README.md` documents what the SDK holds. A CI gate fails any other import a plugin makes; the 10 left from before the SDK are baselined and the baseline only shrinks (P2.2).
+- A plugin can declare lifecycle hooks in its manifest. The first event is `on-apply`: `dot config apply` (`dot apply`) runs each plugin's hook, and the ai plugin's hook replaces apply's own AI step and its 14-entry tool list (P2.2).
+- Chezmoi writes the active theme's palette to `~/.config/dotfiles/palette.env` (`palette.v1`, documented in THEMING.md). dot-ui and the AI CLI theme adapter read it instead of parsing the 17.6k-line theme manifest, and a theme switch rewrites it with the other themed files. Until an install's first apply after upgrading, dot-ui uses its fixed colours (P2.2).
+- `DOTFILES_APP_STORES=0` skips the app-store phase (mas, flatpak, snap) of `dot system update`, for a machine whose store CLI is installed but does not work there.
+
+### Changed
+
+- The command table is built at run time from each plugin's route fragment and cached under `$XDG_CACHE_HOME/dot/cli`; the cache is rebuilt when a fragment, the version or the source tree changes (P2.1). User plugin directories wait for P2.3's signed trust path.
+- Provisioning and `dot ai login` read the AI roster. Provisioning runs `dot ai install --yes`, so it now also installs crush, amp, cursor-agent and grok; `dot ai login [tool...]` honours the tools named (an unknown one exits 2) and takes each login command from the roster (P2.2).
+- `lib/dot/utils.sh` no longer loads the AI installer for every command: sourcing it drops from 8.0 to 2.3 ms, and `dot theme --help` from 14.1 to 8.9 ms.
+- dot-ui and dot-mcp take their version from the release at build time; dot-ui had reported 0.2.512. The Go modules move to `github.com/sebastienrousseau/dot-core`, `dot-ui`, `dot-mcp` and `dot-ai-tui`, and the 17 plugin manifests are versioned with the framework.
+- `dot system update` shows the AI pin check as its own step and lists newer releases after the step list, instead of drawing them through it.
+- macOS 15 or later is the tested floor: GitHub retires the macOS 14 runner image on 2026-11-02, so CI runs on macos-15 and macos-latest.
+- The docs were audited against the code: about 420 false, stale or broken statements are corrected, among them commands removed in 0.2.538, the pre-plugin layout, and release and install steps that would fail.
+
+### Fixed
+
+- A first install backs up the user's existing dotfiles before applying; it had replaced `~/.zshrc`, `~/.gitconfig` and the rest with no copy kept.
+- `dot config import` restores a bundle (it built a new one instead), checking that every member sits under `~/.dotfiles`, `~/.config/chezmoi` or `~/.local/share/mise` and asking before it overwrites anything.
+- `dot config profile set` writes the profile where chezmoi reads it (`chezmoi.toml`), and `profile show` reads it from there; it had changed nothing. The secrets commands read `[data.secrets.policy]` from `chezmoi.toml` too.
+- `dot attest export` writes to the path given (it exited 2, or wrote a file named `--fleet-store`), and `dot attest verify <file>` verifies that file.
+- `dot doctor fix` exits 1 when a repair fails, and counts the failures.
+- `dot fleet apply` runs `dot config update && dot doctor`; it ran a `--quiet` flag that does not exist.
+- The ai cockpit's Control Centre and the MCP server run real commands (`dot mcp check`, `dot ai check`, `dot ai start <tool>`, `dot ai cost show`, `dot attest show --json`); the cockpit sent "mcp doctor" to Claude as a prompt.
+- A Python MCP server install retries once without uv's cache, which recovers from a partly purged cache entry, and reports uv's own error instead of blaming the hash pins.
+- Shell: `extract`, `backup` and `goto` are the same in zsh and bash (zsh's stub recursed); no alias exports `DOTFILES_VERSION=0.2.501` any more; `hom`, `lock-configs`, `tm` and `tmr` find their paths; zsh's Ctrl+R opens fzf's history widget; `gcpd` describes a project instead of deleting it; aliases for commands that do not exist are removed, as are `find='fd'` and `gofmt='go fmt'`, which shadowed real tools.
+- A `DOTFILES_PROFILE` set for one session is kept; bash's eval cache is written 0600 through `mktemp`.
+- tmux Prefix+K resizes; kill-server moves to Prefix+Q.
+- kanshi knows the `hardware.toml` presets (surface-pro, macbook-t2); waybar's config stays off macOS and Windows; the deployed agent card names the current version and commands.
+- A container or `DOTFILES_MINIMAL=1` install skips provisioning, as `--minimal` does; dot-ui rebuilds when any of its Go files changes; `DOTFILES_AI=0` turns the cockpit build off.
+- The mise plugin example installs a release, verified against its `SHA256SUMS`.
+- The README's verified-install digest names the published installer: version-sync and the release check share one rule, so a fix to `install.sh` between releases no longer breaks the documented install.
+- The Sync Versions bot's commits are verified (made through GitHub's API), so a release PR passes the required-signatures rule without an admin merge.
+
+### Removed
+
+- The 0.2.503 migration hooks that could not run (`run_before_00-migrate`, `run_before_00-audit.sh`, `install/run_before_cleanup.sh`); the 0.2.503 rollback now prints the manual recovery and exits 1.
+
+### Security
+
+- `dot config export` leaves the age identity out of the bundle (any file holding an `AGE-SECRET-KEY` line) and says to carry it separately; it had archived it unencrypted.
+- `dot config uninstall` keeps the age identity, and names a source directory outside `~/.dotfiles` instead of deleting it; it had removed both through `chezmoi purge`.
+- `dot <word>` runs a user command from `~/.config/dotfiles/commands`, beside `bin/dot` or on `PATH` only with `DOT_ALLOW_PATH_PLUGINS=1`, with a deprecation warning; otherwise it names the file it found and exits 127 (ADR-016).
+
 ## v0.2.539 (2026-10-27)
 
 ### Changed
