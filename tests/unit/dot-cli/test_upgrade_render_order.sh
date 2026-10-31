@@ -41,7 +41,7 @@ upgrade() {
     DOT_SYSTEM_DOT="$WORK/bin/dot" FAKES="$WORK/bin" "$@" bash -c '
     set -euo pipefail
     source "$1/lib/dot/ui.sh"
-    source "$1/lib/dot/upgrade.sh"
+    source "$1/plugins/system/libexec/system/upgrade.sh"
     source "$2"
     require_source_dir() { printf "%s\n" "$FAKES"; }
     has_command() { [[ -x "$FAKES/$1" ]]; }

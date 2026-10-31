@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
-# Behavioral tests for the secrets provider from scripts/lib/secrets_provider.sh.
+# Behavioral tests for the secrets provider from plugins/secret/libexec/secret/secrets_provider.sh.
 # Mocks keychain/pass/age commands to verify provider detection order and
 # the index, store, and get/set dispatch logic.
 
@@ -12,7 +12,7 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/mocks.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-SECRETS_FILE="$REPO_ROOT/scripts/lib/secrets_provider.sh"
+SECRETS_FILE="$REPO_ROOT/plugins/secret/libexec/secret/secrets_provider.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

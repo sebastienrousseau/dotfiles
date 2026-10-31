@@ -46,7 +46,7 @@ assert_contains "ai_pinned_spec yes" "$out" "and the pins"
 
 test_start "upgrade_loads_no_ai_code"
 # The pin report comes from `dot ai update --check` (P2.2 edge 5b).
-out="$(defined lib/dot/utils.sh lib/dot/upgrade.sh -- dot_upgrade_prepare ai_pin_bumps install_claude_native)"
+out="$(defined lib/dot/utils.sh plugins/system/libexec/system/upgrade.sh -- dot_upgrade_prepare ai_pin_bumps install_claude_native)"
 assert_contains "dot_upgrade_prepare yes" "$out" "upgrade.sh defines the updater"
 assert_contains "ai_pin_bumps no" "$out" "without loading the AI pins"
 assert_contains "install_claude_native no" "$out" "or the AI installer"

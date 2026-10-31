@@ -1,8 +1,3 @@
 # Plugin imports outside the SDK, written by
 #   tools/ci/check-plugin-imports.py --write-baseline
 # Remove a line by moving the library into the plugin that owns it.
-plugins/cli/libexec/registry.sh lib/dot/registry-module.sh
-plugins/cli/libexec/registry.sh lib/dot/registry-trust.sh
-plugins/secret/libexec/secrets.sh scripts/lib/secrets_provider.sh
-plugins/system/libexec/system.sh lib/dot/system.sh
-plugins/system/libexec/system.sh lib/dot/upgrade.sh

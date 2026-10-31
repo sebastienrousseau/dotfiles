@@ -93,7 +93,7 @@ orients in <30 seconds):
 │   ├── platform.sh               # was scripts/dot/lib/platform.sh
 │   ├── log.sh                    # was scripts/dot/lib/log.sh
 │   ├── bento.sh                  # was scripts/dot/lib/bento.sh
-│   └── secrets_provider.sh       # was scripts/lib/secrets_provider.sh
+│   └── secrets_provider.sh       # was plugins/secret/libexec/secret/secrets_provider.sh
 ├── share/                        # OS-conventional resources
 │   ├── man/man1/dot.1            # was dot_local/share/man/man1/dot.1
 │   ├── completions/              # was dot_local/share/zsh/completions/

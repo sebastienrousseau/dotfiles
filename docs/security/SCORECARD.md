@@ -104,7 +104,7 @@ release on purpose or are false positives in Scorecard's regex.
 | Path | Reason | Comment to paste |
 |---|---|---|
 | `defaults/.chezmoitemplates/aliases/legal/legal.aliases.sh:64` | **Won't fix** | User-facing `gen-notice` alias runs `go install github.com/google/go-licenses@latest` in a throwaway container to build a NOTICE file. Pinning by SHA would require users to update the alias manually on every upstream change. Intentional. |
-| `lib/dot/upgrade.sh:144` | **Won't fix** | `npm update -g` in `dot update --globals`, which the user asks for to bring global packages to their latest release. Pinning defeats it. Intentional. |
+| `plugins/system/libexec/system/upgrade.sh:144` | **Won't fix** | `npm update -g` in `dot update --globals`, which the user asks for to bring global packages to their latest release. Pinning defeats it. Intentional. |
 | `plugins/tool/libexec/tool.sh:112` | **False positive** | `npm install --package-lock-only --ignore-scripts --silent` generates a lockfile and does NOT fetch packages. Scorecard's regex matches `npm install` blindly; this invocation has no supply-chain surface. |
 | `install/provision/run_onchange_10-linux-packages.sh.tmpl:383` | **Won't fix** | Already exact-version-pins `aider-chat==0.86.2`. Scorecard wants sha256-hash pinning, which would require a ~2,700-line lockfile covering all 108 transitive deps and re-generated on every aider release — disproportionate maintenance for a single optional provisioning install. |
 

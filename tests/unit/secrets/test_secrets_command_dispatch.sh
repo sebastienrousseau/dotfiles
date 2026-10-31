@@ -83,12 +83,12 @@ chmod +x "$BIN/pass" "$BIN/bash" "$BIN/chezmoi" "$BIN/security"
 # A source tree whose .chezmoidata.toml carries a secrets policy and an AI
 # bucket, so the policy-env and bucket-key paths have real data to read.
 SRC="$WORK/src"
-mkdir -p "$SRC/lib/dot" "$SRC/scripts/lib" "$SRC/plugins/secret/libexec" \
+mkdir -p "$SRC/lib/dot" "$SRC/plugins/secret/libexec/secret" \
   "$SRC/scripts/secrets" "$SRC/scripts/security"
-for lib in ui.sh utils.sh sdk.sh platform.sh ai-roster.sh data preflight.sh upgrade.sh probe.sh log.sh verified-download.sh; do
+for lib in ui.sh utils.sh sdk.sh platform.sh ai-roster.sh data preflight.sh probe.sh log.sh verified-download.sh; do
   ln -sf "$REPO_ROOT/lib/dot/$lib" "$SRC/lib/dot/$lib"
 done
-ln -sf "$REPO_ROOT/scripts/lib/secrets_provider.sh" "$SRC/scripts/lib/secrets_provider.sh"
+ln -sf "$REPO_ROOT/plugins/secret/libexec/secret/secrets_provider.sh" "$SRC/plugins/secret/libexec/secret/secrets_provider.sh"
 ln -sf "$SCRIPT_FILE" "$SRC/plugins/secret/libexec/secrets.sh"
 : >"$SRC/scripts/secrets/age-init.sh"
 : >"$SRC/scripts/secrets/create-secrets-file.sh"

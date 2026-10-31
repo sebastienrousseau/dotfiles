@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # The toolchain side of `dot system update`: prerequisites and consent up front,
 # then mise, system-package and Nix phases, used by cmd_upgrade in
-# scripts/dot/commands/meta.sh.
+# plugins/system/libexec/system.sh.
 # Sourced by plugins/system/libexec/system.sh after utils.sh; inherits
 # set -euo pipefail
 #

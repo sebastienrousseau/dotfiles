@@ -20,7 +20,6 @@ few specialised subtrees.
 | `scripts/dot/commands/` | The last legacy route handlers: `diagnostics.sh`, `manual.sh`, `meta.sh`. Every other domain lives in `plugins/<domain>/`. Sources `lib/dot/*.sh`. | Dispatched by `bin/dot` and plugins |
 | `scripts/dot/powershell/` | Native PowerShell module (`Dot.psm1`), exporting ten functions (`Get-DotVersion`, `Invoke-DotHelp`, `Test-DotAgentsSync`, `Invoke-DotChezmoi`, `Get-DotStatus`, `Get-DotSourcePath`, `Invoke-DotDoctor`, `Get-DotEnvironment`, `Get-DotAgents`, `Get-DotFleetStatus`). | `bin/dot.ps1` |
 | `scripts/dot/data/` | `alias-deprecations.tsv`. | `scripts/dot/commands/*` |
-| `scripts/lib/` | Cross-cutting library helpers reused across multiple scripts. Example: `secrets_provider.sh` (keychain / pass / age dispatch). | `scripts/dot/commands/*`, ops scripts |
 | `scripts/diagnostics/` | `doctor.sh` and its helpers — long-form environment health check. | `dot doctor` |
 | `scripts/security/` | Security-domain ops: `check-disclosure-key-expiry.sh`, `lock-configs.sh`, etc. | `dot security`, CI |
 | `scripts/secrets/` | Secret-bucket utilities (rotation, audit). | `dot secret` subcommands |
