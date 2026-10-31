@@ -16,6 +16,8 @@ is absent, `ui.sh` falls back to plain output.
 Colours come from `DOT_UI_ACCENT`, `DOT_UI_SUCCESS`, `DOT_UI_WARNING`,
 `DOT_UI_ERROR`, `DOT_UI_INFO`, `DOT_UI_PANEL`, `DOT_UI_BORDER`, `DOT_UI_FG`
 and `DOT_UI_BG` (`#rgb` / `#rrggbb`; anything else falls back per field).
+`lib/dot/ui.sh` sets them from the active theme's palette
+(`~/.config/dotfiles/palette.env`, see the theming guide).
 `DOT_UI_SNAPSHOT=1` renders a single static frame — used by golden tests
 and by CI, where there is no terminal.
 
