@@ -42,10 +42,12 @@ if command -v chezmoi >/dev/null 2>&1; then
     assert_equals "$REPO_ROOT" "$got" "fish sets the same checkout"
   fi
 
-  test_start "zsh_no_longer_exports_a_dead_lib_path"
-  render "$REPO_ROOT/defaults/dot_config/zsh/rc.d/10-env.zsh.tmpl" >"$WORK/10-env.zsh"
-  got="$(env -u DOTFILES HOME="$WORK/home" zsh -fc 'source "$1" >/dev/null 2>&1; print -r -- "${DOTFILES-unset}"' _ "$WORK/10-env.zsh" 2>/dev/null)"
-  assert_equals "unset" "$got" "DOTFILES (~/.dotfiles/lib, read by nothing) is gone"
+  if command -v zsh >/dev/null 2>&1; then
+    test_start "zsh_no_longer_exports_a_dead_lib_path"
+    render "$REPO_ROOT/defaults/dot_config/zsh/rc.d/10-env.zsh.tmpl" >"$WORK/10-env.zsh"
+    got="$(env -u DOTFILES HOME="$WORK/home" zsh -fc 'source "$1" >/dev/null 2>&1; print -r -- "${DOTFILES-unset}"' _ "$WORK/10-env.zsh" 2>/dev/null)"
+    assert_equals "unset" "$got" "DOTFILES (~/.dotfiles/lib, read by nothing) is gone"
+  fi
 
   # bento.sh moved to lib/dot/ in the Phase 1 reorg; artifact mode still ran
   # scripts/dot/lib/bento.sh, which no longer exists, so it drew nothing.
