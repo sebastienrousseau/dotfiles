@@ -41,6 +41,11 @@ python = ["3.12", "3.11", "3.14"]
 
 # Go
 go = "latest"
+# govulncheck is the native Go audit that ~/Code/AGENTS.md §0 runs in every
+# Go repository, and gopls's run_govulncheck uses it too. Without it the
+# audit fails with "command not found" on any machine where nobody has run
+# `go install` by hand.
+"go:golang.org/x/vuln/cmd/govulncheck" = "latest"
 
 # Rust -- deliberately NOT managed by mise.
 #
