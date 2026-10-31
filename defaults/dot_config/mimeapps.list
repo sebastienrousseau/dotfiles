@@ -76,3 +76,7 @@ application/x-7z-compressed=xarchiver.desktop
 application/x-gzip=xarchiver.desktop
 application/x-tar=xarchiver.desktop
 x-scheme-handler/claude-cli=claude-code-url-handler.desktop
+x-scheme-handler/geo=google-maps-geo-handler.desktop
+
+[Added Associations]
+x-scheme-handler/geo=google-maps-geo-handler.desktop;
