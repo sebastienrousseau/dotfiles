@@ -52,7 +52,7 @@ service endpoints are allowed by harden-runner and not listed.
 |---|---|
 | `release-distribute-scoop.yml`, `release-distribute-homebrew.yml` | `api.github.com:443`, `github.com:443`, `release-assets.githubusercontent.com:443` |
 | `release-distribute-aur.yml` | the three above, plus `aur.archlinux.org:22`, `auth.docker.io:443`, `registry-1.docker.io:443`, `production.cloudfront.docker.com:443` (archlinux image for `.SRCINFO`) |
-| `sync-versions.yml` (all three jobs) | `github.com:443`, `azure.archive.ubuntu.com:80`, `esm.ubuntu.com:443`, `motd.ubuntu.com:443`, `packages.microsoft.com:443` (apt via `tools/ci/install-tools.sh`) |
+| `sync-versions.yml` (all three jobs) | `github.com:443`, `azure.archive.ubuntu.com:80`, `esm.ubuntu.com:443`, `motd.ubuntu.com:443`, `packages.microsoft.com:443` (apt via `tools/ci/install-tools.sh`); the `sync` job also `api.github.com:443` (`tools/ci/commit-via-api.sh`) |
 
 If Docker Hub moves its layer CDN, the AUR job fails at the image pull:
 add the host the failed run's harden-runner summary names.

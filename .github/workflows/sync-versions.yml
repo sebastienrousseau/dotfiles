@@ -43,8 +43,9 @@ concurrency:
 # Egress: every harden-runner step below blocks all but the endpoints
 # harden-runner saw in audit mode on the last three runs of each job:
 # apt mirrors for tools/ci/install-tools.sh, and github.com for checkout
-# and the sync job's push (verify runs 37544071128, 37511455725,
-# 37506722432; sync runs 37001757289, 36983982516, 36705857691).
+# (verify runs 37544071128, 37511455725, 37506722432; sync runs
+# 37001757289, 36983982516, 36705857691). The sync job also reaches
+# api.github.com, where tools/ci/commit-via-api.sh creates its commit.
 
 jobs:
   verify:
@@ -109,13 +110,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: write   # commit + push version-bump diff
+      contents: write   # createCommitOnBranch for the version-bump diff
     steps:
       - name: Harden runner (block mode)
         uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: block
           allowed-endpoints: >
+            api.github.com:443
             github.com:443
             azure.archive.ubuntu.com:80
             esm.ubuntu.com:443
@@ -124,6 +126,7 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Install dependencies
@@ -150,22 +153,6 @@ jobs:
           echo "target_version=$TARGET_VERSION" >> "$GITHUB_OUTPUT"
           echo "Target version: $TARGET_VERSION"
 
-      - name: Configure signed commits
-        env:
-          ACTIONS_BOT_SIGNING_KEY: ${{ secrets.ACTIONS_BOT_SIGNING_KEY }}
-        run: |
-          set -euo pipefail
-          if [[ -z "${ACTIONS_BOT_SIGNING_KEY}" ]]; then
-            echo "::error::Missing ACTIONS_BOT_SIGNING_KEY secret"
-            exit 1
-          fi
-          install -d -m 700 ~/.ssh
-          printf '%s\n' "${ACTIONS_BOT_SIGNING_KEY}" > ~/.ssh/actions_bot_signing_key
-          chmod 600 ~/.ssh/actions_bot_signing_key
-          git config --local gpg.format ssh
-          git config --local user.signingkey ~/.ssh/actions_bot_signing_key
-          git config --local commit.gpgsign true
-
       - name: Sync versions
         env:
           TARGET_VERSION: ${{ steps.version.outputs.target_version }}
@@ -178,21 +165,11 @@ jobs:
 
       - name: Commit changes
         env:
+          # GitHub signs a commit it creates for this token, so the bot's
+          # commit passes the required-signatures rule on the release PR.
+          GH_TOKEN: ${{ github.token }}
           TARGET_VERSION: ${{ steps.version.outputs.target_version }}
           REF_NAME: ${{ github.ref_name }}
         run: |
-          if git diff --quiet; then
-            echo "No version changes to commit."
-            exit 0
-          fi
-
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-          git add -A
-          # -s adds the DCO Signed-off-by trailer (the repo's "Check
-          # sign-off" workflow requires every PR commit to carry one, so
-          # without it this bot's auto-commit fails DCO on the PR it pushes
-          # to). -S keeps the existing SSH signature.
-          git commit -S -s -m "chore: sync version references to v${TARGET_VERSION}"
-          git push origin "$REF_NAME"
+          bash tools/ci/commit-via-api.sh "$REF_NAME" \
+            "chore: sync version references to v${TARGET_VERSION}"
