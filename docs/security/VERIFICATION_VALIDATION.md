@@ -35,7 +35,7 @@ All verification activities are executed through automated CI pipelines, pre-com
 | VR-01 | Shell scripts pass ShellCheck (severity=error) | Static analysis via `shellcheck --severity=error -e SC1091 -e SC2030 -e SC2031` | `ci.yml`, `ci-enforced.yml`, pre-commit hook | Pass |
 | VR-02 | All scripts have `set -euo pipefail` (exemptions in [SHELL_EXEMPTIONS.md](SHELL_EXEMPTIONS.md)) | `tools/ci/check-shell-preamble.sh` pattern scan; CI enforcement | `shell-preamble-check` pre-commit hook, `reusable-shell-lint.yml` (called by `ci-enforced.yml`) | Pass |
 | VR-03 | No secrets in source control (gitleaks clean) | Gitleaks scan with `config/gitleaks.toml` ruleset | Pre-commit hook, `security-enhanced.yml` | Pass |
-| VR-04 | Cross-platform compatibility (BSD + GNU) | Dual-platform CI matrix (ubuntu-latest, macos-latest, macos-14) | `cross-platform-test.yml` | Pass |
+| VR-04 | Cross-platform compatibility (BSD + GNU) | Dual-platform CI matrix (ubuntu-latest, macos-latest, macos-15) | `cross-platform-test.yml` | Pass |
 | VR-05 | TLS enforcement (no insecure curl/wget) | Pattern blocking for `curl -k`, `--insecure`, `wget --no-check-certificate` | Pre-commit hook, `compliance-guard.yml` | Pass |
 | VR-06 | Permission controls (no chmod 777/666) | CI pattern scan blocks world-writable permissions | Pre-commit hook, `compliance-guard.yml` | Pass |
 | VR-07 | Signed commits enforced | Pre-push hook verifies `git verify-commit` for all commits in range; branch protection on `main` requires signed commits | `scripts/git-hooks/pre-push`, `compliance-guard.yml`, GitHub branch protection | Pass |

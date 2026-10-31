@@ -231,7 +231,7 @@ profile per machine and flip session flags when you need less.
   chezmoi `2.73.3` and installs it through a checksum-verified
   fetch; `install.sh` does the same on your machine.
 
-- **A supported platform.** macOS 14+ (Apple Silicon and Intel),
+- **A supported platform.** macOS 15+ (Apple Silicon and Intel),
   Ubuntu 22.04+, Debian 12+, WSL2, NixOS 23.11+ are CI-tested or
   supported; Fedora and Arch are community-supported. The full
   table, with per-tool floors, is
@@ -1119,7 +1119,7 @@ corpus lives beside the harnesses under
   (`tests/framework/module_coverage.sh`) fails the build when an
   executable module has no test file at all.
 - **Reliability Gate** runs the audit on `ubuntu-latest`,
-  `macos-latest`, and `macos-14` (both Apple Silicon), then the
+  `macos-latest`, and `macos-15` (both Apple Silicon), then the
   examples contract, the WSL contract, and the PowerShell contract
   ([`docs/operations/RELIABILITY.md`](docs/operations/RELIABILITY.md)).
 - **Cross-platform portability scan** rejects GNU-only `sed`,

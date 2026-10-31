@@ -92,7 +92,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, macos-14]
+        os: [ubuntu-latest, macos-latest, macos-15]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Reliability audit

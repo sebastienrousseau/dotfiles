@@ -1174,7 +1174,7 @@ build_landing() {
       {
         "@type": "Question",
         "name": "What platforms are supported?",
-        "acceptedAnswer": {"@type": "Answer", "text": "macOS 14+, Ubuntu/Debian, Arch/CachyOS, Fedora, openSUSE, WSL2. PowerShell 7.5+ for baseline parity on Windows."}
+        "acceptedAnswer": {"@type": "Answer", "text": "macOS 15+, Ubuntu/Debian, Arch/CachyOS, Fedora, openSUSE, WSL2. PowerShell 7.5+ for baseline parity on Windows."}
       },
       {
         "@type": "Question",
