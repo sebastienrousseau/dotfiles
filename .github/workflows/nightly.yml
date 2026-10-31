@@ -132,10 +132,11 @@ jobs:
       fail-fast: false
       matrix:
         # macos-13 was retired from GitHub-hosted runners in late 2025.
-        # macos-15-intel is the supported Intel runner; macos-14 is the
-        # canonical Apple Silicon runner; macos-latest tracks the newest.
-        # Together these give Intel + ASi + bleeding-edge coverage.
-        os: [ubuntu-latest, macos-latest, macos-15-intel, macos-14]
+        # macos-15-intel is the supported Intel runner; macos-15 is the
+        # canonical Apple Silicon runner (macOS 14's image retires on
+        # 2026-11-02); macos-latest tracks the newest. Together these give
+        # Intel + ASi + bleeding-edge coverage.
+        os: [ubuntu-latest, macos-latest, macos-15-intel, macos-15]
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2

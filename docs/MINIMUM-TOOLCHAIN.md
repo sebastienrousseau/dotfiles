@@ -54,7 +54,7 @@ proves it.
 | Fedora 41+ | 5.2 | 5.9 | 2.47 | Yes | No |
 | Arch Linux (rolling) | current | current | current | Yes | No — AUR package published, not CI-tested |
 | Alpine (musl, busybox ash) | — | — | 2.45 | **No** — bash is not installed by default and `install.sh` requires it | No |
-| macOS 14+, stock `/bin/bash` | **3.2.57** | 5.9 | 2.39+ (Xcode) | Yes — this is why the CLI floor is 3.2 | **Yes** — `macos-latest`, `macos-14` |
+| macOS 15+, stock `/bin/bash` | **3.2.57** | 5.9 | 2.39+ (Xcode) | Yes — this is why the CLI floor is 3.2 | **Yes** — `macos-latest`, `macos-15` |
 | macOS + Homebrew bash | 5.3 | 5.9 | 2.5x | Yes | Yes (same runners, Homebrew bash present) |
 | Windows (`windows-latest` runner) + PowerShell 7.6 | n/a | n/a | 2.4x | Core CLI surface only | **Yes** — `windows-latest` PowerShell contract |
 | WSL2 (Ubuntu) | 5.2 | 5.9 | 2.43 | Yes | Partially — `reliability-gate.yml` runs a WSL *contract* check on Linux, not a real WSL VM |

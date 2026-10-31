@@ -48,9 +48,9 @@ This document tracks what is supported on Windows-native PowerShell 7.5+ compare
 
 | Check | Platforms |
 |---|---|
-| `dot version` exits 0 | windows-latest, ubuntu-latest, macos-latest, macos-14 |
-| `dot help` exits 0 | windows-latest, ubuntu-latest, macos-latest, macos-14 |
-| `dot agent context check` exits 0 | windows-latest (native), ubuntu-latest, macos-latest, macos-14 |
+| `dot version` exits 0 | windows-latest, ubuntu-latest, macos-latest, macos-15 |
+| `dot help` exits 0 | windows-latest, ubuntu-latest, macos-latest, macos-15 |
+| `dot agent context check` exits 0 | windows-latest (native), ubuntu-latest, macos-latest, macos-15 |
 | Native module import, agent-body sync, harness inventory, doctor baseline, and chezmoi diff | windows-latest |
 | Native dispatcher version, help, and agent context check | windows-latest |
 | PowerShell ≥ 7.5 | windows-latest (smoke test at `tools/ci/windows-smoke-test.ps1`) |
