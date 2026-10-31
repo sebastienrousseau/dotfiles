@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 # Exhaustive runtime exercise of the `dot ai` surface — drives line
 # coverage across plugins/ai/libexec/ai.sh and the extracted command
-# bodies in lib/dot/ai-commands.sh + lib/dot/ai-install.sh. The fleet and
+# bodies in plugins/ai/libexec/ai/ai-commands.sh + plugins/ai/libexec/ai/ai-install.sh. The fleet and
 # installers are mocked so each verb, bridge, deprecated alias, raw-mode
 # path, cold-cache probe, and install branch executes without touching the
 # host or the network.
@@ -129,7 +129,7 @@ ex absent_kimi ai kimi "hi"   # Kimi native-installer hint branch
 # Static guards keep the file meaningful without xtrace.
 test_start "ai_exhaustive_files_present"
 assert_file_exists "$AI_SCRIPT" "ai.sh present"
-assert_file_exists "$REPO_ROOT/lib/dot/ai-commands.sh" "ai-commands.sh present"
-assert_file_exists "$REPO_ROOT/lib/dot/ai-install.sh" "ai-install.sh present"
+assert_file_exists "$REPO_ROOT/plugins/ai/libexec/ai/ai-commands.sh" "ai-commands.sh present"
+assert_file_exists "$REPO_ROOT/plugins/ai/libexec/ai/ai-install.sh" "ai-install.sh present"
 
 echo "RESULTS:${TESTS_RUN:-0}:${TESTS_PASSED:-0}:${TESTS_FAILED:-0}"

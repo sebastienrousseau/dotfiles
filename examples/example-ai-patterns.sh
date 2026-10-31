@@ -34,9 +34,9 @@ printf '  and OpenAI (/v1/chat/completions) protocols at http://127.0.0.1:3456.\
 # Verify the AI command modules parse.
 for f in \
   "plugins/ai/libexec/ai.sh" \
-  "lib/dot/ai-commands.sh" \
-  "lib/dot/ai-install.sh" \
-  "lib/dot/ai-probe.sh" \
+  "plugins/ai/libexec/ai/ai-commands.sh" \
+  "plugins/ai/libexec/ai/ai-install.sh" \
+  "plugins/ai/libexec/ai/ai-probe.sh" \
   "scripts/ops/ai-setup.sh"; do
   bash -n "$repo_root/$f" || {
     printf 'FAIL: %s\n' "$f" >&2

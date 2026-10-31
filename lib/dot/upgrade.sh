@@ -17,9 +17,6 @@
 [[ -n "${_DOT_UPGRADE_LOADED:-}" ]] && return 0
 _DOT_UPGRADE_LOADED=1
 
-# shellcheck source=ai-install.sh disable=SC1091
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ai-install.sh" # ai_pin_bumps
-
 # The system package manager `dot system update` would drive, if any.
 dot_upgrade_system_pm() {
   local pm
@@ -173,10 +170,11 @@ dot_upgrade_app_steps() {
 }
 
 # _dot_upgrade_pins <list>: the AI CLI pin bumps into <list>, one per line;
-# the printed line counts them for the step.
+# the printed line counts them for the step. The ai plugin reports them
+# (`dot ai update --check`), so the system plugin loads none of its code.
 _dot_upgrade_pins() {
   local n
-  ai_pin_bumps >"$1"
+  "${DOT_SYSTEM_DOT:-$(resolve_source_dir)/bin/dot}" ai update --check >"$1" || return 1
   n="$(grep -c . "$1" || true)"
   if [[ "$n" -eq 0 ]]; then
     echo "every pin is current"

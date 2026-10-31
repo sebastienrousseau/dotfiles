@@ -103,7 +103,7 @@ $script:DotCommands = @{
     'ai pattern show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai run' = @{ Flags = @(@('--help', 'Show help'), @('--style', 'Steering pattern (--pattern is the old name)'), @('-p', 'Steering pattern (--pattern is the old name)')); Values = @('claude', 'codex', 'copilot', 'goose', 'crush', 'amp', 'cursor-agent', 'grok', 'kimi', 'agy', 'kiro', 'sgpt', 'ollama', 'opencode', 'aider', 'autohand', 'vibe', 'qwen', 'zai'); Files = $false; PatternFlags = @('--style', '-p'); ValueFlags = @() }
     'ai start' = @{ Flags = @(, @('--help', 'Show help')); Values = @('claude', 'codex', 'copilot', 'goose', 'crush', 'amp', 'cursor-agent', 'grok', 'kimi', 'agy', 'kiro', 'sgpt', 'ollama', 'opencode', 'aider', 'autohand', 'vibe', 'qwen', 'zai'); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'ai update' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai update' = @{ Flags = @(@('--help', 'Show help'), @('--check', 'List the pins with a newer release; change nothing')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'attest export' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'attest show' = @{ Flags = @(@('--help', 'Show help'), @('--json', 'Print JSON'), @('-j', 'Print JSON'), @('--write', 'Write the attestation to a file'), @('-w', 'Write the attestation to a file')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'attest verify' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }

@@ -21,7 +21,7 @@
 #   processes  process names that belong to the tool (default: bin)
 #   package    mise package, a key of [ai_tools] in defaults/.chezmoidata.toml;
 #              absent when a native installer or the user installs it
-#   native     the installer function in lib/dot/ai-install.sh, when not mise
+#   native     the installer function in plugins/ai/libexec/ai/ai-install.sh, when not mise
 #   chat       false for suite tools that are not agents (no start, no prompt)
 #   fleet      false to keep an installable binary out of the cockpit list
 #   login      the command `dot ai login` runs to authenticate it, as words;

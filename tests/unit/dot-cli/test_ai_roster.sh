@@ -103,7 +103,7 @@ for i in "${!AI_ROSTER_NAMES[@]}"; do
   rc=0
   PATH="$stubs:$PATH" bash -c '
     ui_err() { printf "%s: %s\n" "$1" "$2" >&2; }
-    source "$1/lib/dot/ai-commands.sh"
+    source "$1/plugins/ai/libexec/ai/ai-commands.sh"
     _ai_invoke_provider "$2" "hello" </dev/null' _ "$REPO_ROOT" "$name" >/dev/null 2>&1 || rc=$?
   assert_equals "0" "$rc" "$name runs once"
   assert_file_exists "$_rt_tmp/$bin.ran" "$name calls $bin"
@@ -113,8 +113,8 @@ done
 # themselves (no package and no native installer in the roster).
 test_start "roster_tools_resolve_an_install_method"
 methods="$(bash -c '
-  source "$1/lib/dot/ai-install.sh"
-  source "$1/lib/dot/ai-provision.sh"
+  source "$1/plugins/ai/libexec/ai/ai-install.sh"
+  source "$1/plugins/ai/libexec/ai/ai-provision.sh"
   for b in claude codex kiro-cli cursor-agent passmcp-graph vibe; do
     printf "%s=%s\n" "$b" "$(ai_install_method "$b" || echo none)"
   done' _ "$REPO_ROOT")"

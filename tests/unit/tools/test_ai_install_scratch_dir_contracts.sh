@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2034
 #
-# Contract of _ai_in_scratch_dir in lib/dot/ai-install.sh when no scratch
+# Contract of _ai_in_scratch_dir in plugins/ai/libexec/ai/ai-install.sh when no scratch
 # directory can be created: the helper returns 1 and never runs the
 # command, so a caller such as `dot ai` reports the install as failed
 # instead of running an npm install script in an unknown directory. The
@@ -19,7 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-AI_INSTALL="$REPO_ROOT/lib/dot/ai-install.sh"
+AI_INSTALL="$REPO_ROOT/plugins/ai/libexec/ai/ai-install.sh"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/ai-scratch-fail.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 

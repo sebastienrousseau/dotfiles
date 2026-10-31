@@ -38,6 +38,7 @@ SDK_FILES = {
     "preflight.sh",
     "probe.sh",
     "verified-download.sh",
+    "ai-roster.sh",
 }
 SOURCE = re.compile(r'^\s*(?:source|\.)\s+"([^"]+)"')
 SDK_FORM = re.compile(

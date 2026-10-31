@@ -27,7 +27,7 @@ run_helper() {
   (
     cd "$WORK/cwd" || exit 1
     TMPDIR="$WORK/tmp" PATH="$WORK/stubs:$PATH" bash -c '
-      source "$1/lib/dot/ai-install.sh"
+      source "$1/plugins/ai/libexec/ai/ai-install.sh"
       _ai_in_scratch_dir mise use -g "npm:@charmland/crush@latest"
     ' _ "$REPO_ROOT"
   )

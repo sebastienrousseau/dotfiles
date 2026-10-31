@@ -36,6 +36,7 @@ and adds the host-only helpers.
 | `preflight.sh` (SDK) | Consent and prerequisites for commands that change the machine |
 | `probe.sh` (SDK) | `dot_probe`: run a query of another tool with a time limit |
 | `verified-download.sh` (SDK) | Checksum-verified downloads for installer and provisioning scripts |
+| `ai-roster.sh` (SDK) | `ai_roster_bin`, `ai_roster_package`, `ai_roster_login` and the other lookups over the AI roster (`data/ai-roster.sh`, generated from `plugins/ai/roster.toml`), which the ai plugin and `dot doctor` both read |
 
 ### Command table and help
 
@@ -51,7 +52,6 @@ and adds the host-only helpers.
 | File | Used by |
 |------|---------|
 | `bento.sh` | `_dotfiles_bento_render`, the "D O T F I L E S" splash and intelligence-surface card that `dot top` runs |
-| `ai-commands.sh`, `ai-install.sh`, `ai-probe.sh`, `ai-provision.sh`, `ai-roster.sh` | `dot ai` (`plugins/ai/libexec/ai.sh`), and doctor/apply for the roster and installer |
 | `registry-module.sh`, `registry-trust.sh` | `dot cli install` and `dot cli list --available` (`plugins/cli/libexec/registry.sh`) |
 | `system.sh` | `dot system status` and `dot system schedule list\|set\|run` |
 | `upgrade.sh` | The toolchain side of `dot system update` |

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# Sourced by lib/dot/ai-commands.sh, lib/dot/ai-install.sh and
-# scripts/diagnostics/doctor.sh.
+# Sourced by the ai plugin (through $DOT_SDK: it is part of the plugin SDK),
+# scripts/diagnostics/doctor.sh and scripts/ops/ai-setup.sh.
 # Lookups over the AI roster. The data (lib/dot/data/ai-roster.sh) is
 # generated from plugins/ai/roster.toml by tools/docs/gen_roster.py; no AI
 # tool list is written by hand anywhere else.

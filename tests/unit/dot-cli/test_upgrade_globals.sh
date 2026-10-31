@@ -36,7 +36,6 @@ upgrade() {
     _dot_upgrade_consent_system() { :; }
     dot_upgrade_system_pm() { return 1; }
     ui_step() { :; }
-    ai_pin_bumps() { :; }
     _upgrade_step() { echo "step $1"; }
     shift
     eval "$*"' _ "$REPO_ROOT" "$@"

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Behavioural tests for lib/dot/preflight.sh, lib/dot/upgrade.sh and
-# lib/dot/ai-provision.sh: consent (default no), mise bootstrap, and the
+# plugins/ai/libexec/ai/ai-provision.sh: consent (default no), mise bootstrap, and the
 # toolchain phases of `dot system update`. Every external tool is a stub on a PATH
 # that carries nothing else; the one real terminal case runs under a pty.
 # shellcheck disable=SC1090,SC1091,SC2016,SC2034
@@ -46,7 +46,7 @@ lib() {
     _ai_in_scratch_dir() { "$@"; }
     ai_pinned_spec() { printf "%s@1.0.0\n" "$1"; }
     ai_pin_bumps() { :; }
-    source "$1/lib/dot/ai-provision.sh"
+    source "$1/plugins/ai/libexec/ai/ai-provision.sh"
     eval "$2"' _ "$REPO_ROOT" "$1" 2>&1)"
   RC=$?
 }

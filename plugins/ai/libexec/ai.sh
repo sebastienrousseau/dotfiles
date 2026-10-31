@@ -12,14 +12,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../../../lib/dot/sdk.sh
 source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/sdk.sh"
-# shellcheck source=../../../lib/dot/ai-commands.sh
-source "$SCRIPT_DIR/../../../lib/dot/ai-commands.sh"
-# shellcheck source=../../../lib/dot/ai-provision.sh
-source "$SCRIPT_DIR/../../../lib/dot/ai-provision.sh"
-# shellcheck source=../../../lib/dot/ai-probe.sh
-source "$SCRIPT_DIR/../../../lib/dot/ai-probe.sh"
 # shellcheck source=../../../lib/dot/ai-roster.sh
-source "$SCRIPT_DIR/../../../lib/dot/ai-roster.sh"
+source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/ai-roster.sh"
+# shellcheck source-path=SCRIPTDIR source=ai/ai-commands.sh
+source "$SCRIPT_DIR/ai/ai-commands.sh"
+# shellcheck source-path=SCRIPTDIR source=ai/ai-provision.sh
+source "$SCRIPT_DIR/ai/ai-provision.sh"
+# shellcheck source-path=SCRIPTDIR source=ai/ai-probe.sh
+source "$SCRIPT_DIR/ai/ai-probe.sh"
 # shellcheck source-path=SCRIPTDIR source=ai/status.sh
 source "$SCRIPT_DIR/ai/status.sh"
 
@@ -132,7 +132,7 @@ _ai_get_cached_status() {
   cat "$AI_STATUS_CACHE_FILE"
 }
 
-# _ai_mise_pkg (binary -> mise package map) is defined in lib/dot/ai-install.sh.
+# _ai_mise_pkg (binary -> mise package map) is defined in plugins/ai/libexec/ai/ai-install.sh.
 
 cmd_ai_status() {
   ui_header "AI CLI Status"
@@ -161,7 +161,7 @@ cmd_ai_status() {
   fi
 }
 
-# cmd_ai_setup / cmd_ai_query / cmd_ai_install live in lib/dot/ai-commands.sh.
+# cmd_ai_setup / cmd_ai_query / cmd_ai_install live in plugins/ai/libexec/ai/ai-commands.sh.
 
 _ai_log_run() {
   local provider="$1" exit_code="$2" duration_secs="$3" prompt_words="$4"

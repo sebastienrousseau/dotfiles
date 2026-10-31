@@ -31,7 +31,7 @@ PYTOOLS_FILE="$REPO_ROOT/install/provision/run_onchange_25-python-tools.sh.tmpl"
 # The apply-time AI provider offer is the ai plugin's on-apply hook, over
 # the roster: tests/unit/dot-cli/test_ai_on_apply_hook.sh and
 # tests/unit/ops/test_chezmoi_apply_phases.sh run it.
-check_contains "$REPO_ROOT/lib/dot/ai-install.sh" "https://code.kimi.com/kimi-code/install.sh"
+check_contains "$REPO_ROOT/plugins/ai/libexec/ai/ai-install.sh" "https://code.kimi.com/kimi-code/install.sh"
 check_contains "$REPO_ROOT/defaults/dot_config/shell/00-core-paths.sh.tmpl" '${HOME}/.kimi-code/bin'
 check_contains "$REPO_ROOT/defaults/dot_config/fish/conf.d/env.fish.tmpl" '$HOME/.kimi-code/bin'
 check_contains "$REPO_ROOT/defaults/dot_config/nushell/env.nu.tmpl" '.kimi-code/bin'

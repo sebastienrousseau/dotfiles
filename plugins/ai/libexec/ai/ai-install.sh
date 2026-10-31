@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# Sourced by ai-provision.sh, upgrade.sh and scripts/ops/chezmoi-apply.sh.
+# Sourced by ai-provision.sh (the ai plugin's own modules).
 # Shared AI provider install helpers (mise-package map + Claude installer).
 #
 # Claude Code is installed via Anthropic's native installer rather than
@@ -14,16 +14,16 @@
 [[ "${_DOT_LIB_AI_INSTALL_LOADED:-0}" == "1" ]] && return 0
 _DOT_LIB_AI_INSTALL_LOADED=1
 
-_AI_INSTALL_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=verified-download.sh disable=SC1091
-source "$_AI_INSTALL_LIB_DIR/verified-download.sh"
-# shellcheck source=ai-roster.sh disable=SC1091
-source "$_AI_INSTALL_LIB_DIR/ai-roster.sh"
+_AI_INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../../../../lib/dot/verified-download.sh disable=SC1091
+source "${DOT_SDK:-$_AI_INSTALL_DIR/../../../../lib/dot}/verified-download.sh"
+# shellcheck source=../../../../lib/dot/ai-roster.sh disable=SC1091
+source "${DOT_SDK:-$_AI_INSTALL_DIR/../../../../lib/dot}/ai-roster.sh"
 
 # AI CLIs are pinned (decision D3): [ai_tools] in .chezmoidata.toml maps each
 # mise package to an exact version. The provisioning template reads it
 # through chezmoi; these helpers read the same table at run time.
-_AI_PINS_FILE="${_AI_INSTALL_LIB_DIR}/../../defaults/.chezmoidata.toml"
+_AI_PINS_FILE="${_AI_INSTALL_DIR}/../../../../defaults/.chezmoidata.toml"
 
 # _ai_pinned_version <package>: the version pinned for a mise package (its
 # [uvx_args=...] options ignored); prints nothing when there is none.

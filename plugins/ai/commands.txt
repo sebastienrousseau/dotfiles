@@ -24,6 +24,7 @@ cmd|ai inventory show||read|Agents, versions and config
 cmd|ai pattern show|@ai pattern show|read|One prompt pattern
 cmd|ai pattern edit|@ai pattern edit|write|Edit a prompt pattern
 run|ai install --interactive|@ai install --interactive||
+flag|ai update|check|||List the pins with a newer release; change nothing
 arg|ai start|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
 flag|ai run|style|p|pattern|Steering pattern (--pattern is the old name)
 arg|ai run|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||

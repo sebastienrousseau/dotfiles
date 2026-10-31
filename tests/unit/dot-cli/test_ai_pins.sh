@@ -51,7 +51,7 @@ lib() {
   : >"$CALLS"
   out="$(env -i HOME="$WORK" PATH="$WORK/bin:/usr/bin:/bin" NO_COLOR=1 MISE_SAME="${MISE_SAME:-}" \
     bash -c 'source "$1/lib/dot/ui.sh"; source "$1/lib/dot/utils.sh"
-      source "$1/lib/dot/ai-install.sh"; source "$1/lib/dot/ai-provision.sh"
+      source "$1/plugins/ai/libexec/ai/ai-install.sh"; source "$1/plugins/ai/libexec/ai/ai-provision.sh"
       '"$1" _ "$REPO_ROOT" 2>&1)" || rc=$?
   printf '%s\nrc=%s\n' "$out" "$rc"
 }

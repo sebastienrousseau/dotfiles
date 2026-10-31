@@ -206,7 +206,7 @@ _dot() {
       [[ "$path" != 'ai start' ]] || values='claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai'
       ;;
     'ai update' | 'ai update'\ *)
-      flags='--help'
+      flags='--help --check'
       ;;
     'attest export' | 'attest export'\ *)
       flags='--help'
