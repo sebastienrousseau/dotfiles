@@ -17,7 +17,7 @@ verified by CI.
 
 | OS | Version | Architecture | Status | CI |
 |----|---------|-------------|--------|----|
-| macOS | 14 (Sonoma) or later | aarch64 (Apple Silicon) | Supported, primary development platform | Yes: `macos-14` and `macos-latest` (macOS 26), both Apple Silicon |
+| macOS | 15 (Sequoia) or later | aarch64 (Apple Silicon) | Supported, primary development platform. macOS 14 is no longer tested: GitHub retires its runner image on 2026-11-02 | Yes: `macos-15` and `macos-latest` (macOS 26), both Apple Silicon |
 | macOS | 14 (Sonoma) or later | x86_64 (Intel) | Supported | No Intel runner; templates handle the `/usr/local` Homebrew prefix |
 | Ubuntu | 22.04 or later | x86_64 | Supported | Yes: `ubuntu-latest` (24.04) |
 | Ubuntu | 22.04 or later | aarch64 | Supported | No |
@@ -68,12 +68,12 @@ verified by CI.
 | Workflow | Platforms | Runs on |
 |----------|-----------|---------|
 | `ci.yml` | `ubuntu-latest`, `macos-latest`, `windows-latest` | Pull requests that change code, config or workflows; pushes to `main`; scheduled |
-| `reliability-gate.yml` | `ubuntu-latest`, `macos-latest`, `macos-14`, `windows-latest` (PowerShell parity job) | Every pull request and push to `main` |
-| `cross-platform-test.yml` | `ubuntu-latest`, `macos-latest`, `macos-14` | Pull requests that change code or config; pushes to `main`; scheduled |
-| `ci-enforced.yml` | `ubuntu-latest`; one job also on `macos-latest` and `macos-14` | Every pull request and push; stricter checks |
+| `reliability-gate.yml` | `ubuntu-latest`, `macos-latest`, `macos-15`, `windows-latest` (PowerShell parity job) | Every pull request and push to `main` |
+| `cross-platform-test.yml` | `ubuntu-latest`, `macos-latest`, `macos-15` | Pull requests that change code or config; pushes to `main`; scheduled |
+| `ci-enforced.yml` | `ubuntu-latest`; one job also on `macos-latest` and `macos-15` | Every pull request and push; stricter checks |
 | `devcontainer-prebuild.yml` | `ubuntu-latest` | Pre-built development images |
 
-Both macOS labels are Apple Silicon: `macos-14` runs macOS 14 and
+Both macOS labels are Apple Silicon: `macos-15` runs macOS 15 and
 `macos-latest` runs macOS 26. There is no Intel macOS runner in CI.
 
 ## Known Limitations

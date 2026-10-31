@@ -81,10 +81,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Both macOS labels are Apple Silicon: macos-14 runs macOS 14 and
-        # macos-latest runs macOS 26. There is no Intel macOS runner here;
-        # both are kept to catch drift between macOS releases.
-        os: [ubuntu-latest, macos-latest, macos-14]
+        # Both macOS labels are Apple Silicon: macos-15 runs macOS 15 and
+        # macos-latest runs macOS 26 (GitHub retires the macOS 14 image on
+        # 2026-11-02). There is no Intel macOS runner here; both are kept to
+        # catch drift between macOS releases.
+        os: [ubuntu-latest, macos-latest, macos-15]
         include:
           - os: ubuntu-latest
             platform: linux
@@ -92,7 +93,7 @@ jobs:
           - os: macos-latest
             platform: darwin
             tools: bsd
-          - os: macos-14
+          - os: macos-15
             platform: darwin
             tools: bsd
 

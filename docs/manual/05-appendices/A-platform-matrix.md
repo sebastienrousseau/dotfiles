@@ -12,7 +12,7 @@ which is the source of truth; minimum versions and their reasons are in
 
 | OS | Version | Architecture | Status | CI |
 |:---|:---|:---|:---|:---|
-| macOS | 14 (Sonoma) or later | aarch64 (Apple Silicon) | Supported, primary development platform | Yes: `macos-14` and `macos-latest` (macOS 26) |
+| macOS | 15 (Sequoia) or later | aarch64 (Apple Silicon) | Supported, primary development platform. macOS 14 is no longer tested: GitHub retires its runner image on 2026-11-02 | Yes: `macos-15` and `macos-latest` (macOS 26) |
 | macOS | 14 (Sonoma) or later | x86_64 (Intel) | Supported | No Intel runner |
 | Ubuntu | 22.04 or later | x86_64 | Supported | Yes: `ubuntu-latest` (24.04) |
 | Ubuntu | 22.04 or later | aarch64 | Supported | No |
@@ -62,9 +62,9 @@ fzf, atuin, delta, lazygit, neovim, shellcheck and age). `pandoc` and
 | Workflow | Platforms | Runs on |
 |:---|:---|:---|
 | `ci.yml` | `ubuntu-latest`, `macos-latest`, `windows-latest`; an Ubuntu container job | Pull requests that change code, config or workflows; pushes to `main`; scheduled |
-| `reliability-gate.yml` | `ubuntu-latest`, `macos-latest`, `macos-14`; a `windows-latest` PowerShell contract job | Every pull request and push to `main` |
-| `cross-platform-test.yml` | `ubuntu-latest`, `macos-latest`, `macos-14` | Pull requests that change code or config; pushes to `main`; scheduled |
-| `ci-enforced.yml` | `ubuntu-latest`; a test matrix on `ubuntu-latest`, `macos-latest`, `macos-14` | Every pull request to `main`; pushes to `main` and release tags |
+| `reliability-gate.yml` | `ubuntu-latest`, `macos-latest`, `macos-15`; a `windows-latest` PowerShell contract job | Every pull request and push to `main` |
+| `cross-platform-test.yml` | `ubuntu-latest`, `macos-latest`, `macos-15` | Pull requests that change code or config; pushes to `main`; scheduled |
+| `ci-enforced.yml` | `ubuntu-latest`; a test matrix on `ubuntu-latest`, `macos-latest`, `macos-15` | Every pull request to `main`; pushes to `main` and release tags |
 | `devcontainer-prebuild.yml` | `ubuntu-latest` | Changes to `.devcontainer/`; weekly; builds the development container image |
 
 ## Feature Matrix

@@ -216,7 +216,7 @@ submission — the `DESTDIR` tree they need is already correct.
 
 | Item | Before | After | Evidence |
 |---|---|---|---|
-| OS matrix | Yes | Yes | `cross-platform-test.yml`: ubuntu, macos-latest, macos-14; windows for the PowerShell contract |
+| OS matrix | Yes | Yes | `cross-platform-test.yml`: ubuntu, macos-latest, macos-15; windows for the PowerShell contract |
 | Lint at zero warnings | Yes | Yes | `ci-enforced.yml` |
 | Docs build with warnings denied | Yes | Yes | `pages.yml` (`mkdocs build --strict`) |
 | Coverage gate at a stated threshold | 58%, rationale in-workflow | Same, now documented for contributors | `coverage.yml`; `DEVELOPMENT.md` |
