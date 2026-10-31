@@ -11,10 +11,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
+# Whether `dot theme list` itself succeeds depends on the host's theme data;
+# what matters is where the plugin loaded the SDK from. Without the
+# override it fails with "/nonexistent/sdk.sh: No such file or directory".
 test_start "dispatch_gives_a_plugin_the_host_sdk"
-rc=0
-err="$(DOT_SDK=/nonexistent DOTFILES_NONINTERACTIVE=1 bash "$REPO_ROOT/bin/dot" theme list 2>&1 >/dev/null)" || rc=$?
-assert_equals "0" "$rc" "a plugin runs with a stray DOT_SDK in the environment"
+err="$(DOT_SDK=/nonexistent DOTFILES_NONINTERACTIVE=1 bash "$REPO_ROOT/bin/dot" theme list 2>&1 >/dev/null)" || true
+assert_equals "no" "$([[ "$err" == *"sdk.sh: No such file"* ]] && echo yes || echo no)" "a plugin loads the SDK with a stray DOT_SDK in the environment"
 assert_equals "no" "$([[ "$err" == *"/nonexistent/"* ]] && echo yes || echo no)" "and never loads from it"
 
 test_start "loading_the_sdk_exports_its_own_directory"
