@@ -43,6 +43,9 @@ export BROWSER=true
 export EDITOR=true
 export VISUAL=true
 export GIT_EDITOR=true
+# The shells export the developer's checkout as DOTFILES_DIR, which the
+# aliases and scripts prefer to ~/.dotfiles; a test sets its own.
+unset DOTFILES_DIR
 
 _runner_hermetic_bin="${TMPDIR:-/tmp}/dotfiles-hermetic-bin"
 mkdir -p "$_runner_hermetic_bin"

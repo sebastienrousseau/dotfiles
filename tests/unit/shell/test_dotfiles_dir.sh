@@ -102,4 +102,22 @@ got="$(DOTFILES_DIR="$CHECKOUT" HOME="$WORK/home" EDITOR=echo bash -c 'source "$
 assert_equals "$CHECKOUT/defaults/.chezmoitemplates/aliases
 $CHECKOUT" "$got" "editrc alias opens the alias sources, editrc dotfiles the checkout"
 
+# The scripts that look for the checkout take DOTFILES_DIR, as the shells
+# export it, before guessing ~/.dotfiles: here HOME has no ~/.dotfiles and
+# chezmoi is not driving them.
+# fresh SCRIPT ARGS...: SCRIPT's output and status (RC), DOTFILES_DIR the checkout.
+fresh() {
+  mkdir -p "$WORK/empty-home"
+  RC=0
+  OUT="$(env -u CHEZMOI_SOURCE_DIR DOTFILES_DIR="$REPO_ROOT" HOME="$WORK/empty-home" \
+    PATH="/usr/bin:/bin" NO_COLOR=1 bash "$REPO_ROOT/$1" "${@:2}" 2>&1)" || RC=$?
+}
+
+test_start "diagnostics_take_the_checkout_from_dotfiles_dir"
+fresh scripts/diagnostics/aliases-manifest.sh
+assert_equals "0" "$RC" "aliases-manifest.sh finds a checkout off ~/.dotfiles"
+assert_contains "dotdoc" "$OUT" "and lists the checkout's aliases"
+fresh scripts/diagnostics/version-locks.sh
+assert_equals "0" "$RC" "and so does version-locks.sh"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

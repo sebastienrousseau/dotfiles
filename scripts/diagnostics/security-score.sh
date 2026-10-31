@@ -328,12 +328,12 @@ check_secrets() {
   section "Secrets Management (10 pts max)"
 
   # No secrets in dotfiles repo
-  if [[ -d "${HOME}/.dotfiles" ]]; then
+  if [[ -d "${DOTFILES_DIR:-$HOME/.dotfiles}" ]]; then
     local secrets_found=false
     local match=""
     # Check for common secret patterns, ignore templates/placeholders and variable expansions.
     match=$(grep -rE "^[[:space:]]*(export[[:space:]]+)?[A-Za-z_]*(api_key|api_secret|password|token)[A-Za-z_]*[[:space:]]*=[[:space:]]*['\"][^'\"]+['\"]" \
-      "${HOME}/.dotfiles" --include="*.sh" --include="*.zsh" --include="*.toml" 2>/dev/null |
+      "${DOTFILES_DIR:-$HOME/.dotfiles}" --include="*.sh" --include="*.zsh" --include="*.toml" 2>/dev/null |
       grep -v "example\\|template\\|placeholder" | grep -F -v "\${" | head -1 || true)
     if [[ -n "$match" ]]; then
       secrets_found=true

@@ -18,8 +18,8 @@ resolve_source_dir() {
     printf "%s\n" "$CHEZMOI_SOURCE_DIR"
     return
   fi
-  if [[ -d "$HOME/.dotfiles" ]]; then
-    printf "%s\n" "$HOME/.dotfiles"
+  if [[ -d "${DOTFILES_DIR:-$HOME/.dotfiles}" ]]; then
+    printf "%s\n" "${DOTFILES_DIR:-$HOME/.dotfiles}"
     return
   fi
   if [[ -d "$HOME/.local/share/chezmoi" ]]; then
