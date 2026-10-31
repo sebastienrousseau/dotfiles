@@ -12,7 +12,7 @@
 ##
 ## # Configuration
 ##   TMUX_SESSIONIZER_DIRS    Search paths (colon-separated)
-##   Default: ~/projects:~/work:~/src:~/.dotfiles
+##   Default: ~/projects:~/work:~/src:$DOTFILES_DIR (the dotfiles checkout)
 ##
 ## # Keybindings (inside fzf)
 ##   Enter       Switch to session
@@ -23,7 +23,7 @@
 set -euo pipefail
 
 # --- Configuration ---
-SESSIONIZER_DIRS="${TMUX_SESSIONIZER_DIRS:-$HOME/projects:$HOME/work:$HOME/src:$HOME/.dotfiles}"
+SESSIONIZER_DIRS="${TMUX_SESSIONIZER_DIRS:-$HOME/projects:$HOME/work:$HOME/src:${DOTFILES_DIR:-$HOME/.dotfiles}}"
 
 # --- Colors ---
 readonly DIM=$'\033[2m'

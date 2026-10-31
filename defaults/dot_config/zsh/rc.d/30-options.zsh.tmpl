@@ -212,7 +212,7 @@ if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]
   # Custom quiet hook: suppress direnv status chatter on every prompt/chdir.
   _dotfiles_direnv_hook() {
     # Fast path: skip direnv in dotfiles unless flake mode is explicitly enabled.
-    if [[ "${PWD:A}" == "${HOME}/.dotfiles"* ]] && [[ "${DOTFILES_USE_FLAKE:-0}" != "1" ]] && [[ "${CI:-0}" != "1" ]]; then
+    if [[ "${PWD:A}" == "${DOTFILES_DIR:-$HOME/.dotfiles}"* ]] && [[ "${DOTFILES_USE_FLAKE:-0}" != "1" ]] && [[ "${CI:-0}" != "1" ]]; then
       return 0
     fi
     trap -- '' SIGINT

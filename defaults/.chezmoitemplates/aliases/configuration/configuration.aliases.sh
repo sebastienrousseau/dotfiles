@@ -41,7 +41,7 @@ alias edit_docker_compose='${EDITOR} docker-compose.yml'
 
 # Open current directory in default text editor
 alias edit_current_directory='${EDITOR} .'
-alias eddot='${EDITOR} $HOME/.dotfiles'
+alias eddot='${EDITOR} "${DOTFILES_DIR:-$HOME/.dotfiles}"'
 
 # Git aliases
 # ------------------------------------------------------------------------------

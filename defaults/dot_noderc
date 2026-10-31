@@ -1,5 +1,5 @@
 // Node.js REPL configuration
-// Managed by chezmoi - edit source at ~/.dotfiles/dot_noderc.tmpl
+// Managed by chezmoi - edit the source with `chezmoi edit ~/.noderc`
 
 // Enable syntax highlighting and better formatting
 process.env.NODE_REPL_HISTORY_SIZE = '10000';

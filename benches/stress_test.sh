@@ -4,6 +4,8 @@
 # shellcheck disable=SC1091
 set -euo pipefail
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 # Stress test for shell functions
 # Tests behavior under repeated rapid invocation
 
@@ -52,13 +54,13 @@ main() {
   echo ""
 
   # Test genpass under load
-  source "$HOME/.dotfiles/.chezmoitemplates/functions/security/genpass.sh" 2>/dev/null || true
+  source "$REPO_ROOT/defaults/.chezmoitemplates/functions/security/genpass.sh" 2>/dev/null || true
   if type genpass &>/dev/null; then
     stress_test_function "genpass" "genpass 16"
   fi
 
   # Test extract help (no actual extraction)
-  source "$HOME/.dotfiles/.chezmoitemplates/functions/files/extract.sh" 2>/dev/null || true
+  source "$REPO_ROOT/defaults/.chezmoitemplates/functions/files/extract.sh" 2>/dev/null || true
   if type extract &>/dev/null; then
     stress_test_function "extract --help" "extract --help"
   fi

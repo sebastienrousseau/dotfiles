@@ -1,5 +1,5 @@
 # K9s configuration
-# Managed by chezmoi - edit source at ~/.dotfiles/dot_config/k9s/config.yaml.tmpl
+# Managed by chezmoi - edit the source with `chezmoi edit ~/.config/k9s/config.yaml`
 
 k9s:
   # Refresh rate in seconds

@@ -696,7 +696,7 @@ _dotfiles_deferred_hydration() {
   # Bento-Grid 2.0 (Liquid Glass Dashboard)
   # Only render if interactive and not in restricted ultra-fast mode
   if [[ "$DOTFILES_ARTIFACT_MODE" == "1" ]]; then
-    [[ -f "$HOME/.dotfiles/scripts/dot/lib/bento.sh" ]] && (bash "$HOME/.dotfiles/scripts/dot/lib/bento.sh" </dev/null; kill -WINCH $$) &!
+    [[ -f "${DOTFILES_DIR:-$HOME/.dotfiles}/lib/dot/bento.sh" ]] && (bash "${DOTFILES_DIR:-$HOME/.dotfiles}/lib/dot/bento.sh" </dev/null; kill -WINCH $$) &!
   fi
 }
 

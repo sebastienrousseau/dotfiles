@@ -44,7 +44,7 @@ Only the generic aliases (`e`, `edit`, `editor`, `mate`, `n`, `v`) and `editrc` 
 | `st` | `subl` | Only when `$EDITOR` is `subl` or `*/subl`, `DOTFILES_LEGACY_EDITOR_ALIASES=1`, `st` is not already an alias. |
 | `stt` | `subl .` | Open current directory. Only when `$EDITOR` is `subl` or `*/subl`. |
 | `stn` | `subl -n` | Open in new window. Only when `$EDITOR` is `subl` or `*/subl`. |
-| `editrc` | function | Open a configuration file: `editrc bash\|zsh\|vim\|nvim\|tmux\|git\|ssh\|alias\|dotfiles`. `vim` and `nvim` both open `$NVIM_INIT` or `~/.config/nvim/init.lua`. |
+| `editrc` | function | Open a configuration file: `editrc bash\|zsh\|vim\|nvim\|tmux\|git\|ssh\|alias\|dotfiles`. `vim` and `nvim` both open `$NVIM_INIT` or `~/.config/nvim/init.lua`; `alias` opens the alias sources (`defaults/.chezmoitemplates/aliases` in the checkout) and `dotfiles` the checkout itself (`$DOTFILES_DIR`, `~/.dotfiles` when unset). |
 
 [banner]: https://cloudcdn.pro/dotfiles/v2/images/titles/title-dotfiles.svg
 

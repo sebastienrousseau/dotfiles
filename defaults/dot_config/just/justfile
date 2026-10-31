@@ -71,7 +71,7 @@ dots-diff:
 
 # Benchmark shell startup
 dots-bench:
-    ~/.dotfiles/scripts/diagnostics/benchmark.sh
+    "${DOTFILES_DIR:-$HOME/.dotfiles}/scripts/diagnostics/benchmark.sh"
 
 # Run dotfiles health check
 dots-health:
@@ -93,7 +93,7 @@ nvim-update:
 
 # Cut a release (patch by default)
 release bump="patch":
-    ~/.dotfiles/scripts/ops/release.sh {{bump}}
+    "${DOTFILES_DIR:-$HOME/.dotfiles}/scripts/ops/release.sh" {{bump}}
 
 # === System ===
 

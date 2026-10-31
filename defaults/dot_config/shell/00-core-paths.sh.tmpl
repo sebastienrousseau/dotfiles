@@ -28,6 +28,12 @@
 ## # Idempotency
 ## Safe to source multiple times. Deduplicates PATH entries.
 
+# The dotfiles checkout (chezmoi's working tree; install.sh's SOURCE_DIR,
+# ~/.dotfiles by default), for the aliases, functions and scripts that run
+# its files. A value already set wins.
+[ -n "${DOTFILES_DIR:-}" ] || DOTFILES_DIR={{ squote .chezmoi.workingTree }}
+export DOTFILES_DIR
+
 # Helper: prepend path if directory exists (moves to front if already present)
 path_prepend() {
     local dir="$1"

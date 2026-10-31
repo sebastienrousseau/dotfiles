@@ -8,7 +8,7 @@
   still wins for its registry.
 */ -}}
 # npm configuration
-# Managed by chezmoi - edit source at ~/.dotfiles/defaults/modify_private_dot_npmrc
+# Managed by chezmoi - edit the source with `chezmoi edit ~/.npmrc`
 # Registry auth lines added by `npm login` are kept on apply.
 
 # Global packages location (keep out of system directories)
