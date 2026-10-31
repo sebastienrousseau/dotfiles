@@ -23,7 +23,7 @@ set_secret() { # set_secret <key-file> <key> <value>
   HOME="$WORK" PATH="$WORK/bin:$PATH" DOTFILES_SECRETS_PROVIDER=plain-enc \
     DOT_SECRETS_HOME="$WORK/secrets" DOT_SECRETS_AGE_KEY="$1" \
     bash -c 'source "$0"; dot_secrets_set "$1" "$2"' \
-    "$REPO_ROOT/scripts/lib/secrets_provider.sh" "$2" "$3" >"$WORK/out" 2>&1
+    "$REPO_ROOT/plugins/secret/libexec/secret/secrets_provider.sh" "$2" "$3" >"$WORK/out" 2>&1
 }
 
 test_start "plain_enc_without_age_key_fails"

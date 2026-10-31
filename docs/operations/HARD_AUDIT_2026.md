@@ -60,7 +60,7 @@ The goal stated by the maintainer: become the de facto workstation provisioning 
 
 - **Release supply chain.** `security-release.yml` runs Cosign keyless signing + SBOM generation + SLSA provenance. Actions are SHA-pinned except the SLSA generator's required, documented `v2.1.0` tag reference.
 - **GitHub Actions hygiene.** Every non-exempt `uses:` is SHA-pinned; reusable workflows are blocked by `lint-reusable-pins.sh`. Strong.
-- **Secrets handling.** `scripts/lib/secrets_provider.sh` correctly isolates macOS keychain / `pass` / `age` providers with no plaintext leakage.
+- **Secrets handling.** `plugins/secret/libexec/secret/secrets_provider.sh` correctly isolates macOS keychain / `pass` / `age` providers with no plaintext leakage.
 - **Test suite.** 4035 unit tests, 47.57% measured line coverage with documented structural ceiling.
 
 ## Part 2 — Competitive position (May 2026)

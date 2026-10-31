@@ -9,7 +9,7 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 source "$SCRIPT_DIR/../../framework/coverage_helpers.sh"
 
-PROVIDER_FILE="$REPO_ROOT/scripts/lib/secrets_provider.sh"
+PROVIDER_FILE="$REPO_ROOT/plugins/secret/libexec/secret/secrets_provider.sh"
 
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox

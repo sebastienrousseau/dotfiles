@@ -34,8 +34,8 @@ lockstep() {
 lockstep fleet_name fuzz/fleet_inputs_test.go fleetNamePattern plugins/fleet/libexec/fleet/apply.sh
 lockstep fleet_target fuzz/fleet_inputs_test.go fleetTargetPattern plugins/fleet/libexec/fleet/apply.sh
 lockstep fleet_jobs fuzz/fleet_inputs_test.go fleetJobsPattern plugins/fleet/libexec/fleet/apply.sh
-lockstep secret_key fuzz/secret_key_test.go secretKeyPattern scripts/lib/secrets_provider.sh
-lockstep secret_env_key fuzz/secret_key_test.go secretEnvKeyPattern scripts/lib/secrets_provider.sh
+lockstep secret_key fuzz/secret_key_test.go secretKeyPattern plugins/secret/libexec/secret/secrets_provider.sh
+lockstep secret_env_key fuzz/secret_key_test.go secretEnvKeyPattern plugins/secret/libexec/secret/secrets_provider.sh
 
 # The gateway gate is ported from Python rather than a single regex; pin
 # the two expressions the port mirrors.
