@@ -12,7 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"dotfiles.local/core/protocol"
+	"github.com/sebastienrousseau/dot-core/protocol"
 )
 
 func pluginCommand(ctx context.Context, plugin *os.File, stage, assurance string) (*exec.Cmd, func(), error) {

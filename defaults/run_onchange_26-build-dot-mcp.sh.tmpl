@@ -28,6 +28,8 @@ set -euo pipefail
 
 SRC="$HOME/.local/share/dot-mcp"
 OUT="$HOME/.local/bin/dot-mcp"
+# The framework version, injected as main.version (`--version`).
+VERSION={{ .dotfiles_version | quote }}
 
 [[ -f "$SRC/main.go" ]] || {
   echo "dot-mcp: source not deployed yet — skipping."

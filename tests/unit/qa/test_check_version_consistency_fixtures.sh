@@ -86,9 +86,10 @@ _fixture() { # <name> <version>
   printf 'Current version: v%s.\n' "$v" >"$root/llms.txt"
   printf '# Changelog\n\n## v%s — 2026-01-01\n' "$v" >"$root/CHANGELOG.md"
   printf 'cff-version: 1.2.0\nversion: %s\n' "$v" >"$root/CITATION.cff"
-  # The MCP server's serverInfo.version, which must equal the card's.
-  mkdir -p "$root/defaults/dot_local/share/dot-mcp"
-  printf '// dot-mcp\nconst version = "%s"\n' "$v" >"$root/defaults/dot_local/share/dot-mcp/main.go"
+  # A plugin manifest, versioned in lockstep; an alias's `until` is a
+  # removal version, not a surface.
+  mkdir -p "$root/plugins/demo"
+  printf 'domain = "demo"\nversion = "%s"\n\n[[aliases]]\nuntil = "0.0.1"\n' "$v" >"$root/plugins/demo/dot-plugin.toml"
   printf '%s\n' "$root"
 }
 
@@ -114,6 +115,14 @@ _rc=$?
 assert_equals 0 "$_rc" "matching tree exits 0"
 assert_contains "canonical: 1.2.3" "$_out" "canonical version logged"
 assert_contains "all 18 live version surfaces match 1.2.3" "$_out" "success summary printed"
+
+test_start "a_plugin_manifest_version_drift_is_caught"
+_root="$(_fixture plugin 1.2.3)"
+printf 'domain = "demo"\nversion = "1.2.2"\n\n[[aliases]]\nuntil = "0.0.1"\n' >"$_root/plugins/demo/dot-plugin.toml"
+_out="$(_check "$_root")"
+_rc=$?
+assert_equals 1 "$_rc" "a manifest behind the framework version fails"
+assert_contains "DRIFT in plugins/demo/dot-plugin.toml" "$_out" "the manifest is named"
 
 test_start "quiet_suppresses_output_but_keeps_rc"
 _root="$(_fixture quiet 1.2.3)"

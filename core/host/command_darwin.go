@@ -11,7 +11,7 @@ import (
 	"os"
 	"os/exec"
 
-	"dotfiles.local/core/protocol"
+	"github.com/sebastienrousseau/dot-core/protocol"
 )
 
 func pluginCommand(ctx context.Context, plugin *os.File, _ string, assurance string) (*exec.Cmd, func(), error) {

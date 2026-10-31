@@ -101,9 +101,6 @@ specs=(
   # prints: it sat at 0.2.501 for 38 releases before this was checked.
   "defaults/dot_config/dotfiles/agent-card.json|\"version\"|\"version\": \"${canonical}\""
   ".well-known/mcp/server-card.json|\"version\"|\"version\": \"${canonical}\""
-  # serverInfo.version returned by the MCP `initialize` handshake. A client
-  # reads the card and the handshake; they must agree.
-  "defaults/dot_local/share/dot-mcp/main.go|^const version =|const version = \"${canonical}\""
   # LLM-facing repo index.
   "llms.txt|Current version:|Current version: v${canonical}."
   # Citation metadata: a stale version here is cited in papers.
@@ -111,6 +108,13 @@ specs=(
   # Keep-a-Changelog: the top heading must be the version being shipped.
   "CHANGELOG.md|^## v|## v${canonical}"
 )
+
+# The plugin manifests are versioned in lockstep with the framework. (The Go
+# binaries report it too, injected at build time from dotfiles_version, so
+# their source carries no version to check.)
+for manifest in plugins/*/dot-plugin.toml; do
+  [[ -f "$manifest" ]] && specs+=("$manifest|^version =|version = \"${canonical}\"")
+done
 
 drift=0
 for spec in "${specs[@]}"; do

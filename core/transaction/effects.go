@@ -10,7 +10,7 @@ import (
 	"os"
 	"strconv"
 
-	"dotfiles.local/core/protocol"
+	"github.com/sebastienrousseau/dot-core/protocol"
 )
 
 const maxEffectEntries = 256

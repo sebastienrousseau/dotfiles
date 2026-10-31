@@ -5,13 +5,14 @@ package main
 
 import (
 	"context"
-	"dotfiles.local/core/host"
-	"dotfiles.local/core/protocol"
-	"dotfiles.local/core/transaction"
 	"flag"
 	"fmt"
 	"os"
 	"os/signal"
+
+	"github.com/sebastienrousseau/dot-core/host"
+	"github.com/sebastienrousseau/dot-core/protocol"
+	"github.com/sebastienrousseau/dot-core/transaction"
 )
 
 func run(args []string) error {

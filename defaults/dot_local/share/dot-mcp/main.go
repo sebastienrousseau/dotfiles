@@ -28,11 +28,12 @@ import (
 	"os"
 )
 
-// version is the dot-mcp release string. It tracks the framework version in
-// defaults/.chezmoidata.toml and is kept in step with
-// .well-known/mcp/server-card.json by scripts/version-sync.sh; the pairing is
-// asserted by TestVersionMatchesServerCard.
-const version = "0.2.539"
+// version is the dot-mcp release string, reported as serverInfo.version. The
+// build sets it to the framework version in defaults/.chezmoidata.toml with
+// -ldflags "-X main.version=<version>" (.chezmoitemplates/go-build-command);
+// .well-known/mcp/server-card.json carries the same version, which
+// TestServerCardMatchesFrameworkVersion checks. Unset, it is "dev".
+var version = "dev"
 
 // Process-boundary seams. Each wraps exactly one call that cannot be exercised
 // in-process by `go test`: os.Exit terminates the test binary. Tests substitute

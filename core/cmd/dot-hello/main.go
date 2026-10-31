@@ -7,11 +7,12 @@ import (
 	"bufio"
 	"bytes"
 	"crypto/sha256"
-	"dotfiles.local/core/protocol"
 	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
+
+	"github.com/sebastienrousseau/dot-core/protocol"
 )
 
 func run() error {

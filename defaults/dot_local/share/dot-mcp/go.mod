@@ -1,4 +1,4 @@
-module dotfiles.local/dot-mcp
+module github.com/sebastienrousseau/dot-mcp
 
 go 1.26
 
