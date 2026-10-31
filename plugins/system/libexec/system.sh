@@ -13,10 +13,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../../../lib/dot/sdk.sh
 source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/sdk.sh"
-# shellcheck source=../../../lib/dot/system.sh
-source "$SCRIPT_DIR/../../../lib/dot/system.sh"
-# shellcheck source=../../../lib/dot/upgrade.sh
-source "$SCRIPT_DIR/../../../lib/dot/upgrade.sh"
+# shellcheck source=system/schedule.sh
+source "$SCRIPT_DIR/system/schedule.sh"
+# shellcheck source=system/upgrade.sh
+source "$SCRIPT_DIR/system/upgrade.sh"
 # shellcheck source=../../../lib/dot/log.sh
 source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/log.sh"
 

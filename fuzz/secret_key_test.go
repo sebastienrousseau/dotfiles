@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 // Copyright (c) 2015-2026 Sebastien Rousseau
 //
-// FuzzSecretKey ports the key-name gates of scripts/lib/secrets_provider.sh:
+// FuzzSecretKey ports the key-name gates of plugins/secret/libexec/secret/secrets_provider.sh:
 //
 //	dot_secrets_valid_key      ^[A-Za-z0-9_][A-Za-z0-9_.-]*$
 //	    (keys become "<store>/<key>.age" and keychain service names)
@@ -51,7 +51,7 @@ func FuzzSecretKey(f *testing.F) {
 	}
 	f.Fuzz(func(t *testing.T, key string) {
 		if secretKeyRE.MatchString(key) {
-			store := "/home/u/.config/dotfiles/secrets/store"
+			store := "/u/.config/dotfiles/secrets/store"
 			p := filepath.Join(store, key+".age")
 			if filepath.Dir(p) != store {
 				t.Fatalf("accepted key %q leaves the store: %s", key, p)

@@ -9,7 +9,7 @@ scripts/diagnostics/health.sh
 lib/dot/log.sh
 plugins/cli/libexec/registry.sh
 scripts/version-sync.sh
-scripts/lib/secrets_provider.sh
+plugins/secret/libexec/secret/secrets_provider.sh
 lib/dot/verified-download.sh
 scripts/diagnostics/doctor.sh
 scripts/theme/switch.sh

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# Behavioural tests for lib/dot/preflight.sh, lib/dot/upgrade.sh and
+# Behavioural tests for lib/dot/preflight.sh, plugins/system/libexec/system/upgrade.sh and
 # plugins/ai/libexec/ai/ai-provision.sh: consent (default no), mise bootstrap, and the
 # toolchain phases of `dot system update`. Every external tool is a stub on a PATH
 # that carries nothing else; the one real terminal case runs under a pty.
@@ -41,7 +41,7 @@ lib() {
     source "$1/lib/dot/ui.sh"
     has_command() { command -v "$1" >/dev/null 2>&1; }
     source "$1/lib/dot/preflight.sh"
-    source "$1/lib/dot/upgrade.sh"
+    source "$1/plugins/system/libexec/system/upgrade.sh"
     _ai_mise_pkg() { case "$1" in codex) echo npm:@openai/codex ;; esac; }
     _ai_in_scratch_dir() { "$@"; }
     ai_pinned_spec() { printf "%s@1.0.0\n" "$1"; }

@@ -81,7 +81,7 @@ SKIP_PATHS = {
     "scripts/security/enforce-policies.sh",
     "scripts/security/ssh-cert.sh",
     "scripts/security/firewall.sh",
-    "scripts/lib/secrets_provider.sh",                # keychain/gpg/age bindings
+    "plugins/secret/libexec/secret/secrets_provider.sh",                # keychain/gpg/age bindings
     "scripts/ops/setup.sh",                           # post-install bootstrap
     "scripts/theme/wallpaper-rotate.sh",              # cron-driven wallpaper change
     "scripts/git-hooks/pre-commit-audit.sh",          # full hook flow needs real index

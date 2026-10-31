@@ -28,7 +28,7 @@ on:
       - 'lib/dot/utils.sh'
       - 'plugins/config/libexec/init.sh'
       - 'plugins/fleet/libexec/fleet.sh'
-      - 'scripts/lib/secrets_provider.sh'
+      - 'plugins/secret/libexec/secret/secrets_provider.sh'
       - 'defaults/dot_local/bin/executable_dot-ai-serve'
       - 'fuzz/**'
       - 'defaults/dot_local/share/dot-ui/**'

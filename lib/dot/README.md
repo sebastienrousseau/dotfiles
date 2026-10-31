@@ -14,8 +14,10 @@ directory and `DOT_DOMAIN` to its domain, and the plugin sources
 `"${DOT_SDK:-<fallback>}/<file>"`; the fallback, the same directory reached
 from the plugin's own path, is for a plugin run outside `bin/dot`, as in
 tests. `tools/ci/check-plugin-imports.py` fails a plugin that sources
-anything else outside its own directory; the imports left from before the
-SDK are listed in `tools/ci/plugin-imports-baseline.txt` and only shrink.
+anything else outside its own directory, and its baseline
+(`tools/ci/plugin-imports-baseline.txt`) is empty: a domain's own
+libraries live in its plugin, under `plugins/<domain>/libexec/<module>/`
+(the ai, cli, secret and system plugins' among them).
 
 ```bash
 source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/sdk.sh"
@@ -52,9 +54,6 @@ and adds the host-only helpers.
 | File | Used by |
 |------|---------|
 | `bento.sh` | `_dotfiles_bento_render`, the "D O T F I L E S" splash and intelligence-surface card that `dot top` runs |
-| `registry-module.sh`, `registry-trust.sh` | `dot cli install` and `dot cli list --available` (`plugins/cli/libexec/registry.sh`) |
-| `system.sh` | `dot system status` and `dot system schedule list\|set\|run` |
-| `upgrade.sh` | The toolchain side of `dot system update` |
 | `installer-digest.sh` | The README installer SHA-256 for a release: `scripts/verify-release-versions` checks it, `scripts/version-sync.sh` writes it |
 | `theme-niri.sh`, `theme-nvim.sh`, `theme-transaction.sh` | `bin/dot-theme-sync` targets and its transaction primitives |
 

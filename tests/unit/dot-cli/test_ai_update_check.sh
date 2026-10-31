@@ -89,7 +89,7 @@ pins() {
   OUT="$(DOT_SYSTEM_DOT="$1" bash -c '
     set -euo pipefail
     source "$2/lib/dot/utils.sh"
-    source "$2/lib/dot/upgrade.sh"
+    source "$2/plugins/system/libexec/system/upgrade.sh"
     declare -F ai_pin_bumps >/dev/null && echo "installer loaded"
     _dot_upgrade_pins "$3/pins.list"' _ "$1" "$REPO_ROOT" "$WORK" 2>&1)" || RC=$?
 }

@@ -18,7 +18,7 @@ printf 'nushell:   load-env (dot secrets load ai --shell nu | from nuon)\n'
 
 # --- Underlying secrets scripts (repo source of truth) ---
 printf 'Secrets manager:   %s\n' "$repo_root/scripts/security/manage-secrets.sh"
-printf 'Secrets provider:  %s\n' "$repo_root/scripts/lib/secrets_provider.sh"
+printf 'Secrets provider:  %s\n' "$repo_root/plugins/secret/libexec/secret/secrets_provider.sh"
 
 # Secrets are decrypted on-demand; the provider abstracts keychain / gpg /
 # age backends so shells and scripts read secrets without plaintext on disk.
