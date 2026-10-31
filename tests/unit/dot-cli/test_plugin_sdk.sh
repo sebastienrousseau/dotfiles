@@ -40,7 +40,9 @@ assert_equals $'Pending changes and last apply\nRun a dotfiles command.' "$out" 
 
 # The source-tree resolvers, from a copy of the SDK outside any checkout so
 # the location probe finds nothing and the fallbacks decide.
-WORK="$(mktemp -d "${TMPDIR:-/tmp}/dot-sdk.XXXXXX")"
+# Symlinks resolved: the resolvers return real paths, and macOS's TMPDIR
+# sits under /var, a link to /private/var.
+WORK="$(cd "$(mktemp -d "${TMPDIR:-/tmp}/dot-sdk.XXXXXX")" && pwd -P)"
 trap 'rm -rf "$WORK"' EXIT
 mkdir -p "$WORK/sdk" "$WORK/home/.dotfiles" "$WORK/tree/defaults"
 for f in sdk.sh ui.sh platform.sh preflight.sh data; do ln -s "$REPO_ROOT/lib/dot/$f" "$WORK/sdk/$f"; done
