@@ -125,7 +125,7 @@ gum style \
   "dot theme font install      # Install Nerd Fonts" \
   "dot tool list --nix      # Curated utilities" \
   " " \
-  "Edit ~/.dotfiles/.chezmoidata.toml for shell, features, and profiles."
+  "Edit defaults/.chezmoidata.toml in your checkout (\$DOTFILES_DIR) for shell, features, and profiles."
 
 echo ""
 gum confirm "Next: Projects & Sandbox" || exit 0

@@ -12,9 +12,9 @@ These aliases are defined in `diagnostics.aliases.sh`. Loaded by the eager alias
 
 | Name | Definition | Notes |
 | --- | --- | --- |
-| `dotdoc` | `bash $HOME/.dotfiles/scripts/diagnostics/doctor.sh` | Run the doctor script from the source checkout. |
+| `dotdoc` | `bash "${DOTFILES_DIR:-$HOME/.dotfiles}/scripts/diagnostics/doctor.sh"` | Run the doctor script from the source checkout. |
 | `dot-doctor` | `dotdoc` | Runs `dotdoc`. |
-| `dotdoc-full` | `bash $HOME/.dotfiles/scripts/diagnostics/doctor.sh && echo "\n--- Path Info ---" && echo $PATH \| tr ":" "\n" \| glow -` | Run the doctor, then print each `PATH` entry through `glow`. |
+| `dotdoc-full` | `bash "${DOTFILES_DIR:-$HOME/.dotfiles}/scripts/diagnostics/doctor.sh" && echo "\n--- Path Info ---" && echo $PATH \| tr ":" "\n" \| glow -` | Run the doctor, then print each `PATH` entry through `glow`. |
 | `drift` | `chezmoi verify` | Only when `chezmoi` is on PATH. |
 | `dot-drift` | `drift` | Only when `chezmoi` is on PATH. |
 | `heal` | `chezmoi apply --verbose` | Auto-Repair (Sync) Only when `chezmoi` is on PATH. |

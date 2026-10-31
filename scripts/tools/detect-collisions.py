@@ -12,7 +12,8 @@ import sys
 # named in .chezmoiroot (typically "defaults/"). Prefer the
 # descended path; fall back to the old top-level layout for
 # backwards compatibility.
-_DOTFILES_ROOT = os.path.expanduser("~/.dotfiles")
+# The checkout: $DOTFILES_DIR, which the shells export, else ~/.dotfiles.
+_DOTFILES_ROOT = os.environ.get("DOTFILES_DIR") or os.path.expanduser("~/.dotfiles")
 _CHEZMOIROOT_FILE = os.path.join(_DOTFILES_ROOT, ".chezmoiroot")
 
 

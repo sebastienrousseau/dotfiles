@@ -133,7 +133,7 @@ function _dotfiles_trigger_hydration --on-event fish_prompt
     _dotfiles_async_init
     if test "$DOTFILES_ARTIFACT_MODE" = "1"
         begin
-            bash "$HOME/.dotfiles/scripts/dot/lib/bento.sh" </dev/null
+            bash "$DOTFILES_DIR/lib/dot/bento.sh" </dev/null
             kill -WINCH $fish_pid
         end &
     end

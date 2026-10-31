@@ -42,8 +42,8 @@ resolve_source_dir() {
     echo "$CHEZMOI_SOURCE_DIR"
     return
   fi
-  if [ -d "$HOME/.dotfiles" ]; then
-    echo "$HOME/.dotfiles"
+  if [ -d "${DOTFILES_DIR:-$HOME/.dotfiles}" ]; then
+    echo "${DOTFILES_DIR:-$HOME/.dotfiles}"
     return
   fi
   if [ -d "$HOME/.local/share/chezmoi" ]; then

@@ -41,6 +41,7 @@ Variables the dotfiles set in your shell for tool consumption.
 | `XDG_DATA_HOME` | `~/.local/share` | ditto |
 | `XDG_STATE_HOME` | `~/.local/state` | ditto |
 | `PATH` | managed order | `dot_config/shell/00-core-paths.sh.tmpl` |
+| `DOTFILES_DIR` | the dotfiles checkout: `~/.dotfiles`, or wherever `install.sh`'s `SOURCE_DIR` put it (chezmoi's working tree) | `00-core-paths.sh.tmpl` (bash, zsh), `env.fish.tmpl` (fish); a value already set wins. The aliases, functions and scripts that run files from the checkout read it, and fall back to `~/.dotfiles` |
 | `BUN_INSTALL` | `~/.bun` | `env.fish.tmpl` |
 | `PIPX_HOME` | `~/.local/share/pipx` | ditto |
 | `PIPX_BIN_DIR` | `~/.local/bin` | ditto |

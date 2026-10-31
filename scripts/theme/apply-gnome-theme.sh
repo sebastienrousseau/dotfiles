@@ -327,7 +327,7 @@ main() {
 
       if [ "$theme_exists" = "false" ]; then
         warn "Catppuccin themes not found. Installing them first..."
-        "$HOME/.dotfiles/scripts/theme/install-catppuccin-themes.sh"
+        "$(dirname "${BASH_SOURCE[0]}")/install-catppuccin-themes.sh"
       fi
 
       backup_settings

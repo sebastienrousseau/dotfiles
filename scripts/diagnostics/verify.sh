@@ -39,8 +39,8 @@ resolve_dot_bin() {
   local src_dir=""
   if [[ -n "${CHEZMOI_SOURCE_DIR:-}" && -d "${CHEZMOI_SOURCE_DIR}" ]]; then
     src_dir="${CHEZMOI_SOURCE_DIR}"
-  elif [[ -d "$HOME/.dotfiles" ]]; then
-    src_dir="$HOME/.dotfiles"
+  elif [[ -d "${DOTFILES_DIR:-$HOME/.dotfiles}" ]]; then
+    src_dir="${DOTFILES_DIR:-$HOME/.dotfiles}"
   elif [[ -d "$HOME/.local/share/chezmoi" ]]; then
     src_dir="$HOME/.local/share/chezmoi"
   fi

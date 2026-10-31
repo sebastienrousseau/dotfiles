@@ -28,14 +28,10 @@ analyze_last_error() {
   if [[ -f "${HOME}/.local/bin/ai_core" ]]; then
     "${HOME}/.local/bin/ai_core" query "$prompt"
   else
-    local source_dir="${CHEZMOI_SOURCE_DIR:-${HOME}/.dotfiles}"
-    if [[ ! -d "$source_dir" && -d "${HOME}/.local/share/chezmoi" ]]; then
-      source_dir="${HOME}/.local/share/chezmoi"
-    fi
-
-    if [[ -f "${source_dir}/dot_local/bin/ai_core" ]]; then
-      # Fallback for dev/testing location before chezmoi apply
-      "${source_dir}/dot_local/bin/ai_core" query "$prompt"
+    local ai_core="${DOTFILES_DIR:-$HOME/.dotfiles}/defaults/dot_local/bin/executable_ai_core"
+    if [[ -f "$ai_core" ]]; then
+      # Fallback for dev/testing: the checkout's copy, before chezmoi apply
+      bash "$ai_core" query "$prompt"
     else
       echo "Error: ai_core wrapper not found."
     fi

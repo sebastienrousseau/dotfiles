@@ -26,7 +26,7 @@
   21   21    4.2  108   108 defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh::<top>
   19   27   29.6   53     0 defaults/.chezmoitemplates/aliases/cd/cd-core.aliases.sh::cd_with_history
   16   15    4.0   22    22 defaults/.chezmoitemplates/aliases/cd/cd-shortcuts.aliases.sh::<top>
-  23   21   11.9   76   360 defaults/.chezmoitemplates/aliases/cd/cd.aliases.sh::<top>
+  23   21   11.8   76   360 defaults/.chezmoitemplates/aliases/cd/cd.aliases.sh::<top>
   19   27   29.6   53     0 defaults/.chezmoitemplates/aliases/cd/cd.aliases.sh::cd_with_history
   12   17   18.4   29     0 defaults/.chezmoitemplates/aliases/chmod/chmod.aliases.sh::show_permissions
   15   20   15.4   62     0 defaults/.chezmoitemplates/aliases/default/default.aliases.sh::set_default_aliases
@@ -85,8 +85,6 @@
   16   13   28.1   51   115 install/migrate/migrate-v0_2-to-v0_2_503.sh::<top>
   11   12   19.8   33    33 install/provision/run_onchange_30-darwin-mas.sh::<top>
   21   22   36.0   59    80 install/provision/run_onchange_50-install-fonts.sh::<top>
-  39   20   35.3   29     0 plugins/ai/libexec/ai/ai-commands.sh::_ai_invoke_provider
-  12   11   23.7   24     0 plugins/ai/libexec/ai/ai-commands.sh::cmd_ai_install
   17   21   34.7   36     0 lib/dot/sdk.sh::resolve_source_dir
   12   12   24.7   29     0 lib/dot/theme-transaction.sh::_theme_txn_restore_files
    2    1    4.2   35   693 lib/dot/ui.sh::<top>
@@ -101,6 +99,8 @@
   16    5   25.7   27     0 plugins/agent/libexec/agent.sh::cmd_mode
   12   12   25.8   22     0 plugins/agent/libexec/agents.sh::_agents_repo_root
   18   21   43.4  163     0 plugins/agent/libexec/agents.sh::cmd_agents
+  39   20   35.3   29     0 plugins/ai/libexec/ai/ai-commands.sh::_ai_invoke_provider
+  12   11   23.7   24     0 plugins/ai/libexec/ai/ai-commands.sh::cmd_ai_install
   11   10   33.7   42     0 plugins/cli/libexec/registry.sh::_registry_install
   33   34   43.5  123     0 plugins/cli/libexec/registry.sh::cmd_registry
   22   21   28.7  103     0 plugins/config/libexec/init.sh::cmd_init

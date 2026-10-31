@@ -89,8 +89,8 @@ editrc() {
     tmux) "${EDITOR}" "${HOME}/.tmux.conf" ;;
     git) "${EDITOR}" "${HOME}/.gitconfig" ;;
     ssh) "${EDITOR}" "${HOME}/.ssh/config" ;;
-    alias) "${EDITOR}" "${HOME}/.dotfiles/aliases" ;;
-    dotfiles) "${EDITOR}" "${HOME}/.dotfiles" ;;
+    alias) "${EDITOR}" "${DOTFILES_DIR:-$HOME/.dotfiles}/defaults/.chezmoitemplates/aliases" ;;
+    dotfiles) "${EDITOR}" "${DOTFILES_DIR:-$HOME/.dotfiles}" ;;
     *) echo "Usage: editrc [bash|zsh|vim|nvim|tmux|git|ssh|alias|dotfiles]" ;;
   esac
 }

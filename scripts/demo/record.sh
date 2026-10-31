@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 set -euo pipefail
 
-OUT="${1:-$HOME/.dotfiles/docs/demo/demo.gif}"
+OUT="${1:-${DOTFILES_DIR:-$HOME/.dotfiles}/docs/demo/demo.gif}"
 DURATION="${DURATION:-30}"
 FPS="${FPS:-15}"
 

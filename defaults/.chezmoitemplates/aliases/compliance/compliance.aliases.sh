@@ -28,7 +28,7 @@ audit_fn() {
     tail -n 20 "$log"
   else
     # Fallback to git log when dot has not logged anything yet
-    git -C "$HOME/.dotfiles" log --oneline -n 10 --format="%C(auto)%h %C(blue)%ad %C(reset)%s (%an)" --date=short
+    git -C "${DOTFILES_DIR:-$HOME/.dotfiles}" log --oneline -n 10 --format="%C(auto)%h %C(blue)%ad %C(reset)%s (%an)" --date=short
   fi
 }
 

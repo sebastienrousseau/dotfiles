@@ -13,7 +13,7 @@ These aliases are defined in `compliance.aliases.sh`. Loaded by the eager alias 
 | Name | Definition | Notes |
 | --- | --- | --- |
 | `privacy-mode` | `privacy_mode_fn` | Export the telemetry opt-out variables of .NET, Homebrew, Azure, Azure Functions, AWS SAM, Stripe, Gatsby and Next.js in the current shell. |
-| `dot-audit` | `audit_fn` | Show the last 20 lines of the dot CLI's log, `${XDG_STATE_HOME:-~/.local/state}/dotfiles/dot.log`, or the last 10 commits of `~/.dotfiles` when that log is missing. |
+| `dot-audit` | `audit_fn` | Show the last 20 lines of the dot CLI's log, `${XDG_STATE_HOME:-~/.local/state}/dotfiles/dot.log`, or the last 10 commits of the checkout (`$DOTFILES_DIR`, `~/.dotfiles` when unset) when that log is missing. |
 
 See [COMPLIANCE.md](../../../../docs/security/COMPLIANCE.md) for the controls these support.
 

@@ -1,5 +1,5 @@
 # Yarn Berry (v2+) configuration
-# Managed by chezmoi - edit source at ~/.dotfiles/dot_config/yarn/yarnrc.yml.tmpl
+# Managed by chezmoi - edit the source with `chezmoi edit ~/.config/yarn/yarnrc.yml`
 
 # Use node-modules linker for compatibility (PnP is default but breaks some tools)
 nodeLinker: node-modules

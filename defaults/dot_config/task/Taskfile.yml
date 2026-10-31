@@ -68,7 +68,7 @@ tasks:
   dots:bench:
     desc: Benchmark shell startup
     cmds:
-      - ~/.dotfiles/scripts/diagnostics/benchmark.sh
+      - '"${DOTFILES_DIR:-$HOME/.dotfiles}/scripts/diagnostics/benchmark.sh"'
 
   # System maintenance
   update:

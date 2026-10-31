@@ -106,8 +106,8 @@ MCP_CONFIG="${MCP_CONFIG:-$HOME/.config/claude/mcp_servers.json}"
 _mcp_find_config() {
   local cand
   [[ -f "$MCP_CONFIG" ]] && return 0
-  for cand in "$HOME/.dotfiles/defaults/dot_config/claude/mcp_servers.json" \
-    "$HOME/.dotfiles/dot_config/claude/mcp_servers.json"; do
+  for cand in "${DOTFILES_DIR:-$HOME/.dotfiles}/defaults/dot_config/claude/mcp_servers.json" \
+    "${DOTFILES_DIR:-$HOME/.dotfiles}/dot_config/claude/mcp_servers.json"; do
     if [[ -f "$cand" ]]; then
       MCP_CONFIG="$cand"
       return 0

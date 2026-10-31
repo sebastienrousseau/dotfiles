@@ -18,7 +18,7 @@ These aliases are defined in `configuration.aliases.sh`. Loaded by the eager ali
 | `edit_bash_profile` | `${EDITOR} $HOME/.bash_profile` | Open Bash profile in default text editor. |
 | `edit_docker_compose` | `${EDITOR} docker-compose.yml` | Open Docker Compose file in default text editor. |
 | `edit_current_directory` | `${EDITOR} .` | Open current directory in default text editor. |
-| `eddot` | `${EDITOR} $HOME/.dotfiles` | Open the dotfiles source directory. |
+| `eddot` | `${EDITOR} "${DOTFILES_DIR:-$HOME/.dotfiles}"` | Open the dotfiles checkout. |
 | `edit_git_config` | `${EDITOR} $HOME/.gitconfig` | Open Git configuration file in default text editor. |
 | `edit_git_ignore` | `${EDITOR} $HOME/.gitignore` | Open Git ignore file in default text editor. |
 | `edit_hosts` | `${EDITOR} /etc/hosts` | Open hosts file in default text editor (cross-platform) Only when file `/etc/hosts` exists. |

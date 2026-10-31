@@ -40,7 +40,7 @@ _rt_require_bash4 "$@"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 EXTRACT_SCRIPT="$SCRIPT_DIR/extract-theme.py"
-DOTFILES_DIR="${HOME}/.dotfiles"
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
 
 # Descend into the chezmoi source subdir when .chezmoiroot is present (post-reorg, chezmoi files under defaults/)
 CHEZMOI_SRC="$DOTFILES_DIR"

@@ -158,7 +158,7 @@ check_dotfiles_core() {
 
   if has_command chezmoi; then
     check "Chezmoi installed" "pass"
-    if [[ -d "${HOME}/.local/share/chezmoi" ]] || [[ -d "${HOME}/.dotfiles" ]]; then
+    if [[ -d "${HOME}/.local/share/chezmoi" ]] || [[ -d "${DOTFILES_DIR:-$HOME/.dotfiles}" ]]; then
       check "Chezmoi source directory" "pass"
     else
       check "Chezmoi source directory" "fail" "Not found"
@@ -491,7 +491,7 @@ _health_chezmoi_sync() {
 }
 
 _health_git_tree() {
-  local dotfiles_dir="${HOME}/.dotfiles" git_status="" changes
+  local dotfiles_dir="${DOTFILES_DIR:-$HOME/.dotfiles}" git_status="" changes
   if [[ ! -d "$dotfiles_dir/.git" ]]; then
     check "Git working tree" "warn" "Not a git repo"
     return 0

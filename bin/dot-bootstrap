@@ -104,7 +104,7 @@ checkout_signed_release() {
 }
 
 # 3. Clone Repository
-DOTFILES_DIR="$HOME/.dotfiles"
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
 if [ ! -d "$DOTFILES_DIR" ]; then
   step "Cloning Dotfiles..."
   git clone https://github.com/sebastienrousseau/dotfiles.git "$DOTFILES_DIR"
