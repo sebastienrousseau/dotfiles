@@ -57,7 +57,7 @@ is a bug in one of them.
 | `FuzzValidateName` | `lib/dot/utils.sh:186` (`validate_name`) | Every accepted name contains only `[a-zA-Z0-9._-]`; no shell metacharacter slips through; empty input refused. |
 | `FuzzInitURLResolver` | `plugins/config/libexec/init.sh` (URL construction in `dot config init <user\|owner/repo\|url>`) | Accepted URLs use `https://` / `git@` / `ssh://` only; plain HTTP refused; no shell metacharacters in constructed URLs; one input shape per acceptable form. |
 | `FuzzFleetInputs` | `plugins/fleet/libexec/fleet.sh` (`cmd_fleet_apply` input gates) | An accepted host name joined as `<dir>/<name>.out` stays inside `dir`; an accepted SSH target never starts with `-` and carries no shell metacharacter; `--jobs` is a positive integer. |
-| `FuzzSecretKey` | `scripts/lib/secrets_provider.sh` (`dot_secrets_valid_key`, `dot_secrets_valid_env_key`) | An accepted storage key stays a direct child of the store and never starts with `-` or `.`; an accepted env key is a POSIX shell identifier. |
+| `FuzzSecretKey` | `plugins/secret/libexec/secret/secrets_provider.sh` (`dot_secrets_valid_key`, `dot_secrets_valid_env_key`) | An accepted storage key stays a direct child of the store and never starts with `-` or `.`; an accepted env key is a POSIX shell identifier. |
 | `FuzzGatewayGate` | `defaults/dot_local/bin/executable_dot-ai-serve` (Host and API-key gates) | Only the gateway's own loopback `Host` is allowed; a request authenticates only when a header equals the key exactly, and an empty key authenticates nothing. |
 | `FuzzUIEventLine` | dot-ui `run.go` (`parseEvent`, `renderBar`) | A line either decodes to valid JSON or is refused; an accepted event round-trips with every string field free of control and bidi characters; the derived progress width is always a legal repeat count. |
 | `FuzzUIHexColor` | dot-ui `theme.go` (`parseColor`) | An accepted `DOT_UI_*` value is a literal `#rgb`/`#rrggbb` with no metacharacter or escape sequence — these are interpolated into terminal escapes. |
@@ -200,7 +200,7 @@ which runs OSS-Fuzz-style fuzzing on every PR in this repo
 - **fuzz**: a 60-second window per harness (configurable via
   `workflow_dispatch`) on PRs touching an input-parsing surface:
   `lib/dot/utils.sh`, `plugins/config/libexec/init.sh`,
-  `plugins/fleet/libexec/fleet.sh`, `scripts/lib/secrets_provider.sh`,
+  `plugins/fleet/libexec/fleet.sh`, `plugins/secret/libexec/secret/secrets_provider.sh`,
   `defaults/dot_local/bin/executable_dot-ai-serve`, `fuzz/**`,
   `.clusterfuzzlite/**`, or any of the three Go modules under
   `defaults/dot_local/share/`.

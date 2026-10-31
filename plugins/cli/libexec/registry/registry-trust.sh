@@ -13,7 +13,7 @@
 [[ "${_DOT_REGISTRY_TRUST_LOADED:-0}" == "1" ]] && return 0
 _DOT_REGISTRY_TRUST_LOADED=1
 
-_REGISTRY_TRUST_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+_REGISTRY_TRUST_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 
 # The oldest cached index used when a fetch fails: seven days.
 _REGISTRY_STALE_MAX=604800

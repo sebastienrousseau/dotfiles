@@ -3,7 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2016
 # `dot system schedule list|set|run` and `dot system status`
-# (lib/dot/system.sh): set writes and loads a launchd agent on macOS or a
+# (plugins/system/libexec/system/schedule.sh): set writes and loads a launchd agent on macOS or a
 # systemd user timer on Linux, off removes it, run does the maintenance and
 # records its time and exit code. Fake launchctl, systemctl and dot record
 # their calls; HOME is a temp dir, so no real agent is ever touched.

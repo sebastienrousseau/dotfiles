@@ -45,10 +45,10 @@ source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/ui.sh"
 source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/sdk.sh"
 # shellcheck source=../../../lib/dot/verified-download.sh disable=SC1091
 source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/verified-download.sh"
-# shellcheck source=../../../lib/dot/registry-trust.sh disable=SC1091
-source "$SCRIPT_DIR/../../../lib/dot/registry-trust.sh"
-# shellcheck source=../../../lib/dot/registry-module.sh disable=SC1091
-source "$SCRIPT_DIR/../../../lib/dot/registry-module.sh"
+# shellcheck source=registry/registry-trust.sh disable=SC1091
+source "$SCRIPT_DIR/registry/registry-trust.sh"
+# shellcheck source=registry/registry-module.sh disable=SC1091
+source "$SCRIPT_DIR/registry/registry-module.sh"
 
 _registry_default_url() {
   printf '%s\n' "https://doc.dotfiles.io/registry.json"

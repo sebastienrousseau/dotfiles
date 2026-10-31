@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2016
-# `dot system update` (lib/dot/upgrade.sh) runs what the old `update`
+# `dot system update` (plugins/system/libexec/system/upgrade.sh) runs what the old `update`
 # script and functions ran. The language-globals phase (npm, cargo, pipx)
 # runs only with --globals; the app-store phase (mas, flatpak, snap) runs
 # with the consented system phase. Each runs the managers that are
@@ -29,7 +29,7 @@ done
 upgrade() {
   FAKES="$WORK/bin" PATH="$WORK/bin:/usr/bin:/bin" bash -c '
     set -euo pipefail
-    source "$1/lib/dot/upgrade.sh"
+    source "$1/plugins/system/libexec/system/upgrade.sh"
     has_command() { [[ -x "$FAKES/$1" ]]; }
     dot_apply_yes_flag() { :; }
     dot_ensure_mise() { :; }
@@ -94,7 +94,7 @@ printf '#!/bin/sh\necho "zypper $*" >>"%s/calls"\n' "$WORK" >"$WORK/bin/zypper"
 chmod +x "$WORK/bin/zypper"
 # The real lookup (upgrade() stubs it), with only the fakes on PATH.
 assert_equals "zypper" \
-  "$(upgrade "_DOT_UPGRADE_LOADED=; source '$REPO_ROOT/lib/dot/upgrade.sh'; PATH='$WORK/bin'; dot_upgrade_system_pm")" \
+  "$(upgrade "_DOT_UPGRADE_LOADED=; source '$REPO_ROOT/plugins/system/libexec/system/upgrade.sh'; PATH='$WORK/bin'; dot_upgrade_system_pm")" \
   "found when it is the only one"
 : >"$WORK/calls"
 upgrade '_dot_upgrade_system zypper' >/dev/null 2>&1
