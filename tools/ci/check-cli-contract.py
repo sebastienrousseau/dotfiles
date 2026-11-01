@@ -43,7 +43,6 @@ import pathlib
 import subprocess
 import sys
 import tempfile
-
 import tomllib
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -123,6 +122,8 @@ def check_command(name: str, cmd: dict, objects: set[str], reg: dict) -> list[st
         errors.append(f"{label}: effect '{cmd['effect']}' does not match the verb's class '{verb['effect']}' (N16)")
     if verb.get("confirms") and cmd["effect"] != "destructive":
         errors.append(f"{label}: '{cmd['verb']}' always confirms, so its effect is destructive (N16)")
+    if cmd.get("lock") is False and cmd["effect"] != "write":
+        errors.append(f"{label}: only a write command can opt out of the domain lock with lock = false (N17)")
     output = cmd.get("output", "")
     if output and not output.startswith(f"{name}/"):
         errors.append(f"{label}: output id '{output}' must start with '{name}/' (N13)")

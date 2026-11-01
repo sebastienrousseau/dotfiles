@@ -50,7 +50,7 @@ C="$WORK/cache"
 test_start "a_cold_load_builds_the_cache"
 assert_equals "yes" "$(probe "$SRC" "$C" 1.0.0 theme)" "the table has the theme domain"
 assert_file_exists "$(CACHE_FILE "$C")" "the cache is written"
-assert_equals "dot-cli-table/1|1.0.0|$SRC|lib/dot/data/groups.txt plugins/agent/commands.txt" \
+assert_equals "dot-cli-table/2|1.0.0|$SRC|lib/dot/data/groups.txt plugins/agent/commands.txt" \
   "$(head -1 "$(CACHE_FILE "$C")" | cut -d' ' -f1-2)" "its first line is the key: format, version, tree, fragments"
 grep -v '^#' "$SRC/lib/dot/data/commands.txt" >"$WORK/table"
 assert_equals "" "$(tail -n +2 "$(CACHE_FILE "$C")" | diff "$WORK/table" -)" "its body is the merged table"
@@ -80,7 +80,7 @@ plant
 find "$SRC" -type f -exec touch -d '@0' {} + 2>/dev/null || find "$SRC" -type f -exec touch -t 197001010000 {} +
 assert_equals "yes" "$(probe "$SRC" "$C" 1.0.0 planted)" "same version, older files: the cache stands"
 assert_equals "no" "$(probe "$SRC" "$C" 1.0.1 planted)" "a new version: rebuilt"
-assert_equals "dot-cli-table/1|1.0.1" "$(head -1 "$(CACHE_FILE "$C")" | cut -d'|' -f1-2)" "and the cache is rewritten for it"
+assert_equals "dot-cli-table/2|1.0.1" "$(head -1 "$(CACHE_FILE "$C")" | cut -d'|' -f1-2)" "and the cache is rewritten for it"
 
 test_start "an_empty_cache_is_rebuilt"
 : >"$(CACHE_FILE "$C")"
@@ -93,7 +93,7 @@ tree "$OTHER"
 probe "$SRC" "$C" 1.0.0 theme >/dev/null
 plant
 assert_equals "no" "$(probe "$OTHER" "$C" 1.0.0 planted)" "a cache built for one tree is not read for another"
-assert_equals "dot-cli-table/1|1.0.0|$OTHER" "$(head -1 "$(CACHE_FILE "$C")" | cut -d'|' -f1-3)" "and is replaced with its own"
+assert_equals "dot-cli-table/2|1.0.0|$OTHER" "$(head -1 "$(CACHE_FILE "$C")" | cut -d'|' -f1-3)" "and is replaced with its own"
 
 test_start "help_reads_but_never_writes_the_cache"
 H="$WORK/help-cache"

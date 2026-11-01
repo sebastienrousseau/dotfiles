@@ -71,6 +71,7 @@ summary = "Check modes and policy"
 [[commands]]
 verb = "run"
 effect = "write"
+lock = false
 summary = "Run an agent task"
 
 [[commands]]
@@ -163,6 +164,7 @@ summary = "Configured delegates"
 object = "delegate"
 verb = "run"
 effect = "write"
+lock = false
 summary = "Run a command as a delegate"
 
 [[commands]]
@@ -181,6 +183,7 @@ summary = "Render the context file for every harness"
 object = "mode"
 verb = "run"
 effect = "write"
+lock = false
 summary = "Run a command under a mode"
 
 [[commands]]

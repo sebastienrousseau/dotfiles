@@ -51,6 +51,7 @@ summary = "Pull and apply the dotfiles only"
 [[commands]]
 verb = "edit"
 effect = "write"
+lock = false
 summary = "Open a managed file in $EDITOR"
 
 [[commands]]

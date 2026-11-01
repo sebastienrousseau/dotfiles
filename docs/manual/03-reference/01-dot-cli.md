@@ -528,7 +528,7 @@ See [Environment Reference](03-environment.md) for the full list.
 | 0 | Success |
 | 1 | The command ran and found errors or failed |
 | 2 | Usage error (a missing option value or an unknown option, where the command checks) |
-| 75 | `dot doctor rollback`: another instance held the lock, nothing ran |
+| 75 | Another `dot` command in the same domain holds its lock (`$XDG_STATE_HOME/dot/<domain>/lock`), so nothing ran; the message names its PID. Set `DOT_LOCK_WAIT=<seconds>` to wait for it instead. `dot doctor rollback` also exits 75 when another rollback holds its own lock |
 | 127 | Unknown, removed or not-yet-built (planned) command |
 
 ## See Also

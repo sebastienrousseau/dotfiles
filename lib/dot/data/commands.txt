@@ -388,3 +388,12 @@ alias|locks|removed|tool list --locked|0.2.538
 alias|new|removed|tool new|0.2.538
 alias|intelligence|removed|top|0.2.538
 hook|on-apply|ai|libexec/hooks/on-apply.sh|AI provider CLI checks (optional)
+nolock|agent run||
+nolock|agent delegate run||
+nolock|agent mode run||
+nolock|ai start||
+nolock|ai run||
+nolock|ai login||
+nolock|ai pattern edit||
+nolock|config edit||
+nolock|ui run||

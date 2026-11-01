@@ -14,12 +14,12 @@
 #   (the first of each invocation), then a leg record for each legacy route
 #   a cmd or run record names (the first spelling that runs it; a route
 #   that starts with @ is a plugin entry, not a legacy route), then flag and
-#   arg, then alias, then hook.
+#   arg, then alias, then hook, then nolock.
 #
 # Comments and blank lines are dropped. POSIX awk: no gawk extensions, so it
 # runs on macOS's awk too.
 
-BEGIN { FS = "|"; nb = ng = nr = nc = na = nh = 0 }
+BEGIN { FS = "|"; nb = ng = nr = nc = na = nh = nl = 0 }
 
 /^#/ || /^$/ { next }
 
@@ -32,6 +32,7 @@ $1 == "run" {
 $1 == "flag" || $1 == "arg" { comp[++nc] = $0; next }
 $1 == "alias" { alias[++na] = $0; next }
 $1 == "hook" { hook[++nh] = $0; next }
+$1 == "nolock" { nolock[++nl] = $0; next }
 
 # leg_of ROW: print a leg record for ROW's legacy route, the first time.
 function leg_of(row,   f) {
@@ -51,4 +52,5 @@ END {
   for (i = 1; i <= nc; i++) print comp[i]
   for (i = 1; i <= na; i++) print alias[i]
   for (i = 1; i <= nh; i++) print hook[i]
+  for (i = 1; i <= nl; i++) print nolock[i]
 }
