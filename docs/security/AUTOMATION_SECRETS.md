@@ -8,7 +8,7 @@ render_with_liquid: false
 
 | Secret | Scope | Purpose |
 | :--- | :--- | :--- |
-| `ACTIONS_BOT_SIGNING_KEY` | GitHub Actions | SSH private key used for signed automation commits (dependency updates, Homebrew and Scoop distribution); version sync commits through the API instead (`tools/ci/commit-via-api.sh`) |
+| `ACTIONS_BOT_SIGNING_KEY` | GitHub Actions | SSH private key used for signed automation commits on the Homebrew tap and Scoop bucket; version sync and dependency updates commit through the API instead (`tools/ci/commit-via-api.sh`), which GitHub signs |
 | `TAP_PUSH_TOKEN` | GitHub Actions | Pushes the release formula and manifest to the Homebrew tap and Scoop bucket repositories |
 | `AUR_SSH_KEY` | GitHub Actions | SSH key for pushing the `dot-cli-git` package to the AUR |
 | `GITHUB_TOKEN` | GitHub Actions | GitHub API access for PRs, attestations, and scans (provided per run) |
