@@ -1,14 +1,23 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# Sourced by scripts/dot/commands/*.sh and scripts/diagnostics/*; inherits set -euo pipefail.
-# Structured JSON logging and metrics library.
-# Source this file to emit machine-readable logs and performance metrics.
+# shellcheck shell=bash
+# Sourced by the dot CLI's commands and plugins (SDK); inherits set -euo pipefail.
 #
-# Usage:
-#   source "$(dirname "${BASH_SOURCE[0]}")/log.sh"
-#   dot_log info "apply_start" "source=chezmoi"
-#   dot_metric "shell_startup" 142 ms
+# One log, one schema (log.v1, schemas/cli/log.v1.schema.json): every event
+# is a JSON line in $XDG_STATE_HOME/dot/<domain>/log.jsonl, the domain being
+# the command's (DOT_LOG_DOMAIN, which bin/dot exports, or a plugin's
+# DOT_DOMAIN), else cli. Metrics, the agent session log and fleet events are
+# log.v1 events too, in their domain's log.
+#
+#   dot_log info apply_start source=chezmoi    # level, event, data fields
+#   dot_metric shell_startup 142 ms            # a "metric" event
+#
+# Levels are debug, info, warn and error. Events below DOT_LOG_LEVEL (info,
+# or debug when -v set DOT_VERBOSE) are not written. Records older than
+# DOT_LOG_RETENTION_DAYS (30) are pruned by dot_log_prune, which the
+# maintenance job runs. Metadata only: callers log names, counts and ids,
+# never prompts or file contents.
 
 # Re-source guard: re-sourcing would mint a new DOT_TRACE_ID and break
 # correlation across modules that already captured the original.
@@ -19,113 +28,150 @@ _DOT_LIB_LOG_LOADED=1
 DOT_TRACE_ID="${DOT_TRACE_ID:-$(date +%s%N 2>/dev/null | tail -c 12 || date +%s)}"
 export DOT_TRACE_ID
 
+# Saved state that is not a log (agent checkpoints) stays here until the
+# state migration moves it.
 _DOT_LOG_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
 
 dot_agent_checkpoint_dir() {
   printf '%s\n' "$_DOT_LOG_STATE_DIR/checkpoints"
 }
 
+# dot_jsonl_append FILE PAYLOAD: append PAYLOAD to FILE in the old state
+# directory. Deprecated (SDK v1 keeps it for plugins): log with dot_log.
 dot_jsonl_append() {
-  local file="$1" payload="$2"
   mkdir -p "$_DOT_LOG_STATE_DIR" 2>/dev/null || return 0
-  { printf '%s\n' "$payload"; } 2>/dev/null >>"$_DOT_LOG_STATE_DIR/$file" || true
+  { printf '%s\n' "$2"; } 2>/dev/null >>"$_DOT_LOG_STATE_DIR/$1" || true
 }
 
-# Always-on file logging (appends to dot.log, rotates at 1MB)
-dot_log_file() {
-  local level="$1" event="$2"
+# dot_log_path DOMAIN: where DOMAIN's log.v1 events go.
+dot_log_path() {
+  printf '%s/dot/%s/log.jsonl\n' "${XDG_STATE_HOME:-$HOME/.local/state}" "$1"
+}
+
+# _dot_log_domain: the domain this process logs to.
+_dot_log_domain() {
+  local d="${DOT_LOG_DOMAIN:-${DOT_DOMAIN:-cli}}"
+  [[ "$d" =~ ^[a-z][a-z0-9-]*$ ]] || d=cli
+  printf '%s' "$d"
+}
+
+# _dot_log_rank LEVEL: debug 0, info 1, warn 2, error 3; 1 for anything else.
+_dot_log_rank() {
+  case "$1" in debug) echo 0 ;; warn) echo 2 ;; error) echo 3 ;; *) echo 1 ;; esac
+}
+
+# _dot_log_wanted LEVEL: true when LEVEL is at or above the threshold.
+_dot_log_wanted() {
+  local min="${DOT_LOG_LEVEL:-info}"
+  [[ -n "${DOT_LOG_LEVEL:-}" || "${DOT_VERBOSE:-0}" != 1 ]] || min=debug
+  (($(_dot_log_rank "$1") >= $(_dot_log_rank "$min")))
+}
+
+# _dot_json_str TEXT: TEXT as a JSON string, quotes included. Control
+# characters other than tab, newline and return are dropped.
+_dot_json_str() {
+  local s="$1"
+  s="${s//\\/\\\\}" s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}" s="${s//$'\r'/\\r}" s="${s//$'\t'/\\t}"
+  [[ "$s" != *[[:cntrl:]]* ]] || s="$(printf '%s' "$s" | LC_ALL=C tr -d '\000-\037\177')"
+  printf '"%s"' "$s"
+}
+
+# dot_log_record LEVEL EVENT [KEY=VALUE...]: one log.v1 line on stdout.
+dot_log_record() {
+  local level="$1" event="$2" data="" kv
   shift 2
-  local log_file="$_DOT_LOG_STATE_DIR/dot.log"
-  mkdir -p "$_DOT_LOG_STATE_DIR" 2>/dev/null || return 0
-  # Rotate at 1MB
-  if [[ -f "$log_file" ]]; then
-    local size
-    size=$(stat -c '%s' "$log_file" 2>/dev/null || stat -f '%z' "$log_file" 2>/dev/null || echo 0)
-    if [[ "$size" -gt 1048576 ]]; then
-      mv "$log_file" "${log_file}.1" 2>/dev/null || true
-    fi
-  fi
-  {
-    printf '[%s] [%s] [%s] %s' \
-      "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$level" "$DOT_TRACE_ID" "$event"
-    while [[ $# -gt 0 ]]; do
-      printf ' %s' "$1"
-      shift
-    done
-    printf '\n'
-  } 2>/dev/null >>"$log_file" || true
+  for kv in "$@"; do
+    [[ "$kv" == *=* ]] || kv="$kv="
+    data+="${data:+,}$(_dot_json_str "${kv%%=*}"):$(_dot_json_str "${kv#*=}")"
+  done
+  printf '{"schema":"cli/log.v1","time":"%s","level":%s,"domain":%s,"event":%s,"command":%s,"trace_id":%s,"pid":%d,"data":{%s}}\n' \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(_dot_json_str "$level")" "$(_dot_json_str "$(_dot_log_domain)")" \
+    "$(_dot_json_str "$event")" "$(_dot_json_str "${DOT_COMMAND:-unknown}")" "$(_dot_json_str "$DOT_TRACE_ID")" \
+    "$$" "$data"
 }
 
-# Structured log entry (JSON when DOTFILES_JSON_LOG=1, silent otherwise)
-# Always writes to file log
+# dot_log LEVEL EVENT [KEY=VALUE...]: append a log.v1 event to the domain's
+# log; with DOTFILES_JSON_LOG=1, print it on stdout too. Never fails the
+# caller: a log that cannot be written is skipped.
 dot_log() {
-  local level="$1" event="$2"
-  shift 2
-  local ts
-  ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  # Always-on file logging
-  dot_log_file "$level" "$event" "$@"
-  # JSON stdout logging when enabled
-  if [[ "${DOTFILES_JSON_LOG:-0}" = "1" ]]; then
-    printf '{"time":"%s","level":"%s","event":"%s","command":"%s","trace_id":"%s"' \
-      "$ts" "$level" "$event" "${DOT_COMMAND:-unknown}" "$DOT_TRACE_ID"
-    while [[ $# -gt 0 ]]; do
-      printf ',"%s":"%s"' "${1%%=*}" "${1#*=}"
-      shift
-    done
-    printf '}\n'
+  _dot_log_wanted "$1" || return 0
+  local record file
+  record="$(dot_log_record "$@")"
+  file="$(dot_log_path "$(_dot_log_domain)")"
+  if mkdir -p "${file%/*}" 2>/dev/null; then
+    { printf '%s\n' "$record"; } 2>/dev/null >>"$file" || true
   fi
+  [[ "${DOTFILES_JSON_LOG:-0}" != 1 ]] || printf '%s\n' "$record"
 }
 
-# Metrics emission (append to JSONL metrics file)
+# dot_log_tail DOMAIN [COUNT] [EVENT_PREFIX]: the last COUNT (20) events of
+# DOMAIN's log, those whose event starts with EVENT_PREFIX when given.
+dot_log_tail() {
+  local file
+  file="$(dot_log_path "$1")"
+  [[ -f "$file" ]] || return 0
+  grep -F "\"event\":\"${3:-}" "$file" 2>/dev/null | tail -n "${2:-20}" || true
+}
+
+# dot_log_prune [DAYS]: drop records older than DAYS (DOT_LOG_RETENTION_DAYS,
+# else 30) from every domain's log. ISO timestamps sort as text.
+dot_log_prune() {
+  local days="${1:-${DOT_LOG_RETENTION_DAYS:-30}}" cutoff file
+  [[ "$days" =~ ^[0-9]+$ ]] || return 64
+  cutoff="$(date -u -d "-$days days" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null ||
+    date -u -v"-${days}d" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null)" || return 0
+  for file in "${XDG_STATE_HOME:-$HOME/.local/state}"/dot/*/log.jsonl; do
+    [[ -f "$file" ]] || continue
+    if awk -v c="\"time\":\"$cutoff\"" '{ i = index($0, "\"time\":\""); if (!i || substr($0, i, length(c)) >= c) print }' \
+      "$file" >"$file.$$"; then
+      mv -f "$file.$$" "$file"
+    else
+      rm -f "$file.$$"
+    fi
+  done
+}
+
+# dot_metric NAME VALUE [UNIT]: a "metric" event (unit ms by default).
 dot_metric() {
-  local name="$1" value="$2" unit="${3:-ms}"
-  local ts
-  ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  local metrics_file="$_DOT_LOG_STATE_DIR/metrics.jsonl"
-  mkdir -p "$_DOT_LOG_STATE_DIR" 2>/dev/null || return 0
-  {
-    printf '{"time":"%s","metric":"%s","value":%s,"unit":"%s","trace_id":"%s"}\n' \
-      "$ts" "$name" "$value" "$unit" "$DOT_TRACE_ID"
-  } 2>/dev/null >>"$metrics_file" || true
+  dot_log info metric "name=$1" "value=$2" "unit=${3:-ms}"
 }
 
-# Print recent metrics (for `dot doctor metric list` command)
+# dot_metrics_summary [COUNT]: the last COUNT (20) metric events of every
+# domain, oldest first (`dot doctor metric list`).
 dot_metrics_summary() {
-  local metrics_file="$_DOT_LOG_STATE_DIR/metrics.jsonl"
-  local count="${1:-20}"
-  if [[ ! -f "$metrics_file" ]]; then
+  local count="${1:-20}" files=() f
+  for f in "${XDG_STATE_HOME:-$HOME/.local/state}"/dot/*/log.jsonl; do
+    [[ -f "$f" ]] && files+=("$f")
+  done
+  if ((${#files[@]} == 0)) || ! grep -qF '"event":"metric"' "${files[@]}"; then
     echo "No metrics collected yet."
-    echo "Metrics are recorded at: $metrics_file"
+    echo "Metrics are logged to: $(dot_log_path '<domain>')"
     return 0
   fi
-  tail -n "$count" "$metrics_file"
+  # Stable sort on the time field (the 8th "-separated one), so records of
+  # the same second keep the order they were written in.
+  grep -hF '"event":"metric"' "${files[@]}" | sort -s -t'"' -k8,8 | tail -n "$count"
 }
 
+# dot_agent_session_log EVENT PROFILE [STATUS] [KEY=VALUE...]: an agent
+# session event in the agent domain's log.
 dot_agent_session_log() {
   local event="$1" profile="$2" status="${3:-ok}"
-  shift 3 || true
-  local ts payload
-  ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  payload=$(printf '{"time":"%s","event":"%s","profile":"%s","status":"%s","trace_id":"%s","command":"%s"' \
-    "$ts" "$event" "$profile" "$status" "$DOT_TRACE_ID" "${DOT_COMMAND:-unknown}")
-  while [[ $# -gt 0 ]]; do
-    payload+=$(printf ',"%s":"%s"' "${1%%=*}" "${1#*=}")
-    shift
-  done
-  payload+='}'
-  dot_jsonl_append "agent-sessions.jsonl" "$payload"
+  shift 3 || shift $#
+  DOT_LOG_DOMAIN=agent dot_log info "session_$event" "profile=$profile" "status=$status" "$@"
 }
 
+# dot_agent_session_tail [COUNT]: the last COUNT (20) agent session events.
 dot_agent_session_tail() {
-  local count="${1:-20}"
-  local sessions_file="$_DOT_LOG_STATE_DIR/agent-sessions.jsonl"
-  if [[ ! -f "$sessions_file" ]]; then
+  local out
+  out="$(dot_log_tail agent "${1:-20}" session_)"
+  if [[ -z "$out" ]]; then
     echo "No agent sessions recorded yet."
-    echo "Agent sessions are recorded at: $sessions_file"
+    echo "Agent sessions are logged to: $(dot_log_path agent)"
     return 0
   fi
-  tail -n "$count" "$sessions_file"
+  printf '%s\n' "$out"
 }
 
 dot_agent_checkpoint_create() {

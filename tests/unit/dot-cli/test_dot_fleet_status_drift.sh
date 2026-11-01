@@ -52,7 +52,7 @@ FLEET="$FAKE/plugins/fleet/libexec/fleet.sh"
 DATA="$FAKE/defaults/.chezmoidata.toml"
 
 STATE_DIR="$XDG_STATE_HOME/dotfiles/fleet"
-EVENTS="$STATE_DIR/events.jsonl"
+EVENTS="$XDG_STATE_HOME/dot/fleet/log.jsonl" # log.v1
 HISTORY="$STATE_DIR/drift-history.jsonl"
 
 # ── PATH variants ───────────────────────────────────────────────────
@@ -136,20 +136,23 @@ assert_contains '{"node_id"' "$out" "-j selects json mode"
 
 test_start "fleet_status_human_reports_drift_and_last_apply"
 printf ' M .zshrc\n' >"$TMP/drift.txt"
-mkdir -p "$XDG_STATE_HOME/dotfiles"
-printf '[2026-01-02T03:04:05Z] apply completed\n' >"$XDG_STATE_HOME/dotfiles/dot.log"
+mkdir -p "$XDG_STATE_HOME/dot/config"
+printf '%s\n' '{"schema":"cli/log.v1","time":"2026-01-02T03:04:05Z","level":"info","domain":"config","event":"apply_end","data":{}}' \
+  '{"schema":"cli/log.v1","time":"2026-01-03T00:00:00Z","level":"info","domain":"config","event":"apply_planned","data":{}}' \
+  >"$XDG_STATE_HOME/dot/config/log.jsonl"
 out="$(FAKE_CHEZMOI_STATUS="$TMP/drift.txt" fleet status 2>&1)"
 rc=$?
 assert_equals 0 "$rc" "human status exits 0"
 assert_contains "drifted" "$out" "chezmoi status output flips drift to drifted"
 assert_contains "Last Apply" "$out" "state log timestamp is surfaced"
-assert_contains "2026-01-02T03:04:05Z" "$out" "timestamp parsed from the log line"
+assert_contains "2026-01-02T03:04:05Z" "$out" "the newest apply_end event's time"
+assert_not_contains "2026-01-03" "$out" "another apply event is not an apply"
 assert_file_exists "$EVENTS" "status emits a fleet event"
-assert_file_contains "$EVENTS" '"event":"status"' "event records the subcommand"
+assert_file_contains "$EVENTS" '"event":"fleet_status"' "event records the subcommand"
 assert_file_contains "$EVENTS" '"drift":"drifted"' "event carries the drift kv"
 
 test_start "fleet_status_human_clean_without_state_log"
-rm -f "$XDG_STATE_HOME/dotfiles/dot.log"
+rm -f "$XDG_STATE_HOME/dot/config/log.jsonl"
 out="$(fleet status 2>&1)"
 assert_contains "clean" "$out" "clean drift line rendered"
 assert_not_contains "Last Apply" "$out" "no Last Apply line without a state log"
@@ -220,7 +223,7 @@ rc=$?
 assert_equals 0 "$rc" "clean drift exits 0"
 assert_contains "No drift detected" "$out" "clean message"
 assert_file_contains "$HISTORY" '"status":"clean"' "clean entry appended to history"
-assert_file_contains "$EVENTS" '"event":"drift_check"' "drift_check event emitted"
+assert_file_contains "$EVENTS" '"event":"fleet_drift_check"' "drift_check event emitted"
 
 test_start "fleet_drift_check_reports_changed_files"
 printf 'MM .zshrc\n M .bashrc\nA  .vimrc\nD  .gone\n' >"$TMP/drift4.txt"
@@ -318,13 +321,14 @@ out="$(fleet events 2>&1)"
 rc=$?
 assert_equals 0 "$rc" "no events exits 0"
 assert_contains "No fleet events recorded yet" "$out" "empty message"
-assert_contains "events.jsonl" "$out" "points at the events file"
+assert_contains "dot/fleet/log.jsonl" "$out" "points at the fleet log"
 
-mkdir -p "$STATE_DIR"
+mkdir -p "${EVENTS%/*}"
 cat >"$EVENTS" <<'JSONL'
-{"time":"2026-01-01T00:00:00Z","event":"status","status":"ok","node_id":"n1","namespace":"default","trace_id":"t"}
-{"time":"2026-01-02T00:00:00Z","event":"drift_check","status":"clean","node_id":"n1","namespace":"default","trace_id":"t"}
-{"time":"2026-01-03T00:00:00Z","event":"apply","status":"fail 7","node_id":"n2","namespace":"default","trace_id":"t"}
+{"schema":"cli/log.v1","time":"2026-01-01T00:00:00Z","level":"info","domain":"fleet","event":"fleet_status","command":"fleet","trace_id":"t","pid":1,"data":{"status":"ok","node_id":"n1","namespace":"default"}}
+{"schema":"cli/log.v1","time":"2026-01-01T12:00:00Z","level":"info","domain":"fleet","event":"metric","command":"fleet","trace_id":"t","pid":1,"data":{"name":"x","value":"1","unit":"ms"}}
+{"schema":"cli/log.v1","time":"2026-01-02T00:00:00Z","level":"info","domain":"fleet","event":"fleet_drift_check","command":"fleet","trace_id":"t","pid":1,"data":{"status":"clean","node_id":"n1","namespace":"default"}}
+{"schema":"cli/log.v1","time":"2026-01-03T00:00:00Z","level":"info","domain":"fleet","event":"fleet_apply","command":"fleet","trace_id":"t","pid":1,"data":{"status":"fail 7","node_id":"n2","namespace":"default"}}
 JSONL
 
 test_start "fleet_events_with_jq"
@@ -335,6 +339,7 @@ assert_contains "Fleet Events (last 20)" "$out" "default count in header"
 assert_contains "drift_check" "$out" "clean event rendered"
 assert_contains "apply" "$out" "failed event rendered"
 assert_contains "(n2)" "$out" "node id shown per event"
+assert_not_contains "metric" "$out" "the fleet domain's other log lines are not events"
 
 test_start "fleet_events_count_argument"
 out="$(fleet events 1 2>&1)"
@@ -345,6 +350,7 @@ test_start "fleet_events_without_jq_prints_raw"
 out="$(PATH="$PATH_NO_JQ" fleet events 2 2>&1)"
 rc=$?
 assert_equals 0 "$rc" "raw fallback exits 0"
-assert_contains '{"time":"2026-01-03T00:00:00Z"' "$out" "raw jsonl lines printed"
+assert_contains '"time":"2026-01-03T00:00:00Z","level":"info"' "$out" "raw jsonl lines printed"
+assert_not_contains '"event":"metric"' "$out" "only fleet events, not the domain's other log lines"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

@@ -29,7 +29,7 @@ cov_setup_sandbox
 
 STATE_DIR="$XDG_STATE_HOME/dotfiles"
 CHECKPOINT_DIR="$STATE_DIR/checkpoints"
-SESSIONS="$STATE_DIR/agent-sessions.jsonl"
+SESSIONS="$XDG_STATE_HOME/dot/agent/log.jsonl" # log.v1 session_<event> records
 
 # `timeout` (used by `agent delegate`) is coreutils-only on macOS; shim it so
 # the delegate arm is deterministic on every platform.
@@ -122,7 +122,7 @@ meta mode set plan
 assert_equals 0 "$RC" "rc"
 assert_file_contains "$STATE" "DOT_AGENT_PROFILE=plan" "profile persisted"
 assert_file_contains "$STATE" "DOT_AGENT_MAX_STEPS=" "policy fields persisted"
-assert_file_contains "$SESSIONS" '"event":"set"' "session log appended"
+assert_file_contains "$SESSIONS" '"event":"session_set"' "session log appended"
 
 test_start "mode_set_advisory_rbac_warns_but_proceeds"
 printf 'DOT_AGENT_PROFILE=ask\nDOT_AGENT_ROLE=viewer\n' >"$STATE"
@@ -153,7 +153,7 @@ test_start "mode_run_uses_current_profile_and_exports_env"
 meta mode run bash -c 'echo "p=$DOT_AGENT_PROFILE fs=$DOT_AGENT_FILESYSTEM"'
 assert_equals 0 "$RC" "rc"
 assert_contains "p=ask fs=read-only" "$OUT" "profile env exported to child"
-assert_file_contains "$SESSIONS" '"event":"run_finish"' "run logged"
+assert_file_contains "$SESSIONS" '"event":"session_run_finish"' "run logged"
 
 test_start "mode_run_with_explicit_profile"
 meta mode run plan bash -c 'echo "p=$DOT_AGENT_PROFILE"'
@@ -245,6 +245,6 @@ assert_contains "Agent card not found" "$ERR" "error"
 test_start "mode_log_tails_sessions"
 meta mode log 2
 assert_equals 0 "$RC" "rc"
-assert_contains '"event":"log"' "$OUT" "tail contains the log event itself"
+assert_contains '"event":"session_log"' "$OUT" "tail contains the log event itself"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

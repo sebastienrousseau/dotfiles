@@ -21,8 +21,10 @@ pins. Topgrade, the
 `chezmoi apply` deletes the script and the topgrade config. The `update`
 and `upd` forwarders were removed in 0.2.538: run `dot update`.
 
-The maintenance job clears the shell startup caches and rotates the dot
-log. Nothing is scheduled until you ask:
+The maintenance job clears the shell startup caches, prunes the dot
+logs (`$XDG_STATE_HOME/dot/<domain>/log.jsonl`) to the last
+`DOT_LOG_RETENTION_DAYS` (30) days and rotates the installer log. Nothing
+is scheduled until you ask:
 
 ```bash
 dot system schedule set weekly   # or daily; times differ per OS, see below

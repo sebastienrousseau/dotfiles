@@ -15,7 +15,6 @@ source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/log.sh"
 dot_ui_command_banner "Fleet" "${1:-}"
 
 _FLEET_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/fleet"
-_FLEET_EVENTS_FILE="$_FLEET_STATE_DIR/events.jsonl"
 
 _fleet_enabled() {
   local data_file
@@ -54,7 +53,11 @@ _fleet_emit_event() {
   ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   node_id="$(_fleet_node_id)"
   namespace="$(_fleet_namespace)"
-  mkdir -p "$_FLEET_STATE_DIR" 2>/dev/null || return 0
+  # The local record is a log.v1 event in the fleet log; the endpoint keeps
+  # the payload it has always received (built below, which consumes the
+  # arguments).
+  DOT_LOG_DOMAIN=fleet dot_log info "fleet_$event" "status=$status" "node_id=$node_id" \
+    "namespace=$namespace" "$@"
   local payload
   payload=$(printf '{"time":"%s","event":"%s","status":"%s","node_id":"%s","namespace":"%s","trace_id":"%s"' \
     "$ts" "$event" "$status" "$node_id" "$namespace" "$DOT_TRACE_ID")
@@ -63,7 +66,6 @@ _fleet_emit_event() {
     shift
   done
   payload+='}'
-  printf '%s\n' "$payload" >>"$_FLEET_EVENTS_FILE" 2>/dev/null || true
 
   # Forward to endpoint if configured
   local endpoint=""
@@ -92,14 +94,11 @@ _fleet_drift_state() {
   echo clean
 }
 
-# The timestamp of the last apply recorded in dot.log (empty if none).
+# The time of the last apply: the newest apply_end event the apply step
+# (scripts/ops/chezmoi-apply.sh, run as `dot config apply`) logged in the
+# config log. Empty if none.
 _fleet_last_apply() {
-  local state_log="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/dot.log"
-  [[ -f "$state_log" ]] || return 0
-  # `set -euo pipefail` at the top of this script kills the whole
-  # command when grep matches nothing (rc=1). Wrap the pipeline so
-  # `last_apply` cleanly becomes empty and the UI still renders.
-  grep 'apply' "$state_log" 2>/dev/null | tail -1 | sed -n 's/^\[\([^]]*\)\].*/\1/p' || true
+  dot_log_tail config 1 apply_end | sed -n 's/.*"time":"\([^"]*\)".*/\1/p'
 }
 
 _fleet_status_print() {
@@ -145,10 +144,11 @@ cmd_fleet_status() {
 }
 
 cmd_fleet_events() {
-  local count="${1:-20}"
-  if [[ ! -f "$_FLEET_EVENTS_FILE" ]]; then
+  local count="${1:-20}" events
+  events="$(dot_log_tail fleet "$count" fleet_)"
+  if [[ -z "$events" ]]; then
     ui_info "No fleet events recorded yet."
-    ui_info "Events file" "$_FLEET_EVENTS_FILE"
+    ui_info "Events file" "$(dot_log_path fleet)"
     return 0
   fi
 
@@ -156,7 +156,7 @@ cmd_fleet_events() {
   echo ""
 
   if has_command jq; then
-    tail -n "$count" "$_FLEET_EVENTS_FILE" | jq -r '"\(.time)\t\(.event)\t\(.status)\t\(.node_id)"' | while IFS=$'\t' read -r time event status node; do
+    jq -r '"\(.time)\t\(.event | ltrimstr("fleet_"))\t\(.data.status)\t\(.data.node_id)"' <<<"$events" | while IFS=$'\t' read -r time event status node; do
       if [[ "$status" == "ok" || "$status" == "clean" ]]; then
         ui_ok "$event" "$time ($node)"
       else
@@ -164,7 +164,7 @@ cmd_fleet_events() {
       fi
     done
   else
-    tail -n "$count" "$_FLEET_EVENTS_FILE"
+    printf '%s\n' "$events"
   fi
 }
 

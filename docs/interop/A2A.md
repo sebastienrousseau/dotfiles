@@ -26,7 +26,7 @@ Tracked governance artifacts:
 - prompt registry
 - model registry
 
-Session logs are stored in `~/.local/state/dotfiles/agent-sessions.jsonl`.
+Session events are `session_<event>` records in the agent log, `~/.local/state/dot/agent/log.jsonl` (log.v1).
 Checkpoints are stored in `~/.local/state/dotfiles/checkpoints/`.
 
 Validate conformance with:

@@ -50,7 +50,7 @@ unset DOT_AGENT_PROFILE DOT_AGENT_ROLE
 export AGENT_PROFILE_CONFIG="$DEL_TMP/agent-profiles.json"
 export AGENT_STATE_FILE="$DEL_TMP/agent-mode.env"
 export XDG_STATE_HOME="$DEL_TMP/state"
-SESSIONS="$XDG_STATE_HOME/dotfiles/agent-sessions.jsonl"
+SESSIONS="$XDG_STATE_HOME/dot/agent/log.jsonl" # log.v1 session_<event> records
 
 # profiles <jq filter applied to the tracked file>
 profiles() { jq "$1" "$PROFILES_FILE" >"$AGENT_PROFILE_CONFIG"; }
@@ -84,7 +84,7 @@ delegate test-runner sh -c 'echo "env=$DOT_AGENT_DELEGATE:$DOT_AGENT_MAX_STEPS:$
 assert_contains "env=test-runner:6:apply:apply" "$out"
 
 test_start "delegate_logs_start_and_finish"
-assert_equals "delegate_start delegate_finish" \
+assert_equals "session_delegate_start session_delegate_finish" \
   "$(jq -r 'select(.event? // .action? // "" | test("delegate")) | (.event // .action)' "$SESSIONS" 2>/dev/null | tail -n 2 | xargs)" \
   "one start and one finish event per delegation"
 

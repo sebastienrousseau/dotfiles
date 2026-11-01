@@ -63,7 +63,8 @@ assert_contains "$H/.config/chezmoi/key.txt (your age key)" "$(tr -s ' ' <<<"$OU
 
 test_start "the_bundle_size_is_recorded"
 size="$(wc -c <"$(ls "$H"/out/*.tar.zst)" | tr -d ' ')"
-assert_contains "\"metric\":\"bundle_size\",\"value\":$size," "$(cat "$H/.local/state/dotfiles/metrics.jsonl" 2>/dev/null)" \
+assert_contains "\"event\":\"metric\"" "$(cat "$H"/.local/state/dot/*/log.jsonl 2>/dev/null)" "a metric event is logged"
+assert_contains "\"data\":{\"name\":\"bundle_size\",\"value\":\"$size\",\"unit\":\"bytes\"}" "$(cat "$H"/.local/state/dot/*/log.jsonl 2>/dev/null)" \
   "the metric is the archive's size in bytes"
 
 test_start "without_a_key_nothing_is_left_out"

@@ -295,11 +295,9 @@ The shipped card's `version` field lags the release (it still names 0.2.501), an
 
 | Path | Content | Rotation |
 |:---|:---|:---|
-| `~/.local/state/dotfiles/dot.log` | Every `dot` command's log lines | Moved to `dot.log.1` at 1 MB |
+| `~/.local/state/dot/<domain>/log.jsonl` | The domain's log.v1 events (`schemas/cli/log.v1.schema.json`): every `dot` command's log lines, metrics (`dot doctor metric list`), agent sessions (`dot agent log show`, in `agent`) and fleet events (`dot fleet log show`, in `fleet`) | Records older than `DOT_LOG_RETENTION_DAYS` (30) are pruned by the maintenance job |
 | `~/.local/state/dotfiles/heal.log` | Heal attempts | Append-only |
 | `~/.local/state/dotfiles/rollback.log` | Rollback activity | Append-only |
-| `~/.local/state/dotfiles/metrics.jsonl` | Observability metrics (`dot doctor metric list`) | Append-only |
-| `~/.local/state/dotfiles/agent-sessions.jsonl` | Agent log (`dot agent log show`) | Append-only |
 | `~/.local/state/dotfiles/attestations/workstation-attestation.json` | Latest attestation | Overwritten each run |
 | `~/.local/state/dotfiles/snapshots/*.json` | `dot doctor snapshot new` snapshots | Kept until removed |
 | `~/.local/share/dotfiles/backups/` | `dot doctor rollback` backups | `clean` keeps the newest 10 |
