@@ -23,7 +23,7 @@ cat >"$WORK/bin/mise" <<'EOF'
 #!/bin/sh
 [ "$1" = latest ] || exit 0
 case "$2" in
-  npm:@openai/codex) echo 9.9.9 ;;
+  npm:@openai/codex@0) echo 9.9.9 ;;
   *) echo 1.0.0 ;;
 esac
 EOF

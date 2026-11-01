@@ -14,7 +14,8 @@ import sys
 import tempfile
 
 source = (Path(sys.argv[1]) / "bin/dot-theme-sync").read_text()
-names = ("_theme_target_adapter", "_theme_chezmoi_target", "_theme_chezmoi_apply", "apply_theme_configs")
+names = ("_theme_target_adapter", "_theme_chezmoi_target", "_theme_chezmoi_apply", "_theme_valid_targets",
+         "_theme_apply_counted", "apply_theme_configs")
 functions = "\n".join(re.search(r"^" + name + r"\(\) \{.*?^\}", source, re.M | re.S)[0] for name in names)
 # Substitute only the home-root token in these pure fixture functions, leaving
 # the process's real HOME and all application state untouched.
@@ -24,7 +25,9 @@ with tempfile.TemporaryDirectory(prefix="dot-native-target-") as temporary:
     root = Path(temporary)
     native = root / "Library/Application Support/com.mitchellh.ghostty/config"
     managed = root / ".config/kitty/kitty.conf"
-    for target in (native, managed):
+    # A leftover from before .chezmoiignore excluded it: on disk, not managed.
+    stale = root / ".config/waybar/config.jsonc"
+    for target in (native, managed, stale):
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text("original\n")
     script = '''
@@ -32,9 +35,13 @@ set -euo pipefail
 _ok() { printf '%s: %s\n' "$1" "$2"; }
 _err() { printf '%s: %s\n' "$1" "$2"; }
 _skip() { printf '%s: %s\n' "$1" "$2"; }
-theme_transaction_targets() { printf '%s\n' "$MANAGED" "$NATIVE"; }
+theme_transaction_targets() { printf '%s\n' "$MANAGED" "$STALE" "$NATIVE"; }
 chezmoi() {
   printf '%s\n' "$@" >>"$CALLS"
+  if [[ $1 == managed ]]; then
+    printf '%s\n' "$MANAGED"
+    return 0
+  fi
   printf 'CONFIGURATION_CONTENT_MUST_NOT_LEAK\n'
   if [[ $FAIL_RENDER == 1 ]]; then
     printf 'fixture template error: kitty.conf\n' >&2
@@ -44,7 +51,7 @@ chezmoi() {
 ''' + functions + '\nif apply_theme_configs; then exit 0; else exit 1; fi\n'
     env = dict(os.environ, TEST_HOME=str(root), PLATFORM="Darwin", CHEZMOI_CFG=str(root / "chezmoi.toml"),
                CHEZMOI_SRC=str(root), SRC_DIR=str(root), THEME_TXN_OPERATION_DIR=str(root),
-               MANAGED=str(managed), NATIVE=str(native), CALLS=str(root / "calls"),
+               MANAGED=str(managed), NATIVE=str(native), STALE=str(stale), CALLS=str(root / "calls"),
                PALETTE_FILE=str(root / ".config/dotfiles/palette.env"))
     for failing in (False, True):
         (root / "calls").write_text("")
@@ -53,6 +60,7 @@ chezmoi() {
         calls = (root / "calls").read_text()
         checks.append((result.returncode == int(failing), "render outcome propagates"))
         checks.append((str(managed) in calls and str(native) not in calls, "native mirror is never passed to chezmoi"))
+        checks.append((str(stale) not in calls, "unmanaged leftover is never passed to chezmoi"))
         checks.append(("CONFIGURATION_CONTENT_MUST_NOT_LEAK" not in result.stdout + result.stderr,
                        "rendered configuration stdout is suppressed"))
         if failing:

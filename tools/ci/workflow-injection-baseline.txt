@@ -3,9 +3,6 @@
 .github/actions/setup-chezmoi/action.yml inputs.version 1
 .github/actions/setup-chezmoi/action.yml steps.resolve.outputs.bin_dir 1
 .github/actions/setup-chezmoi/action.yml steps.resolve.outputs.version 1
-.github/actions/setup-mise/action.yml inputs.bin-dir 1
-.github/actions/setup-mise/action.yml inputs.version 2
-.github/actions/setup-mise/action.yml steps.resolve.outputs.bin_dir 1
 .github/workflows/drift-detection.yml steps.drift.outputs.total 1
 .github/workflows/policy-bundle-release.yml inputs.bundle_version 1
 .github/workflows/reusable-copyright-lint.yml inputs.excludes 1
@@ -25,6 +22,5 @@
 .github/workflows/scorecard.yml steps.score.outputs.score 1
 .github/workflows/update-deps.yml steps.updates.outputs.nerd_fonts_update 1
 .github/workflows/update-deps.yml steps.updates.outputs.nerd_fonts_version 1
-.github/workflows/update-deps.yml steps.updates.outputs.updates_summary 1
 .github/workflows/verify-gpg-wkd.yml steps.in_repo.outputs.fpr 1
 .github/workflows/verify-gpg-wkd.yml steps.wkd.outputs.fpr 1

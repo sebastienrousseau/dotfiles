@@ -75,7 +75,14 @@ EOF
 mkstub common chezmoi <<'EOF'
 printf '%s\n' "$*" >>"$CALLS/chezmoi"
 case "${1:-}" in
-  managed) printf '%s\n' "${FAKE_CHEZMOI_MANAGED:-}" ;;
+  # A real host manages its theme targets (niri only with the feature on);
+  # FAKE_CHEZMOI_MANAGED adds more.
+  managed)
+    printf '%s\n' "$XDG_CONFIG_HOME/starship.toml" "$XDG_CONFIG_HOME/kitty/kitty.conf" \
+      "$XDG_CONFIG_HOME/tmux/tmux.conf" "$XDG_CONFIG_HOME/ghostty/config" \
+      "$XDG_CONFIG_HOME/alacritty/alacritty.toml" "$HOME/.codex/themes/dotfiles.tmTheme" \
+      "$XDG_CONFIG_HOME/dotfiles/palette.env" ${FAKE_CHEZMOI_MANAGED:+"$FAKE_CHEZMOI_MANAGED"}
+    ;;
   execute-template) cat; printf '# rendered by the stub\n' ;;
 esac
 exit "${FAKE_CHEZMOI_RC:-0}"
@@ -436,6 +443,20 @@ assert_contains "no template to render" "$(cat "$OUT")" "the skip says why"
 assert_equals "hand kept" "$(cat "$XDG_CONFIG_HOME/niri/config.kdl")" "the hand-kept config is untouched"
 assert_contains "regenerated 6 configs" "$(cat "$OUT")" "the skipped niri config is not counted"
 rm -rf "$XDG_CONFIG_HOME/niri" "$SRC/dot_config/niri"
+run_sync Linux fixture-light
+
+# A config deployed before .chezmoiignore dropped it on this OS (waybar on
+# macOS) stays on disk unmanaged; chezmoi rejected it with "not managed"
+# and the whole switch rolled back.
+test_start "unmanaged_leftover_target_is_skipped"
+reset_calls
+mkdir -p "$XDG_CONFIG_HOME/waybar"
+printf '{}\n' >"$XDG_CONFIG_HOME/waybar/config.jsonc"
+run_sync Linux fixture-dark
+assert_equals 0 $? "a leftover unmanaged config does not fail the switch"
+assert_equals no "$(has "waybar" "$(calls chezmoi)")" "the leftover is never passed to chezmoi"
+assert_contains "regenerated 6 configs" "$(cat "$OUT")" "the leftover is not counted"
+rm -rf "$XDG_CONFIG_HOME/waybar"
 run_sync Linux fixture-light
 
 test_start "apply_is_idempotent_for_the_active_theme"

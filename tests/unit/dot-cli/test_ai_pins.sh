@@ -28,15 +28,19 @@ if [ "\$1" = tool ] && [ "\$2" = --backend ]; then
 fi
 if [ "\$1" = latest ]; then
   case "\$2" in
-    npm:@openai/codex) echo 9.9.9 ;;
+    npm:@openai/codex@0) echo 9.9.9 ;;
     # The registry's first backend for "opencode" is npm:@opencode/cli, a
     # separate 2.x line; the pin is for the aqua build that is installed.
-    opencode) echo 99.0.0 ;;
+    opencode | opencode@*) echo 99.0.0 ;;
+    # The aqua build's repository also tags opencode v2, a separate product
+    # GitHub never marks latest; the 1.x line is the one pinned.
+    aqua:anomalyco/opencode) echo 2.1.4 ;;
+    aqua:anomalyco/opencode@1) echo 1.19.4 ;;
     # A gated latest older than the pin (pin set inside the age gate).
-    github:sebastienrousseau/passmcp) echo 0.0.0 ;;
+    github:sebastienrousseau/passmcp@0) echo 0.0.0 ;;
     # mise cannot look up an asdf plugin by its backend name.
-    asdf:kiro-cli) exit 1 ;;
-    kiro-cli) echo 99.0.0 ;;
+    asdf:kiro-cli*) exit 1 ;;
+    kiro-cli@2) echo 2.99.0 ;;
     *) echo "\${MISE_SAME:-}" ;;
   esac
 fi
@@ -101,12 +105,20 @@ assert_equals "0" "$(grep -c '^mise use' "$CALLS")" "listing bumps installs noth
 
 test_start "upgrade_resolves_latest_through_the_backend_in_use"
 r="$(lib 'ai_pin_bumps')"
-assert_equals "0|1" "$(grep -c ' opencode ' <<<"$r")|$(grep -cx 'mise latest aqua:anomalyco/opencode' "$CALLS")" \
+assert_equals "0|1" "$(grep -c ' -> 99.0.0' <<<"$r")|$(grep -cx 'mise latest aqua:anomalyco/opencode@1' "$CALLS")" \
   "a short name is looked up through its installed backend, not the registry default"
+
+# A new major is a migration to choose, not a pin bump: opencode's repo tags
+# a separate v2 product above the pinned 1.x line.
+test_start "upgrade_stays_on_the_pinned_major"
+r="$(lib 'ai_pin_bumps')"
+assert_contains "opencode $(lib '_ai_pinned_version opencode' | head -n 1) -> 1.19.4" "$r" \
+  "the newest release on the pinned major is the bump"
+assert_equals "0" "$(grep -c -- '-> 2\.1\.4' <<<"$r")" "a newer major is not proposed"
 
 test_start "upgrade_falls_back_to_the_short_name"
 r="$(lib 'ai_pin_bumps')"
-assert_contains "kiro-cli $(lib '_ai_pinned_version kiro-cli' | head -n 1) -> 99.0.0" "$r" \
+assert_contains "kiro-cli $(lib '_ai_pinned_version kiro-cli' | head -n 1) -> 2.99.0" "$r" \
   "a backend mise cannot look up falls back to the short name"
 
 test_start "upgrade_never_proposes_an_older_release"
