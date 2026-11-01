@@ -14,7 +14,8 @@ import sys
 import tempfile
 
 source = (Path(sys.argv[1]) / "bin/dot-theme-sync").read_text()
-names = ("_theme_target_adapter", "_theme_chezmoi_target", "_theme_chezmoi_apply", "apply_theme_configs")
+names = ("_theme_target_adapter", "_theme_chezmoi_target", "_theme_chezmoi_apply", "_theme_valid_targets",
+         "_theme_apply_counted", "apply_theme_configs")
 functions = "\n".join(re.search(r"^" + name + r"\(\) \{.*?^\}", source, re.M | re.S)[0] for name in names)
 # Substitute only the home-root token in these pure fixture functions, leaving
 # the process's real HOME and all application state untouched.

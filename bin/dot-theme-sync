@@ -498,9 +498,38 @@ _theme_chezmoi_apply() {
 # macOS) exists but is unmanaged, and chezmoi rejects it.
 _theme_chezmoi_target() {
   _theme_target_adapter "$1"
-  [[ "$THEME_TARGET_ADAPTER" == chezmoi && "$1" != "$HOME/.config/niri/config.kdl" ]] || return 1
-  [[ -f "$1" || "$1" == "$PALETTE_FILE" ]] || return 1
-  [[ $'\n'"$2"$'\n' == *$'\n'"$1"$'\n'* ]]
+  [[ "$THEME_TARGET_ADAPTER" == chezmoi && "$1" != "$HOME/.config/niri/config.kdl" &&
+    (-f "$1" || "$1" == "$PALETTE_FILE") && $'\n'"$2"$'\n' == *$'\n'"$1"$'\n'* ]]
+}
+
+# _theme_valid_targets: THEME_VALID_TARGETS, the transaction's targets the
+# targeted apply renders (_theme_chezmoi_target); false, after saying so,
+# when chezmoi cannot list the files it manages on this host.
+_theme_valid_targets() {
+  local target managed
+  THEME_VALID_TARGETS=()
+  if ! managed="$(chezmoi managed --include files --path-style absolute 2>>"${THEME_TXN_OPERATION_DIR:?}/chezmoi.log")"; then
+    _err "Chezmoi" "could not list managed files; diagnostics: $THEME_TXN_OPERATION_DIR/chezmoi.log"
+    return 1
+  fi
+  while IFS= read -r target; do
+    _theme_chezmoi_target "$target" "$managed" && THEME_VALID_TARGETS+=("$target")
+  done < <(theme_transaction_targets | awk '!seen[$0]++')
+  return 0 # a skipped last target is not a failure
+}
+
+# _theme_apply_counted N ARGS...: a chezmoi apply of ARGS that must pass its
+# dry run first. It adds N to the caller's applied_count, or sets the
+# caller's required_failed (bash's dynamic scope: apply_theme_configs'
+# locals).
+_theme_apply_counted() {
+  local n="$1"
+  shift
+  if _theme_chezmoi_apply --dry-run --force "$@" && _theme_chezmoi_apply --force "$@"; then
+    applied_count=$((applied_count + n))
+  else
+    required_failed=1
+  fi
 }
 
 apply_theme_configs() {
@@ -512,41 +541,18 @@ apply_theme_configs() {
   # Collect existing targets and apply in one chezmoi call.
   # --force skips interactive "file has changed" prompts; &>/dev/null
   # suppresses the prompt text that leaks onto stdout.
-  local valid_targets=()
-  local target managed
-  if ! managed="$(chezmoi managed --include files --path-style absolute 2>>"${THEME_TXN_OPERATION_DIR:?}/chezmoi.log")"; then
-    _err "Chezmoi" "could not list managed files; diagnostics: $THEME_TXN_OPERATION_DIR/chezmoi.log"
-    return 1
-  fi
-  while IFS= read -r target; do
-    _theme_chezmoi_target "$target" "$managed" && valid_targets+=("$target")
-  done < <(theme_transaction_targets | awk '!seen[$0]++')
+  _theme_valid_targets || return 1
 
-  local applied_count=0
-  local required_failed=0
-  if [[ ${#valid_targets[@]} -gt 0 ]]; then
-    if ! _theme_chezmoi_apply --dry-run --force "${valid_targets[@]}"; then
-      required_failed=1
-    elif _theme_chezmoi_apply --force "${valid_targets[@]}"; then
-      applied_count=${#valid_targets[@]}
-    else
-      required_failed=1
-    fi
-  fi
+  local applied_count=0 required_failed=0
+  [[ ${#THEME_VALID_TARGETS[@]} -eq 0 ]] ||
+    _theme_apply_counted "${#THEME_VALID_TARGETS[@]}" "${THEME_VALID_TARGETS[@]}"
 
   # iTerm2's dynamic profile is produced by a run_onchange script rather than
   # a normal target file, so a targeted apply must address its source path
   # explicitly. Otherwise only a full chezmoi apply ever refreshes iTerm2.
   local iterm_source="$CHEZMOI_SRC/run_onchange_22-iterm2-profile.sh.tmpl"
-  if [[ "$PLATFORM" == "Darwin" && -f "$iterm_source" ]]; then
-    if ! _theme_chezmoi_apply --dry-run --force --source-path "$iterm_source"; then
-      required_failed=1
-    elif _theme_chezmoi_apply --force --source-path "$iterm_source"; then
-      applied_count=$((applied_count + 1))
-    else
-      required_failed=1
-    fi
-  fi
+  [[ "$PLATFORM" != "Darwin" || ! -f "$iterm_source" ]] ||
+    _theme_apply_counted 1 --source-path "$iterm_source"
 
   # Niri: a managed config.kdl goes through chezmoi like the others; an
   # unmanaged one (the usual case, see _theme_niri_managed) is rendered
@@ -554,13 +560,7 @@ apply_theme_configs() {
   local niri_target="$HOME/.config/niri/config.kdl"
   if [[ -f "$niri_target" ]]; then
     if _theme_niri_managed "$niri_target"; then
-      if ! _theme_chezmoi_apply --dry-run --force "$niri_target"; then
-        required_failed=1
-      elif _theme_chezmoi_apply --force "$niri_target"; then
-        applied_count=$((applied_count + 1))
-      else
-        required_failed=1
-      fi
+      _theme_apply_counted 1 "$niri_target"
     elif _theme_render_niri_template "$niri_target"; then
       applied_count=$((applied_count + 1))
     fi

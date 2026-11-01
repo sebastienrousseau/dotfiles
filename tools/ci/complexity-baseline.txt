@@ -7,7 +7,7 @@
   12   19   21.7   83    94 .devcontainer/install-lite.sh::<top>
   32   27   57.7  154   218 benches/dot_command_bench.sh::<top>
   26   32   45.4   82    82 benches/test_help_gates_wall_clock.sh::<top>
-   9    9   22.5   39  1588 bin/dot-theme-sync::<top>
+   9    9   22.5   39  1585 bin/dot-theme-sync::<top>
   25   18   28.6   37     0 bin/dot-theme-sync::_apply_gnome_family_desktop
   42   37   46.0   65     0 bin/dot-theme-sync::_apply_kde_desktop
   25   19   31.6   32     0 bin/dot-theme-sync::_apply_wlroots_desktop
@@ -15,7 +15,7 @@
   20    9   15.3   83     0 bin/dot-theme-sync::_detect_linux_de
   12   12   12.8   21     0 bin/dot-theme-sync::_resolve_theme_wallpapers
   20   26   38.2   48     0 bin/dot-theme-sync::_run_reloads_parallel
-  18   26   39.0   55     0 bin/dot-theme-sync::apply_theme_configs
+  11   12   24.4   30     0 bin/dot-theme-sync::apply_theme_configs
   46   41   67.5  201     0 bin/dot-theme-sync::main
   39   38   41.3   78     0 bin/dot-theme-sync::reload_browsers
   33   39   35.4  149     0 bin/dot-theme-sync::reload_desktop
