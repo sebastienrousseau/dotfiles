@@ -311,6 +311,7 @@ _dot_names_spelling() {
 _dot_spelled() {
   _ARGV=("$@")
   [[ "$_NAME_KIND" == dom || ("$1" == help && $# -gt 1) ]] || return 0
+  [[ "$_NAME_KIND" != dom ]] || export DOT_LOG_DOMAIN="$1" # log.v1 (lib/dot/log.sh)
   _dot_help_asked "$@"
   _dot_resolve "$@"
   if [[ -n "$_RUN" ]]; then

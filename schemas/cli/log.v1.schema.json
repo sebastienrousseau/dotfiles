@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.io/schemas/cli/log.v1.schema.json",
+  "title": "dot log record v1 (one line of $XDG_STATE_HOME/dot/<domain>/log.jsonl)",
+  "description": "Written by dot_log (lib/dot/log.sh). Metadata only: names, counts and ids, never prompts or file contents. Records older than DOT_LOG_RETENTION_DAYS (30) are pruned by the maintenance job.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "time", "level", "domain", "event", "command", "trace_id", "pid", "data"],
+  "properties": {
+    "schema": { "const": "cli/log.v1" },
+    "time": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$", "description": "UTC, to the second" },
+    "level": { "enum": ["debug", "info", "warn", "error"] },
+    "domain": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$", "description": "The command's domain, or cli outside one" },
+    "event": { "type": "string", "minLength": 1, "description": "What happened, snake_case; metric, session_<event> (agent) and fleet_<event> (fleet) are reserved" },
+    "command": { "type": "string", "description": "DOT_COMMAND, or unknown" },
+    "trace_id": { "type": "string", "minLength": 1, "description": "DOT_TRACE_ID: one per invocation, shared by its child commands" },
+    "pid": { "type": "integer", "minimum": 1 },
+    "data": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "description": "The KEY=VALUE arguments, as strings; a metric has name, value and unit"
+    }
+  }
+}

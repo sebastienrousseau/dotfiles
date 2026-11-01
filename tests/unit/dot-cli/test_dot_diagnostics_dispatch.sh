@@ -175,9 +175,9 @@ assert_equals 0 "$RC" "rc"
 handed_to "dot-load-benchmark-pty --quick"
 
 test_start "metrics_reports_from_the_local_log"
-METRICS="$XDG_STATE_HOME/dotfiles/metrics.jsonl"
+METRICS="$XDG_STATE_HOME/dot/shell/log.jsonl" # log.v1 metric events
 mkdir -p "$(dirname "$METRICS")"
-printf '{"metric":"shell_startup_mean","value":42,"unit":"ms"}\n' >"$METRICS"
+printf '%s\n' '{"schema":"cli/log.v1","time":"2026-01-01T00:00:00Z","level":"info","domain":"shell","event":"metric","data":{"name":"shell_startup_mean","value":"42","unit":"ms"}}' >"$METRICS"
 diag metrics 5
 assert_equals 0 "$RC" "rc"
 out_has "Recent Metrics" "header"

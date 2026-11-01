@@ -26,7 +26,7 @@ cov_setup_sandbox
 
 STATE_DIR="$XDG_STATE_HOME/dotfiles"
 CHECKPOINT_DIR="$STATE_DIR/checkpoints"
-SESSIONS="$STATE_DIR/agent-sessions.jsonl"
+SESSIONS="$XDG_STATE_HOME/dot/agent/log.jsonl" # log.v1 session_<event> records
 
 # `timeout` (used by `agent delegate`) is coreutils-only on macOS; shim it so
 # the delegate arm is deterministic on every platform.
@@ -124,7 +124,7 @@ test_start "checkpoint_replay_runs_saved_command"
 meta agent checkpoint replay cp-one
 assert_equals 0 "$RC" "rc"
 assert_contains "hello world" "$OUT" "replayed command output"
-assert_file_contains "$SESSIONS" '"event":"checkpoint_replay_finish"' "logged"
+assert_file_contains "$SESSIONS" '"event":"session_checkpoint_replay_finish"' "logged"
 
 test_start "checkpoint_replay_propagates_failure"
 meta agent checkpoint replay cp-two

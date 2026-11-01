@@ -131,7 +131,7 @@ Only the host with the matching Age private key can decrypt. Other hosts see the
 | `dot fleet apply` | SSH to every host in `~/.config/dotfiles/fleet.toml` and run a command there (`--host`, `--cmd`, `--dry-run`, `--jobs`, `--verify-hosts`) |
 | `dot fleet push <user@host>` | Stream `chezmoi archive` from this host into the remote `$HOME` over SSH (without a `user@host`, it behaves like `dot fleet apply`) |
 | `dot fleet namespace list` | The active namespace and the `[namespaces.*]` defined in `.chezmoidata.toml` |
-| `dot fleet log show` | Recent fleet events from `~/.local/state/dotfiles/fleet/events.jsonl` |
+| `dot fleet log show` | Recent fleet events: the `fleet_<event>` records of `~/.local/state/dot/fleet/log.jsonl` (log.v1) |
 | `dot fleet policy show` / `dot fleet policy set <advisory\|strict>` | The RBAC enforcement mode in `agent-profiles.json` |
 
 `fleet.toml` lists one `[hosts.<name>]` table per host with an `ssh` target and an optional `profile`. By default `dot fleet apply` runs `dot config update && dot doctor` on each host (pull the source, apply it, then check the host), four hosts at a time.
