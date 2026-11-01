@@ -13,9 +13,10 @@ updates the dotfiles, the mise tools and, after asking, the system
 packages (Homebrew, apt, dnf, pacman or zypper) and the app stores (mas,
 Flatpak, Snap). `--globals` adds npm, cargo and pipx globals, and `--yes`
 answers every question. The AI CLIs stay at their `[ai_tools]` pins:
-`dot update` lists the newer releases it finds (from
-`dot ai update --check`, which changes nothing), and `dot ai update`
-moves them past the pins. Topgrade, the
+`dot update` lists the newer releases it finds on each pin's major version
+(from `dot ai update --check`, which changes nothing; a new major is a
+migration to choose, not a bump), and `dot ai update` moves them past the
+pins. Topgrade, the
 `~/.local/bin/update` script and the `update`/`upd` functions are gone;
 `chezmoi apply` deletes the script and the topgrade config. The `update`
 and `upd` forwarders were removed in 0.2.538: run `dot update`.
