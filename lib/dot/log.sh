@@ -109,15 +109,19 @@ dot_log_record() {
 
 # dot_log LEVEL EVENT [KEY=VALUE...]: append a log.v1 event to the domain's
 # log; with DOTFILES_JSON_LOG=1, print it on stdout too. Never fails the
-# caller: a log that cannot be written is skipped.
+# caller: a log that cannot be written is skipped. Logs are private (0700
+# dirs, 0600 files): they name working directories and commands.
 dot_log() {
   _dot_log_wanted "$1" || return 0
-  local record file
+  local record file mask
   record="$(dot_log_record "$@")"
   file="$(dot_log_path "$(_dot_log_domain)")"
+  mask="$(umask)"
+  umask 077
   if mkdir -p "${file%/*}" 2>/dev/null; then
     { printf '%s\n' "$record"; } 2>/dev/null >>"$file" || true
   fi
+  umask "$mask"
   [[ "${DOTFILES_JSON_LOG:-0}" != 1 ]] || printf '%s\n' "$record"
 }
 
@@ -143,6 +147,7 @@ _dot_log_adopt() {
   for orphan in "$1".prune.*; do
     [[ -f "$orphan" ]] || continue
     pid="${orphan##*.}"
+    [[ "$pid" =~ ^[0-9]+$ ]] || continue
     ! kill -0 "$pid" 2>/dev/null || continue
     { cat "$orphan" && { [[ ! -f "$1" ]] || cat "$1"; }; } >"$1.$$" && mv -f "$1.$$" "$1" && rm -f "$orphan"
   done
@@ -245,7 +250,19 @@ dot_agent_session_tail() {
   printf '%s\n' "$out"
 }
 
+# dot_agent_checkpoint_create PROFILE [STATUS] [ARGV...]: write a checkpoint
+# and print its path. Private, like the logs: it records cwd, argv and the
+# agent settings.
 dot_agent_checkpoint_create() {
+  local mask rc=0
+  mask="$(umask)"
+  umask 077
+  _dot_agent_checkpoint_write "$@" || rc=$?
+  umask "$mask"
+  return "$rc"
+}
+
+_dot_agent_checkpoint_write() {
   local profile="$1" status="${2:-ready}"
   shift 2 || true
 
@@ -295,8 +312,9 @@ dot_agent_checkpoint_create() {
         }
       }' >"$checkpoint_file"
   else
-    printf '{"id":"%s","created_at":"%s","profile":"%s","status":"%s","trace_id":"%s","command":"%s"}\n' \
-      "$checkpoint_id" "$created_at" "$profile" "$status" "$DOT_TRACE_ID" "${DOT_COMMAND:-unknown}" >"$checkpoint_file"
+    printf '{"id":%s,"created_at":%s,"profile":%s,"status":%s,"trace_id":%s,"command":%s}\n' \
+      "$(_dot_json_str "$checkpoint_id")" "$(_dot_json_str "$created_at")" "$(_dot_json_str "$profile")" \
+      "$(_dot_json_str "$status")" "$(_dot_json_str "$DOT_TRACE_ID")" "$(_dot_json_str "${DOT_COMMAND:-unknown}")" >"$checkpoint_file"
   fi
 
   printf '%s\n' "$checkpoint_file"

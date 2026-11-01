@@ -295,7 +295,7 @@ The shipped card's `version` field lags the release (it still names 0.2.501), an
 
 | Path | Content | Rotation |
 |:---|:---|:---|
-| `~/.local/state/dot/<domain>/log.jsonl` | The domain's log.v1 events (`schemas/cli/log.v1.schema.json`): every `dot` command's log lines, metrics (`dot doctor metric list`), agent sessions (`dot agent log show`, in `agent`) and fleet events (`dot fleet log show`, in `fleet`) | Records older than `DOT_LOG_RETENTION_DAYS` (30) are pruned by the maintenance job |
+| `~/.local/state/dot/<domain>/log.jsonl` | The domain's log.v1 events (`schemas/cli/log.v1.schema.json`): every `dot` command's log lines, metrics (`dot doctor metric list`), agent sessions (`dot agent log show`, in `agent`) and fleet events (`dot fleet log show`, in `fleet`). Mode 0600; the value of a key that names a secret (token, secret, password, api key, credential, auth) is written as `***`, so a secret under any other key name is not caught | Records older than `DOT_LOG_RETENTION_DAYS` (30) are pruned by the maintenance job |
 | `~/.local/state/dotfiles/heal.log` | Heal attempts | Append-only |
 | `~/.local/state/dotfiles/rollback.log` | Rollback activity | Append-only |
 | `~/.local/state/dotfiles/attestations/workstation-attestation.json` | Latest attestation | Overwritten each run |

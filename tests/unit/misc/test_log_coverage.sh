@@ -121,6 +121,21 @@ assert_equals "1|1" "$(grep -c '"old"' "$pr/state/dot/theme/log.jsonl")|$(grep -
   "the log is put back whole, with the record written meanwhile"
 assert_equals "0" "$(find "$pr/state/dot/theme" -name 'log.jsonl.*' | wc -l | tr -d ' ')" "and nothing temporary is left"
 
+test_start "logs_and_checkpoints_are_private"
+mode() { stat -c '%a' "$1" 2>/dev/null || stat -f '%Lp' "$1"; }
+(umask 022 && lib "$WORK/perm" 'dot_log info e; DOT_AGENT_CHECKPOINT_ID=cpp dot_agent_checkpoint_create plan; umask') >"$WORK/perm.out"
+assert_equals "600|700" "$(mode "$WORK/perm/dot/cli/log.jsonl")|$(mode "$WORK/perm/dot/cli")" "a new log is 0600 in a 0700 dir"
+assert_equals "600" "$(mode "$WORK/perm/dotfiles/checkpoints/cpp.json")" "a checkpoint is 0600"
+assert_equals "0022" "$(tail -n 1 "$WORK/perm.out")" "and the caller's umask is put back"
+
+test_start "an_orphan_whose_suffix_is_not_a_pid_is_left"
+mkdir -p "$WORK/orph/dot/theme"
+printf '%s\n' '{"event":"keep"}' >"$WORK/orph/dot/theme/log.jsonl"
+printf '%s\n' '{"event":"odd"}' >"$WORK/orph/dot/theme/log.jsonl.prune.abc"
+lib "$WORK/orph" 'dot_log_prune' >/dev/null
+assert_file_exists "$WORK/orph/dot/theme/log.jsonl.prune.abc" "a suffix that is not a PID is never passed to kill"
+assert_equals "0" "$(grep -c odd "$WORK/orph/dot/theme/log.jsonl")" "and its file is not adopted"
+
 test_start "debug_events_need_verbose_or_a_level"
 lib "$WORK/lv" 'dot_log debug d1' >/dev/null
 DOT_VERBOSE=1 lib "$WORK/lv" 'dot_log debug d2' >/dev/null
@@ -183,6 +198,11 @@ done
 f="$(PATH="$NOJQ" DOT_AGENT_CHECKPOINT_ID=cp2 DOT_COMMAND=agent lib "$S" 'dot_agent_checkpoint_create ask')"
 assert_file_contains "$f" '{"id":"cp2","created_at":' "printf fallback used"
 assert_file_contains "$f" '"profile":"ask","status":"ready","trace_id":"trace42","command":"agent"}' "fallback fields"
+
+test_start "the_checkpoint_fallback_escapes_its_fields"
+f="$(PATH="$NOJQ" DOT_AGENT_CHECKPOINT_ID=cpq DOT_COMMAND='a"b' lib "$S" 'dot_agent_checkpoint_create '"'"'pro"file'"'"' "st\\at"')"
+assert_file_contains "$f" '"profile":"pro\"file","status":"st\\at"' "quotes and backslashes are escaped"
+assert_file_contains "$f" '"command":"a\"b"}' "in every field"
 
 test_start "checkpoint_tail"
 out="$(lib "$S" 'dot_agent_checkpoint_tail 5')"
