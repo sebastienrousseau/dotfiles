@@ -79,13 +79,27 @@ _dot_json_str() {
   printf '"%s"' "$s"
 }
 
-# dot_log_record LEVEL EVENT [KEY=VALUE...]: one log.v1 line on stdout.
+# _dot_log_secret_key KEY: true when KEY names a secret (token, secret,
+# password, api key, credential, auth), whatever its case.
+_dot_log_secret_key() {
+  local restore rc=1
+  restore="$(shopt -p nocasematch)"
+  shopt -s nocasematch
+  [[ "$1" =~ (token|secret|passw|api_?key|credential|auth) ]] && rc=0
+  eval "$restore"
+  return "$rc"
+}
+
+# dot_log_record LEVEL EVENT [KEY=VALUE...]: one log.v1 line on stdout. The
+# value of a key that names a secret is written as *** (metadata only).
 dot_log_record() {
-  local level="$1" event="$2" data="" kv
+  local level="$1" event="$2" data="" kv value
   shift 2
   for kv in "$@"; do
     [[ "$kv" == *=* ]] || kv="$kv="
-    data+="${data:+,}$(_dot_json_str "${kv%%=*}"):$(_dot_json_str "${kv#*=}")"
+    value="${kv#*=}"
+    ! _dot_log_secret_key "${kv%%=*}" || value="***"
+    data+="${data:+,}$(_dot_json_str "${kv%%=*}"):$(_dot_json_str "$value")"
   done
   printf '{"schema":"cli/log.v1","time":"%s","level":%s,"domain":%s,"event":%s,"command":%s,"trace_id":%s,"pid":%d,"data":{%s}}\n' \
     "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(_dot_json_str "$level")" "$(_dot_json_str "$(_dot_log_domain)")" \
@@ -116,6 +130,24 @@ dot_log_tail() {
   grep -F "\"event\":\"${3:-}" "$file" 2>/dev/null | tail -n "${2:-20}" || true
 }
 
+# _dot_log_prune_file LOG CUTOFF: keep LOG's records from CUTOFF on. LOG is
+# renamed first, so a writer appending meanwhile starts a new LOG; the kept
+# records then go in front of what it wrote. Only a write between that join
+# and the rename back can be lost (no portable file lock: macOS has no flock).
+_dot_log_prune_file() {
+  local file="$1" old="$1.prune.$$"
+  mv -f "$file" "$old" 2>/dev/null || return 0
+  if awk -v c="\"time\":\"$2\"" '{ i = index($0, "\"time\":\""); if (!i || substr($0, i, length(c)) >= c) print }' \
+    "$old" >"$file.$$" && { [[ ! -f "$file" ]] || cat "$file" >>"$file.$$"; }; then
+    mv -f "$file.$$" "$file"
+    rm -f "$old"
+  else
+    rm -f "$file.$$"
+    [[ -f "$file" ]] && cat "$file" >>"$old"
+    mv -f "$old" "$file"
+  fi
+}
+
 # dot_log_prune [DAYS]: drop records older than DAYS (DOT_LOG_RETENTION_DAYS,
 # else 30) from every domain's log. ISO timestamps sort as text.
 dot_log_prune() {
@@ -128,12 +160,7 @@ dot_log_prune() {
   fi
   for file in "${XDG_STATE_HOME:-$HOME/.local/state}"/dot/*/log.jsonl; do
     [[ -f "$file" ]] || continue
-    if awk -v c="\"time\":\"$cutoff\"" '{ i = index($0, "\"time\":\""); if (!i || substr($0, i, length(c)) >= c) print }' \
-      "$file" >"$file.$$"; then
-      mv -f "$file.$$" "$file"
-    else
-      rm -f "$file.$$"
-    fi
+    _dot_log_prune_file "$file" "$cutoff"
   done
 }
 

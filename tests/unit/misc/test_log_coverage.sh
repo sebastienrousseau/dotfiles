@@ -60,6 +60,39 @@ out="$(PATH="$WORK/olddate:/usr/bin:/bin" lib "$S" 'dot_log_prune; echo "rc=$?"'
 assert_contains "the logs were not pruned" "$out" "a date without -d or -v is reported"
 assert_contains "rc=1" "$out" "and prune fails, so the maintenance step shows it"
 
+test_start "values_of_secret_keys_are_redacted"
+out="$(lib "$S" 'dot_log_record info e token=abc API_KEY=k1 apikey=k2 Password=p client_secret=s auth=a name=dot count=3')"
+for k in token API_KEY apikey Password client_secret auth; do
+  assert_contains "\"$k\":\"***\"" "$out" "$k is written as ***"
+done
+assert_contains '"name":"dot","count":"3"' "$out" "other values are kept"
+assert_false '[[ "$out" == *abc* ]]' "the secret value is not written"
+
+test_start "prune_keeps_a_record_written_while_it_runs"
+pr="$WORK/pr"
+mkdir -p "$pr/state/dot/theme" "$pr/bin"
+printf '%s\n' '{"schema":"cli/log.v1","time":"2020-01-01T00:00:00Z","event":"old"}' >"$pr/state/dot/theme/log.jsonl"
+real_awk="$(command -v awk)"
+# A stand-in awk: the real one, then a writer appending to the live log, as
+# dot_log does from another process while prune runs.
+printf '#!/bin/sh\n%s "$@"; rc=$?\nprintf "%%s\\n" "{\\"schema\\":\\"cli/log.v1\\",\\"time\\":\\"2099-01-01T00:00:00Z\\",\\"event\\":\\"during\\"}" >>"%s"\nexit $rc\n' \
+  "$real_awk" "$pr/state/dot/theme/log.jsonl" >"$pr/bin/awk"
+chmod +x "$pr/bin/awk"
+PATH="$pr/bin:$PATH" lib "$pr/state" 'dot_log_prune' >/dev/null
+assert_equals "0|1" "$(grep -c '"old"' "$pr/state/dot/theme/log.jsonl")|$(grep -c '"during"' "$pr/state/dot/theme/log.jsonl")" \
+  "the old record goes and the one written during the prune stays"
+assert_equals "0" "$(find "$pr/state/dot/theme" -name 'log.jsonl.*' | wc -l | tr -d ' ')" "no temporary file is left"
+
+test_start "a_prune_that_fails_restores_the_log"
+printf '%s\n' '{"schema":"cli/log.v1","time":"2020-01-01T00:00:00Z","event":"old"}' >"$pr/state/dot/theme/log.jsonl"
+# This awk fails after a writer appended, so nothing may be lost.
+printf '#!/bin/sh\nprintf "%%s\\n" "{\\"event\\":\\"during\\"}" >>"%s"\nexit 1\n' \
+  "$pr/state/dot/theme/log.jsonl" >"$pr/bin/awk"
+PATH="$pr/bin:$PATH" lib "$pr/state" 'dot_log_prune' >/dev/null
+assert_equals "1|1" "$(grep -c '"old"' "$pr/state/dot/theme/log.jsonl")|$(grep -c '"during"' "$pr/state/dot/theme/log.jsonl")" \
+  "the log is put back whole, with the record written meanwhile"
+assert_equals "0" "$(find "$pr/state/dot/theme" -name 'log.jsonl.*' | wc -l | tr -d ' ')" "and nothing temporary is left"
+
 test_start "debug_events_need_verbose_or_a_level"
 lib "$WORK/lv" 'dot_log debug d1' >/dev/null
 DOT_VERBOSE=1 lib "$WORK/lv" 'dot_log debug d2' >/dev/null
@@ -89,7 +122,7 @@ lib "$S" 'dot_metric startup 142; dot_metric size 3 kb' >/dev/null
 out="$(lib "$S" 'dot_metrics_summary 1')"
 assert_contains '"event":"metric"' "$out" "last metric shown"
 assert_contains '"data":{"name":"size","value":"3","unit":"kb"}}' "$out" "with its name, value and unit"
-assert_not_contains '"name":"startup"' "$out" "and only the last one"
+assert_false '[[ "$out" == *'"'"'"name":"startup"'"'"'* ]]' "and only the last one"
 
 test_start "agent_session_log_and_tail"
 out="$(lib "$WORK/fresh2" 'dot_agent_session_tail')"
