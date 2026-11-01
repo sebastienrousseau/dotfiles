@@ -44,10 +44,10 @@ Even for minimal-risk and exempt systems, the AI Act encourages transparency. Th
 
 | Obligation | Implementation | Evidence |
 |-----------|----------------|----------|
-| AI interaction disclosure | Agent session logging | `agent-sessions.jsonl` via `dot_agent_session_log()` |
+| AI interaction disclosure | Agent session logging | `session_<event>` records in the agent log (`dot/agent/log.jsonl`) via `dot_agent_session_log()` |
 | Model identification | Model registry | `defaults/dot_config/dotfiles/model-registry.json` |
 | Configuration transparency | Agent profiles | `defaults/dot_config/dotfiles/agent-profiles.json` |
-| Audit trail | Structured logging | `${XDG_STATE_HOME:-~/.local/state}/dotfiles/` (`dot.log`, `agent-sessions.jsonl`) |
+| Audit trail | Structured logging | `${XDG_STATE_HOME:-~/.local/state}/dot/<domain>/log.jsonl` (log.v1, one per domain; 30 days kept) |
 | Workstation attestation | Attestation export | `dot attest show --json`, `dot attest export` |
 
 ---

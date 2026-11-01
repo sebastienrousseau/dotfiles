@@ -21,7 +21,9 @@ assert_file_exists "$DOT_CLI" "executable_dot should exist"
 # no interpreter while everything else `dot` needs is still there.
 NEW_TMP="$(mktemp -d)"
 trap 'rm -rf "$NEW_TMP"' EXIT
-mkdir -p "$NEW_TMP/nopy" "$NEW_TMP/work"
+mkdir -p "$NEW_TMP/nopy" "$NEW_TMP/work" "$NEW_TMP/state"
+# `tool new` locks $XDG_STATE_HOME/dot/tool; keep it out of the real state dir.
+export XDG_STATE_HOME="$NEW_TMP/state"
 IFS=: read -ra _path_dirs <<<"$PATH"
 for d in "${_path_dirs[@]}"; do
   [[ -d "$d" ]] || continue

@@ -7,6 +7,9 @@ on:
       - 'schemas/dpp-hello-v1.schema.json'
       - 'schemas/cli/**'
       - 'tests/unit/dot-cli/test_naming_registry.py'
+      # log.v1: the writer and its schema test (schemas/cli/** covers the schema)
+      - 'lib/dot/log.sh'
+      - 'tests/unit/dot-cli/test_log_v1_schema.py'
       # CLI-contract lint (ADR-020): manifests, routes, the command table
       # and its generator, the binary it runs, and the version that expires
       # deprecated names.
@@ -119,6 +122,7 @@ jobs:
       - run: python -m pip install --require-hashes -r requirements-contracts.txt
       - run: python tests/unit/core/test_contract_schemas.py
       - run: python tests/unit/dot-cli/test_naming_registry.py
+      - run: python tests/unit/dot-cli/test_log_v1_schema.py
       - run: python tools/ci/check-cli-contract.py
       - run: python tests/unit/dot-cli/test_cli_contract_lint.py
       - run: bash tests/unit/dot-cli/test_dot_command_table.sh

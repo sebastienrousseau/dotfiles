@@ -174,7 +174,7 @@ On a machine that already has `dot`, `dot config import <bundle>` restores it: i
 
 ### Metrics
 
-`dot doctor metric list [<n>]` prints the last `n` (default 20) lines of `~/.local/state/dotfiles/metrics.jsonl`, an append-only file with one JSON object per measurement. The recorded metrics are shell startup times, `chezmoi apply` duration, doctor error and warning counts, the scorecard scores and bundle size.
+`dot doctor metric list [<n>]` prints the last `n` (default 20) `metric` events across the domains' logs, `~/.local/state/dot/<domain>/log.jsonl` (log.v1: each a JSON line whose `data` holds the metric's `name`, `value` and `unit`). The recorded metrics are shell startup times, `chezmoi apply` duration, doctor error and warning counts, the scorecard scores and bundle size.
 
 ## Design Principles
 

@@ -44,7 +44,7 @@ See [AI_ACT_COMPLIANCE.md](AI_ACT_COMPLIANCE.md) for full assessment.
 | **CC7.1** | System Operations | `compliance-guard.yml` blocks insecure patterns |
 | **CC7.2** | Change Detection | Pre-commit hooks detect security violations |
 | **CC8.1** | Change Management | Git-based IaC, PR templates, CODEOWNERS |
-| **A1.2** | Audit Logs | `${XDG_STATE_HOME:-~/.local/state}/dotfiles/dot.log` records `dot` apply, doctor, rollback and related operations |
+| **A1.2** | Audit Logs | `${XDG_STATE_HOME:-~/.local/state}/dot/<domain>/log.jsonl` (log.v1) records `dot` apply, doctor, rollback and related operations |
 
 ### ISO 27001
 
@@ -422,12 +422,14 @@ lock-configs  # Sets chflags uchg (macOS) or chattr +i (Linux)
 ### Audit Trail
 
 ```bash
-# View dotfiles operations log
-tail -n 50 "${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/dot.log"
+# View the dotfiles operations logs (one per domain), newest last
+cat "${XDG_STATE_HOME:-$HOME/.local/state}"/dot/*/log.jsonl | sort -s -t'"' -k8,8 | tail -n 50
 ```
 
-The log rotates to `dot.log.1` at 1 MB. The `dot-audit` alias shows its
-last 20 lines, and falls back to `git log` when it does not exist yet.
+Each line is a log.v1 record (`schemas/cli/log.v1.schema.json`); the
+maintenance job prunes records older than `DOT_LOG_RETENTION_DAYS` (30).
+The `dot-audit` alias shows the last 20, and falls back to `git log` when
+there are none yet.
 
 ### Supply Chain Security
 

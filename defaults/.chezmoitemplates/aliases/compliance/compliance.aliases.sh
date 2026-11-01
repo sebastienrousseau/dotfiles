@@ -19,13 +19,17 @@ privacy_mode_fn() {
 
 alias privacy-mode=privacy_mode_fn
 
-# Audit Trail: the dot CLI's own log (lib/dot/log.sh), else git history
+# Audit Trail: the dot CLI's own logs (lib/dot/log.sh), else git history
 audit_fn() {
-  local log="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/dot.log"
+  # Every domain's log.v1 log, merged on the time field (find, not a glob:
+  # zsh fails an unmatched one).
+  local state="${XDG_STATE_HOME:-$HOME/.local/state}/dot" lines=""
   echo " Configuration Audit Trail (Recent Changes)"
   echo "---------------------------------------------"
-  if [[ -f "$log" ]]; then
-    tail -n 20 "$log"
+  [[ ! -d "$state" ]] || lines="$(find "$state" -mindepth 2 -maxdepth 2 -name log.jsonl -exec cat {} + 2>/dev/null |
+    sort -s -t'"' -k8,8 | tail -n 20)"
+  if [[ -n "$lines" ]]; then
+    printf '%s\n' "$lines"
   else
     # Fallback to git log when dot has not logged anything yet
     git -C "${DOTFILES_DIR:-$HOME/.dotfiles}" log --oneline -n 10 --format="%C(auto)%h %C(blue)%ad %C(reset)%s (%an)" --date=short
