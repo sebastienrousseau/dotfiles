@@ -310,7 +310,15 @@ assert_contains "memory uses unpinned npx package" "$(cat "$OUT")" "the unpinned
 # CI workflow controls (YAML consumed by GitHub Actions)
 # ===========================================================================
 test_start "update_deps_uses_signed_commits"
-assert_file_contains "$update_deps_workflow" "git commit -S -m" "dependency updates use signed commits"
+# As for version sync below: a runner-side `git commit -S` showed as
+# unknown_key, so both jobs commit through the API, which GitHub signs.
+assert_equals "2" "$(grep -cE '^[[:space:]]*bash tools/ci/commit-via-api\.sh' "$update_deps_workflow")" \
+  "both dependency-update jobs commit through the API"
+if grep -qE '^[[:space:]]*git (commit|push)' "$update_deps_workflow"; then
+  fail "a dependency update still commits or pushes from the runner"
+else
+  pass "dependency updates never commit or push from the runner"
+fi
 
 test_start "sync_versions_uses_signed_commits"
 # The bot commits through createCommitOnBranch (tools/ci/commit-via-api.sh),
