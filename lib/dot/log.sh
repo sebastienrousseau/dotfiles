@@ -130,26 +130,61 @@ dot_log_tail() {
   grep -F "\"event\":\"${3:-}" "$file" 2>/dev/null | tail -n "${2:-20}" || true
 }
 
+# _dot_log_keep CUTOFF: the records on stdin from CUTOFF on (ISO times
+# compare as text; a line without a time is kept).
+_dot_log_keep() {
+  awk -v c="\"time\":\"$1\"" '{ i = index($0, "\"time\":\""); if (!i || substr($0, i, length(c)) >= c) print }'
+}
+
+# _dot_log_adopt LOG: put back the records a prune that died left in
+# LOG.prune.<pid>, older than anything in LOG, so they go in front.
+_dot_log_adopt() {
+  local orphan pid
+  for orphan in "$1".prune.*; do
+    [[ -f "$orphan" ]] || continue
+    pid="${orphan##*.}"
+    ! kill -0 "$pid" 2>/dev/null || continue
+    { cat "$orphan" && { [[ ! -f "$1" ]] || cat "$1"; }; } >"$1.$$" && mv -f "$1.$$" "$1" && rm -f "$orphan"
+  done
+}
+
 # _dot_log_prune_file LOG CUTOFF: keep LOG's records from CUTOFF on. LOG is
-# renamed first, so a writer appending meanwhile starts a new LOG; the kept
-# records then go in front of what it wrote. Only a write between that join
-# and the rename back can be lost (no portable file lock: macOS has no flock).
+# renamed first, so new writers start a new LOG. The first SIZE bytes are
+# filtered; bytes a writer that had LOG open appended to the renamed file
+# after that are kept as they are, then what went to the new LOG. Only a
+# write between that join and the rename back can be lost (no portable file
+# lock: macOS has no flock). A prune that dies leaves LOG.prune.<pid>, which
+# the next one adopts.
 _dot_log_prune_file() {
-  local file="$1" old="$1.prune.$$"
-  mv -f "$file" "$old" 2>/dev/null || return 0
-  if awk -v c="\"time\":\"$2\"" '{ i = index($0, "\"time\":\""); if (!i || substr($0, i, length(c)) >= c) print }' \
-    "$old" >"$file.$$" && { [[ ! -f "$file" ]] || cat "$file" >>"$file.$$"; }; then
-    mv -f "$file.$$" "$file"
+  local old="$1.prune.$$" size
+  mv -f "$1" "$old" 2>/dev/null || return 0
+  size="$(wc -c <"$old" | tr -d ' ')"
+  if _dot_log_rebuild "$1" "$old" "$size" "$2"; then
+    mv -f "$1.$$" "$1"
     rm -f "$old"
   else
-    rm -f "$file.$$"
-    [[ -f "$file" ]] && cat "$file" >>"$old"
-    mv -f "$old" "$file"
+    _dot_log_restore "$1" "$old"
   fi
 }
 
+# _dot_log_rebuild LOG OLD SIZE CUTOFF: LOG.$$ is OLD's first SIZE bytes from
+# CUTOFF on, then the rest of OLD, then what went to the new LOG.
+_dot_log_rebuild() {
+  head -c "$3" "$2" | _dot_log_keep "$4" >"$1.$$" || return 1
+  tail -c "+$(($3 + 1))" "$2" >>"$1.$$" || return 1
+  [[ ! -f "$1" ]] || cat "$1" >>"$1.$$"
+}
+
+# _dot_log_restore LOG OLD: put OLD back whole, with what went to LOG meanwhile.
+_dot_log_restore() {
+  rm -f "$1.$$"
+  [[ ! -f "$1" ]] || cat "$1" >>"$2"
+  mv -f "$2" "$1"
+}
+
 # dot_log_prune [DAYS]: drop records older than DAYS (DOT_LOG_RETENTION_DAYS,
-# else 30) from every domain's log. ISO timestamps sort as text.
+# else 30) from every domain's log. One prune at a time: it holds the `log`
+# lock (lib/dot/lock.sh), and a second exits 75.
 dot_log_prune() {
   local days="${1:-${DOT_LOG_RETENTION_DAYS:-30}}" cutoff file
   [[ "$days" =~ ^[0-9]+$ ]] || return 64
@@ -158,8 +193,12 @@ dot_log_prune() {
     echo "dot_log_prune: this date understands neither -d nor -v; the logs were not pruned" >&2
     return 1
   fi
+  # shellcheck source=lock.sh
+  source "${BASH_SOURCE[0]%/*}/lock.sh"
+  dot_lock log || return $?
   for file in "${XDG_STATE_HOME:-$HOME/.local/state}"/dot/*/log.jsonl; do
     [[ -f "$file" ]] || continue
+    _dot_log_adopt "$file"
     _dot_log_prune_file "$file" "$cutoff"
   done
 }

@@ -83,6 +83,34 @@ assert_equals "0|1" "$(grep -c '"old"' "$pr/state/dot/theme/log.jsonl")|$(grep -
   "the old record goes and the one written during the prune stays"
 assert_equals "0" "$(find "$pr/state/dot/theme" -name 'log.jsonl.*' | wc -l | tr -d ' ')" "no temporary file is left"
 
+test_start "prune_keeps_a_write_to_the_renamed_log"
+# A writer that opened the log before the prune renamed it appends to the
+# renamed file after the prune read it: this awk writes there once it ran.
+printf '%s\n' '{"schema":"cli/log.v1","time":"2020-01-01T00:00:00Z","event":"old"}' >"$pr/state/dot/theme/log.jsonl"
+printf '#!/bin/sh\n%s "$@"; rc=$?\nfor f in "%s".prune.*; do printf "%%s\\n" "{\\"time\\":\\"2099-01-01T00:00:00Z\\",\\"event\\":\\"late\\"}" >>"$f"; done\nexit $rc\n' \
+  "$real_awk" "$pr/state/dot/theme/log.jsonl" >"$pr/bin/awk"
+PATH="$pr/bin:$PATH" lib "$pr/state" 'dot_log_prune' >/dev/null
+assert_equals "0|1" "$(grep -c '"old"' "$pr/state/dot/theme/log.jsonl")|$(grep -c '"late"' "$pr/state/dot/theme/log.jsonl")" \
+  "a record written to the renamed log after it was read is kept"
+
+test_start "prune_adopts_what_a_dead_prune_left"
+printf '%s\n' '{"schema":"cli/log.v1","time":"2099-01-01T00:00:00Z","event":"stranded"}' >"$pr/state/dot/theme/log.jsonl.prune.999999999"
+printf '%s\n' '{"schema":"cli/log.v1","time":"2099-01-02T00:00:00Z","event":"current"}' >"$pr/state/dot/theme/log.jsonl"
+lib "$pr/state" 'dot_log_prune' >/dev/null
+assert_equals "stranded current" "$(grep -o '"event":"[a-z]*"' "$pr/state/dot/theme/log.jsonl" | cut -d'"' -f4 | tr '\n' ' ' | sed 's/ $//')" \
+  "the stranded records come back, in front"
+assert_equals "0" "$(find "$pr/state/dot/theme" -name 'log.jsonl.*' | wc -l | tr -d ' ')" "and the leftover file goes"
+
+test_start "one_prune_at_a_time"
+mkdir -p "$pr/state/dot/log"
+sleep 30 &
+pruner=$!
+ln -sfn "$pruner" "$pr/state/dot/log/lock"
+out="$(lib "$pr/state" 'dot_log_prune; echo "rc=$?"')"
+kill "$pruner" 2>/dev/null
+assert_contains "rc=75" "$out" "a second prune exits 75 while one holds the log lock"
+rm -f "$pr/state/dot/log/lock"
+
 test_start "a_prune_that_fails_restores_the_log"
 printf '%s\n' '{"schema":"cli/log.v1","time":"2020-01-01T00:00:00Z","event":"old"}' >"$pr/state/dot/theme/log.jsonl"
 # This awk fails after a writer appended, so nothing may be lost.
