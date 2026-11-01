@@ -66,9 +66,10 @@ if ! command -v tar >/dev/null || ! command -v zstd >/dev/null; then
   exit 1
 fi
 
-# Define paths to bundle
+# Define paths to bundle: the checkout is the one the shells export as
+# DOTFILES_DIR, wherever it lives.
 declare -a paths_to_bundle=(
-  "$HOME/.dotfiles"
+  "${DOTFILES_DIR:-$HOME/.dotfiles}"
   "$HOME/.config/chezmoi"
   "$HOME/.local/share/mise"
 )
@@ -126,7 +127,7 @@ _bundle_report() {
   done
   ui_info "To restore on an offline machine:"
   ui_bullet "tar --zstd -xf $BUNDLE_FILE -P"
-  ui_bullet "cd ~/.dotfiles && ./install.sh --force"
+  ui_bullet "cd ${DOTFILES_DIR:-$HOME/.dotfiles} && ./install.sh --force"
 }
 
 declare -a valid_paths=() keys=()

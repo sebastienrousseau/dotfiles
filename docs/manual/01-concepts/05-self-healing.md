@@ -139,21 +139,21 @@ It does **not** include:
 
 `dot config export [<dir>]` (`scripts/ops/bundle.sh`) writes a `tar --zstd` archive, `dotfiles_offline_bundle_<YYYYMMDD_HHMMSS>.tar.zst`, to `<dir>` (default `~/Downloads`). It needs `tar` and `zstd`, and stores these paths as absolute paths:
 
-- `~/.dotfiles` (the source checkout)
+- the source checkout: `$DOTFILES_DIR`, which the shells export, else `~/.dotfiles`
 - `~/.config/chezmoi` (your chezmoi config), without the age identity: any file there with an `AGE-SECRET-KEY` line is left out and named, for you to carry to the other machine separately
 - `~/.local/share/mise` (installed toolchains)
 - With `DOTFILES_BUNDLE_NIX=1`: `/nix/store`, `/nix/var/nix` and `~/.nix-profile`
 
-Because the archive holds your age private key in the clear, treat it like the key itself.
+The age key stays out, so the encrypted secrets in the archive stay sealed until you bring the key. The rest (your chezmoi config and the checkout as it stands) is in the clear: keep the archive private.
 
 Restore on the offline machine with the commands the export prints:
 
 ```sh
 tar --zstd -xf dotfiles_offline_bundle_<stamp>.tar.zst -P
-cd ~/.dotfiles && ./install.sh --force
+cd ~/.dotfiles && ./install.sh --force   # the export prints your checkout's path
 ```
 
-On a machine that already has `dot`, `dot config import <bundle>` restores it: it lists what it will overwrite and asks first (`--yes` skips the question), and refuses a file that is not such a bundle or holds anything outside those three paths of your home.
+On a machine that already has `dot`, `dot config import <bundle>` restores it: it lists what it will overwrite and asks first (`--yes` skips the question), and refuses a file that is not such a bundle or holds anything outside those three paths of your home. For a checkout outside `~/.dotfiles`, set `DOTFILES_DIR` to where it goes; one that holds the home itself (`/`, `$HOME`) is refused.
 
 ## Observability
 

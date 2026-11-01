@@ -92,6 +92,35 @@ assert_equals "1" "$RC" "a bundle reaching outside is refused"
 assert_contains "$H/.ssh/authorized_keys" "$OUT" "the refusal names the member"
 assert_equals "mine" "$(cat "$H/.ssh/authorized_keys")" "nothing outside is written"
 
+# A checkout outside ~/.dotfiles is the one DOTFILES_DIR names: export
+# bundles it, and import restores it only where DOTFILES_DIR points.
+test_start "export_and_import_follow_dotfiles_dir"
+C="$H/Code/dotfiles"
+mkdir -p "$C/defaults"
+printf 'moved\n' >"$C/defaults/file"
+in_sandbox env DOTFILES_DIR="$C" bash "$BUNDLE_SH" "$WORK/out-moved"
+MOVED="$(ls "$WORK"/out-moved/*.tar.zst 2>/dev/null || true)"
+assert_contains "$C/defaults/file" "$(tar --zstd -tf "$MOVED" -P 2>/dev/null)" "the bundle holds the checkout DOTFILES_DIR names"
+assert_contains "cd $C && ./install.sh" "$OUT" "the restore hint names that checkout"
+printf 'edited\n' >"$C/defaults/file"
+in_sandbox bash "$ENTRY" import "$MOVED" --yes
+assert_equals "1" "$RC" "without DOTFILES_DIR, the checkout is outside ~/.dotfiles and refused"
+assert_equals "edited" "$(cat "$C/defaults/file")" "and nothing is extracted"
+in_sandbox env DOTFILES_DIR="$C" bash "$ENTRY" import "$MOVED" --yes
+assert_equals "0" "$RC" "with DOTFILES_DIR, import --yes exits 0"
+assert_contains "Overwrites: $C" "$OUT" "the prompt names the checkout"
+assert_equals "moved" "$(cat "$C/defaults/file")" "the checkout is restored"
+
+# A DOTFILES_DIR that holds the home would let the bundle reaching into
+# ~/.ssh through.
+test_start "import_refuses_a_dotfiles_dir_holding_the_home"
+for d in "$H" "$H/" / relative/dotfiles; do
+  in_sandbox env DOTFILES_DIR="$d" bash "$ENTRY" import "$WORK/evil.tar.zst" --yes
+  assert_equals "1" "$RC" "DOTFILES_DIR=$d is refused"
+  assert_contains "must be an absolute path" "$OUT" "the refusal for $d says why"
+done
+assert_equals "mine" "$(cat "$H/.ssh/authorized_keys")" "nothing outside is written"
+
 test_start "import_refuses_another_homes_bundle"
 H="$WORK/other"
 mkdir -p "$H"

@@ -187,7 +187,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot chaos` (retired: exits 127 naming `dot doctor`) | --force (deletes its three targets, plants a broken symlink, spares the rest) | `test_fm_chaos_force` | `help:chaos` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot teleport` → `dot fleet push` | user@host | `test_fm_smoke_teleport` | `help:fleet` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | **smoke** — opens an SSH session to a remote host (network) |
 | `dot teleport` → `dot fleet push` | (no host, exit 1) | `test_fm_teleport_usage` | `run:teleport-usage` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
-| `dot bundle` → `dot config export` | [output-dir] | `test_fm_smoke_bundle` | `help:config` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — archives ~/.dotfiles plus tool caches with zstd (hundreds of MB, minutes) |
+| `dot bundle` → `dot config export` | [output-dir] | `test_fm_smoke_bundle` | `help:config` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — archives the checkout plus tool caches with zstd (hundreds of MB, minutes) |
 | `dot secret-audit` → `dot secret check` | (default) | `test_fm_secret_audit` | `run:secret-audit` | `examples/example-dot-diagnostics.sh` | `docs/manual/command-index.md` | regression |
 | `dot metrics` → `dot doctor metric list` | [count] | `test_fm_metrics` | `run:metrics` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot metrics` → `dot doctor metric list` | (no metrics recorded yet) | `test_fm_metrics_empty` | `help:doctor` | `examples/example-dot-diagnostics.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
@@ -575,7 +575,7 @@ hunted through the table.
 | `dot health` → `dot doctor status` | --fix / -f, --force / -F | --fix re-applies chezmoi and rewrites shell configs in $HOME |
 | `dot load-bench-pty` → `dot doctor perf --ready --pty` | (default) | needs the chezmoi-rendered dot-load-benchmark-pty template and a pseudo-terminal |
 | `dot teleport` → `dot fleet push` | user@host | opens an SSH session to a remote host (network) |
-| `dot bundle` → `dot config export` | [output-dir] | archives ~/.dotfiles plus tool caches with zstd (hundreds of MB, minutes) |
+| `dot bundle` → `dot config export` | [output-dir] | archives the checkout plus tool caches with zstd (hundreds of MB, minutes) |
 | `dot ai` | (default cockpit TUI) | launches the Bubble Tea cockpit / gum launcher (interactive TTY) |
 | `dot ai tools` | install (alias of ai install) | installs AI CLIs through mise/native installers (network, mutates $HOME) |
 | `dot ai run` | "<prompt>" one-shot on Claude | performs a paid LLM round-trip (network) |

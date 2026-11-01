@@ -3,8 +3,8 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Restore an offline bundle written by `dot config export` (bundle.sh).
 #
-# The bundle holds ~/.dotfiles, ~/.config/chezmoi and ~/.local/share/mise
-# under their absolute paths. A bundle any member of which lies elsewhere
+# The bundle holds the checkout (DOTFILES_DIR, else ~/.dotfiles),
+# ~/.config/chezmoi and ~/.local/share/mise under their absolute paths. A bundle any member of which lies elsewhere
 # (another home, the Nix store, a `..` component) is refused whole. It is
 # extracted relative to / without -P, so tar keeps its own guards against
 # `..` and extraction through symlinks.
@@ -21,9 +21,10 @@ usage() {
   cat <<'EOF'
 Usage: dot config import <bundle.tar.zst> [--yes|-y]
 
-Restore a bundle written by `dot config export`. It overwrites
-~/.dotfiles, ~/.config/chezmoi and ~/.local/share/mise with the copies
-the bundle holds. Asks first; --yes restores without asking.
+Restore a bundle written by `dot config export`. It overwrites the
+checkout (DOTFILES_DIR, else ~/.dotfiles), ~/.config/chezmoi and
+~/.local/share/mise with the copies the bundle holds. Asks first; --yes
+restores without asking.
 EOF
 }
 
@@ -60,10 +61,20 @@ _refuse() {
   exit 1
 }
 
+# _checkout: CHECKOUT, the checkout import may overwrite: DOTFILES_DIR, else
+# ~/.dotfiles. One that is relative, or holds the home itself (/, $HOME),
+# would let a bundle write anywhere in it, so it is refused.
+_checkout() {
+  CHECKOUT="${DOTFILES_DIR:-$HOME/.dotfiles}"
+  CHECKOUT="${CHECKOUT%/}"
+  [[ "$CHECKOUT" == /* && "$HOME/" != "$CHECKOUT/"* ]] ||
+    _refuse "DOTFILES_DIR ($DOTFILES_DIR) must be an absolute path that does not hold the home ($HOME)"
+}
+
 # _check_members: every member of the bundle lies under one of the paths
 # export writes; prints the ones the bundle holds, one per line.
 _check_members() {
-  awk -v a="$HOME/.dotfiles" -v b="$HOME/.config/chezmoi" -v c="$HOME/.local/share/mise" '
+  awk -v a="$CHECKOUT" -v b="$HOME/.config/chezmoi" -v c="$HOME/.local/share/mise" '
     function under(n, r) { return n == r || index(n, r "/") == 1 }
     {
       n = $0
@@ -107,7 +118,8 @@ _restore() {
   ui_info "Next" "dot config apply"
 }
 
-ROOTS=""
+ROOTS="" CHECKOUT=""
 _parse_args "$@"
+_checkout
 _read_bundle
 _restore
