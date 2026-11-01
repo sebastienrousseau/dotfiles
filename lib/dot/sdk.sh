@@ -5,8 +5,8 @@
 # The plugin SDK, v1 (P2.2): everything a bundled plugin may load from the
 # host. A plugin sources "$DOT_SDK/sdk.sh" (bin/dot exports DOT_SDK, this
 # directory) and, when it needs them, the other SDK files beside it:
-# ui.sh, log.sh, platform.sh, preflight.sh, probe.sh, verified-download.sh
-# and ai-roster.sh. tools/ci/check-plugin-imports.py fails a plugin
+# ui.sh, log.sh, platform.sh, preflight.sh, probe.sh, verified-download.sh,
+# ai-roster.sh and lock.sh. tools/ci/check-plugin-imports.py fails a plugin
 # that sources anything else outside its own directory.
 #
 # This file loads ui.sh, platform.sh and preflight.sh, and defines the

@@ -20,7 +20,7 @@
 # fragments reads lib/dot/data/commands.txt, the generated merge of the
 # bundled fragments, which the build tools read too.
 _DOT_TABLE=""
-_DOT_TABLE_FORMAT="dot-cli-table/1"
+_DOT_TABLE_FORMAT="dot-cli-table/2"
 
 # _dot_table_fragments SRC: set _DOT_FRAGS to SRC's fragments, groups first,
 # then the plugins in byte order; false when SRC has none.
@@ -148,13 +148,30 @@ _dot_longest() {
 }
 
 # _dot_built WORD...: the longest built spelling (cmd or run) the words start
-# with, in _BEST and _BEST_LEN.
+# with, in _BEST and _BEST_LEN. When a cmd record wins, _CMD_KEY is its
+# spelling and _CMD_EFFECT its effect (N16), which decide its lock (N17).
 _dot_built() {
-  local best="" len=0
+  local best="" len=0 key="" effect=""
+  _CMD_KEY="" _CMD_EFFECT=""
   _dot_longest cmd "$@"
   best="$_BEST" len="$_BEST_LEN"
+  if ((len > 0)); then
+    key="${*:1:len}"
+    _dot_record cmd "$key"
+    effect="${_REC#*|}" effect="${effect%%|*}"
+  fi
   _dot_longest run "$@"
-  ((len > _BEST_LEN)) && _BEST="$best" _BEST_LEN="$len"
+  if ((len > _BEST_LEN)); then
+    _BEST="$best" _BEST_LEN="$len" _CMD_KEY="$key" _CMD_EFFECT="$effect"
+  fi
+  return 0
+}
+
+# _dot_lock_domain DOMAIN: set _DOT_LOCK_DOMAIN to DOMAIN when the command
+# _dot_built chose is a write or destructive one with no nolock record.
+_dot_lock_domain() {
+  case "$_CMD_EFFECT" in write | destructive) ;; *) return 0 ;; esac
+  _dot_record nolock "$_CMD_KEY" || _DOT_LOCK_DOMAIN="$1"
   return 0
 }
 
@@ -299,6 +316,7 @@ _dot_spelled() {
   if [[ -n "$_RUN" ]]; then
     # shellcheck disable=SC2206 # a route and its leading arguments
     _ARGV=($_RUN "${@:$((_RUN_USED + 1))}")
+    [[ "$_NAME_KIND" != dom ]] || _dot_lock_domain "$1"
     return 0
   fi
   _dot_stop_unbuilt "$@"
@@ -322,7 +340,7 @@ _dot_entry_rest() {
 # _dot_names WORD...: the command line bin/dot should route; no command
 # at all shows the overview. Sets _ARGV.
 _dot_names() {
-  _NAME_KIND="" _NAME_WAS=""
+  _NAME_KIND="" _NAME_WAS="" _DOT_LOCK_DOMAIN=""
   _dot_gnu_flags "$@"
   set -- "${_ARGV[@]}"
   if [[ -z "$1" ]]; then

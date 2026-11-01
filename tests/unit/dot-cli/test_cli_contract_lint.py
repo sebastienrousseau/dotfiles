@@ -120,6 +120,11 @@ class Manifests(Fixture):
         self.edit("config", 'verb = "uninstall"\neffect = "destructive"', 'verb = "uninstall"\neffect = "write"')
         self.assertFails("always confirms")
 
+    def test_only_a_write_command_skips_the_lock(self):
+        self.edit("config", 'verb = "uninstall"\neffect = "destructive"',
+                  'verb = "uninstall"\neffect = "destructive"\nlock = false')
+        self.assertFails("only a write command can opt out of the domain lock")
+
     def test_output_id_carries_the_domain(self):
         self.edit("mcp", 'summary = "Configured MCP servers"', 'summary = "x"\noutput = "fleet/list.v1"')
         self.assertFails("must start with 'mcp/'")

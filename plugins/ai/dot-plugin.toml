@@ -57,6 +57,7 @@ summary = "List the pins with a newer release; change nothing"
 [[commands]]
 verb = "start"
 effect = "write"
+lock = false
 summary = "Start an agent"
 
 [commands.args]
@@ -66,6 +67,7 @@ values = ["claude", "codex", "copilot", "goose", "crush", "amp", "cursor-agent",
 [[commands]]
 verb = "run"
 effect = "write"
+lock = false
 summary = "Run an agent once"
 
 [[commands.flags]]
@@ -87,6 +89,7 @@ summary = "Run the gateway in the foreground"
 [[commands]]
 verb = "login"
 effect = "write"
+lock = false
 summary = "Authenticate an agent"
 
 [[commands]]
@@ -135,6 +138,7 @@ summary = "One prompt pattern"
 object = "pattern"
 verb = "edit"
 effect = "write"
+lock = false
 summary = "Edit a prompt pattern"
 
 [[aliases]]

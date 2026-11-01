@@ -41,3 +41,4 @@ alias|profile|removed|config profile|0.2.538
 alias|sandbox|removed|config apply --sandbox|0.2.538
 alias|bundle|removed|config export|0.2.538
 alias|lint|removed|config check|0.2.538
+nolock|config edit||

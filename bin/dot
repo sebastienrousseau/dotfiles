@@ -370,12 +370,24 @@ _dispatch_entry() {
   exit 1
 }
 
+# _dot_take_lock ARGS...: a write or destructive command holds its domain's
+# lock until it exits (ADR-020 N17; lib/dot/lock.sh), or exits 75 when
+# another holds it. Help never locks.
+_dot_take_lock() {
+  [[ -n "${_DOT_LOCK_DOMAIN:-}" ]] || return 0
+  ! _has_help_flag "$@" || return 0
+  # shellcheck source=../lib/dot/lock.sh
+  source "$_SOURCE_DIR/lib/dot/lock.sh"
+  dot_lock "$_DOT_LOCK_DOMAIN" || exit $?
+}
+
 # _dot_set_route ARGS...: the resolver names a plugin entry as @<domain>; it
 # runs now, or shows the domain's help when asked (see below). Anything else
 # sets `route`. `|| true` is intentional: an unknown command yields an empty
 # route, which falls through the case below into the user-command path that
 # emits the proper error.
 _dot_set_route() {
+  _dot_take_lock "$@"
   if [[ "$COMMAND" != @* ]]; then
     route="$(_dot_command_route "$COMMAND" || true)"
     return 0

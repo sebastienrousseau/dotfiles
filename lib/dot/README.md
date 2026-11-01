@@ -37,6 +37,7 @@ and adds the host-only helpers.
 | `log.sh` (SDK) | `dot_log`, `dot_metric`, `dot_jsonl_append`, `dot_agent_session_log`, `log_info/warn/error/success` shims |
 | `preflight.sh` (SDK) | Consent and prerequisites for commands that change the machine |
 | `probe.sh` (SDK) | `dot_probe`: run a query of another tool with a time limit |
+| `lock.sh` (SDK) | `dot_lock`: hold a domain's lock (ADR-020 N17); bin/dot takes it for every write or destructive command, and a second run exits 75 or waits `DOT_LOCK_WAIT` seconds |
 | `verified-download.sh` (SDK) | Checksum-verified downloads for installer and provisioning scripts |
 | `ai-roster.sh` (SDK) | `ai_roster_bin`, `ai_roster_package`, `ai_roster_login` and the other lookups over the AI roster (`data/ai-roster.sh`, generated from `plugins/ai/roster.toml`), which the ai plugin and `dot doctor` both read |
 

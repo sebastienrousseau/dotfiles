@@ -95,7 +95,8 @@
      "spelling": "agent run",
      "effect": "write",
      "summary": "Run an agent task",
-     "built": true
+     "built": true,
+     "lock": false
     },
     {
      "spelling": "agent suspend",
@@ -185,7 +186,8 @@
      "spelling": "agent delegate run",
      "effect": "write",
      "summary": "Run a command as a delegate",
-     "built": true
+     "built": true,
+     "lock": false
     },
     {
      "spelling": "agent context check",
@@ -203,7 +205,8 @@
      "spelling": "agent mode run",
      "effect": "write",
      "summary": "Run a command under a mode",
-     "built": true
+     "built": true,
+     "lock": false
     },
     {
      "spelling": "agent card check",
@@ -306,7 +309,8 @@
        "qwen",
        "zai"
       ]
-     }
+     },
+     "lock": false
     },
     {
      "spelling": "ai run",
@@ -343,7 +347,8 @@
        "qwen",
        "zai"
       ]
-     }
+     },
+     "lock": false
     },
     {
      "spelling": "ai gateway serve",
@@ -355,7 +360,8 @@
      "spelling": "ai login",
      "effect": "write",
      "summary": "Authenticate an agent",
-     "built": true
+     "built": true,
+     "lock": false
     },
     {
      "spelling": "ai check",
@@ -403,7 +409,8 @@
      "spelling": "ai pattern edit",
      "effect": "write",
      "summary": "Edit a prompt pattern",
-     "built": true
+     "built": true,
+     "lock": false
     }
    ],
    "aliases": [
@@ -741,7 +748,8 @@
      "spelling": "config edit",
      "effect": "write",
      "summary": "Open a managed file in $EDITOR",
-     "built": true
+     "built": true,
+     "lock": false
     },
     {
      "spelling": "config add",
@@ -2261,7 +2269,8 @@
      "spelling": "ui run",
      "effect": "write",
      "summary": "Run a command with progress",
-     "built": false
+     "built": false,
+     "lock": false
     },
     {
      "spelling": "ui table show",

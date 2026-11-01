@@ -118,7 +118,14 @@ and a destructive one asks first (`ShouldProcess`).
   (read only).
 - Locking (N17): `write` and `destructive` commands take a per-domain lock
   in `$XDG_STATE_HOME/dot/<domain>/lock`, and a second run waits or exits 75
-  with the holder's PID.
+  with the holder's PID. bin/dot takes it before the command runs
+  (`lib/dot/lock.sh`): a symlink naming the holder's PID, held until that
+  process exits, so a crash leaves a stale link the next run takes over.
+  It waits `DOT_LOCK_WAIT` seconds (default 0) before exiting 75, and a
+  `dot` command run by one holding the lock does not wait on its parent. A
+  `write` command that runs the user's own process (an agent session, an
+  editor) declares `lock = false`: it would otherwise hold the domain for
+  as long as that process runs.
 
 ### Manifest v1
 
