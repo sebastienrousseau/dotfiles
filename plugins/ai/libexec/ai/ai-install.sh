@@ -62,17 +62,19 @@ _ai_version_newer() {
   }'
 }
 
-# _ai_latest <package>: the newest release as mise resolves it, honouring
-# minimum_release_age. A short name is resolved through the backend mise
-# installs it with: `mise latest opencode` follows the registry's first
-# backend (npm:@opencode/cli, a separate 2.x line), not the aqua build pinned.
-# Plugin backends (asdf:kiro-cli) are looked up by the short name: mise
-# reports "plugin not installed" for their backend name.
+# _ai_latest <package> <pinned>: the newest release on the pinned major as
+# mise resolves it, honouring minimum_release_age. A new major is a migration
+# to choose, not a pin bump: anomalyco/opencode tags its separate v2 product
+# above the 1.x line pinned, and GitHub never marks v2 latest. A short name
+# is resolved through the backend mise installs it with: `mise latest
+# opencode` follows the registry's first backend (npm:@opencode/cli), not
+# the aqua build pinned. Plugin backends (asdf:kiro-cli) are looked up by
+# the short name: mise reports "plugin not installed" for their backend name.
 _ai_latest() {
-  local backend=""
+  local backend="" major="${2#v}"
   [[ "$1" == *:* ]] || backend="$(mise tool --backend "$1" 2>/dev/null || true)"
   case "$backend" in asdf:* | vfox:* | "") backend="$1" ;; esac
-  mise latest "$backend" 2>/dev/null || true
+  mise latest "$backend${major:+@${major%%.*}}" 2>/dev/null || true
 }
 
 # ai_pin_bumps: for `dot system update`, each pinned AI CLI with a newer
@@ -86,7 +88,7 @@ ai_pin_bumps() {
   command -v mise >/dev/null 2>&1 || return 0
   while IFS= read -r pkg; do
     pinned="$(_ai_pinned_version "$pkg")"
-    latest="$(_ai_latest "$pkg")"
+    latest="$(_ai_latest "$pkg" "$pinned")"
     if [[ -n "$latest" ]] && _ai_version_newer "$latest" "$pinned"; then
       printf '%s %s -> %s\n' "$pkg" "$pinned" "$latest"
     fi
