@@ -45,6 +45,7 @@
           "effect": { "enum": ["read", "write", "destructive"] },
           "legacy": { "$ref": "#/$defs/legacy" },
           "planned": { "const": true, "description": "Declared but not built yet, in a plugin with an entry" },
+          "lock": { "const": false, "description": "A write command that runs the user's own process (an agent session, an editor) takes no domain lock (N17)" },
           "summary": { "$ref": "#/$defs/summary" },
           "output": { "type": "string", "pattern": "^[a-z]{2,8}/[a-z][a-z0-9-]*\\.v[0-9]+$", "description": "Schema id of the --json output (N13, N14)" },
           "flags": {

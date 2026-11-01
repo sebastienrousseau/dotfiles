@@ -9,3 +9,4 @@ cmd|ui show||read|The primitives on offer
 cmd|ui select||read|Interactive picker for scripts
 cmd|ui run||write|Run a command with progress
 cmd|ui table show||read|Render rows as a table
+nolock|ui run||

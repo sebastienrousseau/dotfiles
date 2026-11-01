@@ -36,3 +36,6 @@ cmd|agent mode run|@agent mode run|write|Run a command under a mode
 cmd|agent card check|@agent card check|read|Check the card against the A2A spec
 alias|mode|removed|agent mode|0.2.538
 alias|agents|removed|agent context|0.2.538
+nolock|agent run||
+nolock|agent delegate run||
+nolock|agent mode run||

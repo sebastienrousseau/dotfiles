@@ -28,6 +28,7 @@ summary = "Interactive picker for scripts"
 [[commands]]
 verb = "run"
 effect = "write"
+lock = false
 summary = "Run a command with progress"
 
 [[commands]]
