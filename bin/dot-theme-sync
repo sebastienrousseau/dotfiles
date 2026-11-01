@@ -490,13 +490,17 @@ _theme_chezmoi_apply() {
 
 # Regenerate only theme-dependent config files via chezmoi.
 # Much faster than a full apply — just renders the templates that use $t.
-# _theme_chezmoi_target TARGET: true when the targeted apply renders it: a
-# chezmoi-owned file that exists (niri has its own step), or the palette
-# contract, applied even before it first exists because the AI theme
-# adapter reads it next.
+# _theme_chezmoi_target TARGET MANAGED: true when the targeted apply renders
+# it: a file chezmoi manages on this host (MANAGED is the newline-separated
+# `chezmoi managed` list) that exists (niri has its own step), or the palette
+# contract, applied even before it first exists because the AI theme adapter
+# reads it next. A file left behind after .chezmoiignore dropped it (waybar on
+# macOS) exists but is unmanaged, and chezmoi rejects it.
 _theme_chezmoi_target() {
   _theme_target_adapter "$1"
-  [[ "$THEME_TARGET_ADAPTER" == chezmoi && "$1" != "$HOME/.config/niri/config.kdl" && (-f "$1" || "$1" == "$PALETTE_FILE") ]]
+  [[ "$THEME_TARGET_ADAPTER" == chezmoi && "$1" != "$HOME/.config/niri/config.kdl" ]] || return 1
+  [[ -f "$1" || "$1" == "$PALETTE_FILE" ]] || return 1
+  [[ $'\n'"$2"$'\n' == *$'\n'"$1"$'\n'* ]]
 }
 
 apply_theme_configs() {
@@ -509,9 +513,13 @@ apply_theme_configs() {
   # --force skips interactive "file has changed" prompts; &>/dev/null
   # suppresses the prompt text that leaks onto stdout.
   local valid_targets=()
-  local target
+  local target managed
+  if ! managed="$(chezmoi managed --include files --path-style absolute 2>>"${THEME_TXN_OPERATION_DIR:?}/chezmoi.log")"; then
+    _err "Chezmoi" "could not list managed files; diagnostics: $THEME_TXN_OPERATION_DIR/chezmoi.log"
+    return 1
+  fi
   while IFS= read -r target; do
-    _theme_chezmoi_target "$target" && valid_targets+=("$target")
+    _theme_chezmoi_target "$target" "$managed" && valid_targets+=("$target")
   done < <(theme_transaction_targets | awk '!seen[$0]++')
 
   local applied_count=0
