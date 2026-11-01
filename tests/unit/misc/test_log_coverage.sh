@@ -46,6 +46,20 @@ DOT_LOG_DOMAIN="Theme" lib "$WORK/dn/state" 'dot_log info e' >/dev/null
 assert_equals "cli" "$(ls "$WORK/dn/state/dot")" "only the cli log is written"
 assert_equals "no" "$([[ -e "$WORK/dn/escape" || -e "$WORK/escape" ]] && echo yes || echo no)" "nothing is written outside the state dir"
 
+test_start "readers_refuse_a_domain_that_is_not_a_name"
+mkdir -p "$WORK/rd/dot/cli" "$WORK/rd/escape"
+printf '{"event":"secret_x"}\n' >"$WORK/rd/escape/log.jsonl"
+out="$(lib "$WORK/rd" 'dot_log_path ../escape; echo "path=$?"; dot_log_tail ../escape 5 secret_; echo "tail=$?"')"
+assert_equals $'path=64\ntail=64' "$out" "dot_log_path and dot_log_tail return 64 and read nothing outside"
+
+test_start "prune_says_so_when_date_cannot_compute_the_cutoff"
+mkdir -p "$WORK/olddate"
+printf '#!/bin/sh\nexit 1\n' >"$WORK/olddate/date"
+chmod +x "$WORK/olddate/date"
+out="$(PATH="$WORK/olddate:/usr/bin:/bin" lib "$S" 'dot_log_prune; echo "rc=$?"')"
+assert_contains "the logs were not pruned" "$out" "a date without -d or -v is reported"
+assert_contains "rc=1" "$out" "and prune fails, so the maintenance step shows it"
+
 test_start "debug_events_need_verbose_or_a_level"
 lib "$WORK/lv" 'dot_log debug d1' >/dev/null
 DOT_VERBOSE=1 lib "$WORK/lv" 'dot_log debug d2' >/dev/null

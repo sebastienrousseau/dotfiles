@@ -35,5 +35,9 @@ rotate_installer_log() {
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 # shellcheck source=../../lib/dot/log.sh
 source "$ROOT/lib/dot/log.sh"
-dot_log_prune
+# A prune that fails (no usable date) still lets the installer log rotate;
+# the step then reports the failure.
+rc=0
+dot_log_prune || rc=1
 rotate_installer_log
+exit "$rc"

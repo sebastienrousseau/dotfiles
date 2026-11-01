@@ -43,8 +43,10 @@ dot_jsonl_append() {
   { printf '%s\n' "$2"; } 2>/dev/null >>"$_DOT_LOG_STATE_DIR/$1" || true
 }
 
-# dot_log_path DOMAIN: where DOMAIN's log.v1 events go.
+# dot_log_path DOMAIN: where DOMAIN's log.v1 events go; 64 for a DOMAIN
+# that is not a plain name, which could otherwise climb out with `..`.
 dot_log_path() {
+  [[ "$1" =~ ^[a-z][a-z0-9-]*$ ]] || return 64
   printf '%s/dot/%s/log.jsonl\n' "${XDG_STATE_HOME:-$HOME/.local/state}" "$1"
 }
 
@@ -109,7 +111,7 @@ dot_log() {
 # DOMAIN's log, those whose event starts with EVENT_PREFIX when given.
 dot_log_tail() {
   local file
-  file="$(dot_log_path "$1")"
+  file="$(dot_log_path "$1")" || return 64
   [[ -f "$file" ]] || return 0
   grep -F "\"event\":\"${3:-}" "$file" 2>/dev/null | tail -n "${2:-20}" || true
 }
@@ -119,8 +121,11 @@ dot_log_tail() {
 dot_log_prune() {
   local days="${1:-${DOT_LOG_RETENTION_DAYS:-30}}" cutoff file
   [[ "$days" =~ ^[0-9]+$ ]] || return 64
-  cutoff="$(date -u -d "-$days days" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null ||
-    date -u -v"-${days}d" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null)" || return 0
+  if ! cutoff="$(date -u -d "-$days days" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null ||
+    date -u -v"-${days}d" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null)"; then
+    echo "dot_log_prune: this date understands neither -d nor -v; the logs were not pruned" >&2
+    return 1
+  fi
   for file in "${XDG_STATE_HOME:-$HOME/.local/state}"/dot/*/log.jsonl; do
     [[ -f "$file" ]] || continue
     if awk -v c="\"time\":\"$cutoff\"" '{ i = index($0, "\"time\":\""); if (!i || substr($0, i, length(c)) >= c) print }' \
@@ -146,7 +151,7 @@ dot_metrics_summary() {
   done
   if ((${#files[@]} == 0)) || ! grep -qF '"event":"metric"' "${files[@]}"; then
     echo "No metrics collected yet."
-    echo "Metrics are logged to: $(dot_log_path '<domain>')"
+    echo "Metrics are logged to: ${XDG_STATE_HOME:-$HOME/.local/state}/dot/<domain>/log.jsonl"
     return 0
   fi
   # Stable sort on the time field (the 8th "-separated one), so records of
