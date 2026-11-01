@@ -12,6 +12,13 @@ source "$SCRIPT_DIR/../../framework/mocks.sh"
 
 DOT_CLI="$REPO_ROOT/bin/dot"
 
+# Write commands (`config add`, `tool new`) take a lock under
+# $XDG_STATE_HOME/dot/<domain>; keep it out of the real state dir, where
+# a parallel run or the user's own dot command would see it busy.
+XDG_STATE_HOME="$(mktemp -d)"
+export XDG_STATE_HOME
+trap 'rm -rf "$XDG_STATE_HOME"' EXIT
+
 echo "Testing dot CLI entry point..."
 
 # Test: dot CLI file exists
