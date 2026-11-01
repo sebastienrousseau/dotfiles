@@ -3,7 +3,9 @@ name: Pages
 # Builds and deploys the docs/ site to GitHub Pages (custom domain:
 # doc.dotfiles.io) with ssg and the vendored Lucid theme
 # (tools/docs/build-site.sh: the docs pages, the landing page and the manual
-# under /manual/, with every internal link checked). The repo's Pages settings have
+# under /manual/, with every internal link checked, and the sitemap and
+# hreflang alternates checked against the built pages). Pull requests that
+# touch the site build it only; pushes to main also deploy. The repo's Pages settings have
 # build_type=workflow, so this is the canonical deploy path — no
 # Jekyll-on-source-branch fallback.
 #
@@ -20,6 +22,14 @@ on:
       - 'docs/**'
       - 'tools/docs/build-site.sh'
       - 'tools/docs/build-manual-site.*'
+      - 'tools/docs/finalize-site.py'
+      - '.github/workflows/pages.yml'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'tools/docs/build-site.sh'
+      - 'tools/docs/build-manual-site.*'
+      - 'tools/docs/finalize-site.py'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -30,8 +40,9 @@ permissions:
 
 # Allow only one concurrent deployment, but don't cancel in-progress
 # runs — Pages publishes are idempotent and we want each push handled.
+# Pull-request builds get their own group so they never queue a deploy.
 concurrency:
-  group: pages
+  group: ${{ github.event_name == 'pull_request' && format('pages-pr-{0}', github.ref) || 'pages' }}
   cancel-in-progress: false
 
 jobs:
@@ -54,8 +65,8 @@ jobs:
 
       - name: Install ssg (pinned release, SHA-256 verified)
         env:
-          SSG_VERSION: 0.0.63
-          SSG_SHA256: b8402ae9bb7a4443e30a4926f067b40feb89477f70a4c9a9d062622bab86ae36
+          SSG_VERSION: 0.0.72
+          SSG_SHA256: 948b9372c1e35735af1c8a5c5bb95ada6867df919c3302bbceaaa67e51453c6c
         run: |
           set -euo pipefail
           asset="ssg-v${SSG_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
@@ -71,12 +82,14 @@ jobs:
         run: bash tools/docs/build-site.sh --out site
 
       - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: ./site
 
   deploy:
     name: Deploy to Pages
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 5

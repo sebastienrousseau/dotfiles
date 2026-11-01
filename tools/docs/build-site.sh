@@ -70,8 +70,9 @@ EOF
 bash "$REPO_ROOT/tools/docs/build-manual-site.sh" --out "$work/out/manual"
 
 # Heading ids, then one link check across the whole site: docs pages,
-# the landing page and the manual.
-python3 "$builder" finalize "$work/out" "/"
+# the landing page and the manual. Then the favicon.ico, the sitemap of
+# canonical page URLs, and no per-page sitemap or robots.txt.
+python3 "$REPO_ROOT/tools/docs/finalize-site.py" "$work/out" "$SITE_URL"
 # The custom-domain CNAME, and the module registry index `dot registry`
 # fetches from the site root (with its minisign signature once one exists).
 cp "$REPO_ROOT"/docs/{CNAME,registry.json*} "$work/out/"
