@@ -621,7 +621,7 @@ test_fm_agent_log() {
   fm_run agent log
   fm_expect_rc 0
   test_start "fm_agent_log_tails_the_session_log"
-  fm_expect_out_matches '"event":"current"'
+  fm_expect_out_matches '"event":"session_current"'
   test_start "fm_agent_log_count_argument"
   fm_run agent log 5
   fm_expect_rc 0

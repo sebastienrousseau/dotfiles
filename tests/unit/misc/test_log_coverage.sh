@@ -40,6 +40,27 @@ assert_file_contains "$S/dot/cli/log.jsonl" '"data":{"a":"1","b":"2"}}' "and its
 assert_file_contains "$S/dot/theme/log.jsonl" '"event":"themed"' "DOT_LOG_DOMAIN picks the domain's log"
 assert_equals "$S/dot/fleet/log.jsonl" "$(lib "$S" 'dot_log_path fleet')" "dot_log_path names a domain's log"
 
+test_start "a_domain_that_is_not_a_name_logs_to_cli"
+DOT_LOG_DOMAIN="../../escape" lib "$WORK/dn/state" 'dot_log info e' >/dev/null
+DOT_LOG_DOMAIN="Theme" lib "$WORK/dn/state" 'dot_log info e' >/dev/null
+assert_equals "cli" "$(ls "$WORK/dn/state/dot")" "only the cli log is written"
+assert_equals "no" "$([[ -e "$WORK/dn/escape" || -e "$WORK/escape" ]] && echo yes || echo no)" "nothing is written outside the state dir"
+
+test_start "debug_events_need_verbose_or_a_level"
+lib "$WORK/lv" 'dot_log debug d1' >/dev/null
+DOT_VERBOSE=1 lib "$WORK/lv" 'dot_log debug d2' >/dev/null
+DOT_VERBOSE=1 DOT_LOG_LEVEL=warn lib "$WORK/lv" 'dot_log info d3' >/dev/null
+assert_equals "d2" "$(grep -o '"event":"d[0-9]"' "$WORK/lv/dot/cli/log.jsonl" | cut -d'"' -f4 | tr '\n' ' ' | sed 's/ $//')" \
+  "debug is written with -v (DOT_VERBOSE) only, and DOT_LOG_LEVEL overrides -v"
+
+test_start "values_are_escaped_and_control_bytes_dropped"
+out="$(lib "$S" $'dot_log_record info e \'q=say "hi"\' \'b=a\\b\' "nl=one\ntwo" "ctl=a\x01b\x1fc"')"
+assert_contains '"q":"say \"hi\""' "$out" "quotes are escaped"
+assert_contains '"b":"a\\b"' "$out" "backslashes are escaped"
+assert_contains '"nl":"one\ntwo"' "$out" "newlines become \\n"
+assert_contains '"ctl":"abc"' "$out" "other control bytes are dropped"
+assert_equals "1" "$(printf '%s\n' "$out" | wc -l | tr -d ' ')" "and the record stays one line"
+
 test_start "json_stdout_log"
 out="$(DOTFILES_JSON_LOG=1 DOT_COMMAND=cov lib "$S" 'dot_log warn thing k=v x=y')"
 assert_contains '"level":"warn","domain":"cli","event":"thing","command":"cov","trace_id":"trace42"' "$out" "JSON line emitted"

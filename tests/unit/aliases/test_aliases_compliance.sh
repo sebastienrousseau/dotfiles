@@ -34,7 +34,8 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
 
-# audit_fn (dot-audit) shows the logs dot actually writes, every domain's
+# audit_fn (dot-audit, aliases/compliance/compliance.aliases.sh) shows the
+# logs dot actually writes, every domain's
 # $XDG_STATE_HOME/dot/<domain>/log.jsonl (log.v1) merged in time order, and
 # falls back to git history.
 WORK="$(mktemp -d)"
