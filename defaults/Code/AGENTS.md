@@ -159,6 +159,20 @@ starting the requested work.
      pull request in the user's own repository is ordinary work; merging it
      is not (§4).
 
+9. **Always build sites with the latest `ssg`.**
+   - Every site or manual built with `ssg` (Shokunin) is built, locally and
+     in CI, with the latest released version (`cargo install ssg --locked`,
+     or `mise use -g cargo:ssg@latest`). A CI pin, a cache key or a
+     `cargo install --version` names that latest version, and moves up
+     whenever a newer one ships.
+   - Never pin, install or downgrade to an older `ssg` to reproduce CI or
+     to get a build through. If the latest version breaks the build, fix
+     the repository forward in the same change: the templates, the
+     post-processing scripts, and the CI pin together (§1.7).
+   - The one exception stays the one in §7.1.3: a site whose committed
+     output the current generator can no longer rebuild is deployed
+     unchanged until its port, which is its own reviewed change.
+
 ---
 
 ## 2. Definition of Done (Verification Gates)
