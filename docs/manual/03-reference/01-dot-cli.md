@@ -495,7 +495,7 @@ dot config export <dir>      # writes the bundle into <dir>
 
 The bundle holds `~/.dotfiles`, `~/.config/chezmoi` and `~/.local/share/mise` (plus the Nix store when `DOTFILES_BUNDLE_NIX=1`). It leaves out the age key (any file in `~/.config/chezmoi` with an `AGE-SECRET-KEY` line) and names it, for you to copy separately. It needs `tar` and `zstd`. To restore on another machine, unpack it with `tar --zstd -xf <bundle> -P`, then run `cd ~/.dotfiles && ./install.sh --force`.
 
-`dot config import <bundle> [--yes|-y]` restores a bundle on a machine that already has `dot`: it names the paths it will overwrite and asks first (`--yes` skips the question, and without a terminal it restores nothing). It refuses a file that is not a `dot config export` bundle, or one holding anything outside `~/.dotfiles`, `~/.config/chezmoi` and `~/.local/share/mise` of the current home (so a bundle made under another home, or with the Nix store, is refused: unpack those with `tar`).
+`dot config import <bundle> [--yes|-y]` restores a bundle on a machine that already has `dot`: it names the paths it will overwrite and asks first (`--yes` skips the question, and without a terminal it restores nothing). It refuses a file that is not a `dot config export` bundle, or one holding anything outside the checkout (`$DOTFILES_DIR`, else `~/.dotfiles`), `~/.config/chezmoi` and `~/.local/share/mise` of the current home (so a bundle made under another home, or with the Nix store, is refused: unpack those with `tar`).
 
 ### `dot tool list --packages`
 
