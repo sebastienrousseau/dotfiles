@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.io/schemas/cli/agent-event.v1.schema.json",
+  "title": "dot agent event v1 (an agent session's last state)",
+  "description": "Written by `dot cli hook run` (plugins/cli/libexec/hook.sh) to $XDG_STATE_HOME/dot/agents/<agent>/<session>.json and sent as a datagram to $XDG_RUNTIME_DIR/dot/agent-events.sock. Read by dot top and dot session. Metadata only: never the prompt, tool input or tool output.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "time", "agent", "session", "state", "event", "cwd"],
+  "properties": {
+    "schema": { "const": "cli/agent-event.v1" },
+    "time": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$", "description": "UTC, to the second" },
+    "agent": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$", "description": "The roster id of the agent whose hook fired" },
+    "session": { "type": "string", "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]{0,127}$", "description": "The agent's own session id" },
+    "state": {
+      "enum": ["running", "blocked", "idle", "error", "gone"],
+      "description": "running: working on a prompt; blocked: waiting for the user (a permission or a question); idle: done, waiting for a prompt; error: the turn failed; gone: the session ended"
+    },
+    "event": { "type": "string", "minLength": 1, "description": "The hook event the state came from (UserPromptSubmit, Notification, Stop...)" },
+    "cwd": { "type": "string", "description": "The session's working directory, as the agent reported it; empty when it did not" }
+  }
+}

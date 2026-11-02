@@ -5,7 +5,7 @@
 # dot-cli: the entry of the cli plugin (ADR-020 N2). bin/dot runs it with the
 # words after `dot cli`, one of the spellings its manifest declares as built;
 # each becomes the subcommand of libexec/registry.sh or libexec/completion.sh
-# that implements it.
+# that implements it, or libexec/hook.sh (dot cli hook).
 
 set -euo pipefail
 
@@ -24,6 +24,8 @@ cli_object() {
     "completion show") exec bash "$_CLI_DIR/libexec/completion.sh" completion "${@:3}" ;;
     "registry show") cli_registry url "${@:3}" ;;
     "registry set") cli_registry set-url "${@:3}" ;;
+    "hook run") exec bash "$_CLI_DIR/libexec/hook.sh" "${@:3}" ;;
+    "hook status") exec bash "$_CLI_DIR/libexec/hook.sh" --status "${@:3}" ;;
   esac
 }
 
