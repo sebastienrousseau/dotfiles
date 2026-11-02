@@ -32,18 +32,36 @@ FAILED=0
 echo -n "   🔍 Scanning for secrets... "
 # Refined patterns: require assignment-like syntax to reduce false positives on documentation
 # Exclude assignments to values containing common placeholder strings or within template expressions
-SENSITIVE_PATTERNS="(GITHUB_TOKEN|API_KEY|SECRET|password|private_key|AKIA[0-9A-Z]{16})[[:space:]]*[:=]"
+# A key (quoted or not) given a value: `=` then anything but `=`, or `:` then a
+# value. Not ${API_KEY:-} or ${API_KEY:=x} (shell defaults), `if not API_KEY:`
+# or a `:` before a comment.
+SENSITIVE_PATTERNS="(GITHUB_TOKEN|API_KEY|SECRET|password|private_key|AKIA[0-9A-Z]{16})[\"']?[[:space:]]*(=[^=]|:[[:space:]]*[^-=#[:space:]])"
 # Exclusions list for legitimate variable checks or documentation
 SECRET_EXCLUDES="test_|assertions.sh|.pre-commit|README|CHANGELOG|FEATURES.md|docs/|install/lib/|.chezmoitemplates/|mcp-doctor.sh|\.github/workflows/"
-# Also exclude .tmpl files from secret scanning as they contain many false positive markers
-if echo "$STAGED_FILES" | grep -v "\.tmpl" | xargs grep -EiE "$SENSITIVE_PATTERNS" /dev/null | grep -vE "$SECRET_EXCLUDES" | grep -viE "dummy|placeholder|example|test|sk-placeholder|\\{\\{" >/dev/null 2>&1; then
+# A value read from somewhere else is not a secret written down: a shell
+# variable ("$key", ${KEY}) or a call (os.environ.get(...), load_token()).
+SECRET_KEYS="(GITHUB_TOKEN|API_KEY|SECRET|password|private_key)"
+SECRET_REFERENCES="${SECRET_KEYS}[\"']?[[:space:]]*(=|:)[[:space:]]*[\"']?(\\$|[A-Za-z_][A-Za-z0-9_.]*\\()"
+# secret_hits: the staged lines that look like a secret written down. Also
+# exclude .tmpl files from secret scanning as they contain many false positive markers
+secret_hits() {
+  echo "$STAGED_FILES" | grep -v "\.tmpl" | xargs grep -EiE "$SENSITIVE_PATTERNS" /dev/null | grep -vE "$SECRET_EXCLUDES" |
+    grep -viE "$SECRET_REFERENCES" | grep -viE "dummy|placeholder|example|test|sk-placeholder|\\{\\{"
+}
+# check_secrets: print the scan's result and list the hits; 1 when any.
+check_secrets() {
+  local hits
+  hits="$(secret_hits 2>/dev/null)" || true
+  if [[ -z "$hits" ]]; then
+    printf '%b\\n' "${GREEN}PASSED${NC}"
+    return 0
+  fi
   printf '%b\\n' "${RED}FAILED${NC}"
   printf '%b\\n' "      ${YELLOW}⚠ Potential secret detected in staged files:${NC}"
-  echo "$STAGED_FILES" | grep -v "\.tmpl" | xargs grep -EiE "$SENSITIVE_PATTERNS" /dev/null | grep -vE "$SECRET_EXCLUDES" | grep -viE "dummy|placeholder|example|test|sk-placeholder|\\{\\{" | sed 's/^/      /'
-  FAILED=1
-else
-  printf '%b\\n' "${GREEN}PASSED${NC}"
-fi
+  printf '%s\n' "$hits" | sed 's/^/      /'
+  return 1
+}
+check_secrets || FAILED=1
 
 # --- 👻 2. Ghost Path Linter ---
 echo -n "   👻 Checking for hardcoded paths... "
