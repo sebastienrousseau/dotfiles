@@ -82,8 +82,9 @@ echo -n "   🧹 Checking formatting... "
 # Find files with trailing whitespace, excluding SVGs and other formats where it might be intentional or harmless.
 # A space or tab before the line end (or before the CR of a CRLF line):
 # .gitattributes checks *.ps1, *.bat and *.cmd out with CRLF, and the CR
-# itself is not trailing whitespace.
-OFFENDING_WHITESPACE=$(echo "$STAGED_FILES" | grep -vE '\.(svg|md)$' | xargs grep -l '[[:blank:]][[:cntrl:]]\{0,1\}$' /dev/null || true)
+# itself is not trailing whitespace. -I skips binary files (an icon's bytes
+# are not lines), here and in the merge-marker check.
+OFFENDING_WHITESPACE=$(echo "$STAGED_FILES" | grep -vE '\.(svg|md)$' | xargs grep -Il '[[:blank:]][[:cntrl:]]\{0,1\}$' /dev/null || true)
 # Use defused patterns to avoid self-detection
 MERGE_START="^<<<<<<< "
 MERGE_END="^>>>>>>> "
@@ -93,10 +94,10 @@ if [[ -n "$OFFENDING_WHITESPACE" ]]; then
   printf '%b\\n' "      ${YELLOW}⚠ Trailing whitespace found in staged files:${NC}"
   echo "      ${OFFENDING_WHITESPACE//$'\n'/$'\n'      }"
   FAILED=1
-elif echo "$STAGED_FILES" | xargs grep -lE "$MERGE_START|$MERGE_END|$MERGE_DIV" /dev/null >/dev/null 2>&1; then
+elif echo "$STAGED_FILES" | xargs grep -IlE "$MERGE_START|$MERGE_END|$MERGE_DIV" /dev/null >/dev/null 2>&1; then
   printf '%b\\n' "${RED}FAILED${NC}"
   printf '%b\\n' "      ${YELLOW}⚠ Unresolved merge markers found in staged files:${NC}"
-  echo "$STAGED_FILES" | xargs grep -lE "$MERGE_START|$MERGE_END|$MERGE_DIV" /dev/null | sed 's/^/      /'
+  echo "$STAGED_FILES" | xargs grep -IlE "$MERGE_START|$MERGE_END|$MERGE_DIV" /dev/null | sed 's/^/      /'
   FAILED=1
 else
   printf '%b\\n' "${GREEN}PASSED${NC}"
