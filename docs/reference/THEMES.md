@@ -124,7 +124,7 @@ python3 scripts/theme/audit-palettes.py --theme maui-dark
 The versioned report checks body and semantic text contrast, focus and
 selection contrast, truecolor ANSI readability, separately quantized
 xterm-256 readability, wallpaper-support color distance, and semantic-role
-distance under protan/deutan/tritan simulation. The committed 228-theme catalog
+distance under protan/deutan/tritan simulation. The committed 296-theme catalog
 has no exceptions; a failure exits non-zero and identifies the theme, metric,
 observed value, and required floor.
 

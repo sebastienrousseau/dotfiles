@@ -51,7 +51,7 @@
 
 **What it does**
 
-- [Wallpaper-driven themes](#wallpaper-driven-themes) — K-Means in CIELAB, WCAG AAA, 228 generated themes
+- [Wallpaper-driven themes](#wallpaper-driven-themes) — K-Means in CIELAB, WCAG AAA, 296 generated themes
 - [Agent governance (ask / plan / apply / audit)](#agent-governance-ask--plan--apply--audit) — bounded profiles, MCP policy, attestation
 - [Self-healing and rollback](#self-healing-and-rollback) — `dot doctor`, `dot doctor fix`, `dot doctor rollback`
 - [Fleet apply](#fleet-apply) — every host in `fleet.toml` over SSH
@@ -430,7 +430,7 @@ Three choices you will not find in `mathiasbynens/`, `holman/`, or
 
 1. **Wallpaper-driven terminal themes.** K-Means clustering in
    CIELAB extracts a palette from any wallpaper; the engine enforces
-   WCAG AAA (7:1) contrast and writes `themes.toml` itself. 228
+   WCAG AAA (7:1) contrast and writes `themes.toml` itself. 296
    generated themes ship today
    ([ADR-009](docs/adr/ADR-009-wallpaper-driven-theming.md)).
 2. **First-class agent governance.** Bounded profiles (`ask` /
@@ -470,7 +470,7 @@ via taplo on every PR).
 
 | Theme | Headline deliverables |
 | :--- | :--- |
-| Wallpaper-driven themes | K-Means clustering in CIELAB extracts terminal palettes from any wallpaper; WCAG AAA enforced; Apple-compatible dynamic HEIC dark/light; 228 generated themes; `dot theme rebuild` |
+| Wallpaper-driven themes | K-Means clustering in CIELAB extracts terminal palettes from any wallpaper; WCAG AAA enforced; Apple-compatible dynamic HEIC dark/light; 296 generated themes; `dot theme rebuild` |
 | AI and MCP native | Agent profiles (`dot agent mode`), MCP policy and registry audit (`dot mcp`), agent card, checkpoints and conformance (`dot agent`), AI commit messages (`dot config save`), the `dot ai` cockpit and local gateway |
 | Cryptographic attestation | Signed commits and tags, machine-readable workstation evidence (`dot attest`), policy-bundle releases, the signing check in `dot doctor`, `dot secret check` |
 | Fleet management | Multi-node status, drift, events, namespaces and RBAC enforcement mode (`dot fleet`); `dot fleet apply` over SSH; `dot fleet push` to bring up a remote host |
@@ -618,7 +618,7 @@ and [`benches/`](benches/).
 | **Development and runtimes** | mise manages language versions in user space with a cross-platform `mise.lock` (Linux, macOS, Windows, exact URLs and SHA-256s). Nix Flakes for strict reproducibility when speed is not the priority. Pueue queues long-running tasks instead of extra tabs. Neovim ships as a full Lua editor, not a starter template. Lazygit for terminal git. Build caches (Go, pip, uv, Zig) live under a private `~/.cache/dot/builds`; Cargo keeps a per-project `./target`. `_cached_eval` caches expensive `tool init` output with mtime and realpath invalidation; `EVALCACHE_DISABLE=true` bypasses it. |
 | **AI, agents, and MCP** | Agent profiles (`dot agent mode`): ask, plan, apply, audit. Pattern library (`dot ai pattern`): architect, hardener, refactor, bundled in `dot_config/ai/patterns/`. MCP policy enforcement (`dot mcp`). AI commit messages (`dot config save`). The `dot ai` cockpit installs and runs Codex, Copilot, Antigravity, Aider, OpenCode and friends from one Bubble Tea TUI; `dot ai gateway serve` exposes your Claude subscription locally to any Anthropic- or OpenAI-protocol tool ([ADR-012](docs/adr/ADR-012-ai-fleet-local-proxy.md), [`docs/AI.md`](docs/AI.md)). Every agent session is logged with a policy hash and an outcome. |
 | **Security, trust, governance** | age and SOPS keep secrets encrypted at rest and out of history. SSH ed25519 signing plus trust metadata back every commit. Gitleaks, detect-secrets, TruffleHog, policy checks, and compliance workflows. `dot attest` records machine state, policy, prompt, and model metadata in tracked JSON. Telemetry controls and local-first defaults (`dot security telemetry apply`, `dot security dns apply`, `dot security firewall apply`, `dot security usb apply`, `dot security lock apply`, `dot security disk show`). SPDX SBOM and Grype CVE scanning in CI. npm releases authenticate through OIDC trusted publishing with provenance, never a long-lived token. |
-| **Themes** | 228 wallpaper-derived themes, dark and light paired; `dot theme`, `dot theme toggle`, `dot theme family`, `dot theme sync` with the OS appearance; `dot theme wallpaper set rotate` and `dot theme wallpaper set sync`. See [Wallpaper-driven themes](#wallpaper-driven-themes). |
+| **Themes** | 296 wallpaper-derived themes, dark and light paired; `dot theme`, `dot theme toggle`, `dot theme family`, `dot theme sync` with the OS appearance; `dot theme wallpaper set rotate` and `dot theme wallpaper set sync`. See [Wallpaper-driven themes](#wallpaper-driven-themes). |
 | **Fleet and remote** | `dot fleet` status, drift, events, namespace, RBAC enforce mode; `dot fleet apply` runs `dot sync` (or a custom `--cmd`) on every host in `fleet.toml`; `dot fleet push` deploys the environment to a fresh host over SSH; `dot config export` builds an offline archive. |
 | **Diagnostics** | `dot doctor` (deep audit, `--ai` analysis), `dot doctor status` dashboard, `dot doctor score`, `dot security score show`, `dot fleet drift`, `dot doctor snapshot new`, `dot doctor metric list` (JSONL observability), `dot shell history list`, `dot tool list --packages`. |
 | **Distribution** | Release archives with a `PREFIX` / `DESTDIR` Makefile, man page (`share/man/man1/dot.1`), generated completions, Homebrew tap, Scoop bucket, AUR, npm, Nix; `dot config uninstall` removes the managed environment. |
