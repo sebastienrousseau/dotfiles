@@ -48,6 +48,22 @@ assert_equals "PASSED" "$(audit_secrets serve.py '        API_KEY = load_or_crea
 assert_equals "FAILED" "$(audit_secrets serve.py 'API_KEY = "sk-live-0123456789"')" "but a literal still fails"
 assert_equals "FAILED" "$(audit_secrets run.sh 'A=$x; API_KEY="sk-live-0123456789"')" "even beside a variable"
 
+# audit_status FILE CONTENT: stage FILE with CONTENT in a fresh repo and
+# print the whole audit's exit status. The scan's verdict must decide it:
+# a clean file passes the audit, a written-down secret fails it.
+audit_status() {
+  local repo="$WORK/repo-$RANDOM" rc=0
+  git init -q "$repo"
+  printf '%s\n' "$2" >"$repo/$1"
+  git -C "$repo" add "$1"
+  (cd "$repo" && bash "$AUDIT" >/dev/null 2>&1) || rc=$?
+  printf '%s' "$rc"
+}
+
+test_start "the_scan_verdict_decides_the_audit_exit"
+assert_equals "0" "$(audit_status notes.txt 'nothing to see here')" "a clean file passes the audit"
+assert_equals "1" "$(audit_status conf.yml 'password: hunter2')" "a written-down secret fails the audit"
+
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
 [[ "$TESTS_FAILED" -eq 0 ]]
