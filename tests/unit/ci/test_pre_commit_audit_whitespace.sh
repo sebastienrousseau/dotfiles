@@ -5,7 +5,8 @@
 # The pre-commit audit's formatting check flags trailing spaces and tabs in
 # staged files, and not the carriage return of a CRLF line: .gitattributes
 # checks *.ps1, *.bat and *.cmd out with CRLF, so every such file used to
-# fail the audit. Runs the audit in a throwaway repository.
+# fail the audit. Binary files are not text and are not checked. Runs the
+# audit in a throwaway repository.
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -33,6 +34,12 @@ assert_equals "PASSED" "$(audit_formatting completion.ps1 'Write-Output 1\r\nWri
 test_start "trailing_space_still_fails"
 assert_equals "FAILED" "$(audit_formatting notes.txt 'one \ntwo\n')" "a trailing space fails"
 assert_equals "FAILED" "$(audit_formatting script.ps1 'one\t\r\ntwo\r\n')" "a trailing tab before CRLF fails"
+
+test_start "binary_files_are_not_text"
+# favicon.ico (#1372) holds a space before a 0x0a byte; an image has no lines.
+assert_equals "PASSED" "$(audit_formatting favicon.ico '\x00\x01 \n\x00')" "a binary with a blank before LF passes"
+assert_equals "PASSED" "$(audit_formatting image.bin '\x00\x01\n=======\n')" "a binary with a merge-marker-like line passes"
+assert_equals "FAILED" "$(audit_formatting conflict.txt 'a\n=======\nb\n')" "a text merge marker still fails"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
