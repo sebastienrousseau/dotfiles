@@ -66,6 +66,29 @@ test_start "the_scan_verdict_decides_the_audit_exit"
 assert_equals "0" "$(audit_status notes.txt 'nothing to see here')" "a clean file passes the audit"
 assert_equals "1" "$(audit_status conf.yml 'password: hunter2')" "a written-down secret fails the audit"
 
+# audit_change FILE OLD NEW: commit FILE as OLD (hooks off), stage it as
+# NEW and print the secret scan's result.
+audit_change() {
+  local repo="$WORK/repo-$RANDOM"
+  git init -q "$repo"
+  printf '%s\n' "$2" >"$repo/$1"
+  git -C "$repo" add "$1"
+  git -C "$repo" -c user.name=t -c user.email=t@example.invalid -c commit.gpgsign=false \
+    -c core.hooksPath=/dev/null commit -q -m old
+  printf '%s\n' "$3" >"$repo/$1"
+  git -C "$repo" add "$1"
+  (cd "$repo" && bash "$AUDIT" 2>&1) | sed -n 's/.*Scanning for secrets\.\.\. *//p' |
+    sed 's/\x1b\[[0-9;]*m//g' | cut -d' ' -f1 | tr -d '\\n'
+}
+
+test_start "only_the_lines_a_commit_adds_are_scanned"
+assert_equals "PASSED" "$(audit_change conf.yml 'password: hunter2' "$(printf 'password: hunter2\nlevel: debug')")" \
+  "a match already in the file is not this commit's"
+assert_equals "FAILED" "$(audit_change conf.yml 'level: debug' "$(printf 'level: debug\npassword: hunter2')")" \
+  "a match the commit adds still fails"
+assert_equals "FAILED" "$(audit_change conf.yml 'level: debug' "$(printf 'level: debug\n++ password: hunter2')")" \
+  "even on a line that starts like a diff header"
+
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
 [[ "$TESTS_FAILED" -eq 0 ]]
