@@ -232,6 +232,18 @@ backup_managed_files() {
   fi
 }
 
+# run_migration SCRIPT WARNING [NOTICE]: run the first checkout's install/migrate/SCRIPT.
+run_migration() {
+  local src script
+  for src in "$SOURCE_DIR" "$LEGACY_SOURCE_DIR"; do
+    script="$src/install/migrate/$1"
+    [[ -f "$script" ]] || continue
+    [[ -z "${3:-}" ]] || echo "   $3"
+    bash "$script" || echo "   $2"
+    return 0
+  done
+}
+
 show_help() {
   cat <<EOF
 Usage: install.sh [version] [options]
@@ -495,17 +507,11 @@ main() {
   # 6. Initialize & Apply
   step "Applying Configuration..."
 
-  # ── Auto-migration for the 0.2.503 reorg ──────────────────────────────
-  # Before apply, so the source-path moves don't delete deployed files. The
-  # script is idempotent and silent; fresh installs find no prior state.
-  for migrate_src in "$SOURCE_DIR" "$LEGACY_SOURCE_DIR"; do
-    migrate_script="$migrate_src/install/migrate/migrate-v0_2-to-v0_2_503.sh"
-    if [[ -x "$migrate_script" ]]; then
-      echo "   Running the 0.2.503 layout migration (idempotent; safe on fresh installs)..."
-      "$migrate_script" || echo "   migration exited non-zero — continuing apply"
-      break
-    fi
-  done
+  # ── Auto-migration for the 0.2.503 reorg, then the state move (N12) ──
+  # Before apply, so the reorg's source-path moves don't delete deployed files.
+  run_migration migrate-v0_2-to-v0_2_503.sh "migration exited non-zero — continuing apply" \
+    "Running the 0.2.503 layout migration (idempotent; safe on fresh installs)..."
+  run_migration migrate-state-to-domains.sh "some state stays in the old directory; the next apply tries again"
 
   # If we are running from a local source, just apply
   if [[ -d "$SOURCE_DIR/.git" ]]; then

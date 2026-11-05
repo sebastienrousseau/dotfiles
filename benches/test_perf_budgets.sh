@@ -343,7 +343,7 @@ _sandbox() {
   export XDG_DATA_HOME="$sb/.local/share"
   export XDG_CACHE_HOME="$sb/.cache"
   export XDG_STATE_HOME="$sb/.local/state"
-  mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME" "$XDG_STATE_HOME/dotfiles"
+  mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME" "$XDG_STATE_HOME/dot"
   export CHEZMOI_SOURCE_DIR="$REPO_ROOT"
   # chezmoi resolves its source dir under XDG_DATA_HOME. Without this the
   # sandbox has none, so `dot status` / `diff` / `doctor` all abort with

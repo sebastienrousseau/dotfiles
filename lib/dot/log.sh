@@ -28,19 +28,17 @@ _DOT_LIB_LOG_LOADED=1
 DOT_TRACE_ID="${DOT_TRACE_ID:-$(date +%s%N 2>/dev/null | tail -c 12 || date +%s)}"
 export DOT_TRACE_ID
 
-# Saved state that is not a log (agent checkpoints) stays here until the
-# state migration moves it.
-_DOT_LOG_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
-
 dot_agent_checkpoint_dir() {
-  printf '%s\n' "$_DOT_LOG_STATE_DIR/checkpoints"
+  printf '%s\n' "${XDG_STATE_HOME:-$HOME/.local/state}/dot/agent/checkpoints"
 }
 
-# dot_jsonl_append FILE PAYLOAD: append PAYLOAD to FILE in the old state
-# directory. Deprecated (SDK v1 keeps it for plugins): log with dot_log.
+# dot_jsonl_append FILE PAYLOAD: append PAYLOAD to FILE in cli/legacy, where
+# the state migration puts the logs that predate log.v1. Deprecated (SDK v1
+# keeps it for plugins): log with dot_log.
 dot_jsonl_append() {
-  mkdir -p "$_DOT_LOG_STATE_DIR" 2>/dev/null || return 0
-  { printf '%s\n' "$2"; } 2>/dev/null >>"$_DOT_LOG_STATE_DIR/$1" || true
+  local dir="${XDG_STATE_HOME:-$HOME/.local/state}/dot/cli/legacy"
+  mkdir -p "$dir" 2>/dev/null || return 0
+  { printf '%s\n' "$2"; } 2>/dev/null >>"$dir/$1" || true
 }
 
 # dot_log_path DOMAIN: where DOMAIN's log.v1 events go; 64 for a DOMAIN

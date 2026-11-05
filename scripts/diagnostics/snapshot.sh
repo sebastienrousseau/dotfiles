@@ -29,7 +29,7 @@ _snapshot_args() {
 }
 _snapshot_args "$@"
 
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/snapshots"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dot/config/snapshots"
 mkdir -p "$STATE_DIR"
 
 if $BASELINE; then

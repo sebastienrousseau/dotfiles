@@ -56,7 +56,7 @@ px() {
 test_start "ai_proxy_new_token_is_43_chars_and_one_newline"
 H="$WORK/fresh"
 px "$H" "$BASE" local on
-TOKEN="$H/.local/state/dotfiles/ai-serve/gateway.token"
+TOKEN="$H/.local/state/dot/ai/serve/gateway.token"
 assert_equals 0 "$RC" "local on succeeds"
 assert_file_exists "$TOKEN" "token file created"
 assert_equals 44 "$(wc -c <"$TOKEN" | tr -d ' ')" "token file is 43 chars + newline"
@@ -67,8 +67,8 @@ assert_file_contains "$H/.config/dotfiles/ai-local.env" "ANTHROPIC_AUTH_TOKEN=\"
 
 test_start "ai_proxy_empty_token_file_fails_local_on"
 H="$WORK/empty"
-mkdir -p "$H/.local/state/dotfiles/ai-serve"
-printf '\n' >"$H/.local/state/dotfiles/ai-serve/gateway.token"
+mkdir -p "$H/.local/state/dot/ai/serve"
+printf '\n' >"$H/.local/state/dot/ai/serve/gateway.token"
 px "$H" "$BASE" local on
 assert_equals 1 "$RC" "local on fails on an empty token"
 assert_contains "Could not read or create the gateway token" "$OUT" "the failure is reported"
@@ -80,7 +80,7 @@ H="$WORK/nomk"
 px "$H" "$NOMKTEMP:$BASE" local on
 assert_equals 1 "$RC" "local on fails when the temp file cannot be made"
 assert_contains "Could not read or create the gateway token" "$OUT" "the failure is reported"
-assert_false "[[ -e '$H/.local/state/dotfiles/ai-serve/gateway.token' ]]" "no token file appears"
+assert_false "[[ -e '$H/.local/state/dot/ai/serve/gateway.token' ]]" "no token file appears"
 assert_false "[[ -e '$H/.config/dotfiles/ai-local.env' ]]" "no routing env is written"
 
 # ── Minting must not depend on SIGPIPE ───────────────────────────────
@@ -99,7 +99,7 @@ run_with_timeout 15 bash -c '
     PATH="$2:/usr/bin:/bin" bash "$3" local on' _ "$SIGPIPE_HOME" "$BASE" "$PROXY" >/dev/null 2>&1 || rc=$?
 assert_not_equals "124" "$rc" "minting finishes with SIGPIPE ignored (124 = hung until the bound)"
 assert_equals "0" "$rc" "local on succeeds"
-sigpipe_token="$SIGPIPE_HOME/.local/state/dotfiles/ai-serve/gateway.token"
+sigpipe_token="$SIGPIPE_HOME/.local/state/dot/ai/serve/gateway.token"
 assert_file_exists "$sigpipe_token" "token file written"
 assert_equals "44" "$(wc -c <"$sigpipe_token" | tr -d ' ')" "43 characters plus one newline"
 assert_true "LC_ALL=C grep -qE '^[A-Za-z0-9_-]{43}\$' '$sigpipe_token'" "token is 43 URL-safe characters"

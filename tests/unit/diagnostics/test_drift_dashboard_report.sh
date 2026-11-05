@@ -68,7 +68,7 @@ STUB
 chmod +x "$BIN/git"
 : >"$DRIFT_FIX/untracked"
 
-ORPHANS="$XDG_STATE_HOME/dotfiles/orphans"
+ORPHANS="$XDG_STATE_HOME/dot/doctor/orphans"
 mkdir -p "$(dirname "$ORPHANS")"
 
 drift() {

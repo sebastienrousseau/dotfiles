@@ -27,7 +27,7 @@ REAL_PROFILES="$REPO_ROOT/defaults/dot_config/dotfiles/agent-profiles.json"
 trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
-STATE_DIR="$XDG_STATE_HOME/dotfiles"
+STATE_DIR="$XDG_STATE_HOME/dot/agent"
 CHECKPOINT_DIR="$STATE_DIR/checkpoints"
 SESSIONS="$XDG_STATE_HOME/dot/agent/log.jsonl" # log.v1 session_<event> records
 

@@ -22,7 +22,7 @@ function _cached_eval_log_timing --description 'Append a timing event for dot do
     if test (count $argv) -ge 5
         set shell $argv[5]
     end
-    set -l log_dir (set -q XDG_STATE_HOME; and echo $XDG_STATE_HOME; or echo "$HOME/.local/state")/dotfiles
+    set -l log_dir (set -q XDG_STATE_HOME; and echo $XDG_STATE_HOME; or echo "$HOME/.local/state")/dot/shell
     mkdir -p "$log_dir" 2>/dev/null; or return 0
     set -l logfile "$log_dir/eval-timings.jsonl"
     test -f "$logfile"; or touch "$logfile" 2>/dev/null; or return 0

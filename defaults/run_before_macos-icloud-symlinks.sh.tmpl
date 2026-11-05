@@ -47,7 +47,7 @@
 #      container exists on disk). If iCloud isn't set up on the machine,
 #      the script silently skips — no error, no partial state.
 #
-#   5. It writes a persistent log to $XDG_STATE_HOME/dotfiles/icloud-
+#   5. It writes a persistent log to $XDG_STATE_HOME/dot/system/icloud-
 #      symlinks.log with a decision per candidate. Every run appends;
 #      nothing is ever silently overwritten.
 #
@@ -91,7 +91,7 @@ set -euo pipefail
 
 # --- 0. Log destination -------------------------------------------------------
 XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
-LOG_DIR="$XDG_STATE_HOME/dotfiles"
+LOG_DIR="$XDG_STATE_HOME/dot/system"
 LOG_FILE="$LOG_DIR/icloud-symlinks.log"
 mkdir -p "$LOG_DIR"
 

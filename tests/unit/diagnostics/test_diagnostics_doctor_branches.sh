@@ -286,10 +286,10 @@ for t in mise starship zoxide atuin fzf direnv pyenv; do
 done
 printf '# dump\n' >"$S_HOME/.zcompdump"
 printf 'x' >"$S_HOME/.zcompdump.zwc"
-mkdir -p "$S_HOME/.cache/dotfiles" "$S_HOME/.local/state/dotfiles"
+mkdir -p "$S_HOME/.cache/dotfiles" "$S_HOME/.local/state/dot/shell"
 printf '{"recorded_at": "2026-01-01T00:00:00Z"}\n' >"$S_HOME/.cache/dotfiles/perf-baseline.json"
 printf '{"label":"starship","ms":40}\n{"label":"zoxide","ms":5}\nnot-json\n' \
-  >"$S_HOME/.local/state/dotfiles/eval-timings.jsonl"
+  >"$S_HOME/.local/state/dot/shell/eval-timings.jsonl"
 
 DOC_ENV=(PIPX_HOME="$S_HOME/.local/pipx" TERM_PROGRAM=FixtureTerm)
 _run_doctor
@@ -301,7 +301,7 @@ _expect "s1_darwin_platform_lines" \
 _expect "s1_all_probes_ok" \
   "[OK] zsh" "[OK] nu" "[OK] bat" "[OK] nix" "[OK] pueue daemon" \
   "[OK] XDG_CONFIG_HOME" "[OK] PIPX_HOME" "[OK] chezmoi" "[OK] .zshrc" \
-  "[OK] dot" "[OK] audit bypass" "[OK] history_filter" "[OK] antigravity wrapper" \
+  "[OK] dot" "[OK] state layout" "[OK] audit bypass" "[OK] history_filter" "[OK] antigravity wrapper" \
   "[OK] fish_plugins" "[OK] cargo-install-update" "[OK] symlinks" \
   "[OK] portability" "[OK] shell caches" "[OK] uncached slow-init tools" \
   "[OK] .zcompdump" "[OK] PATH length" "[OK] shell coverage" "[OK] zsh hooks" \
@@ -381,13 +381,14 @@ chmod +x "$S_HOME/.local/bin/dot"
 printf '#!/usr/bin/env bash\nexit 0\n' >"$S_BIN/antigravity"
 chmod +x "$S_BIN/antigravity"
 mkdir -p "$S_HOME/.config/atuin" "$S_HOME/.config/fish" "$S_HOME/.config/zsh" \
-  "$S_HOME/.local/state/dotfiles"
+  "$S_HOME/.local/state/dot/security"
 printf 'history_filter = [\n  "token"\n]\n' >"$S_HOME/.config/atuin/config.toml"
 printf 'someone/else\n' >"$S_HOME/.config/fish/fish_plugins"
 printf 'eval "$(pyenv init -)"\n' >"$S_HOME/.config/zsh/tools.zsh"
 ln -s /nonexistent/target "$S_HOME/.config/dangling"
 printf '%s bypassed audit\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-  >"$S_HOME/.local/state/dotfiles/audit-bypass.log"
+  >"$S_HOME/.local/state/dot/security/audit-bypass.log"
+mkdir -p "$S_HOME/.local/state/dotfiles"
 printf '# dump\n' >"$S_HOME/.zcompdump"
 touch -t 202001010000 "$S_HOME/.zcompdump"
 long_path="$S_BIN:$SYSBIN"
@@ -412,7 +413,8 @@ _expect "s2_tool_resolution" \
 _expect "s2_environment_and_state" \
   "[WARN] XDG_CONFIG_HOME" "[WARN] XDG_DATA_HOME" "not absolute: relative/data" \
   "[WARN] PIPX_HOME" "[FAIL] chezmoi" "drifted" "[FAIL] .zshrc" "[OK] dot" \
-  "[WARN] audit bypass" "1 push(es) bypassed" "[WARN] history_filter" "1 patterns" \
+  "[WARN] state layout" "is not moved yet" "[WARN] audit bypass" "1 push(es) bypassed" \
+  "[WARN] history_filter" "1 patterns" \
   "[WARN] antigravity wrapper" "expected ~/.local/bin/antigravity" \
   "[WARN] fish_plugins" "missing jorgebucaran/fisher" "[WARN] cargo-install-update" \
   "[WARN] symlinks" "1 broken: $_HOME_TILDE/.config/dangling" \
@@ -439,7 +441,7 @@ _tool fish nushell rg bat fzf zoxide atuin yazi zellij pueue wasmtime nix \
 _bench 9999
 _linux_os_release
 mkdir -p "$S_HOME/proc" "$S_HOME/sys" "$S_HOME/.config/atuin" "$S_HOME/.config/zsh" \
-  "$S_HOME/.local/state/dotfiles"
+  "$S_HOME/.local/state/dot/security"
 printf 'MemTotal:        8388608 kB\nMemAvailable:    4194304 kB\n' >"$S_HOME/proc/meminfo"
 printf 'processor\t: 0\nmodel name\t: Fixture CPU\nprocessor\t: 1\n' >"$S_HOME/proc/cpuinfo"
 _shim uptime <<'EOF'
@@ -478,7 +480,9 @@ exit 0
 EOF
 printf 'export FOO="/Users/someone/bin"\nexport BAR="/home/other/x"\n' >"$S_HOME/.config/zsh/ghost.zsh"
 printf 'other = 1\n' >"$S_HOME/.config/atuin/config.toml"
-printf '2001-01-01T00:00:00Z bypassed audit\n' >"$S_HOME/.local/state/dotfiles/audit-bypass.log"
+printf '2001-01-01T00:00:00Z bypassed audit\n' >"$S_HOME/.local/state/dot/security/audit-bypass.log"
+mkdir -p "$S_HOME/.local/state/dotfiles" "$S_HOME/.local/state/dot/cli/migrations"
+: >"$S_HOME/.local/state/dot/cli/migrations/state-domains.done"
 printf '# zshrc\n' >"$S_HOME/.zshrc"
 printf '# dump\n' >"$S_HOME/.zcompdump"
 printf 'x' >"$S_HOME/.zcompdump.zwc"
@@ -503,7 +507,7 @@ _expect "s3_linux_alt_platform" \
   "4.00 GiB / 8.00 GiB" "GPU: n/a" "1 hour"
 _expect "s3_alt_tool_paths" \
   "[OK] starship" "(mise)" "[OK] nu" "[WARN] pueue daemon" "not running (pueued -d)" \
-  "[FAIL] dot" "not found in PATH" "[OK] audit bypass" "no recent entries" \
+  "[FAIL] dot" "not found in PATH" "[OK] state layout" "[OK] audit bypass" "no recent entries" \
   "[FAIL] history_filter" "no history_filter block" "[WARN] antigravity" \
   "[FAIL] fish_plugins" "[WARN] portability" "2 hardcoded paths" \
   "[OK] shell caches" "[WARN] startup latency" "caches already fresh"
