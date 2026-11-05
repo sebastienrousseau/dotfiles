@@ -17,3 +17,9 @@ c07232b6fb2d0051a7d85cfac9c32690430f6ff7:tests/unit/ci/test_pre_commit_audit_sec
 c07232b6fb2d0051a7d85cfac9c32690430f6ff7:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:34
 c07232b6fb2d0051a7d85cfac9c32690430f6ff7:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:48
 c07232b6fb2d0051a7d85cfac9c32690430f6ff7:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:49
+# The same four lines in the squash commit main got (#1378's merge); the
+# fixtures are now runs of x (no finding), but history keeps these lines.
+9bb4bbe706e33d758e59d15f706f2be1b76c4172:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:33
+9bb4bbe706e33d758e59d15f706f2be1b76c4172:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:34
+9bb4bbe706e33d758e59d15f706f2be1b76c4172:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:48
+9bb4bbe706e33d758e59d15f706f2be1b76c4172:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:49
