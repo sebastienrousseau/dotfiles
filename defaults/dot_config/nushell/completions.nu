@@ -501,6 +501,7 @@ def "nu-complete dot cli" [] {
     [
         { value: "completion", description: "shell completion scripts" }
         { value: "registry", description: "the plugin registry" }
+        { value: "hook", description: "agent hook events (agent-event.v1)" }
         { value: "list", description: "Installed plugins" }
         { value: "show", description: "One plugin in detail" }
         { value: "install", description: "Install a plugin" }
@@ -528,6 +529,28 @@ export extern "dot cli completion" [
 ]
 
 export extern "dot cli completion show" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
+def "nu-complete dot cli hook" [] {
+    [
+        { value: "status", description: "Each agent session's last state" }
+        { value: "run", description: "Record an agent hook event read on stdin" }
+    ]
+}
+export extern "dot cli hook" [
+    command?: string@"nu-complete dot cli hook"
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot cli hook run" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot cli hook status" [
     --help(-h) # Show help
     ...rest: string
 ]

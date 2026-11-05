@@ -325,6 +325,18 @@ function Get-DotCliCompletion {
     dot cli completion show @Arguments
 }
 
+function Get-DotCliHookStatus {
+    <#
+    .SYNOPSIS
+    Each agent session's last state
+    .DESCRIPTION
+    Runs `dot cli hook status`: Each agent session's last state. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot cli hook status @Arguments
+}
+
 function Get-DotCliRegistry {
     <#
     .SYNOPSIS
@@ -803,6 +815,18 @@ function Invoke-DotAi {
     [CmdletBinding()]
     param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
     dot ai run @Arguments
+}
+
+function Invoke-DotCliHook {
+    <#
+    .SYNOPSIS
+    Record an agent hook event read on stdin
+    .DESCRIPTION
+    Runs `dot cli hook run`: Record an agent hook event read on stdin. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot cli hook run @Arguments
 }
 
 function Invoke-DotSystemSchedule {
@@ -1469,6 +1493,7 @@ Export-ModuleMember -Function @(
     'Get-DotAttest'
     'Get-DotCli'
     'Get-DotCliCompletion'
+    'Get-DotCliHookStatus'
     'Get-DotCliRegistry'
     'Get-DotConfigPath'
     'Get-DotConfigProfile'
@@ -1509,6 +1534,7 @@ Export-ModuleMember -Function @(
     'Invoke-DotAgentDelegate'
     'Invoke-DotAgentMode'
     'Invoke-DotAi'
+    'Invoke-DotCliHook'
     'Invoke-DotSystemSchedule'
     'Measure-DotDoctorPerf'
     'New-DotDoctorSnapshot'
