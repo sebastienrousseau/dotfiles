@@ -69,31 +69,57 @@ _hook_send() {
     $s->send($ARGV[1]);' "$1" "$2" 2>/dev/null || true
 }
 
+# _hook_payload ARG...: the payload, the last argument (Codex notify) or
+# stdin (Claude Code, Gemini CLI); at most 2 s waiting on stdin.
+_hook_payload() {
+  local payload=""
+  if [[ $# -gt 0 ]]; then
+    payload="${!#}"
+  elif [[ ! -t 0 ]]; then
+    IFS= read -r -d '' -t 2 payload || true
+  fi
+  printf '%s' "$payload"
+}
+
+# _hook_first JSON NAME...: the first of the NAMEd fields that is set.
+_hook_first() {
+  local json="$1" name value
+  shift
+  for name in "$@"; do
+    value="$(_hook_field "$json" "$name")"
+    [[ -z "$value" ]] || break
+  done
+  printf '%s' "$value"
+}
+
+# _hook_ids_ok AGENT SESSION: both become a path, so a plain id only.
+_hook_ids_ok() {
+  [[ "$1" =~ ^[a-z][a-z0-9-]{0,31}$ ]] || return 1
+  [[ "$2" =~ ^[A-Za-z0-9._-]{1,128}$ && "$2" != .* ]]
+}
+
+# _hook_write AGENT SESSION RECORD: replace the session's state file.
+_hook_write() {
+  local dir="${XDG_STATE_HOME:-$HOME/.local/state}/dot/agents/$1"
+  (umask 077 && mkdir -p "$dir" && printf '%s\n' "$3" >"$dir/$2.json.$$" &&
+    mv -f "$dir/$2.json.$$" "$dir/$2.json") 2>/dev/null || rm -f "$dir/$2.json.$$" 2>/dev/null
+}
+
 hook_main() {
-  local agent=claude payload="" event session state cwd record dir
+  local agent=claude payload event session state record dir
   if [[ "${1:-}" == --agent ]]; then
     agent="${2:-}"
     shift 2 || return 0
   fi
-  if [[ $# -gt 0 ]]; then
-    payload="$1"
-  elif [[ ! -t 0 ]]; then
-    IFS= read -r -d '' -t 2 payload || true
-  fi
-  event="$(_hook_field "$payload" hook_event_name)"
-  [[ -n "$event" ]] || event="$(_hook_field "$payload" type)"
-  session="$(_hook_field "$payload" session_id)"
-  [[ -n "$session" ]] || session="$(_hook_field "$payload" thread-id)"
+  payload="$(_hook_payload "$@")"
+  event="$(_hook_first "$payload" hook_event_name type)"
+  session="$(_hook_first "$payload" session_id thread-id)"
   state="$(_hook_state "$event" "$(_hook_field "$payload" notification_type)")"
-  # Names that become a path: refuse anything but a plain id.
-  [[ -n "$state" && "$agent" =~ ^[a-z][a-z0-9-]{0,31}$ && "$session" =~ ^[A-Za-z0-9._-]{1,128}$ && "$session" != .* ]] ||
-    return 0
-  cwd="$(_hook_field "$payload" cwd)"
+  [[ -n "$state" ]] && _hook_ids_ok "$agent" "$session" || return 0
   record="$(printf '{"schema":"cli/agent-event.v1","time":"%s","agent":"%s","session":"%s","state":"%s","event":%s,"cwd":%s}' \
-    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$agent" "$session" "$state" "$(_hook_json_str "$event")" "$(_hook_json_str "$cwd")")"
-  dir="${XDG_STATE_HOME:-$HOME/.local/state}/dot/agents/$agent"
-  (umask 077 && mkdir -p "$dir" && printf '%s\n' "$record" >"$dir/$session.json.$$" &&
-    mv -f "$dir/$session.json.$$" "$dir/$session.json") 2>/dev/null || rm -f "$dir/$session.json.$$" 2>/dev/null
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$agent" "$session" "$state" "$(_hook_json_str "$event")" \
+    "$(_hook_json_str "$(_hook_field "$payload" cwd)")")"
+  _hook_write "$agent" "$session" "$record"
   # A per-user runtime dir only: a shared /tmp would let another user listen.
   dir="${XDG_RUNTIME_DIR:-${TMPDIR:-}}"
   [[ -z "$dir" ]] || _hook_send "${dir%/}/dot/agent-events.sock" "$record"

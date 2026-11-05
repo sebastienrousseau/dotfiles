@@ -61,6 +61,9 @@ assert_equals "0|idle" "$RC|$(state_of codex t-9)" "agent-turn-complete is idle,
 test_start "ids_that_are_not_plain_names_are_refused"
 hook '{"session_id":"../../escape","hook_event_name":"Stop"}'
 hook '{"session_id":".hidden","hook_event_name":"Stop"}'
+# A valid tail after a path does not make a plain id.
+hook '{"session_id":"/stray","hook_event_name":"Stop"}'
+hook '{"session_id":"ok3","hook_event_name":"Stop"}' --agent 'x/claude'
 hook '{"session_id":"ok1","hook_event_name":"Stop"}' --agent '../evil'
 hook '{"session_id":"ok2","hook_event_name":"WhoKnows"}'
 hook 'not json at all'
@@ -72,13 +75,18 @@ assert_equals "no" "$([[ -e "$WORK/escape.json" || -e "$S/escape.json" ]] && ech
 
 test_start "a_listening_socket_gets_the_record"
 mkdir -p "$R/dot"
+# At most 10 s: no datagram must fail the test, not hang it.
 perl -MIO::Socket::UNIX -MSocket -e '
+  $SIG{ALRM} = sub { exit 1 }; alarm 10;
   my $s = IO::Socket::UNIX->new(Type => SOCK_DGRAM, Local => $ARGV[0]) or die "listen: $!";
   open my $ready, ">", "$ARGV[1].ready"; close $ready;
   $s->recv(my $buf, 65536); open my $out, ">", $ARGV[1]; print $out $buf;' \
   "$R/dot/agent-events.sock" "$WORK/datagram" &
 LISTENER=$!
-for _ in 1 2 3 4 5 6 7 8 9 10; do [[ -f "$WORK/datagram.ready" ]] && break; sleep 0.1; done
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  [[ -f "$WORK/datagram.ready" ]] && break
+  sleep 0.1
+done
 hook '{"session_id":"s3","hook_event_name":"Stop","cwd":"/w"}'
 wait "$LISTENER" 2>/dev/null
 LISTENER=""
