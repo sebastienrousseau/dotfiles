@@ -36,7 +36,7 @@ DOT_COMMAND="heal"
 REPO_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 DOTFILES_SOURCE="$REPO_ROOT"
 BACKUP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/backups"
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dot/doctor"
 HEAL_LOG="$STATE_DIR/heal.log"
 
 # Logging — delegates to shared ui.sh primitives

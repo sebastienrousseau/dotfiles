@@ -86,7 +86,7 @@ Enables verbose diagnostic output during shell startup. Prints which files are s
 
 ### DOTFILES_TRACE=1
 
-Enables `set -x` tracing for the entire shell startup sequence. Output is written to `~/.local/state/dotfiles/debug.log` for post-mortem analysis.
+Enables `set -x` tracing for the entire shell startup sequence. Output is written to `~/.local/state/dot/shell/debug.log` for post-mortem analysis.
 
 ---
 

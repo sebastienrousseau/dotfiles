@@ -79,7 +79,7 @@ fi
 test_start "snapshot_short_flags_runtime"
 snapshot_state_dir="$(mktemp -d)"
 XDG_STATE_HOME="$snapshot_state_dir" bash "$REPO_ROOT/scripts/diagnostics/snapshot.sh" -b >/dev/null 2>&1 || true
-if [[ -f "$snapshot_state_dir/dotfiles/snapshots/baseline.json" ]]; then
+if [[ -f "$snapshot_state_dir/dot/config/snapshots/baseline.json" ]]; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: snapshot -b writes baseline"
 else

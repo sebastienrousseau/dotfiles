@@ -107,14 +107,14 @@ assert_contains "Healthy." "$_out" "healthy summary printed"
 
 test_start "force_apply_fixes_issues_and_logs_completion"
 _unhealthy_home
-rm -f "$XDG_STATE_HOME/dotfiles/heal.log"
+rm -f "$XDG_STATE_HOME/dot/doctor/heal.log"
 _out="$(_heal --force)"
 _rc=$?
 assert_equals 0 "$_rc" "forced heal exits 0"
 assert_contains "Done!" "$_out" "done summary printed"
 assert_contains "fix(es) for" "$_out" "fix count summarised"
 assert_dir_exists "$HOME/.config/nvim" "missing xdg dir was created"
-assert_contains "HEAL_COMPLETE:" "$(cat "$XDG_STATE_HOME/dotfiles/heal.log")" "completion persisted"
+assert_contains "HEAL_COMPLETE:" "$(cat "$XDG_STATE_HOME/dot/doctor/heal.log")" "completion persisted"
 
 test_start "interactive_decline_aborts"
 _healthy_home

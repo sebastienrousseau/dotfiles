@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # dot-ai-proxy — manage the native local Claude proxy (dot-ai-serve) and
-# route the AI fleet through it, so any Anthropic/OpenAI-protocol CLI
+# route the AI tools through it, so any Anthropic/OpenAI-protocol CLI
 # (codex, aider, opencode, claude, …) runs on a single Claude subscription
 # served locally — with no third-party dependency.
 #
@@ -13,7 +13,7 @@
 #
 # Subcommands:
 #   start | stop | restart | status | logs | setup   server process
-#   local on | off | status                           fleet-wide routing env
+#   local on | off | status                           routing env for every AI tool
 
 set -euo pipefail
 
@@ -22,7 +22,7 @@ DOT_AI_PORT="${DOT_AI_PORT:-3456}"
 BASE_URL="http://${DOT_AI_HOST}:${DOT_AI_PORT}"
 SERVE_BIN="${DOT_AI_SERVE_BIN:-dot-ai-serve}"
 
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/ai-serve"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dot/ai/serve"
 PID_FILE="$STATE_DIR/serve.pid"
 TOKEN_FILE="$STATE_DIR/gateway.token" # shared with dot-ai-serve
 LOG_FILE="$STATE_DIR/serve.log"
@@ -53,7 +53,7 @@ Usage: dot ai proxy <start|stop|restart|status|logs|setup>
   proxy logs [-f] Show (or follow) the server log
   proxy setup     Check the engine (claude CLI auth) is ready
 
-  local on        Route the AI fleet through the proxy (writes env)
+  local on        Route the AI tools through the proxy (writes env)
   local off       Stop routing through the proxy (removes env)
   local status    Show whether local routing is active
 
@@ -167,7 +167,7 @@ proxy_status() {
     fi
   fi
   if [[ -f "$ENV_SH" ]]; then
-    ok "local routing: ON  (fleet → $BASE_URL)"
+    ok "local routing: ON  (AI tools → $BASE_URL)"
   else
     info "local routing: OFF"
   fi
@@ -243,7 +243,7 @@ local_on() {
   (
     umask 077
     cat >"$ENV_SH" <<EOF
-# Managed by 'dot ai' — routing for NON-Claude fleet tools only.
+# Managed by 'dot ai' — routing for NON-Claude AI tools only.
 # Consumed per-invocation by 'dot ai <tool>'; NOT sourced into your shell.
 # The primary 'claude' is never routed (it uses its native session).
 export ANTHROPIC_BASE_URL="$BASE_URL"
@@ -258,7 +258,7 @@ export GOOSE_PROVIDER="anthropic"
 export GOOSE_MODEL="$model"
 EOF
     cat >"$ENV_FISH" <<EOF
-# Managed by 'dot ai' — routing for NON-Claude fleet tools only.
+# Managed by 'dot ai' — routing for NON-Claude AI tools only.
 set -gx ANTHROPIC_BASE_URL "$BASE_URL"
 set -gx ANTHROPIC_HOST "$BASE_URL"
 set -gx ANTHROPIC_AUTH_TOKEN "$key"
@@ -281,7 +281,7 @@ local_off() {
 
 local_status() {
   if [[ -f "$ENV_SH" ]]; then
-    ok "local routing: ON  (fleet → $BASE_URL)"
+    ok "local routing: ON  (AI tools → $BASE_URL)"
     info "env file: $ENV_SH"
   else
     info "local routing: OFF"

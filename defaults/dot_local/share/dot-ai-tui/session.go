@@ -170,7 +170,7 @@ func (m *model) handleSlashTool(arg string, sys func(string)) {
 			return
 		}
 	}
-	sys("unknown tool: " + arg + "  (Tab to browse the fleet)")
+	sys("unknown tool: " + arg + "  (Tab to browse the roster)")
 }
 
 func (m *model) handleSlashModel(arg string, sys func(string)) {
@@ -210,8 +210,8 @@ func dbPath() string {
 }
 
 func refresh() tea.Msg {
-	out := refreshMsg{tools: make([]tool, len(fleet)), ecoSnap: sampleEcosystem()}
-	copy(out.tools, fleet)
+	out := refreshMsg{tools: make([]tool, len(roster)), ecoSnap: sampleEcosystem()}
+	copy(out.tools, roster)
 	for i := range out.tools {
 		_, err := exec.LookPath(out.tools[i].bin)
 		out.tools[i].installed = err == nil

@@ -78,12 +78,12 @@ _perf_validate_args() {
   [[ "$TARGET_MS" =~ ^[0-9]+$ ]] || _perf_usage_error "--target must be a whole number of ms (got '$TARGET_MS')"
 }
 
-# --by-tool reader: aggregate $XDG_STATE_HOME/dotfiles/eval-timings.jsonl
+# --by-tool reader: aggregate $XDG_STATE_HOME/dot/shell/eval-timings.jsonl
 # (populated by _cached_eval when EVALCACHE_TIMING=1) and report which
 # tools dominate startup time. Independent of the runtime measurement
 # loop, so it exits immediately.
 _perf_by_tool() {
-  local log_file="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/eval-timings.jsonl"
+  local log_file="${XDG_STATE_HOME:-$HOME/.local/state}/dot/shell/eval-timings.jsonl"
   if $RESET_TIMINGS; then
     : >"$log_file" 2>/dev/null || rm -f "$log_file" 2>/dev/null || true
     ui_ok "eval timings" "cleared $log_file"

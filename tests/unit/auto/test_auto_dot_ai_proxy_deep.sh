@@ -85,8 +85,8 @@ run_proxy() {
   run_proxy stop
   run_proxy unknown
 ) || true
-if [[ -f "$proxy_tmp/state/dotfiles/ai-serve/serve.pid" ]]; then
-  pid="$(cat "$proxy_tmp/state/dotfiles/ai-serve/serve.pid" 2>/dev/null || true)"
+if [[ -f "$proxy_tmp/state/dot/ai/serve/serve.pid" ]]; then
+  pid="$(cat "$proxy_tmp/state/dot/ai/serve/serve.pid" 2>/dev/null || true)"
   if [[ -n "$pid" ]]; then
     kill "$pid" 2>/dev/null || true
   fi

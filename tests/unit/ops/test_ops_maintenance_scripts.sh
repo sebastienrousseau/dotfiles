@@ -77,7 +77,7 @@ exit 0
 STUB
 chmod +x "$BIN/chezmoi"
 export CHEZMOI_CALLS="$DOTFILES_COV_TMPDIR/chezmoi-calls.txt"
-STATE_DIR="$XDG_STATE_HOME/dotfiles/update"
+STATE_DIR="$XDG_STATE_HOME/dot/config/update"
 
 test_start "update_forces_apply_by_default"
 : >"$CHEZMOI_CALLS"
@@ -118,7 +118,7 @@ assert_file_exists "$STATE_DIR/notice" "notice stamped"
 # ── uninstall ───────────────────────────────────────────────────────────
 seed_artifacts() {
   mkdir -p "$HOME/.local/bin" "$XDG_CACHE_HOME/dotfiles" \
-    "$XDG_STATE_HOME/dotfiles" "$XDG_CONFIG_HOME/chezmoi" \
+    "$XDG_STATE_HOME/dotfiles" "$XDG_STATE_HOME/dot/cli" "$XDG_CONFIG_HOME/chezmoi" \
     "$XDG_DATA_HOME/zsh/completions" "$XDG_DATA_HOME/bash-completion/completions"
   : >"$HOME/.local/bin/dot"
   : >"$HOME/.local/bin/dot-ai"
@@ -127,6 +127,7 @@ seed_artifacts() {
   : >"$XDG_DATA_HOME/dotfiles.log"
   : >"$XDG_CACHE_HOME/dotfiles/marker"
   : >"$XDG_STATE_HOME/dotfiles/marker"
+  : >"$XDG_STATE_HOME/dot/cli/marker"
 }
 
 test_start "uninstall_aborts_without_confirmation"
@@ -156,7 +157,8 @@ out_has "Removing shell completions" "completions step ran"
 assert_file_not_exists "$XDG_DATA_HOME/zsh/completions/_dot" "zsh completion removed"
 assert_file_not_exists "$XDG_DATA_HOME/bash-completion/completions/dot" "bash completion removed"
 assert_file_not_exists "$XDG_DATA_HOME/dotfiles.log" "log removed"
-assert_dir_not_exists "$XDG_STATE_HOME/dotfiles" "state removed"
+assert_dir_not_exists "$XDG_STATE_HOME/dotfiles" "legacy state removed"
+assert_dir_not_exists "$XDG_STATE_HOME/dot" "state removed"
 assert_true "! grep -q purge '$CHEZMOI_CALLS'" "chezmoi purge is not run (it deletes the age key)"
 
 test_start "uninstall_skips_chezmoi_when_it_is_not_installed"

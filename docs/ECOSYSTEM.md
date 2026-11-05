@@ -20,7 +20,7 @@ table — and the argument for why the family currently has one member.
 | Configuration tree | `defaults/` (chezmoi source, rebased via `.chezmoiroot`) | Same reason, inverted: the config depends on the CLI's template data. |
 | **MCP governance surface and server** | `plugins/mcp/` → `dot mcp`, server in `defaults/dot_local/share/dot-mcp/` (Go), discovery card at `.well-known/mcp/server-card.json` | See below. |
 | **A2A agent card** | `.well-known/agent-card.json`, validated by `dot agent a2a-card --validate` (a plugin verb outside the ADR-020 names, still routed), conformance suite via `dot agent card check` | A static discovery document plus a subcommand. Nothing to host separately. |
-| AI fleet TUI | `defaults/dot_local/share/dot-ai-tui/` (Go) | Tested by `cockpit-test.yml`. Ships as part of the config tree; useless without it. |
+| AI cockpit TUI | `defaults/dot_local/share/dot-ai-tui/` (Go) | Tested by `cockpit-test.yml`. Ships as part of the config tree; useless without it. |
 | `dot-ui` widgets | `defaults/dot_local/share/dot-ui/` (Go) | Tested by `dot-ui-test.yml`. Same reasoning. |
 | **WASM verifier** | `lib/wasm-tools/` (Rust, crate `dot-sys`), built for `wasm32-wasip1` and run under `wasmtime` by `dot attest verify` | See below. |
 | Module registry | `docs/registry.json` + schema in `docs/schema/`, served over Pages, validated by `tools/ci/check-registry.sh` | A JSON document, not a service. |

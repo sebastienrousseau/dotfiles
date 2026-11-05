@@ -171,7 +171,7 @@ func TestRenderSnapshotSplash(t *testing.T) {
 	if runErr != nil {
 		t.Fatal(runErr)
 	}
-	if !strings.Contains(string(b), "cockpit for your AI fleet") {
+	if !strings.Contains(string(b), "cockpit for your AI tools") {
 		t.Errorf("splash snapshot missing wordmark pitch:\n%s", string(b))
 	}
 }
@@ -396,7 +396,7 @@ func TestResumedSessionCannotOverflow(t *testing.T) {
 
 	m := newModel()
 	m = upd(m, tea.WindowSizeMsg{Width: 100, Height: 30})
-	m = upd(m, refreshMsg{tools: fleet, costToday: "$0.00"})
+	m = upd(m, refreshMsg{tools: roster, costToday: "$0.00"})
 	mm, _ := m.handleSlash("/resume")
 	m = mm.(model)
 	if len(m.transcript) == 0 {

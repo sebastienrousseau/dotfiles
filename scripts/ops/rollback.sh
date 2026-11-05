@@ -32,7 +32,7 @@ else
   DOTFILES_SOURCE="${DOTFILES_DIR:-$HOME/.dotfiles}"
 fi
 BACKUP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/backups"
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dot/doctor"
 ROLLBACK_LOG="$STATE_DIR/rollback.log"
 MAX_BACKUPS=10
 # sysexits.h EX_TEMPFAIL: the command did nothing because another instance

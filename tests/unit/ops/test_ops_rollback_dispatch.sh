@@ -148,7 +148,7 @@ _rb_expect "status_without_backup_dir" 0 "Dotfiles Rollback Status" "No backups 
 # 3. status: chezmoi in sync, clean git tree, two backups, rollback log
 # =======================================================================
 _rb_scenario clean
-mkdir -p "$R_HOME/run" "$R_HOME/.local/state/dotfiles"
+mkdir -p "$R_HOME/run" "$R_HOME/.local/state/dot/doctor"
 _rb_git_fixture
 _rb_backups 2
 _rb_shim chezmoi <<'EOF'
@@ -169,7 +169,7 @@ esac
 exit 0
 EOF
 printf '[2026-01-01T00:00:00] BACKUP_CREATED: backup_20260101_120000_manual\n' \
-  >"$R_HOME/.local/state/dotfiles/rollback.log"
+  >"$R_HOME/.local/state/dot/doctor/rollback.log"
 _run_rb status
 _rb_expect "status_clean_tree_with_backups" 0 \
   "Chezmoi version: chezmoi version 2.47.1" "Chezmoi: All files in sync" \
@@ -312,7 +312,7 @@ printf 'clobbered\n' >"$R_HOME/.zshrc"
 _run_rb rollback --force
 _rb_expect "forced_rollback_restores_and_logs" 0 "Rollback complete:" "file(s) restored"
 test_start "forced_rollback_wrote_persist_log"
-assert_file_contains "$R_HOME/.local/state/dotfiles/rollback.log" "ROLLBACK: from backup_" "rollback must append a ROLLBACK entry to the persistent log"
+assert_file_contains "$R_HOME/.local/state/dot/doctor/rollback.log" "ROLLBACK: from backup_" "rollback must append a ROLLBACK entry to the persistent log"
 
 _run_rb restore .zshrc
 _rb_expect "restore_file_dispatches" 0 "Restored: .zshrc"

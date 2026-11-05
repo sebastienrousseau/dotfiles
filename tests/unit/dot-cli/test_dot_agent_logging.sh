@@ -44,7 +44,7 @@ fi
 test_start "agent_checkpoint_replay_runs"
 replay_file="$REPLAY_STATE_DIR/replayed.txt"
 assert_exit_code 0 "XDG_STATE_HOME='$REPLAY_STATE_DIR' bash '$DOT_CLI' agent checkpoint save ask bash -lc 'printf replayed > \"$replay_file\"'"
-checkpoint_id="$(find "$REPLAY_STATE_DIR/dotfiles/checkpoints" -type f -name '*.json' | xargs -r basename | sed 's/\.json$//')"
+checkpoint_id="$(find "$REPLAY_STATE_DIR/dot/agent/checkpoints" -type f -name '*.json' | xargs -r basename | sed 's/\.json$//')"
 rm -f "$replay_file"
 assert_exit_code 0 "XDG_STATE_HOME='$REPLAY_STATE_DIR' bash '$DOT_CLI' agent checkpoint replay \"$checkpoint_id\""
 if [[ -f "$replay_file" ]]; then

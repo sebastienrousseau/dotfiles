@@ -192,7 +192,7 @@ dot attest export [<file>] [flags]           # write it to <file>, or to the def
 dot attest verify [<file>] [--json|-j] [--max-age|-a <secs>]  # verify <file>, or a fresh record
 ```
 
-Bare `dot attest` is `dot attest show`. Default file: `~/.local/state/dotfiles/attestations/workstation-attestation.json`. `dot attest show --fleet-store|-F <dir>` (or `DOTFILES_FLEET_STORE`) also writes the record to `<dir>/<fleet-id>/<hostname>/`, with `--fleet-id|-I <id>` (default `default`). `dot attest export` takes the same flags after the optional file (`dot attest export --fleet-store <dir>` writes the default file and the store). A missing option value, an unknown option or a stray word exits 2.
+Bare `dot attest` is `dot attest show`. Default file: `~/.local/state/dot/attest/attestations/workstation-attestation.json`. `dot attest show --fleet-store|-F <dir>` (or `DOTFILES_FLEET_STORE`) also writes the record to `<dir>/<fleet-id>/<hostname>/`, with `--fleet-id|-I <id>` (default `default`). `dot attest export` takes the same flags after the optional file (`dot attest export --fleet-store <dir>` writes the default file and the store). A missing option value, an unknown option or a stray word exits 2.
 
 ### `dot config check`
 
