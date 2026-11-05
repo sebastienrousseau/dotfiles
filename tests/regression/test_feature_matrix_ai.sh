@@ -145,7 +145,7 @@ test_fm_ai_install_yes_flag() {
 
 test_fm_ai_doctor() {
   # Whether claude / dot-ai-serve are installed is the host's business; the
-  # hop to `dot-ai-proxy status` and the fleet tally are dot's. A stub that
+  # hop to `dot-ai-proxy status` and the roster tally are dot's. A stub that
   # echoes its argv stands in for the proxy so the hop is observable on a
   # host where it is not deployed; it is removed afterwards so the gateway
   # row installs its own.
@@ -157,8 +157,8 @@ test_fm_ai_doctor() {
   fm_expect_out "AI doctor"
   test_start "fm_ai_doctor_delegates_gateway_status_to_the_proxy"
   fm_expect_out "fm-proxy-stub argv=status"
-  test_start "fm_ai_doctor_tallies_the_fleet"
-  fm_expect_out_matches "Fleet +[0-9]+/[0-9]+ tools installed"
+  test_start "fm_ai_doctor_tallies_the_roster"
+  fm_expect_out_matches "Roster +[0-9]+/[0-9]+ tools installed"
   test_start "fm_ai_doctor_reports_prerequisites"
   fm_expect_out "Prerequisites"
   rm -f "$FM_SANDBOX/bin/dot-ai-proxy"
@@ -236,7 +236,7 @@ test_fm_smoke_ai_install() { fm_smoke ai; }
 test_fm_ai_serve_gateway() {
   # `dot ai serve` starts the real gateway through the real proxy script
   # (repo copies, via wrapper stubs: chezmoi sources are not +x) and routes
-  # the fleet with the generated token. The HTTP rules are then checked on a
+  # the roster with the generated token. The HTTP rules are then checked on a
   # gateway this test owns, since the sandbox kills a command's process
   # group when it returns. `dot ai serve stop` removes the routing.
   if ! command -v python3 >/dev/null 2>&1 || ! command -v curl >/dev/null 2>&1; then
@@ -258,7 +258,7 @@ printf "%s\n" "{\"type\":\"result\",\"is_error\":false,\"result\":\"ok\",\"usage
   fm_expect_rc 0
   test_start "fm_ai_serve_gateway_start_reports"
   fm_expect_any "Proxy started"
-  test_start "fm_ai_serve_gateway_routes_fleet_with_token"
+  test_start "fm_ai_serve_gateway_routes_roster_with_token"
   tok="$(cat "$token_file" 2>/dev/null)"
   if [[ ${#tok} -ge 32 ]] && grep -q "ANTHROPIC_AUTH_TOKEN=\"$tok\"" "$XDG_CONFIG_HOME/dotfiles/ai-local.env" 2>/dev/null; then
     fm_pass "routing env carries the generated token"
