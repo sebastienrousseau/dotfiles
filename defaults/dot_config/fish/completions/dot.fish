@@ -138,6 +138,8 @@ complete -c dot -n '__dot_at '\''cli'\''' -a new -d 'Create a plugin from the te
 complete -c dot -n '__dot_at '\''cli completion'\''' -a show -d 'Print a completion script'
 complete -c dot -n '__dot_at '\''cli hook'\''' -a status -d 'Each agent session'\''s last state'
 complete -c dot -n '__dot_at '\''cli hook'\''' -a run -d 'Record an agent hook event read on stdin'
+complete -c dot -n '__dot_at '\''cli hook'\''' -a install -d 'Wire the hook into each agent'\''s configuration'
+complete -c dot -n '__dot_at '\''cli hook'\''' -a remove -d 'Take the hook out of each agent'\''s configuration'
 complete -c dot -n '__dot_at '\''cli registry'\''' -a show -d 'The plugin registry URL'
 complete -c dot -n '__dot_at '\''cli registry'\''' -a set -d 'Point at another plugin registry'
 complete -c dot -n '__dot_at '\''config'\''' -a path -d 'where the dotfiles source lives'

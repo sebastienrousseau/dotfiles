@@ -745,6 +745,18 @@ function Install-DotCli {
     dot cli install @Arguments
 }
 
+function Install-DotCliHook {
+    <#
+    .SYNOPSIS
+    Wire the hook into each agent's configuration
+    .DESCRIPTION
+    Runs `dot cli hook install`: Wire the hook into each agent's configuration. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot cli hook install @Arguments
+}
+
 function Install-DotThemeFont {
     <#
     .SYNOPSIS
@@ -923,6 +935,18 @@ function Push-DotFleet {
     [CmdletBinding()]
     param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
     dot fleet push @Arguments
+}
+
+function Remove-DotCliHook {
+    <#
+    .SYNOPSIS
+    Take the hook out of each agent's configuration
+    .DESCRIPTION
+    Runs `dot cli hook remove`: Take the hook out of each agent's configuration. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot cli hook remove @Arguments
 }
 
 function Remove-DotSecretCert {
@@ -1528,6 +1552,7 @@ Export-ModuleMember -Function @(
     'Initialize-DotSecret'
     'Install-DotAi'
     'Install-DotCli'
+    'Install-DotCliHook'
     'Install-DotThemeFont'
     'Install-DotTool'
     'Invoke-DotAgent'
@@ -1543,6 +1568,7 @@ Export-ModuleMember -Function @(
     'New-DotSecretKey'
     'New-DotTool'
     'Push-DotFleet'
+    'Remove-DotCliHook'
     'Remove-DotSecretCert'
     'Remove-DotTool'
     'Repair-DotDoctor'

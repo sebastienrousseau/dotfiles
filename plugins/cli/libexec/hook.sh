@@ -23,7 +23,8 @@
 # read into the record.
 #
 # A hook must not get in the agent's way: this prints nothing (Claude Code
-# adds a UserPromptSubmit hook's stdout to the prompt) and always exits 0.
+# adds a UserPromptSubmit hook's stdout to the prompt), except {} for Gemini
+# CLI, which reads it as JSON, and always exits 0.
 
 set -uo pipefail
 
@@ -152,4 +153,6 @@ if [[ "${1:-}" == --status ]]; then
   exit 0
 fi
 hook_main "$@" >/dev/null 2>&1
+# Gemini CLI reads a hook's stdout as JSON: {} says "nothing to change".
+[[ "${1:-} ${2:-}" != "--agent gemini" ]] || printf '{}\n'
 exit 0
