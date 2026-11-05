@@ -2,12 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1091
-# scripts/diagnostics/secret-governance.sh scans what is staged, with a real
-# git. It used `git show -- ":$f"`, which reads `:$f` as a pathspec and
-# prints the last commit's diff for that path: a commit that removed a
-# secret failed, and a secret staged in a file whose last commit was clean
-# passed. Runs a copy of the hook inside a throwaway repository, since the
-# hook works on the repository it lives in.
+# scripts/diagnostics/secret-governance.sh scans the lines a commit adds,
+# with a real git. It used `git show -- ":$f"`, which reads `:$f` as a
+# pathspec and prints the last commit's diff for that path: a commit that
+# removed a secret failed, and a secret staged in a file whose last commit
+# was clean passed. Reading whole staged files instead failed every commit
+# that touched a file with an old match anywhere in it. Runs a copy of the
+# hook inside a throwaway repository, since the hook works on the
+# repository it lives in.
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -56,6 +58,19 @@ git -C "$REPO" add app.conf
 govern
 assert_equals "1" "$RC" "the staged secret is found"
 assert_contains "potential plaintext secret pattern" "$OUT" "and reported"
+
+test_start "an_old_match_elsewhere_in_a_changed_file_passes"
+commit app.conf "$SECRET"
+printf '%s\nlog_level = debug\n' "$SECRET" >"$REPO/app.conf"
+git -C "$REPO" add app.conf
+govern
+assert_equals "0" "$RC" "only the added line is the commit's"
+
+test_start "a_value_taken_from_a_variable_passes"
+printf '%s\n' 'TOKEN="$HOME/.local/state/dot/ai/serve/gateway.token"' >"$REPO/run.sh"
+git -C "$REPO" add run.sh
+govern
+assert_equals "0" "$RC" "a reference is not a written-down secret"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
