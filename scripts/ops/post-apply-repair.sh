@@ -79,8 +79,10 @@ validate_dot_cli() {
     alias dot 2>/dev/null || true
     whence -p dot 2>/dev/null || true
   ' 2>/dev/null || true)"
-  dot_alias="$(printf "%s\n" "$zsh_out" | head -n 1)"
-  dot_path="$(printf "%s\n" "$zsh_out" | tail -n 1)"
+  # First and last line by expansion: `printf | head -n 1` under pipefail
+  # dies with a broken pipe once a chatty login shell outgrows what head reads.
+  dot_alias="${zsh_out%%$'\n'*}"
+  dot_path="${zsh_out##*$'\n'}"
 
   if [[ "$dot_alias" == *"cd_with_history"* ]]; then
     ui_warn "dot alias collision" "legacy sessions may still map dot to navigation; run: unalias dot && exec zsh"
