@@ -27,7 +27,7 @@ A clear and concise description of what you expected to happen.
 - Output of `dot doctor` (if available):
 
 **Logs**
-Include relevant output from `${XDG_STATE_HOME:-~/.local/state}/dotfiles/dot.log` if applicable.
+Include relevant lines from the dot CLI's logs, `${XDG_STATE_HOME:-~/.local/state}/dot/<domain>/log.jsonl` (`dot-audit` shows the latest), if applicable. They hold command names, counts and ids, never file contents.
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.

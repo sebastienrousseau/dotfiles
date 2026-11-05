@@ -9,7 +9,7 @@ How dotfiles handles security and system modifications.
 ## Core Principles
 
 - **Opt-In Only** — No hardening applies unless `DOTFILES_*` variables are set to `1`.
-- **Local Logging**: `dot` operations (apply, doctor, rollback and related commands) log to `${XDG_STATE_HOME:-~/.local/state}/dotfiles/dot.log`. No telemetry.
+- **Local Logging**: `dot` operations (apply, doctor, rollback and related commands) log to `${XDG_STATE_HOME:-~/.local/state}/dot/<domain>/log.jsonl` (log.v1: metadata only, kept 30 days). No telemetry.
 - **No Hidden Sudo** — Sudo requests only for package managers. Never cached indefinitely.
 
 ## Hardening

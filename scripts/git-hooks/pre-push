@@ -21,25 +21,40 @@ repo_root="$(git rev-parse --show-toplevel)"
 # -----------------------------------------------------------------------------
 # Step 1 — signed-commit enforcement (unchanged)
 # -----------------------------------------------------------------------------
-while read -r local_ref local_sha remote_ref remote_sha; do
-  [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue
+ZERO_SHA=0000000000000000000000000000000000000000
 
-  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
-    range="$local_sha"
-  elif git cat-file -e "${remote_sha}^{commit}" 2>/dev/null; then
-    range="$remote_sha..$local_sha"
+# push_range LOCAL REMOTE: the commits a ref update sends.
+push_range() {
+  if [ "$2" = "$ZERO_SHA" ]; then
+    printf '%s\n' "$1"
+  elif git cat-file -e "${2}^{commit}" 2>/dev/null; then
+    printf '%s\n' "$2..$1"
   else
     # Remote tip is not in the local object store yet (push without prior fetch).
     # Fall back to checking commits reachable from local tip.
-    range="$local_sha"
+    printf '%s\n' "$1"
   fi
+}
 
-  for c in $(git rev-list "$range"); do
+# verify_range RANGE: exit 1 on the first commit without a valid signature.
+verify_range() {
+  local c
+  for c in $(git rev-list "$1"); do
     if ! git verify-commit "$c" >/dev/null 2>&1; then
       echo "Blocked: unsigned commit $c" >&2
       exit 1
     fi
   done
+}
+
+# Reads git's ref lines; sets refs=1 when any arrive and updates=1 when any
+# is more than a deletion (a deletion's local sha is all zeros).
+refs=0 updates=0
+while read -r _ local_sha _ remote_sha; do
+  refs=1
+  [ "$local_sha" = "$ZERO_SHA" ] && continue
+  updates=1
+  verify_range "$(push_range "$local_sha" "$remote_sha")"
 done
 
 # -----------------------------------------------------------------------------
@@ -87,6 +102,12 @@ if [ "${DOTFILES_ALLOW_UNSKIPPED_PUSH:-}" = "1" ]; then
     "$ts" "$branch" "$remote" "$reason" >>"$bypass_log"
 
   echo "WARN: pre-push audit bypassed (logged to $bypass_log)" >&2
+  exit 0
+fi
+
+# A push that only deletes remote refs sends no commits: nothing to audit.
+if [ "$refs" = 1 ] && [ "$updates" = 0 ]; then
+  echo "pre-push: deletion only, audit skipped" >&2
   exit 0
 fi
 

@@ -34,7 +34,7 @@ and adds the host-only helpers.
 | `utils.sh` (host) | `sed_in_place`, `check_cmd`, `validate_xdg_path`, `is_help_flag`, `dot_show_help`, `handle_help_flag`; sources `sdk.sh` |
 | `ui.sh` (SDK) | `ui_ok`, `ui_warn`, `ui_err`, `ui_info`, `ui_header`, `ui_section`, `ui_table_begin/add/end`, `ui_spinner_*`, `ui_steps_*`, `ui_pick`, `ui_confirm`, `ui_run_cmd` |
 | `platform.sh` (SDK) | `dot_platform_id`, `dot_host_os`, `dot_is_wsl`, `dot_path_to_unix`, `dot_path_to_native`, `dot_open_path`, `dot_require_platform` |
-| `log.sh` (SDK) | `dot_log`, `dot_metric`, `dot_jsonl_append`, `dot_agent_session_log`, `log_info/warn/error/success` shims |
+| `log.sh` (SDK) | `dot_log` (log.v1 events in `$XDG_STATE_HOME/dot/<domain>/log.jsonl`), `dot_metric`, `dot_log_tail`, `dot_log_prune`, `dot_agent_session_log`, `dot_jsonl_append` (deprecated), `log_info/warn/error/success` shims |
 | `preflight.sh` (SDK) | Consent and prerequisites for commands that change the machine |
 | `probe.sh` (SDK) | `dot_probe`: run a query of another tool with a time limit |
 | `lock.sh` (SDK) | `dot_lock`: hold a domain's lock (ADR-020 N17); bin/dot takes it for every write or destructive command, and a second run exits 75 or waits `DOT_LOCK_WAIT` seconds |

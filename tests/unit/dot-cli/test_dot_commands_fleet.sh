@@ -34,7 +34,7 @@ fi
 DOT_CLI="$REPO_ROOT/bin/dot"
 FLEET_TMP="$DOTFILES_COV_TMPDIR/fleet"
 export XDG_STATE_HOME="$FLEET_TMP/state"
-EVENTS="$XDG_STATE_HOME/dotfiles/fleet/events.jsonl"
+EVENTS="$XDG_STATE_HOME/dot/fleet/log.jsonl" # log.v1
 last_event() { tail -n 1 "$EVENTS" 2>/dev/null | jq -r .event 2>/dev/null; }
 
 test_start "fleet_status_json_is_structured"
@@ -42,14 +42,14 @@ assert_equals "true" "$(bash "$DOT_CLI" fleet status --json 2>/dev/null | jq 'ha
 
 test_start "fleet_status_emits_event"
 bash "$DOT_CLI" fleet status >/dev/null 2>&1 || true
-assert_equals "status" "$(last_event)" "status appends a status event"
+assert_equals "fleet_status" "$(last_event)" "status appends a status event"
 
 test_start "fleet_drift_emits_event"
 bash "$DOT_CLI" fleet drift >/dev/null 2>&1 || true
-assert_equals "drift_check" "$(last_event)" "drift appends a drift_check event"
+assert_equals "fleet_drift_check" "$(last_event)" "drift appends a drift_check event"
 
 test_start "fleet_events_are_valid_jsonl"
-assert_exit_code 0 "jq -e -s 'length >= 2 and all(has(\"time\") and has(\"node_id\") and has(\"trace_id\"))' '$EVENTS'"
+assert_exit_code 0 "jq -e -s 'length >= 2 and all(.schema == \"cli/log.v1\" and has(\"time\") and (.data | has(\"node_id\")) and has(\"trace_id\"))' '$EVENTS'"
 
 test_start "fleet_events_lists_recorded_events"
 assert_output_contains "drift_check" "XDG_STATE_HOME='$XDG_STATE_HOME' bash '$DOT_CLI' fleet events"

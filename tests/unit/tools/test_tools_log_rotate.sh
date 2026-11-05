@@ -24,6 +24,32 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST"
 fi
 
+# The maintenance job's rotation step prunes the log.v1 logs to the
+# retention window, even when the installer log it also rotates is absent.
+test_start "rotation_prunes_the_log_v1_logs"
+rot_state="$(mktemp -d "${TMPDIR:-/tmp}/log-rotate.XXXXXX")"
+mkdir -p "$rot_state/dot/theme"
+printf '%s\n' '{"schema":"cli/log.v1","time":"2020-01-01T00:00:00Z","event":"old"}' \
+  "{\"schema\":\"cli/log.v1\",\"time\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"event\":\"new\"}" \
+  >"$rot_state/dot/theme/log.jsonl"
+rot_rc=0
+HOME="$rot_state/home" XDG_STATE_HOME="$rot_state" bash "$SCRIPT_FILE" || rot_rc=$?
+assert_equals "0|0|1" "$rot_rc|$(grep -c '"old"' "$rot_state/dot/theme/log.jsonl")|$(grep -c '"new"' "$rot_state/dot/theme/log.jsonl")" \
+  "a record older than 30 days goes, today's stays, with no installer log"
+rm -rf "$rot_state"
+
+test_start "installer_log_rotates_from_exactly_1_mib"
+rot_home="$(mktemp -d "${TMPDIR:-/tmp}/log-rotate-home.XXXXXX")"
+mkdir -p "$rot_home/.local/share"
+head -c 1048575 /dev/zero >"$rot_home/.local/share/dotfiles.log"
+HOME="$rot_home" XDG_STATE_HOME="$rot_home/state" bash "$SCRIPT_FILE"
+assert_equals "no" "$([[ -f "$rot_home/.local/share/dotfiles.log.1.gz" ]] && echo yes || echo no)" "one byte under 1 MiB stays"
+head -c 1048576 /dev/zero >"$rot_home/.local/share/dotfiles.log"
+HOME="$rot_home" XDG_STATE_HOME="$rot_home/state" bash "$SCRIPT_FILE"
+assert_equals "yes|0" "$([[ -f "$rot_home/.local/share/dotfiles.log.1.gz" ]] && echo yes || echo no)|$(wc -c <"$rot_home/.local/share/dotfiles.log" | tr -d ' ')" \
+  "1 MiB exactly is rotated, and the log starts empty"
+rm -rf "$rot_home"
+
 # Slice 3 (#883): exercise the script under sandbox for line coverage
 cov_exercise_script "$SCRIPT_FILE"
 

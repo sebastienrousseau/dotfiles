@@ -21,7 +21,7 @@
   33   39   35.4  149     0 bin/dot-theme-sync::reload_desktop
   17   19   28.7   43     0 bin/dot-theme-sync::reload_ghostty
   11   11   20.7   33     0 bin/dot-theme-sync::reload_tmux
-  16   11   27.5   70   335 bin/dot::<top>
+  16   11   27.5   70   342 bin/dot::<top>
   20   24   31.1   39     0 bin/dot::_resolve_source_dir
   21   21    4.2  108   108 defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh::<top>
   19   27   29.6   53     0 defaults/.chezmoitemplates/aliases/cd/cd-core.aliases.sh::cd_with_history
@@ -122,7 +122,7 @@
    4    4   14.4   20   536 scripts/diagnostics/health.sh::<top>
    5    5   17.0   65    65 scripts/diagnostics/history-analysis.sh::<top>
   16   18   37.3   86    92 scripts/diagnostics/scorecard.sh::<top>
-  17   19   27.8   40    46 scripts/diagnostics/secret-governance.sh::<top>
+  17   19   27.8   40    44 scripts/diagnostics/secret-governance.sh::<top>
   14   18   28.5   38     0 scripts/diagnostics/security-score.sh::check_encryption
   22   32   40.2   53     0 scripts/diagnostics/security-score.sh::check_system
   11   11    5.6   26     0 scripts/diagnostics/security-score.sh::get_grade
@@ -131,7 +131,7 @@
   25   27   43.1  135   218 scripts/diagnostics/workstation-attestation.sh::<top>
   11   11   15.2   34     0 scripts/dot/commands/manual.sh::cmd_open
   17   38   24.9   54     0 scripts/dot/commands/meta.sh::cmd_keys
-  18   31   39.3  112   112 scripts/git-hooks/pre-commit-audit.sh::<top>
+  18   30   37.5  107   123 scripts/git-hooks/pre-commit-audit.sh::<top>
   13   12   29.0   59   102 scripts/ops/bundle.sh::<top>
   12   14   22.6   41    45 scripts/ops/chezmoi-update.sh::<top>
    8   10   31.5   42     0 scripts/ops/heal-chezmoi.sh::heal_chezmoi_drift

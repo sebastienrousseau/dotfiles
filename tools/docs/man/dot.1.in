@@ -98,8 +98,9 @@ User-provided aliases and functions.
 .I ~/.config/zsh/rc.d.local/
 User-provided zsh initialization scripts.
 .TP
-.I ~/.local/state/dotfiles/dot.log
-Local action log. No telemetry leaves the machine.
+.I ~/.local/state/dot/<domain>/log.jsonl
+Local action logs, one per domain (log.v1, kept 30 days). No telemetry
+leaves the machine.
 .SH EXIT STATUS
 @EXIT@
 .SH SEE ALSO

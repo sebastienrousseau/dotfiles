@@ -26,7 +26,7 @@ cov_setup_sandbox
 
 STATE_DIR="$XDG_STATE_HOME/dotfiles"
 CHECKPOINT_DIR="$STATE_DIR/checkpoints"
-SESSIONS="$STATE_DIR/agent-sessions.jsonl"
+SESSIONS="$XDG_STATE_HOME/dot/agent/log.jsonl" # log.v1 session_<event> records
 
 # `timeout` (used by `agent delegate`) is coreutils-only on macOS; shim it so
 # the delegate arm is deterministic on every platform.

@@ -57,7 +57,7 @@ Identify the incident through automated or manual signals.
 | CI pipeline | Failed security scan, unsigned commit | `security-enhanced.yml`, `compliance-guard.yml` |
 | Weekly extended tests | Dependency version drift | `nightly.yml` (Sundays 02:00 UTC) |
 | CodeQL | Static analysis finding | `codeql.yml` |
-| Operations log | Unexpected operation | `${XDG_STATE_HOME:-~/.local/state}/dotfiles/dot.log` (written by `dot` apply, doctor, rollback and related commands) |
+| Operations log | Unexpected operation | `${XDG_STATE_HOME:-~/.local/state}/dot/<domain>/log.jsonl` (log.v1, written by `dot` apply, doctor, rollback and related commands) |
 
 **Manual detection signals:**
 
@@ -72,7 +72,7 @@ Classify the incident severity and assign ownership.
 
 ```bash
 # Gather initial evidence
-tail -n 50 "${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/dot.log"
+cat "${XDG_STATE_HOME:-$HOME/.local/state}"/dot/*/log.jsonl | sort -s -t'"' -k8,8 | tail -n 50
 git log --oneline --show-signature -20
 chezmoi diff
 chezmoi verify
@@ -169,7 +169,7 @@ dot doctor status
 dot doctor
 
 # Confirm the operations log captures recovery
-tail -n 20 "${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/dot.log"
+cat "${XDG_STATE_HOME:-$HOME/.local/state}"/dot/*/log.jsonl | sort -s -t'"' -k8,8 | tail -n 20
 ```
 
 ### Phase 6: Post-Mortem
@@ -261,7 +261,7 @@ chezmoi managed --include=files | wc -l
 chezmoi dump --format=json > /tmp/chezmoi-state-$(date +%s).json
 
 # Step 3: Check audit log for unauthorized operations
-grep -E "(apply|edit|add)" "${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/dot.log" | tail -20
+grep -hE '"event":"[a-z_]*(apply|edit|add)' "${XDG_STATE_HOME:-$HOME/.local/state}"/dot/*/log.jsonl | tail -20
 
 # Step 4: Determine root cause
 # Option A: Local manual edit (benign)
@@ -295,7 +295,7 @@ chmod 000 "$(which <tool>)"
 
 # Step 3: Check if the tool executed during shell startup
 grep -l "<tool>" ~/.cache/zsh/* ~/.cache/bash/* 2>/dev/null
-grep "<tool>" "${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/dot.log"
+grep -h "<tool>" "${XDG_STATE_HOME:-$HOME/.local/state}"/dot/*/log.jsonl
 
 # Step 4: Reinstall from verified source
 mise install <tool>@<verified-version> --force
@@ -397,7 +397,7 @@ Preserve all forensic evidence before performing eradication or recovery actions
 
 | Evidence | Command | Storage |
 |----------|---------|---------|
-| Dotfiles operations log | `cp "${XDG_STATE_HOME:-$HOME/.local/state}"/dotfiles/dot.log* /tmp/incident-$(date +%s)/` | Local archive |
+| Dotfiles operations logs | `cp -R "${XDG_STATE_HOME:-$HOME/.local/state}"/dot /tmp/incident-$(date +%s)/` (each domain's `log.jsonl`) | Local archive |
 | Git reflog | `git reflog > /tmp/incident-$(date +%s)/reflog.txt` | Local archive |
 | Git signatures | `git log --show-signature -50 > /tmp/incident-$(date +%s)/signatures.txt` | Local archive |
 | Chezmoi state | `chezmoi dump --format=json > /tmp/incident-$(date +%s)/chezmoi-state.json` | Local archive |

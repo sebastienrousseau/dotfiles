@@ -167,7 +167,7 @@ test_fm_fleet_events() {
 }
 
 test_fm_fleet_events_empty() {
-  rm -f "$XDG_STATE_HOME/dotfiles/fleet/events.jsonl"
+  rm -f "$XDG_STATE_HOME/dot/fleet/log.jsonl"
   test_start "fm_fleet_events_empty"
   fm_run fleet events
   fm_expect_rc 0

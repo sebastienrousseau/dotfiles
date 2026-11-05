@@ -42,7 +42,7 @@ brew install --cask font-jetbrains-mono-nerd-font
 ### Linux (manual)
 
 ```bash
-wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/JetBrainsMono.zip
+wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/JetBrainsMono.zip
 unzip JetBrainsMono.zip -d ~/.local/share/fonts/
 fc-cache -fv
 ```

@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/sebastienrousseau/dotfiles/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=githubactions&logoColor=white" alt="Build" /></a>
-  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.540-blue?style=for-the-badge&logo=semanticrelease&logoColor=white" alt="Version" /></a>
+  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.541-blue?style=for-the-badge&logo=semanticrelease&logoColor=white" alt="Version" /></a>
   <a href="https://www.npmjs.com/package/@sebastienrousseau/dotfiles"><img src="https://img.shields.io/npm/v/@sebastienrousseau/dotfiles?style=for-the-badge&logo=npm&logoColor=white&label=npm" alt="npm" /></a>
   <a href="https://doc.dotfiles.io/"><img src="https://img.shields.io/badge/Manual-doc.dotfiles.io-66c2a5?style=for-the-badge&labelColor=555555" alt="Manual" /></a>
   <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge&logo=github&logoColor=white" alt="Downloads" /></a>
@@ -51,7 +51,7 @@
 
 **What it does**
 
-- [Wallpaper-driven themes](#wallpaper-driven-themes) — K-Means in CIELAB, WCAG AAA, 228 generated themes
+- [Wallpaper-driven themes](#wallpaper-driven-themes) — K-Means in CIELAB, WCAG AAA, 296 generated themes
 - [Agent governance (ask / plan / apply / audit)](#agent-governance-ask--plan--apply--audit) — bounded profiles, MCP policy, attestation
 - [Self-healing and rollback](#self-healing-and-rollback) — `dot doctor`, `dot doctor fix`, `dot doctor rollback`
 - [Fleet apply](#fleet-apply) — every host in `fleet.toml` over SSH
@@ -83,11 +83,11 @@ release process are documented in
 
 ```bash
 curl -fsSL -o /tmp/dotfiles-install.sh \
-  https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.540/dotfiles-install-0.2.540.sh
+  https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.541/dotfiles-install-0.2.541.sh
 if command -v sha256sum >/dev/null 2>&1; then
-  echo "f05088523b85fa73be6d7df020e635fa2ac9214ac151080a1e38fa4e10d3066f  /tmp/dotfiles-install.sh" | sha256sum -c -
+  echo "1ad4bba73b8357b8abd6128af9fd5f957763f16832716db141a92c9415b02ae5  /tmp/dotfiles-install.sh" | sha256sum -c -
 else
-  echo "f05088523b85fa73be6d7df020e635fa2ac9214ac151080a1e38fa4e10d3066f  /tmp/dotfiles-install.sh" | shasum -a 256 -c -
+  echo "1ad4bba73b8357b8abd6128af9fd5f957763f16832716db141a92c9415b02ae5  /tmp/dotfiles-install.sh" | shasum -a 256 -c -
 fi
 bash /tmp/dotfiles-install.sh
 ```
@@ -107,10 +107,10 @@ directory. The archive
 carries SLSA build provenance (keyless, via Fulcio + Rekor):
 
 ```bash
-gh release download v0.2.540 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
-gh attestation verify dot-0.2.540.tar.gz --repo sebastienrousseau/dotfiles
-tar -xzf dot-0.2.540.tar.gz
-make -C dot-0.2.540 install PREFIX=/usr/local
+gh release download v0.2.541 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
+gh attestation verify dot-0.2.541.tar.gz --repo sebastienrousseau/dotfiles
+tar -xzf dot-0.2.541.tar.gz
+make -C dot-0.2.541 install PREFIX=/usr/local
 ```
 
 [`release-install-smoke.yml`](.github/workflows/release-install-smoke.yml)
@@ -312,7 +312,7 @@ and [`AGENTS.md`](AGENTS.md)) on every push to `main`.
 bash /tmp/dotfiles-install.sh  # after the verified download above
 
 # Only the dot CLI, from the attested release archive
-gh release download v0.2.540 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
+gh release download v0.2.541 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
 
 # The Go satellites are (re)built on apply by
 #   defaults/run_onchange_24-build-dot-ui.sh.tmpl
@@ -430,7 +430,7 @@ Three choices you will not find in `mathiasbynens/`, `holman/`, or
 
 1. **Wallpaper-driven terminal themes.** K-Means clustering in
    CIELAB extracts a palette from any wallpaper; the engine enforces
-   WCAG AAA (7:1) contrast and writes `themes.toml` itself. 228
+   WCAG AAA (7:1) contrast and writes `themes.toml` itself. 296
    generated themes ship today
    ([ADR-009](docs/adr/ADR-009-wallpaper-driven-theming.md)).
 2. **First-class agent governance.** Bounded profiles (`ask` /
@@ -470,7 +470,7 @@ via taplo on every PR).
 
 | Theme | Headline deliverables |
 | :--- | :--- |
-| Wallpaper-driven themes | K-Means clustering in CIELAB extracts terminal palettes from any wallpaper; WCAG AAA enforced; Apple-compatible dynamic HEIC dark/light; 228 generated themes; `dot theme rebuild` |
+| Wallpaper-driven themes | K-Means clustering in CIELAB extracts terminal palettes from any wallpaper; WCAG AAA enforced; Apple-compatible dynamic HEIC dark/light; 296 generated themes; `dot theme rebuild` |
 | AI and MCP native | Agent profiles (`dot agent mode`), MCP policy and registry audit (`dot mcp`), agent card, checkpoints and conformance (`dot agent`), AI commit messages (`dot config save`), the `dot ai` cockpit and local gateway |
 | Cryptographic attestation | Signed commits and tags, machine-readable workstation evidence (`dot attest`), policy-bundle releases, the signing check in `dot doctor`, `dot secret check` |
 | Fleet management | Multi-node status, drift, events, namespaces and RBAC enforcement mode (`dot fleet`); `dot fleet apply` over SSH; `dot fleet push` to bring up a remote host |
@@ -618,7 +618,7 @@ and [`benches/`](benches/).
 | **Development and runtimes** | mise manages language versions in user space with a cross-platform `mise.lock` (Linux, macOS, Windows, exact URLs and SHA-256s). Nix Flakes for strict reproducibility when speed is not the priority. Pueue queues long-running tasks instead of extra tabs. Neovim ships as a full Lua editor, not a starter template. Lazygit for terminal git. Build caches (Go, pip, uv, Zig) live under a private `~/.cache/dot/builds`; Cargo keeps a per-project `./target`. `_cached_eval` caches expensive `tool init` output with mtime and realpath invalidation; `EVALCACHE_DISABLE=true` bypasses it. |
 | **AI, agents, and MCP** | Agent profiles (`dot agent mode`): ask, plan, apply, audit. Pattern library (`dot ai pattern`): architect, hardener, refactor, bundled in `dot_config/ai/patterns/`. MCP policy enforcement (`dot mcp`). AI commit messages (`dot config save`). The `dot ai` cockpit installs and runs Codex, Copilot, Antigravity, Aider, OpenCode and friends from one Bubble Tea TUI; `dot ai gateway serve` exposes your Claude subscription locally to any Anthropic- or OpenAI-protocol tool ([ADR-012](docs/adr/ADR-012-ai-fleet-local-proxy.md), [`docs/AI.md`](docs/AI.md)). Every agent session is logged with a policy hash and an outcome. |
 | **Security, trust, governance** | age and SOPS keep secrets encrypted at rest and out of history. SSH ed25519 signing plus trust metadata back every commit. Gitleaks, detect-secrets, TruffleHog, policy checks, and compliance workflows. `dot attest` records machine state, policy, prompt, and model metadata in tracked JSON. Telemetry controls and local-first defaults (`dot security telemetry apply`, `dot security dns apply`, `dot security firewall apply`, `dot security usb apply`, `dot security lock apply`, `dot security disk show`). SPDX SBOM and Grype CVE scanning in CI. npm releases authenticate through OIDC trusted publishing with provenance, never a long-lived token. |
-| **Themes** | 228 wallpaper-derived themes, dark and light paired; `dot theme`, `dot theme toggle`, `dot theme family`, `dot theme sync` with the OS appearance; `dot theme wallpaper set rotate` and `dot theme wallpaper set sync`. See [Wallpaper-driven themes](#wallpaper-driven-themes). |
+| **Themes** | 296 wallpaper-derived themes, dark and light paired; `dot theme`, `dot theme toggle`, `dot theme family`, `dot theme sync` with the OS appearance; `dot theme wallpaper set rotate` and `dot theme wallpaper set sync`. See [Wallpaper-driven themes](#wallpaper-driven-themes). |
 | **Fleet and remote** | `dot fleet` status, drift, events, namespace, RBAC enforce mode; `dot fleet apply` runs `dot sync` (or a custom `--cmd`) on every host in `fleet.toml`; `dot fleet push` deploys the environment to a fresh host over SSH; `dot config export` builds an offline archive. |
 | **Diagnostics** | `dot doctor` (deep audit, `--ai` analysis), `dot doctor status` dashboard, `dot doctor score`, `dot security score show`, `dot fleet drift`, `dot doctor snapshot new`, `dot doctor metric list` (JSONL observability), `dot shell history list`, `dot tool list --packages`. |
 | **Distribution** | Release archives with a `PREFIX` / `DESTDIR` Makefile, man page (`share/man/man1/dot.1`), generated completions, Homebrew tap, Scoop bucket, AUR, npm, Nix; `dot config uninstall` removes the managed environment. |
@@ -878,7 +878,7 @@ design is
 
 ```toml
 # defaults/.chezmoidata.toml — repo-wide defaults, schema-checked in CI
-dotfiles_version = "0.2.540"
+dotfiles_version = "0.2.541"
 
 [features]
 alias_wrapper = false   # confirm destructive aliases

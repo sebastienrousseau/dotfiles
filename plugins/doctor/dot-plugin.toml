@@ -6,7 +6,7 @@
 schema = "cli/manifest.v1"
 name = "doctor"
 domain = "doctor"
-version = "0.2.540"
+version = "0.2.541"
 summary = "health, repair, backup and rollback"
 default = "status"
 

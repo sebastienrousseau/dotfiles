@@ -224,7 +224,7 @@ Show the scorecard: health, security and performance scores out of 100, plus the
 
 ### `dot doctor metric list`
 
-Show recent observability metrics from `~/.local/state/dotfiles/metrics.jsonl` (default 20 lines; `dot doctor metric list <n>` for more).
+Show recent observability metrics: the `metric` events of every domain's log, `~/.local/state/dot/<domain>/log.jsonl` (default 20; `dot doctor metric list <n>` for more).
 
 ### `dot doctor perf --ready`
 

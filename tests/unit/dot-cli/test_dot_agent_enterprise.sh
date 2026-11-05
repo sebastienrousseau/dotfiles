@@ -24,7 +24,7 @@ assert_file_exists "$WELL_KNOWN" ".well-known agent.json should exist"
 
 # card and conformance are exercised by the *_runs cases below.
 test_start "agent_log_shows_session_events"
-assert_output_contains '"event":"log"' "XDG_STATE_HOME='$DOTFILES_COV_TMPDIR/ent-state' bash '$DOT_CLI' agent log"
+assert_output_contains '"event":"session_log"' "XDG_STATE_HOME='$DOTFILES_COV_TMPDIR/ent-state' bash '$DOT_CLI' agent log"
 
 test_start "agent_checkpoint_lists_checkpoints"
 assert_output_contains "Agent Checkpoints" "XDG_STATE_HOME='$DOTFILES_COV_TMPDIR/ent-state' bash '$DOT_CLI' agent checkpoint"

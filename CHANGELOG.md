@@ -2,6 +2,30 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.541 (2026-11-01)
+
+### Added
+
+- Every event is a `cli/log.v1` JSON line (`schemas/cli/log.v1.schema.json`) in `$XDG_STATE_HOME/dot/<domain>/`: the agent session log, fleet events, metrics and the CLI's own log share one schema, and `dot_log` escapes the fields it writes (P2.2).
+- Write and destructive commands hold a per-domain lock in `$XDG_STATE_HOME/dot/<domain>/lock`, so a scheduled `dot update` and a manual `dot config apply` no longer run at once; a second run waits or exits 75 with the holder's PID (ADR-020 N17).
+- `dot ai update --check` reports AI pin bumps, and `dot system update` reads that report.
+- govulncheck is in the base mise layer, so every machine gets it on apply.
+- The source keeps the `geo:` association to `google-maps-geo-handler.desktop`, so an apply no longer drops it.
+
+### Changed
+
+- The checkout is exported as `DOTFILES_DIR`; the shells, aliases, scripts, `dot config export` and `dot config import` use it instead of assuming `~/.dotfiles` (P2.2 edge 5c).
+- Every domain library lives in its plugin and the ai plugin owns its libraries; `tools/ci/plugin-imports-baseline.txt` is empty, so any import a plugin makes outside the SDK fails CI (P2.2 edge 5b).
+- doc.dotfiles.io serves `/favicon.ico` and a `/sitemap.xml` that lists every page by its canonical URL; the build fails if a sitemap URL or hreflang alternate is not a built page, and `pages.yml` builds the site on pull requests with ssg 0.0.72.
+
+### Fixed
+
+- An AI pin bump stays on the pinned major: `dot update` had proposed `opencode 1.19.0 -> 2.1.4`.
+- A theme switch skips files chezmoi no longer manages; on macOS every switch had rolled back on `~/.config/waybar/config.jsonc`.
+- A delete-only push skips the pre-push audit, and the fleet tests no longer lock the real `~/.local/state/dot/fleet/lock`.
+- The weekly dependency update commits through GitHub's API, verified and signed off; it had failed on every run since 2026-09-28.
+- CI: harden-runner v2.22.3 and a count-bounded FuzzFrames run end two flakes that turned `main` red.
+
 ## v0.2.540 (2026-10-31)
 
 ### Added

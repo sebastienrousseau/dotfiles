@@ -50,7 +50,7 @@ echo defaults >"$FAKE/.chezmoiroot"
 FLEET="$FAKE/plugins/fleet/libexec/fleet.sh"
 DATA="$FAKE/defaults/.chezmoidata.toml"
 PROFILES="$FAKE/defaults/dot_config/dotfiles/agent-profiles.json"
-EVENTS="$XDG_STATE_HOME/dotfiles/fleet/events.jsonl"
+EVENTS="$XDG_STATE_HOME/dot/fleet/log.jsonl" # log.v1
 
 # ── PATH ────────────────────────────────────────────────────────────
 # $MINI holds only the coreutils the script needs; $SHIMS is a second
@@ -158,7 +158,7 @@ rc=$?
 assert_equals 0 "$rc" "namespace set exits 0"
 assert_contains "Set to 'lab'" "$out" "confirmation message"
 assert_file_contains "$DATA" 'namespace = "lab"' "data file rewritten atomically"
-assert_file_contains "$EVENTS" '"event":"namespace_set"' "event emitted"
+assert_file_contains "$EVENTS" '"event":"fleet_namespace_set"' "event emitted"
 assert_file_contains "$EVENTS" '"namespace":"lab"' "event carries the new namespace"
 
 test_start "fleet_namespace_set_requires_name"
@@ -277,7 +277,7 @@ rc=$?
 assert_equals 0 "$rc" "enforce set exits 0"
 assert_contains "set to 'strict'" "$out" "confirmation"
 assert_equals "strict" "$(jq -r .rbac.enforcement "$PROFILES")" "profiles file updated"
-assert_file_contains "$EVENTS" '"event":"enforcement_set"' "event emitted"
+assert_file_contains "$EVENTS" '"event":"fleet_enforcement_set"' "event emitted"
 
 test_start "fleet_enforce_set_requires_mode"
 out="$(fleet enforce set 2>&1)"
@@ -412,7 +412,7 @@ assert_contains "all hosts found in known_hosts" "$out" "verification confirmati
 assert_contains "2 ok / 0 failed / 2 total" "$out" "summary line"
 assert_file_contains "$SSH_LOG" "user@alpha.test echo hi" "alpha received the command"
 assert_file_contains "$SSH_LOG" "user@beta.test:2222 echo hi" "beta received the command"
-assert_file_contains "$EVENTS" '"event":"apply"' "apply events emitted"
+assert_file_contains "$EVENTS" '"event":"fleet_apply"' "apply events emitted"
 assert_file_contains "$EVENTS" '"host":"beta"' "event carries the host"
 
 test_start "fleet_apply_reports_failed_hosts"

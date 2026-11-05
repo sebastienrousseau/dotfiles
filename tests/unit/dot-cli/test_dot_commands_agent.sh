@@ -32,7 +32,7 @@ unset AGENT_STATE_FILE DOT_AGENT_PROFILE DOT_AGENT_CHECKPOINT_ID
 mkdir -p "$XDG_CONFIG_HOME" "$XDG_STATE_HOME"
 STATE_FILE="$XDG_CONFIG_HOME/dotfiles/agent-mode.env"
 CHECKPOINTS="$XDG_STATE_HOME/dotfiles/checkpoints"
-SESSIONS="$XDG_STATE_HOME/dotfiles/agent-sessions.jsonl"
+SESSIONS="$XDG_STATE_HOME/dot/agent/log.jsonl" # log.v1 session_<event> records
 
 export AGENT_PROFILE_CONFIG="$WORK/agent-profiles.json"
 cat >"$AGENT_PROFILE_CONFIG" <<'JSON'
@@ -153,7 +153,8 @@ DOT_AGENT_PROFILE=ask" "$env_out" "named profile's policy exported to the comman
 rc="$(mode run "$REAL_BASH" -c 'echo "p=$DOT_AGENT_PROFILE"; exit 7')"
 assert_equals "7" "$rc" "command exit code propagated"
 assert_file_contains "$OUT" "p=sandbox" "no profile named: the current one applies"
-assert_file_contains "$SESSIONS" '"event":"run_finish","profile":"sandbox","status":"failed"' "failure logged"
+assert_equals "yes" "$(grep -q '"event":"session_run_finish".*"data":{"profile":"sandbox","status":"failed"' "$SESSIONS" && echo yes || echo no)" \
+  "failure logged"
 rc="$(mode run)"
 assert_equals "1" "$rc" "run without a command exits 1"
 

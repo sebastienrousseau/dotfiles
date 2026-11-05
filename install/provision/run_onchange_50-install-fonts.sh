@@ -31,7 +31,7 @@ source "$SOURCE_ROOT/install/lib/installers.sh"
 # Support for DOTFILES_SILENT
 log_info() { if [[ "${DOTFILES_SILENT:-0}" != "1" ]]; then printf '\n[INFO] %s\n' "$*"; fi; }
 
-FONT_VERSION="v3.4.0"
+FONT_VERSION="v3.5.1"
 NERD_FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/${FONT_VERSION}"
 NERD_FONT_CHECKSUM_URL="${NERD_FONT_URL}/SHA-256.txt"
 

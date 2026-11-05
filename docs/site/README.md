@@ -35,7 +35,9 @@ pinned, SHA-256-verified ssg release and publishes `_build/site` as-is.
   - `base.html`: no theme screenshot or `.ico`;
   - `footer.html`: the "Made with SSG" credit ssg's quality gate looks for,
     and the copyright line with the author's name linked to his site
-    (`rel="author"`), identical to dotfiles.io's footer.
+    (`rel="author"`), identical to dotfiles.io's footer;
+  - `favicon.ico`: added, the same icon dotfiles.io serves. Pages link the
+    SVG logo, but browsers and crawlers still request `/favicon.ico`.
 - `tools/docs/build-manual-site.py` does what the template engine cannot
   (it has no loops): it reads the table of contents, writes one ssg content
   page per entry with the side navigation, contents list and pager in front
@@ -46,10 +48,17 @@ pinned, SHA-256-verified ssg release and publishes `_build/site` as-is.
   toggle, so a light page on a dark OS got dark text on a dark block), and
   fails on any internal link or fragment that does not resolve, across the
   whole site.
+- `tools/docs/finalize-site.py` runs that last step for the whole site, then
+  copies `favicon.ico` to the root, removes the `sitemap.xml`,
+  `news-sitemap.xml` and `robots.txt` ssg writes beside every page, writes
+  `/sitemap.xml` from each page's canonical URL (ssg's own comes out
+  empty), and fails if a sitemap URL or an hreflang alternate is not a page
+  in the build.
 - `tests/unit/docs/test_manual_site.sh` holds the palette to WCAG AAA in both
   schemes and requires ssg's quality gate to pass for the manual;
   `tests/unit/docs/test_site_build.sh` builds the whole site and checks the
-  published pages, layouts, stylesheets, SRI hashes and CNAME.
+  published pages, layouts, stylesheets, SRI hashes, CNAME, favicon and
+  sitemap.
 
 To pick up a newer Lucid, copy `themes/lucid/_layouts` from the theme
 repository, re-apply the changes above, update the commit here, and run both

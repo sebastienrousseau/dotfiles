@@ -25,11 +25,11 @@ if [[ "${#staged_files[@]}" -eq 0 ]]; then
   exit 0
 fi
 
+# The lines the commit adds: a match already in history is not this
+# commit's, and a removed line is not a leak.
 staged_content() {
-  local f
-  for f in "${staged_files[@]}"; do
-    git show -- ":$f" 2>/dev/null || true
-  done
+  git diff --cached -U0 --no-color --no-ext-diff --diff-filter=ACM 2>/dev/null |
+    sed -n 's/^+//p' | grep -v '^++ ' || true
 }
 
 violations=0
@@ -37,7 +37,8 @@ tmp_content="$(umask 077 && mktemp)"
 trap 'rm -f "$tmp_content"' EXIT
 staged_content >"$tmp_content"
 
-scan_patterns="(api[_-]?key|api[_-]?secret|token|password)[[:space:]]*[:=][[:space:]]*[\"'][^\"']{8,}[\"']"
+# A quoted value of 8 or more characters, not one taken from a variable.
+scan_patterns="(api[_-]?key|api[_-]?secret|token|password)[[:space:]]*[:=][[:space:]]*[\"'][^\"'\$][^\"']{7,}[\"']"
 if grep -Eqi "$scan_patterns" "$tmp_content"; then
   echo "Secret governance: potential plaintext secret pattern detected in staged content."
   violations=$((violations + 1))

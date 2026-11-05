@@ -21,7 +21,7 @@ assert_exit_code 0 "XDG_STATE_HOME='$RUN_STATE_DIR' bash '$DOT_CLI' agent mode r
 
 test_start "agent_log_outputs_jsonl"
 output=$(XDG_STATE_HOME="$RUN_STATE_DIR" bash "$DOT_CLI" agent log 5 2>/dev/null) || true
-if [[ "$output" == *"\"event\":\"log\""* ]] || [[ "$output" == *"\"event\":\"run_finish\""* ]]; then
+if [[ "$output" == *"\"event\":\"session_log\""* ]] || [[ "$output" == *"\"event\":\"session_run_finish\""* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: agent log emits JSONL events"
 else

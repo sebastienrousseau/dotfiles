@@ -32,7 +32,11 @@ fleet() { # fleet <toml> args...
   printf '%s' "$toml" >"$WORK/fleet.toml"
   rm -f "$WORK/ssh.log"
   mkdir -p "$WORK/tmp"
+  # The XDG dirs follow the sandboxed HOME: an inherited XDG_STATE_HOME put
+  # the fleet lock in the real ~/.local/state, where parallel files collided.
   FL_OUT="$(HOME="$WORK/home" TMPDIR="$WORK/tmp" DOTFILES_FLEET_HOSTS="$WORK/fleet.toml" \
+    XDG_STATE_HOME="$WORK/home/.local/state" XDG_CONFIG_HOME="$WORK/home/.config" \
+    XDG_CACHE_HOME="$WORK/home/.cache" XDG_DATA_HOME="$WORK/home/.local/share" \
     PATH="$WORK/stubs:$PATH" perl -e 'alarm 20; exec @ARGV' \
     bash "$DOT_BIN" fleet apply "$@" 2>&1 </dev/null)"
   FL_RC=$?

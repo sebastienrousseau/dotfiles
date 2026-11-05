@@ -60,6 +60,19 @@ names() {
   "$BASH_BIN" -c "source '$WORK/names.sh'; XDG_STATE_HOME='$WORK/state'; _dot_names \"\$@\"; echo \"\${_ARGV[*]}\"" _ "$@" 2>/dev/null
 }
 
+# log.v1 (lib/dot/log.sh): a `dot <domain> ...` line logs to that domain;
+# `dot help <domain>` is not a command in it.
+test_start "a_domain_command_logs_to_its_domain"
+# log_domain WORD...: DOT_LOG_DOMAIN once the resolver has read the words,
+# printed on exit (help exits from inside the resolver).
+log_domain() {
+  "$BASH_BIN" -c "source '$WORK/names.sh'; unset DOT_LOG_DOMAIN
+    trap 'printf \"%s\n\" \"\${DOT_LOG_DOMAIN:-none}\"' EXIT
+    _dot_lookup \"\$1\"; _dot_spelled \"\$@\"" _ "$@" 2>/dev/null | tail -n 1
+}
+assert_equals "shell" "$(log_domain shell clean)" "dot shell clean logs to shell"
+assert_equals "none" "$(log_domain help shell)" "dot help shell sets no log domain"
+
 test_start "new_spellings_run_todays_routes"
 assert_equals "@system update|2" "$(resolve system update)" "dot system update runs the system entry"
 assert_equals "@config update|2" "$(resolve config update)" "dot config update keeps the dotfiles-only update"

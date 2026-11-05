@@ -64,7 +64,7 @@ PowerShell module.
 | **`lib/dot/utils.sh`** | Common helpers (resolve_source_dir, validate_name, die, run_script, etc.). |
 | **`lib/dot/ui.sh`** | Single source of truth for CLI output (ui_ok/warn/err/info, ui_header, ui_table_*, ui_spinner_*, ui_confirm, ...). |
 | **`lib/dot/platform.sh`** | OS / shell / WSL detection, path translation. |
-| **`lib/dot/log.sh`** | Structured logging (JSON entries when `DOTFILES_JSON_LOG=1`). |
+| **`lib/dot/log.sh`** | log.v1 logging to `$XDG_STATE_HOME/dot/<domain>/log.jsonl` (also on stdout when `DOTFILES_JSON_LOG=1`). |
 | **`lib/dot/bento.sh`** | The "bento box" intelligence surface that `dot top` runs. |
 
 See [`../lib/dot/README.md`](../lib/dot/README.md) for every file.

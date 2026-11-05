@@ -109,5 +109,50 @@ assert_equals "ok" "$sri" "every script's integrity attribute matches the file"
 test_start "site_ships_the_cname"
 assert_equals "doc.dotfiles.io" "$(tr -d '[:space:]' <"$SITE/CNAME" 2>/dev/null)" "custom domain at the root"
 
+test_start "site_ships_a_favicon_ico"
+# Browsers and crawlers request /favicon.ico whatever the page links; a
+# missing one is a 404 that Search Console reports against the site.
+favicon="missing"
+if [[ -s "$SITE/favicon.ico" ]]; then
+  favicon="differs"
+  cmp -s "$REPO_ROOT/docs/site/themes/lucid/_layouts/favicon.ico" "$SITE/favicon.ico" && favicon="theme"
+fi
+assert_equals "theme" "$favicon" "the theme's favicon.ico at the root"
+
+test_start "site_sitemap_lists_every_canonical_page"
+# robots.txt names /sitemap.xml: it lists every page once, by its own
+# canonical URL, and nothing that is not a page in the build.
+sitemap="$(
+  python3 - "$SITE" <<'PY'
+import re, sys
+from pathlib import Path
+site = Path(sys.argv[1])
+base = "https://doc.dotfiles.io/"
+locs = re.findall(r"<loc>([^<]+)</loc>", (site / "sitemap.xml").read_text())
+canon = set()
+for p in site.rglob("*.html"):
+    m = re.search(r'<link rel="canonical" href="([^"]+)"', p.read_text())
+    if m:
+        canon.add(m.group(1))
+def page(url):
+    if not url.startswith(base):
+        return False
+    path = url[len(base):]
+    target = site / path / "index.html" if path in ("",) or path.endswith("/") else site / path
+    return target.is_file()
+missing = [u for u in locs if not page(u)]
+print(f"{len(locs)}/{len(set(locs) & canon)}/{len(missing)}")
+PY
+)"
+pages_n="$(find "$SITE" -name '*.html' | wc -l | tr -d ' ')"
+assert_equals "$pages_n/$pages_n/0" "$sitemap" "sitemap: every page once, by canonical URL, none missing"
+
+test_start "site_has_no_per_page_sitemaps"
+# ssg writes a sitemap.xml, news-sitemap.xml and robots.txt beside every
+# page; only the root robots.txt and sitemap.xml mean anything to a crawler.
+stray="$(find "$SITE" \( -name sitemap.xml -o -name robots.txt -o -name news-sitemap.xml \) \
+  ! -path "$SITE/sitemap.xml" ! -path "$SITE/robots.txt" | wc -l | tr -d ' ')"
+assert_equals "0" "$stray" "no nested sitemap.xml, news-sitemap.xml or robots.txt"
+
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

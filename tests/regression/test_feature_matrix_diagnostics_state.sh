@@ -495,10 +495,10 @@ test_fm_secret_audit() {
 }
 
 test_fm_metrics() {
-  # Seed the JSONL event log the reader tails.
-  mkdir -p "$XDG_STATE_HOME/dotfiles"
-  printf '{"time":"2026-01-01T00:00:00Z","metric":"fm_demo","value":1,"unit":"count"}\n' \
-    >"$XDG_STATE_HOME/dotfiles/metrics.jsonl"
+  # Seed a domain log with a log.v1 metric event, which the reader tails.
+  mkdir -p "$XDG_STATE_HOME/dot/doctor"
+  printf '%s\n' '{"schema":"cli/log.v1","time":"2026-01-01T00:00:00Z","level":"info","domain":"doctor","event":"metric","data":{"name":"fm_demo","value":"1","unit":"count"}}' \
+    >"$XDG_STATE_HOME/dot/doctor/log.jsonl"
   test_start "fm_metrics"
   fm_run doctor metric list
   fm_expect_rc 0
@@ -510,12 +510,12 @@ test_fm_metrics() {
 }
 
 test_fm_metrics_empty() {
-  rm -f "$XDG_STATE_HOME/dotfiles/metrics.jsonl"
+  rm -f "$XDG_STATE_HOME/dot/doctor/log.jsonl"
   test_start "fm_metrics_empty"
   fm_run doctor metric list
   fm_expect_rc 0
   test_start "fm_metrics_empty_says_so"
-  fm_expect_any "No metrics" "metrics.jsonl"
+  fm_expect_any "No metrics" "log.jsonl"
 }
 
 test_fm_smoke_test() {

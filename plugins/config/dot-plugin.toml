@@ -6,7 +6,7 @@
 schema = "cli/manifest.v1"
 name = "config"
 domain = "config"
-version = "0.2.540"
+version = "0.2.541"
 summary = "apply, diff and sync the dotfiles"
 default = "status"
 

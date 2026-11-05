@@ -7,6 +7,9 @@ on:
       - 'schemas/dpp-hello-v1.schema.json'
       - 'schemas/cli/**'
       - 'tests/unit/dot-cli/test_naming_registry.py'
+      # log.v1: the writer and its schema test (schemas/cli/** covers the schema)
+      - 'lib/dot/log.sh'
+      - 'tests/unit/dot-cli/test_log_v1_schema.py'
       # agent-event.v1: the hook receiver and its schema test
       - 'tests/unit/dot-cli/test_agent_event_schema.py'
       # CLI-contract lint (ADR-020): manifests, routes, the command table
@@ -54,7 +57,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
-      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
         if: runner.os == 'Linux'
         with:
           egress-policy: audit
@@ -84,7 +87,7 @@ jobs:
       - name: Bounded protocol fuzzing
         if: runner.os == 'Linux'
         working-directory: core
-        run: go test ./protocol -fuzz FuzzFrames -fuzztime 15s -parallel 2
+        run: go test ./protocol -fuzz FuzzFrames -fuzztime 900000x -parallel 2
       - name: Repeat archive recovery boundaries (200 trials per Unix host)
         if: runner.os != 'Windows'
         working-directory: core
@@ -109,7 +112,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
         with:
           egress-policy: audit
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -121,6 +124,7 @@ jobs:
       - run: python -m pip install --require-hashes -r requirements-contracts.txt
       - run: python tests/unit/core/test_contract_schemas.py
       - run: python tests/unit/dot-cli/test_naming_registry.py
+      - run: python tests/unit/dot-cli/test_log_v1_schema.py
       - run: python tests/unit/dot-cli/test_agent_event_schema.py
       - run: python tools/ci/check-cli-contract.py
       - run: python tests/unit/dot-cli/test_cli_contract_lint.py
@@ -130,7 +134,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
         with:
           egress-policy: audit
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -157,7 +161,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
         with:
           egress-policy: audit
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

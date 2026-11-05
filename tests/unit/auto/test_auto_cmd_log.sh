@@ -65,7 +65,7 @@ chmod +x "$log_tmp/bin/jq"
   source "$SCRIPT_FILE"
   dot_agent_checkpoint_dir
   dot_jsonl_append "custom.jsonl" '{"event":"custom"}'
-  dot_log_file info event_a key=value
+  dot_log info event_a key=value
   dot_log warn event_b alpha=beta
   dot_metric shell_startup 12 ms
   dot_metrics_summary 5
