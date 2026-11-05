@@ -17,3 +17,9 @@ c07232b6fb2d0051a7d85cfac9c32690430f6ff7:tests/unit/ci/test_pre_commit_audit_sec
 c07232b6fb2d0051a7d85cfac9c32690430f6ff7:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:34
 c07232b6fb2d0051a7d85cfac9c32690430f6ff7:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:48
 c07232b6fb2d0051a7d85cfac9c32690430f6ff7:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:49
+# #1378 was squash-merged as 9bb4bbe7, which re-adds the same fake literals
+# under a new commit; c07232b6's fingerprints above do not cover it.
+9bb4bbe706e33d758e59d15f706f2be1b76c4172:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:33
+9bb4bbe706e33d758e59d15f706f2be1b76c4172:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:34
+9bb4bbe706e33d758e59d15f706f2be1b76c4172:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:48
+9bb4bbe706e33d758e59d15f706f2be1b76c4172:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:49

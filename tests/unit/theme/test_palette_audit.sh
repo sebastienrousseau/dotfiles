@@ -29,7 +29,7 @@ test_start "palette_catalog_satisfies_quality_contract"
 assert_equals "0" "$catalog_rc"
 
 test_start "palette_catalog_reports_all_themes"
-assert_file_contains "$human" "228/228 themes passed"
+assert_file_contains "$human" "296/296 themes passed"
 
 first="$WORK/first.json"
 second="$WORK/second.json"
@@ -40,7 +40,7 @@ test_start "palette_audit_json_is_deterministic"
 assert_exit_code 0 "cmp -s '$first' '$second'"
 
 test_start "palette_audit_json_contract_is_versioned"
-assert_output_contains '1.0|228|228|0|0' \
+assert_output_contains '1.0|296|296|0|0' \
   "python3 -c 'import json; d=json.load(open(\"$first\")); s=d[\"summary\"]; print(d[\"schema_version\"], s[\"themes\"], s[\"passed\"], s[\"failed\"], s[\"failures\"], sep=\"|\")'"
 
 test_start "palette_audit_enforces_contract_minima"
