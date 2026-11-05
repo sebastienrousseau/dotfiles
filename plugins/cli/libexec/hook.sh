@@ -81,7 +81,7 @@ _hook_payload() {
   printf '%s' "$payload"
 }
 
-# _hook_first JSON NAME...: the first of the NAMEd fields that is set.
+# _hook_first JSON NAME...: the first of those fields that is set.
 _hook_first() {
   local json="$1" name value
   shift
