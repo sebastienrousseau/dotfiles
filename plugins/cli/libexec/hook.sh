@@ -15,7 +15,7 @@
 #   StopFailure                                              error
 #   SessionEnd                                               gone
 #
-# It writes the last state to $XDG_STATE_HOME/dot/agents/<agent>/<session>.json,
+# It writes the last state to $XDG_STATE_HOME/dot/cli/agents/<agent>/<session>.json,
 # so dot session works with no monitor running, and sends the record as a
 # datagram to $XDG_RUNTIME_DIR/dot/agent-events.sock ($TMPDIR on macOS) when
 # a socket of this user's listens there (dot top), giving up after 50 ms.
@@ -100,7 +100,7 @@ _hook_ids_ok() {
 
 # _hook_write AGENT SESSION RECORD: replace the session's state file.
 _hook_write() {
-  local dir="${XDG_STATE_HOME:-$HOME/.local/state}/dot/agents/$1"
+  local dir="${XDG_STATE_HOME:-$HOME/.local/state}/dot/cli/agents/$1"
   (umask 077 && mkdir -p "$dir" && printf '%s\n' "$3" >"$dir/$2.json.$$" &&
     mv -f "$dir/$2.json.$$" "$dir/$2.json") 2>/dev/null || rm -f "$dir/$2.json.$$" 2>/dev/null
 }
@@ -128,7 +128,7 @@ hook_main() {
 # hook_status [--json]: each agent session's last state (dot cli hook
 # status), newest first; --json prints the records, one per line.
 hook_status() {
-  local dir="${XDG_STATE_HOME:-$HOME/.local/state}/dot/agents" f rec
+  local dir="${XDG_STATE_HOME:-$HOME/.local/state}/dot/cli/agents" f rec
   local -a files=()
   for f in "$dir"/*/*.json; do [[ -f "$f" ]] && files+=("$f"); done
   if ((${#files[@]} == 0)); then

@@ -49,7 +49,7 @@ class AgentEvent(unittest.TestCase):
         agent = args[1] if args[:1] == ("--agent",) else "claude"
         return json.loads(
             (
-                self.state / "dot/agents" / agent / f"{payload['session_id']}.json"
+                self.state / "dot/cli/agents" / agent / f"{payload['session_id']}.json"
             ).read_text()
         )
 

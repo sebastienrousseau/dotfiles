@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091,SC2016
 # dot cli hook (plugins/cli/libexec/hook.sh): an agent's hook runs
 # `dot cli hook run` with its payload; the event becomes the session's state
-# (agent-event.v1) in $XDG_STATE_HOME/dot/agents/<agent>/<session>.json and a
+# (agent-event.v1) in $XDG_STATE_HOME/dot/cli/agents/<agent>/<session>.json and a
 # datagram to $XDG_RUNTIME_DIR/dot/agent-events.sock. It prints nothing,
 # always exits 0, never records the prompt, and refuses ids that are not
 # plain names. Every case goes through bin/dot in a sandboxed home.
@@ -32,15 +32,15 @@ hook() {
   ERR="$(cat "$WORK/err")"
 }
 
-state_of() { sed -n 's/.*"state":"\([a-z]*\)".*/\1/p' "$S/dot/agents/$1/$2.json" 2>/dev/null || true; }
+state_of() { sed -n 's/.*"state":"\([a-z]*\)".*/\1/p' "$S/dot/cli/agents/$1/$2.json" 2>/dev/null || true; }
 
 test_start "a_prompt_is_running_and_never_recorded"
 hook '{"session_id":"s1","hook_event_name":"UserPromptSubmit","cwd":"/work/proj","prompt":"SECRET-PROMPT"}'
 assert_equals "0||" "$RC|$OUT|$ERR" "exit 0, and nothing on stdout or stderr"
 assert_equals "running" "$(state_of claude s1)" "UserPromptSubmit is running"
-assert_file_contains "$S/dot/agents/claude/s1.json" '"cwd":"/work/proj"' "the working directory is kept"
-assert_file_not_contains "$S/dot/agents/claude/s1.json" "SECRET-PROMPT" "the prompt is not"
-assert_equals "600" "$(stat -c '%a' "$S/dot/agents/claude/s1.json" 2>/dev/null || stat -f '%Lp' "$S/dot/agents/claude/s1.json")" \
+assert_file_contains "$S/dot/cli/agents/claude/s1.json" '"cwd":"/work/proj"' "the working directory is kept"
+assert_file_not_contains "$S/dot/cli/agents/claude/s1.json" "SECRET-PROMPT" "the prompt is not"
+assert_equals "600" "$(stat -c '%a' "$S/dot/cli/agents/claude/s1.json" 2>/dev/null || stat -f '%Lp' "$S/dot/cli/agents/claude/s1.json")" \
   "the state file is private"
 
 test_start "events_map_to_the_normalised_states"
@@ -68,8 +68,8 @@ hook '{"session_id":"ok1","hook_event_name":"Stop"}' --agent '../evil'
 hook '{"session_id":"ok2","hook_event_name":"WhoKnows"}'
 hook 'not json at all'
 assert_equals "0||" "$RC|$OUT|$ERR" "bad input still exits 0 silently"
-assert_equals "claude codex" "$(ls "$S/dot/agents" | tr '\n' ' ' | sed 's/ $//')" "no other agent dir is made"
-assert_equals "s1.json s2.json" "$(ls "$S/dot/agents/claude" | tr '\n' ' ' | sed 's/ $//')" \
+assert_equals "claude codex" "$(ls "$S/dot/cli/agents" | tr '\n' ' ' | sed 's/ $//')" "no other agent dir is made"
+assert_equals "s1.json s2.json" "$(ls "$S/dot/cli/agents/claude" | tr '\n' ' ' | sed 's/ $//')" \
   "nothing is written for a bad id or an event that says nothing about state"
 assert_equals "no" "$([[ -e "$WORK/escape.json" || -e "$S/escape.json" ]] && echo yes || echo no)" "nothing outside"
 

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dotfiles.io/schemas/cli/agent-event.v1.schema.json",
   "title": "dot agent event v1 (an agent session's last state)",
-  "description": "Written by `dot cli hook run` (plugins/cli/libexec/hook.sh) to $XDG_STATE_HOME/dot/agents/<agent>/<session>.json and sent as a datagram to $XDG_RUNTIME_DIR/dot/agent-events.sock. Read by dot top and dot session. Metadata only: never the prompt, tool input or tool output.",
+  "description": "Written by `dot cli hook run` (plugins/cli/libexec/hook.sh) to $XDG_STATE_HOME/dot/cli/agents/<agent>/<session>.json and sent as a datagram to $XDG_RUNTIME_DIR/dot/agent-events.sock. Read by dot top and dot session. Metadata only: never the prompt, tool input or tool output.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema", "time", "agent", "session", "state", "event", "cwd"],
