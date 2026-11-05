@@ -1,8 +1,8 @@
 # dot-ai-tui
 
 The `dot ai` cockpit — a chat-centric
-[Bubble Tea](https://github.com/charmbracelet/bubbletea) TUI for the AI
-fleet. Pick a tool on the left, chat with it on the right (prompts run
+[Bubble Tea](https://github.com/charmbracelet/bubbletea) TUI for your AI
+tools. Pick a tool on the left, chat with it on the right (prompts run
 through `dot ai <tool>` and stream back live), and watch the gateway and
 today's spend in the header. Every action shells out to a `dot ai` verb
 so behaviour has a single source of truth. Deployed to
@@ -10,8 +10,8 @@ so behaviour has a single source of truth. Deployed to
 
 | Pane | Keys |
 | :--- | :--- |
-| fleet | `↑`/`k` `↓`/`j` move · `⏎` open the tool's native session · `tab` / `p` quick chat · `/` command palette · `m` cycle model · `s` serve / stop · `i` install · `r` refresh · `c` / `v` / `d` jump to corralctl / passmcp / draft · `h`/`l` (or `←`/`→`) pick a control-centre action and `1`-`6` run one · `0`/`backspace` clear the console · `b` show / hide the btop deck · `x` then `x` again within 5s: SIGTERM the selected tool's busiest process (any other key cancels; refused if the PID's start time or program changed) · `q`/`esc` quit |
-| chat | type and `⏎` to send · `/` opens the palette (`↑`/`↓`, `tab` completes, `⏎` runs) · `esc` back to the fleet |
+| roster | `↑`/`k` `↓`/`j` move · `⏎` open the tool's native session · `tab` / `p` quick chat · `/` command palette · `m` cycle model · `s` serve / stop · `i` install · `r` refresh · `c` / `v` / `d` jump to corralctl / passmcp / draft · `h`/`l` (or `←`/`→`) pick a control-centre action and `1`-`6` run one · `0`/`backspace` clear the console · `b` show / hide the btop deck · `x` then `x` again within 5s: SIGTERM the selected tool's busiest process (any other key cancels; refused if the PID's start time or program changed) · `q`/`esc` quit |
+| chat | type and `⏎` to send · `/` opens the palette (`↑`/`↓`, `tab` completes, `⏎` runs) · `esc` back to the roster |
 | slash | `/help` `/model [name\|default]` `/style [name\|off]` `/tool <name>` `/save` `/resume` `/clear` `/serve` `/cost` `/exit` |
 
 Configuration is by environment: `DOT_AI_HOST` / `DOT_AI_PORT` (gateway,
@@ -68,7 +68,7 @@ go test -run '^$' -fuzz=FuzzHighlight          -fuzztime=30s ./...   # fenced-co
 go test -run '^$' -fuzz=FuzzBuildPrompt        -fuzztime=30s ./...   # multi-turn prompt flattening
 go test -run '^$' -fuzz=FuzzHandleSlash        -fuzztime=30s ./...   # slash commands
 go test -run '^$' -fuzz=FuzzPalette            -fuzztime=30s ./...   # `/` palette filtering
-go test -run '^$' -fuzz=FuzzWindowRows         -fuzztime=30s ./...   # fleet list windowing
+go test -run '^$' -fuzz=FuzzWindowRows         -fuzztime=30s ./...   # roster list windowing
 go test -run '^$' -fuzz=FuzzRenderTranscript   -fuzztime=30s ./...   # transcript / splash layout
 go test -run '^$' -fuzz=FuzzParseSession       -fuzztime=30s ./...   # session.json decoder
 go test -run '^$' -fuzz=FuzzFilterSqliteOutput -fuzztime=30s ./...   # sqlite3 output scrubber

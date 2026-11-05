@@ -5,8 +5,8 @@
 
 package main
 
-// fleet is the roster in display order, grouped by section.
-var fleet = []tool{
+// roster is the cockpit's tool list in display order, grouped by section.
+var roster = []tool{
 	{name: "claude", bin: "claude", group: "agents"},
 	{name: "codex", bin: "codex", group: "agents"},
 	{name: "copilot", bin: "copilot", group: "agents"},

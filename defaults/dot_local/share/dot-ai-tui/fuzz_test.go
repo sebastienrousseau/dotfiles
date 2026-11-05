@@ -83,7 +83,7 @@ func FuzzBuildPrompt(f *testing.F) {
 }
 
 // FuzzHandleSlash: every slash command (known or not) is handled without
-// panicking, the cursor stays inside the fleet, and unknown commands leave a
+// panicking, the cursor stays inside the roster, and unknown commands leave a
 // hint in the transcript.
 func FuzzHandleSlash(f *testing.F) {
 	for _, s := range []string{
@@ -100,7 +100,7 @@ func FuzzHandleSlash(f *testing.F) {
 		mm, _ := m.handleSlash(cmd)
 		nm := mm.(model)
 		if nm.cursor < 0 || nm.cursor >= len(nm.tools) {
-			t.Fatalf("cursor %d escaped the fleet", nm.cursor)
+			t.Fatalf("cursor %d escaped the roster", nm.cursor)
 		}
 		name := strings.Fields(cmd)[0]
 		known := map[string]bool{"/help": true, "/?": true, "/clear": true, "/model": true, "/resume": true, "/save": true,
@@ -148,7 +148,7 @@ func FuzzPalette(f *testing.F) {
 			}
 		}
 		_ = m.renderPalette(pal, 40)
-		m.focus = "fleet"
+		m.focus = "roster"
 		if m.palette() != nil {
 			t.Fatal("palette must be nil outside the chat input")
 		}
@@ -311,7 +311,7 @@ func FuzzGatewayURL(f *testing.F) {
 }
 
 // FuzzModelKeys drives the whole cockpit with an arbitrary key script at an
-// arbitrary terminal size. Invariants: cursor inside the fleet, focus is one
+// arbitrary terminal size. Invariants: cursor inside the roster, focus is one
 // of the two panes, the palette selection is never negative, and View never
 // panics. Shell-outs are stubbed to `true`.
 func FuzzModelKeys(f *testing.F) {
@@ -334,7 +334,7 @@ func FuzzModelKeys(f *testing.F) {
 		}
 		m := newModel()
 		m = upd(m, tea.WindowSizeMsg{Width: clampi(w, 0, 300), Height: clampi(h, 0, 100)})
-		m = upd(m, refreshMsg{tools: fleet, costToday: "$0.00", recent: []string{"18:00  claude  dotfiles"}})
+		m = upd(m, refreshMsg{tools: roster, costToday: "$0.00", recent: []string{"18:00  claude  dotfiles"}})
 		for _, k := range keys {
 			var msg tea.KeyMsg
 			switch k {
@@ -361,9 +361,9 @@ func FuzzModelKeys(f *testing.F) {
 			}
 			m = upd(m, msg)
 			if m.cursor < 0 || m.cursor >= len(m.tools) {
-				t.Fatalf("cursor %d escaped the fleet", m.cursor)
+				t.Fatalf("cursor %d escaped the roster", m.cursor)
 			}
-			if m.focus != "fleet" && m.focus != "input" {
+			if m.focus != "roster" && m.focus != "input" {
 				t.Fatalf("focus %q", m.focus)
 			}
 			if m.palSel < 0 {

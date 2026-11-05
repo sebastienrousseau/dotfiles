@@ -244,15 +244,15 @@ func TestUpdateMsgs(t *testing.T) {
 	if _, c := sized().Update(key("ctrl+c")); c == nil {
 		t.Fatal("ctrl+c should quit")
 	}
-	// tab: fleet→input, input→fleet, input+palette→complete
+	// tab: roster→input, input→roster, input+palette→complete
 	m = sized()
 	m = upd(m, key("tab"))
 	if m.focus != "input" {
 		t.Fatal("tab to input")
 	}
 	m = upd(m, key("tab"))
-	if m.focus != "fleet" {
-		t.Fatal("tab back to fleet")
+	if m.focus != "roster" {
+		t.Fatal("tab back to roster")
 	}
 	m = upd(m, key("tab")) // input
 	m.input.SetValue("/")
@@ -262,8 +262,8 @@ func TestUpdateMsgs(t *testing.T) {
 	}
 }
 
-func TestUpdateFleet(t *testing.T) {
-	m := sized() // focus fleet
+func TestUpdateRoster(t *testing.T) {
+	m := sized() // focus roster
 	m = upd(m, key("j"))
 	if m.cursor != 1 {
 		t.Fatal("j")
@@ -273,10 +273,10 @@ func TestUpdateFleet(t *testing.T) {
 		t.Fatal("k")
 	}
 	m = upd(m, key("k")) // at top, no-op
-	for i := 0; i < len(fleet)+3; i++ {
+	for i := 0; i < len(roster)+3; i++ {
 		m = upd(m, key("down"))
 	}
-	if m.cursor != len(fleet)-1 {
+	if m.cursor != len(roster)-1 {
 		t.Fatal("down clamp")
 	}
 	m = upd(m, key("up"))
@@ -320,10 +320,10 @@ func TestUpdateInput(t *testing.T) {
 	// typing
 	m := base()
 	m = upd(m, key("h"))
-	// esc with no palette → fleet
+	// esc with no palette → roster
 	m = upd(m, key("esc"))
-	if m.focus != "fleet" {
-		t.Fatal("esc to fleet")
+	if m.focus != "roster" {
+		t.Fatal("esc to roster")
 	}
 	// esc with palette open → clears
 	m = base()
@@ -425,7 +425,7 @@ func TestRenderPaths(t *testing.T) {
 	if !strings.Contains(tiny.View(), "loading") {
 		t.Fatal("tiny → loading")
 	}
-	// full render: fleet focus, gateway up, style, transcript with code
+	// full render: roster focus, gateway up, style, transcript with code
 	m := sized()
 	m.gatewayUp = true
 	m.gatewayMsg = "127.0.0.1:3456"
@@ -434,7 +434,7 @@ func TestRenderPaths(t *testing.T) {
 	m.recent = []string{"18:00 claude dotfiles"}
 	m.status = "refreshing…"
 	if v := m.View(); !strings.Contains(v, "dot ai") {
-		t.Fatal("fleet view")
+		t.Fatal("roster view")
 	}
 	// input focus + palette + running
 	m = upd(m, key("tab"))
@@ -465,7 +465,7 @@ func TestCoverageGaps(t *testing.T) {
 	// palette dedup: copilot's /clear is shadowed by the cockpit /clear.
 	m := sized()
 	m = upd(m, key("tab"))
-	for i, tl := range fleet {
+	for i, tl := range roster {
 		if tl.name == "copilot" {
 			m.cursor = i
 		}
@@ -602,7 +602,7 @@ func TestModelPicker(t *testing.T) {
 	if nextModel("") != "opus" || nextModel("haiku") != "" || nextModel("bogus") != "" {
 		t.Fatalf("nextModel cycle wrong")
 	}
-	// fleet 'm' cycles the model + sets status
+	// roster 'm' cycles the model + sets status
 	m := sized()
 	m = upd(m, key("m"))
 	if m.aiModel != "opus" || !strings.Contains(m.status, "model") {
@@ -684,7 +684,7 @@ func TestSplash(t *testing.T) {
 	m := sized()
 	// empty transcript → splash with wordmark + pitch + keys
 	out := m.renderTranscript(60, 24)
-	for _, want := range []string{"█▀▄", "cockpit for your AI fleet", "open session"} {
+	for _, want := range []string{"█▀▄", "cockpit for your AI tools", "open session"} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("splash missing %q", want)
 		}

@@ -19,7 +19,7 @@ _ai_deprecated() {
   ui_warn "deprecated" "use: $1" >&2
 }
 
-# _ai_invoke_provider <tool> <full_prompt> — run a fleet tool headlessly and
+# _ai_invoke_provider <tool> <full_prompt> — run a roster tool headlessly and
 # return its exit code. Each provider has its own one-shot incantation; kept
 # here (not in the ai.sh dispatcher) so adding a tool is a single edit and the
 # dispatcher stays under the line budget.
@@ -55,7 +55,7 @@ _ai_invoke_provider() {
 
 # _ai_cockpit <fallback-cmd…> — launch the Bubble Tea cockpit (dot-ai-tui)
 # when it is built and we're on a TTY; otherwise run the fallback (the plain
-# fleet launcher for CI, pipes, or before the binary is built).
+# roster launcher for CI, pipes, or before the binary is built).
 _ai_cockpit() {
   if has_command dot-ai-tui && [[ -t 1 ]]; then
     exec dot-ai-tui
@@ -94,7 +94,7 @@ cmd_ai_update() {
 }
 
 # _ai_serve [stop|status|logs|setup] — the local Claude gateway. `serve`
-# does both: start also routes the non-Claude fleet through it; stop also
+# does both: start also routes the non-Claude tools through it; stop also
 # un-routes. Thin wrapper over the dot-ai-proxy lifecycle helper.
 _ai_serve() {
   if ! has_command dot-ai-proxy; then
@@ -127,7 +127,7 @@ _ai_serve() {
 }
 
 # cmd_ai_chat [tool] — open an interactive session with a tool. With no
-# tool, fall back to the fleet launcher.
+# tool, fall back to the roster launcher.
 cmd_ai_chat() {
   if [[ $# -eq 0 ]]; then
     cmd_ai_status
@@ -145,7 +145,7 @@ cmd_ai_chat() {
   exec "$bin"
 }
 
-# cmd_ai_doctor — health-check the fleet + gateway in one place.
+# cmd_ai_doctor — health-check the roster + gateway in one place.
 cmd_ai_doctor() {
   ui_header "AI doctor"
   if has_command claude; then
@@ -166,7 +166,7 @@ cmd_ai_doctor() {
     total=$((total + 1))
     has_command "$b" && installed=$((installed + 1))
   done
-  ui_info "Fleet" "$installed/$total tools installed — 'dot ai tools' to manage"
+  ui_info "Roster" "$installed/$total tools installed — 'dot ai tools' to manage"
   for b in "${AI_ROSTER_ECO_BINS[@]}"; do
     has_command "$b" && eco_installed=$((eco_installed + 1))
   done

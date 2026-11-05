@@ -95,7 +95,7 @@ func (m model) renderHeader() string {
 	if m.gatewayUp {
 		gw = chipOK.Render("● " + m.gatewayMsg)
 	}
-	left := logoSt.Render("◆ dot ai") + "  " + tagSt.Render("AI fleet cockpit")
+	left := logoSt.Render("◆ dot ai") + "  " + tagSt.Render("AI tools cockpit")
 	if m.aiModel != "" {
 		left += dimSt.Render("  · model ") + selSt.Render(m.aiModel)
 	}
@@ -150,7 +150,7 @@ func (m model) renderLeftPane(bodyH int) string {
 	}
 	rows = windowRows(rows, cursorRow, bodyH)
 	leftStyle := panel
-	if m.focus == "fleet" {
+	if m.focus == "roster" {
 		leftStyle = panelHot
 	}
 	return leftStyle.Width(m.leftWidth()).Height(bodyH).Render(strings.Join(rows, "\n"))
@@ -206,7 +206,7 @@ func (m model) View() string {
 	var keys []struct{ k, d string }
 	if m.focus == "input" {
 		keys = []struct{ k, d string }{
-			{"⏎", "send"}, {"/help", "cmds"}, {"esc", "fleet"}, {"/exit", "quit"},
+			{"⏎", "send"}, {"/help", "cmds"}, {"esc", "roster"}, {"/exit", "quit"},
 		}
 	} else {
 		keys = []struct{ k, d string }{
@@ -264,7 +264,7 @@ func (m model) splash(w, h int) string {
 	}
 	b = append(b,
 		"",
-		c(tagSt.Render("the cockpit for your AI fleet")),
+		c(tagSt.Render("the cockpit for your AI tools")),
 		c(dimSt.Render("one subscription · every agent · zero keys")),
 		"",
 		c(keySt.Render("⏎")+dimSt.Render(" open session    ")+
