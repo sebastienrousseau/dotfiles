@@ -33,7 +33,7 @@ assert_equals "0" "$rc" "the snapshot completes (${elapsed}s)"
 assert_equals "true" "$([[ $elapsed -lt 20 ]] && echo true || echo false)" \
   "the stuck probe is cut off at its limit, not the 60s it would take (${elapsed}s)"
 
-BASELINE="$WORK/home/.local/state/dotfiles/snapshots/baseline.json"
+BASELINE="$WORK/home/.local/state/dot/config/snapshots/baseline.json"
 test_start "snapshot_records_what_answered"
 assert_file_exists "$BASELINE" "baseline.json is written"
 assert_equals "ok" "$(python3 -c 'import json,sys; json.load(open(sys.argv[1])); print("ok")' "$BASELINE" 2>&1)" \

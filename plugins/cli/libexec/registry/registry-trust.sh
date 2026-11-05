@@ -39,7 +39,7 @@ _registry_pubkey_file() {
 }
 
 _registry_state_dir() {
-  printf '%s/dotfiles/registry\n' "${XDG_STATE_HOME:-$HOME/.local/state}"
+  printf '%s/dot/cli/registry\n' "${XDG_STATE_HOME:-$HOME/.local/state}"
 }
 
 ## _registry_verify_signature <index> <signature> <url>

@@ -40,10 +40,10 @@ fi
 # falls back to git history.
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
-mkdir -p "$WORK/state/dot/config" "$WORK/state/dot/theme" "$WORK/state/dotfiles" "$WORK/home/.local/share"
+mkdir -p "$WORK/state/dot/config" "$WORK/state/dot/theme" "$WORK/state/dot/cli/legacy" "$WORK/home/.local/share"
 printf '{"schema":"cli/log.v1","time":"2026-01-02T03:04:05Z","event":"apply_completed"}\n' >"$WORK/state/dot/config/log.jsonl"
 printf '{"schema":"cli/log.v1","time":"2026-01-01T00:00:00Z","event":"theme_set"}\n' >"$WORK/state/dot/theme/log.jsonl"
-printf '[2026-01-02T03:04:05Z] [info] [t1] old format\n' >"$WORK/state/dotfiles/dot.log"
+printf '[2026-01-02T03:04:05Z] [info] [t1] old format\n' >"$WORK/state/dot/cli/legacy/dot.log"
 printf 'legacy line\n' >"$WORK/home/.local/share/dotfiles.log"
 # audit_run: source the aliases and run audit_fn in the sandbox.
 audit_run() {

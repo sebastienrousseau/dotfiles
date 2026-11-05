@@ -22,7 +22,7 @@ trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
 OUTF="$DOTFILES_COV_TMPDIR/perf-out.txt"
-TIMINGS="$XDG_STATE_HOME/dotfiles/eval-timings.jsonl"
+TIMINGS="$XDG_STATE_HOME/dot/shell/eval-timings.jsonl"
 BASELINE="$XDG_CACHE_HOME/dotfiles/perf-baseline.json"
 mkdir -p "$(dirname "$TIMINGS")" "$(dirname "$BASELINE")"
 

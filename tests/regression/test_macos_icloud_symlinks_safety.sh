@@ -53,7 +53,7 @@ _new_sandbox() {
   sb="$(mktemp -d 2>/dev/null || mktemp -d -t 'icloud-regr')"
   export HOME="$sb"
   export XDG_STATE_HOME="$sb/state"
-  mkdir -p "$XDG_STATE_HOME/dotfiles"
+  mkdir -p "$XDG_STATE_HOME/dot/system"
   mkdir -p "$HOME/Library/Mobile Documents/com~apple~CloudDocs"
   export ICLOUD="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
   unset DOTFILES_ICLOUD_SYMLINKS DOTFILES_ICLOUD_DRY_RUN

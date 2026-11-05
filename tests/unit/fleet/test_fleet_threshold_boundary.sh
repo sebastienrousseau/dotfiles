@@ -37,7 +37,7 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 1
 fi
 
-STATE_DIR="$XDG_STATE_HOME/dotfiles/fleet"
+STATE_DIR="$XDG_STATE_HOME/dot/fleet"
 HISTORY="$STATE_DIR/drift-history.jsonl"
 mkdir -p "$STATE_DIR"
 

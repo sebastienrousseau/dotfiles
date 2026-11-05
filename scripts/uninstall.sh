@@ -96,7 +96,7 @@ rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}/bash"
 
 # 6. Remove state and logs
 log_info "Removing state and logs..."
-rm -rf "${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
+rm -rf "${XDG_STATE_HOME:-$HOME/.local/state}/dot" "${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
 rm -f "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles.log"
 
 # 7. Remove completions

@@ -173,8 +173,8 @@ dot doctor rollback  # restore the previous known-good state
 
 If `dot doctor` still fails after `dot doctor fix` and a rollback, check:
 
-- `~/.local/state/dotfiles/heal.log`: what `dot doctor fix` did
-- `~/.local/state/dotfiles/rollback.log`: rollback attempts
+- `~/.local/state/dot/doctor/heal.log`: what `dot doctor fix` did
+- `~/.local/state/dot/doctor/rollback.log`: rollback attempts
 - `chezmoi doctor`: chezmoi-specific diagnostics
 
 Still stuck? See [Cookbook: Troubleshooting](../04-cookbook/02-troubleshooting.md).

@@ -27,7 +27,7 @@ Run this checklist after a fresh install and quarterly afterwards.
 
 - [ ] `dot system update` — pick up security patches
 - [ ] `dot secret check`: confirm no new leaks
-- [ ] `dot attest verify`: the current attestation passes the verifier (needs `wasmtime`); the last one written is `~/.local/state/dotfiles/attestations/workstation-attestation.json`
+- [ ] `dot attest verify`: the current attestation passes the verifier (needs `wasmtime`); the last one written is `~/.local/state/dot/attest/attestations/workstation-attestation.json`
 - [ ] Rotate Age key if compromised or as part of scheduled rotation
 
 ## Ongoing (quarterly)

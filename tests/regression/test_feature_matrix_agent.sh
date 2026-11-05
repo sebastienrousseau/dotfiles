@@ -647,7 +647,7 @@ test_fm_agent_checkpoint_save() {
   test_start "fm_agent_checkpoint_save_reports_an_id"
   fm_expect_any "Agent Checkpoint" "ID"
   test_start "fm_agent_checkpoint_save_writes_the_json"
-  if find "$XDG_STATE_HOME/dotfiles/checkpoints" -name '*.json' 2>/dev/null | grep -q .; then
+  if find "$XDG_STATE_HOME/dot/agent/checkpoints" -name '*.json' 2>/dev/null | grep -q .; then
     fm_pass "checkpoint written"
   else
     fm_fail "no checkpoint JSON under XDG_STATE_HOME"
@@ -693,7 +693,7 @@ test_fm_agent_checkpoint_list() {
 # name made the replay row re-run the wrong checkpoint now and then.
 fm_checkpoint_id_for() {
   local f
-  for f in "$XDG_STATE_HOME"/dotfiles/checkpoints/*.json; do
+  for f in "$XDG_STATE_HOME"/dot/agent/checkpoints/*.json; do
     [[ -f "$f" ]] || continue
     if jq -e --arg w "$1" 'any(.argv[]?; . == $w)' "$f" >/dev/null 2>&1; then
       basename "$f" .json

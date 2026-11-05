@@ -1,10 +1,54 @@
 # Migration
 
-This directory holds the one-time migration for the v0.2.503
-repository reorganisation. You should never need to read it unless
-something goes wrong.
+This directory holds one-time migrations: the per-domain state move
+(below) and the v0.2.503 repository reorganisation. You should never
+need to read it unless something goes wrong.
 
-## How it works
+## State in per-domain directories
+
+`migrate-state-to-domains.sh` moves the dot CLI's state from
+`$XDG_STATE_HOME/dotfiles/` to `$XDG_STATE_HOME/dot/<domain>/`, the
+layout of ADR-020 N12. `defaults/run_before_migrate-state.sh.tmpl` runs
+it before every `chezmoi apply`, and `install.sh` runs it before its
+apply; once the move is done, a marker at
+`$XDG_STATE_HOME/dot/cli/migrations/state-domains.done` makes it a
+no-op.
+
+| Old (`$XDG_STATE_HOME/dotfiles/`) | New (`$XDG_STATE_HOME/dot/`) |
+|---|---|
+| `checkpoints/` | `agent/checkpoints/` |
+| `snapshots/`, `update/` | `config/snapshots/`, `config/update/` |
+| `attestations/` | `attest/attestations/` |
+| `fleet/` | `fleet/` (merged) |
+| `ai-serve/` | `ai/serve/` |
+| `registry/` | `cli/registry/` |
+| `eval-timings.jsonl`, `debug.log` | `shell/` |
+| `audit-bypass.log`, `security-audit.log`, `security-report.md` | `security/` |
+| `rollback.log`, `heal.log`, `orphans` | `doctor/` |
+| `icloud-symlinks.log` | `system/` |
+| `dot.log`, `metrics.jsonl`, `agent-sessions.jsonl` (before log.v1) | `cli/legacy/` |
+
+A directory whose new name exists is merged entry by entry; a log
+whose new file exists is prepended to it. An entry that cannot move
+yet stays, the apply goes on, and the next apply tries again: the AI
+gateway's state while it runs (stop it with `dot-ai-proxy stop`), or a
+name that exists on both sides, which you resolve by hand. Anything
+the script does not know, and `v0_2_503-migration/`, stay in the old
+directory.
+
+```sh
+bash install/migrate/migrate-state-to-domains.sh --dry-run   # list the moves
+bash install/migrate/rollback-state-to-domains.sh            # undo them
+```
+
+The rollback reverses each move recorded in
+`$XDG_STATE_HOME/dot/cli/migrations/state-domains.manifest`, except a
+log prepended to another, and removes the marker. Downgrade first, or
+the next apply moves everything again.
+
+## The v0.2.503 reorganisation
+
+### How it works
 
 When you upgrade to v0.2.503 or later (the v0.2.503 repository
 reorganisation per
@@ -30,7 +74,7 @@ action is checking the state file
 file exists, the script exits 0 immediately (pass `--force` to run
 it again).
 
-## What the migration does
+### What the migration does
 
 `v0.2.503` moves chezmoi-managed source paths:
 
@@ -74,7 +118,7 @@ a Phase 2 that fired would remove that file from your checkout.
 Since chezmoi leaves deployed files in place anyway (see above),
 nothing is lost.
 
-## Rollback
+### Rollback
 
 `rollback-v0_2_503.sh` is retired. It never worked (it read a
 `current ver:` snapshot line the migration never writes, and expected
@@ -90,7 +134,7 @@ git checkout v0.2.502
 chezmoi apply
 ```
 
-## What if the migration script isn't present?
+### What if the migration script isn't present?
 
 Your checkout predates v0.2.503, so it has no
 `install/migrate/` directory. Two recovery paths:

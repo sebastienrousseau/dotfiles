@@ -133,7 +133,7 @@ It does **not** include:
 - Tool binaries (Mise-managed)
 - External state (databases, remote repos)
 
-`dot doctor snapshot new` is a different thing: it records the system and tooling state as JSON in `~/.local/state/dotfiles/snapshots/` (the first `dot apply` writes `baseline.json`), and nothing restores from it.
+`dot doctor snapshot new` is a different thing: it records the system and tooling state as JSON in `~/.local/state/dot/config/snapshots/` (the first `dot apply` writes `baseline.json`), and nothing restores from it.
 
 ## `dot config export` — Offline Recovery
 

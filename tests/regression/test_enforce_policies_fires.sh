@@ -121,10 +121,10 @@ assert_equals "1" "$RUN_REPORT_IN_ROOT" "a checkout keeps its report at the root
 # A packaged install's root is read-only: `dot security policy show` died
 # there writing the report. It now goes beside the audit log.
 test_start "read_only_install_writes_the_report_to_the_state_dir"
-rm -f "$WORKDIR/state/dotfiles/security-report.md"
+rm -f "$WORKDIR/state/dot/security/security-report.md"
 run_scenario "true" ro
 assert_equals "0" "$RUN_RC" "a read-only tree still passes"
-assert_file_exists "$WORKDIR/state/dotfiles/security-report.md" "the report is in the state dir"
+assert_file_exists "$WORKDIR/state/dot/security/security-report.md" "the report is in the state dir"
 
 # -----------------------------------------------------------------------------
 # 2. A private key committed at a NESTED path.

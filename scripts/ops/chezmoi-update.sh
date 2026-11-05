@@ -37,7 +37,7 @@ if [[ "${1:-}" == "--async" ]]; then
   shift
 fi
 
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/update"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dot/config/update"
 mkdir -p "$STATE_DIR"
 LOG_FILE="$STATE_DIR/last.log"
 STATUS_FILE="$STATE_DIR/last.status"
