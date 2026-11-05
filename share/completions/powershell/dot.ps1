@@ -17,8 +17,9 @@ $script:DotChildren = @{
     'ai inventory' = @(, @('show', 'Agents, versions and config'))
     'ai pattern' = @(@('list', 'Prompt patterns'), @('show', 'One prompt pattern'), @('edit', 'Edit a prompt pattern'))
     'attest' = @(@('show', 'The workstation attestation'), @('export', 'Write attestation evidence'), @('verify', 'Verify evidence'))
-    'cli' = @(@('completion', 'shell completion scripts'), @('registry', 'the plugin registry'), @('list', 'Installed plugins'), @('show', 'One plugin in detail'), @('install', 'Install a plugin'), @('update', 'Update dot and its plugins'), @('remove', 'Remove a plugin'), @('verify', 'Verify plugin provenance'), @('new', 'Create a plugin from the template'))
+    'cli' = @(@('completion', 'shell completion scripts'), @('registry', 'the plugin registry'), @('hook', 'agent hook events (agent-event.v1)'), @('list', 'Installed plugins'), @('show', 'One plugin in detail'), @('install', 'Install a plugin'), @('update', 'Update dot and its plugins'), @('remove', 'Remove a plugin'), @('verify', 'Verify plugin provenance'), @('new', 'Create a plugin from the template'))
     'cli completion' = @(, @('show', 'Print a completion script'))
+    'cli hook' = @(@('status', 'Each agent session''s last state'), @('run', 'Record an agent hook event read on stdin'))
     'cli registry' = @(@('show', 'The plugin registry URL'), @('set', 'Point at another plugin registry'))
     'config' = @(@('path', 'where the dotfiles source lives'), @('profile', 'the active profile and its features'), @('status', 'Pending changes and last apply'), @('diff', 'What apply would change'), @('apply', 'Write the dotfiles to this machine'), @('sync', 'Apply the dotfiles; --pull pulls first'), @('update', 'Pull and apply the dotfiles only'), @('edit', 'Open a managed file in $EDITOR'), @('add', 'Start managing an existing file'), @('save', 'Commit source changes'), @('init', 'First-time setup of the dotfiles'), @('check', 'Lint the source and templates'), @('export', 'Write a portable bundle'), @('uninstall', 'Remove the setup, keeping the source'), @('import', 'Restore from an exported bundle'))
     'config path' = @(, @('show', 'Print the source directory'))
@@ -108,6 +109,8 @@ $script:DotCommands = @{
     'attest show' = @{ Flags = @(@('--help', 'Show help'), @('--json', 'Print JSON'), @('-j', 'Print JSON'), @('--write', 'Write the attestation to a file'), @('-w', 'Write the attestation to a file')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'attest verify' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'cli completion show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'cli hook run' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'cli hook status' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'cli install' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'cli list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'cli new' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }

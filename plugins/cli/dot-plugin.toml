@@ -23,6 +23,11 @@ name = "registry"
 summary = "the plugin registry"
 default = "show"
 
+[[objects]]
+name = "hook"
+summary = "agent hook events (agent-event.v1)"
+default = "status"
+
 [[commands]]
 verb = "list"
 effect = "read"
@@ -79,6 +84,22 @@ object = "registry"
 verb = "set"
 effect = "write"
 summary = "Point at another plugin registry"
+
+[[commands]]
+object = "hook"
+verb = "status"
+effect = "read"
+summary = "Each agent session's last state"
+
+# The receiver an agent's hook runs (`dot cli hook run`; N5 keeps the bare
+# object read-only). Agents fire hooks concurrently and must never wait on
+# dot: no lock (N17).
+[[commands]]
+object = "hook"
+verb = "run"
+effect = "write"
+lock = false
+summary = "Record an agent hook event read on stdin"
 
 [[aliases]]
 name = "completion"

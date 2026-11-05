@@ -67,6 +67,7 @@ cmd|attest verify|@attest verify|read|Verify evidence
 dom|cli|list||plugins, updates, completions
 obj|cli completion|show||shell completion scripts
 obj|cli registry|show||the plugin registry
+obj|cli hook|status||agent hook events (agent-event.v1)
 cmd|cli list|@cli list|read|Installed plugins
 cmd|cli show|@cli show|read|One plugin in detail
 cmd|cli install|@cli install|write|Install a plugin
@@ -77,6 +78,8 @@ cmd|cli new||write|Create a plugin from the template
 cmd|cli completion show|@cli completion show|read|Print a completion script
 cmd|cli registry show|@cli registry show|read|The plugin registry URL
 cmd|cli registry set|@cli registry set|write|Point at another plugin registry
+cmd|cli hook status|@cli hook status|read|Each agent session's last state
+cmd|cli hook run|@cli hook run|write|Record an agent hook event read on stdin
 dom|config|status||apply, diff and sync the dotfiles
 obj|config path|show||where the dotfiles source lives
 obj|config profile|show||the active profile and its features
@@ -395,5 +398,6 @@ nolock|ai start||
 nolock|ai run||
 nolock|ai login||
 nolock|ai pattern edit||
+nolock|cli hook run||
 nolock|config edit||
 nolock|ui run||

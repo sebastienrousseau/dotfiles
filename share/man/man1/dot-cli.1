@@ -18,6 +18,9 @@ shell completion scripts; alone it runs \fBshow\fR.
 .TP
 .B registry
 the plugin registry; alone it runs \fBshow\fR.
+.TP
+.B hook
+agent hook events (agent\-event.v1); alone it runs \fBstatus\fR.
 .SH COMMANDS
 .TP
 .B dot cli list
@@ -49,6 +52,12 @@ The plugin registry URL. Effect: read. Runs \fBdot\-cli registry show\fR, the pl
 .TP
 .B dot cli registry set
 Point at another plugin registry. Effect: write. Runs \fBdot\-cli registry set\fR, the plugin's entry.
+.TP
+.B dot cli hook status
+Each agent session's last state. Effect: read. Runs \fBdot\-cli hook status\fR, the plugin's entry.
+.TP
+.B dot cli hook run
+Record an agent hook event read on stdin. Effect: write. Runs \fBdot\-cli hook run\fR, the plugin's entry.
 .SH OTHER NAMES
 .TP
 .B dot completion
