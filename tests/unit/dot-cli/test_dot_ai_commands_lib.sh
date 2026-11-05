@@ -222,13 +222,13 @@ out_has "not found — run: chezmoi apply" "hint"
 stub dot-ai-proxy
 
 # ── doctor ──────────────────────────────────────────────────────────────
-test_start "doctor_reports_the_fleet_and_the_gateway"
+test_start "doctor_reports_the_roster_and_the_gateway"
 ai cmd_ai_doctor
 assert_equals 0 "$RC" "rc"
 out_has "AI doctor" "header"
 out_has "claude CLI" "engine row"
 out_has "gateway engine" "gateway row"
-out_has "Fleet" "fleet tally"
+out_has "Roster" "roster tally"
 called "dot-ai-proxy status"
 
 test_start "doctor_flags_a_missing_engine_and_gateway"

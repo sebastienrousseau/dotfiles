@@ -88,6 +88,15 @@ err="$(python3 "$GEN" --check --root "$root" 2>&1)" || rc=$?
 assert_equals "2" "$rc" "a login given as a list is refused"
 assert_contains "listy login must be a string" "$err" "the error names the tool"
 
+test_start "roster_rejects_the_old_fleet_key"
+root="$(fixture_root)"
+printf '\n[[tool]]\nname = "hidden"\nbin = "hidden"\ntitle = "Hidden"\nsummary = "x"\ngroup = "coding"\nrole = "coding"\nfleet = false\n' \
+  >>"$root/plugins/ai/roster.toml"
+rc=0
+err="$(python3 "$GEN" --check --root "$root" 2>&1)" || rc=$?
+assert_equals "2" "$rc" "fleet is refused, not ignored: the tool would join the cockpit"
+assert_contains "hidden uses fleet, renamed cockpit" "$err" "the error names the new key"
+
 # Every agent runs once through its own one-shot form: a stub on PATH for
 # each binary records that it was called, and an arm missing from
 # _ai_invoke_provider fails as "Unsupported tool".

@@ -799,7 +799,7 @@ plugin manifests (through the command table) and checked in CI.
 
 | | |
 |:---|:---|
-| `dot ai` | AI fleet cockpit — run, chat, install, serve a local gateway, cost |
+| `dot ai` | AI tools cockpit — run, chat, install, serve a local gateway, cost |
 | `dot mcp` | Inspect MCP policy and registry |
 | `dot agent mode` | Show or set the agent profile (ask / plan / apply / audit) |
 | `dot agent` | Agent metadata, logs, checkpoints, conformance |

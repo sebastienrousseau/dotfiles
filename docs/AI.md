@@ -15,17 +15,17 @@ In zsh it sources the opt-in AI shell helpers (context suggestions and error ana
 
 ## Why `dot ai`?
 
-`claude` is one tool. **`dot ai` is the cockpit for your whole AI-CLI fleet.** Use it to install the tools, launch any of them with one keystroke, meter their cost in one place, and — the headline — run every one of them on your single Claude subscription through a built-in local gateway.
+`claude` is one tool. **`dot ai` is the cockpit for every AI CLI you use.** Use it to install the tools, launch any of them with one keystroke, meter their cost in one place, and — the headline — run every one of them on your single Claude subscription through a built-in local gateway.
 
 You use `claude` to talk to Claude. You use `dot ai` to run *everything else* on Claude and keep one cockpit over all of it.
 
 ## Quick start
 
 ```bash
-dot ai install all        # install the fleet (only what's missing)
+dot ai install all        # install the roster (only what's missing)
 dot ai                    # open the cockpit (TUI)
 dot ai "fix the auth bug" # one-shot on Claude — just like `claude "…"`
-dot ai gateway serve      # serve your Claude subscription locally to the fleet
+dot ai gateway serve      # serve your Claude subscription locally to every tool
 ```
 
 ## Prerequisites
@@ -45,16 +45,16 @@ The interface follows ADR-020 (`dot ai <verb>`), modelled on the Claude CLI: bar
 
 | Command | What it does |
 |---------|--------------|
-| `dot ai` | Open the **cockpit** — a Bubble Tea TUI for the fleet, gateway, and cost |
+| `dot ai` | Open the **cockpit** — a Bubble Tea TUI for the roster, gateway, and cost |
 | `dot ai "<prompt>"` | One-shot prompt on Claude |
 | `dot ai <tool> "<prompt>"` | One-shot prompt on a named tool (e.g. `dot ai codex "add tests"`) |
 | `dot ai start [tool]` | Open an interactive session (picker if no tool) (`dot ai chat`) |
-| `dot ai list` | Install status of the fleet, with an install picker (`dot ai tools`) |
+| `dot ai list` | Install status of the roster, with an install picker (`dot ai tools`) |
 | `dot ai install [all\|<tool>] [--yes]` | Install all missing tools, or one, with what they need (asks first) |
-| `dot ai gateway serve [stop\|status]` | Start the local Claude gateway **and** route the fleet through it (`dot ai serve`) |
+| `dot ai gateway serve [stop\|status]` | Start the local Claude gateway **and** route the other tools through it (`dot ai serve`) |
 | `dot ai cost show` | Spend report across providers (`dot ai cost`) |
 | `dot ai login [tool]` | Authenticate a tool |
-| `dot ai check` | Health-check the fleet and the gateway (`dot ai doctor`) |
+| `dot ai check` | Health-check the roster and the gateway (`dot ai doctor`) |
 | `--style <name>` | Steer any prompt with a pattern (see [Steering styles](#steering-styles)) |
 
 ## The cockpit (`dot ai`)
@@ -62,16 +62,16 @@ The interface follows ADR-020 (`dot ai <verb>`), modelled on the Claude CLI: bar
 Running `dot ai` on a terminal opens a glamorous, chat-centric TUI (built with [Bubble Tea](https://github.com/charmbracelet/bubbletea), Charm/Crush-style):
 
 - **Header** — the `◆ dot ai` wordmark plus gateway status (`● :3456` / `○ off`) and today's cost as colour chips.
-- **Left** — the fleet grouped by role, with `●`/`○` install markers and a `▌` selection accent.
+- **Left** — the roster grouped by role, with `●`/`○` install markers and a `▌` selection accent.
 - **Right** — a **chat panel**: pick a tool, type a prompt in the input box, press `Enter`, and the response streams back in the transcript — all without leaving the TUI.
 
 ```text
 Tab focus   ↑↓ move   ⏎ send   s serve   i install   c refresh   q quit
 ```
 
-Two modes per tool: **Enter on the fleet** opens the tool's *full native session* (where its own `/exit`, `/model`, `/clear`, … work); **Tab / `/`** drops into the quick in-cockpit streaming chat. In the chat input, typing `/` opens a **tool-aware command palette** — the cockpit commands (`/help /clear /style /tool /serve /cost /exit`, which run in-chat) plus the selected provider's common REPL commands (`/compact /model /resume /agents` for claude; `/add /diff /commit` for aider; `/approvals /status` for codex; …), tagged `→ <tool> session`. Navigate with `↑↓`, `Tab` to complete, `Enter` to run. Prompts run through `dot ai <tool>`, so the cockpit and the command line behave identically.
+Two modes per tool: **Enter on the roster** opens the tool's *full native session* (where its own `/exit`, `/model`, `/clear`, … work); **Tab / `/`** drops into the quick in-cockpit streaming chat. In the chat input, typing `/` opens a **tool-aware command palette** — the cockpit commands (`/help /clear /style /tool /serve /cost /exit`, which run in-chat) plus the selected provider's common REPL commands (`/compact /model /resume /agents` for claude; `/add /diff /commit` for aider; `/approvals /status` for codex; …), tagged `→ <tool> session`. Navigate with `↑↓`, `Tab` to complete, `Enter` to run. Prompts run through `dot ai <tool>`, so the cockpit and the command line behave identically.
 
-The cockpit also offers a **model picker** (`/model <name>` or the `m` key cycles `default → opus → sonnet → haiku`; the active model shows in the header and is applied to the Claude engine via `ANTHROPIC_MODEL`), **session persistence** (each completed turn is saved to `$XDG_STATE_HOME/dot-ai-tui/session.json`; `/resume` restores your last conversation, `/save` snapshots the current one), and **desktop notifications** when a reply takes longer than ~8s (macOS `osascript` / Linux `notify-send`). In non-interactive contexts (CI, pipes) `dot ai` falls back to a plain text fleet listing. The cockpit binary (`dot-ai-tui`) is built on `chezmoi apply` via the mise-managed Go toolchain; `DOT_AI_SNAPSHOT=1 dot-ai-tui` prints a single frame for previews.
+The cockpit also offers a **model picker** (`/model <name>` or the `m` key cycles `default → opus → sonnet → haiku`; the active model shows in the header and is applied to the Claude engine via `ANTHROPIC_MODEL`), **session persistence** (each completed turn is saved to `$XDG_STATE_HOME/dot-ai-tui/session.json`; `/resume` restores your last conversation, `/save` snapshots the current one), and **desktop notifications** when a reply takes longer than ~8s (macOS `osascript` / Linux `notify-send`). In non-interactive contexts (CI, pipes) `dot ai` falls back to a plain text roster listing. The cockpit binary (`dot-ai-tui`) is built on `chezmoi apply` via the mise-managed Go toolchain; `DOT_AI_SNAPSHOT=1 dot-ai-tui` prints a single frame for previews.
 
 ## Steering styles
 
@@ -99,11 +99,11 @@ dot ai start aider                     # open aider directly
 
 ## The local Claude gateway (`dot ai gateway serve`)
 
-Run one Claude subscription locally and point your whole fleet at it — with **no third-party dependency**. `dot-ai-serve` is a small, stdlib-only Python server (no pip packages) that wraps the `claude` CLI you already have and exposes the standard Anthropic (`/v1/messages`) **and** OpenAI (`/v1/chat/completions`) endpoints. Any tool that speaks either protocol — codex, aider, Open WebUI, an OpenAI SDK — connects to `http://127.0.0.1:3456` and gets Claude on your existing subscription.
+Run one Claude subscription locally and point every tool at it — with **no third-party dependency**. `dot-ai-serve` is a small, stdlib-only Python server (no pip packages) that wraps the `claude` CLI you already have and exposes the standard Anthropic (`/v1/messages`) **and** OpenAI (`/v1/chat/completions`) endpoints. Any tool that speaks either protocol — codex, aider, Open WebUI, an OpenAI SDK — connects to `http://127.0.0.1:3456` and gets Claude on your existing subscription.
 
 ```bash
 claude login              # one-time: authenticate the engine
-dot ai gateway serve          # start the gateway AND route the non-Claude fleet
+dot ai gateway serve          # start the gateway AND route the non-Claude tools
 dot ai gateway serve status   # process + /health + routing state
 dot ai gateway serve stop     # stop the gateway and un-route
 ```
@@ -118,7 +118,7 @@ dot ai gateway serve stop     # stop the gateway and un-route
 
 **Engine limits.** The gateway wraps the `claude` CLI (an agent), not the raw API, so two things are handled gracefully rather than forwarded: **image** blocks are acknowledged inline but not sent (the engine is text-only), and **function/tool-calling** requests are answered in plain text (the CLI can't return caller-defined `tool_use` blocks). Session resumption is still out of scope.
 
-## The fleet
+## The roster
 
 These tools are not installed for you. Install what you want with `dot ai install <tool>` (or `dot ai install all`):
 
