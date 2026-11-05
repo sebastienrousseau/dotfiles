@@ -438,7 +438,7 @@ class Main(unittest.TestCase):
         with mock.patch.object(sys, "argv", ["dot-ai-serve"]), mock.patch.object(srv, "ThreadingHTTPServer", fake):
             srv.main()
         fake.return_value.server_close.assert_called_once()
-        self.assertTrue((self.tmp / "dotfiles" / "ai-serve" / "gateway.token").is_file())
+        self.assertTrue((self.tmp / "dot" / "ai" / "serve" / "gateway.token").is_file())
 
 
 if __name__ == "__main__":

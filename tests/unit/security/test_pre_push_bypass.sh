@@ -108,7 +108,7 @@ rm -rf "$tmpdir/.state"
     DOTFILES_BYPASS_REASON="test fixture" \
     bash .git/hooks/pre-push <<<"$STDIN_LINE" >/dev/null 2>&1
 ) || true
-log="$tmpdir/.state/dotfiles/audit-bypass.log"
+log="$tmpdir/.state/dot/security/audit-bypass.log"
 if [[ -s "$log" ]] && grep -q "reason=test fixture" "$log"; then
   assert_exit_code 0 "true"
 else
@@ -141,7 +141,7 @@ rm -rf "$tmpdir/.state"
     DOTFILES_ALLOW_UNSKIPPED_PUSH=1 \
     bash .git/hooks/pre-push <<<"$STDIN_LINE" >/dev/null 2>&1
 ) || true
-if grep -q "reason=no reason given" "$tmpdir/.state/dotfiles/audit-bypass.log"; then
+if grep -q "reason=no reason given" "$tmpdir/.state/dot/security/audit-bypass.log"; then
   assert_exit_code 0 "true"
 else
   assert_exit_code 0 "false  # default reason not recorded"

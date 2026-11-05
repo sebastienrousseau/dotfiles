@@ -146,12 +146,12 @@ assert_equals "0" "$RC" "an empty capture is fine"
 test_start "apply_takes_a_baseline_snapshot_on_first_run"
 new_case
 apply
-assert_file_exists "$D/home/.local/state/dotfiles/snapshots/baseline.json" "baseline written"
+assert_file_exists "$D/home/.local/state/dot/config/snapshots/baseline.json" "baseline written"
 
 test_start "apply_snapshot_can_be_turned_off"
 new_case
 apply DOTFILES_SNAPSHOT_ON_APPLY=0
-assert_file_not_exists "$D/home/.local/state/dotfiles/snapshots/baseline.json" "no baseline"
+assert_file_not_exists "$D/home/.local/state/dot/config/snapshots/baseline.json" "no baseline"
 
 test_start "apply_runs_post_apply_repair_by_default"
 new_case

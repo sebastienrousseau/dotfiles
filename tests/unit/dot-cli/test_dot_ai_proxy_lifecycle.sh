@@ -29,7 +29,7 @@ trap 'rm -rf "$WORK"; cov_teardown_sandbox' EXIT
 mkdir -p "$WORK/home" "$WORK/stubs" "$WORK/state" "$WORK/config"
 dot_fixture_basebin "$WORK/base" nohup seq kill
 
-STATE="$WORK/home/.local/state/dotfiles/ai-serve"
+STATE="$WORK/home/.local/state/dot/ai/serve"
 CONFIG="$WORK/home/.config/dotfiles"
 mkdir -p "$STATE" "$CONFIG"
 

@@ -98,7 +98,7 @@ Nothing else in this repository writes into the seven folders, and chezmoi itsel
 
 ## Log
 
-Every run appends to `$XDG_STATE_HOME/dotfiles/icloud-symlinks.log` (default: `~/.local/state/dotfiles/icloud-symlinks.log`). Grep for `SKIP` to see why a candidate wasn't linked, or `LINK` to see what was created.
+Every run appends to `$XDG_STATE_HOME/dot/system/icloud-symlinks.log` (default: `~/.local/state/dot/system/icloud-symlinks.log`). Grep for `SKIP` to see why a candidate wasn't linked, or `LINK` to see what was created.
 
 ## Belt-and-braces protection
 

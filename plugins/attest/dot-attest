@@ -20,7 +20,7 @@ _ATTEST_SCRIPT="scripts/diagnostics/workstation-attestation.sh"
 # _attest_export [path] [flags...] — write the record to path, or to the
 # default evidence file when no path comes first.
 _attest_export() {
-  local path="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/attestations/workstation-attestation.json"
+  local path="${XDG_STATE_HOME:-$HOME/.local/state}/dot/attest/attestations/workstation-attestation.json"
   if [[ $# -gt 0 && "$1" != -* ]]; then
     path="$1"
     shift

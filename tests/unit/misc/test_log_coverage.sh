@@ -125,7 +125,7 @@ test_start "logs_and_checkpoints_are_private"
 mode() { stat -c '%a' "$1" 2>/dev/null || stat -f '%Lp' "$1"; }
 (umask 022 && lib "$WORK/perm" 'dot_log info e; DOT_AGENT_CHECKPOINT_ID=cpp dot_agent_checkpoint_create plan; umask') >"$WORK/perm.out"
 assert_equals "600|700" "$(mode "$WORK/perm/dot/cli/log.jsonl")|$(mode "$WORK/perm/dot/cli")" "a new log is 0600 in a 0700 dir"
-assert_equals "600" "$(mode "$WORK/perm/dotfiles/checkpoints/cpp.json")" "a checkpoint is 0600"
+assert_equals "600" "$(mode "$WORK/perm/dot/agent/checkpoints/cpp.json")" "a checkpoint is 0600"
 assert_equals "0022" "$(tail -n 1 "$WORK/perm.out")" "and the caller's umask is put back"
 
 test_start "an_orphan_whose_suffix_is_not_a_pid_is_left"
@@ -210,7 +210,12 @@ assert_contains '"id": "cp1"' "$out" "first checkpoint listed"
 assert_contains '"id":"cp2"' "$out" "second checkpoint listed"
 out="$(lib "$WORK/none" 'dot_agent_checkpoint_tail; echo rc=$?')"
 assert_equals "rc=0" "$out" "no checkpoint dir is fine"
-assert_equals "$WORK/none/dotfiles/checkpoints" "$(lib "$WORK/none" dot_agent_checkpoint_dir)" "dir helper"
+assert_equals "$WORK/none/dot/agent/checkpoints" "$(lib "$WORK/none" dot_agent_checkpoint_dir)" "dir helper"
+
+test_start "jsonl_append_writes_to_cli_legacy"
+lib "$WORK/legacy" 'dot_jsonl_append custom.jsonl "{\"event\":\"custom\"}"' >/dev/null
+assert_equals '{"event":"custom"}' "$(cat "$WORK/legacy/dot/cli/legacy/custom.jsonl" 2>/dev/null)" \
+  "the payload lands in the legacy log the migration keeps"
 
 test_start "unwritable_state_dir_returns_quietly"
 : >"$WORK/blocker"

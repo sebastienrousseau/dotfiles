@@ -89,7 +89,7 @@ fi
 : ${DOTFILES_TRACE:=0}
 
 if [[ "${DOTFILES_TRACE}" == "1" ]]; then
-  _dotfiles_trace_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
+  _dotfiles_trace_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dot/shell"
   mkdir -p "$_dotfiles_trace_dir"
   exec 3>&2 2>"$_dotfiles_trace_dir/debug.log"
   PS4='+%D{%s.%6.} %N:%i> '
@@ -112,13 +112,13 @@ fi
 _SHELL_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
 [[ -d "$_SHELL_CACHE" ]] || mkdir -p "$_SHELL_CACHE"
 
-# Append a timing event to ${XDG_STATE_HOME:-~/.local/state}/dotfiles/eval-timings.jsonl.
+# Append a timing event to ${XDG_STATE_HOME:-~/.local/state}/dot/shell/eval-timings.jsonl.
 # Read by `dot doctor perf show --by-tool` to attribute startup time per tool.
 _cached_eval_log_timing() {
   emulate -L zsh
   setopt no_clobber 2>/dev/null && unsetopt no_clobber
   local label="$1" t0="$2" t1="$3" rc="${4:-0}" shell="${5:-zsh}"
-  local log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
+  local log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dot/shell"
   [[ -d "$log_dir" ]] || mkdir -p "$log_dir" 2>/dev/null || return 0
   local logfile="$log_dir/eval-timings.jsonl"
   [[ -f "$logfile" ]] || touch "$logfile" 2>/dev/null || return 0

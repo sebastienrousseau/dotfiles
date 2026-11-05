@@ -182,7 +182,7 @@ assert_equals "429" "$overcode" "second request over budget returns 429"
 
 # ─────────────── default auth: generated token ───────────────
 body='{"model":"sonnet","messages":[{"role":"user","content":"hi"}]}'
-TOKEN_FILE="$XDG_STATE_HOME/dotfiles/ai-serve/gateway.token"
+TOKEN_FILE="$XDG_STATE_HOME/dot/ai/serve/gateway.token"
 DPORT="$(start_server)"
 
 test_start "default_requires_token"

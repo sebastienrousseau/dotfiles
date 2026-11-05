@@ -23,13 +23,13 @@ Run:
 dot attest
 dot attest --json
 dot attest -j
-dot attest --write ~/.local/state/dotfiles/attestations/workstation.json
-dot attest -w ~/.local/state/dotfiles/attestations/workstation.json
+dot attest --write ~/.local/state/dot/attest/attestations/workstation.json
+dot attest -w ~/.local/state/dot/attest/attestations/workstation.json
 dot attest --fleet-store /srv/dotfiles-fleet
 dot attest -F /srv/dotfiles-fleet -I engineering
 ```
 
-The default output path is `~/.local/state/dotfiles/attestations/workstation-attestation.json`.
+The default output path is `~/.local/state/dot/attest/attestations/workstation-attestation.json`.
 
 Fleet export writes:
 

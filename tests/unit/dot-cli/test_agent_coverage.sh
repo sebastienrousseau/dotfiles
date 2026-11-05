@@ -20,7 +20,7 @@ trap 'rm -rf "$WORK"' EXIT
 export HOME="$WORK/home" XDG_STATE_HOME="$WORK/state" XDG_CONFIG_HOME="$WORK/home/.config"
 export AGENT_PROFILE_CONFIG="$REPO_ROOT/defaults/dot_config/dotfiles/agent-profiles.json"
 export AGENT_STATE_FILE="$WORK/agent-mode.env" NO_COLOR=1 DOTFILES_SHOW_LOGO=0
-mkdir -p "$HOME" "$XDG_STATE_HOME/dotfiles/checkpoints"
+mkdir -p "$HOME" "$XDG_STATE_HOME/dot/agent/checkpoints"
 printf 'DOT_AGENT_PROFILE=ask\n' >"$AGENT_STATE_FILE"
 
 # agent <path> <args…> — source the module and run cmd_mode with that PATH.
@@ -57,7 +57,7 @@ assert_equals "1:yes" "$rc:$([[ "$out" == *"jq is required for dot agent mode"* 
 
 test_start "checkpoint_replay_refuses_an_empty_argv"
 if command -v jq >/dev/null 2>&1; then
-  printf '{"id":"empty1","profile":"ask","argv":[]}\n' >"$XDG_STATE_HOME/dotfiles/checkpoints/empty1.json"
+  printf '{"id":"empty1","profile":"ask","argv":[]}\n' >"$XDG_STATE_HOME/dot/agent/checkpoints/empty1.json"
   out="$(agent "$PATH" checkpoint replay empty1)"
   assert_contains "Checkpoint has no replayable command: empty1" "$out" "empty argv refused"
 else

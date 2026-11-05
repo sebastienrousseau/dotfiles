@@ -88,7 +88,7 @@ _deferred_hydration() {
   # int via string ops so $((...)) integer math handles the delta.
   _cached_eval_log_timing() {
     local label="$1" t0="$2" t1="$3" rc="${4:-0}" shell="${5:-bash}"
-    local log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
+    local log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dot/shell"
     [[ -d "$log_dir" ]] || mkdir -p "$log_dir" 2>/dev/null || return 0
     local logfile="$log_dir/eval-timings.jsonl"
     [[ -f "$logfile" ]] || touch "$logfile" 2>/dev/null || return 0

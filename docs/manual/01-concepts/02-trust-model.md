@@ -137,7 +137,7 @@ The policy is checked, not enforced per tool call: an agent that loads an MCP se
 The record is:
 
 - Not signed: it is evidence to check, not a signed statement
-- Written to `~/.local/state/dotfiles/attestations/workstation-attestation.json` by `dot attest show` (without `--json`), or to a path of your choice with `dot attest export <path>`
+- Written to `~/.local/state/dot/attest/attestations/workstation-attestation.json` by `dot attest show` (without `--json`), or to a path of your choice with `dot attest export <path>`
 - Written per host with `dot attest show --fleet-store <dir> [--fleet-id <id>]`, to `<dir>/<id>/<hostname>/workstation-attestation.json` plus a timestamped copy
 
 ### Verifying an Attestation

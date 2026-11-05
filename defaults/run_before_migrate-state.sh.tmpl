@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Moves the dot CLI's state from $XDG_STATE_HOME/dotfiles/ to
+# $XDG_STATE_HOME/dot/<domain>/ (install/migrate/migrate-state-to-domains.sh)
+# before chezmoi deploys the code that writes to the new paths. It runs
+# before every apply on purpose: once the move is done a marker file makes
+# it a no-op, and an entry it had to leave (the AI gateway while it runs) is
+# tried again next time. It never stops the apply.
+
+set -euo pipefail
+
+script={{ joinPath .chezmoi.sourceDir ".." "install" "migrate" "migrate-state-to-domains.sh" | quote }}
+[[ -f "$script" ]] || exit 0
+bash "$script" ||
+  echo "dot: some state stays in ${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles (listed above); the next apply tries again" >&2
+exit 0

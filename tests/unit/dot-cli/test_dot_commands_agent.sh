@@ -31,7 +31,7 @@ export NO_COLOR=1 DOTFILES_SHOW_LOGO=0 DOTFILES_ACCESSIBILITY=1
 unset AGENT_STATE_FILE DOT_AGENT_PROFILE DOT_AGENT_CHECKPOINT_ID
 mkdir -p "$XDG_CONFIG_HOME" "$XDG_STATE_HOME"
 STATE_FILE="$XDG_CONFIG_HOME/dotfiles/agent-mode.env"
-CHECKPOINTS="$XDG_STATE_HOME/dotfiles/checkpoints"
+CHECKPOINTS="$XDG_STATE_HOME/dot/agent/checkpoints"
 SESSIONS="$XDG_STATE_HOME/dot/agent/log.jsonl" # log.v1 session_<event> records
 
 export AGENT_PROFILE_CONFIG="$WORK/agent-profiles.json"

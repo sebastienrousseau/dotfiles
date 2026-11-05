@@ -51,7 +51,7 @@ echo defaults >"$FAKE/.chezmoiroot"
 FLEET="$FAKE/plugins/fleet/libexec/fleet.sh"
 DATA="$FAKE/defaults/.chezmoidata.toml"
 
-STATE_DIR="$XDG_STATE_HOME/dotfiles/fleet"
+STATE_DIR="$XDG_STATE_HOME/dot/fleet"
 EVENTS="$XDG_STATE_HOME/dot/fleet/log.jsonl" # log.v1
 HISTORY="$STATE_DIR/drift-history.jsonl"
 
