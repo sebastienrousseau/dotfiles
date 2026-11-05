@@ -7,7 +7,9 @@
 # (${API_KEY:-}, ${API_KEY:=x}), a Python condition (if not API_KEY:) or a
 # value taken from a variable or a call, which made every commit touching
 # dot-ai-proxy or dot-ai-serve fail.
-# Runs the audit in a throwaway repository.
+# The fake values are short runs of x: a literal to the audit, nothing for
+# gitleaks or secret-governance.sh to call a leak. Runs the audit in a
+# throwaway repository.
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -30,8 +32,8 @@ audit_secrets() {
 }
 
 test_start "an_assigned_secret_fails"
-assert_equals "FAILED" "$(audit_secrets run.sh 'export API_KEY=sk-live-0123456789')" "shell assignment"
-assert_equals "FAILED" "$(audit_secrets run.sh 'GITHUB_TOKEN = "ghp_0123456789"')" "assignment with spaces"
+assert_equals "FAILED" "$(audit_secrets run.sh 'export API_KEY=xxxxxx')" "shell assignment"
+assert_equals "FAILED" "$(audit_secrets run.sh 'GITHUB_TOKEN = "xxxxxx"')" "assignment with spaces"
 assert_equals "FAILED" "$(audit_secrets conf.yml 'password: hunter2')" "a YAML value"
 assert_equals "FAILED" "$(audit_secrets conf.json '"api_key":"abc123"')" "a JSON value"
 
@@ -45,8 +47,8 @@ assert_equals "PASSED" "$(audit_secrets run.sh 'export OPENAI_API_KEY="$key"')" 
 assert_equals "PASSED" "$(audit_secrets run.sh 'export API_KEY=${KEY}')" "a braced shell variable"
 assert_equals "PASSED" "$(audit_secrets serve.py 'API_KEY = os.environ.get("DOT_AI_API_KEY", "")')" "an environment lookup"
 assert_equals "PASSED" "$(audit_secrets serve.py '        API_KEY = load_or_create_token()')" "a call"
-assert_equals "FAILED" "$(audit_secrets serve.py 'API_KEY = "sk-live-0123456789"')" "but a literal still fails"
-assert_equals "FAILED" "$(audit_secrets run.sh 'A=$x; API_KEY="sk-live-0123456789"')" "even beside a variable"
+assert_equals "FAILED" "$(audit_secrets serve.py 'API_KEY = "xxxxxx"')" "but a literal still fails"
+assert_equals "FAILED" "$(audit_secrets run.sh 'A=$x; API_KEY="xxxxxx"')" "even beside a variable"
 
 # audit_status FILE CONTENT: stage FILE with CONTENT in a fresh repo and
 # print the whole audit's exit status. The scan's verdict must decide it:
