@@ -55,10 +55,12 @@ assert_equals "2" "$RC" "zero runs exits 2"
 assert_contains "Invalid runs value: 0" "$OUT" "and says why"
 
 # ── git pre-commit wrapper ────────────────────────────────────────────────
-# A tree with a copy of the hook and recording stubs for the two scripts it
-# runs: the hook finds them relative to its own location. (Line coverage
-# does not credit a run of a copy; the behaviour is what is pinned here.)
+# A checkout with a copy of the hook and recording stubs for the two scripts
+# it runs: the hook runs those of the checkout being committed, so it runs
+# from inside it. (Line coverage does not credit a run of a copy; the
+# behaviour is what is pinned here.)
 HOOKTREE="$WORK/hooktree"
+git init -q "$HOOKTREE"
 mkdir -p "$HOOKTREE/scripts/git-hooks" "$HOOKTREE/scripts/diagnostics"
 cp "$REPO_ROOT/scripts/git-hooks/pre-commit" "$HOOKTREE/scripts/git-hooks/pre-commit"
 for s in diagnostics/secret-governance.sh git-hooks/pre-commit-audit.sh; do
@@ -67,18 +69,18 @@ for s in diagnostics/secret-governance.sh git-hooks/pre-commit-audit.sh; do
 done
 
 test_start "precommit_runs_both_checks"
-run bash "$HOOKTREE/scripts/git-hooks/pre-commit"
+run bash -c 'cd "$1" && bash scripts/git-hooks/pre-commit' _ "$HOOKTREE"
 assert_equals "0" "$RC" "both checks pass, the hook passes"
 assert_contains "ran diagnostics/secret-governance.sh" "$OUT" "the secret check ran"
 assert_contains "ran git-hooks/pre-commit-audit.sh" "$OUT" "the audit ran"
 
 test_start "precommit_fails_when_a_check_fails"
-STUB_RC=1 run bash "$HOOKTREE/scripts/git-hooks/pre-commit"
+STUB_RC=1 run bash -c 'cd "$1" && bash scripts/git-hooks/pre-commit' _ "$HOOKTREE"
 assert_not_equals "0" "$RC" "a failing check fails the commit"
 
 test_start "precommit_skips_checks_that_are_absent"
 rm -f "$HOOKTREE/scripts/diagnostics/secret-governance.sh"
-run bash "$HOOKTREE/scripts/git-hooks/pre-commit"
+run bash -c 'cd "$1" && bash scripts/git-hooks/pre-commit' _ "$HOOKTREE"
 assert_equals "0" "$RC" "a missing check is skipped"
 assert_contains "ran git-hooks/pre-commit-audit.sh" "$OUT" "the other still runs"
 
