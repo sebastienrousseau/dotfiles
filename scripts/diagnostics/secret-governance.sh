@@ -28,7 +28,7 @@ fi
 staged_content() {
   local f
   for f in "${staged_files[@]}"; do
-    git show -- ":$f" 2>/dev/null || true
+    git show ":$f" 2>/dev/null || true
   done
 }
 
