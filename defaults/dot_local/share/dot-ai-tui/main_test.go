@@ -27,22 +27,22 @@ func TestViewNeverPanics(t *testing.T) {
 		t.Fatal("view reported panic after sizing")
 	}
 
-	// 3. After a refresh payload → renders the fleet.
-	mm, _ = m.Update(refreshMsg{tools: fleet, costToday: "$0.00"})
+	// 3. After a refresh payload → renders the roster.
+	mm, _ = m.Update(refreshMsg{tools: roster, costToday: "$0.00"})
 	m = mm.(model)
 	out := m.View()
 	if !strings.Contains(out, "claude") {
-		t.Fatalf("view missing fleet after refresh:\n%s", out)
+		t.Fatalf("view missing roster after refresh:\n%s", out)
 	}
 }
 
-// The rendered frame must carry the cockpit chrome (logo, fleet, chat input)
+// The rendered frame must carry the cockpit chrome (logo, roster, chat input)
 // once sized — guards the gorgeous layout against regressions.
 func TestRenderChrome(t *testing.T) {
 	m := newModel()
 	mm, _ := m.Update(tea.WindowSizeMsg{Width: 94, Height: 30})
 	m = mm.(model)
-	mm, _ = m.Update(refreshMsg{tools: fleet, costToday: "$0.00"})
+	mm, _ = m.Update(refreshMsg{tools: roster, costToday: "$0.00"})
 	m = mm.(model)
 	out := m.View()
 	for _, want := range []string{"dot ai", "claude", "❯", "gateway"} {
@@ -67,7 +67,7 @@ func TestSlashCommands(t *testing.T) {
 	}
 	mm, _ = m.handleSlash("/tool codex")
 	want := -1
-	for i, tl := range fleet {
+	for i, tl := range roster {
 		if tl.name == "codex" {
 			want = i
 		}
@@ -99,7 +99,7 @@ func TestPalette(t *testing.T) {
 	if p := m.palette(); len(p) != 1 || p[0].label != "/compact" {
 		t.Fatalf("prefix filter failed: %+v", p)
 	}
-	for i, tl := range fleet {
+	for i, tl := range roster {
 		if tl.name == "aider" {
 			m.cursor = i
 		}
@@ -108,7 +108,7 @@ func TestPalette(t *testing.T) {
 	if p := m.palette(); len(p) != 1 || p[0].label != "/add" {
 		t.Fatalf("tool-aware palette failed for aider: %+v", p)
 	}
-	m.focus = "fleet"
+	m.focus = "roster"
 	if m.palette() != nil {
 		t.Fatal("palette must be empty outside the chat input")
 	}
@@ -134,11 +134,11 @@ func TestCursorBounds(t *testing.T) {
 		t.Fatal("cursor went below 0")
 	}
 	down := tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("j")}
-	for i := 0; i < len(fleet)+5; i++ {
+	for i := 0; i < len(roster)+5; i++ {
 		mm, _ = mm.(model).Update(down)
 	}
-	if c := mm.(model).cursor; c != len(fleet)-1 {
-		t.Fatalf("cursor escaped bounds: got %d, want %d", c, len(fleet)-1)
+	if c := mm.(model).cursor; c != len(roster)-1 {
+		t.Fatalf("cursor escaped bounds: got %d, want %d", c, len(roster)-1)
 	}
 }
 
@@ -159,7 +159,7 @@ func TestRenderTranscriptTinyHeightWithRecent(t *testing.T) {
 	// End-to-end: tiny terminal, palette open, empty transcript, recent set.
 	m = newModel()
 	m = upd(m, tea.WindowSizeMsg{Width: 41, Height: 12})
-	m = upd(m, refreshMsg{tools: fleet, recent: []string{"a", "b", "c"}})
+	m = upd(m, refreshMsg{tools: roster, recent: []string{"a", "b", "c"}})
 	m = upd(m, key("tab"))
 	m.input.SetValue("/")
 	if v := m.View(); v == "" {

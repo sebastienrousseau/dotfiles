@@ -35,22 +35,22 @@ Keep the last column a list of backticked function names.
 | refresh | Recent-run rows from the db are sanitised; the `/health` body is read through a 4 KiB cap | crafted db row, oversized body | `TestRefreshCleansRecentRows` `TestRefreshHealthBodyIsBounded` |
 | refresh | Missing DB or invalid SQL yields empty | error paths | `TestSqlite` `TestCoverageGaps2` |
 
-## Fleet pane (focus `fleet`)
+## Roster pane (focus `roster`)
 
 | Area | Feature | Trigger | Tests |
 | :--- | :--- | :--- | :--- |
-| fleet | Key bindings `up`/`k` and `down`/`j` move the cursor (clamped) | keyboard | `TestCursorBounds` `TestUpdateFleet` `FuzzModelKeys` `BenchmarkUpdateFleet` `BenchmarkModelUpdateKeyFleet` |
-| fleet | Key binding `enter` opens the tool's native session (`dot ai start <tool>`) | keyboard | `TestUpdateFleet` `BenchmarkDotExec` |
-| fleet | `x` arms a SIGTERM for the selected tool's own busiest process; a second `x` within 5s sends it after re-checking the PID's start time and program; other keys cancel; never falls back to another tool | keyboard | `TestKillNeedsASecondPressAndTargetsTheSelectedTool` `TestKillNeverFallsBackToAnotherTool` `TestKillIsCancelledByAnyOtherKey` `TestKillArmExpires` `TestKillRefusesAReusedOrVanishedPID` `TestKillReportsSignalErrors` |
-| fleet | Key binding `tab` jumps to the chat input | keyboard | `TestUpdateMsgs` |
-| fleet | Key binding `/` opens the input pre-filled with `/`; `p` opens it empty | keyboard | `TestUpdateFleet` |
-| fleet | Key binding `r` refreshes (status `refreshing…`); `c` / `v` / `d` jump to corralctl / passmcp / draft | keyboard | `TestUpdateFleet` |
-| fleet | Key binding `i` installs the selected tool (`dot ai install <tool>`) | keyboard | `TestUpdateFleet` |
-| fleet | Key binding `m` cycles the model override (default → opus → sonnet → haiku) | keyboard | `TestModelPicker` `FuzzModelCycle` `BenchmarkNextModel` `BenchmarkModelLabel` |
-| fleet | Key binding `s` starts the gateway, or stops it when it is up | keyboard | `TestUpdateFleet` |
-| fleet | Key bindings `q`/`esc` quit | keyboard | `TestUpdateFleet` |
-| fleet | Key binding `ctrl+c` quits from any pane | keyboard | `TestUpdateMsgs` |
-| fleet | Fleet grouped by role with install dots, windowed to the panel height | View | `TestRenderChrome` `TestRenderPaths` `FuzzWindowRows` `BenchmarkWindowRows` |
+| roster | Key bindings `up`/`k` and `down`/`j` move the cursor (clamped) | keyboard | `TestCursorBounds` `TestUpdateRoster` `FuzzModelKeys` `BenchmarkUpdateRoster` `BenchmarkModelUpdateKeyRoster` |
+| roster | Key binding `enter` opens the tool's native session (`dot ai start <tool>`) | keyboard | `TestUpdateRoster` `BenchmarkDotExec` |
+| roster | `x` arms a SIGTERM for the selected tool's own busiest process; a second `x` within 5s sends it after re-checking the PID's start time and program; other keys cancel; never falls back to another tool | keyboard | `TestKillNeedsASecondPressAndTargetsTheSelectedTool` `TestKillNeverFallsBackToAnotherTool` `TestKillIsCancelledByAnyOtherKey` `TestKillArmExpires` `TestKillRefusesAReusedOrVanishedPID` `TestKillReportsSignalErrors` |
+| roster | Key binding `tab` jumps to the chat input | keyboard | `TestUpdateMsgs` |
+| roster | Key binding `/` opens the input pre-filled with `/`; `p` opens it empty | keyboard | `TestUpdateRoster` |
+| roster | Key binding `r` refreshes (status `refreshing…`); `c` / `v` / `d` jump to corralctl / passmcp / draft | keyboard | `TestUpdateRoster` |
+| roster | Key binding `i` installs the selected tool (`dot ai install <tool>`) | keyboard | `TestUpdateRoster` |
+| roster | Key binding `m` cycles the model override (default → opus → sonnet → haiku) | keyboard | `TestModelPicker` `FuzzModelCycle` `BenchmarkNextModel` `BenchmarkModelLabel` |
+| roster | Key binding `s` starts the gateway, or stops it when it is up | keyboard | `TestUpdateRoster` |
+| roster | Key bindings `q`/`esc` quit | keyboard | `TestUpdateRoster` |
+| roster | Key binding `ctrl+c` quits from any pane | keyboard | `TestUpdateMsgs` |
+| roster | Roster grouped by role with install dots, windowed to the panel height | View | `TestRenderChrome` `TestRenderPaths` `FuzzWindowRows` `BenchmarkWindowRows` |
 
 ## Chat input (focus `input`)
 
@@ -59,8 +59,8 @@ Keep the last column a list of backticked function names.
 | input | Typing edits the prompt (2000-char limit) | keyboard | `TestUpdateInput` `BenchmarkUpdateInput` `BenchmarkModelUpdateKeyInput` |
 | input | Key binding `enter` sends the prompt to `dot ai <tool> [--style s]` and streams the reply | keyboard | `TestUpdateInput` `TestStartStreamAndExec` `BenchmarkStartStream` `BenchmarkWaitForChunk` |
 | input | Empty prompt is a no-op; sending while a reply is running is ignored | keyboard | `TestUpdateInput` |
-| input | Key binding `esc` returns to the fleet (closes the palette first) | keyboard | `TestUpdateInput` |
-| input | Key binding `tab` returns to the fleet, or completes the open palette | keyboard | `TestUpdateMsgs` `TestUpdateInput` |
+| input | Key binding `esc` returns to the roster (closes the palette first) | keyboard | `TestUpdateInput` |
+| input | Key binding `tab` returns to the roster, or completes the open palette | keyboard | `TestUpdateMsgs` `TestUpdateInput` |
 | input | Streaming: chunks append live, `done` trims and persists the turn | `streamMsg` | `TestUpdateMsgs` `BenchmarkModelUpdateStream` |
 | input | Streaming: control characters and bidi overrides in a reply become U+FFFD before highlighting; a rune split across reads stays whole | `streamMsg` | `TestStreamChunkStripsTerminalEscapes` `TestStartStreamStripsTerminalEscapes` `TestPumpChunksKeepsRunesWhole` `TestPumpChunksFlushesTruncatedRune` `TestCleanReplacesControlAndBidi` `FuzzRenderTranscript` |
 | input | Streaming: empty reply shows an install/auth hint | `streamMsg` | `TestUpdateMsgs` |
@@ -89,7 +89,7 @@ Keep the last column a list of backticked function names.
 | slash | `/help`, `/?` list the commands | chat | `TestHandleSlashAll` `FuzzHandleSlash` `BenchmarkHandleSlash` |
 | slash | `/model` shows the choices; `/model <name>` sets; `/model default` or `off` clears | chat | `TestModelPicker` |
 | slash | `/style <name>` sets the steering style; `/style` or `/style off` clears | chat | `TestSlashCommands` `TestHandleSlashAll` |
-| slash | `/tool <name>` selects a fleet tool; unknown names are reported | chat | `TestSlashCommands` `TestHandleSlashAll` |
+| slash | `/tool <name>` selects a roster tool; unknown names are reported | chat | `TestSlashCommands` `TestHandleSlashAll` |
 | slash | `/save` persists the transcript; `/resume` restores it (or reports none) | chat | `TestSessionPersistence` `BenchmarkSaveSession` `BenchmarkLoadSession` |
 | slash | `/clear` empties the transcript | chat | `TestSlashCommands` `TestHandleSlashAll` |
 | slash | `/serve` starts the gateway; `/cost` opens the spend report | chat | `TestHandleSlashAll` |
@@ -100,7 +100,7 @@ Keep the last column a list of backticked function names.
 
 | Area | Feature | Trigger | Tests |
 | :--- | :--- | :--- | :--- |
-| view | `loading dot ai…` placeholder before sizing, below 40×12, or with no fleet | View | `TestViewNeverPanics` `TestRenderPaths` `BenchmarkModelView` `BenchmarkModelUpdateResize` `BenchmarkModelUpdateRefresh` `BenchmarkNewModel` `BenchmarkModelInit` |
+| view | `loading dot ai…` placeholder before sizing, below 40×12, or with no roster | View | `TestViewNeverPanics` `TestRenderPaths` `BenchmarkModelView` `BenchmarkModelUpdateResize` `BenchmarkModelUpdateRefresh` `BenchmarkNewModel` `BenchmarkModelInit` |
 | view | Header: logo, tagline, model/style chips, gateway + cost chips (gap clamps on narrow terminals) | View | `TestRenderChrome` `TestModelPicker` `TestCoverageGaps2` |
 | view | Left pane width 18..26, right pane fills the rest | resize | `TestPureHelpers` `BenchmarkLeftWidth` `BenchmarkRightWidth` |
 | view | Focused pane gets the violet border | focus | `TestRenderPaths` |
