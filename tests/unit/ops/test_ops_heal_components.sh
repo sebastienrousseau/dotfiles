@@ -91,7 +91,7 @@ heal() {
       source "$1/lib/dot/utils.sh"
       REPO_ROOT="$2"
       BACKUP_DIR="$HOME/.local/share/dotfiles/backups"
-      HEAL_LOG="$HOME/.local/state/dotfiles/heal.log"
+      HEAL_LOG="$HOME/.local/state/dot/doctor/heal.log"
       FIXES_APPLIED=0 ISSUES_FOUND=0 CHEZMOI_APPLIED=0 MISSING_DEPS_FOUND=0
       log_info() { ui_info "$@"; }
       log_success() { ui_ok "$@"; }
@@ -163,7 +163,7 @@ assert_equals "0" "$?" "drift repair succeeds"
 assert_contains "chezmoi apply --force" "$(calls)" "drift is re-applied with --force"
 assert_contains "1 file(s) synced" "$(output)" "the synced count is reported"
 assert_contains "ISSUES=1 FIXES=1" "$(output)" "one issue found, one fix applied"
-assert_contains "HEAL: chezmoi apply --force" "$(cat "$SANDBOX_HOME/.local/state/dotfiles/heal.log" 2>/dev/null)" \
+assert_contains "HEAL: chezmoi apply --force" "$(cat "$SANDBOX_HOME/.local/state/dot/doctor/heal.log" 2>/dev/null)" \
   "the repair is logged"
 
 test_start "heal_chezmoi_drift_reports_remaining_drift"

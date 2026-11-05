@@ -72,7 +72,7 @@ DOTFILES_PERF_REGRESSION_PCT=5 dot doctor perf show   # tighter threshold
 
 `_cached_eval` (the zsh/fish primitive that caches expensive tool
 init like `starship init zsh`) writes one JSONL row per call to
-`$XDG_STATE_HOME/dotfiles/eval-timings.jsonl` when
+`$XDG_STATE_HOME/dot/shell/eval-timings.jsonl` when
 `EVALCACHE_TIMING=1` is set in the environment. Aggregating that log
 gives a per-tool breakdown of where startup time goes.
 

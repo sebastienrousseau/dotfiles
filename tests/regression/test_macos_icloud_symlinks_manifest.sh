@@ -108,7 +108,7 @@ _new_home() {
   local sb
   sb="$(mktemp -d -t icloud-manifest-home.XXXXXX 2>/dev/null || mktemp -d)"
   mkdir -p "$sb/Library/Mobile Documents/com~apple~CloudDocs"
-  mkdir -p "$sb/state/dotfiles"
+  mkdir -p "$sb/state/dot/system"
   printf '%s\n' "$sb"
 }
 

@@ -38,7 +38,7 @@ Effective with #871 and the corresponding commit on this branch:
 - The legacy `DOTFILES_SKIP_PRE_PUSH_AUDIT=1` is **rejected** with a
   migration message; the hook exits non-zero if it sees the old var.
 - Every bypass is appended to
-  `${XDG_STATE_HOME:-~/.local/state}/dotfiles/audit-bypass.log` with
+  `${XDG_STATE_HOME:-~/.local/state}/dot/security/audit-bypass.log` with
   timestamp, branch, remote, and reason.
 - `dot doctor` reports the count of bypasses in the last 7 days.
 
@@ -82,7 +82,7 @@ When bypass is **not** legitimate:
 
 ```bash
 dot doctor   # surfaces recent bypasses
-cat ${XDG_STATE_HOME:-~/.local/state}/dotfiles/audit-bypass.log
+cat ${XDG_STATE_HOME:-~/.local/state}/dot/security/audit-bypass.log
 ```
 
 Each line of the log is tab-separated:

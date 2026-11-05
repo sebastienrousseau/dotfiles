@@ -42,8 +42,9 @@ CLAUDE_BIN = os.environ.get("DOT_AI_CLAUDE_BIN", "claude")
 DEFAULT_MODEL = os.environ.get("DOT_AI_DEFAULT_MODEL", "sonnet")
 STATE_DIR = os.path.join(
     os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"),
-    "dotfiles",
-    "ai-serve",
+    "dot",
+    "ai",
+    "serve",
 )
 TOKEN_FILE = os.path.join(STATE_DIR, "gateway.token")
 # Extra Host header values to accept (comma-separated host[:port]).

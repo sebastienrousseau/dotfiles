@@ -282,7 +282,7 @@ test_fm_policy_audit_log_location() {
   local repo log
   repo="$(fm_repo_copy)"
   [[ -d "$repo/scripts/security" ]] || cp -R "$REPO_ROOT/scripts/security" "$repo/scripts/security"
-  log="$XDG_STATE_HOME/dotfiles/security-audit.log"
+  log="$XDG_STATE_HOME/dot/security/security-audit.log"
   rm -f "$log"
   test_start "fm_policy_audit_log_location"
   DOTFILES_POLICY_STRICT= DOTFILES_POLICY_DEPS_ONLY=1 fm_run_bin "$repo/bin/dot" security policy show

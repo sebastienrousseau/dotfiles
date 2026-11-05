@@ -160,7 +160,7 @@ _apply_governance() {
 # A baseline snapshot on the first apply (never overwritten).
 _apply_snapshot() {
   local snapshot_script="$SCRIPT_DIR/../diagnostics/snapshot.sh"
-  local snapshot_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/snapshots"
+  local snapshot_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dot/config/snapshots"
   [[ "${DOTFILES_SNAPSHOT_ON_APPLY:-1}" = "1" ]] || return 0
   if [[ -f "$snapshot_script" && ! -f "$snapshot_dir/baseline.json" ]]; then
     mkdir -p "$snapshot_dir"

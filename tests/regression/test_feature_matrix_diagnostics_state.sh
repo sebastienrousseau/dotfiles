@@ -68,7 +68,7 @@ test_fm_snapshot_baseline() {
   fm_run doctor snapshot new -b
   fm_expect_rc 0
   test_start "fm_snapshot_baseline_writes_baseline_json"
-  fm_expect_file "$XDG_STATE_HOME/dotfiles/snapshots/baseline.json"
+  fm_expect_file "$XDG_STATE_HOME/dot/config/snapshots/baseline.json"
   # -f overwrites an existing baseline rather than refusing.
   test_start "fm_snapshot_baseline_force"
   fm_run doctor snapshot new -b -f
@@ -82,11 +82,11 @@ test_fm_env_xdg_state_home() {
   fm_run doctor snapshot new
   fm_expect_rc 0
   test_start "fm_env_xdg_state_home_receives_the_write"
-  if find "$XDG_STATE_HOME/dotfiles/snapshots" -name 'snapshot_*.json' 2>/dev/null |
+  if find "$XDG_STATE_HOME/dot/config/snapshots" -name 'snapshot_*.json' 2>/dev/null |
     grep -q .; then
     fm_pass "snapshot written under XDG_STATE_HOME"
   else
-    fm_fail "no snapshot under $XDG_STATE_HOME/dotfiles/snapshots"
+    fm_fail "no snapshot under $XDG_STATE_HOME/dot/config/snapshots"
   fi
 }
 
@@ -101,7 +101,7 @@ test_fm_attest() {
   test_start "fm_attest_reports_version"
   fm_expect_out_matches 'Version +[0-9]+\.[0-9]+\.[0-9]+'
   test_start "fm_attest_writes_default_attestation"
-  fm_expect_file "$XDG_STATE_HOME/dotfiles/attestations/workstation-attestation.json"
+  fm_expect_file "$XDG_STATE_HOME/dot/attest/attestations/workstation-attestation.json"
 }
 
 test_fm_attest_json() {

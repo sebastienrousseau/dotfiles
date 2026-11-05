@@ -247,7 +247,7 @@ test_fm_ai_serve_gateway() {
   local port base token_file tok gw_pid
   port="$(python3 -c 'import socket;s=socket.socket();s.bind(("127.0.0.1",0));print(s.getsockname()[1]);s.close()')"
   base="http://127.0.0.1:$port"
-  token_file="$XDG_STATE_HOME/dotfiles/ai-serve/gateway.token"
+  token_file="$XDG_STATE_HOME/dot/ai/serve/gateway.token"
   fm_stub dot-ai-proxy "exec bash '$REPO_ROOT/defaults/dot_local/bin/executable_dot-ai-proxy' \"\$@\""
   fm_stub dot-ai-serve "exec python3 '$REPO_ROOT/defaults/dot_local/bin/executable_dot-ai-serve' \"\$@\""
   fm_stub claude 'cat >/dev/null
@@ -296,7 +296,7 @@ printf "%s\n" "{\"type\":\"result\",\"is_error\":false,\"result\":\"ok\",\"usage
   test_start "fm_ai_serve_stop_reports_not_running"
   fm_expect_out "Proxy not running"
   test_start "fm_ai_serve_stop_clears_the_stale_pid_file"
-  if [[ -e "$XDG_STATE_HOME/dotfiles/ai-serve/serve.pid" ]]; then fm_fail "serve.pid left behind"; else fm_pass "stale pid file removed"; fi
+  if [[ -e "$XDG_STATE_HOME/dot/ai/serve/serve.pid" ]]; then fm_fail "serve.pid left behind"; else fm_pass "stale pid file removed"; fi
   test_start "fm_ai_serve_stop_turns_routing_off"
   fm_expect_out "Routing OFF"
   test_start "fm_ai_serve_stop_unroutes"

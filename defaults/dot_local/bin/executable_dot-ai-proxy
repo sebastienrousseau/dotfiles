@@ -22,7 +22,7 @@ DOT_AI_PORT="${DOT_AI_PORT:-3456}"
 BASE_URL="http://${DOT_AI_HOST}:${DOT_AI_PORT}"
 SERVE_BIN="${DOT_AI_SERVE_BIN:-dot-ai-serve}"
 
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/ai-serve"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dot/ai/serve"
 PID_FILE="$STATE_DIR/serve.pid"
 TOKEN_FILE="$STATE_DIR/gateway.token" # shared with dot-ai-serve
 LOG_FILE="$STATE_DIR/serve.log"

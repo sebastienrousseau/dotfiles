@@ -121,7 +121,7 @@ if [[ -z "$FLEET_STORE" && -n "${DOTFILES_FLEET_STORE:-}" ]]; then
   FLEET_STORE="$DOTFILES_FLEET_STORE"
 fi
 
-attestation_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/attestations"
+attestation_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dot/attest/attestations"
 if [[ -n "$WRITE_PATH" ]]; then
   mkdir -p "$(dirname "$WRITE_PATH")"
 elif [[ "$JSON_MODE" -ne 1 && -z "$FLEET_STORE" ]]; then

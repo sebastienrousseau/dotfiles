@@ -138,12 +138,12 @@ _dd_stale() {
 # Class 3: orphan deployed files (chezmoi no longer claims them)
 # Sample heuristic — chezmoi doesn't expose a direct "orphan" query.
 # We surface a count of zero unless the user has a pre-populated
-# ~/.local/state/dotfiles/orphans file (drift-history feature in fleet
+# ~/.local/state/dot/doctor/orphans file (drift-history feature in fleet
 # already maintains one); future work tracked under #875.
 # -----------------------------------------------------------------------------
 _dd_orphans() {
   orphan_count=0
-  orphan_file="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/orphans"
+  orphan_file="${XDG_STATE_HOME:-$HOME/.local/state}/dot/doctor/orphans"
   if [[ -s "$orphan_file" ]]; then
     orphan_count=$(wc -l <"$orphan_file" | tr -d ' ')
   fi

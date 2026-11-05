@@ -91,7 +91,7 @@ Optional keys: `repo` (HTTPS project URL), `tags` (lower-case array), `maintaine
 - Modules never execute: only plain files are accepted, and they are written with your user privileges. Review the preview and publisher before passing `--yes`.
 - The SHA-256 pin binds installation to the reviewed archive bytes, even if the hosting release later changes.
 - The index is signed with an offline minisign key; its public half is `security/registry.pub`. HTTPS adds transport confidentiality, not trust.
-- Rollback: the newest `updated` timestamp ever accepted per registry URL is kept under `${XDG_STATE_HOME:-~/.local/state}/dotfiles/registry/`, and an older (or undated) index is refused.
+- Rollback: the newest `updated` timestamp ever accepted per registry URL is kept under `${XDG_STATE_HOME:-~/.local/state}/dot/cli/registry/`, and an older (or undated) index is refused.
 - Registry text (descriptions, maintainers, tags) is stripped of control characters before it is printed.
 
 ## Why this lives in this repo (for now)

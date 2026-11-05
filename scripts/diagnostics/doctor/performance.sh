@@ -260,7 +260,7 @@ except Exception:
     fi
   fi
 
-  timings_file="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/eval-timings.jsonl"
+  timings_file="${XDG_STATE_HOME:-$HOME/.local/state}/dot/shell/eval-timings.jsonl"
   if [[ -s "$timings_file" ]] && command -v python3 >/dev/null 2>&1; then
     top_tools=$(python3 -c '
 import json, sys

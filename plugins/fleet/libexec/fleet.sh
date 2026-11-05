@@ -14,7 +14,7 @@ source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/log.sh"
 
 dot_ui_command_banner "Fleet" "${1:-}"
 
-_FLEET_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/fleet"
+_FLEET_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dot/fleet"
 
 _fleet_enabled() {
   local data_file

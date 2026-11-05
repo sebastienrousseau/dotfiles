@@ -66,7 +66,7 @@ _new_sandbox() {
   sb="$(mktemp -d -t icloud-test.XXXXXX)"
   export HOME="$sb"
   export XDG_STATE_HOME="$sb/state"
-  mkdir -p "$XDG_STATE_HOME/dotfiles"
+  mkdir -p "$XDG_STATE_HOME/dot/system"
   mkdir -p "$HOME/Library/Mobile Documents/com~apple~CloudDocs"
   export ICLOUD="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
   unset DOTFILES_ICLOUD_SYMLINKS DOTFILES_ICLOUD_DRY_RUN
@@ -460,7 +460,7 @@ test_start "writes_persistent_log"
 _new_sandbox >/dev/null
 mkdir -p "$ICLOUD/Documents"
 _run_script >/dev/null
-LOG="$XDG_STATE_HOME/dotfiles/icloud-symlinks.log"
+LOG="$XDG_STATE_HOME/dot/system/icloud-symlinks.log"
 if [[ -f "$LOG" ]] && grep -q "BEGIN run" "$LOG" && grep -q "END run" "$LOG"; then
   ((TESTS_PASSED++)) || true
   printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
@@ -475,7 +475,7 @@ mkdir -p "$ICLOUD/Documents"
 _run_script >/dev/null
 _run_script >/dev/null
 _run_script >/dev/null
-LOG="$XDG_STATE_HOME/dotfiles/icloud-symlinks.log"
+LOG="$XDG_STATE_HOME/dot/system/icloud-symlinks.log"
 begin_count="$(grep -c "BEGIN run" "$LOG" 2>/dev/null || echo 0)"
 end_count="$(grep -c "END run" "$LOG" 2>/dev/null || echo 0)"
 if [[ "$begin_count" == "3" ]] && [[ "$end_count" == "3" ]]; then
@@ -494,7 +494,7 @@ _new_sandbox >/dev/null
 unset XDG_STATE_HOME
 mkdir -p "$ICLOUD/Documents"
 _run_script >/dev/null
-if [[ -f "$HOME/.local/state/dotfiles/icloud-symlinks.log" ]]; then
+if [[ -f "$HOME/.local/state/dot/system/icloud-symlinks.log" ]]; then
   ((TESTS_PASSED++)) || true
   printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
 else
@@ -512,7 +512,7 @@ sb2="$sb/dir with space"
 mkdir -p "$sb2"
 export HOME="$sb2"
 export XDG_STATE_HOME="$sb2/state"
-mkdir -p "$XDG_STATE_HOME/dotfiles"
+mkdir -p "$XDG_STATE_HOME/dot/system"
 mkdir -p "$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents"
 ICLOUD="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
 _run_script >/dev/null
