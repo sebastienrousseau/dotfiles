@@ -76,7 +76,7 @@
   18   17   21.1  141   141 defaults/dot_local/bin/executable_tour::<top>
    8   17   21.6   38     0 install.sh::install_chezmoi
   14   16   28.6   45     0 install.sh::install_chezmoi_verified_embedded
-  41   51   52.9  251     0 install.sh::main
+  38   47   50.9  246     0 install.sh::main
   11   10   18.5   17     0 install.sh::seed_git_identity
   10   16   20.6   43    50 install/lib/hide_menu_entries.sh::<top>
   19   27   27.7   74   102 install/lib/install_neovim.sh::<top>
@@ -122,7 +122,7 @@
    4    4   14.4   20   536 scripts/diagnostics/health.sh::<top>
    5    5   17.0   65    65 scripts/diagnostics/history-analysis.sh::<top>
   16   18   37.3   86    92 scripts/diagnostics/scorecard.sh::<top>
-  17   19   27.8   40    46 scripts/diagnostics/secret-governance.sh::<top>
+  17   19   27.8   40    44 scripts/diagnostics/secret-governance.sh::<top>
   14   18   28.5   38     0 scripts/diagnostics/security-score.sh::check_encryption
   22   32   40.2   53     0 scripts/diagnostics/security-score.sh::check_system
   11   11    5.6   26     0 scripts/diagnostics/security-score.sh::get_grade

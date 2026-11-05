@@ -2,7 +2,7 @@
 // Copyright (c) 2015-2026 Sebastien Rousseau
 //
 // dot-ai — the `dot ai` cockpit & btop-grade agentic control plane. Unifies
-// the AI fleet with corralctl (multi-forge workspace manager), passmcp (9-repo
+// the AI roster with corralctl (multi-forge workspace manager), passmcp (9-repo
 // MCP security & risk-graph family), and draft (grounded research & C2PA
 // synthesis). Every figure is sampled; energy and carbon read n/a.
 package main
@@ -24,7 +24,8 @@ type tool struct {
 	installed        bool
 }
 
-// The fleet, in display order, is generated from the roster: roster_gen.go.
+// The roster, in display order, is generated from plugins/ai/roster.toml:
+// roster_gen.go.
 
 // ── theme (Charm-flavoured) ─────────────────────────────────────────────────
 var (
@@ -103,7 +104,7 @@ type model struct {
 	costToday     string
 	recent        []string
 	width, height int
-	focus         string // "fleet" | "input"
+	focus         string // "roster" | "input"
 	input         textinput.Model
 	spin          spinner.Model
 	transcript    []line
@@ -124,8 +125,8 @@ type model struct {
 }
 
 func newModel() model {
-	t := make([]tool, len(fleet))
-	copy(t, fleet)
+	t := make([]tool, len(roster))
+	copy(t, roster)
 	ti := textinput.New()
 	ti.Placeholder = "ask the selected tool…  (/help · Tab to browse · 1-6 actions)"
 	ti.Prompt = "❯ "
@@ -138,7 +139,7 @@ func newModel() model {
 	sp.Style = lipgloss.NewStyle().Foreground(pink)
 	snap := sampleEcosystem()
 	hist := []float64{12, 24, 36, 28, 45, 32, 20, max(snap.TotalAICPU, 8)}
-	return model{tools: t, focus: "fleet", input: ti, spin: sp, ecoSnap: snap, cpuHist: hist, scanner: newSessionScanner()}
+	return model{tools: t, focus: "roster", input: ti, spin: sp, ecoSnap: snap, cpuHist: hist, scanner: newSessionScanner()}
 }
 
 // Init starts the refresh and the session scan; each sessionsMsg re-arms the tick.
@@ -228,7 +229,7 @@ func (m model) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "ctrl+c":
 		return m, tea.Quit
 	case "tab":
-		if m.focus == "fleet" {
+		if m.focus == "roster" {
 			m.focus = "input"
 			m.input.Focus()
 			return m, textinput.Blink
@@ -236,23 +237,23 @@ func (m model) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		if len(m.palette()) > 0 {
 			return m.updateInput(msg)
 		}
-		m.focus = "fleet"
+		m.focus = "roster"
 		m.input.Blur()
 		return m, nil
 	}
 	if m.focus == "input" {
 		return m.updateInput(msg)
 	}
-	return m.updateFleet(msg)
+	return m.updateRoster(msg)
 }
 
-func (m model) updateFleet(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m model) updateRoster(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	k := msg.String()
 	if m.kill.pid != 0 && k != "x" {
 		m.kill = pendingKill{}
 		m.status = "kill cancelled"
 	}
-	if nm, handled := m.updateFleetNav(k); handled {
+	if nm, handled := m.updateRosterNav(k); handled {
 		return nm, nil
 	}
 	if len(k) == 1 && k[0] >= '1' && k[0] <= '6' {
@@ -260,10 +261,10 @@ func (m model) updateFleet(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.actionIdx = idx
 		return m.triggerControlAction(idx)
 	}
-	return m.updateFleetHotkey(k)
+	return m.updateRosterHotkey(k)
 }
 
-func (m model) updateFleetNav(k string) (model, bool) {
+func (m model) updateRosterNav(k string) (model, bool) {
 	switch k {
 	case "up", "k":
 		if m.cursor > 0 {
@@ -295,7 +296,7 @@ func (m model) updateFleetNav(k string) (model, bool) {
 	return m, false
 }
 
-func (m model) updateFleetHotkey(k string) (tea.Model, tea.Cmd) {
+func (m model) updateRosterHotkey(k string) (tea.Model, tea.Cmd) {
 	switch k {
 	case "q", "esc":
 		return m, tea.Quit
@@ -374,7 +375,7 @@ func (m model) updateInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.palSel = 0
 			return m, nil
 		}
-		m.focus = "fleet"
+		m.focus = "roster"
 		m.input.Blur()
 		return m, nil
 	case "up", "ctrl+p":

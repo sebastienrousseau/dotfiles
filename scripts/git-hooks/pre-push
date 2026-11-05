@@ -6,7 +6,7 @@
 # 1. Refuses to push any commit that is not GPG/SSH-signed.
 # 2. Runs `scripts/qa/reliability-audit.sh --quick`. The audit is mandatory
 #    by default; explicit per-push bypass requires `DOTFILES_ALLOW_UNSKIPPED_PUSH=1`,
-#    and every bypass is logged to `${XDG_STATE_HOME:-~/.local/state}/dotfiles/audit-bypass.log`.
+#    and every bypass is logged to `${XDG_STATE_HOME:-~/.local/state}/dot/security/audit-bypass.log`.
 #
 # The legacy `DOTFILES_SKIP_PRE_PUSH_AUDIT=1` env var (opt-out) is rejected
 # with a migration message. The new variable is intentionally awkwardly
@@ -72,8 +72,8 @@ authorize a bypass for this single push.
 To bypass for one push:
   DOTFILES_ALLOW_UNSKIPPED_PUSH=1 git push
 
-Every bypass is recorded to ~/.local/state/dotfiles/audit-bypass.log
-($XDG_STATE_HOME/dotfiles/ when set) and surfaced by `dot doctor` if any
+Every bypass is recorded to ~/.local/state/dot/security/audit-bypass.log
+($XDG_STATE_HOME/dot/security/ when set) and surfaced by `dot doctor` if any
 are recent.
 
 See: docs/security/AUDIT_BYPASS.md
@@ -85,7 +85,7 @@ fi
 # Step 3 — run the audit (or log + skip if explicitly bypassed)
 # -----------------------------------------------------------------------------
 if [ "${DOTFILES_ALLOW_UNSKIPPED_PUSH:-}" = "1" ]; then
-  bypass_log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles"
+  bypass_log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dot/security"
   # The audit-bypass log lives under XDG_STATE_HOME (user state — never
   # checked in, never deployed by chezmoi to other locations).
   mkdir -p "$bypass_log_dir"

@@ -33,6 +33,7 @@ cat >"$STUBS/curl" <<EOF
 #!/bin/sh
 out=''; url=''
 while [ \$# -gt 0 ]; do case "\$1" in -o) out="\$2"; shift ;; https://*) url="\$1" ;; esac; shift; done
+echo "\$url" >>"$WORK/urls"
 [ -f "$REL/\${url##*/}" ] || exit 22
 cp "$REL/\${url##*/}" "\$out"
 EOF
@@ -94,7 +95,10 @@ FONTS=".local/share/fonts"
 release regular
 test_start "fonts_regular_archive_installed"
 rc="$(run_fonts "$WORK/h1")"
-assert_equals "0|yes|v3.4.0" \
+# The release it downloaded from, so a version bump needs no test edit.
+fetched="$(sed -n 's|.*/download/\([^/]*\)/JetBrainsMono\.zip$|\1|p' "$WORK/urls" | head -n 1)"
+assert_not_empty "$fetched" "the archive came from a versioned release URL"
+assert_equals "0|yes|$fetched" \
   "$rc|$([[ -f "$WORK/h1/$FONTS/JetBrainsMono-Regular.ttf" ]] && echo yes || echo no)|$(cat "$WORK/h1/$FONTS/.nerd-fonts-version" 2>/dev/null)" \
   "a verified, regular archive is extracted and the version recorded"
 

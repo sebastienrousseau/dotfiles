@@ -94,9 +94,9 @@ chmod +x "$log_tmp/bin/jq"
   dot_agent_checkpoint_create plan ready
   dot_agent_checkpoint_tail 2
 ) >/dev/null || true
-assert_file_exists "$log_tmp/state/dotfiles/checkpoints/checkpoint-test.json" \
+assert_file_exists "$log_tmp/state/dot/agent/checkpoints/checkpoint-test.json" \
   "log deep branches created jq checkpoint"
-assert_file_exists "$log_tmp/state-nojq/dotfiles/checkpoints/checkpoint-nojq.json" \
+assert_file_exists "$log_tmp/state-nojq/dot/agent/checkpoints/checkpoint-nojq.json" \
   "log deep branches created fallback checkpoint"
 
 cov_exercise_functions_file "$SCRIPT_FILE"

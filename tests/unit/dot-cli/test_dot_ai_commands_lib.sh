@@ -70,10 +70,10 @@ err_has() { assert_file_contains "$ERRF" "$1" "${2:-stderr contains $1}"; }
 called() { assert_file_contains "$AI_CALLS" "$1" "invoked $1"; }
 
 # ai_min — same, but with PATH cut down to the sandbox stubs plus the system
-# directories. The host running this suite really does have some of the fleet
+# directories. The host running this suite really does have some of the roster
 # installed, so the "not installed" branches need everything else hidden.
 # bash is linked into the sandbox rather than adding its directory: on macOS
-# that is /opt/homebrew/bin, which also holds real fleet tools.
+# that is /opt/homebrew/bin, which also holds real roster tools.
 ln -sf "$REAL_BASH" "$BIN/bash"
 ai_min() {
   PATH="$BIN:/usr/bin:/bin:/usr/sbin:/sbin" ai "$@"
@@ -189,7 +189,7 @@ called "ollama run qwen3.5:4b"
 DOTFILES_OLLAMA_MODEL="custom-model:small" ai cmd_ai_chat ollama
 called "ollama run custom-model:small"
 
-test_start "serve_start_routes_the_fleet_through_the_proxy"
+test_start "serve_start_routes_the_roster_through_the_proxy"
 ai _ai_serve
 assert_equals 0 "$RC" "rc"
 called "dot-ai-proxy start"
@@ -222,17 +222,17 @@ out_has "not found — run: chezmoi apply" "hint"
 stub dot-ai-proxy
 
 # ── doctor ──────────────────────────────────────────────────────────────
-test_start "doctor_reports_the_fleet_and_the_gateway"
+test_start "doctor_reports_the_roster_and_the_gateway"
 ai cmd_ai_doctor
 assert_equals 0 "$RC" "rc"
 out_has "AI doctor" "header"
 out_has "claude CLI" "engine row"
 out_has "gateway engine" "gateway row"
-out_has "Fleet" "fleet tally"
+out_has "Roster" "roster tally"
 called "dot-ai-proxy status"
 
 test_start "doctor_flags_a_missing_engine_and_gateway"
-NONE="$DOTFILES_COV_TMPDIR/nofleet"
+NONE="$DOTFILES_COV_TMPDIR/noroster"
 mkdir -p "$NONE"
 ln -sf "$REAL_BASH" "$NONE/bash"
 for c in printf cat sed grep tr cut awk dirname basename head tty locale uname date \
@@ -243,11 +243,11 @@ PATH="$NONE" ai cmd_ai_doctor
 assert_equals 0 "$RC" "rc"
 out_has "not installed (the gateway engine needs it)" "engine missing"
 out_has "dot-ai-serve not deployed" "gateway missing"
-out_has "0/19 tools installed" "empty fleet"
+out_has "0/19 tools installed" "empty roster"
 out_has "0/3 suite tools" "empty ecosystem"
 
 # ── install ─────────────────────────────────────────────────────────────
-test_start "install_reports_a_complete_fleet"
+test_start "install_reports_a_complete_roster"
 ai_min cmd_ai_install
 assert_equals 0 "$RC" "rc"
 out_has "all tools already installed" "nothing to do"
@@ -288,7 +288,7 @@ out_has "nothing installed — rerun with --yes" "no consent, no install"
 stub claude
 stub goose
 
-test_start "an_empty_fleet_with_no_install_route_stops_early"
+test_start "an_empty_roster_with_no_install_route_stops_early"
 # Nothing on PATH: every tool is missing, and neither curl (native
 # installers) nor a way to get mise exists, so nothing can be installed.
 PATH="$NONE" ai cmd_ai_install --yes

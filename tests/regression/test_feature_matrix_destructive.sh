@@ -52,7 +52,7 @@ UNINSTALL_TARGETS=(
   .local/bin/dot .local/bin/dot-ai .local/bin/dot-theme-sync .local/bin/tour
   .config/chezmoi/chezmoi.toml .local/share/chezmoi/README.md
   .cache/dotfiles/x .cache/zsh/x .cache/bash/x
-  .local/state/dotfiles/x .local/share/dotfiles.log
+  .local/state/dotfiles/x .local/state/dot/cli/x .local/share/dotfiles.log
   .local/share/zsh/completions/_dot .local/share/bash-completion/completions/dot
 )
 

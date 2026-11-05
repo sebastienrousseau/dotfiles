@@ -16,7 +16,7 @@ import (
 
 func benchModel() model {
 	m := sized()
-	m = upd(m, refreshMsg{tools: fleet, costToday: "$1.23", gatewayUp: true, gatewayMsg: "127.0.0.1:3456", recent: []string{"18:00  claude  dotfiles"}})
+	m = upd(m, refreshMsg{tools: roster, costToday: "$1.23", gatewayUp: true, gatewayMsg: "127.0.0.1:3456", recent: []string{"18:00  claude  dotfiles"}})
 	m.transcript = []line{
 		{who: "you", text: "show me a typed fetch wrapper"},
 		{who: "claude", text: "Here:\n```ts\nexport async function getJSON<T>(url: string): Promise<T> {\n  return (await fetch(url)).json();\n}\n```"},
@@ -239,7 +239,7 @@ func BenchmarkModelUpdateResize(b *testing.B) {
 
 func BenchmarkModelUpdateRefresh(b *testing.B) {
 	m := sized()
-	msg := refreshMsg{tools: fleet, costToday: "$0.00"}
+	msg := refreshMsg{tools: roster, costToday: "$0.00"}
 	for i := 0; i < b.N; i++ {
 		_, _ = m.Update(msg)
 	}
@@ -263,7 +263,7 @@ func BenchmarkModelUpdateStream(b *testing.B) {
 	}
 }
 
-func BenchmarkModelUpdateKeyFleet(b *testing.B) {
+func BenchmarkModelUpdateKeyRoster(b *testing.B) {
 	m := sized()
 	keys := []tea.Msg{key("j"), key("k"), key("m"), key("down"), key("up")}
 	for i := 0; i < b.N; i++ {
@@ -284,10 +284,10 @@ func BenchmarkModelUpdateKeyInput(b *testing.B) {
 	}
 }
 
-func BenchmarkUpdateFleet(b *testing.B) {
+func BenchmarkUpdateRoster(b *testing.B) {
 	m := sized()
 	for i := 0; i < b.N; i++ {
-		_, _ = m.updateFleet(key("j"))
+		_, _ = m.updateRoster(key("j"))
 	}
 }
 

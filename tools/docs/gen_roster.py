@@ -7,7 +7,7 @@ The roster is the only place a tool is named. This writes:
 
   plugins/ai/roster.json                          roster.v1, for dot-top
   lib/dot/data/ai-roster.sh                       data for lib/dot/ai-roster.sh
-  defaults/dot_local/share/dot-ai-tui/roster_gen.go   the cockpit's fleet
+  defaults/dot_local/share/dot-ai-tui/roster_gen.go   the cockpit's roster
 
 and rewrites the line after each `roster: <kind>` marker comment in:
 
@@ -66,10 +66,12 @@ def load(root: pathlib.Path) -> list[dict]:
         missing = [key for key in REQUIRED if not tool.get(key)]
         if missing:
             raise ValueError(f"{ROSTER}: {tool.get('name', '?')} lacks {', '.join(missing)}")
+        if "fleet" in tool:
+            raise ValueError(f"{ROSTER}: {tool['name']} uses fleet, renamed cockpit")
         if tool["group"] not in GROUPS:
             raise ValueError(f"{ROSTER}: {tool['name']} has unknown group {tool['group']}")
         tool = {"aliases": [], "processes": [tool["bin"]], "package": "", "native": "",
-                "login": "", "chat": True, "fleet": True, **tool}
+                "login": "", "chat": True, "cockpit": True, **tool}
         if not isinstance(tool["login"], str):
             raise ValueError(f"{ROSTER}: {tool['name']} login must be a string of words")
         for key in [tool["name"], *tool["aliases"]]:
@@ -117,7 +119,7 @@ def _sh_table(pairs: list[tuple[str, str]]) -> str:
 
 def render_shell(tools: list[dict]) -> str:
     chat = [tool for tool in tools if tool["chat"]]
-    eco = [tool for tool in tools if not tool["chat"] and tool["fleet"]]
+    eco = [tool for tool in tools if not tool["chat"] and tool["cockpit"]]
     bin_of = [(key, tool["bin"]) for tool in tools for key in [tool["name"], *tool["aliases"]]]
     status = ["|".join([*GROUPS[t["group"]], t["title"], t["bin"], t["summary"]])
               for t in by_group(chat)]
@@ -148,7 +150,7 @@ def render_shell(tools: list[dict]) -> str:
 
 
 def render_go(tools: list[dict]) -> str:
-    fleet = [t for t in by_group(tools) if t["fleet"]]
+    listed = [t for t in by_group(tools) if t["cockpit"]]
     roles = sorted({proc: t["role"] for t in tools for proc in t["processes"]}.items())
     out = [*(f"// {line}" for line in LICENSE),
            "",
@@ -156,9 +158,9 @@ def render_go(tools: list[dict]) -> str:
            "",
            "package main",
            "",
-           "// fleet is the roster in display order, grouped by section.",
-           "var fleet = []tool{"]
-    out += [f'\t{{name: "{t["name"]}", bin: "{t["bin"]}", group: "{t["group"]}"}},' for t in fleet]
+           "// roster is the cockpit's tool list in display order, grouped by section.",
+           "var roster = []tool{"]
+    out += [f'\t{{name: "{t["name"]}", bin: "{t["bin"]}", group: "{t["group"]}"}},' for t in listed]
     out += ["}", "", "// rosterRoles maps each roster process name to its process-table role.",
             "var rosterRoles = map[string]string{"]
     width = max(len(proc) for proc, _ in roles) + 3

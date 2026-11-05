@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-// AIProcess represents a live OS process belonging to the AI fleet, local LLM
+// AIProcess represents a live OS process belonging to the AI roster, local LLM
 // runtimes, gateway, or MCP / ecosystem toolchains.
 type AIProcess struct {
 	PID     int

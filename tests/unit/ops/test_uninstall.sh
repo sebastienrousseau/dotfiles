@@ -25,7 +25,7 @@ MANAGED=(
   .local/bin/ai_core .local/bin/ai-update .local/bin/antigravity
   .local/bin/git-ai-commit .local/bin/git-ai-diff
   .cache/dotfiles/x .cache/zsh/x .cache/bash/x
-  .local/state/dotfiles/x .local/share/dotfiles.log
+  .local/state/dotfiles/x .local/state/dot/cli/x .local/share/dotfiles.log
   .local/share/zsh/completions/_dot .local/share/bash-completion/completions/dot
 )
 KEPT=(.config/keep/me.conf .local/bin/not-ours .cache/other/x)

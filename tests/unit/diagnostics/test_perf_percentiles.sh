@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 # Unit tests for the percentile aggregator inside scripts/diagnostics/perf.sh.
 #
-# The aggregator reads $XDG_STATE_HOME/dotfiles/eval-timings.jsonl and
+# The aggregator reads $XDG_STATE_HOME/dot/shell/eval-timings.jsonl and
 # reports count/total/mean/p50/p95/p99 per `_cached_eval` label. The
 # test pins the math against known fixtures so a future refactor of
 # the embedded Python doesn't quietly change semantics.
@@ -34,7 +34,7 @@ assert_file_exists "$PERF" "perf.sh should exist"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
-state_dir="$tmp/state/dotfiles"
+state_dir="$tmp/state/dot/shell"
 mkdir -p "$state_dir"
 log_file="$state_dir/eval-timings.jsonl"
 

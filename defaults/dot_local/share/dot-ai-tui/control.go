@@ -110,7 +110,7 @@ func toolActions(t tool) []controlAction {
 		return []controlAction{
 			{key: "1", label: "Pipeline Help", desc: "draft --help — 5-phase grounded research & C2PA synthesis", bin: "draft", args: []string{"--help"}},
 			{key: "2", label: "Verify C2PA", desc: "draft verify --help — Ed25519 signature & citation check", bin: "draft", args: []string{"verify", "--help"}},
-			{key: "3", label: "AI Doctor", desc: "dot ai check — fleet & provider health check", bin: "dot", args: []string{"ai", "check"}},
+			{key: "3", label: "AI Doctor", desc: "dot ai check — roster & provider health check", bin: "dot", args: []string{"ai", "check"}},
 			{key: "4", label: "MCP Doctor", desc: "dot mcp check — inspect MCP retrieval servers", bin: "dot", args: []string{"mcp", "check"}},
 			{key: "5", label: "Spend", desc: "dot ai cost show — token spend by provider", bin: "dot", args: []string{"ai", "cost", "show"}},
 			{key: "6", label: "Version", desc: "draft --version — binary version & provenance support", bin: "draft", args: []string{"--version"}},
@@ -118,7 +118,7 @@ func toolActions(t tool) []controlAction {
 	default:
 		return []controlAction{
 			{key: "1", label: "Version", desc: t.bin + " --version — inspect agent CLI version", bin: t.bin, args: []string{"--version"}},
-			{key: "2", label: "AI Doctor", desc: "dot ai check — fleet & provider health check", bin: "dot", args: []string{"ai", "check"}},
+			{key: "2", label: "AI Doctor", desc: "dot ai check — roster & provider health check", bin: "dot", args: []string{"ai", "check"}},
 			{key: "3", label: "Spend", desc: "dot ai cost show — token spend by provider", bin: "dot", args: []string{"ai", "cost", "show"}},
 			{key: "4", label: "MCP Audit", desc: "dot mcp check — audit MCP servers & passmcp family", bin: "dot", args: []string{"mcp", "check"}},
 			{key: "5", label: "Start Agent", desc: "dot ai start " + t.name + " — launch interactive agent session", bin: "dot", args: []string{"ai", "start", t.name}, interactive: true},

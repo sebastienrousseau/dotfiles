@@ -47,16 +47,14 @@ out_has() {
 }
 
 # ── secret-governance ───────────────────────────────────────────────────
-# `git diff --cached --name-only` lists the staged paths and `git show :path`
-# prints their staged content; both come from fixtures.
+# `git diff --cached --name-only` lists the staged paths and
+# `git diff --cached -U0` shows the lines they add; both come from fixtures.
 cat >"$BIN/git" <<STUB
 #!$REAL_BASH
-for a in "\$@"; do
-  case "\$a" in
-    diff) cat "\$GOV_FIX/staged"; exit 0 ;;
-    show) cat "\$GOV_FIX/content"; exit 0 ;;
-  esac
-done
+case " \$* " in
+  *" --name-only "*) cat "\$GOV_FIX/staged" ;;
+  *" diff "*) printf '+++ b/file\n'; sed 's/^/+/' "\$GOV_FIX/content" ;;
+esac
 exit 0
 STUB
 chmod +x "$BIN/git"

@@ -323,11 +323,25 @@ _doctor_state() {
   fi
 }
 
+# --- State layout: $XDG_STATE_HOME/dot/<domain>/ (ADR-020 N12) ---
+# install/migrate/migrate-state-to-domains.sh moves the old directory's
+# entries on apply, and marks the move done.
+_doctor_state_layout() {
+  local state="${XDG_STATE_HOME:-$HOME/.local/state}"
+  if [[ -f "$state/dot/cli/migrations/state-domains.done" ]]; then
+    _ok "state layout" "per domain in $(pretty_path "$state/dot")"
+  elif [[ -d "$state/dotfiles" ]]; then
+    _warn "state layout" "$(pretty_path "$state/dotfiles") is not moved yet; chezmoi apply moves it"
+  else
+    _ok "state layout" "per domain in $(pretty_path "$state/dot")"
+  fi
+}
+
 # --- Pre-push audit bypass log (closes #871) ---
 _doctor_pre_push_audit_bypass_log() {
   _section "Pre-Push Audit Bypass"
 
-  bypass_log="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/audit-bypass.log"
+  bypass_log="${XDG_STATE_HOME:-$HOME/.local/state}/dot/security/audit-bypass.log"
   if [[ -s "$bypass_log" ]]; then
     # Count entries in the last 7 days (timestamps are ISO-8601 UTC).
     seven_days_ago=$(date -u -v-7d +%Y-%m-%dT00:00:00Z 2>/dev/null ||
@@ -564,6 +578,7 @@ _doctor_main() {
   _doctor_platform
   _doctor_os_specific_detection
   _doctor_state
+  _doctor_state_layout
   _doctor_pre_push_audit_bypass_log
   _doctor_atuin_history_filter
   _doctor_git_signing
