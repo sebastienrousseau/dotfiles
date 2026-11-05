@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# euxis (sebastienrousseau/euxis) runs these to confirm its agents'
+# claims, in place of the `npm test` it detects from package.json: that is
+# the reliability audit (~15 minutes), far past euxis's per-check budget
+# (the agent timeout, 45 to 120 s), so the check always failed. Each gate
+# below finishes in seconds.
+version: "1"
+verify:
+  - name: cli-table
+    command: ["python3", "tools/ci/cli_command_table.py", "--check"]
+  - name: cli-contract
+    command: ["python3", "tools/ci/check-cli-contract.py"]
+  - name: plugin-imports
+    command: ["python3", "tools/ci/check-plugin-imports.py"]
+  - name: complexity
+    command: ["python3", "tools/ci/complexity.py"]
+  - name: source-grep-tests
+    command: ["python3", "tools/ci/check-source-grep-tests.py"]
+  - name: shell-preamble
+    command: ["bash", "tools/ci/check-shell-preamble.sh"]
+  - name: workflow-hardening
+    command: ["python3", "tools/ci/check-workflow-hardening.py"]
