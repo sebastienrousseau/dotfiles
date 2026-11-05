@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# The checkout being committed, as pre-push does: this file is installed in
+# the main checkout's .git/hooks, so its own path would run the main
+# checkout's checks on a linked worktree's commit.
+repo_root="$(git rev-parse --show-toplevel)"
 
 if [[ -x "${repo_root}/scripts/diagnostics/secret-governance.sh" ]]; then
   "${repo_root}/scripts/diagnostics/secret-governance.sh"
