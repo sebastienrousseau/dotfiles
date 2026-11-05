@@ -62,6 +62,8 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot cli completion show` | Print a completion script |
 | `dot cli registry show` | The plugin registry URL |
 | `dot cli registry set` | Point at another plugin registry |
+| `dot cli hook status` | Each agent session's last state |
+| `dot cli hook run` | Record an agent hook event read on stdin |
 | `dot config status` | Pending changes and last apply |
 | `dot config diff` | What apply would change |
 | `dot config apply` | Write the dotfiles to this machine |

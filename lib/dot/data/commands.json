@@ -592,6 +592,11 @@
      "name": "registry",
      "summary": "the plugin registry",
      "default": "show"
+    },
+    {
+     "name": "hook",
+     "summary": "agent hook events (agent-event.v1)",
+     "default": "status"
     }
    ],
    "commands": [
@@ -654,6 +659,19 @@
      "effect": "write",
      "summary": "Point at another plugin registry",
      "built": true
+    },
+    {
+     "spelling": "cli hook status",
+     "effect": "read",
+     "summary": "Each agent session's last state",
+     "built": true
+    },
+    {
+     "spelling": "cli hook run",
+     "effect": "write",
+     "summary": "Record an agent hook event read on stdin",
+     "built": true,
+     "lock": false
     }
    ],
    "aliases": [

@@ -88,6 +88,8 @@ Plugins, updates, completions.
 | `dot cli completion show` | Print a completion script | `dot completion` |
 | `dot cli registry show` | The plugin registry URL | `dot registry url` |
 | `dot cli registry set` | Point at another plugin registry | `dot registry set-url` |
+| `dot cli hook status` | Each agent session's last state |  |
+| `dot cli hook run` | Record an agent hook event read on stdin |  |
 
 ### dot config
 
