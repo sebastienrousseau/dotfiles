@@ -206,7 +206,7 @@ main() {
     printf 'dot cli hook: jq is needed to edit settings.json; install it with mise or your package manager\n' >&2
     return 2
   fi
-  for a in "${AGENTS[@]}"; do hi_agent "$a" "$mode"; done
+  for a in "${AGENTS[@]}"; do hi_agent "$a" "$mode" || LEFT=1; done
   [[ "$LEFT" == 0 ]] || return 3
 }
 

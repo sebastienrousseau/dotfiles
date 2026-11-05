@@ -82,7 +82,8 @@ assert_equals "0" "$RC" "removes"
 assert_equals "say done" "$(cmds "$S" Stop)" "the other hook stays"
 assert_equals '["Stop"]' "$(jq -c '.hooks | keys' "$S")" "and events left empty are gone"
 run remove --agent claude
-assert_contains "claude: not installed" "$OUT" "a second remove has nothing to do"
+assert_equals "0" "$RC" "a second remove exits 0"
+assert_contains "claude: not installed" "$OUT" "having nothing to do"
 
 test_start "remove_drops_an_emptied_hooks_object"
 fresh claude
@@ -119,6 +120,20 @@ printf '{ not json\n' >"$S"
 run install --agent claude
 assert_equals "3|{ not json" "$RC|$(cat "$S")" "exit 3, file untouched"
 assert_contains "is not valid JSON; left as it was" "$OUT" "and says why"
+
+test_start "a_file_it_cannot_write_is_left"
+fresh claude
+S="$H/.claude/settings.json"
+printf '{}\n' >"$S"
+chmod 0500 "$H/.claude"
+run install --agent claude
+chmod 0700 "$H/.claude"
+if [[ "$(id -u)" == 0 ]]; then
+  echo "  (skipped: root can write a read-only directory)"
+else
+  assert_equals "3|{}" "$RC|$(cat "$S")" "exit 3, file untouched"
+  assert_contains "could not write $S; left as it was" "$OUT" "and says why"
+fi
 
 test_start "dry_run_writes_nothing"
 fresh claude
@@ -167,7 +182,8 @@ assert_equals "3" "$RC" "exit 3"
 assert_contains "already has a notify of its own" "$OUT" "and says why"
 assert_equals 'notify = ["say", "done"]' "$(cat "$T")" "untouched"
 run remove --agent codex
-assert_equals 'notify = ["say", "done"]' "$(cat "$T")" "remove leaves it too"
+assert_equals "0" "$RC" "remove exits 0"
+assert_equals 'notify = ["say", "done"]' "$(cat "$T")" "and leaves it too"
 
 test_start "with_no_agent_it_does_the_ones_present"
 fresh claude codex
