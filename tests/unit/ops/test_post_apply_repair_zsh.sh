@@ -78,6 +78,30 @@ assert_equals "0" "$PA_RC" "an explicit zsh should exit 0"
 assert_contains "dot CLI resolution" "$PA_OUT" \
   "the explicit interpreter should still produce a resolution result"
 
+# ── 3b. A login shell that prints a banner ─────────────────────────────────
+#
+# `zsh -lic` runs the user's startup files, which may print anything before
+# the probe's two lines. Picking the first and last line through
+# `printf | head -n 1` under pipefail died with "printf: write error: Broken
+# pipe" (exit 141) once the output outgrew what head reads before it exits:
+# certain here, a timing race even with two lines (a CI flake, 2026-11-04).
+test_start "post_apply_repair_survives_a_chatty_login_shell"
+cat >"$WORK/stubs/zsh" <<STUB
+#!/bin/sh
+i=0
+while [ \$i -lt 20000 ]; do
+  echo "Welcome to the banner, line \$i"
+  i=\$((i + 1))
+done
+printf '%s\n' "$WORK/home/.local/bin/dot"
+exit 0
+STUB
+chmod +x "$WORK/stubs/zsh"
+pa_run
+assert_equals "0" "$PA_RC" "a banner before the probe output should not abort the checks"
+assert_contains "dot CLI resolution" "$PA_OUT" \
+  "the last line still decides the resolution"
+
 # ── 4. No dot binary at all ────────────────────────────────────────────────
 test_start "post_apply_repair_reports_a_missing_dot_binary"
 rm -f "$WORK/home/.local/bin/dot"
