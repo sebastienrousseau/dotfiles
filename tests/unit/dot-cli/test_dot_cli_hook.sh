@@ -19,6 +19,12 @@ LISTENER=""
 trap '[[ -z "$LISTENER" ]] || kill "$LISTENER" 2>/dev/null; rm -rf "$WORK"' EXIT
 H="$WORK/home" S="$WORK/state" R="$WORK/run"
 mkdir -p "$H" "$R"
+# The coverage runner's tracing, when it is on: env -i would drop it, and
+# the hook's lines would run unmeasured.
+COV_ENV=()
+for v in BASH_ENV PS4 COV_TRACE_FILE COV_ROOT; do
+  [[ -z "${!v:-}" ]] || COV_ENV+=("$v=${!v}")
+done
 
 # hook PAYLOAD [ARGS...]: `dot cli hook run ARGS...` with PAYLOAD on stdin;
 # sets RC, OUT (stdout) and ERR (stderr).
@@ -26,7 +32,7 @@ hook() {
   local payload="$1"
   shift
   RC=0
-  OUT="$(printf '%s' "$payload" | env -i HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$S" \
+  OUT="$(printf '%s' "$payload" | env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$S" \
     XDG_RUNTIME_DIR="$R" XDG_CACHE_HOME="$H/.cache" NO_COLOR=1 TERM=dumb \
     bash "$REPO_ROOT/bin/dot" cli hook run "$@" 2>"$WORK/err")" || RC=$?
   ERR="$(cat "$WORK/err")"
@@ -104,15 +110,15 @@ assert_equals "0|idle" "$RC|$(state_of claude s4)" "dot cli hook run is lock = f
 
 test_start "status_lists_the_sessions"
 RC=0
-OUT="$(env -i HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$S" XDG_CACHE_HOME="$H/.cache" NO_COLOR=1 TERM=dumb \
+OUT="$(env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$S" XDG_CACHE_HOME="$H/.cache" NO_COLOR=1 TERM=dumb \
   bash "$REPO_ROOT/bin/dot" cli hook 2>&1)" || RC=$?
 assert_equals "0" "$RC" "bare dot cli hook is status and exits 0"
 assert_contains "codex      idle" "$OUT" "one row per session, agent and state"
 assert_contains "s3" "$OUT" "naming the session"
-OUT="$(env -i HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$S" XDG_CACHE_HOME="$H/.cache" \
+OUT="$(env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$S" XDG_CACHE_HOME="$H/.cache" \
   bash "$REPO_ROOT/bin/dot" cli hook status --json 2>&1)"
 assert_equals "5" "$(grep -c '"schema":"cli/agent-event.v1"' <<<"$OUT")" "--json prints the records"
-OUT="$(env -i HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$WORK/empty" XDG_CACHE_HOME="$H/.cache" \
+OUT="$(env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$WORK/empty" XDG_CACHE_HOME="$H/.cache" \
   bash "$REPO_ROOT/bin/dot" cli hook status 2>&1)"
 assert_contains "No agent events recorded yet" "$OUT" "with none, it says so"
 
