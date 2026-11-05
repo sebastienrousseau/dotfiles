@@ -42,10 +42,22 @@ SECRET_EXCLUDES="test_|assertions.sh|.pre-commit|README|CHANGELOG|FEATURES.md|do
 # variable ("$key", ${KEY}) or a call (os.environ.get(...), load_token()).
 SECRET_KEYS="(GITHUB_TOKEN|API_KEY|SECRET|password|private_key)"
 SECRET_REFERENCES="${SECRET_KEYS}[\"']?[[:space:]]*(=|:)[[:space:]]*[\"']?(\\$|[A-Za-z_][A-Za-z0-9_.]*\\()"
-# secret_hits: the staged lines that look like a secret written down. Also
-# exclude .tmpl files from secret scanning as they contain many false positive markers
+# added_lines: FILE:LINE for each line the staged diff adds; a match already
+# in history is not this commit's. Also skip .tmpl files from secret
+# scanning as they contain many false positive markers.
+added_lines() {
+  local f
+  while IFS= read -r f; do
+    [[ -n "$f" && "$f" != *.tmpl* ]] || continue
+    # Added lines follow the first hunk header; the +++ before it is the
+    # file name, not content.
+    git diff --cached -U0 --no-color --no-ext-diff -- "$f" |
+      awk -v f="$f" '/^@@/ { h = 1; next } h && /^\+/ { print f ":" substr($0, 2) }'
+  done <<<"$STAGED_FILES"
+}
+# secret_hits: the added lines that look like a secret written down.
 secret_hits() {
-  echo "$STAGED_FILES" | grep -v "\.tmpl" | xargs grep -EiE "$SENSITIVE_PATTERNS" /dev/null | grep -vE "$SECRET_EXCLUDES" |
+  added_lines | grep -EiE "$SENSITIVE_PATTERNS" | grep -vE "$SECRET_EXCLUDES" |
     grep -viE "$SECRET_REFERENCES" | grep -viE "dummy|placeholder|example|test|sk-placeholder|\\{\\{"
 }
 # check_secrets: print the scan's result and list the hits; 1 when any.
