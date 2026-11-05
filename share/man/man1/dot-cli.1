@@ -58,6 +58,12 @@ Each agent session's last state. Effect: read. Runs \fBdot\-cli hook status\fR, 
 .TP
 .B dot cli hook run
 Record an agent hook event read on stdin. Effect: write. Runs \fBdot\-cli hook run\fR, the plugin's entry.
+.TP
+.B dot cli hook install
+Wire the hook into each agent's configuration. Effect: write. Runs \fBdot\-cli hook install\fR, the plugin's entry.
+.TP
+.B dot cli hook remove
+Take the hook out of each agent's configuration. Effect: write. Runs \fBdot\-cli hook remove\fR, the plugin's entry.
 .SH OTHER NAMES
 .TP
 .B dot completion

@@ -450,13 +450,17 @@ The JSON contract + module-contribution flow live in [`docs/operations/REGISTRY.
 Agents report their state through their own hooks: an agent's hook runs `dot cli hook run`, and `dot cli hook` (`status`) lists what they reported.
 
 ```
+dot cli hook install [--agent <id>]... [--dry-run]  # wire the hook into each agent's configuration
+dot cli hook remove [--agent <id>]... [--dry-run]   # take it out again
 dot cli hook run [--agent <id>] [<payload>]  # record one hook event (payload on stdin, or as the argument)
 dot cli hook [status] [--json]               # each agent session's last state, newest first
 ```
 
-`run` maps the hook event to the session's state (`running`, `blocked`, `idle`, `error` or `gone`) and writes it as an `agent-event.v1` record ([`schemas/cli/agent-event.v1.schema.json`](../../../schemas/cli/agent-event.v1.schema.json)) to `$XDG_STATE_HOME/dot/cli/agents/<agent>/<session>.json`, mode 0600. If a socket of yours listens at `$XDG_RUNTIME_DIR/dot/agent-events.sock` (`$TMPDIR` on macOS), it also gets the record as a datagram, within 50 ms. The record holds metadata only (the event, the state, the session id and the working directory), never the prompt or any tool input or output. A hook must never get in the agent's way, so `run` prints nothing, always exits 0, takes no lock, and ignores a payload whose ids are not plain names.
+`install` writes the hook into Claude Code's `~/.claude/settings.json` (every event `run` maps), Gemini CLI's `~/.gemini/settings.json` (its agent and session events) and Codex's `~/.codex/config.toml` (`notify`), for the agents named with `--agent` or, with none, those whose configuration directory exists. The command it writes is the absolute path of `dot`, so an agent started without `~/.local/bin` on its PATH still finds it. Installing again replaces the entry, for example after `dot` moved; everything else in the file stays as it was, and the file keeps its mode. `remove` takes out only the entries `install` wrote. A `settings.json` that is not valid JSON, or a Codex `notify` someone else set, is left untouched and reported, and the command exits 3. Editing `settings.json` needs `jq`.
 
-The agent is `claude` unless `--agent` names another roster id. Claude Code and Gemini CLI send `hook_event_name` and `session_id` on stdin; Codex's `notify` passes `{"type":"agent-turn-complete","thread-id":...}` as the argument. In Claude Code's `settings.json`, for example:
+`run` maps the hook event to the session's state (`running`, `blocked`, `idle`, `error` or `gone`) and writes it as an `agent-event.v1` record ([`schemas/cli/agent-event.v1.schema.json`](../../../schemas/cli/agent-event.v1.schema.json)) to `$XDG_STATE_HOME/dot/cli/agents/<agent>/<session>.json`, mode 0600. If a socket of yours listens at `$XDG_RUNTIME_DIR/dot/agent-events.sock` (`$TMPDIR` on macOS), it also gets the record as a datagram, within 50 ms. The record holds metadata only (the event, the state, the session id and the working directory), never the prompt or any tool input or output. A hook must never get in the agent's way, so `run` prints nothing (`{}` for Gemini CLI, which reads a hook's output as JSON), always exits 0, takes no lock, and ignores a payload whose ids are not plain names.
+
+The agent is `claude` unless `--agent` names another roster id. Claude Code and Gemini CLI send `hook_event_name` and `session_id` on stdin; Codex's `notify` passes `{"type":"agent-turn-complete","thread-id":...}` as the argument. `install` writes entries like this one, in Claude Code's `settings.json`:
 
 ```json
 { "hooks": { "Stop": [ { "hooks": [ { "type": "command", "command": "dot cli hook run" } ] } ] } }

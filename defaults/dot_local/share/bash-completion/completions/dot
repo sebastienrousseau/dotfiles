@@ -45,7 +45,7 @@ _dot() {
     'attest') words='show export verify' ;;
     'cli') words='completion registry hook list show install update remove verify new' ;;
     'cli completion') words='show' ;;
-    'cli hook') words='status run' ;;
+    'cli hook') words='status run install remove' ;;
     'cli registry') words='show set' ;;
     'config') words='path profile status diff apply sync update edit add save init check export uninstall import' ;;
     'config path') words='show' ;;
@@ -219,6 +219,12 @@ _dot() {
       flags='--help'
       ;;
     'cli completion show' | 'cli completion show'\ *)
+      flags='--help'
+      ;;
+    'cli hook install' | 'cli hook install'\ *)
+      flags='--help'
+      ;;
+    'cli hook remove' | 'cli hook remove'\ *)
       flags='--help'
       ;;
     'cli hook run' | 'cli hook run'\ *)

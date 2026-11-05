@@ -45,8 +45,10 @@ class AgentEvent(unittest.TestCase):
             text=True,
             check=True,
         )
-        self.assertEqual((done.stdout, done.stderr), ("", ""))
         agent = args[1] if args[:1] == ("--agent",) else "claude"
+        # Gemini CLI reads a hook's stdout as JSON; the others get nothing.
+        ack = "{}\n" if agent == "gemini" else ""
+        self.assertEqual((done.stdout, done.stderr), (ack, ""))
         return json.loads(
             (
                 self.state / "dot/cli/agents" / agent / f"{payload['session_id']}.json"

@@ -672,6 +672,18 @@
      "summary": "Record an agent hook event read on stdin",
      "built": true,
      "lock": false
+    },
+    {
+     "spelling": "cli hook install",
+     "effect": "write",
+     "summary": "Wire the hook into each agent's configuration",
+     "built": true
+    },
+    {
+     "spelling": "cli hook remove",
+     "effect": "write",
+     "summary": "Take the hook out of each agent's configuration",
+     "built": true
     }
    ],
    "aliases": [

@@ -101,6 +101,18 @@ effect = "write"
 lock = false
 summary = "Record an agent hook event read on stdin"
 
+[[commands]]
+object = "hook"
+verb = "install"
+effect = "write"
+summary = "Wire the hook into each agent's configuration"
+
+[[commands]]
+object = "hook"
+verb = "remove"
+effect = "write"
+summary = "Take the hook out of each agent's configuration"
+
 [[aliases]]
 name = "completion"
 target = "cli completion"

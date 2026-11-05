@@ -537,10 +537,22 @@ def "nu-complete dot cli hook" [] {
     [
         { value: "status", description: "Each agent session's last state" }
         { value: "run", description: "Record an agent hook event read on stdin" }
+        { value: "install", description: "Wire the hook into each agent's configuration" }
+        { value: "remove", description: "Take the hook out of each agent's configuration" }
     ]
 }
 export extern "dot cli hook" [
     command?: string@"nu-complete dot cli hook"
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot cli hook install" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot cli hook remove" [
     --help(-h) # Show help
     ...rest: string
 ]
