@@ -47,7 +47,7 @@ printf '[2026-01-02T03:04:05Z] [info] [t1] old format\n' >"$WORK/state/dot/cli/l
 printf 'legacy line\n' >"$WORK/home/.local/share/dotfiles.log"
 # audit_run: source the aliases and run audit_fn in the sandbox.
 audit_run() {
-  env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+  env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} ${COV_TRACE_FILE:+COV_TRACE_FILE="$COV_TRACE_FILE"} ${COV_ROOT:+COV_ROOT="$COV_ROOT"} \
     HOME="$WORK/home" XDG_STATE_HOME="$WORK/state" PATH="$PATH" \
     bash -c 'source "$1" && audit_fn' _ "$ALIASES_DIR/compliance.aliases.sh" 2>&1
 }

@@ -27,8 +27,8 @@ done
 # setup [SC] [FMT]: a fresh tree in $W/t and stubs in $W/stubs.
 setup() {
   W="$WORK/c$((++N))"
-  mkdir -p "$W/t/plugins/config/libexec" "$W/t/scripts/ops" "$W/t/defaults/dot_local/bin" "$W/stubs"
-  cp -R "$REPO_ROOT/lib" "$W/t/lib"
+  mkdir -p "$W/t/plugins/config/libexec" "$W/t/scripts/ops" "$W/t/defaults/dot_local/bin" "$W/t/lib" "$W/stubs"
+  cp -R "$REPO_ROOT/lib/dot" "$W/t/lib/dot"
   cp "$REPO_ROOT/plugins/config/libexec/lint.sh" "$W/t/plugins/config/libexec/"
   echo defaults >"$W/t/.chezmoiroot"
   printf '#!/usr/bin/env bash\necho a\n' >"$W/t/scripts/ops/a.sh"

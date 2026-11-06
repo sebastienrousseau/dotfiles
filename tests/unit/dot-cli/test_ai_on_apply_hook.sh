@@ -32,11 +32,12 @@ stub claude
 stub mise
 
 # hook [VAR=value...]: run the hook; OUT, RC. The environment is emptied,
-# except the coverage run's tracer (BASH_ENV and PS4), when there is one.
+# except the coverage run's tracer (BASH_ENV, PS4, COV_TRACE_FILE and
+# COV_ROOT), when there is one.
 hook() {
   : >"$WORK/calls"
   RC=0
-  OUT="$(env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+  OUT="$(env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} ${COV_TRACE_FILE:+COV_TRACE_FILE="$COV_TRACE_FILE"} ${COV_ROOT:+COV_ROOT="$COV_ROOT"} \
     HOME="$WORK/home" PATH="$WORK/stubs:$SYS" TERM=dumb NO_COLOR=1 LANG=C.UTF-8 "$@" \
     "$REAL_BASH" "$HOOK" </dev/null 2>&1)" || RC=$?
 }

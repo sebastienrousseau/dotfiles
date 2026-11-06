@@ -38,7 +38,7 @@ value() {
   local var="$1" config="$2"
   shift 2
   render "$config" | grep -E '^(: \$\{DOTFILES_(PROFILE|ALIAS_STRICT_MODE):=|export DOTFILES_PROFILE)' >"$WORK/lines.sh"
-  env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} "$@" \
+  env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} ${COV_TRACE_FILE:+COV_TRACE_FILE="$COV_TRACE_FILE"} ${COV_ROOT:+COV_ROOT="$COV_ROOT"} "$@" \
     bash -c 'source "$1"; eval "printf %s \"\${$2:-}\""' _ "$WORK/lines.sh" "$var"
 }
 

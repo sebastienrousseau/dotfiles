@@ -34,7 +34,7 @@ H="$WORK/home"
 # OUT and RC. stdin is not a terminal, so nothing can be asked.
 in_sandbox() {
   RC=0
-  OUT="$(cd "$WORK" && env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+  OUT="$(cd "$WORK" && env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} ${COV_TRACE_FILE:+COV_TRACE_FILE="$COV_TRACE_FILE"} ${COV_ROOT:+COV_ROOT="$COV_ROOT"} \
     HOME="$H" XDG_RUNTIME_DIR="$WORK" XDG_STATE_HOME="$H/.local/state" \
     XDG_CONFIG_HOME="$H/.config" DOTFILES_SHOW_LOGO=0 \
     PATH="$TOOLS_PATH" TERM=dumb NO_COLOR=1 "$@" 2>&1 </dev/null)" || RC=$?

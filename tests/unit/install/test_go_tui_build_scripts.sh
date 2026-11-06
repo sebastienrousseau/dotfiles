@@ -77,7 +77,7 @@ tui() {
   shift
   mkdir -p "$H/.local/share/dot-ai-tui"
   : >"$H/.local/share/dot-ai-tui/main.go"
-  OUT="$(env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+  OUT="$(env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} ${COV_TRACE_FILE:+COV_TRACE_FILE="$COV_TRACE_FILE"} ${COV_ROOT:+COV_ROOT="$COV_ROOT"} \
     HOME="$H" PATH="$WORK/stubs:/usr/bin:/bin" "$@" bash "$WORK/tui.sh" 2>&1)"
 }
 
@@ -92,7 +92,7 @@ printf '[data]\ndotfiles_version = "7.7.7"\n' >"$WORK/cz/chezmoi.toml"
 H="$WORK/ui-home"
 mkdir -p "$H/.local/share/dot-ui"
 : >"$H/.local/share/dot-ui/main.go"
-env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} ${COV_TRACE_FILE:+COV_TRACE_FILE="$COV_TRACE_FILE"} ${COV_ROOT:+COV_ROOT="$COV_ROOT"} \
   HOME="$H" PATH="$WORK/stubs:/usr/bin:/bin" bash "$WORK/ui.sh" >/dev/null 2>&1
 assert_contains "-ldflags -X main.version=7.7.7" "$(cat "$H/go.calls" 2>/dev/null)" "go build sets main.version"
 

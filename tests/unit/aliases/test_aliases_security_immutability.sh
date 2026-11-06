@@ -38,7 +38,7 @@ lock_alias() {
     mkdir -p "$sandbox/$(dirname "$1")"
     : >"$sandbox/$1"
   fi
-  env -i HOME="$sandbox" PATH="$PATH" ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+  env -i HOME="$sandbox" PATH="$PATH" ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} ${COV_TRACE_FILE:+COV_TRACE_FILE="$COV_TRACE_FILE"} ${COV_ROOT:+COV_ROOT="$COV_ROOT"} \
     bash --norc --noprofile -c ". \"\$1\"; alias lock-configs 2>/dev/null || echo none" _ "$ALIAS_FILE" |
     sed "s|$sandbox|~|"
   rm -rf "$sandbox"

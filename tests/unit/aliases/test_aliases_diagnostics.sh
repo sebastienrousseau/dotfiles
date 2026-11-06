@@ -42,7 +42,7 @@ diag_alias() {
   mkdir -p "$sandbox/bin"
   printf '#!/bin/sh\nexit 0\n' >"$sandbox/bin/chezmoi"
   chmod +x "$sandbox/bin/chezmoi"
-  env -i HOME="$sandbox" PATH="$sandbox/bin:$PATH" ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+  env -i HOME="$sandbox" PATH="$sandbox/bin:$PATH" ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} ${COV_TRACE_FILE:+COV_TRACE_FILE="$COV_TRACE_FILE"} ${COV_ROOT:+COV_ROOT="$COV_ROOT"} \
     bash --norc --noprofile -c ". \"\$1\"; alias \"\$2\" 2>/dev/null || echo none" _ \
     "$ALIASES_DIR/diagnostics.aliases.sh" "$1"
   rm -rf "$sandbox"
