@@ -41,7 +41,7 @@ chmod_run() {
   sandbox="$(mktemp -d)"
   : >"$sandbox/file"
   chmod 644 "$sandbox/file"
-  env -i HOME="$sandbox" PATH="$PATH" ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+  env -i HOME="$sandbox" PATH="$PATH" ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} ${COV_TRACE_FILE:+COV_TRACE_FILE="$COV_TRACE_FILE"} ${COV_ROOT:+COV_ROOT="$COV_ROOT"} \
     bash --norc --noprofile -c ". \"\$1\"; \"\$2\" \"\$3\" \"\$4\" >/dev/null 2>&1; echo \"rc=\$?\"" _ \
     "$REPO_ROOT/defaults/.chezmoitemplates/aliases/chmod/chmod.aliases.sh" "$1" "$2" "$sandbox/file"
   if [[ -n "$(find "$sandbox/file" -perm "$3")" ]]; then echo "mode=$3"; else echo "mode=other"; fi

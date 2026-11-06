@@ -24,7 +24,7 @@ CACHE="$WORK/xdg-cache/bash"
 # mode FILE: its permission bits, on GNU or BSD stat.
 mode() { stat -c '%a' "$1" 2>/dev/null || stat -f '%Lp' "$1"; }
 
-out="$(env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} HOME="$WORK/home" \
+out="$(env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} ${COV_TRACE_FILE:+COV_TRACE_FILE="$COV_TRACE_FILE"} ${COV_ROOT:+COV_ROOT="$COV_ROOT"} HOME="$WORK/home" \
   PATH="$WORK/bin:/usr/bin:/bin" XDG_CACHE_HOME="$WORK/xdg-cache" TERM=dumb \
   bash -i -c '
     umask 022

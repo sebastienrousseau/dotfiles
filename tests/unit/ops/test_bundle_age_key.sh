@@ -24,7 +24,8 @@ fi
 
 # The bundle runs with an emptied environment: PATH holds the system
 # directories and wherever tar and zstd are (Homebrew's on macOS), and the
-# coverage run's tracer (BASH_ENV, PS4) is kept when there is one.
+# coverage run's tracer (BASH_ENV, PS4, COV_TRACE_FILE, COV_ROOT) is kept
+# when there is one.
 TOOLS_PATH="$(dirname "$(command -v zstd)"):$(dirname "$(command -v tar)"):/usr/bin:/bin"
 
 # bundle_of NAME: a bundle of the sandbox home NAME; OUT, RC, and LIST (the
@@ -32,7 +33,7 @@ TOOLS_PATH="$(dirname "$(command -v zstd)"):$(dirname "$(command -v tar)"):/usr/
 bundle_of() {
   local home="$WORK/$1"
   RC=0
-  OUT="$(env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+  OUT="$(env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} ${COV_TRACE_FILE:+COV_TRACE_FILE="$COV_TRACE_FILE"} ${COV_ROOT:+COV_ROOT="$COV_ROOT"} \
     HOME="$home" XDG_RUNTIME_DIR="$WORK" XDG_STATE_HOME="$home/.local/state" \
     PATH="$TOOLS_PATH" TERM=dumb NO_COLOR=1 bash "$BUNDLE" "$home/out" 2>&1)" || RC=$?
   LIST="$(tar --zstd -tf "$home"/out/*.tar.zst -P 2>/dev/null)"

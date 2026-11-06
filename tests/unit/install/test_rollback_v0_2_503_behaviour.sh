@@ -25,7 +25,7 @@ done
 rollback() {
   CALLS="$1/calls"
   : >"$CALLS"
-  OUT="$(env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+  OUT="$(env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} ${COV_TRACE_FILE:+COV_TRACE_FILE="$COV_TRACE_FILE"} ${COV_ROOT:+COV_ROOT="$COV_ROOT"} \
     HOME="$1" PATH="$WORK/bin:/usr/bin:/bin" CALLS="$CALLS" \
     bash "$ROLLBACK" 2>&1)"
   RC=$?

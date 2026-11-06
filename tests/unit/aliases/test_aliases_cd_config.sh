@@ -35,7 +35,7 @@ fi
 version_after() {
   local sandbox
   sandbox="$(mktemp -d)"
-  env -i HOME="$sandbox" PATH="$PATH" ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+  env -i HOME="$sandbox" PATH="$PATH" ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} ${COV_TRACE_FILE:+COV_TRACE_FILE="$COV_TRACE_FILE"} ${COV_ROOT:+COV_ROOT="$COV_ROOT"} \
     ${2:+DOTFILES_VERSION="$2"} bash --norc --noprofile -c \
     ". \"\$1\" >/dev/null 2>&1; printf %s \"\${DOTFILES_VERSION-unset}\"" _ "$1"
   rm -rf "$sandbox"

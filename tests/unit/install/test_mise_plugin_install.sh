@@ -72,7 +72,7 @@ plugin() {
   DEST="$WORK/dest$((++N))"
   CALLS="$WORK/calls$N"
   : >"$CALLS"
-  OUT="$(env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+  OUT="$(env -i ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} ${COV_TRACE_FILE:+COV_TRACE_FILE="$COV_TRACE_FILE"} ${COV_ROOT:+COV_ROOT="$COV_ROOT"} \
     HOME="$WORK/home" PATH="$TOOLPATH" SERVE="$WORK/serve" CALLS="$CALLS" \
     ASDF_INSTALL_VERSION="$version" ASDF_INSTALL_PATH="$DEST" "$@" \
     bash "$PLUGIN_INSTALL" 2>&1)"

@@ -46,7 +46,7 @@ echo "\$*" >>"$sandbox/calls"
 [ "\$1" != has-session ]
 EOF
   chmod +x "$sandbox/bin/tmux"
-  env -i HOME="$sandbox" PATH="$sandbox/bin:$PATH" ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
+  env -i HOME="$sandbox" PATH="$sandbox/bin:$PATH" ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} ${COV_TRACE_FILE:+COV_TRACE_FILE="$COV_TRACE_FILE"} ${COV_ROOT:+COV_ROOT="$COV_ROOT"} \
     bash --norc --noprofile -c "shopt -s expand_aliases; . \"\$1\"; eval \"\$2\"" _ \
     "$ALIASES_DIR/tmux.aliases.sh" "$1" >/dev/null 2>&1
   sed "s|$sandbox|~|g" "$sandbox/calls" 2>/dev/null | tr '\n' '|'
