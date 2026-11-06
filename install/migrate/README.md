@@ -29,12 +29,14 @@ no-op.
 | `dot.log`, `metrics.jsonl`, `agent-sessions.jsonl` (before log.v1) | `cli/legacy/` |
 
 A directory whose new name exists is merged entry by entry; a log
-whose new file exists is prepended to it. An entry that cannot move
-yet stays, the apply goes on, and the next apply tries again: the AI
-gateway's state while it runs (stop it with `dot-ai-proxy stop`), or a
-name that exists on both sides, which you resolve by hand. Anything
-the script does not know, and `v0_2_503-migration/`, stay in the old
-directory.
+whose new file exists is prepended to it. Any other name that exists on
+both sides keeps the new entry, and the old one is set aside in
+`$XDG_STATE_HOME/dot/cli/migrations/superseded/` at its old path, where
+the rollback can put it back. An entry that cannot move yet stays, the
+apply goes on, and the next apply tries again: the AI gateway's state
+while it runs (stop it with `dot-ai-proxy stop`), or a move that fails.
+Anything the script does not know, and `v0_2_503-migration/`, stay in
+the old directory.
 
 ```sh
 bash install/migrate/migrate-state-to-domains.sh --dry-run   # list the moves

@@ -66,7 +66,7 @@ echo late >"$O/eval-timings.jsonl"
 run "$MIGRATE"
 assert_equals "0|late" "$RC|$(cat "$O/eval-timings.jsonl")" "the marker stops a second run"
 
-test_start "an_existing_domain_dir_is_merged_and_a_clash_is_left"
+test_start "an_existing_domain_dir_is_merged_and_a_clash_is_superseded"
 fresh
 mkdir -p "$O/fleet" "$S/dot/fleet"
 echo old-events >"$O/fleet/events.jsonl"
@@ -74,12 +74,15 @@ echo old-drift >"$O/fleet/drift-history.jsonl"
 echo new-log >"$S/dot/fleet/log.jsonl"
 echo new-drift >"$S/dot/fleet/drift-history.jsonl"
 run "$MIGRATE"
-assert_equals "3" "$RC" "a clash exits 3"
-assert_contains "drift-history.jsonl exists" "$OUT" "and names it"
+SUP="$S/dot/cli/migrations/superseded"
+assert_equals "0" "$RC" "a clash does not stop the migration"
+assert_contains "superseded $O/fleet/drift-history.jsonl: kept $S/dot/fleet/drift-history.jsonl" "$OUT" \
+  "and names both sides"
 assert_equals "old-events|new-log|new-drift|old-drift" \
-  "$(cat "$S/dot/fleet/events.jsonl")|$(cat "$S/dot/fleet/log.jsonl")|$(cat "$S/dot/fleet/drift-history.jsonl")|$(cat "$O/fleet/drift-history.jsonl")" \
-  "the free name moves; neither side of the clash is touched"
-assert_false "[[ -e '$S/dot/cli/migrations/state-domains.done' ]]" "not marked done, so the next apply retries"
+  "$(cat "$S/dot/fleet/events.jsonl")|$(cat "$S/dot/fleet/log.jsonl")|$(cat "$S/dot/fleet/drift-history.jsonl")|$(cat "$SUP/fleet/drift-history.jsonl")" \
+  "the free name moves, the new file is kept, the old one is set aside"
+assert_false "[[ -e '$O/fleet' ]]" "the emptied old dir is gone"
+assert_true "[[ -e '$S/dot/cli/migrations/state-domains.done' ]]" "and the run is done"
 
 test_start "a_merged_dir_with_no_clash_is_removed"
 fresh
@@ -89,15 +92,15 @@ run "$MIGRATE"
 assert_equals "0|e" "$RC|$(cat "$S/dot/fleet/events.jsonl")" "every entry moved"
 assert_false "[[ -e '$O/fleet' ]]" "and the emptied old dir is gone"
 
-test_start "a_dir_whose_new_name_is_a_file_is_left_whole"
+test_start "a_dir_whose_new_name_is_a_file_is_superseded_whole"
 fresh
 mkdir -p "$O/orphans" "$S/dot/doctor"
 echo o >"$O/orphans/one"
 echo f >"$S/dot/doctor/orphans"
 run "$MIGRATE"
-assert_equals "3" "$RC" "it is left"
-assert_contains "left $O/orphans: $S/dot/doctor/orphans exists" "$OUT" "as a whole, not merged into the file"
-assert_equals "o|f" "$(cat "$O/orphans/one")|$(cat "$S/dot/doctor/orphans")" "both sides untouched"
+assert_equals "0" "$RC" "it does not stop the migration"
+assert_equals "o|f" "$(cat "$S/dot/cli/migrations/superseded/orphans/one")|$(cat "$S/dot/doctor/orphans")" \
+  "set aside as a whole, not merged into the file"
 
 test_start "a_log_whose_new_file_exists_is_prepended"
 fresh
@@ -109,14 +112,26 @@ assert_equals "0|a b c" "$RC|$(tr '\n' ' ' <"$S/dot/shell/eval-timings.jsonl" | 
   "old lines first, then the new"
 assert_false "[[ -e '$O/eval-timings.jsonl' ]]" "the old file is gone"
 
-test_start "a_file_whose_new_name_exists_is_left"
+test_start "a_file_whose_new_name_exists_is_superseded"
 fresh
 mkdir -p "$S/dot/doctor"
 echo old >"$O/orphans"
 echo new >"$S/dot/doctor/orphans"
 run "$MIGRATE"
-assert_equals "3|old|new" "$RC|$(cat "$O/orphans")|$(cat "$S/dot/doctor/orphans")" \
-  "an orphans list is not a log: both stay"
+assert_equals "0|old|new" "$RC|$(cat "$S/dot/cli/migrations/superseded/orphans")|$(cat "$S/dot/doctor/orphans")" \
+  "an orphans list is not a log: the new one is kept, the old one set aside"
+assert_false "[[ -e '$O/orphans' ]]" "and the old name is free"
+
+test_start "a_superseded_name_that_is_taken_is_left"
+fresh
+mkdir -p "$S/dot/doctor" "$S/dot/cli/migrations/superseded"
+echo old >"$O/orphans"
+echo new >"$S/dot/doctor/orphans"
+echo earlier >"$S/dot/cli/migrations/superseded/orphans"
+run "$MIGRATE"
+assert_equals "3|old|earlier" "$RC|$(cat "$O/orphans")|$(cat "$S/dot/cli/migrations/superseded/orphans")" \
+  "nothing is overwritten, not even an old copy"
+assert_contains "left $O/orphans" "$OUT" "and it says so"
 
 test_start "every_directory_it_makes_is_private"
 fresh
@@ -228,6 +243,16 @@ run "$ROLLBACK" --bogus
 assert_equals "1" "$RC" "an unknown option exits 1"
 assert_contains "unknown option --bogus" "$OUT" "and says which"
 
+test_start "rollback_puts_back_a_superseded_entry"
+fresh
+mkdir -p "$S/dot/doctor"
+echo old >"$O/orphans"
+echo new >"$S/dot/doctor/orphans"
+run "$MIGRATE"
+run "$ROLLBACK"
+assert_equals "0|old|new" "$RC|$(cat "$O/orphans")|$(cat "$S/dot/doctor/orphans")" \
+  "the old copy is back where it was, the new one untouched"
+
 test_start "rollback_leaves_an_entry_whose_old_name_is_taken"
 fresh
 echo h >"$O/heal.log"
@@ -258,10 +283,14 @@ if command -v chezmoi >/dev/null 2>&1; then
   assert_equals "0" "$RC" "a migration exits 0"
   assert_true "[[ -f '$S/dot/doctor/heal.log' ]]" "and the hook ran it"
   fresh
-  mkdir -p "$S/dot/doctor"
-  echo old >"$O/orphans"
-  echo new >"$S/dot/doctor/orphans"
+  mkdir -p "$O/ai-serve"
+  sleep 60 &
+  SLEEPER=$!
+  echo "$SLEEPER" >"$O/ai-serve/serve.pid"
   run "$HOOK"
+  kill "$SLEEPER" 2>/dev/null
+  wait "$SLEEPER" 2>/dev/null
+  SLEEPER=""
   assert_equals "0" "$RC" "something left behind still lets the apply go on"
   assert_contains "the next apply tries again" "$OUT" "and says it will retry"
   mkdir -p "$WORK/packaged/defaults"
