@@ -89,6 +89,26 @@ dot_upgrade_prepare() {
   done
   dot_ensure_mise "dot system update keeps your CLI tools and runtimes current with it" || true
   _dot_upgrade_consent_system
+  _dot_upgrade_consent_hooks
+}
+
+# _dot_upgrade_consent_hooks: once per machine, offer to wire dot's agent
+# hook into the agents that lack it, recording DOT_UPGRADE_HOOKS=1 on yes.
+# The marker is written only when someone answered (a terminal, or -y), so
+# an unattended run asks again next time.
+_dot_upgrade_consent_hooks() {
+  local installer marker unwired
+  DOT_UPGRADE_HOOKS=0
+  installer="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../cli/libexec" 2>/dev/null && pwd)/hook-install.sh"
+  marker="${XDG_STATE_HOME:-$HOME/.local/state}/dot/cli/hook-offer.asked"
+  [[ -f "$installer" && ! -f "$marker" ]] || return 0
+  [[ "${DOTFILES_YES:-0}" == "1" ]] || dot_can_ask || return 0
+  unwired="$(bash "$installer" unwired 2>/dev/null)" || true
+  [[ -n "$unwired" ]] || return 0
+  if dot_consent "Report agent status to dot from ${unwired//$'\n'/, } (dot cli hook install)?"; then
+    DOT_UPGRADE_HOOKS=1
+  fi
+  mkdir -p "${marker%/*}" && : >"$marker"
 }
 
 # _dot_upgrade_mise: missing tools installed, then everything upgraded, from
@@ -153,6 +173,14 @@ dot_upgrade_nix_steps() {
   [[ -f "$1/nix/flake.nix" ]] && has_command nix || return 0
   _upgrade_step nix-flake "Nix flake" "updating…" -- sh -c 'cd "$1" && nix flake update' _ "$1"
   _upgrade_step nix-gc "Nix GC" "collecting…" -- nix-collect-garbage -d
+}
+
+# dot_upgrade_hook_steps <src_dir>: dot cli hook install, when consented.
+# It runs after the dotfiles phase, so the installer is the one just pulled.
+dot_upgrade_hook_steps() {
+  [[ "${DOT_UPGRADE_HOOKS:-0}" == 1 ]] || return 0
+  _upgrade_step hooks "Agent hooks" "dot cli hook install…" -- \
+    bash "$1/plugins/cli/libexec/hook-install.sh" install
 }
 
 # dot_upgrade_app_steps: the app-store phase, when any store is installed.

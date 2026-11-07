@@ -301,7 +301,7 @@ _expect "s1_darwin_platform_lines" \
 _expect "s1_all_probes_ok" \
   "[OK] zsh" "[OK] nu" "[OK] bat" "[OK] nix" "[OK] pueue daemon" \
   "[OK] XDG_CONFIG_HOME" "[OK] PIPX_HOME" "[OK] chezmoi" "[OK] .zshrc" \
-  "[OK] dot" "[OK] state layout" "[OK] audit bypass" "[OK] history_filter" "[OK] antigravity wrapper" \
+  "[OK] dot" "[OK] state layout" "[OK] agent hooks" "no agent configured" "[OK] audit bypass" "[OK] history_filter" "[OK] antigravity wrapper" \
   "[OK] fish_plugins" "[OK] cargo-install-update" "[OK] symlinks" \
   "[OK] portability" "[OK] shell caches" "[OK] uncached slow-init tools" \
   "[OK] .zcompdump" "[OK] PATH length" "[OK] shell coverage" "[OK] zsh hooks" \
@@ -398,6 +398,8 @@ DOC_ENV=(XDG_CONFIG_HOME= XDG_DATA_HOME=relative/data PIPX_HOME= TERM_PROGRAM=)
 # Override the restricted PATH with the padded one for this run only.
 SYSBIN_SAVED="$SYSBIN"
 SYSBIN="$SYSBIN:${long_path#"$S_BIN:$SYSBIN":}"
+# Codex is configured but its notify is not ours.
+mkdir -p "$S_HOME/.codex"
 _run_doctor --ai
 SYSBIN="$SYSBIN_SAVED"
 test_start "s2_linux_wsl_errors_exit_1"
@@ -413,7 +415,8 @@ _expect "s2_tool_resolution" \
 _expect "s2_environment_and_state" \
   "[WARN] XDG_CONFIG_HOME" "[WARN] XDG_DATA_HOME" "not absolute: relative/data" \
   "[WARN] PIPX_HOME" "[FAIL] chezmoi" "drifted" "[FAIL] .zshrc" "[OK] dot" \
-  "[WARN] state layout" "is not moved yet" "[WARN] audit bypass" "1 push(es) bypassed" \
+  "[WARN] state layout" "is not moved yet" \
+  "[WARN] agent hooks" "not wired for codex; run dot cli hook install" "[WARN] audit bypass" "1 push(es) bypassed" \
   "[WARN] history_filter" "1 patterns" \
   "[WARN] antigravity wrapper" "expected ~/.local/bin/antigravity" \
   "[WARN] fish_plugins" "missing jorgebucaran/fisher" "[WARN] cargo-install-update" \
@@ -498,6 +501,9 @@ for t in mise starship zoxide atuin fzf direnv; do
   done
 done
 
+# Codex runs dot's receiver: with no dot on PATH, the repo's bin/dot.
+mkdir -p "$S_HOME/.codex"
+printf 'notify = ["%s", "cli", "hook", "run", "--agent", "codex"]\n' "$(cd "$REPO_ROOT" && pwd)/bin/dot" >"$S_HOME/.codex/config.toml"
 DOC_ENV=(PIPX_HOME= TERM_PROGRAM=)
 _run_doctor
 test_start "s3_linux_alt_probes_exit_1"
@@ -507,7 +513,7 @@ _expect "s3_linux_alt_platform" \
   "4.00 GiB / 8.00 GiB" "GPU: n/a" "1 hour"
 _expect "s3_alt_tool_paths" \
   "[OK] starship" "(mise)" "[OK] nu" "[WARN] pueue daemon" "not running (pueued -d)" \
-  "[FAIL] dot" "not found in PATH" "[OK] state layout" "[OK] audit bypass" "no recent entries" \
+  "[FAIL] dot" "not found in PATH" "[OK] state layout" "[OK] agent hooks" "wired (codex)" "[OK] audit bypass" "no recent entries" \
   "[FAIL] history_filter" "no history_filter block" "[WARN] antigravity" \
   "[FAIL] fish_plugins" "[WARN] portability" "2 hardcoded paths" \
   "[OK] shell caches" "[WARN] startup latency" "caches already fresh"
@@ -571,6 +577,8 @@ _shim uptime <<'EOF'
 #!/usr/bin/env bash
 echo "up 1 day"
 EOF
+# Claude Code is configured, but no jq can read its settings.json.
+mkdir -p "$S_HOME/.claude"
 DOC_ENV=(PIPX_HOME= TERM_PROGRAM=)
 _run_doctor
 test_start "s5_unknown_os_exit_1"
@@ -582,7 +590,8 @@ _expect "s5_unknown_os_fallback" \
   "[FAIL] chezmoi" "[FAIL] .zshrc" "[FAIL] dot" "[WARN] antigravity" \
   "[FAIL] fish_plugins" "[OK] cargo-install-update" "not needed (cargo not installed)" \
   "[OK] symlinks" "[WARN] portability" "[OK] shell caches" "[OK] PATH length" \
-  "[WARN] hyperfine" "Run 'dot doctor fix' to repair."
+  "[WARN] hyperfine" "[WARN] agent hooks" "jq is needed to check them" \
+  "Run 'dot doctor fix' to repair."
 
 # =======================================================================
 # S6 — Linux with no hardware/resolution/package tooling at all.

@@ -92,6 +92,15 @@ assert_contains "DOTFILES_APP_STORES=0" "$out" "naming the setting that turned i
 assert_equals "" "$(inside "$out")" "and still nothing but steps inside the render"
 assert_contains "END" "$out" "and the update carries on to the end"
 
+test_start "agent_hooks_are_a_step_once_consented"
+mkdir -p "$WORK/bin/plugins/cli/libexec"
+printf 'echo "installer $*"\n' >"$WORK/bin/plugins/cli/libexec/hook-install.sh"
+out="$(upgrade DOT_UPGRADE_HOOKS=1)"
+assert_contains "STEP hooks ok installer install" "$out" "the installer runs as its own step"
+assert_equals "" "$(inside "$out")" "inside the render, as a step only"
+out="$(upgrade)"
+assert_output_not_contains "STEP hooks" "printf '%s' '$out'" "and not without consent"
+
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
 [[ "$TESTS_FAILED" -eq 0 ]]

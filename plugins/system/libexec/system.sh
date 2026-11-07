@@ -68,9 +68,8 @@ cmd_upgrade() {
   # (carriage-return progress bars, remote counters) and, in rich mode,
   # writing it to the terminal corrupts the dot-ui renderer that owns
   # the screen. Failing steps get their tail dumped after the run.
-  local log_dir
+  local log_dir fail_labels=() fail_logs=()
   log_dir="$(mktemp -d "${TMPDIR:-/tmp}/dot-upgrade.XXXXXX")"
-  local fail_labels=() fail_logs=()
   # sysexits EX_TEMPFAIL: a phase returns it to say "not now, and here is
   # why" (last line of its log). It is rendered as a skip, not a failure.
   local EX_TEMPFAIL=75
@@ -139,6 +138,7 @@ cmd_upgrade() {
   # overwrite prompt, bypassing the closed stdin above and hanging.
   _upgrade_step dotfiles "Dotfiles" "chezmoi update…" -- _upgrade_dotfiles
   dot_upgrade_toolchain_steps "$log_dir/pins.list"
+  dot_upgrade_hook_steps "$src_dir"
 
   if has_command nvim; then
     # scripts/nvim/headless-upgrade.lua runs Lazy sync AND waits for
