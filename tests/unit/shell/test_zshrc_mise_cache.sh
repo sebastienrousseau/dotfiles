@@ -103,4 +103,21 @@ mkdir -p "$H/.config/mise/conf.d"
 shell "$SANDBOX/second" >/dev/null
 assert_equals "3" "$(activations)" "a conf.d file newer than the cache also expires it"
 
+# `chezmoi apply` runs prewarm.sh, which caches every tool's init. Writing
+# mise's raw activation there would pin PATH again behind the zshrc's back.
+test_start "prewarm_does_not_pin_path"
+mkdir -p "$SANDBOX/prewarm"
+# On a real machine the compiled copy (.zwc) predates prewarm by far more
+# than a second, so zsh loads what prewarm wrote; make that so here too.
+touch -t 202001010000 "$CACHE.zwc" "$CACHE.bin" 2>/dev/null
+env -i HOME="$H" PATH="$H/stubs:$SANDBOX/prewarm:/usr/bin:/bin" TERM=dumb \
+  XDG_CACHE_HOME="$H/.cache" XDG_DATA_HOME="$H/.local/share" \
+  bash "$REPO_ROOT/scripts/ops/prewarm.sh" >/dev/null 2>&1
+after_prewarm="$(shell "$SANDBOX/second")"
+leaked=no
+[[ "$after_prewarm" == *"$SANDBOX/prewarm"* ]] && leaked=yes
+assert_equals "no" "$leaked" "a shell after prewarm does not inherit prewarm's PATH"
+assert_contains "$SANDBOX/shims:$H/stubs:$SANDBOX/second" "$after_prewarm" \
+  "the shell after prewarm gets the shims ahead of its own PATH"
+
 print_summary

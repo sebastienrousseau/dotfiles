@@ -294,10 +294,13 @@ assert_file_exists "$IT_S/home/.local/share/zsh/completions/_gh" "prewarm genera
 
 test_start "integration_prewarm_caches_tools"
 it_missing=""
-for it_t in mise starship zoxide atuin fzf; do
+for it_t in starship zoxide atuin fzf; do
   [[ -s "$IT_CACHE/zsh/$it_t-init.zsh" ]] || it_missing+=" $it_t"
 done
 assert_empty "$it_missing" "prewarm caches every core tool's init"
+# mise's zsh activation embeds the caller's PATH; the zshrc caches it with
+# $PATH unpinned, so prewarm leaves it to the next shell.
+assert_file_not_exists "$IT_CACHE/zsh/mise-init.zsh" "prewarm leaves mise's zsh init to the zshrc"
 
 test_start "integration_prewarm_handles_zsh"
 assert_equals "# starship init zsh" "$(cat "$IT_CACHE/zsh/starship-init.zsh" 2>/dev/null)" "zsh cache holds the zsh init"
