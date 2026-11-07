@@ -112,6 +112,44 @@ hook '{"session_id":"s4","hook_event_name":"Stop"}'
 kill "$holder" 2>/dev/null
 assert_equals "0|idle" "$RC|$(state_of claude s4)" "dot cli hook run is lock = false"
 
+record_of() { cat "$S/dot/cli/agents/$1/$2.json" 2>/dev/null || true; }
+
+test_start "the_record_escapes_quotes_backslashes_and_drops_control_characters"
+hook '{"session_id":"s5","hook_event_name":"Stop","cwd":"/w/a\"b\\c\td\u0001e"}'
+assert_contains '"cwd":"/w/a\"b\\cde"}' "$(record_of claude s5)" "quote and backslash escaped, tab and U+0001 dropped"
+assert_equals "/w/a\"b\\cde" "$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["cwd"])' \
+  "$S/dot/cli/agents/claude/s5.json" 2>&1)" "the record parses back to the same directory"
+
+test_start "a_field_that_is_not_a_string_counts_as_unset"
+hook '{"session_id":"s6","hook_event_name":7,"type":"agent-turn-complete","cwd":["/x"]}'
+assert_equals "idle" "$(state_of claude s6)" "a numeric hook_event_name falls back to type"
+assert_contains '"cwd":""}' "$(record_of claude s6)" "an array cwd is empty"
+
+test_start "the_time_is_utc_on_this_bash_too"
+# bin/dot runs under whichever bash is first on PATH: /bin/bash 3.2 on
+# macOS (the cases above), a bash with printf %()T elsewhere.
+printf '%s' '{"session_id":"s7","hook_event_name":"Stop"}' | env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="/usr/bin:/bin" \
+  XDG_STATE_HOME="$S" XDG_RUNTIME_DIR="$R" TZ=Asia/Tokyo "$BASH" "$REPO_ROOT/bin/dot" cli hook run >/dev/null 2>&1
+want="$(date -u +%Y-%m-%dT%H:%M)"
+assert_contains "\"time\":\"$want" "$(record_of claude s7)" "bash $BASH_VERSION writes UTC with TZ set elsewhere"
+
+test_start "without_jq_the_fields_are_still_read"
+NOJQ="$WORK/nojq"
+mkdir -p "$NOJQ"
+for t in bash sed head mv mkdir rm date perl cat; do
+  p="$(PATH=/usr/bin:/bin command -v "$t")" && ln -s "$p" "$NOJQ/$t"
+done
+printf '%s' '{"session_id":"s8","hook_event_name":"PermissionRequest","cwd":"/nojq"}' | env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" \
+  PATH="$NOJQ" XDG_STATE_HOME="$S" XDG_RUNTIME_DIR="$R" bash "$REPO_ROOT/bin/dot" cli hook run >/dev/null 2>&1
+assert_equals "blocked" "$(state_of claude s8)" "the state comes from sed"
+assert_contains '"cwd":"/nojq"}' "$(record_of claude s8)" "and the directory"
+
+test_start "help_still_reaches_the_help_page"
+OUT="$(env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$S" XDG_CACHE_HOME="$H/.cache" NO_COLOR=1 TERM=dumb \
+  bash "$REPO_ROOT/bin/dot" cli hook run --help 2>&1)"
+assert_contains "cli" "$OUT" "dot cli hook run --help shows help"
+assert_equals "no" "$([[ -e "$S/dot/cli/agents/claude/--help.json" ]] && echo yes || echo no)" "and records nothing"
+
 test_start "status_lists_the_sessions"
 RC=0
 OUT="$(env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$S" XDG_CACHE_HOME="$H/.cache" NO_COLOR=1 TERM=dumb \
@@ -121,7 +159,7 @@ assert_contains "codex      idle" "$OUT" "one row per session, agent and state"
 assert_contains "s3" "$OUT" "naming the session"
 OUT="$(env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$S" XDG_CACHE_HOME="$H/.cache" \
   bash "$REPO_ROOT/bin/dot" cli hook status --json 2>&1)"
-assert_equals "5" "$(grep -c '"schema":"cli/agent-event.v1"' <<<"$OUT")" "--json prints the records"
+assert_equals "9" "$(grep -c '"schema":"cli/agent-event.v1"' <<<"$OUT")" "--json prints the records"
 OUT="$(env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$WORK/empty" XDG_CACHE_HOME="$H/.cache" \
   bash "$REPO_ROOT/bin/dot" cli hook status 2>&1)"
 assert_contains "No agent events recorded yet" "$OUT" "with none, it says so"

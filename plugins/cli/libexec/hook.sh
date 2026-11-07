@@ -28,6 +28,12 @@
 
 set -uo pipefail
 
+# The hook runs on every prompt, tool call and stop of every agent, so the
+# event path forks only jq (once), mv, and perl when a listener is there:
+# the fields come from one jq call, the time from printf, and the record is
+# built in place. tools/ci/hook-bench.sh holds it to its
+# p95 budget.
+
 # _hook_field JSON NAME: the string value of top-level key NAME; empty when
 # absent. jq when installed; else the first "NAME": "value" pair.
 _hook_field() {
@@ -38,25 +44,58 @@ _hook_field() {
   fi
 }
 
-# _hook_state EVENT NOTIFICATION_TYPE: the normalised state; empty for an
-# event that says nothing about it.
+# _hook_fields JSON: sets H_EVENT, H_SESSION, H_NTYPE and H_CWD from the
+# payload, each empty unless a string, control characters dropped. Event
+# and session take the first set of hook_event_name/type and
+# session_id/thread-id (Codex names them so). One jq call; without jq, one
+# sed per field.
+_hook_fields() {
+  local out sep=$'\037'
+  if command -v jq >/dev/null 2>&1; then
+    out="$(jq -r 'def s: if type == "string" then gsub("[[:cntrl:]]"; "") else "" end;
+      def pick(a; b): (a | s) as $v | if $v == "" then b | s else $v end;
+      [pick(.hook_event_name; .type), pick(.session_id; ."thread-id"), (.notification_type | s), (.cwd | s)]
+      | join("\u001f")' <<<"$1" 2>/dev/null)"
+    IFS="$sep" read -r H_EVENT H_SESSION H_NTYPE H_CWD <<<"$out"
+  else
+    H_EVENT="$(_hook_first "$1" hook_event_name type)"
+    H_SESSION="$(_hook_first "$1" session_id thread-id)"
+    H_NTYPE="$(_hook_field "$1" notification_type)"
+    H_CWD="$(_hook_field "$1" cwd)"
+    H_EVENT="${H_EVENT//[[:cntrl:]]/}" H_SESSION="${H_SESSION//[[:cntrl:]]/}"
+    H_NTYPE="${H_NTYPE//[[:cntrl:]]/}" H_CWD="${H_CWD//[[:cntrl:]]/}"
+  fi
+}
+
+# _hook_state EVENT NOTIFICATION_TYPE: sets H_STATE, the normalised state;
+# empty for an event that says nothing about it.
 _hook_state() {
   case "$1" in
-    UserPromptSubmit | BeforeAgent | PreToolUse | PostToolUse) echo running ;;
-    Notification) if [[ "$2" == idle_prompt ]]; then echo idle; else echo blocked; fi ;;
-    PermissionRequest | Elicitation) echo blocked ;;
-    Stop | AfterAgent | SessionStart | agent-turn-complete) echo idle ;;
-    StopFailure) echo error ;;
-    SessionEnd) echo gone ;;
+    UserPromptSubmit | BeforeAgent | PreToolUse | PostToolUse) H_STATE=running ;;
+    Notification) if [[ "$2" == idle_prompt ]]; then H_STATE=idle; else H_STATE=blocked; fi ;;
+    PermissionRequest | Elicitation) H_STATE=blocked ;;
+    Stop | AfterAgent | SessionStart | agent-turn-complete) H_STATE=idle ;;
+    StopFailure) H_STATE=error ;;
+    SessionEnd) H_STATE=gone ;;
+    *) H_STATE="" ;;
   esac
 }
 
-# _hook_json_str TEXT: TEXT as a JSON string (quotes, backslashes and
-# control characters escaped or dropped).
+# _hook_json_str VAR TEXT: sets VAR to TEXT as a JSON string (quotes and
+# backslashes escaped; the caller has dropped control characters).
 _hook_json_str() {
-  local s="${1//\\/\\\\}"
-  s="${s//\"/\\\"}"
-  printf '"%s"' "$(printf '%s' "$s" | LC_ALL=C tr -d '\000-\037\177')"
+  local s="${2//\\/\\\\}"
+  printf -v "$1" '"%s"' "${s//\"/\\\"}"
+}
+
+# _hook_now: sets H_NOW to the UTC time, from printf where bash has %()T
+# (4.2+), else date (macOS /bin/bash 3.2).
+_hook_now() {
+  if ((BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 2))); then
+    TZ=UTC0 printf -v H_NOW '%(%Y-%m-%dT%H:%M:%SZ)T' -1
+  else
+    H_NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  fi
 }
 
 # _hook_send SOCKET RECORD: one datagram, best effort, 50 ms at most, and
@@ -70,16 +109,15 @@ _hook_send() {
     $s->send($ARGV[1]);' "$1" "$2" 2>/dev/null || true
 }
 
-# _hook_payload ARG...: the payload, the last argument (Codex notify) or
+# _hook_payload ARG...: sets H_PAYLOAD, the last argument (Codex notify) or
 # stdin (Claude Code, Gemini CLI); at most 2 s waiting on stdin.
 _hook_payload() {
-  local payload=""
+  H_PAYLOAD=""
   if [[ $# -gt 0 ]]; then
-    payload="${!#}"
+    H_PAYLOAD="${!#}"
   elif [[ ! -t 0 ]]; then
-    IFS= read -r -d '' -t 2 payload || true
+    IFS= read -r -d '' -t 2 H_PAYLOAD || true
   fi
-  printf '%s' "$payload"
 }
 
 # _hook_first JSON NAME...: the first of those fields that is set.
@@ -99,28 +137,32 @@ _hook_ids_ok() {
   [[ "$2" =~ ^[A-Za-z0-9._-]{1,128}$ && "$2" != .* ]]
 }
 
-# _hook_write AGENT SESSION RECORD: replace the session's state file.
+# _hook_write AGENT SESSION RECORD: replace the session's state file
+# (private: hook_main sets umask 077), making its directory only when it is
+# missing.
 _hook_write() {
   local dir="${XDG_STATE_HOME:-$HOME/.local/state}/dot/cli/agents/$1"
-  (umask 077 && mkdir -p "$dir" && printf '%s\n' "$3" >"$dir/$2.json.$$" &&
-    mv -f "$dir/$2.json.$$" "$dir/$2.json") 2>/dev/null || rm -f "$dir/$2.json.$$" 2>/dev/null
+  [[ -d "$dir" ]] || mkdir -p "$dir" 2>/dev/null || return 0
+  { printf '%s\n' "$3" >"$dir/$2.json.$$" && mv -f "$dir/$2.json.$$" "$dir/$2.json"; } 2>/dev/null ||
+    rm -f "$dir/$2.json.$$" 2>/dev/null
 }
 
 hook_main() {
-  local agent=claude payload event session state record dir
+  local agent=claude record event cwd dir
   if [[ "${1:-}" == --agent ]]; then
     agent="${2:-}"
     shift 2 || return 0
   fi
-  payload="$(_hook_payload "$@")"
-  event="$(_hook_first "$payload" hook_event_name type)"
-  session="$(_hook_first "$payload" session_id thread-id)"
-  state="$(_hook_state "$event" "$(_hook_field "$payload" notification_type)")"
-  [[ -n "$state" ]] && _hook_ids_ok "$agent" "$session" || return 0
-  record="$(printf '{"schema":"cli/agent-event.v1","time":"%s","agent":"%s","session":"%s","state":"%s","event":%s,"cwd":%s}' \
-    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$agent" "$session" "$state" "$(_hook_json_str "$event")" \
-    "$(_hook_json_str "$(_hook_field "$payload" cwd)")")"
-  _hook_write "$agent" "$session" "$record"
+  umask 077
+  _hook_payload "$@"
+  _hook_fields "$H_PAYLOAD"
+  _hook_state "$H_EVENT" "$H_NTYPE"
+  [[ -n "$H_STATE" ]] && _hook_ids_ok "$agent" "$H_SESSION" || return 0
+  _hook_now
+  _hook_json_str event "$H_EVENT"
+  _hook_json_str cwd "$H_CWD"
+  record="{\"schema\":\"cli/agent-event.v1\",\"time\":\"$H_NOW\",\"agent\":\"$agent\",\"session\":\"$H_SESSION\",\"state\":\"$H_STATE\",\"event\":$event,\"cwd\":$cwd}"
+  _hook_write "$agent" "$H_SESSION" "$record"
   # A per-user runtime dir only: a shared /tmp would let another user listen.
   dir="${XDG_RUNTIME_DIR:-${TMPDIR:-}}"
   [[ -z "$dir" ]] || _hook_send "${dir%/}/dot/agent-events.sock" "$record"
