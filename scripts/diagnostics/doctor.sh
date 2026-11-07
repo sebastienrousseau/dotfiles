@@ -325,15 +325,19 @@ _doctor_state() {
 
 # --- State layout: $XDG_STATE_HOME/dot/<domain>/ (ADR-020 N12) ---
 # install/migrate/migrate-state-to-domains.sh moves the old directory's
-# entries on apply, and marks the move done.
+# entries on apply, and marks the move done. It leaves the AI gateway's
+# state while the gateway runs, so that is the one thing apply cannot fix.
 _doctor_state_layout() {
-  local state="${XDG_STATE_HOME:-$HOME/.local/state}"
-  if [[ -f "$state/dot/cli/migrations/state-domains.done" ]]; then
+  local state="${XDG_STATE_HOME:-$HOME/.local/state}" pid
+  if [[ -f "$state/dot/cli/migrations/state-domains.done" || ! -d "$state/dotfiles" ]]; then
     _ok "state layout" "per domain in $(pretty_path "$state/dot")"
-  elif [[ -d "$state/dotfiles" ]]; then
-    _warn "state layout" "$(pretty_path "$state/dotfiles") is not moved yet; chezmoi apply moves it"
+    return 0
+  fi
+  pid="$(cat "$state/dotfiles/ai-serve/serve.pid" 2>/dev/null || true)"
+  if [[ "$pid" =~ ^[0-9]+$ ]] && kill -0 "$pid" 2>/dev/null; then
+    _warn "state layout" "the AI gateway still runs from $(pretty_path "$state/dotfiles"); stop it with dot-ai-proxy stop, then chezmoi apply"
   else
-    _ok "state layout" "per domain in $(pretty_path "$state/dot")"
+    _warn "state layout" "$(pretty_path "$state/dotfiles") is not moved yet; chezmoi apply moves it"
   fi
 }
 

@@ -12,10 +12,11 @@
 #
 # Every move is recorded in a manifest, so rollback-state-to-domains.sh can
 # put each entry back. A directory whose destination exists is merged entry
-# by entry; a log whose destination exists is prepended to it. An entry it
-# cannot move yet (the AI gateway while it runs, a name taken in a merged
-# directory) stays where it is, and the run is not marked done, so the next
-# apply tries again. The old directory keeps v0_2_503-migration, which its
+# by entry; a log whose destination exists is prepended to it. Any other
+# entry whose name is taken keeps the new one, and the old one is set aside
+# in dot/cli/migrations/superseded/ at its old path. An entry it cannot
+# move yet (the AI gateway while it runs, a move that fails) stays where it
+# is, and the run is not marked done, so the next apply tries again. The old directory keeps v0_2_503-migration, which its
 # own script reads, and anything this script does not know.
 #
 # Exit codes: 0 done, already done or nothing to move; 1 bad usage;
@@ -28,6 +29,7 @@ OLD="$STATE/dotfiles"
 NEW="$STATE/dot"
 MARKER="$NEW/cli/migrations/state-domains.done"
 MANIFEST="$NEW/cli/migrations/state-domains.manifest"
+SUPERSEDED="$NEW/cli/migrations/superseded"
 
 # Legacy name, then its path under $NEW. dot.log, metrics.jsonl and
 # agent-sessions.jsonl predate log.v1 and are kept, unread, in cli/legacy.
@@ -101,14 +103,28 @@ move_new() {
   fi
 }
 
-# merge_dir SRC DST: move each entry of SRC that DST lacks.
+# supersede SRC DST: DST's name is taken, and DST is kept. SRC moves to its
+# old path under $SUPERSEDED, a move the manifest records for rollback.
+supersede() {
+  local aside="$SUPERSEDED/${1#"$OLD"/}"
+  if [[ -e "$aside" || -L "$aside" ]]; then
+    left "$1" "$2 exists, and so does $aside"
+    return 0
+  fi
+  move_new "$1" "$aside"
+  [[ "$DRY_RUN" == 1 || -e "$1" || -L "$1" ]] ||
+    printf 'migrate-state: superseded %s: kept %s, the old one is in %s\n' "$1" "$2" "$aside" >&2
+}
+
+# merge_dir SRC DST: move each entry of SRC that DST lacks; set aside the
+# rest.
 merge_dir() {
   local entry name
   for entry in "$1"/* "$1"/.[!.]*; do
     [[ -e "$entry" || -L "$entry" ]] || continue
     name="${entry##*/}"
     if [[ -e "$2/$name" ]]; then
-      left "$entry" "$2/$name exists"
+      supersede "$entry" "$2/$name"
     else
       move_new "$entry" "$2/$name"
     fi
@@ -137,7 +153,7 @@ merge_existing() {
   elif [[ -f "$2" && -f "$3" && ("$1" == *.log || "$1" == *.jsonl) ]]; then
     merge_log "$2" "$3"
   else
-    left "$2" "$3 exists"
+    supersede "$2" "$3"
   fi
 }
 
