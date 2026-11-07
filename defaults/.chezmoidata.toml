@@ -86,8 +86,8 @@ node_manager = "mise"  # mise, fnm, or nvm
 # ============================================================================
 #
 # Everything a provisioning run_* script installs is pinned here; tools that
-# `dot system update` refreshes through mise float in conf.d/00-dotfiles.toml with
-# minimum_release_age = "7d" instead. tools/ci/check-unpinned-installs.sh
+# `dot system update` refreshes through mise float in conf.d/00-dotfiles.toml
+# instead (minimum_release_age = "0s": no release cooldown). tools/ci/check-unpinned-installs.sh
 # fails on @latest, on cargo install without --locked and on a git clone of
 # a moving branch. Versions read 2026-10-08.
 

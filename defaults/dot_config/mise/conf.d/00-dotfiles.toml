@@ -11,10 +11,10 @@
 # config.toml or the drift returns.
 
 [settings]
-# Stable workstation channel: do not auto-install a release until it has had
-# seven days of ecosystem exposure. Project-local pins and the committed lock
-# file remain authoritative when a repository needs a newer version.
-minimum_release_age = "7d"
+# No release cooldown: install a release as soon as it is published.
+# Set explicitly, because leaving it unset falls back to mise's own
+# built-in default, which still holds back the newest release.
+minimum_release_age = "0s"
 # Install missing tools automatically
 auto_install = true
 # Ensure mise tool paths/shims are placed ahead of system PATH

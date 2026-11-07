@@ -194,7 +194,7 @@ pins override this file.
 
 ```toml
 [settings]
-minimum_release_age = "7d"
+minimum_release_age = "0s"  # explicit: unset falls back to mise's own age gate
 auto_install = true
 activate_aggressive = true
 # mise's own GitHub API calls; the token is never exported
