@@ -23,7 +23,8 @@ trap 'rm -rf "$WORK"' EXIT
 # audit_secrets FILE CONTENT: stage FILE with CONTENT in a fresh repo and
 # print the result of the audit's secret scan (PASSED or FAILED).
 audit_secrets() {
-  local repo="$WORK/repo-$RANDOM"
+  local repo
+  repo="$(mktemp -d "$WORK/repo-XXXXXX")"
   git init -q "$repo"
   printf '%s\n' "$2" >"$repo/$1"
   git -C "$repo" add "$1"
@@ -54,7 +55,8 @@ assert_equals "FAILED" "$(audit_secrets run.sh 'A=$x; API_KEY="xxxxxx"')" "even 
 # print the whole audit's exit status. The scan's verdict must decide it:
 # a clean file passes the audit, a written-down secret fails it.
 audit_status() {
-  local repo="$WORK/repo-$RANDOM" rc=0
+  local repo rc=0
+  repo="$(mktemp -d "$WORK/repo-XXXXXX")"
   git init -q "$repo"
   printf '%s\n' "$2" >"$repo/$1"
   git -C "$repo" add "$1"
@@ -69,7 +71,8 @@ assert_equals "1" "$(audit_status conf.yml 'password: hunter2')" "a written-down
 # audit_change FILE OLD NEW: commit FILE as OLD (hooks off), stage it as
 # NEW and print the secret scan's result.
 audit_change() {
-  local repo="$WORK/repo-$RANDOM"
+  local repo
+  repo="$(mktemp -d "$WORK/repo-XXXXXX")"
   git init -q "$repo"
   printf '%s\n' "$2" >"$repo/$1"
   git -C "$repo" add "$1"

@@ -23,7 +23,10 @@ done
 
 # run_compress <shell> <args...>: prints the recorded archiver calls.
 run_compress() {
-  local sh="$1" d="$WORK/$1.$RANDOM"
+  local sh="$1" d
+  # mktemp, not $RANDOM: two calls drawing the same number shared a
+  # directory, and the second read the first one's recorded calls.
+  d="$(mktemp -d "$WORK/$1.XXXXXX")"
   shift
   mkdir -p "$d" && : >"$d/a.txt" && : >"$d/b.txt"
   (cd "$d" && env -i HOME="$d" PATH="$WORK/bin:$SYS" CALLS="$d/calls" ARCHIVE_LOG_FILE=/dev/null \

@@ -18,7 +18,8 @@ trap 'rm -rf "$WORK"' EXIT
 # audit_shellcheck FILE CONTENT: stage FILE with CONTENT in a fresh repo and
 # print the result of the audit's ShellCheck step (PASSED, FAILED, SKIPPED).
 audit_shellcheck() {
-  local repo="$WORK/repo-$RANDOM"
+  local repo
+  repo="$(mktemp -d "$WORK/repo-XXXXXX")"
   git init -q "$repo"
   printf '%b' "$2" >"$repo/$1"
   git -C "$repo" add "$1"

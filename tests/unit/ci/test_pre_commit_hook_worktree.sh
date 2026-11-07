@@ -41,7 +41,7 @@ install -m 0755 "$REPO_ROOT/scripts/git-hooks/pre-commit" "$MAIN/.git/hooks/pre-
 # commit_in DIR: commit a new file in DIR through the installed hook.
 commit_in() {
   : >"$LOG"
-  echo x >"$1/f-$RANDOM"
+  echo x >"$(mktemp "$1/f-XXXXXX")"
   g -C "$1" add -A
   g -C "$1" -c core.hooksPath="$MAIN/.git/hooks" commit -q -m change >/dev/null 2>&1
 }

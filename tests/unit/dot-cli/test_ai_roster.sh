@@ -23,7 +23,8 @@ trap 'rm -rf "$_rt_tmp"' EXIT
 
 # fixture_root: a copy of every file the generator reads or writes.
 fixture_root() {
-  local root="$_rt_tmp/root.$RANDOM" path
+  local root path
+  root="$(mktemp -d "$_rt_tmp/root.XXXXXX")"
   for path in plugins/ai/roster.toml plugins/ai/roster.json plugins/ai/dot-plugin.toml \
     defaults/.chezmoidata.toml lib/dot/data/ai-roster.sh defaults/dot_local/bin/executable_tmux-ai \
     defaults/dot_local/share/dot-ai-tui/roster_gen.go; do
