@@ -69,7 +69,8 @@ RUN_RC=0
 # with $2 = ro, run it read-only, as a packaged install is.
 run_scenario() {
   local setup="$1" mode="${2:-}"
-  local dir="$WORKDIR/r$RANDOM$RANDOM"
+  local dir
+  dir="$(mktemp -d "$WORKDIR/r.XXXXXX")"
 
   mkdir -p "$dir/scripts/security" "$dir/lib/dot" "$dir/config" \
     "$dir/.github/security-policies"

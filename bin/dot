@@ -6,28 +6,29 @@ set -euo pipefail
 
 # Dotfiles CLI Entry Point - v0.2.541
 
-# Ensure XDG Base Directory variables are set
-export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
-export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
-export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
-
-# Ensure PIPX paths are set
-export PIPX_HOME="${XDG_DATA_HOME}/pipx"
-export PIPX_BIN_DIR="${HOME}/.local/bin"
-
-# Ensure Nix is in PATH if installed
-if [ -e "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
-  # shellcheck disable=SC1091
-  . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
-fi
+# _dot_hook_fast ARGS...: `dot cli hook run` runs on every prompt, tool call
+# and stop of every agent, so it skips the dispatcher (UI, names, routes,
+# locks; the manifest gives it no lock) and runs the hook in this process,
+# which exits. A symlinked dot, or one asked for --help, returns to take the
+# full path below.
+_dot_hook_fast() {
+  local hook="${BASH_SOURCE[0]%/*}/../plugins/cli/libexec/hook.sh" a
+  [[ "${1:-} ${2:-} ${3:-}" == "cli hook run" && -f "$hook" ]] || return 0
+  for a in "${@:4}"; do
+    [[ "$a" != --help && "$a" != -h ]] || return 0
+  done
+  # In a function, source with no words sees the function's own $@.
+  shift 3
+  set +e
+  # shellcheck source=../plugins/cli/libexec/hook.sh
+  source "$hook"
+}
+_dot_hook_fast "$@"
 
 VERSION="0.2.541"
 
 COMMAND="${1:-}"
-if [ -n "${1:-}" ]; then
-  shift
-fi
+shift "$(($# > 0))"
 
 # Resolve source directory (needed early for ui.sh sourcing)
 _resolve_source_dir() {

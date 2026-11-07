@@ -196,6 +196,26 @@ run install
 assert_contains "No agent configuration found" "$OUT" "nothing present: says so"
 assert_equals "0" "$RC" "and that is not an error"
 
+# unwired: what dot doctor and dot system update read; sets RC and OUT
+# (stdout only).
+unwired() {
+  RC=0
+  OUT="$(env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="$B:$JQ_DIR:/usr/bin:/bin" \
+    bash "$REPO_ROOT/plugins/cli/libexec/hook-install.sh" unwired "$@" 2>/dev/null)" || RC=$?
+}
+
+test_start "unwired_lists_the_agents_an_install_would_change"
+fresh claude codex gemini
+unwired
+assert_equals "0|claude gemini codex" "$RC|$(tr '\n' ' ' <<<"$OUT" | sed 's/ $//')" "all three, before any install"
+run install --agent claude
+unwired
+assert_equals "gemini codex" "$(tr '\n' ' ' <<<"$OUT" | sed 's/ $//')" "claude drops out once wired"
+assert_false "[[ -e '$H/.gemini/settings.json' || -e '$H/.codex/config.toml' ]]" "and nothing is written"
+fresh
+unwired
+assert_equals "0|" "$RC|$OUT" "no agent configured: an empty list, not a sentence"
+
 test_start "bad_usage_exits_1"
 fresh claude
 run install --agent vim

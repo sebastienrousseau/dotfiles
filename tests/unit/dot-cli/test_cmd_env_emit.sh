@@ -46,7 +46,6 @@ else
   _fail "exports_dot_env_emit_function" "function not found"
 fi
 
-
 if [[ -f "$REPO_ROOT/docs/schema/dot-env-v1.json" ]]; then
   _pass "v1_schema_present"
 else

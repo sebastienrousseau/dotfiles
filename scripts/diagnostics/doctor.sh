@@ -337,6 +337,30 @@ _doctor_state_layout() {
   fi
 }
 
+# --- Agent hooks: dot cli hook run wired into each agent present ---
+# plugins/cli/libexec/hook-install.sh unwired names the agents an install
+# would change; without the hook an agent's state never reaches dot.
+_doctor_agent_hooks() {
+  local installer="$SCRIPT_DIR/../../plugins/cli/libexec/hook-install.sh" a present="" unwired rc=0
+  for a in claude gemini codex; do
+    [[ ! -d "$HOME/.$a" ]] || present="$present, $a"
+  done
+  if [[ -z "$present" ]]; then
+    _ok "agent hooks" "no agent configured"
+    return 0
+  fi
+  unwired="$(bash "$installer" unwired 2>/dev/null)" || rc=$?
+  if [[ "$rc" == 2 ]]; then
+    _warn "agent hooks" "jq is needed to check them"
+  elif [[ -n "$unwired" ]]; then
+    _warn "agent hooks" "not wired for ${unwired//$'\n'/, }; run dot cli hook install"
+  elif [[ "$rc" != 0 ]]; then
+    _warn "agent hooks" "not all wired; dot cli hook install says why"
+  else
+    _ok "agent hooks" "wired (${present#, })"
+  fi
+}
+
 # --- Pre-push audit bypass log (closes #871) ---
 _doctor_pre_push_audit_bypass_log() {
   _section "Pre-Push Audit Bypass"
@@ -579,6 +603,7 @@ _doctor_main() {
   _doctor_os_specific_detection
   _doctor_state
   _doctor_state_layout
+  _doctor_agent_hooks
   _doctor_pre_push_audit_bypass_log
   _doctor_atuin_history_filter
   _doctor_git_signing

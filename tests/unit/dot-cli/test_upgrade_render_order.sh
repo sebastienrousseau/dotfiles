@@ -37,7 +37,8 @@ awk '/^(_upgrade_[a-z_]+|cmd_upgrade)\(\) \{/,/^\}/' \
 
 # upgrade [VAR=value...]: one cmd_upgrade run; prints the marker stream.
 upgrade() {
-  env PATH="$WORK/bin:/usr/bin:/bin" TMPDIR="$WORK" DOTFILES_NO_TUI=1 NO_COLOR=1 \
+  # A host that turned its app stores off must not turn them off here.
+  env -u DOTFILES_APP_STORES PATH="$WORK/bin:/usr/bin:/bin" TMPDIR="$WORK" DOTFILES_NO_TUI=1 NO_COLOR=1 \
     DOT_SYSTEM_DOT="$WORK/bin/dot" FAKES="$WORK/bin" "$@" bash -c '
     set -euo pipefail
     source "$1/lib/dot/ui.sh"
@@ -90,6 +91,15 @@ assert_contains "STEP apps skip" "$out" "the phase shows as a skip"
 assert_contains "DOTFILES_APP_STORES=0" "$out" "naming the setting that turned it off"
 assert_equals "" "$(inside "$out")" "and still nothing but steps inside the render"
 assert_contains "END" "$out" "and the update carries on to the end"
+
+test_start "agent_hooks_are_a_step_once_consented"
+mkdir -p "$WORK/bin/plugins/cli/libexec"
+printf 'echo "installer $*"\n' >"$WORK/bin/plugins/cli/libexec/hook-install.sh"
+out="$(upgrade DOT_UPGRADE_HOOKS=1)"
+assert_contains "STEP hooks ok installer install" "$out" "the installer runs as its own step"
+assert_equals "" "$(inside "$out")" "inside the render, as a step only"
+out="$(upgrade)"
+assert_output_not_contains "STEP hooks" "printf '%s' '$out'" "and not without consent"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

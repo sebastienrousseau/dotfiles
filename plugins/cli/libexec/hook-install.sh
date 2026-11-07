@@ -3,6 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # dot cli hook install [--agent <id>]... [--dry-run]
 # dot cli hook remove [--agent <id>]... [--dry-run]
+# hook-install.sh unwired [--agent <id>]...
 #
 # Wire `dot cli hook run` into each agent's own configuration, or take it
 # out again:
@@ -18,6 +19,9 @@
 # ours (a dot that moved) and leaves everything else in the file as it was;
 # removing takes out only ours. A file it cannot read as JSON, or a Codex
 # notify someone else set, is left untouched and reported.
+#
+# unwired prints, one per line, each agent whose hook an install would add
+# or change, and writes nothing: dot doctor and dot system update read it.
 #
 # Exit codes: 0 done (or nothing to do); 1 bad usage; 2 jq is missing;
 # 3 an agent was left as it was (listed on stderr).
@@ -113,7 +117,9 @@ hi_json() {
 
 # hi_apply AGENT FILE BEFORE AFTER MODE: write AFTER when it differs.
 hi_apply() {
-  if [[ "$3" == "$4" ]]; then
+  if [[ "$DRY_RUN" == unwired ]]; then
+    [[ "$3" == "$4" ]] || say "$1"
+  elif [[ "$3" == "$4" ]]; then
     [[ "$5" == install ]] && say "$1: already installed in $2" || say "$1: not installed"
   elif [[ "$DRY_RUN" == 1 ]]; then
     say "$1: would ${5} the hook in $2"
@@ -193,13 +199,21 @@ hi_default_agents() {
   done
 }
 
+# hi_none MODE: no agent is configured. Said in a sentence, except by
+# unwired, whose output is a list.
+hi_none() {
+  [[ "$DRY_RUN" == unwired ]] ||
+    say "No agent configuration found (~/.claude, ~/.gemini, ~/.codex): nothing to $1."
+}
+
 main() {
   local mode="${1:-}" a
   shift || true
   hi_parse "$@"
+  [[ "$mode" != unwired ]] || mode=install DRY_RUN=unwired
   ((${#AGENTS[@]})) || hi_default_agents
   if ((${#AGENTS[@]} == 0)); then
-    say "No agent configuration found (~/.claude, ~/.gemini, ~/.codex): nothing to ${mode}."
+    hi_none "$mode"
     return 0
   fi
   if [[ " ${AGENTS[*]} " =~ \ (claude|gemini)\  ]] && ! command -v jq >/dev/null 2>&1; then
