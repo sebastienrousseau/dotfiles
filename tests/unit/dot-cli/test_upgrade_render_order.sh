@@ -37,7 +37,8 @@ awk '/^(_upgrade_[a-z_]+|cmd_upgrade)\(\) \{/,/^\}/' \
 
 # upgrade [VAR=value...]: one cmd_upgrade run; prints the marker stream.
 upgrade() {
-  env PATH="$WORK/bin:/usr/bin:/bin" TMPDIR="$WORK" DOTFILES_NO_TUI=1 NO_COLOR=1 \
+  # A host that turned its app stores off must not turn them off here.
+  env -u DOTFILES_APP_STORES PATH="$WORK/bin:/usr/bin:/bin" TMPDIR="$WORK" DOTFILES_NO_TUI=1 NO_COLOR=1 \
     DOT_SYSTEM_DOT="$WORK/bin/dot" FAKES="$WORK/bin" "$@" bash -c '
     set -euo pipefail
     source "$1/lib/dot/ui.sh"

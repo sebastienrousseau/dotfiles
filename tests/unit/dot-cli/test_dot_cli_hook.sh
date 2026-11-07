@@ -16,8 +16,12 @@ source "$SCRIPT_DIR/../../framework/assertions.sh"
 
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/dot-hook.XXXXXX")"
 LISTENER=""
-trap '[[ -z "$LISTENER" ]] || kill "$LISTENER" 2>/dev/null; rm -rf "$WORK"' EXIT
-H="$WORK/home" S="$WORK/state" R="$WORK/run"
+# The runtime dir holds a socket, whose path must fit sun_path (104 bytes on
+# macOS): a long $TMPDIR (a CI runner's, the mutation pool's) would overflow
+# it, so this one lives under /tmp.
+R="$(mktemp -d /tmp/dot-hook-run.XXXXXX)"
+trap '[[ -z "$LISTENER" ]] || kill "$LISTENER" 2>/dev/null; rm -rf "$WORK" "$R"' EXIT
+H="$WORK/home" S="$WORK/state"
 mkdir -p "$H" "$R"
 # The coverage runner's tracing, when it is on: env -i would drop it, and
 # the hook's lines would run unmeasured.

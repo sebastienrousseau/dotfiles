@@ -27,7 +27,8 @@ done
 # has_command sees only the fakes, so a runner's own /usr/bin/snap or npm
 # never counts as installed.
 upgrade() {
-  FAKES="$WORK/bin" PATH="$WORK/bin:/usr/bin:/bin" bash -c '
+  # A host that turned its app stores off must not turn them off here.
+  env -u DOTFILES_APP_STORES FAKES="$WORK/bin" PATH="$WORK/bin:/usr/bin:/bin" bash -c '
     set -euo pipefail
     source "$1/plugins/system/libexec/system/upgrade.sh"
     has_command() { [[ -x "$FAKES/$1" ]]; }
