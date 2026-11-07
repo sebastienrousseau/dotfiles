@@ -162,6 +162,50 @@ _cached_eval() {
   return $_ce_rc
 }
 
+# _cached_eval_unpin_path <init output>: print <init output> with each
+# literal copy of the current $PATH replaced by a reference to $PATH.
+#
+# Some init scripts snapshot the PATH of the shell that runs them: `mise
+# activate` prints `export __MISE_ORIG_PATH='<PATH>'` and
+# `export PATH='<shims>:<PATH>'`. Cached verbatim, every later shell would
+# start from that snapshot: tool versions since upgraded, or directories of
+# whichever shell (an IDE, an agent, a test) wrote the cache. Only whole
+# `export NAME='<prefix><PATH>'` lines are rewritten, and only when <prefix>
+# holds nothing the shell would expand inside double quotes.
+_cached_eval_unpin_path() {
+  local line name value prefix
+  local -a out
+  for line in "${(@f)1}"; do
+    if [[ -n "$PATH" && "$line" == "export "*"='"*"'" ]]; then
+      name=${${line#export }%%=*}
+      value=${${line#*=\'}%\'}
+      if [[ "$name" =~ '^[A-Za-z_][A-Za-z0-9_]*$' && "$value" == *"$PATH" ]]; then
+        prefix=${value%"$PATH"}
+        if [[ "$prefix" != *[\$\`\"\\\']* ]]; then
+          line="export $name=\"${prefix}\$PATH\""
+        fi
+      fi
+    fi
+    out+=("$line")
+  done
+  print -r -- "${(F)out}"
+}
+
+# _cached_eval_expire <label> <file>...: drop the cache for <label> when any
+# <file> is newer than it, for init output that depends on configuration the
+# binary's mtime does not reflect.
+_cached_eval_expire() {
+  local cache="$_SHELL_CACHE/${1}.zsh" f
+  shift
+  [[ -f "$cache" ]] || return 0
+  for f in "$@"; do
+    if [[ -f "$f" && "$f" -nt "$cache" ]]; then
+      command rm -f -- "$cache" "${cache}.zwc" "${cache}.bin"
+      return 0
+    fi
+  done
+}
+
 _cached_eval_impl() {
   local label=$1; shift
 
@@ -220,6 +264,7 @@ _cached_eval_impl() {
     print -u2 "[WARN] Suspicious output from $label init, skipping"
     return 1
   fi
+  init_output="$(_cached_eval_unpin_path "$init_output")"
 
   # `mktemp` instead of `${cache}.tmp.$$` — under PID recycling (very
   # rare but possible) two concurrent shells with the same $$ could
@@ -644,6 +689,10 @@ _dotfiles_async_init() {
     if [[ -x "${commands[$t]}" ]]; then
       case "$t" in
         mise)
+          # mise's global config shapes the activation script (hook and
+          # not-found settings), so a change to it expires the cache.
+          local _mise_cfg="${MISE_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/mise}"
+          _cached_eval_expire mise-init "$_mise_cfg"/config.toml(N) "$_mise_cfg"/conf.d/*.toml(N)
           _cached_eval mise-init mise activate zsh
           ;;
         atuin)

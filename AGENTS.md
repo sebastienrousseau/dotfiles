@@ -65,7 +65,7 @@ scripts/version-sync.sh              # Syncs dotfiles_version across non-templat
 - **Version:** Single source of truth is `dotfiles_version` in `defaults/.chezmoidata.toml`. Template files use `{{ .dotfiles_version }}`. Non-template files are updated by `scripts/version-sync.sh` at release time.
 - **Feature flags:** Gated with `{{ if .features.thing }}` in templates. The default `profile` is set in `defaults/.chezmoidata.toml`; `chezmoi init` stores the per-host choice in `~/.config/chezmoi/chezmoi.toml`.
 - **Zsh startup:** `.zshenv` -> `.zprofile` -> `.zshrc` -> `ZDOTDIR/.zshrc` -> `rc.d/*.zsh` (ordered by numeric prefix).
-- **Caching:** `_cached_eval` pattern caches tool init output with binary mtime invalidation.
+- **Caching:** `_cached_eval` pattern caches tool init output with binary mtime invalidation. A literal copy of `$PATH` in the output is stored as a `$PATH` reference, so a cache never pins the PATH of the shell that wrote it; `_cached_eval_expire` drops a cache when config it depends on changes (mise: its global `config.toml` and `conf.d/*.toml`).
 - **Neovim:** lazy.nvim plugin manager. Plugins in `lua/plugins/`. Use `vim.uv` (not deprecated `vim.loop`).
 - **Git commits:** Signed with SSH ED25519. Conventional commit messages enforced by pre-commit hook.
 
