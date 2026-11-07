@@ -45,30 +45,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-          # The bump is pushed from a separate clone of the tap/bucket with
-          # its own credential helper; this checkout never writes back.
+          # The bump is committed to the tap/bucket through the API
+          # (tools/ci/bump-branch-via-api.sh); this checkout never writes back.
           persist-credentials: false
-
-      - name: Setup Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Configure signed commits
-        env:
-          ACTIONS_BOT_SIGNING_KEY: ${{ secrets.ACTIONS_BOT_SIGNING_KEY }}
-        run: |
-          set -euo pipefail
-          if [[ -z "${ACTIONS_BOT_SIGNING_KEY}" ]]; then
-            echo "::error::Missing ACTIONS_BOT_SIGNING_KEY secret"
-            exit 1
-          fi
-          install -d -m 700 ~/.ssh
-          printf '%s\n' "${ACTIONS_BOT_SIGNING_KEY}" > ~/.ssh/actions_bot_signing_key
-          chmod 600 ~/.ssh/actions_bot_signing_key
-          git config --local gpg.format ssh
-          git config --local user.signingkey ~/.ssh/actions_bot_signing_key
-          git config --local commit.gpgsign true
 
       - name: Resolve release tag
         id: resolve-tag
@@ -189,9 +168,6 @@ jobs:
         run: |
           set -euo pipefail
           gh repo clone "${TAP_REPO}" homebrew-tap
-          # Later pushes ask gh for the token, which it reads from the
-          # GH_TOKEN of the step doing the push.
-          git -C homebrew-tap config --local credential.https://github.com.helper '!gh auth git-credential'
           # Detect the default branch (main) so the PR targets
           # the right base regardless of how the tap is initialised.
           cd homebrew-tap
@@ -202,50 +178,23 @@ jobs:
       - name: Prepare bump branch and update formula in tap
         id: prepare-bump
         env:
-          ACTIONS_BOT_SIGNING_KEY: ${{ secrets.ACTIONS_BOT_SIGNING_KEY }}
+          # The bump lands as one commit GitHub creates and signs, so it
+          # shows as verified under the homebrew-tap rule that requires signed
+          # commits; a runner-side SSH signature showed as unknown_key.
           GH_TOKEN: ${{ secrets.TAP_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
+          TAP_REPO: sebastienrousseau/homebrew-tap
           VERSION: ${{ steps.resolve-tag.outputs.version }}
           FORMULA_PATH: ${{ steps.update-formula.outputs.formula_path }}
         run: |
           set -euo pipefail
           BRANCH_NAME="bump/dot-${VERSION}"
+          echo "branch_name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
 
           cd homebrew-tap
-
-          # Configure git for the tap repo
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local gpg.format ssh
-          git config --local user.signingkey ~/.ssh/actions_bot_signing_key
-          git config --local commit.gpgsign true
-
-          # Create or reset the bump branch. `-B` is idempotent for re-runs
-          # against the same release tag (the previous attempt's branch
-          # would otherwise block `-b`).
-          git checkout -B "$BRANCH_NAME"
-
-          # Copy the updated formula into place
           mkdir -p Formula
           cp "$FORMULA_PATH" Formula/dot.rb
-
-          # Commit the change
-          git add Formula/dot.rb
-          if git diff --cached --quiet; then
-            echo "Formula/dot.rb already matches dot ${VERSION}; no bump commit needed."
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "branch_name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          git commit -S -m "dot ${VERSION}
-
-          Update Homebrew formula for dotfiles CLI release ${VERSION}."
-
-          # Force-with-lease so a stale prior bump branch is overwritten
-          # safely without clobbering unrelated commits.
-          git push --force-with-lease origin "$BRANCH_NAME"
-
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-          echo "branch_name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
+          bash "$GITHUB_WORKSPACE/tools/ci/bump-branch-via-api.sh" \
+            "$TAP_REPO" "$BRANCH_NAME" "dot ${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Open Pull Request to homebrew-tap
         env:
