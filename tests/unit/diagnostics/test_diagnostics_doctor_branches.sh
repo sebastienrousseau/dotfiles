@@ -388,7 +388,9 @@ printf 'eval "$(pyenv init -)"\n' >"$S_HOME/.config/zsh/tools.zsh"
 ln -s /nonexistent/target "$S_HOME/.config/dangling"
 printf '%s bypassed audit\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   >"$S_HOME/.local/state/dot/security/audit-bypass.log"
-mkdir -p "$S_HOME/.local/state/dotfiles"
+mkdir -p "$S_HOME/.local/state/dotfiles/ai-serve"
+# Not a pid: `kill -0 -1` would succeed, so it must not count as a gateway.
+echo "-1" >"$S_HOME/.local/state/dotfiles/ai-serve/serve.pid"
 printf '# dump\n' >"$S_HOME/.zcompdump"
 touch -t 202001010000 "$S_HOME/.zcompdump"
 long_path="$S_BIN:$SYSBIN"
@@ -553,6 +555,9 @@ exit 0
 EOF
 printf 'jorgebucaran/fisher\n' >"$S_HOME/.config/fish/fish_plugins"
 printf '# zshrc\n' >"$S_HOME/.zshrc"
+# A gateway still running from the old state dir: this test is its live pid.
+mkdir -p "$S_HOME/.local/state/dotfiles/ai-serve"
+echo "$$" >"$S_HOME/.local/state/dotfiles/ai-serve/serve.pid"
 mid_path="$S_BIN:$SYSBIN"
 for i in $(seq 1 95); do mid_path="$mid_path:$S_HOME/pathpad/$i"; done
 DOC_ENV=(PIPX_HOME= TERM_PROGRAM=)
@@ -566,6 +571,8 @@ _expect "s4_warning_band_probes" \
   "1280x720" "4 (pacman)" "Memory: n/a" "[WARN] dot" "(expected ~/.local/bin/dot)" \
   "[WARN] atuin config" "not found" "[WARN] PATH length" "consider pruning" \
   "[WARN] startup latency" "[OK] Healthy" "warning(s)."
+_expect "s4_a_running_gateway_holds_the_state_back" \
+  "[WARN] state layout" "the AI gateway still runs from" "stop it with dot-ai-proxy stop, then chezmoi apply"
 _expect_absent "s4_no_failures" "[FAIL]"
 
 # =======================================================================
