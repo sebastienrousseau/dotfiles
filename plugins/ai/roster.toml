@@ -139,7 +139,6 @@ title = "Shell-GPT"
 summary = "ChatGPT for the shell"
 group = "general"
 role = "agent"
-package = "pipx:shell-gpt"
 
 [[tool]]
 name = "ollama"

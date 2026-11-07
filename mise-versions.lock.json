@@ -33,7 +33,6 @@
   "pipx:mistral-vibe": "2.7.2",
   "pipx:pip-audit": "2.10.0",
   "pipx:poetry": "2.3.3",
-  "pipx:shell-gpt": "1.5.0",
   "python": "3.11.15",
   "ripgrep": "15.1.0",
   "ruby": "3.3.11",

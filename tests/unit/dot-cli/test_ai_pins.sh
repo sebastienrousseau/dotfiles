@@ -74,12 +74,15 @@ assert_equals "" "$(lib '_ai_pinned_version gopls' | head -n 1)" \
   "keys of other tables are not AI pins"
 
 test_start "every_mapped_provider_is_pinned"
-r="$(lib 'for b in codex copilot crush aider opencode sgpt ollama kiro-cli autohand qwen zai corralctl passmcp passmcp-graph passmcp-lsp passmcp-server draft; do
+r="$(lib 'for b in codex copilot crush aider opencode ollama kiro-cli autohand qwen zai corralctl passmcp passmcp-graph passmcp-lsp passmcp-server draft; do
   p="$(_ai_mise_pkg "$b")"; [[ -n "$(_ai_pinned_version "$p")" ]] || printf "%s " "$b"; done')"
 assert_equals "" "$(head -n 1 <<<"$r")" "every provider dot ai can install has a pin"
 
 test_start "vibe_is_not_installable"
 assert_equals "" "$(lib '_ai_mise_pkg vibe' | head -n 1)" "mistral-vibe is no longer offered (quarantined dependency)"
+
+test_start "sgpt_is_not_installable"
+assert_equals "" "$(lib '_ai_mise_pkg sgpt' | head -n 1)" "shell-gpt is no longer installed by the dotfiles"
 
 test_start "install_uses_the_pin"
 r="$(lib 'ai_install_tool codex Codex')"
