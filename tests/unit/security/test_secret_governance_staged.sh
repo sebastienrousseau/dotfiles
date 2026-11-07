@@ -66,6 +66,14 @@ git -C "$REPO" add app.conf
 govern
 assert_equals "0" "$RC" "only the added line is the commit's"
 
+test_start "an_added_line_that_starts_like_a_diff_header_is_still_scanned"
+commit notes.txt 'nothing here'
+printf '++ %s\n' "$SECRET" >"$REPO/notes.txt"
+git -C "$REPO" add notes.txt
+govern
+assert_equals "1" "$RC" "a leading '++ ' does not hide the secret"
+git -C "$REPO" checkout -q HEAD -- notes.txt
+
 test_start "a_value_taken_from_a_variable_passes"
 printf '%s\n' 'TOKEN="$HOME/.local/state/dot/ai/serve/gateway.token"' >"$REPO/run.sh"
 git -C "$REPO" add run.sh

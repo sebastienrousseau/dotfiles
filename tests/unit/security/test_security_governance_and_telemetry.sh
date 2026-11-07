@@ -53,7 +53,10 @@ cat >"$BIN/git" <<STUB
 #!$REAL_BASH
 case " \$* " in
   *" --name-only "*) cat "\$GOV_FIX/staged" ;;
-  *" diff "*) printf '+++ b/file\n'; sed 's/^/+/' "\$GOV_FIX/content" ;;
+  *" diff "*)
+    printf 'diff --git a/file b/file\n--- a/file\n+++ b/file\n@@ -0,0 +1 @@\n'
+    sed 's/^/+/' "\$GOV_FIX/content"
+    ;;
 esac
 exit 0
 STUB
