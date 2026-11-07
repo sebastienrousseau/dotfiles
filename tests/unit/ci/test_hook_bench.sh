@@ -26,6 +26,19 @@ echo '{}' >"$XDG_STATE_HOME/dot/cli/agents/claude/$session.json"
 [[ "${STUB_MS:-0}" == 0 ]] || sleep "0.$(printf '%03d' "$STUB_MS")"
 EOF
 
+# The bench needs bash 5. The suite may run under macOS /bin/bash 3.2, so
+# take the first bash on PATH when this one is older; with none, skip.
+BASH5="$BASH"
+if ((BASH_VERSINFO[0] < 5)); then
+  BASH5="$(command -v bash || true)"
+  [[ -n "$BASH5" ]] && "$BASH5" -c '[[ -n "${EPOCHREALTIME:-}" ]]' 2>/dev/null || BASH5=""
+fi
+if [[ -z "$BASH5" ]]; then
+  echo "  (no bash 5 on PATH: hook-bench cases skipped)"
+  print_summary
+  exit 0
+fi
+
 # bench [VAR=value...] -- ARGS...: the bench under bash 5; sets RC and OUT.
 bench() {
   local -a vars=()
@@ -35,7 +48,7 @@ bench() {
   done
   shift
   RC=0
-  OUT="$(env ${vars[@]+"${vars[@]}"} "$BASH" "$T/tools/ci/hook-bench.sh" "$@" 2>&1)" || RC=$?
+  OUT="$(env ${vars[@]+"${vars[@]}"} "$BASH5" "$T/tools/ci/hook-bench.sh" "$@" 2>&1)" || RC=$?
 }
 
 test_start "a_fast_hook_passes"
@@ -68,7 +81,7 @@ test_start "bad_usage_and_old_bash_exit_2"
 bench -- --bogus
 assert_equals "2" "$RC" "an unknown argument"
 RC=0
-OUT="$("$BASH" -c 'unset EPOCHREALTIME; . "$0" --runs 1' "$T/tools/ci/hook-bench.sh" 2>&1)" || RC=$?
+OUT="$("$BASH5" -c 'unset EPOCHREALTIME; . "$0" --runs 1' "$T/tools/ci/hook-bench.sh" 2>&1)" || RC=$?
 assert_equals "2" "$RC" "a bash without EPOCHREALTIME"
 assert_contains "needs bash 5" "$OUT" "is named"
 
