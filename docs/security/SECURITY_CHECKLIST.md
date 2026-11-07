@@ -45,7 +45,7 @@ Run `dot mcp check --strict --json` to validate all MCP server configurations an
 - [ ] **SBOM Generation**: Verify `dotfiles-sbom.spdx.json` is generated in release workflow.
 - [ ] **Attestation Signing**: Confirm `actions/attest-build-provenance` signs the release artifacts.
 - [ ] **Attestation Verification**: Verify with `gh attestation verify <artifact> --repo sebastienrousseau/dotfiles`.
-- [ ] **Automation Keying**: Confirm `ACTIONS_BOT_SIGNING_KEY` exists and matches the signer in `defaults/dot_config/git/allowed_signers.tmpl`.
+- [ ] **Automation Commits**: Confirm the latest bot commits here, on the Homebrew tap and on the Scoop bucket show as verified (`gh api repos/<repo>/commits/<sha> --jq .commit.verification`).
 
 ## 7. Final Verification
 

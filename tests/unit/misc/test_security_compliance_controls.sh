@@ -34,6 +34,8 @@ ERR="$WORK/err"
 
 update_deps_workflow="$REPO_ROOT/.github/workflows/update-deps.yml"
 sync_versions_workflow="$REPO_ROOT/.github/workflows/sync-versions.yml"
+homebrew_workflow="$REPO_ROOT/.github/workflows/release-distribute-homebrew.yml"
+scoop_workflow="$REPO_ROOT/.github/workflows/release-distribute-scoop.yml"
 security_workflow="$REPO_ROOT/.github/workflows/security-enhanced.yml"
 reliability_workflow="$REPO_ROOT/.github/workflows/reliability-gate.yml"
 policy_release_workflow="$REPO_ROOT/.github/workflows/policy-bundle-release.yml"
@@ -330,6 +332,20 @@ if grep -qE '^[[:space:]]*git (commit|push)' "$sync_versions_workflow"; then
 else
   pass "version sync never commits or pushes from the runner"
 fi
+
+test_start "distribute_bumps_use_signed_commits"
+# The Homebrew tap and Scoop bucket require signed commits; a runner-side
+# SSH signature showed there as unknown_key, so each bump commits through
+# the API (tools/ci/bump-branch-via-api.sh), which GitHub signs.
+for workflow in "$homebrew_workflow" "$scoop_workflow"; do
+  name="$(basename "$workflow")"
+  assert_file_contains "$workflow" "tools/ci/bump-branch-via-api.sh" "$name commits the bump through the API"
+  if grep -qE '^[[:space:]]*git (commit|push)|ACTIONS_BOT_SIGNING_KEY' "$workflow"; then
+    fail "$name still commits, pushes or signs from the runner"
+  else
+    pass "$name never commits, pushes or signs from the runner"
+  fi
+done
 
 test_start "update_deps_avoids_unverified_yq_download"
 if ! grep -q "wget -qO /usr/local/bin/yq" "$update_deps_workflow"; then
