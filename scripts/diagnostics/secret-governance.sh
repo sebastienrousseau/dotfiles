@@ -26,10 +26,12 @@ if [[ "${#staged_files[@]}" -eq 0 ]]; then
 fi
 
 # The lines the commit adds: a match already in history is not this
-# commit's, and a removed line is not a leak.
+# commit's, and a removed line is not a leak. Added lines follow a file's
+# first hunk header; the +++ before it is the file name, not content, and
+# an added line that itself starts with "++ " is still content.
 staged_content() {
   git diff --cached -U0 --no-color --no-ext-diff --diff-filter=ACM 2>/dev/null |
-    sed -n 's/^+//p' | grep -v '^++ ' || true
+    awk '/^diff --git / { h = 0; next } /^@@/ { h = 1; next } h && /^\+/ { print substr($0, 2) }' || true
 }
 
 violations=0
