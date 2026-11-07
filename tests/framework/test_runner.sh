@@ -212,6 +212,53 @@ aggregate_parallel_results() {
   done
 }
 
+# is_quiet_lane <file> - true when the file's header (first 20 lines) carries
+# `# test-lane: quiet`. Such a file times something against a wall-clock
+# budget (tests/regression/test_gate_integrity.sh runs the real perf gate),
+# so in parallel mode it runs on its own after the pool has drained: inside
+# the pool the rest of the suite loads the machine past what it measures.
+is_quiet_lane() {
+  head -n 20 "$1" 2>/dev/null | grep -q '^# test-lane: quiet$'
+}
+
+# Run test files in parallel ($JOBS workers), then the quiet lane one file
+# at a time, then the framework invariants, which read the others' results.
+# Args: <test-file...>
+run_test_list_parallel() {
+  local out_dir
+  out_dir=$(mktemp -d)
+  # shellcheck disable=SC2064  # capture $out_dir at trap-registration time
+  trap "rm -rf '$out_dir'" RETURN
+
+  export -f run_test_file_worker run_bounded describe_exit
+  export TEST_FILE_TIMEOUT
+  local -a primary_files=() quiet_files=() deferred_inv=()
+  local f
+  for f in "$@"; do
+    if [[ "$(basename "$f")" == "test_test_framework_invariants.sh" ]]; then
+      deferred_inv+=("$f")
+    elif is_quiet_lane "$f"; then
+      quiet_files+=("$f")
+    else
+      primary_files+=("$f")
+    fi
+  done
+
+  if [[ ${#primary_files[@]} -gt 0 ]]; then
+    # shellcheck disable=SC2016  # $0 inside xargs invocation
+    printf '%s\n' "${primary_files[@]}" | xargs -I{} -P "$JOBS" \
+      bash -c 'run_test_file_worker "$@"' _ {} "$out_dir"
+  fi
+  for f in ${quiet_files[@]+"${quiet_files[@]}"}; do
+    run_test_file_worker "$f" "$out_dir"
+  done
+  for f in ${deferred_inv[@]+"${deferred_inv[@]}"}; do
+    INVARIANT_RESULTS_DIR="$out_dir" run_test_file_worker "$f" "$out_dir"
+  done
+
+  aggregate_parallel_results "$out_dir"
+}
+
 # Run a list of test files. Honours $JOBS (set by main).
 # Args: <header-text> <test-file...>
 run_test_list() {
@@ -230,35 +277,7 @@ run_test_list() {
       run_test_file_serial "$f"
     done
   else
-    local out_dir
-    out_dir=$(mktemp -d)
-    # shellcheck disable=SC2064  # capture $out_dir at trap-registration time
-    trap "rm -rf '$out_dir'" RETURN
-
-    export -f run_test_file_worker run_bounded describe_exit
-    export TEST_FILE_TIMEOUT
-    local -a primary_files=() deferred_inv=()
-    local f
-    for f in "$@"; do
-      if [[ "$(basename "$f")" == "test_test_framework_invariants.sh" ]]; then
-        deferred_inv+=("$f")
-      else
-        primary_files+=("$f")
-      fi
-    done
-
-    if [[ ${#primary_files[@]} -gt 0 ]]; then
-      # shellcheck disable=SC2016  # $0 inside xargs invocation
-      printf '%s\n' "${primary_files[@]}" | xargs -I{} -P "$JOBS" \
-        bash -c 'run_test_file_worker "$@"' _ {} "$out_dir"
-    fi
-    if [[ ${#deferred_inv[@]} -gt 0 ]]; then
-      for f in "${deferred_inv[@]}"; do
-        INVARIANT_RESULTS_DIR="$out_dir" run_test_file_worker "$f" "$out_dir"
-      done
-    fi
-
-    aggregate_parallel_results "$out_dir"
+    run_test_list_parallel "$@"
   fi
 }
 

@@ -3,6 +3,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # Regression for: GH-1038
 # shellcheck disable=SC1090,SC1091,SC2034
+# test-lane: quiet
 #
 # Meta-gate: verify every ratchet script *actually fails* when its
 # invariant is violated. A gate that silently passes on regression
