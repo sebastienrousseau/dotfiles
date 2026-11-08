@@ -89,6 +89,18 @@ test_start "mcp_serve_execs_the_server"
 # The root is resolved physically (/var is /private/var on macOS).
 assert_output_contains "argv=serve root=$(cd "$REPO_ROOT" && pwd -P)" "PATH='$MCP_STUB':\"\$PATH\" bash '$REPO_ROOT/bin/dot' mcp serve </dev/null"
 
+# Graphviz installs a binary named dot: the server must call ours instead.
+GV_STUB="$DOTFILES_COV_TMPDIR/mcp-graphviz"
+mkdir -p "$GV_STUB"
+cat >"$GV_STUB/dot-mcp" <<'STUB'
+#!/usr/bin/env bash
+echo "dotbin=$DOT_MCP_DOT_BIN"
+STUB
+printf '\177ELF\002\001\001\000' >"$GV_STUB/dot"
+chmod +x "$GV_STUB/dot-mcp" "$GV_STUB/dot"
+test_start "mcp_serve_skips_another_programs_dot"
+assert_output_contains "dotbin=$(cd "$REPO_ROOT" && pwd -P)/bin/dot" "env -u DOT_MCP_DOT_BIN PATH='$GV_STUB':\"\$PATH\" bash '$REPO_ROOT/bin/dot' mcp serve </dev/null"
+
 test_start "mcp_server_card_declares_no_prompts"
 if [[ "$(jq -r '.capabilities.prompts' "$SERVER_CARD")" == "false" ]]; then
   ((TESTS_PASSED++)) || true
