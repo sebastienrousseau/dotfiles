@@ -365,8 +365,14 @@ cmd_ai_agent_status() {
 
 # cmd_ai_watch — dot ai watch: the agent-event listener in the cockpit
 # binary (dot-ai-tui watch). It prints each change of an agent's state and
-# posts a desktop notification when one becomes blocked.
+# posts a desktop notification when one becomes blocked. dot ai watch
+# service on|off|status keeps it running from login (watch-service.sh).
 cmd_ai_watch() {
+  if [[ "${1:-}" == service ]]; then
+    shift
+    cmd_ai_watch_service "$@"
+    return
+  fi
   if ! has_command dot-ai-tui; then
     ui_err "dot ai watch" "needs the cockpit binary: DOTFILES_AI=1 chezmoi apply builds it (Go from mise)"
     return 1

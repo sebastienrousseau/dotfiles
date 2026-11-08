@@ -20,6 +20,8 @@ source "$SCRIPT_DIR/ai/ai-commands.sh"
 source "$SCRIPT_DIR/ai/ai-provision.sh"
 # shellcheck source-path=SCRIPTDIR source=ai/ai-probe.sh
 source "$SCRIPT_DIR/ai/ai-probe.sh"
+# shellcheck source-path=SCRIPTDIR source=ai/watch-service.sh
+source "$SCRIPT_DIR/ai/watch-service.sh"
 # shellcheck source-path=SCRIPTDIR source=ai/status.sh
 source "$SCRIPT_DIR/ai/status.sh"
 
@@ -59,6 +61,7 @@ _show_ai_bridge_usage() {
   echo "       dot ai install [tool] [--yes]  # install tools and what they need (asks first)"
   echo "       dot ai status [--json]         # each agent session of the last 24 h and its state"
   echo "       dot ai watch                   # follow agents' states; notify when one is blocked"
+  echo "       dot ai watch service on|off    # keep dot ai watch running from login (launchd/systemd)"
   echo ""
   echo "Tools: cl codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai"
   echo ""

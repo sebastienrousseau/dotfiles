@@ -251,11 +251,12 @@ dot ai login [tool]                  # authenticate
 dot ai check                         # health-check fleet + gateway
 dot ai status [--json]               # each agent session of the last 24 h and its state
 dot ai watch                         # follow agents' states; notify when one is blocked
+dot ai watch service on|off|status   # keep dot ai watch running from login (opt-in)
 ```
 
 `dot ai status` reads the state file each agent's hook writes (`dot cli hook install` wires the hooks), so it needs nothing running: one row per session heard from in the last 24 hours (agent, state, time, session), newest first, with ended sessions left out; `--json` prints the `agent-event.v1` records, one per line. Earlier, `dot ai status` was a deprecated name for `dot ai tools` (now `dot ai list`).
 
-`dot ai watch` runs in a terminal of its own. It listens on the socket the hooks send to, starts from the state files, prints a line each time an agent's state changes, and posts a desktop notification when a session becomes blocked on a permission prompt or a question, at most once per session every 30 seconds. It is part of the cockpit binary (`dot-ai-tui`, built when `DOTFILES_AI=1`); only one runs at a time, and the hooks never start it.
+`dot ai watch` runs in a terminal of its own. It listens on the socket the hooks send to, starts from the state files, prints a line each time an agent's state changes, and posts a desktop notification when a session becomes blocked on a permission prompt or a question, at most once per session every 30 seconds. It is part of the cockpit binary (`dot-ai-tui`, built when `DOTFILES_AI=1`); only one runs at a time, and the hooks never start it. `dot ai watch service on` keeps it running from login instead: a launchd agent on macOS (`~/Library/LaunchAgents/com.sebastienrousseau.dot-ai-watch.plist`, logging to `~/.local/state/dot/ai/watch.log`) or a systemd user service on Linux (`dot-ai-watch.service`). It is restarted when it fails and stays down after a clean exit; `off` unloads and deletes it, and `status` says whether it is loaded.
 
 Add `--style <name>` (architect, hardener, refactor) to `dot ai run` to steer a prompt.
 The top-level forms (`dot cl`, `dot claude`, `dot ai-setup`, `dot ai-query`) were removed in 0.2.538 and exit 127. A few old `dot ai` verbs (`dot ai dashboard`, `dot ai proxy`) still run with a deprecation notice. See [AI.md](../../AI.md) for the full guide.
