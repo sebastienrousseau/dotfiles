@@ -37,7 +37,7 @@ hook() {
   shift
   RC=0
   OUT="$(printf '%s' "$payload" | env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$S" \
-    XDG_RUNTIME_DIR="$R" XDG_CACHE_HOME="$H/.cache" NO_COLOR=1 TERM=dumb \
+    XDG_RUNTIME_DIR="$R" XDG_CACHE_HOME="$H/.cache" NO_COLOR=1 TERM=dumb TMUX_PANE="${HOOK_PANE:-}" \
     bash "$REPO_ROOT/bin/dot" cli hook run "$@" 2>"$WORK/err")" || RC=$?
   ERR="$(cat "$WORK/err")"
 }
@@ -52,6 +52,18 @@ assert_file_contains "$S/dot/cli/agents/claude/s1.json" '"cwd":"/work/proj"' "th
 assert_file_not_contains "$S/dot/cli/agents/claude/s1.json" "SECRET-PROMPT" "the prompt is not"
 assert_equals "600" "$(stat -c '%a' "$S/dot/cli/agents/claude/s1.json" 2>/dev/null || stat -f '%Lp' "$S/dot/cli/agents/claude/s1.json")" \
   "the state file is private"
+
+# Inside tmux the record names the agent's pane ($TMUX_PANE), so dot ai wait
+# can follow an agent it started in a tmux session; anything that is not a
+# pane id is left out.
+test_start "the_tmux_pane_is_recorded"
+HOOK_PANE=%7 hook '{"session_id":"p1","hook_event_name":"Stop"}'
+assert_file_contains "$S/dot/cli/agents/claude/p1.json" '"pane":"%7"}' "the pane closes the record"
+HOOK_PANE='%7",' hook '{"session_id":"p2","hook_event_name":"Stop"}'
+assert_file_not_contains "$S/dot/cli/agents/claude/p2.json" '"pane"' "a pane that is not %N is left out"
+hook '{"session_id":"p3","hook_event_name":"Stop"}'
+assert_file_not_contains "$S/dot/cli/agents/claude/p3.json" '"pane"' "outside tmux there is none"
+rm -f "$S"/dot/cli/agents/claude/p[123].json
 
 test_start "events_map_to_the_normalised_states"
 for pair in "PermissionRequest:blocked" "Elicitation:blocked" "Stop:idle" "StopFailure:error" \

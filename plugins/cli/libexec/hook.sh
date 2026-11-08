@@ -22,6 +22,7 @@
 # Inside herdr ($HC_TERMINAL_ID) it also tells the agent's terminal the
 # state as an OSC 7501 record (Program Status Protocol), for agents that do
 # not report their own: Codex and Gemini CLI.
+# Inside tmux the record also names the agent's pane ($TMUX_PANE).
 # Metadata only: the prompt, tool input and output in the payload are never
 # read into the record.
 #
@@ -213,7 +214,11 @@ hook_main() {
   _hook_now
   _hook_json_str event "$H_EVENT"
   _hook_json_str cwd "$H_CWD"
-  record="{\"schema\":\"cli/agent-event.v1\",\"time\":\"$H_NOW\",\"agent\":\"$agent\",\"session\":\"$H_SESSION\",\"state\":\"$H_STATE\",\"event\":$event,\"cwd\":$cwd}"
+  record="{\"schema\":\"cli/agent-event.v1\",\"time\":\"$H_NOW\",\"agent\":\"$agent\",\"session\":\"$H_SESSION\",\"state\":\"$H_STATE\",\"event\":$event,\"cwd\":$cwd"
+  # Inside tmux, the agent's pane: dot ai wait follows an agent it started
+  # in a tmux session by it.
+  [[ ! "${TMUX_PANE:-}" =~ ^%[0-9]+$ ]] || record+=",\"pane\":\"$TMUX_PANE\""
+  record+="}"
   _hook_write "$agent" "$H_SESSION" "$record"
   _hook_report "$agent"
   # A per-user runtime dir only: a shared /tmp would let another user listen.

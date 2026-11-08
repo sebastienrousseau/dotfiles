@@ -37,7 +37,9 @@
     { "name": "suspend", "effect": "change", "powershell": "Suspend", "meaning": "Pause processes or sessions", "replaces": ["freeze", "pause"] },
     { "name": "resume", "effect": "change", "powershell": "Resume", "meaning": "Resume what was suspended", "replaces": [] },
     { "name": "ask", "effect": "read", "powershell": "Request", "meaning": "Ask an AI a question about local context", "replaces": ["query"] },
-    { "name": "login", "effect": "change", "powershell": "Connect", "meaning": "Authenticate a tool", "replaces": ["auth"] }
+    { "name": "login", "effect": "change", "powershell": "Connect", "meaning": "Authenticate a tool", "replaces": ["auth"] },
+    { "name": "send", "effect": "change", "powershell": "Send", "meaning": "Give a running program text, as if typed, and submit it", "replaces": ["paste"] },
+    { "name": "wait", "effect": "read", "powershell": "Wait", "meaning": "Block until a running program stops working, or a timeout", "replaces": [] }
   ],
   "ps_shared": [
     { "powershell": "Get", "verbs": ["list", "show"], "rule": "one cmdlet; show takes -Name" },

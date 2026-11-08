@@ -33,6 +33,7 @@ significant architectural decisions made in this project.
 | [ADR-021](ADR-021-family-lockstep-version.md) | One version for the whole dot family | Accepted; release driver pending |
 | [ADR-022](ADR-022-family-language-go.md) | Go for the dot family's compiled code | Accepted; host and `dot top` still bash (status note) |
 | [ADR-023](ADR-023-family-owner.md) | The personal account owns the dot family | Accepted |
+| [ADR-024](ADR-024-agent-runtime-verbs.md) | `send` and `wait`, the verbs of a running agent | Accepted |
 
 ## ADR Format
 

@@ -45,7 +45,7 @@ closed verb list. The registries are the source of truth:
 | Registry | Holds |
 |---|---|
 | `schemas/cli/domains.json` | The 17 domains, their help groups and the seven shortcuts |
-| `schemas/cli/verbs.json` | The 37 approved verbs, their side-effect class and PowerShell verb |
+| `schemas/cli/verbs.json` | The 39 approved verbs, their side-effect class and PowerShell verb |
 | `schemas/cli/flags.json` | Family-wide flags and exit codes |
 | `schemas/cli/manifest.v1.schema.json` | The naming fields of a plugin's `dot-plugin.toml` |
 

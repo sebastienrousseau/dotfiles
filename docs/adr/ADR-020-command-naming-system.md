@@ -46,7 +46,7 @@ account `sebastienrousseau`; signer identities are pinned to it.
 
 ### Verbs
 
-A closed list of 37 verbs in [`schemas/cli/verbs.json`](https://github.com/sebastienrousseau/dotfiles/blob/main/schemas/cli/verbs.json)
+A closed list of 37 verbs (39 since [ADR-024](ADR-024-agent-runtime-verbs.md)) in [`schemas/cli/verbs.json`](https://github.com/sebastienrousseau/dotfiles/blob/main/schemas/cli/verbs.json)
 (N4). Each has one meaning, one side-effect class (`read`, `change`, or
 `any` for verbs that launch a process), a PowerShell approved verb, and the
 words it replaces. There are no synonyms: `remove`, never `rm` or `delete`;

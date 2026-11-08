@@ -31,11 +31,12 @@ class AgentEvent(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def hook(self, payload: dict, *args: str) -> dict:
+    def hook(self, payload: dict, *args: str, pane: str = "") -> dict:
         env = {
             "PATH": "/usr/bin:/bin",
             "HOME": str(self.state),
             "XDG_STATE_HOME": str(self.state),
+            "TMUX_PANE": pane,
         }
         done = subprocess.run(
             ["bash", str(HOOK), *args],
@@ -88,6 +89,14 @@ class AgentEvent(unittest.TestCase):
         self.assertEqual(list(VALIDATOR.iter_errors(rec)), [], rec)
         self.assertEqual(rec["cwd"], '/w/a "q" b\\cde')
         self.assertEqual(rec["agent"], "gemini")
+
+    def test_the_tmux_pane_is_a_valid_optional_field(self):
+        rec = self.hook({"session_id": "s3", "hook_event_name": "Stop"}, pane="%12")
+        self.assertEqual(list(VALIDATOR.iter_errors(rec)), [], rec)
+        self.assertEqual(rec["pane"], "%12")
+        rec = self.hook({"session_id": "s4", "hook_event_name": "Stop"}, pane="%1;x")
+        self.assertEqual(list(VALIDATOR.iter_errors(rec)), [], rec)
+        self.assertNotIn("pane", rec)
 
 
 if __name__ == "__main__":
