@@ -1,0 +1,35 @@
+name: 'setup-anchore'
+description: >-
+  Put syft and grype on PATH, copied out of their images on Docker Hub,
+  pinned by digest. The anchore/* actions install them with a script that
+  resolves the tag through the github.com release page, which runners can
+  get a 504 from for hours; Docker Hub is a different host, and the digest
+  pins the exact binaries.
+
+runs:
+  using: composite
+  steps:
+    - name: Copy syft and grype out of their pinned images
+      shell: bash
+      env:
+        SYFT_IMAGE: anchore/syft:v1.54.0@sha256:0356562f495d432056237fbea5cbc2d4839c9c75cd500784a66de2e7cc95ca7c
+        GRYPE_IMAGE: anchore/grype:v0.104.3@sha256:d340f4f8b3b7e6e72a6c9c0152f25402ed8a2d7375dba1dfce4e53115242feb6
+      run: |
+        set -euo pipefail
+        bin="$RUNNER_TEMP/anchore-bin"
+        mkdir -p "$bin"
+        for tool in syft grype; do
+          image="SYFT_IMAGE"
+          [[ "$tool" == grype ]] && image="GRYPE_IMAGE"
+          image="${!image}"
+          for try in 1 2 3; do
+            docker pull -q "$image" && break
+            ((try < 3)) || exit 1
+            sleep $((try * 10))
+          done
+          id="$(docker create "$image")"
+          docker cp "$id:/$tool" "$bin/$tool"
+          docker rm "$id" >/dev/null
+          "$bin/$tool" version | sed -n '1,2p'
+        done
+        echo "$bin" >>"$GITHUB_PATH"

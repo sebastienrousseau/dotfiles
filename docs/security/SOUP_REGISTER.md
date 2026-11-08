@@ -16,6 +16,7 @@ Controlled inventory for software of unknown pedigree used by the dotfiles platf
 | Chezmoi installer | `get.chezmoi.io` | SHA-256 pinned, checked by `download_verified_script` | SHA-256 in [remote-installers.sha256](https://github.com/sebastienrousseau/dotfiles/blob/main/security/remote-installers.sha256) | Repo maintainer | Controlled |
 | GitHub Actions marketplace actions | GitHub Marketplace | Full commit SHA pinning | Workflow `uses:` pins | Repo maintainer | Controlled |
 | Grype container | `anchore/grype` | Pinned tag in workflow | Container tag in [security-enhanced.yml](https://github.com/sebastienrousseau/dotfiles/blob/main/.github/workflows/security-enhanced.yml) | Repo maintainer | Controlled |
+| Syft and Grype binaries | `anchore/syft`, `anchore/grype` | Tag plus image digest | Digests in [setup-anchore](https://github.com/sebastienrousseau/dotfiles/blob/main/.github/actions/setup-anchore/action.yml), used by the SBOM, CVE and release workflows | Repo maintainer | Controlled |
 | Trivy container | `aquasec/trivy` | Pinned tag in workflow | Container tag in [security-enhanced.yml](https://github.com/sebastienrousseau/dotfiles/blob/main/.github/workflows/security-enhanced.yml) | Repo maintainer | Controlled |
 | Checkov action | GitHub Marketplace | Full commit SHA pinning | Workflow `uses:` pin | Repo maintainer | Controlled |
 | Nix inputs | GitHub flakes | Locked in [flake.lock](https://github.com/sebastienrousseau/dotfiles/blob/main/flake.lock) | `narHash` and revision lock | Repo maintainer | Controlled |

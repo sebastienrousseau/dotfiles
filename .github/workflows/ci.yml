@@ -290,14 +290,12 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Set up syft and grype
+        uses: ./.github/actions/setup-anchore
       - name: Generate SBOM with Syft
-        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
-        with:
-          format: cyclonedx-json
-          output-file: sbom.cyclonedx.json
-          # CI only needs artifact upload; release attachment is handled in
-          # security-release.yml where permissions are elevated intentionally.
-          upload-release-assets: false
+        # CI only needs artifact upload; release attachment is handled in
+        # security-release.yml where permissions are elevated intentionally.
+        run: syft scan dir:. -o cyclonedx-json=sbom.cyclonedx.json
       - name: Upload SBOM
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -305,11 +303,8 @@ jobs:
           path: sbom.cyclonedx.json
           retention-days: 30
       - name: Scan SBOM with Grype
-        uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
-        with:
-          sbom: sbom.cyclonedx.json
-          fail-build: false
-          severity-cutoff: critical
+        # Report only; the gating scan is sbom-diff.yml's.
+        run: grype sbom:sbom.cyclonedx.json -o table
 
   security-links:
     name: Security / Link Check

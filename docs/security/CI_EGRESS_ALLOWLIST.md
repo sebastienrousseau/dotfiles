@@ -105,7 +105,7 @@ the endpoints that particular job actually touches.
 |---|---|---|
 | `api.osv.dev:443` | grype / scorecard | OSV vuln database |
 | `vulners.com:443` | grype | vulnerability metadata |
-| `toolbox-data.anchore.io:443` | anchore/sbom-action | SBOM tooling |
+| `grype.anchore.io:443` | grype (setup-anchore) | vulnerability database |
 | `api.deps.dev:443` | future deps.dev integration (#877) | package metadata |
 | `api.securityscorecards.dev:443` | scorecard.yml | publish_results upload |
 | `*.codeql.github.com:443` | codeql.yml | CodeQL bundle download |
