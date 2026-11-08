@@ -237,6 +237,27 @@ package = "github:sebastienrousseau/draft"
 chat = false
 
 [[tool]]
+name = "herdr"
+bin = "herdr"
+title = "herdr"
+summary = "Agent multiplexer: a sidebar of every agent's state"
+group = "ecosystem"
+role = "ecosystem"
+package = "aqua:herdrdev/herdr"
+chat = false
+
+[[tool]]
+name = "hc"
+bin = "herdr-core"
+aliases = ["herdr-core"]
+title = "herdr-core"
+summary = "Terminals that outlive you: dot ai spawn/send/wait and dot session run on it"
+group = "ecosystem"
+role = "ecosystem"
+native = "install_hc_native"
+chat = false
+
+[[tool]]
 name = "passmcp-server"
 bin = "passmcp-server"
 title = "passmcp-server"

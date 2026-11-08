@@ -29,6 +29,8 @@ var roster = []tool{
 	{name: "corralctl", bin: "corralctl", group: "ecosystem"},
 	{name: "passmcp", bin: "passmcp", group: "ecosystem"},
 	{name: "draft", bin: "draft", group: "ecosystem"},
+	{name: "herdr", bin: "herdr", group: "ecosystem"},
+	{name: "hc", bin: "herdr-core", group: "ecosystem"},
 }
 
 // rosterRoles maps each roster process name to its process-table role.
@@ -46,6 +48,8 @@ var rosterRoles = map[string]string{
 	"draft":             "ecosystem",
 	"goose":             "agent",
 	"grok":              "agent",
+	"herdr":             "ecosystem",
+	"herdr-core":        "ecosystem",
 	"kimi":              "agent",
 	"kiro-cli":          "cloud",
 	"llama-server":      "local-llm",

@@ -244,7 +244,7 @@ assert_equals 0 "$RC" "rc"
 out_has "not installed (the gateway engine needs it)" "engine missing"
 out_has "dot-ai-serve not deployed" "gateway missing"
 out_has "0/19 tools installed" "empty roster"
-out_has "0/3 suite tools" "empty ecosystem"
+out_has "0/5 suite tools" "empty ecosystem"
 
 # ── install ─────────────────────────────────────────────────────────────
 test_start "install_reports_a_complete_roster"

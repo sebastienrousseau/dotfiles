@@ -152,6 +152,7 @@ tpm_commit = "7bdb7ca33c9cc6440a600202b50142f401b6fe21"
 "github:sebastienrousseau/passmcp-lsp" = "0.0.7"
 "github:sebastienrousseau/passmcp-server" = "0.0.7"
 "github:sebastienrousseau/draft" = "0.0.39"
+"aqua:herdrdev/herdr" = "0.9.5"
 
 # ============================================================================
 # Alias Buckets (per-machine toggle support)
