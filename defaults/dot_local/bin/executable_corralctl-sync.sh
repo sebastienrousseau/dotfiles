@@ -39,7 +39,10 @@ ts() { date '+%Y-%m-%d %H:%M:%S'; }
 
 # Notify only on failure (non-zero exit or any per-repo error).
 if [[ "$code" -ne 0 || "${errors:-0}" -gt 0 ]]; then
-  /usr/bin/osascript -e "display notification \"${errors} error(s), exit ${code}. See ${LOG}\" with title \"corralctl sync failed\" sound name \"Basso\"" || true
+  # The text goes in as arguments, so a quote in $HOME cannot end the string.
+  /usr/bin/osascript -e 'on run argv' \
+    -e 'display notification (item 1 of argv) with title "corralctl sync failed" sound name "Basso"' \
+    -e 'end run' "${errors} error(s), exit ${code}. See ${LOG}" || true
 fi
 
 # Self-trim: cap the log at ~1 MB by keeping the last 2000 lines.

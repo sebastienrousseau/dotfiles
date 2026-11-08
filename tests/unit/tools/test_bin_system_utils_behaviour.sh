@@ -205,7 +205,7 @@ util notify "Build" "finished"
 assert_equals 0 "$RC" "rc"
 if [[ "$(uname -s)" == "Darwin" ]]; then
   called "display notification"
-  assert_file_contains "$CALLS" "with title \"Build\"" "title passed through"
+  assert_file_contains "$CALLS" "end run Build finished" "title and message passed as arguments"
 else
   called "notify-send Build finished"
 fi

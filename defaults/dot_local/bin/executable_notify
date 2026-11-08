@@ -9,12 +9,18 @@ message="${2:-}"
 
 case "$(uname -s)" in
   Darwin)
-    osascript -e "display notification \"$message\" with title \"$title\""
+    # The text goes in as arguments: in the script source, a quote in it
+    # would end the string and run what follows.
+    osascript -e 'on run argv' \
+      -e 'display notification (item 2 of argv) with title (item 1 of argv)' \
+      -e 'end run' "$title" "$message"
     ;;
   Linux)
     if grep -qi microsoft /proc/version 2>/dev/null; then
-      # WSL: Use PowerShell to show a toast notification
-      powershell.exe -Command "[Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); [System.Windows.Forms.MessageBox]::Show('$message', '$title')"
+      # WSL: Use PowerShell to show a toast notification. The text crosses
+      # into Windows through the environment (WSLENV), never the command.
+      NOTIFY_TITLE="$title" NOTIFY_MESSAGE="$message" WSLENV="NOTIFY_TITLE:NOTIFY_MESSAGE${WSLENV:+:$WSLENV}" \
+        powershell.exe -Command "[Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); [System.Windows.Forms.MessageBox]::Show(\$env:NOTIFY_MESSAGE, \$env:NOTIFY_TITLE)"
     elif command -v notify-send >/dev/null 2>&1; then
       notify-send "$title" "$message"
     else
