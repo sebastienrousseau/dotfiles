@@ -115,7 +115,7 @@ list of backticked function names.
 | paths | `DOT_MCP_REPO_ROOT` only, when it holds the marker; the working directory is never searched | server start | `TestRepoRoot` |
 | paths | A broken `home` seam degrades to "unresolved" | daemon environment | `TestRepoRootSurvivesBrokenSeams` `TestEnvironmentGetAndExists` |
 | paths | Checkout, chezmoi-source and deployed layouts all probed | `configPath` | `TestConfigPath` `TestWellKnownPath` |
-| paths | `DOT_MCP_DOT_BIN` selects the CLI, else `dot` from PATH | `tools/call` | `TestDotBinary` `TestToolsCallRunsTheTool` |
+| paths | `DOT_MCP_DOT_BIN` selects the CLI, else a script `dot` on PATH, else the checkout's or `~/.local/bin` `dot` (never Graphviz's binary) | `tools/call` | `TestDotBinary` `TestIsScript` `TestToolsCallRunsTheTool` |
 | paths | Production seams (env, home, stat, ReadFile) exercised | real process | `TestOSEnvironmentSeams` `TestOSReadFileSeam` |
 | limits | A resource read stops one byte past the 1 MiB limit | oversized file | `TestOSReadFileIsBounded` `TestReadResource` |
 | limits | A read error reaches the client as the URI only; the detail goes to stderr | unreadable file | `TestReadResourceKeepsTheReadErrorOffTheWire` |
