@@ -2,6 +2,35 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.542 (2026-11-08)
+
+### Added
+
+- `dot ai status [--json]` lists the agent sessions heard from in the last 24 hours and their state, and `dot ai watch` sends a notification when one is blocked; both read the state files the hook writes, so nothing has to be running (P0.3).
+- `dot cli hook run` takes an agent's hook payload (Claude Code, Gemini CLI, Codex notify) and records it as an `agent-event.v1` state under `$XDG_STATE_HOME/dot/cli/agents/`. `dot cli hook install` and `remove` wire the receiver into each agent's own configuration (P2.2).
+- Inside herdr (`$HC_TERMINAL_ID` set), the hook also reports Codex and Gemini CLI status to the terminal as OSC 7501, so their panes show working, blocked or done (P0.2).
+- `dot doctor` shows an "agent hooks" row, and `dot system update` offers `dot cli hook install` once per machine (P0.1).
+- 34 wallpaper palettes, each in a dark and a light variant: 68 new themes.
+
+### Changed
+
+- The agent hook is 7x faster: p95 per event drops from 206 ms to about 30 ms. CI times it on Linux (30 ms budget) and macOS (60 ms) (P0.1).
+- Each domain's state lives in `$XDG_STATE_HOME/dot/<domain>/`, moved there once from `$XDG_STATE_HOME/dotfiles/` (ADR-020 N12, P2.2).
+- The ai cockpit's list of AI tools is the roster, not the fleet; the roster.toml key that keeps a tool out of the cockpit is now `cockpit`, and the old `fleet` key is refused.
+- The Homebrew and Scoop bump commits go through GitHub's API, so the tap and bucket accept them as verified.
+- mise installs new releases with no cooldown, so local tools match what CI resolves.
+- Nerd Fonts v3.5.1; 39 Neovim plugins updated; two GitHub Actions updated (#1374).
+
+### Fixed
+
+- Security: `notify` passed its title and message into AppleScript (macOS) and PowerShell (WSL) source, so a quote ran what followed. The text is now passed as arguments.
+- Security: secret governance and the pre-commit audit scan the lines a commit adds, read the staged blob in the checkout being committed, and no longer skip an added line that starts with `++ `.
+- The pre-commit audit skips binary files, so a commit staging the favicon no longer fails.
+- On a machine with Graphviz, `dot cli hook install`, `dot mcp serve` and dot-mcp ran Graphviz's `dot` instead of the dotfiles CLI.
+- The state move finishes when a name is taken on both sides: the clash is set aside instead of retried on every apply.
+- A login shell that prints a banner no longer aborts the post-apply checks with a broken pipe.
+- CI: Syft and Grype come from pinned Docker Hub images, so the SBOM jobs survive github.com 504s; coverage measures `env -i` children under bash 5.3; the macOS hook bench runs under Homebrew bash.
+
 ## v0.2.541 (2026-11-01)
 
 ### Added

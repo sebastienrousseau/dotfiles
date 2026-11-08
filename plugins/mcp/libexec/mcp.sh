@@ -65,6 +65,14 @@ cmd_mcp() {
   esac
 }
 
+# _mcp_dot_bin ROOT: the dot on PATH when it is a script, else ROOT/bin/dot.
+_mcp_dot_bin() {
+  local dot
+  dot="$(command -v dot 2>/dev/null || true)"
+  [[ -n "$dot" && "$(head -c 2 "$dot" 2>/dev/null)" == '#!' ]] || dot="$1/bin/dot"
+  printf '%s\n' "$dot"
+}
+
 # cmd_mcp_serve — exec the stdio MCP server (dot-mcp).
 #
 # This is the transport `.well-known/mcp/server-card.json` advertises:
@@ -85,9 +93,10 @@ cmd_mcp_serve() {
   repo_root="$(require_source_dir)"
 
   # Tell the server which tree it is serving, and which CLI to shell out to,
-  # so it never has to guess either.
+  # so it never has to guess either. The dot on PATH counts only when it is
+  # a script: Graphviz installs a binary named dot.
   export DOT_MCP_REPO_ROOT="$repo_root"
-  export DOT_MCP_DOT_BIN="${DOT_MCP_DOT_BIN:-$(command -v dot || echo dot)}"
+  export DOT_MCP_DOT_BIN="${DOT_MCP_DOT_BIN:-$(_mcp_dot_bin "$repo_root")}"
 
   if bin="$(command -v dot-mcp 2>/dev/null)"; then
     exec "$bin" serve "$@"

@@ -27,6 +27,13 @@ func fakeEnv(vars map[string]string, files ...string) environment {
 			}
 			return nil, fs.ErrNotExist
 		},
+		lookPath: func(name string) (string, error) {
+			if p, ok := vars["__path:"+name]; ok {
+				return p, nil
+			}
+			return "", fs.ErrNotExist
+		},
+		isScript: func(p string) bool { _, ok := vars["__script:"+p]; return ok },
 	}
 }
 
@@ -65,31 +72,31 @@ func TestRepoRoot(t *testing.T) {
 	}{
 		{
 			name:  "explicit env is used",
-			vars:  map[string]string{"DOT_MCP_REPO_ROOT": "/repo", "__wd": "/other", "__home": "/home/u"},
+			vars:  map[string]string{"DOT_MCP_REPO_ROOT": "/repo", "__wd": "/other", "__home": "/u"},
 			files: []string{marker("/repo"), marker("/other")},
 			want:  "/repo",
 		},
 		{
 			name:  "env without the marker is ignored",
-			vars:  map[string]string{"DOT_MCP_REPO_ROOT": "/bogus", "__wd": "/repo/sub/dir", "__home": "/home/u"},
+			vars:  map[string]string{"DOT_MCP_REPO_ROOT": "/bogus", "__wd": "/repo/sub/dir", "__home": "/u"},
 			files: []string{marker("/repo")},
 			want:  "",
 		},
 		{
 			name:  "the working directory is never searched",
-			vars:  map[string]string{"__wd": "/repo/a/b/c", "__home": "/home/u"},
+			vars:  map[string]string{"__wd": "/repo/a/b/c", "__home": "/u"},
 			files: []string{marker("/repo"), marker("/repo/a/b/c")},
 			want:  "",
 		},
 		{
 			name:  "the chezmoi source directory is not a fallback",
-			vars:  map[string]string{"__wd": "/nowhere", "__home": "/home/u"},
-			files: []string{"/home/u/.local/share/chezmoi", marker("/home/u/.local/share/chezmoi")},
+			vars:  map[string]string{"__wd": "/nowhere", "__home": "/u"},
+			files: []string{"/u/.local/share/chezmoi", marker("/u/.local/share/chezmoi")},
 			want:  "",
 		},
 		{
 			name: "nothing resolvable",
-			vars: map[string]string{"__wd": "/nowhere", "__home": "/home/u"},
+			vars: map[string]string{"__wd": "/nowhere", "__home": "/u"},
 			want: "",
 		},
 	}
@@ -127,30 +134,30 @@ func TestConfigPath(t *testing.T) {
 	}{
 		{
 			name: "env override wins outright",
-			vars: map[string]string{"MCP_POLICY_CONFIG": "/custom/policy.json", "__wd": "/", "__home": "/home/u"},
+			vars: map[string]string{"MCP_POLICY_CONFIG": "/custom/policy.json", "__wd": "/", "__home": "/u"},
 			want: "/custom/policy.json",
 		},
 		{
 			name:  "checkout layout",
-			vars:  map[string]string{"DOT_MCP_REPO_ROOT": "/repo", "__wd": "/", "__home": "/home/u"},
+			vars:  map[string]string{"DOT_MCP_REPO_ROOT": "/repo", "__wd": "/", "__home": "/u"},
 			files: []string{marker, "/repo/defaults/dot_config/dotfiles/mcp-policy.json"},
 			want:  "/repo/defaults/dot_config/dotfiles/mcp-policy.json",
 		},
 		{
 			name:  "chezmoi source layout",
-			vars:  map[string]string{"DOT_MCP_REPO_ROOT": "/repo", "__wd": "/", "__home": "/home/u"},
+			vars:  map[string]string{"DOT_MCP_REPO_ROOT": "/repo", "__wd": "/", "__home": "/u"},
 			files: []string{marker, "/repo/dot_config/dotfiles/mcp-policy.json"},
 			want:  "/repo/dot_config/dotfiles/mcp-policy.json",
 		},
 		{
 			name:  "deployed home copy",
-			vars:  map[string]string{"__wd": "/", "__home": "/home/u"},
-			files: []string{"/home/u/.config/dotfiles/mcp-policy.json"},
-			want:  "/home/u/.config/dotfiles/mcp-policy.json",
+			vars:  map[string]string{"__wd": "/", "__home": "/u"},
+			files: []string{"/u/.config/dotfiles/mcp-policy.json"},
+			want:  "/u/.config/dotfiles/mcp-policy.json",
 		},
 		{
 			name:  "nothing present falls back to the canonical path",
-			vars:  map[string]string{"DOT_MCP_REPO_ROOT": "/repo", "__wd": "/", "__home": "/home/u"},
+			vars:  map[string]string{"DOT_MCP_REPO_ROOT": "/repo", "__wd": "/", "__home": "/u"},
 			files: []string{marker},
 			want:  "/repo/defaults/dot_config/dotfiles/mcp-policy.json",
 		},
@@ -177,13 +184,54 @@ func TestWellKnownPath(t *testing.T) {
 	}
 }
 
-// TestDotBinary covers the exported override and the PATH fallback.
+// TestDotBinary covers the exported override, a script dot on PATH, and the
+// fallbacks used when PATH holds another program's dot (Graphviz's binary).
 func TestDotBinary(t *testing.T) {
-	if got := fakeEnv(map[string]string{"DOT_MCP_DOT_BIN": "/usr/local/bin/dot"}).dotBinary(); got != "/usr/local/bin/dot" {
-		t.Fatalf("dotBinary = %q", got)
+	root := "/r"
+	marker := filepath.Join(root, rootMarker)
+	cases := []struct {
+		name  string
+		vars  map[string]string
+		files []string
+		want  string
+	}{
+		{"override wins", map[string]string{"DOT_MCP_DOT_BIN": "/usr/local/bin/dot", "__path:dot": "/p/dot", "__script:/p/dot": ""}, nil, "/usr/local/bin/dot"},
+		{"script on PATH", map[string]string{"__path:dot": "/p/dot", "__script:/p/dot": ""}, nil, "/p/dot"},
+		{"binary on PATH, checkout served", map[string]string{"__path:dot": "/usr/bin/dot", "DOT_MCP_REPO_ROOT": root, "__home": "/h"}, []string{marker, "/r/bin/dot", "/h/.local/bin/dot"}, "/r/bin/dot"},
+		{"binary on PATH, installed wrapper", map[string]string{"__path:dot": "/usr/bin/dot", "__home": "/h"}, []string{"/h/.local/bin/dot"}, "/h/.local/bin/dot"},
+		{"checkout without bin/dot", map[string]string{"DOT_MCP_REPO_ROOT": root}, []string{marker}, "dot"},
+		{"nothing found", nil, nil, "dot"},
 	}
-	if got := fakeEnv(nil).dotBinary(); got != "dot" {
-		t.Fatalf("dotBinary = %q, want \"dot\"", got)
+	for _, c := range cases {
+		if got := fakeEnv(c.vars, c.files...).dotBinary(); got != c.want {
+			t.Errorf("%s: dotBinary = %q, want %q", c.name, got, c.want)
+		}
+	}
+}
+
+// TestIsScript covers the production check that tells the dotfiles CLI (a
+// script) from Graphviz's dot (a binary).
+func TestIsScript(t *testing.T) {
+	dir := t.TempDir()
+	write := func(name, body string) string {
+		p := filepath.Join(dir, name)
+		if err := os.WriteFile(p, []byte(body), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		return p
+	}
+	for _, c := range []struct {
+		path string
+		want bool
+	}{
+		{write("script", "#!/usr/bin/env bash\n"), true},
+		{write("elf", "\x7fELF\x02\x01"), false},
+		{write("short", "#"), false},
+		{filepath.Join(dir, "missing"), false},
+	} {
+		if got := isScript(c.path); got != c.want {
+			t.Errorf("isScript(%s) = %v, want %v", filepath.Base(c.path), got, c.want)
+		}
 	}
 }
 

@@ -101,6 +101,15 @@ jobs:
         with:
           persist-credentials: false
 
+      # hook-bench times with $EPOCHREALTIME (bash 5); the runner's bash is
+      # Apple's 3.2. Homebrew's bash goes first on PATH, as on a machine
+      # these dotfiles set up, so the hook runs under it too.
+      - name: Put bash 5 first on PATH (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install bash
+          echo "$(brew --prefix)/bin" >>"$GITHUB_PATH"
+
       - name: Run the hook p95 gate
         env:
           DOT_HOOK_BENCH_BUDGET_MS: ${{ matrix.budget_ms }}

@@ -185,6 +185,15 @@ run remove --agent codex
 assert_equals "0" "$RC" "remove exits 0"
 assert_equals 'notify = ["say", "done"]' "$(cat "$T")" "and leaves it too"
 
+test_start "another_programs_dot_on_path_is_not_wired"
+# Graphviz installs a binary named dot; the hook must run ours instead.
+fresh codex
+printf '\177ELF\002\001\001\000' >"$B/dot"
+run install --agent codex
+assert_equals "0" "$RC" "installs"
+assert_equals "notify = [\"$REPO_ROOT/bin/dot\", \"cli\", \"hook\", \"run\", \"--agent\", \"codex\"]" \
+  "$(cat "$H/.codex/config.toml")" "the repo's dot, not the binary on PATH"
+
 test_start "with_no_agent_it_does_the_ones_present"
 fresh claude codex
 run install

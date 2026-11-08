@@ -40,7 +40,7 @@ Every config file read or written by `.dotfiles`, with its schema and purpose.
 An excerpt of `defaults/.chezmoidata.toml`:
 
 ```toml
-dotfiles_version = "0.2.541"
+dotfiles_version = "0.2.542"
 profile = "laptop"
 
 machine = ""
@@ -194,7 +194,7 @@ pins override this file.
 
 ```toml
 [settings]
-minimum_release_age = "7d"
+minimum_release_age = "0s"  # explicit: unset falls back to mise's own age gate
 auto_install = true
 activate_aggressive = true
 # mise's own GitHub API calls; the token is never exported

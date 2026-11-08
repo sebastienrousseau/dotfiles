@@ -25,7 +25,8 @@ execs this server with both exported (`DOT_MCP_REPO_ROOT`,
 `DOT_MCP_DOT_BIN`). Running `dot-mcp serve` directly needs
 `DOT_MCP_REPO_ROOT` set to the checkout (the working directory is never
 searched, so a cloned repository cannot pick the tree served); `dot` is
-taken from `PATH`.
+the one on `PATH` when it is a script, else the checkout's `bin/dot` or
+`~/.local/bin/dot`, so Graphviz's `dot` binary is never run.
 
 ## What it serves
 

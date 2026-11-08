@@ -27,8 +27,8 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
 
-test_start "mise_global_config_has_release_quarantine"
-assert_file_contains "$global_config" 'minimum_release_age = "7d"' "new tool releases age for seven days before auto-install"
+test_start "mise_global_config_sets_release_age_explicitly"
+assert_file_contains "$global_config" 'minimum_release_age = "0s"' "new tool releases install as soon as published (unset would fall back to mise's own age gate)"
 
 test_start "mise_global_config_does_not_export_github_token"
 if grep -Eq '^[[:space:]]*GITHUB_TOKEN[[:space:]]*=' "$global_config"; then

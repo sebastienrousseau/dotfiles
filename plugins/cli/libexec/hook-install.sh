@@ -42,11 +42,13 @@ left() {
   LEFT=1
 }
 
-# hi_dot: the dot an agent should run, as an absolute path.
+# hi_dot: the dot an agent should run, as an absolute path. The one on PATH
+# counts only when it is a script: Graphviz installs a binary named dot.
 hi_dot() {
-  local dot
+  local dot magic=""
   dot="$(command -v dot 2>/dev/null || true)"
-  [[ "$dot" == /* ]] || dot="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/bin/dot"
+  [[ "$dot" != /* ]] || magic="$(head -c 2 "$dot" 2>/dev/null || true)"
+  [[ "$magic" == '#!' ]] || dot="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/bin/dot"
   printf '%s\n' "$dot"
 }
 
