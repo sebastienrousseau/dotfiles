@@ -19,6 +19,9 @@
 # so dot session works with no monitor running, and sends the record as a
 # datagram to $XDG_RUNTIME_DIR/dot/agent-events.sock ($TMPDIR on macOS) when
 # a socket of this user's listens there (dot top), giving up after 50 ms.
+# Inside herdr ($HC_TERMINAL_ID) it also tells the agent's terminal the
+# state as an OSC 7501 record (Program Status Protocol), for agents that do
+# not report their own: Codex and Gemini CLI.
 # Metadata only: the prompt, tool input and output in the payload are never
 # read into the record.
 #
@@ -31,7 +34,7 @@ set -uo pipefail
 # The hook runs on every prompt, tool call and stop of every agent, so the
 # event path forks only jq (once), mv, and perl when a listener is there:
 # the fields come from one jq call, the time from printf, and the record is
-# built in place. tools/ci/hook-bench.sh holds it to its
+# built in place (inside herdr, one ps finds the agent's terminal). tools/ci/hook-bench.sh holds it to its
 # p95 budget.
 
 # _hook_field JSON NAME: the string value of top-level key NAME; empty when
@@ -109,6 +112,55 @@ _hook_send() {
     $s->send($ARGV[1]);' "$1" "$2" 2>/dev/null || true
 }
 
+# _hook_osc: sets H_OSC, H_STATE (and H_EVENT) as an OSC 7501 state:
+# stops are done, and blocked says whether on a permission or a question.
+_hook_osc() {
+  case "$H_STATE:$H_EVENT" in
+    running:*) H_OSC=working ;;
+    blocked:PermissionRequest) H_OSC=blocked:kind=permission ;;
+    blocked:*) H_OSC=blocked:kind=question ;;
+    idle:SessionStart | idle:Notification) H_OSC=idle ;;
+    idle:*) H_OSC="done" ;;
+    gone:*) H_OSC=clear ;;
+    *) H_OSC="$H_STATE" ;;
+  esac
+}
+
+# _hook_tty: sets H_TTY to the agent's terminal, empty when none of this
+# user's is found: /dev/tty when the hook has one (Codex's notify), else the
+# nearest ancestor's (Claude Code and Gemini CLI start hooks in a session of
+# their own). One ps for the whole walk; bash 3.2 has no assoc arrays, so
+# pids index sparse arrays.
+_hook_tty() {
+  local pid ppid tty p="$PPID" n
+  local -a up=() tt=()
+  H_TTY=/dev/tty
+  { : >/dev/tty; } 2>/dev/null && return
+  H_TTY=""
+  while read -r pid ppid tty; do
+    up[pid]="$ppid" tt[pid]="$tty"
+  done < <(ps -A -o pid= -o ppid= -o tty= 2>/dev/null)
+  for ((n = 0; n < 16 && p > 1; n++)); do
+    tty="${tt[p]:-?}"
+    [[ "$tty" == \?* ]] || break
+    p="${up[p]:-0}"
+  done
+  [[ "$tty" != \?* && -O "/dev/$tty" && -w "/dev/$tty" ]] && H_TTY="/dev/$tty"
+}
+
+# _hook_report AGENT: tell a Program Status Protocol terminal (herdr, which
+# sets $HC_TERMINAL_ID; another with DOT_HOOK_OSC7501=1, none with =0) the
+# agent's state as OSC 7501, in the form herdr-core's status.rs encodes.
+# Claude Code 2.1.295+ reports its own, so it gets no second record.
+_hook_report() {
+  local on="${DOT_HOOK_OSC7501:-}"
+  [[ -n "$on" || -z "${HC_TERMINAL_ID:-}" ]] || on=1
+  [[ "$on" == 1 && "$1" != claude ]] || return
+  _hook_osc
+  _hook_tty
+  [[ -z "$H_TTY" ]] || printf '\033]7501;state=%s:app=%s\033\134' "$H_OSC" "$1" 2>/dev/null >"$H_TTY"
+}
+
 # _hook_payload ARG...: sets H_PAYLOAD, the last argument (Codex notify) or
 # stdin (Claude Code, Gemini CLI); at most 2 s waiting on stdin.
 _hook_payload() {
@@ -163,6 +215,7 @@ hook_main() {
   _hook_json_str cwd "$H_CWD"
   record="{\"schema\":\"cli/agent-event.v1\",\"time\":\"$H_NOW\",\"agent\":\"$agent\",\"session\":\"$H_SESSION\",\"state\":\"$H_STATE\",\"event\":$event,\"cwd\":$cwd}"
   _hook_write "$agent" "$H_SESSION" "$record"
+  _hook_report "$agent"
   # A per-user runtime dir only: a shared /tmp would let another user listen.
   dir="${XDG_RUNTIME_DIR:-${TMPDIR:-}}"
   [[ -z "$dir" ]] || _hook_send "${dir%/}/dot/agent-events.sock" "$record"
