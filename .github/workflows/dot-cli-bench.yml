@@ -16,6 +16,8 @@ on:
     branches: [main]
     paths:
       - 'bin/dot'
+      - 'plugins/cli/libexec/hook.sh'
+      - 'tools/ci/hook-bench.sh'
       - 'scripts/dot/**'
       - 'tools/ci/dot-cli-startup-bench.sh'
       - 'benches/dot_command_bench.sh'
@@ -25,6 +27,8 @@ on:
   pull_request:
     paths:
       - 'bin/dot'
+      - 'plugins/cli/libexec/hook.sh'
+      - 'tools/ci/hook-bench.sh'
       - 'scripts/dot/**'
       - 'tools/ci/dot-cli-startup-bench.sh'
       - 'benches/dot_command_bench.sh'
@@ -68,6 +72,39 @@ jobs:
           DOT_BENCH_RUNS: 11
           DOT_BENCH_CMD: version
         run: bash tools/ci/dot-cli-startup-bench.sh
+
+  # The agent hook: Claude Code, Gemini CLI and Codex run it on every prompt,
+  # tool call and stop, so it is gated per event at p95 over 100 events.
+  # Linux holds the 30ms target. macOS pays ~3ms per process spawn and the
+  # hook spawns three (bash, jq, mv): 20ms is its floor on an M-series Mac
+  # and 30ms its p95 there; hosted runners are slower and noisier, so 60ms
+  # catches a new fork without flaking.
+  hook:
+    name: agent hook / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            budget_ms: 30
+          - os: macos-latest
+            budget_ms: 60
+    timeout-minutes: 5
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run the hook p95 gate
+        env:
+          DOT_HOOK_BENCH_BUDGET_MS: ${{ matrix.budget_ms }}
+        run: bash tools/ci/hook-bench.sh
 
   # Breadth sweep: every routed command, not just `dot version`. The gate
   # above is the asserted one; this job RECORDS timings so a regression in a
