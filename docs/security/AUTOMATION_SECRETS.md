@@ -8,8 +8,7 @@ render_with_liquid: false
 
 | Secret | Scope | Purpose |
 | :--- | :--- | :--- |
-| `ACTIONS_BOT_SIGNING_KEY` | GitHub Actions | SSH private key used for signed automation commits on the Homebrew tap and Scoop bucket; version sync and dependency updates commit through the API instead (`tools/ci/commit-via-api.sh`), which GitHub signs |
-| `TAP_PUSH_TOKEN` | GitHub Actions | Pushes the release formula and manifest to the Homebrew tap and Scoop bucket repositories |
+| `TAP_PUSH_TOKEN` | GitHub Actions | Commits the release formula and manifest to the Homebrew tap and Scoop bucket repositories through the API, and opens their PRs |
 | `AUR_SSH_KEY` | GitHub Actions | SSH key for pushing the `dot-cli-git` package to the AUR |
 | `GITHUB_TOKEN` | GitHub Actions | GitHub API access for PRs, attestations, and scans (provided per run) |
 | `SCORECARD_TOKEN` (optional, not set today) | GitHub Actions | Fine-grained PAT with `Administration: read` so `scorecard.yml` can read branch protection; the workflow falls back to `GITHUB_TOKEN` (see [SCORECARD.md](SCORECARD.md)) |
@@ -29,7 +28,10 @@ These are pinned in the repository, not stored as secrets or set by hand.
 
 ## Provisioning notes
 
-1. Store the SSH signing private key in GitHub Actions as `ACTIONS_BOT_SIGNING_KEY`.
-2. Store the matching public key in [allowed_signers](https://github.com/sebastienrousseau/dotfiles/blob/main/defaults/dot_config/git/allowed_signers.tmpl).
-3. Rotate the key on personnel or workstation change.
-4. Fail closed when secrets are absent.
+1. No workflow signs commits in the runner. Version sync, dependency
+   updates and the Homebrew and Scoop bumps commit through the API
+   (`tools/ci/commit-via-api.sh`, `tools/ci/bump-branch-via-api.sh`), and
+   GitHub signs each commit, so it passes the rules that require signed
+   commits here, on the tap and on the bucket.
+2. Rotate `TAP_PUSH_TOKEN` and `AUR_SSH_KEY` on personnel or workstation change.
+3. Fail closed when secrets are absent.
