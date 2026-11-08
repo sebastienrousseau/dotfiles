@@ -107,4 +107,26 @@ assert_contains " 25%" "$windows_status" "Windows CPU usage comes from PowerS
 assert_contains " 61%" "$windows_status" "Windows memory usage comes from PowerShell CIM"
 assert_contains " 77%" "$windows_status" "Windows battery usage comes from PowerShell CIM"
 
+# tmux-status agents counts the agent sessions dot ai status lists, from
+# the state files the hook writes: gone ones and those silent for a day
+# are left out, and a blocked one is named in text, not colour alone.
+test_start "tmux_status_counts_live_agents"
+agents_dir="$SANDBOX/state/dot/cli/agents"
+mkdir -p "$agents_dir/claude" "$agents_dir/codex"
+now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+agent_record() { # agent_record FILE STATE TIME
+  printf '{"schema":"cli/agent-event.v1","time":"%s","agent":"a","session":"s","state":"%s","event":"e","cwd":"/"}\n' "$3" "$2" >"$1"
+}
+agents() { XDG_STATE_HOME="$SANDBOX/state" bash "$TMUX_STATUS" agents; }
+assert_equals "" "$(agents)" "no state files: the segment is empty"
+agent_record "$agents_dir/claude/one.json" running "$now"
+agent_record "$agents_dir/claude/two.json" gone "$now"
+agent_record "$agents_dir/codex/old.json" blocked 2020-01-01T00:00:00Z
+assert_equals "1 agent" "$(agents)" "gone and day-old sessions are left out"
+agent_record "$agents_dir/codex/three.json" blocked "$now"
+agent_record "$agents_dir/codex/four.json" idle "$now"
+assert_equals "3 agents · 1 blocked" "$(agents)" "a blocked session is named"
+printf 'not json\n' >"$agents_dir/codex/bad.json"
+assert_equals "3 agents · 1 blocked" "$(agents)" "an unreadable record is skipped"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

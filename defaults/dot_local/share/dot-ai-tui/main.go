@@ -45,6 +45,7 @@ var (
 	titleSt  = lipgloss.NewStyle().Bold(true).Foreground(violet)
 	chipOK   = lipgloss.NewStyle().Foreground(lipgloss.Color("#0B1F12")).Background(green).Padding(0, 1).Bold(true)
 	chipOff  = lipgloss.NewStyle().Foreground(text).Background(faint).Padding(0, 1)
+	chipHold = lipgloss.NewStyle().Foreground(lipgloss.Color("#2A0B0B")).Background(red).Padding(0, 1).Bold(true)
 	chipCost = lipgloss.NewStyle().Foreground(lipgloss.Color("#241A05")).Background(amber).Padding(0, 1).Bold(true)
 	groupSt  = lipgloss.NewStyle().Foreground(muted).Bold(true)
 	okSt     = lipgloss.NewStyle().Foreground(green)
@@ -102,6 +103,7 @@ type model struct {
 	gatewayUp     bool
 	gatewayMsg    string
 	costToday     string
+	agents        agentsMsg
 	recent        []string
 	width, height int
 	focus         string // "roster" | "input"
@@ -142,8 +144,11 @@ func newModel() model {
 	return model{tools: t, focus: "roster", input: ti, spin: sp, ecoSnap: snap, cpuHist: hist, scanner: newSessionScanner()}
 }
 
-// Init starts the refresh and the session scan; each sessionsMsg re-arms the tick.
-func (m model) Init() tea.Cmd { return tea.Batch(refresh, textinput.Blink, scanSessions(m.scanner)) }
+// Init starts the refresh, the session scan and the agent count; each
+// sessionsMsg re-arms the tick.
+func (m model) Init() tea.Cmd {
+	return tea.Batch(refresh, textinput.Blink, scanSessions(m.scanner), loadAgents)
+}
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
@@ -156,7 +161,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.refreshed = true
 		m = m.withEco(msg.ecoSnap)
 	case btopTickMsg:
-		return m, tea.Batch(scanSessions(m.scanner), sampleEcosystemCmd)
+		return m, tea.Batch(scanSessions(m.scanner), sampleEcosystemCmd, loadAgents)
+	case agentsMsg:
+		m.agents = msg
 	case ecoMsg:
 		return m.withEco(EcosystemSnapshot(msg)), nil
 	case sessionsMsg:

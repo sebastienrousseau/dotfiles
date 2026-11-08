@@ -3,8 +3,9 @@
 The `dot ai` cockpit — a chat-centric
 [Bubble Tea](https://github.com/charmbracelet/bubbletea) TUI for your AI
 tools. Pick a tool on the left, chat with it on the right (prompts run
-through `dot ai <tool>` and stream back live), and watch the gateway and
-today's spend in the header. Every action shells out to a `dot ai` verb
+through `dot ai <tool>` and stream back live), and watch the gateway,
+today's spend and the live agent sessions (`3 agents · 1 blocked`, the
+ones `dot ai status` lists) in the header. Every action shells out to a `dot ai` verb
 so behaviour has a single source of truth. Deployed to
 `~/.local/bin/dot-ai-tui`.
 

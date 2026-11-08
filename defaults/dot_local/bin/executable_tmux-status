@@ -6,7 +6,8 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: tmux-status apply-colours <block/label>...
+Usage: tmux-status agents
+       tmux-status apply-colours <block/label>...
        tmux-status other-sessions <current-session>
        tmux-status short-path <path>
        tmux-status system
@@ -188,6 +189,46 @@ system_windows() {
   format_system "$cpu" "$memory" "$battery"
 }
 
+# agent_cutoff: sets cutoff to 24 hours ago as the hook writes times
+# (RFC 3339, UTC), so a string comparison finds the older records.
+agent_cutoff() {
+  if [[ -n "${EPOCHSECONDS:-}" ]]; then
+    TZ=UTC0 printf -v cutoff '%(%Y-%m-%dT%H:%M:%SZ)T' "$((EPOCHSECONDS - 86400))"
+  else
+    cutoff="$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -v-24H +%Y-%m-%dT%H:%M:%SZ)"
+  fi
+}
+
+# live_state RECORD: sets state to the record's state, or to "" when the
+# session is gone, was last heard from before cutoff, or is unreadable.
+live_state() {
+  state=""
+  [[ "$1" =~ \"time\":\"([^\"]+)\" ]] || return 0
+  [[ ! "${BASH_REMATCH[1]}" < "$cutoff" ]] || return 0
+  [[ "$1" =~ \"state\":\"([a-z]+)\" ]] || return 0
+  [[ "${BASH_REMATCH[1]}" == gone ]] || state="${BASH_REMATCH[1]}"
+}
+
+# agents_status: "3 agents · 1 blocked", the sessions dot ai status lists,
+# read from the state files the hook writes (no daemon, no jq); nothing
+# when there are none.
+agents_status() {
+  local dir="${XDG_STATE_HOME:-$HOME/.local/state}/dot/cli/agents"
+  local f state cutoff live=0 blocked=0
+  agent_cutoff
+  for f in "$dir"/*/*.json; do
+    [[ -f "$f" ]] || continue
+    live_state "$(<"$f")"
+    [[ -n "$state" ]] || continue
+    ((live += 1))
+    [[ "$state" != blocked ]] || ((blocked += 1))
+  done
+  ((live > 0)) || return 0
+  printf '%d agent' "$live"
+  ((live == 1)) || printf 's'
+  ((blocked == 0)) || printf ' · %d blocked' "$blocked"
+}
+
 system_status() {
   local platform="${TMUX_STATUS_PLATFORM:-}"
   [[ -n "$platform" ]] || platform="$(uname -s 2>/dev/null || true)"
@@ -199,6 +240,9 @@ system_status() {
 }
 
 case "${1:-}" in
+  agents)
+    agents_status
+    ;;
   apply-colours)
     shift
     apply_colours "$@"

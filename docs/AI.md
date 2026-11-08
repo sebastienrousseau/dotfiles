@@ -55,7 +55,7 @@ The interface follows ADR-020 (`dot ai <verb>`), modelled on the Claude CLI: bar
 | `dot ai cost show` | Spend report across providers (`dot ai cost`) |
 | `dot ai login [tool]` | Authenticate a tool |
 | `dot ai check` | Health-check the roster and the gateway (`dot ai doctor`) |
-| `dot ai status [--json]` | Each agent session of the last 24 h and its state, from the hooks' state files |
+| `dot ai status [--json]` | Each agent session of the last 24 h and its state, from the hooks' state files; the cockpit header and the tmux status bar show the same count (`3 agents · 1 blocked`) |
 | `dot ai watch` | Follow agents' states live; a desktop notification when one is blocked |
 | `--style <name>` | Steer any prompt with a pattern (see [Steering styles](#steering-styles)) |
 

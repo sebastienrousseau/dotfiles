@@ -40,6 +40,7 @@ Keep the last column a list of backticked function names.
 | :--- | :--- | :--- | :--- |
 | refresh | Installed tools detected on `PATH` | start, `c`/`r`, after shell-outs | `TestRefresh` `TestCoverageGaps` `BenchmarkRefresh` `BenchmarkExecDone` |
 | refresh | Gateway health chip (`● host:port` / `○ gateway off`) | `GET /health` contains `healthy` | `TestRefresh` `TestRenderChrome` `TestRenderPaths` |
+| agents | Header chip `3 agents · 1 blocked`: the sessions `dot ai status` lists, from the hook's state files (no daemon); red while one is blocked, absent with none | start, every session tick | `TestLoadAgentsCountsTheSessionsDotAiStatusLists` `TestHeaderShowsTheAgentCountAndNamesBlocked` `TestTheSessionTickReloadsTheAgentCount` |
 | refresh | Today's spend from sqlite (`$0.00` when absent) | `runs` table | `TestRefresh` `TestCoverageGaps` `TestSqlite` `BenchmarkSqliteMissingDB` |
 | refresh | Last 8 runs listed for the splash | `runs` table | `TestRefresh` `TestSplash` |
 | refresh | sqlite3 output scrubbed of `~/.sqliterc` meta lines | `.timer`, `Run Time:` | `TestCoverageGaps` `TestFilterSqliteOutput` `FuzzFilterSqliteOutput` `BenchmarkFilterSqliteOutput` |
