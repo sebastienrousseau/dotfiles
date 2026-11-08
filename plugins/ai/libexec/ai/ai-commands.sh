@@ -356,6 +356,24 @@ cmd_ai_draft() {
   draft "$@"
 }
 
+# cmd_ai_agent_status [--json] — dot ai status: each agent session heard
+# from in the last 24 h and its state, from the files each agent's hook
+# writes (dot cli hook install wires them); no watcher needed.
+cmd_ai_agent_status() {
+  bash "${BASH_SOURCE[0]%/*}/../../../cli/libexec/hook.sh" --status --live "$@"
+}
+
+# cmd_ai_watch — dot ai watch: the agent-event listener in the cockpit
+# binary (dot-ai-tui watch). It prints each change of an agent's state and
+# posts a desktop notification when one becomes blocked.
+cmd_ai_watch() {
+  if ! has_command dot-ai-tui; then
+    ui_err "dot ai watch" "needs the cockpit binary: DOTFILES_AI=1 chezmoi apply builds it (Go from mise)"
+    return 1
+  fi
+  exec dot-ai-tui watch "$@"
+}
+
 # cmd_ai_eco [args…] — btop-style sustainability, ecosystem & live process snapshot.
 cmd_ai_eco() {
   if has_command dot-ai-tui; then

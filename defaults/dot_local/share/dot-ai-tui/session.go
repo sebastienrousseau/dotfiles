@@ -388,8 +388,11 @@ func notify(title, body string) {
 func notifyCmd(goos, title, body string) *exec.Cmd {
 	switch goos {
 	case "darwin":
-		return execCommand("osascript", "-e",
-			fmt.Sprintf("display notification %q with title %q", body, title))
+		// The text goes in as arguments: AppleScript would read a quote
+		// or an escape inside its source.
+		return execCommand("osascript", "-e", "on run argv",
+			"-e", "display notification (item 2 of argv) with title (item 1 of argv)",
+			"-e", "end run", title, body)
 	default:
 		return execCommand("notify-send", title, body)
 	}

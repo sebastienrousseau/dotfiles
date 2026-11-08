@@ -55,6 +55,8 @@ The interface follows ADR-020 (`dot ai <verb>`), modelled on the Claude CLI: bar
 | `dot ai cost show` | Spend report across providers (`dot ai cost`) |
 | `dot ai login [tool]` | Authenticate a tool |
 | `dot ai check` | Health-check the roster and the gateway (`dot ai doctor`) |
+| `dot ai status [--json]` | Each agent session of the last 24 h and its state, from the hooks' state files |
+| `dot ai watch` | Follow agents' states live; a desktop notification when one is blocked |
 | `--style <name>` | Steer any prompt with a pattern (see [Steering styles](#steering-styles)) |
 
 ## The cockpit (`dot ai`)
@@ -173,7 +175,6 @@ These verbs inside `dot ai` still work but print a one-line hint with the new na
 
 | Deprecated | Use instead |
 |------------|-------------|
-| `dot ai status` | `dot ai list` |
 | `dot ai dashboard` / `dot ai dash` | `dot ai` (the cockpit) |
 | `dot ai proxy …` / `dot ai local on\|off` | `dot ai gateway serve` |
 | `--pattern <name>` | `--style <name>` |

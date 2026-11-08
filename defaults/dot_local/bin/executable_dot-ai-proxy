@@ -188,7 +188,7 @@ proxy_setup() {
   if _have claude; then
     ok "claude CLI found — the engine is ready (run 'claude login' once if unauthenticated)."
   else
-    err "claude CLI not on PATH — install it ('dot ai status') and run 'claude login'."
+    err "claude CLI not on PATH — install it ('dot ai tools') and run 'claude login'."
     return 1
   fi
   _need_serve >/dev/null 2>&1 || info "Deploy the server: chezmoi apply ~/.local/bin/dot-ai-serve"

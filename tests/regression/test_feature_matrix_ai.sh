@@ -50,15 +50,20 @@ test_fm_ai_tools() {
   fm_expect_out_matches "Codex CLI .*\(not installed\)"
 }
 
-test_fm_ai_status_deprecated() {
-  fm_seed_ai_cache
-  test_start "fm_ai_status_deprecated"
-  DOTFILES_AI_STATUS_TTL=99999 fm_run ai status
+test_fm_ai_status_lists_agent_sessions() {
+  local d="$XDG_STATE_HOME/dot/cli/agents/codex"
+  mkdir -p "$d"
+  printf '{"schema":"cli/agent-event.v1","time":"%s","agent":"codex","session":"fm-1","state":"blocked","event":"PermissionRequest","cwd":"/p"}\n' \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >"$d/fm-1.json"
+  test_start "fm_ai_status_lists_agent_sessions"
+  fm_run ai status
   fm_expect_rc 0
-  test_start "fm_ai_status_deprecated_warns"
-  fm_expect_err "use: dot ai tools"
-  test_start "fm_ai_status_deprecated_still_renders_the_table"
-  fm_expect_out_matches "Claude Code +9\.9\.9-fixture"
+  test_start "fm_ai_status_shows_the_state"
+  fm_expect_out_matches "codex +blocked .*fm-1"
+  test_start "fm_ai_status_json_prints_the_record"
+  fm_run ai status --json
+  fm_expect_out_matches '^\{"schema":"cli/agent-event.v1".*"session":"fm-1"'
+  rm -f "$d/fm-1.json"
 }
 
 test_fm_env_dotfiles_ai_status_ttl() {
@@ -409,7 +414,7 @@ echo "── FEATURE-MATRIX: ai ──"
 echo ""
 
 test_fm_ai_tools
-test_fm_ai_status_deprecated
+test_fm_ai_status_lists_agent_sessions
 test_fm_env_dotfiles_ai_status_ttl
 test_fm_smoke_ai_tools_install
 test_fm_ai_cost

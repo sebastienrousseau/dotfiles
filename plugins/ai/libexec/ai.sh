@@ -57,6 +57,8 @@ _show_ai_bridge_usage() {
   echo "       dot ai <tool> --style <name> \"<prompt>\""
   echo "       dot ai chat [tool]             # interactive session"
   echo "       dot ai install [tool] [--yes]  # install tools and what they need (asks first)"
+  echo "       dot ai status [--json]         # each agent session of the last 24 h and its state"
+  echo "       dot ai watch                   # follow agents' states; notify when one is blocked"
   echo ""
   echo "Tools: cl codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai"
   echo ""
@@ -318,10 +320,11 @@ EOF
 # `dot ai <verb> …` → the function that takes the remaining arguments.
 _AI_VERBS="chat:cmd_ai_chat install:cmd_ai_install update:cmd_ai_update serve:_ai_serve cost:cmd_ai_cost
 login:cmd_ai_setup doctor:cmd_ai_doctor ask:cmd_ai_query run:_ai_oneshot delegate:cmd_ai_delegate
-corral:cmd_ai_corral corralctl:cmd_ai_corral mcp:cmd_ai_mcp passmcp:cmd_ai_mcp draft:cmd_ai_draft eco:cmd_ai_eco top:cmd_ai_eco"
+corral:cmd_ai_corral corralctl:cmd_ai_corral mcp:cmd_ai_mcp passmcp:cmd_ai_mcp draft:cmd_ai_draft eco:cmd_ai_eco top:cmd_ai_eco
+status:cmd_ai_agent_status watch:cmd_ai_watch"
 
-# Deprecated `dot ai` verbs and the bare / unknown forms. `status` and
-# `local` keep their verb in "$@", as they always have.
+# Deprecated `dot ai` verbs and the bare / unknown forms. `local` keeps
+# its verb in "$@", as it always has.
 _ai_other_verb() {
   case "${1:-}" in
     # Bare `dot ai` → the Bubble Tea cockpit (or the launcher fallback).
@@ -334,10 +337,6 @@ _ai_other_verb() {
       else
         cmd_ai_status "$@"
       fi
-      ;;
-    status)
-      _ai_deprecated "dot ai tools"
-      cmd_ai_status "$@"
       ;;
     dashboard | dash)
       _ai_deprecated "dot ai  (cockpit)"

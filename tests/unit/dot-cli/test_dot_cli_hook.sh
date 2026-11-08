@@ -164,4 +164,29 @@ OUT="$(env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="/usr/bin:/bin" XDG_S
   bash "$REPO_ROOT/bin/dot" cli hook status 2>&1)"
 assert_contains "No agent events recorded yet" "$OUT" "with none, it says so"
 
+test_start "live_status_leaves_out_gone_and_old_sessions"
+L="$WORK/live/dot/cli/agents"
+mkdir -p "$L/codex" "$L/claude"
+now_iso="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+live_rec() { printf '{"schema":"cli/agent-event.v1","time":"%s","agent":"%s","session":"%s","state":"%s","event":"E","cwd":"/p"}\n' "$1" "$2" "$3" "$4"; }
+live_rec "$now_iso" codex now running >"$L/codex/now.json"
+live_rec "$now_iso" claude ended gone >"$L/claude/ended.json"
+live_rec "2020-01-01T00:00:00Z" codex stale idle >"$L/codex/stale.json"
+live() {
+  env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$WORK/live" XDG_CACHE_HOME="$H/.cache" \
+    NO_COLOR=1 TERM=dumb bash "$REPO_ROOT/plugins/cli/libexec/hook.sh" --status --live "$@" 2>&1
+}
+OUT="$(live)"
+assert_contains "codex      running" "$OUT" "a session active in the last 24 h is listed"
+assert_equals "no|no" "$([[ "$OUT" == *ended* ]] && echo yes || echo no)|$([[ "$OUT" == *stale* ]] && echo yes || echo no)" \
+  "a gone session and one silent for a day are not"
+OUT="$(live --json)"
+assert_equals "1" "$(grep -c '"schema"' <<<"$OUT")" "--json prints only the live record"
+OUT="$(BASH_ENV= env -i HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$WORK/live" /bin/bash "$REPO_ROOT/plugins/cli/libexec/hook.sh" --status --live --json 2>&1)"
+assert_contains '"session":"now"' "$OUT" "macOS /bin/bash 3.2 finds the cutoff with date"
+assert_equals "1" "$(grep -c '"schema"' <<<"$OUT")" "and filters the same way"
+rm -f "$L/codex/now.json"
+OUT="$(live)"
+assert_contains "No agent sessions in the last 24 hours" "$OUT" "with none live, it says so"
+
 print_summary
