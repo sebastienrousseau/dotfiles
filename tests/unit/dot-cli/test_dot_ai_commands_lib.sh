@@ -418,4 +418,23 @@ assert_equals 0 "$RC" "fallback to doctor exits 0"
 out_has "AI Ecosystem & Green Compute" "eco fallback header"
 stub dot-ai-tui
 
+test_start "watch_runs_the_cockpit_binary_or_says_how_to_build_it"
+ai cmd_ai_watch
+assert_equals 0 "$RC" "with the binary it exits as the binary does"
+called "dot-ai-tui watch"
+rm -f "$BIN/dot-ai-tui"
+ai_min cmd_ai_watch
+assert_equals 1 "$RC" "without the binary it exits 1"
+out_has "DOTFILES_AI=1 chezmoi apply" "and says how to build it"
+stub dot-ai-tui
+
+test_start "status_lists_live_sessions_from_the_state_files"
+SD="$DOTFILES_COV_TMPDIR/state/dot/cli/agents/codex"
+mkdir -p "$SD"
+printf '{"schema":"cli/agent-event.v1","time":"%s","agent":"codex","session":"lib-1","state":"idle","event":"Stop","cwd":"/p"}\n' \
+  "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >"$SD/lib-1.json"
+XDG_STATE_HOME="$DOTFILES_COV_TMPDIR/state" ai cmd_ai_agent_status --json
+assert_equals 0 "$RC" "rc"
+out_has '"session":"lib-1"' "the live record is printed"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

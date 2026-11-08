@@ -30,6 +30,14 @@ Only metadata is read — never prompts, replies or tool output. Transcripts
 are tailed every 2s off the UI goroutine; `≥` marks a Claude total from a
 file too large to read whole (first read is capped at 4 MiB).
 
+`dot-ai-tui watch` (`dot ai watch`) listens for the agent events each
+agent's hook sends (`dot cli hook run`, see `dot cli hook install`) on
+`$XDG_RUNTIME_DIR/dot/agent-events.sock` (`$TMPDIR` on macOS), prints each
+change of state, and posts a desktop notification when a session becomes
+blocked on a permission prompt or a question, at most once per session
+every 30 s. It starts from the state files the hook writes, so it knows the
+sessions already running; the hook never starts it.
+
 See [FEATURES.md](FEATURES.md) for the full feature → test matrix.
 
 ## Development
@@ -51,11 +59,12 @@ DOT_AI_SNAPSHOT=1 go run .            # render one frame without a terminal
 
 ### Fuzzing
 
-Eleven native Go fuzz targets cover every input-transforming surface —
+Twelve native Go fuzz targets cover every input-transforming surface —
 chroma highlighting of model output, prompt flattening, slash-command
 parsing, the `/` palette, list windowing, transcript layout, session
 JSON, sqlite3 output scrubbing, gateway configuration, the whole key
-handler at arbitrary terminal sizes, and the model cycle. Every `go test`
+handler at arbitrary terminal sizes, the model cycle, and the agent-event
+datagrams `watch` reads. Every `go test`
 run replays the seed corpus plus the committed crashers under
 `testdata/fuzz/<Target>/` (today `FuzzHighlight` and
 `FuzzRenderTranscript`). The ClusterFuzzLite / OSS-Fuzz build
@@ -75,6 +84,7 @@ go test -run '^$' -fuzz=FuzzFilterSqliteOutput -fuzztime=30s ./...   # sqlite3 o
 go test -run '^$' -fuzz=FuzzGatewayURL         -fuzztime=30s ./...   # DOT_AI_HOST/PORT → URL
 go test -run '^$' -fuzz=FuzzModelKeys          -fuzztime=30s ./...   # full key handler + resize
 go test -run '^$' -fuzz=FuzzModelCycle         -fuzztime=30s ./...   # `m` model cycle
+go test -run '^$' -fuzz=FuzzParseAgentEvent    -fuzztime=30s ./...   # agent-event datagrams (watch)
 go test -run '^Fuzz' -v ./...                                         # replay every corpus, no fuzzing
 ```
 

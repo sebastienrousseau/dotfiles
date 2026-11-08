@@ -51,7 +51,7 @@ func TestNotifyCmdPlatforms(t *testing.T) {
 		return exec.Command("true")
 	}
 	notifyCmd("darwin", "T", "B")
-	if got[0] != "osascript" || !strings.Contains(strings.Join(got, " "), `display notification "B" with title "T"`) {
+	if got[0] != "osascript" || !strings.HasSuffix(strings.Join(got, " "), "end run T B") {
 		t.Errorf("darwin cmd=%q", got)
 	}
 	notifyCmd("linux", "T", "B")

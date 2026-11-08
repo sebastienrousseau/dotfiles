@@ -201,7 +201,7 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot ai` | (default cockpit TUI) | `test_fm_smoke_ai_cockpit` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — launches the Bubble Tea cockpit / gum launcher (interactive TTY) |
 | `dot ai tools` | (status table, cached probes) | `test_fm_ai_tools` | `run:ai-tools` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot ai tools` | install (alias of ai install) | `test_fm_smoke_ai_tools_install` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — installs AI CLIs through mise/native installers (network, mutates $HOME) |
-| `dot ai` | status (deprecated alias of ai tools) | `test_fm_ai_status_deprecated` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
+| `dot ai status` | agent sessions of the last 24 h and their state (`--json`: the records) | `test_fm_ai_status_lists_agent_sessions` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot ai tools` | DOTFILES_AI_STATUS_TTL / DOTFILES_AI_PROBE_JOBS control the probe cache | `test_fm_env_dotfiles_ai_status_ttl` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/03-environment.md` | regression |
 | `dot ai cost` | (default, --since N) | `test_fm_ai_cost` | `run:ai-cost` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot ai doctor` | (default) | `test_fm_ai_doctor` | `run:ai-doctor` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |

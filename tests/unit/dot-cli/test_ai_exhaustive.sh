@@ -95,7 +95,8 @@ ex ask ai ask "2+2"                    # cmd_ai_query
 ex delegate ai delegate "write a test" # cmd_ai_delegate
 ex login ai login                      # cmd_ai_setup
 ex help ai --help                      # bridge usage
-ex dep_status ai status                # deprecated → cmd_ai_status
+ex agent_status ai status              # cmd_ai_agent_status
+ex watch ai watch                      # cmd_ai_watch (no cockpit binary here)
 ex dep_dash ai dashboard               # deprecated → cockpit
 ex dep_proxy ai proxy start            # deprecated proxy
 ex unknown ai notacommand              # unknown verb → error

@@ -439,6 +439,9 @@ func run() error {
 	if len(os.Args) > 1 && os.Args[1] == "--log-event" {
 		return logEventCLI(os.Args[2:])
 	}
+	if len(os.Args) > 1 && os.Args[1] == "watch" {
+		return runWatch(os.Stdout)
+	}
 	if os.Getenv("DOT_AI_SNAPSHOT") != "" {
 		renderSnapshot()
 		return nil

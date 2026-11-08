@@ -23,6 +23,17 @@ Keep the last column a list of backticked function names.
 | sessions | Files are tailed: partial lines held, truncation re-read, large files tail-read, stale files dropped, directories re-listed every 10s | each scan | `TestScanHoldsAnUnterminatedLineUntilItCompletes` `TestScanRereadsATruncatedFile` `TestScanTailReadsLargeFiles` `TestScanDropsFilesThatLeaveTheWindow` `TestScanListsDirectoriesOnlyEveryRelist` `TestScanSkipsOldFilesSubagentsAndMissingRoots` |
 | sessions | ⁵sessions table filtered to the selected agent, fields sanitised | View | `TestRenderSessionRowsFiltersAndSanitises` `TestSessionsMsgStoresAndRearmsTheTick` |
 
+## Agent watch (`dot ai watch`)
+
+| Area | Feature | Trigger | Tests |
+| :--- | :--- | :--- | :--- |
+| watch | `dot-ai-tui watch` owns `<runtime>/dot/agent-events.sock` (0600, dir 0700): `$XDG_RUNTIME_DIR`, else `$TMPDIR`, as the hook looks | `dot ai watch` | `TestRunDispatchesWatch` `TestAgentDirsFollowTheHook` `TestListenAgentsMakesAPrivateSocket` `TestRunWatchWithoutARuntimeDir` |
+| watch | One watch at a time; a socket left by a dead one is replaced; a path that cannot be a socket is an error | start | `TestRunWatchWhenOneIsAlreadyRunning` `TestListenAgentsReplacesADeadSocket` `TestListenAgentsErrors` |
+| watch | Seeds the table from the hook's state files (last 24 h, gone sessions left out), then folds in each datagram until SIGINT/SIGTERM, removing the socket | start, each event | `TestLoadAgentStatesKeepsLiveRecentSessions` `TestRunWatchSeedsFromStateFilesAndFoldsDatagrams` `TestWatchSignalsCloseTheSocket` `TestAgentTableFoldsRecordsAndDropsGoneSessions` |
+| watch | Only agent-event.v1 records with plain ids, a known state and an RFC 3339 time are taken | each datagram | `TestParseAgentEventAcceptsWhatTheHookWrites` `TestParseAgentEventRefusesWhatIsNotARecord` `FuzzParseAgentEvent` |
+| watch | A change of state prints one line (time, agent, state, project, session), control characters stripped | each change | `TestHandlePrintsChangesAndNotifiesOnceWhenBlocked` `TestHandleCleansTheProjectName` `BenchmarkWatchHandle` |
+| watch | A session becoming blocked posts a desktop notification (permission or question), at most once per session per 30 s, the notifier reaped | into `blocked` | `TestNotifyDueDebouncesEachSession` `TestBlockedReasonNamesAPermissionPrompt` `TestAgentNotifyRunsTheNotifier` |
+
 ## Data gathering
 
 | Area | Feature | Trigger | Tests |
@@ -67,7 +78,7 @@ Keep the last column a list of backticked function names.
 | input | Streaming: a failed turn is surfaced as an `error:` line in the error colour, not highlighted as a reply | `streamMsg` err | `TestUpdateMsgs` `TestErrorLineStyled` |
 | input | Streaming: pipe/start failures surface as errors | `startStream` | `TestStartStreamAndExec` `TestStartStreamPipeError` |
 | input | Spinner ticks only while a reply is running | `spinner.TickMsg` | `TestUpdateMsgs` `BenchmarkModelUpdateSpinner` |
-| input | Desktop notification after a reply that took ≥ 8 s (osascript / notify-send) | `streamMsg` done | `TestNotifyAndDoneHook` `TestNotifyCmdPlatforms` `BenchmarkNotify` `BenchmarkNotifyCmd` |
+| input | Desktop notification after a reply that took ≥ 8 s (osascript with the text as arguments / notify-send) | `streamMsg` done | `TestNotifyAndDoneHook` `TestNotifyCmdPlatforms` `BenchmarkNotify` `BenchmarkNotifyCmd` |
 | input | Multi-turn context flattened into each one-shot prompt | send | `TestBuildPrompt` `FuzzBuildPrompt` `BenchmarkBuildPrompt` |
 | input | Model override exported as `ANTHROPIC_MODEL`; `DOT_AI_RAW=1` suppresses banners | send | `TestStartStreamAndExec` |
 

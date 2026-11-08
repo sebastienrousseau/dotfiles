@@ -221,22 +221,61 @@ hook_main() {
   [[ -z "$dir" ]] || _hook_send "${dir%/}/dot/agent-events.sock" "$record"
 }
 
-# hook_status [--json]: each agent session's last state (dot cli hook
-# status), newest first; --json prints the records, one per line.
-hook_status() {
+# _hook_cutoff: sets H_CUT to the time 24 hours ago as the records write
+# it, so a string comparison finds the older ones: printf where bash has
+# $EPOCHSECONDS (5.0+), else GNU date, else BSD date (macOS /bin/bash 3.2).
+_hook_cutoff() {
+  if [[ -n "${EPOCHSECONDS:-}" ]]; then
+    TZ=UTC0 printf -v H_CUT '%(%Y-%m-%dT%H:%M:%SZ)T' "$((EPOCHSECONDS - 86400))"
+  else
+    H_CUT="$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -v-24H +%Y-%m-%dT%H:%M:%SZ)"
+  fi
+}
+
+# _hook_status_files [LIVE]: sets H_FILES to the sessions' state files;
+# with LIVE set, only sessions that are not gone and were heard from in
+# the last 24 hours.
+_hook_status_files() {
   local dir="${XDG_STATE_HOME:-$HOME/.local/state}/dot/cli/agents" f rec
-  local -a files=()
-  for f in "$dir"/*/*.json; do [[ -f "$f" ]] && files+=("$f"); done
-  if ((${#files[@]} == 0)); then
-    echo "No agent events recorded yet: an agent's hooks report them with 'dot cli hook run'."
+  H_FILES=()
+  [[ -z "${1:-}" ]] || _hook_cutoff
+  for f in "$dir"/*/*.json; do
+    [[ -f "$f" ]] || continue
+    if [[ -n "${1:-}" ]]; then
+      rec="$(cat "$f")"
+      [[ "$(_hook_field "$rec" state)" != gone && ! "$(_hook_field "$rec" time)" < "$H_CUT" ]] || continue
+    fi
+    H_FILES+=("$f")
+  done
+}
+
+# hook_status [--json] [--live]: each agent session's last state (dot cli
+# hook status; dot ai status adds --live), newest first; --json prints the
+# records, one per line, and nothing when there are none.
+hook_status() {
+  local json="" live="" a f rec
+  for a in "$@"; do
+    case "$a" in
+      --json) json=1 ;;
+      --live) live=1 ;;
+    esac
+  done
+  _hook_status_files "$live"
+  if ((${#H_FILES[@]} == 0)); then
+    [[ -n "$json" ]] && return 0
+    if [[ -n "$live" ]]; then
+      echo "No agent sessions in the last 24 hours."
+    else
+      echo "No agent events recorded yet: an agent's hooks report them with 'dot cli hook run'."
+    fi
     return 0
   fi
-  [[ "${1:-}" != --json ]] || {
-    cat "${files[@]}"
+  [[ -z "$json" ]] || {
+    cat "${H_FILES[@]}"
     return 0
   }
   printf '%-10s %-8s %-20s %s\n' AGENT STATE TIME SESSION
-  for f in "${files[@]}"; do
+  for f in "${H_FILES[@]}"; do
     rec="$(cat "$f")"
     printf '%s\t%-10s %-8s %-20s %s\n' "$(_hook_field "$rec" time)" "$(_hook_field "$rec" agent)" \
       "$(_hook_field "$rec" state)" "$(_hook_field "$rec" time)" "$(_hook_field "$rec" session)"

@@ -249,7 +249,13 @@ dot ai gateway serve [stop|status|logs|setup]  # local Claude gateway (start als
 dot ai cost show                     # spend report
 dot ai login [tool]                  # authenticate
 dot ai check                         # health-check fleet + gateway
+dot ai status [--json]               # each agent session of the last 24 h and its state
+dot ai watch                         # follow agents' states; notify when one is blocked
 ```
+
+`dot ai status` reads the state file each agent's hook writes (`dot cli hook install` wires the hooks), so it needs nothing running: one row per session heard from in the last 24 hours (agent, state, time, session), newest first, with ended sessions left out; `--json` prints the `agent-event.v1` records, one per line. Earlier, `dot ai status` was a deprecated name for `dot ai tools` (now `dot ai list`).
+
+`dot ai watch` runs in a terminal of its own. It listens on the socket the hooks send to, starts from the state files, prints a line each time an agent's state changes, and posts a desktop notification when a session becomes blocked on a permission prompt or a question, at most once per session every 30 seconds. It is part of the cockpit binary (`dot-ai-tui`, built when `DOTFILES_AI=1`); only one runs at a time, and the hooks never start it.
 
 Add `--style <name>` (architect, hardener, refactor) to `dot ai run` to steer a prompt.
 The top-level forms (`dot cl`, `dot claude`, `dot ai-setup`, `dot ai-query`) were removed in 0.2.538 and exit 127. A few old `dot ai` verbs (`dot ai dashboard`, `dot ai proxy`) still run with a deprecation notice. See [AI.md](../../AI.md) for the full guide.
