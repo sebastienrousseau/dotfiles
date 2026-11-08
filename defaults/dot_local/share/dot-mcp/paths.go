@@ -8,7 +8,9 @@
 package main
 
 import (
+	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -20,18 +22,37 @@ const rootMarker = "scripts/diagnostics/mcp-doctor.sh"
 // environment is the process environment as this server sees it, injected so
 // tests need not mutate the real one.
 type environment struct {
-	lookup func(string) (string, bool)
-	home   func() (string, error)
-	stat   func(string) (os.FileInfo, error)
+	lookup   func(string) (string, bool)
+	home     func() (string, error)
+	stat     func(string) (os.FileInfo, error)
+	lookPath func(string) (string, error)
+	isScript func(string) bool
 }
 
 // osEnvironment reads the real process environment.
 func osEnvironment() environment {
 	return environment{
-		lookup: os.LookupEnv,
-		home:   os.UserHomeDir,
-		stat:   os.Stat,
+		lookup:   os.LookupEnv,
+		home:     os.UserHomeDir,
+		stat:     os.Stat,
+		lookPath: exec.LookPath,
+		isScript: isScript,
 	}
+}
+
+// isScript reports whether the file at path starts with "#!". The dotfiles
+// CLI is a script; Graphviz installs a binary that is also named dot.
+func isScript(path string) bool {
+	f, err := os.Open(path)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+	head := make([]byte, 2)
+	if _, err := io.ReadFull(f, head); err != nil {
+		return false
+	}
+	return string(head) == "#!"
 }
 
 // get returns an environment variable, or "" when unset.
@@ -108,10 +129,28 @@ func (e environment) wellKnownPath(rel string) string {
 
 // dotBinary is the `dot` executable the tools shell out to. `dot mcp serve`
 // exports its own resolved path so the server calls the same CLI that launched
-// it; a bare "dot" from PATH is the fallback for a directly-launched binary.
+// it. A directly-launched binary takes the dot on PATH only when it is a
+// script (Graphviz installs a binary named dot), else the served checkout's
+// bin/dot, else the installed ~/.local/bin/dot; a bare "dot" is the last
+// resort, when none of those exists.
 func (e environment) dotBinary() string {
 	if v := e.get("DOT_MCP_DOT_BIN"); v != "" {
 		return v
+	}
+	if p, err := e.lookPath("dot"); err == nil && e.isScript(p) {
+		return p
+	}
+	var candidates []string
+	if root := e.repoRoot(); root != "" {
+		candidates = append(candidates, filepath.Join(root, "bin", "dot"))
+	}
+	if home, err := e.home(); err == nil && home != "" {
+		candidates = append(candidates, filepath.Join(home, ".local", "bin", "dot"))
+	}
+	for _, c := range candidates {
+		if e.exists(c) {
+			return c
+		}
 	}
 	return "dot"
 }
