@@ -150,14 +150,13 @@ jobs:
       # CycloneDX SBOM of the staged tree. security-release.yml emits
       # SPDX; both formats are attached because ecosystems differ in
       # which they consume.
+      - name: Set up syft and grype
+        uses: ./.github/actions/setup-anchore
+
       - name: Generate CycloneDX SBOM
-        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
-        with:
-          path: dot-${{ steps.ver.outputs.version }}
-          format: cyclonedx-json
-          output-file: dot-${{ steps.ver.outputs.version }}.cyclonedx.json
-          upload-release-assets: false
-          upload-artifact: false
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: syft scan "dir:dot-${VERSION}" -o "cyclonedx-json=dot-${VERSION}.cyclonedx.json"
 
       - name: Install cosign
         uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2

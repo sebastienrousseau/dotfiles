@@ -46,18 +46,17 @@ jobs:
           persist-credentials: false
           ref: ${{ inputs.release_tag || github.ref }}
 
+      - name: Set up syft and grype
+        uses: ./.github/actions/setup-anchore
+
       - name: Generate SBOM (SPDX)
-        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
-        with:
-          format: spdx-json
-          output-file: dotfiles-sbom.spdx.json
-          upload-release-assets: false
+        run: syft scan dir:. -o spdx-json=dotfiles-sbom.spdx.json
 
       - name: Calculate hash
         id: hash
         run: |
           sha256sum dotfiles-sbom.spdx.json > sbom.sha256
-          echo "hash=$(base64 -w 0 sbom.sha256)" >> $GITHUB_OUTPUT
+          echo "hash=$(base64 -w 0 sbom.sha256)" >> "$GITHUB_OUTPUT"
 
       # Cosign keyless signing of the SBOM (closes #876). Uses the
       # workflow's OIDC token to mint a short-lived certificate from

@@ -27,6 +27,15 @@ jobs:
         with:
           egress-policy: audit
 
+      - name: Checkout tooling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/actions
+
+      - name: Set up syft and grype
+        uses: ./.github/actions/setup-anchore
+
       - name: Checkout base branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -35,12 +44,7 @@ jobs:
           path: base
 
       - name: Generate base SBOM
-        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
-        with:
-          path: base
-          format: spdx-json
-          output-file: base-sbom.spdx.json
-          upload-release-assets: false
+        run: syft scan dir:base -o spdx-json=base-sbom.spdx.json
 
       - name: Checkout PR branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -50,12 +54,7 @@ jobs:
           path: pr
 
       - name: Generate PR SBOM
-        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
-        with:
-          path: pr
-          format: spdx-json
-          output-file: pr-sbom.spdx.json
-          upload-release-assets: false
+        run: syft scan dir:pr -o spdx-json=pr-sbom.spdx.json
 
       - name: Generate SBOM diff
         id: diff
@@ -193,12 +192,11 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Set up syft and grype
+        uses: ./.github/actions/setup-anchore
+
       - name: Generate SBOM
-        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
-        with:
-          format: spdx-json
-          output-file: pr-sbom.spdx.json
-          upload-release-assets: false
+        run: syft scan dir:. -o spdx-json=pr-sbom.spdx.json
 
       - name: Scan SBOM for CVEs with Grype
         # Gate policy (closes #852):
@@ -208,14 +206,13 @@ jobs:
         #     that hasn't yet reached the protected branch.
         # severity-cutoff is set to `high` (was: critical) so RCE-class
         # vulnerabilities no longer slip through silently.
-        uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
-        id: grype
-        with:
-          sbom: pr-sbom.spdx.json
-          fail-build: ${{ github.base_ref == 'main' && 'true' || 'false' }}
-          severity-cutoff: high
-          output-format: json
-          output-file: results.json
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          gate=()
+          [[ "$BASE_REF" == main ]] && gate=(--fail-on high)
+          grype sbom:pr-sbom.spdx.json -o json --file results.json "${gate[@]}"
 
       - name: Upload CVE scan results
         if: always()

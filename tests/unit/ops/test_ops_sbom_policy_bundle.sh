@@ -18,7 +18,7 @@ test_start "sbom_bundle_script_exists"
 assert_file_exists "$BUNDLE_SCRIPT" "package-policy-bundles.sh should exist"
 
 test_start "sbom_workflow_has_syft_step"
-assert_file_contains "$WORKFLOW_FILE" "download-syft" "workflow should install syft"
+assert_file_contains "$WORKFLOW_FILE" "uses: ./.github/actions/setup-anchore" "workflow should install syft"
 
 test_start "sbom_workflow_has_verification_step"
 assert_file_contains "$WORKFLOW_FILE" "Verify SBOM presence" "workflow should verify SBOM"
