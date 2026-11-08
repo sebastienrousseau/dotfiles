@@ -85,9 +85,15 @@ cmd_mcp_serve() {
   repo_root="$(require_source_dir)"
 
   # Tell the server which tree it is serving, and which CLI to shell out to,
-  # so it never has to guess either.
+  # so it never has to guess either. The dot on PATH counts only when it is
+  # a script: Graphviz installs a binary named dot.
   export DOT_MCP_REPO_ROOT="$repo_root"
-  export DOT_MCP_DOT_BIN="${DOT_MCP_DOT_BIN:-$(command -v dot || echo dot)}"
+  if [[ -z "${DOT_MCP_DOT_BIN:-}" ]]; then
+    DOT_MCP_DOT_BIN="$(command -v dot 2>/dev/null || true)"
+    [[ -n "$DOT_MCP_DOT_BIN" && "$(head -c 2 "$DOT_MCP_DOT_BIN" 2>/dev/null)" == '#!' ]] ||
+      DOT_MCP_DOT_BIN="$repo_root/bin/dot"
+  fi
+  export DOT_MCP_DOT_BIN
 
   if bin="$(command -v dot-mcp 2>/dev/null)"; then
     exec "$bin" serve "$@"
