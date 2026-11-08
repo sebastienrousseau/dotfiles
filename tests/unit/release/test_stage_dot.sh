@@ -46,6 +46,15 @@ rc=0
 HOME="$entry_home" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 DOTFILES_SHOW_LOGO=0 \
   "$entry_root/usr/local/bin/dot" fleet policy show </dev/null >"$entry_home/out" 2>&1 || rc=$?
 assert_equals "0" "$rc" "dot fleet policy show finds agent-profiles.json from a make install"
+# dot doctor times shell startup with scripts/diagnostics/../../benches/bench.sh.
+# Without benches/ in the install, bash exits 127 and doctor reported
+# "nothing measured (hyperfine or jq failed)" on every packaged install.
+# With no hyperfine on PATH the bench runs and exits 2: nothing measured.
+test_start "stage_ships_the_startup_bench"
+rc=0
+PATH=/usr/bin:/bin bash "$entry_root/usr/local/lib/dotfiles/scripts/diagnostics/../../benches/bench.sh" \
+  </dev/null >/dev/null 2>&1 || rc=$?
+assert_equals "2" "$rc" "doctor's startup bench runs from a make install"
 rm -rf "$entry_home" "$entry_root"
 
 test_start "stage_make_install_round_trip"
