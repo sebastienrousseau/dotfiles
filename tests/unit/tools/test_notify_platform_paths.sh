@@ -74,4 +74,33 @@ nf_run
 assert_contains "Notification:" "$NF_OUT" \
   "a bare invocation should still carry the default title"
 
+# ── 5. Text is data, never script ──────────────────────────────────────────
+# A title or message with a quote in it used to end the AppleScript (or
+# PowerShell) string and run what followed. Each now reaches the notifier as
+# its own argument, and no script source carries it.
+argv_stub() {
+  cat >"$WORK/stubs/$1" <<'EOF'
+#!/bin/sh
+for a in "$@"; do printf '[%s]\n' "$a"; done
+EOF
+  chmod +x "$WORK/stubs/$1"
+}
+EVIL='x" & (do shell script "touch /tmp/pwned") & "'
+test_start "notify_passes_text_to_osascript_as_arguments"
+nf_uname Darwin
+argv_stub osascript
+nf_run "T'itle" "$EVIL"
+assert_contains "[$EVIL]" "$NF_OUT" "the message is one argument of its own"
+assert_contains "[T'itle]" "$NF_OUT" "and so is the title"
+assert_equals "1" "$(grep -c 'pwned' <<<"$NF_OUT")" "no script line carries it"
+
+test_start "notify_passes_text_to_powershell_through_the_environment"
+nf_uname Linux
+argv_stub powershell.exe
+printf '#!/bin/sh\nexit 0\n' >"$WORK/stubs/grep" && chmod +x "$WORK/stubs/grep"
+nf_run "Build" "it's \$(done)"
+assert_equals "0" "$(grep -c "it's" <<<"$NF_OUT")" "the message is not in the command"
+assert_contains "\$env:NOTIFY_MESSAGE" "$NF_OUT" "which reads it from the environment"
+rm -f "$WORK/stubs/grep" "$WORK/stubs/powershell.exe"
+
 print_summary
