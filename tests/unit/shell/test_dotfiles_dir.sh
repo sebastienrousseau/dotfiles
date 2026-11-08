@@ -17,11 +17,12 @@ WORK="$(mktemp -d "${TMPDIR:-/tmp}/dot-dotfiles-dir.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 ALIASES="$REPO_ROOT/defaults/.chezmoitemplates/aliases"
 
-# render TEMPLATE: the template as chezmoi renders it from this checkout.
+# render TEMPLATE [HOME]: the template as chezmoi renders it from this
+# checkout, for a home directory that does not hold it unless HOME says so.
 render() {
   printf '{}\n' >"$WORK/chezmoi.json"
-  (cd "$WORK" && chezmoi --config "$WORK/chezmoi.json" --source "$REPO_ROOT/defaults" \
-    --destination "$WORK/home" --cache "$WORK/cache" \
+  (cd "$WORK" && HOME="${2:-$WORK/home}" chezmoi --config "$WORK/chezmoi.json" \
+    --source "$REPO_ROOT/defaults" --destination "$WORK/home" --cache "$WORK/cache" \
     --persistent-state "$WORK/state.boltdb" execute-template <"$1")
 }
 
@@ -40,6 +41,25 @@ if command -v chezmoi >/dev/null 2>&1; then
     render "$REPO_ROOT/defaults/dot_config/fish/conf.d/env.fish.tmpl" >"$WORK/env.fish"
     got="$(env -u DOTFILES_DIR HOME="$WORK/home" fish --no-config -c 'source $argv[1] >/dev/null 2>&1; printf %s "$DOTFILES_DIR"' "$WORK/env.fish")"
     assert_equals "$REPO_ROOT" "$got" "fish sets the same checkout"
+  fi
+
+  # A checkout under the home directory is written as "$HOME"/<path>: the
+  # rendered files hold no /Users/<name> or /home/<name> path, which dot
+  # doctor's portability check reports, and they follow HOME.
+  test_start "a_checkout_under_home_is_written_from_HOME"
+  home="$(dirname "$REPO_ROOT")"
+  rel="${REPO_ROOT#"$home"}"
+  render "$REPO_ROOT/defaults/dot_config/shell/00-core-paths.sh.tmpl" "$home" >"$WORK/home-paths.sh"
+  assert_equals "0" "$(grep -c "DOTFILES_DIR=.*$REPO_ROOT" "$WORK/home-paths.sh")" "bash and zsh do not write the checkout's absolute path"
+  got="$(env -u DOTFILES_DIR HOME="$home" bash -c 'source "$1" >/dev/null 2>&1; printf %s "$DOTFILES_DIR"' _ "$WORK/home-paths.sh")"
+  assert_equals "$REPO_ROOT" "$got" "bash and zsh still export the checkout"
+  got="$(env -u DOTFILES_DIR HOME="$WORK/moved" bash -c 'source "$1" >/dev/null 2>&1; printf %s "$DOTFILES_DIR"' _ "$WORK/home-paths.sh")"
+  assert_equals "$WORK/moved$rel" "$got" "under whatever HOME is"
+  if command -v fish >/dev/null 2>&1; then
+    render "$REPO_ROOT/defaults/dot_config/fish/conf.d/env.fish.tmpl" "$home" >"$WORK/home-env.fish"
+    assert_equals "0" "$(grep -c "DOTFILES_DIR.*$REPO_ROOT" "$WORK/home-env.fish")" "fish does not write it"
+    got="$(env -u DOTFILES_DIR HOME="$home" fish --no-config -c 'source $argv[1] >/dev/null 2>&1; printf %s "$DOTFILES_DIR"' "$WORK/home-env.fish")"
+    assert_equals "$REPO_ROOT" "$got" "fish still sets the checkout"
   fi
 
   if command -v zsh >/dev/null 2>&1; then
