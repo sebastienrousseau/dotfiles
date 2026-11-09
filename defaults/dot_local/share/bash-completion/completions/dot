@@ -41,7 +41,7 @@ _dot() {
     'ai cost') words='show' ;;
     'ai gateway') words='serve show' ;;
     'ai inventory') words='show' ;;
-    'ai pattern') words='list show edit' ;;
+    'ai pattern') words='list show edit export' ;;
     'attest') words='show export verify' ;;
     'cli') words='completion registry hook list show install update remove verify new' ;;
     'cli completion') words='show' ;;
@@ -190,6 +190,10 @@ _dot() {
       ;;
     'ai pattern edit' | 'ai pattern edit'\ *)
       flags='--help'
+      ;;
+    'ai pattern export' | 'ai pattern export'\ *)
+      flags='--help --hc --agent'
+      valflags='--agent'
       ;;
     'ai pattern list' | 'ai pattern list'\ *)
       flags='--help'

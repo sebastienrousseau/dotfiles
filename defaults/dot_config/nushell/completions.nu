@@ -381,6 +381,7 @@ def "nu-complete dot ai pattern" [] {
         { value: "list", description: "Prompt patterns" }
         { value: "show", description: "One prompt pattern" }
         { value: "edit", description: "Edit a prompt pattern" }
+        { value: "export", description: "Write patterns as herdr-core templates" }
     ]
 }
 export extern "dot ai pattern" [
@@ -390,6 +391,13 @@ export extern "dot ai pattern" [
 ]
 
 export extern "dot ai pattern edit" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot ai pattern export" [
+    --hc # To ~/.config/herdr-core/templates (required)
+    --agent: string # Agent the template runs (default claude)
     --help(-h) # Show help
     ...rest: string
 ]

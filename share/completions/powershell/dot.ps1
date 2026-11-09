@@ -15,7 +15,7 @@ $script:DotChildren = @{
     'ai cost' = @(, @('show', 'Spend by agent and model'))
     'ai gateway' = @(@('serve', 'Run the gateway in the foreground'), @('show', 'Gateway statistics'))
     'ai inventory' = @(, @('show', 'Agents, versions and config'))
-    'ai pattern' = @(@('list', 'Prompt patterns'), @('show', 'One prompt pattern'), @('edit', 'Edit a prompt pattern'))
+    'ai pattern' = @(@('list', 'Prompt patterns'), @('show', 'One prompt pattern'), @('edit', 'Edit a prompt pattern'), @('export', 'Write patterns as herdr-core templates'))
     'attest' = @(@('show', 'The workstation attestation'), @('export', 'Write attestation evidence'), @('verify', 'Verify evidence'))
     'cli' = @(@('completion', 'shell completion scripts'), @('registry', 'the plugin registry'), @('hook', 'agent hook events (agent-event.v1)'), @('list', 'Installed plugins'), @('show', 'One plugin in detail'), @('install', 'Install a plugin'), @('update', 'Update dot and its plugins'), @('remove', 'Remove a plugin'), @('verify', 'Verify plugin provenance'), @('new', 'Create a plugin from the template'))
     'cli completion' = @(, @('show', 'Print a completion script'))
@@ -100,6 +100,7 @@ $script:DotCommands = @{
     'ai list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai login' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai pattern edit' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai pattern export' = @{ Flags = @(@('--help', 'Show help'), @('--hc', 'To ~/.config/herdr-core/templates (required)'), @('--agent', 'Agent the template runs (default claude)')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @('--agent') }
     'ai pattern list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai pattern show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai run' = @{ Flags = @(@('--help', 'Show help'), @('--style', 'Steering pattern (--pattern is the old name)'), @('-p', 'Steering pattern (--pattern is the old name)')); Values = @('claude', 'codex', 'copilot', 'goose', 'crush', 'amp', 'cursor-agent', 'grok', 'kimi', 'agy', 'kiro', 'sgpt', 'ollama', 'opencode', 'aider', 'autohand', 'vibe', 'qwen', 'zai'); Files = $false; PatternFlags = @('--style', '-p'); ValueFlags = @() }

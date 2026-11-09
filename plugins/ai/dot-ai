@@ -26,6 +26,7 @@ ai_two_words() {
     "pattern list") exec bash "$_AI_DIR/libexec/patterns.sh" list "${@:3}" ;;
     "pattern show") exec bash "$_AI_DIR/libexec/patterns.sh" view "${@:3}" ;;
     "pattern edit") exec bash "$_AI_DIR/libexec/patterns.sh" edit "${@:3}" ;;
+    "pattern export") exec bash "$_AI_DIR/libexec/patterns.sh" export "${@:3}" ;;
   esac
 }
 

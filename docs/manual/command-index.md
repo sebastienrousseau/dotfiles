@@ -49,6 +49,7 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot ai inventory show` | Agents, versions and config *(planned)* |
 | `dot ai pattern show` | One prompt pattern |
 | `dot ai pattern edit` | Edit a prompt pattern |
+| `dot ai pattern export` | Write patterns as herdr-core templates |
 | `dot ai send` | Give a background agent text and submit it |
 | `dot ai wait` | Wait until a background agent stops working |
 | `dot attest show` | The workstation attestation |

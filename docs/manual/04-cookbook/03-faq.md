@@ -102,7 +102,9 @@ defined in `defaults/dot_config/dotfiles/agent-profiles.json`;
 `dot agent mode list` shows them and `dot agent mode set <name>` switches.
 Prompt patterns (architect, hardener and others) are Markdown files in
 `defaults/dot_config/ai/patterns/`: add one there and it appears in
-`dot ai pattern list`.
+`dot ai pattern list`. Add a one-line
+`defaults/dot_config/herdr-core/templates/<name>.md.tmpl` beside it too, so
+`hc run <name>` gets the same role; the tests fail until it exists.
 
 ## Fleet
 

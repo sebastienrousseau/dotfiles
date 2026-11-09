@@ -155,6 +155,22 @@ effect = "write"
 lock = false
 summary = "Edit a prompt pattern"
 
+[[commands]]
+object = "pattern"
+verb = "export"
+effect = "write"
+lock = false
+summary = "Write patterns as herdr-core templates"
+
+[[commands.flags]]
+long = "hc"
+summary = "To ~/.config/herdr-core/templates (required)"
+
+[[commands.flags]]
+long = "agent"
+value = "name"
+summary = "Agent the template runs (default claude)"
+
 [[aliases]]
 name = "ai-setup"
 target = "ai install --interactive"

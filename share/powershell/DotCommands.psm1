@@ -109,6 +109,18 @@ function Edit-DotSecret {
     dot secret edit @Arguments
 }
 
+function Export-DotAiPattern {
+    <#
+    .SYNOPSIS
+    Write patterns as herdr-core templates
+    .DESCRIPTION
+    Runs `dot ai pattern export`: Write patterns as herdr-core templates. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot ai pattern export @Arguments
+}
+
 function Export-DotAttest {
     <#
     .SYNOPSIS
@@ -1583,6 +1595,7 @@ Export-ModuleMember -Function @(
     'Edit-DotAiPattern'
     'Edit-DotConfig'
     'Edit-DotSecret'
+    'Export-DotAiPattern'
     'Export-DotAttest'
     'Export-DotConfig'
     'Export-DotSecret'

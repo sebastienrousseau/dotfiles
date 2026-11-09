@@ -429,6 +429,24 @@
      "lock": false
     },
     {
+     "spelling": "ai pattern export",
+     "effect": "write",
+     "summary": "Write patterns as herdr-core templates",
+     "built": true,
+     "flags": [
+      {
+       "long": "hc",
+       "summary": "To ~/.config/herdr-core/templates (required)"
+      },
+      {
+       "long": "agent",
+       "value": "name",
+       "summary": "Agent the template runs (default claude)"
+      }
+     ],
+     "lock": false
+    },
+    {
      "spelling": "ai send",
      "effect": "write",
      "summary": "Give a background agent text and submit it",

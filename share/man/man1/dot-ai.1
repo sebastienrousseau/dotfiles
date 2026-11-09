@@ -92,6 +92,17 @@ One prompt pattern. Effect: read. Runs \fBdot\-ai pattern show\fR, the plugin's 
 .B dot ai pattern edit
 Edit a prompt pattern. Effect: write. Runs \fBdot\-ai pattern edit\fR, the plugin's entry.
 .TP
+.B dot ai pattern export
+Write patterns as herdr\-core templates. Effect: write. Runs \fBdot\-ai pattern export\fR, the plugin's entry.
+.RS
+.TP
+.B \-\-hc
+To ~/.config/herdr\-core/templates (required)
+.TP
+.B \-\-agent \fIname\fR
+Agent the template runs (default claude)
+.RE
+.TP
 .B dot ai send
 Give a background agent text and submit it. Effect: write. Runs \fBdot\-ai send\fR, the plugin's entry.
 .TP

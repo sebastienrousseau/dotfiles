@@ -67,6 +67,7 @@ Install, route and run coding agents.
 | `dot ai cost show` | Spend by agent and model | `dot ai cost` |
 | `dot ai pattern show` | One prompt pattern | `dot patterns view` |
 | `dot ai pattern edit` | Edit a prompt pattern | `dot patterns edit` |
+| `dot ai pattern export` | Write patterns as herdr-core templates |  |
 
 ### dot attest
 

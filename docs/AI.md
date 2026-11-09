@@ -93,6 +93,8 @@ dot ai run agy --style hardener "audit my ssh config"
 
 The bridge also injects system details (OS, architecture, date) so the model has the context it needs. Quick aliases ship for the common combinations: `dcla` (Claude + architect), `dagyh` (Antigravity + hardener), `dkir` (Kiro + refactor).
 
+The same patterns are herdr-core templates. chezmoi deploys the shipped ones to `~/.config/herdr-core/templates/<name>.md`, so `hc run architect "<task>"` starts Claude Code with that role on every host. `dot ai pattern export --hc` writes them, and any pattern you added, again; `--agent codex` runs them with another agent (one without dot's hooks gets `ready: quiet`).
+
 ## Running tools
 
 ```bash

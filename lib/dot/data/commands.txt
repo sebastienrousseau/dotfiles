@@ -60,6 +60,7 @@ cmd|ai gateway show||read|Gateway statistics
 cmd|ai inventory show||read|Agents, versions and config
 cmd|ai pattern show|@ai pattern show|read|One prompt pattern
 cmd|ai pattern edit|@ai pattern edit|write|Edit a prompt pattern
+cmd|ai pattern export|@ai pattern export|write|Write patterns as herdr-core templates
 cmd|ai send|@ai send|write|Give a background agent text and submit it
 cmd|ai wait|@ai wait|read|Wait until a background agent stops working
 dom|attest|show|@attest|attestation and verification
@@ -268,6 +269,8 @@ flag|ai start|cwd||dir|With --bg: the directory it starts in
 arg|ai start|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
 flag|ai run|style|p|pattern|Steering pattern (--pattern is the old name)
 arg|ai run|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
+flag|ai pattern export|hc|||To ~/.config/herdr-core/templates (required)
+flag|ai pattern export|agent||name|Agent the template runs (default claude)
 flag|ai wait|timeout||seconds|Stop waiting after this long (default 180)
 flag|attest show|json|j||Print JSON
 flag|attest show|write|w||Write the attestation to a file
@@ -407,6 +410,7 @@ nolock|ai start||
 nolock|ai run||
 nolock|ai login||
 nolock|ai pattern edit||
+nolock|ai pattern export||
 nolock|ai send||
 nolock|cli hook run||
 nolock|config edit||

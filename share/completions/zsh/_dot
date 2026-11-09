@@ -33,7 +33,7 @@ _dot() {
     'ai cost') kids_=('show:Spend by agent and model') ;;
     'ai gateway') kids_=('serve:Run the gateway in the foreground' 'show:Gateway statistics') ;;
     'ai inventory') kids_=('show:Agents, versions and config') ;;
-    'ai pattern') kids_=('list:Prompt patterns' 'show:One prompt pattern' 'edit:Edit a prompt pattern') ;;
+    'ai pattern') kids_=('list:Prompt patterns' 'show:One prompt pattern' 'edit:Edit a prompt pattern' 'export:Write patterns as herdr-core templates') ;;
     'attest') kids_=('show:The workstation attestation' 'export:Write attestation evidence' 'verify:Verify evidence') ;;
     'cli') kids_=('completion:shell completion scripts' 'registry:the plugin registry' 'hook:agent hook events (agent-event.v1)' 'list:Installed plugins' 'show:One plugin in detail' 'install:Install a plugin' 'update:Update dot and its plugins' 'remove:Remove a plugin' 'verify:Verify plugin provenance' 'new:Create a plugin from the template') ;;
     'cli completion') kids_=('show:Print a completion script') ;;
@@ -182,6 +182,10 @@ _dot() {
       ;;
     'ai pattern edit' | 'ai pattern edit'\ *)
       flags_=('--help:Show help')
+      ;;
+    'ai pattern export' | 'ai pattern export'\ *)
+      flags_=('--help:Show help' '--hc:To ~/.config/herdr-core/templates (required)' '--agent:Agent the template runs (default claude)')
+      valflags_=(--agent)
       ;;
     'ai pattern list' | 'ai pattern list'\ *)
       flags_=('--help:Show help')
