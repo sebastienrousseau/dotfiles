@@ -7,7 +7,8 @@
 //	dot-ai-tui cost [--by agent|host|day|model|session] [--days N] [--json]
 //	dot-ai-tui cost --session ID [--days N] [--json]
 //
-// --json prints ai/cost-report.v1 (schemas/cli/ai-cost-report.v1.schema.json).
+// --json prints ai/cost-report.v1 (schemas/cli/ai-cost-report.v1.schema.json);
+// --tsv prints a key<TAB>cost line per group, for dot ai status.
 package main
 
 import (
@@ -28,7 +29,7 @@ const costUsage = "usage: dot ai cost show [--by agent|host|day|model|session] [
 type costOpts struct {
 	by, session string
 	days        int
-	json        bool
+	json, tsv   bool
 }
 
 // costRowJSON: one group of an ai/cost-report.v1 report. InputTokens counts
@@ -80,6 +81,8 @@ func parseCostArgs(args []string) (costOpts, error) {
 		switch a := args[i]; {
 		case a == "--json":
 			o.json = true
+		case a == "--tsv":
+			o.tsv = true
 		case costFlags[a] != nil && i+1 < len(args):
 			i++
 			if !costFlags[a](&o, args[i]) {
@@ -122,6 +125,12 @@ func costReport(rt costRoots, now time.Time, loc *time.Location, host string, ar
 		sessions, rep.Session, rep.Agent = []*sessionCost{sc}, sc.Session, sc.Agent
 	}
 	groupCost(&rep, sessions, from)
+	if o.tsv {
+		for _, r := range rep.Rows {
+			fmt.Fprintf(out, "%s\t%.6f\n", oneLine(r.Key), r.CostUSD)
+		}
+		return nil
+	}
 	if o.json {
 		return json.NewEncoder(out).Encode(rep)
 	}

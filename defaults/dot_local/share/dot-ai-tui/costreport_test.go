@@ -206,3 +206,15 @@ func TestRunDispatchesCost(t *testing.T) {
 		t.Errorf("run cost: %v", err)
 	}
 }
+
+// --tsv: key<TAB>cost per row, for dot ai status's COST column.
+func TestCostTSV(t *testing.T) {
+	out, err := runReport(t, reportFixture(t), "--by", "session", "--tsv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "claude/aaaa1111-0000\t14.000000\nclaude/bbbb2222-0000\t2.000000\ncodex/th-1\t0.500000\n"
+	if out != want {
+		t.Fatalf("want %q, got %q", want, out)
+	}
+}

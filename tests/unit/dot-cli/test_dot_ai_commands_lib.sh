@@ -404,4 +404,17 @@ XDG_STATE_HOME="$DOTFILES_COV_TMPDIR/state" ai cmd_ai_agent_status --json
 assert_equals 0 "$RC" "rc"
 out_has '"session":"lib-1"' "the live record is printed"
 
+test_start "status_shows_each_sessions_cost"
+cat >"$BIN/dot-ai-tui" <<STUB
+#!$REAL_BASH
+printf 'dot-ai-tui %s\\n' "\$*" >>"\$AI_CALLS"
+printf 'codex/lib-1\\t1.5\\n'
+STUB
+chmod +x "$BIN/dot-ai-tui"
+XDG_STATE_HOME="$DOTFILES_COV_TMPDIR/state" ai cmd_ai_agent_status
+assert_equals 0 "$RC" "rc"
+called "dot-ai-tui cost --by session --tsv"
+out_has '$1.50' "the session's cost"
+rm -f "$BIN/dot-ai-tui"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

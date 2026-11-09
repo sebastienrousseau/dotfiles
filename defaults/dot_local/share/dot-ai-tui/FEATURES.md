@@ -46,6 +46,7 @@ Keep the last column a list of backticked function names.
 | cost | The gateway's usage logs (`usage*.jsonl`, set-aside ones included) count at the CLI's own cost per request, else the model's price | each request | `TestGatewayLogIsCounted` |
 | cost | Other delegates' runs in the run log (`dotfiles-ai.db`) count, one session each; Claude and Codex runs there are left to their transcripts | each run | `TestRunLogDelegatesAreCounted` `TestNoRunLogIsNoRows` `TestSinceIsDays` |
 | cost | Token counts of a billion and more read as `1.5B` | any table | `TestHumanTokCountsBillions` |
+| cost | `--tsv` prints `agent/session<TAB>usd` per group, for `dot ai status`'s COST column | `dot ai status` | `TestCostTSV` |
 
 ## Data gathering
 

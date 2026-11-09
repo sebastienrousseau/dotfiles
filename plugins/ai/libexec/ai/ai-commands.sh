@@ -331,9 +331,19 @@ cmd_ai_draft() {
 
 # cmd_ai_agent_status [--json] — dot ai status: each agent session heard
 # from in the last 24 h and its state, from the files each agent's hook
-# writes (dot cli hook install wires them); no watcher needed.
+# writes (dot cli hook install wires them); no watcher needed. With the
+# cockpit binary, the table has each session's cost (dot ai cost show).
 cmd_ai_agent_status() {
-  bash "${BASH_SOURCE[0]%/*}/../../../cli/libexec/hook.sh" --status --live "$@"
+  local hook="${BASH_SOURCE[0]%/*}/../../../cli/libexec/hook.sh" costs rc=0
+  if [[ " $* " == *" --json "* ]] || ! has_command dot-ai-tui; then
+    bash "$hook" --status --live "$@"
+    return
+  fi
+  costs="$(mktemp "${TMPDIR:-/tmp}/dot-ai-costs.XXXXXX")" || return 1
+  dot-ai-tui cost --by session --tsv >"$costs" 2>/dev/null || :
+  bash "$hook" --status --live --costs "$costs" "$@" || rc=$?
+  rm -f "$costs"
+  return "$rc"
 }
 
 # cmd_ai_watch — dot ai watch: the agent-event listener in the cockpit
