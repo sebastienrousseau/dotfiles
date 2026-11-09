@@ -32,7 +32,7 @@ done
 cat >"$WORK/claude" <<'EOF'
 #!/bin/sh
 cat >/dev/null
-printf '%s\n' '{"type":"result","is_error":false,"result":"hi","usage":{"input_tokens":1000,"output_tokens":20}}'
+printf '%s\n' '{"type":"result","is_error":false,"result":"hi","total_cost_usd":0.0125,"usage":{"input_tokens":1000,"output_tokens":20}}'
 EOF
 chmod +x "$WORK/claude"
 PORT="$(python3 -c 'import socket;s=socket.socket();s.bind(("127.0.0.1",0));print(s.getsockname()[1]);s.close()')"
@@ -72,9 +72,10 @@ assert_contains "requests     3, 0 errors, 1 streamed" "$OUT" "its requests"
 assert_contains "tokens       3000 in, 60 out" "$OUT" "its tokens"
 assert_contains "images       0" "$OUT" "images"
 assert_contains "tool calls   0" "$OUT" "tool calls"
-assert_contains 'cost         $0.0051 estimated; today $0.0051 of $5.00' "$OUT" "its cost against the budget"
-assert_contains 'haiku        2 requests, $0.0018' "$OUT" "per model"
-assert_contains 'sonnet       1 request, $0.0033' "$OUT" "one request is singular"
+# Each request costs what the CLI reports for it (total_cost_usd).
+assert_contains 'cost         $0.0375 estimated; today $0.0375 of $5.00' "$OUT" "its cost against the budget"
+assert_contains 'haiku        2 requests, $0.0250' "$OUT" "per model"
+assert_contains 'sonnet       1 request, $0.0125' "$OUT" "one request is singular"
 
 test_start "json_is_the_usage_report"
 show --json

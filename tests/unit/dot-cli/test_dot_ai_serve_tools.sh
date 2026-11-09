@@ -4,8 +4,9 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 # Runs the Python tests for images and tool calls through the local AI
 # gateway (dot-ai-serve, plan P1.2): request shaping, the MCP stub that
-# lists the client's tools, both endpoints and the policy check. See
-# dot_ai_serve_shape_units.py and dot_ai_serve_tools_units.py.
+# lists the client's tools, both endpoints and the policy check, and what a
+# request costs (P1.3). See dot_ai_serve_shape_units.py,
+# dot_ai_serve_tools_units.py and dot_ai_serve_meter_units.py.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
@@ -18,7 +19,8 @@ if ! command -v python3 >/dev/null 2>&1; then
 fi
 
 test_start "dot_ai_serve_images_and_tools"
-out="$(cd "$REPO_ROOT" && python3 "$SCRIPT_DIR/dot_ai_serve_shape_units.py" 2>&1 && python3 "$SCRIPT_DIR/dot_ai_serve_tools_units.py" 2>&1)"
+out="$(cd "$REPO_ROOT" && python3 "$SCRIPT_DIR/dot_ai_serve_shape_units.py" 2>&1 && python3 "$SCRIPT_DIR/dot_ai_serve_tools_units.py" 2>&1 &&
+  python3 "$SCRIPT_DIR/dot_ai_serve_meter_units.py" 2>&1)"
 rc=$?
 if [[ "$rc" -eq 0 ]]; then
   assert_exit_code 0 "true"

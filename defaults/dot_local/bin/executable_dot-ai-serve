@@ -135,9 +135,10 @@ MODELS = [
     "claude-haiku-4-5-20251001",
 ]
 
-# Per-million-token prices (USD) for rough cost metering, keyed by the family
-# substring of the resolved model. Override with DOT_AI_PRICING (JSON).
-PRICING = {"opus": (15.0, 75.0), "sonnet": (3.0, 15.0), "haiku": (0.80, 4.0)}
+# Per-million-token prices (USD) of the current models (Opus 5.5, Sonnet 5.5,
+# Haiku 5.5), keyed by the family substring of the resolved model, for a
+# request the CLI reports no cost for. Override with DOT_AI_PRICING (JSON).
+PRICING = {"opus": (4.0, 20.0), "sonnet": (2.0, 10.0), "haiku": (0.10, 0.50)}
 try:
     PRICING.update(
         {k: tuple(v) for k, v in json.loads(os.environ.get("DOT_AI_PRICING", "") or "{}").items()}
@@ -529,16 +530,18 @@ class Handler(BaseHTTPRequestHandler):
         args = (run_model, shaped.system, shaped.prompt, shaped.images, shaped.tools)
         if stream:
 
+            done = {}
+
             def on_done(inp, out, err):
-                record(run_model, inp, out, True, err)
+                record(run_model, inp, out, True, err, done.get("usage"))
 
             sse = anthropic_sse if protocol == "anthropic" else openai_sse
-            return self._send_sse(sse(model, _counted(stream_claude(*args)), on_done))
+            return self._send_sse(sse(model, _counted(stream_claude(*args), done), on_done))
 
         text, usage, err, calls = run_claude(*args)
         _count("tool_calls", len(calls))
         inp, out = _usage_pair(usage)
-        record(run_model, inp, out, False, err)
+        record(run_model, inp, out, False, err, usage)
         if err:
             return self._error(502, f"claude engine: {err}")
         build = anthropic_response if protocol == "anthropic" else openai_response
@@ -589,11 +592,14 @@ def policy_refusal(run_model, tokens):
     return f"dot ai policy: {path} is set but dot-policy is missing or failed; every request is refused"
 
 
-def _counted(gen):
-    """The engine's events, counting the tool calls among them."""
+def _counted(gen, done):
+    """The engine's events, counting the tool calls among them; the turn's
+    usage is left in done["usage"]."""
     for item in gen:
         if item[0] == "tool":
             _count("tool_calls", 1)
+        elif item[0] == "done":
+            done["usage"] = item[1]
         yield item
 
 

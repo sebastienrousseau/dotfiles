@@ -58,9 +58,13 @@ class Meter:
         with self.lock:
             self.metrics[name] += n
 
-    def record(self, model, inp, out, streamed, error):
-        """Fold one request into the counters and the day's spend."""
-        cost = self.estimate(model, inp, out)
+    def record(self, model, inp, out, streamed, error, usage=None):
+        """Fold one request into the counters and the day's spend. Its cost
+        is the CLI's own figure (usage["cost_usd"]) when it gave one, else
+        the price table's."""
+        cost = (usage or {}).get("cost_usd")
+        if not isinstance(cost, float):
+            cost = self.estimate(model, inp, out)
         m = self.metrics
         with self.lock:
             m["requests"] += 1

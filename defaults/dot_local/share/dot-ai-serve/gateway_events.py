@@ -20,6 +20,7 @@ class EventReader:
         self.usage = {}
         self.error = None
         self.calls = []
+        self.model = ""  # the model's own id, from its messages
 
     def feed(self, evt):
         """(events for the client, whether the engine should stop now)."""
@@ -38,6 +39,7 @@ class EventReader:
         return [("delta", delta)] if delta else []
 
     def _assistant(self, message):
+        self.model = message.get("model") or self.model
         out, cur = [], self.text
         for block in message.get("content") or []:
             if block.get("type") == "text":
@@ -57,11 +59,21 @@ class EventReader:
             return [], False
         if (event.get("delta") or {}).get("stop_reason") != "tool_use":
             return [], False
-        self.usage = event.get("usage") or {}
+        self._finish(event.get("usage"), None)
         return [], True
 
+    def _finish(self, usage, cost):
+        """The turn's usage, with the model's id and, when the CLI reported
+        one, its own cost for the run (cost_usd); only the gateway's meter
+        reads those two."""
+        self.usage = dict(usage or {})
+        if self.model:
+            self.usage["model"] = self.model
+        if isinstance(cost, (int, float)) and not isinstance(cost, bool) and cost >= 0:
+            self.usage["cost_usd"] = float(cost)
+
     def _result(self, evt):
-        self.usage = evt.get("usage", {}) or {}
+        self._finish(evt.get("usage"), evt.get("total_cost_usd"))
         if evt.get("is_error"):
             self.error = evt.get("result") or "claude reported an error"
             return []
