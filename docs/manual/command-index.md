@@ -49,6 +49,7 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot ai inventory show` | Agents, versions and config *(planned)* |
 | `dot ai pattern show` | One prompt pattern |
 | `dot ai pattern edit` | Edit a prompt pattern |
+| `dot ai policy show` | The AI policy rules in force for an agent |
 | `dot ai policy check` | Validate the AI policy and name the active mode |
 | `dot ai pattern export` | Write patterns as herdr-core templates |
 | `dot ai send` | Give a background agent text and submit it |

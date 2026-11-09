@@ -301,6 +301,18 @@ function Get-DotAiPattern {
     if ($Name) { dot ai pattern show $Name @Arguments } else { dot ai pattern list @Arguments }
 }
 
+function Get-DotAiPolicy {
+    <#
+    .SYNOPSIS
+    The AI policy rules in force for an agent
+    .DESCRIPTION
+    Runs `dot ai policy show`: The AI policy rules in force for an agent. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot ai policy show @Arguments
+}
+
 function Get-DotAttest {
     <#
     .SYNOPSIS
@@ -1635,6 +1647,7 @@ Export-ModuleMember -Function @(
     'Get-DotAi'
     'Get-DotAiCost'
     'Get-DotAiPattern'
+    'Get-DotAiPolicy'
     'Get-DotAttest'
     'Get-DotCli'
     'Get-DotCliCompletion'

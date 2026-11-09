@@ -34,7 +34,7 @@ _dot() {
     'ai gateway') kids_=('serve:Run the gateway in the foreground' 'show:Gateway statistics') ;;
     'ai inventory') kids_=('show:Agents, versions and config') ;;
     'ai pattern') kids_=('list:Prompt patterns' 'show:One prompt pattern' 'edit:Edit a prompt pattern' 'export:Write patterns as herdr-core templates') ;;
-    'ai policy') kids_=('check:Validate the AI policy and name the active mode') ;;
+    'ai policy') kids_=('show:The AI policy rules in force for an agent' 'check:Validate the AI policy and name the active mode') ;;
     'attest') kids_=('show:The workstation attestation' 'export:Write attestation evidence' 'verify:Verify evidence') ;;
     'cli') kids_=('completion:shell completion scripts' 'registry:the plugin registry' 'hook:agent hook events (agent-event.v1)' 'list:Installed plugins' 'show:One plugin in detail' 'install:Install a plugin' 'update:Update dot and its plugins' 'remove:Remove a plugin' 'verify:Verify plugin provenance' 'new:Create a plugin from the template') ;;
     'cli completion') kids_=('show:Print a completion script') ;;
@@ -197,6 +197,10 @@ _dot() {
     'ai policy check' | 'ai policy check'\ *)
       flags_=('--help:Show help' '--policy:Policy file (default ~/.config/dotfiles/ai-policy.toml)')
       valflags_=(--policy)
+      ;;
+    'ai policy show' | 'ai policy show'\ *)
+      flags_=('--help:Show help' '--agent:Agent whose rules to show (default claude)' '--mode:Mode to show (default the active one)' '--policy:Policy file (default ~/.config/dotfiles/ai-policy.toml)')
+      valflags_=(--agent --mode --policy)
       ;;
     'ai run' | 'ai run'\ *)
       flags_=('--help:Show help' '--style:Steering pattern (--pattern is the old name)' '-p:Steering pattern (--pattern is the old name)')

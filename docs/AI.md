@@ -53,7 +53,8 @@ The interface follows ADR-020 (`dot ai <verb>`), modelled on the Claude CLI: bar
 | `dot ai install [all\|<tool>] [--yes]` | Install all missing tools, or one, with what they need (asks first) |
 | `dot ai gateway serve [stop\|status]` | Start the local Claude gateway **and** route the other tools through it (`dot ai serve`) |
 | `dot ai cost show` | Spend report across providers (`dot ai cost`) |
-| `dot ai policy check` | Validate the [enforced policy](#enforced-policy) and name the active mode |
+| `dot ai policy show [--agent A] [--mode M]` | The [enforced policy](#enforced-policy)'s rules in force for an agent (`dot ai policy`) |
+| `dot ai policy check` | Validate the policy and name the active mode |
 | `dot ai login [tool]` | Authenticate a tool |
 | `dot ai check` | Health-check the roster and the gateway (`dot ai doctor`) |
 | `dot ai status [--json]` | Each agent session of the last 24 h and its state, from the hooks' state files; the cockpit header and the tmux status bar show the same count (`3 agents · 1 blocked`) |
@@ -216,7 +217,7 @@ commands_deny = ["rm -rf *", "git push --force*", "sudo *", "curl * | sh"]
 tools = ["read", "search", "shell", "write"]
 ```
 
-The active mode is the one `dot agent mode set` chose. `dot cli hook install` wires `dot cli hook check` into Claude Code (`PreToolUse`), Gemini CLI (`BeforeTool`) and Codex (`~/.codex/hooks.json`; trust it once in Codex's `/hooks`). A denied call reaches the agent with the reason, such as `dot ai policy (mode ask): tool Write (write) is not allowed`. `dot ai policy check` validates the file and names the active mode.
+The active mode is the one `dot agent mode set` chose. `dot cli hook install` wires `dot cli hook check` into Claude Code (`PreToolUse`), Gemini CLI (`BeforeTool`) and Codex (`~/.codex/hooks.json`; trust it once in Codex's `/hooks`). A denied call reaches the agent with the reason, such as `dot ai policy (mode ask): tool Write (write) is not allowed`. `dot ai policy show` prints the rules in force for an agent (`--agent codex`) in the active mode, or another (`--mode apply`), and `dot ai policy check` validates the file and names the active mode.
 
 It fails closed: a file with an error or an unknown key, a mode it has no rules for, or a missing `dot-policy` binary (chezmoi builds it when Go is installed) denies every tool call until fixed. It is a guardrail, not a sandbox: commands are split at `;`, `&&`, `|` and `$(`, but a script the agent writes and runs is not looked into.
 

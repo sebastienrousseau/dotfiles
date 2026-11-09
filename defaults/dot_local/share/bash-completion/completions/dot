@@ -42,7 +42,7 @@ _dot() {
     'ai gateway') words='serve show' ;;
     'ai inventory') words='show' ;;
     'ai pattern') words='list show edit export' ;;
-    'ai policy') words='check' ;;
+    'ai policy') words='show check' ;;
     'attest') words='show export verify' ;;
     'cli') words='completion registry hook list show install update remove verify new' ;;
     'cli completion') words='show' ;;
@@ -205,6 +205,10 @@ _dot() {
     'ai policy check' | 'ai policy check'\ *)
       flags='--help --policy'
       valflags='--policy'
+      ;;
+    'ai policy show' | 'ai policy show'\ *)
+      flags='--help --agent --mode --policy'
+      valflags='--agent --mode --policy'
       ;;
     'ai run' | 'ai run'\ *)
       flags='--help --style -p'

@@ -17,6 +17,7 @@
 //
 //	check [--agent A] [--mode M] [--policy F]   decide the call on stdin
 //	validate [--policy F]                       check the file, list its modes
+//	show [--agent A] [--mode M] [--policy F]    the rules in force
 //	--version                                   print the version
 package main
 
@@ -47,7 +48,7 @@ func main() {
 
 func run(args []string, in io.Reader, out, errw io.Writer, getenv func(string) string) int {
 	if len(args) == 0 {
-		fmt.Fprintln(errw, "usage: dot-policy check|validate|--version")
+		fmt.Fprintln(errw, "usage: dot-policy check|validate|show|--version")
 		return 2
 	}
 	switch args[0] {
@@ -55,6 +56,8 @@ func run(args []string, in io.Reader, out, errw io.Writer, getenv func(string) s
 		return runCheck(args[1:], in, out, errw, getenv)
 	case "validate":
 		return runValidate(args[1:], out, errw, getenv)
+	case "show":
+		return runShow(args[1:], out, errw, getenv)
 	case "--version":
 		fmt.Fprintln(out, "dot-policy", version)
 		return 0

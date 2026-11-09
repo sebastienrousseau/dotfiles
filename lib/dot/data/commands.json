@@ -259,7 +259,7 @@
     {
      "name": "policy",
      "summary": "the enforced AI policy",
-     "default": "check"
+     "default": "show"
     }
    ],
    "commands": [
@@ -432,6 +432,29 @@
      "summary": "Edit a prompt pattern",
      "built": true,
      "lock": false
+    },
+    {
+     "spelling": "ai policy show",
+     "effect": "read",
+     "summary": "The AI policy rules in force for an agent",
+     "built": true,
+     "flags": [
+      {
+       "long": "agent",
+       "value": "name",
+       "summary": "Agent whose rules to show (default claude)"
+      },
+      {
+       "long": "mode",
+       "value": "name",
+       "summary": "Mode to show (default the active one)"
+      },
+      {
+       "long": "policy",
+       "value": "file",
+       "summary": "Policy file (default ~/.config/dotfiles/ai-policy.toml)"
+      }
+     ]
     },
     {
      "spelling": "ai policy check",

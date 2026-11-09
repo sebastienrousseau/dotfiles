@@ -180,13 +180,16 @@ ai() {
     ${E[@]+"${E[@]}"} bash "$REPO_ROOT/bin/dot" ai "$@" 2>&1 </dev/null)" || RC=$?
 }
 
-test_start "dot_ai_policy_check_runs_dot_policy_validate"
+test_start "dot_ai_policy_runs_dot_policy"
 E=(DOT_POLICY_BIN="$H/bin/fake")
 ai policy check --policy /p.toml
 assert_equals "0|VERDICT" "$RC|$OUT" "its output and status"
 assert_equals "validate --policy /p.toml" "$(cat "$H/args")" "validate, with the flags given"
+ai policy show --agent codex
+assert_equals "0|VERDICT" "$RC|$OUT" "show: its output and status"
+assert_equals "show --agent codex" "$(cat "$H/args")" "show, with the flags given"
 ai policy
-assert_equals "validate" "$(cat "$H/args")" "check is the default"
+assert_equals "show" "$(cat "$H/args")" "show is the default"
 E=(DOT_POLICY_BIN="$H/bin/none")
 ai policy check
 assert_equals "1" "$RC" "no dot-policy: exit 1"
@@ -195,8 +198,8 @@ assert_contains "not built: install Go with mise, then chezmoi apply" "$OUT" "wi
 
 test_start "policy_sh_rejects_another_word"
 RC=0
-OUT="$(bash "$REPO_ROOT/plugins/ai/libexec/policy.sh" show 2>&1)" || RC=$?
+OUT="$(bash "$REPO_ROOT/plugins/ai/libexec/policy.sh" frob 2>&1)" || RC=$?
 assert_equals "1" "$RC" "exit 1"
-assert_contains "Usage: dot ai policy check [--policy FILE]" "$OUT" "usage"
+assert_contains "Usage: dot ai policy show|check [--policy FILE]" "$OUT" "usage"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

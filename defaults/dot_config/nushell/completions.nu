@@ -415,6 +415,7 @@ export extern "dot ai pattern show" [
 
 def "nu-complete dot ai policy" [] {
     [
+        { value: "show", description: "The AI policy rules in force for an agent" }
         { value: "check", description: "Validate the AI policy and name the active mode" }
     ]
 }
@@ -425,6 +426,14 @@ export extern "dot ai policy" [
 ]
 
 export extern "dot ai policy check" [
+    --policy: string # Policy file (default ~/.config/dotfiles/ai-policy.toml)
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot ai policy show" [
+    --agent: string # Agent whose rules to show (default claude)
+    --mode: string # Mode to show (default the active one)
     --policy: string # Policy file (default ~/.config/dotfiles/ai-policy.toml)
     --help(-h) # Show help
     ...rest: string

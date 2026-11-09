@@ -8,7 +8,7 @@ obj|ai pattern|list||prompt patterns
 obj|ai cost|show|@ai|spend by agent and model
 obj|ai gateway|show||the keyless gateway
 obj|ai inventory|show||installed agents and versions
-obj|ai policy|check||the enforced AI policy
+obj|ai policy|show||the enforced AI policy
 cmd|ai list|@ai list|read|Installed agents
 cmd|ai install|@ai install|write|Install agents
 cmd|ai update|@ai update|write|Upgrade agent CLIs
@@ -24,6 +24,7 @@ cmd|ai gateway show||read|Gateway statistics
 cmd|ai inventory show||read|Agents, versions and config
 cmd|ai pattern show|@ai pattern show|read|One prompt pattern
 cmd|ai pattern edit|@ai pattern edit|write|Edit a prompt pattern
+cmd|ai policy show|@ai policy show|read|The AI policy rules in force for an agent
 cmd|ai policy check|@ai policy check|read|Validate the AI policy and name the active mode
 cmd|ai pattern export|@ai pattern export|read|Write patterns as herdr-core templates
 cmd|ai send|@ai send|write|Give a background agent text and submit it
@@ -36,6 +37,9 @@ flag|ai start|cwd||dir|With --bg: the directory it starts in
 arg|ai start|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
 flag|ai run|style|p|pattern|Steering pattern (--pattern is the old name)
 arg|ai run|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
+flag|ai policy show|agent||name|Agent whose rules to show (default claude)
+flag|ai policy show|mode||name|Mode to show (default the active one)
+flag|ai policy show|policy||file|Policy file (default ~/.config/dotfiles/ai-policy.toml)
 flag|ai policy check|policy||file|Policy file (default ~/.config/dotfiles/ai-policy.toml)
 flag|ai pattern export|hc|||To ~/.config/herdr-core/templates (required)
 flag|ai pattern export|agent||name|Agent the template runs (default claude)

@@ -16,7 +16,7 @@ $script:DotChildren = @{
     'ai gateway' = @(@('serve', 'Run the gateway in the foreground'), @('show', 'Gateway statistics'))
     'ai inventory' = @(, @('show', 'Agents, versions and config'))
     'ai pattern' = @(@('list', 'Prompt patterns'), @('show', 'One prompt pattern'), @('edit', 'Edit a prompt pattern'), @('export', 'Write patterns as herdr-core templates'))
-    'ai policy' = @(, @('check', 'Validate the AI policy and name the active mode'))
+    'ai policy' = @(@('show', 'The AI policy rules in force for an agent'), @('check', 'Validate the AI policy and name the active mode'))
     'attest' = @(@('show', 'The workstation attestation'), @('export', 'Write attestation evidence'), @('verify', 'Verify evidence'))
     'cli' = @(@('completion', 'shell completion scripts'), @('registry', 'the plugin registry'), @('hook', 'agent hook events (agent-event.v1)'), @('list', 'Installed plugins'), @('show', 'One plugin in detail'), @('install', 'Install a plugin'), @('update', 'Update dot and its plugins'), @('remove', 'Remove a plugin'), @('verify', 'Verify plugin provenance'), @('new', 'Create a plugin from the template'))
     'cli completion' = @(, @('show', 'Print a completion script'))
@@ -105,6 +105,7 @@ $script:DotCommands = @{
     'ai pattern list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai pattern show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai policy check' = @{ Flags = @(@('--help', 'Show help'), @('--policy', 'Policy file (default ~/.config/dotfiles/ai-policy.toml)')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @('--policy') }
+    'ai policy show' = @{ Flags = @(@('--help', 'Show help'), @('--agent', 'Agent whose rules to show (default claude)'), @('--mode', 'Mode to show (default the active one)'), @('--policy', 'Policy file (default ~/.config/dotfiles/ai-policy.toml)')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @('--agent', '--mode', '--policy') }
     'ai run' = @{ Flags = @(@('--help', 'Show help'), @('--style', 'Steering pattern (--pattern is the old name)'), @('-p', 'Steering pattern (--pattern is the old name)')); Values = @('claude', 'codex', 'copilot', 'goose', 'crush', 'amp', 'cursor-agent', 'grok', 'kimi', 'agy', 'kiro', 'sgpt', 'ollama', 'opencode', 'aider', 'autohand', 'vibe', 'qwen', 'zai'); Files = $false; PatternFlags = @('--style', '-p'); ValueFlags = @() }
     'ai send' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai start' = @{ Flags = @(@('--help', 'Show help'), @('--bg', 'In its own terminal (herdr-core or tmux)'), @('--name', 'With --bg: its name (default <agent>-<n>)'), @('--cwd', 'With --bg: the directory it starts in')); Values = @('claude', 'codex', 'copilot', 'goose', 'crush', 'amp', 'cursor-agent', 'grok', 'kimi', 'agy', 'kiro', 'sgpt', 'ollama', 'opencode', 'aider', 'autohand', 'vibe', 'qwen', 'zai'); Files = $false; PatternFlags = @(); ValueFlags = @('--name', '--cwd') }

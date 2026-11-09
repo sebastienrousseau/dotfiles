@@ -68,6 +68,7 @@ Install, route and run coding agents.
 | `dot ai pattern show` | One prompt pattern | `dot patterns view` |
 | `dot ai pattern edit` | Edit a prompt pattern | `dot patterns edit` |
 | `dot ai pattern export` | Write patterns as herdr-core templates |  |
+| `dot ai policy show` | The AI policy rules in force for an agent |  |
 | `dot ai policy check` | Validate the AI policy and name the active mode |  |
 
 ### dot attest

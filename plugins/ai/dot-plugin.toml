@@ -38,7 +38,7 @@ default = "show"
 [[objects]]
 name = "policy"
 summary = "the enforced AI policy"
-default = "check"
+default = "show"
 
 [[commands]]
 verb = "list"
@@ -159,6 +159,27 @@ verb = "edit"
 effect = "write"
 lock = false
 summary = "Edit a prompt pattern"
+
+[[commands]]
+object = "policy"
+verb = "show"
+effect = "read"
+summary = "The AI policy rules in force for an agent"
+
+[[commands.flags]]
+long = "agent"
+value = "name"
+summary = "Agent whose rules to show (default claude)"
+
+[[commands.flags]]
+long = "mode"
+value = "name"
+summary = "Mode to show (default the active one)"
+
+[[commands.flags]]
+long = "policy"
+value = "file"
+summary = "Policy file (default ~/.config/dotfiles/ai-policy.toml)"
 
 [[commands]]
 object = "policy"

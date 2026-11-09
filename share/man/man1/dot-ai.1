@@ -26,7 +26,7 @@ the keyless gateway; alone it runs \fBshow\fR.
 installed agents and versions; alone it runs \fBshow\fR.
 .TP
 .B policy
-the enforced AI policy; alone it runs \fBcheck\fR.
+the enforced AI policy; alone it runs \fBshow\fR.
 .SH COMMANDS
 .TP
 .B dot ai list
@@ -94,6 +94,20 @@ One prompt pattern. Effect: read. Runs \fBdot\-ai pattern show\fR, the plugin's 
 .TP
 .B dot ai pattern edit
 Edit a prompt pattern. Effect: write. Runs \fBdot\-ai pattern edit\fR, the plugin's entry.
+.TP
+.B dot ai policy show
+The AI policy rules in force for an agent. Effect: read. Runs \fBdot\-ai policy show\fR, the plugin's entry.
+.RS
+.TP
+.B \-\-agent \fIname\fR
+Agent whose rules to show (default claude)
+.TP
+.B \-\-mode \fIname\fR
+Mode to show (default the active one)
+.TP
+.B \-\-policy \fIfile\fR
+Policy file (default ~/.config/dotfiles/ai\-policy.toml)
+.RE
 .TP
 .B dot ai policy check
 Validate the AI policy and name the active mode. Effect: read. Runs \fBdot\-ai policy check\fR, the plugin's entry.
