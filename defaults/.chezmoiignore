@@ -56,6 +56,9 @@ node_modules
 # Same for the MCP server: `go build .` ignores its tests, and the card-truth
 # tests reference .well-known/, which is not deployed either.
 .local/share/dot-mcp/*_test.go
+# And the AI policy evaluator: its tests and fuzz corpus stay in the repo.
+.local/share/dot-policy/*_test.go
+.local/share/dot-policy/testdata
 
 # ── Standalone files that aren't user-deployable ──────────────────────
 install.sh

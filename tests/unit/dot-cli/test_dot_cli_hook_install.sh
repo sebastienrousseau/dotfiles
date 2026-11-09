@@ -105,7 +105,7 @@ test_start "every_installed_event_is_one_the_receiver_maps"
 for a in claude gemini; do
   fresh "$a"
   run install --agent "$a"
-  for e in $(jq -r '.hooks | keys[]' "$H/.$a/settings.json"); do
+  for e in $(jq -r '.hooks | to_entries[] | select(any(.value[].hooks[]; .command | contains(" cli hook run "))) | .key' "$H/.$a/settings.json"); do
     printf '{"session_id":"s-%s","hook_event_name":"%s"}' "$e" "$e" |
       env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$H/.state" \
         bash "$REPO_ROOT/bin/dot" cli hook run --agent "$a" >/dev/null 2>&1

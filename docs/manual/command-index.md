@@ -49,6 +49,7 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot ai inventory show` | Agents, versions and config *(planned)* |
 | `dot ai pattern show` | One prompt pattern |
 | `dot ai pattern edit` | Edit a prompt pattern |
+| `dot ai policy check` | Validate the AI policy and name the active mode |
 | `dot ai pattern export` | Write patterns as herdr-core templates |
 | `dot ai send` | Give a background agent text and submit it |
 | `dot ai wait` | Wait until a background agent stops working |
@@ -67,6 +68,7 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot cli registry set` | Point at another plugin registry |
 | `dot cli hook status` | Each agent session's last state |
 | `dot cli hook run` | Record an agent hook event read on stdin |
+| `dot cli hook check` | Check a tool call against the AI policy |
 | `dot cli hook install` | Wire the hook into each agent's configuration |
 | `dot cli hook remove` | Take the hook out of each agent's configuration |
 | `dot config status` | Pending changes and last apply |

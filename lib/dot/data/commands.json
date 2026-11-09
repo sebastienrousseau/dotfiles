@@ -255,6 +255,11 @@
      "name": "inventory",
      "summary": "installed agents and versions",
      "default": "show"
+    },
+    {
+     "name": "policy",
+     "summary": "the enforced AI policy",
+     "default": "check"
     }
    ],
    "commands": [
@@ -427,6 +432,19 @@
      "summary": "Edit a prompt pattern",
      "built": true,
      "lock": false
+    },
+    {
+     "spelling": "ai policy check",
+     "effect": "read",
+     "summary": "Validate the AI policy and name the active mode",
+     "built": true,
+     "flags": [
+      {
+       "long": "policy",
+       "value": "file",
+       "summary": "Policy file (default ~/.config/dotfiles/ai-policy.toml)"
+      }
+     ]
     },
     {
      "spelling": "ai pattern export",
@@ -724,6 +742,13 @@
      "spelling": "cli hook run",
      "effect": "write",
      "summary": "Record an agent hook event read on stdin",
+     "built": true,
+     "lock": false
+    },
+    {
+     "spelling": "cli hook check",
+     "effect": "read",
+     "summary": "Check a tool call against the AI policy",
      "built": true,
      "lock": false
     },

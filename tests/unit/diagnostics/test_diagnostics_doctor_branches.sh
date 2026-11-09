@@ -506,6 +506,9 @@ done
 # Codex runs dot's receiver: with no dot on PATH, the repo's bin/dot.
 mkdir -p "$S_HOME/.codex"
 printf 'notify = ["%s", "cli", "hook", "run", "--agent", "codex"]\n' "$(cd "$REPO_ROOT" && pwd)/bin/dot" >"$S_HOME/.codex/config.toml"
+# and its policy check (ADR-025), from hooks.json.
+jq -n --arg c "'$(cd "$REPO_ROOT" && pwd)/bin/dot' cli hook check --agent codex" \
+  '{hooks: {PreToolUse: [{hooks: [{type: "command", command: $c}]}]}}' >"$S_HOME/.codex/hooks.json"
 DOC_ENV=(PIPX_HOME= TERM_PROGRAM=)
 _run_doctor
 test_start "s3_linux_alt_probes_exit_1"

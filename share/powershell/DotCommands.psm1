@@ -1429,6 +1429,30 @@ function Test-DotAi {
     dot ai check @Arguments
 }
 
+function Test-DotAiPolicy {
+    <#
+    .SYNOPSIS
+    Validate the AI policy and name the active mode
+    .DESCRIPTION
+    Runs `dot ai policy check`: Validate the AI policy and name the active mode. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot ai policy check @Arguments
+}
+
+function Test-DotCliHook {
+    <#
+    .SYNOPSIS
+    Check a tool call against the AI policy
+    .DESCRIPTION
+    Runs `dot cli hook check`: Check a tool call against the AI policy. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot cli hook check @Arguments
+}
+
 function Test-DotConfig {
     <#
     .SYNOPSIS
@@ -1705,6 +1729,8 @@ Export-ModuleMember -Function @(
     'Test-DotAgentCard'
     'Test-DotAgentContext'
     'Test-DotAi'
+    'Test-DotAiPolicy'
+    'Test-DotCliHook'
     'Test-DotConfig'
     'Test-DotDoctor'
     'Test-DotMcp'

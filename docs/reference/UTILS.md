@@ -68,6 +68,7 @@ Install, route and run coding agents.
 | `dot ai pattern show` | One prompt pattern | `dot patterns view` |
 | `dot ai pattern edit` | Edit a prompt pattern | `dot patterns edit` |
 | `dot ai pattern export` | Write patterns as herdr-core templates |  |
+| `dot ai policy check` | Validate the AI policy and name the active mode |  |
 
 ### dot attest
 
@@ -93,6 +94,7 @@ Plugins, updates, completions.
 | `dot cli registry set` | Point at another plugin registry | `dot registry set-url` |
 | `dot cli hook status` | Each agent session's last state |  |
 | `dot cli hook run` | Record an agent hook event read on stdin |  |
+| `dot cli hook check` | Check a tool call against the AI policy |  |
 | `dot cli hook install` | Wire the hook into each agent's configuration |  |
 | `dot cli hook remove` | Take the hook out of each agent's configuration |  |
 

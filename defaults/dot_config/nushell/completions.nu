@@ -279,6 +279,7 @@ def "nu-complete dot ai" [] {
         { value: "cost", description: "spend by agent and model" }
         { value: "gateway", description: "the keyless gateway" }
         { value: "inventory", description: "installed agents and versions" }
+        { value: "policy", description: "the enforced AI policy" }
         { value: "list", description: "Installed agents" }
         { value: "install", description: "Install agents" }
         { value: "update", description: "Upgrade agent CLIs" }
@@ -408,6 +409,23 @@ export extern "dot ai pattern list" [
 ]
 
 export extern "dot ai pattern show" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
+def "nu-complete dot ai policy" [] {
+    [
+        { value: "check", description: "Validate the AI policy and name the active mode" }
+    ]
+}
+export extern "dot ai policy" [
+    command?: string@"nu-complete dot ai policy"
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot ai policy check" [
+    --policy: string # Policy file (default ~/.config/dotfiles/ai-policy.toml)
     --help(-h) # Show help
     ...rest: string
 ]
@@ -561,12 +579,18 @@ def "nu-complete dot cli hook" [] {
     [
         { value: "status", description: "Each agent session's last state" }
         { value: "run", description: "Record an agent hook event read on stdin" }
+        { value: "check", description: "Check a tool call against the AI policy" }
         { value: "install", description: "Wire the hook into each agent's configuration" }
         { value: "remove", description: "Take the hook out of each agent's configuration" }
     ]
 }
 export extern "dot cli hook" [
     command?: string@"nu-complete dot cli hook"
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot cli hook check" [
     --help(-h) # Show help
     ...rest: string
 ]

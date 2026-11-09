@@ -34,6 +34,7 @@ significant architectural decisions made in this project.
 | [ADR-022](ADR-022-family-language-go.md) | Go for the dot family's compiled code | Accepted; host and `dot top` still bash (status note) |
 | [ADR-023](ADR-023-family-owner.md) | The personal account owns the dot family | Accepted |
 | [ADR-024](ADR-024-agent-runtime-verbs.md) | `send` and `wait`, the verbs of a running agent | Accepted |
+| [ADR-025](ADR-025-enforced-ai-policy.md) | The AI policy is enforced at the agent's pre-tool hook | Accepted |
 
 ## ADR Format
 

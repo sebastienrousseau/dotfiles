@@ -53,6 +53,7 @@ The interface follows ADR-020 (`dot ai <verb>`), modelled on the Claude CLI: bar
 | `dot ai install [all\|<tool>] [--yes]` | Install all missing tools, or one, with what they need (asks first) |
 | `dot ai gateway serve [stop\|status]` | Start the local Claude gateway **and** route the other tools through it (`dot ai serve`) |
 | `dot ai cost show` | Spend report across providers (`dot ai cost`) |
+| `dot ai policy check` | Validate the [enforced policy](#enforced-policy) and name the active mode |
 | `dot ai login [tool]` | Authenticate a tool |
 | `dot ai check` | Health-check the roster and the gateway (`dot ai doctor`) |
 | `dot ai status [--json]` | Each agent session of the last 24 h and its state, from the hooks' state files; the cockpit header and the tmux status bar show the same count (`3 agents · 1 blocked`) |
@@ -191,6 +192,33 @@ If your terminal has built-in AI agents, keep your shell lean and fast:
 - Use `DOTFILES_FAST=1` or `DOTFILES_ULTRA_FAST=1`.
 - Let the terminal handle agents and its own UI.
 - Keep dotfiles focused on consistency, safety, and clean repeats.
+
+## Enforced policy
+
+`~/.config/dotfiles/ai-policy.toml` says what each agent may do in each mode, and the agents' own pre-tool hooks enforce it ([ADR-025](adr/ADR-025-enforced-ai-policy.md)). Without the file nothing is enforced.
+
+```toml
+schema = "ai-policy.v1"
+default_mode = "ask"          # when dot agent mode has none set
+
+[mode.ask]
+tools = ["read", "search"]    # classes: shell read write search fetch mcp, or tool names
+
+[mode.apply]
+tools = ["*"]
+tools_deny = ["mcp__github__*"]
+paths_allow = ["{cwd}/**", "/tmp/**"]
+paths_deny = ["~/.ssh/**", "~/.aws/**", "**/.env"]
+hosts_allow = ["github.com", "*.github.com"]
+commands_deny = ["rm -rf *", "git push --force*", "sudo *", "curl * | sh"]
+
+[agent.codex.mode.apply]      # replaces only the lists it sets
+tools = ["read", "search", "shell", "write"]
+```
+
+The active mode is the one `dot agent mode set` chose. `dot cli hook install` wires `dot cli hook check` into Claude Code (`PreToolUse`), Gemini CLI (`BeforeTool`) and Codex (`~/.codex/hooks.json`; trust it once in Codex's `/hooks`). A denied call reaches the agent with the reason, such as `dot ai policy (mode ask): tool Write (write) is not allowed`. `dot ai policy check` validates the file and names the active mode.
+
+It fails closed: a file with an error or an unknown key, a mode it has no rules for, or a missing `dot-policy` binary (chezmoi builds it when Go is installed) denies every tool call until fixed. It is a guardrail, not a sandbox: commands are split at `;`, `&&`, `|` and `$(`, but a script the agent writes and runs is not looked into.
 
 ## Privacy and safety
 

@@ -37,15 +37,16 @@ _dot() {
     'agent log') words='show' ;;
     'agent mode') words='list show set run' ;;
     'agent policy') words='show' ;;
-    'ai') words='pattern cost gateway inventory list install update start run login check ask send wait' ;;
+    'ai') words='pattern cost gateway inventory policy list install update start run login check ask send wait' ;;
     'ai cost') words='show' ;;
     'ai gateway') words='serve show' ;;
     'ai inventory') words='show' ;;
     'ai pattern') words='list show edit export' ;;
+    'ai policy') words='check' ;;
     'attest') words='show export verify' ;;
     'cli') words='completion registry hook list show install update remove verify new' ;;
     'cli completion') words='show' ;;
-    'cli hook') words='status run install remove' ;;
+    'cli hook') words='status run check install remove' ;;
     'cli registry') words='show set' ;;
     'config') words='path profile status diff apply sync update edit add save init check export uninstall import' ;;
     'config path') words='show' ;;
@@ -201,6 +202,10 @@ _dot() {
     'ai pattern show' | 'ai pattern show'\ *)
       flags='--help'
       ;;
+    'ai policy check' | 'ai policy check'\ *)
+      flags='--help --policy'
+      valflags='--policy'
+      ;;
     'ai run' | 'ai run'\ *)
       flags='--help --style -p'
       patflags='--style -p'
@@ -231,6 +236,9 @@ _dot() {
       flags='--help'
       ;;
     'cli completion show' | 'cli completion show'\ *)
+      flags='--help'
+      ;;
+    'cli hook check' | 'cli hook check'\ *)
       flags='--help'
       ;;
     'cli hook install' | 'cli hook install'\ *)

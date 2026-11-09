@@ -118,6 +118,7 @@ updates:
       - "/fuzz"
       - "/defaults/dot_local/share/dot-ai-tui"
       - "/defaults/dot_local/share/dot-mcp"
+      - "/defaults/dot_local/share/dot-policy"
       - "/defaults/dot_local/share/dot-ui"
     schedule:
       interval: "weekly"

@@ -101,6 +101,15 @@ effect = "write"
 lock = false
 summary = "Record an agent hook event read on stdin"
 
+# The policy check an agent's PreToolUse (Gemini: BeforeTool) hook runs
+# (ADR-025): read-only, and as unlocked as run (N17).
+[[commands]]
+object = "hook"
+verb = "check"
+effect = "read"
+lock = false
+summary = "Check a tool call against the AI policy"
+
 [[commands]]
 object = "hook"
 verb = "install"

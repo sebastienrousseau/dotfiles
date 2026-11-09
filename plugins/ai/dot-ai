@@ -4,8 +4,8 @@
 #
 # dot-ai: the entry of the ai plugin (ADR-020 N2). bin/dot runs it with the
 # words after `dot ai`. Its declared spellings become the verbs of
-# libexec/ai.sh, or of libexec/patterns.sh for patterns; any other word, or
-# none, goes to ai.sh as it always has.
+# libexec/ai.sh, or of libexec/patterns.sh for patterns and libexec/policy.sh
+# for the policy; any other word, or none, goes to ai.sh as it always has.
 
 set -euo pipefail
 
@@ -27,6 +27,7 @@ ai_two_words() {
     "pattern show") exec bash "$_AI_DIR/libexec/patterns.sh" view "${@:3}" ;;
     "pattern edit") exec bash "$_AI_DIR/libexec/patterns.sh" edit "${@:3}" ;;
     "pattern export") exec bash "$_AI_DIR/libexec/patterns.sh" export "${@:3}" ;;
+    "policy check") exec bash "$_AI_DIR/libexec/policy.sh" check "${@:3}" ;;
   esac
 }
 

@@ -35,6 +35,11 @@ name = "inventory"
 summary = "installed agents and versions"
 default = "show"
 
+[[objects]]
+name = "policy"
+summary = "the enforced AI policy"
+default = "check"
+
 [[commands]]
 verb = "list"
 effect = "read"
@@ -154,6 +159,17 @@ verb = "edit"
 effect = "write"
 lock = false
 summary = "Edit a prompt pattern"
+
+[[commands]]
+object = "policy"
+verb = "check"
+effect = "read"
+summary = "Validate the AI policy and name the active mode"
+
+[[commands.flags]]
+long = "policy"
+value = "file"
+summary = "Policy file (default ~/.config/dotfiles/ai-policy.toml)"
 
 [[commands]]
 object = "pattern"

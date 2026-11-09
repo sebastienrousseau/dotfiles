@@ -24,6 +24,9 @@ the keyless gateway; alone it runs \fBshow\fR.
 .TP
 .B inventory
 installed agents and versions; alone it runs \fBshow\fR.
+.TP
+.B policy
+the enforced AI policy; alone it runs \fBcheck\fR.
 .SH COMMANDS
 .TP
 .B dot ai list
@@ -91,6 +94,14 @@ One prompt pattern. Effect: read. Runs \fBdot\-ai pattern show\fR, the plugin's 
 .TP
 .B dot ai pattern edit
 Edit a prompt pattern. Effect: write. Runs \fBdot\-ai pattern edit\fR, the plugin's entry.
+.TP
+.B dot ai policy check
+Validate the AI policy and name the active mode. Effect: read. Runs \fBdot\-ai policy check\fR, the plugin's entry.
+.RS
+.TP
+.B \-\-policy \fIfile\fR
+Policy file (default ~/.config/dotfiles/ai\-policy.toml)
+.RE
 .TP
 .B dot ai pattern export
 Write patterns as herdr\-core templates. Effect: write. Runs \fBdot\-ai pattern export\fR, the plugin's entry.

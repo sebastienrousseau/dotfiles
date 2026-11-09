@@ -62,7 +62,7 @@ exit "${BUILD_RC:-0}"
                        f"VERSION={version or '(unset)'} builds with {want}"))
         if ldflags:
             ldflags.unlink()
-for hook in root.glob("defaults/run_onchange_2[456]-build-*.sh.tmpl"):
+for hook in root.glob("defaults/run_onchange_2[4-7]-build-*.sh.tmpl"):
     source = hook.read_text()
     checks.append(('{{ template "go-build-command" . }}' in source and "if dot_build_go_binary; then" in source
                    and "exit 1" in source and "build failed (continuing" not in source,

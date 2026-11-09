@@ -32,6 +32,7 @@ jobs:
           - fuzz
           - defaults/dot_local/share/dot-ai-tui
           - defaults/dot_local/share/dot-mcp
+          - defaults/dot_local/share/dot-policy
           - defaults/dot_local/share/dot-ui
     steps:
       - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
