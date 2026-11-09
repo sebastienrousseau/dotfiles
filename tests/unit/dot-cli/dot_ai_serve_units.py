@@ -98,9 +98,9 @@ class Config(unittest.TestCase):
 
     def test_budget_rolls_over_a_new_day(self):
         srv = load({"DOT_AI_DAILY_BUDGET": "1"})
-        srv._BUDGET.update(day="1999-01-01", spent=5.0)
-        srv._roll_day()
-        self.assertEqual(0.0, srv._BUDGET["spent"])
+        srv.METER.budget.update(day="1999-01-01", spent=5.0)
+        srv.METER.roll_day()
+        self.assertEqual(0.0, srv.METER.budget["spent"])
 
     def test_allowed_hosts(self):
         srv = load({"DOT_AI_PORT": "4000", "DOT_AI_ALLOWED_HOSTS": "Proxy.Local:443, "})
