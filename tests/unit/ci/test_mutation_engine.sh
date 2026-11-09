@@ -172,6 +172,35 @@ sed -i.bak 's/# mutation: ignore$/# mutation: ignore equivalent: last statement/
 out="$(python3 "$ENGINE" --root "$d" --full --list-mutants)"
 assert_equals "1" "$(printf '%s\n' "$out" | wc -l | tr -d ' ')" "an ignore with a reason skips the line"
 
+test_start "mutation_timeout_kills_the_whole_test"
+# A test that leaves a child holding its output pipe, then hangs: the
+# timeout must end both, at once, not wait for the child.
+H="$WORK/hang"
+mkdir -p "$H/tests"
+cat >"$H/tests/test_hang.sh" <<'EOF'
+#!/usr/bin/env bash
+bash -c 'echo $$ >"$REPO_ROOT/child.pid"; exec sleep 20' &
+sleep 20
+EOF
+OUT="$(python3 - "$ENGINE" "$H" <<'EOF'
+import importlib.util, os, sys, time
+spec = importlib.util.spec_from_file_location("mt", sys.argv[1])
+mt = sys.modules["mt"] = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mt)
+from pathlib import Path
+repo = Path(sys.argv[2])
+verdict, secs = mt.run_test(repo, "tests/test_hang.sh", 2)
+pid = int((repo / "child.pid").read_text())
+try:
+    os.kill(pid, 0)
+    alive = "alive"
+except ProcessLookupError:
+    alive = "gone"
+print(verdict, "fast" if secs < 10 else f"slow({secs:.0f}s)", alive)
+EOF
+)"
+assert_equals "timeout fast gone" "$OUT" "verdict timeout, within the limit, and the child is gone"
+
 test_start "mutation_noop_or_true_is_not_mutated"
 out="$(
   printf '%s\n' 'x || true' 'y && :' 'z || echo fallback' >"$WORK/noop.sh"

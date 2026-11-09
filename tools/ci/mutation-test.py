@@ -39,6 +39,7 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -420,6 +421,19 @@ def copy_tree(root: Path, dest: Path) -> None:
     subprocess.run(["git", "init", "-q", str(dest)], check=False)
 
 
+def kill_session(p: subprocess.Popen) -> None:
+    """SIGKILL the process group a start_new_session child leads, then reap
+    it; a straggler outside the group cannot hold the reap past 5 s."""
+    try:
+        os.killpg(p.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    try:
+        p.communicate(timeout=5)
+    except subprocess.TimeoutExpired:
+        p.kill()
+
+
 def run_test(repo: Path, test: str, timeout: int) -> tuple[str, float]:
     """Run one test in a throwaway HOME. Returns (pass|fail|timeout, secs)."""
     home = Path(tempfile.mkdtemp(prefix="muthome."))
@@ -439,23 +453,27 @@ def run_test(repo: Path, test: str, timeout: int) -> tuple[str, float]:
         "CI": "true",
     }
     t0 = time.monotonic()
+    # Its own session, so a timeout ends the test and everything it started:
+    # a hung mutant's children would otherwise outlive the run, holding the
+    # output pipes open and the CPU busy.
+    p = subprocess.Popen(
+        ["bash", str(repo / test)],
+        cwd=repo,
+        env=env,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        errors="replace",
+        start_new_session=True,
+    )
     try:
-        p = subprocess.run(
-            ["bash", str(repo / test)],
-            cwd=repo,
-            env=env,
-            stdin=subprocess.DEVNULL,
-            check=False,
-            capture_output=True,
-            text=True,
-            errors="replace",
-            timeout=timeout,
-            start_new_session=True,
-        )
-        failed = p.returncode != 0 or bool(RESULTS_FAIL_RE.search(p.stdout + p.stderr))
+        out, err = p.communicate(timeout=timeout)
+        failed = p.returncode != 0 or bool(RESULTS_FAIL_RE.search(out + err))
         verdict = "fail" if failed else "pass"
     except subprocess.TimeoutExpired:
         verdict = "timeout"
+        kill_session(p)
     finally:
         subprocess.run(
             ["chmod", "-R", "u+w", str(home)], capture_output=True, check=False
