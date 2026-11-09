@@ -12,11 +12,14 @@ import (
 )
 
 // Call is one tool call, as Claude Code, Codex and Gemini CLI send it to a
-// PreToolUse (BeforeTool) hook.
+// PreToolUse (BeforeTool) hook, or a prompt event (UserPromptSubmit,
+// BeforeAgent: Event and Session; the prompt itself is never read).
 type Call struct {
-	Tool  string         `json:"tool_name"`
-	Input map[string]any `json:"tool_input"`
-	Cwd   string         `json:"cwd"`
+	Tool    string         `json:"tool_name"`
+	Input   map[string]any `json:"tool_input"`
+	Cwd     string         `json:"cwd"`
+	Event   string         `json:"hook_event_name"`
+	Session string         `json:"session_id"`
 }
 
 // toolClasses maps each agent's tool names to the classes a policy names.

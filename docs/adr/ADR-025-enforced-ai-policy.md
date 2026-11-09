@@ -44,6 +44,12 @@ three. The decision has to come from the hook's output, every time.
   requests: `models` (globs over the resolved model) and
   `max_input_tokens`. `dot-policy gateway` decides each request before
   the engine sees it, and fails closed as the hook does.
+- `[budget]` (0.2.543, plan P1.3) caps what agents spend, at the API list
+  prices `dot ai cost show` reports: `daily_usd` (today, every session)
+  and `session_usd`. The check also runs on each prompt
+  (`UserPromptSubmit`, `BeforeAgent`): from 80% of a cap the prompt
+  carries a warning, at 100% it is blocked before the model sees it. A
+  budget whose spend cannot be read blocks, as the hook fails closed.
 
 ## Consequences
 

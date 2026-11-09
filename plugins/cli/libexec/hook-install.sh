@@ -10,13 +10,13 @@
 # them out again:
 #
 #   claude  ~/.claude/settings.json  hooks for every event the receiver maps;
-#                                    check on PreToolUse
+#                                    check on PreToolUse and UserPromptSubmit
 #   gemini  ~/.gemini/settings.json  hooks for its agent and session events;
-#                                    check on BeforeTool
+#                                    check on BeforeTool and BeforeAgent
 #   codex   ~/.codex/config.toml     notify (Codex passes the event as an
 #                                    argument)
-#           ~/.codex/hooks.json      check on PreToolUse (Codex runs it once
-#                                    trusted in its /hooks)
+#           ~/.codex/hooks.json      check on PreToolUse and UserPromptSubmit
+#                                    (Codex runs it once trusted in its /hooks)
 #
 # With no --agent, the agents whose configuration directory exists. The hook
 # command is the absolute path of dot, so an agent started without
@@ -86,14 +86,15 @@ hi_write() {
   }
 }
 
-# hi_json_edit AGENT FILE EVENTS MODE CHECK: add (install) or drop (remove)
+# hi_json_edit AGENT FILE EVENTS MODE CHECKS: add (install) or drop (remove)
 # the hook entries of ours for AGENT in a settings.json: the receiver on
-# each of EVENTS, the policy check on the CHECK event. Prints the new JSON.
+# each of EVENTS, the policy check on each of CHECKS (a JSON array): the
+# tool call and the prompt. Prints the new JSON.
 hi_json_edit() {
   local dot
   dot="$(hi_dot)"
   jq --arg agent "$1" --arg run "'$dot' cli hook run --agent $1" --arg chk "'$dot' cli hook check --agent $1" \
-    --argjson events "$3" --arg mode "$4" --arg check "$5" '
+    --argjson events "$3" --arg mode "$4" --argjson checks "$5" '
     def ours: (.command // "") as $c
       | ($c | endswith(" cli hook run --agent " + $agent)) or ($c | endswith(" cli hook check --agent " + $agent));
     def drop: map(.hooks |= map(select(ours | not))) | map(select((.hooks | length) > 0));
@@ -102,12 +103,12 @@ hi_json_edit() {
     def add($e; $x): .[$e] = ((.[$e] // []) + [$x]);
     (.hooks // {} | with_entries(.value |= drop) | with_entries(select((.value | length) > 0))) as $kept
     | if $mode == "install" then .hooks = (reduce $events[] as $e ($kept; add($e; entry($run; "dot-cli-hook")))
-        | add($check; entry($chk; "dot-cli-hook-check")))
+        | reduce $checks[] as $c (.; add($c; entry($chk; "dot-cli-hook-check"))))
       elif ($kept | length) > 0 then .hooks = $kept
       else del(.hooks) end' "$2"
 }
 
-# hi_json AGENT FILE EVENTS MODE CHECK: install or remove in one
+# hi_json AGENT FILE EVENTS MODE CHECKS: install or remove in one
 # settings.json.
 hi_json() {
   local before after
@@ -181,11 +182,11 @@ hi_codex() {
 # hi_agent AGENT MODE: install or remove for one agent.
 hi_agent() {
   case "$1" in
-    claude) hi_json claude "$HOME/.claude/settings.json" "$CLAUDE_EVENTS" "$2" PreToolUse ;;
-    gemini) hi_json gemini "$HOME/.gemini/settings.json" "$GEMINI_EVENTS" "$2" BeforeTool ;;
+    claude) hi_json claude "$HOME/.claude/settings.json" "$CLAUDE_EVENTS" "$2" '["PreToolUse","UserPromptSubmit"]' ;;
+    gemini) hi_json gemini "$HOME/.gemini/settings.json" "$GEMINI_EVENTS" "$2" '["BeforeTool","BeforeAgent"]' ;;
     codex)
       hi_codex "$HOME/.codex/config.toml" "$2"
-      hi_json codex "$HOME/.codex/hooks.json" '[]' "$2" PreToolUse
+      hi_json codex "$HOME/.codex/hooks.json" '[]' "$2" '["PreToolUse","UserPromptSubmit"]'
       ;;
   esac
 }

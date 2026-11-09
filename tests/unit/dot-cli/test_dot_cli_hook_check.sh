@@ -69,6 +69,18 @@ check "$WRITE" --agent gemini
 assert_contains "dot-policy is missing or failed" "$(reason)" "gemini: decision deny"
 assert_equals "gemini" "$(form)" "in Gemini CLI's own form"
 
+test_start "a_policy_without_dot_policy_blocks_a_prompt"
+# The check also runs on each prompt (UserPromptSubmit, BeforeAgent): its
+# budget (P1.3). Without dot-policy a prompt is blocked in the prompt form.
+PROMPT='{"hook_event_name":"UserPromptSubmit","session_id":"s1","prompt":"hi"}'
+check "$PROMPT" --agent claude
+assert_equals "block" "$(jq -r .decision <<<"$OUT")" "claude: decision block"
+assert_contains "every prompt is blocked" "$(jq -r .reason <<<"$OUT")" "and says why"
+check "$PROMPT" --agent codex
+assert_equals "block" "$(jq -r .decision <<<"$OUT")" "codex: the same"
+check '{"hook_event_name":"BeforeAgent","session_id":"s1","prompt":"hi"}' --agent gemini
+assert_equals "deny|every prompt is blocked" "$(jq -r .decision <<<"$OUT")|$(jq -r '.reason | capture("(?<x>every prompt is blocked)").x' <<<"$OUT")" "gemini: decision deny"
+
 test_start "a_dot_policy_that_cannot_run_denies"
 printf 'not a program\n' >"$H/bin/broken"
 chmod +x "$H/bin/broken"
@@ -144,6 +156,13 @@ mkdir -p "$H/.claude" "$H/.gemini" "$H/.codex"
 hook install
 assert_contains "cli hook check --agent claude" \
   "$(jq -r '.hooks.PreToolUse[].hooks[].command' "$H/.claude/settings.json")" "claude: PreToolUse"
+assert_contains "cli hook check --agent claude" \
+  "$(jq -r '.hooks.UserPromptSubmit[].hooks[].command' "$H/.claude/settings.json")" "claude: and UserPromptSubmit (the budget)"
+assert_equals "dot-cli-hook-check" \
+  "$(jq -r '.hooks.BeforeAgent[].hooks[] | select(.command | contains("hook check --agent gemini")) | .name' "$H/.gemini/settings.json")" \
+  "gemini: and BeforeAgent"
+assert_contains "cli hook check --agent codex" \
+  "$(jq -r '.hooks.UserPromptSubmit[].hooks[].command' "$H/.codex/hooks.json")" "codex: and UserPromptSubmit"
 assert_equals "dot-cli-hook-check" \
   "$(jq -r '.hooks.BeforeTool[].hooks[] | select(.command | contains("hook check --agent gemini")) | .name' "$H/.gemini/settings.json")" \
   "gemini: BeforeTool, named"

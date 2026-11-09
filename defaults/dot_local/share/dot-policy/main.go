@@ -5,7 +5,9 @@
 // `dot cli hook policy` and `dot ai policy check`.
 //
 // An agent's PreToolUse hook (Gemini CLI: BeforeTool) runs
-// `dot-policy check --agent <id>` with the tool call as JSON on stdin. The
+// `dot-policy check --agent <id>` with the tool call as JSON on stdin; its
+// prompt hook (UserPromptSubmit, BeforeAgent) runs the same, and a
+// [budget] decides the prompt (budget.go). The
 // rules for the active mode in ~/.config/dotfiles/ai-policy.toml (schema
 // ai-policy.v1) decide it; a denial is printed in the form that agent
 // reads, with the reason, and anything else prints nothing (Gemini CLI:
@@ -147,12 +149,34 @@ func runCheck(args []string, in io.Reader, out, errw io.Writer, getenv func(stri
 		writeDecision(out, "", "dot-policy: "+err.Error())
 		return 0
 	}
-	writeDecision(out, o.agent, decideCall(o, in, getenv))
+	var c Call
+	readErr := json.NewDecoder(io.LimitReader(in, maxCall)).Decode(&c)
+	if readErr == nil && promptEvent(c.Event) {
+		block, warn := checkPrompt(o, c, getenv)
+		writePromptDecision(out, o.agent, block, warn)
+		return 0
+	}
+	writeDecision(out, o.agent, decideCall(o, c, readErr, getenv))
 	return 0
 }
 
-// decideCall is the denial reason for the call on stdin, or "" to allow.
-func decideCall(o opts, in io.Reader, getenv func(string) string) string {
+// checkPrompt is the verdict on a prompt event: the budget, when the policy
+// sets one; a policy that does not load blocks it.
+func checkPrompt(o opts, c Call, getenv func(string) string) (block, warn string) {
+	path := policyPath(o, getenv)
+	p, err := LoadPolicy(path)
+	if errors.Is(err, ErrNoPolicy) {
+		return "", ""
+	}
+	if err != nil {
+		return fmt.Sprintf("dot ai policy: %s is invalid (%v); every prompt is blocked until it is fixed (dot ai policy check)", path, err), ""
+	}
+	return decidePrompt(p, o.agent, c.Session, getenv)
+}
+
+// decideCall is the denial reason for the call c (readErr: it could not be
+// read), or "" to allow.
+func decideCall(o opts, c Call, readErr error, getenv func(string) string) string {
 	path := policyPath(o, getenv)
 	p, err := LoadPolicy(path)
 	if errors.Is(err, ErrNoPolicy) {
@@ -166,8 +190,7 @@ func decideCall(o opts, in io.Reader, getenv func(string) string) string {
 	if err != nil {
 		return fmt.Sprintf("dot ai policy: %v in %s", err, path)
 	}
-	var c Call
-	if err := json.NewDecoder(io.LimitReader(in, maxCall)).Decode(&c); err != nil || c.Tool == "" {
+	if readErr != nil || c.Tool == "" {
 		return "dot ai policy: the hook payload names no tool call"
 	}
 	if why := Decide(rules, c, getenv("HOME")); why != "" {

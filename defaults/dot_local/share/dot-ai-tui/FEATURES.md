@@ -47,6 +47,7 @@ Keep the last column a list of backticked function names.
 | cost | Other delegates' runs in the run log (`dotfiles-ai.db`) count, one session each; Claude and Codex runs there are left to their transcripts | each run | `TestRunLogDelegatesAreCounted` `TestNoRunLogIsNoRows` `TestSinceIsDays` |
 | cost | Token counts of a billion and more read as `1.5B` | any table | `TestHumanTokCountsBillions` |
 | cost | `--tsv` prints `agent/session<TAB>usd` per group, for `dot ai status`'s COST column | `dot ai status` | `TestCostTSV` |
+| cost | `--spend AGENT/SESSION` prints today's cost across every session and that session's own, for the policy's `[budget]` | each prompt, with a budget | `TestCostSpend` |
 
 ## Data gathering
 

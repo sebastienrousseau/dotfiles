@@ -243,11 +243,16 @@ tools = ["read", "search", "shell", "write"]
 models = ["haiku", "sonnet", "claude-sonnet-*"]
 max_input_tokens = 100000
 
+[budget]                      # what agents may spend (dot ai cost show's prices)
+daily_usd = 20                # today, every session together
+session_usd = 5               # one session
 ```
 
-The active mode is the one `dot agent mode set` chose. `dot cli hook install` wires `dot cli hook check` into Claude Code (`PreToolUse`), Gemini CLI (`BeforeTool`) and Codex (`~/.codex/hooks.json`; trust it once in Codex's `/hooks`). A denied call reaches the agent with the reason, such as `dot ai policy (mode ask): tool Write (write) is not allowed`. `dot ai policy show` prints the rules in force for an agent (`--agent codex`) in the active mode, or another (`--mode apply`), and `dot ai policy check` validates the file and names the active mode.
+The active mode is the one `dot agent mode set` chose. `dot cli hook install` wires `dot cli hook check` into Claude Code (`PreToolUse` and `UserPromptSubmit`), Gemini CLI (`BeforeTool` and `BeforeAgent`) and Codex (`~/.codex/hooks.json`, `PreToolUse` and `UserPromptSubmit`; trust it once in Codex's `/hooks`). A denied call reaches the agent with the reason, such as `dot ai policy (mode ask): tool Write (write) is not allowed`. `dot ai policy show` prints the rules in force for an agent (`--agent codex`) in the active mode, or another (`--mode apply`), and `dot ai policy check` validates the file and names the active mode.
 
-It fails closed: a file with an error or an unknown key, a mode it has no rules for, or a missing `dot-policy` binary (chezmoi builds it when Go is installed) denies every tool call until fixed. It is a guardrail, not a sandbox: commands are split at `;`, `&&`, `|` and `$(`, but a script the agent writes and runs is not looked into.
+**Budgets.** With a `[budget]`, each prompt is checked before the agent works on it, against what `dot ai cost show` reports: today's spend across every session (`daily_usd`) and the session's own (`session_usd`), at API list prices; 0 or a missing key is no cap. From 80% of a cap the prompt goes ahead with a warning; at 100% it is blocked, with the reason, such as `dot ai policy: the daily budget of $20.00 is spent ($20.41 today)`, and nothing is sent to the model. Raise the cap, or wait for tomorrow. Budgets need the cockpit binary (`dot-ai-tui`), which reads the spend; a budget whose spend cannot be read blocks every prompt, as a policy that cannot be checked does. Codex and Gemini CLI read the same verdicts in their own forms; Claude Code's was tried with the real CLI (2.1.319), theirs were not. The gateway keeps its own daily cap (`DOT_AI_DAILY_BUDGET`).
+
+It fails closed: a file with an error or an unknown key, a mode it has no rules for, or a missing `dot-policy` binary (chezmoi builds it when Go is installed) denies every tool call, and blocks every prompt, until fixed. It is a guardrail, not a sandbox: commands are split at `;`, `&&`, `|` and `$(`, but a script the agent writes and runs is not looked into.
 
 ## Privacy and safety
 

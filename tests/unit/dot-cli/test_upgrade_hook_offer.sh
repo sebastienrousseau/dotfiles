@@ -57,9 +57,11 @@ assert_equals "1 1" "$(offer DOTFILES_YES=1)" "-y counts as consent"
 test_start "a_wired_agent_is_not_offered"
 rm -f "$MARKER"
 printf 'notify = ["%s/bin/dot", "cli", "hook", "run", "--agent", "codex"]\n' "$(cd "$REPO_ROOT" && pwd)" >"$H/.codex/config.toml"
-# Codex is wired once its hooks.json also runs the policy check (ADR-025).
+# Codex is wired once its hooks.json also runs the policy check (ADR-025)
+# on each tool call and each prompt (its budget, P1.3).
 jq -n --arg c "'$(cd "$REPO_ROOT" && pwd)/bin/dot' cli hook check --agent codex" \
-  '{hooks: {PreToolUse: [{hooks: [{type: "command", command: $c}]}]}}' >"$H/.codex/hooks.json"
+  '{hooks: {PreToolUse: [{hooks: [{type: "command", command: $c}]}],
+    UserPromptSubmit: [{hooks: [{type: "command", command: $c}]}]}}' >"$H/.codex/hooks.json"
 assert_equals "0 0" "$(offer CAN_ASK=1 ANSWER=0)" "nothing to wire, nothing asked"
 assert_false "[[ -f '$MARKER' ]]" "and nothing remembered"
 

@@ -55,6 +55,7 @@ type Policy struct {
 	Mode        map[string]Rules      `toml:"mode"`
 	Agent       map[string]AgentRules `toml:"agent"`
 	Gateway     GatewayRules          `toml:"gateway"`
+	Budget      BudgetRules           `toml:"budget"`
 	meta        toml.MetaData
 }
 
@@ -107,6 +108,9 @@ func (p *Policy) validate() error {
 		}
 	}
 	if err := p.Gateway.validate(); err != nil {
+		return err
+	}
+	if err := p.Budget.validate(); err != nil {
 		return err
 	}
 	return p.validateAgents()

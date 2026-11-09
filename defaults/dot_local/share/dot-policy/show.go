@@ -62,5 +62,11 @@ func showPolicy(out io.Writer, p *Policy, path string, o opts, getenv func(strin
 	if g := p.Gateway; g.MaxInputTokens > 0 {
 		line("gateway.max_input_tokens", fmt.Sprint(g.MaxInputTokens))
 	}
+	if b := p.Budget; b.DailyUSD > 0 {
+		line("budget.daily_usd", fmt.Sprintf("$%.2f", b.DailyUSD))
+	}
+	if b := p.Budget; b.SessionUSD > 0 {
+		line("budget.session_usd", fmt.Sprintf("$%.2f", b.SessionUSD))
+	}
 	return nil
 }

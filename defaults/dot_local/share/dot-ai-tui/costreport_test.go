@@ -218,3 +218,22 @@ func TestCostTSV(t *testing.T) {
 		t.Fatalf("want %q, got %q", want, out)
 	}
 }
+
+// --spend AGENT/SESSION: today's cost across every session, and that
+// session's own, for dot-policy's budget check.
+func TestCostSpend(t *testing.T) {
+	rt := reportFixture(t)
+	out, err := runReport(t, rt, "--spend", "claude/aaaa1111-0000")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Today (2026-11-09): Sonnet 5.5 $10 + bbbb's $2 + Codex $0.50; the
+	// session: $4 yesterday and $10 today.
+	if want := "today\t12.500000\nsession\t14.000000\n"; out != want {
+		t.Fatalf("want %q, got %q", want, out)
+	}
+	out, _ = runReport(t, rt, "--spend", "codex/nobody")
+	if want := "today\t12.500000\nsession\t0.000000\n"; out != want {
+		t.Fatalf("an unknown session costs nothing yet: %q", out)
+	}
+}

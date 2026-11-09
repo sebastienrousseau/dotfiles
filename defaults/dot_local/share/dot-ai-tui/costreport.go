@@ -8,7 +8,9 @@
 //	dot-ai-tui cost --session ID [--days N] [--json]
 //
 // --json prints ai/cost-report.v1 (schemas/cli/ai-cost-report.v1.schema.json);
-// --tsv prints a key<TAB>cost line per group, for dot ai status.
+// --tsv prints a key<TAB>cost line per group, for dot ai status;
+// --spend AGENT/SESSION prints today's and that session's cost, for the
+// budget check (dot-policy).
 package main
 
 import (
@@ -27,9 +29,9 @@ const costReportSchema = "ai/cost-report.v1"
 const costUsage = "usage: dot ai cost show [--by agent|host|day|model|session] [--session ID] [--days N] [--json]"
 
 type costOpts struct {
-	by, session string
-	days        int
-	json, tsv   bool
+	by, session, spend string
+	days               int
+	json, tsv          bool
 }
 
 // costRowJSON: one group of an ai/cost-report.v1 report. InputTokens counts
@@ -64,6 +66,7 @@ type costReportJSON struct {
 var costFlags = map[string]func(*costOpts, string) bool{
 	"--by":      func(o *costOpts, v string) bool { o.by = v; return true },
 	"--session": func(o *costOpts, v string) bool { o.session, o.by = v, "model"; return true },
+	"--spend":   func(o *costOpts, v string) bool { o.spend = v; return true },
 	"--days":    setDays,
 	"--since":   setDays,
 }
@@ -115,6 +118,10 @@ func costReport(rt costRoots, now time.Time, loc *time.Location, host string, ar
 	ix := loadCostIndex(rt, now, o.days+1, loc)
 	_ = ix.save(rt.cache)
 	sessions := append(ix.sessions(), runLogSessions(rt.runlog, from, loc)...)
+	if o.spend != "" {
+		printSpend(out, sessions, o.spend, now.In(loc).Format("2006-01-02"), from)
+		return nil
+	}
 	rep := costReportJSON{Schema: costReportSchema, Generated: now.UTC().Format(time.RFC3339),
 		Host: host, Days: o.days, By: o.by, Rows: []costRowJSON{}, Unpriced: []string{}}
 	if o.session != "" {
@@ -136,6 +143,24 @@ func costReport(rt costRoots, now time.Time, loc *time.Location, host string, ar
 	}
 	printCost(out, rep)
 	return nil
+}
+
+// printSpend: today's cost across every session, and the cost of session
+// (agent/session) over the window, as dot-policy's budget check reads them.
+func printSpend(out io.Writer, sessions []*sessionCost, session, today, from string) {
+	var day, own float64
+	for _, sc := range sessions {
+		mine := sc.Agent+"/"+sc.Session == session
+		for _, r := range sc.Rows {
+			if r.Day == today {
+				day += r.USD
+			}
+			if mine && r.Day >= from {
+				own += r.USD
+			}
+		}
+	}
+	fmt.Fprintf(out, "today\t%.6f\nsession\t%.6f\n", day, own)
 }
 
 // pickSession: the one session whose id is id or starts with it.
