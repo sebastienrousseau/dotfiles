@@ -29,8 +29,9 @@ if ! python3 -c 'import socket;s=socket.socket();s.bind(("127.0.0.1",0));s.close
 fi
 
 WORK="$(mktemp -d)"
-# Keep the auto-generated gateway token out of the real state dir.
-export XDG_STATE_HOME="$WORK/state"
+# Keep the auto-generated gateway token out of the real state dir, and a
+# real AI policy out of the requests.
+export XDG_STATE_HOME="$WORK/state" DOT_AI_POLICY="$WORK/no-policy.toml"
 cleanup() {
   # start_server runs inside $(...), so its PIDs are recorded in a file.
   local p

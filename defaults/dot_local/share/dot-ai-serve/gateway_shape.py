@@ -186,8 +186,21 @@ def shape_request(body, default_model):
     return Shaped(body.get("model") or default_model, system_prompt, _prompt(turns), images, tools)
 
 
+# Tokens an image is estimated at: about what the API charges for one of
+# about a megapixel, the most it keeps without scaling down.
+IMAGE_TOKENS = 1600
+
+
 def _engine_text(shaped):
     return f"{shaped.system}\n\n{shaped.prompt}" if shaped.system else shaped.prompt
+
+
+def estimate_tokens(shaped):
+    """A rough count of the request's input tokens, for the policy's cap:
+    four characters a token for the text and the tool schemas, rounded up,
+    and IMAGE_TOKENS an image."""
+    chars = len(_engine_text(shaped)) + (len(json.dumps(shaped.tools)) if shaped.tools else 0)
+    return -(-chars // 4) + IMAGE_TOKENS * len(shaped.images)
 
 
 def engine_message(shaped):

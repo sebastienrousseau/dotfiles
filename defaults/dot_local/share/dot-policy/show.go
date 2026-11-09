@@ -17,8 +17,8 @@ var ruleOrder = []string{
 }
 
 // runShow is `dot-policy show [--agent A] [--mode M] [--policy F]`: the
-// policy file, its modes, and the rules in force for the agent in the
-// active mode, one non-empty list a line.
+// policy file, its modes, the rules in force for the agent in the active
+// mode, one non-empty list a line, and the [gateway] limits.
 func runShow(args []string, out, errw io.Writer, getenv func(string) string) int {
 	o, err := parseOpts("show", args, errw)
 	if err != nil {
@@ -55,6 +55,12 @@ func showPolicy(out io.Writer, p *Policy, path string, o opts, getenv func(strin
 		if list := *fields[key]; len(list) > 0 {
 			line(key, strings.Join(list, ", "))
 		}
+	}
+	if g := p.Gateway; len(g.Models) > 0 {
+		line("gateway.models", strings.Join(g.Models, ", "))
+	}
+	if g := p.Gateway; g.MaxInputTokens > 0 {
+		line("gateway.max_input_tokens", fmt.Sprint(g.MaxInputTokens))
 	}
 	return nil
 }

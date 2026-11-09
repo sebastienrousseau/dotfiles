@@ -40,6 +40,10 @@ three. The decision has to come from the hook's output, every time.
   `dot-policy` that is missing or exits non-zero: each denies the call and
   says why. With no file, nothing is enforced and the hook returns at once.
 - `dot ai policy check` validates the file and names the active mode.
+- `[gateway]` (0.2.543, plan P1.2) limits the local AI gateway's
+  requests: `models` (globs over the resolved model) and
+  `max_input_tokens`. `dot-policy gateway` decides each request before
+  the engine sees it, and fails closed as the hook does.
 
 ## Consequences
 

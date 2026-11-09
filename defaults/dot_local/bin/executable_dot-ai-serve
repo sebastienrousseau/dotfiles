@@ -43,7 +43,7 @@ sys.path.insert(
     0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "share", "dot-ai-serve")
 )
 from gateway_events import EventReader  # noqa: E402
-from gateway_shape import Shaped, engine_message, shape_request  # noqa: E402
+from gateway_shape import Shaped, engine_message, estimate_tokens, shape_request  # noqa: E402
 from gateway_wire import (  # noqa: E402
     _usage_pair,
     anthropic_response,
@@ -593,6 +593,9 @@ class Handler(BaseHTTPRequestHandler):
             shaped = _shape(body)
         except Refused as exc:
             return self._error(exc.code, str(exc))
+        refusal = policy_refusal(resolve_model(shaped.model), estimate_tokens(shaped))
+        if refusal:
+            return self._error(403, refusal)
         _count("images", len(shaped.images))
         return self._answer(protocol, shaped, bool(body.get("stream")))
 
@@ -661,6 +664,32 @@ def _shape(body):
     if not shaped.prompt and not shaped.system:
         raise Refused(400, "no message content")
     return shaped
+
+
+def policy_refusal(run_model, tokens):
+    """Why the AI policy refuses this request, or None (plan P1.2, ADR-025).
+    With no policy file nothing is checked; with one, dot-policy decides by
+    its [gateway] table, and a dot-policy that is missing or fails refuses
+    every request (fail closed). Its argv carries the resolved model (one of
+    our own literals), a number and a path: nothing the request wrote."""
+    path = os.environ.get("DOT_AI_POLICY") or os.path.join(
+        os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config"), "dotfiles", "ai-policy.toml"
+    )
+    if not os.path.exists(path):
+        return None
+    cmd = [
+        os.environ.get("DOT_POLICY_BIN") or os.path.expanduser("~/.local/bin/dot-policy"),
+        "gateway", "--model", run_model, "--input-tokens", str(tokens), "--policy", path,
+    ]
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=10, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        res = None
+    if res is not None and res.returncode == 0:
+        return None
+    if res is not None and res.returncode == 1 and res.stdout.strip():
+        return res.stdout.strip()
+    return f"dot ai policy: {path} is set but dot-policy is missing or failed; every request is refused"
 
 
 def _count(name, n):

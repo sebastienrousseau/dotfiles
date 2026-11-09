@@ -127,6 +127,8 @@ dot ai gateway serve stop     # stop the gateway and un-route
 
 **Images and tool calls.** Both endpoints take images, base64 or by URL (the API fetches a URL itself), in PNG, JPEG, GIF or WebP. A request's tools reach the model, and its calls come back in each protocol's own form: `tool_use` blocks with `stop_reason: "tool_use"`, or `tool_calls` with `finish_reason: "tool_calls"`, whole or streamed. The client runs them and sends the results in its next request, as it would to the API. Inside the gateway nothing runs them: the engine lists them through a stub MCP server and is allowed none, and the gateway stops it at the end of the model's turn. Only client-defined tools are supported; a server tool such as `web_search` is a `400`. Earlier turns, tool calls and results included, reach the engine as a transcript, and session resumption is out of scope.
 
+**Policy.** With an [enforced policy](#enforced-policy), its `[gateway]` table limits each request before the engine sees it: `models` allows only the models it lists (globs over what the request resolves to, such as `haiku` or `claude-sonnet-*`), and `max_input_tokens` caps the gateway's estimate of its input (four characters a token, 1,600 an image). A refused request gets a `403` with the reason. As for the hooks, a policy that does not load, or a missing `dot-policy`, refuses every request.
+
 **Anthropic's terms.** A Claude subscription signs in for "ordinary use of Claude Code and other native Anthropic applications", and Anthropic says its plan limits assume ordinary, individual use and that it may enforce this without notice ([legal and compliance](https://code.claude.com/docs/en/legal-and-compliance)). The gateway runs the unmodified `claude` CLI on your own machine and login. Pointing other tools' agent loops at it is your call, and the risk to your account is yours; with `claude` signed in with an API key, use is billed to that key instead.
 
 ## The roster
@@ -217,6 +219,10 @@ commands_deny = ["rm -rf *", "git push --force*", "sudo *", "curl * | sh"]
 
 [agent.codex.mode.apply]      # replaces only the lists it sets
 tools = ["read", "search", "shell", "write"]
+
+[gateway]                     # what dot ai gateway serve lets a request use
+models = ["haiku", "sonnet", "claude-sonnet-*"]
+max_input_tokens = 100000
 ```
 
 The active mode is the one `dot agent mode set` chose. `dot cli hook install` wires `dot cli hook check` into Claude Code (`PreToolUse`), Gemini CLI (`BeforeTool`) and Codex (`~/.codex/hooks.json`; trust it once in Codex's `/hooks`). A denied call reaches the agent with the reason, such as `dot ai policy (mode ask): tool Write (write) is not allowed`. `dot ai policy show` prints the rules in force for an agent (`--agent codex`) in the active mode, or another (`--mode apply`), and `dot ai policy check` validates the file and names the active mode.

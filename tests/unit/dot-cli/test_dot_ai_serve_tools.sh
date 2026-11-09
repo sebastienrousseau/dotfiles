@@ -4,7 +4,7 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 # Runs the Python tests for images and tool calls through the local AI
 # gateway (dot-ai-serve, plan P1.2): request shaping, the MCP stub that
-# lists the client's tools, and both endpoints. See
+# lists the client's tools, both endpoints and the policy check. See
 # dot_ai_serve_shape_units.py and dot_ai_serve_tools_units.py.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

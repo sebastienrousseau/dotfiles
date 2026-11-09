@@ -229,6 +229,17 @@ class Events(unittest.TestCase):
         self.assertEqual([], r.feed({"type": "system"})[0])
 
 
+class Tokens(unittest.TestCase):
+    def test_estimate_counts_text_tools_and_images(self):
+        img = {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": PNG}}
+        tool = {"name": "t", "description": "", "inputSchema": {"type": "object"}}
+        self.assertEqual(3, shape.estimate_tokens(shape.Shaped("m", "abcd", "efgh", [], [])), "4 characters a token, rounded up")
+        self.assertEqual(1, shape.estimate_tokens(shape.Shaped("m", "", "a", [], [])))
+        with_tool = shape.estimate_tokens(shape.Shaped("m", "", "", [], [tool]))
+        self.assertEqual(-(-len(json.dumps([tool])) // 4), with_tool)
+        self.assertEqual(1600, shape.estimate_tokens(shape.Shaped("m", "", "", [img], [])))
+
+
 class Stub(unittest.TestCase):
     """gateway_stub.py: the MCP server the engine loads the client's tools
     from. It lists them and refuses every call."""

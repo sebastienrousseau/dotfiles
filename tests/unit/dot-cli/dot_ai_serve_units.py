@@ -24,6 +24,8 @@ from pathlib import Path
 from unittest import mock
 
 sys.dont_write_bytecode = True
+# A real ~/.config/dotfiles/ai-policy.toml must not decide these tests.
+os.environ["DOT_AI_POLICY"] = os.path.join(tempfile.gettempdir(), "dot-ai-serve-tests-no-policy.toml")
 
 REPO = Path(__file__).resolve().parents[3]
 GATEWAY = REPO / "defaults" / "dot_local" / "bin" / "executable_dot-ai-serve"

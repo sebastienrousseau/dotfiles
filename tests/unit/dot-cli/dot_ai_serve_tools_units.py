@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-"""Images and tool calls through dot-ai-serve's endpoints (plan P1.2).
+"""Images and tool calls through dot-ai-serve's endpoints (plan P1.2), and
+the per-request policy check.
 
 Driven by test_dot_ai_serve_tools.sh. Both endpoints run against a mock
 `claude` that records its argv and stdin and prints canned stream-json
@@ -12,12 +13,14 @@ from __future__ import annotations
 
 import http.client
 import json
+import os
 import sys
 import tempfile
 import threading
 import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -182,6 +185,75 @@ class Endpoints(unittest.TestCase):
         self.assertIn("dot_ai_images_total 1\n", text)
         self.assertIn("dot_ai_tool_calls_total 2\n", text)
 
+
+class Policy(unittest.TestCase):
+    """The per-request policy check: dot-policy gateway decides before the
+    engine sees the request; it fails closed."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        engine = self.tmp / "claude"
+        engine.write_text("#!/bin/sh\ncat >/dev/null\necho '{\"type\":\"result\",\"result\":\"ok\",\"usage\":{}}'\n")
+        engine.chmod(0o755)
+        self.policy = self.tmp / "ai-policy.toml"
+        self.bin = self.tmp / "dot-policy"
+        env = {"DOT_AI_CLAUDE_BIN": str(engine), "XDG_STATE_HOME": str(self.tmp / "state"),
+               "DOT_AI_POLICY": str(self.policy), "DOT_POLICY_BIN": str(self.bin)}
+        self.srv = load(env)
+        self.env = mock.patch.dict(os.environ, env)
+        self.env.start()
+        self.srv.API_KEY = "k"
+        self.httpd = self.srv.ThreadingHTTPServer(("127.0.0.1", 0), self.srv.Handler)
+        self.srv.PORT = self.httpd.server_address[1]
+        threading.Thread(target=self.httpd.serve_forever, daemon=True).start()
+
+    def tearDown(self):
+        self.env.stop()
+        self.httpd.shutdown()
+        self.httpd.server_close()
+
+    def fake(self, rc, out=""):
+        self.bin.write_text(f'#!/bin/sh\nprintf "%s\\n" "$@" >"{self.tmp}/args"\nprintf "{out}"\nexit {rc}\n')
+        self.bin.chmod(0o755)
+
+    def post(self, model="cheap"):
+        conn = http.client.HTTPConnection("127.0.0.1", self.srv.PORT, timeout=20)
+        body = {"model": model, "messages": [{"role": "user", "content": "x" * 40}]}
+        conn.request("POST", "/v1/messages", body=json.dumps(body),
+                     headers={"Host": f"127.0.0.1:{self.srv.PORT}", "x-api-key": "k"})
+        resp = conn.getresponse()
+        out = resp.status, resp.read()
+        conn.close()
+        return out
+
+    def test_no_policy_file_runs_nothing(self):
+        self.assertEqual(200, self.post()[0], "no dot-policy needed either")
+
+    def test_an_allowed_request_reaches_the_engine(self):
+        self.policy.write_text("")
+        self.fake(0)
+        self.assertEqual(200, self.post()[0])
+        self.assertEqual(["gateway", "--model", "haiku", "--input-tokens", "10", "--policy", str(self.policy)],
+                         (self.tmp / "args").read_text().splitlines(), "the resolved model and the estimate")
+
+    def test_a_refused_request_is_a_403_with_the_reason(self):
+        self.policy.write_text("")
+        self.fake(1, 'dot ai policy: model \\"haiku\\" is not in gateway.models\\n')
+        status, data = self.post()
+        self.assertEqual(403, status)
+        self.assertEqual('dot ai policy: model "haiku" is not in gateway.models', json.loads(data)["error"]["message"])
+
+    def test_it_fails_closed(self):
+        self.policy.write_text("")
+        for rc, out in ((2, "usage"), (1, ""), (0, "")):
+            with self.subTest(rc=rc):
+                if rc == 0:
+                    self.bin.unlink()
+                else:
+                    self.fake(rc, out)
+                status, data = self.post()
+                self.assertEqual(403, status)
+                self.assertIn("dot-policy is missing or failed; every request is refused", json.loads(data)["error"]["message"])
 
 if __name__ == "__main__":
     unittest.main(verbosity=1)
