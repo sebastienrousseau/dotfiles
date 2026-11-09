@@ -114,7 +114,7 @@ function Export-DotAiPattern {
     .SYNOPSIS
     Write patterns as herdr-core templates
     .DESCRIPTION
-    Runs `dot ai pattern export`: Write patterns as herdr-core templates. Effect: write; arguments pass through.
+    Runs `dot ai pattern export`: Write patterns as herdr-core templates. Effect: read; arguments pass through.
     #>
     [CmdletBinding()]
     param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())

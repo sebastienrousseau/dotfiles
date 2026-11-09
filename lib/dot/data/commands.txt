@@ -62,7 +62,7 @@ cmd|ai inventory show||read|Agents, versions and config
 cmd|ai pattern show|@ai pattern show|read|One prompt pattern
 cmd|ai pattern edit|@ai pattern edit|write|Edit a prompt pattern
 cmd|ai policy check|@ai policy check|read|Validate the AI policy and name the active mode
-cmd|ai pattern export|@ai pattern export|write|Write patterns as herdr-core templates
+cmd|ai pattern export|@ai pattern export|read|Write patterns as herdr-core templates
 cmd|ai send|@ai send|write|Give a background agent text and submit it
 cmd|ai wait|@ai wait|read|Wait until a background agent stops working
 dom|attest|show|@attest|attestation and verification
@@ -414,7 +414,6 @@ nolock|ai start||
 nolock|ai run||
 nolock|ai login||
 nolock|ai pattern edit||
-nolock|ai pattern export||
 nolock|ai send||
 nolock|cli hook run||
 nolock|config edit||

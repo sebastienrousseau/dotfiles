@@ -448,7 +448,7 @@
     },
     {
      "spelling": "ai pattern export",
-     "effect": "write",
+     "effect": "read",
      "summary": "Write patterns as herdr-core templates",
      "built": true,
      "flags": [
@@ -461,8 +461,7 @@
        "value": "name",
        "summary": "Agent the template runs (default claude)"
       }
-     ],
-     "lock": false
+     ]
     },
     {
      "spelling": "ai send",

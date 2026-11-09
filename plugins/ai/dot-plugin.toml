@@ -174,8 +174,7 @@ summary = "Policy file (default ~/.config/dotfiles/ai-policy.toml)"
 [[commands]]
 object = "pattern"
 verb = "export"
-effect = "write"
-lock = false
+effect = "read"
 summary = "Write patterns as herdr-core templates"
 
 [[commands.flags]]
