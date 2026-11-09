@@ -40,6 +40,7 @@ SDK_FILES = {
     "verified-download.sh",
     "ai-roster.sh",
     "lock.sh",
+    "agent-runtime.sh",
 }
 SOURCE = re.compile(r'^\s*(?:source|\.)\s+"([^"]+)"')
 SDK_FORM = re.compile(

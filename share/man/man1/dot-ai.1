@@ -42,6 +42,17 @@ List the pins with a newer release; change nothing
 .TP
 .B dot ai start
 Start an agent. Effect: write. Runs \fBdot\-ai start\fR, the plugin's entry.
+.RS
+.TP
+.B \-\-bg
+In its own terminal (herdr\-core or tmux)
+.TP
+.B \-\-name \fIname\fR
+With \-\-bg: its name (default <agent>\-<n>)
+.TP
+.B \-\-cwd \fIdir\fR
+With \-\-bg: the directory it starts in
+.RE
 .TP
 .B dot ai run
 Run an agent once. Effect: write. Runs \fBdot\-ai run\fR, the plugin's entry.
@@ -80,6 +91,17 @@ One prompt pattern. Effect: read. Runs \fBdot\-ai pattern show\fR, the plugin's 
 .TP
 .B dot ai pattern edit
 Edit a prompt pattern. Effect: write. Runs \fBdot\-ai pattern edit\fR, the plugin's entry.
+.TP
+.B dot ai send
+Give a background agent text and submit it. Effect: write. Runs \fBdot\-ai send\fR, the plugin's entry.
+.TP
+.B dot ai wait
+Wait until a background agent stops working. Effect: read. Runs \fBdot\-ai wait\fR, the plugin's entry.
+.RS
+.TP
+.B \-\-timeout \fIseconds\fR
+Stop waiting after this long (default 180)
+.RE
 .SH OTHER NAMES
 .TP
 .B dot ai\-setup

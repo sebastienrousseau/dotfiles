@@ -287,6 +287,22 @@
      "effect": "write",
      "summary": "Start an agent",
      "built": true,
+     "flags": [
+      {
+       "long": "bg",
+       "summary": "In its own terminal (herdr-core or tmux)"
+      },
+      {
+       "long": "name",
+       "value": "name",
+       "summary": "With --bg: its name (default <agent>-<n>)"
+      },
+      {
+       "long": "cwd",
+       "value": "dir",
+       "summary": "With --bg: the directory it starts in"
+      }
+     ],
      "args": {
       "values": [
        "claude",
@@ -411,6 +427,26 @@
      "summary": "Edit a prompt pattern",
      "built": true,
      "lock": false
+    },
+    {
+     "spelling": "ai send",
+     "effect": "write",
+     "summary": "Give a background agent text and submit it",
+     "built": true,
+     "lock": false
+    },
+    {
+     "spelling": "ai wait",
+     "effect": "read",
+     "summary": "Wait until a background agent stops working",
+     "built": true,
+     "flags": [
+      {
+       "long": "timeout",
+       "value": "seconds",
+       "summary": "Stop waiting after this long (default 180)"
+      }
+     ]
     }
    ],
    "aliases": [
@@ -1798,31 +1834,38 @@
      "spelling": "session select",
      "effect": "read",
      "summary": "Pick a session to open",
-     "built": false
+     "built": true
     },
     {
      "spelling": "session list",
      "effect": "read",
      "summary": "Sessions on this machine",
-     "built": false
+     "built": true
     },
     {
      "spelling": "session new",
      "effect": "write",
      "summary": "Start a named session",
-     "built": false
+     "built": true,
+     "flags": [
+      {
+       "long": "cwd",
+       "value": "dir",
+       "summary": "The directory it starts in"
+      }
+     ]
     },
     {
      "spelling": "session open",
      "effect": "read",
      "summary": "Attach to a session",
-     "built": false
+     "built": true
     },
     {
      "spelling": "session stop",
      "effect": "write",
      "summary": "End a session",
-     "built": false
+     "built": true
     },
     {
      "spelling": "session restore",

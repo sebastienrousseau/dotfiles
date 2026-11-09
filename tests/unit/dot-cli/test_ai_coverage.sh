@@ -38,7 +38,7 @@ CALLS="$WORK/calls"
 export CALLS
 
 # ── lib stubs (exported; the lib's guard keeps ai.sh from redefining) ─────
-export _DOT_LIB_AI_COMMANDS_LOADED=1 _DOT_LIB_AI_INSTALL_LOADED=1
+export _DOT_LIB_AI_COMMANDS_LOADED=1 _DOT_LIB_AI_INSTALL_LOADED=1 _DOT_LIB_AI_RUNTIME_LOADED=1
 _ai_deprecated() { echo "deprecated: $1" >&2; }
 _ai_invoke_provider() {
   printf 'invoke %s <<%s>>\n' "$1" "$2" >>"$CALLS"

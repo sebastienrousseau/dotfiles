@@ -29,7 +29,7 @@ _dot() {
     'agent log') kids_=('show:The agent log') ;;
     'agent mode') kids_=('list:Available modes' 'show:One mode in detail' 'set:Switch mode' 'run:Run a command under a mode') ;;
     'agent policy') kids_=('show:The sandbox policy') ;;
-    'ai') kids_=('pattern:prompt patterns' 'cost:spend by agent and model' 'gateway:the keyless gateway' 'inventory:installed agents and versions' 'list:Installed agents' 'install:Install agents' 'update:Upgrade agent CLIs' 'start:Start an agent' 'run:Run an agent once' 'login:Authenticate an agent' 'check:Check agent installs and auth' 'ask:Ask about the local context') ;;
+    'ai') kids_=('pattern:prompt patterns' 'cost:spend by agent and model' 'gateway:the keyless gateway' 'inventory:installed agents and versions' 'list:Installed agents' 'install:Install agents' 'update:Upgrade agent CLIs' 'start:Start an agent' 'run:Run an agent once' 'login:Authenticate an agent' 'check:Check agent installs and auth' 'ask:Ask about the local context' 'send:Give a background agent text and submit it' 'wait:Wait until a background agent stops working') ;;
     'ai cost') kids_=('show:Spend by agent and model') ;;
     'ai gateway') kids_=('serve:Run the gateway in the foreground' 'show:Gateway statistics') ;;
     'ai inventory') kids_=('show:Agents, versions and config') ;;
@@ -194,12 +194,20 @@ _dot() {
       patflags_=(--style -p)
       [[ "$path_" != 'ai run' ]] || values_=(claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai)
       ;;
-    'ai start' | 'ai start'\ *)
+    'ai send' | 'ai send'\ *)
       flags_=('--help:Show help')
+      ;;
+    'ai start' | 'ai start'\ *)
+      flags_=('--help:Show help' '--bg:In its own terminal (herdr-core or tmux)' '--name:With --bg: its name (default <agent>-<n>)' '--cwd:With --bg: the directory it starts in')
+      valflags_=(--name --cwd)
       [[ "$path_" != 'ai start' ]] || values_=(claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai)
       ;;
     'ai update' | 'ai update'\ *)
       flags_=('--help:Show help' '--check:List the pins with a newer release; change nothing')
+      ;;
+    'ai wait' | 'ai wait'\ *)
+      flags_=('--help:Show help' '--timeout:Stop waiting after this long (default 180)')
+      valflags_=(--timeout)
       ;;
     'attest export' | 'attest export'\ *)
       flags_=('--help:Show help')
@@ -475,7 +483,8 @@ _dot() {
       flags_=('--help:Show help')
       ;;
     'session new' | 'session new'\ *)
-      flags_=('--help:Show help')
+      flags_=('--help:Show help' '--cwd:The directory it starts in')
+      valflags_=(--cwd)
       ;;
     'session open' | 'session open'\ *)
       flags_=('--help:Show help')

@@ -23,11 +23,17 @@ cmd|ai gateway show||read|Gateway statistics
 cmd|ai inventory show||read|Agents, versions and config
 cmd|ai pattern show|@ai pattern show|read|One prompt pattern
 cmd|ai pattern edit|@ai pattern edit|write|Edit a prompt pattern
+cmd|ai send|@ai send|write|Give a background agent text and submit it
+cmd|ai wait|@ai wait|read|Wait until a background agent stops working
 run|ai install --interactive|@ai install --interactive||
 flag|ai update|check|||List the pins with a newer release; change nothing
+flag|ai start|bg|||In its own terminal (herdr-core or tmux)
+flag|ai start|name||name|With --bg: its name (default <agent>-<n>)
+flag|ai start|cwd||dir|With --bg: the directory it starts in
 arg|ai start|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
 flag|ai run|style|p|pattern|Steering pattern (--pattern is the old name)
 arg|ai run|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
+flag|ai wait|timeout||seconds|Stop waiting after this long (default 180)
 alias|ai-setup|removed|ai install --interactive|0.2.538
 alias|ai-query|removed|ai ask|0.2.538
 alias|patterns|removed|ai pattern|0.2.538
@@ -52,3 +58,4 @@ nolock|ai start||
 nolock|ai run||
 nolock|ai login||
 nolock|ai pattern edit||
+nolock|ai send||

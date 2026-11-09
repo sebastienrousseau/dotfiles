@@ -11,7 +11,7 @@ $script:DotChildren = @{
     'agent log' = @(, @('show', 'The agent log'))
     'agent mode' = @(@('list', 'Available modes'), @('show', 'One mode in detail'), @('set', 'Switch mode'), @('run', 'Run a command under a mode'))
     'agent policy' = @(, @('show', 'The sandbox policy'))
-    'ai' = @(@('pattern', 'prompt patterns'), @('cost', 'spend by agent and model'), @('gateway', 'the keyless gateway'), @('inventory', 'installed agents and versions'), @('list', 'Installed agents'), @('install', 'Install agents'), @('update', 'Upgrade agent CLIs'), @('start', 'Start an agent'), @('run', 'Run an agent once'), @('login', 'Authenticate an agent'), @('check', 'Check agent installs and auth'), @('ask', 'Ask about the local context'))
+    'ai' = @(@('pattern', 'prompt patterns'), @('cost', 'spend by agent and model'), @('gateway', 'the keyless gateway'), @('inventory', 'installed agents and versions'), @('list', 'Installed agents'), @('install', 'Install agents'), @('update', 'Upgrade agent CLIs'), @('start', 'Start an agent'), @('run', 'Run an agent once'), @('login', 'Authenticate an agent'), @('check', 'Check agent installs and auth'), @('ask', 'Ask about the local context'), @('send', 'Give a background agent text and submit it'), @('wait', 'Wait until a background agent stops working'))
     'ai cost' = @(, @('show', 'Spend by agent and model'))
     'ai gateway' = @(@('serve', 'Run the gateway in the foreground'), @('show', 'Gateway statistics'))
     'ai inventory' = @(, @('show', 'Agents, versions and config'))
@@ -103,8 +103,10 @@ $script:DotCommands = @{
     'ai pattern list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai pattern show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai run' = @{ Flags = @(@('--help', 'Show help'), @('--style', 'Steering pattern (--pattern is the old name)'), @('-p', 'Steering pattern (--pattern is the old name)')); Values = @('claude', 'codex', 'copilot', 'goose', 'crush', 'amp', 'cursor-agent', 'grok', 'kimi', 'agy', 'kiro', 'sgpt', 'ollama', 'opencode', 'aider', 'autohand', 'vibe', 'qwen', 'zai'); Files = $false; PatternFlags = @('--style', '-p'); ValueFlags = @() }
-    'ai start' = @{ Flags = @(, @('--help', 'Show help')); Values = @('claude', 'codex', 'copilot', 'goose', 'crush', 'amp', 'cursor-agent', 'grok', 'kimi', 'agy', 'kiro', 'sgpt', 'ollama', 'opencode', 'aider', 'autohand', 'vibe', 'qwen', 'zai'); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai send' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai start' = @{ Flags = @(@('--help', 'Show help'), @('--bg', 'In its own terminal (herdr-core or tmux)'), @('--name', 'With --bg: its name (default <agent>-<n>)'), @('--cwd', 'With --bg: the directory it starts in')); Values = @('claude', 'codex', 'copilot', 'goose', 'crush', 'amp', 'cursor-agent', 'grok', 'kimi', 'agy', 'kiro', 'sgpt', 'ollama', 'opencode', 'aider', 'autohand', 'vibe', 'qwen', 'zai'); Files = $false; PatternFlags = @(); ValueFlags = @('--name', '--cwd') }
     'ai update' = @{ Flags = @(@('--help', 'Show help'), @('--check', 'List the pins with a newer release; change nothing')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai wait' = @{ Flags = @(@('--help', 'Show help'), @('--timeout', 'Stop waiting after this long (default 180)')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @('--timeout') }
     'attest export' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'attest show' = @{ Flags = @(@('--help', 'Show help'), @('--json', 'Print JSON'), @('-j', 'Print JSON'), @('--write', 'Write the attestation to a file'), @('-w', 'Write the attestation to a file')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'attest verify' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
@@ -195,7 +197,7 @@ $script:DotCommands = @{
     'security usb apply' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'security usb show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'session list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'session new' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'session new' = @{ Flags = @(@('--help', 'Show help'), @('--cwd', 'The directory it starts in')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @('--cwd') }
     'session open' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'session restore' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'session select' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }

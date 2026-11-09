@@ -601,6 +601,18 @@ function Get-DotSecurityScore {
     dot security score show @Arguments
 }
 
+function Get-DotSession {
+    <#
+    .SYNOPSIS
+    Sessions on this machine
+    .DESCRIPTION
+    Runs `dot session list`: Sessions on this machine. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot session list @Arguments
+}
+
 function Get-DotShellAlias {
     <#
     .SYNOPSIS
@@ -913,6 +925,18 @@ function New-DotSecretKey {
     dot secret key new @Arguments
 }
 
+function New-DotSession {
+    <#
+    .SYNOPSIS
+    Start a named session
+    .DESCRIPTION
+    Runs `dot session new`: Start a named session. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot session new @Arguments
+}
+
 function New-DotTool {
     <#
     .SYNOPSIS
@@ -923,6 +947,18 @@ function New-DotTool {
     [CmdletBinding()]
     param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
     dot tool new @Arguments
+}
+
+function Open-DotSession {
+    <#
+    .SYNOPSIS
+    Attach to a session
+    .DESCRIPTION
+    Runs `dot session open`: Attach to a session. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot session open @Arguments
 }
 
 function Push-DotFleet {
@@ -1031,6 +1067,30 @@ function Save-DotConfig {
     [CmdletBinding()]
     param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
     dot config save @Arguments
+}
+
+function Select-DotSession {
+    <#
+    .SYNOPSIS
+    Pick a session to open
+    .DESCRIPTION
+    Runs `dot session select`: Pick a session to open. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot session select @Arguments
+}
+
+function Send-DotAi {
+    <#
+    .SYNOPSIS
+    Give a background agent text and submit it
+    .DESCRIPTION
+    Runs `dot ai send`: Give a background agent text and submit it. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot ai send @Arguments
 }
 
 function Set-DotAgentContext {
@@ -1285,6 +1345,18 @@ function Start-DotMcp {
     dot mcp serve @Arguments
 }
 
+function Stop-DotSession {
+    <#
+    .SYNOPSIS
+    End a session
+    .DESCRIPTION
+    Runs `dot session stop`: End a session. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot session stop @Arguments
+}
+
 function Sync-DotConfig {
     <#
     .SYNOPSIS
@@ -1489,6 +1561,18 @@ function Update-DotTool {
     dot tool update @Arguments
 }
 
+function Wait-DotAi {
+    <#
+    .SYNOPSIS
+    Wait until a background agent stops working
+    .DESCRIPTION
+    Runs `dot ai wait`: Wait until a background agent stops working. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot ai wait @Arguments
+}
+
 Export-ModuleMember -Function @(
     'Add-DotConfig'
     'Backup-DotDoctor'
@@ -1540,6 +1624,7 @@ Export-ModuleMember -Function @(
     'Get-DotSecurityDisk'
     'Get-DotSecurityPolicy'
     'Get-DotSecurityScore'
+    'Get-DotSession'
     'Get-DotShellAlias'
     'Get-DotShellAliasStatus'
     'Get-DotShellHistory'
@@ -1566,7 +1651,9 @@ Export-ModuleMember -Function @(
     'New-DotSecret'
     'New-DotSecretCert'
     'New-DotSecretKey'
+    'New-DotSession'
     'New-DotTool'
+    'Open-DotSession'
     'Push-DotFleet'
     'Remove-DotCliHook'
     'Remove-DotSecretCert'
@@ -1576,6 +1663,8 @@ Export-ModuleMember -Function @(
     'Restore-DotDoctor'
     'Save-DotAgentCheckpoint'
     'Save-DotConfig'
+    'Select-DotSession'
+    'Send-DotAi'
     'Set-DotAgentContext'
     'Set-DotAgentMode'
     'Set-DotCliRegistry'
@@ -1597,6 +1686,7 @@ Export-ModuleMember -Function @(
     'Start-DotAi'
     'Start-DotAiGateway'
     'Start-DotMcp'
+    'Stop-DotSession'
     'Sync-DotConfig'
     'Test-DotAgent'
     'Test-DotAgentCard'
@@ -1614,4 +1704,5 @@ Export-ModuleMember -Function @(
     'Update-DotShell'
     'Update-DotSystem'
     'Update-DotTool'
+    'Wait-DotAi'
 )

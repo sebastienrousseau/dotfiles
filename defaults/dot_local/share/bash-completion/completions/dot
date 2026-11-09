@@ -37,7 +37,7 @@ _dot() {
     'agent log') words='show' ;;
     'agent mode') words='list show set run' ;;
     'agent policy') words='show' ;;
-    'ai') words='pattern cost gateway inventory list install update start run login check ask' ;;
+    'ai') words='pattern cost gateway inventory list install update start run login check ask send wait' ;;
     'ai cost') words='show' ;;
     'ai gateway') words='serve show' ;;
     'ai inventory') words='show' ;;
@@ -202,12 +202,20 @@ _dot() {
       patflags='--style -p'
       [[ "$path" != 'ai run' ]] || values='claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai'
       ;;
-    'ai start' | 'ai start'\ *)
+    'ai send' | 'ai send'\ *)
       flags='--help'
+      ;;
+    'ai start' | 'ai start'\ *)
+      flags='--help --bg --name --cwd'
+      valflags='--name --cwd'
       [[ "$path" != 'ai start' ]] || values='claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai'
       ;;
     'ai update' | 'ai update'\ *)
       flags='--help --check'
+      ;;
+    'ai wait' | 'ai wait'\ *)
+      flags='--help --timeout'
+      valflags='--timeout'
       ;;
     'attest export' | 'attest export'\ *)
       flags='--help'
@@ -483,7 +491,8 @@ _dot() {
       flags='--help'
       ;;
     'session new' | 'session new'\ *)
-      flags='--help'
+      flags='--help --cwd'
+      valflags='--cwd'
       ;;
     'session open' | 'session open'\ *)
       flags='--help'

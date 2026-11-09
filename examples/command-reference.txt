@@ -33,6 +33,8 @@ dot — one command for this machine. Built commands, by domain:
   dot ai cost show — Spend by agent and model
   dot ai pattern show — One prompt pattern
   dot ai pattern edit — Edit a prompt pattern
+  dot ai send — Give a background agent text and submit it
+  dot ai wait — Wait until a background agent stops working
 
 [attest] attestation and verification
   dot attest show — The workstation attestation
@@ -123,6 +125,13 @@ dot — one command for this machine. Built commands, by domain:
   dot security dns apply — Harden the dns setting
   dot security lock apply — Harden the lock setting
   dot security usb apply — Harden the usb setting
+
+[session] find, open and restore terminal sessions
+  dot session select — Pick a session to open
+  dot session list — Sessions on this machine
+  dot session new — Start a named session
+  dot session open — Attach to a session
+  dot session stop — End a session
 
 [shell] aliases, history, startup caches
   dot shell update — Regenerate the startup caches

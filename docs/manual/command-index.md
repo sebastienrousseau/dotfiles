@@ -49,6 +49,8 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot ai inventory show` | Agents, versions and config *(planned)* |
 | `dot ai pattern show` | One prompt pattern |
 | `dot ai pattern edit` | Edit a prompt pattern |
+| `dot ai send` | Give a background agent text and submit it |
+| `dot ai wait` | Wait until a background agent stops working |
 | `dot attest show` | The workstation attestation |
 | `dot attest export` | Write attestation evidence |
 | `dot attest verify` | Verify evidence |
@@ -138,11 +140,11 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot security lock apply` | Harden the lock setting |
 | `dot security usb show` | Current usb setting *(planned)* |
 | `dot security usb apply` | Harden the usb setting |
-| `dot session select` | Pick a session to open *(planned)* |
-| `dot session list` | Sessions on this machine *(planned)* |
-| `dot session new` | Start a named session *(planned)* |
-| `dot session open` | Attach to a session *(planned)* |
-| `dot session stop` | End a session *(planned)* |
+| `dot session select` | Pick a session to open |
+| `dot session list` | Sessions on this machine |
+| `dot session new` | Start a named session |
+| `dot session open` | Attach to a session |
+| `dot session stop` | End a session |
 | `dot session restore` | Restore saved sessions *(planned)* |
 | `dot shell status` | Shell, startup time and cache state *(planned)* |
 | `dot shell update` | Regenerate the startup caches |

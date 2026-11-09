@@ -8,7 +8,7 @@
 #
 # Every AI CLI, the gateway helper and the /vibe delegator are sandbox stubs
 # that record their argv, so provider dispatch, install mapping and the cost
-# and delegate paths are asserted without a single real tool or network call.
+# and cost paths are asserted without a single real tool or network call.
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -296,49 +296,23 @@ assert_equals 1 "$RC" "rc"
 out_has "curl" "the missing native-installer prerequisite is named"
 out_has "mise" "the missing mise prerequisite is named"
 
-# ── delegate / cost ─────────────────────────────────────────────────────
+# ── cost ────────────────────────────────────────────────────────────────
+# dot ai delegate is retired onto start --bg and wait: test_ai_runtime.sh.
 VIBE_TOOLS="$HOME/.claude/skills/vibe/tools"
 mkdir -p "$VIBE_TOOLS"
-cat >"$VIBE_TOOLS/vibe-delegate" <<STUB
-#!$REAL_BASH
-printf 'vibe-delegate %s\\n' "\$*" >>"\$AI_CALLS"
-STUB
 cat >"$VIBE_TOOLS/delegate-report" <<STUB
 #!$REAL_BASH
 printf 'delegate-report %s\\n' "\$*" >>"\$AI_CALLS"
 STUB
-chmod +x "$VIBE_TOOLS/vibe-delegate" "$VIBE_TOOLS/delegate-report"
+chmod +x "$VIBE_TOOLS/delegate-report"
 
-test_start "delegate_requires_a_prompt"
-ai cmd_ai_delegate
-assert_equals 1 "$RC" "rc"
-out_has "dot ai delegate" "usage"
-
-test_start "delegate_passes_cwd_prompt_and_bounds_to_the_delegator"
-ai cmd_ai_delegate "add a changelog entry" 4 reviewer 90
-assert_equals 0 "$RC" "rc"
-called "vibe-delegate"
-assert_file_contains "$AI_CALLS" "add a changelog entry 4 reviewer 90" "argv forwarded"
-
-test_start "delegate_defaults_the_optional_bounds"
-ai cmd_ai_delegate "just the prompt"
-assert_equals 0 "$RC" "rc"
-assert_file_contains "$AI_CALLS" "just the prompt 10  180" "defaults applied"
-
-test_start "delegate_requires_the_vibe_cli"
-rm -f "$BIN/vibe"
-ai_min cmd_ai_delegate "prompt"
-assert_equals 1 "$RC" "rc"
-out_has "mise use -g pipx:mistral-vibe" "install hint"
-stub vibe
-
-test_start "delegate_reports_a_missing_delegator_tool"
-mv "$VIBE_TOOLS/vibe-delegate" "$VIBE_TOOLS/vibe-delegate.bak"
-ai cmd_ai_delegate "prompt"
+test_start "cost_reports_a_missing_report_tool"
+mv "$VIBE_TOOLS/delegate-report" "$VIBE_TOOLS/delegate-report.bak"
+ai cmd_ai_cost
 assert_equals 1 "$RC" "rc"
 err_has "not found at" "error names the path"
 err_has "chezmoi apply" "hint"
-mv "$VIBE_TOOLS/vibe-delegate.bak" "$VIBE_TOOLS/vibe-delegate"
+mv "$VIBE_TOOLS/delegate-report.bak" "$VIBE_TOOLS/delegate-report"
 
 test_start "cost_forwards_to_the_delegate_report"
 ai cmd_ai_cost --since 7d

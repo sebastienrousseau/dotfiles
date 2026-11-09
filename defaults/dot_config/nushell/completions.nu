@@ -287,6 +287,8 @@ def "nu-complete dot ai" [] {
         { value: "login", description: "Authenticate an agent" }
         { value: "check", description: "Check agent installs and auth" }
         { value: "ask", description: "Ask about the local context" }
+        { value: "send", description: "Give a background agent text and submit it" }
+        { value: "wait", description: "Wait until a background agent stops working" }
     ]
 }
 export extern "dot ai" [
@@ -432,6 +434,11 @@ export extern "dot ai run" [
     ...rest: string
 ]
 
+export extern "dot ai send" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
 def "nu-complete dot ai start" [] {
     [
         { value: "claude", description: "" }
@@ -457,12 +464,21 @@ def "nu-complete dot ai start" [] {
 }
 export extern "dot ai start" [
     value?: string@"nu-complete dot ai start"
+    --bg # In its own terminal (herdr-core or tmux)
+    --name: string # With --bg: its name (default <agent>-<n>)
+    --cwd: string # With --bg: the directory it starts in
     --help(-h) # Show help
     ...rest: string
 ]
 
 export extern "dot ai update" [
     --check # List the pins with a newer release; change nothing
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot ai wait" [
+    --timeout: string # Stop waiting after this long (default 180)
     --help(-h) # Show help
     ...rest: string
 ]
@@ -1428,6 +1444,7 @@ export extern "dot session list" [
 ]
 
 export extern "dot session new" [
+    --cwd: string # The directory it starts in
     --help(-h) # Show help
     ...rest: string
 ]

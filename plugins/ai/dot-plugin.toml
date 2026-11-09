@@ -60,6 +60,20 @@ effect = "write"
 lock = false
 summary = "Start an agent"
 
+[[commands.flags]]
+long = "bg"
+summary = "In its own terminal (herdr-core or tmux)"
+
+[[commands.flags]]
+long = "name"
+value = "name"
+summary = "With --bg: its name (default <agent>-<n>)"
+
+[[commands.flags]]
+long = "cwd"
+value = "dir"
+summary = "With --bg: the directory it starts in"
+
 [commands.args]
 # roster: values
 values = ["claude", "codex", "copilot", "goose", "crush", "amp", "cursor-agent", "grok", "kimi", "agy", "kiro", "sgpt", "ollama", "opencode", "aider", "autohand", "vibe", "qwen", "zai"]
@@ -260,3 +274,19 @@ until = "0.2.538"
 event = "on-apply"
 run = "libexec/hooks/on-apply.sh"
 summary = "AI provider CLI checks (optional)"
+
+[[commands]]
+verb = "send"
+effect = "write"
+lock = false
+summary = "Give a background agent text and submit it"
+
+[[commands]]
+verb = "wait"
+effect = "read"
+summary = "Wait until a background agent stops working"
+
+[[commands.flags]]
+long = "timeout"
+value = "seconds"
+summary = "Stop waiting after this long (default 180)"

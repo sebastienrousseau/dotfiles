@@ -60,6 +60,8 @@ cmd|ai gateway show||read|Gateway statistics
 cmd|ai inventory show||read|Agents, versions and config
 cmd|ai pattern show|@ai pattern show|read|One prompt pattern
 cmd|ai pattern edit|@ai pattern edit|write|Edit a prompt pattern
+cmd|ai send|@ai send|write|Give a background agent text and submit it
+cmd|ai wait|@ai wait|read|Wait until a background agent stops working
 dom|attest|show|@attest|attestation and verification
 cmd|attest show|@attest show|read|The workstation attestation
 cmd|attest export|@attest export|read|Write attestation evidence
@@ -185,11 +187,11 @@ cmd|security lock apply|@security lock apply|write|Harden the lock setting
 cmd|security usb show||read|Current usb setting
 cmd|security usb apply|@security usb apply|write|Harden the usb setting
 dom|session|select||find, open and restore terminal sessions
-cmd|session select||read|Pick a session to open
-cmd|session list||read|Sessions on this machine
-cmd|session new||write|Start a named session
-cmd|session open||read|Attach to a session
-cmd|session stop||write|End a session
+cmd|session select|@session select|read|Pick a session to open
+cmd|session list|@session list|read|Sessions on this machine
+cmd|session new|@session new|write|Start a named session
+cmd|session open|@session open|read|Attach to a session
+cmd|session stop|@session stop|write|End a session
 cmd|session restore||write|Restore saved sessions
 dom|shell|status||aliases, history, startup caches
 obj|shell history|list||shell history
@@ -260,9 +262,13 @@ leg|manual|help --manual||
 leg|docs|help --readme||
 leg|learn|help tour||
 flag|ai update|check|||List the pins with a newer release; change nothing
+flag|ai start|bg|||In its own terminal (herdr-core or tmux)
+flag|ai start|name||name|With --bg: its name (default <agent>-<n>)
+flag|ai start|cwd||dir|With --bg: the directory it starts in
 arg|ai start|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
 flag|ai run|style|p|pattern|Steering pattern (--pattern is the old name)
 arg|ai run|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
+flag|ai wait|timeout||seconds|Stop waiting after this long (default 180)
 flag|attest show|json|j||Print JSON
 flag|attest show|write|w||Write the attestation to a file
 arg|config add||files|
@@ -292,6 +298,7 @@ flag|mcp check|json|j||Print a JSON summary
 flag|security score show|verbose|v||Show detailed scoring
 flag|security score show|quiet|q||Reduce output
 flag|security score show|json|j||Print a JSON summary
+flag|session new|cwd||dir|The directory it starts in
 flag|shell alias status|tiers|||Show which ecosystem tiers are enabled
 flag|system update|yes|y||Answer yes to every question
 flag|system update|globals|||Also update npm, cargo and pipx globals
@@ -400,6 +407,7 @@ nolock|ai start||
 nolock|ai run||
 nolock|ai login||
 nolock|ai pattern edit||
+nolock|ai send||
 nolock|cli hook run||
 nolock|config edit||
 nolock|ui run||

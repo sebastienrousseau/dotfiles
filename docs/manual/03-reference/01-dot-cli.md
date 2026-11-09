@@ -252,7 +252,12 @@ dot ai check                         # health-check fleet + gateway
 dot ai status [--json]               # each agent session of the last 24 h and its state
 dot ai watch                         # follow agents' states; notify when one is blocked
 dot ai watch service on|off|status   # keep dot ai watch running from login (opt-in)
+dot ai start --bg <tool> [task]      # in a terminal of its own; --name N, --cwd DIR
+dot ai send <name> <text>            # give that agent more work
+dot ai wait [<name>] [--timeout S]   # until it stops working (default 180 s)
 ```
+
+`dot ai start --bg` starts an agent in a terminal that outlives the shell: on herdr-core (`dot ai install hc`) when it is installed, else in a detached tmux session. It is named `<tool>-<n>` unless `--name` says otherwise; with a task, it waits up to 30 seconds for the agent's first report, then types the task in. `dot ai send` types more text and submits it. `dot ai wait` returns once the agent stops working (idle, blocked on a question or a permission, an error, or its exit) and prints `name: state`; it exits 124 when the agent still works after the timeout, leaving it running. With no name it waits for every agent started with `--bg` (on herdr-core, the children of the terminal it runs in). On tmux, wait follows the state each agent's hook records with its pane, so an agent without hooks counts as working until the timeout. `dot session open <name>` takes over its terminal. `dot ai delegate` is retired onto these.
 
 `dot ai status` reads the state file each agent's hook writes (`dot cli hook install` wires the hooks), so it needs nothing running: one row per session heard from in the last 24 hours (agent, state, time, session), newest first, with ended sessions left out; `--json` prints the `agent-event.v1` records, one per line. Earlier, `dot ai status` was a deprecated name for `dot ai tools` (now `dot ai list`).
 
@@ -260,6 +265,18 @@ dot ai watch service on|off|status   # keep dot ai watch running from login (opt
 
 Add `--style <name>` (architect, hardener, refactor) to `dot ai run` to steer a prompt.
 The top-level forms (`dot cl`, `dot claude`, `dot ai-setup`, `dot ai-query`) were removed in 0.2.538 and exit 127. A few old `dot ai` verbs (`dot ai dashboard`, `dot ai proxy`) still run with a deprecation notice. See [AI.md](../../AI.md) for the full guide.
+
+### `dot session`
+
+```bash
+dot session                          # pick a session and open it (select)
+dot session list                     # the live ones
+dot session new <name> [--cwd DIR] [command...]   # start one, detached
+dot session open <name>              # put this terminal on it
+dot session stop <name>              # end its program
+```
+
+Sessions are the terminals `dot ai start --bg` runs agents in: herdr-core's when it is installed (`hc ls`, `hc attach`, `hc kill`), else tmux sessions. `new` starts the shell when no command is given. `restore` is planned.
 
 ### `dot mcp`
 

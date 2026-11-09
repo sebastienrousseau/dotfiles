@@ -22,6 +22,8 @@ source "$SCRIPT_DIR/ai/ai-provision.sh"
 source "$SCRIPT_DIR/ai/ai-probe.sh"
 # shellcheck source-path=SCRIPTDIR source=ai/watch-service.sh
 source "$SCRIPT_DIR/ai/watch-service.sh"
+# shellcheck source-path=SCRIPTDIR source=ai/runtime.sh
+source "$SCRIPT_DIR/ai/runtime.sh"
 # shellcheck source-path=SCRIPTDIR source=ai/status.sh
 source "$SCRIPT_DIR/ai/status.sh"
 
@@ -58,6 +60,9 @@ _show_ai_bridge_usage() {
   echo "       dot ai <tool> \"<prompt>\"       # one-shot on a tool"
   echo "       dot ai <tool> --style <name> \"<prompt>\""
   echo "       dot ai chat [tool]             # interactive session"
+  echo "       dot ai start --bg <tool> [task]  # in a terminal of its own (herdr-core, else tmux)"
+  echo "       dot ai send <name> <text>      # give a background agent more work"
+  echo "       dot ai wait [<name>]           # until it stops working (--timeout S, default 180)"
   echo "       dot ai install [tool] [--yes]  # install tools and what they need (asks first)"
   echo "       dot ai status [--json]         # each agent session of the last 24 h and its state"
   echo "       dot ai watch                   # follow agents' states; notify when one is blocked"
@@ -324,7 +329,7 @@ EOF
 _AI_VERBS="chat:cmd_ai_chat install:cmd_ai_install update:cmd_ai_update serve:_ai_serve cost:cmd_ai_cost
 login:cmd_ai_setup doctor:cmd_ai_doctor ask:cmd_ai_query run:_ai_oneshot delegate:cmd_ai_delegate
 corral:cmd_ai_corral corralctl:cmd_ai_corral mcp:cmd_ai_mcp passmcp:cmd_ai_mcp draft:cmd_ai_draft eco:cmd_ai_eco top:cmd_ai_eco
-status:cmd_ai_agent_status watch:cmd_ai_watch"
+status:cmd_ai_agent_status watch:cmd_ai_watch send:cmd_ai_send wait:cmd_ai_wait"
 
 # Deprecated `dot ai` verbs and the bare / unknown forms. `local` keeps
 # its verb in "$@", as it always has.

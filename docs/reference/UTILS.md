@@ -56,6 +56,8 @@ Install, route and run coding agents.
 | `dot ai install` | Install agents |  |
 | `dot ai update` | Upgrade agent CLIs |  |
 | `dot ai start` | Start an agent | `dot ai chat` |
+| `dot ai send` | Give a background agent text and submit it |  |
+| `dot ai wait` | Wait until a background agent stops working |  |
 | `dot ai run` | Run an agent once |  |
 | `dot ai gateway serve` | Run the gateway in the foreground | `dot ai serve` |
 | `dot ai login` | Authenticate an agent |  |
@@ -195,6 +197,18 @@ OS hardening.
 | `dot security dns apply` | Harden the dns setting | `dot dns-doh` |
 | `dot security lock apply` | Harden the lock setting | `dot lock-screen` |
 | `dot security usb apply` | Harden the usb setting | `dot usb-safety` |
+
+### dot session
+
+Named terminals that outlive the shell, on herdr-core, else tmux.
+
+| Command | Description | Was |
+|---------|-------------|-----|
+| `dot session select` | Pick a session to open |  |
+| `dot session list` | Sessions on this machine |  |
+| `dot session new` | Start a named session |  |
+| `dot session open` | Attach to a session |  |
+| `dot session stop` | End a session |  |
 
 ### dot shell
 

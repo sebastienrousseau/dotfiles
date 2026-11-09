@@ -57,6 +57,8 @@ The interface follows ADR-020 (`dot ai <verb>`), modelled on the Claude CLI: bar
 | `dot ai check` | Health-check the roster and the gateway (`dot ai doctor`) |
 | `dot ai status [--json]` | Each agent session of the last 24 h and its state, from the hooks' state files; the cockpit header and the tmux status bar show the same count (`3 agents · 1 blocked`) |
 | `dot ai watch` | Follow agents' states live; a desktop notification when one is blocked |
+| `dot ai start --bg <tool> [task]` | Start an agent in a terminal of its own (herdr-core, else tmux), optionally with a task |
+| `dot ai send <name> <text>` / `dot ai wait [<name>]` | Give a background agent more work; wait until it stops working |
 | `dot ai watch service on\|off\|status` | Keep `dot ai watch` running from login (launchd agent or systemd user service), opt-in |
 | `--style <name>` | Steer any prompt with a pattern (see [Steering styles](#steering-styles)) |
 

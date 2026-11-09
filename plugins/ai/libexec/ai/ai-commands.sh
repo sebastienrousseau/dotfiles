@@ -127,8 +127,13 @@ _ai_serve() {
 }
 
 # cmd_ai_chat [tool] — open an interactive session with a tool. With no
-# tool, fall back to the roster launcher.
+# tool, fall back to the roster launcher; with --bg, start it in a terminal
+# of its own (runtime.sh).
 cmd_ai_chat() {
+  if [[ " $* " == *" --bg "* ]]; then
+    cmd_ai_start_bg "$@"
+    return
+  fi
   if [[ $# -eq 0 ]]; then
     cmd_ai_status
     return
@@ -232,11 +237,11 @@ _ai_install_todo() {
   return 1
 }
 
-# Locate the vibe-delegate / delegate-report tools deployed by the /vibe
+# Locate the delegate-report tool deployed by the /vibe
 # Claude Code skill. Path stays in sync with
 # defaults/dot_claude/skills/vibe/tools/.
 _ai_delegate_tool() {
-  local tool="$1" # vibe-delegate | delegate-report
+  local tool="$1" # delegate-report
   local path="${HOME}/.claude/skills/vibe/tools/${tool}"
   if [[ ! -x "$path" ]]; then
     ui_err "$tool" "not found at $path" >&2
@@ -244,29 +249,6 @@ _ai_delegate_tool() {
     return 1
   fi
   printf '%s\n' "$path"
-}
-
-# cmd_ai_delegate "<prompt>" [max-turns] [agent] [timeout] — background
-# delegation via the same delegator the /vibe slash command uses.
-cmd_ai_delegate() {
-  if [[ $# -lt 1 ]]; then
-    ui_err "Usage" "dot ai delegate \"<prompt>\" [max-turns] [agent] [timeout-secs]"
-    ui_info "Example" "dot ai delegate \"add a CHANGELOG entry\""
-    return 1
-  fi
-  local prompt="$1"
-  shift
-  local max_turns="${1:-10}"
-  local agent="${2:-}"
-  local timeout="${3:-180}"
-  local tool
-  tool="$(_ai_delegate_tool vibe-delegate)" || return 1
-  if ! has_command vibe; then
-    ui_warn "vibe" "not installed"
-    ui_info "Install" "mise use -g pipx:mistral-vibe"
-    return 1
-  fi
-  "$tool" "$(pwd)" "$prompt" "$max_turns" "$agent" "$timeout"
 }
 
 # cmd_ai_cost [args…] — unified AI spend report (wraps delegate-report).

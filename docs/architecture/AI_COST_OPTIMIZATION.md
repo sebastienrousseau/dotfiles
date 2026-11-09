@@ -20,7 +20,8 @@ model for orchestration. Two ideas drive it:
 ## Quick reference
 
 ```sh
-dot ai delegate "rename every UserService method that starts with get to fetch"
+dot ai start --bg vibe "rename every UserService method that starts with get to fetch"
+dot ai wait                # until it stops working
 dot ai cost                # all-time overview
 dot ai cost --since 7      # last 7 days
 dot ai cost --fails        # only failures + breakdown by failure type
@@ -66,7 +67,7 @@ for anything beyond a one-line edit.
 | `vibe` skill | `defaults/dot_claude/skills/vibe/` | `~/.claude/skills/vibe/` | Claude Code slash commands (`/vibe`, `/vibe-report`, etc.) |
 | Delegator binary | `defaults/dot_claude/skills/vibe/tools/executable_vibe-delegate` | `~/.claude/skills/vibe/tools/vibe-delegate` | Runs the cheap-model task in a pseudo-TTY, parses streaming JSON, syntax-checks changes, logs the run |
 | Reporter | `defaults/dot_claude/skills/vibe/tools/executable_delegate-report` | `~/.claude/skills/vibe/tools/delegate-report` | Reads the run log, prints overview / by-model / by-project / failure tables |
-| CLI shim | `plugins/ai/libexec/ai.sh` | `bin/dot ai delegate` / `bin/dot ai cost` | Same delegator + reporter, callable from the terminal without Claude Code (`delegate` works through the domain's fallback route; it is not declared in `plugins/ai/dot-plugin.toml`) |
+| CLI shim | `plugins/ai/libexec/ai.sh` | `bin/dot ai cost` | The reporter, callable from the terminal without Claude Code. `dot ai delegate` is retired: it now runs `dot ai start --bg <agent> "<task>"` and `dot ai wait` (ADR-024) |
 | Unified log hook | `_ai_log_run` in `ai.sh` | runs inside `run_ai_with_context` | Records one run per `dot ai <provider>` invocation through `~/.local/bin/dot-ai-log` |
 | Log store | runtime-managed | `~/.local/share/dotfiles-ai.db` | SQLite, one row per run; `dot ai cost` reads it. `dot-ai-log` imports the legacy `delegate-runs.jsonl` on first write, and the reporter falls back to it |
 
