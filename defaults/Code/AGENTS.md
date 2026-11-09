@@ -256,6 +256,24 @@ starting the requested work.
   that version, because an untagged section is not a release. This is the one
   exception to Initial Version above. Merge Authority (§4) is unchanged: this
   authorises preparing the branches and PRs, not merging them.
+- **Family Publication Completion**: Publishing one member does not publish
+  the ecosystem. Before declaring a coordinated release complete, inventory
+  every ecosystem repository and verify each required publication live:
+  registry artifacts or deployed images, signed tags, release titles and
+  release notes. For pain001, check the core, MCP, LSP, both loaders,
+  mockbank, plugin template, native extension and website explicitly; the
+  PyPI-only suite checker is not a complete ecosystem inventory. State any
+  separately versioned members and their policy rather than silently
+  excluding them. A maintainer decides whether they join lockstep; never
+  infer permission to jump a published version. Repair missing publications
+  within the authorized release and report any unresolved member by name.
+  A prepared branch, merged PR or bumped manifest is not a publication.
+  The pain001 lockstep inventory is nine repositories: pain001,
+  pain001-mcp, pain001-lsp, pain001-loader-mt101, pain001-loader-xlsx,
+  pain001-mockbank, pain001-plugin-template, pain001-fast and
+  pain001.github.io (pain001.com). The maintainer authorized the scaffold,
+  native extension and website to join the suite at 0.0.82; preserve their
+  older published tags and advance subsequent releases together by one.
 - **Release Consistency**: Before publishing, verify every version-bearing
   source, nested package manifest, lockfile root package, generated packaging
   manifest, README install example, CI/action reference, and pre-commit revision.
@@ -279,7 +297,7 @@ starting the requested work.
      5. `**Full Changelog**: https://github.com/<owner>/<repo>/compare/<prev_tag>...<curr_tag>`.
      Only the Highlights are written by hand; compose the rest from release artifacts and PR metadata.
   5. **Mandatory Post-Publish Audit & Immediate Remediation**:
-     - After any release is published (or completion of the release workflow), the agent MUST inspect the live GitHub release (`gh release view <tag> --json title,body`).
+     - After any release is published (or completion of the release workflow), the agent MUST inspect the live GitHub release (`gh release view <tag> --json name,body`; the release title is the `name` field, as `gh` has no `title` field).
      - If the title or notes deviate in ANY way, the agent MUST immediately correct it using `gh release edit <tag> --title "<PROJECT_NAME> <VERSION>" --notes-file <path>` before considering the task complete.
 - **Release Preflight Is Blocking**: A release or tag MUST NOT be pushed until
   an automated preflight proves that the repository has zero open Dependabot
@@ -535,7 +553,7 @@ use” and keep commands runnable by copy and paste.
 ## 8. Portfolio Rollout and Enforcement
 
 1. **Audit:** Run
-   `Private/Other/code-portfolio-compliance/tools/audit_compliance.py` across
+   `Public/Python/code-portfolio-compliance/tools/audit_compliance.py` across
    repository roots and generate the Markdown, CSV, and JSON reports. Generated
    reports MUST NOT be hand-edited.
 2. **Template:** Centralize reusable CI workflows and update consumers by pinned
