@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
+# Sourced by plugins/ai/libexec/ai.sh; inherits set -euo pipefail.
 # `dot ai watch service on|off|status`: keep `dot-ai-tui watch` (dot ai
 # watch) running from login, opt-in, as a launchd agent on macOS or a
 # systemd user service on Linux. on writes and loads it, off unloads and
@@ -16,7 +17,6 @@
 # DOT_LAUNCHCTL, DOT_SYSTEMCTL, DOT_SYSTEM_OS, DOT_LAUNCH_AGENTS and
 # DOT_SYSTEMD_USER, as for `dot system schedule`, so tests never touch the
 # real agents.
-# Sourced by plugins/ai/libexec/ai.sh; inherits set -euo pipefail.
 # Bash 3.2 compatible (macOS /bin/bash).
 
 DOT_AI_WATCH_LABEL="com.sebastienrousseau.dot-ai-watch"
