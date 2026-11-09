@@ -17,97 +17,106 @@ def _usage_pair(usage):
 
 
 # ---------------------------------------------------------------------------
-# Response builders for each protocol.
+# Response builders for each protocol. The engine's events are ("delta",
+# text), ("tool", {"id", "name", "input"}) for each tool call the model
+# made, then ("done", usage, error). A turn with tool calls ends with them.
 # ---------------------------------------------------------------------------
-def anthropic_response(model, text, usage):
+def _stop(calls, err, ok):
+    """The stop or finish reason: error, the tool-call reason, or ok."""
+    if err:
+        return "error"
+    return {"anthropic": "tool_use", "openai": "tool_calls"}[ok[0]] if calls else ok[1]
+
+
+def _openai_call(call, index=None):
+    out = {
+        "id": call["id"],
+        "type": "function",
+        "function": {"name": call["name"], "arguments": json.dumps(call["input"])},
+    }
+    return out if index is None else {"index": index, **out}
+
+
+def anthropic_response(model, text, usage, calls=()):
     inp, out = _usage_pair(usage)
+    content = [{"type": "text", "text": text}] if text or not calls else []
+    content += [{"type": "tool_use", **c} for c in calls]
     return {
         "id": f"msg_{uuid.uuid4().hex[:24]}",
         "type": "message",
         "role": "assistant",
         "model": model,
-        "content": [{"type": "text", "text": text}],
-        "stop_reason": "end_turn",
+        "content": content,
+        "stop_reason": _stop(calls, None, ("anthropic", "end_turn")),
         "stop_sequence": None,
         "usage": {"input_tokens": inp, "output_tokens": out},
     }
 
 
-def openai_response(model, text, usage):
+def openai_response(model, text, usage, calls=()):
     inp, out = _usage_pair(usage)
+    message = {"role": "assistant", "content": text if text or not calls else None}
+    if calls:
+        message["tool_calls"] = [_openai_call(c) for c in calls]
     return {
         "id": f"chatcmpl-{uuid.uuid4().hex[:24]}",
         "object": "chat.completion",
         "created": int(time.time()),
         "model": model,
         "choices": [
-            {
-                "index": 0,
-                "message": {"role": "assistant", "content": text},
-                "finish_reason": "stop",
-            }
+            {"index": 0, "message": message, "finish_reason": _stop(calls, None, ("openai", "stop"))}
         ],
-        "usage": {
-            "prompt_tokens": inp,
-            "completion_tokens": out,
-            "total_tokens": inp + out,
-        },
+        "usage": {"prompt_tokens": inp, "completion_tokens": out, "total_tokens": inp + out},
     }
+
+
+def _event(event, data):
+    return f"event: {event}\ndata: {json.dumps({'type': event, **data})}\n\n".encode()
+
+
+def _anthropic_tool_block(index, call):
+    """The three events that stream one tool_use block."""
+    start = {"type": "tool_use", "id": call["id"], "name": call["name"], "input": {}}
+    yield _event("content_block_start", {"index": index, "content_block": start})
+    delta = {"type": "input_json_delta", "partial_json": json.dumps(call["input"])}
+    yield _event("content_block_delta", {"index": index, "delta": delta})
+    yield _event("content_block_stop", {"index": index})
 
 
 def anthropic_sse(model, gen, on_done):
     """Protocol-correct Anthropic SSE that streams deltas from `gen` live;
     on_done(input_tokens, output_tokens, error) runs once it has ended."""
-    mid = f"msg_{uuid.uuid4().hex[:24]}"
-
-    def ev(event, data):
-        return f"event: {event}\ndata: {json.dumps(data)}\n\n".encode()
-
-    yield ev(
-        "message_start",
-        {
-            "type": "message_start",
-            "message": {
-                "id": mid,
-                "type": "message",
-                "role": "assistant",
-                "model": model,
-                "content": [],
-                "stop_reason": None,
-                "usage": {"input_tokens": 0, "output_tokens": 0},
-            },
-        },
-    )
-    yield ev(
-        "content_block_start",
-        {"type": "content_block_start", "index": 0, "content_block": {"type": "text", "text": ""}},
-    )
-    usage, err = {}, None
+    message = {
+        "id": f"msg_{uuid.uuid4().hex[:24]}",
+        "type": "message",
+        "role": "assistant",
+        "model": model,
+        "content": [],
+        "stop_reason": None,
+        "usage": {"input_tokens": 0, "output_tokens": 0},
+    }
+    yield _event("message_start", {"message": message})
+    yield _event("content_block_start", {"index": 0, "content_block": {"type": "text", "text": ""}})
+    usage, err, calls, text_open = {}, None, [], True
     for item in gen:
         if item[0] == "delta":
-            yield ev(
-                "content_block_delta",
-                {
-                    "type": "content_block_delta",
-                    "index": 0,
-                    "delta": {"type": "text_delta", "text": item[1]},
-                },
-            )
+            yield _event("content_block_delta", {"index": 0, "delta": {"type": "text_delta", "text": item[1]}})
+        elif item[0] == "tool":
+            if text_open:
+                yield _event("content_block_stop", {"index": 0})
+                text_open = False
+            calls.append(item[1])
+            yield from _anthropic_tool_block(len(calls), item[1])
         else:
             _, usage, err = item
-    yield ev("content_block_stop", {"type": "content_block_stop", "index": 0})
+    if text_open:
+        yield _event("content_block_stop", {"index": 0})
     inp, out = _usage_pair(usage)
-    yield ev(
-        "message_delta",
-        {
-            "type": "message_delta",
-            "delta": {"stop_reason": "error" if err else "end_turn"},
-            "usage": {"output_tokens": out},
-        },
-    )
+    stop = _stop(calls, err, ("anthropic", "end_turn"))
+    yield _event("message_delta", {"delta": {"stop_reason": stop}, "usage": {"output_tokens": out}})
     if err:
-        yield ev("error", {"type": "error", "error": {"type": "engine_error", "message": err}})
-    yield ev("message_stop", {"type": "message_stop"})
+        yield _event("error", {"error": {"type": "engine_error", "message": err}})
+    yield _event("message_stop", {})
     on_done(inp, out, err)
 
 
@@ -128,13 +137,16 @@ def openai_sse(model, gen, on_done):
         return f"data: {json.dumps(data)}\n\n".encode()
 
     yield chunk({"role": "assistant"})
-    usage, err = {}, None
+    usage, err, calls = {}, None, 0
     for item in gen:
         if item[0] == "delta":
             yield chunk({"content": item[1]})
+        elif item[0] == "tool":
+            yield chunk({"tool_calls": [_openai_call(item[1], calls)]})
+            calls += 1
         else:
             _, usage, err = item
-    yield chunk({}, finish="stop" if not err else "error")
+    yield chunk({}, finish=_stop(calls, err, ("openai", "stop")))
     yield b"data: [DONE]\n\n"
     inp, out = _usage_pair(usage)
     on_done(inp, out, err)

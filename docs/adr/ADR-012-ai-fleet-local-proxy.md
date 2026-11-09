@@ -17,6 +17,15 @@ Accepted; command spellings superseded by [ADR-020](ADR-020-command-naming-syste
 > new spelling. `dot ai serve`, `dot ai dashboard` and `dot ai proxy`
 > still reach the old `plugins/ai/libexec/ai.sh` route through the
 > domain's fallback.
+>
+> **Update (0.2.543):** the gateway now forwards images and returns tool
+> calls (plan P1.2). The engine, still the `claude` CLI, takes stream-json
+> input with image blocks, and sees a request's tools through a stub MCP
+> server it may not call; the gateway ends it at the API's end of a
+> tool-use turn and returns the calls to the client. The "Scope (v2)" limits
+> below no longer hold for images and tools. A warm pool of engines was
+> measured and not built: about 0.1 to 0.35 s off a 1.4 s request, within
+> run-to-run noise, for one idle `claude` process each.
 
 ## Date
 

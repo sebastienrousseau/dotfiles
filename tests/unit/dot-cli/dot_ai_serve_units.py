@@ -119,20 +119,25 @@ class Shaping(unittest.TestCase):
         self.srv = load()
 
     def test_text_of_block_kinds(self):
-        text = self.srv._text_of(
+        images = []
+        png = {"type": "base64", "media_type": "image/png", "data": "iVBORw0KGgo="}
+        text = sys.modules["gateway_shape"].text_of(
             [
                 {"type": "text", "text": "a"},
-                {"type": "image", "source": {}},
+                {"type": "image", "source": png},
                 {"type": "tool_result", "content": "b"},
                 "c",
                 {"type": "other"},
-            ]
+                {"type": "thinking", "text": "hidden"},
+            ],
+            images,
         )
-        self.assertEqual("a\n[image attached — not forwarded; the engine is text-only]\nb\nc", text)
-        self.assertEqual("", self.srv._text_of(42))
+        self.assertEqual("a\n[image 1]\n[tool result (id ): b]\nc", text)
+        self.assertEqual([{"type": "image", "source": png}], images)
+        self.assertEqual("", sys.modules["gateway_shape"].text_of(42, images))
 
     def test_shape_request_turns_and_system(self):
-        model, system, prompt = self.srv.shape_request(
+        shaped = self.srv.shape_request(
             {
                 "model": "opus",
                 "system": "be brief",
@@ -143,11 +148,13 @@ class Shaping(unittest.TestCase):
                     {"role": "user", "content": ""},
                     {"role": "user", "content": "q2"},
                 ],
-            }
+            },
+            "sonnet",
         )
-        self.assertEqual("opus", model)
-        self.assertEqual("be brief\n\nsys2", system)
-        self.assertEqual("User: q1\n\nAssistant: a1\n\nUser: q2\n\nAssistant:", prompt)
+        self.assertEqual("opus", shaped.model)
+        self.assertEqual("be brief\n\nsys2", shaped.system)
+        self.assertEqual("User: q1\n\nAssistant: a1\n\nUser: q2\n\nAssistant:", shaped.prompt)
+        self.assertEqual("sonnet", self.srv.shape_request({"messages": []}, "sonnet").model)
 
 
 class Engine(unittest.TestCase):
@@ -310,7 +317,7 @@ class EngineHardening(unittest.TestCase):
         env = {"DOT_AI_CLAUDE_BIN": mock_engine(self.tmp, body), "DOT_AI_TIMEOUT": "5"}
         srv = load(env)
         with mock.patch.dict(os.environ, env):
-            text, _, err = srv.run_claude("sonnet", "", "hi")
+            text, _, err, _ = srv.run_claude("sonnet", "", "hi")
         self.assertIsNone(err)
         self.assertEqual("ok", text)
 
