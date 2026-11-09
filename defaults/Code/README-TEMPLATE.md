@@ -15,7 +15,7 @@ Releases adhere strictly to https://github.com/sebastienrousseau/passmcp/release
 </p>
 
 <p align="center">
-  <a href="{{REPO_URL}}/actions"><img src="https://img.shields.io/github/actions/workflow/status/{{REPO_DOMAIN_AND_PATH}}/ci.yml?style=for-the-badge&logo=github" alt="Build" height="28" /></a>
+  <a href="{{REPO_URL}}/actions"><img src="https://img.shields.io/github/actions/workflow/status/{{REPO_SLUG}}/ci.yml?style=for-the-badge&logo=github" alt="Build" height="28" /></a>
   <a href="{{REGISTRY_URL}}"><img src="{{REGISTRY_BADGE_IMAGE}}?style=for-the-badge&color=fc8d62&logo={{ECOSYSTEM_LOGO}}" alt="Registry" height="28" /></a>
   <a href="{{API_DOCS_URL}}"><img src="{{API_DOCS_BADGE_IMAGE}}?style=for-the-badge&labelColor=555555&logo={{DOCS_LOGO}}" alt="Docs" height="28" /></a>
   <a href="https://scorecard.dev/viewer/?uri={{REPO_DOMAIN_AND_PATH}}"><img src="https://img.shields.io/ossf-scorecard/{{REPO_DOMAIN_AND_PATH}}?style=for-the-badge&label=OpenSSF%20Scorecard&logo=openssf" alt="OpenSSF Scorecard" height="28" /></a>
