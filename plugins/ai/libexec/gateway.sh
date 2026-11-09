@@ -44,11 +44,17 @@ gw_key() {
   printf '%s' "$key"
 }
 
-gw_show() {
-  local json="${1:-}" host="${DOT_AI_HOST:-127.0.0.1}" key url code
+# gw_url: where the gateway answers. A wildcard bind is reached on loopback.
+gw_url() {
+  local host="${DOT_AI_HOST:-127.0.0.1}"
   [[ "$host" != 0.0.0.0 && "$host" != "::" ]] || host=127.0.0.1
   [[ "$host" != *:* ]] || host="[$host]"
-  url="http://$host:${DOT_AI_PORT:-3456}"
+  printf 'http://%s:%s' "$host" "${DOT_AI_PORT:-3456}"
+}
+
+gw_show() {
+  local json="${1:-}" key url code
+  url="$(gw_url)"
   key="$(gw_key)"
   [[ -n "$key" ]] || {
     ui_err "dot ai gateway" "no gateway token: set DOT_AI_API_KEY, or start the gateway with dot ai gateway serve" >&2

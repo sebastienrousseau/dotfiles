@@ -80,6 +80,14 @@ test_start "json_is_the_usage_report"
 show --json
 assert_equals "0|ai/gateway-usage.v1|3" "$RC|$(jq -r '.schema' <<<"$OUT")|$(jq -r '.requests' <<<"$OUT")" "the report, with its schema id"
 
+test_start "a_wildcard_bind_is_reached_on_loopback"
+for h in 0.0.0.0 ::; do
+  E=(DOT_AI_HOST="$h")
+  show
+  assert_equals "0" "$RC" "DOT_AI_HOST=$h: exit 0"
+  assert_contains "gateway      http://127.0.0.1:$PORT, up " "$OUT" "DOT_AI_HOST=$h: asks 127.0.0.1"
+done
+
 test_start "the_api_key_wins_over_the_token_file"
 E=(DOT_AI_API_KEY=wrong)
 show
@@ -95,6 +103,12 @@ show
 assert_equals "1" "$RC" "exit 1"
 assert_contains "no gateway answers on http://127.0.0.1:$PORT" "$OUT" "says where it looked"
 assert_contains "dot ai gateway serve" "$OUT" "and how to start one"
+
+test_start "an_ipv6_host_is_bracketed"
+E=(DOT_AI_HOST=::1)
+show
+assert_contains "no gateway answers on http://[::1]:$PORT" "$OUT" "the URL brackets it"
+E=()
 
 test_start "no_token_at_all"
 rm -f "$STATE/dot/ai/serve/gateway.token"
