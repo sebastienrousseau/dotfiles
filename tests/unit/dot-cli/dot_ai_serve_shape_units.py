@@ -296,7 +296,7 @@ class Wire(unittest.TestCase):
         self.done = []
 
     def test_anthropic_text_stream(self):
-        gen = iter([("delta", "Hel"), ("delta", "lo"), ("done", {"input_tokens": 4, "output_tokens": 2}, None)])
+        gen = iter([("delta", "Good "), ("delta", "day"), ("done", {"input_tokens": 4, "output_tokens": 2}, None)])
         evs = sse_events(self.wire.anthropic_sse("m", gen, lambda *a: self.done.append(a)))
         self.assertEqual(
             ["message_start", "content_block_start", "content_block_delta", "content_block_delta",
@@ -307,7 +307,7 @@ class Wire(unittest.TestCase):
         start = evs[0][1]["message"]
         self.assertEqual(("message", "assistant", "m", []), (start["type"], start["role"], start["model"], start["content"]))
         self.assertTrue(start["id"].startswith("msg_"))
-        self.assertEqual({"type": "text_delta", "text": "lo"}, evs[3][1]["delta"])
+        self.assertEqual({"type": "text_delta", "text": "day"}, evs[3][1]["delta"])
         self.assertEqual(0, evs[4][1]["index"])
         self.assertEqual({"stop_reason": "end_turn"}, evs[5][1]["delta"])
         self.assertEqual({"output_tokens": 2}, evs[5][1]["usage"])
