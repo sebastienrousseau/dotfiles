@@ -53,7 +53,7 @@ The interface follows ADR-020 (`dot ai <verb>`), modelled on the Claude CLI: bar
 | `dot ai install [all\|<tool>] [--yes]` | Install all missing tools, or one, with what they need (asks first) |
 | `dot ai gateway serve [stop\|status]` | Start the local Claude gateway **and** route the other tools through it (`dot ai serve`) |
 | `dot ai gateway show [--json]` | The running gateway's requests, tokens, tool calls and cost |
-| `dot ai cost show` | Spend report across providers (`dot ai cost`) |
+| `dot ai cost show [--by agent\|host\|day\|model\|session] [--session ID] [--days N] [--json]` | What agent sessions cost (`dot ai cost`) |
 | `dot ai policy show [--agent A] [--mode M]` | The [enforced policy](#enforced-policy)'s rules in force for an agent (`dot ai policy`) |
 | `dot ai policy check` | Validate the policy and name the active mode |
 | `dot ai login [tool]` | Authenticate a tool |
@@ -128,7 +128,7 @@ dot ai gateway serve stop     # stop the gateway and un-route
 
 **Images and tool calls.** Both endpoints take images, base64 or by URL (the API fetches a URL itself), in PNG, JPEG, GIF or WebP. A request's tools reach the model, and its calls come back in each protocol's own form: `tool_use` blocks with `stop_reason: "tool_use"`, or `tool_calls` with `finish_reason: "tool_calls"`, whole or streamed. The client runs them and sends the results in its next request, as it would to the API. Inside the gateway nothing runs them: the engine lists them through a stub MCP server and is allowed none, and the gateway stops it at the end of the model's turn. Only client-defined tools are supported; a server tool such as `web_search` is a `400`. Earlier turns, tool calls and results included, reach the engine as a transcript, and session resumption is out of scope.
 
-**Statistics.** `dot ai gateway show` summarises the running gateway: requests, errors, tokens, images, tool calls and cost, in all and per model, against the daily budget. A request costs what the `claude` CLI reports for it; a turn that ends in tool calls is stopped before the CLI reports one, and is priced from the current models' list prices (`DOT_AI_PRICING` overrides them). `--json` prints the report as `ai/gateway-usage.v1` ([schema](../schemas/cli/ai-gateway-usage.v1.schema.json)).
+**Statistics.** `dot ai gateway show` summarises the running gateway: requests, errors, tokens, images, tool calls and cost, in all and per model, against the daily budget. A request costs what the `claude` CLI reports for it; a turn that ends in tool calls is stopped before the CLI reports one, and is priced from the current models' list prices (`DOT_AI_PRICING` overrides them). Each request is also a line of `$XDG_STATE_HOME/dot/ai/serve/usage.jsonl` (its time, the model's id, its tokens and the CLI's cost: never a prompt or an answer), which `dot ai cost show` reads; at 20 MB the log is set aside under a dated name. `--json` prints the report as `ai/gateway-usage.v1` ([schema](../schemas/cli/ai-gateway-usage.v1.schema.json)).
 
 **Policy.** With an [enforced policy](#enforced-policy), its `[gateway]` table limits each request before the engine sees it: `models` allows only the models it lists (globs over what the request resolves to, such as `haiku` or `claude-sonnet-*`), and `max_input_tokens` caps the gateway's estimate of its input (four characters a token, 1,600 an image). A refused request gets a `403` with the reason. As for the hooks, a policy that does not load, or a missing `dot-policy`, refuses every request.
 
@@ -171,7 +171,23 @@ These tools are not installed for you. Install what you want with `dot ai instal
 
 ## Run cost and telemetry
 
-Every run through the bridge is logged to a local SQLite database (`~/.local/share/dotfiles-ai.db`). `dot ai cost show` reports spend across providers, and the cockpit's cost panel and recent-runs list read from the same log. Token-level cost is populated for providers that surface it (and for everything routed through `dot ai gateway serve`).
+`dot ai cost show` reports what agent sessions cost, read from what each agent keeps on disk:
+
+- **Claude Code**: each request in its transcripts (`~/.claude/projects`, subagents included), at the model's API list price: input, 5-minute and 1-hour cache writes, cache reads (each model's own read price), output, long-prompt prices, fast mode and US-only inference. Claude Code also records its own figure for a run (`cost-state`); where it reports more than the run's transcript logged, the difference counts too.
+- **Codex**: what each rollout's token totals grew by (`~/.codex/sessions`), at OpenAI's prices for the model.
+- **The gateway**: its usage log, at Claude Code's own figure for each request.
+- **Other delegates** (the /vibe skill's Mistral Vibe, say): their runs in the run log, `~/.local/share/dotfiles-ai.db`.
+
+```bash
+dot ai cost show                    # last 30 days, by agent
+dot ai cost show --by day --days 7  # or by host, model, session
+dot ai cost show --session 3dabe8e1 # one session (an id or a unique prefix), by model
+dot ai cost show --json             # ai/cost-report.v1
+```
+
+Costs are at API list prices: on a subscription they are what the tokens would cost, not a bill. A model with no known price is listed, with its tokens, rather than guessed. Only usage is read, never a prompt or a reply. The first run reads the last 30 days of transcripts (about a second for 200 MB); an index in `~/.cache/dot/ai/cost-index.json` keeps its place, so later runs read only what was appended. The cockpit (`dot-ai-tui`) is needed: `DOTFILES_AI=1 chezmoi apply` builds it.
+
+The run log also feeds the cockpit's recent-runs list, and the /vibe skill's `delegate-report` still reports delegate runs in detail (failures, files changed).
 
 ## Old command names
 
@@ -226,6 +242,7 @@ tools = ["read", "search", "shell", "write"]
 [gateway]                     # what dot ai gateway serve lets a request use
 models = ["haiku", "sonnet", "claude-sonnet-*"]
 max_input_tokens = 100000
+
 ```
 
 The active mode is the one `dot agent mode set` chose. `dot cli hook install` wires `dot cli hook check` into Claude Code (`PreToolUse`), Gemini CLI (`BeforeTool`) and Codex (`~/.codex/hooks.json`; trust it once in Codex's `/hooks`). A denied call reaches the agent with the reason, such as `dot ai policy (mode ask): tool Write (write) is not allowed`. `dot ai policy show` prints the rules in force for an agent (`--agent codex`) in the active mode, or another (`--mode apply`), and `dot ai policy check` validates the file and names the active mode.

@@ -15,7 +15,7 @@ AI|ai chat|Start an interactive AI session with a chosen tool|Subcommand — e.g
 AI|ai tools|Show installed AI CLI tools and their versions|Subcommand — e.g. dot ai tools
 AI|ai install|Install AI CLI tools via mise/native installers|Subcommand — e.g. dot ai install
 AI|ai serve|Run the local AI gateway/proxy that routes non-Claude providers|Subcommand — e.g. dot ai serve
-AI|ai cost|Report AI spend across every provider from the unified run log|Subcommand — e.g. dot ai cost --since 7
+AI|ai cost|What agent sessions cost, from their transcripts, the gateway and the run log|Subcommand — e.g. dot ai cost show --by day --days 7
 AI|ai login|Interactive setup/authentication for installed AI CLI tools|Subcommand — e.g. dot ai login
 AI|ai doctor|Diagnose AI tooling configuration and connectivity|Subcommand — e.g. dot ai doctor
 AI|ai ask|Context-aware RAG query over your dotfiles|Subcommand — e.g. dot ai ask "where is theme switch handled"

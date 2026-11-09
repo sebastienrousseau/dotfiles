@@ -15,6 +15,9 @@ on:
       # ai/gateway-usage.v1: the gateway and its schema test
       - 'defaults/dot_local/bin/executable_dot-ai-serve'
       - 'tests/unit/dot-cli/test_gateway_usage_schema.py'
+      # ai/cost-report.v1: the cockpit's report fixture and its schema test
+      - 'defaults/dot_local/share/dot-ai-tui/testdata/cost-report.json'
+      - 'tests/unit/dot-cli/test_cost_report_schema.py'
       # CLI-contract lint (ADR-020): manifests, routes, the command table
       # and its generator, the binary it runs, and the version that expires
       # deprecated names.
@@ -130,6 +133,7 @@ jobs:
       - run: python tests/unit/dot-cli/test_log_v1_schema.py
       - run: python tests/unit/dot-cli/test_agent_event_schema.py
       - run: python tests/unit/dot-cli/test_gateway_usage_schema.py
+      - run: python tests/unit/dot-cli/test_cost_report_schema.py
       - run: python tools/ci/check-cli-contract.py
       - run: python tests/unit/dot-cli/test_cli_contract_lint.py
       - run: bash tests/unit/dot-cli/test_dot_command_table.sh

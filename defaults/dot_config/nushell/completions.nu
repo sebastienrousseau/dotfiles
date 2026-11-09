@@ -320,6 +320,10 @@ export extern "dot ai cost" [
 ]
 
 export extern "dot ai cost show" [
+    --by: string # Group by agent, host, day, model or session (default agent)
+    --session: string # One session (an id or a unique prefix), by model
+    --days: string # Today and the days before it (default 30)
+    --json # Print the report as JSON
     --help(-h) # Show help
     ...rest: string
 ]

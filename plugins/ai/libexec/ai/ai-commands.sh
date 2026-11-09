@@ -237,25 +237,16 @@ _ai_install_todo() {
   return 1
 }
 
-# Locate the delegate-report tool deployed by the /vibe
-# Claude Code skill. Path stays in sync with
-# defaults/dot_claude/skills/vibe/tools/.
-_ai_delegate_tool() {
-  local tool="$1" # delegate-report
-  local path="${HOME}/.claude/skills/vibe/tools/${tool}"
-  if [[ ! -x "$path" ]]; then
-    ui_err "$tool" "not found at $path" >&2
-    ui_info "Hint" "Run 'chezmoi apply' to deploy the /vibe skill" >&2
+# cmd_ai_cost [args…] — dot ai cost show: what agent sessions cost, read from
+# their transcripts, the gateway's usage log and the run log, in the cockpit
+# binary (dot-ai-tui cost). --by agent|host|day|model|session, --session ID,
+# --days N (--since N), --json (ai/cost-report.v1).
+cmd_ai_cost() {
+  if ! has_command dot-ai-tui; then
+    ui_err "dot ai cost" "needs the cockpit binary dot-ai-tui: DOTFILES_AI=1 chezmoi apply builds it (Go from mise)" >&2
     return 1
   fi
-  printf '%s\n' "$path"
-}
-
-# cmd_ai_cost [args…] — unified AI spend report (wraps delegate-report).
-cmd_ai_cost() {
-  local tool
-  tool="$(_ai_delegate_tool delegate-report)" || return 1
-  "$tool" "$@"
+  dot-ai-tui cost "$@"
 }
 
 # cmd_ai_corral [status|sync|doctor|mcp|args…] — workspace & multi-forge repo plane.

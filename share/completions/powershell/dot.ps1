@@ -93,7 +93,7 @@ $script:DotCommands = @{
     'agent suspend' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai ask' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai check' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'ai cost show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai cost show' = @{ Flags = @(@('--help', 'Show help'), @('--by', 'Group by agent, host, day, model or session (default agent)'), @('--session', 'One session (an id or a unique prefix), by model'), @('--days', 'Today and the days before it (default 30)'), @('--json', 'Print the report as JSON')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @('--by', '--session', '--days') }
     'ai gateway serve' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai gateway show' = @{ Flags = @(@('--help', 'Show help'), @('--json', 'Print the usage report as JSON')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai install' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }

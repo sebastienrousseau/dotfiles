@@ -4,18 +4,26 @@
 all and per model, against an optional daily budget. /v1/usage
 (ai/gateway-usage.v1) and /metrics report them.
 
-One Meter per gateway: dot-ai-serve makes it with its prices and budget, so
-nothing here reads the environment or keeps module-level state.
+Each request is also a line of a usage log, which dot ai cost show reads:
+its time, the model's id, its tokens and the CLI's own cost for it (null
+when the CLI gave none: the reader prices it). Never a prompt or an answer.
+The log is set aside under a dated name once it reaches log_max bytes.
+
+One Meter per gateway: dot-ai-serve makes it with its prices, budget and log
+path, so nothing here reads the environment or keeps module-level state.
 """
 
+import json
+import os
 import threading
 import time
 
 
 class Meter:
-    def __init__(self, pricing, daily_budget):
+    def __init__(self, pricing, daily_budget, log_path=None):
         self.pricing = pricing  # family substring -> (input, output) USD per million
         self.daily = daily_budget  # USD; 0 is no cap
+        self.log_path, self.log_max = log_path, 20 << 20
         self.lock = threading.Lock()
         self.metrics = {
             "started": time.time(),
@@ -62,9 +70,9 @@ class Meter:
         """Fold one request into the counters and the day's spend. Its cost
         is the CLI's own figure (usage["cost_usd"]) when it gave one, else
         the price table's."""
-        cost = (usage or {}).get("cost_usd")
-        if not isinstance(cost, float):
-            cost = self.estimate(model, inp, out)
+        usage = usage or {}
+        reported = usage.get("cost_usd")
+        cost = reported if isinstance(reported, float) else self.estimate(model, inp, out)
         m = self.metrics
         with self.lock:
             m["requests"] += 1
@@ -80,7 +88,42 @@ class Meter:
             bm["cost"] += cost
             self.roll_day()
             self.budget["spent"] += cost
+            self._log(usage.get("model") or model, usage, reported if isinstance(reported, float) else None)
         return cost
+
+    def _log(self, model, usage, cost):
+        """Append the request to the usage log (0600); a log that cannot be
+        written only goes unrecorded."""
+        if not self.log_path:
+            return
+        cache = usage.get("cache_creation") or {}
+        w1h = cache.get("ephemeral_1h_input_tokens", 0) if isinstance(cache, dict) else 0
+        tokens = {
+            "input": usage.get("input_tokens", 0),
+            "cache_write_5m": usage.get("cache_creation_input_tokens", 0) - w1h,
+            "cache_write_1h": w1h,
+            "cache_read": usage.get("cache_read_input_tokens", 0),
+            "output": usage.get("output_tokens", 0),
+        }
+        line = {"time": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "model": model,
+                "tokens": tokens, "cost_usd": cost}
+        try:
+            self._rotate()
+            fd = os.open(self.log_path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
+            with os.fdopen(fd, "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(line, separators=(",", ":")) + "\n")
+        except OSError:
+            pass
+
+    def _rotate(self):
+        try:
+            if os.path.getsize(self.log_path) < self.log_max:
+                return
+        except OSError:
+            os.makedirs(os.path.dirname(self.log_path), mode=0o700, exist_ok=True)
+            return
+        stamp = time.strftime("%Y%m%dT%H%M%S", time.gmtime())
+        os.replace(self.log_path, self.log_path[: -len(".jsonl")] + f"-{stamp}-{time.time_ns()}.jsonl")
 
     def report(self):
         """The counters as ai/gateway-usage.v1."""

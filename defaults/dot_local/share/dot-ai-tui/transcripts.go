@@ -473,8 +473,10 @@ func humanTok(n int64) string {
 		return strings.TrimSuffix(fmt.Sprintf("%.1f", float64(n)/1000), ".0") + "k"
 	case n < 1_000_000:
 		return fmt.Sprintf("%dk", n/1000)
-	default:
+	case n < 1_000_000_000:
 		return fmt.Sprintf("%.1fM", float64(n)/1e6)
+	default:
+		return fmt.Sprintf("%.1fB", float64(n)/1e9)
 	}
 }
 

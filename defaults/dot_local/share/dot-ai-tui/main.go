@@ -449,6 +449,9 @@ func run() error {
 	if len(os.Args) > 1 && os.Args[1] == "watch" {
 		return runWatch(os.Stdout)
 	}
+	if len(os.Args) > 1 && os.Args[1] == "cost" {
+		return runCost(os.Args[2:], os.Stdout)
+	}
 	if os.Getenv("DOT_AI_SNAPSHOT") != "" {
 		renderSnapshot()
 		return nil

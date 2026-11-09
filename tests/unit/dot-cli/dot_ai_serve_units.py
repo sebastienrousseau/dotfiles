@@ -32,13 +32,16 @@ GATEWAY = REPO / "defaults" / "dot_local" / "bin" / "executable_dot-ai-serve"
 
 
 def load(env: dict[str, str] | None = None):
-    """A fresh copy of the gateway module with `env` applied at import."""
+    """A fresh copy of the gateway module with `env` applied at import. Its
+    state (token, usage log) goes to a temporary directory unless env names
+    one: never the real ~/.local/state."""
+    env = {"XDG_STATE_HOME": tempfile.mkdtemp(prefix="dot-ai-serve-state-"), **(env or {})}
     name = f"dot_ai_serve_{time.monotonic_ns()}"
     loader = SourceFileLoader(name, str(GATEWAY))
     spec = importlib.util.spec_from_loader(name, loader)
     mod = importlib.util.module_from_spec(spec)
     sys.modules[name] = mod
-    with mock.patch.dict(os.environ, env or {}, clear=False):
+    with mock.patch.dict(os.environ, env, clear=False):
         loader.exec_module(mod)
     return mod
 

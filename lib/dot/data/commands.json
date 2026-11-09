@@ -406,7 +406,29 @@
      "spelling": "ai cost show",
      "effect": "read",
      "summary": "Spend by agent and model",
-     "built": true
+     "built": true,
+     "flags": [
+      {
+       "long": "by",
+       "value": "group",
+       "summary": "Group by agent, host, day, model or session (default agent)"
+      },
+      {
+       "long": "session",
+       "value": "id",
+       "summary": "One session (an id or a unique prefix), by model"
+      },
+      {
+       "long": "days",
+       "value": "n",
+       "summary": "Today and the days before it (default 30)"
+      },
+      {
+       "long": "json",
+       "summary": "Print the report as JSON"
+      }
+     ],
+     "output": "ai/cost-report.v1"
     },
     {
      "spelling": "ai gateway show",

@@ -168,7 +168,7 @@ except json.JSONDecodeError:
 DAILY_BUDGET = float(os.environ.get("DOT_AI_DAILY_BUDGET", "0") or "0")
 
 # The counters, cost and daily budget (gateway_meter.py).
-METER = Meter(PRICING, DAILY_BUDGET)
+METER = Meter(PRICING, DAILY_BUDGET, os.path.join(STATE_DIR, "usage.jsonl"))
 record, budget_exceeded, _count = METER.record, METER.budget_exceeded, METER.count
 usage_report, metrics_text = METER.report, METER.prometheus
 

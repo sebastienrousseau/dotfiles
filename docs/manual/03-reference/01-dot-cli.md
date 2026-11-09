@@ -247,7 +247,7 @@ dot ai list                          # installed agents
 dot ai install [all|<tool>]          # install fleet tools
 dot ai gateway serve [stop|status|logs|setup]  # local Claude gateway (start also routes the fleet)
 dot ai gateway show [--json]         # the gateway's requests, tokens and cost
-dot ai cost show                     # spend report
+dot ai cost show [--by day] [--json]  # what agent sessions cost
 dot ai policy show [--agent A]       # the AI policy rules in force
 dot ai policy check [--policy FILE]  # validate the AI policy, name the active mode
 dot ai login [tool]                  # authenticate

@@ -161,7 +161,8 @@ _dot() {
       flags_=('--help:Show help')
       ;;
     'ai cost show' | 'ai cost show'\ *)
-      flags_=('--help:Show help')
+      flags_=('--help:Show help' '--by:Group by agent, host, day, model or session (default agent)' '--session:One session (an id or a unique prefix), by model' '--days:Today and the days before it (default 30)' '--json:Print the report as JSON')
+      valflags_=(--by --session --days)
       ;;
     'ai gateway serve' | 'ai gateway serve'\ *)
       flags_=('--help:Show help')

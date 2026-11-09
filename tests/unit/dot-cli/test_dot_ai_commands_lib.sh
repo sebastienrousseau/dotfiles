@@ -298,26 +298,19 @@ out_has "mise" "the missing mise prerequisite is named"
 
 # ── cost ────────────────────────────────────────────────────────────────
 # dot ai delegate is retired onto start --bg and wait: test_ai_runtime.sh.
-VIBE_TOOLS="$HOME/.claude/skills/vibe/tools"
-mkdir -p "$VIBE_TOOLS"
-cat >"$VIBE_TOOLS/delegate-report" <<STUB
-#!$REAL_BASH
-printf 'delegate-report %s\\n' "\$*" >>"\$AI_CALLS"
-STUB
-chmod +x "$VIBE_TOOLS/delegate-report"
-
-test_start "cost_reports_a_missing_report_tool"
-mv "$VIBE_TOOLS/delegate-report" "$VIBE_TOOLS/delegate-report.bak"
-ai cmd_ai_cost
+# dot ai cost show is the cockpit binary's cost report (dot-ai-tui cost).
+test_start "cost_without_the_cockpit_binary_says_how_to_build_it"
+ai_min cmd_ai_cost
 assert_equals 1 "$RC" "rc"
-err_has "not found at" "error names the path"
-err_has "chezmoi apply" "hint"
-mv "$VIBE_TOOLS/delegate-report.bak" "$VIBE_TOOLS/delegate-report"
+err_has "dot-ai-tui" "names the binary"
+err_has "DOTFILES_AI=1 chezmoi apply" "and how to build it"
 
-test_start "cost_forwards_to_the_delegate_report"
-ai cmd_ai_cost --since 7d
+test_start "cost_runs_the_cost_report_with_its_flags"
+stub dot-ai-tui
+ai cmd_ai_cost --by day --days 7 --json
 assert_equals 0 "$RC" "rc"
-called "delegate-report --since 7d"
+called "dot-ai-tui cost --by day --days 7 --json"
+rm -f "$BIN/dot-ai-tui"
 
 test_start "deprecation_notice_names_the_new_command"
 ai _ai_deprecated "dot ai chat"

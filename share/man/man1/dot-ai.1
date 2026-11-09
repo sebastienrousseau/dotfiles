@@ -82,6 +82,20 @@ Prompt patterns. Effect: read. Runs \fBdot\-ai pattern list\fR, the plugin's ent
 .TP
 .B dot ai cost show
 Spend by agent and model. Effect: read. Runs \fBdot\-ai cost show\fR, the plugin's entry.
+.RS
+.TP
+.B \-\-by \fIgroup\fR
+Group by agent, host, day, model or session (default agent)
+.TP
+.B \-\-session \fIid\fR
+One session (an id or a unique prefix), by model
+.TP
+.B \-\-days \fIn\fR
+Today and the days before it (default 30)
+.TP
+.B \-\-json
+Print the report as JSON
+.RE
 .TP
 .B dot ai gateway show
 Gateway statistics. Effect: read. Runs \fBdot\-ai gateway show\fR, the plugin's entry.

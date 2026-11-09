@@ -169,7 +169,8 @@ _dot() {
       flags='--help'
       ;;
     'ai cost show' | 'ai cost show'\ *)
-      flags='--help'
+      flags='--help --by --session --days --json'
+      valflags='--by --session --days'
       ;;
     'ai gateway serve' | 'ai gateway serve'\ *)
       flags='--help'
