@@ -749,8 +749,7 @@
      "spelling": "cli hook check",
      "effect": "read",
      "summary": "Check a tool call against the AI policy",
-     "built": true,
-     "lock": false
+     "built": true
     },
     {
      "spelling": "cli hook install",

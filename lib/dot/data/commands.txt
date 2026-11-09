@@ -417,6 +417,5 @@ nolock|ai pattern edit||
 nolock|ai pattern export||
 nolock|ai send||
 nolock|cli hook run||
-nolock|cli hook check||
 nolock|config edit||
 nolock|ui run||
