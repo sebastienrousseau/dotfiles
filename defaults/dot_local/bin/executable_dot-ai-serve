@@ -33,8 +33,22 @@ import sys
 import tempfile
 import threading
 import time
-import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+# The gateway's modules live in ~/.local/share/dot-ai-serve, which is
+# ../share/dot-ai-serve from this script both deployed and in the repo.
+# They are imported without writing bytecode beside them.
+sys.dont_write_bytecode = True
+sys.path.insert(
+    0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "share", "dot-ai-serve")
+)
+from gateway_wire import (  # noqa: E402
+    _usage_pair,
+    anthropic_response,
+    anthropic_sse,
+    openai_response,
+    openai_sse,
+)
 
 HOST = os.environ.get("DOT_AI_HOST", "127.0.0.1")
 PORT = int(os.environ.get("DOT_AI_PORT", "3456"))
@@ -456,134 +470,6 @@ def run_claude(run_model, system_prompt, prompt):
     return text, usage, err
 
 
-def _usage_pair(usage):
-    """Normalize CLI usage into (input_tokens, output_tokens)."""
-    inp = usage.get("input_tokens", 0) + usage.get("cache_read_input_tokens", 0)
-    inp += usage.get("cache_creation_input_tokens", 0)
-    return inp, usage.get("output_tokens", 0)
-
-
-# ---------------------------------------------------------------------------
-# Response builders for each protocol.
-# ---------------------------------------------------------------------------
-def anthropic_response(model, text, usage):
-    inp, out = _usage_pair(usage)
-    return {
-        "id": f"msg_{uuid.uuid4().hex[:24]}",
-        "type": "message",
-        "role": "assistant",
-        "model": model,
-        "content": [{"type": "text", "text": text}],
-        "stop_reason": "end_turn",
-        "stop_sequence": None,
-        "usage": {"input_tokens": inp, "output_tokens": out},
-    }
-
-
-def openai_response(model, text, usage):
-    inp, out = _usage_pair(usage)
-    return {
-        "id": f"chatcmpl-{uuid.uuid4().hex[:24]}",
-        "object": "chat.completion",
-        "created": int(time.time()),
-        "model": model,
-        "choices": [
-            {
-                "index": 0,
-                "message": {"role": "assistant", "content": text},
-                "finish_reason": "stop",
-            }
-        ],
-        "usage": {
-            "prompt_tokens": inp,
-            "completion_tokens": out,
-            "total_tokens": inp + out,
-        },
-    }
-
-
-def anthropic_sse(model, run_model, gen):
-    """Protocol-correct Anthropic SSE that streams deltas from `gen` live."""
-    mid = f"msg_{uuid.uuid4().hex[:24]}"
-
-    def ev(event, data):
-        return f"event: {event}\ndata: {json.dumps(data)}\n\n".encode()
-
-    yield ev(
-        "message_start",
-        {
-            "type": "message_start",
-            "message": {
-                "id": mid,
-                "type": "message",
-                "role": "assistant",
-                "model": model,
-                "content": [],
-                "stop_reason": None,
-                "usage": {"input_tokens": 0, "output_tokens": 0},
-            },
-        },
-    )
-    yield ev(
-        "content_block_start",
-        {"type": "content_block_start", "index": 0, "content_block": {"type": "text", "text": ""}},
-    )
-    usage, err = {}, None
-    for item in gen:
-        if item[0] == "delta":
-            yield ev(
-                "content_block_delta",
-                {
-                    "type": "content_block_delta",
-                    "index": 0,
-                    "delta": {"type": "text_delta", "text": item[1]},
-                },
-            )
-        else:
-            _, usage, err = item
-    yield ev("content_block_stop", {"type": "content_block_stop", "index": 0})
-    inp, out = _usage_pair(usage)
-    yield ev(
-        "message_delta",
-        {
-            "type": "message_delta",
-            "delta": {"stop_reason": "error" if err else "end_turn"},
-            "usage": {"output_tokens": out},
-        },
-    )
-    if err:
-        yield ev("error", {"type": "error", "error": {"type": "engine_error", "message": err}})
-    yield ev("message_stop", {"type": "message_stop"})
-    record(run_model, inp, out, True, err)
-
-
-def openai_sse(model, run_model, gen):
-    cid = f"chatcmpl-{uuid.uuid4().hex[:24]}"
-    created = int(time.time())
-
-    def chunk(delta, finish=None):
-        data = {
-            "id": cid,
-            "object": "chat.completion.chunk",
-            "created": created,
-            "model": model,
-            "choices": [{"index": 0, "delta": delta, "finish_reason": finish}],
-        }
-        return f"data: {json.dumps(data)}\n\n".encode()
-
-    yield chunk({"role": "assistant"})
-    usage, err = {}, None
-    for item in gen:
-        if item[0] == "delta":
-            yield chunk({"content": item[1]})
-        else:
-            _, usage, err = item
-    yield chunk({}, finish="stop" if not err else "error")
-    yield b"data: [DONE]\n\n"
-    inp, out = _usage_pair(usage)
-    record(run_model, inp, out, True, err)
-
-
 # ---------------------------------------------------------------------------
 # Observability.
 # ---------------------------------------------------------------------------
@@ -791,9 +677,12 @@ class Handler(BaseHTTPRequestHandler):
 
         if stream:
             gen = stream_claude(run_model, system_prompt, prompt)
-            if protocol == "anthropic":
-                return self._send_sse(anthropic_sse(model, run_model, gen))
-            return self._send_sse(openai_sse(model, run_model, gen))
+
+            def on_done(inp, out, err):
+                record(run_model, inp, out, True, err)
+
+            sse = anthropic_sse if protocol == "anthropic" else openai_sse
+            return self._send_sse(sse(model, gen, on_done))
 
         text, usage, err = run_claude(run_model, system_prompt, prompt)
         inp, out = _usage_pair(usage)

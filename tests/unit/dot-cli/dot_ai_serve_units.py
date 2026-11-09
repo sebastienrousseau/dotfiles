@@ -181,9 +181,12 @@ class Engine(unittest.TestCase):
         srv, _ = self.run_engine(
             "cat >/dev/null; echo '{\"type\":\"result\",\"is_error\":true,\"result\":\"nope\",\"usage\":{}}'"
         )
-        chunks = b"".join(srv.anthropic_sse("sonnet", "sonnet", srv.stream_claude("sonnet", "", "hi")))
+        done = []
+        gen = srv.stream_claude("sonnet", "", "hi")
+        chunks = b"".join(srv.anthropic_sse("sonnet", gen, lambda *a: done.append(a)))
         self.assertIn(b"engine_error", chunks)
         self.assertIn(b"message_stop", chunks)
+        self.assertEqual([(0, 0, "nope")], done, "metered once, with the error")
 
 
 class Http(unittest.TestCase):
