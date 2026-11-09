@@ -307,7 +307,11 @@ class EngineHardening(unittest.TestCase):
         args = argv.read_text(encoding="utf-8").splitlines()
         self.assertIn("--strict-mcp-config", args)
         self.assertEqual('{"mcpServers":{}}', args[args.index("--mcp-config") + 1])
+        # A client's prompt is not saved as a session in ~/.claude/projects.
+        self.assertIn("--no-session-persistence", args)
         self.assertNotIn("secret-gw-key", envf.read_text(encoding="utf-8"))
+        # Nor an auto-memory directory for its private workdir.
+        self.assertIn("CLAUDE_CODE_DISABLE_AUTO_MEMORY=1", envf.read_text(encoding="utf-8").splitlines())
 
     def test_large_stderr_does_not_stall_the_engine(self):
         # 256 KiB of stderr before any stdout: an undrained stderr pipe

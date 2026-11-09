@@ -299,6 +299,8 @@ def _engine_cmd(run_model, workdir, tools):
         # Hermetic: ignore user/project/local settings and CLAUDE.md.
         "--setting-sources",
         "",
+        # A client's prompt is not kept as a session in ~/.claude/projects.
+        "--no-session-persistence",
         # A text bridge: no Read/Bash/etc., so a request cannot reach files.
         "--tools",
         "",
@@ -349,8 +351,10 @@ def _read_events(proc, reader):
 
 
 def _run_engine(cmd, stdin_text, errfile, workdir):
-    # The engine never sees the gateway's own key.
+    # The engine never sees the gateway's own key, and keeps no auto-memory
+    # directory for its throwaway workdir in ~/.claude/projects.
     env = {k: v for k, v in os.environ.items() if k != "DOT_AI_API_KEY"}
+    env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"
     try:
         proc = subprocess.Popen(
             cmd,
