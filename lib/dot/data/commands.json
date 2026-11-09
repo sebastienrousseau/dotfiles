@@ -412,7 +412,14 @@
      "spelling": "ai gateway show",
      "effect": "read",
      "summary": "Gateway statistics",
-     "built": false
+     "built": true,
+     "flags": [
+      {
+       "long": "json",
+       "summary": "Print the usage report as JSON"
+      }
+     ],
+     "output": "ai/gateway-usage.v1"
     },
     {
      "spelling": "ai inventory show",

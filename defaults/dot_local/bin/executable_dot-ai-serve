@@ -421,6 +421,7 @@ def usage_report():
     with _LOCK:
         _roll_day()
         return {
+            "schema": "ai/gateway-usage.v1",
             "object": "usage",
             "uptime_seconds": int(time.time() - METRICS["started"]),
             "requests": METRICS["requests"],

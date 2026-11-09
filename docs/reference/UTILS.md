@@ -60,6 +60,7 @@ Install, route and run coding agents.
 | `dot ai wait` | Wait until a background agent stops working |  |
 | `dot ai run` | Run an agent once |  |
 | `dot ai gateway serve` | Run the gateway in the foreground | `dot ai serve` |
+| `dot ai gateway show` | Gateway statistics |  |
 | `dot ai login` | Authenticate an agent |  |
 | `dot ai check` | Check agent installs and auth | `dot ai doctor` |
 | `dot ai ask` | Ask about the local context | `dot ai-query` |

@@ -137,8 +137,12 @@ summary = "Spend by agent and model"
 object = "gateway"
 verb = "show"
 effect = "read"
-planned = true
+output = "ai/gateway-usage.v1"
 summary = "Gateway statistics"
+
+[[commands.flags]]
+long = "json"
+summary = "Print the usage report as JSON"
 
 [[commands]]
 object = "inventory"

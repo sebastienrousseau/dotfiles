@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.io/schemas/cli/ai-gateway-usage.v1.schema.json",
+  "title": "dot ai gateway usage v1 (the local gateway's counters)",
+  "description": "Served by dot-ai-serve at GET /v1/usage and printed by `dot ai gateway show --json`. Counts since the gateway started; cost is an estimate from per-model prices (DOT_AI_PRICING). Metadata only: never a prompt or an answer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "object", "uptime_seconds", "requests", "errors", "streamed", "images", "tool_calls", "input_tokens", "output_tokens", "cost_usd", "budget", "by_model"],
+  "$defs": {
+    "count": { "type": "integer", "minimum": 0 },
+    "usd": { "type": "number", "minimum": 0 }
+  },
+  "properties": {
+    "schema": { "const": "ai/gateway-usage.v1" },
+    "object": { "const": "usage" },
+    "uptime_seconds": { "$ref": "#/$defs/count" },
+    "requests": { "$ref": "#/$defs/count" },
+    "errors": { "$ref": "#/$defs/count", "description": "Requests the engine failed" },
+    "streamed": { "$ref": "#/$defs/count", "description": "Requests answered as server-sent events" },
+    "images": { "$ref": "#/$defs/count", "description": "Images forwarded to the model" },
+    "tool_calls": { "$ref": "#/$defs/count", "description": "Tool calls returned to clients to run" },
+    "input_tokens": { "$ref": "#/$defs/count", "description": "Input tokens, cache reads and writes included" },
+    "output_tokens": { "$ref": "#/$defs/count" },
+    "cost_usd": { "$ref": "#/$defs/usd", "description": "Estimated" },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["daily_usd", "spent_today_usd"],
+      "properties": {
+        "daily_usd": { "$ref": "#/$defs/usd", "description": "DOT_AI_DAILY_BUDGET; 0 is no cap" },
+        "spent_today_usd": { "$ref": "#/$defs/usd" }
+      }
+    },
+    "by_model": {
+      "type": "object",
+      "description": "Per model the requests resolved to",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["requests", "input", "output", "cost"],
+        "properties": {
+          "requests": { "$ref": "#/$defs/count" },
+          "input": { "$ref": "#/$defs/count" },
+          "output": { "$ref": "#/$defs/count" },
+          "cost": { "$ref": "#/$defs/usd" }
+        }
+      }
+    }
+  }
+}

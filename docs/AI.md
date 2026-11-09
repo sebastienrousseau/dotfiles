@@ -52,6 +52,7 @@ The interface follows ADR-020 (`dot ai <verb>`), modelled on the Claude CLI: bar
 | `dot ai list` | Install status of the roster, with an install picker (`dot ai tools`) |
 | `dot ai install [all\|<tool>] [--yes]` | Install all missing tools, or one, with what they need (asks first) |
 | `dot ai gateway serve [stop\|status]` | Start the local Claude gateway **and** route the other tools through it (`dot ai serve`) |
+| `dot ai gateway show [--json]` | The running gateway's requests, tokens, tool calls and cost |
 | `dot ai cost show` | Spend report across providers (`dot ai cost`) |
 | `dot ai policy show [--agent A] [--mode M]` | The [enforced policy](#enforced-policy)'s rules in force for an agent (`dot ai policy`) |
 | `dot ai policy check` | Validate the policy and name the active mode |
@@ -126,6 +127,8 @@ dot ai gateway serve stop     # stop the gateway and un-route
 **Security:** the server binds to loopback by default. If you set `DOT_AI_HOST` to a LAN address, both the launcher *and* the server itself refuse to start unless `DOT_AI_API_KEY` is set — an unprotected network proxy leaks your subscription. Every request needs a key: without `DOT_AI_API_KEY` the server and `dot ai proxy local on` share a random 0600 token at `$XDG_STATE_HOME/dot/ai/serve/gateway.token` (`dot-ai-serve --token-path` prints its location). Requests whose `Host` header is not the server's own address are refused (DNS-rebinding guard), and the `claude` engine runs with all tools disabled in an empty temporary directory.
 
 **Images and tool calls.** Both endpoints take images, base64 or by URL (the API fetches a URL itself), in PNG, JPEG, GIF or WebP. A request's tools reach the model, and its calls come back in each protocol's own form: `tool_use` blocks with `stop_reason: "tool_use"`, or `tool_calls` with `finish_reason: "tool_calls"`, whole or streamed. The client runs them and sends the results in its next request, as it would to the API. Inside the gateway nothing runs them: the engine lists them through a stub MCP server and is allowed none, and the gateway stops it at the end of the model's turn. Only client-defined tools are supported; a server tool such as `web_search` is a `400`. Earlier turns, tool calls and results included, reach the engine as a transcript, and session resumption is out of scope.
+
+**Statistics.** `dot ai gateway show` summarises the running gateway: requests, errors, tokens, images, tool calls and estimated cost, in all and per model, against the daily budget. `--json` prints the report as `ai/gateway-usage.v1` ([schema](../schemas/cli/ai-gateway-usage.v1.schema.json)).
 
 **Policy.** With an [enforced policy](#enforced-policy), its `[gateway]` table limits each request before the engine sees it: `models` allows only the models it lists (globs over what the request resolves to, such as `haiku` or `claude-sonnet-*`), and `max_input_tokens` caps the gateway's estimate of its input (four characters a token, 1,600 an image). A refused request gets a `403` with the reason. As for the hooks, a policy that does not load, or a missing `dot-policy`, refuses every request.
 

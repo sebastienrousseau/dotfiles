@@ -342,6 +342,7 @@ export extern "dot ai gateway serve" [
 ]
 
 export extern "dot ai gateway show" [
+    --json # Print the usage report as JSON
     --help(-h) # Show help
     ...rest: string
 ]

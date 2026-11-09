@@ -22,6 +22,7 @@ ai_two_words() {
     # `--interactive` is the guided setup, which `dot ai-setup` ran.
     "install --interactive") exec bash "$_AI_DIR/libexec/ai.sh" ai-setup "${@:3}" ;;
     "gateway serve") ai_module serve "${@:3}" ;;
+    "gateway show") exec bash "$_AI_DIR/libexec/gateway.sh" show "${@:3}" ;;
     "cost show") ai_module cost "${@:3}" ;;
     "pattern list") exec bash "$_AI_DIR/libexec/patterns.sh" list "${@:3}" ;;
     "pattern show") exec bash "$_AI_DIR/libexec/patterns.sh" view "${@:3}" ;;

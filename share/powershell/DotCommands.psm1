@@ -289,6 +289,18 @@ function Get-DotAiCost {
     dot ai cost show @Arguments
 }
 
+function Get-DotAiGateway {
+    <#
+    .SYNOPSIS
+    Gateway statistics
+    .DESCRIPTION
+    Runs `dot ai gateway show`: Gateway statistics. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot ai gateway show @Arguments
+}
+
 function Get-DotAiPattern {
     <#
     .SYNOPSIS
@@ -1646,6 +1658,7 @@ Export-ModuleMember -Function @(
     'Get-DotAgentStatus'
     'Get-DotAi'
     'Get-DotAiCost'
+    'Get-DotAiGateway'
     'Get-DotAiPattern'
     'Get-DotAiPolicy'
     'Get-DotAttest'

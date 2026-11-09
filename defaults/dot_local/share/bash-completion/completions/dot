@@ -175,7 +175,7 @@ _dot() {
       flags='--help'
       ;;
     'ai gateway show' | 'ai gateway show'\ *)
-      flags='--help'
+      flags='--help --json'
       ;;
     'ai install' | 'ai install'\ *)
       flags='--help'

@@ -12,6 +12,9 @@ on:
       - 'tests/unit/dot-cli/test_log_v1_schema.py'
       # agent-event.v1: the hook receiver and its schema test
       - 'tests/unit/dot-cli/test_agent_event_schema.py'
+      # ai/gateway-usage.v1: the gateway and its schema test
+      - 'defaults/dot_local/bin/executable_dot-ai-serve'
+      - 'tests/unit/dot-cli/test_gateway_usage_schema.py'
       # CLI-contract lint (ADR-020): manifests, routes, the command table
       # and its generator, the binary it runs, and the version that expires
       # deprecated names.
@@ -126,6 +129,7 @@ jobs:
       - run: python tests/unit/dot-cli/test_naming_registry.py
       - run: python tests/unit/dot-cli/test_log_v1_schema.py
       - run: python tests/unit/dot-cli/test_agent_event_schema.py
+      - run: python tests/unit/dot-cli/test_gateway_usage_schema.py
       - run: python tools/ci/check-cli-contract.py
       - run: python tests/unit/dot-cli/test_cli_contract_lint.py
       - run: bash tests/unit/dot-cli/test_dot_command_table.sh
