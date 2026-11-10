@@ -11,6 +11,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/sdk.sh"
 # shellcheck source=../../../lib/dot/log.sh
 source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/log.sh"
+# shellcheck source=../../../lib/dot/fleet-hosts.sh
+source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/fleet-hosts.sh"
 
 dot_ui_command_banner "Fleet" "${1:-}"
 

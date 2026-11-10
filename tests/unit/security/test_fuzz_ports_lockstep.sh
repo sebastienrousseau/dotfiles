@@ -31,8 +31,8 @@ lockstep() {
   fi
 }
 
-lockstep fleet_name fuzz/fleet_inputs_test.go fleetNamePattern plugins/fleet/libexec/fleet/apply.sh
-lockstep fleet_target fuzz/fleet_inputs_test.go fleetTargetPattern plugins/fleet/libexec/fleet/apply.sh
+lockstep fleet_name fuzz/fleet_inputs_test.go fleetNamePattern lib/dot/fleet-hosts.sh
+lockstep fleet_target fuzz/fleet_inputs_test.go fleetTargetPattern lib/dot/fleet-hosts.sh
 lockstep fleet_jobs fuzz/fleet_inputs_test.go fleetJobsPattern plugins/fleet/libexec/fleet/apply.sh
 lockstep secret_key fuzz/secret_key_test.go secretKeyPattern plugins/secret/libexec/secret/secrets_provider.sh
 lockstep secret_env_key fuzz/secret_key_test.go secretEnvKeyPattern plugins/secret/libexec/secret/secrets_provider.sh

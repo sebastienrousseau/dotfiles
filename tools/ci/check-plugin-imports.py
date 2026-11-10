@@ -41,6 +41,7 @@ SDK_FILES = {
     "ai-roster.sh",
     "lock.sh",
     "agent-runtime.sh",
+    "fleet-hosts.sh",
 }
 SOURCE = re.compile(r'^\s*(?:source|\.)\s+"([^"]+)"')
 SDK_FORM = re.compile(

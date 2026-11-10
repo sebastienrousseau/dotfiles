@@ -9,35 +9,8 @@
 # applies inside them and cmd_fleet_apply alone returns (its RETURN trap
 # removes the scratch directory).
 
-_fleet_hosts_file() {
-  printf '%s\n' "${DOTFILES_FLEET_HOSTS:-$HOME/.config/dotfiles/fleet.toml}"
-}
-
-# Parse the hosts file. Format:
-#   [hosts.laptop]
-#   ssh = "user@laptop.local"
-#   profile = "workstation"
-#
-# Echoes one record per line: "<name>\t<ssh-target>\t<profile>".
-_fleet_hosts_iter() {
-  local f
-  f="$(_fleet_hosts_file)"
-  [[ -f "$f" ]] || return 0
-  awk '
-    BEGIN { name = ""; ssh = ""; profile = "" }
-    /^\[hosts\./ {
-      if (name != "") { printf "%s\t%s\t%s\n", name, ssh, profile }
-      gsub(/[\[\]]/, "", $0); sub(/^hosts\./, "", $0); name = $0
-      ssh = ""; profile = ""
-      next
-    }
-    /^ssh[[:space:]]*=/    { sub(/^ssh[[:space:]]*=[[:space:]]*/, ""); gsub(/"/, ""); ssh = $0; next }
-    /^profile[[:space:]]*=/ { sub(/^profile[[:space:]]*=[[:space:]]*/, ""); gsub(/"/, ""); profile = $0; next }
-    END {
-      if (name != "") { printf "%s\t%s\t%s\n", name, ssh, profile }
-    }
-  ' "$f"
-}
+# The hosts file, its parsing, the host checks and the SSH call are the
+# SDK's (lib/dot/fleet-hosts.sh), which dot ai shares.
 
 _fleet_apply_help() {
   cat <<EOF
@@ -129,14 +102,14 @@ _fleet_apply_load() {
     _fleet_stop=2
     return 0
   fi
-  hosts_file="$(_fleet_hosts_file)"
+  hosts_file="$(fleet_hosts_file)"
   if [[ ! -f "$hosts_file" ]]; then
     ui_err "Fleet" "no hosts file at $hosts_file"
     ui_info "Hint" "create it with stanzas like '[hosts.laptop]\\nssh = \"user@laptop.local\"'"
     _fleet_stop=1
     return 0
   fi
-  entries="$(_fleet_hosts_iter)"
+  entries="$(fleet_hosts)"
   if [[ -z "$entries" ]]; then
     ui_err "Fleet" "hosts file is empty: $hosts_file"
     _fleet_stop=1
@@ -165,16 +138,11 @@ _fleet_apply_dry_run() {
 # A leading '-' would be parsed by ssh as an option (e.g. -F/-o), and
 # the host name becomes a temp-file name, so it may not contain '/'.
 _fleet_apply_validate() {
-  local name ssh profile
+  local name ssh profile why
   while IFS=$'\t' read -r name ssh profile; do
     [[ -n "$name" ]] || continue
-    if [[ ! "$name" =~ ^[a-zA-Z0-9._-]+$ || "$name" == .* ]]; then
-      ui_err "$name" "invalid host name — only [a-zA-Z0-9._-] allowed, no leading '.'"
-      _fleet_stop=1
-      return 0
-    fi
-    if [[ ! "$ssh" =~ ^[a-zA-Z0-9._@:+/-]+$ || "$ssh" == -* ]]; then
-      ui_err "$name" "invalid ssh target ($ssh) — only [a-zA-Z0-9._@:+/-] allowed, no leading '-'"
+    if ! why="$(fleet_host_check "$name" "$ssh")"; then
+      ui_err "$name" "$why"
       _fleet_stop=1
       return 0
     fi
@@ -215,11 +183,7 @@ _fleet_apply_verify() {
 # implementation had a quoting hazard around TOML hostnames).
 _fleet_apply_one() {
   local _name="$1" _ssh="$2" _cmd="$3" _tmp="$4"
-  if ssh -o BatchMode=yes -o ConnectTimeout=10 \
-    -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
-    -o StrictHostKeyChecking=accept-new \
-    -- "$_ssh" "$_cmd" </dev/null \
-    >"$_tmp/$_name.out" 2>"$_tmp/$_name.err"; then
+  if fleet_ssh "$_ssh" "$_cmd" </dev/null >"$_tmp/$_name.out" 2>"$_tmp/$_name.err"; then
     printf 'ok\n' >"$_tmp/$_name.status"
   else
     printf 'fail %d\n' "$?" >"$_tmp/$_name.status"

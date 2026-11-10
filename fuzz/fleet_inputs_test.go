@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 // Copyright (c) 2015-2026 Sebastien Rousseau
 //
-// FuzzFleetInputs ports the input gates of `dot fleet apply`
-// (plugins/fleet/libexec/fleet.sh, cmd_fleet_apply) that run before any
-// SSH connection:
+// FuzzFleetInputs ports the input gates of `dot fleet apply` and dot ai's
+// fleet commands that run before any SSH connection: the host checks of
+// lib/dot/fleet-hosts.sh (fleet_host_check) and --jobs of
+// plugins/fleet/libexec/fleet/apply.sh:
 //
 //	host name   ^[a-zA-Z0-9._-]+$, not starting with "."
 //	            (it becomes "$tmpdir/$name.out")
@@ -11,7 +12,7 @@
 //	            (ssh would parse a leading "-" as an option)
 //	--jobs      ^[1-9][0-9]*$ (0 or a non-number spun the throttle forever)
 //
-// The literals below must stay byte-identical to fleet.sh;
+// The literals below must stay byte-identical to those files;
 // tests/unit/security/test_fuzz_ports_lockstep.sh fails when they drift.
 //
 // Invariants:
