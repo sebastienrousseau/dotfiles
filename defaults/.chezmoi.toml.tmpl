@@ -65,6 +65,13 @@ git_name          = "{{ if $tty }}{{ promptString "git_name" "Your Name" }}{{ el
 git_email         = "{{ if $tty }}{{ promptString "git_email" "you@example.com" }}{{ else }}{{ coalesce (env "CHEZMOI_GIT_EMAIL") (get $stored "git_email") | default "" }}{{ end }}"
 git_signingkey    = "{{ if $tty }}{{ promptString "git_signingkey" "~/.ssh/id_ed25519" }}{{ else }}{{ coalesce (env "CHEZMOI_GIT_SIGNINGKEY") (get $stored "git_signingkey") "~/.ssh/id_ed25519" }}{{ end }}"
 git_signingformat = "{{ if $tty }}{{ promptString "git_signingformat" "ssh" }}{{ else }}{{ coalesce (env "CHEZMOI_GIT_SIGNINGFORMAT") (get $stored "git_signingformat") "ssh" }}{{ end }}"
+{{- /* draft's publisher identity is set by hand, never prompted for: carry
+       every draft_site_* key over as stored, so a re-init keeps it. */}}
+{{- range $k, $v := . }}
+{{-   if hasPrefix "draft_site_" $k }}
+{{ $k }} = {{ $v | toString | quote }}
+{{-   end }}
+{{- end }}
 {{- /* Written by `dot theme`, never prompted for: carry them over as stored. */}}
 {{- range $k := list "theme_family" "theme_mode" }}
 {{-   with get $ $k }}
