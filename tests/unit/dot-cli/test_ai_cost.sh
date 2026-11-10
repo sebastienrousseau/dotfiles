@@ -82,7 +82,8 @@ assert_contains "usage: dot ai cost show" "$OUT" "usage"
 
 test_start "the_cache_is_private"
 cost show
-mode="$(stat -f %Lp "$H/.cache/dot/ai/cost-index.json" 2>/dev/null || stat -c %a "$H/.cache/dot/ai/cost-index.json")"
+# GNU stat first: on Linux, stat -f is the file system's status, and works.
+mode="$(stat -c %a "$H/.cache/dot/ai/cost-index.json" 2>/dev/null || stat -f %Lp "$H/.cache/dot/ai/cost-index.json")"
 assert_equals "600" "$mode" "0600"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
