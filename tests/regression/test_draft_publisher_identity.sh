@@ -42,25 +42,35 @@ _dp_ignored() {
   _dp_render "$_dp_src/.chezmoiignore.tmpl" "$1" | grep -qx '.config/draft/config.toml' && echo ignored || echo managed
 }
 
-test_start "draft_identity_renders_the_hosts_keys"
 _dp_out="$(_dp_config "$_dp_with")"
+
+test_start "draft_identity_renders_the_name"
 assert_contains 'name           = "Ada Example"' "$_dp_out" "name from draft_site_name"
+
+test_start "draft_identity_renders_the_base_url"
 assert_contains 'base-url       = "https://example.com"' "$_dp_out" "base-url from draft_site_base_url"
+
+test_start "draft_identity_writes_a_number_as_a_string"
 assert_contains 'copyright-from = "2025"' "$_dp_out" "a number is written as draft reads it"
 
 test_start "draft_identity_writes_only_the_keys_set"
 assert_output_not_contains "email" _dp_config "'$_dp_with'"
 
-test_start "draft_identity_ships_nobodys_identity"
+test_start "draft_identity_is_unmanaged_without_keys"
 assert_equals "ignored" "$(_dp_ignored "")" "a host with no draft_site_* keys leaves the file alone"
+
+test_start "draft_identity_template_has_no_identity_of_its_own"
 assert_output_not_contains "Rousseau" _dp_config "''"
 
 test_start "draft_identity_is_managed_when_set"
 assert_equals "managed" "$(_dp_ignored "$_dp_with")" "a host with draft_site_* keys gets the file"
 
-test_start "draft_identity_survives_a_reinit"
 _dp_init="$(CHEZMOI_GIT_NAME=x CHEZMOI_GIT_EMAIL=x@example.com _dp_render "$_dp_src/.chezmoi.toml.tmpl" "$_dp_with" --init)"
+
+test_start "draft_identity_reinit_keeps_the_name"
 assert_contains 'draft_site_name = "Ada Example"' "$_dp_init" "chezmoi init keeps draft_site_name"
+
+test_start "draft_identity_reinit_keeps_every_key"
 assert_contains 'draft_site_copyright_from = "2025"' "$_dp_init" "and every other draft_site_* key"
 
 echo ""
