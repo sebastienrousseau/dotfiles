@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091
+# Regression for: GH-1408
 # Regression: draft's publisher identity is personal. The dotfiles render
 # ~/.config/draft/config.toml from the host's draft_site_* chezmoi data,
 # leave the file unmanaged on a host without it (an empty render would
