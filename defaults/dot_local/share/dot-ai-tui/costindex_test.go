@@ -246,7 +246,7 @@ func TestGatewayLogIsCounted(t *testing.T) {
 // unread; a transcript with no request has no session to report.
 func TestCodexRestartsAndEmptyFiles(t *testing.T) {
 	rt := testRoots(t)
-	tok := `{"timestamp":"2026-11-09T08:00:0%d","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":%d,"cached_input_tokens":0,"output_tokens":0}}}}`
+	tok := `{"timestamp":"2026-11-09T08:00:0%dZ","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":%d,"cached_input_tokens":0,"output_tokens":0}}}}`
 	writeFile(t, filepath.Join(rt.codex, "2026", "11", "09", "rollout-x-th-2.jsonl"),
 		`{"timestamp":"2026-11-09T08:00:00Z","type":"turn_context","payload":{"model":"gpt-5.5"}}`,
 		`{"timestamp":"2026-11-09T08:00:01Z","type":"response_item","payload":{"type":"message"}}`,
