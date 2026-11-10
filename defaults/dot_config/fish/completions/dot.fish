@@ -340,7 +340,7 @@ complete -c dot -n '__dot_in '\''doctor snapshot new'\''' -l force -s f -d 'Over
 complete -c dot -n '__dot_in '\''doctor status'\''' -l json -s j -d 'Print a JSON summary'
 complete -c dot -n '__dot_in '\''doctor status'\''' -l fix -s f -d 'Apply common fixes'
 complete -c dot -n '__dot_in '\''doctor status'\''' -l force -s F -d 'Apply fixes without prompts'
-complete -c dot -n '__dot_in '\''fleet apply'\''' -l agents -d 'Also install each host'\''s agents, this machine'\''s AI policy and the agent hooks'
+complete -c dot -n '__dot_in '\''fleet apply'\''' -l agents -d 'Also install agents, AI policy and hooks on each host'
 complete -c dot -n '__dot_in '\''mcp check'\''' -l strict -s s -d 'Treat policy warnings as errors'
 complete -c dot -n '__dot_in '\''mcp check'\''' -l json -s j -d 'Print a JSON summary'
 complete -c dot -n '__dot_in '\''security score show'\''' -l verbose -s v -d 'Show detailed scoring'
