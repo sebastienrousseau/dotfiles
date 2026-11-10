@@ -105,6 +105,21 @@ assert_equals "1" "$RC" "exit 1"
 assert_contains "no gateway answers on http://127.0.0.1:$PORT" "$OUT" "says where it looked"
 assert_contains "dot ai gateway serve" "$OUT" "and how to start one"
 
+test_start "another_server_on_the_port"
+mkdir -p "$WORK/www"
+(cd "$WORK/www" && exec python3 -m http.server "$PORT" --bind 127.0.0.1 >/dev/null 2>&1) &
+PID=$!
+for _ in $(seq 1 50); do
+  curl -s -o /dev/null "http://127.0.0.1:$PORT/" && break
+  sleep 0.1
+done
+show
+assert_equals "1" "$RC" "exit 1"
+assert_contains "http://127.0.0.1:$PORT/v1/usage answered HTTP 404" "$OUT" "says what answered"
+kill "$PID" 2>/dev/null
+wait "$PID" 2>/dev/null
+PID=""
+
 test_start "an_ipv6_host_is_bracketed"
 E=(DOT_AI_HOST=::1)
 show

@@ -111,6 +111,11 @@ printf 'agents = ["claude; rm -rf ~"]\n[hosts.alpha]\nssh = "u@alpha.test"\n' >"
 fleet --agents --dry-run
 assert_equals "1" "$RC" "a bad agent name: exit 1"
 assert_contains "invalid agent name" "$OUT" "says so"
+rm -rf "$WORK/remote"
+fleet --agents
+assert_equals "1" "$RC" "a real run: exit 1"
+assert_contains "0 ok / 1 failed / 1 total" "$OUT" "the host counts as failed"
+assert_equals "no" "$([[ -d "$WORK/remote" ]] && echo yes || echo no)" "and is never connected to"
 fleet --agents --cmd uptime --dry-run
 assert_equals "1" "$RC" "--cmd and --agents: exit 1"
 assert_contains "--agents and --cmd" "$OUT" "says they do not mix"

@@ -44,7 +44,7 @@ remote_home() { # TARGET RECORDS COSTS
 #!/bin/bash
 case "$*" in
   "ai status --json") cat "$HOME/records" ;;
-  "ai check") echo "AI doctor on $(basename "$HOME")"; exit 3 ;;
+  "ai check") echo "AI doctor on $(basename "$HOME")"; exit "$(cat "$HOME/check-rc" 2>/dev/null || echo 3)" ;;
 esac
 EOF
   printf '#!/bin/bash\n[[ "$*" == "cost --by session --tsv" ]] && cat "$HOME/costs.tsv"\n' >"$home/.local/bin/dot-ai-tui"
@@ -128,12 +128,30 @@ fi
 
 test_start "status_fleet_needs_jq"
 RC=0
-OUT="$(env -i HOME="$H" PATH="$WORK/bin:/usr/bin:/bin" NO_COLOR=1 TERM=dumb bash -c '
+OUT="$(env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="$WORK/bin:/usr/bin:/bin" NO_COLOR=1 TERM=dumb bash -c '
   source "$1/lib/dot/sdk.sh"; source "$1/lib/dot/fleet-hosts.sh"; source "$1/plugins/ai/libexec/ai/fleet.sh"
   has_command() { [[ "$1" != jq ]] && command -v "$1" >/dev/null; }
   ai_status_fleet' _ "$REPO_ROOT" 2>&1)" || RC=$?
 assert_equals "1" "$RC" "exit 1"
 assert_contains "needs jq" "$OUT" "says so"
+
+test_start "status_fleet_refuses_a_bad_host_before_any_connection"
+cp "$H/.config/dotfiles/fleet.toml" "$WORK/fleet.toml.good"
+printf '[hosts.alpha]\nssh = "u@alpha.test"\n\n[hosts.evil]\nssh = "-oProxyCommand=touch $WORK/pwned"\n' >"$H/.config/dotfiles/fleet.toml"
+ai status --fleet
+assert_equals "1" "$RC" "exit 1"
+assert_contains "evil: no answer (" "$OUT" "the host is named"
+assert_contains "invalid" "$OUT" "and why"
+assert_contains "alpha      claude     blocked" "$OUT" "the good host still answers"
+assert_equals "no" "$([[ -e "$WORK/pwned" ]] && echo yes || echo no)" "and the bad one is never connected to"
+cp "$WORK/fleet.toml.good" "$H/.config/dotfiles/fleet.toml"
+
+test_start "status_fleet_with_every_host_answering_exits_0"
+printf '[hosts.alpha]\nssh = "u@alpha.test"\n' >"$H/.config/dotfiles/fleet.toml"
+ai status --fleet
+assert_equals "0" "$RC" "exit 0"
+assert_contains "on 2 of 2 hosts" "$OUT" "every host counted"
+cp "$WORK/fleet.toml.good" "$H/.config/dotfiles/fleet.toml"
 
 test_start "status_without_fleet_is_this_machine_only"
 ai status
@@ -144,6 +162,10 @@ ai check --on alpha
 assert_equals "3" "$RC" "its exit status"
 assert_contains "AI doctor on u@alpha.test" "$OUT" "its output"
 assert_equals "dot ai check" "$(cat "$WORK/remote/last-cmd")" "the command it ran"
+
+printf '0\n' >"$WORK/remote/u@beta.test/check-rc"
+ai check --on beta
+assert_equals "0" "$RC" "a healthy host: exit 0"
 
 test_start "check_on_a_host_not_in_the_fleet"
 ai check --on nowhere
