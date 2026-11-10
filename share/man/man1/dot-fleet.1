@@ -31,6 +31,11 @@ Posture across hosts. Effect: read. Runs \fBdot\-fleet status\fR, the plugin's e
 .TP
 .B dot fleet apply
 Apply the fleet configuration. Effect: write. Runs \fBdot\-fleet apply\fR, the plugin's entry.
+.RS
+.TP
+.B \-\-agents
+Also install each host's agents, this machine's AI policy and the agent hooks
+.RE
 .TP
 .B dot fleet push
 Send configuration to a host. Effect: write. Runs \fBdot\-fleet push\fR, the plugin's entry.

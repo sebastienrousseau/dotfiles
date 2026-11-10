@@ -14,15 +14,17 @@
 
 _fleet_apply_help() {
   cat <<EOF
-Usage: dot fleet apply [--host <name>] [--cmd <shell>] [--dry-run] [--jobs <n>]
+Usage: dot fleet apply [--host <name>] [--agents | --cmd <shell>] [--dry-run] [--jobs <n>]
 
 Push dotfiles state to every host registered in:
   ${DOTFILES_FLEET_HOSTS:-\$HOME/.config/dotfiles/fleet.toml}
 
 Format of fleet.toml:
+  agents = ["claude", "codex"]     # what --agents installs on every host
   [hosts.laptop]
   ssh     = "user@laptop.local"
   profile = "workstation"
+  agents  = ["claude"]             # this host's own list instead
 
 Hostnames are validated against [A-Za-z0-9._@:+/-]+ before any SSH
 fan-out; invalid entries abort the apply.
@@ -42,6 +44,11 @@ Behavior:
 
 Flags:
   --host <name>      Apply to a single host only.
+  --agents           Provision each host's agents (plan P1.4): dot config
+                     update, then dot ai install --yes for each agent (at
+                     its pin), this machine's AI policy (checked there by
+                     dot ai policy check before it replaces the host's),
+                     dot cli hook install, and dot doctor.
   --cmd <shell>      Run a custom command instead of the default.
   --dry-run, -n      Print resolved hosts + planned command; don't SSH.
   --jobs <n>         Parallelism (default 4).
@@ -71,6 +78,10 @@ _fleet_apply_args() {
         only_host="$2"
         shift 2
         ;;
+      --agents)
+        agents=1
+        shift
+        ;;
       --cmd)
         cmd="$2"
         shift 2
@@ -93,8 +104,26 @@ _fleet_apply_args() {
   done
 }
 
+# The run's header; with --agents, also the policy step every host gets.
+_fleet_apply_header() {
+  local what="$effective_cmd"
+  if ((agents == 1)); then
+    _fleet_policy_step
+    what="each host's agents (--agents)"
+  fi
+  ui_header "Fleet apply"
+  ui_info "Hosts file" "$hosts_file"
+  ui_info "Command" "$what"
+  ui_info "Parallel" "$jobs"
+}
+
 # Validates --jobs, then loads the hosts (filtered by --host) into entries.
 _fleet_apply_load() {
+  if ((agents == 1)) && [[ -n "$cmd" ]]; then
+    ui_err "Fleet" "--agents and --cmd do not mix: --agents runs its own steps"
+    _fleet_stop=1
+    return 0
+  fi
   # The throttle loop waits while the running-job count is >= jobs, so 0 or
   # a non-number would spin forever.
   if [[ ! "$jobs" =~ ^[1-9][0-9]*$ ]]; then
@@ -123,11 +152,50 @@ _fleet_apply_load() {
   fi
 }
 
+# _fleet_policy_step: the remote step that installs this machine's AI
+# policy (sent inline, base64): written beside the host's own, checked
+# there with dot ai policy check, and only then moved into place, 0600.
+# Nothing when this machine has no policy. Sets policy_digest for display.
+_fleet_policy_step() {
+  local file="${DOT_AI_POLICY:-${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/ai-policy.toml}" b64
+  policy_step="" policy_digest=""
+  [[ -f "$file" ]] || return 0
+  b64="$(base64 <"$file" | tr -d '\n')"
+  policy_digest="$( (shasum -a 256 "$file" 2>/dev/null || sha256sum "$file") | cut -c1-12)"
+  policy_step='d="$HOME/.config/dotfiles" && mkdir -p "$d" && (umask 077 && printf %s '"'$b64'"' | base64 -d >"$d/ai-policy.toml.new")'
+  policy_step+=' && { dot ai policy check --policy "$d/ai-policy.toml.new" || { rm -f "$d/ai-policy.toml.new"; false; }; }'
+  policy_step+=' && mv -f "$d/ai-policy.toml.new" "$d/ai-policy.toml"'
+}
+
+# _fleet_host_cmd NAME [display]: what host NAME runs; with --agents its
+# steps, the policy shown by its digest when display is set. 1 (having said
+# why) when its agents list is bad.
+_fleet_host_cmd() {
+  local list a why out
+  if ((agents == 0)); then
+    printf '%s\n' "$effective_cmd"
+    return 0
+  fi
+  list="$(fleet_agents "$1")" || {
+    ui_err "$1" "$list" >&2
+    return 1
+  }
+  out="dot config update"
+  for a in $list; do out+=" && dot ai install --yes $a"; done
+  if [[ -n "$policy_step" && -n "${2:-}" ]]; then
+    out+=" && <ai-policy.toml (sha256 $policy_digest), checked, then installed>"
+  elif [[ -n "$policy_step" ]]; then
+    out+=" && $policy_step"
+  fi
+  printf '%s\n' "$out && dot cli hook install && dot doctor"
+}
+
 _fleet_apply_dry_run() {
-  local name ssh profile
-  printf '%s\n' "$entries" | while IFS=$'\t' read -r name ssh profile; do
-    ui_info "$name" "$ssh  profile=$profile  cmd=$effective_cmd"
-  done
+  local name ssh profile hcmd
+  while IFS=$'\t' read -r name ssh profile; do
+    hcmd="$(_fleet_host_cmd "$name" display)" || return 1
+    ui_info "$name" "$ssh  profile=$profile  cmd=$hcmd"
+  done <<<"$entries"
   ui_ok "Dry-run" "no SSH connections opened"
 }
 
@@ -196,7 +264,7 @@ _fleet_apply_one() {
 # Track PIDs and block on the oldest when at capacity instead; works on
 # bash 3.2 and 4+ alike. Counts cmd_fleet_apply's total.
 _fleet_apply_run() {
-  local name ssh profile
+  local name ssh profile hcmd
   local _pids=()
   while IFS=$'\t' read -r name ssh profile; do
     [[ -n "$name" && -n "$ssh" ]] || continue
@@ -205,7 +273,11 @@ _fleet_apply_run() {
       wait "${_pids[0]}" 2>/dev/null || true
       _pids=("${_pids[@]:1}")
     done
-    _fleet_apply_one "$name" "$ssh" "$effective_cmd" "$tmpdir" &
+    hcmd="$(_fleet_host_cmd "$name")" || {
+      printf 'fail bad agents\n' >"$tmpdir/$name.status"
+      continue
+    }
+    _fleet_apply_one "$name" "$ssh" "$hcmd" "$tmpdir" &
     _pids+=("$!")
   done <<<"$entries"
   wait
@@ -230,21 +302,19 @@ _fleet_apply_result() {
 # each registered host. The §3 hero-feature: nobody else owns the
 # "Ansible for personal devices" niche.
 cmd_fleet_apply() {
-  local dry_run=0 only_host="" cmd="" jobs=4 verify_hosts=0 _fleet_stop=""
+  local dry_run=0 only_host="" cmd="" jobs=4 verify_hosts=0 agents=0 _fleet_stop=""
   local hosts_file entries effective_cmd total=0 ok=0 fail=0 tmpdir _cleanup name ssh profile
+  local policy_step="" policy_digest=""
   _fleet_apply_args "$@"
   [[ -z "$_fleet_stop" ]] || return "$_fleet_stop"
   _fleet_apply_load
   [[ -z "$_fleet_stop" ]] || return "$_fleet_stop"
 
   effective_cmd="${cmd:-dot config update && dot doctor}"
-  ui_header "Fleet apply"
-  ui_info "Hosts file" "$hosts_file"
-  ui_info "Command" "$effective_cmd"
-  ui_info "Parallel" "$jobs"
+  _fleet_apply_header
   if [[ "$dry_run" -eq 1 ]]; then
     _fleet_apply_dry_run
-    return 0
+    return
   fi
   if ! command -v ssh >/dev/null 2>&1; then
     ui_err "ssh" "not installed"

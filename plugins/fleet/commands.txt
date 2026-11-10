@@ -16,4 +16,5 @@ cmd|fleet namespace list|@fleet namespace list|read|Namespaces
 cmd|fleet log show|@fleet log show|read|Fleet events
 cmd|fleet policy show|@fleet policy show|read|Fleet policy
 cmd|fleet policy set|@fleet policy set|write|Enforce a fleet policy
+flag|fleet apply|agents|||Also install each host's agents, this machine's AI policy and the agent hooks
 alias|teleport|removed|fleet push|0.2.538

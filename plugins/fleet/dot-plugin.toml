@@ -46,6 +46,10 @@ verb = "apply"
 effect = "write"
 summary = "Apply the fleet configuration"
 
+[[commands.flags]]
+long = "agents"
+summary = "Also install each host's agents, this machine's AI policy and the agent hooks"
+
 [[commands]]
 verb = "push"
 effect = "write"

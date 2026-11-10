@@ -1030,6 +1030,7 @@ export extern "dot fleet" [
 ]
 
 export extern "dot fleet apply" [
+    --agents # Also install each host's agents, this machine's AI policy and the agent hooks
     --help(-h) # Show help
     ...rest: string
 ]

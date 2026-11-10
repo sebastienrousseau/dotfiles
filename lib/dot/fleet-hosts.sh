@@ -70,3 +70,31 @@ fleet_ssh() {
     -o StrictHostKeyChecking=accept-new \
     -- "$1" "$2"
 }
+
+# fleet_agents NAME: the agents host NAME runs, space-separated: its own
+# `agents = [...]`, else the file's top-level one; nothing when neither
+# says. Returns 1, with why on stdout, for a name that is not a plain id.
+fleet_agents() {
+  local list a
+  local -a names=()
+  list="$(awk -v host="$1" '
+    function names(line) {
+      sub(/^[^=]*=[[:space:]]*\[/, "", line); sub(/\][[:space:]]*$/, "", line)
+      gsub(/[",]/, " ", line); return line
+    }
+    /^\[/ { section = $0; next }
+    /^agents[[:space:]]*=/ {
+      if (section == "") top = names($0)
+      else if (section == "[hosts." host "]") own = names($0)
+    }
+    END { print (own != "" ? own : top) }
+  ' "$(fleet_hosts_file)" 2>/dev/null)"
+  read -r -a names <<<"$list"
+  for a in ${names[@]+"${names[@]}"}; do
+    [[ "$a" =~ ^[a-z][a-z0-9-]{0,31}$ ]] || {
+      printf 'invalid agent name (%s) in %s\n' "$a" "$(fleet_hosts_file)"
+      return 1
+    }
+  done
+  printf '%s\n' "${names[*]+${names[*]}}"
+}

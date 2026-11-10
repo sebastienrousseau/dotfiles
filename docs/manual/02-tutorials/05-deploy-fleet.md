@@ -186,6 +186,8 @@ dot fleet apply             # run 'dot config update && dot doctor' on each host
 
 It runs up to four hosts in parallel (`--jobs <n>` changes that); `--host <name>` limits it to one host, and `--verify-hosts` refuses to connect to a host that is not already in `~/.ssh/known_hosts`.
 
+To give every host the same AI agents, add `agents = ["claude", "codex"]` at the top of `fleet.toml` (or under a host, for that host alone) and run `dot fleet apply --agents`. Each host updates, installs those agents at their pinned versions, takes this machine's `~/.config/dotfiles/ai-policy.toml` once its own `dot ai policy check` accepts it, wires the agent hooks and runs `dot doctor`. A policy a host refuses leaves its old one in place and fails that host.
+
 ## Step 7: Secrets Rotation
 
 When a secret is compromised (or as part of routine rotation):

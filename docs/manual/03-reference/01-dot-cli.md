@@ -416,12 +416,13 @@ Fleet hosts are configured in `~/.config/dotfiles/fleet.toml` (`DOTFILES_FLEET_H
 Push dotfiles state to every host registered in `~/.config/dotfiles/fleet.toml`.
 
 ```
-dot fleet apply [--host <name>] [--cmd <shell>] [--dry-run] [--jobs <n>] [--verify-hosts]
+dot fleet apply [--host <name>] [--agents | --cmd <shell>] [--dry-run] [--jobs <n>] [--verify-hosts]
 ```
 
 | Flag | Effect |
 |:---|:---|
 | `--host <name>` | Apply to a single host only (matches the `[hosts.<name>]` stanza key). |
+| `--agents` | Provision each host's agents: `dot config update`, `dot ai install --yes` for each agent in its `agents` list (at the pins in `[ai_tools]`), this machine's `ai-policy.toml` (checked on the host by `dot ai policy check` before it replaces the host's, then 0600), `dot cli hook install`, `dot doctor`. Not with `--cmd`. |
 | `--cmd <shell>` | Run a custom command on every host instead of the default `dot config update && dot doctor`. **Warning:** this is arbitrary shell on remote hosts; the value is your trust boundary. |
 | `--dry-run`, `-n` | Print the resolved hosts + planned command without opening SSH. |
 | `--jobs <n>`, `-j <n>` | Parallelism (default 4). |
@@ -432,9 +433,12 @@ Hostnames in `fleet.toml` are validated against `[A-Za-z0-9._@:+/-]+` before fan
 Example `fleet.toml`:
 
 ```toml
+agents = ["claude", "codex"]   # what --agents installs on every host
+
 [hosts.laptop]
 ssh     = "user@laptop.local"
 profile = "workstation"
+agents  = ["claude"]           # this host's own list instead
 ```
 
 ## Agents

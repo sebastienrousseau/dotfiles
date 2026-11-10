@@ -1468,7 +1468,13 @@
      "spelling": "fleet apply",
      "effect": "write",
      "summary": "Apply the fleet configuration",
-     "built": true
+     "built": true,
+     "flags": [
+      {
+       "long": "agents",
+       "summary": "Also install each host's agents, this machine's AI policy and the agent hooks"
+      }
+     ]
     },
     {
      "spelling": "fleet push",

@@ -309,6 +309,7 @@ flag|doctor perf show|json|j||Print JSON
 flag|doctor perf show|profile|p||Include profile output
 flag|doctor perf show|runs|r|count|Number of runs
 flag|doctor perf show|target|t|ms|Timing target in milliseconds
+flag|fleet apply|agents|||Also install each host's agents, this machine's AI policy and the agent hooks
 flag|mcp check|strict|s||Treat policy warnings as errors
 flag|mcp check|json|j||Print a JSON summary
 flag|security score show|verbose|v||Show detailed scoring

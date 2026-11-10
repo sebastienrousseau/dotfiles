@@ -382,7 +382,7 @@ _dot() {
       flags='--help --json -j --fix -f --force -F'
       ;;
     'fleet apply' | 'fleet apply'\ *)
-      flags='--help'
+      flags='--help --agents'
       ;;
     'fleet drift show' | 'fleet drift show'\ *)
       flags='--help'
