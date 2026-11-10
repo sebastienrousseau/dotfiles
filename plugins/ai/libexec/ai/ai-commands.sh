@@ -152,6 +152,10 @@ cmd_ai_chat() {
 
 # cmd_ai_doctor — health-check the roster + gateway in one place.
 cmd_ai_doctor() {
+  if [[ "${1:-}" == --on ]]; then
+    ai_check_on "${2:-}"
+    return
+  fi
   ui_header "AI doctor"
   if has_command claude; then
     ui_ok "claude CLI" "$(claude --version 2>/dev/null | head -1 || echo installed)"
@@ -335,6 +339,10 @@ cmd_ai_draft() {
 # cockpit binary, the table has each session's cost (dot ai cost show).
 cmd_ai_agent_status() {
   local hook="${BASH_SOURCE[0]%/*}/../../../cli/libexec/hook.sh" costs rc=0
+  if [[ " $* " == *" --fleet "* ]]; then
+    ai_status_fleet "$@"
+    return
+  fi
   if [[ " $* " == *" --json "* ]] || ! has_command dot-ai-tui; then
     bash "$hook" --status --live "$@"
     return

@@ -166,7 +166,8 @@ _dot() {
       flags='--help'
       ;;
     'ai check' | 'ai check'\ *)
-      flags='--help'
+      flags='--help --on'
+      valflags='--on'
       ;;
     'ai cost show' | 'ai cost show'\ *)
       flags='--help --by --session --days --json'

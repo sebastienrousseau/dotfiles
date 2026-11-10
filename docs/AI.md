@@ -57,8 +57,8 @@ The interface follows ADR-020 (`dot ai <verb>`), modelled on the Claude CLI: bar
 | `dot ai policy show [--agent A] [--mode M]` | The [enforced policy](#enforced-policy)'s rules in force for an agent (`dot ai policy`) |
 | `dot ai policy check` | Validate the policy and name the active mode |
 | `dot ai login [tool]` | Authenticate a tool |
-| `dot ai check` | Health-check the roster and the gateway (`dot ai doctor`) |
-| `dot ai status [--json]` | Each agent session of the last 24 h, its state and (with the cockpit binary) its cost, from the hooks' state files; the cockpit header and the tmux status bar show the same count (`3 agents · 1 blocked`) |
+| `dot ai check [--on <host>]` | Health-check the roster and the gateway (`dot ai doctor`); `--on` runs it on a host in `fleet.toml` |
+| `dot ai status [--fleet] [--json]` | Each agent session of the last 24 h, its state and (with the cockpit binary) its cost, from the hooks' state files; `--fleet` adds every host in `fleet.toml`; the cockpit header and the tmux status bar show the same count (`3 agents · 1 blocked`) |
 | `dot ai watch` | Follow agents' states live; a desktop notification when one is blocked |
 | `dot ai start --bg <tool> [task]` | Start an agent in a terminal of its own (herdr-core, else tmux), optionally with a task |
 | `dot ai send <name> <text>` / `dot ai wait [<name>]` | Give a background agent more work; wait until it stops working |

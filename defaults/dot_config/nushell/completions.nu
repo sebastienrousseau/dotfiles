@@ -304,6 +304,7 @@ export extern "dot ai ask" [
 ]
 
 export extern "dot ai check" [
+    --on: string # Run the check on a host in fleet.toml
     --help(-h) # Show help
     ...rest: string
 ]

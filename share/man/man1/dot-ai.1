@@ -73,6 +73,11 @@ Authenticate an agent. Effect: write. Runs \fBdot\-ai login\fR, the plugin's ent
 .TP
 .B dot ai check
 Check agent installs and auth. Effect: read. Runs \fBdot\-ai check\fR, the plugin's entry.
+.RS
+.TP
+.B \-\-on \fIhost\fR
+Run the check on a host in fleet.toml
+.RE
 .TP
 .B dot ai ask
 Ask about the local context. Effect: read. Runs \fBdot\-ai ask\fR, the plugin's entry.

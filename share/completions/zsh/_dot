@@ -158,7 +158,8 @@ _dot() {
       flags_=('--help:Show help')
       ;;
     'ai check' | 'ai check'\ *)
-      flags_=('--help:Show help')
+      flags_=('--help:Show help' '--on:Run the check on a host in fleet.toml')
+      valflags_=(--on)
       ;;
     'ai cost show' | 'ai cost show'\ *)
       flags_=('--help:Show help' '--by:Group by agent, host, day, model or session (default agent)' '--session:One session (an id or a unique prefix), by model' '--days:Today and the days before it (default 30)' '--json:Print the report as JSON')

@@ -116,6 +116,11 @@ verb = "check"
 effect = "read"
 summary = "Check agent installs and auth"
 
+[[commands.flags]]
+long = "on"
+value = "host"
+summary = "Run the check on a host in fleet.toml"
+
 [[commands]]
 verb = "ask"
 effect = "read"

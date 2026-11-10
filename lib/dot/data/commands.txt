@@ -273,6 +273,7 @@ flag|ai start|cwd||dir|With --bg: the directory it starts in
 arg|ai start|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
 flag|ai run|style|p|pattern|Steering pattern (--pattern is the old name)
 arg|ai run|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
+flag|ai check|on||host|Run the check on a host in fleet.toml
 flag|ai cost show|by||group|Group by agent, host, day, model or session (default agent)
 flag|ai cost show|session||id|One session (an id or a unique prefix), by model
 flag|ai cost show|days||n|Today and the days before it (default 30)

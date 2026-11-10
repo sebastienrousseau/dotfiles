@@ -388,7 +388,14 @@
      "spelling": "ai check",
      "effect": "read",
      "summary": "Check agent installs and auth",
-     "built": true
+     "built": true,
+     "flags": [
+      {
+       "long": "on",
+       "value": "host",
+       "summary": "Run the check on a host in fleet.toml"
+      }
+     ]
     },
     {
      "spelling": "ai ask",

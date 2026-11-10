@@ -26,6 +26,10 @@ source "$SCRIPT_DIR/ai/watch-service.sh"
 source "$SCRIPT_DIR/ai/runtime.sh"
 # shellcheck source-path=SCRIPTDIR source=ai/status.sh
 source "$SCRIPT_DIR/ai/status.sh"
+# shellcheck source=../../../lib/dot/fleet-hosts.sh
+source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/fleet-hosts.sh"
+# shellcheck source-path=SCRIPTDIR source=ai/fleet.sh
+source "$SCRIPT_DIR/ai/fleet.sh"
 
 [[ -n "${DOT_AI_RAW:-}" ]] || dot_ui_command_banner "AI and Agents" "${1:-}" # raw mode: no banner
 
