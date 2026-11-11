@@ -359,7 +359,7 @@ export extern "dot ai install" [
 
 def "nu-complete dot ai inventory" [] {
     [
-        { value: "show", description: "Agents, versions and config" }
+        { value: "show", description: "Agents, versions, pins, sign-in, hooks and drift" }
     ]
 }
 export extern "dot ai inventory" [
@@ -369,6 +369,7 @@ export extern "dot ai inventory" [
 ]
 
 export extern "dot ai inventory show" [
+    --json # Print the inventory as JSON
     --help(-h) # Show help
     ...rest: string
 ]

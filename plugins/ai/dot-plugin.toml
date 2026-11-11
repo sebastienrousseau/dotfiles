@@ -173,8 +173,12 @@ summary = "Print the usage report as JSON"
 object = "inventory"
 verb = "show"
 effect = "read"
-planned = true
-summary = "Agents, versions and config"
+output = "ai/inventory.v1"
+summary = "Agents, versions, pins, sign-in, hooks and drift"
+
+[[commands.flags]]
+long = "json"
+summary = "Print the inventory as JSON"
 
 [[commands]]
 object = "pattern"

@@ -32,7 +32,7 @@ _dot() {
     'ai') kids_=('pattern:prompt patterns' 'cost:spend by agent and model' 'gateway:the keyless gateway' 'inventory:installed agents and versions' 'policy:the enforced AI policy' 'list:Installed agents' 'install:Install agents' 'update:Upgrade agent CLIs' 'start:Start an agent' 'run:Run an agent once' 'login:Authenticate an agent' 'check:Check agent installs and auth' 'ask:Ask about the local context' 'send:Give a background agent text and submit it' 'wait:Wait until a background agent stops working') ;;
     'ai cost') kids_=('show:Spend by agent and model') ;;
     'ai gateway') kids_=('serve:Run the gateway in the foreground' 'show:Gateway statistics') ;;
-    'ai inventory') kids_=('show:Agents, versions and config') ;;
+    'ai inventory') kids_=('show:Agents, versions, pins, sign-in, hooks and drift') ;;
     'ai pattern') kids_=('list:Prompt patterns' 'show:One prompt pattern' 'edit:Edit a prompt pattern' 'export:Write patterns as herdr-core templates') ;;
     'ai policy') kids_=('show:The AI policy rules in force for an agent' 'check:Validate the AI policy and name the active mode') ;;
     'attest') kids_=('show:The workstation attestation' 'export:Write attestation evidence' 'verify:Verify evidence') ;;
@@ -175,7 +175,7 @@ _dot() {
       flags_=('--help:Show help')
       ;;
     'ai inventory show' | 'ai inventory show'\ *)
-      flags_=('--help:Show help')
+      flags_=('--help:Show help' '--json:Print the inventory as JSON')
       ;;
     'ai list' | 'ai list'\ *)
       flags_=('--help:Show help')

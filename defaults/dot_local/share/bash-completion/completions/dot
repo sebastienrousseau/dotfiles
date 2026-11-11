@@ -183,7 +183,7 @@ _dot() {
       flags='--help'
       ;;
     'ai inventory show' | 'ai inventory show'\ *)
-      flags='--help'
+      flags='--help --json'
       ;;
     'ai list' | 'ai list'\ *)
       flags='--help'

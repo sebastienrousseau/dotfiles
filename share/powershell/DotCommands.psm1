@@ -301,6 +301,18 @@ function Get-DotAiGateway {
     dot ai gateway show @Arguments
 }
 
+function Get-DotAiInventory {
+    <#
+    .SYNOPSIS
+    Agents, versions, pins, sign-in, hooks and drift
+    .DESCRIPTION
+    Runs `dot ai inventory show`: Agents, versions, pins, sign-in, hooks and drift. Effect: read; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot ai inventory show @Arguments
+}
+
 function Get-DotAiPattern {
     <#
     .SYNOPSIS
@@ -1659,6 +1671,7 @@ Export-ModuleMember -Function @(
     'Get-DotAi'
     'Get-DotAiCost'
     'Get-DotAiGateway'
+    'Get-DotAiInventory'
     'Get-DotAiPattern'
     'Get-DotAiPolicy'
     'Get-DotAttest'

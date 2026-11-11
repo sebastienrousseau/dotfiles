@@ -58,7 +58,7 @@ cmd|ai ask|@ai ask|read|Ask about the local context
 cmd|ai pattern list|@ai pattern list|read|Prompt patterns
 cmd|ai cost show|@ai cost show|read|Spend by agent and model
 cmd|ai gateway show|@ai gateway show|read|Gateway statistics
-cmd|ai inventory show||read|Agents, versions and config
+cmd|ai inventory show|@ai inventory show|read|Agents, versions, pins, sign-in, hooks and drift
 cmd|ai pattern show|@ai pattern show|read|One prompt pattern
 cmd|ai pattern edit|@ai pattern edit|write|Edit a prompt pattern
 cmd|ai policy show|@ai policy show|read|The AI policy rules in force for an agent
@@ -279,6 +279,7 @@ flag|ai cost show|session||id|One session (an id or a unique prefix), by model
 flag|ai cost show|days||n|Today and the days before it (default 30)
 flag|ai cost show|json|||Print the report as JSON
 flag|ai gateway show|json|||Print the usage report as JSON
+flag|ai inventory show|json|||Print the inventory as JSON
 flag|ai policy show|agent||name|Agent whose rules to show (default claude)
 flag|ai policy show|mode||name|Mode to show (default the active one)
 flag|ai policy show|policy||file|Policy file (default ~/.config/dotfiles/ai-policy.toml)

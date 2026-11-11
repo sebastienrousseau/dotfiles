@@ -14,7 +14,7 @@ $script:DotChildren = @{
     'ai' = @(@('pattern', 'prompt patterns'), @('cost', 'spend by agent and model'), @('gateway', 'the keyless gateway'), @('inventory', 'installed agents and versions'), @('policy', 'the enforced AI policy'), @('list', 'Installed agents'), @('install', 'Install agents'), @('update', 'Upgrade agent CLIs'), @('start', 'Start an agent'), @('run', 'Run an agent once'), @('login', 'Authenticate an agent'), @('check', 'Check agent installs and auth'), @('ask', 'Ask about the local context'), @('send', 'Give a background agent text and submit it'), @('wait', 'Wait until a background agent stops working'))
     'ai cost' = @(, @('show', 'Spend by agent and model'))
     'ai gateway' = @(@('serve', 'Run the gateway in the foreground'), @('show', 'Gateway statistics'))
-    'ai inventory' = @(, @('show', 'Agents, versions and config'))
+    'ai inventory' = @(, @('show', 'Agents, versions, pins, sign-in, hooks and drift'))
     'ai pattern' = @(@('list', 'Prompt patterns'), @('show', 'One prompt pattern'), @('edit', 'Edit a prompt pattern'), @('export', 'Write patterns as herdr-core templates'))
     'ai policy' = @(@('show', 'The AI policy rules in force for an agent'), @('check', 'Validate the AI policy and name the active mode'))
     'attest' = @(@('show', 'The workstation attestation'), @('export', 'Write attestation evidence'), @('verify', 'Verify evidence'))
@@ -97,7 +97,7 @@ $script:DotCommands = @{
     'ai gateway serve' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai gateway show' = @{ Flags = @(@('--help', 'Show help'), @('--json', 'Print the usage report as JSON')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai install' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'ai inventory show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai inventory show' = @{ Flags = @(@('--help', 'Show help'), @('--json', 'Print the inventory as JSON')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai login' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai pattern edit' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }

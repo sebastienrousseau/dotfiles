@@ -453,8 +453,15 @@
     {
      "spelling": "ai inventory show",
      "effect": "read",
-     "summary": "Agents, versions and config",
-     "built": false
+     "summary": "Agents, versions, pins, sign-in, hooks and drift",
+     "built": true,
+     "flags": [
+      {
+       "long": "json",
+       "summary": "Print the inventory as JSON"
+      }
+     ],
+     "output": "ai/inventory.v1"
     },
     {
      "spelling": "ai pattern show",

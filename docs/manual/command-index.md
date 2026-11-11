@@ -46,7 +46,7 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot ai pattern list` | Prompt patterns |
 | `dot ai cost show` | Spend by agent and model |
 | `dot ai gateway show` | Gateway statistics |
-| `dot ai inventory show` | Agents, versions and config *(planned)* |
+| `dot ai inventory show` | Agents, versions, pins, sign-in, hooks and drift |
 | `dot ai pattern show` | One prompt pattern |
 | `dot ai pattern edit` | Edit a prompt pattern |
 | `dot ai policy show` | The AI policy rules in force for an agent |
