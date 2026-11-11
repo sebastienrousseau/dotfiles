@@ -1,0 +1,17 @@
+{{- /*
+  draft's user config, rendered only for a host whose chezmoi data sets
+  draft_site_* keys (see .chezmoiignore.tmpl). The publisher identity is
+  personal, so it lives in ~/.config/chezmoi/chezmoi.toml, never in this
+  repository: draft shipped its maintainer's identity as a default until
+  v0.0.44 and every user who had not overridden it published under it.
+*/ -}}
+# draft user config, managed by chezmoi: set the draft_site_* keys in
+# ~/.config/chezmoi/chezmoi.toml rather than editing this file.
+
+# Who your articles are published as.
+[site]
+{{- range $key := list "base-url" "cdn" "name" "short-name" "email" "twitter" "location" "measurement-id" "copyright-from" }}
+{{-   with get $ (printf "draft_site_%s" (replace "-" "_" $key)) }}
+{{ printf "%-14s" $key }} = {{ . | toString | quote }}
+{{-   end }}
+{{- end }}
