@@ -73,7 +73,7 @@ title = "Crush"
 summary = "Charm's glamorous TUI coding agent"
 group = "agents"
 role = "agent"
-package = "npm:@charmland/crush"
+package = "aqua:charmbracelet/crush"
 
 [[tool]]
 name = "amp"

@@ -75,7 +75,7 @@
       "processes": [
         "crush"
       ],
-      "package": "npm:@charmland/crush",
+      "package": "aqua:charmbracelet/crush",
       "native": "",
       "chat": true
     },

@@ -59,7 +59,7 @@ while IFS='=' read -r _bin _want; do
 done <<'MAP'
 codex=npm:@openai/codex
 copilot=npm:@github/copilot
-crush=npm:@charmland/crush
+crush=aqua:charmbracelet/crush
 aider=pipx:aider-chat[uvx_args=--python 3.12]
 opencode=opencode
 sgpt=pipx:shell-gpt

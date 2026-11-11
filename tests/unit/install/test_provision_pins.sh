@@ -80,7 +80,7 @@ test_start "rust_tools_use_the_data_versions"
 assert_contains "cargo install --locked --version 0.13.13 cargo-edit" "$(cat "$CALLS")" "cargo-edit comes from [rust_tools]"
 
 # ── tmux plugin manager ─────────────────────────────────────────────────────
-PIN="7bdb7ca33c9cc6440a600202b50142f401b6fe21"
+PIN="7bdb7ca33c9cc6440a600202b50142f401b6fe21" # pragma: allowlist secret
 stub git 'case "$1" in
   clone) mkdir -p "$(eval echo "\${$#}")" ;;
   -C) if [ "$3" = rev-parse ]; then echo "$FAKE_HEAD"; fi ;;
@@ -120,7 +120,7 @@ test_start "ai_clis_installed_at_pinned_versions"
 assert_equals "0|$roster_mise|0" \
   "$rc|$(grep -c '^mise use -g ' "$CALLS")|$(grep '^mise use -g ' "$CALLS" | grep -cvE '@[0-9]+\.[0-9]+\.[0-9]+$')" \
   "every roster agent with a mise package, each at an exact version"
-assert_contains "mise use -g npm:@charmland/crush@" "$(cat "$CALLS")" "crush, which the old hand-kept list missed, is one"
+assert_contains "mise use -g aqua:charmbracelet/crush@" "$(cat "$CALLS")" "crush, which the old hand-kept list missed, is one"
 
 test_start "ai_clis_use_the_data_versions"
 assert_contains "mise use -g npm:@openai/codex@0.162.1" "$(cat "$CALLS")" "codex comes from [ai_tools]"

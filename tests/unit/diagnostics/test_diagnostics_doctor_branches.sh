@@ -679,7 +679,7 @@ EOF
 ln -sf "$(command -v jq)" "$S_BIN/jq"
 _pin_of() { awk -v k="\"$1\"" '/^\[/ { t = ($0 == "[ai_tools]"); next } t && $1 == k { gsub(/"/, "", $3); print $3; exit }' "$REPO_ROOT/defaults/.chezmoidata.toml"; }
 printf '#!/usr/bin/env bash\necho "codex-cli 0.0.1"\n' >"$S_BIN/codex"
-printf '#!/usr/bin/env bash\necho "crush version %s"\n' "$(_pin_of npm:@charmland/crush)" >"$S_BIN/crush"
+printf '#!/usr/bin/env bash\necho "crush version %s"\n' "$(_pin_of aqua:charmbracelet/crush)" >"$S_BIN/crush"
 chmod +x "$S_BIN/codex" "$S_BIN/crush"
 DOC_ENV=(PIPX_HOME= TERM_PROGRAM=)
 _run_doctor

@@ -77,15 +77,15 @@ zig = "latest"
 # CLI Tools
 atuin = "latest"
 bat = "latest"
-codex = "latest"
+codex = "0.162.1"
 # corralctl, passmcp, and draft — the AI Ecosystem & Governance Suite,
 # managed and updated globally via mise (`github:sebastienrousseau/...`).
-"github:sebastienrousseau/corralctl" = "latest"
-"github:sebastienrousseau/passmcp" = "latest"
-"github:sebastienrousseau/passmcp-graph" = "latest"
-"github:sebastienrousseau/passmcp-lsp" = "latest"
-"github:sebastienrousseau/passmcp-server" = "latest"
-"github:sebastienrousseau/draft" = "latest"
+"github:sebastienrousseau/corralctl" = "0.0.54"
+"github:sebastienrousseau/passmcp" = "0.0.8"
+"github:sebastienrousseau/passmcp-graph" = "0.0.8"
+"github:sebastienrousseau/passmcp-lsp" = "0.0.8"
+"github:sebastienrousseau/passmcp-server" = "0.0.8"
+"github:sebastienrousseau/draft" = "0.0.45"
 eza = "latest"
 gping = "latest"
 # pandoc builds the HTML/PDF/EPUB manual. Without it tools/docs/build-manual.sh
@@ -111,7 +111,7 @@ zoxide = "latest"
 # executable"), which silently breaks `dot doctor`'s startup benchmark.
 # It's provided natively by Brewfile.cli (arm64) and by Linux package
 # managers instead.
-"aqua:ollama/ollama" = "latest"
+"aqua:ollama/ollama" = "0.40.3"
 "aqua:Nukesor/pueue/pueue" = "4.0.4"
 "aqua:Nukesor/pueue/pueued" = "4.0.4"
 wasmtime = "48.0.2"
@@ -133,12 +133,12 @@ uv = "latest"
 # aider supports Python 3.9-3.12. On 3.13+ it crashes at import: pydub
 # (aider's voice support) needs the stdlib audioop module, removed in 3.13.
 # uv builds aider's environment on 3.12 regardless of the default Python.
-"pipx:aider-chat" = { version = "latest", uvx_args = "--python 3.12" }
-"pipx:shell-gpt" = "latest"
+"pipx:aider-chat" = { version = "0.86.2", uvx_args = "--python 3.12" }
+"pipx:shell-gpt" = "1.5.1"
 
 # AI tools
 # "npm:@anthropic-ai/claude-code" = "latest"  # disabled 2026-06-04: npm 11 skips the platform-native optionalDependency on global installs, breaking the binary. Use Anthropic's native installer instead (~/.local/bin/claude, self-updating).
-"npm:@github/copilot" = "latest"
+"npm:@github/copilot" = "1.0.95"
 # antigravity-cli (agy) is installed via native curl installer, not npm:
 # curl -fsSL https://antigravity.google/cli/install.sh | bash
 # codex provided by the native `codex` pin above; `npm:codex-cli` was an
@@ -147,9 +147,9 @@ uv = "latest"
 # `npm:opencode-ai` is a redundant duplicate using the broken npm optional-dep
 # wrapper pattern — do not reintroduce it.
 opencode = "1.19.0"
-"npm:autohand-cli" = "latest"
-"npm:@qwen-code/qwen-code" = "latest"
-"npm:@guizmo-ai/zai-cli" = "latest"
+"npm:autohand-cli" = "0.9.8"
+"npm:@qwen-code/qwen-code" = "0.25.1"
+"npm:@guizmo-ai/zai-cli" = "0.3.5"
 # "pipx:mistral-vibe" = "latest"  # disabled 2026-05-12: dep `mistralai` quarantined on PyPI; re-enable when restored
 
 # Task runners
