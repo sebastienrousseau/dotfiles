@@ -29,6 +29,8 @@ This file documents all notable changes to this project.
 - The gateway's engine no longer saves a session transcript of each client prompt under `~/.claude/projects/`.
 - The Build badge in the README template is built from the repository slug, not the host and path.
 - CI: a mutation test that times out ends everything it started, and the changed-lines mutation job has 45 minutes for its capped sample.
+- CI: when apt cannot install ripgrep or shfmt, they come from a pinned GitHub release checked against its SHA-256, so an unreachable Ubuntu mirror no longer fails the shell-lint jobs.
+- Security: detect-secrets loads its allowlist filter, so inline `pragma: allowlist secret` comments count again, and the pre-commit audit no longer refuses changes to `.secrets.baseline`.
 
 ## v0.2.542 (2026-11-08)
 
