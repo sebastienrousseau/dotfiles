@@ -23,7 +23,9 @@ CURRENT_TEST=""
 # the code under test does. DOTFILES_AI=1 exported by an interactive shell
 # made every rollback test call the real `dot ai claude`. A test that
 # exercises one of these sets it explicitly after sourcing this file.
-unset DOTFILES_AI
+# DOTFILES_DIR is the shell's own checkout (00-core-paths.sh exports it):
+# test_runner.sh drops it, and so must a test file run on its own.
+unset DOTFILES_AI DOTFILES_DIR
 # A test run from a hook in a linked worktree must not write into the real
 # repository; see git_env.sh.
 # shellcheck source=git_env.sh disable=SC1091
