@@ -2,6 +2,16 @@
 
 This file documents all notable changes to this project.
 
+## Unreleased
+
+### Removed
+
+- The dotfiles no longer install shell-gpt. It was installed three ways (the mise declaration, the Python-tools provisioning script and `dot ai install`), so removing it from one let the others put it back; its roster package, `[ai_tools]` pin, mise declaration, provisioning line and lock entry go together. `sgpt` is still recognised when you install it yourself (#1412).
+
+### Fixed
+
+- `dot ai eco` calls the doctor report directly, so shellcheck no longer reports SC2120 on `cmd_ai_doctor` and the pre-push audit passes again (#1412).
+
 ## v0.2.543 (2026-11-11)
 
 ### Added
