@@ -150,12 +150,18 @@ cmd_ai_chat() {
   exec "$bin"
 }
 
-# cmd_ai_doctor — health-check the roster + gateway in one place.
+# cmd_ai_doctor [--on <host>] — health-check the roster + gateway in one
+# place, or run the check on a fleet host.
 cmd_ai_doctor() {
   if [[ "${1:-}" == --on ]]; then
     ai_check_on "${2:-}"
     return
   fi
+  _ai_doctor_report
+}
+
+# _ai_doctor_report — the local health report; takes no arguments.
+_ai_doctor_report() {
   ui_header "AI doctor"
   if has_command claude; then
     ui_ok "claude CLI" "$(claude --version 2>/dev/null | head -1 || echo installed)"
@@ -378,5 +384,5 @@ cmd_ai_eco() {
     return $?
   fi
   ui_header "AI Ecosystem & Green Compute"
-  cmd_ai_doctor
+  _ai_doctor_report
 }
