@@ -184,7 +184,7 @@
       "processes": [
         "sgpt"
       ],
-      "package": "pipx:shell-gpt",
+      "package": "",
       "native": "",
       "chat": true
     },
