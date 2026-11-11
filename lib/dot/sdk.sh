@@ -6,8 +6,10 @@
 # host. A plugin sources "$DOT_SDK/sdk.sh" (bin/dot exports DOT_SDK, this
 # directory) and, when it needs them, the other SDK files beside it:
 # ui.sh, log.sh, platform.sh, preflight.sh, probe.sh, verified-download.sh,
-# ai-roster.sh and lock.sh. tools/ci/check-plugin-imports.py fails a plugin
-# that sources anything else outside its own directory.
+# ai-roster.sh, lock.sh, agent-runtime.sh (the ai and session plugins
+# share it) and fleet-hosts.sh (the fleet and ai plugins share it).
+# tools/ci/check-plugin-imports.py fails a plugin that sources
+# anything else outside its own directory.
 #
 # This file loads ui.sh, platform.sh and preflight.sh, and defines the
 # helpers plugins call: the source tree, scripts, commands, messages and

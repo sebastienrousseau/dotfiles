@@ -97,9 +97,16 @@ class Domains(unittest.TestCase):
 
 
 class Verbs(unittest.TestCase):
-    def test_thirty_seven_unique_verbs(self):
-        self.assertEqual(len(VERBS["verbs"]), 37)
-        self.assertEqual(len(set(names(VERBS["verbs"]))), 37)
+    def test_thirty_nine_unique_verbs(self):
+        # 37 from ADR-020; send and wait from ADR-024.
+        self.assertEqual(len(VERBS["verbs"]), 39)
+        self.assertEqual(len(set(names(VERBS["verbs"]))), 39)
+
+    def test_agent_runtime_verbs(self):
+        # ADR-024: send changes a running program, wait only watches it.
+        by = {v["name"]: v for v in VERBS["verbs"]}
+        self.assertEqual((by["send"]["effect"], by["send"]["powershell"]), ("change", "Send"))
+        self.assertEqual((by["wait"]["effect"], by["wait"]["powershell"]), ("read", "Wait"))
 
     def test_powershell_verbs_are_approved(self):
         for v in VERBS["verbs"]:

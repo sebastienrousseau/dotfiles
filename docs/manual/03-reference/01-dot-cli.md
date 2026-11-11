@@ -246,19 +246,41 @@ dot ai start [tool]                  # interactive session
 dot ai list                          # installed agents
 dot ai install [all|<tool>]          # install fleet tools
 dot ai gateway serve [stop|status|logs|setup]  # local Claude gateway (start also routes the fleet)
-dot ai cost show                     # spend report
+dot ai gateway show [--json]         # the gateway's requests, tokens and cost
+dot ai inventory show [--json]       # agents, versions, pins, sign-in, hooks and drift
+dot ai cost show [--by day] [--json]  # what agent sessions cost
+dot ai policy show [--agent A]       # the AI policy rules in force
+dot ai policy check [--policy FILE]  # validate the AI policy, name the active mode
 dot ai login [tool]                  # authenticate
-dot ai check                         # health-check fleet + gateway
-dot ai status [--json]               # each agent session of the last 24 h and its state
+dot ai check [--on <host>]           # health-check fleet + gateway, here or on a host
+dot ai status [--fleet] [--json]     # each agent session of the last 24 h, here or fleet-wide
 dot ai watch                         # follow agents' states; notify when one is blocked
+dot ai watch service on|off|status   # keep dot ai watch running from login (opt-in)
+dot ai start --bg <tool> [task]      # in a terminal of its own; --name N, --cwd DIR
+dot ai send <name> <text>            # give that agent more work
+dot ai wait [<name>] [--timeout S]   # until it stops working (default 180 s)
 ```
 
-`dot ai status` reads the state file each agent's hook writes (`dot cli hook install` wires the hooks), so it needs nothing running: one row per session heard from in the last 24 hours (agent, state, time, session), newest first, with ended sessions left out; `--json` prints the `agent-event.v1` records, one per line. Earlier, `dot ai status` was a deprecated name for `dot ai tools` (now `dot ai list`).
+`dot ai start --bg` starts an agent in a terminal that outlives the shell: on herdr-core (`dot ai install hc`) when it is installed, else in a detached tmux session. It is named `<tool>-<n>` unless `--name` says otherwise; with a task, it waits up to 30 seconds for the agent's first report, then types the task in. `dot ai send` types more text and submits it. `dot ai wait` returns once the agent stops working (idle, blocked on a question or a permission, an error, or its exit) and prints `name: state`; it exits 124 when the agent still works after the timeout, leaving it running. With no name it waits for every agent started with `--bg` (on herdr-core, the children of the terminal it runs in). On tmux, wait follows the state each agent's hook records with its pane, so an agent without hooks counts as working until the timeout. `dot session open <name>` takes over its terminal. `dot ai delegate` is retired onto these.
 
-`dot ai watch` runs in a terminal of its own. It listens on the socket the hooks send to, starts from the state files, prints a line each time an agent's state changes, and posts a desktop notification when a session becomes blocked on a permission prompt or a question, at most once per session every 30 seconds. It is part of the cockpit binary (`dot-ai-tui`, built when `DOTFILES_AI=1`); only one runs at a time, and the hooks never start it.
+`dot ai status` reads the state file each agent's hook writes (`dot cli hook install` wires the hooks), so it needs nothing running: one row per session heard from in the last 24 hours (agent, state, time, session), newest first, with ended sessions left out. With the cockpit binary (`dot-ai-tui`), a COST column gives each session's cost from `dot ai cost show` (`-` when none is known). `--json` prints the `agent-event.v1` records, one per line; `dot ai cost show --by session --json` has the costs. `--fleet` asks every host in `fleet.toml` at once over SSH (5 s to connect each) and adds a HOST column; a host that does not answer is named with the reason, and the command exits 1. With `--json` it prints one `ai/fleet-status.v1` line per host ([schema](../../../schemas/cli/ai-fleet-status.v1.schema.json)), this machine first. `dot ai check --on <host>` runs `dot ai check` on one of them. Earlier, `dot ai status` was a deprecated name for `dot ai tools` (now `dot ai list`).
+
+`dot ai watch` runs in a terminal of its own. It listens on the socket the hooks send to, starts from the state files, prints a line each time an agent's state changes, and posts a desktop notification when a session becomes blocked on a permission prompt or a question, at most once per session every 30 seconds. It is part of the cockpit binary (`dot-ai-tui`, built when `DOTFILES_AI=1`); only one runs at a time, and the hooks never start it. `dot ai watch service on` keeps it running from login instead: a launchd agent on macOS (`~/Library/LaunchAgents/com.sebastienrousseau.dot-ai-watch.plist`, logging to `~/.local/state/dot/ai/watch.log`) or a systemd user service on Linux (`dot-ai-watch.service`). It is restarted when it fails and stays down after a clean exit; `off` unloads and deletes it, and `status` says whether it is loaded.
 
 Add `--style <name>` (architect, hardener, refactor) to `dot ai run` to steer a prompt.
 The top-level forms (`dot cl`, `dot claude`, `dot ai-setup`, `dot ai-query`) were removed in 0.2.538 and exit 127. A few old `dot ai` verbs (`dot ai dashboard`, `dot ai proxy`) still run with a deprecation notice. See [AI.md](../../AI.md) for the full guide.
+
+### `dot session`
+
+```bash
+dot session                          # pick a session and open it (select)
+dot session list                     # the live ones
+dot session new <name> [--cwd DIR] [command...]   # start one, detached
+dot session open <name>              # put this terminal on it
+dot session stop <name>              # end its program
+```
+
+Sessions are the terminals `dot ai start --bg` runs agents in: herdr-core's when it is installed (`hc ls`, `hc attach`, `hc kill`), else tmux sessions. `new` starts the shell when no command is given. `restore` is planned.
 
 ### `dot mcp`
 
@@ -382,6 +404,7 @@ Multi-node status, drift, and namespace.
 ```
 dot fleet status [--json]   # this node's fleet status (bare 'dot fleet' does the same)
 dot fleet drift show        # check for configuration drift
+dot fleet drift show --agents  # each host's agents against their pins, hooks and this machine's AI policy
 dot fleet log show          # recent fleet events
 dot fleet namespace list    # the active namespace
 dot fleet push [user@host]  # push to one host, or to every host like 'apply'
@@ -395,12 +418,13 @@ Fleet hosts are configured in `~/.config/dotfiles/fleet.toml` (`DOTFILES_FLEET_H
 Push dotfiles state to every host registered in `~/.config/dotfiles/fleet.toml`.
 
 ```
-dot fleet apply [--host <name>] [--cmd <shell>] [--dry-run] [--jobs <n>] [--verify-hosts]
+dot fleet apply [--host <name>] [--agents | --cmd <shell>] [--dry-run] [--jobs <n>] [--verify-hosts]
 ```
 
 | Flag | Effect |
 |:---|:---|
 | `--host <name>` | Apply to a single host only (matches the `[hosts.<name>]` stanza key). |
+| `--agents` | Provision each host's agents: `dot config update`, `dot ai install --yes` for each agent in its `agents` list (at the pins in `[ai_tools]`), this machine's `ai-policy.toml` (checked on the host by `dot ai policy check` before it replaces the host's, then 0600), `dot cli hook install`, `dot doctor`. Not with `--cmd`. |
 | `--cmd <shell>` | Run a custom command on every host instead of the default `dot config update && dot doctor`. **Warning:** this is arbitrary shell on remote hosts; the value is your trust boundary. |
 | `--dry-run`, `-n` | Print the resolved hosts + planned command without opening SSH. |
 | `--jobs <n>`, `-j <n>` | Parallelism (default 4). |
@@ -411,9 +435,12 @@ Hostnames in `fleet.toml` are validated against `[A-Za-z0-9._@:+/-]+` before fan
 Example `fleet.toml`:
 
 ```toml
+agents = ["claude", "codex"]   # what --agents installs on every host
+
 [hosts.laptop]
 ssh     = "user@laptop.local"
 profile = "workstation"
+agents  = ["claude"]           # this host's own list instead
 ```
 
 ## Agents
@@ -459,14 +486,17 @@ Agents report their state through their own hooks: an agent's hook runs `dot cli
 dot cli hook install [--agent <id>]... [--dry-run]  # wire the hook into each agent's configuration
 dot cli hook remove [--agent <id>]... [--dry-run]   # take it out again
 dot cli hook run [--agent <id>] [<payload>]  # record one hook event (payload on stdin, or as the argument)
+dot cli hook check [--agent <id>]            # check a tool call (on stdin) against the AI policy
 dot cli hook [status] [--json]               # each agent session's last state, newest first
 ```
 
-`install` writes the hook into Claude Code's `~/.claude/settings.json` (every event `run` maps), Gemini CLI's `~/.gemini/settings.json` (its agent and session events) and Codex's `~/.codex/config.toml` (`notify`), for the agents named with `--agent` or, with none, those whose configuration directory exists. The command it writes is the absolute path of `dot`, so an agent started without `~/.local/bin` on its PATH still finds it. Installing again replaces the entry, for example after `dot` moved; everything else in the file stays as it was, and the file keeps its mode. `remove` takes out only the entries `install` wrote. A `settings.json` that is not valid JSON, or a Codex `notify` someone else set, is left untouched and reported, and the command exits 3. Editing `settings.json` needs `jq`. `dot doctor` shows an "agent hooks" row naming any configured agent that is not wired, and `dot system update` offers `install` once per machine, before its phases start, when an agent lacks the hook.
+`install` writes the hook into Claude Code's `~/.claude/settings.json` (every event `run` maps, and `check` on `PreToolUse`), Gemini CLI's `~/.gemini/settings.json` (its agent and session events, and `check` on `BeforeTool`) and Codex's `~/.codex/config.toml` (`notify`) and `~/.codex/hooks.json` (`check` on `PreToolUse`, which Codex runs once trusted in its `/hooks`), for the agents named with `--agent` or, with none, those whose configuration directory exists. The command it writes is the absolute path of `dot`, so an agent started without `~/.local/bin` on its PATH still finds it. Installing again replaces the entry, for example after `dot` moved; everything else in the file stays as it was, and the file keeps its mode. `remove` takes out only the entries `install` wrote. A `settings.json` that is not valid JSON, or a Codex `notify` someone else set, is left untouched and reported, and the command exits 3. Editing these files needs `jq`. `dot doctor` shows an "agent hooks" row naming any configured agent that is not wired, and `dot system update` offers `install` once per machine, before its phases start, when an agent lacks the hook.
 
 `run` maps the hook event to the session's state (`running`, `blocked`, `idle`, `error` or `gone`) and writes it as an `agent-event.v1` record ([`schemas/cli/agent-event.v1.schema.json`](../../../schemas/cli/agent-event.v1.schema.json)) to `$XDG_STATE_HOME/dot/cli/agents/<agent>/<session>.json`, mode 0600. If a socket of yours listens at `$XDG_RUNTIME_DIR/dot/agent-events.sock` (`$TMPDIR` on macOS), it also gets the record as a datagram, within 50 ms. The record holds metadata only (the event, the state, the session id and the working directory), never the prompt or any tool input or output. A hook must never get in the agent's way, so `run` prints nothing (`{}` for Gemini CLI, which reads a hook's output as JSON), always exits 0, takes no lock, and ignores a payload whose ids are not plain names. It runs on every prompt, tool call and stop, so `dot` hands `cli hook run` straight to the hook without loading the dispatcher, and the hook forks only `jq` (once) and `mv`; `tools/ci/hook-bench.sh` holds its p95 per event to 30 ms on Linux in CI.
 
 Inside [herdr](https://herdr.dev/core/) (`$HC_TERMINAL_ID` is set), `run` also reports the state to the agent's terminal as an OSC 7501 record, the Program Status Protocol herdr reads: `ESC ] 7501 ; state=<s>[:kind=<k>]:app=<agent> ESC \`. A tool call or prompt is `working`, a permission prompt is `blocked:kind=permission`, a question or other notification is `blocked:kind=question`, a stop is `done`, a new session or the idle prompt is `idle`, a failed stop is `error`, and the end of a session is `clear`. Codex and Gemini CLI get these records; Claude Code 2.1.295 and later reports its own, so it gets none. The hook finds the terminal through `/dev/tty`, or through its nearest ancestor that has one, since Claude Code and Gemini CLI start hooks without a terminal. `DOT_HOOK_OSC7501=1` turns the records on in another terminal that reads them, and `DOT_HOOK_OSC7501=0` turns them off.
+
+`check` decides a tool call by `~/.config/dotfiles/ai-policy.toml` (see [Enforced policy](../../AI.md#enforced-policy) and [ADR-025](../../adr/ADR-025-enforced-ai-policy.md)): it prints the denial in the agent's own form (`permissionDecision` for Claude Code and Codex, `decision` for Gemini CLI) and nothing for an allow (`{}` for Gemini CLI), and always exits 0. With no policy file it allows at once; with one, `dot-policy` decides, and a missing or failing `dot-policy` denies. It takes the same fast path as `run`.
 
 The agent is `claude` unless `--agent` names another roster id. Claude Code and Gemini CLI send `hook_event_name` and `session_id` on stdin; Codex's `notify` passes `{"type":"agent-turn-complete","thread-id":...}` as the argument. `install` writes entries like this one, in Claude Code's `settings.json`:
 

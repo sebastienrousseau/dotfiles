@@ -345,6 +345,38 @@
       "chat": false
     },
     {
+      "name": "herdr",
+      "bin": "herdr",
+      "aliases": [],
+      "title": "herdr",
+      "summary": "Agent multiplexer: a sidebar of every agent's state",
+      "group": "ecosystem",
+      "role": "ecosystem",
+      "processes": [
+        "herdr"
+      ],
+      "package": "aqua:herdrdev/herdr",
+      "native": "",
+      "chat": false
+    },
+    {
+      "name": "hc",
+      "bin": "herdr-core",
+      "aliases": [
+        "herdr-core"
+      ],
+      "title": "herdr-core",
+      "summary": "Terminals that outlive you: dot ai spawn/send/wait and dot session run on it",
+      "group": "ecosystem",
+      "role": "ecosystem",
+      "processes": [
+        "herdr-core"
+      ],
+      "package": "",
+      "native": "install_hc_native",
+      "chat": false
+    },
+    {
       "name": "passmcp-server",
       "bin": "passmcp-server",
       "aliases": [],

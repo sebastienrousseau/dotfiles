@@ -2,6 +2,36 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.543 (2026-11-11)
+
+### Added
+
+- The cockpit header and the tmux status bar count live agent sessions and name blocked ones ("3 agents · 1 blocked"); `@dot_status_show_agents off` hides the tmux segment (P0.3).
+- `dot ai watch service on|off|status` keeps the blocked-session watcher running from login, as a launchd agent on macOS or a systemd user service on Linux. It is opt-in (P0.3).
+- herdr and herdr-core join the roster. `dot ai start --bg`, `dot ai send`, `dot ai wait` and `dot session` run agents in named terminals on herdr-core, else in one detached tmux session each; ADR-024 adds the verbs `send` and `wait`, and agent events name their tmux pane (P0.4).
+- Prompt patterns are herdr-core templates: one role definition serves `dot ai run --style <name>` and `hc run <name>`, deployed by chezmoi and exported (P0.5).
+- The AI policy (`~/.config/dotfiles/ai-policy.toml`, schema `ai-policy.v1`, ADR-025) is enforced at each agent's pre-tool hook, so a refused action is blocked with its reason (P1.1).
+- The local gateway forwards images and returns tool calls. The policy's `[gateway]` table limits each request's models and input tokens, and `dot ai gateway show` prints the running gateway's statistics (P1.2).
+- `dot ai cost show` prices each agent session from what the agents keep on disk, `dot ai status` gains a COST column, and the policy's `[budget]` warns at 80% and blocks a prompt at 100% of the daily or per-session cap (P1.3).
+- `fleet.toml` takes `agents = [...]`: `dot fleet apply --agents` provisions each host's agents, and `dot ai status --fleet` and `dot ai check --on` ask every host at once (P1.4).
+- `dot ai inventory show` lists each agent's version, pin, sign-in and hooks; `dot doctor` names each agent whose version is off its pin, and `dot fleet drift show --agents` names each host's agent drift and an AI policy that differs from this machine's (P1.5).
+- draft's publisher identity is rendered into `~/.config/draft/config.toml` from chezmoi data (#1408).
+
+### Changed
+
+- Go 1.26.11 for GO-2026-6859 in `net/http`, reachable from dot-ai-tui.
+- Neovim plugins updated; ten GitHub Actions updated (#1406).
+
+### Fixed
+
+- `dot doctor`'s portability check no longer warns on a checkout under the home directory: `DOTFILES_DIR` is written from `$HOME`.
+- The release archive ships `benches/`, so `dot doctor` measures shell startup from every packaged install.
+- The gateway's engine no longer saves a session transcript of each client prompt under `~/.claude/projects/`.
+- The Build badge in the README template is built from the repository slug, not the host and path.
+- CI: a mutation test that times out ends everything it started, and the changed-lines mutation job has 45 minutes for its capped sample.
+- CI: when apt cannot install ripgrep or shfmt, they come from a pinned GitHub release checked against its SHA-256, so an unreachable Ubuntu mirror no longer fails the shell-lint jobs.
+- Security: detect-secrets loads its allowlist filter, so inline `pragma: allowlist secret` comments count again, and the pre-commit audit no longer refuses changes to `.secrets.baseline`.
+
 ## v0.2.542 (2026-11-08)
 
 ### Added

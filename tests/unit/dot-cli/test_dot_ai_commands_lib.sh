@@ -8,7 +8,7 @@
 #
 # Every AI CLI, the gateway helper and the /vibe delegator are sandbox stubs
 # that record their argv, so provider dispatch, install mapping and the cost
-# and delegate paths are asserted without a single real tool or network call.
+# and cost paths are asserted without a single real tool or network call.
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -244,7 +244,7 @@ assert_equals 0 "$RC" "rc"
 out_has "not installed (the gateway engine needs it)" "engine missing"
 out_has "dot-ai-serve not deployed" "gateway missing"
 out_has "0/19 tools installed" "empty roster"
-out_has "0/3 suite tools" "empty ecosystem"
+out_has "0/5 suite tools" "empty ecosystem"
 
 # ── install ─────────────────────────────────────────────────────────────
 test_start "install_reports_a_complete_roster"
@@ -296,54 +296,21 @@ assert_equals 1 "$RC" "rc"
 out_has "curl" "the missing native-installer prerequisite is named"
 out_has "mise" "the missing mise prerequisite is named"
 
-# ── delegate / cost ─────────────────────────────────────────────────────
-VIBE_TOOLS="$HOME/.claude/skills/vibe/tools"
-mkdir -p "$VIBE_TOOLS"
-cat >"$VIBE_TOOLS/vibe-delegate" <<STUB
-#!$REAL_BASH
-printf 'vibe-delegate %s\\n' "\$*" >>"\$AI_CALLS"
-STUB
-cat >"$VIBE_TOOLS/delegate-report" <<STUB
-#!$REAL_BASH
-printf 'delegate-report %s\\n' "\$*" >>"\$AI_CALLS"
-STUB
-chmod +x "$VIBE_TOOLS/vibe-delegate" "$VIBE_TOOLS/delegate-report"
-
-test_start "delegate_requires_a_prompt"
-ai cmd_ai_delegate
+# ── cost ────────────────────────────────────────────────────────────────
+# dot ai delegate is retired onto start --bg and wait: test_ai_runtime.sh.
+# dot ai cost show is the cockpit binary's cost report (dot-ai-tui cost).
+test_start "cost_without_the_cockpit_binary_says_how_to_build_it"
+ai_min cmd_ai_cost
 assert_equals 1 "$RC" "rc"
-out_has "dot ai delegate" "usage"
+err_has "dot-ai-tui" "names the binary"
+err_has "DOTFILES_AI=1 chezmoi apply" "and how to build it"
 
-test_start "delegate_passes_cwd_prompt_and_bounds_to_the_delegator"
-ai cmd_ai_delegate "add a changelog entry" 4 reviewer 90
+test_start "cost_runs_the_cost_report_with_its_flags"
+stub dot-ai-tui
+ai cmd_ai_cost --by day --days 7 --json
 assert_equals 0 "$RC" "rc"
-called "vibe-delegate"
-assert_file_contains "$AI_CALLS" "add a changelog entry 4 reviewer 90" "argv forwarded"
-
-test_start "delegate_defaults_the_optional_bounds"
-ai cmd_ai_delegate "just the prompt"
-assert_equals 0 "$RC" "rc"
-assert_file_contains "$AI_CALLS" "just the prompt 10  180" "defaults applied"
-
-test_start "delegate_requires_the_vibe_cli"
-rm -f "$BIN/vibe"
-ai_min cmd_ai_delegate "prompt"
-assert_equals 1 "$RC" "rc"
-out_has "mise use -g pipx:mistral-vibe" "install hint"
-stub vibe
-
-test_start "delegate_reports_a_missing_delegator_tool"
-mv "$VIBE_TOOLS/vibe-delegate" "$VIBE_TOOLS/vibe-delegate.bak"
-ai cmd_ai_delegate "prompt"
-assert_equals 1 "$RC" "rc"
-err_has "not found at" "error names the path"
-err_has "chezmoi apply" "hint"
-mv "$VIBE_TOOLS/vibe-delegate.bak" "$VIBE_TOOLS/vibe-delegate"
-
-test_start "cost_forwards_to_the_delegate_report"
-ai cmd_ai_cost --since 7d
-assert_equals 0 "$RC" "rc"
-called "delegate-report --since 7d"
+called "dot-ai-tui cost --by day --days 7 --json"
+rm -f "$BIN/dot-ai-tui"
 
 test_start "deprecation_notice_names_the_new_command"
 ai _ai_deprecated "dot ai chat"
@@ -436,5 +403,18 @@ printf '{"schema":"cli/agent-event.v1","time":"%s","agent":"codex","session":"li
 XDG_STATE_HOME="$DOTFILES_COV_TMPDIR/state" ai cmd_ai_agent_status --json
 assert_equals 0 "$RC" "rc"
 out_has '"session":"lib-1"' "the live record is printed"
+
+test_start "status_shows_each_sessions_cost"
+cat >"$BIN/dot-ai-tui" <<STUB
+#!$REAL_BASH
+printf 'dot-ai-tui %s\\n' "\$*" >>"\$AI_CALLS"
+printf 'codex/lib-1\\t1.5\\n'
+STUB
+chmod +x "$BIN/dot-ai-tui"
+XDG_STATE_HOME="$DOTFILES_COV_TMPDIR/state" ai cmd_ai_agent_status
+assert_equals 0 "$RC" "rc"
+called "dot-ai-tui cost --by session --tsv"
+out_has '$1.50' "the session's cost"
+rm -f "$BIN/dot-ai-tui"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

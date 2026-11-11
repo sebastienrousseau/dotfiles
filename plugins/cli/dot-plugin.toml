@@ -6,7 +6,7 @@
 schema = "cli/manifest.v1"
 name = "cli"
 domain = "cli"
-version = "0.2.542"
+version = "0.2.543"
 summary = "plugins, updates, completions"
 default = "list"
 
@@ -100,6 +100,14 @@ verb = "run"
 effect = "write"
 lock = false
 summary = "Record an agent hook event read on stdin"
+
+# The policy check an agent's PreToolUse (Gemini: BeforeTool) hook runs
+# (ADR-025): read-only, so it takes no domain lock (N17).
+[[commands]]
+object = "hook"
+verb = "check"
+effect = "read"
+summary = "Check a tool call against the AI policy"
 
 [[commands]]
 object = "hook"

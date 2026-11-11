@@ -26,6 +26,7 @@ audit_secrets() {
   local repo
   repo="$(mktemp -d "$WORK/repo-XXXXXX")"
   git init -q "$repo"
+  mkdir -p "$(dirname "$repo/$1")"
   printf '%s\n' "$2" >"$repo/$1"
   git -C "$repo" add "$1"
   (cd "$repo" && bash "$AUDIT" 2>&1) | sed -n 's/.*Scanning for secrets\.\.\. *//p' |
@@ -91,6 +92,18 @@ assert_equals "FAILED" "$(audit_change conf.yml 'level: debug' "$(printf 'level:
   "a match the commit adds still fails"
 assert_equals "FAILED" "$(audit_change conf.yml 'level: debug' "$(printf 'level: debug\n++ password: hunter2')")" \
   "even on a line that starts like a diff header"
+
+# detect-secrets keeps a SHA-1 of each finding in .secrets.baseline, under
+# the key hashed_secret, and rewrites the file when it re-sorts it. The
+# hash is not the secret, so the baseline is not scanned; the same line in
+# any other file still is.
+test_start "the_detect_secrets_baseline_is_not_scanned"
+assert_equals "PASSED" "$(audit_secrets .secrets.baseline '        "hashed_secret": "0000000000000000000000000000000000000000",')" \
+  "a hash in the detect-secrets baseline"
+assert_equals "FAILED" "$(audit_secrets conf.json '        "hashed_secret": "0000000000000000000000000000000000000000",')" \
+  "the same line elsewhere still fails"
+assert_equals "FAILED" "$(audit_secrets sub/.secrets.baseline '        "hashed_secret": "0000000000000000000000000000000000000000",')" \
+  "and so does a file of that name below the root"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

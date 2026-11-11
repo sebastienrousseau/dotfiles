@@ -31,8 +31,15 @@ dot — one command for this machine. Built commands, by domain:
   dot ai ask — Ask about the local context
   dot ai pattern list — Prompt patterns
   dot ai cost show — Spend by agent and model
+  dot ai gateway show — Gateway statistics
+  dot ai inventory show — Agents, versions, pins, sign-in, hooks and drift
   dot ai pattern show — One prompt pattern
   dot ai pattern edit — Edit a prompt pattern
+  dot ai policy show — The AI policy rules in force for an agent
+  dot ai policy check — Validate the AI policy and name the active mode
+  dot ai pattern export — Write patterns as herdr-core templates
+  dot ai send — Give a background agent text and submit it
+  dot ai wait — Wait until a background agent stops working
 
 [attest] attestation and verification
   dot attest show — The workstation attestation
@@ -48,6 +55,7 @@ dot — one command for this machine. Built commands, by domain:
   dot cli registry set — Point at another plugin registry
   dot cli hook status — Each agent session's last state
   dot cli hook run — Record an agent hook event read on stdin
+  dot cli hook check — Check a tool call against the AI policy
   dot cli hook install — Wire the hook into each agent's configuration
   dot cli hook remove — Take the hook out of each agent's configuration
 
@@ -123,6 +131,13 @@ dot — one command for this machine. Built commands, by domain:
   dot security dns apply — Harden the dns setting
   dot security lock apply — Harden the lock setting
   dot security usb apply — Harden the usb setting
+
+[session] find, open and restore terminal sessions
+  dot session select — Pick a session to open
+  dot session list — Sessions on this machine
+  dot session new — Start a named session
+  dot session open — Attach to a session
+  dot session stop — End a session
 
 [shell] aliases, history, startup caches
   dot shell update — Regenerate the startup caches

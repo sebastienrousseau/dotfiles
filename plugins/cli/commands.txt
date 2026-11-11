@@ -19,6 +19,7 @@ cmd|cli registry show|@cli registry show|read|The plugin registry URL
 cmd|cli registry set|@cli registry set|write|Point at another plugin registry
 cmd|cli hook status|@cli hook status|read|Each agent session's last state
 cmd|cli hook run|@cli hook run|write|Record an agent hook event read on stdin
+cmd|cli hook check|@cli hook check|read|Check a tool call against the AI policy
 cmd|cli hook install|@cli hook install|write|Wire the hook into each agent's configuration
 cmd|cli hook remove|@cli hook remove|write|Take the hook out of each agent's configuration
 run|cli list --available|@cli list --available||

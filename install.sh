@@ -117,7 +117,7 @@ apply_minimal_profile_overrides() {
 # Charm apt key, pinned against a swapped gpg.key: primary fingerprint read from
 # https://repo.charm.sh/apt/gpg.key on 2026-10-08 (the old C026D31B... pin
 # matched no served key). If Charm rotates, update it and note it in CHANGELOG.md.
-CHARM_GPG_EXPECTED_FPR="ED927B38BE981E53CA09153D03BBF595D4DFD35C"
+CHARM_GPG_EXPECTED_FPR="ED927B38BE981E53CA09153D03BBF595D4DFD35C" # pragma: allowlist secret
 
 # charm_keyring_verify <keyring>: apt trusts every primary key in a signed-by
 # file, so it must hold exactly the pinned one; else remove it and return 1.
@@ -136,7 +136,7 @@ charm_keyring_verify() {
 }
 
 # chezmoi_release_sha256 <asset>: reviewed SHA-256 (else $CHEZMOI_SHA256), in step
-# with tools/ci/install-chezmoi-verified.sh; from the v0.2.542 checksums.txt.
+# with tools/ci/install-chezmoi-verified.sh; from the v0.2.543 checksums.txt.
 chezmoi_release_sha256() {
   local sha
   case "$1" in
@@ -249,7 +249,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.542)
+  version       The version (tag or branch) to install (default: v0.2.543)
 
 Options:
   --help        Show this help message
@@ -265,7 +265,7 @@ EOF
 }
 
 main() {
-  local version="v0.2.542"
+  local version="v0.2.543"
   local version_set=0
   local minimal=0
   local provision="${DOTFILES_PROVISION:-0}"
@@ -295,7 +295,7 @@ main() {
         # like `foobar` doesn't trigger a 30s+ network download attempt.
         # Caught by the install.sh fuzz harness (#881).
         if [[ ! "$arg" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-+][a-zA-Z0-9.-]+)?$ ]]; then
-          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.542)."
+          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.543)."
         fi
         version="$arg"
         version_set=1

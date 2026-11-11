@@ -45,10 +45,15 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot ai ask` | Ask about the local context |
 | `dot ai pattern list` | Prompt patterns |
 | `dot ai cost show` | Spend by agent and model |
-| `dot ai gateway show` | Gateway statistics *(planned)* |
-| `dot ai inventory show` | Agents, versions and config *(planned)* |
+| `dot ai gateway show` | Gateway statistics |
+| `dot ai inventory show` | Agents, versions, pins, sign-in, hooks and drift |
 | `dot ai pattern show` | One prompt pattern |
 | `dot ai pattern edit` | Edit a prompt pattern |
+| `dot ai policy show` | The AI policy rules in force for an agent |
+| `dot ai policy check` | Validate the AI policy and name the active mode |
+| `dot ai pattern export` | Write patterns as herdr-core templates |
+| `dot ai send` | Give a background agent text and submit it |
+| `dot ai wait` | Wait until a background agent stops working |
 | `dot attest show` | The workstation attestation |
 | `dot attest export` | Write attestation evidence |
 | `dot attest verify` | Verify evidence |
@@ -64,6 +69,7 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot cli registry set` | Point at another plugin registry |
 | `dot cli hook status` | Each agent session's last state |
 | `dot cli hook run` | Record an agent hook event read on stdin |
+| `dot cli hook check` | Check a tool call against the AI policy |
 | `dot cli hook install` | Wire the hook into each agent's configuration |
 | `dot cli hook remove` | Take the hook out of each agent's configuration |
 | `dot config status` | Pending changes and last apply |
@@ -138,11 +144,11 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot security lock apply` | Harden the lock setting |
 | `dot security usb show` | Current usb setting *(planned)* |
 | `dot security usb apply` | Harden the usb setting |
-| `dot session select` | Pick a session to open *(planned)* |
-| `dot session list` | Sessions on this machine *(planned)* |
-| `dot session new` | Start a named session *(planned)* |
-| `dot session open` | Attach to a session *(planned)* |
-| `dot session stop` | End a session *(planned)* |
+| `dot session select` | Pick a session to open |
+| `dot session list` | Sessions on this machine |
+| `dot session new` | Start a named session |
+| `dot session open` | Attach to a session |
+| `dot session stop` | End a session |
 | `dot session restore` | Restore saved sessions *(planned)* |
 | `dot shell status` | Shell, startup time and cache state *(planned)* |
 | `dot shell update` | Regenerate the startup caches |

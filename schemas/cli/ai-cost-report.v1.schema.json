@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.io/schemas/cli/ai-cost-report.v1.schema.json",
+  "title": "dot ai cost report v1 (what agent sessions cost)",
+  "description": "Printed by `dot ai cost show --json` (dot-ai-tui cost). Read from the transcripts Claude Code and Codex keep, the gateway's usage log and the run log; Claude sessions also count what Claude Code's own cost figure reports beyond their transcripts. Costs are at API list prices: on a subscription, what the tokens would cost, not a bill. Metadata only: never a prompt or an answer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "generated", "host", "days", "by", "rows", "total", "unpriced_models"],
+  "$defs": {
+    "count": { "type": "integer", "minimum": 0 },
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sessions", "requests", "input_tokens", "cache_read_tokens", "cache_write_tokens", "output_tokens", "cost_usd", "unpriced_tokens"],
+      "properties": {
+        "key": { "type": "string", "minLength": 1, "description": "The group: an agent, host, day (YYYY-MM-DD), model, or agent/session" },
+        "sessions": { "$ref": "#/$defs/count" },
+        "requests": { "$ref": "#/$defs/count", "description": "Model requests the transcripts logged" },
+        "input_tokens": { "$ref": "#/$defs/count", "description": "All prompt tokens: uncached input, cache writes and cache reads" },
+        "cache_read_tokens": { "$ref": "#/$defs/count" },
+        "cache_write_tokens": { "$ref": "#/$defs/count" },
+        "output_tokens": { "$ref": "#/$defs/count" },
+        "cost_usd": { "type": "number", "minimum": 0 },
+        "unpriced_tokens": { "$ref": "#/$defs/count", "description": "Tokens on models with no known price, left out of cost_usd" }
+      }
+    }
+  },
+  "properties": {
+    "schema": { "const": "ai/cost-report.v1" },
+    "generated": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+    "host": { "type": "string" },
+    "days": { "type": "integer", "minimum": 1, "description": "The window: today and the days before it" },
+    "by": { "enum": ["agent", "host", "day", "model", "session"] },
+    "session": { "type": "string", "description": "With --session: the session reported, by model" },
+    "agent": { "type": "string", "description": "With --session: its agent" },
+    "rows": { "type": "array", "items": { "$ref": "#/$defs/row", "required": ["key"] } },
+    "total": { "$ref": "#/$defs/row" },
+    "unpriced_models": { "type": "array", "items": { "type": "string" } }
+  }
+}

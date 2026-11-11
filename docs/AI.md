@@ -52,11 +52,18 @@ The interface follows ADR-020 (`dot ai <verb>`), modelled on the Claude CLI: bar
 | `dot ai list` | Install status of the roster, with an install picker (`dot ai tools`) |
 | `dot ai install [all\|<tool>] [--yes]` | Install all missing tools, or one, with what they need (asks first) |
 | `dot ai gateway serve [stop\|status]` | Start the local Claude gateway **and** route the other tools through it (`dot ai serve`) |
-| `dot ai cost show` | Spend report across providers (`dot ai cost`) |
+| `dot ai gateway show [--json]` | The running gateway's requests, tokens, tool calls and cost |
+| `dot ai inventory show [--json]` | Each installed agent's version, pin, sign-in and hooks, the policy's digest, and the drift among them |
+| `dot ai cost show [--by agent\|host\|day\|model\|session] [--session ID] [--days N] [--json]` | What agent sessions cost (`dot ai cost`) |
+| `dot ai policy show [--agent A] [--mode M]` | The [enforced policy](#enforced-policy)'s rules in force for an agent (`dot ai policy`) |
+| `dot ai policy check` | Validate the policy and name the active mode |
 | `dot ai login [tool]` | Authenticate a tool |
-| `dot ai check` | Health-check the roster and the gateway (`dot ai doctor`) |
-| `dot ai status [--json]` | Each agent session of the last 24 h and its state, from the hooks' state files |
+| `dot ai check [--on <host>]` | Health-check the roster and the gateway (`dot ai doctor`); `--on` runs it on a host in `fleet.toml` |
+| `dot ai status [--fleet] [--json]` | Each agent session of the last 24 h, its state and (with the cockpit binary) its cost, from the hooks' state files; `--fleet` adds every host in `fleet.toml`; the cockpit header and the tmux status bar show the same count (`3 agents · 1 blocked`) |
 | `dot ai watch` | Follow agents' states live; a desktop notification when one is blocked |
+| `dot ai start --bg <tool> [task]` | Start an agent in a terminal of its own (herdr-core, else tmux), optionally with a task |
+| `dot ai send <name> <text>` / `dot ai wait [<name>]` | Give a background agent more work; wait until it stops working |
+| `dot ai watch service on\|off\|status` | Keep `dot ai watch` running from login (launchd agent or systemd user service), opt-in |
 | `--style <name>` | Steer any prompt with a pattern (see [Steering styles](#steering-styles)) |
 
 ## The cockpit (`dot ai`)
@@ -90,6 +97,8 @@ dot ai run agy --style hardener "audit my ssh config"
 
 The bridge also injects system details (OS, architecture, date) so the model has the context it needs. Quick aliases ship for the common combinations: `dcla` (Claude + architect), `dagyh` (Antigravity + hardener), `dkir` (Kiro + refactor).
 
+The same patterns are herdr-core templates. chezmoi deploys the shipped ones to `~/.config/herdr-core/templates/<name>.md`, so `hc run architect "<task>"` starts Claude Code with that role on every host. `dot ai pattern export --hc` writes them, and any pattern you added, again; `--agent codex` runs them with another agent (one without dot's hooks gets `ready: quiet`).
+
 ## Running tools
 
 ```bash
@@ -116,9 +125,17 @@ dot ai gateway serve stop     # stop the gateway and un-route
 
 **Config:** `DOT_AI_HOST` (default `127.0.0.1`), `DOT_AI_PORT` (default `3456`), `DOT_AI_DEFAULT_MODEL` (default `sonnet`), `DOT_AI_API_KEY` (shared secret; defaults to a generated token), `DOT_AI_ALLOWED_HOSTS` (extra accepted `Host` values), `DOT_AI_DAILY_BUDGET` (USD, `0` = off), `DOT_AI_MODEL_MAP` / `DOT_AI_PRICING` (JSON overrides).
 
-**Security:** the server binds to loopback by default. If you set `DOT_AI_HOST` to a LAN address, both the launcher *and* the server itself refuse to start unless `DOT_AI_API_KEY` is set — an unprotected network proxy leaks your subscription. Every request needs a key: without `DOT_AI_API_KEY` the server and `dot ai proxy local on` share a random 0600 token at `$XDG_STATE_HOME/dot/ai/serve/gateway.token` (`dot-ai-serve --token-path` prints its location). Requests whose `Host` header is not the server's own address are refused (DNS-rebinding guard), and the `claude` engine runs with all tools disabled in an empty temporary directory.
+**Security:** the server binds to loopback by default. If you set `DOT_AI_HOST` to a LAN address, both the launcher *and* the server itself refuse to start unless `DOT_AI_API_KEY` is set — an unprotected network proxy leaks your subscription. Every request needs a key: without `DOT_AI_API_KEY` the server and `dot ai proxy local on` share a random 0600 token at `$XDG_STATE_HOME/dot/ai/serve/gateway.token` (`dot-ai-serve --token-path` prints its location). Requests whose `Host` header is not the server's own address are refused (DNS-rebinding guard), and the `claude` engine runs with all tools disabled in an empty temporary directory. It saves no session: a client's prompts are not written to `~/.claude/projects`, and no auto-memory directory is made there.
 
-**Engine limits.** The gateway wraps the `claude` CLI (an agent), not the raw API, so two things are handled gracefully rather than forwarded: **image** blocks are acknowledged inline but not sent (the engine is text-only), and **function/tool-calling** requests are answered in plain text (the CLI can't return caller-defined `tool_use` blocks). Session resumption is still out of scope.
+**Images and tool calls.** Both endpoints take images, base64 or by URL (the API fetches a URL itself), in PNG, JPEG, GIF or WebP. A request's tools reach the model, and its calls come back in each protocol's own form: `tool_use` blocks with `stop_reason: "tool_use"`, or `tool_calls` with `finish_reason: "tool_calls"`, whole or streamed. The client runs them and sends the results in its next request, as it would to the API. Inside the gateway nothing runs them: the engine lists them through a stub MCP server and is allowed none, and the gateway stops it at the end of the model's turn. Only client-defined tools are supported; a server tool such as `web_search` is a `400`. Earlier turns, tool calls and results included, reach the engine as a transcript, and session resumption is out of scope.
+
+**Statistics.** `dot ai gateway show` summarises the running gateway: requests, errors, tokens, images, tool calls and cost, in all and per model, against the daily budget. A request costs what the `claude` CLI reports for it; a turn that ends in tool calls is stopped before the CLI reports one, and is priced from the current models' list prices (`DOT_AI_PRICING` overrides them). Each request is also a line of `$XDG_STATE_HOME/dot/ai/serve/usage.jsonl` (its time, the model's id, its tokens and the CLI's cost: never a prompt or an answer), which `dot ai cost show` reads; at 20 MB the log is set aside under a dated name. `--json` prints the report as `ai/gateway-usage.v1` ([schema](../schemas/cli/ai-gateway-usage.v1.schema.json)).
+
+**Inventory.** `dot ai inventory show` lists each agent of the roster found on `PATH`: the version its `--version` prints, its pin in `[ai_tools]` (none for a native install, such as Claude Code), how it is signed in, and whether `dot cli hook` is wired into it; then the AI policy's SHA-256, and the drift: a version off its pin, hooks missing. Sign-in is looked for, never read: an API key in the environment (`key`), else the agent's credentials file or keychain item (`login`), else `none`; an agent `dot` does not know how to ask is `unknown`. `dot doctor` reports each version off its pin, and `dot fleet drift show --agents` asks every host in `fleet.toml` for its inventory and names its drift, with an AI policy that is not this machine's. `--json` prints it as `ai/inventory.v1` ([schema](../schemas/cli/ai-inventory.v1.schema.json)).
+
+**Policy.** With an [enforced policy](#enforced-policy), its `[gateway]` table limits each request before the engine sees it: `models` allows only the models it lists (globs over what the request resolves to, such as `haiku` or `claude-sonnet-*`), and `max_input_tokens` caps the gateway's estimate of its input (four characters a token, 1,600 an image). A refused request gets a `403` with the reason. As for the hooks, a policy that does not load, or a missing `dot-policy`, refuses every request.
+
+**Anthropic's terms.** A Claude subscription signs in for "ordinary use of Claude Code and other native Anthropic applications", and Anthropic says its plan limits assume ordinary, individual use and that it may enforce this without notice ([legal and compliance](https://code.claude.com/docs/en/legal-and-compliance)). The gateway runs the unmodified `claude` CLI on your own machine and login. Pointing other tools' agent loops at it is your call, and the risk to your account is yours; with `claude` signed in with an API key, use is billed to that key instead.
 
 ## The roster
 
@@ -157,7 +174,23 @@ These tools are not installed for you. Install what you want with `dot ai instal
 
 ## Run cost and telemetry
 
-Every run through the bridge is logged to a local SQLite database (`~/.local/share/dotfiles-ai.db`). `dot ai cost show` reports spend across providers, and the cockpit's cost panel and recent-runs list read from the same log. Token-level cost is populated for providers that surface it (and for everything routed through `dot ai gateway serve`).
+`dot ai cost show` reports what agent sessions cost, read from what each agent keeps on disk:
+
+- **Claude Code**: each request in its transcripts (`~/.claude/projects`, subagents included), at the model's API list price: input, 5-minute and 1-hour cache writes, cache reads (each model's own read price), output, long-prompt prices, fast mode and US-only inference. Claude Code also records its own figure for a run (`cost-state`); where it reports more than the run's transcript logged, the difference counts too.
+- **Codex**: what each rollout's token totals grew by (`~/.codex/sessions`), at OpenAI's prices for the model.
+- **The gateway**: its usage log, at Claude Code's own figure for each request.
+- **Other delegates** (the /vibe skill's Mistral Vibe, say): their runs in the run log, `~/.local/share/dotfiles-ai.db`.
+
+```bash
+dot ai cost show                    # last 30 days, by agent
+dot ai cost show --by day --days 7  # or by host, model, session
+dot ai cost show --session 3dabe8e1 # one session (an id or a unique prefix), by model
+dot ai cost show --json             # ai/cost-report.v1
+```
+
+Costs are at API list prices: on a subscription they are what the tokens would cost, not a bill. A model with no known price is listed, with its tokens, rather than guessed. Only usage is read, never a prompt or a reply. The first run reads the last 30 days of transcripts (about a second for 200 MB); an index in `~/.cache/dot/ai/cost-index.json` keeps its place, so later runs read only what was appended. The cockpit (`dot-ai-tui`) is needed: `DOTFILES_AI=1 chezmoi apply` builds it.
+
+The run log also feeds the cockpit's recent-runs list, and the /vibe skill's `delegate-report` still reports delegate runs in detail (failures, files changed).
 
 ## Old command names
 
@@ -186,6 +219,43 @@ If your terminal has built-in AI agents, keep your shell lean and fast:
 - Use `DOTFILES_FAST=1` or `DOTFILES_ULTRA_FAST=1`.
 - Let the terminal handle agents and its own UI.
 - Keep dotfiles focused on consistency, safety, and clean repeats.
+
+## Enforced policy
+
+`~/.config/dotfiles/ai-policy.toml` says what each agent may do in each mode, and the agents' own pre-tool hooks enforce it ([ADR-025](adr/ADR-025-enforced-ai-policy.md)). Without the file nothing is enforced.
+
+```toml
+schema = "ai-policy.v1"
+default_mode = "ask"          # when dot agent mode has none set
+
+[mode.ask]
+tools = ["read", "search"]    # classes: shell read write search fetch mcp, or tool names
+
+[mode.apply]
+tools = ["*"]
+tools_deny = ["mcp__github__*"]
+paths_allow = ["{cwd}/**", "/tmp/**"]
+paths_deny = ["~/.ssh/**", "~/.aws/**", "**/.env"]
+hosts_allow = ["github.com", "*.github.com"]
+commands_deny = ["rm -rf *", "git push --force*", "sudo *", "curl * | sh"]
+
+[agent.codex.mode.apply]      # replaces only the lists it sets
+tools = ["read", "search", "shell", "write"]
+
+[gateway]                     # what dot ai gateway serve lets a request use
+models = ["haiku", "sonnet", "claude-sonnet-*"]
+max_input_tokens = 100000
+
+[budget]                      # what agents may spend (dot ai cost show's prices)
+daily_usd = 20                # today, every session together
+session_usd = 5               # one session
+```
+
+The active mode is the one `dot agent mode set` chose. `dot cli hook install` wires `dot cli hook check` into Claude Code (`PreToolUse` and `UserPromptSubmit`), Gemini CLI (`BeforeTool` and `BeforeAgent`) and Codex (`~/.codex/hooks.json`, `PreToolUse` and `UserPromptSubmit`; trust it once in Codex's `/hooks`). A denied call reaches the agent with the reason, such as `dot ai policy (mode ask): tool Write (write) is not allowed`. `dot ai policy show` prints the rules in force for an agent (`--agent codex`) in the active mode, or another (`--mode apply`), and `dot ai policy check` validates the file and names the active mode.
+
+**Budgets.** With a `[budget]`, each prompt is checked before the agent works on it, against what `dot ai cost show` reports: today's spend across every session (`daily_usd`) and the session's own (`session_usd`), at API list prices; 0 or a missing key is no cap. From 80% of a cap the prompt goes ahead with a warning; at 100% it is blocked, with the reason, such as `dot ai policy: the daily budget of $20.00 is spent ($20.41 today)`, and nothing is sent to the model. Raise the cap, or wait for tomorrow. Budgets need the cockpit binary (`dot-ai-tui`), which reads the spend; a budget whose spend cannot be read blocks every prompt, as a policy that cannot be checked does. Codex and Gemini CLI read the same verdicts in their own forms; Claude Code's was tried with the real CLI (2.1.319), theirs were not. The gateway keeps its own daily cap (`DOT_AI_DAILY_BUDGET`).
+
+It fails closed: a file with an error or an unknown key, a mode it has no rules for, or a missing `dot-policy` binary (chezmoi builds it when Go is installed) denies every tool call, and blocks every prompt, until fixed. It is a guardrail, not a sandbox: commands are split at `;`, `&&`, `|` and `$(`, but a script the agent writes and runs is not looked into.
 
 ## Privacy and safety
 

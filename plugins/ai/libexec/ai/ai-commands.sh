@@ -127,8 +127,13 @@ _ai_serve() {
 }
 
 # cmd_ai_chat [tool] — open an interactive session with a tool. With no
-# tool, fall back to the roster launcher.
+# tool, fall back to the roster launcher; with --bg, start it in a terminal
+# of its own (runtime.sh).
 cmd_ai_chat() {
+  if [[ " $* " == *" --bg "* ]]; then
+    cmd_ai_start_bg "$@"
+    return
+  fi
   if [[ $# -eq 0 ]]; then
     cmd_ai_status
     return
@@ -147,6 +152,10 @@ cmd_ai_chat() {
 
 # cmd_ai_doctor — health-check the roster + gateway in one place.
 cmd_ai_doctor() {
+  if [[ "${1:-}" == --on ]]; then
+    ai_check_on "${2:-}"
+    return
+  fi
   ui_header "AI doctor"
   if has_command claude; then
     ui_ok "claude CLI" "$(claude --version 2>/dev/null | head -1 || echo installed)"
@@ -232,48 +241,16 @@ _ai_install_todo() {
   return 1
 }
 
-# Locate the vibe-delegate / delegate-report tools deployed by the /vibe
-# Claude Code skill. Path stays in sync with
-# defaults/dot_claude/skills/vibe/tools/.
-_ai_delegate_tool() {
-  local tool="$1" # vibe-delegate | delegate-report
-  local path="${HOME}/.claude/skills/vibe/tools/${tool}"
-  if [[ ! -x "$path" ]]; then
-    ui_err "$tool" "not found at $path" >&2
-    ui_info "Hint" "Run 'chezmoi apply' to deploy the /vibe skill" >&2
-    return 1
-  fi
-  printf '%s\n' "$path"
-}
-
-# cmd_ai_delegate "<prompt>" [max-turns] [agent] [timeout] — background
-# delegation via the same delegator the /vibe slash command uses.
-cmd_ai_delegate() {
-  if [[ $# -lt 1 ]]; then
-    ui_err "Usage" "dot ai delegate \"<prompt>\" [max-turns] [agent] [timeout-secs]"
-    ui_info "Example" "dot ai delegate \"add a CHANGELOG entry\""
-    return 1
-  fi
-  local prompt="$1"
-  shift
-  local max_turns="${1:-10}"
-  local agent="${2:-}"
-  local timeout="${3:-180}"
-  local tool
-  tool="$(_ai_delegate_tool vibe-delegate)" || return 1
-  if ! has_command vibe; then
-    ui_warn "vibe" "not installed"
-    ui_info "Install" "mise use -g pipx:mistral-vibe"
-    return 1
-  fi
-  "$tool" "$(pwd)" "$prompt" "$max_turns" "$agent" "$timeout"
-}
-
-# cmd_ai_cost [args…] — unified AI spend report (wraps delegate-report).
+# cmd_ai_cost [args…] — dot ai cost show: what agent sessions cost, read from
+# their transcripts, the gateway's usage log and the run log, in the cockpit
+# binary (dot-ai-tui cost). --by agent|host|day|model|session, --session ID,
+# --days N (--since N), --json (ai/cost-report.v1).
 cmd_ai_cost() {
-  local tool
-  tool="$(_ai_delegate_tool delegate-report)" || return 1
-  "$tool" "$@"
+  if ! has_command dot-ai-tui; then
+    ui_err "dot ai cost" "needs the cockpit binary dot-ai-tui: DOTFILES_AI=1 chezmoi apply builds it (Go from mise)" >&2
+    return 1
+  fi
+  dot-ai-tui cost "$@"
 }
 
 # cmd_ai_corral [status|sync|doctor|mcp|args…] — workspace & multi-forge repo plane.
@@ -358,15 +335,35 @@ cmd_ai_draft() {
 
 # cmd_ai_agent_status [--json] — dot ai status: each agent session heard
 # from in the last 24 h and its state, from the files each agent's hook
-# writes (dot cli hook install wires them); no watcher needed.
+# writes (dot cli hook install wires them); no watcher needed. With the
+# cockpit binary, the table has each session's cost (dot ai cost show).
 cmd_ai_agent_status() {
-  bash "${BASH_SOURCE[0]%/*}/../../../cli/libexec/hook.sh" --status --live "$@"
+  local hook="${BASH_SOURCE[0]%/*}/../../../cli/libexec/hook.sh" costs rc=0
+  if [[ " $* " == *" --fleet "* ]]; then
+    ai_status_fleet "$@"
+    return
+  fi
+  if [[ " $* " == *" --json "* ]] || ! has_command dot-ai-tui; then
+    bash "$hook" --status --live "$@"
+    return
+  fi
+  costs="$(mktemp "${TMPDIR:-/tmp}/dot-ai-costs.XXXXXX")" || return 1
+  dot-ai-tui cost --by session --tsv >"$costs" 2>/dev/null || :
+  bash "$hook" --status --live --costs "$costs" "$@" || rc=$?
+  rm -f "$costs"
+  return "$rc"
 }
 
 # cmd_ai_watch — dot ai watch: the agent-event listener in the cockpit
 # binary (dot-ai-tui watch). It prints each change of an agent's state and
-# posts a desktop notification when one becomes blocked.
+# posts a desktop notification when one becomes blocked. dot ai watch
+# service on|off|status keeps it running from login (watch-service.sh).
 cmd_ai_watch() {
+  if [[ "${1:-}" == service ]]; then
+    shift
+    cmd_ai_watch_service "$@"
+    return
+  fi
   if ! has_command dot-ai-tui; then
     ui_err "dot ai watch" "needs the cockpit binary: DOTFILES_AI=1 chezmoi apply builds it (Go from mise)"
     return 1

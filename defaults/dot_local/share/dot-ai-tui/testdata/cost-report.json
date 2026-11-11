@@ -1,0 +1,55 @@
+{
+  "by": "session",
+  "days": 30,
+  "generated": "2026-11-09T12:00:00Z",
+  "host": "box",
+  "rows": [
+    {
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 0,
+      "cost_usd": 14,
+      "input_tokens": 1000000,
+      "key": "claude/aaaa1111-0000",
+      "output_tokens": 1000000,
+      "requests": 2,
+      "sessions": 1,
+      "unpriced_tokens": 0
+    },
+    {
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 0,
+      "cost_usd": 2,
+      "input_tokens": 500,
+      "key": "claude/bbbb2222-0000",
+      "output_tokens": 100500,
+      "requests": 2,
+      "sessions": 1,
+      "unpriced_tokens": 1000
+    },
+    {
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 0,
+      "cost_usd": 0.5,
+      "input_tokens": 100000,
+      "key": "codex/th-1",
+      "output_tokens": 0,
+      "requests": 1,
+      "sessions": 1,
+      "unpriced_tokens": 0
+    }
+  ],
+  "schema": "ai/cost-report.v1",
+  "total": {
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "cost_usd": 16.5,
+    "input_tokens": 1100500,
+    "output_tokens": 1100500,
+    "requests": 5,
+    "sessions": 3,
+    "unpriced_tokens": 1000
+  },
+  "unpriced_models": [
+    "claude-opus-9"
+  ]
+}

@@ -34,12 +34,28 @@ Keep the last column a list of backticked function names.
 | watch | A change of state prints one line (time, agent, state, project, session), control characters stripped | each change | `TestHandlePrintsChangesAndNotifiesOnceWhenBlocked` `TestHandleCleansTheProjectName` `BenchmarkWatchHandle` |
 | watch | A session becoming blocked posts a desktop notification (permission or question), at most once per session per 30 s, the notifier reaped | into `blocked` | `TestNotifyDueDebouncesEachSession` `TestBlockedReasonNamesAPermissionPrompt` `TestAgentNotifyRunsTheNotifier` |
 
+## Cost (`dot ai cost show`)
+
+| Area | Feature | Trigger | Tests |
+| :--- | :--- | :--- | :--- |
+| cost | `dot-ai-tui cost` reports spend per agent, host, day, model or session, or one session by model (id or unique prefix), over `--days N` (`--since N`); `--json` prints `ai/cost-report.v1` | `dot ai cost show` | `TestRunDispatchesCost` `TestCostByAgent` `TestCostByDayHostAndModel` `TestCostOfOneSession` `TestCostJSON` `TestCostJSONGolden` `TestCostBadUsage` `TestCostWithNoTranscripts` |
+| cost | Prices are API list prices per model (Claude: cache writes 1.25x/2x, per-model reads, long prompts, fast mode, US-only inference; Codex: cached input, long context); a model with no price is counted apart, not guessed | each request | `TestClaudeCostMatchesClaudesOwnFigure` `TestSonnet55CostMatchesClaudesOwnFigure` `TestClaudeCachePricesPerModel` `TestLongPromptsAndFastModeCostMore` `TestCodexPrices` `TestUnknownModelsAreNotPriced` |
+| cost | Claude transcripts are priced per message (a message repeated per content block counts once; subagents join their session); Codex rollouts by what their cumulative totals grew | each transcript line | `TestClaudeTranscriptIsPricedPerDayAndModel` `TestCodexRolloutIsPricedFromItsTotals` |
+| cost | Claude Code's own cost-state counts where it reports more than the run's transcripts logged | a `cost-state` entry | `TestCostStateAddsWhatTheTranscriptDidNotLog` `TestCostStateCoveredByTheTranscriptAddsNothing` `TestARepeatedMessageIsStampedOnce` `TestABadCostStateIsIgnored` |
+| cost | An index in `$XDG_CACHE_HOME/dot/ai/cost-index.json` (0600) keeps each file's offset, so a run reads only what was appended; a rewritten file is read again, a bad cache rebuilt | each run | `TestIndexReadsOnlyWhatWasAppended` `TestARewrittenTranscriptIsReadAgain` `TestOldAndUnreadableFilesAreLeftOut` |
+| cost | The gateway's usage logs (`usage*.jsonl`, set-aside ones included) count at the CLI's own cost per request, else the model's price | each request | `TestGatewayLogIsCounted` |
+| cost | Other delegates' runs in the run log (`dotfiles-ai.db`) count, one session each; Claude and Codex runs there are left to their transcripts | each run | `TestRunLogDelegatesAreCounted` `TestNoRunLogIsNoRows` `TestSinceIsDays` |
+| cost | Token counts of a billion and more read as `1.5B` | any table | `TestHumanTokCountsBillions` |
+| cost | `--tsv` prints `agent/session<TAB>usd` per group, for `dot ai status`'s COST column | `dot ai status` | `TestCostTSV` |
+| cost | `--spend AGENT/SESSION` prints today's cost across every session and that session's own, for the policy's `[budget]` | each prompt, with a budget | `TestCostSpend` |
+
 ## Data gathering
 
 | Area | Feature | Trigger | Tests |
 | :--- | :--- | :--- | :--- |
 | refresh | Installed tools detected on `PATH` | start, `c`/`r`, after shell-outs | `TestRefresh` `TestCoverageGaps` `BenchmarkRefresh` `BenchmarkExecDone` |
 | refresh | Gateway health chip (`● host:port` / `○ gateway off`) | `GET /health` contains `healthy` | `TestRefresh` `TestRenderChrome` `TestRenderPaths` |
+| agents | Header chip `3 agents · 1 blocked`: the sessions `dot ai status` lists, from the hook's state files (no daemon); red while one is blocked, absent with none | start, every session tick | `TestLoadAgentsCountsTheSessionsDotAiStatusLists` `TestHeaderShowsTheAgentCountAndNamesBlocked` `TestTheSessionTickReloadsTheAgentCount` |
 | refresh | Today's spend from sqlite (`$0.00` when absent) | `runs` table | `TestRefresh` `TestCoverageGaps` `TestSqlite` `BenchmarkSqliteMissingDB` |
 | refresh | Last 8 runs listed for the splash | `runs` table | `TestRefresh` `TestSplash` |
 | refresh | sqlite3 output scrubbed of `~/.sqliterc` meta lines | `.timer`, `Run Time:` | `TestCoverageGaps` `TestFilterSqliteOutput` `FuzzFilterSqliteOutput` `BenchmarkFilterSqliteOutput` |

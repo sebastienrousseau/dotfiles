@@ -103,6 +103,13 @@ func (m model) renderHeader() string {
 		left += dimSt.Render("  · style ") + selSt.Render(m.style)
 	}
 	right := gw + " " + chipCost.Render("today "+m.costToday)
+	if l := m.agents.label(); l != "" {
+		chip := chipOff
+		if m.agents.blocked > 0 {
+			chip = chipHold
+		}
+		right = chip.Render(l) + " " + right
+	}
 	gap := max(m.width-lipgloss.Width(left)-lipgloss.Width(right)-2, 1)
 	return " " + left + strings.Repeat(" ", gap) + right
 }

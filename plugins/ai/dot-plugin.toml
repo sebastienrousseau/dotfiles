@@ -6,7 +6,7 @@
 schema = "cli/manifest.v1"
 name = "ai"
 domain = "ai"
-version = "0.2.542"
+version = "0.2.543"
 summary = "install, route and run coding agents"
 default = "tui"
 
@@ -35,6 +35,11 @@ name = "inventory"
 summary = "installed agents and versions"
 default = "show"
 
+[[objects]]
+name = "policy"
+summary = "the enforced AI policy"
+default = "show"
+
 [[commands]]
 verb = "list"
 effect = "read"
@@ -59,6 +64,20 @@ verb = "start"
 effect = "write"
 lock = false
 summary = "Start an agent"
+
+[[commands.flags]]
+long = "bg"
+summary = "In its own terminal (herdr-core or tmux)"
+
+[[commands.flags]]
+long = "name"
+value = "name"
+summary = "With --bg: its name (default <agent>-<n>)"
+
+[[commands.flags]]
+long = "cwd"
+value = "dir"
+summary = "With --bg: the directory it starts in"
 
 [commands.args]
 # roster: values
@@ -97,6 +116,11 @@ verb = "check"
 effect = "read"
 summary = "Check agent installs and auth"
 
+[[commands.flags]]
+long = "on"
+value = "host"
+summary = "Run the check on a host in fleet.toml"
+
 [[commands]]
 verb = "ask"
 effect = "read"
@@ -112,21 +136,49 @@ summary = "Prompt patterns"
 object = "cost"
 verb = "show"
 effect = "read"
+output = "ai/cost-report.v1"
 summary = "Spend by agent and model"
+
+[[commands.flags]]
+long = "by"
+value = "group"
+summary = "Group by agent, host, day, model or session (default agent)"
+
+[[commands.flags]]
+long = "session"
+value = "id"
+summary = "One session (an id or a unique prefix), by model"
+
+[[commands.flags]]
+long = "days"
+value = "n"
+summary = "Today and the days before it (default 30)"
+
+[[commands.flags]]
+long = "json"
+summary = "Print the report as JSON"
 
 [[commands]]
 object = "gateway"
 verb = "show"
 effect = "read"
-planned = true
+output = "ai/gateway-usage.v1"
 summary = "Gateway statistics"
+
+[[commands.flags]]
+long = "json"
+summary = "Print the usage report as JSON"
 
 [[commands]]
 object = "inventory"
 verb = "show"
 effect = "read"
-planned = true
-summary = "Agents, versions and config"
+output = "ai/inventory.v1"
+summary = "Agents, versions, pins, sign-in, hooks and drift"
+
+[[commands.flags]]
+long = "json"
+summary = "Print the inventory as JSON"
 
 [[commands]]
 object = "pattern"
@@ -140,6 +192,53 @@ verb = "edit"
 effect = "write"
 lock = false
 summary = "Edit a prompt pattern"
+
+[[commands]]
+object = "policy"
+verb = "show"
+effect = "read"
+summary = "The AI policy rules in force for an agent"
+
+[[commands.flags]]
+long = "agent"
+value = "name"
+summary = "Agent whose rules to show (default claude)"
+
+[[commands.flags]]
+long = "mode"
+value = "name"
+summary = "Mode to show (default the active one)"
+
+[[commands.flags]]
+long = "policy"
+value = "file"
+summary = "Policy file (default ~/.config/dotfiles/ai-policy.toml)"
+
+[[commands]]
+object = "policy"
+verb = "check"
+effect = "read"
+summary = "Validate the AI policy and name the active mode"
+
+[[commands.flags]]
+long = "policy"
+value = "file"
+summary = "Policy file (default ~/.config/dotfiles/ai-policy.toml)"
+
+[[commands]]
+object = "pattern"
+verb = "export"
+effect = "read"
+summary = "Write patterns as herdr-core templates"
+
+[[commands.flags]]
+long = "hc"
+summary = "To ~/.config/herdr-core/templates (required)"
+
+[[commands.flags]]
+long = "agent"
+value = "name"
+summary = "Agent the template runs (default claude)"
 
 [[aliases]]
 name = "ai-setup"
@@ -260,3 +359,19 @@ until = "0.2.538"
 event = "on-apply"
 run = "libexec/hooks/on-apply.sh"
 summary = "AI provider CLI checks (optional)"
+
+[[commands]]
+verb = "send"
+effect = "write"
+lock = false
+summary = "Give a background agent text and submit it"
+
+[[commands]]
+verb = "wait"
+effect = "read"
+summary = "Wait until a background agent stops working"
+
+[[commands.flags]]
+long = "timeout"
+value = "seconds"
+summary = "Stop waiting after this long (default 180)"

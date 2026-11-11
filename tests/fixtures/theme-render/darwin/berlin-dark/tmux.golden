@@ -200,6 +200,7 @@ set -g status-right-length 120
 # command line, making the generated theme customizable without forking it.
 set -ogq @dot_status_show_path on
 set -ogq @dot_status_show_system on
+set -ogq @dot_status_show_agents on
 
 # Mode badge (like Neovim's NORMAL): the session on its own colour, PREFIX
 # on the alert colour while the prefix is armed, COPY in copy mode. Each
@@ -209,10 +210,13 @@ set -g status-left "\
 #[bg=default,nobold] "
 
 # Context on the transparent middle, then the time on its cyan badge.
+# The agent count (tmux-status agents: the sessions dot ai status lists,
+# naming any blocked one) leads the context and is empty when none run.
 # Nothing depends on the client width, so a half-screen window shows exactly
 # what a full-screen one does.
 set -g status-right "\
-#[fg=#f5f5f8,bg=default,bold]#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
+#[fg=#f5f5f8,bg=default,bold]#{?#{==:#{@dot_status_show_agents},on},#(~/.local/bin/tmux-status agents) ,}\
+#{?pane_synchronized,SYNC · ,}#{?#{==:#{pane_current_command},ssh},SSH · ,}\
 #[nobold]#{?#{==:#{@dot_status_show_path},on},#{b:pane_current_path} ,}\
 #[fg=#ffffff,bg=#007eae,bold] %H:%M "
 

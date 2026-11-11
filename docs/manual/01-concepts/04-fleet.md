@@ -127,7 +127,7 @@ Only the host with the matching Age private key can decrypt. Other hosts see the
 | Command | Purpose |
 |:---|:---|
 | `dot fleet status` | This node's ID, namespace, version, OS, shell, drift state and last apply (`--json` for machine output) |
-| `dot fleet drift show` | This node's drift, recorded in the drift history |
+| `dot fleet drift show` | This node's drift, recorded in the drift history; `--agents` asks every host in `fleet.toml` instead for its agents' drift (versions off their pins, hooks missing) and an AI policy that is not this machine's |
 | `dot fleet apply` | SSH to every host in `~/.config/dotfiles/fleet.toml` and run a command there (`--host`, `--cmd`, `--dry-run`, `--jobs`, `--verify-hosts`) |
 | `dot fleet push <user@host>` | Stream `chezmoi archive` from this host into the remote `$HOME` over SSH (without a `user@host`, it behaves like `dot fleet apply`) |
 | `dot fleet namespace list` | The active namespace and the `[namespaces.*]` defined in `.chezmoidata.toml` |
@@ -138,7 +138,7 @@ Only the host with the matching Age private key can decrypt. Other hosts see the
 
 ## Limitations
 
-- `dot fleet status` and `dot fleet drift show` report on the host they run on; only `dot fleet apply` and `dot fleet push` reach other hosts, over SSH (see [Roadmap](../../operations/ROADMAP.md))
+- `dot fleet status` and `dot fleet drift show` report on the host they run on; `dot fleet apply`, `dot fleet push`, `dot fleet drift show --agents`, `dot ai status --fleet` and `dot ai check --on` reach other hosts, over SSH (see [Roadmap](../../operations/ROADMAP.md))
 - Secret rotation requires re-encrypting for all recipients; there is no `dot` command for it, so re-encrypt with `sops updatekeys` or by re-adding the file with `chezmoi add --encrypt`
 - There is no central policy store — policy is versioned in the Git repository itself
 

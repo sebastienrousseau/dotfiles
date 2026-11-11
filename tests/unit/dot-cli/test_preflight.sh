@@ -266,6 +266,13 @@ assert_contains "rc=1" "$OUT" "an installer that left no goose failed, whatever 
 lib 'install_goose_native() { mkdir -p "$HOME/.local/bin"; printf "#!/bin/sh\n" >"$HOME/.local/bin/goose"; chmod +x "$HOME/.local/bin/goose"; }
   ai_install_tool goose; echo "rc=$?"'
 assert_contains "rc=0" "$OUT" "a goose in ~/.local/bin is a success"
+rm -rf "$WORK/home/.local"
+# hc (herdr-core) installs ~/.local/bin/herdr-core; its hc link is optional.
+lib 'install_hc_native() { :; }; ai_install_tool herdr-core; echo "rc=$?"'
+assert_contains "rc=1" "$OUT" "an hc installer that left no herdr-core failed"
+lib 'install_hc_native() { mkdir -p "$HOME/.local/bin"; printf "#!/bin/sh\n" >"$HOME/.local/bin/herdr-core"; chmod +x "$HOME/.local/bin/herdr-core"; }
+  ai_install_tool herdr-core; echo "rc=$?"'
+assert_contains "rc=0" "$OUT" "a herdr-core in ~/.local/bin is a success"
 rm -rf "$WORK/home/.local" "$STUBS/curl"
 
 test_start "ai_prepare_reports_when_no_route_is_left"

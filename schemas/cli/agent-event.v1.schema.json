@@ -16,6 +16,7 @@
       "description": "running: working on a prompt; blocked: waiting for the user (a permission or a question); idle: done, waiting for a prompt; error: the turn failed; gone: the session ended"
     },
     "event": { "type": "string", "minLength": 1, "description": "The hook event the state came from (UserPromptSubmit, Notification, Stop...)" },
-    "cwd": { "type": "string", "description": "The session's working directory, as the agent reported it; empty when it did not" }
+    "cwd": { "type": "string", "description": "The session's working directory, as the agent reported it; empty when it did not" },
+    "pane": { "type": "string", "pattern": "^%[0-9]+$", "description": "The tmux pane the agent runs in ($TMUX_PANE); absent outside tmux. dot ai wait follows an agent it started in tmux by it" }
   }
 }

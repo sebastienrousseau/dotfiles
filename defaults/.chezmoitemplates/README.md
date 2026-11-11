@@ -5,7 +5,7 @@
   align="right"
 />
 
-# Chezmoi Templates (v0.2.542)
+# Chezmoi Templates (v0.2.543)
 
 Modular shell configuration managed by Chezmoi
 
@@ -31,6 +31,7 @@ This directory contains modular templates that are aggregated into the shell env
 │   ├── helpers/          # path-utils.tmpl
 │   └── groups.json       # lazy-load groups for the files outside utils/
 ├── desktop/              # shell-theme.dconf.tmpl (no template includes it today)
+├── dotfiles-dir          # the checkout as a shell word, from $HOME when it lives there
 ├── go-build-command      # shared Go build snippet for the run_onchange build scripts
 └── theme-name            # resolves the active theme name for themed templates
 ```

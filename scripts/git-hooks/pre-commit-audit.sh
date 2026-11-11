@@ -37,7 +37,9 @@ echo -n "   🔍 Scanning for secrets... "
 # or a `:` before a comment.
 SENSITIVE_PATTERNS="(GITHUB_TOKEN|API_KEY|SECRET|password|private_key|AKIA[0-9A-Z]{16})[\"']?[[:space:]]*(=[^=]|:[[:space:]]*[^-=#[:space:]])"
 # Exclusions list for legitimate variable checks or documentation
-SECRET_EXCLUDES="test_|assertions.sh|.pre-commit|README|CHANGELOG|FEATURES.md|docs/|install/lib/|.chezmoitemplates/|mcp-doctor.sh|\.github/workflows/"
+# detect-secrets' baseline (^.secrets.baseline:) holds only SHA-1 hashes of
+# its findings, under "hashed_secret", and re-sorts them on every refresh.
+SECRET_EXCLUDES="test_|assertions.sh|.pre-commit|README|CHANGELOG|FEATURES.md|docs/|install/lib/|.chezmoitemplates/|mcp-doctor.sh|\.github/workflows/|^\.secrets\.baseline:"
 # A value read from somewhere else is not a secret written down: a shell
 # variable ("$key", ${KEY}) or a call (os.environ.get(...), load_token()).
 SECRET_KEYS="(GITHUB_TOKEN|API_KEY|SECRET|password|private_key)"
@@ -175,6 +177,6 @@ if [[ $FAILED -eq 1 ]]; then
   printf '%b\\n' "   (Use --no-verify to bypass if absolutely necessary)"
   exit 1
 else
-  printf '%b\n' "${GREEN}${BOLD}✅ Audit passed.${NC} v0.2.542 standards maintained."
+  printf '%b\n' "${GREEN}${BOLD}✅ Audit passed.${NC} v0.2.543 standards maintained."
   exit 0
 fi

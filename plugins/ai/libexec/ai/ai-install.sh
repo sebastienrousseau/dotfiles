@@ -300,3 +300,30 @@ install_cursor_native() {
   rm -f "$installer"
   # LCOV_EXCL_STOP
 }
+
+# install_hc_native [label] — herdr-core's installer: it checks the build
+# against the release manifest's sha256 (and, on macOS, Herdr's code
+# signature), installs ~/.local/bin/herdr-core, and links hc to it only
+# when no other hc exists. A POSIX sh script.
+install_hc_native() {
+  # LCOV_EXCL_START — network installer (see install_agy_native).
+  local label="${1:-herdr-core}"
+  local installer
+  installer=$(umask 077 && mktemp)
+  if download_verified_script https://releases.herdr.dev/core/install.sh "$installer" 262144; then
+    if command -v gum >/dev/null 2>&1; then
+      if gum spin --spinner dot --title "Installing $label (native installer)" -- sh "$installer"; then
+        ui_ok "$label" "installed"
+      else
+        ui_warn "$label" "install failed (continuing)"
+      fi
+    else
+      ui_info "Installing" "$label via native installer"
+      sh "$installer" || ui_warn "$label" "install failed (continuing)"
+    fi
+  else
+    ui_warn "$label" "installer download/validation failed (continuing)"
+  fi
+  rm -f "$installer"
+  # LCOV_EXCL_STOP
+}

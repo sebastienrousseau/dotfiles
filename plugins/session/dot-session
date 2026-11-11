@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# dot-session: the entry of the session plugin (ADR-020 N2). bin/dot runs it
+# with the words after `dot session`. Sessions are the terminals of the agent
+# runtime (lib/dot/agent-runtime.sh): herdr-core's when it is installed,
+# else tmux sessions. `dot ai start --bg` starts agents in them.
+#
+#   dot session [select]              pick one and open it
+#   dot session list                  the live ones
+#   dot session new <name> [--cwd D] [command...]   start one, detached
+#   dot session open <name>           put this terminal on it
+#   dot session stop <name>           end its program
+
+set -euo pipefail
+
+_SESSION_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source-path=SCRIPTDIR source=../../lib/dot/sdk.sh
+source "${DOT_SDK:-$_SESSION_DIR/../../lib/dot}/sdk.sh"
+# shellcheck source-path=SCRIPTDIR source=../../lib/dot/agent-runtime.sh
+source "${DOT_SDK:-$_SESSION_DIR/../../lib/dot}/agent-runtime.sh"
+
+# _session_usage LINE: the usage error, status 1.
+_session_usage() {
+  ui_err "Usage" "$1" >&2
+  exit 1
+}
+
+# _session_name NAME USAGE: NAME, or the usage error when it is not one.
+_session_name() {
+  [[ -n "$1" ]] || _session_usage "$2"
+  dot_rt_name_ok "$1" || _session_usage "a name is 1-32 of a-z 0-9 - _"
+}
+
+# session_new NAME [--cwd DIR] [COMMAND...]: start it detached.
+session_new() {
+  local usage="dot session new <name> [--cwd DIR] [command...]" name="${1:-}" cwd=""
+  _session_name "$name" "$usage"
+  shift
+  if [[ "${1:-}" == --cwd ]]; then
+    [[ $# -ge 2 ]] || _session_usage "$usage"
+    cwd="$2"
+    shift 2
+  fi
+  [[ "${1:-}" != -- ]] || shift
+  dot_rt_start "$BACKEND" session "$name" "$cwd" "$@" || {
+    ui_err "$name" "could not start (is the name taken? dot session list)" >&2
+    exit 1
+  }
+  printf 'Started %s (on %s): dot session open %s\n' "$name" "$BACKEND" "$name"
+}
+
+# session_select: pick a live session and open it.
+session_select() {
+  local names pick
+  names="$(dot_rt_names "$BACKEND")"
+  if [[ -z "$names" ]]; then
+    echo "No sessions: dot session new <name>, or dot ai start --bg <agent>."
+    return 0
+  fi
+  pick="$(printf '%s\n' "$names" | ui_pick --header "Sessions (on $BACKEND)" --prompt "Open")"
+  [[ -z "$pick" ]] || dot_rt_open "$BACKEND" "$pick"
+}
+
+BACKEND="$(dot_rt_backend)" || {
+  ui_err "dot session" "needs herdr-core (dot ai install hc) or tmux" >&2
+  exit 1
+}
+case "${1:-select}" in
+  select) session_select ;;
+  list) dot_rt_list "$BACKEND" ;;
+  new) session_new "${@:2}" ;;
+  open | stop)
+    _session_name "${2:-}" "dot session $1 <name>"
+    if [[ "$1" == open ]]; then dot_rt_open "$BACKEND" "$2"; else dot_rt_stop "$BACKEND" "$2"; fi
+    ;;
+  *)
+    printf "dot: unknown 'dot session' command; see 'dot help session'\n" >&2
+    exit 1
+    ;;
+esac

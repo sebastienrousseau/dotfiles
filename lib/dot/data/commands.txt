@@ -45,6 +45,7 @@ obj|ai pattern|list||prompt patterns
 obj|ai cost|show|@ai|spend by agent and model
 obj|ai gateway|show||the keyless gateway
 obj|ai inventory|show||installed agents and versions
+obj|ai policy|show||the enforced AI policy
 cmd|ai list|@ai list|read|Installed agents
 cmd|ai install|@ai install|write|Install agents
 cmd|ai update|@ai update|write|Upgrade agent CLIs
@@ -56,10 +57,15 @@ cmd|ai check|@ai check|read|Check agent installs and auth
 cmd|ai ask|@ai ask|read|Ask about the local context
 cmd|ai pattern list|@ai pattern list|read|Prompt patterns
 cmd|ai cost show|@ai cost show|read|Spend by agent and model
-cmd|ai gateway show||read|Gateway statistics
-cmd|ai inventory show||read|Agents, versions and config
+cmd|ai gateway show|@ai gateway show|read|Gateway statistics
+cmd|ai inventory show|@ai inventory show|read|Agents, versions, pins, sign-in, hooks and drift
 cmd|ai pattern show|@ai pattern show|read|One prompt pattern
 cmd|ai pattern edit|@ai pattern edit|write|Edit a prompt pattern
+cmd|ai policy show|@ai policy show|read|The AI policy rules in force for an agent
+cmd|ai policy check|@ai policy check|read|Validate the AI policy and name the active mode
+cmd|ai pattern export|@ai pattern export|read|Write patterns as herdr-core templates
+cmd|ai send|@ai send|write|Give a background agent text and submit it
+cmd|ai wait|@ai wait|read|Wait until a background agent stops working
 dom|attest|show|@attest|attestation and verification
 cmd|attest show|@attest show|read|The workstation attestation
 cmd|attest export|@attest export|read|Write attestation evidence
@@ -80,6 +86,7 @@ cmd|cli registry show|@cli registry show|read|The plugin registry URL
 cmd|cli registry set|@cli registry set|write|Point at another plugin registry
 cmd|cli hook status|@cli hook status|read|Each agent session's last state
 cmd|cli hook run|@cli hook run|write|Record an agent hook event read on stdin
+cmd|cli hook check|@cli hook check|read|Check a tool call against the AI policy
 cmd|cli hook install|@cli hook install|write|Wire the hook into each agent's configuration
 cmd|cli hook remove|@cli hook remove|write|Take the hook out of each agent's configuration
 dom|config|status||apply, diff and sync the dotfiles
@@ -185,11 +192,11 @@ cmd|security lock apply|@security lock apply|write|Harden the lock setting
 cmd|security usb show||read|Current usb setting
 cmd|security usb apply|@security usb apply|write|Harden the usb setting
 dom|session|select||find, open and restore terminal sessions
-cmd|session select||read|Pick a session to open
-cmd|session list||read|Sessions on this machine
-cmd|session new||write|Start a named session
-cmd|session open||read|Attach to a session
-cmd|session stop||write|End a session
+cmd|session select|@session select|read|Pick a session to open
+cmd|session list|@session list|read|Sessions on this machine
+cmd|session new|@session new|write|Start a named session
+cmd|session open|@session open|read|Attach to a session
+cmd|session stop|@session stop|write|End a session
 cmd|session restore||write|Restore saved sessions
 dom|shell|status||aliases, history, startup caches
 obj|shell history|list||shell history
@@ -260,9 +267,26 @@ leg|manual|help --manual||
 leg|docs|help --readme||
 leg|learn|help tour||
 flag|ai update|check|||List the pins with a newer release; change nothing
+flag|ai start|bg|||In its own terminal (herdr-core or tmux)
+flag|ai start|name||name|With --bg: its name (default <agent>-<n>)
+flag|ai start|cwd||dir|With --bg: the directory it starts in
 arg|ai start|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
 flag|ai run|style|p|pattern|Steering pattern (--pattern is the old name)
 arg|ai run|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
+flag|ai check|on||host|Run the check on a host in fleet.toml
+flag|ai cost show|by||group|Group by agent, host, day, model or session (default agent)
+flag|ai cost show|session||id|One session (an id or a unique prefix), by model
+flag|ai cost show|days||n|Today and the days before it (default 30)
+flag|ai cost show|json|||Print the report as JSON
+flag|ai gateway show|json|||Print the usage report as JSON
+flag|ai inventory show|json|||Print the inventory as JSON
+flag|ai policy show|agent||name|Agent whose rules to show (default claude)
+flag|ai policy show|mode||name|Mode to show (default the active one)
+flag|ai policy show|policy||file|Policy file (default ~/.config/dotfiles/ai-policy.toml)
+flag|ai policy check|policy||file|Policy file (default ~/.config/dotfiles/ai-policy.toml)
+flag|ai pattern export|hc|||To ~/.config/herdr-core/templates (required)
+flag|ai pattern export|agent||name|Agent the template runs (default claude)
+flag|ai wait|timeout||seconds|Stop waiting after this long (default 180)
 flag|attest show|json|j||Print JSON
 flag|attest show|write|w||Write the attestation to a file
 arg|config add||files|
@@ -287,11 +311,14 @@ flag|doctor perf show|json|j||Print JSON
 flag|doctor perf show|profile|p||Include profile output
 flag|doctor perf show|runs|r|count|Number of runs
 flag|doctor perf show|target|t|ms|Timing target in milliseconds
+flag|fleet apply|agents|||Also install agents, AI policy and hooks on each host
+flag|fleet drift show|agents|||Each host's agent versions, hooks and AI policy
 flag|mcp check|strict|s||Treat policy warnings as errors
 flag|mcp check|json|j||Print a JSON summary
 flag|security score show|verbose|v||Show detailed scoring
 flag|security score show|quiet|q||Reduce output
 flag|security score show|json|j||Print a JSON summary
+flag|session new|cwd||dir|The directory it starts in
 flag|shell alias status|tiers|||Show which ecosystem tiers are enabled
 flag|system update|yes|y||Answer yes to every question
 flag|system update|globals|||Also update npm, cargo and pipx globals
@@ -400,6 +427,7 @@ nolock|ai start||
 nolock|ai run||
 nolock|ai login||
 nolock|ai pattern edit||
+nolock|ai send||
 nolock|cli hook run||
 nolock|config edit||
 nolock|ui run||

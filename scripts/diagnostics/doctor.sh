@@ -365,6 +365,26 @@ _doctor_agent_hooks() {
   fi
 }
 
+# --- AI pins: each pinned agent at its [ai_tools] version (plan P1.5) ---
+# dot ai inventory show --json names each version off its pin; missing
+# hooks are _doctor_agent_hooks' to report.
+_doctor_ai_pins() {
+  local inventory="$SCRIPT_DIR/../../plugins/ai/libexec/inventory.sh" out off line
+  out="$(bash "$inventory" show --json 2>/dev/null)" || out=""
+  if [[ "$out" != *'"schema":"ai/inventory.v1"'* ]]; then
+    ui_info "AI pins" "not checked (dot ai inventory show needs jq)"
+    return 0
+  fi
+  off="$(jq -r '.drift[] | select(.kind == "version") | .message' <<<"$out")"
+  if [[ -z "$off" ]]; then
+    _ok "AI pins" "every pinned agent at its pin"
+    return 0
+  fi
+  while IFS= read -r line; do
+    _warn "AI pins" "$line"
+  done <<<"$off"
+}
+
 # --- Pre-push audit bypass log (closes #871) ---
 _doctor_pre_push_audit_bypass_log() {
   _section "Pre-Push Audit Bypass"
@@ -608,6 +628,7 @@ _doctor_main() {
   _doctor_state
   _doctor_state_layout
   _doctor_agent_hooks
+  _doctor_ai_pins
   _doctor_pre_push_audit_bypass_log
   _doctor_atuin_history_filter
   _doctor_git_signing

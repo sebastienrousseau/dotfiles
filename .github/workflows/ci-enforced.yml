@@ -298,7 +298,9 @@ jobs:
   test-mutation:
     name: Test / Mutation
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # The 60-mutant cap bounds the work, not the time: on #1405 the capped
+    # sample ran 25, 28, 27 and once over 30 minutes, the old limit.
+    timeout-minutes: 45
     if: github.event_name == 'pull_request'
     steps:
       - name: Harden runner (audit mode)

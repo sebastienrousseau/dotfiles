@@ -255,6 +255,11 @@
      "name": "inventory",
      "summary": "installed agents and versions",
      "default": "show"
+    },
+    {
+     "name": "policy",
+     "summary": "the enforced AI policy",
+     "default": "show"
     }
    ],
    "commands": [
@@ -287,6 +292,22 @@
      "effect": "write",
      "summary": "Start an agent",
      "built": true,
+     "flags": [
+      {
+       "long": "bg",
+       "summary": "In its own terminal (herdr-core or tmux)"
+      },
+      {
+       "long": "name",
+       "value": "name",
+       "summary": "With --bg: its name (default <agent>-<n>)"
+      },
+      {
+       "long": "cwd",
+       "value": "dir",
+       "summary": "With --bg: the directory it starts in"
+      }
+     ],
      "args": {
       "values": [
        "claude",
@@ -367,7 +388,14 @@
      "spelling": "ai check",
      "effect": "read",
      "summary": "Check agent installs and auth",
-     "built": true
+     "built": true,
+     "flags": [
+      {
+       "long": "on",
+       "value": "host",
+       "summary": "Run the check on a host in fleet.toml"
+      }
+     ]
     },
     {
      "spelling": "ai ask",
@@ -385,19 +413,55 @@
      "spelling": "ai cost show",
      "effect": "read",
      "summary": "Spend by agent and model",
-     "built": true
+     "built": true,
+     "flags": [
+      {
+       "long": "by",
+       "value": "group",
+       "summary": "Group by agent, host, day, model or session (default agent)"
+      },
+      {
+       "long": "session",
+       "value": "id",
+       "summary": "One session (an id or a unique prefix), by model"
+      },
+      {
+       "long": "days",
+       "value": "n",
+       "summary": "Today and the days before it (default 30)"
+      },
+      {
+       "long": "json",
+       "summary": "Print the report as JSON"
+      }
+     ],
+     "output": "ai/cost-report.v1"
     },
     {
      "spelling": "ai gateway show",
      "effect": "read",
      "summary": "Gateway statistics",
-     "built": false
+     "built": true,
+     "flags": [
+      {
+       "long": "json",
+       "summary": "Print the usage report as JSON"
+      }
+     ],
+     "output": "ai/gateway-usage.v1"
     },
     {
      "spelling": "ai inventory show",
      "effect": "read",
-     "summary": "Agents, versions and config",
-     "built": false
+     "summary": "Agents, versions, pins, sign-in, hooks and drift",
+     "built": true,
+     "flags": [
+      {
+       "long": "json",
+       "summary": "Print the inventory as JSON"
+      }
+     ],
+     "output": "ai/inventory.v1"
     },
     {
      "spelling": "ai pattern show",
@@ -411,6 +475,79 @@
      "summary": "Edit a prompt pattern",
      "built": true,
      "lock": false
+    },
+    {
+     "spelling": "ai policy show",
+     "effect": "read",
+     "summary": "The AI policy rules in force for an agent",
+     "built": true,
+     "flags": [
+      {
+       "long": "agent",
+       "value": "name",
+       "summary": "Agent whose rules to show (default claude)"
+      },
+      {
+       "long": "mode",
+       "value": "name",
+       "summary": "Mode to show (default the active one)"
+      },
+      {
+       "long": "policy",
+       "value": "file",
+       "summary": "Policy file (default ~/.config/dotfiles/ai-policy.toml)"
+      }
+     ]
+    },
+    {
+     "spelling": "ai policy check",
+     "effect": "read",
+     "summary": "Validate the AI policy and name the active mode",
+     "built": true,
+     "flags": [
+      {
+       "long": "policy",
+       "value": "file",
+       "summary": "Policy file (default ~/.config/dotfiles/ai-policy.toml)"
+      }
+     ]
+    },
+    {
+     "spelling": "ai pattern export",
+     "effect": "read",
+     "summary": "Write patterns as herdr-core templates",
+     "built": true,
+     "flags": [
+      {
+       "long": "hc",
+       "summary": "To ~/.config/herdr-core/templates (required)"
+      },
+      {
+       "long": "agent",
+       "value": "name",
+       "summary": "Agent the template runs (default claude)"
+      }
+     ]
+    },
+    {
+     "spelling": "ai send",
+     "effect": "write",
+     "summary": "Give a background agent text and submit it",
+     "built": true,
+     "lock": false
+    },
+    {
+     "spelling": "ai wait",
+     "effect": "read",
+     "summary": "Wait until a background agent stops working",
+     "built": true,
+     "flags": [
+      {
+       "long": "timeout",
+       "value": "seconds",
+       "summary": "Stop waiting after this long (default 180)"
+      }
+     ]
     }
    ],
    "aliases": [
@@ -672,6 +809,12 @@
      "summary": "Record an agent hook event read on stdin",
      "built": true,
      "lock": false
+    },
+    {
+     "spelling": "cli hook check",
+     "effect": "read",
+     "summary": "Check a tool call against the AI policy",
+     "built": true
     },
     {
      "spelling": "cli hook install",
@@ -1339,7 +1482,13 @@
      "spelling": "fleet apply",
      "effect": "write",
      "summary": "Apply the fleet configuration",
-     "built": true
+     "built": true,
+     "flags": [
+      {
+       "long": "agents",
+       "summary": "Also install agents, AI policy and hooks on each host"
+      }
+     ]
     },
     {
      "spelling": "fleet push",
@@ -1351,7 +1500,13 @@
      "spelling": "fleet drift show",
      "effect": "read",
      "summary": "Drift across hosts",
-     "built": true
+     "built": true,
+     "flags": [
+      {
+       "long": "agents",
+       "summary": "Each host's agent versions, hooks and AI policy"
+      }
+     ]
     },
     {
      "spelling": "fleet namespace list",
@@ -1798,31 +1953,38 @@
      "spelling": "session select",
      "effect": "read",
      "summary": "Pick a session to open",
-     "built": false
+     "built": true
     },
     {
      "spelling": "session list",
      "effect": "read",
      "summary": "Sessions on this machine",
-     "built": false
+     "built": true
     },
     {
      "spelling": "session new",
      "effect": "write",
      "summary": "Start a named session",
-     "built": false
+     "built": true,
+     "flags": [
+      {
+       "long": "cwd",
+       "value": "dir",
+       "summary": "The directory it starts in"
+      }
+     ]
     },
     {
      "spelling": "session open",
      "effect": "read",
      "summary": "Attach to a session",
-     "built": false
+     "built": true
     },
     {
      "spelling": "session stop",
      "effect": "write",
      "summary": "End a session",
-     "built": false
+     "built": true
     },
     {
      "spelling": "session restore",

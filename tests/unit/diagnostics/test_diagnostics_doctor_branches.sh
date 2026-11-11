@@ -308,6 +308,7 @@ _expect "s1_all_probes_ok" \
   "[OK] startup latency" "[OK] perf baseline" "[OK] perf top-tools" \
   "starship(40ms), zoxide(5ms)" "All checks passed."
 _expect_absent "s1_no_warnings_or_errors" "[WARN]" "[FAIL]"
+_expect "s1_ai_pins_need_a_real_jq" "[INFO] AI pins not checked (dot ai inventory show needs jq)"
 
 # =======================================================================
 # S2 — Linux under WSL with lots of drift, run with --ai: exit 1 and the
@@ -506,6 +507,10 @@ done
 # Codex runs dot's receiver: with no dot on PATH, the repo's bin/dot.
 mkdir -p "$S_HOME/.codex"
 printf 'notify = ["%s", "cli", "hook", "run", "--agent", "codex"]\n' "$(cd "$REPO_ROOT" && pwd)/bin/dot" >"$S_HOME/.codex/config.toml"
+# and its policy check (ADR-025) on each tool call and prompt, from hooks.json.
+jq -n --arg c "'$(cd "$REPO_ROOT" && pwd)/bin/dot' cli hook check --agent codex" \
+  '{hooks: {PreToolUse: [{hooks: [{type: "command", command: $c}]}],
+    UserPromptSubmit: [{hooks: [{type: "command", command: $c}]}]}}' >"$S_HOME/.codex/hooks.json"
 DOC_ENV=(PIPX_HOME= TERM_PROGRAM=)
 _run_doctor
 test_start "s3_linux_alt_probes_exit_1"
@@ -658,5 +663,30 @@ _run_doctor
 _expect "s8_unmeasured_startup_latency" \
   "[WARN] startup latency" "nothing measured (hyperfine or jq failed)"
 _expect_absent "s8_not_reported_as_a_breach" "threshold exceeded"
+
+# =======================================================================
+# S9 — AI pins (plan P1.5): with a real jq, dot ai inventory names each
+# agent whose version is off its [ai_tools] pin; one at its pin is fine.
+# =======================================================================
+_new_scenario s9
+_uname Linux
+_linux_os_release
+mkdir -p "$S_HOME/proc" "$S_HOME/sys"
+_shim uptime <<'EOF'
+#!/usr/bin/env bash
+echo "up 5 minutes"
+EOF
+ln -sf "$(command -v jq)" "$S_BIN/jq"
+_pin_of() { awk -v k="\"$1\"" '/^\[/ { t = ($0 == "[ai_tools]"); next } t && $1 == k { gsub(/"/, "", $3); print $3; exit }' "$REPO_ROOT/defaults/.chezmoidata.toml"; }
+printf '#!/usr/bin/env bash\necho "codex-cli 0.0.1"\n' >"$S_BIN/codex"
+printf '#!/usr/bin/env bash\necho "crush version %s"\n' "$(_pin_of npm:@charmland/crush)" >"$S_BIN/crush"
+chmod +x "$S_BIN/codex" "$S_BIN/crush"
+DOC_ENV=(PIPX_HOME= TERM_PROGRAM=)
+_run_doctor
+_expect "s9_a_version_off_its_pin" "[WARN] AI pins codex: 0.0.1 is off its pin $(_pin_of npm:@openai/codex)"
+_expect_absent "s9_one_at_its_pin_is_fine" "crush: "
+printf '#!/usr/bin/env bash\necho "codex-cli %s"\n' "$(_pin_of npm:@openai/codex)" >"$S_BIN/codex"
+_run_doctor
+_expect "s9_every_pin_held" "[OK] AI pins every pinned agent at its pin"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

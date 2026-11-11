@@ -19,7 +19,7 @@ mkdir -p "$WORK/bin" "$REL"
 
 # The fake release: the archive layout Makefile.dist installs from.
 stage="$WORK/stage/dot-9.9.9"
-mkdir -p "$stage"/{bin,lib,scripts,plugins,security,docs,defaults} \
+mkdir -p "$stage"/{bin,lib,scripts,plugins,security,docs,defaults,benches} \
   "$stage"/share/{man/man1,bash-completion/completions,zsh/site-functions,fish/vendor_completions.d}
 cp "$REPO_ROOT/tools/release/Makefile.dist" "$stage/Makefile"
 printf '#!/bin/sh\necho "dot fake 9.9.9"\n' >"$stage/bin/dot"

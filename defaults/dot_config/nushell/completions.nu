@@ -279,6 +279,7 @@ def "nu-complete dot ai" [] {
         { value: "cost", description: "spend by agent and model" }
         { value: "gateway", description: "the keyless gateway" }
         { value: "inventory", description: "installed agents and versions" }
+        { value: "policy", description: "the enforced AI policy" }
         { value: "list", description: "Installed agents" }
         { value: "install", description: "Install agents" }
         { value: "update", description: "Upgrade agent CLIs" }
@@ -287,6 +288,8 @@ def "nu-complete dot ai" [] {
         { value: "login", description: "Authenticate an agent" }
         { value: "check", description: "Check agent installs and auth" }
         { value: "ask", description: "Ask about the local context" }
+        { value: "send", description: "Give a background agent text and submit it" }
+        { value: "wait", description: "Wait until a background agent stops working" }
     ]
 }
 export extern "dot ai" [
@@ -301,6 +304,7 @@ export extern "dot ai ask" [
 ]
 
 export extern "dot ai check" [
+    --on: string # Run the check on a host in fleet.toml
     --help(-h) # Show help
     ...rest: string
 ]
@@ -317,6 +321,10 @@ export extern "dot ai cost" [
 ]
 
 export extern "dot ai cost show" [
+    --by: string # Group by agent, host, day, model or session (default agent)
+    --session: string # One session (an id or a unique prefix), by model
+    --days: string # Today and the days before it (default 30)
+    --json # Print the report as JSON
     --help(-h) # Show help
     ...rest: string
 ]
@@ -339,6 +347,7 @@ export extern "dot ai gateway serve" [
 ]
 
 export extern "dot ai gateway show" [
+    --json # Print the usage report as JSON
     --help(-h) # Show help
     ...rest: string
 ]
@@ -350,7 +359,7 @@ export extern "dot ai install" [
 
 def "nu-complete dot ai inventory" [] {
     [
-        { value: "show", description: "Agents, versions and config" }
+        { value: "show", description: "Agents, versions, pins, sign-in, hooks and drift" }
     ]
 }
 export extern "dot ai inventory" [
@@ -360,6 +369,7 @@ export extern "dot ai inventory" [
 ]
 
 export extern "dot ai inventory show" [
+    --json # Print the inventory as JSON
     --help(-h) # Show help
     ...rest: string
 ]
@@ -379,6 +389,7 @@ def "nu-complete dot ai pattern" [] {
         { value: "list", description: "Prompt patterns" }
         { value: "show", description: "One prompt pattern" }
         { value: "edit", description: "Edit a prompt pattern" }
+        { value: "export", description: "Write patterns as herdr-core templates" }
     ]
 }
 export extern "dot ai pattern" [
@@ -392,12 +403,45 @@ export extern "dot ai pattern edit" [
     ...rest: string
 ]
 
+export extern "dot ai pattern export" [
+    --hc # To ~/.config/herdr-core/templates (required)
+    --agent: string # Agent the template runs (default claude)
+    --help(-h) # Show help
+    ...rest: string
+]
+
 export extern "dot ai pattern list" [
     --help(-h) # Show help
     ...rest: string
 ]
 
 export extern "dot ai pattern show" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
+def "nu-complete dot ai policy" [] {
+    [
+        { value: "show", description: "The AI policy rules in force for an agent" }
+        { value: "check", description: "Validate the AI policy and name the active mode" }
+    ]
+}
+export extern "dot ai policy" [
+    command?: string@"nu-complete dot ai policy"
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot ai policy check" [
+    --policy: string # Policy file (default ~/.config/dotfiles/ai-policy.toml)
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot ai policy show" [
+    --agent: string # Agent whose rules to show (default claude)
+    --mode: string # Mode to show (default the active one)
+    --policy: string # Policy file (default ~/.config/dotfiles/ai-policy.toml)
     --help(-h) # Show help
     ...rest: string
 ]
@@ -432,6 +476,11 @@ export extern "dot ai run" [
     ...rest: string
 ]
 
+export extern "dot ai send" [
+    --help(-h) # Show help
+    ...rest: string
+]
+
 def "nu-complete dot ai start" [] {
     [
         { value: "claude", description: "" }
@@ -457,12 +506,21 @@ def "nu-complete dot ai start" [] {
 }
 export extern "dot ai start" [
     value?: string@"nu-complete dot ai start"
+    --bg # In its own terminal (herdr-core or tmux)
+    --name: string # With --bg: its name (default <agent>-<n>)
+    --cwd: string # With --bg: the directory it starts in
     --help(-h) # Show help
     ...rest: string
 ]
 
 export extern "dot ai update" [
     --check # List the pins with a newer release; change nothing
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot ai wait" [
+    --timeout: string # Stop waiting after this long (default 180)
     --help(-h) # Show help
     ...rest: string
 ]
@@ -537,12 +595,18 @@ def "nu-complete dot cli hook" [] {
     [
         { value: "status", description: "Each agent session's last state" }
         { value: "run", description: "Record an agent hook event read on stdin" }
+        { value: "check", description: "Check a tool call against the AI policy" }
         { value: "install", description: "Wire the hook into each agent's configuration" }
         { value: "remove", description: "Take the hook out of each agent's configuration" }
     ]
 }
 export extern "dot cli hook" [
     command?: string@"nu-complete dot cli hook"
+    --help(-h) # Show help
+    ...rest: string
+]
+
+export extern "dot cli hook check" [
     --help(-h) # Show help
     ...rest: string
 ]
@@ -968,6 +1032,7 @@ export extern "dot fleet" [
 ]
 
 export extern "dot fleet apply" [
+    --agents # Also install agents, AI policy and hooks on each host
     --help(-h) # Show help
     ...rest: string
 ]
@@ -984,6 +1049,7 @@ export extern "dot fleet drift" [
 ]
 
 export extern "dot fleet drift show" [
+    --agents # Each host's agent versions, hooks and AI policy
     --help(-h) # Show help
     ...rest: string
 ]
@@ -1428,6 +1494,7 @@ export extern "dot session list" [
 ]
 
 export extern "dot session new" [
+    --cwd: string # The directory it starts in
     --help(-h) # Show help
     ...rest: string
 ]

@@ -85,48 +85,25 @@ test_fm_smoke_ai_tools_install() {
 # ── ai: cost / doctor ──────────────────────────────────────────────────────
 
 test_fm_ai_cost() {
-  # `ai cost` wraps the /vibe skill's delegate-report. In a sandboxed HOME
-  # the skill is not deployed, and the wrapper must say which tool it
-  # wanted and point at chezmoi apply rather than crash.
-  test_start "fm_ai_cost_undeployed"
-  fm_run ai cost
-  fm_expect_rc 1
-  test_start "fm_ai_cost_undeployed_names_the_tool"
-  fm_expect_err "delegate-report"
-  test_start "fm_ai_cost_undeployed_points_at_chezmoi_apply"
-  fm_expect_err "chezmoi apply"
-  test_start "fm_ai_cost_no_breakage"
-  fm_expect_no_forbidden
-
-  if ! command -v python3 >/dev/null 2>&1; then
-    test_start "fm_ai_cost"
-    fm_pass "skipped — python3 not installed (delegate-report)"
-    return 0
-  fi
-  # Deploy the report tool into the sandbox HOME the way chezmoi would.
-  # With no run log under that HOME it reports exactly that, offline, and
-  # exits 0 — so both forms must reach it and pass their flags through.
-  local tools="$HOME/.claude/skills/vibe/tools"
-  mkdir -p "$tools"
-  cp "$REPO_ROOT/defaults/dot_claude/skills/vibe/tools/executable_delegate-report" \
-    "$tools/delegate-report"
-  chmod +x "$tools/delegate-report"
+  # `ai cost` (and `ai cost show`) is the cockpit binary's cost report,
+  # dot-ai-tui cost; tests/unit/dot-cli/test_ai_cost.sh runs the real one. A
+  # stand-in on the sandbox PATH shows both spellings reach it with their
+  # flags, whatever the host has installed.
+  local bin="$FM_SANDBOX/bin/dot-ai-tui"
+  printf '#!/bin/sh\nprintf "cost-report %%s\\n" "$*"\n' >"$bin"
+  chmod +x "$bin"
   test_start "fm_ai_cost"
   fm_run ai cost
   fm_expect_rc 0
-  test_start "fm_ai_cost_reports_no_run_log"
-  fm_expect_out "No run log found"
-  test_start "fm_ai_cost_since"
-  fm_run ai cost --since 7
+  test_start "fm_ai_cost_reaches_the_report"
+  fm_expect_out "cost-report cost"
+  test_start "fm_ai_cost_show_passes_its_flags"
+  fm_run ai cost show --by day --days 7
   fm_expect_rc 0
-  test_start "fm_ai_cost_since_reports_no_run_log"
-  fm_expect_out "No run log found"
-  test_start "fm_ai_cost_since_rejects_a_non_integer"
-  fm_run ai cost --since zzz
-  fm_expect_rc 2
-  test_start "fm_ai_cost_since_rejects_a_non_integer_message"
-  fm_expect_err "invalid int value"
-  rm -rf "$HOME/.claude"
+  fm_expect_out "cost-report cost --by day --days 7"
+  test_start "fm_ai_cost_no_breakage"
+  fm_expect_no_forbidden
+  rm -f "$bin"
 }
 
 test_fm_ai_install_unattended_installs_nothing() {

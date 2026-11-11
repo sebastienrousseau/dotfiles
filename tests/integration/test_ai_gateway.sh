@@ -4,8 +4,9 @@
 # shellcheck disable=SC1090,SC1091,SC2034
 # Integration test for the dot-ai-serve gateway (Phase 2/3). Starts the real
 # stdlib server against a mock `claude` CLI and exercises both protocols,
-# streaming, observability, auth, budget, model routing, and graceful
-# handling of tools/images.
+# streaming, observability, auth, budget, model routing, images, and a
+# tools request the model answers in text (tool calls returned:
+# tests/unit/dot-cli/dot_ai_serve_tools_units.py).
 
 set -uo pipefail
 
@@ -28,8 +29,9 @@ if ! python3 -c 'import socket;s=socket.socket();s.bind(("127.0.0.1",0));s.close
 fi
 
 WORK="$(mktemp -d)"
-# Keep the auto-generated gateway token out of the real state dir.
-export XDG_STATE_HOME="$WORK/state"
+# Keep the auto-generated gateway token out of the real state dir, and a
+# real AI policy out of the requests.
+export XDG_STATE_HOME="$WORK/state" DOT_AI_POLICY="$WORK/no-policy.toml"
 cleanup() {
   # start_server runs inside $(...), so its PIDs are recorded in a file.
   local p
@@ -132,13 +134,16 @@ sse="$(POST "$BASE/v1/chat/completions" -d '{"model":"sonnet","stream":true,"mes
 assert_contains "chat.completion.chunk" "$sse" "openai SSE chunks"
 assert_contains "[DONE]" "$sse" "openai SSE terminates with [DONE]"
 
-test_start "multimodal_image_acknowledged"
-resp="$(POST "$BASE/v1/messages" -d '{"model":"sonnet","messages":[{"role":"user","content":[{"type":"text","text":"look"},{"type":"image","source":{}}]}]}')"
-assert_contains "Hello world" "$resp" "image request still returns a text answer"
+test_start "multimodal_image_forwarded"
+resp="$(POST "$BASE/v1/messages" -d '{"model":"sonnet","messages":[{"role":"user","content":[{"type":"text","text":"look"},{"type":"image","source":{"type":"base64","media_type":"image/png","data":"iVBORw0KGgo="}}]}]}')"
+assert_contains "Hello world" "$resp" "an image request gets the answer"
+code="$(code_of -X POST -H 'Content-Type: application/json' -H "x-api-key: $KEY" "$BASE/v1/messages" \
+  -d '{"model":"sonnet","messages":[{"role":"user","content":[{"type":"image","source":{}}]}]}')"
+assert_equals "400" "$code" "an image with no source is a 400"
 
 test_start "tools_request_answered_in_text"
 resp="$(POST "$BASE/v1/chat/completions" -d '{"model":"sonnet","messages":[{"role":"user","content":"hi"}],"tools":[{"type":"function","function":{"name":"x"}}]}')"
-assert_contains "Hello world" "$resp" "tools request degrades to a text answer"
+assert_contains "Hello world" "$resp" "a tools request the model answers in text gets that text"
 
 test_start "observability_usage_and_metrics"
 usage="$(GET "$BASE/v1/usage")"

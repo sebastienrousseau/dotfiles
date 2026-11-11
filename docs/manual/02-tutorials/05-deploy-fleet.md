@@ -114,6 +114,8 @@ dot fleet status        # node ID, namespace, version, OS, shell, drift, last ap
 dot fleet drift show    # which managed files differ from the source
 ```
 
+From any one host, `dot fleet drift show --agents` asks every host for its agents: each version off its pin, hooks missing, and an AI policy that is not this one's.
+
 To collect evidence from every host in one place, write each host's attestation to a shared directory (a synced folder or a mounted share):
 
 ```sh
@@ -185,6 +187,8 @@ dot fleet apply             # run 'dot config update && dot doctor' on each host
 ```
 
 It runs up to four hosts in parallel (`--jobs <n>` changes that); `--host <name>` limits it to one host, and `--verify-hosts` refuses to connect to a host that is not already in `~/.ssh/known_hosts`.
+
+To give every host the same AI agents, add `agents = ["claude", "codex"]` at the top of `fleet.toml` (or under a host, for that host alone) and run `dot fleet apply --agents`. Each host updates, installs those agents at their pinned versions, takes this machine's `~/.config/dotfiles/ai-policy.toml` once its own `dot ai policy check` accepts it, wires the agent hooks and runs `dot doctor`. A policy a host refuses leaves its old one in place and fails that host.
 
 ## Step 7: Secrets Rotation
 

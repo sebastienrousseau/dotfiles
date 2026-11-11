@@ -24,19 +24,24 @@ from pathlib import Path
 from unittest import mock
 
 sys.dont_write_bytecode = True
+# A real ~/.config/dotfiles/ai-policy.toml must not decide these tests.
+os.environ["DOT_AI_POLICY"] = os.path.join(tempfile.gettempdir(), "dot-ai-serve-tests-no-policy.toml")
 
 REPO = Path(__file__).resolve().parents[3]
 GATEWAY = REPO / "defaults" / "dot_local" / "bin" / "executable_dot-ai-serve"
 
 
 def load(env: dict[str, str] | None = None):
-    """A fresh copy of the gateway module with `env` applied at import."""
+    """A fresh copy of the gateway module with `env` applied at import. Its
+    state (token, usage log) goes to a temporary directory unless env names
+    one: never the real ~/.local/state."""
+    env = {"XDG_STATE_HOME": tempfile.mkdtemp(prefix="dot-ai-serve-state-"), **(env or {})}
     name = f"dot_ai_serve_{time.monotonic_ns()}"
     loader = SourceFileLoader(name, str(GATEWAY))
     spec = importlib.util.spec_from_loader(name, loader)
     mod = importlib.util.module_from_spec(spec)
     sys.modules[name] = mod
-    with mock.patch.dict(os.environ, env or {}, clear=False):
+    with mock.patch.dict(os.environ, env, clear=False):
         loader.exec_module(mod)
     return mod
 
@@ -96,9 +101,9 @@ class Config(unittest.TestCase):
 
     def test_budget_rolls_over_a_new_day(self):
         srv = load({"DOT_AI_DAILY_BUDGET": "1"})
-        srv._BUDGET.update(day="1999-01-01", spent=5.0)
-        srv._roll_day()
-        self.assertEqual(0.0, srv._BUDGET["spent"])
+        srv.METER.budget.update(day="1999-01-01", spent=5.0)
+        srv.METER.roll_day()
+        self.assertEqual(0.0, srv.METER.budget["spent"])
 
     def test_allowed_hosts(self):
         srv = load({"DOT_AI_PORT": "4000", "DOT_AI_ALLOWED_HOSTS": "Proxy.Local:443, "})
@@ -119,20 +124,25 @@ class Shaping(unittest.TestCase):
         self.srv = load()
 
     def test_text_of_block_kinds(self):
-        text = self.srv._text_of(
+        images = []
+        png = {"type": "base64", "media_type": "image/png", "data": "iVBORw0KGgo="}
+        text = sys.modules["gateway_shape"].text_of(
             [
                 {"type": "text", "text": "a"},
-                {"type": "image", "source": {}},
+                {"type": "image", "source": png},
                 {"type": "tool_result", "content": "b"},
                 "c",
                 {"type": "other"},
-            ]
+                {"type": "thinking", "text": "hidden"},
+            ],
+            images,
         )
-        self.assertEqual("a\n[image attached — not forwarded; the engine is text-only]\nb\nc", text)
-        self.assertEqual("", self.srv._text_of(42))
+        self.assertEqual("a\n[image 1]\n[tool result (id ): b]\nc", text)
+        self.assertEqual([{"type": "image", "source": png}], images)
+        self.assertEqual("", sys.modules["gateway_shape"].text_of(42, images))
 
     def test_shape_request_turns_and_system(self):
-        model, system, prompt = self.srv.shape_request(
+        shaped = self.srv.shape_request(
             {
                 "model": "opus",
                 "system": "be brief",
@@ -143,11 +153,13 @@ class Shaping(unittest.TestCase):
                     {"role": "user", "content": ""},
                     {"role": "user", "content": "q2"},
                 ],
-            }
+            },
+            "sonnet",
         )
-        self.assertEqual("opus", model)
-        self.assertEqual("be brief\n\nsys2", system)
-        self.assertEqual("User: q1\n\nAssistant: a1\n\nUser: q2\n\nAssistant:", prompt)
+        self.assertEqual("opus", shaped.model)
+        self.assertEqual("be brief\n\nsys2", shaped.system)
+        self.assertEqual("User: q1\n\nAssistant: a1\n\nUser: q2\n\nAssistant:", shaped.prompt)
+        self.assertEqual("sonnet", self.srv.shape_request({"messages": []}, "sonnet").model)
 
 
 class Engine(unittest.TestCase):
@@ -181,9 +193,12 @@ class Engine(unittest.TestCase):
         srv, _ = self.run_engine(
             "cat >/dev/null; echo '{\"type\":\"result\",\"is_error\":true,\"result\":\"nope\",\"usage\":{}}'"
         )
-        chunks = b"".join(srv.anthropic_sse("sonnet", "sonnet", srv.stream_claude("sonnet", "", "hi")))
+        done = []
+        gen = srv.stream_claude("sonnet", "", "hi")
+        chunks = b"".join(srv.anthropic_sse("sonnet", gen, lambda *a: done.append(a)))
         self.assertIn(b"engine_error", chunks)
         self.assertIn(b"message_stop", chunks)
+        self.assertEqual([(0, 0, "nope")], done, "metered once, with the error")
 
 
 class Http(unittest.TestCase):
@@ -295,7 +310,11 @@ class EngineHardening(unittest.TestCase):
         args = argv.read_text(encoding="utf-8").splitlines()
         self.assertIn("--strict-mcp-config", args)
         self.assertEqual('{"mcpServers":{}}', args[args.index("--mcp-config") + 1])
+        # A client's prompt is not saved as a session in ~/.claude/projects.
+        self.assertIn("--no-session-persistence", args)
         self.assertNotIn("secret-gw-key", envf.read_text(encoding="utf-8"))
+        # Nor an auto-memory directory for its private workdir.
+        self.assertIn("CLAUDE_CODE_DISABLE_AUTO_MEMORY=1", envf.read_text(encoding="utf-8").splitlines())
 
     def test_large_stderr_does_not_stall_the_engine(self):
         # 256 KiB of stderr before any stdout: an undrained stderr pipe
@@ -307,7 +326,7 @@ class EngineHardening(unittest.TestCase):
         env = {"DOT_AI_CLAUDE_BIN": mock_engine(self.tmp, body), "DOT_AI_TIMEOUT": "5"}
         srv = load(env)
         with mock.patch.dict(os.environ, env):
-            text, _, err = srv.run_claude("sonnet", "", "hi")
+            text, _, err, _ = srv.run_claude("sonnet", "", "hi")
         self.assertIsNone(err)
         self.assertEqual("ok", text)
 

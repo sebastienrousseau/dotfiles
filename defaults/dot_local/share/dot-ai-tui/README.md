@@ -3,8 +3,9 @@
 The `dot ai` cockpit — a chat-centric
 [Bubble Tea](https://github.com/charmbracelet/bubbletea) TUI for your AI
 tools. Pick a tool on the left, chat with it on the right (prompts run
-through `dot ai <tool>` and stream back live), and watch the gateway and
-today's spend in the header. Every action shells out to a `dot ai` verb
+through `dot ai <tool>` and stream back live), and watch the gateway,
+today's spend and the live agent sessions (`3 agents · 1 blocked`, the
+ones `dot ai status` lists) in the header. Every action shells out to a `dot ai` verb
 so behaviour has a single source of truth. Deployed to
 `~/.local/bin/dot-ai-tui`.
 
@@ -37,6 +38,16 @@ change of state, and posts a desktop notification when a session becomes
 blocked on a permission prompt or a question, at most once per session
 every 30 s. It starts from the state files the hook writes, so it knows the
 sessions already running; the hook never starts it.
+
+`dot-ai-tui cost` (`dot ai cost show`) reports what agent sessions cost:
+per agent, host, day, model or session (`--by`), or one session by model
+(`--session ID`), over `--days N` (default 30); `--json` prints
+`ai/cost-report.v1`. It prices each request in the Claude Code and Codex
+transcripts at API list prices (`prices.go`), adds what Claude Code's own
+cost figure reports beyond its transcripts, and counts the gateway's usage
+log and other delegates' runs from `dotfiles-ai.db`. An index in
+`$XDG_CACHE_HOME/dot/ai/cost-index.json` keeps each file's offset, so after
+the first run only what was appended is read.
 
 See [FEATURES.md](FEATURES.md) for the full feature → test matrix.
 

@@ -2,13 +2,17 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 #
 # Command names of dot session (ADR-020), checked by tools/ci/check-cli-contract.py.
-# Repository at extraction: dot-session.
+# Repository at extraction: dot-session. Sessions are the agent runtime's
+# terminals (lib/dot/agent-runtime.sh): herdr-core's, else tmux sessions.
 schema = "cli/manifest.v1"
 name = "session"
 domain = "session"
-version = "0.2.542"
+version = "0.2.543"
 summary = "find, open and restore terminal sessions"
 default = "select"
+
+[entry]
+command = "dot-session"
 
 [[commands]]
 verb = "select"
@@ -25,6 +29,11 @@ verb = "new"
 effect = "write"
 summary = "Start a named session"
 
+[[commands.flags]]
+long = "cwd"
+value = "dir"
+summary = "The directory it starts in"
+
 [[commands]]
 verb = "open"
 effect = "read"
@@ -38,4 +47,5 @@ summary = "End a session"
 [[commands]]
 verb = "restore"
 effect = "write"
+planned = true
 summary = "Restore saved sessions"

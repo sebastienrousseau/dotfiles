@@ -6,7 +6,7 @@
 schema = "cli/manifest.v1"
 name = "fleet"
 domain = "fleet"
-version = "0.2.542"
+version = "0.2.543"
 summary = "many hosts"
 default = "status"
 
@@ -46,6 +46,10 @@ verb = "apply"
 effect = "write"
 summary = "Apply the fleet configuration"
 
+[[commands.flags]]
+long = "agents"
+summary = "Also install agents, AI policy and hooks on each host"
+
 [[commands]]
 verb = "push"
 effect = "write"
@@ -56,6 +60,10 @@ object = "drift"
 verb = "show"
 effect = "read"
 summary = "Drift across hosts"
+
+[[commands.flags]]
+long = "agents"
+summary = "Each host's agent versions, hooks and AI policy"
 
 [[commands]]
 object = "namespace"

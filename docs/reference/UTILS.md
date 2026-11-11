@@ -56,8 +56,12 @@ Install, route and run coding agents.
 | `dot ai install` | Install agents |  |
 | `dot ai update` | Upgrade agent CLIs |  |
 | `dot ai start` | Start an agent | `dot ai chat` |
+| `dot ai send` | Give a background agent text and submit it |  |
+| `dot ai wait` | Wait until a background agent stops working |  |
 | `dot ai run` | Run an agent once |  |
 | `dot ai gateway serve` | Run the gateway in the foreground | `dot ai serve` |
+| `dot ai gateway show` | Gateway statistics |  |
+| `dot ai inventory show` | Agents, versions, pins, sign-in, hooks and drift |  |
 | `dot ai login` | Authenticate an agent |  |
 | `dot ai check` | Check agent installs and auth | `dot ai doctor` |
 | `dot ai ask` | Ask about the local context | `dot ai-query` |
@@ -65,6 +69,9 @@ Install, route and run coding agents.
 | `dot ai cost show` | Spend by agent and model | `dot ai cost` |
 | `dot ai pattern show` | One prompt pattern | `dot patterns view` |
 | `dot ai pattern edit` | Edit a prompt pattern | `dot patterns edit` |
+| `dot ai pattern export` | Write patterns as herdr-core templates |  |
+| `dot ai policy show` | The AI policy rules in force for an agent |  |
+| `dot ai policy check` | Validate the AI policy and name the active mode |  |
 
 ### dot attest
 
@@ -90,6 +97,7 @@ Plugins, updates, completions.
 | `dot cli registry set` | Point at another plugin registry | `dot registry set-url` |
 | `dot cli hook status` | Each agent session's last state |  |
 | `dot cli hook run` | Record an agent hook event read on stdin |  |
+| `dot cli hook check` | Check a tool call against the AI policy |  |
 | `dot cli hook install` | Wire the hook into each agent's configuration |  |
 | `dot cli hook remove` | Take the hook out of each agent's configuration |  |
 
@@ -195,6 +203,18 @@ OS hardening.
 | `dot security dns apply` | Harden the dns setting | `dot dns-doh` |
 | `dot security lock apply` | Harden the lock setting | `dot lock-screen` |
 | `dot security usb apply` | Harden the usb setting | `dot usb-safety` |
+
+### dot session
+
+Named terminals that outlive the shell, on herdr-core, else tmux.
+
+| Command | Description | Was |
+|---------|-------------|-----|
+| `dot session select` | Pick a session to open |  |
+| `dot session list` | Sessions on this machine |  |
+| `dot session new` | Start a named session |  |
+| `dot session open` | Attach to a session |  |
+| `dot session stop` | End a session |  |
 
 ### dot shell
 

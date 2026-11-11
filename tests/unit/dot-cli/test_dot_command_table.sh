@@ -105,7 +105,7 @@ assert_equals "|0" "$(resolve secret key list)" "a planned command is not run"
 assert_equals "|0" "$(resolve secret)" "a domain whose default is planned"
 assert_equals "@system schedule set|3" "$(resolve system schedule set weekly)" "a built command runs its route, its value left as an argument"
 assert_equals "@agent check|2" "$(resolve agent check)" "a built verb runs its own route even when the domain has one"
-assert_equals "|0" "$(resolve ai gateway show)" "a planned verb never falls through to the old route"
+assert_equals "|0" "$(resolve agent budget show)" "a planned verb never falls through to the old route"
 
 test_start "every_alias_target_runs"
 unresolved=""
@@ -156,12 +156,13 @@ dot 'doc.*' || rc=$?
 assert_equals "127" "$rc" "a pattern in a name is not a regex"
 
 test_start "planned_command_never_reaches_the_old_route"
-# `dot ai <word>` sends <word> to a model as a prompt: a planned verb must
-# stop at 127, not fall through to the domain's own route.
+# A domain with fallback = true passes the words its table does not take to
+# its own route (`dot ai <word>` sends <word> to a model as a prompt): a
+# planned verb must stop at 127, not fall through to it.
 rc=0
-dot ai gateway show || rc=$?
+dot agent budget show || rc=$?
 assert_equals "127" "$rc" "planned verb of a domain with its own route"
-assert_file_contains "$WORK/err" "'dot ai gateway show' is not available yet" "names the spelling"
+assert_file_contains "$WORK/err" "'dot agent budget show' is not available yet" "names the spelling"
 
 test_start "domain_alone_lists_its_commands"
 rc=0

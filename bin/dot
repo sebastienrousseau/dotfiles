@@ -4,28 +4,35 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 set -euo pipefail
 
-# Dotfiles CLI Entry Point - v0.2.542
+# Dotfiles CLI Entry Point - v0.2.543
 
 # _dot_hook_fast ARGS...: `dot cli hook run` runs on every prompt, tool call
-# and stop of every agent, so it skips the dispatcher (UI, names, routes,
-# locks; the manifest gives it no lock) and runs the hook in this process,
-# which exits. A symlinked dot, or one asked for --help, returns to take the
-# full path below.
+# and stop of every agent, and `dot cli hook check` (the policy) on every
+# tool call, so they skip the dispatcher (UI, names, routes, locks; the
+# manifest gives them no lock) and run the hook in this process, which
+# exits. A symlinked dot, or one asked for --help, returns to take the full
+# path below.
 _dot_hook_fast() {
-  local hook="${BASH_SOURCE[0]%/*}/../plugins/cli/libexec/hook.sh" a
-  [[ "${1:-} ${2:-} ${3:-}" == "cli hook run" && -f "$hook" ]] || return 0
+  local libexec="${BASH_SOURCE[0]%/*}/../plugins/cli/libexec" a
+  [[ "${1:-} ${2:-}" == "cli hook" && -f "$libexec/hook.sh" && -f "$libexec/hook-check.sh" ]] || return 0
+  [[ "${3:-}" == run || "${3:-}" == check ]] || return 0
   for a in "${@:4}"; do
     [[ "$a" != --help && "$a" != -h ]] || return 0
   done
   # In a function, source with no words sees the function's own $@.
-  shift 3
   set +e
-  # shellcheck source=../plugins/cli/libexec/hook.sh
-  source "$hook"
+  if [[ "$3" == run ]]; then
+    shift 3
+    # shellcheck source=../plugins/cli/libexec/hook.sh
+    source "$libexec/hook.sh"
+  fi
+  shift 3
+  # shellcheck source=../plugins/cli/libexec/hook-check.sh
+  source "$libexec/hook-check.sh"
 }
 _dot_hook_fast "$@"
 
-VERSION="0.2.542"
+VERSION="0.2.543"
 
 COMMAND="${1:-}"
 shift "$(($# > 0))"
@@ -53,8 +60,8 @@ _resolve_source_dir() {
   done
   if script_path="$(cd "$(dirname "$script_path")" && pwd 2>/dev/null)"; then
     script_dir="$script_path"
-    # Post-v0.2.542: the canonical dispatcher lives at <repo>/bin/dot, so
-    # $script_dir/.. is the repo root. Pre-v0.2.542 (and chezmoi-deployed
+    # Post-v0.2.543: the canonical dispatcher lives at <repo>/bin/dot, so
+    # $script_dir/.. is the repo root. Pre-v0.2.543 (and chezmoi-deployed
     # wrapper invocations that still exec the canonical) the dispatcher
     # was at <repo>/dot_local/bin/executable_dot, so $script_dir/../..
     # was the repo. Probe both to cover the transition.

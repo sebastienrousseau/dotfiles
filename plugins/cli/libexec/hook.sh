@@ -22,6 +22,7 @@
 # Inside herdr ($HC_TERMINAL_ID) it also tells the agent's terminal the
 # state as an OSC 7501 record (Program Status Protocol), for agents that do
 # not report their own: Codex and Gemini CLI.
+# Inside tmux the record also names the agent's pane ($TMUX_PANE).
 # Metadata only: the prompt, tool input and output in the payload are never
 # read into the record.
 #
@@ -213,7 +214,11 @@ hook_main() {
   _hook_now
   _hook_json_str event "$H_EVENT"
   _hook_json_str cwd "$H_CWD"
-  record="{\"schema\":\"cli/agent-event.v1\",\"time\":\"$H_NOW\",\"agent\":\"$agent\",\"session\":\"$H_SESSION\",\"state\":\"$H_STATE\",\"event\":$event,\"cwd\":$cwd}"
+  record="{\"schema\":\"cli/agent-event.v1\",\"time\":\"$H_NOW\",\"agent\":\"$agent\",\"session\":\"$H_SESSION\",\"state\":\"$H_STATE\",\"event\":$event,\"cwd\":$cwd"
+  # Inside tmux, the agent's pane: dot ai wait follows an agent it started
+  # in a tmux session by it.
+  [[ ! "${TMUX_PANE:-}" =~ ^%[0-9]+$ ]] || record+=",\"pane\":\"$TMUX_PANE\""
+  record+="}"
   _hook_write "$agent" "$H_SESSION" "$record"
   _hook_report "$agent"
   # A per-user runtime dir only: a shared /tmp would let another user listen.
@@ -249,16 +254,45 @@ _hook_status_files() {
   done
 }
 
-# hook_status [--json] [--live]: each agent session's last state (dot cli
-# hook status; dot ai status adds --live), newest first; --json prints the
-# records, one per line, and nothing when there are none.
+# _hook_cost COSTS KEY: the cost of agent/session KEY from COSTS (key<TAB>usd
+# lines, as dot-ai-tui cost --by session --tsv prints them), as $0.00; - when
+# it is not there.
+_hook_cost() {
+  awk -F'\t' -v k="$2" '$1 == k { printf "$%.2f", $2; found = 1; exit } END { if (!found) printf "-" }' "$1" 2>/dev/null ||
+    printf -- '-'
+}
+
+# _hook_status_table [COSTS]: the sessions in H_FILES as a table, newest
+# first; with COSTS, a COST column.
+_hook_status_table() {
+  local f rec agent session cost=""
+  if [[ -n "${1:-}" ]]; then
+    printf '%-10s %-8s %-20s %-8s %s\n' AGENT STATE TIME COST SESSION
+  else
+    printf '%-10s %-8s %-20s %s\n' AGENT STATE TIME SESSION
+  fi
+  for f in "${H_FILES[@]}"; do
+    rec="$(cat "$f")"
+    agent="$(_hook_field "$rec" agent)" session="$(_hook_field "$rec" session)"
+    [[ -z "${1:-}" ]] || cost="$(printf '%-8s ' "$(_hook_cost "$1" "$agent/$session")")"
+    printf '%s\t%-10s %-8s %-20s %s%s\n' "$(_hook_field "$rec" time)" "$agent" \
+      "$(_hook_field "$rec" state)" "$(_hook_field "$rec" time)" "$cost" "$session"
+  done | sort -r | cut -f2-
+}
+
+# hook_status [--json] [--live] [--costs FILE]: each agent session's last
+# state (dot cli hook status; dot ai status adds --live and its costs),
+# newest first; --json prints the records, one per line, and nothing when
+# there are none.
 hook_status() {
-  local json="" live="" a f rec
-  for a in "$@"; do
-    case "$a" in
+  local json="" live="" costs=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
       --json) json=1 ;;
       --live) live=1 ;;
+      --costs) costs="${2:-}" && shift ;;
     esac
+    shift
   done
   _hook_status_files "$live"
   if ((${#H_FILES[@]} == 0)); then
@@ -270,16 +304,11 @@ hook_status() {
     fi
     return 0
   fi
-  [[ -z "$json" ]] || {
+  if [[ -n "$json" ]]; then
     cat "${H_FILES[@]}"
-    return 0
-  }
-  printf '%-10s %-8s %-20s %s\n' AGENT STATE TIME SESSION
-  for f in "${H_FILES[@]}"; do
-    rec="$(cat "$f")"
-    printf '%s\t%-10s %-8s %-20s %s\n' "$(_hook_field "$rec" time)" "$(_hook_field "$rec" agent)" \
-      "$(_hook_field "$rec" state)" "$(_hook_field "$rec" time)" "$(_hook_field "$rec" session)"
-  done | sort -r | cut -f2-
+  else
+    _hook_status_table "$costs"
+  fi
 }
 
 if [[ "${1:-}" == --status ]]; then

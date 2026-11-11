@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# run_onchange_27-build-dot-policy.sh.tmpl
+# Builds the AI policy evaluator (ADR-025) to ~/.local/bin/dot-policy when
+# its Go source changes. `dot cli hook check`, the PreToolUse hook, runs it
+# whenever ~/.config/dotfiles/ai-policy.toml exists, and denies every tool
+# call while it is missing (fail closed), so a host with a policy needs it.
+# Skips cleanly when no Go toolchain is available.
+{{- if ne .chezmoi.os "windows" }}
+
+set -euo pipefail
+
+# Source hashes baked in at render time so this script's content changes when
+# the source changes, retriggering chezmoi onchange. Every non-test .go file
+# is hashed, so a new source file cannot be missed.
+{{- range glob (joinPath .chezmoi.sourceDir "dot_local/share/dot-policy/*.go") }}
+{{-   if not (hasSuffix "_test.go" .) }}
+# {{ base . }}: {{ include . | sha256sum }}
+{{-   end }}
+{{- end }}
+# go.mod: {{ include "dot_local/share/dot-policy/go.mod" | sha256sum }}
+# go.sum: {{ include "dot_local/share/dot-policy/go.sum" | sha256sum }}
+
+SRC="$HOME/.local/share/dot-policy"
+OUT="$HOME/.local/bin/dot-policy"
+# The framework version, injected as main.version (`--version`).
+VERSION={{ .dotfiles_version | quote }}
+
+[[ -f "$SRC/main.go" ]] || {
+  echo "dot-policy: source not deployed yet — skipping."
+  exit 0
+}
+
+# Resolve a Go toolchain (mise shims put `go` on PATH when activated).
+if ! command -v go >/dev/null 2>&1; then
+  echo "dot-policy: no Go toolchain — install via mise to enable. Skipping."
+  exit 0
+fi
+
+mkdir -p "$HOME/.local/bin"
+{{ template "go-build-command" . }}
+echo "Building dot-policy (AI policy)…"
+if dot_build_go_binary; then
+  echo "dot-policy installed: $OUT"
+else
+  echo "dot-policy: build failed; existing binary preserved. See compiler diagnostics above." >&2
+  exit 1
+fi
+{{- end }}

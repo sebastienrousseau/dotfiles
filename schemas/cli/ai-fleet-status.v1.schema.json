@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.io/schemas/cli/ai-fleet-status.v1.schema.json",
+  "title": "dot ai fleet status v1 (one host's live agent sessions)",
+  "description": "Printed by `dot ai status --fleet --json`, one line per host: this machine first, then each host in fleet.toml. A host that did not answer has reachable false and the reason. Metadata only: never a prompt or an answer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "host", "reachable", "error", "sessions"],
+  "properties": {
+    "schema": { "const": "ai/fleet-status.v1" },
+    "host": { "type": "string", "minLength": 1, "description": "This machine's short hostname, or the host's name in fleet.toml" },
+    "reachable": { "type": "boolean" },
+    "error": { "type": "string", "description": "Why the host did not answer (ssh's first line of error); empty when it did" },
+    "sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event", "cost_usd"],
+        "properties": {
+          "event": {
+            "type": "object",
+            "description": "The session's last state, a cli/agent-event.v1 record (schemas/cli/agent-event.v1.schema.json)",
+            "required": ["schema", "time", "agent", "session", "state"],
+            "properties": { "schema": { "const": "cli/agent-event.v1" } }
+          },
+          "cost_usd": { "type": ["number", "null"], "minimum": 0, "description": "What the session cost (dot ai cost show); null when the host has no cockpit or no figure" }
+        }
+      }
+    }
+  }
+}

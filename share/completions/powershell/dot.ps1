@@ -11,15 +11,16 @@ $script:DotChildren = @{
     'agent log' = @(, @('show', 'The agent log'))
     'agent mode' = @(@('list', 'Available modes'), @('show', 'One mode in detail'), @('set', 'Switch mode'), @('run', 'Run a command under a mode'))
     'agent policy' = @(, @('show', 'The sandbox policy'))
-    'ai' = @(@('pattern', 'prompt patterns'), @('cost', 'spend by agent and model'), @('gateway', 'the keyless gateway'), @('inventory', 'installed agents and versions'), @('list', 'Installed agents'), @('install', 'Install agents'), @('update', 'Upgrade agent CLIs'), @('start', 'Start an agent'), @('run', 'Run an agent once'), @('login', 'Authenticate an agent'), @('check', 'Check agent installs and auth'), @('ask', 'Ask about the local context'))
+    'ai' = @(@('pattern', 'prompt patterns'), @('cost', 'spend by agent and model'), @('gateway', 'the keyless gateway'), @('inventory', 'installed agents and versions'), @('policy', 'the enforced AI policy'), @('list', 'Installed agents'), @('install', 'Install agents'), @('update', 'Upgrade agent CLIs'), @('start', 'Start an agent'), @('run', 'Run an agent once'), @('login', 'Authenticate an agent'), @('check', 'Check agent installs and auth'), @('ask', 'Ask about the local context'), @('send', 'Give a background agent text and submit it'), @('wait', 'Wait until a background agent stops working'))
     'ai cost' = @(, @('show', 'Spend by agent and model'))
     'ai gateway' = @(@('serve', 'Run the gateway in the foreground'), @('show', 'Gateway statistics'))
-    'ai inventory' = @(, @('show', 'Agents, versions and config'))
-    'ai pattern' = @(@('list', 'Prompt patterns'), @('show', 'One prompt pattern'), @('edit', 'Edit a prompt pattern'))
+    'ai inventory' = @(, @('show', 'Agents, versions, pins, sign-in, hooks and drift'))
+    'ai pattern' = @(@('list', 'Prompt patterns'), @('show', 'One prompt pattern'), @('edit', 'Edit a prompt pattern'), @('export', 'Write patterns as herdr-core templates'))
+    'ai policy' = @(@('show', 'The AI policy rules in force for an agent'), @('check', 'Validate the AI policy and name the active mode'))
     'attest' = @(@('show', 'The workstation attestation'), @('export', 'Write attestation evidence'), @('verify', 'Verify evidence'))
     'cli' = @(@('completion', 'shell completion scripts'), @('registry', 'the plugin registry'), @('hook', 'agent hook events (agent-event.v1)'), @('list', 'Installed plugins'), @('show', 'One plugin in detail'), @('install', 'Install a plugin'), @('update', 'Update dot and its plugins'), @('remove', 'Remove a plugin'), @('verify', 'Verify plugin provenance'), @('new', 'Create a plugin from the template'))
     'cli completion' = @(, @('show', 'Print a completion script'))
-    'cli hook' = @(@('status', 'Each agent session''s last state'), @('run', 'Record an agent hook event read on stdin'), @('install', 'Wire the hook into each agent''s configuration'), @('remove', 'Take the hook out of each agent''s configuration'))
+    'cli hook' = @(@('status', 'Each agent session''s last state'), @('run', 'Record an agent hook event read on stdin'), @('check', 'Check a tool call against the AI policy'), @('install', 'Wire the hook into each agent''s configuration'), @('remove', 'Take the hook out of each agent''s configuration'))
     'cli registry' = @(@('show', 'The plugin registry URL'), @('set', 'Point at another plugin registry'))
     'config' = @(@('path', 'where the dotfiles source lives'), @('profile', 'the active profile and its features'), @('status', 'Pending changes and last apply'), @('diff', 'What apply would change'), @('apply', 'Write the dotfiles to this machine'), @('sync', 'Apply the dotfiles; --pull pulls first'), @('update', 'Pull and apply the dotfiles only'), @('edit', 'Open a managed file in $EDITOR'), @('add', 'Start managing an existing file'), @('save', 'Commit source changes'), @('init', 'First-time setup of the dotfiles'), @('check', 'Lint the source and templates'), @('export', 'Write a portable bundle'), @('uninstall', 'Remove the setup, keeping the source'), @('import', 'Restore from an exported bundle'))
     'config path' = @(, @('show', 'Print the source directory'))
@@ -91,24 +92,30 @@ $script:DotCommands = @{
     'agent status' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'agent suspend' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai ask' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'ai check' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'ai cost show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai check' = @{ Flags = @(@('--help', 'Show help'), @('--on', 'Run the check on a host in fleet.toml')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @('--on') }
+    'ai cost show' = @{ Flags = @(@('--help', 'Show help'), @('--by', 'Group by agent, host, day, model or session (default agent)'), @('--session', 'One session (an id or a unique prefix), by model'), @('--days', 'Today and the days before it (default 30)'), @('--json', 'Print the report as JSON')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @('--by', '--session', '--days') }
     'ai gateway serve' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'ai gateway show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai gateway show' = @{ Flags = @(@('--help', 'Show help'), @('--json', 'Print the usage report as JSON')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai install' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'ai inventory show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai inventory show' = @{ Flags = @(@('--help', 'Show help'), @('--json', 'Print the inventory as JSON')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai login' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai pattern edit' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai pattern export' = @{ Flags = @(@('--help', 'Show help'), @('--hc', 'To ~/.config/herdr-core/templates (required)'), @('--agent', 'Agent the template runs (default claude)')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @('--agent') }
     'ai pattern list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'ai pattern show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai policy check' = @{ Flags = @(@('--help', 'Show help'), @('--policy', 'Policy file (default ~/.config/dotfiles/ai-policy.toml)')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @('--policy') }
+    'ai policy show' = @{ Flags = @(@('--help', 'Show help'), @('--agent', 'Agent whose rules to show (default claude)'), @('--mode', 'Mode to show (default the active one)'), @('--policy', 'Policy file (default ~/.config/dotfiles/ai-policy.toml)')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @('--agent', '--mode', '--policy') }
     'ai run' = @{ Flags = @(@('--help', 'Show help'), @('--style', 'Steering pattern (--pattern is the old name)'), @('-p', 'Steering pattern (--pattern is the old name)')); Values = @('claude', 'codex', 'copilot', 'goose', 'crush', 'amp', 'cursor-agent', 'grok', 'kimi', 'agy', 'kiro', 'sgpt', 'ollama', 'opencode', 'aider', 'autohand', 'vibe', 'qwen', 'zai'); Files = $false; PatternFlags = @('--style', '-p'); ValueFlags = @() }
-    'ai start' = @{ Flags = @(, @('--help', 'Show help')); Values = @('claude', 'codex', 'copilot', 'goose', 'crush', 'amp', 'cursor-agent', 'grok', 'kimi', 'agy', 'kiro', 'sgpt', 'ollama', 'opencode', 'aider', 'autohand', 'vibe', 'qwen', 'zai'); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai send' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai start' = @{ Flags = @(@('--help', 'Show help'), @('--bg', 'In its own terminal (herdr-core or tmux)'), @('--name', 'With --bg: its name (default <agent>-<n>)'), @('--cwd', 'With --bg: the directory it starts in')); Values = @('claude', 'codex', 'copilot', 'goose', 'crush', 'amp', 'cursor-agent', 'grok', 'kimi', 'agy', 'kiro', 'sgpt', 'ollama', 'opencode', 'aider', 'autohand', 'vibe', 'qwen', 'zai'); Files = $false; PatternFlags = @(); ValueFlags = @('--name', '--cwd') }
     'ai update' = @{ Flags = @(@('--help', 'Show help'), @('--check', 'List the pins with a newer release; change nothing')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'ai wait' = @{ Flags = @(@('--help', 'Show help'), @('--timeout', 'Stop waiting after this long (default 180)')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @('--timeout') }
     'attest export' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'attest show' = @{ Flags = @(@('--help', 'Show help'), @('--json', 'Print JSON'), @('-j', 'Print JSON'), @('--write', 'Write the attestation to a file'), @('-w', 'Write the attestation to a file')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'attest verify' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'cli completion show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'cli hook check' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'cli hook install' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'cli hook remove' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'cli hook run' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
@@ -153,8 +160,8 @@ $script:DotCommands = @{
     'doctor snapshot list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'doctor snapshot new' = @{ Flags = @(@('--help', 'Show help'), @('--baseline', 'Capture the baseline snapshot'), @('-b', 'Capture the baseline snapshot'), @('--force', 'Overwrite an existing snapshot'), @('-f', 'Overwrite an existing snapshot')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'doctor status' = @{ Flags = @(@('--help', 'Show help'), @('--json', 'Print a JSON summary'), @('-j', 'Print a JSON summary'), @('--fix', 'Apply common fixes'), @('-f', 'Apply common fixes'), @('--force', 'Apply fixes without prompts'), @('-F', 'Apply fixes without prompts')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'fleet apply' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'fleet drift show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'fleet apply' = @{ Flags = @(@('--help', 'Show help'), @('--agents', 'Also install agents, AI policy and hooks on each host')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'fleet drift show' = @{ Flags = @(@('--help', 'Show help'), @('--agents', 'Each host''s agent versions, hooks and AI policy')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'fleet log show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'fleet namespace list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'fleet policy set' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
@@ -195,7 +202,7 @@ $script:DotCommands = @{
     'security usb apply' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'security usb show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'session list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'session new' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'session new' = @{ Flags = @(@('--help', 'Show help'), @('--cwd', 'The directory it starts in')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @('--cwd') }
     'session open' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'session restore' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'session select' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }

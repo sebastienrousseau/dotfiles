@@ -1,0 +1,15 @@
+{{- /* dotfiles-dir — the checkout (chezmoi's working tree) as one shell word
+       that sh, bash, zsh and fish read alike. A checkout under the home
+       directory is written from $HOME ("$HOME"'/.dotfiles'), so no rendered
+       file holds /Users/<name> or /home/<name>, which dot doctor's
+       portability check reports; any other checkout is written as is.
+
+       Usage: DOTFILES_DIR={{`{{ template "dotfiles-dir" . }}`}}
+*/ -}}
+{{- $home := .chezmoi.homeDir -}}
+{{- $tree := .chezmoi.workingTree -}}
+{{- if hasPrefix (printf "%s/" $home) $tree -}}
+"$HOME"{{ squote (trimPrefix $home $tree) }}
+{{- else -}}
+{{ squote $tree }}
+{{- end -}}

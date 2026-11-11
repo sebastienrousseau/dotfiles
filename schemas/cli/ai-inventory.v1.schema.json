@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.io/schemas/cli/ai-inventory.v1.schema.json",
+  "title": "dot ai inventory v1 (one machine's agents and their drift)",
+  "description": "Printed by `dot ai inventory show --json`: each installed agent's version, pin, sign-in and hook state, the AI policy's digest, and the drift among them. dot doctor and `dot fleet drift agents` read it. Never a credential: sign-in is only where one was found.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "host", "time", "policy", "agents", "drift"],
+  "properties": {
+    "schema": { "const": "ai/inventory.v1" },
+    "host": { "type": "string", "minLength": 1, "description": "The machine's short hostname" },
+    "time": { "type": "string", "format": "date-time" },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "description": "Where the AI policy is read from (DOT_AI_POLICY, else ~/.config/dotfiles/ai-policy.toml)" },
+        "sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$", "description": "The policy file's SHA-256; null when there is no policy" }
+      }
+    },
+    "agents": {
+      "type": "array",
+      "description": "The roster's agents found on PATH, in roster order",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "version", "pin", "auth", "hooks"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "version": { "type": ["string", "null"], "description": "The first dotted number of `<bin> --version`; null when there is none" },
+          "pin": { "type": ["string", "null"], "description": "Its version in [ai_tools]; null for a native install, which has no pin" },
+          "auth": { "enum": ["key", "login", "none", "unknown"], "description": "key: an API key in the environment; login: a credentials file or keychain item; unknown: dot does not know where this agent keeps it" },
+          "hooks": { "enum": ["wired", "missing", "unknown", "n/a"], "description": "dot cli hook wired into the agent's configuration; n/a for an agent dot does not hook or one never configured; unknown when its configuration cannot be read" }
+        }
+      }
+    },
+    "drift": {
+      "type": "array",
+      "description": "One entry per finding, in agent order",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["agent", "kind", "message"],
+        "properties": {
+          "agent": { "type": "string" },
+          "kind": { "enum": ["version", "hooks"], "description": "version: off its pin; hooks: dot's hooks missing" },
+          "message": { "type": "string", "description": "The finding as one sentence" }
+        }
+      }
+    }
+  }
+}

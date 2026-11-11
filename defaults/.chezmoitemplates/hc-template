@@ -1,0 +1,16 @@
+{{- /* hc-template — a prompt pattern as a herdr-core template
+       (~/.config/herdr-core/templates/<name>.md), so one role serves
+       `dot ai run --style <name>` and `hc run <name> "<task>"`. The pattern's
+       first heading, without "Identity:", is the description; Claude Code
+       runs it and reports its own status, so hc's default readiness holds.
+       `dot ai pattern export --hc` writes the same file for any pattern.
+
+       Usage: {{`{{ template "hc-template" (dict "name" "architect") }}`}}
+*/ -}}
+{{- $body := include (printf "dot_config/ai/patterns/%s.md" .name) -}}
+{{- $title := regexReplaceAll "^#+ *(Identity: *)?" (index (splitList "\n" $body) 0) "" -}}
+---
+description: {{ $title }}
+command: claude
+---
+{{ $body -}}
