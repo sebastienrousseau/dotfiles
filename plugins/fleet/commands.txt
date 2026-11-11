@@ -17,4 +17,5 @@ cmd|fleet log show|@fleet log show|read|Fleet events
 cmd|fleet policy show|@fleet policy show|read|Fleet policy
 cmd|fleet policy set|@fleet policy set|write|Enforce a fleet policy
 flag|fleet apply|agents|||Also install agents, AI policy and hooks on each host
+flag|fleet drift show|agents|||Each host's agent versions, hooks and AI policy
 alias|teleport|removed|fleet push|0.2.538

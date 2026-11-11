@@ -161,7 +161,7 @@ $script:DotCommands = @{
     'doctor snapshot new' = @{ Flags = @(@('--help', 'Show help'), @('--baseline', 'Capture the baseline snapshot'), @('-b', 'Capture the baseline snapshot'), @('--force', 'Overwrite an existing snapshot'), @('-f', 'Overwrite an existing snapshot')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'doctor status' = @{ Flags = @(@('--help', 'Show help'), @('--json', 'Print a JSON summary'), @('-j', 'Print a JSON summary'), @('--fix', 'Apply common fixes'), @('-f', 'Apply common fixes'), @('--force', 'Apply fixes without prompts'), @('-F', 'Apply fixes without prompts')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'fleet apply' = @{ Flags = @(@('--help', 'Show help'), @('--agents', 'Also install agents, AI policy and hooks on each host')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'fleet drift show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'fleet drift show' = @{ Flags = @(@('--help', 'Show help'), @('--agents', 'Each host''s agent versions, hooks and AI policy')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'fleet log show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'fleet namespace list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'fleet policy set' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }

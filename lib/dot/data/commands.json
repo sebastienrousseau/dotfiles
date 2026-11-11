@@ -1500,7 +1500,13 @@
      "spelling": "fleet drift show",
      "effect": "read",
      "summary": "Drift across hosts",
-     "built": true
+     "built": true,
+     "flags": [
+      {
+       "long": "agents",
+       "summary": "Each host's agent versions, hooks and AI policy"
+      }
+     ]
     },
     {
      "spelling": "fleet namespace list",

@@ -61,6 +61,10 @@ verb = "show"
 effect = "read"
 summary = "Drift across hosts"
 
+[[commands.flags]]
+long = "agents"
+summary = "Each host's agent versions, hooks and AI policy"
+
 [[commands]]
 object = "namespace"
 verb = "list"

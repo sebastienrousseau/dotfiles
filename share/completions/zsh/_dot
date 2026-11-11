@@ -378,7 +378,7 @@ _dot() {
       flags_=('--help:Show help' '--agents:Also install agents, AI policy and hooks on each host')
       ;;
     'fleet drift show' | 'fleet drift show'\ *)
-      flags_=('--help:Show help')
+      flags_=('--help:Show help' '--agents:Each host'\''s agent versions, hooks and AI policy')
       ;;
     'fleet log show' | 'fleet log show'\ *)
       flags_=('--help:Show help')

@@ -404,6 +404,7 @@ Multi-node status, drift, and namespace.
 ```
 dot fleet status [--json]   # this node's fleet status (bare 'dot fleet' does the same)
 dot fleet drift show        # check for configuration drift
+dot fleet drift show --agents  # each host's agents against their pins, hooks and this machine's AI policy
 dot fleet log show          # recent fleet events
 dot fleet namespace list    # the active namespace
 dot fleet push [user@host]  # push to one host, or to every host like 'apply'

@@ -114,6 +114,8 @@ dot fleet status        # node ID, namespace, version, OS, shell, drift, last ap
 dot fleet drift show    # which managed files differ from the source
 ```
 
+From any one host, `dot fleet drift show --agents` asks every host for its agents: each version off its pin, hooks missing, and an AI policy that is not this one's.
+
 To collect evidence from every host in one place, write each host's attestation to a shared directory (a synced folder or a mounted share):
 
 ```sh

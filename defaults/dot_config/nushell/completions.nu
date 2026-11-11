@@ -1049,6 +1049,7 @@ export extern "dot fleet drift" [
 ]
 
 export extern "dot fleet drift show" [
+    --agents # Each host's agent versions, hooks and AI policy
     --help(-h) # Show help
     ...rest: string
 ]
