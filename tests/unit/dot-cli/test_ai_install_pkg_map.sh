@@ -62,7 +62,6 @@ copilot=npm:@github/copilot
 crush=aqua:charmbracelet/crush
 aider=pipx:aider-chat[uvx_args=--python 3.12]
 opencode=opencode
-sgpt=pipx:shell-gpt
 ollama=aqua:ollama/ollama
 autohand=npm:autohand-cli
 qwen=npm:@qwen-code/qwen-code
@@ -70,7 +69,7 @@ zai=npm:@guizmo-ai/zai-cli
 MAP
 
 test_start "ai_install_leaves_native_installer_providers_unmapped"
-for _bin in goose amp cursor-agent grok agy kimi claude vibe; do
+for _bin in goose amp cursor-agent grok agy kimi claude vibe sgpt; do
   assert_equals "" "$(_pkg "$_bin")" "$_bin has no mise package (native installer, or not installed)"
 done
 

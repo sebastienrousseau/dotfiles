@@ -127,7 +127,7 @@ _aiu_npm() {
   if mise exec node -- npm update -g --audit=false >/dev/null 2>&1; then ok; else fail "npm update -g failed"; fi
 }
 
-# Pipx (aider, sgpt)
+# Pipx-installed tools (aider)
 _aiu_pipx() {
   command -v pipx >/dev/null 2>&1 || return 0
   step "Pipx tools"

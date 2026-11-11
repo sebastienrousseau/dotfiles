@@ -145,7 +145,6 @@ tpm_commit = "7bdb7ca33c9cc6440a600202b50142f401b6fe21" # pragma: allowlist secr
 "npm:@guizmo-ai/zai-cli" = "0.3.5"
 "aqua:charmbracelet/crush" = "0.98.1"
 "pipx:aider-chat" = "0.86.2"
-"pipx:shell-gpt" = "1.5.1"
 "aqua:ollama/ollama" = "0.40.3"
 "opencode" = "1.19.0"
 "github:sebastienrousseau/corralctl" = "0.0.54"
