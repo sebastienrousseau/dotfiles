@@ -157,23 +157,6 @@
       "chat": true
     },
     {
-      "name": "kiro",
-      "bin": "kiro-cli",
-      "aliases": [
-        "kiro-cli"
-      ],
-      "title": "Kiro CLI",
-      "summary": "AWS's agentic dev assistant",
-      "group": "cloud",
-      "role": "cloud",
-      "processes": [
-        "kiro-cli"
-      ],
-      "package": "kiro-cli",
-      "native": "",
-      "chat": true
-    },
-    {
       "name": "sgpt",
       "bin": "sgpt",
       "aliases": [],

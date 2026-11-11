@@ -122,17 +122,6 @@ group = "general"
 role = "agent"
 
 [[tool]]
-name = "kiro"
-bin = "kiro-cli"
-title = "Kiro CLI"
-summary = "AWS's agentic dev assistant"
-aliases = ["kiro-cli"]
-group = "cloud"
-role = "cloud"
-package = "kiro-cli"
-login = "kiro-cli login"
-
-[[tool]]
 name = "sgpt"
 bin = "sgpt"
 title = "Shell-GPT"

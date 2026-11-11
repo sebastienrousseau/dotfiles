@@ -25,21 +25,29 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: syntax error"
 fi
 
-# Without a terminal, a --version probe runs and a login is skipped.
+# Without a terminal, a --version probe runs and a login is skipped. No
+# shipped tool needs a separate login today, so a copy of the script runs
+# beside roster data that gives crush one.
 test_start "ai_setup_probes_versions_and_skips_logins"
 ai_bin="$DOTFILES_COV_TMPDIR/ai-bin"
 ai_log="$DOTFILES_COV_TMPDIR/ai.log"
 mkdir -p "$ai_bin"
-for tool in copilot kiro-cli; do
+for tool in copilot crush; do
   printf '#!/usr/bin/env bash\necho "%s $*" >>"%s"\n' "$tool" "$ai_log" >"$ai_bin/$tool"
   chmod +x "$ai_bin/$tool"
 done
+login_tree="$DOTFILES_COV_TMPDIR/login-tree"
+mkdir -p "$login_tree/scripts/ops" "$login_tree/lib"
+cp "$TEST_SCRIPT" "$login_tree/scripts/ops/ai-setup.sh"
+cp -R "$REPO_ROOT/lib/dot" "$login_tree/lib/dot"
+printf "AI_ROSTER_LOGIN_OF=\$'crush=crush login\\\\n'\n" >>"$login_tree/lib/dot/data/ai-roster.sh"
 ai_rc=0
-ai_out="$(PATH="$ai_bin:$DOTFILES_COV_TMPDIR/bin:/usr/bin:/bin" bash "$TEST_SCRIPT" </dev/null 2>&1)" || ai_rc=$?
+ai_out="$(PATH="$ai_bin:$DOTFILES_COV_TMPDIR/bin:/usr/bin:/bin" bash "$login_tree/scripts/ops/ai-setup.sh" </dev/null 2>&1)" || ai_rc=$?
 assert_equals "0" "$ai_rc" "a missing tool does not fail the run"
 assert_equals "copilot --version" "$(cat "$ai_log" 2>&1)" "only the version probe ran"
-assert_contains "non-interactive shell; skipping login. Run 'kiro-cli login'" "$ai_out" "the login is named, not run"
+assert_contains "non-interactive shell; skipping login. Run 'crush login'" "$ai_out" "the login is named, not run"
 assert_contains "Binary not found" "$ai_out" "a missing tool is reported"
+: >"$ai_log"
 
 # The tools come from the roster: crush, which the hand-kept list never
 # had, is checked too, and naming tools runs only those.
@@ -56,7 +64,7 @@ test_start "ai_setup_named_tools_only"
 ai_out="$(PATH="$ai_bin:$DOTFILES_COV_TMPDIR/bin:/usr/bin:/bin" bash "$TEST_SCRIPT" copilot </dev/null 2>&1)"
 assert_equals "copilot --version" "$(cat "$ai_log" 2>&1)" "the named tool runs"
 assert_equals "" "$(cat "$crush_log" 2>&1)" "the others do not"
-assert_equals "no" "$([[ "$ai_out" == *"Kiro CLI"* ]] && echo yes || echo no)" "nor are they listed"
+assert_equals "no" "$([[ "$ai_out" == *"Claude Code"* ]] && echo yes || echo no)" "nor are they listed"
 
 test_start "ai_setup_unknown_tool_is_a_usage_error"
 ai_rc=0

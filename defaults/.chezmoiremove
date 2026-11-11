@@ -1,0 +1,3 @@
+# Targets chezmoi removes from every machine on apply.
+# kiro-cli left the AI roster in 0.2.544, with the mise plugin that installed it.
+.local/share/mise/plugins/kiro-cli

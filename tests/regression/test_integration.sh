@@ -247,7 +247,7 @@ it_sandbox bridge
 test_start "integration_ai_providers_in_mise"
 it_missing=""
 for it_p in claude:cl copilot:copilot kimi:kimi agy:agy aider:aider opencode:opencode sgpt:sgpt \
-  ollama:ollama kiro-cli:kiro autohand:autohand vibe:vibe qwen:qwen zai:zai; do
+  ollama:ollama autohand:autohand vibe:vibe qwen:qwen zai:zai; do
   it_bin="${it_p%%:*}"
   it_stub "$it_bin" "echo \"$it_bin \$*\" >>\"$IT_S/provider.spy\"; exit 0"
   it_env bash "$DOT_CLI" ai "${it_p#*:}" "fixture prompt" >/dev/null 2>&1

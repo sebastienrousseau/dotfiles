@@ -23,7 +23,7 @@ echo "mise \$*" >>"$CALLS"
 if [ "\$1" = tool ] && [ "\$2" = --backend ]; then
   case "\$3" in
     opencode) echo aqua:anomalyco/opencode ;;
-    kiro-cli) echo asdf:kiro-cli ;;
+    plugin-cli) echo asdf:plugin-cli ;;
   esac
 fi
 if [ "\$1" = latest ]; then
@@ -39,8 +39,8 @@ if [ "\$1" = latest ]; then
     # A gated latest older than the pin (pin set inside the age gate).
     github:sebastienrousseau/passmcp@0) echo 0.0.0 ;;
     # mise cannot look up an asdf plugin by its backend name.
-    asdf:kiro-cli*) exit 1 ;;
-    kiro-cli@2) echo 2.99.0 ;;
+    asdf:plugin-cli*) exit 1 ;;
+    plugin-cli@2) echo 2.99.0 ;;
     *) echo "\${MISE_SAME:-}" ;;
   esac
 fi
@@ -74,7 +74,7 @@ assert_equals "" "$(lib '_ai_pinned_version gopls' | head -n 1)" \
   "keys of other tables are not AI pins"
 
 test_start "every_mapped_provider_is_pinned"
-r="$(lib 'for b in codex copilot crush aider opencode sgpt ollama kiro-cli autohand qwen zai corralctl passmcp passmcp-graph passmcp-lsp passmcp-server draft; do
+r="$(lib 'for b in codex copilot crush aider opencode sgpt ollama autohand qwen zai corralctl passmcp passmcp-graph passmcp-lsp passmcp-server draft; do
   p="$(_ai_mise_pkg "$b")"; [[ -n "$(_ai_pinned_version "$p")" ]] || printf "%s " "$b"; done')"
 assert_equals "" "$(head -n 1 <<<"$r")" "every provider dot ai can install has a pin"
 
@@ -117,8 +117,10 @@ assert_contains "opencode $(lib '_ai_pinned_version opencode' | head -n 1) -> 1.
 assert_equals "0" "$(grep -c -- '-> 2\.1\.4' <<<"$r")" "a newer major is not proposed"
 
 test_start "upgrade_falls_back_to_the_short_name"
-r="$(lib 'ai_pin_bumps')"
-assert_contains "kiro-cli $(lib '_ai_pinned_version kiro-cli' | head -n 1) -> 2.99.0" "$r" \
+# No pinned tool uses a plugin backend today, so a fixture pin stands in.
+printf '[ai_tools]\n"plugin-cli" = "2.0.0"\n' >"$WORK/plugin-pins.toml"
+r="$(lib '_AI_PINS_FILE="$HOME/plugin-pins.toml"; ai_pin_bumps')"
+assert_contains "plugin-cli 2.0.0 -> 2.99.0" "$r" \
   "a backend mise cannot look up falls back to the short name"
 
 test_start "upgrade_never_proposes_an_older_release"

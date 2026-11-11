@@ -207,7 +207,7 @@ _dot() {
     'ai run' | 'ai run'\ *)
       flags_=('--help:Show help' '--style:Steering pattern (--pattern is the old name)' '-p:Steering pattern (--pattern is the old name)')
       patflags_=(--style -p)
-      [[ "$path_" != 'ai run' ]] || values_=(claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai)
+      [[ "$path_" != 'ai run' ]] || values_=(claude codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider autohand vibe qwen zai)
       ;;
     'ai send' | 'ai send'\ *)
       flags_=('--help:Show help')
@@ -215,7 +215,7 @@ _dot() {
     'ai start' | 'ai start'\ *)
       flags_=('--help:Show help' '--bg:In its own terminal (herdr-core or tmux)' '--name:With --bg: its name (default <agent>-<n>)' '--cwd:With --bg: the directory it starts in')
       valflags_=(--name --cwd)
-      [[ "$path_" != 'ai start' ]] || values_=(claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai)
+      [[ "$path_" != 'ai start' ]] || values_=(claude codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider autohand vibe qwen zai)
       ;;
     'ai update' | 'ai update'\ *)
       flags_=('--help:Show help' '--check:List the pins with a newer release; change nothing')

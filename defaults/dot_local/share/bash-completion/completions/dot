@@ -215,7 +215,7 @@ _dot() {
     'ai run' | 'ai run'\ *)
       flags='--help --style -p'
       patflags='--style -p'
-      [[ "$path" != 'ai run' ]] || values='claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai'
+      [[ "$path" != 'ai run' ]] || values='claude codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider autohand vibe qwen zai'
       ;;
     'ai send' | 'ai send'\ *)
       flags='--help'
@@ -223,7 +223,7 @@ _dot() {
     'ai start' | 'ai start'\ *)
       flags='--help --bg --name --cwd'
       valflags='--name --cwd'
-      [[ "$path" != 'ai start' ]] || values='claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai'
+      [[ "$path" != 'ai start' ]] || values='claude codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider autohand vibe qwen zai'
       ;;
     'ai update' | 'ai update'\ *)
       flags='--help --check'

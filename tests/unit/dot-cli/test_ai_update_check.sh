@@ -31,7 +31,7 @@ chmod +x "$WORK/bin/mise"
 cat >"$WORK/pins.toml" <<'TOML'
 [ai_tools]
 "npm:@openai/codex" = "0.162.1"
-"kiro-cli" = "1.0.0"
+"example-cli" = "1.0.0"
 TOML
 
 # update ARGS...: cmd_ai_update in the sandbox; stdout in OUT, status in RC.
@@ -57,7 +57,7 @@ assert_equals "npm:@openai/codex 0.162.1 -> 9.9.9" "$OUT" \
 assert_file_not_exists "$WORK/updater.log" "and the updater does not run"
 
 test_start "check_with_every_pin_current_prints_nothing"
-printf '[ai_tools]\n"kiro-cli" = "1.0.0"\n' >"$WORK/pins.toml"
+printf '[ai_tools]\n"example-cli" = "1.0.0"\n' >"$WORK/pins.toml"
 update --check
 assert_equals "0" "$RC" "a current set of pins is not an error"
 assert_equals "" "$OUT" "and prints nothing"

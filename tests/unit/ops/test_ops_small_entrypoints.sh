@@ -258,7 +258,7 @@ called "ssh deploy@example.com tar xz -C"
 
 # ── ai-setup ────────────────────────────────────────────────────────────
 test_start "ai_setup_walks_the_whole_fleet"
-for t in claude agy codex copilot goose kiro-cli kimi aider autohand vibe qwen zai; do
+for t in claude agy codex copilot goose kimi aider autohand vibe qwen zai; do
   record_stub "$t"
 done
 run bash "$AI_SETUP"
@@ -268,10 +268,6 @@ out_has "AI Setup Complete" "completion"
 out_has "Setting up Claude Code" "per-tool section, titled as the roster names it"
 called "claude --version"
 called "codex --version"
-
-test_start "ai_setup_skips_a_login_flow_when_stdin_is_not_a_terminal"
-out_has "non-interactive shell; skipping login" "kiro login deferred"
-assert_true "! grep -q 'kiro-cli login' '$CALLS'" "login not attempted"
 
 test_start "ai_setup_reports_a_tool_that_is_not_installed"
 NOAI="$DOTFILES_COV_TMPDIR/noai"

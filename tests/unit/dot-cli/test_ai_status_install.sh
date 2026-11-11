@@ -8,7 +8,7 @@
 # the "missing providers" flow behind `dot ai tools` (gum "Install all",
 # "Choose which to install", pick-nothing, no-gum tips), the launcher
 # tip without gum, the run log hook, the bridge's --help / bad --style /
-# kiro alias, the interactive-install prompts (gum confirm, plain read,
+# cursor alias, the interactive-install prompts (gum confirm, plain read,
 # mise failure, no mise) and the deprecated verbs (local, ai-query,
 # tools install). Everything runs against sandboxed shims — no AI CLI,
 # mise, gum or network call ever leaves the sandbox.
@@ -258,7 +258,7 @@ assert_contains "claude-ran" "$OUT" "claude invoked"
 assert_file_contains "$CALLS" "ai-log claude" "run logged with provider"
 assert_file_contains "$CALLS" " 0 " "run logged with exit code 0"
 
-# ── Bridge: --help, bad --style, kiro alias, raw + style ───────────
+# ── Bridge: --help, bad --style, cursor alias, raw + style ─────────
 test_start "ai_bridge_help"
 run_ai "$TOOLS:$BASE_PATH" codex --help
 assert_equals 0 "$RC" "bridge --help exits 0"
@@ -270,11 +270,11 @@ run_ai "$TOOLS:$BASE_PATH" ai claude --style no-such-style "hi"
 assert_equals 1 "$RC" "unknown style exits 1"
 assert_contains "Pattern not found" "$OUT" "unknown style reported"
 
-mk_tool kiro-cli
-test_start "ai_bridge_kiro_alias"
-run_ai "$TOOLS:$BASE_PATH" kiro "hi"
-assert_equals 0 "$RC" "kiro alias exits 0"
-assert_contains "kiro-cli-ran" "$OUT" "kiro resolves to kiro-cli"
+mk_tool cursor-agent
+test_start "ai_bridge_cursor_alias"
+run_ai "$TOOLS:$BASE_PATH" cursor "hi"
+assert_equals 0 "$RC" "cursor alias exits 0"
+assert_contains "cursor-agent-ran" "$OUT" "cursor resolves to cursor-agent"
 
 test_start "ai_bridge_raw_with_style"
 DOT_AI_RAW=1 run_ai "$TOOLS:$BASE_PATH" ai claude --style architect "hi"

@@ -28,9 +28,6 @@ The `d*` aliases call `dot ai <agent>`, an older spelling that `dot ai` still pa
 | `dkma` | `dot ai kimi --style architect` |  |
 | `dkmh` | `dot ai kimi --style hardener` |  |
 | `dkmr` | `dot ai kimi --style refactor` |  |
-| `dkia` | `dot ai kiro --style architect` |  |
-| `dkih` | `dot ai kiro --style hardener` |  |
-| `dkir` | `dot ai kiro --style refactor` |  |
 | `aid` | `aider --read ~/.config/ai/identity.md` | Only when `aider` is on PATH. |
 | `aida` | `aider --read ~/.config/ai/identity.md --chat-mode ask` | Only when `aider` is on PATH. |
 | `aidc` | `aider --read ~/.config/ai/identity.md --chat-mode code` | Only when `aider` is on PATH. |
@@ -41,10 +38,6 @@ The `d*` aliases call `dot ai <agent>`, an older spelling that `dot ai` still pa
 | `cod` | `codex` | Only when `codex` is on PATH. Replaces the `cod` directory shortcut from the cd aliases (eager layer). |
 | `codi` | `codex instruct` | Only when `codex` is on PATH. |
 | `fab` | `fabric` | Only when `fabric` is on PATH. |
-| `kiro` | `kiro-cli` | Only when `kiro-cli` is on PATH. |
-| `kiri` | `kiro-cli` | Only when `kiro-cli` is on PATH. |
-| `kic` | `kiro-cli chat` | Only when `kiro-cli` is on PATH. |
-| `kit` | `kiro-cli term` | Only when `kiro-cli` is on PATH. |
 | `agyi` | `agy info` | Only when `agy` is on PATH. |
 | `agys` | `agy chat` | Only when `agy` is on PATH. |
 | `km` | `kimi` | Only when `kimi` is on PATH. |

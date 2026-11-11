@@ -143,9 +143,6 @@ tpm_commit = "7bdb7ca33c9cc6440a600202b50142f401b6fe21" # pragma: allowlist secr
 "pipx:shell-gpt" = "1.5.1"
 "aqua:ollama/ollama" = "0.40.3"
 "opencode" = "1.19.0"
-# kiro-cli publishes no release dates; 2.29.1 (Homebrew cask, 2026-10-11) was the
-# newest past the 7-day age gate. On macOS the mise plugin copies the cask build.
-"kiro-cli" = "2.29.1"
 "github:sebastienrousseau/corralctl" = "0.0.52"
 "github:sebastienrousseau/passmcp" = "0.0.7"
 "github:sebastienrousseau/passmcp-graph" = "0.0.7"

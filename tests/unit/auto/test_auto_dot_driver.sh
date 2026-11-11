@@ -165,7 +165,6 @@ declare -a PROBES=(
   "ai_bridge_cop   copilot --help"
   "ai_bridge_agy   agy --help"
   "ai_bridge_goose goose --help"
-  "ai_bridge_kiro  kiro --help"
   "ai_bridge_sgpt  sgpt --help"
   "ai_bridge_oll   ollama --help"
   "ai_bridge_opc   opencode --help"

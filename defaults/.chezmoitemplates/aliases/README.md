@@ -52,7 +52,6 @@ made conditional:
 | --- | --- | --- |
 | `d` | `dot` (`system`) | `dig` and `docker` define `d` only when `dot` is not installed |
 | `dcl` | `docker compose logs` (`docker`) | `dot ai claude` (`ai`; `dcla`, `dclh`, `dclr` remain) |
-| `dki` | `docker info` (`docker`) | `dot ai kiro` (`ai`; `dkia`, `dkih`, `dkir` remain) |
 | `gci` | `gcloud compute instances` | `gcloud init` |
 | `gcccc`, `gcccl` | `gcloud container clusters create`, `list` | `gcloud config configurations create`, `list` |
 | `gcpd` | `gcloud projects describe` | `gcloud projects delete` (destructive) |

@@ -203,7 +203,7 @@ _uname Darwin
 _zsh "1 1"
 _tool fish starship nu rg bat fzf zoxide atuin yazi zellij \
   pueue pueued wasmtime nix sops age \
-  claude copilot kimi agy sgpt ollama opencode aider kiro-cli \
+  claude copilot kimi agy sgpt ollama opencode aider \
   cargo-install-update mise direnv pyenv fnm kubectl pwsh \
   sw_vers sysctl vm_stat system_profiler brew
 _bench 10
@@ -442,7 +442,7 @@ _new_scenario s3
 _uname Linux
 _zsh "1 1"
 _tool fish nushell rg bat fzf zoxide atuin yazi zellij pueue wasmtime nix \
-  sops age hyperfine claude copilot kimi agy sgpt ollama opencode aider kiro-cli \
+  sops age hyperfine claude copilot kimi agy sgpt ollama opencode aider \
   cargo-install-update mise xrandr rpm
 _bench 9999
 _linux_os_release

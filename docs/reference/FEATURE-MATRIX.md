@@ -229,7 +229,6 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot kimi` → `dot ai run kimi` | (usage without prompt) | `test_fm_ai_bridge_kimi` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot agy` → `dot ai run agy` | (usage without prompt) | `test_fm_ai_bridge_agy` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot goose` → `dot ai run goose` | (usage without prompt) | `test_fm_ai_bridge_goose` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
-| `dot kiro` → `dot ai run kiro` | (usage without prompt) | `test_fm_ai_bridge_kiro` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot sgpt` → `dot ai run sgpt` | (usage without prompt) | `test_fm_ai_bridge_sgpt` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot ollama` → `dot ai run ollama` | (usage without prompt) | `test_fm_ai_bridge_ollama` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot opencode` → `dot ai run opencode` | (usage without prompt) | `test_fm_ai_bridge_opencode` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
@@ -663,4 +662,3 @@ also drives the real OS appearance, which is why it stays a smoke row.
 - `docs/manual/03-reference/02-config-files.md` — config file schemas
 - `docs/manual/03-reference/03-environment.md` — environment variables
 - `CONTRIBUTING.md` — the "Regression tests" trace-header convention
-

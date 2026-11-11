@@ -218,7 +218,6 @@ An old name prints its new name. A deprecated one still runs until the release s
 | `dot kimi` | `dot ai run kimi` | 0.2.538 |
 | `dot agy` | `dot ai run agy` | 0.2.538 |
 | `dot goose` | `dot ai run goose` | 0.2.538 |
-| `dot kiro` | `dot ai run kiro` | 0.2.538 |
 | `dot sgpt` | `dot ai run sgpt` | 0.2.538 |
 | `dot ollama` | `dot ai run ollama` | 0.2.538 |
 | `dot opencode` | `dot ai run opencode` | 0.2.538 |

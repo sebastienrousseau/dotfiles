@@ -41,12 +41,12 @@ assert_equals "0" "$DOT_FIXTURE_RC" "an installed tool should be launched"
 assert_contains "claude" "$DOT_FIXTURE_OUT" \
   "the short name 'cl' should resolve to the claude binary"
 
-test_start "ai_chat_resolves_kiro_to_kiro_cli"
-dot_fixture_stub "$FX/stubs" kiro-cli 0
-ai_run ai chat kiro
-assert_equals "0" "$DOT_FIXTURE_RC" "kiro should resolve to kiro-cli"
-assert_contains "kiro-cli" "$DOT_FIXTURE_OUT" \
-  "the short name 'kiro' should resolve to the kiro-cli binary"
+test_start "ai_chat_resolves_cursor_to_cursor_agent"
+dot_fixture_stub "$FX/stubs" cursor-agent 0
+ai_run ai chat cursor
+assert_equals "0" "$DOT_FIXTURE_RC" "cursor should resolve to cursor-agent"
+assert_contains "cursor-agent" "$DOT_FIXTURE_OUT" \
+  "the roster alias 'cursor' should resolve to the cursor-agent binary"
 
 # ── 2. install survives a failing package manager ──────────────────────────
 test_start "ai_install_continues_past_a_failed_install"

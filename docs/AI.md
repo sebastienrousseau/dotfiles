@@ -95,7 +95,7 @@ dot ai run claude --style architect "optimize my zshrc"
 dot ai run agy --style hardener "audit my ssh config"
 ```
 
-The bridge also injects system details (OS, architecture, date) so the model has the context it needs. Quick aliases ship for the common combinations: `dcla` (Claude + architect), `dagyh` (Antigravity + hardener), `dkir` (Kiro + refactor).
+The bridge also injects system details (OS, architecture, date) so the model has the context it needs. Quick aliases ship for the common combinations: `dcla` (Claude + architect) and `dagyh` (Antigravity + hardener).
 
 The same patterns are herdr-core templates. chezmoi deploys the shipped ones to `~/.config/herdr-core/templates/<name>.md`, so `hc run architect "<task>"` starts Claude Code with that role on every host. `dot ai pattern export --hc` writes them, and any pattern you added, again; `--agent codex` runs them with another agent (one without dot's hooks gets `ready: quiet`).
 
@@ -167,9 +167,6 @@ These tools are not installed for you. Install what you want with `dot ai instal
 - **Runtime (local)**:
   - `ollama` — run local **and** cloud-hosted open models (`ollama signin` for cloud)
 
-- **Cloud (platform)**:
-  - `kiro-cli` — AWS's agentic dev assistant
-
 `dot ai list` shows install status grouped by role and offers an interactive install picker. Status is cached in `~/.cache/dotfiles/ai/status.tsv` for 5 minutes (tune with `DOTFILES_AI_STATUS_TTL`).
 
 ## Run cost and telemetry
@@ -199,7 +196,7 @@ The top-level provider shortcuts were removed in 0.2.538: each now exits 127 and
 | Removed | Use instead |
 |---------|-------------|
 | `dot cl` / `dot claude` | `dot ai run claude` |
-| `dot codex`, `dot copilot`, `dot kimi`, `dot agy`, `dot goose`, `dot kiro`, `dot sgpt`, `dot ollama`, `dot opencode`, `dot aider`, `dot autohand`, `dot vibe`, `dot qwen`, `dot zai` | `dot ai run codex`, `dot ai run copilot`, `dot ai run kimi`, `dot ai run agy`, `dot ai run goose`, `dot ai run kiro`, `dot ai run sgpt`, `dot ai run ollama`, `dot ai run opencode`, `dot ai run aider`, `dot ai run autohand`, `dot ai run vibe`, `dot ai run qwen`, `dot ai run zai` |
+| `dot codex`, `dot copilot`, `dot kimi`, `dot agy`, `dot goose`, `dot sgpt`, `dot ollama`, `dot opencode`, `dot aider`, `dot autohand`, `dot vibe`, `dot qwen`, `dot zai` | `dot ai run codex`, `dot ai run copilot`, `dot ai run kimi`, `dot ai run agy`, `dot ai run goose`, `dot ai run sgpt`, `dot ai run ollama`, `dot ai run opencode`, `dot ai run aider`, `dot ai run autohand`, `dot ai run vibe`, `dot ai run qwen`, `dot ai run zai` |
 | `dot ai-setup` | `dot ai install --interactive` |
 | `dot ai-query` | `dot ai ask` |
 | `dot patterns` | `dot ai pattern` |

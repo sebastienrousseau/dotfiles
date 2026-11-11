@@ -68,7 +68,7 @@ _ai_version_newer() {
 # above the 1.x line pinned, and GitHub never marks v2 latest. A short name
 # is resolved through the backend mise installs it with: `mise latest
 # opencode` follows the registry's first backend (npm:@opencode/cli), not
-# the aqua build pinned. Plugin backends (asdf:kiro-cli) are looked up by
+# the aqua build pinned. Plugin backends (asdf:*, vfox:*) are looked up by
 # the short name: mise reports "plugin not installed" for their backend name.
 _ai_latest() {
   local backend="" major="${2#v}"

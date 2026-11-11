@@ -51,7 +51,7 @@ check_dot_command_docs() {
 check_ai_provider_docs() {
   local provider=""
 
-  for provider in claude copilot kimi agy kiro sgpt ollama opencode aider; do
+  for provider in claude copilot kimi agy sgpt ollama opencode aider; do
     record_doc_check "dot ai run $provider in AI.md" "\`dot ai run $provider" "$AI_DOC"
   done
 }
