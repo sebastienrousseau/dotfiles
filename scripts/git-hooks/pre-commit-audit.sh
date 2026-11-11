@@ -38,6 +38,9 @@ echo -n "   🔍 Scanning for secrets... "
 SENSITIVE_PATTERNS="(GITHUB_TOKEN|API_KEY|SECRET|password|private_key|AKIA[0-9A-Z]{16})[\"']?[[:space:]]*(=[^=]|:[[:space:]]*[^-=#[:space:]])"
 # Exclusions list for legitimate variable checks or documentation
 SECRET_EXCLUDES="test_|assertions.sh|.pre-commit|README|CHANGELOG|FEATURES.md|docs/|install/lib/|.chezmoitemplates/|mcp-doctor.sh|\.github/workflows/"
+# detect-secrets' baseline holds only SHA-1 hashes of its findings, under
+# "hashed_secret", and re-sorts them on every refresh; it is not scanned.
+SECRET_EXCLUDES="${SECRET_EXCLUDES}|^\.secrets\.baseline:"
 # A value read from somewhere else is not a secret written down: a shell
 # variable ("$key", ${KEY}) or a call (os.environ.get(...), load_token()).
 SECRET_KEYS="(GITHUB_TOKEN|API_KEY|SECRET|password|private_key)"

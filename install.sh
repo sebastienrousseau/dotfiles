@@ -117,7 +117,7 @@ apply_minimal_profile_overrides() {
 # Charm apt key, pinned against a swapped gpg.key: primary fingerprint read from
 # https://repo.charm.sh/apt/gpg.key on 2026-10-08 (the old C026D31B... pin
 # matched no served key). If Charm rotates, update it and note it in CHANGELOG.md.
-CHARM_GPG_EXPECTED_FPR="ED927B38BE981E53CA09153D03BBF595D4DFD35C"
+CHARM_GPG_EXPECTED_FPR="ED927B38BE981E53CA09153D03BBF595D4DFD35C" # pragma: allowlist secret
 
 # charm_keyring_verify <keyring>: apt trusts every primary key in a signed-by
 # file, so it must hold exactly the pinned one; else remove it and return 1.

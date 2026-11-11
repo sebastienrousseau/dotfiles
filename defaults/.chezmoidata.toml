@@ -125,7 +125,7 @@ git-delta = "0.20.1"
 # Tmux Plugin Manager: the commit of tag v3.1.0
 # (https://api.github.com/repos/tmux-plugins/tpm/tags)
 [tmux_plugins]
-tpm_commit = "7bdb7ca33c9cc6440a600202b50142f401b6fe21"
+tpm_commit = "7bdb7ca33c9cc6440a600202b50142f401b6fe21" # pragma: allowlist secret
 
 # AI CLIs, mise package = "version": the newest release at least seven days
 # old (npm registry `time`, PyPI upload time, GitHub release date). Read by
