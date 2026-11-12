@@ -127,17 +127,6 @@ _aiu_npm() {
   if mise exec node -- npm update -g --audit=false >/dev/null 2>&1; then ok; else fail "npm update -g failed"; fi
 }
 
-_aiu_kiro() {
-  step "Kiro CLI"
-  if [[ "$(uname -s)" == "Darwin" ]]; then
-    skip "managed by Kiro app bundle via mise plugin"
-  elif mise upgrade kiro-cli >/dev/null 2>&1; then
-    ok
-  else
-    skip "mise plugin update unavailable"
-  fi
-}
-
 # Pipx-installed tools (aider)
 _aiu_pipx() {
   command -v pipx >/dev/null 2>&1 || return 0
@@ -149,7 +138,6 @@ _aiu_packages() {
   _aiu_brew
   if command -v mise >/dev/null 2>&1; then
     _aiu_npm
-    _aiu_kiro
   fi
   _aiu_pipx
 }
@@ -302,7 +290,6 @@ _aiu_summary() {
   printf '%b\n' "
 ${BOLD}System Version Status:${NC}"
   printf "%b%-12s%b %s\n" "${GRAY}" "Node:" "${NC}" "$(_aiu_version - node -v)"
-  printf "%b%-12s%b %s\n" "${GRAY}" "Kiro:" "${NC}" "$(_aiu_version NF kiro-cli --version)"
   printf "%b%-12s%b %s\n" "${GRAY}" "Ollama:" "${NC}" "$(_aiu_version NF ollama --version)"
   printf "%b%-12s%b %s\n" "${GRAY}" "Pipx:" "${NC}" "$(_aiu_version - pipx --version)"
   printf "%b%-12s%b %s\n" "${GRAY}" "Mise:" "${NC}" "$(_aiu_version 1 mise --version)"

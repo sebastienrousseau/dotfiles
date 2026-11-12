@@ -270,9 +270,9 @@ flag|ai update|check|||List the pins with a newer release; change nothing
 flag|ai start|bg|||In its own terminal (herdr-core or tmux)
 flag|ai start|name||name|With --bg: its name (default <agent>-<n>)
 flag|ai start|cwd||dir|With --bg: the directory it starts in
-arg|ai start|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
+arg|ai start|claude codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider autohand vibe qwen zai||
 flag|ai run|style|p|pattern|Steering pattern (--pattern is the old name)
-arg|ai run|claude codex copilot goose crush amp cursor-agent grok kimi agy kiro sgpt ollama opencode aider autohand vibe qwen zai||
+arg|ai run|claude codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider autohand vibe qwen zai||
 flag|ai check|on||host|Run the check on a host in fleet.toml
 flag|ai cost show|by||group|Group by agent, host, day, model or session (default agent)
 flag|ai cost show|session||id|One session (an id or a unique prefix), by model
@@ -336,7 +336,6 @@ alias|copilot|removed|ai run copilot|0.2.538
 alias|kimi|removed|ai run kimi|0.2.538
 alias|agy|removed|ai run agy|0.2.538
 alias|goose|removed|ai run goose|0.2.538
-alias|kiro|removed|ai run kiro|0.2.538
 alias|sgpt|removed|ai run sgpt|0.2.538
 alias|ollama|removed|ai run ollama|0.2.538
 alias|opencode|removed|ai run opencode|0.2.538

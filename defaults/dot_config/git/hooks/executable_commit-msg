@@ -96,12 +96,6 @@ detect_ai_agent() {
     return
   fi
 
-  # Kiro (AWS)
-  if [[ -n "${KIRO_SESSION:-}" || -n "${KIRO_CLI:-}" ]]; then
-    echo "Kiro:kiro-cli"
-    return
-  fi
-
   # Autohand Code
   if [[ -n "${AUTOHAND_SESSION:-}" ]]; then
     echo "Autohand:autohand-code"

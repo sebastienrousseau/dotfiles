@@ -28,7 +28,7 @@ cov_setup_sandbox
 
 MB="$DOTFILES_COV_TMPDIR/bin"
 AI_TOOLS=(claude codex copilot goose crush amp cursor-agent grok opencode aider
-  kimi autohand vibe qwen zai agy sgpt ollama kiro-cli dot-ai-serve dot-ai-proxy
+  kimi autohand vibe qwen zai agy sgpt ollama dot-ai-serve dot-ai-proxy
   dot-ai-log dot-ai-tui)
 
 mk_tool() {

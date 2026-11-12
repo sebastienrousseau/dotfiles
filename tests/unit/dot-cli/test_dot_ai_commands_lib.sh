@@ -41,7 +41,7 @@ STUB
 }
 
 for t in claude codex copilot agy goose crush amp cursor-agent grok kimi \
-  kiro-cli sgpt ollama opencode aider autohand vibe qwen zai \
+  sgpt ollama opencode aider autohand vibe qwen zai \
   dot-ai-proxy dot-ai-serve mise; do
   stub "$t"
 done
@@ -110,8 +110,6 @@ called "kimi -p hello --quiet"
 test_start "stdin_style_providers_pipe_the_prompt"
 ai _ai_invoke_provider agy "hello"
 called "agy chat"
-ai _ai_invoke_provider kiro "hello"
-called "kiro-cli chat"
 ai _ai_invoke_provider sgpt "hello"
 called "sgpt --chat shell-gpt"
 ai _ai_invoke_provider ollama "hello"
@@ -243,7 +241,7 @@ PATH="$NONE" ai cmd_ai_doctor
 assert_equals 0 "$RC" "rc"
 out_has "not installed (the gateway engine needs it)" "engine missing"
 out_has "dot-ai-serve not deployed" "gateway missing"
-out_has "0/19 tools installed" "empty roster"
+out_has "0/18 tools installed" "empty roster"
 out_has "0/5 suite tools" "empty ecosystem"
 
 # ── install ─────────────────────────────────────────────────────────────

@@ -320,7 +320,6 @@
        "grok",
        "kimi",
        "agy",
-       "kiro",
        "sgpt",
        "ollama",
        "opencode",
@@ -358,7 +357,6 @@
        "grok",
        "kimi",
        "agy",
-       "kiro",
        "sgpt",
        "ollama",
        "opencode",
@@ -608,12 +606,6 @@
     {
      "name": "goose",
      "target": "ai run goose",
-     "kind": "removed",
-     "until": "0.2.538"
-    },
-    {
-     "name": "kiro",
-     "target": "ai run kiro",
      "kind": "removed",
      "until": "0.2.538"
     },

@@ -98,6 +98,14 @@ If a future test introduces order-coupling (writes shared state at
 start, expects it at end), the invariance regression test fails and
 the offending file should be refactored to be hermetic.
 
+A file that times something against a wall-clock budget carries
+`# test-lane: quiet` in its first 20 lines. In parallel mode the runner
+starts it only after the pool has drained, one file at a time, so the
+rest of the suite does not load the machine past what it measures
+(`tests/regression/test_gate_integrity.sh`, which runs the real perf
+gate, is the reason this exists). Use it for timing only: a file that
+merely needs isolation should be made hermetic instead.
+
 `TEST_JOBS=N` is the env-var equivalent of `--jobs N` and lets CI
 configure the default without touching the command line.
 

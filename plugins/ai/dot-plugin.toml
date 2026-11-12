@@ -6,7 +6,7 @@
 schema = "cli/manifest.v1"
 name = "ai"
 domain = "ai"
-version = "0.2.543"
+version = "0.2.544"
 summary = "install, route and run coding agents"
 default = "tui"
 
@@ -81,7 +81,7 @@ summary = "With --bg: the directory it starts in"
 
 [commands.args]
 # roster: values
-values = ["claude", "codex", "copilot", "goose", "crush", "amp", "cursor-agent", "grok", "kimi", "agy", "kiro", "sgpt", "ollama", "opencode", "aider", "autohand", "vibe", "qwen", "zai"]
+values = ["claude", "codex", "copilot", "goose", "crush", "amp", "cursor-agent", "grok", "kimi", "agy", "sgpt", "ollama", "opencode", "aider", "autohand", "vibe", "qwen", "zai"]
 
 [[commands]]
 verb = "run"
@@ -97,7 +97,7 @@ summary = "Steering pattern (--pattern is the old name)"
 
 [commands.args]
 # roster: values
-values = ["claude", "codex", "copilot", "goose", "crush", "amp", "cursor-agent", "grok", "kimi", "agy", "kiro", "sgpt", "ollama", "opencode", "aider", "autohand", "vibe", "qwen", "zai"]
+values = ["claude", "codex", "copilot", "goose", "crush", "amp", "cursor-agent", "grok", "kimi", "agy", "sgpt", "ollama", "opencode", "aider", "autohand", "vibe", "qwen", "zai"]
 
 [[commands]]
 object = "gateway"
@@ -297,12 +297,6 @@ until = "0.2.538"
 [[aliases]]
 name = "goose"
 target = "ai run goose"
-kind = "removed"
-until = "0.2.538"
-
-[[aliases]]
-name = "kiro"
-target = "ai run kiro"
 kind = "removed"
 until = "0.2.538"
 

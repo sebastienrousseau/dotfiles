@@ -1,6 +1,6 @@
 # Active profile - change this to switch configurations
-dotfiles_version = "0.2.543"
-previous_dotfiles_version = "0.2.542"
+dotfiles_version = "0.2.544"
+previous_dotfiles_version = "0.2.543"
 profile = "laptop"
 
 # Machine preset — set per-host in ~/.config/chezmoi/chezmoi.toml:
@@ -131,6 +131,11 @@ tpm_commit = "7bdb7ca33c9cc6440a600202b50142f401b6fe21" # pragma: allowlist secr
 # old (npm registry `time`, PyPI upload time, GitHub release date). Read by
 # install/provision/run_onchange_15-ai-cli-tools.sh.tmpl and, at run time,
 # by plugins/ai/libexec/ai/ai-install.sh; `dot system update` lists newer releases to bump to.
+# The same versions pin defaults/dot_config/mise/conf.d/00-dotfiles.toml,
+# so `mise upgrade` keeps them (test_mise_conf_ai_pins.sh holds the two
+# together). First-party tools (github:sebastienrousseau/*) are pinned to
+# the release verified here, without the age gate: the gate guards against
+# a third party's compromised release, and these are our own.
 [ai_tools]
 "npm:@openai/codex" = "0.162.1"
 "npm:@github/copilot" = "1.0.95"
@@ -138,19 +143,16 @@ tpm_commit = "7bdb7ca33c9cc6440a600202b50142f401b6fe21" # pragma: allowlist secr
 "npm:autohand-cli" = "0.9.8"
 "npm:@qwen-code/qwen-code" = "0.25.1"
 "npm:@guizmo-ai/zai-cli" = "0.3.5"
-"npm:@charmland/crush" = "0.98.1"
+"aqua:charmbracelet/crush" = "0.98.1"
 "pipx:aider-chat" = "0.86.2"
 "aqua:ollama/ollama" = "0.40.3"
 "opencode" = "1.19.0"
-# kiro-cli publishes no release dates; 2.29.1 (Homebrew cask, 2026-10-11) was the
-# newest past the 7-day age gate. On macOS the mise plugin copies the cask build.
-"kiro-cli" = "2.29.1"
-"github:sebastienrousseau/corralctl" = "0.0.52"
-"github:sebastienrousseau/passmcp" = "0.0.7"
-"github:sebastienrousseau/passmcp-graph" = "0.0.7"
-"github:sebastienrousseau/passmcp-lsp" = "0.0.7"
-"github:sebastienrousseau/passmcp-server" = "0.0.7"
-"github:sebastienrousseau/draft" = "0.0.39"
+"github:sebastienrousseau/corralctl" = "0.0.54"
+"github:sebastienrousseau/passmcp" = "0.0.8"
+"github:sebastienrousseau/passmcp-graph" = "0.0.8"
+"github:sebastienrousseau/passmcp-lsp" = "0.0.8"
+"github:sebastienrousseau/passmcp-server" = "0.0.8"
+"github:sebastienrousseau/draft" = "0.0.45"
 "aqua:herdrdev/herdr" = "0.9.5"
 
 # ============================================================================

@@ -67,7 +67,6 @@ autohand AI:AUTOHAND
 aider AI:AIDER
 gemini AI:GEMINI
 kimi AI:KIMI
-kiro-cli AI:KIRO
 ollama AI:OLLAMA
 sgpt AI:SHELL-GPT
 qwen AI:QWEN

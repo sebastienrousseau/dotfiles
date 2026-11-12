@@ -74,8 +74,9 @@ bash "$REPO_ROOT/tools/docs/build-manual-site.sh" --out "$work/out/manual"
 # canonical page URLs, and no per-page sitemap or robots.txt.
 python3 "$REPO_ROOT/tools/docs/finalize-site.py" "$work/out" "$SITE_URL"
 # The custom-domain CNAME, and the module registry index `dot registry`
-# fetches from the site root (with its minisign signature once one exists).
-cp "$REPO_ROOT"/docs/{CNAME,registry.json*} "$work/out/"
+# fetches from the site root (with its minisign signature once one exists),
+# and the module archives its entries pin (tools/registry/build_modules.py).
+cp -R "$REPO_ROOT"/docs/{CNAME,registry.json*,registry} "$work/out/"
 
 rm -rf "$OUT"
 mkdir -p "$(dirname "$OUT")"

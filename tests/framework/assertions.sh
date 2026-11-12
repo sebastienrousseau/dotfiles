@@ -23,7 +23,15 @@ CURRENT_TEST=""
 # the code under test does. DOTFILES_AI=1 exported by an interactive shell
 # made every rollback test call the real `dot ai claude`. A test that
 # exercises one of these sets it explicitly after sourcing this file.
-unset DOTFILES_AI
+# DOTFILES_DIR is the shell's own checkout (00-core-paths.sh exports it):
+# test_runner.sh drops it, and so must a test file run on its own.
+unset DOTFILES_AI DOTFILES_DIR
+# Nor may the developer's XDG base directories. A test that sandboxed only
+# HOME still passed an exported XDG_CACHE_HOME through, and prewarm.sh wrote
+# shell init caches carrying the test's PATH into the real ~/.cache. With
+# these unset, code resolves them from the HOME the test sets, as on CI
+# runners, which export none; a test that needs one sets it after sourcing.
+unset XDG_CACHE_HOME XDG_DATA_HOME XDG_CONFIG_HOME XDG_STATE_HOME XDG_RUNTIME_DIR
 # A test run from a hook in a linked worktree must not write into the real
 # repository; see git_env.sh.
 # shellcheck source=git_env.sh disable=SC1091

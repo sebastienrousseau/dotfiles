@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+# dot-claude-statusline — Claude Code's status line with what dot enforces:
+#   Opus · acme · apply · $1.23 of $5.00
+# the model, the folder, dot's agent mode and the session's cost against the
+# AI policy's session budget, yellow from 80% and red at 100% (the point
+# where dot cli hook check blocks the next prompt). Claude Code runs it
+# with the session as JSON on stdin; wire it in ~/.claude/settings.json:
+#   "statusLine": {"type": "command", "command": "~/.local/bin/dot-claude-statusline"}
+# It reads files only, never runs dot, and always exits 0.
+
+set -uo pipefail
+
+policy="${DOT_AI_POLICY:-${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/ai-policy.toml}"
+state="${AGENT_STATE_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/agent-mode.env}"
+
+# toml_value TABLE KEY: KEY's bare value in [TABLE] of the policy ("" is
+# the top level), quotes dropped.
+toml_value() {
+  [[ -f "$policy" ]] || return 0
+  awk -v t="$1" -v k="$2" '
+    /^[ \t]*\[/ { gsub(/[ \t\[\]]/, ""); cur = $0; next }
+    cur == t && $0 ~ "^[ \t]*" k "[ \t]*=" {
+      sub(/^[^=]*=[ \t]*/, ""); sub(/[ \t]*#.*$/, ""); gsub(/"/, ""); print; exit
+    }' "$policy"
+}
+
+# mode: dot's agent mode, as dot-policy resolves it.
+mode() {
+  local m="${DOT_AGENT_PROFILE:-}"
+  [[ -n "$m" || ! -f "$state" ]] || m="$(sed -n 's/^DOT_AGENT_PROFILE=//p' "$state" | tail -n 1)"
+  [[ -n "$m" ]] || m="$(toml_value "" default_mode)"
+  printf '%s' "$m"
+}
+
+# cost USD CAP: "$1.23", or "$1.23 of $5.00" coloured by how much is spent.
+cost() {
+  local colour
+  [[ -n "$1" ]] || return 0
+  if [[ -z "$2" ]] || ! awk -v c="$2" 'BEGIN { exit !(c > 0) }'; then
+    printf '$%.2f' "$1"
+    return 0
+  fi
+  colour="$(awk -v u="$1" -v c="$2" 'BEGIN { print (u >= c ? 31 : (u >= 0.8 * c ? 33 : "")) }')"
+  if [[ -n "$colour" && -z "${NO_COLOR:-}" ]]; then
+    printf '\033[%sm$%.2f of $%.2f\033[0m' "$colour" "$1" "$2"
+  else
+    printf '$%.2f of $%.2f' "$1" "$2"
+  fi
+}
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo "dot status line: needs jq"
+  exit 0
+fi
+session="$(jq -r '[.model.display_name // "", (.workspace.current_dir // .cwd // "" | sub(".*/"; "")),
+  (.cost.total_cost_usd // "" | tostring)] | join("\t")' 2>/dev/null)" || session=""
+IFS=$'\t' read -r model folder usd <<<"$session"
+out=""
+for part in "${model:-}" "${folder:-}" "$(mode)" "$(cost "${usd:-}" "$(toml_value budget session_usd)")"; do
+  [[ -z "$part" ]] || out="${out:+$out · }$part"
+done
+printf '%s\n' "$out"

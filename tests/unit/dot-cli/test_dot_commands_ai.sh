@@ -140,9 +140,8 @@ sections="$(grep -E '^== ' "$OUT")"
 assert_equals "== Agents (autonomous) ==
 == Coding (interactive) ==
 == General (prompt-based) ==
-== Runtime (local) ==
-== Cloud (platform) ==" "$sections" "five groups in order"
-order="$(grep -oE '^== .* ==$|Kimi CLI|Aider|Shell-GPT|Ollama|Kiro CLI' "$OUT")"
+== Runtime (local) ==" "$sections" "four groups in order; an empty one is not shown"
+order="$(grep -oE '^== .* ==$|Kimi CLI|Aider|Shell-GPT|Ollama' "$OUT")"
 assert_equals "== Agents (autonomous) ==
 Kimi CLI
 == Coding (interactive) ==
@@ -150,9 +149,7 @@ Aider
 == General (prompt-based) ==
 Shell-GPT
 == Runtime (local) ==
-Ollama
-== Cloud (platform) ==
-Kiro CLI" "$order" "each tool sits under its group"
+Ollama" "$order" "each tool sits under its group"
 
 test_start "ai_status_caches_presence_and_versions"
 assert_file_exists "$CACHE" "cold run writes the shared status cache"
@@ -203,7 +200,7 @@ else
   mkdir -p "$(dirname "$CACHE")"
   : >"$CACHE"
   for b in claude codex goose crush amp cursor-agent grok kimi opencode \
-    autohand vibe qwen zai sgpt agy kiro-cli; do
+    autohand vibe qwen zai sgpt agy; do
     printf '%s\t0\t\n' "$b" >>"$CACHE"
   done
   printf 'copilot\t1\t1.0.11\naider\t1\t0.86.1\nollama\t1\t0.12.0\n' >>"$CACHE"

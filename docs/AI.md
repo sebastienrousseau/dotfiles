@@ -95,7 +95,7 @@ dot ai run claude --style architect "optimize my zshrc"
 dot ai run agy --style hardener "audit my ssh config"
 ```
 
-The bridge also injects system details (OS, architecture, date) so the model has the context it needs. Quick aliases ship for the common combinations: `dcla` (Claude + architect), `dagyh` (Antigravity + hardener), `dkir` (Kiro + refactor).
+The bridge also injects system details (OS, architecture, date) so the model has the context it needs. Quick aliases ship for the common combinations: `dcla` (Claude + architect) and `dagyh` (Antigravity + hardener).
 
 The same patterns are herdr-core templates. chezmoi deploys the shipped ones to `~/.config/herdr-core/templates/<name>.md`, so `hc run architect "<task>"` starts Claude Code with that role on every host. `dot ai pattern export --hc` writes them, and any pattern you added, again; `--agent codex` runs them with another agent (one without dot's hooks gets `ready: quiet`).
 
@@ -167,9 +167,6 @@ These tools are not installed for you. Install what you want with `dot ai instal
 - **Runtime (local)**:
   - `ollama` — run local **and** cloud-hosted open models (`ollama signin` for cloud)
 
-- **Cloud (platform)**:
-  - `kiro-cli` — AWS's agentic dev assistant
-
 `dot ai list` shows install status grouped by role and offers an interactive install picker. Status is cached in `~/.cache/dotfiles/ai/status.tsv` for 5 minutes (tune with `DOTFILES_AI_STATUS_TTL`).
 
 ## Run cost and telemetry
@@ -199,7 +196,7 @@ The top-level provider shortcuts were removed in 0.2.538: each now exits 127 and
 | Removed | Use instead |
 |---------|-------------|
 | `dot cl` / `dot claude` | `dot ai run claude` |
-| `dot codex`, `dot copilot`, `dot kimi`, `dot agy`, `dot goose`, `dot kiro`, `dot sgpt`, `dot ollama`, `dot opencode`, `dot aider`, `dot autohand`, `dot vibe`, `dot qwen`, `dot zai` | `dot ai run codex`, `dot ai run copilot`, `dot ai run kimi`, `dot ai run agy`, `dot ai run goose`, `dot ai run kiro`, `dot ai run sgpt`, `dot ai run ollama`, `dot ai run opencode`, `dot ai run aider`, `dot ai run autohand`, `dot ai run vibe`, `dot ai run qwen`, `dot ai run zai` |
+| `dot codex`, `dot copilot`, `dot kimi`, `dot agy`, `dot goose`, `dot sgpt`, `dot ollama`, `dot opencode`, `dot aider`, `dot autohand`, `dot vibe`, `dot qwen`, `dot zai` | `dot ai run codex`, `dot ai run copilot`, `dot ai run kimi`, `dot ai run agy`, `dot ai run goose`, `dot ai run sgpt`, `dot ai run ollama`, `dot ai run opencode`, `dot ai run aider`, `dot ai run autohand`, `dot ai run vibe`, `dot ai run qwen`, `dot ai run zai` |
 | `dot ai-setup` | `dot ai install --interactive` |
 | `dot ai-query` | `dot ai ask` |
 | `dot patterns` | `dot ai pattern` |
@@ -254,6 +251,8 @@ session_usd = 5               # one session
 The active mode is the one `dot agent mode set` chose. `dot cli hook install` wires `dot cli hook check` into Claude Code (`PreToolUse` and `UserPromptSubmit`), Gemini CLI (`BeforeTool` and `BeforeAgent`) and Codex (`~/.codex/hooks.json`, `PreToolUse` and `UserPromptSubmit`; trust it once in Codex's `/hooks`). A denied call reaches the agent with the reason, such as `dot ai policy (mode ask): tool Write (write) is not allowed`. `dot ai policy show` prints the rules in force for an agent (`--agent codex`) in the active mode, or another (`--mode apply`), and `dot ai policy check` validates the file and names the active mode.
 
 **Budgets.** With a `[budget]`, each prompt is checked before the agent works on it, against what `dot ai cost show` reports: today's spend across every session (`daily_usd`) and the session's own (`session_usd`), at API list prices; 0 or a missing key is no cap. From 80% of a cap the prompt goes ahead with a warning; at 100% it is blocked, with the reason, such as `dot ai policy: the daily budget of $20.00 is spent ($20.41 today)`, and nothing is sent to the model. Raise the cap, or wait for tomorrow. Budgets need the cockpit binary (`dot-ai-tui`), which reads the spend; a budget whose spend cannot be read blocks every prompt, as a policy that cannot be checked does. Codex and Gemini CLI read the same verdicts in their own forms; Claude Code's was tried with the real CLI (2.1.319), theirs were not. The gateway keeps its own daily cap (`DOT_AI_DAILY_BUDGET`).
+
+**Presets and the status line.** Two signed registry modules ([REGISTRY.md](operations/REGISTRY.md)) build on this. `dot cli install ai-policy-pack --yes` puts three ready policies in `~/.config/dotfiles/ai-policy.d/`: `standard` (apply mode works freely inside the project; secrets, force pushes, `sudo` and piped installers are denied in every mode), `strict` (apply writes only inside the project, runs no network commands or MCP tools, and fetches only from GitHub) and `regulated` (audit mode by default; apply runs only allow-listed build and test commands, reaches no network and uses no MCP tools). Each defines every agent mode and a budget; none is enforced until you copy it to `~/.config/dotfiles/ai-policy.toml`. `dot cli install claude-statusline --yes` puts `dot-claude-statusline` in `~/.local/bin`: a Claude Code status line showing the model, the folder, the active mode and the session's cost against `session_usd`, yellow from 80% and red at 100%, where the next prompt is blocked.
 
 It fails closed: a file with an error or an unknown key, a mode it has no rules for, or a missing `dot-policy` binary (chezmoi builds it when Go is installed) denies every tool call, and blocks every prompt, until fixed. It is a guardrail, not a sandbox: commands are split at `;`, `&&`, `|` and `$(`, but a script the agent writes and runs is not looked into.
 

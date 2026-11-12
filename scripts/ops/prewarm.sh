@@ -61,7 +61,11 @@ warm_tool() {
 }
 
 ui_section "Zsh"
-warm_tool "mise" "mise activate zsh" "zsh" "zsh"
+# Not mise: its activation embeds the PATH of the shell that ran it. The
+# zshrc writes mise-init.zsh itself with that PATH replaced by $PATH
+# (_cached_eval_unpin_path); a copy cached here would pin this script's
+# PATH into every later shell. Clear a stale one so the next shell rewrites it.
+rm -f "$CACHE_DIR/zsh/mise-init.zsh" "$CACHE_DIR/zsh/mise-init.zsh.zwc" "$CACHE_DIR/zsh/mise-init.zsh.bin"
 warm_tool "starship" "starship init zsh" "zsh" "zsh"
 warm_tool "zoxide" "zoxide init zsh" "zsh" "zsh"
 warm_tool "atuin" "atuin init zsh --disable-up-arrow" "zsh" "zsh"

@@ -129,7 +129,6 @@ Providers tracked today (the agents in `plugins/ai/roster.toml`):
 | ZAI | `zai` | yes | no |
 | Shell-GPT | `sgpt` | yes | no |
 | Ollama (local) | `ollama` | yes | n/a (no cost) |
-| Kiro CLI | `kiro-cli` | yes | no |
 
 ## Future work
 

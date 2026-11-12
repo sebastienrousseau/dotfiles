@@ -20,7 +20,6 @@ provider_label() {
     *aider*) printf 'AI:AIDER' ;;
     *gemini*) printf 'AI:GEMINI' ;;
     *kimi*) printf 'AI:KIMI' ;;
-    *kiro-cli* | *kiro*) printf 'AI:KIRO' ;;
     *ollama*) printf 'AI:OLLAMA' ;;
     *sgpt* | *shell-gpt*) printf 'AI:SHELL-GPT' ;;
     *qwen*) printf 'AI:QWEN' ;;
@@ -87,7 +86,7 @@ launch_provider() {
       launch_command="exec dot ai"
       ;;
     # roster: case
-    claude | codex | copilot | goose | crush | amp | cursor-agent | grok | kimi | agy | kiro | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
+    claude | codex | copilot | goose | crush | amp | cursor-agent | grok | kimi | agy | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
       title="ai-$provider"
       launch_command="exec dot ai chat $provider"
       ;;

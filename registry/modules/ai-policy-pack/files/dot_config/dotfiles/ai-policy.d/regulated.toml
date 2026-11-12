@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+# ai-policy-pack: regulated — for controlled environments: agents read and
+# write only inside the project, run an allow-listed set of build and test
+# commands, reach no network, use no MCP tools, and default to audit mode,
+# which only reads. To use it:
+#   cp ~/.config/dotfiles/ai-policy.d/regulated.toml ~/.config/dotfiles/ai-policy.toml
+# then dot ai policy check. Reference: docs/AI.md, "Enforced policy".
+schema = "ai-policy.v1"
+default_mode = "audit"
+
+[mode.audit]
+tools = ["read", "search"]
+paths_allow = ["{cwd}/**"]
+paths_deny = ["**/.env", "**/.env.*", "**/*.pem", "**/*.key"]
+
+[mode.ask]
+tools = ["read", "search"]
+paths_allow = ["{cwd}/**"]
+paths_deny = ["**/.env", "**/.env.*", "**/*.pem", "**/*.key"]
+
+[mode.plan]
+tools = ["read", "search"]
+paths_allow = ["{cwd}/**"]
+paths_deny = ["**/.env", "**/.env.*", "**/*.pem", "**/*.key"]
+
+[mode.apply]
+tools = ["read", "search", "write", "shell"]
+tools_deny = ["mcp__*", "WebFetch", "WebSearch"]
+paths_allow = ["{cwd}/**"]
+paths_deny = ["**/.env", "**/.env.*", "**/*.pem", "**/*.key", "{cwd}/.git/**"]
+hosts_deny = ["*"]
+commands_allow = ["git status*", "git diff*", "git log*", "make *", "make", "npm test*", "go test *", "cargo test*", "pytest*"]
+commands_deny = ["sudo *", "rm -rf *", "git push*", "curl *", "wget *", "ssh *"]
+
+[budget]
+daily_usd = 10
+session_usd = 2

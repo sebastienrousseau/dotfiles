@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/sebastienrousseau/dotfiles/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/dotfiles/ci.yml?style=for-the-badge&logo=githubactions&logoColor=white" alt="Build" /></a>
-  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.543-blue?style=for-the-badge&logo=semanticrelease&logoColor=white" alt="Version" /></a>
+  <a href="https://github.com/sebastienrousseau/dotfiles/releases/latest"><img src="https://img.shields.io/badge/Version-v0.2.544-blue?style=for-the-badge&logo=semanticrelease&logoColor=white" alt="Version" /></a>
   <a href="https://www.npmjs.com/package/@sebastienrousseau/dotfiles"><img src="https://img.shields.io/npm/v/@sebastienrousseau/dotfiles?style=for-the-badge&logo=npm&logoColor=white&label=npm" alt="npm" /></a>
   <a href="https://doc.dotfiles.io/"><img src="https://img.shields.io/badge/Manual-doc.dotfiles.io-66c2a5?style=for-the-badge&labelColor=555555" alt="Manual" /></a>
   <a href="https://github.com/sebastienrousseau/dotfiles/releases"><img src="https://img.shields.io/github/downloads/sebastienrousseau/dotfiles/total?style=for-the-badge&logo=github&logoColor=white" alt="Downloads" /></a>
@@ -83,11 +83,11 @@ release process are documented in
 
 ```bash
 curl -fsSL -o /tmp/dotfiles-install.sh \
-  https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.543/dotfiles-install-0.2.543.sh
+  https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.544/dotfiles-install-0.2.544.sh
 if command -v sha256sum >/dev/null 2>&1; then
-  echo "307783ef6a7f874bfed1405c187bb6be059064fc08824e00b34ea87e87bc2b11  /tmp/dotfiles-install.sh" | sha256sum -c -
+  echo "821f29e680c879716acfe23332e93ab7a18d108c4ee0b2b1e241518dcba1b0ab  /tmp/dotfiles-install.sh" | sha256sum -c -
 else
-  echo "307783ef6a7f874bfed1405c187bb6be059064fc08824e00b34ea87e87bc2b11  /tmp/dotfiles-install.sh" | shasum -a 256 -c -
+  echo "821f29e680c879716acfe23332e93ab7a18d108c4ee0b2b1e241518dcba1b0ab  /tmp/dotfiles-install.sh" | shasum -a 256 -c -
 fi
 bash /tmp/dotfiles-install.sh
 ```
@@ -107,10 +107,10 @@ directory. The archive
 carries SLSA build provenance (keyless, via Fulcio + Rekor):
 
 ```bash
-gh release download v0.2.543 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
-gh attestation verify dot-0.2.543.tar.gz --repo sebastienrousseau/dotfiles
-tar -xzf dot-0.2.543.tar.gz
-make -C dot-0.2.543 install PREFIX=/usr/local
+gh release download v0.2.544 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
+gh attestation verify dot-0.2.544.tar.gz --repo sebastienrousseau/dotfiles
+tar -xzf dot-0.2.544.tar.gz
+make -C dot-0.2.544 install PREFIX=/usr/local
 ```
 
 [`release-install-smoke.yml`](.github/workflows/release-install-smoke.yml)
@@ -303,7 +303,7 @@ and [`AGENTS.md`](AGENTS.md)) on every push to `main`.
 | **`dot mcp`** ([`docs/security/MCP_POLICY.md`](docs/security/MCP_POLICY.md)) | MCP policy, supply-chain, and registry audit over `mcp-policy.json` / `mcp-registry.json` | Keep Model Context Protocol servers inside an allowlist before an agent touches them. |
 | **`dot-mcp`** ([`defaults/dot_local/share/dot-mcp`](defaults/dot_local/share/dot-mcp)) | Go stdio MCP server behind `dot mcp serve` — JSON-RPC 2.0, four read-only tools, five resources | Let an MCP client audit this workstation's policy, agent mode, attestation and drift without being able to change it. |
 | **`dot-sys`** ([`lib/wasm-tools`](lib/wasm-tools/README.md)) | Rust crate built for `wasm32-wasip1` and run under `wasmtime` | `dot attest verify`: check a workstation evidence record in a sandbox with no filesystem, network or environment, so the verdict does not depend on the machine being reviewed. |
-| **Module registry** ([`docs/operations/REGISTRY.md`](docs/operations/REGISTRY.md)) | JSON index of reusable dotfile modules, schema at [`docs/schema/dot-registry-v1.json`](docs/schema/dot-registry-v1.json) | `dot cli list --available` and `dot cli install` with SHA-256-verified archives and a chezmoi preview before apply. The published index has no modules yet, and `--available` lists the whole index (a search term is ignored). |
+| **Module registry** ([`docs/operations/REGISTRY.md`](docs/operations/REGISTRY.md)) | JSON index of reusable dotfile modules, schema at [`docs/schema/dot-registry-v1.json`](docs/schema/dot-registry-v1.json) | `dot cli list --available` and `dot cli install` with SHA-256-verified archives and a chezmoi preview before apply. The published index carries this repository's own modules (`ai-policy-pack`, `claude-statusline`), and `--available` lists the whole index (a search term is ignored). |
 
 ### Install the pieces
 
@@ -312,7 +312,7 @@ and [`AGENTS.md`](AGENTS.md)) on every push to `main`.
 bash /tmp/dotfiles-install.sh  # after the verified download above
 
 # Only the dot CLI, from the attested release archive
-gh release download v0.2.543 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
+gh release download v0.2.544 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
 
 # The Go satellites are (re)built on apply by
 #   defaults/run_onchange_24-build-dot-ui.sh.tmpl
@@ -878,7 +878,7 @@ design is
 
 ```toml
 # defaults/.chezmoidata.toml — repo-wide defaults, schema-checked in CI
-dotfiles_version = "0.2.543"
+dotfiles_version = "0.2.544"
 
 [features]
 alias_wrapper = false   # confirm destructive aliases

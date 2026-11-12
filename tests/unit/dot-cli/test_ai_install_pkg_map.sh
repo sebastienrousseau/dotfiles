@@ -59,11 +59,10 @@ while IFS='=' read -r _bin _want; do
 done <<'MAP'
 codex=npm:@openai/codex
 copilot=npm:@github/copilot
-crush=npm:@charmland/crush
+crush=aqua:charmbracelet/crush
 aider=pipx:aider-chat[uvx_args=--python 3.12]
 opencode=opencode
 ollama=aqua:ollama/ollama
-kiro-cli=kiro-cli
 autohand=npm:autohand-cli
 qwen=npm:@qwen-code/qwen-code
 zai=npm:@guizmo-ai/zai-cli

@@ -458,7 +458,6 @@ def "nu-complete dot ai run" [] {
         { value: "grok", description: "" }
         { value: "kimi", description: "" }
         { value: "agy", description: "" }
-        { value: "kiro", description: "" }
         { value: "sgpt", description: "" }
         { value: "ollama", description: "" }
         { value: "opencode", description: "" }
@@ -493,7 +492,6 @@ def "nu-complete dot ai start" [] {
         { value: "grok", description: "" }
         { value: "kimi", description: "" }
         { value: "agy", description: "" }
-        { value: "kiro", description: "" }
         { value: "sgpt", description: "" }
         { value: "ollama", description: "" }
         { value: "opencode", description: "" }

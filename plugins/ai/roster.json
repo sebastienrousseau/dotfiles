@@ -75,7 +75,7 @@
       "processes": [
         "crush"
       ],
-      "package": "npm:@charmland/crush",
+      "package": "aqua:charmbracelet/crush",
       "native": "",
       "chat": true
     },
@@ -154,23 +154,6 @@
       ],
       "package": "",
       "native": "install_agy_native",
-      "chat": true
-    },
-    {
-      "name": "kiro",
-      "bin": "kiro-cli",
-      "aliases": [
-        "kiro-cli"
-      ],
-      "title": "Kiro CLI",
-      "summary": "AWS's agentic dev assistant",
-      "group": "cloud",
-      "role": "cloud",
-      "processes": [
-        "kiro-cli"
-      ],
-      "package": "kiro-cli",
-      "native": "",
       "chat": true
     },
     {

@@ -1,0 +1,9 @@
+{
+  "name": "ai-policy-pack",
+  "version": "1.0.0",
+  "description": "Three AI policy presets (standard, strict, regulated) for dot's enforced agent policy, with budgets",
+  "repo": "https://github.com/sebastienrousseau/dotfiles/tree/main/registry/modules/ai-policy-pack",
+  "tags": ["ai", "policy", "governance"],
+  "maintainer": "Sebastien Rousseau",
+  "license": "Apache-2.0 OR MIT"
+}

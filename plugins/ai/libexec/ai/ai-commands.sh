@@ -36,7 +36,6 @@ _ai_invoke_provider() {
     cursor | cursor-agent) cursor-agent -p "$full_prompt" || rc=$? ;;
     grok) grok --no-auto-update -p "$full_prompt" || rc=$? ;;
     kimi) kimi -p "$full_prompt" --quiet || rc=$? ;;
-    kiro | kiro-cli) printf "%s" "$full_prompt" | kiro-cli chat || rc=$? ;;
     sgpt) printf "%s" "$full_prompt" | sgpt --chat shell-gpt || rc=$? ;;
     ollama) printf "%s" "$full_prompt" | ollama run "${DOTFILES_OLLAMA_MODEL:-qwen3.5:4b}" || rc=$? ;;
     opencode) opencode run "$full_prompt" || rc=$? ;;

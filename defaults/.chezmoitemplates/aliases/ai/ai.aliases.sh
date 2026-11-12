@@ -21,10 +21,6 @@ alias dkma='dot ai kimi --style architect'
 alias dkmh='dot ai kimi --style hardener'
 alias dkmr='dot ai kimi --style refactor'
 
-alias dkia='dot ai kiro --style architect'
-alias dkih='dot ai kiro --style hardener'
-alias dkir='dot ai kiro --style refactor'
-
 # Aider (AI Pair Programming)
 if command -v aider &>/dev/null; then
   # Note: Use a fixed path for the identity file to avoid shellcheck warnings
@@ -52,14 +48,6 @@ fi
 #fabric (AI Helper)
 if command -v fabric &>/dev/null; then
   alias fab='fabric'
-fi
-
-# Kiro CLI (AI terminal assistant)
-if command -v kiro-cli &>/dev/null; then
-  alias kiro='kiro-cli'
-  alias kiri='kiro-cli'
-  alias kic='kiro-cli chat'
-  alias kit='kiro-cli term'
 fi
 
 # Google Antigravity CLI

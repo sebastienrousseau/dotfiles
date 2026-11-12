@@ -241,7 +241,6 @@ mk shfmt "3.8.0"
 mk pueue "pueue 3.4.1"
 mk sgpt "ShellGPT 1.4.4"
 mk copilot "copilot 1.0.0"
-mk kiro-cli "kiro-cli 0.2.0"
 rc="$(SCRIPT_PATH="$FULL" run "$SMOKE")"
 assert_equals "0" "$rc" "a complete toolchain passes"
 assert_file_contains "$OUT" "All" "the pass summary is printed"
@@ -267,7 +266,7 @@ for f in "$BARE"/*; do ln -sf "$f" "$MISEONLY/$(basename "$f")"; done
 cat >"$MISEONLY/mise" <<EOF
 #!$REAL_BASH
 trap '' PIPE
-[[ "\${1:-}" == ls ]] && printf 'git 2.42.0\nzsh 5.9\nchezmoi 2.47.1\nrg 14.1.0\nbat 0.24\neza 0.18\nzoxide 0.9\nzellij 0.40\nshfmt 3.8\npueue 3.4\nsgpt 1.4\ncopilot 1.0\nkiro-cli 0.2\n' 2>/dev/null
+[[ "\${1:-}" == ls ]] && printf 'git 2.42.0\nzsh 5.9\nchezmoi 2.47.1\nrg 14.1.0\nbat 0.24\neza 0.18\nzoxide 0.9\nzellij 0.40\nshfmt 3.8\npueue 3.4\nsgpt 1.4\ncopilot 1.0\n' 2>/dev/null
 exit 0
 EOF
 chmod +x "$MISEONLY/mise"

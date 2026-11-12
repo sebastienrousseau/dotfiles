@@ -1,0 +1,9 @@
+{
+  "name": "claude-statusline",
+  "version": "1.0.0",
+  "description": "Claude Code status line: model, folder, dot's agent mode, and the session's cost against the AI policy's budget",
+  "repo": "https://github.com/sebastienrousseau/dotfiles/tree/main/registry/modules/claude-statusline",
+  "tags": ["ai", "claude", "statusline"],
+  "maintainer": "Sebastien Rousseau",
+  "license": "Apache-2.0 OR MIT"
+}

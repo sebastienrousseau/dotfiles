@@ -73,7 +73,7 @@ title = "Crush"
 summary = "Charm's glamorous TUI coding agent"
 group = "agents"
 role = "agent"
-package = "npm:@charmland/crush"
+package = "aqua:charmbracelet/crush"
 
 [[tool]]
 name = "amp"
@@ -120,17 +120,6 @@ summary = "Google's Antigravity agent"
 native = "install_agy_native"
 group = "general"
 role = "agent"
-
-[[tool]]
-name = "kiro"
-bin = "kiro-cli"
-title = "Kiro CLI"
-summary = "AWS's agentic dev assistant"
-aliases = ["kiro-cli"]
-group = "cloud"
-role = "cloud"
-package = "kiro-cli"
-login = "kiro-cli login"
 
 [[tool]]
 name = "sgpt"

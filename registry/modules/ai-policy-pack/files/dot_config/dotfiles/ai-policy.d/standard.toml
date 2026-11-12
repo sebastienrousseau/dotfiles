@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+# ai-policy-pack: standard — agents work freely inside the project, ask
+# mode is read-only, and secrets, force pushes and piped installers are off
+# limits in every mode. To use it:
+#   cp ~/.config/dotfiles/ai-policy.d/standard.toml ~/.config/dotfiles/ai-policy.toml
+# then dot ai policy check. Reference: docs/AI.md, "Enforced policy".
+schema = "ai-policy.v1"
+default_mode = "ask"
+
+[mode.ask]
+tools = ["read", "search"]
+paths_deny = ["~/.ssh/**", "~/.aws/**", "~/.gnupg/**", "**/.env", "**/.env.*"]
+
+[mode.plan]
+tools = ["read", "search", "fetch"]
+paths_deny = ["~/.ssh/**", "~/.aws/**", "~/.gnupg/**", "**/.env", "**/.env.*"]
+
+[mode.apply]
+tools = ["*"]
+paths_allow = ["{cwd}/**", "/tmp/**"]
+paths_deny = ["~/.ssh/**", "~/.aws/**", "~/.gnupg/**", "**/.env", "**/.env.*"]
+commands_deny = ["sudo *", "rm -rf /*", "rm -rf ~*", "git push --force*", "git push -f*", "curl * | sh", "curl * | bash", "wget * | sh"]
+
+[mode.audit]
+tools = ["read", "search"]
+paths_deny = ["~/.ssh/**", "~/.aws/**", "~/.gnupg/**", "**/.env", "**/.env.*"]
+
+[budget]
+daily_usd = 20
+session_usd = 5

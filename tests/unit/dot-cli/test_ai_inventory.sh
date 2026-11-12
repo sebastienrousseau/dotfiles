@@ -30,7 +30,7 @@ ln -s "$(command -v jq)" "$WORK/jq/jq"
 JQ_DIR="$WORK/jq"
 pin_of() { awk -v k="\"$1\"" '/^\[/ { t = ($0 == "[ai_tools]"); next } t && $1 == k { gsub(/"/, "", $3); print $3; exit }' "$REPO_ROOT/defaults/.chezmoidata.toml"; }
 CODEX_PIN="$(pin_of npm:@openai/codex)"
-CRUSH_PIN="$(pin_of npm:@charmland/crush)"
+CRUSH_PIN="$(pin_of aqua:charmbracelet/crush)"
 
 # stub NAME OUTPUT: an agent binary that prints OUTPUT for --version.
 stub() {
