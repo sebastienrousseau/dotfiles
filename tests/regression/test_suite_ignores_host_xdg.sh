@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091
+# Regression for: d7e7c2bc (v0.2.499 baseline)
 # The suite must not write into the developer's real XDG directories.
 #
 # A developer shell exports XDG_CACHE_HOME, XDG_DATA_HOME and friends. A
