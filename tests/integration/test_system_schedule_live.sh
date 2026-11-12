@@ -11,6 +11,10 @@ set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+# assertions.sh drops the inherited XDG directories, XDG_RUNTIME_DIR with
+# them, but `systemctl --user` reaches the user manager through it: this test
+# drives the real scheduler, so it keeps the session's runtime dir.
+session_runtime_dir="${XDG_RUNTIME_DIR:-}"
 source "$SCRIPT_DIR/../framework/assertions.sh"
 
 if [[ "${DOT_SCHEDULE_LIVE:-0}" != 1 ]]; then
@@ -18,6 +22,7 @@ if [[ "${DOT_SCHEDULE_LIVE:-0}" != 1 ]]; then
   echo "RESULTS:0:0:0"
   exit 0
 fi
+[[ -n "$session_runtime_dir" ]] && export XDG_RUNTIME_DIR="$session_runtime_dir"
 
 DOT="$REPO_ROOT/bin/dot"
 STATE="${XDG_STATE_HOME:-$HOME/.local/state}/dot/system"
