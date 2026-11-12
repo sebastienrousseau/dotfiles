@@ -1,6 +1,37 @@
 {
   "version": 1,
-  "updated": "2026-05-15T16:30:00Z",
+  "updated": "2026-11-11T00:00:00Z",
   "registry": "sebastienrousseau/dotfiles",
-  "modules": []
+  "modules": [
+    {
+      "name": "ai-policy-pack",
+      "version": "1.0.0",
+      "description": "Three AI policy presets (standard, strict, regulated) for dot's enforced agent policy, with budgets",
+      "repo": "https://github.com/sebastienrousseau/dotfiles/tree/main/registry/modules/ai-policy-pack",
+      "tags": [
+        "ai",
+        "policy",
+        "governance"
+      ],
+      "maintainer": "Sebastien Rousseau",
+      "license": "Apache-2.0 OR MIT",
+      "archive_url": "https://doc.dotfiles.io/registry/modules/ai-policy-pack-1.0.0.tar.gz",
+      "sha256": "b035494b1c89d8819f690aefda7145627a1f9c0abc25060cb498b2e1f39b679e"
+    },
+    {
+      "name": "claude-statusline",
+      "version": "1.0.0",
+      "description": "Claude Code status line: model, folder, dot's agent mode, and the session's cost against the AI policy's budget",
+      "repo": "https://github.com/sebastienrousseau/dotfiles/tree/main/registry/modules/claude-statusline",
+      "tags": [
+        "ai",
+        "claude",
+        "statusline"
+      ],
+      "maintainer": "Sebastien Rousseau",
+      "license": "Apache-2.0 OR MIT",
+      "archive_url": "https://doc.dotfiles.io/registry/modules/claude-statusline-1.0.0.tar.gz",
+      "sha256": "b3d3a23c842bdb713d9674f774281176a0d63c160a397d0fa71455b5ecfc1fa4"
+    }
+  ]
 }

@@ -24,6 +24,8 @@ Desktop.ini
 *.tgz
 *.tar.gz
 *.zip
+# except the registry modules the site serves (tools/registry/build_modules.py)
+!docs/registry/modules/*.tar.gz
 
 # Editors
 .vscode/

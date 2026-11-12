@@ -44,6 +44,9 @@ assert_equals "0" "$rc" "build-site.sh succeeds, including the whole-site link c
 test_start "site_publishes_the_registry_index"
 # `dot cli list --available` fetches https://doc.dotfiles.io/registry.json; the site must ship it.
 assert_equals "$(cat "$REPO_ROOT/docs/registry.json")" "$(cat "$SITE/registry.json" 2>/dev/null)" "registry.json at the site root"
+for f in "$REPO_ROOT"/docs/registry/modules/*.tar.gz; do
+  assert_true "cmp -s '$f' '$SITE/registry/modules/${f##*/}'" "registry/modules/${f##*/}: the archive the index pins, as committed"
+done
 
 test_start "site_has_one_page_per_toc_entry"
 toc_n="$(grep -cE '^      - ' "$REPO_ROOT/docs/_toc.yml")"

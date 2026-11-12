@@ -16,19 +16,22 @@ This page documents the JSON contract and the contribution flow. It is the §3 /
 
 ## Quick start (consumer side)
 
-The published index has no modules yet: `docs/registry.json` carries an
-empty `modules` array. `rust-dev-setup` below, and in the JSON contract,
-is an illustrative name, not a module you can install today.
+The published index carries this repository's own modules, built from
+`registry/modules/`:
+
+| Module | What it installs |
+|---|---|
+| `ai-policy-pack` | Three AI policy presets in `~/.config/dotfiles/ai-policy.d/`: `standard`, `strict` and `regulated`. None is enforced until you copy one to `~/.config/dotfiles/ai-policy.toml` and run `dot ai policy check` ([docs/AI.md](../AI.md#enforced-policy)). |
+| `claude-statusline` | `~/.local/bin/dot-claude-statusline`, a Claude Code status line with the model, the folder, dot's agent mode and the session's cost against the policy's `session_usd` budget (yellow from 80%, red at 100%, where the next prompt is blocked). Wire it in `~/.claude/settings.json`: `"statusLine": {"type": "command", "command": "~/.local/bin/dot-claude-statusline"}`. It needs `jq`. |
 
 ```sh
 dot cli list --available                   # list every published module
-dot cli list --available rust            # filter by keyword
-dot cli show rust-dev-setup    # full metadata for one module
-dot cli install rust-dev-setup # verify and preview changes
-dot cli install rust-dev-setup --yes # verify, persist, and apply
-dot cli list              # list locally installed modules
-dot cli registry show                    # show active registry URL
-dot cli registry set <url>          # point at a different registry
+dot cli show ai-policy-pack                # full metadata for one module
+dot cli install ai-policy-pack             # verify and preview changes
+dot cli install ai-policy-pack --yes       # verify, persist, and apply
+dot cli list                               # list locally installed modules
+dot cli registry show                      # show active registry URL
+dot cli registry set <url>                 # point at a different registry
 ```
 
 The registry index is cached locally under `${XDG_CACHE_HOME:-~/.cache}/dotfiles/registry/` with a 6 hour TTL, in a file named for the URL it was fetched from (`index-v2-<digest>.json`) so changing the registry URL never serves the previous registry's index. When a fetch fails, a cached index is used only while it is younger than 7 days. Override the URL one-off via `DOTFILES_REGISTRY_URL=<url> dot cli list --available`.
@@ -66,7 +69,7 @@ Optional keys: `repo` (HTTPS project URL), `tags` (lower-case array), `maintaine
 
 ## Contributing a module
 
-1. Build a gzip-compressed tar archive containing a chezmoi-source-compatible directory of plain files. Templates (`*.tmpl`), scripts (`run_*`), `.chezmoi*` files and the `exact_`, `remove_`, `create_`, `modify_`, `symlink_`, `encrypted_` and `external_` attributes are refused anywhere in the tree, as are links and absolute or `..` paths. Publish it at an immutable HTTPS URL, such as a versioned GitHub release asset.
+1. Build a gzip-compressed tar archive containing a chezmoi-source-compatible directory of plain files, under one top-level directory (`<name>-<version>/`): the installer takes a single top-level directory as the module root, so a module whose files all sit under, say, `dot_local/` would otherwise install to `~/bin`. Templates (`*.tmpl`), scripts (`run_*`), `.chezmoi*` files and the `exact_`, `remove_`, `create_`, `modify_`, `symlink_`, `encrypted_` and `external_` attributes are refused anywhere in the tree, as are links and absolute or `..` paths. Publish it at an immutable HTTPS URL, such as a versioned GitHub release asset.
 2. Open a PR against `sebastienrousseau/dotfiles` adding one entry to `docs/registry.json` (alphabetical by `name`).
 3. The PR runs CI checks for:
    - Runtime contract validity and unique, sorted module names.
@@ -74,6 +77,10 @@ Optional keys: `repo` (HTTPS project URL), `tags` (lower-case array), `maintaine
    - A pinned SHA-256 digest for every archive.
 4. The maintainer re-signs the index offline (`minisign -Sm docs/registry.json -s <offline key>`) and commits `docs/registry.json.minisig`. CI (`tools/ci/check-registry.sh`) fails when the committed signature does not match the index.
 5. Once merged, the GitHub Pages workflow re-deploys the registry; `dot cli list --available` picks it up within 6 hours (or immediately if the consumer purges the cache).
+
+### This repository's modules
+
+A module of this repository's own is a directory `registry/modules/<name>/` with a `module.json` (`name`, `version`, `description`, and optionally `repo`, `tags`, `maintainer`, `license`) and a `files/` tree. `tools/registry/build_modules.py` builds each into `docs/registry/modules/<name>-<version>.tar.gz`, reproducibly (sorted entries, fixed times, owners and modes, no gzip timestamp), and writes its entry into `docs/registry.json`, pinned to that digest. The site serves the archives beside the index, at `https://doc.dotfiles.io/registry/modules/`, so they go live with it. `--check` fails when the index or a committed archive is not what a build writes, and `tools/ci/check-registry.sh` runs it. A change to a module's files therefore needs a new `version`, a build, and the index re-signed (step 4); keep the older archives, since a cached index may still name them.
 
 ## Install pipeline
 

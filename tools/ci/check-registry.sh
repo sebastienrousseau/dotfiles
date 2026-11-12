@@ -34,6 +34,10 @@ if ! diff -u \
   exit 1
 fi
 
+# The entries for this repo's own modules (registry/modules) must pin the
+# archives tools/registry/build_modules.py builds from them.
+python3 "$repo_root/tools/registry/build_modules.py" --root "$repo_root" --check || exit 1
+
 # The published index must verify against the committed registry key, which
 # is what `dot registry` checks on every fetch. Until the maintainer has
 # generated the key and committed security/registry.pub together with

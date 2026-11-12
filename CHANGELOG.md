@@ -4,16 +4,25 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+### Added
+
+- The registry carries its first verified modules (P1.6): `ai-policy-pack`, three AI policy presets (standard, strict, regulated), and `claude-statusline`, a Claude Code status line with the model, folder, agent mode and the session's cost against the policy budget. `tools/registry/build_modules.py` builds them into reproducible archives that the site serves beside the signed index, and the registry check fails when the index or an archive is not what a build writes.
+
 ### Removed
 
 - The dotfiles no longer install shell-gpt. It was installed three ways (the mise declaration, the Python-tools provisioning script and `dot ai install`), so removing it from one let the others put it back; its roster package, `[ai_tools]` pin, mise declaration, provisioning line and lock entry go together. `sgpt` is still recognised when you install it yourself (#1412).
 
 ### Fixed
 
+- `dot cli install`'s preview no longer crashes now and then with Homebrew's bash 5.3 when no `LANG` is set (cron, launchd, some SSH sessions): the C locale is set for `tr` alone, so bash never changes its own locale in a forked subshell.
 - `dot ai eco` calls the doctor report directly, so shellcheck no longer reports SC2120 on `cmd_ai_doctor` and the pre-push audit passes again (#1412).
 - zsh no longer starts from a stale `PATH`: the cached `mise activate zsh` output kept the `PATH` of whichever shell wrote it (old tool versions, or a test run's temporary directories), and `chezmoi apply`'s prewarm wrote that raw output too. The cache now writes `$PATH` instead of a snapshot, prewarm leaves it to the next shell, and it expires when mise's config changes.
 - Running the test suite no longer rewrites your real caches: tests now ignore exported XDG base directories and resolve them from the sandboxed `HOME`, as on CI.
 - Timing tests marked `# test-lane: quiet` run after the parallel pool drains, so `test_gate_integrity.sh` no longer fails the pre-push audit on a loaded machine.
+
+### Security
+
+- The registry index is signed with a new key: the secret half of the one committed in #1250 is no longer available. `security/registry.pub` is the new key; a checkout from before this release still holds the old one and refuses the new index until it is updated.
 
 ## v0.2.543 (2026-11-11)
 

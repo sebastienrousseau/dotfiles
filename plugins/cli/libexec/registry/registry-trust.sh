@@ -29,9 +29,11 @@ _REGISTRY_JQ_CLEAN='def clean: tostring | explode | map(if . < 32 or (. >= 127 a
 ## diffs), keeping tab and newline. Bytes, not characters: C1 controls are
 ## only reachable from UTF-8 as two-byte sequences, which this leaves alone,
 ## so the preview is not a terminal-safe channel for C1; C0 is the vector
-## every terminal honours.
+## every terminal honours. env, not bash, sets the C locale: this runs as
+## a pipeline element, in a forked subshell, where Homebrew's bash 5.3 with
+## no LANG set crashes now and then when it changes its own locale.
 _registry_clean_stream() {
-  LC_ALL=C tr '\000-\010\013-\037\177' '?'
+  env LC_ALL=C tr '\000-\010\013-\037\177' '?'
 }
 
 _registry_pubkey_file() {
