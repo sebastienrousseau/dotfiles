@@ -13,6 +13,10 @@ This file documents all notable changes to this project.
 - `dot cli install`'s preview no longer crashes now and then with Homebrew's bash 5.3 when no `LANG` is set (cron, launchd, some SSH sessions): the C locale is set for `tr` alone, so bash never changes its own locale in a forked subshell.
 - `dot ai eco` calls the doctor report directly, so shellcheck no longer reports SC2120 on `cmd_ai_doctor` and the pre-push audit passes again (#1412).
 
+### Security
+
+- The registry index is signed with a new key: the secret half of the one committed in #1250 is no longer available. `security/registry.pub` is the new key; a checkout from before this release still holds the old one and refuses the new index until it is updated.
+
 ## v0.2.543 (2026-11-11)
 
 ### Added
