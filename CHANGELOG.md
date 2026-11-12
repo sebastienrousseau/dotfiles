@@ -11,6 +11,9 @@ This file documents all notable changes to this project.
 ### Fixed
 
 - `dot ai eco` calls the doctor report directly, so shellcheck no longer reports SC2120 on `cmd_ai_doctor` and the pre-push audit passes again (#1412).
+- zsh no longer starts from a stale `PATH`: the cached `mise activate zsh` output kept the `PATH` of whichever shell wrote it (old tool versions, or a test run's temporary directories), and `chezmoi apply`'s prewarm wrote that raw output too. The cache now writes `$PATH` instead of a snapshot, prewarm leaves it to the next shell, and it expires when mise's config changes.
+- Running the test suite no longer rewrites your real caches: tests now ignore exported XDG base directories and resolve them from the sandboxed `HOME`, as on CI.
+- Timing tests marked `# test-lane: quiet` run after the parallel pool drains, so `test_gate_integrity.sh` no longer fails the pre-push audit on a loaded machine.
 
 ## v0.2.543 (2026-11-11)
 
