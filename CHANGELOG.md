@@ -10,6 +10,7 @@ This file documents all notable changes to this project.
 
 ### Fixed
 
+- `dot cli install`'s preview no longer crashes now and then with Homebrew's bash 5.3 when no `LANG` is set (cron, launchd, some SSH sessions): the C locale is set for `tr` alone, so bash never changes its own locale in a forked subshell.
 - `dot ai eco` calls the doctor report directly, so shellcheck no longer reports SC2120 on `cmd_ai_doctor` and the pre-push audit passes again (#1412).
 
 ## v0.2.543 (2026-11-11)
