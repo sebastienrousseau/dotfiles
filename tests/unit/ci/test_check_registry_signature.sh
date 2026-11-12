@@ -91,7 +91,7 @@ assert_file_contains "$OUT" "re-sign" "the fix is named"
 test_start "missing_minisign_fails"
 NOMS="$WORK/nominisign"
 mkdir -p "$NOMS"
-for tool in bash jq diff sort cat dirname; do
+for tool in bash jq diff sort cat dirname python3; do
   p="$(command -v "$tool" 2>/dev/null || true)"
   [[ -n "$p" ]] && ln -sf "$p" "$NOMS/$tool"
 done

@@ -4,6 +4,10 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+### Added
+
+- The registry carries its first verified modules (P1.6): `ai-policy-pack`, three AI policy presets (standard, strict, regulated), and `claude-statusline`, a Claude Code status line with the model, folder, agent mode and the session's cost against the policy budget. `tools/registry/build_modules.py` builds them into reproducible archives that the site serves beside the signed index, and the registry check fails when the index or an archive is not what a build writes.
+
 ### Removed
 
 - The dotfiles no longer install shell-gpt. It was installed three ways (the mise declaration, the Python-tools provisioning script and `dot ai install`), so removing it from one let the others put it back; its roster package, `[ai_tools]` pin, mise declaration, provisioning line and lock entry go together. `sgpt` is still recognised when you install it yourself (#1412).

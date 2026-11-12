@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+# ai-policy-pack: strict — apply mode writes only inside the project, runs
+# no network commands and no MCP tools, and fetches only from GitHub; every
+# other mode is read-only. To use it:
+#   cp ~/.config/dotfiles/ai-policy.d/strict.toml ~/.config/dotfiles/ai-policy.toml
+# then dot ai policy check. Reference: docs/AI.md, "Enforced policy".
+schema = "ai-policy.v1"
+default_mode = "ask"
+
+[mode.ask]
+tools = ["read", "search"]
+paths_allow = ["{cwd}/**"]
+paths_deny = ["~/.ssh/**", "~/.aws/**", "~/.gnupg/**", "**/.env", "**/.env.*"]
+
+[mode.plan]
+tools = ["read", "search"]
+paths_allow = ["{cwd}/**"]
+paths_deny = ["~/.ssh/**", "~/.aws/**", "~/.gnupg/**", "**/.env", "**/.env.*"]
+
+[mode.apply]
+tools = ["read", "search", "write", "shell", "fetch"]
+tools_deny = ["mcp__*"]
+paths_allow = ["{cwd}/**"]
+paths_deny = ["~/.ssh/**", "~/.aws/**", "~/.gnupg/**", "**/.env", "**/.env.*", "{cwd}/.git/**"]
+hosts_allow = ["github.com", "*.github.com", "*.githubusercontent.com"]
+commands_deny = ["sudo *", "rm -rf *", "git push*", "git reset --hard*", "curl *", "wget *", "ssh *", "scp *", "nc *", "docker *", "kubectl *"]
+
+[mode.audit]
+tools = ["read", "search"]
+paths_allow = ["{cwd}/**"]
+paths_deny = ["~/.ssh/**", "~/.aws/**", "~/.gnupg/**", "**/.env", "**/.env.*"]
+
+[budget]
+daily_usd = 10
+session_usd = 2
