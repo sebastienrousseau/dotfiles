@@ -10,8 +10,9 @@
 # Feature matrix: docs/reference/FEATURE-MATRIX.md
 #
 # Runnable and side-effect free: HOME is redirected into a throwaway
-# directory, and launchctl and systemctl are replaced by `true`, so `set`
-# writes its agent or timer into the sandbox and loads nothing.
+# directory, and launchctl and systemctl are replaced by a stand-in that only
+# remembers whether the job is loaded, so `set` writes its agent or timer into
+# the sandbox and loads nothing.
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -21,12 +22,25 @@ sandbox="$(mktemp -d -t dot-example.XXXXXX)"
 trap 'rm -rf "$sandbox"' EXIT
 mkdir -p "$sandbox/.config" "$sandbox/.local/share" "$sandbox/.local/state" "$sandbox/.cache"
 
+# The stand-in scheduler: bootstrap/enable load the job, bootout/disable
+# unload it, and print/is-enabled report it, as launchctl and systemctl do.
+scheduler="$sandbox/scheduler"
+cat >"$scheduler" <<EOF
+#!/bin/sh
+case "\$1" in
+  bootstrap | enable) : >"$sandbox/loaded" ;;
+  bootout | disable) rm -f "$sandbox/loaded" ;;
+  print | is-enabled) [ -f "$sandbox/loaded" ] ;;
+esac
+EOF
+chmod +x "$scheduler"
+
 export HOME="$sandbox" \
   XDG_CONFIG_HOME="$sandbox/.config" \
   XDG_DATA_HOME="$sandbox/.local/share" \
   XDG_STATE_HOME="$sandbox/.local/state" \
   XDG_CACHE_HOME="$sandbox/.cache" \
-  DOT_LAUNCHCTL=true DOT_SYSTEMCTL=true \
+  DOT_LAUNCHCTL="$scheduler" DOT_SYSTEMCTL="$scheduler" \
   NO_COLOR=1 DOTFILES_SHOW_LOGO=0 DOTFILES_NO_TUI=1 DOTFILES_NONINTERACTIVE=1
 
 printf '=== dot system ===\n\n'
@@ -38,5 +52,6 @@ bash "$dot" system schedule list
 bash "$dot" system schedule run
 bash "$dot" system status | grep 'Last run'
 bash "$dot" system schedule set off
+bash "$dot" system schedule list
 
 printf '\ndot system example complete.\n'
