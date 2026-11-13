@@ -48,7 +48,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CHEZMOI_VERSION: "2.73.3"
+  CHEZMOI_VERSION: "2.74.1"
 
 jobs:
   # ============================================================================

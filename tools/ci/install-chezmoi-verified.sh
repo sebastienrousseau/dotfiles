@@ -13,17 +13,17 @@ VERSION="${1:-}"
 BIN_DIR="${2:-$HOME/.local/bin}"
 
 # chezmoi_pinned_sha256 <asset>: the reviewed SHA-256 of a release archive.
-# Source: https://github.com/twpayne/chezmoi/releases/download/v2.73.3/chezmoi_2.73.3_checksums.txt
+# Source: https://github.com/twpayne/chezmoi/releases/download/v2.74.1/chezmoi_2.74.1_checksums.txt
 # (read 2026-10-08; matches the GitHub API asset digests). To add a release,
 # copy its lines for these six archives from that file.
 chezmoi_pinned_sha256() {
   case "$1" in
-    chezmoi_2.73.3_linux_amd64.tar.gz) echo 6e5827598cbfc02d132b04f95b5ea10efb5b79230e2a4a0e52df4af144a8ee9f ;;
-    chezmoi_2.73.3_linux_arm64.tar.gz) echo c9e6a6e71eb5291018e161a8426d7c313cd2e8553c2ca4029511fec2a33bc28c ;;
-    chezmoi_2.73.3_darwin_amd64.tar.gz) echo d865487d6669243c948ee5542087bd95f4ad4ecb5a1311b85cf19f557694fe03 ;;
-    chezmoi_2.73.3_darwin_arm64.tar.gz) echo ec2d0005f369c912ee9891a26c30d65dc0eda51708f06948e5f7a43db69e1aa7 ;;
-    chezmoi_2.73.3_windows_amd64.zip) echo e74f9948a9ac6a5d8b0c0896a9ea129a766d92e38b50b70ee1fa1dc077755d6e ;;
-    chezmoi_2.73.3_windows_arm64.zip) echo b49732852bb2f387dcb9379d742c3a6c3a908173a59e7981fd4da1572ca5ae7b ;;
+    chezmoi_2.74.1_linux_amd64.tar.gz) echo ae01c66b1a6dbf563667c63fbbd9986b3cfa3c98dd266ddee732f63e8af2e9d1 ;;
+    chezmoi_2.74.1_linux_arm64.tar.gz) echo 8c62619c4303770342e7c7e75d168b6cc6efee4ad5e4b994980de7cf794d68e2 ;;
+    chezmoi_2.74.1_darwin_amd64.tar.gz) echo b2229c6ff9eb7d1f10d098aac94241da652dd7df989c7ef35df6777dbe00d397 ;;
+    chezmoi_2.74.1_darwin_arm64.tar.gz) echo fbc7b86c7b36eb0448e2a99a616b6d32f022d1f3895076ad44f4c5d65a77fe60 ;;
+    chezmoi_2.74.1_windows_amd64.zip) echo 208b393f9ad266fc10aab514a8adf87ac4dc5bdd968a54b7eb5b2764ca41eda4 ;;
+    chezmoi_2.74.1_windows_arm64.zip) echo 9521e31bc65eac69fce73385c4f62445c202fbff97a841ec0cb3b976b84ea94e ;;
     *) echo "${CHEZMOI_SHA256:-}" ;;
   esac
 }

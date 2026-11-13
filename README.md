@@ -22,7 +22,7 @@
   <a href="https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/dotfiles"><img src="https://img.shields.io/ossf-scorecard/github.com/sebastienrousseau/dotfiles?style=for-the-badge&logo=linuxfoundation&logoColor=white&label=OpenSSF%20Scorecard" alt="OpenSSF Scorecard" /></a>
   <a href="https://www.bestpractices.dev/projects/12840"><img src="https://img.shields.io/cii/level/12840?style=for-the-badge&logo=linuxfoundation&logoColor=white&label=OpenSSF%20Best%20Practices" alt="OpenSSF Best Practices" /></a>
   <a href="#license"><img src="https://img.shields.io/badge/License-Apache--2.0%20OR%20MIT-green?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="License: Apache-2.0 OR MIT" /></a>
-  <a href="#requirements"><img src="https://img.shields.io/badge/toolchain-bash%205.0%20%C2%B7%20chezmoi%202.73.3-93450a?style=for-the-badge&logo=gnubash&logoColor=white" alt="Minimum toolchain: bash 5.0, chezmoi 2.73.3" /></a>
+  <a href="#requirements"><img src="https://img.shields.io/badge/toolchain-bash%205.0%20%C2%B7%20chezmoi%202.74.1-93450a?style=for-the-badge&logo=gnubash&logoColor=white" alt="Minimum toolchain: bash 5.0, chezmoi 2.74.1" /></a>
 </p>
 
 ---
@@ -227,8 +227,8 @@ profile per machine and flip session flags when you need less.
   `/bin/bash` 3.2 has to run them (the notes are in `lib/dot/ui.sh`),
   but 3.2 is not a supported interactive shell.
 
-- **chezmoi 2.73.3 or newer, git 2.34 or newer, curl.** CI pins
-  chezmoi `2.73.3` and installs it through a checksum-verified
+- **chezmoi 2.74.1 or newer, git 2.34 or newer, curl.** CI pins
+  chezmoi `2.74.1` and installs it through a checksum-verified
   fetch; `install.sh` does the same on your machine.
 
 - **A supported platform.** macOS 15+ (Apple Silicon and Intel),

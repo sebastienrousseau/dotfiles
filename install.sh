@@ -140,10 +140,10 @@ charm_keyring_verify() {
 chezmoi_release_sha256() {
   local sha
   case "$1" in
-    chezmoi_2.73.3_linux_amd64.tar.gz) sha=6e5827598cbfc02d132b04f95b5ea10efb5b79230e2a4a0e52df4af144a8ee9f ;;
-    chezmoi_2.73.3_linux_arm64.tar.gz) sha=c9e6a6e71eb5291018e161a8426d7c313cd2e8553c2ca4029511fec2a33bc28c ;;
-    chezmoi_2.73.3_darwin_amd64.tar.gz) sha=d865487d6669243c948ee5542087bd95f4ad4ecb5a1311b85cf19f557694fe03 ;;
-    chezmoi_2.73.3_darwin_arm64.tar.gz) sha=ec2d0005f369c912ee9891a26c30d65dc0eda51708f06948e5f7a43db69e1aa7 ;;
+    chezmoi_2.74.1_linux_amd64.tar.gz) sha=ae01c66b1a6dbf563667c63fbbd9986b3cfa3c98dd266ddee732f63e8af2e9d1 ;;
+    chezmoi_2.74.1_linux_arm64.tar.gz) sha=8c62619c4303770342e7c7e75d168b6cc6efee4ad5e4b994980de7cf794d68e2 ;;
+    chezmoi_2.74.1_darwin_amd64.tar.gz) sha=b2229c6ff9eb7d1f10d098aac94241da652dd7df989c7ef35df6777dbe00d397 ;;
+    chezmoi_2.74.1_darwin_arm64.tar.gz) sha=fbc7b86c7b36eb0448e2a99a616b6d32f022d1f3895076ad44f4c5d65a77fe60 ;;
     *) sha="${CHEZMOI_SHA256:-}" ;;
   esac
   if [[ "$sha" =~ ^[0-9a-f]{64}$ ]]; then
@@ -411,7 +411,7 @@ main() {
       verified_installer="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/tools/ci/install-chezmoi-verified.sh"
       if [[ -x "$verified_installer" ]] || [[ -f "$verified_installer" ]]; then
         echo "   Using checksum-verified installer..."
-        if ! bash "$verified_installer" "${CHEZMOI_VERSION:-2.73.3}" "$bin_dir"; then
+        if ! bash "$verified_installer" "${CHEZMOI_VERSION:-2.74.1}" "$bin_dir"; then
           echo "" >&2
           echo "   The verified chezmoi installer failed." >&2
           echo "   Refusing to fall back to an unverified bootstrap path." >&2
@@ -423,7 +423,7 @@ main() {
         return 0
       fi
       echo "   Using embedded checksum verifier..."
-      if ! install_chezmoi_verified_embedded "${CHEZMOI_VERSION:-2.73.3}" "$bin_dir"; then
+      if ! install_chezmoi_verified_embedded "${CHEZMOI_VERSION:-2.74.1}" "$bin_dir"; then
         echo "" >&2
         echo "   The embedded checksum-verified chezmoi bootstrap failed." >&2
         echo "   Refusing to fall back to an unverified remote script." >&2

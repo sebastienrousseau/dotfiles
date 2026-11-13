@@ -13,6 +13,11 @@ on:
       - '**/Dockerfile*'
       - 'config/gitleaks.toml'
       - '.github/security-policies/**'
+      # Dependency locks, so the Grype SBOM scan sees a fixed or new pin.
+      - '**/package-lock.json'
+      - '**/requirements*.txt'
+      - '**/go.sum'
+      - '**/Cargo.lock'
   pull_request:
     branches: [main]
     paths:
@@ -24,6 +29,11 @@ on:
       - '**/Dockerfile*'
       - 'config/gitleaks.toml'
       - '.github/security-policies/**'
+      # Dependency locks, so the Grype SBOM scan sees a fixed or new pin.
+      - '**/package-lock.json'
+      - '**/requirements*.txt'
+      - '**/go.sum'
+      - '**/Cargo.lock'
   merge_group:
     branches: [main]
     # NOTE: `paths:` is ignored under merge_group; merge-queue runs
