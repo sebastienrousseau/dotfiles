@@ -11,6 +11,10 @@ This file documents all notable changes to this project.
 - `chezmoi apply`'s prewarm no longer writes a mise activation for bash, which never read it, or for fish, and removes stale copies.
 - `dot system schedule set off` on macOS waits for launchd to let go of the maintenance job, booting it out again, instead of reporting it off while launchd still has it loaded, which it can for a moment after the job has just run. If launchd keeps it, the command says so and exits 1; the agent is deleted all the same, so it does not come back at login.
 
+### Security
+
+- hono 4.13.18 for the dot-mcp Node servers, pinned with an npm override so no affected version resolves: 4.13.15 and earlier carry five advisories (GHSA-46wx-v44x-9hh2, GHSA-4h7h-rv7c-7m2v, GHSA-4m76-xfj5-7975, GHSA-h7mg-cq63-vhpq, GHSA-3gg2-335m-rxc6), and it reaches the servers through `@modelcontextprotocol/sdk` and `@hono/node-server` (#1414).
+
 ## v0.2.544 (2026-11-12)
 
 ### Added
