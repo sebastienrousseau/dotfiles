@@ -37,6 +37,31 @@ function _cached_eval_log_timing --description 'Append a timing event for dot do
         >>"$logfile" 2>/dev/null; or true
 end
 
+# _cached_eval_generate <tool path> <init args...>: run an init command as a
+# shell that has not run it would, and print its output with PATH unpinned.
+#
+# `mise activate fish` snapshots the PATH of the shell that runs it
+# (`set -gx PATH <shims> <PATH>`), and where mise is already active (a tmux
+# pane, an IDE terminal, an agent's shell) it first undoes that session and
+# builds PATH from __MISE_ORIG_PATH. Cached verbatim, every later shell would
+# start from that snapshot. So mise runs without its session and against a
+# PATH no real one equals, which the cache then refers to as $PATH.
+function _cached_eval_generate --description 'Run an init command as a new shell would'
+    set -l tool_path $argv[1]
+    if test (string replace -r '.*/' '' -- $tool_path) != mise
+        command $argv 2>/dev/null
+        return $status
+    end
+    set -l sentinel /__dotfiles_cached_path__
+    set -l unset_args
+    for name in (set --names | string match '__MISE_*') MISE_SHELL
+        set -a unset_args -u $name
+    end
+    set -l out (env $unset_args PATH=$sentinel $argv 2>/dev/null)
+    or return $status
+    string replace -ra -- "(^|\s)$sentinel(?=\s|\$)" '$1$$PATH' $out
+end
+
 function _cached_eval_impl
     set -l tool_name $argv[1]
     if test -z "$tool_name"
@@ -88,7 +113,7 @@ function _cached_eval_impl
 
     # Regenerate cache if stale
     if test "$stale" = 1
-        set -l init_output (command $argv 2>/dev/null)
+        set -l init_output (_cached_eval_generate $tool_path $argv[2..])
         set -l rc $status
         if test "$rc" -ne 0
             echo "[WARN] $tool_name init exited $rc; not caching" >&2

@@ -46,13 +46,24 @@ env -i HOME="$SANDBOX/render-home" PATH="$PATH" \
   --persistent-state "$SANDBOX/state.boltdb" execute-template \
   <"$ZSHRC_TMPL" >"$H/.zshrc"
 
-# A stub mise that activates the way mise does: it snapshots its own PATH.
+# A stub mise that activates the way mise does: it snapshots its own PATH,
+# quoting a value only when it has to. In a shell where mise is already
+# active (its __MISE_SESSION is set), it first undoes that session, unsetting
+# the variables it manages, and builds PATH from __MISE_ORIG_PATH.
 cat >"$H/stubs/mise" <<EOF
 #!/bin/sh
 echo "mise \$*" >>"$LOG"
 if [ "\$1" = activate ]; then
-  printf "export __MISE_ORIG_PATH='%s'\n" "\$PATH"
-  printf "export PATH='%s:%s'\n" "$SANDBOX/shims" "\$PATH"
+  base="\$PATH"
+  if [ -n "\${__MISE_SESSION:-}" ]; then
+    echo "unset JAVA_HOME"
+    base="\$__MISE_ORIG_PATH"
+  fi
+  case "\$base" in
+    *[!A-Za-z0-9/_.-]*) printf "export __MISE_ORIG_PATH='%s'\n" "\$base" ;;
+    *) printf "export __MISE_ORIG_PATH=%s\n" "\$base" ;;
+  esac
+  printf "export PATH='%s:%s'\n" "$SANDBOX/shims" "\$base"
   echo "export MISE_SHELL=zsh"
 fi
 EOF
@@ -103,6 +114,26 @@ mkdir -p "$H/.config/mise/conf.d"
 shell "$SANDBOX/second" >/dev/null
 assert_equals "3" "$(activations)" "a conf.d file newer than the cache also expires it"
 
+# A shell where mise is already active (a tmux pane, an IDE terminal, an
+# agent's shell) must cache what a new shell would run: not its deactivation
+# of the session, nor its own PATH or __MISE_ORIG_PATH.
+test_start "mise_cache_from_an_active_shell"
+rm -f "$CACHE" "$CACHE.zwc" "$CACHE.bin"
+env -i HOME="$H" PATH="$H/stubs:$SANDBOX/install:$SANDBOX/active:/usr/bin:/bin" TERM=dumb \
+  __MISE_SESSION=s __MISE_DIFF=d __MISE_ORIG_PATH="$H/stubs:$SANDBOX/orig:/usr/bin:/bin" \
+  "$ZSH_BIN" -f -i -c 'source "$HOME/.zshrc"; _dotfiles_async_init' >/dev/null 2>&1
+assert_file_exists "$CACHE" "the active shell writes the mise cache"
+pinned=none
+for p in "$SANDBOX/orig" "$SANDBOX/install" "$SANDBOX/active" "unset JAVA_HOME"; do
+  grep -qF -- "$p" "$CACHE" 2>/dev/null && pinned="$p"
+done
+assert_equals "none" "$pinned" "the cache holds neither the active shell's PATH nor its deactivation"
+runs="$(activations)"
+fresh_path="$(shell "$SANDBOX/second")"
+assert_equals "$runs" "$(activations)" "the next shell reads that cache"
+assert_contains "$SANDBOX/shims:$H/stubs:$SANDBOX/second" "$fresh_path" \
+  "the next shell gets the shims ahead of its own PATH"
+
 # `chezmoi apply` runs prewarm.sh, which caches every tool's init. Writing
 # mise's raw activation there would pin PATH again behind the zshrc's back.
 test_start "prewarm_does_not_pin_path"
@@ -110,6 +141,11 @@ mkdir -p "$SANDBOX/prewarm"
 # On a real machine the compiled copy (.zwc) predates prewarm by far more
 # than a second, so zsh loads what prewarm wrote; make that so here too.
 touch -t 202001010000 "$CACHE.zwc" "$CACHE.bin" 2>/dev/null
+# A pinned bash or fish copy from an earlier prewarm must go too: bash never
+# reads one, and fish's own _cached_eval writes it unpinned.
+mkdir -p "$H/.cache/bash" "$H/.cache/fish"
+echo "export PATH='$SANDBOX/stale'" >"$H/.cache/bash/mise-init.bash"
+echo "set -gx PATH $SANDBOX/stale" >"$H/.cache/fish/mise-init.fish"
 env -i HOME="$H" PATH="$H/stubs:$SANDBOX/prewarm:/usr/bin:/bin" TERM=dumb \
   XDG_CACHE_HOME="$H/.cache" XDG_DATA_HOME="$H/.local/share" \
   bash "$REPO_ROOT/scripts/ops/prewarm.sh" >/dev/null 2>&1
@@ -119,5 +155,10 @@ leaked=no
 assert_equals "no" "$leaked" "a shell after prewarm does not inherit prewarm's PATH"
 assert_contains "$SANDBOX/shims:$H/stubs:$SANDBOX/second" "$after_prewarm" \
   "the shell after prewarm gets the shims ahead of its own PATH"
+left=none
+for f in "$H/.cache/bash/mise-init.bash" "$H/.cache/fish/mise-init.fish"; do
+  [[ -e "$f" ]] && left="$f"
+done
+assert_equals "none" "$left" "prewarm leaves no bash or fish mise cache"
 
 print_summary

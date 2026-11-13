@@ -137,12 +137,34 @@ _dot_system_install() {
   fi
 }
 
-# _dot_system_uninstall BACKEND: unload the job and delete it.
+# _dot_system_launchd_unload: boot the job out of launchd and wait until it
+# is gone. launchd can keep a job it has just run loaded for a moment after
+# bootout returns, so ask again, booting it out again, for up to
+# DOT_SYSTEM_UNLOAD_TRIES checks DOT_SYSTEM_UNLOAD_INTERVAL seconds apart.
+# 1 when launchd still has it.
+_dot_system_launchd_unload() {
+  local target tries="${DOT_SYSTEM_UNLOAD_TRIES:-10}" i
+  target="gui/$(id -u)/$DOT_SYSTEM_LABEL"
+  _dot_launchctl bootout "$target" >/dev/null 2>&1 || true
+  for ((i = 1; i <= tries; i++)); do
+    _dot_system_loaded launchd || return 0
+    sleep "${DOT_SYSTEM_UNLOAD_INTERVAL:-0.5}"
+    _dot_launchctl bootout "$target" >/dev/null 2>&1 || true
+  done
+  ! _dot_system_loaded launchd
+}
+
+# _dot_system_uninstall BACKEND: unload the job and delete it. 1 when the
+# scheduler still has it loaded; it is deleted all the same.
 _dot_system_uninstall() {
   local dir
   if [[ "$1" == launchd ]]; then
-    _dot_launchctl bootout "gui/$(id -u)/$DOT_SYSTEM_LABEL" >/dev/null 2>&1 || true
     rm -f "$(_dot_system_plist)"
+    if ! _dot_system_launchd_unload; then
+      printf 'dot: launchd still has the maintenance job loaded; it is gone at next login, or run: launchctl bootout gui/%s/%s\n' \
+        "$(id -u)" "$DOT_SYSTEM_LABEL" >&2
+      return 1
+    fi
   else
     dir="$(_dot_system_unit_dir)"
     _dot_systemctl disable --now "$DOT_SYSTEM_UNIT.timer" >/dev/null 2>&1 || true
@@ -154,7 +176,7 @@ _dot_system_uninstall() {
 # dot_system_schedule_set weekly|daily|off: install, replace or remove the
 # job and record the schedule. 1 for a bad word or no scheduler.
 dot_system_schedule_set() {
-  local when="${1:-}" backend dir
+  local when="${1:-}" backend dir rc=0
   case "$when" in
     weekly | daily | off) ;;
     *)
@@ -167,13 +189,14 @@ dot_system_schedule_set() {
     return 1
   fi
   if [[ "$when" == off ]]; then
-    _dot_system_uninstall "$backend"
+    _dot_system_uninstall "$backend" || rc=1
   else
     _dot_system_install "$backend" "$when"
   fi
   dir="$(_dot_system_state)"
   mkdir -p "$dir"
   printf '%s\n' "$when" >"$dir/schedule"
+  ((rc == 0)) || return 1
   printf 'Maintenance: %s (%s)\n' "$when" "$backend"
 }
 

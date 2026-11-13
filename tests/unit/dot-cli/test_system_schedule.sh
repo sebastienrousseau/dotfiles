@@ -20,6 +20,33 @@ for tool in launchctl systemctl dot; do
   printf '#!/bin/sh\necho "%s $*" >>"%s/calls"\nexit "${FAIL_%s:-0}"\n' "$tool" "$WORK" "$tool" >"$WORK/bin/$tool"
   chmod +x "$WORK/bin/$tool"
 done
+# launchctl keeps the job's state: bootstrap loads it, print reports it, and
+# bootout unloads it, though launchd may take LAUNCHD_LAG more checks to let
+# go of a job that has just run.
+cat >"$WORK/bin/launchctl" <<EOF
+#!/bin/sh
+echo "launchctl \$*" >>"$WORK/calls"
+[ "\${FAIL_launchctl:-0}" = 0 ] || exit "\$FAIL_launchctl"
+case "\$1" in
+  bootstrap) : >"$WORK/loaded" && rm -f "$WORK/lag" ;;
+  bootout)
+    [ -f "$WORK/loaded" ] && [ ! -f "$WORK/lag" ] && echo "\${LAUNCHD_LAG:-0}" >"$WORK/lag"
+    ;;
+  print)
+    [ -f "$WORK/loaded" ] || exit 113
+    if [ -f "$WORK/lag" ]; then
+      lag=\$(cat "$WORK/lag")
+      if [ "\$lag" -le 0 ]; then
+        rm -f "$WORK/loaded" "$WORK/lag"
+        exit 113
+      fi
+      echo \$((lag - 1)) >"$WORK/lag"
+    fi
+    ;;
+esac
+exit 0
+EOF
+chmod +x "$WORK/bin/launchctl"
 UID_NOW="$(id -u)"
 PLIST="$WORK/home/Library/LaunchAgents/com.sebastienrousseau.dot-maintenance.plist"
 UNITS="$WORK/home/.config/systemd/user"
@@ -29,7 +56,7 @@ STATE="$WORK/home/.local/state/dot/system"
 sys() {
   local os="$1"
   shift
-  env -u XDG_STATE_HOME -u XDG_CONFIG_HOME HOME="$WORK/home" DOT_SYSTEM_OS="$os" \
+  env -u XDG_STATE_HOME -u XDG_CONFIG_HOME HOME="$WORK/home" DOT_SYSTEM_OS="$os" DOT_SYSTEM_UNLOAD_INTERVAL=0 \
     DOT_LAUNCHCTL="$WORK/bin/launchctl" DOT_SYSTEMCTL="${DOT_SYSTEMCTL:-$WORK/bin/systemctl}" \
     DOT_SYSTEM_DOT="$WORK/bin/dot" bash "$REPO_ROOT/bin/dot" system "$@"
 }
@@ -56,9 +83,30 @@ assert_contains "maintenance    daily    launchd  loaded" "$(sys Darwin schedule
 assert_contains "not loaded" "$(FAIL_launchctl=113 sys Darwin schedule)" "list is the default, and sees an unloaded one"
 : >"$WORK/calls"
 sys Darwin schedule set off >/dev/null
-assert_equals "launchctl bootout gui/$UID_NOW/com.sebastienrousseau.dot-maintenance" "$(calls)" "off unloads it"
+assert_equals "launchctl bootout gui/$UID_NOW/com.sebastienrousseau.dot-maintenance|launchctl print gui/$UID_NOW/com.sebastienrousseau.dot-maintenance" \
+  "$(calls)" "off unloads it, and checks that launchd let go"
 assert_file_not_exists "$PLIST" "and deletes it"
 assert_equals "off" "$(cat "$STATE/schedule")" "and records off"
+
+# launchd can hold on to a job it has just run for a moment after bootout
+# returns: off waits for it, asking again, instead of reporting it gone.
+test_start "macos_off_waits_for_launchd_to_let_go"
+sys Darwin schedule set daily >/dev/null
+rc=0
+out="$(LAUNCHD_LAG=2 sys Darwin schedule set off 2>&1)" || rc=$?
+assert_equals "0" "$rc" "off succeeds once launchd lets go"
+assert_equals "Maintenance: off (launchd)" "$out" "and says so"
+assert_contains "not loaded" "$(sys Darwin schedule list)" "list then sees it unloaded"
+
+test_start "macos_off_reports_a_job_launchd_keeps"
+sys Darwin schedule set daily >/dev/null
+rc=0
+out="$(LAUNCHD_LAG=1000 sys Darwin schedule set off 2>&1)" || rc=$?
+assert_equals "1" "$rc" "off fails while launchd keeps the job loaded"
+assert_contains "still has the maintenance job loaded" "$out" "and names the problem"
+assert_file_not_exists "$PLIST" "the agent is deleted all the same, so it does not come back at login"
+assert_equals "off" "$(cat "$STATE/schedule")" "and off is recorded"
+rm -f "$WORK/loaded" "$WORK/lag"
 
 test_start "linux_set_writes_and_enables_the_timer"
 : >"$WORK/calls"
