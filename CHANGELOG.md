@@ -9,6 +9,7 @@ This file documents all notable changes to this project.
 - The cached mise activation no longer pins `PATH` when a shell where mise is already active (a tmux pane, an IDE terminal, an agent's shell) writes it: mise there undoes its session, unsetting `GOROOT`, `JAVA_HOME` and the other variables it manages, and builds `PATH` from its own snapshot, so v0.2.544's fix found no `PATH` to replace. zsh and fish now generate the activation without mise's session and against a sentinel `PATH`.
 - fish's mise cache refers to `$PATH` instead of a snapshot, is rewritten when mise is upgraded, and expires when mise's config changes; before, a cache that existed was used as it was forever.
 - `chezmoi apply`'s prewarm no longer writes a mise activation for bash, which never read it, or for fish, and removes stale copies.
+- `dot system schedule set off` on macOS waits for launchd to let go of the maintenance job, booting it out again, instead of reporting it off while launchd still has it loaded, which it can for a moment after the job has just run. If launchd keeps it, the command says so and exits 1; the agent is deleted all the same, so it does not come back at login.
 
 ## v0.2.544 (2026-11-12)
 
