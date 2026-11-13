@@ -2,6 +2,14 @@
 
 This file documents all notable changes to this project.
 
+## Unreleased
+
+### Fixed
+
+- The cached mise activation no longer pins `PATH` when a shell where mise is already active (a tmux pane, an IDE terminal, an agent's shell) writes it: mise there undoes its session, unsetting `GOROOT`, `JAVA_HOME` and the other variables it manages, and builds `PATH` from its own snapshot, so v0.2.544's fix found no `PATH` to replace. zsh and fish now generate the activation without mise's session and against a sentinel `PATH`.
+- fish's mise cache refers to `$PATH` instead of a snapshot, is rewritten when mise is upgraded, and expires when mise's config changes; before, a cache that existed was used as it was forever.
+- `chezmoi apply`'s prewarm no longer writes a mise activation for bash, which never read it, or for fish, and removes stale copies.
+
 ## v0.2.544 (2026-11-12)
 
 ### Added

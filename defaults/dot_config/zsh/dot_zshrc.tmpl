@@ -166,19 +166,25 @@ _cached_eval() {
 # literal copy of the current $PATH replaced by a reference to $PATH.
 #
 # Some init scripts snapshot the PATH of the shell that runs them: `mise
-# activate` prints `export __MISE_ORIG_PATH='<PATH>'` and
+# activate` prints `export __MISE_ORIG_PATH=<PATH>` and
 # `export PATH='<shims>:<PATH>'`. Cached verbatim, every later shell would
 # start from that snapshot: tool versions since upgraded, or directories of
 # whichever shell (an IDE, an agent, a test) wrote the cache. Only whole
-# `export NAME='<prefix><PATH>'` lines are rewritten, and only when <prefix>
-# holds nothing the shell would expand inside double quotes.
+# `export NAME='<prefix><PATH>'` or unquoted `export NAME=<prefix><PATH>`
+# lines are rewritten, and only when <prefix> holds nothing the shell would
+# expand inside double quotes.
 _cached_eval_unpin_path() {
   local line name value prefix
   local -a out
   for line in "${(@f)1}"; do
+    value=""
     if [[ -n "$PATH" && "$line" == "export "*"='"*"'" ]]; then
-      name=${${line#export }%%=*}
       value=${${line#*=\'}%\'}
+    elif [[ -n "$PATH" && "$line" =~ '^export [A-Za-z_][A-Za-z0-9_]*=[^][ "'"'"'$`\\]+$' ]]; then
+      value=${line#*=}
+    fi
+    if [[ -n "$value" ]]; then
+      name=${${line#export }%%=*}
       if [[ "$name" =~ '^[A-Za-z_][A-Za-z0-9_]*$' && "$value" == *"$PATH" ]]; then
         prefix=${value%"$PATH"}
         if [[ "$prefix" != *[\$\`\"\\\']* ]]; then
@@ -189,6 +195,30 @@ _cached_eval_unpin_path() {
     out+=("$line")
   done
   print -r -- "${(F)out}"
+}
+
+# A PATH no real one equals: mise's activation is generated against it, so
+# every copy of PATH in its output is this string and nothing else.
+typeset -g _CACHED_EVAL_PATH_SENTINEL=/__dotfiles_cached_path__
+
+# _cached_eval_generate <command> [args...]: run an init command as a shell
+# that has not run it would, and print its output with PATH unpinned. Call it
+# in a command substitution: it changes the environment of its own subshell.
+#
+# mise's activation depends on the shell it runs in. Where mise is already
+# active (a tmux pane, an IDE terminal, an agent's shell), it first undoes
+# that session, unsetting the variables it manages, and builds PATH from
+# __MISE_ORIG_PATH rather than PATH, so no copy of PATH would be found to
+# unpin. It runs here without mise's session and against a sentinel PATH.
+_cached_eval_generate() {
+  local cmd=${commands[$1]:-$1} out
+  if [[ ${1:t} == mise ]]; then
+    unset -m '__MISE_*'
+    unset MISE_SHELL
+    PATH=$_CACHED_EVAL_PATH_SENTINEL
+  fi
+  out=$("$cmd" "${@:2}" 2>/dev/null) || return
+  _cached_eval_unpin_path "$out"
 }
 
 # _cached_eval_expire <label> <file>...: drop the cache for <label> when any
@@ -251,7 +281,7 @@ _cached_eval_impl() {
   fi
 
   local init_output rc
-  init_output=$("$@" 2>/dev/null)
+  init_output=$(_cached_eval_generate "$@")
   rc=$?
   if (( rc != 0 )); then
     print -u2 "[WARN] $label init exited $rc; not caching"
@@ -264,7 +294,6 @@ _cached_eval_impl() {
     print -u2 "[WARN] Suspicious output from $label init, skipping"
     return 1
   fi
-  init_output="$(_cached_eval_unpin_path "$init_output")"
 
   # `mktemp` instead of `${cache}.tmp.$$` — under PID recycling (very
   # rare but possible) two concurrent shells with the same $$ could

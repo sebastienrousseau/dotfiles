@@ -61,11 +61,14 @@ warm_tool() {
 }
 
 ui_section "Zsh"
-# Not mise: its activation embeds the PATH of the shell that ran it. The
-# zshrc writes mise-init.zsh itself with that PATH replaced by $PATH
-# (_cached_eval_unpin_path); a copy cached here would pin this script's
-# PATH into every later shell. Clear a stale one so the next shell rewrites it.
-rm -f "$CACHE_DIR/zsh/mise-init.zsh" "$CACHE_DIR/zsh/mise-init.zsh.zwc" "$CACHE_DIR/zsh/mise-init.zsh.bin"
+# Not mise, in any shell: its activation embeds the PATH of the shell that
+# ran it. zsh and fish write their mise cache themselves, with that PATH
+# replaced by $PATH (_cached_eval_generate); a copy cached here would pin this
+# script's PATH into every later shell. bash never reads one. Clear stale
+# copies so the next shell rewrites its own.
+rm -f "$CACHE_DIR/zsh/mise-init.zsh" "$CACHE_DIR/zsh/mise-init.zsh.zwc" "$CACHE_DIR/zsh/mise-init.zsh.bin" \
+  "$CACHE_DIR/bash/mise-init.bash" "$CACHE_DIR/bash/mise-init.bin" \
+  "$CACHE_DIR/fish/mise-init.fish" "$CACHE_DIR/fish/mise-init.bin"
 warm_tool "starship" "starship init zsh" "zsh" "zsh"
 warm_tool "zoxide" "zoxide init zsh" "zsh" "zsh"
 warm_tool "atuin" "atuin init zsh --disable-up-arrow" "zsh" "zsh"
@@ -73,7 +76,6 @@ warm_tool "fzf" "fzf --zsh" "zsh" "zsh"
 warm_tool "direnv" "direnv hook zsh" "zsh" "zsh"
 
 ui_section "Bash"
-warm_tool "mise" "mise activate bash" "bash" "bash"
 warm_tool "starship" "starship init bash" "bash" "bash"
 warm_tool "zoxide" "zoxide init bash" "bash" "bash"
 warm_tool "atuin" "atuin init bash --disable-up-arrow" "bash" "bash"
@@ -81,7 +83,6 @@ warm_tool "fzf" "fzf --bash" "bash" "bash"
 warm_tool "direnv" "direnv hook bash" "bash" "bash"
 
 ui_section "Fish"
-warm_tool "mise" "mise activate fish" "fish" "fish"
 warm_tool "starship" "starship init fish" "fish" "fish"
 warm_tool "zoxide" "zoxide init fish" "fish" "fish"
 warm_tool "atuin" "atuin init fish" "fish" "fish"

@@ -64,13 +64,22 @@ end
 
 # ── Lazy Hydration (deferred to first prompt) ────────────────────
 function _dotfiles_async_init
-    # Mise
+    # Mise: _cached_eval rewrites the cache when mise is upgraded, and mise's
+    # config, which shapes its activation, expires it too.
     if command -v mise >/dev/null
-        if not test -s "$SHELL_CACHE/mise-init.fish"
-            _cached_eval mise activate fish
-        else
-            source "$SHELL_CACHE/mise-init.fish"
+        set -l mise_cfg "$HOME/.config/mise"
+        if set -q MISE_CONFIG_DIR
+            set mise_cfg $MISE_CONFIG_DIR
+        else if test -n "$XDG_CONFIG_HOME"
+            set mise_cfg "$XDG_CONFIG_HOME/mise"
         end
+        for cfg in $mise_cfg/config.toml $mise_cfg/conf.d/*.toml
+            if test "$cfg" -nt "$SHELL_CACHE/mise-init.fish"
+                rm -f "$SHELL_CACHE/mise-init.fish"
+                break
+            end
+        end
+        _cached_eval mise activate fish
     end
     # Atuin
     if command -v atuin >/dev/null
