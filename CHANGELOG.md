@@ -14,6 +14,7 @@ This file documents all notable changes to this project.
 ### Security
 
 - hono 4.13.18 for the dot-mcp Node servers, pinned with an npm override so no affected version resolves: 4.13.15 and earlier carry five advisories (GHSA-46wx-v44x-9hh2, GHSA-4h7h-rv7c-7m2v, GHSA-4m76-xfj5-7975, GHSA-h7mg-cq63-vhpq, GHSA-3gg2-335m-rxc6), and it reaches the servers through `@modelcontextprotocol/sdk` and `@hono/node-server` (#1414).
+- opentelemetry-api 1.45.2 for the sqlite MCP server, constrained in its `requirements.in` so no affected version resolves: 1.45.1 and earlier carry GHSA-mf5v-w3w3-f6cg, and it reaches the server through `mcp` (#1417).
 
 ## v0.2.544 (2026-11-12)
 
