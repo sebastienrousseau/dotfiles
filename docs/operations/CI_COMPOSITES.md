@@ -29,7 +29,7 @@ version is restored first.
   # `version` defaults to env.CHEZMOI_VERSION. Override explicitly when
   # the calling workflow has no env block (e.g. theme-contracts):
   with:
-    version: '2.73.3'
+    version: '2.74.1'
 ```
 
 Inputs:
