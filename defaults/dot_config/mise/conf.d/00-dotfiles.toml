@@ -105,6 +105,12 @@ zoxide = "latest"
 "aqua:twpayne/chezmoi" = "2.72.0"
 "aqua:junegunn/fzf" = "latest"
 "aqua:FiloSottile/age" = "latest"
+# minisign verifies the `dot registry` index (registry-trust.sh) and runs in
+# tools/ci/check-registry.sh. Without it those checks stop with "minisign is
+# required" on any machine where nobody installed it by hand. It is also how
+# to check a Zig tarball's .minisig by hand when `mise lock` doesn't record
+# its provenance.
+minisign = "latest"
 # hyperfine intentionally NOT managed by mise: the aqua package for
 # sharkdp/hyperfine only ships an x86_64 macOS binary, so on Apple
 # Silicon without Rosetta the mise shim is unrunnable ("Bad CPU type in
