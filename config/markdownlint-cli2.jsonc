@@ -53,6 +53,9 @@
   // Files / globs to skip — vendored, generated, or intentionally
   // free-form historical content.
   "ignores": [
+    // Git metadata: local scratch such as .git/pr-bodies/*.md (draft PR
+    // bodies) is never tracked, but the glob reaches it in a checkout.
+    ".git/**",
     "node_modules/**",
     "**/node_modules/**",
     "**/CHANGELOG.md",
