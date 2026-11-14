@@ -136,6 +136,10 @@ test_start "a_signed_index_installs_each_module"
 if ! command -v minisign >/dev/null 2>&1 || ! command -v chezmoi >/dev/null 2>&1; then
   echo "  minisign or chezmoi unavailable: end-to-end skipped"
 else
+  # dot runs below under `env -i` with HOME redirected. A mise shim there
+  # cannot see the host's mise trust, so it exits non-zero and the index
+  # looks unsigned. Put the real binary's directory first on PATH.
+  minisign_dir="$(dirname "$(mise which minisign 2>/dev/null || command -v minisign)")"
   idx="$WORK/a/docs/registry.json"
   jq --arg d "file://$WORK/a/docs/registry/modules" '.modules[].archive_url |= ($d + "/" + (split("/") | last))' "$idx" >"$WORK/index.json"
   minisign -G -W -p "$WORK/key.pub" -s "$WORK/key.sec" >/dev/null 2>&1 </dev/null
@@ -144,7 +148,7 @@ else
   mkdir -p "$H"
   for name in claude-statusline ai-policy-pack; do
     RC=0
-    OUT="$(env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="$PATH" NO_COLOR=1 TERM=dumb \
+    OUT="$(env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="$minisign_dir:$PATH" NO_COLOR=1 TERM=dumb \
       DOTFILES_REGISTRY_URL="file://$WORK/index.json" DOTFILES_REGISTRY_PUBKEY="$WORK/key.pub" \
       bash "$REPO_ROOT/bin/dot" cli install "$name" --yes 2>&1 </dev/null)" || RC=$?
     assert_equals "0" "$RC" "$name: installed"
