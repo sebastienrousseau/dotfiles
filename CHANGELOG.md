@@ -2,9 +2,20 @@
 
 This file documents all notable changes to this project.
 
-## Unreleased
+## v0.2.545 (2026-11-14)
+
+### Added
+
+- mise installs minisign on every machine. `dot registry` checks its index signature with it and `tools/ci/check-registry.sh` needs it, but nothing installed it, so on a machine without a hand install both stopped with "minisign is required" (#1420).
+
+### Changed
+
+- `@hono/node-server` 2.1.8 for the dot-mcp Node servers, from 2.1.4 (#1413).
 
 ### Fixed
+
+- The registry's end-to-end install test calls the real minisign binary. It skipped while minisign was missing; once mise installed it, the test ran `dot cli install` with `HOME` redirected, where the mise shim cannot see the host's trusted config, and five checks failed with "index signature verification FAILED" (#1420).
+- `make lint-docs` skips `.git/`, so draft PR bodies kept in `.git/pr-bodies/` no longer fail the local run while CI passes (#1421).
 
 - The cached mise activation no longer pins `PATH` when a shell where mise is already active (a tmux pane, an IDE terminal, an agent's shell) writes it: mise there undoes its session, unsetting `GOROOT`, `JAVA_HOME` and the other variables it manages, and builds `PATH` from its own snapshot, so v0.2.544's fix found no `PATH` to replace. zsh and fish now generate the activation without mise's session and against a sentinel `PATH`.
 - fish's mise cache refers to `$PATH` instead of a snapshot, is rewritten when mise is upgraded, and expires when mise's config changes; before, a cache that existed was used as it was forever.
