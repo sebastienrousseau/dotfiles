@@ -4,7 +4,7 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 set -euo pipefail
 
-# Dotfiles CLI Entry Point - v0.2.544
+# Dotfiles CLI Entry Point - v0.2.545
 
 # _dot_hook_fast ARGS...: `dot cli hook run` runs on every prompt, tool call
 # and stop of every agent, and `dot cli hook check` (the policy) on every
@@ -32,7 +32,7 @@ _dot_hook_fast() {
 }
 _dot_hook_fast "$@"
 
-VERSION="0.2.544"
+VERSION="0.2.545"
 
 COMMAND="${1:-}"
 shift "$(($# > 0))"
@@ -60,8 +60,8 @@ _resolve_source_dir() {
   done
   if script_path="$(cd "$(dirname "$script_path")" && pwd 2>/dev/null)"; then
     script_dir="$script_path"
-    # Post-v0.2.544: the canonical dispatcher lives at <repo>/bin/dot, so
-    # $script_dir/.. is the repo root. Pre-v0.2.544 (and chezmoi-deployed
+    # Post-v0.2.545: the canonical dispatcher lives at <repo>/bin/dot, so
+    # $script_dir/.. is the repo root. Pre-v0.2.545 (and chezmoi-deployed
     # wrapper invocations that still exec the canonical) the dispatcher
     # was at <repo>/dot_local/bin/executable_dot, so $script_dir/../..
     # was the repo. Probe both to cover the transition.

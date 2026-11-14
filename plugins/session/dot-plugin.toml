@@ -7,7 +7,7 @@
 schema = "cli/manifest.v1"
 name = "session"
 domain = "session"
-version = "0.2.544"
+version = "0.2.545"
 summary = "find, open and restore terminal sessions"
 default = "select"
 
