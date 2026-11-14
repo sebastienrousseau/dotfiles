@@ -273,9 +273,12 @@ ln -s /nonexistent "$S_HOME/.config/SingletonLock"
 ln -s "$S_HOME/.zshrc" "$S_HOME/.config/zsh/live-link"
 ln -s "$S_HOME/Library/Caches/org.swift.swiftpm" "$S_HOME/.config/swiftpm-cache"
 # Fresh shell caches (tool binaries dated in the past so cache is newer).
+# mise has none for bash, as on a real machine: bash never activates mise
+# from a cache, and prewarm writes no mise cache for any shell.
 for t in mise starship zoxide atuin fzf direnv pyenv; do
   touch -t 202001010000 "$S_BIN/$t"
   for shdir in zsh bash fish; do
+    [[ "$t" == mise && "$shdir" == bash ]] && continue
     mkdir -p "$S_HOME/.cache/$shdir"
     if [[ "$shdir" == fish ]]; then
       printf '# cached\n' >"$S_HOME/.cache/fish/${t}-init.fish"
@@ -426,7 +429,7 @@ _expect "s2_environment_and_state" \
   "[WARN] symlinks" "1 broken: $_HOME_TILDE/.config/dangling" \
   "[WARN] portability" "scan skipped"
 _expect "s2_performance_warnings" \
-  "[WARN] shell caches" "stale (mise, zoxide, atuin, fzf, direnv)" \
+  "[WARN] shell caches" "stale (mise, zoxide, atuin, fzf, direnv) — run dot shell update --prewarm, then open a new shell" \
   "[WARN] uncached slow-init tools" "pyenv" "[WARN] .zcompdump" "refresh:" \
   "[WARN] .zcompdump.zwc" "[FAIL] PATH length" "likely slowing" \
   "[WARN] shell coverage" "pwsh installed" "[WARN] zsh hooks" "precmd=9 preexec=9" \
@@ -560,6 +563,17 @@ exit 0
 EOF
 printf 'jorgebucaran/fisher\n' >"$S_HOME/.config/fish/fish_plugins"
 printf '# zshrc\n' >"$S_HOME/.zshrc"
+# Only mise's cache is stale (fish has none): zsh and fish rebuild it at their
+# first prompt, and prewarm writes none, so the hint is a new shell.
+_tool mise
+for t in mise starship zoxide atuin fzf; do
+  touch -t 202001010000 "$S_BIN/$t"
+  for shdir in zsh bash fish; do
+    [[ "$t" == mise && "$shdir" != zsh ]] && continue
+    mkdir -p "$S_HOME/.cache/$shdir"
+    printf '# cached\n' >"$S_HOME/.cache/$shdir/${t}-init.$shdir"
+  done
+done
 # A gateway still running from the old state dir: this test is its live pid.
 mkdir -p "$S_HOME/.local/state/dotfiles/ai-serve"
 echo "$$" >"$S_HOME/.local/state/dotfiles/ai-serve/serve.pid"
@@ -576,6 +590,8 @@ _expect "s4_warning_band_probes" \
   "1280x720" "4 (pacman)" "Memory: n/a" "[WARN] dot" "(expected ~/.local/bin/dot)" \
   "[WARN] atuin config" "not found" "[WARN] PATH length" "consider pruning" \
   "[WARN] startup latency" "[OK] Healthy" "warning(s)."
+_expect "s4_stale_mise_cache_asks_for_a_new_shell" \
+  "[WARN] shell caches" "stale (mise) — open a new zsh or fish shell to rebuild it"
 _expect "s4_a_running_gateway_holds_the_state_back" \
   "[WARN] state layout" "the AI gateway still runs from" "stop it with dot-ai-proxy stop, then chezmoi apply"
 _expect_absent "s4_no_failures" "[FAIL]"
