@@ -66,6 +66,29 @@ chezmoi() {
     result = run()
     checks += [(result.returncode == 0 and (work / "updated").is_file(),
                 "clean tracked checkout can update")]
+    # A commit not yet on the upstream: chezmoi update pulls with --rebase,
+    # which rewrites it (a merge commit comes back flattened). Skip instead.
+    (work / "updated").unlink()
+    git("branch", "upstream")
+    git("config", "branch.main.merge", "refs/heads/upstream")
+    commit = ["-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+              "-c", "commit.gpgsign=false", "-c", "core.hooksPath=/dev/null",
+              "commit", "--allow-empty", "-m"]
+    git(*commit, "local work")
+    result = run()
+    checks += [(result.returncode == 0 and "not on its upstream" in result.stdout,
+                "unpushed local commits skip the phase with the reason"),
+               (not (work / "updated").exists(), "unpushed local commits never invoke update"),
+               ("Logs" not in result.stdout, "an unpushed-commit skip is not a failed step")]
+    # Only behind its upstream: nothing local to rewrite, so it updates.
+    (work / "updated").unlink(missing_ok=True)
+    git("checkout", "-q", "-B", "upstream", "main")
+    git(*commit, "upstream work")
+    git("checkout", "-q", "main")
+    git("config", "branch.main.merge", "refs/heads/upstream")
+    result = run()
+    checks += [(result.returncode == 0 and (work / "updated").is_file(),
+                "a checkout only behind its upstream still updates")]
 for passed, label in checks:
     print(("PASS " if passed else "FAIL ") + label)
 failed = sum(not passed for passed, _ in checks)

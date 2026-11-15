@@ -82,6 +82,15 @@ _upgrade_dotfiles() {
       printf 'uncommitted changes; commit or stash them, then rerun\n' >&2
       return "${EX_TEMPFAIL:-75}"
     fi
+    # Commits not yet on the upstream are work too. chezmoi update pulls
+    # with --rebase, which rewrites them unasked (a merge commit comes back
+    # flattened). Decline the same way.
+    local ahead
+    ahead="$(git -C "$update_source" rev-list --count '@{upstream}..HEAD' 2>/dev/null)" || ahead=0
+    if [[ "$ahead" -gt 0 ]]; then
+      printf '%s has %s commit(s) not on its upstream; push them or rebase by hand, then rerun\n' "$branch" "$ahead" >&2
+      return "${EX_TEMPFAIL:-75}"
+    fi
   fi
   chezmoi update --no-tty
 }
