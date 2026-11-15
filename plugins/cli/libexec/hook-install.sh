@@ -49,12 +49,16 @@ left() {
 }
 
 # hi_dot: the dot an agent should run, as an absolute path. The one on PATH
-# counts only when it is a script: Graphviz installs a binary named dot.
+# counts only when it is a script (Graphviz installs a binary named dot)
+# that knows `dot cli hook` (an older dot, such as a stale Homebrew install
+# ahead of ~/.local/bin, answers `Unknown command: cli`); otherwise this
+# checkout's own bin/dot.
 hi_dot() {
   local dot magic=""
   dot="$(command -v dot 2>/dev/null || true)"
   [[ "$dot" != /* ]] || magic="$(head -c 2 "$dot" 2>/dev/null || true)"
-  [[ "$magic" == '#!' ]] || dot="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/bin/dot"
+  [[ "$magic" == '#!' ]] && "$dot" cli hook --help >/dev/null 2>&1 </dev/null ||
+    dot="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/bin/dot"
   printf '%s\n' "$dot"
 }
 

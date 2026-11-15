@@ -113,6 +113,16 @@ for a in claude gemini; do
   done
 done
 
+test_start "a_stale_dot_on_path_is_passed_over"
+# An older dot first on PATH (a Homebrew install from before `dot cli`)
+# answers `Unknown command: cli`: wiring it in breaks every hook event.
+fresh claude
+S="$H/.claude/settings.json"
+printf '#!/bin/sh\necho "Unknown command: $1" >&2\nexit 1\n' >"$B/dot"
+run install --agent claude
+assert_equals "0" "$RC" "installs"
+assert_equals "'$REPO_ROOT/bin/dot' cli hook run --agent claude" "$(cmds "$S" SessionStart)" "with this checkout's dot, not the stale one"
+
 test_start "a_file_that_is_not_json_is_left"
 fresh claude
 S="$H/.claude/settings.json"
