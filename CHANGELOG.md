@@ -2,6 +2,13 @@
 
 This file documents all notable changes to this project.
 
+## Unreleased
+
+### Changed
+
+- AI CLI pins move to the newest release at least seven days old: Codex 0.167.0 (from 0.162.1), GitHub Copilot CLI 1.0.107 (1.0.95), opencode 1.19.5 (1.19.0, the aqua build and `npm:opencode-ai`), autohand 0.9.10 (0.9.8), Qwen Code 0.27.0 (0.25.1) and Crush 0.100.0 (0.98.1). Ollama stays at 0.40.15: 0.40.16 is six days old.
+- The first-party tools, outside the age gate, move to their latest signed releases: passmcp, passmcp-graph, passmcp-lsp and passmcp-server 0.0.10 (from 0.0.8), and draft 0.0.46 (0.0.45).
+
 ## v0.2.546 (2026-11-15)
 
 ### Fixed
