@@ -11,6 +11,10 @@ This file documents all notable changes to this project.
 - `dot ai update` and `dot system update --globals` rebuild pipx venvs whose Python is gone. When Homebrew dropped `python@3.13`, every venv built on it failed `pipx upgrade-all` with "invalid python interpreter", and `dot ai update` reported only "pipx upgrade-all failed". Both now run `pipx reinstall-all`, pipx's own remedy, and upgrade again; any other pipx failure still fails.
 - The theme fuzz test's 10kb-name check and the perf gate's integrity checks no longer fail on a loaded machine. The 10kb name is held against a 4-character one timed in the same run once it passes 500ms, and the gate's pass checks pin its runner factor, so they test the gate's verdicts rather than the machine's speed. A name whose cost grows with its length, and a gate that always fails, are still caught.
 
+### Changed
+
+- Ollama 0.40.15 from 0.40.3, the newest release at least seven days old.
+
 ### Security
 
 - The installer checksums for Goose and the Antigravity CLI follow upstream changes reviewed line by line: Goose's `download_cli.sh` moved to block/goose `e629eea1dd` (#12072, which shell files get the PATH line), and Antigravity's `install.sh` gained Termux (Android) detection. Until then `dot ai update` refused both with "Installer checksum mismatch".
