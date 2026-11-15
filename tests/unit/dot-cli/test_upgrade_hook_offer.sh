@@ -17,12 +17,18 @@ WORK="$(mktemp -d "${TMPDIR:-/tmp}/dot-hook-offer.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 H="$WORK/home"
 MARKER="$H/.state/dot/cli/hook-offer.asked"
+# The coverage runner's tracing, when it is on: env -i would drop it, and
+# the offer's lines would run unmeasured.
+COV_ENV=()
+for v in BASH_ENV PS4 COV_TRACE_FILE COV_ROOT; do
+  [[ -z "${!v:-}" ]] || COV_ENV+=("$v=${!v}")
+done
 
 # offer [VAR=value...]: _dot_upgrade_consent_hooks in the sandboxed home,
 # the question answered by ANSWER (0 yes, 1 no) when someone can answer
 # (CAN_ASK=1); prints "<DOT_UPGRADE_HOOKS> <questions asked>".
 offer() {
-  env -i HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$H/.state" "$@" bash -c '
+  env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="/usr/bin:/bin" XDG_STATE_HOME="$H/.state" "$@" bash -c '
     set -euo pipefail
     source "$1/plugins/system/libexec/system/upgrade.sh"
     asked=0 work="$2"
