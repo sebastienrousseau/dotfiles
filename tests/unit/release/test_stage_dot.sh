@@ -51,11 +51,15 @@ assert_equals "0" "$rc" "dot fleet policy show finds agent-profiles.json from a 
 # "nothing measured (hyperfine or jq failed)" on every packaged install.
 # With no hyperfine on PATH the bench runs and exits 2: nothing measured.
 test_start "stage_ships_the_startup_bench"
+# An empty PATH, not /usr/bin:/bin: a host that installs hyperfine and jq
+# there (Arch, CachyOS) measured every shell and exited 0. bench.sh needs
+# only bash before its tool check, so bash runs by absolute path.
 rc=0
-PATH=/usr/bin:/bin bash "$entry_root/usr/local/lib/dotfiles/scripts/diagnostics/../../benches/bench.sh" \
+no_tools="$(mktemp -d -t dot-stage-path.XXXXXX)"
+PATH="$no_tools" "$BASH" "$entry_root/usr/local/lib/dotfiles/scripts/diagnostics/../../benches/bench.sh" \
   </dev/null >/dev/null 2>&1 || rc=$?
 assert_equals "2" "$rc" "doctor's startup bench runs from a make install"
-rm -rf "$entry_home" "$entry_root"
+rm -rf "$entry_home" "$entry_root" "$no_tools"
 
 test_start "stage_make_install_round_trip"
 install_root="$(mktemp -d -t dot-install.XXXXXX)"
