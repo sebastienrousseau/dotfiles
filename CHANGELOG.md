@@ -9,6 +9,10 @@ This file documents all notable changes to this project.
 - `chezmoi apply` removes `kiro-cli` from mise's global config (`~/.config/mise/config.toml`). `dot ai install` had registered it there with `mise use -g`, a file chezmoi does not manage, so 0.2.544's removal of its mise plugin left a declaration nothing could install: `mise install`, and with it the Mise tools step of `dot upgrade`, failed with "No repository found for plugin kiro-cli". `install/migrate/retire-mise-tools.sh` unregisters each tool the dotfiles retired, keeping its installed files.
 - `dot doctor` no longer reports the mise shell cache as stale forever. Since v0.2.545 nothing writes a bash mise cache, and prewarm removes the others, yet the check wanted one in zsh, bash and fish and suggested prewarm. It now checks zsh and fish for mise and, when only mise is stale, says to open a new shell.
 
+### Security
+
+- The installer checksums for Goose and the Antigravity CLI follow upstream changes reviewed line by line: Goose's `download_cli.sh` moved to block/goose `e629eea1dd` (#12072, which shell files get the PATH line), and Antigravity's `install.sh` gained Termux (Android) detection. Until then `dot ai update` refused both with "Installer checksum mismatch".
+
 ## v0.2.545 (2026-11-14)
 
 ### Added
