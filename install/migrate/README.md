@@ -48,6 +48,18 @@ The rollback reverses each move recorded in
 log prepended to another, and removes the marker. Downgrade first, or
 the next apply moves everything again.
 
+## Tools the dotfiles retired
+
+`dot ai install` registers AI tools with `mise use -g`, which writes them
+into `~/.config/mise/config.toml`. chezmoi does not manage that file, so
+a tool that leaves the roster stays declared there, and once its
+installer is gone too, `mise install` fails on it.
+`retire-mise-tools.sh` unregisters each retired tool it finds there with
+`mise unuse -g --no-prune`, leaving the installed files.
+`defaults/run_onchange_after_33-retire-mise-tools.sh.tmpl` runs it after
+`chezmoi apply` whenever the list changes. Retiring a tool that
+`mise use -g` may have written means adding it to the list.
+
 ## The v0.2.503 reorganisation
 
 ### How it works
