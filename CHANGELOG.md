@@ -13,9 +13,11 @@ This file documents all notable changes to this project.
 - The theme fuzz test's 10kb-name check and the perf gate's integrity checks no longer fail on a loaded machine. The 10kb name is held against a 4-character one timed in the same run once it passes 500ms, and the gate's pass checks pin its runner factor, so they test the gate's verdicts rather than the machine's speed. A name whose cost grows with its length, and a gate that always fails, are still caught.
 - The perf gate no longer fails at random on a reading of .9995 to .9999 seconds. bash 5.3's `time` prints those as `2.:00` (the fraction rounded up to 1000 without carrying), which the gate took for an unusable clock and refused to report, about one reading in 2000. It now reads `N.:00` as the next whole second.
 - `dot ai update` updates Ollama on macOS by what installed it: a Homebrew formula with `brew upgrade ollama`, a cask with `--cask`, and a mise install not at all, since its `[ai_tools]` pin decides. It always ran `brew upgrade ollama --cask`, which fails for the formula and the mise install, so the step always read "Update via App". The version report shows the client version instead of the word "instance" from the warnings `ollama --version` prints when no server runs.
+- `dot cli hook install` passes over an older `dot` first on PATH that does not know `dot cli` (a Homebrew install from before it), which answered every agent hook event with `Unknown command: cli`, and wires in this checkout's `bin/dot` instead.
 
 ### Changed
 
+- mise allows two hours for a release download (`http_download_timeout`, default 30m): ollama's Linux tarball, about 1.5 GB, could outlast the default when GitHub served it slowly, and the install failed (#1427).
 - Ollama 0.40.15 from 0.40.3, the newest release at least seven days old.
 
 ### Security
