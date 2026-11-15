@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Unregisters the tools the dotfiles retired from mise's global config
+# (install/migrate/retire-mise-tools.sh), so `mise install` stops failing on
+# one whose installer is gone. Runs again whenever that script changes.
+{{- if ne .chezmoi.os "windows" }}
+# retire-mise-tools.sh: {{ include (joinPath .chezmoi.sourceDir ".." "install" "migrate" "retire-mise-tools.sh") | sha256sum }}
+
+set -euo pipefail
+
+script={{ joinPath .chezmoi.sourceDir ".." "install" "migrate" "retire-mise-tools.sh" | quote }}
+[[ -f "$script" ]] || exit 0
+bash "$script" || true
+exit 0
+{{- end }}

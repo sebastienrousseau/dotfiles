@@ -2,6 +2,12 @@
 
 This file documents all notable changes to this project.
 
+## Unreleased
+
+### Fixed
+
+- `chezmoi apply` removes `kiro-cli` from mise's global config (`~/.config/mise/config.toml`). `dot ai install` had registered it there with `mise use -g`, a file chezmoi does not manage, so 0.2.544's removal of its mise plugin left a declaration nothing could install: `mise install`, and with it the Mise tools step of `dot upgrade`, failed with "No repository found for plugin kiro-cli". `install/migrate/retire-mise-tools.sh` unregisters each tool the dotfiles retired, keeping its installed files.
+
 ## v0.2.545 (2026-11-14)
 
 ### Added
