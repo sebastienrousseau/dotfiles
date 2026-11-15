@@ -66,6 +66,7 @@ script_stub git '
 case "$*" in
   *"rev-parse --is-inside-work-tree"*) exit 0 ;;
   *"symbolic-ref"*) [[ -f '"$WORK"'/detached ]] && exit 1; echo main ;;
+  *"rev-list --count"*) [[ -f '"$WORK"'/ahead ]] && echo 2 || echo 0 ;;
   *"@{upstream}"*) [[ -f '"$WORK"'/noupstream ]] && exit 1; exit 0 ;;
   *"status --porcelain"*) [[ -f '"$WORK"'/dirty ]] && echo " M file"; exit 0 ;;
 esac
@@ -97,6 +98,14 @@ system_run upgrade
 rm -f "$WORK/dirty"
 assert_equals "0" "$DOT_FIXTURE_RC" "a dirty tree is a skip, not a failed run"
 assert_contains "uncommitted changes" "$DOT_FIXTURE_OUT" "dirty tree explained"
+assert_false '[[ "$DOT_FIXTURE_OUT" == *"updated ok"* ]]' "update not invoked"
+
+test_start "upgrade_skips_unpushed_commits"
+touch "$WORK/ahead"
+system_run upgrade
+rm -f "$WORK/ahead"
+assert_equals "0" "$DOT_FIXTURE_RC" "unpushed commits are a skip, not a failed run"
+assert_contains "2 commit(s) not on its upstream" "$DOT_FIXTURE_OUT" "unpushed commits explained"
 assert_false '[[ "$DOT_FIXTURE_OUT" == *"updated ok"* ]]' "update not invoked"
 
 test_start "upgrade_overwrite_prompt_hint"
