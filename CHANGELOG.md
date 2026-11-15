@@ -2,7 +2,7 @@
 
 This file documents all notable changes to this project.
 
-## Unreleased
+## v0.2.546 (2026-11-15)
 
 ### Fixed
 
