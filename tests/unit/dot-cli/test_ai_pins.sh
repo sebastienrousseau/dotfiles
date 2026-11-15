@@ -35,7 +35,7 @@ if [ "\$1" = latest ]; then
     # The aqua build's repository also tags opencode v2, a separate product
     # GitHub never marks latest; the 1.x line is the one pinned.
     aqua:anomalyco/opencode) echo 2.1.4 ;;
-    aqua:anomalyco/opencode@1) echo 1.19.4 ;;
+    aqua:anomalyco/opencode@1) echo 1.99.0 ;;
     # A gated latest older than the pin (pin set inside the age gate).
     github:sebastienrousseau/passmcp@0) echo 0.0.0 ;;
     # mise cannot look up an asdf plugin by its backend name.
@@ -62,7 +62,7 @@ lib() {
 rc_of() { sed -n 's/^rc=//p' <<<"$1" | tail -n 1; }
 
 test_start "pinned_version_read_from_data"
-assert_equals "0.162.1" "$(lib '_ai_pinned_version npm:@openai/codex' | head -n 1)" \
+assert_equals "0.167.0" "$(lib '_ai_pinned_version npm:@openai/codex' | head -n 1)" \
   "the [ai_tools] pin for codex is read at run time"
 
 test_start "pinned_version_ignores_package_options"
@@ -86,7 +86,7 @@ assert_equals "" "$(lib '_ai_mise_pkg sgpt' | head -n 1)" "shell-gpt is no longe
 
 test_start "install_uses_the_pin"
 r="$(lib 'ai_install_tool codex Codex')"
-assert_equals "0|mise use -g npm:@openai/codex@0.162.1" "$(rc_of "$r")|$(cat "$CALLS")" \
+assert_equals "0|mise use -g npm:@openai/codex@0.167.0" "$(rc_of "$r")|$(cat "$CALLS")" \
   "dot ai install runs mise use at the pinned version"
 
 test_start "unpinned_package_refused"
@@ -101,7 +101,7 @@ assert_equals "1|" "$(rc_of "$r")|$(cat "$CALLS")" \
 
 test_start "upgrade_proposes_bumps"
 r="$(lib 'ai_pin_bumps')"
-assert_contains "npm:@openai/codex 0.162.1 -> 9.9.9" "$r" "a newer release is listed as a bump"
+assert_contains "npm:@openai/codex 0.167.0 -> 9.9.9" "$r" "a newer release is listed as a bump"
 
 test_start "upgrade_bumps_leave_pins_alone"
 assert_equals "0" "$(grep -c '^mise use' "$CALLS")" "listing bumps installs nothing"
@@ -115,7 +115,7 @@ assert_equals "0|1" "$(grep -c ' -> 99.0.0' <<<"$r")|$(grep -cx 'mise latest aqu
 # a separate v2 product above the pinned 1.x line.
 test_start "upgrade_stays_on_the_pinned_major"
 r="$(lib 'ai_pin_bumps')"
-assert_contains "opencode $(lib '_ai_pinned_version opencode' | head -n 1) -> 1.19.4" "$r" \
+assert_contains "opencode $(lib '_ai_pinned_version opencode' | head -n 1) -> 1.99.0" "$r" \
   "the newest release on the pinned major is the bump"
 assert_equals "0" "$(grep -c -- '-> 2\.1\.4' <<<"$r")" "a newer major is not proposed"
 
