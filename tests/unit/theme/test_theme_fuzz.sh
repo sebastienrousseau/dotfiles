@@ -190,19 +190,46 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Property 5: extreme-length names are handled quickly (< 500ms each,
-# not hang).
+# Property 5: extreme-length names are handled quickly, never hang.
+#
+# A 10kb name must cost about what a 4-character one does. Under 500ms
+# passes outright. A machine under load (a fuzzer or a build alongside) slows
+# every run, so past 500ms the 10kb run is held against the short name's,
+# measured here: a length-dependent cost (a quadratic scan, a hang) still
+# fails, a uniformly slow machine does not. Each side is the fastest of three
+# runs, so one stall does not decide the verdict. A hang stops at 10s.
 # ---------------------------------------------------------------------------
 test_start "fuzz_10kb_name_handled_under_500ms"
+_now_ms() { python3 -c 'import time; print(time.monotonic_ns() // 1_000_000)'; }
+# _fastest_ms <name>: the fastest of three runs of theme-sync on <name>.
+_fastest_ms() {
+  local best="" i t0 t1
+  for i in 1 2 3; do
+    t0="$(_now_ms)"
+    if command -v timeout >/dev/null; then
+      timeout 10 "$DOT_THEME_SYNC" "$1" >/dev/null 2>&1
+    else
+      "$DOT_THEME_SYNC" "$1" >/dev/null 2>&1
+    fi
+    t1="$(_now_ms)"
+    if [[ -z "$best" ]] || ((t1 - t0 < best)); then best=$((t1 - t0)); fi
+  done
+  echo "$best"
+}
 huge_name="$(printf 'a%.0s' {1..10000})"
-start_ms="$(python3 -c 'import time; print(time.monotonic_ns() // 1_000_000)')"
-"$DOT_THEME_SYNC" "$huge_name" >/dev/null 2>&1
-end_ms="$(python3 -c 'import time; print(time.monotonic_ns() // 1_000_000)')"
-if ((end_ms - start_ms < 500)); then
+huge_ms="$(_fastest_ms "$huge_name")"
+if ((huge_ms < 500)); then
   _ok
-  printf '     (elapsed=%dms)\n' $((end_ms - start_ms))
+  printf '     (elapsed=%dms)\n' "$huge_ms"
 else
-  _fail "took $((end_ms - start_ms))ms for 10kb name"
+  short_ms="$(_fastest_ms aaaa)"
+  if ((huge_ms <= 3 * short_ms + 100)); then
+    _ok
+    printf '     (elapsed=%dms; a 4-char name took %dms, so the machine is slow, not the name)\n' \
+      "$huge_ms" "$short_ms"
+  else
+    _fail "took ${huge_ms}ms for 10kb name against ${short_ms}ms for a 4-char one"
+  fi
 fi
 
 # ---------------------------------------------------------------------------

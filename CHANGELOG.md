@@ -7,6 +7,7 @@ This file documents all notable changes to this project.
 ### Fixed
 
 - `dot doctor` no longer reports the mise shell cache as stale forever. Since v0.2.545 nothing writes a bash mise cache, and prewarm removes the others, yet the check wanted one in zsh, bash and fish and suggested prewarm. It now checks zsh and fish for mise and, when only mise is stale, says to open a new shell.
+- The theme fuzz test's 10kb-name check and the perf gate's integrity checks no longer fail on a loaded machine. The 10kb name is held against a 4-character one timed in the same run once it passes 500ms, and the gate's pass checks pin its runner factor, so they test the gate's verdicts rather than the machine's speed. A name whose cost grows with its length, and a gate that always fails, are still caught.
 
 ## v0.2.545 (2026-11-14)
 
