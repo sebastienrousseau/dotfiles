@@ -63,6 +63,10 @@ _odd_clock() { TIMEFORMAT='2.:5:'; }
 test_start "time_once_still_refuses_other_odd_fractions"
 out="$(_time_once _odd_clock)"
 assert_equals 1 "$?" "only the rounded-up form is carried"
+_odd_secs_clock() { TIMEFORMAT='x2.:00'; }
+out="$(_time_once _odd_secs_clock)"
+assert_equals 1 "$?" "a rounded-up fraction after non-numeric seconds is still refused"
+assert_contains "CLOCK_UNUSABLE x2.:00" "$out" "with the raw reading"
 
 test_start "time_once_reports_status_and_ms"
 out="$(_time_once false)"

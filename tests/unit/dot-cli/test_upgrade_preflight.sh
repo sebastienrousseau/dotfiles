@@ -89,6 +89,15 @@ chezmoi() {
     result = run()
     checks += [(result.returncode == 0 and (work / "updated").is_file(),
                 "a checkout only behind its upstream still updates")]
+    # A source that is not a git checkout (chezmoi init from an archive):
+    # nothing to check, chezmoi update runs as is.
+    (work / "updated").unlink(missing_ok=True)
+    plain = work / "plain"
+    plain.mkdir()
+    env["UPGRADE_FIXTURE"] = str(plain)
+    result = run()
+    checks += [(result.returncode == 0 and (work / "updated").is_file(),
+                "a source that is not a git checkout updates without the git checks")]
 for passed, label in checks:
     print(("PASS " if passed else "FAIL ") + label)
 failed = sum(not passed for passed, _ in checks)
