@@ -132,6 +132,7 @@ assert_equals "no" "$([[ "$out" == *Goose* ]] && echo yes || echo no)" "no goose
 test_start "ai_update_macos_ollama_upgrades_through_brew"
 aiu Darwin "ollama brew-cask" ""
 assert_file_contains "$WORK/case/calls" "brew upgrade --cask ollama" "brew is asked to upgrade the cask"
+assert_contains "done" "$(printf '%s\n' "$out" | grep -A1 'Ollama (macOS)')" "the cask upgrade is reported done"
 
 test_start "ai_update_macos_ollama_formula_upgrades_the_formula"
 aiu Darwin "ollama brew-formula" ""
@@ -141,6 +142,7 @@ assert_contains "done" "$(printf '%s\n' "$out" | grep -A1 'Ollama (macOS)')" "th
 
 test_start "ai_update_macos_ollama_from_mise_is_left_to_its_pin"
 aiu Darwin "mise-ollama brew-formula" ""
+assert_equals "0" "$rc" "a pinned ollama is not a failure"
 assert_contains "pinned by mise" "$(printf '%s\n' "$out" | grep -A1 'Ollama (macOS)')" "the mise pin owns the version"
 assert_equals "no" "$(grep -q 'brew upgrade.*ollama' "$WORK/case/calls" && echo yes || echo no)" \
   "a shadowed brew copy is not what runs, so it is not the update"
