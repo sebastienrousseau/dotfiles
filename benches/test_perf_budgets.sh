@@ -111,6 +111,13 @@ _time_once() {
   # point, which the shell has none of.
   secs="${elapsed%%.*}"
   ms="${elapsed##*.}"
+  # bash 5.3 rounds a fraction of .9995 to .9999 up to "1000" without carrying
+  # into the seconds, and prints that first digit as ':', one past '9': 2.9997s
+  # reads "2.:00". It is the next whole second.
+  if [[ "$ms" == ":00" && "$secs" =~ ^[0-9]+$ ]]; then
+    secs=$((10#$secs + 1))
+    ms=000
+  fi
   if [[ ! "$secs" =~ ^[0-9]+$ ]] || [[ ! "$ms" =~ ^[0-9]{3}$ ]]; then
     printf 'CLOCK_UNUSABLE %s' "$elapsed"
     return 1
