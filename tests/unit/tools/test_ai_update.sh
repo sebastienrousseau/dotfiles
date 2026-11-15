@@ -142,10 +142,10 @@ assert_contains "done" "$(printf '%s\n' "$out" | grep -A1 'Ollama (macOS)')" "th
 
 test_start "ai_update_macos_ollama_from_mise_is_left_to_its_pin"
 aiu Darwin "mise-ollama brew-formula" ""
+assert_equals "0" "$rc" "a pinned ollama is not a failure"
 assert_contains "pinned by mise" "$(printf '%s\n' "$out" | grep -A1 'Ollama (macOS)')" "the mise pin owns the version"
 assert_equals "no" "$(grep -q 'brew upgrade.*ollama' "$WORK/case/calls" && echo yes || echo no)" \
   "a shadowed brew copy is not what runs, so it is not the update"
-assert_equals "0" "$rc" "leaving ollama to its pin is not a failure"
 
 test_start "ai_update_macos_ollama_brew_failure_falls_back_to_the_app"
 aiu Darwin "ollama brew-cask" "brew"
