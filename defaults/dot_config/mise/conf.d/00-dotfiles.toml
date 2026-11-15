@@ -25,6 +25,9 @@ verbose = false
 ruby.compile = false
 # Tolerate slow crates.io/index responses (default 20s is too tight)
 fetch_remote_versions_timeout = "60s"
+# Large release assets (ollama's linux tarball is ~1.5 GB) can outlast the
+# default 30m when GitHub serves them slowly; the install then fails.
+http_download_timeout = "2h"
 # Authenticate mise's own GitHub API calls through gh. mise runs the command
 # only when it needs a token and keeps the result in-process; nothing is
 # exported, so child processes never inherit it (see the [env] note below).
