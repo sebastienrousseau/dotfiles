@@ -59,6 +59,42 @@ _upgrade_failure_tail() {
   fi
 }
 
+# _upgrade_dotfiles: the Dotfiles phase of cmd_upgrade. Pulls and applies
+# with chezmoi update, unless the checkout is in a state a pull would break or
+# rewrite: those return EX_TEMPFAIL (75) with the reason as the last line.
+_upgrade_dotfiles() {
+  local update_source branch
+  update_source="$(chezmoi source-path 2>/dev/null)" || update_source=""
+  if [[ -d "$update_source" ]] && git -C "$update_source" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    branch="$(git -C "$update_source" symbolic-ref --quiet --short HEAD)" || {
+      printf 'Dotfiles checkout is detached; switch to a tracked branch before upgrading.\n' >&2
+      return 1
+    }
+    if ! git -C "$update_source" rev-parse --verify '@{upstream}' >/dev/null 2>&1; then
+      printf 'Dotfiles branch %s has no upstream. Push it with -u or explicitly select a tracked branch; no files were changed.\n' "$branch" >&2
+      return 1
+    fi
+    # A dirty checkout is a working state, not a fault: editing the
+    # dotfiles is what a dotfiles repo is for. Decline the pull (a
+    # rebase over local edits is not something to do unasked) and let
+    # the other phases run, with the reason on the step line.
+    if [[ -n "$(git -C "$update_source" status --porcelain)" ]]; then
+      printf 'uncommitted changes; commit or stash them, then rerun\n' >&2
+      return "${EX_TEMPFAIL:-75}"
+    fi
+    # Commits not yet on the upstream are work too. chezmoi update pulls
+    # with --rebase, which rewrites them unasked (a merge commit comes back
+    # flattened). Decline the same way.
+    local ahead
+    ahead="$(git -C "$update_source" rev-list --count '@{upstream}..HEAD' 2>/dev/null)" || ahead=0
+    if [[ "$ahead" -gt 0 ]]; then
+      printf '%s has %s commit(s) not on its upstream; push them or rebase by hand, then rerun\n' "$branch" "$ahead" >&2
+      return "${EX_TEMPFAIL:-75}"
+    fi
+  fi
+  chezmoi update --no-tty
+}
+
 cmd_upgrade() {
   local src_dir
   src_dir="$(require_source_dir)"
@@ -73,30 +109,6 @@ cmd_upgrade() {
   # sysexits EX_TEMPFAIL: a phase returns it to say "not now, and here is
   # why" (last line of its log). It is rendered as a skip, not a failure.
   local EX_TEMPFAIL=75
-
-  _upgrade_dotfiles() {
-    local update_source branch
-    update_source="$(chezmoi source-path 2>/dev/null)" || update_source=""
-    if [[ -d "$update_source" ]] && git -C "$update_source" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-      branch="$(git -C "$update_source" symbolic-ref --quiet --short HEAD)" || {
-        printf 'Dotfiles checkout is detached; switch to a tracked branch before upgrading.\n' >&2
-        return 1
-      }
-      if ! git -C "$update_source" rev-parse --verify '@{upstream}' >/dev/null 2>&1; then
-        printf 'Dotfiles branch %s has no upstream. Push it with -u or explicitly select a tracked branch; no files were changed.\n' "$branch" >&2
-        return 1
-      fi
-      # A dirty checkout is a working state, not a fault: editing the
-      # dotfiles is what a dotfiles repo is for. Decline the pull (a
-      # rebase over local edits is not something to do unasked) and let
-      # the other phases run, with the reason on the step line.
-      if [[ -n "$(git -C "$update_source" status --porcelain)" ]]; then
-        printf 'uncommitted changes; commit or stash them, then rerun\n' >&2
-        return "$EX_TEMPFAIL"
-      fi
-    fi
-    chezmoi update --no-tty
-  }
 
   # _upgrade_step <id> <label> <running-detail> -- cmd [args...]
   # Renders one tracked step: spinner while it runs, then ok (with the

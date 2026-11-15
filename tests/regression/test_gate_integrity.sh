@@ -116,6 +116,14 @@ fi
 # ---------------------------------------------------------------------------
 GATE="$REPO_ROOT/benches/test_perf_budgets.sh"
 PERF_PROBE="instant_dot_version"
+# The pass checks below test the gate's verdict logic, not this machine's
+# speed. On a loaded machine (a fuzzer or a build alongside, load average in
+# the hundreds) the gate rightly refuses to judge: its runner factor passes
+# the 4x cap. So the pass checks pin the runner factor at 1 with a reference
+# no spawn can reach and give a budget no healthy command can miss. A broken
+# gate, or one that ignores the measurement, still fails them; whether the
+# real budgets hold is benches/test_perf_budgets.sh's own job in CI.
+PERF_PASS_ENV=(PERF_CALIBRATION_REF_US=1000000000 PERF_BUDGET_PERCENT=100000)
 
 test_start "perf_gate_fails_on_budget_violation"
 if [[ ! -f "$GATE" ]]; then
@@ -132,7 +140,7 @@ else
 fi
 
 test_start "perf_gate_passes_when_within_budget"
-if PERF_GATE_FILTER="$PERF_PROBE" bash "$GATE" >/dev/null 2>&1; then
+if env "${PERF_PASS_ENV[@]}" PERF_GATE_FILTER="$PERF_PROBE" bash "$GATE" >/dev/null 2>&1; then
   ((TESTS_PASSED++)) || true
   printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
 else
@@ -193,7 +201,7 @@ else
 fi
 
 test_start "perf_gate_measures_without_a_gnu_clock"
-if PATH="$_bsd_path:$PATH" PERF_GATE_FILTER="$PERF_PROBE" \
+if env "${PERF_PASS_ENV[@]}" PATH="$_bsd_path:$PATH" PERF_GATE_FILTER="$PERF_PROBE" \
   bash "$GATE" >/dev/null 2>&1; then
   ((TESTS_PASSED++)) || true
   printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
@@ -211,8 +219,8 @@ rm -rf "$_bsd_path"
 # ---------------------------------------------------------------------------
 test_start "icloud_safety_test_still_checks_canary"
 GATE="$REPO_ROOT/tests/regression/test_macos_icloud_symlinks_safety.sh"
-if grep -q "CANARY-DO-NOT-DELETE" "$GATE" \
-   && grep -qE 'canary\.txt' "$GATE"; then
+if grep -q "CANARY-DO-NOT-DELETE" "$GATE" &&
+  grep -qE 'canary\.txt' "$GATE"; then
   ((TESTS_PASSED++)) || true
   printf '  \033[0;32m✓\033[0m %s\n' "$CURRENT_TEST"
 else
@@ -229,7 +237,7 @@ test_start "icloud_script_source_still_free_of_destructive_ops"
 TMPL="$REPO_ROOT/defaults/run_before_macos-icloud-symlinks.sh.tmpl"
 body=$(grep -vE '^\s*#' "$TMPL" | grep -vE '^\s*_log ')
 found=()
-echo "$body" | grep -qE 'rm -rf'   && found+=("rm -rf")
+echo "$body" | grep -qE 'rm -rf' && found+=("rm -rf")
 echo "$body" | grep -qE '^\s*mv\s' && found+=("mv")
 echo "$body" | grep -qE '^\s*chmod\s' && found+=("chmod")
 echo "$body" | grep -qE '^\s*chown\s' && found+=("chown")

@@ -45,6 +45,29 @@ out="$(_time_once _garble_clock)"
 assert_equals 1 "$?" "an unparsable reading returns 1"
 assert_contains "CLOCK_UNUSABLE x" "$out" "and reports the raw reading"
 
+# bash 5.3's `time` rounds a fraction of .9995 to .9999 up to "1000" without
+# carrying into the seconds, and prints its first digit as ':' (one past '9'):
+# 2.9997s reads "2.:00". About one reading in 2000 lands there, and the gate
+# then refused to report: a random red on an unchanged tree.
+_carry_clock() { TIMEFORMAT='2.:00'; }
+_carry_clock_zero() { TIMEFORMAT='0.:00'; }
+
+test_start "time_once_carries_a_rounded_up_fraction"
+out="$(_time_once _carry_clock)"
+assert_equals 0 "$?" "a reading of 2.:00 is a time, not an unusable clock"
+assert_equals "0 3000" "$out" "and is 3000ms"
+out="$(_time_once _carry_clock_zero)"
+assert_equals "0 1000" "$out" "0.:00 is 1000ms"
+
+_odd_clock() { TIMEFORMAT='2.:5:'; }
+test_start "time_once_still_refuses_other_odd_fractions"
+out="$(_time_once _odd_clock)"
+assert_equals 1 "$?" "only the rounded-up form is carried"
+_odd_secs_clock() { TIMEFORMAT='x2.:00'; }
+out="$(_time_once _odd_secs_clock)"
+assert_equals 1 "$?" "a rounded-up fraction after non-numeric seconds is still refused"
+assert_contains "CLOCK_UNUSABLE x2.:00" "$out" "with the raw reading"
+
 test_start "time_once_reports_status_and_ms"
 out="$(_time_once false)"
 assert_equals 0 "$?" "a parseable reading returns 0"
@@ -121,8 +144,10 @@ assert_contains "runner=4.03x per_spawn=4033us reference=1000us exceeds the 4.00
 # nothing, so the gate skips visibly and counts neither a pass nor a run.
 test_start "bench_gate_skips_without_its_tools"
 before="$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
-out="$(BENCH_TOOLS="bash definitely-not-installed-tool" _gate_bench_quick "$REPO_ROOT/benches/bench.sh"
-  printf '|%s:%s:%s' "$TESTS_RUN" "$TESTS_PASSED" "$TESTS_FAILED")"
+out="$(
+  BENCH_TOOLS="bash definitely-not-installed-tool" _gate_bench_quick "$REPO_ROOT/benches/bench.sh"
+  printf '|%s:%s:%s' "$TESTS_RUN" "$TESTS_PASSED" "$TESTS_FAILED"
+)"
 assert_contains "SKIPPED — definitely-not-installed-tool not installed" "$out" "names the missing tool"
 assert_contains "|$before" "$out" "and leaves the counters alone"
 BENCH_TOOLS=definitely-not-installed-tool _gate_bench_quick "$REPO_ROOT/benches/bench.sh" >/dev/null

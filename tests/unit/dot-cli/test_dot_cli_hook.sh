@@ -139,11 +139,16 @@ assert_contains '"cwd":""}' "$(record_of claude s6)" "an array cwd is empty"
 
 test_start "the_time_is_utc_on_this_bash_too"
 # bin/dot runs under whichever bash is first on PATH: /bin/bash 3.2 on
-# macOS (the cases above), a bash with printf %()T elsewhere.
+# macOS (the cases above), a bash with printf %()T elsewhere. The minute is
+# read before and after the run, so one that crosses a minute still
+# matches; TZ=Asia/Tokyo is nine hours off, which neither would be.
+before="$(date -u +%Y-%m-%dT%H:%M)"
 printf '%s' '{"session_id":"s7","hook_event_name":"Stop"}' | env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="/usr/bin:/bin" \
   XDG_STATE_HOME="$S" XDG_RUNTIME_DIR="$R" TZ=Asia/Tokyo "$BASH" "$REPO_ROOT/bin/dot" cli hook run >/dev/null 2>&1
-want="$(date -u +%Y-%m-%dT%H:%M)"
-assert_contains "\"time\":\"$want" "$(record_of claude s7)" "bash $BASH_VERSION writes UTC with TZ set elsewhere"
+after="$(date -u +%Y-%m-%dT%H:%M)"
+rec="$(record_of claude s7)"
+assert_true "[[ '$rec' == *'\"time\":\"$before'* || '$rec' == *'\"time\":\"$after'* ]]" \
+  "bash $BASH_VERSION writes UTC with TZ set elsewhere"
 
 test_start "without_jq_the_fields_are_still_read"
 NOJQ="$WORK/nojq"

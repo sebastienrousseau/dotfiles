@@ -6,9 +6,19 @@ This file documents all notable changes to this project.
 
 ### Fixed
 
+- `dot system update` no longer rebases a dotfiles branch with commits not yet on its upstream. Its Dotfiles step runs `chezmoi update`, which pulls with `--rebase`: unpushed work was rewritten unasked (a merge commit came back flattened). Like uncommitted changes, it now skips the step and says why; a branch only behind its upstream still updates.
 - `chezmoi apply` removes `kiro-cli` from mise's global config (`~/.config/mise/config.toml`). `dot ai install` had registered it there with `mise use -g`, a file chezmoi does not manage, so 0.2.544's removal of its mise plugin left a declaration nothing could install: `mise install`, and with it the Mise tools step of `dot upgrade`, failed with "No repository found for plugin kiro-cli". `install/migrate/retire-mise-tools.sh` unregisters each tool the dotfiles retired, keeping its installed files.
 - `dot doctor` no longer reports the mise shell cache as stale forever. Since v0.2.545 nothing writes a bash mise cache, and prewarm removes the others, yet the check wanted one in zsh, bash and fish and suggested prewarm. It now checks zsh and fish for mise and, when only mise is stale, says to open a new shell.
 - `dot ai update` and `dot system update --globals` rebuild pipx venvs whose Python is gone. When Homebrew dropped `python@3.13`, every venv built on it failed `pipx upgrade-all` with "invalid python interpreter", and `dot ai update` reported only "pipx upgrade-all failed". Both now run `pipx reinstall-all`, pipx's own remedy, and upgrade again; any other pipx failure still fails.
+- The theme fuzz test's 10kb-name check and the perf gate's integrity checks no longer fail on a loaded machine. The 10kb name is held against a 4-character one timed in the same run once it passes 500ms, and the gate's pass checks pin its runner factor, so they test the gate's verdicts rather than the machine's speed. A name whose cost grows with its length, and a gate that always fails, are still caught.
+- The perf gate no longer fails at random on a reading of .9995 to .9999 seconds. bash 5.3's `time` prints those as `2.:00` (the fraction rounded up to 1000 without carrying), which the gate took for an unusable clock and refused to report, about one reading in 2000. It now reads `N.:00` as the next whole second.
+- `dot ai update` updates Ollama on macOS by what installed it: a Homebrew formula with `brew upgrade ollama`, a cask with `--cask`, and a mise install not at all, since its `[ai_tools]` pin decides. It always ran `brew upgrade ollama --cask`, which fails for the formula and the mise install, so the step always read "Update via App". The version report shows the client version instead of the word "instance" from the warnings `ollama --version` prints when no server runs.
+- `dot cli hook install` passes over an older `dot` first on PATH that does not know `dot cli` (a Homebrew install from before it), which answered every agent hook event with `Unknown command: cli`, and wires in this checkout's `bin/dot` instead.
+
+### Changed
+
+- mise allows two hours for a release download (`http_download_timeout`, default 30m): ollama's Linux tarball, about 1.5 GB, could outlast the default when GitHub served it slowly, and the install failed (#1427).
+- Ollama 0.40.15 from 0.40.3, the newest release at least seven days old.
 
 ### Security
 

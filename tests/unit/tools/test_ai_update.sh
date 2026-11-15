@@ -44,6 +44,15 @@ aiu() {
       node) mk node 'echo v24.1.0' ;;
       mise) mk mise '[ "${1:-}" = --version ] && echo "2026.9.9 macos-arm64"; exit 0' ;;
       ollama) mk ollama 'echo "ollama version is 0.9.1"' ;;
+      # With no server running, ollama --version prints two warnings.
+      ollama-noserver) mk ollama 'echo "Warning: could not connect to a running Ollama instance"
+          echo "Warning: client version is 0.40.3"' ;;
+      # An ollama mise manages: on PATH from a mise shims directory.
+      mise-ollama) mk ollama 'echo "ollama version is 0.9.1"' && mkdir -p "$d/mise/shims" &&
+        mv "$d/stubs/ollama" "$d/mise/shims/ollama" ;;
+      # Homebrew with ollama as a formula only, or as a cask only.
+      brew-formula) mk brew 'case "$1 ${2:-}" in "list --cask") exit 1 ;; esac; exit 0' ;;
+      brew-cask) mk brew 'case "$1 ${2:-}" in "list --formula") exit 1 ;; esac; exit 0' ;;
       # pipx whose venvs lost their Python: upgrade-all fails until
       # reinstall-all has run.
       stale-pipx) mk pipx 'case "$1" in upgrade-all) [ -f "$HOME/reinstalled" ] && exit 0
@@ -55,7 +64,7 @@ aiu() {
     esac
   done
   rc=0
-  out="$(env -i HOME="$d/home" PATH="$d/stubs:$d/tools:$SYS" TERM=dumb TMPDIR="$d" \
+  out="$(env -i HOME="$d/home" PATH="$d/stubs:$d/mise/shims:$d/tools:$SYS" TERM=dumb TMPDIR="$d" \
     "$REAL_BASH" "$AIU" </dev/null 2>&1)" || rc=$?
 }
 
@@ -121,12 +130,32 @@ aiu Darwin "" ""
 assert_equals "no" "$([[ "$out" == *Goose* ]] && echo yes || echo no)" "no goose, no goose step"
 
 test_start "ai_update_macos_ollama_upgrades_through_brew"
-aiu Darwin "ollama brew" ""
-assert_file_contains "$WORK/case/calls" "brew upgrade ollama --cask" "brew is asked to upgrade the cask"
+aiu Darwin "ollama brew-cask" ""
+assert_file_contains "$WORK/case/calls" "brew upgrade --cask ollama" "brew is asked to upgrade the cask"
+assert_contains "done" "$(printf '%s\n' "$out" | grep -A1 'Ollama (macOS)')" "the cask upgrade is reported done"
+
+test_start "ai_update_macos_ollama_formula_upgrades_the_formula"
+aiu Darwin "ollama brew-formula" ""
+assert_equals "brew upgrade ollama" "$(grep 'upgrade.*ollama' "$WORK/case/calls")" \
+  "brew upgrades the formula, not a cask"
+assert_contains "done" "$(printf '%s\n' "$out" | grep -A1 'Ollama (macOS)')" "the formula upgrade is reported done"
+
+test_start "ai_update_macos_ollama_from_mise_is_left_to_its_pin"
+aiu Darwin "mise-ollama brew-formula" ""
+assert_equals "0" "$rc" "a pinned ollama is not a failure"
+assert_contains "pinned by mise" "$(printf '%s\n' "$out" | grep -A1 'Ollama (macOS)')" "the mise pin owns the version"
+assert_equals "no" "$(grep -q 'brew upgrade.*ollama' "$WORK/case/calls" && echo yes || echo no)" \
+  "a shadowed brew copy is not what runs, so it is not the update"
 
 test_start "ai_update_macos_ollama_brew_failure_falls_back_to_the_app"
-aiu Darwin "ollama brew" "brew"
+aiu Darwin "ollama brew-cask" "brew"
 assert_contains "Update via App" "$(printf '%s\n' "$out" | grep -A1 'Ollama (macOS)')" "a failed brew upgrade is not reported as done"
+
+test_start "ai_update_version_report_ignores_ollama_warnings"
+aiu Darwin "ollama-noserver" ""
+report="$(printf '%s\n' "$out" | tr -d '\033' | sed 's/\[[0-9;]*m//g' | grep -A1 '^Ollama:' | paste -sd'|' -)"
+assert_equals "Ollama:      0.40.3|Pipx:        N/A" "$report" \
+  "one line, the client version, not the word 'instance'"
 
 test_start "ai_update_linux_ollama_unsupported_arch_is_skipped"
 AIU_ARCH=riscv64 aiu Linux "ollama" ""

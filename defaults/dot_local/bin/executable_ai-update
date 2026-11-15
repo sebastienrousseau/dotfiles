@@ -248,12 +248,32 @@ _aiu_ollama() {
     _aiu_ollama_linux
     return
   fi
-  # macOS users typically use the .app or Brew
   step "Ollama (macOS)"
-  if command -v brew >/dev/null 2>&1 && brew upgrade ollama --cask >/dev/null 2>&1; then
-    ok
-  else
-    skip "Update via App"
+  _aiu_ollama_macos
+}
+
+# _aiu_ollama_macos: update the ollama that runs, by what installed it. A
+# mise copy (first on PATH when mise is active) follows its [ai_tools] pin,
+# so a brew copy behind it is not the one to update.
+_aiu_ollama_macos() {
+  if [[ "$(command -v ollama)" == */mise/* ]]; then
+    skip "pinned by mise: [ai_tools] in defaults/.chezmoidata.toml"
+    return 0
+  fi
+  case "$(_aiu_ollama_brew_kind)" in
+    formula) brew upgrade ollama >/dev/null 2>&1 && ok && return 0 ;;
+    cask) brew upgrade --cask ollama >/dev/null 2>&1 && ok && return 0 ;;
+  esac
+  skip "Update via App"
+}
+
+# _aiu_ollama_brew_kind: "formula" or "cask" when Homebrew installed ollama.
+_aiu_ollama_brew_kind() {
+  command -v brew >/dev/null 2>&1 || return 0
+  if brew list --formula ollama >/dev/null 2>&1; then
+    echo formula
+  elif brew list --cask ollama >/dev/null 2>&1; then
+    echo cask
   fi
 }
 
@@ -283,7 +303,8 @@ _aiu_version() {
   if [[ "$field" == "-" ]]; then
     v="$("$@" 2>/dev/null || true)"
   else
-    v="$("$@" 2>/dev/null | awk "{print \$$field}" || true)"
+    # The last line: ollama --version prints its warnings before the version.
+    v="$("$@" 2>/dev/null | awk "NF {v = \$$field} END {print v}" || true)"
   fi
   printf '%s\n' "${v:-N/A}"
 }
