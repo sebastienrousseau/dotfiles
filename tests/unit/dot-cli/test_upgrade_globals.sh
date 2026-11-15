@@ -42,6 +42,31 @@ upgrade() {
     eval "$*"' _ "$REPO_ROOT" "$@"
 }
 
+test_start "globals_rebuild_pipx_venvs_with_a_stale_interpreter"
+cp "$WORK/bin/pipx" "$WORK/pipx.plain"
+cat >"$WORK/bin/pipx" <<STUB
+#!/bin/sh
+echo "pipx \$*" >>"$WORK/calls"
+case "\$1" in
+  upgrade-all) [ -f "$WORK/reinstalled" ] && exit 0
+    echo "Not upgrading ruff. It has an invalid python interpreter /x/bin/python."; exit 1 ;;
+  reinstall-all) : >"$WORK/reinstalled" ;;
+esac
+STUB
+rm -f "$WORK/calls" "$WORK/reinstalled"
+rc=0
+upgrade 'has_command() { [[ "$1" == pipx ]]; }; _dot_upgrade_globals' >/dev/null 2>&1 || rc=$?
+assert_equals "0" "$rc" "the phase succeeds once the venvs are rebuilt"
+assert_equals "pipx upgrade-all|pipx reinstall-all|pipx upgrade-all" "$(paste -sd '|' "$WORK/calls")" \
+  "upgrade, rebuild, upgrade again"
+cp "$WORK/pipx.plain" "$WORK/bin/pipx"
+rm -f "$WORK/calls"
+rc=0
+FAIL_pipx=1 upgrade 'has_command() { [[ "$1" == pipx ]]; }; _dot_upgrade_globals' >/dev/null 2>&1 || rc=$?
+assert_equals "1" "$rc" "a plain pipx failure still fails"
+assert_equals "pipx upgrade-all" "$(paste -sd '|' "$WORK/calls")" "no reinstall without the stale-interpreter message"
+rm -f "$WORK/calls"
+
 test_start "globals_only_when_asked"
 assert_equals "1" "$(upgrade 'dot_upgrade_prepare --yes --globals; echo $DOT_UPGRADE_GLOBALS')" "--globals asks for the phase"
 assert_equals "0" "$(upgrade 'dot_upgrade_prepare --yes; echo $DOT_UPGRADE_GLOBALS')" "it is off by default"

@@ -44,6 +44,11 @@ aiu() {
       node) mk node 'echo v24.1.0' ;;
       mise) mk mise '[ "${1:-}" = --version ] && echo "2026.9.9 macos-arm64"; exit 0' ;;
       ollama) mk ollama 'echo "ollama version is 0.9.1"' ;;
+      # pipx whose venvs lost their Python: upgrade-all fails until
+      # reinstall-all has run.
+      stale-pipx) mk pipx 'case "$1" in upgrade-all) [ -f "$HOME/reinstalled" ] && exit 0
+          echo "Not upgrading ruff. It has an invalid python interpreter /x/bin/python."; exit 1 ;;
+        reinstall-all) : >"$HOME/reinstalled" ;; esac' ;;
       local-goose) mkdir -p "$d/home/.local/bin" && printf '#!/bin/sh\n' >"$d/home/.local/bin/goose" &&
         chmod +x "$d/home/.local/bin/goose" ;;
       *) mk "$t" 'exit 0' ;;
@@ -81,6 +86,18 @@ assert_contains "Claude Code" "$out" "a failing npm update no longer ends the ru
 test_start "ai_update_pipx_failure_does_not_abort"
 aiu Darwin "pipx lms" "pipx lms"
 assert_contains "2 update(s) failed" "$out" "pipx and lms both counted"
+
+test_start "ai_update_pipx_stale_interpreter_is_rebuilt"
+aiu Darwin "stale-pipx" ""
+assert_equals "0" "$rc" "the run succeeds once the venvs are rebuilt"
+assert_equals "pipx upgrade-all|pipx reinstall-all|pipx upgrade-all" \
+  "$(grep -E '^pipx (upgrade|reinstall)' "$WORK/case/calls" | paste -sd'|' -)" "upgrade, rebuild, upgrade again"
+
+test_start "ai_update_pipx_other_failure_is_not_rebuilt"
+aiu Darwin "pipx" "pipx"
+assert_equals "1" "$rc" "a plain failure still fails"
+assert_equals "pipx upgrade-all" "$(grep -E '^pipx (upgrade|reinstall)' "$WORK/case/calls" | paste -sd'|' -)" \
+  "no reinstall without the stale-interpreter message"
 
 test_start "ai_update_version_report_shows_na_for_missing_tools"
 aiu Darwin "node" ""
