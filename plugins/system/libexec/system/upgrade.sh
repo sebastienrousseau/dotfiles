@@ -164,8 +164,20 @@ _dot_upgrade_globals() {
   local rc=0
   if has_command npm; then npm update -g --audit=false || rc=1; fi
   if has_command cargo && has_command cargo-install-update; then cargo install-update -a || rc=1; fi
-  if has_command pipx; then pipx upgrade-all || rc=1; fi
+  if has_command pipx; then _dot_upgrade_pipx || rc=1; fi
   return "$rc"
+}
+
+# _dot_upgrade_pipx: pipx upgrade-all. A venv whose Python is gone (Homebrew
+# dropped its python@3.x) is never upgraded; pipx's own remedy is to rebuild
+# every venv on today's Python, then upgrade again.
+_dot_upgrade_pipx() {
+  local log rc=0
+  log="$(pipx upgrade-all 2>&1)" || rc=$?
+  printf '%s\n' "$log"
+  ((rc == 0)) && return 0
+  [[ "$log" == *"invalid python interpreter"* ]] || return "$rc"
+  pipx reinstall-all && pipx upgrade-all
 }
 
 # dot_upgrade_nix_steps <src_dir>: the Nix phases, when a flake is present.
