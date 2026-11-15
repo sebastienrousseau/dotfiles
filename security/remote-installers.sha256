@@ -1,8 +1,8 @@
 # SHA-256 allowlist for remotely executed installer scripts.
 # Format: SHA256<two spaces>HTTPS_URL
 # Update intentionally after reviewing the upstream diff.
-ee1ea43ce4e9e56356c4ab6dad907ef357ae4bdfcaadb682735909fb57c9c640  https://antigravity.google/cli/install.sh
-ab5ae40513348ec4e6047cc7338040aab2df5246800c111d22065766ba6013f0  https://github.com/block/goose/releases/download/stable/download_cli.sh
+62966c07365423bd4dc209355060744058fb30d60f5323e2d360e39de64e5042  https://antigravity.google/cli/install.sh
+710f208cf0225ac330f71cc1540d36b10a6be7a850334b5ec4770fe96fbc57c4  https://github.com/block/goose/releases/download/stable/download_cli.sh
 3a68d3406cf674e17bed1733a4dcf37805e2e47d87417700007d7e1aa766a944  https://claude.ai/install.sh
 7212eb6da4e7d53bb4925cfb84e4a87dbdb123843b2e4afd2c2400b3d0649da3  https://code.kimi.com/kimi-code/install.sh
 7fd6fdc75d9418b2e58356726fcbf1ae849416f773925da07d0ccc7a60d3e791  https://x.ai/cli/install.sh

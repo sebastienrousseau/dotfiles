@@ -131,7 +131,17 @@ _aiu_npm() {
 _aiu_pipx() {
   command -v pipx >/dev/null 2>&1 || return 0
   step "Pipx tools"
-  if pipx upgrade-all >/dev/null 2>&1; then ok; else fail "pipx upgrade-all failed"; fi
+  local log
+  if log="$(pipx upgrade-all 2>&1)"; then
+    ok
+  # A venv whose Python is gone (Homebrew dropped its python@3.x) is never
+  # upgraded; pipx's own remedy is to rebuild every venv on today's Python.
+  elif [[ "$log" == *"invalid python interpreter"* ]] &&
+    pipx reinstall-all >/dev/null 2>&1 && pipx upgrade-all >/dev/null 2>&1; then
+    ok
+  else
+    fail "pipx upgrade-all failed"
+  fi
 }
 
 _aiu_packages() {
