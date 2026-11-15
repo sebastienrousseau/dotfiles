@@ -7,11 +7,22 @@
 # zcompdump, PATH length, shell coverage, zsh hooks, perf baseline.
 # Sourced by scripts/diagnostics/doctor.sh; uses its helpers and globals.
 
+# _doctor_cache_shells <tool>: the shells that keep an init cache for <tool>.
+# mise has none in bash: bash never activates mise from a cache, and prewarm
+# writes no mise cache in any shell. zsh and fish write theirs at the first
+# prompt.
+_doctor_cache_shells() {
+  case "$1" in
+    mise) echo "zsh fish" ;;
+    *) echo "zsh bash fish" ;;
+  esac
+}
+
 # _doctor_cache_stale <tool> <bin>: true when any shell's _cached_eval init
 # cache for <tool> is missing or older than the tool's binary.
 _doctor_cache_stale() {
   local tool="$1" bin="$2" sh cache
-  for sh in zsh bash fish; do
+  for sh in $(_doctor_cache_shells "$tool"); do
     cache="$cache_base/$sh/$tool-init.$sh"
     if [[ ! -f "$cache" || "$bin" -nt "$cache" ]]; then
       return 0
@@ -69,8 +80,18 @@ _doctor_perf_cache_freshness() {
     _ok "shell caches" "fresh"
   else
     caches_fresh="stale"
-    _warn "shell caches" "stale ($stale_tools) — run dot shell update --prewarm"
+    _warn "shell caches" "stale ($stale_tools) — $(_doctor_cache_hint "$stale_tools")"
   fi
+}
+
+# _doctor_cache_hint <stale tools>: what rebuilds them. prewarm rebuilds every
+# cache but mise's, which the next zsh or fish shell writes.
+_doctor_cache_hint() {
+  case "$1" in
+    mise) echo "open a new zsh or fish shell to rebuild it" ;;
+    *mise*) echo "run dot shell update --prewarm, then open a new shell" ;;
+    *) echo "run dot shell update --prewarm" ;;
+  esac
 }
 
 # 2. Slow-init tools that are present but NOT wrapped in _cached_eval.

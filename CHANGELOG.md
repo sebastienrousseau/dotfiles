@@ -2,6 +2,12 @@
 
 This file documents all notable changes to this project.
 
+## Unreleased
+
+### Fixed
+
+- `dot doctor` no longer reports the mise shell cache as stale forever. Since v0.2.545 nothing writes a bash mise cache, and prewarm removes the others, yet the check wanted one in zsh, bash and fish and suggested prewarm. It now checks zsh and fish for mise and, when only mise is stale, says to open a new shell.
+
 ## v0.2.545 (2026-11-14)
 
 ### Added
