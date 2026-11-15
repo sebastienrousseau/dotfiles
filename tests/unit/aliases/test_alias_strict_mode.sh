@@ -116,7 +116,10 @@ printf '#!/bin/sh\necho "governance policy=$DOTFILES_ALIAS_POLICY" >>"%s"\n' "$C
 # apply_script <strict>: run the fixture apply script with the stub chezmoi.
 apply_script() {
   : >"$CALLS"
-  env -i HOME="$SB/home" PATH="$SB/bin:/usr/bin:/bin" NO_COLOR=1 DOTFILES_NONINTERACTIVE=1 \
+  # TMPDIR in the sandbox: chezmoi-apply.sh takes its single-instance lock
+  # there, and the shared /tmp lock, held by another file in the parallel
+  # suite, made it exit 0 before governance ran.
+  env -i HOME="$SB/home" TMPDIR="$SB" PATH="$SB/bin:/usr/bin:/bin" NO_COLOR=1 DOTFILES_NONINTERACTIVE=1 \
     DOTFILES_ALIAS_STRICT_MODE="$1" DOTFILES_SNAPSHOT_ON_APPLY=0 DOTFILES_POST_APPLY_REPAIR=0 \
     DOTFILES_CHEZMOI_STATUS=0 "$BASH" "$FX/scripts/ops/chezmoi-apply.sh" >/dev/null 2>&1 </dev/null || true
 }
