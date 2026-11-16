@@ -4,6 +4,10 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+### Fixed
+
+- The dotfiles checkout no longer gives mise a rust. `mise.toml` pinned `rust = "1.95.0"`, so mise exported `RUSTUP_TOOLCHAIN=1.95.0` to everything run inside it, outranking any `rust-toolchain.toml`: with that toolchain's install damaged, `rustc` failed throughout the tree with "missing manifest in toolchain '1.95.0'". rustup now decides there, as it already does everywhere else (`conf.d/00-dotfiles.toml` leaves rust out for the same reason), and `test_mise_lock.sh` has mise read both configs to keep it that way.
+
 ### Changed
 
 - AI CLI pins move to the newest release at least seven days old: Codex 0.167.0 (from 0.162.1), GitHub Copilot CLI 1.0.107 (1.0.95), opencode 1.19.5 (1.19.0, the aqua build and `npm:opencode-ai`), autohand 0.9.10 (0.9.8), Qwen Code 0.27.0 (0.25.1) and Crush 0.100.0 (0.98.1). Ollama stays at 0.40.15: 0.40.16 is six days old.

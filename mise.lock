@@ -557,10 +557,6 @@ checksum = "sha256:2a0880987682f6e5694e5ffd028c6cdb9c1a5d9f37653c738f74db88a5e5f
 url = "https://github.com/anomalyco/opencode/releases/download/v1.2.16/opencode-windows-x64.zip"
 url_api = "https://api.github.com/repos/anomalyco/opencode/releases/assets/366291800"
 
-[[tools.rust]]
-version = "1.95.0"
-backend = "core:rust"
-
 [[tools.sops]]
 version = "3.13.3"
 backend = "aqua:getsops/sops"

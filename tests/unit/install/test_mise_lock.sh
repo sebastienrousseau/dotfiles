@@ -56,7 +56,28 @@ test_start "mise_global_config_authenticates_mise_in_process"
 assert_output_contains 'github.credential_command = "gh auth token"' \
   "toml_table '$global_config' settings"
 
-for tool in node rust go bun starship wasmtime sops yazi zellij; do
+# Neither config may give mise a rust: mise's rust exports RUSTUP_TOOLCHAIN,
+# which outranks every project's rust-toolchain.toml, and a toolchain pinned
+# this way breaks rustc in the whole tree when its install is damaged
+# ("missing manifest in toolchain"). rustup and each project's pin decide.
+# mise itself reads each file, in a sandbox with no other config.
+REAL_MISE="$(command -v mise || true)"
+if [[ -n "$REAL_MISE" ]]; then
+  sandbox="$(mktemp -d)"
+  for cfg in "$config" "$global_config"; do
+    test_start "mise_config_leaves_rust_to_rustup_$(basename "$cfg" .toml)"
+    got="$(env -i HOME="$sandbox" PATH="$(dirname "$REAL_MISE"):/usr/bin:/bin" \
+      MISE_DATA_DIR="$sandbox/d" MISE_CACHE_DIR="$sandbox/c" MISE_STATE_DIR="$sandbox/s" \
+      MISE_CONFIG_DIR="$sandbox/cfg" MISE_OFFLINE=1 \
+      mise config get -f "$cfg" tools.rust 2>/dev/null)" && rc=0 || rc=$?
+    assert_equals "1:" "$rc:$got" "$(basename "$cfg") declares no rust for mise" || true
+  done
+  rm -rf "$sandbox"
+else
+  echo "  - skipped: mise not installed"
+fi
+
+for tool in node go bun starship wasmtime sops yazi zellij; do
   test_start "mise_lock_contains_${tool}"
   assert_file_contains "$lock" "[[tools.$tool]]" "lock contains $tool"
 done
