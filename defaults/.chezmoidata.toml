@@ -137,13 +137,13 @@ tpm_commit = "7bdb7ca33c9cc6440a600202b50142f401b6fe21" # pragma: allowlist secr
 # the release verified here, without the age gate: the gate guards against
 # a third party's compromised release, and these are our own.
 [ai_tools]
-"npm:@openai/codex" = "0.167.0"
-"npm:@github/copilot" = "1.0.107"
+"npm:@openai/codex" = "0.169.0"
+"npm:@github/copilot" = "1.0.112"
 "npm:opencode-ai" = "1.19.5"
-"npm:autohand-cli" = "0.9.10"
+"npm:autohand-cli" = "0.9.11"
 "npm:@qwen-code/qwen-code" = "0.27.4"
 "npm:@guizmo-ai/zai-cli" = "0.3.5"
-"aqua:charmbracelet/crush" = "0.100.0"
+"aqua:charmbracelet/crush" = "0.101.0"
 "pipx:aider-chat" = "0.86.2"
 "aqua:ollama/ollama" = "0.40.16"
 "opencode" = "1.19.5"
