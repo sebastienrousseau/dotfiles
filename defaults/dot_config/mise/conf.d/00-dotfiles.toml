@@ -80,7 +80,7 @@ zig = "latest"
 # CLI Tools
 atuin = "latest"
 bat = "latest"
-codex = "0.167.0"
+codex = "0.169.0"
 # corralctl, passmcp, and draft — the AI Ecosystem & Governance Suite,
 # managed and updated globally via mise (`github:sebastienrousseau/...`).
 "github:sebastienrousseau/corralctl" = "0.0.54"
@@ -146,7 +146,7 @@ uv = "latest"
 
 # AI tools
 # "npm:@anthropic-ai/claude-code" = "latest"  # disabled 2026-06-04: npm 11 skips the platform-native optionalDependency on global installs, breaking the binary. Use Anthropic's native installer instead (~/.local/bin/claude, self-updating).
-"npm:@github/copilot" = "1.0.107"
+"npm:@github/copilot" = "1.0.112"
 # antigravity-cli (agy) is installed via native curl installer, not npm:
 # curl -fsSL https://antigravity.google/cli/install.sh | bash
 # codex provided by the native `codex` pin above; `npm:codex-cli` was an
@@ -155,7 +155,7 @@ uv = "latest"
 # `npm:opencode-ai` is a redundant duplicate using the broken npm optional-dep
 # wrapper pattern — do not reintroduce it.
 opencode = "1.19.5"
-"npm:autohand-cli" = "0.9.10"
+"npm:autohand-cli" = "0.9.11"
 "npm:@qwen-code/qwen-code" = "0.27.4"
 "npm:@guizmo-ai/zai-cli" = "0.3.5"
 # "pipx:mistral-vibe" = "latest"  # disabled 2026-05-12: dep `mistralai` quarantined on PyPI; re-enable when restored
