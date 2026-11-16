@@ -120,7 +120,7 @@ minisign = "latest"
 # executable"), which silently breaks `dot doctor`'s startup benchmark.
 # It's provided natively by Brewfile.cli (arm64) and by Linux package
 # managers instead.
-"aqua:ollama/ollama" = "0.40.15"
+"aqua:ollama/ollama" = "0.40.16"
 "aqua:Nukesor/pueue/pueue" = "4.0.4"
 "aqua:Nukesor/pueue/pueued" = "4.0.4"
 wasmtime = "48.0.2"
@@ -156,7 +156,7 @@ uv = "latest"
 # wrapper pattern — do not reintroduce it.
 opencode = "1.19.5"
 "npm:autohand-cli" = "0.9.10"
-"npm:@qwen-code/qwen-code" = "0.27.0"
+"npm:@qwen-code/qwen-code" = "0.27.4"
 "npm:@guizmo-ai/zai-cli" = "0.3.5"
 # "pipx:mistral-vibe" = "latest"  # disabled 2026-05-12: dep `mistralai` quarantined on PyPI; re-enable when restored
 
