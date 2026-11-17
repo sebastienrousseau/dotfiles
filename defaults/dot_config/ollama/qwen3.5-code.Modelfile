@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+# Coding variant of qwen3.5:4b tuned for MacBook (A18 Pro, 8 GB unified memory).
+# Sampling: Qwen's coding recommendation; presence_penalty 0 because code
+# legitimately repeats tokens (identifiers, braces, keywords).
+FROM qwen3.5:4b
+PARAMETER num_ctx 16384
+PARAMETER temperature 0.6
+PARAMETER top_p 0.95
+PARAMETER top_k 20
+PARAMETER min_p 0
+PARAMETER presence_penalty 0
+PARAMETER repeat_penalty 1
+SYSTEM """You are a senior software engineer fluent in Rust, Python, Go and Java.
+- Write idiomatic, correct, production-quality code for the language asked: Rust (ownership, Result/?, no unwrap in library code, clippy-clean), Python (3.12+, type hints, PEP 8), Go (gofmt, explicit error handling, small interfaces), Java (21+, records, streams where clear).
+- If a request is ambiguous, state the interpretation you chose in one line.
+- Prefer the standard library. Include brief tests when useful.
+- Be concise: code first, minimal prose."""

@@ -64,6 +64,9 @@ assert_equals "/DOT_HOME/.local/share/mise/shims/ollama serve" \
 assert_equals "1|q8_0|1|1|32768|127.0.0.1:11434" \
   "$(plist_field "$WORK/agent.plist" '"|".join(d["EnvironmentVariables"][k] for k in ("OLLAMA_FLASH_ATTENTION","OLLAMA_KV_CACHE_TYPE","OLLAMA_MAX_LOADED_MODELS","OLLAMA_NUM_PARALLEL","OLLAMA_CONTEXT_LENGTH","OLLAMA_HOST"))')" \
   "the server gets the [ollama] settings"
+assert_equals "30m|1|Interactive" \
+  "$(plist_field "$WORK/agent.plist" '"|".join((d["EnvironmentVariables"]["OLLAMA_KEEP_ALIVE"], d["EnvironmentVariables"]["MISE_OFFLINE"], d["ProcessType"]))')" \
+  "the model stays loaded for keep_alive, mise never downloads at login, and launchd does not throttle the server"
 assert_equals "True True" "$(plist_field "$WORK/agent.plist" 'd["RunAtLoad"], d["KeepAlive"]' | tr -d '(),')" \
   "the server starts at login and is restarted if it exits"
 

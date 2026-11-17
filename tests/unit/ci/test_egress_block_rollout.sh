@@ -103,6 +103,20 @@ for rel in "${CHECKOUT_WORKFLOWS[@]}"; do
   done
 done
 
+# install-tools.sh fetches ripgrep with apt, which the runner's mirror list
+# sends to security.ubuntu.com, and falls back to a pinned GitHub release,
+# which redirects to release-assets. Blocking either let the install hang
+# until the job timeout cancelled Verify Version Sync on #1439.
+test_start "egress_block_install_tools_workflows_allow_apt_and_release_fallback"
+for rel in ".github/workflows/sync-versions.yml"; do
+  steps="$(grep -c 'step-security/harden-runner@' "$REPO_ROOT/$rel" || true)"
+  for endpoint in security.ubuntu.com:80 security.ubuntu.com:443 \
+    objects.githubusercontent.com:443 release-assets.githubusercontent.com:443; do
+    assert_equals "$steps" "$(grep -c "^ *$endpoint\$" "$REPO_ROOT/$rel" || true)" \
+      "$rel allows $endpoint in every harden-runner step"
+  done
+done
+
 test_start "egress_block_rollout_avoids_wildcards"
 for rel in "${BLOCKED_WORKFLOWS[@]}"; do
   if grep -Eq '(^|[[:space:]])(\*|0\.0\.0\.0/0|::/0)([[:space:]]|$)' "$REPO_ROOT/$rel"; then

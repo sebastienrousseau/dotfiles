@@ -68,7 +68,8 @@ corral_gitea_mirror = false
 # Local Ollama server (macOS): a LaunchAgent keeps `ollama serve` running
 # with these settings, so every client (CLI, Raycast, editors) gets the same
 # tuned server. Sized for a 16 GB Apple Silicon Mac: one model resident,
-# one request at a time, an 8-bit KV cache and a 32K default context.
+# one request at a time, an 8-bit KV cache, a 32K default context and a
+# model kept loaded for 30 minutes after its last request.
 # Override per host in ~/.config/chezmoi/chezmoi.toml under [data.ollama].
 [ollama]
 server = true
@@ -77,6 +78,7 @@ kv_cache_type = "q8_0"
 max_loaded_models = 1
 num_parallel = 1
 context_length = 32768
+keep_alive = "30m"
 
 [features.ai_theme_providers]
 codex = true

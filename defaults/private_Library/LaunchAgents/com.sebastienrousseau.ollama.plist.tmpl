@@ -17,6 +17,9 @@
 	<dict>
 		<key>PATH</key>
 		<string>{{ .chezmoi.homeDir }}/.local/share/mise/shims:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+		<!-- The shim runs the installed pin and never downloads at login. -->
+		<key>MISE_OFFLINE</key>
+		<string>1</string>
 		<key>OLLAMA_HOST</key>
 		<string>127.0.0.1:11434</string>
 		<key>OLLAMA_FLASH_ATTENTION</key>
@@ -29,12 +32,16 @@
 		<string>{{ .ollama.num_parallel }}</string>
 		<key>OLLAMA_CONTEXT_LENGTH</key>
 		<string>{{ .ollama.context_length }}</string>
+		<key>OLLAMA_KEEP_ALIVE</key>
+		<string>{{ .ollama.keep_alive }}</string>
 	</dict>
 
 	<key>RunAtLoad</key>
 	<true/>
 	<key>KeepAlive</key>
 	<true/>
+	<key>ProcessType</key>
+	<string>Interactive</string>
 
 	<key>StandardOutPath</key>
 	<string>{{ .chezmoi.homeDir }}/Library/Logs/ollama.launchd.log</string>
