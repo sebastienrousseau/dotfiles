@@ -84,9 +84,10 @@ run_activate() { # [VAR=value...]
   command env -i HOME="$HOME_DIR" PATH="$STUBS:$TOOLS" CALLS="$CALLS" "$@" \
     "$REAL_BASH" "$ACTIVATE" >"$WORK/out" 2>"$WORK/err"
 }
-spawn() { # a child that stands in for an `ollama serve`
+spawn() { # a child that stands in for an `ollama serve`; its pid in $last
   "$REAL_BASH" -c 'exec -a ollama-serve-fixture sleep 300' &
-  CHILDREN+=("$!")
+  last=$!
+  CHILDREN+=("$last")
 }
 alive() { kill -0 "$1" 2>/dev/null && echo yes || echo no; }
 
@@ -95,9 +96,9 @@ label="gui/$uid/com.sebastienrousseau.ollama"
 
 test_start "ollama_activate_stops_only_servers_launchd_does_not_own"
 spawn
-agent="${CHILDREN[-1]}"
+agent="$last"
 spawn
-stray="${CHILDREN[-1]}"
+stray="$last"
 run_activate FAKE_LOADED=1 FAKE_AGENT_PID="$agent" FAKE_SERVE_PIDS="$agent $stray"
 assert_equals 0 $? "activate exits 0: $(cat "$WORK/err")"
 assert_equals yes "$(alive "$agent")" "the server launchd runs is left alone"
