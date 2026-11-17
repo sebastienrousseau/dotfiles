@@ -1,0 +1,45 @@
+{{- if and (eq .chezmoi.os "darwin") .ollama.server -}}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.sebastienrousseau.ollama</string>
+
+	<!-- The mise shim runs the [ai_tools] pin, so a pin bump needs no edit here. -->
+	<key>ProgramArguments</key>
+	<array>
+		<string>{{ .chezmoi.homeDir }}/.local/share/mise/shims/ollama</string>
+		<string>serve</string>
+	</array>
+
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>{{ .chezmoi.homeDir }}/.local/share/mise/shims:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+		<key>OLLAMA_HOST</key>
+		<string>127.0.0.1:11434</string>
+		<key>OLLAMA_FLASH_ATTENTION</key>
+		<string>{{ if .ollama.flash_attention }}1{{ else }}0{{ end }}</string>
+		<key>OLLAMA_KV_CACHE_TYPE</key>
+		<string>{{ .ollama.kv_cache_type }}</string>
+		<key>OLLAMA_MAX_LOADED_MODELS</key>
+		<string>{{ .ollama.max_loaded_models }}</string>
+		<key>OLLAMA_NUM_PARALLEL</key>
+		<string>{{ .ollama.num_parallel }}</string>
+		<key>OLLAMA_CONTEXT_LENGTH</key>
+		<string>{{ .ollama.context_length }}</string>
+	</dict>
+
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+
+	<key>StandardOutPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/ollama.launchd.log</string>
+	<key>StandardErrorPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/ollama.launchd.log</string>
+</dict>
+</plist>
+{{- end }}

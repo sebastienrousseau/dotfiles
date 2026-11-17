@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+# Ollama LaunchAgent: {{ include "private_Library/LaunchAgents/com.sebastienrousseau.ollama.plist.tmpl" | sha256sum }} pin {{ index .ai_tools "aqua:ollama/ollama" }}
+# The pin is in the hash so a bump restarts the server on the new binary.
+{{- if eq .chezmoi.os "darwin" }}
+
+set -euo pipefail
+
+label="com.sebastienrousseau.ollama"
+domain="gui/$(id -u)"
+plist="$HOME/Library/LaunchAgents/${label}.plist"
+port=11434
+
+# The GUI domain is per user, not per $HOME: an apply into a sandbox HOME
+# (demo, test) must not replace the real agent.
+account_home="$(dscl . -read "/Users/$(id -un)" NFSHomeDirectory 2>/dev/null | sed -n 's/^NFSHomeDirectory: //p')"
+if [[ -z "$account_home" || ! "$HOME" -ef "$account_home" ]]; then
+  printf 'note: skipping %s: HOME (%s) is not the account home (%s)\n' \
+    "$label" "$HOME" "${account_home:-unknown}" >&2
+  exit 0
+fi
+
+launchctl bootout "$domain/$label" >/dev/null 2>&1 || true
+{{- if not .ollama.server }}
+exit 0
+{{- else }}
+
+# Another `ollama serve` on the port (started by hand, by Raycast or by a
+# client) would hold it without these settings, and launchd would restart
+# the agent against a busy port every ten seconds. Stop it so the agent owns
+# the server; anything else on the port is left alone and reported.
+for pid in $(lsof -nP -iTCP:"$port" -sTCP:LISTEN -t 2>/dev/null || true); do
+  if ps -o command= -p "$pid" 2>/dev/null | grep -Eq '(^|/)ollama serve$'; then
+    kill "$pid" 2>/dev/null || true
+  else
+    printf 'warning: port %s is held by pid %s, not ollama serve; %s will retry until it is free\n' \
+      "$port" "$pid" "$label" >&2
+  fi
+done
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  lsof -nP -iTCP:"$port" -sTCP:LISTEN -t >/dev/null 2>&1 || break
+  sleep 0.5
+done
+
+mkdir -p "$HOME/Library/Logs"
+if launchctl bootstrap "$domain" "$plist"; then
+  launchctl enable "$domain/$label" || true
+else
+  printf 'warning: could not bootstrap %s (no active GUI domain?)\n' "$label" >&2
+fi
+{{- end }}
+{{- end }}

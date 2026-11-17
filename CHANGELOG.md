@@ -4,6 +4,10 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+### Added
+
+- On macOS a LaunchAgent (`com.sebastienrousseau.ollama`) keeps `ollama serve` running with the settings in the new `[ollama]` data table: flash attention, an 8-bit KV cache, one model resident, one request at a time and a 32K default context, sized for a 16 GB Apple Silicon Mac. It runs the `[ai_tools]` pin through the mise shim, restarts when the pin moves, and takes the port from any other `ollama serve` (one started by hand, by Raycast or by a client), which would otherwise serve without these settings. `server = false` under `[data.ollama]` in a host's `chezmoi.toml` removes it.
+
 ### Fixed
 
 - The dotfiles checkout no longer gives mise a rust. `mise.toml` pinned `rust = "1.95.0"`, so mise exported `RUSTUP_TOOLCHAIN=1.95.0` to everything run inside it, outranking any `rust-toolchain.toml`: with that toolchain's install damaged, `rustc` failed throughout the tree with "missing manifest in toolchain '1.95.0'". rustup now decides there, as it already does everywhere else (`conf.d/00-dotfiles.toml` leaves rust out for the same reason), and `test_mise_lock.sh` has mise read both configs to keep it that way.
