@@ -2,7 +2,11 @@
 
 This file documents all notable changes to this project.
 
-## Unreleased
+## v0.2.547 (2026-11-17)
+
+### Added
+
+- On macOS a LaunchAgent (`com.sebastienrousseau.ollama`) keeps `ollama serve` running with the settings in the new `[ollama]` data table: flash attention, an 8-bit KV cache, one model resident, one request at a time and a 32K default context, sized for a 16 GB Apple Silicon Mac. It runs the `[ai_tools]` pin through the mise shim, restarts when the pin moves, and takes the port from any other `ollama serve` (one started by hand, by Raycast or by a client), which would otherwise serve without these settings. `server = false` under `[data.ollama]` in a host's `chezmoi.toml` removes it.
 
 ### Fixed
 

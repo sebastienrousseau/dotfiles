@@ -1,6 +1,6 @@
 # Active profile - change this to switch configurations
-dotfiles_version = "0.2.546"
-previous_dotfiles_version = "0.2.545"
+dotfiles_version = "0.2.547"
+previous_dotfiles_version = "0.2.546"
 profile = "laptop"
 
 # Machine preset — set per-host in ~/.config/chezmoi/chezmoi.toml:
@@ -64,6 +64,19 @@ surface = false
 #   [data.features]
 #   corral_gitea_mirror = true
 corral_gitea_mirror = false
+
+# Local Ollama server (macOS): a LaunchAgent keeps `ollama serve` running
+# with these settings, so every client (CLI, Raycast, editors) gets the same
+# tuned server. Sized for a 16 GB Apple Silicon Mac: one model resident,
+# one request at a time, an 8-bit KV cache and a 32K default context.
+# Override per host in ~/.config/chezmoi/chezmoi.toml under [data.ollama].
+[ollama]
+server = true
+flash_attention = true
+kv_cache_type = "q8_0"
+max_loaded_models = 1
+num_parallel = 1
+context_length = 32768
 
 [features.ai_theme_providers]
 codex = true
