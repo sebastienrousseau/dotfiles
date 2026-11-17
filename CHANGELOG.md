@@ -2,11 +2,20 @@
 
 This file documents all notable changes to this project.
 
-## Unreleased
+## v0.2.547 (2026-11-17)
+
+### Added
+
+- On macOS a LaunchAgent (`com.sebastienrousseau.ollama`) keeps `ollama serve` running with the settings in the new `[ollama]` data table: flash attention, an 8-bit KV cache, one model resident, one request at a time and a 32K default context, sized for a 16 GB Apple Silicon Mac. It runs the `[ai_tools]` pin through the mise shim, restarts when the pin moves, and takes the port from any other `ollama serve` (one started by hand, by Raycast or by a client), which would otherwise serve without these settings. `server = false` under `[data.ollama]` in a host's `chezmoi.toml` removes it.
+
+### Fixed
+
+- The dotfiles checkout no longer gives mise a rust. `mise.toml` pinned `rust = "1.95.0"`, so mise exported `RUSTUP_TOOLCHAIN=1.95.0` to everything run inside it, outranking any `rust-toolchain.toml`: with that toolchain's install damaged, `rustc` failed throughout the tree with "missing manifest in toolchain '1.95.0'". rustup now decides there, as it already does everywhere else (`conf.d/00-dotfiles.toml` leaves rust out for the same reason), and `test_mise_lock.sh` has mise read both configs to keep it that way.
 
 ### Changed
 
-- AI CLI pins move to the newest release at least seven days old: Codex 0.167.0 (from 0.162.1), GitHub Copilot CLI 1.0.107 (1.0.95), opencode 1.19.5 (1.19.0, the aqua build and `npm:opencode-ai`), autohand 0.9.10 (0.9.8), Qwen Code 0.27.0 (0.25.1) and Crush 0.100.0 (0.98.1). Ollama stays at 0.40.15: 0.40.16 is six days old.
+- AI CLI pins move to the newest release at least seven days old: opencode 1.19.5 (from 1.19.0, the aqua build and `npm:opencode-ai`).
+- AI CLI pins move to their latest releases ahead of the seven-day gate, by request: Codex 0.169.0 (from 0.162.1), GitHub Copilot CLI 1.0.112 (1.0.95), autohand 0.9.11 (0.9.8), Crush 0.101.0 (0.98.1), Ollama 0.40.16 (0.40.15) and Qwen Code 0.27.4 (0.25.1).
 - The first-party tools, outside the age gate, move to their latest signed releases: passmcp, passmcp-graph, passmcp-lsp and passmcp-server 0.0.10 (from 0.0.8), and draft 0.0.46 (0.0.45).
 
 ## v0.2.546 (2026-11-15)

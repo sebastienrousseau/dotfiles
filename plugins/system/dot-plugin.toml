@@ -6,7 +6,7 @@
 schema = "cli/manifest.v1"
 name = "system"
 domain = "system"
-version = "0.2.546"
+version = "0.2.547"
 summary = "updates, cleanup, scheduled maintenance"
 default = "status"
 

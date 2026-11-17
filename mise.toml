@@ -3,7 +3,9 @@ lockfile = true
 
 [tools]
 node = "24.14.0"
-rust = "1.95.0"
+# No rust: mise would export RUSTUP_TOOLCHAIN, which outranks every
+# rust-toolchain.toml in the tree. rustup decides (see
+# defaults/dot_config/mise/conf.d/00-dotfiles.toml).
 go = "1.26.11"
 bun = "1.3.10"
 opencode = "1.2.16"
