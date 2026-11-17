@@ -6,7 +6,7 @@
 schema = "cli/manifest.v1"
 name = "theme"
 domain = "theme"
-version = "0.2.546"
+version = "0.2.547"
 summary = "one palette for every app"
 default = "select"
 
