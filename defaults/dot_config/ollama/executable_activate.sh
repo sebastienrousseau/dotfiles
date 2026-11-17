@@ -10,7 +10,8 @@ label="gui/$(id -u)/com.sebastienrousseau.ollama"
 chezmoi cat "$plist" | plutil -lint -
 
 # --- 2. Stop any ad-hoc server not owned by launchd ----------------------
-agent_pid="$(launchctl print "$label" 2>/dev/null | awk '/^	pid =/ {print $3}')"
+# An agent launchd has not loaded yet has no pid; `print` fails then.
+agent_pid="$(launchctl print "$label" 2>/dev/null | awk '/^	pid =/ {print $3}' || true)"
 for pid in $(pgrep -f "ollama serve" || true); do
   [[ "$pid" == "${agent_pid:-}" ]] && continue
   kill "$pid"
