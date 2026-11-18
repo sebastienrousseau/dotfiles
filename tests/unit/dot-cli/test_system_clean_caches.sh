@@ -113,6 +113,16 @@ for _ in 1 2 3 4 5 6 7 8 9 10; do
 done
 assert_file_exists "$STAMP" "and the background refresh records a measurement"
 
+# A measurement belongs to the root it measured: one for another
+# DOT_BUILD_ROOT (a test's empty root, a moved cache) is not reported.
+test_start "a_measurement_of_another_root_is_not_used"
+fill
+sdk dot_build_cache_refresh >/dev/null
+assert_contains "dot system clean --caches" "$(sdk dot_build_cache_warn 0)" "the measured root warns"
+out="$(env -i HOME="$WORK/home" PATH="$SYS" NO_COLOR=1 DOT_BUILD_CACHE_WARN_GB=0 DOT_BUILD_ROOT="$WORK/empty-root" \
+  "$BASH_BIN" -c 'source "$1/lib/dot/sdk.sh"; dot_build_cache_warn' _ "$REPO_ROOT" 2>&1)"
+assert_equals "" "$out" "another root is not reported with that size"
+
 test_start "pruning_forgets_the_measurement"
 fill
 sdk dot_build_cache_refresh >/dev/null
