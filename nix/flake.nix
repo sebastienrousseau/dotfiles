@@ -44,11 +44,7 @@
         final: prev:
         let
           dataFile = ../defaults/.chezmoidata.toml;
-          data =
-            if builtins.pathExists dataFile then
-              builtins.fromTOML (builtins.readFile dataFile)
-            else
-              { };
+          data = if builtins.pathExists dataFile then builtins.fromTOML (builtins.readFile dataFile) else { };
           features = data.features or { };
           enabled = name: features.${name} or true;
           optional = name: pkg: if enabled name then [ pkg ] else [ ];

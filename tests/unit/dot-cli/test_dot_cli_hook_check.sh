@@ -248,6 +248,9 @@ fi
 test_start "the_floor_without_dot_policy_allows"
 # Without Go there is no dot-policy to evaluate the floor; the hook keeps
 # today's behaviour rather than denying every call on such a machine.
+# No policy file either: earlier cases leave one behind, and the floor end
+# to end above removes it only when Go is installed.
+rm -f "$POLICY"
 E=(DOT_POLICY_BIN="$H/bin/none" DOT_AI_POLICY_FLOOR="$REPO_ROOT/defaults/dot_local/share/dot-policy/floor.toml")
 check "$WRITE" --agent gemini
 assert_equals "0|{}" "$RC|$OUT" "gemini: {}"

@@ -23,6 +23,10 @@ if ! command -v zsh >/dev/null 2>&1 || ! command -v python3 >/dev/null 2>&1; the
   exit 0
 fi
 
+# The fake agent binds its socket with the python3 found here: the shells
+# run with PATH limited to /usr/bin:/bin, where a runner's python3 may not
+# be (GitHub's macOS images), and then no socket is ever bound.
+PYTHON3="$(command -v python3)"
 # A short directory: unix socket paths are capped near 104 bytes.
 SANDBOX="$(mktemp -d /tmp/ssha.XXXXXX)"
 trap 'rm -rf "$SANDBOX"' EXIT
@@ -39,7 +43,7 @@ sock="$SANDBOX/random.\$\$.sock"
 [ "\$2" = -a ] && sock="\$3"
 [ -e "\$sock" ] && exit 1
 echo "start \$sock" >>"$LOG"
-python3 -c 'import socket, sys; socket.socket(socket.AF_UNIX).bind(sys.argv[1])' "\$sock"
+"$PYTHON3" -c 'import socket, sys; socket.socket(socket.AF_UNIX).bind(sys.argv[1])' "\$sock"
 : >"\$sock.live"
 echo "SSH_AUTH_SOCK=\$sock; export SSH_AUTH_SOCK;"
 echo "SSH_AGENT_PID=4242; export SSH_AGENT_PID;"
@@ -64,6 +68,7 @@ first="$(shell)"
 second="$(shell)"
 third="$(shell)"
 assert_equals "1" "$(starts)" "three shells start one agent"
+assert_not_empty "$first" "the first shell exports the agent's socket"
 assert_equals "$first" "$second" "the second shell uses the first shell's agent"
 assert_equals "$first" "$third" "so does the third"
 
