@@ -59,6 +59,9 @@ func (e Env) expand(p string) string {
 
 // Decide returns why the call is denied, or "" when the rules allow it.
 func Decide(r Rules, c Call, home string) string {
+	if home != "" {
+		home = filepath.Clean(home)
+	}
 	env := Env{Home: home, Cwd: filepath.Clean(c.Cwd)}
 	class := ToolClass(c.Tool)
 	if why := decideTool(r, c.Tool, class); why != "" {

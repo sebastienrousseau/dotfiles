@@ -221,4 +221,35 @@ OUT="$(bash "$REPO_ROOT/plugins/ai/libexec/policy.sh" frob 2>&1)" || RC=$?
 assert_equals "1" "$RC" "exit 1"
 assert_contains "Usage: dot ai policy show|check [--policy FILE]" "$OUT" "usage"
 
+# With no ai-policy.toml, the deny-only floor the dotfiles deploy beside
+# dot-policy still keeps the credentials dot manages out of an agent's
+# reach; everything else is allowed, whatever agent mode is active.
+test_start "no_policy_still_applies_the_credential_floor"
+if ! command -v go >/dev/null 2>&1; then
+  echo "  go unavailable: floor end-to-end skipped"
+else
+  [[ -x "$H/bin/dot-policy" ]] ||
+    (cd "$REPO_ROOT/defaults/dot_local/share/dot-policy" && GOFLAGS=-mod=mod go build -o "$H/bin/dot-policy" .) 2>/dev/null
+  rm -f "$POLICY"
+  FLOOR="$REPO_ROOT/defaults/dot_local/share/dot-policy/floor.toml"
+  E=(DOT_POLICY_BIN="$H/bin/dot-policy" DOT_AI_POLICY_FLOOR="$FLOOR" DOT_AGENT_PROFILE=ask)
+  check "$WRITE" --agent claude
+  assert_equals "0|" "$RC|$OUT" "a write outside the credentials is allowed, in any agent mode"
+  check '{"tool_name":"Read","tool_input":{"file_path":"'"$H"'/.config/chezmoi/key.txt"},"cwd":"/w"}' --agent claude
+  assert_contains "key.txt" "$(reason)" "reading the age identity is denied"
+  check '{"tool_name":"Bash","tool_input":{"command":"security dump-keychain"},"cwd":"/w"}' --agent codex
+  assert_equals "pretooluse" "$(form)" "dumping the keychain is denied"
+  check '{"tool_name":"Bash","tool_input":{"command":"git status"},"cwd":"/w"}' --agent claude
+  assert_equals "0|" "$RC|$OUT" "an ordinary command is allowed"
+  check '{"hook_event_name":"UserPromptSubmit","session_id":"s1","prompt":"hi"}' --agent claude
+  assert_equals "0|" "$RC|$OUT" "a prompt is not budgeted by the floor"
+fi
+
+test_start "the_floor_without_dot_policy_allows"
+# Without Go there is no dot-policy to evaluate the floor; the hook keeps
+# today's behaviour rather than denying every call on such a machine.
+E=(DOT_POLICY_BIN="$H/bin/none" DOT_AI_POLICY_FLOOR="$REPO_ROOT/defaults/dot_local/share/dot-policy/floor.toml")
+check "$WRITE" --agent gemini
+assert_equals "0|{}" "$RC|$OUT" "gemini: {}"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

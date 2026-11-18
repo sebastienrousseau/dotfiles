@@ -84,6 +84,18 @@ func TestDecideAllowListsAndDenyLists(t *testing.T) {
 	}
 }
 
+// A HOME with a doubled or trailing slash (a TMPDIR ending in "/") still
+// expands ~ to the cleaned path the call's own paths are compared in.
+func TestDecideCleansHome(t *testing.T) {
+	r := Rules{Tools: []string{"*"}, PathsDeny: []string{"~/.netrc"}}
+	for _, home := range []string{"/h//u", "/h/u/"} {
+		why := Decide(r, call("Read", map[string]any{"file_path": "/h/u/.netrc"}), home)
+		if !strings.Contains(why, ".netrc") {
+			t.Errorf("home %q: reading ~/.netrc should be denied, got %q", home, why)
+		}
+	}
+}
+
 func TestToolClass(t *testing.T) {
 	for tool, want := range map[string]string{
 		"Bash": "shell", "exec_command": "shell", "read_file": "read", "MultiEdit": "write",

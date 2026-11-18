@@ -82,16 +82,17 @@ Status: the preset change is Accepted; the default policy is Proposed.
   `gh auth token`, `chezmoi decrypt`, `age -d`). As above, this is a
   guardrail: a command that reaches a secret without naming it is not
   caught.
-- Proposed: with no `ai-policy.toml`, enforce a built-in floor instead of
-  nothing. The floor is the deny lists above with every tool allowed, not
-  the `standard` preset as it stands: `standard` defaults to `ask`, which
-  allows only read and search, so making it the silent default would deny
-  every shell and write call in each session that never ran
-  `dot agent mode`. The change belongs in `dot cli hook check` (it allows
-  at once when the file is missing) and needs `dot-policy` on the host,
-  so it also inherits the fail-closed rule: a host without Go would deny
-  every call. Both trade-offs need the maintainer's decision before the
-  "With no file, nothing is enforced" rule above changes.
+- Decided (maintainer, 2026-11-18): with no `ai-policy.toml`, `dot cli
+  hook check` enforces the deny-only floor in
+  `~/.local/share/dot-policy/floor.toml` (`$DOT_AI_POLICY_FLOOR`). It has
+  one mode, `floor`, which the hook always passes, so the active agent mode
+  cannot select a stricter one: every tool is allowed except reading the
+  credentials listed above and the commands that print or decrypt them.
+  It sets no budget, so prompts are not checked. Unlike a policy file, the
+  floor fails open: without `dot-policy` (no Go on the host) the call is
+  allowed, because denying every call on such a host would leave agents
+  unusable. The "With no file, nothing is enforced" rule above now reads
+  "With no file, only the floor is enforced".
 
 Related: [ADR-020](ADR-020-command-naming-system.md),
 [ADR-022](ADR-022-family-language-go.md).

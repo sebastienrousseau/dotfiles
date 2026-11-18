@@ -7,7 +7,8 @@
 # BeforeTool hook, with the tool call as JSON on stdin; and on each prompt
 # (UserPromptSubmit, Gemini CLI: BeforeAgent), where the policy's [budget]
 # decides (P1.3). dot cli hook install wires both. With no
-# ~/.config/dotfiles/ai-policy.toml ($DOT_AI_POLICY) it allows at once.
+# ~/.config/dotfiles/ai-policy.toml ($DOT_AI_POLICY) only the deny-only
+# floor applies (_check_floor), and only when dot-policy can run.
 # With one, dot-policy (built from ~/.local/share/dot-policy) decides by
 # the active mode's rules. When the policy is there but dot-policy is
 # missing or fails, the call is denied, or the prompt blocked: a policy
@@ -31,6 +32,21 @@ _check_deny() {
   fi
 }
 
+# _check_floor AGENT KIND BIN PAYLOAD: with no policy file, the deny-only
+# floor deployed beside dot-policy ($DOT_AI_POLICY_FLOOR) decides a tool
+# call, always in its one mode "floor". A prompt, a missing floor or a
+# missing dot-policy allows, as before the floor existed: a machine without
+# Go must not lose every tool call.
+_check_floor() {
+  local floor="${DOT_AI_POLICY_FLOOR:-${XDG_DATA_HOME:-$HOME/.local/share}/dot-policy/floor.toml}" out
+  if [[ "$2" == tool && -e "$floor" && -x "$3" ]] &&
+    out="$(printf '%s' "$4" | "$3" check --agent "$1" --mode floor --policy "$floor")" && [[ -n "$out" ]]; then
+    printf '%s\n' "$out"
+  elif [[ "$1" == gemini ]]; then
+    printf '{}\n'
+  fi
+}
+
 check_main() {
   local agent=claude policy bin out payload="" kind=tool what="every tool call is denied"
   [[ "${1:-}" != --agent ]] || agent="${2:-claude}"
@@ -43,7 +59,7 @@ check_main() {
   # dot-policy's verdict counts only when it ran to the end: a crash, or a
   # file that is not dot-policy, must not read as an allow.
   if [[ ! -e "$policy" ]]; then
-    [[ "$agent" != gemini ]] || printf '{}\n'
+    _check_floor "$agent" "$kind" "$bin" "$payload"
   elif [[ -x "$bin" ]] && out="$(printf '%s' "$payload" | "$bin" check --agent "$agent" --policy "$policy")"; then
     [[ -z "$out" ]] || printf '%s\n' "$out"
   else
