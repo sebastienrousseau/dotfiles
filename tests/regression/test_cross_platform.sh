@@ -431,29 +431,33 @@ assert_equals "false" "$xp_auto" "mise loads auto_install=false from the deploye
 
 # A desktop config must ship only as a .tmpl (theme colours and hardware
 # come from chezmoi data) and must render on Linux to the real format, with
-# every template action resolved.
-_xp_desktop_template() { # rel-path-without-.tmpl marker features-json
-  local rendered
-  if [[ ! -f "$REPO_ROOT/defaults/$1.tmpl" ]]; then
-    assert_file_exists "$REPO_ROOT/defaults/$1.tmpl" "$1 ships as a chezmoi template"
-    return
-  fi
-  assert_file_not_exists "$REPO_ROOT/defaults/$1" "no untemplated $1 shadows the template"
+# every template action resolved. One test_start per assertion: the
+# framework invariant (test_test_framework_invariants) needs RUN to equal
+# PASSED + FAILED.
+_xp_desktop_template() { # test-name rel-path-without-.tmpl marker features-json
+  local name="$1" rel="$2" rendered
+  test_start "$name"
+  assert_file_exists "$REPO_ROOT/defaults/$rel.tmpl" "$rel ships as a chezmoi template"
+  [[ -f "$REPO_ROOT/defaults/$rel.tmpl" ]] || return 0
+  test_start "${name}_not_shadowed"
+  assert_file_not_exists "$REPO_ROOT/defaults/$rel" "no untemplated $rel shadows the template"
+  test_start "${name}_renders_on_linux"
   if [[ $_xp_cz_ok -ne 1 ]]; then
     _xp_skip "$_xp_cz_skip"
-    return
+    return 0
   fi
-  rendered="$(_xp_render linux "$1.tmpl" "$3")"
-  assert_contains "$2" "$rendered" "renders to $1 on Linux"
+  rendered="$(_xp_render linux "$rel.tmpl" "$4")"
+  assert_contains "$3" "$rendered" "renders to $rel on Linux"
+  test_start "${name}_actions_resolved"
   assert_false '[[ "$rendered" == *"{{"* ]]' "no template action is left unrendered"
+  test_start "${name}_values_present"
   assert_false '[[ "$rendered" == *"<no value>"* ]]' "no template value is missing"
 }
 
-test_start "platform_niri_config_is_template"
-_xp_desktop_template dot_config/niri/config.kdl "input {" '"features":{"linux_desktop":true,"niri":true}'
-
-test_start "platform_waybar_config_is_template"
-_xp_desktop_template dot_config/waybar/config.jsonc '"modules-left"' '"features":{"linux_desktop":true,"waybar":true}'
+_xp_desktop_template platform_niri_config_is_template dot_config/niri/config.kdl \
+  "input {" '"features":{"linux_desktop":true,"niri":true}'
+_xp_desktop_template platform_waybar_config_is_template dot_config/waybar/config.jsonc \
+  '"modules-left"' '"features":{"linux_desktop":true,"waybar":true}'
 
 # ═══════════════════════════════════════════════════════════════
 # 8. SHELL COMPATIBILITY — multi-shell support

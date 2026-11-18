@@ -135,10 +135,14 @@ if command -v shellcheck >/dev/null 2>&1 && command -v rg >/dev/null 2>&1; then
   # `|| true`: rg exits 1 when nothing matches, which is a legitimate
   # outcome handled by the else branch below. Without it, any suite
   # running under errexit dies here before recording the assertion.
-  files=$(rg --files -g "*.sh" -g "!tests/**" "$REPO_ROOT" 2>/dev/null || true)
+  # rg runs inside REPO_ROOT: its globs match paths relative to the
+  # search root only when that root is the working directory, so with an
+  # absolute search path `!tests/**` excluded nothing and the corpus
+  # silently included every test file (rg 14 and 15 alike).
+  files=$(cd "$REPO_ROOT" && rg --files -g "*.sh" -g "!tests/**" 2>/dev/null || true)
   if [[ -n "$files" ]]; then
     # shellcheck disable=SC2086  # word-split is what we want here
-    if echo "$files" | xargs shellcheck -x -S warning -e SC1090,SC1091,SC2034 -f gcc >/dev/null 2>&1; then
+    if (cd "$REPO_ROOT" && echo "$files" | xargs shellcheck -x -S warning -e SC1090,SC1091,SC2034 -f gcc >/dev/null 2>&1); then
       assert_exit_code 0 "true"
     else
       assert_exit_code 0 "false  # committed shell tree fails portability lint"

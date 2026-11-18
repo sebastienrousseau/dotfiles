@@ -19,7 +19,6 @@ set -euo pipefail
 # archives) under $HOME: 077 keeps other accounts out; call sites chmod to relax.
 umask 077
 
-# ANSI Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -27,13 +26,11 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-# Paths
 SOURCE_DIR="${SOURCE_DIR:-$HOME/.dotfiles}"
 LEGACY_SOURCE_DIR="$HOME/.local/share/chezmoi"
 CHEZMOI_CONFIG_DIR="$HOME/.config/chezmoi"
 CHEZMOI_CONFIG_FILE="$CHEZMOI_CONFIG_DIR/chezmoi.toml"
 
-# Utility Functions
 step() {
   if [[ "${DOTFILES_SILENT:-0}" != "1" ]]; then
     printf '%b\n' "${BOLD}${BLUE}==>${NC} ${BOLD}$1${NC}"
@@ -48,15 +45,6 @@ error() {
 success() {
   if [[ "${DOTFILES_SILENT:-0}" != "1" ]]; then
     printf '%b\n' "${GREEN}Success!${NC} $1"
-  fi
-}
-
-# Cross-platform sed in-place (BSD vs GNU)
-sed_in_place() {
-  if sed --version >/dev/null 2>&1; then
-    sed -i "$@" # GNU
-  else
-    sed -i '' "$@" # BSD (macOS)
   fi
 }
 
@@ -185,8 +173,7 @@ detect_container_env() {
   [[ -f "${1:-}/.dockerenv" || -n "${CODESPACES:-}" || -n "${REMOTE_CONTAINERS:-}" ]]
 }
 
-# apply_source <want_minimal>: apply the configured source, after seeding
-# the git identity and, when asked (1), the minimal profile overrides.
+# apply_source <want_minimal>: seed the git identity, the minimal overrides if 1, apply.
 apply_source() {
   local -a flags=()
   seed_git_identity
@@ -198,11 +185,9 @@ apply_source() {
   chezmoi apply ${flags[@]+"${flags[@]}"}
 }
 
-# _backup_one <path>: copy an existing file or symlink to BACKUP_DIR under
-# its path relative to $HOME; false when there is nothing to copy. Real
-# directories are skipped: apply never clobbers their contents, their files
-# are backed up one by one, and `cp -a` would hit uncopyable things such as
-# ssh-agent sockets ("is a socket (not copied)").
+# _backup_one <path>: copy a file or symlink to BACKUP_DIR at its $HOME-relative
+# path; false if absent. Real directories are skipped (their files are copied one
+# by one; `cp -a` would hit ssh-agent sockets, "is a socket (not copied)").
 _backup_one() {
   local rel="${1#"$HOME"/}"
   [[ -n "$1" && -e "$1" ]] || return 1
@@ -211,10 +196,8 @@ _backup_one() {
   cp -a "$1" "$BACKUP_DIR/$rel"
 }
 
-# backup_managed_files: copy every existing file chezmoi manages (and so
-# would overwrite) to BACKUP_DIR, keeping its path under $HOME. Until
-# chezmoi has a config there is nothing to compare against; a second run
-# copies the same files over their first copies.
+# backup_managed_files: copy every existing file chezmoi manages (and would
+# overwrite) to BACKUP_DIR. Needs a chezmoi config; a re-run overwrites the copies.
 backup_managed_files() {
   local file count=0
   command -v chezmoi >/dev/null && [[ -f "$CHEZMOI_CONFIG_FILE" ]] || {
@@ -291,8 +274,7 @@ bootstrap_gum() {
   fi
 }
 
-# chezmoi_platform: print the release's <os>_<arch> for this machine, or
-# fail with the reason.
+# chezmoi_platform: the release's <os>_<arch> for this machine, or fail saying why.
 chezmoi_platform() {
   local os arch
   os="$(uname -s | tr '[:upper:]' '[:lower:]')"
@@ -315,13 +297,10 @@ chezmoi_platform() {
   printf '%s_%s\n' "$os" "$arch"
 }
 
-# _chezmoi_fetch_install <dir> <base_url> <asset> <checksums_asset> <pinned>
-# <destination>: download <asset> into <dir>, check it against the pinned
-# SHA-256 (and the release checksums, when served), install chezmoi.
-# `set -e` does not apply here: this runs as an `if !` condition, where bash
-# ignores errexit, so every step exits on failure itself; before this, a
-# checksum mismatch fell through to the install. A subshell body, so `cd`
-# and `exit` stay local.
+# _chezmoi_fetch_install <dir> <base_url> <asset> <checksums_asset> <pinned> <dest>:
+# download <asset>, check the pinned SHA-256 (and served checksums), install it.
+# Called in a condition, where errexit is ignored, so each step exits on failure
+# itself (a checksum mismatch once fell through). A subshell: cd/exit stay local.
 _chezmoi_fetch_install() (
   temp_dir="$1" base_url="$2" asset="$3" checksums_asset="$4" pinned="$5" destination="$6"
   curl --proto '=https' --tlsv1.2 -fsSL \
@@ -344,65 +323,49 @@ _chezmoi_fetch_install() (
 # install.sh stays self-contained (repo and npm installs use the helper script).
 install_chezmoi_verified_embedded() {
   local chezmoi_version="$1" destination="$2"
-  local platform asset checksums_asset base_url temp_dir pinned
-
+  local platform asset checksums_asset base_url temp_dir pinned rc=0
   platform="$(chezmoi_platform)" || return 1
   asset="chezmoi_${chezmoi_version}_${platform}.tar.gz"
   checksums_asset="chezmoi_${chezmoi_version}_checksums.txt"
   base_url="https://github.com/twpayne/chezmoi/releases/download/v${chezmoi_version}"
   pinned="$(chezmoi_release_sha256 "$asset")" || return 1
   temp_dir="$(umask 077 && mktemp -d)"
-
-  if ! _chezmoi_fetch_install "$temp_dir" "$base_url" "$asset" "$checksums_asset" "$pinned" "$destination"; then
-    rm -rf "$temp_dir"
-    return 1
-  fi
-
+  _chezmoi_fetch_install "$temp_dir" "$base_url" "$asset" "$checksums_asset" "$pinned" "$destination" || rc=1
   rm -rf "$temp_dir"
+  return "$rc"
 }
 
-# Install chezmoi (run in parallel with the gum bootstrap).
+# Install chezmoi (run in parallel with the gum bootstrap). Without brew,
+# only a SHA-256-verified install: the helper script beside this file, else
+# the embedded verifier. Never an unverified script (the old get.chezmoi.io
+# fallback was a hole), so a failure refuses rather than falling back.
 install_chezmoi() {
   if command -v chezmoi >/dev/null; then
     echo "   chezmoi already installed: $(chezmoi --version)"
     return 0
   fi
-
   if command -v brew >/dev/null; then
     echo "   Installing chezmoi via Homebrew..."
     brew install chezmoi >/dev/null 2>&1
-  else
-    bin_dir="$HOME/.local/bin"
-    mkdir -p "$bin_dir"
-    echo "   Installing chezmoi via binary download..."
-
-    # Only the SHA-256-verified installer; without it, refuse rather than run
-    # an unverified script (the old get.chezmoi.io fallback was a hole).
-    local verified_installer
-    verified_installer="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/tools/ci/install-chezmoi-verified.sh"
-    if [[ -x "$verified_installer" ]] || [[ -f "$verified_installer" ]]; then
-      echo "   Using checksum-verified installer..."
-      if ! bash "$verified_installer" "${CHEZMOI_VERSION:-2.74.1}" "$bin_dir"; then
-        echo "" >&2
-        echo "   The verified chezmoi installer failed." >&2
-        echo "   Refusing to fall back to an unverified bootstrap path." >&2
-        echo "   Install chezmoi manually from a trusted source, then re-run install.sh:" >&2
-        echo "     macOS:  brew install chezmoi" >&2
-        echo "     Linux:  see https://www.chezmoi.io/install/" >&2
-        return 1
-      fi
-      return 0
-    fi
-    echo "   Using embedded checksum verifier..."
-    if ! install_chezmoi_verified_embedded "${CHEZMOI_VERSION:-2.74.1}" "$bin_dir"; then
-      echo "" >&2
-      echo "   The embedded checksum-verified chezmoi bootstrap failed." >&2
-      echo "   Refusing to fall back to an unverified remote script." >&2
-      echo "   Install chezmoi manually from https://www.chezmoi.io/install/" >&2
-      return 1
-    fi
-    return 0
+    return
   fi
+  local bin_dir="$HOME/.local/bin" version="${CHEZMOI_VERSION:-2.74.1}" verified_installer
+  mkdir -p "$bin_dir"
+  echo "   Installing chezmoi via binary download..."
+  verified_installer="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/tools/ci/install-chezmoi-verified.sh"
+  if [[ -f "$verified_installer" ]]; then
+    echo "   Using checksum-verified installer..."
+    bash "$verified_installer" "$version" "$bin_dir" && return 0
+  else
+    echo "   Using embedded checksum verifier..."
+    install_chezmoi_verified_embedded "$version" "$bin_dir" && return 0
+  fi
+  printf '\n%s\n' "   The checksum-verified chezmoi install failed.
+   Refusing to fall back to an unverified remote script.
+   Install chezmoi manually from a trusted source, then re-run install.sh:
+     macOS:  brew install chezmoi
+     Linux:  see https://www.chezmoi.io/install/" >&2
+  return 1
 }
 
 # _toml_line <key> <value>: `key = "value"`; nothing for an empty value.
@@ -454,10 +417,8 @@ parse_install_args() {
   done
 }
 
-# set_version_arg <arg>: the positional version, once. Validate it looks
-# like a semver (with or without leading v): reject garbage early so an
-# unknown positional like `foobar` doesn't trigger a 30s+ network download
-# attempt. Caught by the install.sh fuzz harness (#881).
+# set_version_arg <arg>: the positional version, once, and a semver (v optional):
+# `foobar` must not start a 30s+ download (install.sh fuzz harness, #881).
 set_version_arg() {
   if [[ $version_set -eq 1 ]]; then
     error "Multiple versions specified: $version and $1"
@@ -469,18 +430,15 @@ set_version_arg() {
   version_set=1
 }
 
-# Release tags are signed with these SSH keys: the key lines of KEYS.asc
-# (git allowed_signers format). They are embedded so the trust root comes
-# with this installer, not with the clone it is verifying: a tampered clone
-# would carry a matching KEYS.asc. test_install_verify_tag.sh keeps the two
-# equal.
+# Release tag signers: KEYS.asc's key lines (allowed_signers format), embedded so
+# the trust root ships with the installer, not with the clone it verifies (a
+# tampered clone carries a matching KEYS.asc). test_install_verify_tag.sh: equal.
 DOTFILES_ALLOWED_SIGNERS='sebastienrousseau@users.noreply.github.com namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDjGRQyeM79nAb4GHcpGzXMKq7HE3xyEOev4gVsnBN1e sebastienrousseau@users.noreply.github.com
 sebastienrousseau@users.noreply.github.com namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII32YuD6LxBOeFb5kG4Fqbm62kn9OkcHNPJtktO8iYVF sebastienrousseau@users.noreply.github.com
 sebastienrousseau@users.noreply.github.com namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDpyzi+T8b2k/LF5b5F4LpczG41nhKAa+DksbII8NDEq sebastienrousseau@users.noreply.github.com'
 
-# verify_release_tag <repo_dir> <tag> [allowed_signers]: succeed only when
-# <tag> carries a good signature from an allowed signer (default: the
-# embedded list) and the checkout is exactly the tagged commit.
+# verify_release_tag <repo_dir> <tag> [allowed_signers]: <tag> has a good signature
+# from an allowed signer (default: embedded) and HEAD is exactly its commit.
 verify_release_tag() {
   local dir="$1" tag="$2" signers_text="${3:-$DOTFILES_ALLOWED_SIGNERS}"
   local signers rc=0 head want
@@ -494,9 +452,8 @@ verify_release_tag() {
   [[ -n "$head" && "$head" == "$want" ]]
 }
 
-# clone_verified_source <tag> <dest>: clone <tag> beside <dest>, verify its
-# signature, then move it into place. Fails closed: an unverified clone is
-# deleted, so a re-run can never apply it as an existing local source.
+# clone_verified_source <tag> <dest>: clone beside <dest>, verify, move into place.
+# Fails closed: an unverified clone is deleted, so a re-run never applies it.
 clone_verified_source() {
   local tag="$1" dest="$2" url="https://github.com/sebastienrousseau/dotfiles.git" tmp
   mkdir -p "$(dirname "$dest")"
@@ -545,12 +502,9 @@ deploy_source() {
   apply_source "$1"
 }
 
-# provision_toolchain <provision> <want_minimal> [all]: provisioning is opt-in
-# (--provision or DOTFILES_PROVISION=1): install/provision/ sits outside
-# .chezmoiroot, so apply never runs it, and it installs packages and may
-# change OS defaults, so it is never implicit. The minimal profile
-# (--minimal, DOTFILES_MINIMAL=1 or a container) skips it. Only scripts
-# changed since their last successful run are run, unless [all] is set.
+# provision_toolchain <provision> <want_minimal> [all]: opt-in (--provision or
+# DOTFILES_PROVISION=1; it installs packages and may change OS defaults), skipped by
+# the minimal profile; runs only scripts changed since their last success unless [all].
 provision_toolchain() {
   [[ "$2" -eq 0 ]] || return 0
   if [[ "$1" = "1" ]]; then
@@ -566,9 +520,7 @@ provision_toolchain() {
   fi
 }
 
-# print_identity_hint: with no git identity configured, commits fail with
-# "Author identity unknown". Point the user at the one-line fix rather than
-# letting them discover it on their first commit.
+# print_identity_hint: no git identity means "Author identity unknown"; say how to set it.
 print_identity_hint() {
   if [[ -z "$(git config --global user.email 2>/dev/null || true)" ]] &&
     ! grep -q '^email' "$CHEZMOI_CONFIG_FILE" 2>/dev/null; then
@@ -593,9 +545,8 @@ bootstrap_tools() {
   export PATH="$bin_dir:$PATH"
 }
 
-# backup_existing: point chezmoi at an existing source (if any) and back up
-# what it would overwrite. On a first install there is no source yet, so
-# nothing is listed here: deploy_source backs up again after the clone.
+# backup_existing: point chezmoi at an existing source and back up what it would
+# overwrite; a first install has none yet, so deploy_source backs up after the clone.
 backup_existing() {
   step "Backing up existing dotfiles..."
   BACKUP_DIR="$HOME/.dotfiles.bak.$(date +"%Y%m%d_%H%M%S")"
@@ -608,41 +559,27 @@ backup_existing() {
 }
 
 main() {
-  local version="v0.2.547"
-  local version_set=0
-  local minimal=0
+  local version="v0.2.547" version_set=0 minimal=0 want_minimal=0
   local provision="${DOTFILES_PROVISION:-0}" provision_all=""
-  local _cleanup_files=()
-  trap 'set +u; rm -f "${_cleanup_files[@]}" 2>/dev/null; set -u' EXIT
   parse_install_args "$@"
 
-  # 2. Check Prerequisites & Bootstrap Package Managers
   step "Checking Prerequisites..."
   OS="$(uname -s)"
   target_os="$(detect_target_os "")" # "": the real filesystem root
   bootstrap_tools
 
-  # 4. Prepare source directory (VERSION pinning for supply-chain security)
   step "Preparing source directory..."
   VERSION="$version"
-
-  # 5. Backup existing dotfiles that chezmoi will overwrite
   backup_existing
 
-  # Detect devcontainer/Codespaces environment
   if detect_container_env ""; then
     DOTFILES_MINIMAL=1
     step "Detected container environment — using minimal profile"
   fi
-  # --minimal (or a container) selects the minimal profile. It is written
-  # to the per-host chezmoi config after the source dir is configured and
-  # the git identity is seeded, so the tracked source stays clean.
-  local want_minimal=0
-  if [[ $minimal -eq 1 ]] || [[ "${DOTFILES_MINIMAL:-0}" = "1" ]]; then
-    want_minimal=1
-  fi
+  # --minimal or a container: written to the per-host chezmoi config once the
+  # source is configured and the identity seeded; the tracked source stays clean.
+  [[ $minimal -eq 0 && "${DOTFILES_MINIMAL:-0}" != "1" ]] || want_minimal=1
 
-  # 6. Initialize & Apply
   step "Applying Configuration..."
   # Auto-migration for the 0.2.503 reorg, then the state move (N12), before
   # apply, so the reorg's source-path moves don't delete deployed files.

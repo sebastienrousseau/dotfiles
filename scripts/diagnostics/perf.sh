@@ -183,7 +183,7 @@ calc_score() {
 # the interactive config run instead of returning early, and the -c
 # command prints the profile once startup is done.
 run_profile() {
-  local boot
+  local boot orig_zdotdir="${ZDOTDIR:-}"
   boot="$(mktemp -d)"
   _cleanup_files+=("$boot/.zshenv")
   cat >"$boot/.zshenv" <<'ZSHENV'
@@ -191,7 +191,7 @@ zmodload zsh/zprof
 ZDOTDIR="${_PERF_ORIG_ZDOTDIR:-$HOME}"
 [[ -r "$ZDOTDIR/.zshenv" ]] && source "$ZDOTDIR/.zshenv"
 ZSHENV
-  _PERF_ORIG_ZDOTDIR="${ZDOTDIR:-}" ZDOTDIR="$boot" \
+  _PERF_ORIG_ZDOTDIR="$orig_zdotdir" ZDOTDIR="$boot" \
     zsh -i -c 'zprof' </dev/null 2>/dev/null | head -20
   rm -rf "$boot"
 }

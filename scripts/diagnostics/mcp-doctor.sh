@@ -86,7 +86,9 @@ log_success() {
 }
 log_fail() {
   if [[ "$JSON_MODE" -ne 1 ]]; then
-    ui_err "$1" "${2:-}"
+    # A failed check is a report row: ui_fail keeps it on stdout (ui_err
+    # would send it to stderr and split the report).
+    ui_fail "$1" "${2:-}"
   fi
   Errors=$((Errors + 1))
   return 0
@@ -343,7 +345,7 @@ _mcp_report_json() {
 
 _mcp_report_text() {
   if [[ "$Errors" -ne 0 ]]; then
-    [[ "$JSON_MODE" -eq 1 ]] || ui_err "MCP issues found" "$Errors errors, $Warnings warnings"
+    [[ "$JSON_MODE" -eq 1 ]] || ui_fail "MCP issues found" "$Errors errors, $Warnings warnings"
     exit 1
   fi
   if [[ "$Warnings" -eq 0 ]]; then

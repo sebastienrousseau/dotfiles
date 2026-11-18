@@ -23,7 +23,12 @@ assert_not_empty "$pkgs" "the registry attests github.com packages"
 for pkg in $pkgs; do
   repo="${pkg#github.com/}"
   repo="${repo%@*}"
-  want="$(sed -nE "s|^\"github:${repo}\" = \"([^\"]+)\".*|\\1|p" "$MISE")"
+  # mise takes a pin as a bare string ("0.0.54") or as an inline table
+  # ({ version = "0.0.54", minimum_release_age = "0s" }); read both.
+  want="$(sed -nE \
+    -e "s|^\"github:${repo}\" = \"([^\"]+)\".*|\\1|p" \
+    -e "s|^\"github:${repo}\" = \\{.*version = \"([^\"]+)\".*|\\1|p" "$MISE")"
+  assert_not_empty "$want" "$repo: mise pins a version"
   assert_equals "v$want" "${pkg##*@}" "$repo: registry attests the pinned version"
 done
 

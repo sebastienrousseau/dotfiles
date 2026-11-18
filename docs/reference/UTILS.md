@@ -239,6 +239,7 @@ Updates, cleanup, scheduled maintenance.
 |---------|-------------|-----|
 | `dot system status` | OS, disk, schedule and last run |  |
 | `dot system update` | Update everything, asking first | `dot upgrade` |
+| `dot system clean` | Reclaim space, asking first: prune the Go, pip and uv build caches; --logs rotates the logs; --yes skips the question | `dot log-rotate` (now `--logs`) |
 | `dot system schedule list` | Scheduled jobs |  |
 | `dot system schedule set` | Set the maintenance schedule |  |
 | `dot system schedule run` | Run scheduled maintenance now |  |

@@ -113,6 +113,18 @@ assert_equals 1 "$RC" "rc"
 out_has "not found (expected" "config error"
 out_has "MCP issues found" "summary"
 
+test_start "failure_rows_stay_on_stdout"
+# A failed check is a report row: `dot mcp doctor >report` must keep it.
+# stderr is read for report-formatted rows only (two-space indent, then
+# the fail glyph), so xtrace lines from the coverage run do not count.
+ERRF="$DOTFILES_COV_TMPDIR/doctor-err.txt"
+env HOME="$FIX/emptyhome" MCP_CONFIG="$FIX/absent.json" MCP_POLICY_CONFIG="$LAX_POLICY" \
+  MCP_LOCK_CONFIG="$FIX/none.json" MCP_REGISTRY_CONFIG="$FIX/none.json" \
+  MCP_SERVER_CARD="$FIX/none.json" bash "$DOCTOR" >"$OUTF" 2>"$ERRF" </dev/null
+assert_equals "2" "$(grep -cE '^  (✗|\[FAIL\]) +(MCP config|MCP issues found)' "$OUTF")" \
+  "the config failure and the summary rows are on stdout"
+assert_false "grep -qE '^  (✗|\\[FAIL\\]) ' '$ERRF'" "no report row on stderr"
+
 test_start "invalid_config_json_is_an_error"
 printf '{oops' >"$FIX/bad.json"
 doctor "MCP_CONFIG=$FIX/bad.json" "MCP_POLICY_CONFIG=$LAX_POLICY" \
