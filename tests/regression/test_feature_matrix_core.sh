@@ -36,8 +36,10 @@ test_fm_version_long_flag() {
   test_start "fm_version_long_flag"
   fm_run --version
   fm_expect_rc 0
+  # One parseable line, `dot <version>`; `dot version` keeps the banner (D10).
   test_start "fm_version_long_flag_matches_subcommand"
-  fm_expect_out_matches '\.dotfiles [0-9]+\.[0-9]+\.[0-9]+'
+  fm_expect_out_matches '^dot [0-9]+\.[0-9]+\.[0-9]+$'
+  assert_equals "1" "$(printf '%s\n' "$FM_OUT" | wc -l | tr -d ' ')" "one line"
 }
 
 test_fm_version_short_flag() {
@@ -45,7 +47,8 @@ test_fm_version_short_flag() {
   fm_run -V
   fm_expect_rc 0
   test_start "fm_version_short_flag_matches_subcommand"
-  fm_expect_out_matches '\.dotfiles [0-9]+\.[0-9]+\.[0-9]+'
+  fm_expect_out_matches '^dot [0-9]+\.[0-9]+\.[0-9]+$'
+  assert_equals "1" "$(printf '%s\n' "$FM_OUT" | wc -l | tr -d ' ')" "one line"
 }
 
 # ── dispatcher: help ───────────────────────────────────────────────────────
@@ -127,9 +130,11 @@ test_fm_help_topic() {
 test_fm_help_unknown_topic() {
   test_start "fm_help_unknown_topic"
   fm_run help definitely-not-a-command
-  fm_expect_rc 1
+  fm_expect_rc 64 # a usage error (ADR-020 N10)
   test_start "fm_help_unknown_topic_says_so"
-  fm_expect_err "Unknown help topic"
+  assert_equals "dot: no help topic or command matches 'definitely-not-a-command'
+usage: dot help [<domain>|all|<term>]" "$FM_ERR" "the error and usage line, on stderr"
+  assert_equals "" "$FM_OUT" "nothing on stdout"
 }
 
 test_fm_help_universal_intercept() {
@@ -191,9 +196,10 @@ test_fm_search_missing_keyword() {
 test_fm_search_no_match() {
   test_start "fm_search_no_match"
   fm_run help zzz-no-such-command-zzz
-  fm_expect_rc 1
+  fm_expect_rc 64 # a usage error (ADR-020 N10)
   test_start "fm_search_no_match_says_so"
-  fm_expect_out "Unknown help topic"
+  assert_contains "dot: no help topic or command matches 'zzz-no-such-command-zzz'" "$FM_ERR" "says so on stderr"
+  assert_equals "" "$FM_OUT" "nothing on stdout"
 }
 
 # ── dispatcher: unknown + user commands ────────────────────────────────────
@@ -203,7 +209,7 @@ test_fm_unknown_command() {
   fm_run zzz-not-a-command
   fm_expect_rc 127 # N10: unknown command
   test_start "fm_unknown_command_message"
-  fm_expect_err "Unknown command"
+  assert_equals "dot: 'dot zzz-not-a-command' is not a command; run 'dot help'" "$FM_ERR" "the one message, on stderr"
 }
 
 test_fm_user_custom_command() {
@@ -298,9 +304,9 @@ test_fm_add() {
 test_fm_add_usage() {
   test_start "fm_add_usage"
   fm_run config add
-  fm_expect_rc 1
+  fm_expect_rc 64 # a usage error (ADR-020 N10)
   test_start "fm_add_usage_message"
-  fm_expect_out "Usage: dot config add"
+  assert_contains "usage: dot config add <file>" "$FM_ERR" "the usage line, on stderr"
 }
 
 test_fm_diff() {

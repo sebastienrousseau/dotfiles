@@ -41,7 +41,8 @@ test_fm_system_schedule_set() {
   fm_expect_out "Maintenance: weekly"
   test_start "fm_system_schedule_set_rejects_a_bad_word"
   fm_run system schedule set hourly
-  fm_expect_rc 1
+  fm_expect_rc 64 # a usage error (ADR-020 N10)
+  assert_contains "dot: unknown schedule 'hourly'" "$FM_ERR" "names the bad word, on stderr"
 }
 
 test_fm_system_schedule_run() {

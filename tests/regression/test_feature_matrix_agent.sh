@@ -362,9 +362,9 @@ test_fm_mode_show_unknown() {
   fm_expect_any "Unknown agent profile" "zzz-not-a-profile"
   test_start "fm_mode_show_missing_name"
   fm_run agent mode show
-  fm_expect_rc 1
+  fm_expect_rc 64 # a usage error (ADR-020 N10)
   test_start "fm_mode_show_missing_name_message"
-  fm_expect_any "Usage: dot agent mode show" "mode show"
+  assert_contains "usage: dot agent mode show <profile>" "$FM_ERR" "the usage line, on stderr"
 }
 
 test_fm_mode_set() {
@@ -443,9 +443,9 @@ test_fm_mode_run() {
 test_fm_mode_run_usage() {
   test_start "fm_mode_run_usage"
   fm_run agent mode run
-  fm_expect_rc 1
+  fm_expect_rc 64 # a usage error (ADR-020 N10)
   test_start "fm_mode_run_usage_message"
-  fm_expect_any "Usage: dot agent mode run" "mode run"
+  assert_contains "usage: dot agent mode run [profile] <command>" "$FM_ERR" "the usage line, on stderr"
 }
 
 test_fm_mode_run_exit_code() {
@@ -657,9 +657,9 @@ test_fm_agent_checkpoint_save() {
 test_fm_agent_checkpoint_save_usage() {
   test_start "fm_agent_checkpoint_save_usage"
   fm_run agent checkpoint save
-  fm_expect_rc 1
+  fm_expect_rc 64 # a usage error (ADR-020 N10)
   test_start "fm_agent_checkpoint_save_usage_message"
-  fm_expect_any "Usage: dot agent checkpoint save" "checkpoint save"
+  assert_contains "usage: dot agent checkpoint save [profile] <command>" "$FM_ERR" "the usage line, on stderr"
 }
 
 test_fm_agent_checkpoint_list() {
@@ -734,7 +734,8 @@ test_fm_agent_checkpoint_show_unknown() {
   fm_expect_any "Checkpoint not found" "zzz-no-such-checkpoint"
   test_start "fm_agent_checkpoint_show_missing_id"
   fm_run agent checkpoint show
-  fm_expect_rc 1
+  fm_expect_rc 64 # a usage error (ADR-020 N10)
+  assert_contains "usage: dot agent checkpoint show <id>" "$FM_ERR" "the usage line, on stderr"
 }
 
 test_fm_agent_checkpoint_replay() {
@@ -760,14 +761,14 @@ test_fm_agent_checkpoint_replay() {
 test_fm_agent_checkpoint_replay_usage() {
   test_start "fm_agent_checkpoint_replay_usage"
   fm_run agent checkpoint replay
-  fm_expect_rc 1
+  fm_expect_rc 64 # a usage error (ADR-020 N10)
   test_start "fm_agent_checkpoint_replay_usage_message"
-  fm_expect_any "Usage: dot agent checkpoint replay" "checkpoint replay"
+  assert_contains "usage: dot agent checkpoint replay <id>" "$FM_ERR" "the usage line, on stderr"
   test_start "fm_agent_checkpoint_unknown_action"
   fm_run agent checkpoint zzz-not-an-action
-  fm_expect_rc 1
+  fm_expect_rc 64 # a usage error (ADR-020 N10)
   test_start "fm_agent_checkpoint_unknown_action_message"
-  fm_expect_any "save|list|show|replay" "Usage"
+  assert_contains "usage: dot agent checkpoint [save|list|show|replay]" "$FM_ERR" "lists the actions, on stderr"
 }
 
 test_fm_agent_delegate() {
@@ -823,15 +824,16 @@ test_fm_agent_delegate_disabled() {
 test_fm_agent_delegate_usage() {
   test_start "fm_agent_delegate_usage"
   fm_run agent delegate run
-  fm_expect_rc 1
+  fm_expect_rc 64 # a usage error (ADR-020 N10)
   test_start "fm_agent_delegate_usage_message"
-  fm_expect_any "Usage: dot agent delegate run" "delegate"
+  assert_contains "usage: dot agent delegate run <name> <command>" "$FM_ERR" "the usage line, on stderr"
   test_start "fm_agent_delegate_lists_by_default"
   fm_run agent delegate
   fm_expect_rc 0
   test_start "fm_agent_delegate_missing_command"
   fm_run agent delegate fm-reviewer
-  fm_expect_rc 1
+  fm_expect_rc 64 # a usage error (ADR-020 N10)
+  assert_contains "usage: dot agent delegate run <name> <command>" "$FM_ERR" "the usage line, on stderr"
 }
 
 test_fm_agent_a2a_card() {
