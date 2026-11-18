@@ -37,10 +37,10 @@ github.credential_command = "gh auth token"
 
 [tools]
 # Node.js
-node = "24"
+node = "26"
 
 # Python
-python = ["3.12", "3.11", "3.14"]
+python = ["3.12", "3.14", "3.15"]
 
 # Go
 go = "latest"
@@ -63,10 +63,10 @@ go = "latest"
 # `rust = "latest"` here brings the override back.
 
 # Ruby
-ruby = "3.3"
+ruby = "3.4"
 
 # Java
-java = "21"
+java = "25"
 
 # Deno
 deno = "latest"
@@ -80,7 +80,7 @@ zig = "latest"
 # CLI Tools
 atuin = "latest"
 bat = "latest"
-codex = "0.169.0"
+codex = "0.170.0"
 # corralctl, passmcp, and draft — the AI Ecosystem & Governance Suite,
 # managed and updated globally via mise (`github:sebastienrousseau/...`).
 "github:sebastienrousseau/corralctl" = "0.0.54"
@@ -102,10 +102,10 @@ ripgrep = "latest"
 ruff = "latest"
 # Required by current nvim-treesitter to build its managed parsers.
 "aqua:tree-sitter/tree-sitter" = "latest"
-yazi = "26.5.6"
-zellij = "0.44.3"
+yazi = "26.9.1"
+zellij = "0.46.0"
 zoxide = "latest"
-"aqua:twpayne/chezmoi" = "2.72.0"
+"aqua:twpayne/chezmoi" = "2.74.1"
 "aqua:junegunn/fzf" = "latest"
 "aqua:FiloSottile/age" = "latest"
 # minisign verifies the `dot registry` index (registry-trust.sh) and runs in
@@ -123,7 +123,7 @@ minisign = "latest"
 "aqua:ollama/ollama" = "0.40.16"
 "aqua:Nukesor/pueue/pueue" = "4.0.4"
 "aqua:Nukesor/pueue/pueued" = "4.0.4"
-wasmtime = "48.0.2"
+wasmtime = "50.0.2"
 sops = "3.13.3"
 "aqua:dandavison/delta" = "latest"
 fd = "latest"
@@ -146,7 +146,7 @@ uv = "latest"
 
 # AI tools
 # "npm:@anthropic-ai/claude-code" = "latest"  # disabled 2026-06-04: npm 11 skips the platform-native optionalDependency on global installs, breaking the binary. Use Anthropic's native installer instead (~/.local/bin/claude, self-updating).
-"npm:@github/copilot" = "1.0.112"
+"npm:@github/copilot" = "1.0.114"
 # antigravity-cli (agy) is installed via native curl installer, not npm:
 # curl -fsSL https://antigravity.google/cli/install.sh | bash
 # codex provided by the native `codex` pin above; `npm:codex-cli` was an
@@ -154,9 +154,9 @@ uv = "latest"
 # opencode: native pin below (folded in from the retired ~/mise.toml).
 # `npm:opencode-ai` is a redundant duplicate using the broken npm optional-dep
 # wrapper pattern — do not reintroduce it.
-opencode = "1.19.5"
+opencode = "1.19.6"
 "npm:autohand-cli" = "0.9.11"
-"npm:@qwen-code/qwen-code" = "0.27.4"
+"npm:@qwen-code/qwen-code" = "0.28.0"
 "npm:@guizmo-ai/zai-cli" = "0.3.5"
 # "pipx:mistral-vibe" = "latest"  # disabled 2026-05-12: dep `mistralai` quarantined on PyPI; re-enable when restored
 
@@ -167,8 +167,8 @@ just = "latest"
 # Nushell (structured-data shell). The bare `nushell` name isn't in
 # mise's tool registry; the aqua: backend resolves it from the official
 # release tarballs.
-"aqua:nushell/nushell" = "0.114.1"
-"aqua:PowerShell/PowerShell" = "7.6.6"
+"aqua:nushell/nushell" = "0.117.0"
+"aqua:PowerShell/PowerShell" = "7.7.0"
 
 [env]
 # Environment variables to set
