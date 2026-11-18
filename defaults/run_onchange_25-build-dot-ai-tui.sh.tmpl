@@ -19,6 +19,14 @@ set -euo pipefail
 # go.mod:       {{ include "dot_local/share/dot-ai-tui/go.mod" | sha256sum }}
 # go.sum:       {{ include "dot_local/share/dot-ai-tui/go.sum" | sha256sum }}
 
+# Whether chezmoi saw a Go toolchain when it rendered this script. Without
+# Go the build is skipped (exit 0) and chezmoi records the script as run;
+# this line changes once Go is installed, so the next apply builds.
+# go: {{ if lookPath "go" }}present{{ else }}absent{{ end }}
+# The opt-in below is read from the environment, so it is rendered here too:
+# setting DOTFILES_AI=1 later changes this line and the next apply builds.
+# opt-in: DOTFILES_AI={{ env "DOTFILES_AI" | default "0" }}
+
 SRC="$HOME/.local/share/dot-ai-tui"
 OUT="$HOME/.local/bin/dot-ai-tui"
 

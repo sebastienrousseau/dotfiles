@@ -20,6 +20,11 @@ set -euo pipefail
 # go.mod: {{ include "dot_local/share/dot-policy/go.mod" | sha256sum }}
 # go.sum: {{ include "dot_local/share/dot-policy/go.sum" | sha256sum }}
 
+# Whether chezmoi saw a Go toolchain when it rendered this script. Without
+# Go the build is skipped (exit 0) and chezmoi records the script as run;
+# this line changes once Go is installed, so the next apply builds.
+# go: {{ if lookPath "go" }}present{{ else }}absent{{ end }}
+
 SRC="$HOME/.local/share/dot-policy"
 OUT="$HOME/.local/bin/dot-policy"
 # The framework version, injected as main.version (`--version`).
