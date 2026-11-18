@@ -88,7 +88,7 @@ codex = "0.169.0"
 "github:sebastienrousseau/passmcp-graph" = "0.0.10"
 "github:sebastienrousseau/passmcp-lsp" = "0.0.10"
 "github:sebastienrousseau/passmcp-server" = "0.0.10"
-"github:sebastienrousseau/draft" = "0.0.46"
+"github:sebastienrousseau/draft" = "0.0.47"
 eza = "latest"
 gping = "latest"
 # pandoc builds the HTML/PDF/EPUB manual. Without it tools/docs/build-manual.sh

@@ -2,6 +2,12 @@
 
 This file documents all notable changes to this project.
 
+## Unreleased
+
+### Changed
+
+- draft moves to its latest signed release, 0.0.47 (from 0.0.46), outside the age gate as a first-party tool.
+
 ## v0.2.547 (2026-11-17)
 
 ### Added
