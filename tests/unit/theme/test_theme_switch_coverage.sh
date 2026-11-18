@@ -152,7 +152,7 @@ set_theme_to bloom-dark
 reset_calls
 rc="$(sw mode sepia)"
 assert_equals "1" "$rc" "an unknown mode fails"
-assert_file_contains "$OUT" "dot theme mode <dark|light|auto>" "usage is printed"
+assert_file_contains "$ERR" "dot theme mode <dark|light|auto>" "usage is printed"
 assert_empty "$(last_sync)" "nothing is applied"
 
 test_start "mode_is_a_no_op_when_already_in_the_manual_mode"
@@ -238,17 +238,17 @@ test_start "plan_requires_a_name"
 reset_calls
 rc="$(sw plan)"
 assert_equals "1" "$rc" "plan without a name fails"
-assert_file_contains "$OUT" "dot theme plan <family|variant>" "usage is printed"
+assert_file_contains "$ERR" "dot theme plan <family|variant>" "usage is printed"
 
 test_start "plan_mode_flag_requires_a_value"
 rc="$(sw plan maui --mode)"
 assert_equals "1" "$rc" "--mode without a value fails"
-assert_file_contains "$OUT" "--mode requires auto, dark, or light" "the error explains --mode"
+assert_file_contains "$ERR" "--mode requires auto, dark, or light" "the error explains --mode"
 
 test_start "plan_rejects_unknown_options_and_modes"
 rc="$(sw plan maui --bogus)"
 assert_equals "1" "$rc" "an unknown option fails"
-assert_file_contains "$OUT" "Unknown option" "the option is named"
+assert_file_contains "$ERR" "Unknown option" "the option is named"
 rc="$(sw plan maui --mode=sepia)"
 assert_equals "1" "$rc" "an invalid mode fails"
 assert_empty "$(last_sync)" "no plan is requested on a usage error"
@@ -296,7 +296,7 @@ rm -f "$HIST"
 reset_calls
 rc="$(sw undo)"
 assert_equals "1" "$rc" "undo with no history fails"
-assert_file_contains "$OUT" "no previous theme recorded" "the error explains why"
+assert_file_contains "$ERR" "no previous theme recorded" "the error explains why"
 
 test_start "undo_applies_the_previous_theme_and_pushes_the_current"
 printf 'maui-light\nbloom-dark\nbloom-light\n' >"$HIST"
@@ -321,7 +321,7 @@ assert_equals "bloom-dark" "$(cat "$HIST")" "only the current theme remains"
 test_start "preview_requires_a_name"
 rc="$(sw preview)"
 assert_equals "1" "$rc" "preview without a name fails"
-assert_file_contains "$OUT" "dot theme preview <name>" "usage is printed"
+assert_file_contains "$ERR" "dot theme preview <name>" "usage is printed"
 
 test_start "preview_keeps_the_theme_on_enter"
 set_theme_to bloom-dark
@@ -337,7 +337,7 @@ set_theme_to bloom-dark
 reset_calls
 rc="$(FAKE_SYNC_RC=1 sw preview maui-light)"
 assert_equals "1" "$rc" "a failed preview exits 1"
-assert_file_contains "$OUT" "apply failed" "the failure is reported"
+assert_file_contains "$ERR" "apply failed" "the failure is reported"
 assert_equals "--force bloom-dark" "$(last_sync)" "the previous theme is restored"
 
 # ===========================================================================
@@ -346,13 +346,13 @@ assert_equals "--force bloom-dark" "$(last_sync)" "the previous theme is restore
 test_start "random_rejects_bad_arguments"
 rc="$(sw random --mode sepia)"
 assert_equals "1" "$rc" "an invalid --mode fails"
-assert_file_contains "$OUT" "--mode dark|light" "the valid modes are listed"
+assert_file_contains "$ERR" "--mode dark|light" "the valid modes are listed"
 reset_calls
 rc="$(sw random --mode=purple)"
 assert_equals "1:" "$rc:$(last_sync)" "--mode=purple fails too, and nothing is applied"
 rc="$(sw random --bogus)"
 assert_equals "1" "$rc" "an unknown argument fails"
-assert_file_contains "$OUT" "dot theme random" "usage is printed"
+assert_file_contains "$ERR" "dot theme random" "usage is printed"
 
 test_start "random_picks_another_family_and_keeps_auto"
 set_theme_to bloom-light auto
@@ -389,7 +389,7 @@ printf '[themes.solo-dark]\nmode = "dark"\n' >"$NONE_SRC/.theme-manifest/themes.
 reset_calls
 rc="$(SRC_OVERRIDE="$NONE_SRC" sw random)"
 assert_equals "1" "$rc" "random fails with nothing to pick"
-assert_file_contains "$OUT" "run 'dot theme rebuild' first" "the remedy is suggested"
+assert_file_contains "$ERR" "run 'dot theme rebuild' first" "the remedy is suggested"
 
 # ===========================================================================
 # picker guard
@@ -400,6 +400,6 @@ mkdir -p "$NOTHEMES_SRC"
 printf 'theme = "maui-dark"\n' >"$NOTHEMES_SRC/.chezmoidata.toml"
 rc="$(SRC_OVERRIDE="$NOTHEMES_SRC" sw)"
 assert_equals "1" "$rc" "the picker cannot run without themes.toml"
-assert_file_contains "$OUT" "themes.toml" "the missing file is named"
+assert_file_contains "$ERR" "themes.toml" "the missing file is named"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

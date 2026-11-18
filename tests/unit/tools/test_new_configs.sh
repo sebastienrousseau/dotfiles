@@ -132,6 +132,7 @@ mkdir -p "$SRC/.chezmoidata" "$SRC/.theme-manifest" "$SRC/.chezmoitemplates"
 cp "$DEFAULTS/.chezmoidata.toml" "$SRC/"
 cp "$DEFAULTS/.theme-manifest/themes.toml" "$SRC/.theme-manifest/"
 cp "$DEFAULTS/.chezmoitemplates/theme-name" "$SRC/.chezmoitemplates/"
+cp "$DEFAULTS/.chezmoitemplates/theme-subset" "$SRC/.chezmoitemplates/"
 
 render() { # <template> <theme> <out>
   printf '{"data":{"theme":"%s"}}\n' "$2" >"$WORK/chezmoi-$2.json"
