@@ -1,21 +1,38 @@
-{{- if hasKey . "github_token" }}
-machine github.com
-login {{ .chezmoi.username }}
-password {{ .github_token }}
+{{- /*
+  ~/.netrc: machine credentials for tools that read it (curl -n, pip,
+  huggingface_hub, …). The rendered file is plaintext, readable by every
+  process running as you (AI agents included), so it holds only what
+  nothing else covers.
 
-machine api.github.com
-login {{ .chezmoi.username }}
-password {{ .github_token }}
-{{- end }}
+  - GitHub has no entry. git authenticates through the gh credential
+    helper in ~/.gitconfig, and gh keeps its token in the system keychain.
+    A github_token here used to write that token out in plaintext twice.
+  - GitLab and Hugging Face. Keep the token out of
+    ~/.config/chezmoi/chezmoi.toml (also plaintext) and have chezmoi fetch
+    it at apply time instead, in ~/.config/chezmoi/chezmoi.toml:
 
-{{- if hasKey . "gitlab_token" }}
-machine gitlab.com
-login {{ .chezmoi.username }}
-password {{ .gitlab_token }}
-{{- end }}
+      [data.netrc.keyring]            # system keychain, stored once with
+      "gitlab.com" = true             #   chezmoi secret keyring set \
+      "huggingface.co" = true         #     --service=gitlab.com --user=$USER
 
-{{- if hasKey . "huggingface_token" }}
-machine huggingface.co
-login {{ .chezmoi.username }}
-password {{ .huggingface_token }}
+      [data.netrc.onepassword]        # 1Password CLI (op) reference
+      "huggingface.co" = "op://Private/Hugging Face/token"
+
+    gitlab_token / huggingface_token as plain [data] keys still work but
+    leave the token in plaintext in chezmoi.toml; prefer the above. For
+    GitLab, `glab auth login` with the glab credential helper in
+    ~/.gitconfig needs no entry here at all.
+*/ -}}
+{{- $user := .chezmoi.username }}
+{{- $keyring := dig "netrc" "keyring" dict . }}
+{{- $op := dig "netrc" "onepassword" dict . }}
+{{- $out := list }}
+{{- range $host, $key := dict "gitlab.com" "gitlab_token" "huggingface.co" "huggingface_token" }}
+{{-   $token := "" }}
+{{-   if hasKey $ $key }}{{ $token = index $ $key }}
+{{-   else if hasKey $op $host }}{{ $token = onepasswordRead (index $op $host) }}
+{{-   else if index $keyring $host }}{{ $token = keyring $host $user }}
+{{-   end }}
+{{-   if $token }}{{ $out = append $out (printf "machine %s\nlogin %s\npassword %s\n" $host $user $token) }}{{ end }}
 {{- end }}
+{{- join "\n" $out -}}
