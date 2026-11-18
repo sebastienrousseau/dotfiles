@@ -813,14 +813,23 @@ _dotfiles_async_init() {
 }
 
 # Deferred Hydration for Zero-Jank Experience
+#
+# mise, atuin and zoxide load just after the first prompt is drawn: the
+# first precmd asks zle to call back as soon as it waits for input
+# (`zle -F` on a /dev/null descriptor, which is always readable). If a
+# command is entered before that (typeahead), preexec hydrates first, so
+# mise's environment is in place before any command runs. Until then,
+# commands resolve through mise's shims, which 00-core-paths puts on PATH.
+# Without zle (stdin not a terminal), hydration runs in that first precmd.
+#
+# DOTFILES_HYDRATED is shell-local: exported, it told every child shell
+# (tmux panes, IDE terminals, `exec zsh`) to skip mise, atuin and zoxide.
 _dotfiles_deferred_hydration() {
-  # Unregister self
-  _dotfiles_del_precmd _dotfiles_deferred_hydration
   _dotfiles_del_preexec _dotfiles_deferred_hydration
 
   # Check if already hydrated in this shell instance
   [[ -n "$DOTFILES_HYDRATED" ]] && return 0
-  export DOTFILES_HYDRATED=1
+  typeset -g DOTFILES_HYDRATED=1
 
   _dotfiles_async_init
 
@@ -831,12 +840,34 @@ _dotfiles_deferred_hydration() {
   fi
 }
 
-# 1. Idle trigger (500ms)
-zmodload zsh/sched 2>/dev/null
-sched +1 _dotfiles_deferred_hydration 2>/dev/null
+# zle -F handler: hydrate once, with anything it prints shown above the
+# prompt rather than over it.
+_dotfiles_hydrate_on_idle() {
+  local fd=$1 log="$_SHELL_CACHE/hydrate.$$.log"
+  zle -F "$fd"
+  exec {fd}<&-
+  { _dotfiles_deferred_hydration } >|"$log" 2>&1
+  if [[ -s "$log" ]]; then
+    zle -I
+    print -r -- "$(<"$log")" >&2
+  fi
+  rm -f -- "$log"
+}
 
-# 2. First-action trigger (Prompt or Enter)
-_dotfiles_add_precmd _dotfiles_deferred_hydration
+# First precmd: defer hydration until zle waits for input.
+_dotfiles_hydrate_after_prompt() {
+  _dotfiles_del_precmd _dotfiles_hydrate_after_prompt
+  local fd
+  if [[ -o zle ]] && exec {fd}</dev/null; then
+    zle -F "$fd" _dotfiles_hydrate_on_idle 2>/dev/null && return 0
+    exec {fd}<&-
+  fi
+  _dotfiles_deferred_hydration
+}
+
+# An inherited value comes from a parent shell that exported it.
+unset DOTFILES_HYDRATED
+_dotfiles_add_precmd _dotfiles_hydrate_after_prompt
 _dotfiles_add_preexec _dotfiles_deferred_hydration
 
 fi
