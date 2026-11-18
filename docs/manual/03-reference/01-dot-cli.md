@@ -116,7 +116,8 @@ agreed to. A step that cannot run is shown as skipped with the reason.
 The answer to every question is **no** unless you say yes. `--yes` (or
 `DOTFILES_YES=1`) answers yes to all of them; with no terminal to ask (a pipe,
 cron, CI) and no `--yes`, `dot system update` installs nothing extra and says so.
-`--globals` also updates npm, cargo and pipx globals.
+`--globals` also upgrades pipx venvs. Global npm and cargo tools are not
+floated: they are exact pins (`npm:` in mise's conf.d, `[rust_tools]`).
 
 ### `dot config update`
 

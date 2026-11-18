@@ -224,7 +224,7 @@ $script:DotCommands = @{
     'system settings show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'system show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'system status' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'system update' = @{ Flags = @(@('--help', 'Show help'), @('--yes', 'Answer yes to every question'), @('-y', 'Answer yes to every question'), @('--globals', 'Also update npm, cargo and pipx globals')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'system update' = @{ Flags = @(@('--help', 'Show help'), @('--yes', 'Answer yes to every question'), @('-y', 'Answer yes to every question'), @('--globals', 'Also upgrade pipx globals (npm and cargo tools are pinned)')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'theme font install' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'theme font list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'theme list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }

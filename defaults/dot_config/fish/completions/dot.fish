@@ -352,5 +352,5 @@ complete -c dot -n '__dot_in '\''session new'\''' -l cwd -x -d 'The directory it
 complete -c dot -n '__dot_in '\''shell alias status'\''' -l tiers -d 'Show which ecosystem tiers are enabled'
 complete -c dot -n '__dot_at '\''system schedule set'\''' -a 'weekly daily off'
 complete -c dot -n '__dot_in '\''system update'\''' -l yes -s y -d 'Answer yes to every question'
-complete -c dot -n '__dot_in '\''system update'\''' -l globals -d 'Also update npm, cargo and pipx globals'
+complete -c dot -n '__dot_in '\''system update'\''' -l globals -d 'Also upgrade pipx globals (npm and cargo tools are pinned)'
 complete -c dot -n '__dot_at '\''tool new'\''' -a 'python go node packer molecule'

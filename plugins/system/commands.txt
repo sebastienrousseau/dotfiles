@@ -17,7 +17,7 @@ cmd|system settings show||read|Current OS settings
 cmd|system settings apply|@system settings apply|write|Apply the managed OS settings
 run|system clean --logs|@system clean --logs||
 flag|system update|yes|y||Answer yes to every question
-flag|system update|globals|||Also update npm, cargo and pipx globals
+flag|system update|globals|||Also upgrade pipx globals (npm and cargo tools are pinned)
 arg|system schedule set|weekly daily off||
 alias|update|shortcut|system update|
 alias|upgrade|removed|system update|0.2.538

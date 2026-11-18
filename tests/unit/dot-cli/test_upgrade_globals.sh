@@ -3,8 +3,11 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2016
 # `dot system update` (plugins/system/libexec/system/upgrade.sh) runs what the old `update`
-# script and functions ran. The language-globals phase (npm, cargo, pipx)
-# runs only with --globals; the app-store phase (mas, flatpak, snap) runs
+# script and functions ran. The language-globals phase runs only with
+# --globals and upgrades pipx venvs only: npm and cargo globals floated to
+# whatever was published last (npm with its install scripts), so they are
+# exact pins now (`npm:` in mise's conf.d, [rust_tools]) and never upgraded
+# here; the app-store phase (mas, flatpak, snap) runs
 # with the consented system phase. Each runs the managers that are
 # installed, skips the others, and fails when one fails. Fakes record calls.
 set -uo pipefail
@@ -73,22 +76,21 @@ assert_equals "0" "$(upgrade 'dot_upgrade_prepare --yes; echo $DOT_UPGRADE_GLOBA
 assert_contains "step globals" "$(upgrade 'DOT_UPGRADE_GLOBALS=1 dot_upgrade_toolchain_steps')" "the phase runs when asked"
 assert_output_not_contains "step globals" "upgrade 'DOT_UPGRADE_GLOBALS=0 dot_upgrade_toolchain_steps'" "and not otherwise"
 
-test_start "globals_runs_each_installed_manager"
+test_start "globals_never_float_npm_or_cargo"
 : >"$WORK/calls"
 rc=0
 upgrade _dot_upgrade_globals >/dev/null 2>&1 || rc=$?
-assert_equals "0" "$rc" "every manager succeeded"
-assert_equals "npm update -g --audit=false|cargo install-update -a|pipx upgrade-all" \
-  "$(paste -sd '|' "$WORK/calls")" "npm, cargo and pipx each ran"
+assert_equals "0" "$rc" "the phase succeeded"
+assert_equals "pipx upgrade-all" "$(paste -sd '|' "$WORK/calls")" \
+  "only pipx ran: no npm update -g, no cargo install-update"
 
-test_start "globals_skips_missing_and_fails_on_a_failure"
-rm "$WORK/bin/cargo-install-update"
+test_start "globals_skips_a_missing_pipx"
+mv "$WORK/bin/pipx" "$WORK/pipx.saved"
 : >"$WORK/calls"
 rc=0
-FAIL_npm=3 upgrade _dot_upgrade_globals >/dev/null 2>&1 || rc=$?
-assert_equals "1" "$rc" "a failing manager fails the phase"
-assert_equals "npm update -g --audit=false|pipx upgrade-all" "$(paste -sd '|' "$WORK/calls")" \
-  "the others still run, and a missing one is skipped"
+upgrade _dot_upgrade_globals >/dev/null 2>&1 || rc=$?
+assert_equals "0|" "$rc|$(paste -sd '|' "$WORK/calls")" "no pipx, nothing to do"
+mv "$WORK/pipx.saved" "$WORK/bin/pipx"
 
 test_start "apps_follow_the_system_phase"
 : >"$WORK/calls"

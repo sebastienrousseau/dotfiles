@@ -42,7 +42,7 @@ summary = "Answer yes to every question"
 
 [[commands.flags]]
 long = "globals"
-summary = "Also update npm, cargo and pipx globals"
+summary = "Also upgrade pipx globals (npm and cargo tools are pinned)"
 
 [[commands]]
 verb = "clean"

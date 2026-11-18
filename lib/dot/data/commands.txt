@@ -321,7 +321,7 @@ flag|security score show|json|j||Print a JSON summary
 flag|session new|cwd||dir|The directory it starts in
 flag|shell alias status|tiers|||Show which ecosystem tiers are enabled
 flag|system update|yes|y||Answer yes to every question
-flag|system update|globals|||Also update npm, cargo and pipx globals
+flag|system update|globals|||Also upgrade pipx globals (npm and cargo tools are pinned)
 arg|system schedule set|weekly daily off||
 arg|tool new|python go node packer molecule||
 alias|mode|removed|agent mode|0.2.538

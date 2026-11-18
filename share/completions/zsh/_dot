@@ -569,7 +569,7 @@ _dot() {
       flags_=('--help:Show help')
       ;;
     'system update' | 'system update'\ *)
-      flags_=('--help:Show help' '--yes:Answer yes to every question' '-y:Answer yes to every question' '--globals:Also update npm, cargo and pipx globals')
+      flags_=('--help:Show help' '--yes:Answer yes to every question' '-y:Answer yes to every question' '--globals:Also upgrade pipx globals (npm and cargo tools are pinned)')
       ;;
     'theme font install' | 'theme font install'\ *)
       flags_=('--help:Show help')

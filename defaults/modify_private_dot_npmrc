@@ -24,6 +24,13 @@ registry=https://registry.npmjs.org/
 # Security
 audit=true
 audit-level=moderate
+# No preinstall/install/postinstall scripts: a compromised package runs
+# nothing at install time. A tool that needs its script can be rebuilt by
+# hand with `npm rebuild <pkg> --ignore-scripts=false`.
+ignore-scripts=true
+# Install only versions published at least 7 days ago (npm 11.10+; days).
+# Exempt a package with min-release-age-exclude=<name|glob>.
+min-release-age=7
 
 # Performance
 prefer-offline=true

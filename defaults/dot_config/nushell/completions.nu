@@ -1695,7 +1695,7 @@ export extern "dot system status" [
 
 export extern "dot system update" [
     --yes(-y) # Answer yes to every question
-    --globals # Also update npm, cargo and pipx globals
+    --globals # Also upgrade pipx globals (npm and cargo tools are pinned)
     --help(-h) # Show help
     ...rest: string
 ]
@@ -1941,7 +1941,7 @@ export extern "dot sync" [
 
 export extern "dot update" [
     --yes(-y) # Answer yes to every question
-    --globals # Also update npm, cargo and pipx globals
+    --globals # Also upgrade pipx globals (npm and cargo tools are pinned)
     --help(-h) # Show help
     ...rest: string
 ]
