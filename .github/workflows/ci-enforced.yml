@@ -90,6 +90,9 @@ jobs:
         uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # The action defaults to 8.24.3; keep one gitleaks version across
+          # CI and pre-commit (security-policy job and pre-commit pin 8.30.1).
+          GITLEAKS_VERSION: 8.30.1
 
   security-dependency-audit:
     name: Security / Dependency Audit
