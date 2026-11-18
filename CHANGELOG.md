@@ -4,8 +4,57 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+### Security
+
+- Floating tools wait seven days before mise installs a new release (`minimum_release_age = "7d"`, `auto_install = false`). The first-party `github:sebastienrousseau/*` tools are exempt per tool, and the trust tools (`age`, `minisign`, `uv`, tldr, poetry, govulncheck) get exact pins. Exact pins still install regardless of age.
+- npm blocks install scripts (`ignore-scripts=true`) and waits seven days for new releases (`min-release-age=7`). `dot system update --globals` no longer runs `npm update -g` or `cargo install-update -a`; it upgrades pipx only. autohand-cli alone may run its own install scripts (its postinstall makes node-pty's `spawn-helper` executable) and is approved below aube's weekly-download threshold, so a fresh machine can install it.
+- With no `~/.config/dotfiles/ai-policy.toml`, `dot cli hook check` now applies a deny-only floor: agents may not read the credentials dot manages (the chezmoi age identity, `chezmoi.toml`, `~/.netrc`, `~/.npmrc`, gh's `hosts.yml`, dot's secrets store, the AI gateway token, the macOS keychains) or run commands that print or decrypt them. Everything else is allowed, and without `dot-policy` (no Go) the hook allows as before. Every ai-policy-pack preset (now 1.0.1) denies the same credentials.
+- The AI gateway runs on an API key by default. Routing third-party tools through a Claude subscription is an explicit opt-in (`DOT_AI_GATEWAY_SUBSCRIPTION=1`) that prints Anthropic's own terms on every start and refuses a start without a terminal unless `DOT_AI_GATEWAY_SUBSCRIPTION_ACK=1` is also set. With no key it stops and explains both options; it never falls back to the subscription.
+- `install.sh` verifies the release tag's signature against the maintainer keys it embeds and requires HEAD to be the tagged commit; any failure removes the clone and stops before chezmoi runs. The chezmoi installer is pinned to the repo's chezmoi version, and the Neovim checksum checks the downloaded tarball itself, not a file in the working directory.
+- The README downloads the installer into a private `mktemp -d` directory instead of the shared `/tmp/dotfiles-install.sh`, and no longer runs it after a checksum mismatch.
+- `update-deps.yml` validates the upstream nerd-fonts tag and passes it through `env:`; four other workflows stop interpolating step outputs into `run:` scripts.
+- `~/.netrc` no longer carries the GitHub token (the gh credential helper covers git); GitLab and Hugging Face tokens can come from 1Password or the keyring instead of plain `chezmoi.toml`.
+- Keychain items are added with an empty trusted-application list, so other processes have to ask. Expect one "Always Allow" prompt per secret.
+- The archived `mcp-server-sqlite` (an unfixed SQL injection upstream) is removed, and the MCP registry's attestations name the corralctl and passmcp-server versions that actually run.
+- gitleaks no longer ignores keys that contain `test`, `example`, `cafebabe` or `deadbeef`, or anything under `docs/`; the two real false positives are allowlisted by exact value and fingerprint. CI and pre-commit run the same gitleaks (8.30.1), and Dependabot waits seven days on every ecosystem.
+
+### Fixed
+
+- `chezmoi apply` (`dot sync`) checks its flags before taking the lock, always logs `apply_end` with its status and duration, logs each step, and backs up the files it is about to change (`backup_*_pre_apply`, capped like the other backups; `DOTFILES_BACKUP_ON_APPLY=0` turns it off), so `dot doctor rollback` can return to the last apply. Trace IDs come from a real random source.
+- The CLI follows its own error contract (ADR-020): errors go to stderr, usage errors exit 64, and a word that names no command exits 127 with one message. `dot doctor nope` no longer runs the whole doctor, `dot tool nope` no longer reaches mise, and `--help` after an unknown verb reports the unknown verb.
+- `install.sh --provision` runs only the provisioning scripts that changed since their last successful run (`--all` runs every one), and exits non-zero naming each script that failed instead of reporting success. The first run after upgrading runs them all once.
+- Tool pins have one source, `conf.d/00-dotfiles.toml`: the repo's own `mise.toml` and `mise.lock`, `heal-tools`, the wasmtime version in CI and the docs now match it, and `test_pin_parity.sh` fails on any drift. `heal-tools` installs with `mise install` instead of `mise use --global --pin`, which shadowed conf.d and kept a host on old versions; `dot ai install` does the same for tools conf.d declares, and honours per-host `[data.ai_tools]` overrides.
+- eslint_d, prettierd (replacing prettier_d, deprecated since 2019), typescript and typescript-language-server are exact mise pins, so they survive a Node.js switch instead of living inside one Node version's global packages.
+- `DOTFILES_HYDRATED` is no longer exported, so tmux panes, IDE terminals and `exec zsh` started from a shell set up mise, atuin and zoxide again.
+- zinit and its plugins load at the first command when zinit is installed, and are cloned only on an explicit `zinit` call; the stub made the deferred load a no-op.
+- The compinit dump is refreshed after a full rebuild, so shells stop paying for a full compinit forever once it is a day old. One ssh-agent per host is reused instead of one started per shell.
+- Alias loading no longer forks `uname` or rewrites the history file (`fc -W`, which could drop lines under `SHARE_HISTORY`).
+- The Nix overlay reads `defaults/.chezmoidata.toml`; it read a path that does not exist and silently dropped every feature-gated package.
+- The Go helpers (`run_onchange_24..27`) rebuild once Go is installed; before, a run without Go was recorded as done.
+- `dot-theme-sync` honours `NO_COLOR` and prints no colour codes into a pipe.
+- dot-policy cleans `HOME` before expanding `~`, so a HOME with a trailing or doubled slash no longer makes every `~` rule miss.
+- The global commit-msg hook adds `Assisted-by` only when the commit is made inside an agent session (not whenever any agent runs or `ANTHROPIC_API_KEY` is set), and adds the branding signature only in repositories whose every remote names the owner.
+- The perf gate fails a crashing `dot` command, profiles a real interactive zsh, and gates on the median instead of a three-run mean.
+
+### Added
+
+- `dot system clean --caches` prunes the uv, pip and Go build caches under `~/.cache/dot/builds` (23 GB on one workstation), and `dot doctor` warns when they grow large.
+- `--json` with a versioned schema for `dot version`, `dot tool list` and `dot config profile`; the CLI-contract lint fails any new read command without `--json`, against a baseline that may only shrink. `dot -V` prints one line, `dot <version>`; planned commands move to `dot help --all`.
+- CI installs the deployed mise toolchain: Linux on every pull request that changes the mise config (behind the Merge Gate), Linux and macOS weekly.
+- zsh-bench (pinned by commit and checksum) gates first-prompt and first-command lag in `perf-baseline.yml`.
+- Python (ruff C901, PLR0912, PLR0915) and Go (gocyclo, gocognit, funlen in every module, including `core/` and `fuzz/`) get the same complexity ratchet as shell, with baselines that may only shrink; `# noqa` and `//nolint` cannot hide a function. A pull request may not grow any of the three baselines.
+- Plain-text logs (rollback, heal, last-run, AI watch) are announced in the log.v1 stream with a pointer event.
+
 ### Changed
 
+- The first prompt no longer waits for mise, atuin and zoxide: they hydrate right after it is drawn, or before the first command if one is typed sooner.
+- Theme templates parse only the active theme instead of the whole 460 KB `themes.toml` about 34 times, which cuts `chezmoi status` CPU time by more than half.
+- The starship cache is no longer regenerated in every new shell, and the real `.zshrc` and `rc.d` files are zcompiled.
+- direnv's directory hook runs only in flake mode (`DOTFILES_USE_FLAKE=1`) in zsh and fish; mise is the per-directory environment loader. bash still hooks it.
+- `defaults/.chezmoiignore` is merged into `.chezmoiignore.tmpl`, with an identical ignore set on every platform.
+- `mise-versions.lock.json`, which nothing read, is removed.
+- `docs/AI.md` and the README describe the gateway's API-key default; the cockpit and `dot ai gateway` help no longer promise "zero keys".
+- The shell complexity baseline is down to 174 (from 185).
 - draft moves to its latest signed release, 0.0.47 (from 0.0.46), outside the age gate as a first-party tool.
 - AI CLI pins move to their latest releases ahead of the seven-day gate, by request: Codex 0.170.0 (from 0.169.0), GitHub Copilot CLI 1.0.114 (1.0.112), opencode 1.19.6 (1.19.5, the aqua build and `npm:opencode-ai`) and Qwen Code 0.28.0 (0.27.4). `mise outdated --bump` offers opencode 2.3.2, but that is the separate `npm:@opencode/cli` package, which mise's registry now lists first; the aqua backend the pin installs from is at 1.19.6.
 - Pinned CLI tools move to their latest releases: chezmoi 2.74.1 (from 2.72.0), Zellij 0.46.0 (0.44.3), Yazi 26.9.1 (26.5.6), Wasmtime 50.0.2 (48.0.2), Nushell 0.117.0 (0.114.1) and PowerShell 7.7.0 (7.6.6).
