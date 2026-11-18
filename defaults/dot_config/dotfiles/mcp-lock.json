@@ -25,18 +25,6 @@
         "method": "npm ci --ignore-scripts (package-lock integrity)",
         "status": "approved"
       }
-    },
-    "sqlite": {
-      "command": "${HOME}/.local/share/dot-mcp/python/sqlite/venv/bin/mcp-server-sqlite",
-      "ecosystem": "pypi",
-      "package": "mcp-server-sqlite==2025.4.25",
-      "integrity": "sha256:5ba5706aa29d249a3cde8226577e021c07792d3198e9db40fd005578d2a0801d",
-      "manifest": "dot_local/share/dot-mcp/python/sqlite/requirements.txt",
-      "source": "https://pypi.org/project/mcp-server-sqlite/2025.4.25/",
-      "verification": {
-        "method": "uv pip install --require-hashes",
-        "status": "approved"
-      }
     }
   }
 }

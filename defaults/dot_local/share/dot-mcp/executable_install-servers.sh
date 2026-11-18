@@ -62,7 +62,7 @@ main() {
   local rc=0 dir
   install_node || rc=1
   if ! command -v uv >/dev/null 2>&1; then
-    echo "dot-mcp: uv not found; skipping the Python MCP servers (git, sqlite)." >&2
+    echo "dot-mcp: uv not found; skipping the Python MCP servers (git)." >&2
     return "$rc"
   fi
   for dir in "$ROOT"/python/*/; do

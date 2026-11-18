@@ -87,7 +87,7 @@ assert_contains "npm $ROOT/node :: ci --ignore-scripts" "$(cat "$LOG")" "npm ci 
 refute_contains "npm $ROOT/node :: install" "$(cat "$LOG")" "never npm install (which rewrites the lock)"
 
 test_start "python_servers_install_with_require_hashes"
-for s in git sqlite; do
+for s in git; do
   assert_contains "uv venv" "$(grep "python/$s/venv" "$LOG")" "$s gets its own venv"
   assert_contains "pip install --python $ROOT/python/$s/venv/bin/python --require-hashes -r $ROOT/python/$s/requirements.txt" \
     "$(cat "$LOG")" "$s installs from its hash-pinned requirements"
@@ -98,7 +98,6 @@ test_start "a_rejected_python_install_leaves_no_venv_and_fails"
 run_installer DOT_TEST_UV_RC=1
 assert_not_equals 0 "$RC" "rc"
 assert_dir_not_exists "$ROOT/python/git/venv" "no partial git venv"
-assert_dir_not_exists "$ROOT/python/sqlite/venv" "no partial sqlite venv"
 assert_contains "install failed" "$(cat "$WORK/out")" "the failure is reported"
 # uv's own error says why; the installer must not guess that hashes failed.
 refute_contains "hash-pinned requirements rejected" "$(cat "$WORK/out")" "no invented cause"
@@ -109,7 +108,7 @@ refute_contains "hash-pinned requirements rejected" "$(cat "$WORK/out")" "no inv
 test_start "a_damaged_uv_cache_is_bypassed_once"
 run_installer DOT_TEST_UV_RC=1 DOT_TEST_UV_NOCACHE_RC=0
 assert_equals 0 "$RC" "rc: $(cat "$WORK/out")"
-for s in git sqlite; do
+for s in git; do
   assert_contains "pip install --python $ROOT/python/$s/venv/bin/python --require-hashes -r $ROOT/python/$s/requirements.txt --no-cache" \
     "$(cat "$LOG")" "$s retries hash-checked without the cache"
   assert_file_exists "$ROOT/python/$s/venv/bin/python" "$s venv is in place"

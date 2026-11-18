@@ -73,13 +73,26 @@ Claude starts a server.
 | Server | Package | Manifest | Install |
 |---|---|---|---|
 | `git` | `mcp-server-git==2026.8.18` (PyPI) | `python/git/requirements.txt` | `uv pip install --require-hashes` into its own venv |
-| `sqlite` | `mcp-server-sqlite==2025.4.25` (PyPI) | `python/sqlite/requirements.txt` | `uv pip install --require-hashes` into its own venv |
 | `memory` | `@modelcontextprotocol/server-memory@2026.8.31` (npm) | `node/package-lock.json` | `npm ci --ignore-scripts` |
 
+`sqlite` (`mcp-server-sqlite`) was removed in 0.2.548. It is Anthropic's
+archived reference server: its last release is 2025.4.25, the repository
+was archived in May 2025, and the SQL injection reported against it
+(builds SQL from unsanitised input) will not be fixed upstream. chezmoi
+removes its deployed venv (`.chezmoiremove`). No maintained official
+replacement exists; add a vetted one through the registry when needed.
+
+`git` runs without `--repository`. That flag takes one repository and, from
+mcp-server-git 2025.12.18 on (CVE-2025-68145), confines every tool's
+`repo_path` to it; this file is one static, user-wide config with no way to
+name the session's repository, so a fixed value would break every other
+repository. Scope it per project instead, in that project's `.mcp.json`:
+`"args": ["--repository", "/path/to/repo"]`.
+
 `uvx --with-requirements` does not enforce the hashes in a requirements file,
-so the Python servers get a venv each instead. The npm names `mcp-server-git`
-and `mcp-server-sqlite` are not the official servers (one is an npm security
-placeholder, the other a third-party package); the official ones ship on PyPI.
+so the Python servers get a venv each instead. The npm name `mcp-server-git`
+is not the official server (it is an npm security placeholder); the official
+one ships on PyPI.
 
 `dot mcp check --strict` and `dot mcp check -s` now verify that:
 

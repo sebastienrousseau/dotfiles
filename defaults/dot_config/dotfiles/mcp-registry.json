@@ -19,15 +19,6 @@
       "scope": "workspace-local",
       "verification": "hash-pinned-package"
     },
-    "sqlite": {
-      "transport": "stdio",
-      "launcher": "${HOME}/.local/share/dot-mcp/python/sqlite/venv/bin/mcp-server-sqlite",
-      "package": "mcp-server-sqlite==2025.4.25",
-      "auth": "env",
-      "authProfile": "none",
-      "scope": "workspace-local",
-      "verification": "hash-pinned-package"
-    },
     "example-remote": {
       "transport": "streamable-http",
       "url": "https://mcp.example.com/v1",
@@ -47,7 +38,7 @@
       "transport": "stdio",
       "launcher": "${HOME}/.local/share/mise/shims/corralctl",
       "args": ["mcp"],
-      "package": "github.com/sebastienrousseau/corralctl@v0.0.18",
+      "package": "github.com/sebastienrousseau/corralctl@v0.0.54",
       "auth": "env",
       "authProfile": "none",
       "scope": "workspace-local",
@@ -57,7 +48,7 @@
       "transport": "stdio",
       "launcher": "${HOME}/.local/bin/passmcp-server",
       "args": [],
-      "package": "github.com/sebastienrousseau/passmcp-server@v0.0.7",
+      "package": "github.com/sebastienrousseau/passmcp-server@v0.0.10",
       "auth": "env",
       "authProfile": "none",
       "scope": "workspace-local",

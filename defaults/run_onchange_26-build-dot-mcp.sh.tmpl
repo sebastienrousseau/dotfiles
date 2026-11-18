@@ -24,7 +24,6 @@ set -euo pipefail
 # installer:    {{ include "dot_local/share/dot-mcp/executable_install-servers.sh" | sha256sum }}
 # npm lock:     {{ include "dot_local/share/dot-mcp/node/package-lock.json" | sha256sum }}
 # git reqs:     {{ include "dot_local/share/dot-mcp/python/git/requirements.txt" | sha256sum }}
-# sqlite reqs:  {{ include "dot_local/share/dot-mcp/python/sqlite/requirements.txt" | sha256sum }}
 
 # Whether chezmoi saw a Go toolchain when it rendered this script. Without
 # Go the build is skipped (exit 0) and chezmoi records the script as run;
