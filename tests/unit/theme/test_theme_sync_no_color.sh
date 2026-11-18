@@ -17,10 +17,11 @@ WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 ESC=$'\033'
 
-# on_tty VAR=value...: --help on a pseudo-terminal; prints what it wrote.
+# on_tty VAR=value...: --help on a pseudo-terminal, NO_COLOR cleared from the
+# inherited environment (the mutation runner exports it); prints what it wrote.
 on_tty() {
   local cmd
-  cmd="$(printf '%q ' env HOME="$WORK" DOTFILES_DIR="$REPO_ROOT" "$@" "$BASH_BIN" "$SYNC" --help)"
+  cmd="$(printf '%q ' env -u NO_COLOR HOME="$WORK" DOTFILES_DIR="$REPO_ROOT" "$@" "$BASH_BIN" "$SYNC" --help)"
   if script -q /dev/null true >/dev/null 2>&1; then
     script -q /dev/null "$BASH_BIN" -c "$cmd" </dev/null 2>/dev/null # BSD script
   else
