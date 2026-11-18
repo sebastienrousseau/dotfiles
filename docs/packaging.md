@@ -76,7 +76,7 @@ and every pin is committed:
 
 | Surface | Pinned by | Notes |
 |---|---|---|
-| Development toolchain (node, go, rust, and ~20 CLI tools) | `mise.toml` + `mise.lock` + `mise-versions.lock.json` | mise is the package manager; the lock carries checksums |
+| Development toolchain (node, go, rust, and ~20 CLI tools) | `mise.toml` + `mise.lock` | mise is the package manager; the lock carries checksums |
 | Contract checks (Python) | `requirements-contracts.txt` | Hash-pinned (`--require-hashes`-compatible), compiled from `requirements-contracts.in`. The docs build (`tools/docs/build-site.sh`) uses the standard library only. |
 | Node tooling | `package.json` | Dev-only |
 | Nix | `flake.lock`, `nix/flake.lock` | Root flake provides the dev shell; `nix/flake.nix` provides `packages.default` |

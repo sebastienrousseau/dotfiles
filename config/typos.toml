@@ -55,7 +55,6 @@ extend-exclude = [
   "dot_config/nvim/lazy-lock.json",
   "**/*.lock",
   ".secrets.baseline",
-  "mise-versions.lock.json",
   "flake.lock",
   "package-lock.json",
   "tests/snapshots/**",

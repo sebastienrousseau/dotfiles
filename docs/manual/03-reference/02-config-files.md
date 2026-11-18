@@ -169,41 +169,58 @@ Fields here override same-named fields in `.chezmoidata.toml` at render time. Pe
 
 ## `~/.dotfiles/mise.toml` (Pinned Versions)
 
-Strict versions for working on the repo itself (separate from the user's own mise config). An excerpt:
+Strict versions for working on the repo itself, with checksums in
+`mise.lock`. Where a tool is also in the managed conf.d below, the version
+agrees with it (exactly, or inside a floating conf.d version such as node
+`"26"`); `tests/unit/install/test_pin_parity.sh` fails on any drift. Rust is
+deliberately absent: rustup and each project's `rust-toolchain.toml` decide.
+An excerpt:
 
 ```toml
 [settings]
 lockfile = true
 
 [tools]
-node = "24.14.0"
-rust = "1.95.0"
+node = "26.13.1"
 go = "1.26.11"
 bun = "1.3.10"
 starship = "1.24.2"
 sops = "3.13.3"
+wasmtime = "50.0.2"
 # ...
 ```
 
 ## `~/.config/mise/conf.d/00-dotfiles.toml` (Managed)
 
 The base layer, deployed by chezmoi and loaded first, so it has the lowest
-precedence. `~/.config/mise/config.toml` is deliberately not managed:
+precedence. It is the source of every tool version: `heal-tools`, the repo's
+`mise.toml`, CI's wasmtime and `[ai_tools]` follow it. To move a version,
+edit `defaults/dot_config/mise/conf.d/00-dotfiles.toml` and run
+`chezmoi apply`. `~/.config/mise/config.toml` is deliberately not managed:
 `mise use -g` and `mise upgrade` write their version pins there, and those
-pins override this file.
+pins override this file, so the dotfiles' own installers use `mise install`
+for any tool conf.d declares.
+
+A floating version (`"latest"`, `"26"`) resolves to the newest release at
+least seven days old. An exact pin installs that release whatever its age;
+npm, pipx and go packages and the trust tools (age, minisign, uv) are exact
+pins for that reason. First-party `github:sebastienrousseau/*` tools opt out
+of the gate per tool.
 
 ```toml
 [settings]
-minimum_release_age = "0s"  # explicit: unset falls back to mise's own age gate
-auto_install = true
+minimum_release_age = "7d"  # floating versions wait seven days
+auto_install = false        # missing tools install only through `mise install`
 activate_aggressive = true
 # mise's own GitHub API calls; the token is never exported
 github.credential_command = "gh auth token"
 
 [tools]
-node = "24"
-python = ["3.12", "3.11", "3.14"]
+node = "26"
+python = ["3.12", "3.14", "3.15"]
 go = "latest"
+"aqua:FiloSottile/age" = "1.3.2"
+"github:sebastienrousseau/corralctl" = { version = "0.0.54", minimum_release_age = "0s" }
 # ... more tools
 
 [env]

@@ -59,7 +59,7 @@ See `docs/operations/ROADMAP_V0_2_503.md` for the full history.
 | `.devcontainer/` | ci | Dev Container spec for reproducible contributor onboarding. |
 | `config/` | ci | Lint and tool configs; `.pre-commit-config.yaml` at the root links to `config/pre-commit-config.yaml`. |
 | `flake.nix` / `flake.lock`, `nix/` | ci | Nix flake for the reproducible dev shell, and its sources. |
-| `mise.toml` / `mise.lock` / `mise-versions.lock.json` | ci | Pinned tool versions (mise as the package manager). |
+| `mise.toml` / `mise.lock` | ci | Pinned tool versions (mise as the package manager). |
 | `security/`, `supply-chain/`, `KEYS.asc` | release | Registry public key, pinned remote-installer hashes, dependency provenance policy, release signing keys. |
 | **Misc + agents** | | |
 | `AGENTS.md` | docs | Cross-harness AI agent context (the standard read by Codex/Cursor/etc.). |

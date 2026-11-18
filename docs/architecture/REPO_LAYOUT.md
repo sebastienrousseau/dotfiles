@@ -157,7 +157,7 @@ find this workstation's agent capabilities:
 | `install/provision/`, `install/lib/`, `install/migrate/` | Platform-specific install helpers invoked by `install.sh`     |
 | `GNUmakefile`, `Makefile`               | `make install` contract for the `dot` CLI; `make test` and other runners       |
 | `defaults/dot_config/just/justfile`, `config/treefmt.toml` | Convenience runners and formatter config                    |
-| `mise.toml`, `mise.lock`, `mise-versions.lock.json` | Mise toolchain versions (locked)                                   |
+| `mise.toml`, `mise.lock`                            | Mise toolchain versions (locked)                                   |
 | `package.json`, `requirements-contracts.in`, `requirements-contracts.txt` | Node and Python dev dependencies              |
 | `flake.nix`, `flake.lock` (root)        | Root Nix flake for `direnv` + repo dev shell                                   |
 | `nix/flake.nix`, `nix/home.nix`         | Separate flake for Home Manager activation (used by `dot system update` and `ci-enforced.yml → lint-nix`) |

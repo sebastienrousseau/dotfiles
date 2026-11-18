@@ -46,16 +46,17 @@ ui_header "Version Locks"
 ui_section "mise toolchain"
 mise_config="$cm_src/dot_config/mise/conf.d/00-dotfiles.toml"
 if [[ -f "$mise_config" ]]; then
+  # An inline table ({ version = "...", ... }) reports its version.
   awk -F= '
     /^\[tools\]/ {in_tools=1; next}
     /^\[/ {in_tools=0}
     /^[[:space:]]*(#|$)/ {next}
     in_tools && NF {
-      gsub(/"/, "", $0)
-      tool=$1
-      gsub(/[[:space:]]+/, "", tool)
-      ver=$2
+      if (match($0, /version = "[^"]*"/)) ver = substr($0, RSTART + 11, RLENGTH - 12)
+      else { ver = $2; gsub(/"/, "", ver) }
       gsub(/^[[:space:]]+|[[:space:]]+$/, "", ver)
+      tool=$1
+      gsub(/"|[[:space:]]+/, "", tool)
       if (tool != "") {
         printf "%s\t%s\n", tool, ver
       }
@@ -92,4 +93,4 @@ fi
 
 ui_section "Notes"
 ui_info "Policy" "Prefer LTS and explicit pins for core runtimes"
-ui_info "Update" "Edit ~/.config/mise/config.toml to adjust pins"
+ui_info "Update" "Edit defaults/dot_config/mise/conf.d/00-dotfiles.toml in the dotfiles source, then chezmoi apply (a pin in ~/.config/mise/config.toml overrides it)"
