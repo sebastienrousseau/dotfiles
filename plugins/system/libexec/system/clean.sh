@@ -97,6 +97,8 @@ dot_system_clean_caches() {
   for name in uv pip go; do
     _clean_one "$name" "$root/$name-cache" || rc=1
   done
+  # The recorded size is now wrong; dot doctor measures again.
+  rm -f "$(dot_build_cache_stamp)"
   _clean_report "$root" quiet
   ui_ok "Reclaimed" "$(((before - _CLEAN_KB) / 1024)) MiB"
   return "$rc"

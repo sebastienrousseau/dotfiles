@@ -192,16 +192,39 @@ dot_build_cache_kb() {
   printf '%s\n' "${kb:-0}"
 }
 
+## dot_build_cache_stamp — where the last measurement of the build caches is
+## kept: one line, "<epoch> <KiB>".
+dot_build_cache_stamp() {
+  printf '%s\n' "${XDG_STATE_HOME:-$HOME/.local/state}/dot/build-cache-kb"
+}
+
+## dot_build_cache_refresh — measure the build caches now and record it.
+## Walking a large cache takes seconds (25 GB: over 20 s), so only
+## dot_build_cache_warn's background refresh and tests call this.
+dot_build_cache_refresh() {
+  local stamp kb
+  stamp="$(dot_build_cache_stamp)"
+  kb="$(dot_build_cache_kb "$(dot_build_root)")"
+  mkdir -p "${stamp%/*}" && printf '%s %s\n' "$(date +%s)" "$kb" >"$stamp.$$" &&
+    mv -f "$stamp.$$" "$stamp"
+}
+
 ## dot_build_cache_warn — warn (ui_warn) when the build caches exceed
 ## DOT_BUILD_CACHE_WARN_GB (10) GiB, with the command that prunes them (P9).
+## It reads the recorded measurement and never walks the cache itself: a
+## missing or day-old one is refreshed in the background for the next run.
 ## Silent otherwise; always 0.
 dot_build_cache_warn() {
-  local root limit="${DOT_BUILD_CACHE_WARN_GB:-10}" kb
+  local limit="${DOT_BUILD_CACHE_WARN_GB:-10}" stamp at=0 kb=0
   [[ "$limit" =~ ^[0-9]+$ ]] || limit=10
-  root="$(dot_build_root)"
-  kb="$(dot_build_cache_kb "$root")"
+  stamp="$(dot_build_cache_stamp)"
+  [[ ! -s "$stamp" ]] || read -r at kb <"$stamp" || :
+  [[ "$at" =~ ^[0-9]+$ && "$kb" =~ ^[0-9]+$ ]] || at=0 kb=0
+  if (($(date +%s) - at > 86400)); then
+    (dot_build_cache_refresh >/dev/null 2>&1 &)
+  fi
   ((kb > limit * 1024 * 1024)) || return 0
-  ui_warn "Build caches" "$((kb / 1024 / 1024)) GiB in $root; 'dot system clean --caches' prunes them"
+  ui_warn "Build caches" "$((kb / 1024 / 1024)) GiB in $(dot_build_root); 'dot system clean --caches' prunes them"
 }
 
 # Print warning message

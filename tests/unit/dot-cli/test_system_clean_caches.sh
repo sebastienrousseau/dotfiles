@@ -81,13 +81,42 @@ test_start "a_bad_flag_is_a_usage_error"
 dot system clean --everything
 assert_equals "64" "$RC" "exits 64"
 
+# sdk FN [GB] [PATH]: run an sdk.sh function in the sandboxed home.
+sdk() {
+  env -i HOME="$WORK/home" PATH="${3:-$SYS}" NO_COLOR=1 DOT_BUILD_CACHE_WARN_GB="${2:-10}" "$BASH_BIN" -c \
+    'source "$1/lib/dot/sdk.sh"; '"$1" _ "$REPO_ROOT" 2>&1
+}
+STAMP="$WORK/home/.local/state/dot/build-cache-kb"
+
 test_start "doctor_warns_past_the_threshold"
 fill
-warn() {
-  env -i HOME="$WORK/home" PATH="$SYS" NO_COLOR=1 DOT_BUILD_CACHE_WARN_GB="$1" "$BASH_BIN" -c \
-    'source "$1/lib/dot/sdk.sh"; dot_build_cache_warn' _ "$REPO_ROOT" 2>&1
-}
-assert_contains "dot system clean --caches" "$(warn 0)" "over the limit: warns with the fix"
-assert_equals "" "$(warn 10)" "under it: silent"
+sdk dot_build_cache_refresh >/dev/null
+assert_file_exists "$STAMP" "a measurement is recorded"
+assert_contains "dot system clean --caches" "$(sdk dot_build_cache_warn 0)" "over the limit: warns with the fix"
+assert_equals "" "$(sdk dot_build_cache_warn 10)" "under it: silent"
+
+# Sizing a large cache walks every file (25 GB took over 20 s); dot doctor
+# must not wait for it. The warning reads the recorded measurement, and a
+# missing or day-old one is refreshed in the background.
+test_start "doctor_never_measures_in_the_foreground"
+rm -f "$STAMP"
+mkdir -p "$WORK/slow"
+printf '#!/bin/sh\nsleep 3\necho "4 $2"\n' >"$WORK/slow/du"
+chmod +x "$WORK/slow/du"
+start=$SECONDS
+out="$(sdk dot_build_cache_warn 0 "$WORK/slow:$SYS")"
+assert_true "(( SECONDS - start < 3 ))" "the warning returns without waiting for du"
+assert_equals "" "$out" "with nothing recorded yet it stays silent"
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  [[ -s "$STAMP" ]] && break
+  sleep 1
+done
+assert_file_exists "$STAMP" "and the background refresh records a measurement"
+
+test_start "pruning_forgets_the_measurement"
+fill
+sdk dot_build_cache_refresh >/dev/null
+dot system clean --caches --yes
+assert_file_not_exists "$STAMP" "the next doctor measures again"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
