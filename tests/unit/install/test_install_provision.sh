@@ -97,7 +97,9 @@ test_start "a_template_that_fails_to_render_is_a_failure"
 printf '#!/usr/bin/env bash\nexit 1\n' >"$WORK/bin/chezmoi"
 provision --all
 assert_not_equals "0" "$RC" "a render failure fails the run"
-assert_contains "run_onchange_40-tmpl.sh.tmpl" "$OUT" "and names the template"
+assert_contains "run_onchange_40-tmpl.sh.tmpl could not be rendered" "$OUT" "says the template did not render"
+assert_contains "run_onchange_40-tmpl.sh.tmpl (exit 1)" "$OUT" "and names it among the failures"
+assert_file_contains "$STATE/status" "run_onchange_40-tmpl.sh.tmpl 1" "a render failure is recorded as exit 1"
 
 test_start "no_provision_directory_is_a_no_op"
 OUT="$(source "$REPO_ROOT/install/lib/provision.sh" && run_provision "$WORK/empty" 2>&1)"
