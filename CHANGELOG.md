@@ -17,6 +17,8 @@ This file documents all notable changes to this project.
 - Keychain items are added with an empty trusted-application list, so other processes have to ask. Expect one "Always Allow" prompt per secret.
 - The archived `mcp-server-sqlite` (an unfixed SQL injection upstream) is removed, and the MCP registry's attestations name the corralctl and passmcp-server versions that actually run.
 - gitleaks no longer ignores keys that contain `test`, `example`, `cafebabe` or `deadbeef`, or anything under `docs/`; the two real false positives are allowlisted by exact value and fingerprint. CI and pre-commit run the same gitleaks (8.30.1), and Dependabot waits seven days on every ecosystem.
+- The registry signing key is rotated to `3FC5303AB9BC3776` (from `903D6CC2B8EED517`, whose offline key was no longer available): `security/registry.pub` is the new public half and `docs/registry.json` is re-signed with it. Installs that still carry the old public key refuse the new index until they update the dotfiles, which ships the new key.
+- `dot system update`, a fresh machine and CI now install `tldr` and `zai-cli` again: mise's embedded aube package manager refuses npm packages under 1000 weekly downloads, and both are approved by name (`allow_low_downloads`).
 
 ### Fixed
 
@@ -35,6 +37,11 @@ This file documents all notable changes to this project.
 - dot-policy cleans `HOME` before expanding `~`, so a HOME with a trailing or doubled slash no longer makes every `~` rule miss.
 - The global commit-msg hook adds `Assisted-by` only when the commit is made inside an agent session (not whenever any agent runs or `ANTHROPIC_API_KEY` is set), and adds the branding signature only in repositories whose every remote names the owner.
 - The perf gate fails a crashing `dot` command, profiles a real interactive zsh, and gates on the median instead of a three-run mean.
+- One ssh-agent per host now holds on hosts with long names. The socket was `<dir>/dotfiles-ssh-agent.<host>.sock`, which passed the 104-byte cap on unix socket paths on many managed Macs, so every shell started (and leaked) an agent again; the host part is capped, and a too-deep directory moves the socket to a private `/tmp/dotfiles-ssh-<uid>`.
+- `prewarm` takes its lock in the cache it warms (or `XDG_RUNTIME_DIR`), not in `/tmp`: any other prewarm on the machine, another user's or another HOME's, made it stand down having done nothing, and another user could block it for good.
+- A full completion rebuild uses `compinit -i`: in a fresh shell compinit asked "Ignore insecure directories?" from preexec, which ate the first command typed or hung a pty driver for good. It now names the skipped directories and the fix on one line instead.
+- The first prompt hydrates as designed: under `noclobber` the one-shot hydration fd could not be opened ("can't clobber parameter fd"), so every shell fell back to hydrating before the prompt.
+- zsh-bench runs zsh-bench's zsh commands under a zsh `SHELL` (on Linux `script` ran them with bash and never returned) and under a deadline that prints what the shell last showed.
 
 ### Added
 
@@ -54,7 +61,9 @@ This file documents all notable changes to this project.
 - `defaults/.chezmoiignore` is merged into `.chezmoiignore.tmpl`, with an identical ignore set on every platform.
 - `mise-versions.lock.json`, which nothing read, is removed.
 - `docs/AI.md` and the README describe the gateway's API-key default; the cockpit and `dot ai gateway` help no longer promise "zero keys".
-- The shell complexity baseline is down to 174 (from 185).
+- The shell complexity baseline is down to 171 (from 185), with Python and Go held to their own baselines.
+- CI runs the full test suite once per push: `ci.yml` and `ci-enforced.yml` both ran it; the required, stricter copy in `ci-enforced.yml` stays.
+- `tools/ci/validate-ci-config.sh`, which nothing ran and which checked a CI layout the repository no longer has, is removed.
 - draft moves to its latest signed release, 0.0.47 (from 0.0.46), outside the age gate as a first-party tool.
 - AI CLI pins move to their latest releases ahead of the seven-day gate, by request: Codex 0.170.0 (from 0.169.0), GitHub Copilot CLI 1.0.114 (1.0.112), opencode 1.19.6 (1.19.5, the aqua build and `npm:opencode-ai`) and Qwen Code 0.28.0 (0.27.4). `mise outdated --bump` offers opencode 2.3.2, but that is the separate `npm:@opencode/cli` package, which mise's registry now lists first; the aqua backend the pin installs from is at 1.19.6.
 - Pinned CLI tools move to their latest releases: chezmoi 2.74.1 (from 2.72.0), Zellij 0.46.0 (0.44.3), Yazi 26.9.1 (26.5.6), Wasmtime 50.0.2 (48.0.2), Nushell 0.117.0 (0.114.1) and PowerShell 7.7.0 (7.6.6).
