@@ -1,0 +1,35 @@
+# golangci-lint configuration for the Go complexity ratchet.
+#
+# Used only by tools/ci/complexity_polyglot.py, never by a module's own
+# lint job. The thresholds are deliberately minimal so every function is
+# reported with its measure (cyclomatic, cognitive, lines); the script
+# applies the real limits (cc 10, cog 15, 60 lines) and the baseline in
+# tools/ci/complexity-baseline-go.txt. The per-module .golangci.yml files
+# carry the real limits for local feedback.
+version: "2"
+
+run:
+  # Report paths from the repository root, whichever module is linted.
+  relative-path-mode: gitroot
+
+linters:
+  default: none
+  enable:
+    - funlen
+    - gocognit
+    - gocyclo
+  settings:
+    funlen:
+      lines: 1
+      statements: -1
+      ignore-comments: true
+    gocognit:
+      min-complexity: 0
+    gocyclo:
+      min-complexity: 1
+
+issues:
+  # Every function, every linter: no caps, no one-issue-per-line folding.
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  uniq-by-line: false
