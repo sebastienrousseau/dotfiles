@@ -36,23 +36,30 @@
         };
       };
 
-      # Overlay: read .chezmoidata.toml features to conditionally include packages
+      # Overlay: read the chezmoi data (defaults/.chezmoidata.toml) to
+      # decide which optional packages to include. Each one is on unless
+      # [features] sets it to false. The path was ../.chezmoidata.toml,
+      # which does not exist, so every optional package was dropped.
       overlays.chezmoi-features =
         final: prev:
         let
-          dataFile = ../.chezmoidata.toml;
-          hasFeature =
-            name:
-            builtins.pathExists dataFile
-            && builtins.match ".*${name} = true.*" (builtins.readFile dataFile) != null;
+          dataFile = ../defaults/.chezmoidata.toml;
+          data =
+            if builtins.pathExists dataFile then
+              builtins.fromTOML (builtins.readFile dataFile)
+            else
+              { };
+          features = data.features or { };
+          enabled = name: features.${name} or true;
+          optional = name: pkg: if enabled name then [ pkg ] else [ ];
         in
         {
           dotfiles-conditional = final.buildEnv {
             name = "dotfiles-conditional";
             paths =
-              (if hasFeature "starship" then [ final.starship ] else [ ])
-              ++ (if hasFeature "zsh" then [ final.zoxide ] else [ ])
-              ++ (if hasFeature "fish" then [ final.direnv ] else [ ])
+              optional "starship" final.starship
+              ++ optional "zoxide" final.zoxide
+              ++ optional "direnv" final.direnv
               ++ [
                 final.bat
                 final.ripgrep
