@@ -130,22 +130,25 @@ jobs:
           targets: wasm32-wasip1
           components: clippy
 
-      # Keep the runtime on the version mise.toml pins for the workstation,
-      # so CI and `dot attest --verify` run the module the same way.
+      # Keep the runtime on the version the workstations run: mise's conf.d
+      # (defaults/dot_config/mise/conf.d/00-dotfiles.toml) is the source, so
+      # CI and `dot attest --verify` run the module the same way.
       - uses: taiki-e/install-action@cfdb7ed4ccc7c7dce37759eae89dc5674b469b39 # v2.90.3
         with:
-          tool: wasmtime@47.0.3
+          tool: wasmtime@50.0.2
 
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: lib/wasm-tools
 
-      - name: Guard the pinned runtime against mise.toml
+      - name: Guard the pinned runtime against mise conf.d
         working-directory: ${{ github.workspace }}
         run: |
-          pinned="$(sed -n 's/^wasmtime = "\(.*\)"$/\1/p' mise.toml | head -n 1)"
-          echo "mise.toml pins wasmtime $pinned"
-          wasmtime --version | grep -q "$pinned"
+          conf=defaults/dot_config/mise/conf.d/00-dotfiles.toml
+          pinned="$(sed -n 's/^wasmtime = "\(.*\)"$/\1/p' "$conf" | head -n 1)"
+          [[ -n "$pinned" ]] || { echo "no wasmtime pin in $conf"; exit 1; }
+          echo "conf.d pins wasmtime $pinned"
+          wasmtime --version | grep -qF "wasmtime $pinned "
 
       - name: Clippy for the wasm target
         run: |

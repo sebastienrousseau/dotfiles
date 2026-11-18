@@ -335,13 +335,23 @@ assert_equals "" "$(grep -Ev '^[A-Za-z0-9:_/-]+@[0-9]+\.[0-9]+\.[0-9]+$' <<<"$sp
 heal '_mise_tool_specs ripgrep'
 assert_equals "1" "$?" "an unmapped tool has no spec"
 
+test_start "heal_tools_mise_specs_follow_conf_d"
+reset_home
+printf '[tools]\nyazi = "9.9.9"\n"aqua:nushell/nushell" = { version = "1.2.3" }\n[env]\nzellij = "0.1.0"\n' >"$WORK/conf.toml"
+heal "HEAL_MISE_CONF='$WORK/conf.toml'; _mise_tool_specs yazi; _mise_tool_specs nushell; _mise_tool_specs zellij || echo none"
+assert_equals "yazi@9.9.9|aqua:nushell/nushell@1.2.3|none" "$(grep -v '^ISSUES=' "$OUT" | paste -sd '|' -)" \
+  "versions come from conf.d [tools] (string or inline table); a tool it does not pin has no spec"
+
 test_start "install_with_mise_pins_every_spec"
 reset_home
 stub mise
 heal '_install_with_mise pueue'
 assert_equals "0" "$?" "a mise install succeeds"
-assert_contains "mise use --global --pin aqua:Nukesor/pueue/pueue@4.0.4" "$(calls)" "pueue is pinned"
-assert_contains "mise use --global --pin aqua:Nukesor/pueue/pueued@4.0.4" "$(calls)" "pueued is pinned"
+assert_contains "mise install aqua:Nukesor/pueue/pueue@4.0.4" "$(calls)" "pueue installs at its conf.d pin"
+assert_contains "mise install aqua:Nukesor/pueue/pueued@4.0.4" "$(calls)" "pueued installs at its conf.d pin"
+# `mise use --global` wrote the version into ~/.config/mise/config.toml,
+# which outranks conf.d: one heal held the host on an old version for good.
+refute_contains "mise use" "$(calls)" "nothing is written to the global config"
 stub mise 'exit 1'
 heal '_install_with_mise pueue'
 assert_equals "1" "$?" "a mise failure is returned"
