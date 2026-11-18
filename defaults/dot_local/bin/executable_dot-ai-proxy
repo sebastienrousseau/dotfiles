@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# dot-ai-proxy — manage the native local Claude proxy (dot-ai-serve) and
+# dot-ai-proxy — manage the native local Claude gateway (dot-ai-serve) and
 # route the AI tools through it, so any Anthropic/OpenAI-protocol CLI
-# (codex, aider, opencode, claude, …) runs on a single Claude subscription
-# served locally — with no third-party dependency.
+# (codex, aider, opencode, …) reaches Claude through one local endpoint —
+# with no third-party dependency.
+#
+# Upstream auth is an Anthropic API key by default (ANTHROPIC_API_KEY, else
+# `dot secret show ANTHROPIC_API_KEY`). Running the tools on a Claude
+# subscription sign-in is an explicit opt-in, DOT_AI_GATEWAY_SUBSCRIPTION=1,
+# which prints Anthropic's terms and needs a terminal or
+# DOT_AI_GATEWAY_SUBSCRIPTION_ACK=1 (dot-ai-serve --check decides).
 #
 # The engine is dot-ai-serve: a stdlib Python server that wraps the
 # already-installed `claude` CLI and translates the Anthropic/OpenAI wire
@@ -31,11 +37,12 @@ CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
 ENV_SH="$CONFIG_DIR/ai-local.env"
 ENV_FISH="$CONFIG_DIR/ai-local.fish"
 
-if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
-  C_OK=$'\033[32m' C_INFO=$'\033[36m' C_WARN=$'\033[33m' C_ERR=$'\033[31m' C_RST=$'\033[0m'
-else
+_init_colors() {
   C_OK='' C_INFO='' C_WARN='' C_ERR='' C_RST=''
-fi
+  [[ -t 1 && -z "${NO_COLOR:-}" ]] || return 0
+  C_OK=$'\033[32m' C_INFO=$'\033[36m' C_WARN=$'\033[33m' C_ERR=$'\033[31m' C_RST=$'\033[0m'
+}
+_init_colors
 info() { printf '  %s•%s %s\n' "$C_INFO" "$C_RST" "$*"; }
 ok() { printf '  %s✓%s %s\n' "$C_OK" "$C_RST" "$*"; }
 warn() { printf '  %s!%s %s\n' "$C_WARN" "$C_RST" "$*" >&2; }
@@ -51,14 +58,19 @@ Usage: dot ai proxy <start|stop|restart|status|logs|setup>
   proxy restart   Stop then start
   proxy status    Show process + /health + local-routing state
   proxy logs [-f] Show (or follow) the server log
-  proxy setup     Check the engine (claude CLI auth) is ready
+  proxy setup     Check the engine (claude CLI) and the upstream key
 
   local on        Route the AI tools through the proxy (writes env)
   local off       Stop routing through the proxy (removes env)
   local status    Show whether local routing is active
 
-Env: DOT_AI_HOST (default 127.0.0.1), DOT_AI_PORT (default 3456),
-     DOT_AI_API_KEY (required to bind off-loopback).
+Env: ANTHROPIC_API_KEY (upstream key, the default; else read from
+     'dot secret show ANTHROPIC_API_KEY'),
+     DOT_AI_GATEWAY_SUBSCRIPTION=1 (opt-in: run the tools on your Claude
+     subscription instead; see Anthropic's terms, printed on start),
+     DOT_AI_GATEWAY_SUBSCRIPTION_ACK=1 (that opt-in without a terminal),
+     DOT_AI_HOST (default 127.0.0.1), DOT_AI_PORT (default 3456),
+     DOT_AI_API_KEY (the gateway's client key; required off-loopback).
 EOF
 }
 
@@ -85,18 +97,52 @@ _running_pid() {
 }
 
 # Refuse to expose the proxy off-loopback without an auth key — an open
-# network proxy is a Claude-subscription credential leak.
+# network proxy spends your Anthropic key (or subscription) for anyone.
 _guard_bind() {
   case "$DOT_AI_HOST" in
     127.0.0.1 | localhost | ::1) return 0 ;;
   esac
   if [[ -z "${DOT_AI_API_KEY:-}" ]]; then
     err "Refusing to bind to '$DOT_AI_HOST' without DOT_AI_API_KEY."
-    err "An unprotected network proxy leaks your Claude subscription."
+    err "An unprotected network proxy spends your Anthropic key for anyone who reaches it."
     info "Set a strong DOT_AI_API_KEY and require it on clients first."
     return 1
   fi
   warn "Binding off-loopback ($DOT_AI_HOST) — DOT_AI_API_KEY auth is required on clients."
+}
+
+_subscription_opt_in() {
+  case "${DOT_AI_GATEWAY_SUBSCRIPTION:-}" in
+    1 | true | yes | on | TRUE | YES | ON) return 0 ;;
+  esac
+  return 1
+}
+
+# With no ANTHROPIC_API_KEY in the environment, read it from the secret
+# store (dot secret). Only on a terminal: the store may ask for a keychain
+# or gpg passphrase, and a script, service or test must not reach the
+# user's real secrets unasked. The key is only exported to the gateway's
+# process: never printed, never written to a file.
+_load_upstream_key() {
+  [[ -z "${ANTHROPIC_API_KEY:-}" ]] || return 0
+  _subscription_opt_in && return 0
+  [[ -t 0 ]] || return 0
+  _have dot || return 0
+  local key
+  key="$(dot secret show ANTHROPIC_API_KEY --raw </dev/null 2>/dev/null)" || return 0
+  [[ -n "$key" ]] && export ANTHROPIC_API_KEY="$key"
+  return 0
+}
+
+# Decide the upstream auth in the foreground, on the user's terminal, so a
+# refusal or the subscription warning is seen (dot-ai-serve --check). A
+# subscription opt-in it accepted (a terminal, or the ACK) is passed on to
+# the background server, which has no terminal of its own.
+_check_auth() {
+  _load_upstream_key
+  "$SERVE_BIN" --check || return 1
+  if _subscription_opt_in; then export DOT_AI_GATEWAY_SUBSCRIPTION_ACK=1; fi
+  return 0
 }
 
 proxy_start() {
@@ -108,7 +154,8 @@ proxy_start() {
     return 0
   fi
   _guard_bind || return 1
-  _have claude || warn "claude CLI not on PATH — the engine needs it; run 'claude login' once."
+  _check_auth || return 1
+  _have claude || warn "claude CLI not on PATH — the engine needs it ('dot ai install claude')."
   mkdir -p "$STATE_DIR"
   DOT_AI_HOST="$DOT_AI_HOST" DOT_AI_PORT="$DOT_AI_PORT" \
     nohup "$SERVE_BIN" >"$LOG_FILE" 2>&1 &
@@ -158,7 +205,7 @@ proxy_status() {
     health="$(curl -fsS -m 3 "$BASE_URL/health" 2>/dev/null || true)"
     if [[ -n "$health" ]]; then
       if _have jq; then
-        info "health: $(printf '%s' "$health" | jq -r '"\(.status // "?")  engine=\(.engine // "?")  claude=\(.claude // "?")"' 2>/dev/null || echo "$health")"
+        info "health: $(printf '%s' "$health" | jq -r '"\(.status // "?")  engine=\(.engine // "?")  auth=\(.auth // "?")  claude=\(.claude // "?")"' 2>/dev/null || echo "$health")"
       else
         info "health: $health"
       fi
@@ -186,9 +233,18 @@ proxy_logs() {
 
 proxy_setup() {
   if _have claude; then
-    ok "claude CLI found — the engine is ready (run 'claude login' once if unauthenticated)."
+    ok "claude CLI found — the engine is ready."
   else
-    err "claude CLI not on PATH — install it ('dot ai tools') and run 'claude login'."
+    err "claude CLI not on PATH — install it ('dot ai tools')."
+    return 1
+  fi
+  _load_upstream_key
+  if [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
+    ok "upstream: an Anthropic API key is set (ANTHROPIC_API_KEY or dot secret)."
+  elif _subscription_opt_in; then
+    warn "upstream: subscription opt-in (DOT_AI_GATEWAY_SUBSCRIPTION=1) — see the terms printed on start."
+  else
+    err "upstream: no ANTHROPIC_API_KEY — set it, or store it with 'dot secret set ANTHROPIC_API_KEY'."
     return 1
   fi
   _need_serve >/dev/null 2>&1 || info "Deploy the server: chezmoi apply ~/.local/bin/dot-ai-serve"
@@ -196,7 +252,7 @@ proxy_setup() {
 
 # Write the routing env consumed per-invocation by `dot ai <tool>` for
 # NON-Claude tools. It is deliberately NOT auto-sourced into your shell:
-# the primary `claude` always uses its native session, and setting
+# the primary `claude` always uses its own sign-in, and setting
 # ANTHROPIC_API_KEY where Claude Code sees it would disable claude.ai
 # connectors. The key is the gateway's own token: DOT_AI_API_KEY, or the
 # 0600 token file dot-ai-serve also reads. The gateway rejects anything else.

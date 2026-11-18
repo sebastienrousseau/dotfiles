@@ -236,7 +236,8 @@ test_fm_ai_serve_gateway() {
 printf "%s\n" "{\"type\":\"result\",\"is_error\":false,\"result\":\"ok\",\"usage\":{}}"'
 
   test_start "fm_ai_serve_gateway_starts"
-  DOT_AI_PORT="$port" fm_run ai serve
+  # A fake upstream key: the gateway's default (API-key) mode needs one.
+  ANTHROPIC_API_KEY=sk-ant-fake-upstream DOT_AI_PORT="$port" fm_run ai serve
   fm_expect_rc 0
   test_start "fm_ai_serve_gateway_start_reports"
   fm_expect_any "Proxy started"
@@ -248,7 +249,8 @@ printf "%s\n" "{\"type\":\"result\",\"is_error\":false,\"result\":\"ok\",\"usage
     fm_fail "routing env does not carry the gateway token"
   fi
 
-  DOT_AI_PORT="$port" DOT_AI_HOST=127.0.0.1 python3 "$REPO_ROOT/defaults/dot_local/bin/executable_dot-ai-serve" \
+  ANTHROPIC_API_KEY=sk-ant-fake-upstream DOT_AI_PORT="$port" DOT_AI_HOST=127.0.0.1 \
+    python3 "$REPO_ROOT/defaults/dot_local/bin/executable_dot-ai-serve" \
     >"$FM_SANDBOX/work/gateway.log" 2>&1 &
   gw_pid=$!
   local i

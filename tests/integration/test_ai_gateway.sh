@@ -77,7 +77,8 @@ start_server() {
   local port
   port="$(free_port)"
   # Default bin first (so "$@" can override it); host/port last (fixed).
-  env DOT_AI_CLAUDE_BIN="$MOCK" "$@" DOT_AI_HOST=127.0.0.1 DOT_AI_PORT="$port" \
+  # A fake upstream key: the gateway's default (API-key) mode needs one.
+  env DOT_AI_CLAUDE_BIN="$MOCK" ANTHROPIC_API_KEY=sk-ant-fake-upstream "$@" DOT_AI_HOST=127.0.0.1 DOT_AI_PORT="$port" \
     python3 "$GATEWAY" >"$WORK/srv-$port.log" 2>&1 &
   echo "$!" >>"$WORK/pids"
   local i

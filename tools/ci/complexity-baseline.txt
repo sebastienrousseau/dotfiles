@@ -54,7 +54,6 @@
   14   19   22.0   53    67 defaults/dot_local/bin/executable_b64::<top>
   16   18   25.9   68    78 defaults/dot_local/bin/executable_bm::<top>
   20   38   28.6   36    43 defaults/dot_local/bin/executable_cb::<top>
-  11    4   13.9   41   265 defaults/dot_local/bin/executable_dot-ai-proxy::<top>
   17   21   27.5   58    58 defaults/dot_local/bin/executable_epoch::<top>
   11    2   10.1   29    46 defaults/dot_local/bin/executable_extract::<top>
   13   11   28.2   49    55 defaults/dot_local/bin/executable_gbd::<top>

@@ -38,7 +38,7 @@ chmod +x "$WORK/claude"
 PORT="$(python3 -c 'import socket;s=socket.socket();s.bind(("127.0.0.1",0));print(s.getsockname()[1]);s.close()')"
 
 # The gateway keeps its token in $XDG_STATE_HOME/dot/ai/serve/gateway.token.
-env XDG_STATE_HOME="$STATE" DOT_AI_CLAUDE_BIN="$WORK/claude" DOT_AI_PORT="$PORT" DOT_AI_DAILY_BUDGET=5 \
+env XDG_STATE_HOME="$STATE" ANTHROPIC_API_KEY=sk-ant-fake-upstream DOT_AI_CLAUDE_BIN="$WORK/claude" DOT_AI_PORT="$PORT" DOT_AI_DAILY_BUDGET=5 \
   DOT_AI_POLICY="$WORK/no-policy.toml" python3 "$REPO_ROOT/defaults/dot_local/bin/executable_dot-ai-serve" \
   >"$WORK/serve.log" 2>&1 &
 PID=$!
