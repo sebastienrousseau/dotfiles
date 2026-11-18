@@ -108,6 +108,9 @@ fm_sandbox_setup() {
   # It never reproduced on macOS because stock macOS has no `flock`, so the
   # whole locking block is skipped there.
   export XDG_RUNTIME_DIR="$FM_SANDBOX/run"
+  # mise exports DOT_BUILD_ROOT at the host's build caches; `dot doctor`
+  # sizes that directory (P9), so it must point inside the sandbox too.
+  unset DOT_BUILD_ROOT
   export CHEZMOI_SOURCE_DIR="$REPO_ROOT"
 
   # Deterministic, non-interactive, machine-readable output.
@@ -419,6 +422,18 @@ fm_expect_err() {
     fm_pass
   else
     fm_fail "no '$1' on stderr/stdout"
+  fi
+}
+
+# fm_expect_stderr <substring> — assert stderr alone contains a literal and
+# stdout does not: an error or usage message is a diagnostic (ADR-020 N14).
+fm_expect_stderr() {
+  if [[ "$FM_ERR" != *"$1"* ]]; then
+    fm_fail "no '$1' on stderr"
+  elif [[ "$FM_OUT" == *"$1"* ]]; then
+    fm_fail "'$1' leaked onto stdout"
+  else
+    fm_pass
   fi
 }
 

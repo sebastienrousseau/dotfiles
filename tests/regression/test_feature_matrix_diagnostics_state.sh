@@ -451,7 +451,8 @@ test_fm_chaos() {
   fm_run_route diagnostics chaos --dry-run
   fm_expect_rc 1
   test_start "fm_chaos_refuses_without_force"
-  fm_expect_out "WARNING"
+  # An error is a diagnostic: stderr only (ADR-020 N14, ui_err since v0.2.548).
+  fm_expect_stderr "WARNING"
   test_start "fm_chaos_names_the_force_flag"
   fm_expect_out "--force"
   test_start "fm_chaos_left_the_sandbox_intact"
@@ -467,9 +468,10 @@ test_fm_teleport_usage() {
   # own usage is reached directly, through the script it runs.
   test_start "fm_teleport_usage"
   fm_run_bin "$(dirname "$FM_DOT")/../scripts/ops/teleport.sh"
-  fm_expect_rc 1
+  # A usage error exits 64 with the usage on stderr (dot_usage_error, v0.2.548).
+  fm_expect_rc 64
   test_start "fm_teleport_usage_message"
-  fm_expect_any "Usage" "user@host"
+  fm_expect_stderr "Usage: dot fleet push user@host"
 }
 
 test_fm_smoke_teleport() {
@@ -661,7 +663,8 @@ test_fm_restore_latest_none() {
   XDG_DATA_HOME="$FM_SANDBOX/work/no-backups-data" fm_run doctor restore --latest
   fm_expect_rc 1
   test_start "fm_restore_latest_none_handles_no_backups"
-  fm_expect_out "No backups found"
+  # An error is a diagnostic: stderr only (ADR-020 N14, ui_err since v0.2.548).
+  fm_expect_stderr "No backups found"
 }
 
 test_fm_restore_usage() {
@@ -672,9 +675,10 @@ test_fm_restore_usage() {
   fm_expect_out "--latest"
   test_start "fm_restore_usage_rejects_unknown_option"
   fm_run doctor restore --zzz-not-an-option
-  fm_expect_rc 1
+  # A usage error exits 64 with the usage on stderr (dot_usage_error, v0.2.548).
+  fm_expect_rc 64
   test_start "fm_restore_usage_unknown_message"
-  fm_expect_any "Unknown option" "Usage"
+  fm_expect_stderr "Usage: dot doctor restore [OPTIONS]"
 }
 
 test_fm_env_dotfiles_dir() {
