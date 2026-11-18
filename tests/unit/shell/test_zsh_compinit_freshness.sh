@@ -43,9 +43,12 @@ run_case() {
     dump="$_DOTFILES_ZCOMPDUMP"
     case "$3" in
       fresh) : >"$dump" ;;
-      stale) : >"$dump"; touch -t 202001010000 "$dump" ;;
+      stale | stale-twice) : >"$dump"; touch -t 202001010000 "$dump" ;;
     esac
     _deferred_compinit
+    # A second shell after the rebuild (compinit, stubbed here, does not
+    # rewrite an unchanged dump).
+    [[ "$3" == stale-twice ]] && _deferred_compinit
   ' _ "$WORK/compinit.log" "$WORK/block.zsh" "$1" 2>&1
   cat "$WORK/compinit.log" 2>/dev/null
 }
@@ -70,6 +73,16 @@ if [[ "$out" == *"compinit -d"* && "$out" != *"-C"* ]]; then
   assert_exit_code 0 "true"
 else
   assert_exit_code 0 "false  # missing dump should rebuild, got: $out"
+fi
+
+# compinit leaves an unchanged dump's mtime alone, so without a refresh
+# every shell after the first stale one paid the full compinit + compaudit.
+test_start "compinit_rebuild_refreshes_the_dump"
+out="$(run_case stale-twice)"
+if [[ "$out" == *$'compinit -d'*$'\n'"compinit -C -d"* ]]; then
+  assert_exit_code 0 "true"
+else
+  assert_exit_code 0 "false  # the shell after a rebuild should take the fast path, got: $out"
 fi
 
 echo ""

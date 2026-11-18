@@ -151,6 +151,10 @@ if [[ "${DOTFILES_ENABLE_COMPINIT}" == "1" ]] && [[ "${DOTFILES_FAST:-0}" != "1"
       compinit -C -d "${_DOTFILES_ZCOMPDUMP}"
     else
       compinit -d "${_DOTFILES_ZCOMPDUMP}"
+      # compinit rewrites the dump only when the number of completion
+      # files changed, so its mtime would stay stale and every later shell
+      # would rebuild again. The full check just passed: mark it fresh.
+      [[ -f "${_DOTFILES_ZCOMPDUMP}" ]] && command touch -- "${_DOTFILES_ZCOMPDUMP}"
     fi
     # Compile to bytecode in background for faster subsequent loads
     { [[ ! -f "${_DOTFILES_ZCOMPDUMP}.zwc" || "${_DOTFILES_ZCOMPDUMP}" -nt "${_DOTFILES_ZCOMPDUMP}.zwc" ]] && zcompile "${_DOTFILES_ZCOMPDUMP}" } &!
