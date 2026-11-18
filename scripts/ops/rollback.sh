@@ -34,7 +34,8 @@ fi
 BACKUP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/backups"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dot/doctor"
 ROLLBACK_LOG="$STATE_DIR/rollback.log"
-MAX_BACKUPS=10
+# chezmoi-apply.sh prunes its pre-apply backups to the same count.
+MAX_BACKUPS="${DOTFILES_MAX_BACKUPS:-10}"
 # sysexits.h EX_TEMPFAIL: the command did nothing because another instance
 # holds the lock. Distinct from 1 (the rollback ran and failed) and from 0
 # (the rollback ran and succeeded) — a caller has to be able to tell those
