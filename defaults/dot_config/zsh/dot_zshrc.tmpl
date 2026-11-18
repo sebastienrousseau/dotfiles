@@ -859,7 +859,9 @@ _dotfiles_hydrate_on_idle() {
 # First precmd: defer hydration until zle waits for input.
 _dotfiles_hydrate_after_prompt() {
   _dotfiles_del_precmd _dotfiles_hydrate_after_prompt
-  local fd
+  # -1, not empty: under noclobber (05-core-safety) `exec {fd}<` refuses a
+  # parameter whose value reads as an open descriptor, and empty reads as 0.
+  local fd=-1
   if [[ -o zle ]] && exec {fd}</dev/null; then
     zle -F "$fd" _dotfiles_hydrate_on_idle 2>/dev/null && return 0
     exec {fd}<&-
