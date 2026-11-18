@@ -3,7 +3,7 @@
 # VS Code Aliases
 
 if command -v code &>/dev/null || [[ -x "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" ]]; then
-  if [[ "$(uname || true)" = "Darwin" ]]; then
+  if [[ "${OSTYPE:-}" == darwin* ]]; then
     alias code="/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code"
   fi
 

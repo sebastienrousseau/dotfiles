@@ -18,11 +18,12 @@
 
        The manifest lives outside .chezmoidata (chezmoi hands all of
        .chezmoidata to every template it renders, so a 350 KB manifest there
-       slowed every apply by over a second); callers load it once and pass
-       `.theme` and the parsed `.themes` in a dict.
+       slowed every apply by over a second). Callers parse only the themes
+       they need, through `theme-subset`, and pass `.theme` and the parsed
+       `.themes` in a dict.
 
        Usage:
-         {{`{{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}`}}
+         {{`{{- $themes := (includeTemplate "theme-subset" (dict "theme" .theme) | fromToml).themes -}}`}}
          {{`{{- $themeName := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}`}}
          {{`{{- $t := index $themes $themeName -}}`}}
 

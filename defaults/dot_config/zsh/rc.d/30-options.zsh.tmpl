@@ -151,6 +151,10 @@ if [[ "${DOTFILES_ENABLE_COMPINIT}" == "1" ]] && [[ "${DOTFILES_FAST:-0}" != "1"
       compinit -C -d "${_DOTFILES_ZCOMPDUMP}"
     else
       compinit -d "${_DOTFILES_ZCOMPDUMP}"
+      # compinit rewrites the dump only when the number of completion
+      # files changed, so its mtime would stay stale and every later shell
+      # would rebuild again. The full check just passed: mark it fresh.
+      [[ -f "${_DOTFILES_ZCOMPDUMP}" ]] && command touch -- "${_DOTFILES_ZCOMPDUMP}"
     fi
     # Compile to bytecode in background for faster subsequent loads
     { [[ ! -f "${_DOTFILES_ZCOMPDUMP}.zwc" || "${_DOTFILES_ZCOMPDUMP}" -nt "${_DOTFILES_ZCOMPDUMP}.zwc" ]] && zcompile "${_DOTFILES_ZCOMPDUMP}" } &!
@@ -207,14 +211,14 @@ if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]
   fi
 fi
 
-# direnv (directory environments)
-if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && command -v direnv >/dev/null; then
-  # Custom quiet hook: suppress direnv status chatter on every prompt/chdir.
+# direnv (directory environments): only for `use flake` .envrc files.
+# mise is the per-directory environment loader (its chpwd hook already runs
+# on every cd); direnv's own hook added about 30 ms more to each cd. It is
+# kept for flake mode (DOTFILES_USE_FLAKE=1), as mise cannot `use flake`.
+if [[ "${DOTFILES_USE_FLAKE:-0}" == "1" ]] && [[ "${DOTFILES_FAST:-0}" != "1" ]] &&
+  [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && (( ${+commands[direnv]} )); then
+  # Custom quiet hook: suppress direnv status chatter on every chdir.
   _dotfiles_direnv_hook() {
-    # Fast path: skip direnv in dotfiles unless flake mode is explicitly enabled.
-    if [[ "${PWD:A}" == "${DOTFILES_DIR:-$HOME/.dotfiles}"* ]] && [[ "${DOTFILES_USE_FLAKE:-0}" != "1" ]] && [[ "${CI:-0}" != "1" ]]; then
-      return 0
-    fi
     trap -- '' SIGINT
     eval "$(direnv export zsh 2>/dev/null)"
     trap - SIGINT
