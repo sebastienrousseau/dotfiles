@@ -25,6 +25,8 @@ source "$REPO_ROOT/tests/framework/assertions.sh"
 
 DOT_BIN="$REPO_ROOT/bin/dot"
 SCRUB="$SCRIPT_DIR/scrub.sh"
+EMPTY_BUILD_ROOT="$(mktemp -d)"
+trap 'rm -rf "$EMPTY_BUILD_ROOT"' EXIT
 
 check_snapshot() {
   local slug="$1"
@@ -39,7 +41,9 @@ check_snapshot() {
   fi
 
   local actual
-  actual=$(DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 bash "$DOT_BIN" "$@" 2>&1 | bash "$SCRUB" "$slug" || true)
+  # An empty build-cache root: doctor's cache-size warning (P9) depends on
+  # this machine's caches, not on the CLI.
+  actual=$(DOT_BUILD_ROOT="$EMPTY_BUILD_ROOT" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 bash "$DOT_BIN" "$@" 2>&1 | bash "$SCRUB" "$slug" || true)
   local snapshot
   snapshot=$(cat "$expected")
 
