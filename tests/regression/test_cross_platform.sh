@@ -429,23 +429,31 @@ assert_equals "true" "$xp_auto" "mise loads auto_install=true from the deployed 
 # 7. LINUX DESKTOP — conditional feature flags
 # ═══════════════════════════════════════════════════════════════
 
+# A desktop config must ship only as a .tmpl (theme colours and hardware
+# come from chezmoi data) and must render on Linux to the real format, with
+# every template action resolved.
+_xp_desktop_template() { # rel-path-without-.tmpl marker features-json
+  local rendered
+  if [[ ! -f "$REPO_ROOT/defaults/$1.tmpl" ]]; then
+    assert_file_exists "$REPO_ROOT/defaults/$1.tmpl" "$1 ships as a chezmoi template"
+    return
+  fi
+  assert_file_not_exists "$REPO_ROOT/defaults/$1" "no untemplated $1 shadows the template"
+  if [[ $_xp_cz_ok -ne 1 ]]; then
+    _xp_skip "$_xp_cz_skip"
+    return
+  fi
+  rendered="$(_xp_render linux "$1.tmpl" "$3")"
+  assert_contains "$2" "$rendered" "renders to $1 on Linux"
+  assert_false '[[ "$rendered" == *"{{"* ]]' "no template action is left unrendered"
+  assert_false '[[ "$rendered" == *"<no value>"* ]]' "no template value is missing"
+}
+
 test_start "platform_niri_config_is_template"
-if [[ -f "$REPO_ROOT/defaults/dot_config/niri/config.kdl.tmpl" ]]; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: niri config is a chezmoi template"
-else
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (niri not configured)"
-fi
+_xp_desktop_template dot_config/niri/config.kdl "input {" '"features":{"linux_desktop":true,"niri":true}'
 
 test_start "platform_waybar_config_is_template"
-if [[ -f "$REPO_ROOT/defaults/dot_config/waybar/config.jsonc.tmpl" ]]; then
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: waybar config is a chezmoi template"
-else
-  ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: skipped (waybar not configured)"
-fi
+_xp_desktop_template dot_config/waybar/config.jsonc '"modules-left"' '"features":{"linux_desktop":true,"waybar":true}'
 
 # ═══════════════════════════════════════════════════════════════
 # 8. SHELL COMPATIBILITY — multi-shell support
