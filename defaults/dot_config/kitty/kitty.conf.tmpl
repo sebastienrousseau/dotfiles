@@ -30,7 +30,7 @@ cursor_trail 0
 linux_display_server wayland
 {{- end }}
 
-{{ $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
+{{ $themes := (includeTemplate "theme-subset" (dict "theme" $.theme) | fromToml).themes -}}
 {{- $themeName := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}
 {{- $t := index $themes $themeName -}}
 background {{ $t.term.bg }}

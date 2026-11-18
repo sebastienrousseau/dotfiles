@@ -28,7 +28,7 @@ export FORCE_COLOR_OS="Windows"
 
 {{- $profile := default "laptop" .profile -}}
 {{- $features := default (dict "zsh" true "nvim" true "tmux" true "gui" true "secrets" true) .features -}}
-{{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
+{{- $themes := (includeTemplate "theme-subset" (dict "theme" $.theme) | fromToml).themes -}}
 {{- $theme := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}
 {{- /* aliases.policy.strict_mode in .chezmoidata.toml; a top-level strict_mode still counts */ -}}
 {{- $strict_mode := dig "aliases" "policy" "strict_mode" (default false (index . "strict_mode")) . -}}

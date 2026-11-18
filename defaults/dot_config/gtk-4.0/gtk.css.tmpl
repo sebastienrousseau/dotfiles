@@ -1,5 +1,5 @@
 {{- /* GTK-4.0 custom CSS — colors from SSOT theme manifest */ -}}
-{{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
+{{- $themes := (includeTemplate "theme-subset" (dict "theme" $.theme) | fromToml).themes -}}
 {{- $themeName := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}
 {{- $t := index $themes $themeName -}}
 {{- $is_dark := eq $t.mode "dark" -}}
