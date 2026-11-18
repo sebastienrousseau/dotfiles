@@ -189,70 +189,79 @@ class Walker:
         if not isinstance(n, dict):
             return
         t = n.get("Type")
-
         if t == "FuncDecl":
             self.func(n, unit, depth)
             return
         if t in KEYWORDS:
             _op(unit, KEYWORDS[t])
+        if _is_chain(n):
+            self.chain(n, unit, depth, in_chain)
+            return
+        handler = _HANDLERS.get(t)
+        if handler:
+            handler(self, n, unit, depth)
+            return
+        self.annotate(n, t, unit)
+        self.children(n, t, unit, depth)
 
-        if t == "IfClause":
-            self.if_clause(n, unit, depth)
-            return
-        if t in ("WhileClause", "ForClause"):
-            if t == "WhileClause" and n.get("Until"):
-                _op(unit, "until")
-            unit.cc += 1
-            unit.cog += 1 + depth
-            for k, v in n.items():
-                if k == "Do":
-                    self.stmts(v, unit, depth + 1)
-                elif k not in ("Pos", "End"):
-                    self.node(v, unit, depth)
-            return
-        if t == "CaseClause":
-            unit.cog += 1 + depth
-            self.node(n.get("Word"), unit, depth)
-            for item in n.get("Items") or []:
-                pats = item.get("Patterns") or []
-                lone_default = len(pats) == 1 and _lit(pats[0]) == "*"
-                if not lone_default:
-                    unit.cc += 1
-                _op(unit, ")")
-                for p in pats:
-                    self.node(p, unit, depth)
-                self.stmts(item.get("Stmts"), unit, depth + 1)
-            return
-        if t in ("BinaryCmd", "BinaryTest") and n.get("Op") in (AND, OR):
-            if not in_chain:
-                ops = _chain_ops(n)
-                unit.cc += len(ops)
-                unit.cog += 1 + sum(1 for a, b in zip(ops, ops[1:]) if a != b)
-            _op(unit, "&&" if n["Op"] == AND else "||")
-            for side in (n.get("X"), n.get("Y")):
-                inner = _unwrap(side)
-                # Operands that continue the chain were already counted.
-                self.node(inner if _is_chain(inner) else side, unit, depth, in_chain=_is_chain(inner))
-            return
+    def loop(self, n, unit: Unit, depth: int) -> None:
+        if n.get("Type") == "WhileClause" and n.get("Until"):
+            _op(unit, "until")
+        unit.cc += 1
+        unit.cog += 1 + depth
+        for k, v in n.items():
+            if k == "Do":
+                self.stmts(v, unit, depth + 1)
+            elif k not in ("Pos", "End"):
+                self.node(v, unit, depth)
+
+    def case_clause(self, n, unit: Unit, depth: int) -> None:
+        unit.cog += 1 + depth
+        self.node(n.get("Word"), unit, depth)
+        for item in n.get("Items") or []:
+            pats = item.get("Patterns") or []
+            lone_default = len(pats) == 1 and _lit(pats[0]) == "*"
+            if not lone_default:
+                unit.cc += 1
+            _op(unit, ")")
+            for p in pats:
+                self.node(p, unit, depth)
+            self.stmts(item.get("Stmts"), unit, depth + 1)
+
+    def chain(self, n, unit: Unit, depth: int, in_chain: bool) -> None:
+        if not in_chain:
+            ops = _chain_ops(n)
+            unit.cc += len(ops)
+            unit.cog += 1 + sum(1 for a, b in zip(ops, ops[1:]) if a != b)
+        _op(unit, "&&" if n["Op"] == AND else "||")
+        for side in (n.get("X"), n.get("Y")):
+            inner = _unwrap(side)
+            # Operands that continue the chain were already counted.
+            self.node(inner if _is_chain(inner) else side, unit, depth, in_chain=_is_chain(inner))
+
+    def call_expr(self, n, unit: Unit, depth: int) -> None:
+        args = n.get("Args") or []
+        if args:
+            _op(unit, "cmd:" + (_lit(args[0]) or "<dynamic>"))
+            for a in args[1:]:
+                self.word(a, unit)
+        for a in n.get("Assigns") or []:
+            self.assign(a, unit, depth)
+
+    @staticmethod
+    def annotate(n, t, unit: Unit) -> None:
+        """Operators and operands carried by a node that also has children."""
         if t in ("BinaryCmd", "BinaryTest", "UnaryTest", "BinaryArithm", "UnaryArithm"):
             _op(unit, f"{t}:{n.get('Op')}")
-        if t == "CallExpr":
-            args = n.get("Args") or []
-            if args:
-                _op(unit, "cmd:" + (_lit(args[0]) or "<dynamic>"))
-                for a in args[1:]:
-                    self.word(a, unit)
-            for a in n.get("Assigns") or []:
-                self.assign(a, unit, depth)
-            return
         if t == "ParamExp":
             _opd(unit, "$" + ((n.get("Param") or {}).get("Value") or "?"))
             if n.get("Exp"):
                 _op(unit, f"exp:{n['Exp'].get('Op')}")
-        if "Redirs" in n:
-            for r in n.get("Redirs") or []:
-                _op(unit, f"redir:{r.get('Op')}")
-                self.word(r.get("Word"), unit)
+
+    def children(self, n, t, unit: Unit, depth: int) -> None:
+        for r in n.get("Redirs") or []:
+            _op(unit, f"redir:{r.get('Op')}")
+            self.word(r.get("Word"), unit)
         for k, v in n.items():
             if k in ("Redirs", "Pos", "End"):
                 continue
@@ -316,6 +325,15 @@ class Walker:
             if i not in inside and ln.strip() and not ln.strip().startswith("#")
         )
 
+
+# Node types whose handler measures the whole subtree (``node`` stops there).
+_HANDLERS = {
+    "IfClause": Walker.if_clause,
+    "WhileClause": Walker.loop,
+    "ForClause": Walker.loop,
+    "CaseClause": Walker.case_clause,
+    "CallExpr": Walker.call_expr,
+}
 
 def _lit(word) -> str | None:
     parts = (word or {}).get("Parts") or []
@@ -456,6 +474,10 @@ def report(units: list[Unit], top: int, sort: str) -> int:
     return 0
 
 
+def _quantile(vals: list, q: float):
+    return vals[min(len(vals) - 1, int(q * len(vals)))]
+
+
 def summary(units: list[Unit]) -> int:
     funcs = [u for u in units if u.name != "<top>"]
     print(f"units: {len(units)} ({len(funcs)} functions, {len(units) - len(funcs)} files)")
@@ -463,10 +485,8 @@ def summary(units: list[Unit]) -> int:
         pool = [u for u in units if u.name == "<top>"] if k == "file_nloc" else units
         vals = sorted(u.measures()[k] for u in pool)
         over = sum(1 for v in vals if v > LIMITS[k])
-        pct = lambda q: vals[min(len(vals) - 1, int(q * len(vals)))]  # noqa: E731
-        print(
-            f"  {k:6} total={sum(vals):.0f} p50={pct(0.5)} p90={pct(0.9)} p95={pct(0.95)} max={vals[-1]} over({LIMITS[k]})={over}"
-        )
+        p50, p90, p95 = (_quantile(vals, q) for q in (0.5, 0.9, 0.95))
+        print(f"  {k:6} total={sum(vals):.0f} p50={p50} p90={p90} p95={p95} max={vals[-1]} over({LIMITS[k]})={over}")
     print(f"  complex units (any limit): {sum(1 for u in units if u.over())}")
     return 0
 
