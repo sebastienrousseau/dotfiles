@@ -21,3 +21,4 @@ alias|tools|removed|tool list --nix|0.2.538
 alias|packages|removed|tool list --packages|0.2.538
 alias|locks|removed|tool list --locked|0.2.538
 alias|new|removed|tool new|0.2.538
+ent|tool|||

@@ -101,7 +101,8 @@
       "description": "The plugin runs its own commands (N2): bin/dot hands the words after the domain to this executable in the plugin directory",
       "properties": {
         "command": { "type": "string", "pattern": "^dot-[a-z]{2,8}$" },
-        "fallback": { "type": "boolean", "description": "The domain word alone, and words that are not its verbs or objects, also go to the entry, as they went to the domain's legacy route" }
+        "fallback": { "type": "boolean", "description": "The domain word alone, and words that are not its verbs or objects, also go to the entry, as they went to the domain's legacy route" },
+        "words": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }, "description": "With fallback: the only words outside the table the entry runs (its legacy subcommands); any other word is not a command, also before --help. Absent, the entry takes any word" }
       }
     },
     "capabilities": { "type": "object", "description": "Reserved for P2.3 (ADR-016 trust path)" },
