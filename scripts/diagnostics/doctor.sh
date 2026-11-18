@@ -99,7 +99,7 @@ _ok() {
   Passed=$((Passed + 1))
 }
 _fail() {
-  ui_err "$1" "${2:-}"
+  ui_fail "$1" "${2:-}"
   _record fail "$1" "${2:-}"
   Errors=$((Errors + 1))
 }
@@ -598,7 +598,7 @@ _doctor_summary() {
       ui_ok "Healthy" "$Warnings warning(s)."
     fi
   else
-    ui_err "$Errors error(s)" "$Warnings warning(s). Run 'dot doctor fix' to repair."
+    ui_fail "$Errors error(s)" "$Warnings warning(s). Run 'dot doctor fix' to repair."
 
     if [[ $AI_DEBUG -eq 1 ]]; then
       _section "AI Problem Analysis"

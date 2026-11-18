@@ -32,7 +32,7 @@ and adds the host-only helpers.
 |------|---------|
 | `sdk.sh` (SDK) | `die`, `warn`, `info`, `has_command`, `validate_name`, `resolve_source_dir`, `require_source_dir`, `resolve_chezmoi_source_dir`, `run_script`, `dotfiles_version`, `dot_command_summary` (from the command table), `dot_ui_command_banner`; also sources `ui.sh`, `platform.sh` and `preflight.sh` |
 | `utils.sh` (host) | `sed_in_place`, `check_cmd`, `validate_xdg_path`, `is_help_flag`, `dot_show_help`, `handle_help_flag`; sources `sdk.sh` |
-| `ui.sh` (SDK) | `ui_ok`, `ui_warn`, `ui_err`, `ui_info`, `ui_header`, `ui_section`, `ui_table_begin/add/end`, `ui_spinner_*`, `ui_steps_*`, `ui_pick`, `ui_confirm`, `ui_run_cmd` |
+| `ui.sh` (SDK) | `ui_ok`, `ui_warn`, `ui_err` (stderr), `ui_fail` (failed result row, stdout), `ui_info`, `ui_header`, `ui_section`, `ui_table_begin/add/end`, `ui_spinner_*`, `ui_steps_*`, `ui_pick`, `ui_confirm`, `ui_run_cmd` |
 | `platform.sh` (SDK) | `dot_platform_id`, `dot_host_os`, `dot_is_wsl`, `dot_path_to_unix`, `dot_path_to_native`, `dot_open_path`, `dot_require_platform` |
 | `log.sh` (SDK) | `dot_log` (log.v1 events in `$XDG_STATE_HOME/dot/<domain>/log.jsonl`), `dot_metric`, `dot_log_tail`, `dot_log_prune`, `dot_agent_session_log`, `dot_jsonl_append` (deprecated), `log_info/warn/error/success` shims |
 | `agent-runtime.sh` (SDK) | `dot_rt_backend` (herdr-core, else tmux), `dot_rt_start`, `dot_rt_send`, `dot_rt_wait`, `dot_rt_ready`, `dot_rt_open`, `dot_rt_stop`, `dot_rt_list`, `dot_rt_free_name`: named terminals that outlive the shell, for `dot ai start --bg/send/wait` and `dot session` |
