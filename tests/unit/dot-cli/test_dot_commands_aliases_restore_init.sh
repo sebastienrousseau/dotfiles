@@ -213,7 +213,7 @@ CHECK_HOME="$WORK/check-home"
 mkdir -p "$CHECK_HOME/.config/shell/custom" "$CHECK_HOME/.config/zsh"
 rc="$(aliases "HOME='$CHECK_HOME' cmd_alias_check")"
 assert_equals "1" "$rc" "a missing aliases file fails the check"
-assert_file_contains "$ERR" "Aliases file missing" "the missing file is reported (an error: stderr)"
+assert_file_contains "$OUT" "Aliases file missing" "the missing file is a failed row of the report (stdout)"
 assert_file_contains "$OUT" "missing" "each missing alias is reported"
 {
   for a in c q e l ll la lr lra lt lta h a d _ i; do printf "alias %s='x'\n" "$a"; done

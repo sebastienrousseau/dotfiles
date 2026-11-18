@@ -93,11 +93,15 @@ for words in "theme --help" "theme wallpaper set -h" "theme font install --help"
   assert_equals "0" "$RC" "dot $words exits 0"
   assert_equals "" "$(grep '^ran ' "$WORK/out")" "dot $words runs nothing"
 done
-# An undeclared verb's --help is that verb (D8): not a command, and the entry
-# still never runs.
+# A word the theme entry declares (its [entry] words) answers --help without
+# running the entry; an undeclared word's --help is that word (D8): not a
+# command, and the entry still never runs.
 dot theme toggle --help
-assert_equals "127" "$RC" "dot theme toggle --help: toggle is not a declared verb"
+assert_equals "0" "$RC" "dot theme toggle --help: toggle is a declared entry word"
 assert_equals "" "$(grep '^ran ' "$WORK/out")" "dot theme toggle --help runs nothing"
+dot theme bogusverb --help
+assert_equals "127" "$RC" "dot theme bogusverb --help: an undeclared word is not a command"
+assert_equals "" "$(grep '^ran ' "$WORK/out")" "dot theme bogusverb --help runs nothing"
 
 test_start "help_names_the_entry_that_runs_a_command"
 dot help theme wallpaper set
