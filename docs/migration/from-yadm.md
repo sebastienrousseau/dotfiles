@@ -46,7 +46,7 @@ first, but your step 1 tarball is what you restore from, and
 
 ```sh
 # Download and verify the release installer per docs/guides/INSTALL.md first.
-bash /tmp/dotfiles-install.sh
+bash "$installer_dir/dotfiles-install.sh"
 dot version
 ```
 

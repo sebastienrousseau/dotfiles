@@ -16,7 +16,7 @@ Download and SHA256-verify the release-pinned installer using the canonical
 command in the root [README](../../README.md#verified-release-installer), then:
 
 ```bash
-bash /tmp/dotfiles-install.sh
+bash "$installer_dir/dotfiles-install.sh"
 ```
 
 Then restart your terminal or run `exec $SHELL`.
@@ -105,7 +105,7 @@ Use this mode for CI or scripts that run without user input:
 ```bash
 # After the verified download above:
 DOTFILES_SILENT=1 DOTFILES_NONINTERACTIVE=1 \
-  bash /tmp/dotfiles-install.sh --force
+  bash "$installer_dir/dotfiles-install.sh" --force
 ```
 
 ### Nix

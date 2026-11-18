@@ -71,7 +71,7 @@ mv "$HOME/.dotfiles" "$HOME/.dotfiles.bare.bak"
 alias config='git --git-dir=$HOME/.dotfiles.bare.bak --work-tree=$HOME'
 
 # Download and verify the release installer per docs/guides/INSTALL.md first.
-bash /tmp/dotfiles-install.sh
+bash "$installer_dir/dotfiles-install.sh"
 ```
 
 Your files in `$HOME` are untouched by the move — only the git

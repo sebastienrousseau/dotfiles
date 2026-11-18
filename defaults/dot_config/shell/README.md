@@ -28,7 +28,7 @@ Download and SHA256-verify the release-pinned installer using the root README,
 then run:
 
 ```bash
-bash /tmp/dotfiles-install.sh
+bash "$installer_dir/dotfiles-install.sh"
 ```
 
 This command will:

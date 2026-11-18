@@ -77,7 +77,7 @@ old_source="$(chezmoi source-path)"
 mv "$old_source" ~/chezmoi-source-old
 
 # Download and verify the release installer per docs/guides/INSTALL.md first.
-bash /tmp/dotfiles-install.sh
+bash "$installer_dir/dotfiles-install.sh"
 
 # Copy your source files under defaults/, preserving chezmoi's naming.
 # The metadata files are left out here and merged by hand below.
