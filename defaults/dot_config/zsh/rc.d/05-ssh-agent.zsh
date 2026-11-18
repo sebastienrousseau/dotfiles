@@ -8,8 +8,15 @@ fi
 # A bare `ssh-agent -s` here started, and leaked, a new agent in every
 # shell. Agents started any other way are never touched.
 _dotfiles_ssh_agent() {
-  local dir="${XDG_RUNTIME_DIR:-$HOME/.ssh}"
-  local sock="$dir/dotfiles-ssh-agent.${HOST%%.*}.sock"
+  local dir="${XDG_RUNTIME_DIR:-$HOME/.ssh}" host="${HOST%%.*}"
+  # Unix socket paths are capped at 104 bytes (macOS) or 108 (Linux), and
+  # managed hosts can have long names: keep the name short, and move to a
+  # private directory under /tmp when the home path itself is too long.
+  local sock="$dir/dotfiles-ssh-agent.${host[1,16]}.sock"
+  if (( ${#sock} > 100 )); then
+    dir="/tmp/dotfiles-ssh-$UID"
+    sock="$dir/agent.${host[1,16]}.sock"
+  fi
   # ssh-add exits 2 only when it cannot reach an agent.
   SSH_AUTH_SOCK="$sock" ssh-add -l >/dev/null 2>&1
   if (( $? != 2 )); then

@@ -118,23 +118,58 @@ cmd_summarize() {
 # Under the bash or sh SHELL of a CI runner it dies before the prompt, and
 # zsh-bench then blocks on the fifo for good.
 _bench() {
-  local zsh_bin="$1" dir="$2" iters="$3" out="$4" budget deadline=()
+  local zsh_bin="$1" dir="$2" iters="$3" out="$4" budget
   budget="${ZSH_BENCH_TIMEOUT:-$((120 + 15 * iters))}"
   [[ "$budget" =~ ^[1-9][0-9]*$ ]] || die "ZSH_BENCH_TIMEOUT must be a positive integer" 2
+  _deadline "$budget"
+  local rc=0
+  SHELL="$zsh_bin" ${DEADLINE[@]+"${DEADLINE[@]}"} "$zsh_bin" "$dir/zsh-bench" --raw --iters "$iters" >"$out" || rc=$?
+  case "$rc" in
+    0) return 0 ;;
+    124 | 137)
+      _probe_pty "$zsh_bin"
+      die "zsh-bench timed out after ${budget}s: the interactive zsh never reached a usable prompt"
+      ;;
+    *) die "zsh-bench failed (exit $rc)" ;;
+  esac
+}
+
+# _deadline SECONDS: set DEADLINE to a timeout(1) prefix, or to nothing
+# (with a note) where no timeout(1) is installed.
+_deadline() {
+  DEADLINE=()
   if command -v timeout >/dev/null 2>&1; then
-    deadline=(timeout -k 10 "$budget")
+    DEADLINE=(timeout -k 5 "$1")
   elif command -v gtimeout >/dev/null 2>&1; then
-    deadline=(gtimeout -k 10 "$budget")
+    DEADLINE=(gtimeout -k 5 "$1")
   else
     printf 'zsh-bench: no timeout(1); running without a deadline\n' >&2
   fi
-  local rc=0
-  SHELL="$zsh_bin" ${deadline[@]+"${deadline[@]}"} "$zsh_bin" "$dir/zsh-bench" --raw --iters "$iters" >"$out" || rc=$?
-  case "$rc" in
-    0) return 0 ;;
-    124 | 137) die "zsh-bench timed out after ${budget}s: the interactive zsh never reached a usable prompt" ;;
-    *) die "zsh-bench failed (exit $rc)" ;;
-  esac
+}
+
+# _probe_pty ZSH: after a timeout, show what a login interactive zsh prints
+# in a pty when typed one command, so the log says why zsh-bench waited
+# (a [y/n] question, an error, no prompt at all). zsh-bench's own pty
+# output goes to /dev/null, so this reruns the shell the same way.
+_probe_pty() {
+  local zsh_bin="$1" ts
+  ts="$(mktemp)"
+  _deadline 20
+  {
+    sleep 3
+    printf 'print -r -- ZB-PROBE-""ALIVE\nexit\n'
+    sleep 10
+  } | if script -V 2>/dev/null | grep -q util-linux; then
+    SHELL="$zsh_bin" ${DEADLINE[@]+"${DEADLINE[@]}"} script -qfec "$zsh_bin -li" "$ts"
+  else
+    SHELL="$zsh_bin" ${DEADLINE[@]+"${DEADLINE[@]}"} script -q "$ts" "$zsh_bin" -li
+  fi >/dev/null 2>&1 || true
+  {
+    printf 'zsh-bench: --- what zsh -li showed in a pty (last 3000 bytes) ---\n'
+    tail -c 3000 "$ts" | cat -v
+    printf '\nzsh-bench: --- end; ZB-PROBE-ALIVE on its own line means the shell ran input ---\n'
+  } >&2
+  rm -f "$ts"
 }
 
 # run [--iters N]: measure the current $HOME's interactive zsh.

@@ -38,7 +38,8 @@ env -i HOME="$SANDBOX/render-home" PATH="$PATH" \
   chezmoi --config "$SANDBOX/chezmoi.toml" --source "$REPO_ROOT/defaults" \
   --persistent-state "$SANDBOX/state.boltdb" execute-template \
   <"$REPO_ROOT/defaults/dot_config/zsh/dot_zshrc.tmpl" >"$H/.config/zsh/.zshrc"
-echo "PS1='READY> '" >"$H/.config/zsh/rc.d/99-test.zsh"
+# The deployed config sets noclobber (dot_config/shell/05-core-safety.sh).
+printf '%s\n' "PS1='READY> '" 'setopt noclobber' >"$H/.config/zsh/rc.d/99-test.zsh"
 
 # A slow, logging mise activation that sets a variable.
 cat >"$SANDBOX/bin/mise" <<EOF
