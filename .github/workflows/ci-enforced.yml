@@ -259,6 +259,9 @@ jobs:
   # shell code; tools/ci/complexity.py fails when a unit crosses a limit
   # without being in tools/ci/complexity-baseline.txt, or a baselined unit
   # gets worse. shfmt supplies the AST, pinned by version and checksum.
+  # The Python code gets the same ratchet from ruff (C901, PLR0912,
+  # PLR0915) through tools/ci/complexity_polyglot.py, and on a pull request
+  # no baseline may gain a row or raise a ceiling.
   lint-complexity:
     name: Lint / Complexity ratchet
     runs-on: ubuntu-latest
@@ -266,6 +269,9 @@ jobs:
     env:
       SHFMT_VERSION: v3.13.1
       SHFMT_SHA256: fb096c5d1ac6beabbdbaa2874d025badb03ee07929f0c9ff67563ce8c75398b1
+      # Keep in step with PINNED in tools/ci/complexity_polyglot.py.
+      RUFF_VERSION: 0.17.3
+      RUFF_SHA256: 2b0890f5a55900af741f133918c2656919bbf18c2ab7741b4ca8403a90e647a9
     steps:
       - name: Harden runner (audit mode)
         uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
@@ -285,11 +291,67 @@ jobs:
           shfmt --version
       - name: Complexity ratchet
         run: python3 tools/ci/complexity.py
+      - name: Install pinned ruff
+        run: |
+          set -euo pipefail
+          curl -fsSL -o "$RUNNER_TEMP/ruff.tar.gz" \
+            "https://github.com/astral-sh/ruff/releases/download/${RUFF_VERSION}/ruff-x86_64-unknown-linux-gnu.tar.gz"
+          echo "${RUFF_SHA256}  $RUNNER_TEMP/ruff.tar.gz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/ruff.tar.gz" -C "$RUNNER_TEMP"
+          install -m 0755 "$RUNNER_TEMP/ruff-x86_64-unknown-linux-gnu/ruff" /usr/local/bin/ruff
+          ruff --version
+      - name: Complexity ratchet (Python)
+        run: python3 tools/ci/complexity_polyglot.py --lang python
+      - name: Complexity baselines only shrink
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          python3 tools/ci/check-baseline-shrink.py --base "$BASE_SHA" tools/ci/complexity-baseline*.txt
       # A bundled plugin reaches the host only through the SDK (lib/dot/sdk.sh,
       # passed as $DOT_SDK); the imports left from before it are in
       # tools/ci/plugin-imports-baseline.txt and only shrink.
       - name: Plugin import gate
         run: python3 tools/ci/check-plugin-imports.py
+
+  # The same ratchet for every Go module (core, fuzz and the dot-* modules):
+  # gocyclo, gocognit and funlen through golangci-lint, measured per GOOS,
+  # against tools/ci/complexity-baseline-go.txt. The script also checks each
+  # module's .golangci.yml carries the limits and the generated exclusions,
+  # and that no //nolint hides these linters.
+  lint-complexity-go:
+    name: Lint / Complexity ratchet (Go)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Go (toolchain from core/go.mod)
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: core/go.mod
+          cache-dependency-path: |
+            core/go.sum
+            fuzz/go.sum
+            defaults/dot_local/share/*/go.sum
+
+      # Keep in step with PINNED in tools/ci/complexity_polyglot.py.
+      - name: Install pinned golangci-lint
+        run: |
+          set -euo pipefail
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.2
+          echo "$(go env GOPATH)/bin" >>"$GITHUB_PATH"
+      - name: Complexity ratchet (Go)
+        run: python3 tools/ci/complexity_polyglot.py --lang go
 
   # Mutation gate on the lines a PR changes (tools/ci/mutation-test.py).
   # Line coverage says a line ran; this says whether the tests would notice
@@ -480,6 +542,7 @@ jobs:
       lint-tests,
       lint-install-pins,
       lint-complexity,
+      lint-complexity-go,
       test-mutation,
       toolchain-mise,
     ]

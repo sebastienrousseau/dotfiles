@@ -1,0 +1,88 @@
+# golangci-lint configuration for fuzz.
+#
+# Same linter set as the dot-* modules under defaults/dot_local/share.
+# `standard` is errcheck + govet + ineffassign + staticcheck + unused.
+# CI enforces only the complexity linters here, through
+# tools/ci/complexity_polyglot.py; no job runs the full set on this
+# module yet.
+version: "2"
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - funlen
+    - gocognit
+    - gocyclo
+    - misspell
+    - nolintlint
+    - revive
+    - unconvert
+  settings:
+    # Complexity limits, the same in every Go module and enforced (with a
+    # baseline that only shrinks) by tools/ci/complexity_polyglot.py.
+    funlen:
+      lines: 60
+      statements: -1
+      ignore-comments: true
+    gocognit:
+      min-complexity: 15
+    gocyclo:
+      min-complexity: 10
+    revive:
+      rules:
+        - name: exported # every exported identifier needs a doc comment
+        - name: package-comments
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+  exclusions:
+    presets:
+      - comments
+      - std-error-handling
+    rules:
+      # Test helpers close pipes and sockets on cleanup paths where a
+      # failure cannot affect the assertion under test.
+      - path: _test\.go
+        linters:
+          - errcheck
+      # BEGIN complexity baseline: generated from tools/ci/complexity-baseline-go.txt
+      # by tools/ci/complexity_polyglot.py --write-baseline; do not edit.
+      - path: ^dot_ai_tui_parsers_test\.go$
+        source: '^func FuzzAIFenceTag\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^dot_ai_tui_parsers_test\.go$
+        source: '^func FuzzAISessionFile\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^dot_ui_parsers_test\.go$
+        source: '^func FuzzUIEventLine\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^dot_ui_parsers_test\.go$
+        source: '^func FuzzUIHexColor\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^dot_ui_parsers_test\.go$
+        source: '^func FuzzUIPickFilter\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^dot_ui_parsers_test\.go$
+        source: '^func FuzzUITableRows\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^fleet_inputs_test\.go$
+        source: '^func FuzzFleetInputs\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^gateway_gate_test\.go$
+        source: '^func FuzzGatewayGate\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^init_url_resolver_test\.go$
+        source: '^func ResolveInitURL\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^secret_key_test\.go$
+        source: '^func FuzzSecretKey\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^validate_name_test\.go$
+        source: '^func FuzzValidateName\b'
+        linters: [funlen, gocognit, gocyclo]
+      # END complexity baseline
+
+formatters:
+  enable:
+    - gofmt
