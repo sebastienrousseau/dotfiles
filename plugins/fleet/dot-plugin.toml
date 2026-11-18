@@ -13,6 +13,8 @@ default = "status"
 [entry]
 command = "dot-fleet"
 fallback = true
+# The only words outside the table dot-fleet runs; any other is not a command.
+words = ["events", "ns", "enforce", "help"]
 
 [[objects]]
 name = "drift"

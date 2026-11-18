@@ -13,6 +13,8 @@ default = "list"
 [entry]
 command = "dot-tool"
 fallback = true
+# The only words outside the table dot-tool runs; any other is not a command.
+words = []
 
 [[commands]]
 verb = "list"
