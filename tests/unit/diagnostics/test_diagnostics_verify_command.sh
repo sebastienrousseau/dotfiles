@@ -71,6 +71,14 @@ test_start "verify_failed_step_fails"
 STUB_DIFF="" VFY_FAIL=doctor verify
 assert_equals "1:1" "$rc:$(grep -c 'failed (exit 3)' <<<"$out")" "a failing dot doctor fails verify and reports its exit code"
 
+test_start "verify_failed_rows_and_verdict_stay_on_stdout"
+# A failed check and the verdict are results: stdout, not stderr (ui_fail).
+: >"$VFY/calls"
+vout=$(STUB_DIFF="" VFY_FAIL=doctor PATH="$VFY/bin:$PATH" VFY_CALLS="$VFY/calls" bash "$VERIFY_FILE" 2>"$VFY/stderr")
+assert_contains "failed (exit 3)" "$vout" "the failed step's row is on stdout"
+assert_contains "1 check(s) failed" "$vout" "the verdict is on stdout"
+assert_equals "0" "$(grep -v '^+' "$VFY/stderr" | grep -c 'failed' || true)" "nothing about the failure on stderr"
+
 for flag in --security -s; do
   test_start "verify_security_mode_${flag//-/}"
   STUB_DIFF="" verify "$flag"

@@ -311,8 +311,9 @@ assert_contains "8 checks recorded" "$out" "the summary still prints"
 test_start "fleet_drift_unknown_subcommand"
 out="$(fleet drift bogus 2>&1)"
 rc=$?
-assert_equals 64 "$rc" "unknown drift subcommand is a usage error (64)"
-assert_contains "usage: dot fleet drift" "$out" "usage printed"
+# An unknown word is the CLI's one unknown-command message, exit 127.
+assert_equals 127 "$rc" "unknown drift subcommand is not a command (127)"
+assert_contains "dot: 'dot fleet drift bogus' is not a command; run 'dot help fleet drift'" "$out" "the message names the word"
 
 # ── events ──────────────────────────────────────────────────────────
 test_start "fleet_events_without_log"
