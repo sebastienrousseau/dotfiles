@@ -92,9 +92,12 @@ printf '%s\n' "$SHELL" >"$FAKE_SHELL_LOG"
 printf 'first_prompt_lag_ms=( 30 10 20 )\nfirst_command_lag_ms=( 5 9 7 )\n'
 FAKE
 chmod +x "$fake_dir/zsh-bench"
+# The timeout diagnostic starts this HOME's zsh -li in a pty.
+mkdir -p "$WORK/home"
+printf 'PS1="probe> "\nprint -r -- "RC-""LOADED"\n' >"$WORK/home/.zshrc"
 run_bench() {
   RC=0
-  OUT="$(SHELL=/bin/bash XDG_CACHE_HOME="$WORK/runcache" FAKE_SHELL_LOG="$WORK/shell.log" \
+  OUT="$(env -u ZDOTDIR HOME="$WORK/home" SHELL=/bin/bash XDG_CACHE_HOME="$WORK/runcache" FAKE_SHELL_LOG="$WORK/shell.log" \
     bash "$BENCH" run --iters 3 2>&1)" || RC=$?
 }
 
@@ -112,7 +115,11 @@ if command -v zsh >/dev/null 2>&1; then
     FAKE_MODE=hang ZSH_BENCH_TIMEOUT=2 run_bench
     assert_equals "1" "$RC" "a hung zsh-bench is a failure"
     assert_contains "timed out after 2s" "$OUT" "that says why"
-    assert_true "[ $((SECONDS - started)) -lt 30 ]" "within the deadline, not the job timeout"
+    assert_true "[ $((SECONDS - started)) -lt 45 ]" "within the deadline (plus the probe), not the job timeout"
+    if command -v script >/dev/null 2>&1; then
+      assert_contains "RC-LOADED" "$OUT" "and shows what the pty shell printed"
+      assert_contains "ZB-PROBE-ALIVE" "$OUT" "including whether it ran typed input"
+    fi
   fi
 fi
 
