@@ -58,8 +58,8 @@ chmod +x "$SANDBOX/bin/ssh-agent" "$SANDBOX/bin/ssh-add"
 # shell [SSH_AUTH_SOCK]: an interactive shell sourcing the file; prints the
 # SSH_AUTH_SOCK it ends up with.
 shell() {
-  env -i HOME="$H" PATH="$SANDBOX/bin:/usr/bin:/bin" SSH_AUTH_SOCK="${1:-}" \
-    zsh -f -i -c 'source "$1"; print -r -- "$SSH_AUTH_SOCK"' _ "$AGENT_FILE" 2>/dev/null | tail -n 1
+  env -i HOME="$H" PATH="$SANDBOX/bin:/usr/bin:/bin" SSH_AUTH_SOCK="${1:-}" FAKE_HOST="${FAKE_HOST:-}" \
+    zsh -f -i -c '[[ -z $FAKE_HOST ]] || HOST=$FAKE_HOST; source "$1"; print -r -- "$SSH_AUTH_SOCK"' _ "$AGENT_FILE" 2>/dev/null | tail -n 1
 }
 starts() { grep -c '^start' "$LOG"; }
 
@@ -81,5 +81,37 @@ assert_equals "$first" "$again" "on the same socket"
 test_start "ssh_agent_existing_sock_kept"
 assert_equals "/elsewhere/agent.sock" "$(shell /elsewhere/agent.sock)" "a set SSH_AUTH_SOCK is left alone"
 assert_equals "2" "$(starts)" "and no agent is started"
+
+# GitHub's macOS runners, like many managed Macs, have host names long
+# enough that "<dir>/dotfiles-ssh-agent.<host>.sock" passed the 104-byte
+# cap on unix socket paths: the bind failed, nothing was live, and every
+# shell started an agent again.
+test_start "a_long_host_name_still_reuses_one_agent"
+: >"$LOG"
+FAKE_HOST="$(printf 'a%.0s' {1..80}).example.internal"
+first="$(shell)"
+second="$(shell)"
+assert_equals "1" "$(starts)" "two shells on a long-named host start one agent"
+assert_equals "$first" "$second" "and share its socket"
+assert_true "[[ -S '$first' ]]" "which is a bound socket"
+unset FAKE_HOST
+
+# When even the directory is too long (a deep HOME), the socket moves to a
+# private directory under /tmp. A test-only host name keeps it apart from
+# any real agent there; it is removed afterwards.
+test_start "a_deep_home_moves_the_socket_under_tmp"
+: >"$LOG"
+H_SAVED="$H"
+H="$SANDBOX/$(printf 'd%.0s' {1..70})"
+mkdir -p "$H"
+FAKE_HOST="zzdotfilestest"
+got="$(shell)"
+assert_equals "/tmp/dotfiles-ssh-$(id -u)/agent.zzdotfilestest.sock" "$got" "the agent listens under /tmp/dotfiles-ssh-<uid>"
+assert_true "[[ -S '$got' ]]" "on a bound socket"
+assert_equals "drwx------" "$(ls -ld "/tmp/dotfiles-ssh-$(id -u)" | cut -c1-10)" "in a directory only its owner can enter"
+rm -f "$got" "$got.live"
+rmdir "/tmp/dotfiles-ssh-$(id -u)" 2>/dev/null || :
+H="$H_SAVED"
+unset FAKE_HOST
 
 print_summary
