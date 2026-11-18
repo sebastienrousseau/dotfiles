@@ -248,7 +248,7 @@ _vs_rewrite() {
       local ihash
       ihash="$(dot_installer_digest "$PROJECT_ROOT" "$target_version")"
       [[ -z "$ihash" ]] || sed_in_place "$temp_file" \
-        -e "s|[0-9a-f]{64}(  /tmp/dotfiles-install\.sh)|${ihash}\\1|g"
+        -e "s|[0-9a-f]{64}(  [$]installer_dir/dotfiles-install\.sh)|${ihash}\\1|g"
       ;;
     "docs/manual/00-introduction.md")
       sed_in_place "$temp_file" \

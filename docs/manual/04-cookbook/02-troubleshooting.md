@@ -18,7 +18,7 @@ Symptom → cause → fix.
 ```sh
 export PATH="$HOME/.local/bin:$PATH"
 # Re-run only the installer that was release-pinned and SHA256-verified.
-bash /tmp/dotfiles-install.sh
+bash "$installer_dir/dotfiles-install.sh"
 ```
 
 ### Symptom: "could not create directory ~/.local/share/chezmoi"

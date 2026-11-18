@@ -12,7 +12,7 @@ Short recipes for common tasks.
 
 ```sh
 # After the verified release download in the installation guide:
-bash /tmp/dotfiles-install.sh
+bash "$installer_dir/dotfiles-install.sh"
 ```
 
 ### 2. Update everything
