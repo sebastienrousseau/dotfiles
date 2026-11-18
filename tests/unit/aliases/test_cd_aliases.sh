@@ -356,13 +356,14 @@ assert_equals "$VERSION_BEFORE" "${DOTFILES_VERSION-unset}" \
   "sourcing the cd aliases leaves DOTFILES_VERSION as it was"
 
 # Test: a directory alias exists only when its directory does
+# (_cd_dir_aliases in defaults/.chezmoitemplates/aliases/cd/cd.aliases.sh)
 test_start "dir_aliases_follow_existing_dirs"
 dir_home="$(mktemp -d)"
 mkdir -p "$dir_home/Code"
 dir_aliases="$(
   HOME="$dir_home"
   unalias -a
-  source "$ALIAS_FILE" >/dev/null 2>&1
+  source "$REPO_ROOT/defaults/.chezmoitemplates/aliases/cd/cd.aliases.sh" >/dev/null 2>&1
   alias
 )"
 assert_contains "alias cod=" "$dir_aliases" "cod is defined when ~/Code exists"
