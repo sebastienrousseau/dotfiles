@@ -481,12 +481,12 @@ def _quantile(vals: list, q: float):
 def summary(units: list[Unit]) -> int:
     funcs = [u for u in units if u.name != "<top>"]
     print(f"units: {len(units)} ({len(funcs)} functions, {len(units) - len(funcs)} files)")
-    for k in LIMITS:
+    for k, limit in LIMITS.items():
         pool = [u for u in units if u.name == "<top>"] if k == "file_nloc" else units
         vals = sorted(u.measures()[k] for u in pool)
-        over = sum(1 for v in vals if v > LIMITS[k])
+        over = sum(1 for v in vals if v > limit)
         p50, p90, p95 = (_quantile(vals, q) for q in (0.5, 0.9, 0.95))
-        print(f"  {k:6} total={sum(vals):.0f} p50={p50} p90={p90} p95={p95} max={vals[-1]} over({LIMITS[k]})={over}")
+        print(f"  {k:6} total={sum(vals):.0f} p50={p50} p90={p90} p95={p95} max={vals[-1]} over({limit})={over}")
     print(f"  complex units (any limit): {sum(1 for u in units if u.over())}")
     return 0
 
