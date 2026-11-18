@@ -12,30 +12,41 @@ source "$SCRIPT_DIR/../lib/dot/ui.sh"
 source "$SCRIPT_DIR/../lib/dot/log.sh"
 export DOT_COMMAND="prewarm"
 
-# Prevent concurrent execution
-# Prefer XDG runtime dir when it exists and is writable; fallback to /tmp.
-LOCK_BASE="/tmp"
-if [[ -n "${XDG_RUNTIME_DIR:-}" ]] && [[ -d "${XDG_RUNTIME_DIR}" ]] && [[ -w "${XDG_RUNTIME_DIR}" ]]; then
-  LOCK_BASE="${XDG_RUNTIME_DIR}"
-fi
-LOCK_FILE="${LOCK_BASE}/dotfiles-prewarm.lock"
-LOCK_DIR="${LOCK_FILE}.d"
-if command -v flock >/dev/null 2>&1; then
-  exec 9>"$LOCK_FILE"
-  if ! flock -n 9; then
-    ui_warn "Already running" "Another instance is active"
-    exit 0
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
+mkdir -p "$CACHE_DIR"
+
+# Prevent concurrent execution. The lock lives in XDG_RUNTIME_DIR when it is
+# usable, else in the cache this run warms. A machine-wide /tmp lock let any
+# other prewarm (another user's, another HOME's) make this one stand down,
+# and let another user block it.
+_prewarm_lock_base() {
+  if [[ -n "${XDG_RUNTIME_DIR:-}" && -d "$XDG_RUNTIME_DIR" && -w "$XDG_RUNTIME_DIR" ]]; then
+    printf '%s\n' "$XDG_RUNTIME_DIR"
+  else
+    printf '%s\n' "$CACHE_DIR"
   fi
-else
-  # Portable fallback when flock is unavailable (e.g. minimal macOS envs).
-  if ! mkdir "$LOCK_DIR" 2>/dev/null; then
-    ui_warn "Already running" "Another instance is active"
-    exit 0
+}
+
+# _prewarm_lock: 0 when this run holds the lock. flock where it exists; a
+# lock directory where it does not (macOS ships no flock).
+_prewarm_lock() {
+  local file
+  file="$(_prewarm_lock_base)/dotfiles-prewarm.lock"
+  if command -v flock >/dev/null 2>&1; then
+    exec 9>"$file"
+    flock -n 9
+    return
   fi
+  LOCK_DIR="$file.d"
+  mkdir "$LOCK_DIR" 2>/dev/null || return 1
   trap 'rmdir "$LOCK_DIR" 2>/dev/null || true' EXIT
+}
+
+if ! _prewarm_lock; then
+  ui_warn "Already running" "Another instance is active"
+  exit 0
 fi
 
-CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
 mkdir -p "$CACHE_DIR/"{zsh,bash,fish,nushell}
 
 ui_header "Pre-warming Shell Caches"
@@ -90,22 +101,22 @@ warm_tool "fzf" "fzf --fish" "fish" "fish"
 warm_tool "direnv" "direnv hook fish" "fish" "fish"
 
 ui_section "Nushell"
-for _nu_entry in "starship:starship init nu:starship.nu" "zoxide:zoxide init nushell:zoxide.nu" "atuin:atuin init nu:atuin.nu"; do
-  _nu_tool="${_nu_entry%%:*}"
-  _nu_rest="${_nu_entry#*:}"
-  _nu_cmd="${_nu_rest%%:*}"
-  _nu_file="${_nu_rest#*:}"
-  if command -v "$_nu_tool" >/dev/null 2>&1; then
-    _nu_tmp="$CACHE_DIR/nushell/${_nu_file}.tmp.$$"
-    if eval "$_nu_cmd" >"$_nu_tmp" 2>/dev/null && [ -s "$_nu_tmp" ]; then
-      mv "$_nu_tmp" "$CACHE_DIR/nushell/$_nu_file"
-      ui_ok "$_nu_tool" "Cached for nushell"
-    else
-      rm -f "$_nu_tmp"
-      ui_warn "$_nu_tool" "Failed to cache for nushell"
-    fi
+# _warm_nu TOOL CMD FILE: cache TOOL's nushell init (CMD) as FILE.
+_warm_nu() {
+  local tmp
+  command -v "$1" >/dev/null 2>&1 || return 0
+  tmp="$CACHE_DIR/nushell/$3.tmp.$$"
+  if eval "$2" >"$tmp" 2>/dev/null && [ -s "$tmp" ]; then
+    mv "$tmp" "$CACHE_DIR/nushell/$3"
+    ui_ok "$1" "Cached for nushell"
+  else
+    rm -f "$tmp"
+    ui_warn "$1" "Failed to cache for nushell"
   fi
-done
+}
+_warm_nu starship "starship init nu" starship.nu
+_warm_nu zoxide "zoxide init nushell" zoxide.nu
+_warm_nu atuin "atuin init nu" atuin.nu
 
 # --- Completions ---
 ui_section "Shell completions"
