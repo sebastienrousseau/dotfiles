@@ -177,11 +177,7 @@ ui_ok() { ui_status "$_GL_OK" "[OK]" "$1" "${2:-}" "$GREEN"; }
 ui_warn() { ui_status "$_GL_WARN" "[WARN]" "$1" "${2:-}" "$YELLOW"; }
 # Errors are diagnostics, so they go to stderr (ADR-020 N14: results on
 # stdout, logs on stderr), coloured only when stderr is a terminal.
-ui_err() {
-  local color="$RED"
-  [[ -t 2 ]] || color=""
-  ui_status "$_GL_FAIL" "[FAIL]" "$1" "${2:-}" "$color" >&2
-}
+ui_err() { ui_status "$_GL_FAIL" "[FAIL]" "$1" "${2:-}" "$([[ ! -t 2 ]] || printf %s "$RED")" >&2; }
 ui_info() { ui_status "$_GL_INFO" "[INFO]" "$1" "${2:-}" "$GRAY"; }
 ui_meta() { ui_status "$_GL_INFO" "[INFO]" "$1" "${2:-}" "$GRAY" 14; }
 
