@@ -330,7 +330,7 @@ shfmt -w -i 2 -ci scripts/**/*.sh install.sh defaults/.chezmoitemplates/**/*.sh
 ### Symptom: PR fails at the "Enforce module coverage" step
 
 **Cause**: New code added without tests. The gate runs in "Test / Unit Tests"
-(100% in `ci-enforced.yml`) and "Test / Unit" (98% in `ci.yml`).
+(100% module coverage, in `ci-enforced.yml`); it is the one full-suite run per push.
 
 **Fix**:
 
