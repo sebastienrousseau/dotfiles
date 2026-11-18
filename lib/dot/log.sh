@@ -233,6 +233,27 @@ dot_log_prune() {
   done
 }
 
+# Plain-text logs outside log.v1 (O6). They keep their own formats; each
+# writer logs one text_log event per run naming its file (dot_log_pointer),
+# so `grep '"event":"text_log"' $XDG_STATE_HOME/dot/*/log.jsonl` finds them:
+#   dot/doctor/rollback.log       scripts/ops/rollback.sh
+#   dot/doctor/heal.log           scripts/ops/heal.sh
+#   dot/system/last-run.log       dot system schedule run
+#   dot/ai/watch.log              the dot ai watch service (launchd output)
+# Not yet pointed at (their writers are outside lib/dot, plugins and
+# scripts/ops, or their top level is over the complexity baseline):
+#   dot/config/update/last.log    scripts/ops/chezmoi-update.sh --async
+#   dot/security/security-audit.log  scripts/security/enforce-policies.sh
+#   dot/security/audit-bypass.log    scripts/git-hooks/pre-push
+
+# dot_log_pointer FILE WRITER: a text_log event naming FILE and the WRITER
+# that appends to it, once per process and file.
+dot_log_pointer() {
+  case $'\n'"${_DOT_LOG_POINTED:-}"$'\n' in *$'\n'"$1"$'\n'*) return 0 ;; esac
+  _DOT_LOG_POINTED+="$1"$'\n'
+  dot_log info text_log "path=$1" "writer=$2" "format=text"
+}
+
 # dot_metric NAME VALUE [UNIT]: a "metric" event (unit ms by default).
 dot_metric() {
   dot_log info metric "name=$1" "value=$2" "unit=${3:-ms}"

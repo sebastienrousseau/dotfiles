@@ -144,6 +144,8 @@ head -c 1100000 /dev/zero >"$WORK/home/.local/share/dotfiles.log"
 assert_equals "ok    shell caches|ok    log rotation" "$(sys Darwin schedule run | paste -sd '|' -)" "each step reports"
 assert_equals "dot shell clean" "$(calls)" "clears the startup caches"
 assert_file_exists "$WORK/home/.local/share/dotfiles.log.1.gz" "rotates a full log"
+assert_contains "\"event\":\"text_log\"" "$(cat "$WORK/home/.local/state/dot/system/log.jsonl" 2>/dev/null)" "points log.v1 at its plain-text log (O6)"
+assert_contains "\"path\":\"$STATE/last-run.log\"" "$(cat "$WORK/home/.local/state/dot/system/log.jsonl" 2>/dev/null)" "by path"
 assert_contains ", exit 0" "$(sys Darwin status)" "status shows the run"
 assert_contains "Schedule   off" "$(sys Darwin)" "status is the default, with the schedule"
 
@@ -156,11 +158,12 @@ assert_contains "ok    log rotation" "$out" "the next step still runs"
 assert_contains " 1" "$(cat "$STATE/last-run")" "the exit code is recorded"
 assert_contains ", exit 1" "$(sys Linux status)" "and shown"
 
-test_start "unknown_words_exit_2"
+test_start "unknown_words_exit_127"
 rc=0
 sys Darwin schedule nope 2>"$WORK/err" || rc=$?
-assert_equals "1" "$rc" "an unknown schedule verb"
-assert_file_contains "$WORK/err" "unknown 'dot system' command; see 'dot help system'" "points to help"
+assert_equals "127" "$rc" "an unknown schedule verb is not a command (N10)"
+assert_file_contains "$WORK/err" "dot: 'dot system …' is not a command; run 'dot help system'" "the one message, without the words"
+assert_equals "" "$(grep -F nope "$WORK/err")" "the word itself is not echoed"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

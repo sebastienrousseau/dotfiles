@@ -57,6 +57,7 @@ log_step() {
 persist_log() {
   mkdir -p "$STATE_DIR"
   echo "[$(date -Iseconds)] $*" >>"$ROLLBACK_LOG"
+  dot_log_pointer "$ROLLBACK_LOG" "dot doctor rollback"
 }
 
 usage() {

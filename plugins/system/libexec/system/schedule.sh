@@ -242,6 +242,7 @@ dot_system_schedule_run() {
   mkdir -p "$dir"
   DOT_SYSTEM_LOG="$dir/last-run.log"
   : >"$DOT_SYSTEM_LOG"
+  ! declare -F dot_log_pointer >/dev/null || dot_log_pointer "$DOT_SYSTEM_LOG" "dot system schedule run"
   _dot_system_step "shell caches" "$(_dot_system_dot)" shell clean || rc=1
   _dot_system_step "log rotation" bash "$(resolve_source_dir)/scripts/tools/log-rotate.sh" || rc=1
   printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$rc" >"$dir/last-run"

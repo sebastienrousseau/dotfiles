@@ -100,6 +100,9 @@ EOF
 # _ai_watch_on BACKEND BIN: write the job and load it.
 _ai_watch_on() {
   local f
+  # shellcheck source=../../../../lib/dot/log.sh
+  source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/log.sh"
+  [[ "$1" != launchd ]] || dot_log_pointer "$(_ai_watch_log)" "dot ai watch (launchd)"
   if [[ "$1" == launchd ]]; then
     f="$(_ai_watch_plist)"
     mkdir -p "${f%/*}" "$(dirname "$(_ai_watch_log)")"
