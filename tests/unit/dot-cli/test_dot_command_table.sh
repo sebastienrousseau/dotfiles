@@ -86,7 +86,7 @@ assert_equals "@agent delegate list|2" "$(resolve agent delegate)" "a delegate o
 test_start "shortcuts_and_flags_rewrite_the_command_line"
 assert_equals "@system update --yes" "$(names update --yes)" "dot update is dot system update (N7)"
 assert_equals "@config status" "$(names status)" "dot status is dot config status"
-assert_equals "version" "$(names -V)" "-V is the version"
+assert_equals "dot 0.2.537" "$(names -V)" "-V prints the version line, dot <version> (D10)"
 assert_equals "@system update" "$(names -v system update)" "-v passes the rest on"
 assert_equals "upgrade" "$(names upgrade)" "a deprecated name keeps running its route"
 
@@ -142,7 +142,7 @@ test_start "unknown_and_removed_names_exit_127"
 rc=0
 dot no-such-command-n03 || rc=$?
 assert_equals "127" "$rc" "unknown command (N10)"
-assert_file_contains "$WORK/err" "Unknown command: no-such-command-n03" "says so on stderr"
+assert_file_contains "$WORK/err" "dot: 'dot no-such-command-n03' is not a command; run 'dot help'" "says so on stderr"
 rc=0
 DOT_BIN="$WORK/src/bin/dot" dot frob || rc=$?
 assert_equals "127" "$rc" "removed name"
@@ -171,7 +171,8 @@ assert_equals "0" "$rc" "read-only, exits 0 (N5)"
 assert_equals "dot secret · secrets, keys and SSH certificates" "$(head -1 "$WORK/out")" "its own header"
 assert_output_not_contains "dot config ·" "cat '$WORK/out'" "and no other domain's"
 assert_equals "" "$(grep 'dot secret list ' "$WORK/out" | grep -F '(planned)')" "a built command is not marked planned"
-assert_not_empty "$(grep 'dot secret status ' "$WORK/out" | grep -F '(planned)')" "a planned one is"
+assert_equals "" "$(grep 'dot secret status ' "$WORK/out")" "a planned one is left out (D12)"
+assert_file_contains "$WORK/out" "'dot help --all' lists them" "and counted"
 
 test_start "help_topics_still_resolve"
 rc=0
@@ -180,7 +181,7 @@ assert_equals "0" "$rc" "dot help <command> is not taken for a planned spelling"
 assert_file_contains "$WORK/out" "dot sync" "and shows that command"
 rc=0
 dot help zz-no-such-topic || rc=$?
-assert_equals "1" "$rc" "an unknown topic that matches nothing fails"
+assert_equals "64" "$rc" "an unknown topic that matches nothing is a usage error (64)"
 
 test_start "a_typo_after_an_object_stops"
 # `dot ai <words>` sends the words to a model: a word that is not a verb of

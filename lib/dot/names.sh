@@ -233,12 +233,16 @@ _dot_warn_deprecated() {
   return 0
 }
 
-# _dot_gnu_flags WORD...: GNU flags (N9). -V is the version and -v is
-# --verbose. Sets _ARGV.
+# _dot_gnu_flags WORD...: GNU flags (N9). -V and --version print one
+# parseable line, `dot <version>` (`dot version` keeps the banner), and -v
+# is --verbose. Sets _ARGV.
 _dot_gnu_flags() {
   _ARGV=("$@")
   case "${1:-}" in
-    -V) _ARGV=(version "${@:2}") ;;
+    -V | --version)
+      printf 'dot %s\n' "${VERSION:-unknown}"
+      exit 0
+      ;;
     -v)
       export DOT_VERBOSE=1
       _ARGV=("" "${@:2}")
@@ -295,8 +299,31 @@ _dot_help_asked() {
   done
   ((asked)) || return 0
   [[ -z "$_NAME_WAS" ]] || printf 'dot %s is short for dot %s\n\n' "$_NAME_WAS" "$_NAME_TARGET"
+  _dot_help_verb_known "${spelled[@]}"
   _dot_help_spelling "${spelled[@]}" && exit 0
   return 0
+}
+
+# _dot_help_verb_known WORD...: `dot <domain> [object] <word> --help`
+# resolves the word before showing help (D8): a plain word after the
+# longest domain or object the words start with, when no command spells it
+# (nor an old route record), is not a command and exits 127 instead of
+# showing the domain's help with status 0. Words after a command are its
+# arguments.
+_dot_help_verb_known() {
+  local n key="" next
+  for ((n = $#; n >= 1; n--)); do
+    key="${*:1:n}"
+    ! _dot_record cmd "$key" || return 0
+    ! _dot_record obj "$key" || break
+    ! _dot_record dom "$key" || break
+  done
+  ((n >= 1 && n < $#)) || return 0
+  next="$((n + 1))"
+  next="${!next}"
+  [[ "$next" =~ ^[a-z][a-z0-9-]*$ ]] || return 0
+  [[ "$_DOT_TABLE" != *$'\n'"leg|$key $next"[\ \|]* ]] || return 0
+  dot_not_a_command "$key" "$key $next"
 }
 
 # _dot_names_spelling WORD: WORD starts an ADR-020 spelling (a domain or a
@@ -321,11 +348,17 @@ _dot_spelled() {
     return 0
   fi
   _dot_stop_unbuilt "$@"
-  if [[ "$1" == help ]] && _dot_names_spelling "$2" && _dot_help_spelling "${@:2}"; then
-    exit 0
-  fi
+  [[ "$1" != help ]] || _dot_help_term "${@:2}"
   _dot_entry_rest "$@"
   return 0
+}
+
+# _dot_help_term WORD...: `dot help <spelling>` shows that spelling's help
+# and exits, once its verb resolves (D8); a search term returns.
+_dot_help_term() {
+  _dot_names_spelling "$1" || return 0
+  _dot_help_verb_known "$@"
+  ! _dot_help_spelling "$@" || exit 0
 }
 
 # _dot_entry_rest DOMAIN WORD...: a plugin with an entry (route @DOMAIN)
@@ -353,6 +386,14 @@ _dot_names() {
   _dot_spelled "$@"
 }
 
+# dot_not_a_command TOPIC WORDS: the one message for a spelling that runs
+# nothing (ADR-020 N10, D7): it names `dot WORDS` and the help to read, on
+# stderr, and exits 127. An empty TOPIC points at the overview.
+dot_not_a_command() {
+  echo "dot: 'dot $2' is not a command; run 'dot help${1:+ $1}'" >&2
+  exit 127
+}
+
 # _dot_unknown WORD...: nothing routed WORD. A domain lists its commands
 # when it was given no verb; anything else exits 127 (N10).
 _dot_unknown() {
@@ -366,9 +407,7 @@ _dot_unknown() {
     echo "dot: 'dot $1 $words' is not available yet; run 'dot help $1'" >&2
     exit 127
   fi
-  echo "Unknown command: ${1:-}" >&2
-  echo "Run 'dot help' for available commands." >&2
-  exit 127
+  dot_not_a_command "" "${1:-}"
 }
 
 # _dot_user_command WORD ARGS...: the user commands from before plugins, for
@@ -423,8 +462,7 @@ _dot_stop_unbuilt() {
 _dot_not_a_verb() {
   local word=""
   [[ ! "$3" =~ ^[a-z]+$ ]] || word=" $3"
-  echo "dot: 'dot $1 $2$word' is not a command; run 'dot help $1 $2'" >&2
-  exit 127
+  dot_not_a_command "$1 $2" "$1 $2$word"
 }
 
 # Help from the same table (N0.4), loaded on first use: most invocations

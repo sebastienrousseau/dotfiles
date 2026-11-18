@@ -8,7 +8,7 @@ obj|system schedule|list|@system|scheduled maintenance jobs
 obj|system settings|show||OS settings dot manages
 cmd|system status|@system status|read|OS, disk, schedule and last run
 cmd|system update|@system update|write|Update everything, asking first
-cmd|system clean||write|Reclaim space, asking first
+cmd|system clean|@system clean|write|Reclaim space, asking first
 cmd|system show||read|Hardware and host details
 cmd|system schedule list|@system schedule list|read|Scheduled jobs
 cmd|system schedule set|@system schedule set|write|Set the maintenance schedule
@@ -18,6 +18,9 @@ cmd|system settings apply|@system settings apply|write|Apply the managed OS sett
 run|system clean --logs|@system clean --logs||
 flag|system update|yes|y||Answer yes to every question
 flag|system update|globals|||Also upgrade pipx globals (npm and cargo tools are pinned)
+flag|system clean|caches|||Prune the Go, pip and uv build caches (the default)
+flag|system clean|logs|||Rotate the logs instead
+flag|system clean|yes|y||Prune without asking
 arg|system schedule set|weekly daily off||
 alias|update|shortcut|system update|
 alias|upgrade|removed|system update|0.2.538

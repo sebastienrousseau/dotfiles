@@ -26,6 +26,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 DOT_BIN="${DOT_BIN:-$REPO_ROOT/bin/dot}"
 SCRUB="$SCRIPT_DIR/scrub.sh"
+EMPTY_BUILD_ROOT="$(mktemp -d)"
+trap 'rm -rf "$EMPTY_BUILD_ROOT"' EXIT
 
 if [[ ! -x "$DOT_BIN" && ! -f "$DOT_BIN" ]]; then
   echo "Error: dot binary not found at $DOT_BIN" >&2
@@ -39,7 +41,10 @@ capture() {
   printf 'Updating %s ...\n' "$out"
   # Run the command; tolerate non-zero exit so we still capture the
   # output (e.g., `doctor` returns 1 when something is sub-optimal).
-  DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 bash "$DOT_BIN" "$@" 2>&1 | bash "$SCRUB" "$slug" >"$out" || true
+  # An empty build-cache root, as test_snapshots.sh uses: doctor's
+  # cache-size warning depends on the machine, not the CLI.
+  DOT_BUILD_ROOT="$EMPTY_BUILD_ROOT" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 bash "$DOT_BIN" "$@" 2>&1 |
+    bash "$SCRUB" "$slug" >"$out" || true
 }
 
 capture help --help

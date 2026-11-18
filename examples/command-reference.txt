@@ -152,6 +152,7 @@ dot — one command for this machine. Built commands, by domain:
 [system] updates, cleanup, scheduled maintenance
   dot system status — OS, disk, schedule and last run
   dot system update — Update everything, asking first
+  dot system clean — Reclaim space, asking first
   dot system schedule list — Scheduled jobs
   dot system schedule set — Set the maintenance schedule
   dot system schedule run — Run scheduled maintenance now

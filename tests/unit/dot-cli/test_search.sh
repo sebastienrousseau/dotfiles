@@ -42,12 +42,13 @@ fi
 
 test_start "search_nonexistent_no_match"
 search_none=$(bash "$DOT_CLI" help nonexistentxyz123 2>&1)
-if echo "$search_none" | grep -qi "Unknown help topic"; then
+search_rc=$?
+if [[ $search_rc -eq 64 ]] && echo "$search_none" | grep -q "no help topic or command matches 'nonexistentxyz123'"; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot help nonexistent shows no match"
 else
   ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot help nonexistent should say 'Unknown help topic'"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot help nonexistent should be a usage error (64) naming the term"
   printf '%b\n' "    Got: '$search_none'"
 fi
 

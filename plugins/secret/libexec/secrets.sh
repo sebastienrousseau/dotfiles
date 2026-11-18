@@ -123,7 +123,7 @@ cmd_secrets_provider() {
 
 cmd_secrets_set() {
   local key="${1:-}" value="${2:-}"
-  [[ -n "$key" ]] || die "Usage: dot secret set <KEY> [VALUE]"
+  [[ -n "$key" ]] || dot_usage_error "missing argument" "dot secret set <KEY> [VALUE]"
   if [[ -n "$value" ]]; then
     ui_warn "Value on the command line" "it may be saved in shell history; omit it to be prompted"
   fi
@@ -140,7 +140,7 @@ cmd_secrets_set() {
 
 cmd_secrets_get() {
   local key="${1:-}" raw="${2:-}"
-  [[ -n "$key" ]] || die "Usage: dot secret show <KEY> [--raw]"
+  [[ -n "$key" ]] || dot_usage_error "missing argument" "dot secret show <KEY> [--raw]"
   local value
   value="$(dot_secrets_get "$key" || true)"
   [[ -n "$value" ]] || die "Secret not found: $key"

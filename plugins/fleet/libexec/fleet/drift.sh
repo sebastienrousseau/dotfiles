@@ -212,6 +212,6 @@ cmd_fleet_drift() {
     check) _fleet_drift_check ;;
     history) _fleet_drift_history "$@" ;;
     predict) _fleet_drift_predict ;;
-    *) die "Usage: dot fleet drift [check|history|predict]" ;;
+    *) dot_usage_error "unknown subcommand" "dot fleet drift [check|history|predict]" ;;
   esac
 }

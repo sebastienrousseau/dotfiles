@@ -788,6 +788,7 @@ export extern "dot config profile set" [
 ]
 
 export extern "dot config profile show" [
+    --json(-j) # Print the profile and feature flags as JSON
     --help(-h) # Show help
     ...rest: string
 ]
@@ -1621,6 +1622,9 @@ export extern "dot system" [
 ]
 
 export extern "dot system clean" [
+    --caches # Prune the Go, pip and uv build caches (the default)
+    --logs # Rotate the logs instead
+    --yes(-y) # Prune without asking
     --help(-h) # Show help
     ...rest: string
 ]
@@ -1796,6 +1800,7 @@ export extern "dot tool install" [
 ]
 
 export extern "dot tool list" [
+    --json(-j) # Print the toolchains as JSON
     --help(-h) # Show help
     ...rest: string
 ]

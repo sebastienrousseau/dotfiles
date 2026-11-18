@@ -53,11 +53,7 @@ cmd_update() {
 
 cmd_add() {
   if [ -z "${1:-}" ]; then
-    echo "Usage: dot config add <file>"
-    echo ""
-    echo "Add a file to the chezmoi source directory."
-    echo "The file will be managed by chezmoi from now on."
-    exit 1
+    dot_usage_error "missing file: add one to the chezmoi source directory" "dot config add <file>"
   fi
   exec chezmoi add "$@"
 }
@@ -174,7 +170,7 @@ _set_host_profile() {
 _profile_set() {
   local new_profile="${1:-}"
   if [[ -z "$new_profile" ]]; then
-    die "Usage: dot config profile set <name>"
+    dot_usage_error "missing or unknown argument" "dot config profile set <name>"
   fi
   if [[ ! "$new_profile" =~ ^[A-Za-z0-9._-]+$ ]]; then
     die "Invalid profile name: $new_profile"
@@ -183,36 +179,57 @@ _profile_set() {
   ui_info "Profile" "Set to '$new_profile' in $(_chezmoi_config). Run 'dot sync' to apply."
 }
 
+# _profile_features DATA_FILE: the [features] table as `key<TAB>value`.
+_profile_features() {
+  local line key val
+  grep -A 100 '^\[features\]' "$1" | tail -n +2 | while IFS= read -r line; do
+    [[ "$line" =~ ^\[ ]] && break
+    [[ -z "$line" || "$line" =~ ^# ]] && continue
+    key="${line%%=*}" val="${line#*=}"
+    val="${val// /}"
+    printf '%s\t%s\n' "${key// /}" "${val//\"/}"
+  done
+}
+
+# _profile_show DATA_FILE [--json|-j]: the active profile and the feature
+# flags; with --json one config/profile.v1 object
+# (schemas/cli/config-profile.v1.schema.json).
+_profile_show() {
+  local profile_val key val sep=""
+  profile_val="$(_host_profile)"
+  [[ -n "$profile_val" ]] || profile_val="$(grep '^profile' "$1" | head -1 | sed 's/.*=[[:space:]]*"\(.*\)"/\1/')"
+  if [[ "$2" == --json || "$2" == -j ]]; then
+    printf '{"schema":"config/profile.v1","profile":"%s","features":{' "${profile_val:-default}"
+    while IFS=$'\t' read -r key val; do
+      [[ "$val" == true || "$val" == false ]] || val="\"$val\""
+      printf '%s"%s":%s' "$sep" "$key" "$val"
+      sep=","
+    done < <(_profile_features "$1")
+    printf '}}\n'
+    return 0
+  fi
+  ui_header "Dotfiles Profile"
+  ui_info "Profile" "${profile_val:-default}"
+  echo ""
+  ui_section "Feature Flags"
+  while IFS=$'\t' read -r key val; do
+    ui_info "$key" "$val"
+  done < <(_profile_features "$1")
+}
+
 cmd_profile() {
   local data_file
   data_file="$(resolve_chezmoi_source_dir)/.chezmoidata.toml"
   if [[ ! -f "$data_file" ]]; then
     die ".chezmoidata.toml not found"
   fi
+  # A leading flag (`dot config profile --json`) is the default verb's.
+  [[ "${1:-}" != -* ]] || set -- show "$@"
   case "${1:-show}" in
-    show)
-      ui_header "Dotfiles Profile"
-      local profile_val
-      profile_val="$(_host_profile)"
-      [[ -n "$profile_val" ]] || profile_val="$(grep '^profile' "$data_file" | head -1 | sed 's/.*=[[:space:]]*"\(.*\)"/\1/')"
-      ui_info "Profile" "${profile_val:-default}"
-      echo ""
-      ui_section "Feature Flags"
-      grep -A 100 '^\[features\]' "$data_file" | tail -n +2 | while IFS= read -r line; do
-        [[ "$line" =~ ^\[ ]] && break
-        [[ -z "$line" || "$line" =~ ^# ]] && continue
-        local key val
-        key="${line%%=*}"
-        key="${key// /}"
-        val="${line#*=}"
-        val="${val// /}"
-        val="${val//\"/}"
-        ui_info "$key" "$val"
-      done
-      ;;
+    show) _profile_show "$data_file" "${2:-}" ;;
     set) _profile_set "${2:-}" ;;
     *)
-      die "Unknown profile subcommand: ${1:-}. Use 'show' or 'set'."
+      dot_usage_error "unknown profile subcommand '${1:-}'" "dot config profile [show|set <name>]"
       ;;
   esac
 }

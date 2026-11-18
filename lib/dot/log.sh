@@ -24,9 +24,36 @@
 [[ "${_DOT_LIB_LOG_LOADED:-0}" == "1" ]] && return 0
 _DOT_LIB_LOG_LOADED=1
 
+# _dot_trace_id_new: set DOT_TRACE_ID to 12 random hex digits (O7). bash
+# 5.1's SRANDOM (getrandom(2)) costs no fork; older bash reads
+# /dev/urandom. The digits of `date +%s%N` it replaces ended in 000 on
+# macOS, whose date has microseconds at best.
+_dot_trace_id_new() {
+  if [[ -n "${SRANDOM:-}" ]]; then
+    printf -v DOT_TRACE_ID '%08x%04x' "$SRANDOM" "$((SRANDOM & 0xffff))"
+  else
+    DOT_TRACE_ID="$(od -An -N6 -tx1 /dev/urandom 2>/dev/null | tr -d ' \n')" || DOT_TRACE_ID=""
+  fi
+  [[ -n "$DOT_TRACE_ID" ]] || DOT_TRACE_ID="$$$(date +%s)"
+}
+
 # Correlation ID for tracing across commands in a single invocation
-DOT_TRACE_ID="${DOT_TRACE_ID:-$(date +%s%N 2>/dev/null | tail -c 12 || date +%s)}"
+[[ -n "${DOT_TRACE_ID:-}" ]] || _dot_trace_id_new
 export DOT_TRACE_ID
+
+# dot_now_ms: milliseconds since the epoch. bash 5's EPOCHREALTIME costs no
+# fork; else date's %N where it gives nanoseconds; else whole seconds.
+dot_now_ms() {
+  local t="${EPOCHREALTIME:-}"
+  if [[ -n "$t" ]]; then
+    t="${t/[.,]/}"
+    printf '%s\n' "$((10#$t / 1000))"
+    return 0
+  fi
+  t="$(date +%s%N 2>/dev/null)" || t=""
+  [[ "$t" =~ ^[0-9]{19}$ ]] || t="$(($(date +%s) * 1000000000))"
+  printf '%s\n' "$((t / 1000000))"
+}
 
 dot_agent_checkpoint_dir() {
   printf '%s\n' "${XDG_STATE_HOME:-$HOME/.local/state}/dot/agent/checkpoints"
@@ -204,6 +231,27 @@ dot_log_prune() {
     _dot_log_adopt "$file"
     _dot_log_prune_file "$file" "$cutoff"
   done
+}
+
+# Plain-text logs outside log.v1 (O6). They keep their own formats; each
+# writer logs one text_log event per run naming its file (dot_log_pointer),
+# so `grep '"event":"text_log"' $XDG_STATE_HOME/dot/*/log.jsonl` finds them:
+#   dot/doctor/rollback.log       scripts/ops/rollback.sh
+#   dot/doctor/heal.log           scripts/ops/heal.sh
+#   dot/system/last-run.log       dot system schedule run
+#   dot/ai/watch.log              the dot ai watch service (launchd output)
+# Not yet pointed at (their writers are outside lib/dot, plugins and
+# scripts/ops, or their top level is over the complexity baseline):
+#   dot/config/update/last.log    scripts/ops/chezmoi-update.sh --async
+#   dot/security/security-audit.log  scripts/security/enforce-policies.sh
+#   dot/security/audit-bypass.log    scripts/git-hooks/pre-push
+
+# dot_log_pointer FILE WRITER: a text_log event naming FILE and the WRITER
+# that appends to it, once per process and file.
+dot_log_pointer() {
+  case $'\n'"${_DOT_LOG_POINTED:-}"$'\n' in *$'\n'"$1"$'\n'*) return 0 ;; esac
+  _DOT_LOG_POINTED+="$1"$'\n'
+  dot_log info text_log "path=$1" "writer=$2" "format=text"
 }
 
 # dot_metric NAME VALUE [UNIT]: a "metric" event (unit ms by default).

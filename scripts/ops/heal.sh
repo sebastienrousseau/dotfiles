@@ -56,6 +56,7 @@ log_dry() { ui_warn "DRY-RUN" "Would: $*"; }
 persist_log() {
   mkdir -p "$STATE_DIR"
   echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*" >>"$HEAL_LOG"
+  dot_log_pointer "$HEAL_LOG" "dot doctor fix"
 }
 
 # Options

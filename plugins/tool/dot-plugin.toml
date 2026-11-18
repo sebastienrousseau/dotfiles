@@ -17,7 +17,13 @@ fallback = true
 [[commands]]
 verb = "list"
 effect = "read"
+output = "tool/list.v1"
 summary = "Toolchains and their versions"
+
+[[commands.flags]]
+long = "json"
+short = "j"
+summary = "Print the toolchains as JSON"
 
 [[commands]]
 verb = "install"

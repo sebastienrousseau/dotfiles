@@ -109,7 +109,7 @@ else
     _ARGV=("$@")
   }
   _dot_unknown() {
-    echo "Unknown command: ${1:-}" >&2
+    echo "dot: 'dot ${1:-}' is not a command; run 'dot help'" >&2
     exit 127
   }
   # Minimal fallback when source dir is not available (e.g. first install)
@@ -192,7 +192,14 @@ ui_dot_banner() {
   fi
 }
 
+# show_version [--json|-j]: the banner, or with --json one version.v1
+# object (schemas/cli/version.v1.schema.json). `dot -V` and `dot --version`
+# print the single line `dot <version>` (lib/dot/names.sh).
 show_version() {
+  if [[ "${1:-}" == --json || "${1:-}" == -j ]]; then
+    printf '{"schema":"cli/version.v1","name":"dot","version":"%s","source":"%s"}\n' "$VERSION" "${_DOT_SRC//\"/\\\"}"
+    return 0
+  fi
   ui_dot_banner "Reference"
   ui_header "Dotfiles Version"
   echo ""
@@ -253,6 +260,18 @@ _dot_command_route() {
   return 1
 }
 
+# _dot_usage MESSAGE [USAGE]: a usage error, through the SDK's
+# dot_usage_error (stderr, exit 64, ADR-020 N10) when the SDK is here.
+_dot_usage() {
+  if [[ -f "${_DOT_SRC:-}/lib/dot/sdk.sh" ]]; then
+    # shellcheck source=../lib/dot/sdk.sh
+    source "$_DOT_SRC/lib/dot/sdk.sh"
+    dot_usage_error "$@"
+  fi
+  printf 'dot: %s\n' "$1" >&2
+  exit 64
+}
+
 # Help comes from lib/dot/help.sh; without it (first install) only the usage.
 show_help_overview() {
   if declare -F _dot_help_overview >/dev/null; then
@@ -287,9 +306,7 @@ show_help_command() {
     if _dot_help_search "$command_name"; then
       exit 0
     fi
-    ui_fail "Unknown help topic: $command_name"
-    ui_info "Hint" "Try 'dot help all'"
-    exit 1
+    _dot_usage "no help topic or command matches '$command_name'" "dot help [<domain>|all|<term>]"
   fi
 
   ui_dot_banner "Reference"
@@ -314,6 +331,9 @@ show_help() {
       ;;
     all)
       show_help_all
+      ;;
+    --all)
+      _DOT_HELP_PLANNED=1 show_help_all
       ;;
     --json)
       cat "$_DOT_SRC/lib/dot/data/commands.json"
@@ -445,37 +465,30 @@ if [[ -n "$route" ]] && [[ "$route" != "help" ]] && [[ "$route" != "search" ]] &
   exec bash "$_SOURCE_DIR/bin/dot" help "$COMMAND"
 fi
 
-case "$route" in
-  core | diagnostics | ai | tools | appearance | secrets | security | meta | fleet | completion | agents | init | registry)
-    _dispatch "$route" "$@"
-    ;;
+# _dot_search TERM: `dot help <term>` for a term that is no spelling.
+_dot_search() {
+  [[ -n "${1:-}" ]] || _dot_usage "search needs a term" "dot help <term>"
+  _dot_help_search "$1" || echo "No commands matching '$1'"
+  exit 0
+}
 
-  manual | patterns | system)
-    _dispatch_args "$route" "$@"
-    ;;
+# _dot_run ARGS...: run the route _dot_set_route chose.
+_dot_run() {
+  case "$route" in
+    core | diagnostics | ai | tools | appearance | secrets | security | meta | fleet | completion | agents | init | registry)
+      _dispatch "$route" "$@"
+      ;;
+    manual | patterns | system) _dispatch_args "$route" "$@" ;;
+    search) _dot_search "${1:-}" ;;
+    help) show_help "$@" ;;
+    version) show_version "$@" ;;
+    # A word the table does not know: the deprecated user commands
+    # (lib/dot/names.sh _dot_user_command), else unknown.
+    *)
+      _dot_user_command "$COMMAND" "$@"
+      _dot_unknown "$COMMAND" "$@"
+      ;;
+  esac
+}
 
-  search)
-    keyword="${1:-}"
-    if [[ -z "$keyword" ]]; then
-      echo "Usage: dot help <keyword>"
-      exit 1
-    fi
-    _dot_help_search "$keyword" || echo "No commands matching '$keyword'"
-    exit 0
-    ;;
-
-  help)
-    show_help "$@"
-    ;;
-
-  version)
-    show_version
-    ;;
-
-  # A word the table does not know: the deprecated user commands
-  # (lib/dot/names.sh _dot_user_command), else unknown.
-  *)
-    _dot_user_command "$COMMAND" "$@"
-    _dot_unknown "$COMMAND" "$@"
-    ;;
-esac
+_dot_run "$@"

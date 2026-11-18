@@ -311,8 +311,8 @@ assert_contains "8 checks recorded" "$out" "the summary still prints"
 test_start "fleet_drift_unknown_subcommand"
 out="$(fleet drift bogus 2>&1)"
 rc=$?
-assert_equals 1 "$rc" "unknown drift subcommand exits 1"
-assert_contains "Usage: dot fleet drift" "$out" "usage printed"
+assert_equals 64 "$rc" "unknown drift subcommand is a usage error (64)"
+assert_contains "usage: dot fleet drift" "$out" "usage printed"
 
 # ── events ──────────────────────────────────────────────────────────
 test_start "fleet_events_without_log"

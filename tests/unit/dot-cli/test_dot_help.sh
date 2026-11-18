@@ -44,12 +44,20 @@ done < <(awk -F'|' '$1 == "alias" && $3 == "shortcut" { print $2 }' "$TABLE")
 assert_equals "" "$missing" "every shortcut is listed with its target"
 assert_output_not_contains "upgrade" "cat '$WORK/out'" "no deprecated name"
 
-test_start "help_all_lists_every_spelling_once"
+test_start "help_all_lists_every_built_spelling_once"
 dot help all
+want="$(field cmd 3 | grep -c .)"
+got="$(grep -cE '^  dot ' "$WORK/out")"
+assert_equals "$want" "$got" "one line per built command"
+assert_equals "" "$(grep -E '^  dot ' "$WORK/out" | awk '{print $2, $3, $4}' | sort | uniq -d)" "none twice"
+assert_equals "" "$(grep -F '(planned)' "$WORK/out")" "no planned command by default (D12)"
+assert_file_contains "$WORK/out" "planned, not built yet: 'dot help --all' lists them" "says how to see them"
+
+test_start "help_dash_dash_all_adds_the_planned_spellings"
+dot help --all
 want="$(field cmd 2 | wc -l | tr -d ' ')"
 got="$(grep -cE '^  dot ' "$WORK/out")"
 assert_equals "$want" "$got" "one line per command"
-assert_equals "" "$(grep -E '^  dot ' "$WORK/out" | awk '{print $2, $3, $4}' | sort | uniq -d)" "none twice"
 assert_equals "$(field dom 2 | wc -l | tr -d ' ')" "$(grep -cE '^dot [a-z]+$' "$WORK/out")" "one heading per domain"
 assert_not_empty "$(grep -E 'dot secret key list .*\(planned\)' "$WORK/out")" "a planned command is marked"
 
@@ -70,7 +78,10 @@ dot help system || rc=$?
 assert_equals "0" "$rc" "dot help <domain> exits 0"
 assert_output_not_contains "dot config apply" "cat '$WORK/out'" "no other domain's commands"
 assert_equals "" "$(grep 'dot system update ' "$WORK/out" | grep -F '(planned)')" "a built command is not marked planned"
-assert_not_empty "$(grep 'dot system clean ' "$WORK/out" | grep -F '(planned)')" "a planned one is"
+assert_equals "" "$(grep -F '(planned)' "$WORK/out")" "planned ones are hidden (D12)"
+dot help secret
+assert_equals "" "$(grep 'dot secret key list' "$WORK/out")" "a planned command is not listed"
+assert_file_contains "$WORK/out" "'dot help --all' lists them" "but counted, with where to find it"
 rc=0
 dot secret || rc=$?
 assert_equals "0" "$rc" "a domain alone whose default is planned lists its commands"
@@ -132,7 +143,8 @@ assert_file_contains "$WORK/out" "dot config sync" "a shortcut shows its target"
 test_start "an_unknown_term_finds_nothing"
 rc=0
 dot help zz-no-such-term || rc=$?
-assert_equals "1" "$rc" "exits 1"
+assert_equals "64" "$rc" "a usage error, exit 64 (N10)"
+assert_file_contains "$WORK/err" "no help topic or command matches 'zz-no-such-term'" "said on stderr"
 
 test_start "without_its_library_help_still_answers"
 mkdir -p "$WORK/bare/bin" "$WORK/bare/home"

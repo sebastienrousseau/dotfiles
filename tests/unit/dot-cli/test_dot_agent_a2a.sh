@@ -105,16 +105,16 @@ test_start "a2a_card_validate_invalid_json_exits_1"
 printf '{oops' >"$FAKE/.well-known/agent-card.json"
 fmeta agent a2a-card --strict
 assert_equals 1 "$RC" "rc"
-assert_contains "invalid" "$OUT" "JSON invalid row"
+assert_contains "invalid" "$ERR" "JSON invalid row (an error: stderr)"
 
 test_start "a2a_card_validate_reports_every_missing_field"
 printf '{"specVersion":"0.2","skills":[]}' >"$FAKE/.well-known/agent-card.json"
 fmeta agent a2a-card -s
 assert_equals 1 "$RC" "strict exit"
-assert_contains "expected 0.3, got 0.2" "$OUT" "specVersion"
-assert_contains "missing or empty" "$OUT" "skills"
-assert_contains "authentication" "$OUT" "authentication row"
-assert_contains "missing method" "$OUT" "signing"
+assert_contains "expected 0.3, got 0.2" "$ERR" "specVersion (failed rows are errors: stderr)"
+assert_contains "missing or empty" "$ERR" "skills"
+assert_contains "authentication" "$ERR" "authentication row"
+assert_contains "missing method" "$ERR" "signing"
 
 # Each check on its own must fail strict validation: a card whose only
 # defect is its specVersion still exits 1.

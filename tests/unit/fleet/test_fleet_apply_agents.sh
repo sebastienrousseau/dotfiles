@@ -117,7 +117,7 @@ assert_equals "1" "$RC" "a real run: exit 1"
 assert_contains "0 ok / 1 failed / 1 total" "$OUT" "the host counts as failed"
 assert_equals "no" "$([[ -d "$WORK/remote" ]] && echo yes || echo no)" "and is never connected to"
 fleet --agents --cmd uptime --dry-run
-assert_equals "1" "$RC" "--cmd and --agents: exit 1"
+assert_equals "64" "$RC" "--cmd and --agents: a usage error, exit 64"
 assert_contains "--agents and --cmd" "$OUT" "says they do not mix"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

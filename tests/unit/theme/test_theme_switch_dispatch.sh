@@ -232,7 +232,7 @@ test_start "an_unknown_argument_is_rejected"
 : >"$SYNC_CALLS"
 rc="$(switch definitely-not-a-theme)"
 assert_equals "1" "$rc" "an unknown argument fails"
-assert_file_contains "$OUT" "Unknown command or theme" "the error explains the rejection"
+assert_file_contains "$ERR" "Unknown command or theme" "the error explains the rejection"
 assert_empty "$(last_sync)" "nothing is applied for an unknown argument"
 
 # ===========================================================================
@@ -511,7 +511,7 @@ CHEZMOI_SOURCE_DIR="$EMPTY_SRC" PATH="$BIN:/usr/bin:/bin" \
   "$REAL_BASH" "$SCRIPT_FILE" list >"$OUT" 2>"$ERR" || rc=$?
 cat "$ERR" >&2
 assert_equals "1" "$rc" "a source tree without .chezmoidata.toml is fatal"
-assert_file_contains "$OUT" "Missing" "the error names the missing file"
+assert_file_contains "$ERR" "Missing" "the error names the missing file"
 
 test_start "a_missing_source_tree_is_fatal"
 rc=0
@@ -519,7 +519,7 @@ HOME="$WORK/nohome" CHEZMOI_SOURCE_DIR="" PATH="$BIN:/usr/bin:/bin" \
   "$REAL_BASH" "$SCRIPT_FILE" list >"$OUT" 2>"$ERR" || rc=$?
 cat "$ERR" >&2
 assert_equals "1" "$rc" "no chezmoi source anywhere is fatal"
-assert_file_contains "$OUT" "not found" "the error says the source was not found"
+assert_file_contains "$ERR" "not found" "the error says the source was not found"
 
 test_start "the_legacy_chezmoi_source_location_is_honoured"
 LEGACY_HOME="$WORK/legacy-home"

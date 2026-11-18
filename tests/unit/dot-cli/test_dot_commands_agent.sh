@@ -118,7 +118,7 @@ rc="$(mode show nope)"
 assert_equals "1" "$rc" "unknown profile exits 1"
 assert_file_contains "$OUT" "Unknown agent profile: nope" "unknown profile named"
 rc="$(mode show)"
-assert_equals "1" "$rc" "show without a name exits 1"
+assert_equals "64" "$rc" "show without a name is a usage error (64)"
 
 test_start "agent_cmd_mode_set_and_current_profile"
 rc="$(mode set sandbox)"
@@ -156,7 +156,7 @@ assert_file_contains "$OUT" "p=sandbox" "no profile named: the current one appli
 assert_equals "yes" "$(grep -q '"event":"session_run_finish".*"data":{"profile":"sandbox","status":"failed"' "$SESSIONS" && echo yes || echo no)" \
   "failure logged"
 rc="$(mode run)"
-assert_equals "1" "$rc" "run without a command exits 1"
+assert_equals "64" "$rc" "run without a command is a usage error (64)"
 
 test_start "agent_cmd_mode_doctor"
 rc="$(mode doctor)"
@@ -188,8 +188,8 @@ rc="$(mode checkpoint replay nope)"
 assert_equals "1" "$rc" "unknown checkpoint exits 1"
 assert_file_contains "$OUT" "Checkpoint not found: nope" "unknown checkpoint named"
 rc="$(mode checkpoint frob)"
-assert_equals "1" "$rc" "unknown checkpoint action exits 1"
-assert_file_contains "$OUT" "Usage: dot agent checkpoint [save|list|show|replay]" "checkpoint usage"
+assert_equals "64" "$rc" "unknown checkpoint action is a usage error (64)"
+assert_file_contains "$OUT" "usage: dot agent checkpoint [save|list|show|replay]" "checkpoint usage"
 
 test_start "agent_cmd_mode_conformance"
 rc="$(mode conformance --json --strict)"

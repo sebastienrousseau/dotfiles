@@ -33,14 +33,16 @@ source "$SCRIPT_DIR/../lib/dot/theme-nvim.sh"
 # Constants & Colors
 # =============================================================================
 
-readonly RESET=$'\033[0m'
-readonly BOLD=$'\033[1m'
-readonly DIM=$'\033[2m'
-readonly GREEN=$'\033[32m'
-readonly YELLOW=$'\033[33m'
-readonly BLUE=$'\033[34m'
-readonly RED=$'\033[31m'
-readonly CYAN=$'\033[36m'
+# _theme_sync_colours: the escapes, only on a terminal and never under
+# NO_COLOR or TERM=dumb (ADR-020 N14; lib/dot/ui.sh's ui_init rule).
+_theme_sync_colours() {
+  RESET="" BOLD="" DIM="" GREEN="" YELLOW="" BLUE="" RED="" CYAN=""
+  [[ -t 1 && -z "${NO_COLOR:-}" && "${TERM:-}" != dumb ]] || return 0
+  RESET=$'\033[0m' BOLD=$'\033[1m' DIM=$'\033[2m' GREEN=$'\033[32m'
+  YELLOW=$'\033[33m' BLUE=$'\033[34m' RED=$'\033[31m' CYAN=$'\033[36m'
+}
+_theme_sync_colours
+readonly RESET BOLD DIM GREEN YELLOW BLUE RED CYAN
 
 # Platform detection (R10: declare and assign separately)
 PLATFORM="$(uname -s)"

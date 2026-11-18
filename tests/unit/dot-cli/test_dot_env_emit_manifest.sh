@@ -81,12 +81,12 @@ out_has "Usage: dot tool export" "usage"
 test_start "unknown_flag_is_rejected"
 emit --nope
 assert_equals 1 "$RC" "rc"
-out_has "unknown flag: --nope" "error"
+err_has "unknown flag: --nope" "error"
 
 test_start "unsupported_format_is_rejected"
 emit --format yaml
 assert_equals 1 "$RC" "rc"
-out_has "unsupported format: yaml" "error"
+err_has "unsupported format: yaml" "error"
 
 test_start "default_manifest_matches_the_v1_schema_shape"
 emit
@@ -144,7 +144,7 @@ assert_file_exists "$TARGET.eq" "equals form"
 test_start "a_failing_mise_is_reported_as_exit_3"
 MISE_LS_RC=1 emit
 assert_equals 3 "$RC" "rc"
-out_has "mise ls --json failed" "error"
+err_has "mise ls --json failed" "error"
 
 test_start "missing_dependencies_are_reported_as_exit_2"
 NODEP="$DOTFILES_COV_TMPDIR/nodep"
@@ -156,11 +156,11 @@ done
 ln -sf "$BIN/mise" "$NODEP/mise"
 PATH="$NODEP" emit
 assert_equals 2 "$RC" "rc without jq"
-out_has "jq required" "error names jq"
+err_has "jq required" "error names jq"
 rm -f "$NODEP/mise"
 ln -sf "$(command -v jq)" "$NODEP/jq"
 PATH="$NODEP" emit
 assert_equals 2 "$RC" "rc without mise"
-out_has "mise required" "error names mise"
+err_has "mise required" "error names mise"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
