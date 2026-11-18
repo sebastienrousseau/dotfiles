@@ -172,7 +172,7 @@ for running the repo itself (see [`../../tools/README.md`](https://github.com/se
 
 | Subdir                                    | Purpose                                                         |
 |-------------------------------------------|-----------------------------------------------------------------|
-| `tools/ci/`                               | CI helpers and gates (`check-cli-contract.py`, `cli_command_table.py`, `complexity.py`, `mutation-test.py`, `check-copyright-headers.sh`, ...) |
+| `tools/ci/`                               | CI helpers and gates (`check-cli-contract.py`, `cli_command_table.py`, `complexity.py` (shell), `complexity_polyglot.py` (Python and Go), `mutation-test.py`, `check-copyright-headers.sh`, ...) |
 | `tools/docs/`                             | Manual and site builds, and the generators for man pages, completions and cmdlets |
 | `tools/release/`, `tools/maintenance/`    | Release staging and maintenance tasks                           |
 
