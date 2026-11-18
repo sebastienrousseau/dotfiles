@@ -487,18 +487,20 @@ zcompile_many() {
   local f
   for f; do
     # Compile if source is newer than .zwc or .zwc doesn't exist
-    if [[ -f "$f" ]]; then
-      if [[ ! -f "${f}.zwc" || "$f" -nt "${f}.zwc" ]]; then
-        zcompile "$f"
-      fi
+    if [[ -f "$f" ]] && [[ ! -f "${f}.zwc" || "$f" -nt "${f}.zwc" ]]; then
+      _cached_eval_zcompile "$f"
     fi
   done
 }
 
-# Compile main config and generated files in background
+# Compile main config and generated files in background. zsh reads
+# $ZDOTDIR/.zshrc (~/.zshenv sets ZDOTDIR), not the ~/.zshrc stub, and
+# `source` picks up each rc.d file's .zwc.
 if [[ -o interactive ]]; then
   (
     zcompile_many "${HOME}/.zshrc" \
+                  "${ZDOTDIR:-$HOME/.config/zsh}/.zshrc" \
+                  "${ZSH_RC_DIR}"/*.zsh(N) \
                   "${HOME}/.config/shell/aliases.sh" \
                   "${HOME}/.config/shell/paths.sh" \
                   "${HOME}/.config/shell/functions.sh" \

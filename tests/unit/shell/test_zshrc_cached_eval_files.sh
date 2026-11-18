@@ -67,4 +67,20 @@ done
 assert_equals "none" "$left" "_cached_eval_clear removes mktemp leftovers"
 assert_file_exists "$C/unrelated.txt" "_cached_eval_clear leaves unrelated files alone"
 
+# zsh reads $ZDOTDIR/.zshrc, not the ~/.zshrc stub; the background
+# zcompile compiled only the stub.
+test_start "real_zshrc_and_rc_d_are_compiled"
+Z="$H/.config/zsh"
+mkdir -p "$Z/rc.d"
+cp "$H/.zshrc" "$Z/.zshrc"
+echo ': rc.d' >"$Z/rc.d/10-test.zsh"
+env -i HOME="$H" ZDOTDIR="$Z" PATH="/usr/bin:/bin" TERM=dumb \
+  "$ZSH_BIN" -f -i -c 'source "$ZDOTDIR/.zshrc"' >/dev/null 2>&1
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  [[ -f "$Z/.zshrc.zwc" && -f "$Z/rc.d/10-test.zsh.zwc" ]] && break
+  sleep 0.5
+done
+assert_file_exists "$Z/.zshrc.zwc" "\$ZDOTDIR/.zshrc is compiled"
+assert_file_exists "$Z/rc.d/10-test.zsh.zwc" "rc.d files are compiled"
+
 print_summary
