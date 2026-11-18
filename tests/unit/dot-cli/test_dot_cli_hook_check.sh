@@ -218,7 +218,7 @@ assert_contains "not built: install Go with mise, then chezmoi apply" "$OUT" "wi
 test_start "policy_sh_rejects_another_word"
 RC=0
 OUT="$(bash "$REPO_ROOT/plugins/ai/libexec/policy.sh" frob 2>&1)" || RC=$?
-assert_equals "1" "$RC" "exit 1"
-assert_contains "Usage: dot ai policy show|check [--policy FILE]" "$OUT" "usage"
+assert_equals "64" "$RC" "a usage error: exit 64"
+assert_contains "usage: dot ai policy show|check [--policy FILE]" "$OUT" "usage"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

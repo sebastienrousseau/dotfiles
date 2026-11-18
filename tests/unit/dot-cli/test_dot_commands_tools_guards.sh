@@ -68,12 +68,12 @@ assert_contains "use Homebrew/apt for individual tools" "$_out" "an alternative 
 test_start "new_without_arguments_prints_usage"
 _out="$(_tool new)"
 _rc=$?
-assert_equals 1 "$_rc" "no arguments exits 1"
-assert_contains "Usage: dot tool new <lang> <name>" "$_out" "usage printed"
-assert_contains "Available templates:" "$_out" "templates listed"
+assert_equals 64 "$_rc" "no arguments is a usage error (64)"
+assert_contains "usage: dot tool new <lang> <name>" "$_out" "usage printed"
+assert_contains "templates: python, go, node, packer, molecule" "$_out" "templates listed"
 
 _out="$(_tool new python)"
-assert_equals 1 "$?" "a missing project name exits 1"
+assert_equals 64 "$?" "a missing project name is a usage error (64)"
 
 test_start "new_rejects_a_traversing_template_name"
 _out="$(_tool new "../../etc" proj)"

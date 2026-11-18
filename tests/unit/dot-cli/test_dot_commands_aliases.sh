@@ -134,8 +134,8 @@ assert_true '[[ $A_RC == 0 && $A_OUT =~ python[[:space:]]+enabled && $A_OUT =~ r
 
 test_start "aliases_unknown_subcommand"
 run_aliases -- unknown
-assert_true '[[ $A_RC != 0 && $A_OUT == *"Unknown aliases subcommand: unknown"* ]]' \
-  "an unknown subcommand fails and names it"
+assert_true '[[ $A_RC == 127 && $A_OUT == *"'"'dot shell alias unknown' is not a command"'"* ]]' \
+  "an unknown subcommand exits 127 and names it"
 
 echo ""
 echo "Aliases commands tests completed."

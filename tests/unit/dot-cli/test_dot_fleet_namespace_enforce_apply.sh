@@ -164,8 +164,8 @@ assert_file_contains "$EVENTS" '"namespace":"lab"' "event carries the new namesp
 test_start "fleet_namespace_set_requires_name"
 out="$(fleet namespace set 2>&1)"
 rc=$?
-assert_equals 1 "$rc" "missing name exits 1"
-assert_contains "Usage: dot fleet namespace set" "$out" "usage printed"
+assert_equals 64 "$rc" "missing name is a usage error (64)"
+assert_contains "usage: dot fleet namespace set" "$out" "usage printed"
 
 test_start "fleet_namespace_set_rejects_unsafe_name"
 out="$(fleet namespace set 'bad;name' 2>&1)"
@@ -239,8 +239,8 @@ assert_file_contains "$DATA" 'namespace = "team"' "data file left intact"
 test_start "fleet_namespace_unknown_subcommand"
 out="$(fleet namespace bogus 2>&1)"
 rc=$?
-assert_equals 1 "$rc" "unknown namespace subcommand exits 1"
-assert_contains "Usage: dot fleet namespace" "$out" "usage printed"
+assert_equals 64 "$rc" "unknown namespace subcommand is a usage error (64)"
+assert_contains "usage: dot fleet namespace" "$out" "usage printed"
 
 # ── enforce ─────────────────────────────────────────────────────────
 test_start "fleet_enforce_status_without_profiles"
@@ -282,8 +282,8 @@ assert_file_contains "$EVENTS" '"event":"fleet_enforcement_set"' "event emitted"
 test_start "fleet_enforce_set_requires_mode"
 out="$(fleet enforce set 2>&1)"
 rc=$?
-assert_equals 1 "$rc" "missing mode exits 1"
-assert_contains "Usage: dot fleet enforce set" "$out" "usage printed"
+assert_equals 64 "$rc" "missing mode is a usage error (64)"
+assert_contains "usage: dot fleet enforce set" "$out" "usage printed"
 
 test_start "fleet_enforce_set_rejects_unknown_mode"
 out="$(fleet enforce set lenient 2>&1)"
@@ -303,8 +303,8 @@ assert_contains "agent-profiles.json not found" "$out" "explains the missing fil
 test_start "fleet_enforce_unknown_subcommand"
 out="$(fleet enforce bogus 2>&1)"
 rc=$?
-assert_equals 1 "$rc" "unknown enforce subcommand exits 1"
-assert_contains "Usage: dot fleet enforce" "$out" "usage printed"
+assert_equals 64 "$rc" "unknown enforce subcommand is a usage error (64)"
+assert_contains "usage: dot fleet enforce" "$out" "usage printed"
 
 # ── apply ───────────────────────────────────────────────────────────
 HOSTS="$TMP/fleet.toml"

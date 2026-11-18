@@ -66,7 +66,8 @@ AGENT_MODULE="$REPO_ROOT/plugins/agent/libexec/agent.sh"
 test_start "meta_agent_enterprise_subcommands"
 mode_rc=0
 mode_out="$(bash "$REPO_ROOT/bin/dot" agent checkpoint bogus 2>&1)" || mode_rc=$?
-assert_equals "1 Usage: dot agent checkpoint [save|list|show|replay]" "$mode_rc $mode_out" \
+assert_equals "64 dot: unknown checkpoint subcommand
+usage: dot agent checkpoint [save|list|show|replay]" "$mode_rc $mode_out" \
   "checkpoint dispatches to its own action parser"
 mode_status="$(bash "$REPO_ROOT/bin/dot" agent card check --json 2>/dev/null |
   python3 -c 'import json,sys; print(json.load(sys.stdin)["status"])' 2>&1)"

@@ -64,8 +64,8 @@ jq '.rbac.enforcement = "strict" | .delegation.enabled = true | .profiles.ask.ca
 # ── checkpoint ──────────────────────────────────────────────────────────
 test_start "checkpoint_save_requires_command"
 meta agent checkpoint save
-assert_equals 1 "$RC" "rc"
-assert_contains "Usage: dot agent checkpoint save" "$ERR" "usage"
+assert_equals 64 "$RC" "rc: a usage error"
+assert_contains "usage: dot agent checkpoint save" "$ERR" "usage"
 
 test_start "checkpoint_save_writes_file"
 DOT_AGENT_CHECKPOINT_ID=cp-one meta agent checkpoint save plan echo hello world
@@ -92,8 +92,8 @@ assert_contains "cp-two" "$OUT" "listed"
 
 test_start "checkpoint_show_requires_id"
 meta agent checkpoint show
-assert_equals 1 "$RC" "rc"
-assert_contains "Usage: dot agent checkpoint show" "$ERR" "usage"
+assert_equals 64 "$RC" "rc: a usage error"
+assert_contains "usage: dot agent checkpoint show" "$ERR" "usage"
 
 test_start "checkpoint_show_unknown_id"
 meta agent checkpoint show nope
@@ -112,8 +112,8 @@ assert_equals "cp-one" "$(printf '%s' "$OUT" | jq -r .id)" "raw json"
 
 test_start "checkpoint_replay_requires_id"
 meta agent checkpoint replay
-assert_equals 1 "$RC" "rc"
-assert_contains "Usage: dot agent checkpoint replay" "$ERR" "usage"
+assert_equals 64 "$RC" "rc: a usage error"
+assert_contains "usage: dot agent checkpoint replay" "$ERR" "usage"
 
 test_start "checkpoint_replay_unknown_id"
 meta agent checkpoint replay nope
@@ -138,20 +138,20 @@ assert_contains "no replayable command" "$ERR" "error"
 
 test_start "checkpoint_unknown_action"
 meta agent checkpoint bogus
-assert_equals 1 "$RC" "rc"
-assert_contains "Usage: dot agent checkpoint" "$ERR" "usage"
+assert_equals 64 "$RC" "rc: a usage error"
+assert_contains "usage: dot agent checkpoint" "$ERR" "usage"
 
 # ── delegate ────────────────────────────────────────────────────────────
 # Bare `dot agent delegate` lists (ADR-020); `run` needs a name.
 test_start "delegate_requires_name"
 meta agent delegate run
-assert_equals 1 "$RC" "rc"
-assert_contains "Usage: dot agent delegate" "$ERR" "usage"
+assert_equals 64 "$RC" "rc: a usage error"
+assert_contains "usage: dot agent delegate" "$ERR" "usage"
 
 test_start "delegate_requires_command"
 meta agent delegate lint-checker
-assert_equals 1 "$RC" "rc"
-assert_contains "Usage: dot agent delegate" "$ERR" "usage"
+assert_equals 64 "$RC" "rc: a usage error"
+assert_contains "usage: dot agent delegate" "$ERR" "usage"
 
 test_start "delegate_disabled_in_shipped_config"
 meta agent delegate lint-checker true
@@ -180,7 +180,7 @@ assert_contains "completed" "$OUT" "success line"
 test_start "delegate_reports_failure"
 AGENT_PROFILE_CONFIG="$STRICT_PROFILES" meta agent delegate lint-checker bash -c 'exit 4'
 assert_equals 4 "$RC" "rc"
-assert_contains "failed (exit 4)" "$OUT" "failure line"
+assert_contains "failed (exit 4)" "$ERR" "failure line"
 
 # ── delegate without GNU timeout ────────────────────────────────────────
 # Regression: the arm was `if timeout "$delegate_timeout" "$@"`. `timeout` is
@@ -212,7 +212,7 @@ test_start "delegate_propagates_failure_without_a_timeout_binary"
 PATH="$NOTIME" AGENT_PROFILE_CONFIG="$STRICT_PROFILES" \
   meta agent delegate lint-checker bash -c 'exit 4'
 assert_equals 4 "$RC" "rc"
-assert_contains "failed (exit 4)" "$OUT" "the command's own status survives the fallback"
+assert_contains "failed (exit 4)" "$ERR" "the command's own status survives the fallback"
 
 test_start "delegate_enforces_the_limit_without_a_timeout_binary"
 # The fallback must still bound the command, not merely run it. 124 is GNU

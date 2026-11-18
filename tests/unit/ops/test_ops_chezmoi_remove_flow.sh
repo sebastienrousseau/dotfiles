@@ -106,7 +106,7 @@ mkdir -p "$TMP/cr-home"
 # 1. Argument guards.
 # =======================================================================
 _run_cr n
-_cr_expect "no_arguments_exits_1" 1 "Usage: dot remove <path> [--source] [--dry-run]"
+_cr_expect "no_arguments_is_a_usage_error_64" 64 "Usage: dot remove <path> [--source] [--dry-run]"
 _cr_ran_nothing "no_arguments_runs_no_chezmoi"
 
 _run_cr n --source

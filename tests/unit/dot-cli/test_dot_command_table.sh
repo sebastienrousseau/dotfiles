@@ -180,7 +180,7 @@ assert_equals "0" "$rc" "dot help <command> is not taken for a planned spelling"
 assert_file_contains "$WORK/out" "dot sync" "and shows that command"
 rc=0
 dot help zz-no-such-topic || rc=$?
-assert_equals "1" "$rc" "an unknown topic that matches nothing fails"
+assert_equals "64" "$rc" "an unknown topic that matches nothing is a usage error (64)"
 
 test_start "a_typo_after_an_object_stops"
 # `dot ai <words>` sends the words to a model: a word that is not a verb of
