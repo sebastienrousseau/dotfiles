@@ -262,8 +262,8 @@ back.
 bash /tmp/dotfiles-install.sh
 dot doctor            # audit tools, paths, portability, security
 dot help tour         # interactive tour of shells, secrets, themes, performance
-dot theme rebuild     # generate themes from the wallpapers on this machine
-dot theme toggle      # swap dark and light within the current family
+dot theme list        # the themes generated from this machine's wallpapers
+dot theme set maui    # switch every app to one palette, following the OS appearance
 dot sync              # apply the source tree; the next shell hydrates its caches
 ```
 
