@@ -9,7 +9,7 @@ This file documents all notable changes to this project.
 - draft moves to its latest signed release, 0.0.47 (from 0.0.46), outside the age gate as a first-party tool.
 - AI CLI pins move to their latest releases ahead of the seven-day gate, by request: Codex 0.170.0 (from 0.169.0), GitHub Copilot CLI 1.0.114 (1.0.112), opencode 1.19.6 (1.19.5, the aqua build and `npm:opencode-ai`) and Qwen Code 0.28.0 (0.27.4). `mise outdated --bump` offers opencode 2.3.2, but that is the separate `npm:@opencode/cli` package, which mise's registry now lists first; the aqua backend the pin installs from is at 1.19.6.
 - Pinned CLI tools move to their latest releases: chezmoi 2.74.1 (from 2.72.0), Zellij 0.46.0 (0.44.3), Yazi 26.9.1 (26.5.6), Wasmtime 50.0.2 (48.0.2), Nushell 0.117.0 (0.114.1) and PowerShell 7.7.0 (7.6.6).
-- Runtimes move to their current LTS lines: Node.js 26 (from 24), Ruby 3.4 (3.3) and Java 25 (21). Python adds 3.15 and drops 3.11, keeping 3.12 as the default and 3.14; aider still builds on 3.12.
+- Runtimes move to their current LTS lines: Node.js 26 (from 24), Ruby 3.4 (3.3) and Java 25 (21). Python adds 3.15 and drops 3.11, keeping 3.12 as the default and 3.14; aider still builds on 3.12. The npm package's `engines` range widens to `<27.0.0` so Node 26 satisfies it.
 
 ## v0.2.547 (2026-11-17)
 
