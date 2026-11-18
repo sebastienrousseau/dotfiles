@@ -426,6 +426,39 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+  # Installs the mise toolchain chezmoi deploys (conf.d) whenever
+  # defaults/dot_config/mise/** changes; otherwise it passes in seconds.
+  # Linux only: macOS and a weekly drift run live in mise-toolchain.yml.
+  toolchain-mise:
+    name: Toolchain / mise install (Linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        id: filter
+        # PRs and pushes to main only: tag pushes skip the install.
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+        with:
+          filters: |
+            mise:
+              - 'defaults/dot_config/mise/**'
+              - '.github/actions/mise-toolchain/**'
+
+      - name: Install the deployed toolchain
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.mise == 'true'
+        uses: ./.github/actions/mise-toolchain
+        with:
+          github-token: ${{ github.token }}
+
   # ============================================================================
   # STAGE 4: MERGE GATE (All checks must pass)
   # ============================================================================
@@ -448,6 +481,7 @@ jobs:
       lint-install-pins,
       lint-complexity,
       test-mutation,
+      toolchain-mise,
     ]
     # Run even when a dependency fails. Without this the gate is *skipped*
     # when test-unit fails, and GitHub counts a skipped required check as

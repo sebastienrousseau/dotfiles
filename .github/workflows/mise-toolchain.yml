@@ -1,33 +1,16 @@
 name: Mise Toolchain
 
-# Installs the toolchain the dotfiles actually deploy: chezmoi writes
-# defaults/dot_config/mise/conf.d/00-dotfiles.toml to
-# ~/.config/mise/conf.d/, and every host runs `mise install` against it.
-# No other job exercised that file, so a pin that does not resolve, a
-# backend that broke, or a runtime that fails to install on one OS only
-# surfaced on a workstation. This job places the file exactly where
-# chezmoi deploys it and fails on any install error or missing tool.
-#
-# It reads whatever the file pins; it does not assume tool names,
-# versions or settings (e.g. minimum_release_age), so it keeps working as
-# the file changes.
-#
-# Not a required check: it is path-filtered, and a required check that
-# never runs blocks every PR that does not touch mise.
+# Weekly (and on demand) install of the deployed mise toolchain on Linux
+# and macOS, to catch upstream drift (a backend or release that breaks)
+# when nothing in the repo changed. The per-PR check is the
+# `Toolchain / mise install (Linux)` job in ci-enforced.yml, which runs when
+# defaults/dot_config/mise/** changes and feeds the Merge Gate; macOS is
+# kept here because a full macOS install is too slow to run on PRs.
 
 on:
   schedule:
-    - cron: '23 5 * * 2'  # Weekly, Tuesday 05:23 UTC: catches upstream drift
+    - cron: '23 5 * * 2'  # Weekly, Tuesday 05:23 UTC
   workflow_dispatch:
-  pull_request:
-    paths:
-      - 'defaults/dot_config/mise/**'
-      - '.github/workflows/mise-toolchain.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'defaults/dot_config/mise/**'
-      - '.github/workflows/mise-toolchain.yml'
 
 permissions:
   contents: read
@@ -35,14 +18,6 @@ permissions:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
-env:
-  # Pinned by version and SHA-256 (from the release's SHASUMS256.txt,
-  # cross-checked against the downloaded assets). Published 2026-11-10,
-  # older than the 7-day release-age policy when pinned.
-  MISE_VERSION: "2026.11.6"
-  MISE_SHA256_LINUX_X64: d6ebb6f5601bdf5a8d1d56028b24fe575f45075b989941ccc920f95161c5fa28
-  MISE_SHA256_MACOS_ARM64: 74cf55e92f6c6b1f166781c36db35db9420a4cbf40d62d85c1b9d5dc76e0ba72
 
 jobs:
   install:
@@ -63,58 +38,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install mise (pinned, checksum-verified)
-        run: |
-          set -euo pipefail
-          case "${RUNNER_OS}-${RUNNER_ARCH}" in
-            Linux-X64) target=linux-x64 sha="$MISE_SHA256_LINUX_X64" ;;
-            macOS-ARM64) target=macos-arm64 sha="$MISE_SHA256_MACOS_ARM64" ;;
-            *) echo "::error::no pinned mise checksum for ${RUNNER_OS}-${RUNNER_ARCH}"; exit 1 ;;
-          esac
-          tmp="$(mktemp -d)"
-          asset="mise-v${MISE_VERSION}-${target}.tar.gz"
-          curl -fsSL --retry 3 --max-time 300 -o "$tmp/$asset" \
-            "https://github.com/jdx/mise/releases/download/v${MISE_VERSION}/${asset}"
-          echo "${sha}  $tmp/$asset" | shasum -a 256 -c -
-          tar -xzf "$tmp/$asset" -C "$tmp"
-          mkdir -p "$HOME/.local/bin"
-          install -m 0755 "$tmp/mise/bin/mise" "$HOME/.local/bin/mise"
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          "$HOME/.local/bin/mise" --version
-
-      - name: Deploy the conf.d base layer
-        run: |
-          set -euo pipefail
-          # Same target path chezmoi deploys to; global config, so trusted.
-          conf_dir="$HOME/.config/mise/conf.d"
-          mkdir -p "$conf_dir"
-          cp defaults/dot_config/mise/conf.d/*.toml "$conf_dir/"
-          ls -l "$conf_dir"
-
-      - name: mise install
-        env:
-          # The config authenticates GitHub API calls via `gh auth token`;
-          # gh reads GH_TOKEN. Read-only token (contents: read).
-          GH_TOKEN: ${{ github.token }}
-          GITHUB_TOKEN: ${{ github.token }}
-          MISE_YES: "1"
-        # Run outside the checkout so the repo-root mise.toml does not
-        # take precedence over the deployed global layer.
-        working-directory: ${{ runner.temp }}
-        run: |
-          set -euo pipefail
-          mise install --jobs 4
-
-      - name: Every configured tool is installed
-        env:
-          GH_TOKEN: ${{ github.token }}
-        working-directory: ${{ runner.temp }}
-        run: |
-          set -euo pipefail
-          missing="$(mise ls --current --missing)"
-          if [[ -n "$missing" ]]; then
-            echo "::error::mise reports configured tools that are not installed"
-            printf '%s\n' "$missing"
-            exit 1
-          fi
-          mise ls --current
+      - name: Install the deployed toolchain
+        uses: ./.github/actions/mise-toolchain
+        with:
+          github-token: ${{ github.token }}
