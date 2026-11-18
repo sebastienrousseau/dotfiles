@@ -21,6 +21,8 @@ if ! command -v python3 >/dev/null 2>&1 || ! command -v curl >/dev/null 2>&1 || 
 fi
 
 SERVE="$REPO_ROOT/defaults/dot_local/bin/executable_dot-ai-serve"
+# The gateway's own client token in these tests: a placeholder, not a key.
+GW_CLIENT="gw-client-key"
 PROXY="$REPO_ROOT/defaults/dot_local/bin/executable_dot-ai-proxy"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/dot-gw-auth.XXXXXX")"
 trap 'while read -r p; do kill "$p" 2>/dev/null; done <"$WORK/pids" 2>/dev/null; rm -rf "$WORK"' EXIT
@@ -63,7 +65,7 @@ start() {
   LOG="$WORK/serve-$PORT.log"
   env -i PATH="$SYS_PATH" HOME="$WORK/home" XDG_STATE_HOME="$WORK/state" \
     DOT_AI_POLICY="$WORK/no-policy.toml" DOT_AI_CLAUDE_BIN="$WORK/claude" DOT_AI_PORT="$PORT" \
-    DOT_AI_API_KEY=gw-client-key "$@" python3 "$SERVE" >"$LOG" 2>&1 </dev/null &
+    DOT_AI_API_KEY="$GW_CLIENT" "$@" python3 "$SERVE" >"$LOG" 2>&1 </dev/null &
   echo "$!" >>"$WORK/pids"
   for _ in $(seq 1 50); do
     curl -fsS "http://127.0.0.1:$PORT/health" >/dev/null 2>&1 && return 0
@@ -74,7 +76,7 @@ start() {
 
 ask() {
   rm -f "$WORK/engine.env"
-  curl -fsS -H 'x-api-key: gw-client-key' -H 'Content-Type: application/json' \
+  curl -fsS -H "x-api-key: $GW_CLIENT" -H 'Content-Type: application/json' \
     "http://127.0.0.1:$PORT/v1/messages" -d '{"model":"sonnet","messages":[{"role":"user","content":"hi"}]}' >/dev/null
 }
 

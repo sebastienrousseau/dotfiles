@@ -28,3 +28,7 @@ c07232b6fb2d0051a7d85cfac9c32690430f6ff7:tests/unit/ci/test_pre_commit_audit_sec
 # git history (introduced in cc275a76) and the working tree / staged scan.
 cc275a7675abb2970fec303a457649e970562842:tests/regression/test_enforce_policies_fires.sh:private-key:123
 tests/regression/test_enforce_policies_fires.sh:private-key:138
+# test_ai_gateway_auth.sh's first version sent the gateway's placeholder
+# client token ("gw-client-key") in a literal curl header; the test now
+# takes it from a variable. Scoped to that one historical line.
+76d13bbe767b437651208bb2d0b3d1430f49b90c:tests/unit/dot-cli/test_ai_gateway_auth.sh:curl-auth-header:77
