@@ -41,9 +41,10 @@ check_snapshot() {
   fi
 
   local actual
-  # An empty build-cache root: doctor's cache-size warning (P9) depends on
-  # this machine's caches, not on the CLI.
-  actual=$(DOT_BUILD_ROOT="$EMPTY_BUILD_ROOT" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 bash "$DOT_BIN" "$@" 2>&1 | bash "$SCRUB" "$slug" || true)
+  # An empty build-cache root and cache home: doctor's cache-size warning
+  # (P9) and perf's baseline comparison (perf-baseline.json) depend on this
+  # machine's caches and its recorded timings, not on the CLI.
+  actual=$(DOT_BUILD_ROOT="$EMPTY_BUILD_ROOT" XDG_CACHE_HOME="$EMPTY_BUILD_ROOT/cache" DOTFILES_NONINTERACTIVE=1 NO_COLOR=1 bash "$DOT_BIN" "$@" 2>&1 | bash "$SCRUB" "$slug" || true)
   local snapshot
   snapshot=$(cat "$expected")
 
