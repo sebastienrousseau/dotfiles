@@ -2163,7 +2163,22 @@
      "spelling": "system clean",
      "effect": "write",
      "summary": "Reclaim space, asking first",
-     "built": false
+     "built": true,
+     "flags": [
+      {
+       "long": "caches",
+       "summary": "Prune the Go, pip and uv build caches (the default)"
+      },
+      {
+       "long": "logs",
+       "summary": "Rotate the logs instead"
+      },
+      {
+       "long": "yes",
+       "short": "y",
+       "summary": "Prune without asking"
+      }
+     ]
     },
     {
      "spelling": "system show",

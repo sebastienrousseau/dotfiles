@@ -47,8 +47,20 @@ summary = "Also update npm, cargo and pipx globals"
 [[commands]]
 verb = "clean"
 effect = "write"
-planned = true
 summary = "Reclaim space, asking first"
+
+[[commands.flags]]
+long = "caches"
+summary = "Prune the Go, pip and uv build caches (the default)"
+
+[[commands.flags]]
+long = "logs"
+summary = "Rotate the logs instead"
+
+[[commands.flags]]
+long = "yes"
+short = "y"
+summary = "Prune without asking"
 
 [[commands]]
 verb = "show"

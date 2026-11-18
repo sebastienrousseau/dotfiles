@@ -13,6 +13,8 @@ source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/sdk.sh"
 cmd_doctor() {
   local src_dir
   src_dir="$(resolve_source_dir)"
+  # P9: the private build caches had no pruning; warn when they grow.
+  [[ " $* " == *" --json "* || " $* " == *" -j "* ]] || dot_build_cache_warn
   # Prefer the unified doctor script (doctor-unified.sh)
   if [ -n "$src_dir" ] && [ -f "$src_dir/scripts/diagnostics/doctor-unified.sh" ]; then
     exec bash "$src_dir/scripts/diagnostics/doctor-unified.sh" "$@"

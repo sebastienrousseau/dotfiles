@@ -35,7 +35,18 @@ Also update npm, cargo and pipx globals
 .RE
 .TP
 .B dot system clean
-Reclaim space, asking first. Effect: write. Planned; not built yet.
+Reclaim space, asking first. Effect: write. Runs \fBdot\-system clean\fR, the plugin's entry.
+.RS
+.TP
+.B \-\-caches
+Prune the Go, pip and uv build caches (the default)
+.TP
+.B \-\-logs
+Rotate the logs instead
+.TP
+.B \-\-yes, \-y
+Prune without asking
+.RE
 .TP
 .B dot system show
 Hardware and host details. Effect: read. Planned; not built yet.

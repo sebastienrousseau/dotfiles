@@ -86,7 +86,7 @@ assert_equals "@agent delegate list|2" "$(resolve agent delegate)" "a delegate o
 test_start "shortcuts_and_flags_rewrite_the_command_line"
 assert_equals "@system update --yes" "$(names update --yes)" "dot update is dot system update (N7)"
 assert_equals "@config status" "$(names status)" "dot status is dot config status"
-assert_equals "version" "$(names -V)" "-V is the version"
+assert_equals "dot 0.2.537" "$(names -V)" "-V prints the version line, dot <version> (D10)"
 assert_equals "@system update" "$(names -v system update)" "-v passes the rest on"
 assert_equals "upgrade" "$(names upgrade)" "a deprecated name keeps running its route"
 
@@ -171,7 +171,8 @@ assert_equals "0" "$rc" "read-only, exits 0 (N5)"
 assert_equals "dot secret · secrets, keys and SSH certificates" "$(head -1 "$WORK/out")" "its own header"
 assert_output_not_contains "dot config ·" "cat '$WORK/out'" "and no other domain's"
 assert_equals "" "$(grep 'dot secret list ' "$WORK/out" | grep -F '(planned)')" "a built command is not marked planned"
-assert_not_empty "$(grep 'dot secret status ' "$WORK/out" | grep -F '(planned)')" "a planned one is"
+assert_equals "" "$(grep 'dot secret status ' "$WORK/out")" "a planned one is left out (D12)"
+assert_file_contains "$WORK/out" "'dot help --all' lists them" "and counted"
 
 test_start "help_topics_still_resolve"
 rc=0
