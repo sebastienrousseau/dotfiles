@@ -177,7 +177,8 @@ if command -v zsh >/dev/null 2>&1; then
   assert_equals "$(jq -r .mean_ms <"$OUTF")" "$(jq -r '.shells.zsh.mean_ms' <"$OUTF")" "headline mean comes from zsh"
 else
   assert_equals 1 "$RC" "no measurable shell without zsh"
-  out_has "no measurable shells found" "error names the empty filter"
+  assert_file_contains "$OUTF.err" "no measurable shells found" "error names the empty filter, on stderr"
+  assert_true "! grep -q 'no measurable shells' '$OUTF'" "and stays off stdout"
 fi
 
 test_start "profile_flag_adds_the_zprof_section"
