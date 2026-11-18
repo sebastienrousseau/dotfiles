@@ -135,10 +135,10 @@ test_fm_fleet_drift_predict() {
 test_fm_fleet_drift_unknown() {
   test_start "fm_fleet_drift_unknown"
   fm_run fleet drift zzz-not-a-subcommand
-  # A usage error exits 64 with the usage on stderr (dot_usage_error, v0.2.548).
-  fm_expect_rc 64
+  # An unknown word exits 127 with the one message, naming it (v0.2.548).
+  fm_expect_rc 127
   test_start "fm_fleet_drift_unknown_message"
-  fm_expect_stderr "usage: dot fleet drift [check|history|predict]"
+  fm_expect_stderr "dot: 'dot fleet drift zzz-not-a-subcommand' is not a command; run 'dot help fleet drift'"
 }
 
 test_fm_fleet_events() {
