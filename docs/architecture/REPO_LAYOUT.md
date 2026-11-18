@@ -44,7 +44,7 @@ section is relative to `defaults/`. Filename **prefixes** carry semantics:
 | `.chezmoidata.toml`         | **Source of truth** for version, profile, default theme, shell, feature flags.              |
 | `.chezmoidata/`             | Split data files: `apple.toml`, `hardware.toml`, `keybinds.toml`, `secrets-patterns.toml`.   |
 | `.theme-manifest/themes.toml` | Theme palette manifest read by the theme templates.                                        |
-| `.chezmoiignore`, `.chezmoiignore.tmpl` | Feature-flag-gated "don't deploy these to `$HOME`" list.                         |
+| `.chezmoiignore.tmpl` | Feature-flag-gated "don't deploy these to `$HOME`" list.                         |
 | `.chezmoitemplates/`        | Reusable template partials (`aliases/`, `functions/`, `desktop/`, `go-build-command`, `theme-name`). Not deployed. |
 
 ### Shell rc files
