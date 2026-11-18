@@ -25,6 +25,12 @@ grammar (N1 to N7, N13, N16):
   - lib/dot/data/commands.txt, the table bin/dot resolves names from, is
     what tools/ci/cli_command_table.py generates from the manifests.
 
+Every read command offers --json with a versioned schema (N14): a json
+flag, an output id, and schemas/cli/<domain>-<name>.v<N>.schema.json whose
+schema property is that id. tools/ci/cli-json-baseline.txt lists the read
+commands that do not yet; a command missing that is not listed fails, and
+so does a listed one that has it now, so the list only shrinks.
+
 It also runs bin/dot against the runtime rules (N9 flags, N10 exit codes).
 Today's binary breaks some of them; tools/ci/cli-contract-baseline.txt lists
 those by id. A violation not in the baseline fails, and so does a baseline
@@ -40,6 +46,7 @@ import argparse
 import json
 import os
 import pathlib
+import re
 import subprocess
 import sys
 import tempfile
@@ -288,6 +295,45 @@ def check_table_routes(root: pathlib.Path) -> list[str]:
     return errors
 
 
+def spelling(domain: str, cmd: dict) -> str:
+    return " ".join(w for w in (domain, cmd.get("object", ""), cmd["verb"]) if w)
+
+
+def output_schema_errors(root: pathlib.Path, label: str, output: str) -> list[str]:
+    """The schema file an output id names exists and declares that id."""
+    path = root / "schemas" / "cli" / f"{output.replace('/', '-')}.schema.json"
+    if not path.is_file():
+        return [f"{label}: output '{output}' has no schema {path.relative_to(root)} (N14)"]
+    if json.loads(path.read_text()).get("properties", {}).get("schema", {}).get("const") != output:
+        return [f"{label}: {path.relative_to(root)} does not declare schema '{output}' (N14)"]
+    return []
+
+
+def json_coverage(root: pathlib.Path, manifests: dict) -> tuple[set[str], list[str]]:
+    """Read commands without --json and a versioned schema, and schema errors."""
+    missing, errors = set(), []
+    for domain, manifest in manifests.items():
+        for cmd in manifest.get("commands", []):
+            if cmd["effect"] != "read":
+                continue
+            label, output = spelling(domain, cmd), cmd.get("output", "")
+            has_flag = any(f["long"] == "json" for f in cmd.get("flags", []))
+            errors += output_schema_errors(root, label, output) if output else []
+            if not (has_flag and output):
+                missing.add(label)
+    return missing, errors
+
+
+def check_json(root: pathlib.Path, manifests: dict) -> list[str]:
+    missing, errors = json_coverage(root, manifests)
+    baseline = read_baseline(root / "tools" / "ci" / "cli-json-baseline.txt")
+    errors += [f"{sp}: a read command needs --json and an output schema (N14); "
+               "a new command may not join tools/ci/cli-json-baseline.txt" for sp in sorted(missing - baseline)]
+    errors += [f"{sp}: has --json and a schema now; remove it from tools/ci/cli-json-baseline.txt"
+               for sp in sorted(baseline - missing)]
+    return errors
+
+
 def run_dot_err(dot: pathlib.Path, *args: str) -> tuple[int, str, str]:
     with tempfile.TemporaryDirectory() as home:
         env = {"HOME": home, "PATH": os.environ.get("PATH", "/usr/bin:/bin"), "NO_COLOR": "1", "TERM": "dumb"}
@@ -310,9 +356,11 @@ def check_table(root: pathlib.Path) -> list[str]:
 def runtime_violations(dot: pathlib.Path) -> dict[str, str]:
     """Runtime rules by id; each value says what is wrong today."""
     found = {}
-    rc, _ = run_dot(dot, "-V")
+    rc, short_v = run_dot(dot, "-V")
     if rc != 0:
         found["N9-short-version"] = f"'dot -V' exits {rc}; -V is the version flag"
+    elif not re.fullmatch(r"dot \S+\n", short_v):
+        found["N9-version-one-line"] = "'dot -V' must print one line, 'dot <version>'"
     _, long_out = run_dot(dot, "--version")
     _, short_out, short_err = run_dot_err(dot, "-v")
     if short_out.strip() and short_out == long_out and "-V" not in short_err:
@@ -355,6 +403,7 @@ def lint(root: pathlib.Path, dot: pathlib.Path) -> list[str]:
     errors += check_routes(root, manifests, reg)
     errors += check_table_routes(root)
     errors += check_table(root)
+    errors += check_json(root, manifests)
     return errors + check_runtime(dot, read_baseline(root / "tools" / "ci" / "cli-contract-baseline.txt"))
 
 

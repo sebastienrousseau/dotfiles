@@ -977,7 +977,15 @@
      "spelling": "config profile show",
      "effect": "read",
      "summary": "Show the active profile",
-     "built": true
+     "built": true,
+     "flags": [
+      {
+       "long": "json",
+       "short": "j",
+       "summary": "Print the profile and feature flags as JSON"
+      }
+     ],
+     "output": "config/profile.v1"
     },
     {
      "spelling": "config profile set",
@@ -2308,7 +2316,15 @@
      "spelling": "tool list",
      "effect": "read",
      "summary": "Toolchains and their versions",
-     "built": true
+     "built": true,
+     "flags": [
+      {
+       "long": "json",
+       "short": "j",
+       "summary": "Print the toolchains as JSON"
+      }
+     ],
+     "output": "tool/list.v1"
     },
     {
      "spelling": "tool install",

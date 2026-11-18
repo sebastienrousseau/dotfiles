@@ -41,7 +41,7 @@ class Fixture(unittest.TestCase):
         self.addCleanup(shutil.rmtree, self.tmp)
         for rel in ("schemas/cli", "plugins"):
             shutil.copytree(ROOT / rel, self.tmp / rel)
-        for rel in ("lib/dot/data/routes.txt", "lib/dot/data/commands.txt", "lib/dot/data/commands.json", "lib/dot/data/groups.txt", "defaults/.chezmoidata.toml", "tools/ci/cli-contract-baseline.txt"):
+        for rel in ("lib/dot/data/routes.txt", "lib/dot/data/commands.txt", "lib/dot/data/commands.json", "lib/dot/data/groups.txt", "defaults/.chezmoidata.toml", "tools/ci/cli-contract-baseline.txt", "tools/ci/cli-json-baseline.txt"):
             (self.tmp / rel).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(ROOT / rel, self.tmp / rel)
         self.dot = self.fake_dot(GOOD_DOT)
@@ -149,7 +149,7 @@ class Manifests(Fixture):
 
     def test_local_letter_for_a_family_flag_without_one(self):
         self.flagged(("json", "j"))
-        self.assertEqual([e for e in self.errors() if "mcp show" in e], [])
+        self.assertEqual([e for e in self.errors() if "mcp show" in e and "(N9)" in e], [])
 
     def test_two_verbs_sharing_a_cmdlet(self):
         self.append("secret", '[[commands]]\nverb = "apply"\neffect = "write"\nsummary = "x"\n')
@@ -266,6 +266,37 @@ class Table(Fixture):
         self.assertFails("plugins/theme/commands.txt is stale")
 
 
+class JsonCoverage(Fixture):
+    """Every read command offers --json with a versioned schema (N14)."""
+
+    def test_a_new_read_command_without_json_fails(self):
+        self.append("tool", """
+            [[commands]]
+            verb = "check"
+            effect = "read"
+            summary = "A new read command"
+        """)
+        self.assertFails("tool check: a read command needs --json and an output schema (N14)")
+
+    def test_json_without_an_output_id_is_not_enough(self):
+        self.edit("tool", 'output = "tool/list.v1"\n', "")
+        self.assertFails("tool list: a read command needs --json")
+
+    def test_an_output_id_needs_its_schema_file(self):
+        self.edit("tool", 'output = "tool/list.v1"', 'output = "tool/nolist.v1"')
+        self.assertFails("tool list: output 'tool/nolist.v1' has no schema schemas/cli/tool-nolist.v1.schema.json")
+
+    def test_the_schema_file_declares_the_id(self):
+        schema = self.tmp / "schemas/cli/tool-list.v1.schema.json"
+        schema.write_text(schema.read_text().replace('"const": "tool/list.v1"', '"const": "tool/other.v1"'))
+        self.assertFails("does not declare schema 'tool/list.v1'")
+
+    def test_a_command_that_has_json_must_leave_the_baseline(self):
+        baseline = self.tmp / "tools/ci/cli-json-baseline.txt"
+        baseline.write_text(baseline.read_text() + "tool list\n")
+        self.assertFails("tool list: has --json and a schema now; remove it")
+
+
 class Runtime(Fixture):
     def test_each_old_behaviour_fails(self):
         self.dot = self.fake_dot(OLD_DOT)
@@ -273,6 +304,10 @@ class Runtime(Fixture):
                          "runtime N9-short-version: 'dot -V' exits",
                          "runtime N9-v-is-verbose"):
             self.assertFails(fragment)
+
+    def test_version_flag_prints_one_line(self):
+        self.dot = self.fake_dot(GOOD_DOT.replace('-V|--version) echo "dot 0.2.537" ;;', '-V|--version) printf "\\n DOTFILES\\nVersion 0.2.537\\n" ;;'))
+        self.assertFails("runtime N9-version-one-line")
 
     def test_bare_v_must_warn(self):
         self.dot = self.fake_dot(GOOD_DOT.replace('echo "use -V" >&2; ', ""))

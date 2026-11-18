@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.io/schemas/cli/version.v1.schema.json",
+  "title": "dot version v1",
+  "description": "Printed by `dot version --json`: the CLI's name, version and the source tree it runs from. `dot -V` prints the same version as the single line `dot <version>`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "name", "version", "source"],
+  "properties": {
+    "schema": { "const": "cli/version.v1" },
+    "name": { "const": "dot" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+" },
+    "source": { "type": "string", "description": "The source tree bin/dot resolved; empty when none was found" }
+  }
+}

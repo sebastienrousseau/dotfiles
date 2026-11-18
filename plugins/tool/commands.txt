@@ -14,6 +14,7 @@ cmd|tool new|@tool new|write|Create a project from a template
 run|tool list --nix|@tool list --nix||
 run|tool list --packages|@tool list --packages||
 run|tool list --locked|@tool list --locked||
+flag|tool list|json|j||Print the toolchains as JSON
 arg|tool new|python go node packer molecule||
 alias|env|removed|tool|0.2.538
 alias|tools|removed|tool list --nix|0.2.538

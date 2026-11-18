@@ -192,7 +192,14 @@ ui_dot_banner() {
   fi
 }
 
+# show_version [--json|-j]: the banner, or with --json one version.v1
+# object (schemas/cli/version.v1.schema.json). `dot -V` and `dot --version`
+# print the single line `dot <version>` (lib/dot/names.sh).
 show_version() {
+  if [[ "${1:-}" == --json || "${1:-}" == -j ]]; then
+    printf '{"schema":"cli/version.v1","name":"dot","version":"%s","source":"%s"}\n' "$VERSION" "${_DOT_SRC//\"/\\\"}"
+    return 0
+  fi
   ui_dot_banner "Reference"
   ui_header "Dotfiles Version"
   echo ""
@@ -325,6 +332,9 @@ show_help() {
     all)
       show_help_all
       ;;
+    --all)
+      _DOT_HELP_PLANNED=1 show_help_all
+      ;;
     --json)
       cat "$_DOT_SRC/lib/dot/data/commands.json"
       ;;
@@ -455,34 +465,30 @@ if [[ -n "$route" ]] && [[ "$route" != "help" ]] && [[ "$route" != "search" ]] &
   exec bash "$_SOURCE_DIR/bin/dot" help "$COMMAND"
 fi
 
-case "$route" in
-  core | diagnostics | ai | tools | appearance | secrets | security | meta | fleet | completion | agents | init | registry)
-    _dispatch "$route" "$@"
-    ;;
+# _dot_search TERM: `dot help <term>` for a term that is no spelling.
+_dot_search() {
+  [[ -n "${1:-}" ]] || _dot_usage "search needs a term" "dot help <term>"
+  _dot_help_search "$1" || echo "No commands matching '$1'"
+  exit 0
+}
 
-  manual | patterns | system)
-    _dispatch_args "$route" "$@"
-    ;;
+# _dot_run ARGS...: run the route _dot_set_route chose.
+_dot_run() {
+  case "$route" in
+    core | diagnostics | ai | tools | appearance | secrets | security | meta | fleet | completion | agents | init | registry)
+      _dispatch "$route" "$@"
+      ;;
+    manual | patterns | system) _dispatch_args "$route" "$@" ;;
+    search) _dot_search "${1:-}" ;;
+    help) show_help "$@" ;;
+    version) show_version "$@" ;;
+    # A word the table does not know: the deprecated user commands
+    # (lib/dot/names.sh _dot_user_command), else unknown.
+    *)
+      _dot_user_command "$COMMAND" "$@"
+      _dot_unknown "$COMMAND" "$@"
+      ;;
+  esac
+}
 
-  search)
-    keyword="${1:-}"
-    [[ -n "$keyword" ]] || _dot_usage "search needs a term" "dot help <term>"
-    _dot_help_search "$keyword" || echo "No commands matching '$keyword'"
-    exit 0
-    ;;
-
-  help)
-    show_help "$@"
-    ;;
-
-  version)
-    show_version
-    ;;
-
-  # A word the table does not know: the deprecated user commands
-  # (lib/dot/names.sh _dot_user_command), else unknown.
-  *)
-    _dot_user_command "$COMMAND" "$@"
-    _dot_unknown "$COMMAND" "$@"
-    ;;
-esac
+_dot_run "$@"

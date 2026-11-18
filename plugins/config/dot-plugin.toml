@@ -107,7 +107,13 @@ summary = "Print the source directory"
 object = "profile"
 verb = "show"
 effect = "read"
+output = "config/profile.v1"
 summary = "Show the active profile"
+
+[[commands.flags]]
+long = "json"
+short = "j"
+summary = "Print the profile and feature flags as JSON"
 
 [[commands]]
 object = "profile"

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.io/schemas/cli/config-profile.v1.schema.json",
+  "title": "dot config profile v1",
+  "description": "Printed by `dot config profile show --json`: the active profile (the host's chezmoi.toml, else the default in .chezmoidata.toml) and the [features] flags of .chezmoidata.toml.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "profile", "features"],
+  "properties": {
+    "schema": { "const": "config/profile.v1" },
+    "profile": { "type": "string", "minLength": 1 },
+    "features": {
+      "type": "object",
+      "description": "Each feature flag: true or false, or the value as text when it is not a boolean",
+      "propertyNames": { "pattern": "^[A-Za-z0-9_-]+$" },
+      "additionalProperties": { "type": ["boolean", "string"] }
+    }
+  }
+}

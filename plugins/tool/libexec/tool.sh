@@ -187,21 +187,20 @@ cmd_tools() {
   fi
 }
 
+# _tool_new_args LANG NAME: both given and safe in a path (no traversal),
+# else a usage error (exit 64) or die.
+_tool_new_args() {
+  if [ -z "$1" ] || [ -z "$2" ]; then
+    dot_usage_error "missing template or name (templates: python, go, node, packer, molecule)" "dot tool new <lang> <name>"
+  fi
+  [[ "$1" =~ ^[a-zA-Z0-9_-]+$ ]] || die "Invalid template name: $1"
+  [[ "$2" =~ ^[a-zA-Z0-9_.-]+$ ]] || die "Invalid project name: $2"
+}
+
 cmd_new() {
   local template_lang="${1:-}"
   local project_name="${2:-}"
-
-  if [ -z "$template_lang" ] || [ -z "$project_name" ]; then
-    dot_usage_error "missing template or name (templates: python, go, node, packer, molecule)" "dot tool new <lang> <name>"
-  fi
-
-  # Validate inputs to prevent path traversal
-  if [[ ! "$template_lang" =~ ^[a-zA-Z0-9_-]+$ ]]; then
-    die "Invalid template name: $template_lang"
-  fi
-  if [[ ! "$project_name" =~ ^[a-zA-Z0-9_.-]+$ ]]; then
-    die "Invalid project name: $project_name"
-  fi
+  _tool_new_args "$template_lang" "$project_name"
 
   local src_dir
   src_dir="$(require_source_dir)"
@@ -364,6 +363,16 @@ cmd_env_mise() {
   esac
 }
 
+# cmd_tool_list_json: `dot tool list --json`, one tool/list.v1 object
+# (schemas/cli/tool-list.v1.schema.json): each version mise lists.
+cmd_tool_list_json() {
+  has_command mise || die "mise not installed (required for dot tool)"
+  has_command jq || die "jq is required for --json"
+  mise ls --json 2>/dev/null | jq -c '{schema: "tool/list.v1", tools: [to_entries[] as $t | $t.value[]
+    | {name: $t.key, version: (.version // ""), requested: (.requested_version // null),
+       source: (.source.path // null), installed: (.installed // false), active: (.active // false)}]}'
+}
+
 # Sourced (by tests), only the functions are defined.
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   case "${1:-}" in
@@ -386,6 +395,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
       shift
       cmd_env_mise "$@"
       ;;
+    list-json) cmd_tool_list_json ;;
     *)
       echo "Unknown tool command: ${1:-}" >&2
       exit 1

@@ -233,12 +233,16 @@ _dot_warn_deprecated() {
   return 0
 }
 
-# _dot_gnu_flags WORD...: GNU flags (N9). -V is the version and -v is
-# --verbose. Sets _ARGV.
+# _dot_gnu_flags WORD...: GNU flags (N9). -V and --version print one
+# parseable line, `dot <version>` (`dot version` keeps the banner), and -v
+# is --verbose. Sets _ARGV.
 _dot_gnu_flags() {
   _ARGV=("$@")
   case "${1:-}" in
-    -V) _ARGV=(version "${@:2}") ;;
+    -V | --version)
+      printf 'dot %s\n' "${VERSION:-unknown}"
+      exit 0
+      ;;
     -v)
       export DOT_VERBOSE=1
       _ARGV=("" "${@:2}")

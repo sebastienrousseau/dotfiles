@@ -90,10 +90,10 @@ ui_init() {
     if command -v gum >/dev/null 2>&1 && [[ -t 1 ]]; then
       UI_ENABLED=1
     fi
-    # UTF-8 detection
-    if [[ "$(locale charmap 2>/dev/null || true)" = "UTF-8" ]]; then
-      UI_UTF8=1
-    fi
+    # UTF-8 detection from the locale variables: no `locale` fork (P13)
+    case "${LC_ALL:-${LC_CTYPE:-${LANG:-}}}" in
+      *[Uu][Tt][Ff]-8* | *[Uu][Tt][Ff]8*) UI_UTF8=1 ;;
+    esac
   fi
 
   # --- Color palette (hardcoded ANSI; no tput forks) ---

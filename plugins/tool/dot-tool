@@ -18,9 +18,10 @@ tool_module() {
 }
 
 # tool_list FLAG ARGS... — `list --nix|--packages|--locked`, the views that
-# are not mise's.
+# are not mise's, and `list --json` (tool/list.v1).
 tool_list() {
   case "${1:-}" in
+    --json | -j) tool_module list-json ;;
     --nix) tool_module tools "${@:2}" ;;
     --packages) tool_module packages "${@:2}" ;;
     --locked)

@@ -292,6 +292,7 @@ flag|attest show|write|w||Write the attestation to a file
 arg|config add||files|
 flag|config check|check|c||Check only
 flag|config check|fix|f||Apply safe fixes
+flag|config profile show|json|j||Print the profile and feature flags as JSON
 flag|config import|yes|y||Restore without asking
 flag|doctor status|json|j||Print a JSON summary
 flag|doctor status|fix|f||Apply common fixes
@@ -323,6 +324,7 @@ flag|shell alias status|tiers|||Show which ecosystem tiers are enabled
 flag|system update|yes|y||Answer yes to every question
 flag|system update|globals|||Also update npm, cargo and pipx globals
 arg|system schedule set|weekly daily off||
+flag|tool list|json|j||Print the toolchains as JSON
 arg|tool new|python go node packer molecule||
 alias|mode|removed|agent mode|0.2.538
 alias|agents|removed|agent context|0.2.538
