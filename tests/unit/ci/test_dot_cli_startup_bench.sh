@@ -66,4 +66,13 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
 
+# A command that fails fast must fail the gate, not pass it as "fast":
+# each run's exit status used to be discarded with `|| true`.
+test_start "failing_command_fails_the_gate"
+rc=0
+out="$(DOT_BENCH_BASELINE="$XDG_CACHE_HOME/dotfiles/startup-baseline-fail.txt" \
+  bash "$SCRIPT_FILE" --runs 3 --budget-ms 100000 --cmd no-such-verb-zz 2>&1)" || rc=$?
+assert_not_equals "0" "$rc" "a crashing dot command exits non-zero"
+assert_contains "exited" "$out" "and the log names the failing run"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

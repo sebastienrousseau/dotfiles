@@ -169,7 +169,6 @@
   16   18   35.6   52    52 tools/ci/check-fuzz-harness-self-contained.sh::<top>
   13   15   25.8   36    41 tools/ci/check-remote-installers.sh::<top>
   18    7   15.4   38     0 tools/ci/check-shell-preamble.sh::check_one
-  14   11   37.0   67    79 tools/ci/dot-cli-startup-bench.sh::<top>
   12   15   28.1   42    42 tools/ci/lint-reusable-pins.sh::<top>
   19   17   33.4   59    59 tools/ci/normalize-spdx-headers.sh::<top>
   15   23   34.4  137   175 tools/ci/validate-ci-config.sh::<top>
