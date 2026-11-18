@@ -106,6 +106,7 @@ EOF
 SRC="$WORK/src"
 mkdir -p "$SRC/.chezmoidata" "$SRC/.theme-manifest" "$SRC/.chezmoitemplates" "$SRC/private_Library/LaunchAgents"
 cp "$DEFAULTS/.chezmoitemplates/theme-name" "$SRC/.chezmoitemplates/theme-name"
+cp "$DEFAULTS/.chezmoitemplates/theme-subset" "$SRC/.chezmoitemplates/theme-subset"
 cp "$PLIST_TEMPLATE" "$SRC/private_Library/LaunchAgents/"
 : >"$SRC/run_onchange_22-iterm2-profile.sh.tmpl"
 DATA_FILE="$SRC/.chezmoidata.toml"
