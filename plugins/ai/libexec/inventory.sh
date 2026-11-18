@@ -94,6 +94,7 @@ inv_hooks() {
 # installed agent, in roster order; the versions are probed at once.
 inv_rows() {
   local dir="$1" i name bin unwired
+  _ai_pins_load # once here, not once per agent inside inv_pin's $(...)
   for i in "${!AI_ROSTER_NAMES[@]}"; do
     bin="${AI_ROSTER_BINS[$i]}"
     has_command "$bin" || continue

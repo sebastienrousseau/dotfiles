@@ -20,23 +20,51 @@ source "${DOT_SDK:-$_AI_INSTALL_DIR/../../../../lib/dot}/verified-download.sh"
 # shellcheck source=../../../../lib/dot/ai-roster.sh disable=SC1091
 source "${DOT_SDK:-$_AI_INSTALL_DIR/../../../../lib/dot}/ai-roster.sh"
 
-# AI CLIs are pinned (decision D3): [ai_tools] in .chezmoidata.toml maps each
-# mise package to an exact version. The provisioning template reads it
-# through chezmoi; these helpers read the same table at run time.
-_AI_PINS_FILE="${_AI_INSTALL_DIR}/../../../../defaults/.chezmoidata.toml"
+# AI CLIs are pinned (decision D3): [ai_tools] maps each mise package to an
+# exact version. The provisioning template reads it through chezmoi; these
+# helpers read the same data at run time, through chezmoi too, so a per-host
+# [data.ai_tools] override in ~/.config/chezmoi/chezmoi.toml counts here as
+# it does in the templates. Without chezmoi (or with a fixture file set in
+# _AI_PINS_FILE) they read defaults/.chezmoidata.toml directly.
+_AI_PINS_DEFAULT="${_AI_INSTALL_DIR}/../../../../defaults/.chezmoidata.toml"
+_AI_PINS_FILE="$_AI_PINS_DEFAULT"
+
+# _ai_pins_from_chezmoi: "<package><TAB><version>" per [ai_tools] entry as
+# chezmoi resolves its data; 1 when chezmoi is absent, fails or has none.
+_ai_pins_from_chezmoi() {
+  local out
+  [[ "$_AI_PINS_FILE" == "$_AI_PINS_DEFAULT" ]] || return 1
+  command -v chezmoi >/dev/null 2>&1 || return 1
+  out="$(chezmoi execute-template \
+    '{{ range $k, $v := .ai_tools }}{{ $k }}{{ "\t" }}{{ $v }}{{ "\n" }}{{ end }}' 2>/dev/null)" || return 1
+  [[ -n "$out" ]] || return 1
+  printf '%s\n' "$out"
+}
+
+# _ai_pins_from_file: the same lines, from [ai_tools] in $_AI_PINS_FILE.
+_ai_pins_from_file() {
+  [[ -r "$_AI_PINS_FILE" ]] || return 0
+  awk '/^\[/ { in_table = ($0 == "[ai_tools]"); next }
+    in_table && $2 == "=" { k = $1; v = $3; gsub(/"/, "", k); gsub(/"/, "", v); print k "\t" v }' "$_AI_PINS_FILE"
+}
+
+# _ai_pins_load: read the pins into _AI_PINS once per shell (and again when
+# _AI_PINS_FILE changes). Call it outside $(...) so the cache is kept.
+_ai_pins_load() {
+  [[ "${_AI_PINS_FROM:-}" == "$_AI_PINS_FILE" ]] && return 0
+  _AI_PINS="$(_ai_pins_from_chezmoi || _ai_pins_from_file)"
+  _AI_PINS_FROM="$_AI_PINS_FILE"
+}
 
 # _ai_pinned_version <package>: the version pinned for a mise package (its
 # [uvx_args=...] options ignored); prints nothing when there is none.
 _ai_pinned_version() {
   local key="${1%%\[*}"
-  [[ -r "$_AI_PINS_FILE" ]] || return 0
-  awk -v k="\"$key\"" '
-    /^\[/ { in_table = ($0 == "[ai_tools]"); next }
-    in_table && $1 == k && $2 == "=" { v = $3; gsub(/"/, "", v); print v; exit }
-  ' "$_AI_PINS_FILE"
+  _ai_pins_load
+  awk -F '\t' -v k="$key" '$1 == k { print $2; exit }' <<<"$_AI_PINS"
 }
 
-# ai_pinned_spec <package>: "<package>@<version>" for mise use; 1 (with a
+# ai_pinned_spec <package>: "<package>@<version>" for mise; 1 (with a
 # warning) when the package has no pin, so nothing installs at @latest.
 ai_pinned_spec() {
   local version
@@ -86,14 +114,15 @@ _ai_latest() {
 ai_pin_bumps() {
   local pkg pinned latest
   command -v mise >/dev/null 2>&1 || return 0
+  _ai_pins_load
   while IFS= read -r pkg; do
+    [[ -n "$pkg" ]] || continue
     pinned="$(_ai_pinned_version "$pkg")"
     latest="$(_ai_latest "$pkg" "$pinned")"
     if [[ -n "$latest" ]] && _ai_version_newer "$latest" "$pinned"; then
       printf '%s %s -> %s\n' "$pkg" "$pinned" "$latest"
     fi
-  done < <(awk '/^\[/ { in_table = ($0 == "[ai_tools]"); next }
-    in_table && $2 == "=" { k = $1; gsub(/"/, "", k); print k }' "$_AI_PINS_FILE" 2>/dev/null)
+  done < <(cut -f 1 <<<"$_AI_PINS")
 }
 
 # _ai_in_scratch_dir <cmd...> — run a command from a private scratch

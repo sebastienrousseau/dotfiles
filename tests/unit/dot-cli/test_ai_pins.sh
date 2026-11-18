@@ -60,13 +60,21 @@ lib() {
   printf '%s\nrc=%s\n' "$out" "$rc"
 }
 rc_of() { sed -n 's/^rc=//p' <<<"$1" | tail -n 1; }
+# data_pin <package>: the [ai_tools] pin, read with a TOML parser so the
+# expectations follow the data instead of repeating its versions.
+data_pin() {
+  python3 -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["ai_tools"][sys.argv[2]])' \
+    "$REPO_ROOT/defaults/.chezmoidata.toml" "$1"
+}
+CODEX_PIN="$(data_pin npm:@openai/codex)"
+AIDER_PIN="$(data_pin pipx:aider-chat)"
 
 test_start "pinned_version_read_from_data"
-assert_equals "0.170.0" "$(lib '_ai_pinned_version npm:@openai/codex' | head -n 1)" \
+assert_equals "$CODEX_PIN" "$(lib '_ai_pinned_version npm:@openai/codex' | head -n 1)" \
   "the [ai_tools] pin for codex is read at run time"
 
 test_start "pinned_version_ignores_package_options"
-assert_equals "0.86.2" "$(lib '_ai_pinned_version "pipx:aider-chat[uvx_args=--python 3.12]"' | head -n 1)" \
+assert_equals "$AIDER_PIN" "$(lib '_ai_pinned_version "pipx:aider-chat[uvx_args=--python 3.12]"' | head -n 1)" \
   "mise package options are not part of the pin key"
 
 test_start "pinned_version_only_from_ai_tools_table"
@@ -86,8 +94,42 @@ assert_equals "" "$(lib '_ai_mise_pkg sgpt' | head -n 1)" "shell-gpt is no longe
 
 test_start "install_uses_the_pin"
 r="$(lib 'ai_install_tool codex Codex')"
-assert_equals "0|mise use -g npm:@openai/codex@0.170.0" "$(rc_of "$r")|$(cat "$CALLS")" \
-  "dot ai install runs mise use at the pinned version"
+assert_equals "0|mise use -g npm:@openai/codex@$CODEX_PIN" "$(rc_of "$r")|$(cat "$CALLS")" \
+  "a tool conf.d does not declare is activated with mise use, at the pin"
+
+# A tool the deployed conf.d declares at its pin installs with `mise
+# install`: `mise use -g` wrote ~/.config/mise/config.toml, which outranks
+# conf.d and froze the tool on that version for good.
+test_start "install_of_a_conf_d_tool_leaves_the_global_config_alone"
+mkdir -p "$WORK/.config/mise/conf.d"
+printf '[tools]\n"pipx:aider-chat" = { version = "%s", uvx_args = "--python 3.12" }\n"npm:@openai/codex" = "0.0.1"\n' \
+  "$AIDER_PIN" >"$WORK/.config/mise/conf.d/00-dotfiles.toml"
+r="$(lib 'ai_install_tool aider Aider')"
+assert_equals "0|mise install pipx:aider-chat[uvx_args=--python 3.12]@$AIDER_PIN" "$(rc_of "$r")|$(cat "$CALLS")" \
+  "declared at the pin: mise install, nothing written to config.toml"
+r="$(lib 'ai_install_tool codex Codex')"
+assert_equals "0|mise use -g npm:@openai/codex@$CODEX_PIN" "$(rc_of "$r")|$(cat "$CALLS")" \
+  "declared at another version (a per-host pin): mise use -g still activates the pin"
+rm -rf "$WORK/.config"
+
+# A per-host [data.ai_tools] override in chezmoi.toml is what the templates
+# install; the run-time helpers read the same chezmoi data.
+test_start "pins_follow_chezmoi_data_overrides"
+cat >"$WORK/bin/chezmoi" <<'EOF'
+#!/bin/sh
+[ "$1" = execute-template ] || exit 1
+printf 'npm:@openai/codex\t7.7.7\npipx:aider-chat\t0.86.2\n'
+EOF
+chmod +x "$WORK/bin/chezmoi"
+assert_equals "7.7.7" "$(lib '_ai_pinned_version npm:@openai/codex' | head -n 1)" \
+  "chezmoi's merged data wins over the repo's .chezmoidata.toml"
+r="$(lib 'ai_install_tool codex Codex')"
+assert_equals "0|mise use -g npm:@openai/codex@7.7.7" "$(rc_of "$r")|$(cat "$CALLS")" \
+  "dot ai install installs the per-host pin"
+printf '#!/bin/sh\nexit 1\n' >"$WORK/bin/chezmoi"
+assert_equals "$CODEX_PIN" "$(lib '_ai_pinned_version npm:@openai/codex' | head -n 1)" \
+  "a chezmoi that cannot render falls back to .chezmoidata.toml"
+rm -f "$WORK/bin/chezmoi"
 
 test_start "unpinned_package_refused"
 r="$(lib 'ai_pinned_spec npm:not-pinned')"
@@ -101,7 +143,7 @@ assert_equals "1|" "$(rc_of "$r")|$(cat "$CALLS")" \
 
 test_start "upgrade_proposes_bumps"
 r="$(lib 'ai_pin_bumps')"
-assert_contains "npm:@openai/codex 0.170.0 -> 9.9.9" "$r" "a newer release is listed as a bump"
+assert_contains "npm:@openai/codex $CODEX_PIN -> 9.9.9" "$r" "a newer release is listed as a bump"
 
 test_start "upgrade_bumps_leave_pins_alone"
 assert_equals "0" "$(grep -c '^mise use' "$CALLS")" "listing bumps installs nothing"
@@ -138,7 +180,7 @@ assert_equals "1.10.0:1.9.9 2.29.1:2.29.0 v1.0.1:1.0 " "$(head -n 1 <<<"$r")" \
   "only strictly newer versions count, field by field as numbers"
 
 test_start "upgrade_no_bump_when_current"
-r="$(MISE_SAME=0.86.2 lib 'ai_pin_bumps')"
+r="$(MISE_SAME="$AIDER_PIN" lib 'ai_pin_bumps')"
 assert_equals "0" "$(grep -c 'pipx:aider-chat' <<<"$r")" "a tool already at its newest release is not listed"
 
 print_summary

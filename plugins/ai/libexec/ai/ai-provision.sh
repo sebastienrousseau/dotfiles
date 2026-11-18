@@ -70,6 +70,38 @@ ai_prepare() {
   [[ "$routes" == 1 || "$need_mise$need_curl" == 00 ]]
 }
 
+# _ai_conf_d_version <package>: the version the deployed mise conf.d
+# (~/.config/mise/conf.d/00-dotfiles.toml) gives <package> in [tools], a
+# plain string or an inline table's version; nothing when it has none.
+_ai_conf_d_version() {
+  local conf="${MISE_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/mise}/conf.d/00-dotfiles.toml"
+  [[ -r "$conf" ]] || return 0
+  awk -v k="$1" '
+    /^\[/ { on = ($0 == "[tools]"); next }
+    !on || $2 != "=" { next }
+    { key = $1; gsub(/"/, "", key) }
+    key == k {
+      if (match($0, /version = "[^"]*"/)) v = substr($0, RSTART + 11, RLENGTH - 12)
+      else { v = $3; gsub(/"/, "", v) }
+      print v; exit
+    }' "$conf"
+}
+
+# _ai_mise_install <package[options]@version>: a tool conf.d already
+# declares at this version is installed with `mise install`, which leaves
+# ~/.config/mise/config.toml alone; `mise use -g` would write the version
+# there, outrank conf.d and freeze the tool on it. A tool conf.d does not
+# declare (or declares at another version, e.g. a per-host [ai_tools]
+# override) still needs `mise use -g` to be activated at all.
+_ai_mise_install() {
+  local pkg="${1%@*}"
+  if [[ "$(_ai_conf_d_version "${pkg%%\[*}")" == "${1##*@}" ]]; then
+    _ai_in_scratch_dir mise install "$1" 2>&1
+  else
+    _ai_in_scratch_dir mise use -g "$1" 2>&1
+  fi
+}
+
 # ai_install_tool <bin> [label]: install one tool. 0 installed, 1 failed,
 # 2 no installer (or its prerequisite is missing).
 ai_install_tool() {
@@ -85,11 +117,12 @@ ai_install_tool() {
       ;;
     mise:*)
       command -v mise >/dev/null 2>&1 || return 2
+      _ai_pins_load
       spec="$(ai_pinned_spec "${method#mise:}")" || return 1
       ui_info "Installing" "$label via mise ($spec)"
       # mise's own status is reliable; the new shim may not be on this
       # shell's PATH yet, so a presence check would misreport success.
-      _ai_in_scratch_dir mise use -g "$spec" 2>&1
+      _ai_mise_install "$spec"
       ;;
     *) return 2 ;;
   esac
