@@ -259,7 +259,9 @@ Options:
   --provision   After applying configs, install the toolchain (packages,
                 fonts, language tools) via the install/provision scripts.
                 Also enabled by DOTFILES_PROVISION=1. Opt-in because it
-                installs packages and may change OS defaults.
+                installs packages and may change OS defaults. Runs only the
+                scripts changed since their last successful run.
+  --all         With --provision, run every provisioning script.
 
 EOF
 }
@@ -429,8 +431,8 @@ seed_git_identity() {
   echo "   Seeded git identity ($gname <$gemail>) into chezmoi data."
 }
 
-# parse_install_args "$@": sets the caller's version, version_set, minimal
-# and provision (main's locals, by bash's dynamic scope).
+# parse_install_args "$@": sets the caller's version, version_set, minimal,
+# provision and provision_all (main's locals, by bash's dynamic scope).
 parse_install_args() {
   for arg in "$@"; do
     case "$arg" in
@@ -442,26 +444,29 @@ parse_install_args() {
       --force) export DOTFILES_NONINTERACTIVE=1 ;;
       --minimal) minimal=1 ;;
       --provision) provision=1 ;;
+      --all) provision=1 provision_all=1 ;;
       -*)
         # Catch single-dash and double-dash unknowns the same way.
         error "Unknown option: $arg"
         ;;
-      *)
-        if [[ $version_set -eq 1 ]]; then
-          error "Multiple versions specified: $version and $arg"
-        fi
-        # Validate the positional looks like a semver (with or without
-        # leading v). Reject garbage early so an unknown positional
-        # like `foobar` doesn't trigger a 30s+ network download attempt.
-        # Caught by the install.sh fuzz harness (#881).
-        if [[ ! "$arg" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-+][a-zA-Z0-9.-]+)?$ ]]; then
-          error "Unrecognized positional argument '$arg' — expected a semver version (e.g. v0.2.547)."
-        fi
-        version="$arg"
-        version_set=1
-        ;;
+      *) set_version_arg "$arg" ;;
     esac
   done
+}
+
+# set_version_arg <arg>: the positional version, once. Validate it looks
+# like a semver (with or without leading v): reject garbage early so an
+# unknown positional like `foobar` doesn't trigger a 30s+ network download
+# attempt. Caught by the install.sh fuzz harness (#881).
+set_version_arg() {
+  if [[ $version_set -eq 1 ]]; then
+    error "Multiple versions specified: $version and $1"
+  fi
+  if [[ ! "$1" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-+][a-zA-Z0-9.-]+)?$ ]]; then
+    error "Unrecognized positional argument '$1' — expected a semver version (e.g. v0.2.547)."
+  fi
+  version="$1"
+  version_set=1
 }
 
 # Release tags are signed with these SSH keys: the key lines of KEYS.asc
@@ -540,35 +545,20 @@ deploy_source() {
   apply_source "$1"
 }
 
-# run_provision_scripts: every install/provision script, shells first.
-run_provision_scripts() {
-  local prov_dir="$SOURCE_DIR/install/provision" script
-  [[ -d "$prov_dir" ]] || return 0
-  # run_once_install_* (shells) first, then numbered run_onchange_* in order.
-  # The fixed globs contain no user-controlled filenames.
-  # shellcheck disable=SC2012
-  while IFS= read -r script; do
-    [[ -f "$script" ]] || continue
-    echo "   → $(basename "$script")"
-    if [[ "$script" == *.tmpl ]]; then
-      chezmoi execute-template <"$script" | DOTFILES_SOURCE_DIR="$SOURCE_DIR" bash ||
-        echo "     (step exited non-zero — continuing)"
-    else
-      DOTFILES_SOURCE_DIR="$SOURCE_DIR" bash "$script" || echo "     (step exited non-zero — continuing)"
-    fi
-  done < <(ls "$prov_dir"/run_once_install_* "$prov_dir"/run_onchange_* 2>/dev/null | sort)
-}
-
-# provision_toolchain <provision> <want_minimal>: provisioning is opt-in
+# provision_toolchain <provision> <want_minimal> [all]: provisioning is opt-in
 # (--provision or DOTFILES_PROVISION=1): install/provision/ sits outside
 # .chezmoiroot, so apply never runs it, and it installs packages and may
 # change OS defaults, so it is never implicit. The minimal profile
-# (--minimal, DOTFILES_MINIMAL=1 or a container) skips it.
+# (--minimal, DOTFILES_MINIMAL=1 or a container) skips it. Only scripts
+# changed since their last successful run are run, unless [all] is set.
 provision_toolchain() {
   [[ "$2" -eq 0 ]] || return 0
   if [[ "$1" = "1" ]]; then
     step "Provisioning toolchain (packages, fonts, tools)..."
-    run_provision_scripts
+    # shellcheck source=install/lib/provision.sh
+    source "$SOURCE_DIR/install/lib/provision.sh"
+    run_provision "$SOURCE_DIR" ${3:+--all} ||
+      error "Provisioning failed (above). Fix it, then re-run: bash \"$SOURCE_DIR/install.sh\" --provision"
   else
     step "Configs deployed. To also install the toolchain (packages, fonts, tools):"
     echo "   bash \"$SOURCE_DIR/install.sh\" --provision    # or DOTFILES_PROVISION=1"
@@ -621,7 +611,7 @@ main() {
   local version="v0.2.547"
   local version_set=0
   local minimal=0
-  local provision="${DOTFILES_PROVISION:-0}"
+  local provision="${DOTFILES_PROVISION:-0}" provision_all=""
   local _cleanup_files=()
   trap 'set +u; rm -f "${_cleanup_files[@]}" 2>/dev/null; set -u' EXIT
   parse_install_args "$@"
@@ -660,7 +650,7 @@ main() {
     "Running the 0.2.503 layout migration (idempotent; safe on fresh installs)..."
   run_migration migrate-state-to-domains.sh "some state stays in the old directory; the next apply tries again"
   deploy_source "$want_minimal"
-  provision_toolchain "$provision" "$want_minimal"
+  provision_toolchain "$provision" "$want_minimal" "$provision_all"
 
   success "Configuration loaded. Please restart your shell."
   print_identity_hint
