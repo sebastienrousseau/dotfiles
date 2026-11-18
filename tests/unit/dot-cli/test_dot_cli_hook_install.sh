@@ -131,6 +131,20 @@ run install --agent claude
 assert_equals "3|{ not json" "$RC|$(cat "$S")" "exit 3, file untouched"
 assert_contains "is not valid JSON; left as it was" "$OUT" "and says why"
 
+test_start "json_that_is_not_an_object_is_left"
+fresh claude
+S="$H/.claude/settings.json"
+printf '[]\n' >"$S"
+run install --agent claude
+assert_equals "3|[]" "$RC|$(cat "$S")" "exit 3, file untouched"
+assert_contains "could not edit $S; left as it was" "$OUT" "and says why"
+
+test_start "remove_with_no_settings_file_creates_none"
+fresh claude
+run remove --agent claude
+assert_equals "0|no" "$RC|$([[ -e "$H/.claude/settings.json" ]] && echo yes || echo no)" "nothing to remove, nothing written"
+assert_contains "claude: not installed" "$OUT" "and says so"
+
 test_start "a_file_it_cannot_write_is_left"
 fresh claude
 S="$H/.claude/settings.json"
