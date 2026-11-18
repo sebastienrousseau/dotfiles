@@ -88,7 +88,7 @@ fi
 test_start "dot_unknown_command"
 unknown_output=$(bash "$DOT_CLI" nonexistent-command 2>&1)
 exit_code=$?
-if [[ $exit_code -ne 0 ]] && echo "$unknown_output" | grep -q "Unknown command"; then
+if [[ $exit_code -eq 127 ]] && echo "$unknown_output" | grep -q "is not a command"; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot rejects unknown commands with error"
 else

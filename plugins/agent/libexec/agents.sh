@@ -344,9 +344,7 @@ Harnesses covered by 'render':
 EOF
       ;;
     *)
-      ui_err "Unknown subcommand" "$subcommand"
-      echo "Run 'dot agent context --help' for usage." >&2
-      return 1
+      dot_unknown_command "agent context" "agent context $subcommand"
       ;;
   esac
 }

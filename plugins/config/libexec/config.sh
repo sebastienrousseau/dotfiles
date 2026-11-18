@@ -53,11 +53,7 @@ cmd_update() {
 
 cmd_add() {
   if [ -z "${1:-}" ]; then
-    echo "Usage: dot config add <file>"
-    echo ""
-    echo "Add a file to the chezmoi source directory."
-    echo "The file will be managed by chezmoi from now on."
-    exit 1
+    dot_usage_error "missing file: add one to the chezmoi source directory" "dot config add <file>"
   fi
   exec chezmoi add "$@"
 }
@@ -174,7 +170,7 @@ _set_host_profile() {
 _profile_set() {
   local new_profile="${1:-}"
   if [[ -z "$new_profile" ]]; then
-    die "Usage: dot config profile set <name>"
+    dot_usage_error "missing or unknown argument" "dot config profile set <name>"
   fi
   if [[ ! "$new_profile" =~ ^[A-Za-z0-9._-]+$ ]]; then
     die "Invalid profile name: $new_profile"
@@ -212,7 +208,7 @@ cmd_profile() {
       ;;
     set) _profile_set "${2:-}" ;;
     *)
-      die "Unknown profile subcommand: ${1:-}. Use 'show' or 'set'."
+      dot_usage_error "unknown profile subcommand '${1:-}'" "dot config profile [show|set <name>]"
       ;;
   esac
 }

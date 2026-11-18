@@ -142,7 +142,7 @@ test_start "unknown_and_removed_names_exit_127"
 rc=0
 dot no-such-command-n03 || rc=$?
 assert_equals "127" "$rc" "unknown command (N10)"
-assert_file_contains "$WORK/err" "Unknown command: no-such-command-n03" "says so on stderr"
+assert_file_contains "$WORK/err" "dot: 'dot no-such-command-n03' is not a command; run 'dot help'" "says so on stderr"
 rc=0
 DOT_BIN="$WORK/src/bin/dot" dot frob || rc=$?
 assert_equals "127" "$rc" "removed name"

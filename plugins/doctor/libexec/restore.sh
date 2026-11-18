@@ -238,9 +238,8 @@ parse_args() {
       --dry-run | -n) DRY_RUN=true ;;
       -h | --help) ACTION=help ;;
       *)
-        log_error "Unknown option: $1"
-        usage
-        exit 1
+        usage >&2
+        dot_usage_error "unknown option '$1'"
         ;;
     esac
     shift

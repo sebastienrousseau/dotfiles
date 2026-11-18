@@ -70,7 +70,7 @@ set +e
 output=$(bash "$DOT_CLI" totally-invalid-command-12345 2>&1)
 ec=$?
 set -e
-if [[ "$output" == *"Unknown command"* ]] && [[ $ec -ne 0 ]]; then
+if [[ "$output" == *"is not a command"* ]] && [[ $ec -eq 127 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: unknown command shows error and exits non-zero"
 else

@@ -48,11 +48,11 @@ ssh = "user@alpha.test"
 
 test_start "fleet_jobs_zero_rejected"
 fleet "$GOOD" --jobs 0 --cmd true
-assert_equals "2" "$FL_RC" "--jobs 0 is a usage error, not a hang"
+assert_equals "64" "$FL_RC" "--jobs 0 is a usage error (64), not a hang"
 
 test_start "fleet_jobs_non_numeric_rejected"
 fleet "$GOOD" --jobs many --cmd true
-assert_equals "2" "$FL_RC" "--jobs many is a usage error"
+assert_equals "64" "$FL_RC" "--jobs many is a usage error (64)"
 
 test_start "fleet_jobs_error_names_flag"
 assert_contains "--jobs" "$FL_OUT" "the error names the flag"

@@ -22,8 +22,7 @@ source "$SCRIPT_DIR/ai/ai-install.sh"
 source "$SCRIPT_DIR/ai/ai-probe.sh"
 
 inv_usage() {
-  echo "Usage: dot ai inventory show [--json]"
-  exit 1
+  dot_usage_error "unknown subcommand" "dot ai inventory show [--json]"
 }
 
 # inv_version BIN: the first dotted number in BIN's version line, or nothing.

@@ -192,9 +192,7 @@ cmd_new() {
   local project_name="${2:-}"
 
   if [ -z "$template_lang" ] || [ -z "$project_name" ]; then
-    echo "Usage: dot tool new <lang> <name>"
-    echo "Available templates: python, go, node, packer, molecule"
-    exit 1
+    dot_usage_error "missing template or name (templates: python, go, node, packer, molecule)" "dot tool new <lang> <name>"
   fi
 
   # Validate inputs to prevent path traversal

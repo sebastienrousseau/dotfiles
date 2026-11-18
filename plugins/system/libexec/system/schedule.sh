@@ -180,8 +180,8 @@ dot_system_schedule_set() {
   case "$when" in
     weekly | daily | off) ;;
     *)
-      printf 'Usage: dot system schedule set weekly|daily|off\n' >&2
-      return 1
+      printf 'dot: unknown schedule %s\nusage: dot system schedule set weekly|daily|off\n' "'$when'" >&2
+      return 64
       ;;
   esac
   if ! backend="$(_dot_system_backend)"; then

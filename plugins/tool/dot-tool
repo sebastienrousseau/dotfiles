@@ -4,8 +4,9 @@
 #
 # dot-tool: the entry of the tool plugin (ADR-020 N2). bin/dot runs it with
 # the words after `dot tool`. Its declared spellings become the subcommands
-# of libexec/tool.sh (mise through `env`); any other word, or none, goes to
-# `env` as it always has.
+# of libexec/tool.sh (mise through `env`). No word, or only flags, goes to
+# `env` as it always has; any other word is not a command (exit 127) rather
+# than a mise task name.
 
 set -euo pipefail
 
@@ -44,6 +45,14 @@ tool_verb() {
   esac
 }
 
+# tool_unknown WORD: WORD is no verb of the manifest; the SDK says so (127).
+tool_unknown() {
+  # shellcheck source-path=SCRIPTDIR source=../../lib/dot/sdk.sh
+  source "${DOT_SDK:-$_TOOL_DIR/../../lib/dot}/sdk.sh"
+  dot_unknown_command tool "tool $1"
+}
+
 [[ "${1:-}" != list ]] || tool_list "${@:2}"
 tool_verb "$@"
+[[ -z "${1:-}" || "${1:-}" == -* ]] || tool_unknown "$1"
 tool_module env "$@"

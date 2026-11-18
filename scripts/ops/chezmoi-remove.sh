@@ -5,7 +5,7 @@ set -euo pipefail
 
 if [[ $# -lt 1 ]]; then
   echo "Usage: dot remove <path> [--source] [--dry-run]" >&2
-  exit 1
+  exit 64 # usage error (ADR-020 N10)
 fi
 
 remove_source=0

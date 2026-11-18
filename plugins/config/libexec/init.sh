@@ -127,8 +127,7 @@ EOF
         break
         ;;
       -*)
-        ui_err "Unknown flag" "$1"
-        return 1
+        dot_usage_error "unknown flag '$1'" "dot config init <github-user|owner/repo|url> [--dry-run] [--no-apply] [--force] [--yes]"
         ;;
       *)
         if [[ -n "$user_arg" ]]; then

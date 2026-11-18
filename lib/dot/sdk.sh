@@ -159,6 +159,26 @@ die() {
   exit "${2:-1}"
 }
 
+## dot_usage_error <message> [usage] — A usage error (ADR-020 N10): print
+## "dot: <message>" and, when given, the usage line to stderr, then exit 64.
+## For a bad flag, a missing argument or an argument out of range; a word
+## that is not a command is dot_unknown_command's.
+dot_usage_error() {
+  printf 'dot: %s\n' "$1" >&2
+  [[ -z "${2:-}" ]] || printf 'usage: %s\n' "$2" >&2
+  exit 64
+}
+
+## dot_unknown_command <help-topic> <words> — WORDS name no command: print
+## the one message lib/dot/names.sh gives for that and exit 127 (N10).
+dot_unknown_command() {
+  if ! declare -F dot_not_a_command >/dev/null; then
+    # shellcheck source=names.sh
+    source "$_DOT_SDK_DIR/names.sh"
+  fi
+  dot_not_a_command "$@"
+}
+
 # Print warning message
 warn() {
   ui_warn "$1" >&2

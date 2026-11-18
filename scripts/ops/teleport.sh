@@ -10,8 +10,8 @@ set -euo pipefail
 TARGET="${1:-}"
 
 if [[ -z "$TARGET" ]]; then
-  echo "Usage: dot fleet push user@host"
-  exit 1
+  echo "Usage: dot fleet push user@host" >&2
+  exit 64 # usage error (ADR-020 N10)
 fi
 
 # Validate SSH target: must be user@host format, no shell metacharacters

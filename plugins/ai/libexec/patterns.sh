@@ -18,9 +18,7 @@ command="${1:-list}"
 name="${2:-}"
 
 _pattern_usage() {
-  echo "Usage: dot ai pattern list|show|edit [name]"
-  echo "       dot ai pattern export --hc [--agent AGENT] [name...]"
-  exit 1
+  dot_usage_error "unknown or incomplete pattern command" "dot ai pattern list|show|edit [name] | dot ai pattern export --hc [--agent AGENT] [name...]"
 }
 
 # _pattern_names: every pattern, one name a line.
@@ -90,8 +88,7 @@ _pattern_export() {
 _view_pattern() {
   local pat_name="$1" pattern_file
   if [[ -z "$pat_name" ]]; then
-    ui_err "Missing pattern name" "Usage: dot ai pattern show <name>"
-    exit 1
+    dot_usage_error "missing pattern name" "dot ai pattern show <name>"
   fi
   pattern_file="$PATTERN_DIR/${pat_name}.md"
   if [[ ! -f "$pattern_file" ]]; then
@@ -118,8 +115,7 @@ case "$command" in
     ;;
   edit)
     if [[ -z "$name" ]]; then
-      ui_err "Missing pattern name" "Usage: dot ai pattern edit <name>"
-      exit 1
+      dot_usage_error "missing pattern name" "dot ai pattern edit <name>"
     fi
     pattern_file="$PATTERN_DIR/${name}.md"
     ${EDITOR:-nvim} "$pattern_file"

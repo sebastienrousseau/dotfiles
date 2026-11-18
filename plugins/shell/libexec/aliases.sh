@@ -47,7 +47,7 @@ _aliases_list() {
 _aliases_search() {
   local query="${1:-}" results name value file line
   if [[ -z "$query" ]]; then
-    die "Usage: dot shell alias list <term>"
+    dot_usage_error "missing or unknown argument" "dot shell alias list <term>"
   fi
   ui_header "Alias Search"
   ui_info "Query" "$query"
@@ -91,7 +91,7 @@ _aliases_why_deprecation() {
 _aliases_why() {
   local alias_name="${1:-}" rows deprecation="" name value file line
   if [[ -z "$alias_name" ]]; then
-    die "Usage: dot shell alias show <alias>"
+    dot_usage_error "missing or unknown argument" "dot shell alias show <alias>"
   fi
   ui_header "Alias Details"
   ui_info "Alias" "$alias_name"
@@ -157,13 +157,13 @@ _aliases_cheatsheet() {
       --output | -o)
         out="${2:-}"
         if [[ -z "$out" ]]; then
-          die "Usage: dot shell alias export [--output PATH|-]"
+          dot_usage_error "missing or unknown argument" "dot shell alias export [--output PATH|-]"
           return 1 # die exits; this keeps the loop finite if it is stubbed
         fi
         shift 2
         ;;
       *)
-        die "Unknown option for cheatsheet: $1"
+        dot_usage_error "unknown option '$1'" "dot shell alias export [--output PATH|-]"
         return 1
         ;;
     esac
@@ -230,7 +230,7 @@ cmd_aliases() {
     stats) if [[ "${1:-}" == --tiers ]]; then _aliases_tiers; else _aliases_stats; fi ;;
     cheatsheet) _aliases_cheatsheet "$@" ;;
     tiers) _aliases_tiers ;;
-    *) die "Unknown aliases subcommand: $subcommand" ;;
+    *) dot_unknown_command "shell alias" "shell alias $subcommand" ;;
   esac
 }
 
