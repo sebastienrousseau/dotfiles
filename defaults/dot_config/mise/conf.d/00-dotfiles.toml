@@ -163,7 +163,12 @@ uv = "0.13.7"
 # `npm:opencode-ai` is a redundant duplicate using the broken npm optional-dep
 # wrapper pattern — do not reintroduce it.
 opencode = "1.19.6"
-"npm:autohand-cli" = "0.9.11"
+# mise's embedded aube runs no lifecycle scripts unless allow_builds names the
+# package, and refuses packages under 1000 weekly downloads. autohand's
+# postinstall makes node-pty's spawn-helper executable (without it the
+# terminal helper fails), and it is below the threshold: both grants are
+# scoped to autohand-cli alone.
+"npm:autohand-cli" = { version = "0.9.11", allow_low_downloads = true, allow_builds = ["autohand-cli"] }
 "npm:@qwen-code/qwen-code" = "0.28.0"
 "npm:@guizmo-ai/zai-cli" = "0.3.5"
 # "pipx:mistral-vibe" = "latest"  # disabled 2026-05-12: dep `mistralai` quarantined on PyPI; re-enable when restored

@@ -51,6 +51,26 @@ drift="$(pin_drift "$WORK/conf.toml" "$WORK/data.toml" "$WORK/roster.toml")"
 assert_equals "npm:example-cli conf.d=latest pin=1.0.0" "$drift" \
   "a floating pinned tool is named; a matching one through the roster and an unpinned one are not"
 
+# mise installs npm: tools through its embedded aube, which runs no package's
+# lifecycle scripts unless the tool's `allow_builds` names it, and refuses a
+# package under 1000 weekly downloads unless `allow_low_downloads` approves
+# it. autohand-cli needs both: its postinstall marks node-pty's spawn-helper
+# executable, and it is below the download threshold. The grant stays scoped
+# to that one package; a blanket `allow_builds = true` would run every
+# dependency's scripts.
+build_grants() {
+  python3 - "$1" <<'PY'
+import sys, tomllib
+for name, spec in tomllib.load(open(sys.argv[1], "rb"))["tools"].items():
+    if isinstance(spec, dict) and "allow_builds" in spec:
+        print(f"{name} builds={spec['allow_builds']} low={spec.get('allow_low_downloads', False)}")
+PY
+}
+
+test_start "autohand_alone_may_run_its_install_scripts"
+assert_equals "npm:autohand-cli builds=['autohand-cli'] low=True" "$(build_grants "$CONF")" \
+  "only autohand-cli is granted install scripts, scoped to its own package"
+
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
 [[ "$TESTS_FAILED" -eq 0 ]]
