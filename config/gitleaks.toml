@@ -14,22 +14,22 @@ useDefault = true
 
 # Allowlist patterns that are known false positives.
 #
-# NOTE: keep this as the SINGULAR `[allowlist]` table. The `[[allowlists]]`
-# array form is newer: gitleaks 8.24.3 (pinned by gitleaks-action in CI)
-# silently IGNORES it — the allowlist has no effect and the scan fails —
-# while gitleaks >= 8.30 refuses to load a config that mixes both forms.
-# The singular table is the only spelling both versions honour, so every
-# entry belongs in this one table until the CI pin moves.
+# NOTE: keep this as the SINGULAR `[allowlist]` table. gitleaks >= 8.30
+# refuses to load a config that mixes it with the `[[allowlists]]` array
+# form, and 8.24.3 (gitleaks-action's default) silently ignored the array.
+# CI and pre-commit now all run 8.30.1.
+#
+# Scope every exception to the exact value, path or finding. No substring
+# regexes such as `deadbeef`/`cafebabe` and no generic stopwords such as
+# `test`/`example`: gitleaks drops any finding whose secret CONTAINS one,
+# which hid real credentials (a Stripe `sk_test_...` key contains "test").
+# One-off false positives go in .gitleaksignore by fingerprint, with a
+# reason. tests/unit/security/test_gitleaks_config_detection.sh holds this.
 [allowlist]
 description = "Allowlisted patterns for documentation examples"
 
 # Example secrets used in documentation
 regexes = [
-    # Example hex values commonly used in documentation
-    '''cafebabe:deadbeef''',
-    '''cafebabe''',
-    '''deadbeef''',
-
     # Example AWS keys with XXX indicating they're fake
     '''AKIAIMNOJVGFDXXXE4OA''',
 
@@ -58,6 +58,12 @@ regexes = [
     # correctly re-triggers review here.
     '''f6FG\+guRNtT3R36oQFS4oWCx1d10nm\+BoaIL3Tkh1r4''',
 
+    # The security-disclosure GPG key's PUBLIC fingerprint (docs/MAINTAINERS.md,
+    # verify-gpg-wkd.yml pins the same value). Published on purpose via WKD;
+    # generic-api-key matches it once docs/ is scanned. Exact value, so a
+    # key rotation re-triggers review.
+    '''55AFAD364FD9DB3819E61F0C8D688FAFA9144693''',
+
 ]
 
 # Paths to ignore (documentation files with examples)
@@ -65,8 +71,6 @@ paths = [
     # detect-secrets stores one-way hashes of reviewed false positives. Those
     # hashes are scanner metadata, not retrievable credentials.
     '''\.secrets\.baseline''',
-    '''docs/.*\.md''',
-    '''\.github/.*\.md''',
     '''\.github/security-policies/environment-template\.env''',
     # Security tests deliberately embed secret-shaped patterns to prove the
     # atuin history filter / scanners catch them — not real secrets.
@@ -77,16 +81,6 @@ paths = [
 commits = [
     "c26337708b2c87e0f240c643d203da45eb687aff",
     "499ba965458e0052c01bc4fc71c8a2be43a70b3b",
-]
-
-# Stopwords - common words that appear in secrets but are not secrets
-stopwords = [
-    "example",
-    "test",
-    "sample",
-    "placeholder",
-    "dummy",
-    "fake",
 ]
 
 # Additional patterns to detect

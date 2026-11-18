@@ -23,3 +23,8 @@ c07232b6fb2d0051a7d85cfac9c32690430f6ff7:tests/unit/ci/test_pre_commit_audit_sec
 9bb4bbe706e33d758e59d15f706f2be1b76c4172:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:34
 9bb4bbe706e33d758e59d15f706f2be1b76c4172:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:48
 9bb4bbe706e33d758e59d15f706f2be1b76c4172:tests/unit/ci/test_pre_commit_audit_secrets.sh:generic-api-key:49
+# test_enforce_policies_fires.sh feeds a fake one-line OpenSSH private key
+# (body "x") to prove the policy gate fires; not a key. Scoped to the finding:
+# git history (introduced in cc275a76) and the working tree / staged scan.
+cc275a7675abb2970fec303a457649e970562842:tests/regression/test_enforce_policies_fires.sh:private-key:123
+tests/regression/test_enforce_policies_fires.sh:private-key:138
