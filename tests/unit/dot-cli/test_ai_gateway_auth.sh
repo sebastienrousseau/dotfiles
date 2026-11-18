@@ -226,6 +226,21 @@ EOF
   refute_contains "$FAKE_KEY" "$OUT" "the key is never printed"
 }
 
+# `setup` runs under set -e outside any `||`, so a failing key lookup would
+# end it before the upstream verdict: the stored key must be reported.
+case_proxy_setup_reads_dot_secret() {
+  test_start "proxy_setup_reports_the_key_from_dot_secret_on_a_terminal"
+  ln -sf "$WORK/claude" "$WORK/stubs/claude"
+  RC=0
+  OUT="$(env -i PATH="$WORK/stubs" HOME="$WORK/home" XDG_STATE_HOME="$WORK/pxstate" NO_COLOR=1 \
+    "$(command -v perl)" -e 'alarm 20; exec @ARGV' "$(command -v python3)" "$WORK/on_tty.py" \
+    /bin/bash "$PROXY" setup 2>&1 </dev/null)" || RC=$?
+  rm -f "$WORK/stubs/claude"
+  assert_equals "0" "$RC" "setup succeeds with the stored key"
+  assert_contains "upstream: an Anthropic API key is set" "$OUT" "the stored key counts as upstream auth"
+  refute_contains "$FAKE_KEY" "$OUT" "the key is never printed"
+}
+
 case_proxy_passes_the_opt_in() {
   test_start "proxy_start_passes_an_accepted_opt_in_to_the_server"
   rm -f "$WORK/stubs/dot"
@@ -242,6 +257,7 @@ case_opt_in_without_a_terminal
 setup_proxy_stubs
 case_proxy_without_a_key
 case_proxy_reads_dot_secret
+case_proxy_setup_reads_dot_secret
 case_proxy_passes_the_opt_in
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

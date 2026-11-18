@@ -48,6 +48,26 @@ assert_equals "0" "$sc_rc" "the scorecard renders"
 assert_contains "Failures detected (run 'dot doctor fix')" "$sc_out" "the failed Health verdict is on stdout"
 assert_equals "0" "$(grep -v '^+' "$FX/stderr" | grep -c 'Failures detected' || true)" "and not on stderr"
 
+# run_sc: the fixture scorecard; stdout in sc_out, status in sc_rc.
+run_sc() {
+  sc_rc=0
+  sc_out="$(NO_COLOR=1 PATH="$FX/bin:$PATH" bash "$FX/scripts/diagnostics/scorecard.sh" 2>&1 </dev/null)" || sc_rc=$?
+}
+
+test_start "scorecard_health_verdict_follows_warnings"
+probe health.sh '{"score": 100, "warnings": 0, "failures": 0}'
+run_sc
+assert_contains "All checks passing" "$sc_out" "no warnings and no failures pass"
+probe health.sh '{"score": 90, "warnings": 1, "failures": 0}'
+run_sc
+assert_contains "Warnings detected (run 'dot doctor fix')" "$sc_out" "one warning is a warning"
+
+test_start "scorecard_fails_without_a_probe_document"
+probe health.sh ''
+run_sc
+assert_equals "1" "$sc_rc" "an empty probe document fails the scorecard"
+assert_contains "failed to collect JSON metrics" "$sc_out" "and says why"
+
 # Slice 3 (#883): exercise the script under sandbox for line coverage
 cov_exercise_script "$TEST_SCRIPT"
 

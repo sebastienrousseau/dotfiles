@@ -355,6 +355,22 @@ test_start "dotfiles_version_untouched"
 assert_equals "$VERSION_BEFORE" "${DOTFILES_VERSION-unset}" \
   "sourcing the cd aliases leaves DOTFILES_VERSION as it was"
 
+# Test: a directory alias exists only when its directory does
+# (_cd_dir_aliases in defaults/.chezmoitemplates/aliases/cd/cd.aliases.sh)
+test_start "dir_aliases_follow_existing_dirs"
+dir_home="$(mktemp -d)"
+mkdir -p "$dir_home/Code"
+dir_aliases="$(
+  HOME="$dir_home"
+  unalias -a
+  source "$REPO_ROOT/defaults/.chezmoitemplates/aliases/cd/cd.aliases.sh" >/dev/null 2>&1
+  alias
+)"
+assert_contains "alias cod=" "$dir_aliases" "cod is defined when ~/Code exists"
+assert_empty "$(printf '%s\n' "$dir_aliases" | grep -F 'alias dsk=')" \
+  "dsk is absent when ~/Desktop does not exist"
+rm -rf "$dir_home"
+
 # Test: OS detection works
 test_start "os_detection"
 if [[ -n "${DOTFILES_OS:-}" ]]; then

@@ -62,14 +62,15 @@ _provision_scripts() {
 
 # _provision_one <script> <state_dir> <all> <work>: run one script unless
 # it is unchanged (and <all> is 0). Sets _PROVISION_RESULT to "skipped"
-# or its exit status.
+# or its exit status (1 when a template cannot be rendered); fails when
+# the script did.
 _provision_one() {
-  local script="$1" state="$2" all="$3" name run hash rc=0
+  local script="$1" state="$2" all="$3" name run hash
   name="$(basename "$script")"
   _PROVISION_RESULT=1
   if ! run="$(_provision_runnable "$script" "$4")"; then
     echo "     ($name could not be rendered)" >&2
-    return 0
+    return 1
   fi
   hash="$(_provision_sha256 "$run")"
   if [[ "$all" != 1 && "$hash" == "$(_provision_recorded "$state/hashes" "$name")" ]]; then
@@ -77,9 +78,10 @@ _provision_one() {
     return 0
   fi
   echo "   → $name"
-  DOTFILES_SOURCE_DIR="$_PROVISION_SOURCE" bash "$run" || rc=$?
-  [[ $rc -ne 0 ]] || _provision_record "$state/hashes" "$name" "$hash"
-  _PROVISION_RESULT="$rc"
+  _PROVISION_RESULT=0
+  DOTFILES_SOURCE_DIR="$_PROVISION_SOURCE" bash "$run" || _PROVISION_RESULT=$?
+  [[ $_PROVISION_RESULT -eq 0 ]] || return 1
+  _provision_record "$state/hashes" "$name" "$hash"
 }
 
 # _provision_report <failed>: name each failed script (one per line).
@@ -102,10 +104,9 @@ run_provision() {
   : >"$state/status"
   while IFS= read -r script <&3; do
     name="$(basename "$script")"
-    _provision_one "$script" "$state" "$all" "$work"
-    printf '%s %s\n' "$name" "$_PROVISION_RESULT" >>"$state/status"
-    [[ "$_PROVISION_RESULT" == skipped || "$_PROVISION_RESULT" == 0 ]] ||
+    _provision_one "$script" "$state" "$all" "$work" ||
       failed+="  $name (exit $_PROVISION_RESULT)"$'\n'
+    printf '%s %s\n' "$name" "$_PROVISION_RESULT" >>"$state/status"
   done 3< <(_provision_scripts "$prov_dir")
   rm -rf "$work"
   [[ -z "$failed" ]] && return 0

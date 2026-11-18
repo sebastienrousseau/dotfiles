@@ -75,4 +75,22 @@ out="$(DOT_BENCH_BASELINE="$XDG_CACHE_HOME/dotfiles/startup-baseline-fail.txt" \
 assert_not_equals "0" "$rc" "a crashing dot command exits non-zero"
 assert_contains "exited" "$out" "and the log names the failing run"
 
+# The checkout's bin/dot wins over a `dot` on PATH; PATH's is the fallback
+# only when the checkout's is not executable. A fixture tree holds a copy of
+# the bench and a stub bin/dot; another stub `dot` sits on PATH.
+test_start "prefers_the_checkout_dot_over_path"
+fx="$XDG_CACHE_HOME/bench-fx"
+mkdir -p "$fx/tools/ci" "$fx/bin" "$fx/path"
+cp "$SCRIPT_FILE" "$fx/tools/ci/dot-cli-startup-bench.sh"
+printf '#!/bin/sh\nexit 0\n' | tee "$fx/bin/dot" >"$fx/path/dot"
+chmod +x "$fx/bin/dot" "$fx/path/dot"
+bench_binary() {
+  DOT_BENCH_BASELINE="$fx/baseline.txt" PATH="$fx/path:$PATH" \
+    bash "$fx/tools/ci/dot-cli-startup-bench.sh" --runs 1 --budget-ms 100000 2>&1 |
+    sed -n 's/^  binary : //p'
+}
+assert_equals "$fx/bin/dot" "$(bench_binary)" "an executable checkout dot is used"
+chmod -x "$fx/bin/dot"
+assert_equals "$fx/path/dot" "$(bench_binary)" "a non-executable one falls back to PATH"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

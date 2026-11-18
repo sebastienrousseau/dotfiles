@@ -55,6 +55,10 @@ if command -v plutil >/dev/null 2>&1; then
   assert_equals "0" "$rc" "a valid property list"
 fi
 
+# text_logs: the text_log events of every domain log naming the watch log.
+text_logs() { cat "$WORK"/home/.local/state/dot/*/log.jsonl 2>/dev/null | grep '"event":"text_log"' | grep -c 'ai/watch.log'; }
+assert_equals "1" "$(text_logs)" "on (launchd) points the logs at watch.log"
+
 test_start "macos_status_and_off"
 assert_equals "dot ai watch: loaded (launchd)" "$(watch Darwin service status)" "a loaded agent"
 assert_equals "dot ai watch: not loaded (launchd)" "$(FAIL_launchctl=113 watch Darwin service)" \
@@ -66,7 +70,9 @@ assert_file_not_exists "$PLIST" "and deletes it"
 
 test_start "linux_on_writes_and_starts_the_service"
 : >"$WORK/calls"
+rm -f "$WORK"/home/.local/state/dot/*/log.jsonl
 assert_equals "dot ai watch: on (systemd)" "$(watch Linux service on)" "reports it"
+assert_equals "0" "$(text_logs)" "systemd keeps the output in the journal: no watch.log pointer"
 assert_equals "systemctl --user daemon-reload|systemctl --user enable --now dot-ai-watch.service" "$(calls)" \
   "reloads, then enables and starts it"
 unit="$(cat "$UNIT" 2>/dev/null)"

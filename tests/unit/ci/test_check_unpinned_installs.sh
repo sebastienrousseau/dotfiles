@@ -46,6 +46,8 @@ assert_equals "1|1|1" "$(fixture npm1 install/provision/run_onchange_15-a.sh.tmp
 test_start "allows_versioned_npm_global_install"
 assert_equals "0|0" "$(fixture npm4 install/provision/run_onchange_15-d.sh.tmpl 'npm install -g eslint_d@15.1.0 "@fsouza/prettierd@0.29.0" 2>&1')|$(fixture npm5 install/provision/run_onchange_15-e.sh.tmpl 'npm install --save-dev prettier')" \
   "exact versions pass, and a project-local npm install is out of scope"
+assert_equals "0" "$(fixture npm6 install/provision/run_onchange_15-f.sh.tmpl 'npm install --save-dev left-pad-g')" \
+  "a -g ending a package name is not the global flag"
 
 test_start "flags_cargo_install_without_locked"
 assert_equals "1" "$(fixture cargo install/provision/run_onchange_26-rust.sh.tmpl '  cargo install "$package" || true')" \
