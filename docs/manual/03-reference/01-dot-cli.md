@@ -236,8 +236,11 @@ Measure heavy-layer (nvm, rbenv, direnv) readiness time.
 ### `dot ai`
 
 The cockpit for your AI-CLI fleet. Bare `dot ai` opens a Bubble Tea TUI;
-`dot ai run` runs a one-shot; `dot ai gateway serve` serves your Claude
-subscription locally to any Anthropic/OpenAI-protocol tool.
+`dot ai run` runs a one-shot; `dot ai gateway serve` gives any
+Anthropic/OpenAI-protocol tool a local Claude endpoint on your Anthropic API
+key (`ANTHROPIC_API_KEY` or `dot secret`). Running the tools on your Claude
+subscription is an explicit opt-in, `DOT_AI_GATEWAY_SUBSCRIPTION=1`, which
+prints Anthropic's terms on every start ([AI.md](../../AI.md)).
 
 ```
 dot ai                               # open the cockpit (TUI)

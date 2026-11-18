@@ -28,7 +28,7 @@ for pattern in "$repo_root"/dot_config/ai/patterns/*.md; do
 done
 
 printf '\nLocal Claude gateway (dot ai serve):\n'
-printf '  Serves your Claude subscription over the Anthropic (/v1/messages)\n'
+printf '  Serves Claude, on your ANTHROPIC_API_KEY, over the Anthropic (/v1/messages)\n'
 printf '  and OpenAI (/v1/chat/completions) protocols at http://127.0.0.1:3456.\n'
 
 # Verify the AI command modules parse.
