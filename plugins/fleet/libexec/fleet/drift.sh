@@ -151,10 +151,10 @@ _fleet_drift_host() {
   rc="$(cat "$dir/$n.rc")"
   out="$(cat "$dir/$n.out" 2>/dev/null || true)"
   if [[ "$rc" == refused || "$rc" == 255 ]]; then
-    ui_err "$name" "no answer ($(head -1 "$dir/$n.err"))"
+    ui_fail "$name" "no answer ($(head -1 "$dir/$n.err"))"
     return 1
   elif [[ "$out" != *'"schema":"ai/inventory.v1"'* ]]; then
-    ui_err "$name" "no inventory (dot config update there)"
+    ui_fail "$name" "no inventory (dot config update there)"
     return 1
   fi
   lines="$(jq -r --arg sha "$4" '.drift[].message,

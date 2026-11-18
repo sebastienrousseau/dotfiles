@@ -53,7 +53,7 @@ verdict() {
 # health_verdict: failures are a failed result row (stdout, ui_fail).
 health_verdict() {
   if [[ "$health_failures" -gt 0 ]]; then
-    ui_err "Health" "Failures detected (run 'dot doctor fix')"
+    ui_fail "Health" "Failures detected (run 'dot doctor fix')"
   elif [[ "$health_warnings" -gt 0 ]]; then
     ui_warn "Health" "Warnings detected (run 'dot doctor fix')"
   else

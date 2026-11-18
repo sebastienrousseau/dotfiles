@@ -100,7 +100,7 @@ _health_render() {
     case "$status" in
       pass) ui_ok "$name" ;;
       warn) ui_warn "$name" "$message" ;;
-      fail) ui_err "$name" "$message" ;;
+      fail) ui_fail "$name" "$message" ;;
     esac
     return 0
   fi

@@ -97,6 +97,15 @@ assert_contains "Connection refused" "$OUT" "a host that did not answer, and why
 assert_contains "no inventory (dot config update there)" "$OUT" "a host whose dot has no inventory"
 assert_contains "1 of 4 hosts in step" "$OUT" "a summary"
 
+test_start "failed_host_rows_stay_on_stdout"
+# A host that did not answer is a result row: stdout, not stderr (ui_fail).
+hosts down=u@down.test old=u@old.test
+SOUT="$(env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="$WORK/bin:$WORK/jq:/usr/bin:/bin" FLEET_REMOTE="$WORK/remote" \
+  NO_COLOR=1 TERM=dumb LC_ALL=C bash "$REPO_ROOT/bin/dot" fleet drift show --agents 2>"$WORK/drift.err" </dev/null)" || true
+assert_contains "no answer (ssh: connect to host down.test port 22: Connection refused)" "$SOUT" "the host that did not answer is on stdout"
+assert_contains "no inventory (dot config update there)" "$SOUT" "the host without an inventory is on stdout"
+assert_equals "0" "$(grep -vE '^\++' "$WORK/drift.err" | grep -c 'no answer\|no inventory' || true)" "neither row on stderr"
+
 test_start "no_policy_here_is_no_policy_drift"
 rm -f "$POLICY"
 hosts beta=u@beta.test gamma=u@gamma.test

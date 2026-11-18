@@ -473,8 +473,9 @@ assert_file_contains "$OUT" '"check":"Shell startup time","status":"warn"' "unpa
 # shell's xtrace therefore lands on the pty with the report, so the records
 # are split back out — replayed on fd 2 for the aggregator, and kept out of
 # the text the assertions read.
+# A second argument sends health.sh's stderr to that file instead.
 tty_health() {
-  local bin="$1" inner
+  local bin="$1" inner errto="${2:+ 2>'$2'}"
   inner="$WORK/tty_inner.sh"
   cat >"$inner" <<EOF
 export PATH='$bin'
@@ -483,7 +484,7 @@ export XDG_CONFIG_HOME='$SANDBOX_HOME/.config'
 export XDG_DATA_HOME='$SANDBOX_HOME/.local/share'
 export XDG_STATE_HOME='$SANDBOX_HOME/.local/state'
 export TERM=xterm
-'$REAL_BASH' '$SCRIPT_FILE'
+'$REAL_BASH' '$SCRIPT_FILE'$errto
 echo "health-rc=\$?" >'$WORK/tty.rc'
 EOF
   rm -f "$WORK/tty.rc"
@@ -543,6 +544,18 @@ if command -v script >/dev/null 2>&1; then
   ln -sf "$FULL_BIN/gum" "$GUM_ONLY_BIN/gum"
   tty_health "$GUM_ONLY_BIN"
   assert_file_contains "$OUT" "Needs attention" "a bare environment renders the low-score band"
+else
+  _fail "script(1) not found"
+fi
+
+test_start "tty_failed_rows_stay_on_stdout"
+# The gum renderer's failed rows are results: stdout, not stderr (ui_fail).
+if command -v script >/dev/null 2>&1; then
+  new_home ttyfail
+  tty_health "$GUM_ONLY_BIN" "$WORK/tty.err"
+  grep -E '^\++@COV@:' "$WORK/tty.err" >&2
+  assert_true "grep -qE '✗.* Chezmoi installed +Not installed' '$OUT'" "a failed check row reaches stdout"
+  assert_equals "0" "$(grep -vE '^\++' "$WORK/tty.err" | grep -c '✗' || true)" "no failed row on stderr"
 else
   _fail "script(1) not found"
 fi
