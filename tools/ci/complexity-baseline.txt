@@ -21,7 +21,6 @@
   33   39   35.4  149     0 bin/dot-theme-sync::reload_desktop
   17   19   28.7   43     0 bin/dot-theme-sync::reload_ghostty
   11   11   20.7   33     0 bin/dot-theme-sync::reload_tmux
-  14    9   27.4   60   342 bin/dot::<top>
   20   24   31.1   39     0 bin/dot::_resolve_source_dir
   20   20    4.2   99    99 defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh::<top>
   19   27   29.6   53     0 defaults/.chezmoitemplates/aliases/cd/cd-core.aliases.sh::cd_with_history
@@ -87,10 +86,10 @@
   16   12   25.4   50     0 lib/dot/ui.sh::ui_table_end
   12   11   35.2   53     0 lib/dot/verified-download.sh::download_verified_asset
    9    8   32.9   46     0 lib/dot/verified-download.sh::download_verified_script
-   1    0    1.0    1   518 plugins/agent/libexec/agent.sh::<top>
+   1    0    1.0    1   517 plugins/agent/libexec/agent.sh::<top>
   16    5   25.7   27     0 plugins/agent/libexec/agent.sh::cmd_mode
   12   12   25.8   22     0 plugins/agent/libexec/agents.sh::_agents_repo_root
-  18   21   43.4  163     0 plugins/agent/libexec/agents.sh::cmd_agents
+  18   21   42.8  161     0 plugins/agent/libexec/agents.sh::cmd_agents
   37   19   33.4   28     0 plugins/ai/libexec/ai/ai-commands.sh::_ai_invoke_provider
   12   11   23.7   24     0 plugins/ai/libexec/ai/ai-commands.sh::cmd_ai_install
   11   10   33.7   42     0 plugins/cli/libexec/registry.sh::_registry_install
@@ -103,7 +102,6 @@
   23   19   31.2  148     0 plugins/tool/libexec/env-emit.sh::dot_env_emit
   23   21   25.3   84     0 plugins/tool/libexec/tool.sh::apply_template_security_baseline
   17   26   28.3   77     0 plugins/tool/libexec/tool.sh::cmd_env_mise
-  11   11   24.9   56     0 plugins/tool/libexec/tool.sh::cmd_new
   11   18   17.4   55     0 plugins/tool/libexec/tool.sh::cmd_tools
   22   22   36.8  109   109 scripts/diagnostics/attest-verify.sh::<top>
   13   11   27.4   73   292 scripts/diagnostics/benchmark.sh::<top>
