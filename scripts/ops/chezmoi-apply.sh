@@ -187,8 +187,10 @@ _apply_check_flags() {
   for a in "$@"; do
     [[ "$a" != -- ]] || return 0
     [[ "$a" == -* ]] || continue
+    # `|| true`: no chezmoi, or no flags listed, is an empty list (the
+    # assignment ends an || list, so set -e would end the apply silently).
     [[ -n "$known" ]] || known=" $(chezmoi apply --help 2>/dev/null |
-      grep -oE -- '(^|[ ,])--?[A-Za-z][A-Za-z-]*' | tr -d ' ,' | tr '\n' ' ')"
+      grep -oE -- '(^|[ ,])--?[A-Za-z][A-Za-z-]*' | tr -d ' ,' | tr '\n' ' ' || true)"
     [[ "$known" != " " ]] || return 0
     [[ "$known" == *" ${a%%=*} "* ]] ||
       dot_usage_error "unknown flag '$a' for 'dot config apply'" "dot config apply [chezmoi apply flags] [-- targets]"

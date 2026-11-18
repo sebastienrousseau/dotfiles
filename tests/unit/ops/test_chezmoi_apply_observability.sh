@@ -75,6 +75,16 @@ apply --dry-run -- --not-a-flag
 assert_equals "0" "$RC" "exit 0"
 assert_contains "chezmoi apply --dry-run -- --not-a-flag" "$(cat "$D/calls")" "passed on to chezmoi"
 
+test_start "flags_pass_unchecked_when_chezmoi_lists_none"
+# A chezmoi whose `apply --help` lists no flags (an old or stub build) gives
+# nothing to check against: the apply goes on, rather than exiting 1 with no
+# message because the empty grep failed under set -e.
+new_case
+sed -i.orig 's/^  "apply --help").*$/  "apply --help") exit 0 ;;/' "$D/stubs/chezmoi"
+apply --dry-run
+assert_equals "0" "$RC" "exit 0"
+assert_contains "chezmoi apply --dry-run" "$(cat "$D/calls")" "passed on to chezmoi"
+
 test_start "failed_apply_logs_apply_end_with_status_and_ms"
 new_case
 STUB_RC=3 apply
