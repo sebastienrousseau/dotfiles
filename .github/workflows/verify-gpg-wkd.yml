@@ -110,10 +110,13 @@ jobs:
           echo "WKD fingerprint: $fpr"
 
       - name: Compare fingerprints
+        env:
+          IN_REPO_FPR: ${{ steps.in_repo.outputs.fpr }}
+          WKD_FPR: ${{ steps.wkd.outputs.fpr }}
         run: |
           set -euo pipefail
-          in_repo="${{ steps.in_repo.outputs.fpr }}"
-          wkd="${{ steps.wkd.outputs.fpr }}"
+          in_repo="$IN_REPO_FPR"
+          wkd="$WKD_FPR"
           expected="55AFAD364FD9DB3819E61F0C8D688FAFA9144693"
           if [[ "$wkd" == "UNPUBLISHED" ]]; then
             echo "::warning::WKD cross-check skipped (key not published); validating in-repo ↔ pinned only."

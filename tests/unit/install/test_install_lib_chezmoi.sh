@@ -61,6 +61,37 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: should check existing install"
 fi
 
+# Runs install_chezmoi_binary with the download mocked: the "installer"
+# records the arguments it was given. Prints them.
+run_binary_install_args() {
+  local work bin_dir
+  work="$(mktemp -d)"
+  bin_dir="$work/bin"
+  (
+    CHEZMOI_VERSION="$1"
+    [[ -n "$CHEZMOI_VERSION" ]] || unset CHEZMOI_VERSION
+    source "$CHEZMOI_LIB"
+    download_verified_script() {
+      printf '#!/bin/sh\nprintf "%%s\\n" "$@" >"%s/args"\n' "$work" >"$2"
+    }
+    install_chezmoi_binary "$bin_dir" >/dev/null 2>&1
+  ) || true
+  tr '\n' ' ' <"$work/args" 2>/dev/null
+  rm -rf "$work"
+}
+
+# get.chezmoi.io must be told the version (-t) and the directory (-b) as
+# options; a leading `--` made it ignore both and float to the latest tag.
+test_start "chezmoi_lib_binary_install_pins_tag"
+args="$(run_binary_install_args "")"
+assert_contains "-t v2.74.1 " "$args" "installer is pinned to the repo's chezmoi version"
+assert_contains "-b " "$args" "installer receives -b as an option"
+assert_equals "-b" "${args%% *}" "options come first; no '--' that ends option parsing"
+
+test_start "chezmoi_lib_binary_install_honours_chezmoi_version"
+args="$(run_binary_install_args "2.80.0")"
+assert_contains "-t v2.80.0 " "$args" "CHEZMOI_VERSION overrides the pinned tag"
+
 # Test: shellcheck compliance
 echo ""
 echo "Chezmoi library tests completed."

@@ -141,7 +141,14 @@ time_one_run() {
 # callers/tests that reference time_shell_startup; routes to time_one_run.
 time_shell_startup() { time_one_run zsh; }
 
-# Measure a shell across $RUNS iterations, return "mean min max".
+# _perf_median <n...>: the middle value (lower middle for an even count).
+_perf_median() {
+  printf '%s\n' "$@" | sort -n | awk -v n="$#" 'NR == int((n + 1) / 2) { print; exit }'
+}
+
+# Measure a shell across $RUNS iterations, return "mean min max median".
+# The median is what gates (target, score, baseline): one slow outlier on a
+# shared runner moves a short-run mean but not the median.
 measure_shell() {
   local shell_name="$1" sum=0 min=999999 max=0 t
   local times=()
@@ -154,7 +161,7 @@ measure_shell() {
     [[ "$t" -lt "$min" ]] && min="$t"
     [[ "$t" -gt "$max" ]] && max="$t"
   done
-  echo "$((sum / RUNS)) $min $max"
+  echo "$((sum / RUNS)) $min $max $(_perf_median "${times[@]}")"
 }
 
 calc_score() {
@@ -170,15 +177,23 @@ calc_score() {
   echo $((100 - (mean_ms - TARGET_MS) * 100 / (MAX_MS - TARGET_MS)))
 }
 
+# run_profile: zprof of a real interactive zsh startup. A bootstrap
+# ZDOTDIR loads zsh/zprof before any startup file, then hands back to the
+# user's own .zshenv (which sets the real ZDOTDIR for .zshrc); `-i` makes
+# the interactive config run instead of returning early, and the -c
+# command prints the profile once startup is done.
 run_profile() {
-  zsh -c '
-    zmodload zsh/zprof
-# shellcheck disable=SC1091
-    source ~/.zshenv 2>/dev/null
-# shellcheck disable=SC1091
-    source ~/.config/zsh/.zshrc 2>/dev/null
-    zprof
-  ' 2>/dev/null | head -20
+  local boot
+  boot="$(mktemp -d)"
+  _cleanup_files+=("$boot/.zshenv")
+  cat >"$boot/.zshenv" <<'ZSHENV'
+zmodload zsh/zprof
+ZDOTDIR="${_PERF_ORIG_ZDOTDIR:-$HOME}"
+[[ -r "$ZDOTDIR/.zshenv" ]] && source "$ZDOTDIR/.zshenv"
+ZSHENV
+  _PERF_ORIG_ZDOTDIR="${ZDOTDIR:-}" ZDOTDIR="$boot" \
+    zsh -i -c 'zprof' </dev/null 2>/dev/null | head -20
+  rm -rf "$boot"
 }
 
 # Discover installed shells. SHELL_FILTER (--shell <name>) restricts to one.
@@ -199,18 +214,19 @@ _perf_discover() {
 }
 
 # Measure each shell once into parallel arrays.
-declare -a shell_names shell_means shell_mins shell_maxs shell_targets shell_passes
+declare -a shell_names shell_means shell_medians shell_mins shell_maxs shell_targets shell_passes
 _perf_measure() {
-  local s m mn mx t
+  local s m mn mx md t
   for s in "${shells_to_measure[@]}"; do
-    read -r m mn mx <<<"$(measure_shell "$s")"
+    read -r m mn mx md <<<"$(measure_shell "$s")"
     t=$(shell_target_for "$s")
     shell_names+=("$s")
     shell_means+=("$m")
+    shell_medians+=("$md")
     shell_mins+=("$mn")
     shell_maxs+=("$mx")
     shell_targets+=("$t")
-    if [[ "$m" -le "$t" ]]; then
+    if [[ "$md" -le "$t" ]]; then
       shell_passes+=("1")
     else
       shell_passes+=("0")
@@ -220,26 +236,25 @@ _perf_measure() {
 
 # Primary "score" continues to use the zsh measurement (when available)
 # so existing dashboards / JSON consumers keep their reference number.
+# Sets mean (reported) and median (scored) for that shell.
 _perf_primary_mean() {
-  local i
-  mean=0
+  local i ref=0
   for i in "${!shell_names[@]}"; do
     if [[ "${shell_names[$i]}" == "zsh" ]]; then
-      mean="${shell_means[$i]}"
+      ref="$i"
       break
     fi
   done
-  # _perf_discover exits when nothing is measurable, so shell_means[0] exists.
-  if [[ "$mean" -eq 0 ]]; then
-    mean="${shell_means[0]}"
-  fi
+  # _perf_discover exits when nothing is measurable, so index 0 exists.
+  mean="${shell_means[$ref]}"
+  median="${shell_medians[$ref]}"
 }
 
 # -----------------------------------------------------------------------------
 # Baseline persistence + regression detection (closes part of #863).
 # Stored at $XDG_CACHE_HOME/dotfiles/perf-baseline.json. The file is a
-# JSON object mapping shell name → recorded mean (ms). `--baseline`
-# overwrites it with the current measurement; default behavior reads
+# JSON object mapping shell name → recorded median (ms). `--baseline`
+# overwrites it with the current medians; default behavior reads
 # it (if present) and warns when any shell regresses by more than
 # DOTFILES_PERF_REGRESSION_PCT (default 10%).
 # -----------------------------------------------------------------------------
@@ -253,7 +268,7 @@ _perf_write_baseline() {
       "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$BASELINE_REGRESSION_PCT"
     for i in "${!shell_names[@]}"; do
       [[ "$i" -gt 0 ]] && printf ','
-      printf '\n    "%s": %d' "${shell_names[$i]}" "${shell_means[$i]}"
+      printf '\n    "%s": %d' "${shell_names[$i]}" "${shell_medians[$i]}"
     done
     printf '\n  }\n}\n'
   } >"$BASELINE_FILE"
@@ -283,7 +298,7 @@ except Exception:
 _perf_check_baseline() {
   local i
   for i in "${!shell_names[@]}"; do
-    _perf_compare_one "${shell_names[$i]}" "${shell_means[$i]}"
+    _perf_compare_one "${shell_names[$i]}" "${shell_medians[$i]}"
   done
 }
 
@@ -301,12 +316,12 @@ _perf_json_regressions() {
 
 _perf_json() {
   local i
-  printf '{\n  "runs": %d,\n  "target_ms": %d,\n  "max_ms_target": %d,\n  "score": %d,\n  "mean_ms": %d,\n  "regression_count": %d,\n  "shells": {' \
-    "$RUNS" "$TARGET_MS" "$MAX_MS" "$score" "$mean" "${#baseline_warnings[@]}"
+  printf '{\n  "runs": %d,\n  "target_ms": %d,\n  "max_ms_target": %d,\n  "score": %d,\n  "mean_ms": %d,\n  "median_ms": %d,\n  "regression_count": %d,\n  "shells": {' \
+    "$RUNS" "$TARGET_MS" "$MAX_MS" "$score" "$mean" "$median" "${#baseline_warnings[@]}"
   for i in "${!shell_names[@]}"; do
     [[ "$i" -gt 0 ]] && printf ','
-    printf '\n    "%s": {"mean_ms": %d, "min_ms": %d, "max_ms": %d, "target_ms": %d, "pass": %s}' \
-      "${shell_names[$i]}" "${shell_means[$i]}" "${shell_mins[$i]}" "${shell_maxs[$i]}" \
+    printf '\n    "%s": {"mean_ms": %d, "median_ms": %d, "min_ms": %d, "max_ms": %d, "target_ms": %d, "pass": %s}' \
+      "${shell_names[$i]}" "${shell_means[$i]}" "${shell_medians[$i]}" "${shell_mins[$i]}" "${shell_maxs[$i]}" \
       "${shell_targets[$i]}" "$([[ ${shell_passes[$i]} == 1 ]] && echo true || echo false)"
   done
   printf '\n  }'
@@ -314,11 +329,11 @@ _perf_json() {
   printf '\n}\n'
 }
 
-# Aligned table: name (6) | mean (8) | min/max (16) | target (12) | status
+# Aligned table: name (6) | median (8) | min/max (16) | target (12) | status
 _perf_table() {
   local i m t status_marker detail
   for i in "${!shell_names[@]}"; do
-    m="${shell_means[$i]}"
+    m="${shell_medians[$i]}"
     t="${shell_targets[$i]}"
     if [[ "${shell_passes[$i]}" == "1" ]]; then
       status_marker="✓"
@@ -327,7 +342,7 @@ _perf_table() {
       status_marker="✗"
       detail=" — over by $((m - t))ms"
     fi
-    printf '  %s %-6s mean %4dms  (min %3dms, max %3dms)  target %4dms%s\n' \
+    printf '  %s %-6s median %4dms  (min %3dms, max %3dms)  target %4dms%s\n' \
       "$status_marker" "${shell_names[$i]}" "$m" "${shell_mins[$i]}" "${shell_maxs[$i]}" "$t" "$detail"
   done
 }
@@ -423,7 +438,7 @@ _perf_main() {
   _perf_discover
   _perf_measure
   _perf_primary_mean
-  score=$(calc_score "$mean")
+  score=$(calc_score "$median")
   if $WRITE_BASELINE; then
     _perf_write_baseline
   fi

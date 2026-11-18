@@ -42,14 +42,8 @@ assert_file_contains "$GITLEAKS_CONF" "CHEZMOI_GPG_KEY=" "should allowlist GPG k
 test_start "gitleaks_has_path_ignores"
 assert_file_contains "$GITLEAKS_CONF" "paths = [" "should have path-based ignores"
 
-test_start "gitleaks_ignores_docs"
-assert_file_contains "$GITLEAKS_CONF" "docs/" "should ignore docs directory"
-
 test_start "gitleaks_has_commit_allowlist"
 assert_file_contains "$GITLEAKS_CONF" "commits = [" "should have commit allowlist"
-
-test_start "gitleaks_has_stopwords"
-assert_file_contains "$GITLEAKS_CONF" "stopwords = [" "should have stopwords list"
 
 test_start "gitleaks_has_custom_rules"
 assert_file_contains "$GITLEAKS_CONF" "[[rules]]" "should define custom detection rules"

@@ -13,6 +13,7 @@ opens an issue on a regression.
 |--------|----------|--------|
 | `bench.sh` | Shell startup latency per shell (hyperfine), quick pass/fail against target thresholds. Invoked by `dot doctor` when hyperfine is installed. | `scripts/diagnostics/doctor.sh` |
 | `test_perf_budgets.sh` | Every performance budget in one place, tiered, with a runner-calibration factor. **Gating.** | `.github/workflows/ci.yml` (`quality-performance`) |
+| `zsh-bench.sh` | First-prompt and first-command lag of the deployed interactive zsh, through a pty, via [romkatv/zsh-bench](https://github.com/romkatv/zsh-bench) (MIT) fetched at a pinned commit and SHA-256. Median of 16 iterations. **Gating:** fails on >25% and >15 ms over the recorded baseline. zsh only. | `.github/workflows/perf-baseline.yml` |
 | `dot_command_bench.sh` | Cold-start time of every routed `dot` command; the command list is `run-cases.txt`. | `.github/workflows/dot-cli-bench.yml` (`sweep`; records JSON, then `scripts/qa/check-feature-matrix.sh` asserts every command was reached) |
 | `benchmark_runner.sh` | Full performance regression benchmark; writes `benchmark_*.json` results. | `.github/workflows/ci.yml` (`benchmark`, on the weekly schedule and dispatch only; run directly, non-gating) |
 | `regression_check.sh` | Compares the latest `benchmark_*.json` against the previous run. | manual |

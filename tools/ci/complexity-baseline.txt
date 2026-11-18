@@ -74,12 +74,7 @@
   13   21   27.2   38     0 defaults/dot_local/bin/executable_tmux-sessionizer::build_list
   13   16   26.2   41     0 defaults/dot_local/bin/executable_tmux-status::system_linux
   18   17   21.1  141   141 defaults/dot_local/bin/executable_tour::<top>
-   8   17   21.6   38     0 install.sh::install_chezmoi
-  14   16   28.6   45     0 install.sh::install_chezmoi_verified_embedded
-  38   47   50.9  246     0 install.sh::main
-  11   10   18.5   17     0 install.sh::seed_git_identity
   10   16   20.6   43    50 install/lib/hide_menu_entries.sh::<top>
-  19   27   27.7   74   102 install/lib/install_neovim.sh::<top>
   17   19   19.9   36     0 install/lib/installers.sh::archive_paths_are_safe
   11   12   22.9   41    51 install/lib/upgrade_neovim_nightly.sh::<top>
   16   13   28.1   51   115 install/migrate/migrate-v0_2-to-v0_2_503.sh::<top>
@@ -174,7 +169,6 @@
   16   18   35.6   52    52 tools/ci/check-fuzz-harness-self-contained.sh::<top>
   13   15   25.8   36    41 tools/ci/check-remote-installers.sh::<top>
   18    7   15.4   38     0 tools/ci/check-shell-preamble.sh::check_one
-  14   11   37.0   67    79 tools/ci/dot-cli-startup-bench.sh::<top>
   12   15   28.1   42    42 tools/ci/lint-reusable-pins.sh::<top>
   19   17   33.4   59    59 tools/ci/normalize-spdx-headers.sh::<top>
   15   23   34.4  137   175 tools/ci/validate-ci-config.sh::<top>

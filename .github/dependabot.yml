@@ -10,6 +10,11 @@ updates:
     commit-message:
       prefix: "ci"
     open-pull-requests-limit: 10
+    # Release-age gate (7 days, the same policy as mise minimum_release_age):
+    # a version must have been public this long before a version-update PR
+    # proposes it. Security updates are not delayed by cooldown.
+    cooldown:
+      default-days: 7
     labels:
       - "dependencies"
       - "security"
@@ -36,6 +41,11 @@ updates:
     commit-message:
       prefix: "deps"
     open-pull-requests-limit: 10
+    # Release-age gate (7 days, the same policy as mise minimum_release_age):
+    # a version must have been public this long before a version-update PR
+    # proposes it. Security updates are not delayed by cooldown.
+    cooldown:
+      default-days: 7
     labels:
       - "dependencies"
       - "security"
@@ -69,6 +79,11 @@ updates:
     commit-message:
       prefix: "build"
     open-pull-requests-limit: 5
+    # Release-age gate (7 days, the same policy as mise minimum_release_age):
+    # a version must have been public this long before a version-update PR
+    # proposes it. Security updates are not delayed by cooldown.
+    cooldown:
+      default-days: 7
     labels:
       - "dependencies"
       - "security"
@@ -92,6 +107,11 @@ updates:
     commit-message:
       prefix: "build"
     open-pull-requests-limit: 5
+    # Release-age gate (7 days, the same policy as mise minimum_release_age):
+    # a version must have been public this long before a version-update PR
+    # proposes it. Security updates are not delayed by cooldown.
+    cooldown:
+      default-days: 7
     labels:
       - "dependencies"
       - "security"
@@ -106,6 +126,11 @@ updates:
     commit-message:
       prefix: "deps"
     open-pull-requests-limit: 5
+    # Release-age gate (7 days, the same policy as mise minimum_release_age):
+    # a version must have been public this long before a version-update PR
+    # proposes it. Security updates are not delayed by cooldown.
+    cooldown:
+      default-days: 7
     labels:
       - "dependencies"
       - "security"
@@ -128,6 +153,11 @@ updates:
     commit-message:
       prefix: "deps"
     open-pull-requests-limit: 5
+    # Release-age gate (7 days, the same policy as mise minimum_release_age):
+    # a version must have been public this long before a version-update PR
+    # proposes it. Security updates are not delayed by cooldown.
+    cooldown:
+      default-days: 7
     labels:
       - "dependencies"
       - "security"
@@ -149,6 +179,11 @@ updates:
     commit-message:
       prefix: "deps"
     open-pull-requests-limit: 5
+    # Release-age gate (7 days, the same policy as mise minimum_release_age):
+    # a version must have been public this long before a version-update PR
+    # proposes it. Security updates are not delayed by cooldown.
+    cooldown:
+      default-days: 7
     labels:
       - "dependencies"
       - "security"

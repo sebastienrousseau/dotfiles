@@ -50,6 +50,8 @@ printf 'git %s\n' "$*" >>"$TMP_LOG"
 if [[ "${1:-}" == "clone" ]]; then
   mkdir -p "${@: -1}/.git"
 fi
+# HEAD and the tag resolve to the same commit (verify-tag answers 0 below).
+[[ "${1:-}" == "rev-parse" ]] && echo 0123456789abcdef0123456789abcdef01234567 && exit 0
 # `git config --global user.X` answers from STUB_GIT_<X> (unset = no value).
 if [[ "${1:-} ${2:-}" == "config --global" ]]; then
   case "${3:-}" in
@@ -97,8 +99,8 @@ test_start "install_accepts_whole_semver_positional"
 H="$(new_home accept)"
 run_install "$H" 1.2.3
 assert_equals 0 "$RC" "whole version is accepted"
-assert_contains "git clone --depth 1 --branch 1.2.3 " "$(cat "$H/install.log")" \
-  "accepted version is the ref that gets cloned"
+assert_contains "git clone --depth 1 --branch v1.2.3 " "$(cat "$H/install.log")" \
+  "accepted version is the release tag that gets cloned (v-prefixed, as tags are)"
 
 test_start "install_rejects_text_before_version"
 H="$(new_home prefix)"
