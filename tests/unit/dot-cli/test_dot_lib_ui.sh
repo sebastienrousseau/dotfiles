@@ -85,6 +85,15 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: aborted on empty table — ${out:-no output}"
 fi
 
+# Test: ui_err is a diagnostic: stderr only, nothing on stdout (ADR-020 N14)
+test_start "ui_err_writes_to_stderr"
+err_out="$(NO_COLOR=1 bash -c 'source "$1"; ui_err "boom" "detail" 2>/dev/null' _ "$UI_FILE")"
+err_err="$(NO_COLOR=1 bash -c 'source "$1"; ui_err "boom" "detail" 2>&1 >/dev/null' _ "$UI_FILE")"
+assert_equals "" "$err_out" "ui_err prints nothing on stdout"
+assert_contains "boom" "$err_err" "ui_err prints its message on stderr"
+ok_out="$(NO_COLOR=1 bash -c 'source "$1"; ui_ok "fine" 2>/dev/null' _ "$UI_FILE")"
+assert_contains "fine" "$ok_out" "ui_ok stays on stdout"
+
 echo ""
 echo "UI library tests completed."
 # Slice 3 (#883): exercise the script under sandbox for line coverage
