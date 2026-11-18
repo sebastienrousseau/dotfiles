@@ -24,7 +24,9 @@ trap 'rm -rf "$WORK"' EXIT
   echo "dot-policy did not build"
   exit 1
 }
-H="$WORK/home"
+# cd normalises a TMPDIR that ends in "/": dot-policy matches "~" against
+# HOME as given, while the paths it checks are cleaned.
+H="$(cd "$WORK" && pwd)/home"
 mkdir -p "$H"
 
 # decide PRESET MODE TOOL INPUT-JSON: "allow", or dot-policy's reason.
@@ -80,6 +82,45 @@ expect regulated apply Bash '{"command":"go test ./... && cat ~/.ssh/id_ed25519"
 expect regulated apply Bash '{"command":"python3 -c 1"}' deny
 expect regulated apply WebFetch '{"url":"https://github.com/"}' deny
 expect regulated apply Read '{"file_path":"/src/acme/certs/server.key"}' deny
+
+# The credentials dot itself manages are off limits in every preset and
+# mode: the age identity that decrypts every .age secret, chezmoi's config,
+# ~/.netrc, ~/.npmrc, gh's token file, dot's secrets store, the AI gateway
+# token and the macOS keychains. Reads by path, and shell commands that
+# name them, are denied.
+SECRET_PATHS=(
+  "$H/.config/chezmoi/key.txt"
+  "$H/.config/chezmoi/chezmoi.toml"
+  "$H/.netrc"
+  "$H/.npmrc"
+  "$H/.config/gh/hosts.yml"
+  "$H/.config/dotfiles/secrets/store/API_TOKEN.age"
+  "$H/.local/state/dot/ai/serve/gateway.token"
+  "$H/Library/Keychains/login.keychain-db"
+)
+SECRET_COMMANDS=(
+  "cat ~/.config/chezmoi/key.txt"
+  "go test ./... && cat ~/.netrc"
+  "cp ~/.npmrc /tmp/x"
+  "grep oauth ~/.config/gh/hosts.yml"
+  "cat ~/.local/state/dot/ai/serve/gateway.token"
+  "security find-generic-password -s dotfiles.secret.X -w"
+  "security dump-keychain -d"
+  "gh auth token"
+  "chezmoi decrypt ~/.local/share/chezmoi/encrypted_x.age"
+  "age -d -i key.txt secret.age"
+)
+for p in standard strict regulated; do
+  test_start "${p}_denies_dot_managed_secrets"
+  for mode in ask plan apply audit; do
+    for f in "${SECRET_PATHS[@]}"; do
+      expect "$p" "$mode" Read "{\"file_path\":\"$f\"}" deny
+    done
+  done
+  for c in "${SECRET_COMMANDS[@]}"; do
+    expect "$p" apply Bash "{\"command\":\"$c\"}" deny
+  done
+done
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
 [[ "$TESTS_FAILED" -eq 0 ]]

@@ -66,5 +66,32 @@ three. The decision has to come from the hook's output, every time.
 - The schema is the contract later work builds on: budgets (P1.3), the
   policy hash in the inventory (P1.5), and signed policy packs (P1.6).
 
+## Amendment 2026-11-18 (0.2.548): the credentials dot manages
+
+Status: the preset change is Accepted; the default policy is Proposed.
+
+- Every preset in `ai-policy-pack` (1.0.1) denies, in every mode, reads
+  of the credentials dot itself manages: the chezmoi age identity
+  (`~/.config/chezmoi/key.txt`, which decrypts every `.age` secret),
+  `~/.config/chezmoi/chezmoi.*`, `~/.netrc`, `~/.npmrc`,
+  `~/.config/gh/hosts.yml`, dot's secrets store
+  (`~/.config/dotfiles/secrets/**`), the AI gateway token
+  (`~/.local/state/dot/ai/serve/gateway.token`) and `~/Library/Keychains/**`.
+  Apply mode also denies shell commands that name those files or dump
+  them (`security find-generic-password`, `security dump-keychain`,
+  `gh auth token`, `chezmoi decrypt`, `age -d`). As above, this is a
+  guardrail: a command that reaches a secret without naming it is not
+  caught.
+- Proposed: with no `ai-policy.toml`, enforce a built-in floor instead of
+  nothing. The floor is the deny lists above with every tool allowed, not
+  the `standard` preset as it stands: `standard` defaults to `ask`, which
+  allows only read and search, so making it the silent default would deny
+  every shell and write call in each session that never ran
+  `dot agent mode`. The change belongs in `dot cli hook check` (it allows
+  at once when the file is missing) and needs `dot-policy` on the host,
+  so it also inherits the fail-closed rule: a host without Go would deny
+  every call. Both trade-offs need the maintainer's decision before the
+  "With no file, nothing is enforced" rule above changes.
+
 Related: [ADR-020](ADR-020-command-naming-system.md),
 [ADR-022](ADR-022-family-language-go.md).
