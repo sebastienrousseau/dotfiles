@@ -109,9 +109,11 @@ jobs:
           bash tools/release/package-policy-bundles.sh --json >/tmp/policy-bundle.json
 
       - name: Verify SBOM presence
+        env:
+          BUNDLE_VERSION: ${{ inputs.bundle_version }}
         run: |
           set -euo pipefail
-          sbom_path="dist/policy-bundles/policy-bundles-${{ inputs.bundle_version }}/sbom.cyclonedx.json"
+          sbom_path="dist/policy-bundles/policy-bundles-${BUNDLE_VERSION}/sbom.cyclonedx.json"
           if [[ -f "$sbom_path" ]]; then
             jq empty "$sbom_path"
             echo "SBOM verified: $sbom_path"

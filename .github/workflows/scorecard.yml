@@ -132,9 +132,10 @@ jobs:
           steps.score.outputs.score != ''
         env:
           GH_TOKEN: ${{ github.token }}
+          SCORE: ${{ steps.score.outputs.score }}
         run: |
           set -euo pipefail
-          score="${{ steps.score.outputs.score }}"
+          score="$SCORE"
           threshold="7.0"
 
           # bash arithmetic doesn't handle floats; use awk for the compare.
