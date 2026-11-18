@@ -102,9 +102,11 @@ node_manager = "mise"  # mise, fnm, or nvm
 #
 # Everything a provisioning run_* script installs is pinned here; tools that
 # `dot system update` refreshes through mise float in conf.d/00-dotfiles.toml
-# instead (minimum_release_age = "0s": no release cooldown). tools/ci/check-unpinned-installs.sh
-# fails on @latest, on cargo install without --locked and on a git clone of
-# a moving branch. Versions read 2026-10-08.
+# instead, behind mise's 7-day release-age gate (minimum_release_age = "7d"),
+# and npm/pipx/go packages and the trust tools (age, minisign, uv) are exact
+# pins there. tools/ci/check-unpinned-installs.sh fails on @latest, on an
+# unversioned npm install -g, on cargo install without --locked and on a git
+# clone of a moving branch. Versions read 2026-10-08.
 
 # go install targets, binary = "module/path@version"
 # (https://proxy.golang.org/<module>/@latest)
@@ -147,10 +149,15 @@ tpm_commit = "7bdb7ca33c9cc6440a600202b50142f401b6fe21" # pragma: allowlist secr
 # install/provision/run_onchange_15-ai-cli-tools.sh.tmpl and, at run time,
 # by plugins/ai/libexec/ai/ai-install.sh; `dot system update` lists newer releases to bump to.
 # The same versions pin defaults/dot_config/mise/conf.d/00-dotfiles.toml,
-# so `mise upgrade` keeps them (test_mise_conf_ai_pins.sh holds the two
-# together). First-party tools (github:sebastienrousseau/*) are pinned to
-# the release verified here, without the age gate: the gate guards against
-# a third party's compromised release, and these are our own.
+# so `mise upgrade` keeps them (tests/unit/install/test_pin_parity.sh holds
+# every pin source together). An exact pin installs whatever its age: mise's
+# 7-day gate applies only when it resolves a floating version, so the seven
+# days are checked here, by hand, when a pin moves. First-party tools
+# (github:sebastienrousseau/*) are pinned to the release verified here,
+# without the age gate: the gate guards against a third party's compromised
+# release, and these are our own (conf.d gives each a per-tool
+# minimum_release_age = "0s", so `dot system update` proposes a new
+# first-party release at once).
 [ai_tools]
 "npm:@openai/codex" = "0.170.0"
 "npm:@github/copilot" = "1.0.114"

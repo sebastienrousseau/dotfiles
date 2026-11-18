@@ -125,6 +125,12 @@ assert_contains "mise use -g aqua:charmbracelet/crush@" "$(cat "$CALLS")" "crush
 test_start "ai_clis_use_the_data_versions"
 assert_contains "mise use -g npm:@openai/codex@0.170.0" "$(cat "$CALLS")" "codex comes from [ai_tools]"
 
+# Editor tooling is an `npm:` pin in mise's conf.d now: a global npm
+# package lived inside one Node version's directory and vanished on a switch.
+test_start "dev_tools_come_from_mise_conf_d_not_npm"
+assert_equals "0|1" "$(grep -c '^npm install' "$CALLS")|$(grep -cx 'mise install' "$CALLS")" \
+  "no npm install -g; one plain mise install of the conf.d pins"
+
 test_start "ai_clis_skip_quarantined_vibe"
 assert_equals "0" "$(grep -c 'mistral-vibe' "$CALLS")" "mistral-vibe is not installed"
 

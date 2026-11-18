@@ -11,12 +11,20 @@
 # config.toml or the drift returns.
 
 [settings]
-# No release cooldown: install a release as soon as it is published.
-# Set explicitly, because leaving it unset falls back to mise's own
-# built-in default, which still holds back the newest release.
-minimum_release_age = "0s"
-# Install missing tools automatically
-auto_install = true
+# Release cooldown: a floating version ("latest", "3.4", "26") resolves to
+# the newest release at least seven days old, so a compromised release has
+# a week to be caught before it reaches this machine. The gate applies to
+# version resolution only: an exact pin ("1.3.2") installs that release
+# whatever its age, and so do the trust tools and AI CLIs pinned below.
+# First-party tools (github:sebastienrousseau/*) carry a per-tool
+# minimum_release_age = "0s" so `mise latest` and `dot system update` see
+# their newest release at once (minimum_release_age_excludes takes exact
+# names only, no globs, in mise 2026.11).
+minimum_release_age = "7d"
+# Never install a missing tool behind a shim call or `mise exec`: tools
+# install only through an explicit `mise install` (dot system update,
+# dot ai install, heal-tools).
+auto_install = false
 # Ensure mise tool paths/shims are placed ahead of system PATH
 activate_aggressive = true
 # Use verbose output
@@ -48,7 +56,7 @@ go = "latest"
 # Go repository, and gopls's run_govulncheck uses it too. Without it the
 # audit fails with "command not found" on any machine where nobody has run
 # `go install` by hand.
-"go:golang.org/x/vuln/cmd/govulncheck" = "latest"
+"go:golang.org/x/vuln/cmd/govulncheck" = "1.9.0"
 
 # Rust -- deliberately NOT managed by mise.
 #
@@ -83,12 +91,12 @@ bat = "latest"
 codex = "0.170.0"
 # corralctl, passmcp, and draft — the AI Ecosystem & Governance Suite,
 # managed and updated globally via mise (`github:sebastienrousseau/...`).
-"github:sebastienrousseau/corralctl" = "0.0.54"
-"github:sebastienrousseau/passmcp" = "0.0.10"
-"github:sebastienrousseau/passmcp-graph" = "0.0.10"
-"github:sebastienrousseau/passmcp-lsp" = "0.0.10"
-"github:sebastienrousseau/passmcp-server" = "0.0.10"
-"github:sebastienrousseau/draft" = "0.0.47"
+"github:sebastienrousseau/corralctl" = { version = "0.0.54", minimum_release_age = "0s" }
+"github:sebastienrousseau/passmcp" = { version = "0.0.10", minimum_release_age = "0s" }
+"github:sebastienrousseau/passmcp-graph" = { version = "0.0.10", minimum_release_age = "0s" }
+"github:sebastienrousseau/passmcp-lsp" = { version = "0.0.10", minimum_release_age = "0s" }
+"github:sebastienrousseau/passmcp-server" = { version = "0.0.10", minimum_release_age = "0s" }
+"github:sebastienrousseau/draft" = { version = "0.0.47", minimum_release_age = "0s" }
 eza = "latest"
 gping = "latest"
 # pandoc builds the HTML/PDF/EPUB manual. Without it tools/docs/build-manual.sh
@@ -107,13 +115,13 @@ zellij = "0.46.0"
 zoxide = "latest"
 "aqua:twpayne/chezmoi" = "2.74.1"
 "aqua:junegunn/fzf" = "latest"
-"aqua:FiloSottile/age" = "latest"
+"aqua:FiloSottile/age" = "1.3.2"
 # minisign verifies the `dot registry` index (registry-trust.sh) and runs in
 # tools/ci/check-registry.sh. Without it those checks stop with "minisign is
 # required" on any machine where nobody installed it by hand. It is also how
 # to check a Zig tarball's .minisig by hand when `mise lock` doesn't record
 # its provenance.
-minisign = "latest"
+minisign = "0.12"
 # hyperfine intentionally NOT managed by mise: the aqua package for
 # sharkdp/hyperfine only ships an x86_64 macOS binary, so on Apple
 # Silicon without Rosetta the mise shim is unrunnable ("Bad CPU type in
@@ -128,7 +136,7 @@ sops = "3.13.3"
 "aqua:dandavison/delta" = "latest"
 fd = "latest"
 "aqua:ClementTsang/bottom" = "latest"
-"npm:tldr" = "latest"
+"npm:tldr" = "3.5.0"
 "aqua:jesseduffield/lazygit" = "latest"
 "aqua:jesseduffield/lazydocker" = "latest"
 "aqua:charmbracelet/gum" = "latest"
@@ -137,8 +145,8 @@ fd = "latest"
 starship = "latest"
 
 # Python tools
-"pipx:poetry" = "latest"
-uv = "latest"
+"pipx:poetry" = "2.5.1"
+uv = "0.13.7"
 # aider supports Python 3.9-3.12. On 3.13+ it crashes at import: pydub
 # (aider's voice support) needs the stdlib audioop module, removed in 3.13.
 # uv builds aider's environment on 3.12 regardless of the default Python.
@@ -159,6 +167,15 @@ opencode = "1.19.6"
 "npm:@qwen-code/qwen-code" = "0.28.0"
 "npm:@guizmo-ai/zai-cli" = "0.3.5"
 # "pipx:mistral-vibe" = "latest"  # disabled 2026-05-12: dep `mistralai` quarantined on PyPI; re-enable when restored
+
+# Editor tooling. Global npm packages live inside each Node version's
+# directory, so `npm install -g` ones vanished on every Node switch; as mise
+# tools they survive it. prettierd is the daemon conform.nvim calls (the old
+# prettier_d package is deprecated and shipped another binary).
+"npm:eslint_d" = "15.1.0"
+"npm:@fsouza/prettierd" = "0.29.0"
+"npm:typescript" = "7.0.2"
+"npm:typescript-language-server" = "6.0.3"
 
 # Task runners
 task = "latest"

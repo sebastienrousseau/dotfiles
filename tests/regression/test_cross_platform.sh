@@ -423,7 +423,7 @@ else
   xp_auto="$(python3 -c 'import sys, tomllib; print(str(tomllib.load(open(sys.argv[1], "rb"))["settings"]["auto_install"]).lower())' \
     "$xp_mise_home/.config/mise/conf.d/00-dotfiles.toml" 2>&1)"
 fi
-assert_equals "true" "$xp_auto" "mise loads auto_install=true from the deployed config"
+assert_equals "false" "$xp_auto" "mise loads auto_install=false from the deployed config"
 
 # ═══════════════════════════════════════════════════════════════
 # 7. LINUX DESKTOP — conditional feature flags
