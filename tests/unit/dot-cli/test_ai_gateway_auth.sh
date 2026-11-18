@@ -194,7 +194,9 @@ px() {
   OUT="$(env -i PATH="$WORK/stubs" HOME="$WORK/home" XDG_STATE_HOME="$WORK/pxstate" NO_COLOR=1 \
     DOT_AI_PORT="$(free_port)" "$@" ${PX_TTY[@]+"${PX_TTY[@]}"} /bin/bash "$PROXY" start 2>&1 </dev/null)" || RC=$?
   [[ "$RC" -eq 0 ]] || return 0
-  for _ in $(seq 1 30); do
+  # The server logs on its own schedule; a slow runner (macos-15) took over
+  # the 3 s this used to allow. Wait up to 10 s.
+  for _ in $(seq 1 100); do
     grep -q '^serve ' "$WORK/px.log" 2>/dev/null && return 0
     sleep 0.1
   done
