@@ -177,9 +177,11 @@ ln -sf "$(command -v bash)" "$NOCM/bash"
 for c in jq python3 wc tr git sed grep cat head date printf uname dirname basename tty locale; do
   p="$(command -v "$c" 2>/dev/null)" && ln -sf "$p" "$NOCM/$c"
 done
-PATH="$NOCM" drift
+PATH="$NOCM" drift 2>"$OUTF.err"
 assert_equals 2 "$RC" "rc"
-out_has "chezmoi" "error names the missing tool"
+# The error is a diagnostic: stderr only (ADR-020 N14, ui_err since v0.2.548).
+assert_file_contains "$OUTF.err" "chezmoi" "error names the missing tool"
+assert_true "! grep -q 'not found' '$OUTF'" "the error stays off stdout"
 
 test_start "missing_chezmoi_reports_json_when_asked"
 PATH="$NOCM" drift --json
