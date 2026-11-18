@@ -45,6 +45,8 @@ install_chezmoi_brew() {
 # shellcheck disable=SC2120
 install_chezmoi_binary() {
   local bin_dir="${1:-$HOME/.local/bin}"
+  # Same pin as install.sh; without -t the installer takes the latest tag.
+  local version="${CHEZMOI_VERSION:-2.74.1}"
   mkdir -p "$bin_dir"
 
   echo "   Installing chezmoi via binary download..."
@@ -62,8 +64,9 @@ install_chezmoi_binary() {
     return 1
   fi
 
-  # Execute the verified installer
-  if ! sh "$installer" -- -b "$bin_dir" 2>/dev/null; then
+  # Execute the verified installer. Options go first: a leading `--` ends
+  # getopts, so -b and -t were ignored and the args were passed to chezmoi.
+  if ! sh "$installer" -b "$bin_dir" -t "v${version#v}" 2>/dev/null; then
     rm -f "$installer"
     echo "Error: Failed to install chezmoi." >&2
     return 1
