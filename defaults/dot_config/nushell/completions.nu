@@ -277,7 +277,7 @@ def "nu-complete dot ai" [] {
     [
         { value: "pattern", description: "prompt patterns" }
         { value: "cost", description: "spend by agent and model" }
-        { value: "gateway", description: "the keyless gateway" }
+        { value: "gateway", description: "the local Claude gateway" }
         { value: "inventory", description: "installed agents and versions" }
         { value: "policy", description: "the enforced AI policy" }
         { value: "list", description: "Installed agents" }

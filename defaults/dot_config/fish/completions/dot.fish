@@ -105,7 +105,7 @@ complete -c dot -n '__dot_at '\''agent mode'\''' -a run -d 'Run a command under 
 complete -c dot -n '__dot_at '\''agent policy'\''' -a show -d 'The sandbox policy'
 complete -c dot -n '__dot_at '\''ai'\''' -a pattern -d 'prompt patterns'
 complete -c dot -n '__dot_at '\''ai'\''' -a cost -d 'spend by agent and model'
-complete -c dot -n '__dot_at '\''ai'\''' -a gateway -d 'the keyless gateway'
+complete -c dot -n '__dot_at '\''ai'\''' -a gateway -d 'the local Claude gateway'
 complete -c dot -n '__dot_at '\''ai'\''' -a inventory -d 'installed agents and versions'
 complete -c dot -n '__dot_at '\''ai'\''' -a policy -d 'the enforced AI policy'
 complete -c dot -n '__dot_at '\''ai'\''' -a list -d 'Installed agents'

@@ -27,7 +27,7 @@ fallback = true
 
 [[objects]]
 name = "gateway"
-summary = "the keyless gateway"
+summary = "the local Claude gateway"
 default = "show"
 
 [[objects]]
