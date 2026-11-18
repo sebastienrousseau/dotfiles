@@ -46,7 +46,7 @@ assert_output_not_contains "upgrade" "cat '$WORK/out'" "no deprecated name"
 
 test_start "help_all_lists_every_built_spelling_once"
 dot help all
-want="$(awk -F'|' '$1 == "cmd" && $3 != ""' "$TABLE" | wc -l | tr -d ' ')"
+want="$(field cmd 3 | grep -c .)"
 got="$(grep -cE '^  dot ' "$WORK/out")"
 assert_equals "$want" "$got" "one line per built command"
 assert_equals "" "$(grep -E '^  dot ' "$WORK/out" | awk '{print $2, $3, $4}' | sort | uniq -d)" "none twice"
