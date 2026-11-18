@@ -27,6 +27,9 @@
 # than ZSH_BENCH_REGRESSION_PCT percent (default 25) AND by more than
 # ZSH_BENCH_MIN_DELTA_MS (default 15) milliseconds; the absolute floor keeps
 # runner jitter on small numbers from failing the gate.
+#
+# run fails (never hangs) when zsh-bench does not finish within
+# ZSH_BENCH_TIMEOUT seconds (default 120 + 15 per iteration).
 
 set -euo pipefail
 
@@ -103,17 +106,50 @@ cmd_summarize() {
     }'
 }
 
+# _bench ZSH DIR ITERS OUTFILE: run zsh-bench under a deadline.
+# zsh-bench waits on a fifo for the benchmarked shell to read its input; if
+# that shell never comes up it waits forever, so a wall-clock budget
+# (ZSH_BENCH_TIMEOUT seconds, default 120 + 15 per iteration) turns a hang
+# into a loud failure. GNU timeout signals the whole process group, which
+# reaches zsh-bench's helpers blocked on the fifo.
+#
+# SHELL is pinned to zsh: util-linux script(1) runs its -c command through
+# $SHELL, and zsh-bench's command is zsh syntax (`builtin emulate ...`).
+# Under the bash or sh SHELL of a CI runner it dies before the prompt, and
+# zsh-bench then blocks on the fifo for good.
+_bench() {
+  local zsh_bin="$1" dir="$2" iters="$3" out="$4" budget deadline=()
+  budget="${ZSH_BENCH_TIMEOUT:-$((120 + 15 * iters))}"
+  [[ "$budget" =~ ^[1-9][0-9]*$ ]] || die "ZSH_BENCH_TIMEOUT must be a positive integer" 2
+  if command -v timeout >/dev/null 2>&1; then
+    deadline=(timeout -k 10 "$budget")
+  elif command -v gtimeout >/dev/null 2>&1; then
+    deadline=(gtimeout -k 10 "$budget")
+  else
+    printf 'zsh-bench: no timeout(1); running without a deadline\n' >&2
+  fi
+  local rc=0
+  SHELL="$zsh_bin" ${deadline[@]+"${deadline[@]}"} "$zsh_bin" "$dir/zsh-bench" --raw --iters "$iters" >"$out" || rc=$?
+  case "$rc" in
+    0) return 0 ;;
+    124 | 137) die "zsh-bench timed out after ${budget}s: the interactive zsh never reached a usable prompt" ;;
+    *) die "zsh-bench failed (exit $rc)" ;;
+  esac
+}
+
 # run [--iters N]: measure the current $HOME's interactive zsh.
 cmd_run() {
-  local iters=16 dir raw
+  local iters=16 dir zsh_bin
   if [[ "${1:-}" == "--iters" ]]; then
     [[ "${2:-}" =~ ^[1-9][0-9]*$ ]] || die "--iters needs a positive integer" 2
     iters="$2"
   fi
-  command -v zsh >/dev/null 2>&1 || die "zsh is not installed"
+  zsh_bin="$(command -v zsh)" || die "zsh is not installed"
   dir="$(cmd_fetch)"
-  raw="$(zsh "$dir/zsh-bench" --raw --iters "$iters")" || die "zsh-bench failed"
-  printf '%s\n' "$raw" | cmd_summarize
+  RAW_OUT="$(mktemp)"
+  trap 'rm -f "$RAW_OUT"' EXIT
+  _bench "$zsh_bin" "$dir" "$iters" "$RAW_OUT"
+  cmd_summarize <"$RAW_OUT"
 }
 
 # compare CURRENT BASELINE: gate the medians. A metric absent from the
