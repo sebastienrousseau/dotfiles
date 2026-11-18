@@ -79,4 +79,41 @@ assert_contains "checksum mismatch" "$OUT" "and says why"
 assert_equals "" "$(find "$WORK/cache" -name 'zsh-bench-*' -o -name 'download.*' 2>/dev/null)" \
   "nothing unverified is left in the cache"
 
+# ── run: zsh-bench under a zsh SHELL and a deadline ────────────────────
+# A fake zsh-bench stands in at the verified cache path, so fetch returns
+# it without the network. FAKE_MODE=hang models the CI failure: the
+# benchmarked shell never reads its input and zsh-bench waits forever.
+commit="$(sed -n 's/^readonly ZSH_BENCH_COMMIT="\(.*\)"$/\1/p' "$BENCH")"
+fake_dir="$WORK/runcache/dotfiles/zsh-bench/zsh-bench-$commit"
+mkdir -p "$fake_dir"
+cat >"$fake_dir/zsh-bench" <<'FAKE'
+printf '%s\n' "$SHELL" >"$FAKE_SHELL_LOG"
+[ "${FAKE_MODE:-}" = hang ] && sleep 60
+printf 'first_prompt_lag_ms=( 30 10 20 )\nfirst_command_lag_ms=( 5 9 7 )\n'
+FAKE
+chmod +x "$fake_dir/zsh-bench"
+run_bench() {
+  RC=0
+  OUT="$(SHELL=/bin/bash XDG_CACHE_HOME="$WORK/runcache" FAKE_SHELL_LOG="$WORK/shell.log" \
+    bash "$BENCH" run --iters 3 2>&1)" || RC=$?
+}
+
+if command -v zsh >/dev/null 2>&1; then
+  test_start "run_hands_zsh_bench_a_zsh_SHELL"
+  run_bench
+  assert_equals "0" "$RC" "run succeeds"
+  assert_equals "$(command -v zsh)" "$(cat "$WORK/shell.log")" \
+    "script(1) runs zsh-bench's zsh-syntax -c command through \$SHELL, so it must be zsh"
+  assert_equals "20.0" "$(json_get first_prompt_lag_ms <<<"$OUT")" "and the medians come through"
+
+  if command -v timeout >/dev/null 2>&1 || command -v gtimeout >/dev/null 2>&1; then
+    test_start "run_fails_loudly_when_zsh_bench_hangs"
+    started=$SECONDS
+    FAKE_MODE=hang ZSH_BENCH_TIMEOUT=2 run_bench
+    assert_equals "1" "$RC" "a hung zsh-bench is a failure"
+    assert_contains "timed out after 2s" "$OUT" "that says why"
+    assert_true "[ $((SECONDS - started)) -lt 30 ]" "within the deadline, not the job timeout"
+  fi
+fi
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

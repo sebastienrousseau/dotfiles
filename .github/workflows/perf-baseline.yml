@@ -140,7 +140,10 @@ jobs:
       # First-prompt and first-command lag of the deployed interactive zsh,
       # through a pty (benches/zsh-bench.sh wraps romkatv/zsh-bench, pinned
       # by commit and SHA-256). zsh only; bash/fish stay on benchmark.sh.
+      # The wrapper fails on its own deadline (120 s + 15 s per iteration)
+      # if zsh-bench cannot measure; timeout-minutes is only the backstop.
       - name: Measure first-prompt / first-command lag (zsh-bench)
+        timeout-minutes: 10
         run: |
           set -euo pipefail
           bash benches/zsh-bench.sh run --iters 16 > /tmp/zsh-bench-current.json
