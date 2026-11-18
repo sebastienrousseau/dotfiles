@@ -67,6 +67,9 @@ unknown "dot: 'dot tool nope' is not a command; run 'dot help tool'" tool nope
 # D8: --help after an unknown verb is the unknown verb.
 unknown "dot: 'dot tool nope' is not a command; run 'dot help tool'" tool nope --help
 unknown "dot: 'dot theme nope' is not a command; run 'dot help theme'" theme nope --help
+# A word that is neither a theme command nor a theme name (the theme
+# script needs a dotfiles source to look the name up).
+DOTFILES_DIR="$REPO_ROOT" unknown "dot: 'dot theme nope' is not a command; run 'dot help theme'" theme nope
 unknown "dot: 'dot doctor nope' is not a command; run 'dot help doctor'" help doctor nope
 
 test_start "help_for_known_spellings_still_exits_0"
