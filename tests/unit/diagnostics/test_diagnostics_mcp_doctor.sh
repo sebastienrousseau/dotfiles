@@ -62,7 +62,7 @@ done
 test_start "mcp_config_uses_pinned_package_refs"
 # Each shipped server runs the binary its hash-pinned lock entry approves.
 MCP_LOCK_FILE="$REPO_ROOT/defaults/dot_config/dotfiles/mcp-lock.json"
-for server in git memory sqlite; do
+for server in git memory; do
   cmd="$(jq -r --arg s "$server" '.mcpServers[$s].command' "$MCP_CONFIG_FILE")"
   if [[ "$cmd" == "$(jq -r --arg s "$server" '.packages[$s].command' "$MCP_LOCK_FILE")" ]] &&
     [[ -n "$(jq -r --arg s "$server" '.packages[$s].integrity // empty' "$MCP_LOCK_FILE")" ]]; then

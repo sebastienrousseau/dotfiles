@@ -47,6 +47,8 @@ new_repo() {
   run_in "$repo" git init -q
   run_in "$repo" git config commit.gpgsign false
   run_in "$repo" git config core.hooksPath "$HOOKS"
+  # The branding signature is only added in the owner's repositories.
+  run_in "$repo" git remote add origin "https://github.com/sebastienrousseau/$1.git"
   printf '%s\n' "$1" >"$repo/file"
   run_in "$repo" git add file
   printf '%s\n' "$repo"

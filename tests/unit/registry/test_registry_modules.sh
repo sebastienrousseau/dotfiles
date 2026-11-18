@@ -55,8 +55,11 @@ build "$WORK/a"
 assert_equals "0" "$RC" "first build"
 build "$WORK/b"
 assert_true "cmp -s '$WORK/a/docs/registry.json' '$WORK/b/docs/registry.json'" "the same index"
-for f in "$REPO_ROOT"/docs/registry/modules/*.tar.gz; do
-  assert_true "cmp -s '$f' '$WORK/a/docs/registry/modules/${f##*/}'" "${f##*/}: the committed bytes"
+# Each archive the build writes, against the committed one. Archives of
+# older versions stay committed (a cached index may name them) but are no
+# longer built.
+for f in "$WORK"/a/docs/registry/modules/*.tar.gz; do
+  assert_true "cmp -s '$REPO_ROOT/docs/registry/modules/${f##*/}' '$f'" "${f##*/}: the committed bytes"
   assert_true "cmp -s '$f' '$WORK/b/docs/registry/modules/${f##*/}'" "${f##*/}: the same bytes again"
 done
 assert_equals "2026-11-11T00:00:00Z" "$(jq -r .updated "$WORK/a/docs/registry.json")" "updated as given"
@@ -79,7 +82,7 @@ printf '\n' >>"$WORK/b/registry/modules/ai-policy-pack/files/dot_config/dotfiles
 RC=0
 OUT="$(python3 "$BUILD" --root "$WORK/b" --check 2>&1)" || RC=$?
 assert_equals "1" "$RC" "exit 1"
-assert_contains "docs/registry.json, docs/registry/modules/ai-policy-pack-1.0.0.tar.gz not what the build writes" "$OUT" "names what differs"
+assert_contains "docs/registry.json, docs/registry/modules/ai-policy-pack-1.0.1.tar.gz not what the build writes" "$OUT" "names what differs"
 assert_contains "re-sign the index" "$OUT" "says what to do"
 root "$WORK/d"
 printf 'x' >>"$WORK/d/docs/registry/modules/claude-statusline-1.0.0.tar.gz"

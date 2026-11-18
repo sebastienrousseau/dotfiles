@@ -5,31 +5,93 @@
 # other mode is read-only. To use it:
 #   cp ~/.config/dotfiles/ai-policy.d/strict.toml ~/.config/dotfiles/ai-policy.toml
 # then dot ai policy check. Reference: docs/AI.md, "Enforced policy".
+# Every mode also denies the credentials dot manages (the chezmoi age
+# identity, chezmoi.toml, ~/.netrc, ~/.npmrc, gh's hosts.yml, dot's secrets
+# store, the AI gateway token, the macOS keychains); apply mode denies shell
+# commands that name or dump them.
 schema = "ai-policy.v1"
 default_mode = "ask"
 
 [mode.ask]
 tools = ["read", "search"]
 paths_allow = ["{cwd}/**"]
-paths_deny = ["~/.ssh/**", "~/.aws/**", "~/.gnupg/**", "**/.env", "**/.env.*"]
+paths_deny = [
+  "~/.ssh/**", "~/.aws/**", "~/.gnupg/**", "**/.env", "**/.env.*",
+  "~/.config/chezmoi/key.txt",
+  "~/.config/chezmoi/chezmoi.*",
+  "~/.netrc",
+  "~/.npmrc",
+  "~/.config/gh/hosts.yml",
+  "~/.config/dotfiles/secrets/**",
+  "~/.local/state/dot/ai/serve/gateway.token",
+  "~/Library/Keychains/**",
+]
 
 [mode.plan]
 tools = ["read", "search"]
 paths_allow = ["{cwd}/**"]
-paths_deny = ["~/.ssh/**", "~/.aws/**", "~/.gnupg/**", "**/.env", "**/.env.*"]
+paths_deny = [
+  "~/.ssh/**", "~/.aws/**", "~/.gnupg/**", "**/.env", "**/.env.*",
+  "~/.config/chezmoi/key.txt",
+  "~/.config/chezmoi/chezmoi.*",
+  "~/.netrc",
+  "~/.npmrc",
+  "~/.config/gh/hosts.yml",
+  "~/.config/dotfiles/secrets/**",
+  "~/.local/state/dot/ai/serve/gateway.token",
+  "~/Library/Keychains/**",
+]
 
 [mode.apply]
 tools = ["read", "search", "write", "shell", "fetch"]
 tools_deny = ["mcp__*"]
 paths_allow = ["{cwd}/**"]
-paths_deny = ["~/.ssh/**", "~/.aws/**", "~/.gnupg/**", "**/.env", "**/.env.*", "{cwd}/.git/**"]
+paths_deny = [
+  "~/.ssh/**", "~/.aws/**", "~/.gnupg/**", "**/.env", "**/.env.*", "{cwd}/.git/**",
+  "~/.config/chezmoi/key.txt",
+  "~/.config/chezmoi/chezmoi.*",
+  "~/.netrc",
+  "~/.npmrc",
+  "~/.config/gh/hosts.yml",
+  "~/.config/dotfiles/secrets/**",
+  "~/.local/state/dot/ai/serve/gateway.token",
+  "~/Library/Keychains/**",
+]
 hosts_allow = ["github.com", "*.github.com", "*.githubusercontent.com"]
-commands_deny = ["sudo *", "rm -rf *", "git push*", "git reset --hard*", "curl *", "wget *", "ssh *", "scp *", "nc *", "docker *", "kubectl *"]
+commands_deny = [
+  "sudo *", "rm -rf *", "git push*", "git reset --hard*", "curl *", "wget *", "ssh *", "scp *", "nc *", "docker *", "kubectl *",
+  "*chezmoi/key.txt*",
+  "*chezmoi/chezmoi.*",
+  "*.netrc*",
+  "*.npmrc*",
+  "*gh/hosts.yml*",
+  "*dotfiles/secrets/*",
+  "*gateway.token*",
+  "*Library/Keychains*",
+  "security find-generic-password*",
+  "security find-internet-password*",
+  "security dump-keychain*",
+  "security export*",
+  "gh auth token*",
+  "chezmoi decrypt*",
+  "age -d*",
+  "age --decrypt*",
+]
 
 [mode.audit]
 tools = ["read", "search"]
 paths_allow = ["{cwd}/**"]
-paths_deny = ["~/.ssh/**", "~/.aws/**", "~/.gnupg/**", "**/.env", "**/.env.*"]
+paths_deny = [
+  "~/.ssh/**", "~/.aws/**", "~/.gnupg/**", "**/.env", "**/.env.*",
+  "~/.config/chezmoi/key.txt",
+  "~/.config/chezmoi/chezmoi.*",
+  "~/.netrc",
+  "~/.npmrc",
+  "~/.config/gh/hosts.yml",
+  "~/.config/dotfiles/secrets/**",
+  "~/.local/state/dot/ai/serve/gateway.token",
+  "~/Library/Keychains/**",
+]
 
 [budget]
 daily_usd = 10
