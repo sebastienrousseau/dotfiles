@@ -20,7 +20,7 @@
 # fragments reads lib/dot/data/commands.txt, the generated merge of the
 # bundled fragments, which the build tools read too.
 _DOT_TABLE=""
-_DOT_TABLE_FORMAT="dot-cli-table/2"
+_DOT_TABLE_FORMAT="dot-cli-table/3"
 
 # _dot_table_fragments SRC: set _DOT_FRAGS to SRC's fragments, groups first,
 # then the plugins in byte order; false when SRC has none.
@@ -309,7 +309,8 @@ _dot_help_asked() {
 # longest domain or object the words start with, when no command spells it
 # (nor an old route record), is not a command and exits 127 instead of
 # showing the domain's help with status 0. Words after a command are its
-# arguments.
+# arguments, and a word a fallback entry runs (_dot_entry_takes) is its
+# legacy subcommand, whose help is the domain's.
 _dot_help_verb_known() {
   local n key="" next
   for ((n = $#; n >= 1; n--)); do
@@ -323,7 +324,19 @@ _dot_help_verb_known() {
   next="${!next}"
   [[ "$next" =~ ^[a-z][a-z0-9-]*$ ]] || return 0
   [[ "$_DOT_TABLE" != *$'\n'"leg|$key $next"[\ \|]* ]] || return 0
+  ! _dot_entry_takes "$key" "$next" || return 0
   dot_not_a_command "$key" "$key $next"
+}
+
+# _dot_entry_takes SPELLING WORD: the fallback entry SPELLING (a domain or an
+# object) hands WORD, which the table does not spell, runs it: any word,
+# unless the domain's manifest lists the words its entry runs (an ent
+# record), when only a listed word after the domain itself does.
+_dot_entry_takes() {
+  local domain="${1%% *}"
+  { _dot_record dom "$1" || _dot_record obj "$1"; } && [[ "${_REC#*|}" == @* ]] || return 1
+  _dot_record ent "$domain" || return 0
+  [[ "$1" == "$domain" && " ${_REC%%|*} " == *" $2 "* ]]
 }
 
 # _dot_names_spelling WORD: WORD starts an ADR-020 spelling (a domain or a

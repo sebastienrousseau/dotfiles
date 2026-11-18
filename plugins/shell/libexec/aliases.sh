@@ -246,7 +246,7 @@ cmd_alias_check() {
   if [[ -f "$alias_file" ]]; then
     ui_ok "Aliases file" "$alias_file"
   else
-    ui_err "Aliases file missing" "$alias_file"
+    ui_fail "Aliases file missing" "$alias_file"
     missing=1
   fi
 

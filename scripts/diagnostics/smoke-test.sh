@@ -28,7 +28,7 @@ verify_cmd() {
   # under `set -e`, and returning 1 here used to end the run at the first
   # absent tool with no summary and no exit status of its own.
   if ! check_cmd "$cmd"; then
-    ui_err "$cmd" "not found"
+    ui_fail "$cmd" "not found"
     failed+=1
     return 0
   fi
@@ -41,7 +41,7 @@ verify_cmd() {
       ui_ok "$cmd"
       passed+=1
     else
-      ui_err "$cmd" "output mismatch"
+      ui_fail "$cmd" "output mismatch"
       failed+=1
     fi
   else
@@ -76,6 +76,6 @@ echo ""
 if [[ $failed -eq 0 ]]; then
   ui_ok "All $passed tests passed"
 else
-  ui_err "$failed failed" "$passed passed"
+  ui_fail "$failed failed" "$passed passed"
   exit 1
 fi

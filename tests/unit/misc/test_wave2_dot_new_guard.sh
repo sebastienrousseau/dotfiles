@@ -47,10 +47,11 @@ assert_equals "0|1" "$(grep -rl '__PROJECT_NAME__' "$NEW_TMP/work/demo" 2>/dev/n
 
 test_start "dot_new_no_args_usage"
 set +e
-output=$(CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" tool new 2>&1)
+output=$(CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" tool new 2>&1 >/dev/null)
 ec=$?
 set -e
-if [[ "$output" == *"Usage:"* ]] && [[ $ec -ne 0 ]]; then
+# A usage error: exit 64, the usage line on stderr (ADR-020 N10).
+if [[ "$output" == *"usage: dot tool new <lang> <name>"* ]] && [[ $ec -eq 64 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot tool new with no args shows usage"
 else

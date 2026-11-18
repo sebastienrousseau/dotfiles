@@ -94,6 +94,18 @@ assert_contains "boom" "$err_err" "ui_err prints its message on stderr"
 ok_out="$(NO_COLOR=1 bash -c 'source "$1"; ui_ok "fine" 2>/dev/null' _ "$UI_FILE")"
 assert_contains "fine" "$ok_out" "ui_ok stays on stdout"
 
+# Test: a failed report or step row is a result: stdout, with the rows
+# around it, so `dot doctor >file` and `| grep ✗` keep every failure.
+test_start "ui_fail_and_failed_steps_stay_on_stdout"
+fail_out="$(NO_COLOR=1 bash -c 'source "$1"; ui_fail "chezmoi" "output mismatch" 2>/dev/null' _ "$UI_FILE")"
+fail_err="$(NO_COLOR=1 bash -c 'source "$1"; ui_fail "chezmoi" "output mismatch" 2>&1 >/dev/null' _ "$UI_FILE")"
+assert_contains "output mismatch" "$fail_out" "ui_fail prints its row on stdout"
+assert_equals "" "$fail_err" "ui_fail prints nothing on stderr"
+step_out="$(NO_COLOR=1 DOTFILES_NO_TUI=1 bash -c 'source "$1"; ui_steps_begin "S" ""; ui_step a "Alpha" run; ui_step a "" fail "broke"; ui_steps_end ""' _ "$UI_FILE" 2>/dev/null)"
+assert_contains "Alpha" "$step_out" "a failed step's row stays on stdout"
+run_out="$(NO_COLOR=1 bash -c 'source "$1"; ui_run_cmd "Beta" 0 1 false' _ "$UI_FILE" 2>/dev/null </dev/null)"
+assert_contains "Beta" "$run_out" "a failed ui_run_cmd row stays on stdout"
+
 echo ""
 echo "UI library tests completed."
 # Slice 3 (#883): exercise the script under sandbox for line coverage

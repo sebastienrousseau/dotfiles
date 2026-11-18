@@ -435,3 +435,8 @@ nolock|ai send||
 nolock|cli hook run||
 nolock|config edit||
 nolock|ui run||
+ent|doctor|||
+ent|fleet|events ns enforce help||
+ent|system|upgrade tune log-rotate clean-caches||
+ent|theme|toggle mode rotate sync ambient family current plan undo history reset diff export import fit accent status rebuild preview random help||
+ent|tool|||

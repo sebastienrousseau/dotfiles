@@ -26,3 +26,4 @@ alias|update|shortcut|system update|
 alias|upgrade|removed|system update|0.2.538
 alias|tune|removed|system settings apply|0.2.538
 alias|log-rotate|removed|system clean --logs|0.2.538
+ent|system|upgrade tune log-rotate clean-caches||

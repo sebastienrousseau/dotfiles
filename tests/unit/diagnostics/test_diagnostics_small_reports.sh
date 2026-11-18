@@ -99,7 +99,9 @@ test_start "conflicts_requires_an_executable_manifest"
 chmod -x "$MANIFEST"
 rc="$(SANDBOX_HOME="$CONF_HOME" run "$CONFLICTS")"
 assert_equals "1" "$rc" "a non-executable manifest is fatal"
-assert_file_contains "$OUT" "Alias manifest" "the error names the manifest"
+# An error is a diagnostic: stderr only (ADR-020 N14, ui_err since v0.2.548).
+assert_file_contains "$ERR" "Alias manifest" "the error names the manifest"
+assert_true "! grep -q 'Alias manifest' '$OUT'" "the error stays off stdout"
 chmod +x "$MANIFEST"
 
 test_start "conflicts_resolves_the_source_from_the_environment"

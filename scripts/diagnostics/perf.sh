@@ -403,7 +403,7 @@ _perf_verdict() {
   elif [[ "$score" -ge 80 ]]; then
     ui_warn "Performance" "Good (tune to reach 100)"
   else
-    ui_err "Performance" "Needs attention"
+    ui_fail "Performance" "Needs attention"
   fi
 }
 

@@ -14,3 +14,4 @@ cmd|theme font list||read|Installed terminal fonts
 cmd|theme font install|@theme font install|write|Install the configured fonts
 alias|wallpaper|removed|theme wallpaper set|0.2.538
 alias|fonts|removed|theme font install|0.2.538
+ent|theme|toggle mode rotate sync ambient family current plan undo history reset diff export import fit accent status rebuild preview random help||

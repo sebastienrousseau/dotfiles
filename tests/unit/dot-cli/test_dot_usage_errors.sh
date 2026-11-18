@@ -83,4 +83,29 @@ assert_equals "0" "$RC" "an object's --help exits 0"
 dot tool --help
 assert_equals "0" "$RC" "a domain's --help exits 0"
 
+# A word the table does not spell but a fallback entry runs (its legacy
+# subcommand) keeps the domain's help: every word for an entry with no word
+# list (ai takes any word as a prompt), a listed word for one with a list.
+# Only an unlisted word after a domain that lists its words is unknown.
+legacy_help() {
+  local domain="$1"
+  shift
+  test_start "legacy_help_${domain}_$(printf '%s_' "$@" | tr -c 'a-z0-9_' '_')"
+  dot "$domain" "$@"
+  assert_equals "0" "$RC" "dot $domain $* exits 0"
+  assert_contains "dot $domain" "$OUT" "and shows the domain's help"
+  assert_equals "" "$ERR" "with nothing on stderr"
+}
+legacy_help ai delegate --help
+legacy_help ai claude --help
+legacy_help ai chat -h
+legacy_help fleet enforce --help
+legacy_help theme toggle --help
+legacy_help system tune --help
+test_start "help_for_a_legacy_word_shows_the_domain"
+dot help theme toggle
+assert_equals "0" "$RC" "dot help theme toggle exits 0"
+assert_contains "dot theme" "$OUT" "and shows theme's help"
+unknown "dot: 'dot system bogus' is not a command; run 'dot help system'" system bogus --help
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

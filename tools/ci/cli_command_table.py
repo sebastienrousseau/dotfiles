@@ -17,6 +17,8 @@ the dispatcher resolves ADR-020 spellings without parsing TOML:
   alias|<name>|<shortcut, deprecated or removed>|<target>|<until or empty>
   hook|<event>|<domain>|<script under plugins/<domain>/>|<summary>
   nolock|<spelling>||  (a write command that takes no domain lock, N17)
+  ent|<domain>|<words, space-separated>||  (the only other words a fallback
+                                            entry runs; none: any word)
 
 A plugin with an `[entry]` runs its own commands: its routes are `@<domain>`
 followed by the spelling, and bin/dot hands the words after the domain to
@@ -41,7 +43,7 @@ aliases), flag, arg, alias and hook records, and the family's grp records to
 lib/dot/data/groups.txt. lib/dot/table-merge.awk merges the fragments
 back into the table: grp, then every dom/obj/cmd in domain order, the run
 records (the first of each invocation), the leg records derived from
-them, flag and arg, then alias, then hook, then nolock. `merge()` is the same merge in Python; a
+them, flag and arg, then alias, then hook, then nolock, then ent. `merge()` is the same merge in Python; a
 fragment set must merge to exactly the table above. The fragment format
 is the contract a plugin's loader reads (ADR-020).
 
@@ -126,6 +128,14 @@ def nolock_records(domain: str, manifest: dict) -> list[str]:
     """Commands declared `lock = false`: bin/dot runs them without the
     domain lock that every other write command takes (N17)."""
     return [f"nolock|{spelling(domain, c)}||" for c in manifest["commands"] if c.get("lock") is False]
+
+
+def entry_records(domain: str, manifest: dict) -> list[str]:
+    """A fallback entry that declares `words`: the words outside the table it
+    runs, so `dot <domain> <word> --help` knows any other word is not a
+    command. Without the record the entry takes any word."""
+    entry = manifest.get("entry", {})
+    return [f"ent|{domain}|{' '.join(entry['words'])}||"] if "words" in entry else []
 
 
 def declared(manifests: dict) -> set[str]:
@@ -232,6 +242,8 @@ def build(manifests: dict, family: dict | None = None) -> str:
         rows += hook_records(domain, manifest)
     for domain, manifest in sorted(manifests.items()):
         rows += nolock_records(domain, manifest)
+    for domain, manifest in sorted(manifests.items()):
+        rows += entry_records(domain, manifest)
     return HEADER + "\n".join(rows) + "\n"
 
 
@@ -254,6 +266,7 @@ def fragment(domain: str, manifests: dict) -> str:
     rows += alias_records(manifest)
     rows += hook_records(domain, manifest)
     rows += nolock_records(domain, manifest)
+    rows += entry_records(domain, manifest)
     return FRAGMENT_HEADER.format(source=f"plugins/{domain}/dot-plugin.toml") + "\n".join(rows) + "\n"
 
 
@@ -264,7 +277,7 @@ def records(text: str) -> list[str]:
 def merge(fragments: list[str]) -> list[str]:
     """The table's records from the groups and the fragments, in that
     order; lib/dot/table-merge.awk does the same at run time."""
-    buckets: dict[str, list[str]] = {"grp": [], "body": [], "run": [], "comp": [], "alias": [], "hook": [], "nolock": []}
+    buckets: dict[str, list[str]] = {"grp": [], "body": [], "run": [], "comp": [], "alias": [], "hook": [], "nolock": [], "ent": []}
     runs: set[str] = set()
     for text in fragments:
         for row in records(text):
@@ -277,7 +290,7 @@ def merge(fragments: list[str]) -> list[str]:
                 bucket = {"dom": "body", "obj": "body", "cmd": "body", "flag": "comp", "arg": "comp"}.get(kind, kind)
                 buckets[bucket].append(row)
     body = buckets["body"] + buckets["run"]
-    return buckets["grp"] + body + legacy_records(body) + buckets["comp"] + buckets["alias"] + buckets["hook"] + buckets["nolock"]
+    return buckets["grp"] + body + legacy_records(body) + buckets["comp"] + buckets["alias"] + buckets["hook"] + buckets["nolock"] + buckets["ent"]
 
 
 def main(argv: list[str] | None = None) -> int:

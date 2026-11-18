@@ -87,7 +87,10 @@ fi
 
 # ── bash 4 case-conversion expansions: ${x^^} ${x,,} ${x^} ${x,} ─────
 test_start "no_case_conversion_expansion"
-hits="$(_scan '\$\{[A-Za-z_][A-Za-z0-9_]*(\[[^]]*\])?(\^\^|,,|\^|,)\}')"
+# A comment line may name the construct (lib/dot/help.sh explains why it
+# avoids ${var^^}); only code that would run counts.
+hits="$(_scan '\$\{[A-Za-z_][A-Za-z0-9_]*(\[[^]]*\])?(\^\^|,,|\^|,)\}' |
+  grep -vE '^[^:]+:[0-9]+:[[:space:]]*#' || true)"
 if [[ -z "$hits" ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: no \${x^^}/\${x,,} expansions"

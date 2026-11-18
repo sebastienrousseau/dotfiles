@@ -118,9 +118,9 @@ assert_file_exists "$DOT_CLI" "dot CLI must exist"
 
 # (bin/dot's syntax is proved by every case below that runs it.)
 
+# --version is one parseable line, `dot <version>` (D10, b8900ef3).
 test_start "critical_dot_version"
-# --version prints one parseable line, `dot <version>` (b8900ef3, D10).
-assert_output_matches '^dot [0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?$' "bash '$DOT_CLI' --version"
+assert_output_matches '^dot [0-9]+\.[0-9]+\.[0-9]+$' "bash '$DOT_CLI' --version"
 
 test_start "critical_dot_help_runs"
 assert_exit_code 0 "bash '$DOT_CLI' help"

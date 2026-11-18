@@ -13,6 +13,8 @@ default = "status"
 [entry]
 command = "dot-system"
 fallback = true
+# The only words outside the table dot-system runs; any other is not a command.
+words = ["upgrade", "tune", "log-rotate", "clean-caches"]
 
 [[objects]]
 name = "schedule"
