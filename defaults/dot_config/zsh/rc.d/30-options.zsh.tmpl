@@ -154,7 +154,13 @@ if [[ "${DOTFILES_ENABLE_COMPINIT}" == "1" ]] && [[ "${DOTFILES_FAST:-0}" != "1"
       # of asking "[y/n]?". This runs in preexec, where that question reads
       # the user's typeahead from the terminal, or blocks a pty driver
       # (zsh-bench) for good. Skipping keeps the audit's protection.
+      # -i skips what it distrusts without saying so (and drops it from
+      # fpath), so list it first and say it once per rebuild.
+      local -a _dotfiles_insecure
+      autoload -Uz compaudit
+      _dotfiles_insecure=(${(f)"$(compaudit 2>/dev/null)"})
       compinit -i -d "${_DOTFILES_ZCOMPDUMP}"
+      (( ${#_dotfiles_insecure} )) && print -ru2 -- "dotfiles: completions skipped in ${(j:, :)_dotfiles_insecure} (writable by others); fix: compaudit | xargs chmod g-w,o-w"
       # compinit rewrites the dump only when the number of completion
       # files changed, so its mtime would stay stale and every later shell
       # would rebuild again. The full check just passed: mark it fresh.

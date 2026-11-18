@@ -103,6 +103,9 @@ out="$(XDG_CACHE_HOME="$WORK/cache-insecure" DOTFILES_ENABLE_COMPINIT=1 zsh -f -
 ' _ "$WORK/block.zsh" "$WORK/insecure-fpath" </dev/null 2>&1)"
 assert_contains "compdef=1" "$out" "completion initialises despite the insecure dir"
 assert_output_not_contains "insecure directories" printf '%s' "\"\$out\""
+# Skipping is not silent: one line names what was left out and how to fix it.
+assert_contains "$WORK/insecure-fpath" "$out" "the skipped directory is named"
+assert_contains "compaudit | xargs chmod g-w,o-w" "$out" "with the fix"
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
