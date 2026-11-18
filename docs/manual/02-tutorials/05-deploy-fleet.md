@@ -22,7 +22,7 @@ On each new host:
 
 ```sh
 # Download and verify the release installer per the installation guide first.
-bash /tmp/dotfiles-install.sh
+bash "$installer_dir/dotfiles-install.sh"
 ```
 
 The installer asks no questions. Select the host's preset afterwards in `~/.config/chezmoi/chezmoi.toml`, then run `dot apply`:

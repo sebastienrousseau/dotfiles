@@ -18,7 +18,7 @@ End-to-end installation and verification, from zero to a fully-working environme
 First complete the [verified release download](../../../README.md#verified-release-installer), then:
 
 ```sh
-bash /tmp/dotfiles-install.sh
+bash "$installer_dir/dotfiles-install.sh"
 ```
 
 The installer:

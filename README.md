@@ -82,14 +82,14 @@ release process are documented in
 [`docs/security/INSTALL_VERIFICATION.md`](docs/security/INSTALL_VERIFICATION.md).
 
 ```bash
-curl -fsSL -o /tmp/dotfiles-install.sh \
+installer_dir="$(mktemp -d)"
+curl -fsSL -o "$installer_dir/dotfiles-install.sh" \
   https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.547/dotfiles-install-0.2.547.sh
 if command -v sha256sum >/dev/null 2>&1; then
-  echo "66b3bcbe57bf210afabcb00f34c98cd390336dbb7faec3bb952b7597c1348358  /tmp/dotfiles-install.sh" | sha256sum -c -
+  echo "66b3bcbe57bf210afabcb00f34c98cd390336dbb7faec3bb952b7597c1348358  $installer_dir/dotfiles-install.sh" | sha256sum -c -
 else
-  echo "66b3bcbe57bf210afabcb00f34c98cd390336dbb7faec3bb952b7597c1348358  /tmp/dotfiles-install.sh" | shasum -a 256 -c -
-fi
-bash /tmp/dotfiles-install.sh
+  echo "66b3bcbe57bf210afabcb00f34c98cd390336dbb7faec3bb952b7597c1348358  $installer_dir/dotfiles-install.sh" | shasum -a 256 -c -
+fi && bash "$installer_dir/dotfiles-install.sh"
 ```
 
 The script needs `git`, `curl`, and `sha256sum` or `shasum`. It downloads a
@@ -174,9 +174,9 @@ air-gapped host; unpack it and run `./install.sh --force`.
 Silent install (no prompts):
 
 ```bash
-# After downloading and verifying /tmp/dotfiles-install.sh as shown above:
+# After downloading and verifying the installer as shown above:
 DOTFILES_SILENT=1 DOTFILES_NONINTERACTIVE=1 \
-  bash /tmp/dotfiles-install.sh --force
+  bash "$installer_dir/dotfiles-install.sh" --force
 ```
 
 Docker sandbox:
@@ -258,8 +258,8 @@ back.
 ## Quick Start
 
 ```bash
-# First download and verify /tmp/dotfiles-install.sh as shown in Install.
-bash /tmp/dotfiles-install.sh
+# First download and verify the installer as shown in Install.
+bash "$installer_dir/dotfiles-install.sh"
 dot doctor            # audit tools, paths, portability, security
 dot help tour         # interactive tour of shells, secrets, themes, performance
 dot theme rebuild     # generate themes from the wallpapers on this machine
@@ -309,7 +309,7 @@ and [`AGENTS.md`](AGENTS.md)) on every push to `main`.
 
 ```bash
 # The framework (everything, chezmoi-managed)
-bash /tmp/dotfiles-install.sh  # after the verified download above
+bash "$installer_dir/dotfiles-install.sh"  # after the verified download above
 
 # Only the dot CLI, from the attested release archive
 gh release download v0.2.547 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'

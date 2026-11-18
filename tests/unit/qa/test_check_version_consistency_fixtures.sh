@@ -76,7 +76,7 @@ _fixture() { # <name> <version>
   else
     fixture_hash="$(shasum -a 256 "$root/install.sh" | awk '{print $1}')"
   fi
-  printf 'echo "%s  /tmp/dotfiles-install.sh" | shasum -a 256 -c -\n' \
+  printf 'echo "%s  $installer_dir/dotfiles-install.sh" | shasum -a 256 -c -\n' \
     "$fixture_hash" >>"$root/README.md"
   mkdir -p "$root/.well-known/mcp"
   printf '{\n  "version": "%s"\n}\n' "$v" >"$root/.well-known/agent-card.json"
