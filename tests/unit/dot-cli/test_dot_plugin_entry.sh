@@ -87,12 +87,21 @@ assert_equals "127" "$RC" "a word that is not a verb of the object exits 127"
 assert_equals "" "$(grep '^ran ' "$WORK/out")" "the entry did not run"
 
 test_start "help_never_reaches_the_entry"
-for words in "theme --help" "theme toggle --help" "theme wallpaper set -h" "theme font install --help"; do
+for words in "theme --help" "theme wallpaper set -h" "theme font install --help"; do
   # shellcheck disable=SC2086 # words
   dot $words
   assert_equals "0" "$RC" "dot $words exits 0"
   assert_equals "" "$(grep '^ran ' "$WORK/out")" "dot $words runs nothing"
 done
+# A word the theme entry declares (its [entry] words) answers --help without
+# running the entry; an undeclared word's --help is that word (D8): not a
+# command, and the entry still never runs.
+dot theme toggle --help
+assert_equals "0" "$RC" "dot theme toggle --help: toggle is a declared entry word"
+assert_equals "" "$(grep '^ran ' "$WORK/out")" "dot theme toggle --help runs nothing"
+dot theme bogusverb --help
+assert_equals "127" "$RC" "dot theme bogusverb --help: an undeclared word is not a command"
+assert_equals "" "$(grep '^ran ' "$WORK/out")" "dot theme bogusverb --help runs nothing"
 
 test_start "help_names_the_entry_that_runs_a_command"
 dot help theme wallpaper set

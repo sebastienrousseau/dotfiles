@@ -87,7 +87,10 @@ dot_secrets_store_macos() {
   esac
   # The value goes to security on stdin, never in argv where ps shows it.
   # printf is a builtin, so no process carries the value on its command line.
-  printf 'add-generic-password -U -a %s -s %s -w %s\n' \
+  # -T "" trusts no application, so every later read (security included)
+  # needs the user's approval: without it security(1) is on the item's
+  # access list and any same-user process can read the value silently.
+  printf 'add-generic-password -U -a %s -s %s -w %s -T ""\n' \
     "$(dot_secrets_keychain_quote "$account")" \
     "$(dot_secrets_keychain_quote "$service")" \
     "$(dot_secrets_keychain_quote "$value")" | security -i >/dev/null || return 1

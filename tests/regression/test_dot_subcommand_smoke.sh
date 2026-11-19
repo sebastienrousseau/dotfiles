@@ -196,8 +196,9 @@ else
 fi
 
 test_start "dot_version_prints_version"
+# One parseable line, `dot <version>` (D10).
 out="$(bash "$DOT_CLI" --version 2>&1 || true)"
-if [[ "$out" == *"0.2.503"* ]] || [[ "$out" == *"Dotfiles"* ]]; then
+if [[ "$out" =~ ^dot\ [0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else
@@ -206,8 +207,10 @@ else
 fi
 
 test_start "dot_unknown_command_errors"
-out="$(bash "$DOT_CLI" __nonexistent_command_xyzzy__ 2>&1 || true)"
-if [[ "$out" == *"Unknown"* ]]; then
+# Exit 127 with the CLI's one message, on stderr (ADR-020 N10).
+rc=0
+out="$(bash "$DOT_CLI" __nonexistent_command_xyzzy__ 2>&1 >/dev/null)" || rc=$?
+if [[ $rc -eq 127 && "$out" == "dot: 'dot __nonexistent_command_xyzzy__' is not a command; run 'dot help'" ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 else

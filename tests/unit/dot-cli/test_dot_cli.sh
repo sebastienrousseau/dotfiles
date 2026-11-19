@@ -44,12 +44,12 @@ fi
 # Test: dot --version shows version
 test_start "dot_cli_version"
 output=$(bash "$DOT_CLI" --version 2>&1) || true
-if [[ "$output" == *"Dotfiles Version"* ]] && [[ "$output" == *".dotfiles "* ]] && [[ "$output" == *"Source"* ]]; then
+if [[ "$output" =~ ^dot\ [0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --version shows doctor-style version output"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: --version prints one line, dot <version> (D10)"
 else
   ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --version should show version"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: --version should print one line, dot <version>"
   printf '%b\n' "    Output: $output"
 fi
 
@@ -70,7 +70,7 @@ set +e
 output=$(bash "$DOT_CLI" totally-invalid-command-12345 2>&1)
 ec=$?
 set -e
-if [[ "$output" == *"Unknown command"* ]] && [[ $ec -ne 0 ]]; then
+if [[ "$output" == *"is not a command"* ]] && [[ $ec -eq 127 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: unknown command shows error and exits non-zero"
 else
@@ -153,7 +153,7 @@ fi
 # Test: dot help all shows full reference
 test_start "dot_cli_help_all"
 output=$(bash "$DOT_CLI" help all 2>&1) || true
-if [[ "$output" == *"dot config sync"* ]] && [[ "$output" == *"dot system update"* ]] && [[ "$output" == *"(planned)"* ]]; then
+if [[ "$output" == *"dot config sync"* ]] && [[ "$output" == *"dot system update"* ]] && [[ "$output" != *"(planned)"* ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: help all shows full reference"
 else
@@ -186,16 +186,17 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: -V should match --version output"
 fi
 
-# Test: dot version is alias for --version
+# Test: dot version keeps the banner; --version is the one-line form (D10)
 test_start "dot_cli_version_cmd"
 output=$(bash "$DOT_CLI" version 2>&1) || true
-if [[ "$output" == "$reference_output" ]]; then
+if [[ "$output" != "$reference_output" ]] && [[ "$output" == *"$reference_output"* || "$output" == *"${reference_output#dot }"* ]]; then
   ((TESTS_PASSED++)) || true
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: version matches --version output"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: version shows the banner with the --version number"
 else
   ((TESTS_FAILED++)) || true
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: version should match --version output"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: version should show the banner with the --version number"
 fi
+reference_output="$output"
 
 # Test: dot version uses doctor-style layout
 test_start "dot_cli_version_layout"
@@ -239,7 +240,7 @@ set +e
 output=$(CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" config add 2>&1)
 ec=$?
 set -e
-if [[ "$output" == *"Usage: dot config add"* ]] && [[ $ec -ne 0 ]]; then
+if [[ "$output" == *"usage: dot config add"* ]] && [[ $ec -eq 64 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot config add with no args shows usage"
 else
@@ -253,7 +254,7 @@ set +e
 output=$(CHEZMOI_SOURCE_DIR="$REPO_ROOT" bash "$DOT_CLI" tool new 2>&1)
 ec=$?
 set -e
-if [[ "$output" == *"Usage: dot tool new <lang> <name>"* ]] && [[ $ec -ne 0 ]]; then
+if [[ "$output" == *"usage: dot tool new <lang> <name>"* ]] && [[ $ec -eq 64 ]]; then
   ((TESTS_PASSED++)) || true
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot tool new with no args shows usage"
 else

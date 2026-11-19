@@ -171,7 +171,7 @@ check_installer_digest() {
   fi
   installer_hash="$(dot_installer_digest . "$canonical")"
   documented_hashes="$(
-    grep '/tmp/dotfiles-install\.sh' README.md |
+    grep -F '  $installer_dir/dotfiles-install.sh' README.md |
       grep -oE '[0-9a-f]{64}' |
       sort -u || true
   )"

@@ -57,7 +57,7 @@ tar -czf ~/dotfiles-backup-$(date +%F).tar.gz -C "$HOME" \
 
 # 2. After the verified release download in docs/guides/INSTALL.md,
 #    install the framework. This overwrites the files the defaults manage.
-bash /tmp/dotfiles-install.sh
+bash "$installer_dir/dotfiles-install.sh"
 
 # 3. Restore your own files from the backup, then bring them under
 #    management one at a time (each replaces the default for that path).

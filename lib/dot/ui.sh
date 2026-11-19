@@ -9,7 +9,8 @@
 ## functions below instead.
 ##
 ## # Primitives
-##  Status:   ui_ok, ui_err, ui_warn, ui_info, ui_meta
+##  Status:   ui_ok, ui_err (stderr), ui_fail (failed result row), ui_warn,
+##            ui_info, ui_meta
 ##  Layout:   ui_header, ui_section, ui_cmd, ui_kv, ui_bullet, ui_logo_dot
 ##  Animated: ui_spinner_start, ui_spinner_stop, ui_progress, ui_run_cmd
 ##  Interact: ui_confirm, ui_toast
@@ -45,15 +46,8 @@ UI_INITED=0  # guard flag
 UI_COLOR=0   # tput colors available
 UI_UTF8=0    # terminal supports UTF-8
 
-BOLD=""
-NORMAL=""
-RED=""
-GREEN=""
-YELLOW=""
-BLUE=""
-MAGENTA=""
-CYAN=""
-GRAY=""
+BOLD="" NORMAL="" GRAY=""
+RED="" GREEN="" YELLOW="" BLUE="" MAGENTA="" CYAN=""
 
 # Glyph set — overridden to ASCII by DOTFILES_ACCESSIBILITY
 _GL_OK="✓"
@@ -90,10 +84,10 @@ ui_init() {
     if command -v gum >/dev/null 2>&1 && [[ -t 1 ]]; then
       UI_ENABLED=1
     fi
-    # UTF-8 detection
-    if [[ "$(locale charmap 2>/dev/null || true)" = "UTF-8" ]]; then
-      UI_UTF8=1
-    fi
+    # UTF-8 detection from the locale variables: no `locale` fork (P13)
+    case "${LC_ALL:-${LC_CTYPE:-${LANG:-}}}" in
+      *[Uu][Tt][Ff]-8* | *[Uu][Tt][Ff]8*) UI_UTF8=1 ;;
+    esac
   fi
 
   # --- Color palette (hardcoded ANSI; no tput forks) ---
@@ -175,7 +169,13 @@ ui_status() {
 
 ui_ok() { ui_status "$_GL_OK" "[OK]" "$1" "${2:-}" "$GREEN"; }
 ui_warn() { ui_status "$_GL_WARN" "[WARN]" "$1" "${2:-}" "$YELLOW"; }
-ui_err() { ui_status "$_GL_FAIL" "[FAIL]" "$1" "${2:-}" "$RED"; }
+# Errors are diagnostics, so they go to stderr (ADR-020 N14: results on
+# stdout, logs on stderr), coloured only when stderr is a terminal.
+ui_err() { ui_status "$_GL_FAIL" "[FAIL]" "$1" "${2:-}" "$([[ ! -t 2 ]] || printf %s "$RED")" >&2; }
+# A failed row of a report or step list is a result, not a diagnostic: it
+# stays on stdout with the rows around it, so `dot doctor >file` or
+# `| grep ✗` still sees every failure and its summary line.
+ui_fail() { ui_status "$_GL_FAIL" "[FAIL]" "$1" "${2:-}" "$RED"; }
 ui_info() { ui_status "$_GL_INFO" "[INFO]" "$1" "${2:-}" "$GRAY"; }
 ui_meta() { ui_status "$_GL_INFO" "[INFO]" "$1" "${2:-}" "$GRAY" 14; }
 
@@ -331,7 +331,7 @@ ui_run_cmd() {
     if "$@" >/dev/null 2>&1; then
       ui_ok "$label"
     else
-      ui_err "$label"
+      ui_fail "$label"
       return 1
     fi
     return 0
@@ -378,7 +378,7 @@ ui_run_cmd() {
   if [[ "$rc" == "0" ]]; then
     ui_ok "$label"
   else
-    ui_err "$label"
+    ui_fail "$label"
   fi
   return "$rc"
 }
@@ -421,7 +421,7 @@ _ui_export_theme_colors() {
 #
 # Sequential multi-step operations (theme sync, heal, upgrade, …). In a rich
 # TTY with dot-ui present it streams NDJSON to an animated Bubble Tea view;
-# otherwise it prints today's plain ui_ok/ui_info/ui_err lines. Every
+# otherwise it prints today's plain ui_ok/ui_info/ui_fail lines. Every
 # step-runner using this one API is what makes the output consistent.
 #
 #   ui_steps_begin "dot theme" "pulse"
@@ -596,7 +596,7 @@ ui_step() {
   case "$state" in
     ok) ui_ok "$lbl" "$detail" ;;
     skip) ui_info "$lbl" "$detail" ;;
-    fail) ui_err "$lbl" "$detail" ;;
+    fail) ui_fail "$lbl" "$detail" ;;
     warn) ui_warn "$lbl" "$detail" ;;
     na | run) : ;;
   esac

@@ -50,8 +50,13 @@ assert_false '[[ "$argv_lines" == *"$SECRET"* ]]' "the secret never appears on a
 
 test_start "keychain_secret_sent_on_stdin"
 stdin_lines="$(grep '^STDIN:' "$WORK/security.log" 2>/dev/null || true)"
-assert_equals 'STDIN: add-generic-password -U -a "tester" -s "dotfiles.secret.API_TOKEN" -w "s3cr3t-value"' \
+assert_equals 'STDIN: add-generic-password -U -a "tester" -s "dotfiles.secret.API_TOKEN" -w "s3cr3t-value" -T ""' \
   "$stdin_lines" "security -i receives one quoted add-generic-password command"
+
+# -T "" leaves the item's access list empty, so no application (not even
+# security itself) reads it without the user approving the prompt.
+test_start "keychain_item_trusts_no_application"
+assert_contains ' -T ""' "$stdin_lines" "the item is added with an empty trusted-application list"
 
 test_start "keychain_value_quotes_and_backslashes_escaped"
 store API_TOKEN 'a "q" b\c $x' >/dev/null

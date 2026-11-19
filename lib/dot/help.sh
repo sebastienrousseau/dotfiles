@@ -12,58 +12,99 @@
 # `dot help --json` prints lib/dot/data/commands.json, the same names as one
 # catalog for agents and tools.
 
+# _dot_upper TEXT: TEXT in capitals, in _UP, without a fork (bash 3.2 has
+# no ${var^^}; a `tr` per group heading cost a fork each, P13).
+_dot_upper() {
+  local lower=abcdefghijklmnopqrstuvwxyz upper=ABCDEFGHIJKLMNOPQRSTUVWXYZ c i head
+  _UP=""
+  for ((i = 0; i < ${#1}; i++)); do
+    c="${1:i:1}"
+    head="${lower%%"$c"*}"
+    [[ "$head" == "$lower" ]] || c="${upper:${#head}:1}"
+    _UP+="$c"
+  done
+}
+
 # _dot_help_overview: the domains by group, the shortcuts and the built-ins.
+# One pass over the table collects the groups, domain summaries and
+# shortcuts (P13: a lookup per domain rescanned the whole table).
 _dot_help_overview() {
-  local rec key a b c d
+  local rec key a b c d v groups="" shortcuts=""
   _dot_table_load
+  while IFS='|' read -r rec key a b c; do
+    case "$rec" in
+      grp) groups+="$a|$b"$'\n' ;;
+      dom) printf -v "_dot_dom_$key" '%s' "$c" ;;
+      alias)
+        [[ "$a" == shortcut ]] || continue
+        printf -v v '  %-10s dot %s\n' "$key" "$b"
+        shortcuts+="$v"
+        ;;
+    esac
+  done <<<"$_DOT_TABLE"
   printf 'dot · manage this machine, its shell, its agents and its configuration\n\n'
   printf 'Usage: dot <domain> [object] <verb> [args]\n'
-  while IFS='|' read -r rec key a b c; do
-    [[ "$rec" == grp ]] || continue
-    printf '\n%s\n' "$(printf '%s' "$a" | tr '[:lower:]' '[:upper:]')"
+  while IFS='|' read -r a b; do
+    [[ -n "$a" ]] || continue
+    _dot_upper "$a"
+    printf '\n%s\n' "$_UP"
     for d in $b; do
-      _dot_record dom "$d" && printf '  %-10s %s\n' "$d" "${_REC##*|}"
+      v="_dot_dom_$d"
+      [[ -z "${!v:-}" ]] || printf '  %-10s %s\n' "$d" "${!v}"
     done
-  done <<<"$_DOT_TABLE"
-  printf '\nSHORTCUTS\n'
-  while IFS='|' read -r rec key a b c; do
-    [[ "$rec" == alias && "$a" == shortcut ]] && printf '  %-10s dot %s\n' "$key" "$b"
-  done <<<"$_DOT_TABLE"
+  done <<<"$groups"
+  printf '\nSHORTCUTS\n%s' "$shortcuts"
   printf '\nRun %s for its commands, %s for every command,\n' "'dot help <domain>'" "'dot help all'"
   printf '%s to search, %s for the catalog. Version %s.\n' "'dot help <term>'" "'dot help --json'" "${VERSION:-}"
 }
 
-# _dot_help_all: every spelling, by domain.
+# _dot_help_planned_line KEY ROUTE SUMMARY: one command's help line; a
+# planned one (no route yet) only under `dot help --all`
+# (_DOT_HELP_PLANNED=1, D12), else counted in _DOT_HIDDEN.
+_dot_help_planned_line() {
+  if [[ -n "$2" ]]; then
+    printf '  dot %-28s %s\n' "$1" "$3"
+  elif [[ "${_DOT_HELP_PLANNED:-0}" == 1 ]]; then
+    printf '  dot %-28s %s  (planned)\n' "$1" "$3"
+  else
+    _DOT_HIDDEN=$((_DOT_HIDDEN + 1))
+  fi
+}
+
+# _dot_help_hidden_note: say how many planned commands were left out.
+_dot_help_hidden_note() {
+  ((_DOT_HIDDEN == 0)) || printf "\n  %d planned, not built yet: 'dot help --all' lists them\n" "$_DOT_HIDDEN"
+}
+
+# _dot_help_all: every built spelling, by domain; `dot help --all` sets
+# _DOT_HELP_PLANNED=1 to add the planned ones.
 _dot_help_all() {
-  local rec key a b c domain="" note
+  local rec key a b c domain=""
+  _DOT_HIDDEN=0
   _dot_table_load
   while IFS='|' read -r rec key a b c; do
     [[ "$rec" == cmd ]] || continue
     if [[ "${key%% *}" != "$domain" ]]; then
+      printf '%sdot %s\n' "${domain:+$'\n'}" "${key%% *}"
       domain="${key%% *}"
-      printf '%sdot %s\n' "${note+$'\n'}" "$domain"
     fi
-    note=""
-    [[ -n "$a" ]] || note="  (planned)"
-    printf '  dot %-28s %s%s\n' "$key" "$c" "$note"
+    _dot_help_planned_line "$key" "$a" "$c"
   done <<<"$_DOT_TABLE"
+  _dot_help_hidden_note
 }
 
 # _dot_domain_help PREFIX: a domain's (or an object's) commands.
 _dot_domain_help() {
-  local rec key a b c note
+  local rec key a b c
+  _DOT_HIDDEN=0
   _dot_table_load
   while IFS='|' read -r rec key a b c; do
     case "$rec" in
       dom | obj) [[ "$key" == "$1" ]] && printf 'dot %s · %s\n\n' "$key" "$c" ;;
-      cmd)
-        [[ "$key" == "$1 "* ]] || continue
-        note=""
-        [[ -n "$a" ]] || note="  (planned)"
-        printf '  dot %-28s %s%s\n' "$key" "$c" "$note"
-        ;;
+      cmd) [[ "$key" != "$1 "* ]] || _dot_help_planned_line "$key" "$a" "$c" ;;
     esac
   done <<<"$_DOT_TABLE"
+  _dot_help_hidden_note
   return 0
 }
 

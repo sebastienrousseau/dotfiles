@@ -11,7 +11,8 @@ This runbook captures recovery and release maintenance operations for this repos
 `dot update` (short for `dot system update`) is the one update path. It
 updates the dotfiles, the mise tools and, after asking, the system
 packages (Homebrew, apt, dnf, pacman or zypper) and the app stores (mas,
-Flatpak, Snap). `--globals` adds npm, cargo and pipx globals, and `--yes`
+Flatpak, Snap). `--globals` adds pipx venvs (npm and cargo tools are exact pins, never
+floated), and `--yes`
 answers every question. The AI CLIs stay at their `[ai_tools]` pins:
 `dot update` lists the newer releases it finds on each pin's major version
 (from `dot ai update --check`, which changes nothing; a new major is a

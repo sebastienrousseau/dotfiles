@@ -28,7 +28,7 @@ export FORCE_COLOR_OS="Windows"
 
 {{- $profile := default "laptop" .profile -}}
 {{- $features := default (dict "zsh" true "nvim" true "tmux" true "gui" true "secrets" true) .features -}}
-{{- $themes := (include ".theme-manifest/themes.toml" | fromToml).themes -}}
+{{- $themes := (includeTemplate "theme-subset" (dict "theme" $.theme) | fromToml).themes -}}
 {{- $theme := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}
 {{- /* aliases.policy.strict_mode in .chezmoidata.toml; a top-level strict_mode still counts */ -}}
 {{- $strict_mode := dig "aliases" "policy" "strict_mode" (default false (index . "strict_mode")) . -}}
@@ -236,6 +236,83 @@ _cached_eval_expire() {
   done
 }
 
+# _cached_eval_is_shim <path>: succeed when <path> is a mise shim, a link in
+# mise's shims directory to mise itself. Its realpath is mise, whatever
+# version of the tool it runs.
+_cached_eval_is_shim() {
+  [[ ${1:h:t} == shims && ${1:A:t} == mise ]]
+}
+
+# _cached_eval_resolve <command>: print the binary <command> runs: its
+# realpath, or for a mise shim the binary mise picks (one fork, cache misses
+# only).
+_cached_eval_resolve() {
+  local bin=${commands[$1]}
+  [[ -n "$bin" ]] || return 0
+  if _cached_eval_is_shim "$bin"; then
+    bin=$(command "${bin:A}" which "$1" 2>/dev/null) || return 0
+    [[ -n "$bin" ]] || return 0
+  fi
+  print -r -- "${bin:A}"
+}
+
+# _cached_eval_fresh <cache> <command> [args...]: succeed when <cache> may be
+# sourced as is. It is stale when missing or empty, when the binary or a
+# file-path argument is newer, or when the binary the cache was made with
+# (its pin) is no longer the one <command> runs: a PATH-shadow swap or a mise
+# version change. A mise shim says nothing about the version it runs, so
+# through a shim the pinned binary only has to still exist; the realpath of
+# the shim, mise, would never match the pin and rewrote the cache in every
+# shell that reached a tool both ways (a shim before mise activation, the
+# install directory after).
+_cached_eval_fresh() {
+  local cache=$1 bin=${commands[$2]} pinned arg
+  shift
+  [[ -s "$cache" ]] || return 1
+  [[ -n "$bin" && "$bin" -nt "$cache" ]] && return 1
+  if [[ -n "$bin" && -f "${cache}.bin" ]]; then
+    pinned=$(<"${cache}.bin")
+    if _cached_eval_is_shim "$bin"; then
+      [[ -z "$pinned" || -e "$pinned" ]] || return 1
+    else
+      [[ -z "$pinned" || "$pinned" == "${bin:A}" ]] || return 1
+    fi
+  fi
+  for arg in "${@:2}"; do
+    [[ -f "$arg" && "$arg" -nt "$cache" ]] && return 1
+  done
+  return 0
+}
+
+# _cached_eval_write <file> <content>: replace <file> atomically.
+#
+# `mktemp` instead of `<file>.tmp.$$`: under PID recycling two shells could
+# otherwise share a temp file. `>|` overwrites the mktemp file even under
+# `setopt noclobber` (see dot_config/shell/05-core-safety.sh).
+_cached_eval_write() {
+  local tmp
+  tmp="$(mktemp "${1}.XXXXXX")" || return 1
+  print -r -- "$2" >| "$tmp" && mv -f -- "$tmp" "$1" && return 0
+  rm -f -- "$tmp"
+  return 1
+}
+
+# _cached_eval_zcompile <file>: compile <file> to <file>.zwc atomically, and
+# only if <file> was not replaced meanwhile. Run in the background, a plain
+# `zcompile <file>` let another shell read a half-written .zwc, or write one
+# compiled from an older <file> after a newer one landed.
+_cached_eval_zcompile() {
+  local src=$1 tmp="${1}.$$.tmp.zwc"
+  local -a before after
+  zmodload -F zsh/stat b:zstat 2>/dev/null || return 0
+  zstat -A before +inode -- "$src" 2>/dev/null || return 0
+  if zcompile -- "$tmp" "$src" 2>/dev/null &&
+    zstat -A after +inode -- "$src" 2>/dev/null && [[ "$before" == "$after" ]]; then
+    mv -f -- "$tmp" "${src}.zwc" && return 0
+  fi
+  rm -f -- "$tmp"
+}
+
 _cached_eval_impl() {
   local label=$1; shift
 
@@ -247,35 +324,7 @@ _cached_eval_impl() {
   fi
 
   local cache="$_SHELL_CACHE/${label}.zsh"
-  local pin="${cache}.bin"
-  local bin="${commands[$1]}"
-  local real_bin=""
-  [[ -n "$bin" ]] && real_bin=${bin:A}
-
-  # Cache is valid when: it exists non-empty, the binary is not newer than it,
-  # the recorded realpath (if any) still matches the current realpath, and no
-  # file-path argument has been modified since cache write.
-  local cache_valid=1
-  if [[ ! -s "$cache" ]]; then
-    cache_valid=0
-  elif [[ -n "$bin" && "$bin" -nt "$cache" ]]; then
-    cache_valid=0
-  elif [[ -f "$pin" && -n "$real_bin" ]]; then
-    local pinned_real
-    pinned_real=$(<"$pin")
-    [[ -n "$pinned_real" && "$pinned_real" != "$real_bin" ]] && cache_valid=0
-  fi
-  if (( cache_valid )); then
-    local arg
-    for arg in "${@:2}"; do
-      if [[ -f "$arg" && "$arg" -nt "$cache" ]]; then
-        cache_valid=0
-        break
-      fi
-    done
-  fi
-
-  if (( cache_valid )); then
+  if _cached_eval_fresh "$cache" "$@"; then
     source "$cache"
     return
   fi
@@ -295,26 +344,28 @@ _cached_eval_impl() {
     return 1
   fi
 
-  # `mktemp` instead of `${cache}.tmp.$$` — under PID recycling (very
-  # rare but possible) two concurrent shells with the same $$ could
-  # otherwise race on the same temp file. mktemp gives a unique name.
-  # Use `>|` so we overwrite the just-created mktemp file even when the
-  # user has `setopt noclobber` (see dot_config/shell/05-core-safety.sh).
-  local _tmp _tmp_pin
-  _tmp="$(mktemp "${cache}.XXXXXX")" || return 1
-  print -r -- "$init_output" >| "$_tmp" && mv "$_tmp" "$cache" || { rm -f "$_tmp"; return 1; }
-  if [[ -n "$real_bin" ]]; then
-    _tmp_pin="$(mktemp "${pin}.XXXXXX")" || return 1
-    print -r -- "$real_bin" >| "$_tmp_pin" && mv "$_tmp_pin" "$pin" || { rm -f "$_tmp_pin"; return 1; }
+  # zsh trusts a .zwc whose mtime is not older than its source, to the
+  # second: a cache rewritten within a second of its last compile would
+  # otherwise keep loading the old bytecode.
+  rm -f -- "${cache}.zwc"
+  _cached_eval_write "$cache" "$init_output" || return 1
+  local pinned
+  pinned=$(_cached_eval_resolve "$1")
+  if [[ -n "$pinned" ]]; then
+    _cached_eval_write "${cache}.bin" "$pinned" || return 1
+  else
+    rm -f -- "${cache}.bin"
   fi
   source "$cache"
-  { zcompile "$cache" } &!
+  { _cached_eval_zcompile "$cache" } &!
 }
 
 # Clear cache files written by _cached_eval.
 #
 # Safe by design: only deletes *.zsh / *.zsh.bin / *.zwc files in
-# $_SHELL_CACHE, leaving any unrelated content untouched.
+# $_SHELL_CACHE, and the temp files a shell killed mid-write leaves
+# (<name>.zsh.XXXXXX, <name>.zsh.bin.XXXXXX, <name>.zsh.<pid>.tmp.zwc),
+# leaving any unrelated content untouched.
 #
 # @noargs
 # @stdout Single-line summary: "Cleared N cached eval file(s) from <dir>"
@@ -323,7 +374,8 @@ _cached_eval_clear() {
   local cache_dir="$_SHELL_CACHE"
   [[ -d "$cache_dir" ]] || return 0
   local count=0 f
-  for f in "$cache_dir"/*.zsh(N) "$cache_dir"/*.zsh.bin(N) "$cache_dir"/*.zwc(N); do
+  for f in "$cache_dir"/*.zsh(N) "$cache_dir"/*.zsh.bin(N) "$cache_dir"/*.zwc(N) \
+    "$cache_dir"/*.zsh.??????(N) "$cache_dir"/*.zsh.bin.??????(N); do
     rm -f -- "$f" && (( count++ ))
   done
   printf 'Cleared %d cached eval file(s) from %s\n' "$count" "$cache_dir"
@@ -435,18 +487,20 @@ zcompile_many() {
   local f
   for f; do
     # Compile if source is newer than .zwc or .zwc doesn't exist
-    if [[ -f "$f" ]]; then
-      if [[ ! -f "${f}.zwc" || "$f" -nt "${f}.zwc" ]]; then
-        zcompile "$f"
-      fi
+    if [[ -f "$f" ]] && [[ ! -f "${f}.zwc" || "$f" -nt "${f}.zwc" ]]; then
+      _cached_eval_zcompile "$f"
     fi
   done
 }
 
-# Compile main config and generated files in background
+# Compile main config and generated files in background. zsh reads
+# $ZDOTDIR/.zshrc (~/.zshenv sets ZDOTDIR), not the ~/.zshrc stub, and
+# `source` picks up each rc.d file's .zwc.
 if [[ -o interactive ]]; then
   (
     zcompile_many "${HOME}/.zshrc" \
+                  "${ZDOTDIR:-$HOME/.config/zsh}/.zshrc" \
+                  "${ZSH_RC_DIR}"/*.zsh(N) \
                   "${HOME}/.config/shell/aliases.sh" \
                   "${HOME}/.config/shell/paths.sh" \
                   "${HOME}/.config/shell/functions.sh" \
@@ -728,12 +782,13 @@ _dotfiles_async_init() {
           _cached_eval atuin-init atuin init zsh
           ;;
         starship)
-          if [[ "$DOTFILES_ARTIFACT_MODE" == "0" ]]; then
+          # The prompt was set up eagerly, usually through mise's shim.
+          # Now that mise is active, re-run its init only if mise resolves
+          # a different starship than the cache was made with (a version
+          # change); sourcing it a second time would only redo the work.
+          if [[ "$DOTFILES_ARTIFACT_MODE" == "0" ]] &&
+            ! _cached_eval_fresh "$_SHELL_CACHE/starship-init.zsh" starship init zsh; then
             _cached_eval starship-init starship init zsh
-            if [[ -z "${_DOTFILES_STARSHIP_TRANSIENT:-}" ]] && (( ${+functions[enable_transience]} )); then
-              enable_transience
-              _DOTFILES_STARSHIP_TRANSIENT=1
-            fi
           fi
           ;;
         zoxide)
@@ -760,14 +815,23 @@ _dotfiles_async_init() {
 }
 
 # Deferred Hydration for Zero-Jank Experience
+#
+# mise, atuin and zoxide load just after the first prompt is drawn: the
+# first precmd asks zle to call back as soon as it waits for input
+# (`zle -F` on a /dev/null descriptor, which is always readable). If a
+# command is entered before that (typeahead), preexec hydrates first, so
+# mise's environment is in place before any command runs. Until then,
+# commands resolve through mise's shims, which 00-core-paths puts on PATH.
+# Without zle (stdin not a terminal), hydration runs in that first precmd.
+#
+# DOTFILES_HYDRATED is shell-local: exported, it told every child shell
+# (tmux panes, IDE terminals, `exec zsh`) to skip mise, atuin and zoxide.
 _dotfiles_deferred_hydration() {
-  # Unregister self
-  _dotfiles_del_precmd _dotfiles_deferred_hydration
   _dotfiles_del_preexec _dotfiles_deferred_hydration
 
   # Check if already hydrated in this shell instance
   [[ -n "$DOTFILES_HYDRATED" ]] && return 0
-  export DOTFILES_HYDRATED=1
+  typeset -g DOTFILES_HYDRATED=1
 
   _dotfiles_async_init
 
@@ -778,12 +842,36 @@ _dotfiles_deferred_hydration() {
   fi
 }
 
-# 1. Idle trigger (500ms)
-zmodload zsh/sched 2>/dev/null
-sched +1 _dotfiles_deferred_hydration 2>/dev/null
+# zle -F handler: hydrate once, with anything it prints shown above the
+# prompt rather than over it.
+_dotfiles_hydrate_on_idle() {
+  local fd=$1 log="$_SHELL_CACHE/hydrate.$$.log"
+  zle -F "$fd"
+  exec {fd}<&-
+  { _dotfiles_deferred_hydration } >|"$log" 2>&1
+  if [[ -s "$log" ]]; then
+    zle -I
+    print -r -- "$(<"$log")" >&2
+  fi
+  rm -f -- "$log"
+}
 
-# 2. First-action trigger (Prompt or Enter)
-_dotfiles_add_precmd _dotfiles_deferred_hydration
+# First precmd: defer hydration until zle waits for input.
+_dotfiles_hydrate_after_prompt() {
+  _dotfiles_del_precmd _dotfiles_hydrate_after_prompt
+  # -1, not empty: under noclobber (05-core-safety) `exec {fd}<` refuses a
+  # parameter whose value reads as an open descriptor, and empty reads as 0.
+  local fd=-1
+  if [[ -o zle ]] && exec {fd}</dev/null; then
+    zle -F "$fd" _dotfiles_hydrate_on_idle 2>/dev/null && return 0
+    exec {fd}<&-
+  fi
+  _dotfiles_deferred_hydration
+}
+
+# An inherited value comes from a parent shell that exported it.
+unset DOTFILES_HYDRATED
+_dotfiles_add_precmd _dotfiles_hydrate_after_prompt
 _dotfiles_add_preexec _dotfiles_deferred_hydration
 
 fi

@@ -27,7 +27,7 @@ repo_root = Path(repo_root).resolve()
 #   2. Self-reference — run-coverage.sh is the runner itself; the
 #      runner traces other scripts but not itself.
 #   3. CI-only entry points that mutate real environments (pre-push,
-#      release, install, bump, lint, check-deps-dev, validate-ci-config,
+#      release, install, bump, lint, check-deps-dev,
 #      reliability-audit, coverage-baseline, lint-reusable-pins).
 #   4. Top-level system-mutation scripts that need real OS state
 #      (rebuild-themes scans wallpapers; apply-gnome-theme drives
@@ -61,7 +61,6 @@ SKIP_PATHS = {
     "tools/ci/check-deps-dev.sh",
     "tools/ci/lint-reusable-pins.sh",
     "tools/ci/validate-chezmoidata.sh",
-    "tools/ci/validate-ci-config.sh",
     "tools/ci/check-dangerous-chmod.sh",
     "scripts/git-hooks/pre-push",
     "scripts/qa/reliability-audit.sh",

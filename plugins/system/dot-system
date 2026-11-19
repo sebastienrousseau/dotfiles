@@ -20,5 +20,7 @@ case "${1:-} ${2:-}" in
   "clean --logs") system_module log-rotate "${@:3}" ;;
   "settings apply") system_module tune "${@:3}" ;;
 esac
+# `clean` alone, or with --caches/--yes, prunes the build caches (P9).
+[[ "${1:-}" != clean ]] || system_module clean-caches "${@:2}"
 [[ "${1:-}" != update ]] || system_module upgrade "${@:2}"
 system_module "$@"

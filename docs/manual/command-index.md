@@ -161,7 +161,7 @@ file is stale. `dot help <command>` shows one command and its flags.
 | `dot shell alias export` | Write the alias cheatsheet |
 | `dot system status` | OS, disk, schedule and last run |
 | `dot system update` | Update everything, asking first |
-| `dot system clean` | Reclaim space, asking first *(planned)* |
+| `dot system clean` | Reclaim space, asking first |
 | `dot system show` | Hardware and host details *(planned)* |
 | `dot system schedule list` | Scheduled jobs |
 | `dot system schedule set` | Set the maintenance schedule |

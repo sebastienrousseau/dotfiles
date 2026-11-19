@@ -75,7 +75,7 @@ Your `~/dotfiles` directory still holds the real files. Nothing is lost.
 
 ```sh
 # Download and verify the release installer per docs/guides/INSTALL.md first.
-bash /tmp/dotfiles-install.sh
+bash "$installer_dir/dotfiles-install.sh"
 ```
 
 ## 4. Import your files

@@ -96,9 +96,7 @@ _fleet_apply_args() {
         return 0
         ;;
       *)
-        ui_err "Unknown arg" "$1"
-        _fleet_stop=1
-        return 0
+        dot_usage_error "unknown flag '$1' for 'dot fleet apply'" "dot fleet apply [--host <name>] [--agents | --cmd <shell>] [--dry-run] [--jobs <n>]"
         ;;
     esac
   done
@@ -120,16 +118,12 @@ _fleet_apply_header() {
 # Validates --jobs, then loads the hosts (filtered by --host) into entries.
 _fleet_apply_load() {
   if ((agents == 1)) && [[ -n "$cmd" ]]; then
-    ui_err "Fleet" "--agents and --cmd do not mix: --agents runs its own steps"
-    _fleet_stop=1
-    return 0
+    dot_usage_error "--agents and --cmd do not mix: --agents runs its own steps"
   fi
   # The throttle loop waits while the running-job count is >= jobs, so 0 or
   # a non-number would spin forever.
   if [[ ! "$jobs" =~ ^[1-9][0-9]*$ ]]; then
-    ui_err "--jobs" "expected a positive integer, got '$jobs'"
-    _fleet_stop=2
-    return 0
+    dot_usage_error "--jobs expects a positive integer, got '$jobs'"
   fi
   hosts_file="$(fleet_hosts_file)"
   if [[ ! -f "$hosts_file" ]]; then

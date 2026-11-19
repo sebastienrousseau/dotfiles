@@ -43,7 +43,7 @@ jobs:
       - name: Setup Node.js (for markdownlint-cli2)
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v6
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Setup Go (for actionlint)
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0

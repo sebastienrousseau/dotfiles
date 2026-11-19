@@ -272,7 +272,7 @@ func (m model) splash(w, h int) string {
 	b = append(b,
 		"",
 		c(tagSt.Render("the cockpit for your AI tools")),
-		c(dimSt.Render("one subscription · every agent · zero keys")),
+		c(dimSt.Render("any agent · one place · your own keys")),
 		"",
 		c(keySt.Render("⏎")+dimSt.Render(" open session    ")+
 			keySt.Render("type")+dimSt.Render(" to chat    ")+

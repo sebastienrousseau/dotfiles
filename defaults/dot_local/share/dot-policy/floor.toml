@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+# The deny-only floor (ADR-025 amendment). `dot cli hook check` applies it
+# when there is no ~/.config/dotfiles/ai-policy.toml: every tool is allowed
+# except reading the credentials dot manages, and the shell commands that
+# print or decrypt them. It sets no budget and limits nothing else; for
+# modes and budgets, install a preset (registry module ai-policy-pack).
+# The hook always runs it in mode "floor", whatever agent mode is active.
+schema = "ai-policy.v1"
+default_mode = "floor"
+
+[mode.floor]
+tools = ["*"]
+paths_deny = [
+  "~/.config/chezmoi/key.txt",
+  "~/.config/chezmoi/chezmoi.*",
+  "~/.netrc",
+  "~/.npmrc",
+  "~/.config/gh/hosts.yml",
+  "~/.config/dotfiles/secrets/**",
+  "~/.local/state/dot/ai/serve/gateway.token",
+  "~/Library/Keychains/**",
+]
+commands_deny = [
+  "*chezmoi/key.txt*",
+  "*chezmoi/chezmoi.*",
+  "*gh/hosts.yml*",
+  "*dotfiles/secrets/*",
+  "*gateway.token*",
+  "*Library/Keychains*",
+  "security find-generic-password*",
+  "security find-internet-password*",
+  "security dump-keychain*",
+  "security export*",
+  "gh auth token*",
+  "chezmoi decrypt*",
+  "age -d*",
+  "age --decrypt*",
+]

@@ -97,8 +97,10 @@ PY
 
 # Every module the dispatcher routes to, and every other command module
 # (scripts/dot/commands, and those that moved into a plugin's libexec/),
-# must load and answer an unknown subcommand with a clean usage error
-# (rc 0 or 1). A missing module exits 127; a parse error exits 2.
+# must load and answer an unknown subcommand cleanly: rc 0 or 1 (a module
+# not yet converted), 64 with a "dot: " usage error, or 127 with the CLI's
+# one "is not a command" message (ADR-020 N10). A parse error exits 2, and a
+# 127 without that message is bash failing to find something.
 it_sandbox dispatch
 test_start "dispatch_command_scripts_exist"
 it_bad=""
@@ -110,7 +112,11 @@ it_mods+=("$REPO_ROOT"/scripts/dot/commands/*.sh "$REPO_ROOT"/plugins/*/libexec/
 for it_f in "${it_mods[@]}"; do
   it_rc=0
   it_out="$(cd "$IT_S/tmp" && it_env bash "$it_f" __no_such_subcommand__ 2>&1)" || it_rc=$?
-  if ((it_rc > 1)) || [[ "$it_out" == *"syntax error"* ]]; then it_bad+=" ${it_f#"$REPO_ROOT"/}(rc=$it_rc)"; fi
+  case "$it_rc:$it_out" in
+    *"syntax error"*) it_bad+=" ${it_f#"$REPO_ROOT"/}(rc=$it_rc)" ;;
+    0:* | 1:* | 64:*"dot: "* | 127:*"' is not a command; run 'dot help"*) ;;
+    *) it_bad+=" ${it_f#"$REPO_ROOT"/}(rc=$it_rc)" ;;
+  esac
 done
 assert_empty "$it_bad" "every command module loads and rejects an unknown subcommand"
 

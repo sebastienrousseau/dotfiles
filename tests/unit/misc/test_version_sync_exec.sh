@@ -85,7 +85,7 @@ build_sandbox() {
 ![Version](https://img.shields.io/badge/Version-v$readme-blue)
 [release](https://github.com/example/dotfiles/releases/tag/v$readme)
 [site](https://example.invalid/dotfiles/v$readme/)
-echo "0000000000000000000000000000000000000000000000000000000000000000  /tmp/dotfiles-install.sh" | sha256sum -c -
+echo "0000000000000000000000000000000000000000000000000000000000000000  \$installer_dir/dotfiles-install.sh" | sha256sum -c -
 EOF
   cat >"$SANDBOX/docs/reference/FEATURES.md" <<EOF
 # Features
@@ -244,7 +244,7 @@ tree_ihash="$(shasum -a 256 "$SANDBOX/install.sh" | awk '{print $1}')"
   cd "$SANDBOX" || exit 1
   PATH="$REAL_GIT_PATH" DOTFILES_ALLOW_COVERAGE_WRITES=1 bash scripts/version-sync.sh --force --no-backup 9.9.9 >/dev/null
 )
-assert_file_contains "$SANDBOX/README.md" "$tagged_ihash  /tmp/dotfiles-install.sh" \
+assert_file_contains "$SANDBOX/README.md" "$tagged_ihash  \$installer_dir/dotfiles-install.sh" \
   "the digest is install.sh at the v9.9.9 tag"
 assert_output_not_contains "$tree_ihash" "cat '$SANDBOX/README.md'"
 rm -rf "${SANDBOX:?}/.git"

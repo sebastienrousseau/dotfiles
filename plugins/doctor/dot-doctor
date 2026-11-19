@@ -4,8 +4,9 @@
 #
 # dot-doctor: the entry of the doctor plugin (ADR-020 N2). bin/dot runs it
 # with the words after `dot doctor`. Its declared spellings become the
-# subcommands of libexec/doctor.sh; any other word, or none, goes to the
-# unified doctor as it always has.
+# subcommands of libexec/doctor.sh. No word, or only flags, runs the unified
+# doctor; any other word is not a command (exit 127), so a typo never starts
+# the full doctor.
 
 set -euo pipefail
 
@@ -44,6 +45,14 @@ doctor_verb() {
   esac
 }
 
+# doctor_unknown WORD: WORD is no doctor command; the SDK says so (127).
+doctor_unknown() {
+  # shellcheck source-path=SCRIPTDIR source=../../lib/dot/sdk.sh
+  source "${DOT_SDK:-$_DOCTOR_DIR/../../lib/dot}/sdk.sh"
+  dot_unknown_command doctor "doctor $1"
+}
+
 doctor_object "$@"
 doctor_verb "$@"
+[[ -z "${1:-}" || "${1:-}" == -* ]] || doctor_unknown "$1"
 doctor_module doctor "$@"

@@ -10,11 +10,24 @@ linters:
   default: standard
   enable:
     - bodyclose
+    - funlen
+    - gocognit
+    - gocyclo
     - misspell
     - nolintlint
     - revive
     - unconvert
   settings:
+    # Complexity limits, the same in every Go module and enforced (with a
+    # baseline that only shrinks) by tools/ci/complexity_polyglot.py.
+    funlen:
+      lines: 60
+      statements: -1
+      ignore-comments: true
+    gocognit:
+      min-complexity: 15
+    gocyclo:
+      min-complexity: 10
     revive:
       rules:
         - name: exported # every exported identifier needs a doc comment
@@ -32,6 +45,75 @@ linters:
       - path: _test\.go
         linters:
           - errcheck
+      # BEGIN complexity baseline: generated from tools/ci/complexity-baseline-go.txt
+      # by tools/ci/complexity_polyglot.py --write-baseline; do not edit.
+      - path: ^control\.go$
+        source: '^func \((\w+ )?model(\[[^\]]*\])?\) renderEcosystemControlCentre\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^cov_test\.go$
+        source: '^func TestCoverageGaps\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^cov_test\.go$
+        source: '^func TestModelPicker\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^cov_test\.go$
+        source: '^func TestPureHelpers\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^cov_test\.go$
+        source: '^func TestSessionPersistence\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^cov_test\.go$
+        source: '^func TestUpdateInput\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^cov_test\.go$
+        source: '^func TestUpdateRoster\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^dotcmd_test\.go$
+        source: '^func TestToolActionsRunDeclaredDotCommands\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^ecosystem\.go$
+        source: '^func parseCorralState\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^fuzz_test\.go$
+        source: '^func FuzzModelKeys\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^fuzz_test\.go$
+        source: '^func FuzzWindowRows\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^main\.go$
+        source: '^func \((\w+ )?model(\[[^\]]*\])?\) Update\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^main\.go$
+        source: '^func \((\w+ )?model(\[[^\]]*\])?\) updateRosterHotkey\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^main_test\.go$
+        source: '^func TestPalette\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^render\.go$
+        source: '^func \((\w+ )?model(\[[^\]]*\])?\) View\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^render\.go$
+        source: '^func \((\w+ )?model(\[[^\]]*\])?\) renderEmptyTranscript\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^session\.go$
+        source: '^func \((\w+ )?model(\[[^\]]*\])?\) handleSlash\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^telemetry_test\.go$
+        source: '^func TestBtopDeckAndControlCentre\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transcripts_test\.go$
+        source: '^func TestRenderSessionRowsFiltersAndSanitises\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transcripts_test\.go$
+        source: '^func TestScanClaudeSessionFoldsMetadataAndTokens\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transcripts_test\.go$
+        source: '^func TestScanCodexSessionTailsAppendedLines\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transcripts_test\.go$
+        source: '^func TestScanTailReadsLargeFiles\b'
+        linters: [funlen, gocognit, gocyclo]
+      # END complexity baseline
 
 formatters:
   enable:

@@ -37,6 +37,18 @@ function Clear-DotShell {
     dot shell clean @Arguments
 }
 
+function Clear-DotSystem {
+    <#
+    .SYNOPSIS
+    Reclaim space, asking first
+    .DESCRIPTION
+    Runs `dot system clean`: Reclaim space, asking first. Effect: write; arguments pass through.
+    #>
+    [CmdletBinding()]
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Arguments = @())
+    dot system clean @Arguments
+}
+
 function Compare-DotConfig {
     <#
     .SYNOPSIS
@@ -1649,6 +1661,7 @@ Export-ModuleMember -Function @(
     'Add-DotConfig'
     'Backup-DotDoctor'
     'Clear-DotShell'
+    'Clear-DotSystem'
     'Compare-DotConfig'
     'Confirm-DotAttest'
     'Connect-DotAi'

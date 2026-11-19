@@ -10,11 +10,24 @@ linters:
   default: standard
   enable:
     - bodyclose
+    - funlen
+    - gocognit
+    - gocyclo
     - misspell
     - nolintlint
     - revive
     - unconvert
   settings:
+    # Complexity limits, the same in every Go module and enforced (with a
+    # baseline that only shrinks) by tools/ci/complexity_polyglot.py.
+    funlen:
+      lines: 60
+      statements: -1
+      ignore-comments: true
+    gocognit:
+      min-complexity: 15
+    gocyclo:
+      min-complexity: 10
     revive:
       rules:
         - name: exported # every exported identifier needs a doc comment
@@ -32,6 +45,57 @@ linters:
       - path: _test\.go
         linters:
           - errcheck
+      # BEGIN complexity baseline: generated from tools/ci/complexity-baseline-go.txt
+      # by tools/ci/complexity_polyglot.py --write-baseline; do not edit.
+      - path: ^e2e_test\.go$
+        source: '^func TestEndToEndProtocolExchange\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^fuzz_test\.go$
+        source: '^func FuzzReadFrames\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^fuzz_test\.go$
+        source: '^func FuzzValidateArgs\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^jsonrpc_test\.go$
+        source: '^func TestDecodeRequest\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^jsonrpc_test\.go$
+        source: '^func TestFrameReader\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^jsonrpc_test\.go$
+        source: '^func TestFrameWriter\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^resources_test\.go$
+        source: '^func TestReadResource\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^server\.go$
+        source: '^func \((\w+ )?\*Server(\[[^\]]*\])?\) handleRequest\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^server_test\.go$
+        source: '^func TestResourcesListAndRead\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^server_test\.go$
+        source: '^func TestToolsCallRunsTheTool\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^server_test\.go$
+        source: '^func TestToolsListMatchesTheRegistry\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^tools\.go$
+        source: '^func defaultTools\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^tools_test\.go$
+        source: '^func TestBuildCallResult\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^tools_test\.go$
+        source: '^func TestDefaultToolsAreReadOnly\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^tools_test\.go$
+        source: '^func TestEveryPatternIsCompiled\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^tools_test\.go$
+        source: '^func TestValidateArgs\b'
+        linters: [funlen, gocognit, gocyclo]
+      # END complexity baseline
 
 formatters:
   enable:

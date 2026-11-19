@@ -11,7 +11,7 @@ $script:DotChildren = @{
     'agent log' = @(, @('show', 'The agent log'))
     'agent mode' = @(@('list', 'Available modes'), @('show', 'One mode in detail'), @('set', 'Switch mode'), @('run', 'Run a command under a mode'))
     'agent policy' = @(, @('show', 'The sandbox policy'))
-    'ai' = @(@('pattern', 'prompt patterns'), @('cost', 'spend by agent and model'), @('gateway', 'the keyless gateway'), @('inventory', 'installed agents and versions'), @('policy', 'the enforced AI policy'), @('list', 'Installed agents'), @('install', 'Install agents'), @('update', 'Upgrade agent CLIs'), @('start', 'Start an agent'), @('run', 'Run an agent once'), @('login', 'Authenticate an agent'), @('check', 'Check agent installs and auth'), @('ask', 'Ask about the local context'), @('send', 'Give a background agent text and submit it'), @('wait', 'Wait until a background agent stops working'))
+    'ai' = @(@('pattern', 'prompt patterns'), @('cost', 'spend by agent and model'), @('gateway', 'the local Claude gateway'), @('inventory', 'installed agents and versions'), @('policy', 'the enforced AI policy'), @('list', 'Installed agents'), @('install', 'Install agents'), @('update', 'Upgrade agent CLIs'), @('start', 'Start an agent'), @('run', 'Run an agent once'), @('login', 'Authenticate an agent'), @('check', 'Check agent installs and auth'), @('ask', 'Ask about the local context'), @('send', 'Give a background agent text and submit it'), @('wait', 'Wait until a background agent stops working'))
     'ai cost' = @(, @('show', 'Spend by agent and model'))
     'ai gateway' = @(@('serve', 'Run the gateway in the foreground'), @('show', 'Gateway statistics'))
     'ai inventory' = @(, @('show', 'Agents, versions, pins, sign-in, hooks and drift'))
@@ -139,7 +139,7 @@ $script:DotCommands = @{
     'config init' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'config path show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'config profile set' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'config profile show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'config profile show' = @{ Flags = @(@('--help', 'Show help'), @('--json', 'Print the profile and feature flags as JSON'), @('-j', 'Print the profile and feature flags as JSON')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'config save' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'config status' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'config sync' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
@@ -216,7 +216,7 @@ $script:DotCommands = @{
     'shell history list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'shell status' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'shell update' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'system clean' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'system clean' = @{ Flags = @(@('--help', 'Show help'), @('--caches', 'Prune the Go, pip and uv build caches (the default)'), @('--logs', 'Rotate the logs instead'), @('--yes', 'Prune without asking'), @('-y', 'Prune without asking')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'system schedule list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'system schedule run' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'system schedule set' = @{ Flags = @(, @('--help', 'Show help')); Values = @('weekly', 'daily', 'off'); Files = $false; PatternFlags = @(); ValueFlags = @() }
@@ -224,7 +224,7 @@ $script:DotCommands = @{
     'system settings show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'system show' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'system status' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'system update' = @{ Flags = @(@('--help', 'Show help'), @('--yes', 'Answer yes to every question'), @('-y', 'Answer yes to every question'), @('--globals', 'Also update npm, cargo and pipx globals')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'system update' = @{ Flags = @(@('--help', 'Show help'), @('--yes', 'Answer yes to every question'), @('-y', 'Answer yes to every question'), @('--globals', 'Also upgrade pipx globals (npm and cargo tools are pinned)')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'theme font install' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'theme font list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'theme list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
@@ -233,7 +233,7 @@ $script:DotCommands = @{
     'theme wallpaper set' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'tool export' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'tool install' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
-    'tool list' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
+    'tool list' = @{ Flags = @(@('--help', 'Show help'), @('--json', 'Print the toolchains as JSON'), @('-j', 'Print the toolchains as JSON')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'tool new' = @{ Flags = @(, @('--help', 'Show help')); Values = @('python', 'go', 'node', 'packer', 'molecule'); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'tool remove' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }
     'tool set' = @{ Flags = @(, @('--help', 'Show help')); Values = @(); Files = $false; PatternFlags = @(); ValueFlags = @() }

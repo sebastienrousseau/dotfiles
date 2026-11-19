@@ -13,6 +13,8 @@ default = "status"
 [entry]
 command = "dot-system"
 fallback = true
+# The only words outside the table dot-system runs; any other is not a command.
+words = ["upgrade", "tune", "log-rotate", "clean-caches"]
 
 [[objects]]
 name = "schedule"
@@ -42,13 +44,25 @@ summary = "Answer yes to every question"
 
 [[commands.flags]]
 long = "globals"
-summary = "Also update npm, cargo and pipx globals"
+summary = "Also upgrade pipx globals (npm and cargo tools are pinned)"
 
 [[commands]]
 verb = "clean"
 effect = "write"
-planned = true
 summary = "Reclaim space, asking first"
+
+[[commands.flags]]
+long = "caches"
+summary = "Prune the Go, pip and uv build caches (the default)"
+
+[[commands.flags]]
+long = "logs"
+summary = "Rotate the logs instead"
+
+[[commands.flags]]
+long = "yes"
+short = "y"
+summary = "Prune without asking"
 
 [[commands]]
 verb = "show"

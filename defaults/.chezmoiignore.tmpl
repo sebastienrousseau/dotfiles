@@ -229,3 +229,61 @@ Library/**
 {{- if not $draftSite }}
 .config/draft/config.toml
 {{- end }}
+
+# ══ Repo-internal sources that must not reach $HOME ══════════════════
+# Merged from a second defaults/.chezmoiignore: chezmoi applied both files,
+# while tests rendered only this one. Keep a single ignore file.
+# ── Repo metadata + governance ────────────────────────────────────────
+.gitleaks.toml
+.mailmap
+
+# ── Source / build / test scaffolding (repo-internal, never $HOME) ────
+examples
+.chezmoiroot
+.chezmoiversion
+.chezmoitemplates/aliases/dev-*
+Dockerfile*
+.version-sync-backup
+.sass-cache
+
+# ── Build artifacts (test output, coverage data, traces) ──────────────
+coverage
+nightly-reports
+node_modules
+# dot-ui Go tests never belong in $HOME (`go build .` ignores them). The
+# `_test.go` glob covers main/pick/table/theme; `run_test.go` additionally
+# collides with chezmoi's `run_` prefix — chezmoi strips it to target
+# `test.go` and tries to EXECUTE it (exec format error) — so ignore that too.
+.local/share/dot-ui/*_test.go
+.local/share/dot-ui/test.go
+# Same for the MCP server: `go build .` ignores its tests, and the card-truth
+# tests reference .well-known/, which is not deployed either.
+.local/share/dot-mcp/*_test.go
+# And the AI policy evaluator: its tests and fuzz corpus stay in the repo.
+.local/share/dot-policy/*_test.go
+.local/share/dot-policy/testdata
+
+# ── Standalone files that aren't user-deployable ──────────────────────
+uninstall.sh
+typos.toml
+llms.txt
+mise.lock.json
+Gemfile
+Gemfile.lock
+
+# ── Repo-root dotfiles that aren't chezmoi-prefixed (e.g. .fdignore is
+# meant for the chezmoi source tree itself, not for $HOME).
+.fdignore
+.shellcheckrc
+.taplo.toml
+.markdownlint.json
+.actrc
+.envrc
+
+# ── Mise / asdf / language version pins for THE REPO ──────────────────
+.tool-versions
+.python-version
+.node-version
+.nvmrc
+.ruby-version
+.terraform-version

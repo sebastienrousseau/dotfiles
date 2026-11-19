@@ -135,7 +135,7 @@ called "codex exec -"
 test_start "an_unsupported_tool_is_rejected_with_rc2"
 ai _ai_invoke_provider nosuchtool "hello"
 assert_equals 2 "$RC" "rc"
-out_has "Unsupported tool" "error"
+err_has "Unsupported tool" "error"
 
 test_start "a_failing_provider_propagates_its_exit_code"
 cat >"$BIN/claude" <<STUB
@@ -177,7 +177,7 @@ out_has "status listing" "status shown"
 test_start "chat_with_an_uninstalled_tool_reports_it"
 ai cmd_ai_chat definitely-not-installed
 assert_equals 1 "$RC" "rc"
-out_has "not installed" "error"
+err_has "not installed" "error"
 
 # ── serve ───────────────────────────────────────────────────────────────
 test_start "chat_ollama_uses_the_configured_local_model"
@@ -210,7 +210,7 @@ called "dot-ai-proxy setup"
 test_start "serve_rejects_an_unknown_subcommand"
 ai _ai_serve nonsense
 assert_equals 1 "$RC" "rc"
-out_has "dot ai serve [stop|status|logs|setup]" "usage"
+err_has "dot ai serve [stop|status|logs|setup]" "usage"
 
 test_start "serve_requires_the_proxy_helper"
 rm -f "$BIN/dot-ai-proxy"
@@ -239,7 +239,7 @@ for c in printf cat sed grep tr cut awk dirname basename head tty locale uname d
 done
 PATH="$NONE" ai cmd_ai_doctor
 assert_equals 0 "$RC" "rc"
-out_has "not installed (the gateway engine needs it)" "engine missing"
+err_has "not installed (the gateway engine needs it)" "engine missing"
 out_has "dot-ai-serve not deployed" "gateway missing"
 out_has "0/18 tools installed" "empty roster"
 out_has "0/5 suite tools" "empty ecosystem"
@@ -259,7 +259,7 @@ test_start "a_missing_tool_is_installed_through_mise"
 rm -f "$BIN/opencode"
 ai_min cmd_ai_install opencode
 assert_equals 0 "$RC" "rc"
-called "mise use -g opencode@1.19.5"
+called "mise use -g opencode@1.19.6"
 out_has "installed" "success line"
 stub opencode
 
@@ -349,7 +349,7 @@ assert_equals 0 "$RC" "rc"
 called "passmcp-graph --json"
 ai cmd_ai_mcp bogus
 assert_equals 1 "$RC" "unknown mcp subcommand exits 1"
-out_has "dot ai mcp" "mcp usage shown"
+err_has "dot ai mcp" "mcp usage shown"
 rm -f "$BIN/passmcp" "$BIN/passmcp-graph"
 ai_min cmd_ai_mcp check
 assert_equals 1 "$RC" "missing passmcp exits 1"
@@ -361,7 +361,7 @@ stub passmcp-graph
 test_start "draft_dispatches_standard_and_green_split_stage"
 ai cmd_ai_draft
 assert_equals 1 "$RC" "empty draft args exits 1"
-out_has "dot ai draft [--green]" "draft usage"
+err_has "dot ai draft [--green]" "draft usage"
 ai cmd_ai_draft "topic.md"
 assert_equals 0 "$RC" "rc"
 called "draft topic.md"
@@ -390,7 +390,7 @@ called "dot-ai-tui watch"
 rm -f "$BIN/dot-ai-tui"
 ai_min cmd_ai_watch
 assert_equals 1 "$RC" "without the binary it exits 1"
-out_has "DOTFILES_AI=1 chezmoi apply" "and says how to build it"
+err_has "DOTFILES_AI=1 chezmoi apply" "and says how to build it"
 stub dot-ai-tui
 
 test_start "status_lists_live_sessions_from_the_state_files"

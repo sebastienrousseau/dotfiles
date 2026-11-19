@@ -15,9 +15,9 @@ In zsh it sources the opt-in AI shell helpers (context suggestions and error ana
 
 ## Why `dot ai`?
 
-`claude` is one tool. **`dot ai` is the cockpit for every AI CLI you use.** Use it to install the tools, launch any of them with one keystroke, meter their cost in one place, and — the headline — run every one of them on your single Claude subscription through a built-in local gateway.
+`claude` is one tool. **`dot ai` is the cockpit for every AI CLI you use.** Use it to install the tools, launch any of them with one keystroke, meter their cost in one place, and point the Anthropic- or OpenAI-protocol ones at Claude through a built-in local gateway that runs on your Anthropic API key.
 
-You use `claude` to talk to Claude. You use `dot ai` to run *everything else* on Claude and keep one cockpit over all of it.
+You use `claude` to talk to Claude. You use `dot ai` to run *everything else* and keep one cockpit over all of it.
 
 ## Quick start
 
@@ -25,7 +25,7 @@ You use `claude` to talk to Claude. You use `dot ai` to run *everything else* on
 dot ai install all        # install the roster (only what's missing)
 dot ai                    # open the cockpit (TUI)
 dot ai "fix the auth bug" # one-shot on Claude — just like `claude "…"`
-dot ai gateway serve      # serve your Claude subscription locally to every tool
+dot ai gateway serve      # a local Claude endpoint for every tool, on your API key
 ```
 
 ## Prerequisites
@@ -51,7 +51,7 @@ The interface follows ADR-020 (`dot ai <verb>`), modelled on the Claude CLI: bar
 | `dot ai start [tool]` | Open an interactive session (picker if no tool) (`dot ai chat`) |
 | `dot ai list` | Install status of the roster, with an install picker (`dot ai tools`) |
 | `dot ai install [all\|<tool>] [--yes]` | Install all missing tools, or one, with what they need (asks first) |
-| `dot ai gateway serve [stop\|status]` | Start the local Claude gateway **and** route the other tools through it (`dot ai serve`) |
+| `dot ai gateway serve [stop\|status]` | Start the local Claude gateway (API key by default) **and** route the other tools through it (`dot ai serve`) |
 | `dot ai gateway show [--json]` | The running gateway's requests, tokens, tool calls and cost |
 | `dot ai inventory show [--json]` | Each installed agent's version, pin, sign-in and hooks, the policy's digest, and the drift among them |
 | `dot ai cost show [--by agent\|host\|day\|model\|session] [--session ID] [--days N] [--json]` | What agent sessions cost (`dot ai cost`) |
@@ -110,22 +110,31 @@ dot ai start aider                     # open aider directly
 
 ## The local Claude gateway (`dot ai gateway serve`)
 
-Run one Claude subscription locally and point every tool at it — with **no third-party dependency**. `dot-ai-serve` is a small, stdlib-only Python server (no pip packages) that wraps the `claude` CLI you already have and exposes the standard Anthropic (`/v1/messages`) **and** OpenAI (`/v1/chat/completions`) endpoints. Any tool that speaks either protocol — codex, aider, Open WebUI, an OpenAI SDK — connects to `http://127.0.0.1:3456` and gets Claude on your existing subscription.
+A local endpoint for every tool, with **no third-party dependency**. `dot-ai-serve` is a small, stdlib-only Python server (no pip packages) that wraps the `claude` CLI and exposes the standard Anthropic (`/v1/messages`) **and** OpenAI (`/v1/chat/completions`) endpoints. Any tool that speaks either protocol — codex, aider, Open WebUI, an OpenAI SDK — connects to `http://127.0.0.1:3456`.
 
 ```bash
-claude login              # one-time: authenticate the engine
+export ANTHROPIC_API_KEY=…    # or once: dot secret set ANTHROPIC_API_KEY
 dot ai gateway serve          # start the gateway AND route the non-Claude tools
-dot ai gateway serve status   # process + /health + routing state
+dot ai gateway serve status   # process + /health (auth=api-key) + routing state
 dot ai gateway serve stop     # stop the gateway and un-route
 ```
 
-**Native session, never a key.** The gateway authenticates through your `claude` CLI's native session — there is no API key anywhere. Routing is applied **per-invocation** to non-Claude tools (`dot ai codex "…"`); it is **not** sourced into your interactive shell. The primary `claude` is never routed — it always uses its own native session, so claude.ai connectors stay enabled. (Setting `ANTHROPIC_API_KEY` in your shell would disable those connectors, which is exactly why routing stays scoped to each tool's subprocess.)
+**An API key by default.** The gateway's engine runs on an Anthropic API key (create one at [platform.claude.com](https://platform.claude.com)), and the usage is billed to that key. `dot ai gateway serve` takes `ANTHROPIC_API_KEY` from the environment, or else from the secret store (`dot secret show ANTHROPIC_API_KEY`); the key goes only to the gateway's process and is never printed or written to a file. The engine gets that key and nothing that would outrank it or stand in for it (`ANTHROPIC_AUTH_TOKEN`, `CLAUDE_CODE_OAUTH_TOKEN`). With no key the gateway does not start, and says how to set one; it **never falls back** to your Claude subscription. `dot ai gateway serve setup` checks both the engine and the key.
+
+**Your Claude subscription: an explicit opt-in.** `DOT_AI_GATEWAY_SUBSCRIPTION=1 dot ai gateway serve` runs the tools on your `claude` sign-in instead, and prints this warning on every start. Read what Anthropic says first (retrieved 2026-11-18):
+
+- Claude Code's [legal and compliance](https://code.claude.com/docs/en/legal-and-compliance) page: "**OAuth authentication** is intended exclusively for purchasers of Claude Free, Pro, Max, Ultra, Team, and Enterprise subscription plans and is designed to support ordinary use of Claude Code and other native Anthropic applications." For developers: "Anthropic does not permit third-party developers to offer Claude.ai login into their own applications, or to route requests through Free, Pro, Max, or Ultra plan credentials on behalf of their users." And: "Anthropic reserves the right to take measures to enforce these restrictions and may do so without prior notice." The same page says: "Advertised usage limits for Pro, Max, and Ultra plans assume ordinary, individual usage of Claude Code and the Agent SDK."
+- The [Consumer Terms](https://www.anthropic.com/legal/consumer-terms) (effective Oct 8, 2025, the version served on that date) bar using the Services "Except when you are accessing our Services via an Anthropic API Key or where we otherwise explicitly permit it, to access the Services through automated or non-human means, whether through a bot, script, or otherwise."
+
+Pointing other tools' agent loops at a subscription sign-in is your call, and the risk to your account is yours. The opt-in needs a terminal, where you see the warning; without one (a service, a script, CI) the gateway refuses to start unless you also set `DOT_AI_GATEWAY_SUBSCRIPTION_ACK=1`. `dot ai gateway serve` decides in the foreground, on your terminal, and passes the acknowledgement on to the background server. In this mode the engine gets no `ANTHROPIC_API_KEY`, so a stray key is not billed by surprise. `/health` reports which mode is running (`"auth": "api-key"` or `"subscription"`).
+
+**Routing.** Routing is applied **per-invocation** to non-Claude tools (`dot ai codex "…"`); it is **not** sourced into your interactive shell. Each tool gets the gateway's own client token (below), never your Anthropic key. The primary `claude` is never routed — it always uses its own sign-in, so claude.ai connectors stay enabled. (Setting `ANTHROPIC_API_KEY` in your interactive shell would make `claude` use the key and disable those connectors; export it only where you start the gateway, or keep it in `dot secret`.)
 
 **Streaming, routing & metering.** Replies stream **token-by-token** (real SSE for both protocols). Model **aliases/routing** map friendly names to a Claude tier — `cheap`/`fast` → haiku, `smart` → opus, and common OpenAI ids (`gpt-4` → sonnet, `gpt-3.5-turbo` → haiku); extend with `DOT_AI_MODEL_MAP`. Every request is **metered**: `GET /metrics` (Prometheus text) and `GET /v1/usage` (JSON) report requests, tokens, and estimated cost per model. An optional `DOT_AI_DAILY_BUDGET` (USD) caps daily spend — once reached, requests get `429`.
 
-**Config:** `DOT_AI_HOST` (default `127.0.0.1`), `DOT_AI_PORT` (default `3456`), `DOT_AI_DEFAULT_MODEL` (default `sonnet`), `DOT_AI_API_KEY` (shared secret; defaults to a generated token), `DOT_AI_ALLOWED_HOSTS` (extra accepted `Host` values), `DOT_AI_DAILY_BUDGET` (USD, `0` = off), `DOT_AI_MODEL_MAP` / `DOT_AI_PRICING` (JSON overrides).
+**Config:** `ANTHROPIC_API_KEY` (the upstream key, the default mode), `DOT_AI_GATEWAY_SUBSCRIPTION=1` (opt-in subscription mode) and `DOT_AI_GATEWAY_SUBSCRIPTION_ACK=1` (that opt-in without a terminal), `DOT_AI_HOST` (default `127.0.0.1`), `DOT_AI_PORT` (default `3456`), `DOT_AI_DEFAULT_MODEL` (default `sonnet`), `DOT_AI_API_KEY` (the gateway's client secret; defaults to a generated token), `DOT_AI_ALLOWED_HOSTS` (extra accepted `Host` values), `DOT_AI_DAILY_BUDGET` (USD, `0` = off), `DOT_AI_MODEL_MAP` / `DOT_AI_PRICING` (JSON overrides).
 
-**Security:** the server binds to loopback by default. If you set `DOT_AI_HOST` to a LAN address, both the launcher *and* the server itself refuse to start unless `DOT_AI_API_KEY` is set — an unprotected network proxy leaks your subscription. Every request needs a key: without `DOT_AI_API_KEY` the server and `dot ai proxy local on` share a random 0600 token at `$XDG_STATE_HOME/dot/ai/serve/gateway.token` (`dot-ai-serve --token-path` prints its location). Requests whose `Host` header is not the server's own address are refused (DNS-rebinding guard), and the `claude` engine runs with all tools disabled in an empty temporary directory. It saves no session: a client's prompts are not written to `~/.claude/projects`, and no auto-memory directory is made there.
+**Security:** the server binds to loopback by default. If you set `DOT_AI_HOST` to a LAN address, both the launcher *and* the server itself refuse to start unless `DOT_AI_API_KEY` is set — an unprotected network proxy spends your Anthropic key (or subscription) for anyone who reaches it. Every request needs the gateway's client key: without `DOT_AI_API_KEY` the server and `dot ai proxy local on` share a random 0600 token at `$XDG_STATE_HOME/dot/ai/serve/gateway.token` (`dot-ai-serve --token-path` prints its location). Requests whose `Host` header is not the server's own address are refused (DNS-rebinding guard), and the `claude` engine runs with all tools disabled in an empty temporary directory. It saves no session: a client's prompts are not written to `~/.claude/projects`, and no auto-memory directory is made there.
 
 **Images and tool calls.** Both endpoints take images, base64 or by URL (the API fetches a URL itself), in PNG, JPEG, GIF or WebP. A request's tools reach the model, and its calls come back in each protocol's own form: `tool_use` blocks with `stop_reason: "tool_use"`, or `tool_calls` with `finish_reason: "tool_calls"`, whole or streamed. The client runs them and sends the results in its next request, as it would to the API. Inside the gateway nothing runs them: the engine lists them through a stub MCP server and is allowed none, and the gateway stops it at the end of the model's turn. Only client-defined tools are supported; a server tool such as `web_search` is a `400`. Earlier turns, tool calls and results included, reach the engine as a transcript, and session resumption is out of scope.
 
@@ -134,8 +143,6 @@ dot ai gateway serve stop     # stop the gateway and un-route
 **Inventory.** `dot ai inventory show` lists each agent of the roster found on `PATH`: the version its `--version` prints, its pin in `[ai_tools]` (none for a native install, such as Claude Code), how it is signed in, and whether `dot cli hook` is wired into it; then the AI policy's SHA-256, and the drift: a version off its pin, hooks missing. Sign-in is looked for, never read: an API key in the environment (`key`), else the agent's credentials file or keychain item (`login`), else `none`; an agent `dot` does not know how to ask is `unknown`. `dot doctor` reports each version off its pin, and `dot fleet drift show --agents` asks every host in `fleet.toml` for its inventory and names its drift, with an AI policy that is not this machine's. `--json` prints it as `ai/inventory.v1` ([schema](../schemas/cli/ai-inventory.v1.schema.json)).
 
 **Policy.** With an [enforced policy](#enforced-policy), its `[gateway]` table limits each request before the engine sees it: `models` allows only the models it lists (globs over what the request resolves to, such as `haiku` or `claude-sonnet-*`), and `max_input_tokens` caps the gateway's estimate of its input (four characters a token, 1,600 an image). A refused request gets a `403` with the reason. As for the hooks, a policy that does not load, or a missing `dot-policy`, refuses every request.
-
-**Anthropic's terms.** A Claude subscription signs in for "ordinary use of Claude Code and other native Anthropic applications", and Anthropic says its plan limits assume ordinary, individual use and that it may enforce this without notice ([legal and compliance](https://code.claude.com/docs/en/legal-and-compliance)). The gateway runs the unmodified `claude` CLI on your own machine and login. Pointing other tools' agent loops at it is your call, and the risk to your account is yours; with `claude` signed in with an API key, use is billed to that key instead.
 
 ## The roster
 
@@ -261,4 +268,4 @@ It fails closed: a file with an error or an unknown key, a mode it has no rules 
 - No AI tools are installed for you.
 - No background services run by default; the gateway runs only while you keep `dot ai gateway serve` up.
 - You control AI helpers with `DOTFILES_AI=1`.
-- The gateway uses your native Claude session — no API keys are stored or required.
+- The gateway runs on your Anthropic API key, read from the environment or `dot secret` and never written to disk by `dot ai`; your Claude subscription is used only on the explicit `DOT_AI_GATEWAY_SUBSCRIPTION=1` opt-in.

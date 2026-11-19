@@ -109,12 +109,12 @@ test_start "tools_profile_set_requires_a_name"
 printf 'dotfiles_version = "0.0.1"\n\n[features]\nai = true\n' \
   >"$FX/.chezmoidata.toml"
 tools_run profile set
-assert_equals "1" "$DOT_FIXTURE_RC" "profile set with no name should exit 1"
-assert_contains "Usage: dot config profile set" "$DOT_FIXTURE_OUT" "it should print usage"
+assert_equals "64" "$DOT_FIXTURE_RC" "profile set with no name is a usage error (64)"
+assert_contains "usage: dot config profile set" "$DOT_FIXTURE_OUT" "it should print usage"
 
 test_start "tools_profile_rejects_an_unknown_subcommand"
 tools_run profile nonsense
-assert_equals "1" "$DOT_FIXTURE_RC" "an unknown profile subcommand should exit 1"
+assert_equals "64" "$DOT_FIXTURE_RC" "an unknown profile subcommand is a usage error (64)"
 
 # `profile set` writes this host's chezmoi config, whose [data] overrides the
 # source's .chezmoidata.toml: the source data file is never edited.

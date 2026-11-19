@@ -232,11 +232,14 @@ assert_file_contains "$OUT" "***" "the value is masked without --raw"
 assert_output_not_contains "s3cret" "cat '$OUT'"
 
 test_start "set_and_get_require_a_key"
+# A missing argument is a usage error: exit 64 with the usage on stderr
+# (dot_usage_error, ADR-020 N10, v0.2.548).
 rc="$(secrets secrets set)"
-assert_equals "1" "$rc" "set without a key fails"
-assert_file_contains "$ERR" "Usage: dot secret set" "the usage line is shown"
+assert_equals "64" "$rc" "set without a key fails"
+assert_file_contains "$ERR" "usage: dot secret set <KEY> [VALUE]" "the usage line is shown"
 rc="$(secrets secrets get)"
-assert_equals "1" "$rc" "get without a key fails"
+assert_equals "64" "$rc" "get without a key fails"
+assert_file_contains "$ERR" "usage: dot secret show <KEY> [--raw]" "the usage line is shown"
 
 test_start "get_reports_a_missing_secret"
 rc="$(secrets secrets get NOT_STORED)"

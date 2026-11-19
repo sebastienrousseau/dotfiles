@@ -95,6 +95,16 @@ test_start "charm_single_pinned_key_accepted"
 rc="$(run_gum "$SANDBOX/pinned.asc")"
 assert_equals "0|present|called" "$rc|$(keyring_state)|$(apt_state)" \
   "the pinned key alone is trusted and gum is installed"
+assert_equals "apt-get update|apt-get install gum -y" \
+  "$(paste -sd'|' "$SANDBOX/calls.log" 2>/dev/null)" \
+  "apt-get refreshes the index, then installs gum"
+
+test_start "charm_failed_apt_update_skips_install"
+printf '#!/bin/sh\necho "apt-get $*" >>"%s/calls.log"\n[ "$1" != update ]\n' "$SANDBOX" >"$STUBS/apt-get"
+rc="$(run_gum "$SANDBOX/pinned.asc")"
+assert_equals "1|apt-get update" "$rc|$(paste -sd'|' "$SANDBOX/calls.log" 2>/dev/null)" \
+  "a failed index refresh fails the bootstrap without installing gum"
+printf '#!/bin/sh\necho "apt-get $*" >>"%s/calls.log"\n' "$SANDBOX" >"$STUBS/apt-get"
 
 test_start "charm_appended_second_key_refused"
 rc="$(run_gum "$SANDBOX/pinned-plus-evil.asc")"

@@ -43,7 +43,7 @@ cmd|agent card check|@agent card check|read|Check the card against the A2A spec
 dom|ai|tui|@ai|install, route and run coding agents
 obj|ai pattern|list||prompt patterns
 obj|ai cost|show|@ai|spend by agent and model
-obj|ai gateway|show||the keyless gateway
+obj|ai gateway|show||the local Claude gateway
 obj|ai inventory|show||installed agents and versions
 obj|ai policy|show||the enforced AI policy
 cmd|ai list|@ai list|read|Installed agents
@@ -215,7 +215,7 @@ obj|system schedule|list|@system|scheduled maintenance jobs
 obj|system settings|show||OS settings dot manages
 cmd|system status|@system status|read|OS, disk, schedule and last run
 cmd|system update|@system update|write|Update everything, asking first
-cmd|system clean||write|Reclaim space, asking first
+cmd|system clean|@system clean|write|Reclaim space, asking first
 cmd|system show||read|Hardware and host details
 cmd|system schedule list|@system schedule list|read|Scheduled jobs
 cmd|system schedule set|@system schedule set|write|Set the maintenance schedule
@@ -292,6 +292,7 @@ flag|attest show|write|w||Write the attestation to a file
 arg|config add||files|
 flag|config check|check|c||Check only
 flag|config check|fix|f||Apply safe fixes
+flag|config profile show|json|j||Print the profile and feature flags as JSON
 flag|config import|yes|y||Restore without asking
 flag|doctor status|json|j||Print a JSON summary
 flag|doctor status|fix|f||Apply common fixes
@@ -321,8 +322,12 @@ flag|security score show|json|j||Print a JSON summary
 flag|session new|cwd||dir|The directory it starts in
 flag|shell alias status|tiers|||Show which ecosystem tiers are enabled
 flag|system update|yes|y||Answer yes to every question
-flag|system update|globals|||Also update npm, cargo and pipx globals
+flag|system update|globals|||Also upgrade pipx globals (npm and cargo tools are pinned)
+flag|system clean|caches|||Prune the Go, pip and uv build caches (the default)
+flag|system clean|logs|||Rotate the logs instead
+flag|system clean|yes|y||Prune without asking
 arg|system schedule set|weekly daily off||
+flag|tool list|json|j||Print the toolchains as JSON
 arg|tool new|python go node packer molecule||
 alias|mode|removed|agent mode|0.2.538
 alias|agents|removed|agent context|0.2.538
@@ -430,3 +435,8 @@ nolock|ai send||
 nolock|cli hook run||
 nolock|config edit||
 nolock|ui run||
+ent|doctor|||
+ent|fleet|events ns enforce help||
+ent|system|upgrade tune log-rotate clean-caches||
+ent|theme|toggle mode rotate sync ambient family current plan undo history reset diff export import fit accent status rebuild preview random help||
+ent|tool|||

@@ -89,10 +89,12 @@ out_has "no data at" "and then found nothing to report"
 
 # ── measurement + report ────────────────────────────────────────────────
 test_start "unknown_shell_filter_has_nothing_to_measure"
-perf --shell definitely-not-a-shell
+perf --shell definitely-not-a-shell 2>"$OUTF.err"
 assert_equals 1 "$RC" "rc"
-out_has "no measurable shells found" "error"
-out_has "filter: definitely-not-a-shell" "filter echoed"
+# The error is a diagnostic: stderr only (ADR-020 N14, ui_err since v0.2.548).
+assert_file_contains "$OUTF.err" "no measurable shells found" "error"
+assert_file_contains "$OUTF.err" "filter: definitely-not-a-shell" "filter echoed"
+assert_true "! grep -q 'no measurable shells' '$OUTF'" "the error stays off stdout"
 
 test_start "json_report_has_the_documented_shape"
 # Per-shell targets come from DOTFILES_PERF_TARGET_<SHELL>_MS (bash defaults
@@ -175,7 +177,8 @@ if command -v zsh >/dev/null 2>&1; then
   assert_equals "$(jq -r .mean_ms <"$OUTF")" "$(jq -r '.shells.zsh.mean_ms' <"$OUTF")" "headline mean comes from zsh"
 else
   assert_equals 1 "$RC" "no measurable shell without zsh"
-  out_has "no measurable shells found" "error names the empty filter"
+  assert_file_contains "$OUTF.err" "no measurable shells found" "error names the empty filter, on stderr"
+  assert_true "! grep -q 'no measurable shells' '$OUTF'" "and stays off stdout"
 fi
 
 test_start "profile_flag_adds_the_zprof_section"

@@ -1,0 +1,44 @@
+name: Mise Toolchain
+
+# Weekly (and on demand) install of the deployed mise toolchain on Linux
+# and macOS, to catch upstream drift (a backend or release that breaks)
+# when nothing in the repo changed. The per-PR check is the
+# `Toolchain / mise install (Linux)` job in ci-enforced.yml, which runs when
+# defaults/dot_config/mise/** changes and feeds the Merge Gate; macOS is
+# kept here because a full macOS install is too slow to run on PRs.
+
+on:
+  schedule:
+    - cron: '23 5 * * 2'  # Weekly, Tuesday 05:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  install:
+    name: Mise install / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the deployed toolchain
+        uses: ./.github/actions/mise-toolchain
+        with:
+          github-token: ${{ github.token }}

@@ -64,7 +64,7 @@ run_step() {
   if [[ $ec -eq 0 ]]; then
     ui_ok "$label" "ok"
   else
-    ui_err "$label" "failed (exit $ec)"
+    ui_fail "$label" "failed (exit $ec)"
     failures=$((failures + 1))
   fi
 }
@@ -78,7 +78,7 @@ if dot_bin="$(resolve_dot_bin)"; then
   fi
 else
   # shellcheck disable=SC1091
-  ui_err "dot binary" "not found in PATH, ~/.local/bin, or source tree"
+  ui_fail "dot binary" "not found in PATH, ~/.local/bin, or source tree"
   failures=$((failures + 1))
 fi
 
@@ -105,6 +105,6 @@ if [[ $failures -eq 0 ]]; then
   exit 0
 fi
 
-ui_err "Verification" "$failures check(s) failed"
+ui_fail "Verification" "$failures check(s) failed"
 ui_info "Hint" "Run 'dot doctor fix' then re-run 'dot verify'"
 exit 1

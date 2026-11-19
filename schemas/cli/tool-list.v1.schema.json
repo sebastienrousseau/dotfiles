@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.io/schemas/cli/tool-list.v1.schema.json",
+  "title": "dot tool list v1",
+  "description": "Printed by `dot tool list --json`: every toolchain version mise lists, one entry per version, with the configuration that requests it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "tools"],
+  "properties": {
+    "schema": { "const": "tool/list.v1" },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "version", "requested", "source", "installed", "active"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "description": "The tool as mise names it, backend included (aqua:FiloSottile/age)" },
+          "version": { "type": "string", "description": "The resolved version; empty when mise has none" },
+          "requested": { "type": ["string", "null"], "description": "The version the configuration asks for (latest, 1.3)" },
+          "source": { "type": ["string", "null"], "description": "The configuration file that requests it; null for an orphan install" },
+          "installed": { "type": "boolean" },
+          "active": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

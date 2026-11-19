@@ -7,6 +7,7 @@
 ## the ADR-020 spellings onto these.
 ## Usage: system.sh [status] | schedule [list|set weekly|daily|off|run]
 ##        | upgrade [args] | tune [args] | log-rotate [args]
+##        | clean-caches [--yes]
 
 set -euo pipefail
 
@@ -17,13 +18,15 @@ source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/sdk.sh"
 source "$SCRIPT_DIR/system/schedule.sh"
 # shellcheck source=system/upgrade.sh
 source "$SCRIPT_DIR/system/upgrade.sh"
+# shellcheck source=system/clean.sh
+source "$SCRIPT_DIR/system/clean.sh"
 # shellcheck source=../../../lib/dot/log.sh
 source "${DOT_SDK:-$SCRIPT_DIR/../../../lib/dot}/log.sh"
 
-# _system_unknown: the words are left out, since one may be a secret.
+# _system_unknown: not a command (127, the one message D7 gives). The
+# words are left out, since one may be a secret.
 _system_unknown() {
-  printf "dot: unknown 'dot system' command; see 'dot help system'\n" >&2
-  exit 1
+  dot_unknown_command system "system …"
 }
 
 _system_schedule() {
@@ -238,6 +241,10 @@ case "${1:-status}" in
     dot_ui_command_banner "Tools" log-rotate
     shift
     cmd_log_rotate "$@"
+    ;;
+  clean-caches)
+    shift
+    dot_system_clean_caches "$@"
     ;;
   *) _system_unknown "$@" ;;
 esac

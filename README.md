@@ -82,14 +82,14 @@ release process are documented in
 [`docs/security/INSTALL_VERIFICATION.md`](docs/security/INSTALL_VERIFICATION.md).
 
 ```bash
-curl -fsSL -o /tmp/dotfiles-install.sh \
+installer_dir="$(mktemp -d)"
+curl -fsSL -o "$installer_dir/dotfiles-install.sh" \
   https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.547/dotfiles-install-0.2.547.sh
 if command -v sha256sum >/dev/null 2>&1; then
-  echo "66b3bcbe57bf210afabcb00f34c98cd390336dbb7faec3bb952b7597c1348358  /tmp/dotfiles-install.sh" | sha256sum -c -
+  echo "66b3bcbe57bf210afabcb00f34c98cd390336dbb7faec3bb952b7597c1348358  $installer_dir/dotfiles-install.sh" | sha256sum -c -
 else
-  echo "66b3bcbe57bf210afabcb00f34c98cd390336dbb7faec3bb952b7597c1348358  /tmp/dotfiles-install.sh" | shasum -a 256 -c -
-fi
-bash /tmp/dotfiles-install.sh
+  echo "66b3bcbe57bf210afabcb00f34c98cd390336dbb7faec3bb952b7597c1348358  $installer_dir/dotfiles-install.sh" | shasum -a 256 -c -
+fi && bash "$installer_dir/dotfiles-install.sh"
 ```
 
 The script needs `git`, `curl`, and `sha256sum` or `shasum`. It downloads a
@@ -174,9 +174,9 @@ air-gapped host; unpack it and run `./install.sh --force`.
 Silent install (no prompts):
 
 ```bash
-# After downloading and verifying /tmp/dotfiles-install.sh as shown above:
+# After downloading and verifying the installer as shown above:
 DOTFILES_SILENT=1 DOTFILES_NONINTERACTIVE=1 \
-  bash /tmp/dotfiles-install.sh --force
+  bash "$installer_dir/dotfiles-install.sh" --force
 ```
 
 Docker sandbox:
@@ -258,12 +258,12 @@ back.
 ## Quick Start
 
 ```bash
-# First download and verify /tmp/dotfiles-install.sh as shown in Install.
-bash /tmp/dotfiles-install.sh
+# First download and verify the installer as shown in Install.
+bash "$installer_dir/dotfiles-install.sh"
 dot doctor            # audit tools, paths, portability, security
 dot help tour         # interactive tour of shells, secrets, themes, performance
-dot theme rebuild     # generate themes from the wallpapers on this machine
-dot theme toggle      # swap dark and light within the current family
+dot theme list        # the themes generated from this machine's wallpapers
+dot theme set maui    # switch every app to one palette, following the OS appearance
 dot sync              # apply the source tree; the next shell hydrates its caches
 ```
 
@@ -309,7 +309,7 @@ and [`AGENTS.md`](AGENTS.md)) on every push to `main`.
 
 ```bash
 # The framework (everything, chezmoi-managed)
-bash /tmp/dotfiles-install.sh  # after the verified download above
+bash "$installer_dir/dotfiles-install.sh"  # after the verified download above
 
 # Only the dot CLI, from the attested release archive
 gh release download v0.2.547 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
@@ -616,7 +616,7 @@ and [`benches/`](benches/).
 | :--- | :--- |
 | **Shells and navigation** | Zsh loads in stages through small `rc.d` modules, not one startup script. Fish uses `_cached_eval` and deferred loading. Bash ships full parity with zsh for tooling and aliases. Nushell handles structured workflows (Tier 3). PowerShell keeps cross-platform and WSL sessions on the same baseline with a `pwsh` parity contract in CI. Starship, Zoxide, Atuin, and fzf for navigation and recall. Starship Transient Prompt collapses past prompts to a single glyph on fish; the zsh hook is in place for when upstream lands the matching function ([ADR-010](docs/adr/ADR-010-starship-transient-prompt.md)). |
 | **Development and runtimes** | mise manages language versions in user space with a cross-platform `mise.lock` (Linux, macOS, Windows, exact URLs and SHA-256s). Nix Flakes for strict reproducibility when speed is not the priority. Pueue queues long-running tasks instead of extra tabs. Neovim ships as a full Lua editor, not a starter template. Lazygit for terminal git. Build caches (Go, pip, uv, Zig) live under a private `~/.cache/dot/builds`; Cargo keeps a per-project `./target`. `_cached_eval` caches expensive `tool init` output with mtime and realpath invalidation; `EVALCACHE_DISABLE=true` bypasses it. |
-| **AI, agents, and MCP** | Agent profiles (`dot agent mode`): ask, plan, apply, audit. Pattern library (`dot ai pattern`): architect, hardener, refactor, bundled in `dot_config/ai/patterns/`. MCP policy enforcement (`dot mcp`). AI commit messages (`dot config save`). The `dot ai` cockpit installs and runs Codex, Copilot, Antigravity, Aider, OpenCode and friends from one Bubble Tea TUI; `dot ai gateway serve` exposes your Claude subscription locally to any Anthropic- or OpenAI-protocol tool ([ADR-012](docs/adr/ADR-012-ai-fleet-local-proxy.md), [`docs/AI.md`](docs/AI.md)). Every agent session is logged with a policy hash and an outcome. |
+| **AI, agents, and MCP** | Agent profiles (`dot agent mode`): ask, plan, apply, audit. Pattern library (`dot ai pattern`): architect, hardener, refactor, bundled in `dot_config/ai/patterns/`. MCP policy enforcement (`dot mcp`). AI commit messages (`dot config save`). The `dot ai` cockpit installs and runs Codex, Copilot, Antigravity, Aider, OpenCode and friends from one Bubble Tea TUI; `dot ai gateway serve` gives any Anthropic- or OpenAI-protocol tool a local Claude endpoint on your Anthropic API key (subscription routing is an explicit opt-in; see Anthropic's terms in `docs/AI.md`) ([ADR-012](docs/adr/ADR-012-ai-fleet-local-proxy.md), [`docs/AI.md`](docs/AI.md)). Every agent session is logged with a policy hash and an outcome. |
 | **Security, trust, governance** | age and SOPS keep secrets encrypted at rest and out of history. SSH ed25519 signing plus trust metadata back every commit. Gitleaks, detect-secrets, TruffleHog, policy checks, and compliance workflows. `dot attest` records machine state, policy, prompt, and model metadata in tracked JSON. Telemetry controls and local-first defaults (`dot security telemetry apply`, `dot security dns apply`, `dot security firewall apply`, `dot security usb apply`, `dot security lock apply`, `dot security disk show`). SPDX SBOM and Grype CVE scanning in CI. npm releases authenticate through OIDC trusted publishing with provenance, never a long-lived token. |
 | **Themes** | 296 wallpaper-derived themes, dark and light paired; `dot theme`, `dot theme toggle`, `dot theme family`, `dot theme sync` with the OS appearance; `dot theme wallpaper set rotate` and `dot theme wallpaper set sync`. See [Wallpaper-driven themes](#wallpaper-driven-themes). |
 | **Fleet and remote** | `dot fleet` status, drift, events, namespace, RBAC enforce mode; `dot fleet apply` runs `dot sync` (or a custom `--cmd`) on every host in `fleet.toml`; `dot fleet push` deploys the environment to a fresh host over SSH; `dot config export` builds an offline archive. |

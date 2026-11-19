@@ -1268,7 +1268,7 @@ HTML
 
     <h2>Quick start</h2>
     <pre><code># Download and SHA256-verify the release installer per the install guide.
-bash /tmp/dotfiles-install.sh
+bash "\$installer_dir/dotfiles-install.sh"
 dot doctor
 dot help tour</code></pre>
 

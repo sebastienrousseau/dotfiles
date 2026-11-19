@@ -38,7 +38,7 @@ Every definition in this file also checks that `$OSTYPE` is `darwin*`.
 
 ### `vscode.aliases.sh`
 
-Defined only when `code` is on PATH or the bundle's `code` is executable, and `uname` reports Darwin.
+Defined only when `code` is on PATH or the bundle's `code` is executable, and `$OSTYPE` is darwin.
 
 | Name | Definition | Notes |
 | --- | --- | --- |

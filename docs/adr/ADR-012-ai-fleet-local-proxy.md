@@ -26,6 +26,17 @@ Accepted; command spellings superseded by [ADR-020](ADR-020-command-naming-syste
 > below no longer hold for images and tools. A warm pool of engines was
 > measured and not built: about 0.1 to 0.35 s off a 1.4 s request, within
 > run-to-run noise, for one idle `claude` process each.
+>
+> **Update (0.2.548):** the "no API key anywhere" decision below is
+> reversed. The gateway now runs its engine on an Anthropic API key
+> (`ANTHROPIC_API_KEY`, or `dot secret`) by default and refuses to start
+> without one. Running other tools on a Claude subscription sign-in is an
+> explicit opt-in, `DOT_AI_GATEWAY_SUBSCRIPTION=1`, which prints Anthropic's
+> terms on every start and, without a terminal, also needs
+> `DOT_AI_GATEWAY_SUBSCRIPTION_ACK=1`. Claude Code's legal page says
+> subscription OAuth "is designed to support ordinary use of Claude Code and
+> other native Anthropic applications"; see [AI.md](../AI.md) for the
+> quoted terms.
 
 ## Date
 

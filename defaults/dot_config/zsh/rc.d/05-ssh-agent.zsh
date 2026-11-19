@@ -3,9 +3,32 @@ if [[ -x /usr/lib/ssh/ssh-sk-helper ]]; then
   export SSH_SK_HELPER=/usr/lib/ssh/ssh-sk-helper
 fi
 
-# SSH agent: auto-start if no agent is running (interactive only)
-if [[ -o interactive ]] && [[ -z "$SSH_AUTH_SOCK" ]]; then
-  eval "$(ssh-agent -s)" >/dev/null 2>&1
+# SSH agent: when no agent is set (interactive only), reuse one agent per
+# host on a fixed socket, starting it only when that socket is not live.
+# A bare `ssh-agent -s` here started, and leaked, a new agent in every
+# shell. Agents started any other way are never touched.
+_dotfiles_ssh_agent() {
+  local dir="${XDG_RUNTIME_DIR:-$HOME/.ssh}" host="${HOST%%.*}"
+  # Unix socket paths are capped at 104 bytes (macOS) or 108 (Linux), and
+  # managed hosts can have long names: keep the name short, and move to a
+  # private directory under /tmp when the home path itself is too long.
+  local sock="$dir/dotfiles-ssh-agent.${host[1,16]}.sock"
+  if (( ${#sock} > 100 )); then
+    dir="/tmp/dotfiles-ssh-$UID"
+    sock="$dir/agent.${host[1,16]}.sock"
+  fi
+  # ssh-add exits 2 only when it cannot reach an agent.
+  SSH_AUTH_SOCK="$sock" ssh-add -l >/dev/null 2>&1
+  if (( $? != 2 )); then
+    export SSH_AUTH_SOCK="$sock"
+    return 0
+  fi
+  [[ -d "$dir" ]] || mkdir -m 700 -p "$dir" || return 0
+  # A socket nothing answers on is left over from an agent that exited.
+  [[ -S "$sock" ]] && rm -f -- "$sock"
+  eval "$(ssh-agent -s -a "$sock" 2>/dev/null)" >/dev/null
+  [[ -S "$sock" ]] || return 0
+  export SSH_AUTH_SOCK="$sock"
 
   # Add default key with timeout guard (2s max) to prevent startup hangs
   if [[ -f ~/.ssh/id_ed25519 ]]; then
@@ -15,4 +38,8 @@ if [[ -o interactive ]] && [[ -z "$SSH_AUTH_SOCK" ]]; then
       timeout 2 ssh-add ~/.ssh/id_ed25519 2>/dev/null || true
     fi
   fi
+}
+
+if [[ -o interactive ]] && [[ -z "$SSH_AUTH_SOCK" ]] && (( ${+commands[ssh-agent]} )); then
+  _dotfiles_ssh_agent
 fi

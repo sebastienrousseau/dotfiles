@@ -17,119 +17,77 @@ fi
 # Reference: https://github.com/torvalds/linux/blob/master/Documentation/process/coding-assistants.rst
 # Format:    Assisted-by: AGENT_NAME:MODEL_VERSION [TOOL1] [TOOL2]
 
+# Attribution comes only from the environment of the process running the
+# commit: each agent exports a session variable to the commands it runs.
+# A `claude` process elsewhere on the machine (pgrep) or an API key in the
+# shell said nothing about who wrote this commit, and mislabelled
+# hand-written commits, so neither counts.
+#
+# Claude Code exports CLAUDECODE=1, CLAUDE_CODE_ENTRYPOINT and
+# CLAUDE_CODE_SESSION_ID (checked in a live session) but no variable with
+# the model, so the default below is hardcoded and goes stale whenever a
+# new Opus ships. Override per session without editing this hook:
+#   export CLAUDE_MODEL=claude-sonnet-5
+#
+# One rule per line, first match wins (Codex before Claude: a Codex run can
+# inherit stale Claude state):
+#   session variables (any set) | name | model variable | default model
+AI_AGENT_RULES=(
+  "CODEX_SESSION_ID CODEX_THREAD_ID CODEX_CI|Codex|CODEX_MODEL|codex-cli"
+  "CLAUDECODE CLAUDE_CODE CLAUDE_SESSION_ID CLAUDE_CODE_SESSION_ID CLAUDE_CODE_ENTRYPOINT|Claude|CLAUDE_MODEL|claude-opus-5-5"
+  "GITHUB_COPILOT_CLI COPILOT_SESSION|Copilot||copilot-cli"
+  "AIDER_SESSION AIDER_MODEL|Aider|AIDER_MODEL|unknown"
+  "OPENCODE_SESSION|OpenCode|OPENCODE_MODEL|unknown"
+  "AGY_SESSION|Antigravity||antigravity-cli"
+  "GEMINI_CLI GEMINI_SESSION_ID|Gemini|GEMINI_MODEL|gemini-cli"
+  "MISTRAL_SESSION|Mistral||mistral-vibe"
+  "QWEN_SESSION|Qwen||qwen-code"
+  "AUTOHAND_SESSION|Autohand||autohand-code"
+  "ZAI_SESSION|ZAI||zai-cli"
+  "SHELL_GPT_SESSION|ShellGPT||shell-gpt"
+  "OLLAMA_SESSION|Ollama|OLLAMA_MODEL|local"
+)
+
+# any_set <names>: whether any of the space-separated variables is non-empty.
+any_set() {
+  local name
+  for name in $1; do
+    [[ -n "${!name:-}" ]] && return 0
+  done
+  return 1
+}
+
+# detect_ai_agent: "Name:model" for the agent session this commit runs in,
+# or nothing.
 detect_ai_agent() {
-  # Codex exports stable session/thread identifiers but not always the model.
-  # Prefer an explicit model override; otherwise identify the CLI honestly.
-  if [[ -n "${CODEX_SESSION_ID:-}" ||
-    -n "${CODEX_THREAD_ID:-}" ||
-    -n "${CODEX_CI:-}" ]]; then
-    echo "Codex:${CODEX_MODEL:-codex-cli}"
+  local rule vars name model_var model
+  for rule in "${AI_AGENT_RULES[@]}"; do
+    IFS='|' read -r vars name model_var model <<<"$rule"
+    any_set "$vars" || continue
+    if [[ -n "$model_var" ]]; then
+      model="${!model_var:-$model}"
+    fi
+    echo "${name}:${model}"
     return
-  fi
+  done
+}
 
-  # Default model when running under Claude Code.
-  #
-  # This has to be hardcoded: Claude Code exports CLAUDECODE,
-  # CLAUDE_CODE_ENTRYPOINT, CLAUDE_CODE_SESSION_ID and friends, but no
-  # variable carrying the model, and ~/.claude/settings.json has no `model`
-  # key unless the user pins one. So there is nothing to read it from, and
-  # the default goes stale whenever a new Opus ships — it was still
-  # claude-opus-4-7 while sessions were running on Opus 5, quietly
-  # misattributing every commit. It was claude-opus-5 while sessions ran
-  # on Opus 5.5, until 2026-09-29.
-  #
-  # Override per session without editing this hook:
-  #   export CLAUDE_MODEL=claude-sonnet-5
-  local claude_default="${CLAUDE_MODEL:-claude-opus-5-5}"
-
-  # Claude Code (Anthropic). The CLI actually sets CLAUDECODE=1 (no
-  # underscore); the other vars are kept as historical aliases and for
-  # API-key-only sessions.
-  if [[ -n "${CLAUDECODE:-}" ||
-    -n "${CLAUDE_CODE:-}" ||
-    -n "${CLAUDE_SESSION_ID:-}" ||
-    -n "${CLAUDE_CODE_ENTRYPOINT:-}" ||
-    -n "${ANTHROPIC_API_KEY:-}" ]]; then
-    echo "Claude:${claude_default}"
-    return
-  fi
-
-  # GitHub Copilot CLI
-  if [[ -n "${GITHUB_COPILOT_CLI:-}" || -n "${COPILOT_SESSION:-}" ]]; then
-    echo "Copilot:copilot-cli"
-    return
-  fi
-
-  # Aider
-  if [[ -n "${AIDER_SESSION:-}" || -n "${AIDER_MODEL:-}" ]]; then
-    echo "Aider:${AIDER_MODEL:-unknown}"
-    return
-  fi
-
-  # OpenCode
-  if [[ -n "${OPENCODE_SESSION:-}" ]]; then
-    echo "OpenCode:${OPENCODE_MODEL:-unknown}"
-    return
-  fi
-
-  # Antigravity CLI (Google)
-  if [[ -n "${AGY_API_KEY:-}" && -n "${AGY_SESSION:-}" ]]; then
-    echo "Antigravity:antigravity-cli"
-    return
-  fi
-
-  # Gemini CLI (Google)
-  if [[ -n "${GEMINI_CLI:-}" || -n "${GEMINI_SESSION_ID:-}" ]]; then
-    echo "Gemini:${GEMINI_MODEL:-gemini-cli}"
-    return
-  fi
-
-  # Mistral Vibe
-  if [[ -n "${MISTRAL_API_KEY:-}" && -n "${MISTRAL_SESSION:-}" ]]; then
-    echo "Mistral:mistral-vibe"
-    return
-  fi
-
-  # Qwen Code
-  if [[ -n "${QWEN_SESSION:-}" ]]; then
-    echo "Qwen:qwen-code"
-    return
-  fi
-
-  # Autohand Code
-  if [[ -n "${AUTOHAND_SESSION:-}" ]]; then
-    echo "Autohand:autohand-code"
-    return
-  fi
-
-  # ZAI (Zhipu)
-  if [[ -n "${ZAI_SESSION:-}" ]]; then
-    echo "ZAI:zai-cli"
-    return
-  fi
-
-  # Shell-GPT
-  if [[ -n "${SHELL_GPT_SESSION:-}" ]]; then
-    echo "ShellGPT:shell-gpt"
-    return
-  fi
-
-  # Ollama (local)
-  if [[ -n "${OLLAMA_SESSION:-}" ]]; then
-    echo "Ollama:${OLLAMA_MODEL:-local}"
-    return
-  fi
-
-  # Fallback: check if any known AI process is in the tree.
-  # Uses the same overridable default as the env-var path above so a
-  # single export keeps both sites in sync.
-  if pgrep -q "claude" 2>/dev/null; then
-    echo "Claude:${claude_default}"
-    return
-  fi
-
-  # No AI detected
-  echo ""
+# ── Branding only in the owner's repositories ─────────────────────────
+# The signature is personal branding: a commit to someone else's project
+# (or a fork that has an upstream remote) must not carry it. A repository
+# counts as owned when it has at least one remote and every remote's URL
+# names the owner. The owner is euxis.brandingOwner in git config,
+# defaulting to sebastienrousseau.
+repo_is_owned() {
+  local owner remote url found=0
+  owner="$(git config --get euxis.brandingOwner 2>/dev/null || echo sebastienrousseau)"
+  owner="$(printf '%s' "$owner" | tr '[:upper:]' '[:lower:]')"
+  for remote in $(git remote 2>/dev/null); do
+    url="$(git remote get-url "$remote" 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+    [[ "$url" =~ [:/]${owner}/[^/]+/?$ ]] || return 1
+    found=1
+  done
+  [[ "$found" == 1 ]]
 }
 
 # ── Branding Signature ────────────────────────────────────────────────
@@ -145,28 +103,29 @@ if [[ "$first_line" =~ ^Merge\ |^fixup!\ |^squash!\  ]]; then
 fi
 
 # ── Inject AI attribution if not already present ──────────────────────
-# Line-anchored: a literal mention of `Assisted-by:` inside the commit
-# body (e.g. when the commit message *describes* the trailer) must not
-# fool the hook into skipping injection. Trailers always start at col 1.
-if ! grep -Eq "^Assisted-by:" "$msg_file"; then
+# add_attribution <msg-file>: append the Assisted-by trailer for the
+# current agent session, if any. Line-anchored: a literal mention of
+# `Assisted-by:` inside the commit body (e.g. when the commit message
+# *describes* the trailer) must not fool the hook into skipping injection.
+add_attribution() {
+  local ai_agent
+  grep -Eq "^Assisted-by:" "$1" && return 0
   ai_agent="$(detect_ai_agent)"
-  if [[ -n "$ai_agent" ]]; then
-    # interpret-trailers joins an existing block (Signed-off-by, …) instead
-    # of opening a new paragraph; git reads trailers from the last one only.
-    git interpret-trailers --in-place --trailer "Assisted-by: $ai_agent" "$msg_file" 2>/dev/null ||
-      printf '\nAssisted-by: %s\n' "$ai_agent" >>"$msg_file"
-  fi
-fi
+  [[ -n "$ai_agent" ]] || return 0
+  # interpret-trailers joins an existing block (Signed-off-by, …) instead
+  # of opening a new paragraph; git reads trailers from the last one only.
+  git interpret-trailers --in-place --trailer "Assisted-by: $ai_agent" "$1" 2>/dev/null ||
+    printf '\nAssisted-by: %s\n' "$ai_agent" >>"$1"
+}
+add_attribution "$msg_file"
 
 # ── Inject branding signature if not already present ──────────────────
 [[ -f "$sig_file" ]] || exit 0
+repo_is_owned || exit 0
 
 first_sig_line="$(sed -n '1p' "$sig_file")"
 [[ -n "$first_sig_line" ]] || exit 0
-
-if grep -Fqx -- "$first_sig_line" "$msg_file"; then
-  exit 0
-fi
+grep -Fqx -- "$first_sig_line" "$msg_file" && exit 0
 
 # Git reads trailers (Signed-off-by, Assisted-by, …) from the LAST
 # paragraph only. Appending the signature after them used to push the
@@ -175,6 +134,7 @@ fi
 # trailer block when there is one; otherwise append as before. Comment
 # lines at the end (an editor's template) are kept, after everything.
 tmp_msg="$(mktemp)"
+trap 'rm -f "$tmp_msg"' EXIT
 EUXIS_SIG="$(cat "$sig_file")" awk '
   { lines[NR] = $0 }
   END {
@@ -198,5 +158,4 @@ EUXIS_SIG="$(cat "$sig_file")" awk '
     for (i = n + 1; i <= NR; i++) if (lines[i] ~ /^#/) { if (!tail) print ""; tail = 1; print lines[i] }
   }' "$msg_file" >"$tmp_msg"
 cat "$tmp_msg" >"$msg_file"
-rm -f "$tmp_msg"
 printf '\n' >>"$msg_file"

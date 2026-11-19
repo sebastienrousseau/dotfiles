@@ -29,7 +29,7 @@ _dot() {
     'agent log') kids_=('show:The agent log') ;;
     'agent mode') kids_=('list:Available modes' 'show:One mode in detail' 'set:Switch mode' 'run:Run a command under a mode') ;;
     'agent policy') kids_=('show:The sandbox policy') ;;
-    'ai') kids_=('pattern:prompt patterns' 'cost:spend by agent and model' 'gateway:the keyless gateway' 'inventory:installed agents and versions' 'policy:the enforced AI policy' 'list:Installed agents' 'install:Install agents' 'update:Upgrade agent CLIs' 'start:Start an agent' 'run:Run an agent once' 'login:Authenticate an agent' 'check:Check agent installs and auth' 'ask:Ask about the local context' 'send:Give a background agent text and submit it' 'wait:Wait until a background agent stops working') ;;
+    'ai') kids_=('pattern:prompt patterns' 'cost:spend by agent and model' 'gateway:the local Claude gateway' 'inventory:installed agents and versions' 'policy:the enforced AI policy' 'list:Installed agents' 'install:Install agents' 'update:Upgrade agent CLIs' 'start:Start an agent' 'run:Run an agent once' 'login:Authenticate an agent' 'check:Check agent installs and auth' 'ask:Ask about the local context' 'send:Give a background agent text and submit it' 'wait:Wait until a background agent stops working') ;;
     'ai cost') kids_=('show:Spend by agent and model') ;;
     'ai gateway') kids_=('serve:Run the gateway in the foreground' 'show:Gateway statistics') ;;
     'ai inventory') kids_=('show:Agents, versions, pins, sign-in, hooks and drift') ;;
@@ -310,7 +310,7 @@ _dot() {
       flags_=('--help:Show help')
       ;;
     'config profile show' | 'config profile show'\ *)
-      flags_=('--help:Show help')
+      flags_=('--help:Show help' '--json:Print the profile and feature flags as JSON' '-j:Print the profile and feature flags as JSON')
       ;;
     'config save' | 'config save'\ *)
       flags_=('--help:Show help')
@@ -544,7 +544,7 @@ _dot() {
       flags_=('--help:Show help')
       ;;
     'system clean' | 'system clean'\ *)
-      flags_=('--help:Show help')
+      flags_=('--help:Show help' '--caches:Prune the Go, pip and uv build caches (the default)' '--logs:Rotate the logs instead' '--yes:Prune without asking' '-y:Prune without asking')
       ;;
     'system schedule list' | 'system schedule list'\ *)
       flags_=('--help:Show help')
@@ -569,7 +569,7 @@ _dot() {
       flags_=('--help:Show help')
       ;;
     'system update' | 'system update'\ *)
-      flags_=('--help:Show help' '--yes:Answer yes to every question' '-y:Answer yes to every question' '--globals:Also update npm, cargo and pipx globals')
+      flags_=('--help:Show help' '--yes:Answer yes to every question' '-y:Answer yes to every question' '--globals:Also upgrade pipx globals (npm and cargo tools are pinned)')
       ;;
     'theme font install' | 'theme font install'\ *)
       flags_=('--help:Show help')
@@ -596,7 +596,7 @@ _dot() {
       flags_=('--help:Show help')
       ;;
     'tool list' | 'tool list'\ *)
-      flags_=('--help:Show help')
+      flags_=('--help:Show help' '--json:Print the toolchains as JSON' '-j:Print the toolchains as JSON')
       ;;
     'tool new' | 'tool new'\ *)
       flags_=('--help:Show help')

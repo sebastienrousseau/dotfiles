@@ -307,7 +307,7 @@ to a full commit SHA (`docs/security/CI_PINNING.md`).
 | Job        | Toolchain(s)                    | Purpose                                                                 |
 | :--------- | :------------------------------ | :---------------------------------------------------------------------- |
 | `test`     | stable, 1.86.0, beta × ubuntu, macos | `cargo test --locked`, release build + output-format smoke, fixture verification |
-| `wasm`     | stable + `wasm32-wasip1` + wasmtime 47.0.3 | clippy for the target, build the module, **execute it**, run `tests/wasm.rs` and the shell caller, upload the `.wasm` |
+| `wasm`     | stable + `wasm32-wasip1` + wasmtime 50.0.2 | clippy for the target, build the module, **execute it**, run `tests/wasm.rs` and the shell caller, upload the `.wasm` |
 | `fmt`      | stable                          | `cargo fmt --check` on the crate and the fuzz crate                     |
 | `clippy`   | stable                          | `-D warnings -W clippy::pedantic`, all targets                          |
 | `doc`      | stable                          | `cargo doc --no-deps` with `RUSTDOCFLAGS=-D warnings`, doctests         |

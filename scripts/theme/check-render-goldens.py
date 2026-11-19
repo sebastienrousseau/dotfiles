@@ -77,10 +77,13 @@ def render_all(chezmoi: str) -> dict[str, str]:
             REPO / "defaults/.theme-manifest/themes.toml",
             source / ".theme-manifest/themes.toml",
         )
-        shutil.copyfile(
-            REPO / "defaults/.chezmoitemplates/theme-name",
-            source / ".chezmoitemplates/theme-name",
-        )
+        # theme-name includes theme-subset, which parses only the active
+        # theme out of themes.toml.
+        for partial in ("theme-name", "theme-subset"):
+            shutil.copyfile(
+                REPO / "defaults/.chezmoitemplates" / partial,
+                source / ".chezmoitemplates" / partial,
+            )
         config = work / "chezmoi.json"
         config.write_text("{}\n", encoding="utf-8")
         for platform in PLATFORMS:

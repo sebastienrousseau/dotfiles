@@ -115,30 +115,58 @@ get_package_name() {
 # Usage: _pkg_install "label" completed total command [args...]
 _pkg_install() { ui_run_cmd "$@"; }
 
-_mise_tool_specs() {
+# The mise conf.d the dotfiles deploy is the one source of tool versions;
+# heal installs what it pins, so a heal never moves a host off it.
+HEAL_MISE_CONF="${HEAL_MISE_CONF:-$HEAL_TOOLS_DIR/../../defaults/dot_config/mise/conf.d/00-dotfiles.toml}"
+
+# _mise_conf_version <tool>: the version conf.d's [tools] gives <tool> (a
+# plain string, or an inline table's version); nothing when it has none.
+_mise_conf_version() {
+  [[ -r "$HEAL_MISE_CONF" ]] || return 0
+  awk -v k="$1" '
+    /^\[/ { on = ($0 == "[tools]"); next }
+    !on || $2 != "=" { next }
+    { key = $1; gsub(/"/, "", key) }
+    key == k {
+      if (match($0, /version = "[^"]*"/)) v = substr($0, RSTART + 11, RLENGTH - 12)
+      else { v = $3; gsub(/"/, "", v) }
+      print v; exit
+    }' "$HEAL_MISE_CONF"
+}
+
+# _mise_tool_keys <cmd>: the conf.d tool name(s) that provide <cmd>.
+_mise_tool_keys() {
   case "$1" in
-    nushell) printf '%s\n' 'aqua:nushell/nushell@0.114.1' ;;
-    pueue)
-      printf '%s\n' 'aqua:Nukesor/pueue/pueue@4.0.4'
-      printf '%s\n' 'aqua:Nukesor/pueue/pueued@4.0.4'
-      ;;
-    wasmtime) printf '%s\n' 'wasmtime@47.0.3' ;;
-    sops) printf '%s\n' 'sops@3.13.3' ;;
-    yazi) printf '%s\n' 'yazi@26.5.6' ;;
-    zellij) printf '%s\n' 'zellij@0.44.3' ;;
+    nushell) printf '%s\n' 'aqua:nushell/nushell' ;;
+    pueue) printf '%s\n' 'aqua:Nukesor/pueue/pueue' 'aqua:Nukesor/pueue/pueued' ;;
+    wasmtime | sops | yazi | zellij) printf '%s\n' "$1" ;;
     *) return 1 ;;
   esac
 }
 
+# _mise_tool_specs <cmd>: "<tool>@<version>" for each tool, at its conf.d
+# version; 1 when <cmd> is unmapped or conf.d pins no version for it.
+_mise_tool_specs() {
+  local key version
+  _mise_tool_keys "$1" >/dev/null || return 1
+  while IFS= read -r key; do
+    version="$(_mise_conf_version "$key")"
+    [[ -n "$version" ]] || return 1
+    printf '%s@%s\n' "$key" "$version"
+  done < <(_mise_tool_keys "$1")
+}
+
 _install_with_mise() {
-  local cmd="$1" spec
+  local cmd="$1" spec specs
   command -v mise >/dev/null 2>&1 || return 1
+  specs="$(_mise_tool_specs "$cmd")" || return 1
   while IFS= read -r spec; do
-    [[ -n "$spec" ]] || continue
-    # --pin writes an exact version to the user's writable global config;
-    # aqua/ubi backends verify publisher-provided checksums before install.
-    mise use --global --pin "$spec" || return 1
-  done < <(_mise_tool_specs "$cmd")
+    # `mise install`, never `mise use --global`: conf.d already declares the
+    # tool at this version, and a pin written to ~/.config/mise/config.toml
+    # would outrank conf.d and hold the host there for good. aqua/ubi
+    # backends verify publisher-provided checksums before install.
+    mise install "$spec" || return 1
+  done <<<"$specs"
 }
 
 # Install a single package (dispatcher for _pkg_install to call in subshell)

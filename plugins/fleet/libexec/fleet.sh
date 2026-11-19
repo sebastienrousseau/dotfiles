@@ -215,7 +215,7 @@ _fleet_namespace_render() {
 
 _fleet_namespace_set() {
   local new_ns="${1:-}" data_file _tmp
-  [[ -n "$new_ns" ]] || die "Usage: dot fleet namespace set <name>"
+  [[ -n "$new_ns" ]] || dot_usage_error "missing argument" "dot fleet namespace set <name>"
   validate_name "$new_ns" "namespace"
   data_file="$(resolve_chezmoi_source_dir)/.chezmoidata.toml"
   [[ -f "$data_file" ]] || die ".chezmoidata.toml not found: $data_file"
@@ -242,7 +242,7 @@ cmd_fleet_namespace() {
   case "$subcommand" in
     show) _fleet_namespace_show ;;
     set) _fleet_namespace_set "$@" ;;
-    *) die "Usage: dot fleet namespace [show|set <name>]" ;;
+    *) dot_usage_error "unknown subcommand" "dot fleet namespace [show|set <name>]" ;;
   esac
 }
 
@@ -273,7 +273,7 @@ cmd_fleet_enforce() {
       ;;
     set)
       local mode="${1:-}"
-      [[ -n "$mode" ]] || die "Usage: dot fleet enforce set <advisory|strict>"
+      [[ -n "$mode" ]] || dot_usage_error "missing argument" "dot fleet enforce set <advisory|strict>"
       case "$mode" in
         advisory | strict) ;;
         *) die "Invalid enforcement mode: $mode (use advisory or strict)" ;;
@@ -286,7 +286,7 @@ cmd_fleet_enforce() {
       _fleet_emit_event "enforcement_set" "ok" "mode=$mode"
       ;;
     *)
-      die "Usage: dot fleet enforce [status|set <advisory|strict>]"
+      dot_usage_error "missing or unknown argument" "dot fleet enforce [status|set <advisory|strict>]"
       ;;
   esac
 }
@@ -321,10 +321,7 @@ cmd_fleet() {
       return
     fi
   done
-  ui_err "Unknown subcommand" "$subcommand" >&2
-  echo "Run 'dot fleet help' for usage." >&2
-  _fleet_print_commands >&2
-  return 1
+  dot_unknown_command "fleet" "fleet $subcommand"
 }
 
 _fleet_print_commands() {

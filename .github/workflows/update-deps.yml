@@ -53,10 +53,16 @@ jobs:
 
           # Check Nerd Fonts version
           echo "Checking Nerd Fonts..."
-          LATEST_NF=$(curl -s https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          LATEST_NF=$(curl -fsS https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          # The tag is upstream-controlled: accept only x.y.z before it
+          # reaches $GITHUB_OUTPUT, sed or a PR body (script/newline injection).
+          if [[ ! "$LATEST_NF" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::unexpected nerd-fonts tag; refusing to use it"
+            exit 1
+          fi
           # The script pins FONT_VERSION="v<x.y.z>"; compare without the v.
           CURRENT_NF=$(grep -oP '^FONT_VERSION="v\K[^"]+' install/provision/run_onchange_50-install-fonts.sh 2>/dev/null || echo "unknown")
-          if [[ "$LATEST_NF" != "$CURRENT_NF" && "$LATEST_NF" != "null" ]]; then
+          if [[ "$LATEST_NF" != "$CURRENT_NF" ]]; then
             UPDATES="${UPDATES}nerd-fonts: ${CURRENT_NF} -> ${LATEST_NF}\n"
             echo "nerd_fonts_update=true" >> "$GITHUB_OUTPUT"
             echo "nerd_fonts_version=$LATEST_NF" >> "$GITHUB_OUTPUT"
@@ -84,12 +90,20 @@ jobs:
 
       - name: Apply updates
         if: steps.updates.outputs.has_updates == 'true' && inputs.dry_run != 'true'
+        env:
+          NF_UPDATE: ${{ steps.updates.outputs.nerd_fonts_update }}
+          NF_VERSION: ${{ steps.updates.outputs.nerd_fonts_version }}
         run: |
-          # Update Nerd Fonts version
-          if [[ "${{ steps.updates.outputs.nerd_fonts_update }}" == "true" ]]; then
-            VERSION="${{ steps.updates.outputs.nerd_fonts_version }}"
-            sed -i "s/^FONT_VERSION=\"v[^\"]*\"/FONT_VERSION=\"v${VERSION}\"/" install/provision/run_onchange_50-install-fonts.sh
-            sed -i "s|nerd-fonts/releases/download/v[0-9.]*|nerd-fonts/releases/download/v${VERSION}|g" docs/reference/FONTS.md
+          set -euo pipefail
+          # Update Nerd Fonts version (values arrive through env, never
+          # through expression interpolation; re-validated before sed).
+          if [[ "$NF_UPDATE" == "true" ]]; then
+            if [[ ! "$NF_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::unexpected nerd-fonts version; refusing to apply it"
+              exit 1
+            fi
+            sed -i "s/^FONT_VERSION=\"v[^\"]*\"/FONT_VERSION=\"v${NF_VERSION}\"/" install/provision/run_onchange_50-install-fonts.sh
+            sed -i "s|nerd-fonts/releases/download/v[0-9.]*|nerd-fonts/releases/download/v${NF_VERSION}|g" docs/reference/FONTS.md
           fi
 
       - name: Create Pull Request

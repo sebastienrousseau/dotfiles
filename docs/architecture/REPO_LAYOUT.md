@@ -44,7 +44,7 @@ section is relative to `defaults/`. Filename **prefixes** carry semantics:
 | `.chezmoidata.toml`         | **Source of truth** for version, profile, default theme, shell, feature flags.              |
 | `.chezmoidata/`             | Split data files: `apple.toml`, `hardware.toml`, `keybinds.toml`, `secrets-patterns.toml`.   |
 | `.theme-manifest/themes.toml` | Theme palette manifest read by the theme templates.                                        |
-| `.chezmoiignore`, `.chezmoiignore.tmpl` | Feature-flag-gated "don't deploy these to `$HOME`" list.                         |
+| `.chezmoiignore.tmpl` | Feature-flag-gated "don't deploy these to `$HOME`" list.                         |
 | `.chezmoitemplates/`        | Reusable template partials (`aliases/`, `functions/`, `desktop/`, `go-build-command`, `theme-name`). Not deployed. |
 
 ### Shell rc files
@@ -157,7 +157,7 @@ find this workstation's agent capabilities:
 | `install/provision/`, `install/lib/`, `install/migrate/` | Platform-specific install helpers invoked by `install.sh`     |
 | `GNUmakefile`, `Makefile`               | `make install` contract for the `dot` CLI; `make test` and other runners       |
 | `defaults/dot_config/just/justfile`, `config/treefmt.toml` | Convenience runners and formatter config                    |
-| `mise.toml`, `mise.lock`, `mise-versions.lock.json` | Mise toolchain versions (locked)                                   |
+| `mise.toml`, `mise.lock`                            | Mise toolchain versions (locked)                                   |
 | `package.json`, `requirements-contracts.in`, `requirements-contracts.txt` | Node and Python dev dependencies              |
 | `flake.nix`, `flake.lock` (root)        | Root Nix flake for `direnv` + repo dev shell                                   |
 | `nix/flake.nix`, `nix/home.nix`         | Separate flake for Home Manager activation (used by `dot system update` and `ci-enforced.yml → lint-nix`) |
@@ -172,7 +172,7 @@ for running the repo itself (see [`../../tools/README.md`](https://github.com/se
 
 | Subdir                                    | Purpose                                                         |
 |-------------------------------------------|-----------------------------------------------------------------|
-| `tools/ci/`                               | CI helpers and gates (`check-cli-contract.py`, `cli_command_table.py`, `complexity.py`, `mutation-test.py`, `check-copyright-headers.sh`, ...) |
+| `tools/ci/`                               | CI helpers and gates (`check-cli-contract.py`, `cli_command_table.py`, `complexity.py` (shell), `complexity_polyglot.py` (Python and Go), `mutation-test.py`, `check-copyright-headers.sh`, ...) |
 | `tools/docs/`                             | Manual and site builds, and the generators for man pages, completions and cmdlets |
 | `tools/release/`, `tools/maintenance/`    | Release staging and maintenance tasks                           |
 

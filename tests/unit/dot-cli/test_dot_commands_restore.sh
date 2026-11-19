@@ -57,8 +57,8 @@ assert_equals "$long_out" "$RS_OUT" "-l prints what --list prints"
 
 test_start "restore_rejects_an_unknown_option"
 rs --bogus
-assert_equals "1" "$RS_RC" "an unknown option exits 1"
-assert_contains "Unknown option: --bogus" "$RS_OUT" "and is named"
+assert_equals "64" "$RS_RC" "an unknown option is a usage error (64)"
+assert_contains "dot: unknown option '--bogus'" "$RS_OUT" "and is named"
 rm -rf "$RS_HOME"
 
 test_start "restore_latest_preserves_hidden_paths"

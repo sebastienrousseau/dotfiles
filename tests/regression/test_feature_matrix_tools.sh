@@ -236,9 +236,9 @@ test_fm_profile_set_usage() {
   repo="$(fm_repo_copy)"
   test_start "fm_profile_set_usage"
   fm_run_bin "$repo/bin/dot" config profile set
-  fm_expect_rc 1
+  fm_expect_rc 64 # a usage error (ADR-020 N10)
   test_start "fm_profile_set_usage_message"
-  fm_expect_any "Usage: dot config profile set" "profile set"
+  assert_contains "usage: dot config profile set <name>" "$FM_ERR" "the usage line, on stderr"
 }
 
 test_fm_profile_unknown() {
@@ -325,9 +325,10 @@ test_fm_new() {
 test_fm_new_usage() {
   test_start "fm_new_usage"
   fm_run tool new
-  fm_expect_rc 1
+  fm_expect_rc 64 # a usage error (ADR-020 N10)
   test_start "fm_new_usage_lists_templates"
-  fm_expect_any "Usage: dot tool new" "Available templates"
+  assert_contains "dot: missing template or name (templates: python, go, node" "$FM_ERR" "names the templates, on stderr"
+  assert_contains "usage: dot tool new <lang> <name>" "$FM_ERR" "and the usage line"
   test_start "fm_new_usage_rejects_unknown_template"
   fm_run tool new zzz-not-a-template demo
   fm_expect_rc 1

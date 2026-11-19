@@ -454,8 +454,11 @@ class Main(unittest.TestCase):
         srv = load({"XDG_STATE_HOME": str(self.tmp), "DOT_AI_API_KEY": "", "DOT_AI_DAILY_BUDGET": "3"})
         fake = mock.MagicMock()
         fake.return_value.serve_forever.side_effect = KeyboardInterrupt
-        with mock.patch.object(sys, "argv", ["dot-ai-serve"]), mock.patch.object(srv, "ThreadingHTTPServer", fake):
+        # A fake upstream key: the default (API-key) mode needs one.
+        with mock.patch.object(sys, "argv", ["dot-ai-serve"]), mock.patch.object(srv, "ThreadingHTTPServer", fake), \
+                mock.patch.dict(os.environ, {"ANTHROPIC_API_KEY": "sk-ant-fake-upstream"}):
             srv.main()
+        self.assertEqual("api-key", srv.AUTH_MODE)
         fake.return_value.server_close.assert_called_once()
         self.assertTrue((self.tmp / "dot" / "ai" / "serve" / "gateway.token").is_file())
 

@@ -66,4 +66,24 @@ assert_equals "0" "$PW_RC" "a held lock directory should stand down cleanly"
 assert_contains "Already running" "$PW_OUT" "and say why it did nothing"
 rmdir "$WORK/run/dotfiles-prewarm.lock.d"
 
+# ── 4. No XDG_RUNTIME_DIR (every Mac): the lock is the cache's own ─────────
+# It sat at /tmp/dotfiles-prewarm.lock for everyone, so any prewarm on the
+# machine (another user's, another HOME's, a parallel test) made this one
+# stand down having done nothing, and another user could block it for good.
+test_start "without_a_runtime_dir_the_lock_belongs_to_the_cache"
+pw_cache() {
+  PW_RC=0
+  PW_OUT="$(
+    HOME="$WORK/home" PATH="$WORK/stubs:$WORK/base" NO_COLOR=1 \
+      XDG_CACHE_HOME="$1" "${BASH:-bash}" "$PREWARM" 2>&1 </dev/null
+  )" || PW_RC=$?
+}
+mkdir -p "$WORK/cache-a/dotfiles-prewarm.lock.d" "$WORK/cache-b"
+pw_cache "$WORK/cache-a"
+assert_contains "Already running" "$PW_OUT" "a lock held in this cache stops a second run"
+pw_cache "$WORK/cache-b"
+assert_false "[[ \"\$PW_OUT\" == *'Already running'* ]]" "a lock held for another cache does not"
+assert_true "[[ -d '$WORK/cache-b/zsh' ]]" "and that run warms its own cache"
+rmdir "$WORK/cache-a/dotfiles-prewarm.lock.d"
+
 print_summary

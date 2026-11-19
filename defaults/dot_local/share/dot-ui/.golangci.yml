@@ -10,11 +10,24 @@ linters:
   default: standard
   enable:
     - bodyclose
+    - funlen
+    - gocognit
+    - gocyclo
     - misspell
     - nolintlint
     - revive
     - unconvert
   settings:
+    # Complexity limits, the same in every Go module and enforced (with a
+    # baseline that only shrinks) by tools/ci/complexity_polyglot.py.
+    funlen:
+      lines: 60
+      statements: -1
+      ignore-comments: true
+    gocognit:
+      min-complexity: 15
+    gocyclo:
+      min-complexity: 10
     revive:
       rules:
         - name: exported # every exported identifier needs a doc comment
@@ -32,6 +45,27 @@ linters:
       - path: _test\.go
         linters:
           - errcheck
+      # BEGIN complexity baseline: generated from tools/ci/complexity-baseline-go.txt
+      # by tools/ci/complexity_polyglot.py --write-baseline; do not edit.
+      - path: ^fuzz_test\.go$
+        source: '^func FuzzParseEvent\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^fuzz_test\.go$
+        source: '^func FuzzPickKeys\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^fuzz_test\.go$
+        source: '^func FuzzStepApply\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^pick\.go$
+        source: '^func \((\w+ )?pickModel(\[[^\]]*\])?\) Update\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^run\.go$
+        source: '^func \((\w+ )?\*stepModel(\[[^\]]*\])?\) apply\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^run\.go$
+        source: '^func \((\w+ )?stepModel(\[[^\]]*\])?\) View\b'
+        linters: [funlen, gocognit, gocyclo]
+      # END complexity baseline
 
 formatters:
   enable:

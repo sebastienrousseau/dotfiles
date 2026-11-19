@@ -1,20 +1,28 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-"""dot-ai-serve — a native, dependency-free local Claude proxy.
+"""dot-ai-serve — a native, dependency-free local Claude gateway.
 
 A Meridian-style bridge with no third-party packages: it wraps the
 already-installed `claude` CLI in headless stream-json mode and exposes the
 standard Anthropic (`/v1/messages`) and OpenAI (`/v1/chat/completions`)
 endpoints. Any tool that speaks either protocol points at
-http://127.0.0.1:3456 and gets Claude on your existing subscription.
+http://127.0.0.1:3456.
 
-Auth, prompt caching, and rate limits are owned by the `claude` CLI — this
-server only translates wire formats. Managed via `dot ai serve`.
+Upstream auth (resolve_auth): by default the engine runs on an Anthropic API
+key, ANTHROPIC_API_KEY, billed to that key. With no key the gateway refuses
+to start; it never falls back to a Claude subscription sign-in. Running
+third-party tools on the subscription is an explicit opt-in,
+DOT_AI_GATEWAY_SUBSCRIPTION=1: it prints Anthropic's terms on every start,
+and without a terminal it also needs DOT_AI_GATEWAY_SUBSCRIPTION_ACK=1.
+`dot-ai-serve --check` runs that decision and exits without serving.
+
+Prompt caching and rate limits are owned by the `claude` CLI — this server
+only translates wire formats. Managed via `dot ai gateway serve`.
 
 Features: real token-by-token streaming (SSE), model routing/aliases, cost
 metering (/metrics, /v1/usage), an optional daily budget cap, and a
-mandatory API-key gate: DOT_AI_API_KEY, or a random token generated on first
+mandatory gateway-key gate: DOT_AI_API_KEY, or a random token generated on first
 start (0600; `dot-ai-serve --token-path` prints where it is stored). Requests whose Host
 header is not this server's loopback address are refused, which blocks DNS
 rebinding from browsers. Images (base64, or a URL the API fetches) reach the
@@ -108,6 +116,102 @@ def load_or_create_token(path=TOKEN_FILE):
     with os.fdopen(fd, "w", encoding="utf-8") as fh:
         fh.write(token + "\n")
     return token
+
+
+# ---------------------------------------------------------------------------
+# Upstream auth: an Anthropic API key by default; the subscription only on
+# an explicit, acknowledged opt-in. Never a silent fallback.
+# ---------------------------------------------------------------------------
+SUBSCRIPTION_ENV = "DOT_AI_GATEWAY_SUBSCRIPTION"
+SUBSCRIPTION_ACK_ENV = "DOT_AI_GATEWAY_SUBSCRIPTION_ACK"
+LEGAL_URL = "https://code.claude.com/docs/en/legal-and-compliance"
+TERMS_URL = "https://www.anthropic.com/legal/consumer-terms"
+# Set in main(): "api-key" or "subscription", and the key the engine gets.
+AUTH_MODE = ""
+UPSTREAM_KEY = ""
+
+SUBSCRIPTION_WARNING = f"""\
+WARNING: subscription mode ({SUBSCRIPTION_ENV}=1). Every tool pointed at this
+gateway runs on your Claude subscription sign-in through the claude CLI.
+Anthropic's Claude Code legal page says subscription OAuth "is designed to
+support ordinary use of Claude Code and other native Anthropic applications",
+and that Anthropic "does not permit third-party developers ... to route
+requests through Free, Pro, Max, or Ultra plan credentials on behalf of their
+users"; it "may" enforce this "without prior notice" ({LEGAL_URL}).
+The Consumer Terms bar access "through automated or non-human means, whether
+through a bot, script, or otherwise" except "via an Anthropic API Key or where
+we otherwise explicitly permit it" ({TERMS_URL}).
+The risk to your account is yours. To use an API key instead, unset
+{SUBSCRIPTION_ENV} and set ANTHROPIC_API_KEY."""
+
+NO_KEY_ERROR = f"""\
+no upstream API key: the gateway runs on an Anthropic API key by default and
+never falls back to your Claude subscription. Choose one:
+  1. API key (default, billed to the key): export ANTHROPIC_API_KEY, or store
+     it with `dot secret set ANTHROPIC_API_KEY` (dot ai gateway serve reads it).
+     Create one at https://platform.claude.com.
+  2. Subscription (opt-in, see Anthropic's terms: {LEGAL_URL}):
+     {SUBSCRIPTION_ENV}=1 dot ai gateway serve
+     Without a terminal, also set {SUBSCRIPTION_ACK_ENV}=1."""
+
+
+class AuthRefused(Exception):
+    """The gateway cannot start with this upstream auth configuration."""
+
+
+def _flag(name):
+    return os.environ.get(name, "").strip().lower() in ("1", "true", "yes", "on")
+
+
+def _gateway_secret():
+    """The gateway's own client key, if one exists yet (never created here)."""
+    return os.environ.get("DOT_AI_API_KEY", "") or _private_token(TOKEN_FILE) or ""
+
+
+def resolve_auth(interactive):
+    """(mode, upstream_key) for this start, or AuthRefused with the reason.
+    `interactive` is whether a person is at a terminal to read the warning."""
+    if _flag(SUBSCRIPTION_ENV):
+        log(SUBSCRIPTION_WARNING)
+        if not interactive and not _flag(SUBSCRIPTION_ACK_ENV):
+            raise AuthRefused(
+                f"REFUSING subscription mode without a terminal: set {SUBSCRIPTION_ACK_ENV}=1 to "
+                "acknowledge the terms above, or use an API key (unset "
+                f"{SUBSCRIPTION_ENV}, set ANTHROPIC_API_KEY)."
+            )
+        return "subscription", ""
+    key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if not key:
+        raise AuthRefused(NO_KEY_ERROR)
+    if key == _gateway_secret():
+        raise AuthRefused(
+            "ANTHROPIC_API_KEY is this gateway's own client token (from ai-local.env), "
+            "not an Anthropic API key. Set your Anthropic key instead.\n" + NO_KEY_ERROR
+        )
+    return "api-key", key
+
+
+def _interactive():
+    try:
+        return sys.stdin.isatty() and sys.stderr.isatty()
+    except (AttributeError, ValueError):
+        return False
+
+
+def engine_env(base=None):
+    """The engine's environment for the current AUTH_MODE. It never sees the
+    gateway's own key, and keeps no auto-memory directory for its throwaway
+    workdir in ~/.claude/projects. In API-key mode it gets only the key
+    (credentials that outrank it or fall back to a sign-in are removed); in
+    subscription mode no key, so the CLI's own sign-in is what is used."""
+    drop = {"DOT_AI_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN"}
+    if AUTH_MODE == "subscription":
+        drop.discard("CLAUDE_CODE_OAUTH_TOKEN")
+    env = {k: v for k, v in (os.environ if base is None else base).items() if k not in drop}
+    if AUTH_MODE == "api-key":
+        env["ANTHROPIC_API_KEY"] = UPSTREAM_KEY
+    env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"
+    return env
 
 
 API_KEY = os.environ.get("DOT_AI_API_KEY", "")  # resolved in main(); never empty while serving
@@ -295,10 +399,7 @@ def _read_events(proc, reader):
 
 
 def _run_engine(cmd, stdin_text, errfile, workdir):
-    # The engine never sees the gateway's own key, and keeps no auto-memory
-    # directory for its throwaway workdir in ~/.claude/projects.
-    env = {k: v for k, v in os.environ.items() if k != "DOT_AI_API_KEY"}
-    env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"
+    env = engine_env()
     try:
         proc = subprocess.Popen(
             cmd,
@@ -442,6 +543,7 @@ class Handler(BaseHTTPRequestHandler):
                 {
                     "status": "healthy" if ok else "unhealthy",
                     "engine": "claude-cli",
+                    "auth": AUTH_MODE or "unset",
                     "model": DEFAULT_MODEL,
                     "claude": "found" if ok else "not-found",
                     "streaming": True,
@@ -614,6 +716,17 @@ def allowed_hosts():
     return hosts
 
 
+def _start_auth():
+    """Decide the upstream auth (resolve_auth) or exit 2 with the reason."""
+    global AUTH_MODE, UPSTREAM_KEY
+    try:
+        AUTH_MODE, UPSTREAM_KEY = resolve_auth(_interactive())
+    except AuthRefused as exc:
+        log(str(exc))
+        sys.exit(2)
+    log(f"upstream auth: {AUTH_MODE}")
+
+
 def main():
     global API_KEY
     if sys.argv[1:] == ["--token-path"]:
@@ -622,27 +735,30 @@ def main():
             load_or_create_token()
         print(TOKEN_FILE)
         return
+    if sys.argv[1:] == ["--check"]:
+        _start_auth()
+        return
     if sys.argv[1:]:
-        log(f"unknown arguments: {' '.join(sys.argv[1:])} (supported: --token-path)")
+        log(f"unknown arguments: {' '.join(sys.argv[1:])} (supported: --token-path, --check)")
         sys.exit(64)
-    if not shutil.which(CLAUDE_BIN):
-        log(f"WARNING: '{CLAUDE_BIN}' not on PATH — requests will fail until it is installed and authenticated.")
     if HOST not in ("127.0.0.1", "localhost", "::1") and not API_KEY:
         log("REFUSING to bind a non-loopback host without DOT_AI_API_KEY set.")
         sys.exit(2)
+    _start_auth()
+    if not shutil.which(CLAUDE_BIN):
+        log(f"WARNING: '{CLAUDE_BIN}' not on PATH — requests will fail until it is installed.")
     if not API_KEY:
         API_KEY = load_or_create_token()
         log(f"auth: token from {TOKEN_FILE}")
     server = ThreadingHTTPServer((HOST, PORT), Handler)
     extra = f", budget: ${DAILY_BUDGET:.2f}/day" if DAILY_BUDGET > 0 else ""
-    log(f"listening on http://{HOST}:{PORT}  (engine: {CLAUDE_BIN}, model: {DEFAULT_MODEL}{extra})")
+    log(f"listening on http://{HOST}:{PORT}  (engine: {CLAUDE_BIN}, auth: {AUTH_MODE}, model: {DEFAULT_MODEL}{extra})")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         pass
     finally:
         server.server_close()
-
 
 if __name__ == "__main__":
     main()

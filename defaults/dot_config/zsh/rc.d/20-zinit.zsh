@@ -9,14 +9,26 @@ _dotfiles_zinit_git_policy() {
   command git -C "$ZINIT_HOME" config --local merge.verifySignatures false >/dev/null 2>&1 || true
 }
 
-_dotfiles_zinit_init() {
-  if [[ ! -f "$ZINIT_HOME/zinit.zsh" ]]; then
-     print -P "%F{33}▓▒░ %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} Initiative Plugin Manager (%F{33}zdharma-continuum/zinit%F{220})…%f"
-     command mkdir -p "$(dirname "$ZINIT_HOME")" && command chmod g-rwX "$(dirname "$ZINIT_HOME")"
-     command git clone https://github.com/zdharma-continuum/zinit "$ZINIT_HOME" && \
-        print -P "%F{33}▓▒░ %F{34}Installation successful.%f%b" || \
-        print -P "%F{160}▓▒░ The clone has failed.%f%b"
+# _dotfiles_zinit_install: clone zinit. Only on an explicit `zinit` call,
+# never from a prompt hook: a network clone there blocked the shell.
+_dotfiles_zinit_install() {
+  print -P "%F{33}▓▒░ %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} Initiative Plugin Manager (%F{33}zdharma-continuum/zinit%F{220})…%f"
+  command mkdir -p "${ZINIT_HOME:h}" && command chmod g-rwX "${ZINIT_HOME:h}"
+  if command git clone https://github.com/zdharma-continuum/zinit "$ZINIT_HOME"; then
+    print -P "%F{33}▓▒░ %F{34}Installation successful.%f%b"
+  else
+    print -P "%F{160}▓▒░ The clone has failed.%f%b"
+    return 1
   fi
+}
+
+# _dotfiles_zinit_init: source zinit and queue the plugins, once. Returns 1
+# when zinit is not installed.
+_dotfiles_zinit_init() {
+  (( ${_DOTFILES_ZINIT_LOADED:-0} )) && return 0
+  [[ -f "$ZINIT_HOME/zinit.zsh" ]] || return 1
+  typeset -g _DOTFILES_ZINIT_LOADED=1
+  (( ${+functions[zinit]} )) && unfunction zinit
 
   _dotfiles_zinit_git_policy
 
@@ -37,22 +49,28 @@ _dotfiles_zinit_init() {
 : ${DOTFILES_DEFER_ZINIT:=1}
 : ${DOTFILES_DEFER_ZINIT_MODE:=preexec}
 
-if [[ "${DOTFILES_DEFER_ZINIT}" == "1" ]]; then
-  # Stub to auto-load zinit on first call (e.g. by a script that runs zinit)
-  zinit() {
-    unfunction zinit
-    _dotfiles_zinit_init
-    zinit "$@"
-  }
+# Stub: an explicit `zinit` call installs zinit if needed, loads it, and
+# runs the real command.
+zinit() {
+  if [[ ! -f "$ZINIT_HOME/zinit.zsh" ]]; then
+    _dotfiles_zinit_install || return 1
+  fi
+  _dotfiles_zinit_init || return 1
+  zinit "$@"
+}
 
+if [[ "${DOTFILES_DEFER_ZINIT}" == "1" ]]; then
+  # Load zinit at the first command (or prompt) if it is installed. The
+  # check used to ask whether `zinit` was a function, which the stub above
+  # always is, so zinit never loaded.
   _dotfiles_zinit_deferred() {
     if [[ "${DOTFILES_DEFER_ZINIT_MODE}" == "preexec" ]]; then
       _dotfiles_del_preexec _dotfiles_zinit_deferred
     else
       _dotfiles_del_precmd _dotfiles_zinit_deferred
     fi
-    # If zinit was already loaded via the stub, this is a no-op
-    (( ${+functions[zinit]} )) && [[ "$(whence -w zinit)" == "zinit: function" ]] || _dotfiles_zinit_init
+    _dotfiles_zinit_init
+    return 0
   }
 
   if [[ "${DOTFILES_DEFER_ZINIT_MODE}" == "preexec" ]]; then

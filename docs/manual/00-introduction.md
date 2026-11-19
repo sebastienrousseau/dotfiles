@@ -54,7 +54,7 @@ dot help --manual text      # pipe plain text to pager
 
 ```sh
 # After the verified release download documented in the root README:
-bash /tmp/dotfiles-install.sh
+bash "$installer_dir/dotfiles-install.sh"
 dot doctor
 ```
 

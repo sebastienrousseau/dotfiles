@@ -1,0 +1,18 @@
+# Ruff configuration for the repo's Python tooling.
+#
+# Adds the complexity rules to ruff's defaults. The same limits are
+# enforced in CI by tools/ci/complexity_polyglot.py, which reads them
+# from here and ratchets existing offenders through
+# tools/ci/complexity-baseline-python.txt (no `# noqa` for these rules).
+# templates/projects/python carries its own pyproject.toml for the
+# projects it scaffolds.
+
+[lint]
+extend-select = ["C901", "PLR0912", "PLR0915"]
+
+[lint.mccabe]
+max-complexity = 10
+
+[lint.pylint]
+max-branches = 12
+max-statements = 50

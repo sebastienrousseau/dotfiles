@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-HOOK="$REPO_ROOT/defaults/dot_config/git/hooks/executable_commit-msg"
+HOOK="${COMMIT_MSG_HOOK:-$REPO_ROOT/defaults/dot_config/git/hooks/executable_commit-msg}"
 SANDBOX="$(mktemp -d)"
 trap 'rm -rf "$SANDBOX"' EXIT
 mkdir -p "$SANDBOX/home"
@@ -53,5 +53,33 @@ env -i PATH="$PATH" HOME="$SANDBOX/home" CLAUDECODE=1 \
 assert_contains "Assisted-by: Claude:" "$(git interpret-trailers --parse <"$plain_message")" \
   "Assisted-by is a parsed trailer on a message without one"
 assert_file_contains "$plain_message" "Body text only." "the body is kept"
+
+# Only the committing process's own environment counts: a claude process
+# running elsewhere, or an API key exported in the shell, is not a session.
+mkdir -p "$SANDBOX/bin"
+printf '#!/bin/sh\nexit 0\n' >"$SANDBOX/bin/pgrep"
+chmod +x "$SANDBOX/bin/pgrep"
+
+test_start "commit_hook_ignores_a_claude_process_elsewhere"
+hand_message="$SANDBOX/hand-message"
+printf 'feat: test\n' >"$hand_message"
+env -i PATH="$SANDBOX/bin:$PATH" HOME="$SANDBOX/home" bash "$HOOK" "$hand_message"
+assert_equals "0" "$(grep -c '^Assisted-by:' "$hand_message" || true)" \
+  "a running claude process elsewhere does not attribute a hand-written commit"
+
+test_start "commit_hook_ignores_an_exported_api_key"
+key_message="$SANDBOX/key-message"
+printf 'feat: test\n' >"$key_message"
+env -i PATH="$PATH" HOME="$SANDBOX/home" ANTHROPIC_API_KEY=sk-test bash "$HOOK" "$key_message"
+assert_equals "0" "$(grep -c '^Assisted-by:' "$key_message" || true)" \
+  "ANTHROPIC_API_KEY alone is not an agent session"
+
+test_start "commit_hook_attributes_claude_session_with_model_override"
+session_message="$SANDBOX/session-message"
+printf 'feat: test\n' >"$session_message"
+env -i PATH="$PATH" HOME="$SANDBOX/home" CLAUDE_CODE_SESSION_ID=abc CLAUDE_MODEL=claude-test \
+  bash "$HOOK" "$session_message"
+assert_file_contains "$session_message" "Assisted-by: Claude:claude-test" \
+  "a Claude Code session variable attributes the commit, with CLAUDE_MODEL"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

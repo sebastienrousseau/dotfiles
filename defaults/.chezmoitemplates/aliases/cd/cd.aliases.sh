@@ -13,28 +13,37 @@ DOTFILES_LAST_UPDATED="2025-03-12"
 #-----------------------------------------------------------------------------
 # OS Detection for cross-platform compatibility
 #-----------------------------------------------------------------------------
-DOTFILES_OS="$(uname -s)"
-case "${DOTFILES_OS}" in
-  Darwin*)
-    # macOS specific settings - no group directories option
-    LS_COLOR_OPT="-G"
-    LS_GROUP_DIRS=""
-    SED_INPLACE="sed -i ''"
-    ;;
-  Linux*)
-    # Linux specific settings
-    LS_COLOR_OPT="--color=auto"
-    LS_GROUP_DIRS="--group-directories-first"
-    SED_INPLACE="sed -i"
-    ;;
-  *)
-    # Default settings for other systems
-    LS_COLOR_OPT=""
-    LS_GROUP_DIRS=""
-    # shellcheck disable=SC2034
-    SED_INPLACE="sed -i"
-    ;;
-esac
+# _cd_detect_os: set DOTFILES_OS and the ls/sed flags for this OS, from
+# $OSTYPE rather than a `uname` fork on every shell start.
+_cd_detect_os() {
+  case "${OSTYPE:-}" in
+    darwin*) DOTFILES_OS="Darwin" ;;
+    linux*) DOTFILES_OS="Linux" ;;
+    *) DOTFILES_OS="$(uname -s)" ;;
+  esac
+  case "${DOTFILES_OS}" in
+    Darwin*)
+      # macOS specific settings - no group directories option
+      LS_COLOR_OPT="-G"
+      LS_GROUP_DIRS=""
+      SED_INPLACE="sed -i ''"
+      ;;
+    Linux*)
+      # Linux specific settings
+      LS_COLOR_OPT="--color=auto"
+      LS_GROUP_DIRS="--group-directories-first"
+      SED_INPLACE="sed -i"
+      ;;
+    *)
+      # Default settings for other systems
+      LS_COLOR_OPT=""
+      LS_GROUP_DIRS=""
+      # shellcheck disable=SC2034
+      SED_INPLACE="sed -i"
+      ;;
+  esac
+}
+_cd_detect_os
 
 #-----------------------------------------------------------------------------
 # Configuration and customization options
@@ -50,21 +59,25 @@ AUTO_LIST_AFTER_CD=${AUTO_LIST_AFTER_CD:-true}
 RESTORE_LAST_DIR=${RESTORE_LAST_DIR:-false}
 LARGE_DIR_THRESHOLD=${LARGE_DIR_THRESHOLD:-1000} # Skip auto-listing for dirs with >1000 files
 
-# Build the ls command based on configuration
-LS_CMD="ls -lh"
+# _cd_build_ls_cmd: the ls command auto-listing uses, from the options above.
+_cd_build_ls_cmd() {
+  # Build the ls command based on configuration
+  LS_CMD="ls -lh"
 
-if [[ "${SHOW_HIDDEN_FILES}" == "true" ]]; then
-  LS_CMD="${LS_CMD} -a"
-fi
+  if [[ "${SHOW_HIDDEN_FILES}" == "true" ]]; then
+    LS_CMD="${LS_CMD} -a"
+  fi
 
-if [[ "${ENABLE_COLOR_OUTPUT}" == "true" && -n "${LS_COLOR_OPT}" ]]; then
-  LS_CMD="${LS_CMD} ${LS_COLOR_OPT}"
-fi
+  if [[ "${ENABLE_COLOR_OUTPUT}" == "true" && -n "${LS_COLOR_OPT}" ]]; then
+    LS_CMD="${LS_CMD} ${LS_COLOR_OPT}"
+  fi
 
-# Only add group directories option if it's supported and enabled
-if [[ "${ENABLE_DIR_GROUPING}" == "true" && -n "${LS_GROUP_DIRS}" ]]; then
-  LS_CMD="${LS_CMD} ${LS_GROUP_DIRS}"
-fi
+  # Only add group directories option if it's supported and enabled
+  if [[ "${ENABLE_DIR_GROUPING}" == "true" && -n "${LS_GROUP_DIRS}" ]]; then
+    LS_CMD="${LS_CMD} ${LS_GROUP_DIRS}"
+  fi
+}
+_cd_build_ls_cmd
 
 #-----------------------------------------------------------------------------
 # Frequently Used Directory Variables
@@ -487,25 +500,28 @@ alias .....='cd_with_history ../../../..' # Go up four levels
 #-----------------------------------------------------------------------------
 # Home and Frequently Used Directories
 #-----------------------------------------------------------------------------
-# Only create aliases for directories that exist
-[[ -d "${APP_DIR}" ]] && alias app='cd_with_history "${APP_DIR}"'     # Applications
-[[ -d "${CODE_DIR}" ]] && alias cod='cd_with_history "${CODE_DIR}"'   # Code
-[[ -d "${DESK_DIR}" ]] && alias dsk='cd_with_history "${DESK_DIR}"'   # Desktop
-[[ -d "${DOCS_DIR}" ]] && alias doc='cd_with_history "${DOCS_DIR}"'   # Documents
-[[ -d "${DOTF_DIR}" ]] && alias dotd='cd_with_history "${DOTF_DIR}"'  # Dotfiles dir
-[[ -d "${DOWN_DIR}" ]] && alias dwn='cd_with_history "${DOWN_DIR}"'   # Downloads
-[[ -d "${HOME_DIR}" ]] && alias hom='cd_with_history "${HOME_DIR}"'   # Home Directory
-[[ -d "${MUSIC_DIR}" ]] && alias mus='cd_with_history "${MUSIC_DIR}"' # Music
-[[ -d "${PICS_DIR}" ]] && alias pic='cd_with_history "${PICS_DIR}"'   # Pictures
-[[ -d "${VIDS_DIR}" ]] && alias vid='cd_with_history "${VIDS_DIR}"'   # Videos
-
-#-----------------------------------------------------------------------------
-# System Directories
-#-----------------------------------------------------------------------------
-[[ -d "/etc" ]] && alias etc="cd_with_history /etc" # System configuration
-[[ -d "/var" ]] && alias var="cd_with_history /var" # Variable data
-[[ -d "/tmp" ]] && alias tmp="cd_with_history /tmp" # Temporary files
-[[ -d "/usr" ]] && alias usr="cd_with_history /usr" # User programs
+# _cd_dir_aliases: an alias per frequently used directory that exists. Each
+# alias reads its variable when used, as before.
+_cd_dir_aliases() {
+  local spec name var dir
+  for spec in \
+    "app:APP_DIR:${APP_DIR}" "cod:CODE_DIR:${CODE_DIR}" "dsk:DESK_DIR:${DESK_DIR}" \
+    "doc:DOCS_DIR:${DOCS_DIR}" "dotd:DOTF_DIR:${DOTF_DIR}" "dwn:DOWN_DIR:${DOWN_DIR}" \
+    "hom:HOME_DIR:${HOME_DIR}" "mus:MUSIC_DIR:${MUSIC_DIR}" "pic:PICS_DIR:${PICS_DIR}" \
+    "vid:VIDS_DIR:${VIDS_DIR}"; do
+    name="${spec%%:*}"
+    spec="${spec#*:}"
+    var="${spec%%:*}"
+    dir="${spec#*:}"
+    [[ -d "$dir" ]] && alias "$name=cd_with_history \"\${$var}\""
+  done
+  # System directories
+  for dir in etc var tmp usr; do
+    [[ -d "/$dir" ]] && alias "$dir=cd_with_history /$dir"
+  done
+  return 0
+}
+_cd_dir_aliases
 
 #-----------------------------------------------------------------------------
 # Add completion for custom commands

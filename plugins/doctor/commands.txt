@@ -66,3 +66,4 @@ alias|backup|removed|doctor backup|0.2.538
 alias|chaos|removed|doctor|0.2.538
 alias|smoke-test|removed|doctor|0.2.538
 alias|keys|removed|doctor|0.2.538
+ent|doctor|||

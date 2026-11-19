@@ -38,6 +38,14 @@ PY
     cat >"$d/stubs/$t" <<SH
 #!$REAL_BASH
 var=\$(printf '%s' "$t" | tr '[:lower:]' '[:upper:]')_MS
+# SEQ_<SHELL>="a b c": the n-th call costs the n-th value (warm-up first).
+seqvar=SEQ_\$(printf '%s' "$t" | tr '[:lower:]' '[:upper:]')
+seq=\$(eval "echo \\\${\$seqvar:-}")
+if [ -n "\$seq" ]; then
+  n=\$((\$(cat "$d/n_$t" 2>/dev/null || echo 0) + 1)); echo "\$n" >"$d/n_$t"
+  echo "\$seq" | cut -d' ' -f"\$n" >"$d/pending"
+  exit 0
+fi
 eval "echo \\\${\$var:-50}" >"$d/pending"
 SH
   done
@@ -59,6 +67,15 @@ test_start "perf_mean_equal_to_target_passes"
 perf zsh ZSH_MS=250 -- --json
 assert_equals "0:250:True" "$RC:$(json 'd["mean_ms"]'):$(json 'd["shells"]["zsh"]["pass"]')" \
   "a mean exactly at the target is a pass"
+
+# The gate is the median of the runs, not the mean: one slow outlier among
+# three runs (100, 100, 400 after a 50 ms warm-up) must not fail a 150 ms
+# target that the typical run meets.
+test_start "perf_gates_on_the_median_not_the_mean"
+perf zsh SEQ_ZSH="50 100 100 400" -- --json -r 3 --target 150
+assert_equals "100:True" "$(json 'd["shells"]["zsh"].get("median_ms")'):$(json 'd["shells"]["zsh"]["pass"]')" \
+  "median 100 ms passes a 150 ms target (mean 200 would fail)"
+assert_equals "200" "$(json 'd["shells"]["zsh"]["mean_ms"]')" "the mean is still reported"
 
 test_start "perf_mean_one_over_target_fails"
 perf zsh ZSH_MS=251 -- --json

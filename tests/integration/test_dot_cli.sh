@@ -28,12 +28,12 @@ fi
 
 test_start "dot_version_output"
 version_output=$(bash "$DOT_CLI" --version 2>&1)
-if echo "$version_output" | grep -q "\.dotfiles"; then
+if [[ "$version_output" =~ ^dot\ [0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot --version outputs version string"
 else
   ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot --version should output '.dotfiles v...'"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: dot --version should output one line, 'dot <version>' (D10)"
   printf '%b\n' "    Got: '$version_output'"
 fi
 
@@ -88,7 +88,7 @@ fi
 test_start "dot_unknown_command"
 unknown_output=$(bash "$DOT_CLI" nonexistent-command 2>&1)
 exit_code=$?
-if [[ $exit_code -ne 0 ]] && echo "$unknown_output" | grep -q "Unknown command"; then
+if [[ $exit_code -eq 127 ]] && echo "$unknown_output" | grep -q "is not a command"; then
   ((TESTS_PASSED++))
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: dot rejects unknown commands with error"
 else

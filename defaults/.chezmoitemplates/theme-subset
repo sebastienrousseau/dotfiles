@@ -1,0 +1,38 @@
+{{- /* theme-subset — the part of .theme-manifest/themes.toml a template needs.
+
+       Prints TOML holding only the `[themes.<name>]` tables (and their
+       sub-tables) for the requested theme and `fallback-dark`, the theme
+       `theme-name` falls back to. Parsing the whole ~460 KB manifest with
+       `fromToml` costs about 50 ms of CPU, and some 30 templates each did it
+       on every `chezmoi status`, `diff` and `apply`; splitting the raw text
+       on table headers and parsing two themes is close to free. The
+       manifest still stays out of .chezmoidata (see `theme-name`).
+
+       Usage:
+         {{`{{- $themes := (includeTemplate "theme-subset" (dict "theme" .theme) | fromToml).themes -}}`}}
+         {{`{{- $themeName := includeTemplate "theme-name" (dict "theme" .theme "themes" $themes) -}}`}}
+
+       Every header in the generated manifest is `[themes.<name>]` or
+       `[themes.<name>.<table>]`, so a chunk belongs to <name> when it
+       starts with `<name>]` or `<name>.`. A manifest laid out any other
+       way (neither theme found) is printed whole, so `theme-name` still
+       sees every theme it holds.
+    */ -}}
+{{- $prefixes := list -}}
+{{- range $name := list (default "fallback-dark" .theme) "fallback-dark" | uniq -}}
+  {{- $prefixes = concat $prefixes (list (printf "%s]" $name) (printf "%s." $name)) -}}
+{{- end -}}
+{{- $raw := include ".theme-manifest/themes.toml" -}}
+{{- $out := list -}}
+{{- range $chunk := splitList "\n[themes." (print "\n" $raw) -}}
+  {{- range $p := $prefixes -}}
+    {{- if hasPrefix $p $chunk -}}
+      {{- $out = append $out (printf "[themes.%s" $chunk) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if $out -}}
+{{- join "\n" $out -}}
+{{- else -}}
+{{- $raw -}}
+{{- end -}}

@@ -127,7 +127,7 @@ refused_case() {
   assert_equals "1" "$rc" "a module carrying $rel is refused"
 
   test_start "${label}_refusal_names_the_entry"
-  assert_file_contains "$OUT" "($named)" "the error names the offending component"
+  assert_file_contains "$ERR" "($named)" "the error names the offending component"
 
   test_start "${label}_chezmoi_never_called"
   assert_file_not_exists "$CALLS" "refused before any chezmoi call"

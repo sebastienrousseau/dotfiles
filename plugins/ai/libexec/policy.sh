@@ -18,8 +18,7 @@ case "${1:-show}" in
   show) cmd=show ;;
   check) cmd=validate ;;
   *)
-    echo "Usage: dot ai policy show|check [--policy FILE]"
-    exit 1
+    dot_usage_error "unknown subcommand" "dot ai policy show|check [--policy FILE]"
     ;;
 esac
 shift || true

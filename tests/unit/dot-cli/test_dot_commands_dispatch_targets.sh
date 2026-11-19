@@ -141,9 +141,9 @@ assert_file_contains "$OUT" "dispatched scripts/fonts/install-nerd-fonts.sh JetB
 test_start "system_module_refuses_other_words"
 for word in not-a-subcommand theme wallpaper fonts --help; do
   rc="$(dispatch "$APPEARANCE" "$word")"
-  assert_equals "1" "$rc" "'$word' is not a system.sh subcommand"
+  assert_equals "127" "$rc" "'$word' is not a system.sh subcommand (127, N10)"
 done
-assert_file_contains "$ERR" "unknown 'dot system' command" "the error says so"
+assert_file_contains "$ERR" "is not a command; run 'dot help system'" "the error says so, in the one unknown-command format"
 
 test_start "appearance_tune_selects_the_platform_script"
 FAKE_UNAME=Darwin dispatch "$APPEARANCE" tune --dry-run >/dev/null

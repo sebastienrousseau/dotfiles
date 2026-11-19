@@ -144,8 +144,8 @@ rc="$(aliases 'cmd_aliases search zzzznomatch')"
 assert_equals "1" "$rc" "a search with no matches returns 1"
 assert_file_contains "$OUT" "No matches" "the miss is reported"
 rc="$(aliases 'cmd_aliases search')"
-assert_equals "1" "$rc" "search without a term fails"
-assert_file_contains "$ERR" "Usage: dot shell alias list" "the usage line is shown"
+assert_equals "64" "$rc" "search without a term is a usage error (64)"
+assert_file_contains "$ERR" "usage: dot shell alias list" "the usage line is shown"
 
 test_start "aliases_why_explains_an_alias_and_its_deprecation"
 rc="$(aliases 'cmd_aliases why old')"
@@ -160,8 +160,8 @@ rc="$(aliases 'cmd_aliases why definitely-not-an-alias')"
 assert_equals "1" "$rc" "an unknown alias returns 1"
 assert_file_contains "$OUT" "not found" "the miss is reported"
 rc="$(aliases 'cmd_aliases why')"
-assert_equals "1" "$rc" "why without a name fails"
-assert_file_contains "$ERR" "Usage: dot shell alias show" "the usage line is shown"
+assert_equals "64" "$rc" "why without a name is a usage error (64)"
+assert_file_contains "$ERR" "usage: dot shell alias show" "the usage line is shown"
 
 test_start "aliases_stats_counts_history_usage"
 HIST="$WORK/zsh_history"
@@ -188,10 +188,10 @@ assert_file_contains "$OUT" "# Cheatsheet" "the cheatsheet is printed"
 
 test_start "aliases_cheatsheet_validates_its_options"
 rc="$(aliases 'cmd_aliases cheatsheet --output')"
-assert_equals "1" "$rc" "--output without a path fails"
+assert_equals "64" "$rc" "--output without a path is a usage error (64)"
 rc="$(aliases 'cmd_aliases cheatsheet --nope')"
-assert_equals "1" "$rc" "an unknown option fails"
-assert_file_contains "$ERR" "Unknown option for cheatsheet" "the error names the option"
+assert_equals "64" "$rc" "an unknown option is a usage error (64)"
+assert_file_contains "$ERR" "unknown option '--nope'" "the error names the option"
 
 test_start "aliases_tiers_reports_the_enabled_ecosystems"
 rc="$(aliases 'DOTFILES_ALIAS_ECOSYSTEMS=python,node DOTFILES_ALIAS_BUCKETS=system cmd_aliases tiers')"
@@ -205,15 +205,15 @@ assert_file_contains "$OUT" "enabled" "everything is enabled by default"
 
 test_start "aliases_rejects_an_unknown_subcommand"
 rc="$(aliases 'cmd_aliases not-a-subcommand')"
-assert_equals "1" "$rc" "an unknown subcommand fails"
-assert_file_contains "$ERR" "Unknown aliases subcommand" "the error names the subcommand"
+assert_equals "127" "$rc" "an unknown subcommand is not a command (127)"
+assert_file_contains "$ERR" "'dot shell alias not-a-subcommand' is not a command" "the error names the subcommand"
 
 test_start "alias_check_reports_missing_and_present_aliases"
 CHECK_HOME="$WORK/check-home"
 mkdir -p "$CHECK_HOME/.config/shell/custom" "$CHECK_HOME/.config/zsh"
 rc="$(aliases "HOME='$CHECK_HOME' cmd_alias_check")"
 assert_equals "1" "$rc" "a missing aliases file fails the check"
-assert_file_contains "$OUT" "Aliases file missing" "the missing file is reported"
+assert_file_contains "$OUT" "Aliases file missing" "the missing file is a failed row of the report (stdout)"
 assert_file_contains "$OUT" "missing" "each missing alias is reported"
 {
   for a in c q e l ll la lr lra lt lta h a d _ i; do printf "alias %s='x'\n" "$a"; done
@@ -256,8 +256,8 @@ rc="$(restore)"
 assert_equals "0" "$rc" "no arguments prints usage and exits 0"
 assert_file_contains "$OUT" "--latest" "the options are documented"
 rc="$(restore --nope)"
-assert_equals "1" "$rc" "an unknown option fails"
-assert_file_contains "$OUT" "Usage: dot doctor restore" "usage follows the error"
+assert_equals "64" "$rc" "an unknown option is a usage error (64)"
+assert_file_contains "$ERR" "Usage: dot doctor restore" "usage follows the error, on stderr"
 
 test_start "restore_list_reports_an_empty_backup_directory"
 new_restore_home empty
@@ -293,7 +293,7 @@ new_restore_home nolatest
 mkdir -p "$RESTORE_HOME/.local/share/dotfiles/backups"
 rc="$(restore -L)"
 assert_equals "1" "$rc" "an empty backup directory returns 1"
-assert_file_contains "$OUT" "No backups found" "the empty state is reported"
+assert_file_contains "$ERR" "No backups found" "the empty state is reported (an error: stderr)"
 
 test_start "restore_from_a_git_ref_backs_up_first"
 new_restore_home git
@@ -329,7 +329,7 @@ test_start "restore_git_operations_need_a_repository"
 new_restore_home norepo
 rc="$(restore --git HEAD)"
 assert_equals "1" "$rc" "no repository is an error"
-assert_file_contains "$OUT" "No git repository found" "the error explains the failure"
+assert_file_contains "$ERR" "No git repository found" "the error explains the failure, on stderr"
 rc="$(restore --diff HEAD)"
 assert_equals "1" "$rc" "the same applies to --diff"
 
@@ -392,13 +392,13 @@ assert_equals "0" "$rc" "--help exits 0"
 assert_file_contains "$OUT" "Usage: dot config init" "usage is printed"
 rc="$(init 'cmd_init')"
 assert_equals "1" "$rc" "no argument fails"
-assert_file_contains "$OUT" "missing <user|repo|url>" "the error asks for a source"
+assert_file_contains "$ERR" "missing <user|repo|url>" "the error asks for a source, on stderr"
 rc="$(init 'cmd_init --not-a-flag')"
-assert_equals "1" "$rc" "an unknown flag fails"
-assert_file_contains "$OUT" "Unknown flag" "the error names the flag"
+assert_equals "64" "$rc" "an unknown flag is a usage error (64)"
+assert_file_contains "$ERR" "unknown flag '--not-a-flag'" "the error names the flag"
 rc="$(init 'cmd_init alice bob')"
 assert_equals "1" "$rc" "two positional arguments fail"
-assert_file_contains "$OUT" "Too many arguments" "the error explains the refusal"
+assert_file_contains "$ERR" "Too many arguments" "the error explains the refusal, on stderr"
 
 test_start "init_dry_run_makes_no_changes"
 new_init_home dryrun
@@ -418,14 +418,14 @@ for tool in bash sh printf cat grep sed awk mkdir rm head uname locale dirname; 
 done
 rc="$(INIT_PATH="$NOCHEZMOI" init 'cmd_init alice')"
 assert_equals "127" "$rc" "a missing chezmoi is rc=127"
-assert_file_contains "$OUT" "not installed" "the error says chezmoi is missing"
+assert_file_contains "$ERR" "not installed" "the error says chezmoi is missing, on stderr"
 
 test_start "init_refuses_to_clobber_an_existing_source_directory"
 new_init_home existing
 mkdir -p "$INIT_HOME/.local/share/chezmoi"
 rc="$(DOTFILES_NONINTERACTIVE=1 init 'cmd_init alice')"
 assert_equals "1" "$rc" "an existing source directory is refused"
-assert_file_contains "$OUT" "pass --force to overwrite" "the error says how to proceed"
+assert_file_contains "$ERR" "pass --force to overwrite" "the error says how to proceed, on stderr"
 
 test_start "init_clones_and_applies_with_force"
 new_init_home force
@@ -451,6 +451,6 @@ new_init_home failed
 : >"$CALLS"
 rc="$(DOTFILES_NONINTERACTIVE=1 FAKE_CHEZMOI_RC=3 init 'cmd_init alice --yes')"
 assert_equals "3" "$rc" "chezmoi's exit status is propagated"
-assert_file_contains "$OUT" "chezmoi exited 3" "the failure is reported with its code"
+assert_file_contains "$ERR" "chezmoi exited 3" "the failure is reported with its code, on stderr"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

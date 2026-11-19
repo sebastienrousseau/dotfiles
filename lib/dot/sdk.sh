@@ -159,6 +159,76 @@ die() {
   exit "${2:-1}"
 }
 
+## dot_usage_error <message> [usage] — A usage error (ADR-020 N10): print
+## "dot: <message>" and, when given, the usage line to stderr, then exit 64.
+## For a bad flag, a missing argument or an argument out of range; a word
+## that is not a command is dot_unknown_command's.
+dot_usage_error() {
+  printf 'dot: %s\n' "$1" >&2
+  [[ -z "${2:-}" ]] || printf 'usage: %s\n' "$2" >&2
+  exit 64
+}
+
+## dot_unknown_command <help-topic> <words> — WORDS name no command: print
+## the one message lib/dot/names.sh gives for that and exit 127 (N10).
+dot_unknown_command() {
+  if ! declare -F dot_not_a_command >/dev/null; then
+    # shellcheck source=names.sh
+    source "$_DOT_SDK_DIR/names.sh"
+  fi
+  dot_not_a_command "$@"
+}
+
+## dot_build_root — the private build-cache root mise points Go, pip, uv and
+## Zig at (DOT_BUILD_ROOT, else $XDG_CACHE_HOME/dot/builds).
+dot_build_root() {
+  printf '%s\n' "${DOT_BUILD_ROOT:-${XDG_CACHE_HOME:-$HOME/.cache}/dot/builds}"
+}
+
+## dot_build_cache_kb <dir> — DIR's size in KiB; 0 when it does not exist.
+dot_build_cache_kb() {
+  local kb=0
+  [[ ! -d "$1" ]] || kb="$(du -sk "$1" 2>/dev/null | awk '{ print $1 }')"
+  printf '%s\n' "${kb:-0}"
+}
+
+## dot_build_cache_stamp — where the last measurement of the build caches is
+## kept: one line, "<epoch> <KiB> <root it measured>".
+dot_build_cache_stamp() {
+  printf '%s\n' "${XDG_STATE_HOME:-$HOME/.local/state}/dot/build-cache-kb"
+}
+
+## dot_build_cache_refresh — measure the build caches now and record it.
+## Walking a large cache takes seconds (25 GB: over 20 s), so only
+## dot_build_cache_warn's background refresh and tests call this.
+dot_build_cache_refresh() {
+  local stamp kb root
+  stamp="$(dot_build_cache_stamp)"
+  root="$(dot_build_root)"
+  kb="$(dot_build_cache_kb "$root")"
+  mkdir -p "${stamp%/*}" && printf '%s %s %s\n' "$(date +%s)" "$kb" "$root" >"$stamp.$$" &&
+    mv -f "$stamp.$$" "$stamp"
+}
+
+## dot_build_cache_warn — warn (ui_warn) when the build caches exceed
+## DOT_BUILD_CACHE_WARN_GB (10) GiB, with the command that prunes them (P9).
+## It reads the recorded measurement and never walks the cache itself: a
+## missing, day-old or other-root one is refreshed in the background for
+## the next run.
+## Silent otherwise; always 0.
+dot_build_cache_warn() {
+  local limit="${DOT_BUILD_CACHE_WARN_GB:-10}" stamp at=0 kb=0 measured=""
+  [[ "$limit" =~ ^[0-9]+$ ]] || limit=10
+  stamp="$(dot_build_cache_stamp)"
+  [[ ! -s "$stamp" ]] || read -r at kb measured <"$stamp" || :
+  [[ "$at" =~ ^[0-9]+$ && "$kb" =~ ^[0-9]+$ && "$measured" == "$(dot_build_root)" ]] || at=0 kb=0
+  if (($(date +%s) - at > 86400)); then
+    (dot_build_cache_refresh >/dev/null 2>&1 &)
+  fi
+  ((kb > limit * 1024 * 1024)) || return 0
+  ui_warn "Build caches" "$((kb / 1024 / 1024)) GiB in $(dot_build_root); 'dot system clean --caches' prunes them"
+}
+
 # Print warning message
 warn() {
   ui_warn "$1" >&2

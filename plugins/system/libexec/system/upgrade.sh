@@ -157,15 +157,15 @@ _dot_upgrade_apps() {
   return "$rc"
 }
 
-# _dot_upgrade_globals: npm, cargo and pipx globals, asked for with
-# --globals (what the old `update` script did, minus per-package pip3
-# upgrades, which PEP 668 refuses). A missing manager is skipped.
+# _dot_upgrade_globals: pipx venvs, asked for with --globals (per-package
+# pip3 upgrades are left out: PEP 668 refuses them). npm and cargo globals
+# are not floated: `npm update -g` and `cargo install-update -a` installed
+# whatever was published last, npm with its install scripts. Global npm
+# tools are exact `npm:` pins in mise's conf.d, which the mise phase
+# installs, and cargo tools are [rust_tools] pins (install.sh --provision).
 _dot_upgrade_globals() {
-  local rc=0
-  if has_command npm; then npm update -g --audit=false || rc=1; fi
-  if has_command cargo && has_command cargo-install-update; then cargo install-update -a || rc=1; fi
-  if has_command pipx; then _dot_upgrade_pipx || rc=1; fi
-  return "$rc"
+  has_command pipx || return 0
+  _dot_upgrade_pipx
 }
 
 # _dot_upgrade_pipx: pipx upgrade-all. A venv whose Python is gone (Homebrew
@@ -255,6 +255,6 @@ dot_upgrade_toolchain_steps() {
     ui_step system "System packages" skip "not requested — answer yes, or dot update --yes"
   fi
   if [[ "${DOT_UPGRADE_GLOBALS:-0}" == 1 ]]; then
-    _upgrade_step globals "Language globals" "npm, cargo, pipx…" -- _dot_upgrade_globals
+    _upgrade_step globals "Language globals" "pipx…" -- _dot_upgrade_globals
   fi
 }

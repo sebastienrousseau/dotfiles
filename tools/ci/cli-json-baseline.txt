@@ -1,0 +1,105 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Read commands that do not yet offer --json with a versioned schema
+# (ADR-020 N14), by spelling. Read by tools/ci/check-cli-contract.py: a read
+# command missing --json that is not listed fails, and an entry that has it
+# now must be removed, so this list only shrinks. Adding --json means a json
+# flag, an output id and schemas/cli/<domain>-<name>.v<N>.schema.json.
+agent budget show
+agent card check
+agent card show
+agent check
+agent checkpoint list
+agent context check
+agent context show
+agent delegate list
+agent export
+agent log show
+agent mode list
+agent mode show
+agent policy show
+agent status
+ai ask
+ai check
+ai gateway serve
+ai list
+ai pattern export
+ai pattern list
+ai pattern show
+ai policy check
+ai policy show
+ai wait
+attest export
+attest show
+attest verify
+cli completion show
+cli hook check
+cli hook status
+cli list
+cli registry show
+cli show
+cli verify
+config check
+config diff
+config export
+config path show
+config status
+doctor check
+doctor conflict list
+doctor drift show
+doctor metric list
+doctor perf measure
+doctor perf show
+doctor report show
+doctor score show
+doctor snapshot list
+doctor status
+fleet drift show
+fleet log show
+fleet namespace list
+fleet policy show
+fleet status
+mcp check
+mcp list
+mcp serve
+secret cert list
+secret check
+secret export
+secret key list
+secret list
+secret provider show
+secret show
+secret status
+security disk show
+security dns show
+security firewall show
+security lock show
+security policy show
+security score show
+security status
+security telemetry show
+security usb show
+session list
+session open
+session select
+shell alias check
+shell alias export
+shell alias list
+shell alias show
+shell alias status
+shell history list
+shell status
+system schedule list
+system settings show
+system show
+system status
+theme font list
+theme list
+theme show
+tool export
+top measure
+top report show
+ui select
+ui show
+ui table show

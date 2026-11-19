@@ -1,0 +1,187 @@
+# golangci-lint configuration for core.
+#
+# Same linter set as the dot-* modules under defaults/dot_local/share.
+# `standard` is errcheck + govet + ineffassign + staticcheck + unused.
+# CI enforces only the complexity linters here, through
+# tools/ci/complexity_polyglot.py; no job runs the full set on this
+# module yet.
+version: "2"
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - funlen
+    - gocognit
+    - gocyclo
+    - misspell
+    - nolintlint
+    - revive
+    - unconvert
+  settings:
+    # Complexity limits, the same in every Go module and enforced (with a
+    # baseline that only shrinks) by tools/ci/complexity_polyglot.py.
+    funlen:
+      lines: 60
+      statements: -1
+      ignore-comments: true
+    gocognit:
+      min-complexity: 15
+    gocyclo:
+      min-complexity: 10
+    revive:
+      rules:
+        - name: exported # every exported identifier needs a doc comment
+        - name: package-comments
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+  exclusions:
+    presets:
+      - comments
+      - std-error-handling
+    rules:
+      # Test helpers close pipes and sockets on cleanup paths where a
+      # failure cannot affect the assertion under test.
+      - path: _test\.go
+        linters:
+          - errcheck
+      # BEGIN complexity baseline: generated from tools/ci/complexity-baseline-go.txt
+      # by tools/ci/complexity_polyglot.py --write-baseline; do not edit.
+      - path: ^cmd/dot-core/main\.go$
+        source: '^func run\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^cmd/dot-hello/main\.go$
+        source: '^func run\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^cmd/dot-hello/main_test\.go$
+        source: '^func TestNegotiation\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^host/host\.go$
+        source: '^func RegisterWithAssurance\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^host/host\.go$
+        source: '^func apply\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^host/host\.go$
+        source: '^func openBinary\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^host/host_test\.go$
+        source: '^func TestChildGroupCleanup\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^host/host_test\.go$
+        source: '^func TestIdentityNegotiation\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^host/host_test\.go$
+        source: '^func TestLifecycle\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^host/process_darwin_test\.go$
+        source: '^func TestGroupExitTransition\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^protocol/protocol\.go$
+        source: '^func Read\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^protocol/protocol\.go$
+        source: '^func Strict\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^sandbox/run_linux\.go$
+        source: '^func restrictSyscalls\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^sandbox/run_linux\.go$
+        source: '^func validate\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^sandbox/run_linux_test\.go$
+        source: '^func TestLinuxContainment\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^sandbox/run_linux_test\.go$
+        source: '^func TestValidationFailsClosed\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/abandoned_test\.go$
+        source: '^func TestDiscardAbandonedPrepareBoundaries\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/abandoned_test\.go$
+        source: '^func TestDiscardAbandonedPreservesRecoveryAndUnknownEvidence\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/abandoned_test\.go$
+        source: '^func TestDiscardAbandonedProcessCrash\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/effects\.go$
+        source: '^func \((\w+ )?\*Engine(\[[^\]]*\])?\) ApplyEffects\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/effects\.go$
+        source: '^func effectLedger\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/effects\.go$
+        source: '^func recordEffect\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/effects_test\.go$
+        source: '^func TestEffectPolicyAndLedgerTamper\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/effects_test\.go$
+        source: '^func TestEffectsRetryAndArchiveGate\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/engine\.go$
+        source: '^func \((\w+ )?\*Engine(\[[^\]]*\])?\) Commit\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/engine\.go$
+        source: '^func \((\w+ )?\*Engine(\[[^\]]*\])?\) Prepare\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/engine\.go$
+        source: '^func \((\w+ )?\*Engine(\[[^\]]*\])?\) Recover\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/engine\.go$
+        source: '^func \((\w+ )?\*Engine(\[[^\]]*\])?\) Status\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/engine\.go$
+        source: '^func \((\w+ )?\*Engine(\[[^\]]*\])?\) record\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/engine\.go$
+        source: '^func Open\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/engine\.go$
+        source: '^func load\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/engine\.go$
+        source: '^func validate\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/engine_test\.go$
+        source: '^func TestConflictAndTamper\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/engine_test\.go$
+        source: '^func TestCrashBoundaries\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/engine_test\.go$
+        source: '^func TestModePolicy\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/fs_unix\.go$
+        source: '^func read\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/lifecycle\.go$
+        source: '^func \((\w+ )?\*Engine(\[[^\]]*\])?\) Archive\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/lifecycle\.go$
+        source: '^func \((\w+ )?\*Engine(\[[^\]]*\])?\) DiscardAbandoned\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/lifecycle\.go$
+        source: '^func \((\w+ )?\*Engine(\[[^\]]*\])?\) terminal\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/lifecycle_test\.go$
+        source: '^func TestArchiveCrashBoundaries\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/lifecycle_test\.go$
+        source: '^func TestArchiveGenerations\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/lifecycle_test\.go$
+        source: '^func TestArchiveRefusals\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/lifecycle_test\.go$
+        source: '^func TestInterruptedArchiveConflicts\b'
+        linters: [funlen, gocognit, gocyclo]
+      - path: ^transaction/types\.go$
+        source: '^func Canonical\b'
+        linters: [funlen, gocognit, gocyclo]
+      # END complexity baseline
+
+formatters:
+  enable:
+    - gofmt

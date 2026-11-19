@@ -399,7 +399,7 @@ ts=$(date +%s)
 # 4. Reinstall from scratch
 cd /tmp
 # Download and SHA256-verify the release installer per docs/guides/INSTALL.md.
-bash /tmp/dotfiles-install.sh
+bash "$installer_dir/dotfiles-install.sh"
 ```
 
 #### Scenario: WSL2 completely broken

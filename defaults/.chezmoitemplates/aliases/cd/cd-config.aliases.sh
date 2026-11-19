@@ -8,8 +8,12 @@ _CD_CONFIG_LOADED=1
 # DOTFILES_VERSION comes from the shell rc, not from here.
 export DOTFILES_LAST_UPDATED="2025-03-12"
 
-# OS Detection for cross-platform compatibility
-DOTFILES_OS="$(uname -s)"
+# OS Detection for cross-platform compatibility ($OSTYPE: no uname fork)
+case "${OSTYPE:-}" in
+  darwin*) DOTFILES_OS="Darwin" ;;
+  linux*) DOTFILES_OS="Linux" ;;
+  *) DOTFILES_OS="$(uname -s)" ;;
+esac
 case "${DOTFILES_OS}" in
   Darwin*)
     # macOS specific settings - no group directories option

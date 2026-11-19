@@ -50,8 +50,10 @@ the next apply moves everything again.
 
 ## Tools the dotfiles retired
 
-`dot ai install` registers AI tools with `mise use -g`, which writes them
-into `~/.config/mise/config.toml`. chezmoi does not manage that file, so
+`dot ai install` registers an AI tool that mise's conf.d does not declare
+at its pin with `mise use -g`, which writes it into
+`~/.config/mise/config.toml` (earlier releases did this for every tool; a
+tool conf.d declares now installs with `mise install` instead). chezmoi does not manage that file, so
 a tool that leaves the roster stays declared there, and once its
 installer is gone too, `mise install` fails on it.
 `retire-mise-tools.sh` unregisters each retired tool it finds there with

@@ -285,9 +285,11 @@ _theme_quick_switch() {
   elif theme_exists "${1}-dark" && theme_exists "${1}-light"; then
     set_theme "$1"
   else
-    ui_err "Unknown command or theme" "$1"
-    ui_info "Usage" "dot theme [list|set <name>|toggle|family|current|help]"
-    exit 1
+    # Neither a command nor a theme: the CLI's one message for that, on
+    # stderr, exit 127 (ADR-020 N10).
+    # shellcheck source=../../lib/dot/names.sh
+    source "$SCRIPT_DIR/../../lib/dot/names.sh"
+    dot_not_a_command theme "theme $1"
   fi
 }
 

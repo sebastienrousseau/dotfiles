@@ -40,7 +40,7 @@ and the verification step before any tag bump:
 
 | File | Covers | `--locked` in CI |
 |---|---|---|
-| `mise.lock`, `mise-versions.lock.json` | The local development toolchain | No: no CI job runs `mise install` |
+| `mise.lock` | The local development toolchain | No: no CI job runs `mise install` |
 | `requirements-contracts.txt` | Contract tests (Python), hash-pinned, compiled from `requirements-contracts.in` | Yes: `core-contracts.yml` installs with `pip install --require-hashes` |
 | `package.json` | Node dev tooling | No: there is no lockfile, so versions are not locked |
 | `flake.lock`, `nix/flake.lock` | Nix dev shell and package outputs | Yes |

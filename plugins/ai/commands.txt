@@ -6,7 +6,7 @@
 dom|ai|tui|@ai|install, route and run coding agents
 obj|ai pattern|list||prompt patterns
 obj|ai cost|show|@ai|spend by agent and model
-obj|ai gateway|show||the keyless gateway
+obj|ai gateway|show||the local Claude gateway
 obj|ai inventory|show||installed agents and versions
 obj|ai policy|show||the enforced AI policy
 cmd|ai list|@ai list|read|Installed agents

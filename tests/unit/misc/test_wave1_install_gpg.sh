@@ -5,9 +5,9 @@
 # Unit tests for Wave 1: install.sh chezmoi installation strategy
 #
 # install.sh is never run. A copy is sourced in a sandbox (sourcing does
-# not call main), the chezmoi installer functions nested in main are
-# lifted out of `declare -f main` and run with brew, curl, chezmoi and
-# the verified installer replaced by stubs that record their calls.
+# not call main) and its top-level chezmoi installer functions run with
+# brew, curl, chezmoi and the verified installer replaced by stubs that
+# record their calls.
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -24,14 +24,8 @@ INST="$SANDBOX/installer"
 mkdir -p "$INST/tools/ci" "$SANDBOX/bin"
 cp "$INSTALL_SCRIPT" "$INST/install.sh"
 
-# Lift install_chezmoi and install_chezmoi_verified_embedded out of main.
-# They are written next to the install.sh copy so their BASH_SOURCE-based
+# The copy sits in the sandbox so install_chezmoi's BASH_SOURCE-based
 # lookup of tools/ci/install-chezmoi-verified.sh resolves into the sandbox.
-env -i HOME="$SANDBOX" PATH="/usr/bin:/bin" "$BASH" --norc --noprofile -c \
-  'source "$1" && declare -f main' _ "$INST/install.sh" |
-  awk '/^    function install_chezmoi(_verified_embedded)? \(\) *$/ { on = 1 }
-       on { print }
-       on && /^    };?$/ { on = 0 }' >"$INST/nested.sh"
 
 # run_install <home> <path> [VAR=value ...]: run install_chezmoi in a clean
 # bash the way main does (a background subshell under install.sh's
@@ -42,10 +36,10 @@ run_install() {
   shift 2
   mkdir -p "$home"
   env -i HOME="$home" PATH="$path" CALL_LOG="$SANDBOX/calls.log" "$@" \
-    "$BASH" --norc --noprofile -c 'source "$1"; source "$2"
+    "$BASH" --norc --noprofile -c 'source "$1"
       (install_chezmoi) &
       rc=0; wait "$!" || rc=$?; echo "rc=$rc"' \
-    _ "$INST/install.sh" "$INST/nested.sh" >"$SANDBOX/out.txt" 2>&1
+    _ "$INST/install.sh" >"$SANDBOX/out.txt" 2>&1
   sed -n 's/^rc=//p' "$SANDBOX/out.txt"
 }
 
@@ -63,10 +57,10 @@ stub "$SANDBOX/has-brew" brew 'exit 0'
 stub "$SANDBOX/has-curl" curl 'exit 22'
 SYS="/usr/bin:/bin"
 
-test_start "installer_functions_lifted"
+test_start "installer_functions_top_level"
 assert_equals "function function" \
-  "$(env -i PATH="$SYS" "$BASH" --norc --noprofile -c 'source "$1"; echo $(type -t install_chezmoi install_chezmoi_verified_embedded)' _ "$INST/nested.sh")" \
-  "install_chezmoi and its verified bootstrap are defined in main"
+  "$(env -i HOME="$SANDBOX" PATH="$SYS" "$BASH" --norc --noprofile -c 'source "$1"; echo $(type -t install_chezmoi install_chezmoi_verified_embedded)' _ "$INST/install.sh")" \
+  "sourcing install.sh defines install_chezmoi and its verified bootstrap without running main"
 
 # --- chezmoi already installed ---
 

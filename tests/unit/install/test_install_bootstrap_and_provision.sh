@@ -51,8 +51,10 @@ grep -q '^git clone' "$OS_CASE/log" && cloned=yes
 assert_equals "no" "$cloned" "nothing is cloned without chezmoi"
 
 # ── --provision ─────────────────────────────────────────────────────────
-# prov_case <name>: a case dir whose git stub clones a source with one
-# provisioning script that marks $HOME/provisioned.
+# prov_case <name>: a case dir whose git stub clones a source with
+# install/lib/provision.sh and one provisioning script that marks
+# $HOME/provisioned (one line per run).
+export PROVISION_LIB="$REPO_ROOT/install/lib/provision.sh"
 prov_case() {
   PROV_CASE="$WORK/$1"
   mkdir -p "$PROV_CASE/bin" "$PROV_CASE/home"
@@ -63,9 +65,10 @@ prov_case() {
   stub "$PROV_CASE/bin" git '
 if [[ "$1" == "clone" ]]; then
   dest="${*: -1}"
-  mkdir -p "$dest/.git" "$dest/defaults" "$dest/install/provision"
+  mkdir -p "$dest/.git" "$dest/defaults" "$dest/install/provision" "$dest/install/lib"
+  cp "$PROVISION_LIB" "$dest/install/lib/" 2>/dev/null
   printf "profile = \"default\"\n" >"$dest/defaults/.chezmoidata.toml"
-  printf "#!/usr/bin/env bash\ntouch \"\$HOME/provisioned\"\n" \
+  printf "#!/usr/bin/env bash\necho ran >>\"\$HOME/provisioned\"\n" \
     >"$dest/install/provision/run_onchange_10-mark.sh"
 fi
 [[ "$1" == "describe" ]] && exit 1
@@ -78,6 +81,22 @@ prov_case prov
 run_install "$PROV_CASE" --provision
 assert_equals "0" "$?" "install.sh --provision succeeds"
 assert_file_exists "$PROV_CASE/home/provisioned" "the provisioning script ran"
+
+# A second --provision skips the unchanged script; --all reruns it.
+test_start "provision_reruns_only_changed_scripts_unless_all"
+run_install "$PROV_CASE" --provision
+assert_equals "0" "$?" "a second --provision succeeds"
+assert_equals "1" "$(wc -l <"$PROV_CASE/home/provisioned" | tr -d ' ')" "the unchanged script is not rerun"
+run_install "$PROV_CASE" --provision --all
+assert_equals "0" "$?" "--provision --all succeeds"
+assert_equals "2" "$(wc -l <"$PROV_CASE/home/provisioned" | tr -d ' ')" "--all reruns it"
+
+# A failing provisioning script fails install.sh and is named.
+test_start "provision_failure_fails_the_install"
+printf '#!/usr/bin/env bash\nexit 4\n' >"$PROV_CASE/home/.dotfiles/install/provision/run_onchange_20-broken.sh"
+run_install "$PROV_CASE" --provision
+assert_not_equals "0" "$?" "install.sh --provision fails"
+assert_file_contains "$PROV_CASE/out" "run_onchange_20-broken.sh" "the failed script is named"
 
 # The minimal profile skips provisioning however it was selected: --minimal,
 # DOTFILES_MINIMAL=1, or a detected container (Codespaces here).

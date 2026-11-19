@@ -186,9 +186,10 @@ test_fm_secrets_set() {
 test_fm_secrets_set_usage() {
   test_start "fm_secrets_set_usage"
   fm_run secret set
-  fm_expect_rc 1
+  # A usage error exits 64 with the usage on stderr (dot_usage_error, v0.2.548).
+  fm_expect_rc 64
   test_start "fm_secrets_set_usage_message"
-  fm_expect_any "Usage: dot secret set" "secrets set"
+  fm_expect_stderr "usage: dot secret set <KEY> [VALUE]"
 }
 
 test_fm_smoke_secrets_set_prompt() {
@@ -236,9 +237,10 @@ test_fm_secrets_get_missing() {
   fm_expect_any "not found" "no provider"
   test_start "fm_secrets_get_missing_key_usage"
   fm_run secret show
-  fm_expect_rc 1
+  # A usage error exits 64 with the usage on stderr (dot_usage_error, v0.2.548).
+  fm_expect_rc 64
   test_start "fm_secrets_get_missing_key_usage_message"
-  fm_expect_any "Usage: dot secret show" "secrets get"
+  fm_expect_stderr "usage: dot secret show <KEY> [--raw]"
 }
 
 test_fm_secrets_list() {

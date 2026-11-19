@@ -18,7 +18,7 @@ Symptom → cause → fix.
 ```sh
 export PATH="$HOME/.local/bin:$PATH"
 # Re-run only the installer that was release-pinned and SHA256-verified.
-bash /tmp/dotfiles-install.sh
+bash "$installer_dir/dotfiles-install.sh"
 ```
 
 ### Symptom: "could not create directory ~/.local/share/chezmoi"
@@ -330,7 +330,7 @@ shfmt -w -i 2 -ci scripts/**/*.sh install.sh defaults/.chezmoitemplates/**/*.sh
 ### Symptom: PR fails at the "Enforce module coverage" step
 
 **Cause**: New code added without tests. The gate runs in "Test / Unit Tests"
-(100% in `ci-enforced.yml`) and "Test / Unit" (98% in `ci.yml`).
+(100% module coverage, in `ci-enforced.yml`); it is the one full-suite run per push.
 
 **Fix**:
 

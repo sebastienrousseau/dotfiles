@@ -226,7 +226,7 @@ _agent_mode_current() {
 # dot agent mode show
 _agent_mode_show() {
   local name="${1:-}"
-  [[ -n "$name" ]] || die "Usage: dot agent mode show <profile>"
+  [[ -n "$name" ]] || dot_usage_error "missing argument" "dot agent mode show <profile>"
   _agent_profile_exists "$name" || die "Unknown agent profile: $name"
   dot_agent_session_log "show" "$name" "ok"
   ui_header "Agent Mode"
@@ -242,7 +242,7 @@ _agent_mode_show() {
 # dot agent mode set
 _agent_mode_set() {
   local name="${1:-}" state_file role=""
-  [[ -n "$name" ]] || die "Usage: dot agent mode set <profile>"
+  [[ -n "$name" ]] || dot_usage_error "missing argument" "dot agent mode set <profile>"
   _agent_profile_exists "$name" || die "Unknown agent profile: $name"
   _agent_enforce_rbac "$name"
   state_file="$(_agent_state_file)"
@@ -272,7 +272,7 @@ _agent_mode_run() {
   else
     name="$(_agent_current_profile)"
   fi
-  [[ $# -gt 0 ]] || die "Usage: dot agent mode run [profile] <command> [args...]"
+  [[ $# -gt 0 ]] || dot_usage_error "missing argument" "dot agent mode run [profile] <command> [args...]"
   _agent_apply_profile_env "$name"
   local checkpoint_file checkpoint_id
   checkpoint_file="$(dot_agent_checkpoint_create "$name" "ready" "$@")"
@@ -346,7 +346,7 @@ _agent_checkpoint_save() {
   else
     name="$(_agent_current_profile)"
   fi
-  [[ $# -gt 0 ]] || die "Usage: dot agent checkpoint save [profile] <command> [args...]"
+  [[ $# -gt 0 ]] || dot_usage_error "missing argument" "dot agent checkpoint save [profile] <command> [args...]"
   _agent_apply_profile_env "$name"
   checkpoint_file="$(dot_agent_checkpoint_create "$name" "saved" "$@")"
   checkpoint_id="$(basename "$checkpoint_file" .json)"
@@ -372,7 +372,7 @@ _agent_checkpoint_list() {
 # dot agent mode checkpoint show
 _agent_checkpoint_show() {
   local checkpoint_id="${1:-}" checkpoint_file json_mode=0
-  [[ -n "$checkpoint_id" ]] || die "Usage: dot agent checkpoint show <id> [--json]"
+  [[ -n "$checkpoint_id" ]] || dot_usage_error "missing argument" "dot agent checkpoint show <id> [--json]"
   shift || true
   [[ "${1:-}" == "--json" || "${1:-}" == "-j" ]] && json_mode=1
   checkpoint_file="$(_agent_checkpoint_file "$checkpoint_id")"
@@ -395,7 +395,7 @@ _agent_checkpoint_show() {
 _agent_checkpoint_replay() {
   local checkpoint_id="${1:-}" checkpoint_file replay_profile
   local -a replay_argv=()
-  [[ -n "$checkpoint_id" ]] || die "Usage: dot agent checkpoint replay <id>"
+  [[ -n "$checkpoint_id" ]] || dot_usage_error "missing argument" "dot agent checkpoint replay <id>"
   checkpoint_file="$(_agent_checkpoint_file "$checkpoint_id")"
   [[ -f "$checkpoint_file" ]] || die "Checkpoint not found: $checkpoint_id"
   replay_profile="$(jq -r '.profile' "$checkpoint_file")"
@@ -433,8 +433,7 @@ _agent_mode_checkpoint() {
       _agent_checkpoint_replay "$@"
       ;;
     *)
-      echo "Usage: dot agent checkpoint [save|list|show|replay]" >&2
-      exit 1
+      dot_usage_error "unknown checkpoint subcommand" "dot agent checkpoint [save|list|show|replay]"
       ;;
   esac
 }
@@ -468,9 +467,9 @@ _agent_delegate() {
 # dot agent delegate run <name> <command>
 _agent_mode_delegate() {
   local delegate_name="${1:-}"
-  [[ -n "$delegate_name" ]] || die "Usage: dot agent delegate run <name> <command> [args...]"
+  [[ -n "$delegate_name" ]] || dot_usage_error "missing argument" "dot agent delegate run <name> <command> [args...]"
   shift || true
-  [[ $# -gt 0 ]] || die "Usage: dot agent delegate run <name> <command> [args...]"
+  [[ $# -gt 0 ]] || dot_usage_error "missing argument" "dot agent delegate run <name> <command> [args...]"
   local profiles_file current_profile
   profiles_file="$(_agent_profiles_file)"
   current_profile="$(_agent_current_profile)"

@@ -173,12 +173,12 @@ assert_file_contains "$ERR" "must use https://" "the refusal explains the requir
 test_start "set_url_rejects_non_https_schemes"
 rc="$(run set-url "ftp://example.com/registry.json")"
 assert_equals "1" "$rc" "ftp:// is refused"
-assert_file_contains "$OUT" "must use https://" "set-url explains the requirement"
+assert_file_contains "$ERR" "must use https://" "set-url explains the requirement"
 
 test_start "set_url_requires_an_argument"
 rc="$(run set-url)"
 assert_equals "1" "$rc" "set-url with no URL fails"
-assert_file_contains "$OUT" "missing URL" "the error names the missing argument"
+assert_file_contains "$ERR" "missing URL" "the error names the missing argument"
 
 test_start "set_url_reports_a_config_it_cannot_write"
 # Permission bits are not enough: root ignores them, and CI containers
@@ -191,7 +191,7 @@ mkdir -p "$(dirname "$cfg_dir")"
 rc="$(run set-url "file://$GOOD_INDEX")"
 rm -f "$cfg_dir"
 assert_equals "1" "$rc" "a config path that cannot be created is an error, not a silent no-op"
-assert_file_contains "$OUT" "set-url" "the failure is attributed to set-url"
+assert_file_contains "$ERR" "set-url" "the failure is attributed to set-url"
 
 # ===========================================================================
 # Fetch failures and the stale-cache fallback
@@ -258,14 +258,14 @@ clear_cache
 test_start "install_rejects_an_invalid_module_name"
 rc="$(run install "../../etc/passwd")"
 assert_equals "1" "$rc" "a traversal-shaped module name is refused"
-assert_file_contains "$OUT" "invalid module name" "the refusal names the problem"
+assert_file_contains "$ERR" "invalid module name" "the refusal names the problem"
 
 test_start "install_reports_a_download_failure"
 export DOTFILES_REGISTRY_URL="file://$MISSING_ARCHIVE_INDEX"
 clear_cache
 rc="$(run install good-module)"
 assert_equals "1" "$rc" "a missing archive fails the install"
-assert_file_contains "$OUT" "could not download" "the error names the download"
+assert_file_contains "$ERR" "could not download" "the error names the download"
 assert_output_not_contains "archive is empty" "cat '$OUT'"
 
 test_start "install_refuses_a_checksum_mismatch"
@@ -273,7 +273,7 @@ export DOTFILES_REGISTRY_URL="file://$MISMATCH_INDEX"
 clear_cache
 rc="$(run install good-module)"
 assert_equals "1" "$rc" "a mismatched SHA-256 stops the install"
-assert_file_contains "$OUT" "SHA-256 mismatch" "the error names the mismatch"
+assert_file_contains "$ERR" "SHA-256 mismatch" "the error names the mismatch"
 
 test_start "the_traversal_fixture_really_contains_a_traversal_path"
 # Guards the guard: if tar ever normalises the member away, the refusal test
@@ -285,7 +285,7 @@ export DOTFILES_REGISTRY_URL="file://$TRAVERSAL_INDEX"
 clear_cache
 rc="$(run install traversal-module)"
 assert_equals "1" "$rc" "a ../ member stops the install"
-assert_file_contains "$OUT" "unsafe path" "the error names the unsafe member"
+assert_file_contains "$ERR" "unsafe path" "the error names the unsafe member"
 
 test_start "install_refuses_an_empty_module"
 export DOTFILES_REGISTRY_URL="file://$EMPTY_INDEX"
@@ -312,7 +312,7 @@ export DOTFILES_REGISTRY_URL="file://$BIG_INDEX"
 clear_cache
 rc="$(run install big-module)"
 assert_equals "1" "$rc" "an archive over the size limit is refused"
-assert_file_contains "$OUT" "50 MiB" "the error quotes the limit"
+assert_file_contains "$ERR" "50 MiB" "the error quotes the limit"
 assert_output_not_contains "archive is empty" "cat '$OUT'"
 rm -f "$BIG_ARCHIVE"
 
@@ -338,7 +338,7 @@ PATH="$NOJQ_BIN"
 rc="$(run list)"
 PATH="$saved_path"
 assert_equals "127" "$rc" "a missing jq is reported as unavailable (127)"
-assert_file_contains "$OUT" "jq is required" "the error names jq"
+assert_file_contains "$ERR" "jq is required" "the error names jq"
 
 test_start "registry_needs_curl"
 NOCURL_BIN="$WORK/nocurl-bin"

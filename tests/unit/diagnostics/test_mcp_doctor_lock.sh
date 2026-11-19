@@ -48,7 +48,7 @@ shipped() {
 test_start "shipped_servers_run_installed_binaries_not_package_runners"
 assert_equals "" "$(jq -r '.mcpServers[] | select(.command | test("(^|/)(npx|uvx)$")) | .command' "$CONFIG")" \
   "no shipped server fetches a package at launch"
-assert_equals "3" "$(jq '[.packages[] | select(.integrity)] | length' "$LOCK")" "every lock entry carries an integrity hash"
+assert_equals "$(jq '.packages | length' "$LOCK")" "$(jq '[.packages[] | select(.integrity)] | length' "$LOCK")" "every lock entry carries an integrity hash"
 
 test_start "shipped_config_passes_strict_with_integrity"
 shipped
@@ -74,16 +74,16 @@ test_start "a_tampered_manifest_fails"
 ROOTCOPY="$FIX/root"
 mkdir -p "$ROOTCOPY"
 cp -R "$REPO_ROOT/defaults/dot_local" "$ROOTCOPY/"
-sed -i.bak 's/^mcp-server-sqlite==\(.*\) \\$/mcp-server-sqlite==9.9.9 \\/' \
-  "$ROOTCOPY/dot_local/share/dot-mcp/python/sqlite/requirements.txt"
+sed -i.bak 's/^mcp-server-git==\(.*\) \\$/mcp-server-git==9.9.9 \\/' \
+  "$ROOTCOPY/dot_local/share/dot-mcp/python/git/requirements.txt"
 shipped "MCP_LOCK_ROOT=$ROOTCOPY"
 assert_equals 1 "$RC" "rc"
-out_has "sqlite: mcp-server-sqlite==" "a version swap in the manifest is caught"
+out_has "git: mcp-server-git==" "a version swap in the manifest is caught"
 jq '.packages["node_modules/@modelcontextprotocol/server-memory"].version = "0.0.1"' \
   "$REPO_ROOT/defaults/dot_local/share/dot-mcp/node/package-lock.json" \
   >"$ROOTCOPY/dot_local/share/dot-mcp/node/package-lock.json"
-cp "$REPO_ROOT/defaults/dot_local/share/dot-mcp/python/sqlite/requirements.txt" \
-  "$ROOTCOPY/dot_local/share/dot-mcp/python/sqlite/requirements.txt"
+cp "$REPO_ROOT/defaults/dot_local/share/dot-mcp/python/git/requirements.txt" \
+  "$ROOTCOPY/dot_local/share/dot-mcp/python/git/requirements.txt"
 shipped "MCP_LOCK_ROOT=$ROOTCOPY"
 assert_equals 1 "$RC" "rc"
 out_has "memory: @modelcontextprotocol/server-memory@" "a version swap in the npm lock is caught"

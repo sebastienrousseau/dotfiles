@@ -29,6 +29,8 @@ proxy_tmp="${DOTFILES_COV_TMPDIR:-${TMPDIR:-/tmp}/dotfiles-proxy-test.$$}/proxy-
 mkdir -p "$proxy_tmp/bin" "$proxy_tmp/home" "$proxy_tmp/state" "$proxy_tmp/config"
 cat >"$proxy_tmp/bin/dot-ai-serve" <<'EOF_SERVE'
 #!/usr/bin/env bash
+# `dot-ai-serve --check` (the launcher's upstream-auth check) answers at once.
+[[ "${1:-}" != --check ]] || exit 0
 while :; do
   sleep 1
 done
@@ -61,7 +63,8 @@ run_proxy() {
     PATH="$proxy_tmp/bin:$PATH" \
     DOT_AI_PORT=4567 \
     DOT_AI_SERVE_BIN=dot-ai-serve \
-    bash "$PROXY" "$@" >/dev/null
+    ANTHROPIC_API_KEY=sk-ant-fake-upstream \
+    bash "$PROXY" "$@" >/dev/null </dev/null
 }
 
 (

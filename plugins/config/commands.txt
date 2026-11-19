@@ -26,6 +26,7 @@ run|config apply --sandbox|@config apply --sandbox||
 arg|config add||files|
 flag|config check|check|c||Check only
 flag|config check|fix|f||Apply safe fixes
+flag|config profile show|json|j||Print the profile and feature flags as JSON
 flag|config import|yes|y||Restore without asking
 alias|apply|shortcut|config apply|
 alias|sync|shortcut|config sync|

@@ -16,7 +16,9 @@ name: Perf Baseline
 #   1. Restore the previous baseline from the most recent successful run.
 #   2. Apply the dotfiles + record current means via `dot doctor perf --json`.
 #   3. Compare; emit ::warning:: (push) or open/comment issue (cron).
-#   4. Upload current measurement as the next baseline (cron only).
+#   4. Measure first-prompt / first-command lag with zsh-bench and FAIL on a
+#      regression against the recorded zsh-bench baseline (every event).
+#   5. Upload current measurements as the next baseline (cron only).
 
 on:
   schedule:
@@ -34,6 +36,7 @@ on:
       - 'defaults/dot_config/shell/**'
       - 'defaults/dot_*'
       - 'scripts/diagnostics/perf.sh'
+      - 'benches/zsh-bench.sh'
       - '.github/workflows/perf-baseline.yml'
   workflow_dispatch:
 
@@ -96,13 +99,17 @@ jobs:
             --json databaseId,createdAt \
             > runs.json 2>/dev/null || echo '[]' > runs.json
 
-          PREV_ID=$(jq -r '.[0].databaseId // empty' runs.json)
-          if [ -n "$PREV_ID" ]; then
-            gh run download "$PREV_ID" \
-              --name perf-baseline \
-              --dir "$HOME/.cache/dotfiles" 2>/dev/null \
-              || echo "::notice::No previous baseline artifact — first run."
-          fi
+          # Push runs succeed without uploading a baseline, so take the most
+          # recent successful run that actually carries the artifact.
+          found=false
+          for id in $(jq -r '.[].databaseId' runs.json); do
+            if gh run download "$id" --name perf-baseline \
+              --dir "$HOME/.cache/dotfiles" 2>/dev/null; then
+              found=true
+              break
+            fi
+          done
+          $found || echo "::notice::No previous baseline artifact — first run."
 
           if [ -s "$HOME/.cache/dotfiles/perf-baseline.json" ]; then
             echo "has_baseline=true" >> "$GITHUB_OUTPUT"
@@ -129,6 +136,33 @@ jobs:
         run: |
           echo "::warning::Perf regression detected on this push — see job log for details. Tracked weekly via cron; baseline not overwritten by push events."
           cat /tmp/perf-current.json
+
+      # First-prompt and first-command lag of the deployed interactive zsh,
+      # through a pty (benches/zsh-bench.sh wraps romkatv/zsh-bench, pinned
+      # by commit and SHA-256). zsh only; bash/fish stay on benchmark.sh.
+      # The wrapper fails on its own deadline (120 s + 15 s per iteration)
+      # if zsh-bench cannot measure; timeout-minutes is only the backstop.
+      - name: Measure first-prompt / first-command lag (zsh-bench)
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          bash benches/zsh-bench.sh run --iters 16 > /tmp/zsh-bench-current.json
+          cat /tmp/zsh-bench-current.json
+
+      # The gate: median of 16 iterations vs the recorded baseline. Fails
+      # when first_prompt_lag_ms or first_command_lag_ms is more than 25%
+      # AND more than 15 ms over it (both, so small-number jitter passes).
+      # A regressed scheduled run fails here too, so it never records
+      # itself as the next baseline.
+      - name: Gate zsh-bench against the baseline
+        run: |
+          set -euo pipefail
+          baseline="$HOME/.cache/dotfiles/zsh-bench-baseline.json"
+          if [[ ! -s "$baseline" ]]; then
+            echo "::notice::No zsh-bench baseline yet; this run records the first one (schedule/dispatch)."
+            exit 0
+          fi
+          bash benches/zsh-bench.sh compare /tmp/zsh-bench-current.json "$baseline"
 
       - name: Open regression issue
         if: github.event_name != 'push' && steps.measure.outputs.regression_count != '0'
@@ -177,13 +211,16 @@ jobs:
           # invoke it that way to keep the format stable. Push events
           # measure-only — baseline is only updated by the weekly cron
           # so per-PR drift doesn't quietly rewrite the reference.
-          bash scripts/diagnostics/perf.sh --baseline >/dev/null 2>&1 || true
+          bash scripts/diagnostics/perf.sh --baseline >/dev/null
           cp "$HOME/.cache/dotfiles/perf-baseline.json" /tmp/perf-baseline.json
+          cp /tmp/zsh-bench-current.json /tmp/zsh-bench-baseline.json
 
       - name: Upload new baseline artifact
         if: github.event_name != 'push'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: perf-baseline
-          path: /tmp/perf-baseline.json
+          path: |
+            /tmp/perf-baseline.json
+            /tmp/zsh-bench-baseline.json
           retention-days: 90

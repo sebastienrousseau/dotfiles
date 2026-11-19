@@ -1,0 +1,17 @@
+# Complexity ceilings per function, written by
+#   tools/ci/complexity_polyglot.py --lang python --write-baseline
+# Columns: cc branches statements path::function. Limits: cc 10, branches 12, statements 50.
+# A row may only go down or go away; new functions must stay under the limits.
+   5    2   54 scripts/theme/audit-palettes.py::audit_theme
+  12   11   32 scripts/theme/extract-theme.py::_compute_support_colours
+  11    7   22 scripts/theme/sync-ai-cli-themes.py::merge_json
+  24   24  108 tests/visual/capture_tmux.py::capture
+  16   16   41 tools/ci/check-source-grep-tests.py::lint_file
+  12   13   41 tools/ci/check-source-grep-tests.py::main
+  21   21   67 tools/ci/coverage_aggregate.py::analyze
+  16   15   19 tools/ci/coverage_aggregate.py::classify
+  28   33  113 tools/ci/coverage_aggregate.py::scan_line
+  11   11   27 tools/ci/mutation-test.py::generate
+  13   13   58 tools/ci/mutation-test.py::main
+  13   14   38 tools/docs/build-manual-site.py::build_pages
+  15   14   31 tools/docs/build-manual-site.py::finalize

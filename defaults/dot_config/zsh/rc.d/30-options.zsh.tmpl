@@ -120,8 +120,8 @@ fi
 #     `.zwc` siblings automatically — non-laptop profiles get the
 #     benefit even without re-running compinit).
 #   * `compinit -C` (skip security-check, use the cached dump) is used
-#     when the dump is fresh (< 24 h); full `compinit` rebuilds when
-#     the dump is older.
+#     when the dump is fresh (< 24 h); full `compinit -i` rebuilds when
+#     the dump is older, dropping insecure fpath dirs without a prompt.
 #   * The dump is `zcompile`d in the background after each rebuild so
 #     subsequent shells load the bytecode form directly.
 #   * The fpath corpus itself is precompiled at chezmoi-apply time by
@@ -150,7 +150,21 @@ if [[ "${DOTFILES_ENABLE_COMPINIT}" == "1" ]] && [[ "${DOTFILES_FAST:-0}" != "1"
     if (( ${#_dotfiles_fresh_dump} )); then
       compinit -C -d "${_DOTFILES_ZCOMPDUMP}"
     else
-      compinit -d "${_DOTFILES_ZCOMPDUMP}"
+      # -i: skip insecure (group/world-writable) fpath directories instead
+      # of asking "[y/n]?". This runs in preexec, where that question reads
+      # the user's typeahead from the terminal, or blocks a pty driver
+      # (zsh-bench) for good. Skipping keeps the audit's protection.
+      # -i skips what it distrusts without saying so (and drops it from
+      # fpath), so list it first and say it once per rebuild.
+      local -a _dotfiles_insecure
+      autoload -Uz compaudit
+      _dotfiles_insecure=(${(f)"$(compaudit 2>/dev/null)"})
+      compinit -i -d "${_DOTFILES_ZCOMPDUMP}"
+      (( ${#_dotfiles_insecure} )) && print -ru2 -- "dotfiles: completions skipped in ${(j:, :)_dotfiles_insecure} (writable by others); fix: compaudit | xargs chmod g-w,o-w"
+      # compinit rewrites the dump only when the number of completion
+      # files changed, so its mtime would stay stale and every later shell
+      # would rebuild again. The full check just passed: mark it fresh.
+      [[ -f "${_DOTFILES_ZCOMPDUMP}" ]] && command touch -- "${_DOTFILES_ZCOMPDUMP}"
     fi
     # Compile to bytecode in background for faster subsequent loads
     { [[ ! -f "${_DOTFILES_ZCOMPDUMP}.zwc" || "${_DOTFILES_ZCOMPDUMP}" -nt "${_DOTFILES_ZCOMPDUMP}.zwc" ]] && zcompile "${_DOTFILES_ZCOMPDUMP}" } &!
@@ -207,14 +221,14 @@ if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]
   fi
 fi
 
-# direnv (directory environments)
-if [[ "${DOTFILES_FAST:-0}" != "1" ]] && [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && command -v direnv >/dev/null; then
-  # Custom quiet hook: suppress direnv status chatter on every prompt/chdir.
+# direnv (directory environments): only for `use flake` .envrc files.
+# mise is the per-directory environment loader (its chpwd hook already runs
+# on every cd); direnv's own hook added about 30 ms more to each cd. It is
+# kept for flake mode (DOTFILES_USE_FLAKE=1), as mise cannot `use flake`.
+if [[ "${DOTFILES_USE_FLAKE:-0}" == "1" ]] && [[ "${DOTFILES_FAST:-0}" != "1" ]] &&
+  [[ "${DOTFILES_ULTRA_FAST:-0}" != "1" ]] && (( ${+commands[direnv]} )); then
+  # Custom quiet hook: suppress direnv status chatter on every chdir.
   _dotfiles_direnv_hook() {
-    # Fast path: skip direnv in dotfiles unless flake mode is explicitly enabled.
-    if [[ "${PWD:A}" == "${DOTFILES_DIR:-$HOME/.dotfiles}"* ]] && [[ "${DOTFILES_USE_FLAKE:-0}" != "1" ]] && [[ "${CI:-0}" != "1" ]]; then
-      return 0
-    fi
     trap -- '' SIGINT
     eval "$(direnv export zsh 2>/dev/null)"
     trap - SIGINT

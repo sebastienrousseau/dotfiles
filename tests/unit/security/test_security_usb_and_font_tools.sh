@@ -104,7 +104,9 @@ done
 ln -sf "$BIN/uname" "$NOGS/uname"
 rc="$(SCRIPT_PATH="$NOGS" DOTFILES_USB_SAFETY=1 FAKE_UNAME=Linux run "$USB")"
 assert_equals "1" "$rc" "no gsettings is an error"
-assert_file_contains "$OUT" "gsettings" "the missing tool is named"
+# The error is a diagnostic: stderr only (ADR-020 N14, ui_err since v0.2.548).
+assert_file_contains "$ERR" "gsettings" "the missing tool is named"
+assert_true "! grep -q 'not found' '$OUT'" "the error stays off stdout"
 
 test_start "usb_safety_explains_the_macos_situation"
 rc="$(DOTFILES_USB_SAFETY=1 FAKE_UNAME=Darwin run "$USB")"
@@ -115,7 +117,9 @@ assert_file_contains "$OUT" "System Settings" "the manual alternative is given"
 test_start "usb_safety_refuses_an_unsupported_platform"
 rc="$(DOTFILES_USB_SAFETY=1 FAKE_UNAME=SunOS run "$USB")"
 assert_equals "1" "$rc" "an unsupported platform fails"
-assert_file_contains "$OUT" "Unsupported OS" "the refusal names the platform"
+# The error is a diagnostic: stderr only (ADR-020 N14, ui_err since v0.2.548).
+assert_file_contains "$ERR" "Unsupported OS" "the refusal names the platform"
+assert_true "! grep -q 'Unsupported OS' '$OUT'" "the error stays off stdout"
 
 # ===========================================================================
 # patch-fonts.sh

@@ -18,24 +18,17 @@ log_info "Installing the AI tools (dot ai install)..."
 DOTFILES_NONINTERACTIVE=1 bash "$DOT_BIN" ai install --yes ||
   log_error "Some AI tools were not installed (continuing...). Retry with: dot ai install"
 
-# Install development tools globally (always via npm)
-log_info "Installing development tools via npm..."
-
-DEV_TOOLS=(
-  "eslint_d"
-  "prettier_d"
-  "typescript"
-  "typescript-language-server"
-)
-
-# Ensure Node.js is available for dev tools
-if command -v node >/dev/null 2>&1; then
-  for tool in "${DEV_TOOLS[@]}"; do
-    log_info "Installing $tool..."
-    npm install -g "$tool" 2>&1 || log_error "Failed to install $tool (continuing...)"
-  done
+# Editor tooling (eslint_d, prettierd, typescript, typescript-language-server)
+# and every other tool are exact `npm:`/aqua pins in mise's conf.d
+# (~/.config/mise/conf.d/00-dotfiles.toml). As mise tools they survive a Node
+# switch, which `npm install -g` packages did not. mise does not install a
+# missing tool on its own (auto_install = false), so install them here, from
+# $HOME so the global config applies rather than a project's pins.
+if command -v mise >/dev/null 2>&1; then
+  log_info "Installing the mise tools pinned in conf.d (mise install)..."
+  (cd "$HOME" && mise install) || log_error "Some mise tools were not installed (continuing...). Retry with: dot system update"
 else
-  log_info "Node.js not found — skipping dev tools"
+  log_info "mise not found — skipping the conf.d tools"
 fi
 
 log_info "AI tools and dev tools installation complete!"

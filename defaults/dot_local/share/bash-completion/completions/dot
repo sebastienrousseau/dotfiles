@@ -318,7 +318,7 @@ _dot() {
       flags='--help'
       ;;
     'config profile show' | 'config profile show'\ *)
-      flags='--help'
+      flags='--help --json -j'
       ;;
     'config save' | 'config save'\ *)
       flags='--help'
@@ -552,7 +552,7 @@ _dot() {
       flags='--help'
       ;;
     'system clean' | 'system clean'\ *)
-      flags='--help'
+      flags='--help --caches --logs --yes -y'
       ;;
     'system schedule list' | 'system schedule list'\ *)
       flags='--help'
@@ -604,7 +604,7 @@ _dot() {
       flags='--help'
       ;;
     'tool list' | 'tool list'\ *)
-      flags='--help'
+      flags='--help --json -j'
       ;;
     'tool new' | 'tool new'\ *)
       flags='--help'

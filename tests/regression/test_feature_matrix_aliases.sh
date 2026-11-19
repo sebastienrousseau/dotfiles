@@ -146,7 +146,8 @@ test_fm_aliases_cheatsheet() {
   fi
   test_start "fm_aliases_cheatsheet_rejects_unknown_option"
   fm_run shell alias export --zzz-not-an-option
-  fm_expect_rc 1
+  fm_expect_rc 64 # a usage error (ADR-020 N10)
+  assert_contains "dot: unknown option '--zzz-not-an-option'" "$FM_ERR" "names the option, on stderr"
 }
 
 test_fm_aliases_cheatsheet_default() {

@@ -164,8 +164,8 @@ assert_file_contains "$EVENTS" '"namespace":"lab"' "event carries the new namesp
 test_start "fleet_namespace_set_requires_name"
 out="$(fleet namespace set 2>&1)"
 rc=$?
-assert_equals 1 "$rc" "missing name exits 1"
-assert_contains "Usage: dot fleet namespace set" "$out" "usage printed"
+assert_equals 64 "$rc" "missing name is a usage error (64)"
+assert_contains "usage: dot fleet namespace set" "$out" "usage printed"
 
 test_start "fleet_namespace_set_rejects_unsafe_name"
 out="$(fleet namespace set 'bad;name' 2>&1)"
@@ -239,8 +239,8 @@ assert_file_contains "$DATA" 'namespace = "team"' "data file left intact"
 test_start "fleet_namespace_unknown_subcommand"
 out="$(fleet namespace bogus 2>&1)"
 rc=$?
-assert_equals 1 "$rc" "unknown namespace subcommand exits 1"
-assert_contains "Usage: dot fleet namespace" "$out" "usage printed"
+assert_equals 64 "$rc" "unknown namespace subcommand is a usage error (64)"
+assert_contains "usage: dot fleet namespace" "$out" "usage printed"
 
 # ── enforce ─────────────────────────────────────────────────────────
 test_start "fleet_enforce_status_without_profiles"
@@ -282,8 +282,8 @@ assert_file_contains "$EVENTS" '"event":"fleet_enforcement_set"' "event emitted"
 test_start "fleet_enforce_set_requires_mode"
 out="$(fleet enforce set 2>&1)"
 rc=$?
-assert_equals 1 "$rc" "missing mode exits 1"
-assert_contains "Usage: dot fleet enforce set" "$out" "usage printed"
+assert_equals 64 "$rc" "missing mode is a usage error (64)"
+assert_contains "usage: dot fleet enforce set" "$out" "usage printed"
 
 test_start "fleet_enforce_set_rejects_unknown_mode"
 out="$(fleet enforce set lenient 2>&1)"
@@ -303,8 +303,8 @@ assert_contains "agent-profiles.json not found" "$out" "explains the missing fil
 test_start "fleet_enforce_unknown_subcommand"
 out="$(fleet enforce bogus 2>&1)"
 rc=$?
-assert_equals 1 "$rc" "unknown enforce subcommand exits 1"
-assert_contains "Usage: dot fleet enforce" "$out" "usage printed"
+assert_equals 64 "$rc" "unknown enforce subcommand is a usage error (64)"
+assert_contains "usage: dot fleet enforce" "$out" "usage printed"
 
 # ── apply ───────────────────────────────────────────────────────────
 HOSTS="$TMP/fleet.toml"
@@ -329,8 +329,8 @@ assert_contains "$HOSTS" "$out" "help names the active hosts file"
 test_start "fleet_apply_rejects_unknown_flag"
 out="$(fleet apply --bogus 2>&1)"
 rc=$?
-assert_equals 1 "$rc" "unknown flag exits 1"
-assert_contains "Unknown arg" "$out" "flag echoed"
+assert_equals 64 "$rc" "unknown flag is a usage error (64)"
+assert_contains "unknown flag '--bogus'" "$out" "flag echoed"
 
 test_start "fleet_apply_without_hosts_file"
 out="$(DOTFILES_FLEET_HOSTS="$TMP/nope.toml" fleet apply 2>&1)"
@@ -502,14 +502,10 @@ assert_contains "apply" "$out" "apply listed"
 test_start "fleet_unknown_subcommand_fails"
 out="$(fleet bogus 2>/dev/null)"
 rc=$?
-assert_equals 1 "$rc" "unknown subcommand exits 1"
+assert_equals 127 "$rc" "unknown subcommand exits 127"
 assert_equals "" "$out" "nothing on stdout"
 err="$(fleet bogus 2>&1 >/dev/null)"
-assert_contains "Unknown subcommand" "$err" "error line on stderr"
-assert_contains "bogus" "$err" "the unknown word is named"
-assert_contains "Run 'dot fleet help' for usage." "$err" "points at help"
-assert_contains "Fleet Commands" "$err" "command list follows on stderr"
-assert_contains "apply" "$err" "apply listed"
+assert_equals "dot: 'dot fleet bogus' is not a command; run 'dot help fleet'" "$err" "the one unknown-command message, on stderr"
 
 test_start "fleet_dispatch_without_fleet_prefix"
 out="$(bash "$FLEET" --json 2>&1)"

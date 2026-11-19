@@ -75,9 +75,10 @@ jobs:
         if: steps.drift.outputs.total != '0'
         env:
           GH_TOKEN: ${{ github.token }}
+          DRIFT_TOTAL: ${{ steps.drift.outputs.total }}
         run: |
           set -euo pipefail
-          total="${{ steps.drift.outputs.total }}"
+          total="$DRIFT_TOTAL"
           title="Drift detected on main ($(date -u +%Y-%m-%d))"
           body=$(cat <<EOF
           Nightly drift scan found **$total** drift signal(s).

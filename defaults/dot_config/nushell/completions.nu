@@ -277,7 +277,7 @@ def "nu-complete dot ai" [] {
     [
         { value: "pattern", description: "prompt patterns" }
         { value: "cost", description: "spend by agent and model" }
-        { value: "gateway", description: "the keyless gateway" }
+        { value: "gateway", description: "the local Claude gateway" }
         { value: "inventory", description: "installed agents and versions" }
         { value: "policy", description: "the enforced AI policy" }
         { value: "list", description: "Installed agents" }
@@ -788,6 +788,7 @@ export extern "dot config profile set" [
 ]
 
 export extern "dot config profile show" [
+    --json(-j) # Print the profile and feature flags as JSON
     --help(-h) # Show help
     ...rest: string
 ]
@@ -1621,6 +1622,9 @@ export extern "dot system" [
 ]
 
 export extern "dot system clean" [
+    --caches # Prune the Go, pip and uv build caches (the default)
+    --logs # Rotate the logs instead
+    --yes(-y) # Prune without asking
     --help(-h) # Show help
     ...rest: string
 ]
@@ -1695,7 +1699,7 @@ export extern "dot system status" [
 
 export extern "dot system update" [
     --yes(-y) # Answer yes to every question
-    --globals # Also update npm, cargo and pipx globals
+    --globals # Also upgrade pipx globals (npm and cargo tools are pinned)
     --help(-h) # Show help
     ...rest: string
 ]
@@ -1796,6 +1800,7 @@ export extern "dot tool install" [
 ]
 
 export extern "dot tool list" [
+    --json(-j) # Print the toolchains as JSON
     --help(-h) # Show help
     ...rest: string
 ]
@@ -1941,7 +1946,7 @@ export extern "dot sync" [
 
 export extern "dot update" [
     --yes(-y) # Answer yes to every question
-    --globals # Also update npm, cargo and pipx globals
+    --globals # Also upgrade pipx globals (npm and cargo tools are pinned)
     --help(-h) # Show help
     ...rest: string
 ]

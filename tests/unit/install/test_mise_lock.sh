@@ -27,8 +27,44 @@ else
   printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
 fi
 
-test_start "mise_global_config_sets_release_age_explicitly"
-assert_file_contains "$global_config" 'minimum_release_age = "0s"' "new tool releases install as soon as published (unset would fall back to mise's own age gate)"
+# The release-age gate: a floating version resolves to a release at least
+# seven days old, and nothing installs behind a shim call. A tool the gate
+# cannot guard (an npm, pipx, go or github package, whose registry is the
+# only check between publisher and shell) or a trust tool is pinned exactly,
+# and first-party tools opt out per tool. mise reads the file itself.
+REAL_MISE="$(command -v mise || true)"
+mise_get() {
+  env -i HOME="$sandbox" PATH="$(dirname "$REAL_MISE"):/usr/bin:/bin" \
+    MISE_DATA_DIR="$sandbox/d" MISE_CACHE_DIR="$sandbox/c" MISE_STATE_DIR="$sandbox/s" \
+    MISE_CONFIG_DIR="$sandbox/cfg" MISE_OFFLINE=1 \
+    mise config get -f "$global_config" "$1" 2>/dev/null
+}
+if [[ -n "$REAL_MISE" ]]; then
+  sandbox="$(mktemp -d)"
+  test_start "mise_global_config_gates_floating_releases_for_seven_days"
+  assert_equals "7d|false" "$(mise_get settings.minimum_release_age)|$(mise_get settings.auto_install)" \
+    "floating versions wait seven days; missing tools install only on request" || true
+  test_start "mise_global_config_exempts_first_party_tools_from_the_gate"
+  assert_equals "0s" "$(mise_get 'tools."github:sebastienrousseau/corralctl".minimum_release_age')" \
+    "a first-party release is seen at once" || true
+  rm -rf "$sandbox"
+else
+  echo "  - skipped: mise not installed"
+fi
+
+test_start "mise_global_config_pins_ungated_and_trust_tools_exactly"
+floating="$(
+  python3 - "$global_config" <<'PY'
+import re, sys, tomllib
+tools = tomllib.load(open(sys.argv[1], "rb"))["tools"]
+must_pin = re.compile(r"^(npm|pipx|go|github|cargo):|^(aqua:FiloSottile/age|minisign|uv)$")
+for name, spec in tools.items():
+    version = spec.get("version") if isinstance(spec, dict) else spec
+    if must_pin.search(name) and not re.fullmatch(r"\d+(\.\d+)+", str(version)):
+        print(name, version)
+PY
+)"
+assert_equals "" "$floating" "npm/pipx/go/github packages and age, minisign, uv name an exact version" || true
 
 test_start "mise_global_config_does_not_export_github_token"
 if grep -Eq '^[[:space:]]*GITHUB_TOKEN[[:space:]]*=' "$global_config"; then

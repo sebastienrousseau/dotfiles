@@ -28,13 +28,29 @@ export DOT_COMMAND="apply"
 # variable" error, which would fire on every clean `dot sync`.
 _TMPFILES=()
 _LOCK_DIR=""
+_APPLY_T0=""
 cleanup() {
   set +u
   rm -f "${_TMPFILES[@]}" 2>/dev/null
   [[ -n "$_LOCK_DIR" ]] && rmdir "$_LOCK_DIR" 2>/dev/null
   set -u
 }
-trap cleanup EXIT
+
+# _apply_finish: the EXIT trap. Once apply_start is logged, every exit, a
+# failed step included, logs apply_end with its status and duration in ms
+# (O2, O3), so `dot fleet` sees failed applies too.
+_apply_finish() {
+  local rc=$? ms level=info
+  if [[ -n "$_APPLY_T0" ]]; then
+    ms=$(($(dot_now_ms) - _APPLY_T0))
+    ((rc == 0)) || level=error
+    dot_log "$level" apply_end "status=$rc" "duration_ms=$ms"
+    dot_metric chezmoi_apply_duration "$ms" ms
+  fi
+  cleanup
+  return "$rc"
+}
+trap _apply_finish EXIT
 
 _apply_help() {
   cat <<HELP
@@ -126,18 +142,21 @@ _apply_lock() {
 
 # run_step <title> <cmd...>: run cmd under a gum spinner (or a plain
 # "title..." line), its output captured; show it with --verbose, or on
-# failure, which ends the apply.
+# failure, which ends the apply. Each step logs an apply_step event with
+# its status and duration in ms (O3).
 run_step() {
-  local title="$1" out rc=0
+  local title="$1" out rc=0 t0
   shift
   out="$(umask 077 && mktemp)"
   _TMPFILES+=("$out")
+  t0="$(dot_now_ms)"
   if [[ "$UI_ENABLED" = "1" ]]; then
     gum spin --spinner dot --title "$title" -- "$@" >"$out" 2>&1 || rc=$?
   else
     echo "$title..."
     "$@" >"$out" 2>&1 || rc=$?
   fi
+  _run_step_log "$title" "$rc" "$t0"
   if [[ $rc -ne 0 ]]; then
     [[ "$UI_ENABLED" = "1" ]] && ui_err "$title"
     cat "$out"
@@ -149,6 +168,74 @@ run_step() {
     cat "$out"
   fi
   rm -f "$out"
+}
+
+# _run_step_log TITLE RC T0: the step's apply_step event (error when RC
+# is not 0), its duration counted from T0 (ms).
+_run_step_log() {
+  local level=info
+  (($2 == 0)) || level=error
+  dot_log "$level" apply_step "step=$1" "status=$2" "duration_ms=$(($(dot_now_ms) - $3))"
+}
+
+# _apply_check_flags ARG...: every flag before `--` is one `chezmoi apply`
+# takes (its own --help lists them), else a usage error (exit 64) before
+# the lock is taken, apply_start is logged or chezmoi runs (D4). Without
+# chezmoi there is nothing to check against, and the apply fails anyway.
+_apply_check_flags() {
+  local a known=""
+  for a in "$@"; do
+    [[ "$a" != -- ]] || return 0
+    [[ "$a" == -* ]] || continue
+    # `|| true`: no chezmoi, or no flags listed, is an empty list (the
+    # assignment ends an || list, so set -e would end the apply silently).
+    [[ -n "$known" ]] || known=" $(chezmoi apply --help 2>/dev/null |
+      grep -oE -- '(^|[ ,])--?[A-Za-z][A-Za-z-]*' | tr -d ' ,' | tr '\n' ' ' || true)"
+    [[ "$known" != " " ]] || return 0
+    [[ "$known" == *" ${a%%=*} "* ]] ||
+      dot_usage_error "unknown flag '$a' for 'dot config apply'" "dot config apply [chezmoi apply flags] [-- targets]"
+  done
+}
+
+# _apply_backup: before chezmoi overwrites anything, copy each existing
+# target that `chezmoi status` says the apply changes into
+# backup_<time>_pre_apply, beside the backups of scripts/ops/rollback.sh,
+# so `dot doctor rollback` returns to the state before the last apply (O4).
+# Skipped for --dry-run, or with DOTFILES_BACKUP_ON_APPLY=0.
+_apply_backup() {
+  local status dir n
+  [[ "${DOTFILES_BACKUP_ON_APPLY:-1}" == 1 ]] || return 0
+  ! has_flag --dry-run && ! has_flag -n || return 0
+  status="$(chezmoi status 2>/dev/null | sed -n 's/^.[^ R] //p')" || return 0
+  [[ -n "$status" ]] || return 0
+  dir="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/backups/backup_$(date +%Y%m%d_%H%M%S)_pre_apply"
+  mkdir -p "$dir" 2>/dev/null || return 0
+  n="$(_apply_backup_copy "$dir" <<<"$status")"
+  printf 'timestamp=%s\nreason=pre_apply\nfiles_backed_up=%s\n' "$(date +%Y%m%d_%H%M%S)" "$n" >"$dir/.backup_meta"
+  dot_log info apply_backup "files=$n" "backup=${dir##*/}"
+  _apply_backup_prune "${dir%/*}"
+}
+
+# _apply_backup_copy DIR: copy each target on stdin (relative to HOME) that
+# exists into DIR at the same path; print how many were copied.
+_apply_backup_copy() {
+  local rel n=0
+  while IFS= read -r rel; do
+    [[ -f "$HOME/$rel" || -L "$HOME/$rel" ]] || continue
+    mkdir -p "$(dirname "$1/$rel")" && cp -pP "$HOME/$rel" "$1/$rel" && n=$((n + 1))
+  done
+  printf '%s\n' "$n"
+}
+
+# _apply_backup_prune DIR: keep the newest DOTFILES_MAX_BACKUPS (10, as
+# rollback.sh's MAX_BACKUPS) backup_* directories in DIR.
+_apply_backup_prune() {
+  local max="${DOTFILES_MAX_BACKUPS:-10}" old
+  [[ "$max" =~ ^[1-9][0-9]*$ ]] || max=10
+  find "$1" -mindepth 1 -maxdepth 1 -type d -name 'backup_*' 2>/dev/null | sort -r | tail -n "+$((max + 1))" |
+    while IFS= read -r old; do
+      [[ "$old" == "$1"/backup_* ]] && rm -rf -- "$old"
+    done
 }
 
 _apply_governance() {
@@ -203,15 +290,17 @@ case "${1:-}" in
     ;;
 esac
 
+_apply_check_flags "$@"
 _apply_build_args "$@"
 _apply_interactive
 ui_init
 _apply_lock
 
 dot_log info "apply_start"
-_apply_start=$(date +%s)
+_APPLY_T0="$(dot_now_ms)"
 ui_header "Applying dotfiles"
 _apply_governance
+_apply_backup
 run_step "Chezmoi apply" chezmoi apply "${args[@]}"
 _apply_snapshot
 
@@ -222,7 +311,4 @@ _apply_repair
 _apply_prewarm
 
 printf "\n"
-_apply_end=$(date +%s)
-dot_log info "apply_end" "duration_s=$((_apply_end - _apply_start))"
-dot_metric "chezmoi_apply_duration" "$((_apply_end - _apply_start))" "s"
 ui_info "Shell reload" "Run 'exec zsh' or restart your terminal to reload aliases/functions."

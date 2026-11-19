@@ -287,7 +287,7 @@ assert_file_contains "$OUT" "inactive" "an inactive timer is reported"
 test_start "ambient_rejects_unknown_subcommands"
 rc="$(sw ambient bogus)"
 assert_equals "1" "$rc" "an unknown ambient subcommand fails"
-assert_file_contains "$OUT" "ambient subcommand 'bogus'" "the subcommand is named"
+assert_file_contains "$ERR" "ambient subcommand 'bogus'" "the subcommand is named"
 
 # ===========================================================================
 # rotate
@@ -315,7 +315,7 @@ assert_false "[[ -e '$UNITS/dot-theme-rotate.timer' ]]" "the timer unit is remov
 test_start "rotate_rejects_unknown_subcommands"
 rc="$(sw rotate bogus)"
 assert_equals "1" "$rc" "an unknown rotate subcommand fails"
-assert_file_contains "$OUT" "dot theme rotate" "usage is printed"
+assert_file_contains "$ERR" "dot theme rotate" "usage is printed"
 
 # ===========================================================================
 # reset / diff
@@ -333,13 +333,13 @@ assert_file_contains "$OUT" "wallpaper untouched" "the note is printed"
 test_start "diff_validates_its_arguments"
 rc="$(sw diff maui-dark)"
 assert_equals "1" "$rc" "diff needs two themes"
-assert_file_contains "$OUT" "dot theme diff <theme-a> <theme-b>" "usage is printed"
+assert_file_contains "$ERR" "dot theme diff <theme-a> <theme-b>" "usage is printed"
 rc="$(sw diff nope-dark maui-dark)"
 assert_equals "1" "$rc" "an unknown first theme fails"
-assert_file_contains "$OUT" "theme 'nope-dark'" "the first theme is named"
+assert_file_contains "$ERR" "theme 'nope-dark'" "the first theme is named"
 rc="$(sw diff maui-dark nope-light)"
 assert_equals "1" "$rc" "an unknown second theme fails"
-assert_file_contains "$OUT" "theme 'nope-light'" "the second theme is named"
+assert_file_contains "$ERR" "theme 'nope-light'" "the second theme is named"
 
 test_start "diff_compares_two_themes"
 rc="$(sw diff maui-dark maui-light)"
@@ -368,15 +368,15 @@ assert_file_contains "$OUT" "Export" "the export is confirmed"
 test_start "import_validates_its_input"
 rc="$(sw import)"
 assert_equals "1" "$rc" "import without a file fails"
-assert_file_contains "$OUT" "dot theme import <file.json>" "usage is printed"
+assert_file_contains "$ERR" "dot theme import <file.json>" "usage is printed"
 printf '{ "version": 1 }\n' >"$WORK/empty.json"
 rc="$(sw import "$WORK/empty.json")"
 assert_equals "1" "$rc" "a snapshot without a theme fails"
-assert_file_contains "$OUT" "no theme field" "the missing field is reported"
+assert_file_contains "$ERR" "no theme field" "the missing field is reported"
 printf '{ "theme": "ghost-dark" }\n' >"$WORK/ghost.json"
 rc="$(sw import "$WORK/ghost.json")"
 assert_equals "1" "$rc" "an unknown theme fails"
-assert_file_contains "$OUT" "not in themes.toml" "the unknown theme is reported"
+assert_file_contains "$ERR" "not in themes.toml" "the unknown theme is reported"
 
 test_start "import_applies_theme_and_fit"
 printf '{\n  "theme": "maui-light",\n  "fit": "zoom"\n}\n' >"$WORK/good.json"
@@ -404,7 +404,7 @@ assert_equals "0" "$rc" "a valid fit exits 0"
 assert_file_contains "$CALLS/gsettings" "picture-options scaled" "the fit is written"
 rc="$(USE="uname" sw fit scaled)"
 assert_equals "1" "$rc" "fit fails without gsettings"
-assert_file_contains "$OUT" "gsettings not available" "the missing tool is reported"
+assert_file_contains "$ERR" "gsettings not available" "the missing tool is reported"
 
 # ===========================================================================
 # wallpaper
@@ -421,7 +421,7 @@ assert_file_contains "$OUT" "picture-uri-dark.jpg" "the dark wallpaper is shown"
 test_start "wallpaper_rejects_a_missing_file"
 rc="$(sw wallpaper "$WORK/pics/missing.jpg")"
 assert_equals "1" "$rc" "a missing file fails"
-assert_file_contains "$OUT" "file not found" "the error names the problem"
+assert_file_contains "$ERR" "file not found" "the error names the problem"
 
 test_start "wallpaper_sets_gnome_from_a_relative_path"
 reset_calls
@@ -449,7 +449,7 @@ assert_file_contains "$CALLS/desktop" "last-image -s $IMG" "the last-image prope
 test_start "wallpaper_fails_without_a_mechanism"
 rc="$(USE="uname" XDG_CURRENT_DESKTOP=KDE sw wallpaper "$IMG")"
 assert_equals "1" "$rc" "no KDE tool fails"
-assert_file_contains "$OUT" "no wallpaper mechanism found for kde" "the desktop is named"
+assert_file_contains "$ERR" "no wallpaper mechanism found for kde" "the desktop is named"
 
 # ===========================================================================
 # accent
@@ -480,7 +480,7 @@ rc="$(sw accent magenta)"
 assert_equals "1" "$rc" "an unknown accent fails"
 rc="$(USE="uname" sw accent blue)"
 assert_equals "1" "$rc" "no accent tool fails"
-assert_file_contains "$OUT" "no gsettings or kwriteconfig6 available" "the missing tools are named"
+assert_file_contains "$ERR" "no gsettings or kwriteconfig6 available" "the missing tools are named"
 
 # ===========================================================================
 # status
@@ -583,6 +583,7 @@ printf '[themes.solo-dark]\nmode = "dark"\n[themes.maui-dark]\nmode = "dark"\n[t
   >"$SOLO_SRC/.theme-manifest/themes.toml"
 reset_calls
 rc="$(SRC_OVERRIDE="$SOLO_SRC" sw solo)"
-assert_equals "1:" "$rc:$(last_sync)" "solo has no light variant: unknown, nothing applied"
+assert_equals "127:" "$rc:$(last_sync)" "solo has no light variant: not a command (ADR-020 N10), nothing applied"
+assert_file_contains "$ERR" "dot: 'dot theme solo' is not a command; run 'dot help theme'" "the CLI's one message names the word"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

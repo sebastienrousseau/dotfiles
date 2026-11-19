@@ -135,9 +135,10 @@ test_fm_fleet_drift_predict() {
 test_fm_fleet_drift_unknown() {
   test_start "fm_fleet_drift_unknown"
   fm_run fleet drift zzz-not-a-subcommand
-  fm_expect_rc 1
+  # An unknown word exits 127 with the one message, naming it (v0.2.548).
+  fm_expect_rc 127
   test_start "fm_fleet_drift_unknown_message"
-  fm_expect_any "check|history|predict" "Usage"
+  fm_expect_stderr "dot: 'dot fleet drift zzz-not-a-subcommand' is not a command; run 'dot help fleet drift'"
 }
 
 test_fm_fleet_events() {
@@ -254,10 +255,15 @@ test_fm_fleet_namespace_set_invalid() {
   fm_expect_any "Invalid namespace" "only alphanumeric"
   test_start "fm_fleet_namespace_set_missing_name"
   fm_run_bin "$repo/bin/dot" fleet namespace set
-  fm_expect_rc 1
+  # A usage error exits 64 with the usage on stderr (dot_usage_error, v0.2.548).
+  fm_expect_rc 64
+  test_start "fm_fleet_namespace_set_missing_name_usage"
+  fm_expect_stderr "usage: dot fleet namespace set <name>"
   test_start "fm_fleet_namespace_unknown_subcommand"
   fm_run fleet namespace zzz-not-a-subcommand
-  fm_expect_rc 1
+  fm_expect_rc 64
+  test_start "fm_fleet_namespace_unknown_subcommand_usage"
+  fm_expect_stderr "usage: dot fleet namespace [show|set <name>]"
 }
 
 test_fm_fleet_enforce() {
@@ -313,10 +319,15 @@ test_fm_fleet_enforce_set_invalid() {
   fm_expect_any "Invalid enforcement mode" "advisory or strict"
   test_start "fm_fleet_enforce_set_missing_mode"
   fm_run_bin "$repo/bin/dot" fleet enforce set
-  fm_expect_rc 1
+  # A usage error exits 64 with the usage on stderr (dot_usage_error, v0.2.548).
+  fm_expect_rc 64
+  test_start "fm_fleet_enforce_set_missing_mode_usage"
+  fm_expect_stderr "usage: dot fleet enforce set <advisory|strict>"
   test_start "fm_fleet_enforce_unknown_subcommand"
   fm_run fleet enforce zzz-not-a-subcommand
-  fm_expect_rc 1
+  fm_expect_rc 64
+  test_start "fm_fleet_enforce_unknown_subcommand_usage"
+  fm_expect_stderr "usage: dot fleet enforce [status|set <advisory|strict>]"
 }
 
 # ── fleet apply ────────────────────────────────────────────────────────────
@@ -380,9 +391,10 @@ test_fm_fleet_apply_host_unknown() {
   fm_expect_any "host not found" "zzz-nohost"
   test_start "fm_fleet_apply_rejects_unknown_flag"
   DOTFILES_FLEET_HOSTS="$hosts" fm_run fleet apply --zzz-not-a-flag
-  fm_expect_rc 1
+  # A usage error exits 64 with the usage on stderr (dot_usage_error, v0.2.548).
+  fm_expect_rc 64
   test_start "fm_fleet_apply_unknown_flag_message"
-  fm_expect_any "Unknown arg" "zzz-not-a-flag"
+  fm_expect_stderr "unknown flag '--zzz-not-a-flag' for 'dot fleet apply'"
 }
 
 test_fm_fleet_apply_verify_hosts() {
@@ -513,10 +525,11 @@ test_fm_fleet_apply_jobs_invalid() {
   for jobs in 0 many -1; do
     test_start "fm_fleet_apply_jobs_invalid_${jobs//-/neg}"
     DOTFILES_FLEET_HOSTS="$hosts" fm_run fleet apply --cmd true --jobs "$jobs"
-    fm_expect_rc 2
+    # A usage error: exit 64 (dot_usage_error, v0.2.548), was 2.
+    fm_expect_rc 64
+    test_start "fm_fleet_apply_jobs_invalid_${jobs//-/neg}_message"
+    fm_expect_stderr "--jobs expects a positive integer, got '$jobs'"
   done
-  test_start "fm_fleet_apply_jobs_invalid_message"
-  fm_expect_any "positive integer"
 }
 
 test_fm_fleet_apply_rejects_option_target() {
@@ -557,18 +570,19 @@ test_fm_fleet_help() {
 }
 
 test_fm_fleet_unknown() {
-  # Like every other group: an unknown subcommand is named, the command
-  # list follows, and the exit status is 1.
+  # Like every other group (v0.2.548, ADR-020 N10): an unknown subcommand
+  # exits 127 with the one message, which names the words and points at
+  # `dot help fleet`; that command list names the subcommands.
   test_start "fm_fleet_unknown"
   fm_run fleet zzz-not-a-subcommand
-  fm_expect_rc 1
+  fm_expect_rc 127
   test_start "fm_fleet_unknown_names_the_subcommand"
-  fm_expect_err "Unknown subcommand"
-  fm_expect_err "zzz-not-a-subcommand"
-  test_start "fm_fleet_unknown_prints_the_command_list"
-  fm_expect_err "Fleet Commands"
+  fm_expect_stderr "'dot fleet zzz-not-a-subcommand' is not a command"
+  test_start "fm_fleet_unknown_points_at_the_command_list"
+  fm_expect_stderr "run 'dot help fleet'"
   test_start "fm_fleet_unknown_lists_the_subcommands"
-  if printf '%s' "$FM_ERR$FM_OUT" | grep -Eq 'apply +SSH out'; then
+  fm_run help fleet
+  if [[ "$FM_RC" == 0 ]] && printf '%s' "$FM_OUT" | grep -Eq 'dot fleet apply +[A-Z]'; then
     fm_pass
   else
     fm_fail "command list does not name apply"
@@ -959,9 +973,12 @@ test_fm_patterns_view() {
 test_fm_patterns_view_missing() {
   test_start "fm_patterns_view_missing"
   fm_run ai pattern show
-  fm_expect_rc 1
+  # A usage error exits 64 with the usage on stderr (dot_usage_error, v0.2.548).
+  fm_expect_rc 64
   test_start "fm_patterns_view_missing_message"
-  fm_expect_any "Missing pattern name" "Usage: dot ai pattern show"
+  fm_expect_stderr "missing pattern name"
+  test_start "fm_patterns_view_missing_usage"
+  fm_expect_stderr "usage: dot ai pattern show <name>"
   test_start "fm_patterns_view_unknown_pattern"
   fm_run ai pattern show zzz-no-such-pattern
   fm_expect_rc 1
@@ -989,9 +1006,12 @@ test_fm_patterns_edit() {
 test_fm_patterns_edit_missing() {
   test_start "fm_patterns_edit_missing"
   fm_run ai pattern edit
-  fm_expect_rc 1
+  # A usage error exits 64 with the usage on stderr (dot_usage_error, v0.2.548).
+  fm_expect_rc 64
   test_start "fm_patterns_edit_missing_message"
-  fm_expect_any "Missing pattern name" "Usage: dot ai pattern edit"
+  fm_expect_stderr "missing pattern name"
+  test_start "fm_patterns_edit_missing_usage"
+  fm_expect_stderr "usage: dot ai pattern edit <name>"
 }
 
 test_fm_patterns_unknown() {
@@ -1142,7 +1162,10 @@ test_fm_init_usage() {
   fm_expect_any "missing <user|repo|url>" "init"
   test_start "fm_init_usage_unknown_flag"
   fm_run config init --zzz-not-a-flag
-  fm_expect_rc 1
+  # A usage error exits 64 with the usage on stderr (dot_usage_error, v0.2.548).
+  fm_expect_rc 64
+  test_start "fm_init_usage_unknown_flag_message"
+  fm_expect_stderr "unknown flag '--zzz-not-a-flag'"
   test_start "fm_init_usage_too_many_args"
   fm_run config init alice bob
   fm_expect_rc 1

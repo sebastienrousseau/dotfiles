@@ -261,7 +261,7 @@ cmd_ai_cost() {
 # cmd_ai_corral [status|sync|doctor|mcp|args…] — workspace & multi-forge repo plane.
 cmd_ai_corral() {
   if ! has_command corralctl; then
-    ui_warn "corralctl" "not installed — run: dot ai install corralctl (or mise use -g github:sebastienrousseau/corralctl)"
+    ui_warn "corralctl" "not installed — run: dot ai install corralctl (or mise install github:sebastienrousseau/corralctl)"
     return 1
   fi
   case "${1:-status}" in
@@ -299,7 +299,7 @@ cmd_ai_mcp() {
       if has_command passmcp-graph; then
         passmcp-graph "$@"
       else
-        ui_warn "passmcp-graph" "not installed — run: dot ai install passmcp-graph (or mise use -g github:sebastienrousseau/passmcp-graph)"
+        ui_warn "passmcp-graph" "not installed — run: dot ai install passmcp-graph (or mise install github:sebastienrousseau/passmcp-graph)"
         return 1
       fi
       ;;
@@ -307,7 +307,7 @@ cmd_ai_mcp() {
       if has_command passmcp; then
         passmcp "$sub" "$@"
       else
-        ui_warn "passmcp" "not installed — run: dot ai install passmcp (or mise use -g github:sebastienrousseau/passmcp)"
+        ui_warn "passmcp" "not installed — run: dot ai install passmcp (or mise install github:sebastienrousseau/passmcp)"
         return 1
       fi
       ;;
@@ -321,7 +321,7 @@ cmd_ai_mcp() {
 # cmd_ai_draft [--green] <args…> — grounded 5-phase research & C2PA synthesis via draft.
 cmd_ai_draft() {
   if ! has_command draft; then
-    ui_warn "draft" "not installed — run: dot ai install draft (or mise use -g github:sebastienrousseau/draft)"
+    ui_warn "draft" "not installed — run: dot ai install draft (or mise install github:sebastienrousseau/draft)"
     return 1
   fi
   if [[ $# -eq 0 ]]; then

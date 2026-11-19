@@ -24,5 +24,6 @@ echo '{"tool_name":"Write","tool_input":{"file_path":"a"},"cwd":"/w"}' |
 | `main.go` | `check` and `validate`; the active mode; each agent's output form |
 | `policy.go` | `ai-policy.v1`: parsing, validation, per-agent overrides |
 | `budget.go` | `[budget]`: the spend, the verdict on a prompt and its output form |
+| `floor.toml` | the deny-only floor `dot cli hook check` applies when there is no `ai-policy.toml` |
 | `eval.go` | tool classes; the paths, commands and hosts a call touches |
 | `glob.go` | the one glob syntax every list uses |

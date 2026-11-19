@@ -105,8 +105,10 @@ function _dotfiles_async_init
             source "$SHELL_CACHE/fzf-init.fish"
         end
     end
-    # Direnv
-    if command -v direnv >/dev/null
+    # Direnv: only for `use flake` .envrc files (DOTFILES_USE_FLAKE=1). mise
+    # is the per-directory environment loader; direnv's hook would add its
+    # own export to every directory change, as in zsh's rc.d/30-options.
+    if test "$DOTFILES_USE_FLAKE" = 1; and command -v direnv >/dev/null
         if not test -s "$SHELL_CACHE/direnv-init.fish"
             _cached_eval direnv hook fish
         else

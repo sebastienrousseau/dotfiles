@@ -148,8 +148,8 @@ assert_contains "needs jq" "$OUT" "says so"
 test_start "bad_usage"
 RC=0
 OUT="$(bash "$REPO_ROOT/plugins/ai/libexec/inventory.sh" frob 2>&1)" || RC=$?
-assert_equals "1" "$RC" "exit 1"
-assert_contains "Usage: dot ai inventory show [--json]" "$OUT" "usage"
+assert_equals "64" "$RC" "a usage error: exit 64"
+assert_contains "usage: dot ai inventory show [--json]" "$OUT" "usage"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
 [[ "$TESTS_FAILED" -eq 0 ]]

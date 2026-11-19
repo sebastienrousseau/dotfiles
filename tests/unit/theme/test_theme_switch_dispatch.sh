@@ -231,8 +231,8 @@ assert_equals "maui-dark" "$(last_sync)" "the theme name is handed to dot-theme-
 test_start "an_unknown_argument_is_rejected"
 : >"$SYNC_CALLS"
 rc="$(switch definitely-not-a-theme)"
-assert_equals "1" "$rc" "an unknown argument fails"
-assert_file_contains "$OUT" "Unknown command or theme" "the error explains the rejection"
+assert_equals "127" "$rc" "an unknown argument names no command (ADR-020 N10)"
+assert_file_contains "$ERR" "dot: 'dot theme definitely-not-a-theme' is not a command; run 'dot help theme'" "the error is the CLI's one message for that"
 assert_empty "$(last_sync)" "nothing is applied for an unknown argument"
 
 # ===========================================================================
@@ -416,7 +416,7 @@ if [[ -x /bin/bash ]]; then
     PATH="$BIN:/usr/bin:/bin" \
     /bin/bash "$SCRIPT_FILE" definitely-not-a-theme </dev/null >"$OUT" 2>"$ERR" || rc=$?
   cat "$ERR" >&2
-  assert_equals "1" "$rc" "an unknown argument still fails under the system bash"
+  assert_equals "127" "$rc" "an unknown argument still fails under the system bash"
 else
   _fail "/bin/bash not found"
 fi
@@ -511,7 +511,7 @@ CHEZMOI_SOURCE_DIR="$EMPTY_SRC" PATH="$BIN:/usr/bin:/bin" \
   "$REAL_BASH" "$SCRIPT_FILE" list >"$OUT" 2>"$ERR" || rc=$?
 cat "$ERR" >&2
 assert_equals "1" "$rc" "a source tree without .chezmoidata.toml is fatal"
-assert_file_contains "$OUT" "Missing" "the error names the missing file"
+assert_file_contains "$ERR" "Missing" "the error names the missing file"
 
 test_start "a_missing_source_tree_is_fatal"
 rc=0
@@ -519,7 +519,7 @@ HOME="$WORK/nohome" CHEZMOI_SOURCE_DIR="" PATH="$BIN:/usr/bin:/bin" \
   "$REAL_BASH" "$SCRIPT_FILE" list >"$OUT" 2>"$ERR" || rc=$?
 cat "$ERR" >&2
 assert_equals "1" "$rc" "no chezmoi source anywhere is fatal"
-assert_file_contains "$OUT" "not found" "the error says the source was not found"
+assert_file_contains "$ERR" "not found" "the error says the source was not found"
 
 test_start "the_legacy_chezmoi_source_location_is_honoured"
 LEGACY_HOME="$WORK/legacy-home"

@@ -1,3 +1,7 @@
 # Targets chezmoi removes from every machine on apply.
 # kiro-cli left the AI roster in 0.2.544, with the mise plugin that installed it.
 .local/share/mise/plugins/kiro-cli
+# The archived mcp-server-sqlite (unfixed SQL injection, upstream will not
+# patch it) left the default MCP servers in 0.2.548; install-servers.sh
+# installs every python/*/requirements.txt, so its deployed copy must go.
+.local/share/dot-mcp/python/sqlite

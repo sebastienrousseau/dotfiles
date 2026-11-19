@@ -69,6 +69,22 @@ cz "$H1" "$SB/empty.toml" "$SB/new" apply >/dev/null 2>&1 || rc=$?
 test_start "npmrc_second_apply_is_stable"
 assert_equals "0|1" "$rc|$(grep -c 'npm_FAKE_LOGIN' "$H1/.npmrc")" "a second apply changes nothing"
 
+# Supply-chain hardening: no lifecycle scripts, and no release younger than
+# seven days. npm itself reads the rendered file (its own key names).
+NPM_BIN="$(command -v npm || true)"
+test_start "npmrc_blocks_install_scripts_and_fresh_releases"
+if [[ -n "$NPM_BIN" ]]; then
+  npm_get() {
+    env -i HOME="$H1" PATH="$(dirname "$NPM_BIN"):/usr/bin:/bin" "$NPM_BIN" config get "$1" \
+      --userconfig "$H1/.npmrc" --globalconfig "$SB/none" 2>/dev/null
+  }
+  assert_equals "true|7" "$(npm_get ignore-scripts)|$(npm_get min-release-age)" \
+    "npm runs no install scripts and installs nothing published in the last 7 days"
+else
+  assert_equals "2" "$(grep -cE '^(ignore-scripts=true|min-release-age=7)$' "$H1/.npmrc")" \
+    "npm runs no install scripts and installs nothing published in the last 7 days"
+fi
+
 # 2. A token in chezmoi data wins for its registry; other registries are kept.
 H2="$SB/h2"
 mkdir -p "$H2"

@@ -24,6 +24,13 @@ registry=https://registry.npmjs.org/
 # Security
 audit=true
 audit-level=moderate
+# No preinstall/install/postinstall scripts: a compromised package runs
+# nothing at install time. A tool that needs its script can be rebuilt by
+# hand with `npm rebuild <pkg> --ignore-scripts=false`.
+ignore-scripts=true
+# Install only versions published at least 7 days ago (npm 11.10+; days).
+# Exempt a package with min-release-age-exclude=<name|glob>.
+min-release-age=7
 
 # Performance
 prefer-offline=true
@@ -39,11 +46,11 @@ init-author-name={{ .chezmoi.username }}
 init-license=MIT
 init-version=0.1.0
 
-# Authentication tokens (configured via chezmoi secrets)
-# To set tokens, add them to ~/.config/chezmoi/chezmoi.toml:
-#   [data]
-#   npm_token = "npm_xxxx"
-#   github_npm_token = "ghp_xxxx"
+# Authentication tokens
+# Use `npm login` (its auth line is kept on apply). Do not put npm_token or
+# github_npm_token in ~/.config/chezmoi/chezmoi.toml: that file is plaintext,
+# readable by every process you run (AI agents included), and the token is
+# copied here on top. A token chezmoi data does set still wins for its registry.
 
 {{- if hasKey . "npm_token" }}
 # npm registry auth token

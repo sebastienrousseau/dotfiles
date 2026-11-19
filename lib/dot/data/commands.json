@@ -248,7 +248,7 @@
     },
     {
      "name": "gateway",
-     "summary": "the keyless gateway",
+     "summary": "the local Claude gateway",
      "default": "show"
     },
     {
@@ -977,7 +977,15 @@
      "spelling": "config profile show",
      "effect": "read",
      "summary": "Show the active profile",
-     "built": true
+     "built": true,
+     "flags": [
+      {
+       "long": "json",
+       "short": "j",
+       "summary": "Print the profile and feature flags as JSON"
+      }
+     ],
+     "output": "config/profile.v1"
     },
     {
      "spelling": "config profile set",
@@ -2147,7 +2155,7 @@
       },
       {
        "long": "globals",
-       "summary": "Also update npm, cargo and pipx globals"
+       "summary": "Also upgrade pipx globals (npm and cargo tools are pinned)"
       }
      ]
     },
@@ -2155,7 +2163,22 @@
      "spelling": "system clean",
      "effect": "write",
      "summary": "Reclaim space, asking first",
-     "built": false
+     "built": true,
+     "flags": [
+      {
+       "long": "caches",
+       "summary": "Prune the Go, pip and uv build caches (the default)"
+      },
+      {
+       "long": "logs",
+       "summary": "Rotate the logs instead"
+      },
+      {
+       "long": "yes",
+       "short": "y",
+       "summary": "Prune without asking"
+      }
+     ]
     },
     {
      "spelling": "system show",
@@ -2308,7 +2331,15 @@
      "spelling": "tool list",
      "effect": "read",
      "summary": "Toolchains and their versions",
-     "built": true
+     "built": true,
+     "flags": [
+      {
+       "long": "json",
+       "short": "j",
+       "summary": "Print the toolchains as JSON"
+      }
+     ],
+     "output": "tool/list.v1"
     },
     {
      "spelling": "tool install",

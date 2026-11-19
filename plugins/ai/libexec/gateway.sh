@@ -32,8 +32,7 @@ row("cost"; "\(.cost_usd | money) estimated; today \(.budget.spent_today_usd | m
 EOF
 
 gw_usage() {
-  echo "Usage: dot ai gateway show [--json]"
-  exit 1
+  dot_usage_error "unknown subcommand" "dot ai gateway show [--json]"
 }
 
 # gw_key: the gateway's key, or nothing.

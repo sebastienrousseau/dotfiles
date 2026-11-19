@@ -13,6 +13,8 @@ default = "select"
 [entry]
 command = "dot-theme"
 fallback = true
+# The only words outside the table dot-theme runs; any other is not a command.
+words = ["toggle", "mode", "rotate", "sync", "ambient", "family", "current", "plan", "undo", "history", "reset", "diff", "export", "import", "fit", "accent", "status", "rebuild", "preview", "random", "help"]
 
 [[objects]]
 name = "wallpaper"
