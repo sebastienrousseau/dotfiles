@@ -170,7 +170,6 @@ opencode = "1.19.6"
 # scoped to autohand-cli alone.
 "npm:autohand-cli" = { version = "0.9.11", allow_low_downloads = true, allow_builds = ["autohand-cli"] }
 "npm:@qwen-code/qwen-code" = "0.28.0"
-"npm:@guizmo-ai/zai-cli" = { version = "0.3.5", allow_low_downloads = true } # below aube's download threshold
 # "pipx:mistral-vibe" = "latest"  # disabled 2026-05-12: dep `mistralai` quarantined on PyPI; re-enable when restored
 
 # Editor tooling. Global npm packages live inside each Node version's

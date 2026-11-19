@@ -21,7 +21,6 @@ var roster = []tool{
 	{name: "autohand", bin: "autohand", group: "coding"},
 	{name: "vibe", bin: "vibe", group: "coding"},
 	{name: "qwen", bin: "qwen", group: "coding"},
-	{name: "zai", bin: "zai", group: "coding"},
 	{name: "agy", bin: "agy", group: "general"},
 	{name: "sgpt", bin: "sgpt", group: "general"},
 	{name: "ollama", bin: "ollama", group: "local"},
@@ -62,5 +61,4 @@ var rosterRoles = map[string]string{
 	"qwen":              "coding",
 	"sgpt":              "agent",
 	"vibe":              "coding",
-	"zai":               "coding",
 }

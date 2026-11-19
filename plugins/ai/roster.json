@@ -263,21 +263,6 @@
       "chat": true
     },
     {
-      "name": "zai",
-      "bin": "zai",
-      "aliases": [],
-      "title": "ZAI",
-      "summary": "Zhipu GLM coding agent",
-      "group": "coding",
-      "role": "coding",
-      "processes": [
-        "zai"
-      ],
-      "package": "npm:@guizmo-ai/zai-cli",
-      "native": "",
-      "chat": true
-    },
-    {
       "name": "corralctl",
       "bin": "corralctl",
       "aliases": [],

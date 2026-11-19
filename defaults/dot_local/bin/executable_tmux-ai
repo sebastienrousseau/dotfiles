@@ -26,7 +26,6 @@ provider_label() {
     *antigravity* | *agy*) printf 'AI:ANTIGRAVITY' ;;
     *mistral*vibe* | *vibe*) printf 'AI:VIBE' ;;
     *grok*) printf 'AI:GROK' ;;
-    *zai*) printf 'AI:ZAI' ;;
     *amp*) printf 'AI:AMP' ;;
     *) return 1 ;;
   esac
@@ -86,7 +85,7 @@ launch_provider() {
       launch_command="exec dot ai"
       ;;
     # roster: case
-    claude | codex | copilot | goose | crush | amp | cursor-agent | grok | kimi | agy | sgpt | ollama | opencode | aider | autohand | vibe | qwen | zai)
+    claude | codex | copilot | goose | crush | amp | cursor-agent | grok | kimi | agy | sgpt | ollama | opencode | aider | autohand | vibe | qwen)
       title="ai-$provider"
       launch_command="exec dot ai chat $provider"
       ;;

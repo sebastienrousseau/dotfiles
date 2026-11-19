@@ -43,7 +43,6 @@ _ai_invoke_provider() {
     autohand) autohand --prompt "$full_prompt" || rc=$? ;;
     vibe) vibe --prompt "$full_prompt" || rc=$? ;;
     qwen) qwen --prompt "$full_prompt" || rc=$? ;;
-    zai) zai --prompt "$full_prompt" || rc=$? ;;
     *)
       ui_err "Unsupported tool" "$tool"
       return 2

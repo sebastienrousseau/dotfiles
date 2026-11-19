@@ -126,7 +126,6 @@ Providers tracked today (the agents in `plugins/ai/roster.toml`):
 | Autohand | `autohand` | yes | no |
 | Mistral Vibe | `vibe` | yes | **yes** (via delegator) |
 | Qwen | `qwen` | yes | no |
-| ZAI | `zai` | yes | no |
 | Shell-GPT | `sgpt` | yes | no |
 | Ollama (local) | `ollama` | yes | n/a (no cost) |
 

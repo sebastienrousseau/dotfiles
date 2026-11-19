@@ -200,7 +200,7 @@ else
   mkdir -p "$(dirname "$CACHE")"
   : >"$CACHE"
   for b in claude codex goose crush amp cursor-agent grok kimi opencode \
-    autohand vibe qwen zai sgpt agy; do
+    autohand vibe qwen sgpt agy; do
     printf '%s\t0\t\n' "$b" >>"$CACHE"
   done
   printf 'copilot\t1\t1.0.11\naider\t1\t0.86.1\nollama\t1\t0.12.0\n' >>"$CACHE"

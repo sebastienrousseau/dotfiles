@@ -73,7 +73,6 @@ qwen AI:QWEN
 agy AI:ANTIGRAVITY
 vibe AI:VIBE
 grok AI:GROK
-zai AI:ZAI
 amp AI:AMP
 EOF
 

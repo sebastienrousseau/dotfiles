@@ -172,7 +172,6 @@ declare -a PROBES=(
   "ai_bridge_auto  autohand --help"
   "ai_bridge_vibe  vibe --help"
   "ai_bridge_qwen  qwen --help"
-  "ai_bridge_zai   zai --help"
   # ── Fleet drift + namespace ──
   "fleet_namesp    fleet namespace"
   "fleet_drift     fleet drift"

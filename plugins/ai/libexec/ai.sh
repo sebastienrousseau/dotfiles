@@ -5,7 +5,7 @@
 ##
 ## Provides AI CLI status, setup, RAG query, and bridge commands.
 ## Wraps AI CLI tools with contextual patterns and system metadata.
-## Usage: dot ai [delegate|cost|dashboard|proxy|local|status]|ai-setup|ai-query|cl|copilot|kimi|agy|sgpt|ollama|opencode|aider|autohand|vibe|qwen|zai
+## Usage: dot ai [delegate|cost|dashboard|proxy|local|status]|ai-setup|ai-query|cl|copilot|kimi|agy|sgpt|ollama|opencode|aider|autohand|vibe|qwen
 
 set -euo pipefail
 
@@ -72,7 +72,7 @@ _show_ai_bridge_usage() {
   echo "       dot ai watch                   # follow agents' states; notify when one is blocked"
   echo "       dot ai watch service on|off    # keep dot ai watch running from login (launchd/systemd)"
   echo ""
-  echo "Tools: cl codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider autohand vibe qwen zai"
+  echo "Tools: cl codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider autohand vibe qwen"
   echo ""
   echo "Available styles:"
   # shellcheck disable=SC2012

@@ -106,4 +106,3 @@ Detailed guide: [AI.md](../AI.md).
 | **Autohand Code** | Autohand coding agent CLI |
 | **Mistral Vibe** | Mistral AI coding agent |
 | **Qwen Code** | Qwen AI coding assistant |
-| **ZAI** | Zhipu AI GLM coding agent |

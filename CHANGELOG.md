@@ -18,7 +18,7 @@ This file documents all notable changes to this project.
 - The archived `mcp-server-sqlite` (an unfixed SQL injection upstream) is removed, and the MCP registry's attestations name the corralctl and passmcp-server versions that actually run.
 - gitleaks no longer ignores keys that contain `test`, `example`, `cafebabe` or `deadbeef`, or anything under `docs/`; the two real false positives are allowlisted by exact value and fingerprint. CI and pre-commit run the same gitleaks (8.30.1), and Dependabot waits seven days on every ecosystem.
 - The registry signing key is rotated to `3FC5303AB9BC3776` (from `903D6CC2B8EED517`, whose offline key was no longer available): `security/registry.pub` is the new public half and `docs/registry.json` is re-signed with it. Installs that still carry the old public key refuse the new index until they update the dotfiles, which ships the new key.
-- `dot system update`, a fresh machine and CI now install `tldr` and `zai-cli` again: mise's embedded aube package manager refuses npm packages under 1000 weekly downloads, and both are approved by name (`allow_low_downloads`).
+- `dot system update`, a fresh machine and CI now install `tldr` again: mise's embedded aube package manager refuses npm packages under 1000 weekly downloads, and it is approved by name (`allow_low_downloads`).
 
 ### Fixed
 
@@ -68,6 +68,7 @@ This file documents all notable changes to this project.
 - AI CLI pins move to their latest releases ahead of the seven-day gate, by request: Codex 0.170.0 (from 0.169.0), GitHub Copilot CLI 1.0.114 (1.0.112), opencode 1.19.6 (1.19.5, the aqua build and `npm:opencode-ai`) and Qwen Code 0.28.0 (0.27.4). `mise outdated --bump` offers opencode 2.3.2, but that is the separate `npm:@opencode/cli` package, which mise's registry now lists first; the aqua backend the pin installs from is at 1.19.6.
 - Pinned CLI tools move to their latest releases: chezmoi 2.74.1 (from 2.72.0), Zellij 0.46.0 (0.44.3), Yazi 26.9.1 (26.5.6), Wasmtime 50.0.2 (48.0.2), Nushell 0.117.0 (0.114.1) and PowerShell 7.7.0 (7.6.6).
 - Runtimes move to their current LTS lines: Node.js 26 (from 24), Ruby 3.4 (3.3) and Java 25 (21). Python adds 3.15 and drops 3.11, keeping 3.12 as the default and 3.14; aider still builds on 3.12. The npm package's `engines` range widens to `<27.0.0` so Node 26 satisfies it.
+- **Breaking:** ZAI (`npm:@guizmo-ai/zai-cli`) leaves the toolchain: its roster entry (`dot ai run/start zai`, the `dot zai` alias, completions, man pages), `[ai_tools]` pin, mise conf.d entry, the `za`/`zac`/`zar` aliases and the commit-msg `ZAI_SESSION` attribution are gone. The maintainer does not use it, and it needed a standing `allow_low_downloads` exception to install. `chezmoi apply` also unregisters it from mise's global config when `dot ai install` put it there; the installed files stay.
 
 ## v0.2.547 (2026-11-17)
 

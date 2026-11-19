@@ -43,7 +43,6 @@ AI_AGENT_RULES=(
   "MISTRAL_SESSION|Mistral||mistral-vibe"
   "QWEN_SESSION|Qwen||qwen-code"
   "AUTOHAND_SESSION|Autohand||autohand-code"
-  "ZAI_SESSION|ZAI||zai-cli"
   "SHELL_GPT_SESSION|ShellGPT||shell-gpt"
   "OLLAMA_SESSION|Ollama|OLLAMA_MODEL|local"
 )

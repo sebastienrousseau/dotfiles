@@ -493,7 +493,10 @@ test_fm_secret_audit() {
   # plaintext-secret pattern — a real finding to act on, not host variance.
   fm_expect_rc 0
   test_start "fm_secret_audit_reports"
-  fm_expect_out "Secret governance:"
+  # "Secret governance: no staged files." with a clean index, "Secret
+  # governance passed." with staged changes: match the prefix both share,
+  # so the result does not depend on the contributor's index.
+  fm_expect_out "Secret governance"
 }
 
 test_fm_metrics() {

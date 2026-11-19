@@ -225,7 +225,6 @@ An old name prints its new name. A deprecated one still runs until the release s
 | `dot autohand` | `dot ai run autohand` | 0.2.538 |
 | `dot vibe` | `dot ai run vibe` | 0.2.538 |
 | `dot qwen` | `dot ai run qwen` | 0.2.538 |
-| `dot zai` | `dot ai run zai` | 0.2.538 |
 | `dot attestation` | `dot attest` | 0.2.538 |
 | `dot completion` | `dot cli completion` | 0.2.538 |
 | `dot registry` | `dot cli list --available` | 0.2.538 |

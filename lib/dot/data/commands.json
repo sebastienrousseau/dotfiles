@@ -326,8 +326,7 @@
        "aider",
        "autohand",
        "vibe",
-       "qwen",
-       "zai"
+       "qwen"
       ]
      },
      "lock": false
@@ -363,8 +362,7 @@
        "aider",
        "autohand",
        "vibe",
-       "qwen",
-       "zai"
+       "qwen"
       ]
      },
      "lock": false
@@ -648,12 +646,6 @@
     {
      "name": "qwen",
      "target": "ai run qwen",
-     "kind": "removed",
-     "until": "0.2.538"
-    },
-    {
-     "name": "zai",
-     "target": "ai run zai",
      "kind": "removed",
      "until": "0.2.538"
     }
