@@ -236,7 +236,6 @@ bash scripts/qa/check-feature-matrix.sh
 | `dot autohand` → `dot ai run autohand` | (usage without prompt) | `test_fm_ai_bridge_autohand` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
 | `dot vibe` → `dot ai run vibe` | (usage without prompt) | `test_fm_ai_bridge_vibe` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
 | `dot qwen` → `dot ai run qwen` | (usage without prompt) | `test_fm_ai_bridge_qwen` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
-| `dot zai` → `dot ai run zai` | (usage without prompt) | `test_fm_ai_bridge_zai` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/command-index.md` | regression |
 | `dot cl` → `dot ai run claude` | --style / --pattern / -p <name> (unknown pattern exits 1) | `test_fm_ai_bridge_style` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | regression |
 | `dot cl` → `dot ai run claude` | "<prompt>" with an installed tool | `test_fm_smoke_ai_bridge_prompt` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/01-dot-cli.md` | **smoke** — performs a paid LLM round-trip (network) |
 | `dot cl` → `dot ai run claude` | DOT_AI_RAW=1 suppresses the banner and metadata preamble | `test_fm_env_dot_ai_raw` | `help:ai` | `examples/example-dot-ai.sh` | `docs/manual/03-reference/03-environment.md` | regression |

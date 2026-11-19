@@ -46,7 +46,7 @@ err="$(python3 "$GEN" --check --root "$root" 2>&1)" || rc=$?
 assert_equals "1" "$rc" "--check exits 1 when a generated file is stale"
 assert_contains "stale: plugins/ai/dot-plugin.toml" "$err" "the manifest values are named as stale"
 python3 "$GEN" --root "$root" >/dev/null
-assert_file_contains "$root/defaults/dot_local/bin/executable_tmux-ai" "| zai | newbot)" "tmux-ai launches the new agent"
+assert_file_contains "$root/defaults/dot_local/bin/executable_tmux-ai" "| qwen | newbot)" "tmux-ai launches the new agent"
 assert_file_contains "$root/lib/dot/data/ai-roster.sh" "newbot=newbot" "the shell lookups know it"
 assert_file_contains "$root/defaults/dot_local/share/dot-ai-tui/roster_gen.go" '{name: "newbot", bin: "newbot", group: "agents"}' "the cockpit lists it"
 assert_equals "0" "$(python3 "$GEN" --check --root "$root" >/dev/null 2>&1 && echo 0 || echo $?)" "regenerating clears the drift"

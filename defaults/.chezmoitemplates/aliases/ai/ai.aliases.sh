@@ -124,13 +124,6 @@ if command -v qwen &>/dev/null; then
   alias qwr='qwen run'
 fi
 
-# ZAI CLI (Zhipu AI)
-if command -v zai &>/dev/null; then
-  alias za='zai'
-  alias zac='zai chat'
-  alias zar='zai run'
-fi
-
 # Ghost text / inline suggestions
 if command -v ghost &>/dev/null; then
   alias gt='ghost'

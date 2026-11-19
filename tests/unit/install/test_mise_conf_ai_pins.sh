@@ -72,8 +72,8 @@ assert_equals "npm:autohand-cli builds=['autohand-cli'] low=True" "$(build_grant
   "only autohand-cli is granted install scripts, scoped to its own package"
 
 # aube also refuses, on a fresh machine, any package under its weekly
-# download threshold; the CI toolchain job caught tldr (822) and
-# zai-cli (66). Each approval is explicit and per tool.
+# download threshold; the CI toolchain job caught tldr (822). Each
+# approval is explicit and per tool.
 low_downloads() {
   python3 - "$1" <<'PY2'
 import sys, tomllib
@@ -84,7 +84,7 @@ PY2
 }
 
 test_start "low_download_npm_tools_are_approved_by_name"
-assert_equals "npm:tldr npm:autohand-cli npm:@guizmo-ai/zai-cli" "$(low_downloads "$CONF" | paste -sd' ' -)" \
+assert_equals "npm:tldr npm:autohand-cli" "$(low_downloads "$CONF" | paste -sd' ' -)" \
   "exactly the tools below aube's download threshold are approved"
 
 echo ""

@@ -76,6 +76,25 @@ STUB_RC=1 run
 assert_equals "0" "$RC" "exits 0"
 assert_contains "could not remove kiro-cli" "$OUT" "asks for a manual edit"
 
+test_start "zai_cli_declared_by_dot_ai_install_is_unused"
+fresh
+printf '[tools]\nnode = "24"\n"npm:@guizmo-ai/zai-cli" = "0.3.5"\n' >"$CFG"
+run
+assert_equals "0" "$RC" "exits 0"
+assert_equals "$CFG unuse -g --no-prune npm:@guizmo-ai/zai-cli" "$(cat "$LOG" 2>/dev/null)" "mise unuse names the npm tool"
+assert_contains "removed npm:@guizmo-ai/zai-cli" "$OUT" "says what it removed"
+
+test_start "real_mise_removes_the_zai_cli_line"
+if [[ -n "$REAL_MISE" ]]; then
+  fresh
+  printf '[tools]\nnode = "24"\n"npm:@guizmo-ai/zai-cli" = "0.3.5"\n' >"$CFG"
+  run "$(dirname "$REAL_MISE"):/usr/bin:/bin"
+  assert_equals "0" "$RC" "exits 0"
+  assert_equals '[tools]|node = "24"' "$(paste -sd'|' "$CFG")" "only the zai-cli line goes"
+else
+  echo "  - skipped: mise not installed"
+fi
+
 test_start "real_mise_removes_the_line"
 if [[ -n "$REAL_MISE" ]]; then
   fresh

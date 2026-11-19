@@ -185,15 +185,6 @@ role = "coding"
 package = "npm:@qwen-code/qwen-code"
 
 [[tool]]
-name = "zai"
-bin = "zai"
-title = "ZAI"
-summary = "Zhipu GLM coding agent"
-group = "coding"
-role = "coding"
-package = "npm:@guizmo-ai/zai-cli"
-
-[[tool]]
 name = "corralctl"
 bin = "corralctl"
 title = "corralctl"

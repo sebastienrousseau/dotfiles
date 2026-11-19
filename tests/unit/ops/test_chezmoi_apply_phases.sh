@@ -198,7 +198,7 @@ if command -v script >/dev/null 2>&1; then
   with_gum
   apply_tty GUM_CHOICE="Install all"
   assert_equals "0:yes:yes:yes" \
-    "$RC:$(yes_no called 'gum choose --header'):$(yes_no called 'mise use -g npm:@openai/codex@0.170.0'):$(yes_no called 'mise use -g npm:@guizmo-ai/zai-cli@0.3.5')" \
+    "$RC:$(yes_no called 'gum choose --header'):$(yes_no called 'mise use -g npm:@openai/codex@0.170.0'):$(yes_no called 'mise use -g npm:@qwen-code/qwen-code@0.28.0')" \
     "mise installs each one, and the run completes"
 
   test_start "apply_tty_install_all_tries_native_installers"

@@ -45,7 +45,6 @@ check_contains "$DOC_FILE" "| **Ollama** | Run large language models locally |"
 check_contains "$DOC_FILE" "| **Autohand Code** | Autohand coding agent CLI |"
 check_contains "$DOC_FILE" "| **Mistral Vibe** | Mistral AI coding agent |"
 check_contains "$DOC_FILE" "| **Qwen Code** | Qwen AI coding assistant |"
-check_contains "$DOC_FILE" "| **ZAI** | Zhipu AI GLM coding agent |"
 
 # Python tools should include key dev tools
 check_contains "$PYTOOLS_FILE" "install_python_tool \"pytest\""

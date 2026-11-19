@@ -41,7 +41,7 @@ STUB
 }
 
 for t in claude codex copilot agy goose crush amp cursor-agent grok kimi \
-  sgpt ollama opencode aider autohand vibe qwen zai \
+  sgpt ollama opencode aider autohand vibe qwen \
   dot-ai-proxy dot-ai-serve mise; do
   stub "$t"
 done
@@ -124,8 +124,6 @@ ai _ai_invoke_provider vibe "hello"
 called "vibe --prompt hello"
 ai _ai_invoke_provider qwen "hello"
 called "qwen --prompt hello"
-ai _ai_invoke_provider zai "hello"
-called "zai --prompt hello"
 ai _ai_invoke_provider autohand "hello"
 called "autohand --prompt hello"
 ai _ai_invoke_provider codex "hello"
@@ -134,6 +132,11 @@ called "codex exec -"
 
 test_start "an_unsupported_tool_is_rejected_with_rc2"
 ai _ai_invoke_provider nosuchtool "hello"
+assert_equals 2 "$RC" "rc"
+err_has "Unsupported tool" "error"
+
+test_start "retired_zai_is_rejected_with_rc2"
+ai _ai_invoke_provider zai "hello"
 assert_equals 2 "$RC" "rc"
 err_has "Unsupported tool" "error"
 
@@ -241,7 +244,7 @@ PATH="$NONE" ai cmd_ai_doctor
 assert_equals 0 "$RC" "rc"
 err_has "not installed (the gateway engine needs it)" "engine missing"
 out_has "dot-ai-serve not deployed" "gateway missing"
-out_has "0/18 tools installed" "empty roster"
+out_has "0/17 tools installed" "empty roster"
 out_has "0/5 suite tools" "empty ecosystem"
 
 # ── install ─────────────────────────────────────────────────────────────

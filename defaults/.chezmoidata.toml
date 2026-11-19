@@ -164,7 +164,6 @@ tpm_commit = "7bdb7ca33c9cc6440a600202b50142f401b6fe21" # pragma: allowlist secr
 "npm:opencode-ai" = "1.19.6"
 "npm:autohand-cli" = "0.9.11"
 "npm:@qwen-code/qwen-code" = "0.28.0"
-"npm:@guizmo-ai/zai-cli" = "0.3.5"
 "aqua:charmbracelet/crush" = "0.101.0"
 "pipx:aider-chat" = "0.86.2"
 "aqua:ollama/ollama" = "0.40.16"

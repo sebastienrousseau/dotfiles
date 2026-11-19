@@ -258,7 +258,7 @@ called "ssh deploy@example.com tar xz -C"
 
 # ── ai-setup ────────────────────────────────────────────────────────────
 test_start "ai_setup_walks_the_whole_fleet"
-for t in claude agy codex copilot goose kimi aider autohand vibe qwen zai; do
+for t in claude agy codex copilot goose kimi aider autohand vibe qwen; do
   record_stub "$t"
 done
 run bash "$AI_SETUP"

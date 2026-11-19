@@ -465,7 +465,6 @@ def "nu-complete dot ai run" [] {
         { value: "autohand", description: "" }
         { value: "vibe", description: "" }
         { value: "qwen", description: "" }
-        { value: "zai", description: "" }
     ]
 }
 export extern "dot ai run" [
@@ -499,7 +498,6 @@ def "nu-complete dot ai start" [] {
         { value: "autohand", description: "" }
         { value: "vibe", description: "" }
         { value: "qwen", description: "" }
-        { value: "zai", description: "" }
     ]
 }
 export extern "dot ai start" [

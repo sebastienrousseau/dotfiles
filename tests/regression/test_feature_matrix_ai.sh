@@ -298,7 +298,7 @@ test_fm_smoke_ai_bridge_prompt() { fm_smoke cl; }
 # 1 without contacting anything. Driven from one list so a newly added
 # provider cannot quietly skip the check.
 
-FM_AI_BRIDGES="cl claude codex copilot kimi agy goose sgpt ollama opencode aider autohand vibe qwen zai"
+FM_AI_BRIDGES="cl claude codex copilot kimi agy goose sgpt ollama opencode aider autohand vibe qwen"
 
 fm_assert_bridge_usage() {
   local tool="$1"
@@ -330,7 +330,6 @@ test_fm_ai_bridge_aider() { fm_assert_bridge_usage aider; }
 test_fm_ai_bridge_autohand() { fm_assert_bridge_usage autohand; }
 test_fm_ai_bridge_vibe() { fm_assert_bridge_usage vibe; }
 test_fm_ai_bridge_qwen() { fm_assert_bridge_usage qwen; }
-test_fm_ai_bridge_zai() { fm_assert_bridge_usage zai; }
 
 test_fm_ai_bridge_every_routed_provider_refuses() {
   # Belt and braces: the route table is the source of truth, so assert the
@@ -428,7 +427,6 @@ test_fm_ai_bridge_aider
 test_fm_ai_bridge_autohand
 test_fm_ai_bridge_vibe
 test_fm_ai_bridge_qwen
-test_fm_ai_bridge_zai
 test_fm_ai_bridge_every_routed_provider_refuses
 test_fm_ai_bridge_style
 test_fm_env_dot_ai_raw

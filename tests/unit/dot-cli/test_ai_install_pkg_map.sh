@@ -65,7 +65,6 @@ opencode=opencode
 ollama=aqua:ollama/ollama
 autohand=npm:autohand-cli
 qwen=npm:@qwen-code/qwen-code
-zai=npm:@guizmo-ai/zai-cli
 MAP
 
 test_start "ai_install_leaves_native_installer_providers_unmapped"

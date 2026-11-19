@@ -82,7 +82,7 @@ assert_equals "" "$(lib '_ai_pinned_version gopls' | head -n 1)" \
   "keys of other tables are not AI pins"
 
 test_start "every_mapped_provider_is_pinned"
-r="$(lib 'for b in codex copilot crush aider opencode ollama autohand qwen zai corralctl passmcp passmcp-graph passmcp-lsp passmcp-server draft; do
+r="$(lib 'for b in codex copilot crush aider opencode ollama autohand qwen corralctl passmcp passmcp-graph passmcp-lsp passmcp-server draft; do
   p="$(_ai_mise_pkg "$b")"; [[ -n "$(_ai_pinned_version "$p")" ]] || printf "%s " "$b"; done')"
 assert_equals "" "$(head -n 1 <<<"$r")" "every provider dot ai can install has a pin"
 

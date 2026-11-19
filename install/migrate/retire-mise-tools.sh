@@ -17,6 +17,7 @@ set -euo pipefail
 # tool|release that retired it
 RETIRED=(
   "kiro-cli|0.2.544"
+  "npm:@guizmo-ai/zai-cli|0.2.548"
 )
 
 cfg="${MISE_GLOBAL_CONFIG_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/mise/config.toml}"

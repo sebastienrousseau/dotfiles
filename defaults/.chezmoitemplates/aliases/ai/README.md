@@ -69,9 +69,6 @@ The `d*` aliases call `dot ai <agent>`, an older spelling that `dot ai` still pa
 | `qw` | `qwen` | Only when `qwen` is on PATH. |
 | `qwc` | `qwen chat` | Only when `qwen` is on PATH. |
 | `qwr` | `qwen run` | Only when `qwen` is on PATH. |
-| `za` | `zai` | Only when `zai` is on PATH. |
-| `zac` | `zai chat` | Only when `zai` is on PATH. |
-| `zar` | `zai run` | Only when `zai` is on PATH. |
 | `gt` | `ghost` | Only when `ghost` is on PATH. |
 | `gts` | `ghost suggest` | Only when `ghost` is on PATH. |
 | `a` | `ai_core query` | Only when `ai_core` is on PATH and `a` is not already an alias. |

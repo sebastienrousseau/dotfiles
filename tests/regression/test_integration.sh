@@ -253,7 +253,7 @@ it_sandbox bridge
 test_start "integration_ai_providers_in_mise"
 it_missing=""
 for it_p in claude:cl copilot:copilot kimi:kimi agy:agy aider:aider opencode:opencode sgpt:sgpt \
-  ollama:ollama autohand:autohand vibe:vibe qwen:qwen zai:zai; do
+  ollama:ollama autohand:autohand vibe:vibe qwen:qwen; do
   it_bin="${it_p%%:*}"
   it_stub "$it_bin" "echo \"$it_bin \$*\" >>\"$IT_S/provider.spy\"; exit 0"
   it_env bash "$DOT_CLI" ai "${it_p#*:}" "fixture prompt" >/dev/null 2>&1
@@ -264,13 +264,13 @@ assert_empty "$it_missing" "every AI provider in the bridge invokes its binary"
 # Source the AI aliases with a stub for every provider on PATH, and read
 # back what each alias expands to.
 it_sandbox aliases
-for it_t in claude gh agy ollama kimi autohand vibe qwen zai; do it_stub "$it_t" "exit 0"; done
+for it_t in claude gh agy ollama kimi autohand vibe qwen; do it_stub "$it_t" "exit 0"; done
 IT_ALIASES="$(it_env bash --norc --noprofile -c 'shopt -s expand_aliases; source "$1"; alias' _ \
   "$REPO_ROOT/defaults/.chezmoitemplates/aliases/ai/ai.aliases.sh" 2>&1)"
 
 test_start "integration_ai_aliases_match_bridge"
 it_missing=""
-for it_a in "km='kimi'" "ah='autohand'" "vb='vibe'" "qw='qwen'" "za='zai'" "dkm='dot ai kimi'"; do
+for it_a in "km='kimi'" "ah='autohand'" "vb='vibe'" "qw='qwen'" "dkm='dot ai kimi'"; do
   [[ "$IT_ALIASES" == *"alias $it_a"* ]] || it_missing+=" $it_a"
 done
 assert_empty "$it_missing" "each installed AI CLI gets its short alias"
