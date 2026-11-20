@@ -40,7 +40,7 @@ Every config file read or written by `.dotfiles`, with its schema and purpose.
 An excerpt of `defaults/.chezmoidata.toml`:
 
 ```toml
-dotfiles_version = "0.2.548"
+dotfiles_version = "0.2.549"
 profile = "laptop"
 
 machine = ""
