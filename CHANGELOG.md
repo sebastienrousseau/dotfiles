@@ -2,7 +2,7 @@
 
 This file documents all notable changes to this project.
 
-## Unreleased
+## v0.2.548 (2026-11-20)
 
 ### Security
 
@@ -22,6 +22,7 @@ This file documents all notable changes to this project.
 
 ### Fixed
 
+- The PR signature check reads the PR body from the API instead of the event payload. A rerun replays the payload from when the run started, so it kept failing after the signature was added (#1442).
 - `chezmoi apply` (`dot sync`) checks its flags before taking the lock, always logs `apply_end` with its status and duration, logs each step, and backs up the files it is about to change (`backup_*_pre_apply`, capped like the other backups; `DOTFILES_BACKUP_ON_APPLY=0` turns it off), so `dot doctor rollback` can return to the last apply. Trace IDs come from a real random source.
 - The CLI follows its own error contract (ADR-020): errors go to stderr, usage errors exit 64, and a word that names no command exits 127 with one message. `dot doctor nope` no longer runs the whole doctor, `dot tool nope` no longer reaches mise, and `--help` after an unknown verb reports the unknown verb.
 - `install.sh --provision` runs only the provisioning scripts that changed since their last successful run (`--all` runs every one), and exits non-zero naming each script that failed instead of reporting success. The first run after upgrading runs them all once.
