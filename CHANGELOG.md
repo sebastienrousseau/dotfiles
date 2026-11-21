@@ -2,6 +2,16 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.549 (2026-11-20)
+
+### Changed
+
+- npm's seven-day wait for new releases (`min-release-age=7`) no longer applies to the first-party `@sebastienrousseau/*` packages (`min-release-age-exclude`), as mise already exempts `github:sebastienrousseau/*`. A lockstep release installs its own just-published siblings, which the wait refused with `ETARGET`; third-party packages still wait seven days.
+
+### Fixed
+
+- rustup is the standalone install in `~/.cargo/bin` on macOS too. Homebrew's rustup leaves the Brewfiles and `PATH`: with both installed, each one's proxies fell back to the other's, so a missing component such as `rust-analyzer` recursed forever and Neovim's Rust LSP never started. `chezmoi apply` installs the standalone rustup when it is missing, checking `rustup-init.sh` against its published checksum, and only then removes Homebrew's; toolchains in `~/.rustup` stay. The Rust provisioner no longer suggests `mise use -g rust@stable`, which overrides every `rust-toolchain.toml`.
+
 ## v0.2.548 (2026-11-20)
 
 ### Security

@@ -55,7 +55,6 @@ brew "shfmt"
 # Languages & Runtimes (mise itself is the standalone build, see mise.run)
 # -----------------------------------------------------------------------------
 brew "uv"                    # Fast Python package manager
-brew "rustup"
 brew "sccache"                # Shared compilation cache; see ~/.cargo/config.toml
 brew "go"
 

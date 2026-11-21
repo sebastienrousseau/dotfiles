@@ -31,6 +31,8 @@ ignore-scripts=true
 # Install only versions published at least 7 days ago (npm 11.10+; days).
 # Exempt a package with min-release-age-exclude=<name|glob>.
 min-release-age=7
+# First-party packages: the lockstep suite needs its own release at once.
+min-release-age-exclude=@sebastienrousseau/*
 
 # Performance
 prefer-offline=true
