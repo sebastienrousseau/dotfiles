@@ -13,7 +13,7 @@ Flat top-level keys (values as shipped, before any `chezmoi.toml` override):
 
 | Variable | Type | Example |
 |:---|:---|:---|
-| `.dotfiles_version` | string | `"0.2.549"` |
+| `.dotfiles_version` | string | `"0.2.550"` |
 | `.theme` | string | `"maui-dark"` |
 | `.theme_family` | string | `"maui"` |
 | `.theme_mode` | string | `"auto"` |

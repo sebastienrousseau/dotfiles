@@ -124,7 +124,7 @@ charm_keyring_verify() {
 }
 
 # chezmoi_release_sha256 <asset>: reviewed SHA-256 (else $CHEZMOI_SHA256), in step
-# with tools/ci/install-chezmoi-verified.sh; from the v0.2.549 checksums.txt.
+# with tools/ci/install-chezmoi-verified.sh; from the v0.2.550 checksums.txt.
 chezmoi_release_sha256() {
   local sha
   case "$1" in
@@ -232,7 +232,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.549)
+  version       The version (tag or branch) to install (default: v0.2.550)
 
 Options:
   --help        Show this help message
@@ -424,7 +424,7 @@ set_version_arg() {
     error "Multiple versions specified: $version and $1"
   fi
   if [[ ! "$1" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-+][a-zA-Z0-9.-]+)?$ ]]; then
-    error "Unrecognized positional argument '$1' — expected a semver version (e.g. v0.2.549)."
+    error "Unrecognized positional argument '$1' — expected a semver version (e.g. v0.2.550)."
   fi
   version="$1"
   version_set=1
@@ -559,7 +559,7 @@ backup_existing() {
 }
 
 main() {
-  local version="v0.2.549" version_set=0 minimal=0 want_minimal=0
+  local version="v0.2.550" version_set=0 minimal=0 want_minimal=0
   local provision="${DOTFILES_PROVISION:-0}" provision_all=""
   parse_install_args "$@"
 
