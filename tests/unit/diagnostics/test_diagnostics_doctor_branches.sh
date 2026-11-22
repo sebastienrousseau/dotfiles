@@ -429,7 +429,7 @@ _expect "s2_environment_and_state" \
   "[WARN] symlinks" "1 broken: $_HOME_TILDE/.config/dangling" \
   "[WARN] portability" "scan skipped"
 _expect "s2_performance_warnings" \
-  "[WARN] shell caches" "stale (mise, zoxide, atuin, fzf, direnv) — run dot shell update --prewarm, then open a new shell" \
+  "[WARN] shell caches" "stale (mise, zoxide, atuin, fzf, direnv) — run dot shell update --prewarm" \
   "[WARN] uncached slow-init tools" "pyenv" "[WARN] .zcompdump" "refresh:" \
   "[WARN] .zcompdump.zwc" "[FAIL] PATH length" "likely slowing" \
   "[WARN] shell coverage" "pwsh installed" "[WARN] zsh hooks" "precmd=9 preexec=9" \
@@ -563,8 +563,8 @@ exit 0
 EOF
 printf 'jorgebucaran/fisher\n' >"$S_HOME/.config/fish/fish_plugins"
 printf '# zshrc\n' >"$S_HOME/.zshrc"
-# Only mise's cache is stale (fish has none): zsh and fish rebuild it at their
-# first prompt, and prewarm writes none, so the hint is a new shell.
+# Only mise's cache is stale (fish has none): prewarm has zsh and fish
+# rebuild it, so the hint is prewarm, as for every other tool.
 _tool mise
 for t in mise starship zoxide atuin fzf; do
   touch -t 202001010000 "$S_BIN/$t"
@@ -590,8 +590,8 @@ _expect "s4_warning_band_probes" \
   "1280x720" "4 (pacman)" "Memory: n/a" "[WARN] dot" "(expected ~/.local/bin/dot)" \
   "[WARN] atuin config" "not found" "[WARN] PATH length" "consider pruning" \
   "[WARN] startup latency" "[OK] Healthy" "warning(s)."
-_expect "s4_stale_mise_cache_asks_for_a_new_shell" \
-  "[WARN] shell caches" "stale (mise) — open a new zsh or fish shell to rebuild it"
+_expect "s4_stale_mise_cache_asks_for_prewarm" \
+  "[WARN] shell caches" "stale (mise) — run dot shell update --prewarm"
 _expect "s4_a_running_gateway_holds_the_state_back" \
   "[WARN] state layout" "the AI gateway still runs from" "stop it with dot-ai-proxy stop, then chezmoi apply"
 _expect_absent "s4_no_failures" "[FAIL]"

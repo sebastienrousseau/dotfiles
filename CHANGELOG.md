@@ -8,6 +8,10 @@ This file documents all notable changes to this project.
 
 - ollama moves to 0.40.17 and draft to 0.0.50, the newest releases of both (`[ai_tools]` in `defaults/.chezmoidata.toml` and `conf.d/00-dotfiles.toml`).
 
+### Fixed
+
+- `dot shell update --prewarm` (and every `chezmoi apply`, which runs it) no longer leaves zsh and fish without a mise cache: it clears the old copies, then has each shell write its own again through its `_cached_eval`, which keeps the cache free of the caller's `PATH`. `dot doctor` called the missing cache stale until a new shell was opened; its hint for a stale mise cache is now prewarm, as for every other tool.
+
 ## v0.2.549 (2026-11-22)
 
 ### Changed

@@ -8,9 +8,8 @@
 # Sourced by scripts/diagnostics/doctor.sh; uses its helpers and globals.
 
 # _doctor_cache_shells <tool>: the shells that keep an init cache for <tool>.
-# mise has none in bash: bash never activates mise from a cache, and prewarm
-# writes no mise cache in any shell. zsh and fish write theirs at the first
-# prompt.
+# mise has none in bash: bash never activates mise from a cache. zsh and
+# fish write theirs at the first prompt, and prewarm has them write it too.
 _doctor_cache_shells() {
   case "$1" in
     mise) echo "zsh fish" ;;
@@ -84,14 +83,11 @@ _doctor_perf_cache_freshness() {
   fi
 }
 
-# _doctor_cache_hint <stale tools>: what rebuilds them. prewarm rebuilds every
-# cache but mise's, which the next zsh or fish shell writes.
+# _doctor_cache_hint: what rebuilds stale caches. prewarm rebuilds every
+# one, mise's included (zsh and fish write it through their own
+# _cached_eval).
 _doctor_cache_hint() {
-  case "$1" in
-    mise) echo "open a new zsh or fish shell to rebuild it" ;;
-    *mise*) echo "run dot shell update --prewarm, then open a new shell" ;;
-    *) echo "run dot shell update --prewarm" ;;
-  esac
+  echo "run dot shell update --prewarm"
 }
 
 # 2. Slow-init tools that are present but NOT wrapped in _cached_eval.

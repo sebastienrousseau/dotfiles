@@ -149,16 +149,20 @@ echo "set -gx PATH $SANDBOX/stale" >"$H/.cache/fish/mise-init.fish"
 env -i HOME="$H" PATH="$H/stubs:$SANDBOX/prewarm:/usr/bin:/bin" TERM=dumb \
   XDG_CACHE_HOME="$H/.cache" XDG_DATA_HOME="$H/.local/share" \
   bash "$REPO_ROOT/scripts/ops/prewarm.sh" >/dev/null 2>&1
+# prewarm has zsh write its mise cache again, through the zshrc's own
+# _cached_eval, so `dot doctor` finds it fresh and the next shell reads it.
+assert_file_exists "$CACHE" "prewarm leaves a fresh zsh mise cache"
+runs="$(activations)"
 after_prewarm="$(shell "$SANDBOX/second")"
+assert_equals "$runs" "$(activations)" "the shell after prewarm reads that cache"
 leaked=no
 [[ "$after_prewarm" == *"$SANDBOX/prewarm"* ]] && leaked=yes
 assert_equals "no" "$leaked" "a shell after prewarm does not inherit prewarm's PATH"
 assert_contains "$SANDBOX/shims:$H/stubs:$SANDBOX/second" "$after_prewarm" \
   "the shell after prewarm gets the shims ahead of its own PATH"
 left=none
-for f in "$H/.cache/bash/mise-init.bash" "$H/.cache/fish/mise-init.fish"; do
-  [[ -e "$f" ]] && left="$f"
-done
-assert_equals "none" "$left" "prewarm leaves no bash or fish mise cache"
+[[ -e "$H/.cache/bash/mise-init.bash" ]] && left=bash
+grep -qF -- "$SANDBOX/stale" "$H/.cache/fish/mise-init.fish" 2>/dev/null && left=fish
+assert_equals "none" "$left" "prewarm leaves no bash mise cache and no pinned fish one"
 
 print_summary
