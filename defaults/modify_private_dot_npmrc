@@ -35,7 +35,10 @@ min-release-age=7
 min-release-age-exclude=@sebastienrousseau/*
 
 # Performance
-prefer-offline=true
+# No prefer-offline: it reuses cached package metadata without asking the
+# registry, so a release published since the last fetch stays invisible
+# (ETARGET) until the cache ages out. The seven-day wait above already
+# keeps fresh third-party versions out; stale metadata adds nothing.
 progress=false
 
 # Behavior

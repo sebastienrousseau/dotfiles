@@ -2,7 +2,7 @@
 
 This file documents all notable changes to this project.
 
-## v0.2.549 (2026-11-20)
+## v0.2.549 (2026-11-22)
 
 ### Changed
 
@@ -10,6 +10,7 @@ This file documents all notable changes to this project.
 
 ### Fixed
 
+- npm no longer runs with `prefer-offline=true`, which reused cached package metadata without asking the registry: a release published since the last fetch failed with `ETARGET` until the cache aged out, even for the exempt `@sebastienrousseau/*` packages. The seven-day wait already keeps new third-party versions out.
 - rustup is the standalone install in `~/.cargo/bin` on macOS too. Homebrew's rustup leaves the Brewfiles and `PATH`: with both installed, each one's proxies fell back to the other's, so a missing component such as `rust-analyzer` recursed forever and Neovim's Rust LSP never started. `chezmoi apply` installs the standalone rustup when it is missing, checking `rustup-init.sh` against its published checksum, and only then removes Homebrew's; toolchains in `~/.rustup` stay. The Rust provisioner no longer suggests `mise use -g rust@stable`, which overrides every `rust-toolchain.toml`.
 
 ## v0.2.548 (2026-11-20)

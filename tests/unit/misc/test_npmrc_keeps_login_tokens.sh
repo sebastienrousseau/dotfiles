@@ -85,6 +85,13 @@ else
     "npm runs no install scripts and installs nothing published in the last 7 days"
 fi
 
+# Package metadata is always revalidated: prefer-offline served a stale
+# packument, so a first-party release the cooldown exempts still failed
+# with ETARGET until the cache aged out.
+test_start "npmrc_revalidates_package_metadata"
+assert_equals "0" "$(grep -c '^prefer-offline' "$H1/.npmrc" || true)" \
+  "the rendered npmrc does not set prefer-offline"
+
 # 2. A token in chezmoi data wins for its registry; other registries are kept.
 H2="$SB/h2"
 mkdir -p "$H2"
