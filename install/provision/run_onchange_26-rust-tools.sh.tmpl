@@ -16,9 +16,79 @@ if [[ "${DOTFILES_CONTAINER:-0}" = "1" && "${DOTFILES_RUST_IN_CONTAINER:-0}" != 
   exit 0
 fi
 
-# Check if rustup is available
+# rustup is the standalone install in $CARGO_HOME/bin on every OS, never
+# Homebrew's or mise's: mise exports RUSTUP_TOOLCHAIN, which overrides
+# rust-toolchain.toml, and with Homebrew's rustup beside the standalone one
+# each one's proxies fall back to the other's, so a missing component such
+# as rust-analyzer recursed forever.
+CARGO_BIN="${CARGO_HOME:-$HOME/.cargo}/bin"
+
+sha256_of() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  else
+    shasum -a 256 "$1" | awk '{print $1}'
+  fi
+}
+
+# fetch_rustup_init <dir>: downloads rustup-init.sh into <dir> and checks it
+# against the checksum rust-lang.org publishes for it.
+fetch_rustup_init() {
+  local dir="$1" expected actual
+  if ! curl --proto '=https' --tlsv1.2 -fsSL -o "$dir/rustup-init.sh" https://sh.rustup.rs ||
+    ! curl --proto '=https' --tlsv1.2 -fsSL -o "$dir/rustup-init.sh.sha256" \
+      https://static.rust-lang.org/rustup/rustup-init.sh.sha256; then
+    log_error "Failed to download the rustup installer or its checksum."
+    return 1
+  fi
+  expected="$(awk '{print $1}' "$dir/rustup-init.sh.sha256")"
+  actual="$(sha256_of "$dir/rustup-init.sh")"
+  if [[ ! "$expected" =~ ^[0-9a-f]{64}$ || "$expected" != "$actual" ]]; then
+    log_error "rustup installer checksum mismatch (expected=$expected actual=$actual)."
+    return 1
+  fi
+}
+
+brew_has_rustup() {
+  command -v brew >/dev/null 2>&1 && brew list --formula rustup >/dev/null 2>&1
+}
+
+# ensure_rustup: installs the standalone rustup when it is missing and retires
+# Homebrew's. Homebrew's goes only after the replacement is verified, so a
+# failed download leaves the machine as it was. Toolchains in ~/.rustup stay.
+ensure_rustup() {
+  local tmp rc=0
+  if [[ -x "$CARGO_BIN/rustup" ]]; then
+    if brew_has_rustup; then
+      log_info "Removing Homebrew's rustup; the standalone one in $CARGO_BIN stays."
+      brew uninstall rustup || log_warn "Could not remove Homebrew's rustup: run 'brew uninstall rustup'."
+    fi
+    return 0
+  fi
+  if ! brew_has_rustup && command -v rustup >/dev/null 2>&1; then
+    return 0
+  fi
+  log_info "Installing rustup..."
+  tmp="$(umask 077 && mktemp -d)"
+  if fetch_rustup_init "$tmp"; then
+    if brew_has_rustup; then
+      brew uninstall rustup || log_warn "Could not remove Homebrew's rustup."
+    fi
+    sh "$tmp/rustup-init.sh" -y --no-modify-path --default-toolchain stable || rc=$?
+  else
+    rc=1
+  fi
+  rm -rf "$tmp"
+  return "$rc"
+}
+
+if ! ensure_rustup; then
+  log_warn "rustup is not installed; skipping Rust tools. Rerun 'chezmoi apply' to retry."
+  exit 0
+fi
+export PATH="$CARGO_BIN:$PATH"
 if ! command -v rustup >/dev/null 2>&1; then
-  log_warn "rustup not found. Install it with 'mise use -g rust@stable' or rerun the verified Linux provisioner."
+  log_warn "rustup not found after install; skipping Rust tools."
   exit 0
 fi
 

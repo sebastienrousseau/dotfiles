@@ -56,7 +56,6 @@ brew "shfmt"
 # Languages & Runtimes (Cross-Platform)
 # -----------------------------------------------------------------------------
 brew "uv"                      # Fast Python package manager
-brew "rustup"
 brew "go"
 
 # -----------------------------------------------------------------------------
