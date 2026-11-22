@@ -206,6 +206,35 @@ assert_equals 0 "$RC" "rc"
 called "gh completion -s zsh"
 assert_file_contains "$XDG_DATA_HOME/zsh/completions/_gh" "#compdef gh" "completion written"
 
+# prewarm writes no mise cache itself (it would pin its own PATH); it has
+# each shell rebuild its own through _cached_eval. These stub shells record
+# how they are called: zsh writes its cache, fish writes none.
+test_start "prewarm_has_each_shell_rebuild_its_mise_cache"
+record_stub mise
+cat >"$BIN/zsh" <<STUB
+#!$REAL_BASH
+printf 'zsh %s\\n' "\$*" >>"\$CALLS"
+echo "# mise activate zsh" >"\$XDG_CACHE_HOME/zsh/mise-init.zsh"
+STUB
+cat >"$BIN/fish" <<STUB
+#!$REAL_BASH
+printf 'fish %s\\n' "\$*" >>"\$CALLS"
+STUB
+chmod +x "$BIN/zsh" "$BIN/fish"
+run bash "$PREWARM"
+assert_equals 0 "$RC" "rc"
+called "zsh -i -c _cached_eval mise-init mise activate zsh"
+called "fish -c _cached_eval mise activate fish"
+out_has "Cached for zsh" "the cache zsh wrote is reported"
+out_has "Not cached for fish; its next start writes it" "a shell that wrote none is reported"
+
+test_start "prewarm_starts_no_shell_without_mise"
+rm -f "$BIN/mise"
+run env PATH="$BIN:/usr/bin:/bin" "$REAL_BASH" "$PREWARM"
+assert_equals 0 "$RC" "rc"
+assert_true "! grep -qE '^(zsh|fish) ' '$CALLS'" "no shell started for mise"
+rm -f "$BIN/zsh" "$BIN/fish"
+
 test_start "prewarm_refuses_to_run_twice_at_once"
 LOCK="$XDG_RUNTIME_DIR/dotfiles-prewarm.lock"
 NOFLOCK="$DOTFILES_COV_TMPDIR/noflock"

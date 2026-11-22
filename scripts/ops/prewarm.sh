@@ -76,10 +76,28 @@ ui_section "Zsh"
 # ran it. zsh and fish write their mise cache themselves, with that PATH
 # replaced by $PATH (_cached_eval_generate); a copy cached here would pin this
 # script's PATH into every later shell. bash never reads one. Clear stale
-# copies so the next shell rewrites its own.
+# copies, then have zsh and fish write theirs again through their own
+# _cached_eval, so the caches are fresh before the next shell (and `dot
+# doctor`) looks.
 rm -f "$CACHE_DIR/zsh/mise-init.zsh" "$CACHE_DIR/zsh/mise-init.zsh.zwc" "$CACHE_DIR/zsh/mise-init.zsh.bin" \
   "$CACHE_DIR/bash/mise-init.bash" "$CACHE_DIR/bash/mise-init.bin" \
   "$CACHE_DIR/fish/mise-init.fish" "$CACHE_DIR/fish/mise-init.bin"
+
+# _warm_mise SHELL CMD...: run CMD (the shell with its own config) to write
+# SHELL's mise cache; a shell without the dotfiles' _cached_eval writes none
+# and leaves it to its next start.
+_warm_mise() {
+  local shell="$1"
+  shift
+  command -v mise >/dev/null 2>&1 && command -v "$shell" >/dev/null 2>&1 || return 0
+  "$@" </dev/null >/dev/null 2>&1 || true
+  if [ -s "$CACHE_DIR/$shell/mise-init.$shell" ]; then
+    ui_ok "mise" "Cached for $shell"
+  else
+    ui_warn "mise" "Not cached for $shell; its next start writes it"
+  fi
+}
+_warm_mise zsh zsh -i -c '_cached_eval mise-init mise activate zsh'
 warm_tool "starship" "starship init zsh" "zsh" "zsh"
 warm_tool "zoxide" "zoxide init zsh" "zsh" "zsh"
 warm_tool "atuin" "atuin init zsh --disable-up-arrow" "zsh" "zsh"
@@ -94,6 +112,7 @@ warm_tool "fzf" "fzf --bash" "bash" "bash"
 warm_tool "direnv" "direnv hook bash" "bash" "bash"
 
 ui_section "Fish"
+_warm_mise fish fish -c '_cached_eval mise activate fish'
 warm_tool "starship" "starship init fish" "fish" "fish"
 warm_tool "zoxide" "zoxide init fish" "fish" "fish"
 warm_tool "atuin" "atuin init fish" "fish" "fish"

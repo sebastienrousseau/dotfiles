@@ -96,7 +96,7 @@ codex = "0.170.0"
 "github:sebastienrousseau/passmcp-graph" = { version = "0.0.10", minimum_release_age = "0s" }
 "github:sebastienrousseau/passmcp-lsp" = { version = "0.0.10", minimum_release_age = "0s" }
 "github:sebastienrousseau/passmcp-server" = { version = "0.0.10", minimum_release_age = "0s" }
-"github:sebastienrousseau/draft" = { version = "0.0.47", minimum_release_age = "0s" }
+"github:sebastienrousseau/draft" = { version = "0.0.50", minimum_release_age = "0s" }
 eza = "latest"
 gping = "latest"
 # pandoc builds the HTML/PDF/EPUB manual. Without it tools/docs/build-manual.sh
@@ -128,7 +128,7 @@ minisign = "0.12"
 # executable"), which silently breaks `dot doctor`'s startup benchmark.
 # It's provided natively by Brewfile.cli (arm64) and by Linux package
 # managers instead.
-"aqua:ollama/ollama" = "0.40.16"
+"aqua:ollama/ollama" = "0.40.17"
 "aqua:Nukesor/pueue/pueue" = "4.0.4"
 "aqua:Nukesor/pueue/pueued" = "4.0.4"
 wasmtime = "50.0.2"

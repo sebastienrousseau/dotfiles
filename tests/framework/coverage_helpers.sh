@@ -26,6 +26,10 @@ cov_setup_sandbox() {
   export XDG_DATA_HOME="$HOME/.local/share"
   export XDG_CACHE_HOME="$HOME/.cache"
   export XDG_STATE_HOME="$HOME/.local/state"
+  # zsh reads its startup files from $ZDOTDIR before $HOME: a developer's
+  # exported ZDOTDIR would load their real zshrc into every zsh a test
+  # starts. Unset, zsh looks in the sandbox $HOME, as it does in CI.
+  unset ZDOTDIR
   export MISE_YES=1
   mkdir -p "$HOME/.config" "$HOME/.local/share" "$HOME/.cache" \
     "$HOME/.local/state" "$tmp/bin"
