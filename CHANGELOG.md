@@ -2,6 +2,12 @@
 
 This file documents all notable changes to this project.
 
+## Unreleased
+
+### Changed
+
+- ollama moves to 0.40.17 and draft to 0.0.50, the newest releases of both (`[ai_tools]` in `defaults/.chezmoidata.toml` and `conf.d/00-dotfiles.toml`).
+
 ## v0.2.549 (2026-11-22)
 
 ### Changed
