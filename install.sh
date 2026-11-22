@@ -124,7 +124,7 @@ charm_keyring_verify() {
 }
 
 # chezmoi_release_sha256 <asset>: reviewed SHA-256 (else $CHEZMOI_SHA256), in step
-# with tools/ci/install-chezmoi-verified.sh; from the v0.2.550 checksums.txt.
+# with tools/ci/install-chezmoi-verified.sh; from chezmoi_2.74.1_checksums.txt.
 chezmoi_release_sha256() {
   local sha
   case "$1" in

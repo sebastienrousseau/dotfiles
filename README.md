@@ -86,9 +86,9 @@ installer_dir="$(mktemp -d)"
 curl -fsSL -o "$installer_dir/dotfiles-install.sh" \
   https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.550/dotfiles-install-0.2.550.sh
 if command -v sha256sum >/dev/null 2>&1; then
-  echo "8805e13ef64daf3a23564816be02feb14e72824426cdd2e6c8f93e22c93d5238  $installer_dir/dotfiles-install.sh" | sha256sum -c -
+  echo "a22c03338d675c5defd061e98dc56fedba9cd13cc1d56c2f7f60e077b4e31935  $installer_dir/dotfiles-install.sh" | sha256sum -c -
 else
-  echo "8805e13ef64daf3a23564816be02feb14e72824426cdd2e6c8f93e22c93d5238  $installer_dir/dotfiles-install.sh" | shasum -a 256 -c -
+  echo "a22c03338d675c5defd061e98dc56fedba9cd13cc1d56c2f7f60e077b4e31935  $installer_dir/dotfiles-install.sh" | shasum -a 256 -c -
 fi && bash "$installer_dir/dotfiles-install.sh"
 ```
 
