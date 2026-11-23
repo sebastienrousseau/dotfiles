@@ -11,9 +11,11 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import filecmp
 import hashlib
 import os
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -213,11 +215,46 @@ def check_sync(src_dir: Path | None, targets: list[tuple[str, Path]], quiet: boo
     return 1
 
 
-def push_sync(src_dir: Path | None, targets: list[tuple[str, Path]]) -> int:
-    """Propagate canonical repo files to all target destinations."""
+def published_blobs(src_dir: Path, fname: str) -> set[str]:
+    """Every version of `fname` this repository has committed, as git blob ids."""
+    log = subprocess.run(
+        ["git", "-C", str(src_dir), "log", "--raw", "--no-abbrev", "--format=", "--", fname],
+        capture_output=True, text=True, check=False,
+    ).stdout
+    return {line.split()[3] for line in log.splitlines() if line.startswith(":")}
+
+
+def blob_of(path: Path) -> str:
+    """The git blob id of a file's current content."""
+    return subprocess.run(
+        ["git", "hash-object", str(path)], capture_output=True, text=True, check=False
+    ).stdout.strip()
+
+
+def safe_to_overwrite(src_dir: Path, src: Path, dst: Path) -> bool:
+    """Whether pushing `src` over `dst` loses nothing.
+
+    It does not when `dst` is missing, already matches, or holds a version
+    this repository once published. Any other content was edited in place
+    (in ~/Code or a dotfiles copy) and is newer than the canonical source as
+    far as anyone can tell: a push that overwrote it once replaced the
+    workspace's AGENTS.md with an October copy. Such a file is kept.
+    """
+    if not dst.exists() or filecmp.cmp(src, dst, shallow=False):
+        return True
+    return blob_of(dst) in published_blobs(src_dir, src.name)
+
+
+def push_sync(src_dir: Path | None, targets: list[tuple[str, Path]], force: bool = False) -> int:
+    """Propagate canonical repo files to all target destinations.
+
+    A target file edited in place is kept and reported, unless `force`:
+    adopt it with --pull, or overwrite it with --push --force.
+    """
     if src_dir is None:
         print("Cannot push: no standards source directory located.")
         return 1
+    kept = 0
 
     print(f"Synchronizing {len(STANDARD_FILES)} standard files to {len(targets)} targets...\n")
     for label, target_dir in targets:
@@ -234,11 +271,18 @@ def push_sync(src_dir: Path | None, targets: list[tuple[str, Path]]) -> int:
             try:
                 if not src.is_file():
                     continue
+                if not force and not safe_to_overwrite(src_dir, src, dst):
+                    kept += 1
+                    print(f"  [KEPT] {fname}: edited here, not a published version; --pull to adopt it, --push --force to overwrite")
+                    continue
                 shutil.copy2(src, dst)
                 print(f"  [COPIED] {fname}")
             except (OSError, PermissionError) as e:
                 print(f"  [ERROR] {fname}: {e}")
         print()
+    if kept:
+        print(f"Push synchronization kept {kept} file(s) edited in place; nothing of them was overwritten.")
+        return 1
     print("Push synchronization complete.")
     return 0
 
@@ -305,6 +349,7 @@ def main() -> int:
     parser.add_argument("--check", action="store_true", help="Check for drift without modifying files")
     parser.add_argument("-q", "--quiet", action="store_true", help="Quiet mode: suppress output unless drift detected")
     parser.add_argument("--push", action="store_true", help="Push canonical repo standards to all targets")
+    parser.add_argument("--force", action="store_true", help="With --push, also overwrite files edited in place")
     parser.add_argument("--pull", action="store_true", help="Pull standards from workspace root into repo")
     parser.add_argument("--install-hooks", action="store_true", help="Install git post-commit and post-merge hooks")
     args = parser.parse_args()
@@ -319,7 +364,7 @@ def main() -> int:
     if args.check:
         return check_sync(src_dir, targets, quiet=args.quiet)
 
-    return push_sync(src_dir, targets)
+    return push_sync(src_dir, targets, force=args.force)
 
 
 if __name__ == "__main__":
