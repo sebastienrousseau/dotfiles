@@ -7,6 +7,7 @@ This file documents all notable changes to this project.
 ### Changed
 
 - CI's Rust workflow uses taiki-e/install-action 2.90.5 (was 2.90.3), a patch release, pinned by commit SHA as before.
+- Neovim's plugin lockfile (`lazy-lock.json`) moves nine plugins to their latest commits: copilot.lua, gitsigns.nvim, mason-lspconfig.nvim, nvim-lint, nvim-lspconfig, nvim-scrollbar, nvim-tree.lua, nvim-treesitter and outline.nvim.
 
 ## v0.2.550 (2026-11-22)
 
