@@ -133,7 +133,7 @@ jobs:
       # Keep the runtime on the version the workstations run: mise's conf.d
       # (defaults/dot_config/mise/conf.d/00-dotfiles.toml) is the source, so
       # CI and `dot attest --verify` run the module the same way.
-      - uses: taiki-e/install-action@cfdb7ed4ccc7c7dce37759eae89dc5674b469b39 # v2.90.3
+      - uses: taiki-e/install-action@ab49d3c64680143e184118bed66a46419fc15519 # v2.90.5
         with:
           tool: wasmtime@50.0.2
 
@@ -298,7 +298,7 @@ jobs:
           toolchain: stable
           components: llvm-tools-preview
 
-      - uses: taiki-e/install-action@cfdb7ed4ccc7c7dce37759eae89dc5674b469b39 # v2.90.3
+      - uses: taiki-e/install-action@ab49d3c64680143e184118bed66a46419fc15519 # v2.90.5
         with:
           tool: cargo-llvm-cov
 
@@ -383,7 +383,7 @@ jobs:
           toolchain: nightly
           components: rust-src
 
-      - uses: taiki-e/install-action@cfdb7ed4ccc7c7dce37759eae89dc5674b469b39 # v2.90.3
+      - uses: taiki-e/install-action@ab49d3c64680143e184118bed66a46419fc15519 # v2.90.5
         with:
           tool: cargo-fuzz
 
@@ -525,7 +525,7 @@ jobs:
         with:
           toolchain: stable
 
-      - uses: taiki-e/install-action@cfdb7ed4ccc7c7dce37759eae89dc5674b469b39 # v2.90.3
+      - uses: taiki-e/install-action@ab49d3c64680143e184118bed66a46419fc15519 # v2.90.5
         with:
           tool: cargo-audit
 
