@@ -89,15 +89,39 @@ quiet_out="$(STANDARDS_REPO="$SRC_DIR" STANDARDS_TARGETS="$TARGET_DIR" "$PYTHON_
 assert_equals "1" "$quiet_status" "quiet check returns 1 when drifted"
 assert_contains "Drift detected" "$quiet_out" "quiet mode outputs drift warning"
 
-test_start "standards_sync_push_repair"
+sandbox_git() {
+  git -C "$SRC_DIR" -c user.name=test -c user.email=test@example.invalid \
+    -c commit.gpgsign=false "$@" >/dev/null 2>&1
+}
+
+# A target edited in place is newer than the source as far as push can tell
+test_start "standards_sync_push_keeps_edit"
+sandbox_git init -q
+sandbox_git add -A
+sandbox_git commit -q -m seed
+kept_status=0
+kept_out="$(STANDARDS_REPO="$SRC_DIR" STANDARDS_TARGETS="$TARGET_DIR" "$PYTHON_BIN" "$SYNC_BIN" --push 2>&1)" || kept_status=$?
+assert_equals "1" "$kept_status" "push returns 1 when it keeps an edited file"
+assert_contains "[KEPT] AGENTS.md" "$kept_out" "push reports the kept file"
+assert_equals "drifted content" "$(cat "$TARGET_DIR/AGENTS.md")" "edited target survives push"
+
+test_start "standards_sync_push_force"
+push_out="$(STANDARDS_REPO="$SRC_DIR" STANDARDS_TARGETS="$TARGET_DIR" "$PYTHON_BIN" "$SYNC_BIN" --push --force 2>&1)"
+push_status=$?
+assert_equals "0" "$push_status" "push --force returns 0"
+assert_contains "Push synchronization complete" "$push_out" "push --force completes"
+restored_diff="$(diff -u "$SRC_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md" 2>&1 || true)"
+assert_equals "" "$restored_diff" "target AGENTS.md matches source after push --force"
+
+# A target holding a version the source once committed is stale, not edited
+test_start "standards_sync_push_updates_published"
+printf 'new content of AGENTS.md\n' >"$SRC_DIR/AGENTS.md"
+sandbox_git commit -q -am update
 push_out="$(STANDARDS_REPO="$SRC_DIR" STANDARDS_TARGETS="$TARGET_DIR" "$PYTHON_BIN" "$SYNC_BIN" --push 2>&1)"
 push_status=$?
-assert_equals "0" "$push_status" "push sync returns 0"
-assert_contains "Push synchronization complete" "$push_out" "push completes"
-
-# Verify target AGENTS.md is restored
-restored_diff="$(diff -u "$SRC_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md" 2>&1 || true)"
-assert_equals "" "$restored_diff" "target AGENTS.md matches source after push"
+assert_equals "0" "$push_status" "push returns 0 over a published version"
+updated_diff="$(diff -u "$SRC_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md" 2>&1 || true)"
+assert_equals "" "$updated_diff" "stale published target is updated"
 
 # 5. Verify 45-standards.zsh sentinel exists and is valid shell syntax
 test_start "standards_sentinel_syntax"
