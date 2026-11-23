@@ -52,12 +52,24 @@ fi
 EOF
 chmod +x "$SANDBOX/bin/mise"
 
+# /usr/bin and /bin without the tools hydration loads. Distro packages (Arch
+# ships mise, atuin, starship and zoxide) put them in /usr/bin: a real
+# starship replaced READY> with its own prompt, so the first prompt was never
+# seen and the 30 s wait for it outlasted the 2 s activation.
+SYS="$SANDBOX/sys"
+mkdir -p "$SYS"
+for p in /usr/bin/* /bin/*; do
+  n="${p##*/}"
+  case "$n" in mise | atuin | starship | zoxide) continue ;; esac
+  [[ -e "$SYS/$n" ]] || ln -s "$p" "$SYS/$n"
+done
+
 # The session: wait for the first prompt and note whether mise had run;
 # type a command at once; start a child `zsh -i` and query it.
 cat >"$SANDBOX/drive.zsh" <<'EOF'
 zmodload zsh/zpty zsh/datetime
-H=$1 LOG=$2 BIN=$3 ZSH_BIN=$4
-zpty -b S env -i HOME=$H ZDOTDIR=$H/.config/zsh PATH=$BIN:/usr/bin:/bin TERM=xterm $ZSH_BIN -d -i
+H=$1 LOG=$2 BIN=$3 ZSH_BIN=$4 SYS=$5
+zpty -b S env -i HOME=$H ZDOTDIR=$H/.config/zsh PATH=$BIN:$SYS TERM=xterm $ZSH_BIN -d -i
 # expect <pattern>: read until the output matches <pattern> (30 s cap).
 expect() {
   local t0=$EPOCHREALTIME chunk
@@ -84,7 +96,7 @@ zpty -w S 'exit'
 zpty -d S
 EOF
 
-out="$("$ZSH_BIN" -f "$SANDBOX/drive.zsh" "$H" "$LOG" "$SANDBOX/bin" "$ZSH_BIN" 2>&1)"
+out="$("$ZSH_BIN" -f "$SANDBOX/drive.zsh" "$H" "$LOG" "$SANDBOX/bin" "$ZSH_BIN" "$SYS" 2>&1)"
 field() { printf '%s\n' "$out" | sed -n "s/^$1=//p" | tail -n 1; }
 
 test_start "first_prompt_does_not_wait_for_hydration"

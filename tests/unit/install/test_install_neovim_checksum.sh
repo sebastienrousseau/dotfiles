@@ -18,7 +18,10 @@ HELPER="$REPO_ROOT/install/lib/install_neovim.sh"
 WORK="$(mktemp -d -t nvim-checksum.XXXXXX)"
 trap 'rm -rf "$WORK"' EXIT
 
-hash_of() { shasum -a 256 "$1" | awk '{print $1}'; }
+# Resolved now: each case runs with PATH cut to /usr/bin:/bin, and Arch keeps
+# shasum in /usr/bin/core_perl, so a bare `shasum` in the stub is not found.
+SHASUM="$(command -v shasum)"
+hash_of() { "$SHASUM" -a 256 "$1" | awk '{print $1}'; }
 
 # make_tarball <out> <payload>: an nvim-linux64 tree whose nvim prints <payload>.
 make_tarball() {
@@ -38,7 +41,7 @@ new_case() {
   printf '#!/bin/sh\necho Linux\n' >"$C/bin/uname"
   printf '#!/bin/sh\necho 1000\n' >"$C/bin/id"
   printf '#!/bin/sh\nexec "$@"\n' >"$C/bin/sudo"
-  printf '#!/bin/sh\nexec shasum -a 256 "$@"\n' >"$C/bin/sha256sum"
+  printf '#!/bin/sh\nexec %s -a 256 "$@"\n' "$SHASUM" >"$C/bin/sha256sum"
   chmod +x "$C/bin/"*
 }
 
