@@ -8,6 +8,10 @@ This file documents all notable changes to this project.
 
 - The shared `AGENTS.md` (installed as `~/Code/AGENTS.md`) adds a Definition of Done rule: where a repository has checks too slow or costly for CI, run them anyway (`make mutation`, `make corpus-live`), and report one that cannot run.
 
+### Fixed
+
+- `standards-sync --push` keeps a target file that was edited in place (its content is neither the source nor any version the standards repository committed) and exits 1 naming it, instead of overwriting it; one such overwrite replaced the workspace `AGENTS.md` with an October copy. `--pull` adopts the edit, `--push --force` overwrites it. The installed script is the standards repository's `scripts/sync.py` again, byte for byte.
+
 ## v0.2.551 (2026-11-23)
 
 ### Changed
