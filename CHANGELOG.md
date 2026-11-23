@@ -2,6 +2,12 @@
 
 This file documents all notable changes to this project.
 
+## Unreleased
+
+### Fixed
+
+- fish now puts `~/.cargo/bin`, `~/.local/bin`, `~/bin` and the mise shims ahead of the system directories even when the parent process already had them on `PATH`, as a terminal started from a login session does. They were left behind `/usr/bin`, so a distro's `rustc` and `cargo` shadowed rustup (ignoring each project's `rust-toolchain.toml`) and `/usr/bin` tools shadowed their mise shims. `~/.local/bin` also now comes before `~/.cargo/bin`, as in bash and zsh.
+
 ## v0.2.553 (2026-11-24)
 
 ### Changed
