@@ -2,6 +2,12 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.551 (2026-11-23)
+
+### Changed
+
+- CI's Rust workflow uses taiki-e/install-action 2.90.5 (was 2.90.3), a patch release, pinned by commit SHA as before.
+
 ## v0.2.550 (2026-11-22)
 
 ### Changed
