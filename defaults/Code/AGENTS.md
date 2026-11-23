@@ -191,6 +191,12 @@ starting the requested work.
   choosing individual checkers by hand; the gate can grow without the agent's
   list going stale. Stage new files first when a check reads `git ls-files`,
   or it will not see them.
+- **Run the gates CI does not.** Where a repository has checks too slow
+  or too costly for CI, run them too: `make mutation` (mutation testing,
+  efficacy held at its threshold; a timed-out mutant is rerun with a
+  longer timeout, not counted as killed) and `make corpus-live` (live
+  recall against a real backend, which every recorded-output test misses).
+  If one cannot run (no backend, no credentials), say so in the report.
 - **A change must not add warnings.** A new compiler, linter or type-checker
   warning is a failure, not a note.
 - **Observe and Report**:
