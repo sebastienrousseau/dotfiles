@@ -37,8 +37,10 @@ fi
 FISH_BIN="$(command -v fish || true)"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
+# From the exports the dir list reads ($PIPX_BIN_DIR, $BUN_INSTALL): without
+# them "$BUN_INSTALL/bin" is /bin, which would be moved ahead of /usr/bin.
 PATH_BLOCK="$WORK/path-block.fish"
-sed -n '/^set -q PAGER/,/^# Promote mise/p' "$CONF_FILE" | sed '/^{{/d' >"$PATH_BLOCK"
+sed -n '/^set -gx PIPX_HOME/,/^# Promote mise/p' "$CONF_FILE" | sed '/^{{/d' >"$PATH_BLOCK"
 for start in "/bin:/usr/bin" "/sbin:/usr/sbin:/bin:/usr/bin" "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"; do
   test_start "fish_conf_env_system_dirs_follow_core_paths_from_${start//[:\/]/_}"
   if [[ -z "$FISH_BIN" ]]; then
@@ -54,6 +56,34 @@ for start in "/bin:/usr/bin" "/sbin:/usr/sbin:/bin:/usr/bin" "/usr/local/bin:/us
     [[ -d "$d" ]] && want+="$d "
   done
   assert_equals "$want" "$got" "system dirs from $start"
+done
+
+# User dirs the parent already put on PATH (a terminal started from a login
+# session passes ~/.cargo/bin, ~/.local/bin and the mise shims in) still end
+# up ahead of the system dirs. Skipping a dir because it was present left it
+# wherever the parent had it, behind the /usr/bin the block above moves to the
+# front: /usr/bin/rustc then shadowed rustup and every mise shim.
+UHOME="$WORK/home"
+mkdir -p "$UHOME/.local/share/mise/shims" "$UHOME/bin" "$UHOME/.local/bin" "$UHOME/.cargo/bin"
+SHIMS="$UHOME/.local/share/mise/shims"
+for start in \
+  "$SHIMS:$UHOME/bin:$UHOME/.cargo/bin:$UHOME/.local/bin:/usr/bin:/bin" \
+  "/usr/bin:/bin:$UHOME/.cargo/bin:$SHIMS" \
+  "/usr/bin:/bin"; do
+  label="${start//$UHOME/~}"
+  test_start "fish_conf_env_user_dirs_ahead_of_system_from_${label//[:\/~.]/_}"
+  if [[ -z "$FISH_BIN" ]]; then
+    assert_true "true" "fish not installed; skipped"
+    continue
+  fi
+  # shellcheck disable=SC2016 # fish code, expanded by fish
+  got="$(env -i HOME="$UHOME" PATH="$start" "$FISH_BIN" --no-config -c \
+    'source $argv[1]; for p in $PATH; contains -- $p $argv[2..]; and echo $p; end' \
+    "$PATH_BLOCK" "$SHIMS" "$UHOME/bin" "$UHOME/.local/bin" "$UHOME/.cargo/bin" /usr/bin 2>&1 |
+    tr '\n' ' ')"
+  want="$SHIMS $UHOME/bin $UHOME/.local/bin $UHOME/.cargo/bin "
+  [[ -d /usr/bin ]] && want+="/usr/bin "
+  assert_equals "$want" "$got" "user dirs from $label"
 done
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
