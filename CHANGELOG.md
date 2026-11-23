@@ -2,6 +2,12 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.552 (2026-11-23)
+
+### Changed
+
+- The shared `AGENTS.md` (installed as `~/Code/AGENTS.md`) adds a Definition of Done rule: where a repository has checks too slow or costly for CI, run them anyway (`make mutation`, `make corpus-live`), and report one that cannot run.
+
 ## v0.2.551 (2026-11-23)
 
 ### Changed
