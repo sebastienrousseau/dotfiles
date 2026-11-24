@@ -11,6 +11,7 @@ This file documents all notable changes to this project.
 ### Fixed
 
 - `standards-sync --push` and `--pull` leave a target that links to the source alone and report it `[LINKED]`, instead of copying each file onto itself and printing `[ERROR] ... are the same file`. The script is the standards repository's `scripts/sync.py` again, byte for byte.
+- The test suite no longer passes a developer's exported `ZDOTDIR` to the tests. Every `zsh -i` a test started loaded the real zshrc against the test's own HOME; on a developer machine two tests never returned and the pre-push suite ran out of processes. CI, which exports no `ZDOTDIR`, never saw it.
 
 ## v0.2.552 (2026-11-23)
 
