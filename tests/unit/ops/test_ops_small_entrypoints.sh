@@ -230,7 +230,15 @@ out_has "Not cached for fish; its next start writes it" "a shell that wrote none
 
 test_start "prewarm_starts_no_shell_without_mise"
 rm -f "$BIN/mise"
-run env PATH="$BIN:/usr/bin:/bin" "$REAL_BASH" "$PREWARM"
+# /usr/bin and /bin without mise: a distro package (Arch's mise) installs it
+# in /usr/bin, where prewarm would find it and start the stubbed shells.
+NOMISE="$DOTFILES_COV_TMPDIR/nomise"
+mkdir -p "$NOMISE"
+for p in /usr/bin/* /bin/*; do
+  n="${p##*/}"
+  [[ "$n" == mise || -e "$NOMISE/$n" ]] || ln -s "$p" "$NOMISE/$n"
+done
+run env PATH="$BIN:$NOMISE" "$REAL_BASH" "$PREWARM"
 assert_equals 0 "$RC" "rc"
 assert_true "! grep -qE '^(zsh|fish) ' '$CALLS'" "no shell started for mise"
 rm -f "$BIN/zsh" "$BIN/fish"
