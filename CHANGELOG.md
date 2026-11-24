@@ -2,6 +2,16 @@
 
 This file documents all notable changes to this project.
 
+## v0.2.553 (2026-11-24)
+
+### Changed
+
+- `~/Code`'s standard files (`AGENTS.md`, `GEMINI.md`, `PR-TEMPLATE.md`, `README-TEMPLATE.md`, `REPO-STANDARD.md`) are symlinks into the standards clone when one exists at `standards_repo` (`~/Code/Public/Other/standards`, new in `.chezmoidata.toml`). An edit in `~/Code` is then a change in the clone that git shows, and neither `chezmoi apply` nor `standards-sync` can copy over it. `chezmoi apply` makes the links (`install/migrate/link-standards.sh`): a missing file, an identical copy or a link elsewhere becomes the link, and a file edited in place is kept and named, with `standards-sync --pull` to adopt it. Without a clone, chezmoi installs plain copies as before.
+
+### Fixed
+
+- `standards-sync --push` and `--pull` leave a target that links to the source alone and report it `[LINKED]`, instead of copying each file onto itself and printing `[ERROR] ... are the same file`. The script is the standards repository's `scripts/sync.py` again, byte for byte.
+
 ## v0.2.552 (2026-11-23)
 
 ### Changed
