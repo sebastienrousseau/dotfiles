@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# Links ~/Code's standard files into the standards clone
+# (install/migrate/link-standards.sh), which .chezmoiignore then leaves to
+# it. Runs again when that script changes or the clone appears.
+{{- if ne .chezmoi.os "windows" }}
+{{- $clone := joinPath .chezmoi.homeDir .standards_repo }}
+# link-standards.sh: {{ include (joinPath .chezmoi.sourceDir ".." "install" "migrate" "link-standards.sh") | sha256sum }}
+# clone present: {{ if stat (joinPath $clone "AGENTS.md") }}yes{{ else }}no{{ end }}
+
+set -euo pipefail
+
+script={{ joinPath .chezmoi.sourceDir ".." "install" "migrate" "link-standards.sh" | quote }}
+[[ -f "$script" ]] || exit 0
+bash "$script" {{ $clone | quote }} {{ joinPath .chezmoi.homeDir "Code" | quote }} || true
+exit 0
+{{- end }}
