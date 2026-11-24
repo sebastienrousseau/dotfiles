@@ -46,6 +46,11 @@ export GIT_EDITOR=true
 # The shells export the developer's checkout as DOTFILES_DIR, which the
 # aliases and scripts prefer to ~/.dotfiles; a test sets its own.
 unset DOTFILES_DIR
+# zsh reads its startup files from $ZDOTDIR before $HOME, so a developer's
+# exported ZDOTDIR loads their real zshrc into every `zsh -i` a test starts,
+# whatever HOME the test set. Under the feature matrix, health.sh's
+# `zsh -i -c exit` did that and never returned. CI has none.
+unset ZDOTDIR
 
 _runner_hermetic_bin="${TMPDIR:-/tmp}/dotfiles-hermetic-bin"
 mkdir -p "$_runner_hermetic_bin"

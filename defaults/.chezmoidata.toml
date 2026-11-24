@@ -1,6 +1,6 @@
 # Active profile - change this to switch configurations
-dotfiles_version = "0.2.552"
-previous_dotfiles_version = "0.2.551"
+dotfiles_version = "0.2.553"
+previous_dotfiles_version = "0.2.552"
 profile = "laptop"
 
 # Machine preset — set per-host in ~/.config/chezmoi/chezmoi.toml:
@@ -8,6 +8,11 @@ profile = "laptop"
 #   machine = "macbook-t2"
 # See .chezmoidata/hardware.toml for available presets.
 machine = ""
+
+# The standards clone, relative to $HOME: the canonical AGENTS.md and its
+# siblings, and standards-sync's first source. When it exists, ~/Code's
+# copies are symlinks into it (install/migrate/link-standards.sh).
+standards_repo = "Code/Public/Other/standards"
 
 # Visual theme. `theme_family` is the wallpaper/palette family and
 # `theme_mode = "auto"` follows the operating-system appearance. `theme` is

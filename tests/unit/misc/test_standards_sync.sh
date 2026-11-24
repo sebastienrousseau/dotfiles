@@ -123,6 +123,36 @@ assert_equals "0" "$push_status" "push returns 0 over a published version"
 updated_diff="$(diff -u "$SRC_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md" 2>&1 || true)"
 assert_equals "" "$updated_diff" "stale published target is updated"
 
+# A target that is a symlink to the source is the source: nothing to copy
+LINK_DIR="$SANDBOX/linked"
+mkdir -p "$LINK_DIR"
+for f in "${STANDARD_FILES[@]}"; do
+  ln -s "$SRC_DIR/$f" "$LINK_DIR/$f"
+done
+
+test_start "standards_sync_push_skips_linked_target"
+link_status=0
+link_out="$(STANDARDS_REPO="$SRC_DIR" STANDARDS_TARGETS="$LINK_DIR" "$PYTHON_BIN" "$SYNC_BIN" --push 2>&1)" || link_status=$?
+assert_equals "0" "$link_status" "push returns 0 over linked targets"
+assert_contains "[LINKED]  AGENTS.md" "$link_out" "push reports the linked file"
+assert_equals "" "$(grep -F '[ERROR]' <<<"$link_out")" "push copies no file onto itself"
+if [[ -L "$LINK_DIR/AGENTS.md" ]]; then link_kept=yes; else link_kept=no; fi
+assert_equals "yes" "$link_kept" "the link is still a link"
+
+test_start "standards_sync_pull_skips_linked_workspace"
+PULL_HOME="$SANDBOX/home"
+mkdir -p "$PULL_HOME/Code" "$SANDBOX/mirror"
+for f in "${STANDARD_FILES[@]}"; do
+  ln -s "$SRC_DIR/$f" "$PULL_HOME/Code/$f"
+done
+pull_status=0
+pull_out="$(HOME="$PULL_HOME" STANDARDS_REPO="$SRC_DIR" STANDARDS_TARGETS="$SANDBOX/mirror" "$PYTHON_BIN" "$SYNC_BIN" --pull 2>&1)" || pull_status=$?
+assert_equals "0" "$pull_status" "pull returns 0 from a linked workspace"
+assert_contains "[LINKED]  AGENTS.md" "$pull_out" "pull reports the linked file"
+assert_equals "" "$(grep -F '[ERROR]' <<<"$pull_out")" "pull copies no file onto itself"
+mirror_diff="$(diff -u "$SRC_DIR/AGENTS.md" "$SANDBOX/mirror/AGENTS.md" 2>&1 || true)"
+assert_equals "" "$mirror_diff" "pull still updates the mirrors"
+
 # 5. Verify 45-standards.zsh sentinel exists and is valid shell syntax
 test_start "standards_sentinel_syntax"
 if [[ -f "$SENTINEL_ZSH" ]]; then

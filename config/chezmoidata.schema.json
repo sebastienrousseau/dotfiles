@@ -26,6 +26,11 @@
       "type": "string",
       "description": "Machine preset key from .chezmoidata/hardware.toml. Empty string for generic / no preset."
     },
+    "standards_repo": {
+      "type": "string",
+      "pattern": "^[^/].*[^/]$",
+      "description": "The standards clone, relative to $HOME. When it holds AGENTS.md, ~/Code's standard files are symlinks into it (install/migrate/link-standards.sh) and chezmoi leaves them alone."
+    },
     "theme": {
       "type": "string",
       "minLength": 1,

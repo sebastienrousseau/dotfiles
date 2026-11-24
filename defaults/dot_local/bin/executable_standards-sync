@@ -245,11 +245,43 @@ def safe_to_overwrite(src_dir: Path, src: Path, dst: Path) -> bool:
     return blob_of(dst) in published_blobs(src_dir, src.name)
 
 
+def is_same_file(a: Path, b: Path) -> bool:
+    """Whether `a` and `b` are one file, as when a target links to the source.
+
+    Copying a file onto itself fails (shutil.SameFileError), and there is
+    nothing to copy: a linked target is always in sync.
+    """
+    try:
+        return a.exists() and b.exists() and os.path.samefile(a, b)
+    except OSError:
+        return False
+
+
+def push_file(src_dir: Path, fname: str, dst: Path, force: bool) -> bool:
+    """Push one standard file to `dst`; return True when an edit was kept."""
+    src = src_dir / fname
+    try:
+        if not src.is_file():
+            return False
+        if is_same_file(src, dst):
+            print(f"  [LINKED]  {fname}")
+            return False
+        if not force and not safe_to_overwrite(src_dir, src, dst):
+            print(f"  [KEPT] {fname}: edited here, not a published version; --pull to adopt it, --push --force to overwrite")
+            return True
+        shutil.copy2(src, dst)
+        print(f"  [COPIED] {fname}")
+    except (OSError, PermissionError) as e:
+        print(f"  [ERROR] {fname}: {e}")
+    return False
+
+
 def push_sync(src_dir: Path | None, targets: list[tuple[str, Path]], force: bool = False) -> int:
     """Propagate canonical repo files to all target destinations.
 
     A target file edited in place is kept and reported, unless `force`:
-    adopt it with --pull, or overwrite it with --push --force.
+    adopt it with --pull, or overwrite it with --push --force. A target
+    that links to the source is reported as linked and left alone.
     """
     if src_dir is None:
         print("Cannot push: no standards source directory located.")
@@ -266,19 +298,7 @@ def push_sync(src_dir: Path | None, targets: list[tuple[str, Path]], force: bool
 
         print(f"Updating: {label} ({target_dir})")
         for fname in STANDARD_FILES:
-            src = src_dir / fname
-            dst = target_dir / fname
-            try:
-                if not src.is_file():
-                    continue
-                if not force and not safe_to_overwrite(src_dir, src, dst):
-                    kept += 1
-                    print(f"  [KEPT] {fname}: edited here, not a published version; --pull to adopt it, --push --force to overwrite")
-                    continue
-                shutil.copy2(src, dst)
-                print(f"  [COPIED] {fname}")
-            except (OSError, PermissionError) as e:
-                print(f"  [ERROR] {fname}: {e}")
+            kept += push_file(src_dir, fname, target_dir / fname, force)
         print()
     if kept:
         print(f"Push synchronization kept {kept} file(s) edited in place; nothing of them was overwritten.")
@@ -304,6 +324,9 @@ def pull_sync(src_dir: Path | None) -> int:
         dst = src_dir / fname
         try:
             if not src.is_file():
+                continue
+            if is_same_file(src, dst):
+                print(f"  [LINKED]  {fname}")
                 continue
             shutil.copy2(src, dst)
             print(f"  [PULLED] {fname}")

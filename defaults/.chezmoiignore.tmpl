@@ -287,3 +287,14 @@ Gemfile.lock
 .nvmrc
 .ruby-version
 .terraform-version
+
+# ── ~/Code standards: symlinks into the standards clone when it exists ──
+# install/migrate/link-standards.sh (run_onchange_after_35) links each file
+# to its canonical copy; chezmoi installs plain copies only without a clone.
+{{- if stat (joinPath .chezmoi.homeDir .standards_repo "AGENTS.md") }}
+Code/AGENTS.md
+Code/GEMINI.md
+Code/PR-TEMPLATE.md
+Code/README-TEMPLATE.md
+Code/REPO-STANDARD.md
+{{- end }}

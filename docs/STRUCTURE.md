@@ -39,7 +39,7 @@ See `docs/operations/ROADMAP_V0_2_503.md` for the full history.
 | `defaults/dot_cargo/`, `defaults/dot_warp/` | defaults | Tool-specific roots (cargo, Warp terminal). |
 | `defaults/private_dot_ssh/` | defaults | SSH config (chezmoi `private_` prefix forces 0600). Does NOT contain private keys. |
 | `defaults/dot_claude/`, `defaults/dot_codex/` | defaults | Claude Code and Codex per-user config. |
-| `defaults/Code/` | defaults | Standards files deployed to `~/Code/`. |
+| `defaults/Code/` | defaults | Standards files deployed to `~/Code/`, as copies when no standards clone exists (otherwise `~/Code` links into the clone, `install/migrate/link-standards.sh`). |
 | **Templates + data** | | |
 | `defaults/.chezmoitemplates/` | framework | Reusable Go-template partials (aliases, functions, desktop, `theme-name`, `go-build-command`), included by the `.tmpl` files. |
 | `defaults/.chezmoidata.toml` | data | Feature flags + version. Single source-of-truth for `dotfiles_version`. |
