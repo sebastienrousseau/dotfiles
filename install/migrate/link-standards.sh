@@ -25,14 +25,13 @@ FILES=(AGENTS.md GEMINI.md PR-TEMPLATE.md README-TEMPLATE.md REPO-STANDARD.md)
 link_one() {
   local src="$1" dst="$2"
   if [[ -L "$dst" && "$(readlink "$dst")" == "$src" ]]; then
-    return 0
-  fi
-  if [[ -L "$dst" || ! -e "$dst" ]] || { [[ -f "$dst" ]] && cmp -s "$src" "$dst"; }; then
+    : # already linked
+  elif [[ -L "$dst" || ! -e "$dst" ]] || { [[ -f "$dst" ]] && cmp -s "$src" "$dst"; }; then
     ln -sfn "$src" "$dst"
     echo "dot: linked ${dst} to ${src}"
-    return 0
+  else
+    echo "dot: kept ${dst}: it differs from ${src}; run 'standards-sync --pull' to adopt it into the clone, or remove it to link it" >&2
   fi
-  echo "dot: kept ${dst}: it differs from ${src}; run 'standards-sync --pull' to adopt it into the clone, or remove it to link it" >&2
 }
 
 clone="${1:?usage: link-standards.sh CLONE CODE}"
