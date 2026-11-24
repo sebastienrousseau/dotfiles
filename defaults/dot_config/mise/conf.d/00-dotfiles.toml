@@ -91,7 +91,7 @@ bat = "latest"
 codex = "0.170.0"
 # corralctl, passmcp, and draft — the AI Ecosystem & Governance Suite,
 # managed and updated globally via mise (`github:sebastienrousseau/...`).
-"github:sebastienrousseau/corralctl" = { version = "0.0.54", minimum_release_age = "0s" }
+"github:sebastienrousseau/corralctl" = { version = "0.0.56", minimum_release_age = "0s" }
 "github:sebastienrousseau/passmcp" = { version = "0.0.10", minimum_release_age = "0s" }
 "github:sebastienrousseau/passmcp-graph" = { version = "0.0.10", minimum_release_age = "0s" }
 "github:sebastienrousseau/passmcp-lsp" = { version = "0.0.10", minimum_release_age = "0s" }
