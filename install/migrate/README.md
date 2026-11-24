@@ -62,6 +62,22 @@ installer is gone too, `mise install` fails on it.
 `chezmoi apply` whenever the list changes. Retiring a tool that
 `mise use -g` may have written means adding it to the list.
 
+## ~/Code standards linked to their clone
+
+The standards repository is the canonical source of `AGENTS.md`,
+`GEMINI.md`, `PR-TEMPLATE.md`, `README-TEMPLATE.md` and
+`REPO-STANDARD.md`. With a clone at `standards_repo`
+(`~/Code/Public/Other/standards` by default, in `.chezmoidata.toml`),
+`link-standards.sh` makes each `~/Code` copy a symlink into it, so an edit
+in `~/Code` is a change in the clone that git shows, and nothing can copy
+over it. A missing file, a copy identical to the clone's, or a link
+elsewhere becomes the link; a file that differs, edited in place, is kept
+and named, and `standards-sync --pull` adopts it into the clone.
+`.chezmoiignore` leaves the five files to it while the clone exists;
+without one, chezmoi installs plain copies as before.
+`defaults/run_onchange_after_35-link-standards.sh.tmpl` runs it after
+`chezmoi apply` when the script changes or the clone appears.
+
 ## The v0.2.503 reorganisation
 
 ### How it works
