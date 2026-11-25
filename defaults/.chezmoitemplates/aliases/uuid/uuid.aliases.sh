@@ -35,4 +35,4 @@ uuid_copy() {
   fi
   return 0
 }
-alias uuid='uuid_copy'
+alias uuid='uuid_copy' # Generate a lowercase UUID, copy it and print it

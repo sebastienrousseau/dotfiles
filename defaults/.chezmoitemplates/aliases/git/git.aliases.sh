@@ -137,7 +137,7 @@ if command -v git &>/dev/null; then
     fi
     git push --set-upstream origin "$branch"
   }
-  alias gpoll='git push origin --all'
+  alias gpoll='git push origin --all' # Push every branch to origin
 
   # TUI Git
   if command -v lazygit &>/dev/null; then
@@ -170,7 +170,7 @@ if command -v git &>/dev/null; then
       git reset --hard && git clean -ffd
     }
   fi
-  alias gress='git reset --soft HEAD~1'
+  alias gress='git reset --soft HEAD~1' # Undo the last commit, keeping its changes staged
 
   # --- Submodules ---
   alias gsm='git submodule'

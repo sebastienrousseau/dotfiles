@@ -24,7 +24,7 @@ set_default_aliases() {
   _default_general_aliases
   _default_system_aliases
   _default_network_aliases
-  alias clearasl='clear_asl_logs'
+  alias clearasl='clear_asl_logs' # Clear ASL logs (macOS) - requires confirmation
   _default_utility_aliases
   _default_clipboard_shims
 }

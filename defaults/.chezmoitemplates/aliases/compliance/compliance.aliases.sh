@@ -36,4 +36,4 @@ audit_fn() {
   fi
 }
 
-alias dot-audit=audit_fn
+alias dot-audit=audit_fn # Show recent configuration changes
