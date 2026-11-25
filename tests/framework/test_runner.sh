@@ -70,7 +70,16 @@ unset _shim
 # download commands of cargo, rustup and go, with exit 97; read-only probes
 # (`go env`, `cargo install --list`) pass through. A test that needs one
 # declares it in its first 30 lines: `# test-needs: network go`.
-cat >"$_runner_hermetic_bin/.guard.$$" <<'GUARD'
+#
+# The guards live in a directory of this run's own, removed on exit. Which
+# tools get one depends on this run's PATH, and test files start nested
+# runners in parallel, so a shared directory let one run delete or restore
+# another's guards mid-test. Guards an earlier version left in the shared
+# directory are cleared.
+rm -f "$_runner_hermetic_bin"/{curl,wget,cargo,rustup,go}
+_runner_guard_bin="$(cd "$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-guards.XXXXXX")" && pwd)"
+trap 'rm -rf "$_runner_guard_bin"' EXIT
+cat >"$_runner_guard_bin/guard" <<'GUARD'
 #!/usr/bin/env bash
 # Hermetic guard written by tests/framework/test_runner.sh.
 tool="${0##*/}"
@@ -108,28 +117,24 @@ if [[ "$blocked" -eq 1 ]]; then
 fi
 exec "$real" "$@"
 GUARD
-chmod +x "$_runner_hermetic_bin/.guard.$$"
+chmod +x "$_runner_guard_bin/guard"
 # Guard only the tools that are installed: a guard for a missing tool would
 # make `command -v` succeed, and a test that skips without the tool would
 # run and fail instead (macOS runners have no go on PATH).
-_runner_path=":$PATH:"
-_runner_path="${_runner_path//:$_runner_hermetic_bin:/:}"
 for _shim in curl wget cargo rustup go; do
-  if PATH="${_runner_path#:}" command -v "$_shim" >/dev/null 2>&1; then
-    cp "$_runner_hermetic_bin/.guard.$$" "$_runner_hermetic_bin/.$_shim.$$"
-    mv -f "$_runner_hermetic_bin/.$_shim.$$" "$_runner_hermetic_bin/$_shim"
-  else
-    rm -f "$_runner_hermetic_bin/$_shim"
+  if command -v "$_shim" >/dev/null 2>&1; then
+    cp "$_runner_guard_bin/guard" "$_runner_guard_bin/$_shim"
   fi
 done
-rm -f "$_runner_hermetic_bin/.guard.$$"
-unset _shim _runner_path
+rm -f "$_runner_guard_bin/guard"
+unset _shim
 
-# First on PATH, always: an earlier entry would bypass the guards.
+# The shims, then the guards, first on PATH: an earlier entry would bypass
+# them.
 _runner_path=":$PATH:"
 _runner_path="${_runner_path//:$_runner_hermetic_bin:/:}"
 _runner_path="${_runner_path#:}"
-export PATH="$_runner_hermetic_bin:${_runner_path%:}"
+export PATH="$_runner_guard_bin:$_runner_hermetic_bin:${_runner_path%:}"
 unset _runner_path
 
 # test_needs <test-file>: the tools its `# test-needs:` header line declares.
