@@ -179,6 +179,18 @@ assert_file_contains "$target" "set -euo pipefail" "the scaffold sets the strict
 assert_file_contains "$OUT" "Created $target" "the creation is reported"
 if [[ -x "$target" ]]; then _pass; else _fail "the scaffold is not executable"; fi
 
+# The sandbox's git shim answers user.name with "Test User".
+test_start "mkscript_header_names_the_author"
+target="$WORK/new/dir/authored"
+rc="$(run "$MKSCRIPT" "$target")"
+assert_equals "0" "$rc" "mkscript exits 0"
+assert_file_contains "$target" "# Copyright (c) $(date +%Y) Test User" "the copyright line names the git user"
+if grep -qi 'all rights reserved' "$target"; then
+  _fail "the scaffold reserves all rights"
+else
+  _pass
+fi
+
 test_start "mkscript_refuses_to_overwrite"
 rc="$(run "$MKSCRIPT" "$target")"
 assert_equals "1" "$rc" "an existing file is not overwritten"
