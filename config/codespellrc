@@ -1,7 +1,7 @@
 # codespell configuration — `codespell --config config/codespellrc`
 # Scope: prose and source. Generated, vendored, and lock files are skipped.
 [codespell]
-skip = .git,node_modules,*.lock,*.sum,mise.lock,requirements-docs.txt,.secrets.baseline,CHANGELOG.md,docs/archive,site,_build,build,dist,coverage,*.png,*.jpg,*.svg,*.gif,*.heic,*.woff,*.woff2,*.ttf,*.otf,LICENSES
+skip = .git,node_modules,*.lock,*.sum,mise.lock,requirements-docs.txt,.secrets.baseline,CHANGELOG.md,docs/archive,site,_build,build,dist,coverage,*.png,*.jpg,*.svg,*.gif,*.heic,*.woff,*.woff2,*.ttf,*.otf,LICENSES,*config/typos.toml,*package-lock.json,*fuzz/corpus*
 # Words codespell flags that are correct here. Each is a real term:
 #   als/ALS  alias-listing helper       oll     Ollama alias prefix
 #   ans      Ansible/answers fixtures   nd      Neovim leader-key binding
@@ -10,5 +10,13 @@ skip = .git,node_modules,*.lock,*.sum,mise.lock,requirements-docs.txt,.secrets.b
 #   trough   GTK scrollbar widget part  crasher/crashers  fuzzing term for a
 #                                              crash-triggering input
 #   wth      appears inside config/typos.toml's own rules
-ignore-words-list = als,ans,crasher,crashers,fpr,hashi,intoto,nd,noice,oll,trough,wth
+#   tru/fals truncated JSON keywords: parser fixtures in lib/wasm-tools
+#   buildd   Debian's build daemon (a kernel version string fixture)
+#   statics  plural noun (static themes) in a theme test
+#   keep-alives  plural of keep-alive (SSH keep-alive messages)
+#   whoknows a deliberately unknown command name in a CLI test
+#   fwe      the `fwe` alias: sudo ufw enable (security aliases)
+# Skipped: config/typos.toml lists misspellings on purpose; lockfiles and
+# fuzz corpora hold hashes and binary inputs, not prose.
+ignore-words-list = als,ans,buildd,crasher,crashers,fals,fpr,fwe,hashi,intoto,keep-alives,nd,noice,oll,statics,trough,tru,whoknows,wth
 quiet-level = 2
