@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+name: Documentation problem
+description: A page in the README, the manual or the docs is wrong, missing or unclear.
+labels: ["type:docs"]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page
+      placeholder: https://doc.dotfiles.io/... or docs/... path
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong or missing
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: What it should say

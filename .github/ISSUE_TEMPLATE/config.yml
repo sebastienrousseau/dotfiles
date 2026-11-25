@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+blank_issues_enabled: false
+contact_links:
+  - name: Report a vulnerability
+    url: https://github.com/sebastienrousseau/dotfiles/security/advisories/new
+    about: Privately, as SECURITY.md describes. Please do not open a public issue.
+  - name: Ask a question
+    url: https://github.com/sebastienrousseau/dotfiles/discussions
+    about: Usage questions and ideas that are not yet a concrete request.
