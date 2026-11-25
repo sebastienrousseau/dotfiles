@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
+# test-needs: go
 # shellcheck disable=SC1091
 # The ai-policy-pack registry module (plan P1.6): three ai-policy.v1
 # presets. Each must validate with dot-policy, define every agent mode, and

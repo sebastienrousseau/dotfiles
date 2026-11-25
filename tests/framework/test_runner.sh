@@ -54,6 +54,7 @@ unset ZDOTDIR
 
 _runner_hermetic_bin="${TMPDIR:-/tmp}/dotfiles-hermetic-bin"
 mkdir -p "$_runner_hermetic_bin"
+_runner_hermetic_bin="$(cd "$_runner_hermetic_bin" && pwd)"
 for _shim in open xdg-open osascript; do
   if [[ ! -x "$_runner_hermetic_bin/$_shim" ]]; then
     printf '#!/bin/sh\nexit 0\n' >"$_runner_hermetic_bin/$_shim"
@@ -61,10 +62,71 @@ for _shim in open xdg-open osascript; do
   fi
 done
 unset _shim
-case ":$PATH:" in
-  *":$_runner_hermetic_bin:"*) ;;
-  *) export PATH="$_runner_hermetic_bin:$PATH" ;;
+
+# Hermetic guards: a test must not reach the network or run a real build.
+# One that did (a coverage run started `cargo build`, and rustup downloaded
+# a toolchain into the sandbox HOME) timed out and wrote into the repo. The
+# guard refuses curl/wget to hosts other than loopback, and the build or
+# download commands of cargo, rustup and go, with exit 97; read-only probes
+# (`go env`, `cargo install --list`) pass through. A test that needs one
+# declares it in its first 30 lines: `# test-needs: network go`.
+cat >"$_runner_hermetic_bin/.guard.$$" <<'GUARD'
+#!/usr/bin/env bash
+# Hermetic guard written by tests/framework/test_runner.sh.
+tool="${0##*/}"
+self_dir="$(cd "${0%/*}" && pwd)"
+# The real tool: the first on PATH outside this directory, compared after
+# resolving (TMPDIR's trailing slash puts this directory on PATH as `T//…`).
+real="" dir=""
+IFS=: read -r -a path_dirs <<<"$PATH"
+for dir in "${path_dirs[@]}"; do
+  [[ -x "$dir/$tool" && "$(cd "$dir" 2>/dev/null && pwd)" != "$self_dir" ]] && real="$dir/$tool" && break
+done
+[[ -n "$real" ]] || {
+  echo "$tool: command not found" >&2
+  exit 127
+}
+need="$tool" blocked=0
+case "$tool" in
+  curl | wget)
+    need=network
+    for arg in "$@"; do
+      case "$arg" in
+        http://127.0.0.1* | https://127.0.0.1* | http://localhost* | https://localhost* | http://\[::1\]*) ;;
+        http://* | https://*) blocked=1 ;;
+      esac
+    done
+    ;;
+  cargo) case "${1:-} ${2:-}" in "install --list") ;; build* | install* | run* | test* | fetch* | update* | publish*) blocked=1 ;; esac ;;
+  rustup) case "${1:-}" in --version | -V | show | which) ;; *) blocked=1 ;; esac ;;
+  go) case "${1:-} ${2:-}" in build* | install* | get* | run* | test* | "mod download"*) blocked=1 ;; esac ;;
 esac
+case " ${DOT_TEST_NEEDS:-} " in *" $need "*) blocked=0 ;; esac
+if [[ "$blocked" -eq 1 ]]; then
+  printf 'hermetic: this test ran a real `%s %s`; stub it, or declare `# test-needs: %s` in its header\n' "$tool" "$*" "$need" >&2
+  exit 97
+fi
+exec "$real" "$@"
+GUARD
+chmod +x "$_runner_hermetic_bin/.guard.$$"
+for _shim in curl wget cargo rustup go; do
+  cp "$_runner_hermetic_bin/.guard.$$" "$_runner_hermetic_bin/.$_shim.$$"
+  mv -f "$_runner_hermetic_bin/.$_shim.$$" "$_runner_hermetic_bin/$_shim"
+done
+rm -f "$_runner_hermetic_bin/.guard.$$"
+unset _shim
+
+# First on PATH, always: an earlier entry would bypass the guards.
+_runner_path=":$PATH:"
+_runner_path="${_runner_path//:$_runner_hermetic_bin:/:}"
+_runner_path="${_runner_path#:}"
+export PATH="$_runner_hermetic_bin:${_runner_path%:}"
+unset _runner_path
+
+# test_needs <test-file>: the tools its `# test-needs:` header line declares.
+test_needs() {
+  head -n 30 "$1" 2>/dev/null | sed -n 's/^# test-needs: //p' | head -n 1
+}
 
 # -----------------------------------------------------------------------------
 # Helpers
@@ -147,7 +209,7 @@ run_test_file_serial() {
   echo "─────────────────────────────────────"
 
   local exit_status=0
-  run_bounded "$TEST_FILE_TIMEOUT" bash "$test_file" </dev/null 2>&1 | tee "$temp_results" || exit_status=$?
+  DOT_TEST_NEEDS="$(test_needs "$test_file")" run_bounded "$TEST_FILE_TIMEOUT" bash "$test_file" </dev/null 2>&1 | tee "$temp_results" || exit_status=$?
 
   local results_line
   results_line=$(grep "^RESULTS:" "$temp_results" | tail -1) || true
@@ -199,7 +261,7 @@ run_test_file_worker() {
     echo "Running: $(basename "$test_file")"
     echo "─────────────────────────────────────"
     local exit_status=0
-    run_bounded "$TEST_FILE_TIMEOUT" bash "$test_file" </dev/null 2>&1 || exit_status=$?
+    DOT_TEST_NEEDS="$(test_needs "$test_file")" run_bounded "$TEST_FILE_TIMEOUT" bash "$test_file" </dev/null 2>&1 || exit_status=$?
     # Append exit status sentinel for the aggregator
     printf 'EXIT_STATUS:%d\n' "$exit_status"
   } >"$out_file" 2>&1
@@ -254,7 +316,7 @@ run_test_list_parallel() {
   # shellcheck disable=SC2064  # capture $out_dir at trap-registration time
   trap "rm -rf '$out_dir'" RETURN
 
-  export -f run_test_file_worker run_bounded describe_exit
+  export -f run_test_file_worker run_bounded describe_exit test_needs
   export TEST_FILE_TIMEOUT
   local -a primary_files=() quiet_files=() deferred_inv=()
   local f

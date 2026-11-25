@@ -84,9 +84,15 @@ assert_exit_code 1 "bash -c 'source \"$LOGGING_FILE\"; source \"$INSTALLERS_FILE
 test_start "warn_unpinned_ok_pinned"
 assert_exit_code 0 "bash -c 'source \"$LOGGING_FILE\"; source \"$INSTALLERS_FILE\"; warn_unpinned Test v1.2.3 TEST_TAG'"
 
+# A curl that always fails: github_asset_url falls back to the URL it
+# builds itself when the release API gives nothing, without the network.
+NO_API_BIN="$(mktemp -d)"
+printf '#!/bin/sh\nexit 22\n' >"$NO_API_BIN/curl"
+chmod +x "$NO_API_BIN/curl"
+
 # Test: github_asset_url constructs fallback URL for tagged release
 test_start "github_asset_url_tagged"
-output=$(bash -c '
+output=$(PATH="$NO_API_BIN:$PATH" bash -c '
   source "'"$LOGGING_FILE"'"
   source "'"$INSTALLERS_FILE"'"
   github_asset_url "owner/repo" "binary-linux.tar.gz" "v1.0.0"
@@ -102,7 +108,7 @@ fi
 
 # Test: github_asset_url constructs fallback URL for latest release
 test_start "github_asset_url_latest"
-output=$(bash -c '
+output=$(PATH="$NO_API_BIN:$PATH" bash -c '
   source "'"$LOGGING_FILE"'"
   source "'"$INSTALLERS_FILE"'"
   github_asset_url "owner/repo" "binary.tar.gz" "latest"
@@ -115,6 +121,8 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: github_asset_url should construct latest URL"
   printf '%b\n' "    Output: $output"
 fi
+
+rm -rf "$NO_API_BIN"
 
 # Test: download_and_verify_sha256 verifies matching checksum
 test_start "download_verify_matching"
