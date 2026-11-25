@@ -362,7 +362,7 @@ starting the requested work.
 - **PR Descriptions**: Follow `~/Code/PR-TEMPLATE.md` exactly, including the
   section order, the `## Highlights ⭐️`, the fenced Checksums block, and the
   `**Full Changelog**` line. Open with a two-line BLUF (bottom line up
-  front) that announces the PR: line one begins `This PR ` and says what it does,
+  front) that announces the PR: line one begins with the words `This PR` and says what it does,
   line two says why it matters or the outcome. Separate line 1 and line 2
   with a blank line (a single newline soft-wraps into one paragraph in
   Markdown, so the blank line is what puts each on its own line). Not a
