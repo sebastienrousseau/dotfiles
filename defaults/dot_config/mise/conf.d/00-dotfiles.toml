@@ -57,6 +57,11 @@ go = "latest"
 # audit fails with "command not found" on any machine where nobody has run
 # `go install` by hand.
 "go:golang.org/x/vuln/cmd/govulncheck" = "1.9.0"
+# golangci-lint, the linter behind the Go complexity ratchet (§0). A
+# `go install` copy sits in one Go version's bin directory, so the next
+# `go = "latest"` upgrade drops it off PATH; as a mise tool it stays. The
+# version is CI's (tools/ci/complexity_polyglot.py PINNED).
+"aqua:golangci/golangci-lint" = "2.13.2"
 
 # Rust -- deliberately NOT managed by mise.
 #
@@ -91,7 +96,7 @@ bat = "latest"
 codex = "0.170.0"
 # corralctl, passmcp, and draft — the AI Ecosystem & Governance Suite,
 # managed and updated globally via mise (`github:sebastienrousseau/...`).
-"github:sebastienrousseau/corralctl" = { version = "0.0.54", minimum_release_age = "0s" }
+"github:sebastienrousseau/corralctl" = { version = "0.0.56", minimum_release_age = "0s" }
 "github:sebastienrousseau/passmcp" = { version = "0.0.10", minimum_release_age = "0s" }
 "github:sebastienrousseau/passmcp-graph" = { version = "0.0.10", minimum_release_age = "0s" }
 "github:sebastienrousseau/passmcp-lsp" = { version = "0.0.10", minimum_release_age = "0s" }

@@ -38,7 +38,7 @@
       "transport": "stdio",
       "launcher": "${HOME}/.local/share/mise/shims/corralctl",
       "args": ["mcp"],
-      "package": "github.com/sebastienrousseau/corralctl@v0.0.54",
+      "package": "github.com/sebastienrousseau/corralctl@v0.0.56",
       "auth": "env",
       "authProfile": "none",
       "scope": "workspace-local",

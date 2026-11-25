@@ -154,7 +154,11 @@ else
   printf '%b\n' "  ${YELLOW}!${NC} $CURRENT_TEST: no module at $MODULE or no $WASMTIME_BIN; execution checks skipped"
 fi
 
-# Slice 2: drive real line coverage of the script under test
-cov_exercise_script "$TEST_SCRIPT"
+# Slice 2: drive real line coverage of the script under test. With no module
+# built, a runtime and cargo on PATH, its no-argument run would start a real
+# `cargo build` of lib/wasm-tools: minutes in the sandbox's empty rustup home,
+# past the runner's timeout, and writing into the repository. A module path
+# that does not exist stops it at the missing-module check instead.
+DOT_SYS_WASM="$DOTFILES_COV_TMPDIR/no-such-module.wasm" cov_exercise_script "$TEST_SCRIPT"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

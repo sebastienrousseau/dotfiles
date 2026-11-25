@@ -7,6 +7,11 @@ node = "26.13.1"
 # rust-toolchain.toml in the tree. rustup decides (see
 # defaults/dot_config/mise/conf.d/00-dotfiles.toml).
 go = "1.26.11"
+# The Go complexity ratchet's linter, pinned as a mise tool so it survives a
+# Go upgrade: a `go install` copy lives in one Go version's bin directory and
+# drops off PATH when go moves. Keep in step with PINNED in
+# tools/ci/complexity_polyglot.py and the go install pins in the workflows.
+"aqua:golangci/golangci-lint" = "2.13.2"
 bun = "1.3.10"
 opencode = "1.19.6"
 zoxide = "0.9.9"
