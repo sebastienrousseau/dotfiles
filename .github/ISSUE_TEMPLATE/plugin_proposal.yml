@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+name: Plugin proposal
+description: Propose a new dot plugin, bundled or in its own dot-* repository.
+labels: ["type:enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A repository named `dot-X` provides exactly the command `dot X`, and its manifest declares `name = "X"` (see docs/ECOSYSTEM.md).
+  - type: input
+    id: name
+    attributes:
+      label: Plugin name
+      description: Lowercase, as in `dot <name>`.
+      placeholder: weather
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: What it does
+      description: The commands it adds and one example run.
+    validations:
+      required: true
+  - type: checkboxes
+    id: capabilities
+    attributes:
+      label: Capabilities it needs
+      description: Plugins are deny-by-default; tick only what it cannot work without.
+      options:
+        - label: Network access (list the hosts below)
+        - label: Writes outside its own data directory (list the paths below)
+        - label: Secrets or credentials
+        - label: Runs other programs
+  - type: textarea
+    id: capability-detail
+    attributes:
+      label: Hosts, paths and programs
+  - type: dropdown
+    id: licence
+    attributes:
+      label: Licence
+      options:
+        - Apache-2.0 OR MIT
+        - Other (explain in the summary)
+    validations:
+      required: true
+  - type: input
+    id: repository
+    attributes:
+      label: Existing repository, if any
+      placeholder: https://github.com/<owner>/dot-<name>

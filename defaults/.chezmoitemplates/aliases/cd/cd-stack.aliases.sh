@@ -1,5 +1,6 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # CD Navigation - Directory Stack Management
 [[ -n "${_CD_STACK_LOADED:-}" ]] && :
 _CD_STACK_LOADED=1

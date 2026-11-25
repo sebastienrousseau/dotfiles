@@ -1,5 +1,6 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Legal & Licensing Aliases
 # Tools for license compliance, headers, and attribution.
 
@@ -61,7 +62,7 @@ gen_notice_fn() {
   echo "Generating NOTICE file for dependencies..."
   if [[ -f "go.mod" ]]; then
     docker run --rm -v "$(pwd):/src" -w /src golang:latest \
-      sh -c "go install github.com/google/go-licenses@latest && go-licenses report . --template /src/NOTICE.tpl > NOTICE"
+      sh -c "go install github.com/google/go-licenses@v1.6.0 && go-licenses report . --template /src/NOTICE.tpl > NOTICE"
   else
     echo "️  No supported package manager found for automatic NOTICE generation."
   fi

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
+# test-needs: go
 # shellcheck disable=SC1090,SC1091,SC2016
 # dot ai cost show (plan P1.3): the cockpit binary's cost report, built from
 # defaults/dot_local/share/dot-ai-tui and run through bin/dot in a sandboxed

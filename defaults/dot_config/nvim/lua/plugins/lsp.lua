@@ -1,4 +1,5 @@
--- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0 OR MIT
+-- Copyright (c) 2015-2026 Sebastien Rousseau
 -- @module nvim.plugins.lsp
 -- Language Server Protocol configuration.
 -- Mason manages external tool installation (LSP servers, formatters, linters).

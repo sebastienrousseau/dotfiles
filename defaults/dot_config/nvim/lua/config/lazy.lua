@@ -1,4 +1,5 @@
--- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0 OR MIT
+-- Copyright (c) 2015-2026 Sebastien Rousseau
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
   vim

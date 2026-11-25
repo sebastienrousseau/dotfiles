@@ -6,12 +6,9 @@ on:
     # branch (OpenSSF Scorecard counts the share of commits a SAST tool ran on).
     branches: [main]
   pull_request:
+    # No path filter here either: Scorecard's SAST check reads the checks
+    # on each merged PR, and a filtered-out PR counts as unanalysed.
     branches: [main]
-    paths:
-      - '**.py'
-      - '**.js'
-      - '**.ts'
-      - '.github/workflows/**'
   merge_group:
     branches: [main]
     # NOTE: `paths:` is not honored under merge_group — actionlint warns

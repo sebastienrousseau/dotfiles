@@ -1,4 +1,5 @@
--- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0 OR MIT
+-- Copyright (c) 2015-2026 Sebastien Rousseau
 -- Run with Lua 5.1+; all plugin APIs are offline test doubles.
 local root = assert(arg[1], "repository path required")
 local cases = {

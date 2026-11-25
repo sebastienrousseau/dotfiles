@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# test-kind: structural
+# test-kind: structural except tools/ci/check-copyright-headers.sh
 # shellcheck disable=SC1090,SC1091,SC2034
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
@@ -70,11 +70,14 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 # File WITH a valid header
+# REUSE-IgnoreStart -- fixture text, not a declaration
 cat >"$TMP/good.sh" <<'EOF'
 #!/usr/bin/env bash
-# Copyright (c) 2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2026 Sebastien Rousseau
 echo hi
 EOF
+# REUSE-IgnoreEnd
 
 # File WITHOUT any recognised header
 cat >"$TMP/bad.sh" <<'EOF'
@@ -122,6 +125,79 @@ else
   printf '%b\n' "  ${YELLOW}∼${NC} $CURRENT_TEST: skipped (ripgrep unavailable)"
 fi
 popd >/dev/null
+
+# A copyright line that reserves all rights contradicts the open grant,
+# even in a file whose extension the header scan does not cover.
+test_start "fails_on_all_rights_reserved"
+pushd "$TMP" >/dev/null
+if command -v rg >/dev/null 2>&1; then
+  rm -f "$TMP/bad.sh"
+  mkdir -p "$TMP/.templates"
+  cat >"$TMP/.templates/reserved.sh.tmpl" <<'EOF'
+# Copyright (c) 2026 Dotfiles. All rights reserved.
+echo reserved
+EOF
+  # A developer's global gitignore hides the directory, as one hid bin/ and
+  # let a header through locally that CI then rejected: the check must not
+  # depend on whose machine it runs on.
+  # rg reads the global ignore from $XDG_CONFIG_HOME/git/ignore once
+  # $HOME/.gitconfig names no other excludesFile.
+  mkdir -p "$TMP/.git" # rg applies a global ignore only inside a repository
+  mkdir -p "$TMP/xdg/git"
+  printf '/.templates/\n' >"$TMP/xdg/git/ignore"
+  set +e
+  # stdin is a pipe, as in CI: rg with no path would search stdin instead.
+  out="$(echo unrelated | HOME="$TMP" XDG_CONFIG_HOME="$TMP/xdg" bash "$SCRIPT_FILE" --extensions=sh 2>&1)"
+  ec=$?
+  set -e
+  assert_equals "1" "$ec" "a reserved-rights header fails the check"
+  assert_contains ".templates/reserved.sh.tmpl" "$out" "the file is named, despite a global ignore"
+  rm -rf "$TMP/.templates" "$TMP/.git" "$TMP/xdg"
+else
+  printf '%b\n' "  ${YELLOW}∼${NC} $CURRENT_TEST: skipped (ripgrep unavailable)"
+fi
+popd >/dev/null
+
+# run_in_fixture FILE-CONTENT ARGS...: run the checker over a fresh tree
+# holding one file, x.sh, with that content; sets ec and out.
+run_in_fixture() {
+  local dir content="$1"
+  shift
+  dir="$(mktemp -d)"
+  printf '%b' "$content" >"$dir/x.sh"
+  set +e
+  out="$(cd "$dir" && echo unrelated | bash "$SCRIPT_FILE" --extensions=sh "$@" 2>&1)"
+  ec=$?
+  set -e
+  rm -rf "$dir"
+}
+
+# REUSE-IgnoreStart -- fixture headers, not declarations
+test_start "fails_on_narrower_grant"
+if command -v rg >/dev/null 2>&1; then
+  run_in_fixture '#!/bin/sh\n# SPDX-License-Identifier: MIT\necho hi\n'
+  assert_equals "1" "$ec" "a file declaring MIT alone fails under an Apache-2.0 OR MIT grant"
+  assert_contains "x.sh: declares 'MIT'" "$out" "the narrower grant is named"
+else
+  printf '%b\n' "  ${YELLOW}∼${NC} $CURRENT_TEST: skipped (ripgrep unavailable)"
+fi
+
+test_start "no_spdx_value_skips_the_grant"
+if command -v rg >/dev/null 2>&1; then
+  run_in_fixture '#!/bin/sh\n# SPDX-License-Identifier: MIT\necho hi\n' --no-spdx-value
+  assert_equals "0" "$ec" "--no-spdx-value checks only that a header exists"
+else
+  printf '%b\n' "  ${YELLOW}∼${NC} $CURRENT_TEST: skipped (ripgrep unavailable)"
+fi
+# REUSE-IgnoreEnd
+
+test_start "reserved_rights_on_line_ten_counts"
+if command -v rg >/dev/null 2>&1; then
+  run_in_fixture '#!/bin/sh\n# Copyright (c) 2026 A\n\n\n\n\n\n\n\n# Copyright (c) 2026 B. All rights reserved.\n'
+  assert_equals "1" "$ec" "a reserved-rights line on line 10 is inside the header"
+else
+  printf '%b\n' "  ${YELLOW}∼${NC} $CURRENT_TEST: skipped (ripgrep unavailable)"
+fi
 
 # Slice 2: drive real line coverage of the script under test
 cov_exercise_script "$SCRIPT_FILE"

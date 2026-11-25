@@ -1,4 +1,5 @@
--- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0 OR MIT
+-- Copyright (c) 2015-2026 Sebastien Rousseau
 -- Completion engine: blink.cmp (replaces nvim-cmp + 6 plugins)
 -- https://github.com/Saghen/blink.cmp
 

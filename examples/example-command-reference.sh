@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Example: Complete dot command reference — one usage line per public
 # command/subcommand. The list lives in examples/command-reference.txt,
 # generated from lib/dot/data/commands.txt by

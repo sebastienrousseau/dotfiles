@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Behavioural tests for `dot theme ambient` time-of-day resolution.
 # Exercises the sunrise/sunset resolution ladder, mode target
 # computation, and the no-op / apply decision — without touching any

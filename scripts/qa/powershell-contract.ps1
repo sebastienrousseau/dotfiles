@@ -1,4 +1,5 @@
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 #
 # PowerShell parity contract — smoke test for the dotfiles PowerShell
 # profile. Run by the windows-latest CI job (#860). Asserts that:

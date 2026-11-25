@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+name: Bug report
+description: Something in dot or the dotfiles does not work as documented.
+labels: ["type:bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. For a security problem, do not open an issue: use a private advisory (see the link on the previous page).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you saw, including any error message.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run `dot ...`
+        2. See the error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system and version
+      placeholder: macOS 26.2, Ubuntu 24.04, WSL2 on Windows 11
+    validations:
+      required: true
+  - type: input
+    id: shell
+    attributes:
+      label: Shell
+      placeholder: output of `echo $SHELL`
+  - type: input
+    id: version
+    attributes:
+      label: Dotfiles version
+      placeholder: output of `dot --version`
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of `dot doctor`
+      render: shell
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Lines from `${XDG_STATE_HOME:-~/.local/state}/dot/<domain>/log.jsonl` (`dot-audit` shows the latest). They hold command names, counts and ids, never file contents.
+      render: shell

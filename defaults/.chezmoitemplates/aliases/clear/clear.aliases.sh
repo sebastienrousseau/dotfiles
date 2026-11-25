@@ -1,9 +1,10 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Description: Enhances terminal interaction with aliases for clearing the screen,
 # navigating directories, and displaying directory contents in an organized manner.
 # Website: https://dotfiles.io
-# License: MIT
+# License: Apache-2.0 OR MIT
 ################################################################################
 
 # Configurable paths

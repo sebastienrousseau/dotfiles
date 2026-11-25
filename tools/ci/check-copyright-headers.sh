@@ -68,14 +68,15 @@ PATTERNS=(
   "© "
 )
 
-# Build a ripgrep glob like `{*.sh,*.lua,*.nix}` from the comma list.
-IFS=',' read -r -a exts <<<"$EXTENSIONS"
-glob="{"
-for i in "${!exts[@]}"; do
-  [[ $i -gt 0 ]] && glob+=","
-  glob+="*.${exts[$i]}"
-done
-glob+="}"
+# extension_glob: a ripgrep glob like `{*.sh,*.lua,*.nix}` from $EXTENSIONS.
+extension_glob() {
+  local -a exts
+  local ext glob=""
+  IFS=',' read -r -a exts <<<"$EXTENSIONS"
+  for ext in "${exts[@]}"; do glob+="${glob:+,}*.${ext}"; done
+  printf '{%s}' "$glob"
+}
+glob="$(extension_glob)"
 
 # `mapfile` is a bash 4 builtin; macOS still ships bash 3.2 as
 # /bin/bash, where it fails with "command not found" (rc 127) and this
@@ -83,76 +84,116 @@ glob+="}"
 all_files=()
 while IFS= read -r _line; do
   [[ -n "$_line" ]] && all_files+=("$_line")
-done < <(rg --files -g "$glob" 2>/dev/null || true)
+done < <(rg --no-ignore-global --files -g "$glob" 2>/dev/null || true)
 
 if [[ "${#all_files[@]}" -eq 0 ]]; then
   echo "::notice::No files matched extensions: $EXTENSIONS"
   exit 0
 fi
 
-missing=()
-wrong_spdx=()
-for file in "${all_files[@]}"; do
-  if [[ "$file" =~ $EXCLUDES ]]; then
-    continue
-  fi
-
-  found=false
-  # Read the first 10 lines once; search each pattern against that buffer.
-  head_buf="$(head -n 10 "$file" 2>/dev/null || true)"
+# has_header <head-buffer>: true when the buffer holds any of PATTERNS.
+has_header() {
+  local pattern
   for pattern in "${PATTERNS[@]}"; do
-    if grep -qF -- "$pattern" <<<"$head_buf"; then
-      found=true
-      break
+    grep -qF -- "$pattern" <<<"$1" && return 0
+  done
+  return 1
+}
+
+# grant_set <expression>: the operands of an SPDX expression, sorted, so
+# `A OR B` and `B OR A` compare equal and a file is not failed over order.
+grant_set() {
+  printf '%s' "$1" | tr ' ' '\n' | grep -v '^OR$' | LC_ALL=C sort | tr '\n' ' '
+}
+
+# declared_grant <head-buffer>: the SPDX expression the buffer declares,
+# trimmed of a trailing comment close (`-->`) and whitespace; empty if none.
+declared_grant() {
+  local spdx_line declared
+  # REUSE-IgnoreStart -- search string, not a declaration
+  spdx_line="$(grep -m1 -F 'SPDX-License-Identifier:' <<<"$1" || true)"
+  [[ -n "$spdx_line" ]] || return 0
+  declared="${spdx_line#*SPDX-License-Identifier:}"
+  # REUSE-IgnoreEnd
+  declared="${declared%%-->*}"
+  declared="${declared#"${declared%%[![:space:]]*}"}"
+  printf '%s' "${declared%"${declared##*[![:space:]]}"}"
+}
+
+# scan_files: fill `missing` (no header in the first 10 lines) and
+# `wrong_spdx` (an SPDX line declaring other than the project's grant;
+# a missing SPDX line is the header check's to report).
+scan_files() {
+  local file head_buf declared expected
+  expected="$(grant_set "$EXPECTED_SPDX")"
+  for file in "${all_files[@]}"; do
+    [[ "$file" =~ $EXCLUDES ]] && continue
+    # Read the first 10 lines once; every check searches that buffer.
+    head_buf="$(head -n 10 "$file" 2>/dev/null || true)"
+    has_header "$head_buf" || missing+=("$file")
+    [[ "$CHECK_SPDX_VALUE" -eq 1 ]] || continue
+    declared="$(declared_grant "$head_buf")"
+    if [[ -n "$declared" && "$(grant_set "$declared")" != "$expected" ]]; then
+      wrong_spdx+=("$file: declares '$declared'")
     fi
   done
+}
 
-  $found || missing+=("$file")
+missing=()
+wrong_spdx=()
+scan_files
 
-  # Second gate: if the file declares an SPDX identifier at all, it
-  # must be the project's grant. A missing SPDX line is covered by the
-  # header check above; a *wrong* one is what this catches.
-  if [[ "$CHECK_SPDX_VALUE" -eq 1 ]]; then
-    # REUSE-IgnoreStart -- search string, not a declaration
-    spdx_line="$(grep -m1 -F 'SPDX-License-Identifier:' <<<"$head_buf" || true)"
-    if [[ -n "$spdx_line" ]]; then
-      # Strip everything up to the tag, and any trailing comment
-      # close (`-->`) or whitespace, leaving the bare expression.
-      declared="${spdx_line#*SPDX-License-Identifier:}"
-      # REUSE-IgnoreEnd
-      declared="${declared%%-->*}"
-      # Trim surrounding whitespace without a subshell.
-      declared="${declared#"${declared%%[![:space:]]*}"}"
-      declared="${declared%"${declared##*[![:space:]]}"}"
-      # `A OR B` and `B OR A` are the same grant. Compare the operands
-      # as a set so a file is not failed over word order alone.
-      declared_sorted="$(printf '%s' "$declared" | tr ' ' '\n' | grep -v '^OR$' | LC_ALL=C sort | tr '\n' ' ')"
-      expected_sorted="$(printf '%s' "$EXPECTED_SPDX" | tr ' ' '\n' | grep -v '^OR$' | LC_ALL=C sort | tr '\n' ' ')"
-      if [[ -n "$declared" && "$declared_sorted" != "$expected_sorted" ]]; then
-        wrong_spdx+=("$file: declares '$declared'")
-      fi
-    fi
-  fi
-done
-
-if [[ "${#missing[@]}" -gt 0 ]]; then
-  echo "::error::Copyright header validation failed — ${#missing[@]} file(s) missing header"
+# fail_missing <file...>: report files with no header, and the patterns that count.
+fail_missing() {
+  echo "::error::Copyright header validation failed — $# file(s) missing header"
   echo "Files missing a recognised copyright header:"
-  printf '  - %s\n' "${missing[@]}"
+  printf '  - %s\n' "$@"
   echo
   echo "Add ONE of the following to the first 10 lines:"
   printf '  - %s\n' "${PATTERNS[@]}"
   exit 1
-fi
+}
 
-if [[ "${#wrong_spdx[@]}" -gt 0 ]]; then
-  echo "::error::SPDX grant mismatch — ${#wrong_spdx[@]} file(s) declare a licence other than '$EXPECTED_SPDX'"
-  printf '  - %s\n' "${wrong_spdx[@]}"
+# fail_wrong_spdx <finding...>: report files declaring a narrower grant.
+fail_wrong_spdx() {
+  echo "::error::SPDX grant mismatch — $# file(s) declare a licence other than '$EXPECTED_SPDX'"
+  printf '  - %s\n' "$@"
   echo
   echo "The project ships LICENSE-APACHE and LICENSE-MIT and package.json declares"
   echo "'$EXPECTED_SPDX'. A file claiming less is the statement downstream relies on."
   echo "Fix with: tools/ci/normalize-spdx-headers.sh"
   exit 1
-fi
+}
+
+[[ "${#missing[@]}" -eq 0 ]] || fail_missing "${missing[@]}"
+[[ "${#wrong_spdx[@]}" -eq 0 ]] || fail_wrong_spdx "${wrong_spdx[@]}"
+
+# Third gate: a copyright line that reserves all rights contradicts the
+# grant: it withholds what LICENSE-APACHE and LICENSE-MIT give away. It
+# runs over every file, hidden ones and templates included, because the
+# extension scan above skips both and the line survived there for years.
+# Licence texts and vendored trees keep their own wording.
+#
+# check_reserved_rights: exit 1 naming each file whose first ten lines
+# reserve all rights, with the header to use instead.
+check_reserved_rights() {
+  local excludes='(^|/)(node_modules|\.git|vendor|target|build|LICENSES)/' file lineno
+  local -a reserved=()
+  while IFS=: read -r file lineno _; do
+    [[ "$lineno" -le 10 && ! "$file" =~ $excludes ]] && reserved+=("${file#./}")
+  done < <(rg --no-ignore-global --hidden -g '!.git' -n -i -m1 'copyright.*all rights reserved' . 2>/dev/null || true)
+  [[ "${#reserved[@]}" -eq 0 ]] && return 0
+  echo "::error::Reserved-rights header: ${#reserved[@]} file(s) say 'All rights reserved' under an '$EXPECTED_SPDX' grant"
+  printf '  - %s\n' "${reserved[@]}"
+  echo
+  echo "Use the project header instead:"
+  # REUSE-IgnoreStart -- printed hint, not a declaration
+  echo "  SPDX-License-Identifier: $EXPECTED_SPDX"
+  # REUSE-IgnoreEnd
+  echo "  Copyright (c) <years> Sebastien Rousseau"
+  exit 1
+}
+
+check_reserved_rights
 
 echo "::notice::All ${#all_files[@]} file(s) have a valid copyright header and declare '$EXPECTED_SPDX'"

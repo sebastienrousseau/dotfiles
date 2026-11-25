@@ -68,6 +68,9 @@
     // The ~/Code workspace standards, deployed into $HOME: their style is
     // theirs (a PR template's `*` bullets, a quoted "This PR " prefix,
     // {{PLACEHOLDER}} anchors), as for their relative links in lychee.toml.
-    "defaults/Code/**"
+    "defaults/Code/**",
+    // The PR template opens with that same standard, byte for byte
+    // (tests/unit/ci/test_pr_template.sh), so the same style applies.
+    ".github/PULL_REQUEST_TEMPLATE.md"
   ]
 }

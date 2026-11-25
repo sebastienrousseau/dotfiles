@@ -1,8 +1,9 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Description: This script provides enhanced functionality to quickly navigate directories.
 # Website: https://dotfiles.io
-# License: MIT
+# License: Apache-2.0 OR MIT
 ################################################################################
 
 #-----------------------------------------------------------------------------

@@ -1,4 +1,5 @@
--- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0 OR MIT
+-- Copyright (c) 2015-2026 Sebastien Rousseau
 
 -- Require Neovim >= 0.11.2 for native LSP improvements and vim.snippet
 if vim.fn.has("nvim-0.11.2") ~= 1 then

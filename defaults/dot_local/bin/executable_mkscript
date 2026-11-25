@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 ## mkscript — Create a ready-to-go shell script.
 ##
 ## # Usage
@@ -42,9 +43,13 @@ fi
 
 mkdir -p "$(dirname "${file}")"
 
-cat >"${file}" <<'EOF'
+# The new script is the user's work: name them, never this project.
+year="$(date +%Y)"
+author="$(git config --get user.name 2>/dev/null || id -un)"
+
+cat >"${file}" <<EOF
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# Copyright (c) ${year} ${author}
 
 set -euo pipefail
 

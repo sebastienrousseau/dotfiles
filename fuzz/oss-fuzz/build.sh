@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # OSS-Fuzz build script — compiles every Go fuzzer in fuzz/
 # against libFuzzer with $SANITIZER applied.
 #
@@ -41,7 +42,7 @@ cd "$SRC/dotfiles/fuzz"
 # into this package and are fuzzed in-module as well (each module's
 # fuzz_test.go), where they run against the real implementation.
 
-go get github.com/AdamKorcz/go-118-fuzz-build/testing
+go get github.com/AdamKorcz/go-118-fuzz-build/testing@v0.0.0-20250520111509-a70c2aa677fa
 
 compile_native_go_fuzzer \
   github.com/sebastienrousseau/dotfiles/fuzz \

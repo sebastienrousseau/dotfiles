@@ -97,6 +97,14 @@ repos:
     hooks:
       - id: typos
 
+  # codespell: REPO-STANDARD's named spelling gate, beside typos. Its
+  # allowlist and skips live in config/codespellrc, each with a reason.
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.3
+    hooks:
+      - id: codespell
+        args: ['--config', 'config/codespellrc']
+
   # GitHub Actions workflow linting (actionlint).
   - repo: https://github.com/rhysd/actionlint
     rev: v1.7.12

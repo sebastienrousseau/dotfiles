@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
+# test-needs: go
 # shellcheck disable=SC1090,SC1091,SC2016
 # dot cli hook check (plugins/cli/libexec/hook-check.sh, ADR-025): the
 # policy hook, through bin/dot in a sandboxed home. No policy allows at

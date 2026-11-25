@@ -1,23 +1,22 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
+# test-kind: structural
 # shellcheck disable=SC1090,SC1091,SC2034
-# Tests for global standards synchronization utility (standards-sync) and defaults/Code
+# standards-sync and defaults/Code. The command is not vendored here: mise
+# installs it from PyPI (pipx:standards-sync), and its behaviour is tested
+# in the standards repository. This file checks what the dotfiles own: the
+# standard files, the pinned install, the removal of the old copy, the
+# sentinel's syntax, and, when a standards-sync is installed, the --check
+# contract the sentinel relies on.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 source "$SCRIPT_DIR/../../framework/assertions.sh"
 
-SYNC_BIN="$REPO_ROOT/defaults/dot_local/bin/executable_standards-sync"
+MISE_CONF="$REPO_ROOT/defaults/dot_config/mise/conf.d/00-dotfiles.toml"
+CHEZMOI_REMOVE="$REPO_ROOT/defaults/.chezmoiremove"
 SENTINEL_ZSH="$REPO_ROOT/defaults/dot_config/zsh/rc.d/45-standards.zsh"
-
-if [[ -x /usr/bin/python3 ]]; then
-  PYTHON_BIN="/usr/bin/python3"
-elif command -v python3 >/dev/null 2>&1; then
-  PYTHON_BIN="$(command -v python3)"
-else
-  PYTHON_BIN="python3"
-fi
 
 STANDARD_FILES=(
   "AGENTS.md"
@@ -27,7 +26,7 @@ STANDARD_FILES=(
   "REPO-STANDARD.md"
 )
 
-# 1. Verify standard files present and non-empty in defaults/Code
+# 1. The standard files are present and non-empty in defaults/Code
 for file in "${STANDARD_FILES[@]}"; do
   test_start "standards_${file//./_}_present"
   target="$REPO_ROOT/defaults/Code/$file"
@@ -40,132 +39,73 @@ for file in "${STANDARD_FILES[@]}"; do
   fi
 done
 
-# 2. Verify executable_standards-sync binary exists and is executable
-test_start "bin_standards_sync_executable"
-if [[ -f "$SYNC_BIN" && -x "$SYNC_BIN" ]]; then
+# 2. mise installs it from PyPI at an exact version, never "latest"
+test_start "standards_sync_pinned_in_mise"
+pin="$(sed -n 's/^"pipx:standards-sync" = "\([^"]*\)".*/\1/p' "$MISE_CONF")"
+if [[ "$pin" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   ((TESTS_PASSED++))
-  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: standards-sync executable exists and has +x permission"
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: pipx:standards-sync pinned to $pin"
 else
   ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: standards-sync binary is missing or not executable"
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: pipx:standards-sync is not pinned to an exact version (got '$pin')"
 fi
 
-# 3. Verify standards-sync --help
-test_start "standards_sync_help"
-help_out="$("$PYTHON_BIN" "$SYNC_BIN" --help 2>&1)" || true
-assert_contains "Standards synchronization and integrity verification utility" "$help_out" "help describes utility"
-assert_contains "--check" "$help_out" "help lists --check flag"
+# 3. The old vendored copy is gone, and chezmoi removes the installed one
+test_start "vendored_copy_removed"
+if [[ -e "$REPO_ROOT/defaults/dot_local/bin/executable_standards-sync" ]]; then
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: defaults/dot_local/bin/executable_standards-sync would shadow the mise install"
+else
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+fi
+test_start "chezmoi_removes_old_copy"
+if grep -qx '.local/bin/standards-sync' "$CHEZMOI_REMOVE"; then
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+else
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: .chezmoiremove does not list .local/bin/standards-sync"
+fi
 
-# 4. Verify standards-sync behavior in an isolated sandbox
+# 4. 45-standards.zsh exists and is valid shell syntax
+test_start "standards_sentinel_syntax"
+if [[ -f "$SENTINEL_ZSH" ]] && { ! command -v zsh >/dev/null 2>&1 || zsh -n "$SENTINEL_ZSH" 2>/dev/null; }; then
+  ((TESTS_PASSED++))
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: 45-standards.zsh exists and has valid shell syntax"
+else
+  ((TESTS_FAILED++))
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: 45-standards.zsh is missing or has a syntax error"
+fi
+
+# 5. The --check contract the sentinel relies on: 0 when in sync, 1 and a
+# "Drift detected" line under --quiet when not. Runs only where installed.
+if ! command -v standards-sync >/dev/null 2>&1; then
+  printf '%b\n' "  ${YELLOW}∼${NC} standards_sync_check_contract: skipped (standards-sync not installed)"
+  echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
+  exit 0
+fi
+
 SANDBOX="$(mktemp -d "${TMPDIR:-/tmp}/standards-sync-test.XXXXXX")"
 trap 'rm -rf "$SANDBOX"' EXIT
-
-SRC_DIR="$SANDBOX/src"
-TARGET_DIR="$SANDBOX/target"
-mkdir -p "$SRC_DIR" "$TARGET_DIR"
-
+mkdir -p "$SANDBOX/src" "$SANDBOX/target"
 for f in "${STANDARD_FILES[@]}"; do
-  printf 'content of %s\n' "$f" >"$SRC_DIR/$f"
-  cp "$SRC_DIR/$f" "$TARGET_DIR/$f"
+  printf 'content of %s\n' "$f" >"$SANDBOX/src/$f"
+  cp "$SANDBOX/src/$f" "$SANDBOX/target/$f"
 done
 
-test_start "standards_sync_check_clean"
-check_clean_out="$(STANDARDS_REPO="$SRC_DIR" STANDARDS_TARGETS="$TARGET_DIR" "$PYTHON_BIN" "$SYNC_BIN" --check 2>&1)"
-clean_status=$?
-assert_equals "0" "$clean_status" "check returns 0 when clean"
-assert_contains "All standards are synchronized" "$check_clean_out" "reports clean sync"
-
-test_start "standards_sync_drift_detected"
-# Induce drift in a target file
-printf 'drifted content\n' >"$TARGET_DIR/AGENTS.md"
-drift_status=0
-drift_out="$(STANDARDS_REPO="$SRC_DIR" STANDARDS_TARGETS="$TARGET_DIR" "$PYTHON_BIN" "$SYNC_BIN" --check 2>&1)" || drift_status=$?
-assert_equals "1" "$drift_status" "check returns 1 when drifted"
-assert_contains "DRIFTED" "$drift_out" "reports drifted file"
-
-test_start "standards_sync_quiet_drift"
-quiet_status=0
-quiet_out="$(STANDARDS_REPO="$SRC_DIR" STANDARDS_TARGETS="$TARGET_DIR" "$PYTHON_BIN" "$SYNC_BIN" --check --quiet 2>&1)" || quiet_status=$?
-assert_equals "1" "$quiet_status" "quiet check returns 1 when drifted"
-assert_contains "Drift detected" "$quiet_out" "quiet mode outputs drift warning"
-
-sandbox_git() {
-  git -C "$SRC_DIR" -c user.name=test -c user.email=test@example.invalid \
-    -c commit.gpgsign=false "$@" >/dev/null 2>&1
+# sync ARGS...: run the installed command on the sandbox; sets rc and out.
+sync() {
+  rc=0
+  out="$(STANDARDS_REPO="$SANDBOX/src" STANDARDS_TARGETS="$SANDBOX/target" standards-sync "$@" 2>&1)" || rc=$?
 }
 
-# A target edited in place is newer than the source as far as push can tell
-test_start "standards_sync_push_keeps_edit"
-sandbox_git init -q
-sandbox_git add -A
-sandbox_git commit -q -m seed
-kept_status=0
-kept_out="$(STANDARDS_REPO="$SRC_DIR" STANDARDS_TARGETS="$TARGET_DIR" "$PYTHON_BIN" "$SYNC_BIN" --push 2>&1)" || kept_status=$?
-assert_equals "1" "$kept_status" "push returns 1 when it keeps an edited file"
-assert_contains "[KEPT] AGENTS.md" "$kept_out" "push reports the kept file"
-assert_equals "drifted content" "$(cat "$TARGET_DIR/AGENTS.md")" "edited target survives push"
-
-test_start "standards_sync_push_force"
-push_out="$(STANDARDS_REPO="$SRC_DIR" STANDARDS_TARGETS="$TARGET_DIR" "$PYTHON_BIN" "$SYNC_BIN" --push --force 2>&1)"
-push_status=$?
-assert_equals "0" "$push_status" "push --force returns 0"
-assert_contains "Push synchronization complete" "$push_out" "push --force completes"
-restored_diff="$(diff -u "$SRC_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md" 2>&1 || true)"
-assert_equals "" "$restored_diff" "target AGENTS.md matches source after push --force"
-
-# A target holding a version the source once committed is stale, not edited
-test_start "standards_sync_push_updates_published"
-printf 'new content of AGENTS.md\n' >"$SRC_DIR/AGENTS.md"
-sandbox_git commit -q -am update
-push_out="$(STANDARDS_REPO="$SRC_DIR" STANDARDS_TARGETS="$TARGET_DIR" "$PYTHON_BIN" "$SYNC_BIN" --push 2>&1)"
-push_status=$?
-assert_equals "0" "$push_status" "push returns 0 over a published version"
-updated_diff="$(diff -u "$SRC_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md" 2>&1 || true)"
-assert_equals "" "$updated_diff" "stale published target is updated"
-
-# A target that is a symlink to the source is the source: nothing to copy
-LINK_DIR="$SANDBOX/linked"
-mkdir -p "$LINK_DIR"
-for f in "${STANDARD_FILES[@]}"; do
-  ln -s "$SRC_DIR/$f" "$LINK_DIR/$f"
-done
-
-test_start "standards_sync_push_skips_linked_target"
-link_status=0
-link_out="$(STANDARDS_REPO="$SRC_DIR" STANDARDS_TARGETS="$LINK_DIR" "$PYTHON_BIN" "$SYNC_BIN" --push 2>&1)" || link_status=$?
-assert_equals "0" "$link_status" "push returns 0 over linked targets"
-assert_contains "[LINKED]  AGENTS.md" "$link_out" "push reports the linked file"
-assert_equals "" "$(grep -F '[ERROR]' <<<"$link_out")" "push copies no file onto itself"
-if [[ -L "$LINK_DIR/AGENTS.md" ]]; then link_kept=yes; else link_kept=no; fi
-assert_equals "yes" "$link_kept" "the link is still a link"
-
-test_start "standards_sync_pull_skips_linked_workspace"
-PULL_HOME="$SANDBOX/home"
-mkdir -p "$PULL_HOME/Code" "$SANDBOX/mirror"
-for f in "${STANDARD_FILES[@]}"; do
-  ln -s "$SRC_DIR/$f" "$PULL_HOME/Code/$f"
-done
-pull_status=0
-pull_out="$(HOME="$PULL_HOME" STANDARDS_REPO="$SRC_DIR" STANDARDS_TARGETS="$SANDBOX/mirror" "$PYTHON_BIN" "$SYNC_BIN" --pull 2>&1)" || pull_status=$?
-assert_equals "0" "$pull_status" "pull returns 0 from a linked workspace"
-assert_contains "[LINKED]  AGENTS.md" "$pull_out" "pull reports the linked file"
-assert_equals "" "$(grep -F '[ERROR]' <<<"$pull_out")" "pull copies no file onto itself"
-mirror_diff="$(diff -u "$SRC_DIR/AGENTS.md" "$SANDBOX/mirror/AGENTS.md" 2>&1 || true)"
-assert_equals "" "$mirror_diff" "pull still updates the mirrors"
-
-# 5. Verify 45-standards.zsh sentinel exists and is valid shell syntax
-test_start "standards_sentinel_syntax"
-if [[ -f "$SENTINEL_ZSH" ]]; then
-  if ! command -v zsh >/dev/null 2>&1 || zsh -n "$SENTINEL_ZSH" 2>/dev/null; then
-    ((TESTS_PASSED++))
-    printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: 45-standards.zsh exists and has valid shell syntax"
-  else
-    ((TESTS_FAILED++))
-    printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: 45-standards.zsh syntax error"
-  fi
-else
-  ((TESTS_FAILED++))
-  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: 45-standards.zsh is missing"
-fi
+test_start "standards_sync_check_contract"
+sync --check --quiet
+assert_equals "0" "$rc" "check exits 0 when the targets match"
+printf 'drifted content\n' >"$SANDBOX/target/AGENTS.md"
+sync --check --quiet
+assert_equals "1" "$rc" "check exits 1 when a target drifted"
+assert_contains "Drift detected" "$out" "quiet mode prints the warning the sentinel shows"
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

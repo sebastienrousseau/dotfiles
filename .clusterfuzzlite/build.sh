@@ -29,7 +29,7 @@ cd "$SRC/dotfiles/fuzz"
 # into this package and are fuzzed in-module as well (each module's
 # fuzz_test.go), where they run against the real implementation.
 
-go get github.com/AdamKorcz/go-118-fuzz-build/testing
+go get github.com/AdamKorcz/go-118-fuzz-build/testing@v0.0.0-20250520111509-a70c2aa677fa
 
 compile_native_go_fuzzer \
   github.com/sebastienrousseau/dotfiles/fuzz \

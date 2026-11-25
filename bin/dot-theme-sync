@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 ## dot-theme-sync — Fast theme switching with config regeneration + IPC reload.
 ##
 ## Sets the active theme in .chezmoidata.toml, regenerates config files via

@@ -70,9 +70,10 @@ lint-shell: ## shellcheck + shfmt, exactly as CI runs them
 lint-shell-all: ## shfmt over every tracked shell file (superset of CI)
 	git ls-files '*.sh' | xargs shfmt -d -i 2 -ci
 
-lint-docs: ## markdownlint-cli2 + codespell over docs and *.md
-	npx --yes markdownlint-cli2 '**/*.md'
-	codespell --config config/codespellrc
+lint-docs: ## markdownlint-cli2, typos and codespell, as the Pre-Commit CI job runs them
+	pre-commit run markdownlint-cli2 --all-files
+	pre-commit run typos --all-files
+	pre-commit run codespell --all-files
 
 lint-pins: ## Reusable workflows must be pinned by 40-hex SHA
 	bash ./tools/ci/lint-reusable-pins.sh

@@ -81,7 +81,7 @@ Catalog of the executables chezmoi installs into `~/.local/bin/` from `defaults/
 
 | Command | Description |
 |---------|-------------|
-| `standards-sync` | Keep the standards repository, `~/Code` and the dotfiles in sync |
+| `standards-sync` | Keep the standards repository, `~/Code` and the dotfiles in sync. Installed by mise from PyPI (`pipx:standards-sync`), not shipped in this repository |
 | `corralctl-sync.sh` | Scheduled `corralctl` sync into `~/Code` (macOS launchd agent) |
 | `corralctl-daily-run.sh` | Daily `corralctl` run started by `corralctl.timer` (Linux, `corral_gitea_mirror` only) |
 | `corralctl-gitea-mirror.sh` | Mirror GitHub to a NAS Gitea (Linux, `corral_gitea_mirror` only) |

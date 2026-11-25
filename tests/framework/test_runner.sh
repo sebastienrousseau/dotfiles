@@ -54,6 +54,7 @@ unset ZDOTDIR
 
 _runner_hermetic_bin="${TMPDIR:-/tmp}/dotfiles-hermetic-bin"
 mkdir -p "$_runner_hermetic_bin"
+_runner_hermetic_bin="$(cd "$_runner_hermetic_bin" && pwd)"
 for _shim in open xdg-open osascript; do
   if [[ ! -x "$_runner_hermetic_bin/$_shim" ]]; then
     printf '#!/bin/sh\nexit 0\n' >"$_runner_hermetic_bin/$_shim"
@@ -61,10 +62,85 @@ for _shim in open xdg-open osascript; do
   fi
 done
 unset _shim
-case ":$PATH:" in
-  *":$_runner_hermetic_bin:"*) ;;
-  *) export PATH="$_runner_hermetic_bin:$PATH" ;;
+
+# Hermetic guards: a test must not reach the network or run a real build.
+# One that did (a coverage run started `cargo build`, and rustup downloaded
+# a toolchain into the sandbox HOME) timed out and wrote into the repo. The
+# guard refuses curl/wget to hosts other than loopback, and the build or
+# download commands of cargo, rustup and go, with exit 97; read-only probes
+# (`go env`, `cargo install --list`) pass through. A test that needs one
+# declares it in its first 30 lines: `# test-needs: network go`.
+#
+# The guards live in a directory of this run's own, removed on exit. Which
+# tools get one depends on this run's PATH, and test files start nested
+# runners in parallel, so a shared directory let one run delete or restore
+# another's guards mid-test. Guards an earlier version left in the shared
+# directory are cleared.
+rm -f "$_runner_hermetic_bin"/{curl,wget,cargo,rustup,go}
+_runner_guard_bin="$(cd "$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-guards.XXXXXX")" && pwd)"
+trap 'rm -rf "$_runner_guard_bin"' EXIT
+cat >"$_runner_guard_bin/guard" <<'GUARD'
+#!/usr/bin/env bash
+# Hermetic guard written by tests/framework/test_runner.sh.
+tool="${0##*/}"
+self_dir="$(cd "${0%/*}" && pwd)"
+# The real tool: the first on PATH outside this directory, compared after
+# resolving (TMPDIR's trailing slash puts this directory on PATH as `T//…`).
+real="" dir=""
+IFS=: read -r -a path_dirs <<<"$PATH"
+for dir in "${path_dirs[@]}"; do
+  [[ -x "$dir/$tool" && "$(cd "$dir" 2>/dev/null && pwd)" != "$self_dir" ]] && real="$dir/$tool" && break
+done
+[[ -n "$real" ]] || {
+  echo "$tool: command not found" >&2
+  exit 127
+}
+need="$tool" blocked=0
+case "$tool" in
+  curl | wget)
+    need=network
+    for arg in "$@"; do
+      case "$arg" in
+        http://127.0.0.1* | https://127.0.0.1* | http://localhost* | https://localhost* | http://\[::1\]*) ;;
+        http://* | https://*) blocked=1 ;;
+      esac
+    done
+    ;;
+  cargo) case "${1:-} ${2:-}" in "install --list") ;; build* | install* | run* | test* | fetch* | update* | publish*) blocked=1 ;; esac ;;
+  rustup) case "${1:-}" in --version | -V | show | which) ;; *) blocked=1 ;; esac ;;
+  go) case "${1:-} ${2:-}" in build* | install* | get* | run* | test* | "mod download"*) blocked=1 ;; esac ;;
 esac
+case " ${DOT_TEST_NEEDS:-} " in *" $need "*) blocked=0 ;; esac
+if [[ "$blocked" -eq 1 ]]; then
+  printf 'hermetic: this test ran a real `%s %s`; stub it, or declare `# test-needs: %s` in its header\n' "$tool" "$*" "$need" >&2
+  exit 97
+fi
+exec "$real" "$@"
+GUARD
+chmod +x "$_runner_guard_bin/guard"
+# Guard only the tools that are installed: a guard for a missing tool would
+# make `command -v` succeed, and a test that skips without the tool would
+# run and fail instead (macOS runners have no go on PATH).
+for _shim in curl wget cargo rustup go; do
+  if command -v "$_shim" >/dev/null 2>&1; then
+    cp "$_runner_guard_bin/guard" "$_runner_guard_bin/$_shim"
+  fi
+done
+rm -f "$_runner_guard_bin/guard"
+unset _shim
+
+# The shims, then the guards, first on PATH: an earlier entry would bypass
+# them.
+_runner_path=":$PATH:"
+_runner_path="${_runner_path//:$_runner_hermetic_bin:/:}"
+_runner_path="${_runner_path#:}"
+export PATH="$_runner_guard_bin:$_runner_hermetic_bin:${_runner_path%:}"
+unset _runner_path
+
+# test_needs <test-file>: the tools its `# test-needs:` header line declares.
+test_needs() {
+  head -n 30 "$1" 2>/dev/null | sed -n 's/^# test-needs: //p' | head -n 1
+}
 
 # -----------------------------------------------------------------------------
 # Helpers
@@ -147,7 +223,7 @@ run_test_file_serial() {
   echo "─────────────────────────────────────"
 
   local exit_status=0
-  run_bounded "$TEST_FILE_TIMEOUT" bash "$test_file" </dev/null 2>&1 | tee "$temp_results" || exit_status=$?
+  DOT_TEST_NEEDS="$(test_needs "$test_file")" run_bounded "$TEST_FILE_TIMEOUT" bash "$test_file" </dev/null 2>&1 | tee "$temp_results" || exit_status=$?
 
   local results_line
   results_line=$(grep "^RESULTS:" "$temp_results" | tail -1) || true
@@ -155,14 +231,35 @@ run_test_file_serial() {
     local run passed failed
     IFS=':' read -r _ run passed failed <<<"$results_line"
     TOTAL_TESTS_PASSED=$((TOTAL_TESTS_PASSED + passed))
-    TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + failed))
     TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + passed + failed))
-    if [[ "$failed" -gt 0 ]]; then TOTAL_FAILED_FILES+=("$(basename "$test_file") ($failed failed)"); fi
+    if [[ "$failed" -gt 0 ]]; then record_failure "$(basename "$test_file")" "$failed" "$failed failed"; fi
   elif [[ $exit_status -ne 0 ]]; then
     printf '%b\n' "\033[0;31mERROR: $(basename "$test_file") $(describe_exit "$exit_status") without producing results\033[0m"
     TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + 1))
-    TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + 1))
-    TOTAL_FAILED_FILES+=("$(basename "$test_file") ($(describe_exit "$exit_status"))")
+    record_failure "$(basename "$test_file")" 1 "$(describe_exit "$exit_status")"
+  fi
+}
+
+# Quarantine (tests/quarantine.tsv, checked by tools/ci/check-quarantine.py):
+# a listed file still runs and its failures are still printed, but until the
+# entry's expiry date they do not fail the run.
+QUARANTINE_FILE="${QUARANTINE_FILE:-$TESTS_DIR/quarantine.tsv}"
+
+# is_quarantined <file-basename>: true when an unexpired entry lists the file.
+is_quarantined() {
+  [[ -f "$QUARANTINE_FILE" ]] || return 1
+  awk -F'\t' -v name="$1" -v today="$(date +%Y-%m-%d)" \
+    '$0 !~ /^#/ && $1 == name && $3 >= today { found = 1 } END { exit !found }' "$QUARANTINE_FILE"
+}
+
+# record_failure <file-basename> <count> <label>: count a failing file, or
+# list it as quarantined when is_quarantined says so.
+record_failure() {
+  if is_quarantined "$1"; then
+    QUARANTINED_FILES+=("$1 ($3)")
+  else
+    TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + $2))
+    TOTAL_FAILED_FILES+=("$1 ($3)")
   fi
 }
 
@@ -178,7 +275,7 @@ run_test_file_worker() {
     echo "Running: $(basename "$test_file")"
     echo "─────────────────────────────────────"
     local exit_status=0
-    run_bounded "$TEST_FILE_TIMEOUT" bash "$test_file" </dev/null 2>&1 || exit_status=$?
+    DOT_TEST_NEEDS="$(test_needs "$test_file")" run_bounded "$TEST_FILE_TIMEOUT" bash "$test_file" </dev/null 2>&1 || exit_status=$?
     # Append exit status sentinel for the aggregator
     printf 'EXIT_STATUS:%d\n' "$exit_status"
   } >"$out_file" 2>&1
@@ -205,14 +302,12 @@ aggregate_parallel_results() {
       local run passed failed
       IFS=':' read -r _ run passed failed <<<"$results_line"
       TOTAL_TESTS_PASSED=$((TOTAL_TESTS_PASSED + passed))
-      TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + failed))
       TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + passed + failed))
-      if [[ "$failed" -gt 0 ]]; then TOTAL_FAILED_FILES+=("$(basename "$f" .out) ($failed failed)"); fi
+      if [[ "$failed" -gt 0 ]]; then record_failure "$(basename "$f" .out)" "$failed" "$failed failed"; fi
     elif [[ $exit_status -ne 0 ]]; then
       printf '%b\n' "\033[0;31mERROR: $(basename "$f" .out) $(describe_exit "$exit_status") without producing results\033[0m"
       TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + 1))
-      TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + 1))
-      TOTAL_FAILED_FILES+=("$(basename "$f" .out) ($(describe_exit "$exit_status"))")
+      record_failure "$(basename "$f" .out)" 1 "$(describe_exit "$exit_status")"
     fi
   done
 }
@@ -235,7 +330,7 @@ run_test_list_parallel() {
   # shellcheck disable=SC2064  # capture $out_dir at trap-registration time
   trap "rm -rf '$out_dir'" RETURN
 
-  export -f run_test_file_worker run_bounded describe_exit
+  export -f run_test_file_worker run_bounded describe_exit test_needs
   export TEST_FILE_TIMEOUT
   local -a primary_files=() quiet_files=() deferred_inv=()
   local f
@@ -337,6 +432,7 @@ main() {
   TOTAL_TESTS_PASSED=0
   TOTAL_TESTS_FAILED=0
   TOTAL_FAILED_FILES=()
+  QUARANTINED_FILES=()
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -466,6 +562,10 @@ main() {
   if [[ "${#TOTAL_FAILED_FILES[@]}" -gt 0 ]]; then
     printf '%b\n' "\033[0;31mFailed test files (${#TOTAL_FAILED_FILES[@]}):\033[0m"
     printf '  - %s\n' "${TOTAL_FAILED_FILES[@]}"
+  fi
+  if [[ "${#QUARANTINED_FILES[@]}" -gt 0 ]]; then
+    printf '%b\n' "\033[0;33mQuarantined test files (${#QUARANTINED_FILES[@]}):\033[0m"
+    printf '  - %s\n' "${QUARANTINED_FILES[@]}"
   fi
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 

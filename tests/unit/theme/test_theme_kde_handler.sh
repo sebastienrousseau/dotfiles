@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Behavioural tests for _apply_kde_desktop in bin/dot-theme-sync using
 # PATH-injected mocks. The GNOME box this runs on has no KDE session,
 # so we simulate one by:
