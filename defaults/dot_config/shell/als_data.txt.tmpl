@@ -7,42 +7,53 @@
   {{- $category := base (dir .) -}}
   {{- if eq $category "aliases" }}{{ $category = base . | replace ".aliases.sh" "" }}{{ end -}}
   {{- $category = title $category -}}
-  
+
   {{- $fileContent := include . -}}
   {{- $lastComment := "" -}}
-  
+  {{- $commentIndented := false -}}
+
   {{- range (splitList "\n" $fileContent) -}}
     {{- $line := trim . -}}
-    
+
     {{- if (hasPrefix "#" $line) -}}
       {{- $comment := $line | trimPrefix "#" | trim -}}
       {{- if and (not (contains "shellcheck" $comment)) (not (contains "Copyright" $comment)) -}}
         {{- $lastComment = $comment -}}
+        {{- $commentIndented = or (hasPrefix " " .) (hasPrefix "\t" .) -}}
       {{- end -}}
     {{- else if (hasPrefix "alias " $line) -}}
       {{- $working := $line | replace "alias " "" -}}
       {{- $parts := splitList "=" $working -}}
-      
+
       {{- if (ge (len $parts) 2) -}}
         {{- $name := index $parts 0 | trim -}}
         {{- $rest := slice $parts 1 | join "=" -}}
-        
+
         {{- $cmdDesc := splitList "#" $rest -}}
         {{- $cmd := index $cmdDesc 0 | trim | trimPrefix "'" | trimSuffix "'" | trimPrefix "\"" | trimSuffix "\"" | trim -}}
-        
+
         {{- $desc := "" -}}
         {{- if (ge (len $cmdDesc) 2) -}}
           {{- $desc = slice $cmdDesc 1 | join "#" | trim -}}
         {{- else -}}
           {{- $desc = $lastComment -}}
         {{- end -}}
-        
+
         {{- if eq $desc "" }}{{ $desc = "Shell command" }}{{ end -}}
 
         {{- if and (ne $name "") (ne $cmd "") -}}
           {{- $entry := printf "%s|%s|%s|%s" $category $name $cmd $desc -}}
           {{- $db = append $db $entry -}}
         {{- end -}}
+      {{- end -}}
+    {{- else if and $commentIndented (ne $line "") -}}
+      {{- /* An indented comment is a note on the code below it, so other
+             code ends its reach, except a line that only opens or closes
+             the block an alias sits in. A top-level comment is a heading
+             for the aliases that follow, and keeps its reach. */ -}}
+      {{- $word := index (splitList " " $line) 0 | trimSuffix ";" -}}
+      {{- if not (or (has $word (list "if" "elif" "else" "then" "fi" "case" "esac" ";;")) (hasSuffix ")" $word)) -}}
+        {{- $lastComment = "" -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}

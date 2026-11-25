@@ -260,7 +260,7 @@ if command -v chmod >/dev/null; then
     fi
   }
 
-  alias permissions='show_permissions'
+  alias permissions='show_permissions' # Show a path's permissions in octal
 
 fi
 

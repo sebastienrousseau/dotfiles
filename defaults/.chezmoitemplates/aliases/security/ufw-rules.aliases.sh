@@ -74,7 +74,7 @@ if command -v ufw >/dev/null 2>&1; then
     sudo ufw logging "$1"
   }
 
-  alias fwreset='sudo ufw reset'
+  alias fwreset='sudo ufw reset' # Reset ufw to its defaults
 
   # Common Rules
   alias fwassh='sudo ufw allow ssh'
