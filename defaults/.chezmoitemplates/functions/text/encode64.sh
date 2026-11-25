@@ -1,5 +1,6 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Description:
 #   encode64 and decode64 are functions for encoding and decoding strings to and
 #   from base64. These functions can process input either directly as arguments

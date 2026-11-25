@@ -155,4 +155,27 @@ if [[ "${#wrong_spdx[@]}" -gt 0 ]]; then
   exit 1
 fi
 
+# Third gate: a copyright line that reserves all rights contradicts the
+# grant: it withholds what LICENSE-APACHE and LICENSE-MIT give away. It
+# runs over every file, hidden ones and templates included, because the
+# extension scan above skips both and the line survived there for years.
+# Licence texts and vendored trees keep their own wording.
+RESERVED_EXCLUDES='(^|/)(node_modules|\.git|vendor|target|build|LICENSES)/'
+reserved=()
+while IFS=: read -r _file _lineno _; do
+  [[ "$_lineno" -le 10 && ! "$_file" =~ $RESERVED_EXCLUDES ]] && reserved+=("$_file")
+done < <(rg --hidden -g '!.git' -n -i -m1 'copyright.*all rights reserved' 2>/dev/null || true)
+
+if [[ "${#reserved[@]}" -gt 0 ]]; then
+  echo "::error::Reserved-rights header: ${#reserved[@]} file(s) say 'All rights reserved' under an '$EXPECTED_SPDX' grant"
+  printf '  - %s\n' "${reserved[@]}"
+  echo
+  echo "Use the project header instead:"
+  # REUSE-IgnoreStart -- printed hint, not a declaration
+  echo "  SPDX-License-Identifier: $EXPECTED_SPDX"
+  # REUSE-IgnoreEnd
+  echo "  Copyright (c) <years> Sebastien Rousseau"
+  exit 1
+fi
+
 echo "::notice::All ${#all_files[@]} file(s) have a valid copyright header and declare '$EXPECTED_SPDX'"

@@ -1,4 +1,5 @@
--- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0 OR MIT
+-- Copyright (c) 2015-2026 Sebastien Rousseau
 -- Keep asynchronous parser work observable to the headless upgrade driver.
 local M = { tasks = {} }
 

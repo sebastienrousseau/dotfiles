@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Behavioral tests for dot-theme-sync's multi-DE dispatcher, wallpaper
 # resolution, accent mapping, and cursor picker. Sources the script
 # (source guard prevents main() from running) and calls the pure

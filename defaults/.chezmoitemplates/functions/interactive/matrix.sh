@@ -1,5 +1,6 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Description:
 #   matrix is a wrapper around cmatrix with a bash fallback for terminals
 #   without cmatrix installed. Supports color themes and speed options.

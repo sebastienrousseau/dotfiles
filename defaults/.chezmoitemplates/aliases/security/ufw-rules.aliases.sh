@@ -1,5 +1,6 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # UFW (Uncomplicated Firewall) Aliases
 [[ -n "${_UFW_RULES_LOADED:-}" ]] && return 0
 _UFW_RULES_LOADED=1

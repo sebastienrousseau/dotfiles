@@ -1,5 +1,6 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # OpenSSL CSR (Certificate Signing Request) Operations
 [[ -n "${_OPENSSL_CSR_LOADED:-}" ]] && return 0
 _OPENSSL_CSR_LOADED=1

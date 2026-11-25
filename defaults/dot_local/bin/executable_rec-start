@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 ## rec-start — Disable shell history for screencasts/recordings.
 ##
 ## Backs up and removes the history file to prevent secrets leaking.

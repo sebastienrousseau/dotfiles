@@ -1,6 +1,6 @@
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # IPython configuration
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
 c = get_config()  # noqa: F821
 
 # Prompt

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 ## monitor — GPU-aware system monitoring in tmux.
 ##
 ## Opens btop alongside an auto-detected GPU monitor in a tmux split.

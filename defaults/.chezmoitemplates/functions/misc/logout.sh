@@ -1,5 +1,6 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Description:
 #   logout is a utility function to log out from macOS, Linux, or Windows via
 #   the terminal. It provides options for confirmation and forceful logout if

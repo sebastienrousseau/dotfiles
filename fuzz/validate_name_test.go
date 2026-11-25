@@ -1,4 +1,5 @@
-// Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+// Copyright (c) 2015-2026 Sebastien Rousseau
 // FuzzValidateName exercises the same regex our shell
 // `validate_name` function (scripts/dot/lib/utils.sh:101) uses
 // to gate user-supplied identifiers before passing them to mise /

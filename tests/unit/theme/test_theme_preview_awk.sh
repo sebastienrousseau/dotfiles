@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Unit tests for the awk-based preview payload that renders inside the
 # fzf picker. The preview must:
 #   * Emit family / wallpaper / accent / bg / fg lines

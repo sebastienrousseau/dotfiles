@@ -1,5 +1,6 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Description:
 #   curlstatus is a function to fetch and display the HTTP status code for a
 #   given URL. It uses curl to make a request and extracts the HTTP status

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Sourced by dot_zshrc.tmpl / dot_bashrc; inherits set -euo pipefail from the caller.
 
 # Set ls colors with GNU/BSD detection and caching

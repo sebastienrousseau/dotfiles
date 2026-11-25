@@ -1,5 +1,6 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # OpenSSL Cryptographic Operations (Hash, Digest, Random, Encryption)
 [[ -n "${_OPENSSL_CRYPTO_LOADED:-}" ]] && return 0
 _OPENSSL_CRYPTO_LOADED=1

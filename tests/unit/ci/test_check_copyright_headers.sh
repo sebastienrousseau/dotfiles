@@ -70,11 +70,14 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 # File WITH a valid header
+# REUSE-IgnoreStart -- fixture text, not a declaration
 cat >"$TMP/good.sh" <<'EOF'
 #!/usr/bin/env bash
-# Copyright (c) 2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2026 Sebastien Rousseau
 echo hi
 EOF
+# REUSE-IgnoreEnd
 
 # File WITHOUT any recognised header
 cat >"$TMP/bad.sh" <<'EOF'
@@ -118,6 +121,29 @@ EOF
     ((TESTS_FAILED++)) || true
     printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: expected exit 1, got $ec"
   fi
+else
+  printf '%b\n' "  ${YELLOW}∼${NC} $CURRENT_TEST: skipped (ripgrep unavailable)"
+fi
+popd >/dev/null
+
+# A copyright line that reserves all rights contradicts the open grant,
+# even in a file whose extension the header scan does not cover.
+test_start "fails_on_all_rights_reserved"
+pushd "$TMP" >/dev/null
+if command -v rg >/dev/null 2>&1; then
+  rm -f "$TMP/bad.sh"
+  mkdir -p "$TMP/.templates"
+  cat >"$TMP/.templates/reserved.sh.tmpl" <<'EOF'
+# Copyright (c) 2026 Dotfiles. All rights reserved.
+echo reserved
+EOF
+  set +e
+  out="$(bash "$SCRIPT_FILE" --extensions=sh 2>&1)"
+  ec=$?
+  set -e
+  assert_equals "1" "$ec" "a reserved-rights header fails the check"
+  assert_contains ".templates/reserved.sh.tmpl" "$out" "the file is named"
+  rm -rf "$TMP/.templates"
 else
   printf '%b\n' "  ${YELLOW}∼${NC} $CURRENT_TEST: skipped (ripgrep unavailable)"
 fi

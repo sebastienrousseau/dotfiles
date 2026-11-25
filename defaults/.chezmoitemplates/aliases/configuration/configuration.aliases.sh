@@ -1,9 +1,10 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Description: Script containing aliases to open configuration files in default
 # editor
 # Website: https://dotfiles.io
-# License: MIT
+# License: Apache-2.0 OR MIT
 ################################################################################
 
 # Set default text editor

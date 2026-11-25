@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Shared helpers for tests/unit/commands/ and tests/integration/.
 #
 # Every command-smoke test file in the tree repeats the same shape:

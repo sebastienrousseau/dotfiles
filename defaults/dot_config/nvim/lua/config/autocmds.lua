@@ -1,4 +1,5 @@
--- Copyright (c) 2015-2026 Dotfiles. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0 OR MIT
+-- Copyright (c) 2015-2026 Sebastien Rousseau
 -- Reload externally changed files before autowrite can flush stale buffers.
 vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "TermClose", "TermLeave" }, {
   command = "if mode() != 'c' && getcmdwintype() == '' | checktime | endif",

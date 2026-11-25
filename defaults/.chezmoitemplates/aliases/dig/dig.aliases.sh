@@ -1,8 +1,9 @@
 # shellcheck shell=bash
-# Copyright (c) 2015-2026. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
 # Version: 0.2.501
 # Website: https://dotfiles.io
-# License: MIT
+# License: Apache-2.0 OR MIT
 
 # 🅳🅸🅶 🅰🅻🅸🅰🆂🅴🆂
 if command -v dig &>/dev/null; then
