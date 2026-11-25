@@ -5,3 +5,6 @@
 # patch it) left the default MCP servers in 0.2.548; install-servers.sh
 # installs every python/*/requirements.txt, so its deployed copy must go.
 .local/share/dot-mcp/python/sqlite
+# standards-sync moved to mise (pipx:standards-sync, from PyPI) in 0.2.554;
+# the copy dot_local/bin installed would shadow it on PATH, so it goes.
+.local/bin/standards-sync

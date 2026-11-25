@@ -4,6 +4,10 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+### Changed
+
+- `standards-sync` is installed by mise from PyPI (`pipx:standards-sync` 0.0.14, published with trusted publishing) instead of shipping as a copy in `~/.local/bin`. `chezmoi apply` removes the old copy, which would otherwise shadow the mise install on `PATH`. 0.0.14 also fixes a push that reported success after a failed write, `--install-hooks` overwriting an existing hook, and colour codes written into pipes.
+
 ### Fixed
 
 - fish now puts `~/.cargo/bin`, `~/.local/bin`, `~/bin` and the mise shims ahead of the system directories even when the parent process already had them on `PATH`, as a terminal started from a login session does. They were left behind `/usr/bin`, so a distro's `rustc` and `cargo` shadowed rustup (ignoring each project's `rust-toolchain.toml`) and `/usr/bin` tools shadowed their mise shims. `~/.local/bin` also now comes before `~/.cargo/bin`, as in bash and zsh.
