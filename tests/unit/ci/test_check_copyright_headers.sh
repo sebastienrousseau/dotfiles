@@ -137,14 +137,22 @@ if command -v rg >/dev/null 2>&1; then
 # Copyright (c) 2026 Dotfiles. All rights reserved.
 echo reserved
 EOF
+  # A developer's global gitignore hides the directory, as one hid bin/ and
+  # let a header through locally that CI then rejected: the check must not
+  # depend on whose machine it runs on.
+  # rg reads the global ignore from $XDG_CONFIG_HOME/git/ignore once
+  # $HOME/.gitconfig names no other excludesFile.
+  mkdir -p "$TMP/.git" # rg applies a global ignore only inside a repository
+  mkdir -p "$TMP/xdg/git"
+  printf '/.templates/\n' >"$TMP/xdg/git/ignore"
   set +e
   # stdin is a pipe, as in CI: rg with no path would search stdin instead.
-  out="$(echo unrelated | bash "$SCRIPT_FILE" --extensions=sh 2>&1)"
+  out="$(echo unrelated | HOME="$TMP" XDG_CONFIG_HOME="$TMP/xdg" bash "$SCRIPT_FILE" --extensions=sh 2>&1)"
   ec=$?
   set -e
   assert_equals "1" "$ec" "a reserved-rights header fails the check"
-  assert_contains ".templates/reserved.sh.tmpl" "$out" "the file is named"
-  rm -rf "$TMP/.templates"
+  assert_contains ".templates/reserved.sh.tmpl" "$out" "the file is named, despite a global ignore"
+  rm -rf "$TMP/.templates" "$TMP/.git" "$TMP/xdg"
 else
   printf '%b\n' "  ${YELLOW}∼${NC} $CURRENT_TEST: skipped (ripgrep unavailable)"
 fi

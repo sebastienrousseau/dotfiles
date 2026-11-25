@@ -8,7 +8,7 @@ description: |
   defaults to dry-run in safer modes and full apply in `apply`.
 version: 1.0.0
 maintainer: Sebastien Rousseau <sebastienrousseau@users.noreply.github.com>
-license: MIT
+license: Apache-2.0 OR MIT
 tags: [dotfiles, chezmoi, bootstrap, provisioning, workstation, agents]
 requires:
   - chezmoi >= 2.47

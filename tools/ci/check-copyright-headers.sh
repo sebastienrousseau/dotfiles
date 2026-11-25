@@ -84,7 +84,7 @@ glob="$(extension_glob)"
 all_files=()
 while IFS= read -r _line; do
   [[ -n "$_line" ]] && all_files+=("$_line")
-done < <(rg --files -g "$glob" 2>/dev/null || true)
+done < <(rg --no-ignore-global --files -g "$glob" 2>/dev/null || true)
 
 if [[ "${#all_files[@]}" -eq 0 ]]; then
   echo "::notice::No files matched extensions: $EXTENSIONS"
@@ -181,7 +181,7 @@ check_reserved_rights() {
   local -a reserved=()
   while IFS=: read -r file lineno _; do
     [[ "$lineno" -le 10 && ! "$file" =~ $excludes ]] && reserved+=("${file#./}")
-  done < <(rg --hidden -g '!.git' -n -i -m1 'copyright.*all rights reserved' . 2>/dev/null || true)
+  done < <(rg --no-ignore-global --hidden -g '!.git' -n -i -m1 'copyright.*all rights reserved' . 2>/dev/null || true)
   [[ "${#reserved[@]}" -eq 0 ]] && return 0
   echo "::error::Reserved-rights header: ${#reserved[@]} file(s) say 'All rights reserved' under an '$EXPECTED_SPDX' grant"
   printf '  - %s\n' "${reserved[@]}"
