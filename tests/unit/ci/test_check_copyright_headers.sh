@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
-# test-kind: structural
+# test-kind: structural except tools/ci/check-copyright-headers.sh
 # shellcheck disable=SC1090,SC1091,SC2034
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
@@ -157,6 +157,47 @@ else
   printf '%b\n' "  ${YELLOW}∼${NC} $CURRENT_TEST: skipped (ripgrep unavailable)"
 fi
 popd >/dev/null
+
+# run_in_fixture FILE-CONTENT ARGS...: run the checker over a fresh tree
+# holding one file, x.sh, with that content; sets ec and out.
+run_in_fixture() {
+  local dir content="$1"
+  shift
+  dir="$(mktemp -d)"
+  printf '%b' "$content" >"$dir/x.sh"
+  set +e
+  out="$(cd "$dir" && echo unrelated | bash "$SCRIPT_FILE" --extensions=sh "$@" 2>&1)"
+  ec=$?
+  set -e
+  rm -rf "$dir"
+}
+
+# REUSE-IgnoreStart -- fixture headers, not declarations
+test_start "fails_on_narrower_grant"
+if command -v rg >/dev/null 2>&1; then
+  run_in_fixture '#!/bin/sh\n# SPDX-License-Identifier: MIT\necho hi\n'
+  assert_equals "1" "$ec" "a file declaring MIT alone fails under an Apache-2.0 OR MIT grant"
+  assert_contains "x.sh: declares 'MIT'" "$out" "the narrower grant is named"
+else
+  printf '%b\n' "  ${YELLOW}∼${NC} $CURRENT_TEST: skipped (ripgrep unavailable)"
+fi
+
+test_start "no_spdx_value_skips_the_grant"
+if command -v rg >/dev/null 2>&1; then
+  run_in_fixture '#!/bin/sh\n# SPDX-License-Identifier: MIT\necho hi\n' --no-spdx-value
+  assert_equals "0" "$ec" "--no-spdx-value checks only that a header exists"
+else
+  printf '%b\n' "  ${YELLOW}∼${NC} $CURRENT_TEST: skipped (ripgrep unavailable)"
+fi
+# REUSE-IgnoreEnd
+
+test_start "reserved_rights_on_line_ten_counts"
+if command -v rg >/dev/null 2>&1; then
+  run_in_fixture '#!/bin/sh\n# Copyright (c) 2026 A\n\n\n\n\n\n\n\n# Copyright (c) 2026 B. All rights reserved.\n'
+  assert_equals "1" "$ec" "a reserved-rights line on line 10 is inside the header"
+else
+  printf '%b\n' "  ${YELLOW}∼${NC} $CURRENT_TEST: skipped (ripgrep unavailable)"
+fi
 
 # Slice 2: drive real line coverage of the script under test
 cov_exercise_script "$SCRIPT_FILE"
