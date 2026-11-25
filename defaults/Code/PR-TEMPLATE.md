@@ -18,6 +18,8 @@ Rules baked into this shape:
 Keep the sections and their order. Fill every {{PLACEHOLDER}} from real evidence.
 -->
 
+<!-- The <name> placeholder is not HTML. -->
+<!-- markdownlint-disable-next-line MD033 -->
 {{OPTIONAL_UPSTREAM_GREETING: Hi <name>,}}
 
 This PR {{announces what it does, in one plain line}}.

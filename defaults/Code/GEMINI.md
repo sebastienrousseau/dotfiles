@@ -3,6 +3,7 @@
 Mandatory across all repositories from `https://github.com/sebastienrousseau` and all portfolio workspaces under `~/Code` (`Public/`, `Private/`, `Work/`, `Forks/`).
 
 The authoritative sources of truth are:
+
 - [`~/Code/AGENTS.md`](AGENTS.md): Code Repositories Standard
 - [`~/Code/PR-TEMPLATE.md`](PR-TEMPLATE.md): Pull Request Specification
 - [`~/Code/README-TEMPLATE.md`](README-TEMPLATE.md): Canonical README Standard

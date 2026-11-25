@@ -121,7 +121,7 @@ this order (the template adds optional ones between them):
          - `## Checksums`: Introduced by `SHA-256 of every asset attached to this release:`, followed by a fenced ````text```` block listing every asset's 64-char hash and filename.
          - `**Full Changelog**: https://github.com/<owner>/<repo>/compare/<prev_tag>...<curr_tag>`.
       5. **Mandatory Post-Publish Audit & Immediate Remediation**:
-         - After any release is published, the agent MUST inspect the live GitHub release (`gh release view <tag> --json title,body`).
+         - After any release is published, the agent MUST inspect the live GitHub release (`gh release view <tag> --json name,body`; the release title is the `name` field, as `gh` has no `title` field).
          - If the title or notes deviate in any way, the agent MUST immediately correct it using `gh release edit <tag> --title "<PROJECT_NAME> <VERSION>" --notes-file <path>` before considering the task complete.
 
 ### 5. Packaging and distribution
@@ -191,7 +191,7 @@ this order (the template adds optional ones between them):
 
 ## The canonical layout
 
-```
+```text
 {{PROJECT}}/
 ├── README.md  CHANGELOG.md  LICENSE-*  DEVELOPMENT.md
 ├── CODE_OF_CONDUCT.md  CONTRIBUTING.md  GOVERNANCE.md
@@ -210,7 +210,7 @@ this order (the template adds optional ones between them):
 ## The six phases
 
 | # | Phase | Ships | Done when |
-|---|-------|-------|-----------|
+| --- | --- | --- | --- |
 | 1 | **Normalize layout** | `docs/` root, DEVELOPMENT.md, editorconfig, docs-lint CI | No stray layouts; lint green everywhere |
 | 2 | **Install UX** | GNUmakefile, generated manpages + completions | `make DESTDIR=/tmp/stage install` correct on a clean runner |
 | 3 | **Rendered manual** | mdBook/MkDocs on Pages, README doc links unified | Manual live; link check gating CI |

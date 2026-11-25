@@ -33,6 +33,9 @@ crates.io, npm and other registries, which do not resolve relative paths.
 
 ## Contents
 
+<!-- The fragments below hold placeholders until a README fills them in. -->
+<!-- markdownlint-disable MD051 -->
+
 **Getting started**
 
 - [Install](#install): {{INSTALL_METHODS_SUMMARY}}
@@ -60,6 +63,8 @@ crates.io, npm and other registries, which do not resolve relative paths.
 - [Documentation](#documentation): all reference docs
 - [Stability guarantees](#stability-guarantees): SemVer axis, output stability, minimum toolchain discipline
 - [License](#license)
+
+<!-- markdownlint-enable MD051 -->
 
 ---
 
