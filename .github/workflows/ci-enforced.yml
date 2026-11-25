@@ -235,6 +235,10 @@ jobs:
           persist-credentials: false
       - name: Source-grep ratchet
         run: python3 tools/ci/check-source-grep-tests.py
+      # Every quarantined test is owned, explained and within 60 days of
+      # its expiry; an expired entry fails here and in the runner.
+      - name: Quarantine entries are current
+        run: python3 tools/ci/check-quarantine.py
 
   # chezmoi run_* scripts install with the user's privileges on every apply,
   # so each install must be pinned: no @latest, cargo install --locked, no

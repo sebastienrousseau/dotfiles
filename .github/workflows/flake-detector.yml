@@ -1,0 +1,72 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+name: Flake Detector
+
+# Reruns the unit suite on one commit several times per OS and names the
+# test files that fail in some runs but not others (flaky) or in every run
+# (broken). A flaky file not listed in tests/quarantine.tsv fails the job;
+# a quarantined one is reported. Five runs a night on two OSes reaches the
+# plan's bar of 50 reruns in five nights.
+
+on:
+  schedule:
+    - cron: '41 2 * * *'
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: Runs per OS
+        default: '5'
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  rerun:
+    name: Flakes / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup chezmoi
+        uses: ./.github/actions/setup-chezmoi
+
+      - name: Run the unit suite repeatedly
+        env:
+          RUNS: ${{ inputs.runs || '5' }}
+        run: |
+          set -uo pipefail
+          mkdir -p flake-logs
+          for run in $(seq 1 "$RUNS"); do
+            echo "::group::Run $run of $RUNS"
+            ./tests/framework/test_runner.sh --jobs auto >"flake-logs/run-$run.log" 2>&1 || true
+            grep -a -E 'Total (tests run|failed)' "flake-logs/run-$run.log" || true
+            echo "::endgroup::"
+          done
+
+      - name: Report flaky and broken test files
+        run: python3 tools/ci/flake-report.py --summary "$GITHUB_STEP_SUMMARY" flake-logs/run-*.log
+
+      - name: Keep the logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: flake-logs-${{ matrix.os }}
+          path: flake-logs/
+          retention-days: 14

@@ -155,14 +155,35 @@ run_test_file_serial() {
     local run passed failed
     IFS=':' read -r _ run passed failed <<<"$results_line"
     TOTAL_TESTS_PASSED=$((TOTAL_TESTS_PASSED + passed))
-    TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + failed))
     TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + passed + failed))
-    if [[ "$failed" -gt 0 ]]; then TOTAL_FAILED_FILES+=("$(basename "$test_file") ($failed failed)"); fi
+    if [[ "$failed" -gt 0 ]]; then record_failure "$(basename "$test_file")" "$failed" "$failed failed"; fi
   elif [[ $exit_status -ne 0 ]]; then
     printf '%b\n' "\033[0;31mERROR: $(basename "$test_file") $(describe_exit "$exit_status") without producing results\033[0m"
     TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + 1))
-    TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + 1))
-    TOTAL_FAILED_FILES+=("$(basename "$test_file") ($(describe_exit "$exit_status"))")
+    record_failure "$(basename "$test_file")" 1 "$(describe_exit "$exit_status")"
+  fi
+}
+
+# Quarantine (tests/quarantine.tsv, checked by tools/ci/check-quarantine.py):
+# a listed file still runs and its failures are still printed, but until the
+# entry's expiry date they do not fail the run.
+QUARANTINE_FILE="${QUARANTINE_FILE:-$TESTS_DIR/quarantine.tsv}"
+
+# is_quarantined <file-basename>: true when an unexpired entry lists the file.
+is_quarantined() {
+  [[ -f "$QUARANTINE_FILE" ]] || return 1
+  awk -F'\t' -v name="$1" -v today="$(date +%Y-%m-%d)" \
+    '$0 !~ /^#/ && $1 == name && $3 >= today { found = 1 } END { exit !found }' "$QUARANTINE_FILE"
+}
+
+# record_failure <file-basename> <count> <label>: count a failing file, or
+# list it as quarantined when is_quarantined says so.
+record_failure() {
+  if is_quarantined "$1"; then
+    QUARANTINED_FILES+=("$1 ($3)")
+  else
+    TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + $2))
+    TOTAL_FAILED_FILES+=("$1 ($3)")
   fi
 }
 
@@ -205,14 +226,12 @@ aggregate_parallel_results() {
       local run passed failed
       IFS=':' read -r _ run passed failed <<<"$results_line"
       TOTAL_TESTS_PASSED=$((TOTAL_TESTS_PASSED + passed))
-      TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + failed))
       TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + passed + failed))
-      if [[ "$failed" -gt 0 ]]; then TOTAL_FAILED_FILES+=("$(basename "$f" .out) ($failed failed)"); fi
+      if [[ "$failed" -gt 0 ]]; then record_failure "$(basename "$f" .out)" "$failed" "$failed failed"; fi
     elif [[ $exit_status -ne 0 ]]; then
       printf '%b\n' "\033[0;31mERROR: $(basename "$f" .out) $(describe_exit "$exit_status") without producing results\033[0m"
       TOTAL_TESTS_RUN=$((TOTAL_TESTS_RUN + 1))
-      TOTAL_TESTS_FAILED=$((TOTAL_TESTS_FAILED + 1))
-      TOTAL_FAILED_FILES+=("$(basename "$f" .out) ($(describe_exit "$exit_status"))")
+      record_failure "$(basename "$f" .out)" 1 "$(describe_exit "$exit_status")"
     fi
   done
 }
@@ -337,6 +356,7 @@ main() {
   TOTAL_TESTS_PASSED=0
   TOTAL_TESTS_FAILED=0
   TOTAL_FAILED_FILES=()
+  QUARANTINED_FILES=()
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -466,6 +486,10 @@ main() {
   if [[ "${#TOTAL_FAILED_FILES[@]}" -gt 0 ]]; then
     printf '%b\n' "\033[0;31mFailed test files (${#TOTAL_FAILED_FILES[@]}):\033[0m"
     printf '  - %s\n' "${TOTAL_FAILED_FILES[@]}"
+  fi
+  if [[ "${#QUARANTINED_FILES[@]}" -gt 0 ]]; then
+    printf '%b\n' "\033[0;33mQuarantined test files (${#QUARANTINED_FILES[@]}):\033[0m"
+    printf '  - %s\n' "${QUARANTINED_FILES[@]}"
   fi
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
