@@ -138,7 +138,8 @@ if command -v rg >/dev/null 2>&1; then
 echo reserved
 EOF
   set +e
-  out="$(bash "$SCRIPT_FILE" --extensions=sh 2>&1)"
+  # stdin is a pipe, as in CI: rg with no path would search stdin instead.
+  out="$(echo unrelated | bash "$SCRIPT_FILE" --extensions=sh 2>&1)"
   ec=$?
   set -e
   assert_equals "1" "$ec" "a reserved-rights header fails the check"
