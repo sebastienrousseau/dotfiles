@@ -14,7 +14,7 @@ This file documents all notable changes to this project.
 
 ### Fixed
 
-- 227 files said "All rights reserved" in their copyright header, contradicting the project's Apache-2.0 OR MIT licence, and 13 banners said "License: MIT". Every header now declares `SPDX-License-Identifier: Apache-2.0 OR MIT`, and the copyright check fails on any header that reserves all rights, including in templates.
+- 227 files said "All rights reserved" in their copyright header, contradicting the project's Apache-2.0 OR MIT licence, and 13 banners said "License: MIT". Every header now declares the Apache-2.0 OR MIT grant in an SPDX line, and the copyright check fails on any header that reserves all rights, including in templates.
 - `mkscript` no longer stamps new scripts with this project's copyright and "All rights reserved"; the header names the current year and your git `user.name`.
 - fish now puts `~/.cargo/bin`, `~/.local/bin`, `~/bin` and the mise shims ahead of the system directories even when the parent process already had them on `PATH`, as a terminal started from a login session does. They were left behind `/usr/bin`, so a distro's `rustc` and `cargo` shadowed rustup (ignoring each project's `rust-toolchain.toml`) and `/usr/bin` tools shadowed their mise shims. `~/.local/bin` also now comes before `~/.cargo/bin`, as in bash and zsh.
 
