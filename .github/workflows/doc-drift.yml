@@ -40,6 +40,9 @@ on:
       - 'scripts/release-preflight'
       - 'tests/unit/qa/test_release_preflight.sh'
       - '.github/workflows/doc-drift.yml'
+      - 'README.md'
+      - 'defaults/Code/README-TEMPLATE.md'
+      - 'tools/ci/check-readme-template.py'
       - 'tools/docs/generate-manpage.sh'
       - 'tools/docs/man/dot.1.in'
       - 'tools/docs/gen_manpages.py'
@@ -106,6 +109,29 @@ jobs:
         run: bash tools/docs/generate-command-index.sh --check
       - name: Verify examples/command-reference.txt is in sync
         run: bash tools/docs/generate-command-reference.sh --check
+
+  readme-template:
+    name: Generators / README template
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Harden runner (block mode)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            codeload.github.com:443
+            objects.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Report mode while the README is brought into the template's shape
+      # (plan R1.1); this step gains --enforce when it reports nothing.
+      - name: Compare README.md with defaults/Code/README-TEMPLATE.md
+        run: python3 tools/ci/check-readme-template.py
 
   version-consistency:
     name: Generators / version-consistency
