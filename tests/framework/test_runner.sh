@@ -109,12 +109,21 @@ fi
 exec "$real" "$@"
 GUARD
 chmod +x "$_runner_hermetic_bin/.guard.$$"
+# Guard only the tools that are installed: a guard for a missing tool would
+# make `command -v` succeed, and a test that skips without the tool would
+# run and fail instead (macOS runners have no go on PATH).
+_runner_path=":$PATH:"
+_runner_path="${_runner_path//:$_runner_hermetic_bin:/:}"
 for _shim in curl wget cargo rustup go; do
-  cp "$_runner_hermetic_bin/.guard.$$" "$_runner_hermetic_bin/.$_shim.$$"
-  mv -f "$_runner_hermetic_bin/.$_shim.$$" "$_runner_hermetic_bin/$_shim"
+  if PATH="${_runner_path#:}" command -v "$_shim" >/dev/null 2>&1; then
+    cp "$_runner_hermetic_bin/.guard.$$" "$_runner_hermetic_bin/.$_shim.$$"
+    mv -f "$_runner_hermetic_bin/.$_shim.$$" "$_runner_hermetic_bin/$_shim"
+  else
+    rm -f "$_runner_hermetic_bin/$_shim"
+  fi
 done
 rm -f "$_runner_hermetic_bin/.guard.$$"
-unset _shim
+unset _shim _runner_path
 
 # First on PATH, always: an earlier entry would bypass the guards.
 _runner_path=":$PATH:"

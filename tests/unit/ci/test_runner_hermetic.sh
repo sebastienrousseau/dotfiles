@@ -31,13 +31,27 @@ echo "RESULTS:1:1:0"
 EOF
 }
 
+fixture absent "" "command -v rustup"
 fixture net "" "curl -fsS https://example.invalid/x"
 fixture loopback "" "curl -fsS http://127.0.0.1:9/"
 fixture build "" "cargo build --release"
 fixture list "" "cargo install --list"
 fixture declared "# test-needs: cargo" "cargo build --release"
 
-PATH="$WORK/fake:$PATH" bash "$WORK/tests/framework/test_runner.sh" 'hfixture_*' >"$WORK/runner.log" 2>&1
+# PATH without any directory holding a real rustup, so the absent-tool case
+# is the same on every machine.
+no_rustup_path=""
+IFS=: read -r -a dirs <<<"$PATH"
+for d in "${dirs[@]}"; do
+  [[ -x "$d/rustup" ]] || no_rustup_path="${no_rustup_path:+$no_rustup_path:}$d"
+done
+
+PATH="$WORK/fake:$no_rustup_path" bash "$WORK/tests/framework/test_runner.sh" 'hfixture_*' >"$WORK/runner.log" 2>&1
+
+test_start "absent_tool_stays_absent"
+# A guard for a tool that is not installed would make `command -v` succeed,
+# and a test that skips without the tool would run and fail instead.
+assert_equals "1" "$(cat "$WORK/out/absent.rc")" "command -v rustup still fails when rustup is not installed"
 
 test_start "outside_network_is_refused"
 assert_equals "97" "$(cat "$WORK/out/net.rc")" "curl to an outside host exits 97"
