@@ -2,6 +2,21 @@
 
 This file documents all notable changes to this project.
 
+## Unreleased
+
+### Changed
+
+- The shared `AGENTS.md` (installed as `~/Code/AGENTS.md`) adds two session rules from standards 0.0.15: record in a repository's `AGENTS.md` what sessions keep rediscovering, and make session hooks fail open.
+- Shipped scripts bound slow commands with `dot_bounded` (`lib/dot/probe.sh`), which needs no `timeout(1)`, and a CI check fails any shipped `timeout` call that does not first check that `timeout` exists.
+
+### Fixed
+
+- On macOS before 27, which ships no `timeout(1)`, several commands failed or lost their time limit: a new SSH agent never got `~/.ssh/id_ed25519` (the error was discarded), `/vibe` delegation never ran its delegate, `dot doctor` dropped its zsh hooks check, and the zsh startup benchmark and the examples gate ran with no deadline. Each now works without `timeout(1)`.
+- `/vibe` delegation reported a timed-out delegate on no OS: under `set -e` the script ended at the failed pipeline, before the "VIBE TIMEOUT" report and the run log. It also exited 1 after a run that changed no files or left no session log.
+- The nightly Flake Detector failed before running a test: it gave `setup-chezmoi` no chezmoi version. On macOS it now runs the suite under bash 5 with shellcheck, as the project requires, instead of Apple's bash 3.2.
+- The test framework's `timeout` shim, used when `timeout(1)` is missing, broke tests that ran it through `env` or child shells and dropped the time limit; tests use `run_with_timeout`, which needs no `timeout(1)`.
+- `pre-push` failed on machines where PowerShell comes from mise (the Scoop `dot.ps1` check ran the mise shim under the test's `HOME`), and nested test runners could loop between their hermetic guards until the 900 s bound.
+
 ## v0.2.554 (2026-11-25)
 
 ### Changed
