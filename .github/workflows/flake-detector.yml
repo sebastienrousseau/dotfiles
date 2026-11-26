@@ -21,6 +21,11 @@ on:
 permissions:
   contents: read
 
+# setup-chezmoi takes its version from here, as in ci.yml; without it the
+# action exits before the suite runs.
+env:
+  CHEZMOI_VERSION: "2.74.1"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
