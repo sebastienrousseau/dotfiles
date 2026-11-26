@@ -70,4 +70,33 @@ out="$(bash "$DRILL" --print)"
 assert_contains "bash \"\$installer_dir/dotfiles-install.sh\"" "$out" "the verified installer runs"
 assert_contains "dot doctor" "$out" "then the Quick Start commands"
 
+# --judge ELAPSED: the verdict on a `dot doctor --json` report.
+judge() {
+  rc=0
+  out="$(printf '%s' "$2" | DRILL_BUDGET=300 bash "$DRILL" --judge "$1" 2>&1)" || rc=$?
+}
+CLEAN='{"status":"healthy","failures":0,"warnings":1,"results":[]}'
+FAILED='{"status":"degraded","failures":2,"results":[{"name":"zsh","status":"fail"},{"name":"git","status":"ok"},{"name":"mise","status":"error"}]}'
+
+test_start "judge_passes_a_clean_report_in_budget"
+judge 120 "$CLEAN"
+assert_equals "0" "$rc" "no failures within 300s passes"
+assert_contains "drill: passed" "$out" "and says so"
+
+test_start "judge_fails_a_report_with_failures"
+judge 120 "$FAILED"
+assert_equals "1" "$rc" "doctor failures fail the drill"
+assert_contains "failed: zsh" "$out" "each failed check is named"
+assert_contains "failed: mise" "$out" "errors count as failures"
+assert_equals "" "$(grep -F 'failed: git' <<<"$out")" "a passing check is not listed"
+
+test_start "judge_fails_over_budget"
+judge 301 "$CLEAN"
+assert_equals "1" "$rc" "a clean report past the budget fails"
+assert_contains "over the 300s budget" "$out" "and says why"
+
+test_start "judge_passes_at_the_budget"
+judge 300 "$CLEAN"
+assert_equals "0" "$rc" "exactly the budget passes"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

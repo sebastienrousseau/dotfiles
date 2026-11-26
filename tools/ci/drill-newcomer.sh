@@ -9,6 +9,7 @@
 #
 #   tools/ci/drill-newcomer.sh            # run the drill (changes $HOME)
 #   tools/ci/drill-newcomer.sh --print    # print the commands it would run
+#   tools/ci/drill-newcomer.sh --judge ELAPSED <report.json   # the verdict
 #
 # Run it only on a disposable machine (a CI runner): the README's
 # installer applies the dotfiles to $HOME.
@@ -39,10 +40,37 @@ drill_script() {
   printf '%s\n%s\n' "$install" "$quick"
 }
 
-if [[ "${1:-}" == "--print" ]]; then
-  drill_script
-  exit
-fi
+# judge ELAPSED: read `dot doctor --json` on stdin; pass (exit 0) when it
+# reports no failures and ELAPSED is within the budget.
+judge() {
+  local elapsed="$1" report failures
+  report="$(cat)"
+  failures="$(printf '%s' "$report" | python3 -c 'import json,sys; print(json.load(sys.stdin)["failures"])')"
+  echo "drill: dot doctor --json reports $failures failure(s); ${elapsed}s of a ${BUDGET}s budget"
+  if [[ "$failures" != "0" ]]; then
+    printf '%s' "$report" | python3 -c 'import json,sys
+for r in json.load(sys.stdin).get("results", []):
+    if str(r.get("status", "")).lower() in ("fail", "failed", "error"):
+        print("  failed:", r.get("name") or r)'
+    return 1
+  fi
+  if ((elapsed > BUDGET)); then
+    echo "drill: over the ${BUDGET}s budget" >&2
+    return 1
+  fi
+  echo "drill: passed"
+}
+
+case "${1:-}" in
+  --print)
+    drill_script
+    exit
+    ;;
+  --judge)
+    judge "${2:?usage: drill-newcomer.sh --judge ELAPSED <report.json}"
+    exit
+    ;;
+esac
 
 script="$(drill_script)"
 echo "drill: running the README's Install and Quick Start blocks:"
@@ -52,19 +80,4 @@ start=$SECONDS
 # Install's $installer_dir and Quick Start's PATH carry over.
 bash -e -c "$script" </dev/null
 report="$(PATH="$HOME/.local/bin:$PATH" dot doctor --json)"
-elapsed=$((SECONDS - start))
-
-failures="$(printf '%s' "$report" | python3 -c 'import json,sys; print(json.load(sys.stdin)["failures"])')"
-echo "drill: dot doctor --json reports $failures failure(s); ${elapsed}s of a ${BUDGET}s budget"
-if [[ "$failures" != "0" ]]; then
-  printf '%s' "$report" | python3 -c 'import json,sys
-for r in json.load(sys.stdin).get("results", []):
-    if str(r.get("status", "")).lower() in ("fail", "failed", "error"):
-        print("  failed:", r.get("name") or r)'
-  exit 1
-fi
-if ((elapsed > BUDGET)); then
-  echo "drill: over the ${BUDGET}s budget" >&2
-  exit 1
-fi
-echo "drill: passed"
+printf '%s' "$report" | judge "$((SECONDS - start))"
