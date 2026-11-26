@@ -115,15 +115,22 @@ CHARM_GPG_EXPECTED_FPR="ED927B38BE981E53CA09153D03BBF595D4DFD35C" # pragma: allo
 # charm_keyring_verify <keyring>: apt trusts every primary key in a signed-by
 # file, so it must hold exactly the pinned one; else remove it and return 1.
 charm_keyring_verify() {
-  local keyring="$1" keys pub_count primary_fpr
+  local keyring="$1" keys pub_count primary_fpr gpg_err
+  gpg_err="$(mktemp -t charm-gpg.XXXXXX)"
   keys="$(gpg --no-default-keyring --keyring "$keyring" \
-    --with-colons --list-keys 2>/dev/null || true)"
+    --with-colons --list-keys 2>"$gpg_err" || true)"
   pub_count="$(grep -c '^pub:' <<<"$keys" || true)"
   primary_fpr="$(awk -F: '/^pub:/ { pub = 1; next } pub && /^fpr:/ { print $10; exit }' <<<"$keys")"
   if [[ "$pub_count" == 1 && "$primary_fpr" == "$CHARM_GPG_EXPECTED_FPR" ]]; then
+    rm -f "$gpg_err"
     return 0
   fi
   echo "Error: Charm keyring must hold only $CHARM_GPG_EXPECTED_FPR (found ${pub_count:-0} key(s), first ${primary_fpr:-none})" >&2
+  # Why: an empty download, a file this user cannot read, or gpg's complaint.
+  echo "  keyring: $(stat -c '%A owner %u:%g, %s bytes' "$keyring" 2>/dev/null ||
+    stat -f '%Sp owner %u:%g, %z bytes' "$keyring" 2>&1)" >&2
+  [[ ! -s "$gpg_err" ]] || echo "  gpg: $(head -n 1 "$gpg_err")" >&2
+  rm -f "$gpg_err"
   sudo rm -f "$keyring"
   return 1
 }

@@ -120,4 +120,15 @@ test_start "charm_refusal_names_pin"
 assert_contains "$PIN_FPR" "$(cat "$SANDBOX/out.txt")" \
   "the refusal names the expected fingerprint"
 
+# A refusal that found no key says why: the keyring's size, owner and mode,
+# and gpg's own message. A CI runner reported "found 0 key(s)" with nothing
+# else, which does not tell an empty download from an unreadable file.
+test_start "charm_empty_keyring_refusal_says_why"
+: >"$SANDBOX/empty.asc"
+rc="$(run_gum "$SANDBOX/empty.asc")"
+assert_equals "1|absent" "$rc|$(keyring_state)" "an empty key is refused and removed"
+assert_contains "found 0 key(s)" "$(cat "$SANDBOX/out.txt")" "the count is reported"
+assert_contains "  keyring: " "$(cat "$SANDBOX/out.txt")" \
+  "with what stat says of the keyring (size, owner and mode, or why it cannot)"
+
 print_summary
