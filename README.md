@@ -46,7 +46,7 @@ matches the one below ([why](docs/security/INSTALL_VERIFICATION.md)):
 
 ```bash
 installer_dir="$(mktemp -d)" && curl -fsSLo "$installer_dir/dotfiles-install.sh" https://github.com/sebastienrousseau/dotfiles/releases/download/v0.2.555/dotfiles-install-0.2.555.sh
-echo "02453a61209243c0d516aabb830f5d8aecf7f577bb57690633851b21f9689a9a  $installer_dir/dotfiles-install.sh" | $(command -v sha256sum || echo shasum -a 256) -c - && bash "$installer_dir/dotfiles-install.sh" --provision
+echo "abce9104352d57ca09e32356179f509290ae46e856516599c331f4a3d6b884bc  $installer_dir/dotfiles-install.sh" | $(command -v sha256sum || echo shasum -a 256) -c - && bash "$installer_dir/dotfiles-install.sh" --provision
 ```
 
 It needs `git` and `curl`, clones the release to `~/.dotfiles`, applies

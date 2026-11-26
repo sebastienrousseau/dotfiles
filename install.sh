@@ -257,16 +257,16 @@ bootstrap_gum() {
   if [[ "$OS" == "Darwin" ]] && command -v brew >/dev/null; then
     brew install gum >/dev/null 2>&1
   elif [[ "$target_os" == "debian" || "$target_os" == "wsl2" ]]; then
-    sudo mkdir -p /etc/apt/keyrings
+    sudo install -d -m 0755 /etc/apt/keyrings
     charm_key_tmp="$(mktemp -t charm-key.XXXXXX)"
     if ! curl --proto '=https' --tlsv1.2 -fsSL \
       -o "$charm_key_tmp" https://repo.charm.sh/apt/gpg.key; then
       rm -f "$charm_key_tmp"
       return 1
     fi
-    sudo gpg --batch --yes --dearmor \
-      -o /etc/apt/keyrings/charm.gpg "$charm_key_tmp"
-    rm -f "$charm_key_tmp"
+    sudo gpg --batch --yes --dearmor -o "$charm_key_tmp.gpg" "$charm_key_tmp"
+    sudo install -m 0644 "$charm_key_tmp.gpg" /etc/apt/keyrings/charm.gpg # readable whatever root's umask
+    sudo rm -f "$charm_key_tmp" "$charm_key_tmp.gpg"
     charm_keyring_verify /etc/apt/keyrings/charm.gpg || return 1
     echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
     sudo apt-get update && sudo apt-get install gum -y >/dev/null 2>&1

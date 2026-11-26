@@ -31,7 +31,7 @@ FAKE="$SANDBOX/root"
 export GNUPGHOME="$SANDBOX/gnupg"
 mkdir -p "$INST" "$STUBS" "$FAKE" "$GNUPGHOME"
 # A PATH holding only ordinary tools, so a gum installed here stays hidden.
-dot_fixture_basebin "$SANDBOX/base" tee
+dot_fixture_basebin "$SANDBOX/base" tee install chmod
 chmod 700 "$GNUPGHOME"
 cp "$REPO_ROOT/install.sh" "$INST/install.sh"
 
@@ -77,7 +77,7 @@ chmod +x "$STUBS/rewrite" "$STUBS/sudo" "$STUBS/gpg" "$STUBS/apt-get"
 # prints the return code.
 run_gum() {
   local home="${2:-$GNUPGHOME}"
-  rm -rf "$FAKE/etc" "$SANDBOX/calls.log"
+  rm -rf "${FAKE:?}/etc" "$SANDBOX/calls.log"
   printf '#!/bin/sh\nwhile [ $# -gt 0 ]; do [ "$1" = -o ] && { cp "%s" "$2"; exit 0; }; shift; done\nexit 22\n' \
     "$1" >"$STUBS/curl"
   chmod +x "$STUBS/curl"
@@ -108,6 +108,20 @@ test_start "charm_pinned_key_accepted_without_a_usable_gnupg_home"
 rc="$(run_gum "$SANDBOX/pinned.asc" "$SANDBOX/no-such-gnupg-home")"
 assert_equals "0|present|called" "$rc|$(keyring_state)|$(apt_state)" \
   "the pinned key is trusted whatever state the caller's GnuPG home is in"
+
+# sudo gpg --dearmor writes under root's umask; a strict one (as on the
+# GitHub runners) left a keyring the user, and apt's _apt user, could not
+# read, and the pinned key was refused as "found 0 key(s)". The sandbox
+# runs as one user, so it checks what apt needs: a world-readable keyring
+# even when the dearmor runs with umask 0277.
+test_start "charm_keyring_is_world_readable_after_a_strict_root_umask"
+printf '#!/bin/sh\n[ "$1" = gpg ] && umask 0277\nexec "%s/rewrite" "$@"\n' "$STUBS" >"$STUBS/sudo"
+rc="$(run_gum "$SANDBOX/pinned.asc")"
+mode="$(stat -c %a "$FAKE/etc/apt/keyrings/charm.gpg" 2>/dev/null || stat -f %Lp "$FAKE/etc/apt/keyrings/charm.gpg" 2>/dev/null)"
+assert_equals "0|present|called|644" "$rc|$(keyring_state)|$(apt_state)|$mode" \
+  "the pinned key is trusted and the keyring is mode 644"
+printf '#!/bin/sh\nexec "%s/rewrite" "$@"\n' "$STUBS" >"$STUBS/sudo"
+chmod -R u+rwX "$FAKE" 2>/dev/null || true
 
 test_start "charm_failed_apt_update_skips_install"
 printf '#!/bin/sh\necho "apt-get $*" >>"%s/calls.log"\n[ "$1" != update ]\n' "$SANDBOX" >"$STUBS/apt-get"
