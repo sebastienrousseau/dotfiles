@@ -95,24 +95,29 @@ chmod +x "$fake_dir/zsh-bench"
 # The timeout diagnostic starts this HOME's zsh -li in a pty.
 mkdir -p "$WORK/home"
 printf 'PS1="probe> "\nprint -r -- "RC-""LOADED"\n' >"$WORK/home/.zshrc"
+# run_bench PATH: one benchmark run with PATH; sets RC and OUT.
 run_bench() {
   RC=0
-  OUT="$(env -u ZDOTDIR HOME="$WORK/home" SHELL=/bin/bash XDG_CACHE_HOME="$WORK/runcache" FAKE_SHELL_LOG="$WORK/shell.log" \
+  OUT="$(env -u ZDOTDIR PATH="$1" HOME="$WORK/home" SHELL=/bin/bash XDG_CACHE_HOME="$WORK/runcache" FAKE_SHELL_LOG="$WORK/shell.log" \
     bash "$BENCH" run --iters 3 2>&1)" || RC=$?
 }
 
+# Both with and without timeout(1), which macOS before 27 does not ship:
+# the deadline holds either way.
+NO_TIMEOUT_PATH="$(path_without "$WORK/nt-bin" timeout gtimeout)"
 if command -v zsh >/dev/null 2>&1; then
-  test_start "run_hands_zsh_bench_a_zsh_SHELL"
-  run_bench
-  assert_equals "0" "$RC" "run succeeds"
-  assert_equals "$(command -v zsh)" "$(cat "$WORK/shell.log")" \
-    "script(1) runs zsh-bench's zsh-syntax -c command through \$SHELL, so it must be zsh"
-  assert_equals "20.0" "$(json_get first_prompt_lag_ms <<<"$OUT")" "and the medians come through"
+  for case in "with_timeout_binary:$PATH" "without_timeout_binary:$NO_TIMEOUT_PATH"; do
+    label="${case%%:*}"
+    test_start "run_hands_zsh_bench_a_zsh_SHELL_$label"
+    run_bench "${case#*:}"
+    assert_equals "0" "$RC" "run succeeds"
+    assert_equals "$(PATH="${case#*:}" command -v zsh)" "$(cat "$WORK/shell.log")" \
+      "script(1) runs zsh-bench's zsh-syntax -c command through \$SHELL, so it must be zsh"
+    assert_equals "20.0" "$(json_get first_prompt_lag_ms <<<"$OUT")" "and the medians come through"
 
-  if command -v timeout >/dev/null 2>&1 || command -v gtimeout >/dev/null 2>&1; then
-    test_start "run_fails_loudly_when_zsh_bench_hangs"
+    test_start "run_fails_loudly_when_zsh_bench_hangs_$label"
     started=$SECONDS
-    FAKE_MODE=hang ZSH_BENCH_TIMEOUT=2 run_bench
+    FAKE_MODE=hang ZSH_BENCH_TIMEOUT=2 run_bench "${case#*:}"
     assert_equals "1" "$RC" "a hung zsh-bench is a failure"
     assert_contains "timed out after 2s" "$OUT" "that says why"
     assert_true "[ $((SECONDS - started)) -lt 45 ]" "within the deadline (plus the probe), not the job timeout"
@@ -120,7 +125,7 @@ if command -v zsh >/dev/null 2>&1; then
       assert_contains "RC-LOADED" "$OUT" "and shows what the pty shell printed"
       assert_contains "ZB-PROBE-ALIVE" "$OUT" "including whether it ran typed input"
     fi
-  fi
+  done
 fi
 
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
