@@ -515,6 +515,9 @@ main() {
 
     if [[ ${#unit_files[@]} -eq 0 ]]; then
       echo "No unit tests found matching pattern: $test_pattern"
+      # A narrowed run that selects nothing tested nothing; passing it hid
+      # a CI step whose glob pointed where no test lived.
+      [[ "$test_pattern" == "*" ]] || exit 1
     else
       run_test_list "UNIT TESTS (${#unit_files[@]} files)" "${unit_files[@]}"
     fi

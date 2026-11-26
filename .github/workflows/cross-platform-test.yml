@@ -271,44 +271,14 @@ jobs:
           echo "Found $warnings portability warnings"
 
       - name: Run unit tests
+        # The dot command and diagnostics tests (tests/unit/*/test_dot_commands_*
+        # and test_diagnostics_*). The runner bounds each file itself, so no
+        # timeout(1), which macOS runners lack; a failure fails the job, and a
+        # pattern that selects no file fails the run.
         run: |
           echo "=== Running unit tests on ${{ matrix.platform }} ==="
-
-          if [[ -f tests/framework/test_runner.sh ]]; then
-            chmod +x tests/framework/test_runner.sh
-
-            # Run a subset of critical tests with timeout
-            timeout 120 bash -c '
-              export REPO_ROOT="$(pwd)"
-              cd tests/unit
-
-              passed=0
-              failed=0
-
-              for test in test_dot_commands_*.sh test_diagnostics_*.sh; do
-                if [[ -f "$test" ]]; then
-                  if bash "$test" > "$RUNNER_TEMP/test_output.txt" 2>&1; then
-                    passed=$((passed + 1))
-                  else
-                    echo "FAIL: $test"
-                    tail -20 "$RUNNER_TEMP/test_output.txt"
-                    failed=$((failed + 1))
-                  fi
-                fi
-              done
-
-              echo ""
-              echo "Tests passed: $passed, failed: $failed"
-
-              if [[ $failed -gt 0 ]]; then
-                exit 1
-              fi
-            ' || {
-              echo "::warning::Some tests failed on ${{ matrix.platform }}"
-            }
-          else
-            echo "Test runner not found, skipping"
-          fi
+          ./tests/framework/test_runner.sh --unit-only --jobs auto 'dot_commands_*'
+          ./tests/framework/test_runner.sh --unit-only --jobs auto 'diagnostics_*'
 
       - name: Test critical scripts runtime
         run: |
