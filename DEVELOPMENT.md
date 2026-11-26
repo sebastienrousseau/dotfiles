@@ -152,101 +152,208 @@ Most workflows are one of a handful of scripts; the tables map each
 to the command that reproduces it. `make check` runs the everyday
 subset (lint + drift + test + examples) in one go.
 
-### Lint and formatting
+### Local environment
 
-| Workflow | Job | Locally |
-|---|---|---|
-| `ci.yml` | Lint / Shell | `make lint-shell` (`shellcheck -x --severity=error -e SC1091 -e SC2030 -e SC2031` over `*.sh`) |
-| `ci.yml` | Lint / Shell (format) | `shfmt -d -i 2 -ci scripts install.sh defaults/.chezmoitemplates` (CI's `shfmt_targets`; `make lint-shell-all` is the repo-wide superset) |
-| `ci.yml` | Lint / Lua | `luacheck .` and `stylua --check .` |
-| `ci.yml` | Lint / Fish | `fish --no-execute <file>` per fish file |
-| `ci.yml` | Lint / Nushell | `nu --commands 'source <file>'` per nu file |
-| `ci.yml` | Lint / Copyright | `bash tools/ci/check-copyright-headers.sh` |
-| `ci.yml` | Lint / Reusable Workflow Pins | `bash tools/ci/lint-reusable-pins.sh` |
-| `ci.yml` | Lint / Chezmoidata Schema | `bash tools/ci/validate-chezmoidata.sh` |
-| `ci.yml` | Security / Link Check | `lychee --offline '**/*.md'` (see below) |
-| `ci-enforced.yml` | Lint / * (zero warnings) | `make lint` |
-| `pre-commit.yml` | Pre-Commit | `pre-commit run --all-files --config config/pre-commit-config.yaml` |
-| `pre-commit.yml` | actionlint hook | `make lint-workflows` (`actionlint -shellcheck=`, matching the hook) |
-| `reusable-shell-lint.yml` | Shell Lint | `make lint-shell` |
-| `reusable-lua-lint.yml` | Lua Lint | `luacheck . && stylua --check .` |
-| `reusable-nix-lint.yml` | Nix Lint | `nix flake check` (root and `nix/`) |
-| `reusable-copyright-lint.yml` | Copyright Headers | `make lint-copyright` |
-| `docs-link-check.yml` | Docs / Link Check | `make lint-links` |
-| `docs-link-check.yml` | Docs / REUSE lint | `make lint-reuse` |
+Three things this table assumes, each learnt from a check that failed
+locally while CI passed:
 
-### Tests
+- **Load the repository's mise tools first.** Several tests start the
+  tools through mise shims under a test `HOME`, where a shim cannot find
+  its tool unless the environment already points at it:
+  `eval "$(mise env -s bash)"` (or `zsh`) before `make test` or
+  `./tests/framework/test_runner.sh`.
+- **`make check-drift` needs `jsonschema`** for
+  `tools/ci/check-cli-contract.py`:
+  `uv run --no-project --with jsonschema make check-drift`.
+- **Build the WASM verifier once** so the real-module checks of
+  `test_diagnostics_attest_verify.sh` run instead of being skipped:
+  `cargo build --release --target wasm32-wasip1 --manifest-path lib/wasm-tools/Cargo.toml`.
 
-| Workflow | Job | Locally |
-|---|---|---|
-| `ci.yml` | Test / * | `make test` |
-| `ci-enforced.yml` | Test / Unit Tests | `make test-unit` |
-| `reusable-test-suite.yml` | Test Suite | `RUN_INTEGRATION=1 ./tests/framework/test_runner.sh --jobs auto` |
-| `reliability-gate.yml` | Reliability / * | `bash scripts/qa/reliability-audit.sh --with-integration` |
-| `reliability-gate.yml` | Examples Contract | `make examples` |
-| `reliability-gate.yml` | WSL Contract | `bash scripts/qa/wsl-contract.sh` |
-| `reliability-gate.yml` | PowerShell Contract | `pwsh scripts/qa/powershell-contract.ps1` |
-| `cross-platform-test.yml` | Test on \<os\> | `bash -n` over every `.sh`, then `bash scripts/diagnostics/health.sh` |
-| `coverage.yml` | Coverage / kcov | `MIN_COVERAGE_PCT=98 bash tools/ci/run-coverage.sh` |
-| `coverage.yml` | Coverage / behavioural tests only | `DOTFILES_COV_EXERCISE=0 MIN_COVERAGE_PCT=96 bash tools/ci/run-coverage.sh` |
-| `cockpit-test.yml` | Cockpit / Go Tests | `cd defaults/dot_local/share/dot-ai-tui && go test ./...` |
-| `dot-ui-test.yml` | dot-ui / Go Tests | `cd defaults/dot_local/share/dot-ui && go test ./...` |
-| `mcp-server-test.yml` | MCP Server / Go Tests | `cd defaults/dot_local/share/dot-mcp && go test ./...` |
-| `nightly.yml` | Weekly extended | `make test` plus `make bench` |
+### Every job
 
-### Fuzzing
+One row per job of every workflow. The command comes from
+[`docs/ci-gates.toml`](docs/ci-gates.toml); the job list, its egress
+policy (Harden Runner: `blocked`, `allow-listed`, `unrestricted`, or
+`reusable` for a job that calls another workflow) and the secrets it
+reads come from the workflow file. `make check-drift` fails when a
+workflow has no entry or a command names a make target or script that
+does not exist.
 
-| Workflow | Job | Locally |
-|---|---|---|
-| `fuzz.yml` | Fuzz / corpus replay | `make fuzz` |
-| `fuzz.yml` | Fuzz / \<harness\> | `make fuzz FUZZTIME=60s` |
-| `cflite_pr.yml` | ClusterFuzzLite / Build | the ClusterFuzzLite build needs Docker; `make fuzz` runs the same harnesses |
-| `install-fuzz.yml` | Fuzz / install.sh | `bash fuzz/install/fuzz_install.sh` |
+<!-- BEGIN GENERATED: docs/ci-gates.toml -->
+<!-- Do not edit: run `make generate` after changing docs/ci-gates.toml or a workflow. -->
 
-### Docs and generated artefacts
+| Workflow | Job | Locally | Egress | Secrets |
+|---|---|---|---|---|
+| `branch-drift-guard.yml` | Long-lived branches are not drifting | none: compares open branches with main on GitHub | unrestricted | — |
+| `cflite_pr.yml` | ClusterFuzzLite / Build | `make fuzz` (the ClusterFuzzLite build itself needs Docker) | unrestricted | — |
+| `ci-enforced.yml` | Lint / Shell (Zero Warnings) | `make lint-shell` | reusable | — |
+| `ci-enforced.yml` | Lint / Lua (Zero Warnings) | `luacheck . && stylua --check .` | reusable | — |
+| `ci-enforced.yml` | Lint / Nix (Zero Warnings) | `nix flake check` (root and nix/) | reusable | — |
+| `ci-enforced.yml` | Lint / Copyright Headers (Zero Tolerance) | `make lint-copyright` | reusable | — |
+| `ci-enforced.yml` | Security / Secrets Scan | `gitleaks detect --config config/gitleaks.toml` | unrestricted | — |
+| `ci-enforced.yml` | Security / Dependency Audit | `make sbom` | unrestricted | — |
+| `ci-enforced.yml` | Security / Infrastructure Scan | `checkov -d . --framework dockerfile,yaml,secrets --skip-path fuzz/oss-fuzz/` | unrestricted | — |
+| `ci-enforced.yml` | Test / ${{ matrix.os }} | `make test` | unrestricted | — |
+| `ci-enforced.yml` | Test / Unit Tests | `make test-unit` | reusable | — |
+| `ci-enforced.yml` | Lint / Tests run the code | `python3 tools/ci/check-source-grep-tests.py` | unrestricted | — |
+| `ci-enforced.yml` | Lint / Install pins | `make lint` | unrestricted | — |
+| `ci-enforced.yml` | Lint / Complexity ratchet | `python3 tools/ci/complexity.py && python3 tools/ci/complexity_polyglot.py --lang python` | unrestricted | — |
+| `ci-enforced.yml` | Lint / Complexity ratchet (Go) | `python3 tools/ci/complexity_polyglot.py --lang go` | unrestricted | — |
+| `ci-enforced.yml` | Test / Mutation | `python3 tools/ci/mutation-test.py --base origin/main --min-score 80` | unrestricted | — |
+| `ci-enforced.yml` | Security / Policy Script | `bash scripts/security/enforce-policies.sh` | unrestricted | — |
+| `ci-enforced.yml` | Toolchain / mise install (Linux) | `mise install` | unrestricted | — |
+| `ci-enforced.yml` | Merge Gate | none: aggregates the jobs above | unrestricted | — |
+| `ci.yml` | Detect Changes | none: path filter for the jobs below | unrestricted | — |
+| `ci.yml` | Lint / Shell | `make lint-shell` | reusable | — |
+| `ci.yml` | Lint / Lua | `luacheck . && stylua --check .` | reusable | — |
+| `ci.yml` | Lint / Fish | `fish --no-execute <file> per fish file` | unrestricted | — |
+| `ci.yml` | Lint / Nushell | `nu --commands 'source <file>' per nu file` | unrestricted | — |
+| `ci.yml` | Lint / Copyright | `bash tools/ci/check-copyright-headers.sh` | reusable | — |
+| `ci.yml` | Lint / Reusable Workflow Pins | `bash tools/ci/lint-reusable-pins.sh` | unrestricted | — |
+| `ci.yml` | Lint / Chezmoidata Schema | `bash tools/ci/validate-chezmoidata.sh` | unrestricted | — |
+| `ci.yml` | Security / Secrets Scan | `gitleaks detect --config config/gitleaks.toml` | reusable | — |
+| `ci.yml` | Security / Dependency Audit | `make sbom` | reusable | — |
+| `ci.yml` | Security / TruffleHog | `trufflehog filesystem .` | unrestricted | — |
+| `ci.yml` | Security / SBOM Generation | `make sbom` | unrestricted | — |
+| `ci.yml` | Security / Link Check | `make lint-links` | unrestricted | — |
+| `ci.yml` | Test / Linux | `make test` | unrestricted | — |
+| `ci.yml` | Test / macOS | `make test` | unrestricted | — |
+| `ci.yml` | Test / Windows | `pwsh scripts/qa/powershell-contract.ps1` | unrestricted | — |
+| `ci.yml` | Test / Integration (Docker) | `docker build .` (needs Docker) | unrestricted | — |
+| `ci.yml` | Quality / Performance budgets (${{ matrix.os }}) | `bash scripts/diagnostics/perf.sh --json` | unrestricted | — |
+| `ci.yml` | Quality / Idempotency | `chezmoi apply twice; the second apply changes nothing` | unrestricted | — |
+| `ci.yml` | Quality / Nix | `nix flake check` | reusable | — |
+| `ci.yml` | Benchmark / Linux | `make bench` | unrestricted | — |
+| `ci.yml` | Quality Gate | none: aggregates the jobs above | unrestricted | — |
+| `cockpit-test.yml` | Cockpit / Test + Coverage (go ${{ matrix.go }}) | `cd defaults/dot_local/share/dot-ai-tui && go test ./... && go vet ./...` | unrestricted | — |
+| `cockpit-test.yml` | Cockpit / staticcheck + golangci-lint | `cd defaults/dot_local/share/dot-ai-tui && go test ./... && go vet ./...` | unrestricted | — |
+| `codeql.yml` | Security / CodeQL | none: needs the CodeQL CLI (codeql database create) | unrestricted | — |
+| `compliance-guard.yml` | Verify Commit Signatures | `git log --format='%G?' origin/main..HEAD` (G on every line) | unrestricted | — |
+| `compliance-guard.yml` | Scan for Insecure Patterns | `bash tools/ci/check-insecure-tls.sh && bash tools/ci/check-dangerous-chmod.sh` | unrestricted | — |
+| `compliance-guard.yml` | Portability Shell Lint | `make lint-shell` | reusable | — |
+| `compliance-guard.yml` | Cross-Platform Portability | `bash tools/ci/check-insecure-tls.sh && bash tools/ci/check-dangerous-chmod.sh` | unrestricted | — |
+| `compliance-guard.yml` | Dockerfile Lint | `hadolint $(git ls-files '*Dockerfile*')` | unrestricted | — |
+| `compliance-guard.yml` | Compliance Summary | none: aggregates the jobs above | unrestricted | — |
+| `core-contracts.yml` | Core / ${{ matrix.os }} | `python3 tools/ci/check-cli-contract.py` (with jsonschema installed) | unrestricted | — |
+| `core-contracts.yml` | contracts | `python3 tools/ci/check-cli-contract.py` (with jsonschema installed) | unrestricted | — |
+| `core-contracts.yml` | visual | `python3 tools/ci/check-cli-contract.py` (with jsonschema installed) | unrestricted | — |
+| `core-contracts.yml` | npm-consumer | `python3 tools/ci/check-cli-contract.py` (with jsonschema installed) | unrestricted | — |
+| `coverage.yml` | Coverage / kcov | `MIN_COVERAGE_PCT=98 bash tools/ci/run-coverage.sh` | unrestricted | — |
+| `coverage.yml` | Coverage / behavioural tests only | `DOTFILES_COV_EXERCISE=0 MIN_COVERAGE_PCT=96 bash tools/ci/run-coverage.sh` | unrestricted | — |
+| `cross-platform-test.yml` | Detect Changes | none: path filter for the jobs below | unrestricted | — |
+| `cross-platform-test.yml` | Test on ${{ matrix.os }} | `bash -n over every .sh, then bash scripts/diagnostics/health.sh` | unrestricted | — |
+| `cross-platform-test.yml` | Scheduled maintenance on ${{ matrix.os }} | `bash -n over every .sh, then bash scripts/diagnostics/health.sh` | unrestricted | — |
+| `cross-platform-test.yml` | Compatibility Report | `bash -n over every .sh, then bash scripts/diagnostics/health.sh` | unrestricted | — |
+| `cross-platform-test.yml` | Cross-Platform Tests | none: aggregates the jobs above | unrestricted | — |
+| `dco.yml` | Check sign-off | `git log --format='%(trailers:key=Signed-off-by)' origin/main..HEAD` (no empty lines) | allow-listed | — |
+| `dependency-review.yml` | Security / Dependency Review | none: pull-request only, run by GitHub | unrestricted | — |
+| `deps-dev-validation.yml` | deps.dev / direct deps | `bash tools/ci/check-deps-dev.sh` | unrestricted | — |
+| `devcontainer-prebuild.yml` | Build Devcontainer Image | none: scheduled devcontainer image build | unrestricted | — |
+| `doc-drift.yml` | Generators / command-index | `make check-drift` (with jsonschema installed) | allow-listed | — |
+| `doc-drift.yml` | Generators / README template | `python3 tools/ci/check-readme-template.py --enforce && python3 tools/docs/gen_ecosystem.py --check && python3 tools/docs/gen_ci_gates.py --check` | allow-listed | — |
+| `doc-drift.yml` | Generators / version-consistency | `bash scripts/verify-release-versions && python3 tools/ci/check-readme-toolchain.py` | allow-listed | — |
+| `doc-drift.yml` | Generators / man page | `make check-drift` (with jsonschema installed) | allow-listed | — |
+| `doc-drift.yml` | Generators / completions | `make check-drift` (with jsonschema installed) | allow-listed | — |
+| `docs-link-check.yml` | Docs / Link Check (offline, gating) | `make lint-links` | allow-listed | — |
+| `docs-link-check.yml` | Docs / Link Check (online, advisory) | `make lint-links` | unrestricted | — |
+| `docs-link-check.yml` | Docs / REUSE lint | `make lint-reuse` | unrestricted | — |
+| `dot-cli-bench.yml` | dot CLI / ${{ matrix.os }} | `DOT_BENCH_BUDGET_MS=150 DOT_BENCH_RUNS=11 bash tools/ci/dot-cli-startup-bench.sh` | unrestricted | — |
+| `dot-cli-bench.yml` | agent hook / ${{ matrix.os }} | `DOT_BENCH_BUDGET_MS=150 DOT_BENCH_RUNS=11 bash tools/ci/dot-cli-startup-bench.sh` | unrestricted | — |
+| `dot-cli-bench.yml` | dot CLI sweep / ${{ matrix.os }} | `DOT_BENCH_BUDGET_MS=150 DOT_BENCH_RUNS=11 bash tools/ci/dot-cli-startup-bench.sh` | unrestricted | — |
+| `dot-ui-test.yml` | dot-ui / Test + Coverage (go ${{ matrix.go }}) | `cd defaults/dot_local/share/dot-ui && go test ./... && go vet ./...` | unrestricted | — |
+| `dot-ui-test.yml` | dot-ui / staticcheck + golangci-lint | `cd defaults/dot_local/share/dot-ui && go test ./... && go vet ./...` | unrestricted | — |
+| `drift-detection.yml` | Drift / Master | none: scheduled housekeeping | unrestricted | — |
+| `flake-detector.yml` | Flakes / ${{ matrix.os }} | `./tests/framework/test_runner.sh --jobs auto, several times, then python3 tools/ci/flake-report.py <logs>` | unrestricted | — |
+| `fuzz.yml` | Fuzz / Replay corpus (${{ matrix.name }}) | `make fuzz` | unrestricted | — |
+| `fuzz.yml` | Fuzz / Harness self-containment | `make fuzz FUZZTIME=60s` | unrestricted | — |
+| `fuzz.yml` | Fuzz / ${{ matrix.harness }} | `make fuzz FUZZTIME=60s` | unrestricted | — |
+| `govulncheck.yml` | govulncheck / ${{ matrix.dir }} | `govulncheck ./... in each Go module` | unrestricted | — |
+| `install-fuzz.yml` | Fuzz / install.sh | `bash fuzz/install/fuzz_install.sh` | unrestricted | — |
+| `install-fuzz.yml` | Open tracking issue on schedule failure | none: opens an issue when the scheduled run fails | unrestricted | — |
+| `manual-publish.yml` | Validate Manual (fast — pandoc only) | `bash tools/docs/check-manual.sh && bash tools/docs/build-manual.sh` | unrestricted | — |
+| `manual-publish.yml` | Build Manual (9 formats) | `bash tools/docs/check-manual.sh && bash tools/docs/build-manual.sh` | unrestricted | — |
+| `manual-publish.yml` | Attach to Release | none: attaches the manual to a release | unrestricted | — |
+| `mcp-server-test.yml` | MCP / Test + Coverage (go ${{ matrix.go }}) | `cd defaults/dot_local/share/dot-mcp && go test ./... && go vet ./...` | unrestricted | — |
+| `mcp-server-test.yml` | MCP / staticcheck + golangci-lint | `cd defaults/dot_local/share/dot-mcp && go test ./... && go vet ./...` | unrestricted | — |
+| `mise-toolchain.yml` | Mise install / ${{ matrix.os }} | `mise install` | unrestricted | — |
+| `mutation-nightly.yml` | Mutation / core scripts | `python3 tools/ci/mutation-test.py --full --min-score 90 $(grep -vE '^\s*(#\|$)' tools/ci/mutation-core.txt)` | unrestricted | — |
+| `nightly.yml` | Dependency Updates | `make test && make bench` | unrestricted | — |
+| `nightly.yml` | Nightly / Test Suite | `make test && make bench` | reusable | — |
+| `nightly.yml` | Extended OS Testing (${{ matrix.os }}) | `make test && make bench` | unrestricted | — |
+| `nightly.yml` | Beta/Nightly Tools Test | `make test && make bench` | unrestricted | — |
+| `nightly.yml` | Extended Security Scan | `make test && make bench` | unrestricted | — |
+| `nightly.yml` | Performance Regression Tracking | `make test && make bench` | unrestricted | — |
+| `nightly.yml` | Nightly Summary Report | none: aggregates the jobs above | unrestricted | — |
+| `npm-publish.yml` | publish-npm | none: publishes on release | unrestricted | — |
+| `npm-publish.yml` | publish-gpr | none: publishes on release | unrestricted | — |
+| `pages.yml` | Build site (ssg + Lucid) | `make docs` | unrestricted | — |
+| `pages.yml` | Deploy to Pages | none: deploys to GitHub Pages | unrestricted | — |
+| `perf-baseline.yml` | Perf / Baseline | `bash scripts/diagnostics/perf.sh --json` | unrestricted | — |
+| `policy-bundle-release.yml` | Package Policy Bundle | none: packages policy bundles on release (bash tools/release/package-policy-bundles.sh builds them) | unrestricted | — |
+| `policy-bundle-release.yml` | Attest Policy Bundle | none: packages policy bundles on release (bash tools/release/package-policy-bundles.sh builds them) | unrestricted | — |
+| `policy-bundle-release.yml` | Policy Bundle Release Summary | none: packages policy bundles on release (bash tools/release/package-policy-bundles.sh builds them) | unrestricted | — |
+| `policy-test.yml` | Policy / Test + Coverage (go ${{ matrix.go }}) | `cd defaults/dot_local/share/dot-policy && go test ./... && go vet ./...` | unrestricted | — |
+| `policy-test.yml` | Policy / staticcheck + golangci-lint | `cd defaults/dot_local/share/dot-policy && go test ./... && go vet ./...` | unrestricted | — |
+| `pr-signature.yml` | Verify PR description signature | none: checks the pull request description on GitHub | allow-listed | — |
+| `pre-commit.yml` | Pre-Commit | `pre-commit run --all-files --config config/pre-commit-config.yaml` | unrestricted | — |
+| `regression-trace-audit.yml` | audit | `bash tools/ci/check-regression-traceability.sh` | unrestricted | — |
+| `release-attestation-check.yml` | Verify last release has full attestation bundle | none: checks a published release's attestations | unrestricted | — |
+| `release-distribute-aur.yml` | Distribute AUR Package | none: publishes to the AUR on release | allow-listed | `AUR_SSH_KEY` |
+| `release-distribute-homebrew.yml` | Distribute Homebrew Formula | none: opens the tap pull request on release | allow-listed | `TAP_PUSH_TOKEN` |
+| `release-distribute-scoop.yml` | Distribute Scoop Manifest | none: updates the bucket on release | allow-listed | `TAP_PUSH_TOKEN` |
+| `release-install-smoke.yml` | Clean install / ${{ matrix.os }} | `make DESTDIR=/tmp/stage install installcheck uninstall` | unrestricted | — |
+| `release-package-dot.yml` | Package dot CLI tarball + zip | none: builds and signs release archives (workflow_dispatch with dry_run builds without publishing) | unrestricted | — |
+| `reliability-gate.yml` | Reliability / ${{ matrix.os }} | `bash scripts/qa/reliability-audit.sh --with-integration` | unrestricted | — |
+| `reliability-gate.yml` | Examples Contract | `make examples` | unrestricted | — |
+| `reliability-gate.yml` | Feature Matrix | `bash scripts/qa/check-feature-matrix.sh` | unrestricted | — |
+| `reliability-gate.yml` | WSL Contract | `bash scripts/qa/wsl-contract.sh` | unrestricted | — |
+| `reliability-gate.yml` | PowerShell Contract | `pwsh scripts/qa/powershell-contract.ps1` | unrestricted | — |
+| `reliability-gate.yml` | Reliability Summary | none: aggregates the jobs above | unrestricted | — |
+| `reusable-copyright-lint.yml` | Copyright Headers | `make lint-copyright` | unrestricted | — |
+| `reusable-lua-lint.yml` | Lua Lint | `luacheck . && stylua --check .` | unrestricted | — |
+| `reusable-nix-lint.yml` | Nix Lint | `nix flake check` (root and nix/) | unrestricted | — |
+| `reusable-secrets-scan.yml` | Secrets Scan | `gitleaks detect --config config/gitleaks.toml` | unrestricted | — |
+| `reusable-security-baseline.yml` | Security Baseline | `make sbom` | allow-listed | — |
+| `reusable-shell-lint.yml` | Shell Lint | `make lint-shell` | unrestricted | — |
+| `reusable-test-suite.yml` | Test Suite | `RUN_INTEGRATION=1 ./tests/framework/test_runner.sh --jobs auto` | unrestricted | — |
+| `rust.yml` | Test / ${{ matrix.toolchain }} / ${{ matrix.os }} | `cd lib/wasm-tools && cargo test` | unrestricted | — |
+| `rust.yml` | WebAssembly / wasm32-wasip1 under wasmtime | `cd lib/wasm-tools && cargo build --target wasm32-wasip1` | unrestricted | — |
+| `rust.yml` | Lint / rustfmt | `cd lib/wasm-tools && cargo fmt --check` | unrestricted | — |
+| `rust.yml` | Lint / clippy (pedantic) | `cd lib/wasm-tools && cargo clippy --all-targets` | unrestricted | — |
+| `rust.yml` | Docs / rustdoc -D warnings | `cd lib/wasm-tools && cargo doc --no-deps` | unrestricted | — |
+| `rust.yml` | Coverage / llvm-cov >= 98% | `cd lib/wasm-tools && cargo test` | unrestricted | — |
+| `rust.yml` | Miri / nightly | `cd lib/wasm-tools && cargo test` | unrestricted | — |
+| `rust.yml` | Fuzz / ${{ matrix.target }} | `cd lib/wasm-tools && cargo test` | unrestricted | — |
+| `rust.yml` | Bench / criterion smoke | `cd lib/wasm-tools && cargo test` | unrestricted | — |
+| `rust.yml` | Examples / run all | `cd lib/wasm-tools && cargo test` | unrestricted | — |
+| `rust.yml` | Supply chain / cargo-deny | `cd lib/wasm-tools && cargo deny check` | unrestricted | — |
+| `rust.yml` | Supply chain / cargo-audit | `cd lib/wasm-tools && cargo audit` | unrestricted | — |
+| `sbom-diff.yml` | SBOM / Diff | `make sbom && grype sbom:build/sbom.cyclonedx.json` | unrestricted | — |
+| `sbom-diff.yml` | SBOM / CVE Scan | `make sbom && grype sbom:build/sbom.cyclonedx.json` | unrestricted | — |
+| `scorecard.yml` | Scorecard / Analysis | `scorecard --local .` (needs the OpenSSF binary) | unrestricted | `SCORECARD_TOKEN` |
+| `scorecard.yml` | Scorecard / Regression Tracker | none: compares the result with the last snapshot | unrestricted | — |
+| `security-enhanced.yml` | Security / Secrets Detection | `detect-secrets scan --baseline .secrets.baseline` | reusable | — |
+| `security-enhanced.yml` | Security / TruffleHog OSS | `trufflehog filesystem .` | unrestricted | — |
+| `security-enhanced.yml` | Security / Dependencies | `detect-secrets scan --baseline .secrets.baseline` | unrestricted | — |
+| `security-enhanced.yml` | Security / Infrastructure | `checkov -d . --framework dockerfile,yaml,secrets --skip-path fuzz/oss-fuzz/` | unrestricted | — |
+| `security-enhanced.yml` | Security / Container | `detect-secrets scan --baseline .secrets.baseline` | unrestricted | — |
+| `security-enhanced.yml` | Security / Policy Enforcement | `bash scripts/security/enforce-policies.sh` | reusable | — |
+| `security-enhanced.yml` | Security / Attestation | `detect-secrets scan --baseline .secrets.baseline` | unrestricted | — |
+| `security-enhanced.yml` | Security Summary | none: aggregates the jobs above | unrestricted | — |
+| `security-release.yml` | Release / SBOM | none: SBOM, signatures and provenance for a release | unrestricted | — |
+| `security-release.yml` | Release / Signed Asset Manifest | none: SBOM, signatures and provenance for a release | unrestricted | — |
+| `security-release.yml` | Release / SLSA Provenance | none: SBOM, signatures and provenance for a release | reusable | — |
+| `security-release.yml` | Release / Verify Integrity | none: SBOM, signatures and provenance for a release | unrestricted | — |
+| `sync-versions.yml` | Verify Version Sync | `./scripts/version-sync.sh --verify` | allow-listed | — |
+| `sync-versions.yml` | Verify Version Sync (Protected Branch) | `./scripts/version-sync.sh --verify` | allow-listed | — |
+| `sync-versions.yml` | Sync Version Numbers | `./scripts/version-sync.sh --verify` | allow-listed | — |
+| `theme-contracts.yml` | Theme renders / ${{ matrix.os }} | `bash tests/unit/theme/test_render_goldens.sh && python3 scripts/theme/check-render-goldens.py` | unrestricted | — |
+| `update-deps.yml` | Update Dependencies | none: scheduled dependency update | unrestricted | — |
+| `update-deps.yml` | Update Neovim Plugins | none: scheduled dependency update | unrestricted | — |
+| `verify-gpg-wkd.yml` | Verify in-repo ↔ WKD fingerprint | `bash scripts/security/check-disclosure-key-expiry.sh` | unrestricted | — |
+| `verify-tag-signature.yml` | Signed annotated tag | `git -c gpg.ssh.allowedSignersFile=KEYS.asc tag -v <tag>` | allow-listed | — |
 
-| Workflow | Job | Locally |
-|---|---|---|
-| `doc-drift.yml` | Generators / command-index | `bash tools/docs/generate-command-index.sh --check` |
-| `doc-drift.yml` | Generators / man page | `bash tools/docs/generate-manpage.sh --check` |
-| `doc-drift.yml` | Generators / completions | `bash tools/docs/generate-completions.sh --check` |
-| `doc-drift.yml` | Generators / version-consistency | `bash scripts/verify-release-versions` |
-| `sync-versions.yml` | Verify Version Sync | `./scripts/version-sync.sh --verify` |
-| `pages.yml` | Build site | `make docs` (`tools/docs/build-site.sh`, ssg + Lucid) |
-| `manual-publish.yml` | Validate + Build Manual | `bash tools/docs/check-manual.sh` then `bash tools/docs/build-manual.sh` |
-| — | all four drift gates at once | `make check-drift` |
-
-### Security and supply chain
-
-| Workflow | Job | Locally |
-|---|---|---|
-| `ci.yml` | Security / Secrets Scan | `gitleaks detect --config config/gitleaks.toml` |
-| `ci.yml` | Security / SBOM Generation | `make sbom` |
-| `security-enhanced.yml` | Secrets Detection | `detect-secrets scan --baseline .secrets.baseline` |
-| `security-enhanced.yml` | TruffleHog OSS | `trufflehog filesystem .` |
-| `security-enhanced.yml` | Infrastructure | `checkov -d . --framework dockerfile,yaml,secrets --skip-path fuzz/oss-fuzz/` |
-| `security-enhanced.yml` | Policy Enforcement | `bash scripts/security/enforce-policies.sh` |
-| `compliance-guard.yml` | Insecure Patterns | `bash tools/ci/check-insecure-tls.sh` + `bash tools/ci/check-dangerous-chmod.sh` |
-| `compliance-guard.yml` | Dockerfile Lint | `hadolint $(git ls-files '*Dockerfile*')` |
-| `compliance-guard.yml` | Verify Commit Signatures | `git log --format='%G?' origin/main..HEAD` (expect `G` on every line) |
-| `deps-dev-validation.yml` | deps.dev / direct deps | `bash tools/ci/check-deps-dev.sh` |
-| `sbom-diff.yml` | SBOM / Diff + CVE Scan | `make sbom` then `grype sbom:build/sbom.cyclonedx.json` |
-| `codeql.yml` | Security / CodeQL | Not reproducible locally without the CodeQL CLI; run `codeql database create` if you have it |
-| `scorecard.yml` | Scorecard / Analysis | `scorecard --local .` (needs the OpenSSF binary) |
-| `dependency-review.yml` | Dependency Review | PR-only, GitHub-side; no local equivalent |
-| `verify-gpg-wkd.yml` | in-repo ↔ WKD fingerprint | `bash scripts/security/check-disclosure-key-expiry.sh` |
-| `verify-tag-signature.yml` | Signed annotated tag | `git -c gpg.ssh.allowedSignersFile=KEYS.asc tag -v <tag>` |
-| `dco.yml` | Check sign-off | `git log --format='%(trailers:key=Signed-off-by)' origin/main..HEAD` (no empty lines) |
-| `pr-signature.yml` | PR description signature | GitHub-side; check the PR body before pushing |
-| `regression-trace-audit.yml` | Regression traceability | `bash tools/ci/check-regression-traceability.sh` |
-
-### Performance
-
-| Workflow | Job | Locally |
-|---|---|---|
-| `dot-cli-bench.yml` | dot CLI cold start | `DOT_BENCH_BUDGET_MS=150 DOT_BENCH_RUNS=11 bash tools/ci/dot-cli-startup-bench.sh` |
-| `perf-baseline.yml` | Perf / Baseline | `bash scripts/diagnostics/perf.sh --json` |
-| — | benchmarks | `make bench` |
+<!-- END GENERATED -->
 
 ### Release-only (not reproducible on a branch)
 

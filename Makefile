@@ -112,6 +112,7 @@ generate: ## Regenerate every manifest-derived artefact
 	bash ./tools/docs/generate-command-index.sh
 	bash ./tools/docs/generate-command-reference.sh
 	python3 ./tools/docs/gen_ecosystem.py
+	python3 ./tools/docs/gen_ci_gates.py
 
 check-drift: ## Fail if any generated artefact is stale (what doc-drift.yml runs)
 	python3 ./tools/ci/check-cli-contract.py
@@ -121,6 +122,7 @@ check-drift: ## Fail if any generated artefact is stale (what doc-drift.yml runs
 	bash ./tools/docs/generate-manpage.sh --check
 	bash ./tools/docs/generate-completions.sh --check
 	python3 ./tools/docs/gen_ecosystem.py --check
+	python3 ./tools/docs/gen_ci_gates.py --check
 	bash ./scripts/verify-release-versions
 	bash ./scripts/release-preflight --development
 

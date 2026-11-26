@@ -24,6 +24,10 @@ name: Doc Drift / Generators
 #   - tools/docs/gen_ecosystem.py --check
 #       Verifies docs/ECOSYSTEM.md's table matches docs/ecosystem.toml.
 #
+#   - tools/docs/gen_ci_gates.py --check
+#       Verifies DEVELOPMENT.md has a row, with a local command, for every
+#       job of every workflow.
+#
 #   - tools/ci/check-readme-toolchain.py
 #       Verifies the README's toolchain floors match
 #       docs/MINIMUM-TOOLCHAIN.md and CI's chezmoi pin.
@@ -54,6 +58,11 @@ on:
       - 'docs/ECOSYSTEM.md'
       - 'docs/ecosystem.toml'
       - 'tools/docs/gen_ecosystem.py'
+      - 'DEVELOPMENT.md'
+      - 'docs/ci-gates.toml'
+      - 'tools/docs/gen_ci_gates.py'
+      - '.github/workflows/*.yml'
+      - 'Makefile'
       - 'docs/MINIMUM-TOOLCHAIN.md'
       - '.github/workflows/ci.yml'
       - 'tools/docs/generate-manpage.sh'
@@ -148,6 +157,10 @@ jobs:
       # docs/ECOSYSTEM.md's table is generated from docs/ecosystem.toml.
       - name: Check docs/ECOSYSTEM.md against docs/ecosystem.toml
         run: python3 tools/docs/gen_ecosystem.py --check
+      # DEVELOPMENT.md's CI-gate table: every job of every workflow, with
+      # the local command from docs/ci-gates.toml.
+      - name: Check DEVELOPMENT.md against docs/ci-gates.toml and the workflows
+        run: python3 tools/docs/gen_ci_gates.py --check
 
   version-consistency:
     name: Generators / version-consistency
