@@ -77,3 +77,12 @@ jobs:
 
       - name: Run the README as a newcomer would
         run: bash tools/ci/drill-newcomer.sh
+
+      # When the doctor reports the chezmoi state drifted, the drill's
+      # verdict cannot say what drifted; this does.
+      - name: Show what chezmoi sees as drifted
+        if: failure()
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          chezmoi status || true
+          chezmoi diff --no-pager 2>/dev/null | head -n 120 || true

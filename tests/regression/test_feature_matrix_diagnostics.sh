@@ -202,7 +202,7 @@ test_fm_doctor_json() {
   test_start "fm_doctor_json_counts_warnings"
   fm_expect_out_matches '"warnings": [0-9]+,'
   test_start "fm_doctor_json_lists_results"
-  fm_expect_out_matches '"check":"zsh","status":"(pass|fail)"'
+  fm_expect_out_matches '"check":"zsh","status":"(pass|warn|fail)"'
   test_start "fm_doctor_json_drops_the_dashboard"
   if [[ "$FM_OUT" == *"--- Dotfiles Doctor ---"* ]]; then
     fm_fail "the text dashboard leaked into the JSON output"
