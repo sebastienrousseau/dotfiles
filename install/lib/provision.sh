@@ -51,13 +51,18 @@ _provision_record() {
   mv "$tmp" "$1"
 }
 
-# _provision_scripts <dir>: run_once_install_* (shells) first, then the
-# numbered run_onchange_* in order, one path per line.
+# _provision_scripts <dir>: the numbered run_onchange_* in order, then the
+# run_once_install_* shell scripts, one path per line. The shell scripts make
+# zsh or fish the login shell, so they run once the package scripts have
+# installed it: run first, they found no zsh on Linux and, being run-once,
+# never set it.
 _provision_scripts() {
-  local f
-  for f in "$1"/run_once_install_* "$1"/run_onchange_*; do
-    [[ -f "$f" ]] && printf '%s\n' "$f"
-  done | LC_ALL=C sort
+  local f pattern
+  for pattern in "run_onchange_*" "run_once_install_*"; do
+    for f in "$1"/$pattern; do
+      [[ -f "$f" ]] && printf '%s\n' "$f"
+    done | LC_ALL=C sort
+  done
 }
 
 # _provision_one <script> <state_dir> <all> <work>: run one script unless

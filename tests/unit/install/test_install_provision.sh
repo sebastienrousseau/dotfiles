@@ -53,7 +53,9 @@ assert_not_equals "0" "$RC" "a failing script makes run_provision fail"
 assert_true 'ran run_onchange_10-ok' "the passing script ran"
 assert_true 'ran run_onchange_20-fails' "the failing script ran"
 assert_true 'ran run_onchange_30-changes' "the script after the failure still ran"
-assert_equals "run_once_install_shell" "$(head -n 1 "$RUNS")" "run_once_install_* scripts run first"
+# The shell scripts make zsh/fish the login shell, which needs the shell
+# installed: by the package scripts, so they come after every run_onchange_.
+assert_equals "run_once_install_shell" "$(tail -n 1 "$RUNS")" "run_once_install_* scripts run last"
 assert_contains "run_onchange_20-fails.sh" "$OUT" "the failed script is named"
 assert_contains "exit 3" "$OUT" "with its exit status"
 assert_file_contains "$STATE/status" "run_onchange_20-fails.sh 3" "the failure's exit status is recorded"
