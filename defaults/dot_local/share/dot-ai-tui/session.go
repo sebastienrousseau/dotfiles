@@ -50,7 +50,6 @@ var toolCmds = map[string][]paletteItem{
 	"goose":        {{"/mode", "set agent mode", "session"}, {"/extension", "manage extensions", "session"}, {"/model", "switch model", "session"}},
 	"crush":        {{"/model", "switch model", "session"}, {"/help", "list commands", "session"}, {"/compact", "summarise context", "session"}},
 	"amp":          {{"/help", "list commands", "session"}, {"/thread", "manage threads", "session"}},
-	"cursor-agent": {{"/model", "switch model", "session"}, {"/help", "list commands", "session"}},
 	"grok":         {{"/model", "switch model", "session"}, {"/plan", "plan-first mode", "session"}, {"/mcp", "MCP servers", "session"}},
 	"copilot":      {{"/model", "switch model", "session"}, {"/clear", "clear context", "session"}},
 	"qwen":         {{"/model", "switch model", "session"}, {"/clear", "clear", "session"}},

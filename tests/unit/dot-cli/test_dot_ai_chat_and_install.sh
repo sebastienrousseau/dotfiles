@@ -41,12 +41,13 @@ assert_equals "0" "$DOT_FIXTURE_RC" "an installed tool should be launched"
 assert_contains "claude" "$DOT_FIXTURE_OUT" \
   "the short name 'cl' should resolve to the claude binary"
 
-test_start "ai_chat_resolves_cursor_to_cursor_agent"
+# cursor-agent is not offered (its installer runs an unverified binary,
+# docs/AI.md): even installed, `cursor` is not a tool dot ai launches.
+test_start "ai_chat_does_not_offer_cursor"
 dot_fixture_stub "$FX/stubs" cursor-agent 0
 ai_run ai chat cursor
-assert_equals "0" "$DOT_FIXTURE_RC" "cursor should resolve to cursor-agent"
-assert_contains "cursor-agent" "$DOT_FIXTURE_OUT" \
-  "the roster alias 'cursor' should resolve to the cursor-agent binary"
+assert_not_equals "0" "$DOT_FIXTURE_RC" "cursor is not a tool dot ai knows"
+assert_output_not_contains "cursor-agent" "printf '%s' \"\$DOT_FIXTURE_OUT\""
 
 # ── 2. install survives a failing package manager ──────────────────────────
 test_start "ai_install_continues_past_a_failed_install"

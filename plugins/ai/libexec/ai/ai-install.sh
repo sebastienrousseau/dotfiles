@@ -246,29 +246,6 @@ install_kimi_native() {
   # LCOV_EXCL_STOP
 }
 
-install_grok_native() {
-  # LCOV_EXCL_START — network installer (see install_agy_native).
-  local label="${1:-Grok Build}"
-  local installer
-  installer=$(umask 077 && mktemp)
-  if download_verified_script https://x.ai/cli/install.sh "$installer"; then
-    if command -v gum >/dev/null 2>&1; then
-      if gum spin --spinner dot --title "Installing $label (native installer)" -- bash "$installer"; then
-        ui_ok "$label" "installed"
-      else
-        ui_warn "$label" "install failed (continuing)"
-      fi
-    else
-      ui_info "Installing" "$label via native installer"
-      bash "$installer" || ui_warn "$label" "install failed (continuing)"
-    fi
-  else
-    ui_warn "$label" "installer download/validation failed (continuing)"
-  fi
-  rm -f "$installer"
-  # LCOV_EXCL_STOP
-}
-
 install_amp_native() {
   # LCOV_EXCL_START — network installer (see install_agy_native).
   # amp publishes only prerelease-tagged npm versions (0.0.<epoch>-g<sha>),
@@ -296,32 +273,6 @@ install_amp_native() {
     else
       ui_info "Installing" "$label via native installer"
       AMP_VERSION="$amp_version" bash "$installer" || ui_warn "$label" "install failed (continuing)"
-    fi
-  else
-    ui_warn "$label" "installer download/validation failed (continuing)"
-  fi
-  rm -f "$installer"
-  # LCOV_EXCL_STOP
-}
-
-install_cursor_native() {
-  # LCOV_EXCL_START — network installer (see install_agy_native).
-  local label="${1:-Cursor CLI}"
-  local installer
-  installer=$(umask 077 && mktemp)
-  # cursor.com/install User-Agent-sniffs: a default curl UA is served the
-  # marketing HTML page (which fails the shebang check below), while a
-  # browser-like UA gets the real install script. Spoof a browser UA.
-  if download_verified_script https://cursor.com/install "$installer" 524288 "Mozilla/5.0"; then
-    if command -v gum >/dev/null 2>&1; then
-      if gum spin --spinner dot --title "Installing $label (native installer)" -- bash "$installer"; then
-        ui_ok "$label" "installed"
-      else
-        ui_warn "$label" "install failed (continuing)"
-      fi
-    else
-      ui_info "Installing" "$label via native installer"
-      bash "$installer" || ui_warn "$label" "install failed (continuing)"
     fi
   else
     ui_warn "$label" "installer download/validation failed (continuing)"

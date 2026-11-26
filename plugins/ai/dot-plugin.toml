@@ -81,7 +81,7 @@ summary = "With --bg: the directory it starts in"
 
 [commands.args]
 # roster: values
-values = ["claude", "codex", "copilot", "goose", "crush", "amp", "cursor-agent", "grok", "kimi", "agy", "sgpt", "ollama", "opencode", "aider", "autohand", "vibe", "qwen"]
+values = ["claude", "codex", "copilot", "goose", "crush", "amp", "kimi", "agy", "sgpt", "ollama", "opencode", "aider", "autohand", "vibe", "qwen"]
 
 [[commands]]
 verb = "run"
@@ -97,7 +97,7 @@ summary = "Steering pattern (--pattern is the old name)"
 
 [commands.args]
 # roster: values
-values = ["claude", "codex", "copilot", "goose", "crush", "amp", "cursor-agent", "grok", "kimi", "agy", "sgpt", "ollama", "opencode", "aider", "autohand", "vibe", "qwen"]
+values = ["claude", "codex", "copilot", "goose", "crush", "amp", "kimi", "agy", "sgpt", "ollama", "opencode", "aider", "autohand", "vibe", "qwen"]
 
 [[commands]]
 object = "gateway"

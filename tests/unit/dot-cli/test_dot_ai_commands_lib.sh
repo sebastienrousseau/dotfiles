@@ -40,7 +40,7 @@ STUB
   chmod +x "$BIN/$1"
 }
 
-for t in claude codex copilot agy goose crush amp cursor-agent grok kimi \
+for t in claude codex copilot agy goose crush amp kimi \
   sgpt ollama opencode aider autohand vibe qwen \
   dot-ai-proxy dot-ai-serve mise; do
   stub "$t"
@@ -100,10 +100,6 @@ ai _ai_invoke_provider crush "hello"
 called "crush run hello"
 ai _ai_invoke_provider amp "hello"
 called "amp -x hello"
-ai _ai_invoke_provider cursor "hello"
-called "cursor-agent -p hello"
-ai _ai_invoke_provider grok "hello"
-called "grok --no-auto-update -p hello"
 ai _ai_invoke_provider kimi "hello"
 called "kimi -p hello --quiet"
 
@@ -244,7 +240,9 @@ PATH="$NONE" ai cmd_ai_doctor
 assert_equals 0 "$RC" "rc"
 err_has "not installed (the gateway engine needs it)" "engine missing"
 out_has "dot-ai-serve not deployed" "gateway missing"
-out_has "0/17 tools installed" "empty roster"
+# The roster's own size, so adding or removing a tool needs no edit here.
+roster_size="$(source "$REPO_ROOT/lib/dot/data/ai-roster.sh" && echo "${#AI_ROSTER_NAMES[@]}")"
+out_has "0/$roster_size tools installed" "empty roster"
 out_has "0/5 suite tools" "empty ecosystem"
 
 # ── install ─────────────────────────────────────────────────────────────
@@ -276,8 +274,8 @@ test_start "native_installers_are_preferred_for_the_tools_that_have_one"
 # installers, the rest to mise packages.
 ai_min ai_install_method claude
 out_has "native:install_claude_native" "claude uses its native installer"
-ai_min ai_install_method cursor-agent
-out_has "native:install_cursor_native" "cursor-agent uses its native installer"
+ai_min ai_install_method kimi
+out_has "native:install_kimi_native" "kimi uses its native installer"
 ai_min ai_install_method codex
 out_has "mise:npm:@openai/codex" "codex installs through mise"
 

@@ -3,11 +3,9 @@
 # Update intentionally after reviewing the upstream diff.
 62966c07365423bd4dc209355060744058fb30d60f5323e2d360e39de64e5042  https://antigravity.google/cli/install.sh
 710f208cf0225ac330f71cc1540d36b10a6be7a850334b5ec4770fe96fbc57c4  https://github.com/block/goose/releases/download/stable/download_cli.sh
-3a68d3406cf674e17bed1733a4dcf37805e2e47d87417700007d7e1aa766a944  https://claude.ai/install.sh
-7212eb6da4e7d53bb4925cfb84e4a87dbdb123843b2e4afd2c2400b3d0649da3  https://code.kimi.com/kimi-code/install.sh
-7fd6fdc75d9418b2e58356726fcbf1ae849416f773925da07d0ccc7a60d3e791  https://x.ai/cli/install.sh
-07bea1669144a5191c873a61a3244266ca046557bff7123f0be41d0723592297  https://ampcode.com/install.sh
-bb54a2c0c13a936faab47355edd7125ec43a203af5610175ab39f5571df16e74  https://cursor.com/install
+2c5506d110560bf618bbe88f678f2c2a0047c86a9c6585fc84976120b1de0b44  https://claude.ai/install.sh
+270a86f2d2304529b6d8a3783fca9534874ebaeecb6cfcc1aebcdb6ce20ae1d7  https://code.kimi.com/kimi-code/install.sh
+83b0a61b09cb653b92e47e039e3aba8bda60c62c0eea6e1467c1b1b12c258cc9  https://ampcode.com/install.sh
 ac94d641e3ddb7cd1e8ec9b61babafe77a0a8f741a4eafea0844a00d0e14dd59  https://releases.herdr.dev/core/install.sh
 75de125a45a82b53c16546db7057052e98c11866ded27c4b6f95a51f59432e7b  https://get.chezmoi.io
 12479a24be3f5307eecac7cde670fad7118640f031229e964f544b1367b52a41  https://raw.githubusercontent.com/Homebrew/install/24173182915f24bdd52a22fd073e421953b2a252/install.sh

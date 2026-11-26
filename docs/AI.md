@@ -31,8 +31,11 @@ dot ai gateway serve      # a local Claude endpoint for every tool, on your API 
 ## Prerequisites
 
 Most tools install through [mise](https://mise.jdx.dev); `claude`, `goose`,
-`agy`, `amp`, `cursor-agent`, `grok` and `kimi` use their own pinned native
-installers, which need `curl`. When a tool you install needs mise and it is
+`agy`, `amp` and `kimi` use their own pinned native installers, which need
+`curl`. Cursor's `cursor-agent` and xAI's `grok` are not offered: their
+install scripts download the binary without checking a checksum or a
+signature, so a pinned script still runs an unverified program. They come
+back when there is a way to verify what they install. When a tool you install needs mise and it is
 missing, `dot ai` offers to install it first. Nothing installs without your
 yes: `dot ai install` asks before a bulk install, `dot ai <tool>` asks before
 installing a missing tool, and `--yes` (or `DOTFILES_YES=1`) answers yes.
@@ -155,8 +158,6 @@ These tools are not installed for you. Install what you want with `dot ai instal
   - `goose` — Block's open-source coding agent
   - `crush` — Charm's glamorous TUI coding agent
   - `amp` — Sourcegraph's agentic coder
-  - `cursor-agent` — Cursor's terminal agent
-  - `grok` — xAI's terminal coding agent (Grok Build; needs a SuperGrok / X Premium+ plan)
   - `kimi` — Moonshot AI's Kimi Code CLI; installed natively to `~/.kimi-code/bin/kimi` and supports native interactive use and one-shot prompts
 
 - **Coding (interactive)** — focused pair-programming assistants:

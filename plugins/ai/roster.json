@@ -95,38 +95,6 @@
       "chat": true
     },
     {
-      "name": "cursor-agent",
-      "bin": "cursor-agent",
-      "aliases": [
-        "cursor"
-      ],
-      "title": "Cursor CLI",
-      "summary": "Cursor's terminal agent",
-      "group": "agents",
-      "role": "agent",
-      "processes": [
-        "cursor-agent"
-      ],
-      "package": "",
-      "native": "install_cursor_native",
-      "chat": true
-    },
-    {
-      "name": "grok",
-      "bin": "grok",
-      "aliases": [],
-      "title": "Grok Build",
-      "summary": "xAI's terminal coding agent",
-      "group": "agents",
-      "role": "agent",
-      "processes": [
-        "grok"
-      ],
-      "package": "",
-      "native": "install_grok_native",
-      "chat": true
-    },
-    {
       "name": "kimi",
       "bin": "kimi",
       "aliases": [],

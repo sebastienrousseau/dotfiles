@@ -85,25 +85,6 @@ group = "agents"
 role = "agent"
 
 [[tool]]
-name = "cursor-agent"
-bin = "cursor-agent"
-title = "Cursor CLI"
-summary = "Cursor's terminal agent"
-native = "install_cursor_native"
-aliases = ["cursor"]
-group = "agents"
-role = "agent"
-
-[[tool]]
-name = "grok"
-bin = "grok"
-title = "Grok Build"
-summary = "xAI's terminal coding agent"
-native = "install_grok_native"
-group = "agents"
-role = "agent"
-
-[[tool]]
 name = "kimi"
 bin = "kimi"
 title = "Kimi CLI"
