@@ -75,7 +75,7 @@ probe() {
   local shell="$1"
   shift
   # Only the stubs and the base system on PATH, so host tools do not count.
-  timeout 60 env -i HOME="$SANDBOX/home" PATH="$SANDBOX/bin:/usr/bin:/bin" TERM=dumb \
+  run_with_timeout 60 env -i HOME="$SANDBOX/home" PATH="$SANDBOX/bin:/usr/bin:/bin" TERM=dumb \
     SANDBOX="$SANDBOX" ASK="$ASK" ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
     "$(command -v "$shell")" "$@" -c ". \"\$SANDBOX/probe.sh\"" 2>/dev/null
 }

@@ -30,11 +30,14 @@ mkdir -p "$WORK/home/.euxis/data/config/branding"
 printf 'SIG LINE ONE\nSIG LINE TWO\n' >"$WORK/home/.euxis/data/config/branding/signature.txt"
 
 # run_in <dir> <cmd...>: a clean environment (no AI-session variables, no
-# user or system git config) rooted in <dir>.
+# user or system git config) rooted in <dir>, bounded to RUN_IN_LIMIT
+# seconds when that is set.
 run_in() {
   local dir="$1"
   shift
-  (cd "$dir" && env -i HOME="$WORK/home" PATH="$PATH" XDG_CONFIG_HOME="$WORK/xdg" \
+  local -a limit=()
+  [[ -n "${RUN_IN_LIMIT:-}" ]] && limit=(run_with_timeout "$RUN_IN_LIMIT")
+  (cd "$dir" && "${limit[@]}" env -i HOME="$WORK/home" PATH="$PATH" XDG_CONFIG_HOME="$WORK/xdg" \
     GIT_CONFIG_NOSYSTEM=1 GIT_CEILING_DIRECTORIES="$WORK" \
     GIT_AUTHOR_NAME=T GIT_AUTHOR_EMAIL=t@example.com \
     GIT_COMMITTER_NAME=T GIT_COMMITTER_EMAIL=t@example.com "$@")
@@ -68,7 +71,7 @@ HOOK
   chmod +x "$1/.git/hooks/$2"
 }
 
-commit() { run_in "$1" timeout 30 git commit -q -m 'feat: thing' >/dev/null 2>&1; }
+commit() { RUN_IN_LIMIT=30 run_in "$1" git commit -q -m 'feat: thing' >/dev/null 2>&1; }
 last_msg() { run_in "$1" git log -1 --format=%B; }
 
 test_start "rejecting_repo_pre_commit_blocks_the_commit"

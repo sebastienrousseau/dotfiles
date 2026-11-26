@@ -42,8 +42,8 @@ env -i HOME="$SANDBOX/render-home" PATH="$PATH" \
   <"$REPO_ROOT/defaults/dot_config/tmux/tmux.conf.tmpl" >"$SANDBOX/tmux.conf" || rc=$?
 assert_equals "0" "$rc" "tmux.conf renders"
 
-KEYS="$(env -i HOME="$SANDBOX/home" TMUX_TMPDIR="$SANDBOX/sock" PATH="$PATH" TERM=xterm-256color \
-  timeout 30 "$TMUX_BIN" -L keys -f "$SANDBOX/tmux.conf" start-server \; list-keys -T prefix 2>/dev/null)"
+KEYS="$(run_with_timeout 30 env -i HOME="$SANDBOX/home" TMUX_TMPDIR="$SANDBOX/sock" PATH="$PATH" TERM=xterm-256color \
+  "$TMUX_BIN" -L keys -f "$SANDBOX/tmux.conf" start-server \; list-keys -T prefix 2>/dev/null)"
 
 # key_cmd <key>: the command Prefix+<key> runs, flags and key stripped.
 key_cmd() {
