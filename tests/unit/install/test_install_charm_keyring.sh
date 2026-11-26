@@ -72,14 +72,16 @@ printf '#!/bin/sh\nexec "%s/rewrite" "%s" "$@"\n' "$STUBS" "$REAL_GPG" >"$STUBS/
 printf '#!/bin/sh\necho "apt-get $*" >>"%s/calls.log"\n' "$SANDBOX" >"$STUBS/apt-get"
 chmod +x "$STUBS/rewrite" "$STUBS/sudo" "$STUBS/gpg" "$STUBS/apt-get"
 
-# run_gum <served-key>: bootstrap_gum on "debian" with curl serving the key;
+# run_gum <served-key> [gnupghome]: bootstrap_gum on "debian" with curl
+# serving the key and GNUPGHOME set to gnupghome (default: the sandbox's);
 # prints the return code.
 run_gum() {
+  local home="${2:-$GNUPGHOME}"
   rm -rf "$FAKE/etc" "$SANDBOX/calls.log"
   printf '#!/bin/sh\nwhile [ $# -gt 0 ]; do [ "$1" = -o ] && { cp "%s" "$2"; exit 0; }; shift; done\nexit 22\n' \
     "$1" >"$STUBS/curl"
   chmod +x "$STUBS/curl"
-  env -i HOME="$SANDBOX" PATH="$STUBS:$SANDBOX/base" GNUPGHOME="$GNUPGHOME" \
+  env -i HOME="$SANDBOX" PATH="$STUBS:$SANDBOX/base" GNUPGHOME="$home" \
     "$BASH" --norc --noprofile -c 'source "$1"; source "$2"
       OS=Linux target_os=debian
       CHARM_GPG_EXPECTED_FPR="$3"
@@ -98,6 +100,14 @@ assert_equals "0|present|called" "$rc|$(keyring_state)|$(apt_state)" \
 assert_equals "apt-get update|apt-get install gum -y" \
   "$(paste -sd'|' "$SANDBOX/calls.log" 2>/dev/null)" \
   "apt-get refreshes the index, then installs gum"
+
+# The caller's GnuPG home is not the keyring's business: a GNUPGHOME that
+# does not exist (or that the user cannot write) made gpg exit before it
+# listed anything, and the pinned key was refused as "0 key(s)".
+test_start "charm_pinned_key_accepted_without_a_usable_gnupg_home"
+rc="$(run_gum "$SANDBOX/pinned.asc" "$SANDBOX/no-such-gnupg-home")"
+assert_equals "0|present|called" "$rc|$(keyring_state)|$(apt_state)" \
+  "the pinned key is trusted whatever state the caller's GnuPG home is in"
 
 test_start "charm_failed_apt_update_skips_install"
 printf '#!/bin/sh\necho "apt-get $*" >>"%s/calls.log"\n[ "$1" != update ]\n' "$SANDBOX" >"$STUBS/apt-get"

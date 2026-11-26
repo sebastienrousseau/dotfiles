@@ -110,9 +110,9 @@ CHARM_GPG_EXPECTED_FPR="ED927B38BE981E53CA09153D03BBF595D4DFD35C" # pragma: allo
 # charm_keyring_verify <keyring>: apt trusts every primary key in a signed-by
 # file, so it must hold exactly the pinned one; else remove it and return 1.
 charm_keyring_verify() {
-  local keyring="$1" keys pub_count primary_fpr
-  keys="$(gpg --no-default-keyring --keyring "$keyring" \
-    --with-colons --list-keys 2>/dev/null || true)"
+  local keyring="$1" keys pub_count primary_fpr h
+  h="$(mktemp -d)" # throwaway GnuPG home: with a broken ~/.gnupg, gpg listed 0 keys
+  keys="$(GNUPGHOME="$h" gpg --batch --no-default-keyring --keyring "$keyring" --with-colons --list-keys 2>/dev/null || true)" && rm -rf "$h"
   pub_count="$(grep -c '^pub:' <<<"$keys" || true)"
   primary_fpr="$(awk -F: '/^pub:/ { pub = 1; next } pub && /^fpr:/ { print $10; exit }' <<<"$keys")"
   if [[ "$pub_count" == 1 && "$primary_fpr" == "$CHARM_GPG_EXPECTED_FPR" ]]; then

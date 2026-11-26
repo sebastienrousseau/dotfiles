@@ -18,6 +18,7 @@ This file documents all notable changes to this project.
 
 ### Fixed
 
+- On a fresh Debian or Ubuntu machine the installer refused Charm's genuine apt key ("Charm keyring must hold only ED927B38... (found 0 key(s), first none)") and stopped. The check listed the keyring through the caller's GnuPG home and discarded gpg's errors, so a missing or unwritable `~/.gnupg` or `GNUPGHOME` made it list nothing. It now lists the keyring in a throwaway GnuPG home. The README's Install drill (Drill A1) failed on this.
 - On macOS before 27, which ships no `timeout(1)`, several commands failed or lost their time limit: a new SSH agent never got `~/.ssh/id_ed25519` (the error was discarded), `/vibe` delegation never ran its delegate, `dot doctor` dropped its zsh hooks check, and the zsh startup benchmark and the examples gate ran with no deadline. Each now works without `timeout(1)`.
 - `/vibe` delegation reported a timed-out delegate on no OS: under `set -e` the script ended at the failed pipeline, before the "VIBE TIMEOUT" report and the run log. It also exited 1 after a run that changed no files or left no session log.
 - The nightly Flake Detector failed before running a test: it gave `setup-chezmoi` no chezmoi version. On macOS it now runs the suite under bash 5 with shellcheck, as the project requires, instead of Apple's bash 3.2.
