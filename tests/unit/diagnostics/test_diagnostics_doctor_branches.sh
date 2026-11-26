@@ -56,6 +56,14 @@ _new_scenario() {
     "$S_HOME/.local/share" "$S_HOME/.cache" "$S_HOME/.local/state"
 }
 
+# _provisioned: the scenario's machine has run install.sh --provision (the
+# record run_provision keeps), so a missing toolchain command is a failure
+# rather than a warning naming --provision.
+_provisioned() {
+  mkdir -p "$S_HOME/.local/state/dot/provision"
+  printf 'run_once_packages.sh 0123abcd\n' >"$S_HOME/.local/state/dot/provision/hashes"
+}
+
 # _shim <name>: write stdin as an executable shim into the scenario bin.
 _shim() {
   cat >"$S_BIN/$1"
@@ -318,6 +326,7 @@ _expect "s1_ai_pins_need_a_real_jq" "[INFO] AI pins not checked (dot ai inventor
 # AI analysis hook fires through the ~/.local/bin/dot shim.
 # =======================================================================
 _new_scenario s2
+_provisioned
 _uname Linux
 _zsh "9 9"
 _tool pueue pueued batcat wasmtime age hyperfine \
@@ -600,6 +609,7 @@ _expect_absent "s4_no_failures" "[FAIL]"
 # S5 — unknown OS with an empty toolbox: every "missing" branch.
 # =======================================================================
 _new_scenario s5
+_provisioned
 _uname FreeBSD
 _shim uptime <<'EOF'
 #!/usr/bin/env bash
