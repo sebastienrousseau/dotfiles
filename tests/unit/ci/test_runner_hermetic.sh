@@ -38,6 +38,18 @@ fixture build "" "cargo build --release"
 fixture list "" "cargo install --list"
 fixture declared "# test-needs: cargo" "cargo build --release"
 
+# A runner started inside a test puts its guards ahead of the outer run's.
+# Each guard must still reach the real tool, not hand the call back and
+# forth between the two. The alarm bounds the old endless loop at 30 s.
+mkdir -p "$WORK/nested/tests/unit/fixture"
+cp -R "$REPO_ROOT/tests/framework" "$WORK/nested/tests/framework"
+cat >"$WORK/nested/tests/unit/fixture/test_hloop_loopback.sh" <<EOF
+#!/usr/bin/env bash
+curl -fsS http://127.0.0.1:9/ >/dev/null 2>&1; echo "\$?" >"$WORK/out/nestedcurl.rc"
+echo "RESULTS:1:1:0"
+EOF
+fixture nested "" "perl -e 'alarm 30; exec @ARGV' bash $WORK/nested/tests/framework/test_runner.sh hloop_*"
+
 # PATH without any directory holding a real rustup, so the absent-tool case
 # is the same on every machine.
 no_rustup_path=""
@@ -72,6 +84,17 @@ assert_contains "test-needs: cargo" "$(cat "$WORK/out/build.txt")" "the refusal 
 
 test_start "read_only_probe_passes_through"
 assert_equals "fake cargo install --list" "$(cat "$WORK/out/list.txt")" "cargo install --list reaches the real tool"
+
+test_start "nested_runner_guards_reach_the_real_tool"
+assert_equals "0" "$(cat "$WORK/out/nested.rc" 2>/dev/null)" "the nested runner finished within 30 s"
+curl_rc="$(cat "$WORK/out/nestedcurl.rc" 2>/dev/null || echo missing)"
+if [[ "$curl_rc" =~ ^[0-9]+$ && "$curl_rc" != 97 && "$curl_rc" != 127 ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST: loopback curl reached the real curl (rc=$curl_rc)"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: loopback curl in the nested run did not reach curl (rc=$curl_rc)"
+fi
 
 test_start "declared_need_passes_through"
 assert_equals "fake cargo build --release" "$(cat "$WORK/out/declared.txt")" "a declared need reaches the real tool"
