@@ -84,6 +84,13 @@ max_loaded_models = 1
 num_parallel = 1
 context_length = 32768
 keep_alive = "30m"
+# A Mac with at most low_memory_gb of unified memory gets these instead: a
+# 32K context on an 8 GB machine pushes into SSD swap, and a 2m keep-alive
+# hands the model's ~3 GB back to macOS soon after the last prompt.
+# Set memory_gb in a host's chezmoi.toml [data.ollama] to skip detection.
+low_memory_gb = 8
+low_memory_context_length = 8192
+low_memory_keep_alive = "2m"
 
 [features.ai_theme_providers]
 codex = true

@@ -1,4 +1,16 @@
 {{- if and (eq .chezmoi.os "darwin") .ollama.server -}}
+{{- $memGB := 0 -}}
+{{- if hasKey .ollama "memory_gb" -}}
+{{-   $memGB = int .ollama.memory_gb -}}
+{{- else -}}
+{{-   $memGB = div (output "/usr/sbin/sysctl" "-n" "hw.memsize" | trim | atoi) 1073741824 -}}
+{{- end -}}
+{{- $contextLength := .ollama.context_length -}}
+{{- $keepAlive := .ollama.keep_alive -}}
+{{- if le $memGB (int .ollama.low_memory_gb) -}}
+{{-   $contextLength = .ollama.low_memory_context_length -}}
+{{-   $keepAlive = .ollama.low_memory_keep_alive -}}
+{{- end -}}
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -31,9 +43,9 @@
 		<key>OLLAMA_NUM_PARALLEL</key>
 		<string>{{ .ollama.num_parallel }}</string>
 		<key>OLLAMA_CONTEXT_LENGTH</key>
-		<string>{{ .ollama.context_length }}</string>
+		<string>{{ $contextLength }}</string>
 		<key>OLLAMA_KEEP_ALIVE</key>
-		<string>{{ .ollama.keep_alive }}</string>
+		<string>{{ $keepAlive }}</string>
 	</dict>
 
 	<key>RunAtLoad</key>
