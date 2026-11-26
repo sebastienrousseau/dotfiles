@@ -30,15 +30,22 @@ prompts, anything destructive that needs my eyes first), hand
 them over as ONE runnable script FILE that I can invoke by path
 — never a fenced copy-paste block, never scattered one-liners.
 
-- Write the script to disk: `.git/<name>.sh` for repo-local
-  work, or another path outside the working tree.
-- `chmod +x` it so I can run it directly: `./.git/<name>.sh`.
-- Shebang `#!/usr/bin/env bash`, first line of body
-  `set -euo pipefail`.
+- Write the script to `/tmp/<repo-name>/<script-name>.sh`
+  (`~/Code/AGENTS.md` §4), never inside the working tree.
+- Hand it over as ONE command that works from any directory:
+  `zsh /tmp/<repo-name>/<script-name>.sh`.
+- Shebang `#!/usr/bin/env zsh`, first line of body
+  `set -euo pipefail`; `chmod +x` it too.
 - Quote heredocs (`<<'EOF'`) so commit messages don't
   interpolate.
-- Normalise cwd up front: `cd "$(git rev-parse --show-toplevel)"`
-  (or an explicit absolute path).
+- Normalise cwd up front with an explicit absolute path:
+  `cd /path/to/repo`. (`git rev-parse` run from inside `.git/`
+  fails.)
+- zsh rules: quote any URL or API path holding `?` or `*` (glob),
+  and brace a variable before a colon, `"${VAR}:x"` (`$VAR:s`
+  is a modifier).
+- Run the script's read-only preflight under zsh yourself before
+  handing it over; `zsh -n` only checks syntax.
 - Multi-phase work goes in one script with labelled sections,
   not multiple scripts I have to chain.
 - After the script, one line on what it does and what to tell
