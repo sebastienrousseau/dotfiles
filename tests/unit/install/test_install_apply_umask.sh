@@ -25,15 +25,15 @@ source "$REPO_ROOT/install.sh"
 test_start "installer_keeps_077_for_its_own_files"
 assert_equals "0077" "$(umask)" "install.sh itself runs under umask 077"
 
-# Stubs: each chezmoi call logs "<umask> DOTFILES_AI=<value>"; no git
-# identity work.
-chezmoi() { printf '%s DOTFILES_AI=%s\n' "$(umask)" "${DOTFILES_AI:-unset}" >>"$WORK/chezmoi.log"; }
+# Stubs: each chezmoi call logs "<umask> DOTFILES_AI=<value> <args>"; no
+# git identity work.
+chezmoi() { printf '%s DOTFILES_AI=%s %s\n' "$(umask)" "${DOTFILES_AI:-unset}" "$*" >>"$WORK/chezmoi.log"; }
 seed_git_identity() { :; }
 unset DOTFILES_AI
 
 test_start "dotfiles_apply_under_the_dotfiles_umask"
 apply_source 0
-assert_equals "0022 DOTFILES_AI=1" "$(cat "$WORK/chezmoi.log" 2>/dev/null)" \
+assert_equals "0022 DOTFILES_AI=1 apply" "$(cat "$WORK/chezmoi.log" 2>/dev/null)" \
   "chezmoi apply runs under 022 (not the caller's 002 or the installer's 077) and DOTFILES_AI=1"
 assert_equals "0077" "$(umask)" "and the installer's own umask is unchanged afterwards"
 
@@ -47,8 +47,12 @@ SOURCE_DIR="$WORK/src"
 test_start "provisioning_is_followed_by_an_apply"
 : >"$WORK/chezmoi.log"
 provision_toolchain 1 0 "" >/dev/null
-assert_equals $'provisioned\n0022 DOTFILES_AI=1' "$(cat "$WORK/chezmoi.log")" \
-  "after provisioning, chezmoi applies once more, in the same environment"
+# --force: since the first apply only provisioning ran, so a managed file
+# changed since then was changed by a vendor installer (a PATH line in
+# .bashrc), and chezmoi stopped to ask with no terminal ("could not open a
+# new TTY"; drill A1). The dotfiles own those files.
+assert_equals $'provisioned\n0022 DOTFILES_AI=1 apply --force' "$(cat "$WORK/chezmoi.log")" \
+  "after provisioning, chezmoi applies once more, in the same environment, restoring managed files"
 
 test_start "no_provisioning_no_second_apply"
 : >"$WORK/chezmoi.log"

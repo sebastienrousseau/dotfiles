@@ -200,9 +200,10 @@ apply_source() {
 # renders them: umask 022 and DOTFILES_AI=1, both from dot_profile. Under
 # the installer's environment instead, every file's mode and the
 # DOTFILES_AI-dependent build scripts showed as drift on a fresh install.
+# Extra arguments go to chezmoi apply.
 chezmoi_apply() {
-  local -a flags=()
-  [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]] || flags=(--force --no-tty)
+  local -a flags=("$@")
+  [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]] || flags+=(--force --no-tty)
   (
     umask "$DOTFILES_APPLY_UMASK"
     DOTFILES_AI=1 chezmoi apply ${flags[@]+"${flags[@]}"}
@@ -538,9 +539,12 @@ provision_toolchain() {
     run_provision "$SOURCE_DIR" ${3:+--all} ||
       error "Provisioning failed (above). Fix it, then re-run: bash \"$SOURCE_DIR/install.sh\" --provision"
     # The tools just installed (go, for the Go builds) change what the
-    # templates render; apply again so nothing is left pending.
+    # templates render; apply again so nothing is left pending. --force:
+    # only provisioning ran since the first apply, so a managed file changed
+    # since was changed by a vendor installer (a PATH line in .bashrc), and
+    # without it chezmoi stops to ask, or fails with no terminal.
     step "Applying the dotfiles with the new toolchain..."
-    chezmoi_apply
+    chezmoi_apply --force
   else
     step "Configs deployed. To also install the toolchain (packages, fonts, tools):"
     echo "   bash \"$SOURCE_DIR/install.sh\" --provision    # or DOTFILES_PROVISION=1"
