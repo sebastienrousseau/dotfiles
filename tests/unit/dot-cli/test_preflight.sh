@@ -105,15 +105,15 @@ lib '_dot_mise_tag'
 assert_equals "v2099.1.1" "$OUT" "the deployed pin wins"
 rm -f "$WORK/home/.config/dotfiles/versions.env"
 lib '_dot_mise_tag'
-assert_equals "v2026.3.8" "$OUT" "the built-in pin without it"
+assert_equals "v2026.11.7" "$OUT" "the built-in pin without it"
 
 test_start "mise_asset_names_match_the_release"
 stub uname 'case "$1" in -s) echo Darwin ;; -m) echo arm64 ;; esac'
 lib '_dot_mise_asset'
-assert_equals "mise-v2026.3.8-macos-arm64.tar.gz" "$OUT" "macOS arm64"
+assert_equals "mise-v2026.11.7-macos-arm64.tar.gz" "$OUT" "macOS arm64"
 stub uname 'case "$1" in -s) echo Linux ;; -m) echo x86_64 ;; esac'
 lib '_dot_mise_asset'
-assert_equals "mise-v2026.3.8-linux-x64.tar.gz" "$OUT" "Linux x86_64"
+assert_equals "mise-v2026.11.7-linux-x64.tar.gz" "$OUT" "Linux x86_64"
 rm -f "$STUBS/uname"
 
 test_start "mise_install_method_prefers_brew"

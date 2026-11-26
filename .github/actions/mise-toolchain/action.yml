@@ -19,12 +19,12 @@ runs:
     - name: Install mise (pinned, checksum-verified)
       shell: bash
       env:
-        # SHA-256 from the release's SHASUMS256.txt, cross-checked against
-        # the downloaded assets. Published 2026-11-10, older than the 7-day
-        # release-age policy when pinned.
-        MISE_VERSION: "2026.11.6"
-        MISE_SHA256_LINUX_X64: d6ebb6f5601bdf5a8d1d56028b24fe575f45075b989941ccc920f95161c5fa28
-        MISE_SHA256_MACOS_ARM64: 74cf55e92f6c6b1f166781c36db35db9420a4cbf40d62d85c1b9d5dc76e0ba72
+        # SHA-256 from the release's SHASUMS256.txt. Published 2026-11-12.
+        # The same release as MISE_TAG in defaults/dot_config/dotfiles/
+        # versions.env, the mise users get (tests/unit/ci/test_mise_pin_parity.sh).
+        MISE_VERSION: "2026.11.7"
+        MISE_SHA256_LINUX_X64: 3198a5ed5716ca8c17ecfc54521e2769d6cacbf2d13f24f0c2f9706620ec0024
+        MISE_SHA256_MACOS_ARM64: 92f1b9f68b6031a9f77938a0ff8dfd7a77fe9cd918c5b09d0ed434f06ebbd3f2
       run: |
         set -euo pipefail
         case "${RUNNER_OS}-${RUNNER_ARCH}" in
