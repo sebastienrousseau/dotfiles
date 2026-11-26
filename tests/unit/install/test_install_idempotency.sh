@@ -56,23 +56,20 @@ fi
 mkdir -p "$FONT_DIR"
 
 # Case 1: First run (should install)
-# curl serves one small, regular zip per font (no network, no large files);
-# the installer checks each with archive_paths_are_safe and unzips it. The
-# two archives hold different file names, as the real ones do: the installer
-# unzips both at once into one directory, and two unzips writing the same
-# name race (one fails with "cannot create").
+# curl serves one small, regular .tar.xz per font, as the release does (no
+# network, no large files); the installer checks each with
+# archive_paths_are_safe and extracts it. The two archives hold different
+# file names, as the real ones do: both extract at once into one directory.
 MOCK_BIN=$(mktemp -d)
 export PATH="$MOCK_BIN:$PATH"
-python3 -c 'import sys, zipfile
+python3 -I -c 'import io, sys, tarfile
 for path, member in zip(sys.argv[1::2], sys.argv[2::2]):
-    info = zipfile.ZipInfo(member)
-    info.create_system = 3
-    info.external_attr = 0o100644 << 16
-    z = zipfile.ZipFile(path, "w")
-    z.writestr(info, "font")
-    z.close()' \
-  "$MOCK_BIN/JetBrainsMono.zip" "Mock-Regular.ttf" \
-  "$MOCK_BIN/NerdFontsSymbolsOnly.zip" "Mock-Symbols.ttf"
+    info = tarfile.TarInfo(member)
+    info.size, info.mode = 4, 0o644
+    with tarfile.open(path, "w:xz") as tar:
+        tar.addfile(info, io.BytesIO(b"font"))' \
+  "$MOCK_BIN/JetBrainsMono.tar.xz" "Mock-Regular.ttf" \
+  "$MOCK_BIN/NerdFontsSymbolsOnly.tar.xz" "Mock-Symbols.ttf"
 
 cat >"$MOCK_BIN/curl" <<EOF
 #!/bin/sh
@@ -87,7 +84,7 @@ while [ "\$#" -gt 0 ]; do
   esac
 done
 if [ "\${url##*/}" = "SHA-256.txt" ]; then
-  (cd "$MOCK_BIN" && shasum -a 256 JetBrainsMono.zip NerdFontsSymbolsOnly.zip) >"\$destination"
+  (cd "$MOCK_BIN" && shasum -a 256 JetBrainsMono.tar.xz NerdFontsSymbolsOnly.tar.xz) >"\$destination"
 else
   cp "$MOCK_BIN/\${url##*/}" "\$destination"
 fi
