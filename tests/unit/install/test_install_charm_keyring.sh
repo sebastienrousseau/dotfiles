@@ -109,15 +109,17 @@ rc="$(run_gum "$SANDBOX/pinned.asc" "$SANDBOX/no-such-gnupg-home")"
 assert_equals "0|present|called" "$rc|$(keyring_state)|$(apt_state)" \
   "the pinned key is trusted whatever state the caller's GnuPG home is in"
 
-# sudo gpg --dearmor writes the keyring under root's umask; a strict one
-# leaves a file the user, and apt's _apt user, cannot read, and the pinned
-# key was refused as "found 0 key(s)". Here the dearmor runs with umask
-# 0777, so the file it writes starts unreadable even to its owner.
-test_start "charm_keyring_is_readable_after_a_strict_root_umask"
-printf '#!/bin/sh\n[ "$1" = gpg ] && umask 0777\nexec "%s/rewrite" "$@"\n' "$STUBS" >"$STUBS/sudo"
+# sudo gpg --dearmor writes under root's umask; a strict one (as on the
+# GitHub runners) left a keyring the user, and apt's _apt user, could not
+# read, and the pinned key was refused as "found 0 key(s)". The sandbox
+# runs as one user, so it checks what apt needs: a world-readable keyring
+# even when the dearmor runs with umask 0277.
+test_start "charm_keyring_is_world_readable_after_a_strict_root_umask"
+printf '#!/bin/sh\n[ "$1" = gpg ] && umask 0277\nexec "%s/rewrite" "$@"\n' "$STUBS" >"$STUBS/sudo"
 rc="$(run_gum "$SANDBOX/pinned.asc")"
-assert_equals "0|present|called" "$rc|$(keyring_state)|$(apt_state)" \
-  "the pinned key is trusted and the keyring is left world-readable"
+mode="$(stat -c %a "$FAKE/etc/apt/keyrings/charm.gpg" 2>/dev/null || stat -f %Lp "$FAKE/etc/apt/keyrings/charm.gpg" 2>/dev/null)"
+assert_equals "0|present|called|644" "$rc|$(keyring_state)|$(apt_state)|$mode" \
+  "the pinned key is trusted and the keyring is mode 644"
 printf '#!/bin/sh\nexec "%s/rewrite" "$@"\n' "$STUBS" >"$STUBS/sudo"
 chmod -R u+rwX "$FAKE" 2>/dev/null || true
 

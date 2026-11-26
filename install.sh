@@ -265,9 +265,9 @@ bootstrap_gum() {
       rm -f "$charm_key_tmp"
       return 1
     fi
-    sudo gpg --batch --yes --dearmor \
-      -o /etc/apt/keyrings/charm.gpg "$charm_key_tmp" && sudo chmod a+r /etc/apt/keyrings/charm.gpg
-    rm -f "$charm_key_tmp"
+    sudo gpg --batch --yes --dearmor -o "$charm_key_tmp.gpg" "$charm_key_tmp"
+    sudo install -m 0644 "$charm_key_tmp.gpg" /etc/apt/keyrings/charm.gpg # readable whatever root's umask
+    sudo rm -f "$charm_key_tmp" "$charm_key_tmp.gpg"
     charm_keyring_verify /etc/apt/keyrings/charm.gpg || return 1
     echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
     sudo apt-get update && sudo apt-get install gum -y >/dev/null 2>&1
