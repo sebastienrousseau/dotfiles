@@ -1784,7 +1784,7 @@ main() {
   local do_auto=false
   local do_plan=false
   local do_json=false
-  local lock_timeout="${DOT_THEME_LOCK_TIMEOUT:-10}"
+  local lock_timeout="${DOT_THEME_LOCK_TIMEOUT:-}" # empty: the library's default
   local new_theme=""
 
   # Parse arguments — accept a flag before OR after the theme name.
