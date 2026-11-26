@@ -128,10 +128,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # Report mode while the README is brought into the template's shape
-      # (plan R1.1); this step gains --enforce when it reports nothing.
+      # Fails on heading order, an unresolved {{TOKEN}}, a Quick Start below
+      # line 90, or a Documentation section without the four links.
       - name: Compare README.md with defaults/Code/README-TEMPLATE.md
-        run: python3 tools/ci/check-readme-template.py
+        run: python3 tools/ci/check-readme-template.py --enforce
 
   version-consistency:
     name: Generators / version-consistency
