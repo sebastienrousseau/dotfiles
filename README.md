@@ -72,7 +72,7 @@ section in the manual's [install methods](docs/manual/02-tutorials/07-install-me
 | chezmoi | 2.74.1+ (the installer fetches it, checksum-verified) |
 | git | 2.34+ |
 | curl | any current release |
-| Platforms | macOS 15+, Ubuntu 22.04+, Debian 12+, WSL2, NixOS 23.11+; Fedora and Arch community-supported |
+| Platforms | macOS 15+, Ubuntu 22.04+, Debian 12+, WSL2; Fedora and Arch community-supported |
 | Windows | PowerShell 7.5+ runs the native `dot.ps1` for the daily workflow |
 
 Each floor is what CI runs, and it rises only in a release whose changelog

@@ -21,6 +21,10 @@ name: Doc Drift / Generators
 #   - tools/docs/gen_roster.py --check
 #       Verifies every AI tool list matches plugins/ai/roster.toml.
 #
+#   - tools/ci/check-readme-toolchain.py
+#       Verifies the README's toolchain floors match
+#       docs/MINIMUM-TOOLCHAIN.md and CI's chezmoi pin.
+#
 # Adding a third generator is just adding a new step below — keep
 # this workflow flat and easy to extend.
 
@@ -43,6 +47,9 @@ on:
       - 'README.md'
       - 'defaults/Code/README-TEMPLATE.md'
       - 'tools/ci/check-readme-template.py'
+      - 'tools/ci/check-readme-toolchain.py'
+      - 'docs/MINIMUM-TOOLCHAIN.md'
+      - '.github/workflows/ci.yml'
       - 'tools/docs/generate-manpage.sh'
       - 'tools/docs/man/dot.1.in'
       - 'tools/docs/gen_manpages.py'
@@ -162,6 +169,10 @@ jobs:
           # Branch validation permits development after an immutable release.
           # Actual release creation retains strict --require-untagged preflight.
           bash scripts/release-preflight --development
+      # The README's toolchain badge and Requirements table against the
+      # floors in docs/MINIMUM-TOOLCHAIN.md and CI's CHEZMOI_VERSION.
+      - name: Verify README toolchain versions
+        run: python3 tools/ci/check-readme-toolchain.py
 
   manpage:
     name: Generators / man page
