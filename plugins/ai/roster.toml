@@ -85,6 +85,25 @@ group = "agents"
 role = "agent"
 
 [[tool]]
+name = "continue"
+bin = "cn"
+title = "Continue CLI"
+summary = "Continue's open-source terminal coding agent"
+aliases = ["cn"]
+group = "agents"
+role = "agent"
+package = "npm:@continuedev/cli"
+
+[[tool]]
+name = "cline"
+bin = "cline"
+title = "Cline CLI"
+summary = "Cline's open-source terminal coding agent"
+group = "agents"
+role = "agent"
+package = "npm:cline"
+
+[[tool]]
 name = "kimi"
 bin = "kimi"
 title = "Kimi CLI"

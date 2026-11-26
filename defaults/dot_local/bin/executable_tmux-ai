@@ -83,7 +83,7 @@ launch_provider() {
       launch_command="exec dot ai"
       ;;
     # roster: case
-    claude | codex | copilot | goose | crush | amp | kimi | agy | sgpt | ollama | opencode | aider | autohand | vibe | qwen)
+    claude | codex | copilot | goose | crush | amp | continue | cline | kimi | agy | sgpt | ollama | opencode | aider | autohand | vibe | qwen)
       title="ai-$provider"
       launch_command="exec dot ai chat $provider"
       ;;

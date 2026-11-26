@@ -75,6 +75,11 @@ assert_equals "claude" "$(ai_roster_bin cl)" "cl is claude"
 assert_equals "1" "$(ai_roster_bin nosuchtool >/dev/null && echo 0 || echo 1)" "an unknown name is not in the roster"
 assert_equals "pipx:aider-chat[uvx_args=--python 3.12]" "$(ai_roster_package aider)" "a package with = in it survives the lookup"
 assert_equals "install_kimi_native" "$(ai_roster_native kimi)" "native installers are looked up by binary"
+# Continue and Cline install from npm packages with provenance, through mise.
+assert_equals "cn" "$(ai_roster_bin continue)" "continue runs cn"
+assert_equals "cn" "$(ai_roster_bin cn)" "cn is continue's alias"
+assert_equals "npm:@continuedev/cli" "$(ai_roster_package cn)" "continue installs @continuedev/cli"
+assert_equals "npm:cline" "$(ai_roster_package cline)" "cline installs the cline package"
 # cursor-agent and grok are not offered: their installers run an unverified
 # binary (docs/AI.md). Neither name, nor cursor's alias, is in the roster.
 for name in cursor-agent cursor grok; do

@@ -40,7 +40,7 @@ STUB
   chmod +x "$BIN/$1"
 }
 
-for t in claude codex copilot agy goose crush amp kimi \
+for t in claude codex copilot agy goose crush amp kimi cn cline \
   sgpt ollama opencode aider autohand vibe qwen \
   dot-ai-proxy dot-ai-serve mise; do
   stub "$t"
@@ -102,6 +102,12 @@ ai _ai_invoke_provider amp "hello"
 called "amp -x hello"
 ai _ai_invoke_provider kimi "hello"
 called "kimi -p hello --quiet"
+ai _ai_invoke_provider continue "hello"
+called "cn -p hello"
+# Cline's one-shot auto-approves every tool by default ("yolo"); dot ai asks
+# for approval mode instead, as its other agents run bounded.
+ai _ai_invoke_provider cline "hello"
+called "cline --auto-approve false hello"
 
 test_start "stdin_style_providers_pipe_the_prompt"
 ai _ai_invoke_provider agy "hello"

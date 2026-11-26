@@ -454,6 +454,8 @@ def "nu-complete dot ai run" [] {
         { value: "goose", description: "" }
         { value: "crush", description: "" }
         { value: "amp", description: "" }
+        { value: "continue", description: "" }
+        { value: "cline", description: "" }
         { value: "kimi", description: "" }
         { value: "agy", description: "" }
         { value: "sgpt", description: "" }
@@ -485,6 +487,8 @@ def "nu-complete dot ai start" [] {
         { value: "goose", description: "" }
         { value: "crush", description: "" }
         { value: "amp", description: "" }
+        { value: "continue", description: "" }
+        { value: "cline", description: "" }
         { value: "kimi", description: "" }
         { value: "agy", description: "" }
         { value: "sgpt", description: "" }

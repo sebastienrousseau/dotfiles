@@ -95,6 +95,38 @@
       "chat": true
     },
     {
+      "name": "continue",
+      "bin": "cn",
+      "aliases": [
+        "cn"
+      ],
+      "title": "Continue CLI",
+      "summary": "Continue's open-source terminal coding agent",
+      "group": "agents",
+      "role": "agent",
+      "processes": [
+        "cn"
+      ],
+      "package": "npm:@continuedev/cli",
+      "native": "",
+      "chat": true
+    },
+    {
+      "name": "cline",
+      "bin": "cline",
+      "aliases": [],
+      "title": "Cline CLI",
+      "summary": "Cline's open-source terminal coding agent",
+      "group": "agents",
+      "role": "agent",
+      "processes": [
+        "cline"
+      ],
+      "package": "npm:cline",
+      "native": "",
+      "chat": true
+    },
+    {
       "name": "kimi",
       "bin": "kimi",
       "aliases": [],

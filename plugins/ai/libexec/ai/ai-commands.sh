@@ -34,6 +34,9 @@ _ai_invoke_provider() {
     crush) crush run "$full_prompt" || rc=$? ;;
     amp) amp -x "$full_prompt" || rc=$? ;;
     kimi) kimi -p "$full_prompt" --quiet || rc=$? ;;
+    continue | cn) cn -p "$full_prompt" || rc=$? ;;
+    # Cline's one-shot auto-approves every tool unless told otherwise.
+    cline) cline --auto-approve false "$full_prompt" || rc=$? ;;
     sgpt) printf "%s" "$full_prompt" | sgpt --chat shell-gpt || rc=$? ;;
     ollama) printf "%s" "$full_prompt" | ollama run "${DOTFILES_OLLAMA_MODEL:-qwen3.5:4b}" || rc=$? ;;
     opencode) opencode run "$full_prompt" || rc=$? ;;
