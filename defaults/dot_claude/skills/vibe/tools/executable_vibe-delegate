@@ -70,13 +70,15 @@ _vd_banner() {
 
 # _vd_write_cmd FILE: the vibe command as a script. The prompt is embedded
 # %q-quoted, so colons, quotes, emojis or code in it are never expanded.
+# ${a[@]+...} because bash 3.2, macOS's /bin/bash, calls an empty array
+# unbound under set -u.
 _vd_write_cmd() {
   local -a agent=()
   [ -z "$AGENT" ] || agent=(--agent "$AGENT")
   {
     echo '#!/usr/bin/env bash'
     printf 'exec vibe'
-    printf ' %q' "${agent[@]}" -p "$PROMPT" --trust --max-turns "$MAX_TURNS" \
+    printf ' %q' ${agent[@]+"${agent[@]}"} -p "$PROMPT" --trust --max-turns "$MAX_TURNS" \
       --output streaming --workdir "$WORKDIR"
     printf '\n'
   } >"$1"

@@ -37,7 +37,7 @@ run_in() {
   shift
   local -a limit=()
   [[ -n "${RUN_IN_LIMIT:-}" ]] && limit=(run_with_timeout "$RUN_IN_LIMIT")
-  (cd "$dir" && "${limit[@]}" env -i HOME="$WORK/home" PATH="$PATH" XDG_CONFIG_HOME="$WORK/xdg" \
+  (cd "$dir" && ${limit[@]+"${limit[@]}"} env -i HOME="$WORK/home" PATH="$PATH" XDG_CONFIG_HOME="$WORK/xdg" \
     GIT_CONFIG_NOSYSTEM=1 GIT_CEILING_DIRECTORIES="$WORK" \
     GIT_AUTHOR_NAME=T GIT_AUTHOR_EMAIL=t@example.com \
     GIT_COMMITTER_NAME=T GIT_COMMITTER_EMAIL=t@example.com "$@")
