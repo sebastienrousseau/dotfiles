@@ -32,6 +32,27 @@ install_python_tool() {
   log_error "No python installer found for ${tool}. Install manually."
 }
 
+# install_python_plugin <host> <plugin>: a package with no command of its own
+# (a pytest plugin), which `uv tool install` and `pipx install` refuse, goes
+# into its host tool's environment instead.
+install_python_plugin() {
+  local host="$1" plugin="$2"
+
+  if command -v uv >/dev/null 2>&1; then
+    log_info "Installing ${plugin} into ${host} via uv..."
+    uv tool install --upgrade "$host" --with "$plugin" || log_error "Failed to install ${plugin} via uv."
+    return 0
+  fi
+
+  if command -v pipx >/dev/null 2>&1; then
+    log_info "Installing ${plugin} into ${host} via pipx..."
+    pipx inject "$host" "$plugin" || log_error "Failed to install ${plugin} via pipx."
+    return 0
+  fi
+
+  install_python_tool "$plugin"
+}
+
 log_info "Python tools: starting setup..."
 
 # Linting & formatting
@@ -44,7 +65,7 @@ install_python_tool "mypy"
 
 # Testing
 install_python_tool "pytest"
-install_python_tool "pytest-cov"
+install_python_plugin "pytest" "pytest-cov"
 
 # Security & auditing
 install_python_tool "bandit"
