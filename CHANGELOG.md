@@ -2,7 +2,7 @@
 
 This file documents all notable changes to this project.
 
-## Unreleased
+## v0.2.555 (2026-11-26)
 
 ### Changed
 
@@ -13,6 +13,7 @@ This file documents all notable changes to this project.
 - A new weekly CI drill runs the README's Install and Quick Start blocks on fresh Ubuntu and macOS runners and requires `dot doctor` to report no failures within five minutes.
 - The site is built with ssg 0.0.76, the latest release.
 - `standards-sync` is pinned to 0.0.15.
+- `~/.claude/CLAUDE.md` puts hand-over scripts in `/tmp/<repo-name>/<script-name>.sh`, run as `zsh <path>` from any directory, as the shared `AGENTS.md` section 4 requires (it said `.git/<name>.sh` and bash). It also records three ways such scripts broke: `git rev-parse` run inside `.git/`, an unquoted `?` read as a zsh glob, and `"$VAR:x"` read as a zsh modifier.
 - The `/vibe` skill's `vibe-delegate` is split into small shell functions and a Python helper installed beside it (`~/.claude/skills/vibe/tools/vibe_delegate.py`), which runs vibe in a pseudo-terminal and enforces its timeout itself, so delegation needs neither `timeout(1)` nor perl. Its output and run log are unchanged.
 
 ### Fixed

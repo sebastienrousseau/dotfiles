@@ -16,7 +16,7 @@ directory. The archive
 carries SLSA build provenance (keyless, via Fulcio + Rekor):
 
 ```bash
-gh release download v0.2.554 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
+gh release download v0.2.555 --repo sebastienrousseau/dotfiles --pattern 'dot-*.tar.gz'
 gh attestation verify dot-0.2.554.tar.gz --repo sebastienrousseau/dotfiles
 tar -xzf dot-0.2.554.tar.gz
 make -C dot-0.2.554 install PREFIX=/usr/local
