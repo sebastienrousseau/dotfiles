@@ -130,5 +130,16 @@ assert_equals "1|absent" "$rc|$(keyring_state)" "an empty key is refused and rem
 assert_contains "found 0 key(s)" "$(cat "$SANDBOX/out.txt")" "the count is reported"
 assert_contains "  keyring: " "$(cat "$SANDBOX/out.txt")" \
   "with what stat says of the keyring (size, owner and mode, or why it cannot)"
+assert_equals "" "$(grep -F '  gpg: ' "$SANDBOX/out.txt")" "gpg said nothing, so no gpg line"
+
+test_start "charm_unreadable_keyring_refusal_quotes_gpg"
+# A keyring gpg cannot parse: its complaint is the clue, so it is shown.
+mkdir -p "$SANDBOX/kr"
+printf 'garbage keyring bytes\n' >"$SANDBOX/kr/charm.gpg"
+env -i HOME="$SANDBOX" PATH="$STUBS:$SANDBOX/base" GNUPGHOME="$GNUPGHOME" \
+  "$BASH" --norc --noprofile -c 'source "$1"; rc=0; charm_keyring_verify "$2" || rc=$?; echo "rc=$rc"' \
+  _ "$INST/install.sh" "$SANDBOX/kr/charm.gpg" >"$SANDBOX/out.txt" 2>&1
+assert_contains "rc=1" "$(cat "$SANDBOX/out.txt")" "the keyring is refused"
+assert_contains "  gpg: " "$(cat "$SANDBOX/out.txt")" "gpg's first complaint is shown"
 
 print_summary

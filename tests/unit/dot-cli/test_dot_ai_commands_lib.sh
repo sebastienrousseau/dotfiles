@@ -143,14 +143,16 @@ assert_equals 2 "$RC" "rc"
 err_has "Unsupported tool" "error"
 
 test_start "a_failing_provider_propagates_its_exit_code"
-cat >"$BIN/claude" <<STUB
+for pair in claude:claude continue:cn cline:cline; do
+  cat >"$BIN/${pair#*:}" <<STUB
 #!$REAL_BASH
 exit 9
 STUB
-chmod +x "$BIN/claude"
-ai _ai_invoke_provider claude "hello"
-assert_equals 9 "$RC" "rc"
-stub claude
+  chmod +x "$BIN/${pair#*:}"
+  ai _ai_invoke_provider "${pair%%:*}" "hello"
+  assert_equals 9 "$RC" "${pair%%:*}'s exit code reaches the caller"
+  stub "${pair#*:}"
+done
 
 # ── oneshot ─────────────────────────────────────────────────────────────
 test_start "oneshot_defaults_to_claude"
