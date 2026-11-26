@@ -21,6 +21,9 @@ name: Doc Drift / Generators
 #   - tools/docs/gen_roster.py --check
 #       Verifies every AI tool list matches plugins/ai/roster.toml.
 #
+#   - tools/docs/gen_ecosystem.py --check
+#       Verifies docs/ECOSYSTEM.md's table matches docs/ecosystem.toml.
+#
 #   - tools/ci/check-readme-toolchain.py
 #       Verifies the README's toolchain floors match
 #       docs/MINIMUM-TOOLCHAIN.md and CI's chezmoi pin.
@@ -48,6 +51,9 @@ on:
       - 'defaults/Code/README-TEMPLATE.md'
       - 'tools/ci/check-readme-template.py'
       - 'tools/ci/check-readme-toolchain.py'
+      - 'docs/ECOSYSTEM.md'
+      - 'docs/ecosystem.toml'
+      - 'tools/docs/gen_ecosystem.py'
       - 'docs/MINIMUM-TOOLCHAIN.md'
       - '.github/workflows/ci.yml'
       - 'tools/docs/generate-manpage.sh'
@@ -139,6 +145,9 @@ jobs:
       # line 90, or a Documentation section without the four links.
       - name: Compare README.md with defaults/Code/README-TEMPLATE.md
         run: python3 tools/ci/check-readme-template.py --enforce
+      # docs/ECOSYSTEM.md's table is generated from docs/ecosystem.toml.
+      - name: Check docs/ECOSYSTEM.md against docs/ecosystem.toml
+        run: python3 tools/docs/gen_ecosystem.py --check
 
   version-consistency:
     name: Generators / version-consistency

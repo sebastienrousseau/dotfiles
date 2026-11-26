@@ -27,6 +27,35 @@ table — and the argument for why the family currently has one member.
 | Packaging recipes | `pkg/` (brew, scoop, aur, nix, docker) | The *published* taps are separate repos and have to be — see the next table. |
 | Documentation site | `docs/` → `tools/docs/build-site.sh` → `doc.dotfiles.io` via `pages.yml` | Built from the same tree it documents; a docs repo would drift by construction. |
 
+## Repositories, now and planned
+
+Each component below ships inside this repository today and moves to its
+own repository in the plan's extraction order (P3): the least coupled
+first, then the AI and secrets surfaces, then themes and diagnostics, and
+finally the split of what remains into the `dot` CLI and the `dotfiles`
+configuration. The table is generated from
+[`ecosystem.toml`](ecosystem.toml) and checked in CI.
+
+<!-- BEGIN GENERATED: docs/ecosystem.toml -->
+<!-- Do not edit: run `make generate` after changing docs/ecosystem.toml. -->
+
+| Repository | Command | Kind | Lives today in | Extraction wave | Latest release |
+|---|---|---|---|---|---|
+| `dot-fleet` | `dot fleet` | plugin | `plugins/fleet` | 1 | ships inside .dotfiles |
+| `dot-attest` | `dot attest` | plugin | `plugins/attest` | 1 | ships inside .dotfiles |
+| `dot-security` | `dot security` | plugin | `plugins/security` | 1 | ships inside .dotfiles |
+| `dot-ui` | `dot-ui` | binary | `defaults/dot_local/share/dot-ui`, `plugins/ui` | 1 | ships inside .dotfiles |
+| `dot-mcp` | `dot mcp` | plugin | `plugins/mcp`, `defaults/dot_local/share/dot-mcp` | 1 | ships inside .dotfiles |
+| `dot-secrets` | `dot secret` | plugin | `plugins/secret` | 2 | ships inside .dotfiles |
+| `dot-agent` | `dot agent` | plugin | `plugins/agent` | 2 | ships inside .dotfiles |
+| `dot-ai` | `dot ai` | plugin | `plugins/ai`, `defaults/dot_local/share/dot-ai-tui` | 2 | ships inside .dotfiles |
+| `dot-theme` | `dot theme` | plugin | `plugins/theme` | 3 | ships inside .dotfiles |
+| `dot-doctor` | `dot doctor` | plugin | `plugins/doctor` | 3 | ships inside .dotfiles |
+| `dot` | `dot` | cli | `bin/dot`, `lib/dot`, `plugins` | final split | ships inside .dotfiles |
+| `dotfiles` | `chezmoi apply` | distro | `defaults` | final split | ships inside .dotfiles |
+
+<!-- END GENERATED -->
+
 ## Repositories that genuinely are separate
 
 Three, and only because the tooling requires an external repository:
