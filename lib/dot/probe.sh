@@ -12,15 +12,23 @@
 # grandchild that inherited stdout would otherwise keep the caller's $( )
 # open. Exits 124 on expiry, else the command's status. perl gives fork +
 # setsid + group kill on macOS and Linux; without it there is no limit.
+#
+# dot_bounded <seconds> <command…> — the same limit and exit codes for a
+# command that is not a query: stdin and stderr stay the caller's. Use it
+# instead of timeout(1), which macOS before 27 does not ship.
 
 [[ "${_DOT_PROBE_LOADED:-0}" == "1" ]] && return 0
 _DOT_PROBE_LOADED=1
 
 dot_probe() {
+  dot_bounded "$@" </dev/null 2>/dev/null
+}
+
+dot_bounded() {
   local secs="$1"
   shift
   if ! command -v perl >/dev/null 2>&1; then
-    "$@" </dev/null 2>/dev/null
+    "$@"
     return
   fi
   perl -e '
@@ -43,5 +51,5 @@ dot_probe() {
     kill("KILL", -$pid);
     exit(124) if $timed_out;
     exit($status & 127 ? 128 + ($status & 127) : $status >> 8);
-  ' "$secs" "$@" </dev/null 2>/dev/null
+  ' "$secs" "$@"
 }
