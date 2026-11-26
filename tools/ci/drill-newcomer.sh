@@ -39,7 +39,27 @@ drill_script() {
     echo "drill: README has no bash block under Install or Quick Start" >&2
     return 1
   fi
+  install="$(local_installer "$install")" || return 1
   printf '%s\n%s\n' "$install" "$quick"
+}
+
+# local_installer INSTALL_BLOCK: with DRILL_INSTALLER set, the block with its
+# download replaced by a copy of that file, and nothing else changed: the
+# README's digest check still runs against it. The workflow sets it on a
+# release pull request, whose README pins an installer not published yet.
+local_installer() {
+  local swapped
+  [[ -n "${DRILL_INSTALLER:-}" ]] || {
+    printf '%s\n' "$1"
+    return
+  }
+  swapped="$(printf '%s\n' "$1" | sed -E \
+    "s#curl -fsSLo \"\\\$installer_dir/dotfiles-install\\.sh\" https://[^ ]+#cp \"$DRILL_INSTALLER\" \"\$installer_dir/dotfiles-install.sh\"#")"
+  if [[ "$swapped" == "$1" ]]; then
+    echo "drill: DRILL_INSTALLER is set but the Install block has no installer download to replace" >&2
+    return 1
+  fi
+  printf '%s\n' "$swapped"
 }
 
 # judge ELAPSED: read `dot doctor --json` on stdin; pass (exit 0) when it

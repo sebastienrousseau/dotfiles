@@ -2,7 +2,7 @@
 
 This file documents all notable changes to this project.
 
-## Unreleased
+## v0.2.555 (2026-11-26)
 
 ### Changed
 
@@ -10,17 +10,21 @@ This file documents all notable changes to this project.
 - Shipped scripts bound slow commands with `dot_bounded` (`lib/dot/probe.sh`), which needs no `timeout(1)`, and a CI check fails any shipped `timeout` call that does not first check that `timeout` exists.
 - The README follows the workspace README template: Install, Requirements and Quick Start fit the first screen (Quick Start at line 83, from 258), with the verified installer on two lines and the other install methods in a table. Nine sections moved, unchanged, into the manual: the migration guide, the design rationale, the alias hub, agent governance, the `dot` CLI tour, the full comparison, the acknowledgements, and the theme, self-healing and fleet sections. The Documentation section opens with the family's four links, and Stability guarantees states the command-line contract (command names, `--json` output and exit codes are API; one release of deprecation, per ADR-020). CI enforces the template, and checks the README's toolchain floors against `docs/MINIMUM-TOOLCHAIN.md` and CI's chezmoi pin.
 - `docs/ECOSYSTEM.md`'s repository map is generated from `docs/ecosystem.toml`, and `DEVELOPMENT.md` lists every CI job (169 across 60 workflows) with the local command that reproduces it, its egress policy and the secrets it reads, generated from `docs/ci-gates.toml` and the workflows; both are checked by `make check-drift`.
-- A new CI drill runs the README's Install and Quick Start blocks on fresh Ubuntu and macOS runners and requires `dot doctor` to report no failures within 20 minutes. It runs when a release is published and weekly, against the installer the README pins.
+- A new CI drill runs the README's Install and Quick Start blocks on fresh Ubuntu and macOS runners and requires `dot doctor` to report no failures within 20 minutes. It runs when the README, the installer or the drill changes, when a release is published and weekly, against the installer the README pins (on a release pull request, the branch's installer, checked against the README's digest).
 - The README's install passes `--provision`, so it installs the toolchain `dot doctor` checks; without it the installer deploys the configuration alone, which the README never said.
 - mise is pinned to 2026.11.7 for both provisioning and CI, which used to pin different releases; a check keeps them the same.
 - The site is built with ssg 0.0.76, the latest release.
 - `standards-sync` is pinned to 0.0.15.
+- `~/.claude/CLAUDE.md` puts hand-over scripts in `/tmp/<repo-name>/<script-name>.sh`, run as `zsh <path>` from any directory, as the shared `AGENTS.md` section 4 requires (it said `.git/<name>.sh` and bash). It also records three ways such scripts broke: `git rev-parse` run inside `.git/`, an unquoted `?` read as a zsh glob, and `"$VAR:x"` read as a zsh modifier.
 - The `/vibe` skill's `vibe-delegate` is split into small shell functions and a Python helper installed beside it (`~/.claude/skills/vibe/tools/vibe_delegate.py`), which runs vibe in a pseudo-terminal and enforces its timeout itself, so delegation needs neither `timeout(1)` nor perl. Its output and run log are unchanged.
 - `dot ai` no longer offers `cursor-agent` or `grok`: their install scripts download the binary without checking a checksum or a signature, and both had changed since they were pinned, so neither installed. They come back when what they install can be verified. The claude, amp and kimi installers, which verify their downloads, are pinned to their current scripts after review; agy's was reviewed too and is unchanged.
 - `dot ai` adds Continue CLI (`continue`, alias `cn`) and Cline (`cline`), installed through mise from npm packages with build provenance, at 1.5.47 and 3.0.74. A Cline prompt from `dot ai` runs with approval prompts on, not Cline's default of approving every tool.
 
 ### Fixed
 
+- On macOS, when `brew install chezmoi` failed the installer stopped with "chezmoi installation failed" and discarded Homebrew's output. It now keeps that output in `$TMPDIR/dotfiles-brew-chezmoi.log`, says so, and installs the checksum-verified chezmoi binary instead. Drill A1 failed on this on macOS runners.
+- Drill A1 could not pass on a release pull request: the README pins the installer that release is about to publish, so the drill's download returned 404. On a pull request whose pinned installer is not published yet, the drill now runs the branch's `install.sh` in its place, still checked against the README's digest.
+- On a fresh Debian or Ubuntu machine the installer refused Charm's genuine apt key ("Charm keyring must hold only ED927B38... (found 0 key(s), first none)") and stopped. The check listed the keyring through the caller's GnuPG home and discarded gpg's errors, so a missing or unwritable `~/.gnupg` or `GNUPGHOME` made it list nothing. It now lists the keyring in a throwaway GnuPG home. The README's Install drill (Drill A1) failed on this.
 - On macOS before 27, which ships no `timeout(1)`, several commands failed or lost their time limit: a new SSH agent never got `~/.ssh/id_ed25519` (the error was discarded), `/vibe` delegation never ran its delegate, `dot doctor` dropped its zsh hooks check, and the zsh startup benchmark and the examples gate ran with no deadline. Each now works without `timeout(1)`.
 - `/vibe` delegation reported a timed-out delegate on no OS: under `set -e` the script ended at the failed pipeline, before the "VIBE TIMEOUT" report and the run log. It also exited 1 after a run that changed no files or left no session log.
 - The nightly Flake Detector failed before running a test: it gave `setup-chezmoi` no chezmoi version. On macOS it now runs the suite under bash 5 with shellcheck, as the project requires, instead of Apple's bash 3.2.
