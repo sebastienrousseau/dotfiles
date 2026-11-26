@@ -7,9 +7,9 @@ name: Drill A1 / Newcomer
 # failures, all within five minutes (tools/ci/drill-newcomer.sh). The
 # installer is the published release the README pins, so this checks what
 # a reader of the README gets today. The one exception is a release pull
-# request, whose README pins the installer it is about to publish: there
-# the drill runs this branch's install.sh, still checked against the
-# README's digest.
+# request, whose README pins the installer it is about to publish and the
+# signed tag it clones: there the drill runs this branch's install.sh,
+# still checked against the README's digest, on this branch's source.
 
 on:
   pull_request:
@@ -66,8 +66,13 @@ jobs:
             exit 1
           fi
           if ! curl -fsIL -o /dev/null "$url"; then
-            echo "::notice::$url is not published yet (a release pull request); running this branch's install.sh, checked against the README's digest"
+            echo "::notice::$url is not published yet (a release pull request); running this branch's install.sh, checked against the README's digest, on this branch's source"
             echo "DRILL_INSTALLER=$GITHUB_WORKSPACE/install.sh" >>"$GITHUB_ENV"
+            # The installer clones the signed release tag, which does not
+            # exist until the release is published. A checkout already at
+            # ~/.dotfiles is the installer's own local-source path, so it
+            # applies this branch instead; signature checks are unchanged.
+            cp -R "$GITHUB_WORKSPACE" "$HOME/.dotfiles"
           fi
 
       - name: Run the README as a newcomer would
