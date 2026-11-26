@@ -346,8 +346,8 @@ install_chezmoi() {
   fi
   if command -v brew >/dev/null; then
     echo "   Installing chezmoi via Homebrew..."
-    brew install chezmoi >/dev/null 2>&1
-    return
+    brew install chezmoi >"${TMPDIR:-/tmp}/dotfiles-brew-chezmoi.log" 2>&1 && return 0
+    echo "   Homebrew could not install chezmoi (${TMPDIR:-/tmp}/dotfiles-brew-chezmoi.log); using the verified binary."
   fi
   local bin_dir="$HOME/.local/bin" version="${CHEZMOI_VERSION:-2.74.1}" verified_installer
   mkdir -p "$bin_dir"
