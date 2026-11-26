@@ -1,0 +1,267 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# How to reproduce each CI job locally. tools/docs/gen_ci_gates.py renders
+# this with the workflows themselves into the table in DEVELOPMENT.md
+# (`make generate`); `make check-drift` fails when a workflow has no entry
+# here, so a new workflow cannot land without saying how to run it.
+#
+# Per workflow:
+#   local  the command that reproduces its jobs, or "none: <why>"
+#   jobs   optional { <job id> = "<command>" } where a job differs
+#
+# The job list, what each checks (its name), its egress policy and the
+# secrets it reads come from the workflow file, not from here.
+
+[workflows."branch-drift-guard.yml"]
+local = "none: compares open branches with main on GitHub"
+
+[workflows."cflite_pr.yml"]
+local = "make fuzz (the ClusterFuzzLite build itself needs Docker)"
+
+[workflows."ci-enforced.yml"]
+local = "make lint"
+jobs.lint-shell = "make lint-shell"
+jobs.lint-lua = "luacheck . && stylua --check ."
+jobs.lint-nix = "nix flake check (root and nix/)"
+jobs.lint-copyright = "make lint-copyright"
+jobs.security-secrets = "gitleaks detect --config config/gitleaks.toml"
+jobs.security-dependency-audit = "make sbom"
+jobs.security-infrastructure = "checkov -d . --framework dockerfile,yaml,secrets --skip-path fuzz/oss-fuzz/"
+jobs.test-matrix = "make test"
+jobs.test-unit = "make test-unit"
+jobs.lint-tests = "python3 tools/ci/check-source-grep-tests.py"
+jobs.lint-complexity = "python3 tools/ci/complexity.py && python3 tools/ci/complexity_polyglot.py --lang python"
+jobs.lint-complexity-go = "python3 tools/ci/complexity_polyglot.py --lang go"
+jobs.test-mutation = "python3 tools/ci/mutation-test.py --base origin/main --min-score 80"
+jobs.security-policy-script = "bash scripts/security/enforce-policies.sh"
+jobs.toolchain-mise = "mise install"
+jobs.merge-gate = "none: aggregates the jobs above"
+jobs.nightly = "make test"
+
+[workflows."ci.yml"]
+local = "make check"
+jobs.changes = "none: path filter for the jobs below"
+jobs.lint-shell = "make lint-shell"
+jobs.lint-lua = "luacheck . && stylua --check ."
+jobs.lint-fish = "fish --no-execute <file> per fish file"
+jobs.lint-nushell = "nu --commands 'source <file>' per nu file"
+jobs.lint-copyright = "bash tools/ci/check-copyright-headers.sh"
+jobs.lint-reusable-pins = "bash tools/ci/lint-reusable-pins.sh"
+jobs.lint-chezmoidata = "bash tools/ci/validate-chezmoidata.sh"
+jobs.security-secrets = "gitleaks detect --config config/gitleaks.toml"
+jobs.security-dependencies = "make sbom"
+jobs.security-trufflehog = "trufflehog filesystem ."
+jobs.security-sbom = "make sbom"
+jobs.security-links = "make lint-links"
+jobs.test-linux = "make test"
+jobs.test-macos = "make test"
+jobs.test-windows = "pwsh scripts/qa/powershell-contract.ps1"
+jobs.test-docker = "docker build . (needs Docker)"
+jobs.quality-performance = "bash scripts/diagnostics/perf.sh --json"
+jobs.quality-idempotency = "chezmoi apply twice; the second apply changes nothing"
+jobs.quality-nix = "nix flake check"
+jobs.benchmark = "make bench"
+jobs.quality-gate = "none: aggregates the jobs above"
+
+[workflows."cockpit-test.yml"]
+local = "cd defaults/dot_local/share/dot-ai-tui && go test ./... && go vet ./..."
+
+[workflows."codeql.yml"]
+local = "none: needs the CodeQL CLI (codeql database create)"
+
+[workflows."compliance-guard.yml"]
+local = "bash tools/ci/check-insecure-tls.sh && bash tools/ci/check-dangerous-chmod.sh"
+jobs.verify-signatures = "git log --format='%G?' origin/main..HEAD (G on every line)"
+jobs.portability-shell-lint = "make lint-shell"
+jobs.dockerfile-lint = "hadolint $(git ls-files '*Dockerfile*')"
+jobs.compliance-summary = "none: aggregates the jobs above"
+
+[workflows."core-contracts.yml"]
+local = "python3 tools/ci/check-cli-contract.py (with jsonschema installed)"
+
+[workflows."coverage.yml"]
+local = "MIN_COVERAGE_PCT=98 bash tools/ci/run-coverage.sh"
+jobs.coverage-behavioural = "DOTFILES_COV_EXERCISE=0 MIN_COVERAGE_PCT=96 bash tools/ci/run-coverage.sh"
+
+[workflows."cross-platform-test.yml"]
+local = "bash -n over every .sh, then bash scripts/diagnostics/health.sh"
+jobs.changes = "none: path filter for the jobs below"
+jobs.gate = "none: aggregates the jobs above"
+
+[workflows."dco.yml"]
+local = "git log --format='%(trailers:key=Signed-off-by)' origin/main..HEAD (no empty lines)"
+
+[workflows."dependency-review.yml"]
+local = "none: pull-request only, run by GitHub"
+
+[workflows."deps-dev-validation.yml"]
+local = "bash tools/ci/check-deps-dev.sh"
+
+[workflows."devcontainer-prebuild.yml"]
+local = "none: scheduled devcontainer image build"
+
+[workflows."doc-drift.yml"]
+local = "make check-drift (with jsonschema installed)"
+jobs.readme-template = "python3 tools/ci/check-readme-template.py --enforce && python3 tools/docs/gen_ecosystem.py --check && python3 tools/docs/gen_ci_gates.py --check"
+jobs.version-consistency = "bash scripts/verify-release-versions && python3 tools/ci/check-readme-toolchain.py"
+
+[workflows."docs-link-check.yml"]
+local = "make lint-links"
+jobs.reuse = "make lint-reuse"
+
+[workflows."dot-cli-bench.yml"]
+local = "DOT_BENCH_BUDGET_MS=150 DOT_BENCH_RUNS=11 bash tools/ci/dot-cli-startup-bench.sh"
+
+[workflows."dot-ui-test.yml"]
+local = "cd defaults/dot_local/share/dot-ui && go test ./... && go vet ./..."
+
+[workflows."drill-newcomer.yml"]
+local = "bash tools/ci/drill-newcomer.sh --print (the drill itself installs into $HOME: run it only on a disposable machine)"
+
+[workflows."drift-detection.yml"]
+local = "none: scheduled housekeeping"
+
+[workflows."flake-detector.yml"]
+local = "./tests/framework/test_runner.sh --jobs auto, several times, then python3 tools/ci/flake-report.py <logs>"
+
+[workflows."fuzz.yml"]
+local = "make fuzz FUZZTIME=60s"
+jobs.replay = "make fuzz"
+
+[workflows."govulncheck.yml"]
+local = "govulncheck ./... in each Go module"
+
+[workflows."install-fuzz.yml"]
+local = "bash fuzz/install/fuzz_install.sh"
+jobs.report-failure = "none: opens an issue when the scheduled run fails"
+
+[workflows."manual-publish.yml"]
+local = "bash tools/docs/check-manual.sh && bash tools/docs/build-manual.sh"
+jobs.attach-release = "none: attaches the manual to a release"
+
+[workflows."mcp-server-test.yml"]
+local = "cd defaults/dot_local/share/dot-mcp && go test ./... && go vet ./..."
+
+[workflows."mise-toolchain.yml"]
+local = "mise install"
+
+[workflows."mutation-nightly.yml"]
+local = "python3 tools/ci/mutation-test.py --full --min-score 90 $(grep -vE '^\\s*(#|$)' tools/ci/mutation-core.txt)"
+
+[workflows."nightly.yml"]
+local = "make test && make bench"
+jobs.nightly-summary = "none: aggregates the jobs above"
+
+[workflows."npm-publish.yml"]
+local = "none: publishes on release"
+
+[workflows."pages.yml"]
+local = "make docs"
+jobs.deploy = "none: deploys to GitHub Pages"
+
+[workflows."perf-baseline.yml"]
+local = "bash scripts/diagnostics/perf.sh --json"
+
+[workflows."policy-bundle-release.yml"]
+local = "none: packages policy bundles on release (bash tools/release/package-policy-bundles.sh builds them)"
+
+[workflows."policy-test.yml"]
+local = "cd defaults/dot_local/share/dot-policy && go test ./... && go vet ./..."
+
+[workflows."pr-signature.yml"]
+local = "none: checks the pull request description on GitHub"
+
+[workflows."pre-commit.yml"]
+local = "pre-commit run --all-files --config config/pre-commit-config.yaml"
+
+[workflows."regression-trace-audit.yml"]
+local = "bash tools/ci/check-regression-traceability.sh"
+
+[workflows."release-attestation-check.yml"]
+local = "none: checks a published release's attestations"
+
+[workflows."release-distribute-aur.yml"]
+local = "none: publishes to the AUR on release"
+
+[workflows."release-distribute-homebrew.yml"]
+local = "none: opens the tap pull request on release"
+
+[workflows."release-distribute-scoop.yml"]
+local = "none: updates the bucket on release"
+
+[workflows."release-install-smoke.yml"]
+local = "make DESTDIR=/tmp/stage install installcheck uninstall"
+
+[workflows."release-package-dot.yml"]
+local = "none: builds and signs release archives (workflow_dispatch with dry_run builds without publishing)"
+
+[workflows."reliability-gate.yml"]
+local = "bash scripts/qa/reliability-audit.sh --with-integration"
+jobs.examples-contract = "make examples"
+jobs.feature-matrix = "bash scripts/qa/check-feature-matrix.sh"
+jobs.wsl-contract = "bash scripts/qa/wsl-contract.sh"
+jobs.powershell-contract = "pwsh scripts/qa/powershell-contract.ps1"
+jobs.reliability-summary = "none: aggregates the jobs above"
+
+[workflows."reusable-copyright-lint.yml"]
+local = "make lint-copyright"
+
+[workflows."reusable-lua-lint.yml"]
+local = "luacheck . && stylua --check ."
+
+[workflows."reusable-nix-lint.yml"]
+local = "nix flake check (root and nix/)"
+
+[workflows."reusable-secrets-scan.yml"]
+local = "gitleaks detect --config config/gitleaks.toml"
+
+[workflows."reusable-security-baseline.yml"]
+local = "make sbom"
+
+[workflows."reusable-shell-lint.yml"]
+local = "make lint-shell"
+
+[workflows."reusable-test-suite.yml"]
+local = "RUN_INTEGRATION=1 ./tests/framework/test_runner.sh --jobs auto"
+
+[workflows."rust.yml"]
+local = "cd lib/wasm-tools && cargo test"
+jobs.wasm = "cd lib/wasm-tools && cargo build --target wasm32-wasip1"
+jobs.fmt = "cd lib/wasm-tools && cargo fmt --check"
+jobs.clippy = "cd lib/wasm-tools && cargo clippy --all-targets"
+jobs.doc = "cd lib/wasm-tools && cargo doc --no-deps"
+jobs.deny = "cd lib/wasm-tools && cargo deny check"
+jobs.audit = "cd lib/wasm-tools && cargo audit"
+
+[workflows."sbom-diff.yml"]
+local = "make sbom && grype sbom:build/sbom.cyclonedx.json"
+
+[workflows."scorecard.yml"]
+local = "scorecard --local . (needs the OpenSSF binary)"
+jobs.track-regression = "none: compares the result with the last snapshot"
+
+[workflows."security-enhanced.yml"]
+local = "detect-secrets scan --baseline .secrets.baseline"
+jobs.secrets-trufflehog = "trufflehog filesystem ."
+jobs.infrastructure-scan = "checkov -d . --framework dockerfile,yaml,secrets --skip-path fuzz/oss-fuzz/"
+jobs.policy-enforcement = "bash scripts/security/enforce-policies.sh"
+jobs.security-summary = "none: aggregates the jobs above"
+
+[workflows."security-release.yml"]
+local = "none: SBOM, signatures and provenance for a release"
+
+[workflows."sync-versions.yml"]
+local = "./scripts/version-sync.sh --verify"
+
+[workflows."theme-contracts.yml"]
+local = "bash tests/unit/theme/test_render_goldens.sh && python3 scripts/theme/check-render-goldens.py"
+
+[workflows."update-deps.yml"]
+local = "none: scheduled dependency update"
+
+[workflows."verify-gpg-wkd.yml"]
+local = "bash scripts/security/check-disclosure-key-expiry.sh"
+
+[workflows."verify-tag-signature.yml"]
+local = "git -c gpg.ssh.allowedSignersFile=KEYS.asc tag -v <tag>"

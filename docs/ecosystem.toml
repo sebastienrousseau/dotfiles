@@ -1,0 +1,115 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+#
+# The .dotfiles ecosystem, one entry per component that becomes its own
+# repository. tools/docs/gen_ecosystem.py renders it into the generated
+# table in docs/ECOSYSTEM.md (`make generate`), and `make check-drift`
+# fails when that table was edited by hand or this file changed without
+# it.
+#
+#   repo            the repository the component moves to
+#   command         what a user types
+#   kind            plugin (a `dot` domain), binary (its own executable),
+#                   cli (the dispatcher) or distro (the configuration tree)
+#   home            where it lives in this repository today
+#   wave            the extraction wave in the plan (P3), 1 to 3; 4 is the
+#                   final split of what remains into `dot` and `dotfiles`
+#   latest_release  the component's own latest release; empty while it
+#                   ships only inside .dotfiles (a nightly check fills it
+#                   once the repositories exist)
+
+[[component]]
+repo = "dot-fleet"
+command = "dot fleet"
+kind = "plugin"
+home = ["plugins/fleet"]
+wave = 1
+latest_release = ""
+
+[[component]]
+repo = "dot-attest"
+command = "dot attest"
+kind = "plugin"
+home = ["plugins/attest"]
+wave = 1
+latest_release = ""
+
+[[component]]
+repo = "dot-security"
+command = "dot security"
+kind = "plugin"
+home = ["plugins/security"]
+wave = 1
+latest_release = ""
+
+[[component]]
+repo = "dot-ui"
+command = "dot-ui"
+kind = "binary"
+home = ["defaults/dot_local/share/dot-ui", "plugins/ui"]
+wave = 1
+latest_release = ""
+
+[[component]]
+repo = "dot-mcp"
+command = "dot mcp"
+kind = "plugin"
+home = ["plugins/mcp", "defaults/dot_local/share/dot-mcp"]
+wave = 1
+latest_release = ""
+
+[[component]]
+repo = "dot-secrets"
+command = "dot secret"
+kind = "plugin"
+home = ["plugins/secret"]
+wave = 2
+latest_release = ""
+
+[[component]]
+repo = "dot-agent"
+command = "dot agent"
+kind = "plugin"
+home = ["plugins/agent"]
+wave = 2
+latest_release = ""
+
+[[component]]
+repo = "dot-ai"
+command = "dot ai"
+kind = "plugin"
+home = ["plugins/ai", "defaults/dot_local/share/dot-ai-tui"]
+wave = 2
+latest_release = ""
+
+[[component]]
+repo = "dot-theme"
+command = "dot theme"
+kind = "plugin"
+home = ["plugins/theme"]
+wave = 3
+latest_release = ""
+
+[[component]]
+repo = "dot-doctor"
+command = "dot doctor"
+kind = "plugin"
+home = ["plugins/doctor"]
+wave = 3
+latest_release = ""
+
+[[component]]
+repo = "dot"
+command = "dot"
+kind = "cli"
+home = ["bin/dot", "lib/dot", "plugins"]
+wave = 4
+latest_release = ""
+
+[[component]]
+repo = "dotfiles"
+command = "chezmoi apply"
+kind = "distro"
+home = ["defaults"]
+wave = 4
+latest_release = ""

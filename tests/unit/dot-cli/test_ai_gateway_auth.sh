@@ -182,7 +182,14 @@ fi
 exit 0
 EOF
   chmod +x "$WORK/stubs/dot-ai-serve"
-  printf '#!/bin/sh\nexit 0\n' >"$WORK/stubs/curl" # /health answers at once
+  # /health answers once the server has started, as the real one does (the
+  # server serves it). A stub that answered at once let `start` return, and
+  # the terminal session end, before a slow runner's nohup had made the
+  # server ignore SIGHUP: the hang-up killed it (seen on macos-15).
+  cat >"$WORK/stubs/curl" <<EOF
+#!/bin/sh
+grep -q '^serve ' "$WORK/px.log" 2>/dev/null
+EOF
   chmod +x "$WORK/stubs/curl"
 }
 

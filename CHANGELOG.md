@@ -8,6 +8,11 @@ This file documents all notable changes to this project.
 
 - The shared `AGENTS.md` (installed as `~/Code/AGENTS.md`) adds two session rules from standards 0.0.15: record in a repository's `AGENTS.md` what sessions keep rediscovering, and make session hooks fail open.
 - Shipped scripts bound slow commands with `dot_bounded` (`lib/dot/probe.sh`), which needs no `timeout(1)`, and a CI check fails any shipped `timeout` call that does not first check that `timeout` exists.
+- The README follows the workspace README template: Install, Requirements and Quick Start fit the first screen (Quick Start at line 83, from 258), with the verified installer on two lines and the other install methods in a table. Nine sections moved, unchanged, into the manual: the migration guide, the design rationale, the alias hub, agent governance, the `dot` CLI tour, the full comparison, the acknowledgements, and the theme, self-healing and fleet sections. The Documentation section opens with the family's four links, and Stability guarantees states the command-line contract (command names, `--json` output and exit codes are API; one release of deprecation, per ADR-020). CI enforces the template, and checks the README's toolchain floors against `docs/MINIMUM-TOOLCHAIN.md` and CI's chezmoi pin.
+- `docs/ECOSYSTEM.md`'s repository map is generated from `docs/ecosystem.toml`, and `DEVELOPMENT.md` lists every CI job (169 across 60 workflows) with the local command that reproduces it, its egress policy and the secrets it reads, generated from `docs/ci-gates.toml` and the workflows; both are checked by `make check-drift`.
+- A new weekly CI drill runs the README's Install and Quick Start blocks on fresh Ubuntu and macOS runners and requires `dot doctor` to report no failures within five minutes.
+- The site is built with ssg 0.0.76, the latest release.
+- `standards-sync` is pinned to 0.0.15.
 - The `/vibe` skill's `vibe-delegate` is split into small shell functions and a Python helper installed beside it (`~/.claude/skills/vibe/tools/vibe_delegate.py`), which runs vibe in a pseudo-terminal and enforces its timeout itself, so delegation needs neither `timeout(1)` nor perl. Its output and run log are unchanged.
 
 ### Fixed
@@ -16,6 +21,9 @@ This file documents all notable changes to this project.
 - `/vibe` delegation reported a timed-out delegate on no OS: under `set -e` the script ended at the failed pipeline, before the "VIBE TIMEOUT" report and the run log. It also exited 1 after a run that changed no files or left no session log.
 - The nightly Flake Detector failed before running a test: it gave `setup-chezmoi` no chezmoi version. On macOS it now runs the suite under bash 5 with shellcheck, as the project requires, instead of Apple's bash 3.2.
 - The test framework's `timeout` shim, used when `timeout(1)` is missing, broke tests that ran it through `env` or child shells and dropped the time limit; tests use `run_with_timeout`, which needs no `timeout(1)`.
+- The README listed NixOS 23.11+ as a supported platform, which no document backs; it is removed.
+- The cross-platform workflow's unit-test step ran no test on any OS (its glob pointed where no test file lives, it used `timeout(1)`, which macOS runners lack, and it turned failures into warnings); it now runs the 63 `dot` command and diagnostics test files and fails on a failure. The test runner fails a run whose pattern selects no file.
+- `test_ai_gateway_auth.sh` failed now and then on slow runners: its `/health` stub answered before the stub server had started, so the terminal's hang-up could kill it. The stub now answers only once the server runs, as the real one does.
 - `pre-push` failed on machines where PowerShell comes from mise (the Scoop `dot.ps1` check ran the mise shim under the test's `HOME`), and nested test runners could loop between their hermetic guards until the 900 s bound.
 
 ## v0.2.554 (2026-11-25)

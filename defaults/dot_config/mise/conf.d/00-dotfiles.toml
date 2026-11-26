@@ -155,7 +155,7 @@ starship = "latest"
 # standards repository; 45-standards.zsh runs its daily check. Published on
 # PyPI with trusted publishing; it replaced the copy vendored in
 # dot_local/bin, which .chezmoiremove now deletes.
-"pipx:standards-sync" = "0.0.14"
+"pipx:standards-sync" = "0.0.15"
 uv = "0.13.7"
 # aider supports Python 3.9-3.12. On 3.13+ it crashes at import: pydub
 # (aider's voice support) needs the stdlib audioop module, removed in 3.13.

@@ -16,6 +16,9 @@ sections:
       - 03-theme-engine.md
       - 04-fleet.md
       - 05-self-healing.md
+      - 06-why-this-approach.md
+      - 07-five-shells-one-alias-hub.md
+      - 08-agent-governance.md
 
   - group: "Tutorials"
     prefix: "02-tutorials"
@@ -25,6 +28,8 @@ sections:
       - 03-create-profile.md
       - 04-encrypt-secret.md
       - 05-deploy-fleet.md
+      - 06-migrate-from-another-manager.md
+      - 07-install-methods.md
 
   - group: "Reference"
     prefix: "03-reference"
@@ -34,6 +39,7 @@ sections:
       - 03-environment.md
       - 04-templates.md
       - 05-feature-flags.md
+      - 06-cli-tour.md
 
   - group: "Cookbook"
     prefix: "04-cookbook"
@@ -50,6 +56,8 @@ sections:
       - C-glossary.md
       - D-bibliography.md
       - E-license.md
+      - F-comparison.md
+      - G-acknowledgements.md
 
   - file: concept-index.md
     title: "Concept Index"

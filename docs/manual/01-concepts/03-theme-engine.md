@@ -193,3 +193,56 @@ See [Theming Reference](../03-reference/01-dot-cli.md#dot-theme) for the exact c
 - [Theming Guide](../../guides/THEMING.md) — quick-start and troubleshooting
 - [Theme Reference](../../reference/THEMES.md) — data schema and runtime behaviour
 - [Tutorial: Add a Wallpaper](../02-tutorials/02-add-wallpaper.md)
+
+<!-- The section below moved from the README (wave 2, R2.3); the text is unchanged. -->
+
+## Wallpaper-driven themes
+
+Drop a wallpaper. Get a theme.
+
+`dot theme rebuild` discovers system wallpapers and your custom
+ones. On macOS it looks in `/System/Library/Desktop Pictures/`. On
+Linux it looks in `/usr/share/backgrounds/`. Custom wallpapers live
+in `~/Pictures/Wallpapers/` (`DOTFILES_WALLPAPER_DIR` overrides).
+K-Means clustering in CIELAB colour space extracts the dominant
+colours; the engine generates a 16-colour terminal palette, enforces
+WCAG AAA contrast (7:1 for fg/bg, accent text on accent, and c15 on
+bg), and assembles `defaults/.theme-manifest/themes.toml` on its own.
+Extraction runs four jobs in parallel, results are cached in
+`~/.cache/dotfiles/themes/`, and only changed wallpapers are
+regenerated.
+
+| Tier | Source | Format |
+|:---|:---|:---|
+| **System** | macOS `/System/Library/Desktop Pictures/`<br/>Linux `/usr/share/backgrounds/` | `.heic`, `.jpg`, `.png` |
+| **Custom** | `~/Pictures/Wallpapers/` (overrides system on name collision) | Apple-compatible dynamic HEIC (single file, both appearances) |
+
+```bash
+dot theme              # interactive picker (paired themes only)
+dot theme set maui     # select a family and follow OS appearance
+dot theme plan maui --mode auto --json # inspect the pure transaction plan
+dot theme tahoe-dark   # switch directly
+dot theme toggle       # swap dark and light within the current family
+dot theme mode light   # pin a manual appearance
+dot theme mode auto    # resume following the OS appearance
+dot theme family       # cycle between theme families
+dot theme sync         # enable auto mode and sync immediately
+dot theme rebuild      # regenerate from current wallpapers
+```
+
+Maui is the default family. Its dynamic HEIC supplies both wallpaper
+appearances, while the resolved `maui-light` or `maui-dark` palette keeps
+terminals and applications aligned. On macOS, a LaunchAgent watches the
+system appearance preference and reruns the sync automatically. Runtime
+selection is machine-local in `~/.config/chezmoi/chezmoi.toml`, so using the
+picker does not modify the dotfiles checkout.
+
+On theme switch, every managed surface updates. Terminals: Ghostty,
+Alacritty, Kitty, WezTerm, Warp, iTerm2, tmux. Editors: Neovim and
+VS Code. The theme also sets GTK and icon themes, the macOS accent
+colour and dark-mode toggle (with a forced UI refresh), the browser
+colour mode, and the wallpaper. On Linux the engine converts HEIC to
+PNG through `magick` or `heif-convert`.
+
+Full guide: [`docs/guides/THEMING.md`](../../../docs/guides/THEMING.md).
+Rationale: [ADR-009](../../../docs/adr/ADR-009-wallpaper-driven-theming.md).

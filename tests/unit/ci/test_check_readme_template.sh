@@ -80,4 +80,44 @@ check --readme "$WORK/late.md" --enforce
 assert_equals "1" "$rc" "a Quick Start past line 90 fails"
 assert_contains "Quick Start is at line" "$out" "the line is named"
 
+# The Documentation section opens with the family's four links, labels in
+# this order, so every repository's README points at the same four places.
+printf '<h1 align="center">{{PROJECT_NAME}}</h1>\n\n## Install\n\n## Documentation\n\n## License\n' \
+  >"$WORK/DOCS-TEMPLATE.md"
+LINKS='**[User Manual](https://doc.example.org/) · [API reference](docs/api.md) · [Development](DEVELOPMENT.md) · [Ecosystem map](docs/ECOSYSTEM.md)**'
+
+# docs_readme FILE FIRST-LINE: a README whose Documentation section opens
+# with FIRST-LINE.
+docs_readme() {
+  printf '<h1 align="center">demo</h1>\n\n## Install\n\ntext\n\n## Documentation\n\n%s\n\nMore.\n\n## License\n' \
+    "$2" >"$1"
+}
+
+test_start "documentation_links_pass"
+docs_readme "$WORK/docs-ok.md" "$LINKS"
+check --readme "$WORK/docs-ok.md" --template "$WORK/DOCS-TEMPLATE.md" --enforce
+assert_equals "0" "$rc" "the four links in order pass"
+
+test_start "documentation_links_missing_fail"
+docs_readme "$WORK/docs-none.md" "See the manual."
+check --readme "$WORK/docs-none.md" --template "$WORK/DOCS-TEMPLATE.md" --enforce
+assert_equals "1" "$rc" "a Documentation section without the links fails"
+assert_contains "four documentation links" "$out" "the problem is named"
+
+test_start "documentation_links_reordered_fail"
+docs_readme "$WORK/docs-order.md" \
+  '**[API reference](docs/api.md) · [User Manual](https://doc.example.org/) · [Development](DEVELOPMENT.md) · [Ecosystem map](docs/ECOSYSTEM.md)**'
+check --readme "$WORK/docs-order.md" --template "$WORK/DOCS-TEMPLATE.md" --enforce
+assert_equals "1" "$rc" "the links out of order fail"
+
+test_start "documentation_manual_must_be_a_url"
+docs_readme "$WORK/docs-local.md" \
+  '**[User Manual](docs/manual/) · [API reference](docs/api.md) · [Development](DEVELOPMENT.md) · [Ecosystem map](docs/ECOSYSTEM.md)**'
+check --readme "$WORK/docs-local.md" --template "$WORK/DOCS-TEMPLATE.md" --enforce
+assert_equals "1" "$rc" "a User Manual that is not the published site fails"
+
+test_start "repository_readme_passes_enforced"
+check --readme "$REPO_ROOT/README.md" --template "$REPO_ROOT/defaults/Code/README-TEMPLATE.md" --enforce
+assert_equals "0" "$rc" "this repository's README matches the template"
+
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

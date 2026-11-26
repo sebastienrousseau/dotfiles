@@ -65,8 +65,8 @@ jobs:
 
       - name: Install ssg (pinned release, SHA-256 verified)
         env:
-          SSG_VERSION: 0.0.72
-          SSG_SHA256: 948b9372c1e35735af1c8a5c5bb95ada6867df919c3302bbceaaa67e51453c6c
+          SSG_VERSION: 0.0.76
+          SSG_SHA256: a0ed1f8cde9b8b00d93f9a4f31bd78a803cc43f4370872cd3909835e32ad4358
         run: |
           set -euo pipefail
           asset="ssg-v${SSG_VERSION}-x86_64-unknown-linux-gnu.tar.gz"

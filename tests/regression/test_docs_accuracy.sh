@@ -23,7 +23,8 @@ test_start "readme_install_url_valid"
 assert_file_contains "$REPO_ROOT/README.md" "releases/download/v" "README install URL must reference a release asset"
 
 test_start "readme_install_sha256_verified"
-assert_file_contains "$REPO_ROOT/README.md" "sha256sum -c" "README install path must verify SHA256"
+# The checksum check gates the run: `... -c - && bash "$installer_dir/..."`.
+assert_file_contains "$REPO_ROOT/README.md" '-c - && bash "$installer_dir/dotfiles-install.sh"' "README install path must verify SHA256 before it runs"
 
 test_start "readme_install_does_not_execute_main"
 assert_output_not_contains "dotfiles/main/install.sh" "cat '$REPO_ROOT/README.md'"
@@ -37,8 +38,8 @@ assert_file_contains "$REPO_ROOT/README.md" "dot help tour" "README must referen
 test_start "readme_version_badge_present"
 assert_file_contains "$REPO_ROOT/README.md" "Version-v" "README must have version badge"
 
-test_start "readme_first_5_minutes_section"
-assert_file_contains "$REPO_ROOT/README.md" "First 5 Minutes" "README must have First 5 Minutes section"
+test_start "readme_quick_start_section"
+assert_file_contains "$REPO_ROOT/README.md" "## Quick Start" "README must have a Quick Start section"
 
 test_start "readme_references_profiles_doc"
 assert_file_contains "$REPO_ROOT/README.md" "PROFILES.md" "README must link to PROFILES.md"

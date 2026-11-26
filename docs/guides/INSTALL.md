@@ -13,7 +13,7 @@ Set up on macOS, Linux, or WSL in 3 to 5 minutes.
 ## Install
 
 Download and SHA256-verify the release-pinned installer using the canonical
-command in the root [README](../../README.md#verified-release-installer), then:
+command in the root [README](../../README.md#install), then:
 
 ```bash
 bash "$installer_dir/dotfiles-install.sh"

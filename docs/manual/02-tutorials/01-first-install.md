@@ -15,7 +15,7 @@ End-to-end installation and verification, from zero to a fully-working environme
 
 ## Step 1: Run the Installer
 
-First complete the [verified release download](../../../README.md#verified-release-installer), then:
+First complete the [verified release download](../../../README.md#install), then:
 
 ```sh
 bash "$installer_dir/dotfiles-install.sh"

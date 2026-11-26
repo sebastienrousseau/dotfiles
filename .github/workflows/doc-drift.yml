@@ -21,6 +21,17 @@ name: Doc Drift / Generators
 #   - tools/docs/gen_roster.py --check
 #       Verifies every AI tool list matches plugins/ai/roster.toml.
 #
+#   - tools/docs/gen_ecosystem.py --check
+#       Verifies docs/ECOSYSTEM.md's table matches docs/ecosystem.toml.
+#
+#   - tools/docs/gen_ci_gates.py --check
+#       Verifies DEVELOPMENT.md has a row, with a local command, for every
+#       job of every workflow.
+#
+#   - tools/ci/check-readme-toolchain.py
+#       Verifies the README's toolchain floors match
+#       docs/MINIMUM-TOOLCHAIN.md and CI's chezmoi pin.
+#
 # Adding a third generator is just adding a new step below — keep
 # this workflow flat and easy to extend.
 
@@ -43,6 +54,17 @@ on:
       - 'README.md'
       - 'defaults/Code/README-TEMPLATE.md'
       - 'tools/ci/check-readme-template.py'
+      - 'tools/ci/check-readme-toolchain.py'
+      - 'docs/ECOSYSTEM.md'
+      - 'docs/ecosystem.toml'
+      - 'tools/docs/gen_ecosystem.py'
+      - 'DEVELOPMENT.md'
+      - 'docs/ci-gates.toml'
+      - 'tools/docs/gen_ci_gates.py'
+      - '.github/workflows/*.yml'
+      - 'Makefile'
+      - 'docs/MINIMUM-TOOLCHAIN.md'
+      - '.github/workflows/ci.yml'
       - 'tools/docs/generate-manpage.sh'
       - 'tools/docs/man/dot.1.in'
       - 'tools/docs/gen_manpages.py'
@@ -128,10 +150,17 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # Report mode while the README is brought into the template's shape
-      # (plan R1.1); this step gains --enforce when it reports nothing.
+      # Fails on heading order, an unresolved {{TOKEN}}, a Quick Start below
+      # line 90, or a Documentation section without the four links.
       - name: Compare README.md with defaults/Code/README-TEMPLATE.md
-        run: python3 tools/ci/check-readme-template.py
+        run: python3 tools/ci/check-readme-template.py --enforce
+      # docs/ECOSYSTEM.md's table is generated from docs/ecosystem.toml.
+      - name: Check docs/ECOSYSTEM.md against docs/ecosystem.toml
+        run: python3 tools/docs/gen_ecosystem.py --check
+      # DEVELOPMENT.md's CI-gate table: every job of every workflow, with
+      # the local command from docs/ci-gates.toml.
+      - name: Check DEVELOPMENT.md against docs/ci-gates.toml and the workflows
+        run: python3 tools/docs/gen_ci_gates.py --check
 
   version-consistency:
     name: Generators / version-consistency
@@ -162,6 +191,10 @@ jobs:
           # Branch validation permits development after an immutable release.
           # Actual release creation retains strict --require-untagged preflight.
           bash scripts/release-preflight --development
+      # The README's toolchain badge and Requirements table against the
+      # floors in docs/MINIMUM-TOOLCHAIN.md and CI's CHEZMOI_VERSION.
+      - name: Verify README toolchain versions
+        run: python3 tools/ci/check-readme-toolchain.py
 
   manpage:
     name: Generators / man page

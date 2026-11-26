@@ -7,14 +7,16 @@ REPO-STANDARD fixes one README shape for every repository: the level-2
 headings of ~/Code/README-TEMPLATE.md, in its order. standards-sync
 keeps a copy at defaults/Code/README-TEMPLATE.md, which this check
 reads, so the expected order never drifts from the standard. It also
-reports a `{{TOKEN}}` left unresolved outside code, and a Quick Start
-more than 90 lines down (REPO-STANDARD: "within one screen of the top").
+reports a `{{TOKEN}}` left unresolved outside code, a Quick Start more
+than 90 lines down (REPO-STANDARD: "within one screen of the top"), and a
+Documentation section that does not open with the family's four links:
+User Manual (the published site), API reference, Development and
+Ecosystem map, labelled and ordered the same in every repository.
 
     tools/ci/check-readme-template.py            # report: annotate, exit 0
     tools/ci/check-readme-template.py --enforce  # exit 1 on any finding
 
-Report mode lets CI show the gap while the README is restructured; the
-job switches to --enforce once it is clean.
+CI runs it with --enforce in the docs-lint job (Doc Drift).
 """
 
 from __future__ import annotations
@@ -30,6 +32,14 @@ H2 = re.compile(r"(?m)^## (.+?)\s*$")
 TOKEN = re.compile(r"\{\{[A-Z][A-Z0-9_]*\}\}")
 FENCE = re.compile(r"(?ms)^```.*?^```[^\n]*$|`[^`\n]*`")
 QUICK_START_MAX_LINE = 90
+# The first line of the Documentation section. Labels and order are fixed;
+# each repository supplies its own targets, the manual as an https URL.
+DOC_LINKS = re.compile(
+    r"^\*\*\[User Manual\]\(https://[^)\s]+\)"
+    r" · \[API reference\]\([^)\s]+\)"
+    r" · \[Development\]\([^)\s]*DEVELOPMENT\.md\)"
+    r" · \[Ecosystem map\]\([^)\s]+\)\*\*$"
+)
 
 
 def template_headings(template: str, project: str) -> list[str]:
@@ -67,16 +77,34 @@ def quick_start_findings(readme: str) -> list[str]:
     return []
 
 
+def documentation_findings(readme: str) -> list[str]:
+    """A Documentation section whose first line is not the four links."""
+    lines = readme.splitlines()
+    if "## Documentation" not in (ln.strip() for ln in lines):
+        return []
+    start = [ln.strip() for ln in lines].index("## Documentation") + 1
+    first = next((ln.strip() for ln in lines[start:] if ln.strip()), "")
+    if DOC_LINKS.match(first):
+        return []
+    expected = (
+        "**[User Manual](https://...) · [API reference](...) · "
+        "[Development](DEVELOPMENT.md) · [Ecosystem map](...)**"
+    )
+    return [f"Documentation must open with the four documentation links: {expected}"]
+
+
 def findings_for(readme: str, template: str) -> list[str]:
     """Every finding for one README, or a single blocking one."""
     match = H1.search(readme)
     if not match:
         return ['centred project <h1 align="center"> missing']
     required = template_headings(template, match.group(1).strip())
+    docs = documentation_findings(readme) if "Documentation" in required else []
     return (
         heading_findings(readme, required)
         + token_findings(readme)
         + quick_start_findings(readme)
+        + docs
     )
 
 
