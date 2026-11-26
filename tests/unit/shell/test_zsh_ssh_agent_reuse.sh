@@ -58,7 +58,7 @@ chmod +x "$SANDBOX/bin/ssh-agent" "$SANDBOX/bin/ssh-add"
 # shell [SSH_AUTH_SOCK]: an interactive shell sourcing the file; prints the
 # SSH_AUTH_SOCK it ends up with.
 shell() {
-  env -i HOME="$H" PATH="$SANDBOX/bin:/usr/bin:/bin" SSH_AUTH_SOCK="${1:-}" FAKE_HOST="${FAKE_HOST:-}" \
+  env -i HOME="$H" PATH="${SHELL_PATH:-$SANDBOX/bin:/usr/bin:/bin}" SSH_AUTH_SOCK="${1:-}" FAKE_HOST="${FAKE_HOST:-}" \
     zsh -f -i -c '[[ -z $FAKE_HOST ]] || HOST=$FAKE_HOST; source "$1"; print -r -- "$SSH_AUTH_SOCK"' _ "$AGENT_FILE" 2>/dev/null | tail -n 1
 }
 starts() { grep -c '^start' "$LOG"; }
@@ -113,5 +113,46 @@ rm -f "$got" "$got.live"
 rmdir "/tmp/dotfiles-ssh-$(id -u)" 2>/dev/null || :
 H="$H_SAVED"
 unset FAKE_HOST
+
+# A new agent gets the default key, with a 2 s bound so a passphrase prompt
+# or a stuck agent cannot hang startup. The bound came from timeout(1),
+# which macOS before 27 does not ship: there `timeout` was not found, the
+# error was discarded, and the key was never added.
+cat >"$SANDBOX/bin/ssh-add" <<EOF
+case "\$*" in
+  *id_ed25519*)
+    echo "add \$*" >>"$SANDBOX/add.log"
+    [ -e "$SANDBOX/add-hangs" ] && sleep 30
+    exit 0 ;;
+esac
+[ -S "\$SSH_AUTH_SOCK" ] && [ -e "\$SSH_AUTH_SOCK.live" ] && exit 1
+exit 2
+EOF
+chmod +x "$SANDBOX/bin/ssh-add"
+mkdir -p "$H/.ssh"
+: >"$H/.ssh/id_ed25519"
+NO_TIMEOUT_BIN="$(PATH=/usr/bin:/bin path_without "$SANDBOX/nt" timeout gtimeout)"
+key_flag=""
+[[ "$(uname -s)" == Darwin ]] && key_flag="--apple-use-keychain "
+
+n=0
+for case in "with_timeout_binary:/usr/bin:/bin" "without_timeout_binary:$NO_TIMEOUT_BIN"; do
+  label="${case%%:*}"
+  n=$((n + 1))
+  test_start "new_agent_gets_the_default_key_$label"
+  : >"$SANDBOX/add.log"
+  rm -f "$SANDBOX/add-hangs"
+  FAKE_HOST="zzkey$n" SHELL_PATH="$SANDBOX/bin:${case#*:}" shell >/dev/null
+  assert_contains "add ${key_flag}$H/.ssh/id_ed25519" "$(cat "$SANDBOX/add.log")" "ssh-add gets the key"
+
+  test_start "a_hanging_ssh_add_does_not_hang_the_shell_$label"
+  : >"$SANDBOX/add.log"
+  : >"$SANDBOX/add-hangs"
+  start=$SECONDS
+  FAKE_HOST="zzhang$n" SHELL_PATH="$SANDBOX/bin:${case#*:}" shell >/dev/null
+  assert_not_empty "$(cat "$SANDBOX/add.log")" "ssh-add was called"
+  assert_equals "true" "$([[ $((SECONDS - start)) -lt 15 ]] && echo true || echo false)" \
+    "and the shell starts within its bound, not after ssh-add's 30 s"
+done
 
 print_summary

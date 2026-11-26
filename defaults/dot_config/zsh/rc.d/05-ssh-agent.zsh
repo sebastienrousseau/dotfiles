@@ -30,12 +30,17 @@ _dotfiles_ssh_agent() {
   [[ -S "$sock" ]] || return 0
   export SSH_AUTH_SOCK="$sock"
 
-  # Add default key with timeout guard (2s max) to prevent startup hangs
+  # Add default key with timeout guard (2s max) to prevent startup hangs.
+  # timeout(1) where installed; else perl's alarm, since macOS before 27
+  # ships no timeout(1) and the key was silently never added there. No
+  # output is kept: a child left behind must not hold the shell's stdout.
   if [[ -f ~/.ssh/id_ed25519 ]]; then
-    if [[ "$OSTYPE" == darwin* ]]; then
-      timeout 2 ssh-add --apple-use-keychain ~/.ssh/id_ed25519 2>/dev/null || true
+    local -a add=(ssh-add)
+    [[ "$OSTYPE" == darwin* ]] && add+=(--apple-use-keychain)
+    if (( ${+commands[timeout]} )); then
+      timeout 2 "${add[@]}" ~/.ssh/id_ed25519 >/dev/null 2>&1 || true
     else
-      timeout 2 ssh-add ~/.ssh/id_ed25519 2>/dev/null || true
+      perl -e 'alarm shift; exec @ARGV or exit 127' 2 "${add[@]}" ~/.ssh/id_ed25519 >/dev/null 2>&1 || true
     fi
   fi
 }
