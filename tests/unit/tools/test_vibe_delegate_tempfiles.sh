@@ -59,5 +59,45 @@ assert_contains "vibe-delegate." "$(cat "$WORK/seen.log" 2>/dev/null)" \
 test_start "vibe_delegate_cleans_up"
 assert_equals "" "$(ls -A "$WORK/tmp")" "the per-run directory is removed afterwards"
 
+# run_delegate_on PATH NAME BUDGET: one delegation with PATH ahead of the
+# stubs' directory; sets RC to its exit status.
+run_delegate_on() {
+  RC=0
+  HOME="$WORK/home" TMPDIR="$WORK/tmp" PATH="$WORK/stubs:$1" \
+    bash "$DELEGATE" "$WORK/repo" "say ok" 1 "" "$3" >"$WORK/out.$2" 2>&1 || RC=$?
+}
+
+# A run that changes nothing and leaves no session log is a success: under
+# set -e, `grep -c` finding no changed files and `ls` finding no log both
+# used to end the script with status 1.
+test_start "vibe_delegate_quiet_run_exits_0"
+run_delegate_on "$PATH" quiet 30
+assert_equals "0" "$RC" "exit 0"
+assert_contains "[vibe] ok" "$(cat "$WORK/out.quiet")" "the delegate's reply is read"
+
+# macOS before 27 ships no timeout(1). The delegation still runs there.
+NO_TIMEOUT_PATH="$(path_without "$WORK/nt-bin" timeout gtimeout)"
+test_start "vibe_delegate_runs_without_timeout_binary"
+run_delegate_on "$NO_TIMEOUT_PATH" nt 30
+assert_equals "0" "$RC" "exit 0"
+assert_contains "[vibe] ok" "$(cat "$WORK/out.nt")" "the delegate runs and its reply is read"
+assert_output_not_contains "VIBE TIMEOUT" cat "$WORK/out.nt"
+
+# A delegate that outlives its budget is stopped, reported and exits 124,
+# with or without timeout(1). The failing pipeline used to end the script
+# under set -e before the report.
+cat >"$WORK/stubs/vibe" <<'STUB'
+sleep 60
+STUB
+for case in "with_timeout_binary:$PATH" "without_timeout_binary:$NO_TIMEOUT_PATH"; do
+  test_start "vibe_delegate_reports_a_timeout_${case%%:*}"
+  start=$SECONDS
+  run_delegate_on "${case#*:}" "hang-${case%%:*}" 2
+  assert_equals "124" "$RC" "exit 124"
+  assert_contains "VIBE TIMEOUT" "$(cat "$WORK/out.hang-${case%%:*}")" "the timeout is reported"
+  assert_equals "true" "$([[ $((SECONDS - start)) -lt 30 ]] && echo true || echo false)" \
+    "and the delegate is stopped near its budget"
+done
+
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

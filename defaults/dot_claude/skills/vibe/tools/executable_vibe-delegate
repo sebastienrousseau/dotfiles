@@ -103,7 +103,37 @@ chmod +x "$VIBE_SCRIPT"
 # Pseudo-TTY for vibe via python pty.spawn (works without a parent TTY, unlike `script`).
 SCRIPT_CMD=(python3 -c 'import pty,sys,os; sys.exit(os.waitstatus_to_exitcode(pty.spawn(sys.argv[1:])))' "$VIBE_SCRIPT")
 
-timeout "$TIMEOUT_SECS" "${SCRIPT_CMD[@]}" | python3 -c "
+# _bounded SECONDS CMD...: timeout(1) where installed; else perl, which
+# macOS ships (timeout(1) arrived only in macOS 27). Exit 124 on expiry
+# either way, with the whole process group killed, as lib/dot/probe.sh does.
+_bounded() {
+  if command -v timeout >/dev/null 2>&1; then
+    timeout "$@"
+    return
+  fi
+  perl -e '
+    use POSIX qw(setsid);
+    my $secs = shift @ARGV;
+    my $pid  = fork();
+    die "vibe-delegate: fork failed: $!\n" unless defined $pid;
+    if ($pid == 0) { setsid(); exec { $ARGV[0] } @ARGV; exit 127; }
+    my $timed_out = 0;
+    $SIG{ALRM} = sub { $timed_out = 1; kill("KILL", -$pid); };
+    alarm($secs);
+    my $reaped;
+    do { $reaped = waitpid($pid, 0); } while ($reaped == -1 && $!{EINTR});
+    my $status = $?;
+    alarm(0);
+    kill("KILL", -$pid);
+    exit(124) if $timed_out;
+    exit($status & 127 ? 128 + ($status & 127) : $status >> 8);
+  ' "$@"
+}
+
+# Under set -e a failing pipeline would end the script here, skipping the
+# timeout report and stats below; `||` records its status instead.
+VIBE_EXIT=0
+_bounded "$TIMEOUT_SECS" "${SCRIPT_CMD[@]}" | python3 -c "
 import sys, json, re, os
 
 ANSI_RE = re.compile(r'\x1b\[[0-9;]*[mABCDEFGHJKSTfhilmnprsu]|\x1b\([AB]|\x0f|\x0e')
@@ -175,14 +205,14 @@ if _sf:
             json.dump({'tool_calls': tools_called, 'warn_count': warn_count, 'search_replace_fails': sr_fails}, _f)
     except Exception:
         pass
-"
-VIBE_EXIT=${PIPESTATUS[0]}
+" || VIBE_EXIT=${PIPESTATUS[0]}
 
 # ── Real Mistral token counts from session log ─────────────────────────────────
 VIBE_HOME="${VIBE_HOME:-$HOME/.vibe}"
 # mtime ordering selects the latest session log.
 # shellcheck disable=SC2012
-SESSION_LOG=$(ls -t "$VIBE_HOME/logs/session"/*/meta.json 2>/dev/null | head -1)
+# No log yet (vibe killed or failed before writing one) is not an error.
+SESSION_LOG=$(ls -t "$VIBE_HOME/logs/session"/*/meta.json 2>/dev/null | head -1 || true)
 if [ -n "$SESSION_LOG" ]; then
   python3 -c "
 import json, sys, os
@@ -358,7 +388,8 @@ fi
 
 # ── Run log ────────────────────────────────────────────────────────────────────
 END_NS=$(date +%s%N)
-FILES_CHANGED_COUNT=$(printf '%s\n' "$CHANGED" | grep -c '[^[:space:]]' 2>/dev/null)
+# grep -c prints 0 and exits 1 when nothing changed; that is not a failure.
+FILES_CHANGED_COUNT=$(printf '%s\n' "$CHANGED" | grep -c '[^[:space:]]' 2>/dev/null || true)
 FILES_CHANGED_COUNT=${FILES_CHANGED_COUNT:-0}
 TOTAL_ERRORS=${TOTAL_ERRORS:-0}
 
