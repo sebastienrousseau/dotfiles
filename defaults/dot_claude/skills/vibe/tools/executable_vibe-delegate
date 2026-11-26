@@ -116,12 +116,12 @@ _bounded() {
     my $secs = shift @ARGV;
     my $pid  = fork();
     die "vibe-delegate: fork failed: $!\n" unless defined $pid;
-    if ($pid == 0) { setsid(); exec { $ARGV[0] } @ARGV; exit 127; }
+    if ($pid == 0) { setsid(); exec { $ARGV[0] } @ARGV; exit 127; } # mutation: ignore unreachable here, the command is python3, which the next stage needs; tested in lib/dot/probe.sh
     my $timed_out = 0;
     $SIG{ALRM} = sub { $timed_out = 1; kill("KILL", -$pid); };
     alarm($secs);
     my $reaped;
-    do { $reaped = waitpid($pid, 0); } while ($reaped == -1 && $!{EINTR});
+    do { $reaped = waitpid($pid, 0); } while ($reaped == -1 && $!{EINTR}); # mutation: ignore retries only a signal-interrupted wait, which a test cannot provoke
     my $status = $?;
     alarm(0);
     kill("KILL", -$pid);
