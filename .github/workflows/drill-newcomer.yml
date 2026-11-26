@@ -29,7 +29,9 @@ jobs:
   drill:
     name: Drill A1 / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    # Above the drill's own 20-minute budget, so a slow run fails with the
+    # drill's reason rather than being cancelled.
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:

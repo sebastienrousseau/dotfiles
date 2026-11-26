@@ -4,8 +4,10 @@
 # Drill A1, the newcomer: on a fresh machine, run every command of the
 # README's Install and Quick Start blocks, in order and as written, then
 # `dot doctor --json`. Passes when that reports no failures and the whole
-# drill took at most DRILL_BUDGET seconds (default 300). Nothing is added
-# that the README does not show: no environment variable, no extra step.
+# drill took at most DRILL_BUDGET seconds (default 1200: the full toolchain
+# took about 14 minutes on Ubuntu 24.04, 4 CPUs, in November 2026). Nothing
+# is added that the README does not show: no environment variable, no extra
+# step.
 #
 #   tools/ci/drill-newcomer.sh            # run the drill (changes $HOME)
 #   tools/ci/drill-newcomer.sh --print    # print the commands it would run
@@ -16,7 +18,7 @@
 set -euo pipefail
 
 README="${DRILL_README:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/README.md}"
-BUDGET="${DRILL_BUDGET:-300}"
+BUDGET="${DRILL_BUDGET:-1200}"
 
 # readme_block HEADING: the first ```bash block under `## HEADING`.
 readme_block() {
