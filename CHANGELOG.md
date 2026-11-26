@@ -8,6 +8,7 @@ This file documents all notable changes to this project.
 
 - The shared `AGENTS.md` (installed as `~/Code/AGENTS.md`) adds two session rules from standards 0.0.15: record in a repository's `AGENTS.md` what sessions keep rediscovering, and make session hooks fail open.
 - Shipped scripts bound slow commands with `dot_bounded` (`lib/dot/probe.sh`), which needs no `timeout(1)`, and a CI check fails any shipped `timeout` call that does not first check that `timeout` exists.
+- The `/vibe` skill's `vibe-delegate` is split into small shell functions and a Python helper installed beside it (`~/.claude/skills/vibe/tools/vibe_delegate.py`), which runs vibe in a pseudo-terminal and enforces its timeout itself, so delegation needs neither `timeout(1)` nor perl. Its output and run log are unchanged.
 
 ### Fixed
 
