@@ -85,11 +85,16 @@ cat >"$_runner_guard_bin/guard" <<'GUARD'
 tool="${0##*/}"
 self_dir="$(cd "${0%/*}" && pwd)"
 # The real tool: the first on PATH outside this directory, compared after
-# resolving (TMPDIR's trailing slash puts this directory on PATH as `T//…`).
+# resolving (TMPDIR's trailing slash puts this directory on PATH as `T//…`),
+# that is not another run's guard. A nested runner puts its guards ahead of
+# the outer run's: each skipping only itself, the two exec'd each other
+# forever.
 real="" dir=""
 IFS=: read -r -a path_dirs <<<"$PATH"
 for dir in "${path_dirs[@]}"; do
-  [[ -x "$dir/$tool" && "$(cd "$dir" 2>/dev/null && pwd)" != "$self_dir" ]] && real="$dir/$tool" && break
+  [[ -x "$dir/$tool" && "$(cd "$dir" 2>/dev/null && pwd)" != "$self_dir" ]] || continue
+  grep -qs '^# Hermetic guard written by tests/framework/test_runner.sh' "$dir/$tool" && continue
+  real="$dir/$tool" && break
 done
 [[ -n "$real" ]] || {
   echo "$tool: command not found" >&2
