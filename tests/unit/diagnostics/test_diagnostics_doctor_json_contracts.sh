@@ -268,8 +268,9 @@ assert_equals "pass pass pass" \
   "zsh, rg and sops rows are pass"
 
 # ── R2: fish and nu hidden — two warnings, still healthy ──────────────
+tools=()
 # shellcheck disable=SC2086
-mapfile -t tools < <(printf '%s\n' $FULL_TOOLS | grep -vx -e fish -e nu)
+while IFS= read -r t; do tools+=("$t"); done < <(printf '%s\n' $FULL_TOOLS | grep -vx -e fish -e nu)
 _fixture r2 "${tools[@]}"
 _run_json
 _assert_contract "json_warned" 0 0 2 "healthy" "2 warning(s)."
@@ -279,8 +280,9 @@ assert_equals "fish nu" \
   "the two warn rows are the hidden optional tools"
 
 # ── R3: rg and sops hidden too — two failures, unhealthy ────────────────
+tools=()
 # shellcheck disable=SC2086
-mapfile -t tools < <(printf '%s\n' $FULL_TOOLS | grep -vx -e fish -e nu -e rg -e sops)
+while IFS= read -r t; do tools+=("$t"); done < <(printf '%s\n' $FULL_TOOLS | grep -vx -e fish -e nu -e rg -e sops)
 _fixture r3 "${tools[@]}"
 _run_json
 _assert_contract "json_failed" 1 2 2 "unhealthy" "2 error(s), 2 warning(s). Run 'dot doctor fix' to repair."
@@ -292,8 +294,9 @@ assert_equals "rg sops" \
 # ── R5: configs only (install.sh without --provision) — the same tools
 # hidden are not installed yet, not broken: warnings that say how to
 # provision, no failures, healthy ─────────────────────────────────────
+tools=()
 # shellcheck disable=SC2086
-mapfile -t tools < <(printf '%s\n' $FULL_TOOLS | grep -vx -e fish -e nu -e rg -e sops)
+while IFS= read -r t; do tools+=("$t"); done < <(printf '%s\n' $FULL_TOOLS | grep -vx -e fish -e nu -e rg -e sops)
 _fixture r5 "${tools[@]}"
 rm -rf "$S_HOME/.local/state/dot/provision"
 _run_json
