@@ -73,6 +73,8 @@ It prints one section per area (core shells, CLI tools, infrastructure, AI CLIs,
 
 A failing check names the command that fixes it.
 
+Before you provision, the toolchain checks (core shells, CLI tools, infrastructure) report a missing tool as a warning that names `install.sh --provision`, not a failure: a configs-only install is complete as it is. Once `install.sh --provision` has run on the machine, a missing tool is a failure.
+
 ## Step 3: Take the Tour
 
 ```sh
