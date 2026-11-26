@@ -14,9 +14,11 @@ log_error() { printf '\n[ERROR] %s\n' "$*" >&2; }
 # installer, verified by checksum) and at which pinned version. This script
 # names no tool of its own. --yes also installs mise when it is missing.
 DOT_BIN="${DOTFILES_SOURCE_DIR:?install.sh must export DOTFILES_SOURCE_DIR}/bin/dot"
-log_info "Installing the AI tools (dot ai install)..."
-DOTFILES_NONINTERACTIVE=1 bash "$DOT_BIN" ai install --yes ||
-  log_error "Some AI tools were not installed (continuing...). Retry with: dot ai install"
+ai_install() {
+  log_info "Installing the AI tools (dot ai install)..."
+  DOTFILES_NONINTERACTIVE=1 bash "$DOT_BIN" ai install --yes ||
+    log_error "Some AI tools were not installed (continuing...). Retry with: dot ai install"
+}
 
 # Editor tooling (eslint_d, prettierd, typescript, typescript-language-server)
 # and every other tool are exact `npm:`/aqua pins in mise's conf.d
@@ -24,11 +26,26 @@ DOTFILES_NONINTERACTIVE=1 bash "$DOT_BIN" ai install --yes ||
 # switch, which `npm install -g` packages did not. mise does not install a
 # missing tool on its own (auto_install = false), so install them here, from
 # $HOME so the global config applies rather than a project's pins.
-if command -v mise >/dev/null 2>&1; then
+mise_install() {
   log_info "Installing the mise tools pinned in conf.d (mise install)..."
   (cd "$HOME" && mise install) || log_error "Some mise tools were not installed (continuing...). Retry with: dot system update"
+}
+
+# The runtimes first: the AI tools that run on node or python need mise's
+# node and python installed, and `dot ai install` failed each of them when it
+# ran before `mise install`. Without mise, `dot ai install --yes` installs it,
+# so the AI tools are installed again once the runtimes exist.
+if command -v mise >/dev/null 2>&1; then
+  mise_install
+  ai_install
 else
-  log_info "mise not found — skipping the conf.d tools"
+  ai_install
+  if command -v mise >/dev/null 2>&1; then
+    mise_install
+    ai_install
+  else
+    log_info "mise not found — skipping the conf.d tools"
+  fi
 fi
 
 log_info "AI tools and dev tools installation complete!"
