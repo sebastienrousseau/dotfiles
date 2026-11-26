@@ -17,7 +17,7 @@ set -euo pipefail
 
 # Bootstrap writes secret-adjacent files (chezmoi config, age keys, ssh tooling,
 # archives) under $HOME: 077 keeps other accounts out; call sites chmod to relax.
-umask 077
+CALLER_UMASK="$(umask)" && umask 077 # chezmoi apply runs under CALLER_UMASK (apply_source)
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -182,7 +182,7 @@ apply_source() {
     apply_minimal_profile_overrides
   fi
   [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]] || flags=(--force --no-tty)
-  chezmoi apply ${flags[@]+"${flags[@]}"}
+  (umask "${CALLER_UMASK:-022}" && chezmoi apply ${flags[@]+"${flags[@]}"})
 }
 
 # _backup_one <path>: copy a file or symlink to BACKUP_DIR at its $HOME-relative
