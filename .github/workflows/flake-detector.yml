@@ -25,6 +25,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  CHEZMOI_VERSION: "2.74.1"
+
 jobs:
   rerun:
     name: Flakes / ${{ matrix.os }}
@@ -46,6 +49,16 @@ jobs:
 
       - name: Setup chezmoi
         uses: ./.github/actions/setup-chezmoi
+
+      # The suite needs bash 5 (README "Requirements"); macOS runners put
+      # Apple's bash 3.2 first on PATH and ship no shellcheck, which the
+      # Ubuntu image has. Without these, macOS reports bash 3.2 errors as
+      # broken tests.
+      - name: Install bash 5 and shellcheck (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install bash shellcheck
+          echo "$(brew --prefix)/bin" >>"$GITHUB_PATH"
 
       - name: Run the unit suite repeatedly
         env:

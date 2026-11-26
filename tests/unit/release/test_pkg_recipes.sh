@@ -145,8 +145,13 @@ while IFS= read -r shim; do
 done < <(jq -r '.bin[]' "$REPO_ROOT/pkg/scoop/dot.json")
 if command -v pwsh >/dev/null 2>&1; then
   test_start "scoop_ps1_runs"
+  # pwsh may be a version manager's shim (mise), which finds its tool
+  # through the config under HOME: with the test's HOME it exits 1 before
+  # dot.ps1 runs. Resolve the real binary while HOME is still the user's.
+  pwsh_bin="$(pwsh -NoProfile -NonInteractive -Command '[Environment]::ProcessPath' 2>/dev/null)" ||
+    pwsh_bin="$(command -v pwsh)"
   rc=0
-  HOME="$tmp/home" NO_COLOR=1 pwsh -NoProfile -File "$bundle/bin/dot.ps1" version >"$tmp/out" 2>&1 || rc=$?
+  HOME="$tmp/home" NO_COLOR=1 "$pwsh_bin" -NoProfile -File "$bundle/bin/dot.ps1" version >"$tmp/out" 2>&1 || rc=$?
   assert_equals "0" "$rc" "bin/dot.ps1 version runs from the archive"
 fi
 
