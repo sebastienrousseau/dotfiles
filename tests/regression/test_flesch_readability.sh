@@ -142,7 +142,10 @@ failures=0
 for doc in "${USER_DOCS[@]}"; do
   filepath="$REPO_ROOT/$doc"
   [[ -f "$filepath" ]] || continue
-  prose=$(_extract_prose "$filepath")
+  # The README template (REPO-STANDARD) names these headings and the
+  # documentation link; only they are exempt, so "ecosystem" in prose
+  # still counts.
+  prose=$(_extract_prose "$filepath" | sed -E 's/The \.dotfiles ecosystem|Ecosystem comparison|Ecosystem map//g')
   if echo "$prose" | grep -qiE "$jargon_words"; then
     matches=$(echo "$prose" | grep -oiE "$jargon_words" | sort -u | tr '\n' ', ')
     printf '    %s: jargon found: %s\n' "$doc" "$matches"
