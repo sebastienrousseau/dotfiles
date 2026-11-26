@@ -158,6 +158,8 @@ These tools are not installed for you. Install what you want with `dot ai instal
   - `goose` — Block's open-source coding agent
   - `crush` — Charm's glamorous TUI coding agent
   - `amp` — Sourcegraph's agentic coder
+  - `continue` (`cn`) — Continue's open-source terminal coding agent
+  - `cline` — Cline's open-source terminal coding agent; `dot ai cline "<prompt>"` keeps approval prompts on
   - `kimi` — Moonshot AI's Kimi Code CLI; installed natively to `~/.kimi-code/bin/kimi` and supports native interactive use and one-shot prompts
 
 - **Coding (interactive)** — focused pair-programming assistants:

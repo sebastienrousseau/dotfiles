@@ -16,6 +16,8 @@ This file documents all notable changes to this project.
 - The site is built with ssg 0.0.76, the latest release.
 - `standards-sync` is pinned to 0.0.15.
 - The `/vibe` skill's `vibe-delegate` is split into small shell functions and a Python helper installed beside it (`~/.claude/skills/vibe/tools/vibe_delegate.py`), which runs vibe in a pseudo-terminal and enforces its timeout itself, so delegation needs neither `timeout(1)` nor perl. Its output and run log are unchanged.
+- `dot ai` no longer offers `cursor-agent` or `grok`: their install scripts download the binary without checking a checksum or a signature, and both had changed since they were pinned, so neither installed. They come back when what they install can be verified. The claude, amp and kimi installers, which verify their downloads, are pinned to their current scripts after review; agy's was reviewed too and is unchanged.
+- `dot ai` adds Continue CLI (`continue`, alias `cn`) and Cline (`cline`), installed through mise from npm packages with build provenance, at 1.5.47 and 3.0.74. A Cline prompt from `dot ai` runs with approval prompts on, not Cline's default of approving every tool.
 
 ### Fixed
 
