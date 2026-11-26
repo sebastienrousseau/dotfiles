@@ -263,6 +263,7 @@ does not exist.
 | `dot-ui-test.yml` | dot-ui / Test + Coverage (go ${{ matrix.go }}) | `cd defaults/dot_local/share/dot-ui && go test ./... && go vet ./...` | unrestricted | — |
 | `dot-ui-test.yml` | dot-ui / staticcheck + golangci-lint | `cd defaults/dot_local/share/dot-ui && go test ./... && go vet ./...` | unrestricted | — |
 | `drift-detection.yml` | Drift / Master | none: scheduled housekeeping | unrestricted | — |
+| `drill-newcomer.yml` | Drill A1 / ${{ matrix.os }} | `bash tools/ci/drill-newcomer.sh --print` (the drill itself installs into $HOME: run it only on a disposable machine) | unrestricted | — |
 | `flake-detector.yml` | Flakes / ${{ matrix.os }} | `./tests/framework/test_runner.sh --jobs auto, several times, then python3 tools/ci/flake-report.py <logs>` | unrestricted | — |
 | `fuzz.yml` | Fuzz / Replay corpus (${{ matrix.name }}) | `make fuzz` | unrestricted | — |
 | `fuzz.yml` | Fuzz / Harness self-containment | `make fuzz FUZZTIME=60s` | unrestricted | — |

@@ -116,6 +116,9 @@ local = "DOT_BENCH_BUDGET_MS=150 DOT_BENCH_RUNS=11 bash tools/ci/dot-cli-startup
 [workflows."dot-ui-test.yml"]
 local = "cd defaults/dot_local/share/dot-ui && go test ./... && go vet ./..."
 
+[workflows."drill-newcomer.yml"]
+local = "bash tools/ci/drill-newcomer.sh --print (the drill itself installs into $HOME: run it only on a disposable machine)"
+
 [workflows."drift-detection.yml"]
 local = "none: scheduled housekeeping"
 

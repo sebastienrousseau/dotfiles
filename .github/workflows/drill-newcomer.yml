@@ -1,0 +1,56 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Copyright (c) 2015-2026 Sebastien Rousseau
+name: Drill A1 / Newcomer
+
+# A first-time user on a fresh machine: run the README's Install and Quick
+# Start blocks as written, then `dot doctor --json`, which must report no
+# failures, all within five minutes (tools/ci/drill-newcomer.sh). The
+# installer is the published release the README pins, so this checks what
+# a reader of the README gets today.
+
+on:
+  pull_request:
+    paths:
+      - 'README.md'
+      - 'install.sh'
+      - 'tools/ci/drill-newcomer.sh'
+      - '.github/workflows/drill-newcomer.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'README.md'
+      - 'install.sh'
+      - 'tools/ci/drill-newcomer.sh'
+      - '.github/workflows/drill-newcomer.yml'
+  schedule:
+    - cron: '17 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  drill:
+    name: Drill A1 / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Harden runner (audit mode)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run the README as a newcomer would
+        run: bash tools/ci/drill-newcomer.sh
