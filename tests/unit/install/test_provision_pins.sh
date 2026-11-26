@@ -72,9 +72,9 @@ render "$PROV/run_onchange_26-rust-tools.sh.tmpl" "$WORK/rust.sh"
 rc="$(run_rendered "$WORK/rust.sh")"
 
 test_start "rust_tools_locked_exact_versions"
-assert_equals "0|8|0" \
+assert_equals "0|9|0" \
   "$rc|$(grep -c '^cargo install ' "$CALLS")|$(grep '^cargo install ' "$CALLS" | grep -cvE '^cargo install --locked --version [0-9]+\.[0-9]+\.[0-9]+ [a-z-]+$')" \
-  "eight crates, each --locked at an exact --version"
+  "nine crates (stylua included), each --locked at an exact --version"
 
 test_start "rust_tools_use_the_data_versions"
 assert_contains "cargo install --locked --version 0.13.13 cargo-edit" "$(cat "$CALLS")" "cargo-edit comes from [rust_tools]"

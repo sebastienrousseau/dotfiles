@@ -31,22 +31,39 @@ sha256_of() {
   fi
 }
 
-# fetch_rustup_init <dir>: downloads rustup-init.sh into <dir> and checks it
-# against the checksum rust-lang.org publishes for it.
+# rustup_target: the rustup-init platform for this OS and CPU, or nothing.
+rustup_target() {
+  case "$(uname -s)-$(uname -m)" in
+    Linux-x86_64) echo x86_64-unknown-linux-gnu ;;
+    Linux-aarch64 | Linux-arm64) echo aarch64-unknown-linux-gnu ;;
+    Darwin-arm64) echo aarch64-apple-darwin ;;
+    Darwin-x86_64) echo x86_64-apple-darwin ;;
+  esac
+}
+
+# fetch_rustup_init <dir>: downloads this platform's rustup-init into <dir>
+# and checks it against the checksum rust-lang.org publishes beside it. (It
+# publishes none for the rustup-init.sh script: that URL is a 404.)
 fetch_rustup_init() {
-  local dir="$1" expected actual
-  if ! curl --proto '=https' --tlsv1.2 -fsSL -o "$dir/rustup-init.sh" https://sh.rustup.rs ||
-    ! curl --proto '=https' --tlsv1.2 -fsSL -o "$dir/rustup-init.sh.sha256" \
-      https://static.rust-lang.org/rustup/rustup-init.sh.sha256; then
+  local dir="$1" target base expected actual
+  target="$(rustup_target)"
+  if [[ -z "$target" ]]; then
+    log_error "No rustup-init for $(uname -s) $(uname -m)."
+    return 1
+  fi
+  base="https://static.rust-lang.org/rustup/dist/$target/rustup-init"
+  if ! curl --proto '=https' --tlsv1.2 -fsSL -o "$dir/rustup-init" "$base" ||
+    ! curl --proto '=https' --tlsv1.2 -fsSL -o "$dir/rustup-init.sha256" "$base.sha256"; then
     log_error "Failed to download the rustup installer or its checksum."
     return 1
   fi
-  expected="$(awk '{print $1}' "$dir/rustup-init.sh.sha256")"
-  actual="$(sha256_of "$dir/rustup-init.sh")"
+  expected="$(awk '{print $1}' "$dir/rustup-init.sha256")"
+  actual="$(sha256_of "$dir/rustup-init")"
   if [[ ! "$expected" =~ ^[0-9a-f]{64}$ || "$expected" != "$actual" ]]; then
     log_error "rustup installer checksum mismatch (expected=$expected actual=$actual)."
     return 1
   fi
+  chmod +x "$dir/rustup-init"
 }
 
 brew_has_rustup() {
@@ -74,7 +91,7 @@ ensure_rustup() {
     if brew_has_rustup; then
       brew uninstall rustup || log_warn "Could not remove Homebrew's rustup."
     fi
-    sh "$tmp/rustup-init.sh" -y --no-modify-path --default-toolchain stable || rc=$?
+    "$tmp/rustup-init" -y --no-modify-path --default-toolchain stable || rc=$?
   else
     rc=1
   fi
@@ -153,6 +170,9 @@ install_cargo_tool "cargo-outdated" "cargo-outdated" {{ index .rust_tools "cargo
 
 # cargo-update: lets `dot update --globals` upgrade Cargo packages
 install_cargo_tool "cargo-install-update" "cargo-update" {{ index .rust_tools "cargo-update" | quote }}
+
+# stylua: the Lua formatter the Neovim config and the lint use
+install_cargo_tool "stylua" "stylua" {{ index .rust_tools "stylua" | quote }}
 
 # cargo-expand: Expand macros for debugging
 install_cargo_tool "cargo-expand" "cargo-expand" {{ index .rust_tools "cargo-expand" | quote }}

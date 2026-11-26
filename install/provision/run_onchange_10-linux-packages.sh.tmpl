@@ -277,44 +277,10 @@ fi
 {{- end }}
 
 # ── Rust Toolchain ───────────────────────────────────────────
-
-if ! command -v rustup >/dev/null; then
-  log_info "Installing Rustup..."
-  rustup_tmp=$(umask 077 && mktemp -d)
-  rustup_installer="$rustup_tmp/rustup-init.sh"
-  rustup_sha="$rustup_tmp/rustup-init.sh.sha256"
-  if curl --proto '=https' --tlsv1.2 -fsSL -o "$rustup_installer" https://sh.rustup.rs \
-     && curl --proto '=https' --tlsv1.2 -fsSL -o "$rustup_sha" https://static.rust-lang.org/rustup/rustup-init.sh.sha256; then
-    expected_sha="$(awk '{print $1}' "$rustup_sha")"
-    actual_sha="$(sha256sum "$rustup_installer" | awk '{print $1}')"
-    if [ -n "$expected_sha" ] && [ "$expected_sha" = "$actual_sha" ]; then
-      sh "$rustup_installer" -y --no-modify-path
-    else
-      log_error "Rustup installer SHA256 mismatch (expected=$expected_sha actual=$actual_sha). Install manually."
-    fi
-  else
-    log_error "Failed to download rustup installer or checksum."
-  fi
-  rm -rf "$rustup_tmp"
-  # shellcheck disable=SC1091
-  . "${HOME}/.cargo/env"
-fi
-
-if command -v cargo >/dev/null; then
-  if ! cargo install --list 2>/dev/null | grep -q "^cargo-update "; then
-    log_info "Installing cargo-install-update..."
-    cargo install --locked --version {{ index .rust_tools "cargo-update" | quote }} cargo-update || true
-  fi
-fi
-
-if ! command -v stylua >/dev/null; then
-  if command -v cargo >/dev/null; then
-    log_info "Installing Stylua via cargo..."
-    cargo install --locked --version {{ index .rust_tools "stylua" | quote }} stylua || true
-  else
-    log_warn "Stylua not found and cargo is missing. Install stylua manually."
-  fi
-fi
+# rustup, and the cargo tools that need it (cargo-update, stylua), are
+# installed by run_onchange_26-rust-tools.sh on every OS. A second copy
+# here fetched a rustup-init.sh checksum rust-lang.org does not publish (a
+# 404), then sourced the ~/.cargo/env that was never made, and exited.
 
 if ! command -v delta >/dev/null; then
   if command -v cargo >/dev/null; then
