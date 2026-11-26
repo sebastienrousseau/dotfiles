@@ -152,7 +152,7 @@ NC='\033[0m'
 # a host that lacks a command.
 
 # path_without DIR NAME...: fill DIR with links to every command on PATH
-# except the NAMEs, and print DIR. PATH="$(path_without "$tmp/bin"
+# except the named ones, and print DIR. PATH="$(path_without "$tmp/bin"
 # timeout gtimeout)" runs code as on stock macOS before 27, on any host.
 path_without() {
   local dir="$1" d f n
