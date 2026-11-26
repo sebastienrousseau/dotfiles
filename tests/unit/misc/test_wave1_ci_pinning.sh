@@ -72,6 +72,39 @@ else
   printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: install script should use pinned CHEZMOI_VERSION env variable"
 fi
 
+# Every workflow that uses setup-chezmoi must give it a version: the action
+# exits when neither its `version:` input nor $CHEZMOI_VERSION is set, so a
+# workflow that supplies neither fails at setup on every run.
+# step_has_version FILE: 0 when each setup-chezmoi step in FILE has a
+# non-empty `version:` input before the next step starts.
+step_has_version() {
+  awk '
+    /uses: *\.\/\.github\/actions\/setup-chezmoi/ {
+      if (open && !found) bad = 1
+      open = 1; found = 0; match($0, /[^ ]/); indent = RSTART; next
+    }
+    open && /^ *- / { match($0, /[^ ]/); if (RSTART <= indent) { if (!found) bad = 1; open = 0 } }
+    open && /^ *[a-z_-]+:/ { match($0, /[^ ]/); if (RSTART < indent) { if (!found) bad = 1; open = 0 } }
+    open && /^ +version: *["'\'']?[0-9]/ { found = 1 }
+    END { if (open && !found) bad = 1; exit bad }
+  ' "$1"
+}
+
+test_start "every_setup_chezmoi_user_supplies_a_version"
+missing=""
+for wf in "$REPO_ROOT"/.github/workflows/*.yml; do
+  grep -q 'uses: *\./\.github/actions/setup-chezmoi' "$wf" || continue
+  grep -Eq '^ +CHEZMOI_VERSION: *"?[0-9]' "$wf" && continue
+  step_has_version "$wf" || missing+=" ${wf##*/}"
+done
+if [[ -z "$missing" ]]; then
+  ((TESTS_PASSED++)) || true
+  printf '%b\n' "  ${GREEN}✓${NC} $CURRENT_TEST"
+else
+  ((TESTS_FAILED++)) || true
+  printf '%b\n' "  ${RED}✗${NC} $CURRENT_TEST: no CHEZMOI_VERSION or version: input in:$missing"
+fi
+
 echo ""
 echo "Wave 1 CI pinning tests completed."
 print_summary

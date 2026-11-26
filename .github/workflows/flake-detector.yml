@@ -25,6 +25,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  CHEZMOI_VERSION: "2.74.1"
+
 jobs:
   rerun:
     name: Flakes / ${{ matrix.os }}
