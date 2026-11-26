@@ -189,3 +189,23 @@ On a machine that already has `dot`, `dot config import <bundle>` restores it: i
 - [Reliability Operations](../../operations/RELIABILITY.md)
 - [Tutorial: First Install](../02-tutorials/01-first-install.md)
 - [Cookbook: Troubleshooting](../04-cookbook/02-troubleshooting.md)
+
+<!-- The section below moved from the README (wave 2, R2.3); the text is unchanged. -->
+
+## Self-healing and rollback
+
+The CLI is idempotent, and it checks its own work.
+
+```bash
+dot doctor                # deep audit: tools, paths, portability, AI analysis
+dot doctor fix            # auto-fix tools, chezmoi drift, broken symlinks, missing files
+dot doctor rollback       # return to a previous known-good state
+dot doctor snapshot new   # capture a baseline to compare against later
+```
+
+Tool recovery is checksum-verified: Nushell, Pueue, Wasmtime, SOPS,
+Yazi, and Zellij are restored from exact mise / aqua pins, never
+from a mutable release URL. `dot doctor status` renders the cache and tool
+state as a live dashboard (`-j` for JSON); its output, like
+`doctor`, `perf`, `version`, and `--help`, is pinned by golden
+snapshots in [`tests/snapshots/`](../../../tests/snapshots/).

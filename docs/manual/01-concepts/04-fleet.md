@@ -147,4 +147,31 @@ Only the host with the matching Age private key can decrypt. Other hosts see the
 - [Fleet Deployment Architecture](../../architecture/fleet-deployment.md) — diagrams
 - [Trust Model](02-trust-model.md)
 - [Tutorial: Deploy to a Fleet](../02-tutorials/05-deploy-fleet.md)
+
+<!-- The section below moved from the README (wave 2, R2.3); the text is unchanged. -->
+
+## Fleet apply
+
+```toml
+# ~/.config/dotfiles/fleet.toml  (DOTFILES_FLEET_HOSTS overrides the path)
+[hosts.laptop]
+ssh     = "user@laptop.local"
+profile = "workstation"
+```
+
+```bash
+dot fleet                     # this node: id, namespace, version, OS, drift, last apply
+dot fleet drift               # configuration drift across managed files
+dot fleet apply               # every host runs: dot sync && dot doctor --quiet
+dot fleet apply --cmd uptime  # or an arbitrary command — this is the trust boundary
+dot fleet namespace list      # the active namespace (multi-tenant isolation)
+dot fleet log show            # recent fleet events from the local log
+```
+
+Hostnames are validated against `[A-Za-z0-9._@:+/-]+` before any SSH
+fan-out; first connections use `StrictHostKeyChecking=accept-new`,
+so pre-populate `~/.ssh/known_hosts` if your threat model allows no
+TOFU window. `dot fleet push` brings a fresh machine up over SSH
+before it joins the fleet. The concept chapter is
+[`docs/manual/01-concepts/04-fleet.md`](../../../docs/manual/01-concepts/04-fleet.md).
 {% endraw %}
