@@ -6,7 +6,10 @@ name: Drill A1 / Newcomer
 # Start blocks as written, then `dot doctor --json`, which must report no
 # failures, all within five minutes (tools/ci/drill-newcomer.sh). The
 # installer is the published release the README pins, so this checks what
-# a reader of the README gets today.
+# a reader of the README gets today. The one exception is a release pull
+# request, whose README pins the installer it is about to publish: there
+# the drill runs this branch's install.sh, still checked against the
+# README's digest.
 
 on:
   pull_request:
@@ -51,6 +54,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      - name: Use this branch's installer if the pinned one is unpublished
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          url="$(bash tools/ci/drill-newcomer.sh --print |
+            grep -oE 'https://github\.com/[^ ]+/dotfiles-install-[0-9.]+\.sh' | head -1 || true)"
+          if [[ -z "$url" ]]; then
+            echo "::error::the README's Install block names no installer to download"
+            exit 1
+          fi
+          if ! curl -fsIL -o /dev/null "$url"; then
+            echo "::notice::$url is not published yet (a release pull request); running this branch's install.sh, checked against the README's digest"
+            echo "DRILL_INSTALLER=$GITHUB_WORKSPACE/install.sh" >>"$GITHUB_ENV"
+          fi
 
       - name: Run the README as a newcomer would
         run: bash tools/ci/drill-newcomer.sh
