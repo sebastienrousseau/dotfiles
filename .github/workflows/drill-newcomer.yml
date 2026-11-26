@@ -4,24 +4,16 @@ name: Drill A1 / Newcomer
 
 # A first-time user on a fresh machine: run the README's Install and Quick
 # Start blocks as written, then `dot doctor --json`, which must report no
-# failures, all within five minutes (tools/ci/drill-newcomer.sh). The
+# failures, within the time budget (tools/ci/drill-newcomer.sh). The
 # installer is the published release the README pins, so this checks what
-# a reader of the README gets today.
+# a reader of the README gets today. It runs when a release is published
+# and weekly, not on pull requests: a PR's own changes reach the drill only
+# once released, and on the release PR the README already names an
+# installer that is not published yet.
 
 on:
-  pull_request:
-    paths:
-      - 'README.md'
-      - 'install.sh'
-      - 'tools/ci/drill-newcomer.sh'
-      - '.github/workflows/drill-newcomer.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'README.md'
-      - 'install.sh'
-      - 'tools/ci/drill-newcomer.sh'
-      - '.github/workflows/drill-newcomer.yml'
+  release:
+    types: [published]
   schedule:
     - cron: '17 5 * * 1'
   workflow_dispatch:
