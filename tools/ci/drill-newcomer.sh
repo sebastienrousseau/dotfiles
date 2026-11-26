@@ -51,7 +51,7 @@ judge() {
     printf '%s' "$report" | python3 -c 'import json,sys
 for r in json.load(sys.stdin).get("results", []):
     if str(r.get("status", "")).lower() in ("fail", "failed", "error"):
-        print("  failed:", r.get("name") or r)'
+        print("  failed:", r.get("check") or r.get("name") or r)'
     return 1
   fi
   if ((elapsed > BUDGET)); then
