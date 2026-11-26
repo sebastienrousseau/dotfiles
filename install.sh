@@ -17,6 +17,11 @@ set -euo pipefail
 
 # Bootstrap writes secret-adjacent files (chezmoi config, age keys, ssh tooling,
 # archives) under $HOME: 077 keeps other accounts out; call sites chmod to relax.
+# The dotfiles themselves are applied under 022 (apply_source), the umask
+# their shells set (defaults/dot_profile): chezmoi derives every target's mode
+# from the umask, so an apply under 077 (or a caller's 002) wrote modes that
+# every later `chezmoi status` from a dotfiles shell reported as drifted.
+DOTFILES_APPLY_UMASK=0022
 umask 077
 
 RED='\033[0;31m'
@@ -175,14 +180,26 @@ detect_container_env() {
 
 # apply_source <want_minimal>: seed the git identity, the minimal overrides if 1, apply.
 apply_source() {
-  local -a flags=()
   seed_git_identity
   if [[ "$1" -eq 1 ]]; then
     step "Applying minimal profile overrides..."
     apply_minimal_profile_overrides
   fi
+  chezmoi_apply
+}
+
+# chezmoi_apply: apply the dotfiles in the environment their shells will
+# have, so templates render as a later `chezmoi status` or `dot doctor`
+# renders them: umask 022 and DOTFILES_AI=1, both from dot_profile. Under
+# the installer's environment instead, every file's mode and the
+# DOTFILES_AI-dependent build scripts showed as drift on a fresh install.
+chezmoi_apply() {
+  local -a flags=()
   [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]] || flags=(--force --no-tty)
-  chezmoi apply ${flags[@]+"${flags[@]}"}
+  (
+    umask "$DOTFILES_APPLY_UMASK"
+    DOTFILES_AI=1 chezmoi apply ${flags[@]+"${flags[@]}"}
+  )
 }
 
 # _backup_one <path>: copy a file or symlink to BACKUP_DIR at its $HOME-relative
@@ -513,6 +530,10 @@ provision_toolchain() {
     source "$SOURCE_DIR/install/lib/provision.sh"
     run_provision "$SOURCE_DIR" ${3:+--all} ||
       error "Provisioning failed (above). Fix it, then re-run: bash \"$SOURCE_DIR/install.sh\" --provision"
+    # The tools just installed (go, for the Go builds) change what the
+    # templates render; apply again so nothing is left pending.
+    step "Applying the dotfiles with the new toolchain..."
+    chezmoi_apply
   else
     step "Configs deployed. To also install the toolchain (packages, fonts, tools):"
     echo "   bash \"$SOURCE_DIR/install.sh\" --provision    # or DOTFILES_PROVISION=1"
