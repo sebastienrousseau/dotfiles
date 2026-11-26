@@ -6,6 +6,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 EXAMPLES_DIR="$REPO_ROOT/examples"
+# shellcheck source-path=SCRIPTDIR source=../../lib/dot/probe.sh
+source "$REPO_ROOT/lib/dot/probe.sh" # dot_bounded
 
 # Per-example wall-clock budget. Bounding each example individually means one
 # slow or hanging example is reported by name instead of silently consuming the
@@ -46,35 +48,43 @@ if [ ! -d "$EXAMPLES_DIR" ]; then
   exit 1
 fi
 
-# Resolve a timeout binary. GNU coreutils ships `timeout`; on macOS it is
-# `gtimeout` when coreutils is installed. Without either, run unbounded rather
-# than failing outright.
-timeout_cmd=()
-if [ "$EXAMPLE_TIMEOUT" != "0" ]; then
+# resolve_timeout_cmd: set timeout_cmd to the prefix that bounds one example,
+# or to nothing when EXAMPLE_TIMEOUT=0. GNU coreutils ships `timeout`; on
+# macOS it is `gtimeout` when coreutils is installed. Without either, as on
+# macOS before 27, dot_bounded keeps the budget (it used to run unbounded).
+resolve_timeout_cmd() {
+  timeout_cmd=()
+  [ "$EXAMPLE_TIMEOUT" != "0" ] || return 0
   if command -v timeout >/dev/null 2>&1; then
     timeout_cmd=(timeout --kill-after=5 "$EXAMPLE_TIMEOUT")
   elif command -v gtimeout >/dev/null 2>&1; then
     timeout_cmd=(gtimeout --kill-after=5 "$EXAMPLE_TIMEOUT")
   else
-    printf 'warning: no timeout binary found; examples run unbounded\n' >&2
+    timeout_cmd=(dot_bounded "$EXAMPLE_TIMEOUT")
   fi
-fi
+}
+resolve_timeout_cmd
+
+# run_example FILE: run one example within its budget; count it in `failed`
+# when it times out or exits non-zero.
+run_example() {
+  local name rc=0
+  name="$(basename "$1")"
+  printf 'Running example: %s\n' "$name"
+  "${timeout_cmd[@]+"${timeout_cmd[@]}"}" bash "$1" </dev/null || rc=$?
+  if [ "$rc" -eq 124 ]; then
+    printf 'FAIL: %s exceeded the %ss timeout\n' "$name" "$EXAMPLE_TIMEOUT" >&2
+  elif [ "$rc" -ne 0 ]; then
+    printf 'FAIL: %s exited %s\n' "$name" "$rc" >&2
+  fi
+  [ "$rc" -eq 0 ] || failed=$((failed + 1))
+}
 
 found=0
 failed=0
 while IFS= read -r -d '' example; do
   found=1
-  name="$(basename "$example")"
-  printf 'Running example: %s\n' "$name"
-  rc=0
-  "${timeout_cmd[@]+"${timeout_cmd[@]}"}" bash "$example" </dev/null || rc=$?
-  if [ "$rc" -eq 124 ]; then
-    printf 'FAIL: %s exceeded the %ss timeout\n' "$name" "$EXAMPLE_TIMEOUT" >&2
-    failed=$((failed + 1))
-  elif [ "$rc" -ne 0 ]; then
-    printf 'FAIL: %s exited %s\n' "$name" "$rc" >&2
-    failed=$((failed + 1))
-  fi
+  run_example "$example"
 done < <(find "$EXAMPLES_DIR" -maxdepth 1 -type f -name "*.sh" -print0 | sort -z)
 
 if [ "$found" -eq 0 ]; then

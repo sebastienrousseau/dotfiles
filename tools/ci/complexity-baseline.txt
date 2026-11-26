@@ -136,7 +136,6 @@
   23   22   37.5   57     0 scripts/ops/rollback.sh::restore_file
   11   12   18.7   86   108 scripts/ops/setup.sh::<top>
   11   12   30.8   89    89 scripts/qa/scorecard-snapshot.sh::<top>
-  15   16   34.9   56    66 scripts/qa/validate-examples.sh::<top>
   17   14   34.9   63    63 scripts/security/check-disclosure-key-expiry.sh::<top>
   11   22   23.6   48    48 scripts/security/encryption-check.sh::<top>
   12   15   22.4   29     0 scripts/security/enforce-policies.sh::check_file_permissions

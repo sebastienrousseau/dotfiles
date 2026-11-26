@@ -31,7 +31,7 @@ trap 'rm -rf "$WORK"; cov_teardown_sandbox' EXIT
 # than what the host has installed.
 BASEBIN="$WORK/basebin"
 mkdir -p "$BASEBIN"
-for tool in basename dirname cat find sort env bash; do
+for tool in basename dirname cat find sort env bash perl sleep; do
   resolved="$(command -v "$tool" 2>/dev/null || true)"
   [[ -n "$resolved" ]] && ln -sf "$resolved" "$BASEBIN/$tool"
 done
@@ -41,8 +41,9 @@ done
 ve_project() {
   local d="$WORK/$1"
   rm -rf "$d"
-  mkdir -p "$d/scripts/qa" "$d/examples"
+  mkdir -p "$d/scripts/qa" "$d/examples" "$d/lib/dot"
   ln -s "$VE_FILE" "$d/scripts/qa/validate-examples.sh"
+  ln -s "$REPO_ROOT/lib/dot/probe.sh" "$d/lib/dot/probe.sh"
   printf '%s\n' "$d"
 }
 
@@ -156,13 +157,21 @@ ve_stub "$stubs" gtimeout 0
 VE_TIMEOUT=30 ve_run "$proj" "$stubs"
 assert_equals "0" "$VE_RC" "gtimeout should be accepted as the bounding wrapper"
 
-# 4c. Neither wrapper available: warn, then run unbounded.
-test_start "validate_examples_warns_when_unbounded"
+# 4c. Neither wrapper available, as on macOS before 27: the examples still
+# run, and still within their budget (dot_bounded, perl), never unbounded.
+test_start "validate_examples_bounded_without_timeout_binary"
 proj="$(ve_project unbounded)"
 ve_example "$proj" alpha 0
 VE_TIMEOUT=30 ve_run "$proj"
 assert_equals "0" "$VE_RC" "a missing timeout binary should not fail the run"
-assert_contains "run unbounded" "$VE_OUT" "the unbounded run should be announced"
+assert_contains "Examples passed." "$VE_OUT" "the example runs"
+printf '#!/usr/bin/env bash\nsleep 30\n' >"$proj/examples/beta.sh"
+start=$SECONDS
+VE_TIMEOUT=1 ve_run "$proj"
+assert_equals "1" "$VE_RC" "an example past its budget fails the run"
+assert_contains "exceeded the 1s timeout" "$VE_OUT" "and is named"
+assert_equals "true" "$([[ $((SECONDS - start)) -lt 15 ]] && echo true || echo false)" \
+  "at its budget, not after the example's 30s"
 
 # 4d. The timeout is opt-out-able entirely.
 test_start "validate_examples_honours_timeout_zero"

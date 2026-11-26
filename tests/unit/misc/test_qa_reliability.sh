@@ -187,8 +187,9 @@ assert_contains "Platform: WSL" "$QA_OUT" "Linux with a Microsoft kernel reports
 _qa_examples_repo() {
   local dir
   dir="$(_qa_fixture)"
-  mkdir -p "$dir/scripts/qa"
+  mkdir -p "$dir/scripts/qa" "$dir/lib/dot"
   cp "$examples_script" "$dir/scripts/qa/validate-examples.sh"
+  cp "$REPO_ROOT/lib/dot/probe.sh" "$dir/lib/dot/probe.sh"
   printf '%s\n' "$dir"
 }
 
