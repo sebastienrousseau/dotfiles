@@ -5,8 +5,9 @@
 # ROOT CAUSE FIX (2026-05-10):
 #   vibe checks for a TTY on startup. Without one (e.g. when piped directly),
 #   it hangs indefinitely waiting for terminal initialisation → 0 tool calls,
-#   silent timeout. Fix: wrap vibe in `script -q -c "..." /dev/null` to allocate
-#   a pseudo-TTY. The JSON streaming output is then piped cleanly to the parser.
+#   silent timeout. Fix: run vibe in a pseudo-TTY (`vibe_delegate.py run`,
+#   which also enforces the timeout). The JSON streaming output is then piped
+#   cleanly to the parser.
 #
 # PROMPT SAFETY (2026-05-12):
 #   Long prompts with Python code, dicts, colons, emojis, or accented chars are
@@ -14,522 +15,168 @@
 #   a wrapper that cats the file). This avoids shell injection / truncation bugs.
 #
 # RUN LOG (2026-05-12):
-#   Appends one JSONL entry to ~/.local/share/delegate-runs.jsonl after each run.
+#   Appends one row to ~/.local/share/dotfiles-ai.db after each run.
 #   Fields: ts, delegate, project, prompt_words, agent, max_turns, timeout_secs,
 #           exit_code, timed_out, tool_calls, files_changed, syntax_errors,
 #           duration_secs, tokens_in, tokens_out, tokens_total, cost_usd, model,
 #           warn_count, search_replace_fails, cost_claude_eq, wrote_nothing.
+#
+# The Python steps (pseudo-TTY and timeout, stream parsing, token counts,
+# syntax checks, run log) live in vibe_delegate.py beside this script.
 
 set -euo pipefail
 
-WORKDIR="${1:?Usage: vibe-delegate <workdir> <prompt> [max-turns] [agent] [timeout-secs]}"
-PROMPT="${2:?Prompt required}"
-MAX_TURNS="${3:-10}"
-AGENT="${4:-}"
-TIMEOUT_SECS="${5:-180}"
+VD_PY="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/vibe_delegate.py"
 
-if [ ! -d "$WORKDIR" ]; then
-  echo "ERROR: workdir '$WORKDIR' does not exist" >&2
-  exit 1
-fi
+# _vd_args ARGS...: the run's settings, or exit 1 when the workdir is missing.
+_vd_args() {
+  WORKDIR="${1:?Usage: vibe-delegate <workdir> <prompt> [max-turns] [agent] [timeout-secs]}"
+  PROMPT="${2:?Prompt required}"
+  MAX_TURNS="${3:-10}"
+  AGENT="${4:-}"
+  TIMEOUT_SECS="${5:-180}"
+  if [ ! -d "$WORKDIR" ]; then
+    echo "ERROR: workdir '$WORKDIR' does not exist" >&2
+    exit 1
+  fi
+}
 
-# Model override: /vibe-model-pick writes alias to this flag file.
-# VIBE_ACTIVE_MODEL is inherited by the script child process via `script`.
-VIBE_MODEL_FLAG="$HOME/.local/share/vibe-model.flag"
-VIBE_MODEL_OVERRIDE=""
-if [ -f "$VIBE_MODEL_FLAG" ]; then
-  VIBE_MODEL_OVERRIDE=$(tr -d '[:space:]' <"$VIBE_MODEL_FLAG")
+# _vd_model: the model /vibe-model-pick chose, if any. VIBE_ACTIVE_MODEL is
+# inherited by vibe through the pseudo-TTY.
+_vd_model() {
+  local flag="$HOME/.local/share/vibe-model.flag"
+  VIBE_MODEL_OVERRIDE=""
+  [ -f "$flag" ] || return 0
+  VIBE_MODEL_OVERRIDE=$(tr -d '[:space:]' <"$flag")
   export VIBE_ACTIVE_MODEL="$VIBE_MODEL_OVERRIDE"
-fi
+}
 
-cd "$WORKDIR"
-START_NS=$(date +%s%N)
-PROMPT_WORDS=$(printf '%s' "$PROMPT" | wc -w | tr -d ' ')
-GIT_BEFORE=$(git rev-parse HEAD 2>/dev/null || echo "no-git")
+# _vd_changed_files: modified and untracked files, for post-run syntax checks.
+_vd_changed_files() {
+  git diff --name-only 2>/dev/null || true
+  git ls-files --others --exclude-standard 2>/dev/null || true
+}
 
-# Track modified files for post-run syntax checks
-FILES_BEFORE=$(
-  git diff --name-only 2>/dev/null
-  git ls-files --others --exclude-standard 2>/dev/null
-)
+_vd_banner() {
+  echo "=== VIBE START ==="
+  echo "Workdir : $WORKDIR"
+  echo "Agent   : ${AGENT:-default}"
+  echo "Model   : ${VIBE_MODEL_OVERRIDE:-(config default)}"
+  echo "Turns   : $MAX_TURNS"
+  echo "Timeout : ${TIMEOUT_SECS}s"
+  echo "Prompt  : ${PROMPT:0:120}..."
+  echo "==================="
+}
 
-echo "=== VIBE START ==="
-echo "Workdir : $WORKDIR"
-echo "Agent   : ${AGENT:-default}"
-echo "Model   : ${VIBE_MODEL_OVERRIDE:-(config default)}"
-echo "Turns   : $MAX_TURNS"
-echo "Timeout : ${TIMEOUT_SECS}s"
-echo "Prompt  : ${PROMPT:0:120}..."
-echo "==================="
+# _vd_write_cmd FILE: the vibe command as a script. The prompt is embedded
+# %q-quoted, so colons, quotes, emojis or code in it are never expanded.
+_vd_write_cmd() {
+  local -a agent=()
+  [ -z "$AGENT" ] || agent=(--agent "$AGENT")
+  {
+    echo '#!/usr/bin/env bash'
+    printf 'exec vibe'
+    printf ' %q' "${agent[@]}" -p "$PROMPT" --trust --max-turns "$MAX_TURNS" \
+      --output streaming --workdir "$WORKDIR"
+    printf '\n'
+  } >"$1"
+  chmod +x "$1"
+}
 
-# All scratch files live in one private directory. (BSD mktemp leaves the
-# X's literal when a suffix follows them, so `mktemp /tmp/x-XXXXXX.sh` was a
-# fixed, pre-creatable path in the shared /tmp.)
-VIBE_TMP=$(mktemp -d "${TMPDIR:-/tmp}/vibe-delegate.XXXXXX")
+# _vd_run: vibe in a pseudo-TTY, its stream parsed. Under set -e a failing
+# pipeline would end the script before the timeout report and run log;
+# `||` keeps its status in VIBE_EXIT instead.
+_vd_run() {
+  VIBE_EXIT=0
+  python3 "$VD_PY" run "$TIMEOUT_SECS" "$VIBE_TMP/cmd.sh" |
+    python3 "$VD_PY" stream "$DELEGATE_STATS_FILE" || VIBE_EXIT=${PIPESTATUS[0]}
+}
 
-# Write prompt to a temp file — avoids shell injection when prompt contains
-# colons, quotes, emojis, accented chars, or multi-line Python/JS code.
-PROMPT_FILE="$VIBE_TMP/prompt.txt"
-printf '%s' "$PROMPT" >"$PROMPT_FILE"
+# _vd_tokens: real token counts from the newest vibe session log, when one
+# exists (none when vibe was killed or failed before writing it).
+_vd_tokens() {
+  local log
+  # mtime ordering selects the latest session log.
+  # shellcheck disable=SC2012
+  log=$(ls -t "${VIBE_HOME:-$HOME/.vibe}/logs/session"/*/meta.json 2>/dev/null | head -1 || true)
+  [ -z "$log" ] || python3 "$VD_PY" tokens "$log" "$DELEGATE_STATS_FILE" 2>/dev/null || true
+}
 
-# Write the vibe command to a temp script.
-# Reads the prompt from the file to stay safe from shell expansion.
-VIBE_SCRIPT="$VIBE_TMP/cmd.sh"
-
-# Stats handoff file: Python parser writes JSON here; bash reads it for the log.
-DELEGATE_STATS_FILE="$VIBE_TMP/stats.json"
-printf '{}' >"$DELEGATE_STATS_FILE"
-export DELEGATE_STATS_FILE
-
-trap 'rm -rf "$VIBE_TMP"' EXIT
-
-{
-  echo '#!/usr/bin/env bash'
-  echo "PROMPT_CONTENT=$(printf '%q' "$(cat "$PROMPT_FILE")")"
-  if [ -n "$AGENT" ]; then
-    # PROMPT_CONTENT expands in the generated script.
-    # shellcheck disable=SC2016
-    printf 'exec vibe --agent %q -p "$PROMPT_CONTENT" --trust --max-turns %q --output streaming --workdir %q\n' \
-      "$AGENT" "$MAX_TURNS" "$WORKDIR"
+_vd_status() {
+  echo ""
+  if [ "$VIBE_EXIT" -eq 124 ]; then
+    echo "=== VIBE TIMEOUT (>${TIMEOUT_SECS}s) — killed ==="
   else
-    # PROMPT_CONTENT expands in the generated script.
-    # shellcheck disable=SC2016
-    printf 'exec vibe -p "$PROMPT_CONTENT" --trust --max-turns %q --output streaming --workdir %q\n' \
-      "$MAX_TURNS" "$WORKDIR"
+    echo "=== VIBE DONE (exit: $VIBE_EXIT) ==="
   fi
-} >"$VIBE_SCRIPT"
-chmod +x "$VIBE_SCRIPT"
-
-# Pseudo-TTY for vibe via python pty.spawn (works without a parent TTY, unlike `script`).
-SCRIPT_CMD=(python3 -c 'import pty,sys,os; sys.exit(os.waitstatus_to_exitcode(pty.spawn(sys.argv[1:])))' "$VIBE_SCRIPT")
-
-# _bounded SECONDS CMD...: timeout(1) where installed; else perl, which
-# macOS ships (timeout(1) arrived only in macOS 27). Exit 124 on expiry
-# either way, with the whole process group killed, as lib/dot/probe.sh does.
-_bounded() {
-  if command -v timeout >/dev/null 2>&1; then
-    timeout "$@"
-    return
-  fi
-  perl -e '
-    use POSIX qw(setsid);
-    my $secs = shift @ARGV;
-    my $pid  = fork();
-    die "vibe-delegate: fork failed: $!\n" unless defined $pid;
-    if ($pid == 0) { setsid(); exec { $ARGV[0] } @ARGV; exit 127; } # mutation: ignore unreachable here, the command is python3, which the next stage needs; tested in lib/dot/probe.sh
-    my $timed_out = 0;
-    $SIG{ALRM} = sub { $timed_out = 1; kill("KILL", -$pid); };
-    alarm($secs);
-    my $reaped;
-    do { $reaped = waitpid($pid, 0); } while ($reaped == -1 && $!{EINTR}); # mutation: ignore retries only a signal-interrupted wait, which a test cannot provoke
-    my $status = $?;
-    alarm(0);
-    kill("KILL", -$pid);
-    exit(124) if $timed_out;
-    exit($status & 127 ? 128 + ($status & 127) : $status >> 8);
-  ' "$@"
 }
 
-# Under set -e a failing pipeline would end the script here, skipping the
-# timeout report and stats below; `||` records its status instead.
-VIBE_EXIT=0
-_bounded "$TIMEOUT_SECS" "${SCRIPT_CMD[@]}" | python3 -c "
-import sys, json, re, os
-
-ANSI_RE = re.compile(r'\x1b\[[0-9;]*[mABCDEFGHJKSTfhilmnprsu]|\x1b\([AB]|\x0f|\x0e')
-tools_called = 0
-warn_count = 0
-sr_fails = 0
-writes = []
-def clean(line):
-    line = line.replace('\r', '')
-    return ANSI_RE.sub('', line).strip()
-
-for raw in sys.stdin:
-    line = clean(raw)
-    if not line:
-        continue
-    try:
-        msg = json.loads(line)
-    except json.JSONDecodeError:
-        continue
-
-    role    = msg.get('role', '')
-    content = msg.get('content', '') or ''
-
-    if role in ('system', 'user'):
-        continue
-
-    if role == 'assistant':
-        text = content.strip()
-        if not text:
-            continue
-        print(f'  [vibe] {text[:400]}', flush=True)
-
-    elif role == 'tool':
-        tools_called += 1
-        first_line = content.split('\n')[0] if content else ''
-        tool_name  = msg.get('tool', '') or msg.get('name', '')
-
-        # Detect writes to track files for syntax check
-        if 'write' in tool_name.lower() or 'edit' in tool_name.lower():
-            filepath = msg.get('path') or msg.get('file_path') or ''
-            if filepath:
-                writes.append(filepath)
-            print(f'  [tool]  file: {filepath or first_line[:80]}', flush=True)
-        elif first_line.startswith('path:'):
-            print(f'  [read]  {first_line[5:].strip()}', flush=True)
-        elif 'search_replace' in tool_name.lower() or 'SEARCH' in content:
-            status = 'FAIL' if 'failed' in content.lower() else 'OK'
-            if status == 'FAIL':
-                sr_fails += 1
-            print(f'  [tool]  search_replace [{status}] {first_line[:80]}', flush=True)
-        elif first_line.startswith('error') or 'Error' in first_line or 'failed' in first_line.lower():
-            warn_count += 1
-            print(f'  [WARN]  {first_line[:120]}', flush=True)
-        elif 'matches:' in first_line or 'grep' in tool_name.lower():
-            print(f'  [tool]  matches: {first_line[:100]}', flush=True)
-        elif 'command' in tool_name.lower():
-            print(f'  [tool]  command: {first_line[:100]}', flush=True)
-        else:
-            snippet = (first_line or content)[:100]
-            print(f'  [tool]  {snippet}', flush=True)
-
-print(f'Tool calls: {tools_called}  |  warns: {warn_count}  |  sr_fails: {sr_fails}')
-
-# Write partial stats so the token block can merge into it.
-_sf = os.environ.get('DELEGATE_STATS_FILE', '')
-if _sf:
-    try:
-        with open(_sf, 'w') as _f:
-            json.dump({'tool_calls': tools_called, 'warn_count': warn_count, 'search_replace_fails': sr_fails}, _f)
-    except Exception:
-        pass
-" || VIBE_EXIT=${PIPESTATUS[0]}
-
-# ── Real Mistral token counts from session log ─────────────────────────────────
-VIBE_HOME="${VIBE_HOME:-$HOME/.vibe}"
-# mtime ordering selects the latest session log.
-# shellcheck disable=SC2012
-# No log yet (vibe killed or failed before writing one) is not an error.
-SESSION_LOG=$(ls -t "$VIBE_HOME/logs/session"/*/meta.json 2>/dev/null | head -1 || true)
-if [ -n "$SESSION_LOG" ]; then
-  python3 -c "
-import json, sys, os
-try:
-    with open('$SESSION_LOG') as f:
-        data = json.load(f)
-    stats = data.get('stats', {})
-    prompt = stats.get('last_turn_prompt_tokens', 0)
-    completion = stats.get('last_turn_completion_tokens', 0)
-    total = stats.get('last_turn_total_tokens', prompt + completion)
-    cost = stats.get('session_cost', 0)
-    session_total = stats.get('session_total_llm_tokens', 0)
-    model_name = data.get('config', {}).get('active_model', 'unknown')
-
-    # Read per-model pricing from ~/.vibe/config.toml (fallback: Mistral Medium 3.5 rates)
-    input_price, output_price = 1.5, 7.5
-    try:
-        import tomllib
-    except ImportError:
-        try:
-            import tomli as tomllib
-        except ImportError:
-            tomllib = None
-    if tomllib:
-        config_path = os.path.expanduser('~/.vibe/config.toml')
-        try:
-            with open(config_path, 'rb') as cf:
-                cfg = tomllib.load(cf)
-            active = model_name  # use session's actual model, not config default
-            for m in cfg.get('models', []):
-                if m.get('alias') == active or m.get('name') == active:
-                    input_price = m.get('input_price', input_price)
-                    output_price = m.get('output_price', output_price)
-                    break
-        except Exception:
-            pass
-
-    # Each -p invocation creates a new session, so session_total_llm_tokens is
-    # the full run total. last_turn_* covers only the final exchange — wrong for
-    # multi-turn runs (e.g. 10 turns × 8 reads each = ~10× undercount).
-    run_total = session_total if session_total > 0 else total
-    if (prompt + completion) > 0 and run_total > 0:
-        ratio_in = prompt / (prompt + completion)
-        run_tokens_in  = round(run_total * ratio_in)
-        run_tokens_out = run_total - run_tokens_in
-    else:
-        run_tokens_in, run_tokens_out = prompt, completion
-    run_cost = (run_tokens_in * input_price + run_tokens_out * output_price) / 1_000_000
-    claude_cost = (run_tokens_in * 3.0 + run_tokens_out * 15.0) / 1_000_000
-    print(f'Model               : {model_name}')
-    print(f'Delegate tokens (run): {run_total:,}  (last turn: {prompt:,}+{completion:,})  |  cost ~\${run_cost:.4f}')
-    print(f'Claude Sonnet 4.6 eq: same tokens would cost ~\${claude_cost:.4f}  (ratio x{claude_cost/run_cost:.1f})' if run_cost > 0 else f'Claude Sonnet 4.6 eq: ~\${claude_cost:.4f}')
-    # Merge token stats into the delegate stats file.
-    sf = os.environ.get('DELEGATE_STATS_FILE', '')
-    if sf:
-        try:
-            existing = json.load(open(sf))
-        except Exception:
-            existing = {}
-        existing.update({
-            'tokens_in':    run_tokens_in,
-            'tokens_out':   run_tokens_out,
-            'tokens_total': run_total,
-            'cost_usd':     round(run_cost, 6),
-            'model':        model_name,
-        })
-        with open(sf, 'w') as wf:
-            json.dump(existing, wf)
-except Exception as e:
-    print(f'(token read failed: {e})')
-" 2>/dev/null
-fi
-
-echo ""
-if [ "$VIBE_EXIT" -eq 124 ]; then
-  echo "=== VIBE TIMEOUT (>${TIMEOUT_SECS}s) — killed ==="
-else
-  echo "=== VIBE DONE (exit: $VIBE_EXIT) ==="
-fi
-
-# ── Post-run syntax checks — language-agnostic ────────────────────────────────
-FILES_AFTER=$(
-  git diff --name-only 2>/dev/null
-  git ls-files --others --exclude-standard 2>/dev/null
-)
-CHANGED=$(comm -13 <(echo "$FILES_BEFORE" | sort) <(echo "$FILES_AFTER" | sort) 2>/dev/null)
-
-SYNTAX_COUNT_FILE="$VIBE_TMP/syntax-count.txt"
-echo 0 >"$SYNTAX_COUNT_FILE"
-export DELEGATE_CHANGED="$CHANGED"
-export SYNTAX_COUNT_FILE
-
-python3 <<'PYSYNTAX'
-import os, shutil, subprocess
-
-changed = [f for f in os.environ.get('DELEGATE_CHANGED', '').splitlines() if f.strip()]
-# CWD is always $WORKDIR — cd "$WORKDIR" runs before this block.
-errors  = 0
-checked = 0
-
-def has(cmd):
-    return shutil.which(cmd) is not None
-
-def check(cmd, label, cwd=None):
-    global errors, checked
-    r = subprocess.run(cmd, capture_output=True, text=True, cwd=cwd)
-    checked += 1
-    if r.returncode != 0:
-        errors += 1
-        msg = (r.stderr or r.stdout).strip().split('\n')[0][:120]
-        print(f'  [SYNTAX ERROR] {label}: {msg}')
-
-# Per-file checks — tools available without project context
-for f in changed:
-    if not os.path.isfile(f):
-        continue
-    if   f.endswith('.py'):
-        check(['python3', '-m', 'py_compile', f], f)
-    elif f.endswith(('.js', '.mjs', '.cjs')) and has('node'):
-        check(['node', '--check', f], f)
-    elif f.endswith('.rb') and has('ruby'):
-        check(['ruby', '-c', f], f)
-    elif f.endswith(('.sh', '.bash')):
-        check(['bash', '-n', f], f)
-    elif f.endswith('.php') and has('php'):
-        check(['php', '-l', f], f)
-    elif f.endswith('.json'):
-        check(['python3', '-c', 'import json,sys;json.load(open(sys.argv[1]))', f], f)
-
-# Project-level checks — run once if any matching files changed
-live = [f for f in changed if os.path.isfile(f)]
-if any(f.endswith('.go') for f in live) and has('go'):
-    check(['go', 'vet', './...'], 'go vet')
-if any(f.endswith('.rs') for f in live) and has('cargo'):
-    check(['cargo', 'check', '--quiet'], 'cargo check')
-if any(f.endswith(('.ts', '.tsx')) for f in live):
-    if has('tsc') and os.path.isfile('tsconfig.json'):
-        check(['tsc', '--noEmit', '--skipLibCheck'], 'tsc --noEmit')
-    else:
-        print('  [SKIP] tsc — no tsconfig.json found, TypeScript not checked')
-
-if checked > 0:
-    if errors == 0:
-        print(f'=== SYNTAX OK ({checked} check(s)) ===')
-    else:
-        print(f'=== SYNTAX ERRORS: {errors} in {checked} check(s) — fix before committing ===')
-
-cf = os.environ.get('SYNTAX_COUNT_FILE', '')
-if cf:
-    with open(cf, 'w') as fh:
-        fh.write(str(errors))
-PYSYNTAX
-
-TOTAL_ERRORS=$(cat "$SYNTAX_COUNT_FILE" 2>/dev/null || echo 0)
-rm -f "$SYNTAX_COUNT_FILE"
-
-# ── Git summary ────────────────────────────────────────────────────────────────
-GIT_AFTER=$(git rev-parse HEAD 2>/dev/null || echo "no-git")
-
-if [ "$GIT_BEFORE" != "$GIT_AFTER" ]; then
-  echo ""
-  echo "=== COMMITS CREATED ==="
-  git log "$GIT_BEFORE".."$GIT_AFTER" --oneline
-  echo ""
-  echo "=== DIFF STAT ==="
-  git diff "$GIT_BEFORE".."$GIT_AFTER" --stat
-else
-  echo ""
-  echo "=== UNCOMMITTED CHANGES ==="
-  git diff --stat 2>/dev/null || echo "(no git)"
-  git status --short 2>/dev/null
-fi
-
-# ── Run log ────────────────────────────────────────────────────────────────────
-END_NS=$(date +%s%N)
-# grep -c prints 0 and exits 1 when nothing changed; that is not a failure.
-FILES_CHANGED_COUNT=$(printf '%s\n' "$CHANGED" | grep -c '[^[:space:]]' 2>/dev/null || true)
-FILES_CHANGED_COUNT=${FILES_CHANGED_COUNT:-0}
-TOTAL_ERRORS=${TOTAL_ERRORS:-0}
-
-export DELEGATE_NAME="vibe"
-export DELEGATE_WORKDIR="$WORKDIR"
-export DELEGATE_EXIT="$VIBE_EXIT"
-export DELEGATE_TIMEOUT="$TIMEOUT_SECS"
-export DELEGATE_PROMPT_WORDS="$PROMPT_WORDS"
-export DELEGATE_AGENT="${AGENT:-default}"
-export DELEGATE_MAX_TURNS="$MAX_TURNS"
-export DELEGATE_FILES_CHANGED="$FILES_CHANGED_COUNT"
-export DELEGATE_SYNTAX_ERRORS="$TOTAL_ERRORS"
-export DELEGATE_START_NS="$START_NS"
-export DELEGATE_END_NS="$END_NS"
-
-python3 <<'PYLOG'
-import json, os, sqlite3
-from pathlib import Path
-from datetime import datetime, timezone
-
-DB    = Path.home() / '.local' / 'share' / 'dotfiles-ai.db'
-JSONL = Path.home() / '.local' / 'share' / 'delegate-runs.jsonl'
-DB.parent.mkdir(parents=True, exist_ok=True)
-
-sf = os.environ.get('DELEGATE_STATS_FILE', '')
-stats = {}
-if sf:
-    try:
-        stats = json.loads(Path(sf).read_text())
-    except Exception:
-        pass
-
-start_ns = int(os.environ.get('DELEGATE_START_NS', 0) or 0)
-end_ns   = int(os.environ.get('DELEGATE_END_NS',   0) or 0)
-duration = round((end_ns - start_ns) / 1e9, 1) if start_ns and end_ns else 0
-
-entry = {
-    'ts':            datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
-    'delegate':      os.environ.get('DELEGATE_NAME', 'vibe'),
-    'workdir':       os.environ.get('DELEGATE_WORKDIR', ''),
-    'project':       os.path.basename(os.environ.get('DELEGATE_WORKDIR', '')),
-    'prompt_words':  int(os.environ.get('DELEGATE_PROMPT_WORDS', 0) or 0),
-    'agent':         os.environ.get('DELEGATE_AGENT', 'default'),
-    'max_turns':     int(os.environ.get('DELEGATE_MAX_TURNS', 0) or 0),
-    'timeout_secs':  int(os.environ.get('DELEGATE_TIMEOUT', 0) or 0),
-    'exit_code':     int(os.environ.get('DELEGATE_EXIT', 0) or 0),
-    'timed_out':     os.environ.get('DELEGATE_EXIT') == '124',
-    'files_changed':       int(os.environ.get('DELEGATE_FILES_CHANGED', 0) or 0),
-    'syntax_errors':       int(os.environ.get('DELEGATE_SYNTAX_ERRORS', 0) or 0),
-    'duration_secs':       duration,
-    'warn_count':          stats.get('warn_count', 0),
-    'search_replace_fails': stats.get('search_replace_fails', 0),
+# _vd_syntax: syntax-check the files the run created or modified.
+_vd_syntax() {
+  CHANGED=$(comm -13 <(printf '%s\n' "$FILES_BEFORE" | sort) <(_vd_changed_files | sort))
+  printf '%s\n' "$CHANGED" | python3 "$VD_PY" syntax "$VIBE_TMP/syntax-count.txt" || true
+  TOTAL_ERRORS=$(cat "$VIBE_TMP/syntax-count.txt" 2>/dev/null || echo 0)
 }
-entry.update(stats)
 
-# Compute Claude Sonnet 4.6 equivalent cost for savings tracking.
-ti = entry.get('tokens_in', 0)
-to = entry.get('tokens_out', 0)
-entry['cost_claude_eq'] = round((ti * 3.0 + to * 15.0) / 1_000_000, 6)
+_vd_git_summary() {
+  local after
+  after=$(git rev-parse HEAD 2>/dev/null || echo "no-git")
+  echo ""
+  if [ "$GIT_BEFORE" != "$after" ]; then
+    echo "=== COMMITS CREATED ==="
+    git log "$GIT_BEFORE".."$after" --oneline
+    echo ""
+    echo "=== DIFF STAT ==="
+    git diff "$GIT_BEFORE".."$after" --stat
+  else
+    echo "=== UNCOMMITTED CHANGES ==="
+    git diff --stat 2>/dev/null || echo "(no git)"
+    git status --short 2>/dev/null || true
+  fi
+}
 
-# True when Vibe ran tool calls but wrote nothing (vague prompt or task already done).
-# Excluded for read-only agents that intentionally never write files.
-_readonly_agents = ('code-reviewer', 'code-architect', 'planner')
-entry['wrote_nothing'] = (
-    entry.get('files_changed', 0) == 0
-    and entry.get('tool_calls', 0) >= 3
-    and entry.get('exit_code', 0) == 0
-    and entry.get('agent', 'default') not in _readonly_agents
-)
+# _vd_log: one row in ~/.local/share/dotfiles-ai.db for this run.
+_vd_log() {
+  local changed_count
+  # grep -c prints 0 and exits 1 when nothing changed; that is not a failure.
+  changed_count=$(printf '%s\n' "$CHANGED" | grep -c '[^[:space:]]' || true)
+  DELEGATE_NAME=vibe DELEGATE_WORKDIR="$WORKDIR" DELEGATE_EXIT="$VIBE_EXIT" \
+    DELEGATE_TIMEOUT="$TIMEOUT_SECS" DELEGATE_PROMPT_WORDS="$PROMPT_WORDS" \
+    DELEGATE_AGENT="${AGENT:-default}" DELEGATE_MAX_TURNS="$MAX_TURNS" \
+    DELEGATE_FILES_CHANGED="${changed_count:-0}" DELEGATE_SYNTAX_ERRORS="${TOTAL_ERRORS:-0}" \
+    DELEGATE_START_NS="$START_NS" DELEGATE_END_NS="$(date +%s%N)" \
+    python3 "$VD_PY" log "$DELEGATE_STATS_FILE"
+}
 
-db = sqlite3.connect(str(DB), timeout=10, isolation_level=None)
-db.execute('PRAGMA journal_mode=WAL')
-db.execute('PRAGMA synchronous=NORMAL')
-db.execute('''CREATE TABLE IF NOT EXISTS runs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    ts TEXT NOT NULL DEFAULT "", delegate TEXT NOT NULL DEFAULT "",
-    model TEXT NOT NULL DEFAULT "", project TEXT NOT NULL DEFAULT "",
-    workdir TEXT DEFAULT "", agent TEXT DEFAULT "default",
-    max_turns INTEGER DEFAULT 0, timeout_secs INTEGER DEFAULT 0,
-    exit_code INTEGER DEFAULT 0, timed_out INTEGER DEFAULT 0,
-    duration_secs REAL DEFAULT 0, prompt_words INTEGER DEFAULT 0,
-    tool_calls INTEGER DEFAULT 0, files_changed INTEGER DEFAULT 0,
-    wrote_nothing INTEGER DEFAULT 0, warn_count INTEGER DEFAULT 0,
-    search_replace_fails INTEGER DEFAULT 0, syntax_errors INTEGER DEFAULT 0,
-    tokens_in INTEGER DEFAULT 0, tokens_out INTEGER DEFAULT 0,
-    tokens_total INTEGER DEFAULT 0, cost_usd REAL DEFAULT 0,
-    cost_claude_eq REAL DEFAULT 0
-)''')
-db.execute('CREATE TABLE IF NOT EXISTS _meta (key TEXT PRIMARY KEY, value TEXT)')
-if not db.execute("SELECT 1 FROM _meta WHERE key='jsonl_migrated'").fetchone():
-    if JSONL.exists():
-        for line in JSONL.read_text().splitlines():
-            if not line.strip():
-                continue
-            try:
-                r = json.loads(line)
-                db.execute('''INSERT INTO runs
-                    (ts,delegate,model,project,workdir,agent,max_turns,timeout_secs,
-                     exit_code,timed_out,duration_secs,prompt_words,tool_calls,
-                     files_changed,wrote_nothing,warn_count,search_replace_fails,
-                     syntax_errors,tokens_in,tokens_out,tokens_total,cost_usd,cost_claude_eq)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''',
-                    (r.get('ts',''), r.get('delegate',''), r.get('model',''),
-                     r.get('project',''), r.get('workdir',''), r.get('agent','default'),
-                     int(r.get('max_turns',0) or 0), int(r.get('timeout_secs',0) or 0),
-                     int(r.get('exit_code',0) or 0), int(bool(r.get('timed_out',False))),
-                     float(r.get('duration_secs',0) or 0), int(r.get('prompt_words',0) or 0),
-                     int(r.get('tool_calls',0) or 0), int(r.get('files_changed',0) or 0),
-                     int(bool(r.get('wrote_nothing',False))), int(r.get('warn_count',0) or 0),
-                     int(r.get('search_replace_fails',0) or 0), int(r.get('syntax_errors',0) or 0),
-                     int(r.get('tokens_in',0) or 0), int(r.get('tokens_out',0) or 0),
-                     int(r.get('tokens_total',0) or 0), float(r.get('cost_usd',0) or 0),
-                     float(r.get('cost_claude_eq',0) or 0)))
-            except Exception:
-                pass
-    db.execute("INSERT OR REPLACE INTO _meta VALUES ('jsonl_migrated','1')")
+main() {
+  _vd_args "$@"
+  _vd_model
+  cd "$WORKDIR"
+  START_NS=$(date +%s%N)
+  PROMPT_WORDS=$(printf '%s' "$PROMPT" | wc -w | tr -d ' ')
+  GIT_BEFORE=$(git rev-parse HEAD 2>/dev/null || echo "no-git")
+  FILES_BEFORE=$(_vd_changed_files)
+  _vd_banner
 
-db.execute('''INSERT INTO runs
-    (ts,delegate,model,project,workdir,agent,max_turns,timeout_secs,
-     exit_code,timed_out,duration_secs,prompt_words,tool_calls,
-     files_changed,wrote_nothing,warn_count,search_replace_fails,
-     syntax_errors,tokens_in,tokens_out,tokens_total,cost_usd,cost_claude_eq)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''',
-    (entry.get('ts',''), entry.get('delegate',''), entry.get('model',''),
-     entry.get('project',''), entry.get('workdir',''), entry.get('agent','default'),
-     int(entry.get('max_turns',0) or 0), int(entry.get('timeout_secs',0) or 0),
-     int(entry.get('exit_code',0) or 0), int(bool(entry.get('timed_out',False))),
-     float(entry.get('duration_secs',0) or 0), int(entry.get('prompt_words',0) or 0),
-     int(entry.get('tool_calls',0) or 0), int(entry.get('files_changed',0) or 0),
-     int(bool(entry.get('wrote_nothing',False))), int(entry.get('warn_count',0) or 0),
-     int(entry.get('search_replace_fails',0) or 0), int(entry.get('syntax_errors',0) or 0),
-     int(entry.get('tokens_in',0) or 0), int(entry.get('tokens_out',0) or 0),
-     int(entry.get('tokens_total',0) or 0), float(entry.get('cost_usd',0) or 0),
-     float(entry.get('cost_claude_eq',0) or 0)))
-db.close()
+  # All scratch files live in one private directory. (BSD mktemp leaves the
+  # X's literal when a suffix follows them, so `mktemp /tmp/x-XXXXXX.sh` was
+  # a fixed, pre-creatable path in the shared /tmp.)
+  VIBE_TMP=$(mktemp -d "${TMPDIR:-/tmp}/vibe-delegate.XXXXXX")
+  trap 'rm -rf "$VIBE_TMP"' EXIT
+  DELEGATE_STATS_FILE="$VIBE_TMP/stats.json"
+  printf '{}' >"$DELEGATE_STATS_FILE"
 
-tok = entry.get('tokens_total', '?')
-saved = entry['cost_claude_eq'] - entry.get('cost_usd', 0)
-saved_str = f', saved ~${saved:.4f} vs Claude' if saved > 0 else ''
-print(f'[log] → {DB}  ({tok} tokens, exit {entry["exit_code"]}, {duration}s{saved_str})')
-PYLOG
+  _vd_write_cmd "$VIBE_TMP/cmd.sh"
+  _vd_run
+  _vd_tokens
+  _vd_status
+  _vd_syntax
+  _vd_git_summary
+  _vd_log
+  exit "$VIBE_EXIT"
+}
 
-exit "$VIBE_EXIT"
+# Sourced (by tests), only the functions are defined.
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi
