@@ -648,6 +648,14 @@ append-only. Source: <https://code.claude.com/docs/en/prompt-caching>.
    (or `promptCacheTtl` for the main conversation on an API key) keeps
    caches warm through longer gaps, but one-hour cache writes cost more, so
    set it only for work that idles past five minutes between turns.
+9. **Record what sessions keep rediscovering.** A command, flag or setup
+   step that agents in a repository keep finding by failure goes into that
+   repository's `AGENTS.md`, so the next session reads it instead of paying
+   to find it again.
+10. **Session hooks fail open.** A hook or plugin that runs in every session
+    never blocks it on its own error, says what it did in one line, and
+    can be undone; the names of the state it keeps are a compatibility
+    promise.
 
 Unverified tools that claim to route agent decisions outside the prompt are
 not adopted on this basis; any such tool goes through §1.5 (evidence) and
