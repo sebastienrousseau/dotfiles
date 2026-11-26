@@ -144,33 +144,34 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
-# Portable `timeout` shim. GNU coreutils ships `timeout`, but stock
-# macOS does not (only `gtimeout`, and only after `brew install
-# coreutils`). The macOS reliability runners don't install coreutils,
-# so tests that wrap commands in `timeout <secs> <cmd>` otherwise fail
-# with "timeout: command not found" (rc 127) on every invocation.
-# Prefer real `timeout`, then `gtimeout`, else run the command without
-# the hang-guard (losing only the timeout, not correctness). All test
-# usages are the simple `timeout <duration> <command…>` form.
-if ! command -v timeout >/dev/null 2>&1; then
-  if command -v gtimeout >/dev/null 2>&1; then
-    timeout() { gtimeout "$@"; }
-  else
-    # Fallback: strip any leading options (e.g. `--kill-after=5`, `-k 5`,
-    # `-s TERM`) and the DURATION operand, then run the command unguarded.
-    # Handles both `timeout 15 cmd` and `timeout --kill-after=5 60 cmd`.
-    timeout() {
-      while [[ "${1:-}" == -* ]]; do
-        case "$1" in
-          -k | --kill-after | -s | --signal) shift 2 ;; # option takes a value
-          *) shift ;;                                   # bare flag or --opt=val
-        esac
-      done
-      shift # drop the DURATION operand
-      "$@"
-    }
-  fi
-fi
+# No `timeout` shim. A shell function named timeout looked like the real
+# command to `command -v`, yet `env`, `xargs` and child shells could not
+# run it (rc 127), and its fallback dropped the limit. It also hid code
+# that needs timeout(1), which macOS before 27 does not ship. Tests bound
+# a command with run_with_timeout, and use path_without to run code as on
+# a host that lacks a command.
+
+# path_without DIR NAME...: fill DIR with links to every command on PATH
+# except the named ones, and print DIR. PATH="$(path_without "$tmp/bin"
+# timeout gtimeout)" runs code as on stock macOS before 27, on any host.
+path_without() {
+  local dir="$1" d f n
+  shift
+  local skip=" $* "
+  local -a dirs
+  IFS=: read -ra dirs <<<"$PATH"
+  mkdir -p "$dir"
+  for d in "${dirs[@]}"; do
+    [[ -d "$d" ]] || continue
+    for f in "$d"/*; do
+      n="${f##*/}"
+      [[ -x "$f" && ! -d "$f" && ! -e "$dir/$n" ]] || continue
+      [[ "$skip" == *" $n "* ]] && continue
+      ln -s "$f" "$dir/$n"
+    done
+  done
+  printf '%s\n' "$dir"
+}
 
 # Start a new test case
 test_start() {

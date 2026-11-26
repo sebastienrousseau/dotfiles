@@ -204,18 +204,19 @@ _doctor_perf_shell_coverage() {
 
 # 6. Zsh hook count. Heavy precmd/preexec functions compound per-prompt.
 # Probe an interactive zsh with a hard timeout so a broken zshrc doesn't
-# stall doctor; skip cleanly if the probe fails.
+# stall doctor; skip cleanly if the probe fails. dot_probe bounds it without
+# timeout(1), which macOS before 27 lacks: gating on it skipped the check.
 _doctor_perf_zsh_hooks() {
-  if command -v zsh >/dev/null 2>&1 && command -v timeout >/dev/null 2>&1; then
+  if command -v zsh >/dev/null 2>&1; then
     # Fire every hook once first, as the first prompt and first command do:
     # the deferred-init hooks deregister themselves after one run, so counting
     # at startup reported one-shot work (zinit, compinit, carapace, layer
     # loading) as per-prompt cost. What remains is what runs on every prompt.
     # shellcheck disable=SC2016 # expanded by the probed zsh
-    hook_counts=$(timeout 5 zsh -i -c 'local -a _p _e; _p=($precmd_functions); _e=($preexec_functions)
+    hook_counts=$(dot_probe 5 zsh -i -c 'local -a _p _e; _p=($precmd_functions); _e=($preexec_functions)
     for f in $_p; do (( $+functions[$f] )) && $f >/dev/null 2>&1; done
     for f in $_e; do (( $+functions[$f] )) && $f true >/dev/null 2>&1; done
-    echo "$#precmd_functions $#preexec_functions"' 2>/dev/null | tail -1 || echo "")
+    echo "$#precmd_functions $#preexec_functions"' | tail -1 || echo "")
     if [[ -n "$hook_counts" ]]; then
       read -r precmd_n preexec_n <<<"$hook_counts"
       if [[ "${precmd_n:-0}" -le 5 && "${preexec_n:-0}" -le 5 ]]; then

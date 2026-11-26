@@ -208,7 +208,7 @@ _fastest_ms() {
   for i in 1 2 3; do
     t0="$(_now_ms)"
     if command -v timeout >/dev/null; then
-      timeout 10 "$DOT_THEME_SYNC" "$1" >/dev/null 2>&1
+      run_with_timeout 10 "$DOT_THEME_SYNC" "$1" >/dev/null 2>&1
     else
       "$DOT_THEME_SYNC" "$1" >/dev/null 2>&1
     fi

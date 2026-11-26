@@ -33,6 +33,9 @@
 
 set -euo pipefail
 
+# shellcheck source-path=SCRIPTDIR source=../lib/dot/probe.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/lib/dot/probe.sh" # dot_bounded
+
 readonly ZSH_BENCH_COMMIT="28b1b1bc888159f0a2cf50f9d29381758341aba1"
 readonly ZSH_BENCH_SHA256="cf6889c98513e2ced811102b2ca4ff0937466b6b8cf650967c17ab1228caf1c7"
 readonly GATED_METRICS="first_prompt_lag_ms first_command_lag_ms"
@@ -134,17 +137,12 @@ _bench() {
   esac
 }
 
-# _deadline SECONDS: set DEADLINE to a timeout(1) prefix, or to nothing
-# (with a note) where no timeout(1) is installed.
+# _deadline SECONDS: set DEADLINE to a prefix that stops the command and its
+# process group after SECONDS with status 124. dot_bounded needs no
+# timeout(1), which macOS before 27 does not ship: without it the run used
+# to go unbounded and a hung zsh-bench waited for the job timeout.
 _deadline() {
-  DEADLINE=()
-  if command -v timeout >/dev/null 2>&1; then
-    DEADLINE=(timeout -k 5 "$1")
-  elif command -v gtimeout >/dev/null 2>&1; then
-    DEADLINE=(gtimeout -k 5 "$1")
-  else
-    printf 'zsh-bench: no timeout(1); running without a deadline\n' >&2
-  fi
+  DEADLINE=(dot_bounded "$1")
 }
 
 # _probe_pty ZSH: after a timeout, show what a login interactive zsh prints

@@ -39,6 +39,9 @@ source "$SCRIPT_DIR/../../lib/dot/utils.sh" # check_cmd
 # shellcheck source=../../lib/dot/ai-roster.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../../lib/dot/ai-roster.sh" # AI_ROSTER_BINS
+# shellcheck source=../../lib/dot/probe.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../../lib/dot/probe.sh" # dot_probe
 # shellcheck source-path=SCRIPTDIR source=doctor/platform.sh
 source "$SCRIPT_DIR/doctor/platform.sh"
 # shellcheck source-path=SCRIPTDIR source=doctor/performance.sh

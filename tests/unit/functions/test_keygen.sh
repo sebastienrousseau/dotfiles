@@ -27,7 +27,7 @@ assert_true "type keygen &>/dev/null" "keygen function should exist"
 # Test no arguments shows usage
 test_start "keygen_no_args"
 if type keygen &>/dev/null; then
-  output=$(timeout 5 bash -c 'source "'"$FUNC_FILE"'" && keygen' 2>&1 || true)
+  output=$(run_with_timeout 5 bash -c 'source "'"$FUNC_FILE"'" && keygen' 2>&1 || true)
   # Should show usage or error - use direct check to avoid eval issues
   if [[ -n "$output" ]]; then
     ((TESTS_PASSED++)) || true
@@ -41,14 +41,14 @@ fi
 # Test help flag
 test_start "keygen_help_flag"
 if type keygen &>/dev/null; then
-  output=$(timeout 5 bash -c 'source "'"$FUNC_FILE"'" && keygen --help' 2>&1 || echo "usage")
+  output=$(run_with_timeout 5 bash -c 'source "'"$FUNC_FILE"'" && keygen --help' 2>&1 || echo "usage")
   assert_true "true" "help flag check completed"
 fi
 
 # Test invalid key type
 test_start "keygen_invalid_type"
 if type keygen &>/dev/null; then
-  result=$(timeout 5 bash -c 'source "'"$FUNC_FILE"'" && keygen --type invalid_type test_key' 2>&1 || echo "error")
+  result=$(run_with_timeout 5 bash -c 'source "'"$FUNC_FILE"'" && keygen --type invalid_type test_key' 2>&1 || echo "error")
   # Check for error messages (case insensitive)
   if echo "$result" | grep -iqE "(error|invalid|unknown|usage)"; then
     ((TESTS_PASSED++)) || true
@@ -63,7 +63,7 @@ fi
 test_start "keygen_dry_run"
 if type keygen &>/dev/null; then
   # Just verify it doesn't crash with common args
-  timeout 5 bash -c 'source "'"$FUNC_FILE"'" && keygen --help' 2>/dev/null || true
+  run_with_timeout 5 bash -c 'source "'"$FUNC_FILE"'" && keygen --help' 2>/dev/null || true
   assert_true "true" "keygen help does not crash"
 fi
 

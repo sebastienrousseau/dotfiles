@@ -162,15 +162,9 @@ for cmd in "${routes[@]}"; do
   case " $HIDDEN_FROM_HELP " in
     *" $cmd "*) skipped=$((skipped + 1)); continue ;;
   esac
-  # timeout is GNU-only; use gtimeout on macOS if available, otherwise
-  # trust bash to bound the help invocation (it's in-process).
-  if command -v timeout >/dev/null 2>&1; then
-    out="$(timeout 5 bash "$DOT_CLI" help "$cmd" 2>&1 || true)"
-  elif command -v gtimeout >/dev/null 2>&1; then
-    out="$(gtimeout 5 bash "$DOT_CLI" help "$cmd" 2>&1 || true)"
-  else
-    out="$(bash "$DOT_CLI" help "$cmd" 2>&1 || true)"
-  fi
+  # run_with_timeout bounds the help call on every host, with or without
+  # GNU timeout(1).
+  out="$(run_with_timeout 5 bash "$DOT_CLI" help "$cmd" 2>&1 || true)"
   # ANSI-strip via sed for portability.
   clean="$(printf '%s' "$out" | sed 's/\x1b\[[0-9;]*[mK]//g')"
   case "$clean" in

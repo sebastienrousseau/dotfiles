@@ -263,7 +263,7 @@ test_start "a_link_loop_ends"
 fresh claude
 ln -s settings.json "$H/.claude/settings.json"
 RC=0
-timeout 20 env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="$B:$JQ_DIR:/usr/bin:/bin" \
+run_with_timeout 20 env -i ${COV_ENV[@]+"${COV_ENV[@]}"} HOME="$H" PATH="$B:$JQ_DIR:/usr/bin:/bin" \
   XDG_STATE_HOME="$H/.state" bash "$REPO_ROOT/bin/dot" cli hook install --agent claude >/dev/null 2>&1 || RC=$?
 assert_not_equals "124" "$RC" "following links stops instead of hanging"
 

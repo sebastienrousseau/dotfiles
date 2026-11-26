@@ -77,9 +77,9 @@ EOF
 probe() {
   local shell="$1" layers="$2"
   shift 2
-  env -i HOME="$SANDBOX/home" PATH="$PATH" TERM=dumb SANDBOX="$SANDBOX" \
+  run_with_timeout 60 env -i HOME="$SANDBOX/home" PATH="$PATH" TERM=dumb SANDBOX="$SANDBOX" \
     ${BASH_ENV:+BASH_ENV="$BASH_ENV"} ${PS4:+PS4="$PS4"} \
-    SHELL_NAME="$shell" LAYERS="$layers" timeout 60 "$shell" "$@" 2>/dev/null | head -c 4000
+    SHELL_NAME="$shell" LAYERS="$layers" "$shell" "$@" 2>/dev/null | head -c 4000
 }
 
 ZSH_OUT="$(probe zsh "90-ux-aliases 91-ux-aliases-lazy 51-logic-functions-extra" -f -c ". \"\$SANDBOX/probe.sh\"")"
