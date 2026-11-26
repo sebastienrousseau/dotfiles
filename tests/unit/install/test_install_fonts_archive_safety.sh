@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2016,SC2034
-# The Nerd Font installers unzip a downloaded archive into the font directory
-# with `unzip -o`. A checksum proves only that the release served it: the
+# The Nerd Font installers extract a downloaded archive into the font
+# directory (provisioning: a .tar.xz; the interactive checker: a .zip). A
+# checksum proves only that the release served it: the
 # archive must also pass archive_paths_are_safe (no symlinks, no paths that
 # leave the directory) before anything is extracted, and a refused archive
 # must fail the run instead of being recorded as installed.
@@ -62,6 +63,31 @@ with zipfile.ZipFile(path, "w") as z:
 PY
 }
 
+# make_tarxz <archive> <kind>: the same three shapes as a .tar.xz, which
+# provisioning downloads (JetBrainsMono.zip is 134 MB, over the 100 MiB
+# download cap; its .tar.xz is 7 MB).
+make_tarxz() {
+  python3 - "$1" "$2" <<'PY2'
+import io, os, sys, tarfile
+path, kind = sys.argv[1], sys.argv[2]
+base = os.path.basename(path)[: -len(".tar.xz")]
+def add(t, name, data=b"font", link=None):
+    info = tarfile.TarInfo(name)
+    if link:
+        info.type, info.linkname = tarfile.SYMTYPE, link
+        t.addfile(info)
+    else:
+        info.size, info.mode = len(data), 0o644
+        t.addfile(info, io.BytesIO(data))
+with tarfile.open(path, "w:xz") as t:
+    add(t, f"{base}-Regular.ttf")
+    if kind == "symlink":
+        add(t, f"{base}-Bold.ttf", link="../../../.bashrc")
+    elif kind == "traversal":
+        add(t, "../escaped.ttf")
+PY2
+}
+
 sha_of() {
   if command -v sha256sum >/dev/null 2>&1; then
     sha256sum "$1" | awk '{print $1}'
@@ -70,14 +96,15 @@ sha_of() {
   fi
 }
 
-# release <kind>: both font zips of that kind plus a SHA-256.txt matching them.
+# release <kind>: both font archives of that kind plus a SHA-256.txt
+# matching them.
 release() {
   rm -f "$REL"/*
-  make_zip "$REL/JetBrainsMono.zip" "$1"
-  make_zip "$REL/NerdFontsSymbolsOnly.zip" regular
+  make_tarxz "$REL/JetBrainsMono.tar.xz" "$1"
+  make_tarxz "$REL/NerdFontsSymbolsOnly.tar.xz" regular
   {
-    printf '%s  JetBrainsMono.zip\n' "$(sha_of "$REL/JetBrainsMono.zip")"
-    printf '%s  NerdFontsSymbolsOnly.zip\n' "$(sha_of "$REL/NerdFontsSymbolsOnly.zip")"
+    printf '%s  JetBrainsMono.tar.xz\n' "$(sha_of "$REL/JetBrainsMono.tar.xz")"
+    printf '%s  NerdFontsSymbolsOnly.tar.xz\n' "$(sha_of "$REL/NerdFontsSymbolsOnly.tar.xz")"
   } >"$REL/SHA-256.txt"
 }
 
@@ -96,7 +123,7 @@ release regular
 test_start "fonts_regular_archive_installed"
 rc="$(run_fonts "$WORK/h1")"
 # The release it downloaded from, so a version bump needs no test edit.
-fetched="$(sed -n 's|.*/download/\([^/]*\)/JetBrainsMono\.zip$|\1|p' "$WORK/urls" | head -n 1)"
+fetched="$(sed -n 's|.*/download/\([^/]*\)/JetBrainsMono\.tar\.xz$|\1|p' "$WORK/urls" | head -n 1)"
 assert_not_empty "$fetched" "the archive came from a versioned release URL"
 assert_equals "0|yes|$fetched" \
   "$rc|$([[ -f "$WORK/h1/$FONTS/JetBrainsMono-Regular.ttf" ]] && echo yes || echo no)|$(cat "$WORK/h1/$FONTS/.nerd-fonts-version" 2>/dev/null)" \
