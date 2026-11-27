@@ -14,7 +14,9 @@ for every task:
    is, what its core value is, and its own rules; where it is stricter or
    more specific, it wins), then its `README.md` and contribution guide.
 2. **Hygiene** (§0): clear what the health check finds.
-3. **Do the task** within the invariants (§1), on the right branch (§3).
+3. **Do the task** within the invariants (§1), adding no dependency (§11)
+   and holding the code to the four principles (§12), on the right branch
+   (§3).
 4. **Verify** (§2): the repository's single gate, then report what ran, what
    it showed, and what could not be checked.
 5. **Hand over** (§4): commit with attribution, open the pull request, and
@@ -173,6 +175,12 @@ starting the requested work.
      output the current generator can no longer rebuild is deployed
      unchanged until its port, which is its own reviewed change.
 
+10. **Dependencies: the strict minimum.**
+    - No new third-party dependency of any kind without the human's
+      explicit approval of that named dependency. Build the capability
+      in the repository instead, so the code is written, validated and
+      vetted by us. The full rule is §11.
+
 ---
 
 ## 2. Definition of Done (Verification Gates)
@@ -199,6 +207,11 @@ starting the requested work.
   If one cannot run (no backend, no credentials), say so in the report.
 - **A change must not add warnings.** A new compiler, linter or type-checker
   warning is a failure, not a note.
+- **A change must not add a dependency** (§11) or raise the dependency
+  baseline, unless the human approved that dependency by name.
+- **Hold it to the four principles** (§12) before calling it done: the
+  data model stated, nothing speculative, every changed line with a
+  reason, every claim with its proof.
 - **Observe and Report**:
   - State explicitly what command was run and what the result was. Never assume a test passed without running it.
   - State what could not be done: a test that could not run, a platform not
@@ -660,3 +673,105 @@ append-only. Source: <https://code.claude.com/docs/en/prompt-caching>.
 Unverified tools that claim to route agent decisions outside the prompt are
 not adopted on this basis; any such tool goes through §1.5 (evidence) and
 the supply-chain checks of the repository it would run in.
+
+---
+
+## 11. Dependencies: Build It Ourselves
+
+Every third-party dependency is code we ship without having written,
+reviewed or tested it; its maintainers, its own dependencies and its
+registry accounts become part of our attack surface. Too many defects
+and advisories in this portfolio came from them. The strategy is to keep
+dependencies to the strict minimum and to build capabilities within our
+control: code written, validated and vetted by us.
+
+1. **No new dependency by default.** This covers every kind: runtime,
+   build, development and test dependencies, CI actions, tools a build or
+   check installs, container base images, and the transitive closure each
+   one brings. Count what the lockfile gains, not the line added to the
+   manifest. Build the capability in the repository instead, at the size
+   the task needs (§12.2).
+2. **An exception is explicit and recorded.** A new dependency needs the
+   human's explicit approval of that named dependency, after being shown
+   what it does, why building it in-house is worse, how many packages the
+   lockfile gains, who publishes them, and their advisory history. The
+   decision and its reason are recorded in the repository (an ADR or the
+   dependency inventory). An agent never adds one to finish a task faster,
+   and an approval never extends to another dependency.
+3. **What we do not write ourselves.** Some code is safer from a vetted,
+   audited source than from us: cryptographic primitives and their
+   constant-time implementations (never write our own cryptography), TLS
+   and other protocol stacks with a security history, the language's
+   standard library and toolchain, and operating-system interfaces. These
+   stay dependencies, chosen for their audit history, pinned, with default
+   features off and only the features used turned on. In-house code builds
+   on them (a protocol over an audited TLS library); it does not replace
+   them.
+4. **Shrink what exists.** Each repository keeps a committed,
+   CI-enforced dependency baseline (the third-party packages in its
+   lockfile, per ecosystem) that may only go down, like the complexity
+   baseline (§0.4, §1.6). Replace dependencies worst-first: those with
+   advisories, the unmaintained, those used for one function, those whose
+   transitive tree is largest for what they give. Each replacement is its
+   own reviewed change, with tests that pin the old behaviour first.
+5. **In-house means owned.** Code that replaces a dependency meets the
+   same bar as the rest: tests, fuzzing where it parses input, the
+   complexity ceilings and documentation. Copying a dependency's source
+   into the tree (vendoring) is not building it ourselves: it keeps code we
+   did not write and adds the licence and provenance duties of §1.3 and
+   §1.5.
+6. **Updating is not adding.** Updating an existing dependency for a fix
+   or an advisory (§0.1) is expected. An update that pulls in new
+   transitive packages counts as adding them.
+7. **Report the gap; do not fill it.** When a feature needs a capability
+   only a new dependency provides today, say so, give the cost of building
+   it in-house, and defer the feature until the human decides.
+
+---
+
+## 12. Code Quality: The Four Principles
+
+Every change an agent writes or reviews is held to four principles,
+adapted from the Torvalds doctrine
+(<https://github.com/leopiney/linus-torvalds-skills>). They sharpen §0.3,
+§0.4 and §2. Where a repository's own rule is more specific, it wins
+(Start here, step 1).
+
+1. **Data first.** Design the data before the logic.
+   - State the data layout (types, ownership, what is held in memory and
+     for how long) before writing the code that uses it.
+   - Choose structures that make the common case the obvious path. When
+     special cases pile up, fix the shape of the data instead of adding
+     branches.
+   - Prefer a plain struct and a few functions to a type hierarchy.
+   - Test: the data model fits in one honest paragraph. If it does not,
+     the change is not ready.
+2. **Simplicity first.** The least code that is obviously correct.
+   - No abstraction, trait, plug-in point or option for a single use or
+     for a future nobody asked for. Configuration exists where a
+     requirement or a repository rule calls for it, not as decoration.
+   - No error handling for cases that cannot happen. Handle the ones that
+     can, and show with a test that they can.
+   - No cleverness the next reader has to decode. If fifty lines do it,
+     do not write five hundred.
+   - Test: a careful maintainer reading it would not ask why it exists.
+3. **Surgical changes.** Touch only what the task needs.
+   - No drive-by refactors, reformatting, renames or comment rewrites
+     outside the change. Match the existing style.
+   - Remove only what the change itself made unused.
+   - Report unrelated problems found on the way and fix them as their own
+     commit (§1.7), never folded into this one.
+   - Test: every changed line has a direct reason tied to the task.
+4. **Show me the code.** Proof over confidence.
+   - Define success as checks before starting. For multi-step work, write
+     the plan as steps, each with the check that proves it
+     (`step → verify: check`).
+   - A claim about correctness, safety or speed comes with the test,
+     proof or rerunnable benchmark behind it (§2, §9). Without one it is
+     a guess, and is reported as one.
+   - Ask when a requirement is unclear; never invent one.
+   - Test: a reviewer can rerun what proved it.
+
+A review names the principle a change breaks and the fix, in plain
+technical terms about the code, never about the person. A change that
+breaks one is not done, and "clean it up later" is not an outcome (§1.7).
