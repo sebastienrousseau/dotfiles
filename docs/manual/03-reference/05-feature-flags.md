@@ -14,6 +14,7 @@ Feature flags toggle optional subsystems. Defaults live in `defaults/.chezmoidat
 alias_wrapper = false
 dms = true
 zellij = false
+rust_dev_tools = false
 ai_theme_sync = true
 linux_desktop = false
 niri = false
@@ -78,6 +79,12 @@ When `true`:
 
 Requires: Zellij installed (or the Linux provisioning step).
 
+### `rust_dev_tools`: Rust Development Tools
+
+When `true`, `install.sh --provision` (and the next `chezmoi apply`) also builds cargo-edit, cargo-watch, cargo-audit, cargo-outdated, cargo-expand, cargo-nextest and cargo-deny with `cargo install --locked` at the versions pinned in `[rust_tools]`. They compile from source, about 16 minutes on a CI runner, so a fresh install leaves them out. stylua (the Lua lint) and cargo-update (`dot update --globals`) are installed either way. Turning the flag on changes the provisioning script, so the next apply runs it; turning it off removes nothing.
+
+Requires: rustup, which `--provision` installs.
+
 ### `fuzzel`, `foot`, `kanshi`: Wayland Tools
 
 When `true`, deploys `~/.config/fuzzel/`, `~/.config/foot/` or `~/.config/kanshi/` respectively. The Fuzzel and Foot configs take their colours from the active theme. No effect on macOS.
@@ -125,6 +132,7 @@ kanshi = false
 linux_desktop = false
 mako = false
 niri = false
+rust_dev_tools = false
 surface = false
 t2 = false
 touch = false

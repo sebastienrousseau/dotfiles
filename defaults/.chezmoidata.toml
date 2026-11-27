@@ -48,6 +48,15 @@ dms = true
 # Terminal multiplexers
 zellij = false
 
+# Rust development tools (cargo-edit, cargo-watch, cargo-audit,
+# cargo-outdated, cargo-expand, cargo-nextest, cargo-deny), compiled from
+# source by --provision: about 16 minutes. stylua and cargo-update, which the
+# dotfiles use, are always installed. Enable per host in
+# ~/.config/chezmoi/chezmoi.toml:
+#   [data.features]
+#   rust_dev_tools = true
+rust_dev_tools = false
+
 # Wallpaper-aware AI CLI appearance adapters. Provider configs remain
 # user-owned: malformed or concurrently changed files are never overwritten.
 ai_theme_sync = true

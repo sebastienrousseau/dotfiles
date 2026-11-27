@@ -127,6 +127,30 @@ assert_output_not_contains "curl" calls
 assert_output_not_contains "brew uninstall" calls
 assert_contains "rustup update stable" "$(calls)" "the existing rustup is used"
 
+# The default install builds only the cargo tools the dotfiles use: stylua
+# (the Lua lint) and cargo-update (`dot update --globals`, checked by
+# `dot doctor`). The seven Rust development tools took 16 of the README
+# drill's 27 minutes to compile, so they wait for features.rust_dev_tools.
+DEV_TOOLS=(cargo-edit cargo-watch cargo-audit cargo-outdated cargo-expand cargo-nextest cargo-deny)
+
+test_start "default_install_builds_only_the_tools_the_dotfiles_use"
+STANDALONE=1 run
+assert_contains "cargo install --locked --version 2.5.2 stylua" "$(calls)" "stylua is installed"
+assert_contains "cargo install --locked --version 22.1.1 cargo-update" "$(calls)" "cargo-update is installed"
+for crate in "${DEV_TOOLS[@]}"; do
+  assert_output_not_contains " $crate" calls
+done
+
+test_start "rust_dev_tools_feature_builds_the_development_tools"
+printf '[data.features]\nrust_dev_tools = true\n' >"$WORK/cz/chezmoi.toml"
+env -i HOME="$WORK/cz" PATH="$STUBS:$PATH" chezmoi --config "$WORK/cz/chezmoi.toml" \
+  --source "$REPO_ROOT/defaults" --persistent-state "$WORK/cz/state" \
+  execute-template <"$REPO_ROOT/install/provision/run_onchange_26-rust-tools.sh.tmpl" >"$WORK/rust.sh"
+STANDALONE=1 run
+for crate in "${DEV_TOOLS[@]}" stylua cargo-update; do
+  assert_contains "cargo install --locked --version" "$(grep -e " $crate\$" "$CALLS")" "$crate is installed"
+done
+
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"
 [[ "$TESTS_FAILED" -eq 0 ]]

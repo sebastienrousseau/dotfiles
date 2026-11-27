@@ -15,6 +15,7 @@ These flags control shell behavior and terminal tools.
 | `alias_wrapper` | `false` | Exports `DOTFILES_ALIAS_WRAPPER=1` in zsh. Nothing reads that variable today, so the flag has no effect yet. |
 | `dms` | `true` | Dank Material Shell accent colors. Not read by any template today: `dot-theme-sync` drives DMS whenever the `dms` command is installed. |
 | `zellij` | `false` | Deploy the Zellij multiplexer config (`~/.config/zellij`) |
+| `rust_dev_tools` | `false` | Build the Rust development tools on `--provision`: cargo-edit, cargo-watch, cargo-audit, cargo-outdated, cargo-expand, cargo-nextest and cargo-deny, compiled from source (about 16 minutes). stylua and cargo-update are always installed. |
 | `ai_theme_sync` | `true` | Let `dot-theme-sync` update AI CLI appearance settings to match the theme |
 
 Each AI CLI can be opted out on its own under `[features.ai_theme_providers]`: `codex`, `claude`, `gemini`, `agy`, `qwen`, `opencode` (all `true` by default).
