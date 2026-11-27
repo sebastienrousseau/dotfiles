@@ -34,6 +34,12 @@ _dot_hook_fast "$@"
 
 VERSION="0.2.555"
 
+# chezmoi renders DOTFILES_AI into run_onchange_25-build-dot-ai-tui, and
+# install.sh applies with 1, the shipped profiles' value. A shell opened
+# before the install has none, so default it here or every chezmoi call
+# from that shell sees the script as pending (drift). An explicit 0 stays.
+export DOTFILES_AI="${DOTFILES_AI:-1}"
+
 COMMAND="${1:-}"
 shift "$(($# > 0))"
 
