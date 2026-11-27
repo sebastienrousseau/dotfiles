@@ -43,19 +43,19 @@ var cockpitCmds = []paletteItem{
 }
 
 var toolCmds = map[string][]paletteItem{
-	"claude":       {{"/compact", "summarise context", "session"}, {"/model", "switch model", "session"}, {"/resume", "resume a session", "session"}, {"/agents", "manage subagents", "session"}, {"/mcp", "MCP servers", "session"}, {"/usage", "usage & limits", "session"}, {"/init", "generate CLAUDE.md", "session"}},
-	"codex":        {{"/model", "switch model", "session"}, {"/approvals", "approval mode", "session"}, {"/status", "session status", "session"}, {"/mcp", "MCP servers", "session"}},
-	"aider":        {{"/add", "add files", "session"}, {"/drop", "drop files", "session"}, {"/diff", "show diff", "session"}, {"/commit", "commit changes", "session"}, {"/undo", "undo last edit", "session"}, {"/model", "switch model", "session"}},
-	"opencode":     {{"/model", "switch model", "session"}, {"/share", "share session", "session"}, {"/undo", "undo", "session"}},
-	"goose":        {{"/mode", "set agent mode", "session"}, {"/extension", "manage extensions", "session"}, {"/model", "switch model", "session"}},
-	"crush":        {{"/model", "switch model", "session"}, {"/help", "list commands", "session"}, {"/compact", "summarise context", "session"}},
-	"amp":          {{"/help", "list commands", "session"}, {"/thread", "manage threads", "session"}},
-	"grok":         {{"/model", "switch model", "session"}, {"/plan", "plan-first mode", "session"}, {"/mcp", "MCP servers", "session"}},
-	"copilot":      {{"/model", "switch model", "session"}, {"/clear", "clear context", "session"}},
-	"qwen":         {{"/model", "switch model", "session"}, {"/clear", "clear", "session"}},
-	"corralctl":    {{"/sync", "sync forge repos", "session"}, {"/doctor", "refresh Finder tags", "session"}},
-	"passmcp":      {{"/check", "9-phase MCP audit", "session"}, {"/graph", "capability risk graph", "session"}},
-	"draft":        {{"/verify", "verify C2PA provenance", "session"}},
+	"claude":    {{"/compact", "summarise context", "session"}, {"/model", "switch model", "session"}, {"/resume", "resume a session", "session"}, {"/agents", "manage subagents", "session"}, {"/mcp", "MCP servers", "session"}, {"/usage", "usage & limits", "session"}, {"/init", "generate CLAUDE.md", "session"}},
+	"codex":     {{"/model", "switch model", "session"}, {"/approvals", "approval mode", "session"}, {"/status", "session status", "session"}, {"/mcp", "MCP servers", "session"}},
+	"aider":     {{"/add", "add files", "session"}, {"/drop", "drop files", "session"}, {"/diff", "show diff", "session"}, {"/commit", "commit changes", "session"}, {"/undo", "undo last edit", "session"}, {"/model", "switch model", "session"}},
+	"opencode":  {{"/model", "switch model", "session"}, {"/share", "share session", "session"}, {"/undo", "undo", "session"}},
+	"goose":     {{"/mode", "set agent mode", "session"}, {"/extension", "manage extensions", "session"}, {"/model", "switch model", "session"}},
+	"crush":     {{"/model", "switch model", "session"}, {"/help", "list commands", "session"}, {"/compact", "summarise context", "session"}},
+	"amp":       {{"/help", "list commands", "session"}, {"/thread", "manage threads", "session"}},
+	"grok":      {{"/model", "switch model", "session"}, {"/plan", "plan-first mode", "session"}, {"/mcp", "MCP servers", "session"}},
+	"copilot":   {{"/model", "switch model", "session"}, {"/clear", "clear context", "session"}},
+	"qwen":      {{"/model", "switch model", "session"}, {"/clear", "clear", "session"}},
+	"corralctl": {{"/sync", "sync forge repos", "session"}, {"/doctor", "refresh Finder tags", "session"}},
+	"passmcp":   {{"/check", "9-phase MCP audit", "session"}, {"/graph", "capability risk graph", "session"}},
+	"draft":     {{"/verify", "verify C2PA provenance", "session"}},
 }
 
 func (m model) palette() []paletteItem {
