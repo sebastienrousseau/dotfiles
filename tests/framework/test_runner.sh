@@ -25,6 +25,9 @@ TESTS_DIR="$(dirname "$SCRIPT_DIR")"
 REPO_ROOT="$(dirname "$TESTS_DIR")"
 # Every suite inherits this environment; see git_env.sh.
 source "$SCRIPT_DIR/git_env.sh"
+# Once for the whole run: workers inherit a PATH of real mise installs.
+# shellcheck source=mise_env.sh disable=SC1091
+source "$SCRIPT_DIR/mise_env.sh"
 
 if [[ ! -d "$REPO_ROOT" ]]; then
   echo "Error: REPO_ROOT is not a valid directory: $REPO_ROOT" >&2

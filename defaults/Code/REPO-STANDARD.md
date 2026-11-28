@@ -166,6 +166,10 @@ this order (the template adds optional ones between them):
       osv-scanner, npm audit — whatever the ecosystem has)
 - [ ] Dependency **provenance** policy: cargo-vet or equivalent, with
       exemptions regenerated on every dep change
+- [ ] Dependencies at the strict minimum (`AGENTS.md` §11): a committed
+      baseline of third-party packages per lockfile that CI holds and
+      that only goes down, and an inventory giving each dependency's
+      reason
 - [ ] Everything pinned: actions by SHA, container bases by digest,
       lockfiles committed and `--locked` in CI
 - [ ] OpenSSF Scorecard workflow, badge in README, score ≥ 9 chased

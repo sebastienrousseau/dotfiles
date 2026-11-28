@@ -59,8 +59,10 @@ jobs:
         with:
           persist-credentials: false
 
+      # Every event, not only pull requests: after a release pull request
+      # merges, main's README pins the installer of a release that is not
+      # published until its signed tag is, and the push run would 404.
       - name: Use this branch's installer if the pinned one is unpublished
-        if: github.event_name == 'pull_request'
         run: |
           set -euo pipefail
           url="$(bash tools/ci/drill-newcomer.sh --print |
@@ -70,7 +72,7 @@ jobs:
             exit 1
           fi
           if ! curl -fsIL -o /dev/null "$url"; then
-            echo "::notice::$url is not published yet (a release pull request); running this branch's install.sh, checked against the README's digest, on this branch's source"
+            echo "::notice::$url is not published yet (a release not yet cut); running this branch's install.sh, checked against the README's digest, on this branch's source"
             echo "DRILL_INSTALLER=$GITHUB_WORKSPACE/install.sh" >>"$GITHUB_ENV"
             # The installer clones the signed release tag, which does not
             # exist until the release is published. A checkout already at
