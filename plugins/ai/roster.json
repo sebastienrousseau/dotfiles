@@ -95,35 +95,35 @@
       "chat": true
     },
     {
-      "name": "cursor-agent",
-      "bin": "cursor-agent",
+      "name": "continue",
+      "bin": "cn",
       "aliases": [
-        "cursor"
+        "cn"
       ],
-      "title": "Cursor CLI",
-      "summary": "Cursor's terminal agent",
+      "title": "Continue CLI",
+      "summary": "Continue's open-source terminal coding agent",
       "group": "agents",
       "role": "agent",
       "processes": [
-        "cursor-agent"
+        "cn"
       ],
-      "package": "",
-      "native": "install_cursor_native",
+      "package": "npm:@continuedev/cli",
+      "native": "",
       "chat": true
     },
     {
-      "name": "grok",
-      "bin": "grok",
+      "name": "cline",
+      "bin": "cline",
       "aliases": [],
-      "title": "Grok Build",
-      "summary": "xAI's terminal coding agent",
+      "title": "Cline CLI",
+      "summary": "Cline's open-source terminal coding agent",
       "group": "agents",
       "role": "agent",
       "processes": [
-        "grok"
+        "cline"
       ],
-      "package": "",
-      "native": "install_grok_native",
+      "package": "npm:cline",
+      "native": "",
       "chat": true
     },
     {

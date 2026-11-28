@@ -65,6 +65,36 @@ out="$(DRILL_README="$WORK/no-quick.md" bash "$DRILL" --print 2>&1)" || rc=$?
 assert_equals "1" "$rc" "no Quick Start block fails"
 assert_contains "no bash block" "$out" "and says why"
 
+# DRILL_INSTALLER: a release pull request's README pins an installer that
+# is not published yet; the drill copies the branch's file in place of the
+# download, and the README's digest check still runs.
+cat >"$WORK/pinned.md" <<'EOF'
+## Install
+
+```bash
+installer_dir="$(mktemp -d)" && curl -fsSLo "$installer_dir/dotfiles-install.sh" https://github.com/o/r/releases/download/v9.9.9/dotfiles-install-9.9.9.sh
+echo "abc  $installer_dir/dotfiles-install.sh" | sha256sum -c - && bash "$installer_dir/dotfiles-install.sh"
+```
+
+## Quick Start
+
+```bash
+dot doctor
+```
+EOF
+
+test_start "local_installer_replaces_only_the_download"
+out="$(DRILL_INSTALLER=/repo/install.sh DRILL_README="$WORK/pinned.md" bash "$DRILL" --print)"
+assert_contains "cp \"/repo/install.sh\" \"\$installer_dir/dotfiles-install.sh\"" "$out" "the download becomes a copy"
+assert_contains "echo \"abc  \$installer_dir/dotfiles-install.sh\" | sha256sum -c -" "$out" "the digest check stays"
+assert_equals "" "$(grep curl <<<"$out" || true)" "nothing is downloaded"
+
+test_start "local_installer_refuses_a_block_without_a_download"
+rc=0
+out="$(DRILL_INSTALLER=/repo/install.sh DRILL_README="$WORK/README.md" bash "$DRILL" --print 2>&1)" || rc=$?
+assert_equals "1" "$rc" "nothing to replace fails rather than running the README unchanged"
+assert_contains "no installer download to replace" "$out" "and says why"
+
 test_start "repository_readme_has_both_blocks"
 out="$(bash "$DRILL" --print)"
 assert_contains "bash \"\$installer_dir/dotfiles-install.sh\"" "$out" "the verified installer runs"

@@ -1,6 +1,6 @@
 # Active profile - change this to switch configurations
-dotfiles_version = "0.2.554"
-previous_dotfiles_version = "0.2.553"
+dotfiles_version = "0.2.555"
+previous_dotfiles_version = "0.2.554"
 profile = "laptop"
 
 # Machine preset — set per-host in ~/.config/chezmoi/chezmoi.toml:
@@ -48,6 +48,15 @@ dms = true
 # Terminal multiplexers
 zellij = false
 
+# Rust development tools (cargo-edit, cargo-watch, cargo-audit,
+# cargo-outdated, cargo-expand, cargo-nextest, cargo-deny), compiled from
+# source by --provision: about 16 minutes. stylua and cargo-update, which the
+# dotfiles use, are always installed. Enable per host in
+# ~/.config/chezmoi/chezmoi.toml:
+#   [data.features]
+#   rust_dev_tools = true
+rust_dev_tools = false
+
 # Wallpaper-aware AI CLI appearance adapters. Provider configs remain
 # user-owned: malformed or concurrently changed files are never overwritten.
 ai_theme_sync = true
@@ -84,6 +93,13 @@ max_loaded_models = 1
 num_parallel = 1
 context_length = 32768
 keep_alive = "30m"
+# A Mac with at most low_memory_gb of unified memory gets these instead: a
+# 32K context on an 8 GB machine pushes into SSD swap, and a 2m keep-alive
+# hands the model's ~3 GB back to macOS soon after the last prompt.
+# Set memory_gb in a host's chezmoi.toml [data.ollama] to skip detection.
+low_memory_gb = 8
+low_memory_context_length = 8192
+low_memory_keep_alive = "2m"
 
 [features.ai_theme_providers]
 codex = true
@@ -169,11 +185,13 @@ tpm_commit = "7bdb7ca33c9cc6440a600202b50142f401b6fe21" # pragma: allowlist secr
 "npm:opencode-ai" = "1.19.6"
 "npm:autohand-cli" = "0.9.11"
 "npm:@qwen-code/qwen-code" = "0.28.0"
+"npm:@continuedev/cli" = "1.5.47"
+"npm:cline" = "3.0.74"
 "aqua:charmbracelet/crush" = "0.101.0"
 "pipx:aider-chat" = "0.86.2"
 "aqua:ollama/ollama" = "0.40.17"
 "opencode" = "1.19.6"
-"github:sebastienrousseau/corralctl" = "0.0.56"
+"github:sebastienrousseau/corralctl" = "0.0.57"
 "github:sebastienrousseau/passmcp" = "0.0.10"
 "github:sebastienrousseau/passmcp-graph" = "0.0.10"
 "github:sebastienrousseau/passmcp-lsp" = "0.0.10"

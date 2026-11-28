@@ -85,23 +85,23 @@ group = "agents"
 role = "agent"
 
 [[tool]]
-name = "cursor-agent"
-bin = "cursor-agent"
-title = "Cursor CLI"
-summary = "Cursor's terminal agent"
-native = "install_cursor_native"
-aliases = ["cursor"]
+name = "continue"
+bin = "cn"
+title = "Continue CLI"
+summary = "Continue's open-source terminal coding agent"
+aliases = ["cn"]
 group = "agents"
 role = "agent"
+package = "npm:@continuedev/cli"
 
 [[tool]]
-name = "grok"
-bin = "grok"
-title = "Grok Build"
-summary = "xAI's terminal coding agent"
-native = "install_grok_native"
+name = "cline"
+bin = "cline"
+title = "Cline CLI"
+summary = "Cline's open-source terminal coding agent"
 group = "agents"
 role = "agent"
+package = "npm:cline"
 
 [[tool]]
 name = "kimi"

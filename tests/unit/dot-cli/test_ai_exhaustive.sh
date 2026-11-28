@@ -27,7 +27,7 @@ trap cov_teardown_sandbox EXIT
 cov_setup_sandbox
 
 MB="$DOTFILES_COV_TMPDIR/bin"
-AI_TOOLS=(claude codex copilot goose crush amp cursor-agent grok opencode aider
+AI_TOOLS=(claude codex copilot goose crush amp opencode aider
   kimi autohand vibe qwen agy sgpt ollama dot-ai-serve dot-ai-proxy
   dot-ai-log dot-ai-tui)
 
@@ -85,7 +85,6 @@ ex run ai run claude "hello"           # _ai_oneshot → run_ai_with_context
 ex bridge_codex codex "hi"             # bridge + non-claude routing source
 ex bridge_crush crush "hi"             # new agent: crush run
 ex bridge_amp amp "hi"                 # new agent: amp -x
-ex bridge_cursor cursor-agent "hi"     # new agent: cursor-agent -p
 ex bridge_grok grok "hi"               # new agent: grok -p
 ex bridge_kimi kimi "hi"               # new agent: kimi -p --quiet
 ex oneshot_crush ai crush "hi"         # dot ai <newtool> → _ai_oneshot routing
@@ -118,7 +117,6 @@ ex install_all ai install all             # bulk install loop
 ex install_claude ai install claude       # native installer dispatch
 ex install_codex ai install codex         # mise-package install path
 ex install_crush ai install crush         # npm-package via mise
-ex install_cursor ai install cursor-agent # native installer dispatch
 ex install_kimi ai install kimi           # native installer dispatch
 ex install_unknown ai install nope        # unmapped tool
 rm -f "$HOME/.cache/dotfiles/ai/status.tsv"

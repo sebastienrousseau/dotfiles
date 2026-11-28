@@ -169,5 +169,15 @@ cfg="$H/.config/chezmoi/chezmoi.toml"
 assert_file_contains "$cfg" 'email = "ada@example.com"' "identity still seeded"
 assert_equals "0" "$(grep -c signingkey "$cfg" 2>/dev/null)" "no empty signingkey entry"
 
+# helpers <silent>: success and step from install.sh, colours stripped.
+helpers() {
+  env -i HOME="$(mktemp -d)" PATH="$PATH" DOTFILES_SILENT="$1" bash -c 'source "$1"; success "done"; step "working"' \
+    _ "$REPO_ROOT/install.sh" 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | paste -sd '|' -
+}
+
+test_start "install_progress_shows_unless_silent"
+assert_equals "Success! done|==> working" "$(helpers 0)" "success and step print by default"
+assert_equals "" "$(helpers 1)" "--silent prints neither"
+
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

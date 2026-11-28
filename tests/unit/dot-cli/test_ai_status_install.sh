@@ -8,7 +8,7 @@
 # the "missing providers" flow behind `dot ai tools` (gum "Install all",
 # "Choose which to install", pick-nothing, no-gum tips), the launcher
 # tip without gum, the run log hook, the bridge's --help / bad --style /
-# cursor alias, the interactive-install prompts (gum confirm, plain read,
+# cursor alias (no longer offered), the interactive-install prompts (gum confirm, plain read,
 # mise failure, no mise) and the deprecated verbs (local, ai-query,
 # tools install). Everything runs against sandboxed shims — no AI CLI,
 # mise, gum or network call ever leaves the sandbox.
@@ -270,11 +270,13 @@ run_ai "$TOOLS:$BASE_PATH" ai claude --style no-such-style "hi"
 assert_equals 1 "$RC" "unknown style exits 1"
 assert_contains "Pattern not found" "$OUT" "unknown style reported"
 
+# cursor-agent is not offered (docs/AI.md): installed or not, the `cursor`
+# alias no longer launches it.
 mk_tool cursor-agent
-test_start "ai_bridge_cursor_alias"
+test_start "ai_bridge_cursor_not_offered"
 run_ai "$TOOLS:$BASE_PATH" cursor "hi"
-assert_equals 0 "$RC" "cursor alias exits 0"
-assert_contains "cursor-agent-ran" "$OUT" "cursor resolves to cursor-agent"
+assert_not_equals 0 "$RC" "cursor is not a tool dot ai knows"
+assert_equals "" "$(grep -F cursor-agent-ran <<<"$OUT")" "cursor-agent does not run"
 
 test_start "ai_bridge_raw_with_style"
 DOT_AI_RAW=1 run_ai "$TOOLS:$BASE_PATH" ai claude --style architect "hi"

@@ -335,6 +335,19 @@ _validate_theme_name() {
   fi
 }
 
+# _theme_transaction_target_lines FULL: theme_transaction_targets, then, when
+# FULL is true and chezmoi is installed, every chezmoi-managed file; one per
+# line, duplicates and empty lines left to the caller.
+_theme_transaction_target_lines() {
+  local target
+  theme_transaction_targets
+  if [[ "$1" == true ]] && command -v chezmoi >/dev/null 2>&1; then
+    while IFS= read -r -d '' target; do
+      printf '%s\n' "$target"
+    done < <(chezmoi managed --include files --path-style absolute --nul-path-separator 2>/dev/null || true)
+  fi
+}
+
 # All files directly or indirectly owned by one theme operation. Existing
 # files are copied into the private operation directory before the first
 # mutation; absent files are recorded so rollback can remove newly-created
@@ -1784,7 +1797,7 @@ main() {
   local do_auto=false
   local do_plan=false
   local do_json=false
-  local lock_timeout="${DOT_THEME_LOCK_TIMEOUT:-10}"
+  local lock_timeout="" # empty: DOT_THEME_LOCK_TIMEOUT, else the library's default
   local new_theme=""
 
   # Parse arguments — accept a flag before OR after the theme name.
@@ -1904,17 +1917,7 @@ main() {
   local transaction_target
   while IFS= read -r transaction_target; do
     [[ -n "$transaction_target" ]] && transaction_targets+=("$transaction_target")
-  done < <(theme_transaction_targets | awk '!seen[$0]++')
-  if [[ "$do_full" == true ]] && command -v chezmoi >/dev/null 2>&1; then
-    while IFS= read -r -d '' transaction_target; do
-      [[ -n "$transaction_target" ]] && transaction_targets+=("$transaction_target")
-    done < <(chezmoi managed --include files --path-style absolute --nul-path-separator 2>/dev/null || true)
-  fi
-  local unique_transaction_targets=()
-  while IFS= read -r transaction_target; do
-    [[ -n "$transaction_target" ]] && unique_transaction_targets+=("$transaction_target")
-  done < <(printf '%s\n' "${transaction_targets[@]}" | awk '!seen[$0]++')
-  transaction_targets=("${unique_transaction_targets[@]}")
+  done < <(_theme_transaction_target_lines "$do_full" | awk '!seen[$0]++')
   if ! _theme_txn_begin "$prev_theme" "$target_theme" "$requested_preference" \
     "$lock_timeout" "${transaction_targets[@]}"; then
     _err "Transaction" "could not acquire lock or snapshot targets"

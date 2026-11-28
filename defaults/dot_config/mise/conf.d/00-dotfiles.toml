@@ -96,7 +96,7 @@ bat = "latest"
 codex = "0.170.0"
 # corralctl, passmcp, and draft — the AI Ecosystem & Governance Suite,
 # managed and updated globally via mise (`github:sebastienrousseau/...`).
-"github:sebastienrousseau/corralctl" = { version = "0.0.56", minimum_release_age = "0s" }
+"github:sebastienrousseau/corralctl" = { version = "0.0.57", minimum_release_age = "0s" }
 "github:sebastienrousseau/passmcp" = { version = "0.0.10", minimum_release_age = "0s" }
 "github:sebastienrousseau/passmcp-graph" = { version = "0.0.10", minimum_release_age = "0s" }
 "github:sebastienrousseau/passmcp-lsp" = { version = "0.0.10", minimum_release_age = "0s" }
@@ -180,6 +180,8 @@ opencode = "1.19.6"
 # scoped to autohand-cli alone.
 "npm:autohand-cli" = { version = "0.9.11", allow_low_downloads = true, allow_builds = ["autohand-cli"] }
 "npm:@qwen-code/qwen-code" = "0.28.0"
+"npm:@continuedev/cli" = "1.5.47"
+"npm:cline" = "3.0.74"
 # "pipx:mistral-vibe" = "latest"  # disabled 2026-05-12: dep `mistralai` quarantined on PyPI; re-enable when restored
 
 # Editor tooling. Global npm packages live inside each Node version's

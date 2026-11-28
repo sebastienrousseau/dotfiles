@@ -50,13 +50,16 @@ render() { # <template> <os> <out> [prelude]
     --persistent-state "$WORK/state.boltdb" execute-template >"$3" 2>"$3.err"
 }
 SERVER_OFF='{{- $_ := set $.ollama "server" false -}}'
+# Fixed memory, so a render never depends on the host running the test.
+MEM_16='{{- $_ := set $.ollama "memory_gb" 16 -}}'
+MEM_8='{{- $_ := set $.ollama "memory_gb" 8 -}}'
 
 plist_field() { # <plist> <python expression over d>
   "$PY3" -c 'import plistlib,sys; d=plistlib.load(open(sys.argv[1],"rb")); print(eval(sys.argv[2]))' "$1" "$2"
 }
 
 test_start "ollama_agent_plist_runs_the_mise_pin_with_tuned_settings"
-render "$PLIST_TEMPLATE" darwin "$WORK/agent.plist"
+render "$PLIST_TEMPLATE" darwin "$WORK/agent.plist" "$MEM_16"
 assert_equals 0 $? "plist renders: $(cat "$WORK/agent.plist.err")"
 assert_equals "/DOT_HOME/.local/share/mise/shims/ollama serve" \
   "$(plist_field "$WORK/agent.plist" '" ".join(d["ProgramArguments"])')" \
@@ -69,6 +72,13 @@ assert_equals "30m|1|Interactive" \
   "the model stays loaded for keep_alive, mise never downloads at login, and launchd does not throttle the server"
 assert_equals "True True" "$(plist_field "$WORK/agent.plist" 'd["RunAtLoad"], d["KeepAlive"]' | tr -d '(),')" \
   "the server starts at login and is restarted if it exits"
+
+test_start "ollama_agent_plist_caps_context_and_keep_alive_on_8gb"
+render "$PLIST_TEMPLATE" darwin "$WORK/agent-8gb.plist" "$MEM_8"
+assert_equals 0 $? "plist renders: $(cat "$WORK/agent-8gb.plist.err")"
+assert_equals "8192|2m|q8_0|1" \
+  "$(plist_field "$WORK/agent-8gb.plist" '"|".join(d["EnvironmentVariables"][k] for k in ("OLLAMA_CONTEXT_LENGTH","OLLAMA_KEEP_ALIVE","OLLAMA_KV_CACHE_TYPE","OLLAMA_FLASH_ATTENTION"))')" \
+  "an 8 GB Mac gets an 8K context and a 2m keep-alive, keeping the q8_0 cache and flash attention"
 
 test_start "ollama_agent_plist_is_empty_off_macos_or_when_disabled"
 render "$PLIST_TEMPLATE" linux "$WORK/agent-linux.plist"

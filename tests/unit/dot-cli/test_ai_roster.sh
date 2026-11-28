@@ -72,10 +72,19 @@ assert_contains "cl names two tools" "$err" "the error names the clash"
 test_start "roster_lookups_resolve_names_and_aliases"
 source "$REPO_ROOT/lib/dot/ai-roster.sh"
 assert_equals "claude" "$(ai_roster_bin cl)" "cl is claude"
-assert_equals "cursor-agent" "$(ai_roster_bin cursor)" "cursor runs cursor-agent"
 assert_equals "1" "$(ai_roster_bin nosuchtool >/dev/null && echo 0 || echo 1)" "an unknown name is not in the roster"
 assert_equals "pipx:aider-chat[uvx_args=--python 3.12]" "$(ai_roster_package aider)" "a package with = in it survives the lookup"
-assert_equals "install_cursor_native" "$(ai_roster_native cursor-agent)" "native installers are looked up by binary"
+assert_equals "install_kimi_native" "$(ai_roster_native kimi)" "native installers are looked up by binary"
+# Continue and Cline install from npm packages with provenance, through mise.
+assert_equals "cn" "$(ai_roster_bin continue)" "continue runs cn"
+assert_equals "cn" "$(ai_roster_bin cn)" "cn is continue's alias"
+assert_equals "npm:@continuedev/cli" "$(ai_roster_package cn)" "continue installs @continuedev/cli"
+assert_equals "npm:cline" "$(ai_roster_package cline)" "cline installs the cline package"
+# cursor-agent and grok are not offered: their installers run an unverified
+# binary (docs/AI.md). Neither name, nor cursor's alias, is in the roster.
+for name in cursor-agent cursor grok; do
+  assert_equals "1" "$(ai_roster_bin "$name" >/dev/null && echo 0 || echo 1)" "$name is not in the roster"
+done
 # No shipped tool needs a separate login today, so the lookup reads a stand-in.
 assert_equals "example-cli login" "$(AI_ROSTER_LOGIN_OF=$'example-cli=example-cli login\n' ai_roster_login example-cli)" \
   "a tool's login command comes from the roster"
@@ -126,13 +135,13 @@ test_start "roster_tools_resolve_an_install_method"
 methods="$(bash -c '
   source "$1/plugins/ai/libexec/ai/ai-install.sh"
   source "$1/plugins/ai/libexec/ai/ai-provision.sh"
-  for b in claude codex opencode cursor-agent passmcp-graph vibe; do
+  for b in claude codex opencode kimi passmcp-graph vibe; do
     printf "%s=%s\n" "$b" "$(ai_install_method "$b" || echo none)"
   done' _ "$REPO_ROOT")"
 assert_contains "claude=native:install_claude_native" "$methods" "claude uses its native installer"
 assert_contains "codex=mise:npm:@openai/codex" "$methods" "codex installs through mise"
 assert_contains "opencode=mise:opencode" "$methods" "opencode installs through mise's own registry"
-assert_contains "cursor-agent=native:install_cursor_native" "$methods" "cursor-agent uses its native installer"
+assert_contains "kimi=native:install_kimi_native" "$methods" "kimi uses its native installer"
 assert_contains "passmcp-graph=mise:github:sebastienrousseau/passmcp-graph" "$methods" "passmcp companions install through mise"
 assert_contains "vibe=none" "$methods" "vibe has no installer in the roster"
 

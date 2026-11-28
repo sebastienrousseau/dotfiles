@@ -54,7 +54,7 @@ dot_apply_yes_flag() {
 _dot_mise_tag() {
   local env="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/versions.env" tag=""
   [[ -f "$env" ]] && tag="$(sed -n 's/^MISE_TAG="\{0,1\}\([^"]*\)"\{0,1\}$/\1/p' "$env" | head -1)"
-  [[ "$tag" == v* ]] || tag="v2026.3.8"
+  [[ "$tag" == v* ]] || tag="v2026.11.7"
   printf '%s' "$tag"
 }
 

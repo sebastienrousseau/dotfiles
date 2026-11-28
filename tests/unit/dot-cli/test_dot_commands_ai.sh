@@ -112,8 +112,7 @@ assert_file_contains "$OUT" "Available styles" "styles heading"
 assert_file_contains "$OUT" "  - architect" "sandbox style listed"
 
 # ── status listing ────────────────────────────────────────────────────────
-for p in "copilot 1.0.11" "crush 0.9.4" "amp 0.0.17" "cursor-agent 2025.09.12" \
-  "grok 0.3.1" "kimi 1.4.0"; do
+for p in "copilot 1.0.11" "crush 0.9.4" "amp 0.0.17" "kimi 1.4.0"; do
   # shellcheck disable=SC2086
   provider $p
 done
@@ -126,8 +125,6 @@ assert_equals "0" "$rc" "tools exits 0 off a TTY"
 for row in "Copilot CLI|1.0.11 — GitHub Copilot in the terminal" \
   "Crush|0.9.4 — Charm's glamorous TUI coding agent" \
   "Amp|0.0.17 — Sourcegraph's agentic coder" \
-  "Cursor CLI|2025.09.12 — Cursor's terminal agent" \
-  "Grok Build|0.3.1 — xAI's terminal coding agent" \
   "Kimi CLI|1.4.0 — Moonshot AI's terminal coding agent"; do
   name="${row%%|*}"
   line="$(grep -F "$name " "$OUT" | head -1)"
@@ -199,7 +196,7 @@ else
   # Every row cached so the missing-provider prompt stays out of the way.
   mkdir -p "$(dirname "$CACHE")"
   : >"$CACHE"
-  for b in claude codex goose crush amp cursor-agent grok kimi opencode \
+  for b in claude codex goose crush amp kimi opencode \
     autohand vibe qwen sgpt agy; do
     printf '%s\t0\t\n' "$b" >>"$CACHE"
   done

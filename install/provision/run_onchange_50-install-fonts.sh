@@ -65,21 +65,23 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 
 log_info "Installing Nerd Fonts ($FONT_VERSION) for $OS_TYPE..."
 
-# install_font <font>: download and verify one font zip, then check every
-# entry (no links, no paths leaving the directory) before unzip -o writes
-# into the font directory. Run in a subshell: a refusal exits it.
+# install_font <font>: download and verify one font archive, then check every
+# entry (no links, no paths leaving the directory) before it is extracted into
+# the font directory. Run in a subshell: a refusal exits it. The .tar.xz, not
+# the .zip: JetBrainsMono.zip is 134 MB, over the 100 MiB download cap, and
+# its .tar.xz is 7 MB (tar reads xz on GNU and BSD systems; no unzip needed).
 install_font() {
   local font="$1"
   [[ "${DOTFILES_SILENT:-0}" == "1" ]] || echo "   -> Processing $font..."
   download_verified_asset \
-    "${NERD_FONT_URL}/${font}.zip" \
+    "${NERD_FONT_URL}/${font}.tar.xz" \
     "$NERD_FONT_CHECKSUM_URL" \
-    "${font}.zip" \
-    "$TMP_DIR/${font}.zip" \
+    "${font}.tar.xz" \
+    "$TMP_DIR/${font}.tar.xz" \
     104857600
-  archive_paths_are_safe zip "$TMP_DIR/${font}.zip"
-  unzip -o -q "$TMP_DIR/${font}.zip" -d "$FONT_DIR"
-  rm -f "$TMP_DIR/${font}.zip"
+  archive_paths_are_safe tar "$TMP_DIR/${font}.tar.xz"
+  tar -xf "$TMP_DIR/${font}.tar.xz" -C "$FONT_DIR"
+  rm -f "$TMP_DIR/${font}.tar.xz"
 }
 
 # wait_all <pid>...: 0 only when every background install succeeded.

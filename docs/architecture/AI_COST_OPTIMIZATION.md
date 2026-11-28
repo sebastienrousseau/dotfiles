@@ -117,8 +117,6 @@ Providers tracked today (the agents in `plugins/ai/roster.toml`):
 | Goose | `goose` | yes | no |
 | Crush | `crush` | yes | no |
 | Amp | `amp` | yes | no |
-| Cursor CLI | `cursor-agent` | yes | no |
-| Grok Build | `grok` | yes | no |
 | Kimi CLI | `kimi` | yes | no |
 | Antigravity CLI | `agy` | yes | no |
 | Aider | `aider` | yes | no |

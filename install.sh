@@ -17,36 +17,24 @@ set -euo pipefail
 
 # Bootstrap writes secret-adjacent files (chezmoi config, age keys, ssh tooling,
 # archives) under $HOME: 077 keeps other accounts out; call sites chmod to relax.
+# The dotfiles are applied under their shells' umask (dot_profile): chezmoi
+# takes target modes from it, and 077 or 002 showed every file as drifted.
+DOTFILES_APPLY_UMASK=0022
 umask 077
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-BOLD='\033[1m'
-NC='\033[0m'
+RED='\033[0;31m' GREEN='\033[0;32m' BLUE='\033[0;34m' CYAN='\033[0;36m' BOLD='\033[1m' NC='\033[0m'
 
 SOURCE_DIR="${SOURCE_DIR:-$HOME/.dotfiles}"
 LEGACY_SOURCE_DIR="$HOME/.local/share/chezmoi"
 CHEZMOI_CONFIG_DIR="$HOME/.config/chezmoi"
 CHEZMOI_CONFIG_FILE="$CHEZMOI_CONFIG_DIR/chezmoi.toml"
 
-step() {
-  if [[ "${DOTFILES_SILENT:-0}" != "1" ]]; then
-    printf '%b\n' "${BOLD}${BLUE}==>${NC} ${BOLD}$1${NC}"
-  fi
-}
-
+step() { [[ "${DOTFILES_SILENT:-0}" == "1" ]] || printf '%b\n' "${BOLD}${BLUE}==>${NC} ${BOLD}$1${NC}"; }
 error() {
   printf '%b\n' "${RED}Error:${NC} $1" >&2
   exit 1
 }
-
-success() {
-  if [[ "${DOTFILES_SILENT:-0}" != "1" ]]; then
-    printf '%b\n' "${GREEN}Success!${NC} $1"
-  fi
-}
+success() { [[ "${DOTFILES_SILENT:-0}" == "1" ]] || printf '%b\n' "${GREEN}Success!${NC} $1"; }
 
 toml_escape() { printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'; }
 
@@ -108,17 +96,19 @@ apply_minimal_profile_overrides() {
 CHARM_GPG_EXPECTED_FPR="ED927B38BE981E53CA09153D03BBF595D4DFD35C" # pragma: allowlist secret
 
 # charm_keyring_verify <keyring>: apt trusts every primary key in a signed-by
-# file, so it must hold exactly the pinned one; else remove it and return 1.
+# file, so it must hold exactly the pinned one; else say why, remove it, return 1.
 charm_keyring_verify() {
-  local keyring="$1" keys pub_count primary_fpr
-  keys="$(gpg --no-default-keyring --keyring "$keyring" \
-    --with-colons --list-keys 2>/dev/null || true)"
+  local keyring="$1" keys pub_count primary_fpr h why
+  h="$(mktemp -d)" # throwaway GnuPG home: with a broken ~/.gnupg, gpg listed 0 keys
+  keys="$(GNUPGHOME="$h" gpg --batch --no-default-keyring --keyring "$keyring" --with-colons --list-keys 2>"$h/err" || true)"
   pub_count="$(grep -c '^pub:' <<<"$keys" || true)"
   primary_fpr="$(awk -F: '/^pub:/ { pub = 1; next } pub && /^fpr:/ { print $10; exit }' <<<"$keys")"
-  if [[ "$pub_count" == 1 && "$primary_fpr" == "$CHARM_GPG_EXPECTED_FPR" ]]; then
-    return 0
-  fi
+  why="$(grep -v -m 1 'trustdb created' "$h/err" || true)" && rm -rf "$h"
+  [[ "$pub_count" != 1 || "$primary_fpr" != "$CHARM_GPG_EXPECTED_FPR" ]] || return 0
   echo "Error: Charm keyring must hold only $CHARM_GPG_EXPECTED_FPR (found ${pub_count:-0} key(s), first ${primary_fpr:-none})" >&2
+  echo "  keyring: $(stat -c '%A owner %u:%g, %s bytes' "$keyring" 2>/dev/null ||
+    stat -f '%Sp owner %u:%g, %z bytes' "$keyring" 2>&1)" >&2
+  [[ -z "$why" ]] || echo "  $why" >&2
   sudo rm -f "$keyring"
   return 1
 }
@@ -175,14 +165,23 @@ detect_container_env() {
 
 # apply_source <want_minimal>: seed the git identity, the minimal overrides if 1, apply.
 apply_source() {
-  local -a flags=()
   seed_git_identity
   if [[ "$1" -eq 1 ]]; then
     step "Applying minimal profile overrides..."
     apply_minimal_profile_overrides
   fi
-  [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]] || flags=(--force --no-tty)
-  chezmoi apply ${flags[@]+"${flags[@]}"}
+  chezmoi_apply
+}
+
+# chezmoi_apply [args]: apply as the dotfiles' shells will see it (umask 022,
+# DOTFILES_AI=1, from dot_profile), or a fresh install shows as drift.
+chezmoi_apply() {
+  local -a flags=("$@")
+  [[ "${DOTFILES_NONINTERACTIVE:-0}" != "1" ]] || flags+=(--force --no-tty)
+  (
+    umask "$DOTFILES_APPLY_UMASK"
+    DOTFILES_AI=1 chezmoi apply ${flags[@]+"${flags[@]}"}
+  )
 }
 
 # _backup_one <path>: copy a file or symlink to BACKUP_DIR at its $HOME-relative
@@ -232,7 +231,7 @@ show_help() {
 Usage: install.sh [version] [options]
 
 Arguments:
-  version       The version (tag or branch) to install (default: v0.2.554)
+  version       The version (tag or branch) to install (default: v0.2.555)
 
 Options:
   --help        Show this help message
@@ -258,16 +257,16 @@ bootstrap_gum() {
   if [[ "$OS" == "Darwin" ]] && command -v brew >/dev/null; then
     brew install gum >/dev/null 2>&1
   elif [[ "$target_os" == "debian" || "$target_os" == "wsl2" ]]; then
-    sudo mkdir -p /etc/apt/keyrings
+    sudo install -d -m 0755 /etc/apt/keyrings
     charm_key_tmp="$(mktemp -t charm-key.XXXXXX)"
     if ! curl --proto '=https' --tlsv1.2 -fsSL \
       -o "$charm_key_tmp" https://repo.charm.sh/apt/gpg.key; then
       rm -f "$charm_key_tmp"
       return 1
     fi
-    sudo gpg --batch --yes --dearmor \
-      -o /etc/apt/keyrings/charm.gpg "$charm_key_tmp"
-    rm -f "$charm_key_tmp"
+    sudo gpg --batch --yes --dearmor -o "$charm_key_tmp.gpg" "$charm_key_tmp"
+    sudo install -m 0644 "$charm_key_tmp.gpg" /etc/apt/keyrings/charm.gpg # readable whatever root's umask
+    sudo rm -f "$charm_key_tmp" "$charm_key_tmp.gpg"
     charm_keyring_verify /etc/apt/keyrings/charm.gpg || return 1
     echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
     sudo apt-get update && sudo apt-get install gum -y >/dev/null 2>&1
@@ -346,8 +345,8 @@ install_chezmoi() {
   fi
   if command -v brew >/dev/null; then
     echo "   Installing chezmoi via Homebrew..."
-    brew install chezmoi >/dev/null 2>&1
-    return
+    brew install chezmoi >"${TMPDIR:-/tmp}/dotfiles-brew-chezmoi.log" 2>&1 && return 0
+    echo "   Homebrew could not install chezmoi (${TMPDIR:-/tmp}/dotfiles-brew-chezmoi.log); using the verified binary."
   fi
   local bin_dir="$HOME/.local/bin" version="${CHEZMOI_VERSION:-2.74.1}" verified_installer
   mkdir -p "$bin_dir"
@@ -408,10 +407,7 @@ parse_install_args() {
       --minimal) minimal=1 ;;
       --provision) provision=1 ;;
       --all) provision=1 provision_all=1 ;;
-      -*)
-        # Catch single-dash and double-dash unknowns the same way.
-        error "Unknown option: $arg"
-        ;;
+      -*) error "Unknown option: $arg" ;; # single- and double-dash alike
       *) set_version_arg "$arg" ;;
     esac
   done
@@ -420,11 +416,9 @@ parse_install_args() {
 # set_version_arg <arg>: the positional version, once, and a semver (v optional):
 # `foobar` must not start a 30s+ download (install.sh fuzz harness, #881).
 set_version_arg() {
-  if [[ $version_set -eq 1 ]]; then
-    error "Multiple versions specified: $version and $1"
-  fi
+  [[ $version_set -eq 0 ]] || error "Multiple versions specified: $version and $1"
   if [[ ! "$1" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-+][a-zA-Z0-9.-]+)?$ ]]; then
-    error "Unrecognized positional argument '$1' — expected a semver version (e.g. v0.2.554)."
+    error "Unrecognized positional argument '$1' — expected a semver version (e.g. v0.2.555)."
   fi
   version="$1"
   version_set=1
@@ -513,6 +507,10 @@ provision_toolchain() {
     source "$SOURCE_DIR/install/lib/provision.sh"
     run_provision "$SOURCE_DIR" ${3:+--all} ||
       error "Provisioning failed (above). Fix it, then re-run: bash \"$SOURCE_DIR/install.sh\" --provision"
+    # New tools change what templates render. --force: since the first
+    # apply, only vendor installers (a PATH line in .bashrc) changed files.
+    step "Applying the dotfiles with the new toolchain..."
+    chezmoi_apply --force
   else
     step "Configs deployed. To also install the toolchain (packages, fonts, tools):"
     echo "   bash \"$SOURCE_DIR/install.sh\" --provision    # or DOTFILES_PROVISION=1"
@@ -559,7 +557,7 @@ backup_existing() {
 }
 
 main() {
-  local version="v0.2.554" version_set=0 minimal=0 want_minimal=0
+  local version="v0.2.555" version_set=0 minimal=0 want_minimal=0
   local provision="${DOTFILES_PROVISION:-0}" provision_all=""
   parse_install_args "$@"
 

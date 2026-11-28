@@ -4,8 +4,10 @@
 # Drill A1, the newcomer: on a fresh machine, run every command of the
 # README's Install and Quick Start blocks, in order and as written, then
 # `dot doctor --json`. Passes when that reports no failures and the whole
-# drill took at most DRILL_BUDGET seconds (default 300). Nothing is added
-# that the README does not show: no environment variable, no extra step.
+# drill took at most DRILL_BUDGET seconds (default 1200: the full toolchain
+# took about 14 minutes on Ubuntu 24.04, 4 CPUs, in November 2026). Nothing
+# is added that the README does not show: no environment variable, no extra
+# step.
 #
 #   tools/ci/drill-newcomer.sh            # run the drill (changes $HOME)
 #   tools/ci/drill-newcomer.sh --print    # print the commands it would run
@@ -16,7 +18,7 @@
 set -euo pipefail
 
 README="${DRILL_README:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/README.md}"
-BUDGET="${DRILL_BUDGET:-300}"
+BUDGET="${DRILL_BUDGET:-1200}"
 
 # readme_block HEADING: the first ```bash block under `## HEADING`.
 readme_block() {
@@ -37,7 +39,27 @@ drill_script() {
     echo "drill: README has no bash block under Install or Quick Start" >&2
     return 1
   fi
+  install="$(local_installer "$install")" || return 1
   printf '%s\n%s\n' "$install" "$quick"
+}
+
+# local_installer INSTALL_BLOCK: with DRILL_INSTALLER set, the block with its
+# download replaced by a copy of that file, and nothing else changed: the
+# README's digest check still runs against it. The workflow sets it on a
+# release pull request, whose README pins an installer not published yet.
+local_installer() {
+  local swapped
+  [[ -n "${DRILL_INSTALLER:-}" ]] || {
+    printf '%s\n' "$1"
+    return
+  }
+  swapped="$(printf '%s\n' "$1" | sed -E \
+    "s#curl -fsSLo \"\\\$installer_dir/dotfiles-install\\.sh\" https://[^ ]+#cp \"$DRILL_INSTALLER\" \"\$installer_dir/dotfiles-install.sh\"#")"
+  if [[ "$swapped" == "$1" ]]; then
+    echo "drill: DRILL_INSTALLER is set but the Install block has no installer download to replace" >&2
+    return 1
+  fi
+  printf '%s\n' "$swapped"
 }
 
 # judge ELAPSED: read `dot doctor --json` on stdin; pass (exit 0) when it
@@ -51,7 +73,7 @@ judge() {
     printf '%s' "$report" | python3 -c 'import json,sys
 for r in json.load(sys.stdin).get("results", []):
     if str(r.get("status", "")).lower() in ("fail", "failed", "error"):
-        print("  failed:", r.get("name") or r)'
+        print("  failed:", r.get("check") or r.get("name") or r)'
     return 1
   fi
   if ((elapsed > BUDGET)); then

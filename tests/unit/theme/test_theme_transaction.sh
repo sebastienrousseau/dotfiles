@@ -178,13 +178,25 @@ printf '%s\n' '{not-json' >"$HOME/.claude/settings.json"
 invalid_provider_before="$(shasum -a 256 "$HOME/.claude/settings.json" | awk '{print $1}')"
 success_rc=0
 success_output="$WORK/success.out"
+# A live operation holds the lock for 12 s, past the 10 s a theme operation
+# used to wait: the auto-theme agent's first switch at install did, and the
+# README's `dot theme set` gave up (Drill A1, macOS). This one waits it out.
+lock_dir="$DOT_THEME_LOCK_ROOT/dot-theme-$(id -u).lock.d"
+sh -c 'mkdir "$1" && echo "pid=$$" >"$1/owner" && sleep 12 && rm -rf "$1"' _ "$lock_dir" &
+holder=$!
+until [[ -s "$lock_dir/owner" ]]; do sleep 0.1; done
 "$THEME_SYNC" maui-dark --force >"$success_output" 2>&1 || success_rc=$?
+wait "$holder"
 if [[ "$success_rc" -ne 0 ]]; then
   sed 's/^/    | /' "$success_output" >&2
 fi
 
 test_start "successful_transaction_exits_zero"
 assert_equals "0" "$success_rc"
+
+test_start "theme_operation_waits_out_a_live_lock_and_says_so"
+assert_equals "1" "$(grep -c "waiting for the theme operation of PID $holder to finish" "$success_output")" \
+  "one notice naming the operation it waits for"
 
 test_start "successful_transaction_commits_machine_state"
 assert_file_contains "$HOME/.config/chezmoi/chezmoi.toml" 'theme = "maui-dark"'

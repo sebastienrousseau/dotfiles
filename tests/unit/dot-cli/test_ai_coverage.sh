@@ -48,7 +48,7 @@ _ai_in_scratch_dir() { "$@"; }
 ai_pinned_spec() { printf '%s@9.9.9\n' "$1"; }
 _ai_mise_pkg() {
   case "$1" in
-    claude | goose | amp | cursor-agent | grok | agy | kimi | ollama) echo "" ;;
+    claude | goose | amp | agy | kimi | ollama) echo "" ;;
     *) echo "npm:$1" ;;
   esac
 }
@@ -71,7 +71,7 @@ export -f _ai_deprecated _ai_invoke_provider _ai_in_scratch_dir _ai_mise_pkg ai_
   _ai_stub _ai_cockpit _ai_oneshot _ai_serve cmd_ai_chat cmd_ai_doctor \
   cmd_ai_setup cmd_ai_query cmd_ai_install cmd_ai_delegate cmd_ai_cost \
   cmd_ai_corral cmd_ai_mcp cmd_ai_draft cmd_ai_eco
-for n in claude goose agy amp cursor grok kimi; do
+for n in claude goose agy amp kimi; do
   eval "install_${n}_native() { echo \"native ${n} \$1\" >>\"\$CALLS\"; }"
   export -f "install_${n}_native"
 done
@@ -210,7 +210,7 @@ else
   rc=$?
   assert_equals "0" "$rc" "flow exits 0"
   assert_file_contains "$CALLS" "native goose Goose" "goose uses native installer"
-  for n in claude agy amp cursor grok kimi; do
+  for n in claude agy amp kimi; do
     assert_file_contains "$CALLS" "native $n " "$n uses native installer"
   done
   assert_file_contains "$TTY_OUT" "install failed" "a failed install is reported"

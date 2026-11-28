@@ -18,6 +18,12 @@ THEME_TXN_STARTED_AT=""
 THEME_TXN_PREVIOUS=""
 THEME_TXN_DESIRED=""
 THEME_TXN_PREFERENCE=""
+# Seconds a theme operation waits for another to finish. The auto-theme
+# agent's first run at install switches the theme with a full chezmoi apply,
+# which held the lock past the 10 s this used to be, so the README's
+# `dot theme set` gave up on a fresh Mac (Drill A1).
+THEME_TXN_LOCK_TIMEOUT_DEFAULT=120
+THEME_TXN_WAIT_NOTED=0
 
 _theme_txn_json_escape() {
   local value="${1:-}"
@@ -146,8 +152,15 @@ _theme_txn_mkdir_private() {
   (umask 077 && mkdir "$@")
 }
 
+# _theme_txn_note_wait <owner pid>: say once per wait whose operation it is.
+_theme_txn_note_wait() {
+  [[ "$THEME_TXN_WAIT_NOTED" == 0 ]] || return 0
+  THEME_TXN_WAIT_NOTED=1
+  printf 'dot-theme-sync: waiting for the theme operation%s to finish\n' "${1:+ of PID $1}" >&2
+}
+
 _theme_txn_acquire_lock() {
-  local timeout="${1:-${DOT_THEME_LOCK_TIMEOUT:-10}}"
+  local timeout="${1:-${DOT_THEME_LOCK_TIMEOUT:-$THEME_TXN_LOCK_TIMEOUT_DEFAULT}}"
   local lock_root lock_dir started now owner_pid
   case "$timeout" in
     '' | *[!0-9]*)
@@ -160,6 +173,7 @@ _theme_txn_acquire_lock() {
   _theme_txn_mkdir_private -p "$lock_root"
   lock_dir="$lock_root/dot-theme-${UID:-$(id -u)}.lock.d"
   started="$(date +%s)"
+  THEME_TXN_WAIT_NOTED=0
 
   while ! _theme_txn_mkdir_private "$lock_dir" 2>/dev/null; do
     owner_pid="$(_theme_txn_lock_owner_pid "$lock_dir")"
@@ -176,6 +190,7 @@ _theme_txn_acquire_lock() {
       printf '\n' >&2
       return 1
     fi
+    _theme_txn_note_wait "$owner_pid"
     sleep 1
   done
 

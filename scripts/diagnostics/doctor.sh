@@ -42,6 +42,9 @@ source "$SCRIPT_DIR/../../lib/dot/ai-roster.sh" # AI_ROSTER_BINS
 # shellcheck source=../../lib/dot/probe.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../../lib/dot/probe.sh" # dot_probe
+# shellcheck source=../../lib/dot/doctor-toolchain.sh
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/../../lib/dot/doctor-toolchain.sh" # the toolchain sections
 # shellcheck source-path=SCRIPTDIR source=doctor/platform.sh
 source "$SCRIPT_DIR/doctor/platform.sh"
 # shellcheck source-path=SCRIPTDIR source=doctor/performance.sh
@@ -192,71 +195,6 @@ get_cmd_path() {
 # --- Header ---
 _doctor_header() {
   ui_header "Dotfiles Doctor"
-}
-
-# --- Core Shells ---
-_doctor_core_shells() {
-  _section "Core Shells"
-  for cmd in zsh fish starship; do
-    if check_cmd "$cmd"; then
-      cmd_path="$(get_cmd_path "$cmd")"
-      _ok "$cmd" "$(pretty_path "$cmd_path") ($(tool_source "$cmd_path"))"
-    elif [[ "$cmd" == "fish" ]]; then
-      _warn "$cmd" "optional"
-    else
-      _fail "$cmd" "missing"
-    fi
-  done
-
-  if check_cmd "nu"; then
-    cmd_path="$(get_cmd_path "nu")"
-    _ok "nu" "$(pretty_path "$cmd_path") ($(tool_source "$cmd_path"))"
-  elif check_cmd "nushell"; then
-    cmd_path="$(get_cmd_path "nushell")"
-    _ok "nu" "$(pretty_path "$cmd_path") ($(tool_source "$cmd_path"))"
-  else
-    _warn "nu" "optional"
-  fi
-}
-
-# --- Modern CLI Tools ---
-_doctor_modern_cli_tools() {
-  _section "Modern CLI Tools"
-  for cmd in rg bat chezmoi fzf zoxide atuin yazi zellij; do
-    if check_cmd "$cmd"; then
-      _ok "$cmd" "$(pretty_path "$(get_cmd_path "$cmd")")"
-    elif [[ "$cmd" == "bat" ]] && check_cmd "batcat"; then
-      _ok "$cmd" "$(pretty_path "$(get_cmd_path "batcat")") (batcat)"
-    else
-      _fail "$cmd" "missing"
-    fi
-  done
-}
-
-# --- Infrastructure ---
-_doctor_infrastructure() {
-  _section "Infrastructure"
-  for cmd in pueue wasmtime nix sops age hyperfine; do
-    if check_cmd "$cmd"; then
-      _ok "$cmd" "$(pretty_path "$(get_cmd_path "$cmd")")"
-    elif [[ "$cmd" == "nix" ]]; then
-      _ok "$cmd" "optional (not installed)"
-    else
-      _fail "$cmd" "missing"
-    fi
-  done
-
-  if check_cmd pueue; then
-    if "$(get_cmd_path pueue)" status >/dev/null 2>&1; then
-      _ok "pueue daemon" "running"
-    # 3>&-: in --json mode fd 3 is the caller's stdout; a daemon that
-    # inherits it holds `$(doctor --json)` open for its whole lifetime.
-    elif command -v pueued >/dev/null 2>&1 && pueued -d >/dev/null 2>&1 3>&- && "$(get_cmd_path pueue)" status >/dev/null 2>&1; then
-      _ok "pueue daemon" "started"
-    else
-      _warn "pueue daemon" "not running (pueued -d)"
-    fi
-  fi
 }
 
 # --- AI CLIs ---

@@ -270,9 +270,9 @@ flag|ai update|check|||List the pins with a newer release; change nothing
 flag|ai start|bg|||In its own terminal (herdr-core or tmux)
 flag|ai start|name||name|With --bg: its name (default <agent>-<n>)
 flag|ai start|cwd||dir|With --bg: the directory it starts in
-arg|ai start|claude codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider autohand vibe qwen||
+arg|ai start|claude codex copilot goose crush amp continue cline kimi agy sgpt ollama opencode aider autohand vibe qwen||
 flag|ai run|style|p|pattern|Steering pattern (--pattern is the old name)
-arg|ai run|claude codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider autohand vibe qwen||
+arg|ai run|claude codex copilot goose crush amp continue cline kimi agy sgpt ollama opencode aider autohand vibe qwen||
 flag|ai check|on||host|Run the check on a host in fleet.toml
 flag|ai cost show|by||group|Group by agent, host, day, model or session (default agent)
 flag|ai cost show|session||id|One session (an id or a unique prefix), by model

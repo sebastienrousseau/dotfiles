@@ -31,7 +31,7 @@ FAKE="$SANDBOX/root"
 export GNUPGHOME="$SANDBOX/gnupg"
 mkdir -p "$INST" "$STUBS" "$FAKE" "$GNUPGHOME"
 # A PATH holding only ordinary tools, so a gum installed here stays hidden.
-dot_fixture_basebin "$SANDBOX/base" tee
+dot_fixture_basebin "$SANDBOX/base" tee install chmod
 chmod 700 "$GNUPGHOME"
 cp "$REPO_ROOT/install.sh" "$INST/install.sh"
 
@@ -72,14 +72,16 @@ printf '#!/bin/sh\nexec "%s/rewrite" "%s" "$@"\n' "$STUBS" "$REAL_GPG" >"$STUBS/
 printf '#!/bin/sh\necho "apt-get $*" >>"%s/calls.log"\n' "$SANDBOX" >"$STUBS/apt-get"
 chmod +x "$STUBS/rewrite" "$STUBS/sudo" "$STUBS/gpg" "$STUBS/apt-get"
 
-# run_gum <served-key>: bootstrap_gum on "debian" with curl serving the key;
+# run_gum <served-key> [gnupghome]: bootstrap_gum on "debian" with curl
+# serving the key and GNUPGHOME set to gnupghome (default: the sandbox's);
 # prints the return code.
 run_gum() {
-  rm -rf "$FAKE/etc" "$SANDBOX/calls.log"
+  local home="${2:-$GNUPGHOME}"
+  rm -rf "${FAKE:?}/etc" "$SANDBOX/calls.log"
   printf '#!/bin/sh\nwhile [ $# -gt 0 ]; do [ "$1" = -o ] && { cp "%s" "$2"; exit 0; }; shift; done\nexit 22\n' \
     "$1" >"$STUBS/curl"
   chmod +x "$STUBS/curl"
-  env -i HOME="$SANDBOX" PATH="$STUBS:$SANDBOX/base" GNUPGHOME="$GNUPGHOME" \
+  env -i HOME="$SANDBOX" PATH="$STUBS:$SANDBOX/base" GNUPGHOME="$home" \
     "$BASH" --norc --noprofile -c 'source "$1"; source "$2"
       OS=Linux target_os=debian
       CHARM_GPG_EXPECTED_FPR="$3"
@@ -98,6 +100,28 @@ assert_equals "0|present|called" "$rc|$(keyring_state)|$(apt_state)" \
 assert_equals "apt-get update|apt-get install gum -y" \
   "$(paste -sd'|' "$SANDBOX/calls.log" 2>/dev/null)" \
   "apt-get refreshes the index, then installs gum"
+
+# The caller's GnuPG home is not the keyring's business: a GNUPGHOME that
+# does not exist (or that the user cannot write) made gpg exit before it
+# listed anything, and the pinned key was refused as "0 key(s)".
+test_start "charm_pinned_key_accepted_without_a_usable_gnupg_home"
+rc="$(run_gum "$SANDBOX/pinned.asc" "$SANDBOX/no-such-gnupg-home")"
+assert_equals "0|present|called" "$rc|$(keyring_state)|$(apt_state)" \
+  "the pinned key is trusted whatever state the caller's GnuPG home is in"
+
+# sudo gpg --dearmor writes under root's umask; a strict one (as on the
+# GitHub runners) left a keyring the user, and apt's _apt user, could not
+# read, and the pinned key was refused as "found 0 key(s)". The sandbox
+# runs as one user, so it checks what apt needs: a world-readable keyring
+# even when the dearmor runs with umask 0277.
+test_start "charm_keyring_is_world_readable_after_a_strict_root_umask"
+printf '#!/bin/sh\n[ "$1" = gpg ] && umask 0277\nexec "%s/rewrite" "$@"\n' "$STUBS" >"$STUBS/sudo"
+rc="$(run_gum "$SANDBOX/pinned.asc")"
+mode="$(stat -c %a "$FAKE/etc/apt/keyrings/charm.gpg" 2>/dev/null || stat -f %Lp "$FAKE/etc/apt/keyrings/charm.gpg" 2>/dev/null)"
+assert_equals "0|present|called|644" "$rc|$(keyring_state)|$(apt_state)|$mode" \
+  "the pinned key is trusted and the keyring is mode 644"
+printf '#!/bin/sh\nexec "%s/rewrite" "$@"\n' "$STUBS" >"$STUBS/sudo"
+chmod -R u+rwX "$FAKE" 2>/dev/null || true
 
 test_start "charm_failed_apt_update_skips_install"
 printf '#!/bin/sh\necho "apt-get $*" >>"%s/calls.log"\n[ "$1" != update ]\n' "$SANDBOX" >"$STUBS/apt-get"
@@ -119,5 +143,30 @@ assert_equals "1|absent|untouched" "$rc|$(keyring_state)|$(apt_state)" \
 test_start "charm_refusal_names_pin"
 assert_contains "$PIN_FPR" "$(cat "$SANDBOX/out.txt")" \
   "the refusal names the expected fingerprint"
+
+# A refusal that found no key says why: the keyring's size, owner and mode,
+# and gpg's own message. A CI runner reported "found 0 key(s)" with nothing
+# else, which does not tell an empty download from an unreadable file.
+test_start "charm_empty_keyring_refusal_says_why"
+: >"$SANDBOX/empty.asc"
+rc="$(run_gum "$SANDBOX/empty.asc")"
+assert_equals "1|absent" "$rc|$(keyring_state)" "an empty key is refused and removed"
+assert_contains "found 0 key(s)" "$(cat "$SANDBOX/out.txt")" "the count is reported"
+assert_contains "  keyring: " "$(cat "$SANDBOX/out.txt")" \
+  "with what stat says of the keyring (size, owner and mode, or why it cannot)"
+assert_equals "" "$(grep -F '  gpg: ' "$SANDBOX/out.txt")" "gpg said nothing, so no gpg line"
+
+test_start "charm_unreadable_keyring_refusal_quotes_gpg"
+# A keyring gpg cannot parse: its complaint is the clue, so it is shown.
+mkdir -p "$SANDBOX/kr"
+printf 'garbage keyring bytes\n' >"$SANDBOX/kr/charm.gpg"
+env -i HOME="$SANDBOX" PATH="$STUBS:$SANDBOX/base" GNUPGHOME="$GNUPGHOME" \
+  "$BASH" --norc --noprofile -c 'source "$1"; rc=0; charm_keyring_verify "$2" || rc=$?; echo "rc=$rc"' \
+  _ "$INST/install.sh" "$SANDBOX/kr/charm.gpg" >"$SANDBOX/out.txt" 2>&1
+assert_contains "rc=1" "$(cat "$SANDBOX/out.txt")" "the keyring is refused"
+assert_contains "  gpg: " "$(cat "$SANDBOX/out.txt")" "gpg's first complaint is shown"
+# The check runs gpg in a throwaway home, whose "trustdb created" note always
+# comes first: the line shown is the first one about the key.
+assert_contains "  gpg: [don't know]: invalid packet" "$(cat "$SANDBOX/out.txt")" "past gpg's own trustdb note"
 
 print_summary

@@ -40,7 +40,7 @@ STUB
   chmod +x "$BIN/$1"
 }
 
-for t in claude codex copilot agy goose crush amp cursor-agent grok kimi \
+for t in claude codex copilot agy goose crush amp kimi cn cline \
   sgpt ollama opencode aider autohand vibe qwen \
   dot-ai-proxy dot-ai-serve mise; do
   stub "$t"
@@ -100,12 +100,14 @@ ai _ai_invoke_provider crush "hello"
 called "crush run hello"
 ai _ai_invoke_provider amp "hello"
 called "amp -x hello"
-ai _ai_invoke_provider cursor "hello"
-called "cursor-agent -p hello"
-ai _ai_invoke_provider grok "hello"
-called "grok --no-auto-update -p hello"
 ai _ai_invoke_provider kimi "hello"
 called "kimi -p hello --quiet"
+ai _ai_invoke_provider continue "hello"
+called "cn -p hello"
+# Cline's one-shot auto-approves every tool by default ("yolo"); dot ai asks
+# for approval mode instead, as its other agents run bounded.
+ai _ai_invoke_provider cline "hello"
+called "cline --auto-approve false hello"
 
 test_start "stdin_style_providers_pipe_the_prompt"
 ai _ai_invoke_provider agy "hello"
@@ -141,14 +143,16 @@ assert_equals 2 "$RC" "rc"
 err_has "Unsupported tool" "error"
 
 test_start "a_failing_provider_propagates_its_exit_code"
-cat >"$BIN/claude" <<STUB
+for pair in claude:claude continue:cn cline:cline; do
+  cat >"$BIN/${pair#*:}" <<STUB
 #!$REAL_BASH
 exit 9
 STUB
-chmod +x "$BIN/claude"
-ai _ai_invoke_provider claude "hello"
-assert_equals 9 "$RC" "rc"
-stub claude
+  chmod +x "$BIN/${pair#*:}"
+  ai _ai_invoke_provider "${pair%%:*}" "hello"
+  assert_equals 9 "$RC" "${pair%%:*}'s exit code reaches the caller"
+  stub "${pair#*:}"
+done
 
 # ── oneshot ─────────────────────────────────────────────────────────────
 test_start "oneshot_defaults_to_claude"
@@ -244,7 +248,9 @@ PATH="$NONE" ai cmd_ai_doctor
 assert_equals 0 "$RC" "rc"
 err_has "not installed (the gateway engine needs it)" "engine missing"
 out_has "dot-ai-serve not deployed" "gateway missing"
-out_has "0/17 tools installed" "empty roster"
+# The roster's own size, so adding or removing a tool needs no edit here.
+roster_size="$(source "$REPO_ROOT/lib/dot/data/ai-roster.sh" && echo "${#AI_ROSTER_NAMES[@]}")"
+out_has "0/$roster_size tools installed" "empty roster"
 out_has "0/5 suite tools" "empty ecosystem"
 
 # ── install ─────────────────────────────────────────────────────────────
@@ -276,8 +282,8 @@ test_start "native_installers_are_preferred_for_the_tools_that_have_one"
 # installers, the rest to mise packages.
 ai_min ai_install_method claude
 out_has "native:install_claude_native" "claude uses its native installer"
-ai_min ai_install_method cursor-agent
-out_has "native:install_cursor_native" "cursor-agent uses its native installer"
+ai_min ai_install_method kimi
+out_has "native:install_kimi_native" "kimi uses its native installer"
 ai_min ai_install_method codex
 out_has "mise:npm:@openai/codex" "codex installs through mise"
 

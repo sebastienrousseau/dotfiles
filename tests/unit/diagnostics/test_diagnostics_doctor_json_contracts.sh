@@ -66,9 +66,10 @@ _shim() {
   chmod +x "$S_BIN/$1"
 }
 
-# _fixture <name> <tool>...: a Linux workstation where every probe passes
-# when the full tool list is present. Hiding a tool moves exactly one
-# probe (or a known few) to warn or fail:
+# _fixture <name> <tool>...: a provisioned Linux workstation (install.sh
+# --provision has recorded its scripts) where every probe passes when the
+# full tool list is present. Hiding a tool moves exactly one probe (or a
+# known few) to warn or fail:
 #   fish, nu -> warn                   rg, sops, hyperfine (and the rest) -> fail
 #   (hyperfine is in doctor's required Infrastructure set; hiding it also
 #   adds a separate "benchmark skipped" warning)
@@ -141,6 +142,8 @@ EOF
   } >"$S_HOME/.config/atuin/config.toml"
   printf 'jorgebucaran/fisher\n' >"$S_HOME/.config/fish/fish_plugins"
   printf '# nu cache\n' >"$S_HOME/.config/nushell/cached_eval.nu"
+  mkdir -p "$S_HOME/.local/state/dot/provision"
+  printf 'run_once_packages.sh 0123abcd\n' >"$S_HOME/.local/state/dot/provision/hashes"
 }
 
 # _run_json: run `doctor --json` in the fixture. Sets JSON_OUT (stdout
@@ -265,8 +268,10 @@ assert_equals "pass pass pass" \
   "zsh, rg and sops rows are pass"
 
 # ── R2: fish and nu hidden — two warnings, still healthy ──────────────
+tools=()
 # shellcheck disable=SC2086
-_fixture r2 $(printf '%s\n' $FULL_TOOLS | grep -vx -e fish -e nu)
+while IFS= read -r t; do tools+=("$t"); done < <(printf '%s\n' $FULL_TOOLS | grep -vx -e fish -e nu)
+_fixture r2 "${tools[@]}"
 _run_json
 _assert_contract "json_warned" 0 0 2 "healthy" "2 warning(s)."
 test_start "json_warned_rows_named"
@@ -275,14 +280,35 @@ assert_equals "fish nu" \
   "the two warn rows are the hidden optional tools"
 
 # ── R3: rg and sops hidden too — two failures, unhealthy ────────────────
+tools=()
 # shellcheck disable=SC2086
-_fixture r3 $(printf '%s\n' $FULL_TOOLS | grep -vx -e fish -e nu -e rg -e sops)
+while IFS= read -r t; do tools+=("$t"); done < <(printf '%s\n' $FULL_TOOLS | grep -vx -e fish -e nu -e rg -e sops)
+_fixture r3 "${tools[@]}"
 _run_json
 _assert_contract "json_failed" 1 2 2 "unhealthy" "2 error(s), 2 warning(s). Run 'dot doctor fix' to repair."
 test_start "json_failed_rows_named"
 assert_equals "rg sops" \
   "$(_jq '[.results[] | select(.status == "fail") | .check] | sort | join(" ")')" \
   "the two fail rows are the hidden required tools"
+
+# ── R5: configs only (install.sh without --provision) — the same tools
+# hidden are not installed yet, not broken: warnings that say how to
+# provision, no failures, healthy ─────────────────────────────────────
+tools=()
+# shellcheck disable=SC2086
+while IFS= read -r t; do tools+=("$t"); done < <(printf '%s\n' $FULL_TOOLS | grep -vx -e fish -e nu -e rg -e sops)
+_fixture r5 "${tools[@]}"
+rm -rf "$S_HOME/.local/state/dot/provision"
+_run_json
+_assert_contract "json_configs_only" 0 0 4 "healthy" "4 warning(s)."
+test_start "json_configs_only_rows_named"
+assert_equals "fish nu rg sops" \
+  "$(_jq '[.results[] | select(.status == "warn") | .check] | sort | join(" ")')" \
+  "the hidden toolchain tools warn alongside the optional ones"
+test_start "json_configs_only_says_how_to_provision"
+assert_equals "install.sh --provision" \
+  "$(_jq '[.results[] | select(.check == "rg") | .message] | first' | grep -oE 'install\.sh --provision')" \
+  "the warning names install.sh --provision"
 
 # ── Cross-run: hiding tools moves rows, never adds or drops them ────────
 test_start "json_runs_differ_only_by_status"

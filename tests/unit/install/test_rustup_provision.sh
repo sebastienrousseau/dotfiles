@@ -3,8 +3,10 @@
 # Copyright (c) 2015-2026 Sebastien Rousseau
 # shellcheck disable=SC1090,SC1091,SC2016
 # install/provision/run_onchange_26-rust-tools.sh.tmpl installs the standalone
-# rustup on macOS and Linux, verifying rustup-init.sh against its published
-# checksum, and retires Homebrew's rustup. With both installed, each one's
+# rustup on macOS and Linux, verifying the rustup-init binary for this
+# platform against its published checksum, and retires Homebrew's rustup.
+# (It used to fetch rustup-init.sh with a checksum URL rust-lang.org does not
+# publish, a 404, so rustup never installed on Linux; drill A1.) With both installed, each one's
 # proxies fall back to the other's and `rust-analyzer` recursed forever.
 # Homebrew's copy is removed only once the replacement is downloaded and
 # verified, so a failed download never leaves a machine without rustup.
@@ -41,8 +43,8 @@ stub curl 'out=""; url=""
 while [ $# -gt 0 ]; do case "$1" in -o) out="$2"; shift ;; https://*) url="$1" ;; esac; shift; done
 [ -n "$CURL_FAIL" ] && exit 22
 case "$url" in
-  https://sh.rustup.rs) printf "%s\n" "$INSTALLER" >"$out" ;;
-  *rustup-init.sh.sha256) printf "%s  rustup-init.sh\n" "$INSTALLER_SHA" >"$out" ;;
+  https://static.rust-lang.org/rustup/dist/*/rustup-init) printf "%s\n" "$INSTALLER" >"$out" ;;
+  https://static.rust-lang.org/rustup/dist/*/rustup-init.sha256) printf "%s *./rustup-init\n" "$INSTALLER_SHA" >"$out" ;;
 esac'
 stub brew 'case "$1" in list) [ -n "$BREW_HAS_RUSTUP" ] ;; esac'
 printf '#!/bin/sh\necho "rustup $*" >>"$CALLS"\n' >"$WORK/rustup.stub"
@@ -75,6 +77,25 @@ assert_contains "curl --proto =https --tlsv1.2 -fsSL -o" "$(calls)" "downloads o
 assert_contains "rustup-init -y --no-modify-path" "$(calls)" "runs the verified installer"
 assert_contains "rustup component add rust-analyzer" "$(calls)" "then installs components with the new rustup"
 
+test_start "the_installer_is_this_platforms_rustup_init"
+run
+assert_contains "https://static.rust-lang.org/rustup/dist/$(case "$(uname -s)-$(uname -m)" in
+  Linux-x86_64) echo x86_64-unknown-linux-gnu ;;
+  Linux-aarch64 | Linux-arm64) echo aarch64-unknown-linux-gnu ;;
+  Darwin-arm64) echo aarch64-apple-darwin ;;
+  Darwin-x86_64) echo x86_64-apple-darwin ;;
+esac)/rustup-init" "$(calls)" "the rustup-init binary for this OS and CPU"
+
+for platform in "Linux x86_64 x86_64-unknown-linux-gnu" "Linux aarch64 aarch64-unknown-linux-gnu" \
+  "Darwin arm64 aarch64-apple-darwin" "Darwin x86_64 x86_64-apple-darwin"; do
+  read -r os cpu target <<<"$platform"
+  test_start "rustup_target_for_${os}_${cpu}"
+  stub uname "case \"\$1\" in -s) echo $os ;; -m) echo $cpu ;; esac"
+  run
+  assert_contains "/rustup/dist/$target/rustup-init" "$(calls)" "$os $cpu downloads $target"
+  rm -f "$STUBS/uname"
+done
+
 test_start "checksum_mismatch_never_runs_the_installer"
 INSTALLER_SHA="$(printf '0%.0s' {1..64})" run
 assert_equals "0" "$RC" "never fails the apply"
@@ -85,7 +106,7 @@ assert_output_not_contains "cargo install" calls
 test_start "homebrew_rustup_is_replaced_after_verification"
 run BREW_HAS_RUSTUP=1
 assert_equals "0" "$RC" "exits 0"
-dl="$(line_of 'sh.rustup.rs')" un="$(line_of 'brew uninstall rustup')" init="$(line_of '^rustup-init ')"
+dl="$(line_of 'rustup/dist/')" un="$(line_of 'brew uninstall rustup')" init="$(line_of '^rustup-init ')"
 assert_true "(( dl > 0 && un > dl && init > un ))" \
   "download ($dl), then brew uninstall ($un), then install ($init)"
 
@@ -105,6 +126,30 @@ STANDALONE=1 run
 assert_output_not_contains "curl" calls
 assert_output_not_contains "brew uninstall" calls
 assert_contains "rustup update stable" "$(calls)" "the existing rustup is used"
+
+# The default install builds only the cargo tools the dotfiles use: stylua
+# (the Lua lint) and cargo-update (`dot update --globals`, checked by
+# `dot doctor`). The seven Rust development tools took 16 of the README
+# drill's 27 minutes to compile, so they wait for features.rust_dev_tools.
+DEV_TOOLS=(cargo-edit cargo-watch cargo-audit cargo-outdated cargo-expand cargo-nextest cargo-deny)
+
+test_start "default_install_builds_only_the_tools_the_dotfiles_use"
+STANDALONE=1 run
+assert_contains "cargo install --locked --version 2.5.2 stylua" "$(calls)" "stylua is installed"
+assert_contains "cargo install --locked --version 22.1.1 cargo-update" "$(calls)" "cargo-update is installed"
+for crate in "${DEV_TOOLS[@]}"; do
+  assert_output_not_contains " $crate" calls
+done
+
+test_start "rust_dev_tools_feature_builds_the_development_tools"
+printf '[data.features]\nrust_dev_tools = true\n' >"$WORK/cz/chezmoi.toml"
+env -i HOME="$WORK/cz" PATH="$STUBS:$PATH" chezmoi --config "$WORK/cz/chezmoi.toml" \
+  --source "$REPO_ROOT/defaults" --persistent-state "$WORK/cz/state" \
+  execute-template <"$REPO_ROOT/install/provision/run_onchange_26-rust-tools.sh.tmpl" >"$WORK/rust.sh"
+STANDALONE=1 run
+for crate in "${DEV_TOOLS[@]}" stylua cargo-update; do
+  assert_contains "cargo install --locked --version" "$(grep -e " $crate\$" "$CALLS")" "$crate is installed"
+done
 
 echo ""
 echo "RESULTS:$TESTS_RUN:$TESTS_PASSED:$TESTS_FAILED"

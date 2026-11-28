@@ -72,7 +72,7 @@ _show_ai_bridge_usage() {
   echo "       dot ai watch                   # follow agents' states; notify when one is blocked"
   echo "       dot ai watch service on|off    # keep dot ai watch running from login (launchd/systemd)"
   echo ""
-  echo "Tools: cl codex copilot goose crush amp cursor-agent grok kimi agy sgpt ollama opencode aider autohand vibe qwen"
+  echo "Tools: cl codex copilot goose crush amp kimi agy sgpt ollama opencode aider autohand vibe qwen"
   echo ""
   echo "Available styles:"
   # shellcheck disable=SC2012
@@ -239,7 +239,7 @@ ${prompt}"
 }
 
 # _ai_tool_bin <tool>: the executable behind a tool name or alias, from the
-# roster (cl is claude, cursor is cursor-agent); a name it does not know is
+# roster (cl is claude); a name it does not know is
 # its own executable.
 _ai_tool_bin() {
   ai_roster_bin "$1" 2>/dev/null || echo "$1"

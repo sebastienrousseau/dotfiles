@@ -7,7 +7,7 @@
 set -euo pipefail
 
 # Source shared libraries
-SCRIPT_DIR="{{ .chezmoi.sourceDir }}/install/lib"
+SCRIPT_DIR="{{ .chezmoi.workingTree }}/install/lib"
 # shellcheck source=install/lib/logging.sh
 . "${SCRIPT_DIR}/logging.sh"
 # shellcheck source=install/lib/installers.sh
@@ -56,9 +56,13 @@ warn_unpinned "Mods" "$MODS_TAG" "MODS_TAG"
 if command -v apt-get >/dev/null; then
   log_info "Updating packages (apt)..."
   $sudo_cmd apt-get update
+  # bzip2: release archives (goose) are .tar.bz2; libatomic1: mise's node
+  # links it. A desktop Ubuntu or a CI runner has both; a minimal one has not.
+  # Every name here must exist in the oldest supported release (Ubuntu 22.04,
+  # Debian 12): one missing name makes apt-get install none of them.
   packages=(
-    curl git zsh unzip fontconfig build-essential
-    ripgrep fd-find bat fzf jq yq hyperfine fastfetch
+    curl git zsh unzip bzip2 libatomic1 fontconfig build-essential
+    ripgrep fd-find bat fzf jq hyperfine
     age podman lua5.1 luajit luarocks
     tmux pipx ruby ruby-dev gnupg
   )
@@ -103,10 +107,15 @@ if command -v apt-get >/dev/null; then
     $sudo_cmd apt-get install -y gh || log_info "Skipping GitHub CLI install (apt)."
   fi
 
-  optional_packages=(terraform terraform-docs tflint trivy packer vagrant ansible sccache)
+  # fastfetch is not in Ubuntu 24.04 (noble), nor yq in 22.04 (jammy); in the
+  # required list above either made apt-get refuse the whole list, so zsh and
+  # ripgrep never installed.
+  optional_packages=(fastfetch yq terraform terraform-docs tflint trivy packer vagrant ansible sccache)
   install_optional=()
   for pkg in "${optional_packages[@]}"; do
-    if apt-cache show "$pkg" >/dev/null 2>&1; then
+    # An install candidate, not just a name apt knows: Ubuntu 24.04 lists
+    # packer and vagrant with none, and one such name made apt-get fail.
+    if [ -n "$(apt-cache policy "$pkg" 2>/dev/null | sed -n 's/^  Candidate: \([^(].*\)/\1/p')" ]; then
       install_optional+=("$pkg")
     else
       log_info "Skipping optional package (apt): $pkg"
@@ -119,7 +128,7 @@ if command -v apt-get >/dev/null; then
 elif command -v dnf >/dev/null; then
   log_info "Updating packages (dnf)..."
   packages=(
-    curl git zsh unzip fontconfig gcc make
+    curl git zsh unzip bzip2 libatomic fontconfig gcc make
     ripgrep fd-find bat fzf jq yq hyperfine fastfetch
     age podman lua luajit luarocks
     tmux pipx ruby ruby-devel gh gnupg2
@@ -143,7 +152,7 @@ elif command -v pacman >/dev/null; then
   log_info "Updating packages (pacman)..."
   $sudo_cmd pacman -Syu --noconfirm
   packages=(
-    curl git zsh unzip fontconfig base-devel
+    curl git zsh unzip bzip2 fontconfig base-devel
     ripgrep fd bat fzf jq yq hyperfine fastfetch
     age podman lua luajit luarocks
     tmux pipx ruby github-cli gnupg
@@ -268,44 +277,10 @@ fi
 {{- end }}
 
 # ── Rust Toolchain ───────────────────────────────────────────
-
-if ! command -v rustup >/dev/null; then
-  log_info "Installing Rustup..."
-  rustup_tmp=$(umask 077 && mktemp -d)
-  rustup_installer="$rustup_tmp/rustup-init.sh"
-  rustup_sha="$rustup_tmp/rustup-init.sh.sha256"
-  if curl --proto '=https' --tlsv1.2 -fsSL -o "$rustup_installer" https://sh.rustup.rs \
-     && curl --proto '=https' --tlsv1.2 -fsSL -o "$rustup_sha" https://static.rust-lang.org/rustup/rustup-init.sh.sha256; then
-    expected_sha="$(awk '{print $1}' "$rustup_sha")"
-    actual_sha="$(sha256sum "$rustup_installer" | awk '{print $1}')"
-    if [ -n "$expected_sha" ] && [ "$expected_sha" = "$actual_sha" ]; then
-      sh "$rustup_installer" -y --no-modify-path
-    else
-      log_error "Rustup installer SHA256 mismatch (expected=$expected_sha actual=$actual_sha). Install manually."
-    fi
-  else
-    log_error "Failed to download rustup installer or checksum."
-  fi
-  rm -rf "$rustup_tmp"
-  # shellcheck disable=SC1091
-  . "${HOME}/.cargo/env"
-fi
-
-if command -v cargo >/dev/null; then
-  if ! cargo install --list 2>/dev/null | grep -q "^cargo-update "; then
-    log_info "Installing cargo-install-update..."
-    cargo install --locked --version {{ index .rust_tools "cargo-update" | quote }} cargo-update || true
-  fi
-fi
-
-if ! command -v stylua >/dev/null; then
-  if command -v cargo >/dev/null; then
-    log_info "Installing Stylua via cargo..."
-    cargo install --locked --version {{ index .rust_tools "stylua" | quote }} stylua || true
-  else
-    log_warn "Stylua not found and cargo is missing. Install stylua manually."
-  fi
-fi
+# rustup, and the cargo tools that need it (cargo-update, stylua), are
+# installed by run_onchange_26-rust-tools.sh on every OS. A second copy
+# here fetched a rustup-init.sh checksum rust-lang.org does not publish (a
+# 404), then sourced the ~/.cargo/env that was never made, and exited.
 
 if ! command -v delta >/dev/null; then
   if command -v cargo >/dev/null; then

@@ -61,7 +61,6 @@ codex AI:CODEX
 gh-copilot AI:COPILOT
 goose AI:GOOSE
 crush AI:CRUSH
-cursor-agent AI:CURSOR
 opencode AI:OPENCODE
 autohand AI:AUTOHAND
 aider AI:AIDER
@@ -72,7 +71,6 @@ sgpt AI:SHELL-GPT
 qwen AI:QWEN
 agy AI:ANTIGRAVITY
 vibe AI:VIBE
-grok AI:GROK
 amp AI:AMP
 EOF
 

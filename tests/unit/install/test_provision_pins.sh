@@ -68,13 +68,16 @@ assert_contains "go install golang.org/x/tools/gopls@v0.23.0" "$(cat "$CALLS")" 
 # ── rust tools ──────────────────────────────────────────────────────────────
 stub rustup 'case "$1 $2" in "component list") echo "clippy rustfmt rust-src rust-analyzer" | tr " " "\n" ;; esac'
 stub cargo
+# rust_dev_tools on: every [rust_tools] pin is installed, so every one is checked.
+printf '[data.features]\nrust_dev_tools = true\n' >"$WORK/cz/chezmoi.toml"
 render "$PROV/run_onchange_26-rust-tools.sh.tmpl" "$WORK/rust.sh"
+: >"$WORK/cz/chezmoi.toml"
 rc="$(run_rendered "$WORK/rust.sh")"
 
 test_start "rust_tools_locked_exact_versions"
-assert_equals "0|8|0" \
+assert_equals "0|9|0" \
   "$rc|$(grep -c '^cargo install ' "$CALLS")|$(grep '^cargo install ' "$CALLS" | grep -cvE '^cargo install --locked --version [0-9]+\.[0-9]+\.[0-9]+ [a-z-]+$')" \
-  "eight crates, each --locked at an exact --version"
+  "nine crates (stylua included), each --locked at an exact --version"
 
 test_start "rust_tools_use_the_data_versions"
 assert_contains "cargo install --locked --version 0.13.13 cargo-edit" "$(cat "$CALLS")" "cargo-edit comes from [rust_tools]"
