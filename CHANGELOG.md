@@ -4,6 +4,10 @@ This file documents all notable changes to this project.
 
 ## Unreleased
 
+### Changed
+
+- The shared `AGENTS.md` (installed as `~/Code/AGENTS.md`) follows standards 0.0.16: section 11 keeps dependencies to the strict minimum and section 12 states the four principles, with pointers from `GEMINI.md` and `REPO-STANDARD.md`. mise installs `standards-sync` 0.0.16.
+
 ### Fixed
 
 - Drill A1 failed on `main` after every release pull request merged: the README then pins an installer that is published only with the release, and the workflow used the branch's own `install.sh` on pull requests alone. It now does so on any run where the pinned installer is not published yet.
