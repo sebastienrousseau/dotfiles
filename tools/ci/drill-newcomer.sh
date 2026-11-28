@@ -46,7 +46,8 @@ drill_script() {
 # local_installer INSTALL_BLOCK: with DRILL_INSTALLER set, the block with its
 # download replaced by a copy of that file, and nothing else changed: the
 # README's digest check still runs against it. The workflow sets it on a
-# release pull request, whose README pins an installer not published yet.
+# release pull request, or main before that release is published, whose
+# README pins an installer not published yet.
 local_installer() {
   local swapped
   [[ -n "${DRILL_INSTALLER:-}" ]] || {
