@@ -24,7 +24,8 @@ WORK="$(mktemp -d "${TMPDIR:-/tmp}/runner-quiet.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 mkdir -p "$WORK/tests/framework" "$WORK/tests/unit" "$WORK/tests/regression"
 cp "$REPO_ROOT/tests/framework/test_runner.sh" "$REPO_ROOT/tests/framework/assertions.sh" \
-  "$REPO_ROOT/tests/framework/git_env.sh" "$WORK/tests/framework/"
+  "$REPO_ROOT/tests/framework/git_env.sh" "$REPO_ROOT/tests/framework/mise_env.sh" \
+  "$WORK/tests/framework/"
 
 LOG="$WORK/order.log"
 cat >"$WORK/tests/unit/test_a_quiet.sh" <<EOF

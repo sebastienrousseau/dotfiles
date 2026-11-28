@@ -39,6 +39,9 @@ source "$(dirname "${BASH_SOURCE[0]}")/git_env.sh"
 # Hermetic mise: mise shims (e.g. python3) executed in isolated test sandboxes
 # where HOME is redirected must not prompt or fail on untrusted host configs.
 export MISE_YES=1
+# Real binaries, not mise shims, and no auto-install; see mise_env.sh.
+# shellcheck source=mise_env.sh disable=SC1091
+source "$(dirname "${BASH_SOURCE[0]}")/mise_env.sh"
 # Headless test execution: no test may open browser windows, GUI editors,
 # terminal sessions, Finder windows, or desktop notifications.
 export DOT_OPENER=true

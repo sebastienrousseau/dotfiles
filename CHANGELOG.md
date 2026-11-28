@@ -2,6 +2,13 @@
 
 This file documents all notable changes to this project.
 
+## Unreleased
+
+### Fixed
+
+- Drill A1 failed on `main` after every release pull request merged: the README then pins an installer that is published only with the release, and the workflow used the branch's own `install.sh` on pull requests alone. It now does so on any run where the pinned installer is not published yet.
+- The test suite ran mise's shims instead of the installed tools when the shims directory came first on PATH, as in a non-interactive shell. A shim run under a test's temporary HOME found no installs there and, with `auto_install` on, downloaded the tool into it: about 2.4 GB of Python per test, enough to fill the disk during a pre-push run. The test framework now replaces the shims directory with the install directories `mise bin-paths` reports and turns mise's auto-install off.
+
 ## v0.2.555 (2026-11-26)
 
 ### Changed

@@ -18,7 +18,8 @@ WORK="$(mktemp -d "${TMPDIR:-/tmp}/runner-timeout.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 mkdir -p "$WORK/tests/framework" "$WORK/tests/unit" "$WORK/tests/regression"
 cp "$REPO_ROOT/tests/framework/test_runner.sh" "$REPO_ROOT/tests/framework/assertions.sh" \
-  "$REPO_ROOT/tests/framework/git_env.sh" "$WORK/tests/framework/"
+  "$REPO_ROOT/tests/framework/git_env.sh" "$REPO_ROOT/tests/framework/mise_env.sh" \
+  "$WORK/tests/framework/"
 
 # The sleeper carries a unique argv (exec -a) so the orphan check cannot
 # match another test's sleep when the suite runs in parallel.
